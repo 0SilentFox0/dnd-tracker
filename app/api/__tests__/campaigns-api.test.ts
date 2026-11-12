@@ -1,266 +1,338 @@
-import { NextResponse } from "next/server";
-import { beforeEach,describe, expect, it, vi } from "vitest";
+import { NextResponse } from 'next/server';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { createRequest,getResponseJson, getResponseStatus } from "./helpers";
+import { createRequest, getResponseJson, getResponseStatus } from './helpers';
 
-import { API_ERRORS } from "@/lib/constants/api-errors";
-import { prisma } from "@/lib/db";
-import * as apiAuth from "@/lib/utils/api/api-auth";
-import { DEFAULT_RULES } from "@/lib/utils/rules";
+import { API_ERRORS } from '@/lib/constants/api-errors';
+import { prisma } from '@/lib/db';
+import * as apiAuth from '@/lib/utils/api/api-auth';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
 
-vi.mock("@/lib/utils/api/api-auth", () => ({
-  requireAuth: vi.fn(),
-  requireDM: vi.fn(),
-  requireCampaignAccess: vi.fn(),
+vi.mock('@/lib/utils/api/api-auth', () => ({
+    requireAuth: vi.fn(),
+    requireDM: vi.fn(),
+    requireCampaignAccess: vi.fn(),
 }));
 
-vi.mock("@/lib/db", () => ({
-  prisma: {
-    $transaction: async (callback: (tx: object) => unknown) => callback({ $queryRaw: async () => [{ id: "c1" }], campaign: { update: async () => ({ contentVersion: 1 }) } }),
-    campaign: {
-      findUnique: vi.fn(),
-      update: vi.fn(),
-    },
-  },
-}));
-
-describe("GET /api/campaigns/[id]", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it("повертає 401, якщо користувач не авторизований", async () => {
-    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(
-      NextResponse.json({ error: "Unauthorized" }, { status: 401 }),
-    );
-
-    const { GET } = await import("@/app/api/campaigns/[id]/route");
-
-    const request = createRequest("http://localhost/api/campaigns/c1");
-
-    const response = await GET(request, {
-      params: Promise.resolve({ id: "c1" }),
-    });
-
-    expect(await getResponseStatus(response)).toBe(401);
-
-    const data = await getResponseJson<{ error: string }>(response);
-
-    expect(data.error).toBe("Unauthorized");
-  });
-
-  it("повертає 404, якщо кампанію не знайдено", async () => {
-    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue({ userId: "user-1" } as never);
-    vi.mocked(prisma.campaign.findUnique).mockResolvedValue(null);
-
-    const { GET } = await import("@/app/api/campaigns/[id]/route");
-
-    const request = createRequest("http://localhost/api/campaigns/c1");
-
-    const response = await GET(request, {
-      params: Promise.resolve({ id: "c1" }),
-    });
-
-    expect(await getResponseStatus(response)).toBe(404);
-
-    const data = await getResponseJson<{ error: string }>(response);
-
-    expect(data.error).toBe(API_ERRORS.CAMPAIGN_NOT_FOUND);
-  });
-
-  it("повертає 403, якщо користувач не учасник кампанії", async () => {
-    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(NextResponse.json({ error: API_ERRORS.FORBIDDEN }, { status: 403 }));
-
-    const { GET } = await import("@/app/api/campaigns/[id]/route");
-
-    const request = createRequest("http://localhost/api/campaigns/c1");
-
-    const response = await GET(request, {
-      params: Promise.resolve({ id: "c1" }),
-    });
-
-    expect(await getResponseStatus(response)).toBe(403);
-
-    const data = await getResponseJson<{ error: string }>(response);
-
-    expect(data.error).toBe(API_ERRORS.FORBIDDEN);
-  });
-
-  it("повертає 200 та кампанію, якщо користувач — учасник", async () => {
-    const campaignId = "c1";
-
-    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue({ userId: "user-1" } as never);
-
-    const campaign = {
-      id: campaignId,
-      name: "Test Campaign",
-      description: "Desc",
-      inviteCode: "invite-1",
-      dmUserId: "dm-1",
-      maxLevel: 20,
-      allowPlayerEdit: true,
-      status: "active",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      friendlyFire: false,
-      members: [
-        {
-          userId: "user-1",
-          role: "player",
-          id: "m1",
-          campaignId,
-          joinedAt: new Date(),
-          user: { id: "user-1", email: "u@test.com", displayName: "User", avatar: null, createdAt: new Date() },
+vi.mock('@/lib/db', () => ({
+    prisma: {
+        $transaction: async (callback: (tx: object) => unknown) =>
+            callback({
+                $queryRaw: async () => [{ id: 'c1' }],
+                campaign: { update: async () => ({ contentVersion: 1 }) },
+            }),
+        campaign: {
+            findUnique: vi.fn(),
+            update: vi.fn(),
         },
-      ],
-      dm: { id: "dm-1", email: "dm@test.com", displayName: "DM", avatar: null, createdAt: new Date() },
-    };
+    },
+}));
 
-    vi.mocked(prisma.campaign.findUnique).mockResolvedValue(campaign as never);
-
-    const { GET } = await import("@/app/api/campaigns/[id]/route");
-
-    const request = createRequest("http://localhost/api/campaigns/c1");
-
-    const response = await GET(request, {
-      params: Promise.resolve({ id: campaignId }),
+describe('GET /api/campaigns/[id]', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
     });
 
-    expect(await getResponseStatus(response)).toBe(200);
+    it('повертає 401, якщо користувач не авторизований', async () => {
+        vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(
+            NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        );
 
-    const data = await getResponseJson(response);
+        const { GET } = await import('@/app/api/campaigns/[id]/route');
 
-    expect(data).toBeDefined();
-    expect((data as { id: string }).id).toBe(campaignId);
-    expect((data as { name: string }).name).toBe("Test Campaign");
-  });
+        const request = createRequest('http://localhost/api/campaigns/c1');
+
+        const response = await GET(request, {
+            params: Promise.resolve({ id: 'c1' }),
+        });
+
+        expect(await getResponseStatus(response)).toBe(401);
+
+        const data = await getResponseJson<{ error: string }>(response);
+
+        expect(data.error).toBe('Unauthorized');
+    });
+
+    it('повертає 404, якщо кампанію не знайдено', async () => {
+        vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue({
+            userId: 'user-1',
+        } as never);
+        vi.mocked(prisma.campaign.findUnique).mockResolvedValue(null);
+
+        const { GET } = await import('@/app/api/campaigns/[id]/route');
+
+        const request = createRequest('http://localhost/api/campaigns/c1');
+
+        const response = await GET(request, {
+            params: Promise.resolve({ id: 'c1' }),
+        });
+
+        expect(await getResponseStatus(response)).toBe(404);
+
+        const data = await getResponseJson<{ error: string }>(response);
+
+        expect(data.error).toBe(API_ERRORS.CAMPAIGN_NOT_FOUND);
+    });
+
+    it('повертає 403, якщо користувач не учасник кампанії', async () => {
+        vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(
+            NextResponse.json({ error: API_ERRORS.FORBIDDEN }, { status: 403 })
+        );
+
+        const { GET } = await import('@/app/api/campaigns/[id]/route');
+
+        const request = createRequest('http://localhost/api/campaigns/c1');
+
+        const response = await GET(request, {
+            params: Promise.resolve({ id: 'c1' }),
+        });
+
+        expect(await getResponseStatus(response)).toBe(403);
+
+        const data = await getResponseJson<{ error: string }>(response);
+
+        expect(data.error).toBe(API_ERRORS.FORBIDDEN);
+    });
+
+    it('повертає 200 та кампанію, якщо користувач — учасник', async () => {
+        const campaignId = 'c1';
+
+        vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue({
+            userId: 'user-1',
+        } as never);
+
+        const campaign = {
+            id: campaignId,
+            name: 'Test Campaign',
+            description: 'Desc',
+            inviteCode: 'invite-1',
+            dmUserId: 'dm-1',
+            maxLevel: 20,
+            allowPlayerEdit: true,
+            status: 'active',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            friendlyFire: false,
+            members: [
+                {
+                    userId: 'user-1',
+                    role: 'player',
+                    id: 'm1',
+                    campaignId,
+                    joinedAt: new Date(),
+                    user: {
+                        id: 'user-1',
+                        email: 'u@test.com',
+                        displayName: 'User',
+                        avatar: null,
+                        createdAt: new Date(),
+                    },
+                },
+            ],
+            dm: {
+                id: 'dm-1',
+                email: 'dm@test.com',
+                displayName: 'DM',
+                avatar: null,
+                createdAt: new Date(),
+            },
+        };
+
+        vi.mocked(prisma.campaign.findUnique).mockResolvedValue(
+            campaign as never
+        );
+
+        const { GET } = await import('@/app/api/campaigns/[id]/route');
+
+        const request = createRequest('http://localhost/api/campaigns/c1');
+
+        const response = await GET(request, {
+            params: Promise.resolve({ id: campaignId }),
+        });
+
+        expect(await getResponseStatus(response)).toBe(200);
+
+        const data = await getResponseJson(response);
+
+        expect(data).toBeDefined();
+        expect((data as { id: string }).id).toBe(campaignId);
+        expect((data as { name: string }).name).toBe('Test Campaign');
+    });
 });
 
-describe("PATCH /api/campaigns/[id]", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it("повертає 403, якщо користувач не DM", async () => {
-    vi.mocked(apiAuth.requireDM).mockResolvedValue(
-      NextResponse.json({ error: "Forbidden" }, { status: 403 }),
-    );
-
-    const { PATCH } = await import("@/app/api/campaigns/[id]/route");
-
-    const request = createRequest("http://localhost/api/campaigns/c1", {
-      method: "PATCH",
-      body: JSON.stringify({ name: "New Name" }),
-      headers: { "Content-Type": "application/json" },
+describe('PATCH /api/campaigns/[id]', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
     });
 
-    const response = await PATCH(request, {
-      params: Promise.resolve({ id: "c1" }),
+    it('повертає 403, якщо користувач не DM', async () => {
+        vi.mocked(apiAuth.requireDM).mockResolvedValue(
+            NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+        );
+
+        const { PATCH } = await import('@/app/api/campaigns/[id]/route');
+
+        const request = createRequest('http://localhost/api/campaigns/c1', {
+            method: 'PATCH',
+            body: JSON.stringify({ name: 'New Name' }),
+            headers: { 'Content-Type': 'application/json' },
+        });
+
+        const response = await PATCH(request, {
+            params: Promise.resolve({ id: 'c1' }),
+        });
+
+        expect(await getResponseStatus(response)).toBe(403);
     });
 
-    expect(await getResponseStatus(response)).toBe(403);
-  });
+    it('повертає 200 та оновлену кампанію при успішному PATCH', async () => {
+        const campaignId = 'c1';
 
-  it("повертає 200 та оновлену кампанію при успішному PATCH", async () => {
-    const campaignId = "c1";
+        vi.mocked(apiAuth.requireDM).mockResolvedValue({
+            userId: 'dm-1',
+            isDM: false,
+            campaign: {
+                kind: 'campaign',
+                rules: DEFAULT_RULES,
+                id: campaignId,
+                maxLevel: 20,
+                allowPlayerEdit: true,
+                members: [{ userId: 'dm-1', role: 'dm' }],
+            },
+        });
+        vi.mocked(prisma.campaign.findUnique).mockResolvedValue({
+            id: campaignId,
+            members: [{ userId: 'dm-1', role: 'dm' }],
+        } as never);
 
-    vi.mocked(apiAuth.requireDM).mockResolvedValue({
-      userId: "dm-1",
-      isDM: false,
-      campaign: {
-        kind: "campaign",
-        rules: DEFAULT_RULES,
-        id: campaignId,
-        maxLevel: 20,
-        allowPlayerEdit: true,
-        members: [{ userId: "dm-1", role: "dm" }],
-      },
+        const updated = {
+            id: campaignId,
+            name: 'Updated Name',
+            description: null,
+            inviteCode: 'invite-1',
+            dmUserId: 'dm-1',
+            maxLevel: 20,
+            allowPlayerEdit: true,
+            status: 'active',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            friendlyFire: false,
+            members: [
+                {
+                    userId: 'dm-1',
+                    role: 'dm',
+                    user: {
+                        id: 'dm-1',
+                        email: 'dm@test.com',
+                        displayName: 'DM',
+                        avatar: null,
+                        createdAt: new Date(),
+                    },
+                },
+            ],
+            dm: {
+                id: 'dm-1',
+                email: 'dm@test.com',
+                displayName: 'DM',
+                avatar: null,
+                createdAt: new Date(),
+            },
+        };
+
+        vi.mocked(prisma.campaign.update).mockResolvedValue(updated as never);
+
+        const { PATCH } = await import('@/app/api/campaigns/[id]/route');
+
+        const request = createRequest('http://localhost/api/campaigns/c1', {
+            method: 'PATCH',
+            body: JSON.stringify({ name: 'Updated Name' }),
+            headers: { 'Content-Type': 'application/json' },
+        });
+
+        const response = await PATCH(request, {
+            params: Promise.resolve({ id: campaignId }),
+        });
+
+        expect(await getResponseStatus(response)).toBe(200);
+
+        const data = await getResponseJson(response);
+
+        expect((data as { name: string }).name).toBe('Updated Name');
     });
-    vi.mocked(prisma.campaign.findUnique).mockResolvedValue({
-      id: campaignId,
-      members: [{ userId: "dm-1", role: "dm" }],
-    } as never);
 
-    const updated = {
-      id: campaignId,
-      name: "Updated Name",
-      description: null,
-      inviteCode: "invite-1",
-      dmUserId: "dm-1",
-      maxLevel: 20,
-      allowPlayerEdit: true,
-      status: "active",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      friendlyFire: false,
-      members: [{ userId: "dm-1", role: "dm", user: { id: "dm-1", email: "dm@test.com", displayName: "DM", avatar: null, createdAt: new Date() } }],
-      dm: { id: "dm-1", email: "dm@test.com", displayName: "DM", avatar: null, createdAt: new Date() },
-    };
+    it('PATCH зберігає critChoiceByDm', async () => {
+        vi.mocked(apiAuth.requireDM).mockResolvedValue({
+            userId: 'dm-1',
+            isDM: false,
+            campaign: {
+                kind: 'campaign',
+                rules: DEFAULT_RULES,
+                id: 'c1',
+                maxLevel: 20,
+                allowPlayerEdit: true,
+                members: [{ userId: 'dm-1', role: 'dm' }],
+            },
+        });
+        vi.mocked(prisma.campaign.update).mockResolvedValue({
+            id: 'c1',
+            critChoiceByDm: true,
+            members: [],
+        } as never);
 
-    vi.mocked(prisma.campaign.update).mockResolvedValue(updated as never);
+        const { PATCH } = await import('@/app/api/campaigns/[id]/route');
 
-    const { PATCH } = await import("@/app/api/campaigns/[id]/route");
+        const response = await PATCH(
+            createRequest('http://localhost/api/campaigns/c1', {
+                method: 'PATCH',
+                body: JSON.stringify({ critChoiceByDm: true }),
+                headers: { 'Content-Type': 'application/json' },
+            }),
+            { params: Promise.resolve({ id: 'c1' }) }
+        );
 
-    const request = createRequest("http://localhost/api/campaigns/c1", {
-      method: "PATCH",
-      body: JSON.stringify({ name: "Updated Name" }),
-      headers: { "Content-Type": "application/json" },
+        expect(await getResponseStatus(response)).toBe(200);
+        expect(prisma.campaign.update).toHaveBeenCalledWith(
+            expect.objectContaining({
+                data: expect.objectContaining({ critChoiceByDm: true }),
+            })
+        );
     });
 
-    const response = await PATCH(request, {
-      params: Promise.resolve({ id: campaignId }),
+    it('PATCH зберігає acquaintancesEnabled', async () => {
+        vi.mocked(apiAuth.requireDM).mockResolvedValue({
+            userId: 'dm-1',
+            isDM: false,
+            campaign: {
+                kind: 'campaign',
+                rules: DEFAULT_RULES,
+                id: 'c1',
+                maxLevel: 20,
+                allowPlayerEdit: true,
+                members: [{ userId: 'dm-1', role: 'dm' }],
+            },
+        });
+        vi.mocked(prisma.campaign.update).mockResolvedValue({
+            id: 'c1',
+            acquaintancesEnabled: true,
+            members: [],
+        } as never);
+
+        const { PATCH } = await import('@/app/api/campaigns/[id]/route');
+
+        const response = await PATCH(
+            createRequest('http://localhost/api/campaigns/c1', {
+                method: 'PATCH',
+                body: JSON.stringify({ acquaintancesEnabled: true }),
+                headers: { 'Content-Type': 'application/json' },
+            }),
+            { params: Promise.resolve({ id: 'c1' }) }
+        );
+
+        expect(await getResponseStatus(response)).toBe(200);
+        expect(prisma.campaign.update).toHaveBeenCalledWith(
+            expect.objectContaining({
+                data: expect.objectContaining({ acquaintancesEnabled: true }),
+            })
+        );
     });
-
-    expect(await getResponseStatus(response)).toBe(200);
-
-    const data = await getResponseJson(response);
-
-    expect((data as { name: string }).name).toBe("Updated Name");
-  });
-
-  it("PATCH зберігає critChoiceByDm", async () => {
-    vi.mocked(apiAuth.requireDM).mockResolvedValue({
-      userId: "dm-1",
-      isDM: false,
-      campaign: { kind: "campaign", rules: DEFAULT_RULES, id: "c1", maxLevel: 20, allowPlayerEdit: true, members: [{ userId: "dm-1", role: "dm" }] },
-    });
-    vi.mocked(prisma.campaign.update).mockResolvedValue({ id: "c1", critChoiceByDm: true, members: [] } as never);
-
-    const { PATCH } = await import("@/app/api/campaigns/[id]/route");
-
-    const response = await PATCH(
-      createRequest("http://localhost/api/campaigns/c1", {
-        method: "PATCH",
-        body: JSON.stringify({ critChoiceByDm: true }),
-        headers: { "Content-Type": "application/json" },
-      }),
-      { params: Promise.resolve({ id: "c1" }) },
-    );
-
-    expect(await getResponseStatus(response)).toBe(200);
-    expect(prisma.campaign.update).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({ critChoiceByDm: true }) }));
-  });
-
-  it("PATCH зберігає acquaintancesEnabled", async () => {
-    vi.mocked(apiAuth.requireDM).mockResolvedValue({
-      userId: "dm-1",
-      isDM: false,
-      campaign: { kind: "campaign", rules: DEFAULT_RULES, id: "c1", maxLevel: 20, allowPlayerEdit: true, members: [{ userId: "dm-1", role: "dm" }] },
-    });
-    vi.mocked(prisma.campaign.update).mockResolvedValue({ id: "c1", acquaintancesEnabled: true, members: [] } as never);
-
-    const { PATCH } = await import("@/app/api/campaigns/[id]/route");
-
-    const response = await PATCH(
-      createRequest("http://localhost/api/campaigns/c1", {
-        method: "PATCH",
-        body: JSON.stringify({ acquaintancesEnabled: true }),
-        headers: { "Content-Type": "application/json" },
-      }),
-      { params: Promise.resolve({ id: "c1" }) },
-    );
-
-    expect(await getResponseStatus(response)).toBe(200);
-    expect(prisma.campaign.update).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({ acquaintancesEnabled: true }) }));
-  });
 });

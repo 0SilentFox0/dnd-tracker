@@ -1,1 +1,1 @@
-export { readCharacter } from "@/lib/server/characters/operations/get";
+export { readCharacter } from '@/lib/server/characters/operations/get';

@@ -1,98 +1,197 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
-import { context, goblin, hero, participant } from "./fixtures";
+import { context, goblin, hero, participant } from './fixtures';
 
-import { API_ERRORS } from "@/lib/constants/api-errors";
-import { patchParticipantMutation } from "@/lib/server/battles/mutations/participants/patch-participant-mutation";
-import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
+import { API_ERRORS } from '@/lib/constants/api-errors';
+import { patchParticipantMutation } from '@/lib/server/battles/mutations/participants/patch-participant-mutation';
+import { eventTextOf } from '@/lib/utils/battle/log/__tests__/event-text';
 
-const orc = participant("orc", { controlledBy: "dm" });
+const orc = participant('orc', { controlledBy: 'dm' });
 
-describe("patch-participant mutation", () => {
-  it("видалення учасника перед поточним зсуває хід назад", () => {
-    const out = patchParticipantMutation(context({ participants: [hero, goblin, orc], scene: { ...context().scene, turnIndex: 2 } }), "hero", { removeFromBattle: true });
+describe('patch-participant mutation', () => {
+    it('видалення учасника перед поточним зсуває хід назад', () => {
+        const out = patchParticipantMutation(
+            context({
+                participants: [hero, goblin, orc],
+                scene: { ...context().scene, turnIndex: 2 },
+            }),
+            'hero',
+            { removeFromBattle: true }
+        );
 
-    expect(out.participants.map((p) => p.basicInfo.id)).toEqual(["gob", "orc"]);
-    expect(out.scene?.turnIndex).toBe(1);
-  });
+        expect(out.participants.map((p) => p.basicInfo.id)).toEqual([
+            'gob',
+            'orc',
+        ]);
+        expect(out.scene?.turnIndex).toBe(1);
+    });
 
-  it("видалення учасника з резерву прибирає його з pending, черга не змінюється", () => {
-    const imp = { ...participant("imp", { controlledBy: "dm" }), battleData: { ...goblin.battleData, reserved: true } };
+    it('видалення учасника з резерву прибирає його з pending, черга не змінюється', () => {
+        const imp = {
+            ...participant('imp', { controlledBy: 'dm' }),
+            battleData: { ...goblin.battleData, reserved: true },
+        };
 
-    const out = patchParticipantMutation(context({ pending: [imp] }), "imp", { removeFromBattle: true });
+        const out = patchParticipantMutation(
+            context({ pending: [imp] }),
+            'imp',
+            { removeFromBattle: true }
+        );
 
-    expect(out.pending).toEqual([]);
-    expect(out.participants.map((p) => p.basicInfo.id)).toEqual(["hero", "gob"]);
-    expect(eventTextOf(out.events[0])).toContain("з резерву");
-  });
+        expect(out.pending).toEqual([]);
+        expect(out.participants.map((p) => p.basicInfo.id)).toEqual([
+            'hero',
+            'gob',
+        ]);
+        expect(eventTextOf(out.events[0])).toContain('з резерву');
+    });
 
-  it("returnToReserve: учасник іде з черги в резерв без позиції, хід не збивається", () => {
-    const placed = participant("orc", { controlledBy: "dm" }, { battleData: { ...orc.battleData, position: { x: 3, y: 4 }, facing: "e" } });
+    it('returnToReserve: учасник іде з черги в резерв без позиції, хід не збивається', () => {
+        const placed = participant(
+            'orc',
+            { controlledBy: 'dm' },
+            {
+                battleData: {
+                    ...orc.battleData,
+                    position: { x: 3, y: 4 },
+                    facing: 'e',
+                },
+            }
+        );
 
-    const out = patchParticipantMutation(context({ participants: [hero, goblin, placed], scene: { ...context().scene, turnIndex: 2 } }), "orc", { returnToReserve: true });
+        const out = patchParticipantMutation(
+            context({
+                participants: [hero, goblin, placed],
+                scene: { ...context().scene, turnIndex: 2 },
+            }),
+            'orc',
+            { returnToReserve: true }
+        );
 
-    expect(out.participants?.map((p) => p.basicInfo.id)).toEqual(["hero", "gob"]);
-    expect(out.pending).toHaveLength(1);
-    expect(out.pending?.[0].battleData).toMatchObject({ reserved: true });
-    expect(out.pending?.[0].battleData.position).toBeUndefined();
-    expect(out.pending?.[0].battleData.facing).toBeUndefined();
-  });
+        expect(out.participants?.map((p) => p.basicInfo.id)).toEqual([
+            'hero',
+            'gob',
+        ]);
+        expect(out.pending).toHaveLength(1);
+        expect(out.pending?.[0].battleData).toMatchObject({ reserved: true });
+        expect(out.pending?.[0].battleData.position).toBeUndefined();
+        expect(out.pending?.[0].battleData.facing).toBeUndefined();
+    });
 
-  it("HP до 0 — unconscious і подія зі зміною HP", () => {
-    const out = patchParticipantMutation(context(), "gob", { currentHp: 0 });
+    it('HP до 0 — unconscious і подія зі зміною HP', () => {
+        const out = patchParticipantMutation(context(), 'gob', {
+            currentHp: 0,
+        });
 
-    const gob = out.participants.find((p) => p.basicInfo.id === "gob");
+        const gob = out.participants.find((p) => p.basicInfo.id === 'gob');
 
-    expect(gob?.combatStats).toMatchObject({ currentHp: 0, status: "unconscious" });
-    expect(out.events[0].hpChanges).toEqual([expect.objectContaining({ participantId: "gob", newHp: 0 })]);
-  });
+        expect(gob?.combatStats).toMatchObject({
+            currentHp: 0,
+            status: 'unconscious',
+        });
+        expect(out.events[0].hpChanges).toEqual([
+            expect.objectContaining({ participantId: 'gob', newHp: 0 }),
+        ]);
+    });
 
-  it("немає учасника — 404", () => {
-    expect(() => patchParticipantMutation(context(), "nobody", { currentHp: 3 })).toThrow(expect.objectContaining({ status: 404 }));
-  });
+    it('немає учасника — 404', () => {
+        expect(() =>
+            patchParticipantMutation(context(), 'nobody', { currentHp: 3 })
+        ).toThrow(expect.objectContaining({ status: 404 }));
+    });
 
-  it("видалення поточного учасника: наступний отримує початок ходу, флаги скинуті", () => {
-    const tired = { ...goblin, actionFlags: { ...goblin.actionFlags, hasUsedAction: true } };
+    it('видалення поточного учасника: наступний отримує початок ходу, флаги скинуті', () => {
+        const tired = {
+            ...goblin,
+            actionFlags: { ...goblin.actionFlags, hasUsedAction: true },
+        };
 
-    const out = patchParticipantMutation(context({ participants: [hero, tired], scene: { ...context().scene, turnIndex: 0 } }), "hero", { removeFromBattle: true });
+        const out = patchParticipantMutation(
+            context({
+                participants: [hero, tired],
+                scene: { ...context().scene, turnIndex: 0 },
+            }),
+            'hero',
+            { removeFromBattle: true }
+        );
 
-    expect(out.participants.map((p) => p.basicInfo.id)).toEqual(["gob"]);
-    expect(out.scene?.turnIndex).toBe(0);
-    expect(out.participants[0].actionFlags.hasUsedAction).toBe(false);
-  });
+        expect(out.participants.map((p) => p.basicInfo.id)).toEqual(['gob']);
+        expect(out.scene?.turnIndex).toBe(0);
+        expect(out.participants[0].actionFlags.hasUsedAction).toBe(false);
+    });
 
-  it("видалення останнього в черзі, коли хід на ньому, — новий раунд", () => {
-    const out = patchParticipantMutation(context({ participants: [hero, goblin, orc], scene: { ...context().scene, turnIndex: 2 } }), "orc", { removeFromBattle: true });
+    it('видалення останнього в черзі, коли хід на ньому, — новий раунд', () => {
+        const out = patchParticipantMutation(
+            context({
+                participants: [hero, goblin, orc],
+                scene: { ...context().scene, turnIndex: 2 },
+            }),
+            'orc',
+            { removeFromBattle: true }
+        );
 
-    expect(out.scene).toMatchObject({ round: 2 });
-    expect(out.participants[out.scene?.turnIndex ?? -1]?.basicInfo.id).toBe("hero");
-  });
+        expect(out.scene).toMatchObject({ round: 2 });
+        expect(out.participants[out.scene?.turnIndex ?? -1]?.basicInfo.id).toBe(
+            'hero'
+        );
+    });
 
-  it("HP > 0 повертає непритомного до бою", () => {
-    const downed = { ...goblin, combatStats: { ...goblin.combatStats, currentHp: 0, status: "unconscious" as const } };
+    it('HP > 0 повертає непритомного до бою', () => {
+        const downed = {
+            ...goblin,
+            combatStats: {
+                ...goblin.combatStats,
+                currentHp: 0,
+                status: 'unconscious' as const,
+            },
+        };
 
-    const out = patchParticipantMutation(context({ participants: [hero, downed] }), "gob", { currentHp: 5 });
+        const out = patchParticipantMutation(
+            context({ participants: [hero, downed] }),
+            'gob',
+            { currentHp: 5 }
+        );
 
-    expect(out.participants.find((p) => p.basicInfo.id === "gob")?.combatStats.status).toBe("active");
-  });
+        expect(
+            out.participants.find((p) => p.basicInfo.id === 'gob')?.combatStats
+                .status
+        ).toBe('active');
+    });
 
-  it("kill — HP 0, статус dead і подія «Вбито»", () => {
-    const out = patchParticipantMutation(context(), "gob", { kill: true });
+    it('kill — HP 0, статус dead і подія «Вбито»', () => {
+        const out = patchParticipantMutation(context(), 'gob', { kill: true });
 
-    expect(out.participants.find((p) => p.basicInfo.id === "gob")?.combatStats).toMatchObject({ currentHp: 0, status: "dead" });
-    expect(eventTextOf(out.events[0])).toContain("Вбито (DM)");
-  });
+        expect(
+            out.participants.find((p) => p.basicInfo.id === 'gob')?.combatStats
+        ).toMatchObject({ currentHp: 0, status: 'dead' });
+        expect(eventTextOf(out.events[0])).toContain('Вбито (DM)');
+    });
 
-  it("revive — мертвий герой повертається з 1 HP і статусом active", () => {
-    const fallen = { ...hero, combatStats: { ...hero.combatStats, currentHp: 0, status: "dead" as const } };
+    it('revive — мертвий герой повертається з 1 HP і статусом active', () => {
+        const fallen = {
+            ...hero,
+            combatStats: {
+                ...hero.combatStats,
+                currentHp: 0,
+                status: 'dead' as const,
+            },
+        };
 
-    const out = patchParticipantMutation(context({ participants: [fallen, goblin] }), "hero", { revive: true });
+        const out = patchParticipantMutation(
+            context({ participants: [fallen, goblin] }),
+            'hero',
+            { revive: true }
+        );
 
-    expect(out.participants.find((p) => p.basicInfo.id === "hero")?.combatStats).toMatchObject({ currentHp: 1, status: "active" });
-    expect(eventTextOf(out.events[0])).toContain("Повернуто до життя (DM)");
-  });
+        expect(
+            out.participants.find((p) => p.basicInfo.id === 'hero')?.combatStats
+        ).toMatchObject({ currentHp: 1, status: 'active' });
+        expect(eventTextOf(out.events[0])).toContain('Повернуто до життя (DM)');
+    });
 
-  it("revive живого — помилка", () => {
-    expect(() => patchParticipantMutation(context(), "hero", { revive: true })).toThrow(API_ERRORS.BATTLE_PARTICIPANT_ALREADY_ALIVE);
-  });
+    it('revive живого — помилка', () => {
+        expect(() =>
+            patchParticipantMutation(context(), 'hero', { revive: true })
+        ).toThrow(API_ERRORS.BATTLE_PARTICIPANT_ALREADY_ALIVE);
+    });
 });

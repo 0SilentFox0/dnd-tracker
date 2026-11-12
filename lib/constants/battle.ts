@@ -1,4 +1,4 @@
-import type { BattleMapConfig } from "@/types/battle";
+import type { BattleMapConfig } from '@/types/battle';
 
 export const CONDITION_LIMITS = { rounds: 99, dc: 40 } as const;
 
@@ -6,100 +6,114 @@ export const TURN_TIMER_RANGE = [10, 600] as const;
 
 export const DEFAULT_TURN_TIMER_SECONDS = 60;
 
-export const clampTurnTimer = (seconds: number | null): number => Math.min(TURN_TIMER_RANGE[1], Math.max(TURN_TIMER_RANGE[0], seconds ?? DEFAULT_TURN_TIMER_SECONDS));
+export const clampTurnTimer = (seconds: number | null): number =>
+    Math.min(
+        TURN_TIMER_RANGE[1],
+        Math.max(TURN_TIMER_RANGE[0], seconds ?? DEFAULT_TURN_TIMER_SECONDS)
+    );
 
 export const AttackType = {
-  MELEE: "melee",
-  RANGED: "ranged",
+    MELEE: 'melee',
+    RANGED: 'ranged',
 } as const;
 
 export type AttackType = (typeof AttackType)[keyof typeof AttackType];
 
 export const ParticipantSide = {
-  ALLY: "ally",
-  ENEMY: "enemy",
+    ALLY: 'ally',
+    ENEMY: 'enemy',
 } as const;
 
-export type ParticipantSide = (typeof ParticipantSide)[keyof typeof ParticipantSide];
+export type ParticipantSide =
+    (typeof ParticipantSide)[keyof typeof ParticipantSide];
 
 export const CombatStatus = {
-  ACTIVE: "active",
-  UNCONSCIOUS: "unconscious",
-  DEAD: "dead",
+    ACTIVE: 'active',
+    UNCONSCIOUS: 'unconscious',
+    DEAD: 'dead',
 } as const;
 
 export type CombatStatusType = (typeof CombatStatus)[keyof typeof CombatStatus];
 
 export const EffectMarker = {
-  IMMOBILIZED: "immobilized",
-  SKIP_ACTION: "skip_action",
-  NO_REACTION: "no_reaction",
-  NO_BONUS_ACTION: "no_bonus_action",
-  DISENGAGED: "disengaged",
+    IMMOBILIZED: 'immobilized',
+    SKIP_ACTION: 'skip_action',
+    NO_REACTION: 'no_reaction',
+    NO_BONUS_ACTION: 'no_bonus_action',
+    DISENGAGED: 'disengaged',
 } as const;
 
 export type EffectMarker = (typeof EffectMarker)[keyof typeof EffectMarker];
 
 export const BattleStatus = {
-  PREPARED: "prepared",
-  ACTIVE: "active",
-  COMPLETED: "completed",
+    PREPARED: 'prepared',
+    ACTIVE: 'active',
+    COMPLETED: 'completed',
 } as const;
 
 export type BattleStatus = (typeof BattleStatus)[keyof typeof BattleStatus];
 
 export const BATTLE_SNAPSHOT_RETENTION_DAYS = 90;
 
-export const DM_ACTOR = { actorId: "dm", actorName: "", actorSide: ParticipantSide.ALLY } as const;
+export const DM_ACTOR = {
+    actorId: 'dm',
+    actorName: '',
+    actorSide: ParticipantSide.ALLY,
+} as const;
 
 // service actors persist an empty name; the UI translates by actorId
-export const SYSTEM_ACTOR = { actorId: "system", actorName: "", actorSide: ParticipantSide.ALLY } as const;
+export const SYSTEM_ACTOR = {
+    actorId: 'system',
+    actorName: '',
+    actorSide: ParticipantSide.ALLY,
+} as const;
 
 export const BattleActionType = {
-  ATTACK: "attack",
-  SPELL: "spell",
-  BONUS_ACTION: "bonus_action",
-  ABILITY: "ability",
-  END_TURN: "end_turn",
-  SKIP_TURN: "skip_turn",
-  MORALE_SKIP: "morale_skip",
-  RETALIATION: "retaliation",
+    ATTACK: 'attack',
+    SPELL: 'spell',
+    BONUS_ACTION: 'bonus_action',
+    ABILITY: 'ability',
+    END_TURN: 'end_turn',
+    SKIP_TURN: 'skip_turn',
+    MORALE_SKIP: 'morale_skip',
+    RETALIATION: 'retaliation',
 } as const;
 
 /**
  * Глобальні константи бою
  */
 export const BATTLE_CONSTANTS = {
-  MIN_DAMAGE: 0,
-  
-  MAX_RESISTANCE: 1.0,
-  
-  MIN_RESISTANCE: 0,
-  
-  DEFAULT_RESISTANCE_PERCENT: 50,
-  
-  MIN_HP_PERCENT: 0,
-  
-  MAX_HP_PERCENT: 100,
+    MIN_DAMAGE: 0,
 
-  /** Загальний дільник для percent → fraction (e.g. 25% → 0.25). */
-  PERCENT_DIVISOR: 100,
+    MAX_RESISTANCE: 1.0,
 
-  /** Жорсткий cap відсоткового опору в бою (skill+racial sum ≤ 100%). */
-  RESISTANCE_PERCENT_CAP: 100,
+    MIN_RESISTANCE: 0,
 
-  /** Множник для конвертації fraction → percent (e.g. 0.25 → 25). */
-  FRACTION_TO_PERCENT: 100,
+    DEFAULT_RESISTANCE_PERCENT: 50,
+
+    MIN_HP_PERCENT: 0,
+
+    MAX_HP_PERCENT: 100,
+
+    /** Загальний дільник для percent → fraction (e.g. 25% → 0.25). */
+    PERCENT_DIVISOR: 100,
+
+    /** Жорсткий cap відсоткового опору в бою (skill+racial sum ≤ 100%). */
+    RESISTANCE_PERCENT_CAP: 100,
+
+    /** Множник для конвертації fraction → percent (e.g. 0.25 → 25). */
+    FRACTION_TO_PERCENT: 100,
 } as const;
 
 export const ParticipantSourceType = {
-  CHARACTER: "character",
-  UNIT: "unit",
+    CHARACTER: 'character',
+    UNIT: 'unit',
 } as const;
 
-export type ParticipantSourceTypeValue = (typeof ParticipantSourceType)[keyof typeof ParticipantSourceType];
+export type ParticipantSourceTypeValue =
+    (typeof ParticipantSourceType)[keyof typeof ParticipantSourceType];
 
-export const BATTLE_VERSION_ONLY_PARAM = "versionOnly";
+export const BATTLE_VERSION_ONLY_PARAM = 'versionOnly';
 
 export const BATTLE_LOG_RECENT_EVENTS = 30;
 
@@ -117,7 +131,8 @@ export const RECHARGE_THRESHOLDS = [4, 5, 6] as const;
 
 export type RechargeThreshold = (typeof RECHARGE_THRESHOLDS)[number];
 
-export const isRecharge = (value: unknown): value is RechargeThreshold => (RECHARGE_THRESHOLDS as readonly unknown[]).includes(value);
+export const isRecharge = (value: unknown): value is RechargeThreshold =>
+    (RECHARGE_THRESHOLDS as readonly unknown[]).includes(value);
 
 export const MIN_CRIT_ON = 2;
 
@@ -128,25 +143,39 @@ export const AURA_RADIUS_CELLS = 2;
 // одиночні заклинання, розширені вмінням (spellTargeting area), на карті наводяться колом; «all» б'є всю сторону
 export const SKILL_AREA_RADIUS_FEET = 10;
 
-export const DEFAULT_MAP_BACKGROUND = "/battle-maps/nicolas-tomb.webp";
+export const DEFAULT_MAP_BACKGROUND = '/battle-maps/nicolas-tomb.webp';
 
-export const DEFAULT_HAZARD_DICE = "1d6";
+export const DEFAULT_HAZARD_DICE = '1d6';
 
-export const DEFAULT_HAZARD_DAMAGE_TYPE = "fire";
+export const DEFAULT_HAZARD_DAMAGE_TYPE = 'fire';
 
 export const HAZARD_DICE_PATTERN = /^\d{1,2}d\d{1,3}([+-]\d{1,3})?$/;
 
 export const DEFAULT_BATTLE_MAP = {
-  cols: 20,
-  rows: 12,
-  background: null,
-  opacity: 0.35,
+    cols: 20,
+    rows: 12,
+    background: null,
+    opacity: 0.35,
 } as const satisfies BattleMapConfig;
 
-export const MAZE_DIFFICULTIES = ["easy", "medium", "hard"] as const;
+export const MAZE_DIFFICULTIES = ['easy', 'medium', 'hard'] as const;
 
-export const MAZE_MARK_SYMBOLS = ["arrow-n", "arrow-e", "arrow-s", "arrow-w", "cross", "skull", "star"] as const;
+export const MAZE_MARK_SYMBOLS = [
+    'arrow-n',
+    'arrow-e',
+    'arrow-s',
+    'arrow-w',
+    'cross',
+    'skull',
+    'star',
+] as const;
 
-export const MAZE_LIMITS = { wallEdgesPerOp: 400, fogCellsPerOp: 400, teleportPairs: 10, fogPatches: 20 } as const;
+export const MAZE_LIMITS = {
+    wallEdgesPerOp: 400,
+    fogCellsPerOp: 400,
+    teleportPairs: 10,
+    fogPatches: 20,
+} as const;
 
-export const BATTLE_SELECT_CLASS = "h-10 min-w-40 border border-white/20 bg-black/30 px-2 text-[var(--ink)]";
+export const BATTLE_SELECT_CLASS =
+    'h-10 min-w-40 border border-white/20 bg-black/30 px-2 text-[var(--ink)]';

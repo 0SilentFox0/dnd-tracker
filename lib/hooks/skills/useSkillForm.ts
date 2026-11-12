@@ -1,80 +1,104 @@
-"use client";
+'use client';
 
-import { type FormEvent, useCallback, useState } from "react";
-import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { type FormEvent, useCallback, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
-import { useMainSkills } from "./useMainSkills";
-import { useCreateSkill, useUpdateSkill } from "./useSkills";
+import { useMainSkills } from './useMainSkills';
+import { useCreateSkill, useUpdateSkill } from './useSkills';
 
-import { abilitySaveError, useAbilityValidity } from "@/lib/hooks/abilities";
-import { useNavigateFresh } from "@/lib/hooks/common";
-import { useTranslator } from "@/lib/i18n/use-translator";
-import { initialSkillFormValues } from "@/lib/utils/skills/form/normalize";
-import { buildSkillFormPayload } from "@/lib/utils/skills/form/payload";
-import type { MainSkill } from "@/types/main-skills";
-import type { Skill, SkillFormBinding, SkillFormValues } from "@/types/skills";
+import { abilitySaveError, useAbilityValidity } from '@/lib/hooks/abilities';
+import { useNavigateFresh } from '@/lib/hooks/common';
+import { useTranslator } from '@/lib/i18n/use-translator';
+import { initialSkillFormValues } from '@/lib/utils/skills/form/normalize';
+import { buildSkillFormPayload } from '@/lib/utils/skills/form/payload';
+import type { MainSkill } from '@/types/main-skills';
+import type { Skill, SkillFormBinding, SkillFormValues } from '@/types/skills';
 
 export function useSkillForm(
-  campaignId: string,
-  { initialData, initialMainSkills }: { initialData?: Skill; initialMainSkills?: MainSkill[] } = {},
+    campaignId: string,
+    {
+        initialData,
+        initialMainSkills,
+    }: { initialData?: Skill; initialMainSkills?: MainSkill[] } = {}
 ) {
-  const t = useTranslations("common.form");
+    const t = useTranslations('common.form');
 
-  const ta = useTranslator("abilities");
+    const ta = useTranslator('abilities');
 
-  const router = useRouter();
+    const router = useRouter();
 
-  const navigateFresh = useNavigateFresh();
+    const navigateFresh = useNavigateFresh();
 
-  const { data: mainSkillsFromApi = [] } = useMainSkills(campaignId, { enabled: initialMainSkills === undefined });
+    const { data: mainSkillsFromApi = [] } = useMainSkills(campaignId, {
+        enabled: initialMainSkills === undefined,
+    });
 
-  const mainSkills = initialMainSkills ?? mainSkillsFromApi;
+    const mainSkills = initialMainSkills ?? mainSkillsFromApi;
 
-  const create = useCreateSkill(campaignId);
+    const create = useCreateSkill(campaignId);
 
-  const update = useUpdateSkill(campaignId);
+    const update = useUpdateSkill(campaignId);
 
-  const [values, setValues] = useState<SkillFormValues>(() => initialSkillFormValues(initialData));
+    const [values, setValues] = useState<SkillFormValues>(() =>
+        initialSkillFormValues(initialData)
+    );
 
-  const [error, setError] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
-  const validity = useAbilityValidity();
+    const validity = useAbilityValidity();
 
-  const set = useCallback<SkillFormBinding["set"]>((key, value) => setValues((prev) => ({ ...prev, [key]: value })), []);
+    const set = useCallback<SkillFormBinding['set']>(
+        (key, value) => setValues((prev) => ({ ...prev, [key]: value })),
+        []
+    );
 
-  const listHref = `/campaigns/${campaignId}/dm/skills`;
+    const listHref = `/campaigns/${campaignId}/dm/skills`;
 
-  const submit = async (event: FormEvent) => {
-    event.preventDefault();
+    const submit = async (event: FormEvent) => {
+        event.preventDefault();
 
-    if (!values.name.trim()) {
-      setError(t("nameRequired"));
+        if (!values.name.trim()) {
+            setError(t('nameRequired'));
 
-      return;
-    }
+            return;
+        }
 
-    if (!validity.valid) return;
+        if (!validity.valid) return;
 
-    setError(null);
+        setError(null);
 
-    try {
-      const payload = buildSkillFormPayload(values);
+        try {
+            const payload = buildSkillFormPayload(values);
 
-      if (initialData) await update.mutateAsync({ skillId: initialData.id, data: payload });
-      else await create.mutateAsync(payload);
+            if (initialData)
+                await update.mutateAsync({
+                    skillId: initialData.id,
+                    data: payload,
+                });
+            else await create.mutateAsync(payload);
 
-      navigateFresh(listHref);
-    } catch (err) {
-      setError(abilitySaveError(err, initialData ? t("updateFailed") : t("createFailed"), ta));
-    }
-  };
+            navigateFresh(listHref);
+        } catch (err) {
+            setError(
+                abilitySaveError(
+                    err,
+                    initialData ? t('updateFailed') : t('createFailed'),
+                    ta
+                )
+            );
+        }
+    };
 
-  return {
-    form: { data: values, set } satisfies SkillFormBinding,
-    mainSkills,
-    abilities: { ...validity, issues: initialData?.abilityIssues ?? [] },
-    status: { isSaving: create.isPending || update.isPending, error, isEdit: !!initialData },
-    actions: { submit, cancel: () => router.push(listHref) },
-  };
+    return {
+        form: { data: values, set } satisfies SkillFormBinding,
+        mainSkills,
+        abilities: { ...validity, issues: initialData?.abilityIssues ?? [] },
+        status: {
+            isSaving: create.isPending || update.isPending,
+            error,
+            isEdit: !!initialData,
+        },
+        actions: { submit, cancel: () => router.push(listHref) },
+    };
 }

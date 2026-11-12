@@ -1,15 +1,15 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
 export function useDebouncedValue<T>(value: T, ms: number): T {
-  const [debounced, setDebounced] = useState(value);
+    const [debounced, setDebounced] = useState(value);
 
-  useEffect(() => {
-    const t = setTimeout(() => setDebounced(value), ms);
+    useEffect(() => {
+        const t = setTimeout(() => setDebounced(value), ms);
 
-    return () => clearTimeout(t);
-  }, [value, ms]);
+        return () => clearTimeout(t);
+    }, [value, ms]);
 
-  return debounced;
+    return debounced;
 }

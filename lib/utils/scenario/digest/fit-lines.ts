@@ -1,26 +1,26 @@
 export function fitLines(lines: string[], maxChars: number): string {
-  const out: string[] = [];
+    const out: string[] = [];
 
-  let used = 0;
+    let used = 0;
 
-  for (const line of lines) {
-    const cost = line.length + (out.length ? 1 : 0);
+    for (const line of lines) {
+        const cost = line.length + (out.length ? 1 : 0);
 
-    if (used + cost > maxChars) break;
+        if (used + cost > maxChars) break;
 
-    out.push(line);
-    used += cost;
-  }
+        out.push(line);
+        used += cost;
+    }
 
-  const marker = (omitted: number) => `- … ${omitted} more pages omitted`;
+    const marker = (omitted: number) => `- … ${omitted} more pages omitted`;
 
-  while (out.length < lines.length) {
-    const text = [...out, marker(lines.length - out.length)].join("\n");
+    while (out.length < lines.length) {
+        const text = [...out, marker(lines.length - out.length)].join('\n');
 
-    if (text.length <= maxChars) return text;
+        if (text.length <= maxChars) return text;
 
-    if (!out.pop()) break;
-  }
+        if (!out.pop()) break;
+    }
 
-  return out.join("\n");
+    return out.join('\n');
 }

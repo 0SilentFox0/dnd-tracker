@@ -1,40 +1,89 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
-import { retaliate, SWORD,swordUnit } from "./helpers";
+import { retaliate, SWORD, swordUnit } from './helpers';
 
-import { ParticipantSide } from "@/lib/constants/battle";
-import { seq } from "@/lib/utils/abilities/__tests__/fixtures";
-import { resolveServerAttack } from "@/lib/utils/battle/attack/server-attack";
-import type { ActionFlow } from "@/lib/utils/battle/common/action-flow";
-import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
-import { DEFAULT_RULES } from "@/lib/utils/rules";
+import { ParticipantSide } from '@/lib/constants/battle';
+import { seq } from '@/lib/utils/abilities/__tests__/fixtures';
+import { resolveServerAttack } from '@/lib/utils/battle/attack/server-attack';
+import type { ActionFlow } from '@/lib/utils/battle/common/action-flow';
+import { eventTextOf } from '@/lib/utils/battle/log/__tests__/event-text';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
 
-const flowOf = (ps: ReturnType<typeof swordUnit>[], rng: () => number): ActionFlow => ({ ps, messages: [], summons: [], ctx: { round: 1, rng, rules: DEFAULT_RULES } });
+const flowOf = (
+    ps: ReturnType<typeof swordUnit>[],
+    rng: () => number
+): ActionFlow => ({
+    ps,
+    messages: [],
+    summons: [],
+    ctx: { round: 1, rng, rules: DEFAULT_RULES },
+});
 
-describe("resolveServerAttack", () => {
-  it("заголовок залежить від label; відсіч збігається з resolveRetaliation", () => {
-    const run = (label: "retaliation" | "opportunity" | "readied") => {
-      const rng = seq(0.85);
+describe('resolveServerAttack', () => {
+    it('заголовок залежить від label; відсіч збігається з resolveRetaliation', () => {
+        const run = (label: 'retaliation' | 'opportunity' | 'readied') => {
+            const rng = seq(0.85);
 
-      const ps = [swordUnit("a", ParticipantSide.ALLY), swordUnit("d", ParticipantSide.ENEMY)];
+            const ps = [
+                swordUnit('a', ParticipantSide.ALLY),
+                swordUnit('d', ParticipantSide.ENEMY),
+            ];
 
-      return resolveServerAttack({ flow: flowOf(ps, rng), attackerId: "d", targetId: "a", attack: SWORD, currentRound: 1, battleId: "b1", rng, label });
-    };
+            return resolveServerAttack({
+                flow: flowOf(ps, rng),
+                attackerId: 'd',
+                targetId: 'a',
+                attack: SWORD,
+                currentRound: 1,
+                battleId: 'b1',
+                rng,
+                label,
+            });
+        };
 
-    expect(eventTextOf(run("readied").battleAction).startsWith("Підготовлена атака:")).toBe(true);
-    expect(eventTextOf(run("opportunity").battleAction).startsWith("Атака можливості:")).toBe(true);
-    expect(eventTextOf(run("retaliation").battleAction).startsWith("Відсіч:")).toBe(true);
-    expect(run("retaliation").hit).toBe(true);
-    expect(eventTextOf(retaliate([swordUnit("a", ParticipantSide.ALLY), swordUnit("d", ParticipantSide.ENEMY)])?.battleAction as never)).toBe(eventTextOf(run("retaliation").battleAction));
-  });
+        expect(
+            eventTextOf(run('readied').battleAction).startsWith(
+                'Підготовлена атака:'
+            )
+        ).toBe(true);
+        expect(
+            eventTextOf(run('opportunity').battleAction).startsWith(
+                'Атака можливості:'
+            )
+        ).toBe(true);
+        expect(
+            eventTextOf(run('retaliation').battleAction).startsWith('Відсіч:')
+        ).toBe(true);
+        expect(run('retaliation').hit).toBe(true);
+        expect(
+            eventTextOf(
+                retaliate([
+                    swordUnit('a', ParticipantSide.ALLY),
+                    swordUnit('d', ParticipantSide.ENEMY),
+                ])?.battleAction as never
+            )
+        ).toBe(eventTextOf(run('retaliation').battleAction));
+    });
 
-  it("промах: hit=false, ціль не падає", () => {
-    const rng = seq(0.05);
+    it('промах: hit=false, ціль не падає', () => {
+        const rng = seq(0.05);
 
-    const ps = [swordUnit("a", ParticipantSide.ALLY), swordUnit("d", ParticipantSide.ENEMY)];
+        const ps = [
+            swordUnit('a', ParticipantSide.ALLY),
+            swordUnit('d', ParticipantSide.ENEMY),
+        ];
 
-    const r = resolveServerAttack({ flow: flowOf(ps, rng), attackerId: "d", targetId: "a", attack: SWORD, currentRound: 1, battleId: "b1", rng, label: "readied" });
+        const r = resolveServerAttack({
+            flow: flowOf(ps, rng),
+            attackerId: 'd',
+            targetId: 'a',
+            attack: SWORD,
+            currentRound: 1,
+            battleId: 'b1',
+            rng,
+            label: 'readied',
+        });
 
-    expect(r).toMatchObject({ hit: false, downed: false });
-  });
+        expect(r).toMatchObject({ hit: false, downed: false });
+    });
 });

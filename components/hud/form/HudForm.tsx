@@ -1,42 +1,76 @@
-"use client";
+'use client';
 
-import { type FormEvent, type ReactNode, useState } from "react";
+import { type FormEvent, type ReactNode, useState } from 'react';
 
-import { type HudTab, HudTabs } from "./HudTabs";
-import { useRevealInvalidTab } from "./reveal-invalid-tab";
+import { type HudTab, HudTabs } from './HudTabs';
+import { useRevealInvalidTab } from './reveal-invalid-tab';
 
-import { ActionBar } from "@/components/common/ActionBar";
-import { cn } from "@/lib/utils";
+import { ActionBar } from '@/components/common/ActionBar';
+import { cn } from '@/lib/utils';
 
 interface HudFormProps<T extends string> {
-  id: string;
-  onSubmit: (e: FormEvent<HTMLFormElement>) => void;
-  tabs?: HudTab<T>[];
-  tab?: T;
-  onTabChange?: (tab: T) => void;
-  children?: ReactNode;
-  actions: ReactNode;
-  error?: string | null;
-  className?: string;
-  triggerClassName?: string;
+    id: string;
+    onSubmit: (e: FormEvent<HTMLFormElement>) => void;
+    tabs?: HudTab<T>[];
+    tab?: T;
+    onTabChange?: (tab: T) => void;
+    children?: ReactNode;
+    actions: ReactNode;
+    error?: string | null;
+    className?: string;
+    triggerClassName?: string;
 }
 
-export function HudForm<T extends string>({ id, onSubmit, tabs, tab, onTabChange, children, actions, error, className, triggerClassName }: HudFormProps<T>) {
-  const [innerTab, setInnerTab] = useState<T | undefined>(tabs?.[0]?.id);
+export function HudForm<T extends string>({
+    id,
+    onSubmit,
+    tabs,
+    tab,
+    onTabChange,
+    children,
+    actions,
+    error,
+    className,
+    triggerClassName,
+}: HudFormProps<T>) {
+    const [innerTab, setInnerTab] = useState<T | undefined>(tabs?.[0]?.id);
 
-  const active = tab ?? innerTab ?? tabs?.[0]?.id;
+    const active = tab ?? innerTab ?? tabs?.[0]?.id;
 
-  const setActive = (next: T) => {
-    setInnerTab(next);
-    onTabChange?.(next);
-  };
+    const setActive = (next: T) => {
+        setInnerTab(next);
+        onTabChange?.(next);
+    };
 
-  const onInvalidCapture = useRevealInvalidTab(tabs ? active : undefined, setActive);
+    const onInvalidCapture = useRevealInvalidTab(
+        tabs ? active : undefined,
+        setActive
+    );
 
-  return (
-    <form id={id} onSubmit={onSubmit} onInvalidCapture={onInvalidCapture} className={cn("flex flex-1 flex-col", className)}>
-      {tabs && active ? <HudTabs tabs={tabs} value={active} onValueChange={setActive} triggerClassName={triggerClassName} keepMounted /> : <div className="px-4 py-3">{children}</div>}
-      <ActionBar error={error} className="mt-auto flex-wrap [&>*]:min-w-fit border-hud-rule bg-hud-page/95 px-4 sm:px-4 sm:pb-4">{actions}</ActionBar>
-    </form>
-  );
+    return (
+        <form
+            id={id}
+            onSubmit={onSubmit}
+            onInvalidCapture={onInvalidCapture}
+            className={cn('flex flex-1 flex-col', className)}
+        >
+            {tabs && active ? (
+                <HudTabs
+                    tabs={tabs}
+                    value={active}
+                    onValueChange={setActive}
+                    triggerClassName={triggerClassName}
+                    keepMounted
+                />
+            ) : (
+                <div className="px-4 py-3">{children}</div>
+            )}
+            <ActionBar
+                error={error}
+                className="mt-auto flex-wrap border-hud-rule bg-hud-page/95 px-4 sm:px-4 sm:pb-4 [&>*]:min-w-fit"
+            >
+                {actions}
+            </ActionBar>
+        </form>
+    );
 }

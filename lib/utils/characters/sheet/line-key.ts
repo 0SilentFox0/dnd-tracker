@@ -1,1 +1,2 @@
-export const sheetLineKey = (id: string) => `characterProfile.sheet.lines.${id}`;
+export const sheetLineKey = (id: string) =>
+    `characterProfile.sheet.lines.${id}`;

@@ -1,18 +1,23 @@
-import type { ApiErrorPayload } from "@/lib/api/client";
+import type { ApiErrorPayload } from '@/lib/api/client';
 
 let redirecting = false;
 
 export function resetUnauthorizedRedirect() {
-  redirecting = false;
+    redirecting = false;
 }
 
 export function handleApiError({ status, message, url }: ApiErrorPayload) {
-  if (typeof window === "undefined") return;
+    if (typeof window === 'undefined') return;
 
-  console.error("[API Error]", status, url, message);
+    console.error('[API Error]', status, url, message);
 
-  if (status !== 401 || redirecting || window.location.pathname.startsWith("/sign-in")) return;
+    if (
+        status !== 401 ||
+        redirecting ||
+        window.location.pathname.startsWith('/sign-in')
+    )
+        return;
 
-  redirecting = true;
-  window.location.assign("/sign-in");
+    redirecting = true;
+    window.location.assign('/sign-in');
 }

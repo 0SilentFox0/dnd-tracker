@@ -1,29 +1,27 @@
+import { createCharacter } from './create-character';
+import { listCharacters } from './list-characters';
 
-
-import { createCharacter } from "./create-character";
-import { listCharacters } from "./list-characters";
-
-import { handleApiError } from "@/lib/utils/api/error-handler";
-import type { CampaignRouteContext } from "@/types/api";
+import { handleApiError } from '@/lib/utils/api/error-handler';
+import type { CampaignRouteContext } from '@/types/api';
 
 export async function POST(request: Request, { params }: CampaignRouteContext) {
-  try {
-    const { id } = await params;
+    try {
+        const { id } = await params;
 
-    return await createCharacter(request, id);
-  } catch (error) {
-    return handleApiError(error, { action: "create character" });
-  }
+        return await createCharacter(request, id);
+    } catch (error) {
+        return handleApiError(error, { action: 'create character' });
+    }
 }
 
 export async function GET(request: Request, { params }: CampaignRouteContext) {
-  try {
-    const { id } = await params;
+    try {
+        const { id } = await params;
 
-    return await listCharacters(request, id);
-  } catch (error) {
-    return handleApiError(error, { action: "list characters" });
-  }
+        return await listCharacters(request, id);
+    } catch (error) {
+        return handleApiError(error, { action: 'list characters' });
+    }
 }
 
-export { DELETE } from "@/lib/server/characters/operations/delete-all";
+export { DELETE } from '@/lib/server/characters/operations/delete-all';

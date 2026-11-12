@@ -1,31 +1,52 @@
 // @vitest-environment happy-dom
-import { cleanup, fireEvent, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { cleanup, fireEvent, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { BattlePreparationView } from "@/components/battle/overlays/BattlePreparationView";
-import { render } from "@/lib/i18n/test/render-uk";
+import { BattlePreparationView } from '@/components/battle/overlays/BattlePreparationView';
+import { render } from '@/lib/i18n/test/render-uk';
 
-vi.unmock("next-intl");
+vi.unmock('next-intl');
 
 afterEach(cleanup);
 
-describe("BattlePreparationView: старт", () => {
-  it("без учасників на полі кнопка вимкнена з підказкою", () => {
-    const onStart = vi.fn();
+describe('BattlePreparationView: старт', () => {
+    it('без учасників на полі кнопка вимкнена з підказкою', () => {
+        const onStart = vi.fn();
 
-    render(<BattlePreparationView alliesCount={1} enemiesCount={1} isDM onStartBattle={onStart} isStarting={false} canStart={false} />);
+        render(
+            <BattlePreparationView
+                alliesCount={1}
+                enemiesCount={1}
+                isDM
+                onStartBattle={onStart}
+                isStarting={false}
+                canStart={false}
+            />
+        );
 
-    const button = screen.getByRole("button", { name: "ДО БОЮ!" }) as HTMLButtonElement;
+        const button = screen.getByRole('button', {
+            name: 'ДО БОЮ!',
+        }) as HTMLButtonElement;
 
-    expect(button.disabled).toBe(true);
-    expect(screen.getByText("Хоча б один учасник має бути на полі")).toBeTruthy();
-  });
+        expect(button.disabled).toBe(true);
+        expect(
+            screen.getByText('Хоча б один учасник має бути на полі')
+        ).toBeTruthy();
+    });
 
-  it("за наявності учасників на полі старт працює", () => {
-    const onStart = vi.fn();
+    it('за наявності учасників на полі старт працює', () => {
+        const onStart = vi.fn();
 
-    render(<BattlePreparationView alliesCount={1} enemiesCount={1} isDM onStartBattle={onStart} isStarting={false} />);
-    fireEvent.click(screen.getByRole("button", { name: "ДО БОЮ!" }));
-    expect(onStart).toHaveBeenCalled();
-  });
+        render(
+            <BattlePreparationView
+                alliesCount={1}
+                enemiesCount={1}
+                isDM
+                onStartBattle={onStart}
+                isStarting={false}
+            />
+        );
+        fireEvent.click(screen.getByRole('button', { name: 'ДО БОЮ!' }));
+        expect(onStart).toHaveBeenCalled();
+    });
 });

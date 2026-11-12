@@ -1,61 +1,106 @@
-import { CHARACTERISTIC_KEYS, type Characteristics, type LedgerEntry } from "../characteristics/keys";
+import {
+    CHARACTERISTIC_KEYS,
+    type Characteristics,
+    type LedgerEntry,
+} from '../characteristics/keys';
 
-export type UndoResult = { ok: true; next: Characteristics; entry: LedgerEntry } | { ok: false; error: "LEDGER_EMPTY" | "LEDGER_STALE" };
+export type UndoResult =
+    | { ok: true; next: Characteristics; entry: LedgerEntry }
+    | { ok: false; error: 'LEDGER_EMPTY' | 'LEDGER_STALE' };
 
-const without = <T>(record: Record<string, T>, key: string) => Object.fromEntries(Object.entries(record).filter(([k]) => k !== key));
+const without = <T>(record: Record<string, T>, key: string) =>
+    Object.fromEntries(Object.entries(record).filter(([k]) => k !== key));
 
-function dropTick(c: Characteristics, tick: string | undefined): Characteristics {
-  if (!tick || !c.career?.ticks.includes(tick)) return c;
+function dropTick(
+    c: Characteristics,
+    tick: string | undefined
+): Characteristics {
+    if (!tick || !c.career?.ticks.includes(tick)) return c;
 
-  return { ...c, career: { ...c.career, ticks: c.career.ticks.filter((t) => t !== tick) } };
+    return {
+        ...c,
+        career: {
+            ...c.career,
+            ticks: c.career.ticks.filter((t) => t !== tick),
+        },
+    };
 }
 
 export function planUndo(characteristics: Characteristics): UndoResult {
-  const result = undoLast(characteristics);
+    const result = undoLast(characteristics);
 
-  if (!result.ok) return result;
+    if (!result.ok) return result;
 
-  const next = dropTick(result.next, result.entry.tick);
+    const next = dropTick(result.next, result.entry.tick);
 
-  const { entry } = result;
+    const { entry } = result;
 
-  if (!entry.discount) return { ...result, next };
+    if (!entry.discount) return { ...result, next };
 
-  if (next.downtime?.training) return { ok: false, error: "LEDGER_STALE" };
+    if (next.downtime?.training) return { ok: false, error: 'LEDGER_STALE' };
 
-  const training = { kind: entry.kind as "characteristic" | "skill", key: entry.key, discount: entry.discount };
+    const training = {
+        kind: entry.kind as 'characteristic' | 'skill',
+        key: entry.key,
+        discount: entry.discount,
+    };
 
-  return { ...result, next: { ...next, downtime: { ...(next.downtime ?? { ailments: [] }), training } } };
+    return {
+        ...result,
+        next: {
+            ...next,
+            downtime: { ...(next.downtime ?? { ailments: [] }), training },
+        },
+    };
 }
 
 function undoLast(characteristics: Characteristics): UndoResult {
-  const entry = characteristics.ledger[characteristics.ledger.length - 1];
+    const entry = characteristics.ledger[characteristics.ledger.length - 1];
 
-  if (!entry) return { ok: false, error: "LEDGER_EMPTY" };
+    if (!entry) return { ok: false, error: 'LEDGER_EMPTY' };
 
-  const ledger = characteristics.ledger.slice(0, -1);
+    const ledger = characteristics.ledger.slice(0, -1);
 
-  const stale = { ok: false, error: "LEDGER_STALE" } as const;
+    const stale = { ok: false, error: 'LEDGER_STALE' } as const;
 
-  if (entry.kind === "characteristic") {
-    const key = CHARACTERISTIC_KEYS.find((k) => k === entry.key);
+    if (entry.kind === 'characteristic') {
+        const key = CHARACTERISTIC_KEYS.find((k) => k === entry.key);
 
-    if (!key || characteristics.advances[key] !== entry.to) return stale;
+        if (!key || characteristics.advances[key] !== entry.to) return stale;
 
-    return { ok: true, next: { ...characteristics, advances: { ...characteristics.advances, [key]: entry.from }, ledger }, entry };
-  }
+        return {
+            ok: true,
+            next: {
+                ...characteristics,
+                advances: { ...characteristics.advances, [key]: entry.from },
+                ledger,
+            },
+            entry,
+        };
+    }
 
-  if (entry.kind === "skill") {
-    if ((characteristics.skillAdvances[entry.key] ?? 0) !== entry.to) return stale;
+    if (entry.kind === 'skill') {
+        if ((characteristics.skillAdvances[entry.key] ?? 0) !== entry.to)
+            return stale;
 
-    const skillAdvances = entry.from === 0 ? without(characteristics.skillAdvances, entry.key) : { ...characteristics.skillAdvances, [entry.key]: entry.from };
+        const skillAdvances =
+            entry.from === 0
+                ? without(characteristics.skillAdvances, entry.key)
+                : { ...characteristics.skillAdvances, [entry.key]: entry.from };
 
-    return { ok: true, next: { ...characteristics, skillAdvances, ledger }, entry };
-  }
+        return {
+            ok: true,
+            next: { ...characteristics, skillAdvances, ledger },
+            entry,
+        };
+    }
 
-  if ((characteristics.talents[entry.key] ?? 0) !== entry.to) return stale;
+    if ((characteristics.talents[entry.key] ?? 0) !== entry.to) return stale;
 
-  const talents = entry.from === 0 ? without(characteristics.talents, entry.key) : { ...characteristics.talents, [entry.key]: entry.from };
+    const talents =
+        entry.from === 0
+            ? without(characteristics.talents, entry.key)
+            : { ...characteristics.talents, [entry.key]: entry.from };
 
-  return { ok: true, next: { ...characteristics, talents, ledger }, entry };
+    return { ok: true, next: { ...characteristics, talents, ledger }, entry };
 }

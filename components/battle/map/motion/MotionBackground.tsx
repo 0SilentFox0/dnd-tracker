@@ -1,112 +1,165 @@
-"use client";
+'use client';
 
-import { useEffect, useRef } from "react";
-import Image from "next/image";
+import { useEffect, useRef } from 'react';
+import Image from 'next/image';
 
-import { DEFAULT_MAP_BACKGROUND } from "@/lib/constants/battle";
-import { useLoadedAspect } from "@/lib/hooks/battle";
-import { usePageHidden, useReducedMotion } from "@/lib/hooks/common";
-import { mirrorTileCount, motionInMapSpace, stepMotion } from "@/lib/utils/battle/map-motion";
-import { subscribe } from "@/lib/utils/canvas/ticker";
-import type { BattleMapConfig, MapMotion } from "@/types/battle";
+import { DEFAULT_MAP_BACKGROUND } from '@/lib/constants/battle';
+import { useLoadedAspect } from '@/lib/hooks/battle';
+import { usePageHidden, useReducedMotion } from '@/lib/hooks/common';
+import {
+    mirrorTileCount,
+    motionInMapSpace,
+    stepMotion,
+} from '@/lib/utils/battle/map-motion';
+import { subscribe } from '@/lib/utils/canvas/ticker';
+import type { BattleMapConfig, MapMotion } from '@/types/battle';
 
 const REST_PX_PER_S = 0.5;
 
 /** Фон, що їде під нерухомою сіткою: дзеркально зациклена доріжка тайлів, фаза крутиться локально в rAF. */
-export function MotionBackground({ map, motion, cellPx, rotated, phone, onReady }: { map: BattleMapConfig; motion: MapMotion; cellPx: number; rotated: boolean; phone: boolean; onReady?: () => void }) {
-  const src = map.background ?? DEFAULT_MAP_BACKGROUND;
+export function MotionBackground({
+    map,
+    motion,
+    cellPx,
+    rotated,
+    phone,
+    onReady,
+}: {
+    map: BattleMapConfig;
+    motion: MapMotion;
+    cellPx: number;
+    rotated: boolean;
+    phone: boolean;
+    onReady?: () => void;
+}) {
+    const src = map.background ?? DEFAULT_MAP_BACKGROUND;
 
-  const { aspect, imgProps } = useLoadedAspect(src, onReady);
+    const { aspect, imgProps } = useLoadedAspect(src, onReady);
 
-  const reduced = useReducedMotion();
+    const reduced = useReducedMotion();
 
-  const visible = !usePageHidden();
+    const visible = !usePageHidden();
 
-  const trackRef = useRef<HTMLDivElement>(null);
+    const trackRef = useRef<HTMLDivElement>(null);
 
-  const mapW = map.cols * cellPx;
+    const mapW = map.cols * cellPx;
 
-  const mapH = map.rows * cellPx;
+    const mapH = map.rows * cellPx;
 
-  const m = motionInMapSpace(motion, rotated);
+    const m = motionInMapSpace(motion, rotated);
 
-  const horizontal = m.axis === "x";
+    const horizontal = m.axis === 'x';
 
-  const tileLen = aspect ? (horizontal ? mapH / aspect : mapW * aspect) : 0;
+    const tileLen = aspect ? (horizontal ? mapH / aspect : mapW * aspect) : 0;
 
-  const period = 2 * tileLen;
+    const period = 2 * tileLen;
 
-  const target = m.speed * cellPx;
+    const target = m.speed * cellPx;
 
-  const state = useRef({ phase: 0, speed: target });
+    const state = useRef({ phase: 0, speed: target });
 
-  const apply = useRef<(() => void) | undefined>(undefined);
+    const apply = useRef<(() => void) | undefined>(undefined);
 
-  useEffect(() => {
-    apply.current = () => {
-      const track = trackRef.current;
+    useEffect(() => {
+        apply.current = () => {
+            const track = trackRef.current;
 
-      if (!track) return;
+            if (!track) return;
 
-      const offset = (((state.current.phase % period) + period) % period) - period;
+            const offset =
+                (((state.current.phase % period) + period) % period) - period;
 
-      track.style.transform = horizontal ? `translate3d(${offset}px,0,0)` : `translate3d(0,${offset}px,0)`;
-    };
-    apply.current();
-  }, [horizontal, period]);
+            track.style.transform = horizontal
+                ? `translate3d(${offset}px,0,0)`
+                : `translate3d(0,${offset}px,0)`;
+        };
+        apply.current();
+    }, [horizontal, period]);
 
-  useEffect(() => {
-    if (!tileLen || reduced || !visible) return;
+    useEffect(() => {
+        if (!tileLen || reduced || !visible) return;
 
-    if (target === 0 && Math.abs(state.current.speed) < REST_PX_PER_S) return;
+        if (target === 0 && Math.abs(state.current.speed) < REST_PX_PER_S)
+            return;
 
-    return subscribe((_now, dt) => {
-      state.current = stepMotion(state.current, target, dt, period);
-      apply.current?.();
+        return subscribe((_now, dt) => {
+            state.current = stepMotion(state.current, target, dt, period);
+            apply.current?.();
 
-      if (target === 0 && Math.abs(state.current.speed) < REST_PX_PER_S) {
-        state.current = { ...state.current, speed: 0 };
+            if (target === 0 && Math.abs(state.current.speed) < REST_PX_PER_S) {
+                state.current = { ...state.current, speed: 0 };
 
-        return false;
-      }
-    });
-  }, [tileLen, period, target, reduced, visible]);
+                return false;
+            }
+        });
+    }, [tileLen, period, target, reduced, visible]);
 
-  if (!aspect) {
+    if (!aspect) {
+        return (
+            <div
+                data-map-background
+                className="pointer-events-none absolute inset-0 overflow-hidden"
+            >
+                <Image
+                    src={src}
+                    alt=""
+                    fill
+                    sizes={phone && mapW > 0 ? `${Math.ceil(mapW)}px` : '100vw'}
+                    className="object-contain object-left-top"
+                    priority
+                    {...imgProps}
+                />
+            </div>
+        );
+    }
+
+    const count = mirrorTileCount(horizontal ? mapW : mapH, tileLen);
+
+    const tileSize = horizontal
+        ? { width: tileLen, height: mapH }
+        : { width: mapW, height: tileLen };
+
     return (
-      <div data-map-background className="pointer-events-none absolute inset-0 overflow-hidden">
-        <Image
-          src={src}
-          alt=""
-          fill
-          sizes={phone && mapW > 0 ? `${Math.ceil(mapW)}px` : "100vw"}
-          className="object-contain object-left-top"
-          priority
-          {...imgProps}
-        />
-      </div>
+        <div
+            data-map-background
+            className="pointer-events-none absolute inset-0 overflow-hidden"
+        >
+            <div
+                ref={trackRef}
+                data-motion-track
+                data-motion-axis={m.axis}
+                className="absolute top-0 left-0 flex will-change-transform"
+                style={{
+                    flexDirection: horizontal ? 'row' : 'column',
+                    ...(horizontal
+                        ? { width: count * tileLen, height: mapH }
+                        : { width: mapW, height: count * tileLen }),
+                }}
+            >
+                {Array.from({ length: count }, (_, i) => (
+                    <div
+                        key={i}
+                        className="relative shrink-0"
+                        style={{
+                            ...tileSize,
+                            transform:
+                                i % 2
+                                    ? horizontal
+                                        ? 'scale(-1, 1)'
+                                        : 'scale(1, -1)'
+                                    : undefined,
+                        }}
+                    >
+                        <Image
+                            src={src}
+                            alt=""
+                            fill
+                            sizes={`${Math.ceil(tileSize.width)}px`}
+                            className="object-fill"
+                        />
+                    </div>
+                ))}
+            </div>
+        </div>
     );
-  }
-
-  const count = mirrorTileCount(horizontal ? mapW : mapH, tileLen);
-
-  const tileSize = horizontal ? { width: tileLen, height: mapH } : { width: mapW, height: tileLen };
-
-  return (
-    <div data-map-background className="pointer-events-none absolute inset-0 overflow-hidden">
-      <div
-        ref={trackRef}
-        data-motion-track
-        data-motion-axis={m.axis}
-        className="absolute left-0 top-0 flex will-change-transform"
-        style={{ flexDirection: horizontal ? "row" : "column", ...(horizontal ? { width: count * tileLen, height: mapH } : { width: mapW, height: count * tileLen }) }}
-      >
-        {Array.from({ length: count }, (_, i) => (
-          <div key={i} className="relative shrink-0" style={{ ...tileSize, transform: i % 2 ? (horizontal ? "scale(-1, 1)" : "scale(1, -1)") : undefined }}>
-            <Image src={src} alt="" fill sizes={`${Math.ceil(tileSize.width)}px`} className="object-fill" />
-          </div>
-        ))}
-      </div>
-    </div>
-  );
 }

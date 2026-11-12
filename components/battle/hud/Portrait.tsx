@@ -1,45 +1,71 @@
-import Image from "next/image";
+import Image from 'next/image';
 
-import { ParticipantSide } from "@/lib/constants/battle";
-import { cn } from "@/lib/utils";
-import { isDown } from "@/lib/utils/battle/participant/state";
-import type { BattleParticipant } from "@/types/battle";
+import { ParticipantSide } from '@/lib/constants/battle';
+import { cn } from '@/lib/utils';
+import { isDown } from '@/lib/utils/battle/participant/state';
+import type { BattleParticipant } from '@/types/battle';
 
 export interface PortraitProps {
-  participant: BattleParticipant;
-  size?: number;
-  current?: boolean;
-  me?: boolean;
-  extra?: boolean;
-  className?: string;
-  /** FX anchor: the row/hero portrait, or its copy in the initiative track (used only when the row is off-screen). */
-  fx?: "main" | "track" | "detail";
+    participant: BattleParticipant;
+    size?: number;
+    current?: boolean;
+    me?: boolean;
+    extra?: boolean;
+    className?: string;
+    /** FX anchor: the row/hero portrait, or its copy in the initiative track (used only when the row is off-screen). */
+    fx?: 'main' | 'track' | 'detail';
 }
 
-export function Portrait({ participant, size = 40, current, me, extra, className, fx }: PortraitProps) {
-  const { avatar, name, side } = participant.basicInfo;
+export function Portrait({
+    participant,
+    size = 40,
+    current,
+    me,
+    extra,
+    className,
+    fx,
+}: PortraitProps) {
+    const { avatar, name, side } = participant.basicInfo;
 
-  const ring = side === ParticipantSide.ALLY ? "var(--ally)" : "var(--enemy)";
+    const ring = side === ParticipantSide.ALLY ? 'var(--ally)' : 'var(--enemy)';
 
-  return (
-    <span
-      data-fx-participant={fx ? participant.basicInfo.id : undefined}
-      data-fx-anchor={fx && fx !== "main" ? fx : undefined}
-      className={cn("relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-hud-raised text-xs font-bold", isDown(participant) && "grayscale brightness-50", className)}
-      style={{
-        width: size,
-        height: size,
-        boxShadow: current
-          ? `0 0 0 2px var(--bone), 0 0 0 4px ${ring}`
-          : me
-            ? `0 0 0 2px ${ring}, 0 0 0 3px #000, 0 0 0 5px var(--gold)`
-            : extra
-              ? `0 0 0 2px var(--gold), 0 0 0 3px #000`
-              : `0 0 0 2px ${ring}, 0 0 0 3px #000`,
-      }}
-    >
-      {avatar ? <Image src={avatar} alt={name} fill sizes={`${size}px`} className="object-cover" /> : name.slice(0, 2)}
-      {extra && <span className="absolute -right-0.5 -top-0.5 flex size-3.5 items-center justify-center rounded-full bg-[var(--gold)] text-[10px] leading-none text-black">+</span>}
-    </span>
-  );
+    return (
+        <span
+            data-fx-participant={fx ? participant.basicInfo.id : undefined}
+            data-fx-anchor={fx && fx !== 'main' ? fx : undefined}
+            className={cn(
+                'relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-hud-raised text-xs font-bold',
+                isDown(participant) && 'brightness-50 grayscale',
+                className
+            )}
+            style={{
+                width: size,
+                height: size,
+                boxShadow: current
+                    ? `0 0 0 2px var(--bone), 0 0 0 4px ${ring}`
+                    : me
+                      ? `0 0 0 2px ${ring}, 0 0 0 3px #000, 0 0 0 5px var(--gold)`
+                      : extra
+                        ? `0 0 0 2px var(--gold), 0 0 0 3px #000`
+                        : `0 0 0 2px ${ring}, 0 0 0 3px #000`,
+            }}
+        >
+            {avatar ? (
+                <Image
+                    src={avatar}
+                    alt={name}
+                    fill
+                    sizes={`${size}px`}
+                    className="object-cover"
+                />
+            ) : (
+                name.slice(0, 2)
+            )}
+            {extra && (
+                <span className="absolute -top-0.5 -right-0.5 flex size-3.5 items-center justify-center rounded-full bg-[var(--gold)] text-[10px] leading-none text-black">
+                    +
+                </span>
+            )}
+        </span>
+    );
 }

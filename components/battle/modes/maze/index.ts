@@ -1,1 +1,1 @@
-export { MAZE_UI } from "./ui";
+export { MAZE_UI } from './ui';

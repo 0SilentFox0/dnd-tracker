@@ -1,72 +1,117 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
-import { addRow, addSection, emptyContent, moveRow, moveSection, removeRow, removeSection, setRowBattle, setRowSlide, setSectionTrack, updateRow, updateSection } from "@/lib/utils/scenario/structure";
+import {
+    addRow,
+    addSection,
+    emptyContent,
+    moveRow,
+    moveSection,
+    removeRow,
+    removeSection,
+    setRowBattle,
+    setRowSlide,
+    setSectionTrack,
+    updateRow,
+    updateSection,
+} from '@/lib/utils/scenario/structure';
 
-describe("structure", () => {
-  it("addSection додає розділ з одним порожнім рядком і унікальними id", () => {
-    const c = addSection(addSection(emptyContent(), "A"), "B");
+describe('structure', () => {
+    it('addSection додає розділ з одним порожнім рядком і унікальними id', () => {
+        const c = addSection(addSection(emptyContent(), 'A'), 'B');
 
-    expect(c.sections.map((s) => s.title)).toEqual(["A", "B"]);
-    expect(c.sections[0].rows).toHaveLength(1);
-    expect(new Set([c.sections[0].id, c.sections[1].id]).size).toBe(2);
-  });
+        expect(c.sections.map((s) => s.title)).toEqual(['A', 'B']);
+        expect(c.sections[0].rows).toHaveLength(1);
+        expect(new Set([c.sections[0].id, c.sections[1].id]).size).toBe(2);
+    });
 
-  it("move/remove/update розділів не мутують вхід", () => {
-    const c = addSection(addSection(emptyContent(), "A"), "B");
+    it('move/remove/update розділів не мутують вхід', () => {
+        const c = addSection(addSection(emptyContent(), 'A'), 'B');
 
-    const [a, b] = c.sections;
+        const [a, b] = c.sections;
 
-    expect(moveSection(c, b.id, -1).sections.map((s) => s.title)).toEqual(["B", "A"]);
-    expect(moveSection(c, a.id, -1)).toBe(c);
-    expect(removeSection(c, a.id).sections.map((s) => s.title)).toEqual(["B"]);
-    expect(updateSection(c, a.id, { title: "A2" }).sections[0].title).toBe("A2");
-    expect(c.sections[0].title).toBe("A");
-  });
+        expect(moveSection(c, b.id, -1).sections.map((s) => s.title)).toEqual([
+            'B',
+            'A',
+        ]);
+        expect(moveSection(c, a.id, -1)).toBe(c);
+        expect(removeSection(c, a.id).sections.map((s) => s.title)).toEqual([
+            'B',
+        ]);
+        expect(updateSection(c, a.id, { title: 'A2' }).sections[0].title).toBe(
+            'A2'
+        );
+        expect(c.sections[0].title).toBe('A');
+    });
 
-  it("рядки: add/update/move/remove", () => {
-    const base = addSection(emptyContent(), "A");
+    it('рядки: add/update/move/remove', () => {
+        const base = addSection(emptyContent(), 'A');
 
-    const sid = base.sections[0].id;
+        const sid = base.sections[0].id;
 
-    const c = addRow(base, sid);
+        const c = addRow(base, sid);
 
-    const [r1, r2] = c.sections[0].rows;
+        const [r1, r2] = c.sections[0].rows;
 
-    expect(moveRow(c, sid, r2.id, -1).sections[0].rows[0].id).toBe(r2.id);
-    expect(removeRow(c, sid, r1.id).sections[0].rows.map((r) => r.id)).toEqual([r2.id]);
+        expect(moveRow(c, sid, r2.id, -1).sections[0].rows[0].id).toBe(r2.id);
+        expect(
+            removeRow(c, sid, r1.id).sections[0].rows.map((r) => r.id)
+        ).toEqual([r2.id]);
 
-    const story = { type: "doc" as const, content: [{ type: "paragraph" as const }] };
+        const story = {
+            type: 'doc' as const,
+            content: [{ type: 'paragraph' as const }],
+        };
 
-    expect(updateRow(c, sid, r1.id, { story }).sections[0].rows[0].story).toBe(story);
-  });
+        expect(
+            updateRow(c, sid, r1.id, { story }).sections[0].rows[0].story
+        ).toBe(story);
+    });
 
-  it("setRowSlide / setRowBattle ставлять і знімають прив'язку без зайвих ключів", () => {
-    const base = addSection(emptyContent(), "Р");
+    it("setRowSlide / setRowBattle ставлять і знімають прив'язку без зайвих ключів", () => {
+        const base = addSection(emptyContent(), 'Р');
 
-    const sectionId = base.sections[0].id;
+        const sectionId = base.sections[0].id;
 
-    const rowId = base.sections[0].rows[0].id;
+        const rowId = base.sections[0].rows[0].id;
 
-    const bound = setRowBattle(setRowSlide(base, sectionId, rowId, { deckId: "d1", slideId: "s1" }), sectionId, rowId, "b1");
+        const bound = setRowBattle(
+            setRowSlide(base, sectionId, rowId, {
+                deckId: 'd1',
+                slideId: 's1',
+            }),
+            sectionId,
+            rowId,
+            'b1'
+        );
 
-    expect(bound.sections[0].rows[0]).toMatchObject({ slide: { deckId: "d1", slideId: "s1" }, battleId: "b1" });
+        expect(bound.sections[0].rows[0]).toMatchObject({
+            slide: { deckId: 'd1', slideId: 's1' },
+            battleId: 'b1',
+        });
 
-    const cleared = setRowBattle(setRowSlide(bound, sectionId, rowId, undefined), sectionId, rowId, undefined);
+        const cleared = setRowBattle(
+            setRowSlide(bound, sectionId, rowId, undefined),
+            sectionId,
+            rowId,
+            undefined
+        );
 
-    expect(cleared.sections[0].rows[0]).not.toHaveProperty("slide");
-    expect(cleared.sections[0].rows[0]).not.toHaveProperty("battleId");
-  });
+        expect(cleared.sections[0].rows[0]).not.toHaveProperty('slide');
+        expect(cleared.sections[0].rows[0]).not.toHaveProperty('battleId');
+    });
 });
 
-describe("setSectionTrack", () => {
-  it("ставить і знімає трек розділу", () => {
-    const base = addSection(emptyContent(), "Глава");
+describe('setSectionTrack', () => {
+    it('ставить і знімає трек розділу', () => {
+        const base = addSection(emptyContent(), 'Глава');
 
-    const id = base.sections[0].id;
+        const id = base.sections[0].id;
 
-    const bound = setSectionTrack(base, id, "t1");
+        const bound = setSectionTrack(base, id, 't1');
 
-    expect(bound.sections[0].trackId).toBe("t1");
-    expect(setSectionTrack(bound, id, undefined).sections[0]).not.toHaveProperty("trackId");
-  });
+        expect(bound.sections[0].trackId).toBe('t1');
+        expect(
+            setSectionTrack(bound, id, undefined).sections[0]
+        ).not.toHaveProperty('trackId');
+    });
 });

@@ -1,52 +1,72 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
-import { makeEffect, makeParticipant, seq } from "@/lib/utils/abilities/__tests__/fixtures";
-import { textsOf } from "@/lib/utils/battle/log/__tests__/event-text";
-import { DEFAULT_RULES } from "@/lib/utils/rules";
-import { rollSaveEnds } from "@/systems/d20/rules/saves/save-ends";
-import type { BattleParticipant } from "@/types/battle";
+import {
+    makeEffect,
+    makeParticipant,
+    seq,
+} from '@/lib/utils/abilities/__tests__/fixtures';
+import { textsOf } from '@/lib/utils/battle/log/__tests__/event-text';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { rollSaveEnds } from '@/systems/d20/rules/saves/save-ends';
+import type { BattleParticipant } from '@/types/battle';
 
 const holder = (...ids: string[]): BattleParticipant => {
-  const p = makeParticipant({ id: "t" });
+    const p = makeParticipant({ id: 't' });
 
-  return { ...p, battleData: { ...p.battleData, activeEffects: ids.map((id) => makeEffect(id, { name: id, saveEnds: { ability: "wisdom", dc: 14 } })) } };
+    return {
+        ...p,
+        battleData: {
+            ...p.battleData,
+            activeEffects: ids.map((id) =>
+                makeEffect(id, {
+                    name: id,
+                    saveEnds: { ability: 'wisdom', dc: 14 },
+                })
+            ),
+        },
+    };
 };
 
-describe("rollSaveEnds", () => {
-  it("успіх знімає стан", () => {
-    const p = holder("paralyzed");
+describe('rollSaveEnds', () => {
+    it('успіх знімає стан', () => {
+        const p = holder('paralyzed');
 
-    const r = rollSaveEnds(p, [p], DEFAULT_RULES, seq(0.7));
+        const r = rollSaveEnds(p, [p], DEFAULT_RULES, seq(0.7));
 
-    expect(r.participant.battleData.activeEffects).toHaveLength(0);
-    expect(textsOf(r.messages)[0]).toContain("звільняється від стану");
-  });
+        expect(r.participant.battleData.activeEffects).toHaveLength(0);
+        expect(textsOf(r.messages)[0]).toContain('звільняється від стану');
+    });
 
-  it("провал лишає стан", () => {
-    const p = holder("paralyzed");
+    it('провал лишає стан', () => {
+        const p = holder('paralyzed');
 
-    const r = rollSaveEnds(p, [p], DEFAULT_RULES, seq(0.1));
+        const r = rollSaveEnds(p, [p], DEFAULT_RULES, seq(0.1));
 
-    expect(r.participant.battleData.activeEffects).toHaveLength(1);
-    expect(textsOf(r.messages)[0]).toContain("лишається");
-  });
+        expect(r.participant.battleData.activeEffects).toHaveLength(1);
+        expect(textsOf(r.messages)[0]).toContain('лишається');
+    });
 
-  it("кожен ефект — окремий кидок", () => {
-    const p = holder("a", "b");
+    it('кожен ефект — окремий кидок', () => {
+        const p = holder('a', 'b');
 
-    const r = rollSaveEnds(p, [p], DEFAULT_RULES, seq(0.7, 0.1));
+        const r = rollSaveEnds(p, [p], DEFAULT_RULES, seq(0.7, 0.1));
 
-    expect(r.participant.battleData.activeEffects.map((e) => e.id)).toEqual(["b"]);
-    expect(textsOf(r.messages)).toHaveLength(2);
-  });
+        expect(r.participant.battleData.activeEffects.map((e) => e.id)).toEqual(
+            ['b']
+        );
+        expect(textsOf(r.messages)).toHaveLength(2);
+    });
 
-  it("без saveEnds rng не чіпається", () => {
-    const p = makeParticipant({ id: "t" });
+    it('без saveEnds rng не чіпається', () => {
+        const p = makeParticipant({ id: 't' });
 
-    const rng = () => {
-      throw new Error("rng used");
-    };
+        const rng = () => {
+            throw new Error('rng used');
+        };
 
-    expect(rollSaveEnds(p, [p], DEFAULT_RULES, rng)).toEqual({ participant: p, messages: [] });
-  });
+        expect(rollSaveEnds(p, [p], DEFAULT_RULES, rng)).toEqual({
+            participant: p,
+            messages: [],
+        });
+    });
 });

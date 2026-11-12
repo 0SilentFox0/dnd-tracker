@@ -1,72 +1,119 @@
 // @vitest-environment happy-dom
-import type { ReactElement } from "react";
-import { cleanup, fireEvent, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import type { ReactElement } from 'react';
+import { cleanup, fireEvent, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { sheetFixture, withSheet } from "./sheet-fixture";
+import { sheetFixture, withSheet } from './sheet-fixture';
 
-vi.unmock("next-intl");
-vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "", HUD_SURFACE: "hud-surface" }));
-vi.mock("@/lib/hooks/characters", async (orig) => ({ ...(await orig<object>()), useCharacterGoals: () => ({ save: vi.fn(), isPending: false }) }));
+vi.unmock('next-intl');
+vi.mock('@/components/hud/fonts', () => ({
+    hudFontClassName: '',
+    HUD_SURFACE: 'hud-surface',
+}));
+vi.mock('@/lib/hooks/characters', async (orig) => ({
+    ...(await orig<object>()),
+    useCharacterGoals: () => ({ save: vi.fn(), isPending: false }),
+}));
 
-import { GoalList } from "@/components/character-profile/GoalList";
-import { ProfileContext } from "@/components/character-profile/ProfileContext";
-import { ProfileHero } from "@/components/character-profile/ProfileHero";
-import { ConfirmProvider } from "@/components/ui/confirm-dialog";
-import { renderWithIntl } from "@/lib/i18n/test/render-with-intl";
-import type { CharacterSheet } from "@/types/characters";
+import { GoalList } from '@/components/character-profile/GoalList';
+import { ProfileContext } from '@/components/character-profile/ProfileContext';
+import { ProfileHero } from '@/components/character-profile/ProfileHero';
+import { ConfirmProvider } from '@/components/ui/confirm-dialog';
+import { renderWithIntl } from '@/lib/i18n/test/render-with-intl';
+import type { CharacterSheet } from '@/types/characters';
 
 const inProfile = (sheet: CharacterSheet, ui: ReactElement) =>
-  renderWithIntl(
-    <ConfirmProvider>
-      <ProfileContext.Provider value={{ campaignId: "c", characterId: "ch", sheet, canEdit: false }}>{ui}</ProfileContext.Provider>
-    </ConfirmProvider>,
-    { locale: "en", namespaces: ["common", "validation", "characterProfile"] },
-  );
+    renderWithIntl(
+        <ConfirmProvider>
+            <ProfileContext.Provider
+                value={{
+                    campaignId: 'c',
+                    characterId: 'ch',
+                    sheet,
+                    canEdit: false,
+                }}
+            >
+                {ui}
+            </ProfileContext.Provider>
+        </ConfirmProvider>,
+        {
+            locale: 'en',
+            namespaces: ['common', 'validation', 'characterProfile'],
+        }
+    );
 
-describe("character profile (en)", () => {
-  afterEach(cleanup);
+describe('character profile (en)', () => {
+    afterEach(cleanup);
 
-  it("hero chips and the hp breakdown are English without raw keys", async () => {
-    const sheet = withSheet({ hp: { total: 300, lines: [{ label: "characterProfile.sheet.lines.hitDice", params: { dice: "3d10" }, value: "" }] } });
+    it('hero chips and the hp breakdown are English without raw keys', async () => {
+        const sheet = withSheet({
+            hp: {
+                total: 300,
+                lines: [
+                    {
+                        label: 'characterProfile.sheet.lines.hitDice',
+                        params: { dice: '3d10' },
+                        value: '',
+                    },
+                ],
+            },
+        });
 
-    const { container } = await inProfile(sheet, <ProfileHero />);
+        const { container } = await inProfile(sheet, <ProfileHero />);
 
-    fireEvent.click(screen.getByText("HP 300"));
+        fireEvent.click(screen.getByText('HP 300'));
 
-    expect(screen.getByLabelText("Proficiency")).toBeInTheDocument();
-    expect(screen.getByText("Hit dice: 3d10")).toBeInTheDocument();
-    expect(container.textContent).not.toMatch(/characterProfile\./);
-  });
+        expect(screen.getByLabelText('Proficiency')).toBeInTheDocument();
+        expect(screen.getByText('Hit dice: 3d10')).toBeInTheDocument();
+        expect(container.textContent).not.toMatch(/characterProfile\./);
+    });
 
-  it("class is shown in d20 and hidden in wfrp", async () => {
-    const d20 = await inProfile(withSheet({ system: "dnd5e", identity: { ...sheetFixture.identity, className: "Paladin" } }), <ProfileHero />);
+    it('class is shown in d20 and hidden in wfrp', async () => {
+        const d20 = await inProfile(
+            withSheet({
+                system: 'dnd5e',
+                identity: { ...sheetFixture.identity, className: 'Paladin' },
+            }),
+            <ProfileHero />
+        );
 
-    expect(d20.container.textContent).toContain("Paladin");
-    cleanup();
+        expect(d20.container.textContent).toContain('Paladin');
+        cleanup();
 
-    const wfrp = await inProfile(withSheet({ system: "wfrp", identity: { ...sheetFixture.identity, className: "Paladin" } }), <ProfileHero />);
+        const wfrp = await inProfile(
+            withSheet({
+                system: 'wfrp',
+                identity: { ...sheetFixture.identity, className: 'Paladin' },
+            }),
+            <ProfileHero />
+        );
 
-    expect(wfrp.container.textContent).not.toContain("Paladin");
-  });
+        expect(wfrp.container.textContent).not.toContain('Paladin');
+    });
 
-  it("alignment is shown in d20 and hidden in wfrp", async () => {
-    const identity = { ...sheetFixture.identity, alignment: "Lawful Good" };
+    it('alignment is shown in d20 and hidden in wfrp', async () => {
+        const identity = { ...sheetFixture.identity, alignment: 'Lawful Good' };
 
-    const d20 = await inProfile(withSheet({ system: "dnd5e", identity }), <ProfileHero />);
+        const d20 = await inProfile(
+            withSheet({ system: 'dnd5e', identity }),
+            <ProfileHero />
+        );
 
-    expect(d20.container.textContent).toContain("Lawful Good");
-    cleanup();
+        expect(d20.container.textContent).toContain('Lawful Good');
+        cleanup();
 
-    const wfrp = await inProfile(withSheet({ system: "wfrp", identity }), <ProfileHero />);
+        const wfrp = await inProfile(
+            withSheet({ system: 'wfrp', identity }),
+            <ProfileHero />
+        );
 
-    expect(wfrp.container.textContent).not.toContain("Lawful Good");
-  });
+        expect(wfrp.container.textContent).not.toContain('Lawful Good');
+    });
 
-  it("goals render English headings and kinds", async () => {
-    const { container } = await inProfile(sheetFixture, <GoalList />);
+    it('goals render English headings and kinds', async () => {
+        const { container } = await inProfile(sheetFixture, <GoalList />);
 
-    expect(screen.getByText("GOALS")).toBeInTheDocument();
-    expect(container.textContent).not.toMatch(/characterProfile\./);
-  });
+        expect(screen.getByText('GOALS')).toBeInTheDocument();
+        expect(container.textContent).not.toMatch(/characterProfile\./);
+    });
 });

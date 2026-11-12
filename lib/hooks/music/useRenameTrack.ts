@@ -1,18 +1,25 @@
-"use client";
+'use client';
 
-import { useCallback } from "react";
+import { useCallback } from 'react';
 
-import { trackKeys } from "./keys";
+import { trackKeys } from './keys';
 
-import { updateTrack } from "@/lib/api/tracks";
-import { useCrudMutation } from "@/lib/hooks/common";
+import { updateTrack } from '@/lib/api/tracks';
+import { useCrudMutation } from '@/lib/hooks/common';
 
-export function useRenameTrack(campaignId: string, onError: (e: unknown) => void): (id: string, title: string) => void {
-  const { mutate } = useCrudMutation({
-    mutationFn: ({ id, title }: { id: string; title: string }) => updateTrack(campaignId, id, { title }),
-    invalidateKeys: [trackKeys.list(campaignId)],
-    onError,
-  });
+export function useRenameTrack(
+    campaignId: string,
+    onError: (e: unknown) => void
+): (id: string, title: string) => void {
+    const { mutate } = useCrudMutation({
+        mutationFn: ({ id, title }: { id: string; title: string }) =>
+            updateTrack(campaignId, id, { title }),
+        invalidateKeys: [trackKeys.list(campaignId)],
+        onError,
+    });
 
-  return useCallback((id: string, title: string) => mutate({ id, title }), [mutate]);
+    return useCallback(
+        (id: string, title: string) => mutate({ id, title }),
+        [mutate]
+    );
 }

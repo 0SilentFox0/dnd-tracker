@@ -1,1 +1,1 @@
-export { listCharacters } from "@/lib/server/characters/operations/list";
+export { listCharacters } from '@/lib/server/characters/operations/list';

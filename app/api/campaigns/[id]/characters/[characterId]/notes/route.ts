@@ -1,1 +1,1 @@
-export { PUT } from "@/lib/server/characters/operations/notes";
+export { PUT } from '@/lib/server/characters/operations/notes';

@@ -1,39 +1,44 @@
-import type { CriticalEffect } from "@/lib/constants/critical-effects";
-import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
-import type { DamageRow } from "@/types/battle";
-import type { LogLine } from "@/types/text";
+import type { CriticalEffect } from '@/lib/constants/critical-effects';
+import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
+import type { DamageRow } from '@/types/battle';
+import type { LogLine } from '@/types/text';
 
 export interface AttackRollResult {
-  isHit: boolean;
-  isCritical: boolean;
-  isCriticalFail: boolean;
-  totalAttackValue: number;
-  attackBonus: number;
-  criticalEffect?: CriticalEffect;
-  advantageUsed: boolean;
-  /** d20, що пішов у розрахунок після переваги/недоліку */
-  chosenD20: number;
-  /** другий d20 для переваги/недоліку; serverRolled — якщо клієнт його не надіслав */
-  secondRoll?: { mode: "advantage" | "disadvantage"; value: number; serverRolled: boolean; manual?: boolean };
-  /** d20 never writes these three */
-  system?: SystemSlot;
-  margin?: number;
-  location?: string;
+    isHit: boolean;
+    isCritical: boolean;
+    isCriticalFail: boolean;
+    totalAttackValue: number;
+    attackBonus: number;
+    criticalEffect?: CriticalEffect;
+    advantageUsed: boolean;
+    /** d20, що пішов у розрахунок після переваги/недоліку */
+    chosenD20: number;
+    /** другий d20 для переваги/недоліку; serverRolled — якщо клієнт його не надіслав */
+    secondRoll?: {
+        mode: 'advantage' | 'disadvantage';
+        value: number;
+        serverRolled: boolean;
+        manual?: boolean;
+    };
+    /** d20 never writes these three */
+    system?: SystemSlot;
+    margin?: number;
+    location?: string;
 }
 
 export interface AttackResult {
-  attackRoll: AttackRollResult;
-  damageResult?: {
-    totalDamage: number;
-    finalDamage: number;
-    breakdown: DamageRow[];
-    resistanceBreakdown: LogLine[];
-  };
-  targetHpChange: {
-    oldHp: number;
-    newHp: number;
-    oldTempHp: number;
-    newTempHp: number;
-  };
-  criticalEffectApplied?: CriticalEffect;
+    attackRoll: AttackRollResult;
+    damageResult?: {
+        totalDamage: number;
+        finalDamage: number;
+        breakdown: DamageRow[];
+        resistanceBreakdown: LogLine[];
+    };
+    targetHpChange: {
+        oldHp: number;
+        newHp: number;
+        oldTempHp: number;
+        newTempHp: number;
+    };
+    criticalEffectApplied?: CriticalEffect;
 }

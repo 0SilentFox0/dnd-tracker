@@ -1,99 +1,135 @@
-"use client";
+'use client';
 
-import { AmountField } from "./AmountField";
-import { DistanceDiceField } from "./DistanceDiceField";
-import { DurationField } from "./DurationField";
-import { FlatField } from "./FlatField";
-import { MultiSelectField } from "./MultiSelectField";
-import { NumberField } from "./NumberField";
-import { NumberListField } from "./NumberListField";
-import { SaveEndsField } from "./SaveEndsField";
-import { SelectInput } from "./SelectInput";
-import { SpellPickerField } from "./SpellPickerField";
-import { TextField } from "./TextField";
-import { ToggleField } from "./ToggleField";
-import { UnitPickerField } from "./UnitPickerField";
+import { AmountField } from './AmountField';
+import { DistanceDiceField } from './DistanceDiceField';
+import { DurationField } from './DurationField';
+import { FlatField } from './FlatField';
+import { MultiSelectField } from './MultiSelectField';
+import { NumberField } from './NumberField';
+import { NumberListField } from './NumberListField';
+import { SaveEndsField } from './SaveEndsField';
+import { SelectInput } from './SelectInput';
+import { SpellPickerField } from './SpellPickerField';
+import { TextField } from './TextField';
+import { ToggleField } from './ToggleField';
+import { UnitPickerField } from './UnitPickerField';
 
-import { useErrorsUnder } from "@/components/abilities/editor-context";
-import { FieldErrors } from "@/components/abilities/FieldErrors";
-import { localizeField } from "@/components/abilities/fields/registry-labels";
-import { Label } from "@/components/ui/label";
-import { useTranslator } from "@/lib/i18n/use-translator";
-import type { FieldMeta, LocalizedFieldMeta } from "@/lib/utils/abilities/registry/fields";
-import { TARGET_KEYS } from "@/lib/utils/abilities/registry/labels";
+import { useErrorsUnder } from '@/components/abilities/editor-context';
+import { FieldErrors } from '@/components/abilities/FieldErrors';
+import { localizeField } from '@/components/abilities/fields/registry-labels';
+import { Label } from '@/components/ui/label';
+import { useTranslator } from '@/lib/i18n/use-translator';
+import type {
+    FieldMeta,
+    LocalizedFieldMeta,
+} from '@/lib/utils/abilities/registry/fields';
+import { TARGET_KEYS } from '@/lib/utils/abilities/registry/labels';
 
 export interface FieldProps<V = unknown> {
-  id: string;
-  value: V;
-  onChange: (v: V | undefined) => void;
-  meta: LocalizedFieldMeta;
+    id: string;
+    value: V;
+    onChange: (v: V | undefined) => void;
+    meta: LocalizedFieldMeta;
 }
 
 interface FieldRendererProps {
-  meta: FieldMeta | LocalizedFieldMeta;
-  value: unknown;
-  onChange: (v: unknown) => void;
-  path: string;
-  /** Registry key of the effect/flag/trigger/condition the field belongs to; omitted when `meta` is already translated. */
-  owner?: string;
+    meta: FieldMeta | LocalizedFieldMeta;
+    value: unknown;
+    onChange: (v: unknown) => void;
+    path: string;
+    /** Registry key of the effect/flag/trigger/condition the field belongs to; omitted when `meta` is already translated. */
+    owner?: string;
 }
 
-export function FieldRenderer({ meta: rawMeta, value, onChange, path, owner }: FieldRendererProps) {
-  const tr = useTranslator("abilityRegistry");
+export function FieldRenderer({
+    meta: rawMeta,
+    value,
+    onChange,
+    path,
+    owner,
+}: FieldRendererProps) {
+    const tr = useTranslator('abilityRegistry');
 
-  const errors = useErrorsUnder(path);
+    const errors = useErrorsUnder(path);
 
-  const meta = owner ? localizeField(tr, owner, rawMeta) : (rawMeta as LocalizedFieldMeta);
+    const meta = owner
+        ? localizeField(tr, owner, rawMeta)
+        : (rawMeta as LocalizedFieldMeta);
 
-  const targetOptions = TARGET_KEYS.map((value) => ({ value, label: tr(`targets.${value}`) }));
+    const targetOptions = TARGET_KEYS.map((value) => ({
+        value,
+        label: tr(`targets.${value}`),
+    }));
 
-  const props = { id: path, value: value as never, onChange, meta };
+    const props = { id: path, value: value as never, onChange, meta };
 
-  const input = (() => {
-    switch (meta.input) {
-      case "number":
-        return <NumberField {...props} />;
-      case "text":
-      case "strings":
-        return <TextField {...props} />;
-      case "select":
-        return <SelectInput {...props} />;
-      case "target":
-        return <SelectInput {...props} meta={{ ...meta, options: targetOptions, optional: true }} />;
-      case "multiselect":
-        return <MultiSelectField {...props} />;
-      case "toggle":
-        return <ToggleField {...props} />;
-      case "amount":
-        return <AmountField {...props} />;
-      case "flat":
-        return <FlatField {...props} />;
-      case "duration":
-        return <DurationField {...props} />;
-      case "numberList":
-        return <NumberListField {...props} />;
-      case "distanceDice":
-        return <DistanceDiceField {...props} />;
-      case "spells":
-        return <SpellPickerField {...props} />;
-      case "saveEnds":
-        return <SaveEndsField {...props} />;
-      case "unit":
-        return <UnitPickerField {...props} />;
-      default:
-        return null;
-    }
-  })();
+    const input = (() => {
+        switch (meta.input) {
+            case 'number':
+                return <NumberField {...props} />;
+            case 'text':
+            case 'strings':
+                return <TextField {...props} />;
+            case 'select':
+                return <SelectInput {...props} />;
+            case 'target':
+                return (
+                    <SelectInput
+                        {...props}
+                        meta={{
+                            ...meta,
+                            options: targetOptions,
+                            optional: true,
+                        }}
+                    />
+                );
+            case 'multiselect':
+                return <MultiSelectField {...props} />;
+            case 'toggle':
+                return <ToggleField {...props} />;
+            case 'amount':
+                return <AmountField {...props} />;
+            case 'flat':
+                return <FlatField {...props} />;
+            case 'duration':
+                return <DurationField {...props} />;
+            case 'numberList':
+                return <NumberListField {...props} />;
+            case 'distanceDice':
+                return <DistanceDiceField {...props} />;
+            case 'spells':
+                return <SpellPickerField {...props} />;
+            case 'saveEnds':
+                return <SaveEndsField {...props} />;
+            case 'unit':
+                return <UnitPickerField {...props} />;
+            default:
+                return null;
+        }
+    })();
 
-  const compact = meta.input === "number" || meta.input === "duration";
+    const compact = meta.input === 'number' || meta.input === 'duration';
 
-  return (
-    <div className={compact ? "col-span-2 flex flex-col justify-end space-y-1" : "col-span-3 space-y-1"}>
-      <Label htmlFor={path} className={compact ? "text-xs leading-tight text-muted-foreground" : "text-xs text-muted-foreground"}>
-        {meta.label}
-      </Label>
-      {input}
-      <FieldErrors errors={errors} testId={`field-errors-${path}`} />
-    </div>
-  );
+    return (
+        <div
+            className={
+                compact
+                    ? 'col-span-2 flex flex-col justify-end space-y-1'
+                    : 'col-span-3 space-y-1'
+            }
+        >
+            <Label
+                htmlFor={path}
+                className={
+                    compact
+                        ? 'text-xs leading-tight text-muted-foreground'
+                        : 'text-xs text-muted-foreground'
+                }
+            >
+                {meta.label}
+            </Label>
+            {input}
+            <FieldErrors errors={errors} testId={`field-errors-${path}`} />
+        </div>
+    );
 }

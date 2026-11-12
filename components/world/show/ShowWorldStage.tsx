@@ -1,58 +1,87 @@
-"use client";
+'use client';
 
-import type { CSSProperties } from "react";
-import { useTranslations } from "next-intl";
+import type { CSSProperties } from 'react';
+import { useTranslations } from 'next-intl';
 
-import { ShowWaiting } from "@/components/show/stage/ShowWaiting";
-import { WorldMapView } from "@/components/world/WorldMapView";
-import { useMediaQuery, useReducedMotion } from "@/lib/hooks/common";
-import { DESKTOP_QUERY } from "@/lib/hooks/common/useIsMobile";
-import { useShowWorld, useWorldDive } from "@/lib/hooks/world";
-import { cn } from "@/lib/utils";
-import type { ShowWorld } from "@/types/show";
+import { ShowWaiting } from '@/components/show/stage/ShowWaiting';
+import { WorldMapView } from '@/components/world/WorldMapView';
+import { useMediaQuery, useReducedMotion } from '@/lib/hooks/common';
+import { DESKTOP_QUERY } from '@/lib/hooks/common/useIsMobile';
+import { useShowWorld, useWorldDive } from '@/lib/hooks/world';
+import { cn } from '@/lib/utils';
+import type { ShowWorld } from '@/types/show';
 
-export function ShowWorldStage({ campaignId, world, isDM, readOnly = false }: { campaignId: string; world: ShowWorld; isDM: boolean; readOnly?: boolean }) {
-  const t = useTranslations("world.show");
+export function ShowWorldStage({
+    campaignId,
+    world,
+    isDM,
+    readOnly = false,
+}: {
+    campaignId: string;
+    world: ShowWorld;
+    isDM: boolean;
+    readOnly?: boolean;
+}) {
+    const t = useTranslations('world.show');
 
-  const scene = useShowWorld(campaignId, world, isDM || readOnly, readOnly);
+    const scene = useShowWorld(campaignId, world, isDM || readOnly, readOnly);
 
-  const reduced = useReducedMotion();
+    const reduced = useReducedMotion();
 
-  const isDesktop = useMediaQuery(DESKTOP_QUERY);
+    const isDesktop = useMediaQuery(DESKTOP_QUERY);
 
-  const dive = useWorldDive(scene.props, reduced);
+    const dive = useWorldDive(scene.props, reduced);
 
-  const shown = dive.shown;
+    const shown = dive.shown;
 
-  if (!shown || scene.status === "missing") {
+    if (!shown || scene.status === 'missing') {
+        return (
+            <div className="absolute inset-0 z-10 bg-black">
+                <ShowWaiting
+                    message={
+                        scene.status === 'missing' ? t('missing') : t('loading')
+                    }
+                />
+            </div>
+        );
+    }
+
+    const current = shown.detail.map.id === scene.mapId;
+
     return (
-      <div className="absolute inset-0 z-10 bg-black">
-        <ShowWaiting message={scene.status === "missing" ? t("missing") : t("loading")} />
-      </div>
+        <div className="absolute inset-0 z-10 bg-black">
+            <div
+                data-phase={dive.phase}
+                className={cn(
+                    'atlas-dive-scene',
+                    dive.phase === 'dive' && 'atlas-dive',
+                    dive.phase === 'reveal' && 'atlas-reveal'
+                )}
+                style={
+                    dive.origin
+                        ? ({
+                              '--dive-x': `${dive.origin.x * 100}%`,
+                              '--dive-y': `${dive.origin.y * 100}%`,
+                          } as CSSProperties)
+                        : undefined
+                }
+            >
+                <WorldMapView
+                    key={shown.detail.map.id}
+                    detail={shown.detail}
+                    heroes={shown.heroes}
+                    fog={shown.fog}
+                    focus={current ? scene.focus : undefined}
+                    selectedId={current ? scene.selectedId : undefined}
+                    compact={!isDesktop}
+                    className="rounded-none border-0"
+                />
+            </div>
+            {isDM && !readOnly && (
+                <p className="pointer-events-none absolute bottom-3 left-1/2 z-20 -translate-x-1/2 rounded bg-black/70 px-3 py-1 text-sm text-hud-bone">
+                    {t('dmNotice')}
+                </p>
+            )}
+        </div>
     );
-  }
-
-  const current = shown.detail.map.id === scene.mapId;
-
-  return (
-    <div className="absolute inset-0 z-10 bg-black">
-      <div
-        data-phase={dive.phase}
-        className={cn("atlas-dive-scene", dive.phase === "dive" && "atlas-dive", dive.phase === "reveal" && "atlas-reveal")}
-        style={dive.origin ? ({ "--dive-x": `${dive.origin.x * 100}%`, "--dive-y": `${dive.origin.y * 100}%` } as CSSProperties) : undefined}
-      >
-        <WorldMapView
-          key={shown.detail.map.id}
-          detail={shown.detail}
-          heroes={shown.heroes}
-          fog={shown.fog}
-          focus={current ? scene.focus : undefined}
-          selectedId={current ? scene.selectedId : undefined}
-          compact={!isDesktop}
-          className="rounded-none border-0"
-        />
-      </div>
-      {isDM && !readOnly && <p className="pointer-events-none absolute bottom-3 left-1/2 z-20 -translate-x-1/2 rounded bg-black/70 px-3 py-1 text-sm text-hud-bone">{t("dmNotice")}</p>}
-    </div>
-  );
 }

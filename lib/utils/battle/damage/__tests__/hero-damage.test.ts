@@ -1,96 +1,165 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
-import { AttackType, ParticipantSide } from "@/lib/constants/battle";
-import type { CriticalEffect } from "@/lib/constants/critical-effects";
-import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
-import { computeHitDamage } from "@/lib/utils/battle/attack/process/compute";
-import { computeDamageBreakdown } from "@/lib/utils/battle/damage";
-import { averageAttackDamage } from "@/lib/utils/battle/damage/average";
-import { damageDiceSlots, heroAttackDamageParts, heroDamageContext } from "@/lib/utils/battle/damage/hero-damage";
-import { DEFAULT_RULES } from "@/lib/utils/rules";
-import type { BattleAttack, BattleParticipant } from "@/types/battle";
+import { AttackType, ParticipantSide } from '@/lib/constants/battle';
+import type { CriticalEffect } from '@/lib/constants/critical-effects';
+import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
+import { computeHitDamage } from '@/lib/utils/battle/attack/process/compute';
+import { computeDamageBreakdown } from '@/lib/utils/battle/damage';
+import { averageAttackDamage } from '@/lib/utils/battle/damage/average';
+import {
+    damageDiceSlots,
+    heroAttackDamageParts,
+    heroDamageContext,
+} from '@/lib/utils/battle/damage/hero-damage';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
+import type { BattleAttack, BattleParticipant } from '@/types/battle';
 
 const base = createMockParticipant();
 
-const hero = createMockParticipant({ abilities: { ...base.abilities, level: 5 } });
+const hero = createMockParticipant({
+    abilities: { ...base.abilities, level: 5 },
+});
 
-const unit = createMockParticipant({ basicInfo: { ...base.basicInfo, id: "u1", sourceType: "unit" } });
+const unit = createMockParticipant({
+    basicInfo: { ...base.basicInfo, id: 'u1', sourceType: 'unit' },
+});
 
-const target = createMockParticipant({ basicInfo: { ...base.basicInfo, id: "t1", side: ParticipantSide.ENEMY } });
+const target = createMockParticipant({
+    basicInfo: { ...base.basicInfo, id: 't1', side: ParticipantSide.ENEMY },
+});
 
-const sword: BattleAttack = { id: "s", name: "Меч", type: AttackType.MELEE, attackBonus: 0, damageDice: "1d8+2", damageType: "slashing" };
+const sword: BattleAttack = {
+    id: 's',
+    name: 'Меч',
+    type: AttackType.MELEE,
+    attackBonus: 0,
+    damageDice: '1d8+2',
+    damageType: 'slashing',
+};
 
-const maxDamage: CriticalEffect = { id: 2, type: "success", flavorCount: 0, effect: { type: "max_damage" } };
+const maxDamage: CriticalEffect = {
+    id: 2,
+    type: 'success',
+    flavorCount: 0,
+    effect: { type: 'max_damage' },
+};
 
-const hit = (attacker: BattleParticipant, attack: BattleAttack, rolls: number[], crit = false) =>
-  computeHitDamage({ rules: DEFAULT_RULES,
-    attacker,
-    target,
-    attack,
-    damageRolls: rolls,
-    allParticipants: [attacker, target],
-    attackRoll: crit ? { isCritical: true, criticalEffect: maxDamage } : { isCritical: false },
-    currentRound: 1,
-  }).physicalDamage;
+const hit = (
+    attacker: BattleParticipant,
+    attack: BattleAttack,
+    rolls: number[],
+    crit = false
+) =>
+    computeHitDamage({
+        rules: DEFAULT_RULES,
+        attacker,
+        target,
+        attack,
+        damageRolls: rolls,
+        allParticipants: [attacker, target],
+        attackRoll: crit
+            ? { isCritical: true, criticalEffect: maxDamage }
+            : { isCritical: false },
+        currentRound: 1,
+    }).physicalDamage;
 
 const preview = (attacker: BattleParticipant, rolls: number[]) =>
-  computeDamageBreakdown({ rules: DEFAULT_RULES, attacker, target, attack: sword, damageRolls: rolls, allParticipants: [attacker, target] }).finalDamage;
+    computeDamageBreakdown({
+        rules: DEFAULT_RULES,
+        attacker,
+        target,
+        attack: sword,
+        damageRolls: rolls,
+        allParticipants: [attacker, target],
+    }).finalDamage;
 
-describe("шкода атаки: числа до дедупу", () => {
-  it("герой 5 рівня, один кидок — кубики рівня середнім: 5 + 7 + 5 + 2 + 2 (бонус зброї)", () => {
-    expect(hit(hero, sword, [5])).toBe(21);
-    expect(preview(hero, [5])).toBe(21);
-  });
+describe('шкода атаки: числа до дедупу', () => {
+    it('герой 5 рівня, один кидок — кубики рівня середнім: 5 + 7 + 5 + 2 + 2 (бонус зброї)', () => {
+        expect(hit(hero, sword, [5])).toBe(21);
+        expect(preview(hero, [5])).toBe(21);
+    });
 
-  it("герой кинув зброю й кубики рівня разом: сума кидків + 5 + 2 + 2 (бонус зброї)", () => {
-    expect(hit(hero, sword, [5, 3, 4])).toBe(21);
-    expect(preview(hero, [5, 3, 4])).toBe(21);
-    expect(hit(hero, sword, [6, 6, 8])).toBe(29);
-  });
+    it('герой кинув зброю й кубики рівня разом: сума кидків + 5 + 2 + 2 (бонус зброї)', () => {
+        expect(hit(hero, sword, [5, 3, 4])).toBe(21);
+        expect(preview(hero, [5, 3, 4])).toBe(21);
+        expect(hit(hero, sword, [6, 6, 8])).toBe(29);
+    });
 
-  it("середня шкода й слоти кубиків", () => {
-    expect(averageAttackDamage(hero, sword, [hero]).total).toBe(20);
-    expect(averageAttackDamage(unit, sword, [unit]).total).toBe(8);
-    expect(damageDiceSlots(hero, sword)).toEqual([6, 6, 8]);
-    expect(damageDiceSlots(unit, sword)).toEqual([8]);
-    expect(damageDiceSlots(unit, { ...sword, damageDice: "" })).toEqual([6]);
-  });
+    it('середня шкода й слоти кубиків', () => {
+        expect(averageAttackDamage(hero, sword, [hero]).total).toBe(20);
+        expect(averageAttackDamage(unit, sword, [unit]).total).toBe(8);
+        expect(damageDiceSlots(hero, sword)).toEqual([6, 6, 8]);
+        expect(damageDiceSlots(unit, sword)).toEqual([8]);
+        expect(damageDiceSlots(unit, { ...sword, damageDice: '' })).toEqual([
+            6,
+        ]);
+    });
 
-  it("юніт: кидки + характеристика", () => {
-    expect(hit(unit, sword, [5])).toBe(9);
-    expect(hit(unit, { ...sword, damageDice: "" }, [3])).toBe(5);
-  });
+    it('юніт: кидки + характеристика', () => {
+        expect(hit(unit, sword, [5])).toBe(9);
+        expect(hit(unit, { ...sword, damageDice: '' }, [3])).toBe(5);
+    });
 
-  it("крит «Максимальний урон»: усі групи зброї (+ кубики рівня героя і плоский бонус зброї) на максимум + характеристика", () => {
-    expect(hit(unit, sword, [5], true)).toBe(12);
-    expect(hit(hero, sword, [5], true)).toBe(24);
-    expect(hit(unit, { ...sword, damageDice: "2d6" }, [5, 5], true)).toBe(14);
-    expect(hit(unit, { ...sword, damageDice: "" }, [3], true)).toBe(8);
-    expect(hit(unit, { ...sword, damageDice: "2d6 + STR" }, [5, 5], true)).toBe(14);
-  });
+    it('крит «Максимальний урон»: усі групи зброї (+ кубики рівня героя і плоский бонус зброї) на максимум + характеристика', () => {
+        expect(hit(unit, sword, [5], true)).toBe(12);
+        expect(hit(hero, sword, [5], true)).toBe(24);
+        expect(hit(unit, { ...sword, damageDice: '2d6' }, [5, 5], true)).toBe(
+            14
+        );
+        expect(hit(unit, { ...sword, damageDice: '' }, [3], true)).toBe(8);
+        expect(
+            hit(unit, { ...sword, damageDice: '2d6 + STR' }, [5, 5], true)
+        ).toBe(14);
+    });
 });
 
-describe("heroAttackDamageParts", () => {
-  it("герой: зброя + кубики рівня", () => {
-    expect(heroAttackDamageParts(hero, sword)).toEqual({ weaponDice: "1d8+2", heroDice: "2d6", formula: "2d6+1d8" });
-  });
+describe('heroAttackDamageParts', () => {
+    it('герой: зброя + кубики рівня', () => {
+        expect(heroAttackDamageParts(hero, sword)).toEqual({
+            weaponDice: '1d8+2',
+            heroDice: '2d6',
+            formula: '2d6+1d8',
+        });
+    });
 
-  it("не герой: лише зброя", () => {
-    expect(heroAttackDamageParts(unit, sword)).toEqual({ weaponDice: "1d8+2", heroDice: "", formula: "1d8+2" });
-  });
+    it('не герой: лише зброя', () => {
+        expect(heroAttackDamageParts(unit, sword)).toEqual({
+            weaponDice: '1d8+2',
+            heroDice: '',
+            formula: '1d8+2',
+        });
+    });
 });
 
-describe("heroDamageContext", () => {
-  it("один кидок героя — кубики рівня середнім", () => {
-    expect(heroDamageContext(hero, sword, [5])).toEqual({ heroLevelPart: 5, heroDicePart: 7, heroDiceNotation: "2d6", weaponDiceNotation: "1d8+2" });
-  });
+describe('heroDamageContext', () => {
+    it('один кидок героя — кубики рівня середнім', () => {
+        expect(heroDamageContext(hero, sword, [5])).toEqual({
+            heroLevelPart: 5,
+            heroDicePart: 7,
+            heroDiceNotation: '2d6',
+            weaponDiceNotation: '1d8+2',
+        });
+    });
 
-  it("повні кидки героя — об'єднана формула, без середнього", () => {
-    expect(heroDamageContext(hero, sword, [5, 3, 4])).toEqual({ heroLevelPart: 5, heroDicePart: 0, heroDiceNotation: "", weaponDiceNotation: "2d6+1d8" });
-  });
+    it("повні кидки героя — об'єднана формула, без середнього", () => {
+        expect(heroDamageContext(hero, sword, [5, 3, 4])).toEqual({
+            heroLevelPart: 5,
+            heroDicePart: 0,
+            heroDiceNotation: '',
+            weaponDiceNotation: '2d6+1d8',
+        });
+    });
 
-  it("юніт", () => {
-    expect(heroDamageContext(unit, sword, [5])).toEqual({ heroLevelPart: 0, heroDicePart: 0, heroDiceNotation: "", weaponDiceNotation: "1d8+2" });
-    expect(heroDamageContext(unit, { ...sword, damageDice: "" }, [3]).weaponDiceNotation).toBeUndefined();
-  });
+    it('юніт', () => {
+        expect(heroDamageContext(unit, sword, [5])).toEqual({
+            heroLevelPart: 0,
+            heroDicePart: 0,
+            heroDiceNotation: '',
+            weaponDiceNotation: '1d8+2',
+        });
+        expect(
+            heroDamageContext(unit, { ...sword, damageDice: '' }, [3])
+                .weaponDiceNotation
+        ).toBeUndefined();
+    });
 });

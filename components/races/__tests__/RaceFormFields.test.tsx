@@ -1,59 +1,81 @@
 // @vitest-environment happy-dom
-import { useState } from "react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { cleanup, fireEvent, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
+import { useState } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { cleanup, fireEvent, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it } from 'vitest';
 
-import { RaceFormFields } from "@/components/races/RaceFormFields";
-import { renderWithConfirm } from "@/components/ui/__tests__/render-with-confirm";
-import type { RaceFormData } from "@/types/races";
+import { RaceFormFields } from '@/components/races/RaceFormFields';
+import { renderWithConfirm } from '@/components/ui/__tests__/render-with-confirm';
+import type { RaceFormData } from '@/types/races';
 
 function Harness() {
-  const [data, setData] = useState<RaceFormData>({ name: "Ельф", icon: "", availableSkills: [], disabledSkills: [], abilities: [] });
+    const [data, setData] = useState<RaceFormData>({
+        name: 'Ельф',
+        icon: '',
+        availableSkills: [],
+        disabledSkills: [],
+        abilities: [],
+    });
 
-  return (
-    <QueryClientProvider client={new QueryClient()}>
-      <RaceFormFields campaignId="c1" form={{ data, set: setData }} />
-      <output data-testid="n">{data.abilities.length}</output>
-      <output data-testid="icon">{data.icon}</output>
-      <output data-testid="color">{data.color}</output>
-    </QueryClientProvider>
-  );
+    return (
+        <QueryClientProvider client={new QueryClient()}>
+            <RaceFormFields campaignId="c1" form={{ data, set: setData }} />
+            <output data-testid="n">{data.abilities.length}</output>
+            <output data-testid="icon">{data.icon}</output>
+            <output data-testid="color">{data.color}</output>
+        </QueryClientProvider>
+    );
 }
 
-describe("RaceFormFields", () => {
-  afterEach(cleanup);
+describe('RaceFormFields', () => {
+    afterEach(cleanup);
 
-  it("редактор вмінь додає вміння з шаблону", () => {
-    renderWithConfirm(<Harness />);
+    it('редактор вмінь додає вміння з шаблону', () => {
+        renderWithConfirm(<Harness />);
 
-    expect(screen.getByText(/abilities.editor.title/)).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "abilities.chips.add" }));
-    fireEvent.click(screen.getByText("abilityRegistry.templates.resistance.label"));
-    fireEvent.click(screen.getByRole("button", { name: "abilities.templates.create" }));
+        expect(screen.getByText(/abilities.editor.title/)).toBeInTheDocument();
+        fireEvent.click(
+            screen.getByRole('button', { name: 'abilities.chips.add' })
+        );
+        fireEvent.click(
+            screen.getByText('abilityRegistry.templates.resistance.label')
+        );
+        fireEvent.click(
+            screen.getByRole('button', { name: 'abilities.templates.create' })
+        );
 
-    expect(screen.getByTestId("n").textContent).toBe("1");
-  });
+        expect(screen.getByTestId('n').textContent).toBe('1');
+    });
 
-  it("іконка раси: URL записується у форму", () => {
-    renderWithConfirm(<Harness />);
+    it('іконка раси: URL записується у форму', () => {
+        renderWithConfirm(<Harness />);
 
-    fireEvent.change(screen.getByLabelText("races.form.icon"), { target: { value: "https://x/elf.png" } });
+        fireEvent.change(screen.getByLabelText('races.form.icon'), {
+            target: { value: 'https://x/elf.png' },
+        });
 
-    expect(screen.getByTestId("icon").textContent).toBe("https://x/elf.png");
-  });
+        expect(screen.getByTestId('icon').textContent).toBe(
+            'https://x/elf.png'
+        );
+    });
 
-  it("іконка раси — лише посилання: файл з компʼютера не пропонується", () => {
-    renderWithConfirm(<Harness />);
+    it('іконка раси — лише посилання: файл з компʼютера не пропонується', () => {
+        renderWithConfirm(<Harness />);
 
-    expect(screen.queryByRole("button", { name: /common.ui.uploadFromComputer/ })).toBeNull();
-  });
+        expect(
+            screen.queryByRole('button', {
+                name: /common.ui.uploadFromComputer/,
+            })
+        ).toBeNull();
+    });
 
-  it("колір раси: hex записується у форму", () => {
-    renderWithConfirm(<Harness />);
+    it('колір раси: hex записується у форму', () => {
+        renderWithConfirm(<Harness />);
 
-    fireEvent.change(screen.getByLabelText("races.form.color (hex)"), { target: { value: "#123456" } });
+        fireEvent.change(screen.getByLabelText('races.form.color (hex)'), {
+            target: { value: '#123456' },
+        });
 
-    expect(screen.getByTestId("color").textContent).toBe("#123456");
-  });
+        expect(screen.getByTestId('color').textContent).toBe('#123456');
+    });
 });

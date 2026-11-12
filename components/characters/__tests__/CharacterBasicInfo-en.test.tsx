@@ -1,67 +1,118 @@
 // @vitest-environment happy-dom
-import { cleanup, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { cleanup, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { CharacterBasicInfo } from "@/components/characters/basic/CharacterBasicInfo";
-import { DraftBanner } from "@/components/characters/player-draft/DraftBanner";
-import { renderWithIntl } from "@/lib/i18n/test/render-with-intl";
-import { defaultCharacterFormData } from "@/lib/utils/characters/form/defaults";
+import { CharacterBasicInfo } from '@/components/characters/basic/CharacterBasicInfo';
+import { DraftBanner } from '@/components/characters/player-draft/DraftBanner';
+import { renderWithIntl } from '@/lib/i18n/test/render-with-intl';
+import { defaultCharacterFormData } from '@/lib/utils/characters/form/defaults';
 
-vi.unmock("next-intl");
-vi.mock("@/components/ui/image-upload", () => ({ ImageUpload: ({ label }: { label: string }) => <span>{label}</span> }));
+vi.unmock('next-intl');
+vi.mock('@/components/ui/image-upload', () => ({
+    ImageUpload: ({ label }: { label: string }) => <span>{label}</span>,
+}));
 
-describe("characters in en", () => {
-  afterEach(cleanup);
+describe('characters in en', () => {
+    afterEach(cleanup);
 
-  it("CharacterBasicInfo renders English labels and archetypes", async () => {
-    const basicInfo = { data: { ...defaultCharacterFormData.basicInfo, type: "player" }, set: vi.fn() };
+    it('CharacterBasicInfo renders English labels and archetypes', async () => {
+        const basicInfo = {
+            data: { ...defaultCharacterFormData.basicInfo, type: 'player' },
+            set: vi.fn(),
+        };
 
-    await renderWithIntl(<CharacterBasicInfo basicInfo={basicInfo as never} races={[]} />, { locale: "en", namespaces: ["common", "characters"] });
+        await renderWithIntl(
+            <CharacterBasicInfo basicInfo={basicInfo as never} races={[]} />,
+            { locale: 'en', namespaces: ['common', 'characters'] }
+        );
 
-    expect(screen.getByText("Race *")).toBeInTheDocument();
-    expect(screen.getByText("Controlled by *")).toBeInTheDocument();
-    expect(screen.getByText("Create a race in the Races section first")).toBeInTheDocument();
-    expect(screen.getByText("Character portrait")).toBeInTheDocument();
-  });
+        expect(screen.getByText('Race *')).toBeInTheDocument();
+        expect(screen.getByText('Controlled by *')).toBeInTheDocument();
+        expect(
+            screen.getByText('Create a race in the Races section first')
+        ).toBeInTheDocument();
+        expect(screen.getByText('Character portrait')).toBeInTheDocument();
+    });
 
-  it("hideLineage hides race, subrace and alignment", async () => {
-    const basicInfo = { data: { ...defaultCharacterFormData.basicInfo, type: "player" }, set: vi.fn() };
+    it('hideLineage hides race, subrace and alignment', async () => {
+        const basicInfo = {
+            data: { ...defaultCharacterFormData.basicInfo, type: 'player' },
+            set: vi.fn(),
+        };
 
-    await renderWithIntl(<CharacterBasicInfo basicInfo={basicInfo as never} races={[]} hideLineage />, { locale: "en", namespaces: ["common", "characters"] });
+        await renderWithIntl(
+            <CharacterBasicInfo
+                basicInfo={basicInfo as never}
+                races={[]}
+                hideLineage
+            />,
+            { locale: 'en', namespaces: ['common', 'characters'] }
+        );
 
-    expect(screen.queryByText("Race *")).toBeNull();
-    expect(screen.queryByText("Create a race in the Races section first")).toBeNull();
-    expect(screen.queryByLabelText("Alignment")).toBeNull();
-    expect(screen.getByText("Controlled by *")).toBeInTheDocument();
-  });
+        expect(screen.queryByText('Race *')).toBeNull();
+        expect(
+            screen.queryByText('Create a race in the Races section first')
+        ).toBeNull();
+        expect(screen.queryByLabelText('Alignment')).toBeNull();
+        expect(screen.getByText('Controlled by *')).toBeInTheDocument();
+    });
 
-  it("hideClass hides class and subclass, d20 keeps the required class field", async () => {
-    const basicInfo = { data: { ...defaultCharacterFormData.basicInfo, type: "player" }, set: vi.fn() };
+    it('hideClass hides class and subclass, d20 keeps the required class field', async () => {
+        const basicInfo = {
+            data: { ...defaultCharacterFormData.basicInfo, type: 'player' },
+            set: vi.fn(),
+        };
 
-    await renderWithIntl(<CharacterBasicInfo basicInfo={basicInfo as never} races={[]} />, { locale: "en", namespaces: ["common", "characters"] });
-    expect(document.getElementById("class")).toBeRequired();
-    cleanup();
+        await renderWithIntl(
+            <CharacterBasicInfo basicInfo={basicInfo as never} races={[]} />,
+            { locale: 'en', namespaces: ['common', 'characters'] }
+        );
+        expect(document.getElementById('class')).toBeRequired();
+        cleanup();
 
-    await renderWithIntl(<CharacterBasicInfo basicInfo={basicInfo as never} races={[]} hideClass />, { locale: "en", namespaces: ["common", "characters"] });
-    expect(document.getElementById("class")).toBeNull();
-    expect(document.getElementById("subclass")).toBeNull();
-  });
+        await renderWithIntl(
+            <CharacterBasicInfo
+                basicInfo={basicInfo as never}
+                races={[]}
+                hideClass
+            />,
+            { locale: 'en', namespaces: ['common', 'characters'] }
+        );
+        expect(document.getElementById('class')).toBeNull();
+        expect(document.getElementById('subclass')).toBeNull();
+    });
 
-  it("hideAlignment hides only the alignment field", async () => {
-    const basicInfo = { data: { ...defaultCharacterFormData.basicInfo, type: "player" }, set: vi.fn() };
+    it('hideAlignment hides only the alignment field', async () => {
+        const basicInfo = {
+            data: { ...defaultCharacterFormData.basicInfo, type: 'player' },
+            set: vi.fn(),
+        };
 
-    await renderWithIntl(<CharacterBasicInfo basicInfo={basicInfo as never} races={[]} />, { locale: "en", namespaces: ["common", "characters"] });
-    expect(document.getElementById("alignment")).not.toBeNull();
-    cleanup();
+        await renderWithIntl(
+            <CharacterBasicInfo basicInfo={basicInfo as never} races={[]} />,
+            { locale: 'en', namespaces: ['common', 'characters'] }
+        );
+        expect(document.getElementById('alignment')).not.toBeNull();
+        cleanup();
 
-    await renderWithIntl(<CharacterBasicInfo basicInfo={basicInfo as never} races={[]} hideAlignment />, { locale: "en", namespaces: ["common", "characters"] });
-    expect(document.getElementById("alignment")).toBeNull();
-    expect(screen.getByText("Race *")).toBeInTheDocument();
-  });
+        await renderWithIntl(
+            <CharacterBasicInfo
+                basicInfo={basicInfo as never}
+                races={[]}
+                hideAlignment
+            />,
+            { locale: 'en', namespaces: ['common', 'characters'] }
+        );
+        expect(document.getElementById('alignment')).toBeNull();
+        expect(screen.getByText('Race *')).toBeInTheDocument();
+    });
 
-  it("DraftBanner interpolates the DM comment", async () => {
-    await renderWithIntl(<DraftBanner campaignId="c1" note="Add a goal" isOwner={false} />, { locale: "en", namespaces: ["common", "characters"] });
+    it('DraftBanner interpolates the DM comment', async () => {
+        await renderWithIntl(
+            <DraftBanner campaignId="c1" note="Add a goal" isOwner={false} />,
+            { locale: 'en', namespaces: ['common', 'characters'] }
+        );
 
-    expect(screen.getByText("DM comment: Add a goal")).toBeInTheDocument();
-  });
+        expect(screen.getByText('DM comment: Add a goal')).toBeInTheDocument();
+    });
 });

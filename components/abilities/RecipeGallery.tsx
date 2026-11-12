@@ -1,202 +1,331 @@
-"use client";
+'use client';
 
-import { useMemo, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useMemo, useState } from 'react';
+import { useTranslations } from 'next-intl';
 
-import { AbilityCopySourcePicker } from "./AbilityCopySourcePicker";
-import { AbilityFlow } from "./AbilityFlow";
-import { useAbilityEditor } from "./editor-context";
-import { RecipeForm } from "./RecipeForm";
-import { useAbilityText } from "./use-ability-text";
+import { AbilityCopySourcePicker } from './AbilityCopySourcePicker';
+import { AbilityFlow } from './AbilityFlow';
+import { useAbilityEditor } from './editor-context';
+import { RecipeForm } from './RecipeForm';
+import { useAbilityText } from './use-ability-text';
 
-import { HudChipTabs } from "@/components/hud/page";
-import { Button } from "@/components/ui/button";
-import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
-import { useAbilityComposition } from "@/lib/hooks/abilities/useAbilityComposition";
-import { useRecipeText } from "@/lib/hooks/abilities/useRecipeText";
-import { useRecipeValues } from "@/lib/hooks/abilities/useRecipeValues";
-import { useRuleSystem } from "@/lib/hooks/systems/useRuleSystem";
-import { useTranslator } from "@/lib/i18n/use-translator";
-import type { Ability } from "@/lib/utils/abilities/schema";
-import { summarizeAbility } from "@/lib/utils/abilities/summary";
-import { buildRecipe, buildScratchAbility, type Recipe, RECIPE_CATEGORIES, type RecipeCategory, type RecipeResult, RECIPES, recipesOf } from "@/lib/utils/abilities/templates";
-import type { SpellEffect } from "@/lib/utils/spells/model/schema";
+import { HudChipTabs } from '@/components/hud/page';
+import { Button } from '@/components/ui/button';
+import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
+import { useAbilityComposition } from '@/lib/hooks/abilities/useAbilityComposition';
+import { useRecipeText } from '@/lib/hooks/abilities/useRecipeText';
+import { useRecipeValues } from '@/lib/hooks/abilities/useRecipeValues';
+import { useRuleSystem } from '@/lib/hooks/systems/useRuleSystem';
+import { useTranslator } from '@/lib/i18n/use-translator';
+import type { Ability } from '@/lib/utils/abilities/schema';
+import { summarizeAbility } from '@/lib/utils/abilities/summary';
+import {
+    buildRecipe,
+    buildScratchAbility,
+    type Recipe,
+    RECIPE_CATEGORIES,
+    type RecipeCategory,
+    type RecipeResult,
+    RECIPES,
+    recipesOf,
+} from '@/lib/utils/abilities/templates';
+import type { SpellEffect } from '@/lib/utils/spells/model/schema';
 
 type SpellPick = { effects: SpellEffect[]; concentration?: boolean };
 
-type RecipeGalleryProps = { open: boolean; onOpenChange: (open: boolean) => void } & (
-  | { scope: "ability"; onPick: (abilities: Ability[]) => void }
-  | { scope: "spell"; onPick: (r: SpellPick) => void }
+type RecipeGalleryProps = {
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+} & (
+    | { scope: 'ability'; onPick: (abilities: Ability[]) => void }
+    | { scope: 'spell'; onPick: (r: SpellPick) => void }
 );
 
-const ALL = "all";
+const ALL = 'all';
 
 function Preview({ result }: { result: RecipeResult }) {
-  const text = useAbilityText();
+    const text = useAbilityText();
 
-  if ("ability" in result) return <AbilityFlow summary={summarizeAbility({ id: "", ...result.ability })} variant="card" as="span" />;
+    if ('ability' in result)
+        return (
+            <AbilityFlow
+                summary={summarizeAbility({ id: '', ...result.ability })}
+                variant="card"
+                as="span"
+            />
+        );
 
-  return <span className="text-xs font-normal text-hud-muted">{result.spell.map((e) => text.effect(e)).join(" · ")}</span>;
+    return (
+        <span className="text-xs font-normal text-hud-muted">
+            {result.spell.map((e) => text.effect(e)).join(' · ')}
+        </span>
+    );
 }
 
 export function RecipeGallery(props: RecipeGalleryProps) {
-  const { open, onOpenChange, scope } = props;
+    const { open, onOpenChange, scope } = props;
 
-  const t = useTranslations("abilities.templates");
+    const t = useTranslations('abilities.templates');
 
-  const tr = useTranslator("abilityRegistry");
+    const tr = useTranslator('abilityRegistry');
 
-  const { campaignId } = useAbilityEditor();
+    const { campaignId } = useAbilityEditor();
 
-  const text = useRecipeText();
+    const text = useRecipeText();
 
-  const rule = useRuleSystem({ campaignId });
+    const rule = useRuleSystem({ campaignId });
 
-  const { composition: activeComposition } = useAbilityComposition(campaignId);
+    const { composition: activeComposition } =
+        useAbilityComposition(campaignId);
 
-  const traitRecipes = useMemo(() => (rule.ready ? (rule.system.traits?.recipes ?? []) : []), [rule]);
+    const traitRecipes = useMemo(
+        () => (rule.ready ? (rule.system.traits?.recipes ?? []) : []),
+        [rule]
+    );
 
-  const [category, setCategory] = useState<RecipeCategory | typeof ALL>(ALL);
+    const [category, setCategory] = useState<RecipeCategory | typeof ALL>(ALL);
 
-  const [selected, setSelected] = useState<Recipe | null>(null);
+    const [selected, setSelected] = useState<Recipe | null>(null);
 
-  const [copying, setCopying] = useState(false);
+    const [copying, setCopying] = useState(false);
 
-  const [name, setName] = useState("");
+    const [name, setName] = useState('');
 
-  const note = tr("templates.custom.note");
+    const note = tr('templates.custom.note');
 
-  const ctx = useMemo(() => ({ scope, name, note }), [scope, name, note]);
+    const ctx = useMemo(() => ({ scope, name, note }), [scope, name, note]);
 
-  const form = useRecipeValues(selected, ctx);
+    const form = useRecipeValues(selected, ctx);
 
-  const baseRecipes = useMemo(() => (activeComposition ? recipesOf(activeComposition) : RECIPES), [activeComposition]);
+    const baseRecipes = useMemo(
+        () => (activeComposition ? recipesOf(activeComposition) : RECIPES),
+        [activeComposition]
+    );
 
-  const recipes = useMemo(() => [...baseRecipes, ...traitRecipes].filter((r) => r.scopes.includes(scope) && (category === ALL || r.category === category)), [scope, category, baseRecipes, traitRecipes]);
+    const recipes = useMemo(
+        () =>
+            [...baseRecipes, ...traitRecipes].filter(
+                (r) =>
+                    r.scopes.includes(scope) &&
+                    (category === ALL || r.category === category)
+            ),
+        [scope, category, baseRecipes, traitRecipes]
+    );
 
-  const cardCtx = useMemo(() => (r: Recipe) => ({ scope, name: text(r, "defaultName"), note }), [scope, text, note]);
+    const cardCtx = useMemo(
+        () => (r: Recipe) => ({ scope, name: text(r, 'defaultName'), note }),
+        [scope, text, note]
+    );
 
-  const close = () => {
-    setCategory(ALL);
-    setSelected(null);
-    setCopying(false);
-    form.reset();
-    onOpenChange(false);
-  };
+    const close = () => {
+        setCategory(ALL);
+        setSelected(null);
+        setCopying(false);
+        form.reset();
+        onOpenChange(false);
+    };
 
-  const deliver = (result: RecipeResult) => {
-    if ("ability" in result) {
-      if (props.scope === "ability") props.onPick([{ id: "", ...result.ability }]);
-    } else if (props.scope === "spell") {
-      props.onPick({ effects: result.spell, ...(result.concentration ? { concentration: true } : {}) });
-    }
+    const deliver = (result: RecipeResult) => {
+        if ('ability' in result) {
+            if (props.scope === 'ability')
+                props.onPick([{ id: '', ...result.ability }]);
+        } else if (props.scope === 'spell') {
+            props.onPick({
+                effects: result.spell,
+                ...(result.concentration ? { concentration: true } : {}),
+            });
+        }
 
-    close();
-  };
+        close();
+    };
 
-  const pickAbilities = (abilities: Ability[]) => {
-    if (props.scope === "ability") props.onPick(abilities);
+    const pickAbilities = (abilities: Ability[]) => {
+        if (props.scope === 'ability') props.onPick(abilities);
 
-    close();
-  };
+        close();
+    };
 
-  const choose = (recipe: Recipe) => {
-    if (recipe.params.length > 0) {
-      setName(text(recipe, "defaultName"));
-      setSelected(recipe);
+    const choose = (recipe: Recipe) => {
+        if (recipe.params.length > 0) {
+            setName(text(recipe, 'defaultName'));
+            setSelected(recipe);
 
-      return;
-    }
+            return;
+        }
 
-    const built = buildRecipe(recipe, {}, cardCtx(recipe));
+        const built = buildRecipe(recipe, {}, cardCtx(recipe));
 
-    if (built.ok) deliver(built.result);
-  };
+        if (built.ok) deliver(built.result);
+    };
 
-  const back = () => {
-    form.reset();
-    setSelected(null);
-  };
+    const back = () => {
+        form.reset();
+        setSelected(null);
+    };
 
-  const submit = () => {
-    if (form.built?.ok) deliver(form.built.result);
-  };
+    const submit = () => {
+        if (form.built?.ok) deliver(form.built.result);
+    };
 
-  const scratch = () => pickAbilities([{ id: "", ...buildScratchAbility({ name: tr("templates.custom.defaultName"), note }) }]);
+    const scratch = () =>
+        pickAbilities([
+            {
+                id: '',
+                ...buildScratchAbility({
+                    name: tr('templates.custom.defaultName'),
+                    note,
+                }),
+            },
+        ]);
 
-  const categories = [ALL, ...RECIPE_CATEGORIES, ...(traitRecipes.some((r) => r.scopes.includes(scope)) ? (["traits"] as const) : [])] as const;
+    const categories = [
+        ALL,
+        ...RECIPE_CATEGORIES,
+        ...(traitRecipes.some((r) => r.scopes.includes(scope))
+            ? (['traits'] as const)
+            : []),
+    ] as const;
 
-  const title = copying ? t("copyTitle") : selected ? text(selected, "label") : t(scope === "spell" ? "addSpellTitle" : "addTitle");
+    const title = copying
+        ? t('copyTitle')
+        : selected
+          ? text(selected, 'label')
+          : t(scope === 'spell' ? 'addSpellTitle' : 'addTitle');
 
-  const footer = selected ? (
-    <>
-      <Button type="button" variant="outline" onClick={back}>
-        {t("back")}
-      </Button>
-      <Button type="submit" form="recipe-form" disabled={!form.built?.ok}>
-        {t("create")}
-      </Button>
-    </>
-  ) : copying ? (
-    <Button type="button" variant="outline" onClick={() => setCopying(false)}>
-      {t("back")}
-    </Button>
-  ) : undefined;
-
-  return (
-    <ResponsiveDialog hud open={open} onOpenChange={(o) => (o ? onOpenChange(true) : close())} title={title} footer={footer}>
-      {copying ? (
-        <AbilityCopySourcePicker campaignId={campaignId} onPick={pickAbilities} />
-      ) : selected ? (
-        <form
-          id="recipe-form"
-          className="space-y-3"
-          onSubmit={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            submit();
-          }}
+    const footer = selected ? (
+        <>
+            <Button type="button" variant="outline" onClick={back}>
+                {t('back')}
+            </Button>
+            <Button type="submit" form="recipe-form" disabled={!form.built?.ok}>
+                {t('create')}
+            </Button>
+        </>
+    ) : copying ? (
+        <Button
+            type="button"
+            variant="outline"
+            onClick={() => setCopying(false)}
         >
-          <RecipeForm recipe={selected} values={form.values} onChange={form.set} issues={form.built && !form.built.ok ? form.built.issues : []} name={scope === "ability" ? { value: name, onChange: setName } : undefined} />
-          {form.built?.ok && (
-            <div className="space-y-1">
-              <p className="hud-sc text-xs text-hud-muted">{t("previewTitle")}</p>
-              <Preview result={form.built.result} />
-            </div>
-          )}
-        </form>
-      ) : (
-        <div className="space-y-3">
-          <HudChipTabs
-            ariaLabel={t(scope === "spell" ? "addSpellTitle" : "addTitle")}
-            items={categories.map((c) => ({ key: c, label: c === ALL ? t("allCategories") : tr(`templates.categories.${c}`), active: category === c, onSelect: () => setCategory(c) }))}
-          />
-          <div className="space-y-2">
-            {recipes.map((r) => {
-              const built = buildRecipe(r, {}, cardCtx(r));
+            {t('back')}
+        </Button>
+    ) : undefined;
 
-              return (
-                <Button key={r.id} type="button" variant="outline" className="h-auto w-full flex-col items-start gap-1 whitespace-normal py-2 text-left" onClick={() => choose(r)}>
-                  <span className="font-medium">{text(r, "label")}</span>
-                  <span className="text-xs font-normal text-muted-foreground">{text(r, "hint")}</span>
-                  {built.ok && <Preview result={built.result} />}
-                </Button>
-              );
-            })}
-            {scope === "ability" && (
-              <>
-                <Button type="button" variant="outline" className="h-auto w-full flex-col items-start whitespace-normal py-2 text-left" onClick={scratch}>
-                  <span className="font-medium">{t("scratch")}</span>
-                  <span className="text-xs font-normal text-muted-foreground">{t("scratchHint")}</span>
-                </Button>
-                <Button type="button" variant="secondary" className="w-full" onClick={() => setCopying(true)}>
-                  {t("copyFrom")}
-                </Button>
-              </>
+    return (
+        <ResponsiveDialog
+            hud
+            open={open}
+            onOpenChange={(o) => (o ? onOpenChange(true) : close())}
+            title={title}
+            footer={footer}
+        >
+            {copying ? (
+                <AbilityCopySourcePicker
+                    campaignId={campaignId}
+                    onPick={pickAbilities}
+                />
+            ) : selected ? (
+                <form
+                    id="recipe-form"
+                    className="space-y-3"
+                    onSubmit={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        submit();
+                    }}
+                >
+                    <RecipeForm
+                        recipe={selected}
+                        values={form.values}
+                        onChange={form.set}
+                        issues={
+                            form.built && !form.built.ok
+                                ? form.built.issues
+                                : []
+                        }
+                        name={
+                            scope === 'ability'
+                                ? { value: name, onChange: setName }
+                                : undefined
+                        }
+                    />
+                    {form.built?.ok && (
+                        <div className="space-y-1">
+                            <p className="hud-sc text-xs text-hud-muted">
+                                {t('previewTitle')}
+                            </p>
+                            <Preview result={form.built.result} />
+                        </div>
+                    )}
+                </form>
+            ) : (
+                <div className="space-y-3">
+                    <HudChipTabs
+                        ariaLabel={t(
+                            scope === 'spell' ? 'addSpellTitle' : 'addTitle'
+                        )}
+                        items={categories.map((c) => ({
+                            key: c,
+                            label:
+                                c === ALL
+                                    ? t('allCategories')
+                                    : tr(`templates.categories.${c}`),
+                            active: category === c,
+                            onSelect: () => setCategory(c),
+                        }))}
+                    />
+                    <div className="space-y-2">
+                        {recipes.map((r) => {
+                            const built = buildRecipe(r, {}, cardCtx(r));
+
+                            return (
+                                <Button
+                                    key={r.id}
+                                    type="button"
+                                    variant="outline"
+                                    className="h-auto w-full flex-col items-start gap-1 py-2 text-left whitespace-normal"
+                                    onClick={() => choose(r)}
+                                >
+                                    <span className="font-medium">
+                                        {text(r, 'label')}
+                                    </span>
+                                    <span className="text-xs font-normal text-muted-foreground">
+                                        {text(r, 'hint')}
+                                    </span>
+                                    {built.ok && (
+                                        <Preview result={built.result} />
+                                    )}
+                                </Button>
+                            );
+                        })}
+                        {scope === 'ability' && (
+                            <>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    className="h-auto w-full flex-col items-start py-2 text-left whitespace-normal"
+                                    onClick={scratch}
+                                >
+                                    <span className="font-medium">
+                                        {t('scratch')}
+                                    </span>
+                                    <span className="text-xs font-normal text-muted-foreground">
+                                        {t('scratchHint')}
+                                    </span>
+                                </Button>
+                                <Button
+                                    type="button"
+                                    variant="secondary"
+                                    className="w-full"
+                                    onClick={() => setCopying(true)}
+                                >
+                                    {t('copyFrom')}
+                                </Button>
+                            </>
+                        )}
+                    </div>
+                </div>
             )}
-          </div>
-        </div>
-      )}
-    </ResponsiveDialog>
-  );
+        </ResponsiveDialog>
+    );
 }

@@ -1,76 +1,136 @@
-import { NextResponse } from "next/server";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { NextResponse } from 'next/server';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { getResponseJson } from "./helpers";
+import { getResponseJson } from './helpers';
 
-import { prisma } from "@/lib/db";
-import { notifyCharacterOwners } from "@/lib/server/notifications/notify";
-import * as apiAuth from "@/lib/utils/api/api-auth";
-import { DEFAULT_RULES } from "@/lib/utils/rules";
+import { prisma } from '@/lib/db';
+import { notifyCharacterOwners } from '@/lib/server/notifications/notify';
+import * as apiAuth from '@/lib/utils/api/api-auth';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
 
-vi.mock("@/lib/server/notifications/notify", () => ({ notifyCharacterOwners: vi.fn().mockResolvedValue(0) }));
-vi.mock("@/lib/utils/api/api-auth", () => ({ requireDM: vi.fn() }));
-vi.mock("@/lib/db", () => ({ prisma: { character: { findUnique: vi.fn(), update: vi.fn() }, race: { findFirst: vi.fn() } } }));
+vi.mock('@/lib/server/notifications/notify', () => ({
+    notifyCharacterOwners: vi.fn().mockResolvedValue(0),
+}));
+vi.mock('@/lib/utils/api/api-auth', () => ({ requireDM: vi.fn() }));
+vi.mock('@/lib/db', () => ({
+    prisma: {
+        character: { findUnique: vi.fn(), update: vi.fn() },
+        race: { findFirst: vi.fn() },
+    },
+}));
 
-const dm = (maxLevel = 20) => ({ userId: "dm", isDM: true, campaign: { id: "camp", rules: DEFAULT_RULES, maxLevel, members: [{ userId: "dm", role: "dm" }] } }) as never;
+const dm = (maxLevel = 20) =>
+    ({
+        userId: 'dm',
+        isDM: true,
+        campaign: {
+            id: 'camp',
+            rules: DEFAULT_RULES,
+            maxLevel,
+            members: [{ userId: 'dm', role: 'dm' }],
+        },
+    }) as never;
 
 const CHARACTER = {
-  id: "ch", campaignId: "camp", race: "Ельф", level: 3, seenLevel: 3,
-  strength: 30, dexterity: 10, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10,
-  spellSlots: { "1": { max: 3, current: 1 } },
+    id: 'ch',
+    campaignId: 'camp',
+    race: 'Ельф',
+    level: 3,
+    seenLevel: 3,
+    strength: 30,
+    dexterity: 10,
+    constitution: 10,
+    intelligence: 10,
+    wisdom: 10,
+    charisma: 10,
+    spellSlots: { '1': { max: 3, current: 1 } },
 };
 
 const post = async () => {
-  const mod = await import("@/app/api/campaigns/[id]/characters/[characterId]/level-up/route");
+    const mod = await import(
+        '@/app/api/campaigns/[id]/characters/[characterId]/level-up/route'
+    );
 
-  return mod.POST(new Request("http://x", { method: "POST" }), { params: Promise.resolve({ id: "camp", characterId: "ch" }) }) as Promise<NextResponse>;
+    return mod.POST(new Request('http://x', { method: 'POST' }), {
+        params: Promise.resolve({ id: 'camp', characterId: 'ch' }),
+    }) as Promise<NextResponse>;
 };
 
-const random = vi.spyOn(Math, "random");
+const random = vi.spyOn(Math, 'random');
 
-describe("POST level-up", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    random.mockReturnValue(0);
-    vi.mocked(apiAuth.requireDM).mockResolvedValue(dm());
-    vi.mocked(prisma.character.findUnique).mockResolvedValue(CHARACTER as never);
-    vi.mocked(prisma.race.findFirst).mockResolvedValue({ spellSlotProgression: [{ level: 2, slots: 3 }] } as never);
-    vi.mocked(prisma.character.update).mockImplementation(((args: { data: object }) => Promise.resolve({ ...CHARACTER, ...args.data })) as never);
-  });
+describe('POST level-up', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+        random.mockReturnValue(0);
+        vi.mocked(apiAuth.requireDM).mockResolvedValue(dm());
+        vi.mocked(prisma.character.findUnique).mockResolvedValue(
+            CHARACTER as never
+        );
+        vi.mocked(prisma.race.findFirst).mockResolvedValue({
+            spellSlotProgression: [{ level: 2, slots: 3 }],
+        } as never);
+        vi.mocked(prisma.character.update).mockImplementation(((args: {
+            data: object;
+        }) => Promise.resolve({ ...CHARACTER, ...args.data })) as never);
+    });
 
-  afterEach(() => random.mockReset());
+    afterEach(() => random.mockReset());
 
-  it("+1 до характеристики не на стелі, слоти — приріст з прогресії раси, HP не змінюється", async () => {
-    const res = await post();
+    it('+1 до характеристики не на стелі, слоти — приріст з прогресії раси, HP не змінюється', async () => {
+        const res = await post();
 
-    expect(res.status).toBe(200);
+        expect(res.status).toBe(200);
 
-    const data = vi.mocked(prisma.character.update).mock.calls[0][0].data as Record<string, unknown>;
+        const data = vi.mocked(prisma.character.update).mock.calls[0][0]
+            .data as Record<string, unknown>;
 
-    expect(data).toMatchObject({ level: 4, strength: 30, dexterity: 11, spellSlots: { "1": { max: 3, current: 1 }, "2": { max: 1, current: 1 } } });
-    expect(data).not.toHaveProperty("maxHp");
-    expect(data).not.toHaveProperty("currentHp");
-    expect(await getResponseJson(res)).toMatchObject({ levelUpDetails: { abilityIncreased: "dexterity" } });
-  });
+        expect(data).toMatchObject({
+            level: 4,
+            strength: 30,
+            dexterity: 11,
+            spellSlots: {
+                '1': { max: 3, current: 1 },
+                '2': { max: 1, current: 1 },
+            },
+        });
+        expect(data).not.toHaveProperty('maxHp');
+        expect(data).not.toHaveProperty('currentHp');
+        expect(await getResponseJson(res)).toMatchObject({
+            levelUpDetails: { abilityIncreased: 'dexterity' },
+        });
+    });
 
-  it("сповіщає власника про новий рівень", async () => {
-    await post();
+    it('сповіщає власника про новий рівень', async () => {
+        await post();
 
-    expect(notifyCharacterOwners).toHaveBeenCalledWith(
-      { campaignId: "camp", actorUserId: "dm", events: [{ characterId: "ch", type: "level", refId: "ch:4" }] },
-      prisma,
-    );
-  });
+        expect(notifyCharacterOwners).toHaveBeenCalledWith(
+            {
+                campaignId: 'camp',
+                actorUserId: 'dm',
+                events: [{ characterId: 'ch', type: 'level', refId: 'ch:4' }],
+            },
+            prisma
+        );
+    });
 
-  it("на максимальному рівні кампанії — 422, без запису", async () => {
-    vi.mocked(apiAuth.requireDM).mockResolvedValue(dm(3));
+    it('на максимальному рівні кампанії — 422, без запису', async () => {
+        vi.mocked(apiAuth.requireDM).mockResolvedValue(dm(3));
 
-    const res = await post();
+        const res = await post();
 
-    expect(res.status).toBe(422);
-    expect(prisma.character.update).not.toHaveBeenCalled();
-  });
+        expect(res.status).toBe(422);
+        expect(prisma.character.update).not.toHaveBeenCalled();
+    });
 });
 
 // Shared transaction SQL is exercised by character storage integration; retain the existing business DB doubles.
-vi.mock("@/lib/server/content/write", () => ({ withCampaignContentWrite: async (_id: string, fn: (tx: unknown) => unknown) => fn({ $queryRaw: async () => [], $executeRaw: async () => 1 }), withCampaignRuntimeWrite: async (_id: string, fn: (tx: unknown) => unknown) => fn({ $queryRaw: async () => [], $executeRaw: async () => 1 }) }));
+vi.mock('@/lib/server/content/write', () => ({
+    withCampaignContentWrite: async (
+        _id: string,
+        fn: (tx: unknown) => unknown
+    ) => fn({ $queryRaw: async () => [], $executeRaw: async () => 1 }),
+    withCampaignRuntimeWrite: async (
+        _id: string,
+        fn: (tx: unknown) => unknown
+    ) => fn({ $queryRaw: async () => [], $executeRaw: async () => 1 }),
+}));

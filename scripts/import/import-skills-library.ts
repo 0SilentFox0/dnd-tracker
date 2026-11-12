@@ -10,371 +10,387 @@
  * campaignId за замовчуванням — з lib/constants/campaigns.ts
  */
 
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from '@prisma/client';
 
-import { convertLegacySkill } from "./legacy-convert/convert-skill";
-import { loadSkillsFromDoc } from "./import-skills-library-parse";
-import { triggerStringToSkillTriggers } from "./import-skills-library-triggers";
-import type { LibraryEffect, LibrarySkill } from "./import-skills-library-types";
+import { convertLegacySkill } from './legacy-convert/convert-skill';
+import { loadSkillsFromDoc } from './import-skills-library-parse';
+import { triggerStringToSkillTriggers } from './import-skills-library-triggers';
+import type {
+    LibraryEffect,
+    LibrarySkill,
+} from './import-skills-library-types';
 
-import { DEFAULT_CAMPAIGN_ID } from "@/scripts/shared/default-campaign";
+import { DEFAULT_CAMPAIGN_ID } from '@/scripts/shared/default-campaign';
 
-export { loadSkillsFromDoc, stripJsonComments } from "./import-skills-library-parse";
-export { triggerStringToSkillTriggers } from "./import-skills-library-triggers";
-export type { LibraryEffect, LibrarySkill } from "./import-skills-library-types";
+export {
+    loadSkillsFromDoc,
+    stripJsonComments,
+} from './import-skills-library-parse';
+export { triggerStringToSkillTriggers } from './import-skills-library-triggers';
+export type {
+    LibraryEffect,
+    LibrarySkill,
+} from './import-skills-library-types';
 
 const prisma = new PrismaClient();
 
 /** Код категорії (англ.) → назва базового навику в UI та БД */
 const MAIN_SKILL_BY_CATEGORY: Record<string, string> = {
-  Attack: "Напад",
-  Ranged: "Стрільба",
-  Defense: "Захист",
-  MagicLight: "Магія Світла",
-  MagicDark: "Магія Темряви",
-  MagicChaos: "Магія Хаосу",
-  MagicSummon: "Магія Призиву",
-  Leadership: "Лідерство",
-  Race: "Раса",
-  Ultimate: "Ультимат",
-  Personal: "Персональні",
+    Attack: 'Напад',
+    Ranged: 'Стрільба',
+    Defense: 'Захист',
+    MagicLight: 'Магія Світла',
+    MagicDark: 'Магія Темряви',
+    MagicChaos: 'Магія Хаосу',
+    MagicSummon: 'Магія Призиву',
+    Leadership: 'Лідерство',
+    Race: 'Раса',
+    Ultimate: 'Ультимат',
+    Personal: 'Персональні',
 };
 
 /** Аліаси (різні написання) → канонічна назва базового навику */
 const MAIN_SKILL_ALIASES: Record<string, string> = {
-  "Темна Магія": "Магія Темряви",
-  "Темна магія": "Магія Темряви",
-  "Темрява": "Магія Темряви",
-  "Світло": "Магія Світла",
-  "Хаос": "Магія Хаосу",
-  "Призив": "Магія Призиву",
+    'Темна Магія': 'Магія Темряви',
+    'Темна магія': 'Магія Темряви',
+    Темрява: 'Магія Темряви',
+    Світло: 'Магія Світла',
+    Хаос: 'Магія Хаосу',
+    Призив: 'Магія Призиву',
 };
 
 /** Усі канонічні назви базових навиків (для валідації) */
-const MAIN_SKILL_NAMES = new Set([
-  ...Object.values(MAIN_SKILL_BY_CATEGORY),
-]);
+const MAIN_SKILL_NAMES = new Set([...Object.values(MAIN_SKILL_BY_CATEGORY)]);
 
 /**
  * Повертає канонічну назву базового навику за кодом категорії або аліасом.
  */
 function getCanonicalMainSkillName(
-  categoryOrAlias: string,
-  mainSkillFromSkill?: string
+    categoryOrAlias: string,
+    mainSkillFromSkill?: string
 ): string {
-  if (mainSkillFromSkill?.trim()) {
-    const alias = MAIN_SKILL_ALIASES[mainSkillFromSkill.trim()];
+    if (mainSkillFromSkill?.trim()) {
+        const alias = MAIN_SKILL_ALIASES[mainSkillFromSkill.trim()];
 
-    if (alias) return alias;
+        if (alias) return alias;
 
-    if (MAIN_SKILL_NAMES.has(mainSkillFromSkill.trim()))
-      return mainSkillFromSkill.trim();
-  }
+        if (MAIN_SKILL_NAMES.has(mainSkillFromSkill.trim()))
+            return mainSkillFromSkill.trim();
+    }
 
-  const byCategory = MAIN_SKILL_BY_CATEGORY[categoryOrAlias];
+    const byCategory = MAIN_SKILL_BY_CATEGORY[categoryOrAlias];
 
-  if (byCategory) return byCategory;
+    if (byCategory) return byCategory;
 
-  const byAlias = MAIN_SKILL_ALIASES[categoryOrAlias];
+    const byAlias = MAIN_SKILL_ALIASES[categoryOrAlias];
 
-  if (byAlias) return byAlias;
+    if (byAlias) return byAlias;
 
-  return categoryOrAlias;
+    return categoryOrAlias;
 }
 
 /** Усі варіанти назв для канонічної назви (сама назва + аліаси, що на неї вказують) */
 function getMainSkillNameVariants(canonicalName: string): string[] {
-  const aliases = Object.entries(MAIN_SKILL_ALIASES)
-    .filter(([, v]) => v === canonicalName)
-    .map(([k]) => k);
+    const aliases = Object.entries(MAIN_SKILL_ALIASES)
+        .filter(([, v]) => v === canonicalName)
+        .map(([k]) => k);
 
-  return [canonicalName, ...aliases];
+    return [canonicalName, ...aliases];
 }
 
 function effectsToBonuses(effects: LibraryEffect[]): Record<string, number> {
-  const bonuses: Record<string, number> = {};
+    const bonuses: Record<string, number> = {};
 
-  for (const e of effects) {
-    if (e.type === "percent" && typeof e.value === "number") {
-      bonuses[e.stat] = e.value;
+    for (const e of effects) {
+        if (e.type === 'percent' && typeof e.value === 'number') {
+            bonuses[e.stat] = e.value;
+        }
+
+        if (e.type === 'flat' && typeof e.value === 'number') {
+            bonuses[`${e.stat}_flat`] = e.value;
+        }
     }
 
-    if (e.type === "flat" && typeof e.value === "number") {
-      bonuses[`${e.stat}_flat`] = e.value;
-    }
-  }
-
-  return bonuses;
+    return bonuses;
 }
 
 async function ensureMainSkill(
-  campaignId: string,
-  category: string,
-  mainSkillFromSkill?: string
+    campaignId: string,
+    category: string,
+    mainSkillFromSkill?: string
 ): Promise<string | null> {
-  const canonicalName = getCanonicalMainSkillName(category, mainSkillFromSkill);
+    const canonicalName = getCanonicalMainSkillName(
+        category,
+        mainSkillFromSkill
+    );
 
-  const nameVariants = getMainSkillNameVariants(canonicalName);
+    const nameVariants = getMainSkillNameVariants(canonicalName);
 
-  let main = await prisma.mainSkill.findFirst({
-    where: { campaignId, name: { in: nameVariants } },
-  });
-
-  if (main && main.name !== canonicalName) {
-    const oldName = main.name;
-
-    main = await prisma.mainSkill.update({
-      where: { id: main.id },
-      data: { name: canonicalName },
+    let main = await prisma.mainSkill.findFirst({
+        where: { campaignId, name: { in: nameVariants } },
     });
-    console.log(`  MainSkill: "${oldName}" → "${canonicalName}"`);
-  }
 
-  if (!main) {
-    main = await prisma.mainSkill.create({
-      data: {
-        campaignId,
-        name: canonicalName,
-        color: "#6366f1",
-      },
-    });
-    console.log(`  MainSkill: ${canonicalName}`);
-  }
+    if (main && main.name !== canonicalName) {
+        const oldName = main.name;
 
-  return main.id;
+        main = await prisma.mainSkill.update({
+            where: { id: main.id },
+            data: { name: canonicalName },
+        });
+        console.log(`  MainSkill: "${oldName}" → "${canonicalName}"`);
+    }
+
+    if (!main) {
+        main = await prisma.mainSkill.create({
+            data: {
+                campaignId,
+                name: canonicalName,
+                color: '#6366f1',
+            },
+        });
+        console.log(`  MainSkill: ${canonicalName}`);
+    }
+
+    return main.id;
 }
 
 // ---------- Людино-читабельний опис ефекту ----------
 
 const STAT_LABELS: Record<string, string> = {
-  melee_damage: "шкода ближня",
-  ranged_damage: "шкода дальня",
-  all_damage: "шкода (вся)",
-  counter_damage: "контр-атака",
-  area_damage: "площинна шкода",
-  bleed_damage: "кровотеча",
-  poison_damage: "отрута",
-  burn_damage: "опік",
-  fire_damage: "вогняна шкода",
-  armor: "броня",
-  hp_bonus: "бонус HP",
-  physical_resistance: "фіз. резист",
-  spell_resistance: "маг. резист",
-  all_resistance: "резист (увесь)",
-  damage_resistance: "зниження шкоди",
-  speed: "швидкість",
-  initiative: "ініціатива",
-  morale: "мораль",
-  crit_threshold: "поріг криту",
-  spell_levels: "рівень заклинань",
-  spell_slots_lvl4_5: "слоти 4-5 рівня",
-  spell_targets_lvl4_5: "цілі 4-5 рівня",
-  advantage: "перевага",
-  enemy_attack_disadvantage: "недолік атаки ворога",
-  guaranteed_hit: "гарантований удар",
-  attack_before_enemy: "атака першим",
-  control_units: "контроль юнітів",
-  summon_tier: "виклик істоти",
-  redirect_physical_damage: "перенаправлення шкоди",
-  marked_targets: "позначені цілі",
-  extra_casts: "додаткові касти",
-  restore_spell_slot: "відновлення слоту",
-  field_damage: "пекельна земля",
-  revive_hp: "воскресіння",
-  clear_negative_effects: "зняття негативних ефектів",
-  morale_per_kill: "мораль за вбивство",
-  morale_per_ally_death: "мораль за смерть союзника",
-  light_spells_target_all_allies: "заклинання світла на всіх",
+    melee_damage: 'шкода ближня',
+    ranged_damage: 'шкода дальня',
+    all_damage: 'шкода (вся)',
+    counter_damage: 'контр-атака',
+    area_damage: 'площинна шкода',
+    bleed_damage: 'кровотеча',
+    poison_damage: 'отрута',
+    burn_damage: 'опік',
+    fire_damage: 'вогняна шкода',
+    armor: 'броня',
+    hp_bonus: 'бонус HP',
+    physical_resistance: 'фіз. резист',
+    spell_resistance: 'маг. резист',
+    all_resistance: 'резист (увесь)',
+    damage_resistance: 'зниження шкоди',
+    speed: 'швидкість',
+    initiative: 'ініціатива',
+    morale: 'мораль',
+    crit_threshold: 'поріг криту',
+    spell_levels: 'рівень заклинань',
+    spell_slots_lvl4_5: 'слоти 4-5 рівня',
+    spell_targets_lvl4_5: 'цілі 4-5 рівня',
+    advantage: 'перевага',
+    enemy_attack_disadvantage: 'недолік атаки ворога',
+    guaranteed_hit: 'гарантований удар',
+    attack_before_enemy: 'атака першим',
+    control_units: 'контроль юнітів',
+    summon_tier: 'виклик істоти',
+    redirect_physical_damage: 'перенаправлення шкоди',
+    marked_targets: 'позначені цілі',
+    extra_casts: 'додаткові касти',
+    restore_spell_slot: 'відновлення слоту',
+    field_damage: 'пекельна земля',
+    revive_hp: 'воскресіння',
+    clear_negative_effects: 'зняття негативних ефектів',
+    morale_per_kill: 'мораль за вбивство',
+    morale_per_ally_death: 'мораль за смерть союзника',
+    light_spells_target_all_allies: 'заклинання світла на всіх',
 };
 
 function effectToHumanDescription(e: LibraryEffect): string {
-  const label = STAT_LABELS[e.stat] || e.stat;
+    const label = STAT_LABELS[e.stat] || e.stat;
 
-  if (e.type === "flag" || e.type === "ignore") {
-    return label;
-  }
+    if (e.type === 'flag' || e.type === 'ignore') {
+        return label;
+    }
 
-  let valueStr = "";
+    let valueStr = '';
 
-  if (e.type === "percent" && typeof e.value === "number") {
-    valueStr = `+${e.value}%`;
-  } else if (e.type === "flat" && typeof e.value === "number") {
-    valueStr = e.value > 0 ? `+${e.value}` : `${e.value}`;
-  } else if (e.type === "formula" && typeof e.value === "string") {
-    valueStr = `(${e.value})`;
-  } else if (e.type === "dice" && typeof e.value === "string") {
-    valueStr = e.value;
-  } else if (e.type === "min" && typeof e.value === "number") {
-    valueStr = `мін. ${e.value}`;
-  } else if (e.type === "stack" && typeof e.value === "number") {
-    valueStr = `×${e.value} стаків`;
-  } else if (e.value !== undefined) {
-    valueStr = String(e.value);
-  }
+    if (e.type === 'percent' && typeof e.value === 'number') {
+        valueStr = `+${e.value}%`;
+    } else if (e.type === 'flat' && typeof e.value === 'number') {
+        valueStr = e.value > 0 ? `+${e.value}` : `${e.value}`;
+    } else if (e.type === 'formula' && typeof e.value === 'string') {
+        valueStr = `(${e.value})`;
+    } else if (e.type === 'dice' && typeof e.value === 'string') {
+        valueStr = e.value;
+    } else if (e.type === 'min' && typeof e.value === 'number') {
+        valueStr = `мін. ${e.value}`;
+    } else if (e.type === 'stack' && typeof e.value === 'number') {
+        valueStr = `×${e.value} стаків`;
+    } else if (e.value !== undefined) {
+        valueStr = String(e.value);
+    }
 
-  const durationStr = e.duration ? ` (${e.duration} р.)` : "";
+    const durationStr = e.duration ? ` (${e.duration} р.)` : '';
 
-  return `${label}: ${valueStr}${durationStr}`.trim();
+    return `${label}: ${valueStr}${durationStr}`.trim();
 }
 
 // ---------- Upsert Skill ----------
 
 async function upsertSkill(
-  campaignId: string,
-  mainSkillId: string | null,
-  lib: LibrarySkill
+    campaignId: string,
+    mainSkillId: string | null,
+    lib: LibrarySkill
 ): Promise<void> {
-  // Генеруємо людино-читабельний опис з ефектів
-  const description = lib.effects.length
-    ? lib.effects
-        .map((e) => effectToHumanDescription(e))
-        .filter(Boolean)
-        .join(". ")
-    : "";
+    // Генеруємо людино-читабельний опис з ефектів
+    const description = lib.effects.length
+        ? lib.effects
+              .map((e) => effectToHumanDescription(e))
+              .filter(Boolean)
+              .join('. ')
+        : '';
 
-  const skillTriggers = triggerStringToSkillTriggers(lib.trigger);
+    const skillTriggers = triggerStringToSkillTriggers(lib.trigger);
 
-  if (skillTriggers.length === 0) {
-    console.log(`  ⚠️  Не вдалося розпарсити тригер: "${lib.trigger}" для ${lib.name}`);
-  }
+    if (skillTriggers.length === 0) {
+        console.log(
+            `  ⚠️  Не вдалося розпарсити тригер: "${lib.trigger}" для ${lib.name}`
+        );
+    }
 
-  const existing = await prisma.skill.findFirst({
-    where: { campaignId, name: lib.name },
-  });
+    const existing = await prisma.skill.findFirst({
+        where: { campaignId, name: lib.name },
+    });
 
-  // формат бібліотеки — старий (ефекти + тригери), у БД іде лише abilities
-  const abilities = convertLegacySkill({
-    id: existing?.id ?? lib.name,
-    name: lib.name,
-    combatStats: { effects: lib.effects },
-    bonuses: effectsToBonuses(lib.effects),
-    skillTriggers,
-    spellGroupId: null,
-  }).abilities as unknown as object[];
+    // формат бібліотеки — старий (ефекти + тригери), у БД іде лише abilities
+    const abilities = convertLegacySkill({
+        id: existing?.id ?? lib.name,
+        name: lib.name,
+        combatStats: { effects: lib.effects },
+        bonuses: effectsToBonuses(lib.effects),
+        skillTriggers,
+        spellGroupId: null,
+    }).abilities as unknown as object[];
 
-  const data = {
-    name: lib.name,
-    description: description || null,
-    image: lib.image ?? null,
-    mainSkillId,
-    abilities,
-  };
+    const data = {
+        name: lib.name,
+        description: description || null,
+        image: lib.image ?? null,
+        mainSkillId,
+        abilities,
+    };
 
-  const triggersLog = skillTriggers.map((t) => (t.type === "simple" ? t.trigger : "complex")).join(", ");
+    const triggersLog = skillTriggers
+        .map((t) => (t.type === 'simple' ? t.trigger : 'complex'))
+        .join(', ');
 
-  if (existing) {
-    await prisma.skill.update({ where: { id: existing.id }, data });
-    console.log(`  Updated: ${lib.name} [${triggersLog}]`);
-  } else {
-    await prisma.skill.create({ data: { campaignId, ...data } });
-    console.log(`  Created: ${lib.name} [${triggersLog}]`);
-  }
+    if (existing) {
+        await prisma.skill.update({ where: { id: existing.id }, data });
+        console.log(`  Updated: ${lib.name} [${triggersLog}]`);
+    } else {
+        await prisma.skill.create({ data: { campaignId, ...data } });
+        console.log(`  Created: ${lib.name} [${triggersLog}]`);
+    }
 }
 
 // ---------- Main ----------
 
 async function main() {
-  const campaignId = process.argv[2] || DEFAULT_CAMPAIGN_ID;
+    const campaignId = process.argv[2] || DEFAULT_CAMPAIGN_ID;
 
-  const docPath = process.argv[3] || "docs/SKILLS.md";
+    const docPath = process.argv[3] || 'docs/SKILLS.md';
 
-  console.log("Campaign ID:", campaignId);
-  console.log("Reading:", docPath);
+    console.log('Campaign ID:', campaignId);
+    console.log('Reading:', docPath);
 
-  const skills = loadSkillsFromDoc(docPath);
+    const skills = loadSkillsFromDoc(docPath);
 
-  console.log(`Loaded ${skills.length} skills\n`);
+    console.log(`Loaded ${skills.length} skills\n`);
 
-  const campaign = await prisma.campaign.findUnique({
-    where: { id: campaignId },
-  });
+    const campaign = await prisma.campaign.findUnique({
+        where: { id: campaignId },
+    });
 
-  if (!campaign) {
-    console.error("Campaign not found:", campaignId);
-    process.exit(1);
-  }
+    if (!campaign) {
+        console.error('Campaign not found:', campaignId);
+        process.exit(1);
+    }
 
-  // Статистика тригерів
-  const triggerStats = new Map<string, number>();
+    // Статистика тригерів
+    const triggerStats = new Map<string, number>();
 
-  for (const lib of skills) {
-    const mainSkillId = await ensureMainSkill(
-      campaignId,
-      lib.category,
-      lib.mainSkill
+    for (const lib of skills) {
+        const mainSkillId = await ensureMainSkill(
+            campaignId,
+            lib.category,
+            lib.mainSkill
+        );
+
+        await upsertSkill(campaignId, mainSkillId, lib);
+
+        // Збираємо статистику
+        const triggers = triggerStringToSkillTriggers(lib.trigger);
+
+        for (const t of triggers) {
+            const key = t.type === 'simple' ? t.trigger : 'complex';
+
+            triggerStats.set(key, (triggerStats.get(key) ?? 0) + 1);
+        }
+    }
+
+    // Перевірка: скіли згруповані по базовим навикам
+    const byMain = await prisma.skill.groupBy({
+        by: ['mainSkillId'],
+        where: { campaignId },
+        _count: { id: true },
+    });
+
+    const mainSkills = await prisma.mainSkill.findMany({
+        where: { campaignId },
+        select: { id: true, name: true },
+    });
+
+    const nameById = new Map(mainSkills.map((m) => [m.id, m.name]));
+
+    console.log('\n--- Групування по базовим навикам ---');
+
+    let total = 0;
+
+    const sorted = byMain.sort((a, b) =>
+        (a.mainSkillId ?? '').localeCompare(b.mainSkillId ?? '')
     );
 
-    await upsertSkill(campaignId, mainSkillId, lib);
+    for (const g of sorted) {
+        const name = g.mainSkillId
+            ? (nameById.get(g.mainSkillId) ?? '(невідомий id)')
+            : '(без базового навику)';
 
-    // Збираємо статистику
-    const triggers = triggerStringToSkillTriggers(lib.trigger);
-
-    for (const t of triggers) {
-      const key = t.type === "simple" ? t.trigger : "complex";
-
-      triggerStats.set(key, (triggerStats.get(key) ?? 0) + 1);
+        console.log(`  ${name}: ${g._count.id} скілів`);
+        total += g._count.id;
     }
-  }
+    console.log(`  Всього скілів у кампанії: ${total}`);
 
-  // Перевірка: скіли згруповані по базовим навикам
-  const byMain = await prisma.skill.groupBy({
-    by: ["mainSkillId"],
-    where: { campaignId },
-    _count: { id: true },
-  });
+    if (total !== skills.length) {
+        console.warn(`  Очікувалось з файлу: ${skills.length}`);
+    }
 
-  const mainSkills = await prisma.mainSkill.findMany({
-    where: { campaignId },
-    select: { id: true, name: true },
-  });
+    // Виводимо статистику тригерів
+    console.log('\n--- Статистика тригерів ---');
 
-  const nameById = new Map(mainSkills.map((m) => [m.id, m.name]));
+    const sortedTriggers = [...triggerStats.entries()].sort(
+        (a, b) => b[1] - a[1]
+    );
 
-  console.log("\n--- Групування по базовим навикам ---");
+    for (const [trigger, count] of sortedTriggers) {
+        console.log(`  ${trigger}: ${count} скілів`);
+    }
 
-  let total = 0;
-
-  const sorted = byMain.sort((a, b) =>
-    (a.mainSkillId ?? "").localeCompare(b.mainSkillId ?? "")
-  );
-
-  for (const g of sorted) {
-    const name = g.mainSkillId
-      ? nameById.get(g.mainSkillId) ?? "(невідомий id)"
-      : "(без базового навику)";
-
-    console.log(`  ${name}: ${g._count.id} скілів`);
-    total += g._count.id;
-  }
-  console.log(`  Всього скілів у кампанії: ${total}`);
-
-  if (total !== skills.length) {
-    console.warn(`  Очікувалось з файлу: ${skills.length}`);
-  }
-
-  // Виводимо статистику тригерів
-  console.log("\n--- Статистика тригерів ---");
-
-  const sortedTriggers = [...triggerStats.entries()].sort((a, b) => b[1] - a[1]);
-
-  for (const [trigger, count] of sortedTriggers) {
-    console.log(`  ${trigger}: ${count} скілів`);
-  }
-
-  console.log("\nDone.");
+    console.log('\nDone.');
 }
 
 // Запускати main лише коли скрипт викликають напряму (не при імпорті)
 const isEntryPoint =
-  typeof process !== "undefined" &&
-  process.argv[1] != null &&
-  process.argv[1].includes("import-skills-library");
+    typeof process !== 'undefined' &&
+    process.argv[1] != null &&
+    process.argv[1].includes('import-skills-library');
 
 if (isEntryPoint) {
-  main()
-    .catch((e) => {
-      console.error(e);
-      process.exit(1);
-    })
-    .finally(() => prisma.$disconnect());
+    main()
+        .catch((e) => {
+            console.error(e);
+            process.exit(1);
+        })
+        .finally(() => prisma.$disconnect());
 }

@@ -1,71 +1,86 @@
 // @vitest-environment happy-dom
-import { cleanup, fireEvent, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { cleanup, fireEvent, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "" }));
+vi.mock('@/components/hud/fonts', () => ({ hudFontClassName: '' }));
 
-import { FORTUNE_INPUT } from "../../../rules/percentile/fortune";
-import { CastTestBody } from "../CastTestBody";
+import { FORTUNE_INPUT } from '../../../rules/percentile/fortune';
+import { CastTestBody } from '../CastTestBody';
 
-import { render } from "@/lib/i18n/test/render-uk";
+import { render } from '@/lib/i18n/test/render-uk';
 
-vi.unmock("next-intl");
+vi.unmock('next-intl');
 
 type Props = Parameters<typeof CastTestBody>[0];
 
 const model = (over: { fortune?: boolean; state?: object } = {}) => {
-  const actions = { setCastRoll: vi.fn(), setCastSystem: vi.fn() };
+    const actions = { setCastRoll: vi.fn(), setCastSystem: vi.fn() };
 
-  const book = {
-    state: { ...over.state },
-    view: { cast: { cn: 6, target: 50, channelTarget: 40, channelled: 2, armourSl: 0 }, caster: { battleData: { fortune: over.fortune ? 2 : 0 } } },
-    actions,
-  } as unknown as Props["book"];
+    const book = {
+        state: { ...over.state },
+        view: {
+            cast: {
+                cn: 6,
+                target: 50,
+                channelTarget: 40,
+                channelled: 2,
+                armourSl: 0,
+            },
+            caster: { battleData: { fortune: over.fortune ? 2 : 0 } },
+        },
+        actions,
+    } as unknown as Props['book'];
 
-  return { book, actions };
+    return { book, actions };
 };
 
-describe("CastTestBody", () => {
-  afterEach(cleanup);
+describe('CastTestBody', () => {
+    afterEach(cleanup);
 
-  it("shows CN, target, скерування and armour", () => {
-    render(<CastTestBody book={model().book} />);
-    expect(screen.getByText("СН 6 · ціль 50 · Скерування +2 · броня −0")).toBeTruthy();
-  });
+    it('shows CN, target, скерування and armour', () => {
+        render(<CastTestBody book={model().book} />);
+        expect(
+            screen.getByText('СН 6 · ціль 50 · Скерування +2 · броня −0')
+        ).toBeTruthy();
+    });
 
-  it("Auto sends the server roll", () => {
-    const { book, actions } = model();
+    it('Auto sends the server roll', () => {
+        const { book, actions } = model();
 
-    render(<CastTestBody book={book} />);
-    fireEvent.click(screen.getByRole("button", { name: "Авто-кидок" }));
-    expect(actions.setCastRoll).toHaveBeenCalledWith();
-  });
+        render(<CastTestBody book={book} />);
+        fireEvent.click(screen.getByRole('button', { name: 'Авто-кидок' }));
+        expect(actions.setCastRoll).toHaveBeenCalledWith();
+    });
 
-  it("the 30 + 0 pair sends castRoll 30", () => {
-    const { book, actions } = model();
+    it('the 30 + 0 pair sends castRoll 30', () => {
+        const { book, actions } = model();
 
-    render(<CastTestBody book={book} />);
-    fireEvent.click(screen.getByRole("button", { name: "Ручний" }));
-    fireEvent.click(screen.getByRole("button", { name: "30" }));
-    fireEvent.click(screen.getByRole("button", { name: "0" }));
-    fireEvent.click(screen.getByRole("button", { name: "Кинути" }));
-    expect(actions.setCastRoll).toHaveBeenCalledWith(30);
-  });
+        render(<CastTestBody book={book} />);
+        fireEvent.click(screen.getByRole('button', { name: 'Ручний' }));
+        fireEvent.click(screen.getByRole('button', { name: '30' }));
+        fireEvent.click(screen.getByRole('button', { name: '0' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Кинути' }));
+        expect(actions.setCastRoll).toHaveBeenCalledWith(30);
+    });
 
-  it("the Fortune toggle needs a Fortune point", () => {
-    render(<CastTestBody book={model().book} />);
-    expect(screen.queryByRole("group", { name: "Удача" })).toBeNull();
-    cleanup();
+    it('the Fortune toggle needs a Fortune point', () => {
+        render(<CastTestBody book={model().book} />);
+        expect(screen.queryByRole('group', { name: 'Удача' })).toBeNull();
+        cleanup();
 
-    const { book, actions } = model({ fortune: true });
+        const { book, actions } = model({ fortune: true });
 
-    render(<CastTestBody book={book} />);
-    fireEvent.click(screen.getByRole("button", { name: "Перекинути" }));
-    expect(actions.setCastSystem).toHaveBeenCalledWith(FORTUNE_INPUT.write({ kind: "reroll" }));
-  });
+        render(<CastTestBody book={book} />);
+        fireEvent.click(screen.getByRole('button', { name: 'Перекинути' }));
+        expect(actions.setCastSystem).toHaveBeenCalledWith(
+            FORTUNE_INPUT.write({ kind: 'reroll' })
+        );
+    });
 
-  it("confirms an accepted roll", () => {
-    render(<CastTestBody book={model({ state: { castRoll: 42 } }).book} />);
-    expect(screen.getByRole("status").textContent).toBe("Кидок прийнято: 42");
-  });
+    it('confirms an accepted roll', () => {
+        render(<CastTestBody book={model({ state: { castRoll: 42 } }).book} />);
+        expect(screen.getByRole('status').textContent).toBe(
+            'Кидок прийнято: 42'
+        );
+    });
 });

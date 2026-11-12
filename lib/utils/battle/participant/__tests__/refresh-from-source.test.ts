@@ -1,145 +1,343 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
-import { makeEffect, makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
-import { refreshFromSource } from "@/lib/utils/battle/participant/refresh-from-source";
-import { slotOf } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
-import type { BattleParticipant } from "@/types/battle";
+import {
+    makeEffect,
+    makeParticipant,
+    resolved,
+} from '@/lib/utils/abilities/__tests__/fixtures';
+import { refreshFromSource } from '@/lib/utils/battle/participant/refresh-from-source';
+import { slotOf } from '@/systems/wfrp/rules/__tests__/slot-fixtures';
+import type { BattleParticipant } from '@/types/battle';
 
-const oldAb = resolved({ trigger: { event: "passive" }, effects: [] }, { id: "old" });
+const oldAb = resolved(
+    { trigger: { event: 'passive' }, effects: [] },
+    { id: 'old' }
+);
 
-const newAb = resolved({ trigger: { event: "passive" }, effects: [] }, { id: "new" });
+const newAb = resolved(
+    { trigger: { event: 'passive' }, effects: [] },
+    { id: 'new' }
+);
 
-function withSlots(p: BattleParticipant, slots: BattleParticipant["spellcasting"]["spellSlots"]): BattleParticipant {
-  return { ...p, spellcasting: { ...p.spellcasting, spellSlots: slots } };
+function withSlots(
+    p: BattleParticipant,
+    slots: BattleParticipant['spellcasting']['spellSlots']
+): BattleParticipant {
+    return { ...p, spellcasting: { ...p.spellcasting, spellSlots: slots } };
 }
 
-describe("refreshFromSource", () => {
-  it("replaces abilities, attacks and spells, keeps live battle state", () => {
-    const base = makeParticipant({ id: "p", hp: 7, abilities: [oldAb] });
+describe('refreshFromSource', () => {
+    it('replaces abilities, attacks and spells, keeps live battle state', () => {
+        const base = makeParticipant({ id: 'p', hp: 7, abilities: [oldAb] });
 
-    const live: BattleParticipant = {
-      ...base,
-      battleData: { ...base.battleData, activeEffects: [makeEffect("e")], abilityUsage: { k: { perBattle: 1 } } as never, hpMultiplier: 1.5, damageMultiplier: 1.2 },
-      actionFlags: { ...base.actionFlags, hasUsedAction: true },
-    };
+        const live: BattleParticipant = {
+            ...base,
+            battleData: {
+                ...base.battleData,
+                activeEffects: [makeEffect('e')],
+                abilityUsage: { k: { perBattle: 1 } } as never,
+                hpMultiplier: 1.5,
+                damageMultiplier: 1.2,
+            },
+            actionFlags: { ...base.actionFlags, hasUsedAction: true },
+        };
 
-    const fresh: BattleParticipant = {
-      ...makeParticipant({ id: "p", hp: 99, abilities: [newAb] }),
-      spellcasting: { ...base.spellcasting, knownSpells: ["s1"], spellSaveDC: 15, spellAttackBonus: 6, spellSlots: {} },
-    };
+        const fresh: BattleParticipant = {
+            ...makeParticipant({ id: 'p', hp: 99, abilities: [newAb] }),
+            spellcasting: {
+                ...base.spellcasting,
+                knownSpells: ['s1'],
+                spellSaveDC: 15,
+                spellAttackBonus: 6,
+                spellSlots: {},
+            },
+        };
 
-    fresh.battleData = { ...fresh.battleData, attacks: [{ name: "Новий" } as never], hpMultiplier: 1, damageMultiplier: 1 };
+        fresh.battleData = {
+            ...fresh.battleData,
+            attacks: [{ name: 'Новий' } as never],
+            hpMultiplier: 1,
+            damageMultiplier: 1,
+        };
 
-    const out = refreshFromSource(live, fresh);
+        const out = refreshFromSource(live, fresh);
 
-    expect(out.battleData.resolvedAbilities).toEqual([newAb]);
-    expect(out.battleData.attacks).toEqual(fresh.battleData.attacks);
-    expect(out.spellcasting).toMatchObject({ knownSpells: ["s1"], spellSaveDC: 15, spellAttackBonus: 6 });
-    expect(out.combatStats.currentHp).toBe(7);
-    expect(out.battleData.activeEffects).toHaveLength(1);
-    expect(out.battleData.abilityUsage).toEqual(live.battleData.abilityUsage);
-    expect(out.actionFlags.hasUsedAction).toBe(true);
-    expect(out.battleData.hpMultiplier).toBe(1.5);
-    expect(out.battleData.damageMultiplier).toBe(1.2);
-  });
-
-  it("takes grid size and speed from the library, keeps live morale", () => {
-    const base = makeParticipant({ id: "p", hp: 7 });
-
-    const live = { ...base, combatStats: { ...base.combatStats, speed: 30, morale: 3 } };
-
-    const fresh = makeParticipant({ id: "p", hp: 99 });
-
-    fresh.combatStats = { ...fresh.combatStats, gridSize: 2, speed: 40, morale: 1 };
-
-    const out = refreshFromSource(live, fresh);
-
-    expect(out.combatStats).toMatchObject({ gridSize: 2, speed: 40, morale: 3, currentHp: 7 });
-  });
-
-  describe("spell slots", () => {
-    const run = (live: Record<string, { max: number; current: number }>, fresh: Record<string, { max: number; current: number }>) =>
-      refreshFromSource(withSlots(makeParticipant({ id: "p" }), live), withSlots(makeParticipant({ id: "p" }), fresh)).spellcasting.spellSlots;
-
-    it("a new key appears full", () => {
-      expect(run({ "1": { max: 2, current: 2 } }, { "1": { max: 2, current: 2 }, "3": { max: 2, current: 2 } })["3"]).toEqual({ max: 2, current: 2 });
+        expect(out.battleData.resolvedAbilities).toEqual([newAb]);
+        expect(out.battleData.attacks).toEqual(fresh.battleData.attacks);
+        expect(out.spellcasting).toMatchObject({
+            knownSpells: ['s1'],
+            spellSaveDC: 15,
+            spellAttackBonus: 6,
+        });
+        expect(out.combatStats.currentHp).toBe(7);
+        expect(out.battleData.activeEffects).toHaveLength(1);
+        expect(out.battleData.abilityUsage).toEqual(
+            live.battleData.abilityUsage
+        );
+        expect(out.actionFlags.hasUsedAction).toBe(true);
+        expect(out.battleData.hpMultiplier).toBe(1.5);
+        expect(out.battleData.damageMultiplier).toBe(1.2);
     });
 
-    it("spent slots stay spent when max grows", () => {
-      expect(run({ "1": { max: 2, current: 0 } }, { "1": { max: 4, current: 4 } })["1"]).toEqual({ max: 4, current: 2 });
+    it('takes grid size and speed from the library, keeps live morale', () => {
+        const base = makeParticipant({ id: 'p', hp: 7 });
+
+        const live = {
+            ...base,
+            combatStats: { ...base.combatStats, speed: 30, morale: 3 },
+        };
+
+        const fresh = makeParticipant({ id: 'p', hp: 99 });
+
+        fresh.combatStats = {
+            ...fresh.combatStats,
+            gridSize: 2,
+            speed: 40,
+            morale: 1,
+        };
+
+        const out = refreshFromSource(live, fresh);
+
+        expect(out.combatStats).toMatchObject({
+            gridSize: 2,
+            speed: 40,
+            morale: 3,
+            currentHp: 7,
+        });
     });
 
-    it("lowered max clamps current", () => {
-      expect(run({ "1": { max: 4, current: 4 } }, { "1": { max: 2, current: 2 } })["1"]).toEqual({ max: 2, current: 2 });
-    });
+    describe('spell slots', () => {
+        const run = (
+            live: Record<string, { max: number; current: number }>,
+            fresh: Record<string, { max: number; current: number }>
+        ) =>
+            refreshFromSource(
+                withSlots(makeParticipant({ id: 'p' }), live),
+                withSlots(makeParticipant({ id: 'p' }), fresh)
+            ).spellcasting.spellSlots;
 
-    it("a slot removed in the library drops to max 0", () => {
-      expect(run({ "2": { max: 1, current: 1 } }, {})["2"]).toEqual({ max: 0, current: 0 });
+        it('a new key appears full', () => {
+            expect(
+                run(
+                    { '1': { max: 2, current: 2 } },
+                    { '1': { max: 2, current: 2 }, '3': { max: 2, current: 2 } }
+                )['3']
+            ).toEqual({ max: 2, current: 2 });
+        });
+
+        it('spent slots stay spent when max grows', () => {
+            expect(
+                run(
+                    { '1': { max: 2, current: 0 } },
+                    { '1': { max: 4, current: 4 } }
+                )['1']
+            ).toEqual({ max: 4, current: 2 });
+        });
+
+        it('lowered max clamps current', () => {
+            expect(
+                run(
+                    { '1': { max: 4, current: 4 } },
+                    { '1': { max: 2, current: 2 } }
+                )['1']
+            ).toEqual({ max: 2, current: 2 });
+        });
+
+        it('a slot removed in the library drops to max 0', () => {
+            expect(run({ '2': { max: 1, current: 1 } }, {})['2']).toEqual({
+                max: 0,
+                current: 0,
+            });
+        });
     });
-  });
 });
 
-describe("refreshFromSource pools", () => {
-  it("keeps a resolved spell name when a refreshed definition has only its ID", () => {
-    const base = makeParticipant({ id: "p" });
+describe('refreshFromSource pools', () => {
+    it('keeps a resolved spell name when a refreshed definition has only its ID', () => {
+        const base = makeParticipant({ id: 'p' });
 
-    const live = { ...base, battleData: { ...base.battleData, pools: { "pool:spell:breath": { label: "Вогняний подих", max: 1, rest: null } } } };
+        const live = {
+            ...base,
+            battleData: {
+                ...base.battleData,
+                pools: {
+                    'pool:spell:breath': {
+                        label: 'Вогняний подих',
+                        max: 1,
+                        rest: null,
+                    },
+                },
+            },
+        };
 
-    const fresh = { ...base, battleData: { ...base.battleData, pools: { "pool:spell:breath": { label: "breath", max: 2, rest: null, recharge: 5 as const } } } };
+        const fresh = {
+            ...base,
+            battleData: {
+                ...base.battleData,
+                pools: {
+                    'pool:spell:breath': {
+                        label: 'breath',
+                        max: 2,
+                        rest: null,
+                        recharge: 5 as const,
+                    },
+                },
+            },
+        };
 
-    expect(refreshFromSource(live, fresh).battleData.pools?.["pool:spell:breath"]).toEqual({ label: "Вогняний подих", max: 2, rest: null, recharge: 5 });
-  });
+        expect(
+            refreshFromSource(live, fresh).battleData.pools?.[
+                'pool:spell:breath'
+            ]
+        ).toEqual({ label: 'Вогняний подих', max: 2, rest: null, recharge: 5 });
+    });
 
-  it("refreshes grant overrides and statblock while preserving spent usage", () => {
-    const base = makeParticipant({ id: "p" });
+    it('refreshes grant overrides and statblock while preserving spent usage', () => {
+        const base = makeParticipant({ id: 'p' });
 
-    const live = { ...base, battleData: { ...base.battleData, abilityUsage: { "pool:spell:fireball": { battle: 1, round: 0, turn: 0 } } } };
+        const live = {
+            ...base,
+            battleData: {
+                ...base.battleData,
+                abilityUsage: {
+                    'pool:spell:fireball': { battle: 1, round: 0, turn: 0 },
+                },
+            },
+        };
 
-    const fresh = { ...base, abilities: { ...base.abilities, creatureType: "dragon" }, spellcasting: { ...base.spellcasting, grants: [{ spellId: "fireball", pool: "pool:spell:fireball", cost: 1, dc: 22, attackBonus: 14 }] }, battleData: { ...base.battleData, senses: { blindsight: 60 }, languages: "Draconic", telepathy: 120 } };
+        const fresh = {
+            ...base,
+            abilities: { ...base.abilities, creatureType: 'dragon' },
+            spellcasting: {
+                ...base.spellcasting,
+                grants: [
+                    {
+                        spellId: 'fireball',
+                        pool: 'pool:spell:fireball',
+                        cost: 1,
+                        dc: 22,
+                        attackBonus: 14,
+                    },
+                ],
+            },
+            battleData: {
+                ...base.battleData,
+                senses: { blindsight: 60 },
+                languages: 'Draconic',
+                telepathy: 120,
+            },
+        };
 
-    const out = refreshFromSource(live, fresh);
+        const out = refreshFromSource(live, fresh);
 
-    expect(out.spellcasting.grants).toEqual(fresh.spellcasting.grants);
-    expect(out.abilities.creatureType).toBe("dragon");
-    expect(out.battleData).toMatchObject({ senses: { blindsight: 60 }, languages: "Draconic", telepathy: 120 });
-    expect(out.battleData.abilityUsage).toEqual(live.battleData.abilityUsage);
-  });
+        expect(out.spellcasting.grants).toEqual(fresh.spellcasting.grants);
+        expect(out.abilities.creatureType).toBe('dragon');
+        expect(out.battleData).toMatchObject({
+            senses: { blindsight: 60 },
+            languages: 'Draconic',
+            telepathy: 120,
+        });
+        expect(out.battleData.abilityUsage).toEqual(
+            live.battleData.abilityUsage
+        );
+    });
 
-  it("keeps spell grant pools spent while refreshing their limits", () => {
-    const base = makeParticipant({ id: "p", hp: 7 });
+    it('keeps spell grant pools spent while refreshing their limits', () => {
+        const base = makeParticipant({ id: 'p', hp: 7 });
 
-    const live = { ...base, battleData: { ...base.battleData, pools: { "pool:spell:fireball": { label: "fireball", max: 1, rest: null, recharge: 5 as const } }, abilityUsage: { "pool:spell:fireball": { battle: 1, round: 0, turn: 0 } } } };
+        const live = {
+            ...base,
+            battleData: {
+                ...base.battleData,
+                pools: {
+                    'pool:spell:fireball': {
+                        label: 'fireball',
+                        max: 1,
+                        rest: null,
+                        recharge: 5 as const,
+                    },
+                },
+                abilityUsage: {
+                    'pool:spell:fireball': { battle: 1, round: 0, turn: 0 },
+                },
+            },
+        };
 
-    const fresh = { ...base, battleData: { ...base.battleData, pools: { "pool:spell:fireball": { label: "fireball", max: 2, rest: null, recharge: 5 as const } } } };
+        const fresh = {
+            ...base,
+            battleData: {
+                ...base.battleData,
+                pools: {
+                    'pool:spell:fireball': {
+                        label: 'fireball',
+                        max: 2,
+                        rest: null,
+                        recharge: 5 as const,
+                    },
+                },
+            },
+        };
 
-    const out = refreshFromSource(live, fresh);
+        const out = refreshFromSource(live, fresh);
 
-    expect(out.battleData.pools?.["pool:spell:fireball"]?.max).toBe(2);
-    expect(out.battleData.abilityUsage).toEqual(live.battleData.abilityUsage);
-  });
+        expect(out.battleData.pools?.['pool:spell:fireball']?.max).toBe(2);
+        expect(out.battleData.abilityUsage).toEqual(
+            live.battleData.abilityUsage
+        );
+    });
 
-  it("drops live pools when the fresh build has none", () => {
-    const base = makeParticipant({ id: "p", hp: 7 });
+    it('drops live pools when the fresh build has none', () => {
+        const base = makeParticipant({ id: 'p', hp: 7 });
 
-    const live = { ...base, battleData: { ...base.battleData, pools: { "pool:c:x": { label: "X", max: 2, rest: "long" as const } } } };
+        const live = {
+            ...base,
+            battleData: {
+                ...base.battleData,
+                pools: {
+                    'pool:c:x': { label: 'X', max: 2, rest: 'long' as const },
+                },
+            },
+        };
 
-    expect(refreshFromSource(live, makeParticipant({ id: "p", hp: 7 })).battleData.pools).toBeUndefined();
-  });
+        expect(
+            refreshFromSource(live, makeParticipant({ id: 'p', hp: 7 }))
+                .battleData.pools
+        ).toBeUndefined();
+    });
 });
 
-describe("refreshFromSource WFRP traits", () => {
-  it("takes size, ward, AP and trait attacks from the fresh build, keeps live HP", () => {
-    const live = { ...makeParticipant({ id: "p", hp: 3 }), abilities: { ...makeParticipant({ id: "p" }).abilities, system: slotOf(undefined, { sb: 3, tb: 3, ag: 3 }) } } as BattleParticipant;
+describe('refreshFromSource WFRP traits', () => {
+    it('takes size, ward, AP and trait attacks from the fresh build, keeps live HP', () => {
+        const live = {
+            ...makeParticipant({ id: 'p', hp: 3 }),
+            abilities: {
+                ...makeParticipant({ id: 'p' }).abilities,
+                system: slotOf(undefined, { sb: 3, tb: 3, ag: 3 }),
+            },
+        } as BattleParticipant;
 
-    const fresh = makeParticipant({ id: "p", hp: 99 });
+        const fresh = makeParticipant({ id: 'p', hp: 99 });
 
-    fresh.abilities = { ...fresh.abilities, system: slotOf(undefined, { sb: 3, tb: 3, ag: 3, ap: { head: 2, arm: 2, body: 2, leg: 2 }, size: "large", ward: 7 }) };
-    fresh.battleData = { ...fresh.battleData, attacks: [{ id: "u-trait-bite-0", name: "Bite" } as never] };
+        fresh.abilities = {
+            ...fresh.abilities,
+            system: slotOf(undefined, {
+                sb: 3,
+                tb: 3,
+                ag: 3,
+                ap: { head: 2, arm: 2, body: 2, leg: 2 },
+                size: 'large',
+                ward: 7,
+            }),
+        };
+        fresh.battleData = {
+            ...fresh.battleData,
+            attacks: [{ id: 'u-trait-bite-0', name: 'Bite' } as never],
+        };
 
-    const out = refreshFromSource(live, fresh);
+        const out = refreshFromSource(live, fresh);
 
-    expect(out.abilities.system).toEqual(fresh.abilities.system);
-    expect(out.battleData.attacks).toEqual(fresh.battleData.attacks);
-    expect(out.combatStats.currentHp).toBe(3);
-  });
+        expect(out.abilities.system).toEqual(fresh.abilities.system);
+        expect(out.battleData.attacks).toEqual(fresh.battleData.attacks);
+        expect(out.combatStats.currentHp).toBe(3);
+    });
 });

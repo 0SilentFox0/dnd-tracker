@@ -1,112 +1,179 @@
-import { immuneTo } from "./each";
-import type { EffectApplyInput, EffectApplyResult } from "./types";
+import { immuneTo } from './each';
+import type { EffectApplyInput, EffectApplyResult } from './types';
 
-import { ParticipantSourceType } from "@/lib/constants/battle";
-import { textRef } from "@/lib/i18n/text-ref";
-import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
-import { effectSource, upsertTimedEffect } from "@/lib/utils/abilities/engine/effects/timed-effects";
-import type { Effect } from "@/lib/utils/abilities/schema";
-import { seg, type Segment } from "@/lib/utils/abilities/segments";
-import type { LogLine } from "@/types/text";
+import { ParticipantSourceType } from '@/lib/constants/battle';
+import { textRef } from '@/lib/i18n/text-ref';
+import {
+    findParticipant,
+    isActive,
+    replaceParticipant,
+} from '@/lib/utils/abilities/engine/core/participants';
+import {
+    effectSource,
+    upsertTimedEffect,
+} from '@/lib/utils/abilities/engine/effects/timed-effects';
+import type { Effect } from '@/lib/utils/abilities/schema';
+import { seg, type Segment } from '@/lib/utils/abilities/segments';
+import type { LogLine } from '@/types/text';
 
-type Of<K extends Effect["kind"]> = Extract<Effect, { kind: K }>;
+type Of<K extends Effect['kind']> = Extract<Effect, { kind: K }>;
 
-export function applyBerserk(input: EffectApplyInput<Of<"berserk">>): EffectApplyResult {
-  const { ability, effect, ctx } = input;
+export function applyBerserk(
+    input: EffectApplyInput<Of<'berserk'>>
+): EffectApplyResult {
+    const { ability, effect, ctx } = input;
 
-  let ps = input.participants;
+    let ps = input.participants;
 
-  const owner = findParticipant(ps, input.ownerId);
+    const owner = findParticipant(ps, input.ownerId);
 
-  const messages: LogLine[] = [];
+    const messages: LogLine[] = [];
 
-  for (const id of input.targetIds) {
-    const t = findParticipant(ps, id);
+    for (const id of input.targetIds) {
+        const t = findParticipant(ps, id);
 
-    if (!t || !isActive(t)) continue;
+        if (!t || !isActive(t)) continue;
 
-    if (t.basicInfo.sourceType === ParticipantSourceType.CHARACTER) {
-      messages.push(textRef("abilityText.log.notOnHeroes", { ability: ability.name, target: t.basicInfo.name }));
-      continue;
+        if (t.basicInfo.sourceType === ParticipantSourceType.CHARACTER) {
+            messages.push(
+                textRef('abilityText.log.notOnHeroes', {
+                    ability: ability.name,
+                    target: t.basicInfo.name,
+                })
+            );
+            continue;
+        }
+
+        if (immuneTo(ps, id, 'berserk')) {
+            messages.push(
+                textRef('abilityText.log.immune', {
+                    ability: ability.name,
+                    target: t.basicInfo.name,
+                })
+            );
+            continue;
+        }
+
+        ps = replaceParticipant(
+            ps,
+            upsertTimedEffect(
+                t,
+                {
+                    timedKey: `${ability.key}#${input.effectIndex}`,
+                    source: effectSource(owner, ability),
+                    name: ability.name,
+                    type: 'condition',
+                    rounds: effect.duration.rounds,
+                    stackable: false,
+                    effects: [
+                        { type: 'berserk', value: effect.damageBonusPercent },
+                    ],
+                },
+                ctx.round
+            )
+        );
+        messages.push(
+            textRef('abilityText.log.berserk', {
+                ability: ability.name,
+                target: t.basicInfo.name,
+                rounds: effect.duration.rounds,
+            })
+        );
     }
 
-    if (immuneTo(ps, id, "berserk")) {
-      messages.push(textRef("abilityText.log.immune", { ability: ability.name, target: t.basicInfo.name }));
-      continue;
-    }
-
-    ps = replaceParticipant(
-      ps,
-      upsertTimedEffect(
-        t,
-        {
-          timedKey: `${ability.key}#${input.effectIndex}`,
-          source: effectSource(owner, ability),
-          name: ability.name,
-          type: "condition",
-          rounds: effect.duration.rounds,
-          stackable: false,
-          effects: [{ type: "berserk", value: effect.damageBonusPercent }],
-        },
-        ctx.round,
-      ),
-    );
-    messages.push(textRef("abilityText.log.berserk", { ability: ability.name, target: t.basicInfo.name, rounds: effect.duration.rounds }));
-  }
-
-  return { participants: ps, messages };
+    return { participants: ps, messages };
 }
 
-export function applyCharm(input: EffectApplyInput<Of<"charm">>): EffectApplyResult {
-  const { ability, effect, ctx } = input;
+export function applyCharm(
+    input: EffectApplyInput<Of<'charm'>>
+): EffectApplyResult {
+    const { ability, effect, ctx } = input;
 
-  let ps = input.participants;
+    let ps = input.participants;
 
-  const owner = findParticipant(ps, input.ownerId);
+    const owner = findParticipant(ps, input.ownerId);
 
-  if (!owner) return { participants: ps, messages: [] };
+    if (!owner) return { participants: ps, messages: [] };
 
-  const messages: LogLine[] = [];
+    const messages: LogLine[] = [];
 
-  for (const id of input.targetIds) {
-    const t = findParticipant(ps, id);
+    for (const id of input.targetIds) {
+        const t = findParticipant(ps, id);
 
-    if (!t || !isActive(t)) continue;
+        if (!t || !isActive(t)) continue;
 
-    if (t.basicInfo.sourceType === ParticipantSourceType.CHARACTER) {
-      messages.push(textRef("abilityText.log.notOnHeroes", { ability: ability.name, target: t.basicInfo.name }));
-      continue;
+        if (t.basicInfo.sourceType === ParticipantSourceType.CHARACTER) {
+            messages.push(
+                textRef('abilityText.log.notOnHeroes', {
+                    ability: ability.name,
+                    target: t.basicInfo.name,
+                })
+            );
+            continue;
+        }
+
+        if (immuneTo(ps, id, 'charm')) {
+            messages.push(
+                textRef('abilityText.log.immune', {
+                    ability: ability.name,
+                    target: t.basicInfo.name,
+                })
+            );
+            continue;
+        }
+
+        if (
+            t.basicInfo.side === owner.basicInfo.side ||
+            t.battleData.activeEffects.some((e) => e.charmOrigin)
+        )
+            continue;
+
+        const charmed = upsertTimedEffect(
+            t,
+            {
+                timedKey: `${ability.key}#${input.effectIndex}`,
+                source: effectSource(owner, ability),
+                name: ability.name,
+                type: 'condition',
+                rounds: effect.duration.rounds,
+                stackable: false,
+                effects: [{ type: 'charm', value: 1 }],
+                charmOrigin: {
+                    side: t.basicInfo.side,
+                    controlledBy: t.basicInfo.controlledBy,
+                },
+            },
+            ctx.round
+        );
+
+        ps = replaceParticipant(ps, {
+            ...charmed,
+            basicInfo: {
+                ...charmed.basicInfo,
+                side: owner.basicInfo.side,
+                controlledBy: owner.basicInfo.controlledBy,
+            },
+        });
+        messages.push(
+            textRef('abilityText.log.charm', {
+                ability: ability.name,
+                target: t.basicInfo.name,
+                owner: owner.basicInfo.name,
+                rounds: effect.duration.rounds,
+            })
+        );
     }
 
-    if (immuneTo(ps, id, "charm")) {
-      messages.push(textRef("abilityText.log.immune", { ability: ability.name, target: t.basicInfo.name }));
-      continue;
-    }
-
-    if (t.basicInfo.side === owner.basicInfo.side || t.battleData.activeEffects.some((e) => e.charmOrigin)) continue;
-
-    const charmed = upsertTimedEffect(
-      t,
-      {
-        timedKey: `${ability.key}#${input.effectIndex}`,
-        source: effectSource(owner, ability),
-        name: ability.name,
-        type: "condition",
-        rounds: effect.duration.rounds,
-        stackable: false,
-        effects: [{ type: "charm", value: 1 }],
-        charmOrigin: { side: t.basicInfo.side, controlledBy: t.basicInfo.controlledBy },
-      },
-      ctx.round,
-    );
-
-    ps = replaceParticipant(ps, { ...charmed, basicInfo: { ...charmed.basicInfo, side: owner.basicInfo.side, controlledBy: owner.basicInfo.controlledBy } });
-    messages.push(textRef("abilityText.log.charm", { ability: ability.name, target: t.basicInfo.name, owner: owner.basicInfo.name, rounds: effect.duration.rounds }));
-  }
-
-  return { participants: ps, messages };
+    return { participants: ps, messages };
 }
 
-export const describeBerserk = (e: Of<"berserk">): Segment[] => [seg("summary.effects.berserk", { percent: e.damageBonusPercent, rounds: e.duration?.rounds ?? "?" })];
+export const describeBerserk = (e: Of<'berserk'>): Segment[] => [
+    seg('summary.effects.berserk', {
+        percent: e.damageBonusPercent,
+        rounds: e.duration?.rounds ?? '?',
+    }),
+];
 
-export const describeCharm = (e: Of<"charm">): Segment[] => [seg("summary.effects.charm", { rounds: e.duration?.rounds ?? "?" })];
+export const describeCharm = (e: Of<'charm'>): Segment[] => [
+    seg('summary.effects.charm', { rounds: e.duration?.rounds ?? '?' }),
+];

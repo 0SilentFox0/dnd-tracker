@@ -1,1 +1,1 @@
-export { SkillMainSkillSection } from "./SkillMainSkillSection";
+export { SkillMainSkillSection } from './SkillMainSkillSection';

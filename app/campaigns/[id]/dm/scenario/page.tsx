@@ -1,22 +1,32 @@
-import { ScenarioIndexPageClient } from "./page-client";
+import { ScenarioIndexPageClient } from './page-client';
 
-import { scenarioKeys } from "@/lib/hooks/scenario/keys";
-import { PrefetchedQuery } from "@/lib/providers/prefetched-query";
-import { requireCampaignDMOrDemo } from "@/lib/server/campaigns/access";
-import { listScenarioHandler } from "@/lib/server/scenario/read-scenario";
-import { readOkJson } from "@/lib/utils/api/read-json";
-import type { ScenarioPageSummary } from "@/types/scenario";
+import { scenarioKeys } from '@/lib/hooks/scenario/keys';
+import { PrefetchedQuery } from '@/lib/providers/prefetched-query';
+import { requireCampaignDMOrDemo } from '@/lib/server/campaigns/access';
+import { listScenarioHandler } from '@/lib/server/scenario/read-scenario';
+import { readOkJson } from '@/lib/utils/api/read-json';
+import type { ScenarioPageSummary } from '@/types/scenario';
 
-export default async function DMScenarioPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+export default async function DMScenarioPage({
+    params,
+}: {
+    params: Promise<{ id: string }>;
+}) {
+    const { id } = await params;
 
-  const { campaign, isDemo } = await requireCampaignDMOrDemo(id);
+    const { campaign, isDemo } = await requireCampaignDMOrDemo(id);
 
-  const pages = await readOkJson<ScenarioPageSummary[]>(await listScenarioHandler(id));
+    const pages = await readOkJson<ScenarioPageSummary[]>(
+        await listScenarioHandler(id)
+    );
 
-  return (
-    <PrefetchedQuery queryKey={scenarioKeys.list(id)} data={pages}>
-      <ScenarioIndexPageClient campaignId={id} campaignName={campaign.name} canEdit={!isDemo} />
-    </PrefetchedQuery>
-  );
+    return (
+        <PrefetchedQuery queryKey={scenarioKeys.list(id)} data={pages}>
+            <ScenarioIndexPageClient
+                campaignId={id}
+                campaignName={campaign.name}
+                canEdit={!isDemo}
+            />
+        </PrefetchedQuery>
+    );
 }

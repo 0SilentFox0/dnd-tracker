@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import { useCallback, useState } from "react";
+import { useCallback, useState } from 'react';
 
 export function usePaletteToggle() {
-  const [active, setActive] = useState(false);
+    const [active, setActive] = useState(false);
 
-  const close = useCallback(() => setActive(false), []);
+    const close = useCallback(() => setActive(false), []);
 
-  const toggle = useCallback(() => setActive((o) => !o), []);
+    const toggle = useCallback(() => setActive((o) => !o), []);
 
-  return { active, toggle, close };
+    return { active, toggle, close };
 }

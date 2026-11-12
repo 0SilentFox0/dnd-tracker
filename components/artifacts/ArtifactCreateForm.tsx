@@ -1,65 +1,65 @@
-"use client";
+'use client';
 
-import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
-import { ArtifactForm } from "./ArtifactForm";
+import { ArtifactForm } from './ArtifactForm';
 
-import { ArtifactRarity, ArtifactSlot } from "@/lib/constants/artifacts";
-import { useCreateArtifact } from "@/lib/hooks/artifacts";
-import type { ArtifactSetOption } from "@/types/artifacts";
+import { ArtifactRarity, ArtifactSlot } from '@/lib/constants/artifacts';
+import { useCreateArtifact } from '@/lib/hooks/artifacts';
+import type { ArtifactSetOption } from '@/types/artifacts';
 
 interface ArtifactCreateFormProps {
-  campaignId: string;
-  artifactSets: ArtifactSetOption[];
+    campaignId: string;
+    artifactSets: ArtifactSetOption[];
 }
 
 export function ArtifactCreateForm({
-  campaignId,
-  artifactSets,
+    campaignId,
+    artifactSets,
 }: ArtifactCreateFormProps) {
-  const t = useTranslations("artifacts.form");
+    const t = useTranslations('artifacts.form');
 
-  const tc = useTranslations("common.actions");
+    const tc = useTranslations('common.actions');
 
-  const router = useRouter();
+    const router = useRouter();
 
-  const create = useCreateArtifact(campaignId);
+    const create = useCreateArtifact(campaignId);
 
-  return (
-    <ArtifactForm
-      campaignId={campaignId}
-      artifactSets={artifactSets}
-      mode="create"
-      labels={{
-        title: t("createTitle"),
-        description: t("createDescription"),
-        submit: t("createSubmit"),
-        saving: tc("creating"),
-        iconHint: t("createIconHint", { bucket: "artifact-icons" }),
-      }}
-      cancelHref={`/campaigns/${campaignId}/dm/artifacts`}
-      initial={{
-        name: "",
-        description: "",
-        rarity: ArtifactRarity.COMMON,
-        slot: ArtifactSlot.ITEM,
-        icon: "",
-        setId: null,
-        abilities: [],
-        abilityIssues: [],
-      }}
-      actions={{
-        onSubmit: async (payload) => {
-          await create.mutateAsync({
-            ...payload,
-            description: payload.description ?? undefined,
-            setId: payload.setId ?? undefined,
-          });
-          router.push(`/campaigns/${campaignId}/dm/artifacts`);
-          router.refresh();
-        },
-      }}
-    />
-  );
+    return (
+        <ArtifactForm
+            campaignId={campaignId}
+            artifactSets={artifactSets}
+            mode="create"
+            labels={{
+                title: t('createTitle'),
+                description: t('createDescription'),
+                submit: t('createSubmit'),
+                saving: tc('creating'),
+                iconHint: t('createIconHint', { bucket: 'artifact-icons' }),
+            }}
+            cancelHref={`/campaigns/${campaignId}/dm/artifacts`}
+            initial={{
+                name: '',
+                description: '',
+                rarity: ArtifactRarity.COMMON,
+                slot: ArtifactSlot.ITEM,
+                icon: '',
+                setId: null,
+                abilities: [],
+                abilityIssues: [],
+            }}
+            actions={{
+                onSubmit: async (payload) => {
+                    await create.mutateAsync({
+                        ...payload,
+                        description: payload.description ?? undefined,
+                        setId: payload.setId ?? undefined,
+                    });
+                    router.push(`/campaigns/${campaignId}/dm/artifacts`);
+                    router.refresh();
+                },
+            }}
+        />
+    );
 }

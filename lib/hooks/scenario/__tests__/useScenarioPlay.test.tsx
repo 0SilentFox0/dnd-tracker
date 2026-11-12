@@ -1,208 +1,333 @@
 // @vitest-environment happy-dom
-import type { ReactNode } from "react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { act, renderHook, waitFor } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { ReactNode } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { act, renderHook, waitFor } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import * as battlesApi from "@/lib/api/battles";
-import * as decksApi from "@/lib/api/decks";
-import { battleKeys } from "@/lib/hooks/battles";
-import { useScenarioPlay } from "@/lib/hooks/scenario";
-import type { ScenarioContent, ScenarioRow } from "@/types/scenario";
-import type { ShowState } from "@/types/show";
+import * as battlesApi from '@/lib/api/battles';
+import * as decksApi from '@/lib/api/decks';
+import { battleKeys } from '@/lib/hooks/battles';
+import { useScenarioPlay } from '@/lib/hooks/scenario';
+import type { ScenarioContent, ScenarioRow } from '@/types/scenario';
+import type { ShowState } from '@/types/show';
 
 const send = vi.fn(async () => true);
 
 let show: ShowState | null = null;
 
-vi.mock("@/lib/api/battles", () => ({ getBattleBriefs: vi.fn(async () => []), startBattle: vi.fn(async () => ({})) }));
-vi.mock("@/lib/api/decks", () => ({ getDeck: vi.fn(async () => ({ id: "d1", slides: [{ id: "sl1", imageUrl: "https://x/a.webp" }] })) }));
-vi.mock("@/lib/hooks/common", async (importOriginal) => ({ ...(await importOriginal<typeof import("@/lib/hooks/common")>()), useNotify: () => vi.fn() }));
-vi.mock("@/lib/hooks/show", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("@/lib/hooks/show")>()),
-  usePusherShowSync: () => undefined,
-  useShowState: () => ({ show }),
-  useShowControl: () => ({ send, pending: false }),
+vi.mock('@/lib/api/battles', () => ({
+    getBattleBriefs: vi.fn(async () => []),
+    startBattle: vi.fn(async () => ({})),
+}));
+vi.mock('@/lib/api/decks', () => ({
+    getDeck: vi.fn(async () => ({
+        id: 'd1',
+        slides: [{ id: 'sl1', imageUrl: 'https://x/a.webp' }],
+    })),
+}));
+vi.mock('@/lib/hooks/common', async (importOriginal) => ({
+    ...(await importOriginal<typeof import('@/lib/hooks/common')>()),
+    useNotify: () => vi.fn(),
+}));
+vi.mock('@/lib/hooks/show', async (importOriginal) => ({
+    ...(await importOriginal<typeof import('@/lib/hooks/show')>()),
+    usePusherShowSync: () => undefined,
+    useShowState: () => ({ show }),
+    useShowControl: () => ({ send, pending: false }),
 }));
 
-const p = { type: "doc" as const, content: [] };
+const p = { type: 'doc' as const, content: [] };
 
-const slideRow: ScenarioRow = { id: "r1", story: p, notes: p, slide: { deckId: "d1", slideId: "sl1" } };
+const slideRow: ScenarioRow = {
+    id: 'r1',
+    story: p,
+    notes: p,
+    slide: { deckId: 'd1', slideId: 'sl1' },
+};
 
-const battleRow: ScenarioRow = { id: "r2", story: p, notes: p, battleId: "b1" };
+const battleRow: ScenarioRow = { id: 'r2', story: p, notes: p, battleId: 'b1' };
 
-const content: ScenarioContent = { legend: [], sections: [{ id: "s1", title: "S", played: false, rows: [slideRow, battleRow] }] };
+const content: ScenarioContent = {
+    legend: [],
+    sections: [
+        { id: 's1', title: 'S', played: false, rows: [slideRow, battleRow] },
+    ],
+};
 
-const brief = (status: string) => ({ id: "b1", name: "Засідка", status });
+const brief = (status: string) => ({ id: 'b1', name: 'Засідка', status });
 
-function setup(status = "prepared", c: ScenarioContent = content) {
-  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+function setup(status = 'prepared', c: ScenarioContent = content) {
+    const client = new QueryClient({
+        defaultOptions: { queries: { retry: false } },
+    });
 
-  client.setQueryData(battleKeys.briefs("c"), [brief(status)]);
+    client.setQueryData(battleKeys.briefs('c'), [brief(status)]);
 
-  const wrapper = ({ children }: { children: ReactNode }) => <QueryClientProvider client={client}>{children}</QueryClientProvider>;
+    const wrapper = ({ children }: { children: ReactNode }) => (
+        <QueryClientProvider client={client}>{children}</QueryClientProvider>
+    );
 
-  return { client, ...renderHook(() => useScenarioPlay("c", c), { wrapper }) };
+    return {
+        client,
+        ...renderHook(() => useScenarioPlay('c', c), { wrapper }),
+    };
 }
 
 beforeEach(() => {
-  vi.clearAllMocks();
-  show = null;
+    vi.clearAllMocks();
+    show = null;
 });
 
-describe("useScenarioPlay", () => {
-  it("showSlide шле open для готового рядка", async () => {
-    const { result } = setup();
+describe('useScenarioPlay', () => {
+    it('showSlide шле open для готового рядка', async () => {
+        const { result } = setup();
 
-    await waitFor(() => expect(result.current.lookup.decks.get("d1")).toBeTruthy());
-    act(() => result.current.showSlide(slideRow));
+        await waitFor(() =>
+            expect(result.current.lookup.decks.get('d1')).toBeTruthy()
+        );
+        act(() => result.current.showSlide(slideRow));
 
-    expect(send).toHaveBeenCalledWith({ action: "open", deckId: "d1", slideId: "sl1" });
-  });
-
-  it("readOnly (демо): showSlide і showMarker нічого не шлють", async () => {
-    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-
-    const { result } = renderHook(() => useScenarioPlay("c", content, true, { readOnly: true }), { wrapper: ({ children }: { children: ReactNode }) => <QueryClientProvider client={client}>{children}</QueryClientProvider> });
-
-    await waitFor(() => expect(result.current.lookup.decks.get("d1")).toBeTruthy());
-    act(() => {
-      result.current.showSlide(slideRow);
-      result.current.showMarker({ mapId: "w", markerId: "m" });
+        expect(send).toHaveBeenCalledWith({
+            action: 'open',
+            deckId: 'd1',
+            slideId: 'sl1',
+        });
     });
 
-    expect(result.current.readOnly).toBe(true);
-    expect(send).not.toHaveBeenCalled();
-  });
+    it('readOnly (демо): showSlide і showMarker нічого не шлють', async () => {
+        const client = new QueryClient({
+            defaultOptions: { queries: { retry: false } },
+        });
 
-  it("showSlide пропускає вже активний слайд", async () => {
-    show = { deckId: "d1", deckTitle: "Д", slide: { id: "sl1", imageUrl: "https://x/a.webp" }, nextImageUrl: null, audio: null, seq: 1 };
+        const { result } = renderHook(
+            () => useScenarioPlay('c', content, true, { readOnly: true }),
+            {
+                wrapper: ({ children }: { children: ReactNode }) => (
+                    <QueryClientProvider client={client}>
+                        {children}
+                    </QueryClientProvider>
+                ),
+            }
+        );
 
-    const { result } = setup();
+        await waitFor(() =>
+            expect(result.current.lookup.decks.get('d1')).toBeTruthy()
+        );
+        act(() => {
+            result.current.showSlide(slideRow);
+            result.current.showMarker({ mapId: 'w', markerId: 'm' });
+        });
 
-    await waitFor(() => expect(result.current.lookup.decks.get("d1")).toBeTruthy());
-    act(() => result.current.showSlide(slideRow));
+        expect(result.current.readOnly).toBe(true);
+        expect(send).not.toHaveBeenCalled();
+    });
 
-    expect(send).not.toHaveBeenCalled();
-  });
+    it('showSlide пропускає вже активний слайд', async () => {
+        show = {
+            deckId: 'd1',
+            deckTitle: 'Д',
+            slide: { id: 'sl1', imageUrl: 'https://x/a.webp' },
+            nextImageUrl: null,
+            audio: null,
+            seq: 1,
+        };
 
-  it("runBattle на prepared: спершу start, потім виклик у показі", async () => {
-    const { result } = setup("prepared");
+        const { result } = setup();
 
-    await act(async () => result.current.runBattle(battleRow));
+        await waitFor(() =>
+            expect(result.current.lookup.decks.get('d1')).toBeTruthy()
+        );
+        act(() => result.current.showSlide(slideRow));
 
-    await waitFor(() => expect(send).toHaveBeenCalledWith({ action: "battle", battleId: "b1" }));
-    expect(battlesApi.startBattle).toHaveBeenCalledWith("c", "b1", {});
-    expect(vi.mocked(battlesApi.startBattle).mock.invocationCallOrder[0]).toBeLessThan(send.mock.invocationCallOrder[0]);
-  });
+        expect(send).not.toHaveBeenCalled();
+    });
 
-  it("runBattle на active: лише виклик, без start", async () => {
-    const { result } = setup("active");
+    it('runBattle на prepared: спершу start, потім виклик у показі', async () => {
+        const { result } = setup('prepared');
 
-    await act(async () => result.current.runBattle(battleRow));
+        await act(async () => result.current.runBattle(battleRow));
 
-    await waitFor(() => expect(send).toHaveBeenCalledWith({ action: "battle", battleId: "b1" }));
-    expect(battlesApi.startBattle).not.toHaveBeenCalled();
-  });
+        await waitFor(() =>
+            expect(send).toHaveBeenCalledWith({
+                action: 'battle',
+                battleId: 'b1',
+            })
+        );
+        expect(battlesApi.startBattle).toHaveBeenCalledWith('c', 'b1', {});
+        expect(
+            vi.mocked(battlesApi.startBattle).mock.invocationCallOrder[0]
+        ).toBeLessThan(send.mock.invocationCallOrder[0]);
+    });
 
-  it("кеш уже active, хоча рядок бачив prepared: start не повторюється", async () => {
-    const { result, client } = setup("prepared");
+    it('runBattle на active: лише виклик, без start', async () => {
+        const { result } = setup('active');
 
-    client.setQueryData(battleKeys.briefs("c"), [brief("active")]);
-    await act(async () => result.current.runBattle(battleRow));
+        await act(async () => result.current.runBattle(battleRow));
 
-    expect(battlesApi.startBattle).not.toHaveBeenCalled();
-  });
+        await waitFor(() =>
+            expect(send).toHaveBeenCalledWith({
+                action: 'battle',
+                battleId: 'b1',
+            })
+        );
+        expect(battlesApi.startBattle).not.toHaveBeenCalled();
+    });
 
-  it("enabled=false: ні списку боїв, ні наборів не вантажимо", async () => {
-    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    it('кеш уже active, хоча рядок бачив prepared: start не повторюється', async () => {
+        const { result, client } = setup('prepared');
 
-    const wrapper = ({ children }: { children: ReactNode }) => <QueryClientProvider client={client}>{children}</QueryClientProvider>;
+        client.setQueryData(battleKeys.briefs('c'), [brief('active')]);
+        await act(async () => result.current.runBattle(battleRow));
 
-    renderHook(() => useScenarioPlay("c", content, false), { wrapper });
-    await Promise.resolve();
+        expect(battlesApi.startBattle).not.toHaveBeenCalled();
+    });
 
-    expect(battlesApi.getBattleBriefs).not.toHaveBeenCalled();
-    expect(decksApi.getDeck).not.toHaveBeenCalled();
-  });
+    it('enabled=false: ні списку боїв, ні наборів не вантажимо', async () => {
+        const client = new QueryClient({
+            defaultOptions: { queries: { retry: false } },
+        });
 
-  it("без прив'язок до боїв список боїв не вантажиться", async () => {
-    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+        const wrapper = ({ children }: { children: ReactNode }) => (
+            <QueryClientProvider client={client}>
+                {children}
+            </QueryClientProvider>
+        );
 
-    const wrapper = ({ children }: { children: ReactNode }) => <QueryClientProvider client={client}>{children}</QueryClientProvider>;
+        renderHook(() => useScenarioPlay('c', content, false), { wrapper });
+        await Promise.resolve();
 
-    renderHook(() => useScenarioPlay("c", { legend: [], sections: [{ id: "s", title: "S", played: false, rows: [slideRow] }] }), { wrapper });
-    await waitFor(() => expect(decksApi.getDeck).toHaveBeenCalled());
+        expect(battlesApi.getBattleBriefs).not.toHaveBeenCalled();
+        expect(decksApi.getDeck).not.toHaveBeenCalled();
+    });
 
-    expect(battlesApi.getBattleBriefs).not.toHaveBeenCalled();
-  });
+    it("без прив'язок до боїв список боїв не вантажиться", async () => {
+        const client = new QueryClient({
+            defaultOptions: { queries: { retry: false } },
+        });
+
+        const wrapper = ({ children }: { children: ReactNode }) => (
+            <QueryClientProvider client={client}>
+                {children}
+            </QueryClientProvider>
+        );
+
+        renderHook(
+            () =>
+                useScenarioPlay('c', {
+                    legend: [],
+                    sections: [
+                        {
+                            id: 's',
+                            title: 'S',
+                            played: false,
+                            rows: [slideRow],
+                        },
+                    ],
+                }),
+            { wrapper }
+        );
+        await waitFor(() => expect(decksApi.getDeck).toHaveBeenCalled());
+
+        expect(battlesApi.getBattleBriefs).not.toHaveBeenCalled();
+    });
 });
 
-describe("useScenarioPlay — наступний рядок і заглушка", () => {
-  const shown = (over: Partial<ShowState> = {}): ShowState => ({ deckId: "d1", deckTitle: "Д", slide: { id: "sl1", imageUrl: "https://x/a.webp" }, nextImageUrl: null, audio: null, seq: 1, ...over });
-
-  it("showSlide поточного рядка під заглушкою шле open (сервер знімає заглушку)", async () => {
-    show = shown({ curtain: true });
-
-    const { result } = setup();
-
-    await waitFor(() => expect(result.current.lookup.decks.get("d1")).toBeTruthy());
-    act(() => result.current.showSlide(slideRow));
-
-    expect(send).toHaveBeenCalledWith({ action: "open", deckId: "d1", slideId: "sl1" });
-  });
-
-  it("nextRow: без показу — перший рядок; рядок на екрані — далі нічого; під заглушкою — поточний", async () => {
-    const { result, rerender } = setup();
-
-    await waitFor(() => expect(result.current.nextRow).toBe(slideRow));
-
-    show = shown();
-    rerender();
-    expect(result.current.nextRow).toBeNull();
-    expect(result.current.currentRow).toBe(slideRow);
-
-    show = shown({ curtain: true });
-    rerender();
-    expect(result.current.nextRow).toBe(slideRow);
-  });
-
-  describe("трек розділу", () => {
-    const withTrack: ScenarioContent = { legend: [], sections: [{ ...content.sections[0], trackId: "t1" }] };
-
-    const play = { action: "audio", command: { action: "play", trackId: "t1" } };
-
-    it("showSlide після open вмикає трек розділу", async () => {
-      const { result } = setup("prepared", withTrack);
-
-      await waitFor(() => expect(result.current.lookup.decks.get("d1")).toBeTruthy());
-      act(() => result.current.showSlide(slideRow));
-
-      await waitFor(() => expect(send).toHaveBeenCalledWith(play));
-      expect(send.mock.calls[0]).toEqual([{ action: "open", deckId: "d1", slideId: "sl1" }]);
+describe('useScenarioPlay — наступний рядок і заглушка', () => {
+    const shown = (over: Partial<ShowState> = {}): ShowState => ({
+        deckId: 'd1',
+        deckTitle: 'Д',
+        slide: { id: 'sl1', imageUrl: 'https://x/a.webp' },
+        nextImageUrl: null,
+        audio: null,
+        seq: 1,
+        ...over,
     });
 
-    it("слайд зі своїм треком — трек розділу не вмикається", async () => {
-      vi.mocked(decksApi.getDeck).mockResolvedValueOnce({ id: "d1", slides: [{ id: "sl1", imageUrl: "https://x/a.webp", trackId: "own" }] } as never);
+    it('showSlide поточного рядка під заглушкою шле open (сервер знімає заглушку)', async () => {
+        show = shown({ curtain: true });
 
-      const { result } = setup("prepared", withTrack);
+        const { result } = setup();
 
-      await waitFor(() => expect(result.current.lookup.decks.get("d1")).toBeTruthy());
-      act(() => result.current.showSlide(slideRow));
+        await waitFor(() =>
+            expect(result.current.lookup.decks.get('d1')).toBeTruthy()
+        );
+        act(() => result.current.showSlide(slideRow));
 
-      await waitFor(() => expect(send).toHaveBeenCalledTimes(1));
-      expect(send).not.toHaveBeenCalledWith(play);
+        expect(send).toHaveBeenCalledWith({
+            action: 'open',
+            deckId: 'd1',
+            slideId: 'sl1',
+        });
     });
 
-    it("playSectionTrack вмикає трек без слайда; без треку або в демо — нічого", () => {
-      const { result } = setup("prepared", withTrack);
+    it('nextRow: без показу — перший рядок; рядок на екрані — далі нічого; під заглушкою — поточний', async () => {
+        const { result, rerender } = setup();
 
-      act(() => result.current.playSectionTrack(withTrack.sections[0]));
-      expect(send).toHaveBeenCalledWith(play);
+        await waitFor(() => expect(result.current.nextRow).toBe(slideRow));
 
-      send.mockClear();
-      act(() => result.current.playSectionTrack(content.sections[0]));
-      expect(send).not.toHaveBeenCalled();
+        show = shown();
+        rerender();
+        expect(result.current.nextRow).toBeNull();
+        expect(result.current.currentRow).toBe(slideRow);
+
+        show = shown({ curtain: true });
+        rerender();
+        expect(result.current.nextRow).toBe(slideRow);
     });
-  });
+
+    describe('трек розділу', () => {
+        const withTrack: ScenarioContent = {
+            legend: [],
+            sections: [{ ...content.sections[0], trackId: 't1' }],
+        };
+
+        const play = {
+            action: 'audio',
+            command: { action: 'play', trackId: 't1' },
+        };
+
+        it('showSlide після open вмикає трек розділу', async () => {
+            const { result } = setup('prepared', withTrack);
+
+            await waitFor(() =>
+                expect(result.current.lookup.decks.get('d1')).toBeTruthy()
+            );
+            act(() => result.current.showSlide(slideRow));
+
+            await waitFor(() => expect(send).toHaveBeenCalledWith(play));
+            expect(send.mock.calls[0]).toEqual([
+                { action: 'open', deckId: 'd1', slideId: 'sl1' },
+            ]);
+        });
+
+        it('слайд зі своїм треком — трек розділу не вмикається', async () => {
+            vi.mocked(decksApi.getDeck).mockResolvedValueOnce({
+                id: 'd1',
+                slides: [
+                    { id: 'sl1', imageUrl: 'https://x/a.webp', trackId: 'own' },
+                ],
+            } as never);
+
+            const { result } = setup('prepared', withTrack);
+
+            await waitFor(() =>
+                expect(result.current.lookup.decks.get('d1')).toBeTruthy()
+            );
+            act(() => result.current.showSlide(slideRow));
+
+            await waitFor(() => expect(send).toHaveBeenCalledTimes(1));
+            expect(send).not.toHaveBeenCalledWith(play);
+        });
+
+        it('playSectionTrack вмикає трек без слайда; без треку або в демо — нічого', () => {
+            const { result } = setup('prepared', withTrack);
+
+            act(() => result.current.playSectionTrack(withTrack.sections[0]));
+            expect(send).toHaveBeenCalledWith(play);
+
+            send.mockClear();
+            act(() => result.current.playSectionTrack(content.sections[0]));
+            expect(send).not.toHaveBeenCalled();
+        });
+    });
 });

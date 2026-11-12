@@ -1,38 +1,43 @@
-"use client";
+'use client';
 
-import { useTranslations } from "next-intl";
+import { useTranslations } from 'next-intl';
 
-import { useProfile } from "../ProfileContext";
+import { useProfile } from '../ProfileContext';
 
-import { HudPill } from "@/components/hud/page";
-import { systemUiOf } from "@/components/systems";
-import { RULE_SYSTEM_REGISTRY } from "@/lib/utils/rules/systems";
+import { HudPill } from '@/components/hud/page';
+import { systemUiOf } from '@/components/systems';
+import { RULE_SYSTEM_REGISTRY } from '@/lib/utils/rules/systems';
 
 export function RestBadges() {
-  const t = useTranslations("rest.badges");
+    const t = useTranslations('rest.badges');
 
-  const { sheet } = useProfile();
+    const { sheet } = useProfile();
 
-  const rest = sheet.rest;
+    const rest = sheet.rest;
 
-  const system = RULE_SYSTEM_REGISTRY[sheet.system];
+    const system = RULE_SYSTEM_REGISTRY[sheet.system];
 
-  const Badges = systemUiOf(sheet.system).RestBadges;
+    const Badges = systemUiOf(sheet.system).RestBadges;
 
-  if (!rest) return null;
+    if (!rest) return null;
 
-  return (
-    <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs">
-      {rest.dead && <HudPill tone="silver">{t("dead")}</HudPill>}
-      {Badges && <Badges sheet={sheet} />}
-      {system.rest.kinds && rest.shortRestOpen && <HudPill tone="gold">{t("shortRest")}</HudPill>}
-      {rest.xp && (
-        <span className="text-hud-muted">
-          {t("xp", { value: rest.xp.value })}
-          {rest.xp.next !== null && t("xpNext", { next: rest.xp.next })}
-          {rest.xp.levelUp && <b className="ml-1 text-hud-gold">{t("levelUp")}</b>}
-        </span>
-      )}
-    </div>
-  );
+    return (
+        <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs">
+            {rest.dead && <HudPill tone="silver">{t('dead')}</HudPill>}
+            {Badges && <Badges sheet={sheet} />}
+            {system.rest.kinds && rest.shortRestOpen && (
+                <HudPill tone="gold">{t('shortRest')}</HudPill>
+            )}
+            {rest.xp && (
+                <span className="text-hud-muted">
+                    {t('xp', { value: rest.xp.value })}
+                    {rest.xp.next !== null &&
+                        t('xpNext', { next: rest.xp.next })}
+                    {rest.xp.levelUp && (
+                        <b className="ml-1 text-hud-gold">{t('levelUp')}</b>
+                    )}
+                </span>
+            )}
+        </div>
+    );
 }

@@ -1,3 +1,3 @@
 export const trackKeys = {
-  list: (campaignId: string) => ["tracks", campaignId] as const,
+    list: (campaignId: string) => ['tracks', campaignId] as const,
 };

@@ -1,52 +1,101 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
-import { makeParticipant, resolved, seq } from "./fixtures";
+import { makeParticipant, resolved, seq } from './fixtures';
 
-import { AttackType, ParticipantSide } from "@/lib/constants/battle";
-import { resolveAmount } from "@/lib/utils/abilities/engine/core/amount";
-import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
-import { averageAttackDamage } from "@/lib/utils/battle/damage/average";
-import { DEFAULT_RULES } from "@/lib/utils/rules";
-import type { AbilityEvent } from "@/types/abilities";
-import type { BattleAttack } from "@/types/battle";
+import { AttackType, ParticipantSide } from '@/lib/constants/battle';
+import { resolveAmount } from '@/lib/utils/abilities/engine/core/amount';
+import { runAbilities } from '@/lib/utils/abilities/engine/core/run-abilities';
+import { averageAttackDamage } from '@/lib/utils/battle/damage/average';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
+import type { AbilityEvent } from '@/types/abilities';
+import type { BattleAttack } from '@/types/battle';
 
-const sword: BattleAttack = { id: "sw", name: "Меч", type: AttackType.MELEE, attackBonus: 5, damageDice: "2d6", damageType: "slashing" };
-
-const withAttack = (id: string, abilities = [] as ReturnType<typeof resolved>[]) => {
-  const p = makeParticipant({ id, abilities });
-
-  return { ...p, battleData: { ...p.battleData, attacks: [sword] } };
+const sword: BattleAttack = {
+    id: 'sw',
+    name: 'Меч',
+    type: AttackType.MELEE,
+    attackBonus: 5,
+    damageDice: '2d6',
+    damageType: 'slashing',
 };
 
-describe("percentOf ownerAttack", () => {
-  const owner = withAttack("h");
+const withAttack = (
+    id: string,
+    abilities = [] as ReturnType<typeof resolved>[]
+) => {
+    const p = makeParticipant({ id, abilities });
 
-  const amount = { percentOf: "ownerAttack" as const, value: 50 };
+    return { ...p, battleData: { ...p.battleData, attacks: [sword] } };
+};
 
-  it("is a share of the average primary attack", () => {
-    const total = averageAttackDamage(owner, sword, [owner]).total;
+describe('percentOf ownerAttack', () => {
+    const owner = withAttack('h');
 
-    expect(total).toBeGreaterThan(0);
-    expect(resolveAmount(amount, { owner, rng: seq(0) })).toBe(Math.floor(total / 2));
-  });
+    const amount = { percentOf: 'ownerAttack' as const, value: 50 };
 
-  it("is 0 without attacks", () => {
-    expect(resolveAmount(amount, { owner: { ...owner, battleData: { ...owner.battleData, attacks: [] } }, rng: seq(0) })).toBe(0);
-  });
+    it('is a share of the average primary attack', () => {
+        const total = averageAttackDamage(owner, sword, [owner]).total;
 
-  it("dot stores the resolved per-round damage", () => {
-    const dot = resolved({ trigger: { event: "hit", role: "attacker" }, effects: [{ kind: "dot", damagePerRound: amount, damageType: "bleed", duration: { rounds: 2 }, target: "eventTarget" }] });
+        expect(total).toBeGreaterThan(0);
+        expect(resolveAmount(amount, { owner, rng: seq(0) })).toBe(
+            Math.floor(total / 2)
+        );
+    });
 
-    const owner = withAttack("h", [dot]);
+    it('is 0 without attacks', () => {
+        expect(
+            resolveAmount(amount, {
+                owner: {
+                    ...owner,
+                    battleData: { ...owner.battleData, attacks: [] },
+                },
+                rng: seq(0),
+            })
+        ).toBe(0);
+    });
 
-    const expected = Math.floor(averageAttackDamage(owner, sword, [owner]).total / 2);
+    it('dot stores the resolved per-round damage', () => {
+        const dot = resolved({
+            trigger: { event: 'hit', role: 'attacker' },
+            effects: [
+                {
+                    kind: 'dot',
+                    damagePerRound: amount,
+                    damageType: 'bleed',
+                    duration: { rounds: 2 },
+                    target: 'eventTarget',
+                },
+            ],
+        });
 
-    const ps = [owner, makeParticipant({ id: "e", side: ParticipantSide.ENEMY })];
+        const owner = withAttack('h', [dot]);
 
-    const event = { type: "hit", actorId: "h", targetId: "e", attackKind: "melee", damage: 5 } as AbilityEvent;
+        const expected = Math.floor(
+            averageAttackDamage(owner, sword, [owner]).total / 2
+        );
 
-    const r = runAbilities(ps, event, { rules: DEFAULT_RULES, round: 1, rng: seq(0) });
+        const ps = [
+            owner,
+            makeParticipant({ id: 'e', side: ParticipantSide.ENEMY }),
+        ];
 
-    expect(r.participants[1].battleData.activeEffects[0].dotDamage?.damagePerRound).toBe(expected);
-  });
+        const event = {
+            type: 'hit',
+            actorId: 'h',
+            targetId: 'e',
+            attackKind: 'melee',
+            damage: 5,
+        } as AbilityEvent;
+
+        const r = runAbilities(ps, event, {
+            rules: DEFAULT_RULES,
+            round: 1,
+            rng: seq(0),
+        });
+
+        expect(
+            r.participants[1].battleData.activeEffects[0].dotDamage
+                ?.damagePerRound
+        ).toBe(expected);
+    });
 });

@@ -1,158 +1,360 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
-import { ParticipantSide } from "@/lib/constants/battle";
-import { textOf } from "@/lib/i18n/test/text";
-import { enT, ukT } from "@/lib/utils/abilities/__tests__/describe-fixtures";
-import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
-import { applyEffect, describeEffect as describeEffectSegments, FLAG_FIELDS } from "@/lib/utils/abilities/registry/effects";
-import type { Effect } from "@/lib/utils/abilities/schema";
-import { renderSegments } from "@/lib/utils/abilities/segments";
-import { DEFAULT_RULES } from "@/lib/utils/rules";
+import { ParticipantSide } from '@/lib/constants/battle';
+import { textOf } from '@/lib/i18n/test/text';
+import { enT, ukT } from '@/lib/utils/abilities/__tests__/describe-fixtures';
+import {
+    makeParticipant,
+    resolved,
+    seq,
+} from '@/lib/utils/abilities/__tests__/fixtures';
+import {
+    applyEffect,
+    describeEffect as describeEffectSegments,
+    FLAG_FIELDS,
+} from '@/lib/utils/abilities/registry/effects';
+import type { Effect } from '@/lib/utils/abilities/schema';
+import { renderSegments } from '@/lib/utils/abilities/segments';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
 
 const t = await ukT();
 
-const describeEffect = (e: Parameters<typeof describeEffectSegments>[0]) => renderSegments(t, describeEffectSegments(e)).join(" · ");
+const describeEffect = (e: Parameters<typeof describeEffectSegments>[0]) =>
+    renderSegments(t, describeEffectSegments(e)).join(' · ');
 
-function run(effect: Effect, targetIds: string[], ps = [makeParticipant({ id: "o" }), makeParticipant({ id: "t", side: ParticipantSide.ENEMY })]) {
-  const ability = resolved({ trigger: { event: "hit", role: "attacker" }, effects: [effect] });
+function run(
+    effect: Effect,
+    targetIds: string[],
+    ps = [
+        makeParticipant({ id: 'o' }),
+        makeParticipant({ id: 't', side: ParticipantSide.ENEMY }),
+    ]
+) {
+    const ability = resolved({
+        trigger: { event: 'hit', role: 'attacker' },
+        effects: [effect],
+    });
 
-  return applyEffect({
-    participants: ps,
-    ability,
-    effectIndex: 0,
-    ownerId: "o",
-    effect,
-    targetIds,
-    event: { type: "hit", actorId: "o", targetId: "t", attackKind: "melee", damage: 10 },
-    ctx: { round: 1, rng: seq(0.5), rules: DEFAULT_RULES },
-  });
+    return applyEffect({
+        participants: ps,
+        ability,
+        effectIndex: 0,
+        ownerId: 'o',
+        effect,
+        targetIds,
+        event: {
+            type: 'hit',
+            actorId: 'o',
+            targetId: 't',
+            attackKind: 'melee',
+            damage: 10,
+        },
+        ctx: { round: 1, rng: seq(0.5), rules: DEFAULT_RULES },
+    });
 }
 
-describe("effects", () => {
-  it("dot кидає кубики один раз і вішає дебаф з dotDamage", () => {
-    const r = run({ kind: "dot", damagePerRound: "1d4", damageType: "bleed", duration: { rounds: 3 } }, ["t"]);
+describe('effects', () => {
+    it('dot кидає кубики один раз і вішає дебаф з dotDamage', () => {
+        const r = run(
+            {
+                kind: 'dot',
+                damagePerRound: '1d4',
+                damageType: 'bleed',
+                duration: { rounds: 3 },
+            },
+            ['t']
+        );
 
-    const t = r.participants[1];
+        const t = r.participants[1];
 
-    expect(t.battleData.activeEffects[0]).toMatchObject({ type: "debuff", duration: 3, dotDamage: { damagePerRound: 3, damageType: "bleed" } });
-    expect(textOf(r.messages[0])).toContain("🔥");
-  });
+        expect(t.battleData.activeEffects[0]).toMatchObject({
+            type: 'debuff',
+            duration: 3,
+            dotDamage: { damagePerRound: 3, damageType: 'bleed' },
+        });
+        expect(textOf(r.messages[0])).toContain('🔥');
+    });
 
-  it("статичний ефект без duration повертає actionModifiers і не змінює стан", () => {
-    const r = run({ kind: "damageBonus", filter: { kind: "melee" }, percent: 10 }, ["o"]);
+    it('статичний ефект без duration повертає actionModifiers і не змінює стан', () => {
+        const r = run(
+            { kind: 'damageBonus', filter: { kind: 'melee' }, percent: 10 },
+            ['o']
+        );
 
-    expect(r.actionModifiers).toEqual([{ participantId: "o", effect: { kind: "damageBonus", filter: { kind: "melee" }, percent: 10 } }]);
-    expect(r.participants[0].battleData.activeEffects).toHaveLength(0);
-  });
+        expect(r.actionModifiers).toEqual([
+            {
+                participantId: 'o',
+                effect: {
+                    kind: 'damageBonus',
+                    filter: { kind: 'melee' },
+                    percent: 10,
+                },
+            },
+        ]);
+        expect(r.participants[0].battleData.activeEffects).toHaveLength(0);
+    });
 
-  it("modifyStat з duration — таймовий бафф з abilityEffects", () => {
-    const r = run({ kind: "modifyStat", stat: "armor", flat: -2, duration: { rounds: 1 }, target: "eventTarget" }, ["t"]);
+    it('modifyStat з duration — таймовий бафф з abilityEffects', () => {
+        const r = run(
+            {
+                kind: 'modifyStat',
+                stat: 'armor',
+                flat: -2,
+                duration: { rounds: 1 },
+                target: 'eventTarget',
+            },
+            ['t']
+        );
 
-    expect(r.participants[1].battleData.activeEffects[0]).toMatchObject({ type: "debuff", abilityEffects: [{ kind: "modifyStat", stat: "armor", flat: -2 }] });
-  });
+        expect(r.participants[1].battleData.activeEffects[0]).toMatchObject({
+            type: 'debuff',
+            abilityEffects: [{ kind: 'modifyStat', stat: 'armor', flat: -2 }],
+        });
+    });
 
-  it("dealDamage повертає downed", () => {
-    const ps = [makeParticipant({ id: "o" }), makeParticipant({ id: "t", hp: 3, side: ParticipantSide.ENEMY })];
+    it('dealDamage повертає downed', () => {
+        const ps = [
+            makeParticipant({ id: 'o' }),
+            makeParticipant({ id: 't', hp: 3, side: ParticipantSide.ENEMY }),
+        ];
 
-    const r = run({ kind: "dealDamage", amount: 5 }, ["t"], ps);
+        const r = run({ kind: 'dealDamage', amount: 5 }, ['t'], ps);
 
-    expect(r.downed).toEqual([{ victimId: "t", actorId: "o" }]);
-    expect(r.participants[1].combatStats.status).toBe("unconscious");
-  });
+        expect(r.downed).toEqual([{ victimId: 't', actorId: 'o' }]);
+        expect(r.participants[1].combatStats.status).toBe('unconscious');
+    });
 
-  it("heal з revive повертає з 0 HP", () => {
-    const down = makeParticipant({ id: "o", hp: -4 });
+    it('heal з revive повертає з 0 HP', () => {
+        const down = makeParticipant({ id: 'o', hp: -4 });
 
-    const ps = [{ ...down, combatStats: { ...down.combatStats, status: "dead" as const } }];
+        const ps = [
+            {
+                ...down,
+                combatStats: { ...down.combatStats, status: 'dead' as const },
+            },
+        ];
 
-    const r = run({ kind: "heal", amount: 1, revive: true }, ["o"], ps);
+        const r = run({ kind: 'heal', amount: 1, revive: true }, ['o'], ps);
 
-    expect(r.participants[0].combatStats).toMatchObject({ currentHp: 1, status: "active" });
-  });
+        expect(r.participants[0].combatStats).toMatchObject({
+            currentHp: 1,
+            status: 'active',
+        });
+    });
 
-  it("changeMorale обмежується ±3, restoreSpellSlot бере найнижчий", () => {
-    const base = makeParticipant({ id: "o" });
+    it('changeMorale обмежується ±3, restoreSpellSlot бере найнижчий', () => {
+        const base = makeParticipant({ id: 'o' });
 
-    const p = { ...base, combatStats: { ...base.combatStats, morale: 2 }, spellcasting: { ...base.spellcasting, spellSlots: { "1": { max: 2, current: 2 }, "2": { max: 2, current: 0 } } } };
+        const p = {
+            ...base,
+            combatStats: { ...base.combatStats, morale: 2 },
+            spellcasting: {
+                ...base.spellcasting,
+                spellSlots: {
+                    '1': { max: 2, current: 2 },
+                    '2': { max: 2, current: 0 },
+                },
+            },
+        };
 
-    expect(run({ kind: "changeMorale", delta: 5 }, ["o"], [p]).participants[0].combatStats.morale).toBe(3);
-    expect(run({ kind: "restoreSpellSlot", count: 1 }, ["o"], [p]).participants[0].spellcasting.spellSlots["2"].current).toBe(1);
-  });
+        expect(
+            run({ kind: 'changeMorale', delta: 5 }, ['o'], [p]).participants[0]
+                .combatStats.morale
+        ).toBe(3);
+        expect(
+            run({ kind: 'restoreSpellSlot', count: 1 }, ['o'], [p])
+                .participants[0].spellcasting.spellSlots['2'].current
+        ).toBe(1);
+    });
 
-  it("randomOf обирає варіант через rng, cleanse знімає дебафи", () => {
-    const r = run({ kind: "randomOf", options: [{ kind: "heal", amount: 1 }, { kind: "changeMorale", delta: 1 }] }, ["o"]);
+    it('randomOf обирає варіант через rng, cleanse знімає дебафи', () => {
+        const r = run(
+            {
+                kind: 'randomOf',
+                options: [
+                    { kind: 'heal', amount: 1 },
+                    { kind: 'changeMorale', delta: 1 },
+                ],
+            },
+            ['o']
+        );
 
-    expect(r.participants[0].combatStats.morale).toBe(1);
-  });
+        expect(r.participants[0].combatStats.morale).toBe(1);
+    });
 
-  it("describe", () => {
-    expect(describeEffect({ kind: "damageBonus", filter: { kind: "melee" }, percent: 10 })).toBe("шкода (ближня) +10%");
-    expect(describeEffect({ kind: "dot", damagePerRound: "1d4", damageType: "bleed", duration: { rounds: 3 } })).toBe("Кровотеча 1d4/раунд × 3 р.");
-  });
+    it('describe', () => {
+        expect(
+            describeEffect({
+                kind: 'damageBonus',
+                filter: { kind: 'melee' },
+                percent: 10,
+            })
+        ).toBe('шкода (ближня) +10%');
+        expect(
+            describeEffect({
+                kind: 'dot',
+                damagePerRound: '1d4',
+                damageType: 'bleed',
+                duration: { rounds: 3 },
+            })
+        ).toBe('Кровотеча 1d4/раунд × 3 р.');
+    });
 });
 
-describe("counterAttack у редакторі", () => {
-  it("на вибір лише ближня і дальня; опис згадує дальні", () => {
-    expect(FLAG_FIELDS.counterAttack[0].options?.map((o) => o.value)).toEqual(["melee", "ranged"]);
-    expect(describeEffect({ kind: "flag", flag: "counterAttack", attackKinds: ["ranged"], bonusPercent: 20 })).toBe("відсіч (і на дальні) +20%");
-    expect(describeEffect({ kind: "flag", flag: "counterAttack", attackKinds: ["melee"], bonusPercent: 15 })).toBe("відсіч +15%");
-  });
+describe('counterAttack у редакторі', () => {
+    it('на вибір лише ближня і дальня; опис згадує дальні', () => {
+        expect(
+            FLAG_FIELDS.counterAttack[0].options?.map((o) => o.value)
+        ).toEqual(['melee', 'ranged']);
+        expect(
+            describeEffect({
+                kind: 'flag',
+                flag: 'counterAttack',
+                attackKinds: ['ranged'],
+                bonusPercent: 20,
+            })
+        ).toBe('відсіч (і на дальні) +20%');
+        expect(
+            describeEffect({
+                kind: 'flag',
+                flag: 'counterAttack',
+                attackKinds: ['melee'],
+                bonusPercent: 15,
+            })
+        ).toBe('відсіч +15%');
+    });
 });
 
-describe("прапорці моралі", () => {
-  it("мітки й описи", () => {
-    expect(describeEffect({ kind: "flag", flag: "noNegativeMorale" })).toBe("від'ємна мораль = 0");
-    expect(describeEffect({ kind: "flag", flag: "ignoreMorale" })).toBe("мораль не діє");
-    expect(FLAG_FIELDS.noNegativeMorale).toEqual([]);
-    expect(FLAG_FIELDS.ignoreMorale).toEqual([]);
-  });
+describe('прапорці моралі', () => {
+    it('мітки й описи', () => {
+        expect(describeEffect({ kind: 'flag', flag: 'noNegativeMorale' })).toBe(
+            "від'ємна мораль = 0"
+        );
+        expect(describeEffect({ kind: 'flag', flag: 'ignoreMorale' })).toBe(
+            'мораль не діє'
+        );
+        expect(FLAG_FIELDS.noNegativeMorale).toEqual([]);
+        expect(FLAG_FIELDS.ignoreMorale).toEqual([]);
+    });
 });
 
-describe("randomOf", () => {
-  const ps = [makeParticipant({ id: "o" }), makeParticipant({ id: "a" }), makeParticipant({ id: "t", side: ParticipantSide.ENEMY })];
+describe('randomOf', () => {
+    const ps = [
+        makeParticipant({ id: 'o' }),
+        makeParticipant({ id: 'a' }),
+        makeParticipant({ id: 't', side: ParticipantSide.ENEMY }),
+    ];
 
-  it("варіант з власним target перераховує цілі", () => {
-    const effect: Effect = { kind: "randomOf", options: [{ kind: "modifyStat", stat: "armor", flat: 1, duration: { rounds: 1 }, target: "allAllies" }] };
+    it('варіант з власним target перераховує цілі', () => {
+        const effect: Effect = {
+            kind: 'randomOf',
+            options: [
+                {
+                    kind: 'modifyStat',
+                    stat: 'armor',
+                    flat: 1,
+                    duration: { rounds: 1 },
+                    target: 'allAllies',
+                },
+            ],
+        };
 
-    const r = run(effect, ["t"], ps);
+        const r = run(effect, ['t'], ps);
 
-    expect(r.participants.map((p) => p.battleData.activeEffects.length)).toEqual([1, 1, 0]);
-  });
+        expect(
+            r.participants.map((p) => p.battleData.activeEffects.length)
+        ).toEqual([1, 1, 0]);
+    });
 
-  it("варіант без target лишає цілі правила", () => {
-    const effect: Effect = { kind: "randomOf", options: [{ kind: "modifyStat", stat: "armor", flat: 1, duration: { rounds: 1 } }] };
+    it('варіант без target лишає цілі правила', () => {
+        const effect: Effect = {
+            kind: 'randomOf',
+            options: [
+                {
+                    kind: 'modifyStat',
+                    stat: 'armor',
+                    flat: 1,
+                    duration: { rounds: 1 },
+                },
+            ],
+        };
 
-    const r = run(effect, ["t"], ps);
+        const r = run(effect, ['t'], ps);
 
-    expect(r.participants.map((p) => p.battleData.activeEffects.length)).toEqual([0, 0, 1]);
-  });
+        expect(
+            r.participants.map((p) => p.battleData.activeEffects.length)
+        ).toEqual([0, 0, 1]);
+    });
 
-  it("restoreSpellSlot/drainSpellSlot з ключем pact: pact останній при відновленні, за level при втраті", () => {
-    const base = makeParticipant({ id: "o" });
+    it('restoreSpellSlot/drainSpellSlot з ключем pact: pact останній при відновленні, за level при втраті', () => {
+        const base = makeParticipant({ id: 'o' });
 
-    const p = { ...base, spellcasting: { ...base.spellcasting, spellSlots: { "1": { max: 2, current: 1 }, "4": { max: 1, current: 1 }, pact: { level: 5, max: 2, current: 0 } } } };
+        const p = {
+            ...base,
+            spellcasting: {
+                ...base.spellcasting,
+                spellSlots: {
+                    '1': { max: 2, current: 1 },
+                    '4': { max: 1, current: 1 },
+                    pact: { level: 5, max: 2, current: 0 },
+                },
+            },
+        };
 
-    expect(run({ kind: "restoreSpellSlot", count: 1 }, ["o"], [p]).participants[0].spellcasting.spellSlots["1"].current).toBe(2);
-    expect(run({ kind: "drainSpellSlot", count: 1 }, ["o"], [{ ...p, spellcasting: { ...p.spellcasting, spellSlots: { ...p.spellcasting.spellSlots, pact: { level: 5, max: 2, current: 1 } } } }]).participants[0].spellcasting.spellSlots.pact.current).toBe(0);
-  });
+        expect(
+            run({ kind: 'restoreSpellSlot', count: 1 }, ['o'], [p])
+                .participants[0].spellcasting.spellSlots['1'].current
+        ).toBe(2);
+        expect(
+            run(
+                { kind: 'drainSpellSlot', count: 1 },
+                ['o'],
+                [
+                    {
+                        ...p,
+                        spellcasting: {
+                            ...p.spellcasting,
+                            spellSlots: {
+                                ...p.spellcasting.spellSlots,
+                                pact: { level: 5, max: 2, current: 1 },
+                            },
+                        },
+                    },
+                ]
+            ).participants[0].spellcasting.spellSlots.pact.current
+        ).toBe(0);
+    });
 });
 
-describe("describeEffect: unknown kind and randomOf", () => {
-  const unknown = { kind: "xyz" } as unknown as Effect;
+describe('describeEffect: unknown kind and randomOf', () => {
+    const unknown = { kind: 'xyz' } as unknown as Effect;
 
-  const random: Effect = { kind: "randomOf", options: [{ kind: "heal", amount: 3 }, { kind: "dealDamage", amount: 4 }] };
+    const random: Effect = {
+        kind: 'randomOf',
+        options: [
+            { kind: 'heal', amount: 3 },
+            { kind: 'dealDamage', amount: 4 },
+        ],
+    };
 
-  it("unknown kind renders in uk and en", async () => {
-    expect(describeEffect(unknown)).toBe("невідомий ефект (xyz)");
-    expect(renderSegments(await enT(), describeEffectSegments(unknown)).join(" · ")).toBe("unknown effect (xyz)");
-  });
+    it('unknown kind renders in uk and en', async () => {
+        expect(describeEffect(unknown)).toBe('невідомий ефект (xyz)');
+        expect(
+            renderSegments(await enT(), describeEffectSegments(unknown)).join(
+                ' · '
+            )
+        ).toBe('unknown effect (xyz)');
+    });
 
-  it("randomOf renders options in uk and en without Cyrillic", async () => {
-    expect(describeEffect(random)).toBe("одне з: лікування 3 / шкода 4");
+    it('randomOf renders options in uk and en without Cyrillic', async () => {
+        expect(describeEffect(random)).toBe('одне з: лікування 3 / шкода 4');
 
-    const en = renderSegments(await enT(), describeEffectSegments(random)).join(" · ");
+        const en = renderSegments(
+            await enT(),
+            describeEffectSegments(random)
+        ).join(' · ');
 
-    expect(en).toMatch(/^one of: /);
-    expect(en).not.toMatch(/[А-Яа-яІіЇїЄєҐґ]/);
-  });
+        expect(en).toMatch(/^one of: /);
+        expect(en).not.toMatch(/[А-Яа-яІіЇїЄєҐґ]/);
+    });
 });

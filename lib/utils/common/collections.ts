@@ -1,16 +1,22 @@
-export function groupBy<T, K>(items: readonly T[], keyFn: (item: T) => K): Map<K, T[]> {
-  const groups = new Map<K, T[]>();
+export function groupBy<T, K>(
+    items: readonly T[],
+    keyFn: (item: T) => K
+): Map<K, T[]> {
+    const groups = new Map<K, T[]>();
 
-  for (const item of items) {
-    const key = keyFn(item);
+    for (const item of items) {
+        const key = keyFn(item);
 
-    const list = groups.get(key);
+        const list = groups.get(key);
 
-    if (list) list.push(item);
-    else groups.set(key, [item]);
-  }
+        if (list) list.push(item);
+        else groups.set(key, [item]);
+    }
 
-  return groups;
+    return groups;
 }
 
-export const toggleItem = <T>(list: readonly T[] | undefined, item: T): T[] => ((list ?? []).includes(item) ? (list ?? []).filter((x) => x !== item) : [...(list ?? []), item]);
+export const toggleItem = <T>(list: readonly T[] | undefined, item: T): T[] =>
+    (list ?? []).includes(item)
+        ? (list ?? []).filter((x) => x !== item)
+        : [...(list ?? []), item];

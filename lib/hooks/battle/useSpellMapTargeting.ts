@@ -1,130 +1,186 @@
-"use client";
+'use client';
 
-import { type Dispatch, useCallback, useEffect, useRef, useState } from "react";
+import { type Dispatch, useCallback, useEffect, useRef, useState } from 'react';
 
-import { spellAimTargets, type SpellFlowAction, type SpellFlowState } from "@/lib/utils/battle/flows";
-import type { MapAim, MapPick } from "@/lib/utils/battle/grid";
-import type { Ruleset } from "@/lib/utils/rules/schema";
-import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
+import {
+    spellAimTargets,
+    type SpellFlowAction,
+    type SpellFlowState,
+} from '@/lib/utils/battle/flows';
+import type { MapAim, MapPick } from '@/lib/utils/battle/grid';
+import type { Ruleset } from '@/lib/utils/rules/schema';
+import type {
+    BattleMapConfig,
+    BattleParticipant,
+    GridPoint,
+} from '@/types/battle';
 
 export interface MapTargetingContext {
-  caster: BattleParticipant | null;
-  order: BattleParticipant[];
-  map: BattleMapConfig | null;
-  rules: Ruleset;
-  active: boolean;
-  candidates: BattleParticipant[];
-  inRange(t: BattleParticipant): boolean;
-  filteredOut?(t: BattleParticipant): boolean;
-  setMapAim(aim: MapAim | null): void;
-  setMapPick(pick: MapPick | null): void;
+    caster: BattleParticipant | null;
+    order: BattleParticipant[];
+    map: BattleMapConfig | null;
+    rules: Ruleset;
+    active: boolean;
+    candidates: BattleParticipant[];
+    inRange(t: BattleParticipant): boolean;
+    filteredOut?(t: BattleParticipant): boolean;
+    setMapAim(aim: MapAim | null): void;
+    setMapPick(pick: MapPick | null): void;
 }
 
 export interface AimHoverStore {
-  get(): GridPoint | null;
-  set(cell: GridPoint | null): void;
-  subscribe(listener: () => void): () => void;
+    get(): GridPoint | null;
+    set(cell: GridPoint | null): void;
+    subscribe(listener: () => void): () => void;
 }
 
 function createAimHoverStore(): AimHoverStore {
-  let cell: GridPoint | null = null;
+    let cell: GridPoint | null = null;
 
-  const listeners = new Set<() => void>();
+    const listeners = new Set<() => void>();
 
-  return {
-    get: () => cell,
-    set: (next) => {
-      if (next === cell) return;
+    return {
+        get: () => cell,
+        set: (next) => {
+            if (next === cell) return;
 
-      cell = next;
-      listeners.forEach((l) => l());
-    },
-    subscribe: (l) => {
-      listeners.add(l);
+            cell = next;
+            listeners.forEach((l) => l());
+        },
+        subscribe: (l) => {
+            listeners.add(l);
 
-      return () => listeners.delete(l);
-    },
-  };
+            return () => listeners.delete(l);
+        },
+    };
 }
 
 /** Крок цілей на карті: шаблон приймає точку наведення, решта — клік по токену; ховер пишеться у стор, щоб прев'ю перемальовувало лише своїх підписників, Escape скасовує. */
-export function useSpellMapTargeting(state: SpellFlowState, dispatch: Dispatch<SpellFlowAction>, ctx: MapTargetingContext): AimHoverStore {
-  const { caster, order, map, rules, active, candidates, inRange, filteredOut, setMapAim, setMapPick } = ctx;
+export function useSpellMapTargeting(
+    state: SpellFlowState,
+    dispatch: Dispatch<SpellFlowAction>,
+    ctx: MapTargetingContext
+): AimHoverStore {
+    const {
+        caster,
+        order,
+        map,
+        rules,
+        active,
+        candidates,
+        inRange,
+        filteredOut,
+        setMapAim,
+        setMapPick,
+    } = ctx;
 
-  const aimAt = useRef<(cell: GridPoint) => void>(() => undefined);
+    const aimAt = useRef<(cell: GridPoint) => void>(() => undefined);
 
-  const pickAt = useRef<(id: string) => void>(() => undefined);
+    const pickAt = useRef<(id: string) => void>(() => undefined);
 
-  const latest = useRef({ candidates, inRange, filteredOut });
+    const latest = useRef({ candidates, inRange, filteredOut });
 
-  const [hover] = useState(createAimHoverStore);
+    const [hover] = useState(createAimHoverStore);
 
-  useEffect(() => {
-    latest.current = { candidates, inRange, filteredOut };
-    aimAt.current = (cell) => {
-      if (!map || !caster || !state.pick) return;
+    useEffect(() => {
+        latest.current = { candidates, inRange, filteredOut };
+        aimAt.current = (cell) => {
+            if (!map || !caster || !state.pick) return;
 
-      const ids = spellAimTargets({ map, participants: order, caster, rules }, state.pick, cell).map((p) => p.basicInfo.id);
+            const ids = spellAimTargets(
+                { map, participants: order, caster, rules },
+                state.pick,
+                cell
+            ).map((p) => p.basicInfo.id);
 
-      dispatch({ type: "SET_AIM", aim: cell, targetIds: ids });
-      // клік у межах дальності і є підтвердженням, навіть якщо зона нікого не зачепила
-      dispatch({ type: "CONFIRM_TARGETS" });
-    };
-    pickAt.current = (id) => {
-      const target = order.find((p) => p.basicInfo.id === id);
+            dispatch({ type: 'SET_AIM', aim: cell, targetIds: ids });
+            // клік у межах дальності і є підтвердженням, навіть якщо зона нікого не зачепила
+            dispatch({ type: 'CONFIRM_TARGETS' });
+        };
+        pickAt.current = (id) => {
+            const target = order.find((p) => p.basicInfo.id === id);
 
-      if (target && inRange(target)) dispatch({ type: "PICK_TARGET", id });
-    };
-  });
+            if (target && inRange(target))
+                dispatch({ type: 'PICK_TARGET', id });
+        };
+    });
 
-  const onAim = useCallback((cell: GridPoint) => aimAt.current(cell), []);
+    const onAim = useCallback((cell: GridPoint) => aimAt.current(cell), []);
 
-  const onPick = useCallback((id: string) => pickAt.current(id), []);
+    const onPick = useCallback((id: string) => pickAt.current(id), []);
 
-  const template = active && state.pick?.targetMode === "template" ? state.pick.template : undefined;
+    const template =
+        active && state.pick?.targetMode === 'template'
+            ? state.pick.template
+            : undefined;
 
-  const picking = active && !!state.pick && state.pick.targetMode !== "template";
+    const picking =
+        active && !!state.pick && state.pick.targetMode !== 'template';
 
-  const range = state.pick?.range;
+    const range = state.pick?.range;
 
-  const casterId = caster?.basicInfo.id;
+    const casterId = caster?.basicInfo.id;
 
-  useEffect(() => {
-    if (!template || !casterId) return;
+    useEffect(() => {
+        if (!template || !casterId) return;
 
-    setMapAim({ template, casterId, ...(range !== undefined && { range }), ...(state.aim && { aim: state.aim }), onAim, onHover: hover.set });
+        setMapAim({
+            template,
+            casterId,
+            ...(range !== undefined && { range }),
+            ...(state.aim && { aim: state.aim }),
+            onAim,
+            onHover: hover.set,
+        });
 
-    return () => {
-      setMapAim(null);
-      hover.set(null);
-    };
-  }, [template, casterId, range, state.aim, onAim, setMapAim, hover]);
+        return () => {
+            setMapAim(null);
+            hover.set(null);
+        };
+    }, [template, casterId, range, state.aim, onAim, setMapAim, hover]);
 
-  const pickSignature = picking ? candidates.map((p) => `${p.basicInfo.id}${inRange(p) ? "+" : "-"}`).join(",") : "";
+    const pickSignature = picking
+        ? candidates
+              .map((p) => `${p.basicInfo.id}${inRange(p) ? '+' : '-'}`)
+              .join(',')
+        : '';
 
-  const pickedIds = state.targetIds.join(",");
+    const pickedIds = state.targetIds.join(',');
 
-  useEffect(() => {
-    if (!picking || !casterId) return;
+    useEffect(() => {
+        if (!picking || !casterId) return;
 
-    const { candidates: list, inRange: reach, filteredOut } = latest.current;
+        const {
+            candidates: list,
+            inRange: reach,
+            filteredOut,
+        } = latest.current;
 
-    setMapPick({ casterId, targets: list.map((p) => ({ id: p.basicInfo.id, reachable: reach(p), ...(filteredOut?.(p) && { filteredOut: true }) })), selectedIds: pickedIds ? pickedIds.split(",") : [], onPick });
+        setMapPick({
+            casterId,
+            targets: list.map((p) => ({
+                id: p.basicInfo.id,
+                reachable: reach(p),
+                ...(filteredOut?.(p) && { filteredOut: true }),
+            })),
+            selectedIds: pickedIds ? pickedIds.split(',') : [],
+            onPick,
+        });
 
-    return () => setMapPick(null);
-  }, [picking, casterId, pickSignature, pickedIds, onPick, setMapPick]);
+        return () => setMapPick(null);
+    }, [picking, casterId, pickSignature, pickedIds, onPick, setMapPick]);
 
-  useEffect(() => {
-    if (!active) return;
+    useEffect(() => {
+        if (!active) return;
 
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") dispatch({ type: "CLOSE" });
-    };
+        const onKey = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') dispatch({ type: 'CLOSE' });
+        };
 
-    window.addEventListener("keydown", onKey);
+        window.addEventListener('keydown', onKey);
 
-    return () => window.removeEventListener("keydown", onKey);
-  }, [active, dispatch]);
+        return () => window.removeEventListener('keydown', onKey);
+    }, [active, dispatch]);
 
-  return hover;
+    return hover;
 }

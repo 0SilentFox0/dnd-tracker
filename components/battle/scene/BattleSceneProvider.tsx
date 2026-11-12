@@ -1,26 +1,42 @@
-"use client";
+'use client';
 
-import type { ReactNode } from "react";
+import type { ReactNode } from 'react';
 
-import { ModeSceneProvider } from "@/components/battle/modes";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { BattleSceneContext, BattleSceneDataContext, ParticipantFacesContext, useBattleSceneDataValue, useParticipantFacesValue } from "@/lib/hooks/battle";
-import type { BattleSceneValue } from "@/lib/hooks/battle/types";
+import { ModeSceneProvider } from '@/components/battle/modes';
+import { TooltipProvider } from '@/components/ui/tooltip';
+import {
+    BattleSceneContext,
+    BattleSceneDataContext,
+    ParticipantFacesContext,
+    useBattleSceneDataValue,
+    useParticipantFacesValue,
+} from '@/lib/hooks/battle';
+import type { BattleSceneValue } from '@/lib/hooks/battle/types';
 
-const NO_ORDER: BattleSceneValue["battle"]["initiativeOrder"] = [];
+const NO_ORDER: BattleSceneValue['battle']['initiativeOrder'] = [];
 
-export function BattleSceneProvider({ value, children }: { value: BattleSceneValue; children: ReactNode }) {
-  const data = useBattleSceneDataValue(value);
+export function BattleSceneProvider({
+    value,
+    children,
+}: {
+    value: BattleSceneValue;
+    children: ReactNode;
+}) {
+    const data = useBattleSceneDataValue(value);
 
-  const faces = useParticipantFacesValue(value.battle.initiativeOrder ?? NO_ORDER);
+    const faces = useParticipantFacesValue(
+        value.battle.initiativeOrder ?? NO_ORDER
+    );
 
-  return (
-    <BattleSceneDataContext.Provider value={data}>
-      <ParticipantFacesContext.Provider value={faces}>
-        <BattleSceneContext.Provider value={value}>
-          <TooltipProvider delayDuration={200}><ModeSceneProvider>{children}</ModeSceneProvider></TooltipProvider>
-        </BattleSceneContext.Provider>
-      </ParticipantFacesContext.Provider>
-    </BattleSceneDataContext.Provider>
-  );
+    return (
+        <BattleSceneDataContext.Provider value={data}>
+            <ParticipantFacesContext.Provider value={faces}>
+                <BattleSceneContext.Provider value={value}>
+                    <TooltipProvider delayDuration={200}>
+                        <ModeSceneProvider>{children}</ModeSceneProvider>
+                    </TooltipProvider>
+                </BattleSceneContext.Provider>
+            </ParticipantFacesContext.Provider>
+        </BattleSceneDataContext.Provider>
+    );
 }

@@ -1,102 +1,170 @@
-import { buildPartyPower, computeFairScaling, type FairScaling, type PartyMember, type PartyPower, type Power, unitMember } from "./fair";
-import type { HitModel } from "./hit-model";
-import type { UnitStats } from "./stats";
-import { computeXpBudget, type XpBudgetResult, type XpEdition } from "./xp-budget";
+import {
+    buildPartyPower,
+    computeFairScaling,
+    type FairScaling,
+    type PartyMember,
+    type PartyPower,
+    type Power,
+    unitMember,
+} from './fair';
+import type { HitModel } from './hit-model';
+import type { UnitStats } from './stats';
+import {
+    computeXpBudget,
+    type XpBudgetResult,
+    type XpEdition,
+} from './xp-budget';
 
-import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
+import { ParticipantSide, ParticipantSourceType } from '@/lib/constants/battle';
 
 export interface SetupBalanceParticipant {
-  id: string;
-  type: string;
-  side: string;
-  quantity?: number;
+    id: string;
+    type: string;
+    side: string;
+    quantity?: number;
 }
 
 export interface SetupBalanceStats {
-  characterStats: Record<string, PartyMember>;
-  unitStats: Record<string, Omit<UnitStats, "unitId">>;
+    characterStats: Record<string, PartyMember>;
+    unitStats: Record<string, Omit<UnitStats, 'unitId'>>;
 }
 
-function unitLibraryFromStats(unitStats: SetupBalanceStats["unitStats"]): UnitStats[] {
-  return Object.entries(unitStats).map(([unitId, u]) => ({
-    unitId,
-    name: u.name,
-    dpr: u.dpr,
-    hp: u.hp,
-    kpi: u.kpi,
-    level: u.level,
-    raceId: u.raceId,
-    ...(u.ac !== undefined && { ac: u.ac }),
-    ...(u.attackBonus !== undefined && { attackBonus: u.attackBonus }),
-    ...(u.damageKey !== undefined && { damageKey: u.damageKey }),
-    ...(u.resist !== undefined && { resist: u.resist }),
-    ...(u.spell !== undefined && { spell: u.spell }),
-    ...(u.summon && { summon: true }),
-  }));
+function unitLibraryFromStats(
+    unitStats: SetupBalanceStats['unitStats']
+): UnitStats[] {
+    return Object.entries(unitStats).map(([unitId, u]) => ({
+        unitId,
+        name: u.name,
+        dpr: u.dpr,
+        hp: u.hp,
+        kpi: u.kpi,
+        level: u.level,
+        raceId: u.raceId,
+        ...(u.ac !== undefined && { ac: u.ac }),
+        ...(u.attackBonus !== undefined && { attackBonus: u.attackBonus }),
+        ...(u.damageKey !== undefined && { damageKey: u.damageKey }),
+        ...(u.resist !== undefined && { resist: u.resist }),
+        ...(u.spell !== undefined && { spell: u.spell }),
+        ...(u.summon && { summon: true }),
+    }));
 }
 
-function setupPartyPower(participants: SetupBalanceParticipant[], stats: SetupBalanceStats, model?: HitModel): PartyPower {
-  const members: Parameters<typeof buildPartyPower>[0] = [];
+function setupPartyPower(
+    participants: SetupBalanceParticipant[],
+    stats: SetupBalanceStats,
+    model?: HitModel
+): PartyPower {
+    const members: Parameters<typeof buildPartyPower>[0] = [];
 
-  for (const p of participants) {
-    if (p.side !== ParticipantSide.ALLY) continue;
+    for (const p of participants) {
+        if (p.side !== ParticipantSide.ALLY) continue;
 
-    if (p.type === ParticipantSourceType.UNIT) {
-      const u = stats.unitStats[p.id];
+        if (p.type === ParticipantSourceType.UNIT) {
+            const u = stats.unitStats[p.id];
 
-      if (u) members.push({ stats: unitMember(u), quantity: p.quantity ?? 1, hero: false });
-    } else {
-      const c = stats.characterStats[p.id];
+            if (u)
+                members.push({
+                    stats: unitMember(u),
+                    quantity: p.quantity ?? 1,
+                    hero: false,
+                });
+        } else {
+            const c = stats.characterStats[p.id];
 
-      if (c) members.push({ stats: c, hero: true });
+            if (c) members.push({ stats: c, hero: true });
+        }
     }
-  }
 
-  return buildPartyPower(members, model);
+    return buildPartyPower(members, model);
 }
 
 /** The same function the battle start runs, over the lobby roster. */
-export function setupFairScaling(participants: SetupBalanceParticipant[], stats: SetupBalanceStats, raceId?: string | null, model?: HitModel): { party: PartyPower; scaling: FairScaling } {
-  const library = unitLibraryFromStats(stats.unitStats);
+export function setupFairScaling(
+    participants: SetupBalanceParticipant[],
+    stats: SetupBalanceStats,
+    raceId?: string | null,
+    model?: HitModel
+): { party: PartyPower; scaling: FairScaling } {
+    const library = unitLibraryFromStats(stats.unitStats);
 
-  const party = setupPartyPower(participants, stats, model);
+    const party = setupPartyPower(participants, stats, model);
 
-  const roster = participants.filter((p) => p.side === ParticipantSide.ENEMY && p.type === ParticipantSourceType.UNIT).map((p) => ({ unitId: p.id, quantity: p.quantity ?? 1 }));
+    const roster = participants
+        .filter(
+            (p) =>
+                p.side === ParticipantSide.ENEMY &&
+                p.type === ParticipantSourceType.UNIT
+        )
+        .map((p) => ({ unitId: p.id, quantity: p.quantity ?? 1 }));
 
-  const fixed = participants.reduce<Power>((a, p) => {
-    const s = p.side === ParticipantSide.ENEMY && p.type !== ParticipantSourceType.UNIT ? stats.characterStats[p.id] : undefined;
+    const fixed = participants.reduce<Power>(
+        (a, p) => {
+            const s =
+                p.side === ParticipantSide.ENEMY &&
+                p.type !== ParticipantSourceType.UNIT
+                    ? stats.characterStats[p.id]
+                    : undefined;
 
-    return s ? { hp: a.hp + s.hp, dpr: a.dpr + s.dpr } : a;
-  }, { hp: 0, dpr: 0 });
+            return s ? { hp: a.hp + s.hp, dpr: a.dpr + s.dpr } : a;
+        },
+        { hp: 0, dpr: 0 }
+    );
 
-  const pool = raceId ? library.filter((u) => u.raceId === raceId) : library;
+    const pool = raceId ? library.filter((u) => u.raceId === raceId) : library;
 
-  return { party, scaling: computeFairScaling(party, roster, library, pool, fixed) };
+    return {
+        party,
+        scaling: computeFairScaling(party, roster, library, pool, fixed),
+    };
 }
 
 /** The edit page has no race picker: hints follow the race when every enemy unit shares it. */
-export function sharedEnemyRace(participants: SetupBalanceParticipant[], stats: SetupBalanceStats | null | undefined): string | null {
-  const races = new Set<string | null>();
+export function sharedEnemyRace(
+    participants: SetupBalanceParticipant[],
+    stats: SetupBalanceStats | null | undefined
+): string | null {
+    const races = new Set<string | null>();
 
-  for (const p of participants) if (p.side === ParticipantSide.ENEMY && p.type === ParticipantSourceType.UNIT) races.add(stats?.unitStats[p.id]?.raceId ?? null);
+    for (const p of participants)
+        if (
+            p.side === ParticipantSide.ENEMY &&
+            p.type === ParticipantSourceType.UNIT
+        )
+            races.add(stats?.unitStats[p.id]?.raceId ?? null);
 
-  const [only] = races;
+    const [only] = races;
 
-  return races.size === 1 ? (only ?? null) : null;
+    return races.size === 1 ? (only ?? null) : null;
 }
 
-export function setupXpBudget(participants: SetupBalanceParticipant[], stats: SetupBalanceStats, edition: XpEdition): XpBudgetResult | null {
-  const heroLevels = participants.flatMap((p) => {
-    const c = p.side === ParticipantSide.ALLY && p.type === ParticipantSourceType.CHARACTER ? stats.characterStats[p.id] : undefined;
+export function setupXpBudget(
+    participants: SetupBalanceParticipant[],
+    stats: SetupBalanceStats,
+    edition: XpEdition
+): XpBudgetResult | null {
+    const heroLevels = participants.flatMap((p) => {
+        const c =
+            p.side === ParticipantSide.ALLY &&
+            p.type === ParticipantSourceType.CHARACTER
+                ? stats.characterStats[p.id]
+                : undefined;
 
-    return c ? [c.level ?? 1] : [];
-  });
+        return c ? [c.level ?? 1] : [];
+    });
 
-  const enemies = participants
-    .filter((p) => p.side === ParticipantSide.ENEMY && p.type === ParticipantSourceType.UNIT)
-    .map((p) => ({ unitId: p.id, quantity: p.quantity ?? 1, xp: stats.unitStats[p.id]?.xp ?? null }));
+    const enemies = participants
+        .filter(
+            (p) =>
+                p.side === ParticipantSide.ENEMY &&
+                p.type === ParticipantSourceType.UNIT
+        )
+        .map((p) => ({
+            unitId: p.id,
+            quantity: p.quantity ?? 1,
+            xp: stats.unitStats[p.id]?.xp ?? null,
+        }));
 
-  if (heroLevels.length === 0 || enemies.length === 0) return null;
+    if (heroLevels.length === 0 || enemies.length === 0) return null;
 
-  return computeXpBudget({ edition, heroLevels, enemies });
+    return computeXpBudget({ edition, heroLevels, enemies });
 }

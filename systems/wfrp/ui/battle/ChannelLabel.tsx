@@ -1,5 +1,5 @@
-import { useTranslations } from "next-intl";
+import { useTranslations } from 'next-intl';
 
 export function ChannelLabel() {
-  return <>{useTranslations("wfrpMagic.ui.channel")("tile")}</>;
+    return <>{useTranslations('wfrpMagic.ui.channel')('tile')}</>;
 }

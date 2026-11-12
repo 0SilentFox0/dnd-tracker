@@ -1,3 +1,3 @@
 export const artifactSetKeys = {
-  list: (campaignId: string) => ["artifact-sets", campaignId] as const,
+    list: (campaignId: string) => ['artifact-sets', campaignId] as const,
 };

@@ -1,59 +1,91 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { useTranslations } from "next-intl";
-import { Swords } from "lucide-react";
+import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { Swords } from 'lucide-react';
 
-import { BattleListCard } from "@/components/battle/list/BattleListCard";
-import { SearchEmptyState } from "@/components/common/SearchEmptyState";
-import { SearchInput } from "@/components/common/SearchInput";
-import { EmptyState } from "@/components/common/states";
-import { HudSection } from "@/components/hud/form";
-import { HudPanel } from "@/components/hud/page";
-import { Button } from "@/components/ui/button";
-import { useBattleListSections } from "@/lib/hooks/battles";
+import { BattleListCard } from '@/components/battle/list/BattleListCard';
+import { SearchEmptyState } from '@/components/common/SearchEmptyState';
+import { SearchInput } from '@/components/common/SearchInput';
+import { EmptyState } from '@/components/common/states';
+import { HudSection } from '@/components/hud/form';
+import { HudPanel } from '@/components/hud/page';
+import { Button } from '@/components/ui/button';
+import { useBattleListSections } from '@/lib/hooks/battles';
 
-type Battle = Parameters<typeof BattleListCard>[0]["battle"] & { status: string };
+type Battle = Parameters<typeof BattleListCard>[0]['battle'] & {
+    status: string;
+};
 
-export function BattleSections({ battles, campaignId, canEdit = true }: { battles: Battle[]; campaignId: string; canEdit?: boolean }) {
-  const t = useTranslations("battleSetup.list");
+export function BattleSections({
+    battles,
+    campaignId,
+    canEdit = true,
+}: {
+    battles: Battle[];
+    campaignId: string;
+    canEdit?: boolean;
+}) {
+    const t = useTranslations('battleSetup.list');
 
-  const { search, sections } = useBattleListSections(battles);
+    const { search, sections } = useBattleListSections(battles);
 
-  if (battles.length === 0) {
+    if (battles.length === 0) {
+        return (
+            <EmptyState
+                className="bg-hud-panel"
+                icon={Swords}
+                title={t('empty.title')}
+                action={
+                    canEdit && (
+                        <Link href={`/campaigns/${campaignId}/dm/battles/new`}>
+                            <Button>{t('empty.create')}</Button>
+                        </Link>
+                    )
+                }
+            />
+        );
+    }
+
     return (
-      <EmptyState
-        className="bg-hud-panel"
-        icon={Swords}
-        title={t("empty.title")}
-        action={
-          canEdit && (
-            <Link href={`/campaigns/${campaignId}/dm/battles/new`}>
-              <Button>{t("empty.create")}</Button>
-            </Link>
-          )
-        }
-      />
+        <>
+            <SearchInput
+                value={search.query.value}
+                onChange={search.query.set}
+                label={t('search')}
+            />
+            {sections.length === 0 && (
+                <SearchEmptyState
+                    query={search.query.value}
+                    onClear={() => search.query.set('')}
+                />
+            )}
+            <div className="space-y-3" data-tour="battle.list">
+                {sections.map(
+                    ({ kind, title, battles: list }, sectionIndex) => (
+                        <HudPanel key={kind}>
+                            <HudSection title={title}>
+                                <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+                                    {list.map((battle, i) => (
+                                        <BattleListCard
+                                            key={battle.id}
+                                            battle={battle}
+                                            campaignId={campaignId}
+                                            kind={kind}
+                                            canEdit={canEdit}
+                                            data-tour={
+                                                sectionIndex === 0 && i === 0
+                                                    ? 'battle.card'
+                                                    : undefined
+                                            }
+                                        />
+                                    ))}
+                                </div>
+                            </HudSection>
+                        </HudPanel>
+                    )
+                )}
+            </div>
+        </>
     );
-  }
-
-  return (
-    <>
-      <SearchInput value={search.query.value} onChange={search.query.set} label={t("search")} />
-      {sections.length === 0 && <SearchEmptyState query={search.query.value} onClear={() => search.query.set("")} />}
-      <div className="space-y-3" data-tour="battle.list">
-        {sections.map(({ kind, title, battles: list }, sectionIndex) => (
-          <HudPanel key={kind}>
-            <HudSection title={title}>
-              <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-                {list.map((battle, i) => (
-                  <BattleListCard key={battle.id} battle={battle} campaignId={campaignId} kind={kind} canEdit={canEdit} data-tour={sectionIndex === 0 && i === 0 ? "battle.card" : undefined} />
-                ))}
-              </div>
-            </HudSection>
-          </HudPanel>
-        ))}
-      </div>
-    </>
-  );
 }

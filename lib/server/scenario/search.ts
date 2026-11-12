@@ -1,14 +1,24 @@
-import "server-only";
-import { SCENARIO_SEARCH_LIMIT } from "@/lib/constants/scenario";
-import { prisma } from "@/lib/db";
-import { SNIPPET_RADIUS, snippetFromWindow } from "@/lib/utils/scenario/search-text";
-import type { ScenarioSearchHit } from "@/types/scenario";
+import 'server-only';
+import { SCENARIO_SEARCH_LIMIT } from '@/lib/constants/scenario';
+import { prisma } from '@/lib/db';
+import {
+    SNIPPET_RADIUS,
+    snippetFromWindow,
+} from '@/lib/utils/scenario/search-text';
+import type { ScenarioSearchHit } from '@/types/scenario';
 
-type Row = { id: string; title: string; sectionId: string | null; win: string; at: number; cutBefore: boolean };
+type Row = {
+    id: string;
+    title: string;
+    sectionId: string | null;
+    win: string;
+    at: number;
+    cutBefore: boolean;
+};
 
 // the match is located in SQL so only a short window per page leaves the DB (searchText of a scene is 50-150 KB)
 function searchRows(campaignId: string, q: string) {
-  return prisma.$queryRaw<Row[]>`
+    return prisma.$queryRaw<Row[]>`
     WITH hit AS (
       SELECT id, title, "sortOrder", "searchText" AS st, strpos(lower("searchText"), lower(${q}::text)) AS pos
       FROM scenario_pages WHERE "campaignId" = ${campaignId}
@@ -30,25 +40,45 @@ function searchRows(campaignId: string, q: string) {
     FROM win ORDER BY "sortOrder" ASC`;
 }
 
-export async function searchScenarioPages(campaignId: string, q: string): Promise<ScenarioSearchHit[]> {
-  const rows = await searchRows(campaignId, q);
+export async function searchScenarioPages(
+    campaignId: string,
+    q: string
+): Promise<ScenarioSearchHit[]> {
+    const rows = await searchRows(campaignId, q);
 
-  return rows.flatMap((r) => {
-    const snippet = snippetFromWindow({ win: r.win, at: Number(r.at), cutBefore: r.cutBefore, needleLength: q.length });
+    return rows.flatMap((r) => {
+        const snippet = snippetFromWindow({
+            win: r.win,
+            at: Number(r.at),
+            cutBefore: r.cutBefore,
+            needleLength: q.length,
+        });
 
-    return snippet ? [{ pageId: r.id, pageTitle: r.title, sectionId: r.sectionId, snippet }] : [];
-  });
+        return snippet
+            ? [
+                  {
+                      pageId: r.id,
+                      pageTitle: r.title,
+                      sectionId: r.sectionId,
+                      snippet,
+                  },
+              ]
+            : [];
+    });
 }
 
 // pages whose searchText contains every prefix, so only candidate pages are read in full
-export async function pageIdsMatching(campaignId: string, prefixes: string[]): Promise<string[]> {
-  if (!prefixes.length) return [];
+export async function pageIdsMatching(
+    campaignId: string,
+    prefixes: string[]
+): Promise<string[]> {
+    if (!prefixes.length) return [];
 
-  const rows = await prisma.$queryRaw<{ id: string }[]>`
+    const rows = await prisma.$queryRaw<{ id: string }[]>`
     SELECT id FROM scenario_pages
     WHERE "campaignId" = ${campaignId}
       AND NOT EXISTS (SELECT 1 FROM unnest(${prefixes}::text[]) p WHERE strpos(lower("searchText"), p) = 0)
     ORDER BY "sortOrder" ASC, title ASC`;
 
-  return rows.map((r) => r.id);
+    return rows.map((r) => r.id);
 }

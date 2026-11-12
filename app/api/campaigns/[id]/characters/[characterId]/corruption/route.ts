@@ -1,1 +1,1 @@
-export { POST } from "@/systems/wfrp/server/operations/corruption";
+export { POST } from '@/systems/wfrp/server/operations/corruption';

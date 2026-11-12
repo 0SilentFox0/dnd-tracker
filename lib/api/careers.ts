@@ -1,7 +1,12 @@
-import { createCampaignCrudApi } from "@/lib/api/client";
-import type { CareerData, CareerFormData } from "@/types/careers";
+import { createCampaignCrudApi } from '@/lib/api/client';
+import type { CareerData, CareerFormData } from '@/types/careers';
 
-const careersApi = createCampaignCrudApi<CareerData, CareerFormData, Partial<CareerFormData>, { ok: true }>("/careers");
+const careersApi = createCampaignCrudApi<
+    CareerData,
+    CareerFormData,
+    Partial<CareerFormData>,
+    { ok: true }
+>('/careers');
 
 export const getCareers = careersApi.list;
 export const getCareer = careersApi.get;

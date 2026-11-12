@@ -1,14 +1,25 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
-import { heroArchetype } from "@/lib/constants/hero-archetypes";
+import { heroArchetype } from '@/lib/constants/hero-archetypes';
 
-describe("heroArchetype", () => {
-  it("null і невідоме — Універсал 10/1/1/1", () => {
-    expect(heroArchetype(null)).toMatchObject({ key: null, hpPerLevel: 10, melee: 1, ranged: 1, magic: 1 });
-    expect(heroArchetype("x").key).toBeNull();
-  });
+describe('heroArchetype', () => {
+    it('null і невідоме — Універсал 10/1/1/1', () => {
+        expect(heroArchetype(null)).toMatchObject({
+            key: null,
+            hpPerLevel: 10,
+            melee: 1,
+            ranged: 1,
+            magic: 1,
+        });
+        expect(heroArchetype('x').key).toBeNull();
+    });
 
-  it("значення зі спеки", () => {
-    expect(heroArchetype("ranger")).toMatchObject({ hpPerLevel: 9, melee: 0.7, ranged: 1.5, magic: 0.7 });
-  });
+    it('значення зі спеки', () => {
+        expect(heroArchetype('ranger')).toMatchObject({
+            hpPerLevel: 9,
+            melee: 0.7,
+            ranged: 1.5,
+            magic: 0.7,
+        });
+    });
 });

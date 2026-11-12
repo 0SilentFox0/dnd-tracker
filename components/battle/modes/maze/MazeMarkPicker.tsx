@@ -1,65 +1,90 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useTranslations } from "next-intl";
-import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Skull, Star, X } from "lucide-react";
+import { useState } from 'react';
+import { useTranslations } from 'next-intl';
+import {
+    ArrowDown,
+    ArrowLeft,
+    ArrowRight,
+    ArrowUp,
+    Skull,
+    Star,
+    X,
+} from 'lucide-react';
 
-import { MAZE_MARK_SYMBOLS } from "@/lib/constants/battle";
-import { useBattleScene } from "@/lib/hooks/battle";
-import { useMazeView } from "@/lib/hooks/battle/modes/maze";
-import { mazeBudgetLeft } from "@/lib/utils/battle/modes/maze";
-import type { BattleParticipant, MazeMarkSymbol } from "@/types/battle";
+import { MAZE_MARK_SYMBOLS } from '@/lib/constants/battle';
+import { useBattleScene } from '@/lib/hooks/battle';
+import { useMazeView } from '@/lib/hooks/battle/modes/maze';
+import { mazeBudgetLeft } from '@/lib/utils/battle/modes/maze';
+import type { BattleParticipant, MazeMarkSymbol } from '@/types/battle';
 
 const SYMBOL_ICONS: Record<MazeMarkSymbol, typeof Star> = {
-  "arrow-n": ArrowUp,
-  "arrow-e": ArrowRight,
-  "arrow-s": ArrowDown,
-  "arrow-w": ArrowLeft,
-  cross: X,
-  skull: Skull,
-  star: Star,
+    'arrow-n': ArrowUp,
+    'arrow-e': ArrowRight,
+    'arrow-s': ArrowDown,
+    'arrow-w': ArrowLeft,
+    cross: X,
+    skull: Skull,
+    star: Star,
 };
 
 export function MazeMarkPicker({ hero }: { hero: BattleParticipant }) {
-  const t = useTranslations("battleDm.maze.marks");
+    const t = useTranslations('battleDm.maze.marks');
 
-  const { battle, actions, anyPending } = useBattleScene();
+    const { battle, actions, anyPending } = useBattleScene();
 
-  const { view } = useMazeView();
+    const { view } = useMazeView();
 
-  const [open, setOpen] = useState(false);
+    const [open, setOpen] = useState(false);
 
-  if (!battle.map?.maze || !view || battle.map.maze.dark || mazeBudgetLeft(hero) <= 0) return null;
+    if (
+        !battle.map?.maze ||
+        !view ||
+        battle.map.maze.dark ||
+        mazeBudgetLeft(hero) <= 0
+    )
+        return null;
 
-  const place = (symbol: MazeMarkSymbol) => {
-    actions.mazeMark.mutate({ participantId: hero.basicInfo.id, symbol });
-    setOpen(false);
-  };
+    const place = (symbol: MazeMarkSymbol) => {
+        actions.mazeMark.mutate({ participantId: hero.basicInfo.id, symbol });
+        setOpen(false);
+    };
 
-  return (
-    <div className="pt-2">
-      <button
-        type="button"
-        disabled={anyPending}
-        aria-expanded={open}
-        onClick={() => setOpen((v) => !v)}
-        className="hud-sc flex h-11 w-full items-center justify-center border border-white/25 bg-black/55 text-[15px] tracking-[.08em] text-[var(--ink)] disabled:opacity-50"
-      >
-        {t("picker")}
-      </button>
-      {open && (
-        <div role="group" aria-label={t("group")} className="mt-1 grid grid-cols-7 gap-1">
-          {MAZE_MARK_SYMBOLS.map((symbol) => {
-            const Icon = SYMBOL_ICONS[symbol];
+    return (
+        <div className="pt-2">
+            <button
+                type="button"
+                disabled={anyPending}
+                aria-expanded={open}
+                onClick={() => setOpen((v) => !v)}
+                className="hud-sc flex h-11 w-full items-center justify-center border border-white/25 bg-black/55 text-[15px] tracking-[.08em] text-[var(--ink)] disabled:opacity-50"
+            >
+                {t('picker')}
+            </button>
+            {open && (
+                <div
+                    role="group"
+                    aria-label={t('group')}
+                    className="mt-1 grid grid-cols-7 gap-1"
+                >
+                    {MAZE_MARK_SYMBOLS.map((symbol) => {
+                        const Icon = SYMBOL_ICONS[symbol];
 
-            return (
-              <button key={symbol} type="button" aria-label={t(symbol)} disabled={anyPending} onClick={() => place(symbol)} className="flex h-11 items-center justify-center border border-white/25 bg-black/55 text-[var(--gold)] disabled:opacity-50">
-                <Icon className="size-5" />
-              </button>
-            );
-          })}
+                        return (
+                            <button
+                                key={symbol}
+                                type="button"
+                                aria-label={t(symbol)}
+                                disabled={anyPending}
+                                onClick={() => place(symbol)}
+                                className="flex h-11 items-center justify-center border border-white/25 bg-black/55 text-[var(--gold)] disabled:opacity-50"
+                            >
+                                <Icon className="size-5" />
+                            </button>
+                        );
+                    })}
+                </div>
+            )}
         </div>
-      )}
-    </div>
-  );
+    );
 }

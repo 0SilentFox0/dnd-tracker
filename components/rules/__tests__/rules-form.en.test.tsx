@@ -1,41 +1,60 @@
 // @vitest-environment happy-dom
-import { cleanup, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { cleanup, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { RulesForm } from "../RulesForm";
+import { RulesForm } from '../RulesForm';
 
-import "@/components/ui/__tests__/match-media";
+import '@/components/ui/__tests__/match-media';
 
-vi.unmock("next-intl");
+vi.unmock('next-intl');
 
-import { ConfirmProvider } from "@/components/ui/confirm-dialog";
-import { renderWithIntl } from "@/lib/i18n/test/render-with-intl";
-import { DEFAULT_RULES } from "@/lib/utils/rules";
+import { ConfirmProvider } from '@/components/ui/confirm-dialog';
+import { renderWithIntl } from '@/lib/i18n/test/render-with-intl';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
 
-vi.mock("@/lib/hooks/campaigns/useRemoveCustomCondition", () => ({ useRemoveCustomCondition: () => ({ remove: vi.fn(), isPending: false, usage: null, closeUsage: vi.fn() }) }));
-
-vi.mock("@/lib/hooks/campaigns/useRemoveCustomCondition", () => ({ useRemoveCustomCondition: () => ({ remove: vi.fn(), isPending: false, usage: null, closeUsage: vi.fn() }) }));
-
-vi.mock("@/lib/hooks/campaigns/useCampaignRules", () => ({
-  useCampaignRules: () => ({ data: DEFAULT_RULES, isLoading: false }),
-  useUpdateCampaignRules: () => ({ mutateAsync: vi.fn(), isPending: false }),
+vi.mock('@/lib/hooks/campaigns/useRemoveCustomCondition', () => ({
+    useRemoveCustomCondition: () => ({
+        remove: vi.fn(),
+        isPending: false,
+        usage: null,
+        closeUsage: vi.fn(),
+    }),
 }));
 
-describe("RulesForm (en)", () => {
-  afterEach(cleanup);
+vi.mock('@/lib/hooks/campaigns/useRemoveCustomCondition', () => ({
+    useRemoveCustomCondition: () => ({
+        remove: vi.fn(),
+        isPending: false,
+        usage: null,
+        closeUsage: vi.fn(),
+    }),
+}));
 
-  it("renders the morale section in English without raw keys", async () => {
-    await renderWithIntl(
-      <ConfirmProvider>
-        <RulesForm campaignId="c1" />
-      </ConfirmProvider>,
-      { locale: "en", namespaces: ["common", "validation", "rules", "battleTerms"] },
-    );
+vi.mock('@/lib/hooks/campaigns/useCampaignRules', () => ({
+    useCampaignRules: () => ({ data: DEFAULT_RULES, isLoading: false }),
+    useUpdateCampaignRules: () => ({ mutateAsync: vi.fn(), isPending: false }),
+}));
 
-    expect(screen.getByLabelText("Cap ±N")).toBeTruthy();
-    expect(screen.getAllByRole("switch", { name: "Enabled" }).length).toBeGreaterThan(0);
-    expect(screen.getByRole("button", { name: "Save" })).toBeTruthy();
-    expect(screen.getByText(/Changes apply to new battles/)).toBeTruthy();
-    expect(document.body.textContent).not.toMatch(/rules\./);
-  });
+describe('RulesForm (en)', () => {
+    afterEach(cleanup);
+
+    it('renders the morale section in English without raw keys', async () => {
+        await renderWithIntl(
+            <ConfirmProvider>
+                <RulesForm campaignId="c1" />
+            </ConfirmProvider>,
+            {
+                locale: 'en',
+                namespaces: ['common', 'validation', 'rules', 'battleTerms'],
+            }
+        );
+
+        expect(screen.getByLabelText('Cap ±N')).toBeTruthy();
+        expect(
+            screen.getAllByRole('switch', { name: 'Enabled' }).length
+        ).toBeGreaterThan(0);
+        expect(screen.getByRole('button', { name: 'Save' })).toBeTruthy();
+        expect(screen.getByText(/Changes apply to new battles/)).toBeTruthy();
+        expect(document.body.textContent).not.toMatch(/rules\./);
+    });
 });

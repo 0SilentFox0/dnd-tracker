@@ -1,62 +1,100 @@
-import { after, NextResponse } from "next/server";
+import { after, NextResponse } from 'next/server';
 
-import { API_ERRORS } from "@/lib/constants/api-errors";
-import { prisma } from "@/lib/db";
-import { getRequestLocale } from "@/lib/i18n/request-locale";
-import { getTranslator } from "@/lib/i18n/translator";
-import { puzzleCommandSchema } from "@/lib/schemas/puzzle";
-import { publishShow, readShowState, writeShowState } from "@/lib/server/show/show-store";
-import { showForViewer } from "@/lib/server/show/viewer-show";
-import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
-import { errorResponse } from "@/lib/utils/api/api-response";
-import { handleApiError } from "@/lib/utils/api/error-handler";
-import { parseBody } from "@/lib/utils/api/parse-body";
-import { BATTLE_RATE_LIMITS, checkRateLimit, rateLimitResponse } from "@/lib/utils/api/rate-limit";
-import { applyPuzzleCommand } from "@/lib/utils/puzzle/puzzle-command";
-import type { ShowResponse } from "@/types/show";
+import { API_ERRORS } from '@/lib/constants/api-errors';
+import { prisma } from '@/lib/db';
+import { getRequestLocale } from '@/lib/i18n/request-locale';
+import { getTranslator } from '@/lib/i18n/translator';
+import { puzzleCommandSchema } from '@/lib/schemas/puzzle';
+import {
+    publishShow,
+    readShowState,
+    writeShowState,
+} from '@/lib/server/show/show-store';
+import { showForViewer } from '@/lib/server/show/viewer-show';
+import { requireCampaignAccess } from '@/lib/utils/api/api-auth';
+import { errorResponse } from '@/lib/utils/api/api-response';
+import { handleApiError } from '@/lib/utils/api/error-handler';
+import { parseBody } from '@/lib/utils/api/parse-body';
+import {
+    BATTLE_RATE_LIMITS,
+    checkRateLimit,
+    rateLimitResponse,
+} from '@/lib/utils/api/rate-limit';
+import { applyPuzzleCommand } from '@/lib/utils/puzzle/puzzle-command';
+import type { ShowResponse } from '@/types/show';
 
 const ATTEMPTS = 3;
 
 async function displayName(userId: string): Promise<string> {
-  const user = await prisma.user.findUnique({ where: { id: userId }, select: { displayName: true } });
+    const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { displayName: true },
+    });
 
-  return user?.displayName ?? (await getTranslator(await getRequestLocale(), "show"))("puzzle.player");
+    return (
+        user?.displayName ??
+        (await getTranslator(await getRequestLocale(), 'show'))('puzzle.player')
+    );
 }
 
-export async function commandPuzzle(req: Request, campaignId: string): Promise<NextResponse> {
-  try {
-    const access = await requireCampaignAccess(campaignId);
+export async function commandPuzzle(
+    req: Request,
+    campaignId: string
+): Promise<NextResponse> {
+    try {
+        const access = await requireCampaignAccess(campaignId);
 
-    if (access instanceof NextResponse) return access;
+        if (access instanceof NextResponse) return access;
 
-    const rate = await checkRateLimit({ userId: access.userId, scope: "puzzle", battleId: campaignId, ...BATTLE_RATE_LIMITS.puzzle });
+        const rate = await checkRateLimit({
+            userId: access.userId,
+            scope: 'puzzle',
+            battleId: campaignId,
+            ...BATTLE_RATE_LIMITS.puzzle,
+        });
 
-    if (!rate.allowed) return rateLimitResponse(rate);
+        if (!rate.allowed) return rateLimitResponse(rate);
 
-    const cmd = await parseBody(puzzleCommandSchema, req);
+        const cmd = await parseBody(puzzleCommandSchema, req);
 
-    if (cmd instanceof NextResponse) return cmd;
+        if (cmd instanceof NextResponse) return cmd;
 
-    const user = { id: access.userId, name: cmd.action === "puzzleGrab" ? await displayName(access.userId) : "", isDM: access.isDM };
+        const user = {
+            id: access.userId,
+            name:
+                cmd.action === 'puzzleGrab'
+                    ? await displayName(access.userId)
+                    : '',
+            isDM: access.isDM,
+        };
 
-    for (let attempt = 0; attempt < ATTEMPTS; attempt++) {
-      const prev = await readShowState(campaignId);
+        for (let attempt = 0; attempt < ATTEMPTS; attempt++) {
+            const prev = await readShowState(campaignId);
 
-      const result = applyPuzzleCommand(prev, cmd, { now: Date.now(), user });
+            const result = applyPuzzleCommand(prev, cmd, {
+                now: Date.now(),
+                user,
+            });
 
-      if (!result.ok) return errorResponse(result.message, result.message === API_ERRORS.FORBIDDEN ? 403 : 422);
+            if (!result.ok)
+                return errorResponse(
+                    result.message,
+                    result.message === API_ERRORS.FORBIDDEN ? 403 : 422
+                );
 
-      const next = result.value;
+            const next = result.value;
 
-      if (await writeShowState(campaignId, prev, next)) {
-        after(() => publishShow(campaignId, next));
+            if (await writeShowState(campaignId, prev, next)) {
+                after(() => publishShow(campaignId, next));
 
-        return NextResponse.json({ show: await showForViewer(campaignId, access, next) } satisfies ShowResponse);
-      }
+                return NextResponse.json({
+                    show: await showForViewer(campaignId, access, next),
+                } satisfies ShowResponse);
+            }
+        }
+
+        return errorResponse(API_ERRORS.SHOW_CONFLICT, 409);
+    } catch (error) {
+        return handleApiError(error, { action: 'puzzle command' });
     }
-
-    return errorResponse(API_ERRORS.SHOW_CONFLICT, 409);
-  } catch (error) {
-    return handleApiError(error, { action: "puzzle command" });
-  }
 }

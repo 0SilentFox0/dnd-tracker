@@ -1,37 +1,65 @@
-"use client";
+'use client';
 
-import { useTranslations } from "next-intl";
+import { useTranslations } from 'next-intl';
 
-import { DmEntityCard } from "@/components/common/DmEntityCard";
-import { EntityIcon } from "@/components/common/EntityIcon";
-import { Badge } from "@/components/ui/badge";
-import type { GameClassData } from "@/types/classes";
+import { DmEntityCard } from '@/components/common/DmEntityCard';
+import { EntityIcon } from '@/components/common/EntityIcon';
+import { Badge } from '@/components/ui/badge';
+import type { GameClassData } from '@/types/classes';
 
 interface ClassCardProps {
-  gameClass: GameClassData;
-  campaignId: string;
-  onDelete?: (classId: string) => void;
-  canEdit?: boolean;
+    gameClass: GameClassData;
+    campaignId: string;
+    onDelete?: (classId: string) => void;
+    canEdit?: boolean;
 }
 
-export function ClassCard({ gameClass, campaignId, onDelete, canEdit = true }: ClassCardProps) {
-  const t = useTranslations();
+export function ClassCard({
+    gameClass,
+    campaignId,
+    onDelete,
+    canEdit = true,
+}: ClassCardProps) {
+    const t = useTranslations();
 
-  return (
-    <DmEntityCard href={`/campaigns/${campaignId}/dm/classes/${gameClass.id}`} title={gameClass.name} accent={gameClass.color ?? undefined} icon={gameClass.icon} onDelete={() => onDelete?.(gameClass.id)} canEdit={canEdit}>
-      <Badge variant="outline">d{gameClass.hitDie}</Badge>
-      <Badge variant="outline">{t(`classes.casters.${gameClass.caster}`)}</Badge>
-      <Badge variant="outline">{t("classes.card.subclasses", { count: gameClass.subclasses.length })}</Badge>
-      {gameClass.subclasses.length > 0 && (
-        <span className="flex basis-full flex-wrap gap-1">
-          {gameClass.subclasses.map((s) => (
-            <span key={s.id} title={s.name} className="inline-flex items-center gap-1 rounded bg-muted/50 px-1.5 py-1 text-xs">
-              <EntityIcon src={s.icon} name={s.name} size={24} alt={s.name} className="size-6 rounded text-xs" />
-              <span>{s.name}</span>
-            </span>
-          ))}
-        </span>
-      )}
-    </DmEntityCard>
-  );
+    return (
+        <DmEntityCard
+            href={`/campaigns/${campaignId}/dm/classes/${gameClass.id}`}
+            title={gameClass.name}
+            accent={gameClass.color ?? undefined}
+            icon={gameClass.icon}
+            onDelete={() => onDelete?.(gameClass.id)}
+            canEdit={canEdit}
+        >
+            <Badge variant="outline">d{gameClass.hitDie}</Badge>
+            <Badge variant="outline">
+                {t(`classes.casters.${gameClass.caster}`)}
+            </Badge>
+            <Badge variant="outline">
+                {t('classes.card.subclasses', {
+                    count: gameClass.subclasses.length,
+                })}
+            </Badge>
+            {gameClass.subclasses.length > 0 && (
+                <span className="flex basis-full flex-wrap gap-1">
+                    {gameClass.subclasses.map((s) => (
+                        <span
+                            key={s.id}
+                            title={s.name}
+                            className="inline-flex items-center gap-1 rounded bg-muted/50 px-1.5 py-1 text-xs"
+                        >
+                            <EntityIcon
+                                src={s.icon}
+                                name={s.name}
+                                size={24}
+                                alt={s.name}
+                                className="size-6 rounded text-xs"
+                            />
+                            <span>{s.name}</span>
+                        </span>
+                    ))}
+                </span>
+            )}
+        </DmEntityCard>
+    );
 }

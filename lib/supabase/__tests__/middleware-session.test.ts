@@ -1,99 +1,146 @@
-import { NextRequest } from "next/server";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { NextRequest } from 'next/server';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { updateSession } from "../middleware";
+import { updateSession } from '../middleware';
 
 const getClaims = vi.hoisted(() => vi.fn());
 
 const getUser = vi.hoisted(() => vi.fn());
 
-const createServerClient = vi.hoisted(() => vi.fn(() => ({ auth: { getClaims, getUser } })));
+const createServerClient = vi.hoisted(() =>
+    vi.fn(() => ({ auth: { getClaims, getUser } }))
+);
 
-vi.mock("@supabase/ssr", () => ({ createServerClient }));
+vi.mock('@supabase/ssr', () => ({ createServerClient }));
 
-const request = (pathname: string, init?: { method?: string; origin?: string }) =>
-  new NextRequest(`http://app.test${pathname}`, {
-    method: init?.method ?? "GET",
-    headers: init?.origin ? { origin: init.origin, host: "app.test" } : { host: "app.test" },
-  });
+const request = (
+    pathname: string,
+    init?: { method?: string; origin?: string }
+) =>
+    new NextRequest(`http://app.test${pathname}`, {
+        method: init?.method ?? 'GET',
+        headers: init?.origin
+            ? { origin: init.origin, host: 'app.test' }
+            : { host: 'app.test' },
+    });
 
-const signedIn = () => getClaims.mockResolvedValue({ data: { claims: { sub: "u1" } }, error: null });
+const signedIn = () =>
+    getClaims.mockResolvedValue({
+        data: { claims: { sub: 'u1' } },
+        error: null,
+    });
 
-const signedOut = () => getClaims.mockResolvedValue({ data: null, error: null });
+const signedOut = () =>
+    getClaims.mockResolvedValue({ data: null, error: null });
 
-describe("updateSession", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    process.env.NEXT_PUBLIC_SUPABASE_URL = "http://supabase.test";
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = "anon";
-  });
+describe('updateSession', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+        process.env.NEXT_PUBLIC_SUPABASE_URL = 'http://supabase.test';
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'anon';
+    });
 
-  it("/api — без Supabase Auth: маршрути самі перевіряють сесію і віддають 401", async () => {
-    signedOut();
+    it('/api — без Supabase Auth: маршрути самі перевіряють сесію і віддають 401', async () => {
+        signedOut();
 
-    const res = await updateSession(request("/api/campaigns"));
+        const res = await updateSession(request('/api/campaigns'));
 
-    expect(res.status).toBe(200);
-    expect(res.headers.get("location")).toBeNull();
-    expect(createServerClient).not.toHaveBeenCalled();
-  });
+        expect(res.status).toBe(200);
+        expect(res.headers.get('location')).toBeNull();
+        expect(createServerClient).not.toHaveBeenCalled();
+    });
 
-  it("/api — CSRF-перевірка лишається", async () => {
-    const res = await updateSession(request("/api/campaigns", { method: "POST", origin: "http://evil.test" }));
+    it('/api — CSRF-перевірка лишається', async () => {
+        const res = await updateSession(
+            request('/api/campaigns', {
+                method: 'POST',
+                origin: 'http://evil.test',
+            })
+        );
 
-    expect(res.status).toBe(403);
-  });
+        expect(res.status).toBe(403);
+    });
 
-  it("/auth/signout — без redirect на /sign-in, CSRF-перевірка діє", async () => {
-    signedOut();
+    it('/auth/signout — без redirect на /sign-in, CSRF-перевірка діє', async () => {
+        signedOut();
 
-    const ok = await updateSession(request("/auth/signout", { method: "POST", origin: "http://app.test" }));
+        const ok = await updateSession(
+            request('/auth/signout', {
+                method: 'POST',
+                origin: 'http://app.test',
+            })
+        );
 
-    expect(ok.headers.get("location")).toBeNull();
-    expect((await updateSession(request("/auth/signout", { method: "POST", origin: "http://evil.test" }))).status).toBe(403);
-  });
+        expect(ok.headers.get('location')).toBeNull();
+        expect(
+            (
+                await updateSession(
+                    request('/auth/signout', {
+                        method: 'POST',
+                        origin: 'http://evil.test',
+                    })
+                )
+            ).status
+        ).toBe(403);
+    });
 
-  it("сторінка без сесії — redirect на /sign-in", async () => {
-    signedOut();
+    it('сторінка без сесії — redirect на /sign-in', async () => {
+        signedOut();
 
-    const res = await updateSession(request("/campaigns/c1"));
+        const res = await updateSession(request('/campaigns/c1'));
 
-    expect(new URL(res.headers.get("location") ?? "").pathname).toBe("/sign-in");
-  });
+        expect(new URL(res.headers.get('location') ?? '').pathname).toBe(
+            '/sign-in'
+        );
+    });
 
-  it("сторінка із сесією — пропускає, перевіряючи JWT через getClaims, а не getUser", async () => {
-    signedIn();
+    it('сторінка із сесією — пропускає, перевіряючи JWT через getClaims, а не getUser', async () => {
+        signedIn();
 
-    const res = await updateSession(request("/campaigns/c1"));
+        const res = await updateSession(request('/campaigns/c1'));
 
-    expect(res.headers.get("location")).toBeNull();
-    expect(getClaims).toHaveBeenCalledTimes(1);
-    expect(getUser).not.toHaveBeenCalled();
-  });
+        expect(res.headers.get('location')).toBeNull();
+        expect(getClaims).toHaveBeenCalledTimes(1);
+        expect(getUser).not.toHaveBeenCalled();
+    });
 
-  it("/sign-in із сесією — redirect на /campaigns", async () => {
-    signedIn();
+    it('/sign-in із сесією — redirect на /campaigns', async () => {
+        signedIn();
 
-    const res = await updateSession(request("/sign-in"));
+        const res = await updateSession(request('/sign-in'));
 
-    expect(new URL(res.headers.get("location") ?? "").pathname).toBe("/campaigns");
-  });
+        expect(new URL(res.headers.get('location') ?? '').pathname).toBe(
+            '/campaigns'
+        );
+    });
 
-  it("публічні сторінки без сесії — пропускає", async () => {
-    signedOut();
+    it('публічні сторінки без сесії — пропускає', async () => {
+        signedOut();
 
-    for (const path of ["/", "/uk", "/sign-in", "/sign-up", "/forgot-password", "/reset-password", "/auth/callback"]) {
-      expect((await updateSession(request(path))).headers.get("location")).toBeNull();
-    }
-  });
+        for (const path of [
+            '/',
+            '/uk',
+            '/sign-in',
+            '/sign-up',
+            '/forgot-password',
+            '/reset-password',
+            '/auth/callback',
+        ]) {
+            expect(
+                (await updateSession(request(path))).headers.get('location')
+            ).toBeNull();
+        }
+    });
 
-  it("/?code=… (Site URL fallback) — довершує вхід через /auth/callback", async () => {
-    signedOut();
+    it('/?code=… (Site URL fallback) — довершує вхід через /auth/callback', async () => {
+        signedOut();
 
-    const res = await updateSession(request("/?code=abc&type=recovery"));
+        const res = await updateSession(request('/?code=abc&type=recovery'));
 
-    const location = new URL(res.headers.get("location") ?? "");
+        const location = new URL(res.headers.get('location') ?? '');
 
-    expect(location.pathname + location.search).toBe("/auth/callback?code=abc&type=recovery");
-  });
+        expect(location.pathname + location.search).toBe(
+            '/auth/callback?code=abc&type=recovery'
+        );
+    });
 });

@@ -1,35 +1,43 @@
-import { redirect } from "next/navigation";
+import { redirect } from 'next/navigation';
 
-import { SourceNotes } from "@/components/content-import/SourceNotes";
-import { RaceEditForm } from "@/components/races/RaceEditForm";
-import { prisma } from "@/lib/db";
-import { requireCampaignDM } from "@/lib/server/campaigns/access";
-import { readAbilities } from "@/lib/utils/abilities/read";
-import { toRace } from "@/lib/utils/races/to-race";
+import { SourceNotes } from '@/components/content-import/SourceNotes';
+import { RaceEditForm } from '@/components/races/RaceEditForm';
+import { prisma } from '@/lib/db';
+import { requireCampaignDM } from '@/lib/server/campaigns/access';
+import { readAbilities } from '@/lib/utils/abilities/read';
+import { toRace } from '@/lib/utils/races/to-race';
 
 export default async function EditRacePage({
-  params,
+    params,
 }: {
-  params: Promise<{ id: string; raceId: string }>;
+    params: Promise<{ id: string; raceId: string }>;
 }) {
-  const { id, raceId } = await params;
+    const { id, raceId } = await params;
 
-  await requireCampaignDM(id);
+    await requireCampaignDM(id);
 
-  const raceData = await prisma.race.findFirst({
-    where: {
-      id: raceId,
-      campaignId: id,
-    },
-  });
+    const raceData = await prisma.race.findFirst({
+        where: {
+            id: raceId,
+            campaignId: id,
+        },
+    });
 
-  if (!raceData) {
-    redirect(`/campaigns/${id}/dm/races`);
-  }
+    if (!raceData) {
+        redirect(`/campaigns/${id}/dm/races`);
+    }
 
-  const { abilities, issues: abilityIssues } = readAbilities("race", raceData);
+    const { abilities, issues: abilityIssues } = readAbilities(
+        'race',
+        raceData
+    );
 
-  const race = toRace(raceData, { abilities, abilityIssues });
+    const race = toRace(raceData, { abilities, abilityIssues });
 
-  return <><SourceNotes campaignId={id} kind="races" targetId={raceId} /><RaceEditForm campaignId={id} race={race} /></>;
+    return (
+        <>
+            <SourceNotes campaignId={id} kind="races" targetId={raceId} />
+            <RaceEditForm campaignId={id} race={race} />
+        </>
+    );
 }

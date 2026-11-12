@@ -1,4 +1,4 @@
-import type { z } from "zod";
+import type { z } from 'zod';
 
 // <systems:generated>
 import { D20_FLAG_SCHEMAS } from "@/systems/d20/rules/ability-flags";
@@ -7,13 +7,15 @@ import { RETALIATION_FLAG_SCHEMAS } from "@/systems/retaliation/rules/ability-fl
 // </systems:generated>
 
 const SYSTEM_FLAG_SCHEMA_LISTS = [
-  // <systems:generated>
-  D20_FLAG_SCHEMAS,
-  MORALE_FLAG_SCHEMAS,
-  RETALIATION_FLAG_SCHEMAS,
-  // </systems:generated>
+    // <systems:generated>
+    D20_FLAG_SCHEMAS,
+    MORALE_FLAG_SCHEMAS,
+    RETALIATION_FLAG_SCHEMAS,
+    // </systems:generated>
 ] as const;
 
 export const SYSTEM_FLAG_SCHEMAS = SYSTEM_FLAG_SCHEMA_LISTS.flat();
 
-export type SystemFlagKey = z.infer<(typeof SYSTEM_FLAG_SCHEMAS)[number]>["flag"];
+export type SystemFlagKey = z.infer<
+    (typeof SYSTEM_FLAG_SCHEMAS)[number]
+>['flag'];

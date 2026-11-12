@@ -1,66 +1,143 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
-import type { LearnedNode } from "@/lib/utils/skills/progression";
-import { schoolMasteryFromLearned, spellDice } from "@/lib/utils/spells/model/dice";
+import type { LearnedNode } from '@/lib/utils/skills/progression';
+import {
+    schoolMasteryFromLearned,
+    spellDice,
+} from '@/lib/utils/spells/model/dice';
 
-const node = (branchId: string, level: "basic" | "advanced" | "expert"): LearnedNode => ({ kind: "branchLevel", nodeId: `${branchId}-${level}`, branchId, level, skillId: null, circle: null });
-
-const learned = [node("b-chaos", "basic"), node("b-chaos", "expert"), node("b-light", "advanced")];
-
-const mastery = schoolMasteryFromLearned(learned, { "b-chaos": "chaos", "b-light": "light" });
-
-const fireball = { dice: 4, groupId: "chaos" };
-
-describe("spellDice", () => {
-  it("герой L6 експерт: 6к10", () => {
-    expect(spellDice({ kind: "hero", level: 6 }, fireball, mastery)).toEqual({ count: 6, sides: 10 });
-  });
-
-  it("герой L2 без гілки: 4к6", () => {
-    expect(spellDice({ kind: "hero", level: 2 }, { dice: 4, groupId: "dark" }, mastery)).toEqual({ count: 4, sides: 6 });
-  });
-
-  it("просунутий — к8", () => {
-    expect(spellDice({ kind: "hero", level: 3 }, { dice: 2, groupId: "light" }, mastery).sides).toBe(8);
-  });
-
-  it.each([
-    [1, { count: 4, sides: 6 }],
-    [4, { count: 6, sides: 6 }],
-    [5, { count: 6, sides: 8 }],
-    [9, { count: 8, sides: 8 }],
-    [10, { count: 9, sides: 10 }],
-    [12, { count: 10, sides: 10 }],
-  ])("юніт L%i: +рівень/2 кубиків, грані за рівнем, майстерність ігнорується", (level, dice) => {
-    expect(spellDice({ kind: "unit", level }, fireball, mastery)).toEqual(dice);
-  });
-
-  it("Печерний владика L6: Вогняна куля 6к8, Метеоритний дощ 5к8", () => {
-    expect(spellDice({ kind: "unit", level: 6 }, { dice: 3, groupId: null }, mastery)).toEqual({ count: 6, sides: 8 });
-    expect(spellDice({ kind: "unit", level: 6 }, { dice: 2, groupId: null }, mastery)).toEqual({ count: 5, sides: 8 });
-  });
-
-  it("герой не змінився: +рівень/3 кубиків, к6 без майстерності", () => {
-    expect(spellDice({ kind: "hero", level: 12 }, { dice: 4, groupId: "dark" }, mastery)).toEqual({ count: 8, sides: 6 });
-  });
+const node = (
+    branchId: string,
+    level: 'basic' | 'advanced' | 'expert'
+): LearnedNode => ({
+    kind: 'branchLevel',
+    nodeId: `${branchId}-${level}`,
+    branchId,
+    level,
+    skillId: null,
+    circle: null,
 });
 
-describe("spellDice без кубиків", () => {
-  it("dice 0: без кубиків для героя і юніта", () => {
-    const buff = { dice: 0, groupId: "light" };
+const learned = [
+    node('b-chaos', 'basic'),
+    node('b-chaos', 'expert'),
+    node('b-light', 'advanced'),
+];
 
-    expect(spellDice({ kind: "hero", level: 6 }, buff, mastery)).toMatchObject({ count: 0 });
-    expect(spellDice({ kind: "unit", level: 6 }, buff, mastery)).toMatchObject({ count: 0 });
-  });
+const mastery = schoolMasteryFromLearned(learned, {
+    'b-chaos': 'chaos',
+    'b-light': 'light',
 });
 
-describe("schoolMasteryFromLearned", () => {
-  it("расові й ультимативні вузли не впливають на майстерність", () => {
-    const nodes: LearnedNode[] = [
-      { nodeId: "r", kind: "racial", skillId: null, branchId: "b-chaos", level: "expert", circle: null },
-      { nodeId: "u", kind: "ultimate", skillId: "s", branchId: "b-chaos", level: "expert", circle: null },
-    ];
+const fireball = { dice: 4, groupId: 'chaos' };
 
-    expect(schoolMasteryFromLearned(nodes, { "b-chaos": "chaos" })("chaos")).toBeNull();
-  });
+describe('spellDice', () => {
+    it('герой L6 експерт: 6к10', () => {
+        expect(
+            spellDice({ kind: 'hero', level: 6 }, fireball, mastery)
+        ).toEqual({ count: 6, sides: 10 });
+    });
+
+    it('герой L2 без гілки: 4к6', () => {
+        expect(
+            spellDice(
+                { kind: 'hero', level: 2 },
+                { dice: 4, groupId: 'dark' },
+                mastery
+            )
+        ).toEqual({ count: 4, sides: 6 });
+    });
+
+    it('просунутий — к8', () => {
+        expect(
+            spellDice(
+                { kind: 'hero', level: 3 },
+                { dice: 2, groupId: 'light' },
+                mastery
+            ).sides
+        ).toBe(8);
+    });
+
+    it.each([
+        [1, { count: 4, sides: 6 }],
+        [4, { count: 6, sides: 6 }],
+        [5, { count: 6, sides: 8 }],
+        [9, { count: 8, sides: 8 }],
+        [10, { count: 9, sides: 10 }],
+        [12, { count: 10, sides: 10 }],
+    ])(
+        'юніт L%i: +рівень/2 кубиків, грані за рівнем, майстерність ігнорується',
+        (level, dice) => {
+            expect(
+                spellDice({ kind: 'unit', level }, fireball, mastery)
+            ).toEqual(dice);
+        }
+    );
+
+    it('Печерний владика L6: Вогняна куля 6к8, Метеоритний дощ 5к8', () => {
+        expect(
+            spellDice(
+                { kind: 'unit', level: 6 },
+                { dice: 3, groupId: null },
+                mastery
+            )
+        ).toEqual({ count: 6, sides: 8 });
+        expect(
+            spellDice(
+                { kind: 'unit', level: 6 },
+                { dice: 2, groupId: null },
+                mastery
+            )
+        ).toEqual({ count: 5, sides: 8 });
+    });
+
+    it('герой не змінився: +рівень/3 кубиків, к6 без майстерності', () => {
+        expect(
+            spellDice(
+                { kind: 'hero', level: 12 },
+                { dice: 4, groupId: 'dark' },
+                mastery
+            )
+        ).toEqual({ count: 8, sides: 6 });
+    });
+});
+
+describe('spellDice без кубиків', () => {
+    it('dice 0: без кубиків для героя і юніта', () => {
+        const buff = { dice: 0, groupId: 'light' };
+
+        expect(
+            spellDice({ kind: 'hero', level: 6 }, buff, mastery)
+        ).toMatchObject({ count: 0 });
+        expect(
+            spellDice({ kind: 'unit', level: 6 }, buff, mastery)
+        ).toMatchObject({ count: 0 });
+    });
+});
+
+describe('schoolMasteryFromLearned', () => {
+    it('расові й ультимативні вузли не впливають на майстерність', () => {
+        const nodes: LearnedNode[] = [
+            {
+                nodeId: 'r',
+                kind: 'racial',
+                skillId: null,
+                branchId: 'b-chaos',
+                level: 'expert',
+                circle: null,
+            },
+            {
+                nodeId: 'u',
+                kind: 'ultimate',
+                skillId: 's',
+                branchId: 'b-chaos',
+                level: 'expert',
+                circle: null,
+            },
+        ];
+
+        expect(
+            schoolMasteryFromLearned(nodes, { 'b-chaos': 'chaos' })('chaos')
+        ).toBeNull();
+    });
 });

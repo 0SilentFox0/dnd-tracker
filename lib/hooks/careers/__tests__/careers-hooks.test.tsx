@@ -1,64 +1,102 @@
 // @vitest-environment happy-dom
-import type { ReactNode } from "react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { act, renderHook, waitFor } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { ReactNode } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { act, renderHook, waitFor } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { careerKeys, useCareerForm, useCareers } from "..";
+import { careerKeys, useCareerForm, useCareers } from '..';
 
-import { createCareer, getCareers, updateCareer } from "@/lib/api/careers";
-import type { CareerData } from "@/types/careers";
+import { createCareer, getCareers, updateCareer } from '@/lib/api/careers';
+import type { CareerData } from '@/types/careers';
 
-vi.mock("@/lib/api/careers", () => ({ getCareers: vi.fn(), createCareer: vi.fn(), updateCareer: vi.fn(), deleteCareer: vi.fn(), getCareer: vi.fn() }));
+vi.mock('@/lib/api/careers', () => ({
+    getCareers: vi.fn(),
+    createCareer: vi.fn(),
+    updateCareer: vi.fn(),
+    deleteCareer: vi.fn(),
+    getCareer: vi.fn(),
+}));
 
-const tier = { name: "T", characteristics: ["ws" as const], skills: ["athletics"], talents: [], trappings: [] };
-
-const career: CareerData = { id: "k1", name: "Soldier", icon: null, class: null, tiers: [tier, tier, tier, tier] };
-
-const wrapper = (client: QueryClient) => {
-  function Wrapper({ children }: { children: ReactNode }) {
-    return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
-  }
-
-  return Wrapper;
+const tier = {
+    name: 'T',
+    characteristics: ['ws' as const],
+    skills: ['athletics'],
+    talents: [],
+    trappings: [],
 };
 
-const newClient = () => new QueryClient({ defaultOptions: { queries: { retry: false } } });
+const career: CareerData = {
+    id: 'k1',
+    name: 'Soldier',
+    icon: null,
+    class: null,
+    tiers: [tier, tier, tier, tier],
+};
 
-describe("career hooks", () => {
-  beforeEach(() => vi.clearAllMocks());
+const wrapper = (client: QueryClient) => {
+    function Wrapper({ children }: { children: ReactNode }) {
+        return (
+            <QueryClientProvider client={client}>
+                {children}
+            </QueryClientProvider>
+        );
+    }
 
-  it("useCareers loads through the api client under the list key", async () => {
-    vi.mocked(getCareers).mockResolvedValue([career]);
+    return Wrapper;
+};
 
-    const client = newClient();
+const newClient = () =>
+    new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
-    const { result } = renderHook(() => useCareers("c1"), { wrapper: wrapper(client) });
+describe('career hooks', () => {
+    beforeEach(() => vi.clearAllMocks());
 
-    await waitFor(() => expect(result.current.isLoading).toBe(false));
-    expect(getCareers).toHaveBeenCalledWith("c1");
-    expect(result.current.data).toEqual([career]);
-    expect(client.getQueryData(careerKeys.list("c1"))).toEqual([career]);
-  });
+    it('useCareers loads through the api client under the list key', async () => {
+        vi.mocked(getCareers).mockResolvedValue([career]);
 
-  it("new form has four empty tiers and creates", async () => {
-    vi.mocked(createCareer).mockResolvedValue(career);
+        const client = newClient();
 
-    const { result } = renderHook(() => useCareerForm("c1"), { wrapper: wrapper(newClient()) });
+        const { result } = renderHook(() => useCareers('c1'), {
+            wrapper: wrapper(client),
+        });
 
-    expect(result.current.form.data.tiers).toHaveLength(4);
+        await waitFor(() => expect(result.current.isLoading).toBe(false));
+        expect(getCareers).toHaveBeenCalledWith('c1');
+        expect(result.current.data).toEqual([career]);
+        expect(client.getQueryData(careerKeys.list('c1'))).toEqual([career]);
+    });
 
-    act(() => result.current.form.set((prev) => ({ ...prev, name: "  Soldier " })));
-    await act(() => result.current.save());
-    expect(createCareer).toHaveBeenCalledWith("c1", expect.objectContaining({ name: "Soldier" }));
-  });
+    it('new form has four empty tiers and creates', async () => {
+        vi.mocked(createCareer).mockResolvedValue(career);
 
-  it("existing career form updates by id", async () => {
-    vi.mocked(updateCareer).mockResolvedValue(career);
+        const { result } = renderHook(() => useCareerForm('c1'), {
+            wrapper: wrapper(newClient()),
+        });
 
-    const { result } = renderHook(() => useCareerForm("c1", career), { wrapper: wrapper(newClient()) });
+        expect(result.current.form.data.tiers).toHaveLength(4);
 
-    await act(() => result.current.save());
-    expect(updateCareer).toHaveBeenCalledWith("c1", "k1", expect.objectContaining({ name: "Soldier" }));
-  });
+        act(() =>
+            result.current.form.set((prev) => ({ ...prev, name: '  Soldier ' }))
+        );
+        await act(() => result.current.save());
+        expect(createCareer).toHaveBeenCalledWith(
+            'c1',
+            expect.objectContaining({ name: 'Soldier' })
+        );
+    });
+
+    it('existing career form updates by id', async () => {
+        vi.mocked(updateCareer).mockResolvedValue(career);
+
+        const { result } = renderHook(() => useCareerForm('c1', career), {
+            wrapper: wrapper(newClient()),
+        });
+
+        await act(() => result.current.save());
+        expect(updateCareer).toHaveBeenCalledWith(
+            'c1',
+            'k1',
+            expect.objectContaining({ name: 'Soldier' })
+        );
+    });
 });

@@ -1,42 +1,58 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
-import { resetTurnState } from "../turn-state";
+import { resetTurnState } from '../turn-state';
 
-import { placed } from "@/lib/utils/battle/__tests__/fixtures/placed";
+import { placed } from '@/lib/utils/battle/__tests__/fixtures/placed';
 
-describe("resetTurnState", () => {
-  it("clears per-turn counters and remembers the start position", () => {
-    const p = placed("a", { side: "ally", at: { x: 2, y: 3 } });
+describe('resetTurnState', () => {
+    it('clears per-turn counters and remembers the start position', () => {
+        const p = placed('a', { side: 'ally', at: { x: 2, y: 3 } });
 
-    const dirty = {
-      ...p,
-      battleData: { ...p.battleData, retaliationsUsed: 2, movementUsed: 15, returnedThisTurn: true },
-    };
+        const dirty = {
+            ...p,
+            battleData: {
+                ...p.battleData,
+                retaliationsUsed: 2,
+                movementUsed: 15,
+                returnedThisTurn: true,
+            },
+        };
 
-    const next = resetTurnState(dirty);
+        const next = resetTurnState(dirty);
 
-    expect(next.retaliationsUsed).toBe(0);
-    expect(next.movementUsed).toBe(0);
-    expect(next.turnStartPosition).toEqual({ x: 2, y: 3 });
-    expect(next.returnedThisTurn).toBeUndefined();
-  });
+        expect(next.retaliationsUsed).toBe(0);
+        expect(next.movementUsed).toBe(0);
+        expect(next.turnStartPosition).toEqual({ x: 2, y: 3 });
+        expect(next.returnedThisTurn).toBeUndefined();
+    });
 
-  it("does not add movementUsed when it was unset", () => {
-    const next = resetTurnState(placed("a", { side: "ally", at: { x: 0, y: 0 } }));
+    it('does not add movementUsed when it was unset', () => {
+        const next = resetTurnState(
+            placed('a', { side: 'ally', at: { x: 0, y: 0 } })
+        );
 
-    expect("movementUsed" in next && next.movementUsed).toBeFalsy();
-  });
+        expect('movementUsed' in next && next.movementUsed).toBeFalsy();
+    });
 });
 
-describe("resetTurnState legendary", () => {
-  const withLegendary = () => {
-    const p = placed("m", { side: "enemy", at: { x: 0, y: 0 } });
+describe('resetTurnState legendary', () => {
+    const withLegendary = () => {
+        const p = placed('m', { side: 'enemy', at: { x: 0, y: 0 } });
 
-    return { ...p, battleData: { ...p.battleData, legendary: { actions: 3, actionsLeft: 1, resistLeft: 1 } } } as typeof p;
-  };
+        return {
+            ...p,
+            battleData: {
+                ...p.battleData,
+                legendary: { actions: 3, actionsLeft: 1, resistLeft: 1 },
+            },
+        } as typeof p;
+    };
 
-  it("рефілить легендарні дії на початку ходу, але не при keepLegendary", () => {
-    expect(resetTurnState(withLegendary()).legendary?.actionsLeft).toBe(3);
-    expect(resetTurnState(withLegendary(), { keepLegendary: true }).legendary?.actionsLeft).toBe(1);
-  });
+    it('рефілить легендарні дії на початку ходу, але не при keepLegendary', () => {
+        expect(resetTurnState(withLegendary()).legendary?.actionsLeft).toBe(3);
+        expect(
+            resetTurnState(withLegendary(), { keepLegendary: true }).legendary
+                ?.actionsLeft
+        ).toBe(1);
+    });
 });

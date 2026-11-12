@@ -1,135 +1,170 @@
 // @vitest-environment happy-dom
-import type { ReactNode } from "react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { renderHook } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { ReactNode } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { renderHook } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { showKeys } from "../keys";
-import { usePusherShowSync } from "../usePusherShowSync";
+import { showKeys } from '../keys';
+import { usePusherShowSync } from '../usePusherShowSync';
 
-import { worldKeys } from "@/lib/hooks/world/keys";
+import { worldKeys } from '@/lib/hooks/world/keys';
 
-const captured = vi.hoisted(() => ({ handlers: {} as Record<string, (d: unknown) => void>, callbacks: {} as { onSubscribed?: () => void } }));
+const captured = vi.hoisted(() => ({
+    handlers: {} as Record<string, (d: unknown) => void>,
+    callbacks: {} as { onSubscribed?: () => void },
+}));
 
-vi.mock("@/lib/hooks/common", async (orig) => ({
-  ...(await orig<typeof import("@/lib/hooks/common")>()),
-  usePusherChannel: (_name: string | null, handlers: Record<string, (d: unknown) => void>, callbacks: { onSubscribed?: () => void }) => {
-    captured.handlers = handlers;
-    captured.callbacks = callbacks;
-  },
+vi.mock('@/lib/hooks/common', async (orig) => ({
+    ...(await orig<typeof import('@/lib/hooks/common')>()),
+    usePusherChannel: (
+        _name: string | null,
+        handlers: Record<string, (d: unknown) => void>,
+        callbacks: { onSubscribed?: () => void }
+    ) => {
+        captured.handlers = handlers;
+        captured.callbacks = callbacks;
+    },
 }));
 
 const setup = () => {
-  const queryClient = new QueryClient();
+    const queryClient = new QueryClient();
 
-  const invalidate = vi.spyOn(queryClient, "invalidateQueries");
+    const invalidate = vi.spyOn(queryClient, 'invalidateQueries');
 
-  const wrapper = ({ children }: { children: ReactNode }) => <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+    const wrapper = ({ children }: { children: ReactNode }) => (
+        <QueryClientProvider client={queryClient}>
+            {children}
+        </QueryClientProvider>
+    );
 
-  const hook = renderHook(() => usePusherShowSync("c1"), { wrapper });
+    const hook = renderHook(() => usePusherShowSync('c1'), { wrapper });
 
-  return { invalidate, queryClient, ...hook };
+    return { invalidate, queryClient, ...hook };
 };
 
-const keysOf = (spy: ReturnType<typeof setup>["invalidate"]) => spy.mock.calls.map((c) => c[0]?.queryKey);
+const keysOf = (spy: ReturnType<typeof setup>['invalidate']) =>
+    spy.mock.calls.map((c) => c[0]?.queryKey);
 
-const event = (seq: number) => ({ campaignId: "c1", mapId: "m1", seq });
+const event = (seq: number) => ({ campaignId: 'c1', mapId: 'm1', seq });
 
-describe("usePusherShowSync world-changed", () => {
-  beforeEach(() => vi.useFakeTimers());
+describe('usePusherShowSync world-changed', () => {
+    beforeEach(() => vi.useFakeTimers());
 
-  afterEach(() => vi.useRealTimers());
+    afterEach(() => vi.useRealTimers());
 
-  it("3 події за 200 мс — одна інвалідація світу", () => {
-    const { invalidate } = setup();
+    it('3 події за 200 мс — одна інвалідація світу', () => {
+        const { invalidate } = setup();
 
-    for (const seq of [1, 2, 3]) {
-      captured.handlers["world-changed"](event(seq));
-      vi.advanceTimersByTime(60);
-    }
+        for (const seq of [1, 2, 3]) {
+            captured.handlers['world-changed'](event(seq));
+            vi.advanceTimersByTime(60);
+        }
 
-    expect(invalidate).not.toHaveBeenCalled();
+        expect(invalidate).not.toHaveBeenCalled();
 
-    vi.advanceTimersByTime(1000);
+        vi.advanceTimersByTime(1000);
 
-    expect(keysOf(invalidate)).toEqual([worldKeys.viewAll("c1"), worldKeys.mapAll("c1"), worldKeys.maps("c1"), worldKeys.log("c1")]);
-  });
+        expect(keysOf(invalidate)).toEqual([
+            worldKeys.viewAll('c1'),
+            worldKeys.mapAll('c1'),
+            worldKeys.maps('c1'),
+            worldKeys.log('c1'),
+        ]);
+    });
 
-  it("повтор того ж seq ігнорується", () => {
-    const { invalidate } = setup();
+    it('повтор того ж seq ігнорується', () => {
+        const { invalidate } = setup();
 
-    captured.handlers["world-changed"](event(5));
-    vi.advanceTimersByTime(1000);
-    invalidate.mockClear();
+        captured.handlers['world-changed'](event(5));
+        vi.advanceTimersByTime(1000);
+        invalidate.mockClear();
 
-    captured.handlers["world-changed"](event(5));
-    vi.advanceTimersByTime(1000);
+        captured.handlers['world-changed'](event(5));
+        vi.advanceTimersByTime(1000);
 
-    expect(invalidate).not.toHaveBeenCalled();
-  });
+        expect(invalidate).not.toHaveBeenCalled();
+    });
 
-  it("сміття без seq ігнорується", () => {
-    const { invalidate } = setup();
+    it('сміття без seq ігнорується', () => {
+        const { invalidate } = setup();
 
-    captured.handlers["world-changed"](null);
-    captured.handlers["world-changed"]({ campaignId: "c1" });
-    vi.advanceTimersByTime(1000);
+        captured.handlers['world-changed'](null);
+        captured.handlers['world-changed']({ campaignId: 'c1' });
+        vi.advanceTimersByTime(1000);
 
-    expect(invalidate).not.toHaveBeenCalled();
-  });
+        expect(invalidate).not.toHaveBeenCalled();
+    });
 
-  it("unmount скасовує таймер", () => {
-    const { invalidate, unmount } = setup();
+    it('unmount скасовує таймер', () => {
+        const { invalidate, unmount } = setup();
 
-    captured.handlers["world-changed"](event(1));
-    unmount();
-    vi.advanceTimersByTime(2000);
+        captured.handlers['world-changed'](event(1));
+        unmount();
+        vi.advanceTimersByTime(2000);
 
-    expect(invalidate).not.toHaveBeenCalled();
-  });
+        expect(invalidate).not.toHaveBeenCalled();
+    });
 
-  it("onSubscribed інвалідовує і показ, і world view", () => {
-    const { invalidate } = setup();
+    it('onSubscribed інвалідовує і показ, і world view', () => {
+        const { invalidate } = setup();
 
-    captured.callbacks.onSubscribed?.();
+        captured.callbacks.onSubscribed?.();
 
-    expect(keysOf(invalidate)).toContainEqual(worldKeys.viewAll("c1"));
-    expect(invalidate).toHaveBeenCalledTimes(2);
-  });
+        expect(keysOf(invalidate)).toContainEqual(worldKeys.viewAll('c1'));
+        expect(invalidate).toHaveBeenCalledTimes(2);
+    });
 });
 
-describe("usePusherShowSync show-state", () => {
-  const full = { deckId: null, deckTitle: null, slide: null, nextImageUrl: null, audio: null, seq: 3 };
+describe('usePusherShowSync show-state', () => {
+    const full = {
+        deckId: null,
+        deckTitle: null,
+        slide: null,
+        nextImageUrl: null,
+        audio: null,
+        seq: 3,
+    };
 
-  it("повний стан лягає в кеш без перечитування", () => {
-    const { invalidate, queryClient } = setup();
+    it('повний стан лягає в кеш без перечитування', () => {
+        const { invalidate, queryClient } = setup();
 
-    captured.handlers["show-state"]({ campaignId: "c1", show: full, seq: 3 });
+        captured.handlers['show-state']({
+            campaignId: 'c1',
+            show: full,
+            seq: 3,
+        });
 
-    expect(queryClient.getQueryData<{ show: { seq: number } }>(showKeys.state("c1"))?.show.seq).toBe(3);
-    expect(invalidate).not.toHaveBeenCalled();
-  });
+        expect(
+            queryClient.getQueryData<{ show: { seq: number } }>(
+                showKeys.state('c1')
+            )?.show.seq
+        ).toBe(3);
+        expect(invalidate).not.toHaveBeenCalled();
+    });
 
-  it("подія лише з seq перечитує вигляд, якщо seq новіший", () => {
-    const { invalidate, queryClient } = setup();
+    it('подія лише з seq перечитує вигляд, якщо seq новіший', () => {
+        const { invalidate, queryClient } = setup();
 
-    queryClient.setQueryData(showKeys.state("c1"), { show: full, clockOffsetMs: null });
+        queryClient.setQueryData(showKeys.state('c1'), {
+            show: full,
+            clockOffsetMs: null,
+        });
 
-    captured.handlers["show-state"]({ campaignId: "c1", seq: 3 });
+        captured.handlers['show-state']({ campaignId: 'c1', seq: 3 });
 
-    expect(invalidate).not.toHaveBeenCalled();
+        expect(invalidate).not.toHaveBeenCalled();
 
-    captured.handlers["show-state"]({ campaignId: "c1", seq: 4 });
+        captured.handlers['show-state']({ campaignId: 'c1', seq: 4 });
 
-    expect(keysOf(invalidate)).toEqual([showKeys.state("c1")]);
-  });
+        expect(keysOf(invalidate)).toEqual([showKeys.state('c1')]);
+    });
 
-  it("сміття ігнорується", () => {
-    const { invalidate } = setup();
+    it('сміття ігнорується', () => {
+        const { invalidate } = setup();
 
-    captured.handlers["show-state"](null);
-    captured.handlers["show-state"]({ campaignId: "c1" });
+        captured.handlers['show-state'](null);
+        captured.handlers['show-state']({ campaignId: 'c1' });
 
-    expect(invalidate).not.toHaveBeenCalled();
-  });
+        expect(invalidate).not.toHaveBeenCalled();
+    });
 });

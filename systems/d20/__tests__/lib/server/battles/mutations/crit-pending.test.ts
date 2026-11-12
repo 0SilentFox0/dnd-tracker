@@ -1,223 +1,398 @@
-import type { Spell } from "@prisma/client";
-import { describe, expect, it, vi } from "vitest";
+import type { Spell } from '@prisma/client';
+import { describe, expect, it, vi } from 'vitest';
 
-import { AttackType } from "@/lib/constants/battle";
-import { CRITICAL_SUCCESS_EFFECTS } from "@/lib/constants/critical-effects";
-import { attackBodySchema } from "@/lib/schemas/battles";
-import { context, goblin as baseGoblin, participant } from "@/lib/server/battles/__tests__/mutations/fixtures";
-import { createAttackMutation } from "@/lib/server/battles/mutations/attack/attack-mutation";
-import { createSpellMutation } from "@/lib/server/battles/mutations/spell/spell-mutation";
-import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
-import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
-import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
-import { mulberry32 } from "@/lib/utils/common/rng";
-import { createCritChoiceMutation } from "@/systems/d20/server/battle/crit-choice-mutation";
+import { AttackType } from '@/lib/constants/battle';
+import { CRITICAL_SUCCESS_EFFECTS } from '@/lib/constants/critical-effects';
+import { attackBodySchema } from '@/lib/schemas/battles';
+import {
+    context,
+    goblin as baseGoblin,
+    participant,
+} from '@/lib/server/battles/__tests__/mutations/fixtures';
+import { createAttackMutation } from '@/lib/server/battles/mutations/attack/attack-mutation';
+import { createSpellMutation } from '@/lib/server/battles/mutations/spell/spell-mutation';
+import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
+import { eventTextOf } from '@/lib/utils/battle/log/__tests__/event-text';
+import type { BattleMutationContext } from '@/lib/utils/battle/pipeline/run-battle-mutation';
+import { mulberry32 } from '@/lib/utils/common/rng';
+import { createCritChoiceMutation } from '@/systems/d20/server/battle/crit-choice-mutation';
 
 const base = createMockParticipant();
 
 const hero = participant(
-  "hero",
-  { controlledBy: "user-1" },
-  {
-    battleData: { ...base.battleData, attacks: [{ id: "sword", name: "Меч", type: AttackType.MELEE, attackBonus: 5, damageDice: "1d8", damageType: "slashing" }] },
-    spellcasting: { spellSlots: { "1": { max: 2, current: 2 } }, knownSpells: ["s1"] },
-  },
+    'hero',
+    { controlledBy: 'user-1' },
+    {
+        battleData: {
+            ...base.battleData,
+            attacks: [
+                {
+                    id: 'sword',
+                    name: 'Меч',
+                    type: AttackType.MELEE,
+                    attackBonus: 5,
+                    damageDice: '1d8',
+                    damageType: 'slashing',
+                },
+            ],
+        },
+        spellcasting: {
+            spellSlots: { '1': { max: 2, current: 2 } },
+            knownSpells: ['s1'],
+        },
+    }
 );
 
-const goblin = { ...baseGoblin, combatStats: { ...baseGoblin.combatStats, maxHp: 100, currentHp: 100 } };
+const goblin = {
+    ...baseGoblin,
+    combatStats: { ...baseGoblin.combatStats, maxHp: 100, currentHp: 100 },
+};
 
-const attack = createAttackMutation({ loadPool: async () => ({ units: [], races: [] }), loadSpells: async () => [] });
+const attack = createAttackMutation({
+    loadPool: async () => ({ units: [], races: [] }),
+    loadSpells: async () => [],
+});
 
 const spell = createSpellMutation({
-  loadPool: async () => ({ units: [], races: [] }),
-  loadSpell: vi.fn(async () => ({
-    id: "s1", campaignId: "c1", name: "Стріла", level: 1, groupId: null, icon: null, dice: 1, cost: "action", targeting: { kind: "enemy" },
-    resolution: { kind: "save", ability: "dexterity", onSuccess: "half" },
-    spellEffects: [{ kind: "dealDamage", amount: { spellRoll: 100 }, damageType: "fire" }], raceModifiers: [],
-  }) as unknown as Spell),
+    loadPool: async () => ({ units: [], races: [] }),
+    loadSpell: vi.fn(
+        async () =>
+            ({
+                id: 's1',
+                campaignId: 'c1',
+                name: 'Стріла',
+                level: 1,
+                groupId: null,
+                icon: null,
+                dice: 1,
+                cost: 'action',
+                targeting: { kind: 'enemy' },
+                resolution: {
+                    kind: 'save',
+                    ability: 'dexterity',
+                    onSuccess: 'half',
+                },
+                spellEffects: [
+                    {
+                        kind: 'dealDamage',
+                        amount: { spellRoll: 100 },
+                        damageType: 'fire',
+                    },
+                ],
+                raceModifiers: [],
+            }) as unknown as Spell
+    ),
 });
 
 const on = (over: Partial<BattleMutationContext> = {}) => {
-  const c = context({ participants: [hero, goblin], ...over });
+    const c = context({ participants: [hero, goblin], ...over });
 
-  return { ...c, meta: { ...c.meta, critChoiceByDm: true } };
+    return { ...c, meta: { ...c.meta, critChoiceByDm: true } };
 };
 
-const body = (over: Record<string, unknown> = {}) => attackBodySchema.parse({ attackerId: "hero", targetId: "gob", attackId: "sword", d20Roll: 20, damageRolls: [4], ...over });
-
-const hpOf = (out: { participants: { basicInfo: { id: string }; combatStats: { currentHp: number } }[] }) => out.participants.find((p) => p.basicInfo.id === "gob")?.combatStats.currentHp;
-
-describe("атака: вибір крита ДМ-ом", () => {
-  it("прапор off + нат. 20: дія застосована, pending немає", async () => {
-    const c = on();
-
-    const out = await attack({ ...c, meta: { ...c.meta, critChoiceByDm: false } }, body());
-
-    expect(out.events).toHaveLength(1);
-    expect(out.scene?.pendingChoice).toBeUndefined();
-  });
-
-  it("прапор on + тригер: учасники без змін, подій немає, pending має seed і request", async () => {
-    const c = on();
-
-    const out = await attack(c, body());
-
-    expect(out.participants).toBe(c.participants);
-    expect(out.events).toEqual([]);
-    expect(out.response).toEqual({ pendingChoice: true });
-    expect(out.scene?.pendingChoice).toMatchObject({
-      shown: { action: "attack", actorId: "hero", triggers: [expect.objectContaining({ source: "attack", kind: "success", key: "attack:hero:gob:0" })] },
-      hidden: { seed: expect.any(Number), request: expect.objectContaining({ attackerId: "hero" }) },
+const body = (over: Record<string, unknown> = {}) =>
+    attackBodySchema.parse({
+        attackerId: 'hero',
+        targetId: 'gob',
+        attackId: 'sword',
+        d20Roll: 20,
+        damageRolls: [4],
+        ...over,
     });
-  });
 
-  it("прапор on без крита: звичайний результат", async () => {
-    const out = await attack(on(), body({ d20Roll: 12 }));
+const hpOf = (out: {
+    participants: {
+        basicInfo: { id: string };
+        combatStats: { currentHp: number };
+    }[];
+}) =>
+    out.participants.find((p) => p.basicInfo.id === 'gob')?.combatStats
+        .currentHp;
 
-    expect(out.events).toHaveLength(1);
-    expect(out.scene?.pendingChoice).toBeUndefined();
-  });
+describe('атака: вибір крита ДМ-ом', () => {
+    it('прапор off + нат. 20: дія застосована, pending немає', async () => {
+        const c = on();
 
-  it("resume з порожнім вибором однаковий за seed і очищає pending", async () => {
-    const pending = (await attack(on(), body())).scene?.pendingChoice as { hidden: { seed: number } };
+        const out = await attack(
+            { ...c, meta: { ...c.meta, critChoiceByDm: false } },
+            body()
+        );
 
-    const resume = { seed: pending.hidden.seed, choices: {} };
+        expect(out.events).toHaveLength(1);
+        expect(out.scene?.pendingChoice).toBeUndefined();
+    });
 
-    const a = await attack(on(), body(), resume);
+    it('прапор on + тригер: учасники без змін, подій немає, pending має seed і request', async () => {
+        const c = on();
 
-    const b = await attack(on(), body(), resume);
+        const out = await attack(c, body());
 
-    expect(a.scene?.pendingChoice).toBeNull();
-    expect(a.events).toHaveLength(1);
-    expect(hpOf(a)).toBe(hpOf(b));
-    expect(eventTextOf(a.events[0])).toBe(eventTextOf(b.events[0]));
-  });
+        expect(out.participants).toBe(c.participants);
+        expect(out.events).toEqual([]);
+        expect(out.response).toEqual({ pendingChoice: true });
+        expect(out.scene?.pendingChoice).toMatchObject({
+            shown: {
+                action: 'attack',
+                actorId: 'hero',
+                triggers: [
+                    expect.objectContaining({
+                        source: 'attack',
+                        kind: 'success',
+                        key: 'attack:hero:gob:0',
+                    }),
+                ],
+            },
+            hidden: {
+                seed: expect.any(Number),
+                request: expect.objectContaining({ attackerId: 'hero' }),
+            },
+        });
+    });
 
-  it("пауза → вибір «випадково» дає той самий результат, що й прапор off із тим самим rng", async () => {
-    const critChoice = createCritChoiceMutation({ attack, spell });
+    it('прапор on без крита: звичайний результат', async () => {
+        const out = await attack(on(), body({ d20Roll: 12 }));
 
-    const random = vi.spyOn(Math, "random").mockReturnValue(0.37);
+        expect(out.events).toHaveLength(1);
+        expect(out.scene?.pendingChoice).toBeUndefined();
+    });
 
-    const seeded = (flag: boolean) => {
-      const c = on();
+    it('resume з порожнім вибором однаковий за seed і очищає pending', async () => {
+        const pending = (await attack(on(), body())).scene?.pendingChoice as {
+            hidden: { seed: number };
+        };
 
-      return { ...c, meta: { ...c.meta, critChoiceByDm: flag } };
+        const resume = { seed: pending.hidden.seed, choices: {} };
+
+        const a = await attack(on(), body(), resume);
+
+        const b = await attack(on(), body(), resume);
+
+        expect(a.scene?.pendingChoice).toBeNull();
+        expect(a.events).toHaveLength(1);
+        expect(hpOf(a)).toBe(hpOf(b));
+        expect(eventTextOf(a.events[0])).toBe(eventTextOf(b.events[0]));
+    });
+
+    it('пауза → вибір «випадково» дає той самий результат, що й прапор off із тим самим rng', async () => {
+        const critChoice = createCritChoiceMutation({ attack, spell });
+
+        const random = vi.spyOn(Math, 'random').mockReturnValue(0.37);
+
+        const seeded = (flag: boolean) => {
+            const c = on();
+
+            return { ...c, meta: { ...c.meta, critChoiceByDm: flag } };
+        };
+
+        const off = await attack(seeded(false), body());
+
+        const paused = seeded(true);
+
+        const pending = (await attack(paused, body())).scene?.pendingChoice;
+
+        const resumed = await critChoice(
+            { ...paused, scene: { ...paused.scene, pendingChoice: pending! } },
+            { choices: { 'attack:hero:gob:0': 'random' } }
+        );
+
+        random.mockRestore();
+
+        expect(eventTextOf(resumed.events[0])).toBe(eventTextOf(off.events[0]));
+        expect(hpOf(resumed)).toBe(hpOf(off));
+    });
+
+    it('схема відкидає critChoices/seed з тіла — pending не обійти', async () => {
+        const parsed = body({
+            critChoices: { 'attack:hero:gob:0': 1 },
+            seed: 5,
+        });
+
+        expect(parsed).not.toHaveProperty('critChoices');
+        expect(parsed).not.toHaveProperty('seed');
+
+        expect((await attack(on(), parsed)).scene?.pendingChoice).toBeTruthy();
+    });
+});
+
+describe('заклинання: вибір крита ДМ-ом', () => {
+    const dm = () => on({ isDM: true, userId: 'dm' });
+
+    const data = (over: Record<string, unknown> = {}) => ({
+        casterId: 'hero',
+        spellId: 's1',
+        targetIds: ['gob'],
+        diceRolls: [4],
+        saveRolls: [{ participantId: 'gob', roll: 20 }],
+        ...over,
+    });
+
+    it('крит рятунку при увімкненому прапорі створює pending', async () => {
+        const out = await spell(dm(), data() as never);
+
+        expect(out.events).toEqual([]);
+        expect(out.scene?.pendingChoice).toMatchObject({
+            shown: {
+                action: 'spell',
+                triggers: [expect.objectContaining({ source: 'save' })],
+            },
+        });
+    });
+
+    it('повтор після вибору йде від імені гравця: free від гравця не робить каст безкоштовним', async () => {
+        const critChoice = createCritChoiceMutation({ attack, spell });
+
+        let player = on();
+
+        let pending;
+
+        for (let seed = 1; !pending && seed < 500; seed++) {
+            player = on({ rng: mulberry32(seed) });
+
+            pending = (
+                await spell(
+                    player,
+                    data({ free: true, saveRolls: [] }) as never
+                )
+            ).scene?.pendingChoice;
+        }
+
+        const dmCtx = {
+            ...dm(),
+            scene: { ...player.scene, pendingChoice: pending! },
+        };
+
+        const out = await critChoice(dmCtx, {
+            choices: { 'save:hero:gob:0': 'random' },
+        });
+
+        const caster = out.participants.find((p) => p.basicInfo.id === 'hero')!;
+
+        expect(caster.spellcasting.spellSlots['1'].current).toBe(1);
+        expect(caster.actionFlags.hasUsedAction).toBe(true);
+    });
+
+    it('preview pending не створює', async () => {
+        const out = await spell(
+            dm(),
+            data({ preview: true, diceRolls: [] }) as never
+        );
+
+        expect(out.scene?.pendingChoice).toBeUndefined();
+        expect(out.response).toMatchObject({ preview: true });
+    });
+
+    it('прапор off: заклинання застосоване', async () => {
+        const c = dm();
+
+        const out = await spell(
+            { ...c, meta: { ...c.meta, critChoiceByDm: false } },
+            data() as never
+        );
+
+        expect(out.events).toHaveLength(1);
+        expect(out.scene?.pendingChoice).toBeUndefined();
+    });
+});
+
+describe('заклинання-атака: вибір крита ДМ-ом', () => {
+    const bolt = createSpellMutation({
+        loadPool: async () => ({ units: [], races: [] }),
+        loadSpell: vi.fn(
+            async () =>
+                ({
+                    id: 's1',
+                    campaignId: 'c1',
+                    name: 'Промінь',
+                    level: 1,
+                    groupId: null,
+                    icon: null,
+                    dice: 1,
+                    cost: 'action',
+                    targeting: { kind: 'enemy' },
+                    resolution: { kind: 'attack' },
+                    spellEffects: [
+                        {
+                            kind: 'dealDamage',
+                            amount: { spellRoll: 100 },
+                            damageType: 'fire',
+                        },
+                    ],
+                    raceModifiers: [],
+                }) as unknown as Spell
+        ),
+    });
+
+    const critChoice = createCritChoiceMutation({ attack, spell: bolt });
+
+    const dm = () => on({ isDM: true, userId: 'dm' });
+
+    const data = {
+        casterId: 'hero',
+        spellId: 's1',
+        targetIds: ['gob'],
+        diceRolls: [4],
+        attackRolls: [{ participantId: 'gob', roll: 20 }],
     };
 
-    const off = await attack(seeded(false), body());
+    it('нат. 20 при увімкненому прапорі: pending, учасники й версія без змін, тригер attack', async () => {
+        const c = dm();
 
-    const paused = seeded(true);
+        const out = await bolt(c, data as never);
 
-    const pending = (await attack(paused, body())).scene?.pendingChoice;
+        expect(out.participants).toBe(c.participants);
+        expect(out.events).toEqual([]);
+        expect(out.response).toEqual({ pendingChoice: true });
+        expect(out.scene?.pendingChoice).toMatchObject({
+            shown: {
+                action: 'spell',
+                triggers: [
+                    expect.objectContaining({
+                        source: 'attack',
+                        kind: 'success',
+                        key: 'attack:hero:gob:0',
+                    }),
+                ],
+            },
+        });
+    });
 
-    const resumed = await critChoice({ ...paused, scene: { ...paused.scene, pendingChoice: pending! } }, { choices: { "attack:hero:gob:0": "random" } });
+    it('вибраний double_damage застосовано, pending очищено', async () => {
+        const c = dm();
 
-    random.mockRestore();
+        const pending = (await bolt(c, data as never)).scene?.pendingChoice;
 
-    expect(eventTextOf(resumed.events[0])).toBe(eventTextOf(off.events[0]));
-    expect(hpOf(resumed)).toBe(hpOf(off));
-  });
+        const plain = await bolt(
+            {
+                ...c,
+                meta: {
+                    ...c.meta,
+                    critChoiceByDm: false,
+                    rules: {
+                        ...c.meta.rules,
+                        criticals: {
+                            ...c.meta.rules.criticals,
+                            effects: false,
+                        },
+                    },
+                },
+            },
+            data as never
+        );
 
-  it("схема відкидає critChoices/seed з тіла — pending не обійти", async () => {
-    const parsed = body({ critChoices: { "attack:hero:gob:0": 1 }, seed: 5 });
+        const out = await critChoice(
+            { ...c, scene: { ...c.scene, pendingChoice: pending! } },
+            {
+                choices: {
+                    'attack:hero:gob:0': CRITICAL_SUCCESS_EFFECTS.find(
+                        (e) => e.effect.type === 'double_damage'
+                    )!.id,
+                },
+            }
+        );
 
-    expect(parsed).not.toHaveProperty("critChoices");
-    expect(parsed).not.toHaveProperty("seed");
-
-    expect((await attack(on(), parsed)).scene?.pendingChoice).toBeTruthy();
-  });
-});
-
-describe("заклинання: вибір крита ДМ-ом", () => {
-  const dm = () => on({ isDM: true, userId: "dm" });
-
-  const data = (over: Record<string, unknown> = {}) => ({ casterId: "hero", spellId: "s1", targetIds: ["gob"], diceRolls: [4], saveRolls: [{ participantId: "gob", roll: 20 }], ...over });
-
-  it("крит рятунку при увімкненому прапорі створює pending", async () => {
-    const out = await spell(dm(), data() as never);
-
-    expect(out.events).toEqual([]);
-    expect(out.scene?.pendingChoice).toMatchObject({ shown: { action: "spell", triggers: [expect.objectContaining({ source: "save" })] } });
-  });
-
-  it("повтор після вибору йде від імені гравця: free від гравця не робить каст безкоштовним", async () => {
-    const critChoice = createCritChoiceMutation({ attack, spell });
-
-    let player = on();
-
-    let pending;
-
-    for (let seed = 1; !pending && seed < 500; seed++) {
-      player = on({ rng: mulberry32(seed) });
-
-      pending = (await spell(player, data({ free: true, saveRolls: [] }) as never)).scene?.pendingChoice;
-    }
-
-    const dmCtx = { ...dm(), scene: { ...player.scene, pendingChoice: pending! } };
-
-    const out = await critChoice(dmCtx, { choices: { "save:hero:gob:0": "random" } });
-
-    const caster = out.participants.find((p) => p.basicInfo.id === "hero")!;
-
-    expect(caster.spellcasting.spellSlots["1"].current).toBe(1);
-    expect(caster.actionFlags.hasUsedAction).toBe(true);
-  });
-
-  it("preview pending не створює", async () => {
-    const out = await spell(dm(), data({ preview: true, diceRolls: [] }) as never);
-
-    expect(out.scene?.pendingChoice).toBeUndefined();
-    expect(out.response).toMatchObject({ preview: true });
-  });
-
-  it("прапор off: заклинання застосоване", async () => {
-    const c = dm();
-
-    const out = await spell({ ...c, meta: { ...c.meta, critChoiceByDm: false } }, data() as never);
-
-    expect(out.events).toHaveLength(1);
-    expect(out.scene?.pendingChoice).toBeUndefined();
-  });
-});
-
-
-describe("заклинання-атака: вибір крита ДМ-ом", () => {
-  const bolt = createSpellMutation({
-    loadPool: async () => ({ units: [], races: [] }),
-    loadSpell: vi.fn(async () => ({
-      id: "s1", campaignId: "c1", name: "Промінь", level: 1, groupId: null, icon: null, dice: 1, cost: "action", targeting: { kind: "enemy" },
-      resolution: { kind: "attack" },
-      spellEffects: [{ kind: "dealDamage", amount: { spellRoll: 100 }, damageType: "fire" }], raceModifiers: [],
-    }) as unknown as Spell),
-  });
-
-  const critChoice = createCritChoiceMutation({ attack, spell: bolt });
-
-  const dm = () => on({ isDM: true, userId: "dm" });
-
-  const data = { casterId: "hero", spellId: "s1", targetIds: ["gob"], diceRolls: [4], attackRolls: [{ participantId: "gob", roll: 20 }] };
-
-  it("нат. 20 при увімкненому прапорі: pending, учасники й версія без змін, тригер attack", async () => {
-    const c = dm();
-
-    const out = await bolt(c, data as never);
-
-    expect(out.participants).toBe(c.participants);
-    expect(out.events).toEqual([]);
-    expect(out.response).toEqual({ pendingChoice: true });
-    expect(out.scene?.pendingChoice).toMatchObject({ shown: { action: "spell", triggers: [expect.objectContaining({ source: "attack", kind: "success", key: "attack:hero:gob:0" })] } });
-  });
-
-  it("вибраний double_damage застосовано, pending очищено", async () => {
-    const c = dm();
-
-    const pending = (await bolt(c, data as never)).scene?.pendingChoice;
-
-    const plain = await bolt({ ...c, meta: { ...c.meta, critChoiceByDm: false, rules: { ...c.meta.rules, criticals: { ...c.meta.rules.criticals, effects: false } } } }, data as never);
-
-    const out = await critChoice({ ...c, scene: { ...c.scene, pendingChoice: pending! } }, { choices: { "attack:hero:gob:0": CRITICAL_SUCCESS_EFFECTS.find((e) => e.effect.type === "double_damage")!.id } });
-
-    expect(out.scene?.pendingChoice).toBeNull();
-    expect(100 - (hpOf(out) as number)).toBe(2 * (100 - (hpOf(plain) as number)));
-  });
+        expect(out.scene?.pendingChoice).toBeNull();
+        expect(100 - (hpOf(out) as number)).toBe(
+            2 * (100 - (hpOf(plain) as number))
+        );
+    });
 });

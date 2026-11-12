@@ -1,218 +1,364 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
-import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
-import { buildParticipantPatch } from "@/lib/utils/battle/store";
-import { joinParticipant, splitParticipant } from "@/lib/utils/battle/store/split-participant";
-import { hashJson, stableStringify } from "@/lib/utils/battle/store/stable-json";
-import type { BattleParticipant } from "@/types/battle";
+import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
+import { buildParticipantPatch } from '@/lib/utils/battle/store';
+import {
+    joinParticipant,
+    splitParticipant,
+} from '@/lib/utils/battle/store/split-participant';
+import {
+    hashJson,
+    stableStringify,
+} from '@/lib/utils/battle/store/stable-json';
+import type { BattleParticipant } from '@/types/battle';
 
 function richParticipant(): BattleParticipant {
-  const base = createMockParticipant();
+    const base = createMockParticipant();
 
-  return {
-    ...base,
-    basicInfo: { ...base.basicInfo, avatar: "https://x/a.png", instanceNumber: 2 },
-    combatStats: { ...base.combatStats, currentHp: 7, tempHp: 3, morale: -1, status: "unconscious" },
-    spellcasting: {
-      spellcastingAbility: "wisdom",
-      spellSaveDC: 13,
-      spellSlots: { "1": { max: 3, current: 1 }, "2": { max: 2, current: 2 } },
-      knownSpells: ["s1", "s2"],
-    },
-    battleData: {
-      ...base.battleData,
-      attacks: [{ name: "Меч", type: "melee", attackBonus: 5, damageDice: "1d8+3", damageType: "slashing" }],
-      activeEffects: [{ id: "e1", name: "Отрута", duration: 2 } as never],
-      abilityUsage: { "skill:sk1:t0": { battle: 1, round: 1, turn: 0 } },
-      pendingExtraActions: 1,
-      extras: { critThreshold: 19 },
-    } as BattleParticipant["battleData"],
-    actionFlags: { hasUsedAction: true, hasUsedBonusAction: false, hasUsedReaction: true, hasExtraTurn: false },
-  };
+    return {
+        ...base,
+        basicInfo: {
+            ...base.basicInfo,
+            avatar: 'https://x/a.png',
+            instanceNumber: 2,
+        },
+        combatStats: {
+            ...base.combatStats,
+            currentHp: 7,
+            tempHp: 3,
+            morale: -1,
+            status: 'unconscious',
+        },
+        spellcasting: {
+            spellcastingAbility: 'wisdom',
+            spellSaveDC: 13,
+            spellSlots: {
+                '1': { max: 3, current: 1 },
+                '2': { max: 2, current: 2 },
+            },
+            knownSpells: ['s1', 's2'],
+        },
+        battleData: {
+            ...base.battleData,
+            attacks: [
+                {
+                    name: 'Меч',
+                    type: 'melee',
+                    attackBonus: 5,
+                    damageDice: '1d8+3',
+                    damageType: 'slashing',
+                },
+            ],
+            activeEffects: [{ id: 'e1', name: 'Отрута', duration: 2 } as never],
+            abilityUsage: { 'skill:sk1:t0': { battle: 1, round: 1, turn: 0 } },
+            pendingExtraActions: 1,
+            extras: { critThreshold: 19 },
+        } as BattleParticipant['battleData'],
+        actionFlags: {
+            hasUsedAction: true,
+            hasUsedBonusAction: false,
+            hasUsedReaction: true,
+            hasExtraTurn: false,
+        },
+    };
 }
 
-describe("stableStringify", () => {
-  it("не залежить від порядку ключів", () => {
-    expect(stableStringify({ b: 1, a: { d: 2, c: 3 } })).toBe(stableStringify({ a: { c: 3, d: 2 }, b: 1 }));
-    expect(hashJson({ b: 1, a: 2 })).toBe(hashJson({ a: 2, b: 1 }));
-  });
-
-  it("ігнорує undefined як JSON", () => {
-    expect(stableStringify({ a: 1, b: undefined })).toBe(stableStringify({ a: 1 }));
-  });
-});
-
-describe("splitParticipant / joinParticipant", () => {
-  it("round-trip повертає того самого учасника", () => {
-    const p = richParticipant();
-
-    const stored = splitParticipant(p, { orderIndex: 3, isPending: false });
-
-    expect(joinParticipant(stored, p.basicInfo.battleId)).toEqual(p);
-  });
-
-  it("лічильники вмінь — у state", () => {
-    const stored = splitParticipant(richParticipant(), { orderIndex: 0, isPending: false });
-
-    expect(stored.state.abilityUsage).toEqual({ "skill:sk1:t0": { battle: 1, round: 1, turn: 0 } });
-    expect(stableStringify(stored.snapshot)).not.toContain("abilityUsage");
-  });
-
-  it("гарячі поля — у колонках", () => {
-    const stored = splitParticipant(richParticipant(), { orderIndex: 3, isPending: true });
-
-    expect(stored.columns).toMatchObject({
-      id: "p1",
-      orderIndex: 3,
-      isPending: true,
-      extraTurnOf: null,
-      currentHp: 7,
-      tempHp: 3,
-      morale: -1,
-      status: "unconscious",
-      initiative: 10,
-      hasUsedAction: true,
-      hasUsedReaction: true,
+describe('stableStringify', () => {
+    it('не залежить від порядку ключів', () => {
+        expect(stableStringify({ b: 1, a: { d: 2, c: 3 } })).toBe(
+            stableStringify({ a: { c: 3, d: 2 }, b: 1 })
+        );
+        expect(hashJson({ b: 1, a: 2 })).toBe(hashJson({ a: 2, b: 1 }));
     });
-  });
 
-  it("поточні слоти і ефекти — у state, максимум слотів — у snapshot", () => {
-    const stored = splitParticipant(richParticipant(), { orderIndex: 0, isPending: false });
-
-    expect(stored.state.spellSlotsCurrent).toEqual({ "1": 1, "2": 2 });
-    expect(stored.state.activeEffects).toHaveLength(1);
-    expect(stableStringify(stored.snapshot)).not.toContain('"current"');
-    expect(stableStringify(stored.snapshot)).not.toContain('"activeEffects"');
-  });
-
-  it("зміна лише HP не змінює snapshotHash", () => {
-    const p = richParticipant();
-
-    const a = splitParticipant(p, { orderIndex: 0, isPending: false });
-
-    const b = splitParticipant(
-      { ...p, combatStats: { ...p.combatStats, currentHp: 1 } },
-      { orderIndex: 0, isPending: false },
-    );
-
-    expect(b.snapshotHash).toBe(a.snapshotHash);
-  });
-
-  it("бафф AC змінює snapshotHash", () => {
-    const p = richParticipant();
-
-    const a = splitParticipant(p, { orderIndex: 0, isPending: false });
-
-    const b = splitParticipant(
-      { ...p, combatStats: { ...p.combatStats, armorClass: p.combatStats.armorClass + 2 } },
-      { orderIndex: 0, isPending: false },
-    );
-
-    expect(b.snapshotHash).not.toBe(a.snapshotHash);
-  });
-
-  it("pendingScopedArtifactBonuses не зберігається", () => {
-    const p = richParticipant();
-
-    (p.battleData as unknown as Record<string, unknown>).pendingScopedArtifactBonuses = [{}];
-
-    const stored = splitParticipant(p, { orderIndex: 0, isPending: false });
-
-    expect(stableStringify(stored.snapshot)).not.toContain("pendingScopedArtifactBonuses");
-  });
-
-  it("дробові HP/мораль/ініціатива округлюються — колонки INTEGER не мають падати", () => {
-    const p = richParticipant();
-
-    const stored = splitParticipant(
-      {
-        ...p,
-        abilities: { ...p.abilities, initiative: 12.5 },
-        combatStats: { ...p.combatStats, currentHp: 7.4, tempHp: 0.6, maxHp: 20.2, morale: -0.7 },
-      },
-      { orderIndex: 0, isPending: false },
-    );
-
-    for (const key of ["currentHp", "tempHp", "maxHp", "morale", "initiative"] as const) {
-      expect(Number.isInteger(stored.columns[key])).toBe(true);
-    }
-  });
+    it('ігнорує undefined як JSON', () => {
+        expect(stableStringify({ a: 1, b: undefined })).toBe(
+            stableStringify({ a: 1 })
+        );
+    });
 });
 
-describe("ingredientStock", () => {
-  const stock = { items: [{ id: "d1", key: "diamond", name: "Diamond", worthGp: 50, qty: 2, used: 0 }], purseCp: 1000, usedCp: 0 };
+describe('splitParticipant / joinParticipant', () => {
+    it('round-trip повертає того самого учасника', () => {
+        const p = richParticipant();
 
-  it("lives in state, not in the snapshot, and survives split/join", () => {
-    const base = createMockParticipant();
+        const stored = splitParticipant(p, { orderIndex: 3, isPending: false });
 
-    const p = { ...base, battleData: { ...base.battleData, ingredientStock: stock } };
+        expect(joinParticipant(stored, p.basicInfo.battleId)).toEqual(p);
+    });
 
-    const stored = splitParticipant(p, { orderIndex: 0, isPending: false });
+    it('лічильники вмінь — у state', () => {
+        const stored = splitParticipant(richParticipant(), {
+            orderIndex: 0,
+            isPending: false,
+        });
 
-    expect(stored.state.ingredientStock).toEqual(stock);
-    expect(JSON.stringify(stored.snapshot)).not.toContain("ingredientStock");
-    expect(stored.snapshotHash).toBe(splitParticipant(base, { orderIndex: 0, isPending: false }).snapshotHash);
-    expect(joinParticipant(stored, "b1").battleData.ingredientStock).toEqual(stock);
-  });
+        expect(stored.state.abilityUsage).toEqual({
+            'skill:sk1:t0': { battle: 1, round: 1, turn: 0 },
+        });
+        expect(stableStringify(stored.snapshot)).not.toContain('abilityUsage');
+    });
 
-  it("a spent item reaches the client as a patch, not a full participant", () => {
-    const base = createMockParticipant();
+    it('гарячі поля — у колонках', () => {
+        const stored = splitParticipant(richParticipant(), {
+            orderIndex: 3,
+            isPending: true,
+        });
 
-    const before = { ...base, battleData: { ...base.battleData, ingredientStock: stock } };
+        expect(stored.columns).toMatchObject({
+            id: 'p1',
+            orderIndex: 3,
+            isPending: true,
+            extraTurnOf: null,
+            currentHp: 7,
+            tempHp: 3,
+            morale: -1,
+            status: 'unconscious',
+            initiative: 10,
+            hasUsedAction: true,
+            hasUsedReaction: true,
+        });
+    });
 
-    const used = { ...stock, items: [{ ...stock.items[0], used: 1 }] };
+    it('поточні слоти і ефекти — у state, максимум слотів — у snapshot', () => {
+        const stored = splitParticipant(richParticipant(), {
+            orderIndex: 0,
+            isPending: false,
+        });
 
-    const after = { ...before, battleData: { ...before.battleData, ingredientStock: used } };
+        expect(stored.state.spellSlotsCurrent).toEqual({ '1': 1, '2': 2 });
+        expect(stored.state.activeEffects).toHaveLength(1);
+        expect(stableStringify(stored.snapshot)).not.toContain('"current"');
+        expect(stableStringify(stored.snapshot)).not.toContain(
+            '"activeEffects"'
+        );
+    });
 
-    expect(buildParticipantPatch(before, after)).toEqual({ id: base.basicInfo.id, battleData: { ingredientStock: used } });
-  });
+    it('зміна лише HP не змінює snapshotHash', () => {
+        const p = richParticipant();
+
+        const a = splitParticipant(p, { orderIndex: 0, isPending: false });
+
+        const b = splitParticipant(
+            { ...p, combatStats: { ...p.combatStats, currentHp: 1 } },
+            { orderIndex: 0, isPending: false }
+        );
+
+        expect(b.snapshotHash).toBe(a.snapshotHash);
+    });
+
+    it('бафф AC змінює snapshotHash', () => {
+        const p = richParticipant();
+
+        const a = splitParticipant(p, { orderIndex: 0, isPending: false });
+
+        const b = splitParticipant(
+            {
+                ...p,
+                combatStats: {
+                    ...p.combatStats,
+                    armorClass: p.combatStats.armorClass + 2,
+                },
+            },
+            { orderIndex: 0, isPending: false }
+        );
+
+        expect(b.snapshotHash).not.toBe(a.snapshotHash);
+    });
+
+    it('pendingScopedArtifactBonuses не зберігається', () => {
+        const p = richParticipant();
+
+        (
+            p.battleData as unknown as Record<string, unknown>
+        ).pendingScopedArtifactBonuses = [{}];
+
+        const stored = splitParticipant(p, { orderIndex: 0, isPending: false });
+
+        expect(stableStringify(stored.snapshot)).not.toContain(
+            'pendingScopedArtifactBonuses'
+        );
+    });
+
+    it('дробові HP/мораль/ініціатива округлюються — колонки INTEGER не мають падати', () => {
+        const p = richParticipant();
+
+        const stored = splitParticipant(
+            {
+                ...p,
+                abilities: { ...p.abilities, initiative: 12.5 },
+                combatStats: {
+                    ...p.combatStats,
+                    currentHp: 7.4,
+                    tempHp: 0.6,
+                    maxHp: 20.2,
+                    morale: -0.7,
+                },
+            },
+            { orderIndex: 0, isPending: false }
+        );
+
+        for (const key of [
+            'currentHp',
+            'tempHp',
+            'maxHp',
+            'morale',
+            'initiative',
+        ] as const) {
+            expect(Number.isInteger(stored.columns[key])).toBe(true);
+        }
+    });
 });
 
-describe("ammo and reload live in state", () => {
-  const archer = (): BattleParticipant => {
-    const p = richParticipant();
+describe('ingredientStock', () => {
+    const stock = {
+        items: [
+            {
+                id: 'd1',
+                key: 'diamond',
+                name: 'Diamond',
+                worthGp: 50,
+                qty: 2,
+                used: 0,
+            },
+        ],
+        purseCp: 1000,
+        usedCp: 0,
+    };
 
-    return { ...p, battleData: { ...p.battleData, ammo: { bow: 2 }, reload: {} } };
-  };
+    it('lives in state, not in the snapshot, and survives split/join', () => {
+        const base = createMockParticipant();
 
-  it("spending ammo keeps the snapshot hash and patches battleData only", () => {
-    const before = archer();
+        const p = {
+            ...base,
+            battleData: { ...base.battleData, ingredientStock: stock },
+        };
 
-    const after = { ...before, battleData: { ...before.battleData, ammo: { bow: 1 }, reload: { bow: 2 } } };
+        const stored = splitParticipant(p, { orderIndex: 0, isPending: false });
 
-    expect(splitParticipant(after, { orderIndex: 0, isPending: false }).snapshotHash).toBe(splitParticipant(before, { orderIndex: 0, isPending: false }).snapshotHash);
-    expect(buildParticipantPatch(before, after)).toEqual({ id: before.basicInfo.id, battleData: { ammo: { bow: 1 }, reload: { bow: 2 } } });
-  });
+        expect(stored.state.ingredientStock).toEqual(stock);
+        expect(JSON.stringify(stored.snapshot)).not.toContain(
+            'ingredientStock'
+        );
+        expect(stored.snapshotHash).toBe(
+            splitParticipant(base, { orderIndex: 0, isPending: false })
+                .snapshotHash
+        );
+        expect(
+            joinParticipant(stored, 'b1').battleData.ingredientStock
+        ).toEqual(stock);
+    });
 
-  it("round-trips through state", () => {
-    const stored = splitParticipant(archer(), { orderIndex: 0, isPending: false });
+    it('a spent item reaches the client as a patch, not a full participant', () => {
+        const base = createMockParticipant();
 
-    expect(stored.state).toMatchObject({ ammo: { bow: 2 }, reload: {} });
-    expect(joinParticipant(stored, archer().basicInfo.battleId).battleData).toMatchObject({ ammo: { bow: 2 }, reload: {} });
-  });
+        const before = {
+            ...base,
+            battleData: { ...base.battleData, ingredientStock: stock },
+        };
+
+        const used = { ...stock, items: [{ ...stock.items[0], used: 1 }] };
+
+        const after = {
+            ...before,
+            battleData: { ...before.battleData, ingredientStock: used },
+        };
+
+        expect(buildParticipantPatch(before, after)).toEqual({
+            id: base.basicInfo.id,
+            battleData: { ingredientStock: used },
+        });
+    });
 });
 
-describe("psychologyTested lives in state", () => {
-  const scared = (): BattleParticipant => {
-    const p = richParticipant();
+describe('ammo and reload live in state', () => {
+    const archer = (): BattleParticipant => {
+        const p = richParticipant();
 
-    return { ...p, battleData: { ...p.battleData, psychologyTested: { fear: 2 } } };
-  };
+        return {
+            ...p,
+            battleData: { ...p.battleData, ammo: { bow: 2 }, reload: {} },
+        };
+    };
 
-  it("keeps the snapshot hash and patches battleData only", () => {
-    const before = richParticipant();
+    it('spending ammo keeps the snapshot hash and patches battleData only', () => {
+        const before = archer();
 
-    const after = scared();
+        const after = {
+            ...before,
+            battleData: {
+                ...before.battleData,
+                ammo: { bow: 1 },
+                reload: { bow: 2 },
+            },
+        };
 
-    expect(splitParticipant(after, { orderIndex: 0, isPending: false }).snapshotHash).toBe(splitParticipant(before, { orderIndex: 0, isPending: false }).snapshotHash);
-    expect(buildParticipantPatch(before, after)).toEqual({ id: before.basicInfo.id, battleData: { psychologyTested: { fear: 2 } } });
-  });
+        expect(
+            splitParticipant(after, { orderIndex: 0, isPending: false })
+                .snapshotHash
+        ).toBe(
+            splitParticipant(before, { orderIndex: 0, isPending: false })
+                .snapshotHash
+        );
+        expect(buildParticipantPatch(before, after)).toEqual({
+            id: before.basicInfo.id,
+            battleData: { ammo: { bow: 1 }, reload: { bow: 2 } },
+        });
+    });
 
-  it("round-trips through state, not the snapshot", () => {
-    const stored = splitParticipant(scared(), { orderIndex: 0, isPending: false });
+    it('round-trips through state', () => {
+        const stored = splitParticipant(archer(), {
+            orderIndex: 0,
+            isPending: false,
+        });
 
-    expect(stored.state).toMatchObject({ psychologyTested: { fear: 2 } });
-    expect(stored.snapshot.battleData).not.toHaveProperty("psychologyTested");
-    expect(joinParticipant(stored, scared().basicInfo.battleId).battleData).toMatchObject({ psychologyTested: { fear: 2 } });
-  });
+        expect(stored.state).toMatchObject({ ammo: { bow: 2 }, reload: {} });
+        expect(
+            joinParticipant(stored, archer().basicInfo.battleId).battleData
+        ).toMatchObject({ ammo: { bow: 2 }, reload: {} });
+    });
+});
+
+describe('psychologyTested lives in state', () => {
+    const scared = (): BattleParticipant => {
+        const p = richParticipant();
+
+        return {
+            ...p,
+            battleData: { ...p.battleData, psychologyTested: { fear: 2 } },
+        };
+    };
+
+    it('keeps the snapshot hash and patches battleData only', () => {
+        const before = richParticipant();
+
+        const after = scared();
+
+        expect(
+            splitParticipant(after, { orderIndex: 0, isPending: false })
+                .snapshotHash
+        ).toBe(
+            splitParticipant(before, { orderIndex: 0, isPending: false })
+                .snapshotHash
+        );
+        expect(buildParticipantPatch(before, after)).toEqual({
+            id: before.basicInfo.id,
+            battleData: { psychologyTested: { fear: 2 } },
+        });
+    });
+
+    it('round-trips through state, not the snapshot', () => {
+        const stored = splitParticipant(scared(), {
+            orderIndex: 0,
+            isPending: false,
+        });
+
+        expect(stored.state).toMatchObject({ psychologyTested: { fear: 2 } });
+        expect(stored.snapshot.battleData).not.toHaveProperty(
+            'psychologyTested'
+        );
+        expect(
+            joinParticipant(stored, scared().basicInfo.battleId).battleData
+        ).toMatchObject({ psychologyTested: { fear: 2 } });
+    });
 });

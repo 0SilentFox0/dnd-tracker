@@ -1,76 +1,110 @@
-"use client";
+'use client';
 
-import { useTranslations } from "next-intl";
-import { useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from 'next-intl';
+import { useQueryClient } from '@tanstack/react-query';
 
-import { worldKeys } from "./keys";
+import { worldKeys } from './keys';
 
-import { createWorldNote, deleteWorldNote, updateWorldNote } from "@/lib/api/world";
-import { useCrudMutation } from "@/lib/hooks/common";
-import type { CreateWorldNoteData, WorldMapDetail, WorldNote, WorldView } from "@/types/world";
+import {
+    createWorldNote,
+    deleteWorldNote,
+    updateWorldNote,
+} from '@/lib/api/world';
+import { useCrudMutation } from '@/lib/hooks/common';
+import type {
+    CreateWorldNoteData,
+    WorldMapDetail,
+    WorldNote,
+    WorldView,
+} from '@/types/world';
 
 type Snapshot = [readonly unknown[], WorldView | WorldMapDetail | undefined][];
 
 export function useWorldNotes(campaignId: string, mapId: string | null) {
-  const queryClient = useQueryClient();
+    const queryClient = useQueryClient();
 
-  const t = useTranslations("world.errors");
+    const t = useTranslations('world.errors');
 
-  const viewFilter = { queryKey: worldKeys.viewAll(campaignId) };
+    const viewFilter = { queryKey: worldKeys.viewAll(campaignId) };
 
-  const invalidateKeys = () => [worldKeys.viewAll(campaignId), ...(mapId ? [worldKeys.map(campaignId, mapId)] : [])];
+    const invalidateKeys = () => [
+        worldKeys.viewAll(campaignId),
+        ...(mapId ? [worldKeys.map(campaignId, mapId)] : []),
+    ];
 
-  const mapKey = mapId ? worldKeys.map(campaignId, mapId) : null;
+    const mapKey = mapId ? worldKeys.map(campaignId, mapId) : null;
 
-  const patchNotes = (fn: (notes: WorldNote[]) => WorldNote[]) => {
-    queryClient.setQueriesData<WorldView>(viewFilter, (v) => (v ? { ...v, notes: fn(v.notes) } : v));
+    const patchNotes = (fn: (notes: WorldNote[]) => WorldNote[]) => {
+        queryClient.setQueriesData<WorldView>(viewFilter, (v) =>
+            v ? { ...v, notes: fn(v.notes) } : v
+        );
 
-    if (mapKey) queryClient.setQueryData<WorldMapDetail>(mapKey, (d) => (d?.notes ? { ...d, notes: fn(d.notes) } : d));
-  };
+        if (mapKey)
+            queryClient.setQueryData<WorldMapDetail>(mapKey, (d) =>
+                d?.notes ? { ...d, notes: fn(d.notes) } : d
+            );
+    };
 
-  const snapshot = async (): Promise<Snapshot> => {
-    await queryClient.cancelQueries(viewFilter);
+    const snapshot = async (): Promise<Snapshot> => {
+        await queryClient.cancelQueries(viewFilter);
 
-    const mapData = mapKey ? ([[mapKey, queryClient.getQueryData<WorldMapDetail>(mapKey)]] as Snapshot) : [];
+        const mapData = mapKey
+            ? ([
+                  [mapKey, queryClient.getQueryData<WorldMapDetail>(mapKey)],
+              ] as Snapshot)
+            : [];
 
-    return [...queryClient.getQueriesData<WorldView>(viewFilter), ...mapData];
-  };
+        return [
+            ...queryClient.getQueriesData<WorldView>(viewFilter),
+            ...mapData,
+        ];
+    };
 
-  const restore = (_e: unknown, _v: unknown, prev: Snapshot | undefined) => prev?.forEach(([key, data]) => queryClient.setQueryData(key, data));
+    const restore = (_e: unknown, _v: unknown, prev: Snapshot | undefined) =>
+        prev?.forEach(([key, data]) => queryClient.setQueryData(key, data));
 
-  const create = useCrudMutation({
-    mutationFn: (data: CreateWorldNoteData) => createWorldNote(campaignId, data),
-    invalidateKeys,
-    errorText: t("saveNote"),
-  });
+    const create = useCrudMutation({
+        mutationFn: (data: CreateWorldNoteData) =>
+            createWorldNote(campaignId, data),
+        invalidateKeys,
+        errorText: t('saveNote'),
+    });
 
-  const update = useCrudMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<Pick<WorldNote, "text" | "visibility">> }) => updateWorldNote(campaignId, id, data),
-    onMutate: async ({ id, data }) => {
-      const prev = await snapshot();
+    const update = useCrudMutation({
+        mutationFn: ({
+            id,
+            data,
+        }: {
+            id: string;
+            data: Partial<Pick<WorldNote, 'text' | 'visibility'>>;
+        }) => updateWorldNote(campaignId, id, data),
+        onMutate: async ({ id, data }) => {
+            const prev = await snapshot();
 
-      patchNotes((notes) => notes.map((n) => (n.id === id ? { ...n, ...data } : n)));
+            patchNotes((notes) =>
+                notes.map((n) => (n.id === id ? { ...n, ...data } : n))
+            );
 
-      return prev;
-    },
-    onError: restore,
-    invalidateKeys,
-    errorText: t("saveNote"),
-  });
+            return prev;
+        },
+        onError: restore,
+        invalidateKeys,
+        errorText: t('saveNote'),
+    });
 
-  const remove = useCrudMutation({
-    mutationFn: (id: string) => deleteWorldNote(campaignId, id),
-    onMutate: async (id) => {
-      const prev = await snapshot();
+    const remove = useCrudMutation({
+        mutationFn: (id: string) => deleteWorldNote(campaignId, id),
+        onMutate: async (id) => {
+            const prev = await snapshot();
 
-      patchNotes((notes) => notes.filter((n) => n.id !== id));
+            patchNotes((notes) => notes.filter((n) => n.id !== id));
 
-      return prev;
-    },
-    onError: restore,
-    invalidateKeys,
-    errorText: t("deleteNote"),
-  });
+            return prev;
+        },
+        onError: restore,
+        invalidateKeys,
+        errorText: t('deleteNote'),
+    });
 
-  return { create, update, remove };
+    return { create, update, remove };
 }

@@ -1,7 +1,12 @@
-import { CORE_ABILITY_SCORES } from "@/lib/constants/abilities";
-import { SPELL_COST_KEYS as COST_KEYS, SPELL_SAVE_ON_SUCCESS_KEYS, SPELL_TARGETING_KINDS, TEMPLATE_SHAPE_KEYS as SHAPE_KEYS } from "@/lib/constants/spells";
-import { defaultSpellForm } from "@/lib/utils/spells/model/form";
-import type { SpellFormData } from "@/types/spells";
+import { CORE_ABILITY_SCORES } from '@/lib/constants/abilities';
+import {
+    SPELL_COST_KEYS as COST_KEYS,
+    SPELL_SAVE_ON_SUCCESS_KEYS,
+    SPELL_TARGETING_KINDS,
+    TEMPLATE_SHAPE_KEYS as SHAPE_KEYS,
+} from '@/lib/constants/spells';
+import { defaultSpellForm } from '@/lib/utils/spells/model/form';
+import type { SpellFormData } from '@/types/spells';
 
 export type { SpellFormData };
 
@@ -19,14 +24,16 @@ export const SAVE_ABILITY_KEYS = CORE_ABILITY_SCORES.map(({ key }) => key);
 
 export const SAVE_ON_SUCCESS_KEYS = [...SPELL_SAVE_ON_SUCCESS_KEYS];
 
-export const SPELL_RESOLUTION_KEYS = ["auto", "save", "attack"];
+export const SPELL_RESOLUTION_KEYS = ['auto', 'save', 'attack'];
 
-export const MAGIC_RESOLUTION_KEYS = ["auto"];
+export const MAGIC_RESOLUTION_KEYS = ['auto'];
 
-export const resolutionKeysOf = (magic: boolean) => (magic ? MAGIC_RESOLUTION_KEYS : SPELL_RESOLUTION_KEYS);
+export const resolutionKeysOf = (magic: boolean) =>
+    magic ? MAGIC_RESOLUTION_KEYS : SPELL_RESOLUTION_KEYS;
 
-export const spellCostKeysOf = (magic: boolean) => (magic ? SPELL_COST_KEYS.filter((k) => k !== "long") : SPELL_COST_KEYS);
+export const spellCostKeysOf = (magic: boolean) =>
+    magic ? SPELL_COST_KEYS.filter((k) => k !== 'long') : SPELL_COST_KEYS;
 
-export const SPELL_SIDE_KEYS = ["enemy", "ally"];
+export const SPELL_SIDE_KEYS = ['enemy', 'ally'];
 
 export const DIE_SIDES = [4, 6, 8, 10, 12];

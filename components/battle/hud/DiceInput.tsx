@@ -1,78 +1,157 @@
-"use client";
+'use client';
 
-import { useTranslations } from "next-intl";
-import { Dices } from "lucide-react";
+import { useTranslations } from 'next-intl';
+import { Dices } from 'lucide-react';
 
-import { cn } from "@/lib/utils";
-import { parseDieInput } from "@/lib/utils/battle/flows";
+import { cn } from '@/lib/utils';
+import { parseDieInput } from '@/lib/utils/battle/flows';
 
-export function DiceGrid({ sides, value, onPick, highlight }: { sides: number; value?: number; onPick: (v: number) => void; highlight?: { rolls: number[]; tone: "gold" | "danger" } }) {
-  return (
-    <div className="mt-3 grid grid-cols-5 gap-1.5">
-      {Array.from({ length: sides }, (_, i) => i + 1).map((n) => (
-        <button
-          key={n}
-          type="button"
-          onClick={() => onPick(n)}
-          className={cn(
-            "flex h-12 items-center justify-center border text-lg font-medium",
-            n === value ? "border-[#c0392b] bg-[var(--enemy)] font-bold text-white" : "border-white/15 bg-black/25 text-[var(--bone)]",
-            n !== value && n === sides && sides === 20 && "text-[#e8c77a]",
-            n !== value && n === 1 && "text-[#c98a7c]",
-            n !== value && highlight?.rolls.includes(n) && (highlight.tone === "gold" ? "border-hud-gold-strong bg-hud-gold-strong/20 font-bold text-hud-gold-bright" : "border-[#c0392b] bg-[#c0392b]/25 font-bold text-hud-bad"),
-          )}
-        >
-          {n}
-        </button>
-      ))}
-    </div>
-  );
+export function DiceGrid({
+    sides,
+    value,
+    onPick,
+    highlight,
+}: {
+    sides: number;
+    value?: number;
+    onPick: (v: number) => void;
+    highlight?: { rolls: number[]; tone: 'gold' | 'danger' };
+}) {
+    return (
+        <div className="mt-3 grid grid-cols-5 gap-1.5">
+            {Array.from({ length: sides }, (_, i) => i + 1).map((n) => (
+                <button
+                    key={n}
+                    type="button"
+                    onClick={() => onPick(n)}
+                    className={cn(
+                        'flex h-12 items-center justify-center border text-lg font-medium',
+                        n === value
+                            ? 'border-[#c0392b] bg-[var(--enemy)] font-bold text-white'
+                            : 'border-white/15 bg-black/25 text-[var(--bone)]',
+                        n !== value &&
+                            n === sides &&
+                            sides === 20 &&
+                            'text-[#e8c77a]',
+                        n !== value && n === 1 && 'text-[#c98a7c]',
+                        n !== value &&
+                            highlight?.rolls.includes(n) &&
+                            (highlight.tone === 'gold'
+                                ? 'border-hud-gold-strong bg-hud-gold-strong/20 font-bold text-hud-gold-bright'
+                                : 'border-[#c0392b] bg-[#c0392b]/25 font-bold text-hud-bad')
+                    )}
+                >
+                    {n}
+                </button>
+            ))}
+        </div>
+    );
 }
 
 /** One die field: focus selects the content, a new digit replaces the old one, Backspace clears. */
-export function DieInput({ sides, value, onChange, label, className, strict }: { sides: number; value: number | undefined; onChange: (v: number | undefined) => void; label: string; className?: string; strict?: boolean }) {
-  return (
-    <input
-      aria-label={label}
-      inputMode="numeric"
-      pattern="[0-9]*"
-      value={value ?? ""}
-      onFocus={(e) => e.target.select()}
-      onChange={(e) => {
-        const v = parseDieInput(e.target.value, sides, strict);
+export function DieInput({
+    sides,
+    value,
+    onChange,
+    label,
+    className,
+    strict,
+}: {
+    sides: number;
+    value: number | undefined;
+    onChange: (v: number | undefined) => void;
+    label: string;
+    className?: string;
+    strict?: boolean;
+}) {
+    return (
+        <input
+            aria-label={label}
+            inputMode="numeric"
+            pattern="[0-9]*"
+            value={value ?? ''}
+            onFocus={(e) => e.target.select()}
+            onChange={(e) => {
+                const v = parseDieInput(e.target.value, sides, strict);
 
-        if (v !== null) onChange(v);
-      }}
-      className={className}
-    />
-  );
+                if (v !== null) onChange(v);
+            }}
+            className={className}
+        />
+    );
 }
 
 /** parchment: dark text and borders for the light spellbook instead of the HUD colours. */
-type Tone = "hud" | "parchment";
+type Tone = 'hud' | 'parchment';
 
-export function DamageDice({ slots, values, onChange, tone = "hud" }: { slots: number[]; values: (number | undefined)[]; onChange: (i: number, v: number | undefined) => void; tone?: Tone }) {
-  const t = useTranslations("battle.hud");
+export function DamageDice({
+    slots,
+    values,
+    onChange,
+    tone = 'hud',
+}: {
+    slots: number[];
+    values: (number | undefined)[];
+    onChange: (i: number, v: number | undefined) => void;
+    tone?: Tone;
+}) {
+    const t = useTranslations('battle.hud');
 
-  return (
-    <div className="mt-3 grid grid-cols-4 gap-2">
-      {slots.map((sides, i) => (
-        <label key={i} className={cn("flex flex-col gap-1 text-xs", tone === "parchment" ? "text-[#6b5a44]" : "text-[var(--hud-muted)]")}>
-          d{sides}
-          <DieInput label={t("dieLabel", { n: i + 1, sides })} sides={sides} value={values[i]} onChange={(v) => onChange(i, v)} className={cn("h-12 border text-center text-lg", tone === "parchment" ? "border-[#2a2018]/35 bg-white/40 text-[#2a2018]" : "border-white/20 bg-black/30 text-[var(--ink)]")} />
-        </label>
-      ))}
-    </div>
-  );
+    return (
+        <div className="mt-3 grid grid-cols-4 gap-2">
+            {slots.map((sides, i) => (
+                <label
+                    key={i}
+                    className={cn(
+                        'flex flex-col gap-1 text-xs',
+                        tone === 'parchment'
+                            ? 'text-[#6b5a44]'
+                            : 'text-[var(--hud-muted)]'
+                    )}
+                >
+                    d{sides}
+                    <DieInput
+                        label={t('dieLabel', { n: i + 1, sides })}
+                        sides={sides}
+                        value={values[i]}
+                        onChange={(v) => onChange(i, v)}
+                        className={cn(
+                            'h-12 border text-center text-lg',
+                            tone === 'parchment'
+                                ? 'border-[#2a2018]/35 bg-white/40 text-[#2a2018]'
+                                : 'border-white/20 bg-black/30 text-[var(--ink)]'
+                        )}
+                    />
+                </label>
+            ))}
+        </div>
+    );
 }
 
-export function AiRollButton({ onClick, label, tone = "hud" }: { onClick: () => void; label?: string; tone?: Tone }) {
-  const t = useTranslations("battle.hud");
+export function AiRollButton({
+    onClick,
+    label,
+    tone = 'hud',
+}: {
+    onClick: () => void;
+    label?: string;
+    tone?: Tone;
+}) {
+    const t = useTranslations('battle.hud');
 
-  return (
-    <button type="button" onClick={onClick} className={cn("hud-sc flex h-[52px] w-full items-center justify-center gap-2.5 whitespace-nowrap border text-[15px] font-bold tracking-[.04em]", tone === "parchment" ? "border-[#2a2018]/40 text-[#2a2018]" : "border-white/25 text-[var(--bone)]")}>
-      <Dices className="size-5" />
-      {label ?? t("autoRoll")}
-    </button>
-  );
+    return (
+        <button
+            type="button"
+            onClick={onClick}
+            className={cn(
+                'hud-sc flex h-[52px] w-full items-center justify-center gap-2.5 border text-[15px] font-bold tracking-[.04em] whitespace-nowrap',
+                tone === 'parchment'
+                    ? 'border-[#2a2018]/40 text-[#2a2018]'
+                    : 'border-white/25 text-[var(--bone)]'
+            )}
+        >
+            <Dices className="size-5" />
+            {label ?? t('autoRoll')}
+        </button>
+    );
 }

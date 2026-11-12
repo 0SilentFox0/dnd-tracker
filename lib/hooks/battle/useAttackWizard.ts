@@ -1,245 +1,482 @@
-"use client";
+'use client';
 
-import { useMemo, useReducer } from "react";
+import { useMemo, useReducer } from 'react';
 
-import { useAttackSubmit } from "./useAttackSubmit";
-import { useAttackTargets } from "./useAttackTargets";
-import { useBattleRules } from "./useBattleRules";
-import { useBattleScene } from "./useBattleScene";
+import { useAttackSubmit } from './useAttackSubmit';
+import { useAttackTargets } from './useAttackTargets';
+import { useBattleRules } from './useBattleRules';
+import { useBattleScene } from './useBattleScene';
 
-import { AttackType } from "@/lib/constants/battle";
-import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
-import { withSelf } from "@/lib/utils/abilities/engine/core/participants";
-import type { CunningStrikeEffect } from "@/lib/utils/abilities/schema";
-import { ammoStatus } from "@/lib/utils/battle/ammo";
-import { attackCounter } from "@/lib/utils/battle/attack/attacks-left";
-import { critDoublesDice } from "@/lib/utils/battle/attack/crit-dice";
-import { CUNNING_STRIKE_LABELS, cunningStrikeOffer, toggleCunningStrike } from "@/lib/utils/battle/attack/cunning-strike";
-import { canUseInspiration } from "@/lib/utils/battle/attack/inspiration";
-import { attackMaxTargets } from "@/lib/utils/battle/attack/max-targets";
-import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
-import { damageDiceSlots } from "@/lib/utils/battle/damage/hero-damage";
-import { attackFlow, type AttackFlowAction, type AttackMode, forcedFor, initialAttackFlow, type RollOutcome, rollOutcomeOf, strikeMode } from "@/lib/utils/battle/flows";
-import { enemiesInReach } from "@/lib/utils/battle/grid";
-import { canSeeExactStats, strikeDamageSteps, weaponPreview } from "@/lib/utils/battle/view";
-import { cryptoRandom, rollDie } from "@/lib/utils/common/dice";
-import { ruleSystemOf } from "@/lib/utils/rules/systems";
-import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
-import type { BattleAttack, BattleParticipant, DamageStep } from "@/types/battle";
+import { AttackType } from '@/lib/constants/battle';
+import { findFlags } from '@/lib/utils/abilities/engine/core/collect-modifiers';
+import { withSelf } from '@/lib/utils/abilities/engine/core/participants';
+import type { CunningStrikeEffect } from '@/lib/utils/abilities/schema';
+import { ammoStatus } from '@/lib/utils/battle/ammo';
+import { attackCounter } from '@/lib/utils/battle/attack/attacks-left';
+import { critDoublesDice } from '@/lib/utils/battle/attack/crit-dice';
+import {
+    CUNNING_STRIKE_LABELS,
+    cunningStrikeOffer,
+    toggleCunningStrike,
+} from '@/lib/utils/battle/attack/cunning-strike';
+import { canUseInspiration } from '@/lib/utils/battle/attack/inspiration';
+import { attackMaxTargets } from '@/lib/utils/battle/attack/max-targets';
+import { attackKindOf } from '@/lib/utils/battle/common/attack-kind';
+import { damageDiceSlots } from '@/lib/utils/battle/damage/hero-damage';
+import {
+    attackFlow,
+    type AttackFlowAction,
+    type AttackMode,
+    forcedFor,
+    initialAttackFlow,
+    type RollOutcome,
+    rollOutcomeOf,
+    strikeMode,
+} from '@/lib/utils/battle/flows';
+import { enemiesInReach } from '@/lib/utils/battle/grid';
+import {
+    canSeeExactStats,
+    strikeDamageSteps,
+    weaponPreview,
+} from '@/lib/utils/battle/view';
+import { cryptoRandom, rollDie } from '@/lib/utils/common/dice';
+import { ruleSystemOf } from '@/lib/utils/rules/systems';
+import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
+import type {
+    BattleAttack,
+    BattleParticipant,
+    DamageStep,
+} from '@/types/battle';
 
-export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () => void) {
-  const scene = useBattleScene();
+export function useAttackWizard(
+    attacker: BattleParticipant | null,
+    onDone?: () => void
+) {
+    const scene = useBattleScene();
 
-  const { dice, serverJudged, sceneState } = useBattleRules();
+    const { dice, serverJudged, sceneState } = useBattleRules();
 
-  const [state, dispatch] = useReducer(attackFlow, initialAttackFlow);
+    const [state, dispatch] = useReducer(attackFlow, initialAttackFlow);
 
-  const order = scene.battle.initiativeOrder;
+    const order = scene.battle.initiativeOrder;
 
-  const attackPools = useMemo(() => {
-    const all = attacker?.battleData.attacks ?? [];
+    const attackPools = useMemo(() => {
+        const all = attacker?.battleData.attacks ?? [];
 
-    return { main: all.filter((a) => a.hand !== "off"), off: all.filter((a) => a.hand === "off") };
-  }, [attacker]);
+        return {
+            main: all.filter((a) => a.hand !== 'off'),
+            off: all.filter((a) => a.hand === 'off'),
+        };
+    }, [attacker]);
 
-  const attacks = state.offHand ? attackPools.off : attackPools.main;
+    const attacks = state.offHand ? attackPools.off : attackPools.main;
 
-  const attack = attacks.find((a) => (a.id ?? a.name) === state.attackId) ?? null;
+    const attack =
+        attacks.find((a) => (a.id ?? a.name) === state.attackId) ?? null;
 
-  const { targets, enemyTargets, cover, unreachable, visible } = useAttackTargets(attacker, attack, state.step);
+    const { targets, enemyTargets, cover, unreachable, visible } =
+        useAttackTargets(attacker, attack, state.step);
 
-  const byId = (id: string) => order.find((p) => p.basicInfo.id === id);
+    const byId = (id: string) => order.find((p) => p.basicInfo.id === id);
 
-  const map = scene.battle.map;
+    const map = scene.battle.map;
 
-  const steps = useMemo<DamageStep[][]>(() => {
-    if (!attacker || !attack || state.step !== "summary") return [];
+    const steps = useMemo<DamageStep[][]>(() => {
+        if (!attacker || !attack || state.step !== 'summary') return [];
 
-    return state.strikes
-      .filter((s) => s.outcome === "hit" || s.outcome === "crit")
-      .map((s) => {
-        const target = byId(s.targetId);
+        return state.strikes
+            .filter((s) => s.outcome === 'hit' || s.outcome === 'crit')
+            .map((s) => {
+                const target = byId(s.targetId);
 
-        if (!target) return [];
+                if (!target) return [];
 
-        return strikeDamageSteps({
-          attacker,
-          target,
-          attack,
-          damage: s.damage,
-          isCritical: s.outcome === "crit",
-          blockedByCover: cover.has(s.targetId),
-          battle: { initiativeOrder: order, rules: scene.battle.rules, battleLog: scene.battle.battleLog, knowledge: scene.battle.knowledge },
-          viewer: scene.viewer,
+                return strikeDamageSteps({
+                    attacker,
+                    target,
+                    attack,
+                    damage: s.damage,
+                    isCritical: s.outcome === 'crit',
+                    blockedByCover: cover.has(s.targetId),
+                    battle: {
+                        initiativeOrder: order,
+                        rules: scene.battle.rules,
+                        battleLog: scene.battle.battleLog,
+                        knowledge: scene.battle.knowledge,
+                    },
+                    viewer: scene.viewer,
+                });
+            });
+        // byId читає order, який уже в deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [
+        attacker,
+        attack,
+        state.step,
+        state.strikes,
+        order,
+        scene.battle.rules,
+        scene.battle.battleLog,
+        scene.battle.knowledge,
+        scene.viewer,
+        cover,
+    ]);
+
+    const estimate = steps.reduce(
+        (sum, list) => sum + (list.at(-1)?.after ?? 0),
+        0
+    );
+
+    const isOpen = state.step !== 'closed';
+
+    const previews = useMemo(
+        () =>
+            attacker && isOpen
+                ? Object.fromEntries(
+                      attacks.map((a) => [
+                          a.id ?? a.name,
+                          weaponPreview(attacker, a, order),
+                      ])
+                  )
+                : {},
+        [attacker, attacks, order, isOpen]
+    );
+
+    const attackTarget = ruleSystemOf(scene.battle.rules).combat.attackTarget;
+
+    const judged = {
+        target:
+            serverJudged && attacker && attack
+                ? (attackTarget?.(attacker, attack) ?? null)
+                : null,
+        sceneState,
+        attackerSide: attacker?.basicInfo.side,
+        weaponTargets:
+            serverJudged && attacker && isOpen
+                ? Object.fromEntries(
+                      attacks.map((a) => [
+                          a.id ?? a.name,
+                          attackTarget?.(attacker, a)?.target,
+                      ])
+                  )
+                : {},
+    };
+
+    const unknownDefense = state.strikes.some((s) => {
+        const t = byId(s.targetId);
+
+        return (
+            (s.outcome === 'hit' || s.outcome === 'crit') &&
+            !!t &&
+            !canSeeExactStats(t, scene.viewer)
+        );
+    });
+
+    const hitsAll =
+        !!attacker &&
+        findFlags(
+            withSelf(order, attacker),
+            attacker.basicInfo.id,
+            'attackHitsAllEnemies'
+        ).length > 0;
+
+    const chain =
+        !!attacker &&
+        findFlags(withSelf(order, attacker), attacker.basicInfo.id, 'chainShot')
+            .length > 0;
+
+    const describe = (a: BattleAttack) => {
+        const onMap = !!scene.battle.map && !!attacker?.battleData.position;
+
+        const maxTargets = attacker
+            ? attackMaxTargets(attacker, a, { chain, onMap })
+            : 1;
+
+        return {
+            attackId: a.id ?? a.name,
+            maxTargets: hitsAll
+                ? Math.max(maxTargets, enemyTargets.length)
+                : maxTargets,
+            diceSlots: attacker ? damageDiceSlots(attacker, a) : [6],
+        };
+    };
+
+    const preselectAll = (chosen: BattleAttack) => {
+        if (!hitsAll) return;
+
+        const inReach =
+            attacker && scene.battle.map && attacker.battleData.position
+                ? enemiesInReach(
+                      scene.battle.map,
+                      order,
+                      attacker,
+                      chosen,
+                      scene.battle.rules
+                  ).filter(visible)
+                : enemyTargets;
+
+        dispatch({
+            type: 'SET_TARGETS',
+            ids: inReach.map((p) => p.basicInfo.id),
         });
-      });
-    // byId читає order, який уже в deps
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [attacker, attack, state.step, state.strikes, order, scene.battle.rules, scene.battle.battleLog, scene.battle.knowledge, scene.viewer, cover]);
+    };
 
-  const estimate = steps.reduce((sum, list) => sum + (list.at(-1)?.after ?? 0), 0);
+    const currentStrike = state.strikes[state.index];
 
-  const isOpen = state.step !== "closed";
+    const currentMode = strikeMode(state, currentStrike);
 
-  const previews = useMemo(
-    () => (attacker && isOpen ? Object.fromEntries(attacks.map((a) => [a.id ?? a.name, weaponPreview(attacker, a, order)])) : {}),
-    [attacker, attacks, order, isOpen],
-  );
+    const attackCtx = {
+        order,
+        round: scene.battle.currentRound,
+        map,
+        rules: scene.battle.rules,
+    };
 
-  const attackTarget = ruleSystemOf(scene.battle.rules).combat.attackTarget;
+    const outcomeOf = (d20: number, second?: number): RollOutcome => {
+        const target = byId(state.strikes[state.index]?.targetId ?? '');
 
-  const judged = {
-    target: serverJudged && attacker && attack ? (attackTarget?.(attacker, attack) ?? null) : null,
-    sceneState,
-    attackerSide: attacker?.basicInfo.side,
-    weaponTargets: serverJudged && attacker && isOpen ? Object.fromEntries(attacks.map((a) => [a.id ?? a.name, attackTarget?.(attacker, a)?.target])) : {},
-  };
+        if (!attacker || !attack || !target) return 'miss';
 
-  const unknownDefense = state.strikes.some((s) => {
-    const t = byId(s.targetId);
+        return rollOutcomeOf(attacker, target, attack, attackCtx, {
+            d20,
+            second,
+            mode: currentMode,
+        });
+    };
 
-    return (s.outcome === "hit" || s.outcome === "crit") && !!t && !canSeeExactStats(t, scene.viewer);
-  });
+    const rollAction = (d20?: number, second?: number): AttackFlowAction =>
+        serverJudged
+            ? {
+                  type: 'ROLL',
+                  d20,
+                  outcome: 'hit',
+                  judge: 'server',
+                  damage: state.diceSlots.map((sides) =>
+                      rollDie(sides, cryptoRandom)
+                  ),
+                  ...(second !== undefined && { second }),
+              }
+            : {
+                  type: 'ROLL',
+                  d20,
+                  second,
+                  outcome: outcomeOf(d20 ?? 0, second),
+              };
 
-  const hitsAll = !!attacker && findFlags(withSelf(order, attacker), attacker.basicInfo.id, "attackHitsAllEnemies").length > 0;
+    useAttackSubmit({ attacker, attack, flow: { state, dispatch }, onDone });
 
-  const chain = !!attacker && findFlags(withSelf(order, attacker), attacker.basicInfo.id, "chainShot").length > 0;
+    const cunningOffer = useMemo(
+        () =>
+            attacker && !state.offHand && isOpen
+                ? cunningStrikeOffer(attacker, scene.battle.currentRound)
+                : null,
+        [attacker, state.offHand, isOpen, scene.battle.currentRound]
+    );
 
-  const describe = (a: BattleAttack) => {
-    const onMap = !!scene.battle.map && !!attacker?.battleData.position;
+    const view = {
+        cunning: cunningOffer && {
+            options: cunningOffer.options.map((o) => ({
+                ...o,
+                label: CUNNING_STRIKE_LABELS[o.effect],
+                selected: !!state.cunningStrike?.includes(o.effect),
+            })),
+            maxEffects: cunningOffer.maxEffects,
+            sneakDice: cunningOffer.sneakDice,
+        },
+        attacker,
+        ammo: attacker
+            ? Object.fromEntries(
+                  attacks.flatMap((a) =>
+                      a.id && a.ammo?.capacity
+                          ? [
+                                [
+                                    a.id,
+                                    {
+                                        status: ammoStatus(attacker, a),
+                                        left:
+                                            attacker.battleData.ammo?.[a.id] ??
+                                            a.ammo.capacity,
+                                        capacity: a.ammo.capacity,
+                                    },
+                                ] as const,
+                            ]
+                          : []
+                  )
+              )
+            : {},
+        attack,
+        attacks,
+        targets,
+        steps,
+        estimate,
+        cover,
+        unreachable,
+        unknownDefense,
+        previews,
+        dice,
+        serverJudged,
+        judged,
+        attackKind: attack
+            ? attackKindOf(attack.type) === AttackType.RANGED
+                ? ('ranged' as const)
+                : ('melee' as const)
+            : null,
+        /** дальність перевірена картою — лише тоді «ціль поруч» правда */
+        reachChecked:
+            !!scene.battle.map &&
+            !!attacker?.battleData.position &&
+            state.targetIds.every((id) => !!byId(id)?.battleData.position),
+        rollMode: currentMode,
+        forcedMode: currentStrike?.forced,
+        inspirationAvailable: canUseInspiration(attacker, scene.battle.rules),
+        offHand: !!state.offHand,
+        counter:
+            attacker && !state.offHand ? attackCounter(attacker, order) : null,
+        canSelectAllEnemies:
+            enemyTargets.length > 1 && state.maxTargets >= enemyTargets.length,
+    };
 
-    const maxTargets = attacker ? attackMaxTargets(attacker, a, { chain, onMap }) : 1;
+    const actions = {
+        open: (
+            targetId?: string,
+            attackId?: string,
+            opts: { offHand?: boolean } = {}
+        ) => {
+            const offHand = !!opts.offHand;
 
-    return { attackId: a.id ?? a.name, maxTargets: hitsAll ? Math.max(maxTargets, enemyTargets.length) : maxTargets, diceSlots: attacker ? damageDiceSlots(attacker, a) : [6] };
-  };
+            const pool = offHand ? attackPools.off : attackPools.main;
 
-  const preselectAll = (chosen: BattleAttack) => {
-    if (!hitsAll) return;
+            const first = pool[0];
 
-    const inReach = attacker && scene.battle.map && attacker.battleData.position ? enemiesInReach(scene.battle.map, order, attacker, chosen, scene.battle.rules).filter(visible) : enemyTargets;
+            if (!first) return;
 
-    dispatch({ type: "SET_TARGETS", ids: inReach.map((p) => p.basicInfo.id) });
-  };
+            const target = targetId ? byId(targetId) : undefined;
 
-  const currentStrike = state.strikes[state.index];
+            if (!target) {
+                dispatch({
+                    type: 'OPEN',
+                    weaponCount: pool.length,
+                    ...describe(first),
+                    ...(offHand && { offHand }),
+                });
+                preselectAll(first);
 
-  const currentMode = strikeMode(state, currentStrike);
+                return;
+            }
 
-  const attackCtx = { order, round: scene.battle.currentRound, map, rules: scene.battle.rules };
+            const chosen =
+                (attackId && pool.find((a) => (a.id ?? a.name) === attackId)) ||
+                first;
 
-  const outcomeOf = (d20: number, second?: number): RollOutcome => {
-    const target = byId(state.strikes[state.index]?.targetId ?? "");
+            const picked = pool.length === 1 || !!attackId;
 
-    if (!attacker || !attack || !target) return "miss";
+            dispatch({
+                type: 'OPEN',
+                weaponCount: pool.length,
+                ...describe(chosen),
+                targetIds: [target.basicInfo.id],
+                picked,
+                ...(offHand && { offHand }),
+            });
 
-    return rollOutcomeOf(attacker, target, attack, attackCtx, { d20, second, mode: currentMode });
-  };
+            if (picked) {
+                if (pool.length > 1)
+                    dispatch({ type: 'SELECT_WEAPON', ...describe(chosen) });
 
-  const rollAction = (d20?: number, second?: number): AttackFlowAction =>
-    serverJudged ? { type: "ROLL", d20, outcome: "hit", judge: "server", damage: state.diceSlots.map((sides) => rollDie(sides, cryptoRandom)), ...(second !== undefined && { second }) } : { type: "ROLL", d20, second, outcome: outcomeOf(d20 ?? 0, second) };
+                const forced = attacker
+                    ? forcedFor(attacker, target, chosen, attackCtx)
+                    : undefined;
 
-  useAttackSubmit({ attacker, attack, flow: { state, dispatch }, onDone });
+                dispatch({
+                    type: 'CONFIRM_TARGETS',
+                    forced: { [target.basicInfo.id]: forced },
+                });
+            }
+        },
+        changeWeapon: () => dispatch({ type: 'CHANGE_WEAPON' }),
+        selectWeapon: (a: BattleAttack) => {
+            dispatch({ type: 'SELECT_WEAPON', ...describe(a) });
+            preselectAll(a);
+        },
+        toggleTarget: (id: string) => dispatch({ type: 'TOGGLE_TARGET', id }),
+        confirmTargets: () => {
+            const forced = Object.fromEntries(
+                state.targetIds.map((id) => {
+                    const t = byId(id);
 
-  const cunningOffer = useMemo(() => (attacker && !state.offHand && isOpen ? cunningStrikeOffer(attacker, scene.battle.currentRound) : null), [attacker, state.offHand, isOpen, scene.battle.currentRound]);
+                    return [
+                        id,
+                        attacker && attack && t
+                            ? forcedFor(attacker, t, attack, attackCtx)
+                            : undefined,
+                    ];
+                })
+            );
 
-  const view = {
-    cunning: cunningOffer && {
-      options: cunningOffer.options.map((o) => ({ ...o, label: CUNNING_STRIKE_LABELS[o.effect], selected: !!state.cunningStrike?.includes(o.effect) })),
-      maxEffects: cunningOffer.maxEffects,
-      sneakDice: cunningOffer.sneakDice,
-    },
-    attacker,
-    ammo: attacker ? Object.fromEntries(attacks.flatMap((a) => (a.id && a.ammo?.capacity ? [[a.id, { status: ammoStatus(attacker, a), left: attacker.battleData.ammo?.[a.id] ?? a.ammo.capacity, capacity: a.ammo.capacity }] as const] : []))) : {},
-    attack, attacks, targets, steps, estimate, cover, unreachable, unknownDefense, previews, dice, serverJudged, judged,
-    attackKind: attack ? (attackKindOf(attack.type) === AttackType.RANGED ? ("ranged" as const) : ("melee" as const)) : null,
-    /** дальність перевірена картою — лише тоді «ціль поруч» правда */
-    reachChecked: !!scene.battle.map && !!attacker?.battleData.position && state.targetIds.every((id) => !!byId(id)?.battleData.position),
-    rollMode: currentMode,
-    forcedMode: currentStrike?.forced,
-    inspirationAvailable: canUseInspiration(attacker, scene.battle.rules),
-    offHand: !!state.offHand,
-    counter: attacker && !state.offHand ? attackCounter(attacker, order) : null,
-    canSelectAllEnemies: enemyTargets.length > 1 && state.maxTargets >= enemyTargets.length,
-  };
+            dispatch({ type: 'CONFIRM_TARGETS', forced });
+        },
+        selectAllEnemies: () =>
+            dispatch({
+                type: 'SET_TARGETS',
+                ids: enemyTargets
+                    .filter((p) => !unreachable.has(p.basicInfo.id))
+                    .map((p) => p.basicInfo.id),
+            }),
+        toggleCunning: (effect: CunningStrikeEffect) =>
+            cunningOffer &&
+            dispatch({
+                type: 'SET_CUNNING_STRIKE',
+                effects: toggleCunningStrike(
+                    state.cunningStrike ?? [],
+                    effect,
+                    cunningOffer
+                ),
+            }),
+        setMode: (mode: AttackMode) => dispatch({ type: 'SET_MODE', mode }),
+        setSystemInput: (value: SystemSlot | null) =>
+            dispatch({ type: 'SET_SYSTEM_INPUT', value }),
+        setInspiration: (value: boolean) => {
+            const t = byId(state.strikes[0]?.targetId ?? '');
 
-  const actions = {
-    open: (targetId?: string, attackId?: string, opts: { offHand?: boolean } = {}) => {
-      const offHand = !!opts.offHand;
+            const forced =
+                attacker && attack && t
+                    ? forcedFor(attacker, t, attack, attackCtx, {
+                          inspiration: value,
+                      })
+                    : undefined;
 
-      const pool = offHand ? attackPools.off : attackPools.main;
+            dispatch({ type: 'SET_INSPIRATION', value, forced });
+        },
+        roll: (d20: number, second?: number) =>
+            dispatch(rollAction(d20, second)),
+        aiRoll: () => {
+            if (serverJudged) return dispatch(rollAction());
 
-      const first = pool[0];
+            const d20 = rollDie(dice, cryptoRandom);
 
-      if (!first) return;
+            const second =
+                currentMode === 'normal'
+                    ? undefined
+                    : rollDie(20, cryptoRandom);
 
-      const target = targetId ? byId(targetId) : undefined;
+            dispatch(rollAction(d20, second));
+        },
+        damage: (values: number[]) => dispatch({ type: 'DAMAGE', values }),
+        back: () => dispatch({ type: 'BACK' }),
+        submit: () => dispatch({ type: 'SUBMIT' }),
+        close: () => dispatch({ type: 'CLOSE' }),
+    };
 
-      if (!target) {
-        dispatch({ type: "OPEN", weaponCount: pool.length, ...describe(first), ...(offHand && { offHand }) });
-        preselectAll(first);
+    const doubled =
+        state.step === 'damage' &&
+        currentStrike?.outcome === 'crit' &&
+        critDoublesDice(scene.battle.rules, true);
 
-        return;
-      }
-
-      const chosen = (attackId && pool.find((a) => (a.id ?? a.name) === attackId)) || first;
-
-      const picked = pool.length === 1 || !!attackId;
-
-      dispatch({ type: "OPEN", weaponCount: pool.length, ...describe(chosen), targetIds: [target.basicInfo.id], picked, ...(offHand && { offHand }) });
-
-      if (picked) {
-        if (pool.length > 1) dispatch({ type: "SELECT_WEAPON", ...describe(chosen) });
-
-        const forced = attacker ? forcedFor(attacker, target, chosen, attackCtx) : undefined;
-
-        dispatch({ type: "CONFIRM_TARGETS", forced: { [target.basicInfo.id]: forced } });
-      }
-    },
-    changeWeapon: () => dispatch({ type: "CHANGE_WEAPON" }),
-    selectWeapon: (a: BattleAttack) => {
-      dispatch({ type: "SELECT_WEAPON", ...describe(a) });
-      preselectAll(a);
-    },
-    toggleTarget: (id: string) => dispatch({ type: "TOGGLE_TARGET", id }),
-    confirmTargets: () => {
-      const forced = Object.fromEntries(
-        state.targetIds.map((id) => {
-          const t = byId(id);
-
-          return [id, attacker && attack && t ? forcedFor(attacker, t, attack, attackCtx) : undefined];
-        }),
-      );
-
-      dispatch({ type: "CONFIRM_TARGETS", forced });
-    },
-    selectAllEnemies: () => dispatch({ type: "SET_TARGETS", ids: enemyTargets.filter((p) => !unreachable.has(p.basicInfo.id)).map((p) => p.basicInfo.id) }),
-    toggleCunning: (effect: CunningStrikeEffect) => cunningOffer && dispatch({ type: "SET_CUNNING_STRIKE", effects: toggleCunningStrike(state.cunningStrike ?? [], effect, cunningOffer) }),
-    setMode: (mode: AttackMode) => dispatch({ type: "SET_MODE", mode }),
-    setSystemInput: (value: SystemSlot | null) => dispatch({ type: "SET_SYSTEM_INPUT", value }),
-    setInspiration: (value: boolean) => {
-      const t = byId(state.strikes[0]?.targetId ?? "");
-
-      const forced = attacker && attack && t ? forcedFor(attacker, t, attack, attackCtx, { inspiration: value }) : undefined;
-
-      dispatch({ type: "SET_INSPIRATION", value, forced });
-    },
-    roll: (d20: number, second?: number) => dispatch(rollAction(d20, second)),
-    aiRoll: () => {
-      if (serverJudged) return dispatch(rollAction());
-
-      const d20 = rollDie(dice, cryptoRandom);
-
-      const second = currentMode === "normal" ? undefined : rollDie(20, cryptoRandom);
-
-      dispatch(rollAction(d20, second));
-    },
-    damage: (values: number[]) => dispatch({ type: "DAMAGE", values }),
-    back: () => dispatch({ type: "BACK" }),
-    submit: () => dispatch({ type: "SUBMIT" }),
-    close: () => dispatch({ type: "CLOSE" }),
-  };
-
-  const doubled = state.step === "damage" && currentStrike?.outcome === "crit" && critDoublesDice(scene.battle.rules, true);
-
-  return { state: doubled ? { ...state, diceSlots: [...state.diceSlots, ...state.diceSlots] } : state, view, actions };
+    return {
+        state: doubled
+            ? { ...state, diceSlots: [...state.diceSlots, ...state.diceSlots] }
+            : state,
+        view,
+        actions,
+    };
 }

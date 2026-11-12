@@ -1,64 +1,127 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from 'vitest';
 
-import { ParticipantSide } from "@/lib/constants/battle";
-import { attackBodySchema } from "@/lib/schemas/battles";
-import { context } from "@/lib/server/battles/__tests__/mutations/fixtures";
-import { attackMutation } from "@/lib/server/battles/mutations/attack/attack-mutation";
-import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
-import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
-import { stripPlayerHiddenRules } from "@/lib/utils/rules/player-hidden";
-import { DEFAULT_CHARACTERISTICS } from "@/systems/wfrp/rules/characteristics/keys";
-import { wfrpAbilitiesOf } from "@/systems/wfrp/rules/combat/participant";
-import { conditionLevel } from "@/systems/wfrp/rules/conditions/levels";
-import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
-import type { TableRow } from "@/systems/wfrp/rules/tables/schema";
-import { must } from "@/systems/wfrp/rules/traits/__tests__/fixtures";
-import type { BattleParticipant } from "@/types/battle";
+import { ParticipantSide } from '@/lib/constants/battle';
+import { attackBodySchema } from '@/lib/schemas/battles';
+import { context } from '@/lib/server/battles/__tests__/mutations/fixtures';
+import { attackMutation } from '@/lib/server/battles/mutations/attack/attack-mutation';
+import { makeParticipant } from '@/lib/utils/abilities/__tests__/fixtures';
+import type { BattleMutationContext } from '@/lib/utils/battle/pipeline/run-battle-mutation';
+import { stripPlayerHiddenRules } from '@/lib/utils/rules/player-hidden';
+import { DEFAULT_CHARACTERISTICS } from '@/systems/wfrp/rules/characteristics/keys';
+import { wfrpAbilitiesOf } from '@/systems/wfrp/rules/combat/participant';
+import { conditionLevel } from '@/systems/wfrp/rules/conditions/levels';
+import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
+import type { TableRow } from '@/systems/wfrp/rules/tables/schema';
+import { must } from '@/systems/wfrp/rules/traits/__tests__/fixtures';
+import type { BattleParticipant } from '@/types/battle';
 
-vi.mock("@/lib/db", () => ({ prisma: { race: { findFirst: vi.fn() } } }));
+vi.mock('@/lib/db', () => ({ prisma: { race: { findFirst: vi.fn() } } }));
 
 const fighter = (id: string, side: ParticipantSide): BattleParticipant => {
-  const p = makeParticipant({ id, side, hp: 30, maxHp: 30 });
+    const p = makeParticipant({ id, side, hp: 30, maxHp: 30 });
 
-  const characteristics = { ...DEFAULT_CHARACTERISTICS, base: { ...DEFAULT_CHARACTERISTICS.base, ws: 40, s: 30, t: 30, wp: 35 } };
+    const characteristics = {
+        ...DEFAULT_CHARACTERISTICS,
+        base: { ...DEFAULT_CHARACTERISTICS.base, ws: 40, s: 30, t: 30, wp: 35 },
+    };
 
-  return {
-    ...p,
-    basicInfo: { ...p.basicInfo, battleId: "b1", controlledBy: "dm" },
-    abilities: { ...p.abilities, ...wfrpAbilitiesOf(characteristics, { ap: { head: 0, arm: 0, body: 0, leg: 0 } }) },
-    battleData: { ...p.battleData, attacks: [{ id: "sw", name: "Sword", type: "melee", attackBonus: 0, damageDice: "1d6", damageType: "slashing" } as never] },
-  };
+    return {
+        ...p,
+        basicInfo: { ...p.basicInfo, battleId: 'b1', controlledBy: 'dm' },
+        abilities: {
+            ...p.abilities,
+            ...wfrpAbilitiesOf(characteristics, {
+                ap: { head: 0, arm: 0, body: 0, leg: 0 },
+            }),
+        },
+        battleData: {
+            ...p.battleData,
+            attacks: [
+                {
+                    id: 'sw',
+                    name: 'Sword',
+                    type: 'melee',
+                    attackBonus: 0,
+                    damageDice: '1d6',
+                    damageType: 'slashing',
+                } as never,
+            ],
+        },
+    };
 };
 
-const CAMPAIGN_ROW: TableRow[] = [{ max: 100, text: "Cut <b>deep</b>", effects: [{ type: "damage", amount: 5 }, { type: "condition", key: "stunned", levels: 2 }, { type: "marker", key: "crippled" }] }];
+const CAMPAIGN_ROW: TableRow[] = [
+    {
+        max: 100,
+        text: 'Cut <b>deep</b>',
+        effects: [
+            { type: 'damage', amount: 5 },
+            { type: 'condition', key: 'stunned', levels: 2 },
+            { type: 'marker', key: 'crippled' },
+        ],
+    },
+];
 
 const run = async (rules: typeof WFRP_RULES) => {
-  const base = context({ participants: [fighter("h", ParticipantSide.ALLY), fighter("t", ParticipantSide.ENEMY)], isDM: true });
+    const base = context({
+        participants: [
+            fighter('h', ParticipantSide.ALLY),
+            fighter('t', ParticipantSide.ENEMY),
+        ],
+        isDM: true,
+    });
 
-  const ctx: BattleMutationContext = { ...base, meta: { ...base.meta, rules }, scene: { ...base.scene, turnIndex: 0 }, rng: () => 0.5 };
+    const ctx: BattleMutationContext = {
+        ...base,
+        meta: { ...base.meta, rules },
+        scene: { ...base.scene, turnIndex: 0 },
+        rng: () => 0.5,
+    };
 
-  return attackMutation(ctx, attackBodySchema.parse({ attackerId: "h", targetId: "t", attackId: "sw", d20Roll: 11, damageRolls: [4], endTurn: false }));
+    return attackMutation(
+        ctx,
+        attackBodySchema.parse({
+            attackerId: 'h',
+            targetId: 't',
+            attackId: 'sw',
+            d20Roll: 11,
+            damageRolls: [4],
+            endTurn: false,
+        })
+    );
 };
 
-describe("wfrp rules.tables end to end", () => {
-  it("campaign critArm row applies damage, condition and marker and logs its text", async () => {
-    const out = await run({ ...WFRP_RULES, tables: { critArm: CAMPAIGN_ROW } });
+describe('wfrp rules.tables end to end', () => {
+    it('campaign critArm row applies damage, condition and marker and logs its text', async () => {
+        const out = await run({
+            ...WFRP_RULES,
+            tables: { critArm: CAMPAIGN_ROW },
+        });
 
-    const target = must(out.participants.find((p) => p.basicInfo.id === "t"));
+        const target = must(
+            out.participants.find((p) => p.basicInfo.id === 't')
+        );
 
-    expect(JSON.stringify(out.events)).toContain("Cut <b>deep</b>");
-    expect(conditionLevel(target, "stunned")).toBe(2);
-    expect(target.battleData.activeEffects.map((e) => e.name)).toContain("crit.wfrp.arm.1.crippled");
-  });
+        expect(JSON.stringify(out.events)).toContain('Cut <b>deep</b>');
+        expect(conditionLevel(target, 'stunned')).toBe(2);
+        expect(target.battleData.activeEffects.map((e) => e.name)).toContain(
+            'crit.wfrp.arm.1.crippled'
+        );
+    });
 
-  it("empty tables keep the shipped crit", async () => {
-    const out = await run(WFRP_RULES);
+    it('empty tables keep the shipped crit', async () => {
+        const out = await run(WFRP_RULES);
 
-    expect(JSON.stringify(out.events)).toContain("battleWfrp.crit.arm.");
-    expect(JSON.stringify(out.events)).not.toContain("Cut <b>deep</b>");
-  });
+        expect(JSON.stringify(out.events)).toContain('battleWfrp.crit.arm.');
+        expect(JSON.stringify(out.events)).not.toContain('Cut <b>deep</b>');
+    });
 
-  it("players get the rules without tables", () => {
-    expect(stripPlayerHiddenRules({ ...WFRP_RULES, tables: { critArm: CAMPAIGN_ROW } }).tables).toEqual({});
-  });
+    it('players get the rules without tables', () => {
+        expect(
+            stripPlayerHiddenRules({
+                ...WFRP_RULES,
+                tables: { critArm: CAMPAIGN_ROW },
+            }).tables
+        ).toEqual({});
+    });
 });

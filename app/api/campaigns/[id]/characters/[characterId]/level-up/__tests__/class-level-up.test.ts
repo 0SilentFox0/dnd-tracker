@@ -1,160 +1,296 @@
-import { NextResponse } from "next/server";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { NextResponse } from 'next/server';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { API_ERRORS } from "@/lib/constants/api-errors";
-import { prisma } from "@/lib/db";
-import * as apiAuth from "@/lib/utils/api/api-auth";
-import { DEFAULT_RULES } from "@/lib/utils/rules/defaults";
+import { API_ERRORS } from '@/lib/constants/api-errors';
+import { prisma } from '@/lib/db';
+import * as apiAuth from '@/lib/utils/api/api-auth';
+import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
 
-vi.mock("@/lib/server/notifications/notify", () => ({ notifyCharacterOwners: vi.fn().mockResolvedValue(0) }));
-vi.mock("server-only", () => ({}));
-vi.mock("@/lib/utils/api/api-auth", () => ({ requireDM: vi.fn() }));
-vi.mock("@/lib/cache/reference-data", () => ({
-  getCachedClasses: vi.fn(async () => [
-    { id: "c1", name: "Воїн", hitDie: 10, caster: "none", savingThrows: [], proficiencies: {}, skillChoices: {}, features: [], subclasses: [{ id: "s1", name: "Чемпіон", features: [] }, { id: "s2", name: "Майстер", features: [] }], subclassLevel: 3 },
-    { id: "c3", name: "Бард", hitDie: 8, caster: "none", savingThrows: [], proficiencies: {}, skillChoices: {}, features: [], subclasses: [], subclassLevel: 3 },
-    { id: "e1", name: "Fighter", hitDie: 10, caster: "none", savingThrows: [], proficiencies: {}, skillChoices: {}, features: [], subclasses: [], subclassLevel: null },
-    { id: "e2", name: "Wizard", hitDie: 6, caster: "full", savingThrows: [], proficiencies: {}, skillChoices: {}, features: [], subclasses: [], subclassLevel: null },
-    { id: "c2", name: "Маг", hitDie: 6, caster: "full", savingThrows: [], proficiencies: {}, skillChoices: {}, features: [], subclasses: [], subclassLevel: null },
-  ]),
+vi.mock('@/lib/server/notifications/notify', () => ({
+    notifyCharacterOwners: vi.fn().mockResolvedValue(0),
 }));
-vi.mock("@/lib/server/characters/core/load-race-progression", () => ({ loadRaceProgression: vi.fn(async () => null) }));
-vi.mock("@/lib/db", () => {
-  const prisma: Record<string, unknown> = { $queryRaw: vi.fn(async () => []), character: { findUnique: vi.fn(), update: vi.fn() } };
+vi.mock('server-only', () => ({}));
+vi.mock('@/lib/utils/api/api-auth', () => ({ requireDM: vi.fn() }));
+vi.mock('@/lib/cache/reference-data', () => ({
+    getCachedClasses: vi.fn(async () => [
+        {
+            id: 'c1',
+            name: 'Воїн',
+            hitDie: 10,
+            caster: 'none',
+            savingThrows: [],
+            proficiencies: {},
+            skillChoices: {},
+            features: [],
+            subclasses: [
+                { id: 's1', name: 'Чемпіон', features: [] },
+                { id: 's2', name: 'Майстер', features: [] },
+            ],
+            subclassLevel: 3,
+        },
+        {
+            id: 'c3',
+            name: 'Бард',
+            hitDie: 8,
+            caster: 'none',
+            savingThrows: [],
+            proficiencies: {},
+            skillChoices: {},
+            features: [],
+            subclasses: [],
+            subclassLevel: 3,
+        },
+        {
+            id: 'e1',
+            name: 'Fighter',
+            hitDie: 10,
+            caster: 'none',
+            savingThrows: [],
+            proficiencies: {},
+            skillChoices: {},
+            features: [],
+            subclasses: [],
+            subclassLevel: null,
+        },
+        {
+            id: 'e2',
+            name: 'Wizard',
+            hitDie: 6,
+            caster: 'full',
+            savingThrows: [],
+            proficiencies: {},
+            skillChoices: {},
+            features: [],
+            subclasses: [],
+            subclassLevel: null,
+        },
+        {
+            id: 'c2',
+            name: 'Маг',
+            hitDie: 6,
+            caster: 'full',
+            savingThrows: [],
+            proficiencies: {},
+            skillChoices: {},
+            features: [],
+            subclasses: [],
+            subclassLevel: null,
+        },
+    ]),
+}));
+vi.mock('@/lib/server/characters/core/load-race-progression', () => ({
+    loadRaceProgression: vi.fn(async () => null),
+}));
+vi.mock('@/lib/db', () => {
+    const prisma: Record<string, unknown> = {
+        $queryRaw: vi.fn(async () => []),
+        character: { findUnique: vi.fn(), update: vi.fn() },
+    };
 
-  prisma.$transaction = vi.fn(async (fn: (tx: unknown) => unknown) => fn(prisma));
+    prisma.$transaction = vi.fn(async (fn: (tx: unknown) => unknown) =>
+        fn(prisma)
+    );
 
-  return { prisma };
+    return { prisma };
 });
 
-const campaign = { id: "camp", maxLevel: 20, rules: { ...DEFAULT_RULES, classes: { enabled: true } } };
-
-const post = async (body?: object) => {
-  const { POST } = await import("../route");
-
-  return POST(new Request("http://x", { method: "POST", body: body ? JSON.stringify(body) : undefined }), {
-    params: Promise.resolve({ id: "camp", characterId: "ch" }),
-  }) as Promise<NextResponse>;
+const campaign = {
+    id: 'camp',
+    maxLevel: 20,
+    rules: { ...DEFAULT_RULES, classes: { enabled: true } },
 };
 
-const base = { id: "ch", campaignId: "camp", level: 2, seenLevel: 2, race: "Люди", spellSlots: {}, strength: 10, dexterity: 10, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10, spellcastingAbility: null };
+const post = async (body?: object) => {
+    const { POST } = await import('../route');
 
-describe("POST level-up (classes)", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    vi.mocked(apiAuth.requireDM).mockResolvedValue({ userId: "dm", isDM: true, campaign } as never);
-    vi.mocked(prisma.character.update).mockImplementation((async (args: { data: object }) => ({ id: "ch", ...args.data })) as never);
-  });
+    return POST(
+        new Request('http://x', {
+            method: 'POST',
+            body: body ? JSON.stringify(body) : undefined,
+        }),
+        {
+            params: Promise.resolve({ id: 'camp', characterId: 'ch' }),
+        }
+    ) as Promise<NextResponse>;
+};
 
-  const withClasses = (classes: object[], level = 2) => vi.mocked(prisma.character.findUnique).mockResolvedValue({ ...base, level, classes } as never);
+const base = {
+    id: 'ch',
+    campaignId: 'camp',
+    level: 2,
+    seenLevel: 2,
+    race: 'Люди',
+    spellSlots: {},
+    strength: 10,
+    dexterity: 10,
+    constitution: 10,
+    intelligence: 10,
+    wisdom: 10,
+    charisma: 10,
+    spellcastingAbility: null,
+};
 
-  const written = () => vi.mocked(prisma.character.update).mock.calls[0][0].data as Record<string, unknown>;
+describe('POST level-up (classes)', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+        vi.mocked(apiAuth.requireDM).mockResolvedValue({
+            userId: 'dm',
+            isDM: true,
+            campaign,
+        } as never);
+        vi.mocked(prisma.character.update).mockImplementation((async (args: {
+            data: object;
+        }) => ({ id: 'ch', ...args.data })) as never);
+    });
 
-  it("клас-шлях: характеристики не змінюються", async () => {
-    withClasses([{ classId: "c1", level: 1 }], 1);
+    const withClasses = (classes: object[], level = 2) =>
+        vi
+            .mocked(prisma.character.findUnique)
+            .mockResolvedValue({ ...base, level, classes } as never);
 
-    const res = await post({ classId: "c1" });
+    const written = () =>
+        vi.mocked(prisma.character.update).mock.calls[0][0].data as Record<
+            string,
+            unknown
+        >;
 
-    const json = await res.json();
+    it('клас-шлях: характеристики не змінюються', async () => {
+        withClasses([{ classId: 'c1', level: 1 }], 1);
 
-    expect(res.status).toBe(200);
-    expect(written()).toMatchObject({ level: 2, classes: [{ classId: "c1", level: 2 }] });
-    expect(written()).not.toHaveProperty("strength");
-    expect(json.levelUpDetails).toEqual({ abilityIncreased: null, classId: "c1" });
-  });
+        const res = await post({ classId: 'c1' });
 
-  it("мультиклас: новий клас додається", async () => {
-    withClasses([{ classId: "c1", level: 2 }]);
+        const json = await res.json();
 
-    await post({ classId: "c2" });
+        expect(res.status).toBe(200);
+        expect(written()).toMatchObject({
+            level: 2,
+            classes: [{ classId: 'c1', level: 2 }],
+        });
+        expect(written()).not.toHaveProperty('strength');
+        expect(json.levelUpDetails).toEqual({
+            abilityIncreased: null,
+            classId: 'c1',
+        });
+    });
 
-    expect(written()).toMatchObject({ level: 3, classes: [{ classId: "c1", level: 2 }, { classId: "c2", level: 1 }] });
-  });
+    it('мультиклас: новий клас додається', async () => {
+        withClasses([{ classId: 'c1', level: 2 }]);
 
-  it("мультиклас SRD: без 13 у ключовій характеристиці — 422", async () => {
-    vi.mocked(prisma.character.findUnique).mockResolvedValue({ ...base, strength: 15, classes: [{ classId: "e1", level: 2 }] } as never);
+        await post({ classId: 'c2' });
 
-    const res = await post({ classId: "e2" });
+        expect(written()).toMatchObject({
+            level: 3,
+            classes: [
+                { classId: 'c1', level: 2 },
+                { classId: 'c2', level: 1 },
+            ],
+        });
+    });
 
-    expect(res.status).toBe(422);
-    expect((await res.json()).error).toContain("Wizard");
-    expect(prisma.character.update).not.toHaveBeenCalled();
-  });
+    it('мультиклас SRD: без 13 у ключовій характеристиці — 422', async () => {
+        vi.mocked(prisma.character.findUnique).mockResolvedValue({
+            ...base,
+            strength: 15,
+            classes: [{ classId: 'e1', level: 2 }],
+        } as never);
 
-  it("мультиклас SRD: з 13 у обох — додається", async () => {
-    vi.mocked(prisma.character.findUnique).mockResolvedValue({ ...base, strength: 15, intelligence: 13, classes: [{ classId: "e1", level: 2 }] } as never);
+        const res = await post({ classId: 'e2' });
 
-    expect((await post({ classId: "e2" })).status).toBe(200);
-  });
+        expect(res.status).toBe(422);
+        expect((await res.json()).error).toContain('Wizard');
+        expect(prisma.character.update).not.toHaveBeenCalled();
+    });
 
-  it("SUBCLASS_REQUIRED на рівні subclassLevel", async () => {
-    withClasses([{ classId: "c1", level: 2 }]);
+    it('мультиклас SRD: з 13 у обох — додається', async () => {
+        vi.mocked(prisma.character.findUnique).mockResolvedValue({
+            ...base,
+            strength: 15,
+            intelligence: 13,
+            classes: [{ classId: 'e1', level: 2 }],
+        } as never);
 
-    const res = await post({ classId: "c1" });
+        expect((await post({ classId: 'e2' })).status).toBe(200);
+    });
 
-    expect(res.status).toBe(422);
-    expect((await res.json()).error).toBe(API_ERRORS.SUBCLASS_REQUIRED);
-    expect(prisma.character.update).not.toHaveBeenCalled();
-  });
+    it('SUBCLASS_REQUIRED на рівні subclassLevel', async () => {
+        withClasses([{ classId: 'c1', level: 2 }]);
 
-  it("підклас у тілі приймається", async () => {
-    withClasses([{ classId: "c1", level: 2 }]);
+        const res = await post({ classId: 'c1' });
 
-    const res = await post({ classId: "c1", subclassId: "s1" });
+        expect(res.status).toBe(422);
+        expect((await res.json()).error).toBe(API_ERRORS.SUBCLASS_REQUIRED);
+        expect(prisma.character.update).not.toHaveBeenCalled();
+    });
 
-    expect(res.status).toBe(200);
-    expect(written()).toMatchObject({ subclass: "Чемпіон" });
-  });
+    it('підклас у тілі приймається', async () => {
+        withClasses([{ classId: 'c1', level: 2 }]);
 
-  it("CLASS_REQUIRED без classId", async () => {
-    withClasses([{ classId: "c1", level: 2 }]);
+        const res = await post({ classId: 'c1', subclassId: 's1' });
 
-    const res = await post();
+        expect(res.status).toBe(200);
+        expect(written()).toMatchObject({ subclass: 'Чемпіон' });
+    });
 
-    expect(res.status).toBe(422);
-    expect((await res.json()).error).toBe(API_ERRORS.CLASS_REQUIRED);
-  });
+    it('CLASS_REQUIRED без classId', async () => {
+        withClasses([{ classId: 'c1', level: 2 }]);
 
-  it("HOMM-шлях: без класів і без тіла — як раніше", async () => {
-    withClasses([]);
+        const res = await post();
 
-    const res = await post();
+        expect(res.status).toBe(422);
+        expect((await res.json()).error).toBe(API_ERRORS.CLASS_REQUIRED);
+    });
 
-    const json = await res.json();
+    it('HOMM-шлях: без класів і без тіла — як раніше', async () => {
+        withClasses([]);
 
-    expect(res.status).toBe(200);
-    expect(written().level).toBe(3);
-    expect(json.levelUpDetails).toHaveProperty("spellSlots");
-    expect(written()).not.toHaveProperty("classes");
-  });
+        const res = await post();
 
-  it("порожні classes + classId — 422 «Спершу переведіть»", async () => {
-    withClasses([]);
+        const json = await res.json();
 
-    const res = await post({ classId: "c1" });
+        expect(res.status).toBe(200);
+        expect(written().level).toBe(3);
+        expect(json.levelUpDetails).toHaveProperty('spellSlots');
+        expect(written()).not.toHaveProperty('classes');
+    });
 
-    expect(res.status).toBe(422);
-    expect((await res.json()).error).toBe(API_ERRORS.CONVERT_TO_CLASSES_FIRST);
-    expect(prisma.character.update).not.toHaveBeenCalled();
-  });
+    it('порожні classes + classId — 422 «Спершу переведіть»', async () => {
+        withClasses([]);
 
-  it("клас без підкласів на subclassLevel не вимагає підклас", async () => {
-    withClasses([{ classId: "c3", level: 2 }]);
+        const res = await post({ classId: 'c1' });
 
-    const res = await post({ classId: "c3" });
+        expect(res.status).toBe(422);
+        expect((await res.json()).error).toBe(
+            API_ERRORS.CONVERT_TO_CLASSES_FIRST
+        );
+        expect(prisma.character.update).not.toHaveBeenCalled();
+    });
 
-    expect(res.status).toBe(200);
-  });
+    it('клас без підкласів на subclassLevel не вимагає підклас', async () => {
+        withClasses([{ classId: 'c3', level: 2 }]);
 
-  it("зміна наявного підкласу при підвищенні — 422", async () => {
-    withClasses([{ classId: "c1", level: 3, subclassId: "s1" }], 3);
+        const res = await post({ classId: 'c3' });
 
-    const res = await post({ classId: "c1", subclassId: "s2" });
+        expect(res.status).toBe(200);
+    });
 
-    expect(res.status).toBe(422);
-    expect((await res.json()).error).toBe(API_ERRORS.SUBCLASS_ALREADY_SET);
-  });
+    it('зміна наявного підкласу при підвищенні — 422', async () => {
+        withClasses([{ classId: 'c1', level: 3, subclassId: 's1' }], 3);
+
+        const res = await post({ classId: 'c1', subclassId: 's2' });
+
+        expect(res.status).toBe(422);
+        expect((await res.json()).error).toBe(API_ERRORS.SUBCLASS_ALREADY_SET);
+    });
 });
 
 // Shared transaction SQL is exercised by character storage integration; retain the existing business DB doubles.
-vi.mock("@/lib/server/content/write", () => ({ withCampaignContentWrite: async (_id: string, fn: (tx: unknown) => unknown) => fn({ $queryRaw: async () => [], $executeRaw: async () => 1 }), withCampaignRuntimeWrite: async (_id: string, fn: (tx: unknown) => unknown) => fn({ $queryRaw: async () => [], $executeRaw: async () => 1 }) }));
+vi.mock('@/lib/server/content/write', () => ({
+    withCampaignContentWrite: async (
+        _id: string,
+        fn: (tx: unknown) => unknown
+    ) => fn({ $queryRaw: async () => [], $executeRaw: async () => 1 }),
+    withCampaignRuntimeWrite: async (
+        _id: string,
+        fn: (tx: unknown) => unknown
+    ) => fn({ $queryRaw: async () => [], $executeRaw: async () => 1 }),
+}));

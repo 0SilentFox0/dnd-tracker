@@ -1,351 +1,738 @@
-import { describe, expect, it } from "vitest";
-
-import { attackFlow, type AttackFlowAction, type AttackFlowState, attackPayload, effectiveD20, initialAttackFlow, lockedRollSource, strikeMode } from "@/lib/utils/battle/flows";
-
-const run = (...actions: AttackFlowAction[]) => actions.reduce<AttackFlowState>(attackFlow, initialAttackFlow);
-
-const open = (weaponCount = 1, maxTargets = 1): AttackFlowAction => ({ type: "OPEN", weaponCount, attackId: "rapier", maxTargets, diceSlots: [8] });
-
-describe("attackFlow", () => {
-  it("одна зброя — одразу ціль; кілька — спершу зброя", () => {
-    expect(run(open()).step).toBe("target");
-    expect(run(open(3)).step).toBe("weapon");
-    expect(run(open(3), { type: "SELECT_WEAPON", attackId: "bow", maxTargets: 2, diceSlots: [8] })).toMatchObject({ step: "target", attackId: "bow", maxTargets: 2 });
-  });
-
-  it("OPEN з targetIds: одна зброя — крок цілі з обраною ціллю; кілька — крок зброї, SELECT_WEAPON обрізає", () => {
-    const withTargets = (weaponCount: number, maxTargets: number, targetIds: string[]): AttackFlowAction => ({ type: "OPEN", weaponCount, attackId: "rapier", maxTargets, diceSlots: [8], targetIds });
-
-    expect(run(withTargets(1, 1, ["e1"]))).toMatchObject({ step: "target", targetIds: ["e1"] });
-    expect(run(withTargets(1, 1, ["e1", "e2"])).targetIds).toEqual(["e1"]);
-    expect(run(withTargets(2, 2, ["e1"]))).toMatchObject({ step: "weapon", targetIds: ["e1"] });
-    expect(run(withTargets(2, 2, ["e1", "e2"]), { type: "SELECT_WEAPON", attackId: "bow", maxTargets: 1, diceSlots: [8] }).targetIds).toEqual(["e1"]);
-  });
-
-  describe("CHANGE_WEAPON", () => {
-    const picked: AttackFlowAction[] = [
-      { type: "OPEN", weaponCount: 2, attackId: "rapier", maxTargets: 1, diceSlots: [8], targetIds: ["e1"], picked: true },
-      { type: "SELECT_WEAPON", attackId: "rapier", maxTargets: 1, diceSlots: [8] },
-      { type: "CONFIRM_TARGETS" },
-    ];
-
-    it("з кидка — назад до зброї з тією ж ціллю, удари скинуті, позначка вибору знята", () => {
-      expect(run(...picked)).toMatchObject({ step: "roll", picked: true });
-
-      const s = run(...picked, { type: "CHANGE_WEAPON" });
-
-      expect(s).toMatchObject({ step: "weapon", targetIds: ["e1"], strikes: [], index: 0, picked: false });
-      expect(attackFlow(s, { type: "SELECT_WEAPON", attackId: "bow", maxTargets: 1, diceSlots: [6] })).toMatchObject({ step: "target", attackId: "bow", targetIds: ["e1"] });
-    });
-
-    it("одна зброя або не крок кидка — без змін", () => {
-      const single = run({ type: "OPEN", weaponCount: 1, attackId: "rapier", maxTargets: 1, diceSlots: [8], targetIds: ["e1"], picked: true }, { type: "CONFIRM_TARGETS" });
-
-      expect(attackFlow(single, { type: "CHANGE_WEAPON" })).toBe(single);
-
-      const atWeapon = run(picked[0]);
-
-      expect(attackFlow(atWeapon, { type: "CHANGE_WEAPON" })).toBe(atWeapon);
-    });
-  });
-
-  it("одна ціль — заміна; кілька — перемикання до максимуму", () => {
-    expect(run(open(), { type: "TOGGLE_TARGET", id: "a" }, { type: "TOGGLE_TARGET", id: "b" }).targetIds).toEqual(["b"]);
-
-    const multi = run(open(1, 2), { type: "TOGGLE_TARGET", id: "a" }, { type: "TOGGLE_TARGET", id: "b" }, { type: "TOGGLE_TARGET", id: "c" });
-
-    expect(multi.targetIds).toEqual(["a", "b"]);
-    expect(attackFlow(multi, { type: "TOGGLE_TARGET", id: "a" }).targetIds).toEqual(["b"]);
-  });
-
-  it("без цілі далі не йде", () => {
-    expect(run(open(), { type: "CONFIRM_TARGETS" }).step).toBe("target");
-  });
-
-  it("промах однієї цілі — одразу відправка, без кроку шкоди", () => {
-    const s = run(open(), { type: "TOGGLE_TARGET", id: "a" }, { type: "CONFIRM_TARGETS" }, { type: "ROLL", d20: 3, outcome: "miss" });
-
-    expect(s.step).toBe("submitting");
-    expect(attackPayload(s, "me")).toEqual({ attackerId: "me", attackId: "rapier", targetIds: ["a"], attackRoll: 3, damageRolls: [], endTurn: false });
-  });
-
-  it("влучання → шкода → підсумок → відправка; payload з кидками", () => {
-    const s = run(
-      open(),
-      { type: "TOGGLE_TARGET", id: "a" },
-      { type: "CONFIRM_TARGETS" },
-      { type: "SET_MODE", mode: "advantage" },
-      { type: "ROLL", d20: 14, second: 6, outcome: "hit" },
-      { type: "DAMAGE", values: [6] },
-    );
-
-    expect(s.step).toBe("summary");
-    expect(attackPayload(s, "me")).toEqual({
-      attackerId: "me", attackId: "rapier", targetIds: ["a"], attackRoll: 14, advantageRoll: 6, rollMode: "advantage", damageRolls: [6], endTurn: false,
-    });
-    expect(attackFlow(s, { type: "SUBMIT" }).step).toBe("submitting");
-  });
-
-  it("недолік іде в payload без поля obstacle", () => {
-    const s = run(
-      open(),
-      { type: "TOGGLE_TARGET", id: "a" },
-      { type: "CONFIRM_TARGETS" },
-      { type: "SET_MODE", mode: "disadvantage" },
-      { type: "ROLL", d20: 14, second: 12, outcome: "hit" },
-      { type: "DAMAGE", values: [6] },
-    );
-
-    expect(s).toMatchObject({ mode: "disadvantage" });
-    expect(attackPayload(s, "me")).toMatchObject({ disadvantageRoll: 12, attackRoll: 14 });
-    expect(attackPayload(s, "me")).not.toHaveProperty("obstacle");
-  });
-
-  it("дві цілі: кидок на кожну; шкода лише для влучених; промахи теж у payload", () => {
-    const s = run(
-      open(1, 2),
-      { type: "TOGGLE_TARGET", id: "a" },
-      { type: "TOGGLE_TARGET", id: "b" },
-      { type: "CONFIRM_TARGETS" },
-      { type: "ROLL", d20: 4, outcome: "miss" },
-    );
-
-    expect(s).toMatchObject({ step: "roll", index: 1 });
-
-    const t = run(
-      open(1, 2), { type: "TOGGLE_TARGET", id: "a" }, { type: "TOGGLE_TARGET", id: "b" }, { type: "CONFIRM_TARGETS" },
-      { type: "ROLL", d20: 4, outcome: "miss" }, { type: "ROLL", d20: 17, outcome: "hit" },
-    );
-
-    expect(t).toMatchObject({ step: "damage", index: 1 });
-
-    const u = attackFlow(t, { type: "DAMAGE", values: [5] });
-
-    expect(attackPayload(u, "me")).toEqual({ attackerId: "me", attackId: "rapier", targetIds: ["a", "b"], attackRolls: [4, 17], damageRolls: [5], endTurn: false });
-  });
-
-  it("BACK із підсумку — до шкоди, з кидка першої цілі — до вибору цілі", () => {
-    const sum = run(open(), { type: "TOGGLE_TARGET", id: "a" }, { type: "CONFIRM_TARGETS" }, { type: "ROLL", d20: 14, outcome: "hit" }, { type: "DAMAGE", values: [6] });
-
-    expect(attackFlow(sum, { type: "BACK" }).step).toBe("damage");
-    expect(run(open(), { type: "TOGGLE_TARGET", id: "a" }, { type: "CONFIRM_TARGETS" }, { type: "BACK" }).step).toBe("target");
-  });
-
-  it("FAIL повертає на підсумок із помилкою й не губить кидки; SUCCESS → result; CLOSE → closed", () => {
-    const sum = run(open(), { type: "TOGGLE_TARGET", id: "a" }, { type: "CONFIRM_TARGETS" }, { type: "ROLL", d20: 14, outcome: "hit" }, { type: "DAMAGE", values: [6] }, { type: "SUBMIT" });
-
-    const failed = attackFlow(sum, { type: "FAIL", error: "Стан бою змінився" });
-
-    expect(failed).toMatchObject({ step: "summary", error: "Стан бою змінився" });
-    expect(failed.strikes[0].damage).toEqual([6]);
-
-    const ok = attackFlow(sum, { type: "SUCCESS", results: [{ kind: "hit", targetId: "a", damage: 9, downed: false }] });
-
-    expect(ok.step).toBe("result");
-    expect(attackFlow(ok, { type: "CLOSE" })).toEqual(initialAttackFlow);
-  });
-
-  it("SET_TARGETS вибирає всіх ворогів, але не більше maxTargets", () => {
-    expect(run(open(1, 3), { type: "SET_TARGETS", ids: ["a", "b", "c", "d"] }).targetIds).toEqual(["a", "b", "c"]);
-  });
-
-  it("multi-target payload sends raw d20 and raw second rolls, never a pre-folded value", () => {
-    const s = run(
-      open(1, 2),
-      { type: "TOGGLE_TARGET", id: "a" },
-      { type: "TOGGLE_TARGET", id: "b" },
-      { type: "CONFIRM_TARGETS" },
-      { type: "SET_MODE", mode: "disadvantage" },
-      { type: "ROLL", d20: 17, second: 3, outcome: "miss" },
-      { type: "ROLL", d20: 15, second: 18, outcome: "hit" },
-      { type: "DAMAGE", values: [5] },
-    );
-
-    expect(attackPayload(s, "me")).toMatchObject({ targetIds: ["a", "b"], attackRolls: [17, 15], secondRolls: [3, 18] });
-  });
-
-  it("payload carries misses too, so the server logs them and never rerolls", () => {
-    const s = run(
-      open(1, 2),
-      { type: "TOGGLE_TARGET", id: "a" },
-      { type: "TOGGLE_TARGET", id: "b" },
-      { type: "CONFIRM_TARGETS" },
-      { type: "ROLL", d20: 4, outcome: "miss" },
-      { type: "ROLL", d20: 17, outcome: "hit" },
-      { type: "DAMAGE", values: [5] },
-    );
-
-    expect(attackPayload(s, "me")).toMatchObject({ targetIds: ["a", "b"], attackRolls: [4, 17], damageRolls: [5] });
-  });
-
-  describe("перевага/недолік: навички vs вибір гравця", () => {
-    const forced = { a: { mode: "advantage" as const, reason: "Перевага: Мітка мисливця" } };
-
-    it("навичка задає режим: удар заблоковано, SET_MODE не змінює його, payload без rollMode", () => {
-      const s = run(open(), { type: "TOGGLE_TARGET", id: "a" }, { type: "CONFIRM_TARGETS", forced }, { type: "SET_MODE", mode: "disadvantage" });
-
-      expect(s.strikes[0].forced).toEqual(forced.a);
-      expect(strikeMode(s, s.strikes[0])).toBe("advantage");
-      expect(s.mode).toBe("normal");
-
-      const done = run(open(), { type: "TOGGLE_TARGET", id: "a" }, { type: "CONFIRM_TARGETS", forced }, { type: "ROLL", d20: 4, second: 16, outcome: "hit" }, { type: "DAMAGE", values: [6] });
-
-      expect(attackPayload(done, "me")).toMatchObject({ attackRoll: 4, advantageRoll: 16 });
-      expect(attackPayload(done, "me")).not.toHaveProperty("rollMode");
-      expect(effectiveD20(done.strikes[0], strikeMode(done, done.strikes[0]))).toBe(16);
-    });
-
-    it("без навичок — ручний вибір іде на сервер як rollMode", () => {
-      const s = run(open(), { type: "TOGGLE_TARGET", id: "a" }, { type: "CONFIRM_TARGETS", forced: {} }, { type: "SET_MODE", mode: "disadvantage" }, { type: "ROLL", d20: 14, second: 5, outcome: "hit" }, { type: "DAMAGE", values: [6] });
-
-      expect(attackPayload(s, "me")).toMatchObject({ rollMode: "disadvantage", disadvantageRoll: 5 });
-      expect(effectiveD20(s.strikes[0], strikeMode(s, s.strikes[0]))).toBe(5);
-    });
-
-    it("взаємне скасування теж блокує: режим «звичайний», ручний вибір ігнорується", () => {
-      const s = run(open(), { type: "TOGGLE_TARGET", id: "a" }, { type: "CONFIRM_TARGETS", forced: { a: { mode: "normal", reason: "скасовуються" } } }, { type: "SET_MODE", mode: "advantage" });
-
-      expect(strikeMode(s, s.strikes[0])).toBe("normal");
-    });
-
-    it("залп: режим на кожен удар свій; удар без другого кубика — null у secondRolls", () => {
-      const s = run(
-        open(1, 2),
-        { type: "TOGGLE_TARGET", id: "a" },
-        { type: "TOGGLE_TARGET", id: "b" },
-        { type: "SET_MODE", mode: "advantage" },
-        { type: "CONFIRM_TARGETS", forced: { a: { mode: "normal", reason: "скасовуються" } } },
-        { type: "ROLL", d20: 17, outcome: "hit" },
-      );
-
-      expect(strikeMode(s, s.strikes[1])).toBe("advantage");
-
-      const t = run(
-        open(1, 2), { type: "TOGGLE_TARGET", id: "a" }, { type: "TOGGLE_TARGET", id: "b" },
-        { type: "SET_MODE", mode: "advantage" },
-        { type: "CONFIRM_TARGETS", forced: { a: { mode: "normal", reason: "скасовуються" } } },
-        { type: "ROLL", d20: 17, outcome: "miss" }, { type: "ROLL", d20: 4, second: 15, outcome: "hit" }, { type: "DAMAGE", values: [5] },
-      );
-
-      expect(attackPayload(t, "me")).toMatchObject({ attackRolls: [17, 4], secondRolls: [null, 15], rollMode: "advantage" });
-    });
-  });
-
-  describe("WAIT_CRIT", () => {
-    const submitted: AttackFlowAction[] = [open(), { type: "TOGGLE_TARGET", id: "e1" }, { type: "CONFIRM_TARGETS" }, { type: "ROLL", d20: 4, outcome: "miss" }];
-
-    it("відправка → очікування вибору ДМ → результат", () => {
-      const waiting = run(...submitted, { type: "WAIT_CRIT" });
-
-      expect(waiting).toMatchObject({ step: "submitting", waitingCrit: true });
-      expect(attackFlow(waiting, { type: "SUCCESS", results: [] })).toMatchObject({ step: "result", waitingCrit: false });
-    });
-
-    it("поза відправкою ігнорується; FAIL знімає очікування", () => {
-      expect(run(open(), { type: "WAIT_CRIT" }).waitingCrit).toBeFalsy();
-      expect(attackFlow(run(...submitted, { type: "WAIT_CRIT" }), { type: "FAIL", error: "x" }).waitingCrit).toBe(false);
-    });
-  });
-
-  it("d100: ROLL одразу відправляє без кроку шкоди; помилка повертає на кидок", () => {
-    const s = run(open(), { type: "TOGGLE_TARGET", id: "a" }, { type: "CONFIRM_TARGETS" }, { type: "ROLL", d20: 73, outcome: "hit", judge: "server" });
-
-    expect(s.step).toBe("submitting");
-    expect(attackPayload(s, "me")).toEqual({ attackerId: "me", attackId: "rapier", targetIds: ["a"], attackRoll: 73, damageRolls: [], endTurn: false });
-
-    const failed = attackFlow(s, { type: "FAIL", error: "x" });
-
-    expect(failed.step).toBe("roll");
-    expect(failed.index).toBe(0);
-  });
-
-  it("d100: кубики шкоди з кидка потрапляють у payload", () => {
-    const s = run(open(), { type: "TOGGLE_TARGET", id: "a" }, { type: "CONFIRM_TARGETS" }, { type: "ROLL", d20: 73, outcome: "hit", judge: "server", damage: [4] });
-
-    expect(attackPayload(s, "me")).toMatchObject({ attackRoll: 73, damageRolls: [4] });
-  });
-
-  it("d100: авто-кидок не має d20 і йде прапорцем serverRoll без attackRoll", () => {
-    const one = run(open(), { type: "TOGGLE_TARGET", id: "a" }, { type: "CONFIRM_TARGETS" }, { type: "ROLL", outcome: "hit", judge: "server", damage: [4] });
-
-    expect(attackPayload(one, "me")).toEqual({ attackerId: "me", attackId: "rapier", targetIds: ["a"], serverRoll: true, damageRolls: [4], endTurn: false });
-
-    const s = run(open(1, 2), { type: "SET_TARGETS", ids: ["a", "b"] }, { type: "CONFIRM_TARGETS" }, { type: "ROLL", outcome: "hit", judge: "server" }, { type: "ROLL", outcome: "hit", judge: "server" });
-
-    const payload = attackPayload(s, "me");
-
-    expect(payload).toMatchObject({ serverRoll: true, targetIds: ["a", "b"] });
-    expect(payload).not.toHaveProperty("attackRolls");
-  });
-
-  it("d100: кілька цілей — кидок на кожну, потім відправка", () => {
-    const s = run(open(1, 2), { type: "SET_TARGETS", ids: ["a", "b"] }, { type: "CONFIRM_TARGETS" }, { type: "ROLL", d20: 55, outcome: "hit", judge: "server" });
-
-    expect(s).toMatchObject({ step: "roll", index: 1 });
-
-    const done = attackFlow(s, { type: "ROLL", d20: 100, outcome: "hit", judge: "server" });
-
-    expect(done.step).toBe("submitting");
-    expect(attackPayload(done, "me")).toMatchObject({ attackRolls: [55, 100], damageRolls: [] });
-  });
-
-  it("d100: the roll source is locked by the first strike so modes cannot mix", () => {
-    const start = run(open(1, 2), { type: "SET_TARGETS", ids: ["a", "b"] }, { type: "CONFIRM_TARGETS" });
-
-    expect(lockedRollSource(start)).toBeUndefined();
-
-    const manual = attackFlow(start, { type: "ROLL", d20: 40, outcome: "hit", judge: "server" });
-
-    expect(lockedRollSource(manual)).toBe("manual");
-
-    const server = attackFlow(start, { type: "ROLL", outcome: "hit", judge: "server" });
-
-    expect(lockedRollSource(server)).toBe("server");
-
-    const done = attackFlow(manual, { type: "ROLL", d20: 12, outcome: "hit", judge: "server" });
-
-    expect(attackPayload(done, "me")).toMatchObject({ attackRolls: [40, 12] });
-    expect(attackPayload(done, "me")).not.toHaveProperty("serverRoll");
-  });
+import { describe, expect, it } from 'vitest';
+
+import {
+    attackFlow,
+    type AttackFlowAction,
+    type AttackFlowState,
+    attackPayload,
+    effectiveD20,
+    initialAttackFlow,
+    lockedRollSource,
+    strikeMode,
+} from '@/lib/utils/battle/flows';
+
+const run = (...actions: AttackFlowAction[]) =>
+    actions.reduce<AttackFlowState>(attackFlow, initialAttackFlow);
+
+const open = (weaponCount = 1, maxTargets = 1): AttackFlowAction => ({
+    type: 'OPEN',
+    weaponCount,
+    attackId: 'rapier',
+    maxTargets,
+    diceSlots: [8],
 });
 
-describe("System input in attack flow", () => {
-  const slot = (kind: string) => ({ key: "x", data: { kind } });
+describe('attackFlow', () => {
+    it('одна зброя — одразу ціль; кілька — спершу зброя', () => {
+        expect(run(open()).step).toBe('target');
+        expect(run(open(3)).step).toBe('weapon');
+        expect(
+            run(open(3), {
+                type: 'SELECT_WEAPON',
+                attackId: 'bow',
+                maxTargets: 2,
+                diceSlots: [8],
+            })
+        ).toMatchObject({ step: 'target', attackId: 'bow', maxTargets: 2 });
+    });
 
-  const pct = (...extra: AttackFlowAction[]) => run(open(1, 2), { type: "TOGGLE_TARGET", id: "e1" }, { type: "CONFIRM_TARGETS" }, ...extra);
+    it('OPEN з targetIds: одна зброя — крок цілі з обраною ціллю; кілька — крок зброї, SELECT_WEAPON обрізає', () => {
+        const withTargets = (
+            weaponCount: number,
+            maxTargets: number,
+            targetIds: string[]
+        ): AttackFlowAction => ({
+            type: 'OPEN',
+            weaponCount,
+            attackId: 'rapier',
+            maxTargets,
+            diceSlots: [8],
+            targetIds,
+        });
 
-  it("SET_SYSTEM_INPUT sets state; payload carries system and the second roll", () => {
-    const s = pct({ type: "SET_SYSTEM_INPUT", value: slot("reroll") }, { type: "ROLL", d20: 90, second: 20, outcome: "hit", judge: "server" });
+        expect(run(withTargets(1, 1, ['e1']))).toMatchObject({
+            step: 'target',
+            targetIds: ['e1'],
+        });
+        expect(run(withTargets(1, 1, ['e1', 'e2'])).targetIds).toEqual(['e1']);
+        expect(run(withTargets(2, 2, ['e1']))).toMatchObject({
+            step: 'weapon',
+            targetIds: ['e1'],
+        });
+        expect(
+            run(withTargets(2, 2, ['e1', 'e2']), {
+                type: 'SELECT_WEAPON',
+                attackId: 'bow',
+                maxTargets: 1,
+                diceSlots: [8],
+            }).targetIds
+        ).toEqual(['e1']);
+    });
 
-    expect(s.system).toEqual(slot("reroll"));
-    expect(attackPayload(s, "a1")).toMatchObject({ system: slot("reroll"), secondRoll: 20, attackRoll: 90 });
-    expect(attackPayload(s, "a1")).not.toHaveProperty("advantageRoll");
-  });
+    describe('CHANGE_WEAPON', () => {
+        const picked: AttackFlowAction[] = [
+            {
+                type: 'OPEN',
+                weaponCount: 2,
+                attackId: 'rapier',
+                maxTargets: 1,
+                diceSlots: [8],
+                targetIds: ['e1'],
+                picked: true,
+            },
+            {
+                type: 'SELECT_WEAPON',
+                attackId: 'rapier',
+                maxTargets: 1,
+                diceSlots: [8],
+            },
+            { type: 'CONFIRM_TARGETS' },
+        ];
 
-  it("server roll: no secondRoll; no system: no secondRoll", () => {
-    const server = pct({ type: "SET_SYSTEM_INPUT", value: slot("reroll") }, { type: "ROLL", outcome: "hit", judge: "server" });
+        it('з кидка — назад до зброї з тією ж ціллю, удари скинуті, позначка вибору знята', () => {
+            expect(run(...picked)).toMatchObject({
+                step: 'roll',
+                picked: true,
+            });
 
-    expect(attackPayload(server, "a1")).toMatchObject({ system: slot("reroll") });
-    expect(attackPayload(server, "a1")).not.toHaveProperty("secondRoll");
+            const s = run(...picked, { type: 'CHANGE_WEAPON' });
 
-    const bare = pct({ type: "ROLL", d20: 90, second: 20, outcome: "hit", judge: "server" });
+            expect(s).toMatchObject({
+                step: 'weapon',
+                targetIds: ['e1'],
+                strikes: [],
+                index: 0,
+                picked: false,
+            });
+            expect(
+                attackFlow(s, {
+                    type: 'SELECT_WEAPON',
+                    attackId: 'bow',
+                    maxTargets: 1,
+                    diceSlots: [6],
+                })
+            ).toMatchObject({
+                step: 'target',
+                attackId: 'bow',
+                targetIds: ['e1'],
+            });
+        });
 
-    expect(attackPayload(bare, "a1")).not.toHaveProperty("system");
-    expect(attackPayload(bare, "a1")).not.toHaveProperty("secondRoll");
-  });
+        it('одна зброя або не крок кидка — без змін', () => {
+            const single = run(
+                {
+                    type: 'OPEN',
+                    weaponCount: 1,
+                    attackId: 'rapier',
+                    maxTargets: 1,
+                    diceSlots: [8],
+                    targetIds: ['e1'],
+                    picked: true,
+                },
+                { type: 'CONFIRM_TARGETS' }
+            );
 
-  it("SET_SYSTEM_INPUT null clears it", () => {
-    expect(run(open(1, 3), { type: "SET_SYSTEM_INPUT", value: slot("sl") }, { type: "SET_SYSTEM_INPUT", value: null }).system).toBeUndefined();
-  });
+            expect(attackFlow(single, { type: 'CHANGE_WEAPON' })).toBe(single);
 
-  it("two targets: no system in body; SET_TARGETS/TOGGLE_TARGET to >1 clears it", () => {
-    const base = run(open(1, 3), { type: "SET_SYSTEM_INPUT", value: slot("sl") });
+            const atWeapon = run(picked[0]);
 
-    expect(run(open(1, 3), { type: "SET_SYSTEM_INPUT", value: slot("sl") }, { type: "SET_TARGETS", ids: ["a", "b"] }).system).toBeUndefined();
-    expect(attackFlow({ ...base, targetIds: ["a"] }, { type: "TOGGLE_TARGET", id: "b" }).system).toBeUndefined();
+            expect(attackFlow(atWeapon, { type: 'CHANGE_WEAPON' })).toBe(
+                atWeapon
+            );
+        });
+    });
 
-    const two = run(open(1, 2), { type: "SET_TARGETS", ids: ["a", "b"] }, { type: "CONFIRM_TARGETS" }, { type: "ROLL", d20: 10, outcome: "miss", judge: "server" }, { type: "ROLL", d20: 10, outcome: "miss", judge: "server" });
+    it('одна ціль — заміна; кілька — перемикання до максимуму', () => {
+        expect(
+            run(
+                open(),
+                { type: 'TOGGLE_TARGET', id: 'a' },
+                { type: 'TOGGLE_TARGET', id: 'b' }
+            ).targetIds
+        ).toEqual(['b']);
 
-    expect(attackPayload({ ...two, system: slot("sl") }, "a1")).not.toHaveProperty("system");
-  });
+        const multi = run(
+            open(1, 2),
+            { type: 'TOGGLE_TARGET', id: 'a' },
+            { type: 'TOGGLE_TARGET', id: 'b' },
+            { type: 'TOGGLE_TARGET', id: 'c' }
+        );
+
+        expect(multi.targetIds).toEqual(['a', 'b']);
+        expect(
+            attackFlow(multi, { type: 'TOGGLE_TARGET', id: 'a' }).targetIds
+        ).toEqual(['b']);
+    });
+
+    it('без цілі далі не йде', () => {
+        expect(run(open(), { type: 'CONFIRM_TARGETS' }).step).toBe('target');
+    });
+
+    it('промах однієї цілі — одразу відправка, без кроку шкоди', () => {
+        const s = run(
+            open(),
+            { type: 'TOGGLE_TARGET', id: 'a' },
+            { type: 'CONFIRM_TARGETS' },
+            { type: 'ROLL', d20: 3, outcome: 'miss' }
+        );
+
+        expect(s.step).toBe('submitting');
+        expect(attackPayload(s, 'me')).toEqual({
+            attackerId: 'me',
+            attackId: 'rapier',
+            targetIds: ['a'],
+            attackRoll: 3,
+            damageRolls: [],
+            endTurn: false,
+        });
+    });
+
+    it('влучання → шкода → підсумок → відправка; payload з кидками', () => {
+        const s = run(
+            open(),
+            { type: 'TOGGLE_TARGET', id: 'a' },
+            { type: 'CONFIRM_TARGETS' },
+            { type: 'SET_MODE', mode: 'advantage' },
+            { type: 'ROLL', d20: 14, second: 6, outcome: 'hit' },
+            { type: 'DAMAGE', values: [6] }
+        );
+
+        expect(s.step).toBe('summary');
+        expect(attackPayload(s, 'me')).toEqual({
+            attackerId: 'me',
+            attackId: 'rapier',
+            targetIds: ['a'],
+            attackRoll: 14,
+            advantageRoll: 6,
+            rollMode: 'advantage',
+            damageRolls: [6],
+            endTurn: false,
+        });
+        expect(attackFlow(s, { type: 'SUBMIT' }).step).toBe('submitting');
+    });
+
+    it('недолік іде в payload без поля obstacle', () => {
+        const s = run(
+            open(),
+            { type: 'TOGGLE_TARGET', id: 'a' },
+            { type: 'CONFIRM_TARGETS' },
+            { type: 'SET_MODE', mode: 'disadvantage' },
+            { type: 'ROLL', d20: 14, second: 12, outcome: 'hit' },
+            { type: 'DAMAGE', values: [6] }
+        );
+
+        expect(s).toMatchObject({ mode: 'disadvantage' });
+        expect(attackPayload(s, 'me')).toMatchObject({
+            disadvantageRoll: 12,
+            attackRoll: 14,
+        });
+        expect(attackPayload(s, 'me')).not.toHaveProperty('obstacle');
+    });
+
+    it('дві цілі: кидок на кожну; шкода лише для влучених; промахи теж у payload', () => {
+        const s = run(
+            open(1, 2),
+            { type: 'TOGGLE_TARGET', id: 'a' },
+            { type: 'TOGGLE_TARGET', id: 'b' },
+            { type: 'CONFIRM_TARGETS' },
+            { type: 'ROLL', d20: 4, outcome: 'miss' }
+        );
+
+        expect(s).toMatchObject({ step: 'roll', index: 1 });
+
+        const t = run(
+            open(1, 2),
+            { type: 'TOGGLE_TARGET', id: 'a' },
+            { type: 'TOGGLE_TARGET', id: 'b' },
+            { type: 'CONFIRM_TARGETS' },
+            { type: 'ROLL', d20: 4, outcome: 'miss' },
+            { type: 'ROLL', d20: 17, outcome: 'hit' }
+        );
+
+        expect(t).toMatchObject({ step: 'damage', index: 1 });
+
+        const u = attackFlow(t, { type: 'DAMAGE', values: [5] });
+
+        expect(attackPayload(u, 'me')).toEqual({
+            attackerId: 'me',
+            attackId: 'rapier',
+            targetIds: ['a', 'b'],
+            attackRolls: [4, 17],
+            damageRolls: [5],
+            endTurn: false,
+        });
+    });
+
+    it('BACK із підсумку — до шкоди, з кидка першої цілі — до вибору цілі', () => {
+        const sum = run(
+            open(),
+            { type: 'TOGGLE_TARGET', id: 'a' },
+            { type: 'CONFIRM_TARGETS' },
+            { type: 'ROLL', d20: 14, outcome: 'hit' },
+            { type: 'DAMAGE', values: [6] }
+        );
+
+        expect(attackFlow(sum, { type: 'BACK' }).step).toBe('damage');
+        expect(
+            run(
+                open(),
+                { type: 'TOGGLE_TARGET', id: 'a' },
+                { type: 'CONFIRM_TARGETS' },
+                { type: 'BACK' }
+            ).step
+        ).toBe('target');
+    });
+
+    it('FAIL повертає на підсумок із помилкою й не губить кидки; SUCCESS → result; CLOSE → closed', () => {
+        const sum = run(
+            open(),
+            { type: 'TOGGLE_TARGET', id: 'a' },
+            { type: 'CONFIRM_TARGETS' },
+            { type: 'ROLL', d20: 14, outcome: 'hit' },
+            { type: 'DAMAGE', values: [6] },
+            { type: 'SUBMIT' }
+        );
+
+        const failed = attackFlow(sum, {
+            type: 'FAIL',
+            error: 'Стан бою змінився',
+        });
+
+        expect(failed).toMatchObject({
+            step: 'summary',
+            error: 'Стан бою змінився',
+        });
+        expect(failed.strikes[0].damage).toEqual([6]);
+
+        const ok = attackFlow(sum, {
+            type: 'SUCCESS',
+            results: [{ kind: 'hit', targetId: 'a', damage: 9, downed: false }],
+        });
+
+        expect(ok.step).toBe('result');
+        expect(attackFlow(ok, { type: 'CLOSE' })).toEqual(initialAttackFlow);
+    });
+
+    it('SET_TARGETS вибирає всіх ворогів, але не більше maxTargets', () => {
+        expect(
+            run(open(1, 3), { type: 'SET_TARGETS', ids: ['a', 'b', 'c', 'd'] })
+                .targetIds
+        ).toEqual(['a', 'b', 'c']);
+    });
+
+    it('multi-target payload sends raw d20 and raw second rolls, never a pre-folded value', () => {
+        const s = run(
+            open(1, 2),
+            { type: 'TOGGLE_TARGET', id: 'a' },
+            { type: 'TOGGLE_TARGET', id: 'b' },
+            { type: 'CONFIRM_TARGETS' },
+            { type: 'SET_MODE', mode: 'disadvantage' },
+            { type: 'ROLL', d20: 17, second: 3, outcome: 'miss' },
+            { type: 'ROLL', d20: 15, second: 18, outcome: 'hit' },
+            { type: 'DAMAGE', values: [5] }
+        );
+
+        expect(attackPayload(s, 'me')).toMatchObject({
+            targetIds: ['a', 'b'],
+            attackRolls: [17, 15],
+            secondRolls: [3, 18],
+        });
+    });
+
+    it('payload carries misses too, so the server logs them and never rerolls', () => {
+        const s = run(
+            open(1, 2),
+            { type: 'TOGGLE_TARGET', id: 'a' },
+            { type: 'TOGGLE_TARGET', id: 'b' },
+            { type: 'CONFIRM_TARGETS' },
+            { type: 'ROLL', d20: 4, outcome: 'miss' },
+            { type: 'ROLL', d20: 17, outcome: 'hit' },
+            { type: 'DAMAGE', values: [5] }
+        );
+
+        expect(attackPayload(s, 'me')).toMatchObject({
+            targetIds: ['a', 'b'],
+            attackRolls: [4, 17],
+            damageRolls: [5],
+        });
+    });
+
+    describe('перевага/недолік: навички vs вибір гравця', () => {
+        const forced = {
+            a: {
+                mode: 'advantage' as const,
+                reason: 'Перевага: Мітка мисливця',
+            },
+        };
+
+        it('навичка задає режим: удар заблоковано, SET_MODE не змінює його, payload без rollMode', () => {
+            const s = run(
+                open(),
+                { type: 'TOGGLE_TARGET', id: 'a' },
+                { type: 'CONFIRM_TARGETS', forced },
+                { type: 'SET_MODE', mode: 'disadvantage' }
+            );
+
+            expect(s.strikes[0].forced).toEqual(forced.a);
+            expect(strikeMode(s, s.strikes[0])).toBe('advantage');
+            expect(s.mode).toBe('normal');
+
+            const done = run(
+                open(),
+                { type: 'TOGGLE_TARGET', id: 'a' },
+                { type: 'CONFIRM_TARGETS', forced },
+                { type: 'ROLL', d20: 4, second: 16, outcome: 'hit' },
+                { type: 'DAMAGE', values: [6] }
+            );
+
+            expect(attackPayload(done, 'me')).toMatchObject({
+                attackRoll: 4,
+                advantageRoll: 16,
+            });
+            expect(attackPayload(done, 'me')).not.toHaveProperty('rollMode');
+            expect(
+                effectiveD20(done.strikes[0], strikeMode(done, done.strikes[0]))
+            ).toBe(16);
+        });
+
+        it('без навичок — ручний вибір іде на сервер як rollMode', () => {
+            const s = run(
+                open(),
+                { type: 'TOGGLE_TARGET', id: 'a' },
+                { type: 'CONFIRM_TARGETS', forced: {} },
+                { type: 'SET_MODE', mode: 'disadvantage' },
+                { type: 'ROLL', d20: 14, second: 5, outcome: 'hit' },
+                { type: 'DAMAGE', values: [6] }
+            );
+
+            expect(attackPayload(s, 'me')).toMatchObject({
+                rollMode: 'disadvantage',
+                disadvantageRoll: 5,
+            });
+            expect(
+                effectiveD20(s.strikes[0], strikeMode(s, s.strikes[0]))
+            ).toBe(5);
+        });
+
+        it('взаємне скасування теж блокує: режим «звичайний», ручний вибір ігнорується', () => {
+            const s = run(
+                open(),
+                { type: 'TOGGLE_TARGET', id: 'a' },
+                {
+                    type: 'CONFIRM_TARGETS',
+                    forced: { a: { mode: 'normal', reason: 'скасовуються' } },
+                },
+                { type: 'SET_MODE', mode: 'advantage' }
+            );
+
+            expect(strikeMode(s, s.strikes[0])).toBe('normal');
+        });
+
+        it('залп: режим на кожен удар свій; удар без другого кубика — null у secondRolls', () => {
+            const s = run(
+                open(1, 2),
+                { type: 'TOGGLE_TARGET', id: 'a' },
+                { type: 'TOGGLE_TARGET', id: 'b' },
+                { type: 'SET_MODE', mode: 'advantage' },
+                {
+                    type: 'CONFIRM_TARGETS',
+                    forced: { a: { mode: 'normal', reason: 'скасовуються' } },
+                },
+                { type: 'ROLL', d20: 17, outcome: 'hit' }
+            );
+
+            expect(strikeMode(s, s.strikes[1])).toBe('advantage');
+
+            const t = run(
+                open(1, 2),
+                { type: 'TOGGLE_TARGET', id: 'a' },
+                { type: 'TOGGLE_TARGET', id: 'b' },
+                { type: 'SET_MODE', mode: 'advantage' },
+                {
+                    type: 'CONFIRM_TARGETS',
+                    forced: { a: { mode: 'normal', reason: 'скасовуються' } },
+                },
+                { type: 'ROLL', d20: 17, outcome: 'miss' },
+                { type: 'ROLL', d20: 4, second: 15, outcome: 'hit' },
+                { type: 'DAMAGE', values: [5] }
+            );
+
+            expect(attackPayload(t, 'me')).toMatchObject({
+                attackRolls: [17, 4],
+                secondRolls: [null, 15],
+                rollMode: 'advantage',
+            });
+        });
+    });
+
+    describe('WAIT_CRIT', () => {
+        const submitted: AttackFlowAction[] = [
+            open(),
+            { type: 'TOGGLE_TARGET', id: 'e1' },
+            { type: 'CONFIRM_TARGETS' },
+            { type: 'ROLL', d20: 4, outcome: 'miss' },
+        ];
+
+        it('відправка → очікування вибору ДМ → результат', () => {
+            const waiting = run(...submitted, { type: 'WAIT_CRIT' });
+
+            expect(waiting).toMatchObject({
+                step: 'submitting',
+                waitingCrit: true,
+            });
+            expect(
+                attackFlow(waiting, { type: 'SUCCESS', results: [] })
+            ).toMatchObject({ step: 'result', waitingCrit: false });
+        });
+
+        it('поза відправкою ігнорується; FAIL знімає очікування', () => {
+            expect(run(open(), { type: 'WAIT_CRIT' }).waitingCrit).toBeFalsy();
+            expect(
+                attackFlow(run(...submitted, { type: 'WAIT_CRIT' }), {
+                    type: 'FAIL',
+                    error: 'x',
+                }).waitingCrit
+            ).toBe(false);
+        });
+    });
+
+    it('d100: ROLL одразу відправляє без кроку шкоди; помилка повертає на кидок', () => {
+        const s = run(
+            open(),
+            { type: 'TOGGLE_TARGET', id: 'a' },
+            { type: 'CONFIRM_TARGETS' },
+            { type: 'ROLL', d20: 73, outcome: 'hit', judge: 'server' }
+        );
+
+        expect(s.step).toBe('submitting');
+        expect(attackPayload(s, 'me')).toEqual({
+            attackerId: 'me',
+            attackId: 'rapier',
+            targetIds: ['a'],
+            attackRoll: 73,
+            damageRolls: [],
+            endTurn: false,
+        });
+
+        const failed = attackFlow(s, { type: 'FAIL', error: 'x' });
+
+        expect(failed.step).toBe('roll');
+        expect(failed.index).toBe(0);
+    });
+
+    it('d100: кубики шкоди з кидка потрапляють у payload', () => {
+        const s = run(
+            open(),
+            { type: 'TOGGLE_TARGET', id: 'a' },
+            { type: 'CONFIRM_TARGETS' },
+            {
+                type: 'ROLL',
+                d20: 73,
+                outcome: 'hit',
+                judge: 'server',
+                damage: [4],
+            }
+        );
+
+        expect(attackPayload(s, 'me')).toMatchObject({
+            attackRoll: 73,
+            damageRolls: [4],
+        });
+    });
+
+    it('d100: авто-кидок не має d20 і йде прапорцем serverRoll без attackRoll', () => {
+        const one = run(
+            open(),
+            { type: 'TOGGLE_TARGET', id: 'a' },
+            { type: 'CONFIRM_TARGETS' },
+            { type: 'ROLL', outcome: 'hit', judge: 'server', damage: [4] }
+        );
+
+        expect(attackPayload(one, 'me')).toEqual({
+            attackerId: 'me',
+            attackId: 'rapier',
+            targetIds: ['a'],
+            serverRoll: true,
+            damageRolls: [4],
+            endTurn: false,
+        });
+
+        const s = run(
+            open(1, 2),
+            { type: 'SET_TARGETS', ids: ['a', 'b'] },
+            { type: 'CONFIRM_TARGETS' },
+            { type: 'ROLL', outcome: 'hit', judge: 'server' },
+            { type: 'ROLL', outcome: 'hit', judge: 'server' }
+        );
+
+        const payload = attackPayload(s, 'me');
+
+        expect(payload).toMatchObject({
+            serverRoll: true,
+            targetIds: ['a', 'b'],
+        });
+        expect(payload).not.toHaveProperty('attackRolls');
+    });
+
+    it('d100: кілька цілей — кидок на кожну, потім відправка', () => {
+        const s = run(
+            open(1, 2),
+            { type: 'SET_TARGETS', ids: ['a', 'b'] },
+            { type: 'CONFIRM_TARGETS' },
+            { type: 'ROLL', d20: 55, outcome: 'hit', judge: 'server' }
+        );
+
+        expect(s).toMatchObject({ step: 'roll', index: 1 });
+
+        const done = attackFlow(s, {
+            type: 'ROLL',
+            d20: 100,
+            outcome: 'hit',
+            judge: 'server',
+        });
+
+        expect(done.step).toBe('submitting');
+        expect(attackPayload(done, 'me')).toMatchObject({
+            attackRolls: [55, 100],
+            damageRolls: [],
+        });
+    });
+
+    it('d100: the roll source is locked by the first strike so modes cannot mix', () => {
+        const start = run(
+            open(1, 2),
+            { type: 'SET_TARGETS', ids: ['a', 'b'] },
+            { type: 'CONFIRM_TARGETS' }
+        );
+
+        expect(lockedRollSource(start)).toBeUndefined();
+
+        const manual = attackFlow(start, {
+            type: 'ROLL',
+            d20: 40,
+            outcome: 'hit',
+            judge: 'server',
+        });
+
+        expect(lockedRollSource(manual)).toBe('manual');
+
+        const server = attackFlow(start, {
+            type: 'ROLL',
+            outcome: 'hit',
+            judge: 'server',
+        });
+
+        expect(lockedRollSource(server)).toBe('server');
+
+        const done = attackFlow(manual, {
+            type: 'ROLL',
+            d20: 12,
+            outcome: 'hit',
+            judge: 'server',
+        });
+
+        expect(attackPayload(done, 'me')).toMatchObject({
+            attackRolls: [40, 12],
+        });
+        expect(attackPayload(done, 'me')).not.toHaveProperty('serverRoll');
+    });
+});
+
+describe('System input in attack flow', () => {
+    const slot = (kind: string) => ({ key: 'x', data: { kind } });
+
+    const pct = (...extra: AttackFlowAction[]) =>
+        run(
+            open(1, 2),
+            { type: 'TOGGLE_TARGET', id: 'e1' },
+            { type: 'CONFIRM_TARGETS' },
+            ...extra
+        );
+
+    it('SET_SYSTEM_INPUT sets state; payload carries system and the second roll', () => {
+        const s = pct(
+            { type: 'SET_SYSTEM_INPUT', value: slot('reroll') },
+            {
+                type: 'ROLL',
+                d20: 90,
+                second: 20,
+                outcome: 'hit',
+                judge: 'server',
+            }
+        );
+
+        expect(s.system).toEqual(slot('reroll'));
+        expect(attackPayload(s, 'a1')).toMatchObject({
+            system: slot('reroll'),
+            secondRoll: 20,
+            attackRoll: 90,
+        });
+        expect(attackPayload(s, 'a1')).not.toHaveProperty('advantageRoll');
+    });
+
+    it('server roll: no secondRoll; no system: no secondRoll', () => {
+        const server = pct(
+            { type: 'SET_SYSTEM_INPUT', value: slot('reroll') },
+            { type: 'ROLL', outcome: 'hit', judge: 'server' }
+        );
+
+        expect(attackPayload(server, 'a1')).toMatchObject({
+            system: slot('reroll'),
+        });
+        expect(attackPayload(server, 'a1')).not.toHaveProperty('secondRoll');
+
+        const bare = pct({
+            type: 'ROLL',
+            d20: 90,
+            second: 20,
+            outcome: 'hit',
+            judge: 'server',
+        });
+
+        expect(attackPayload(bare, 'a1')).not.toHaveProperty('system');
+        expect(attackPayload(bare, 'a1')).not.toHaveProperty('secondRoll');
+    });
+
+    it('SET_SYSTEM_INPUT null clears it', () => {
+        expect(
+            run(
+                open(1, 3),
+                { type: 'SET_SYSTEM_INPUT', value: slot('sl') },
+                { type: 'SET_SYSTEM_INPUT', value: null }
+            ).system
+        ).toBeUndefined();
+    });
+
+    it('two targets: no system in body; SET_TARGETS/TOGGLE_TARGET to >1 clears it', () => {
+        const base = run(open(1, 3), {
+            type: 'SET_SYSTEM_INPUT',
+            value: slot('sl'),
+        });
+
+        expect(
+            run(
+                open(1, 3),
+                { type: 'SET_SYSTEM_INPUT', value: slot('sl') },
+                { type: 'SET_TARGETS', ids: ['a', 'b'] }
+            ).system
+        ).toBeUndefined();
+        expect(
+            attackFlow(
+                { ...base, targetIds: ['a'] },
+                { type: 'TOGGLE_TARGET', id: 'b' }
+            ).system
+        ).toBeUndefined();
+
+        const two = run(
+            open(1, 2),
+            { type: 'SET_TARGETS', ids: ['a', 'b'] },
+            { type: 'CONFIRM_TARGETS' },
+            { type: 'ROLL', d20: 10, outcome: 'miss', judge: 'server' },
+            { type: 'ROLL', d20: 10, outcome: 'miss', judge: 'server' }
+        );
+
+        expect(
+            attackPayload({ ...two, system: slot('sl') }, 'a1')
+        ).not.toHaveProperty('system');
+    });
 });

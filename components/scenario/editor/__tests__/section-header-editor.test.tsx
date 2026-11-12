@@ -1,39 +1,82 @@
 // @vitest-environment happy-dom
-import { cleanup, fireEvent, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { cleanup, fireEvent, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { SectionHeaderEditor } from "@/components/scenario/editor/SectionHeaderEditor";
-import { render } from "@/components/ui/__tests__/uk-intl";
-import type { ScenarioSection } from "@/types/scenario";
+import { SectionHeaderEditor } from '@/components/scenario/editor/SectionHeaderEditor';
+import { render } from '@/components/ui/__tests__/uk-intl';
+import type { ScenarioSection } from '@/types/scenario';
 
 afterEach(cleanup);
 
-vi.unmock("next-intl");
+vi.unmock('next-intl');
 
-const section: ScenarioSection = { id: "s1", title: "2.3 Орлине Гніздо", played: false, rows: [{ id: "r", story: { type: "doc", content: [] }, notes: { type: "doc", content: [] }, battleId: "b" }] };
-
-const open = () => {
-  const trigger = screen.getByRole("button", { name: /Іконка розділу/ });
-
-  fireEvent.pointerDown(trigger, { button: 0, ctrlKey: false, pointerType: "mouse" });
+const section: ScenarioSection = {
+    id: 's1',
+    title: '2.3 Орлине Гніздо',
+    played: false,
+    rows: [
+        {
+            id: 'r',
+            story: { type: 'doc', content: [] },
+            notes: { type: 'doc', content: [] },
+            battleId: 'b',
+        },
+    ],
 };
 
-describe("SectionHeaderEditor", () => {
-  it("показує автоматичну іконку і дозволяє обрати іншу або повернути авто", async () => {
-    const onIcon = vi.fn();
+const open = () => {
+    const trigger = screen.getByRole('button', { name: /Іконка розділу/ });
 
-    const actions = { onTitle: vi.fn(), onMove: vi.fn(), onRemove: vi.fn(), onIcon, onMarker: vi.fn(), onTrack: vi.fn() };
+    fireEvent.pointerDown(trigger, {
+        button: 0,
+        ctrlKey: false,
+        pointerType: 'mouse',
+    });
+};
 
-    const { container, rerender } = render(<SectionHeaderEditor campaignId="c" section={section} actions={actions} />);
+describe('SectionHeaderEditor', () => {
+    it('показує автоматичну іконку і дозволяє обрати іншу або повернути авто', async () => {
+        const onIcon = vi.fn();
 
-    expect(container.querySelector("[data-section-icon]")?.getAttribute("data-section-icon")).toBe("battle");
-    open();
-    fireEvent.click(await screen.findByRole("menuitem", { name: /Відпочинок/ }));
-    expect(onIcon).toHaveBeenCalledWith("rest");
+        const actions = {
+            onTitle: vi.fn(),
+            onMove: vi.fn(),
+            onRemove: vi.fn(),
+            onIcon,
+            onMarker: vi.fn(),
+            onTrack: vi.fn(),
+        };
 
-    rerender(<SectionHeaderEditor campaignId="c" section={{ ...section, icon: "rest" }} actions={actions} />);
-    open();
-    fireEvent.click(await screen.findByRole("menuitem", { name: /Автоматично/ }));
-    expect(onIcon).toHaveBeenLastCalledWith(undefined);
-  });
+        const { container, rerender } = render(
+            <SectionHeaderEditor
+                campaignId="c"
+                section={section}
+                actions={actions}
+            />
+        );
+
+        expect(
+            container
+                .querySelector('[data-section-icon]')
+                ?.getAttribute('data-section-icon')
+        ).toBe('battle');
+        open();
+        fireEvent.click(
+            await screen.findByRole('menuitem', { name: /Відпочинок/ })
+        );
+        expect(onIcon).toHaveBeenCalledWith('rest');
+
+        rerender(
+            <SectionHeaderEditor
+                campaignId="c"
+                section={{ ...section, icon: 'rest' }}
+                actions={actions}
+            />
+        );
+        open();
+        fireEvent.click(
+            await screen.findByRole('menuitem', { name: /Автоматично/ })
+        );
+        expect(onIcon).toHaveBeenLastCalledWith(undefined);
+    });
 });

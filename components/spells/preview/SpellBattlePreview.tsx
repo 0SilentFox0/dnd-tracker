@@ -1,25 +1,39 @@
-"use client";
+'use client';
 
-import { type ComponentProps, lazy, Suspense, useEffect, useSyncExternalStore } from "react";
+import {
+    type ComponentProps,
+    lazy,
+    Suspense,
+    useEffect,
+    useSyncExternalStore,
+} from 'react';
 
 // the battle engine and FX runtime load only when a spell is opened; React.lazy keeps next/dynamic's loader out of the entry chunk
-const Panel = lazy(() => import("./SpellBattlePreviewPanel"));
+const Panel = lazy(() => import('./SpellBattlePreviewPanel'));
 
 const subscribe = () => () => {};
 
 export function SpellBattlePreview(props: ComponentProps<typeof Panel>) {
-  const client = useSyncExternalStore(subscribe, () => true, () => false);
+    const client = useSyncExternalStore(
+        subscribe,
+        () => true,
+        () => false
+    );
 
-  const archetype = props.spell.fx?.archetype;
+    const archetype = props.spell.fx?.archetype;
 
-  // the signature chunk loads alongside the panel's, so the first cast plays without a wait
-  useEffect(() => {
-    if (archetype) void import("@/components/battle/fx/animations").then((m) => m.preloadAnimation(archetype), () => undefined);
-  }, [archetype]);
+    // the signature chunk loads alongside the panel's, so the first cast plays without a wait
+    useEffect(() => {
+        if (archetype)
+            void import('@/components/battle/fx/animations').then(
+                (m) => m.preloadAnimation(archetype),
+                () => undefined
+            );
+    }, [archetype]);
 
-  return client ? (
-    <Suspense fallback={null}>
-      <Panel {...props} />
-    </Suspense>
-  ) : null;
+    return client ? (
+        <Suspense fallback={null}>
+            <Panel {...props} />
+        </Suspense>
+    ) : null;
 }

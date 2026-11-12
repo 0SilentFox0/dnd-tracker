@@ -1,26 +1,35 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const kv = vi.hoisted(() => ({ kvGet: vi.fn(), kvSet: vi.fn(), kvDel: vi.fn() }));
-
-vi.mock("@/lib/cache/kv", () => kv);
-vi.mock("@/lib/db", () => ({ prisma: { campaign: { findMany: vi.fn(async () => []) } } }));
-vi.mock("@/lib/utils/api/api-auth", () => ({
-  requireAuth: vi.fn(async () => ({ userId: "u1" })),
+const kv = vi.hoisted(() => ({
+    kvGet: vi.fn(),
+    kvSet: vi.fn(),
+    kvDel: vi.fn(),
 }));
 
-import { GET } from "@/app/api/campaigns/route";
+vi.mock('@/lib/cache/kv', () => kv);
+vi.mock('@/lib/db', () => ({
+    prisma: { campaign: { findMany: vi.fn(async () => []) } },
+}));
+vi.mock('@/lib/utils/api/api-auth', () => ({
+    requireAuth: vi.fn(async () => ({ userId: 'u1' })),
+}));
 
-describe("GET /api/campaigns", () => {
-  beforeEach(() => vi.clearAllMocks());
+import { GET } from '@/app/api/campaigns/route';
 
-  it.each([
-    ["з БД", null],
-    ["з KV", [{ id: "c1" }]],
-  ])("список кампанії користувача (%s) — private, no-store", async (_source, cached) => {
-    kv.kvGet.mockResolvedValue(cached);
+describe('GET /api/campaigns', () => {
+    beforeEach(() => vi.clearAllMocks());
 
-    const res = await GET();
+    it.each([
+        ['з БД', null],
+        ['з KV', [{ id: 'c1' }]],
+    ])(
+        'список кампанії користувача (%s) — private, no-store',
+        async (_source, cached) => {
+            kv.kvGet.mockResolvedValue(cached);
 
-    expect(res.headers.get("Cache-Control")).toBe("private, no-store");
-  });
+            const res = await GET();
+
+            expect(res.headers.get('Cache-Control')).toBe('private, no-store');
+        }
+    );
 });

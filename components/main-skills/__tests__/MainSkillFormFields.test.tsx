@@ -1,36 +1,75 @@
 // @vitest-environment happy-dom
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { MainSkillFormFields } from "@/components/main-skills/MainSkillFormFields";
+import { MainSkillFormFields } from '@/components/main-skills/MainSkillFormFields';
 
-const form = { name: "Магія", color: "#112233", icon: "", isEnableInSkillTree: false, spellGroupId: null };
+const form = {
+    name: 'Магія',
+    color: '#112233',
+    icon: '',
+    isEnableInSkillTree: false,
+    spellGroupId: null,
+};
 
-describe("MainSkillFormFields", () => {
-  afterEach(cleanup);
+describe('MainSkillFormFields', () => {
+    afterEach(cleanup);
 
-  it("кожне поле шле лише свою зміну; іконка з фолбеком на літеру назви", () => {
-    const onChange = vi.fn();
+    it('кожне поле шле лише свою зміну; іконка з фолбеком на літеру назви', () => {
+        const onChange = vi.fn();
 
-    render(<MainSkillFormFields form={form} onChange={onChange} spellGroups={[]} />);
+        render(
+            <MainSkillFormFields
+                form={form}
+                onChange={onChange}
+                spellGroups={[]}
+            />
+        );
 
-    fireEvent.change(screen.getByLabelText(/skills.mainSkills.form.name/), { target: { value: "Напад" } });
-    fireEvent.change(screen.getByLabelText("skills.mainSkills.form.color (hex)"), { target: { value: "#ff0000" } });
-    fireEvent.change(screen.getByLabelText("skills.mainSkills.form.icon"), { target: { value: "https://example.com/i.png" } });
+        fireEvent.change(screen.getByLabelText(/skills.mainSkills.form.name/), {
+            target: { value: 'Напад' },
+        });
+        fireEvent.change(
+            screen.getByLabelText('skills.mainSkills.form.color (hex)'),
+            { target: { value: '#ff0000' } }
+        );
+        fireEvent.change(screen.getByLabelText('skills.mainSkills.form.icon'), {
+            target: { value: 'https://example.com/i.png' },
+        });
 
-    expect(onChange.mock.calls).toEqual([[{ name: "Напад" }], [{ color: "#ff0000" }], [{ icon: "https://example.com/i.png" }]]);
-    expect(screen.getByText("М")).toBeTruthy();
-  });
+        expect(onChange.mock.calls).toEqual([
+            [{ name: 'Напад' }],
+            [{ color: '#ff0000' }],
+            [{ icon: 'https://example.com/i.png' }],
+        ]);
+        expect(screen.getByText('М')).toBeTruthy();
+    });
 
-  it("без груп заклинань — без поля школи", () => {
-    render(<MainSkillFormFields form={form} onChange={vi.fn()} spellGroups={[]} />);
+    it('без груп заклинань — без поля школи', () => {
+        render(
+            <MainSkillFormFields
+                form={form}
+                onChange={vi.fn()}
+                spellGroups={[]}
+            />
+        );
 
-    expect(screen.queryByText("skills.mainSkills.form.spellGroup")).toBeNull();
-  });
+        expect(
+            screen.queryByText('skills.mainSkills.form.spellGroup')
+        ).toBeNull();
+    });
 
-  it("з групами — поле школи", () => {
-    render(<MainSkillFormFields form={form} onChange={vi.fn()} spellGroups={[{ id: "g1", name: "Вогонь" }]} />);
+    it('з групами — поле школи', () => {
+        render(
+            <MainSkillFormFields
+                form={form}
+                onChange={vi.fn()}
+                spellGroups={[{ id: 'g1', name: 'Вогонь' }]}
+            />
+        );
 
-    expect(screen.getByText("skills.mainSkills.form.spellGroup")).toBeTruthy();
-  });
+        expect(
+            screen.getByText('skills.mainSkills.form.spellGroup')
+        ).toBeTruthy();
+    });
 });

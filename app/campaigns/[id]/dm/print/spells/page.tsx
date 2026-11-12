@@ -1,38 +1,38 @@
-import { PrintSpellsPageClient } from "./page-client";
+import { PrintSpellsPageClient } from './page-client';
 
-import { prisma } from "@/lib/db";
-import { requireCampaignDM } from "@/lib/server/campaigns/access";
-import type { Spell } from "@/types/spells";
+import { prisma } from '@/lib/db';
+import { requireCampaignDM } from '@/lib/server/campaigns/access';
+import type { Spell } from '@/types/spells';
 
 export default async function PrintSpellsPage({
-  params,
+    params,
 }: {
-  params: Promise<{ id: string }>;
+    params: Promise<{ id: string }>;
 }) {
-  const { id } = await params;
+    const { id } = await params;
 
-  const { campaign } = await requireCampaignDM(id);
+    const { campaign } = await requireCampaignDM(id);
 
-  const [spells, spellGroups] = await Promise.all([
-    prisma.spell.findMany({
-      where: { campaignId: id },
-      include: { spellGroup: true },
-      orderBy: [{ level: "asc" }, { name: "asc" }],
-    }),
-    prisma.spellGroup.findMany({
-      where: { campaignId: id },
-      orderBy: { name: "asc" },
-    }),
-  ]);
+    const [spells, spellGroups] = await Promise.all([
+        prisma.spell.findMany({
+            where: { campaignId: id },
+            include: { spellGroup: true },
+            orderBy: [{ level: 'asc' }, { name: 'asc' }],
+        }),
+        prisma.spellGroup.findMany({
+            where: { campaignId: id },
+            orderBy: { name: 'asc' },
+        }),
+    ]);
 
-  const spellsForClient = spells as unknown as Spell[];
+    const spellsForClient = spells as unknown as Spell[];
 
-  return (
-    <PrintSpellsPageClient
-      campaignId={id}
-      campaignName={campaign.name}
-      initialSpells={spellsForClient}
-      spellGroups={spellGroups.map((g) => ({ id: g.id, name: g.name }))}
-    />
-  );
+    return (
+        <PrintSpellsPageClient
+            campaignId={id}
+            campaignName={campaign.name}
+            initialSpells={spellsForClient}
+            spellGroups={spellGroups.map((g) => ({ id: g.id, name: g.name }))}
+        />
+    );
 }

@@ -1,61 +1,140 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
-import { dmSectionsFor, dmTilesFor } from "@/lib/constants/campaigns";
+import { dmSectionsFor, dmTilesFor } from '@/lib/constants/campaigns';
 
 const paths = (s: { path: string }[]) => s.map((x) => x.path);
 
-describe("dmSectionsFor", () => {
-  it("template without classes hides classes, feats, backgrounds and campaign-only sections", () => {
-    const p = paths(dmSectionsFor({ isTemplate: true, classesEnabled: false }));
+describe('dmSectionsFor', () => {
+    it('template without classes hides classes, feats, backgrounds and campaign-only sections', () => {
+        const p = paths(
+            dmSectionsFor({ isTemplate: true, classesEnabled: false })
+        );
 
-    for (const hidden of ["classes", "feats", "backgrounds", "characters", "battles", "scenario", "show", "assistant"]) expect(p).not.toContain(hidden);
+        for (const hidden of [
+            'classes',
+            'feats',
+            'backgrounds',
+            'characters',
+            'battles',
+            'scenario',
+            'show',
+            'assistant',
+        ])
+            expect(p).not.toContain(hidden);
 
-    expect(p).toEqual(expect.arrayContaining(["spells", "units", "rules", "spell-groups", "music"]));
-  });
+        expect(p).toEqual(
+            expect.arrayContaining([
+                'spells',
+                'units',
+                'rules',
+                'spell-groups',
+                'music',
+            ])
+        );
+    });
 
-  it("hides skill libraries in class (5e) campaigns only", () => {
-    expect(paths(dmSectionsFor({ isTemplate: false, classesEnabled: true }))).not.toContain("skills");
-    expect(paths(dmSectionsFor({ isTemplate: false, classesEnabled: true }))).not.toContain("skill-trees");
-    expect(paths(dmSectionsFor({ isTemplate: false, classesEnabled: false }))).toEqual(expect.arrayContaining(["skills", "skill-trees"]));
-    expect(paths(dmTilesFor({ isTemplate: false, classesEnabled: true }))).not.toContain("skills");
-  });
+    it('hides skill libraries in class (5e) campaigns only', () => {
+        expect(
+            paths(dmSectionsFor({ isTemplate: false, classesEnabled: true }))
+        ).not.toContain('skills');
+        expect(
+            paths(dmSectionsFor({ isTemplate: false, classesEnabled: true }))
+        ).not.toContain('skill-trees');
+        expect(
+            paths(dmSectionsFor({ isTemplate: false, classesEnabled: false }))
+        ).toEqual(expect.arrayContaining(['skills', 'skill-trees']));
+        expect(
+            paths(dmTilesFor({ isTemplate: false, classesEnabled: true }))
+        ).not.toContain('skills');
+    });
 
-  it("template menu keeps the API tokens entry", () => {
-    expect(paths(dmSectionsFor({ isTemplate: true, classesEnabled: false }))).toContain("ai");
-  });
+    it('template menu keeps the API tokens entry', () => {
+        expect(
+            paths(dmSectionsFor({ isTemplate: true, classesEnabled: false }))
+        ).toContain('ai');
+    });
 
-  it("template with classes shows the class library", () => {
-    expect(paths(dmSectionsFor({ isTemplate: true, classesEnabled: true }))).toEqual(expect.arrayContaining(["classes", "feats", "backgrounds"]));
-  });
+    it('template with classes shows the class library', () => {
+        expect(
+            paths(dmSectionsFor({ isTemplate: true, classesEnabled: true }))
+        ).toEqual(expect.arrayContaining(['classes', 'feats', 'backgrounds']));
+    });
 
-  it("campaign shows characters, battles and scenario", () => {
-    expect(paths(dmSectionsFor({ isTemplate: false, classesEnabled: false }))).toEqual(expect.arrayContaining(["characters", "battles", "scenario", "assistant", "ai"]));
-  });
+    it('campaign shows characters, battles and scenario', () => {
+        expect(
+            paths(dmSectionsFor({ isTemplate: false, classesEnabled: false }))
+        ).toEqual(
+            expect.arrayContaining([
+                'characters',
+                'battles',
+                'scenario',
+                'assistant',
+                'ai',
+            ])
+        );
+    });
 
-  it("menu and page tiles agree on a template", () => {
-    for (const classesEnabled of [false, true]) {
-      const ctx = { isTemplate: true, classesEnabled };
+    it('menu and page tiles agree on a template', () => {
+        for (const classesEnabled of [false, true]) {
+            const ctx = { isTemplate: true, classesEnabled };
 
-      expect(paths(dmSectionsFor(ctx)).filter((p) => !paths(dmTilesFor(ctx)).includes(p))).toEqual([]);
-    }
-  });
+            expect(
+                paths(dmSectionsFor(ctx)).filter(
+                    (p) => !paths(dmTilesFor(ctx)).includes(p)
+                )
+            ).toEqual([]);
+        }
+    });
 
-  it("campaign tiles are a subset of the menu and skip template-only tiles", () => {
-    const ctx = { isTemplate: false, classesEnabled: true };
+    it('campaign tiles are a subset of the menu and skip template-only tiles', () => {
+        const ctx = { isTemplate: false, classesEnabled: true };
 
-    const menu = paths(dmSectionsFor(ctx));
+        const menu = paths(dmSectionsFor(ctx));
 
-    expect(menu).toEqual(expect.arrayContaining(paths(dmTilesFor(ctx))));
-    expect(paths(dmTilesFor(ctx))).toContain("rules");
-    expect(paths(dmTilesFor(ctx))).not.toContain("spell-groups");
-  });
+        expect(menu).toEqual(expect.arrayContaining(paths(dmTilesFor(ctx))));
+        expect(paths(dmTilesFor(ctx))).toContain('rules');
+        expect(paths(dmTilesFor(ctx))).not.toContain('spell-groups');
+    });
 
-  it("careers appear only in wfrp campaigns, never on templates", () => {
-    expect(paths(dmSectionsFor({ isTemplate: false, classesEnabled: false, systemKey: "wfrp" }))).toContain("careers");
-    expect(paths(dmTilesFor({ isTemplate: false, classesEnabled: false, systemKey: "wfrp" }))).toContain("careers");
+    it('careers appear only in wfrp campaigns, never on templates', () => {
+        expect(
+            paths(
+                dmSectionsFor({
+                    isTemplate: false,
+                    classesEnabled: false,
+                    systemKey: 'wfrp',
+                })
+            )
+        ).toContain('careers');
+        expect(
+            paths(
+                dmTilesFor({
+                    isTemplate: false,
+                    classesEnabled: false,
+                    systemKey: 'wfrp',
+                })
+            )
+        ).toContain('careers');
 
-    for (const systemKey of ["dnd5e", "homm", undefined]) expect(paths(dmSectionsFor({ isTemplate: false, classesEnabled: true, systemKey }))).not.toContain("careers");
+        for (const systemKey of ['dnd5e', 'homm', undefined])
+            expect(
+                paths(
+                    dmSectionsFor({
+                        isTemplate: false,
+                        classesEnabled: true,
+                        systemKey,
+                    })
+                )
+            ).not.toContain('careers');
 
-    expect(paths(dmSectionsFor({ isTemplate: true, classesEnabled: false, systemKey: "wfrp" }))).not.toContain("careers");
-  });
+        expect(
+            paths(
+                dmSectionsFor({
+                    isTemplate: true,
+                    classesEnabled: false,
+                    systemKey: 'wfrp',
+                })
+            )
+        ).not.toContain('careers');
+    });
 });

@@ -1,140 +1,239 @@
-import { ABILITY_KEYS, type AbilityKey } from "@/lib/constants/abilities";
-import { API_ERRORS } from "@/lib/constants/api-errors";
-import { DND_SKILLS, type DndSkill } from "@/lib/constants/skills";
-import { isChoiceOpen, resolveChoiceCount } from "@/lib/utils/characters/choices/count";
-import { isUnmet, requirementsOf } from "@/lib/utils/characters/choices/requirements";
-import type { Choice, ChoiceErrorCode, ChoiceIssue, ChoiceOwner, ChoicePick, FeatData, Picks, SpellRef } from "@/types/choices";
-import type { ClassColumn } from "@/types/classes";
+import { ABILITY_KEYS, type AbilityKey } from '@/lib/constants/abilities';
+import { API_ERRORS } from '@/lib/constants/api-errors';
+import { DND_SKILLS, type DndSkill } from '@/lib/constants/skills';
+import {
+    isChoiceOpen,
+    resolveChoiceCount,
+} from '@/lib/utils/characters/choices/count';
+import {
+    isUnmet,
+    requirementsOf,
+} from '@/lib/utils/characters/choices/requirements';
+import type {
+    Choice,
+    ChoiceErrorCode,
+    ChoiceIssue,
+    ChoiceOwner,
+    ChoicePick,
+    FeatData,
+    Picks,
+    SpellRef,
+} from '@/types/choices';
+import type { ClassColumn } from '@/types/classes';
 
 export interface PickContext {
-  owner: ChoiceOwner;
-  level: number;
-  totalLevel: number;
-  columns?: readonly ClassColumn[];
-  maxSlotLevel?: number;
-  featsById: Readonly<Record<string, FeatData>>;
-  spellsById: Readonly<Record<string, SpellRef>>;
-  proficient: ReadonlySet<DndSkill>;
-  scores: Readonly<Record<AbilityKey, number>>;
-  featCounts: ReadonlyMap<string, number>;
+    owner: ChoiceOwner;
+    level: number;
+    totalLevel: number;
+    columns?: readonly ClassColumn[];
+    maxSlotLevel?: number;
+    featsById: Readonly<Record<string, FeatData>>;
+    spellsById: Readonly<Record<string, SpellRef>>;
+    proficient: ReadonlySet<DndSkill>;
+    scores: Readonly<Record<AbilityKey, number>>;
+    featCounts: ReadonlyMap<string, number>;
 }
 
 // the ICU texts of these codes end with {detail}, so the separator travels with the value
-export const choiceIssue = (path: string, code: ChoiceErrorCode, detail?: string): ChoiceIssue => ({ path, code, message: API_ERRORS[code], params: { detail: detail ? `: ${detail}` : "" } });
+export const choiceIssue = (
+    path: string,
+    code: ChoiceErrorCode,
+    detail?: string
+): ChoiceIssue => ({
+    path,
+    code,
+    message: API_ERRORS[code],
+    params: { detail: detail ? `: ${detail}` : '' },
+});
 
-export const featPrerequisiteMet = (feat: FeatData, ctx: { totalLevel: number; scores: Readonly<Record<AbilityKey, number>> }): boolean => requirementsOf(feat, { ...ctx, level: ctx.totalLevel }).every((r) => r.met);
+export const featPrerequisiteMet = (
+    feat: FeatData,
+    ctx: { totalLevel: number; scores: Readonly<Record<AbilityKey, number>> }
+): boolean =>
+    requirementsOf(feat, { ...ctx, level: ctx.totalLevel }).every((r) => r.met);
 
-const duplicates = (picks: ChoicePick[]) => picks.length !== new Set(picks.map((p) => p.id)).size;
+const duplicates = (picks: ChoicePick[]) =>
+    picks.length !== new Set(picks.map((p) => p.id)).size;
 
-function optionIssues(choice: Choice, picks: ChoicePick[], ctx: PickContext, at: string): ChoiceIssue[] {
-  const options = new Map((choice.options ?? []).map((o) => [o.id, o]));
+function optionIssues(
+    choice: Choice,
+    picks: ChoicePick[],
+    ctx: PickContext,
+    at: string
+): ChoiceIssue[] {
+    const options = new Map((choice.options ?? []).map((o) => [o.id, o]));
 
-  const picked = new Set(picks.map((p) => p.id));
+    const picked = new Set(picks.map((p) => p.id));
 
-  return picks.flatMap((p) => {
-    const option = options.get(p.id);
+    return picks.flatMap((p) => {
+        const option = options.get(p.id);
 
-    if (!option) return [choiceIssue(at, "CHOICE_UNKNOWN", p.id)];
+        if (!option) return [choiceIssue(at, 'CHOICE_UNKNOWN', p.id)];
 
-    const unmet = requirementsOf(option, { totalLevel: ctx.totalLevel, level: ctx.level, scores: ctx.scores, picked }).filter(isUnmet);
+        const unmet = requirementsOf(option, {
+            totalLevel: ctx.totalLevel,
+            level: ctx.level,
+            scores: ctx.scores,
+            picked,
+        }).filter(isUnmet);
 
-    if (unmet.some((r) => r.kind === "level")) return [choiceIssue(at, "CHOICE_MIN_LEVEL", option.name)];
+        if (unmet.some((r) => r.kind === 'level'))
+            return [choiceIssue(at, 'CHOICE_MIN_LEVEL', option.name)];
 
-    return unmet.length ? [choiceIssue(at, "CHOICE_REQUIRES", option.name)] : [];
-  });
+        return unmet.length
+            ? [choiceIssue(at, 'CHOICE_REQUIRES', option.name)]
+            : [];
+    });
 }
 
-function featIssues(choice: Choice, picks: ChoicePick[], ctx: PickContext, at: string): ChoiceIssue[] {
-  const embedded = new Set((choice.options ?? []).map((o) => o.id));
+function featIssues(
+    choice: Choice,
+    picks: ChoicePick[],
+    ctx: PickContext,
+    at: string
+): ChoiceIssue[] {
+    const embedded = new Set((choice.options ?? []).map((o) => o.id));
 
-  return picks.flatMap((p, i) => {
-    if (embedded.has(p.id)) return [];
+    return picks.flatMap((p, i) => {
+        if (embedded.has(p.id)) return [];
 
-    const feat = ctx.featsById[p.id];
+        const feat = ctx.featsById[p.id];
 
-    if (!feat) return [choiceIssue(at, "CHOICE_UNKNOWN", p.id)];
+        if (!feat) return [choiceIssue(at, 'CHOICE_UNKNOWN', p.id)];
 
-    if (!(choice.featTypes ?? []).includes(feat.type)) return [choiceIssue(at, "FEAT_TYPE", feat.name)];
+        if (!(choice.featTypes ?? []).includes(feat.type))
+            return [choiceIssue(at, 'FEAT_TYPE', feat.name)];
 
-    if (!featPrerequisiteMet(feat, ctx)) return [choiceIssue(at, "FEAT_PREREQUISITE", feat.name)];
+        if (!featPrerequisiteMet(feat, ctx))
+            return [choiceIssue(at, 'FEAT_PREREQUISITE', feat.name)];
 
-    if (!feat.repeatable && (ctx.featCounts.get(feat.id) ?? 0) > 1) return [choiceIssue(at, "FEAT_NOT_REPEATABLE", feat.name)];
+        if (!feat.repeatable && (ctx.featCounts.get(feat.id) ?? 0) > 1)
+            return [choiceIssue(at, 'FEAT_NOT_REPEATABLE', feat.name)];
 
-    return validatePicks(feat.choices, p.picks ?? {}, { ...ctx, owner: "feat", level: ctx.totalLevel, columns: [] }, `${at}.${i}`);
-  });
+        return validatePicks(
+            feat.choices,
+            p.picks ?? {},
+            { ...ctx, owner: 'feat', level: ctx.totalLevel, columns: [] },
+            `${at}.${i}`
+        );
+    });
 }
 
-function skillIssues(choice: Choice, picks: ChoicePick[], ctx: PickContext, at: string): ChoiceIssue[] {
-  const allowed = new Set<string>(choice.skills?.length ? choice.skills : DND_SKILLS);
+function skillIssues(
+    choice: Choice,
+    picks: ChoicePick[],
+    ctx: PickContext,
+    at: string
+): ChoiceIssue[] {
+    const allowed = new Set<string>(
+        choice.skills?.length ? choice.skills : DND_SKILLS
+    );
 
-  return picks.flatMap((p) => {
-    if (!allowed.has(p.id)) return [choiceIssue(at, "SKILL_NOT_ALLOWED", p.id)];
+    return picks.flatMap((p) => {
+        if (!allowed.has(p.id))
+            return [choiceIssue(at, 'SKILL_NOT_ALLOWED', p.id)];
 
-    return choice.kind === "expertise" && !ctx.proficient.has(p.id as DndSkill) ? [choiceIssue(at, "EXPERTISE_NEEDS_PROFICIENCY", p.id)] : [];
-  });
+        return choice.kind === 'expertise' &&
+            !ctx.proficient.has(p.id as DndSkill)
+            ? [choiceIssue(at, 'EXPERTISE_NEEDS_PROFICIENCY', p.id)]
+            : [];
+    });
 }
 
-function spellIssues(choice: Choice, picks: ChoicePick[], ctx: PickContext, at: string): ChoiceIssue[] {
-  const rule = choice.spells;
+function spellIssues(
+    choice: Choice,
+    picks: ChoicePick[],
+    ctx: PickContext,
+    at: string
+): ChoiceIssue[] {
+    const rule = choice.spells;
 
-  if (!rule) return [];
+    if (!rule) return [];
 
-  const max = rule.maxLevel === "slots" ? (ctx.maxSlotLevel ?? 0) : rule.maxLevel;
+    const max =
+        rule.maxLevel === 'slots' ? (ctx.maxSlotLevel ?? 0) : rule.maxLevel;
 
-  return picks.flatMap((p) => {
-    const spell = ctx.spellsById[p.id];
+    return picks.flatMap((p) => {
+        const spell = ctx.spellsById[p.id];
 
-    if (!spell) return [choiceIssue(at, "CHOICE_UNKNOWN", p.id)];
+        if (!spell) return [choiceIssue(at, 'CHOICE_UNKNOWN', p.id)];
 
-    const listed = rule.lists.length === 0 || spell.lists.some((l) => rule.lists.includes(l));
+        const listed =
+            rule.lists.length === 0 ||
+            spell.lists.some((l) => rule.lists.includes(l));
 
-    return listed && spell.level >= rule.minLevel && spell.level <= max ? [] : [choiceIssue(at, "SPELL_NOT_IN_LIST", spell.name)];
-  });
+        return listed && spell.level >= rule.minLevel && spell.level <= max
+            ? []
+            : [choiceIssue(at, 'SPELL_NOT_IN_LIST', spell.name)];
+    });
 }
 
-function kindIssues(choice: Choice, picks: ChoicePick[], ctx: PickContext, at: string): ChoiceIssue[] {
-  switch (choice.kind) {
-    case "option":
-      return optionIssues(choice, picks, ctx, at);
-    case "feat":
-      return featIssues(choice, picks, ctx, at);
-    case "skill":
-    case "expertise":
-      return skillIssues(choice, picks, ctx, at);
-    case "spell":
-      return spellIssues(choice, picks, ctx, at);
-    case "abilityScore": {
-      const allowed = new Set<string>(choice.abilities ?? ABILITY_KEYS);
+function kindIssues(
+    choice: Choice,
+    picks: ChoicePick[],
+    ctx: PickContext,
+    at: string
+): ChoiceIssue[] {
+    switch (choice.kind) {
+        case 'option':
+            return optionIssues(choice, picks, ctx, at);
+        case 'feat':
+            return featIssues(choice, picks, ctx, at);
+        case 'skill':
+        case 'expertise':
+            return skillIssues(choice, picks, ctx, at);
+        case 'spell':
+            return spellIssues(choice, picks, ctx, at);
+        case 'abilityScore': {
+            const allowed = new Set<string>(choice.abilities ?? ABILITY_KEYS);
 
-      const issues = picks.flatMap((p) => (allowed.has(p.id) ? [] : [choiceIssue(at, "CHOICE_UNKNOWN", p.id)]));
+            const issues = picks.flatMap((p) =>
+                allowed.has(p.id)
+                    ? []
+                    : [choiceIssue(at, 'CHOICE_UNKNOWN', p.id)]
+            );
 
-      const maxPerAbility = choice.maxPerAbility;
+            const maxPerAbility = choice.maxPerAbility;
 
-      if (maxPerAbility && [...new Set(picks.map((p) => p.id))].some((id) => picks.filter((p) => p.id === id).length > maxPerAbility)) issues.push(choiceIssue(at, "CHOICE_COUNT", choice.label));
+            if (
+                maxPerAbility &&
+                [...new Set(picks.map((p) => p.id))].some(
+                    (id) =>
+                        picks.filter((p) => p.id === id).length > maxPerAbility
+                )
+            )
+                issues.push(choiceIssue(at, 'CHOICE_COUNT', choice.label));
 
-      return issues;
+            return issues;
+        }
     }
-  }
 }
 
-export function validatePicks(choices: readonly Choice[], picks: Picks, ctx: PickContext, path: string): ChoiceIssue[] {
-  const byId = new Map(choices.map((c) => [c.id, c]));
+export function validatePicks(
+    choices: readonly Choice[],
+    picks: Picks,
+    ctx: PickContext,
+    path: string
+): ChoiceIssue[] {
+    const byId = new Map(choices.map((c) => [c.id, c]));
 
-  return Object.entries(picks).flatMap(([choiceId, list]) => {
-    const choice = byId.get(choiceId);
+    return Object.entries(picks).flatMap(([choiceId, list]) => {
+        const choice = byId.get(choiceId);
 
-    const at = `${path}.${choiceId}`;
+        const at = `${path}.${choiceId}`;
 
-    if (!choice) return [choiceIssue(at, "CHOICE_UNKNOWN", choiceId)];
+        if (!choice) return [choiceIssue(at, 'CHOICE_UNKNOWN', choiceId)];
 
-    if (!isChoiceOpen(choice, ctx.level, ctx.owner)) return [];
+        if (!isChoiceOpen(choice, ctx.level, ctx.owner)) return [];
 
-    const issues: ChoiceIssue[] = [];
+        const issues: ChoiceIssue[] = [];
 
-    if (list.length > resolveChoiceCount(choice, ctx.level, ctx.columns)) issues.push(choiceIssue(at, "CHOICE_COUNT", choice.label));
+        if (list.length > resolveChoiceCount(choice, ctx.level, ctx.columns))
+            issues.push(choiceIssue(at, 'CHOICE_COUNT', choice.label));
 
-    if (choice.kind !== "abilityScore" && duplicates(list)) issues.push(choiceIssue(at, "CHOICE_DUPLICATE", choice.label));
+        if (choice.kind !== 'abilityScore' && duplicates(list))
+            issues.push(choiceIssue(at, 'CHOICE_DUPLICATE', choice.label));
 
-    return [...issues, ...kindIssues(choice, list, ctx, at)];
-  });
+        return [...issues, ...kindIssues(choice, list, ctx, at)];
+    });
 }

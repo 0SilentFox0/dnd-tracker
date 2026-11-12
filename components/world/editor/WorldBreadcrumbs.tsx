@@ -1,9 +1,9 @@
-import { useWorldEditorContext } from "./WorldEditorContext";
+import { useWorldEditorContext } from './WorldEditorContext';
 
-import { WorldCrumbs } from "@/components/world/WorldCrumbs";
+import { WorldCrumbs } from '@/components/world/WorldCrumbs';
 
 export function WorldBreadcrumbs({ mapId }: { mapId: string }) {
-  const { maps, openMap } = useWorldEditorContext();
+    const { maps, openMap } = useWorldEditorContext();
 
-  return <WorldCrumbs maps={maps} mapId={mapId} onOpen={openMap} />;
+    return <WorldCrumbs maps={maps} mapId={mapId} onOpen={openMap} />;
 }

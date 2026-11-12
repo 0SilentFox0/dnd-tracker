@@ -9,80 +9,82 @@
  * NEXT_PUBLIC_PUSHER_CLUSTER не всі встановлені.
  */
 
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
-import { findMissing, TEST_RUN_ID } from "./_helpers";
+import { findMissing, TEST_RUN_ID } from './_helpers';
 
-import { battleChannelName, userChannelName } from "@/lib/pusher/channels";
-import { safePusherTrigger } from "@/lib/pusher/safe-trigger";
-import { pusherServer } from "@/lib/pusher/server";
+import { battleChannelName, userChannelName } from '@/lib/pusher/channels';
+import { safePusherTrigger } from '@/lib/pusher/safe-trigger';
+import { pusherServer } from '@/lib/pusher/server';
 
 const missing = findMissing(
-  "PUSHER_APP_ID",
-  "PUSHER_SECRET",
-  "NEXT_PUBLIC_PUSHER_KEY",
-  "NEXT_PUBLIC_PUSHER_CLUSTER",
+    'PUSHER_APP_ID',
+    'PUSHER_SECRET',
+    'NEXT_PUBLIC_PUSHER_KEY',
+    'NEXT_PUBLIC_PUSHER_CLUSTER'
 );
 
 const enabled = missing.length === 0;
 
 if (!enabled) {
-  console.warn(`[integration:pusher] skipped — missing: ${missing.join(", ")}`);
+    console.warn(
+        `[integration:pusher] skipped — missing: ${missing.join(', ')}`
+    );
 }
 
-describe.skipIf(!enabled)("Pusher integration (server trigger)", () => {
-  it("battleChannelName повертає private-battle-{id}", () => {
-    const ch = battleChannelName("test-battle-1");
+describe.skipIf(!enabled)('Pusher integration (server trigger)', () => {
+    it('battleChannelName повертає private-battle-{id}', () => {
+        const ch = battleChannelName('test-battle-1');
 
-    expect(ch).toBe("private-battle-test-battle-1");
-  });
-
-  it("userChannelName повертає private-user-{id}", () => {
-    const ch = userChannelName("user-1");
-
-    expect(ch).toBe("private-user-user-1");
-  });
-
-  it("pusherServer.trigger() на тестовий канал — успішний (без error)", async () => {
-    const channel = battleChannelName(`int-test-${TEST_RUN_ID}`);
-
-    const response = await pusherServer.trigger(channel, "battle-delta", {
-      test: true,
-      runId: TEST_RUN_ID,
+        expect(ch).toBe('private-battle-test-battle-1');
     });
 
-    // Pusher.trigger() повертає Response з status 200 при успіху.
-    expect(response.status).toBe(200);
-  });
+    it('userChannelName повертає private-user-{id}', () => {
+        const ch = userChannelName('user-1');
 
-  it("safePusherTrigger() не кидає винятку (fire-and-forget OK)", async () => {
-    const channel = battleChannelName(`int-test-${TEST_RUN_ID}`);
+        expect(ch).toBe('private-user-user-1');
+    });
 
-    expect(() =>
-      safePusherTrigger(
-        pusherServer,
-        channel,
-        "battle-delta",
-        { test: true },
-        { action: "integration test", channel },
-      ),
-    ).not.toThrow();
+    it('pusherServer.trigger() на тестовий канал — успішний (без error)', async () => {
+        const channel = battleChannelName(`int-test-${TEST_RUN_ID}`);
 
-    // Дамо async catch'у час спрацювати, якщо щось упало.
-    await new Promise((resolve) => setTimeout(resolve, 200));
-  });
+        const response = await pusherServer.trigger(channel, 'battle-delta', {
+            test: true,
+            runId: TEST_RUN_ID,
+        });
 
-  it("trigger на невалідний channel name — повертає 400", async () => {
-    // Pusher не дозволяє порожнє ім'я каналу — це валідний негативний кейс
-    // що перевіряє що ми реально розмовляємо з Pusher API.
-    let caughtError: unknown = null;
+        // Pusher.trigger() повертає Response з status 200 при успіху.
+        expect(response.status).toBe(200);
+    });
 
-    try {
-      await pusherServer.trigger("", "test-event", { test: true });
-    } catch (err) {
-      caughtError = err;
-    }
+    it('safePusherTrigger() не кидає винятку (fire-and-forget OK)', async () => {
+        const channel = battleChannelName(`int-test-${TEST_RUN_ID}`);
 
-    expect(caughtError).not.toBeNull();
-  });
+        expect(() =>
+            safePusherTrigger(
+                pusherServer,
+                channel,
+                'battle-delta',
+                { test: true },
+                { action: 'integration test', channel }
+            )
+        ).not.toThrow();
+
+        // Дамо async catch'у час спрацювати, якщо щось упало.
+        await new Promise((resolve) => setTimeout(resolve, 200));
+    });
+
+    it('trigger на невалідний channel name — повертає 400', async () => {
+        // Pusher не дозволяє порожнє ім'я каналу — це валідний негативний кейс
+        // що перевіряє що ми реально розмовляємо з Pusher API.
+        let caughtError: unknown = null;
+
+        try {
+            await pusherServer.trigger('', 'test-event', { test: true });
+        } catch (err) {
+            caughtError = err;
+        }
+
+        expect(caughtError).not.toBeNull();
+    });
 });

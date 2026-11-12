@@ -1,36 +1,81 @@
-import { z } from "zod";
+import { z } from 'zod';
 
-import type { PackRow } from "./pack";
+import type { PackRow } from './pack';
 
-import { saveSkillTreeSchema } from "@/lib/schemas/skills";
-import type { PackKind } from "@/lib/utils/templates/manifest";
+import { saveSkillTreeSchema } from '@/lib/schemas/skills';
+import type { PackKind } from '@/lib/utils/templates/manifest';
 
 /** Columns the import specs do not carry; a pack row may hold only these in `extra`. */
-export const EXTRA_COLUMNS: Partial<Record<PackKind, readonly string[]>> = { units: ["levelScaling"] };
+export const EXTRA_COLUMNS: Partial<Record<PackKind, readonly string[]>> = {
+    units: ['levelScaling'],
+};
 
 /** Kinds without a name column: an unslugged row of the template is matched, and made unique, by this column. */
-export const MATCH_COLUMN: Partial<Record<PackKind, string>> = { skillTrees: "race", tracks: "title" };
+export const MATCH_COLUMN: Partial<Record<PackKind, string>> = {
+    skillTrees: 'race',
+    tracks: 'title',
+};
 
-const trackRowSchema = z.object({ title: z.string().min(1), kind: z.enum(["youtube", "file"]), url: z.string().nullish(), youtubeId: z.string().nullish(), durationSec: z.number().int().nullish(), sortOrder: z.number().int().optional() });
+const trackRowSchema = z.object({
+    title: z.string().min(1),
+    kind: z.enum(['youtube', 'file']),
+    url: z.string().nullish(),
+    youtubeId: z.string().nullish(),
+    durationSec: z.number().int().nullish(),
+    sortOrder: z.number().int().optional(),
+});
 
 /** Zod schemas for kinds written straight to their columns (the importer has none for them). */
-const ROW_SCHEMAS: Partial<Record<PackKind, z.ZodType>> = { skillTrees: saveSkillTreeSchema, tracks: trackRowSchema };
+const ROW_SCHEMAS: Partial<Record<PackKind, z.ZodType>> = {
+    skillTrees: saveSkillTreeSchema,
+    tracks: trackRowSchema,
+};
 
-export function rowSchemaIssues(kind: PackKind, row: Record<string, unknown>): string[] {
-  const schema = ROW_SCHEMAS[kind];
+export function rowSchemaIssues(
+    kind: PackKind,
+    row: Record<string, unknown>
+): string[] {
+    const schema = ROW_SCHEMAS[kind];
 
-  if (!schema) return [];
+    if (!schema) return [];
 
-  const parsed = schema.safeParse(row);
+    const parsed = schema.safeParse(row);
 
-  return parsed.success ? [] : parsed.error.issues.map((i) => `${i.path.join(".") || "row"} ${i.message}`);
+    return parsed.success
+        ? []
+        : parsed.error.issues.map(
+              (i) => `${i.path.join('.') || 'row'} ${i.message}`
+          );
 }
 
 /** Optional core-table columns a pack may drop; a rerun clears them for every system, not only d20. */
-export const CORE_CLEARABLE_COLUMNS: Partial<Record<PackKind, readonly string[]>> = { spells: ["dieSides", "upcastDice", "upcastTargets", "addAbilityMod", "fixedDice", "damageBonus"] };
+export const CORE_CLEARABLE_COLUMNS: Partial<
+    Record<PackKind, readonly string[]>
+> = {
+    spells: [
+        'dieSides',
+        'upcastDice',
+        'upcastTargets',
+        'addAbilityMod',
+        'fixedDice',
+        'damageBonus',
+    ],
+};
 
-export const clearableColumnsOf = (kind: PackKind): string[] => [...(CORE_CLEARABLE_COLUMNS[kind] ?? [])];
+export const clearableColumnsOf = (kind: PackKind): string[] => [
+    ...(CORE_CLEARABLE_COLUMNS[kind] ?? []),
+];
 
 /** The import treats null as an empty cell and keeps the old value, so a rerun clears dropped optional columns itself. */
-export const staleColumns = (rows: readonly PackRow[], columns: readonly string[]): Array<{ column: string; slugs: string[] }> =>
-  columns.map((column) => ({ column, slugs: rows.filter((r) => r[column] === undefined).map((r) => r.slug) })).filter((c) => c.slugs.length > 0);
+export const staleColumns = (
+    rows: readonly PackRow[],
+    columns: readonly string[]
+): Array<{ column: string; slugs: string[] }> =>
+    columns
+        .map((column) => ({
+            column,
+            slugs: rows
+                .filter((r) => r[column] === undefined)
+                .map((r) => r.slug),
+        }))
+        .filter((c) => c.slugs.length > 0);

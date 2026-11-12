@@ -1,27 +1,54 @@
-import { removeEffects } from "@/lib/utils/battle/conditions/query";
-import type { ActiveEffect, BattleParticipant } from "@/types/battle";
+import { removeEffects } from '@/lib/utils/battle/conditions/query';
+import type { ActiveEffect, BattleParticipant } from '@/types/battle';
 
-export const effectKey = (participantId: string, effectId: string) => `${participantId}:${effectId}`;
+export const effectKey = (participantId: string, effectId: string) =>
+    `${participantId}:${effectId}`;
 
 export function activeEffectIds(ps: BattleParticipant[]): Set<string> {
-  return new Set(ps.flatMap((p) => p.battleData.activeEffects.map((e) => effectKey(p.basicInfo.id, e.id))));
+    return new Set(
+        ps.flatMap((p) =>
+            p.battleData.activeEffects.map((e) =>
+                effectKey(p.basicInfo.id, e.id)
+            )
+        )
+    );
 }
 
-export const withoutEffects = (p: BattleParticipant, drop: (e: ActiveEffect) => boolean): BattleParticipant => removeEffects(p, drop).participant;
+export const withoutEffects = (
+    p: BattleParticipant,
+    drop: (e: ActiveEffect) => boolean
+): BattleParticipant => removeEffects(p, drop).participant;
 
 export function consumeAttackEffects(
-  ps: BattleParticipant[],
-  a: { attackerId: string; targetId: string; hit: boolean; existedBefore: Set<string> },
-): BattleParticipant[] {
-  return ps.map((p) => {
-    const id = p.basicInfo.id;
-
-    if (id === a.attackerId) {
-      return withoutEffects(p, (e) => a.existedBefore.has(effectKey(id, e.id)) && (e.consumeOn === "ownAttack" || (a.hit && e.consumeOn === "ownHit")));
+    ps: BattleParticipant[],
+    a: {
+        attackerId: string;
+        targetId: string;
+        hit: boolean;
+        existedBefore: Set<string>;
     }
+): BattleParticipant[] {
+    return ps.map((p) => {
+        const id = p.basicInfo.id;
 
-    if (id === a.targetId) return withoutEffects(p, (e) => a.existedBefore.has(effectKey(id, e.id)) && e.consumeOn === "attackAgainst");
+        if (id === a.attackerId) {
+            return withoutEffects(
+                p,
+                (e) =>
+                    a.existedBefore.has(effectKey(id, e.id)) &&
+                    (e.consumeOn === 'ownAttack' ||
+                        (a.hit && e.consumeOn === 'ownHit'))
+            );
+        }
 
-    return p;
-  });
+        if (id === a.targetId)
+            return withoutEffects(
+                p,
+                (e) =>
+                    a.existedBefore.has(effectKey(id, e.id)) &&
+                    e.consumeOn === 'attackAgainst'
+            );
+
+        return p;
+    });
 }

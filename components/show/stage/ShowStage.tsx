@@ -1,46 +1,120 @@
-"use client";
+'use client';
 
-import Image from "next/image";
+import Image from 'next/image';
 
-import { ShowWaiting } from "./ShowWaiting";
-import { SlideCaption } from "./SlideCaption";
+import { ShowWaiting } from './ShowWaiting';
+import { SlideCaption } from './SlideCaption';
 
-import { PuzzleStage } from "@/components/show/puzzle/PuzzleStage";
-import { ShowWorldStage } from "@/components/world/show/ShowWorldStage";
-import { SLIDE_CROSSFADE_MS } from "@/lib/constants/show";
-import { useSlideLayers } from "@/lib/hooks/show";
-import { cn } from "@/lib/utils";
-import { isSupabaseStorageUrl } from "@/lib/utils/common/image-url";
-import { stageMode, visibleSlide } from "@/lib/utils/show/player-view";
-import type { ShowState } from "@/types/show";
+import { PuzzleStage } from '@/components/show/puzzle/PuzzleStage';
+import { ShowWorldStage } from '@/components/world/show/ShowWorldStage';
+import { SLIDE_CROSSFADE_MS } from '@/lib/constants/show';
+import { useSlideLayers } from '@/lib/hooks/show';
+import { cn } from '@/lib/utils';
+import { isSupabaseStorageUrl } from '@/lib/utils/common/image-url';
+import { stageMode, visibleSlide } from '@/lib/utils/show/player-view';
+import type { ShowState } from '@/types/show';
 
-const imageProps = (src: string) => ({ src, fill: true, sizes: "100vw", unoptimized: !isSupabaseStorageUrl(src) });
+const imageProps = (src: string) => ({
+    src,
+    fill: true,
+    sizes: '100vw',
+    unoptimized: !isSupabaseStorageUrl(src),
+});
 
-export function ShowStage({ show, campaignId, isDM = false, userId = "", readOnlyPreview = false, readOnly = false }: { show: ShowState | null; campaignId: string; isDM?: boolean; userId?: string; readOnlyPreview?: boolean; readOnly?: boolean }) {
-  const current = visibleSlide(show);
+export function ShowStage({
+    show,
+    campaignId,
+    isDM = false,
+    userId = '',
+    readOnlyPreview = false,
+    readOnly = false,
+}: {
+    show: ShowState | null;
+    campaignId: string;
+    isDM?: boolean;
+    userId?: string;
+    readOnlyPreview?: boolean;
+    readOnly?: boolean;
+}) {
+    const current = visibleSlide(show);
 
-  const layers = useSlideLayers(current);
+    const layers = useSlideLayers(current);
 
-  const puzzle = !readOnlyPreview && stageMode(show) === "puzzle" && current?.puzzle && show?.puzzle ? { spec: current.puzzle, imageUrl: current.imageUrl, puzzle: show.puzzle } : null;
+    const puzzle =
+        !readOnlyPreview &&
+        stageMode(show) === 'puzzle' &&
+        current?.puzzle &&
+        show?.puzzle
+            ? {
+                  spec: current.puzzle,
+                  imageUrl: current.imageUrl,
+                  puzzle: show.puzzle,
+              }
+            : null;
 
-  return (
-    <div className="absolute inset-0 overflow-hidden bg-black">
-      {!puzzle && layers.map(({ slide, key, role }) => (
-        <div
-          key={key}
-          className={cn("absolute inset-0", role === "top" && "animate-slide-in", role === "ending" && "animate-slide-out")}
-          style={{ animationDuration: `${SLIDE_CROSSFADE_MS}ms` }}
-        >
-          <Image {...imageProps(slide.imageUrl)} alt={slide.title ?? ""} className="object-contain" priority />
+    return (
+        <div className="absolute inset-0 overflow-hidden bg-black">
+            {!puzzle &&
+                layers.map(({ slide, key, role }) => (
+                    <div
+                        key={key}
+                        className={cn(
+                            'absolute inset-0',
+                            role === 'top' && 'animate-slide-in',
+                            role === 'ending' && 'animate-slide-out'
+                        )}
+                        style={{ animationDuration: `${SLIDE_CROSSFADE_MS}ms` }}
+                    >
+                        <Image
+                            {...imageProps(slide.imageUrl)}
+                            alt={slide.title ?? ''}
+                            className="object-contain"
+                            priority
+                        />
+                    </div>
+                ))}
+            {puzzle && (
+                <PuzzleStage
+                    campaignId={campaignId}
+                    isDM={isDM}
+                    readOnly={readOnly}
+                    userId={userId}
+                    {...puzzle}
+                />
+            )}
+            {puzzle ? null : current ? (
+                <SlideCaption key={current.id} slide={current} />
+            ) : (
+                !show?.battle && <ShowWaiting paused={!!show?.curtain} />
+            )}
+            {show?.world && stageMode(show) === 'world' && (
+                <ShowWorldStage
+                    campaignId={campaignId}
+                    world={show.world}
+                    isDM={isDM}
+                    readOnly={readOnly}
+                />
+            )}
+            <div
+                data-slide-preload
+                aria-hidden
+                className="pointer-events-none absolute inset-0 opacity-0"
+            >
+                {show?.nextImageUrl && (
+                    <Image
+                        {...imageProps(show.nextImageUrl)}
+                        alt=""
+                        loading="eager"
+                    />
+                )}
+                {show?.cover && current?.id !== show.cover.slide.id && (
+                    <Image
+                        {...imageProps(show.cover.slide.imageUrl)}
+                        alt=""
+                        loading="eager"
+                    />
+                )}
+            </div>
         </div>
-      ))}
-      {puzzle && <PuzzleStage campaignId={campaignId} isDM={isDM} readOnly={readOnly} userId={userId} {...puzzle} />}
-      {puzzle ? null : current ? <SlideCaption key={current.id} slide={current} /> : !show?.battle && <ShowWaiting paused={!!show?.curtain} />}
-      {show?.world && stageMode(show) === "world" && <ShowWorldStage campaignId={campaignId} world={show.world} isDM={isDM} readOnly={readOnly} />}
-      <div data-slide-preload aria-hidden className="pointer-events-none absolute inset-0 opacity-0">
-        {show?.nextImageUrl && <Image {...imageProps(show.nextImageUrl)} alt="" loading="eager" />}
-        {show?.cover && current?.id !== show.cover.slide.id && <Image {...imageProps(show.cover.slide.imageUrl)} alt="" loading="eager" />}
-      </div>
-    </div>
-  );
+    );
 }

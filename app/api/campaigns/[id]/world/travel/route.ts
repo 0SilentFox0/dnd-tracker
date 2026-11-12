@@ -1,9 +1,9 @@
-import { travelHandler } from "@/lib/server/world/travel-handlers";
+import { travelHandler } from '@/lib/server/world/travel-handlers';
 
 type Params = { params: Promise<{ id: string }> };
 
 export async function POST(req: Request, { params }: Params) {
-  const { id } = await params;
+    const { id } = await params;
 
-  return travelHandler(req, id);
+    return travelHandler(req, id);
 }

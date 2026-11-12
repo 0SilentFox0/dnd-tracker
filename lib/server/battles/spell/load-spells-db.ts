@@ -1,3 +1,4 @@
-import { prisma } from "@/lib/db";
+import { prisma } from '@/lib/db';
 
-export const loadSpellsFromDb = (campaignId: string, ids: string[]) => prisma.spell.findMany({ where: { campaignId, id: { in: ids } } });
+export const loadSpellsFromDb = (campaignId: string, ids: string[]) =>
+    prisma.spell.findMany({ where: { campaignId, id: { in: ids } } });

@@ -1,10 +1,19 @@
-import { NextResponse } from "next/server";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { NextResponse } from 'next/server';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { requireAuth, requireAuthUser, requireCampaignAccess, requireCampaignDMOrDemoAccess, requireDM } from "../api-auth";
+import {
+    requireAuth,
+    requireAuthUser,
+    requireCampaignAccess,
+    requireCampaignDMOrDemoAccess,
+    requireDM,
+} from '../api-auth';
 
-import { API_ERRORS } from "@/lib/constants/api-errors";
-import { CampaignRole, type CampaignRoleValue } from "@/lib/constants/campaigns";
+import { API_ERRORS } from '@/lib/constants/api-errors';
+import {
+    CampaignRole,
+    type CampaignRoleValue,
+} from '@/lib/constants/campaigns';
 
 const getUser = vi.hoisted(() => vi.fn());
 
@@ -12,173 +21,230 @@ const getClaims = vi.hoisted(() => vi.fn());
 
 const findCampaign = vi.hoisted(() => vi.fn());
 
-vi.mock("@/lib/supabase/server", () => ({ createClient: async () => ({ auth: { getUser, getClaims } }) }));
-vi.mock("@/lib/db", () => ({ prisma: { campaign: { findUnique: findCampaign } } }));
+vi.mock('@/lib/supabase/server', () => ({
+    createClient: async () => ({ auth: { getUser, getClaims } }),
+}));
+vi.mock('@/lib/db', () => ({
+    prisma: { campaign: { findUnique: findCampaign } },
+}));
 
 const campaign = (role?: CampaignRoleValue) => ({
-  id: "c1",
-  kind: "campaign",
-  maxLevel: 20,
-  members: role ? [{ userId: "u1", role }] : [],
+    id: 'c1',
+    kind: 'campaign',
+    maxLevel: 20,
+    members: role ? [{ userId: 'u1', role }] : [],
 });
 
-const statusOf = (result: unknown) => (result instanceof NextResponse ? result.status : 200);
+const statusOf = (result: unknown) =>
+    result instanceof NextResponse ? result.status : 200;
 
-describe("api-auth", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    getUser.mockResolvedValue({ data: { user: { id: "u1", email: "a@b.c", user_metadata: { name: "A" } } } });
-    getClaims.mockResolvedValue({ data: { claims: { sub: "u1", email: "a@b.c" } } });
-  });
-
-  describe("requireAuth", () => {
-    it("без сесії — 401", async () => {
-      getClaims.mockResolvedValue({ data: null, error: null });
-
-      expect(statusOf(await requireAuth())).toBe(401);
+describe('api-auth', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+        getUser.mockResolvedValue({
+            data: {
+                user: {
+                    id: 'u1',
+                    email: 'a@b.c',
+                    user_metadata: { name: 'A' },
+                },
+            },
+        });
+        getClaims.mockResolvedValue({
+            data: { claims: { sub: 'u1', email: 'a@b.c' } },
+        });
     });
 
-    it("невалідний токен — 401", async () => {
-      getClaims.mockResolvedValue({ data: null, error: new Error("invalid JWT") });
+    describe('requireAuth', () => {
+        it('без сесії — 401', async () => {
+            getClaims.mockResolvedValue({ data: null, error: null });
 
-      expect(statusOf(await requireAuth())).toBe(401);
+            expect(statusOf(await requireAuth())).toBe(401);
+        });
+
+        it('невалідний токен — 401', async () => {
+            getClaims.mockResolvedValue({
+                data: null,
+                error: new Error('invalid JWT'),
+            });
+
+            expect(statusOf(await requireAuth())).toBe(401);
+        });
+
+        it('із сесією — userId з claims без запиту до Supabase Auth', async () => {
+            expect(await requireAuth()).toEqual({ userId: 'u1' });
+            expect(getUser).not.toHaveBeenCalled();
+        });
     });
 
-    it("із сесією — userId з claims без запиту до Supabase Auth", async () => {
-      expect(await requireAuth()).toEqual({ userId: "u1" });
-      expect(getUser).not.toHaveBeenCalled();
-    });
-  });
+    describe('requireAuthUser', () => {
+        it('без сесії — 401', async () => {
+            getUser.mockResolvedValue({ data: { user: null } });
 
-  describe("requireAuthUser", () => {
-    it("без сесії — 401", async () => {
-      getUser.mockResolvedValue({ data: { user: null } });
+            expect(statusOf(await requireAuthUser())).toBe(401);
+        });
 
-      expect(statusOf(await requireAuthUser())).toBe(401);
-    });
-
-    it("повертає email і user_metadata з Supabase Auth", async () => {
-      expect(await requireAuthUser()).toEqual({
-        userId: "u1",
-        authUser: { id: "u1", email: "a@b.c", user_metadata: { name: "A" } },
-      });
-    });
-  });
-
-  describe("requireCampaignAccess", () => {
-    it("без сесії — 401 без запиту до БД", async () => {
-      getClaims.mockResolvedValue({ data: null, error: null });
-
-      expect(statusOf(await requireCampaignAccess("c1"))).toBe(401);
-      expect(findCampaign).not.toHaveBeenCalled();
+        it('повертає email і user_metadata з Supabase Auth', async () => {
+            expect(await requireAuthUser()).toEqual({
+                userId: 'u1',
+                authUser: {
+                    id: 'u1',
+                    email: 'a@b.c',
+                    user_metadata: { name: 'A' },
+                },
+            });
+        });
     });
 
-    it("шукає членство лише поточного користувача", async () => {
-      findCampaign.mockResolvedValue(campaign(CampaignRole.PLAYER));
+    describe('requireCampaignAccess', () => {
+        it('без сесії — 401 без запиту до БД', async () => {
+            getClaims.mockResolvedValue({ data: null, error: null });
 
-      await requireCampaignAccess("c1");
+            expect(statusOf(await requireCampaignAccess('c1'))).toBe(401);
+            expect(findCampaign).not.toHaveBeenCalled();
+        });
 
-      expect(findCampaign).toHaveBeenCalledWith({
-        where: { id: "c1" },
-        select: { id: true, kind: true, maxLevel: true, rules: true, allowPlayerEdit: true, members: { where: { userId: "u1" }, select: { userId: true, role: true } } },
-      });
+        it('шукає членство лише поточного користувача', async () => {
+            findCampaign.mockResolvedValue(campaign(CampaignRole.PLAYER));
+
+            await requireCampaignAccess('c1');
+
+            expect(findCampaign).toHaveBeenCalledWith({
+                where: { id: 'c1' },
+                select: {
+                    id: true,
+                    kind: true,
+                    maxLevel: true,
+                    rules: true,
+                    allowPlayerEdit: true,
+                    members: {
+                        where: { userId: 'u1' },
+                        select: { userId: true, role: true },
+                    },
+                },
+            });
+        });
+
+        it('неіснуюча кампанія — 404', async () => {
+            findCampaign.mockResolvedValue(null);
+
+            expect(statusOf(await requireCampaignAccess('c1'))).toBe(404);
+        });
+
+        it('не член — 403', async () => {
+            findCampaign.mockResolvedValue(campaign());
+
+            expect(statusOf(await requireCampaignAccess('c1'))).toBe(403);
+        });
+
+        it('Demo не відкриває доступ за замовчуванням', async () => {
+            findCampaign.mockResolvedValue({ ...campaign(), kind: 'demo' });
+
+            expect(statusOf(await requireCampaignAccess('demo-id'))).toBe(403);
+        });
+
+        it('allowDemo пускає без membership, але не стає DM', async () => {
+            findCampaign.mockResolvedValue({ ...campaign(), kind: 'demo' });
+
+            expect(
+                await requireCampaignAccess('demo-id', false, {
+                    allowDemo: true,
+                })
+            ).toMatchObject({
+                userId: 'u1',
+                isDM: false,
+                isDemo: true,
+                campaign: { id: 'c1', kind: 'demo', members: [] },
+            });
+        });
+
+        it('isDM: true для DM, false для гравця', async () => {
+            findCampaign.mockResolvedValue(campaign(CampaignRole.DM));
+            expect(await requireCampaignAccess('c1')).toMatchObject({
+                isDM: true,
+            });
+
+            findCampaign.mockResolvedValue(campaign(CampaignRole.PLAYER));
+            expect(await requireCampaignAccess('c1')).toMatchObject({
+                isDM: false,
+            });
+        });
+
+        it('відмови мають форму { error } українською', async () => {
+            findCampaign.mockResolvedValue(null);
+            expect(
+                await (
+                    (await requireCampaignAccess('c1')) as NextResponse
+                ).json()
+            ).toMatchObject({ error: API_ERRORS.CAMPAIGN_NOT_FOUND });
+
+            findCampaign.mockResolvedValue(campaign());
+            expect(
+                await (
+                    (await requireCampaignAccess('c1')) as NextResponse
+                ).json()
+            ).toMatchObject({ error: API_ERRORS.FORBIDDEN });
+        });
+
+        it('гравець — доступ і дані кампанії', async () => {
+            findCampaign.mockResolvedValue(campaign(CampaignRole.PLAYER));
+
+            expect(await requireCampaignAccess('c1')).toMatchObject({
+                userId: 'u1',
+                campaign: {
+                    id: 'c1',
+                    maxLevel: 20,
+                    members: [{ userId: 'u1', role: CampaignRole.PLAYER }],
+                },
+            });
+        });
     });
 
-    it("неіснуюча кампанія — 404", async () => {
-      findCampaign.mockResolvedValue(null);
+    describe('requireDM', () => {
+        it('гравець — 403', async () => {
+            findCampaign.mockResolvedValue(campaign(CampaignRole.PLAYER));
 
-      expect(statusOf(await requireCampaignAccess("c1"))).toBe(404);
+            expect(statusOf(await requireDM('c1'))).toBe(403);
+        });
+
+        it('DM — доступ', async () => {
+            findCampaign.mockResolvedValue(campaign(CampaignRole.DM));
+
+            expect(statusOf(await requireDM('c1'))).toBe(200);
+        });
+
+        it('не член — 403', async () => {
+            findCampaign.mockResolvedValue(campaign());
+
+            expect(statusOf(await requireDM('c1'))).toBe(403);
+        });
+
+        it('Demo ніколи не надає доступ DM навіть без membership', async () => {
+            findCampaign.mockResolvedValue({ ...campaign(), kind: 'demo' });
+
+            expect(statusOf(await requireDM('demo-id'))).toBe(403);
+        });
     });
 
-    it("не член — 403", async () => {
-      findCampaign.mockResolvedValue(campaign());
+    describe('requireCampaignDMOrDemoAccess', () => {
+        it('Demo can read campaign DM content without becoming a DM', async () => {
+            findCampaign.mockResolvedValue({ ...campaign(), kind: 'demo' });
 
-      expect(statusOf(await requireCampaignAccess("c1"))).toBe(403);
+            expect(
+                await requireCampaignDMOrDemoAccess('demo-id')
+            ).toMatchObject({ isDemo: true, isDM: false });
+        });
+
+        it('campaign players remain blocked while DMs can read', async () => {
+            findCampaign.mockResolvedValue(campaign(CampaignRole.PLAYER));
+            expect(statusOf(await requireCampaignDMOrDemoAccess('c1'))).toBe(
+                403
+            );
+
+            findCampaign.mockResolvedValue(campaign(CampaignRole.DM));
+            expect(statusOf(await requireCampaignDMOrDemoAccess('c1'))).toBe(
+                200
+            );
+        });
     });
-
-    it("Demo не відкриває доступ за замовчуванням", async () => {
-      findCampaign.mockResolvedValue({ ...campaign(), kind: "demo" });
-
-      expect(statusOf(await requireCampaignAccess("demo-id"))).toBe(403);
-    });
-
-    it("allowDemo пускає без membership, але не стає DM", async () => {
-      findCampaign.mockResolvedValue({ ...campaign(), kind: "demo" });
-
-      expect(await requireCampaignAccess("demo-id", false, { allowDemo: true })).toMatchObject({
-        userId: "u1",
-        isDM: false,
-        isDemo: true,
-        campaign: { id: "c1", kind: "demo", members: [] },
-      });
-    });
-
-    it("isDM: true для DM, false для гравця", async () => {
-      findCampaign.mockResolvedValue(campaign(CampaignRole.DM));
-      expect(await requireCampaignAccess("c1")).toMatchObject({ isDM: true });
-
-      findCampaign.mockResolvedValue(campaign(CampaignRole.PLAYER));
-      expect(await requireCampaignAccess("c1")).toMatchObject({ isDM: false });
-    });
-
-    it("відмови мають форму { error } українською", async () => {
-      findCampaign.mockResolvedValue(null);
-      expect(await (await requireCampaignAccess("c1") as NextResponse).json()).toMatchObject({ error: API_ERRORS.CAMPAIGN_NOT_FOUND });
-
-      findCampaign.mockResolvedValue(campaign());
-      expect(await (await requireCampaignAccess("c1") as NextResponse).json()).toMatchObject({ error: API_ERRORS.FORBIDDEN });
-    });
-
-    it("гравець — доступ і дані кампанії", async () => {
-      findCampaign.mockResolvedValue(campaign(CampaignRole.PLAYER));
-
-      expect(await requireCampaignAccess("c1")).toMatchObject({
-        userId: "u1",
-        campaign: { id: "c1", maxLevel: 20, members: [{ userId: "u1", role: CampaignRole.PLAYER }] },
-      });
-    });
-  });
-
-  describe("requireDM", () => {
-    it("гравець — 403", async () => {
-      findCampaign.mockResolvedValue(campaign(CampaignRole.PLAYER));
-
-      expect(statusOf(await requireDM("c1"))).toBe(403);
-    });
-
-    it("DM — доступ", async () => {
-      findCampaign.mockResolvedValue(campaign(CampaignRole.DM));
-
-      expect(statusOf(await requireDM("c1"))).toBe(200);
-    });
-
-    it("не член — 403", async () => {
-      findCampaign.mockResolvedValue(campaign());
-
-      expect(statusOf(await requireDM("c1"))).toBe(403);
-    });
-
-    it("Demo ніколи не надає доступ DM навіть без membership", async () => {
-      findCampaign.mockResolvedValue({ ...campaign(), kind: "demo" });
-
-      expect(statusOf(await requireDM("demo-id"))).toBe(403);
-    });
-  });
-
-  describe("requireCampaignDMOrDemoAccess", () => {
-    it("Demo can read campaign DM content without becoming a DM", async () => {
-      findCampaign.mockResolvedValue({ ...campaign(), kind: "demo" });
-
-      expect(await requireCampaignDMOrDemoAccess("demo-id")).toMatchObject({ isDemo: true, isDM: false });
-    });
-
-    it("campaign players remain blocked while DMs can read", async () => {
-      findCampaign.mockResolvedValue(campaign(CampaignRole.PLAYER));
-      expect(statusOf(await requireCampaignDMOrDemoAccess("c1"))).toBe(403);
-
-      findCampaign.mockResolvedValue(campaign(CampaignRole.DM));
-      expect(statusOf(await requireCampaignDMOrDemoAccess("c1"))).toBe(200);
-    });
-  });
-
 });

@@ -1,91 +1,154 @@
-import type { Feat as FeatRow } from "@prisma/client";
-import type { z } from "zod";
+import type { Feat as FeatRow } from '@prisma/client';
+import type { z } from 'zod';
 
-import "server-only";
-import { getCachedFeats } from "@/lib/cache/reference-data";
-import { ReferenceKind } from "@/lib/cache/tags";
-import { API_ERRORS } from "@/lib/constants/api-errors";
-import { prisma } from "@/lib/db";
-import { createFeatSchema, updateFeatSchema } from "@/lib/schemas";
-import { addedIds, assertCampaignRefs } from "@/lib/server/campaigns/campaign-refs";
-import { defineResource } from "@/lib/server/content/define-resource";
-import { ContentError } from "@/lib/server/content/errors";
-import { assertCampaignEffects, storedEffectOwners } from "@/lib/server/content/traits-guard";
-import { featNameTaken } from "@/lib/server/feats/feat-name";
-import { featAsiUsedByBackground, featInUse } from "@/lib/server/feats/feat-usage";
-import { profileReferences } from "@/lib/server/races/profile-usage";
-import { abilitiesJson } from "@/lib/utils/abilities/read";
-import { backgroundAsiRules } from "@/lib/utils/backgrounds/asi";
-import { choiceSpellIds, readChoices } from "@/lib/utils/characters/choices/read";
-import { toInputJson } from "@/lib/utils/common/json";
-import { toFeatData } from "@/lib/utils/feats/row";
+import 'server-only';
+import { getCachedFeats } from '@/lib/cache/reference-data';
+import { ReferenceKind } from '@/lib/cache/tags';
+import { API_ERRORS } from '@/lib/constants/api-errors';
+import { prisma } from '@/lib/db';
+import { createFeatSchema, updateFeatSchema } from '@/lib/schemas';
+import {
+    addedIds,
+    assertCampaignRefs,
+} from '@/lib/server/campaigns/campaign-refs';
+import { defineResource } from '@/lib/server/content/define-resource';
+import { ContentError } from '@/lib/server/content/errors';
+import {
+    assertCampaignEffects,
+    storedEffectOwners,
+} from '@/lib/server/content/traits-guard';
+import { featNameTaken } from '@/lib/server/feats/feat-name';
+import {
+    featAsiUsedByBackground,
+    featInUse,
+} from '@/lib/server/feats/feat-usage';
+import { profileReferences } from '@/lib/server/races/profile-usage';
+import { abilitiesJson } from '@/lib/utils/abilities/read';
+import { backgroundAsiRules } from '@/lib/utils/backgrounds/asi';
+import {
+    choiceSpellIds,
+    readChoices,
+} from '@/lib/utils/characters/choices/read';
+import { toInputJson } from '@/lib/utils/common/json';
+import { toFeatData } from '@/lib/utils/feats/row';
 
 type CreateInput = z.infer<typeof createFeatSchema>;
 
 type UpdateInput = z.infer<typeof updateFeatSchema>;
 
-async function assertNameFree(campaignId: string, name: string, exceptId?: string) {
-  if (await featNameTaken(campaignId, name, exceptId)) throw new ContentError(API_ERRORS.FEAT_NAME_TAKEN, 409, undefined, { name });
+async function assertNameFree(
+    campaignId: string,
+    name: string,
+    exceptId?: string
+) {
+    if (await featNameTaken(campaignId, name, exceptId))
+        throw new ContentError(API_ERRORS.FEAT_NAME_TAKEN, 409, undefined, {
+            name,
+        });
 }
 
 export const featsResource = defineResource<FeatRow, CreateInput, UpdateInput>({
-  kind: "feats",
-  listFields: ["type", "repeatable"],
-  idParam: "featId",
-  label: "Feats",
-  description: "5e feats: type (origin/general/fightingStyle/epicBoon), prerequisites, repeatability, features and nested choices.",
-  path: "/feats",
-  schemas: { create: createFeatSchema, update: updateFeatSchema },
-  errors: [409],
-  access: { list: "member", item: "dm" },
-  invalidates: [ReferenceKind.FEATS],
-  notFound: API_ERRORS.FEAT_NOT_FOUND,
-  list: async (actor) => (await getCachedFeats(actor.campaignId)).map(toFeatData),
-  toItem: toFeatData,
-  find: (actor, id) => prisma.feat.findFirst({ where: { id, campaignId: actor.campaignId } }),
-  async create(actor, data) {
-    await assertCampaignEffects(actor.campaignId, data.abilities);
-    await assertNameFree(actor.campaignId, data.name);
-    await assertCampaignRefs(actor.campaignId, { spell: choiceSpellIds(data.choices) });
+    kind: 'feats',
+    listFields: ['type', 'repeatable'],
+    idParam: 'featId',
+    label: 'Feats',
+    description:
+        '5e feats: type (origin/general/fightingStyle/epicBoon), prerequisites, repeatability, features and nested choices.',
+    path: '/feats',
+    schemas: { create: createFeatSchema, update: updateFeatSchema },
+    errors: [409],
+    access: { list: 'member', item: 'dm' },
+    invalidates: [ReferenceKind.FEATS],
+    notFound: API_ERRORS.FEAT_NOT_FOUND,
+    list: async (actor) =>
+        (await getCachedFeats(actor.campaignId)).map(toFeatData),
+    toItem: toFeatData,
+    find: (actor, id) =>
+        prisma.feat.findFirst({ where: { id, campaignId: actor.campaignId } }),
+    async create(actor, data) {
+        await assertCampaignEffects(actor.campaignId, data.abilities);
+        await assertNameFree(actor.campaignId, data.name);
+        await assertCampaignRefs(actor.campaignId, {
+            spell: choiceSpellIds(data.choices),
+        });
 
-    return prisma.feat.create({
-      data: {
-        campaignId: actor.campaignId,
-        name: data.name,
-        icon: data.icon ?? null,
-        type: data.type,
-        prerequisite: toInputJson(data.prerequisite),
-        repeatable: data.repeatable,
-        xpCost: data.xpCost ?? null,
-        maxRank: data.maxRank ?? null,
-        description: data.description ?? null,
-        abilities: abilitiesJson(data.abilities),
-        choices: toInputJson(data.choices),
-      },
-    });
-  },
-  async update(actor, existing, data) {
-    await assertCampaignEffects(actor.campaignId, data.abilities, storedEffectOwners(existing.abilities));
-    await assertCampaignRefs(actor.campaignId, { spell: addedIds(choiceSpellIds(data.choices), choiceSpellIds(readChoices(existing.choices)) ?? []) });
+        return prisma.feat.create({
+            data: {
+                campaignId: actor.campaignId,
+                name: data.name,
+                icon: data.icon ?? null,
+                type: data.type,
+                prerequisite: toInputJson(data.prerequisite),
+                repeatable: data.repeatable,
+                xpCost: data.xpCost ?? null,
+                maxRank: data.maxRank ?? null,
+                description: data.description ?? null,
+                abilities: abilitiesJson(data.abilities),
+                choices: toInputJson(data.choices),
+            },
+        });
+    },
+    async update(actor, existing, data) {
+        await assertCampaignEffects(
+            actor.campaignId,
+            data.abilities,
+            storedEffectOwners(existing.abilities)
+        );
+        await assertCampaignRefs(actor.campaignId, {
+            spell: addedIds(
+                choiceSpellIds(data.choices),
+                choiceSpellIds(readChoices(existing.choices)) ?? []
+            ),
+        });
 
-    if (data.name !== undefined) await assertNameFree(actor.campaignId, data.name, existing.id);
+        if (data.name !== undefined)
+            await assertNameFree(actor.campaignId, data.name, existing.id);
 
-    if (data.type !== undefined && data.type !== "origin" && existing.type === "origin" && await prisma.background.findFirst({ where: { campaignId: actor.campaignId, originFeatId: existing.id }, select: { id: true } })) throw new ContentError(API_ERRORS.FEAT_IN_USE, 409);
+        if (
+            data.type !== undefined &&
+            data.type !== 'origin' &&
+            existing.type === 'origin' &&
+            (await prisma.background.findFirst({
+                where: {
+                    campaignId: actor.campaignId,
+                    originFeatId: existing.id,
+                },
+                select: { id: true },
+            }))
+        )
+            throw new ContentError(API_ERRORS.FEAT_IN_USE, 409);
 
-    if (data.choices !== undefined && JSON.stringify(backgroundAsiRules(existing.choices)) !== JSON.stringify(backgroundAsiRules(data.choices)) && await featAsiUsedByBackground(actor.campaignId, existing.id)) throw new ContentError(API_ERRORS.BACKGROUND_ASI_IN_USE, 409);
+        if (
+            data.choices !== undefined &&
+            JSON.stringify(backgroundAsiRules(existing.choices)) !==
+                JSON.stringify(backgroundAsiRules(data.choices)) &&
+            (await featAsiUsedByBackground(actor.campaignId, existing.id))
+        )
+            throw new ContentError(API_ERRORS.BACKGROUND_ASI_IN_USE, 409);
 
-    const { prerequisite, abilities, choices, ...rest } = data;
+        const { prerequisite, abilities, choices, ...rest } = data;
 
-    return prisma.feat.update({
-      where: { id: existing.id },
-      data: { ...rest, ...(prerequisite && { prerequisite: toInputJson(prerequisite) }), ...(abilities && { abilities: abilitiesJson(abilities) }), ...(choices && { choices: toInputJson(choices) }) },
-    });
-  },
-  async remove(actor, existing) {
-    if (await featInUse(actor.campaignId, existing.id)) throw new ContentError(API_ERRORS.FEAT_IN_USE, 409);
+        return prisma.feat.update({
+            where: { id: existing.id },
+            data: {
+                ...rest,
+                ...(prerequisite && {
+                    prerequisite: toInputJson(prerequisite),
+                }),
+                ...(abilities && { abilities: abilitiesJson(abilities) }),
+                ...(choices && { choices: toInputJson(choices) }),
+            },
+        });
+    },
+    async remove(actor, existing) {
+        if (await featInUse(actor.campaignId, existing.id))
+            throw new ContentError(API_ERRORS.FEAT_IN_USE, 409);
 
-    if (await profileReferences(actor.campaignId, { featId: existing.id })) throw new ContentError(API_ERRORS.FEAT_IN_SPECIES_TABLE, 409);
+        if (await profileReferences(actor.campaignId, { featId: existing.id }))
+            throw new ContentError(API_ERRORS.FEAT_IN_SPECIES_TABLE, 409);
 
-    await prisma.feat.deleteMany({ where: { id: existing.id, campaignId: actor.campaignId } });
-  },
+        await prisma.feat.deleteMany({
+            where: { id: existing.id, campaignId: actor.campaignId },
+        });
+    },
 });

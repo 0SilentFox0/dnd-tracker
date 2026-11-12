@@ -1,26 +1,48 @@
-import { findParticipant } from "@/lib/utils/abilities/engine/core/participants";
-import { apexOf, bothOnMap, cellDistance, cellKey, cellsOf, closestCell, footprintDistance, participantsInCells, rayCells } from "@/lib/utils/battle/grid";
-import { isHostile } from "@/lib/utils/battle/modes/engine";
-import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
+import { findParticipant } from '@/lib/utils/abilities/engine/core/participants';
+import {
+    apexOf,
+    bothOnMap,
+    cellDistance,
+    cellKey,
+    cellsOf,
+    closestCell,
+    footprintDistance,
+    participantsInCells,
+    rayCells,
+} from '@/lib/utils/battle/grid';
+import { isHostile } from '@/lib/utils/battle/modes/engine';
+import type { BattleMapConfig, BattleParticipant } from '@/types/battle';
 
-export function piercingTargets(map: BattleMapConfig | null | undefined, ps: BattleParticipant[], attacker: BattleParticipant, firstTargetId: string): string[] {
-  const first = findParticipant(ps, firstTargetId);
+export function piercingTargets(
+    map: BattleMapConfig | null | undefined,
+    ps: BattleParticipant[],
+    attacker: BattleParticipant,
+    firstTargetId: string
+): string[] {
+    const first = findParticipant(ps, firstTargetId);
 
-  if (!first || !bothOnMap(map, attacker, first)) return [firstTargetId];
+    if (!first || !bothOnMap(map, attacker, first)) return [firstTargetId];
 
-  const origin = cellsOf(attacker);
+    const origin = cellsOf(attacker);
 
-  const through = closestCell(cellsOf(first), origin);
+    const through = closestCell(cellsOf(first), origin);
 
-  const apex = apexOf(origin, through);
+    const apex = apexOf(origin, through);
 
-  const ray = rayCells(map, apex, through, { maxCells: Math.max(map.cols, map.rows) }).map(cellKey);
+    const ray = rayCells(map, apex, through, {
+        maxCells: Math.max(map.cols, map.rows),
+    }).map(cellKey);
 
-  const reach = cellDistance(apex, through);
+    const reach = cellDistance(apex, through);
 
-  const rest = participantsInCells(ps, ray, apex)
-    .filter((p) => p.basicInfo.id !== firstTargetId && isHostile(map, attacker, p) && footprintDistance([apex], cellsOf(p)) >= reach)
-    .map((p) => p.basicInfo.id);
+    const rest = participantsInCells(ps, ray, apex)
+        .filter(
+            (p) =>
+                p.basicInfo.id !== firstTargetId &&
+                isHostile(map, attacker, p) &&
+                footprintDistance([apex], cellsOf(p)) >= reach
+        )
+        .map((p) => p.basicInfo.id);
 
-  return [firstTargetId, ...rest];
+    return [firstTargetId, ...rest];
 }

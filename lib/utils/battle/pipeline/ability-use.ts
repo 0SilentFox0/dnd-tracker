@@ -1,107 +1,234 @@
-import { API_ERRORS } from "@/lib/constants/api-errors";
-import { textRef } from "@/lib/i18n/text-ref";
-import { findParticipant, isActive, updateParticipant } from "@/lib/utils/abilities/engine/core/participants";
-import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
-import type { AbilityRunContext } from "@/lib/utils/abilities/engine/core/types";
-import { cooldownLeft, poolAffordable, withinCountLimits } from "@/lib/utils/abilities/engine/core/usage";
-import { conditionRequiresStill, evaluateCondition } from "@/lib/utils/abilities/registry/conditions";
-import { canActNow, currentOf } from "@/lib/utils/battle/common/control";
-import { lineText, logFields } from "@/lib/utils/battle/log/lines";
-import { applyMainActionUsed } from "@/lib/utils/battle/participant";
-import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
-import { BattleAccessError, BattleRuleError } from "@/lib/utils/battle/store";
-import { REJECT } from "@/lib/utils/battle/store/reject";
-import { applyAbilitySummons, type SummonDeps } from "@/lib/utils/battle/summon/ability-summons";
-import { assertCanAct } from "@/lib/utils/battle/turn";
-import { assertAbilityAim } from "@/lib/utils/battle/validation/ability-aim";
-import { assertAbilityTargets } from "@/lib/utils/battle/validation/ability-targets";
-import { abilityOnMap } from "@/lib/utils/battle/view";
-import { rngOf } from "@/lib/utils/common/rng";
-import type { BattleParticipant, GridPoint } from "@/types/battle";
+import { API_ERRORS } from '@/lib/constants/api-errors';
+import { textRef } from '@/lib/i18n/text-ref';
+import {
+    findParticipant,
+    isActive,
+    updateParticipant,
+} from '@/lib/utils/abilities/engine/core/participants';
+import { runAbilities } from '@/lib/utils/abilities/engine/core/run-abilities';
+import type { AbilityRunContext } from '@/lib/utils/abilities/engine/core/types';
+import {
+    cooldownLeft,
+    poolAffordable,
+    withinCountLimits,
+} from '@/lib/utils/abilities/engine/core/usage';
+import {
+    conditionRequiresStill,
+    evaluateCondition,
+} from '@/lib/utils/abilities/registry/conditions';
+import { canActNow, currentOf } from '@/lib/utils/battle/common/control';
+import { lineText, logFields } from '@/lib/utils/battle/log/lines';
+import { applyMainActionUsed } from '@/lib/utils/battle/participant';
+import type {
+    BattleMutationContext,
+    MutationResult,
+} from '@/lib/utils/battle/pipeline/run-battle-mutation';
+import { BattleAccessError, BattleRuleError } from '@/lib/utils/battle/store';
+import { REJECT } from '@/lib/utils/battle/store/reject';
+import {
+    applyAbilitySummons,
+    type SummonDeps,
+} from '@/lib/utils/battle/summon/ability-summons';
+import { assertCanAct } from '@/lib/utils/battle/turn';
+import { assertAbilityAim } from '@/lib/utils/battle/validation/ability-aim';
+import { assertAbilityTargets } from '@/lib/utils/battle/validation/ability-targets';
+import { abilityOnMap } from '@/lib/utils/battle/view';
+import { rngOf } from '@/lib/utils/common/rng';
+import type { BattleParticipant, GridPoint } from '@/types/battle';
 
-export type AbilityUseTrigger = "action" | "bonusAction";
+export type AbilityUseTrigger = 'action' | 'bonusAction';
 
 export interface AbilityUseRequest {
-  participantId: string;
-  abilityKey: string;
-  targetIds: string[];
-  targetCell?: GridPoint;
+    participantId: string;
+    abilityKey: string;
+    targetIds: string[];
+    targetCell?: GridPoint;
 }
 
-const USAGE: Record<AbilityUseTrigger, { used: (p: BattleParticipant) => boolean; error: { code: "action_used"; message: string }; spendFirst: boolean }> = {
-  action: { used: (p) => p.actionFlags.hasUsedAction, error: { code: "action_used", message: API_ERRORS.ACTION_USED }, spendFirst: true },
-  bonusAction: { used: (p) => p.actionFlags.hasUsedBonusAction, error: { code: "action_used", message: REJECT.bonusActionUsed }, spendFirst: false },
+const USAGE: Record<
+    AbilityUseTrigger,
+    {
+        used: (p: BattleParticipant) => boolean;
+        error: { code: 'action_used'; message: string };
+        spendFirst: boolean;
+    }
+> = {
+    action: {
+        used: (p) => p.actionFlags.hasUsedAction,
+        error: { code: 'action_used', message: API_ERRORS.ACTION_USED },
+        spendFirst: true,
+    },
+    bonusAction: {
+        used: (p) => p.actionFlags.hasUsedBonusAction,
+        error: { code: 'action_used', message: REJECT.bonusActionUsed },
+        spendFirst: false,
+    },
 };
 
-const spend: Record<AbilityUseTrigger, (p: BattleParticipant) => BattleParticipant> = {
-  action: applyMainActionUsed,
-  bonusAction: (p) => ({ ...p, actionFlags: { ...p.actionFlags, hasUsedBonusAction: true } }),
+const spend: Record<
+    AbilityUseTrigger,
+    (p: BattleParticipant) => BattleParticipant
+> = {
+    action: applyMainActionUsed,
+    bonusAction: (p) => ({
+        ...p,
+        actionFlags: { ...p.actionFlags, hasUsedBonusAction: true },
+    }),
 };
 
-export const abilityRunContext = (ctx: BattleMutationContext): AbilityRunContext => ({ round: ctx.scene.round, rng: rngOf(ctx), map: ctx.meta.map, rules: ctx.meta.rules });
+export const abilityRunContext = (
+    ctx: BattleMutationContext
+): AbilityRunContext => ({
+    round: ctx.scene.round,
+    rng: rngOf(ctx),
+    map: ctx.meta.map,
+    rules: ctx.meta.rules,
+});
 
-export async function runAbilityUse(ctx: BattleMutationContext, req: AbilityUseRequest, trigger: AbilityUseTrigger, deps: SummonDeps): Promise<MutationResult> {
-  const participant = findParticipant(ctx.participants, req.participantId);
+export async function runAbilityUse(
+    ctx: BattleMutationContext,
+    req: AbilityUseRequest,
+    trigger: AbilityUseTrigger,
+    deps: SummonDeps
+): Promise<MutationResult> {
+    const participant = findParticipant(ctx.participants, req.participantId);
 
-  if (!participant) throw new BattleAccessError(404, API_ERRORS.BATTLE_PARTICIPANT_NOT_IN_BATTLE);
+    if (!participant)
+        throw new BattleAccessError(
+            404,
+            API_ERRORS.BATTLE_PARTICIPANT_NOT_IN_BATTLE
+        );
 
-  if (!canActNow(ctx, participant, currentOf(ctx))) throw new BattleAccessError(403, API_ERRORS.FORBIDDEN);
+    if (!canActNow(ctx, participant, currentOf(ctx)))
+        throw new BattleAccessError(403, API_ERRORS.FORBIDDEN);
 
-  if (!isActive(participant)) throw new BattleRuleError("participant_dead", REJECT.cannotAct);
+    if (!isActive(participant))
+        throw new BattleRuleError('participant_dead', REJECT.cannotAct);
 
-  assertCanAct(ctx, participant.basicInfo.id);
+    assertCanAct(ctx, participant.basicInfo.id);
 
-  const ability = (participant.battleData.resolvedAbilities ?? []).find((a) => a.key === req.abilityKey && a.trigger.event === trigger);
+    const ability = (participant.battleData.resolvedAbilities ?? []).find(
+        (a) => a.key === req.abilityKey && a.trigger.event === trigger
+    );
 
-  if (!ability) throw new BattleRuleError("action_rejected", REJECT.noSuchAbility);
+    if (!ability)
+        throw new BattleRuleError('action_rejected', REJECT.noSuchAbility);
 
-  if (ability.limits?.lair) throw new BattleRuleError("action_rejected", REJECT.abilityIsLair);
+    if (ability.limits?.lair)
+        throw new BattleRuleError('action_rejected', REJECT.abilityIsLair);
 
-  if (ability.limits?.legendaryCost) throw new BattleRuleError("action_rejected", REJECT.abilityIsLegendary);
+    if (ability.limits?.legendaryCost)
+        throw new BattleRuleError('action_rejected', REJECT.abilityIsLegendary);
 
-  const usage = USAGE[trigger];
+    const usage = USAGE[trigger];
 
-  if (usage.used(participant)) throw new BattleRuleError(usage.error.code, usage.error.message);
+    if (usage.used(participant))
+        throw new BattleRuleError(usage.error.code, usage.error.message);
 
-  if (!poolAffordable(participant, ability)) throw new BattleRuleError("ability_limit", API_ERRORS.ABILITY_POOL_EMPTY);
+    if (!poolAffordable(participant, ability))
+        throw new BattleRuleError(
+            'ability_limit',
+            API_ERRORS.ABILITY_POOL_EMPTY
+        );
 
-  if (!withinCountLimits(participant, ability)) throw new BattleRuleError("ability_limit", REJECT.abilityLimit);
+    if (!withinCountLimits(participant, ability))
+        throw new BattleRuleError('ability_limit', REJECT.abilityLimit);
 
-  const wait = cooldownLeft(participant, ability, ctx.scene.round);
+    const wait = cooldownLeft(participant, ability, ctx.scene.round);
 
-  if (wait > 0) throw new BattleRuleError("ability_limit", REJECT.abilityCooldown, { rounds: wait });
+    if (wait > 0)
+        throw new BattleRuleError('ability_limit', REJECT.abilityCooldown, {
+            rounds: wait,
+        });
 
-  if (ability.condition && conditionRequiresStill(ability.condition) && !evaluateCondition(ability.condition, { owner: participant, event: null, participants: ctx.participants })) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_ABILITY_CONDITION_UNMET);
+    if (
+        ability.condition &&
+        conditionRequiresStill(ability.condition) &&
+        !evaluateCondition(ability.condition, {
+            owner: participant,
+            event: null,
+            participants: ctx.participants,
+        })
+    )
+        throw new BattleRuleError(
+            'action_rejected',
+            API_ERRORS.BATTLE_ABILITY_CONDITION_UNMET
+        );
 
-  const targetCell = assertAbilityAim(ability, ctx.meta.map, participant, req.targetCell, ctx.meta.rules);
+    const targetCell = assertAbilityAim(
+        ability,
+        ctx.meta.map,
+        participant,
+        req.targetCell,
+        ctx.meta.rules
+    );
 
-  const targetIds = assertAbilityTargets(ability, ctx.participants, req.targetIds, { owner: participant, onMap: abilityOnMap(ctx.meta.map, participant), map: ctx.meta.map });
+    const targetIds = assertAbilityTargets(
+        ability,
+        ctx.participants,
+        req.targetIds,
+        {
+            owner: participant,
+            onMap: abilityOnMap(ctx.meta.map, participant),
+            map: ctx.meta.map,
+        }
+    );
 
-  const id = participant.basicInfo.id;
+    const id = participant.basicInfo.id;
 
-  const order = usage.spendFirst ? updateParticipant(ctx.participants, id, spend[trigger]) : ctx.participants;
+    const order = usage.spendFirst
+        ? updateParticipant(ctx.participants, id, spend[trigger])
+        : ctx.participants;
 
-  const run = runAbilities(order, { type: trigger, actorId: id, abilityKey: ability.key, targetIds, ...(targetCell && { targetCell }) }, abilityRunContext(ctx));
+    const run = runAbilities(
+        order,
+        {
+            type: trigger,
+            actorId: id,
+            abilityKey: ability.key,
+            targetIds,
+            ...(targetCell && { targetCell }),
+        },
+        abilityRunContext(ctx)
+    );
 
-  const summoned = await applyAbilitySummons(run.summons, run.participants, { campaignId: ctx.scene.campaignId, battleId: ctx.scene.id, rng: rngOf(ctx), rules: ctx.meta.rules, deps });
+    const summoned = await applyAbilitySummons(run.summons, run.participants, {
+        campaignId: ctx.scene.campaignId,
+        battleId: ctx.scene.id,
+        rng: rngOf(ctx),
+        rules: ctx.meta.rules,
+        deps,
+    });
 
-  const participants = usage.spendFirst ? summoned.order : updateParticipant(summoned.order, id, spend[trigger]);
+    const participants = usage.spendFirst
+        ? summoned.order
+        : updateParticipant(summoned.order, id, spend[trigger]);
 
-  const text = run.fired.length ? lineText([...run.messages, ...summoned.messages], " | ") : textRef("battleLog.ability.noEffect", { name: ability.name });
+    const text = run.fired.length
+        ? lineText([...run.messages, ...summoned.messages], ' | ')
+        : textRef('battleLog.ability.noEffect', { name: ability.name });
 
-  const abilityText = logFields(text || ability.name);
+    const abilityText = logFields(text || ability.name);
 
-  return {
-    participants,
-    pending: ctx.pending,
-    events: [
-      {
-        type: "ability",
-        round: ctx.scene.round,
-        actorId: id,
-        ...abilityText,
-        details: { actorName: participant.basicInfo.name, actorSide: participant.basicInfo.side, actionDetails: { abilityKey: ability.key, skillName: ability.name }, ...(abilityText.log && { log: abilityText.log }) },
-      },
-    ],
-  };
+    return {
+        participants,
+        pending: ctx.pending,
+        events: [
+            {
+                type: 'ability',
+                round: ctx.scene.round,
+                actorId: id,
+                ...abilityText,
+                details: {
+                    actorName: participant.basicInfo.name,
+                    actorSide: participant.basicInfo.side,
+                    actionDetails: {
+                        abilityKey: ability.key,
+                        skillName: ability.name,
+                    },
+                    ...(abilityText.log && { log: abilityText.log }),
+                },
+            },
+        ],
+    };
 }

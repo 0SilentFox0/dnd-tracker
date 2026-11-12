@@ -1,56 +1,98 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
-import { moveMarks, targetMarks } from "../map-view";
+import { moveMarks, targetMarks } from '../map-view';
 
-import { AttackType, ParticipantSide } from "@/lib/constants/battle";
-import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
-import { DEFAULT_RULES } from "@/lib/utils/rules";
-import type { BattleAttack, BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
+import { AttackType, ParticipantSide } from '@/lib/constants/battle';
+import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
+import type {
+    BattleAttack,
+    BattleMapConfig,
+    BattleParticipant,
+    GridPoint,
+} from '@/types/battle';
 
-const map: BattleMapConfig = { cols: 10, rows: 5, background: null, opacity: 0.3 };
+const map: BattleMapConfig = {
+    cols: 10,
+    rows: 5,
+    background: null,
+    opacity: 0.3,
+};
 
 function at(id: string, position: GridPoint, side: string): BattleParticipant {
-  const p = createMockParticipant();
+    const p = createMockParticipant();
 
-  return { ...p, basicInfo: { ...p.basicInfo, id, side: side as BattleParticipant["basicInfo"]["side"] }, combatStats: { ...p.combatStats, speed: 10 }, battleData: { ...p.battleData, position } };
+    return {
+        ...p,
+        basicInfo: {
+            ...p.basicInfo,
+            id,
+            side: side as BattleParticipant['basicInfo']['side'],
+        },
+        combatStats: { ...p.combatStats, speed: 10 },
+        battleData: { ...p.battleData, position },
+    };
 }
 
-const sword = { id: "s", name: "Меч", type: AttackType.MELEE } as BattleAttack;
+const sword = { id: 's', name: 'Меч', type: AttackType.MELEE } as BattleAttack;
 
-describe("підсвітка карти", () => {
-  it("рух — клітинки в межах залишку руху", () => {
-    const hero = at("h", { x: 0, y: 0 }, ParticipantSide.ALLY);
+describe('підсвітка карти', () => {
+    it('рух — клітинки в межах залишку руху', () => {
+        const hero = at('h', { x: 0, y: 0 }, ParticipantSide.ALLY);
 
-    const marks = moveMarks(map, [hero], hero, { rules: DEFAULT_RULES });
+        const marks = moveMarks(map, [hero], hero, { rules: DEFAULT_RULES });
 
-    expect(marks.get("2:2")).toBe(2);
-    expect(marks.has("3:0")).toBe(false);
-  });
+        expect(marks.get('2:2')).toBe(2);
+        expect(marks.has('3:0')).toBe(false);
+    });
 
-  it("цілі — сусід доступний, далекий ворог ні, союзник не підсвічується", () => {
-    const hero = at("h", { x: 0, y: 0 }, ParticipantSide.ALLY);
+    it('цілі — сусід доступний, далекий ворог ні, союзник не підсвічується', () => {
+        const hero = at('h', { x: 0, y: 0 }, ParticipantSide.ALLY);
 
-    const near = at("e1", { x: 1, y: 0 }, ParticipantSide.ENEMY);
+        const near = at('e1', { x: 1, y: 0 }, ParticipantSide.ENEMY);
 
-    const far = at("e2", { x: 5, y: 0 }, ParticipantSide.ENEMY);
+        const far = at('e2', { x: 5, y: 0 }, ParticipantSide.ENEMY);
 
-    const ally = at("a", { x: 0, y: 1 }, ParticipantSide.ALLY);
+        const ally = at('a', { x: 0, y: 1 }, ParticipantSide.ALLY);
 
-    const marks = targetMarks(map, [hero, near, far, ally], hero, [sword], DEFAULT_RULES);
+        const marks = targetMarks(
+            map,
+            [hero, near, far, ally],
+            hero,
+            [sword],
+            DEFAULT_RULES
+        );
 
-    expect(marks.get("1:0")).toBe("target");
-    expect(marks.get("5:0")).toBe("invalid-target");
-    expect(marks.has("0:1")).toBe(false);
-  });
+        expect(marks.get('1:0')).toBe('target');
+        expect(marks.get('5:0')).toBe('invalid-target');
+        expect(marks.has('0:1')).toBe(false);
+    });
 
-  it("ціль досяжна, якщо дістає будь-яка атака", () => {
-    const bow = { id: "b", name: "Лук", type: AttackType.RANGED, range: "60 ft" } as BattleAttack;
+    it('ціль досяжна, якщо дістає будь-яка атака', () => {
+        const bow = {
+            id: 'b',
+            name: 'Лук',
+            type: AttackType.RANGED,
+            range: '60 ft',
+        } as BattleAttack;
 
-    const hero = at("h", { x: 0, y: 0 }, ParticipantSide.ALLY);
+        const hero = at('h', { x: 0, y: 0 }, ParticipantSide.ALLY);
 
-    const far = at("e2", { x: 5, y: 0 }, ParticipantSide.ENEMY);
+        const far = at('e2', { x: 5, y: 0 }, ParticipantSide.ENEMY);
 
-    expect(targetMarks(map, [hero, far], hero, [sword], DEFAULT_RULES).get("5:0")).toBe("invalid-target");
-    expect(targetMarks(map, [hero, far], hero, [sword, bow], DEFAULT_RULES).get("5:0")).toBe("target");
-  });
+        expect(
+            targetMarks(map, [hero, far], hero, [sword], DEFAULT_RULES).get(
+                '5:0'
+            )
+        ).toBe('invalid-target');
+        expect(
+            targetMarks(
+                map,
+                [hero, far],
+                hero,
+                [sword, bow],
+                DEFAULT_RULES
+            ).get('5:0')
+        ).toBe('target');
+    });
 });

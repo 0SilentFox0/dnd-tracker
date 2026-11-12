@@ -1,201 +1,383 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
-import { alert, featsById, refs, rogue, sorcerer } from "./fixtures";
+import { alert, featsById, refs, rogue, sorcerer } from './fixtures';
 
-import type { ChoiceRefs } from "@/lib/utils/characters/choices/walk";
-import { backgroundConflict, picksAtStep, withStepBackground, withStepPicks, withStepSubclass, type WizardStep, wizardSteps } from "@/lib/utils/characters/choices/wizard";
-import type { BackgroundData } from "@/types/backgrounds";
-import type { ChoicesState } from "@/types/choices";
+import type { ChoiceRefs } from '@/lib/utils/characters/choices/walk';
+import {
+    backgroundConflict,
+    picksAtStep,
+    withStepBackground,
+    withStepPicks,
+    withStepSubclass,
+    type WizardStep,
+    wizardSteps,
+} from '@/lib/utils/characters/choices/wizard';
+import type { BackgroundData } from '@/types/backgrounds';
+import type { ChoicesState } from '@/types/choices';
 
-const draconic = { id: "sub-dr", name: "Draconic", features: [{ level: 3, abilities: [], choices: [{ id: "ancestry", label: "Ancestry", level: 3, count: 1, kind: "option" as const, options: [{ id: "red", name: "Red", abilities: [] }] }] }] };
+const draconic = {
+    id: 'sub-dr',
+    name: 'Draconic',
+    features: [
+        {
+            level: 3,
+            abilities: [],
+            choices: [
+                {
+                    id: 'ancestry',
+                    label: 'Ancestry',
+                    level: 3,
+                    count: 1,
+                    kind: 'option' as const,
+                    options: [{ id: 'red', name: 'Red', abilities: [] }],
+                },
+            ],
+        },
+    ],
+};
 
 const sorcWithSub = { ...sorcerer, subclasses: [draconic] };
 
-const background: BackgroundData = { id: "bg", name: "Sage", icon: null, description: null, choices: [{ id: "bg-skill", label: "Skill", level: 1, count: 1, kind: "skill" }], skillProficiencies: [], toolProficiencies: [], originFeatId: "f-mi", equipmentText: null };
+const background: BackgroundData = {
+    id: 'bg',
+    name: 'Sage',
+    icon: null,
+    description: null,
+    choices: [
+        { id: 'bg-skill', label: 'Skill', level: 1, count: 1, kind: 'skill' },
+    ],
+    skillProficiencies: [],
+    toolProficiencies: [],
+    originFeatId: 'f-mi',
+    equipmentText: null,
+};
 
-const wrefs: ChoiceRefs = { ...refs, classesById: { ...refs.classesById, [sorcerer.id]: sorcWithSub }, backgroundsById: { bg: background }, featsById: { ...featsById, "f-alert": alert } };
+const wrefs: ChoiceRefs = {
+    ...refs,
+    classesById: { ...refs.classesById, [sorcerer.id]: sorcWithSub },
+    backgroundsById: { bg: background },
+    featsById: { ...featsById, 'f-alert': alert },
+};
 
 const hero = { level: 1, classMode: true };
 
-const state = (over: Partial<ChoicesState> = {}): ChoicesState => ({ raceChoices: {}, feats: [], classes: [{ classId: sorcerer.id, level: 1 }], ...over });
-
-const keys = (s: ChoicesState, h = hero, keep?: Set<string>, r = wrefs) => wizardSteps(s, r, h, keep).map((x) => x.key);
-
-describe("wizardSteps", () => {
-  it("orders race, background, origin feat, classes, feats", () => {
-    const s = state({ backgroundId: "bg", feats: [{ id: "f-mi", source: "dm" }], classes: [{ classId: sorcerer.id, level: 1 }, { classId: rogue.id, level: 1 }] });
-
-    expect(keys(s)).toEqual([
-      "raceChoices.elven-lineage",
-      "raceChoices.keen-senses",
-      "backgroundChoices.bg-skill",
-      "backgroundFeatPicks.cantrips",
-      `classes.${sorcerer.id}.cantrips`,
-      `classes.${sorcerer.id}.prepared-spells`,
-      `classes.${rogue.id}.expertise-1`,
-      "feats.0.cantrips",
-    ]);
-  });
-
-  it("includes only choices that are not fully picked, unless kept", () => {
-    const s = state({ raceChoices: { "elven-lineage": [{ id: "drow" }] } });
-
-    expect(keys(s)).not.toContain("raceChoices.elven-lineage");
-    expect(keys(s, hero, new Set(["raceChoices.elven-lineage"]))).toContain("raceChoices.elven-lineage");
-  });
-
-  it("skips choices above the owner level", () => {
-    expect(keys(state())).not.toContain(`classes.${sorcerer.id}.metamagic`);
-    expect(keys(state({ classes: [{ classId: sorcerer.id, level: 2 }] }), { level: 2, classMode: true })).toContain(`classes.${sorcerer.id}.metamagic`);
-  });
-
-  it("offers the subclass first in its class only from subclassLevel and while unset", () => {
-    const at3 = state({ classes: [{ classId: sorcerer.id, level: 3 }] });
-
-    const list = keys(at3, { level: 3, classMode: true });
-
-    expect(list.indexOf(`subclass:${sorcerer.id}`)).toBeLessThan(list.indexOf(`classes.${sorcerer.id}.cantrips`));
-    expect(keys(state())).not.toContain(`subclass:${sorcerer.id}`);
-    expect(keys(state({ classes: [{ classId: sorcerer.id, level: 3, subclassId: draconic.id }] }), { level: 3, classMode: true })).not.toContain(`subclass:${sorcerer.id}`);
-    expect(keys(state({ classes: [{ classId: sorcerer.id, level: 3, subclassId: draconic.id }] }), { level: 3, classMode: true }, new Set([`subclass:${sorcerer.id}`]))).toContain(`subclass:${sorcerer.id}`);
-  });
-
-  it("a class without subclasses gets no subclass step", () => {
-    expect(keys(state({ classes: [{ classId: sorcerer.id, level: 3 }] }), { level: 3, classMode: true }, undefined, refs)).not.toContain(`subclass:${sorcerer.id}`);
-  });
-
-  it("subclass choices appear after the subclass is picked", () => {
-    const s = state({ classes: [{ classId: sorcerer.id, level: 3 }] });
-
-    const step = wizardSteps(s, wrefs, { level: 3, classMode: true }).find((x) => x.kind === "subclass");
-
-    if (!step) throw new Error("no subclass step");
-
-    expect(keys(withStepSubclass(s, step, draconic.id), { level: 3, classMode: true })).toContain(`classes.${sorcerer.id}.ancestry`);
-  });
-
-  it("an empty hero has no steps", () => {
-    expect(wizardSteps({ raceChoices: {}, feats: [], classes: [] }, { race: null, classesById: {}, featsById: {} }, { level: 1, classMode: false })).toEqual([]);
-  });
-
-  it("describes the source of a step", () => {
-    const [first] = wizardSteps(state(), wrefs, hero);
-
-    expect(first.source).toEqual({ owner: "race", name: "Elf" });
-    expect(wizardSteps(state(), wrefs, hero).find((x) => x.key === `classes.${sorcerer.id}.cantrips`)?.source).toEqual({ owner: "class", name: "Sorcerer", level: 1 });
-  });
+const state = (over: Partial<ChoicesState> = {}): ChoicesState => ({
+    raceChoices: {},
+    feats: [],
+    classes: [{ classId: sorcerer.id, level: 1 }],
+    ...over,
 });
 
-describe("withStepPicks", () => {
-  const stepOf = (s: ChoicesState, key: string, h = hero): WizardStep => {
-    const step = wizardSteps(s, wrefs, h, new Set([key])).find((x) => x.key === key);
+const keys = (s: ChoicesState, h = hero, keep?: Set<string>, r = wrefs) =>
+    wizardSteps(s, r, h, keep).map((x) => x.key);
 
-    if (!step) throw new Error(key);
+describe('wizardSteps', () => {
+    it('orders race, background, origin feat, classes, feats', () => {
+        const s = state({
+            backgroundId: 'bg',
+            feats: [{ id: 'f-mi', source: 'dm' }],
+            classes: [
+                { classId: sorcerer.id, level: 1 },
+                { classId: rogue.id, level: 1 },
+            ],
+        });
 
-    return step;
-  };
+        expect(keys(s)).toEqual([
+            'raceChoices.elven-lineage',
+            'raceChoices.keen-senses',
+            'backgroundChoices.bg-skill',
+            'backgroundFeatPicks.cantrips',
+            `classes.${sorcerer.id}.cantrips`,
+            `classes.${sorcerer.id}.prepared-spells`,
+            `classes.${rogue.id}.expertise-1`,
+            'feats.0.cantrips',
+        ]);
+    });
 
-  const list = [{ id: "x" }];
+    it('includes only choices that are not fully picked, unless kept', () => {
+        const s = state({ raceChoices: { 'elven-lineage': [{ id: 'drow' }] } });
 
-  it("writes race picks", () => {
-    const s = state();
+        expect(keys(s)).not.toContain('raceChoices.elven-lineage');
+        expect(keys(s, hero, new Set(['raceChoices.elven-lineage']))).toContain(
+            'raceChoices.elven-lineage'
+        );
+    });
 
-    expect(withStepPicks(s, stepOf(s, "raceChoices.keen-senses"), list).raceChoices["keen-senses"]).toEqual(list);
-  });
+    it('skips choices above the owner level', () => {
+        expect(keys(state())).not.toContain(`classes.${sorcerer.id}.metamagic`);
+        expect(
+            keys(state({ classes: [{ classId: sorcerer.id, level: 2 }] }), {
+                level: 2,
+                classMode: true,
+            })
+        ).toContain(`classes.${sorcerer.id}.metamagic`);
+    });
 
-  it("writes background and origin feat picks", () => {
-    const s = state({ backgroundId: "bg" });
+    it('offers the subclass first in its class only from subclassLevel and while unset', () => {
+        const at3 = state({ classes: [{ classId: sorcerer.id, level: 3 }] });
 
-    expect(withStepPicks(s, stepOf(s, "backgroundChoices.bg-skill"), list).backgroundChoices).toEqual({ "bg-skill": list });
-    expect(withStepPicks(s, stepOf(s, "backgroundFeatPicks.cantrips"), list).backgroundFeatPicks).toEqual({ cantrips: list });
-  });
+        const list = keys(at3, { level: 3, classMode: true });
 
-  it("writes class picks and standalone feat picks", () => {
-    const s = state({ feats: [{ id: "f-mi", source: "dm" }] });
+        expect(list.indexOf(`subclass:${sorcerer.id}`)).toBeLessThan(
+            list.indexOf(`classes.${sorcerer.id}.cantrips`)
+        );
+        expect(keys(state())).not.toContain(`subclass:${sorcerer.id}`);
+        expect(
+            keys(
+                state({
+                    classes: [
+                        {
+                            classId: sorcerer.id,
+                            level: 3,
+                            subclassId: draconic.id,
+                        },
+                    ],
+                }),
+                { level: 3, classMode: true }
+            )
+        ).not.toContain(`subclass:${sorcerer.id}`);
+        expect(
+            keys(
+                state({
+                    classes: [
+                        {
+                            classId: sorcerer.id,
+                            level: 3,
+                            subclassId: draconic.id,
+                        },
+                    ],
+                }),
+                { level: 3, classMode: true },
+                new Set([`subclass:${sorcerer.id}`])
+            )
+        ).toContain(`subclass:${sorcerer.id}`);
+    });
 
-    const next = withStepPicks(withStepPicks(s, stepOf(s, `classes.${sorcerer.id}.cantrips`), list), stepOf(s, "feats.0.cantrips"), list);
+    it('a class without subclasses gets no subclass step', () => {
+        expect(
+            keys(
+                state({ classes: [{ classId: sorcerer.id, level: 3 }] }),
+                { level: 3, classMode: true },
+                undefined,
+                refs
+            )
+        ).not.toContain(`subclass:${sorcerer.id}`);
+    });
 
-    expect(next.classes[0].choices).toEqual({ cantrips: list });
-    expect(next.feats[0].picks).toEqual({ cantrips: list });
-    expect(picksAtStep(next, stepOf(next, "feats.0.cantrips"))).toEqual(list);
-  });
+    it('subclass choices appear after the subclass is picked', () => {
+        const s = state({ classes: [{ classId: sorcerer.id, level: 3 }] });
 
-  it("does not mutate the input", () => {
-    const s = state();
+        const step = wizardSteps(s, wrefs, { level: 3, classMode: true }).find(
+            (x) => x.kind === 'subclass'
+        );
 
-    withStepPicks(s, stepOf(s, "raceChoices.keen-senses"), list);
+        if (!step) throw new Error('no subclass step');
 
-    expect(s.raceChoices).toEqual({});
-  });
+        expect(
+            keys(withStepSubclass(s, step, draconic.id), {
+                level: 3,
+                classMode: true,
+            })
+        ).toContain(`classes.${sorcerer.id}.ancestry`);
+    });
+
+    it('an empty hero has no steps', () => {
+        expect(
+            wizardSteps(
+                { raceChoices: {}, feats: [], classes: [] },
+                { race: null, classesById: {}, featsById: {} },
+                { level: 1, classMode: false }
+            )
+        ).toEqual([]);
+    });
+
+    it('describes the source of a step', () => {
+        const [first] = wizardSteps(state(), wrefs, hero);
+
+        expect(first.source).toEqual({ owner: 'race', name: 'Elf' });
+        expect(
+            wizardSteps(state(), wrefs, hero).find(
+                (x) => x.key === `classes.${sorcerer.id}.cantrips`
+            )?.source
+        ).toEqual({ owner: 'class', name: 'Sorcerer', level: 1 });
+    });
 });
 
-describe("background step", () => {
-  const bg2: BackgroundData = { ...background, id: "bg2", name: "Soldier", choices: [] };
+describe('withStepPicks', () => {
+    const stepOf = (s: ChoicesState, key: string, h = hero): WizardStep => {
+        const step = wizardSteps(s, wrefs, h, new Set([key])).find(
+            (x) => x.key === key
+        );
 
-  const r2: ChoiceRefs = { ...wrefs, backgroundsById: { bg: background, bg2 } };
+        if (!step) throw new Error(key);
 
-  const keep = new Set(["background"]);
+        return step;
+    };
 
-  it("appears first, only with keep", () => {
-    expect(keys(state(), hero, keep, r2)[0]).toBe("background");
-    expect(keys(state(), hero, undefined, r2)).not.toContain("background");
-  });
+    const list = [{ id: 'x' }];
 
-  it("needs classMode and backgrounds", () => {
-    expect(keys(state(), { level: 1, classMode: false }, keep, r2)).not.toContain("background");
-    expect(keys(state(), hero, keep, refs)).not.toContain("background");
-  });
+    it('writes race picks', () => {
+        const s = state();
 
-  it("uses the current background name", () => {
-    expect(wizardSteps(state({ backgroundId: "bg" }), r2, hero, keep)[0]?.source.name).toBe("Sage");
-  });
+        expect(
+            withStepPicks(s, stepOf(s, 'raceChoices.keen-senses'), list)
+                .raceChoices['keen-senses']
+        ).toEqual(list);
+    });
 
-  it("withStepBackground resets picks on change, keeps on same id, null clears", () => {
-    const s = state({ backgroundId: "bg", backgroundChoices: { "bg-skill": [{ id: "x" }] }, backgroundFeatPicks: { a: [{ id: "y" }] } });
+    it('writes background and origin feat picks', () => {
+        const s = state({ backgroundId: 'bg' });
 
-    const changed = withStepBackground(s, s, "bg2");
+        expect(
+            withStepPicks(s, stepOf(s, 'backgroundChoices.bg-skill'), list)
+                .backgroundChoices
+        ).toEqual({ 'bg-skill': list });
+        expect(
+            withStepPicks(s, stepOf(s, 'backgroundFeatPicks.cantrips'), list)
+                .backgroundFeatPicks
+        ).toEqual({ cantrips: list });
+    });
 
-    expect(changed.backgroundId).toBe("bg2");
-    expect(changed.backgroundChoices).toEqual({});
-    expect(changed.backgroundFeatPicks).toEqual({});
-    expect(withStepBackground(s, s, "bg").backgroundChoices).toEqual(s.backgroundChoices);
-    expect(withStepBackground(s, s, null).backgroundId).toBeNull();
-    expect(withStepBackground(s, s, null).backgroundChoices).toEqual({});
-  });
+    it('writes class picks and standalone feat picks', () => {
+        const s = state({ feats: [{ id: 'f-mi', source: 'dm' }] });
 
-  it("switching away and back to the saved background restores its picks", () => {
-    const saved = state({ backgroundId: "bg", backgroundChoices: { "bg-skill": [{ id: "x" }] }, backgroundFeatPicks: { a: [{ id: "y" }] } });
+        const next = withStepPicks(
+            withStepPicks(
+                s,
+                stepOf(s, `classes.${sorcerer.id}.cantrips`),
+                list
+            ),
+            stepOf(s, 'feats.0.cantrips'),
+            list
+        );
 
-    const away = withStepBackground(saved, saved, "bg2");
+        expect(next.classes[0].choices).toEqual({ cantrips: list });
+        expect(next.feats[0].picks).toEqual({ cantrips: list });
+        expect(picksAtStep(next, stepOf(next, 'feats.0.cantrips'))).toEqual(
+            list
+        );
+    });
 
-    const back = withStepBackground(saved, away, "bg");
+    it('does not mutate the input', () => {
+        const s = state();
 
-    expect(back.backgroundId).toBe("bg");
-    expect(back.backgroundChoices).toEqual(saved.backgroundChoices);
-    expect(back.backgroundFeatPicks).toEqual(saved.backgroundFeatPicks);
-  });
+        withStepPicks(s, stepOf(s, 'raceChoices.keen-senses'), list);
 
-  it("new background choices appear after replacement", () => {
-    const s = (() => { const cur = state({ backgroundId: "bg2" });
-
- return withStepBackground(cur, cur, "bg"); })();
-
-    expect(keys(s, hero, keep, r2)).toContain("backgroundChoices.bg-skill");
-  });
+        expect(s.raceChoices).toEqual({});
+    });
 });
 
-describe("backgroundConflict", () => {
-  const withFeat = { ...background, originFeatId: "f-alert" };
+describe('background step', () => {
+    const bg2: BackgroundData = {
+        ...background,
+        id: 'bg2',
+        name: 'Soldier',
+        choices: [],
+    };
 
-  const r = { backgroundsById: { bg: withFeat }, featsById: { "f-alert": { ...alert, repeatable: false } } };
+    const r2: ChoiceRefs = {
+        ...wrefs,
+        backgroundsById: { bg: background, bg2 },
+    };
 
-  it("none without a background or clashing feats", () => {
-    expect(backgroundConflict(state(), r)).toBeNull();
-    expect(backgroundConflict(state({ backgroundId: "bg" }), r)).toBeNull();
-  });
+    const keep = new Set(['background']);
 
-  it("free origin feat and a duplicate of the background feat", () => {
-    expect(backgroundConflict(state({ backgroundId: "bg", feats: [{ id: "x", source: "origin" }] }), r)).toEqual({ kind: "freeOrigin" });
-    expect(backgroundConflict(state({ backgroundId: "bg", feats: [{ id: "f-alert", source: "dm" }] }), r)).toEqual({ kind: "duplicate", name: alert.name });
-  });
+    it('appears first, only with keep', () => {
+        expect(keys(state(), hero, keep, r2)[0]).toBe('background');
+        expect(keys(state(), hero, undefined, r2)).not.toContain('background');
+    });
+
+    it('needs classMode and backgrounds', () => {
+        expect(
+            keys(state(), { level: 1, classMode: false }, keep, r2)
+        ).not.toContain('background');
+        expect(keys(state(), hero, keep, refs)).not.toContain('background');
+    });
+
+    it('uses the current background name', () => {
+        expect(
+            wizardSteps(state({ backgroundId: 'bg' }), r2, hero, keep)[0]
+                ?.source.name
+        ).toBe('Sage');
+    });
+
+    it('withStepBackground resets picks on change, keeps on same id, null clears', () => {
+        const s = state({
+            backgroundId: 'bg',
+            backgroundChoices: { 'bg-skill': [{ id: 'x' }] },
+            backgroundFeatPicks: { a: [{ id: 'y' }] },
+        });
+
+        const changed = withStepBackground(s, s, 'bg2');
+
+        expect(changed.backgroundId).toBe('bg2');
+        expect(changed.backgroundChoices).toEqual({});
+        expect(changed.backgroundFeatPicks).toEqual({});
+        expect(withStepBackground(s, s, 'bg').backgroundChoices).toEqual(
+            s.backgroundChoices
+        );
+        expect(withStepBackground(s, s, null).backgroundId).toBeNull();
+        expect(withStepBackground(s, s, null).backgroundChoices).toEqual({});
+    });
+
+    it('switching away and back to the saved background restores its picks', () => {
+        const saved = state({
+            backgroundId: 'bg',
+            backgroundChoices: { 'bg-skill': [{ id: 'x' }] },
+            backgroundFeatPicks: { a: [{ id: 'y' }] },
+        });
+
+        const away = withStepBackground(saved, saved, 'bg2');
+
+        const back = withStepBackground(saved, away, 'bg');
+
+        expect(back.backgroundId).toBe('bg');
+        expect(back.backgroundChoices).toEqual(saved.backgroundChoices);
+        expect(back.backgroundFeatPicks).toEqual(saved.backgroundFeatPicks);
+    });
+
+    it('new background choices appear after replacement', () => {
+        const s = (() => {
+            const cur = state({ backgroundId: 'bg2' });
+
+            return withStepBackground(cur, cur, 'bg');
+        })();
+
+        expect(keys(s, hero, keep, r2)).toContain('backgroundChoices.bg-skill');
+    });
+});
+
+describe('backgroundConflict', () => {
+    const withFeat = { ...background, originFeatId: 'f-alert' };
+
+    const r = {
+        backgroundsById: { bg: withFeat },
+        featsById: { 'f-alert': { ...alert, repeatable: false } },
+    };
+
+    it('none without a background or clashing feats', () => {
+        expect(backgroundConflict(state(), r)).toBeNull();
+        expect(backgroundConflict(state({ backgroundId: 'bg' }), r)).toBeNull();
+    });
+
+    it('free origin feat and a duplicate of the background feat', () => {
+        expect(
+            backgroundConflict(
+                state({
+                    backgroundId: 'bg',
+                    feats: [{ id: 'x', source: 'origin' }],
+                }),
+                r
+            )
+        ).toEqual({ kind: 'freeOrigin' });
+        expect(
+            backgroundConflict(
+                state({
+                    backgroundId: 'bg',
+                    feats: [{ id: 'f-alert', source: 'dm' }],
+                }),
+                r
+            )
+        ).toEqual({ kind: 'duplicate', name: alert.name });
+    });
 });

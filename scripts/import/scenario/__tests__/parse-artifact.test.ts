@@ -1,10 +1,10 @@
 // @vitest-environment happy-dom
-import { getSchema } from "@tiptap/core";
-import { describe, expect, it } from "vitest";
+import { getSchema } from '@tiptap/core';
+import { describe, expect, it } from 'vitest';
 
-import { buildExtensions } from "@/components/scenario/editor/extensions";
-import { scenarioContentSchema } from "@/lib/schemas/scenario";
-import { parseArtifactHtml } from "@/scripts/import/scenario/parse-artifact";
+import { buildExtensions } from '@/components/scenario/editor/extensions';
+import { scenarioContentSchema } from '@/lib/schemas/scenario';
+import { parseArtifactHtml } from '@/scripts/import/scenario/parse-artifact';
 
 const scene = `<!DOCTYPE html><html><body>
 <header class="title"><h1>Монастир Світла</h1><p>Сцена перша</p>
@@ -36,91 +36,153 @@ const edge = `<html><body><header class="title"><h1>Крайні випадки<
 </div><aside class="notes"><p class="secret"><span class="g"></span> жетон <span class="r"></span></p></aside></div>
 </section></main></body></html>`;
 
-const types = (nodes: { type: string }[] | undefined) => (nodes ?? []).map((n) => n.type);
+const types = (nodes: { type: string }[] | undefined) =>
+    (nodes ?? []).map((n) => n.type);
 
-describe("parseArtifactHtml", () => {
-  it("сцена: заголовок, легенда, розділи й рядки з колонками", () => {
-    const { title, subtitle, content } = parseArtifactHtml(scene, "scene");
+describe('parseArtifactHtml', () => {
+    it('сцена: заголовок, легенда, розділи й рядки з колонками', () => {
+        const { title, subtitle, content } = parseArtifactHtml(scene, 'scene');
 
-    expect(title).toBe("Монастир Світла");
-    expect(subtitle).toBe("Сцена перша");
-    expect(content.legend).toEqual([
-      { kind: "read", label: "Читати вголос і події" },
-      { kind: "shadow", label: "Тіньова лінія Аграїла" },
-    ]);
-    expect(content.sections).toHaveLength(1);
-    expect(content.sections[0].title).toBe("1.0 Собор Ельрата");
-    expect(content.sections[0].rows).toHaveLength(2);
+        expect(title).toBe('Монастир Світла');
+        expect(subtitle).toBe('Сцена перша');
+        expect(content.legend).toEqual([
+            { kind: 'read', label: 'Читати вголос і події' },
+            { kind: 'shadow', label: 'Тіньова лінія Аграїла' },
+        ]);
+        expect(content.sections).toHaveLength(1);
+        expect(content.sections[0].title).toBe('1.0 Собор Ельрата');
+        expect(content.sections[0].rows).toHaveLength(2);
 
-    const story = content.sections[0].rows[0].story.content;
+        const story = content.sections[0].rows[0].story.content;
 
-    expect(types(story)).toEqual(["callout", "readAloud", "say", "heading", "callout"]);
-    expect(story[0].attrs).toEqual({ kind: "shadow", tag: "Тіньова лінія: пролог" });
-    expect(types(story[4].content)).toEqual(["bulletList"]);
+        expect(types(story)).toEqual([
+            'callout',
+            'readAloud',
+            'say',
+            'heading',
+            'callout',
+        ]);
+        expect(story[0].attrs).toEqual({
+            kind: 'shadow',
+            tag: 'Тіньова лінія: пролог',
+        });
+        expect(types(story[4].content)).toEqual(['bulletList']);
 
-    const li = story[4].content?.[0].content?.[0].content?.[0].content ?? [];
+        const li =
+            story[4].content?.[0].content?.[0].content?.[0].content ?? [];
 
-    expect(li[0]).toEqual({ type: "token", attrs: { color: "green" } });
-    expect(li.find((n) => n.text === "одразу")?.marks).toEqual([{ type: "bold" }]);
+        expect(li[0]).toEqual({ type: 'token', attrs: { color: 'green' } });
+        expect(li.find((n) => n.text === 'одразу')?.marks).toEqual([
+            { type: 'bold' },
+        ]);
 
-    const notes = content.sections[0].rows[0].notes.content;
+        const notes = content.sections[0].rows[0].notes.content;
 
-    expect(notes[0].content?.[0].marks).toEqual(expect.arrayContaining([{ type: "secret" }, { type: "bold" }]));
-    expect(notes[0].content?.[1].marks).toEqual([{ type: "secret" }]);
-    expect(types(notes)).toEqual(["paragraph", "table"]);
-    expect(content.sections[0].rows[1].notes.content).toEqual([]);
-  });
+        expect(notes[0].content?.[0].marks).toEqual(
+            expect.arrayContaining([{ type: 'secret' }, { type: 'bold' }])
+        );
+        expect(notes[0].content?.[1].marks).toEqual([{ type: 'secret' }]);
+        expect(types(notes)).toEqual(['paragraph', 'table']);
+        expect(content.sections[0].rows[1].notes.content).toEqual([]);
+    });
 
-  it("герой: розділ = глава з одним рядком, маркери key/goal/secretbox, цитата як репліка", () => {
-    const { title, subtitle, content } = parseArtifactHtml(hero, "hero");
+    it('герой: розділ = глава з одним рядком, маркери key/goal/secretbox, цитата як репліка', () => {
+        const { title, subtitle, content } = parseArtifactHtml(hero, 'hero');
 
-    expect(title).toBe("Лорд Годрик");
-    expect(subtitle).toBe("Паладин.");
-    expect(content.sections.map((s) => s.title)).toEqual(["Історія", "На що звертати увагу", "Люди"]);
-    expect(content.sections.every((s) => s.rows.length === 1 && s.reveal?.mode === "manual" && !s.revealedAt)).toBe(true);
-    expect(types(content.sections[0].rows[0].story.content)).toEqual(["say", "paragraph"]);
+        expect(title).toBe('Лорд Годрик');
+        expect(subtitle).toBe('Паладин.');
+        expect(content.sections.map((s) => s.title)).toEqual([
+            'Історія',
+            'На що звертати увагу',
+            'Люди',
+        ]);
+        expect(
+            content.sections.every(
+                (s) =>
+                    s.rows.length === 1 &&
+                    s.reveal?.mode === 'manual' &&
+                    !s.revealedAt
+            )
+        ).toBe(true);
+        expect(types(content.sections[0].rows[0].story.content)).toEqual([
+            'say',
+            'paragraph',
+        ]);
 
-    const callouts = content.sections[1].rows[0].story.content;
+        const callouts = content.sections[1].rows[0].story.content;
 
-    expect(callouts.map((c) => c.attrs)).toEqual([
-      { kind: "hero", tag: "Обов'язок" },
-      { kind: "goal", tag: "Ціль" },
-      { kind: "confide", tag: "Тавро" },
-    ]);
-    expect(types(content.sections[2].rows[0].story.content)).toEqual(["table", "bulletList"]);
-  });
+        expect(callouts.map((c) => c.attrs)).toEqual([
+            { kind: 'hero', tag: "Обов'язок" },
+            { kind: 'goal', tag: 'Ціль' },
+            { kind: 'confide', tag: 'Тавро' },
+        ]);
+        expect(types(content.sections[2].rows[0].story.content)).toEqual([
+            'table',
+            'bulletList',
+        ]);
+    });
 
-  it("результат проходить схему", () => {
-    expect(scenarioContentSchema.safeParse(parseArtifactHtml(scene, "scene").content).success).toBe(true);
-    expect(scenarioContentSchema.safeParse(parseArtifactHtml(hero, "hero").content).success).toBe(true);
-  });
+    it('результат проходить схему', () => {
+        expect(
+            scenarioContentSchema.safeParse(
+                parseArtifactHtml(scene, 'scene').content
+            ).success
+        ).toBe(true);
+        expect(
+            scenarioContentSchema.safeParse(
+                parseArtifactHtml(hero, 'hero').content
+            ).success
+        ).toBe(true);
+    });
 
-  it("жетон усередині .secret лишається секретним", () => {
-    const notes = parseArtifactHtml(edge, "scene").content.sections[0].rows[0].notes.content;
+    it('жетон усередині .secret лишається секретним', () => {
+        const notes = parseArtifactHtml(edge, 'scene').content.sections[0]
+            .rows[0].notes.content;
 
-    const tokens = (notes[0].content ?? []).filter((n) => n.type === "token");
+        const tokens = (notes[0].content ?? []).filter(
+            (n) => n.type === 'token'
+        );
 
-    expect(tokens).toHaveLength(2);
-    expect(tokens.every((t) => t.marks?.some((m) => m.type === "secret"))).toBe(true);
-  });
+        expect(tokens).toHaveLength(2);
+        expect(
+            tokens.every((t) => t.marks?.some((m) => m.type === 'secret'))
+        ).toBe(true);
+    });
 
-  it("порожній div.read не дає порожнього readAloud", () => {
-    const story = parseArtifactHtml(edge, "scene").content.sections[0].rows[0].story.content;
+    it('порожній div.read не дає порожнього readAloud', () => {
+        const story = parseArtifactHtml(edge, 'scene').content.sections[0]
+            .rows[0].story.content;
 
-    expect(story[1]).toEqual({ type: "readAloud", content: [{ type: "paragraph", content: [{ type: "text", text: "Без абзаців" }] }] });
-  });
+        expect(story[1]).toEqual({
+            type: 'readAloud',
+            content: [
+                {
+                    type: 'paragraph',
+                    content: [{ type: 'text', text: 'Без абзаців' }],
+                },
+            ],
+        });
+    });
 
-  it("усі story/notes документи валідні для схеми ProseMirror редактора", () => {
-    const schema = getSchema(buildExtensions(async () => []));
+    it('усі story/notes документи валідні для схеми ProseMirror редактора', () => {
+        const schema = getSchema(buildExtensions(async () => []));
 
-    for (const [html, kind] of [[scene, "scene"], [hero, "hero"], [edge, "scene"]] as const) {
-      for (const section of parseArtifactHtml(html, kind).content.sections) {
-        for (const row of section.rows) {
-          for (const doc of [row.story, row.notes]) {
-            if (doc.content.length) expect(() => schema.nodeFromJSON(doc).check()).not.toThrow();
-          }
+        for (const [html, kind] of [
+            [scene, 'scene'],
+            [hero, 'hero'],
+            [edge, 'scene'],
+        ] as const) {
+            for (const section of parseArtifactHtml(html, kind).content
+                .sections) {
+                for (const row of section.rows) {
+                    for (const doc of [row.story, row.notes]) {
+                        if (doc.content.length)
+                            expect(() =>
+                                schema.nodeFromJSON(doc).check()
+                            ).not.toThrow();
+                    }
+                }
+            }
         }
-      }
-    }
-  });
+    });
 });

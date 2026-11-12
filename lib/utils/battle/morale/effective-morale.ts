@@ -1,28 +1,42 @@
-import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
-import { withSelf } from "@/lib/utils/abilities/engine/core/participants";
-import { combineMorale, moraleCapOf, ownTimedMoraleFlat } from "@/lib/utils/abilities/engine/effects/morale";
-import type { BattleParticipant } from "@/types/battle";
+import { findFlags } from '@/lib/utils/abilities/engine/core/collect-modifiers';
+import { withSelf } from '@/lib/utils/abilities/engine/core/participants';
+import {
+    combineMorale,
+    moraleCapOf,
+    ownTimedMoraleFlat,
+} from '@/lib/utils/abilities/engine/effects/morale';
+import type { BattleParticipant } from '@/types/battle';
 
 /** Лідерські бонуси до шансу додаткового ходу (прапорець moraleChance), %. */
-export function moraleChanceBonus(p: BattleParticipant, participants: BattleParticipant[]): number {
-  return findFlags(withSelf(participants, p), p.basicInfo.id, "moraleChance").reduce((sum, f) => sum + f.percent, 0);
+export function moraleChanceBonus(
+    p: BattleParticipant,
+    participants: BattleParticipant[]
+): number {
+    return findFlags(
+        withSelf(participants, p),
+        p.basicInfo.id,
+        'moraleChance'
+    ).reduce((sum, f) => sum + f.percent, 0);
 }
 
-export function effectiveMorale(p: BattleParticipant, participants: BattleParticipant[]): { value: number; ignored: boolean } {
-  const all = withSelf(participants, p);
+export function effectiveMorale(
+    p: BattleParticipant,
+    participants: BattleParticipant[]
+): { value: number; ignored: boolean } {
+    const all = withSelf(participants, p);
 
-  const id = p.basicInfo.id;
+    const id = p.basicInfo.id;
 
-  const mins = findFlags(all, id, "minMorale").map((f) => f.value);
+    const mins = findFlags(all, id, 'minMorale').map((f) => f.value);
 
-  return combineMorale(
-    p.combatStats.morale,
-    ownTimedMoraleFlat(p, all),
-    {
-      ignored: findFlags(all, id, "ignoreMorale").length > 0,
-      noNegative: findFlags(all, id, "noNegativeMorale").length > 0,
-      min: mins.length ? Math.max(...mins) : undefined,
-    },
-    moraleCapOf(p),
-  );
+    return combineMorale(
+        p.combatStats.morale,
+        ownTimedMoraleFlat(p, all),
+        {
+            ignored: findFlags(all, id, 'ignoreMorale').length > 0,
+            noNegative: findFlags(all, id, 'noNegativeMorale').length > 0,
+            min: mins.length ? Math.max(...mins) : undefined,
+        },
+        moraleCapOf(p)
+    );
 }

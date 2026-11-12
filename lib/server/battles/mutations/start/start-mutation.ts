@@ -1,37 +1,62 @@
-import { buildStartOrder } from "./start-battle-handler";
+import { buildStartOrder } from './start-battle-handler';
 
-import { API_ERRORS } from "@/lib/constants/api-errors";
-import { BattleStatus } from "@/lib/constants/battle";
-import { modeStart } from "@/lib/utils/battle/modes/server";
-import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
-import { battleActionToEvent, BattleRuleError } from "@/lib/utils/battle/store";
+import { API_ERRORS } from '@/lib/constants/api-errors';
+import { BattleStatus } from '@/lib/constants/battle';
+import { modeStart } from '@/lib/utils/battle/modes/server';
+import type {
+    BattleMutationContext,
+    MutationResult,
+} from '@/lib/utils/battle/pipeline/run-battle-mutation';
+import { battleActionToEvent, BattleRuleError } from '@/lib/utils/battle/store';
 
 export function createStartMutation(build = buildStartOrder) {
-  return async (ctx: BattleMutationContext): Promise<MutationResult> => {
-    if (ctx.meta.setup.length === 0) {
-      throw new BattleRuleError("invalid_target", API_ERRORS.BATTLE_NO_PARTICIPANTS);
-    }
+    return async (ctx: BattleMutationContext): Promise<MutationResult> => {
+        if (ctx.meta.setup.length === 0) {
+            throw new BattleRuleError(
+                'invalid_target',
+                API_ERRORS.BATTLE_NO_PARTICIPANTS
+            );
+        }
 
-    const { order, reserve, triggerLogEntries } = await build(ctx.scene.id, ctx.scene.campaignId, ctx.meta.setup, ctx.meta.map, ctx.meta.rules);
+        const { order, reserve, triggerLogEntries } = await build(
+            ctx.scene.id,
+            ctx.scene.campaignId,
+            ctx.meta.setup,
+            ctx.meta.map,
+            ctx.meta.rules
+        );
 
-    if (order.length === 0) {
-      throw new BattleRuleError("invalid_target", API_ERRORS.BATTLE_ONE_ON_FIELD);
-    }
+        if (order.length === 0) {
+            throw new BattleRuleError(
+                'invalid_target',
+                API_ERRORS.BATTLE_ONE_ON_FIELD
+            );
+        }
 
-    const map = ctx.meta.map;
+        const map = ctx.meta.map;
 
-    const started = modeStart(map, order);
+        const started = modeStart(map, order);
 
-    const participants = started?.participants ?? order;
+        const participants = started?.participants ?? order;
 
-    const turnIndex = started?.turnIndex ?? 0;
+        const turnIndex = started?.turnIndex ?? 0;
 
-    return {
-      participants,
-      pending: reserve,
-      scene: { status: BattleStatus.ACTIVE, startedAt: new Date(), completedAt: null, round: 1, turnIndex, pendingMoraleCheck: null, pendingChoice: null, sceneState: null, rules: ctx.meta.rules },
-      events: triggerLogEntries.map(battleActionToEvent),
-      history: { clear: true },
+        return {
+            participants,
+            pending: reserve,
+            scene: {
+                status: BattleStatus.ACTIVE,
+                startedAt: new Date(),
+                completedAt: null,
+                round: 1,
+                turnIndex,
+                pendingMoraleCheck: null,
+                pendingChoice: null,
+                sceneState: null,
+                rules: ctx.meta.rules,
+            },
+            events: triggerLogEntries.map(battleActionToEvent),
+            history: { clear: true },
+        };
     };
-  };
 }

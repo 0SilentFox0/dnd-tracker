@@ -1,71 +1,146 @@
-import { isValidElement, type ReactElement, type ReactNode } from "react";
-import { describe, expect, it, vi } from "vitest";
+import { isValidElement, type ReactElement, type ReactNode } from 'react';
+import { describe, expect, it, vi } from 'vitest';
 
 const findMany = vi.fn<(args?: unknown) => Promise<unknown[]>>(async () => [
-  {
-    id: "s1", name: "Лють", description: null, basicInfo: {}, combatStats: {}, bonuses: {}, skillTriggers: [], mainSkill: null, grantedSpell: null, icon: null, image: null,
-    abilities: [{ id: "a", name: "Лють", trigger: { event: "passive" }, effects: [{ kind: "damageBonus", filter: { kind: "melee" }, percent: 10 }] }],
-  },
+    {
+        id: 's1',
+        name: 'Лють',
+        description: null,
+        basicInfo: {},
+        combatStats: {},
+        bonuses: {},
+        skillTriggers: [],
+        mainSkill: null,
+        grantedSpell: null,
+        icon: null,
+        image: null,
+        abilities: [
+            {
+                id: 'a',
+                name: 'Лють',
+                trigger: { event: 'passive' },
+                effects: [
+                    {
+                        kind: 'damageBonus',
+                        filter: { kind: 'melee' },
+                        percent: 10,
+                    },
+                ],
+            },
+        ],
+    },
 ]);
 
-vi.mock("next/cache", () => ({ unstable_cache: (fn: () => unknown) => fn }));
+vi.mock('next/cache', () => ({ unstable_cache: (fn: () => unknown) => fn }));
 
 const access = vi.hoisted(() => ({ rules: {} as unknown }));
 
-vi.mock("@/lib/server/campaigns/access", () => ({ requireCampaignMember: vi.fn(async () => ({ isDM: false, campaign: { rules: access.rules } })) }));
-vi.mock("@/lib/cache/reference-data", () => ({ REFERENCE_REVALIDATE_SECONDS: 300, getCachedClasses: vi.fn(async () => [{ id: "k1", name: "Воїн", hitDie: 10, features: [{ level: 1, description: "Heal", abilities: [] }] }]) }));
-vi.mock("@/lib/db", () => ({ prisma: { skill: { findMany: (a: unknown) => findMany(a) }, spell: { findMany: vi.fn(async () => []) }, artifact: { findMany: vi.fn(async () => []) }, artifactSet: { findMany: vi.fn(async () => []) }, characterInventory: { findMany: vi.fn(async () => []) } } }));
-vi.mock("@/components/campaigns/info/InfoReferenceClient", () => ({ InfoReferenceClient: () => null }));
+vi.mock('@/lib/server/campaigns/access', () => ({
+    requireCampaignMember: vi.fn(async () => ({
+        isDM: false,
+        campaign: { rules: access.rules },
+    })),
+}));
+vi.mock('@/lib/cache/reference-data', () => ({
+    REFERENCE_REVALIDATE_SECONDS: 300,
+    getCachedClasses: vi.fn(async () => [
+        {
+            id: 'k1',
+            name: 'Воїн',
+            hitDie: 10,
+            features: [{ level: 1, description: 'Heal', abilities: [] }],
+        },
+    ]),
+}));
+vi.mock('@/lib/db', () => ({
+    prisma: {
+        skill: { findMany: (a: unknown) => findMany(a) },
+        spell: { findMany: vi.fn(async () => []) },
+        artifact: { findMany: vi.fn(async () => []) },
+        artifactSet: { findMany: vi.fn(async () => []) },
+        characterInventory: { findMany: vi.fn(async () => []) },
+    },
+}));
+vi.mock('@/components/campaigns/info/InfoReferenceClient', () => ({
+    InfoReferenceClient: () => null,
+}));
 
-import CampaignInfoPage from "@/app/campaigns/[id]/info/page";
-import { InfoReferenceClient } from "@/components/campaigns/info/InfoReferenceClient";
+import CampaignInfoPage from '@/app/campaigns/[id]/info/page';
+import { InfoReferenceClient } from '@/components/campaigns/info/InfoReferenceClient';
 
 function findProps(node: ReactNode): Record<string, unknown> | null {
-  if (!isValidElement(node)) return null;
+    if (!isValidElement(node)) return null;
 
-  const el = node as ReactElement<{ children?: ReactNode }>;
+    const el = node as ReactElement<{ children?: ReactNode }>;
 
-  if (el.type === InfoReferenceClient) return el.props as Record<string, unknown>;
+    if (el.type === InfoReferenceClient)
+        return el.props as Record<string, unknown>;
 
-  const kids = ([] as ReactNode[]).concat(el.props.children ?? []);
+    const kids = ([] as ReactNode[]).concat(el.props.children ?? []);
 
-  for (const k of kids) {
-    const found = findProps(k);
+    for (const k of kids) {
+        const found = findProps(k);
 
-    if (found) return found;
-  }
+        if (found) return found;
+    }
 
-  return null;
+    return null;
 }
 
-describe("сторінка info", () => {
-  it("віддає гравцям опис умінь замість старих полів", async () => {
-    const tree = await CampaignInfoPage({ params: Promise.resolve({ id: "c1" }) });
+describe('сторінка info', () => {
+    it('віддає гравцям опис умінь замість старих полів', async () => {
+        const tree = await CampaignInfoPage({
+            params: Promise.resolve({ id: 'c1' }),
+        });
 
-    const [skill] = (findProps(tree)?.skills ?? []) as Record<string, unknown>[];
+        const [skill] = (findProps(tree)?.skills ?? []) as Record<
+            string,
+            unknown
+        >[];
 
-    expect(skill.name).toBe("Лють");
-    expect(skill).not.toHaveProperty("combatStats");
-    expect(skill).not.toHaveProperty("bonuses");
-    expect(skill).not.toHaveProperty("skillTriggers");
-    expect(skill).not.toHaveProperty("abilities");
-    expect(skill.abilitySummary).toEqual([expect.objectContaining({ then: [[expect.objectContaining({ key: "summary.effects.damageBonus" })]] })]);
-  });
+        expect(skill.name).toBe('Лють');
+        expect(skill).not.toHaveProperty('combatStats');
+        expect(skill).not.toHaveProperty('bonuses');
+        expect(skill).not.toHaveProperty('skillTriggers');
+        expect(skill).not.toHaveProperty('abilities');
+        expect(skill.abilitySummary).toEqual([
+            expect.objectContaining({
+                then: [
+                    [
+                        expect.objectContaining({
+                            key: 'summary.effects.damageBonus',
+                        }),
+                    ],
+                ],
+            }),
+        ]);
+    });
 
-  it("у класовому режимі віддає класи й ховає скіли", async () => {
-    access.rules = { classes: { enabled: true } };
+    it('у класовому режимі віддає класи й ховає скіли', async () => {
+        access.rules = { classes: { enabled: true } };
 
-    const props = findProps(await CampaignInfoPage({ params: Promise.resolve({ id: "c1" }) }));
+        const props = findProps(
+            await CampaignInfoPage({ params: Promise.resolve({ id: 'c1' }) })
+        );
 
-    access.rules = {};
+        access.rules = {};
 
-    expect(props?.skills).toEqual([]);
-    expect(props?.classes).toEqual([expect.objectContaining({ name: "Воїн", features: [{ level: 1, name: null, icon: null, description: "Heal" }] })]);
-  });
+        expect(props?.skills).toEqual([]);
+        expect(props?.classes).toEqual([
+            expect.objectContaining({
+                name: 'Воїн',
+                features: [
+                    { level: 1, name: null, icon: null, description: 'Heal' },
+                ],
+            }),
+        ]);
+    });
 
-  it("без класів передає classes: null", async () => {
-    const props = findProps(await CampaignInfoPage({ params: Promise.resolve({ id: "c1" }) }));
+    it('без класів передає classes: null', async () => {
+        const props = findProps(
+            await CampaignInfoPage({ params: Promise.resolve({ id: 'c1' }) })
+        );
 
-    expect(props?.classes).toBeNull();
-  });
+        expect(props?.classes).toBeNull();
+    });
 });

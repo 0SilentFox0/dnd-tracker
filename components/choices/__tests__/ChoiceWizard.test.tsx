@@ -1,208 +1,474 @@
 // @vitest-environment happy-dom
-import { useEffect, useState } from "react";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { useEffect, useState } from 'react';
+import {
+    cleanup,
+    fireEvent,
+    render,
+    screen,
+    waitFor,
+} from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { ChoiceWizard } from "@/components/choices/ChoiceWizard";
-import { SubclassCard } from "@/components/choices/SubclassCard";
-import type { ChoiceRefsView } from "@/lib/hooks/characters";
-import { featsById, refs, scores, sorcerer } from "@/lib/utils/characters/choices/__tests__/fixtures";
-import type { ChoicesState, FeatData } from "@/types/choices";
-import type { GameClassData } from "@/types/classes";
+import { ChoiceWizard } from '@/components/choices/ChoiceWizard';
+import { SubclassCard } from '@/components/choices/SubclassCard';
+import type { ChoiceRefsView } from '@/lib/hooks/characters';
+import {
+    featsById,
+    refs,
+    scores,
+    sorcerer,
+} from '@/lib/utils/characters/choices/__tests__/fixtures';
+import type { ChoicesState, FeatData } from '@/types/choices';
+import type { GameClassData } from '@/types/classes';
 
-const mocks = vi.hoisted(() => ({ save: vi.fn(), bump: () => {}, error: null as string | null }));
+const mocks = vi.hoisted(() => ({
+    save: vi.fn(),
+    bump: () => {},
+    error: null as string | null,
+}));
 
-vi.mock("@/lib/hooks/characters/useCharacterChoices", () => ({ useCharacterChoices: () => ({ save: mocks.save, isPending: false, error: mocks.error, issues: [], clear: vi.fn() }) }));
+vi.mock('@/lib/hooks/characters/useCharacterChoices', () => ({
+    useCharacterChoices: () => ({
+        save: mocks.save,
+        isPending: false,
+        error: mocks.error,
+        issues: [],
+        clear: vi.fn(),
+    }),
+}));
 
-const grip: FeatData = { id: "f-grip", name: "Grip", icon: null, type: "general", prerequisite: { scores: { abilities: ["strength"], min: 13 } }, repeatable: false, description: null, abilities: [], choices: [] };
-
-const fighter: GameClassData = {
-  ...sorcerer,
-  id: "cls-fighter",
-  name: "Fighter",
-  caster: "none",
-  spellcastingAbility: null,
-  columns: [],
-  subclassLevel: null,
-  features: [
-    { level: 1, abilities: [], choices: [{ id: "boost", label: "Boost", level: 1, count: 1, kind: "abilityScore", abilities: ["strength"], points: 1, max: 20 }] },
-    { level: 1, abilities: [], choices: [{ id: "style", label: "Style", level: 1, count: 1, kind: "feat", featTypes: ["general"] }] },
-    { level: 1, abilities: [], choices: [{ id: "pick", label: "Pick", level: 1, count: 1, kind: "option", options: [{ id: "a", name: "Option A", abilities: [] }] }] },
-  ],
+const grip: FeatData = {
+    id: 'f-grip',
+    name: 'Grip',
+    icon: null,
+    type: 'general',
+    prerequisite: { scores: { abilities: ['strength'], min: 13 } },
+    repeatable: false,
+    description: null,
+    abilities: [],
+    choices: [],
 };
 
-const draconic = { id: "sub-dr", name: "Draconic", features: [{ level: 3, abilities: [], description: "Dragon blood.", choices: [] }] };
+const fighter: GameClassData = {
+    ...sorcerer,
+    id: 'cls-fighter',
+    name: 'Fighter',
+    caster: 'none',
+    spellcastingAbility: null,
+    columns: [],
+    subclassLevel: null,
+    features: [
+        {
+            level: 1,
+            abilities: [],
+            choices: [
+                {
+                    id: 'boost',
+                    label: 'Boost',
+                    level: 1,
+                    count: 1,
+                    kind: 'abilityScore',
+                    abilities: ['strength'],
+                    points: 1,
+                    max: 20,
+                },
+            ],
+        },
+        {
+            level: 1,
+            abilities: [],
+            choices: [
+                {
+                    id: 'style',
+                    label: 'Style',
+                    level: 1,
+                    count: 1,
+                    kind: 'feat',
+                    featTypes: ['general'],
+                },
+            ],
+        },
+        {
+            level: 1,
+            abilities: [],
+            choices: [
+                {
+                    id: 'pick',
+                    label: 'Pick',
+                    level: 1,
+                    count: 1,
+                    kind: 'option',
+                    options: [{ id: 'a', name: 'Option A', abilities: [] }],
+                },
+            ],
+        },
+    ],
+};
 
-const wrefs = { ...refs, ready: true, race: null, feats: [grip], spells: [], featsById: { ...featsById, [grip.id]: grip }, classesById: { [fighter.id]: fighter, [sorcerer.id]: { ...sorcerer, subclasses: [draconic] } } } as unknown as ChoiceRefsView;
+const draconic = {
+    id: 'sub-dr',
+    name: 'Draconic',
+    features: [
+        { level: 3, abilities: [], description: 'Dragon blood.', choices: [] },
+    ],
+};
 
-const initial: ChoicesState = { raceChoices: {}, feats: [], classes: [{ classId: fighter.id, level: 1 }] };
+const wrefs = {
+    ...refs,
+    ready: true,
+    race: null,
+    feats: [grip],
+    spells: [],
+    featsById: { ...featsById, [grip.id]: grip },
+    classesById: {
+        [fighter.id]: fighter,
+        [sorcerer.id]: { ...sorcerer, subclasses: [draconic] },
+    },
+} as unknown as ChoiceRefsView;
 
-function Harness({ startAt, onClose = () => {} }: { startAt?: string; onClose?: () => void }) {
-  const [str, setStr] = useState(12);
+const initial: ChoicesState = {
+    raceChoices: {},
+    feats: [],
+    classes: [{ classId: fighter.id, level: 1 }],
+};
 
-  useEffect(() => {
-    mocks.bump = () => setStr(13);
-  }, []);
+function Harness({
+    startAt,
+    onClose = () => {},
+}: {
+    startAt?: string;
+    onClose?: () => void;
+}) {
+    const [str, setStr] = useState(12);
 
-  return <ChoiceWizard campaignId="c" characterId="h" initial={initial} hero={{ level: 1, scores: { ...scores, strength: str }, skills: {}, classMode: true }} refs={wrefs} startAt={startAt} onClose={onClose} />;
+    useEffect(() => {
+        mocks.bump = () => setStr(13);
+    }, []);
+
+    return (
+        <ChoiceWizard
+            campaignId="c"
+            characterId="h"
+            initial={initial}
+            hero={{
+                level: 1,
+                scores: { ...scores, strength: str },
+                skills: {},
+                classMode: true,
+            }}
+            refs={wrefs}
+            startAt={startAt}
+            onClose={onClose}
+        />
+    );
 }
 
-describe("ChoiceWizard", () => {
-  beforeEach(() => {
-    mocks.save.mockReset().mockImplementation(async () => {
-      mocks.bump();
+describe('ChoiceWizard', () => {
+    beforeEach(() => {
+        mocks.save.mockReset().mockImplementation(async () => {
+            mocks.bump();
 
-      return true;
+            return true;
+        });
+        mocks.error = null;
     });
-    mocks.error = null;
-  });
 
-  afterEach(cleanup);
+    afterEach(cleanup);
 
-  it("shows the step number, source and what it gives", () => {
-    render(<Harness />);
+    it('shows the step number, source and what it gives', () => {
+        render(<Harness />);
 
-    expect(screen.getByText('choices.wizard.step {"n":1,"total":3}')).toBeTruthy();
-    expect(screen.getByText('choices.wizard.source.classLevel {"name":"Fighter","level":1}')).toBeTruthy();
-    expect(screen.getByText("choices.wizard.gives.abilityScore")).toBeTruthy();
-  });
+        expect(
+            screen.getByText('choices.wizard.step {"n":1,"total":3}')
+        ).toBeTruthy();
+        expect(
+            screen.getByText(
+                'choices.wizard.source.classLevel {"name":"Fighter","level":1}'
+            )
+        ).toBeTruthy();
+        expect(
+            screen.getByText('choices.wizard.gives.abilityScore')
+        ).toBeTruthy();
+    });
 
-  it("a feat gated on STR 13 unlocks on the next step after the ability step is saved", async () => {
-    render(<Harness />);
+    it('a feat gated on STR 13 unlocks on the next step after the ability step is saved', async () => {
+        render(<Harness />);
 
-    fireEvent.click(screen.getByRole("button", { name: /\+1 .*strength/ }));
-    fireEvent.click(screen.getByRole("button", { name: "choices.wizard.next" }));
+        fireEvent.click(screen.getByRole('button', { name: /\+1 .*strength/ }));
+        fireEvent.click(
+            screen.getByRole('button', { name: 'choices.wizard.next' })
+        );
 
-    await waitFor(() => expect(screen.getByText('choices.wizard.step {"n":2,"total":3}')).toBeTruthy());
+        await waitFor(() =>
+            expect(
+                screen.getByText('choices.wizard.step {"n":2,"total":3}')
+            ).toBeTruthy()
+        );
 
-    expect(mocks.save).toHaveBeenCalledTimes(1);
-    expect(screen.getByRole("radio", { name: /Grip/ }).hasAttribute("disabled")).toBe(false);
+        expect(mocks.save).toHaveBeenCalledTimes(1);
+        expect(
+            screen.getByRole('radio', { name: /Grip/ }).hasAttribute('disabled')
+        ).toBe(false);
 
-    fireEvent.click(screen.getByRole("button", { name: "choices.wizard.back" }));
+        fireEvent.click(
+            screen.getByRole('button', { name: 'choices.wizard.back' })
+        );
 
-    expect(screen.queryByText("13 → 14")).toBeNull();
-  });
+        expect(screen.queryByText('13 → 14')).toBeNull();
+    });
 
-  it("failed save stays on the step and shows the error", async () => {
-    mocks.save.mockResolvedValue(false);
-    mocks.error = "boom";
+    it('failed save stays on the step and shows the error', async () => {
+        mocks.save.mockResolvedValue(false);
+        mocks.error = 'boom';
 
-    render(<Harness />);
-    fireEvent.click(screen.getByRole("button", { name: "choices.wizard.next" }));
+        render(<Harness />);
+        fireEvent.click(
+            screen.getByRole('button', { name: 'choices.wizard.next' })
+        );
 
-    await waitFor(() => expect(screen.getByRole("alert").textContent).toBe("boom"));
-    expect(screen.getByText('choices.wizard.step {"n":1,"total":3}')).toBeTruthy();
-  });
+        await waitFor(() =>
+            expect(screen.getByRole('alert').textContent).toBe('boom')
+        );
+        expect(
+            screen.getByText('choices.wizard.step {"n":1,"total":3}')
+        ).toBeTruthy();
+    });
 
-  it("last step is Done and closes after saving", async () => {
-    const onClose = vi.fn();
+    it('last step is Done and closes after saving', async () => {
+        const onClose = vi.fn();
 
-    render(<Harness startAt="classes.cls-fighter.pick" onClose={onClose} />);
-    fireEvent.click(screen.getByRole("button", { name: "choices.wizard.finish" }));
+        render(
+            <Harness startAt="classes.cls-fighter.pick" onClose={onClose} />
+        );
+        fireEvent.click(
+            screen.getByRole('button', { name: 'choices.wizard.finish' })
+        );
 
-    await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
-  });
+        await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
+    });
 
-  it("nothing open: empty state without a step counter or a pick button", () => {
-    const empty = { ...wrefs, classesById: {} } as unknown as ChoiceRefsView;
+    it('nothing open: empty state without a step counter or a pick button', () => {
+        const empty = {
+            ...wrefs,
+            classesById: {},
+        } as unknown as ChoiceRefsView;
 
-    render(<ChoiceWizard campaignId="c" characterId="h" initial={{ raceChoices: {}, feats: [], classes: [] }} hero={{ level: 1, scores, skills: {}, classMode: true }} refs={empty} onClose={() => {}} />);
+        render(
+            <ChoiceWizard
+                campaignId="c"
+                characterId="h"
+                initial={{ raceChoices: {}, feats: [], classes: [] }}
+                hero={{ level: 1, scores, skills: {}, classMode: true }}
+                refs={empty}
+                onClose={() => {}}
+            />
+        );
 
-    expect(screen.getByText("choices.wizard.allChosen")).toBeTruthy();
-    expect(screen.queryByText(/choices.wizard.step/)).toBeNull();
-    expect(screen.queryByRole("button", { name: "choices.wizard.next" })).toBeNull();
-  });
+        expect(screen.getByText('choices.wizard.allChosen')).toBeTruthy();
+        expect(screen.queryByText(/choices.wizard.step/)).toBeNull();
+        expect(
+            screen.queryByRole('button', { name: 'choices.wizard.next' })
+        ).toBeNull();
+    });
 
-  it("subclass step picks a subclass and saves it with Next", async () => {
-    render(<ChoiceWizard campaignId="c" characterId="h" initial={{ raceChoices: {}, feats: [], classes: [{ classId: sorcerer.id, level: 3 }] }} hero={{ level: 3, scores, skills: {}, classMode: true }} refs={wrefs} startAt={`subclass:${sorcerer.id}`} onClose={() => {}} />);
+    it('subclass step picks a subclass and saves it with Next', async () => {
+        render(
+            <ChoiceWizard
+                campaignId="c"
+                characterId="h"
+                initial={{
+                    raceChoices: {},
+                    feats: [],
+                    classes: [{ classId: sorcerer.id, level: 3 }],
+                }}
+                hero={{ level: 3, scores, skills: {}, classMode: true }}
+                refs={wrefs}
+                startAt={`subclass:${sorcerer.id}`}
+                onClose={() => {}}
+            />
+        );
 
-    fireEvent.click(screen.getByRole("radio", { name: /Draconic/ }));
-    fireEvent.click(screen.getByRole("button", { name: "choices.wizard.next" }));
+        fireEvent.click(screen.getByRole('radio', { name: /Draconic/ }));
+        fireEvent.click(
+            screen.getByRole('button', { name: 'choices.wizard.next' })
+        );
 
-    await waitFor(() => expect(mocks.save).toHaveBeenCalledTimes(1));
-    expect(mocks.save.mock.calls[0]![0].classSubclasses).toEqual({ [sorcerer.id]: "sub-dr" });
-  });
+        await waitFor(() => expect(mocks.save).toHaveBeenCalledTimes(1));
+        expect(mocks.save.mock.calls[0]![0].classSubclasses).toEqual({
+            [sorcerer.id]: 'sub-dr',
+        });
+    });
 });
 
-describe("background step", () => {
-  afterEach(cleanup);
+describe('background step', () => {
+    afterEach(cleanup);
 
-  beforeEach(() => mocks.save.mockReset().mockResolvedValue(true));
+    beforeEach(() => mocks.save.mockReset().mockResolvedValue(true));
 
-  const sage = { id: "bg-sage", name: "Sage", icon: null, description: "Scholar", choices: [], skillProficiencies: [], toolProficiencies: ["Ink"], originFeatId: null, equipmentText: null };
+    const sage = {
+        id: 'bg-sage',
+        name: 'Sage',
+        icon: null,
+        description: 'Scholar',
+        choices: [],
+        skillProficiencies: [],
+        toolProficiencies: ['Ink'],
+        originFeatId: null,
+        equipmentText: null,
+    };
 
-  const soldier = { ...sage, id: "bg-soldier", name: "Soldier", description: null };
+    const soldier = {
+        ...sage,
+        id: 'bg-soldier',
+        name: 'Soldier',
+        description: null,
+    };
 
-  const brefs = { ...wrefs, backgroundsById: { [sage.id]: sage, [soldier.id]: soldier } } as unknown as ChoiceRefsView;
+    const brefs = {
+        ...wrefs,
+        backgroundsById: { [sage.id]: sage, [soldier.id]: soldier },
+    } as unknown as ChoiceRefsView;
 
-  const view = (backgroundId?: string) => render(<ChoiceWizard campaignId="c" characterId="h" initial={{ raceChoices: {}, feats: [], classes: [{ classId: fighter.id, level: 1 }], ...(backgroundId && { backgroundId }) }} hero={{ level: 1, scores, skills: {}, classMode: true }} refs={brefs} startAt="background" onClose={() => {}} />);
+    const view = (backgroundId?: string) =>
+        render(
+            <ChoiceWizard
+                campaignId="c"
+                characterId="h"
+                initial={{
+                    raceChoices: {},
+                    feats: [],
+                    classes: [{ classId: fighter.id, level: 1 }],
+                    ...(backgroundId && { backgroundId }),
+                }}
+                hero={{ level: 1, scores, skills: {}, classMode: true }}
+                refs={brefs}
+                startAt="background"
+                onClose={() => {}}
+            />
+        );
 
-  it("picking a card saves the new background id with Next, empty state needs no warning", async () => {
-    view();
+    it('picking a card saves the new background id with Next, empty state needs no warning', async () => {
+        view();
 
-    expect(screen.queryByText("choices.wizard.background.resetWarning")).toBeNull();
+        expect(
+            screen.queryByText('choices.wizard.background.resetWarning')
+        ).toBeNull();
 
-    fireEvent.click(screen.getByRole("radio", { name: /Sage/ }));
-    fireEvent.click(screen.getByRole("button", { name: "choices.wizard.next" }));
+        fireEvent.click(screen.getByRole('radio', { name: /Sage/ }));
+        fireEvent.click(
+            screen.getByRole('button', { name: 'choices.wizard.next' })
+        );
 
-    await waitFor(() => expect(mocks.save).toHaveBeenCalledTimes(1));
-    expect(mocks.save.mock.calls[0]![0].backgroundId).toBe("bg-sage");
-  });
+        await waitFor(() => expect(mocks.save).toHaveBeenCalledTimes(1));
+        expect(mocks.save.mock.calls[0]![0].backgroundId).toBe('bg-sage');
+    });
 
-  it("warns only when replacing the saved background", () => {
-    view("bg-sage");
+    it('warns only when replacing the saved background', () => {
+        view('bg-sage');
 
-    expect(screen.queryByText("choices.wizard.background.resetWarning")).toBeNull();
+        expect(
+            screen.queryByText('choices.wizard.background.resetWarning')
+        ).toBeNull();
 
-    fireEvent.click(screen.getByRole("radio", { name: /Soldier/ }));
+        fireEvent.click(screen.getByRole('radio', { name: /Soldier/ }));
 
-    expect(screen.getByText("choices.wizard.background.resetWarning")).toBeTruthy();
-  });
+        expect(
+            screen.getByText('choices.wizard.background.resetWarning')
+        ).toBeTruthy();
+    });
 
-  it("Next is blocked until a background is chosen", () => {
-    view();
+    it('Next is blocked until a background is chosen', () => {
+        view();
 
-    expect(screen.getByRole("button", { name: "choices.wizard.next" }).hasAttribute("disabled")).toBe(true);
+        expect(
+            screen
+                .getByRole('button', { name: 'choices.wizard.next' })
+                .hasAttribute('disabled')
+        ).toBe(true);
 
-    fireEvent.click(screen.getByRole("radio", { name: /Sage/ }));
+        fireEvent.click(screen.getByRole('radio', { name: /Sage/ }));
 
-    expect(screen.getByRole("button", { name: "choices.wizard.next" }).hasAttribute("disabled")).toBe(false);
-  });
+        expect(
+            screen
+                .getByRole('button', { name: 'choices.wizard.next' })
+                .hasAttribute('disabled')
+        ).toBe(false);
+    });
 
-  it("a free origin feat conflicts with a background: hint, replace button, Next unblocked after replacing", () => {
-    render(<ChoiceWizard campaignId="c" characterId="h" initial={{ raceChoices: {}, feats: [{ id: "f-alert", source: "origin" }], classes: [{ classId: fighter.id, level: 1 }], backgroundId: sage.id }} hero={{ level: 1, scores, skills: {}, classMode: true }} refs={brefs} startAt="background" onClose={() => {}} />);
+    it('a free origin feat conflicts with a background: hint, replace button, Next unblocked after replacing', () => {
+        render(
+            <ChoiceWizard
+                campaignId="c"
+                characterId="h"
+                initial={{
+                    raceChoices: {},
+                    feats: [{ id: 'f-alert', source: 'origin' }],
+                    classes: [{ classId: fighter.id, level: 1 }],
+                    backgroundId: sage.id,
+                }}
+                hero={{ level: 1, scores, skills: {}, classMode: true }}
+                refs={brefs}
+                startAt="background"
+                onClose={() => {}}
+            />
+        );
 
-    expect(screen.getByText(/choices.editor.originFirst/)).toBeTruthy();
-    expect(screen.getByRole("button", { name: "choices.wizard.next" }).hasAttribute("disabled")).toBe(true);
+        expect(screen.getByText(/choices.editor.originFirst/)).toBeTruthy();
+        expect(
+            screen
+                .getByRole('button', { name: 'choices.wizard.next' })
+                .hasAttribute('disabled')
+        ).toBe(true);
 
-    fireEvent.click(screen.getByRole("button", { name: "choices.editor.replaceOrigin" }));
+        fireEvent.click(
+            screen.getByRole('button', { name: 'choices.editor.replaceOrigin' })
+        );
 
-    expect(screen.queryByText(/choices.editor.originFirst/)).toBeNull();
-    expect(screen.getByRole("button", { name: "choices.wizard.next" }).hasAttribute("disabled")).toBe(false);
-  });
+        expect(screen.queryByText(/choices.editor.originFirst/)).toBeNull();
+        expect(
+            screen
+                .getByRole('button', { name: 'choices.wizard.next' })
+                .hasAttribute('disabled')
+        ).toBe(false);
+    });
 
-  it("a card without description falls back to skills, tools and origin feat", () => {
-    view();
+    it('a card without description falls back to skills, tools and origin feat', () => {
+        view();
 
-    expect(screen.getAllByText(/Ink/).length).toBeGreaterThan(0);
-  });
+        expect(screen.getAllByText(/Ink/).length).toBeGreaterThan(0);
+    });
 });
 
-describe("SubclassCard", () => {
-  afterEach(cleanup);
+describe('SubclassCard', () => {
+    afterEach(cleanup);
 
-  it("onChange receives the subclass id", () => {
-    const onChange = vi.fn();
+    it('onChange receives the subclass id', () => {
+        const onChange = vi.fn();
 
-    render(<SubclassCard cls={{ ...sorcerer, subclasses: [draconic] }} onChange={onChange} />);
-    fireEvent.click(screen.getByRole("radio", { name: /Draconic/ }));
+        render(
+            <SubclassCard
+                cls={{ ...sorcerer, subclasses: [draconic] }}
+                onChange={onChange}
+            />
+        );
+        fireEvent.click(screen.getByRole('radio', { name: /Draconic/ }));
 
-    expect(onChange).toHaveBeenCalledWith("sub-dr");
-  });
+        expect(onChange).toHaveBeenCalledWith('sub-dr');
+    });
 
-  it("marks the current value", () => {
-    render(<SubclassCard cls={{ ...sorcerer, subclasses: [draconic] }} value="sub-dr" onChange={() => {}} />);
+    it('marks the current value', () => {
+        render(
+            <SubclassCard
+                cls={{ ...sorcerer, subclasses: [draconic] }}
+                value="sub-dr"
+                onChange={() => {}}
+            />
+        );
 
-    expect(screen.getByRole("radio", { name: /Draconic/ }).getAttribute("aria-checked")).toBe("true");
-  });
+        expect(
+            screen
+                .getByRole('radio', { name: /Draconic/ })
+                .getAttribute('aria-checked')
+        ).toBe('true');
+    });
 });

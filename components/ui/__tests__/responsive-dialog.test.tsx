@@ -1,258 +1,404 @@
 // @vitest-environment happy-dom
-import { useState } from "react";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { useState } from 'react';
+import {
+    cleanup,
+    fireEvent,
+    render,
+    screen,
+    waitFor,
+} from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { mockMatchMedia } from "./match-media";
+import { mockMatchMedia } from './match-media';
 
-import { Button } from "@/components/ui/button";
-import { HudPortalClassProvider } from "@/components/ui/portal-class";
-import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { SelectField } from "@/components/ui/select-field";
+import { Button } from '@/components/ui/button';
+import { HudPortalClassProvider } from '@/components/ui/portal-class';
+import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import { SelectField } from '@/components/ui/select-field';
 
-Object.assign(Element.prototype, { hasPointerCapture: () => false, releasePointerCapture: () => {}, setPointerCapture: () => {}, scrollIntoView: () => {} });
-
-const base = { open: true, onOpenChange: vi.fn(), title: "Додати вміння", description: "Опис", footer: <Button>Зберегти</Button> };
-
-describe("ResponsiveDialog", () => {
-  afterEach(cleanup);
-
-  it("десктоп: модалка з заголовком, футером і ✕", () => {
-    mockMatchMedia(false);
-    render(<ResponsiveDialog {...base}>вміст</ResponsiveDialog>);
-
-    expect(screen.getByRole("dialog")).toHaveAccessibleName("Додати вміння");
-    expect(screen.getByRole("button", { name: "common.ui.close" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Зберегти" })).toBeInTheDocument();
-    expect(document.querySelector("[data-slot=sheet]")).toBeNull();
-  });
-
-  it("телефон: шторка з ручкою і прилиплим футером", () => {
-    mockMatchMedia(true);
-    render(<ResponsiveDialog {...base}>вміст</ResponsiveDialog>);
-
-    expect(document.querySelector("[data-slot=sheet]")).not.toBeNull();
-    expect(document.querySelector("[data-slot=sheet-handle]")).not.toBeNull();
-    expect(document.querySelector("[data-slot=sheet-footer]")?.className).toContain("safe-area-inset-bottom");
-    expect(screen.getByText("Додати вміння")).toBeInTheDocument();
-  });
-
-  it.each([false, true])("dismissible=false не закривається Escape (mobile=%s)", (mobile) => {
-    mockMatchMedia(mobile);
-
-    const onOpenChange = vi.fn();
-
-    render(<ResponsiveDialog {...base} onOpenChange={onOpenChange} dismissible={false}>вміст</ResponsiveDialog>);
-    fireEvent.keyDown(document.activeElement ?? document.body, { key: "Escape" });
-
-    expect(onOpenChange).not.toHaveBeenCalledWith(false);
-  });
-
-  it("телефон: вкладений діалог відкривається поверх, закриття не закриває батьківський", () => {
-    mockMatchMedia(true);
-
-    function Nested() {
-      const [inner, setInner] = useState(false);
-
-      const [outer, setOuter] = useState(true);
-
-      return (
-        <ResponsiveDialog open={outer} onOpenChange={setOuter} title="Раса">
-          <Button onClick={() => setInner(true)}>Шаблони</Button>
-          <ResponsiveDialog open={inner} onOpenChange={setInner} title="Шаблони вмінь">
-            <Button onClick={() => setInner(false)}>Готово</Button>
-          </ResponsiveDialog>
-        </ResponsiveDialog>
-      );
-    }
-
-    render(<Nested />);
-    fireEvent.click(screen.getByRole("button", { name: "Шаблони" }));
-    expect(screen.getByText("Шаблони вмінь")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Готово" }));
-
-    // vaul keeps the closed sheet mounted until its exit animation ends, which happy-dom never fires
-    const sheetOf = (text: string) => screen.getByText(text).closest("[data-slot=sheet]");
-
-    expect(sheetOf("Шаблони вмінь")).toHaveAttribute("data-state", "closed");
-    expect(sheetOf("Раса")).toHaveAttribute("data-state", "open");
-  });
-
-  it("телефон: шторка й оверлей, що зникають, пропускають тапи (перший тап після закриття не губиться)", () => {
-    mockMatchMedia(true);
-
-    function Closable() {
-      const [open, setOpen] = useState(true);
-
-      return (
-        <ResponsiveDialog open={open} onOpenChange={setOpen} title="Довгий лук">
-          <Button onClick={() => setOpen(false)}>Закрити шторку</Button>
-        </ResponsiveDialog>
-      );
-    }
-
-    render(<Closable />);
-    fireEvent.click(screen.getByRole("button", { name: "Закрити шторку" }));
-
-    const sheet = document.querySelector("[data-slot=sheet]");
-
-    const overlay = document.querySelector("[data-vaul-overlay]");
-
-    expect(sheet).toHaveAttribute("data-state", "closed");
-    expect(overlay).toHaveAttribute("data-state", "closed");
-    expect(overlay?.className).toContain("data-[state=closed]:pointer-events-none!");
-    expect(sheet?.className).toContain("data-[state=closed]:pointer-events-none!");
-  });
-
-  it("телефон: вибір у Select всередині шторки не закриває її", async () => {
-    mockMatchMedia(true);
-
-    const onOpenChange = vi.fn();
-
-    function WithSelect() {
-      const [v, setV] = useState("a");
-
-      return (
-        <ResponsiveDialog {...base} onOpenChange={onOpenChange}>
-          <SelectField id="s" value={v} onValueChange={setV} options={[{ value: "a", label: "А" }, { value: "b", label: "Б" }]} />
-        </ResponsiveDialog>
-      );
-    }
-
-    render(<WithSelect />);
-    fireEvent.pointerDown(screen.getByRole("combobox"), { button: 0, ctrlKey: false, pointerType: "mouse" });
-    fireEvent.click(await screen.findByRole("option", { name: "Б" }));
-
-    expect(onOpenChange).not.toHaveBeenCalledWith(false);
-    expect(screen.getByRole("combobox")).toHaveTextContent("Б");
-  });
+Object.assign(Element.prototype, {
+    hasPointerCapture: () => false,
+    releasePointerCapture: () => {},
+    setPointerCapture: () => {},
+    scrollIntoView: () => {},
 });
 
-describe("ResponsiveDialog ширина", () => {
-  afterEach(cleanup);
+const base = {
+    open: true,
+    onOpenChange: vi.fn(),
+    title: 'Додати вміння',
+    description: 'Опис',
+    footer: <Button>Зберегти</Button>,
+};
 
-  it("className з sm:max-w-* перекриває size на десктопі", () => {
-    mockMatchMedia(false);
-    render(<ResponsiveDialog open onOpenChange={vi.fn()} title="Бонусна дія" size="sm" className="sm:max-w-lg">x</ResponsiveDialog>);
+describe('ResponsiveDialog', () => {
+    afterEach(cleanup);
 
-    expect(screen.getByRole("dialog").className).toContain("sm:max-w-lg");
-    expect(screen.getByRole("dialog").className).not.toContain("sm:max-w-sm");
-  });
+    it('десктоп: модалка з заголовком, футером і ✕', () => {
+        mockMatchMedia(false);
+        render(<ResponsiveDialog {...base}>вміст</ResponsiveDialog>);
 
-  it("телефон: десктопні класи позиціонування не застосовуються до шторки", () => {
-    mockMatchMedia(true);
-    render(<ResponsiveDialog open onOpenChange={vi.fn()} title="Закляття" className="sm:max-w-lg top-[10px] translate-y-0">x</ResponsiveDialog>);
+        expect(screen.getByRole('dialog')).toHaveAccessibleName(
+            'Додати вміння'
+        );
+        expect(
+            screen.getByRole('button', { name: 'common.ui.close' })
+        ).toBeInTheDocument();
+        expect(
+            screen.getByRole('button', { name: 'Зберегти' })
+        ).toBeInTheDocument();
+        expect(document.querySelector('[data-slot=sheet]')).toBeNull();
+    });
 
-    const sheet = document.querySelector("[data-slot=sheet]") as HTMLElement;
+    it('телефон: шторка з ручкою і прилиплим футером', () => {
+        mockMatchMedia(true);
+        render(<ResponsiveDialog {...base}>вміст</ResponsiveDialog>);
 
-    expect(sheet.className).not.toContain("top-[10px]");
-    expect(sheet.className).toContain("bottom-0");
-  });
-});
+        expect(document.querySelector('[data-slot=sheet]')).not.toBeNull();
+        expect(
+            document.querySelector('[data-slot=sheet-handle]')
+        ).not.toBeNull();
+        expect(
+            document.querySelector('[data-slot=sheet-footer]')?.className
+        ).toContain('safe-area-inset-bottom');
+        expect(screen.getByText('Додати вміння')).toBeInTheDocument();
+    });
 
-describe("ResponsiveDialog hud", () => {
-  afterEach(cleanup);
+    it.each([false, true])(
+        'dismissible=false не закривається Escape (mobile=%s)',
+        (mobile) => {
+            mockMatchMedia(mobile);
 
-  it("десктоп: модалка отримує HUD-поверхню", () => {
-    mockMatchMedia(false);
-    render(<ResponsiveDialog open hud title="Т" onOpenChange={vi.fn()}>тіло</ResponsiveDialog>);
+            const onOpenChange = vi.fn();
 
-    expect(screen.getByRole("dialog").className).toContain("hud-surface");
-  });
+            render(
+                <ResponsiveDialog
+                    {...base}
+                    onOpenChange={onOpenChange}
+                    dismissible={false}
+                >
+                    вміст
+                </ResponsiveDialog>
+            );
+            fireEvent.keyDown(document.activeElement ?? document.body, {
+                key: 'Escape',
+            });
 
-  it("телефон: шторка отримує HUD-поверхню", () => {
-    mockMatchMedia(true);
-    render(<ResponsiveDialog open hud title="Т" onOpenChange={vi.fn()}>тіло</ResponsiveDialog>);
-
-    expect((document.querySelector("[data-slot=sheet]") as HTMLElement).className).toContain("hud-surface");
-  });
-});
-
-describe("ResponsiveDialog portal class", () => {
-  afterEach(cleanup);
-
-  const Menu = () => (
-    <Select open value="a">
-      <SelectTrigger><SelectValue /></SelectTrigger>
-      <SelectContent><SelectItem value="a">Альфа</SelectItem></SelectContent>
-    </Select>
-  );
-
-  const content = () => document.body.querySelector('[data-slot="select-content"]');
-
-  it("hud: випадайка в body отримує HUD-клас", () => {
-    mockMatchMedia(false);
-    render(<ResponsiveDialog open hud title="Т" onOpenChange={vi.fn()}><Menu /></ResponsiveDialog>);
-
-    expect(content()?.className).toContain("hud-surface");
-    expect(document.querySelector("[role=dialog]")?.contains(content())).toBe(false);
-  });
-
-  it("без hud скидає клас, успадкований від HUD-сторінки", () => {
-    mockMatchMedia(false);
-    render(
-      <HudPortalClassProvider value="hud-surface">
-        <ResponsiveDialog open title="Т" onOpenChange={vi.fn()}><Menu /></ResponsiveDialog>
-      </HudPortalClassProvider>,
+            expect(onOpenChange).not.toHaveBeenCalledWith(false);
+        }
     );
 
-    expect(content()?.className).not.toContain("hud-surface");
-  });
+    it('телефон: вкладений діалог відкривається поверх, закриття не закриває батьківський', () => {
+        mockMatchMedia(true);
+
+        function Nested() {
+            const [inner, setInner] = useState(false);
+
+            const [outer, setOuter] = useState(true);
+
+            return (
+                <ResponsiveDialog
+                    open={outer}
+                    onOpenChange={setOuter}
+                    title="Раса"
+                >
+                    <Button onClick={() => setInner(true)}>Шаблони</Button>
+                    <ResponsiveDialog
+                        open={inner}
+                        onOpenChange={setInner}
+                        title="Шаблони вмінь"
+                    >
+                        <Button onClick={() => setInner(false)}>Готово</Button>
+                    </ResponsiveDialog>
+                </ResponsiveDialog>
+            );
+        }
+
+        render(<Nested />);
+        fireEvent.click(screen.getByRole('button', { name: 'Шаблони' }));
+        expect(screen.getByText('Шаблони вмінь')).toBeInTheDocument();
+        fireEvent.click(screen.getByRole('button', { name: 'Готово' }));
+
+        // vaul keeps the closed sheet mounted until its exit animation ends, which happy-dom never fires
+        const sheetOf = (text: string) =>
+            screen.getByText(text).closest('[data-slot=sheet]');
+
+        expect(sheetOf('Шаблони вмінь')).toHaveAttribute(
+            'data-state',
+            'closed'
+        );
+        expect(sheetOf('Раса')).toHaveAttribute('data-state', 'open');
+    });
+
+    it('телефон: шторка й оверлей, що зникають, пропускають тапи (перший тап після закриття не губиться)', () => {
+        mockMatchMedia(true);
+
+        function Closable() {
+            const [open, setOpen] = useState(true);
+
+            return (
+                <ResponsiveDialog
+                    open={open}
+                    onOpenChange={setOpen}
+                    title="Довгий лук"
+                >
+                    <Button onClick={() => setOpen(false)}>
+                        Закрити шторку
+                    </Button>
+                </ResponsiveDialog>
+            );
+        }
+
+        render(<Closable />);
+        fireEvent.click(screen.getByRole('button', { name: 'Закрити шторку' }));
+
+        const sheet = document.querySelector('[data-slot=sheet]');
+
+        const overlay = document.querySelector('[data-vaul-overlay]');
+
+        expect(sheet).toHaveAttribute('data-state', 'closed');
+        expect(overlay).toHaveAttribute('data-state', 'closed');
+        expect(overlay?.className).toContain(
+            'data-[state=closed]:pointer-events-none!'
+        );
+        expect(sheet?.className).toContain(
+            'data-[state=closed]:pointer-events-none!'
+        );
+    });
+
+    it('телефон: вибір у Select всередині шторки не закриває її', async () => {
+        mockMatchMedia(true);
+
+        const onOpenChange = vi.fn();
+
+        function WithSelect() {
+            const [v, setV] = useState('a');
+
+            return (
+                <ResponsiveDialog {...base} onOpenChange={onOpenChange}>
+                    <SelectField
+                        id="s"
+                        value={v}
+                        onValueChange={setV}
+                        options={[
+                            { value: 'a', label: 'А' },
+                            { value: 'b', label: 'Б' },
+                        ]}
+                    />
+                </ResponsiveDialog>
+            );
+        }
+
+        render(<WithSelect />);
+        fireEvent.pointerDown(screen.getByRole('combobox'), {
+            button: 0,
+            ctrlKey: false,
+            pointerType: 'mouse',
+        });
+        fireEvent.click(await screen.findByRole('option', { name: 'Б' }));
+
+        expect(onOpenChange).not.toHaveBeenCalledWith(false);
+        expect(screen.getByRole('combobox')).toHaveTextContent('Б');
+    });
 });
 
-describe("ResponsiveDialog size md", () => {
-  afterEach(cleanup);
+describe('ResponsiveDialog ширина', () => {
+    afterEach(cleanup);
 
-  it("на десктопі лишається шириною md, як до міграції", async () => {
-    mockMatchMedia(false);
+    it('className з sm:max-w-* перекриває size на десктопі', () => {
+        mockMatchMedia(false);
+        render(
+            <ResponsiveDialog
+                open
+                onOpenChange={vi.fn()}
+                title="Бонусна дія"
+                size="sm"
+                className="sm:max-w-lg"
+            >
+                x
+            </ResponsiveDialog>
+        );
 
-    render(<ResponsiveDialog open onOpenChange={vi.fn()} title="Атака" size="md" hud>x</ResponsiveDialog>);
-    expect(screen.getByRole("dialog").className).toContain("sm:max-w-lg");
-  });
-
-  describe.each([false, true])("фокус і роль (mobile=%s)", (mobile) => {
-    function Harness({ role }: { role?: "alertdialog" }) {
-      const [open, setOpen] = useState(false);
-
-      return (
-        <>
-          <button onClick={() => setOpen(true)}>відкрити</button>
-          <ResponsiveDialog {...base} open={open} onOpenChange={setOpen} role={role}>вміст</ResponsiveDialog>
-        </>
-      );
-    }
-
-    it("після Esc фокус повертається на елемент, що відкрив діалог", async () => {
-      mockMatchMedia(mobile);
-      render(<Harness />);
-
-      const opener = screen.getByRole("button", { name: "відкрити" });
-
-      opener.focus();
-      fireEvent.click(opener);
-      await screen.findByRole("dialog");
-      fireEvent.keyDown(document.activeElement ?? document.body, { key: "Escape" });
-      await waitFor(() => {
-        const sheet = document.querySelector("[data-slot=sheet]");
-
-        if (sheet) fireEvent.animationEnd(sheet);
-
-        expect(document.activeElement).toBe(opener);
-      });
+        expect(screen.getByRole('dialog').className).toContain('sm:max-w-lg');
+        expect(screen.getByRole('dialog').className).not.toContain(
+            'sm:max-w-sm'
+        );
     });
 
-    it("role=alertdialog, за замовчуванням dialog", async () => {
-      mockMatchMedia(mobile);
+    it('телефон: десктопні класи позиціонування не застосовуються до шторки', () => {
+        mockMatchMedia(true);
+        render(
+            <ResponsiveDialog
+                open
+                onOpenChange={vi.fn()}
+                title="Закляття"
+                className="top-[10px] translate-y-0 sm:max-w-lg"
+            >
+                x
+            </ResponsiveDialog>
+        );
 
-      const { unmount } = render(<Harness />);
+        const sheet = document.querySelector(
+            '[data-slot=sheet]'
+        ) as HTMLElement;
 
-      fireEvent.click(screen.getByRole("button", { name: "відкрити" }));
-      expect(await screen.findByRole("dialog")).toBeInTheDocument();
-      unmount();
-      render(<Harness role="alertdialog" />);
-      fireEvent.click(screen.getByRole("button", { name: "відкрити" }));
-      expect(await screen.findByRole("alertdialog")).toBeInTheDocument();
+        expect(sheet.className).not.toContain('top-[10px]');
+        expect(sheet.className).toContain('bottom-0');
     });
-  });
+});
+
+describe('ResponsiveDialog hud', () => {
+    afterEach(cleanup);
+
+    it('десктоп: модалка отримує HUD-поверхню', () => {
+        mockMatchMedia(false);
+        render(
+            <ResponsiveDialog open hud title="Т" onOpenChange={vi.fn()}>
+                тіло
+            </ResponsiveDialog>
+        );
+
+        expect(screen.getByRole('dialog').className).toContain('hud-surface');
+    });
+
+    it('телефон: шторка отримує HUD-поверхню', () => {
+        mockMatchMedia(true);
+        render(
+            <ResponsiveDialog open hud title="Т" onOpenChange={vi.fn()}>
+                тіло
+            </ResponsiveDialog>
+        );
+
+        expect(
+            (document.querySelector('[data-slot=sheet]') as HTMLElement)
+                .className
+        ).toContain('hud-surface');
+    });
+});
+
+describe('ResponsiveDialog portal class', () => {
+    afterEach(cleanup);
+
+    const Menu = () => (
+        <Select open value="a">
+            <SelectTrigger>
+                <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+                <SelectItem value="a">Альфа</SelectItem>
+            </SelectContent>
+        </Select>
+    );
+
+    const content = () =>
+        document.body.querySelector('[data-slot="select-content"]');
+
+    it('hud: випадайка в body отримує HUD-клас', () => {
+        mockMatchMedia(false);
+        render(
+            <ResponsiveDialog open hud title="Т" onOpenChange={vi.fn()}>
+                <Menu />
+            </ResponsiveDialog>
+        );
+
+        expect(content()?.className).toContain('hud-surface');
+        expect(
+            document.querySelector('[role=dialog]')?.contains(content())
+        ).toBe(false);
+    });
+
+    it('без hud скидає клас, успадкований від HUD-сторінки', () => {
+        mockMatchMedia(false);
+        render(
+            <HudPortalClassProvider value="hud-surface">
+                <ResponsiveDialog open title="Т" onOpenChange={vi.fn()}>
+                    <Menu />
+                </ResponsiveDialog>
+            </HudPortalClassProvider>
+        );
+
+        expect(content()?.className).not.toContain('hud-surface');
+    });
+});
+
+describe('ResponsiveDialog size md', () => {
+    afterEach(cleanup);
+
+    it('на десктопі лишається шириною md, як до міграції', async () => {
+        mockMatchMedia(false);
+
+        render(
+            <ResponsiveDialog
+                open
+                onOpenChange={vi.fn()}
+                title="Атака"
+                size="md"
+                hud
+            >
+                x
+            </ResponsiveDialog>
+        );
+        expect(screen.getByRole('dialog').className).toContain('sm:max-w-lg');
+    });
+
+    describe.each([false, true])('фокус і роль (mobile=%s)', (mobile) => {
+        function Harness({ role }: { role?: 'alertdialog' }) {
+            const [open, setOpen] = useState(false);
+
+            return (
+                <>
+                    <button onClick={() => setOpen(true)}>відкрити</button>
+                    <ResponsiveDialog
+                        {...base}
+                        open={open}
+                        onOpenChange={setOpen}
+                        role={role}
+                    >
+                        вміст
+                    </ResponsiveDialog>
+                </>
+            );
+        }
+
+        it('після Esc фокус повертається на елемент, що відкрив діалог', async () => {
+            mockMatchMedia(mobile);
+            render(<Harness />);
+
+            const opener = screen.getByRole('button', { name: 'відкрити' });
+
+            opener.focus();
+            fireEvent.click(opener);
+            await screen.findByRole('dialog');
+            fireEvent.keyDown(document.activeElement ?? document.body, {
+                key: 'Escape',
+            });
+            await waitFor(() => {
+                const sheet = document.querySelector('[data-slot=sheet]');
+
+                if (sheet) fireEvent.animationEnd(sheet);
+
+                expect(document.activeElement).toBe(opener);
+            });
+        });
+
+        it('role=alertdialog, за замовчуванням dialog', async () => {
+            mockMatchMedia(mobile);
+
+            const { unmount } = render(<Harness />);
+
+            fireEvent.click(screen.getByRole('button', { name: 'відкрити' }));
+            expect(await screen.findByRole('dialog')).toBeInTheDocument();
+            unmount();
+            render(<Harness role="alertdialog" />);
+            fireEvent.click(screen.getByRole('button', { name: 'відкрити' }));
+            expect(await screen.findByRole('alertdialog')).toBeInTheDocument();
+        });
+    });
 });

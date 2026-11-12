@@ -1,79 +1,129 @@
-import { Prisma, type Race as RaceRow } from "@prisma/client";
-import type { z } from "zod";
+import { Prisma, type Race as RaceRow } from '@prisma/client';
+import type { z } from 'zod';
 
-import "server-only";
-import { getCachedRaces } from "@/lib/cache/reference-data";
-import { ReferenceKind } from "@/lib/cache/tags";
-import { API_ERRORS } from "@/lib/constants/api-errors";
-import { raceColorAt } from "@/lib/constants/race-colors";
-import { prisma } from "@/lib/db";
-import { createRaceSchema, updateRaceSchema } from "@/lib/schemas";
-import { addedIds, assertCampaignRefs } from "@/lib/server/campaigns/campaign-refs";
-import { defineResource } from "@/lib/server/content/define-resource";
-import { detachRefs } from "@/lib/server/content/detach-refs";
-import { ContentError } from "@/lib/server/content/errors";
-import { assertCampaignEffects, storedEffectOwners } from "@/lib/server/content/traits-guard";
-import { raceNameTaken } from "@/lib/server/races/race-name";
-import { updateRaceCascade } from "@/lib/server/races/update-race";
-import { abilitiesJson, withAbilityIssues } from "@/lib/utils/abilities/read";
-import { choiceSpellIds, readChoices } from "@/lib/utils/characters/choices/read";
+import 'server-only';
+import { getCachedRaces } from '@/lib/cache/reference-data';
+import { ReferenceKind } from '@/lib/cache/tags';
+import { API_ERRORS } from '@/lib/constants/api-errors';
+import { raceColorAt } from '@/lib/constants/race-colors';
+import { prisma } from '@/lib/db';
+import { createRaceSchema, updateRaceSchema } from '@/lib/schemas';
+import {
+    addedIds,
+    assertCampaignRefs,
+} from '@/lib/server/campaigns/campaign-refs';
+import { defineResource } from '@/lib/server/content/define-resource';
+import { detachRefs } from '@/lib/server/content/detach-refs';
+import { ContentError } from '@/lib/server/content/errors';
+import {
+    assertCampaignEffects,
+    storedEffectOwners,
+} from '@/lib/server/content/traits-guard';
+import { raceNameTaken } from '@/lib/server/races/race-name';
+import { updateRaceCascade } from '@/lib/server/races/update-race';
+import { abilitiesJson, withAbilityIssues } from '@/lib/utils/abilities/read';
+import {
+    choiceSpellIds,
+    readChoices,
+} from '@/lib/utils/characters/choices/read';
 
-async function assertNameFree(campaignId: string, name: string, exceptId?: string) {
-  if (await raceNameTaken(campaignId, name, exceptId)) throw new ContentError(API_ERRORS.RACE_NAME_TAKEN, 409, undefined, { name });
+async function assertNameFree(
+    campaignId: string,
+    name: string,
+    exceptId?: string
+) {
+    if (await raceNameTaken(campaignId, name, exceptId))
+        throw new ContentError(API_ERRORS.RACE_NAME_TAKEN, 409, undefined, {
+            name,
+        });
 }
 
-export const racesResource = defineResource<RaceRow, z.infer<typeof createRaceSchema>, z.infer<typeof updateRaceSchema>>({
-  kind: "races",
-  listFields: ["color"],
-  idParam: "raceId",
-  label: "Races",
-  description: "Game races: colour, icon, available skills, slot progression, racial abilities.",
-  path: "/races",
-  schemas: { create: createRaceSchema, update: updateRaceSchema },
-  errors: [409],
-  access: { list: "member", item: "dm" },
-  invalidates: [ReferenceKind.RACES, ReferenceKind.UNITS],
-  notFound: API_ERRORS.RACE_NOT_FOUND,
-  list: (actor) => getCachedRaces(actor.campaignId),
-  find: (actor, id) => prisma.race.findFirst({ where: { id, campaignId: actor.campaignId } }),
-  toItem: (row) => withAbilityIssues("race", row),
-  async create(actor, data) {
-    await assertCampaignEffects(actor.campaignId, data.abilities);
-    await assertNameFree(actor.campaignId, data.name);
-    await assertCampaignRefs(actor.campaignId, { mainSkill: data.availableSkills, skill: data.disabledSkills, spell: choiceSpellIds(data.choices) });
+export const racesResource = defineResource<
+    RaceRow,
+    z.infer<typeof createRaceSchema>,
+    z.infer<typeof updateRaceSchema>
+>({
+    kind: 'races',
+    listFields: ['color'],
+    idParam: 'raceId',
+    label: 'Races',
+    description:
+        'Game races: colour, icon, available skills, slot progression, racial abilities.',
+    path: '/races',
+    schemas: { create: createRaceSchema, update: updateRaceSchema },
+    errors: [409],
+    access: { list: 'member', item: 'dm' },
+    invalidates: [ReferenceKind.RACES, ReferenceKind.UNITS],
+    notFound: API_ERRORS.RACE_NOT_FOUND,
+    list: (actor) => getCachedRaces(actor.campaignId),
+    find: (actor, id) =>
+        prisma.race.findFirst({ where: { id, campaignId: actor.campaignId } }),
+    toItem: (row) => withAbilityIssues('race', row),
+    async create(actor, data) {
+        await assertCampaignEffects(actor.campaignId, data.abilities);
+        await assertNameFree(actor.campaignId, data.name);
+        await assertCampaignRefs(actor.campaignId, {
+            mainSkill: data.availableSkills,
+            skill: data.disabledSkills,
+            spell: choiceSpellIds(data.choices),
+        });
 
-    const color = data.color ?? raceColorAt(await prisma.race.count({ where: { campaignId: actor.campaignId } }));
+        const color =
+            data.color ??
+            raceColorAt(
+                await prisma.race.count({
+                    where: { campaignId: actor.campaignId },
+                })
+            );
 
-    return prisma.race.create({
-      data: {
-        campaignId: actor.campaignId,
-        name: data.name,
-        icon: data.icon ?? null,
-        color,
-        availableSkills: data.availableSkills as Prisma.InputJsonValue,
-        disabledSkills: data.disabledSkills as Prisma.InputJsonValue,
-        passiveAbility: data.passiveAbility ? (data.passiveAbility as Prisma.InputJsonValue) : Prisma.JsonNull,
-        spellSlotProgression: data.spellSlotProgression ? (data.spellSlotProgression as Prisma.InputJsonValue) : [],
-        ...(data.abilities && { abilities: abilitiesJson(data.abilities) }),
-        ...(data.choices && { choices: data.choices as unknown as Prisma.InputJsonValue }),
-      },
-    });
-  },
-  async update(actor, existing, data) {
-    await assertCampaignEffects(actor.campaignId, data.abilities, storedEffectOwners(existing.abilities));
+        return prisma.race.create({
+            data: {
+                campaignId: actor.campaignId,
+                name: data.name,
+                icon: data.icon ?? null,
+                color,
+                availableSkills: data.availableSkills as Prisma.InputJsonValue,
+                disabledSkills: data.disabledSkills as Prisma.InputJsonValue,
+                passiveAbility: data.passiveAbility
+                    ? (data.passiveAbility as Prisma.InputJsonValue)
+                    : Prisma.JsonNull,
+                spellSlotProgression: data.spellSlotProgression
+                    ? (data.spellSlotProgression as Prisma.InputJsonValue)
+                    : [],
+                ...(data.abilities && {
+                    abilities: abilitiesJson(data.abilities),
+                }),
+                ...(data.choices && {
+                    choices: data.choices as unknown as Prisma.InputJsonValue,
+                }),
+            },
+        });
+    },
+    async update(actor, existing, data) {
+        await assertCampaignEffects(
+            actor.campaignId,
+            data.abilities,
+            storedEffectOwners(existing.abilities)
+        );
 
-    if (data.name !== undefined) await assertNameFree(actor.campaignId, data.name, existing.id);
+        if (data.name !== undefined)
+            await assertNameFree(actor.campaignId, data.name, existing.id);
 
-    await assertCampaignRefs(actor.campaignId, {
-      mainSkill: addedIds(data.availableSkills, existing.availableSkills),
-      skill: addedIds(data.disabledSkills, existing.disabledSkills),
-      spell: addedIds(choiceSpellIds(data.choices), choiceSpellIds(readChoices(existing.choices)) ?? []),
-    });
+        await assertCampaignRefs(actor.campaignId, {
+            mainSkill: addedIds(data.availableSkills, existing.availableSkills),
+            skill: addedIds(data.disabledSkills, existing.disabledSkills),
+            spell: addedIds(
+                choiceSpellIds(data.choices),
+                choiceSpellIds(readChoices(existing.choices)) ?? []
+            ),
+        });
 
-    return updateRaceCascade(actor.campaignId, existing, data);
-  },
-  async remove(actor, existing) {
-    await detachRefs(prisma, actor.campaignId, "race", [existing.id]);
-    await prisma.race.deleteMany({ where: { id: existing.id, campaignId: actor.campaignId } });
-  },
+        return updateRaceCascade(actor.campaignId, existing, data);
+    },
+    async remove(actor, existing) {
+        await detachRefs(prisma, actor.campaignId, 'race', [existing.id]);
+        await prisma.race.deleteMany({
+            where: { id: existing.id, campaignId: actor.campaignId },
+        });
+    },
 });

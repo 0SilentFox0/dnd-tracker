@@ -1,3 +1,5 @@
-import { z } from "zod";
+import { z } from 'zod';
 
-export const characterIdSchema = z.object({ characterId: z.string().min(1).max(100) });
+export const characterIdSchema = z.object({
+    characterId: z.string().min(1).max(100),
+});

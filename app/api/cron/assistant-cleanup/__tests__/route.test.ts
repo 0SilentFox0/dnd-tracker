@@ -1,58 +1,74 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { cleanupAssistantData, cleanupReadNotifications, cleanupBattleSnapshots } = vi.hoisted(() => ({
-  cleanupAssistantData: vi.fn(),
-  cleanupReadNotifications: vi.fn(),
-  cleanupBattleSnapshots: vi.fn(),
+const {
+    cleanupAssistantData,
+    cleanupReadNotifications,
+    cleanupBattleSnapshots,
+} = vi.hoisted(() => ({
+    cleanupAssistantData: vi.fn(),
+    cleanupReadNotifications: vi.fn(),
+    cleanupBattleSnapshots: vi.fn(),
 }));
 
-vi.mock("@/lib/server/assistant/cleanup", () => ({ cleanupAssistantData }));
-vi.mock("@/lib/server/notifications/cleanup", () => ({ cleanupReadNotifications }));
-vi.mock("@/lib/server/battles/cleanup", () => ({ cleanupBattleSnapshots }));
+vi.mock('@/lib/server/assistant/cleanup', () => ({ cleanupAssistantData }));
+vi.mock('@/lib/server/notifications/cleanup', () => ({
+    cleanupReadNotifications,
+}));
+vi.mock('@/lib/server/battles/cleanup', () => ({ cleanupBattleSnapshots }));
 
-import { GET } from "../route";
+import { GET } from '../route';
 
-import { API_ERRORS } from "@/lib/constants/api-errors";
+import { API_ERRORS } from '@/lib/constants/api-errors';
 
-const call = (token?: string) => GET(new Request("http://localhost/api/cron/assistant-cleanup", { headers: token ? { authorization: `Bearer ${token}` } : {} }));
+const call = (token?: string) =>
+    GET(
+        new Request('http://localhost/api/cron/assistant-cleanup', {
+            headers: token ? { authorization: `Bearer ${token}` } : {},
+        })
+    );
 
-describe("GET /api/cron/assistant-cleanup", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    vi.stubEnv("CRON_SECRET", "s3cret");
-    cleanupAssistantData.mockResolvedValue({ assistant: 1 });
-    cleanupReadNotifications.mockResolvedValue({ notifications: 2 });
-    cleanupBattleSnapshots.mockResolvedValue({ snapshots: 4 });
-  });
+describe('GET /api/cron/assistant-cleanup', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+        vi.stubEnv('CRON_SECRET', 's3cret');
+        cleanupAssistantData.mockResolvedValue({ assistant: 1 });
+        cleanupReadNotifications.mockResolvedValue({ notifications: 2 });
+        cleanupBattleSnapshots.mockResolvedValue({ snapshots: 4 });
+    });
 
-  it("returns an error key when the secret is not configured", async () => {
-    vi.stubEnv("CRON_SECRET", "");
+    it('returns an error key when the secret is not configured', async () => {
+        vi.stubEnv('CRON_SECRET', '');
 
-    const res = await call();
+        const res = await call();
 
-    expect(res.status).toBe(503);
-    expect((await res.json()).error).toBe(API_ERRORS.CRON_NOT_CONFIGURED);
-  });
+        expect(res.status).toBe(503);
+        expect((await res.json()).error).toBe(API_ERRORS.CRON_NOT_CONFIGURED);
+    });
 
-  it("rejects a wrong token with the unauthorized key", async () => {
-    const res = await call("nope");
+    it('rejects a wrong token with the unauthorized key', async () => {
+        const res = await call('nope');
 
-    expect(res.status).toBe(401);
-    expect((await res.json()).error).toBe(API_ERRORS.UNAUTHORIZED);
-  });
+        expect(res.status).toBe(401);
+        expect((await res.json()).error).toBe(API_ERRORS.UNAUTHORIZED);
+    });
 
-  it("runs both cleanups", async () => {
-    const res = await call("s3cret");
+    it('runs both cleanups', async () => {
+        const res = await call('s3cret');
 
-    expect(await res.json()).toEqual({ ok: true, assistant: 1, notifications: 2, battleSnapshotsDeleted: 4 });
-  });
+        expect(await res.json()).toEqual({
+            ok: true,
+            assistant: 1,
+            notifications: 2,
+            battleSnapshotsDeleted: 4,
+        });
+    });
 
-  it("maps a failure to the generic internal error", async () => {
-    cleanupAssistantData.mockRejectedValue(new Error("db down"));
+    it('maps a failure to the generic internal error', async () => {
+        cleanupAssistantData.mockRejectedValue(new Error('db down'));
 
-    const res = await call("s3cret");
+        const res = await call('s3cret');
 
-    expect(res.status).toBe(500);
-    expect((await res.json()).error).toBe(API_ERRORS.INTERNAL);
-  });
+        expect(res.status).toBe(500);
+        expect((await res.json()).error).toBe(API_ERRORS.INTERNAL);
+    });
 });

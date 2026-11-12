@@ -1,43 +1,74 @@
-import { ParticipantSide } from "@/lib/constants/battle";
-import type { Rng } from "@/lib/utils/abilities/engine/core/types";
-import type { Ability } from "@/lib/utils/abilities/schema";
-import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
-import type { AbilitySource, ResolvedAbility } from "@/types/abilities";
-import type { ActiveEffect, BattleParticipant } from "@/types/battle";
+import { ParticipantSide } from '@/lib/constants/battle';
+import type { Rng } from '@/lib/utils/abilities/engine/core/types';
+import type { Ability } from '@/lib/utils/abilities/schema';
+import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
+import type { AbilitySource, ResolvedAbility } from '@/types/abilities';
+import type { ActiveEffect, BattleParticipant } from '@/types/battle';
 
 export function makeParticipant(opts: {
-  id: string;
-  side?: ParticipantSide;
-  hp?: number;
-  maxHp?: number;
-  abilities?: ResolvedAbility[];
-  level?: number;
+    id: string;
+    side?: ParticipantSide;
+    hp?: number;
+    maxHp?: number;
+    abilities?: ResolvedAbility[];
+    level?: number;
 }): BattleParticipant {
-  const base = createMockParticipant();
+    const base = createMockParticipant();
 
-  return {
-    ...base,
-    basicInfo: { ...base.basicInfo, id: opts.id, name: opts.id, side: opts.side ?? ParticipantSide.ALLY },
-    abilities: { ...base.abilities, level: opts.level ?? 1 },
-    combatStats: { ...base.combatStats, currentHp: opts.hp ?? 20, maxHp: opts.maxHp ?? 20 },
-    battleData: { ...base.battleData, resolvedAbilities: opts.abilities ?? [] },
-  };
+    return {
+        ...base,
+        basicInfo: {
+            ...base.basicInfo,
+            id: opts.id,
+            name: opts.id,
+            side: opts.side ?? ParticipantSide.ALLY,
+        },
+        abilities: { ...base.abilities, level: opts.level ?? 1 },
+        combatStats: {
+            ...base.combatStats,
+            currentHp: opts.hp ?? 20,
+            maxHp: opts.maxHp ?? 20,
+        },
+        battleData: {
+            ...base.battleData,
+            resolvedAbilities: opts.abilities ?? [],
+        },
+    };
 }
 
-export function makeEffect(id: string, over: Partial<ActiveEffect> = {}): ActiveEffect {
-  return { id, name: id, type: "buff", duration: 2, appliedAt: { round: 1, timestamp: new Date(0) }, effects: [], ...over };
+export function makeEffect(
+    id: string,
+    over: Partial<ActiveEffect> = {}
+): ActiveEffect {
+    return {
+        id,
+        name: id,
+        type: 'buff',
+        duration: 2,
+        appliedAt: { round: 1, timestamp: new Date(0) },
+        effects: [],
+        ...over,
+    };
 }
 
-export function resolved(ability: Omit<Ability, "id" | "name"> & Partial<Ability>, source: Partial<AbilitySource> = {}): ResolvedAbility {
-  const full = { id: "a", name: "Вміння", ...ability } as Ability;
+export function resolved(
+    ability: Omit<Ability, 'id' | 'name'> & Partial<Ability>,
+    source: Partial<AbilitySource> = {}
+): ResolvedAbility {
+    const full = { id: 'a', name: 'Вміння', ...ability } as Ability;
 
-  const src: AbilitySource = { type: "skill", id: "s1", name: full.name, ...source };
+    const src: AbilitySource = {
+        type: 'skill',
+        id: 's1',
+        name: full.name,
+        ...source,
+    };
 
-  return { ...full, source: src, key: `${src.type}:${src.id}:${full.id}` };
+    return { ...full, source: src, key: `${src.type}:${src.id}:${full.id}` };
 }
 
 export function seq(...values: number[]): Rng {
-  let i = 0;
+    let i = 0;
 
-  return () => values[i++ % values.length];
+    return () => values[i++ % values.length];
 }

@@ -1,98 +1,169 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { bodyErrorMessage, campaignGet, campaignRequest, request } from "../client";
+import {
+    bodyErrorMessage,
+    campaignGet,
+    campaignRequest,
+    request,
+} from '../client';
 
-import { API_ERRORS } from "@/lib/constants/api-errors";
+import { API_ERRORS } from '@/lib/constants/api-errors';
 
-describe("campaignRequest", () => {
-  afterEach(() => vi.unstubAllGlobals());
+describe('campaignRequest', () => {
+    afterEach(() => vi.unstubAllGlobals());
 
-  it("без campaignId кидає помилку й не робить запит", async () => {
-    const fetch = vi.fn();
+    it('без campaignId кидає помилку й не робить запит', async () => {
+        const fetch = vi.fn();
 
-    vi.stubGlobal("fetch", fetch);
+        vi.stubGlobal('fetch', fetch);
 
-    await expect(campaignRequest("", "/spells")).rejects.toThrow("Campaign ID is required");
-    expect(fetch).not.toHaveBeenCalled();
-  });
+        await expect(campaignRequest('', '/spells')).rejects.toThrow(
+            'Campaign ID is required'
+        );
+        expect(fetch).not.toHaveBeenCalled();
+    });
 
-  it("будує URL кампанії", async () => {
-    const fetch = vi.fn(async () => new Response("[]", { status: 200 }));
+    it('будує URL кампанії', async () => {
+        const fetch = vi.fn(async () => new Response('[]', { status: 200 }));
 
-    vi.stubGlobal("fetch", fetch);
+        vi.stubGlobal('fetch', fetch);
 
-    await campaignGet("c1", "spells");
+        await campaignGet('c1', 'spells');
 
-    expect(fetch).toHaveBeenCalledWith("/api/campaigns/c1/spells", expect.objectContaining({ method: "GET" }));
-  });
+        expect(fetch).toHaveBeenCalledWith(
+            '/api/campaigns/c1/spells',
+            expect.objectContaining({ method: 'GET' })
+        );
+    });
 });
 
-describe("bodyErrorMessage / request errors", () => {
-  afterEach(() => vi.unstubAllGlobals());
+describe('bodyErrorMessage / request errors', () => {
+    afterEach(() => vi.unstubAllGlobals());
 
-  it("рядок error показується як є", () => {
-    expect(bodyErrorMessage({ error: API_ERRORS.FORBIDDEN }, "x")).toBe(API_ERRORS.FORBIDDEN);
-  });
+    it('рядок error показується як є', () => {
+        expect(bodyErrorMessage({ error: API_ERRORS.FORBIDDEN }, 'x')).toBe(
+            API_ERRORS.FORBIDDEN
+        );
+    });
 
-  it("error + issues — повідомлення з деталями", () => {
-    expect(bodyErrorMessage({ error: API_ERRORS.INVALID_BODY, issues: [{ message: "Required" }, { message: "Too short" }] }, "x")).toBe(
-      `${API_ERRORS.INVALID_BODY}: Required; Too short`,
-    );
-  });
+    it('error + issues — повідомлення з деталями', () => {
+        expect(
+            bodyErrorMessage(
+                {
+                    error: API_ERRORS.INVALID_BODY,
+                    issues: [{ message: 'Required' }, { message: 'Too short' }],
+                },
+                'x'
+            )
+        ).toBe(`${API_ERRORS.INVALID_BODY}: Required; Too short`);
+    });
 
-  it("issue з pathLabel — підпис поля перед повідомленням, pathLabel важить більше за path", () => {
-    const issues = [
-      { path: ["name"], pathLabel: "Назва", message: "Обов'язкове поле" },
-      { path: ["attacks", 0, "damageDice"], pathLabel: "Атаки › #1 › Кубики шкоди", message: "Не більше 30 символів" },
-      { path: ["customField"], message: "x" },
-    ];
+    it('issue з pathLabel — підпис поля перед повідомленням, pathLabel важить більше за path', () => {
+        const issues = [
+            { path: ['name'], pathLabel: 'Назва', message: "Обов'язкове поле" },
+            {
+                path: ['attacks', 0, 'damageDice'],
+                pathLabel: 'Атаки › #1 › Кубики шкоди',
+                message: 'Не більше 30 символів',
+            },
+            { path: ['customField'], message: 'x' },
+        ];
 
-    expect(bodyErrorMessage({ error: API_ERRORS.INVALID_BODY, issues }, "x")).toBe(
-      `${API_ERRORS.INVALID_BODY}: Назва: Обов'язкове поле; Атаки › #1 › Кубики шкоди: Не більше 30 символів; customField: x`,
-    );
-  });
+        expect(
+            bodyErrorMessage({ error: API_ERRORS.INVALID_BODY, issues }, 'x')
+        ).toBe(
+            `${API_ERRORS.INVALID_BODY}: Назва: Обов'язкове поле; Атаки › #1 › Кубики шкоди: Не більше 30 символів; customField: x`
+        );
+    });
 
-  it("старий формат (error — масив issues) досі читається", () => {
-    expect(bodyErrorMessage({ error: [{ message: "Required" }] }, "x")).toBe("Required");
-  });
+    it('старий формат (error — масив issues) досі читається', () => {
+        expect(
+            bodyErrorMessage({ error: [{ message: 'Required' }] }, 'x')
+        ).toBe('Required');
+    });
 
-  it("без error — запасний текст", () => {
-    expect(bodyErrorMessage(null, "Bad Request")).toBe("Bad Request");
-  });
+    it('без error — запасний текст', () => {
+        expect(bodyErrorMessage(null, 'Bad Request')).toBe('Bad Request');
+    });
 
-  it("request кидає ApiError з українським повідомленням сервера", async () => {
-    vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ error: API_ERRORS.INVALID_JSON }), { status: 400 })));
+    it('request кидає ApiError з українським повідомленням сервера', async () => {
+        vi.stubGlobal(
+            'fetch',
+            vi.fn(
+                async () =>
+                    new Response(
+                        JSON.stringify({ error: API_ERRORS.INVALID_JSON }),
+                        { status: 400 }
+                    )
+            )
+        );
 
-    await expect(request("/api/x")).rejects.toMatchObject({ message: API_ERRORS.INVALID_JSON, status: 400 });
-  });
+        await expect(request('/api/x')).rejects.toMatchObject({
+            message: API_ERRORS.INVALID_JSON,
+            status: 400,
+        });
+    });
 });
 
-describe("request errorKey", () => {
-  afterEach(() => vi.unstubAllGlobals());
+describe('request errorKey', () => {
+    afterEach(() => vi.unstubAllGlobals());
 
-  it("ApiError.errorKey береться з тіла", async () => {
-    vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ error: "Forbidden", errorKey: "errors.forbidden" }), { status: 403 })));
+    it('ApiError.errorKey береться з тіла', async () => {
+        vi.stubGlobal(
+            'fetch',
+            vi.fn(
+                async () =>
+                    new Response(
+                        JSON.stringify({
+                            error: 'Forbidden',
+                            errorKey: 'errors.forbidden',
+                        }),
+                        { status: 403 }
+                    )
+            )
+        );
 
-    await expect(request("/api/x")).rejects.toMatchObject({ message: "Forbidden", errorKey: "errors.forbidden" });
-  });
+        await expect(request('/api/x')).rejects.toMatchObject({
+            message: 'Forbidden',
+            errorKey: 'errors.forbidden',
+        });
+    });
 
-  it("тіло без error — HTTP <status>", async () => {
-    vi.stubGlobal("fetch", vi.fn(async () => new Response("{}", { status: 502, statusText: "" })));
+    it('тіло без error — HTTP <status>', async () => {
+        vi.stubGlobal(
+            'fetch',
+            vi.fn(
+                async () => new Response('{}', { status: 502, statusText: '' })
+            )
+        );
 
-    await expect(request("/api/x")).rejects.toMatchObject({ message: "HTTP 502" });
-  });
+        await expect(request('/api/x')).rejects.toMatchObject({
+            message: 'HTTP 502',
+        });
+    });
 });
 
-describe("request onResponse", () => {
-  afterEach(() => vi.unstubAllGlobals());
+describe('request onResponse', () => {
+    afterEach(() => vi.unstubAllGlobals());
 
-  it("віддає сиру відповідь до розбору тіла (заголовок Date для годинника)", async () => {
-    vi.stubGlobal("fetch", vi.fn(async () => new Response("{}", { status: 200, headers: { date: "Mon, 19 Oct 2026 10:00:00 GMT" } })));
+    it('віддає сиру відповідь до розбору тіла (заголовок Date для годинника)', async () => {
+        vi.stubGlobal(
+            'fetch',
+            vi.fn(
+                async () =>
+                    new Response('{}', {
+                        status: 200,
+                        headers: { date: 'Mon, 19 Oct 2026 10:00:00 GMT' },
+                    })
+            )
+        );
 
-    const onResponse = vi.fn();
+        const onResponse = vi.fn();
 
-    await campaignGet("c1", "/x", { onResponse });
+        await campaignGet('c1', '/x', { onResponse });
 
-    expect(onResponse.mock.calls[0][0].headers.get("date")).toBe("Mon, 19 Oct 2026 10:00:00 GMT");
-  });
+        expect(onResponse.mock.calls[0][0].headers.get('date')).toBe(
+            'Mon, 19 Oct 2026 10:00:00 GMT'
+        );
+    });
 });

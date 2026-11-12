@@ -1,21 +1,21 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
-import { hasScope } from "@/lib/constants/ai";
+import { hasScope } from '@/lib/constants/ai';
 
-describe("hasScope", () => {
-  it("content:write включає content:read", () => {
-    expect(hasScope(["content:write"], "content:read")).toBe(true);
-    expect(hasScope(["content:read"], "content:write")).toBe(false);
-  });
+describe('hasScope', () => {
+    it('content:write включає content:read', () => {
+        expect(hasScope(['content:write'], 'content:read')).toBe(true);
+        expect(hasScope(['content:read'], 'content:write')).toBe(false);
+    });
 
-  it("world:write включає world:read, але world:read не дає права на запис", () => {
-    expect(hasScope(["world:write"], "world:read")).toBe(true);
-    expect(hasScope(["world:read"], "world:write")).toBe(false);
-  });
+    it('world:write включає world:read, але world:read не дає права на запис', () => {
+        expect(hasScope(['world:write'], 'world:read')).toBe(true);
+        expect(hasScope(['world:read'], 'world:write')).toBe(false);
+    });
 
-  it("ai не дає прав на контент і навпаки", () => {
-    expect(hasScope(["ai"], "content:read")).toBe(false);
-    expect(hasScope(["content:write"], "ai")).toBe(false);
-    expect(hasScope(["ai"], "ai")).toBe(true);
-  });
+    it('ai не дає прав на контент і навпаки', () => {
+        expect(hasScope(['ai'], 'content:read')).toBe(false);
+        expect(hasScope(['content:write'], 'ai')).toBe(false);
+        expect(hasScope(['ai'], 'ai')).toBe(true);
+    });
 });

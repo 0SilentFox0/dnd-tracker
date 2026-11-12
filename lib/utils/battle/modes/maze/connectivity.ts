@@ -1,40 +1,43 @@
-import { teleportPartner } from "./features";
-import type { MazeGrid } from "./grid";
-import { mazeNeighbors, wallSet } from "./walls";
+import { teleportPartner } from './features';
+import type { MazeGrid } from './grid';
+import { mazeNeighbors, wallSet } from './walls';
 
-import { allCells, cellKey, inBounds } from "@/lib/utils/battle/grid/geometry";
-import type { GridPoint } from "@/types/battle";
+import { allCells, cellKey, inBounds } from '@/lib/utils/battle/grid/geometry';
+import type { GridPoint } from '@/types/battle';
 
-export function mazeDistances(grid: MazeGrid, sources: GridPoint[]): Map<string, number> {
-  const walls = wallSet(grid.maze);
+export function mazeDistances(
+    grid: MazeGrid,
+    sources: GridPoint[]
+): Map<string, number> {
+    const walls = wallSet(grid.maze);
 
-  const dist = new Map<string, number>();
+    const dist = new Map<string, number>();
 
-  const queue: GridPoint[] = [];
+    const queue: GridPoint[] = [];
 
-  for (const s of sources) {
-    if (!inBounds(grid, s) || dist.has(cellKey(s))) continue;
+    for (const s of sources) {
+        if (!inBounds(grid, s) || dist.has(cellKey(s))) continue;
 
-    dist.set(cellKey(s), 0);
-    queue.push(s);
-  }
-
-  for (let i = 0; i < queue.length; i++) {
-    const cur = queue[i];
-
-    const d = dist.get(cellKey(cur)) as number;
-
-    for (const n of mazeNeighbors(grid, walls, cur)) {
-      const key = cellKey(n);
-
-      if (dist.has(key)) continue;
-
-      dist.set(key, d + 1);
-      queue.push(n);
+        dist.set(cellKey(s), 0);
+        queue.push(s);
     }
-  }
 
-  return dist;
+    for (let i = 0; i < queue.length; i++) {
+        const cur = queue[i];
+
+        const d = dist.get(cellKey(cur)) as number;
+
+        for (const n of mazeNeighbors(grid, walls, cur)) {
+            const key = cellKey(n);
+
+            if (dist.has(key)) continue;
+
+            dist.set(key, d + 1);
+            queue.push(n);
+        }
+    }
+
+    return dist;
 }
 
 /**
@@ -42,58 +45,58 @@ export function mazeDistances(grid: MazeGrid, sources: GridPoint[]): Map<string,
  * Один зворотний пошук на всю карту замість окремого пошуку від кожного учасника.
  */
 function exitReachers(grid: MazeGrid, exitKey: string): ReadonlySet<string> {
-  const walls = wallSet(grid.maze);
+    const walls = wallSet(grid.maze);
 
-  const from = new Map<string, GridPoint[]>();
+    const from = new Map<string, GridPoint[]>();
 
-  const good = new Set<string>();
+    const good = new Set<string>();
 
-  const queue: GridPoint[] = [];
+    const queue: GridPoint[] = [];
 
-  for (const cell of allCells(grid)) {
-    for (const n of mazeNeighbors(grid, walls, cell)) {
-      if (cellKey(n) === exitKey) {
-        if (!good.has(cellKey(cell))) {
-          good.add(cellKey(cell));
-          queue.push(cell);
+    for (const cell of allCells(grid)) {
+        for (const n of mazeNeighbors(grid, walls, cell)) {
+            if (cellKey(n) === exitKey) {
+                if (!good.has(cellKey(cell))) {
+                    good.add(cellKey(cell));
+                    queue.push(cell);
+                }
+
+                continue;
+            }
+
+            const land = cellKey(teleportPartner(grid.maze, n) ?? n);
+
+            const list = from.get(land);
+
+            if (list) list.push(cell);
+            else from.set(land, [cell]);
         }
-
-        continue;
-      }
-
-      const land = cellKey(teleportPartner(grid.maze, n) ?? n);
-
-      const list = from.get(land);
-
-      if (list) list.push(cell);
-      else from.set(land, [cell]);
     }
-  }
 
-  for (let i = 0; i < queue.length; i++) {
-    for (const prev of from.get(cellKey(queue[i])) ?? []) {
-      if (good.has(cellKey(prev))) continue;
+    for (let i = 0; i < queue.length; i++) {
+        for (const prev of from.get(cellKey(queue[i])) ?? []) {
+            if (good.has(cellKey(prev))) continue;
 
-      good.add(cellKey(prev));
-      queue.push(prev);
+            good.add(cellKey(prev));
+            queue.push(prev);
+        }
     }
-  }
 
-  return good;
+    return good;
 }
 
 export function allReachExit(grid: MazeGrid, points: GridPoint[]): boolean {
-  const { exit } = grid.maze;
+    const { exit } = grid.maze;
 
-  if (!exit || points.length === 0) return true;
+    if (!exit || points.length === 0) return true;
 
-  const exitKey = cellKey(exit);
+    const exitKey = cellKey(exit);
 
-  const others = points.filter((p) => cellKey(p) !== exitKey);
+    const others = points.filter((p) => cellKey(p) !== exitKey);
 
-  if (others.length === 0) return true;
+    if (others.length === 0) return true;
 
-  const good = exitReachers(grid, exitKey);
+    const good = exitReachers(grid, exitKey);
 
-  return others.every((p) => good.has(cellKey(p)));
+    return others.every((p) => good.has(cellKey(p)));
 }

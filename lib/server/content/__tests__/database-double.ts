@@ -1,26 +1,35 @@
-import { type Mock, vi } from "vitest";
+import { type Mock, vi } from 'vitest';
 
-import { createScopedDatabase } from "@/lib/server/content/write-context";
+import { createScopedDatabase } from '@/lib/server/content/write-context';
 
 /** ORM boundary for route tests. Keep the real campaign guard, scoped transaction,
  * and after-commit callbacks; real SQL locking/rollback belongs to storage integration. */
 export function contentDatabaseDouble<T extends object>(delegates: T) {
-  const base = delegates as T & { $queryRaw: Mock; $transaction: Mock };
+    const base = delegates as T & { $queryRaw: Mock; $transaction: Mock };
 
-  base.$queryRaw = vi.fn(async (query: TemplateStringsArray, ...values: unknown[]) => {
-    if (!query.join("?").includes("FROM campaigns WHERE id = ? FOR UPDATE") || typeof values[0] !== "string") {
-      throw new Error("Unexpected SQL in content route fixture");
-    }
+    base.$queryRaw = vi.fn(
+        async (query: TemplateStringsArray, ...values: unknown[]) => {
+            if (
+                !query
+                    .join('?')
+                    .includes('FROM campaigns WHERE id = ? FOR UPDATE') ||
+                typeof values[0] !== 'string'
+            ) {
+                throw new Error('Unexpected SQL in content route fixture');
+            }
 
-    return [{ id: values[0] }];
-  });
+            return [{ id: values[0] }];
+        }
+    );
 
-  const withCampaign = base as T & { campaign?: { update?: Mock } };
+    const withCampaign = base as T & { campaign?: { update?: Mock } };
 
-  withCampaign.campaign ??= {};
-  withCampaign.campaign.update ??= vi.fn(async () => ({ contentVersion: 1 }));
-  base.$transaction ??= vi.fn();
-  base.$transaction.mockImplementation(async (callback: (tx: typeof base) => unknown) => callback(base));
+    withCampaign.campaign ??= {};
+    withCampaign.campaign.update ??= vi.fn(async () => ({ contentVersion: 1 }));
+    base.$transaction ??= vi.fn();
+    base.$transaction.mockImplementation(
+        async (callback: (tx: typeof base) => unknown) => callback(base)
+    );
 
-  return createScopedDatabase(base);
+    return createScopedDatabase(base);
 }

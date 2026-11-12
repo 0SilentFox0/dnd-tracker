@@ -1,10 +1,14 @@
-import { BattleSetupForm } from "@/components/battle/setup/BattleSetupForm";
-import { requireCampaignDM } from "@/lib/server/campaigns/access";
+import { BattleSetupForm } from '@/components/battle/setup/BattleSetupForm';
+import { requireCampaignDM } from '@/lib/server/campaigns/access';
 
-export default async function NewBattlePage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+export default async function NewBattlePage({
+    params,
+}: {
+    params: Promise<{ id: string }>;
+}) {
+    const { id } = await params;
 
-  await requireCampaignDM(id);
+    await requireCampaignDM(id);
 
-  return <BattleSetupForm campaignId={id} />;
+    return <BattleSetupForm campaignId={id} />;
 }

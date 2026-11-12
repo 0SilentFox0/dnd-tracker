@@ -1,134 +1,235 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
-import { deriveScene, deriveTurn } from "../derive-scene";
-import { canSeeExactStats } from "../visibility";
+import { deriveScene, deriveTurn } from '../derive-scene';
+import { canSeeExactStats } from '../visibility';
 
-import { ParticipantSide } from "@/lib/constants/battle";
-import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
-import type { BattleScene } from "@/types/api";
+import { ParticipantSide } from '@/lib/constants/battle';
+import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
+import type { BattleScene } from '@/types/api';
 
-const p = (id: string, controlledBy: string, side: ParticipantSide = ParticipantSide.ALLY) => {
-  const b = createMockParticipant();
+const p = (
+    id: string,
+    controlledBy: string,
+    side: ParticipantSide = ParticipantSide.ALLY
+) => {
+    const b = createMockParticipant();
 
-  return { ...b, basicInfo: { ...b.basicInfo, id, controlledBy, side } };
+    return { ...b, basicInfo: { ...b.basicInfo, id, controlledBy, side } };
 };
 
 const battle = (turnIndex: number) =>
-  ({ initiativeOrder: [p("gob", "dm", ParticipantSide.ENEMY), p("h1", "u1"), p("h2", "u1"), p("other", "u2")], currentTurnIndex: turnIndex, status: "active" }) as unknown as BattleScene;
+    ({
+        initiativeOrder: [
+            p('gob', 'dm', ParticipantSide.ENEMY),
+            p('h1', 'u1'),
+            p('h2', 'u1'),
+            p('other', 'u2'),
+        ],
+        currentTurnIndex: turnIndex,
+        status: 'active',
+    }) as unknown as BattleScene;
 
-describe("deriveTurn", () => {
-  it("гравець з двома героями: hero — поточний, якщо це мій, інакше мій, хто ходитиме найближче", () => {
-    expect(deriveTurn(battle(2), "u1", false, null)).toMatchObject({ isMyTurn: true, hero: { basicInfo: { id: "h2" } } });
+describe('deriveTurn', () => {
+    it('гравець з двома героями: hero — поточний, якщо це мій, інакше мій, хто ходитиме найближче', () => {
+        expect(deriveTurn(battle(2), 'u1', false, null)).toMatchObject({
+            isMyTurn: true,
+            hero: { basicInfo: { id: 'h2' } },
+        });
 
-    const waiting = deriveTurn(battle(0), "u1", false, null);
+        const waiting = deriveTurn(battle(0), 'u1', false, null);
 
-    expect(waiting.isMyTurn).toBe(false);
-    expect(waiting.hero?.basicInfo.id).toBe("h1");
+        expect(waiting.isMyTurn).toBe(false);
+        expect(waiting.hero?.basicInfo.id).toBe('h1');
 
-    const later = deriveTurn(battle(3), "u1", false, null);
+        const later = deriveTurn(battle(3), 'u1', false, null);
 
-    expect(later.hero?.basicInfo.id).toBe("h1");
+        expect(later.hero?.basicInfo.id).toBe('h1');
 
-    const order = [p("h1", "u1"), p("gob", "dm", ParticipantSide.ENEMY), p("h2", "u1")];
+        const order = [
+            p('h1', 'u1'),
+            p('gob', 'dm', ParticipantSide.ENEMY),
+            p('h2', 'u1'),
+        ];
 
-    const nextUp = deriveTurn({ initiativeOrder: order, currentTurnIndex: 1, currentRound: 1, status: "active" } as unknown as BattleScene, "u1", false, null);
+        const nextUp = deriveTurn(
+            {
+                initiativeOrder: order,
+                currentTurnIndex: 1,
+                currentRound: 1,
+                status: 'active',
+            } as unknown as BattleScene,
+            'u1',
+            false,
+            null
+        );
 
-    expect(nextUp.hero?.basicInfo.id).toBe("h2");
-    expect(waiting.myParticipants.map((x) => x.basicInfo.id)).toEqual(["h1", "h2"]);
-  });
+        expect(nextUp.hero?.basicInfo.id).toBe('h2');
+        expect(waiting.myParticipants.map((x) => x.basicInfo.id)).toEqual([
+            'h1',
+            'h2',
+        ]);
+    });
 
-  it("DM: хід ворога — його; взяв керування гравцем — його", () => {
-    expect(deriveTurn(battle(0), "dm-user", true, null).isMyTurn).toBe(true);
-    expect(deriveTurn(battle(3), "dm-user", true, null)).toMatchObject({ isMyTurn: false, hero: { basicInfo: { id: "other" } } });
-    expect(deriveTurn(battle(3), "dm-user", true, "other")).toMatchObject({ isMyTurn: true, hero: { basicInfo: { id: "other" } } });
-  });
+    it('DM: хід ворога — його; взяв керування гравцем — його', () => {
+        expect(deriveTurn(battle(0), 'dm-user', true, null).isMyTurn).toBe(
+            true
+        );
+        expect(deriveTurn(battle(3), 'dm-user', true, null)).toMatchObject({
+            isMyTurn: false,
+            hero: { basicInfo: { id: 'other' } },
+        });
+        expect(deriveTurn(battle(3), 'dm-user', true, 'other')).toMatchObject({
+            isMyTurn: true,
+            hero: { basicInfo: { id: 'other' } },
+        });
+    });
 });
 
-describe("deriveTurn — завершений бій", () => {
-  it("після завершення нічий хід не активний", () => {
-    const done = { ...battle(1), status: "completed" } as unknown as BattleScene;
+describe('deriveTurn — завершений бій', () => {
+    it('після завершення нічий хід не активний', () => {
+        const done = {
+            ...battle(1),
+            status: 'completed',
+        } as unknown as BattleScene;
 
-    expect(deriveTurn(done, "u1", false, null).isMyTurn).toBe(false);
-    expect(deriveTurn(done, "dm-user", true, null).isMyTurn).toBe(false);
-  });
+        expect(deriveTurn(done, 'u1', false, null).isMyTurn).toBe(false);
+        expect(deriveTurn(done, 'dm-user', true, null).isMyTurn).toBe(false);
+    });
 });
 
-describe("резерв і очікування рішення ДМ", () => {
-  const dead = (id: string) => {
-    const e = p(id, "dm", ParticipantSide.ENEMY);
+describe('резерв і очікування рішення ДМ', () => {
+    const dead = (id: string) => {
+        const e = p(id, 'dm', ParticipantSide.ENEMY);
 
-    return { ...e, combatStats: { ...e.combatStats, currentHp: 0, status: "dead" as const } };
-  };
+        return {
+            ...e,
+            combatStats: {
+                ...e.combatStats,
+                currentHp: 0,
+                status: 'dead' as const,
+            },
+        };
+    };
 
-  const imp = { ...p("imp", "dm", ParticipantSide.ENEMY), battleData: { ...createMockParticipant().battleData, reserved: true } };
+    const imp = {
+        ...p('imp', 'dm', ParticipantSide.ENEMY),
+        battleData: { ...createMockParticipant().battleData, reserved: true },
+    };
 
-  const scene = (isDM: boolean, pendingSummons = [imp]) =>
-    ({ initiativeOrder: [p("h1", "u1"), dead("gob")], currentTurnIndex: 0, currentRound: 1, status: "active", isDM, pendingSummons }) as unknown as BattleScene;
+    const scene = (isDM: boolean, pendingSummons = [imp]) =>
+        ({
+            initiativeOrder: [p('h1', 'u1'), dead('gob')],
+            currentTurnIndex: 0,
+            currentRound: 1,
+            status: 'active',
+            isDM,
+            pendingSummons,
+        }) as unknown as BattleScene;
 
-  it("DM бачить резерв і awaiting", () => {
-    const out = deriveScene(scene(true), "dm-user", null);
+    it('DM бачить резерв і awaiting', () => {
+        const out = deriveScene(scene(true), 'dm-user', null);
 
-    expect(out.roster.reserve.map((x) => x.basicInfo.id)).toEqual(["imp"]);
-    expect(out.awaiting).toBe("victory");
-  });
+        expect(out.roster.reserve.map((x) => x.basicInfo.id)).toEqual(['imp']);
+        expect(out.awaiting).toBe('victory');
+    });
 
-  it("гравець: резерв порожній, але awaiting відомий", () => {
-    const out = deriveScene(scene(false), "u1", null);
+    it('гравець: резерв порожній, але awaiting відомий', () => {
+        const out = deriveScene(scene(false), 'u1', null);
 
-    expect(out.roster.reserve).toEqual([]);
-    expect(out.awaiting).toBe("victory");
-  });
+        expect(out.roster.reserve).toEqual([]);
+        expect(out.awaiting).toBe('victory');
+    });
 
-  it("без резерву ворогів awaiting немає; завершений бій теж не awaiting", () => {
-    expect(deriveScene(scene(true, []), "dm-user", null).awaiting).toBeNull();
-    expect(deriveScene({ ...scene(true), status: "completed" } as unknown as BattleScene, "dm-user", null).awaiting).toBeNull();
-  });
+    it('без резерву ворогів awaiting немає; завершений бій теж не awaiting', () => {
+        expect(
+            deriveScene(scene(true, []), 'dm-user', null).awaiting
+        ).toBeNull();
+        expect(
+            deriveScene(
+                {
+                    ...scene(true),
+                    status: 'completed',
+                } as unknown as BattleScene,
+                'dm-user',
+                null
+            ).awaiting
+        ).toBeNull();
+    });
 
-  it("під час awaiting ні в кого немає свого ходу", () => {
-    expect(deriveScene(scene(false), "u1", null).turn.isMyTurn).toBe(false);
-    expect(deriveScene(scene(true), "dm-user", null).turn.isMyTurn).toBe(false);
-    expect(deriveTurn(scene(false), "u1", false, null).isMyTurn).toBe(true);
-    expect(deriveTurn(scene(false), "u1", false, null, true).isMyTurn).toBe(false);
-  });
+    it('під час awaiting ні в кого немає свого ходу', () => {
+        expect(deriveScene(scene(false), 'u1', null).turn.isMyTurn).toBe(false);
+        expect(deriveScene(scene(true), 'dm-user', null).turn.isMyTurn).toBe(
+            false
+        );
+        expect(deriveTurn(scene(false), 'u1', false, null).isMyTurn).toBe(true);
+        expect(deriveTurn(scene(false), 'u1', false, null, true).isMyTurn).toBe(
+            false
+        );
+    });
 });
 
-describe("deriveScene: playerView", () => {
-  const dmHero = (id: string, side = ParticipantSide.ALLY) => p(id, "dm-user", side);
+describe('deriveScene: playerView', () => {
+    const dmHero = (id: string, side = ParticipantSide.ALLY) =>
+        p(id, 'dm-user', side);
 
-  const imp = { ...p("imp", "dm", ParticipantSide.ENEMY), battleData: { ...createMockParticipant().battleData, reserved: true } };
+    const imp = {
+        ...p('imp', 'dm', ParticipantSide.ENEMY),
+        battleData: { ...createMockParticipant().battleData, reserved: true },
+    };
 
-  const scene = (turnIndex = 0) =>
-    ({ initiativeOrder: [dmHero("mine"), p("gob", "dm", ParticipantSide.ENEMY)], currentTurnIndex: turnIndex, currentRound: 1, status: "active", isDM: true, pendingSummons: [imp] }) as unknown as BattleScene;
+    const scene = (turnIndex = 0) =>
+        ({
+            initiativeOrder: [
+                dmHero('mine'),
+                p('gob', 'dm', ParticipantSide.ENEMY),
+            ],
+            currentTurnIndex: turnIndex,
+            currentRound: 1,
+            status: 'active',
+            isDM: true,
+            pendingSummons: [imp],
+        }) as unknown as BattleScene;
 
-  it("DM + playerView: не DM, readOnly, без резерву, без свого ходу і героя", () => {
-    const out = deriveScene(scene(0), "dm-user", "gob", { playerView: true });
+    it('DM + playerView: не DM, readOnly, без резерву, без свого ходу і героя', () => {
+        const out = deriveScene(scene(0), 'dm-user', 'gob', {
+            playerView: true,
+        });
 
-    expect(out.viewer).toMatchObject({ userId: null, isDM: false, readOnly: true, canSeeEnemyHp: false });
-    expect(out.roster.reserve).toEqual([]);
-    expect(out.turn.isMyTurn).toBe(false);
-    expect(out.roster.hero).toBeNull();
-    expect(out.roster.myParticipants).toEqual([]);
-  });
+        expect(out.viewer).toMatchObject({
+            userId: null,
+            isDM: false,
+            readOnly: true,
+            canSeeEnemyHp: false,
+        });
+        expect(out.roster.reserve).toEqual([]);
+        expect(out.turn.isMyTurn).toBe(false);
+        expect(out.roster.hero).toBeNull();
+        expect(out.roster.myParticipants).toEqual([]);
+    });
 
-  it("dmControlledId ігнорується", () => {
-    const out = deriveScene(scene(1), "dm-user", "gob", { playerView: true });
+    it('dmControlledId ігнорується', () => {
+        const out = deriveScene(scene(1), 'dm-user', 'gob', {
+            playerView: true,
+        });
 
-    expect(out.turn.isMyTurn).toBe(false);
-    expect(out.roster.hero).toBeNull();
-  });
+        expect(out.turn.isMyTurn).toBe(false);
+        expect(out.roster.hero).toBeNull();
+    });
 
-  it("ворожі стати приховані як для гравця (canSeeExactStats)", () => {
-    const { viewer, roster } = deriveScene(scene(), "dm-user", null, { playerView: true });
+    it('ворожі стати приховані як для гравця (canSeeExactStats)', () => {
+        const { viewer, roster } = deriveScene(scene(), 'dm-user', null, {
+            playerView: true,
+        });
 
-    expect(canSeeExactStats(roster.enemies[0]!, viewer)).toBe(false);
-    expect(canSeeExactStats(roster.allies[0]!, viewer)).toBe(true);
-  });
+        expect(canSeeExactStats(roster.enemies[0]!, viewer)).toBe(false);
+        expect(canSeeExactStats(roster.allies[0]!, viewer)).toBe(true);
+    });
 
-  it("без опції поведінка DM незмінна; без knowledge не падає", () => {
-    const out = deriveScene(scene(0), "dm-user", null);
+    it('без опції поведінка DM незмінна; без knowledge не падає', () => {
+        const out = deriveScene(scene(0), 'dm-user', null);
 
-    expect(out.viewer).toMatchObject({ isDM: true, readOnly: false });
-    expect(out.turn.isMyTurn).toBe(true);
-    expect(out.roster.reserve).toHaveLength(1);
-  });
+        expect(out.viewer).toMatchObject({ isDM: true, readOnly: false });
+        expect(out.turn.isMyTurn).toBe(true);
+        expect(out.roster.reserve).toHaveLength(1);
+    });
 });

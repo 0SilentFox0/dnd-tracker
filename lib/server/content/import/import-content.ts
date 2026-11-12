@@ -1,407 +1,793 @@
-import type { Prisma } from "@prisma/client";
+import type { Prisma } from '@prisma/client';
 
-import "server-only";
-import { invalidateReference, type ReferenceKindValue } from "@/lib/cache/tags";
-import { AI_LIMITS } from "@/lib/constants/ai";
-import { API_ERRORS, type ErrorParams } from "@/lib/constants/api-errors";
-import type { ContentImportInput } from "@/lib/schemas/content-import";
-import { assertCan } from "@/lib/server/content/access";
-import type { AnyContentResource } from "@/lib/server/content/define-resource";
-import { ContentError } from "@/lib/server/content/errors";
-import { type KeyRow, loadKeys, tableOfKind, writeSlug } from "@/lib/server/content/import/slug";
-import { CONTENT_RESOURCES } from "@/lib/server/content/resources";
-import { withCampaignContentWrite, withCampaignRuntimeWrite } from "@/lib/server/content/write";
-import { afterContentCommit, currentContentWrite, markContentDirty } from "@/lib/server/content/write-context";
-import { rowHash } from "@/lib/server/templates/sync/hash";
-import type { Actor } from "@/lib/utils/api/actor";
-import { NEED } from "@/lib/utils/api/need";
-import { isRecord } from "@/lib/utils/common/is-record";
-import { coerceRecord, emptyCounts, IMPORT_SPECS, nameKey, refKindsOf } from "@/lib/utils/content/import";
-import { isSlug } from "@/lib/utils/templates/slug";
-import type { IdName } from "@/types/common";
-import type { ImportField, ImportIssue, ImportKind, ImportMode, ImportRecord, ImportReport, ImportRowResult, ImportSpec } from "@/types/content-import";
+import 'server-only';
+import { invalidateReference, type ReferenceKindValue } from '@/lib/cache/tags';
+import { AI_LIMITS } from '@/lib/constants/ai';
+import { API_ERRORS, type ErrorParams } from '@/lib/constants/api-errors';
+import type { ContentImportInput } from '@/lib/schemas/content-import';
+import { assertCan } from '@/lib/server/content/access';
+import type { AnyContentResource } from '@/lib/server/content/define-resource';
+import { ContentError } from '@/lib/server/content/errors';
+import {
+    type KeyRow,
+    loadKeys,
+    tableOfKind,
+    writeSlug,
+} from '@/lib/server/content/import/slug';
+import { CONTENT_RESOURCES } from '@/lib/server/content/resources';
+import {
+    withCampaignContentWrite,
+    withCampaignRuntimeWrite,
+} from '@/lib/server/content/write';
+import {
+    afterContentCommit,
+    currentContentWrite,
+    markContentDirty,
+} from '@/lib/server/content/write-context';
+import { rowHash } from '@/lib/server/templates/sync/hash';
+import type { Actor } from '@/lib/utils/api/actor';
+import { NEED } from '@/lib/utils/api/need';
+import { isRecord } from '@/lib/utils/common/is-record';
+import {
+    coerceRecord,
+    emptyCounts,
+    IMPORT_SPECS,
+    nameKey,
+    refKindsOf,
+} from '@/lib/utils/content/import';
+import { isSlug } from '@/lib/utils/templates/slug';
+import type { IdName } from '@/types/common';
+import type {
+    ImportField,
+    ImportIssue,
+    ImportKind,
+    ImportMode,
+    ImportRecord,
+    ImportReport,
+    ImportRowResult,
+    ImportSpec,
+} from '@/types/content-import';
 
 export interface ImportDeps {
-  resource(kind: ImportKind): AnyContentResource;
-  loadKeys(campaignId: string, kind: ImportKind): Promise<KeyRow[]>;
-  writeSlug(campaignId: string, kind: ImportKind, id: string, slug: string): Promise<void>;
-  invalidate?(kinds: readonly ReferenceKindValue[], campaignId: string): void;
-  transactional?: boolean;
-  skipUnchanged?: boolean;
+    resource(kind: ImportKind): AnyContentResource;
+    loadKeys(campaignId: string, kind: ImportKind): Promise<KeyRow[]>;
+    writeSlug(
+        campaignId: string,
+        kind: ImportKind,
+        id: string,
+        slug: string
+    ): Promise<void>;
+    invalidate?(kinds: readonly ReferenceKindValue[], campaignId: string): void;
+    transactional?: boolean;
+    skipUnchanged?: boolean;
 }
 
-export const DEFAULT_IMPORT_DEPS: ImportDeps = { resource: (kind) => CONTENT_RESOURCES[kind] as AnyContentResource, loadKeys, writeSlug, transactional: true };
+export const DEFAULT_IMPORT_DEPS: ImportDeps = {
+    resource: (kind) => CONTENT_RESOURCES[kind] as AnyContentResource,
+    loadKeys,
+    writeSlug,
+    transactional: true,
+};
 
-export const OFFLINE_IMPORT_DEPS: ImportDeps = { ...DEFAULT_IMPORT_DEPS, invalidate: () => undefined, skipUnchanged: true };
+export const OFFLINE_IMPORT_DEPS: ImportDeps = {
+    ...DEFAULT_IMPORT_DEPS,
+    invalidate: () => undefined,
+    skipUnchanged: true,
+};
 
-type NameIndex = { byName: Map<string, string[]>; ids: Set<string>; bySlug: Map<string, KeyRow>; slugOf: Map<string, string | null> };
+type NameIndex = {
+    byName: Map<string, string[]>;
+    ids: Set<string>;
+    bySlug: Map<string, KeyRow>;
+    slugOf: Map<string, string | null>;
+};
 
-type Plan = { row: number; name?: string; status: ImportRowResult["status"] | "pending"; op?: "create" | "update"; existingId?: string; slug?: string; storedSlug?: string | null; body?: unknown; issues: ImportIssue[] };
+type Plan = {
+    row: number;
+    name?: string;
+    status: ImportRowResult['status'] | 'pending';
+    op?: 'create' | 'update';
+    existingId?: string;
+    slug?: string;
+    storedSlug?: string | null;
+    body?: unknown;
+    issues: ImportIssue[];
+};
 
 function indexNames(rows: Array<IdName & { slug?: string | null }>): NameIndex {
-  const byName = new Map<string, string[]>();
+    const byName = new Map<string, string[]>();
 
-  for (const r of rows) byName.set(nameKey(r.name), [...(byName.get(nameKey(r.name)) ?? []), r.id]);
+    for (const r of rows)
+        byName.set(nameKey(r.name), [
+            ...(byName.get(nameKey(r.name)) ?? []),
+            r.id,
+        ]);
 
-  return { byName, ids: new Set(rows.map((r) => r.id)), bySlug: new Map(rows.flatMap((r) => (r.slug ? [[r.slug, { ...r, slug: r.slug }] as const] : []))), slugOf: new Map(rows.map((r) => [r.id, r.slug ?? null])) };
+    return {
+        byName,
+        ids: new Set(rows.map((r) => r.id)),
+        bySlug: new Map(
+            rows.flatMap((r) =>
+                r.slug ? [[r.slug, { ...r, slug: r.slug }] as const] : []
+            )
+        ),
+        slugOf: new Map(rows.map((r) => [r.id, r.slug ?? null])),
+    };
 }
 
-const err = (message: string, field?: string, extra?: Partial<ImportIssue>): ImportIssue => ({ ...(field && { field }), level: "error", message, ...extra });
+const err = (
+    message: string,
+    field?: string,
+    extra?: Partial<ImportIssue>
+): ImportIssue => ({
+    ...(field && { field }),
+    level: 'error',
+    message,
+    ...extra,
+});
 
-const hasError = (issues: ImportIssue[]) => issues.some((i) => i.level === "error");
+const hasError = (issues: ImportIssue[]) =>
+    issues.some((i) => i.level === 'error');
 
-function resolveRefs(record: ImportRecord, fields: readonly ImportField[], refs: Map<ImportKind, NameIndex>, issues: ImportIssue[], op: "create" | "update") {
-  for (const field of fields) {
-    const value = record[field.key];
+function resolveRefs(
+    record: ImportRecord,
+    fields: readonly ImportField[],
+    refs: Map<ImportKind, NameIndex>,
+    issues: ImportIssue[],
+    op: 'create' | 'update'
+) {
+    for (const field of fields) {
+        const value = record[field.key];
 
-    if (!field.ref || value === undefined) continue;
+        if (!field.ref || value === undefined) continue;
 
-    const index = refs.get(field.ref);
+        const index = refs.get(field.ref);
 
-    const kind = `contentImport.kinds.${field.ref}`;
+        const kind = `contentImport.kinds.${field.ref}`;
 
-    const resolve = (v: unknown) => {
-      const s = String(v);
+        const resolve = (v: unknown) => {
+            const s = String(v);
 
-      const id = index?.ids.has(s) ? s : index?.byName.get(nameKey(s))?.[0];
+            const id = index?.ids.has(s)
+                ? s
+                : index?.byName.get(nameKey(s))?.[0];
 
-      if (!id) issues.push({ field: field.key, level: field.required || field.strictRef ? "error" : "warning", message: "contentImport.issues.refNotFound", params: { field: field.labelKey, value: s, kind } });
+            if (!id)
+                issues.push({
+                    field: field.key,
+                    level:
+                        field.required || field.strictRef ? 'error' : 'warning',
+                    message: 'contentImport.issues.refNotFound',
+                    params: { field: field.labelKey, value: s, kind },
+                });
 
-      return id;
-    };
+            return id;
+        };
 
-    if (field.type === "refList" && Array.isArray(value)) {
-      const ids = value.map(resolve).filter((id): id is string => !!id);
+        if (field.type === 'refList' && Array.isArray(value)) {
+            const ids = value.map(resolve).filter((id): id is string => !!id);
 
-      if (op === "update" && ids.length < value.length) delete record[field.key];
-      else record[field.key] = ids;
-    } else {
-      const id = resolve(value);
+            if (op === 'update' && ids.length < value.length)
+                delete record[field.key];
+            else record[field.key] = ids;
+        } else {
+            const id = resolve(value);
 
-      if (id) record[field.key] = id;
-      else if (op === "create") record[field.key] = null;
-      else delete record[field.key];
+            if (id) record[field.key] = id;
+            else if (op === 'create') record[field.key] = null;
+            else delete record[field.key];
+        }
     }
-  }
 }
 
-function resolveNestedRefs(record: ImportRecord, fields: readonly ImportField[], refs: Map<ImportKind, NameIndex>, issues: ImportIssue[]) {
-  for (const field of fields) {
-    const nested = field.nestedRef;
+function resolveNestedRefs(
+    record: ImportRecord,
+    fields: readonly ImportField[],
+    refs: Map<ImportKind, NameIndex>,
+    issues: ImportIssue[]
+) {
+    for (const field of fields) {
+        const nested = field.nestedRef;
 
-    const value = record[field.key];
+        const value = record[field.key];
 
-    if (!nested || value === undefined) continue;
+        if (!nested || value === undefined) continue;
 
-    const index = refs.get(nested.kind);
+        const index = refs.get(nested.kind);
 
-    const kind = `contentImport.kinds.${nested.kind}`;
+        const kind = `contentImport.kinds.${nested.kind}`;
 
-    const walk = (v: unknown): unknown => {
-      if (Array.isArray(v)) return v.map(walk);
+        const walk = (v: unknown): unknown => {
+            if (Array.isArray(v)) return v.map(walk);
 
-      if (!isRecord(v)) return v;
+            if (!isRecord(v)) return v;
 
-      return Object.fromEntries(
-        Object.entries(v).map(([k, x]) => {
-          if (k !== nested.key || typeof x !== "string") return [k, walk(x)];
+            return Object.fromEntries(
+                Object.entries(v).map(([k, x]) => {
+                    if (k !== nested.key || typeof x !== 'string')
+                        return [k, walk(x)];
 
-          const id = index?.ids.has(x) ? x : index?.byName.get(nameKey(x))?.[0];
+                    const id = index?.ids.has(x)
+                        ? x
+                        : index?.byName.get(nameKey(x))?.[0];
 
-          if (!id) issues.push({ field: field.key, level: "error", message: "contentImport.issues.refNotFound", params: { field: field.labelKey, value: x, kind } });
+                    if (!id)
+                        issues.push({
+                            field: field.key,
+                            level: 'error',
+                            message: 'contentImport.issues.refNotFound',
+                            params: { field: field.labelKey, value: x, kind },
+                        });
 
-          return [k, id ?? x];
-        }),
-      );
-    };
+                    return [k, id ?? x];
+                })
+            );
+        };
 
-    record[field.key] = walk(value);
-  }
+        record[field.key] = walk(value);
+    }
 }
 
-type ZodLikeIssue = { path: PropertyKey[]; message: string; minimum?: unknown; maximum?: unknown; params?: unknown };
+type ZodLikeIssue = {
+    path: PropertyKey[];
+    message: string;
+    minimum?: unknown;
+    maximum?: unknown;
+    params?: unknown;
+};
 
-const bound = (v: unknown) => (typeof v === "number" || typeof v === "bigint" ? Number(v) : undefined);
+const bound = (v: unknown) =>
+    typeof v === 'number' || typeof v === 'bigint' ? Number(v) : undefined;
 
 function zodIssues(error: { issues: ZodLikeIssue[] }): ImportIssue[] {
-  return error.issues.map((i) => {
-    const minimum = bound(i.minimum);
+    return error.issues.map((i) => {
+        const minimum = bound(i.minimum);
 
-    const maximum = bound(i.maximum);
+        const maximum = bound(i.maximum);
 
-    return err(i.message, i.path.map(String).join(".") || undefined, { ...(minimum !== undefined && { minimum }), ...(maximum !== undefined && { maximum }), ...(isRecord(i.params) && { params: i.params as ErrorParams }) });
-  });
+        return err(i.message, i.path.map(String).join('.') || undefined, {
+            ...(minimum !== undefined && { minimum }),
+            ...(maximum !== undefined && { maximum }),
+            ...(isRecord(i.params) && { params: i.params as ErrorParams }),
+        });
+    });
 }
 
-type PlanCtx = { spec: ImportSpec; resource: AnyContentResource; mode: ImportMode; existing: NameIndex; refs: Map<ImportKind, NameIndex>; seen: Set<string>; seenSlugs: Set<string>; incomingSlugs: Set<string>; claimed: Set<string> };
+type PlanCtx = {
+    spec: ImportSpec;
+    resource: AnyContentResource;
+    mode: ImportMode;
+    existing: NameIndex;
+    refs: Map<ImportKind, NameIndex>;
+    seen: Set<string>;
+    seenSlugs: Set<string>;
+    incomingSlugs: Set<string>;
+    claimed: Set<string>;
+};
 
-function planRow(raw: Record<string, unknown>, row: number, ctx: PlanCtx): Plan {
-  const { slug: rawSlug, ...fields } = raw;
+function planRow(
+    raw: Record<string, unknown>,
+    row: number,
+    ctx: PlanCtx
+): Plan {
+    const { slug: rawSlug, ...fields } = raw;
 
-  const { value: record, issues } = coerceRecord(fields, ctx.spec.fields);
+    const { value: record, issues } = coerceRecord(fields, ctx.spec.fields);
 
-  const name = typeof record.name === "string" ? record.name : undefined;
+    const name = typeof record.name === 'string' ? record.name : undefined;
 
-  if (!name) return { row, status: "error", issues: [...issues, err("contentImport.issues.noName", "name")] };
+    if (!name)
+        return {
+            row,
+            status: 'error',
+            issues: [...issues, err('contentImport.issues.noName', 'name')],
+        };
 
-  const slug = typeof rawSlug === "string" && rawSlug ? rawSlug : undefined;
+    const slug = typeof rawSlug === 'string' && rawSlug ? rawSlug : undefined;
 
-  if (slug !== undefined && !isSlug(slug)) return { row, name, status: "error", issues: [...issues, err("contentImport.issues.invalidSlug", "slug")] };
+    if (slug !== undefined && !isSlug(slug))
+        return {
+            row,
+            name,
+            status: 'error',
+            issues: [
+                ...issues,
+                err('contentImport.issues.invalidSlug', 'slug'),
+            ],
+        };
 
-  if (slug && ctx.seenSlugs.has(slug)) return { row, name, status: "error", issues: [...issues, err("contentImport.issues.duplicateSlug", "slug")] };
+    if (slug && ctx.seenSlugs.has(slug))
+        return {
+            row,
+            name,
+            status: 'error',
+            issues: [
+                ...issues,
+                err('contentImport.issues.duplicateSlug', 'slug'),
+            ],
+        };
 
-  const key = nameKey(name);
+    const key = nameKey(name);
 
-  if (ctx.seen.has(key)) {
-    const message = "contentImport.issues.duplicateName";
+    if (ctx.seen.has(key)) {
+        const message = 'contentImport.issues.duplicateName';
 
-    return ctx.mode === "skip" ? { row, name, status: "skipped", issues: [...issues, { level: "warning", message }] } : { row, name, status: "error", issues: [...issues, err(message, "name")] };
-  }
+        return ctx.mode === 'skip'
+            ? {
+                  row,
+                  name,
+                  status: 'skipped',
+                  issues: [...issues, { level: 'warning', message }],
+              }
+            : {
+                  row,
+                  name,
+                  status: 'error',
+                  issues: [...issues, err(message, 'name')],
+              };
+    }
 
-  ctx.seen.add(key);
+    ctx.seen.add(key);
 
-  if (slug) ctx.seenSlugs.add(slug);
+    if (slug) ctx.seenSlugs.add(slug);
 
-  const bySlug = slug ? ctx.existing.bySlug.get(slug) : undefined;
+    const bySlug = slug ? ctx.existing.bySlug.get(slug) : undefined;
 
-  const byName = (ctx.existing.byName.get(key) ?? []).filter((id) => {
-    const stored = ctx.existing.slugOf.get(id);
+    const byName = (ctx.existing.byName.get(key) ?? []).filter((id) => {
+        const stored = ctx.existing.slugOf.get(id);
 
-    return !ctx.claimed.has(id) && (!stored || stored === slug || !ctx.incomingSlugs.has(stored));
-  });
+        return (
+            !ctx.claimed.has(id) &&
+            (!stored || stored === slug || !ctx.incomingSlugs.has(stored))
+        );
+    });
 
-  const matches = bySlug ? [bySlug.id] : byName;
+    const matches = bySlug ? [bySlug.id] : byName;
 
-  for (const id of matches) ctx.claimed.add(id);
+    for (const id of matches) ctx.claimed.add(id);
 
-  if (matches.length > 0 && ctx.mode === "create") return { row, name, status: "error", issues: [...issues, err("contentImport.issues.alreadyExists", "name", { params: { name } })] };
+    if (matches.length > 0 && ctx.mode === 'create')
+        return {
+            row,
+            name,
+            status: 'error',
+            issues: [
+                ...issues,
+                err('contentImport.issues.alreadyExists', 'name', {
+                    params: { name },
+                }),
+            ],
+        };
 
-  if (matches.length > 0 && ctx.mode === "skip") return { row, name, status: "skipped", issues };
+    if (matches.length > 0 && ctx.mode === 'skip')
+        return { row, name, status: 'skipped', issues };
 
-  const op = matches.length > 0 ? "update" : "create";
+    const op = matches.length > 0 ? 'update' : 'create';
 
-  if (matches.length > 1) issues.push({ level: "warning", message: "contentImport.issues.multipleMatches", params: { name } });
+    if (matches.length > 1)
+        issues.push({
+            level: 'warning',
+            message: 'contentImport.issues.multipleMatches',
+            params: { name },
+        });
 
-  resolveRefs(record, ctx.spec.fields, ctx.refs, issues, op);
+    resolveRefs(record, ctx.spec.fields, ctx.refs, issues, op);
 
-  resolveNestedRefs(record, ctx.spec.fields, ctx.refs, issues);
+    resolveNestedRefs(record, ctx.spec.fields, ctx.refs, issues);
 
-  if (hasError(issues)) return { row, name, status: "error", issues };
+    if (hasError(issues)) return { row, name, status: 'error', issues };
 
-  const body = ctx.spec.toBody ? ctx.spec.toBody(record, op) : record;
+    const body = ctx.spec.toBody ? ctx.spec.toBody(record, op) : record;
 
-  const parsed = (op === "create" ? ctx.resource.schemas.create : ctx.resource.schemas.update).safeParse(body);
+    const parsed = (
+        op === 'create'
+            ? ctx.resource.schemas.create
+            : ctx.resource.schemas.update
+    ).safeParse(body);
 
-  if (!parsed.success) return { row, name, status: "error", issues: [...issues, ...zodIssues(parsed.error)] };
+    if (!parsed.success)
+        return {
+            row,
+            name,
+            status: 'error',
+            issues: [...issues, ...zodIssues(parsed.error)],
+        };
 
-  return { row, name, status: "pending", op, existingId: matches[0], slug, storedSlug: matches[0] ? (ctx.existing.slugOf.get(matches[0]) ?? null) : null, body: parsed.data, issues };
+    return {
+        row,
+        name,
+        status: 'pending',
+        op,
+        existingId: matches[0],
+        slug,
+        storedSlug: matches[0]
+            ? (ctx.existing.slugOf.get(matches[0]) ?? null)
+            : null,
+        body: parsed.data,
+        issues,
+    };
 }
 
 function contentErrorIssues(error: ContentError): ImportIssue[] {
-  const extra = Array.isArray(error.issues)
-    ? error.issues.map((i) =>
-        isRecord(i) && typeof i.message === "string" ? err(i.message, Array.isArray(i.path) ? i.path.map(String).join(".") || undefined : undefined, { ...(bound(i.minimum) !== undefined && { minimum: bound(i.minimum) }), ...(bound(i.maximum) !== undefined && { maximum: bound(i.maximum) }), ...(isRecord(i.params) && { params: i.params as ErrorParams }) }) : err(typeof i === "string" ? i : JSON.stringify(i)),
-      )
-    : [];
+    const extra = Array.isArray(error.issues)
+        ? error.issues.map((i) =>
+              isRecord(i) && typeof i.message === 'string'
+                  ? err(
+                        i.message,
+                        Array.isArray(i.path)
+                            ? i.path.map(String).join('.') || undefined
+                            : undefined,
+                        {
+                            ...(bound(i.minimum) !== undefined && {
+                                minimum: bound(i.minimum),
+                            }),
+                            ...(bound(i.maximum) !== undefined && {
+                                maximum: bound(i.maximum),
+                            }),
+                            ...(isRecord(i.params) && {
+                                params: i.params as ErrorParams,
+                            }),
+                        }
+                    )
+                  : err(typeof i === 'string' ? i : JSON.stringify(i))
+          )
+        : [];
 
-  return [err(error.message, undefined, error.params && { params: error.params }), ...extra];
+    return [
+        err(error.message, undefined, error.params && { params: error.params }),
+        ...extra,
+    ];
 }
 
-async function writePlan(resource: AnyContentResource, actor: Actor, plan: Plan, kind: ImportKind, deps: ImportDeps) {
-  let id = plan.existingId as string;
+async function writePlan(
+    resource: AnyContentResource,
+    actor: Actor,
+    plan: Plan,
+    kind: ImportKind,
+    deps: ImportDeps
+) {
+    let id = plan.existingId as string;
 
-  if (plan.op === "create") id = ((await resource.create(actor, plan.body)) as { id: string }).id;
-  else {
-    const existing = await resource.find(actor, id, "write");
+    if (plan.op === 'create')
+        id = ((await resource.create(actor, plan.body)) as { id: string }).id;
+    else {
+        const existing = await resource.find(actor, id, 'write');
 
-    if (!existing) throw new ContentError(resource.notFound, 404);
+        if (!existing) throw new ContentError(resource.notFound, 404);
 
-    await resource.update(actor, existing, plan.body);
-  }
+        await resource.update(actor, existing, plan.body);
+    }
 
-  if (plan.slug && plan.slug !== plan.storedSlug) await deps.writeSlug(actor.campaignId, kind, id, plan.slug);
+    if (plan.slug && plan.slug !== plan.storedSlug)
+        await deps.writeSlug(actor.campaignId, kind, id, plan.slug);
 }
 
 class Rollback extends Error {
-  constructor(readonly unchanged: boolean) {
-    super("rollback");
-  }
+    constructor(readonly unchanged: boolean) {
+        super('rollback');
+    }
 }
 
 /** Applies the update inside a transaction and compares the stored row before and after; an unchanged row is rolled back. */
-async function applyIfChanged(resource: AnyContentResource, actor: Actor, plan: Plan, kind: ImportKind, deps: ImportDeps, commit: boolean): Promise<boolean> {
-  const table = tableOfKind(kind);
+async function applyIfChanged(
+    resource: AnyContentResource,
+    actor: Actor,
+    plan: Plan,
+    kind: ImportKind,
+    deps: ImportDeps,
+    commit: boolean
+): Promise<boolean> {
+    const table = tableOfKind(kind);
 
-  try {
-    await withCampaignContentWrite(actor.campaignId, async () => {
-      const before = (await resource.find(actor, plan.existingId as string, "write")) as Record<string, unknown> | null;
+    try {
+        await withCampaignContentWrite(actor.campaignId, async () => {
+            const before = (await resource.find(
+                actor,
+                plan.existingId as string,
+                'write'
+            )) as Record<string, unknown> | null;
 
-      if (!before) throw new ContentError(resource.notFound, 404);
+            if (!before) throw new ContentError(resource.notFound, 404);
 
-      await resource.update(actor, before, plan.body);
+            await resource.update(actor, before, plan.body);
 
-      const after = (await resource.find(actor, plan.existingId as string, "write")) as Record<string, unknown>;
+            const after = (await resource.find(
+                actor,
+                plan.existingId as string,
+                'write'
+            )) as Record<string, unknown>;
 
-      if (rowHash(before, table) === rowHash(after, table)) throw new Rollback(true);
+            if (rowHash(before, table) === rowHash(after, table))
+                throw new Rollback(true);
 
-      if (!commit) throw new Rollback(false);
+            if (!commit) throw new Rollback(false);
 
-      if (plan.slug && plan.slug !== plan.storedSlug) await deps.writeSlug(actor.campaignId, kind, plan.existingId as string, plan.slug);
-    });
+            if (plan.slug && plan.slug !== plan.storedSlug)
+                await deps.writeSlug(
+                    actor.campaignId,
+                    kind,
+                    plan.existingId as string,
+                    plan.slug
+                );
+        });
 
-    return true;
-  } catch (error) {
-    if (!(error instanceof Rollback)) throw error;
+        return true;
+    } catch (error) {
+        if (!(error instanceof Rollback)) throw error;
 
-    if (error.unchanged && commit && plan.slug && plan.slug !== plan.storedSlug) await withCampaignRuntimeWrite(actor.campaignId, () => deps.writeSlug(actor.campaignId, kind, plan.existingId as string, plan.slug as string));
+        if (
+            error.unchanged &&
+            commit &&
+            plan.slug &&
+            plan.slug !== plan.storedSlug
+        )
+            await withCampaignRuntimeWrite(actor.campaignId, () =>
+                deps.writeSlug(
+                    actor.campaignId,
+                    kind,
+                    plan.existingId as string,
+                    plan.slug as string
+                )
+            );
 
-    return !error.unchanged;
-  }
+        return !error.unchanged;
+    }
 }
 
-async function prepareBody(resource: AnyContentResource, actor: Actor, plan: Plan, create: boolean) {
-  if (create) {
-    if (resource.prepareCreate) plan.body = await resource.prepareCreate(actor, plan.body);
+async function prepareBody(
+    resource: AnyContentResource,
+    actor: Actor,
+    plan: Plan,
+    create: boolean
+) {
+    if (create) {
+        if (resource.prepareCreate)
+            plan.body = await resource.prepareCreate(actor, plan.body);
 
-    return;
-  }
+        return;
+    }
 
-  if (!resource.prepareUpdate) return;
+    if (!resource.prepareUpdate) return;
 
-  const current = await resource.find(actor, plan.existingId as string, "write");
+    const current = await resource.find(
+        actor,
+        plan.existingId as string,
+        'write'
+    );
 
-  if (!current) throw new ContentError(resource.notFound, 404);
+    if (!current) throw new ContentError(resource.notFound, 404);
 
-  plan.body = await resource.prepareUpdate(actor, current, plan.body);
+    plan.body = await resource.prepareUpdate(actor, current, plan.body);
 }
 
-async function checkPlan(resource: AnyContentResource, actor: Actor, plan: Plan): Promise<ImportRowResult> {
-  if (plan.status !== "pending" || !resource.checkImport) return toResult(plan);
+async function checkPlan(
+    resource: AnyContentResource,
+    actor: Actor,
+    plan: Plan
+): Promise<ImportRowResult> {
+    if (plan.status !== 'pending' || !resource.checkImport)
+        return toResult(plan);
 
-  try {
-    await resource.checkImport(actor, plan.body);
+    try {
+        await resource.checkImport(actor, plan.body);
 
-    return toResult(plan);
-  } catch (error) {
-    if (!(error instanceof ContentError)) throw error;
+        return toResult(plan);
+    } catch (error) {
+        if (!(error instanceof ContentError)) throw error;
 
-    return { ...toResult(plan), status: "error", issues: [...plan.issues, ...contentErrorIssues(error)] };
-  }
+        return {
+            ...toResult(plan),
+            status: 'error',
+            issues: [...plan.issues, ...contentErrorIssues(error)],
+        };
+    }
 }
 
-const toResult = ({ row, name, status, op, issues }: Plan): ImportRowResult => ({
-  row,
-  ...(name && { name }),
-  status: status === "pending" ? (op === "update" ? "updated" : "created") : status,
-  issues,
+const toResult = ({
+    row,
+    name,
+    status,
+    op,
+    issues,
+}: Plan): ImportRowResult => ({
+    row,
+    ...(name && { name }),
+    status:
+        status === 'pending'
+            ? op === 'update'
+                ? 'updated'
+                : 'created'
+            : status,
+    issues,
 });
 
 function report(dryRun: boolean, results: ImportRowResult[]): ImportReport {
-  const counts = emptyCounts();
+    const counts = emptyCounts();
 
-  for (const r of results) counts[r.status] += 1;
+    for (const r of results) counts[r.status] += 1;
 
-  return { dryRun, results, counts };
+    return { dryRun, results, counts };
 }
 
-export async function importContent(actor: Actor, kind: ImportKind, input: ContentImportInput, deps: ImportDeps = DEFAULT_IMPORT_DEPS): Promise<ImportReport> {
-  assertCan(actor, NEED.write);
+export async function importContent(
+    actor: Actor,
+    kind: ImportKind,
+    input: ContentImportInput,
+    deps: ImportDeps = DEFAULT_IMPORT_DEPS
+): Promise<ImportReport> {
+    assertCan(actor, NEED.write);
 
-  const spec = IMPORT_SPECS[kind];
+    const spec = IMPORT_SPECS[kind];
 
-  const resource = deps.resource(kind);
+    const resource = deps.resource(kind);
 
-  const refKinds = refKindsOf(spec);
+    const refKinds = refKindsOf(spec);
 
-  const [own, ...refLists] = await Promise.all([deps.loadKeys(actor.campaignId, kind), ...refKinds.map((k) => deps.loadKeys(actor.campaignId, k))]);
+    const [own, ...refLists] = await Promise.all([
+        deps.loadKeys(actor.campaignId, kind),
+        ...refKinds.map((k) => deps.loadKeys(actor.campaignId, k)),
+    ]);
 
-  const ctx: PlanCtx = { spec, resource, mode: input.mode, existing: indexNames(own), refs: new Map(refKinds.map((k, i) => [k, indexNames(refLists[i])])), seen: new Set(), seenSlugs: new Set(), incomingSlugs: new Set(input.rows.flatMap((r) => (typeof r.slug === "string" && r.slug ? [r.slug] : []))), claimed: new Set() };
+    const ctx: PlanCtx = {
+        spec,
+        resource,
+        mode: input.mode,
+        existing: indexNames(own),
+        refs: new Map(refKinds.map((k, i) => [k, indexNames(refLists[i])])),
+        seen: new Set(),
+        seenSlugs: new Set(),
+        incomingSlugs: new Set(
+            input.rows.flatMap((r) =>
+                typeof r.slug === 'string' && r.slug ? [r.slug] : []
+            )
+        ),
+        claimed: new Set(),
+    };
 
-  const plans = input.rows.map((raw, i) => planRow(raw, i + 1, ctx));
+    const plans = input.rows.map((raw, i) => planRow(raw, i + 1, ctx));
 
-  if (input.dryRun) {
-    const checked = await Promise.all(plans.map((plan) => checkPlan(resource, actor, plan)));
+    if (input.dryRun) {
+        const checked = await Promise.all(
+            plans.map((plan) => checkPlan(resource, actor, plan))
+        );
 
-    if (!deps.skipUnchanged) return report(true, checked);
+        if (!deps.skipUnchanged) return report(true, checked);
 
-    for (const [i, plan] of plans.entries()) {
-      if (plan.status !== "pending" || plan.op !== "update" || checked[i].status !== "updated") continue;
+        for (const [i, plan] of plans.entries()) {
+            if (
+                plan.status !== 'pending' ||
+                plan.op !== 'update' ||
+                checked[i].status !== 'updated'
+            )
+                continue;
 
-      await prepareBody(resource, actor, plan, false);
+            await prepareBody(resource, actor, plan, false);
 
-      if (!(await applyIfChanged(resource, actor, plan, kind, deps, false))) checked[i] = { ...checked[i], status: "skipped" };
-    }
-
-    return report(true, checked);
-  }
-
-  const results: ImportRowResult[] = [];
-
-  let wrote = false;
-
-  for (const plan of plans) {
-    if (plan.status !== "pending") {
-      results.push(toResult(plan));
-      continue;
-    }
-
-    try {
-      await prepareBody(resource, actor, plan, plan.op === "create");
-
-      if (plan.op === "update" && deps.skipUnchanged) {
-        if (await applyIfChanged(resource, actor, plan, kind, deps, true)) {
-          wrote = true;
-          results.push(toResult(plan));
-        } else {
-          plan.status = "skipped";
-          results.push(toResult(plan));
+            if (
+                !(await applyIfChanged(
+                    resource,
+                    actor,
+                    plan,
+                    kind,
+                    deps,
+                    false
+                ))
+            )
+                checked[i] = { ...checked[i], status: 'skipped' };
         }
 
-        continue;
-      }
-
-      if (deps.transactional) {
-        const current = currentContentWrite();
-
-        if (current) {
-          const tx = current.db as Prisma.TransactionClient;
-
-          await tx.$executeRaw`SAVEPOINT assistant_import_row`;
-          try {
-            await writePlan(resource, actor, plan, kind, deps);
-            markContentDirty();
-            await tx.$executeRaw`RELEASE SAVEPOINT assistant_import_row`;
-          } catch (error) {
-            await tx.$executeRaw`ROLLBACK TO SAVEPOINT assistant_import_row`;
-            await tx.$executeRaw`RELEASE SAVEPOINT assistant_import_row`;
-            throw error;
-          }
-        } else await withCampaignContentWrite(actor.campaignId, () => writePlan(resource, actor, plan, kind, deps));
-      }
-      else await writePlan(resource, actor, plan, kind, deps);
-
-      wrote = true;
-      results.push(toResult(plan));
-    } catch (error) {
-      if (!(error instanceof ContentError)) console.error("[content import]", kind, error instanceof Error ? error.name : "unknown");
-
-      results.push({ ...toResult(plan), status: "error", issues: [...plan.issues, ...(error instanceof ContentError ? contentErrorIssues(error) : [err(API_ERRORS.IMPORT_ROW_FAILED)])] });
+        return report(true, checked);
     }
-  }
 
-  if (wrote && resource.invalidates.length > 0) afterContentCommit(() => (deps.invalidate ?? invalidateReference)(resource.invalidates, actor.campaignId));
+    const results: ImportRowResult[] = [];
 
-  return report(false, results);
+    let wrote = false;
+
+    for (const plan of plans) {
+        if (plan.status !== 'pending') {
+            results.push(toResult(plan));
+            continue;
+        }
+
+        try {
+            await prepareBody(resource, actor, plan, plan.op === 'create');
+
+            if (plan.op === 'update' && deps.skipUnchanged) {
+                if (
+                    await applyIfChanged(
+                        resource,
+                        actor,
+                        plan,
+                        kind,
+                        deps,
+                        true
+                    )
+                ) {
+                    wrote = true;
+                    results.push(toResult(plan));
+                } else {
+                    plan.status = 'skipped';
+                    results.push(toResult(plan));
+                }
+
+                continue;
+            }
+
+            if (deps.transactional) {
+                const current = currentContentWrite();
+
+                if (current) {
+                    const tx = current.db as Prisma.TransactionClient;
+
+                    await tx.$executeRaw`SAVEPOINT assistant_import_row`;
+                    try {
+                        await writePlan(resource, actor, plan, kind, deps);
+                        markContentDirty();
+                        await tx.$executeRaw`RELEASE SAVEPOINT assistant_import_row`;
+                    } catch (error) {
+                        await tx.$executeRaw`ROLLBACK TO SAVEPOINT assistant_import_row`;
+                        await tx.$executeRaw`RELEASE SAVEPOINT assistant_import_row`;
+                        throw error;
+                    }
+                } else
+                    await withCampaignContentWrite(actor.campaignId, () =>
+                        writePlan(resource, actor, plan, kind, deps)
+                    );
+            } else await writePlan(resource, actor, plan, kind, deps);
+
+            wrote = true;
+            results.push(toResult(plan));
+        } catch (error) {
+            if (!(error instanceof ContentError))
+                console.error(
+                    '[content import]',
+                    kind,
+                    error instanceof Error ? error.name : 'unknown'
+                );
+
+            results.push({
+                ...toResult(plan),
+                status: 'error',
+                issues: [
+                    ...plan.issues,
+                    ...(error instanceof ContentError
+                        ? contentErrorIssues(error)
+                        : [err(API_ERRORS.IMPORT_ROW_FAILED)]),
+                ],
+            });
+        }
+    }
+
+    if (wrote && resource.invalidates.length > 0)
+        afterContentCommit(() =>
+            (deps.invalidate ?? invalidateReference)(
+                resource.invalidates,
+                actor.campaignId
+            )
+        );
+
+    return report(false, results);
 }
 
 export function compactImportReport(r: ImportReport, limit = 50) {
-  const notable = r.results.filter((x) => x.status === "error" || x.issues.length > 0);
+    const notable = r.results.filter(
+        (x) => x.status === 'error' || x.issues.length > 0
+    );
 
-  const compact = (n: number) => ({ dryRun: r.dryRun, counts: r.counts, rows: notable.slice(0, n), omitted: Math.max(0, notable.length - n) });
+    const compact = (n: number) => ({
+        dryRun: r.dryRun,
+        counts: r.counts,
+        rows: notable.slice(0, n),
+        omitted: Math.max(0, notable.length - n),
+    });
 
-  let n = limit;
+    let n = limit;
 
-  while (n > 1 && JSON.stringify(compact(n)).length > AI_LIMITS.toolResultChars) n = Math.floor(n / 2);
+    while (
+        n > 1 &&
+        JSON.stringify(compact(n)).length > AI_LIMITS.toolResultChars
+    )
+        n = Math.floor(n / 2);
 
-  return compact(n);
+    return compact(n);
 }

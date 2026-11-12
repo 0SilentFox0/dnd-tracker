@@ -1,37 +1,59 @@
-import type { AbilitySource, DerivedAbility, ResolvedAbility } from "@/types/abilities";
-import type { LogLine } from "@/types/text";
+import type {
+    AbilitySource,
+    DerivedAbility,
+    ResolvedAbility,
+} from '@/types/abilities';
+import type { LogLine } from '@/types/text';
 
 const RANK: Record<string, number> = { basic: 1, advanced: 2, expert: 3 };
 
 export function abilityKey(source: AbilitySource, abilityId: string): string {
-  return `${source.type}:${source.id}:${abilityId}`;
+    return `${source.type}:${source.id}:${abilityId}`;
 }
 
-export const abilityLabel = (a: Pick<DerivedAbility, "name" | "label">): LogLine => a.label ?? a.name;
+export const abilityLabel = (
+    a: Pick<DerivedAbility, 'name' | 'label'>
+): LogLine => a.label ?? a.name;
 
-export function resolveAbilities(source: AbilitySource, abilities: DerivedAbility[]): ResolvedAbility[] {
-  return abilities.map((a) => ({ ...a, source, key: abilityKey(source, a.id) }));
+export function resolveAbilities(
+    source: AbilitySource,
+    abilities: DerivedAbility[]
+): ResolvedAbility[] {
+    return abilities.map((a) => ({
+        ...a,
+        source,
+        key: abilityKey(source, a.id),
+    }));
 }
 
 function isLevelLine(source: AbilitySource): boolean {
-  return source.line?.levelNode === true;
+    return source.line?.levelNode === true;
 }
 
 // «Найвищий рівень у лінії»: рівні гілки групуються за mainSkillId, решта — за власним id.
-export function pickHighestPerLine<T>(items: { item: T; source: AbilitySource }[]): { item: T; source: AbilitySource }[] {
-  const byKey = new Map<string, { item: T; source: AbilitySource }>();
+export function pickHighestPerLine<T>(
+    items: { item: T; source: AbilitySource }[]
+): { item: T; source: AbilitySource }[] {
+    const byKey = new Map<string, { item: T; source: AbilitySource }>();
 
-  for (const entry of items) {
-    const line = entry.source.line;
+    for (const entry of items) {
+        const line = entry.source.line;
 
-    const key = line && isLevelLine(entry.source) ? `line:${line.mainSkillId}` : `skill:${entry.source.id}`;
+        const key =
+            line && isLevelLine(entry.source)
+                ? `line:${line.mainSkillId}`
+                : `skill:${entry.source.id}`;
 
-    const existing = byKey.get(key);
+        const existing = byKey.get(key);
 
-    const rank = RANK[line?.level ?? "basic"] ?? 1;
+        const rank = RANK[line?.level ?? 'basic'] ?? 1;
 
-    if (!existing || rank > (RANK[existing.source.line?.level ?? "basic"] ?? 1)) byKey.set(key, entry);
-  }
+        if (
+            !existing ||
+            rank > (RANK[existing.source.line?.level ?? 'basic'] ?? 1)
+        )
+            byKey.set(key, entry);
+    }
 
-  return [...byKey.values()];
+    return [...byKey.values()];
 }

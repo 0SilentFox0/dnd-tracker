@@ -1,52 +1,100 @@
-import { API_ERRORS } from "@/lib/constants/api-errors";
-import { ParticipantSide } from "@/lib/constants/battle";
-import { findParticipant, isActive, isAirborne } from "@/lib/utils/abilities/engine/core/participants";
-import { deadTargetRules, isEligibleDeadTarget } from "@/lib/utils/abilities/target-rules";
-import { isHostile } from "@/lib/utils/battle/modes/engine";
-import { BattleRuleError } from "@/lib/utils/battle/store/errors";
-import { bonusTargetSide, needsBonusTarget } from "@/lib/utils/battle/view";
-import type { ResolvedAbility } from "@/types/abilities";
-import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
+import { API_ERRORS } from '@/lib/constants/api-errors';
+import { ParticipantSide } from '@/lib/constants/battle';
+import {
+    findParticipant,
+    isActive,
+    isAirborne,
+} from '@/lib/utils/abilities/engine/core/participants';
+import {
+    deadTargetRules,
+    isEligibleDeadTarget,
+} from '@/lib/utils/abilities/target-rules';
+import { isHostile } from '@/lib/utils/battle/modes/engine';
+import { BattleRuleError } from '@/lib/utils/battle/store/errors';
+import { bonusTargetSide, needsBonusTarget } from '@/lib/utils/battle/view';
+import type { ResolvedAbility } from '@/types/abilities';
+import type { BattleMapConfig, BattleParticipant } from '@/types/battle';
 
-export const abilityMaxTargets = (a: ResolvedAbility): number => a.maxTargets ?? 1;
+export const abilityMaxTargets = (a: ResolvedAbility): number =>
+    a.maxTargets ?? 1;
 
-export function assertAbilityTargets(ability: ResolvedAbility, ps: BattleParticipant[], rawTargetIds: string[], ctx: { owner?: BattleParticipant; onMap?: boolean; map?: BattleMapConfig | null } = {}): string[] {
-  const { owner, onMap = false, map } = ctx;
+export function assertAbilityTargets(
+    ability: ResolvedAbility,
+    ps: BattleParticipant[],
+    rawTargetIds: string[],
+    ctx: {
+        owner?: BattleParticipant;
+        onMap?: boolean;
+        map?: BattleMapConfig | null;
+    } = {}
+): string[] {
+    const { owner, onMap = false, map } = ctx;
 
-  const targetIds = [...new Set(rawTargetIds)];
+    const targetIds = [...new Set(rawTargetIds)];
 
-  if (targetIds.length > abilityMaxTargets(ability)) throw new BattleRuleError("invalid_target", API_ERRORS.ABILITY_TOO_MANY_TARGETS);
+    if (targetIds.length > abilityMaxTargets(ability))
+        throw new BattleRuleError(
+            'invalid_target',
+            API_ERRORS.ABILITY_TOO_MANY_TARGETS
+        );
 
-  const targets = targetIds.map((id) => findParticipant(ps, id));
+    const targets = targetIds.map((id) => findParticipant(ps, id));
 
-  if (targets.some((t) => !t)) throw new BattleRuleError("invalid_target", API_ERRORS.NOT_FOUND);
+    if (targets.some((t) => !t))
+        throw new BattleRuleError('invalid_target', API_ERRORS.NOT_FOUND);
 
-  if (targets.some((t) => t && isAirborne(t))) throw new BattleRuleError("invalid_target", API_ERRORS.TARGET_AIRBORNE);
+    if (targets.some((t) => t && isAirborne(t)))
+        throw new BattleRuleError('invalid_target', API_ERRORS.TARGET_AIRBORNE);
 
-  if (targets.length === 0 && needsBonusTarget(ability, onMap)) {
-    throw new BattleRuleError("invalid_target", deadTargetRules(ability).requiresDead ? API_ERRORS.BONUS_TARGET_MUST_BE_DEAD : API_ERRORS.ABILITY_TARGET_REQUIRED);
-  }
-
-  const rules = deadTargetRules(ability);
-
-  if (rules.requiresDead) {
-    for (const t of targets) {
-      if (t && isActive(t)) throw new BattleRuleError("invalid_target", API_ERRORS.BONUS_TARGET_MUST_BE_DEAD);
-
-      if (t && !isEligibleDeadTarget(rules, t, owner)) throw new BattleRuleError("invalid_target", API_ERRORS.ABILITY_TARGET_INVALID);
+    if (targets.length === 0 && needsBonusTarget(ability, onMap)) {
+        throw new BattleRuleError(
+            'invalid_target',
+            deadTargetRules(ability).requiresDead
+                ? API_ERRORS.BONUS_TARGET_MUST_BE_DEAD
+                : API_ERRORS.ABILITY_TARGET_REQUIRED
+        );
     }
-  }
 
-  // UI пропонує лише ворогів; без цього застарілий клієнт міг повісити «Мисливця» на союзника
-  if (!rules.requiresDead && owner && bonusTargetSide(ability) === ParticipantSide.ENEMY && targets.some((t) => t && !isHostile(map, owner, t))) {
-    throw new BattleRuleError("invalid_target", API_ERRORS.ABILITY_TARGET_INVALID);
-  }
+    const rules = deadTargetRules(ability);
 
-  return targetIds;
+    if (rules.requiresDead) {
+        for (const t of targets) {
+            if (t && isActive(t))
+                throw new BattleRuleError(
+                    'invalid_target',
+                    API_ERRORS.BONUS_TARGET_MUST_BE_DEAD
+                );
+
+            if (t && !isEligibleDeadTarget(rules, t, owner))
+                throw new BattleRuleError(
+                    'invalid_target',
+                    API_ERRORS.ABILITY_TARGET_INVALID
+                );
+        }
+    }
+
+    // UI пропонує лише ворогів; без цього застарілий клієнт міг повісити «Мисливця» на союзника
+    if (
+        !rules.requiresDead &&
+        owner &&
+        bonusTargetSide(ability) === ParticipantSide.ENEMY &&
+        targets.some((t) => t && !isHostile(map, owner, t))
+    ) {
+        throw new BattleRuleError(
+            'invalid_target',
+            API_ERRORS.ABILITY_TARGET_INVALID
+        );
+    }
+
+    return targetIds;
 }
 
-export function toggleAbilityTarget(selected: string[], id: string, max: number): string[] {
-  if (selected.includes(id)) return selected.filter((x) => x !== id);
+export function toggleAbilityTarget(
+    selected: string[],
+    id: string,
+    max: number
+): string[] {
+    if (selected.includes(id)) return selected.filter((x) => x !== id);
 
-  return selected.length >= max ? selected : [...selected, id];
+    return selected.length >= max ? selected : [...selected, id];
 }

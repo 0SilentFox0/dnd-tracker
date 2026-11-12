@@ -1,66 +1,96 @@
-"use client";
+'use client';
 
-import { useCallback } from "react";
+import { useCallback } from 'react';
 import {
-  type QueryKey,
-  useMutation,
-  type UseMutationOptions,
-  useQueryClient,
-} from "@tanstack/react-query";
+    type QueryKey,
+    useMutation,
+    type UseMutationOptions,
+    useQueryClient,
+} from '@tanstack/react-query';
 
-import { useOptionalNotify } from "./useNotify";
+import { useOptionalNotify } from './useNotify';
 
-type Options<TData, TError, TVariables, TContext> = UseMutationOptions<TData, TError, TVariables, TContext>;
+type Options<TData, TError, TVariables, TContext> = UseMutationOptions<
+    TData,
+    TError,
+    TVariables,
+    TContext
+>;
 
 // useMutation + invalidateQueries for every key; extra onSuccess runs after invalidation
 export function useCrudMutation<
-  TData = unknown,
-  TVariables = void,
-  TError = Error,
-  TContext = unknown,
+    TData = unknown,
+    TVariables = void,
+    TError = Error,
+    TContext = unknown,
 >(options: {
-  mutationFn: (variables: TVariables) => Promise<TData>;
-  invalidateKeys?: QueryKey[] | ((data: TData, variables: TVariables) => QueryKey[]);
-  /** shown in a notice when the mutation fails */
-  errorText?: string;
-  /** mutateAsync resolves only after the invalidated queries refetched */
-  awaitInvalidation?: boolean;
-  onMutate?: Options<TData, TError, TVariables, TContext>["onMutate"];
-  onSuccess?: Options<TData, TError, TVariables, TContext>["onSuccess"];
-  onError?: Options<TData, TError, TVariables, TContext>["onError"];
-  onSettled?: Options<TData, TError, TVariables, TContext>["onSettled"];
+    mutationFn: (variables: TVariables) => Promise<TData>;
+    invalidateKeys?:
+        | QueryKey[]
+        | ((data: TData, variables: TVariables) => QueryKey[]);
+    /** shown in a notice when the mutation fails */
+    errorText?: string;
+    /** mutateAsync resolves only after the invalidated queries refetched */
+    awaitInvalidation?: boolean;
+    onMutate?: Options<TData, TError, TVariables, TContext>['onMutate'];
+    onSuccess?: Options<TData, TError, TVariables, TContext>['onSuccess'];
+    onError?: Options<TData, TError, TVariables, TContext>['onError'];
+    onSettled?: Options<TData, TError, TVariables, TContext>['onSettled'];
 }) {
-  const queryClient = useQueryClient();
+    const queryClient = useQueryClient();
 
-  const notify = useOptionalNotify();
+    const notify = useOptionalNotify();
 
-  const { mutationFn, invalidateKeys = [], errorText, awaitInvalidation = false, onMutate, onSuccess, onError, onSettled } = options;
+    const {
+        mutationFn,
+        invalidateKeys = [],
+        errorText,
+        awaitInvalidation = false,
+        onMutate,
+        onSuccess,
+        onError,
+        onSettled,
+    } = options;
 
-  const mutation = useMutation<TData, TError, TVariables, TContext>({
-    mutationFn,
-    onMutate,
-    onSuccess: async (data, variables, onMutateResult, context) => {
-      const keys = typeof invalidateKeys === "function" ? invalidateKeys(data, variables) : invalidateKeys;
+    const mutation = useMutation<TData, TError, TVariables, TContext>({
+        mutationFn,
+        onMutate,
+        onSuccess: async (data, variables, onMutateResult, context) => {
+            const keys =
+                typeof invalidateKeys === 'function'
+                    ? invalidateKeys(data, variables)
+                    : invalidateKeys;
 
-      const invalidations = Promise.all(keys.map((key) => queryClient.invalidateQueries({ queryKey: key })));
+            const invalidations = Promise.all(
+                keys.map((key) =>
+                    queryClient.invalidateQueries({ queryKey: key })
+                )
+            );
 
-      if (awaitInvalidation) await invalidations;
-      else void invalidations;
+            if (awaitInvalidation) await invalidations;
+            else void invalidations;
 
-      onSuccess?.(data, variables, onMutateResult, context);
-    },
-    onError: (error, variables, onMutateResult, context) => {
-      onError?.(error, variables, onMutateResult, context);
+            onSuccess?.(data, variables, onMutateResult, context);
+        },
+        onError: (error, variables, onMutateResult, context) => {
+            onError?.(error, variables, onMutateResult, context);
 
-      if (errorText) notify(errorText);
-    },
-    onSettled,
-  });
+            if (errorText) notify(errorText);
+        },
+        onSettled,
+    });
 
-  const { mutateAsync } = mutation;
+    const { mutateAsync } = mutation;
 
-  // resolves false on failure instead of rejecting — the error is already in state (and notified with errorText)
-  const mutateOk = useCallback((variables: TVariables) => mutateAsync(variables).then(() => true, () => false), [mutateAsync]);
+    // resolves false on failure instead of rejecting — the error is already in state (and notified with errorText)
+    const mutateOk = useCallback(
+        (variables: TVariables) =>
+            mutateAsync(variables).then(
+                () => true,
+                () => false
+            ),
+        [mutateAsync]
+    );
 
-  return { ...mutation, mutateOk };
+    return { ...mutation, mutateOk };
 }

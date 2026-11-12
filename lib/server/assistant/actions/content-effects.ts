@@ -1,47 +1,86 @@
-import { z } from "zod";
+import { z } from 'zod';
 
-import type { EffectHandlers } from "../effects";
-import type { ActionExecutionContext } from "../types";
+import type { EffectHandlers } from '../effects';
+import type { ActionExecutionContext } from '../types';
 
-import "server-only";
-import { ALL_REFERENCE_KINDS, invalidateReference, type ReferenceKindValue } from "@/lib/cache/tags";
-import { API_ERRORS } from "@/lib/constants/api-errors";
-import { ContentError } from "@/lib/server/content/errors";
-import { currentContentWrite, markContentDirty } from "@/lib/server/content/write-context";
-import { removeTrackFile, trackObjectPath, trackPathOwnedBy } from "@/lib/supabase/battle-music-storage";
+import 'server-only';
+import {
+    ALL_REFERENCE_KINDS,
+    invalidateReference,
+    type ReferenceKindValue,
+} from '@/lib/cache/tags';
+import { API_ERRORS } from '@/lib/constants/api-errors';
+import { ContentError } from '@/lib/server/content/errors';
+import {
+    currentContentWrite,
+    markContentDirty,
+} from '@/lib/server/content/write-context';
+import {
+    removeTrackFile,
+    trackObjectPath,
+    trackPathOwnedBy,
+} from '@/lib/supabase/battle-music-storage';
 
 export const CONTENT_EFFECT_HANDLERS: EffectHandlers = {
-  invalidate: async (payload) => {
-    const { campaignId, kinds } = z.object({ campaignId: z.string().min(1), kinds: z.array(z.enum(ALL_REFERENCE_KINDS)) }).parse(payload);
+    invalidate: async (payload) => {
+        const { campaignId, kinds } = z
+            .object({
+                campaignId: z.string().min(1),
+                kinds: z.array(z.enum(ALL_REFERENCE_KINDS)),
+            })
+            .parse(payload);
 
-    invalidateReference(kinds, campaignId);
-  },
-  "media-cleanup": async (payload) => {
-    const { campaignId, url } = z.object({ campaignId: z.string().min(1), url: z.string().url() }).parse(payload);
+        invalidateReference(kinds, campaignId);
+    },
+    'media-cleanup': async (payload) => {
+        const { campaignId, url } = z
+            .object({ campaignId: z.string().min(1), url: z.string().url() })
+            .parse(payload);
 
-    const path = trackObjectPath(url);
+        const path = trackObjectPath(url);
 
-    if (!path || !trackPathOwnedBy(path, campaignId)) throw new ContentError(API_ERRORS.ASSISTANT_PURGE_TARGET_INVALID, 403);
+        if (!path || !trackPathOwnedBy(path, campaignId))
+            throw new ContentError(
+                API_ERRORS.ASSISTANT_PURGE_TARGET_INVALID,
+                403
+            );
 
-    await removeTrackFile(url, { strict: true });
-  },
+        await removeTrackFile(url, { strict: true });
+    },
 };
 
-export async function withContentEffects<T>(ctx: ActionExecutionContext, kinds: readonly ReferenceKindValue[], work: () => Promise<T>): Promise<T> {
-  const current = currentContentWrite();
+export async function withContentEffects<T>(
+    ctx: ActionExecutionContext,
+    kinds: readonly ReferenceKindValue[],
+    work: () => Promise<T>
+): Promise<T> {
+    const current = currentContentWrite();
 
-  if (!current || current.campaignId !== ctx.caller.actor.campaignId) throw new ContentError(API_ERRORS.ASSISTANT_WRITE_CONTEXT_MISSING, 500);
+    if (!current || current.campaignId !== ctx.caller.actor.campaignId)
+        throw new ContentError(API_ERRORS.ASSISTANT_WRITE_CONTEXT_MISSING, 500);
 
-  const previous = current.onTrackFileRemoved;
+    const previous = current.onTrackFileRemoved;
 
-  current.onTrackFileRemoved = (url) => ctx.afterCommit({ key: `${ctx.intentId}:track-file`, kind: "media-cleanup", payload: { campaignId: current.campaignId, url } });
-  try {
-    const result = await work();
+    current.onTrackFileRemoved = (url) =>
+        ctx.afterCommit({
+            key: `${ctx.intentId}:track-file`,
+            kind: 'media-cleanup',
+            payload: { campaignId: current.campaignId, url },
+        });
+    try {
+        const result = await work();
 
-    markContentDirty();
+        markContentDirty();
 
-    if (kinds.length) ctx.afterCommit({ key: `${ctx.intentId}:content`, kind: "invalidate", payload: { campaignId: current.campaignId, kinds: [...kinds] } });
+        if (kinds.length)
+            ctx.afterCommit({
+                key: `${ctx.intentId}:content`,
+                kind: 'invalidate',
+                payload: { campaignId: current.campaignId, kinds: [...kinds] },
+            });
 
-    return result;
-  } finally { current.onTrackFileRemoved = previous; }
+        return result;
+    } finally {
+        current.onTrackFileRemoved = previous;
+    }
 }

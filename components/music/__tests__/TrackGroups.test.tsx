@@ -1,77 +1,132 @@
 // @vitest-environment happy-dom
-import { cleanup, fireEvent, render, within } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { cleanup, fireEvent, render, within } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { TrackGroups } from "../TrackGroups";
+import { TrackGroups } from '../TrackGroups';
 
-import type { CampaignTrack } from "@/types/audio";
+import type { CampaignTrack } from '@/types/audio';
 
 afterEach(cleanup);
 
-vi.mock("@/lib/hooks/music", async () => {
-  const { useState } = await import("react");
+vi.mock('@/lib/hooks/music', async () => {
+    const { useState } = await import('react');
 
-  return {
-    useTrackPreview: () => {
-      const [playingId, setPlayingId] = useState<string | null>(null);
+    return {
+        useTrackPreview: () => {
+            const [playingId, setPlayingId] = useState<string | null>(null);
 
-      return { playingId, failedId: null, progress: null, toggle: (t: { id: string }) => setPlayingId((p) => (p === t.id ? null : t.id)), stop: () => setPlayingId(null) };
-    },
-  };
+            return {
+                playingId,
+                failedId: null,
+                progress: null,
+                toggle: (t: { id: string }) =>
+                    setPlayingId((p) => (p === t.id ? null : t.id)),
+                stop: () => setPlayingId(null),
+            };
+        },
+    };
 });
 
-const track = (id: string, title: string): CampaignTrack => ({ id, title, kind: "youtube", url: null, youtubeId: "dQw4w9WgXcQ", durationSec: null, sortOrder: 0, createdAt: "" });
+const track = (id: string, title: string): CampaignTrack => ({
+    id,
+    title,
+    kind: 'youtube',
+    url: null,
+    youtubeId: 'dQw4w9WgXcQ',
+    durationSec: null,
+    sortOrder: 0,
+    createdAt: '',
+});
 
-const tracks = [track("1", "Люди - Місто"), track("2", "Люди - Битва 1"), track("3", "Ельфи - Битва"), track("4", "Ельфи - Місто")];
+const tracks = [
+    track('1', 'Люди - Місто'),
+    track('2', 'Люди - Битва 1'),
+    track('3', 'Ельфи - Битва'),
+    track('4', 'Ельфи - Місто'),
+];
 
 function setup() {
-  const actions = { onRename: vi.fn(), onEdit: vi.fn(), onDelete: vi.fn(), onMove: vi.fn() };
+    const actions = {
+        onRename: vi.fn(),
+        onEdit: vi.fn(),
+        onDelete: vi.fn(),
+        onMove: vi.fn(),
+    };
 
-  return { ...render(<TrackGroups tracks={tracks} busy={false} actions={actions} />), actions };
+    return {
+        ...render(
+            <TrackGroups tracks={tracks} busy={false} actions={actions} />
+        ),
+        actions,
+    };
 }
 
-describe("TrackGroups", () => {
-  it("на всіх групах одночасно активний лише один трек", () => {
-    const { getAllByRole, queryAllByRole } = setup();
+describe('TrackGroups', () => {
+    it('на всіх групах одночасно активний лише один трек', () => {
+        const { getAllByRole, queryAllByRole } = setup();
 
-    fireEvent.click(getAllByRole("button", { name: "music.list.play" })[0]);
-    expect(queryAllByRole("button", { name: "music.list.pause" })).toHaveLength(1);
-    fireEvent.click(getAllByRole("button", { name: "music.list.play" })[2]);
-    expect(queryAllByRole("button", { name: "music.list.pause" })).toHaveLength(1);
-  });
+        fireEvent.click(getAllByRole('button', { name: 'music.list.play' })[0]);
+        expect(
+            queryAllByRole('button', { name: 'music.list.pause' })
+        ).toHaveLength(1);
+        fireEvent.click(getAllByRole('button', { name: 'music.list.play' })[2]);
+        expect(
+            queryAllByRole('button', { name: 'music.list.pause' })
+        ).toHaveLength(1);
+    });
 
-  it("групи за расами, усі битви — в окремій групі «Битва»", () => {
-    const { getByRole } = setup();
+    it('групи за расами, усі битви — в окремій групі «Битва»', () => {
+        const { getByRole } = setup();
 
-    const battle = within(getByRole("region", { name: "music.groups.battle" }));
+        const battle = within(
+            getByRole('region', { name: 'music.groups.battle' })
+        );
 
-    expect(battle.getAllByRole("listitem")).toHaveLength(2);
-    expect(battle.getByDisplayValue("Люди - Битва 1")).toBeTruthy();
-    expect(battle.getByDisplayValue("Ельфи - Битва")).toBeTruthy();
-    expect(within(getByRole("region", { name: "Люди" })).getAllByRole("listitem")).toHaveLength(1);
-    expect(within(getByRole("region", { name: "Ельфи" })).getAllByRole("listitem")).toHaveLength(1);
-  });
+        expect(battle.getAllByRole('listitem')).toHaveLength(2);
+        expect(battle.getByDisplayValue('Люди - Битва 1')).toBeTruthy();
+        expect(battle.getByDisplayValue('Ельфи - Битва')).toBeTruthy();
+        expect(
+            within(getByRole('region', { name: 'Люди' })).getAllByRole(
+                'listitem'
+            )
+        ).toHaveLength(1);
+        expect(
+            within(getByRole('region', { name: 'Ельфи' })).getAllByRole(
+                'listitem'
+            )
+        ).toHaveLength(1);
+    });
 
-  it("групу можна згорнути", () => {
-    const { getByRole, queryByDisplayValue } = setup();
+    it('групу можна згорнути', () => {
+        const { getByRole, queryByDisplayValue } = setup();
 
-    fireEvent.click(within(getByRole("region", { name: "music.groups.battle" })).getByRole("button", { expanded: true }));
-    expect(queryByDisplayValue("Ельфи - Битва")).toBeNull();
-  });
+        fireEvent.click(
+            within(
+                getByRole('region', { name: 'music.groups.battle' })
+            ).getByRole('button', { expanded: true })
+        );
+        expect(queryByDisplayValue('Ельфи - Битва')).toBeNull();
+    });
 
-  it("«Згорнути всі» ховає всі групи, повторне натискання розгортає", () => {
-    const { getByRole, queryAllByRole } = setup();
+    it('«Згорнути всі» ховає всі групи, повторне натискання розгортає', () => {
+        const { getByRole, queryAllByRole } = setup();
 
-    fireEvent.click(getByRole("button", { name: "music.list.collapseAll" }));
-    expect(queryAllByRole("listitem")).toHaveLength(0);
-    fireEvent.click(getByRole("button", { name: "music.list.expandAll" }));
-    expect(queryAllByRole("listitem")).toHaveLength(4);
-  });
+        fireEvent.click(
+            getByRole('button', { name: 'music.list.collapseAll' })
+        );
+        expect(queryAllByRole('listitem')).toHaveLength(0);
+        fireEvent.click(getByRole('button', { name: 'music.list.expandAll' }));
+        expect(queryAllByRole('listitem')).toHaveLength(4);
+    });
 
-  it("пошук звужує список", () => {
-    const { getByLabelText, queryByRole } = setup();
+    it('пошук звужує список', () => {
+        const { getByLabelText, queryByRole } = setup();
 
-    fireEvent.change(getByLabelText("music.search.label"), { target: { value: "місто" } });
-    expect(queryByRole("region", { name: "music.groups.battle" })).toBeNull();
-  });
+        fireEvent.change(getByLabelText('music.search.label'), {
+            target: { value: 'місто' },
+        });
+        expect(
+            queryByRole('region', { name: 'music.groups.battle' })
+        ).toBeNull();
+    });
 });

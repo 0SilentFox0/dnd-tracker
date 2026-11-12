@@ -1,44 +1,77 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
-import { reachableSources, walkSources } from "../test/import-graph";
+import { reachableSources, walkSources } from '../test/import-graph';
 
 const BATTLE_SEGMENTS = /^app\/campaigns\/[^/]+\/(dm\/)?battles\//;
 
 const SERVER_ONLY = /^(lib\/server|app\/api)\//;
 
-const BATTLE_CODE = /^(components\/battle\/|lib\/hooks\/battles?\/|lib\/utils\/battle\/(view|flows)\/)/;
+const BATTLE_CODE =
+    /^(components\/battle\/|lib\/hooks\/battles?\/|lib\/utils\/battle\/(view|flows)\/)/;
 
-const BATTLE_KEY = /["'`](?:battleCommon|battleWizards|battleDm|battleSetup|battleLog|battleActions)(?:\.[^"'`]*)?["'`]|["'`]battle\.[\w.${}]+["'`]|(?:useTranslations|getTranslations|getTranslator|useTranslator)\(\s*["'`]battle["'`]/;
+const BATTLE_KEY =
+    /["'`](?:battleCommon|battleWizards|battleDm|battleSetup|battleLog|battleActions)(?:\.[^"'`]*)?["'`]|["'`]battle\.[\w.${}]+["'`]|(?:useTranslations|getTranslations|getTranslator|useTranslator)\(\s*["'`]battle["'`]/;
 
 // demo tour steps name `data-tour="battle.*"` anchors, not translation keys
-const TOUR_ANCHORS = "lib/onboarding/demo-tours.ts";
+const TOUR_ANCHORS = 'lib/onboarding/demo-tours.ts';
 
 // reviewed: pages outside the battle segments reach only these battle files (dice roller, FX runtime and preview, query keys); the battle namespaces are not loaded there
-const ALLOWED_BATTLE_CODE = ["components/battle/fx/dice/", "components/battle/fx/runtime/", "components/battle/fx/preview/", "components/battle/fx/animations/", "lib/hooks/battles/keys.ts"];
+const ALLOWED_BATTLE_CODE = [
+    'components/battle/fx/dice/',
+    'components/battle/fx/runtime/',
+    'components/battle/fx/preview/',
+    'components/battle/fx/animations/',
+    'lib/hooks/battles/keys.ts',
+];
 
 function outsideBattleGraph(): Map<string, string> {
-  const roots = walkSources("app").filter((f) => !SERVER_ONLY.test(f) && !BATTLE_SEGMENTS.test(f) && !f.startsWith("app/dev/"));
+    const roots = walkSources('app').filter(
+        (f) =>
+            !SERVER_ONLY.test(f) &&
+            !BATTLE_SEGMENTS.test(f) &&
+            !f.startsWith('app/dev/')
+    );
 
-  // systems/ was invisible to this walk while it used relative imports inside lib/; keep that boundary
-  return reachableSources(roots, (file, text) => file.startsWith("systems/") || SERVER_ONLY.test(file) || text.includes('"server-only"') || BATTLE_SEGMENTS.test(file));
+    // systems/ was invisible to this walk while it used relative imports inside lib/; keep that boundary
+    return reachableSources(
+        roots,
+        (file, text) =>
+            file.startsWith('systems/') ||
+            SERVER_ONLY.test(file) ||
+            text.includes('"server-only"') ||
+            BATTLE_SEGMENTS.test(file)
+    );
 }
 
-describe("battle namespaces stay inside the battle segments", () => {
-  const graph = outsideBattleGraph();
+describe('battle namespaces stay inside the battle segments', () => {
+    const graph = outsideBattleGraph();
 
-  it("no file reachable from the other pages reads a battle namespace", () => {
-    const bad = [...graph].filter(([file, text]) => {
-      const source = text.replace(/["'`](?:battle\.open|battle\.scene)["'`]/g, "");
+    it('no file reachable from the other pages reads a battle namespace', () => {
+        const bad = [...graph]
+            .filter(([file, text]) => {
+                const source = text.replace(
+                    /["'`](?:battle\.open|battle\.scene)["'`]/g,
+                    ''
+                );
 
-      return !file.startsWith("lib/i18n/") && file !== TOUR_ANCHORS && BATTLE_KEY.test(source);
-    }).map(([file]) => file);
+                return (
+                    !file.startsWith('lib/i18n/') &&
+                    file !== TOUR_ANCHORS &&
+                    BATTLE_KEY.test(source)
+                );
+            })
+            .map(([file]) => file);
 
-    expect(bad).toEqual([]);
-  });
+        expect(bad).toEqual([]);
+    });
 
-  it("other pages reach only the reviewed battle code", () => {
-    const reached = [...graph.keys()].filter((f) => BATTLE_CODE.test(f) && !ALLOWED_BATTLE_CODE.some((a) => f.startsWith(a)));
+    it('other pages reach only the reviewed battle code', () => {
+        const reached = [...graph.keys()].filter(
+            (f) =>
+                BATTLE_CODE.test(f) &&
+                !ALLOWED_BATTLE_CODE.some((a) => f.startsWith(a))
+        );
 
-    expect(reached).toEqual([]);
-  });
+        expect(reached).toEqual([]);
+    });
 });

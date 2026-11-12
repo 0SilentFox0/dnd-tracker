@@ -1,143 +1,219 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
-import { SelectField } from "@/components/ui/select-field";
-import { Textarea } from "@/components/ui/textarea";
-import { AI_IMAGE_ASPECTS, AI_IMAGE_PROMPT_MAX, AI_PROVIDER_LABELS, type AiImageAspect, type AiProvider } from "@/lib/constants/ai";
-import { useGenerateSlide } from "@/lib/hooks/show";
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
+import { SelectField } from '@/components/ui/select-field';
+import { Textarea } from '@/components/ui/textarea';
+import {
+    AI_IMAGE_ASPECTS,
+    AI_IMAGE_PROMPT_MAX,
+    AI_PROVIDER_LABELS,
+    type AiImageAspect,
+    type AiProvider,
+} from '@/lib/constants/ai';
+import { useGenerateSlide } from '@/lib/hooks/show';
 
-const FORM_ID = "generate-slide-form";
+const FORM_ID = 'generate-slide-form';
 
-export function GenerateSlideDialog({ campaignId, open, onOpenChange, onAdd }: { campaignId: string; open: boolean; onOpenChange(open: boolean): void; onAdd(url: string): void }) {
-  const t = useTranslations("show");
+export function GenerateSlideDialog({
+    campaignId,
+    open,
+    onOpenChange,
+    onAdd,
+}: {
+    campaignId: string;
+    open: boolean;
+    onOpenChange(open: boolean): void;
+    onAdd(url: string): void;
+}) {
+    const t = useTranslations('show');
 
-  const tc = useTranslations("common");
+    const tc = useTranslations('common');
 
-  const gen = useGenerateSlide(campaignId);
+    const gen = useGenerateSlide(campaignId);
 
-  const [prompt, setPrompt] = useState("");
+    const [prompt, setPrompt] = useState('');
 
-  const [style, setStyle] = useState<boolean | null>(null);
+    const [style, setStyle] = useState<boolean | null>(null);
 
-  const [aspect, setAspect] = useState<AiImageAspect>("16:9");
+    const [aspect, setAspect] = useState<AiImageAspect>('16:9');
 
-  const [chosen, setChosen] = useState<{ provider?: AiProvider; model?: string }>({});
+    const [chosen, setChosen] = useState<{
+        provider?: AiProvider;
+        model?: string;
+    }>({});
 
-  const [result, setResult] = useState<string | null>(null);
+    const [result, setResult] = useState<string | null>(null);
 
-  const option = gen.providers.find((p) => p.provider === chosen.provider) ?? gen.providers[0];
+    const option =
+        gen.providers.find((p) => p.provider === chosen.provider) ??
+        gen.providers[0];
 
-  const model = option?.models.find((m) => m.id === chosen.model) ?? option?.models[0];
+    const model =
+        option?.models.find((m) => m.id === chosen.model) ?? option?.models[0];
 
-  const useCampaignStyle = style ?? gen.hasInstructions;
+    const useCampaignStyle = style ?? gen.hasInstructions;
 
-  const run = async () => {
-    if (!option || !model) return;
+    const run = async () => {
+        if (!option || !model) return;
 
-    if (result) gen.discard(result);
+        if (result) gen.discard(result);
 
-    setResult(null);
-    setResult(await gen.generate({ prompt: prompt.trim(), provider: option.provider, model: model.id, aspect, useCampaignStyle }));
-  };
+        setResult(null);
+        setResult(
+            await gen.generate({
+                prompt: prompt.trim(),
+                provider: option.provider,
+                model: model.id,
+                aspect,
+                useCampaignStyle,
+            })
+        );
+    };
 
-  const close = (next: boolean, added = false) => {
-    if (!next) {
-      if (result && !added) gen.discard(result);
+    const close = (next: boolean, added = false) => {
+        if (!next) {
+            if (result && !added) gen.discard(result);
 
-      setResult(null);
-      gen.reset();
-    }
+            setResult(null);
+            gen.reset();
+        }
 
-    onOpenChange(next);
-  };
+        onOpenChange(next);
+    };
 
-  return (
-    <ResponsiveDialog
-      hud
-      open={open}
-      onOpenChange={close}
-      title={t("generate.title")}
-      footer={
-        <>
-          <Button type="button" variant="outline" onClick={() => close(false)}>
-            {tc("actions.cancel")}
-          </Button>
-          {result ? (
-            <>
-              <Button type="button" variant="outline" disabled={gen.pending} onClick={() => void run()}>
-                {t("generate.again")}
-              </Button>
-              <Button
-                type="button"
-                onClick={() => {
-                  onAdd(result);
-                  setPrompt("");
-                  close(false, true);
+    return (
+        <ResponsiveDialog
+            hud
+            open={open}
+            onOpenChange={close}
+            title={t('generate.title')}
+            footer={
+                <>
+                    <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => close(false)}
+                    >
+                        {tc('actions.cancel')}
+                    </Button>
+                    {result ? (
+                        <>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                disabled={gen.pending}
+                                onClick={() => void run()}
+                            >
+                                {t('generate.again')}
+                            </Button>
+                            <Button
+                                type="button"
+                                onClick={() => {
+                                    onAdd(result);
+                                    setPrompt('');
+                                    close(false, true);
+                                }}
+                            >
+                                {t('generate.addSlide')}
+                            </Button>
+                        </>
+                    ) : (
+                        <Button
+                            type="submit"
+                            form={FORM_ID}
+                            disabled={!prompt.trim() || gen.pending || !option}
+                        >
+                            {t('addSlides.generate')}
+                        </Button>
+                    )}
+                </>
+            }
+        >
+            <form
+                id={FORM_ID}
+                className="flex flex-col gap-3"
+                onSubmit={(e) => {
+                    e.preventDefault();
+                    void run();
                 }}
-              >
-                {t("generate.addSlide")}
-              </Button>
-            </>
-          ) : (
-            <Button type="submit" form={FORM_ID} disabled={!prompt.trim() || gen.pending || !option}>
-              {t("addSlides.generate")}
-            </Button>
-          )}
-        </>
-      }
-    >
-      <form
-        id={FORM_ID}
-        className="flex flex-col gap-3"
-        onSubmit={(e) => {
-          e.preventDefault();
-          void run();
-        }}
-      >
-        <Textarea aria-label={t("generate.prompt")} placeholder={t("generate.prompt")} rows={4} maxLength={AI_IMAGE_PROMPT_MAX} value={prompt} disabled={gen.pending} onChange={(e) => setPrompt(e.target.value)} />
-        <label className="flex items-center gap-2 text-sm">
-          <Checkbox checked={useCampaignStyle} disabled={gen.pending} onCheckedChange={(v) => setStyle(v === true)} />
-          {t("generate.campaignStyle")}
-        </label>
-        <div className="grid gap-2 sm:grid-cols-3">
-          <SelectField
-            aria-label={t("generate.aspect")}
-            value={aspect}
-            onValueChange={(v) => setAspect(v as AiImageAspect)}
-            options={AI_IMAGE_ASPECTS.map((a) => ({ value: a, label: a }))}
-            disabled={gen.pending}
-          />
-          <SelectField
-            aria-label={t("generate.provider")}
-            value={option?.provider ?? ""}
-            onValueChange={(v) => setChosen({ provider: v as AiProvider })}
-            options={gen.providers.map((p) => ({ value: p.provider, label: AI_PROVIDER_LABELS[p.provider] }))}
-            disabled={gen.pending}
-          />
-          <SelectField
-            aria-label={t("generate.model")}
-            value={model?.id ?? ""}
-            onValueChange={(v) => setChosen({ provider: option?.provider, model: v })}
-            options={(option?.models ?? []).map((m) => ({ value: m.id, label: m.label }))}
-            disabled={gen.pending}
-          />
-        </div>
-        {gen.pending && <p className="text-sm text-hud-muted">{t("generate.pending")}</p>}
-        {gen.error && !gen.pending && (
-          <p role="alert" className="text-sm text-destructive">
-            {gen.error}
-          </p>
-        )}
-        {result && !gen.pending && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={result} alt={t("generate.resultAlt")} className="max-h-80 w-full rounded-md object-contain" />
-        )}
-      </form>
-    </ResponsiveDialog>
-  );
+            >
+                <Textarea
+                    aria-label={t('generate.prompt')}
+                    placeholder={t('generate.prompt')}
+                    rows={4}
+                    maxLength={AI_IMAGE_PROMPT_MAX}
+                    value={prompt}
+                    disabled={gen.pending}
+                    onChange={(e) => setPrompt(e.target.value)}
+                />
+                <label className="flex items-center gap-2 text-sm">
+                    <Checkbox
+                        checked={useCampaignStyle}
+                        disabled={gen.pending}
+                        onCheckedChange={(v) => setStyle(v === true)}
+                    />
+                    {t('generate.campaignStyle')}
+                </label>
+                <div className="grid gap-2 sm:grid-cols-3">
+                    <SelectField
+                        aria-label={t('generate.aspect')}
+                        value={aspect}
+                        onValueChange={(v) => setAspect(v as AiImageAspect)}
+                        options={AI_IMAGE_ASPECTS.map((a) => ({
+                            value: a,
+                            label: a,
+                        }))}
+                        disabled={gen.pending}
+                    />
+                    <SelectField
+                        aria-label={t('generate.provider')}
+                        value={option?.provider ?? ''}
+                        onValueChange={(v) =>
+                            setChosen({ provider: v as AiProvider })
+                        }
+                        options={gen.providers.map((p) => ({
+                            value: p.provider,
+                            label: AI_PROVIDER_LABELS[p.provider],
+                        }))}
+                        disabled={gen.pending}
+                    />
+                    <SelectField
+                        aria-label={t('generate.model')}
+                        value={model?.id ?? ''}
+                        onValueChange={(v) =>
+                            setChosen({ provider: option?.provider, model: v })
+                        }
+                        options={(option?.models ?? []).map((m) => ({
+                            value: m.id,
+                            label: m.label,
+                        }))}
+                        disabled={gen.pending}
+                    />
+                </div>
+                {gen.pending && (
+                    <p className="text-sm text-hud-muted">
+                        {t('generate.pending')}
+                    </p>
+                )}
+                {gen.error && !gen.pending && (
+                    <p role="alert" className="text-sm text-destructive">
+                        {gen.error}
+                    </p>
+                )}
+                {result && !gen.pending && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                        src={result}
+                        alt={t('generate.resultAlt')}
+                        className="max-h-80 w-full rounded-md object-contain"
+                    />
+                )}
+            </form>
+        </ResponsiveDialog>
+    );
 }

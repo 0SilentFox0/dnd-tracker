@@ -1,76 +1,101 @@
-export type ImportKind = "units" | "spells" | "skills" | "main-skills" | "spell-groups" | "races" | "classes" | "feats" | "backgrounds" | "careers" | "artifacts" | "artifact-sets";
+export type ImportKind =
+    | 'units'
+    | 'spells'
+    | 'skills'
+    | 'main-skills'
+    | 'spell-groups'
+    | 'races'
+    | 'classes'
+    | 'feats'
+    | 'backgrounds'
+    | 'careers'
+    | 'artifacts'
+    | 'artifact-sets';
 
-export type ImportMode = "create" | "update" | "skip";
+export type ImportMode = 'create' | 'update' | 'skip';
 
-export type ImportFieldType = "string" | "int" | "number" | "bool" | "enum" | "list" | "dice" | "cr" | "ref" | "refList" | "json" | "attacks" | "abilitiesText";
+export type ImportFieldType =
+    | 'string'
+    | 'int'
+    | 'number'
+    | 'bool'
+    | 'enum'
+    | 'list'
+    | 'dice'
+    | 'cr'
+    | 'ref'
+    | 'refList'
+    | 'json'
+    | 'attacks'
+    | 'abilitiesText';
 
 export interface ImportField {
-  key: string;
-  /** `contentImport.fields.<kind>.<key>` */
-  labelKey: string;
-  aliases: readonly string[];
-  type: ImportFieldType;
-  enumValues?: readonly string[];
-  /** accepted labels per enum value; the first one is shown in hints */
-  enumLabels?: Readonly<Record<string, readonly string[]>>;
-  /** words accepted instead of a number (normalized header form), e.g. "cantrip" -> 0 */
-  numberWords?: Readonly<Record<string, number>>;
-  ref?: ImportKind;
-  /** Explicit unresolved references fail the row instead of dropping benefits. */
-  strictRef?: boolean;
-  /** json: глибоко замінює назви на id у властивості `key` (напр. spellId у виборах раси) */
-  nestedRef?: { kind: ImportKind; key: string };
-  required?: boolean;
+    key: string;
+    /** `contentImport.fields.<kind>.<key>` */
+    labelKey: string;
+    aliases: readonly string[];
+    type: ImportFieldType;
+    enumValues?: readonly string[];
+    /** accepted labels per enum value; the first one is shown in hints */
+    enumLabels?: Readonly<Record<string, readonly string[]>>;
+    /** words accepted instead of a number (normalized header form), e.g. "cantrip" -> 0 */
+    numberWords?: Readonly<Record<string, number>>;
+    ref?: ImportKind;
+    /** Explicit unresolved references fail the row instead of dropping benefits. */
+    strictRef?: boolean;
+    /** json: глибоко замінює назви на id у властивості `key` (напр. spellId у виборах раси) */
+    nestedRef?: { kind: ImportKind; key: string };
+    required?: boolean;
 }
 
 export interface ImportMessage {
-  message: string;
-  params?: Record<string, string | number>;
+    message: string;
+    params?: Record<string, string | number>;
 }
 
 export type ImportRecord = Record<string, unknown>;
 
 export interface ImportSpec {
-  kind: ImportKind;
-  fields: readonly ImportField[];
-  toBody?: (record: ImportRecord, op: "create" | "update") => ImportRecord;
+    kind: ImportKind;
+    fields: readonly ImportField[];
+    toBody?: (record: ImportRecord, op: 'create' | 'update') => ImportRecord;
 }
 
 export type ImportMapping = Record<string, string | null>;
 
 export interface ImportIssue {
-  field?: string;
-  level: "error" | "warning";
-  message: string;
-  params?: Record<string, string | number>;
-  minimum?: number;
-  maximum?: number;
+    field?: string;
+    level: 'error' | 'warning';
+    message: string;
+    params?: Record<string, string | number>;
+    minimum?: number;
+    maximum?: number;
 }
 
-export type ImportRowStatus = "created" | "updated" | "skipped" | "error";
+export type ImportRowStatus = 'created' | 'updated' | 'skipped' | 'error';
 
 export interface ImportRowResult {
-  row: number;
-  status: ImportRowStatus;
-  name?: string;
-  issues: ImportIssue[];
+    row: number;
+    status: ImportRowStatus;
+    name?: string;
+    issues: ImportIssue[];
 }
 
 export type ImportCounts = Record<ImportRowStatus, number>;
 
 export interface ImportReport {
-  dryRun: boolean;
-  results: ImportRowResult[];
-  counts: ImportCounts;
+    dryRun: boolean;
+    results: ImportRowResult[];
+    counts: ImportCounts;
 }
 
 export interface ParsedTable {
-  format: "csv" | "json";
-  headers: string[];
-  rows: Array<Record<string, unknown>>;
+    format: 'csv' | 'json';
+    headers: string[];
+    rows: Array<Record<string, unknown>>;
 }
 
 export interface AiMapResult {
-  mapping: ImportMapping;
-  notes: string[];
+    mapping: ImportMapping;
+    notes: string[];
 }

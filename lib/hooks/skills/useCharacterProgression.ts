@@ -1,36 +1,51 @@
-"use client";
+'use client';
 
-import { useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 
-import { skillKeys } from "./keys";
+import { skillKeys } from './keys';
 
-import { getCharacterProgression } from "@/lib/api/character-progression";
-import { ENTITY_STALE_MS } from "@/lib/providers/query-provider";
-import { normalizeTree, progressionView, rankOffers, resolveLearned } from "@/lib/utils/skills/progression";
+import { getCharacterProgression } from '@/lib/api/character-progression';
+import { ENTITY_STALE_MS } from '@/lib/providers/query-provider';
+import {
+    normalizeTree,
+    progressionView,
+    rankOffers,
+    resolveLearned,
+} from '@/lib/utils/skills/progression';
 
-export function useCharacterProgression(campaignId: string, characterId: string | undefined) {
-  const query = useQuery({
-    queryKey: skillKeys.progression(campaignId, characterId ?? ""),
-    queryFn: () => getCharacterProgression(campaignId, characterId ?? ""),
-    enabled: !!campaignId && !!characterId,
-    staleTime: ENTITY_STALE_MS,
-  });
+export function useCharacterProgression(
+    campaignId: string,
+    characterId: string | undefined
+) {
+    const query = useQuery({
+        queryKey: skillKeys.progression(campaignId, characterId ?? ''),
+        queryFn: () => getCharacterProgression(campaignId, characterId ?? ''),
+        enabled: !!campaignId && !!characterId,
+        staleTime: ENTITY_STALE_MS,
+    });
 
-  const { data } = query;
+    const { data } = query;
 
-  const derived = useMemo(() => {
-    if (!data?.treeId || !data.tree) return { tree: null, view: null, offers: [], learned: [] };
+    const derived = useMemo(() => {
+        if (!data?.treeId || !data.tree)
+            return { tree: null, view: null, offers: [], learned: [] };
 
-    const tree = normalizeTree({ id: data.treeId, race: data.race, skills: data.tree });
+        const tree = normalizeTree({
+            id: data.treeId,
+            race: data.race,
+            skills: data.tree,
+        });
 
-    return {
-      tree,
-      view: progressionView(tree, data.unlocked, data.level),
-      offers: rankOffers(tree, data.unlocked, data.level),
-      learned: resolveLearned(tree, { [tree.treeId]: { unlockedSkills: data.unlocked } }),
-    };
-  }, [data]);
+        return {
+            tree,
+            view: progressionView(tree, data.unlocked, data.level),
+            offers: rankOffers(tree, data.unlocked, data.level),
+            learned: resolveLearned(tree, {
+                [tree.treeId]: { unlockedSkills: data.unlocked },
+            }),
+        };
+    }, [data]);
 
-  return { query, data, ...derived };
+    return { query, data, ...derived };
 }

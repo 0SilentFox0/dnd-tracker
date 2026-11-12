@@ -1,1 +1,1 @@
-export { DELETE } from "@/lib/server/characters/operations/tokens-delete";
+export { DELETE } from '@/lib/server/characters/operations/tokens-delete';

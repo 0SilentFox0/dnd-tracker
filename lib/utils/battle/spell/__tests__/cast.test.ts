@@ -1,460 +1,1144 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
-import { ParticipantSide } from "@/lib/constants/battle";
-import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
-import type { Effect } from "@/lib/utils/abilities/schema";
-import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
-import { castSpell } from "@/lib/utils/battle/spell";
-import { resolveSpellTargets } from "@/lib/utils/battle/spell/spell-targeting";
-import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
-import { DEFAULT_RULES } from "@/lib/utils/rules";
-import type { SpellDefinition } from "@/lib/utils/spells/model/schema";
-import type { BattleParticipant } from "@/types/battle";
+import { ParticipantSide } from '@/lib/constants/battle';
+import {
+    makeParticipant,
+    resolved,
+    seq,
+} from '@/lib/utils/abilities/__tests__/fixtures';
+import type { Effect } from '@/lib/utils/abilities/schema';
+import { eventTextOf } from '@/lib/utils/battle/log/__tests__/event-text';
+import { castSpell } from '@/lib/utils/battle/spell';
+import { resolveSpellTargets } from '@/lib/utils/battle/spell/spell-targeting';
+import type { CastableSpell } from '@/lib/utils/battle/types/spell-process';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
+import type { SpellDefinition } from '@/lib/utils/spells/model/schema';
+import type { BattleParticipant } from '@/types/battle';
 
-const dmg = (damageType: string): Effect => ({ kind: "dealDamage", amount: { spellRoll: 100 }, damageType });
-
-const fire: Effect = { kind: "dealDamage", amount: { spellRoll: 100 }, damageType: "fire" };
-
-const spellOf = (over: Partial<SpellDefinition> = {}, extra: Partial<CastableSpell> = {}): CastableSpell => ({
-  id: "sp",
-  name: "Заклинання",
-  level: 1,
-  groupId: "chaos",
-  definition: { dice: 2, cost: "action", targeting: { kind: "enemy" }, resolution: { kind: "auto" }, effects: [fire], raceModifiers: [], ...over },
-  ...extra,
+const dmg = (damageType: string): Effect => ({
+    kind: 'dealDamage',
+    amount: { spellRoll: 100 },
+    damageType,
 });
 
-const withSlots = (p: BattleParticipant): BattleParticipant => ({ ...p, spellcasting: { ...p.spellcasting, spellSlots: { "1": { max: 2, current: 2 } } } });
-
-const caster = () => withSlots(makeParticipant({ id: "c" }));
-
-const enemy = (id: string, raceId?: string): BattleParticipant => {
-  const p = makeParticipant({ id, side: ParticipantSide.ENEMY, hp: 200, maxHp: 200 });
-
-  return { ...p, abilities: { ...p.abilities, raceId } };
+const fire: Effect = {
+    kind: 'dealDamage',
+    amount: { spellRoll: 100 },
+    damageType: 'fire',
 };
 
-const hp = (r: { allParticipantsUpdated: BattleParticipant[] }, id: string) => r.allParticipantsUpdated.find((p) => p.basicInfo.id === id)?.combatStats.currentHp as number;
+const spellOf = (
+    over: Partial<SpellDefinition> = {},
+    extra: Partial<CastableSpell> = {}
+): CastableSpell => ({
+    id: 'sp',
+    name: 'Заклинання',
+    level: 1,
+    groupId: 'chaos',
+    definition: {
+        dice: 2,
+        cost: 'action',
+        targeting: { kind: 'enemy' },
+        resolution: { kind: 'auto' },
+        effects: [fire],
+        raceModifiers: [],
+        ...over,
+    },
+    ...extra,
+});
 
-function cast(spell: CastableSpell, targetIds: string[], others: BattleParticipant[], over: { caster?: BattleParticipant; saveRolls?: { participantId: string; roll: number }[]; diceRolls?: number[] } = {}) {
-  const c = over.caster ?? caster();
+const withSlots = (p: BattleParticipant): BattleParticipant => ({
+    ...p,
+    spellcasting: {
+        ...p.spellcasting,
+        spellSlots: { '1': { max: 2, current: 2 } },
+    },
+});
 
-  return castSpell({ rules: DEFAULT_RULES, caster: c, spell, targetIds, allParticipants: [c, ...others], currentRound: 1, battleId: "b", diceRolls: over.diceRolls ?? [3, 3], saveRolls: over.saveRolls, rng: seq(0.5) });
+const caster = () => withSlots(makeParticipant({ id: 'c' }));
+
+const enemy = (id: string, raceId?: string): BattleParticipant => {
+    const p = makeParticipant({
+        id,
+        side: ParticipantSide.ENEMY,
+        hp: 200,
+        maxHp: 200,
+    });
+
+    return { ...p, abilities: { ...p.abilities, raceId } };
+};
+
+const hp = (r: { allParticipantsUpdated: BattleParticipant[] }, id: string) =>
+    r.allParticipantsUpdated.find((p) => p.basicInfo.id === id)?.combatStats
+        .currentHp as number;
+
+function cast(
+    spell: CastableSpell,
+    targetIds: string[],
+    others: BattleParticipant[],
+    over: {
+        caster?: BattleParticipant;
+        saveRolls?: { participantId: string; roll: number }[];
+        diceRolls?: number[];
+    } = {}
+) {
+    const c = over.caster ?? caster();
+
+    return castSpell({
+        rules: DEFAULT_RULES,
+        caster: c,
+        spell,
+        targetIds,
+        allParticipants: [c, ...others],
+        currentRound: 1,
+        battleId: 'b',
+        diceRolls: over.diceRolls ?? [3, 3],
+        saveRolls: over.saveRolls,
+        rng: seq(0.5),
+    });
 }
 
-describe("кантрипи", () => {
-  it("коло 0 кастується без слота й нічого не витрачає", () => {
-    const c = makeParticipant({ id: "c" });
+describe('кантрипи', () => {
+    it('коло 0 кастується без слота й нічого не витрачає', () => {
+        const c = makeParticipant({ id: 'c' });
 
-    const r = cast(spellOf({}, { level: 0 }), ["e1"], [enemy("e1")], { caster: c });
+        const r = cast(spellOf({}, { level: 0 }), ['e1'], [enemy('e1')], {
+            caster: c,
+        });
 
-    expect(r.success).toBe(true);
-    expect(r.casterUpdated.spellcasting.spellSlots).toEqual(c.spellcasting.spellSlots);
-  });
+        expect(r.success).toBe(true);
+        expect(r.casterUpdated.spellcasting.spellSlots).toEqual(
+            c.spellcasting.spellSlots
+        );
+    });
 
-  it("коло 1 без слота не кастується", () => {
-    const r = cast(spellOf(), ["e1"], [enemy("e1")], { caster: makeParticipant({ id: "c" }) });
+    it('коло 1 без слота не кастується', () => {
+        const r = cast(spellOf(), ['e1'], [enemy('e1')], {
+            caster: makeParticipant({ id: 'c' }),
+        });
 
-    expect(r.success).toBe(false);
-  });
+        expect(r.success).toBe(false);
+    });
 });
 
-describe("targeting kinds", () => {
-  const c = caster();
+describe('targeting kinds', () => {
+    const c = caster();
 
-  const ally = makeParticipant({ id: "a" });
+    const ally = makeParticipant({ id: 'a' });
 
-  const dead = { ...makeParticipant({ id: "d" }), combatStats: { ...makeParticipant({ id: "d" }).combatStats, currentHp: 0, status: "dead" as const } };
+    const dead = {
+        ...makeParticipant({ id: 'd' }),
+        combatStats: {
+            ...makeParticipant({ id: 'd' }).combatStats,
+            currentHp: 0,
+            status: 'dead' as const,
+        },
+    };
 
-  const e1 = enemy("e1");
+    const e1 = enemy('e1');
 
-  const e2 = enemy("e2");
+    const e2 = enemy('e2');
 
-  const ps = [c, ally, dead, e1, e2];
+    const ps = [c, ally, dead, e1, e2];
 
-  const resolve = (targeting: Parameters<typeof resolveSpellTargets>[3], chosen: string[]) => resolveSpellTargets(ps, c, { id: "sp", groupId: "chaos", level: 1 }, targeting, chosen);
+    const resolve = (
+        targeting: Parameters<typeof resolveSpellTargets>[3],
+        chosen: string[]
+    ) =>
+        resolveSpellTargets(
+            ps,
+            c,
+            { id: 'sp', groupId: 'chaos', level: 1 },
+            targeting,
+            chosen
+        );
 
-  it("self ігнорує вибір", () => {
-    expect(resolve({ kind: "self" }, ["e1"])).toEqual({ ok: true, targetIds: ["c"] });
-  });
+    it('self ігнорує вибір', () => {
+        expect(resolve({ kind: 'self' }, ['e1'])).toEqual({
+            ok: true,
+            targetIds: ['c'],
+        });
+    });
 
-  it("ally і enemy: одна жива ціль потрібної сторони", () => {
-    expect(resolve({ kind: "ally" }, ["a"])).toEqual({ ok: true, targetIds: ["a"] });
-    expect(resolve({ kind: "ally" }, ["e1"]).ok).toBe(false);
-    expect(resolve({ kind: "enemy" }, ["e1"])).toEqual({ ok: true, targetIds: ["e1"] });
-    expect(resolve({ kind: "enemy" }, ["e1", "e2"]).ok).toBe(false);
-    expect(resolve({ kind: "enemy" }, ["a"]).ok).toBe(false);
-    expect(resolve({ kind: "enemy" }, []).ok).toBe(false);
-  });
+    it('ally і enemy: одна жива ціль потрібної сторони', () => {
+        expect(resolve({ kind: 'ally' }, ['a'])).toEqual({
+            ok: true,
+            targetIds: ['a'],
+        });
+        expect(resolve({ kind: 'ally' }, ['e1']).ok).toBe(false);
+        expect(resolve({ kind: 'enemy' }, ['e1'])).toEqual({
+            ok: true,
+            targetIds: ['e1'],
+        });
+        expect(resolve({ kind: 'enemy' }, ['e1', 'e2']).ok).toBe(false);
+        expect(resolve({ kind: 'enemy' }, ['a']).ok).toBe(false);
+        expect(resolve({ kind: 'enemy' }, []).ok).toBe(false);
+    });
 
-  it("allyDead: лише полеглий союзник", () => {
-    expect(resolve({ kind: "allyDead" }, ["d"])).toEqual({ ok: true, targetIds: ["d"] });
-    expect(resolve({ kind: "allyDead" }, ["a"]).ok).toBe(false);
-  });
+    it('allyDead: лише полеглий союзник', () => {
+        expect(resolve({ kind: 'allyDead' }, ['d'])).toEqual({
+            ok: true,
+            targetIds: ['d'],
+        });
+        expect(resolve({ kind: 'allyDead' }, ['a']).ok).toBe(false);
+    });
 
-  it("allAlliesDead: усі полеглі союзники заклинателя, чужі й живі — ні", () => {
-    const fallenEnemy = { ...enemy("fe"), combatStats: { ...enemy("fe").combatStats, currentHp: 0, status: "dead" as const } };
+    it('allAlliesDead: усі полеглі союзники заклинателя, чужі й живі — ні', () => {
+        const fallenEnemy = {
+            ...enemy('fe'),
+            combatStats: {
+                ...enemy('fe').combatStats,
+                currentHp: 0,
+                status: 'dead' as const,
+            },
+        };
 
-    const all = [...ps, fallenEnemy, { ...dead, basicInfo: { ...dead.basicInfo, id: "d2" } }];
+        const all = [
+            ...ps,
+            fallenEnemy,
+            { ...dead, basicInfo: { ...dead.basicInfo, id: 'd2' } },
+        ];
 
-    expect(resolveSpellTargets(all, c, { id: "sp", groupId: "chaos", level: 1 }, { kind: "allAlliesDead" }, [])).toEqual({ ok: true, targetIds: ["d", "d2"] });
-    expect(resolveSpellTargets([c, ally, e1], c, { id: "sp", groupId: "chaos", level: 1 }, { kind: "allAlliesDead" }, []).ok).toBe(false);
-  });
+        expect(
+            resolveSpellTargets(
+                all,
+                c,
+                { id: 'sp', groupId: 'chaos', level: 1 },
+                { kind: 'allAlliesDead' },
+                []
+            )
+        ).toEqual({ ok: true, targetIds: ['d', 'd2'] });
+        expect(
+            resolveSpellTargets(
+                [c, ally, e1],
+                c,
+                { id: 'sp', groupId: 'chaos', level: 1 },
+                { kind: 'allAlliesDead' },
+                []
+            ).ok
+        ).toBe(false);
+    });
 
-  it("area: до maxTargets цілей зазначеної сторони", () => {
-    expect(resolve({ kind: "area", side: "enemy", maxTargets: 2 }, ["e1", "e2"])).toEqual({ ok: true, targetIds: ["e1", "e2"] });
-    expect(resolve({ kind: "area", side: "enemy", maxTargets: 1 }, ["e1", "e2"]).ok).toBe(false);
-    expect(resolve({ kind: "area", side: "enemy", maxTargets: 3 }, ["a"]).ok).toBe(false);
-  });
+    it('area: до maxTargets цілей зазначеної сторони', () => {
+        expect(
+            resolve({ kind: 'area', side: 'enemy', maxTargets: 2 }, [
+                'e1',
+                'e2',
+            ])
+        ).toEqual({ ok: true, targetIds: ['e1', 'e2'] });
+        expect(
+            resolve({ kind: 'area', side: 'enemy', maxTargets: 1 }, [
+                'e1',
+                'e2',
+            ]).ok
+        ).toBe(false);
+        expect(
+            resolve({ kind: 'area', side: 'enemy', maxTargets: 3 }, ['a']).ok
+        ).toBe(false);
+    });
 
-  it("allAllies, allEnemies, everyone беруть лише живих", () => {
-    expect(resolve({ kind: "allAllies" }, [])).toEqual({ ok: true, targetIds: ["c", "a"] });
-    expect(resolve({ kind: "allEnemies" }, [])).toEqual({ ok: true, targetIds: ["e1", "e2"] });
-    expect(resolve({ kind: "everyone" }, [])).toEqual({ ok: true, targetIds: ["c", "a", "e1", "e2"] });
-  });
+    it('allAllies, allEnemies, everyone беруть лише живих', () => {
+        expect(resolve({ kind: 'allAllies' }, [])).toEqual({
+            ok: true,
+            targetIds: ['c', 'a'],
+        });
+        expect(resolve({ kind: 'allEnemies' }, [])).toEqual({
+            ok: true,
+            targetIds: ['e1', 'e2'],
+        });
+        expect(resolve({ kind: 'everyone' }, [])).toEqual({
+            ok: true,
+            targetIds: ['c', 'a', 'e1', 'e2'],
+        });
+    });
 
-  it("скіл spellTargeting all розширює ally-бафф на всіх союзників", () => {
-    const widened = { ...c, battleData: { ...c.battleData, resolvedAbilities: [resolved({ trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "spellTargeting", mode: "all" }] })] } };
+    it('скіл spellTargeting all розширює ally-бафф на всіх союзників', () => {
+        const widened = {
+            ...c,
+            battleData: {
+                ...c.battleData,
+                resolvedAbilities: [
+                    resolved({
+                        trigger: { event: 'passive' },
+                        effects: [
+                            {
+                                kind: 'flag',
+                                flag: 'spellTargeting',
+                                mode: 'all',
+                            },
+                        ],
+                    }),
+                ],
+            },
+        };
 
-    const r = resolveSpellTargets([widened, ally, e1], widened, { id: "sp", groupId: "light", level: 1 }, { kind: "ally" }, ["a"]);
+        const r = resolveSpellTargets(
+            [widened, ally, e1],
+            widened,
+            { id: 'sp', groupId: 'light', level: 1 },
+            { kind: 'ally' },
+            ['a']
+        );
 
-    expect(r.ok && r.targetIds.sort()).toEqual(["a", "c"]);
-  });
+        expect(r.ok && r.targetIds.sort()).toEqual(['a', 'c']);
+    });
 });
 
-describe("castSpell", () => {
-  it("зберігає порядок ініціативи: кастер не переміщується на початок", () => {
-    const c = caster();
+describe('castSpell', () => {
+    it('зберігає порядок ініціативи: кастер не переміщується на початок', () => {
+        const c = caster();
 
-    const first = makeParticipant({ id: "a" });
+        const first = makeParticipant({ id: 'a' });
 
-    const r = castSpell({ rules: DEFAULT_RULES, caster: c, spell: spellOf(), targetIds: ["e1"], allParticipants: [first, enemy("e1"), c], currentRound: 1, battleId: "b", diceRolls: [3, 3], rng: seq(0.5) });
+        const r = castSpell({
+            rules: DEFAULT_RULES,
+            caster: c,
+            spell: spellOf(),
+            targetIds: ['e1'],
+            allParticipants: [first, enemy('e1'), c],
+            currentRound: 1,
+            battleId: 'b',
+            diceRolls: [3, 3],
+            rng: seq(0.5),
+        });
 
-    expect(r.allParticipantsUpdated.map((p) => p.basicInfo.id)).toEqual(["a", "e1", "c"]);
-  });
-
-  it("шкода = сума кубиків, один кидок на всі цілі", () => {
-    const r = cast(spellOf({ targeting: { kind: "area", side: "enemy", maxTargets: 2 } }), ["e1", "e2"], [enemy("e1"), enemy("e2")]);
-
-    expect(hp(r, "e1")).toBe(200 - 6);
-    expect(hp(r, "e2")).toBe(200 - 6);
-  });
-
-  it("рятівний кидок half: успішний кидок ділить шкоду навпіл", () => {
-    const spell = spellOf({ resolution: { kind: "save", ability: "dexterity", onSuccess: "half" }, targeting: { kind: "area", side: "enemy", maxTargets: 3 } });
-
-    const r = cast(spell, ["e1", "e2", "e3"], [enemy("e1"), enemy("e2"), enemy("e3")], {
-      saveRolls: [{ participantId: "e1", roll: 1 }, { participantId: "e2", roll: 9 }, { participantId: "e3", roll: 1 }],
+        expect(r.allParticipantsUpdated.map((p) => p.basicInfo.id)).toEqual([
+            'a',
+            'e1',
+            'c',
+        ]);
     });
 
-    expect([hp(r, "e1"), hp(r, "e2"), hp(r, "e3")]).toEqual([194, 197, 194]);
-    expect(r.battleAction.actionDetails.savingThrows?.map((s) => s.result)).toEqual(["fail", "success", "fail"]);
-    expect(eventTextOf(r.battleAction)).toMatch(/рятівний кидок 1[+-]\d+=-?\d+ проти СК \d+ — провал/);
-    expect(eventTextOf(r.battleAction)).toMatch(/рятівний кидок 9[+-]\d+=-?\d+ проти СК \d+ — успіх, половина шкоди/);
-  });
-
-  it("рятівний кидок none: успіх скасовує все; half пропускає недіапазонні ефекти", () => {
-    const stun: Effect = { kind: "applyCondition", condition: "no_reaction", duration: { rounds: 2 } };
-
-    const none = cast(spellOf({ resolution: { kind: "save", ability: "dexterity", onSuccess: "none" }, effects: [fire, stun] }), ["e1"], [enemy("e1")], { saveRolls: [{ participantId: "e1", roll: 20 }] });
-
-    expect(hp(none, "e1")).toBe(200);
-    expect(none.allParticipantsUpdated.find((p) => p.basicInfo.id === "e1")?.battleData.activeEffects).toHaveLength(0);
-
-    const half = cast(spellOf({ resolution: { kind: "save", ability: "dexterity", onSuccess: "half" }, effects: [fire, stun] }), ["e1"], [enemy("e1")], { saveRolls: [{ participantId: "e1", roll: 20 }] });
-
-    expect(hp(half, "e1")).toBe(197);
-    expect(half.allParticipantsUpdated.find((p) => p.basicInfo.id === "e1")?.battleData.activeEffects).toHaveLength(0);
-
-    const fail = cast(spellOf({ resolution: { kind: "save", ability: "dexterity", onSuccess: "half" }, effects: [fire, stun] }), ["e1"], [enemy("e1")], { saveRolls: [{ participantId: "e1", roll: 1 }] });
-
-    expect(fail.allParticipantsUpdated.find((p) => p.basicInfo.id === "e1")?.battleData.activeEffects).toHaveLength(1);
-  });
-
-  it("расовий модифікатор: −100 % — імунітет, +100 % — подвоєння", () => {
-    const spell = spellOf({ targeting: { kind: "allEnemies" }, raceModifiers: [{ raceId: "human", percent: -100 }, { raceId: "orc", percent: 100 }] });
-
-    const r = cast(spell, ["h", "o", "g"], [enemy("h", "human"), enemy("o", "orc"), enemy("g", "goblin")]);
-
-    expect([hp(r, "h"), hp(r, "o"), hp(r, "g")]).toEqual([200, 200 - 12, 200 - 6]);
-    expect(eventTextOf(r.battleAction)).toContain("імунітет раси");
-  });
-
-  it("Армагеддон (everyone) б'є і заклинателя, і його союзників", () => {
-    const ally = makeParticipant({ id: "a", hp: 50, maxHp: 50 });
-
-    const r = cast(spellOf({ targeting: { kind: "everyone" } }), ["c", "a", "e1"], [ally, enemy("e1")]);
-
-    expect(hp(r, "a")).toBe(44);
-    expect(hp(r, "c")).toBe(14);
-    expect(hp(r, "e1")).toBe(194);
-  });
-
-  it("DoT з кубиками кидається один раз на каст", () => {
-    const wall: Effect = { kind: "dot", damagePerRound: { spellRoll: 50 }, damageType: "fire", duration: { rounds: 3 } };
-
-    const r = cast(spellOf({ targeting: { kind: "allEnemies" }, effects: [wall] }), ["e1", "e2"], [enemy("e1"), enemy("e2")], { diceRolls: [5, 6] });
-
-    const dots = ["e1", "e2"].map((id) => r.allParticipantsUpdated.find((p) => p.basicInfo.id === id)?.battleData.activeEffects[0].dotDamage?.damagePerRound);
-
-    expect(dots).toEqual([5, 5]);
-  });
-
-  it("Ланцюгова блискавка: шкода спадає по цілях", () => {
-    const chain: Effect = { kind: "dealDamage", amount: { spellRoll: 100 }, damageType: "lightning", falloff: [100, 50, 25] };
-
-    const r = cast(spellOf({ targeting: { kind: "area", side: "enemy", maxTargets: 3 }, effects: [chain] }), ["e1", "e2", "e3"], [enemy("e1"), enemy("e2"), enemy("e3")], { diceRolls: [10, 9] });
-
-    expect([hp(r, "e1"), hp(r, "e2"), hp(r, "e3")]).toEqual([200 - 19, 200 - 9, 200 - 4]);
-  });
-
-  it("опір і імунітет до стихії застосовуються до шкоди заклинання", () => {
-    const resistant = enemy("e1");
-
-    resistant.battleData.resolvedAbilities = [resolved({ trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "resistance", damageType: "fire", percent: 50 }] })];
-
-    const r = cast(spellOf(), ["e1"], [resistant]);
-
-    expect(hp(r, "e1")).toBe(200 - 3);
-  });
-
-  it("імунітет до стихії: шкода 0 і позначка ⛔ у лозі", () => {
-    const immune = enemy("e1");
-
-    immune.battleData.resolvedAbilities = [resolved({ name: "Вогнетривкість", trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "resistance", damageType: "fire", percent: 100 }] })];
-
-    const r = cast(spellOf(), ["e1"], [immune]);
-
-    expect(hp(r, "e1")).toBe(200);
-    expect(eventTextOf(r.battleAction)).toContain("⛔ e1:");
-  });
-
-  it("Відродження лісу: усі полеглі союзники повертаються з 30 % HP", () => {
-    const fallen = (id: string) => ({ ...makeParticipant({ id, hp: 0, maxHp: 50 }), combatStats: { ...makeParticipant({ id, maxHp: 50 }).combatStats, currentHp: 0, maxHp: 50, status: "dead" as const } });
-
-    const rebirth = spellOf({ dice: 0, targeting: { kind: "allAlliesDead" }, effects: [{ kind: "heal", amount: { percentOf: "maxHp", value: 30 }, revive: true }] });
-
-    const r = cast(rebirth, ["d1", "d2"], [fallen("d1"), fallen("d2")], { diceRolls: [] });
-
-    expect(["d1", "d2"].map((id) => r.allParticipantsUpdated.find((p) => p.basicInfo.id === id)?.combatStats)).toEqual([expect.objectContaining({ currentHp: 15, status: "active" }), expect.objectContaining({ currentHp: 15, status: "active" })]);
-  });
-
-  it("лікування й Воскресіння (allyDead) через heal з revive", () => {
-    const fallen = { ...makeParticipant({ id: "d", hp: 0, maxHp: 40 }), combatStats: { ...makeParticipant({ id: "d", maxHp: 40 }).combatStats, currentHp: 0, maxHp: 40, status: "dead" as const } };
-
-    const res = spellOf({ dice: 0, targeting: { kind: "allyDead" }, effects: [{ kind: "heal", amount: { percentOf: "maxHp", value: 50 }, revive: true }] });
-
-    const r = cast(res, ["d"], [fallen], { diceRolls: [] });
-
-    expect(r.allParticipantsUpdated.find((p) => p.basicInfo.id === "d")?.combatStats).toMatchObject({ currentHp: 20, status: "active" });
-  });
-
-  it("регенерація: hot на союзника з кубиками заклинання", () => {
-    const regen = spellOf({ dice: 1, targeting: { kind: "ally" }, effects: [{ kind: "hot", healPerRound: { spellRoll: 100 }, duration: { rounds: 3 } }] });
-
-    const r = cast(regen, ["a"], [makeParticipant({ id: "a" })], { diceRolls: [4] });
-
-    expect(r.allParticipantsUpdated.find((p) => p.basicInfo.id === "a")?.battleData.activeEffects[0].hotHeal).toEqual({ healPerRound: 4 });
-  });
-
-  it("ефект self діє на заклинателя, а не на ціль; summon повертає запит", () => {
-    const buff: Effect = { kind: "modifyStat", stat: "armor", flat: 2, duration: { rounds: 2 }, target: "self" };
-
-    const r = cast(spellOf({ dice: 0, effects: [buff, { kind: "summon", unitId: "u1" }] }), ["e1"], [enemy("e1")], { diceRolls: [] });
-
-    expect(r.allParticipantsUpdated[0].battleData.activeEffects).toHaveLength(1);
-    expect(r.allParticipantsUpdated.find((p) => p.basicInfo.id === "e1")?.battleData.activeEffects).toHaveLength(0);
-    expect(r.summons).toEqual([expect.objectContaining({ unitId: "u1", ownerId: "c" })]);
-  });
-
-  it("слот витрачається; без слота — нічого не відбувається", () => {
-    const ok = cast(spellOf(), ["e1"], [enemy("e1")]);
-
-    expect(ok.casterUpdated.spellcasting.spellSlots["1"].current).toBe(1);
-
-    const empty = { ...caster(), spellcasting: { ...caster().spellcasting, spellSlots: { "1": { max: 2, current: 0 } } } };
-
-    const none = cast(spellOf(), ["e1"], [enemy("e1")], { caster: empty });
-
-    expect(none.success).toBe(false);
-    expect(hp(none, "e1")).toBe(200);
-  });
-
-  it("Немічність: −2 AC складається до maxStacks, далі оновлюється найкоротший стак", () => {
-    const frail = spellOf({ dice: 0, stackable: true, maxStacks: 3, effects: [{ kind: "modifyStat", stat: "armor", flat: -2, duration: { rounds: 3 } }] });
-
-    const c = caster();
-
-    let target = enemy("e1");
-
-    for (let i = 0; i < 4; i++) {
-      const r = castSpell({ rules: DEFAULT_RULES, caster: c, spell: frail, targetIds: ["e1"], allParticipants: [c, target], currentRound: i + 1, battleId: "b", diceRolls: [], rng: seq(0.5) });
-
-      target = r.allParticipantsUpdated.find((p) => p.basicInfo.id === "e1") as BattleParticipant;
-    }
-
-    expect(target.battleData.activeEffects).toHaveLength(3);
-  });
-
-  it("без stackable повторний каст оновлює один ефект", () => {
-    const frail = spellOf({ dice: 0, effects: [{ kind: "modifyStat", stat: "armor", flat: -2, duration: { rounds: 3 } }] });
-
-    const c = caster();
-
-    let target = enemy("e1");
-
-    for (let i = 0; i < 3; i++) {
-      target = castSpell({ rules: DEFAULT_RULES, caster: c, spell: frail, targetIds: ["e1"], allParticipants: [c, target], currentRound: 1, battleId: "b", diceRolls: [], rng: seq(0.5) }).allParticipantsUpdated.find((p) => p.basicInfo.id === "e1") as BattleParticipant;
-    }
-
-    expect(target.battleData.activeEffects).toHaveLength(1);
-  });
-
-  it("Божественна відплата: відсоток кидка — формула від втраченого HP заклинателя", () => {
-    const retribution = spellOf({ dice: 2, effects: [{ kind: "dealDamage", amount: { spellRoll: { formula: "100 + lost_hp_percent" } }, damageType: "radiant" }] });
-
-    const full = caster();
-
-    const wounded = { ...caster(), combatStats: { ...caster().combatStats, currentHp: 10 } };
-
-    const hit = (c: BattleParticipant) => 200 - hp(castSpell({ rules: DEFAULT_RULES, caster: c, spell: retribution, targetIds: ["e1"], allParticipants: [c, enemy("e1")], currentRound: 1, battleId: "b", diceRolls: [3, 3], rng: seq(0.5) }), "e1");
-
-    expect(hit(full)).toBe(6);
-    expect(hit(wounded)).toBe(Math.floor((6 * 150) / 100));
-  });
-
-  it("Шал і Ляльковод не діють на героїв, але слот витрачено", () => {
-    const hero = makeParticipant({ id: "h", side: ParticipantSide.ENEMY });
-
-    for (const effect of [{ kind: "berserk" as const, damageBonusPercent: 50, duration: { rounds: 1 } }, { kind: "charm" as const, duration: { rounds: 1 } }]) {
-      const r = cast(spellOf({ dice: 0, effects: [effect] }), ["h"], [hero], { diceRolls: [] });
-
-      const target = r.allParticipantsUpdated.find((p) => p.basicInfo.id === "h") as BattleParticipant;
-
-      expect(target.battleData.activeEffects).toHaveLength(0);
-      expect(target.basicInfo.side).toBe(ParticipantSide.ENEMY);
-      expect(eventTextOf(r.battleAction)).toContain("⛔");
-      expect(r.casterUpdated.spellcasting.spellSlots["1"].current).toBe(1);
-    }
-  });
-
-  describe("ефекти поза циклом по цілях", () => {
-    const poison: Effect = { kind: "dot", damagePerRound: 3, damageType: "poison", duration: { rounds: 2 }, target: "allEnemies" };
-
-    const dotOf = (r: { allParticipantsUpdated: BattleParticipant[] }, id: string) => r.allParticipantsUpdated.find((p) => p.basicInfo.id === id)?.battleData.activeEffects.length;
-
-    it("расовий імунітет і імунітет до заклинання діють на ворогів, що не є ціллю каста", () => {
-      const warded = enemy("w");
-
-      warded.battleData.resolvedAbilities = [resolved({ trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "spellImmunity", spellIds: ["sp"] }] })];
-
-      const spell = spellOf({ dice: 0, targeting: { kind: "enemy" }, effects: [poison], raceModifiers: [{ raceId: "human", percent: -100 }] });
-
-      const r = cast(spell, ["g"], [enemy("g"), enemy("h", "human"), warded], { diceRolls: [] });
-
-      expect([dotOf(r, "g"), dotOf(r, "h"), dotOf(r, "w")]).toEqual([1, 0, 0]);
+    it('шкода = сума кубиків, один кидок на всі цілі', () => {
+        const r = cast(
+            spellOf({
+                targeting: { kind: 'area', side: 'enemy', maxTargets: 2 },
+            }),
+            ['e1', 'e2'],
+            [enemy('e1'), enemy('e2')]
+        );
+
+        expect(hp(r, 'e1')).toBe(200 - 6);
+        expect(hp(r, 'e2')).toBe(200 - 6);
     });
 
-    it("збереження цілі каста скасовує й її ефекти з іншою ціллю", () => {
-      const spell = spellOf({ dice: 0, resolution: { kind: "save", ability: "dexterity", onSuccess: "none" }, effects: [poison] });
+    it('рятівний кидок half: успішний кидок ділить шкоду навпіл', () => {
+        const spell = spellOf({
+            resolution: {
+                kind: 'save',
+                ability: 'dexterity',
+                onSuccess: 'half',
+            },
+            targeting: { kind: 'area', side: 'enemy', maxTargets: 3 },
+        });
 
-      const r = cast(spell, ["g"], [enemy("g"), enemy("o")], { diceRolls: [], saveRolls: [{ participantId: "g", roll: 20 }] });
+        const r = cast(
+            spell,
+            ['e1', 'e2', 'e3'],
+            [enemy('e1'), enemy('e2'), enemy('e3')],
+            {
+                saveRolls: [
+                    { participantId: 'e1', roll: 1 },
+                    { participantId: 'e2', roll: 9 },
+                    { participantId: 'e3', roll: 1 },
+                ],
+            }
+        );
 
-      expect(dotOf(r, "g")).toBe(0);
-      expect(dotOf(r, "o")).toBe(1);
+        expect([hp(r, 'e1'), hp(r, 'e2'), hp(r, 'e3')]).toEqual([
+            194, 197, 194,
+        ]);
+        expect(
+            r.battleAction.actionDetails.savingThrows?.map((s) => s.result)
+        ).toEqual(['fail', 'success', 'fail']);
+        expect(eventTextOf(r.battleAction)).toMatch(
+            /рятівний кидок 1[+-]\d+=-?\d+ проти СК \d+ — провал/
+        );
+        expect(eventTextOf(r.battleAction)).toMatch(
+            /рятівний кидок 9[+-]\d+=-?\d+ проти СК \d+ — успіх, половина шкоди/
+        );
     });
 
-    it("randomOf застосовується до цілей каста з урахуванням імунітету раси", () => {
-      const rnd: Effect = { kind: "randomOf", options: [{ kind: "changeMorale", delta: -1 }, { kind: "changeMorale", delta: -1 }] };
+    it('рятівний кидок none: успіх скасовує все; half пропускає недіапазонні ефекти', () => {
+        const stun: Effect = {
+            kind: 'applyCondition',
+            condition: 'no_reaction',
+            duration: { rounds: 2 },
+        };
 
-      const spell = spellOf({ dice: 0, targeting: { kind: "allEnemies" }, effects: [rnd], raceModifiers: [{ raceId: "human", percent: -100 }] });
+        const none = cast(
+            spellOf({
+                resolution: {
+                    kind: 'save',
+                    ability: 'dexterity',
+                    onSuccess: 'none',
+                },
+                effects: [fire, stun],
+            }),
+            ['e1'],
+            [enemy('e1')],
+            { saveRolls: [{ participantId: 'e1', roll: 20 }] }
+        );
 
-      const r = cast(spell, ["g", "h"], [enemy("g"), enemy("h", "human")], { diceRolls: [] });
+        expect(hp(none, 'e1')).toBe(200);
+        expect(
+            none.allParticipantsUpdated.find((p) => p.basicInfo.id === 'e1')
+                ?.battleData.activeEffects
+        ).toHaveLength(0);
 
-      const morale = (id: string) => r.allParticipantsUpdated.find((p) => p.basicInfo.id === id)?.combatStats.morale;
+        const half = cast(
+            spellOf({
+                resolution: {
+                    kind: 'save',
+                    ability: 'dexterity',
+                    onSuccess: 'half',
+                },
+                effects: [fire, stun],
+            }),
+            ['e1'],
+            [enemy('e1')],
+            { saveRolls: [{ participantId: 'e1', roll: 20 }] }
+        );
 
-      expect([morale("g"), morale("h")]).toEqual([-1, 0]);
+        expect(hp(half, 'e1')).toBe(197);
+        expect(
+            half.allParticipantsUpdated.find((p) => p.basicInfo.id === 'e1')
+                ?.battleData.activeEffects
+        ).toHaveLength(0);
+
+        const fail = cast(
+            spellOf({
+                resolution: {
+                    kind: 'save',
+                    ability: 'dexterity',
+                    onSuccess: 'half',
+                },
+                effects: [fire, stun],
+            }),
+            ['e1'],
+            [enemy('e1')],
+            { saveRolls: [{ participantId: 'e1', roll: 1 }] }
+        );
+
+        expect(
+            fail.allParticipantsUpdated.find((p) => p.basicInfo.id === 'e1')
+                ?.battleData.activeEffects
+        ).toHaveLength(1);
     });
-  });
 
-  it("кілька dealDamage на одній цілі зливають кроки шкоди", () => {
-    const resistant = enemy("e1");
+    it('расовий модифікатор: −100 % — імунітет, +100 % — подвоєння', () => {
+        const spell = spellOf({
+            targeting: { kind: 'allEnemies' },
+            raceModifiers: [
+                { raceId: 'human', percent: -100 },
+                { raceId: 'orc', percent: 100 },
+            ],
+        });
 
-    resistant.battleData.resolvedAbilities = [resolved({ trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "resistance", damageType: "all", percent: 50 }] })];
+        const r = cast(
+            spell,
+            ['h', 'o', 'g'],
+            [enemy('h', 'human'), enemy('o', 'orc'), enemy('g', 'goblin')]
+        );
 
-    const r = cast(spellOf({ effects: [dmg("fire"), dmg("cold")] }), ["e1"], [resistant]);
+        expect([hp(r, 'h'), hp(r, 'o'), hp(r, 'g')]).toEqual([
+            200,
+            200 - 12,
+            200 - 6,
+        ]);
+        expect(eventTextOf(r.battleAction)).toContain('імунітет раси');
+    });
 
-    expect(r.battleAction.actionDetails.damageSteps?.e1).toHaveLength(2);
-  });
+    it("Армагеддон (everyone) б'є і заклинателя, і його союзників", () => {
+        const ally = makeParticipant({ id: 'a', hp: 50, maxHp: 50 });
+
+        const r = cast(
+            spellOf({ targeting: { kind: 'everyone' } }),
+            ['c', 'a', 'e1'],
+            [ally, enemy('e1')]
+        );
+
+        expect(hp(r, 'a')).toBe(44);
+        expect(hp(r, 'c')).toBe(14);
+        expect(hp(r, 'e1')).toBe(194);
+    });
+
+    it('DoT з кубиками кидається один раз на каст', () => {
+        const wall: Effect = {
+            kind: 'dot',
+            damagePerRound: { spellRoll: 50 },
+            damageType: 'fire',
+            duration: { rounds: 3 },
+        };
+
+        const r = cast(
+            spellOf({ targeting: { kind: 'allEnemies' }, effects: [wall] }),
+            ['e1', 'e2'],
+            [enemy('e1'), enemy('e2')],
+            { diceRolls: [5, 6] }
+        );
+
+        const dots = ['e1', 'e2'].map(
+            (id) =>
+                r.allParticipantsUpdated.find((p) => p.basicInfo.id === id)
+                    ?.battleData.activeEffects[0].dotDamage?.damagePerRound
+        );
+
+        expect(dots).toEqual([5, 5]);
+    });
+
+    it('Ланцюгова блискавка: шкода спадає по цілях', () => {
+        const chain: Effect = {
+            kind: 'dealDamage',
+            amount: { spellRoll: 100 },
+            damageType: 'lightning',
+            falloff: [100, 50, 25],
+        };
+
+        const r = cast(
+            spellOf({
+                targeting: { kind: 'area', side: 'enemy', maxTargets: 3 },
+                effects: [chain],
+            }),
+            ['e1', 'e2', 'e3'],
+            [enemy('e1'), enemy('e2'), enemy('e3')],
+            { diceRolls: [10, 9] }
+        );
+
+        expect([hp(r, 'e1'), hp(r, 'e2'), hp(r, 'e3')]).toEqual([
+            200 - 19,
+            200 - 9,
+            200 - 4,
+        ]);
+    });
+
+    it('опір і імунітет до стихії застосовуються до шкоди заклинання', () => {
+        const resistant = enemy('e1');
+
+        resistant.battleData.resolvedAbilities = [
+            resolved({
+                trigger: { event: 'passive' },
+                effects: [
+                    {
+                        kind: 'flag',
+                        flag: 'resistance',
+                        damageType: 'fire',
+                        percent: 50,
+                    },
+                ],
+            }),
+        ];
+
+        const r = cast(spellOf(), ['e1'], [resistant]);
+
+        expect(hp(r, 'e1')).toBe(200 - 3);
+    });
+
+    it('імунітет до стихії: шкода 0 і позначка ⛔ у лозі', () => {
+        const immune = enemy('e1');
+
+        immune.battleData.resolvedAbilities = [
+            resolved({
+                name: 'Вогнетривкість',
+                trigger: { event: 'passive' },
+                effects: [
+                    {
+                        kind: 'flag',
+                        flag: 'resistance',
+                        damageType: 'fire',
+                        percent: 100,
+                    },
+                ],
+            }),
+        ];
+
+        const r = cast(spellOf(), ['e1'], [immune]);
+
+        expect(hp(r, 'e1')).toBe(200);
+        expect(eventTextOf(r.battleAction)).toContain('⛔ e1:');
+    });
+
+    it('Відродження лісу: усі полеглі союзники повертаються з 30 % HP', () => {
+        const fallen = (id: string) => ({
+            ...makeParticipant({ id, hp: 0, maxHp: 50 }),
+            combatStats: {
+                ...makeParticipant({ id, maxHp: 50 }).combatStats,
+                currentHp: 0,
+                maxHp: 50,
+                status: 'dead' as const,
+            },
+        });
+
+        const rebirth = spellOf({
+            dice: 0,
+            targeting: { kind: 'allAlliesDead' },
+            effects: [
+                {
+                    kind: 'heal',
+                    amount: { percentOf: 'maxHp', value: 30 },
+                    revive: true,
+                },
+            ],
+        });
+
+        const r = cast(rebirth, ['d1', 'd2'], [fallen('d1'), fallen('d2')], {
+            diceRolls: [],
+        });
+
+        expect(
+            ['d1', 'd2'].map(
+                (id) =>
+                    r.allParticipantsUpdated.find((p) => p.basicInfo.id === id)
+                        ?.combatStats
+            )
+        ).toEqual([
+            expect.objectContaining({ currentHp: 15, status: 'active' }),
+            expect.objectContaining({ currentHp: 15, status: 'active' }),
+        ]);
+    });
+
+    it('лікування й Воскресіння (allyDead) через heal з revive', () => {
+        const fallen = {
+            ...makeParticipant({ id: 'd', hp: 0, maxHp: 40 }),
+            combatStats: {
+                ...makeParticipant({ id: 'd', maxHp: 40 }).combatStats,
+                currentHp: 0,
+                maxHp: 40,
+                status: 'dead' as const,
+            },
+        };
+
+        const res = spellOf({
+            dice: 0,
+            targeting: { kind: 'allyDead' },
+            effects: [
+                {
+                    kind: 'heal',
+                    amount: { percentOf: 'maxHp', value: 50 },
+                    revive: true,
+                },
+            ],
+        });
+
+        const r = cast(res, ['d'], [fallen], { diceRolls: [] });
+
+        expect(
+            r.allParticipantsUpdated.find((p) => p.basicInfo.id === 'd')
+                ?.combatStats
+        ).toMatchObject({ currentHp: 20, status: 'active' });
+    });
+
+    it('регенерація: hot на союзника з кубиками заклинання', () => {
+        const regen = spellOf({
+            dice: 1,
+            targeting: { kind: 'ally' },
+            effects: [
+                {
+                    kind: 'hot',
+                    healPerRound: { spellRoll: 100 },
+                    duration: { rounds: 3 },
+                },
+            ],
+        });
+
+        const r = cast(regen, ['a'], [makeParticipant({ id: 'a' })], {
+            diceRolls: [4],
+        });
+
+        expect(
+            r.allParticipantsUpdated.find((p) => p.basicInfo.id === 'a')
+                ?.battleData.activeEffects[0].hotHeal
+        ).toEqual({ healPerRound: 4 });
+    });
+
+    it('ефект self діє на заклинателя, а не на ціль; summon повертає запит', () => {
+        const buff: Effect = {
+            kind: 'modifyStat',
+            stat: 'armor',
+            flat: 2,
+            duration: { rounds: 2 },
+            target: 'self',
+        };
+
+        const r = cast(
+            spellOf({
+                dice: 0,
+                effects: [buff, { kind: 'summon', unitId: 'u1' }],
+            }),
+            ['e1'],
+            [enemy('e1')],
+            { diceRolls: [] }
+        );
+
+        expect(
+            r.allParticipantsUpdated[0].battleData.activeEffects
+        ).toHaveLength(1);
+        expect(
+            r.allParticipantsUpdated.find((p) => p.basicInfo.id === 'e1')
+                ?.battleData.activeEffects
+        ).toHaveLength(0);
+        expect(r.summons).toEqual([
+            expect.objectContaining({ unitId: 'u1', ownerId: 'c' }),
+        ]);
+    });
+
+    it('слот витрачається; без слота — нічого не відбувається', () => {
+        const ok = cast(spellOf(), ['e1'], [enemy('e1')]);
+
+        expect(ok.casterUpdated.spellcasting.spellSlots['1'].current).toBe(1);
+
+        const empty = {
+            ...caster(),
+            spellcasting: {
+                ...caster().spellcasting,
+                spellSlots: { '1': { max: 2, current: 0 } },
+            },
+        };
+
+        const none = cast(spellOf(), ['e1'], [enemy('e1')], { caster: empty });
+
+        expect(none.success).toBe(false);
+        expect(hp(none, 'e1')).toBe(200);
+    });
+
+    it('Немічність: −2 AC складається до maxStacks, далі оновлюється найкоротший стак', () => {
+        const frail = spellOf({
+            dice: 0,
+            stackable: true,
+            maxStacks: 3,
+            effects: [
+                {
+                    kind: 'modifyStat',
+                    stat: 'armor',
+                    flat: -2,
+                    duration: { rounds: 3 },
+                },
+            ],
+        });
+
+        const c = caster();
+
+        let target = enemy('e1');
+
+        for (let i = 0; i < 4; i++) {
+            const r = castSpell({
+                rules: DEFAULT_RULES,
+                caster: c,
+                spell: frail,
+                targetIds: ['e1'],
+                allParticipants: [c, target],
+                currentRound: i + 1,
+                battleId: 'b',
+                diceRolls: [],
+                rng: seq(0.5),
+            });
+
+            target = r.allParticipantsUpdated.find(
+                (p) => p.basicInfo.id === 'e1'
+            ) as BattleParticipant;
+        }
+
+        expect(target.battleData.activeEffects).toHaveLength(3);
+    });
+
+    it('без stackable повторний каст оновлює один ефект', () => {
+        const frail = spellOf({
+            dice: 0,
+            effects: [
+                {
+                    kind: 'modifyStat',
+                    stat: 'armor',
+                    flat: -2,
+                    duration: { rounds: 3 },
+                },
+            ],
+        });
+
+        const c = caster();
+
+        let target = enemy('e1');
+
+        for (let i = 0; i < 3; i++) {
+            target = castSpell({
+                rules: DEFAULT_RULES,
+                caster: c,
+                spell: frail,
+                targetIds: ['e1'],
+                allParticipants: [c, target],
+                currentRound: 1,
+                battleId: 'b',
+                diceRolls: [],
+                rng: seq(0.5),
+            }).allParticipantsUpdated.find(
+                (p) => p.basicInfo.id === 'e1'
+            ) as BattleParticipant;
+        }
+
+        expect(target.battleData.activeEffects).toHaveLength(1);
+    });
+
+    it('Божественна відплата: відсоток кидка — формула від втраченого HP заклинателя', () => {
+        const retribution = spellOf({
+            dice: 2,
+            effects: [
+                {
+                    kind: 'dealDamage',
+                    amount: { spellRoll: { formula: '100 + lost_hp_percent' } },
+                    damageType: 'radiant',
+                },
+            ],
+        });
+
+        const full = caster();
+
+        const wounded = {
+            ...caster(),
+            combatStats: { ...caster().combatStats, currentHp: 10 },
+        };
+
+        const hit = (c: BattleParticipant) =>
+            200 -
+            hp(
+                castSpell({
+                    rules: DEFAULT_RULES,
+                    caster: c,
+                    spell: retribution,
+                    targetIds: ['e1'],
+                    allParticipants: [c, enemy('e1')],
+                    currentRound: 1,
+                    battleId: 'b',
+                    diceRolls: [3, 3],
+                    rng: seq(0.5),
+                }),
+                'e1'
+            );
+
+        expect(hit(full)).toBe(6);
+        expect(hit(wounded)).toBe(Math.floor((6 * 150) / 100));
+    });
+
+    it('Шал і Ляльковод не діють на героїв, але слот витрачено', () => {
+        const hero = makeParticipant({ id: 'h', side: ParticipantSide.ENEMY });
+
+        for (const effect of [
+            {
+                kind: 'berserk' as const,
+                damageBonusPercent: 50,
+                duration: { rounds: 1 },
+            },
+            { kind: 'charm' as const, duration: { rounds: 1 } },
+        ]) {
+            const r = cast(
+                spellOf({ dice: 0, effects: [effect] }),
+                ['h'],
+                [hero],
+                { diceRolls: [] }
+            );
+
+            const target = r.allParticipantsUpdated.find(
+                (p) => p.basicInfo.id === 'h'
+            ) as BattleParticipant;
+
+            expect(target.battleData.activeEffects).toHaveLength(0);
+            expect(target.basicInfo.side).toBe(ParticipantSide.ENEMY);
+            expect(eventTextOf(r.battleAction)).toContain('⛔');
+            expect(r.casterUpdated.spellcasting.spellSlots['1'].current).toBe(
+                1
+            );
+        }
+    });
+
+    describe('ефекти поза циклом по цілях', () => {
+        const poison: Effect = {
+            kind: 'dot',
+            damagePerRound: 3,
+            damageType: 'poison',
+            duration: { rounds: 2 },
+            target: 'allEnemies',
+        };
+
+        const dotOf = (
+            r: { allParticipantsUpdated: BattleParticipant[] },
+            id: string
+        ) =>
+            r.allParticipantsUpdated.find((p) => p.basicInfo.id === id)
+                ?.battleData.activeEffects.length;
+
+        it('расовий імунітет і імунітет до заклинання діють на ворогів, що не є ціллю каста', () => {
+            const warded = enemy('w');
+
+            warded.battleData.resolvedAbilities = [
+                resolved({
+                    trigger: { event: 'passive' },
+                    effects: [
+                        {
+                            kind: 'flag',
+                            flag: 'spellImmunity',
+                            spellIds: ['sp'],
+                        },
+                    ],
+                }),
+            ];
+
+            const spell = spellOf({
+                dice: 0,
+                targeting: { kind: 'enemy' },
+                effects: [poison],
+                raceModifiers: [{ raceId: 'human', percent: -100 }],
+            });
+
+            const r = cast(
+                spell,
+                ['g'],
+                [enemy('g'), enemy('h', 'human'), warded],
+                { diceRolls: [] }
+            );
+
+            expect([dotOf(r, 'g'), dotOf(r, 'h'), dotOf(r, 'w')]).toEqual([
+                1, 0, 0,
+            ]);
+        });
+
+        it('збереження цілі каста скасовує й її ефекти з іншою ціллю', () => {
+            const spell = spellOf({
+                dice: 0,
+                resolution: {
+                    kind: 'save',
+                    ability: 'dexterity',
+                    onSuccess: 'none',
+                },
+                effects: [poison],
+            });
+
+            const r = cast(spell, ['g'], [enemy('g'), enemy('o')], {
+                diceRolls: [],
+                saveRolls: [{ participantId: 'g', roll: 20 }],
+            });
+
+            expect(dotOf(r, 'g')).toBe(0);
+            expect(dotOf(r, 'o')).toBe(1);
+        });
+
+        it('randomOf застосовується до цілей каста з урахуванням імунітету раси', () => {
+            const rnd: Effect = {
+                kind: 'randomOf',
+                options: [
+                    { kind: 'changeMorale', delta: -1 },
+                    { kind: 'changeMorale', delta: -1 },
+                ],
+            };
+
+            const spell = spellOf({
+                dice: 0,
+                targeting: { kind: 'allEnemies' },
+                effects: [rnd],
+                raceModifiers: [{ raceId: 'human', percent: -100 }],
+            });
+
+            const r = cast(
+                spell,
+                ['g', 'h'],
+                [enemy('g'), enemy('h', 'human')],
+                { diceRolls: [] }
+            );
+
+            const morale = (id: string) =>
+                r.allParticipantsUpdated.find((p) => p.basicInfo.id === id)
+                    ?.combatStats.morale;
+
+            expect([morale('g'), morale('h')]).toEqual([-1, 0]);
+        });
+    });
+
+    it('кілька dealDamage на одній цілі зливають кроки шкоди', () => {
+        const resistant = enemy('e1');
+
+        resistant.battleData.resolvedAbilities = [
+            resolved({
+                trigger: { event: 'passive' },
+                effects: [
+                    {
+                        kind: 'flag',
+                        flag: 'resistance',
+                        damageType: 'all',
+                        percent: 50,
+                    },
+                ],
+            }),
+        ];
+
+        const r = cast(
+            spellOf({ effects: [dmg('fire'), dmg('cold')] }),
+            ['e1'],
+            [resistant]
+        );
+
+        expect(r.battleAction.actionDetails.damageSteps?.e1).toHaveLength(2);
+    });
 });
 
-describe("fx metadata", () => {
-  it("records damage type, targeting and effect kinds", () => {
-    const r = cast(spellOf({ targeting: { kind: "allEnemies" } }), ["e1", "e2"], [enemy("e1"), enemy("e2")]);
+describe('fx metadata', () => {
+    it('records damage type, targeting and effect kinds', () => {
+        const r = cast(
+            spellOf({ targeting: { kind: 'allEnemies' } }),
+            ['e1', 'e2'],
+            [enemy('e1'), enemy('e2')]
+        );
 
-    expect(r.battleAction.actionDetails).toMatchObject({ spellDamageType: "fire", spellTargeting: "allEnemies", spellEffectKinds: ["dealDamage"] });
-  });
+        expect(r.battleAction.actionDetails).toMatchObject({
+            spellDamageType: 'fire',
+            spellTargeting: 'allEnemies',
+            spellEffectKinds: ['dealDamage'],
+        });
+    });
 
-  it("includes spell-only effect kinds", () => {
-    const grant = { kind: "grantCast", label: "x", cost: "action", duration: { rounds: 3 }, cast: { targeting: { kind: "single", range: 5 }, resolution: { kind: "none" }, dice: "" } } as unknown as Effect;
+    it('includes spell-only effect kinds', () => {
+        const grant = {
+            kind: 'grantCast',
+            label: 'x',
+            cost: 'action',
+            duration: { rounds: 3 },
+            cast: {
+                targeting: { kind: 'single', range: 5 },
+                resolution: { kind: 'none' },
+                dice: '',
+            },
+        } as unknown as Effect;
 
-    const r = cast(spellOf({ effects: [grant] }), ["e1"], [enemy("e1")]);
+        const r = cast(spellOf({ effects: [grant] }), ['e1'], [enemy('e1')]);
 
-    expect(r.battleAction.actionDetails.spellEffectKinds).toContain("grantCast");
-  });
+        expect(r.battleAction.actionDetails.spellEffectKinds).toContain(
+            'grantCast'
+        );
+    });
 
-  it("finds damage type and kinds inside randomOf and omits damage type when none", () => {
-    const random = { kind: "randomOf", options: [{ kind: "applyCondition", condition: "skip_action", duration: { rounds: 1 } }, dmg("cold")] } as Effect;
+    it('finds damage type and kinds inside randomOf and omits damage type when none', () => {
+        const random = {
+            kind: 'randomOf',
+            options: [
+                {
+                    kind: 'applyCondition',
+                    condition: 'skip_action',
+                    duration: { rounds: 1 },
+                },
+                dmg('cold'),
+            ],
+        } as Effect;
 
-    const r = cast(spellOf({ effects: [random] }), ["e1"], [enemy("e1")]);
+        const r = cast(spellOf({ effects: [random] }), ['e1'], [enemy('e1')]);
 
-    expect(r.battleAction.actionDetails).toMatchObject({ spellDamageType: "cold", spellEffectKinds: expect.arrayContaining(["applyCondition", "dealDamage"]) });
+        expect(r.battleAction.actionDetails).toMatchObject({
+            spellDamageType: 'cold',
+            spellEffectKinds: expect.arrayContaining([
+                'applyCondition',
+                'dealDamage',
+            ]),
+        });
 
-    const none = cast(spellOf({ effects: [{ kind: "note", text: "x" } as Effect] }), ["e1"], [enemy("e1")]);
+        const none = cast(
+            spellOf({ effects: [{ kind: 'note', text: 'x' } as Effect] }),
+            ['e1'],
+            [enemy('e1')]
+        );
 
-    expect("spellDamageType" in none.battleAction.actionDetails).toBe(false);
-  });
+        expect('spellDamageType' in none.battleAction.actionDetails).toBe(
+            false
+        );
+    });
 
-  it("records applied debuffs per target", () => {
-    const slow = { kind: "applyCondition", condition: "skip_action", duration: { rounds: 2 } } as Effect;
+    it('records applied debuffs per target', () => {
+        const slow = {
+            kind: 'applyCondition',
+            condition: 'skip_action',
+            duration: { rounds: 2 },
+        } as Effect;
 
-    const r = cast(spellOf({ effects: [slow] }), ["e1"], [enemy("e1")]);
+        const r = cast(spellOf({ effects: [slow] }), ['e1'], [enemy('e1')]);
 
-    expect(r.battleAction.actionDetails.appliedEffects?.[0]).toMatchObject({ targetId: "e1" });
-  });
+        expect(r.battleAction.actionDetails.appliedEffects?.[0]).toMatchObject({
+            targetId: 'e1',
+        });
+    });
 
-  it("tags lasting effects with the spell damage type", () => {
-    const chill = { kind: "modifyStat", stat: "armor", flat: -2, duration: { rounds: 2 } } as Effect;
+    it('tags lasting effects with the spell damage type', () => {
+        const chill = {
+            kind: 'modifyStat',
+            stat: 'armor',
+            flat: -2,
+            duration: { rounds: 2 },
+        } as Effect;
 
-    const r = cast(spellOf({ effects: [dmg("cold"), chill] }), ["e1"], [enemy("e1")]);
+        const r = cast(
+            spellOf({ effects: [dmg('cold'), chill] }),
+            ['e1'],
+            [enemy('e1')]
+        );
 
-    const effects = r.allParticipantsUpdated.find((p) => p.basicInfo.id === "e1")?.battleData.activeEffects ?? [];
+        const effects =
+            r.allParticipantsUpdated.find((p) => p.basicInfo.id === 'e1')
+                ?.battleData.activeEffects ?? [];
 
-    expect(effects.length).toBeGreaterThan(0);
-    expect(effects.every((e) => e.fxElement === "cold")).toBe(true);
-  });
+        expect(effects.length).toBeGreaterThan(0);
+        expect(effects.every((e) => e.fxElement === 'cold')).toBe(true);
+    });
 
-  it("does not tag effects applied during the cast by a trigger", () => {
-    const chill = { kind: "modifyStat", stat: "armor", flat: -2, duration: { rounds: 2 } } as Effect;
+    it('does not tag effects applied during the cast by a trigger', () => {
+        const chill = {
+            kind: 'modifyStat',
+            stat: 'armor',
+            flat: -2,
+            duration: { rounds: 2 },
+        } as Effect;
 
-    const target = enemy("e1");
+        const target = enemy('e1');
 
-    target.battleData.resolvedAbilities = [resolved({ name: "Відплата", trigger: { event: "spellCast", phase: "after", role: "target" }, effects: [{ kind: "modifyStat", stat: "armor", flat: 1, duration: { rounds: 2 }, target: "self" } as Effect] })];
+        target.battleData.resolvedAbilities = [
+            resolved({
+                name: 'Відплата',
+                trigger: { event: 'spellCast', phase: 'after', role: 'target' },
+                effects: [
+                    {
+                        kind: 'modifyStat',
+                        stat: 'armor',
+                        flat: 1,
+                        duration: { rounds: 2 },
+                        target: 'self',
+                    } as Effect,
+                ],
+            }),
+        ];
 
-    const r = cast(spellOf({ effects: [dmg("cold"), chill] }), ["e1"], [target]);
+        const r = cast(
+            spellOf({ effects: [dmg('cold'), chill] }),
+            ['e1'],
+            [target]
+        );
 
-    const effects = r.allParticipantsUpdated.find((p) => p.basicInfo.id === "e1")?.battleData.activeEffects ?? [];
+        const effects =
+            r.allParticipantsUpdated.find((p) => p.basicInfo.id === 'e1')
+                ?.battleData.activeEffects ?? [];
 
-    expect(effects.find((e) => e.name === "Заклинання")?.fxElement).toBe("cold");
-    expect(effects.find((e) => e.name === "Відплата")).toBeDefined();
-    expect(effects.find((e) => e.name === "Відплата")?.fxElement).toBeUndefined();
-  });
+        expect(effects.find((e) => e.name === 'Заклинання')?.fxElement).toBe(
+            'cold'
+        );
+        expect(effects.find((e) => e.name === 'Відплата')).toBeDefined();
+        expect(
+            effects.find((e) => e.name === 'Відплата')?.fxElement
+        ).toBeUndefined();
+    });
 
-  it("leaves fxElement unset when the spell has no damage type", () => {
-    const slow = { kind: "applyCondition", condition: "skip_action", duration: { rounds: 2 } } as Effect;
+    it('leaves fxElement unset when the spell has no damage type', () => {
+        const slow = {
+            kind: 'applyCondition',
+            condition: 'skip_action',
+            duration: { rounds: 2 },
+        } as Effect;
 
-    const r = cast(spellOf({ effects: [slow] }), ["e1"], [enemy("e1")]);
+        const r = cast(spellOf({ effects: [slow] }), ['e1'], [enemy('e1')]);
 
-    expect(r.allParticipantsUpdated.find((p) => p.basicInfo.id === "e1")?.battleData.activeEffects[0].fxElement).toBeUndefined();
-  });
+        expect(
+            r.allParticipantsUpdated.find((p) => p.basicInfo.id === 'e1')
+                ?.battleData.activeEffects[0].fxElement
+        ).toBeUndefined();
+    });
 });

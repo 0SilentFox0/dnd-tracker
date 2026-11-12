@@ -1,54 +1,88 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock("@/lib/utils/api/api-auth", () => ({
-  requireDM: vi.fn(async () => ({ userId: "u1" })),
-  requireCampaignAccess: vi.fn(async () => ({ userId: "u1" })),
+vi.mock('@/lib/utils/api/api-auth', () => ({
+    requireDM: vi.fn(async () => ({ userId: 'u1' })),
+    requireCampaignAccess: vi.fn(async () => ({ userId: 'u1' })),
 }));
 
-vi.mock("server-only", () => ({}));
+vi.mock('server-only', () => ({}));
 
-vi.mock("@/lib/db", async () => {
-  const { contentDatabaseDouble } = await import("@/lib/server/content/__tests__/database-double");
+vi.mock('@/lib/db', async () => {
+    const { contentDatabaseDouble } = await import(
+        '@/lib/server/content/__tests__/database-double'
+    );
 
-  return { prisma: contentDatabaseDouble({ artifact: { findFirst: vi.fn(), update: vi.fn(), create: vi.fn() } }) };
+    return {
+        prisma: contentDatabaseDouble({
+            artifact: { findFirst: vi.fn(), update: vi.fn(), create: vi.fn() },
+        }),
+    };
 });
 
-import { prisma } from "@/lib/db";
+import { prisma } from '@/lib/db';
 
-const ctx = { params: Promise.resolve({ id: "c1", artifactId: "a1" }) };
+const ctx = { params: Promise.resolve({ id: 'c1', artifactId: 'a1' }) };
 
-const patch = (body: unknown) => new Request("http://localhost/api/campaigns/c1/artifacts/a1", { method: "PATCH", body: JSON.stringify(body), headers: { "content-type": "application/json" } });
-
-describe("artifact weapon stats API", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    vi.mocked(prisma.artifact.findFirst).mockResolvedValue({ id: "a1", campaignId: "c1", slot: "weapon" } as never);
-    vi.mocked(prisma.artifact.update).mockResolvedValue({ id: "a1", campaignId: "c1" } as never);
-  });
-
-  it("PATCH weapon пише bonuses/modifiers, які читає бій", async () => {
-    const { PATCH } = await import("@/app/api/campaigns/[id]/artifacts/[artifactId]/route");
-
-    const res = await PATCH(patch({ weapon: { damageDice: "2d8", damageType: "fire", attackBonus: 1 } }), ctx);
-
-    expect(res.status).toBe(200);
-    expect(vi.mocked(prisma.artifact.update).mock.calls[0][0].data).toMatchObject({
-      bonuses: { attackBonus: 1 },
-      modifiers: [
-        { type: "damageDice", value: "2d8" },
-        { type: "damageType", value: "fire" },
-      ],
+const patch = (body: unknown) =>
+    new Request('http://localhost/api/campaigns/c1/artifacts/a1', {
+        method: 'PATCH',
+        body: JSON.stringify(body),
+        headers: { 'content-type': 'application/json' },
     });
-  });
 
-  it("PATCH без weapon не чіпає колонки зброї", async () => {
-    const { PATCH } = await import("@/app/api/campaigns/[id]/artifacts/[artifactId]/route");
+describe('artifact weapon stats API', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+        vi.mocked(prisma.artifact.findFirst).mockResolvedValue({
+            id: 'a1',
+            campaignId: 'c1',
+            slot: 'weapon',
+        } as never);
+        vi.mocked(prisma.artifact.update).mockResolvedValue({
+            id: 'a1',
+            campaignId: 'c1',
+        } as never);
+    });
 
-    await PATCH(patch({ name: "Новий" }), ctx);
+    it('PATCH weapon пише bonuses/modifiers, які читає бій', async () => {
+        const { PATCH } = await import(
+            '@/app/api/campaigns/[id]/artifacts/[artifactId]/route'
+        );
 
-    const data = vi.mocked(prisma.artifact.update).mock.calls[0][0].data as Record<string, unknown>;
+        const res = await PATCH(
+            patch({
+                weapon: {
+                    damageDice: '2d8',
+                    damageType: 'fire',
+                    attackBonus: 1,
+                },
+            }),
+            ctx
+        );
 
-    expect(data).not.toHaveProperty("bonuses");
-    expect(data).not.toHaveProperty("modifiers");
-  });
+        expect(res.status).toBe(200);
+        expect(
+            vi.mocked(prisma.artifact.update).mock.calls[0][0].data
+        ).toMatchObject({
+            bonuses: { attackBonus: 1 },
+            modifiers: [
+                { type: 'damageDice', value: '2d8' },
+                { type: 'damageType', value: 'fire' },
+            ],
+        });
+    });
+
+    it('PATCH без weapon не чіпає колонки зброї', async () => {
+        const { PATCH } = await import(
+            '@/app/api/campaigns/[id]/artifacts/[artifactId]/route'
+        );
+
+        await PATCH(patch({ name: 'Новий' }), ctx);
+
+        const data = vi.mocked(prisma.artifact.update).mock.calls[0][0]
+            .data as Record<string, unknown>;
+
+        expect(data).not.toHaveProperty('bonuses');
+        expect(data).not.toHaveProperty('modifiers');
+    });
 });

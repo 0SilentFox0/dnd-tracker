@@ -1,144 +1,160 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useTranslations } from "next-intl";
-import { AlertCircle, CheckCircle2,FileText, Upload } from "lucide-react";
+import { useState } from 'react';
+import { useTranslations } from 'next-intl';
+import { AlertCircle, CheckCircle2, FileText, Upload } from 'lucide-react';
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
-import type { UseFileImportReturn } from "@/lib/hooks/common";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
+import type { UseFileImportReturn } from '@/lib/hooks/common';
 
 interface ImportDialogProps {
-  triggerLabel?: string;
-  title?: string;
-  description?: string;
-  importHook: UseFileImportReturn;
-  accept?: string;
-  hideTrigger?: boolean;
-  onOpenChange?: (open: boolean) => void;
-  open?: boolean;
+    triggerLabel?: string;
+    title?: string;
+    description?: string;
+    importHook: UseFileImportReturn;
+    accept?: string;
+    hideTrigger?: boolean;
+    onOpenChange?: (open: boolean) => void;
+    open?: boolean;
 }
 
 export function ImportDialog({
-  triggerLabel,
-  title,
-  description,
-  importHook,
-  accept = ".csv,.json",
-  hideTrigger = false,
-  onOpenChange,
-  open,
+    triggerLabel,
+    title,
+    description,
+    importHook,
+    accept = '.csv,.json',
+    hideTrigger = false,
+    onOpenChange,
+    open,
 }: ImportDialogProps) {
-  const t = useTranslations("common.import");
+    const t = useTranslations('common.import');
 
-  const tc = useTranslations("common.actions");
+    const tc = useTranslations('common.actions');
 
-  const { file, status, actions } = importHook;
+    const { file, status, actions } = importHook;
 
-  const { error, success, isLoading } = status;
+    const { error, success, isLoading } = status;
 
-  const { handleFileChange, handleImport, reset } = actions;
+    const { handleFileChange, handleImport, reset } = actions;
 
-  const [innerOpen, setInnerOpen] = useState(false);
+    const [innerOpen, setInnerOpen] = useState(false);
 
-  const isOpen = open ?? innerOpen;
+    const isOpen = open ?? innerOpen;
 
-  const handleDialogOpenChange = (newOpen: boolean) => {
-    if (!newOpen) {
-      reset();
-    }
+    const handleDialogOpenChange = (newOpen: boolean) => {
+        if (!newOpen) {
+            reset();
+        }
 
-    setInnerOpen(newOpen);
-    onOpenChange?.(newOpen);
-  };
+        setInnerOpen(newOpen);
+        onOpenChange?.(newOpen);
+    };
 
-  const handleImportClick = async () => {
-    await handleImport();
+    const handleImportClick = async () => {
+        await handleImport();
 
-    if (success) {
-      setTimeout(() => {
-        handleDialogOpenChange(false);
-      }, 2000);
-    }
-  };
+        if (success) {
+            setTimeout(() => {
+                handleDialogOpenChange(false);
+            }, 2000);
+        }
+    };
 
-  return (
-    <>
-      {!hideTrigger && (
-        <Button onClick={() => handleDialogOpenChange(true)} variant="outline">
-          <Upload className="h-4 w-4 mr-2" />
-          {triggerLabel ?? t("triggerLabel")}
-        </Button>
-      )}
-    <ResponsiveDialog
-      hud
-      open={isOpen}
-      onOpenChange={handleDialogOpenChange}
-      title={title ?? t("title")}
-      description={description ?? t("description")}
-    >
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="file-upload">{t("fileLabel")}</Label>
-            <div className="flex items-center gap-2">
-              <Input
-                id="file-upload"
-                type="file"
-                accept={accept}
-                onChange={handleFileChange}
-                disabled={isLoading}
-                className="w-full"
-              />
-              {file && (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <FileText className="h-4 w-4" />
-                  <span>{file.name}</span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {error && (
-            <div className="flex items-center gap-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md text-sm text-red-700 dark:text-red-400">
-              <AlertCircle className="h-4 w-4 shrink-0" />
-              <span>{error}</span>
-            </div>
-          )}
-
-          {success && (
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md text-sm text-green-700 dark:text-green-400">
-                <CheckCircle2 className="h-4 w-4 shrink-0" />
-                <span>
-                  {t("result", { imported: success.imported, total: success.total })}
-                  {success.skipped ? t("skipped", { skipped: success.skipped }) : ""}
-                </span>
-              </div>
-              {success.warnings?.map((warning) => (
-                <p key={warning} className="flex items-center gap-2 p-3 rounded-md border border-amber-200 bg-amber-50 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-300">
-                  <AlertCircle className="h-4 w-4 shrink-0" />
-                  {warning}
-                </p>
-              ))}
-            </div>
-          )}
-
-          <div className="flex justify-end gap-2">
-            <Button
-              variant="outline"
-              onClick={() => handleDialogOpenChange(false)}
-              disabled={isLoading}
+    return (
+        <>
+            {!hideTrigger && (
+                <Button
+                    onClick={() => handleDialogOpenChange(true)}
+                    variant="outline"
+                >
+                    <Upload className="mr-2 h-4 w-4" />
+                    {triggerLabel ?? t('triggerLabel')}
+                </Button>
+            )}
+            <ResponsiveDialog
+                hud
+                open={isOpen}
+                onOpenChange={handleDialogOpenChange}
+                title={title ?? t('title')}
+                description={description ?? t('description')}
             >
-              {tc("cancel")}
-            </Button>
-            <Button onClick={handleImportClick} disabled={isLoading || !file}>
-              {isLoading ? t("submitting") : t("submit")}
-            </Button>
-          </div>
-        </div>
-    </ResponsiveDialog>
-    </>
-  );
+                <div className="space-y-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="file-upload">{t('fileLabel')}</Label>
+                        <div className="flex items-center gap-2">
+                            <Input
+                                id="file-upload"
+                                type="file"
+                                accept={accept}
+                                onChange={handleFileChange}
+                                disabled={isLoading}
+                                className="w-full"
+                            />
+                            {file && (
+                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                    <FileText className="h-4 w-4" />
+                                    <span>{file.name}</span>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {error && (
+                        <div className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">
+                            <AlertCircle className="h-4 w-4 shrink-0" />
+                            <span>{error}</span>
+                        </div>
+                    )}
+
+                    {success && (
+                        <div className="space-y-2">
+                            <div className="flex items-center gap-2 rounded-md border border-green-200 bg-green-50 p-3 text-sm text-green-700 dark:border-green-800 dark:bg-green-900/20 dark:text-green-400">
+                                <CheckCircle2 className="h-4 w-4 shrink-0" />
+                                <span>
+                                    {t('result', {
+                                        imported: success.imported,
+                                        total: success.total,
+                                    })}
+                                    {success.skipped
+                                        ? t('skipped', {
+                                              skipped: success.skipped,
+                                          })
+                                        : ''}
+                                </span>
+                            </div>
+                            {success.warnings?.map((warning) => (
+                                <p
+                                    key={warning}
+                                    className="flex items-center gap-2 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-300"
+                                >
+                                    <AlertCircle className="h-4 w-4 shrink-0" />
+                                    {warning}
+                                </p>
+                            ))}
+                        </div>
+                    )}
+
+                    <div className="flex justify-end gap-2">
+                        <Button
+                            variant="outline"
+                            onClick={() => handleDialogOpenChange(false)}
+                            disabled={isLoading}
+                        >
+                            {tc('cancel')}
+                        </Button>
+                        <Button
+                            onClick={handleImportClick}
+                            disabled={isLoading || !file}
+                        >
+                            {isLoading ? t('submitting') : t('submit')}
+                        </Button>
+                    </div>
+                </div>
+            </ResponsiveDialog>
+        </>
+    );
 }

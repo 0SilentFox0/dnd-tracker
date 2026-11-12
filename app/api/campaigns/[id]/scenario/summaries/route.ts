@@ -1,7 +1,10 @@
-import { listSummariesHandler } from "./summaries-handler";
+import { listSummariesHandler } from './summaries-handler';
 
-export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+export async function GET(
+    _req: Request,
+    { params }: { params: Promise<{ id: string }> }
+) {
+    const { id } = await params;
 
-  return listSummariesHandler(id);
+    return listSummariesHandler(id);
 }

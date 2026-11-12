@@ -1,1 +1,1 @@
-export { SkillTreeEditor } from "./SkillTreeEditor";
+export { SkillTreeEditor } from './SkillTreeEditor';

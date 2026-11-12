@@ -1,9 +1,12 @@
-"use client";
+'use client';
 
-import { createStorageFlag, useStorageValue } from "@/lib/hooks/common/storage-value";
+import {
+    createStorageFlag,
+    useStorageValue,
+} from '@/lib/hooks/common/storage-value';
 
-const dockExpanded = createStorageFlag("scenario-show-dock", false);
+const dockExpanded = createStorageFlag('scenario-show-dock', false);
 
 export function useShowDockExpanded(): [boolean, (value: boolean) => void] {
-  return [useStorageValue(dockExpanded, false), dockExpanded.set];
+    return [useStorageValue(dockExpanded, false), dockExpanded.set];
 }

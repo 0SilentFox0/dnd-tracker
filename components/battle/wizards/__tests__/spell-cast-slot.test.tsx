@@ -1,128 +1,210 @@
 // @vitest-environment happy-dom
-import { useEffect } from "react";
-import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { useEffect } from 'react';
+import { cleanup, fireEvent, screen, waitFor } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "" }));
+vi.mock('@/components/hud/fonts', () => ({ hudFontClassName: '' }));
 
-vi.mock("next-intl", async () => (await import("./uk-intl")).catalogIntl());
+vi.mock('next-intl', async () => (await import('./uk-intl')).catalogIntl());
 
 const lib = vi.hoisted(() => ({
-  spells: [
-    { id: "bolt", name: "Крижаний спис", level: 1, dice: 3, upcastDice: 1, cost: "action", targeting: { kind: "enemy" }, resolution: { kind: "auto" } },
-    { id: "ray", name: "Промінь слабкості", level: 1, dice: 1, cost: "action", targeting: { kind: "enemy" }, resolution: { kind: "attack" } },
-    { id: "mark", name: "Знак мисливця", level: 1, dice: 0, upcastTargets: 1, cost: "action", targeting: { kind: "enemy" }, resolution: { kind: "auto" } },
-  ],
+    spells: [
+        {
+            id: 'bolt',
+            name: 'Крижаний спис',
+            level: 1,
+            dice: 3,
+            upcastDice: 1,
+            cost: 'action',
+            targeting: { kind: 'enemy' },
+            resolution: { kind: 'auto' },
+        },
+        {
+            id: 'ray',
+            name: 'Промінь слабкості',
+            level: 1,
+            dice: 1,
+            cost: 'action',
+            targeting: { kind: 'enemy' },
+            resolution: { kind: 'attack' },
+        },
+        {
+            id: 'mark',
+            name: 'Знак мисливця',
+            level: 1,
+            dice: 0,
+            upcastTargets: 1,
+            cost: 'action',
+            targeting: { kind: 'enemy' },
+            resolution: { kind: 'auto' },
+        },
+    ],
 }));
 
-vi.mock("@/lib/hooks/spells", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("@/lib/hooks/spells")>()),
-  useSpells: vi.fn(() => ({ data: undefined })),
-  useSpellsByIds: vi.fn((_campaignId: string, ids: string[]) => ({ data: lib.spells.filter((s) => ids.includes(s.id)) })),
+vi.mock('@/lib/hooks/spells', async (importOriginal) => ({
+    ...(await importOriginal<typeof import('@/lib/hooks/spells')>()),
+    useSpells: vi.fn(() => ({ data: undefined })),
+    useSpellsByIds: vi.fn((_campaignId: string, ids: string[]) => ({
+        data: lib.spells.filter((s) => ids.includes(s.id)),
+    })),
 }));
 
-import { SpellBook } from "@/components/battle/wizards/SpellBook";
-import { useSpellBook } from "@/lib/hooks/battle";
-import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
-import { render } from "@/lib/i18n/test/render-uk";
-import { textOf } from "@/lib/i18n/test/text";
-import { slotOptions } from "@/lib/utils/battle/flows";
+import { SpellBook } from '@/components/battle/wizards/SpellBook';
+import { useSpellBook } from '@/lib/hooks/battle';
+import { fakeScene } from '@/lib/hooks/battle/__tests__/fake-scene';
+import { render } from '@/lib/i18n/test/render-uk';
+import { textOf } from '@/lib/i18n/test/text';
+import { slotOptions } from '@/lib/utils/battle/flows';
 
-vi.unmock("next-intl");
+vi.unmock('next-intl');
 
 type Caster = NonNullable<Parameters<typeof useSpellBook>[0]>;
 
-const hero = (p: Caster, model?: "5e"): Caster => ({ ...p, basicInfo: { ...p.basicInfo, sourceType: "character" as const }, abilities: { ...p.abilities, ...(model && { damageModel: model }) } });
-
-const SLOTS = { "1": { max: 2, current: 2 }, "2": { max: 1, current: 0 }, "3": { max: 1, current: 1 }, pact: { max: 1, current: 1, level: 3 } };
-
-function Harness({ caster, model }: { caster: Caster; model?: "5e" }) {
-  const book = useSpellBook(hero(caster, model), {});
-
-  useEffect(() => book.actions.open(1), []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  return <SpellBook book={book} />;
-}
-
-describe("slotOptions", () => {
-  it("лише кола не нижче заклинання з непорожнім слотом і пакт не нижче", () => {
-    const { caster } = fakeScene({ slots: SLOTS });
-
-    const keys = (level: number, p = hero(caster, "5e")) => slotOptions(p, level).map((o) => `${o.key}:${textOf(o.label)}`);
-
-    expect(keys(1)).toEqual(["1:Коло 1", "3:Коло 3", "pact:Пакт · коло 3"]);
-    expect(keys(2)).toEqual(["3:Коло 3", "pact:Пакт · коло 3"]);
-    expect(keys(4)).toEqual([]);
-    expect(keys(0)).toEqual([]);
-    expect(keys(1, hero(caster))).toEqual([]);
-  });
+const hero = (p: Caster, model?: '5e'): Caster => ({
+    ...p,
+    basicInfo: { ...p.basicInfo, sourceType: 'character' as const },
+    abilities: { ...p.abilities, ...(model && { damageModel: model }) },
 });
 
-describe("слот у вікні касту", () => {
-  afterEach(cleanup);
+const SLOTS = {
+    '1': { max: 2, current: 2 },
+    '2': { max: 1, current: 0 },
+    '3': { max: 1, current: 1 },
+    pact: { max: 1, current: 1, level: 3 },
+};
 
-  it("герой 5e: селект слота, вибір «Коло 3» дає 5 кубиків і slotKey у запиті", async () => {
-    const { wrapper, caster, castSpell } = fakeScene({ knownSpells: ["bolt"], slots: SLOTS });
+function Harness({ caster, model }: { caster: Caster; model?: '5e' }) {
+    const book = useSpellBook(hero(caster, model), {});
 
-    render(<Harness caster={caster} model="5e" />, { wrapper });
+    useEffect(() => book.actions.open(1), []); // eslint-disable-line react-hooks/exhaustive-deps
 
-    fireEvent.click(await screen.findByText("Крижаний спис"));
-    fireEvent.click(screen.getByRole("button", { name: /Обрати цілі/ }));
+    return <SpellBook book={book} />;
+}
 
-    const select = screen.getByLabelText("Слот") as HTMLSelectElement;
+describe('slotOptions', () => {
+    it('лише кола не нижче заклинання з непорожнім слотом і пакт не нижче', () => {
+        const { caster } = fakeScene({ slots: SLOTS });
 
-    expect([...select.options].map((o) => o.text)).toEqual(["Коло 1", "Коло 3", "Пакт · коло 3"]);
+        const keys = (level: number, p = hero(caster, '5e')) =>
+            slotOptions(p, level).map((o) => `${o.key}:${textOf(o.label)}`);
 
-    fireEvent.change(select, { target: { value: "3" } });
-    fireEvent.click(screen.getByRole("button", { name: /Гоблін/ }));
-    fireEvent.click(screen.getByRole("button", { name: "Далі · кидки" }));
+        expect(keys(1)).toEqual(['1:Коло 1', '3:Коло 3', 'pact:Пакт · коло 3']);
+        expect(keys(2)).toEqual(['3:Коло 3', 'pact:Пакт · коло 3']);
+        expect(keys(4)).toEqual([]);
+        expect(keys(0)).toEqual([]);
+        expect(keys(1, hero(caster))).toEqual([]);
+    });
+});
 
-    expect(screen.getByLabelText("Кубик 5 (d6)")).toBeTruthy();
-    expect(screen.queryByLabelText("Кубик 6 (d6)")).toBeNull();
+describe('слот у вікні касту', () => {
+    afterEach(cleanup);
 
-    for (let i = 1; i <= 5; i += 1) fireEvent.change(screen.getByLabelText(`Кубик ${i} (d6)`), { target: { value: "2" } });
+    it('герой 5e: селект слота, вибір «Коло 3» дає 5 кубиків і slotKey у запиті', async () => {
+        const { wrapper, caster, castSpell } = fakeScene({
+            knownSpells: ['bolt'],
+            slots: SLOTS,
+        });
 
-    fireEvent.click(screen.getByRole("button", { name: "Далі · підсумок" }));
-    fireEvent.click(screen.getByRole("button", { name: /Застосувати/ }));
+        render(<Harness caster={caster} model="5e" />, { wrapper });
 
-    await waitFor(() => expect(castSpell).toHaveBeenCalledWith(expect.objectContaining({ spellId: "bolt", slotKey: "3", diceRolls: [2, 2, 2, 2, 2] })));
-  });
+        fireEvent.click(await screen.findByText('Крижаний спис'));
+        fireEvent.click(screen.getByRole('button', { name: /Обрати цілі/ }));
 
-  it("герой HOMM не бачить селекта й не шле slotKey", async () => {
-    const { wrapper, caster, castSpell } = fakeScene({ knownSpells: ["bolt"], slots: SLOTS });
+        const select = screen.getByLabelText('Слот') as HTMLSelectElement;
 
-    render(<Harness caster={caster} />, { wrapper });
+        expect([...select.options].map((o) => o.text)).toEqual([
+            'Коло 1',
+            'Коло 3',
+            'Пакт · коло 3',
+        ]);
 
-    fireEvent.click(await screen.findByText("Крижаний спис"));
-    expect(screen.queryByLabelText("Слот")).toBeNull();
-    fireEvent.click(screen.getByRole("button", { name: /Обрати цілі/ }));
-    expect(screen.queryByLabelText("Слот")).toBeNull();
-    fireEvent.click(screen.getByRole("button", { name: /Гоблін/ }));
-    fireEvent.click(screen.getByRole("button", { name: "Далі · кидки" }));
+        fireEvent.change(select, { target: { value: '3' } });
+        fireEvent.click(screen.getByRole('button', { name: /Гоблін/ }));
+        fireEvent.click(screen.getByRole('button', { name: 'Далі · кидки' }));
 
-    for (let i = 1; i <= 3; i += 1) fireEvent.change(screen.getByLabelText(`Кубик ${i} (d6)`), { target: { value: "1" } });
+        expect(screen.getByLabelText('Кубик 5 (d6)')).toBeTruthy();
+        expect(screen.queryByLabelText('Кубик 6 (d6)')).toBeNull();
 
-    fireEvent.click(screen.getByRole("button", { name: "Далі · підсумок" }));
-    fireEvent.click(screen.getByRole("button", { name: /Застосувати/ }));
+        for (let i = 1; i <= 5; i += 1)
+            fireEvent.change(screen.getByLabelText(`Кубик ${i} (d6)`), {
+                target: { value: '2' },
+            });
 
-    await waitFor(() => expect(castSpell).toHaveBeenCalled());
-    expect(castSpell.mock.calls[0][0]).not.toHaveProperty("slotKey");
-  });
+        fireEvent.click(
+            screen.getByRole('button', { name: 'Далі · підсумок' })
+        );
+        fireEvent.click(screen.getByRole('button', { name: /Застосувати/ }));
 
-  it("атака заклинанням: d20 цілі йде в attackRolls", async () => {
-    const { wrapper, caster, castSpell } = fakeScene({ knownSpells: ["ray"], slots: SLOTS });
+        await waitFor(() =>
+            expect(castSpell).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    spellId: 'bolt',
+                    slotKey: '3',
+                    diceRolls: [2, 2, 2, 2, 2],
+                })
+            )
+        );
+    });
 
-    render(<Harness caster={caster} model="5e" />, { wrapper });
+    it('герой HOMM не бачить селекта й не шле slotKey', async () => {
+        const { wrapper, caster, castSpell } = fakeScene({
+            knownSpells: ['bolt'],
+            slots: SLOTS,
+        });
 
-    fireEvent.click(await screen.findByText("Промінь слабкості"));
-    fireEvent.click(screen.getByRole("button", { name: /Обрати цілі/ }));
-    fireEvent.click(screen.getByRole("button", { name: /Гоблін/ }));
-    fireEvent.click(screen.getByRole("button", { name: "Далі · кидки" }));
-    fireEvent.change(screen.getByLabelText("Кидок атаки: Гоблін"), { target: { value: "17" } });
-    fireEvent.change(screen.getByLabelText("Кубик 1 (d6)"), { target: { value: "4" } });
-    fireEvent.click(screen.getByRole("button", { name: "Далі · підсумок" }));
-    fireEvent.click(screen.getByRole("button", { name: /Застосувати/ }));
+        render(<Harness caster={caster} />, { wrapper });
 
-    await waitFor(() => expect(castSpell).toHaveBeenCalledWith(expect.objectContaining({ spellId: "ray", attackRolls: [{ participantId: "gob", roll: 17 }] })));
-  });
+        fireEvent.click(await screen.findByText('Крижаний спис'));
+        expect(screen.queryByLabelText('Слот')).toBeNull();
+        fireEvent.click(screen.getByRole('button', { name: /Обрати цілі/ }));
+        expect(screen.queryByLabelText('Слот')).toBeNull();
+        fireEvent.click(screen.getByRole('button', { name: /Гоблін/ }));
+        fireEvent.click(screen.getByRole('button', { name: 'Далі · кидки' }));
+
+        for (let i = 1; i <= 3; i += 1)
+            fireEvent.change(screen.getByLabelText(`Кубик ${i} (d6)`), {
+                target: { value: '1' },
+            });
+
+        fireEvent.click(
+            screen.getByRole('button', { name: 'Далі · підсумок' })
+        );
+        fireEvent.click(screen.getByRole('button', { name: /Застосувати/ }));
+
+        await waitFor(() => expect(castSpell).toHaveBeenCalled());
+        expect(castSpell.mock.calls[0][0]).not.toHaveProperty('slotKey');
+    });
+
+    it('атака заклинанням: d20 цілі йде в attackRolls', async () => {
+        const { wrapper, caster, castSpell } = fakeScene({
+            knownSpells: ['ray'],
+            slots: SLOTS,
+        });
+
+        render(<Harness caster={caster} model="5e" />, { wrapper });
+
+        fireEvent.click(await screen.findByText('Промінь слабкості'));
+        fireEvent.click(screen.getByRole('button', { name: /Обрати цілі/ }));
+        fireEvent.click(screen.getByRole('button', { name: /Гоблін/ }));
+        fireEvent.click(screen.getByRole('button', { name: 'Далі · кидки' }));
+        fireEvent.change(screen.getByLabelText('Кидок атаки: Гоблін'), {
+            target: { value: '17' },
+        });
+        fireEvent.change(screen.getByLabelText('Кубик 1 (d6)'), {
+            target: { value: '4' },
+        });
+        fireEvent.click(
+            screen.getByRole('button', { name: 'Далі · підсумок' })
+        );
+        fireEvent.click(screen.getByRole('button', { name: /Застосувати/ }));
+
+        await waitFor(() =>
+            expect(castSpell).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    spellId: 'ray',
+                    attackRolls: [{ participantId: 'gob', roll: 17 }],
+                })
+            )
+        );
+    });
 });

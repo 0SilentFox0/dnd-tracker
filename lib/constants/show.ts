@@ -1,4 +1,4 @@
-export const SCENE_SLIDES_BUCKET = "scene-slides";
+export const SCENE_SLIDES_BUCKET = 'scene-slides';
 
 export const MAX_SLIDE_MB = 8;
 
@@ -22,20 +22,23 @@ export const SLIDE_MAX_EDGE_PX = 2560;
 
 /** Бакет приймає й те, що дзеркалиться за посиланням (resolveImageForPersistence). */
 export const SLIDE_FORMATS = {
-  "image/webp": "webp",
-  "image/jpeg": "jpg",
-  "image/png": "png",
-  "image/gif": "gif",
+    'image/webp': 'webp',
+    'image/jpeg': 'jpg',
+    'image/png': 'png',
+    'image/gif': 'gif',
 } as const;
 
 /** Що клієнт вантажить напряму (після зменшення). */
-export const SLIDE_UPLOAD_TYPES = ["image/webp", "image/jpeg"] as const satisfies readonly (keyof typeof SLIDE_FORMATS)[];
+export const SLIDE_UPLOAD_TYPES = [
+    'image/webp',
+    'image/jpeg',
+] as const satisfies readonly (keyof typeof SLIDE_FORMATS)[];
 
 export type SlideUploadType = (typeof SLIDE_UPLOAD_TYPES)[number];
 
 export const SLIDE_BUCKET_TYPES = Object.keys(SLIDE_FORMATS);
 
-export const SLIDE_FILE_ACCEPT = SLIDE_BUCKET_TYPES.join(",");
+export const SLIDE_FILE_ACCEPT = SLIDE_BUCKET_TYPES.join(',');
 
 export const SLIDE_CROSSFADE_MS = 600;
 

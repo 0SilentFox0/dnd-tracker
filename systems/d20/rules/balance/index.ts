@@ -1,1 +1,1 @@
-export { d20HitModel } from "./hit-model";
+export { d20HitModel } from './hit-model';

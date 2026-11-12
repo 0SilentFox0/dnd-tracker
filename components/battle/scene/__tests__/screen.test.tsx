@@ -1,310 +1,405 @@
 // @vitest-environment happy-dom
-import { renderToString } from "react-dom/server";
-import { cleanup, fireEvent, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { renderToString } from 'react-dom/server';
+import { cleanup, fireEvent, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "" }));
+vi.mock('@/components/hud/fonts', () => ({ hudFontClassName: '' }));
 
 const media = vi.hoisted(() => ({ wide: false }));
 
-vi.mock("@/lib/hooks/common/useMediaQuery", () => ({ useMediaQuery: () => media.wide }));
+vi.mock('@/lib/hooks/common/useMediaQuery', () => ({
+    useMediaQuery: () => media.wide,
+}));
 
-const fx = vi.hoisted(() => ({ on: true, preloadFx: vi.fn(() => Promise.resolve()) }));
+const fx = vi.hoisted(() => ({
+    on: true,
+    preloadFx: vi.fn(() => Promise.resolve()),
+}));
 
-vi.mock("@/lib/hooks/battle/useFxEnabled", () => ({ useFxEnabled: () => ({ enabled: fx.on, userEnabled: fx.on, motionAllowed: true, setEnabled: vi.fn() }) }));
-vi.mock("@/components/battle/fx/preload", () => ({ preloadFx: fx.preloadFx }));
+vi.mock('@/lib/hooks/battle/useFxEnabled', () => ({
+    useFxEnabled: () => ({
+        enabled: fx.on,
+        userEnabled: fx.on,
+        motionAllowed: true,
+        setEnabled: vi.fn(),
+    }),
+}));
+vi.mock('@/components/battle/fx/preload', () => ({ preloadFx: fx.preloadFx }));
 
-import { BattleScreen } from "@/components/battle/scene/BattleScreen";
-import { ParticipantSide } from "@/lib/constants/battle";
-import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
-import { render } from "@/lib/i18n/test/render-uk";
-import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
+import { BattleScreen } from '@/components/battle/scene/BattleScreen';
+import { ParticipantSide } from '@/lib/constants/battle';
+import { fakeScene } from '@/lib/hooks/battle/__tests__/fake-scene';
+import { render } from '@/lib/i18n/test/render-uk';
+import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 
-vi.unmock("next-intl");
+vi.unmock('next-intl');
 
-vi.stubGlobal("ResizeObserver", class {
-  observe() {}
-  disconnect() {}
-  unobserve() {}
-});
+vi.stubGlobal(
+    'ResizeObserver',
+    class {
+        observe() {}
+        disconnect() {}
+        unobserve() {}
+    }
+);
 
 const MAP = { cols: 4, rows: 3, background: null, opacity: 0.3 };
 
 const base = createMockParticipant();
 
-const IMP = { ...base, basicInfo: { ...base.basicInfo, id: "imp", name: "Біс", side: ParticipantSide.ENEMY }, battleData: { ...base.battleData, reserved: true } };
+const IMP = {
+    ...base,
+    basicInfo: {
+        ...base.basicInfo,
+        id: 'imp',
+        name: 'Біс',
+        side: ParticipantSide.ENEMY,
+    },
+    battleData: { ...base.battleData, reserved: true },
+};
+
+describe('BattleScreen', () => {
+    afterEach(cleanup);
+
+    it('no longer exposes the retired scene tour target on the prepared screen', () => {
+        const { wrapper } = fakeScene({ status: 'prepared', isDM: false });
+
+        const { container } = render(<BattleScreen />, { wrapper });
+
+        expect(
+            container.querySelector('[data-tour="battle.scene"]')
+        ).toBeNull();
+    });
+
+    it('десктоп з картою: карта замість списків, журнал праворуч', async () => {
+        media.wide = true;
+
+        const { wrapper } = fakeScene({ isMyTurn: false, map: MAP });
+
+        const { container } = render(<BattleScreen />, { wrapper });
+
+        expect(await screen.findByText('Журнал')).toBeTruthy();
+        expect(container.querySelector('[data-fx-clip]')).not.toBeNull();
+        expect(screen.queryByText(/Союзники ·/)).toBeNull();
+        expect(screen.queryByText(/Вороги ·/)).toBeNull();
+    });
+
+    it('десктоп з картою: перемикач «Колонки» показує списки без карти', async () => {
+        media.wide = true;
+        window.localStorage.clear();
+
+        const { wrapper } = fakeScene({ isMyTurn: false, map: MAP });
+
+        const { container } = render(<BattleScreen />, { wrapper });
+
+        fireEvent.click(await screen.findByRole('button', { name: 'Колонки' }));
+        expect(screen.getByText(/Союзники ·/)).toBeTruthy();
+        expect(screen.getByText(/Вороги ·/)).toBeTruthy();
+        expect(container.querySelector('[data-fx-clip]')).toBeNull();
+
+        fireEvent.click(screen.getByRole('button', { name: 'Карта' }));
+        expect(container.querySelector('[data-fx-clip]')).not.toBeNull();
+    });
+
+    it('десктоп, вигляд «Карта»: резерв окремою групою з кнопкою введення; у «Колонках» — лише в списку', async () => {
+        media.wide = true;
+        window.localStorage.clear();
+
+        const { wrapper, value } = fakeScene({
+            isMyTurn: false,
+            map: MAP,
+            isDM: true,
+            reserve: [IMP],
+        });
+
+        render(<BattleScreen />, { wrapper });
+
+        const group = await screen.findByRole('region', { name: 'Резерв' });
+
+        expect(group.textContent).toContain('Резерв (1)');
+        fireEvent.click(
+            screen.getByRole('button', { name: 'Ввести в бій: Біс' })
+        );
+        expect(value.actions.reveal.mutate).toHaveBeenCalledWith({
+            participantIds: ['imp'],
+        });
+
+        fireEvent.click(screen.getByRole('button', { name: 'Колонки' }));
+        expect(screen.queryByRole('region', { name: 'Резерв' })).toBeNull();
+        expect(
+            screen.getAllByRole('button', { name: 'Ввести в бій: Біс' })
+        ).toHaveLength(1);
+    });
+
+    it('телефон, вкладка «Карта»: кнопка «Резерв (N)» відкриває список; без резерву кнопки немає', async () => {
+        media.wide = false;
+
+        const { wrapper, value } = fakeScene({
+            isMyTurn: false,
+            map: MAP,
+            isDM: true,
+            reserve: [IMP],
+        });
+
+        render(<BattleScreen />, { wrapper });
+
+        fireEvent.click(screen.getByRole('button', { name: 'Резерв (1)' }));
+        fireEvent.click(
+            await screen.findByRole('button', { name: 'Ввести в бій: Біс' })
+        );
+        expect(value.actions.reveal.mutate).toHaveBeenCalledWith({
+            participantIds: ['imp'],
+        });
 
-describe("BattleScreen", () => {
-  afterEach(cleanup);
+        cleanup();
+        render(<BattleScreen />, {
+            wrapper: fakeScene({ isMyTurn: false, map: MAP }).wrapper,
+        });
+        expect(screen.queryByRole('button', { name: /Резерв/ })).toBeNull();
+    });
 
-  it("no longer exposes the retired scene tour target on the prepared screen", () => {
-    const { wrapper } = fakeScene({ status: "prepared", isDM: false });
+    it('десктоп без карти: перемикача немає', async () => {
+        media.wide = true;
 
-    const { container } = render(<BattleScreen />, { wrapper });
+        const { wrapper } = fakeScene({ isMyTurn: false });
 
-    expect(container.querySelector('[data-tour="battle.scene"]')).toBeNull();
-  });
+        render(<BattleScreen />, { wrapper });
 
-  it("десктоп з картою: карта замість списків, журнал праворуч", async () => {
-    media.wide = true;
+        expect(await screen.findByText(/Союзники ·/)).toBeTruthy();
+        expect(screen.queryByRole('button', { name: 'Колонки' })).toBeNull();
+    });
 
-    const { wrapper } = fakeScene({ isMyTurn: false, map: MAP });
+    it('телефон з картою: вкладка «Карта» за замовчуванням, є «Союзники» і «Вороги»', () => {
+        media.wide = false;
 
-    const { container } = render(<BattleScreen />, { wrapper });
+        const { wrapper } = fakeScene({ isMyTurn: false, map: MAP });
 
-    expect(await screen.findByText("Журнал")).toBeTruthy();
-    expect(container.querySelector("[data-fx-clip]")).not.toBeNull();
-    expect(screen.queryByText(/Союзники ·/)).toBeNull();
-    expect(screen.queryByText(/Вороги ·/)).toBeNull();
-  });
+        const { container } = render(<BattleScreen />, { wrapper });
 
-  it("десктоп з картою: перемикач «Колонки» показує списки без карти", async () => {
-    media.wide = true;
-    window.localStorage.clear();
+        expect(
+            screen
+                .getByRole('tab', { name: /Карта/ })
+                .getAttribute('aria-selected')
+        ).toBe('true');
+        expect(container.querySelector('[data-fx-clip]')).not.toBeNull();
 
-    const { wrapper } = fakeScene({ isMyTurn: false, map: MAP });
+        fireEvent.click(screen.getByRole('tab', { name: /Вороги/ }));
 
-    const { container } = render(<BattleScreen />, { wrapper });
+        expect(container.querySelector('[data-fx-clip]')).toBeNull();
+        expect(
+            screen
+                .getByRole('tab', { name: /Вороги/ })
+                .getAttribute('aria-selected')
+        ).toBe('true');
+    });
 
-    fireEvent.click(await screen.findByRole("button", { name: "Колонки" }));
-    expect(screen.getByText(/Союзники ·/)).toBeTruthy();
-    expect(screen.getByText(/Вороги ·/)).toBeTruthy();
-    expect(container.querySelector("[data-fx-clip]")).toBeNull();
+    it('наведення шаблону показує карту: десктоп у «Колонках» і телефон на вкладці «Вороги»', () => {
+        const mapAim = {
+            template: { shape: 'circle' as const, size: 10 },
+            casterId: 'me',
+            onAim: vi.fn(),
+        };
 
-    fireEvent.click(screen.getByRole("button", { name: "Карта" }));
-    expect(container.querySelector("[data-fx-clip]")).not.toBeNull();
-  });
+        media.wide = true;
+        window.localStorage.setItem('battle-view-mode:b1', 'columns');
 
-  it("десктоп, вигляд «Карта»: резерв окремою групою з кнопкою введення; у «Колонках» — лише в списку", async () => {
-    media.wide = true;
-    window.localStorage.clear();
+        const desk = render(<BattleScreen />, {
+            wrapper: fakeScene({ isMyTurn: false, map: MAP, mapAim }).wrapper,
+        });
 
-    const { wrapper, value } = fakeScene({ isMyTurn: false, map: MAP, isDM: true, reserve: [IMP] });
+        expect(desk.container.querySelector('[data-fx-clip]')).not.toBeNull();
+        expect(window.localStorage.getItem('battle-view-mode:b1')).toBe(
+            'columns'
+        );
+        desk.unmount();
+        window.localStorage.clear();
 
-    render(<BattleScreen />, { wrapper });
+        media.wide = false;
 
-    const group = await screen.findByRole("region", { name: "Резерв" });
+        render(<BattleScreen />, {
+            wrapper: fakeScene({ isMyTurn: false, map: MAP, mapAim }).wrapper,
+        });
 
-    expect(group.textContent).toContain("Резерв (1)");
-    fireEvent.click(screen.getByRole("button", { name: "Ввести в бій: Біс" }));
-    expect(value.actions.reveal.mutate).toHaveBeenCalledWith({ participantIds: ["imp"] });
+        fireEvent.click(screen.getByRole('tab', { name: /Вороги/ }));
+        expect(
+            screen
+                .getByRole('tab', { name: /Карта/ })
+                .getAttribute('aria-selected')
+        ).toBe('true');
+    });
 
-    fireEvent.click(screen.getByRole("button", { name: "Колонки" }));
-    expect(screen.queryByRole("region", { name: "Резерв" })).toBeNull();
-    expect(screen.getAllByRole("button", { name: "Ввести в бій: Біс" })).toHaveLength(1);
-  });
+    it('телефон без карти: вкладки Карта немає', () => {
+        media.wide = false;
 
-  it("телефон, вкладка «Карта»: кнопка «Резерв (N)» відкриває список; без резерву кнопки немає", async () => {
-    media.wide = false;
+        const { wrapper } = fakeScene({ isMyTurn: false });
 
-    const { wrapper, value } = fakeScene({ isMyTurn: false, map: MAP, isDM: true, reserve: [IMP] });
+        const { container } = render(<BattleScreen />, { wrapper });
 
-    render(<BattleScreen />, { wrapper });
+        expect(screen.queryByRole('tab', { name: /Карта/ })).toBeNull();
+        expect(container.querySelector('[data-fx-clip]')).toBeNull();
+    });
 
-    fireEvent.click(screen.getByRole("button", { name: "Резерв (1)" }));
-    fireEvent.click(await screen.findByRole("button", { name: "Ввести в бій: Біс" }));
-    expect(value.actions.reveal.mutate).toHaveBeenCalledWith({ participantIds: ["imp"] });
+    it('серверний HTML не містить обчисленої висоти шапки', () => {
+        media.wide = false;
 
-    cleanup();
-    render(<BattleScreen />, { wrapper: fakeScene({ isMyTurn: false, map: MAP }).wrapper });
-    expect(screen.queryByRole("button", { name: /Резерв/ })).toBeNull();
-  });
+        const { wrapper: Wrapper } = fakeScene({ isMyTurn: false });
 
-  it("десктоп без карти: перемикача немає", async () => {
-    media.wide = true;
+        const html = renderToString(
+            <Wrapper>
+                <BattleScreen />
+            </Wrapper>
+        );
 
-    const { wrapper } = fakeScene({ isMyTurn: false });
+        expect(html).not.toContain('- 0px)');
+        expect(html).toContain('below-header');
+    });
 
-    render(<BattleScreen />, { wrapper });
+    it('телефон, не мій хід: вкладки, «ходить», мій герой, без кнопок дій', () => {
+        media.wide = false;
 
-    expect(await screen.findByText(/Союзники ·/)).toBeTruthy();
-    expect(screen.queryByRole("button", { name: "Колонки" })).toBeNull();
-  });
+        const { wrapper } = fakeScene({ isMyTurn: false });
 
-  it("телефон з картою: вкладка «Карта» за замовчуванням, є «Союзники» і «Вороги»", () => {
-    media.wide = false;
+        render(<BattleScreen />, { wrapper });
 
-    const { wrapper } = fakeScene({ isMyTurn: false, map: MAP });
+        expect(screen.getByRole('tab', { name: /Вороги/ })).toBeTruthy();
+        expect(screen.getByText(/ходить/)).toBeTruthy();
+        expect(screen.queryByRole('button', { name: /Атака/ })).toBeNull();
+    });
 
-    const { container } = render(<BattleScreen />, { wrapper });
+    it('телефон, мій хід: банер і дії', () => {
+        media.wide = false;
 
-    expect(screen.getByRole("tab", { name: /Карта/ }).getAttribute("aria-selected")).toBe("true");
-    expect(container.querySelector("[data-fx-clip]")).not.toBeNull();
+        const { wrapper } = fakeScene({ isMyTurn: true });
 
-    fireEvent.click(screen.getByRole("tab", { name: /Вороги/ }));
+        render(<BattleScreen />, { wrapper });
 
-    expect(container.querySelector("[data-fx-clip]")).toBeNull();
-    expect(screen.getByRole("tab", { name: /Вороги/ }).getAttribute("aria-selected")).toBe("true");
-  });
+        expect(screen.getAllByText('Твій хід').length).toBeGreaterThan(0);
+        expect(screen.getByRole('button', { name: /Атака/ })).toBeTruthy();
+    });
 
-  it("наведення шаблону показує карту: десктоп у «Колонках» і телефон на вкладці «Вороги»", () => {
-    const mapAim = { template: { shape: "circle" as const, size: 10 }, casterId: "me", onAim: vi.fn() };
+    it('десктоп: союзники і вороги поруч, журнал праворуч', async () => {
+        media.wide = true;
 
-    media.wide = true;
-    window.localStorage.setItem("battle-view-mode:b1", "columns");
+        const { wrapper } = fakeScene({ isMyTurn: false });
 
-    const desk = render(<BattleScreen />, { wrapper: fakeScene({ isMyTurn: false, map: MAP, mapAim }).wrapper });
+        render(<BattleScreen />, { wrapper });
 
-    expect(desk.container.querySelector("[data-fx-clip]")).not.toBeNull();
-    expect(window.localStorage.getItem("battle-view-mode:b1")).toBe("columns");
-    desk.unmount();
-    window.localStorage.clear();
+        expect(await screen.findByText(/Союзники ·/)).toBeTruthy();
+        expect(screen.queryByRole('tab')).toBeNull();
+        expect(screen.getByText(/Вороги ·/)).toBeTruthy();
+        expect(screen.getByText('Журнал')).toBeTruthy();
+    });
 
-    media.wide = false;
+    it('завершений бій: банер «Бій завершено» замість «ходить», без дій — на телефоні й десктопі', async () => {
+        for (const wide of [false, true]) {
+            media.wide = wide;
 
-    render(<BattleScreen />, { wrapper: fakeScene({ isMyTurn: false, map: MAP, mapAim }).wrapper });
+            const { wrapper } = fakeScene({
+                isMyTurn: false,
+                status: 'completed',
+            });
 
-    fireEvent.click(screen.getByRole("tab", { name: /Вороги/ }));
-    expect(screen.getByRole("tab", { name: /Карта/ }).getAttribute("aria-selected")).toBe("true");
-  });
+            render(<BattleScreen />, { wrapper });
 
-  it("телефон без карти: вкладки Карта немає", () => {
-    media.wide = false;
+            expect(
+                (await screen.findAllByText('Бій завершено')).length
+            ).toBeGreaterThan(0);
+            expect(screen.queryByText(/ходить/)).toBeNull();
+            expect(screen.queryByRole('button', { name: /Атака/ })).toBeNull();
+            expect(
+                screen.queryByText(/хід через|Дії стануть доступні/)
+            ).toBeNull();
 
-    const { wrapper } = fakeScene({ isMyTurn: false });
+            cleanup();
+        }
+    });
 
-    const { container } = render(<BattleScreen />, { wrapper });
+    it('DM може скинути завершений бій, але не передати хід', async () => {
+        media.wide = true;
 
-    expect(screen.queryByRole("tab", { name: /Карта/ })).toBeNull();
-    expect(container.querySelector("[data-fx-clip]")).toBeNull();
-  });
+        const { wrapper } = fakeScene({
+            isDM: true,
+            isMyTurn: false,
+            status: 'completed',
+        });
 
-  it("серверний HTML не містить обчисленої висоти шапки", () => {
-    media.wide = false;
+        render(<BattleScreen />, { wrapper });
 
-    const { wrapper: Wrapper } = fakeScene({ isMyTurn: false });
+        expect(
+            await screen.findByRole('button', { name: 'Скинути' })
+        ).toBeTruthy();
+        expect(
+            screen.queryByRole('button', { name: 'Наступний хід' })
+        ).toBeNull();
+    });
 
-    const html = renderToString(<Wrapper><BattleScreen /></Wrapper>);
+    it('FX chunks are preloaded only while the player keeps FX on', async () => {
+        media.wide = false;
 
-    expect(html).not.toContain("- 0px)");
-    expect(html).toContain("below-header");
-  });
+        const { wrapper } = fakeScene({ isMyTurn: false });
 
-  it("телефон, не мій хід: вкладки, «ходить», мій герой, без кнопок дій", () => {
-    media.wide = false;
+        fx.on = false;
+        fx.preloadFx.mockClear();
+        render(<BattleScreen />, { wrapper });
+        await new Promise((r) => setTimeout(r, 0));
+        expect(fx.preloadFx).not.toHaveBeenCalled();
+        cleanup();
 
-    const { wrapper } = fakeScene({ isMyTurn: false });
+        fx.on = true;
+        render(<BattleScreen />, { wrapper });
+        await vi.waitFor(() => expect(fx.preloadFx).toHaveBeenCalled());
+    });
 
-    render(<BattleScreen />, { wrapper });
+    it('телефон: журнал відкривається станом сцени (log.show)', () => {
+        media.wide = false;
 
-    expect(screen.getByRole("tab", { name: /Вороги/ })).toBeTruthy();
-    expect(screen.getByText(/ходить/)).toBeTruthy();
-    expect(screen.queryByRole("button", { name: /Атака/ })).toBeNull();
-  });
+        const s = fakeScene({ isMyTurn: false });
 
-  it("телефон, мій хід: банер і дії", () => {
-    media.wide = false;
+        s.value.log = { ...s.value.log, open: true };
 
-    const { wrapper } = fakeScene({ isMyTurn: true });
+        render(<BattleScreen />, { wrapper: s.wrapper });
 
-    render(<BattleScreen />, { wrapper });
-
-    expect(screen.getAllByText("Твій хід").length).toBeGreaterThan(0);
-    expect(screen.getByRole("button", { name: /Атака/ })).toBeTruthy();
-  });
-
-  it("десктоп: союзники і вороги поруч, журнал праворуч", async () => {
-    media.wide = true;
-
-    const { wrapper } = fakeScene({ isMyTurn: false });
-
-    render(<BattleScreen />, { wrapper });
-
-    expect(await screen.findByText(/Союзники ·/)).toBeTruthy();
-    expect(screen.queryByRole("tab")).toBeNull();
-    expect(screen.getByText(/Вороги ·/)).toBeTruthy();
-    expect(screen.getByText("Журнал")).toBeTruthy();
-  });
-
-  it("завершений бій: банер «Бій завершено» замість «ходить», без дій — на телефоні й десктопі", async () => {
-    for (const wide of [false, true]) {
-      media.wide = wide;
-
-      const { wrapper } = fakeScene({ isMyTurn: false, status: "completed" });
-
-      render(<BattleScreen />, { wrapper });
-
-      expect((await screen.findAllByText("Бій завершено")).length).toBeGreaterThan(0);
-      expect(screen.queryByText(/ходить/)).toBeNull();
-      expect(screen.queryByRole("button", { name: /Атака/ })).toBeNull();
-      expect(screen.queryByText(/хід через|Дії стануть доступні/)).toBeNull();
-
-      cleanup();
-    }
-  });
-
-  it("DM може скинути завершений бій, але не передати хід", async () => {
-    media.wide = true;
-
-    const { wrapper } = fakeScene({ isDM: true, isMyTurn: false, status: "completed" });
-
-    render(<BattleScreen />, { wrapper });
-
-    expect(await screen.findByRole("button", { name: "Скинути" })).toBeTruthy();
-    expect(screen.queryByRole("button", { name: "Наступний хід" })).toBeNull();
-  });
-
-  it("FX chunks are preloaded only while the player keeps FX on", async () => {
-    media.wide = false;
-
-    const { wrapper } = fakeScene({ isMyTurn: false });
-
-    fx.on = false;
-    fx.preloadFx.mockClear();
-    render(<BattleScreen />, { wrapper });
-    await new Promise((r) => setTimeout(r, 0));
-    expect(fx.preloadFx).not.toHaveBeenCalled();
-    cleanup();
-
-    fx.on = true;
-    render(<BattleScreen />, { wrapper });
-    await vi.waitFor(() => expect(fx.preloadFx).toHaveBeenCalled());
-  });
-
-  it("телефон: журнал відкривається станом сцени (log.show)", () => {
-    media.wide = false;
-
-    const s = fakeScene({ isMyTurn: false });
-
-    s.value.log = { ...s.value.log, open: true };
-
-    render(<BattleScreen />, { wrapper: s.wrapper });
-
-    expect(screen.getByRole("dialog")).toHaveTextContent("Журнал");
-  });
+        expect(screen.getByRole('dialog')).toHaveTextContent('Журнал');
+    });
 });
 
-describe("BattleScreen: вигляд гравця", () => {
-  afterEach(cleanup);
+describe('BattleScreen: вигляд гравця', () => {
+    afterEach(cleanup);
 
-  it("клавіша P перемикає режим лише для ДМ", () => {
-    media.wide = false;
+    it('клавіша P перемикає режим лише для ДМ', () => {
+        media.wide = false;
 
-    const dm = fakeScene({ isDM: true });
+        const dm = fakeScene({ isDM: true });
 
-    render(<BattleScreen />, { wrapper: dm.wrapper });
-    fireEvent.keyDown(window, { code: "KeyP" });
-    expect(dm.value.playerView.toggle).toHaveBeenCalledTimes(1);
-    cleanup();
+        render(<BattleScreen />, { wrapper: dm.wrapper });
+        fireEvent.keyDown(window, { code: 'KeyP' });
+        expect(dm.value.playerView.toggle).toHaveBeenCalledTimes(1);
+        cleanup();
 
-    const player = fakeScene({ isDM: false });
+        const player = fakeScene({ isDM: false });
 
-    render(<BattleScreen />, { wrapper: player.wrapper });
-    fireEvent.keyDown(window, { code: "KeyP" });
-    expect(player.value.playerView.toggle).not.toHaveBeenCalled();
-  });
+        render(<BattleScreen />, { wrapper: player.wrapper });
+        fireEvent.keyDown(window, { code: 'KeyP' });
+        expect(player.value.playerView.toggle).not.toHaveBeenCalled();
+    });
 
-  it("FX-шар кидків лишається в режимі гравця (readOnly його не вимикає)", async () => {
-    media.wide = false;
-    fx.on = true;
+    it('FX-шар кидків лишається в режимі гравця (readOnly його не вимикає)', async () => {
+        media.wide = false;
+        fx.on = true;
 
-    const s = fakeScene({ isDM: true });
+        const s = fakeScene({ isDM: true });
 
-    s.value.viewer = { ...s.value.viewer, isDM: false, readOnly: true };
-    s.value.playerView = { available: true, enabled: true, toggle: vi.fn() };
+        s.value.viewer = { ...s.value.viewer, isDM: false, readOnly: true };
+        s.value.playerView = {
+            available: true,
+            enabled: true,
+            toggle: vi.fn(),
+        };
 
-    const { container } = render(<BattleScreen />, { wrapper: s.wrapper });
+        const { container } = render(<BattleScreen />, { wrapper: s.wrapper });
 
-    await vi.waitFor(() => expect(container.querySelector(".fx-layer")).not.toBeNull());
-  });
+        await vi.waitFor(() =>
+            expect(container.querySelector('.fx-layer')).not.toBeNull()
+        );
+    });
 });

@@ -1,108 +1,183 @@
-import { NextResponse } from "next/server";
-import { z } from "zod";
+import { NextResponse } from 'next/server';
+import { z } from 'zod';
 
-import { characterHandler, defineCharacterOperation, memberScope } from "../operation-runner";
+import {
+    characterHandler,
+    defineCharacterOperation,
+    memberScope,
+} from '../operation-runner';
 
-import { API_ERRORS } from "@/lib/constants/api-errors";
-import { CharacterStatus, type CharacterStatusValue, CharacterType, type CharacterTypeValue } from "@/lib/constants/characters";
-import { prisma } from "@/lib/db";
-import { ContentError } from "@/lib/server/content/errors";
-import type { Actor } from "@/lib/utils/api/actor";
-import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
-import { type RuleSystemDefinition, ruleSystemOf } from "@/lib/utils/rules/systems";
+import { API_ERRORS } from '@/lib/constants/api-errors';
+import {
+    CharacterStatus,
+    type CharacterStatusValue,
+    CharacterType,
+    type CharacterTypeValue,
+} from '@/lib/constants/characters';
+import { prisma } from '@/lib/db';
+import { ContentError } from '@/lib/server/content/errors';
+import type { Actor } from '@/lib/utils/api/actor';
+import { requireCampaignAccess } from '@/lib/utils/api/api-auth';
+import {
+    type RuleSystemDefinition,
+    ruleSystemOf,
+} from '@/lib/utils/rules/systems';
 
 const COMPACT_SELECT = {
-  id: true,
-  campaignId: true,
-  type: true,
-  controlledBy: true,
-  name: true,
-  level: true,
-  class: true,
-  race: true,
-  avatar: true,
+    id: true,
+    campaignId: true,
+    type: true,
+    controlledBy: true,
+    name: true,
+    level: true,
+    class: true,
+    race: true,
+    avatar: true,
 } as const;
 
 const LIST_SELECT = {
-  ...COMPACT_SELECT,
-  subrace: true,
-  constitution: true,
-  archetype: true,
-  classes: true,
-  armorClass: true,
-  initiative: true,
-  experience: true,
-  inspiration: true,
-  resources: true,
-  characteristics: true,
-  user: { select: { displayName: true } },
+    ...COMPACT_SELECT,
+    subrace: true,
+    constitution: true,
+    archetype: true,
+    classes: true,
+    armorClass: true,
+    initiative: true,
+    experience: true,
+    inspiration: true,
+    resources: true,
+    characteristics: true,
+    user: { select: { displayName: true } },
 } as const;
 
 type LedgerRow = { characteristics?: unknown; controlledBy?: string | null };
 
-export const redactListedLedgers = <T extends LedgerRow>(rows: T[], viewer: { userId?: string; isDM: boolean }, system: RuleSystemDefinition): T[] => {
-  const { redact } = system.characteristics;
+export const redactListedLedgers = <T extends LedgerRow>(
+    rows: T[],
+    viewer: { userId?: string; isDM: boolean },
+    system: RuleSystemDefinition
+): T[] => {
+    const { redact } = system.characteristics;
 
-  if (!redact) return rows;
+    if (!redact) return rows;
 
-  return rows.map((row) => (row.characteristics ? { ...row, characteristics: redact(row.characteristics, { isDM: viewer.isDM, isOwner: !!viewer.userId && row.controlledBy === viewer.userId }) } : row));
+    return rows.map((row) =>
+        row.characteristics
+            ? {
+                  ...row,
+                  characteristics: redact(row.characteristics, {
+                      isDM: viewer.isDM,
+                      isOwner:
+                          !!viewer.userId && row.controlledBy === viewer.userId,
+                  }),
+              }
+            : row
+    );
 };
 
-const listSchema = z.object({ type: z.string().nullish(), compact: z.boolean().optional(), status: z.string().nullish() });
+const listSchema = z.object({
+    type: z.string().nullish(),
+    compact: z.boolean().optional(),
+    status: z.string().nullish(),
+});
 
 export const listOperation = defineCharacterOperation({
-  name: "list",
-  action: "list characters",
-  schema: listSchema,
-  unlocked: true,
-  gate: memberScope,
-  query: ({ searchParams }) => ({ type: searchParams.get("type"), compact: searchParams.get("compact") === "1" || searchParams.get("compact") === "true", status: searchParams.get("status") }),
-  run: async ({ access, campaignId }, { type, compact, status }) => {
-    const pending = status === CharacterStatus.PENDING;
+    name: 'list',
+    action: 'list characters',
+    schema: listSchema,
+    unlocked: true,
+    gate: memberScope,
+    query: ({ searchParams }) => ({
+        type: searchParams.get('type'),
+        compact:
+            searchParams.get('compact') === '1' ||
+            searchParams.get('compact') === 'true',
+        status: searchParams.get('status'),
+    }),
+    run: async ({ access, campaignId }, { type, compact, status }) => {
+        const pending = status === CharacterStatus.PENDING;
 
-    if (pending && !access.isDM) throw new ContentError(API_ERRORS.FORBIDDEN, 403);
+        if (pending && !access.isDM)
+            throw new ContentError(API_ERRORS.FORBIDDEN, 403);
 
-    const where: { campaignId: string; status: CharacterStatusValue; type?: CharacterTypeValue } = {
-      campaignId,
-      status: pending ? CharacterStatus.PENDING : CharacterStatus.ACTIVE,
-    };
+        const where: {
+            campaignId: string;
+            status: CharacterStatusValue;
+            type?: CharacterTypeValue;
+        } = {
+            campaignId,
+            status: pending ? CharacterStatus.PENDING : CharacterStatus.ACTIVE,
+        };
 
-    if (type === CharacterType.PLAYER || type === CharacterType.NPC_HERO) where.type = type;
+        if (type === CharacterType.PLAYER || type === CharacterType.NPC_HERO)
+            where.type = type;
 
-    const orderBy = { createdAt: "desc" } as const;
+        const orderBy = { createdAt: 'desc' } as const;
 
-    if (compact) return prisma.character.findMany({ where, select: COMPACT_SELECT, orderBy });
+        if (compact)
+            return prisma.character.findMany({
+                where,
+                select: COMPACT_SELECT,
+                orderBy,
+            });
 
-    return redactListedLedgers(await prisma.character.findMany({ where, select: pending ? { ...LIST_SELECT, reviewNote: true } : LIST_SELECT, orderBy }), access, ruleSystemOf(access.campaign.rules));
-  },
+        return redactListedLedgers(
+            await prisma.character.findMany({
+                where,
+                select: pending
+                    ? { ...LIST_SELECT, reviewNote: true }
+                    : LIST_SELECT,
+                orderBy,
+            }),
+            access,
+            ruleSystemOf(access.campaign.rules)
+        );
+    },
 });
 
 const list = characterHandler(listOperation);
 
-export async function listCharacters(request: Request, campaignId: string, actor?: Actor) {
-  if (actor) return list(request, campaignId, undefined, actor);
+export async function listCharacters(
+    request: Request,
+    campaignId: string,
+    actor?: Actor
+) {
+    if (actor) return list(request, campaignId, undefined, actor);
 
-  const access = await requireCampaignAccess(campaignId, false, { allowDemo: true });
+    const access = await requireCampaignAccess(campaignId, false, {
+        allowDemo: true,
+    });
 
-  if (access instanceof NextResponse) return access;
+    if (access instanceof NextResponse) return access;
 
-  if (!access.isDemo) return list(request, campaignId);
+    if (!access.isDemo) return list(request, campaignId);
 
-  const search = new URL(request.url).searchParams;
+    const search = new URL(request.url).searchParams;
 
-  const type = search.get("type");
+    const type = search.get('type');
 
-  const compact = search.get("compact") === "1" || search.get("compact") === "true";
+    const compact =
+        search.get('compact') === '1' || search.get('compact') === 'true';
 
-  const rows = await prisma.character.findMany({
-    where: {
-      campaignId,
-      status: CharacterStatus.ACTIVE,
-      ...(type === CharacterType.PLAYER || type === CharacterType.NPC_HERO ? { type } : {}),
-    },
-    select: compact ? COMPACT_SELECT : LIST_SELECT,
-    orderBy: { createdAt: "desc" },
-  });
+    const rows = await prisma.character.findMany({
+        where: {
+            campaignId,
+            status: CharacterStatus.ACTIVE,
+            ...(type === CharacterType.PLAYER || type === CharacterType.NPC_HERO
+                ? { type }
+                : {}),
+        },
+        select: compact ? COMPACT_SELECT : LIST_SELECT,
+        orderBy: { createdAt: 'desc' },
+    });
 
-  return NextResponse.json(compact ? rows : redactListedLedgers(rows as LedgerRow[], access, ruleSystemOf(access.campaign.rules)));
+    return NextResponse.json(
+        compact
+            ? rows
+            : redactListedLedgers(
+                  rows as LedgerRow[],
+                  access,
+                  ruleSystemOf(access.campaign.rules)
+              )
+    );
 }

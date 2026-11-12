@@ -1,12 +1,16 @@
-import { Prisma } from "@prisma/client";
-import { describe, expect, it } from "vitest";
+import { Prisma } from '@prisma/client';
+import { describe, expect, it } from 'vitest';
 
-describe("RaceProfile prisma model", () => {
-  const model = Prisma.dmmf.datamodel.models.find((m) => m.name === "RaceProfile");
+describe('RaceProfile prisma model', () => {
+    const model = Prisma.dmmf.datamodel.models.find(
+        (m) => m.name === 'RaceProfile'
+    );
 
-  it("is keyed by raceId and cascades with the race", () => {
-    expect(model?.fields.find((f) => f.name === "raceId")?.isId).toBe(true);
-    expect(model?.fields.find((f) => f.name === "race")?.relationOnDelete).toBe("Cascade");
-    expect(model?.dbName).toBe("race_profiles");
-  });
+    it('is keyed by raceId and cascades with the race', () => {
+        expect(model?.fields.find((f) => f.name === 'raceId')?.isId).toBe(true);
+        expect(
+            model?.fields.find((f) => f.name === 'race')?.relationOnDelete
+        ).toBe('Cascade');
+        expect(model?.dbName).toBe('race_profiles');
+    });
 });

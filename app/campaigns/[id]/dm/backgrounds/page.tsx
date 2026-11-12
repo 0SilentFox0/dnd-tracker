@@ -1,16 +1,27 @@
-import { DMBackgroundsPageClient } from "./page-client";
+import { DMBackgroundsPageClient } from './page-client';
 
-import { getRequestLocale } from "@/lib/i18n/request-locale";
-import { getTranslator } from "@/lib/i18n/translator";
-import { requireCampaignDMOrDemo } from "@/lib/server/campaigns/access";
-import { parseRules } from "@/lib/utils/rules/schema";
+import { getRequestLocale } from '@/lib/i18n/request-locale';
+import { getTranslator } from '@/lib/i18n/translator';
+import { requireCampaignDMOrDemo } from '@/lib/server/campaigns/access';
+import { parseRules } from '@/lib/utils/rules/schema';
 
-export default async function DMBackgroundsPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+export default async function DMBackgroundsPage({
+    params,
+}: {
+    params: Promise<{ id: string }>;
+}) {
+    const { id } = await params;
 
-  const { campaign, isDemo } = await requireCampaignDMOrDemo(id);
+    const { campaign, isDemo } = await requireCampaignDMOrDemo(id);
 
-  if (!isDemo && !parseRules(campaign.rules).classes.enabled) return <p className="p-4">{(await getTranslator(await getRequestLocale(), "backgrounds"))("page.classesOnly")}</p>;
+    if (!isDemo && !parseRules(campaign.rules).classes.enabled)
+        return (
+            <p className="p-4">
+                {(await getTranslator(await getRequestLocale(), 'backgrounds'))(
+                    'page.classesOnly'
+                )}
+            </p>
+        );
 
-  return <DMBackgroundsPageClient campaignId={id} canEdit={!isDemo} />;
+    return <DMBackgroundsPageClient campaignId={id} canEdit={!isDemo} />;
 }

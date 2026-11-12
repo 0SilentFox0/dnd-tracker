@@ -1,126 +1,247 @@
-import { ABILITY_KEYS } from "@/lib/constants/abilities";
-import { resolveFlat } from "@/lib/utils/abilities/engine/core/amount";
-import { auraKey } from "@/lib/utils/abilities/engine/core/collect-modifiers";
-import { staticEffectStrength } from "@/lib/utils/abilities/engine/core/effect-strength";
-import { resolvedAbilitiesOf } from "@/lib/utils/abilities/engine/core/participants";
-import { clampMorale, moraleCapOf } from "@/lib/utils/abilities/engine/effects/morale";
-import { evaluateCondition } from "@/lib/utils/abilities/registry/conditions";
-import type { Effect } from "@/lib/utils/abilities/schema";
-import { isBakedStat } from "@/lib/utils/abilities/schema/kinds";
-import { isStaticCondition } from "@/lib/utils/abilities/schema/static-condition";
-import { getAbilityModifier } from "@/lib/utils/common/calculations";
-import type { ResolvedAbility } from "@/types/abilities";
-import type { BattleParticipant } from "@/types/battle";
+import { ABILITY_KEYS } from '@/lib/constants/abilities';
+import { resolveFlat } from '@/lib/utils/abilities/engine/core/amount';
+import { auraKey } from '@/lib/utils/abilities/engine/core/collect-modifiers';
+import { staticEffectStrength } from '@/lib/utils/abilities/engine/core/effect-strength';
+import { resolvedAbilitiesOf } from '@/lib/utils/abilities/engine/core/participants';
+import {
+    clampMorale,
+    moraleCapOf,
+} from '@/lib/utils/abilities/engine/effects/morale';
+import { evaluateCondition } from '@/lib/utils/abilities/registry/conditions';
+import type { Effect } from '@/lib/utils/abilities/schema';
+import { isBakedStat } from '@/lib/utils/abilities/schema/kinds';
+import { isStaticCondition } from '@/lib/utils/abilities/schema/static-condition';
+import { getAbilityModifier } from '@/lib/utils/common/calculations';
+import type { ResolvedAbility } from '@/types/abilities';
+import type { BattleParticipant } from '@/types/battle';
 
-type ModifyStat = Extract<Effect, { kind: "modifyStat" }>;
+type ModifyStat = Extract<Effect, { kind: 'modifyStat' }>;
 
-function bakeOne(p: BattleParticipant, e: ModifyStat, owner: BattleParticipant): BattleParticipant {
-  const flat = e.flat !== undefined ? resolveFlat(e.flat, owner) : 0;
+function bakeOne(
+    p: BattleParticipant,
+    e: ModifyStat,
+    owner: BattleParticipant
+): BattleParticipant {
+    const flat = e.flat !== undefined ? resolveFlat(e.flat, owner) : 0;
 
-  const pct = (base: number) => flat + Math.floor((base * (e.percent !== undefined ? resolveFlat(e.percent, owner) : 0)) / 100);
+    const pct = (base: number) =>
+        flat +
+        Math.floor(
+            (base *
+                (e.percent !== undefined ? resolveFlat(e.percent, owner) : 0)) /
+                100
+        );
 
-  const cs = p.combatStats;
+    const cs = p.combatStats;
 
-  switch (e.stat) {
-    case "maxHp": {
-      const d = pct(cs.maxHp);
+    switch (e.stat) {
+        case 'maxHp': {
+            const d = pct(cs.maxHp);
 
-      return { ...p, combatStats: { ...cs, maxHp: cs.maxHp + d, currentHp: cs.currentHp + d } };
+            return {
+                ...p,
+                combatStats: {
+                    ...cs,
+                    maxHp: cs.maxHp + d,
+                    currentHp: cs.currentHp + d,
+                },
+            };
+        }
+        case 'speed':
+            return {
+                ...p,
+                combatStats: { ...cs, speed: cs.speed + pct(cs.speed) },
+            };
+        case 'morale':
+            return {
+                ...p,
+                combatStats: {
+                    ...cs,
+                    morale: clampMorale(cs.morale + flat, moraleCapOf(p)),
+                },
+            };
+        case 'minTargets':
+        case 'maxTargets':
+            return {
+                ...p,
+                combatStats: { ...cs, [e.stat]: cs[e.stat] + flat },
+            };
+        case 'initiative':
+            return {
+                ...p,
+                abilities: {
+                    ...p.abilities,
+                    baseInitiative: p.abilities.baseInitiative + flat,
+                    initiative: p.abilities.initiative + flat,
+                    initiativeBonus: (p.abilities.initiativeBonus ?? 0) + flat,
+                },
+            };
+        case 'spellSlots': {
+            const slots = { ...p.spellcasting.spellSlots };
+
+            for (const level of e.spellLevels ?? []) {
+                const s = slots[String(level)] ?? { max: 0, current: 0 };
+
+                slots[String(level)] = {
+                    max: s.max + flat,
+                    current: s.current + flat,
+                };
+            }
+
+            return {
+                ...p,
+                spellcasting: { ...p.spellcasting, spellSlots: slots },
+            };
+        }
+        default: {
+            if (!(ABILITY_KEYS as readonly string[]).includes(e.stat)) return p;
+
+            const stat = e.stat as (typeof ABILITY_KEYS)[number];
+
+            const score =
+                e.atLeast !== undefined
+                    ? Math.max(p.abilities[stat], e.atLeast)
+                    : p.abilities[stat] + flat;
+
+            return {
+                ...p,
+                abilities: {
+                    ...p.abilities,
+                    [stat]: score,
+                    modifiers: {
+                        ...p.abilities.modifiers,
+                        [stat]: getAbilityModifier(score),
+                    },
+                },
+            };
+        }
     }
-    case "speed":
-      return { ...p, combatStats: { ...cs, speed: cs.speed + pct(cs.speed) } };
-    case "morale":
-      return { ...p, combatStats: { ...cs, morale: clampMorale(cs.morale + flat, moraleCapOf(p)) } };
-    case "minTargets":
-    case "maxTargets":
-      return { ...p, combatStats: { ...cs, [e.stat]: cs[e.stat] + flat } };
-    case "initiative":
-      return { ...p, abilities: { ...p.abilities, baseInitiative: p.abilities.baseInitiative + flat, initiative: p.abilities.initiative + flat, initiativeBonus: (p.abilities.initiativeBonus ?? 0) + flat } };
-    case "spellSlots": {
-      const slots = { ...p.spellcasting.spellSlots };
-
-      for (const level of e.spellLevels ?? []) {
-        const s = slots[String(level)] ?? { max: 0, current: 0 };
-
-        slots[String(level)] = { max: s.max + flat, current: s.current + flat };
-      }
-
-      return { ...p, spellcasting: { ...p.spellcasting, spellSlots: slots } };
-    }
-    default: {
-      if (!(ABILITY_KEYS as readonly string[]).includes(e.stat)) return p;
-
-      const stat = e.stat as (typeof ABILITY_KEYS)[number];
-
-      const score = e.atLeast !== undefined ? Math.max(p.abilities[stat], e.atLeast) : p.abilities[stat] + flat;
-
-      return { ...p, abilities: { ...p.abilities, [stat]: score, modifiers: { ...p.abilities.modifiers, [stat]: getAbilityModifier(score) } } };
-    }
-  }
 }
 
 const bakesNow = (a: ResolvedAbility, p: BattleParticipant) =>
-  a.trigger.event === "passive" && (!a.condition || (isStaticCondition(a.condition) && evaluateCondition(a.condition, { owner: p, event: null, participants: [p] })));
+    a.trigger.event === 'passive' &&
+    (!a.condition ||
+        (isStaticCondition(a.condition) &&
+            evaluateCondition(a.condition, {
+                owner: p,
+                event: null,
+                participants: [p],
+            })));
 
-function bakedEffects(p: BattleParticipant): { ability: ResolvedAbility; effect: ModifyStat; target: string }[] {
-  return resolvedAbilitiesOf(p)
-    .filter((a) => bakesNow(a, p))
-    .flatMap((ability) => ability.effects.filter((e): e is ModifyStat => e.kind === "modifyStat" && isBakedStat(e.stat)).map((effect) => ({ ability, effect, target: effect.target ?? "self" })));
+function bakedEffects(
+    p: BattleParticipant
+): { ability: ResolvedAbility; effect: ModifyStat; target: string }[] {
+    return resolvedAbilitiesOf(p)
+        .filter((a) => bakesNow(a, p))
+        .flatMap((ability) =>
+            ability.effects
+                .filter(
+                    (e): e is ModifyStat =>
+                        e.kind === 'modifyStat' && isBakedStat(e.stat)
+                )
+                .map((effect) => ({
+                    ability,
+                    effect,
+                    target: effect.target ?? 'self',
+                }))
+        );
 }
 
 export function bakePassives(p: BattleParticipant): BattleParticipant {
-  return bakedEffects(p)
-    .filter((x) => x.target === "self")
-    .sort((a, b) => Number(a.effect.atLeast !== undefined) - Number(b.effect.atLeast !== undefined))
-    .reduce((acc, { effect }) => bakeOne(acc, effect, p), p);
+    return bakedEffects(p)
+        .filter((x) => x.target === 'self')
+        .sort(
+            (a, b) =>
+                Number(a.effect.atLeast !== undefined) -
+                Number(b.effect.atLeast !== undefined)
+        )
+        .reduce((acc, { effect }) => bakeOne(acc, effect, p), p);
 }
 
 /**
  * Аури (allAllies/allEnemies) запікаються в учасника один раз на ключ аури — як у collectModifiers:
  * та сама аура кількох власників діє лише найсильнішою; уже запечену (стара пара власник–ціль) не дублюємо.
  */
-export function applyBakedAuras(ps: BattleParticipant[], newIds: Set<string>): BattleParticipant[] {
-  const sources = ps.map((source) => ({ source, baked: bakedEffects(source).filter((x) => x.target === "allAllies" || x.target === "allEnemies") }));
+export function applyBakedAuras(
+    ps: BattleParticipant[],
+    newIds: Set<string>
+): BattleParticipant[] {
+    const sources = ps.map((source) => ({
+        source,
+        baked: bakedEffects(source).filter(
+            (x) => x.target === 'allAllies' || x.target === 'allEnemies'
+        ),
+    }));
 
-  return ps.map((r) => {
-    const groups = new Map<string, { effect: ModifyStat; source: BattleParticipant; fresh: boolean }[]>();
+    return ps.map((r) => {
+        const groups = new Map<
+            string,
+            { effect: ModifyStat; source: BattleParticipant; fresh: boolean }[]
+        >();
 
-    for (const { source, baked } of sources) {
-      for (const { ability, effect, target } of baked) {
-        const sameSide = r.basicInfo.side === source.basicInfo.side;
+        for (const { source, baked } of sources) {
+            for (const { ability, effect, target } of baked) {
+                const sameSide = r.basicInfo.side === source.basicInfo.side;
 
-        if (target === "allAllies" ? !sameSide : sameSide) continue;
+                if (target === 'allAllies' ? !sameSide : sameSide) continue;
 
-        const key = `${auraKey(ability)}:${effect.stat}`;
+                const key = `${auraKey(ability)}:${effect.stat}`;
 
-        const list = groups.get(key) ?? [];
+                const list = groups.get(key) ?? [];
 
-        list.push({ effect, source, fresh: newIds.has(source.basicInfo.id) || newIds.has(r.basicInfo.id) });
-        groups.set(key, list);
-      }
-    }
+                list.push({
+                    effect,
+                    source,
+                    fresh:
+                        newIds.has(source.basicInfo.id) ||
+                        newIds.has(r.basicInfo.id),
+                });
+                groups.set(key, list);
+            }
+        }
 
-    let out = r;
+        let out = r;
 
-    for (const list of groups.values()) {
-      if (list.some((x) => !x.fresh)) continue;
+        for (const list of groups.values()) {
+            if (list.some((x) => !x.fresh)) continue;
 
-      const best = list.reduce((a, b) => (staticEffectStrength(b.effect, b.source) > staticEffectStrength(a.effect, a.source) ? b : a));
+            const best = list.reduce((a, b) =>
+                staticEffectStrength(b.effect, b.source) >
+                staticEffectStrength(a.effect, a.source)
+                    ? b
+                    : a
+            );
 
-      out = bakeOne(out, best.effect, best.source);
-    }
+            out = bakeOne(out, best.effect, best.source);
+        }
 
-    return out;
-  });
+        return out;
+    });
 }
 
-export function bakedStatSources(p: BattleParticipant, stat: string): { label: string; value: number; sourceType: ResolvedAbility["source"]["type"] }[] {
-  return resolvedAbilitiesOf(p)
-    .filter((a) => bakesNow(a, p))
-    .flatMap((a) =>
-      a.effects
-        .filter((e): e is ModifyStat => e.kind === "modifyStat" && e.stat === stat && (e.target ?? "self") === "self")
-        .map((e) => ({ label: a.source.name, value: e.flat === undefined ? 0 : resolveFlat(e.flat, p), sourceType: a.source.type })),
-    )
-    .filter((x) => x.value !== 0);
+export function bakedStatSources(
+    p: BattleParticipant,
+    stat: string
+): {
+    label: string;
+    value: number;
+    sourceType: ResolvedAbility['source']['type'];
+}[] {
+    return resolvedAbilitiesOf(p)
+        .filter((a) => bakesNow(a, p))
+        .flatMap((a) =>
+            a.effects
+                .filter(
+                    (e): e is ModifyStat =>
+                        e.kind === 'modifyStat' &&
+                        e.stat === stat &&
+                        (e.target ?? 'self') === 'self'
+                )
+                .map((e) => ({
+                    label: a.source.name,
+                    value: e.flat === undefined ? 0 : resolveFlat(e.flat, p),
+                    sourceType: a.source.type,
+                }))
+        )
+        .filter((x) => x.value !== 0);
 }

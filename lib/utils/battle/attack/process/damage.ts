@@ -1,62 +1,74 @@
-import { BATTLE_CONSTANTS, CombatStatus } from "@/lib/constants/battle";
-import { dropBreakOnDamage } from "@/lib/utils/abilities/engine/effects/hp";
-import type { AttackKind } from "@/lib/utils/abilities/schema";
-import { applyResistance } from "@/lib/utils/battle/resistance";
-import type { BattleParticipant } from "@/types/battle";
-import type { LogLine } from "@/types/text";
+import { BATTLE_CONSTANTS, CombatStatus } from '@/lib/constants/battle';
+import { dropBreakOnDamage } from '@/lib/utils/abilities/engine/effects/hp';
+import type { AttackKind } from '@/lib/utils/abilities/schema';
+import { applyResistance } from '@/lib/utils/battle/resistance';
+import type { BattleParticipant } from '@/types/battle';
+import type { LogLine } from '@/types/text';
 
 /** Фізичний + додатковий урон: спершу tempHp, далі HP і статус. Виживання вирішують уміння (lethalDamage). */
-export function applyDamageToTarget(target: BattleParticipant, totalFinalDamage: number): BattleParticipant {
-  const fromTemp = Math.min(target.combatStats.tempHp, Math.max(0, totalFinalDamage));
+export function applyDamageToTarget(
+    target: BattleParticipant,
+    totalFinalDamage: number
+): BattleParticipant {
+    const fromTemp = Math.min(
+        target.combatStats.tempHp,
+        Math.max(0, totalFinalDamage)
+    );
 
-  const currentHp = Math.max(BATTLE_CONSTANTS.MIN_DAMAGE, target.combatStats.currentHp - (totalFinalDamage - fromTemp));
+    const currentHp = Math.max(
+        BATTLE_CONSTANTS.MIN_DAMAGE,
+        target.combatStats.currentHp - (totalFinalDamage - fromTemp)
+    );
 
-  return dropBreakOnDamage(
-    {
-      ...target,
-      combatStats: {
-        ...target.combatStats,
-        tempHp: target.combatStats.tempHp - fromTemp,
-        currentHp,
-        status: currentHp <= 0 ? CombatStatus.UNCONSCIOUS : target.combatStats.status,
-      },
-    },
-    totalFinalDamage,
-  );
+    return dropBreakOnDamage(
+        {
+            ...target,
+            combatStats: {
+                ...target.combatStats,
+                tempHp: target.combatStats.tempHp - fromTemp,
+                currentHp,
+                status:
+                    currentHp <= 0
+                        ? CombatStatus.UNCONSCIOUS
+                        : target.combatStats.status,
+            },
+        },
+        totalFinalDamage
+    );
 }
 
 export interface ApplyResistanceForAdditionalResult {
-  totalAdditionalDamage: number;
-  additionalDamageBreakdown: LogLine[];
+    totalAdditionalDamage: number;
+    additionalDamageBreakdown: LogLine[];
 }
 
 /**
  * Застосовує опір для додаткових типів урону (fire, poison тощо).
  */
 export function applyResistanceForAdditional(
-  target: BattleParticipant,
-  additionalDamageList: Array<{ type: string; value: number }>,
-  dmgMult: number,
-  participants: BattleParticipant[] = [target],
-  attackKind?: AttackKind,
+    target: BattleParticipant,
+    additionalDamageList: Array<{ type: string; value: number }>,
+    dmgMult: number,
+    participants: BattleParticipant[] = [target],
+    attackKind?: AttackKind
 ): ApplyResistanceForAdditionalResult {
-  let totalAdditionalDamage = 0;
+    let totalAdditionalDamage = 0;
 
-  const additionalDamageBreakdown: LogLine[] = [];
+    const additionalDamageBreakdown: LogLine[] = [];
 
-  for (const additionalDamage of additionalDamageList) {
-    const additionalValue = Math.floor(additionalDamage.value * dmgMult);
+    for (const additionalDamage of additionalDamageList) {
+        const additionalValue = Math.floor(additionalDamage.value * dmgMult);
 
-    const additionalResistance = applyResistance(
-      target,
-      additionalValue,
-      additionalDamage.type,
-      { participants, attackKind },
-    );
+        const additionalResistance = applyResistance(
+            target,
+            additionalValue,
+            additionalDamage.type,
+            { participants, attackKind }
+        );
 
-    totalAdditionalDamage += additionalResistance.finalDamage;
-    additionalDamageBreakdown.push(...additionalResistance.breakdown);
-  }
+        totalAdditionalDamage += additionalResistance.finalDamage;
+        additionalDamageBreakdown.push(...additionalResistance.breakdown);
+    }
 
-  return { totalAdditionalDamage, additionalDamageBreakdown };
+    return { totalAdditionalDamage, additionalDamageBreakdown };
 }

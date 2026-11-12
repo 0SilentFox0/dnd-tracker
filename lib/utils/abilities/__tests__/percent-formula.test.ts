@@ -1,72 +1,142 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
-import { ukT } from "./describe-fixtures";
-import { makeParticipant, resolved } from "./fixtures";
+import { ukT } from './describe-fixtures';
+import { makeParticipant, resolved } from './fixtures';
 
-import { textOf } from "@/lib/i18n/test/text";
-import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
-import { describeEffect as describeEffectSegments } from "@/lib/utils/abilities/registry/effects";
-import { renderSegments } from "@/lib/utils/abilities/segments";
-import type { BattleParticipant } from "@/types/battle";
+import { textOf } from '@/lib/i18n/test/text';
+import { collectModifiers } from '@/lib/utils/abilities/engine/core/collect-modifiers';
+import { describeEffect as describeEffectSegments } from '@/lib/utils/abilities/registry/effects';
+import { renderSegments } from '@/lib/utils/abilities/segments';
+import type { BattleParticipant } from '@/types/battle';
 
 const t = await ukT();
 
-const describeEffect = (e: Parameters<typeof describeEffectSegments>[0]) => renderSegments(t, describeEffectSegments(e)).join(" · ");
+const describeEffect = (e: Parameters<typeof describeEffectSegments>[0]) =>
+    renderSegments(t, describeEffectSegments(e)).join(' · ');
 
 const hero = (morale: number): BattleParticipant => {
-  const p = makeParticipant({
-    id: "h",
-    abilities: [resolved({ trigger: { event: "passive" }, effects: [{ kind: "damageBonus", filter: { kind: "physical" }, percent: { formula: "3*morale" } }] })],
-  });
-
-  return { ...p, combatStats: { ...p.combatStats, morale } };
-};
-
-describe("formula in percent", () => {
-  it.each([
-    [2, 6],
-    [-1, -3],
-  ])("morale %i → %i%%", (morale, expected) => {
-    expect(collectModifiers([hero(morale)], "h", { damage: { kind: "melee" } }).percent).toBe(expected);
-  });
-
-  it("describes the formula", () => {
-    expect(textOf(describeEffect({ kind: "damageBonus", filter: { kind: "all" }, percent: { formula: "3*morale" } }))).toContain("(3*morale)%");
-  });
-
-  it("morale у формулі враховує власний тимчасовий бонус і прапорець noNegativeMorale", () => {
-    const timed = (p: BattleParticipant, flat: number): BattleParticipant => ({
-      ...p,
-      battleData: {
-        ...p.battleData,
-        activeEffects: [{ id: "n", name: "Натхнення", type: "buff", duration: 2, appliedAt: { round: 1, timestamp: new Date() }, effects: [], abilityEffects: [{ kind: "modifyStat", stat: "morale", flat }] }],
-      },
+    const p = makeParticipant({
+        id: 'h',
+        abilities: [
+            resolved({
+                trigger: { event: 'passive' },
+                effects: [
+                    {
+                        kind: 'damageBonus',
+                        filter: { kind: 'physical' },
+                        percent: { formula: '3*morale' },
+                    },
+                ],
+            }),
+        ],
     });
 
-    const query = (p: BattleParticipant) => collectModifiers([p], "h", { damage: { kind: "melee" } }).percent;
+    return { ...p, combatStats: { ...p.combatStats, morale } };
+};
 
-    expect(query(timed(hero(2), 1))).toBe(9);
-    expect(query(timed(hero(3), 1))).toBe(9);
-    expect(query(timed(hero(-2), 1))).toBe(-3);
+describe('formula in percent', () => {
+    it.each([
+        [2, 6],
+        [-1, -3],
+    ])('morale %i → %i%%', (morale, expected) => {
+        expect(
+            collectModifiers([hero(morale)], 'h', { damage: { kind: 'melee' } })
+                .percent
+        ).toBe(expected);
+    });
 
-    const base = hero(-2);
+    it('describes the formula', () => {
+        expect(
+            textOf(
+                describeEffect({
+                    kind: 'damageBonus',
+                    filter: { kind: 'all' },
+                    percent: { formula: '3*morale' },
+                })
+            )
+        ).toContain('(3*morale)%');
+    });
 
-    const steady = {
-      ...base,
-      battleData: { ...base.battleData, resolvedAbilities: [...(base.battleData.resolvedAbilities ?? []), resolved({ trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "noNegativeMorale" }] }, { id: "s" })] },
-    };
+    it('morale у формулі враховує власний тимчасовий бонус і прапорець noNegativeMorale', () => {
+        const timed = (
+            p: BattleParticipant,
+            flat: number
+        ): BattleParticipant => ({
+            ...p,
+            battleData: {
+                ...p.battleData,
+                activeEffects: [
+                    {
+                        id: 'n',
+                        name: 'Натхнення',
+                        type: 'buff',
+                        duration: 2,
+                        appliedAt: { round: 1, timestamp: new Date() },
+                        effects: [],
+                        abilityEffects: [
+                            { kind: 'modifyStat', stat: 'morale', flat },
+                        ],
+                    },
+                ],
+            },
+        });
 
-    expect(query(steady)).toBe(0);
-  });
+        const query = (p: BattleParticipant) =>
+            collectModifiers([p], 'h', { damage: { kind: 'melee' } }).percent;
 
-  it("morale у формулі враховує minMorale власника", () => {
-    const base = hero(-2);
+        expect(query(timed(hero(2), 1))).toBe(9);
+        expect(query(timed(hero(3), 1))).toBe(9);
+        expect(query(timed(hero(-2), 1))).toBe(-3);
 
-    const withMin = {
-      ...base,
-      battleData: { ...base.battleData, resolvedAbilities: [...(base.battleData.resolvedAbilities ?? []), resolved({ trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "minMorale", value: 1 }] }, { id: "m" })] },
-    };
+        const base = hero(-2);
 
-    expect(collectModifiers([withMin], "h", { damage: { kind: "melee" } }).percent).toBe(3);
-  });
+        const steady = {
+            ...base,
+            battleData: {
+                ...base.battleData,
+                resolvedAbilities: [
+                    ...(base.battleData.resolvedAbilities ?? []),
+                    resolved(
+                        {
+                            trigger: { event: 'passive' },
+                            effects: [
+                                { kind: 'flag', flag: 'noNegativeMorale' },
+                            ],
+                        },
+                        { id: 's' }
+                    ),
+                ],
+            },
+        };
+
+        expect(query(steady)).toBe(0);
+    });
+
+    it('morale у формулі враховує minMorale власника', () => {
+        const base = hero(-2);
+
+        const withMin = {
+            ...base,
+            battleData: {
+                ...base.battleData,
+                resolvedAbilities: [
+                    ...(base.battleData.resolvedAbilities ?? []),
+                    resolved(
+                        {
+                            trigger: { event: 'passive' },
+                            effects: [
+                                { kind: 'flag', flag: 'minMorale', value: 1 },
+                            ],
+                        },
+                        { id: 'm' }
+                    ),
+                ],
+            },
+        };
+
+        expect(
+            collectModifiers([withMin], 'h', { damage: { kind: 'melee' } })
+                .percent
+        ).toBe(3);
+    });
 });

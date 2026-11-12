@@ -1,134 +1,340 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
-import { ParticipantSide } from "@/lib/constants/battle";
-import { textRef } from "@/lib/i18n/text-ref";
-import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
-import { resolveTargetIds } from "@/lib/utils/abilities/engine/core/targets";
-import type { Effect } from "@/lib/utils/abilities/schema";
-import { spellTargetInRange } from "@/lib/utils/battle/flows/spell-flow";
-import { mazeMap } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";
-import { resolveSpellTargets, type SpellMapContext } from "@/lib/utils/battle/spell/spell-targeting";
-import { DEFAULT_RULES } from "@/lib/utils/rules";
-import type { SpellTargeting } from "@/lib/utils/spells/model/schema";
-import type { AbilityEvent } from "@/types/abilities";
-import type { BattleMapConfig, BattleParticipant, Direction8, GridPoint, MazeConfig } from "@/types/battle";
+import { ParticipantSide } from '@/lib/constants/battle';
+import { textRef } from '@/lib/i18n/text-ref';
+import {
+    makeParticipant,
+    resolved,
+} from '@/lib/utils/abilities/__tests__/fixtures';
+import { resolveTargetIds } from '@/lib/utils/abilities/engine/core/targets';
+import type { Effect } from '@/lib/utils/abilities/schema';
+import { spellTargetInRange } from '@/lib/utils/battle/flows/spell-flow';
+import { mazeMap } from '@/lib/utils/battle/modes/maze/__tests__/fixtures';
+import {
+    resolveSpellTargets,
+    type SpellMapContext,
+} from '@/lib/utils/battle/spell/spell-targeting';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
+import type { SpellTargeting } from '@/lib/utils/spells/model/schema';
+import type { AbilityEvent } from '@/types/abilities';
+import type {
+    BattleMapConfig,
+    BattleParticipant,
+    Direction8,
+    GridPoint,
+    MazeConfig,
+} from '@/types/battle';
 
-const mapOf = (over: Partial<MazeConfig> = {}): BattleMapConfig => mazeMap({ exit: { x: 11, y: 11 }, ...over }, 12);
+const mapOf = (over: Partial<MazeConfig> = {}): BattleMapConfig =>
+    mazeMap({ exit: { x: 11, y: 11 }, ...over }, 12);
 
-const spell = { id: "sp", groupId: "chaos", level: 1 };
+const spell = { id: 'sp', groupId: 'chaos', level: 1 };
 
-function at(id: string, position: GridPoint, side: ParticipantSide = ParticipantSide.ALLY, extra: { facing?: Direction8; effects?: Effect[]; dormant?: boolean } = {}): BattleParticipant {
-  const p = makeParticipant({ id, side, abilities: extra.effects?.length ? [resolved({ trigger: { event: "passive" }, effects: extra.effects })] : [] });
+function at(
+    id: string,
+    position: GridPoint,
+    side: ParticipantSide = ParticipantSide.ALLY,
+    extra: { facing?: Direction8; effects?: Effect[]; dormant?: boolean } = {}
+): BattleParticipant {
+    const p = makeParticipant({
+        id,
+        side,
+        abilities: extra.effects?.length
+            ? [
+                  resolved({
+                      trigger: { event: 'passive' },
+                      effects: extra.effects,
+                  }),
+              ]
+            : [],
+    });
 
-  return { ...p, battleData: { ...p.battleData, position, ...(extra.facing && { facing: extra.facing }), ...(extra.dormant && { dormant: true }) } };
+    return {
+        ...p,
+        battleData: {
+            ...p.battleData,
+            position,
+            ...(extra.facing && { facing: extra.facing }),
+            ...(extra.dormant && { dormant: true }),
+        },
+    };
 }
 
-const caster = at("c", { x: 5, y: 5 }, ParticipantSide.ALLY, { facing: "e" });
+const caster = at('c', { x: 5, y: 5 }, ParticipantSide.ALLY, { facing: 'e' });
 
-const ahead = at("e1", { x: 8, y: 5 }, ParticipantSide.ENEMY);
+const ahead = at('e1', { x: 8, y: 5 }, ParticipantSide.ENEMY);
 
-const behind = at("e2", { x: 2, y: 5 }, ParticipantSide.ENEMY);
+const behind = at('e2', { x: 2, y: 5 }, ParticipantSide.ENEMY);
 
 const ps = [caster, ahead, behind];
 
-const bolt: SpellTargeting = { kind: "enemy", range: 120 };
+const bolt: SpellTargeting = { kind: 'enemy', range: 120 };
 
-const fireball: SpellTargeting = { kind: "template", shape: "circle", size: 10, side: "enemy", maxTargets: 5, range: 120 };
+const fireball: SpellTargeting = {
+    kind: 'template',
+    shape: 'circle',
+    size: 10,
+    side: 'enemy',
+    maxTargets: 5,
+    range: 120,
+};
 
-const resolve = (targeting: SpellTargeting, chosen: string[], ctx: SpellMapContext, list = ps, who = caster) => resolveSpellTargets(list, who, spell, targeting, chosen, ctx);
+const resolve = (
+    targeting: SpellTargeting,
+    chosen: string[],
+    ctx: SpellMapContext,
+    list = ps,
+    who = caster
+) => resolveSpellTargets(list, who, spell, targeting, chosen, ctx);
 
-describe("заклинання в лабіринті", () => {
-  it("одиночна ціль: у полі зору — ок, позаду чи за стіною — відмова", () => {
-    expect(resolve(bolt, ["e1"], { rules: DEFAULT_RULES, map: mapOf() })).toEqual({ ok: true, targetIds: ["e1"] });
-    expect(resolve(bolt, ["e2"], { rules: DEFAULT_RULES, map: mapOf() })).toEqual({ ok: false, error: textRef("battleActions.maze.targetOutOfSight") });
-    expect(resolve(bolt, ["e1"], { rules: DEFAULT_RULES, map: mapOf({ walls: ["6:5:e"] }) })).toEqual({ ok: false, error: textRef("battleActions.maze.targetOutOfSight") });
-  });
+describe('заклинання в лабіринті', () => {
+    it('одиночна ціль: у полі зору — ок, позаду чи за стіною — відмова', () => {
+        expect(
+            resolve(bolt, ['e1'], { rules: DEFAULT_RULES, map: mapOf() })
+        ).toEqual({ ok: true, targetIds: ['e1'] });
+        expect(
+            resolve(bolt, ['e2'], { rules: DEFAULT_RULES, map: mapOf() })
+        ).toEqual({
+            ok: false,
+            error: textRef('battleActions.maze.targetOutOfSight'),
+        });
+        expect(
+            resolve(bolt, ['e1'], {
+                rules: DEFAULT_RULES,
+                map: mapOf({ walls: ['6:5:e'] }),
+            })
+        ).toEqual({
+            ok: false,
+            error: textRef('battleActions.maze.targetOutOfSight'),
+        });
+    });
 
-  it("на себе й без лабіринту — як раніше", () => {
-    expect(resolve({ kind: "ally", range: 30 }, ["c"], { rules: DEFAULT_RULES, map: mapOf() })).toEqual({ ok: true, targetIds: ["c"] });
+    it('на себе й без лабіринту — як раніше', () => {
+        expect(
+            resolve({ kind: 'ally', range: 30 }, ['c'], {
+                rules: DEFAULT_RULES,
+                map: mapOf(),
+            })
+        ).toEqual({ ok: true, targetIds: ['c'] });
 
-    const plain = { cols: 12, rows: 12, background: null, opacity: 0.3 };
+        const plain = { cols: 12, rows: 12, background: null, opacity: 0.3 };
 
-    expect(resolve(bolt, ["e2"], { rules: DEFAULT_RULES, map: plain })).toEqual({ ok: true, targetIds: ["e2"] });
-  });
+        expect(
+            resolve(bolt, ['e2'], { rules: DEFAULT_RULES, map: plain })
+        ).toEqual({ ok: true, targetIds: ['e2'] });
+    });
 
-  it("шаблон: приціл поза полем зору — відмова; у полі зору — зона не зупиняється тонкими стінами", () => {
-    expect(resolve(fireball, [], { rules: DEFAULT_RULES, map: mapOf(), targetCell: { x: 2, y: 5 } })).toEqual({ ok: false, error: textRef("battleActions.maze.aimOutOfSight") });
+    it('шаблон: приціл поза полем зору — відмова; у полі зору — зона не зупиняється тонкими стінами', () => {
+        expect(
+            resolve(fireball, [], {
+                rules: DEFAULT_RULES,
+                map: mapOf(),
+                targetCell: { x: 2, y: 5 },
+            })
+        ).toEqual({
+            ok: false,
+            error: textRef('battleActions.maze.aimOutOfSight'),
+        });
 
-    const r = resolve(fireball, [], { rules: DEFAULT_RULES, map: mapOf({ walls: ["8:5:e"] }), targetCell: { x: 8, y: 5 } });
+        const r = resolve(fireball, [], {
+            rules: DEFAULT_RULES,
+            map: mapOf({ walls: ['8:5:e'] }),
+            targetCell: { x: 8, y: 5 },
+        });
 
-    expect(r.ok).toBe(true);
-    expect(r.ok && r.cells).toContain("9:5");
-  });
+        expect(r.ok).toBe(true);
+        expect(r.ok && r.cells).toContain('9:5');
+    });
 
-  it("розширення вмінням (радіус): приціл поза полем зору — відмова", () => {
-    const wide = at("c", { x: 5, y: 5 }, ParticipantSide.ALLY, { facing: "e", effects: [{ kind: "flag", flag: "spellTargeting", mode: "area", maxTargets: 3 }] });
+    it('розширення вмінням (радіус): приціл поза полем зору — відмова', () => {
+        const wide = at('c', { x: 5, y: 5 }, ParticipantSide.ALLY, {
+            facing: 'e',
+            effects: [
+                {
+                    kind: 'flag',
+                    flag: 'spellTargeting',
+                    mode: 'area',
+                    maxTargets: 3,
+                },
+            ],
+        });
 
-    expect(resolve(bolt, [], { rules: DEFAULT_RULES, map: mapOf(), targetCell: { x: 2, y: 5 } }, [wide, ahead, behind], wide)).toEqual({ ok: false, error: textRef("battleActions.maze.aimOutOfSight") });
-    expect(resolve(bolt, [], { rules: DEFAULT_RULES, map: mapOf(), targetCell: { x: 8, y: 5 } }, [wide, ahead, behind], wide)).toMatchObject({ ok: true, targetIds: ["e1"] });
-  });
+        expect(
+            resolve(
+                bolt,
+                [],
+                {
+                    rules: DEFAULT_RULES,
+                    map: mapOf(),
+                    targetCell: { x: 2, y: 5 },
+                },
+                [wide, ahead, behind],
+                wide
+            )
+        ).toEqual({
+            ok: false,
+            error: textRef('battleActions.maze.aimOutOfSight'),
+        });
+        expect(
+            resolve(
+                bolt,
+                [],
+                {
+                    rules: DEFAULT_RULES,
+                    map: mapOf(),
+                    targetCell: { x: 8, y: 5 },
+                },
+                [wide, ahead, behind],
+                wide
+            )
+        ).toMatchObject({ ok: true, targetIds: ['e1'] });
+    });
 
-  it("ланцюг: перша ціль — у полі зору, стрибки стіни не перевіряють", () => {
-    const chain: SpellTargeting = { kind: "area", side: "enemy", maxTargets: 2, range: 120, chain: true };
+    it('ланцюг: перша ціль — у полі зору, стрибки стіни не перевіряють', () => {
+        const chain: SpellTargeting = {
+            kind: 'area',
+            side: 'enemy',
+            maxTargets: 2,
+            range: 120,
+            chain: true,
+        };
 
-    const next = at("e3", { x: 9, y: 5 }, ParticipantSide.ENEMY);
+        const next = at('e3', { x: 9, y: 5 }, ParticipantSide.ENEMY);
 
-    const map = mapOf({ walls: ["8:5:e"] });
+        const map = mapOf({ walls: ['8:5:e'] });
 
-    expect(resolve(chain, ["e1"], { rules: DEFAULT_RULES, map }, [caster, ahead, next])).toEqual({ ok: true, targetIds: ["e1", "e3"] });
-    expect(resolve(chain, ["e2"], { rules: DEFAULT_RULES, map }, [caster, behind, next])).toEqual({ ok: false, error: textRef("battleActions.maze.targetOutOfSight") });
-  });
+        expect(
+            resolve(chain, ['e1'], { rules: DEFAULT_RULES, map }, [
+                caster,
+                ahead,
+                next,
+            ])
+        ).toEqual({ ok: true, targetIds: ['e1', 'e3'] });
+        expect(
+            resolve(chain, ['e2'], { rules: DEFAULT_RULES, map }, [
+                caster,
+                behind,
+                next,
+            ])
+        ).toEqual({
+            ok: false,
+            error: textRef('battleActions.maze.targetOutOfSight'),
+        });
+    });
 });
 
-describe("spellTargetInRange у лабіринті", () => {
-  it("підсвічує лише ціль у полі зору", () => {
-    expect(spellTargetInRange(mapOf(), caster, ahead, 120, DEFAULT_RULES)).toBe(true);
-    expect(spellTargetInRange(mapOf(), caster, behind, 120, DEFAULT_RULES)).toBe(false);
-  });
+describe('spellTargetInRange у лабіринті', () => {
+    it('підсвічує лише ціль у полі зору', () => {
+        expect(
+            spellTargetInRange(mapOf(), caster, ahead, 120, DEFAULT_RULES)
+        ).toBe(true);
+        expect(
+            spellTargetInRange(mapOf(), caster, behind, 120, DEFAULT_RULES)
+        ).toBe(false);
+    });
 });
 
-describe("ціль без дальності", () => {
-  it("теж лише в полі зору", () => {
-    expect(resolve({ kind: "enemy" }, ["e2"], { rules: DEFAULT_RULES, map: mapOf() })).toEqual({ ok: false, error: textRef("battleActions.maze.targetOutOfSight") });
-    expect(spellTargetInRange(mapOf(), caster, behind, undefined, DEFAULT_RULES)).toBe(false);
-  });
+describe('ціль без дальності', () => {
+    it('теж лише в полі зору', () => {
+        expect(
+            resolve({ kind: 'enemy' }, ['e2'], {
+                rules: DEFAULT_RULES,
+                map: mapOf(),
+            })
+        ).toEqual({
+            ok: false,
+            error: textRef('battleActions.maze.targetOutOfSight'),
+        });
+        expect(
+            spellTargetInRange(
+                mapOf(),
+                caster,
+                behind,
+                undefined,
+                DEFAULT_RULES
+            )
+        ).toBe(false);
+    });
 });
 
-const friendBehind = at("a2", { x: 3, y: 9 });
+const friendBehind = at('a2', { x: 3, y: 9 });
 
 const massPs = [caster, ahead, behind, friendBehind];
 
-const resolveMass = (targeting: SpellTargeting, ctx: SpellMapContext) => resolveSpellTargets(massPs, caster, spell, targeting, [], ctx);
+const resolveMass = (targeting: SpellTargeting, ctx: SpellMapContext) =>
+    resolveSpellTargets(massPs, caster, spell, targeting, [], ctx);
 
-describe("масові заклинання в лабіринті — лише вороги в полі зору заклинателя", () => {
-  it("«усі вороги»: ворог позаду не зачеплений; без лабіринту — усі", () => {
-    expect(resolveMass({ kind: "allEnemies" }, { rules: DEFAULT_RULES, map: mapOf() })).toEqual({ ok: true, targetIds: ["e1"] });
-    expect(resolveMass({ kind: "allEnemies" }, { rules: DEFAULT_RULES, map: { ...mapOf(), maze: null } })).toEqual({ ok: true, targetIds: ["e1", "e2"] });
-  });
+describe('масові заклинання в лабіринті — лише вороги в полі зору заклинателя', () => {
+    it('«усі вороги»: ворог позаду не зачеплений; без лабіринту — усі', () => {
+        expect(
+            resolveMass(
+                { kind: 'allEnemies' },
+                { rules: DEFAULT_RULES, map: mapOf() }
+            )
+        ).toEqual({ ok: true, targetIds: ['e1'] });
+        expect(
+            resolveMass(
+                { kind: 'allEnemies' },
+                { rules: DEFAULT_RULES, map: { ...mapOf(), maze: null } }
+            )
+        ).toEqual({ ok: true, targetIds: ['e1', 'e2'] });
+    });
 
-  it("«усі»: союзники поза полем зору лишаються, невидимі вороги — ні", () => {
-    expect(resolveMass({ kind: "everyone" }, { rules: DEFAULT_RULES, map: mapOf() })).toEqual({ ok: true, targetIds: ["c", "e1", "a2"] });
-    expect(resolveMass({ kind: "allAllies" }, { rules: DEFAULT_RULES, map: mapOf() })).toEqual({ ok: true, targetIds: ["c", "a2"] });
-  });
+    it('«усі»: союзники поза полем зору лишаються, невидимі вороги — ні', () => {
+        expect(
+            resolveMass(
+                { kind: 'everyone' },
+                { rules: DEFAULT_RULES, map: mapOf() }
+            )
+        ).toEqual({ ok: true, targetIds: ['c', 'e1', 'a2'] });
+        expect(
+            resolveMass(
+                { kind: 'allAllies' },
+                { rules: DEFAULT_RULES, map: mapOf() }
+            )
+        ).toEqual({ ok: true, targetIds: ['c', 'a2'] });
+    });
 
-  it("розширення вмінням «на всіх»: лише видимі вороги", () => {
-    const widened = at("c", { x: 5, y: 5 }, ParticipantSide.ALLY, { facing: "e", effects: [{ kind: "flag", flag: "spellTargeting", mode: "all" } as Effect] });
+    it('розширення вмінням «на всіх»: лише видимі вороги', () => {
+        const widened = at('c', { x: 5, y: 5 }, ParticipantSide.ALLY, {
+            facing: 'e',
+            effects: [
+                { kind: 'flag', flag: 'spellTargeting', mode: 'all' } as Effect,
+            ],
+        });
 
-    const r = resolveSpellTargets([widened, ahead, behind], widened, spell, { kind: "enemy", range: 120 }, ["e1"], { rules: DEFAULT_RULES, map: mapOf() });
+        const r = resolveSpellTargets(
+            [widened, ahead, behind],
+            widened,
+            spell,
+            { kind: 'enemy', range: 120 },
+            ['e1'],
+            { rules: DEFAULT_RULES, map: mapOf() }
+        );
 
-    expect(r).toEqual({ ok: true, targetIds: ["e1"] });
-  });
+        expect(r).toEqual({ ok: true, targetIds: ['e1'] });
+    });
 });
 
-describe("масові вміння не зачіпають сплячих у лабіринті", () => {
-  it("allEnemies / everyone без сплячого", () => {
-    const sleeper = at("z", { x: 9, y: 9 }, ParticipantSide.ENEMY, { dormant: true });
+describe('масові вміння не зачіпають сплячих у лабіринті', () => {
+    it('allEnemies / everyone без сплячого', () => {
+        const sleeper = at('z', { x: 9, y: 9 }, ParticipantSide.ENEMY, {
+            dormant: true,
+        });
 
-    const list = [caster, ahead, sleeper];
+        const list = [caster, ahead, sleeper];
 
-    const event = { type: "turnStart", participantId: "c" } as unknown as AbilityEvent;
+        const event = {
+            type: 'turnStart',
+            participantId: 'c',
+        } as unknown as AbilityEvent;
 
-    expect(resolveTargetIds("allEnemies", "c", event, list)).toEqual(["e1"]);
-    expect(resolveTargetIds("everyone", "c", event, list)).toEqual(["c", "e1"]);
-  });
+        expect(resolveTargetIds('allEnemies', 'c', event, list)).toEqual([
+            'e1',
+        ]);
+        expect(resolveTargetIds('everyone', 'c', event, list)).toEqual([
+            'c',
+            'e1',
+        ]);
+    });
 });

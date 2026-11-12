@@ -1,60 +1,105 @@
 // components/character-profile/rest/__tests__/hit-dice-panel.test.tsx
 // @vitest-environment happy-dom
-import { cleanup, fireEvent, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { cleanup, fireEvent, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { sheetFixture } from "../../__tests__/sheet-fixture";
-import { ProfileProvider } from "../../ProfileContext";
-import { HitDicePanel } from "../HitDicePanel";
+import { sheetFixture } from '../../__tests__/sheet-fixture';
+import { ProfileProvider } from '../../ProfileContext';
+import { HitDicePanel } from '../HitDicePanel';
 
-import { renderWithConfirm } from "@/components/ui/__tests__/render-with-confirm";
-import type { CharacterSheet, SheetRest } from "@/types/characters";
+import { renderWithConfirm } from '@/components/ui/__tests__/render-with-confirm';
+import type { CharacterSheet, SheetRest } from '@/types/characters';
 
-const h = vi.hoisted(() => ({ spend: { mutateAsync: vi.fn(async () => ({ roll: 6, healed: 8 })), isPending: false } }));
+const h = vi.hoisted(() => ({
+    spend: {
+        mutateAsync: vi.fn(async () => ({ roll: 6, healed: 8 })),
+        isPending: false,
+    },
+}));
 
-vi.mock("@/lib/hooks/characters", async (orig) => ({ ...(await orig<object>()), useSpendHitDie: () => h.spend }));
+vi.mock('@/lib/hooks/characters', async (orig) => ({
+    ...(await orig<object>()),
+    useSpendHitDie: () => h.spend,
+}));
 
 const rest = (over: Partial<SheetRest> = {}): SheetRest => ({
-  persist: true, hp: { current: 10, max: 30, temp: 0 }, dead: false, exhaustion: 0, shortRestOpen: true,
-  hitDice: [{ classId: "fig", name: "Воїн", die: 10, total: 3, spent: 1 }], charges: [], arcaneRecovery: null, inspiration: null, xp: null, ...over,
+    persist: true,
+    hp: { current: 10, max: 30, temp: 0 },
+    dead: false,
+    exhaustion: 0,
+    shortRestOpen: true,
+    hitDice: [{ classId: 'fig', name: 'Воїн', die: 10, total: 3, spent: 1 }],
+    charges: [],
+    arcaneRecovery: null,
+    inspiration: null,
+    xp: null,
+    ...over,
 });
 
-const show = (r: SheetRest, viewer: CharacterSheet["viewer"] = { isDM: false, isOwner: true }) =>
-  renderWithConfirm(
-    <ProfileProvider campaignId="c" characterId="ch" sheet={{ ...sheetFixture, viewer, rest: r }} canEdit={false}>
-      <HitDicePanel />
-    </ProfileProvider>,
-  );
+const show = (
+    r: SheetRest,
+    viewer: CharacterSheet['viewer'] = { isDM: false, isOwner: true }
+) =>
+    renderWithConfirm(
+        <ProfileProvider
+            campaignId="c"
+            characterId="ch"
+            sheet={{ ...sheetFixture, viewer, rest: r }}
+            canEdit={false}
+        >
+            <HitDicePanel />
+        </ProfileProvider>
+    );
 
-describe("HitDicePanel", () => {
-  afterEach(cleanup);
+describe('HitDicePanel', () => {
+    afterEach(cleanup);
 
-  it("spend button in the short rest window", () => {
-    show(rest());
+    it('spend button in the short rest window', () => {
+        show(rest());
 
-    expect(screen.getByText(/"spent":1,"total":3/)).toBeTruthy();
+        expect(screen.getByText(/"spent":1,"total":3/)).toBeTruthy();
 
-    fireEvent.click(screen.getByRole("button", { name: "rest.hitDice.spend" }));
+        fireEvent.click(
+            screen.getByRole('button', { name: 'rest.hitDice.spend' })
+        );
 
-    expect(h.spend.mutateAsync).toHaveBeenCalledWith("fig");
-  });
+        expect(h.spend.mutateAsync).toHaveBeenCalledWith('fig');
+    });
 
-  it("no button outside the window, when all spent, or for a stranger", () => {
-    show(rest({ shortRestOpen: false }));
-    expect(screen.queryByRole("button", { name: "rest.hitDice.spend" })).toBeNull();
-    cleanup();
+    it('no button outside the window, when all spent, or for a stranger', () => {
+        show(rest({ shortRestOpen: false }));
+        expect(
+            screen.queryByRole('button', { name: 'rest.hitDice.spend' })
+        ).toBeNull();
+        cleanup();
 
-    show(rest({ hitDice: [{ classId: "fig", name: "Воїн", die: 10, total: 3, spent: 3 }] }));
-    expect(screen.queryByRole("button", { name: "rest.hitDice.spend" })).toBeNull();
-    cleanup();
+        show(
+            rest({
+                hitDice: [
+                    {
+                        classId: 'fig',
+                        name: 'Воїн',
+                        die: 10,
+                        total: 3,
+                        spent: 3,
+                    },
+                ],
+            })
+        );
+        expect(
+            screen.queryByRole('button', { name: 'rest.hitDice.spend' })
+        ).toBeNull();
+        cleanup();
 
-    show(rest(), { isDM: false, isOwner: false });
-    expect(screen.queryByRole("button", { name: "rest.hitDice.spend" })).toBeNull();
-  });
+        show(rest(), { isDM: false, isOwner: false });
+        expect(
+            screen.queryByRole('button', { name: 'rest.hitDice.spend' })
+        ).toBeNull();
+    });
 
-  it("renders nothing without persisted resources", () => {
-    show(rest({ persist: false, hitDice: [] }));
+    it('renders nothing without persisted resources', () => {
+        show(rest({ persist: false, hitDice: [] }));
 
-    expect(screen.queryByLabelText("Кістки хітів")).toBeNull();
-  });
+        expect(screen.queryByLabelText('Кістки хітів')).toBeNull();
+    });
 });

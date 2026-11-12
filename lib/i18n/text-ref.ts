@@ -1,53 +1,85 @@
-import type { Messages } from "use-intl";
+import type { Messages } from 'use-intl';
 
-import { CAPITALIZE_KEY, JOIN_KEY, translateIssue } from "./translate-issue";
-import type { Translator } from "./translator";
+import { CAPITALIZE_KEY, JOIN_KEY, translateIssue } from './translate-issue';
+import type { Translator } from './translator';
 
-import type { LogLine, TextArg, TextRef } from "@/types/text";
+import type { LogLine, TextArg, TextRef } from '@/types/text';
 
-type Flatten<T, P extends string> = { [K in keyof T & string]: T[K] extends string ? `${P}${K}` : Flatten<T[K], `${P}${K}.`> }[keyof T & string];
+type Flatten<T, P extends string> = {
+    [K in keyof T & string]: T[K] extends string
+        ? `${P}${K}`
+        : Flatten<T[K], `${P}${K}.`>;
+}[keyof T & string];
 
-export type AppMessageKey = { [N in keyof Messages & string]: Flatten<Messages[N], `${N}.`> }[keyof Messages & string];
+export type AppMessageKey = {
+    [N in keyof Messages & string]: Flatten<Messages[N], `${N}.`>;
+}[keyof Messages & string];
 
 /** Empty-string params are dropped to keep the stored log small; `translateIssue` fills the missing placeholders with "". */
-function compactRef(message: string, params?: Record<string, TextArg>): TextRef {
-  const kept = params && Object.entries(params).filter(([, value]) => value !== "");
+function compactRef(
+    message: string,
+    params?: Record<string, TextArg>
+): TextRef {
+    const kept =
+        params && Object.entries(params).filter(([, value]) => value !== '');
 
-  return kept?.length ? { message, params: Object.fromEntries(kept) } : { message };
+    return kept?.length
+        ? { message, params: Object.fromEntries(kept) }
+        : { message };
 }
 
-export function textRef(message: AppMessageKey, params?: Record<string, TextArg>): TextRef {
-  return compactRef(message, params);
+export function textRef(
+    message: AppMessageKey,
+    params?: Record<string, TextArg>
+): TextRef {
+    return compactRef(message, params);
 }
 
 /** For keys built at runtime (`battleTerms.crits.${source}…`); each dynamic family needs a `label-keys-<ns>` test. */
-export function dynamicTextRef(message: string, params?: Record<string, TextArg>): TextRef {
-  return compactRef(message, params);
+export function dynamicTextRef(
+    message: string,
+    params?: Record<string, TextArg>
+): TextRef {
+    return compactRef(message, params);
 }
 
 /** Concatenates lines; plain strings collapse into one string, otherwise a catalog-free `$join` ref that `formatText` resolves. */
-export function joinLines(parts: readonly LogLine[], separator = ""): LogLine {
-  if (parts.every((part) => typeof part === "string")) return parts.join(separator);
+export function joinLines(parts: readonly LogLine[], separator = ''): LogLine {
+    if (parts.every((part) => typeof part === 'string'))
+        return parts.join(separator);
 
-  return { message: JOIN_KEY, params: { ...(separator && { separator }), ...Object.fromEntries(parts.map((part, index) => [`p${index}`, part])) } };
+    return {
+        message: JOIN_KEY,
+        params: {
+            ...(separator && { separator }),
+            ...Object.fromEntries(
+                parts.map((part, index) => [`p${index}`, part])
+            ),
+        },
+    };
 }
 
 /** Capitalizes at render time, after the locale text is known. */
 export function capitalizeLine(line: LogLine): LogLine {
-  if (typeof line === "string") return line.charAt(0).toLocaleUpperCase() + line.slice(1);
+    if (typeof line === 'string')
+        return line.charAt(0).toLocaleUpperCase() + line.slice(1);
 
-  return { message: CAPITALIZE_KEY, params: { p0: line } };
+    return { message: CAPITALIZE_KEY, params: { p0: line } };
 }
 
 /** Stable identity of a line for sets and maps. */
 export function lineKey(line: LogLine): string {
-  return typeof line === "string" ? line : JSON.stringify(line);
+    return typeof line === 'string' ? line : JSON.stringify(line);
 }
 
 function isRef(value: unknown): value is TextRef {
-  return typeof value === "object" && value !== null && typeof (value as TextRef).message === "string";
+    return (
+        typeof value === 'object' &&
+        value !== null &&
+        typeof (value as TextRef).message === 'string'
+    );
 }
 
 export function formatText(t: Translator, line: LogLine): string {
-  return isRef(line) ? translateIssue(t, line) : line;
+    return isRef(line) ? translateIssue(t, line) : line;
 }

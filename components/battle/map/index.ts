@@ -1,1 +1,6 @@
-export { BattleMap, type BattleMapActions, type BattleMapProps, type BattleMapView } from "./BattleMap";
+export {
+    BattleMap,
+    type BattleMapActions,
+    type BattleMapProps,
+    type BattleMapView,
+} from './BattleMap';

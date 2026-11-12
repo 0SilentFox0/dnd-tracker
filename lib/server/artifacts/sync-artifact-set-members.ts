@@ -1,45 +1,47 @@
-import "server-only";
-import { API_ERRORS } from "@/lib/constants/api-errors";
-import { prisma } from "@/lib/db";
+import 'server-only';
+import { API_ERRORS } from '@/lib/constants/api-errors';
+import { prisma } from '@/lib/db';
 
 export class SyncArtifactSetError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "SyncArtifactSetError";
-  }
+    constructor(message: string) {
+        super(message);
+        this.name = 'SyncArtifactSetError';
+    }
 }
 
 /**
  * Очищає setId у всіх артефактів цього сету і призначає setId обраним id.
  */
 export async function syncArtifactSetMembers(
-  campaignId: string,
-  setId: string,
-  artifactIds: string[],
+    campaignId: string,
+    setId: string,
+    artifactIds: string[]
 ): Promise<void> {
-  const unique = [...new Set(artifactIds)];
-
-  if (unique.length > 0) {
-    const count = await prisma.artifact.count({
-      where: { id: { in: unique }, campaignId },
-    });
-
-    if (count !== unique.length) {
-      throw new SyncArtifactSetError(API_ERRORS.ARTIFACT_SET_MEMBERS_INVALID);
-    }
-  }
-
-  await prisma.$transaction(async (tx) => {
-    await tx.artifact.updateMany({
-      where: { campaignId, setId },
-      data: { setId: null },
-    });
+    const unique = [...new Set(artifactIds)];
 
     if (unique.length > 0) {
-      await tx.artifact.updateMany({
-        where: { id: { in: unique }, campaignId },
-        data: { setId },
-      });
+        const count = await prisma.artifact.count({
+            where: { id: { in: unique }, campaignId },
+        });
+
+        if (count !== unique.length) {
+            throw new SyncArtifactSetError(
+                API_ERRORS.ARTIFACT_SET_MEMBERS_INVALID
+            );
+        }
     }
-  });
+
+    await prisma.$transaction(async (tx) => {
+        await tx.artifact.updateMany({
+            where: { campaignId, setId },
+            data: { setId: null },
+        });
+
+        if (unique.length > 0) {
+            await tx.artifact.updateMany({
+                where: { id: { in: unique }, campaignId },
+                data: { setId },
+            });
+        }
+    });
 }

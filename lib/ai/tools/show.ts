@@ -1,25 +1,32 @@
-import { z } from "zod";
+import { z } from 'zod';
 
-import { defineTool } from "./define";
+import { defineTool } from './define';
 
-import "server-only";
-import { readShowState } from "@/lib/server/show/show-store";
+import 'server-only';
+import { readShowState } from '@/lib/server/show/show-store';
 
 export async function showSummary(campaignId: string): Promise<string | null> {
-  const s = await readShowState(campaignId);
+    const s = await readShowState(campaignId);
 
-  if (!s?.slide) return null;
+    if (!s?.slide) return null;
 
-  return [`Deck: ${s.deckTitle ?? "—"}`, `Slide: ${s.slide.title ?? "untitled"}`, s.slide.caption && `Caption: ${s.slide.caption}`, s.battle && `Players are called to battle: ${s.battle.name}`]
-    .filter(Boolean)
-    .join("\n");
+    return [
+        `Deck: ${s.deckTitle ?? '—'}`,
+        `Slide: ${s.slide.title ?? 'untitled'}`,
+        s.slide.caption && `Caption: ${s.slide.caption}`,
+        s.battle && `Players are called to battle: ${s.battle.name}`,
+    ]
+        .filter(Boolean)
+        .join('\n');
 }
 
 export const getShowStateTool = defineTool({
-  name: "get_show_state",
-  scopes: ["ai"],
-  title: "Current show",
-  description: "What the players currently see on the show screen: deck, slide title and caption, battle call.",
-  input: z.object({}),
-  handler: async (ctx) => (await showSummary(ctx.campaignId)) ?? "No show is running right now",
+    name: 'get_show_state',
+    scopes: ['ai'],
+    title: 'Current show',
+    description:
+        'What the players currently see on the show screen: deck, slide title and caption, battle call.',
+    input: z.object({}),
+    handler: async (ctx) =>
+        (await showSummary(ctx.campaignId)) ?? 'No show is running right now',
 });

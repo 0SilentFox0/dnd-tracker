@@ -1,50 +1,83 @@
-import type { Prisma } from "@prisma/client";
+import type { Prisma } from '@prisma/client';
 
-import { persistedHeroes } from "./persist-resources";
+import { persistedHeroes } from './persist-resources';
 
-import { InventoryLogKind } from "@/lib/constants/inventory";
-import { lockCampaignArtifacts } from "@/lib/server/artifacts/lock";
-import { normalizeItems } from "@/lib/utils/inventory/items";
-import { consumableSpend, spendConsumables } from "@/lib/utils/items/consumables";
-import type { BattleParticipant } from "@/types/battle";
+import { InventoryLogKind } from '@/lib/constants/inventory';
+import { lockCampaignArtifacts } from '@/lib/server/artifacts/lock';
+import { normalizeItems } from '@/lib/utils/inventory/items';
+import {
+    consumableSpend,
+    spendConsumables,
+} from '@/lib/utils/items/consumables';
+import type { BattleParticipant } from '@/types/battle';
 
 export async function persistConsumables(
-  tx: Pick<Prisma.TransactionClient, "characterInventory" | "inventoryLog" | "campaign" | "$executeRaw">,
-  battle: { campaignId: string },
-  participants: BattleParticipant[],
+    tx: Pick<
+        Prisma.TransactionClient,
+        'characterInventory' | 'inventoryLog' | 'campaign' | '$executeRaw'
+    >,
+    battle: { campaignId: string },
+    participants: BattleParticipant[]
 ): Promise<void> {
-  const spent = persistedHeroes(participants).flatMap((h) => {
-    const byItem = consumableSpend(h);
+    const spent = persistedHeroes(participants).flatMap((h) => {
+        const byItem = consumableSpend(h);
 
-    return Object.keys(byItem).length > 0 ? [{ characterId: h.basicInfo.sourceId, byItem }] : [];
-  });
+        return Object.keys(byItem).length > 0
+            ? [{ characterId: h.basicInfo.sourceId, byItem }]
+            : [];
+    });
 
-  if (spent.length === 0) return;
+    if (spent.length === 0) return;
 
-  await lockCampaignArtifacts(tx as Prisma.TransactionClient, battle.campaignId);
+    await lockCampaignArtifacts(
+        tx as Prisma.TransactionClient,
+        battle.campaignId
+    );
 
-  const [campaign, inventories] = await Promise.all([
-    tx.campaign.findUnique({ where: { id: battle.campaignId }, select: { dmUserId: true } }),
-    tx.characterInventory.findMany({ where: { characterId: { in: spent.map((s) => s.characterId) } }, select: { characterId: true, items: true } }),
-  ]);
+    const [campaign, inventories] = await Promise.all([
+        tx.campaign.findUnique({
+            where: { id: battle.campaignId },
+            select: { dmUserId: true },
+        }),
+        tx.characterInventory.findMany({
+            where: { characterId: { in: spent.map((s) => s.characterId) } },
+            select: { characterId: true, items: true },
+        }),
+    ]);
 
-  const inventoryOf = new Map(inventories.map((i) => [i.characterId, i]));
+    const inventoryOf = new Map(inventories.map((i) => [i.characterId, i]));
 
-  const logs: Prisma.InventoryLogCreateManyInput[] = [];
+    const logs: Prisma.InventoryLogCreateManyInput[] = [];
 
-  for (const { characterId, byItem } of spent) {
-    const inv = inventoryOf.get(characterId);
+    for (const { characterId, byItem } of spent) {
+        const inv = inventoryOf.get(characterId);
 
-    if (!inv) continue;
+        if (!inv) continue;
 
-    const { items, used } = spendConsumables(normalizeItems(inv.items), byItem);
+        const { items, used } = spendConsumables(
+            normalizeItems(inv.items),
+            byItem
+        );
 
-    if (used.length === 0) continue;
+        if (used.length === 0) continue;
 
-    await tx.characterInventory.update({ where: { characterId }, data: { items: items as unknown as Prisma.InputJsonValue } });
+        await tx.characterInventory.update({
+            where: { characterId },
+            data: { items: items as unknown as Prisma.InputJsonValue },
+        });
 
-    if (campaign) logs.push(...used.map((u) => ({ campaignId: battle.campaignId, characterId, actorUserId: campaign.dmUserId, kind: InventoryLogKind.ITEM_USE, delta: { item: u.item, qty: -u.qty }, note: null })));
-  }
+        if (campaign)
+            logs.push(
+                ...used.map((u) => ({
+                    campaignId: battle.campaignId,
+                    characterId,
+                    actorUserId: campaign.dmUserId,
+                    kind: InventoryLogKind.ITEM_USE,
+                    delta: { item: u.item, qty: -u.qty },
+                    note: null,
+                }))
+            );
+    }
 
-  if (logs.length > 0) await tx.inventoryLog.createMany({ data: logs });
+    if (logs.length > 0) await tx.inventoryLog.createMany({ data: logs });
 }

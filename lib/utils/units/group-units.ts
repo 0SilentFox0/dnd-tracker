@@ -1,103 +1,153 @@
-import { UNGROUPED_KEY } from "@/lib/constants/ungrouped";
-import type { UnitGroupAppearance } from "@/lib/schemas/unit-groups";
-import { groupBy } from "@/lib/utils/common/collections";
-import { byName } from "@/lib/utils/common/text";
-import { matchesQuery } from "@/lib/utils/common/text-search";
-import type { Race } from "@/types/races";
-import type { Unit } from "@/types/units";
+import { UNGROUPED_KEY } from '@/lib/constants/ungrouped';
+import type { UnitGroupAppearance } from '@/lib/schemas/unit-groups';
+import { groupBy } from '@/lib/utils/common/collections';
+import { byName } from '@/lib/utils/common/text';
+import { matchesQuery } from '@/lib/utils/common/text-search';
+import type { Race } from '@/types/races';
+import type { Unit } from '@/types/units';
 
-export const NO_RACE = "none";
+export const NO_RACE = 'none';
 
-const TYPE_PREFIX = "type:";
+const TYPE_PREFIX = 'type:';
 
-export type UnitGroupRace = Pick<Race, "id" | "name" | "color" | "icon">;
+export type UnitGroupRace = Pick<Race, 'id' | 'name' | 'color' | 'icon'>;
 
 export interface UnitTier {
-  level: number;
-  units: Unit[];
+    level: number;
+    units: Unit[];
 }
 
 export interface UnitRaceGroup<R extends UnitGroupRace = UnitGroupRace> {
-  key: string;
-  label: string;
-  race: R | null;
-  icon: string | null;
-  defaultIcon: string | null;
-  customName?: string;
-  customIcon?: string | null;
-  total: number;
-  tiers: UnitTier[];
+    key: string;
+    label: string;
+    race: R | null;
+    icon: string | null;
+    defaultIcon: string | null;
+    customName?: string;
+    customIcon?: string | null;
+    total: number;
+    tiers: UnitTier[];
 }
 
 export interface UnitRaceChip {
-  key: string;
-  label: string;
-  color: string | null;
-  count: number;
+    key: string;
+    label: string;
+    color: string | null;
+    count: number;
 }
 
 function toTiers(units: Unit[]): UnitTier[] {
-  return [...groupBy(units, (unit) => unit.level).entries()].sort(([a], [b]) => a - b).map(([level, list]) => ({ level, units: list.sort(byName) }));
+    return [...groupBy(units, (unit) => unit.level).entries()]
+        .sort(([a], [b]) => a - b)
+        .map(([level, list]) => ({ level, units: list.sort(byName) }));
 }
 
-export function groupUnitsByRace<R extends UnitGroupRace>(units: Unit[], races: R[], query = "", appearances: Record<string, UnitGroupAppearance> = {}): UnitRaceGroup<R>[] {
-  const q = query.trim();
+export function groupUnitsByRace<R extends UnitGroupRace>(
+    units: Unit[],
+    races: R[],
+    query = '',
+    appearances: Record<string, UnitGroupAppearance> = {}
+): UnitRaceGroup<R>[] {
+    const q = query.trim();
 
-  const matches = (unit: Unit) => matchesQuery([unit.name], q);
+    const matches = (unit: Unit) => matchesQuery([unit.name], q);
 
-  const known = new Set(races.map((r) => r.id));
+    const known = new Set(races.map((r) => r.id));
 
-  const group = (key: string, race: R | null, own: Unit[], label = race?.name ?? ""): UnitRaceGroup<R> => {
-    const tiers = toTiers(own);
+    const group = (
+        key: string,
+        race: R | null,
+        own: Unit[],
+        label = race?.name ?? ''
+    ): UnitRaceGroup<R> => {
+        const tiers = toTiers(own);
 
-    const appearance = appearances[key];
+        const appearance = appearances[key];
 
-    const defaultIcon = race?.icon || tiers.flatMap((tier) => tier.units).find((unit) => unit.avatar)?.avatar || null;
+        const defaultIcon =
+            race?.icon ||
+            tiers.flatMap((tier) => tier.units).find((unit) => unit.avatar)
+                ?.avatar ||
+            null;
 
-    return {
-      key, label, race, total: own.length,
-      customName: appearance?.name,
-      customIcon: appearance?.icon,
-      defaultIcon,
-      icon: appearance?.icon || defaultIcon,
-      tiers: q ? tiers.map((tier) => ({ ...tier, units: tier.units.filter(matches) })).filter((tier) => tier.units.length > 0) : tiers,
+        return {
+            key,
+            label,
+            race,
+            total: own.length,
+            customName: appearance?.name,
+            customIcon: appearance?.icon,
+            defaultIcon,
+            icon: appearance?.icon || defaultIcon,
+            tiers: q
+                ? tiers
+                      .map((tier) => ({
+                          ...tier,
+                          units: tier.units.filter(matches),
+                      }))
+                      .filter((tier) => tier.units.length > 0)
+                : tiers,
+        };
     };
-  };
 
-  const unraced = units.filter((u) => !u.raceId || !known.has(u.raceId));
+    const unraced = units.filter((u) => !u.raceId || !known.has(u.raceId));
 
-  const byType = groupBy(unraced, (u) => u.statblock?.creatureType?.trim().toLowerCase() || "");
+    const byType = groupBy(
+        unraced,
+        (u) => u.statblock?.creatureType?.trim().toLowerCase() || ''
+    );
 
-  const typeGroups = [...byType.entries()]
-    .filter(([type]) => type)
-    .sort(([a], [b]) => a.localeCompare(b))
-    .map(([type, own]) => group(TYPE_PREFIX + type, null, own, type));
+    const typeGroups = [...byType.entries()]
+        .filter(([type]) => type)
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([type, own]) => group(TYPE_PREFIX + type, null, own, type));
 
-  const groups = [
-    ...[...races].sort(byName).map((race) => group(race.id, race, units.filter((u) => u.raceId === race.id))),
-    ...typeGroups,
-    group(NO_RACE, null, byType.get("") ?? []),
-  ];
+    const groups = [
+        ...[...races].sort(byName).map((race) =>
+            group(
+                race.id,
+                race,
+                units.filter((u) => u.raceId === race.id)
+            )
+        ),
+        ...typeGroups,
+        group(NO_RACE, null, byType.get('') ?? []),
+    ];
 
-  return groups.filter((g) => g.tiers.length > 0);
+    return groups.filter((g) => g.tiers.length > 0);
 }
 
 export function raceIdOfGroup(key: string): string | null {
-  return key === NO_RACE || key.startsWith(TYPE_PREFIX) ? null : key;
+    return key === NO_RACE || key.startsWith(TYPE_PREFIX) ? null : key;
 }
 
-export const isTypeGroup = (key: string): boolean => key.startsWith(TYPE_PREFIX);
+export const isTypeGroup = (key: string): boolean =>
+    key.startsWith(TYPE_PREFIX);
 
-export const creatureTypeOfGroup = (key: string): string | null => (isTypeGroup(key) ? key.slice(TYPE_PREFIX.length) : null);
+export const creatureTypeOfGroup = (key: string): string | null =>
+    isTypeGroup(key) ? key.slice(TYPE_PREFIX.length) : null;
 
-export function raceChips(groups: UnitRaceGroup[], labelOf: (group: UnitRaceGroup) => string = (g) => g.label): UnitRaceChip[] {
-  return groups.map((g) => ({ key: g.key, label: labelOf(g), color: g.race?.color ?? null, count: g.total }));
+export function raceChips(
+    groups: UnitRaceGroup[],
+    labelOf: (group: UnitRaceGroup) => string = (g) => g.label
+): UnitRaceChip[] {
+    return groups.map((g) => ({
+        key: g.key,
+        label: labelOf(g),
+        color: g.race?.color ?? null,
+        count: g.total,
+    }));
 }
 
-export function groupUnitsByRaceName<U extends { raceName: string | null; level: number }>(units: U[]): Map<string, U[]> {
-  const byRace = groupBy(units, (unit) => unit.raceName?.trim() || UNGROUPED_KEY);
+export function groupUnitsByRaceName<
+    U extends { raceName: string | null; level: number },
+>(units: U[]): Map<string, U[]> {
+    const byRace = groupBy(
+        units,
+        (unit) => unit.raceName?.trim() || UNGROUPED_KEY
+    );
 
-  for (const list of byRace.values()) list.sort((a, b) => a.level - b.level);
+    for (const list of byRace.values()) list.sort((a, b) => a.level - b.level);
 
-  return byRace;
+    return byRace;
 }

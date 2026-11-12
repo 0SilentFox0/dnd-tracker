@@ -1,1 +1,1 @@
-export { ScenarioGraph } from "./ScenarioGraph";
+export { ScenarioGraph } from './ScenarioGraph';

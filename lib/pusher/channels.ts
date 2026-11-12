@@ -9,36 +9,39 @@
  */
 
 export const battleChannelName = (battleId: string): string =>
-  `private-battle-${battleId}`;
+    `private-battle-${battleId}`;
 
 export const userChannelName = (userId: string): string =>
-  `private-user-${userId}`;
+    `private-user-${userId}`;
 
-export const BATTLE_CHANNEL_PREFIX = "private-battle-";
-export const BATTLE_DM_CHANNEL_PREFIX = "private-battle-dm-";
+export const BATTLE_CHANNEL_PREFIX = 'private-battle-';
+export const BATTLE_DM_CHANNEL_PREFIX = 'private-battle-dm-';
 
 /** Повна дельта лише для ДМ: публічний канал несе журнал, відредагований для гравців. */
-export const battleDmChannelName = (battleId: string): string => `${BATTLE_DM_CHANNEL_PREFIX}${battleId}`;
-export const USER_CHANNEL_PREFIX = "private-user-";
+export const battleDmChannelName = (battleId: string): string =>
+    `${BATTLE_DM_CHANNEL_PREFIX}${battleId}`;
+export const USER_CHANNEL_PREFIX = 'private-user-';
 
-export const NOTIFY_CHANNEL_PREFIX = "private-notify-";
+export const NOTIFY_CHANNEL_PREFIX = 'private-notify-';
 
 /** Окремо від `private-user-*`: бій відписується від нього при unmount. */
-export const notifyChannelName = (userId: string): string => `${NOTIFY_CHANNEL_PREFIX}${userId}`;
+export const notifyChannelName = (userId: string): string =>
+    `${NOTIFY_CHANNEL_PREFIX}${userId}`;
 
-export const NOTIFICATIONS_CHANGED_EVENT = "notifications-changed";
+export const NOTIFICATIONS_CHANGED_EVENT = 'notifications-changed';
 
-export const PUSHER_AUTH_ENDPOINT = "/api/pusher/auth";
+export const PUSHER_AUTH_ENDPOINT = '/api/pusher/auth';
 
 /** Окремо від battle-delta: музика не підвищує версію бою. */
-export const BATTLE_AUDIO_EVENT = "battle-audio";
+export const BATTLE_AUDIO_EVENT = 'battle-audio';
 
-export const SHOW_CHANNEL_PREFIX = "private-show-";
+export const SHOW_CHANNEL_PREFIX = 'private-show-';
 
-export const showChannelName = (campaignId: string): string => `${SHOW_CHANNEL_PREFIX}${campaignId}`;
+export const showChannelName = (campaignId: string): string =>
+    `${SHOW_CHANNEL_PREFIX}${campaignId}`;
 
 /** Повний стан показу: він малий, дельти не потрібні. */
-export const SHOW_STATE_EVENT = "show-state";
+export const SHOW_STATE_EVENT = 'show-state';
 
 /** Лише сигнал «світ змінився»: дані клієнт дочитує власним відфільтрованим view. */
-export const WORLD_CHANGED_EVENT = "world-changed";
+export const WORLD_CHANGED_EVENT = 'world-changed';

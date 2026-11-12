@@ -3,10 +3,10 @@
  * pooler (6543) може довго «висіти» на handshake. Generate виконується в buildCommand
  * з placeholder URL (див. vercel.json).
  */
-import { execSync } from "node:child_process";
+import { execSync } from 'node:child_process';
 
 if (process.env.VERCEL) {
-  process.exit(0);
+    process.exit(0);
 }
 
-execSync("prisma generate", { stdio: "inherit" });
+execSync('prisma generate', { stdio: 'inherit' });

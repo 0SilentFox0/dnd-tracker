@@ -1,1 +1,1 @@
-export { POST } from "@/lib/server/characters/operations/experience";
+export { POST } from '@/lib/server/characters/operations/experience';

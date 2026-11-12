@@ -1,80 +1,209 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
-import { deckSceneSchema, readSlides, saveDeckSchema, showCommandSchema, slideUploadRequestSchema } from "@/lib/schemas/show";
+import {
+    deckSceneSchema,
+    readSlides,
+    saveDeckSchema,
+    showCommandSchema,
+    slideUploadRequestSchema,
+} from '@/lib/schemas/show';
 
-const slide = (id: string, extra: Record<string, unknown> = {}) => ({ id, imageUrl: "https://x.supabase.co/storage/v1/object/public/scene-slides/c1/a.webp", ...extra });
-
-const T = "2026-01-01T00:00:00.000Z";
-
-describe("show schemas", () => {
-  it("набір: порожні заголовок/підпис стають undefined, пробіли обрізаються", () => {
-    const parsed = saveDeckSchema.parse({ expectedUpdatedAt: T, title: "  Таверна ", slides: [slide("slide-0001", { title: "  ", caption: " Минуло три дні " })] });
-
-    expect(parsed).toEqual({ expectedUpdatedAt: T, title: "Таверна", slides: [{ id: "slide-0001", imageUrl: slide("x").imageUrl, title: undefined, caption: "Минуло три дні" }] });
-  });
-
-  it("набір: дублікати id, 101 слайд, підпис 201 символ, не-http посилання — відхиляються", () => {
-    expect(saveDeckSchema.safeParse({ expectedUpdatedAt: T, title: "a", slides: [slide("slide-0001"), slide("slide-0001")] }).success).toBe(false);
-    expect(saveDeckSchema.safeParse({ expectedUpdatedAt: T, title: "a", slides: Array.from({ length: 101 }, (_, i) => slide(`slide-${1000 + i}`)) }).success).toBe(false);
-    expect(saveDeckSchema.safeParse({ expectedUpdatedAt: T, title: "a", slides: [slide("slide-0001", { caption: "x".repeat(201) })] }).success).toBe(false);
-    expect(saveDeckSchema.safeParse({ expectedUpdatedAt: T, title: "a", slides: [{ id: "slide-0001", imageUrl: "javascript:alert(1)" }] }).success).toBe(false);
-    expect(saveDeckSchema.safeParse({ expectedUpdatedAt: T, title: " ", slides: [] }).success).toBe(false);
-    expect(saveDeckSchema.safeParse({ title: "a", slides: [] }).success).toBe(false);
-  });
-
-  it("квиток: лише webp/jpeg до 8 МБ", () => {
-    expect(slideUploadRequestSchema.safeParse({ size: 1000, contentType: "image/webp" }).success).toBe(true);
-    expect(slideUploadRequestSchema.safeParse({ size: 1000, contentType: "image/svg+xml" }).success).toBe(false);
-    expect(slideUploadRequestSchema.safeParse({ size: 9 * 1024 * 1024, contentType: "image/jpeg" }).success).toBe(false);
-  });
-
-  it("команди показу", () => {
-    expect(showCommandSchema.parse({ action: "open", deckId: "d1" })).toEqual({ action: "open", deckId: "d1" });
-    expect(showCommandSchema.parse({ action: "audio", command: { action: "play", trackId: "t1" } })).toEqual({ action: "audio", command: { action: "play", trackId: "t1" } });
-    expect(showCommandSchema.safeParse({ action: "audio", command: { action: "seek" } }).success).toBe(false);
-    expect(showCommandSchema.safeParse({ action: "jump" }).success).toBe(false);
-  });
-
-  it("readSlides: битий JSON з БД — порожній масив", () => {
-    expect(readSlides([slide("slide-0001")])).toHaveLength(1);
-    expect(readSlides({ nope: true })).toEqual([]);
-    expect(readSlides(null)).toEqual([]);
-  });
+const slide = (id: string, extra: Record<string, unknown> = {}) => ({
+    id,
+    imageUrl:
+        'https://x.supabase.co/storage/v1/object/public/scene-slides/c1/a.webp',
+    ...extra,
 });
 
-describe("showCommandSchema battle / deckSceneSchema", () => {
-  it("команда battle з battleId", () => {
-    expect(showCommandSchema.parse({ action: "battle", battleId: "b1" })).toEqual({ action: "battle", battleId: "b1" });
-    expect(showCommandSchema.safeParse({ action: "battle" }).success).toBe(false);
-  });
+const T = '2026-01-01T00:00:00.000Z';
 
-  it("сцена набору — id або null", () => {
-    expect(deckSceneSchema.parse({ scenarioPageId: null })).toEqual({ scenarioPageId: null });
-    expect(deckSceneSchema.parse({ scenarioPageId: "p1" })).toEqual({ scenarioPageId: "p1" });
-    expect(deckSceneSchema.safeParse({ scenarioPageId: "" }).success).toBe(false);
-  });
+describe('show schemas', () => {
+    it('набір: порожні заголовок/підпис стають undefined, пробіли обрізаються', () => {
+        const parsed = saveDeckSchema.parse({
+            expectedUpdatedAt: T,
+            title: '  Таверна ',
+            slides: [
+                slide('slide-0001', {
+                    title: '  ',
+                    caption: ' Минуло три дні ',
+                }),
+            ],
+        });
+
+        expect(parsed).toEqual({
+            expectedUpdatedAt: T,
+            title: 'Таверна',
+            slides: [
+                {
+                    id: 'slide-0001',
+                    imageUrl: slide('x').imageUrl,
+                    title: undefined,
+                    caption: 'Минуло три дні',
+                },
+            ],
+        });
+    });
+
+    it('набір: дублікати id, 101 слайд, підпис 201 символ, не-http посилання — відхиляються', () => {
+        expect(
+            saveDeckSchema.safeParse({
+                expectedUpdatedAt: T,
+                title: 'a',
+                slides: [slide('slide-0001'), slide('slide-0001')],
+            }).success
+        ).toBe(false);
+        expect(
+            saveDeckSchema.safeParse({
+                expectedUpdatedAt: T,
+                title: 'a',
+                slides: Array.from({ length: 101 }, (_, i) =>
+                    slide(`slide-${1000 + i}`)
+                ),
+            }).success
+        ).toBe(false);
+        expect(
+            saveDeckSchema.safeParse({
+                expectedUpdatedAt: T,
+                title: 'a',
+                slides: [slide('slide-0001', { caption: 'x'.repeat(201) })],
+            }).success
+        ).toBe(false);
+        expect(
+            saveDeckSchema.safeParse({
+                expectedUpdatedAt: T,
+                title: 'a',
+                slides: [{ id: 'slide-0001', imageUrl: 'javascript:alert(1)' }],
+            }).success
+        ).toBe(false);
+        expect(
+            saveDeckSchema.safeParse({
+                expectedUpdatedAt: T,
+                title: ' ',
+                slides: [],
+            }).success
+        ).toBe(false);
+        expect(
+            saveDeckSchema.safeParse({ title: 'a', slides: [] }).success
+        ).toBe(false);
+    });
+
+    it('квиток: лише webp/jpeg до 8 МБ', () => {
+        expect(
+            slideUploadRequestSchema.safeParse({
+                size: 1000,
+                contentType: 'image/webp',
+            }).success
+        ).toBe(true);
+        expect(
+            slideUploadRequestSchema.safeParse({
+                size: 1000,
+                contentType: 'image/svg+xml',
+            }).success
+        ).toBe(false);
+        expect(
+            slideUploadRequestSchema.safeParse({
+                size: 9 * 1024 * 1024,
+                contentType: 'image/jpeg',
+            }).success
+        ).toBe(false);
+    });
+
+    it('команди показу', () => {
+        expect(
+            showCommandSchema.parse({ action: 'open', deckId: 'd1' })
+        ).toEqual({ action: 'open', deckId: 'd1' });
+        expect(
+            showCommandSchema.parse({
+                action: 'audio',
+                command: { action: 'play', trackId: 't1' },
+            })
+        ).toEqual({
+            action: 'audio',
+            command: { action: 'play', trackId: 't1' },
+        });
+        expect(
+            showCommandSchema.safeParse({
+                action: 'audio',
+                command: { action: 'seek' },
+            }).success
+        ).toBe(false);
+        expect(showCommandSchema.safeParse({ action: 'jump' }).success).toBe(
+            false
+        );
+    });
+
+    it('readSlides: битий JSON з БД — порожній масив', () => {
+        expect(readSlides([slide('slide-0001')])).toHaveLength(1);
+        expect(readSlides({ nope: true })).toEqual([]);
+        expect(readSlides(null)).toEqual([]);
+    });
 });
 
-describe("слайд-пазл", () => {
-  const puzzle = { cut: "classic", count: 24, seed: 5, imageWidth: 1600, imageHeight: 900 };
+describe('showCommandSchema battle / deckSceneSchema', () => {
+    it('команда battle з battleId', () => {
+        expect(
+            showCommandSchema.parse({ action: 'battle', battleId: 'b1' })
+        ).toEqual({ action: 'battle', battleId: 'b1' });
+        expect(showCommandSchema.safeParse({ action: 'battle' }).success).toBe(
+            false
+        );
+    });
 
-  it("readSlides зберігає kind і puzzle", () => {
-    const slides = readSlides([slide("slide-0001", { kind: "puzzle", puzzle })]);
-
-    expect(slides[0]).toMatchObject({ kind: "puzzle", puzzle });
-  });
-
-  it("відхиляє kind без puzzle, puzzle без kind, count і розміри поза межами", () => {
-    const parse = (extra: Record<string, unknown>) => saveDeckSchema.safeParse({ expectedUpdatedAt: T, title: "a", slides: [slide("slide-0001", extra)] }).success;
-
-    expect(parse({ kind: "puzzle", puzzle })).toBe(true);
-    expect(parse({ kind: "puzzle" })).toBe(false);
-    expect(parse({ puzzle })).toBe(false);
-    expect(parse({ kind: "puzzle", puzzle: { ...puzzle, count: 3 } })).toBe(false);
-    expect(parse({ kind: "puzzle", puzzle: { ...puzzle, count: 101 } })).toBe(false);
-    expect(parse({ kind: "puzzle", puzzle: { ...puzzle, cut: "zigzag" } })).toBe(false);
-    expect(parse({ kind: "puzzle", puzzle: { ...puzzle, imageWidth: 9000 } })).toBe(false);
-    expect(parse({ kind: "puzzle", puzzle: { ...puzzle, seed: -1 } })).toBe(false);
-  });
+    it('сцена набору — id або null', () => {
+        expect(deckSceneSchema.parse({ scenarioPageId: null })).toEqual({
+            scenarioPageId: null,
+        });
+        expect(deckSceneSchema.parse({ scenarioPageId: 'p1' })).toEqual({
+            scenarioPageId: 'p1',
+        });
+        expect(deckSceneSchema.safeParse({ scenarioPageId: '' }).success).toBe(
+            false
+        );
+    });
 });
 
+describe('слайд-пазл', () => {
+    const puzzle = {
+        cut: 'classic',
+        count: 24,
+        seed: 5,
+        imageWidth: 1600,
+        imageHeight: 900,
+    };
+
+    it('readSlides зберігає kind і puzzle', () => {
+        const slides = readSlides([
+            slide('slide-0001', { kind: 'puzzle', puzzle }),
+        ]);
+
+        expect(slides[0]).toMatchObject({ kind: 'puzzle', puzzle });
+    });
+
+    it('відхиляє kind без puzzle, puzzle без kind, count і розміри поза межами', () => {
+        const parse = (extra: Record<string, unknown>) =>
+            saveDeckSchema.safeParse({
+                expectedUpdatedAt: T,
+                title: 'a',
+                slides: [slide('slide-0001', extra)],
+            }).success;
+
+        expect(parse({ kind: 'puzzle', puzzle })).toBe(true);
+        expect(parse({ kind: 'puzzle' })).toBe(false);
+        expect(parse({ puzzle })).toBe(false);
+        expect(parse({ kind: 'puzzle', puzzle: { ...puzzle, count: 3 } })).toBe(
+            false
+        );
+        expect(
+            parse({ kind: 'puzzle', puzzle: { ...puzzle, count: 101 } })
+        ).toBe(false);
+        expect(
+            parse({ kind: 'puzzle', puzzle: { ...puzzle, cut: 'zigzag' } })
+        ).toBe(false);
+        expect(
+            parse({ kind: 'puzzle', puzzle: { ...puzzle, imageWidth: 9000 } })
+        ).toBe(false);
+        expect(parse({ kind: 'puzzle', puzzle: { ...puzzle, seed: -1 } })).toBe(
+            false
+        );
+    });
+});

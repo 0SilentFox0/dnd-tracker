@@ -1,34 +1,34 @@
-import { notFound } from "next/navigation";
+import { notFound } from 'next/navigation';
 
-import { MainSkillEditForm } from "@/components/main-skills/MainSkillEditForm";
-import { prisma } from "@/lib/db";
-import { requireCampaignDM } from "@/lib/server/campaigns/access";
+import { MainSkillEditForm } from '@/components/main-skills/MainSkillEditForm';
+import { prisma } from '@/lib/db';
+import { requireCampaignDM } from '@/lib/server/campaigns/access';
 
 export default async function EditMainSkillPage({
-  params,
+    params,
 }: {
-  params: Promise<{ id: string; mainSkillId: string }>;
+    params: Promise<{ id: string; mainSkillId: string }>;
 }) {
-  const { id, mainSkillId } = await params;
+    const { id, mainSkillId } = await params;
 
-  await requireCampaignDM(id);
+    await requireCampaignDM(id);
 
-  const mainSkill = await prisma.mainSkill.findFirst({
-    where: { id: mainSkillId, campaignId: id },
-  });
+    const mainSkill = await prisma.mainSkill.findFirst({
+        where: { id: mainSkillId, campaignId: id },
+    });
 
-  if (!mainSkill) {
-    notFound();
-  }
+    if (!mainSkill) {
+        notFound();
+    }
 
-  return (
-    <MainSkillEditForm
-      campaignId={id}
-      mainSkill={{
-        ...mainSkill,
-        createdAt: mainSkill.createdAt.toISOString(),
-        updatedAt: mainSkill.updatedAt.toISOString(),
-      }}
-    />
-  );
+    return (
+        <MainSkillEditForm
+            campaignId={id}
+            mainSkill={{
+                ...mainSkill,
+                createdAt: mainSkill.createdAt.toISOString(),
+                updatedAt: mainSkill.updatedAt.toISOString(),
+            }}
+        />
+    );
 }

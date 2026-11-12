@@ -1,52 +1,83 @@
-import { API_ERRORS } from "@/lib/constants/api-errors";
-import { coreActionsOn } from "@/lib/utils/battle/actions/access";
-import { runCoreAction } from "@/lib/utils/battle/actions/dispatch";
-import type { CoreActionBody } from "@/lib/utils/battle/actions/schema";
-import { currentOf, requireActor } from "@/lib/utils/battle/common/control";
-import { lineText } from "@/lib/utils/battle/log/lines";
-import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
-import { sceneStatePatch } from "@/lib/utils/battle/scene-state";
-import { battleActionToEvent, BattleRuleError, systemEvent } from "@/lib/utils/battle/store";
-import { REJECT } from "@/lib/utils/battle/store/reject";
-import { assertCanAct } from "@/lib/utils/battle/turn";
-import { rngOf } from "@/lib/utils/common/rng";
+import { API_ERRORS } from '@/lib/constants/api-errors';
+import { coreActionsOn } from '@/lib/utils/battle/actions/access';
+import { runCoreAction } from '@/lib/utils/battle/actions/dispatch';
+import type { CoreActionBody } from '@/lib/utils/battle/actions/schema';
+import { currentOf, requireActor } from '@/lib/utils/battle/common/control';
+import { lineText } from '@/lib/utils/battle/log/lines';
+import type {
+    BattleMutationContext,
+    MutationResult,
+} from '@/lib/utils/battle/pipeline/run-battle-mutation';
+import { sceneStatePatch } from '@/lib/utils/battle/scene-state';
+import {
+    battleActionToEvent,
+    BattleRuleError,
+    systemEvent,
+} from '@/lib/utils/battle/store';
+import { REJECT } from '@/lib/utils/battle/store/reject';
+import { assertCanAct } from '@/lib/utils/battle/turn';
+import { rngOf } from '@/lib/utils/common/rng';
 
 function guard(ctx: BattleMutationContext, body: CoreActionBody): void {
-  const offTurn = body.action === "readiedAttack";
+    const offTurn = body.action === 'readiedAttack';
 
-  const actor = requireActor(ctx, body.participantId, {
-    missing: API_ERRORS.BATTLE_PARTICIPANT_NOT_IN_BATTLE,
-    forbidden: offTurn ? REJECT.actForbiddenOwner : REJECT.attackForbidden,
-    inactive: { code: "action_rejected", message: REJECT.participantInactive },
-    anyTurn: offTurn,
-  });
+    const actor = requireActor(ctx, body.participantId, {
+        missing: API_ERRORS.BATTLE_PARTICIPANT_NOT_IN_BATTLE,
+        forbidden: offTurn ? REJECT.actForbiddenOwner : REJECT.attackForbidden,
+        inactive: {
+            code: 'action_rejected',
+            message: REJECT.participantInactive,
+        },
+        anyTurn: offTurn,
+    });
 
-  if (offTurn) return;
+    if (offTurn) return;
 
-  if (currentOf(ctx)?.basicInfo.id !== actor.basicInfo.id) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_NOT_PARTICIPANT_TURN);
+    if (currentOf(ctx)?.basicInfo.id !== actor.basicInfo.id)
+        throw new BattleRuleError(
+            'action_rejected',
+            API_ERRORS.BATTLE_NOT_PARTICIPANT_TURN
+        );
 
-  assertCanAct(ctx, actor.basicInfo.id);
+    assertCanAct(ctx, actor.basicInfo.id);
 }
 
-export function coreActionMutation(ctx: BattleMutationContext, body: CoreActionBody): MutationResult {
-  if (!coreActionsOn(ctx.meta.rules)) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_CORE_ACTIONS_DISABLED);
+export function coreActionMutation(
+    ctx: BattleMutationContext,
+    body: CoreActionBody
+): MutationResult {
+    if (!coreActionsOn(ctx.meta.rules))
+        throw new BattleRuleError(
+            'action_rejected',
+            API_ERRORS.BATTLE_CORE_ACTIONS_DISABLED
+        );
 
-  guard(ctx, body);
+    guard(ctx, body);
 
-  const out = runCoreAction({
-    participants: ctx.participants,
-    body,
-    map: ctx.meta.map,
-    rules: ctx.meta.rules,
-    round: ctx.scene.round,
-    rng: rngOf(ctx),
-    battleId: ctx.scene.id,
-    sceneState: ctx.scene.sceneState,
-  });
+    const out = runCoreAction({
+        participants: ctx.participants,
+        body,
+        map: ctx.meta.map,
+        rules: ctx.meta.rules,
+        round: ctx.scene.round,
+        rng: rngOf(ctx),
+        battleId: ctx.scene.id,
+        sceneState: ctx.scene.sceneState,
+    });
 
-  const events = [...(out.messages.length ? [systemEvent(ctx.scene.round, lineText(out.messages, "; "))] : []), ...(out.actions ?? []).map(battleActionToEvent)];
+    const events = [
+        ...(out.messages.length
+            ? [systemEvent(ctx.scene.round, lineText(out.messages, '; '))]
+            : []),
+        ...(out.actions ?? []).map(battleActionToEvent),
+    ];
 
-  const patch = sceneStatePatch(ctx.scene.sceneState, out.sceneState);
+    const patch = sceneStatePatch(ctx.scene.sceneState, out.sceneState);
 
-  return { participants: out.participants, pending: ctx.pending, events, ...(Object.keys(patch).length > 0 && { scene: patch }) };
+    return {
+        participants: out.participants,
+        pending: ctx.pending,
+        events,
+        ...(Object.keys(patch).length > 0 && { scene: patch }),
+    };
 }

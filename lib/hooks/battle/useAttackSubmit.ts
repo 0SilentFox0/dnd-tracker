@@ -1,103 +1,142 @@
-"use client";
+'use client';
 
-import { type Dispatch, useEffect, useEffectEvent } from "react";
+import { type Dispatch, useEffect, useEffectEvent } from 'react';
 
-import { useBattleScene } from "./useBattleScene";
-import { useCritPause } from "./useCritPause";
+import { useBattleScene } from './useBattleScene';
+import { useCritPause } from './useCritPause';
 
-import { textRef } from "@/lib/i18n/text-ref";
-import { type AttackFlowAction, type AttackFlowState, attackPayload, effectiveD20, strikeMode } from "@/lib/utils/battle/flows";
-import { attackResultsOf, buildAttackResultFx, canSeeExactStats } from "@/lib/utils/battle/view";
-import type { BattleAttack, BattleParticipant } from "@/types/battle";
+import { textRef } from '@/lib/i18n/text-ref';
+import {
+    type AttackFlowAction,
+    type AttackFlowState,
+    attackPayload,
+    effectiveD20,
+    strikeMode,
+} from '@/lib/utils/battle/flows';
+import {
+    attackResultsOf,
+    buildAttackResultFx,
+    canSeeExactStats,
+} from '@/lib/utils/battle/view';
+import type { BattleAttack, BattleParticipant } from '@/types/battle';
 
-const FAIL_TEXT = textRef("battleWizards.attack.failed");
+const FAIL_TEXT = textRef('battleWizards.attack.failed');
 
 interface AttackSubmitInput {
-  attacker: BattleParticipant | null;
-  attack: BattleAttack | null;
-  flow: { state: AttackFlowState; dispatch: Dispatch<AttackFlowAction> };
-  onDone?: () => void;
+    attacker: BattleParticipant | null;
+    attack: BattleAttack | null;
+    flow: { state: AttackFlowState; dispatch: Dispatch<AttackFlowAction> };
+    onDone?: () => void;
 }
 
 /** Надсилає атаку, чекає на вибір крита від ДМ і показує підсумок. */
-export function useAttackSubmit({ attacker, attack, flow: { state, dispatch }, onDone }: AttackSubmitInput) {
-  const scene = useBattleScene();
+export function useAttackSubmit({
+    attacker,
+    attack,
+    flow: { state, dispatch },
+    onDone,
+}: AttackSubmitInput) {
+    const scene = useBattleScene();
 
-  const order = scene.battle.initiativeOrder;
+    const order = scene.battle.initiativeOrder;
 
-  const finish = (attackerId: string, seen: Set<number>) => {
-    const current = scene.readBattle();
+    const finish = (attackerId: string, seen: Set<number>) => {
+        const current = scene.readBattle();
 
-    const log = current?.battleLog ?? [];
+        const log = current?.battleLog ?? [];
 
-    const results = attackResultsOf(log, seen, attackerId, current?.initiativeOrder ?? order, state.strikes);
+        const results = attackResultsOf(
+            log,
+            seen,
+            attackerId,
+            current?.initiativeOrder ?? order,
+            state.strikes
+        );
 
-    dispatch({ type: "SUCCESS", results });
+        dispatch({ type: 'SUCCESS', results });
 
-    const strike = state.strikes[0];
+        const strike = state.strikes[0];
 
-    scene.result.show(
-      buildAttackResultFx({
-        results,
-        log,
-        seen,
-        attackerId,
-        d20: effectiveD20(strike, strikeMode(state, strike)),
-        weapon: attack?.name,
-        nameOf: (id) => order.find((p) => p.basicInfo.id === id)?.basicInfo.name ?? "",
-        exactOf: (id) => {
-          const target = (current?.initiativeOrder ?? order).find((p) => p.basicInfo.id === id);
+        scene.result.show(
+            buildAttackResultFx({
+                results,
+                log,
+                seen,
+                attackerId,
+                d20: effectiveD20(strike, strikeMode(state, strike)),
+                weapon: attack?.name,
+                nameOf: (id) =>
+                    order.find((p) => p.basicInfo.id === id)?.basicInfo.name ??
+                    '',
+                exactOf: (id) => {
+                    const target = (current?.initiativeOrder ?? order).find(
+                        (p) => p.basicInfo.id === id
+                    );
 
-          return !!target && canSeeExactStats(target, scene.viewer);
-        },
-        knowledge: current?.knowledge,
-      }),
-    );
+                    return !!target && canSeeExactStats(target, scene.viewer);
+                },
+                knowledge: current?.knowledge,
+            })
+        );
 
-    onDone?.();
-  };
+        onDone?.();
+    };
 
-  const settle = (attackerId: string, seen: Set<number>) => {
-    try {
-      finish(attackerId, seen);
-    } catch (e) {
-      dispatch({ type: "FAIL", error: e instanceof Error ? e.message : FAIL_TEXT });
-    }
-  };
+    const settle = (attackerId: string, seen: Set<number>) => {
+        try {
+            finish(attackerId, seen);
+        } catch (e) {
+            dispatch({
+                type: 'FAIL',
+                error: e instanceof Error ? e.message : FAIL_TEXT,
+            });
+        }
+    };
 
-  const pauseCrit = useCritPause({
-    waiting: state.waitingCrit,
-    actorId: attacker?.basicInfo.id,
-    onResolved: (seen) => attacker && settle(attacker.basicInfo.id, seen),
-    onCancelled: () => dispatch({ type: "FAIL", error: textRef("battleWizards.critCancelled") }),
-  });
+    const pauseCrit = useCritPause({
+        waiting: state.waitingCrit,
+        actorId: attacker?.basicInfo.id,
+        onResolved: (seen) => attacker && settle(attacker.basicInfo.id, seen),
+        onCancelled: () =>
+            dispatch({
+                type: 'FAIL',
+                error: textRef('battleWizards.critCancelled'),
+            }),
+    });
 
-  const send = useEffectEvent(async () => {
-    if (!attacker) return;
+    const send = useEffectEvent(async () => {
+        if (!attacker) return;
 
-    const seen = new Set((scene.battle.battleLog ?? []).map((e) => e.actionIndex));
+        const seen = new Set(
+            (scene.battle.battleLog ?? []).map((e) => e.actionIndex)
+        );
 
-    let res: Awaited<ReturnType<typeof scene.actions.attack.mutateAsync>>;
+        let res: Awaited<ReturnType<typeof scene.actions.attack.mutateAsync>>;
 
-    try {
-      res = await scene.actions.attack.mutateAsync(attackPayload(state, attacker.basicInfo.id));
-    } catch (e) {
-      dispatch({ type: "FAIL", error: e instanceof Error ? e.message : FAIL_TEXT });
+        try {
+            res = await scene.actions.attack.mutateAsync(
+                attackPayload(state, attacker.basicInfo.id)
+            );
+        } catch (e) {
+            dispatch({
+                type: 'FAIL',
+                error: e instanceof Error ? e.message : FAIL_TEXT,
+            });
 
-      return;
-    }
+            return;
+        }
 
-    if (res?.pendingChoice) {
-      pauseCrit(seen);
-      dispatch({ type: "WAIT_CRIT" });
+        if (res?.pendingChoice) {
+            pauseCrit(seen);
+            dispatch({ type: 'WAIT_CRIT' });
 
-      return;
-    }
+            return;
+        }
 
-    settle(attacker.basicInfo.id, seen);
-  });
+        settle(attacker.basicInfo.id, seen);
+    });
 
-  useEffect(() => {
-    if (state.step === "submitting") void send();
-  }, [state.step]);
+    useEffect(() => {
+        if (state.step === 'submitting') void send();
+    }, [state.step]);
 }

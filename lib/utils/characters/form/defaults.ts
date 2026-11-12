@@ -1,53 +1,53 @@
-import { CharacterType, HERO_INITIATIVE } from "@/lib/constants/characters";
-import type { CharacterFormData } from "@/types/characters";
+import { CharacterType, HERO_INITIATIVE } from '@/lib/constants/characters';
+import type { CharacterFormData } from '@/types/characters';
 
 export const defaultCharacterFormData: CharacterFormData = {
-  basicInfo: {
-    name: "",
-    type: CharacterType.PLAYER,
-    controlledBy: "",
-    level: 1,
-    class: "",
-    subclass: "",
-    archetype: "",
-    race: "",
-    subrace: "",
-    alignment: "",
-    background: "",
-    avatar: "",
-  },
-  abilityScores: {
-    strength: 10,
-    dexterity: 10,
-    constitution: 10,
-    intelligence: 10,
-    wisdom: 10,
-    charisma: 10,
-    primaryAbility: null,
-  },
-  combatStats: {
-    armorClass: 10,
-    initiative: HERO_INITIATIVE.DEFAULT,
-    speed: 30,
-    minTargets: 1,
-    maxTargets: 1,
-    morale: 0,
-  },
-  skills: {
-    savingThrows: {},
-    skills: {},
-  },
-  spellcasting: {
-    spellcastingAbility: undefined,
-    spellSlots: {},
-    knownSpells: [],
-  },
-  roleplay: {
-    languages: [],
-    proficiencies: {},
-    immunities: [],
-  },
-  abilities: {
-    personalSkillId: "",
-  },
+    basicInfo: {
+        name: '',
+        type: CharacterType.PLAYER,
+        controlledBy: '',
+        level: 1,
+        class: '',
+        subclass: '',
+        archetype: '',
+        race: '',
+        subrace: '',
+        alignment: '',
+        background: '',
+        avatar: '',
+    },
+    abilityScores: {
+        strength: 10,
+        dexterity: 10,
+        constitution: 10,
+        intelligence: 10,
+        wisdom: 10,
+        charisma: 10,
+        primaryAbility: null,
+    },
+    combatStats: {
+        armorClass: 10,
+        initiative: HERO_INITIATIVE.DEFAULT,
+        speed: 30,
+        minTargets: 1,
+        maxTargets: 1,
+        morale: 0,
+    },
+    skills: {
+        savingThrows: {},
+        skills: {},
+    },
+    spellcasting: {
+        spellcastingAbility: undefined,
+        spellSlots: {},
+        knownSpells: [],
+    },
+    roleplay: {
+        languages: [],
+        proficiencies: {},
+        immunities: [],
+    },
+    abilities: {
+        personalSkillId: '',
+    },
 };

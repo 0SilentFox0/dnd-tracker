@@ -1,36 +1,36 @@
-import type { CritKind, CritSource } from "./catalog";
+import type { CritKind, CritSource } from './catalog';
 
-import type { CriticalEffect } from "@/lib/constants/critical-effects";
+import type { CriticalEffect } from '@/lib/constants/critical-effects';
 
 export interface CritTriggerInfo {
-  source: CritSource;
-  kind: CritKind;
-  actorId: string;
-  targetId: string;
+    source: CritSource;
+    kind: CritKind;
+    actorId: string;
+    targetId: string;
 }
 
 export interface CritTrigger extends CritTriggerInfo {
-  key: string;
+    key: string;
 }
 
 export type CritPicker = (info: CritTriggerInfo) => CriticalEffect | undefined;
 
 export interface PendingCritChoice {
-  action: "attack" | "spell";
-  actorId: string;
-  triggers: CritTrigger[];
+    action: 'attack' | 'spell';
+    actorId: string;
+    triggers: CritTrigger[];
 }
 
 export interface CritPendingHidden {
-  request: unknown;
-  seed: number;
-  serverRolls?: boolean;
-  userId: string;
-  isDM: boolean;
+    request: unknown;
+    seed: number;
+    serverRolls?: boolean;
+    userId: string;
+    isDM: boolean;
 }
 
 export interface CritResume {
-  seed: number;
-  /** key тригера → id ефекту */
-  choices: Record<string, number>;
+    seed: number;
+    /** key тригера → id ефекту */
+    choices: Record<string, number>;
 }

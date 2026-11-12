@@ -1,20 +1,33 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
-import { textOf } from "@/lib/i18n/test/text";
-import { goblin, hero } from "@/lib/server/battles/__tests__/mutations/fixtures";
-import { ukT } from "@/lib/utils/abilities/__tests__/describe-fixtures";
-import { effectName } from "@/lib/utils/battle/common/terms";
-import { displayEffects, effectSummary } from "@/lib/utils/battle/view";
-import { DEFAULT_RULES } from "@/lib/utils/rules";
-import { applyCondition5e } from "@/systems/d20/rules/conditions/apply";
+import { textOf } from '@/lib/i18n/test/text';
+import {
+    goblin,
+    hero,
+} from '@/lib/server/battles/__tests__/mutations/fixtures';
+import { ukT } from '@/lib/utils/abilities/__tests__/describe-fixtures';
+import { effectName } from '@/lib/utils/battle/common/terms';
+import { displayEffects, effectSummary } from '@/lib/utils/battle/view';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { applyCondition5e } from '@/systems/d20/rules/conditions/apply';
 
-describe("показ станів 5e", () => {
-  it("стан з назвою й тривалістю видно в списку ефектів, у т.ч. ворога", async () => {
-    const ps = applyCondition5e([hero, goblin], "gob", { key: "prone", rounds: 3, source: undefined, sourceName: "ДМ", timedKey: "t", round: 1, rules: DEFAULT_RULES }).participants;
+describe('показ станів 5e', () => {
+    it('стан з назвою й тривалістю видно в списку ефектів, у т.ч. ворога', async () => {
+        const ps = applyCondition5e([hero, goblin], 'gob', {
+            key: 'prone',
+            rounds: 3,
+            source: undefined,
+            sourceName: 'ДМ',
+            timedKey: 't',
+            round: 1,
+            rules: DEFAULT_RULES,
+        }).participants;
 
-    const shown = displayEffects(ps[1], ps);
+        const shown = displayEffects(ps[1], ps);
 
-    expect(shown.map((e) => textOf(effectName(e)))).toEqual(["Повалений"]);
-    expect(effectSummary(shown[0], await ukT()).map((l) => textOf(l))).toContain("ще 3 раунди");
-  });
+        expect(shown.map((e) => textOf(effectName(e)))).toEqual(['Повалений']);
+        expect(
+            effectSummary(shown[0], await ukT()).map((l) => textOf(l))
+        ).toContain('ще 3 раунди');
+    });
 });

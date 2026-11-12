@@ -1,66 +1,83 @@
-"use client";
+'use client';
 
-import { useEffect, useRef } from "react";
-import { useTranslations } from "next-intl";
+import { useEffect, useRef } from 'react';
+import { useTranslations } from 'next-intl';
 
-import type { AbilitySectionProps } from "../AbilityPanel";
-import { useAbilityEditor } from "../editor-context";
-import { EffectCard } from "../EffectCard";
-import { FieldErrors } from "../FieldErrors";
-import { NestedEffectsEditor } from "../NestedEffectsEditor";
-import { sectionId,SectionShell } from "./SectionShell";
+import type { AbilitySectionProps } from '../AbilityPanel';
+import { useAbilityEditor } from '../editor-context';
+import { EffectCard } from '../EffectCard';
+import { FieldErrors } from '../FieldErrors';
+import { NestedEffectsEditor } from '../NestedEffectsEditor';
+import { sectionId, SectionShell } from './SectionShell';
 
-import { useAbilityComposition } from "@/lib/hooks/abilities/useAbilityComposition";
-import { newEffect } from "@/lib/utils/abilities/editor";
+import { useAbilityComposition } from '@/lib/hooks/abilities/useAbilityComposition';
+import { newEffect } from '@/lib/utils/abilities/editor';
 
-export function EffectsSection({ ability, path, onChange, state }: AbilitySectionProps) {
-  const t = useTranslations("abilities.effects");
+export function EffectsSection({
+    ability,
+    path,
+    onChange,
+    state,
+}: AbilitySectionProps) {
+    const t = useTranslations('abilities.effects');
 
-  const { campaignId, errorsByPath } = useAbilityEditor();
+    const { campaignId, errorsByPath } = useAbilityEditor();
 
-  const { kinds } = useAbilityComposition(campaignId);
+    const { kinds } = useAbilityComposition(campaignId);
 
-  const frame = useRef<number>(undefined);
+    const frame = useRef<number>(undefined);
 
-  useEffect(() => () => cancelAnimationFrame(frame.current ?? 0), []);
+    useEffect(() => () => cancelAnimationFrame(frame.current ?? 0), []);
 
-  const revealLast = () => {
-    cancelAnimationFrame(frame.current ?? 0);
-    frame.current = requestAnimationFrame(() => {
-      const cards = document.querySelectorAll<HTMLElement>(`#${CSS.escape(sectionId(path, "then"))}-body [data-effect-card]`);
+    const revealLast = () => {
+        cancelAnimationFrame(frame.current ?? 0);
+        frame.current = requestAnimationFrame(() => {
+            const cards = document.querySelectorAll<HTMLElement>(
+                `#${CSS.escape(sectionId(path, 'then'))}-body [data-effect-card]`
+            );
 
-      cards[cards.length - 1]?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-    });
-  };
+            cards[cards.length - 1]?.scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest',
+            });
+        });
+    };
 
-  const change = (effects: typeof ability.effects) => {
-    onChange({ ...ability, effects });
+    const change = (effects: typeof ability.effects) => {
+        onChange({ ...ability, effects });
 
-    if (effects.length > ability.effects.length) {
-      if (!state.open) state.onToggle();
+        if (effects.length > ability.effects.length) {
+            if (!state.open) state.onToggle();
 
-      revealLast();
-    }
-  };
+            revealLast();
+        }
+    };
 
-  return (
-    <SectionShell path={path} part="then" title={t("title")} {...state}>
-      <FieldErrors errors={errorsByPath[`${path}.effects`] ?? []} />
-      <NestedEffectsEditor
-        effects={ability.effects}
-        path={`${path}.effects`}
-        className=""
-        limits={{ min: 0 }}
-        labels={{ add: t("add") }}
-        create={() => newEffect(kinds(ability.trigger)[0], ability.trigger)}
-        onChange={change}
-        renderCard={({ effect, path: p, actions }) => (
-          <div data-effect-card className="space-y-1">
-            <FieldErrors errors={errorsByPath[p] ?? []} />
-            <EffectCard effect={effect} trigger={ability.trigger} path={p} actions={actions} />
-          </div>
-        )}
-      />
-    </SectionShell>
-  );
+    return (
+        <SectionShell path={path} part="then" title={t('title')} {...state}>
+            <FieldErrors errors={errorsByPath[`${path}.effects`] ?? []} />
+            <NestedEffectsEditor
+                effects={ability.effects}
+                path={`${path}.effects`}
+                className=""
+                limits={{ min: 0 }}
+                labels={{ add: t('add') }}
+                create={() =>
+                    newEffect(kinds(ability.trigger)[0], ability.trigger)
+                }
+                onChange={change}
+                renderCard={({ effect, path: p, actions }) => (
+                    <div data-effect-card className="space-y-1">
+                        <FieldErrors errors={errorsByPath[p] ?? []} />
+                        <EffectCard
+                            effect={effect}
+                            trigger={ability.trigger}
+                            path={p}
+                            actions={actions}
+                        />
+                    </div>
+                )}
+            />
+        </SectionShell>
+    );
 }

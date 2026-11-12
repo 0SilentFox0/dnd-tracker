@@ -1,21 +1,21 @@
-import type { BattleStatus } from "@/lib/constants/battle";
-import type { SYNC_SCOPES, SYNC_STATUSES } from "@/lib/constants/source-sync";
-import type { Ruleset } from "@/lib/utils/rules";
-import type { TemplateContentLocale } from "@/lib/utils/templates/manifest";
+import type { BattleStatus } from '@/lib/constants/battle';
+import type { SYNC_SCOPES, SYNC_STATUSES } from '@/lib/constants/source-sync';
+import type { Ruleset } from '@/lib/utils/rules';
+import type { TemplateContentLocale } from '@/lib/utils/templates/manifest';
 
 export interface Campaign {
-  id: string;
-  name: string;
-  description?: string;
-  inviteCode: string;
-  dmUserId: string;
-  maxLevel: number;
-  allowPlayerEdit: boolean;
-  critChoiceByDm: boolean;
-  acquaintancesEnabled: boolean;
-  status: string;
-  kind?: "campaign" | "template";
-  members?: CampaignMembership[];
+    id: string;
+    name: string;
+    description?: string;
+    inviteCode: string;
+    dmUserId: string;
+    maxLevel: number;
+    allowPlayerEdit: boolean;
+    critChoiceByDm: boolean;
+    acquaintancesEnabled: boolean;
+    status: string;
+    kind?: 'campaign' | 'template';
+    members?: CampaignMembership[];
 }
 
 export type CampaignWithWarnings = Campaign & { warnings?: string[] };
@@ -23,152 +23,180 @@ export type CampaignWithWarnings = Campaign & { warnings?: string[] };
 export type CampaignBundle = Record<string, unknown>;
 
 export interface TemplateCard {
-  id: string;
-  name: string;
-  description: string | null;
-  visibility: string;
-  counts: Record<string, number>;
-  credits?: string | null;
-  locale?: string | null;
-  templateKey?: string | null;
-  kind?: string;
-  availableLocales?: readonly string[];
-  system?: string;
+    id: string;
+    name: string;
+    description: string | null;
+    visibility: string;
+    counts: Record<string, number>;
+    credits?: string | null;
+    locale?: string | null;
+    templateKey?: string | null;
+    kind?: string;
+    availableLocales?: readonly string[];
+    system?: string;
 }
 
 export interface TemplateList {
-  official: TemplateCard[];
-  mine: TemplateCard[];
+    official: TemplateCard[];
+    mine: TemplateCard[];
 }
 
 export interface BundleFile {
-  name: string;
-  bundle: CampaignBundle;
-  entities: number;
+    name: string;
+    bundle: CampaignBundle;
+    entities: number;
 }
 
-export type TemplateSelection = { templateId?: string | null; file?: BundleFile; contentLocale?: TemplateContentLocale };
+export type TemplateSelection = {
+    templateId?: string | null;
+    file?: BundleFile;
+    contentLocale?: TemplateContentLocale;
+};
 
 /** Рядок campaign_members з user-relation (сторінка кампанії). */
 export interface CampaignMembership {
-  id: string;
-  userId: string;
-  role: string;
-  user?: PublicUser;
+    id: string;
+    userId: string;
+    role: string;
+    user?: PublicUser;
 }
 
 export interface PublicUser {
-  id: string;
-  displayName: string;
-  avatar: string | null;
+    id: string;
+    displayName: string;
+    avatar: string | null;
 }
 
 /** Рядок GET /members: `id` — userId; `email` лише для DM. */
 export interface CampaignMember {
-  id: string;
-  displayName: string;
-  email?: string;
+    id: string;
+    displayName: string;
+    email?: string;
 }
 
 export interface CampaignSettings {
-  name: string;
-  description: string | null;
-  maxLevel: number;
-  allowPlayerEdit: boolean;
-  critChoiceByDm: boolean;
-  acquaintancesEnabled: boolean;
-  status: string;
+    name: string;
+    description: string | null;
+    maxLevel: number;
+    allowPlayerEdit: boolean;
+    critChoiceByDm: boolean;
+    acquaintancesEnabled: boolean;
+    status: string;
 }
 
 export interface CampaignSettingsMeta {
-  createdFromId: string | null;
-  isTemplate: boolean;
-  credits?: string | null;
+    createdFromId: string | null;
+    isTemplate: boolean;
+    credits?: string | null;
 }
 
 export interface ActiveBattleRef {
-  id: string;
-  campaignId: string;
+    id: string;
+    campaignId: string;
 }
 
 export interface ActiveShowRef {
-  campaignId: string;
+    campaignId: string;
 }
 
 export interface ActiveSessions {
-  battles: ActiveBattleRef[];
-  shows: ActiveShowRef[];
+    battles: ActiveBattleRef[];
+    shows: ActiveShowRef[];
 }
 
 export type SourceSyncScope = (typeof SYNC_SCOPES)[number];
 
 export type SourceSyncStatus = (typeof SYNC_STATUSES)[number];
 
-export type SyncRef = { scope: SourceSyncScope; key: string; sourceHash: string | null; status: SourceSyncStatus };
+export type SyncRef = {
+    scope: SourceSyncScope;
+    key: string;
+    sourceHash: string | null;
+    status: SourceSyncStatus;
+};
 
 export type SourceApplyBody = { apply: SyncRef[]; ignore: SyncRef[] };
 
 export type SourceDiffItem = {
-  scope: SourceSyncScope;
-  key: string;
-  localId: string | null;
-  name: string;
-  status: SourceSyncStatus;
-  changedFields: string[];
-  sourceHash: string | null;
-  requires: Array<{ scope: SourceSyncScope; key: string; name: string }>;
-  usage?: { characters: number; content: number };
+    scope: SourceSyncScope;
+    key: string;
+    localId: string | null;
+    name: string;
+    status: SourceSyncStatus;
+    changedFields: string[];
+    sourceHash: string | null;
+    requires: Array<{ scope: SourceSyncScope; key: string; name: string }>;
+    usage?: { characters: number; content: number };
 };
 
-export type SourceDiff = { source: { id: string; name: string; kind: string }; syncedAt: string | null; items: SourceDiffItem[] };
+export type SourceDiff = {
+    source: { id: string; name: string; kind: string };
+    syncedAt: string | null;
+    items: SourceDiffItem[];
+};
 
-export type TemplatePublishResult = { version: number; added: number; changed: number; removed: number };
+export type TemplatePublishResult = {
+    version: number;
+    added: number;
+    changed: number;
+    removed: number;
+};
 
-export type SourceApplyResult = { applied: number; ignored: number; autoAdded: Array<{ scope: SourceSyncScope; key: string; name: string }>; warnings: string[] };
+export type SourceApplyResult = {
+    applied: number;
+    ignored: number;
+    autoAdded: Array<{ scope: SourceSyncScope; key: string; name: string }>;
+    warnings: string[];
+};
 
 export interface DmDashboardData {
-  pendingDrafts: number;
-  scenarioPages: { id: string; title: string }[];
-  battles: { id: string; name: string; status: BattleStatus }[];
-  sourceUpdate: { sourceVersion: number } | null;
+    pendingDrafts: number;
+    scenarioPages: { id: string; title: string }[];
+    battles: { id: string; name: string; status: BattleStatus }[];
+    sourceUpdate: { sourceVersion: number } | null;
 }
 
 export interface DashboardHero {
-  id: string;
-  name: string;
-  level: number;
-  race: string;
-  class: string;
-  avatar: string | null;
-  armorClass: number;
-  speed: number;
-  status: string;
-  reviewNote: string | null;
-  seenLevel: number | null;
+    id: string;
+    name: string;
+    level: number;
+    race: string;
+    class: string;
+    avatar: string | null;
+    armorClass: number;
+    speed: number;
+    status: string;
+    reviewNote: string | null;
+    seenLevel: number | null;
 }
 
 export interface HeroHpValue {
-  current: number;
-  max: number;
-  temp: number;
+    current: number;
+    max: number;
+    temp: number;
 }
 
 export interface PlayerDashboardData {
-  hero: DashboardHero | null;
-  activeBattle: { battleId: string; hp: HeroHpValue } | null;
-  hasWorld: boolean;
+    hero: DashboardHero | null;
+    activeBattle: { battleId: string; hp: HeroHpValue } | null;
+    hasWorld: boolean;
 }
 
 export interface ConditionUsage {
-  battles: { id: string; name: string; status: string; participants: string[] }[];
-  spells: { id: string; name: string }[];
-  units: { id: string; name: string }[];
-  skills: { id: string; name: string }[];
-  artifacts: { id: string; name: string }[];
-  artifactSets: { id: string; name: string }[];
-  races: { id: string; name: string }[];
-  feats: { id: string; name: string }[];
-  statusEffects: { id: string; name: string }[];
+    battles: {
+        id: string;
+        name: string;
+        status: string;
+        participants: string[];
+    }[];
+    spells: { id: string; name: string }[];
+    units: { id: string; name: string }[];
+    skills: { id: string; name: string }[];
+    artifacts: { id: string; name: string }[];
+    artifactSets: { id: string; name: string }[];
+    races: { id: string; name: string }[];
+    feats: { id: string; name: string }[];
+    statusEffects: { id: string; name: string }[];
 }
 
 export type CampaignRulesView = Ruleset & { systemLocked?: boolean };

@@ -1,594 +1,1156 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
-import { BRANCHES } from "../branches";
-import { buildLibrary, LIBRARY_COMPLETE, LIBRARY_SOURCE, MIN_APPEARANCE_LENGTH, racePassiveAbilities, racePassiveStatModifiers, raceSkills } from "../build";
-import { PERSONAL } from "../personal";
-import { RACES } from "../races";
-import { SPELLS } from "../spells";
-import type { LibraryArtifact, LibraryArtifactSet, LibraryBranch, LibraryRace, LibrarySkill, LibrarySource, LibrarySpell, LibraryUnit } from "../types";
-import { falloff, hatred, raiseOnKill } from "../unit-abilities";
-import { UNITS } from "../units";
+import { BRANCHES } from '../branches';
+import {
+    buildLibrary,
+    LIBRARY_COMPLETE,
+    LIBRARY_SOURCE,
+    MIN_APPEARANCE_LENGTH,
+    racePassiveAbilities,
+    racePassiveStatModifiers,
+    raceSkills,
+} from '../build';
+import { PERSONAL } from '../personal';
+import { RACES } from '../races';
+import { SPELLS } from '../spells';
+import type {
+    LibraryArtifact,
+    LibraryArtifactSet,
+    LibraryBranch,
+    LibraryRace,
+    LibrarySkill,
+    LibrarySource,
+    LibrarySpell,
+    LibraryUnit,
+} from '../types';
+import { falloff, hatred, raiseOnKill } from '../unit-abilities';
+import { UNITS } from '../units';
 
-import { BRANCH_ICONS, SKILL_ICONS, SPELL_ICONS } from "@/data/skill-icons";
-import { scaleSummon } from "@/lib/utils/units/level-scaling";
-import type { BattleParticipant } from "@/types/battle";
+import { BRANCH_ICONS, SKILL_ICONS, SPELL_ICONS } from '@/data/skill-icons';
+import { scaleSummon } from '@/lib/utils/units/level-scaling';
+import type { BattleParticipant } from '@/types/battle';
 
 function must<T>(value: T | undefined): T {
-  if (value === undefined) throw new Error("не знайдено в бібліотеці");
+    if (value === undefined) throw new Error('не знайдено в бібліотеці');
 
-  return value;
+    return value;
 }
 
-const APPEARANCE = "Світло розгортається над полем бою золотим куполом, і навіть найстаміший воїн відчуває, як повертаються сили.";
+const APPEARANCE =
+    'Світло розгортається над полем бою золотим куполом, і навіть найстаміший воїн відчуває, як повертаються сили.';
 
 function skill(key: string, over: Partial<LibrarySkill> = {}): LibrarySkill {
-  return {
-    key,
-    name: `Скіл ${key}`,
-    description: "Дає +1 до сили.",
-    appearanceDescription: APPEARANCE,
-    abilities: [{ id: key, name: key, trigger: { event: "passive" }, effects: [{ kind: "modifyStat", stat: "strength", flat: 1 }] }],
-    ...over,
-  };
+    return {
+        key,
+        name: `Скіл ${key}`,
+        description: 'Дає +1 до сили.',
+        appearanceDescription: APPEARANCE,
+        abilities: [
+            {
+                id: key,
+                name: key,
+                trigger: { event: 'passive' },
+                effects: [{ kind: 'modifyStat', stat: 'strength', flat: 1 }],
+            },
+        ],
+        ...over,
+    };
 }
 
 function spell(key: string, over: Partial<LibrarySpell> = {}): LibrarySpell {
-  return {
-    key,
-    iconKey: "haste",
-    name: `Заклинання ${key}`,
-    description: "Завдає шкоди.",
-    appearanceDescription: APPEARANCE,
-    school: "Світло",
-    level: 1,
-    definition: { dice: 1, cost: "action", targeting: { kind: "enemy" }, resolution: { kind: "auto" }, effects: [] },
-    raceModifiers: [],
-    ...over,
-  };
+    return {
+        key,
+        iconKey: 'haste',
+        name: `Заклинання ${key}`,
+        description: 'Завдає шкоди.',
+        appearanceDescription: APPEARANCE,
+        school: 'Світло',
+        level: 1,
+        definition: {
+            dice: 1,
+            cost: 'action',
+            targeting: { kind: 'enemy' },
+            resolution: { kind: 'auto' },
+            effects: [],
+        },
+        raceModifiers: [],
+        ...over,
+    };
 }
 
 function race(key: string): LibraryRace {
-  return {
-    key,
-    name: `Раса ${key}`,
-    description: "Опис раси.",
-    appearanceDescription: APPEARANCE,
-    passive: {
-      iconKey: "race-flag-humans",
-      name: "Пасивка",
-      description: "+1 до Сили.",
-      appearanceDescription: APPEARANCE,
-      stats: { strength: 1 },
-      trait: [{ id: `${key}-trait`, name: "Риса", trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "noNegativeMorale" }] }],
-    },
-    branchKeys: ["b"],
-    spellSlotProgression: [],
-    levels: [skill(`${key}-1`), skill(`${key}-2`), skill(`${key}-3`)],
-    ultimate: skill(`${key}-u`),
-  };
+    return {
+        key,
+        name: `Раса ${key}`,
+        description: 'Опис раси.',
+        appearanceDescription: APPEARANCE,
+        passive: {
+            iconKey: 'race-flag-humans',
+            name: 'Пасивка',
+            description: '+1 до Сили.',
+            appearanceDescription: APPEARANCE,
+            stats: { strength: 1 },
+            trait: [
+                {
+                    id: `${key}-trait`,
+                    name: 'Риса',
+                    trigger: { event: 'passive' },
+                    effects: [{ kind: 'flag', flag: 'noNegativeMorale' }],
+                },
+            ],
+        },
+        branchKeys: ['b'],
+        spellSlotProgression: [],
+        levels: [skill(`${key}-1`), skill(`${key}-2`), skill(`${key}-3`)],
+        ultimate: skill(`${key}-u`),
+    };
 }
 
 function branch(key: string, over: Partial<LibraryBranch> = {}): LibraryBranch {
-  return {
-    key,
-    name: `Гілка ${key}`,
-    description: "Опис гілки.",
-    appearanceDescription: APPEARANCE,
-    color: "#ffffff",
-    levels: [skill(`${key}-l1`)],
-    slots: [[skill(`${key}-s1`)]],
-    spares: [],
-    ...over,
-  };
+    return {
+        key,
+        name: `Гілка ${key}`,
+        description: 'Опис гілки.',
+        appearanceDescription: APPEARANCE,
+        color: '#ffffff',
+        levels: [skill(`${key}-l1`)],
+        slots: [[skill(`${key}-s1`)]],
+        spares: [],
+        ...over,
+    };
 }
 
-function artifact(key: string, over: Partial<LibraryArtifact> = {}): LibraryArtifact {
-  return { key, name: `Артефакт ${key}`, description: "опис", appearanceDescription: APPEARANCE, iconKey: "unicorn-horn-bow", slot: "ring1", rarity: "epic", abilities: [], ...over };
+function artifact(
+    key: string,
+    over: Partial<LibraryArtifact> = {}
+): LibraryArtifact {
+    return {
+        key,
+        name: `Артефакт ${key}`,
+        description: 'опис',
+        appearanceDescription: APPEARANCE,
+        iconKey: 'unicorn-horn-bow',
+        slot: 'ring1',
+        rarity: 'epic',
+        abilities: [],
+        ...over,
+    };
 }
 
-function set(key: string, over: Partial<LibraryArtifactSet> = {}): LibraryArtifactSet {
-  return {
-    key,
-    name: `Сет ${key}`,
-    description: "опис",
-    appearanceDescription: APPEARANCE,
-    iconKey: "unicorn-horn-bow",
-    heroName: "Айвен",
-    artifacts: [artifact(`${key}-a`, { slot: "ring1" }), artifact(`${key}-b`, { slot: "helmet" }), artifact(`${key}-c`, { slot: "cape" })],
-    abilities: [],
-    ...over,
-  };
+function set(
+    key: string,
+    over: Partial<LibraryArtifactSet> = {}
+): LibraryArtifactSet {
+    return {
+        key,
+        name: `Сет ${key}`,
+        description: 'опис',
+        appearanceDescription: APPEARANCE,
+        iconKey: 'unicorn-horn-bow',
+        heroName: 'Айвен',
+        artifacts: [
+            artifact(`${key}-a`, { slot: 'ring1' }),
+            artifact(`${key}-b`, { slot: 'helmet' }),
+            artifact(`${key}-c`, { slot: 'cape' }),
+        ],
+        abilities: [],
+        ...over,
+    };
 }
 
 function unit(key: string, over: Partial<LibraryUnit> = {}): LibraryUnit {
-  return {
-    key,
-    name: `Юніт ${key}`,
-    raceKey: null,
-    tier: 1,
-    role: "base",
-    hp: 12,
-    ac: 11,
-    attackBonus: 3,
-    initiative: 8,
-    attacks: [{ name: "Удар", type: "melee", dice: "1d6", damageType: "slashing" }],
-    abilities: [],
-    ...over,
-  };
+    return {
+        key,
+        name: `Юніт ${key}`,
+        raceKey: null,
+        tier: 1,
+        role: 'base',
+        hp: 12,
+        ac: 11,
+        attackBonus: 3,
+        initiative: 8,
+        attacks: [
+            {
+                name: 'Удар',
+                type: 'melee',
+                dice: '1d6',
+                damageType: 'slashing',
+            },
+        ],
+        abilities: [],
+        ...over,
+    };
 }
 
 function raceUnits(raceKey: string): LibraryUnit[] {
-  const roles = ["base", "upgrade", "alt"] as const;
+    const roles = ['base', 'upgrade', 'alt'] as const;
 
-  return Array.from({ length: 21 }, (_, i) => unit(`${raceKey}-${i}`, { raceKey, tier: Math.floor(i / 3) + 1, role: roles[i % 3] }));
+    return Array.from({ length: 21 }, (_, i) =>
+        unit(`${raceKey}-${i}`, {
+            raceKey,
+            tier: Math.floor(i / 3) + 1,
+            role: roles[i % 3],
+        })
+    );
 }
 
 function source(over: Partial<LibrarySource> = {}): LibrarySource {
-  return { spells: [], branches: [], races: [], personal: [], artifactSets: [], units: [], ...over };
+    return {
+        spells: [],
+        branches: [],
+        races: [],
+        personal: [],
+        artifactSets: [],
+        units: [],
+        ...over,
+    };
 }
 
-describe("buildLibrary validation", () => {
-  it("rejects races with invalid or empty passives", () => {
-    const base = race("r");
-
-    const withPassive = (over: Partial<LibraryRace["passive"]>) => source({ branches: [branch("b")], races: [{ ...base, passive: { ...base.passive, ...over } }] });
-
-    expect(() => buildLibrary(withPassive({ description: " " }))).toThrow(/порожнє passive.description/);
-    expect(() => buildLibrary(withPassive({ appearanceDescription: "коротко" }))).toThrow(/пасивки коротший/);
-    expect(() => buildLibrary(withPassive({ trait: [] }))).toThrow(/порожній passive.trait/);
-    expect(() => buildLibrary(withPassive({ trait: [{ id: "x", name: "x", trigger: { event: "passive" }, effects: [{ kind: "heal", amount: { flat: 1 } } as never] }] }))).toThrow(/пасивка/);
-  });
-
-  it("accepts a valid source", () => {
-    const lib = buildLibrary(source({ spells: [spell("s")], branches: [branch("b", { spellSchool: "Світло" })], races: [race("r")] }));
-
-    expect(lib.schools).toEqual(["Світло"]);
-    expect(lib.skills).toHaveLength(6);
-
-    expect(() => buildLibrary(source({ branches: [branch("b")], races: [{ ...race("r"), branchKeys: ["x"] }] }))).toThrow(/невідома гілка «x»/);
-    expect(() => buildLibrary(source({ branches: [branch("b")], races: [{ ...race("r"), branchKeys: [] }] }))).toThrow(/порожній список/);
-    expect(lib.spellByKey.has("s")).toBe(true);
-  });
-
-  it("reports duplicate keys and names", () => {
-    expect(() => buildLibrary(source({ spells: [spell("s"), spell("s")] }))).toThrow(/дублікат key «s»/);
-    expect(() => buildLibrary(source({ spells: [spell("a", { name: "Х" }), spell("b", { name: "Х" })] }))).toThrow(/дублікат name «Х»/);
-    expect(() => buildLibrary(source({ personal: [skill("p"), skill("p")] }))).toThrow(/Скіли: дублікат key/);
-  });
-
-  it("rejects invalid ability JSON", () => {
-    const bad = skill("bad", { abilities: [{ id: "x", name: "x", trigger: { event: "passive" }, effects: [] }] });
-
-    expect(() => buildLibrary(source({ personal: [bad] }))).toThrow(/Скіл «bad»/);
-  });
-
-  it("rejects a set with fewer than 3 artifacts", () => {
-    expect(() => buildLibrary(source({ artifactSets: [set("s", { artifacts: [artifact("a"), artifact("b", { slot: "helmet" })] })] }))).toThrow(/менше 3/);
-  });
-
-  it("rejects repeated slots inside a set", () => {
-    const s = set("s", { artifacts: [artifact("a"), artifact("b"), artifact("c", { slot: "cape" })] });
-
-    expect(() => buildLibrary(source({ artifactSets: [s] }))).toThrow(/слот «ring1» повторюється/);
-  });
-
-  it("rejects an unknown artifact iconKey", () => {
-    const s = set("s");
-
-    s.artifacts[0].iconKey = "nope";
-
-    expect(() => buildLibrary(source({ artifactSets: [s] }))).toThrow(/невідомий iconKey/);
-  });
-
-  it("rejects an invalid artifact ability", () => {
-    const s = set("s");
-
-    s.artifacts[0].abilities = [{ id: "x", name: "x", trigger: { event: "passive" }, effects: [] } as never];
-
-    expect(() => buildLibrary(source({ artifactSets: [s] }))).toThrow(/Артефакт «s-a»/);
-  });
-
-  it("rejects an unknown spell key in artifact abilities", () => {
-    const s = set("s", { abilities: [{ id: "i", name: "i", trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "spellImmunity", spellIds: ["nope"], target: "allAllies" }] }] });
-
-    expect(() => buildLibrary(source({ artifactSets: [s] }))).toThrow(/nope/);
-  });
-
-  it("rejects duplicate artifact keys across sets", () => {
-    expect(() => buildLibrary(source({ artifactSets: [set("s"), set("t", { artifacts: set("s").artifacts })] }))).toThrow(/дублікат key/);
-  });
-
-  it("rejects invalid spell definitions", () => {
-    const bad = spell("bad");
-
-    bad.definition.dice = 99;
-
-    expect(() => buildLibrary(source({ spells: [bad] }))).toThrow(/Заклинання «bad»/);
-  });
-
-  it("rejects unknown icon keys", () => {
-    expect(() => buildLibrary(source({ personal: [skill("p", { iconKey: "nope" })] }))).toThrow(/невідомий iconKey/);
-    expect(() => buildLibrary(source({ personal: [skill("p", { iconKey: "brutality" })] }))).not.toThrow();
-  });
-
-  it("requires known spell icons", () => {
-    expect(() => buildLibrary(source({ spells: [spell("s", { iconKey: undefined })] }))).toThrow(/немає iconKey/);
-    expect(() => buildLibrary(source({ spells: [spell("s", { iconKey: "brutality" })] }))).toThrow(/невідомий iconKey/);
-  });
-
-  it("rejects short or empty descriptions", () => {
-    expect(() => buildLibrary(source({ personal: [skill("p", { appearanceDescription: "Коротко." })] }))).toThrow(/коротший/);
-    expect(() => buildLibrary(source({ personal: [skill("p", { description: " " })] }))).toThrow(/порожній опис/);
-  });
-
-  it("resolves spell references", () => {
-    const flag = {
-      id: "t",
-      name: "t",
-      trigger: { event: "passive" as const },
-      effects: [{ kind: "flag" as const, flag: "spellTargeting" as const, mode: "area" as const, spellIds: ["missing"] }],
-    };
-
-    expect(() => buildLibrary(source({ personal: [skill("p", { abilities: [flag] })] }))).toThrow(/заклинання «missing» не знайдено/);
-
-    const trigger = { id: "t", name: "t", trigger: { event: "spellCast" as const, phase: "after" as const, role: "caster" as const, spellIds: ["missing"], school: "Нема" }, effects: [{ kind: "note" as const, text: "x" }] };
-
-    expect(() => buildLibrary(source({ personal: [skill("p", { abilities: [trigger] })] }))).toThrow(/заклинання «missing» не знайдено/);
-    expect(() => buildLibrary(source({ personal: [skill("p", { abilities: [trigger] })] }))).toThrow(/невідома школа «Нема»/);
-    expect(() => buildLibrary(source({ personal: [skill("p", { grantedSpellKey: "missing" })] }))).toThrow(/grantedSpellKey/);
-    expect(() => buildLibrary(source({ personal: [skill("p", { grantedSpellKey: "s" })], spells: [spell("s")] }))).not.toThrow();
-    expect(() => buildLibrary(source({ spells: [spell("s", { raceModifiers: [{ raceKey: "none", percent: 10 }] })] }))).toThrow(/невідома раса/);
-    expect(() => buildLibrary(source({ branches: [branch("b", { spellSchool: "Хаос" })] }))).toThrow(/невідома школа/);
-  });
-});
-
-describe("buildLibrary unit validation", () => {
-  it("unit ability descriptions have no raw damage-type ids", () => {
-    const raw = UNITS.flatMap((u) => u.abilities.map((a) => a.description ?? "")).filter((d) => /\([a-z]+(, [a-z]+)*\)/.test(d));
-
-    expect(raw).toEqual([]);
-  });
-
-  const withUnits = (units: LibraryUnit[], over: Partial<LibrarySource> = {}) => source({ units, ...over });
-
-  it("accepts valid units and indexes them", () => {
-    expect(buildLibrary(withUnits([unit("u")])).unitByKey.get("u")?.name).toBe("Юніт u");
-  });
-
-  it("rejects duplicate keys and names", () => {
-    expect(() => buildLibrary(withUnits([unit("u"), unit("u", { name: "Інший" })]))).toThrow(/дублікат key «u»/);
-    expect(() => buildLibrary(withUnits([unit("a", { name: "Х" }), unit("b", { name: "Х" })]))).toThrow(/дублікат name «Х»/);
-  });
-
-  it("rejects unknown races and tiers out of range", () => {
-    expect(() => buildLibrary(withUnits([unit("u", { raceKey: "nope" })]))).toThrow(/невідома раса «nope»/);
-    expect(() => buildLibrary(withUnits([unit("u", { tier: 8 })]))).toThrow(/тір/);
-    expect(() => buildLibrary(withUnits([unit("u", { tier: 0 })]))).toThrow(/тір/);
-  });
-
-  it("rejects unknown spell keys and broken abilities", () => {
-    expect(() => buildLibrary(withUnits([unit("u", { spellKeys: ["nope"] })]))).toThrow(/закляття «nope»/);
-    expect(() => buildLibrary(withUnits([unit("u", { abilities: [{ id: "x", name: "x", trigger: { event: "passive" }, effects: [] }] })]))).toThrow(/Юніт «u»/);
-    expect(() => buildLibrary(withUnits([unit("u", { abilities: [{ id: "x", name: "x", trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "spellImmunity", spellIds: ["nope"] }] }] })]))).toThrow(/«nope»/);
-  });
-
-  it("rejects unknown race names in targetRace", () => {
-    expect(() => buildLibrary(withUnits([unit("u", { abilities: [hatred("Кара", ["Нікого"])] })]))).toThrow(/невідома раса «Нікого»/);
-  });
-
-  it("requires falloff for multi-target attacks", () => {
-    const attacks: LibraryUnit["attacks"] = [{ name: "Залп", type: "ranged", dice: "1d6", damageType: "piercing", targets: 2 }];
-
-    expect(() => buildLibrary(withUnits([unit("u", { attacks })]))).toThrow(/multiTargetFalloff/);
-    expect(() => buildLibrary(withUnits([unit("u", { attacks, abilities: [falloff("Залп")] })]))).not.toThrow();
-  });
-
-  it("requires unique ability ids within a unit", () => {
-    expect(() => buildLibrary(withUnits([unit("u", { abilities: [falloff("a"), falloff("b")] })]))).toThrow(/id «unit-falloff» повторюється/);
-  });
-
-  it("requires summoned unit keys to exist", () => {
-    expect(() => buildLibrary(withUnits([unit("u", { abilities: [raiseOnKill("ghost")] })]))).toThrow(/юніт «ghost»/);
-    expect(() => buildLibrary(withUnits([unit("u", { abilities: [raiseOnKill("u2")] }), unit("u2")]))).not.toThrow();
-
-    const summoning = spell("s", { definition: { ...spell("s").definition, effects: [{ kind: "summon", unitId: "ghost" }] } });
-
-    expect(() => buildLibrary(withUnits([], { spells: [summoning] }))).toThrow(/юніт «ghost»/);
-    expect(() => buildLibrary(withUnits([unit("ghost")], { spells: [summoning] }))).not.toThrow();
-  });
-
-  it("requires exactly 21 units per race, 3 per tier with distinct roles", () => {
-    const r = race("r");
-
-    const full = raceUnits("r");
-
-    expect(() => buildLibrary(withUnits(full, { branches: [branch("b")], races: [r] }))).not.toThrow();
-    expect(() => buildLibrary(withUnits(full.slice(1), { branches: [branch("b")], races: [r] }))).toThrow(/21 юніт/);
-
-    const skewed = full.map((u, i) => (i === 1 ? { ...u, role: "base" as const } : u));
-
-    expect(() => buildLibrary(withUnits(skewed, { branches: [branch("b")], races: [r] }))).toThrow(/ролі/);
-  });
-});
-
-describe("library content", () => {
-  it("builds without issues", () => {
-    expect(() => buildLibrary(LIBRARY_SOURCE)).not.toThrow();
-  });
-
-  const content = it.skipIf(!LIBRARY_COMPLETE);
-
-  content("only the listed large creatures occupy 2x2", () => {
-    const large = UNITS.filter((u) => (u.gridSize ?? 1) > 1);
-
-    expect(large.every((u) => u.gridSize === 2)).toBe(true);
-    expect(large.map((u) => u.key).sort()).toEqual([
-      "dark-elves-black-dragon",
-      "dark-elves-dark-rider",
-      "dark-elves-deep-hydra",
-      "dark-elves-gloom-rider",
-      "dark-elves-hydra",
-      "dark-elves-red-dragon",
-      "dark-elves-rotting-hydra",
-      "dark-elves-shadow-dragon",
-      "dark-elves-swift-rider",
-      "demons-archdemon",
-      "demons-archdevil",
-      "demons-cave-abomination",
-      "demons-cave-demon",
-      "demons-cave-lord",
-      "demons-devil",
-      "demons-gloom",
-      "demons-hell-nightmare",
-      "demons-nightmare",
-      "dwarves-arkat-dragon",
-      "dwarves-bear-rider",
-      "dwarves-black-bear-rider",
-      "dwarves-earl",
-      "dwarves-fire-dragon",
-      "dwarves-jarl",
-      "dwarves-lava-dragon",
-      "dwarves-thane",
-      "dwarves-white-bear-rider",
-      "elves-ancient-ent",
-      "elves-crystal-dragon",
-      "elves-emerald-dragon",
-      "elves-ent",
-      "elves-green-dragon",
-      "elves-light-unicorn",
-      "elves-unicorn",
-      "elves-war-unicorn",
-      "elves-wild-ent",
-      "humans-angel",
-      "humans-archangel",
-      "humans-battle-griffin",
-      "humans-champion",
-      "humans-griffin",
-      "humans-knight",
-      "humans-paladin",
-      "humans-royal-griffin",
-      "humans-seraph",
-      "mages-colossus",
-      "mages-genie",
-      "mages-genie-sultan",
-      "mages-genie-vizier",
-      "mages-rakshasa-kshatriya",
-      "mages-rakshasa-princess",
-      "mages-rakshasa-raja",
-      "mages-storm-lord",
-      "mages-titan",
-      "necromancers-archlich",
-      "necromancers-bone-dragon",
-      "necromancers-high-lich",
-      "necromancers-lich",
-      "necromancers-sorrow-dragon",
-      "necromancers-spectral-dragon",
-      "neutral-death-avatar",
-      "neutral-phoenix",
-    ]);
-  });
-
-  content("has 8 branches with 3 levels and 3/2/1 slots", () => {
-    expect(BRANCHES).toHaveLength(8);
-
-    for (const b of BRANCHES) {
-      expect(b.levels, b.key).toHaveLength(3);
-      expect(b.slots.map((s) => s.length), b.key).toEqual([3, 2, 1]);
-    }
-  });
-
-  content("gives every race a passive with stat bonuses and one trait", () => {
-    const expected: Record<string, Record<string, number>> = {
-      humans: { strength: 2, charisma: 1 },
-      demons: { strength: 2, charisma: 1 },
-      elves: { dexterity: 2, wisdom: 1 },
-      necromancers: { intelligence: 2, constitution: 1 },
-      mages: { intelligence: 2, wisdom: 1 },
-      "dark-elves": { dexterity: 2, charisma: 1 },
-      dwarves: { constitution: 2, strength: 1 },
-    };
-
-    for (const r of RACES) {
-      expect(r.passive.stats, r.key).toEqual(expected[r.key]);
-      expect(r.passive.trait, r.key).toHaveLength(2);
-      expect(racePassiveAbilities(r)[0].id, r.key).toBe(`${r.key}-stats`);
-      expect(Object.keys(racePassiveStatModifiers(r)), r.key).toEqual(Object.keys(expected[r.key]));
-    }
-  });
-
-  content("has 4 elemental summon spells pointing at scaling neutral units", () => {
-    const spells = SPELLS.filter((sp) => sp.name.startsWith("Прикликання елементаля"));
-
-    expect(spells).toHaveLength(4);
-
-    for (const sp of spells) {
-      const summon = sp.definition.effects.find((e) => e.kind === "summon");
-
-      const unit = UNITS.find((u) => summon?.kind === "summon" && u.key === summon.unitId);
-
-      expect(unit?.raceKey, sp.key).toBeNull();
-      expect(unit?.levelScaling, sp.key).toBeDefined();
-      expect(sp.level, sp.key).toBe(3);
-    }
-  });
-
-  content("«Призив Фенікса» summons the scaling Phoenix that is reborn once at half HP", () => {
-    const spell = must(SPELLS.find((sp) => sp.key === "call-of-the-beast"));
-
-    expect(spell.name).toBe("Призив Фенікса");
-    expect(spell.formerNames).toEqual(["Поклик звіра"]);
-    expect(spell.level).toBe(5);
-    expect(spell.definition.effects).toEqual([{ kind: "summon", unitId: "neutral-phoenix" }]);
-
-    const phoenix = must(UNITS.find((u) => u.key === "neutral-phoenix"));
-
-    expect(phoenix).toMatchObject({ name: "Фенікс", raceKey: null, tier: 7, flying: true, levelScaling: { hpPerLevel: 10, damagePerLevel: 1, attackPerTwoLevels: 1 } });
-
-    const rebirth = phoenix.abilities.find((a) => a.trigger.event === "lethalDamage");
-
-    expect(rebirth?.limits).toEqual({ perBattle: 1 });
-    expect(rebirth?.effects).toEqual([{ kind: "heal", amount: { percentOf: "maxHp", value: 50 }, revive: true, target: "self" }]);
-  });
-
-  content("scales the earth elemental to 73 HP at level 6", () => {
-    const earth = must(UNITS.find((u) => u.key === "neutral-earth-elemental"));
-
-    const p = { combatStats: { maxHp: earth.hp, currentHp: earth.hp }, battleData: { attacks: [{ damageDice: "2d8", attackBonus: 3 }] } } as unknown as BattleParticipant;
-
-    expect(scaleSummon(p, earth.levelScaling, 6).combatStats.maxHp).toBe(73);
-  });
-
-  content("has 7 races with 4 skills each", () => {
-    expect(RACES).toHaveLength(7);
-
-    for (const r of RACES) expect(raceSkills(r), r.key).toHaveLength(4);
-  });
-
-  content("race trees use the agreed branch sets", () => {
-    const keys = Object.fromEntries(RACES.map((r) => [r.key, r.branchKeys]));
-
-    expect(keys).toEqual({
-      humans: ["leadership", "ranged", "attack", "defense", "light"],
-      necromancers: ["ranged", "attack", "defense", "dark"],
-      demons: ["attack", "defense", "ranged", "dark", "leadership", "chaos"],
-      elves: ["leadership", "ranged", "attack", "defense", "nature"],
-      dwarves: ["leadership", "ranged", "attack", "defense", "light"],
-      mages: ["light", "dark", "chaos", "nature", "defense", "leadership"],
-      "dark-elves": ["attack", "defense", "ranged", "dark", "chaos"],
+describe('buildLibrary validation', () => {
+    it('rejects races with invalid or empty passives', () => {
+        const base = race('r');
+
+        const withPassive = (over: Partial<LibraryRace['passive']>) =>
+            source({
+                branches: [branch('b')],
+                races: [{ ...base, passive: { ...base.passive, ...over } }],
+            });
+
+        expect(() => buildLibrary(withPassive({ description: ' ' }))).toThrow(
+            /порожнє passive.description/
+        );
+        expect(() =>
+            buildLibrary(withPassive({ appearanceDescription: 'коротко' }))
+        ).toThrow(/пасивки коротший/);
+        expect(() => buildLibrary(withPassive({ trait: [] }))).toThrow(
+            /порожній passive.trait/
+        );
+        expect(() =>
+            buildLibrary(
+                withPassive({
+                    trait: [
+                        {
+                            id: 'x',
+                            name: 'x',
+                            trigger: { event: 'passive' },
+                            effects: [
+                                { kind: 'heal', amount: { flat: 1 } } as never,
+                            ],
+                        },
+                    ],
+                })
+            )
+        ).toThrow(/пасивка/);
     });
-  });
 
-  content("has 10 personal abilities", () => {
-    expect(PERSONAL).toHaveLength(10);
-  });
+    it('accepts a valid source', () => {
+        const lib = buildLibrary(
+            source({
+                spells: [spell('s')],
+                branches: [branch('b', { spellSchool: 'Світло' })],
+                races: [race('r')],
+            })
+        );
 
-  content("has spells in 5 schools", () => {
-    expect(buildLibrary().schools).toHaveLength(5);
-    expect(SPELLS.length).toBeGreaterThanOrEqual(48);
-  });
+        expect(lib.schools).toEqual(['Світло']);
+        expect(lib.skills).toHaveLength(6);
 
-  content("has icons that exist and long appearance texts", () => {
-    const lib = buildLibrary();
+        expect(() =>
+            buildLibrary(
+                source({
+                    branches: [branch('b')],
+                    races: [{ ...race('r'), branchKeys: ['x'] }],
+                })
+            )
+        ).toThrow(/невідома гілка «x»/);
+        expect(() =>
+            buildLibrary(
+                source({
+                    branches: [branch('b')],
+                    races: [{ ...race('r'), branchKeys: [] }],
+                })
+            )
+        ).toThrow(/порожній список/);
+        expect(lib.spellByKey.has('s')).toBe(true);
+    });
 
-    const icons = new Set([...Object.keys(SKILL_ICONS), ...Object.keys(BRANCH_ICONS)]);
+    it('reports duplicate keys and names', () => {
+        expect(() =>
+            buildLibrary(source({ spells: [spell('s'), spell('s')] }))
+        ).toThrow(/дублікат key «s»/);
+        expect(() =>
+            buildLibrary(
+                source({
+                    spells: [
+                        spell('a', { name: 'Х' }),
+                        spell('b', { name: 'Х' }),
+                    ],
+                })
+            )
+        ).toThrow(/дублікат name «Х»/);
+        expect(() =>
+            buildLibrary(source({ personal: [skill('p'), skill('p')] }))
+        ).toThrow(/Скіли: дублікат key/);
+    });
 
-    const entries = [...lib.spells, ...lib.branches, ...lib.races, ...lib.skills];
+    it('rejects invalid ability JSON', () => {
+        const bad = skill('bad', {
+            abilities: [
+                {
+                    id: 'x',
+                    name: 'x',
+                    trigger: { event: 'passive' },
+                    effects: [],
+                },
+            ],
+        });
 
-    for (const e of entries) {
-      expect(e.description.trim(), e.key).not.toBe("");
-      expect(e.appearanceDescription.length, e.key).toBeGreaterThanOrEqual(MIN_APPEARANCE_LENGTH);
+        expect(() => buildLibrary(source({ personal: [bad] }))).toThrow(
+            /Скіл «bad»/
+        );
+    });
 
-      if (e.iconKey) expect((SPELLS.includes(e as never) ? Object.keys(SPELL_ICONS) : [...icons]).includes(e.iconKey), e.key).toBe(true);
-    }
-  });
+    it('rejects a set with fewer than 3 artifacts', () => {
+        expect(() =>
+            buildLibrary(
+                source({
+                    artifactSets: [
+                        set('s', {
+                            artifacts: [
+                                artifact('a'),
+                                artifact('b', { slot: 'helmet' }),
+                            ],
+                        }),
+                    ],
+                })
+            )
+        ).toThrow(/менше 3/);
+    });
 
-  content("branch levels are absolute: the highest level replaces lower ones", () => {
-    const value = (b: string, i: number) => {
-      const effect = BRANCHES.find((x) => x.key === b)?.levels[i].abilities[0].effects[0] as { percent?: number; flat?: number };
+    it('rejects repeated slots inside a set', () => {
+        const s = set('s', {
+            artifacts: [
+                artifact('a'),
+                artifact('b'),
+                artifact('c', { slot: 'cape' }),
+            ],
+        });
 
-      return effect.percent ?? effect.flat;
-    };
+        expect(() => buildLibrary(source({ artifactSets: [s] }))).toThrow(
+            /слот «ring1» повторюється/
+        );
+    });
 
-    for (const b of ["attack", "ranged", "defense"]) expect([0, 1, 2].map((i) => value(b, i))).toEqual([10, 20, 30]);
+    it('rejects an unknown artifact iconKey', () => {
+        const s = set('s');
 
-    expect([0, 1, 2].map((i) => value("leadership", i))).toEqual([1, 2, 3]);
+        s.artifacts[0].iconKey = 'nope';
 
-    for (const e of [...BRANCHES, ...RACES]) expect(`${e.description} ${[...e.levels].map((l) => l.description).join(" ")}`, e.key).not.toMatch(/разом із|ще \+/);
-  });
+        expect(() => buildLibrary(source({ artifactSets: [s] }))).toThrow(
+            /невідомий iconKey/
+        );
+    });
+
+    it('rejects an invalid artifact ability', () => {
+        const s = set('s');
+
+        s.artifacts[0].abilities = [
+            {
+                id: 'x',
+                name: 'x',
+                trigger: { event: 'passive' },
+                effects: [],
+            } as never,
+        ];
+
+        expect(() => buildLibrary(source({ artifactSets: [s] }))).toThrow(
+            /Артефакт «s-a»/
+        );
+    });
+
+    it('rejects an unknown spell key in artifact abilities', () => {
+        const s = set('s', {
+            abilities: [
+                {
+                    id: 'i',
+                    name: 'i',
+                    trigger: { event: 'passive' },
+                    effects: [
+                        {
+                            kind: 'flag',
+                            flag: 'spellImmunity',
+                            spellIds: ['nope'],
+                            target: 'allAllies',
+                        },
+                    ],
+                },
+            ],
+        });
+
+        expect(() => buildLibrary(source({ artifactSets: [s] }))).toThrow(
+            /nope/
+        );
+    });
+
+    it('rejects duplicate artifact keys across sets', () => {
+        expect(() =>
+            buildLibrary(
+                source({
+                    artifactSets: [
+                        set('s'),
+                        set('t', { artifacts: set('s').artifacts }),
+                    ],
+                })
+            )
+        ).toThrow(/дублікат key/);
+    });
+
+    it('rejects invalid spell definitions', () => {
+        const bad = spell('bad');
+
+        bad.definition.dice = 99;
+
+        expect(() => buildLibrary(source({ spells: [bad] }))).toThrow(
+            /Заклинання «bad»/
+        );
+    });
+
+    it('rejects unknown icon keys', () => {
+        expect(() =>
+            buildLibrary(
+                source({ personal: [skill('p', { iconKey: 'nope' })] })
+            )
+        ).toThrow(/невідомий iconKey/);
+        expect(() =>
+            buildLibrary(
+                source({ personal: [skill('p', { iconKey: 'brutality' })] })
+            )
+        ).not.toThrow();
+    });
+
+    it('requires known spell icons', () => {
+        expect(() =>
+            buildLibrary(
+                source({ spells: [spell('s', { iconKey: undefined })] })
+            )
+        ).toThrow(/немає iconKey/);
+        expect(() =>
+            buildLibrary(
+                source({ spells: [spell('s', { iconKey: 'brutality' })] })
+            )
+        ).toThrow(/невідомий iconKey/);
+    });
+
+    it('rejects short or empty descriptions', () => {
+        expect(() =>
+            buildLibrary(
+                source({
+                    personal: [
+                        skill('p', { appearanceDescription: 'Коротко.' }),
+                    ],
+                })
+            )
+        ).toThrow(/коротший/);
+        expect(() =>
+            buildLibrary(
+                source({ personal: [skill('p', { description: ' ' })] })
+            )
+        ).toThrow(/порожній опис/);
+    });
+
+    it('resolves spell references', () => {
+        const flag = {
+            id: 't',
+            name: 't',
+            trigger: { event: 'passive' as const },
+            effects: [
+                {
+                    kind: 'flag' as const,
+                    flag: 'spellTargeting' as const,
+                    mode: 'area' as const,
+                    spellIds: ['missing'],
+                },
+            ],
+        };
+
+        expect(() =>
+            buildLibrary(
+                source({ personal: [skill('p', { abilities: [flag] })] })
+            )
+        ).toThrow(/заклинання «missing» не знайдено/);
+
+        const trigger = {
+            id: 't',
+            name: 't',
+            trigger: {
+                event: 'spellCast' as const,
+                phase: 'after' as const,
+                role: 'caster' as const,
+                spellIds: ['missing'],
+                school: 'Нема',
+            },
+            effects: [{ kind: 'note' as const, text: 'x' }],
+        };
+
+        expect(() =>
+            buildLibrary(
+                source({ personal: [skill('p', { abilities: [trigger] })] })
+            )
+        ).toThrow(/заклинання «missing» не знайдено/);
+        expect(() =>
+            buildLibrary(
+                source({ personal: [skill('p', { abilities: [trigger] })] })
+            )
+        ).toThrow(/невідома школа «Нема»/);
+        expect(() =>
+            buildLibrary(
+                source({
+                    personal: [skill('p', { grantedSpellKey: 'missing' })],
+                })
+            )
+        ).toThrow(/grantedSpellKey/);
+        expect(() =>
+            buildLibrary(
+                source({
+                    personal: [skill('p', { grantedSpellKey: 's' })],
+                    spells: [spell('s')],
+                })
+            )
+        ).not.toThrow();
+        expect(() =>
+            buildLibrary(
+                source({
+                    spells: [
+                        spell('s', {
+                            raceModifiers: [{ raceKey: 'none', percent: 10 }],
+                        }),
+                    ],
+                })
+            )
+        ).toThrow(/невідома раса/);
+        expect(() =>
+            buildLibrary(
+                source({ branches: [branch('b', { spellSchool: 'Хаос' })] })
+            )
+        ).toThrow(/невідома школа/);
+    });
 });
 
-describe("spell map templates and ranges", () => {
-  const byKey = (key: string) => SPELLS.find((s) => s.key === key)?.definition.targeting;
+describe('buildLibrary unit validation', () => {
+    it('unit ability descriptions have no raw damage-type ids', () => {
+        const raw = UNITS.flatMap((u) =>
+            u.abilities.map((a) => a.description ?? '')
+        ).filter((d) => /\([a-z]+(, [a-z]+)*\)/.test(d));
 
-  it("опис template-заклинання відповідає шаблону: розмір і дальність у футах, союзники в зоні, режим без карти", () => {
-    const templates = SPELLS.filter((s) => s.definition.targeting?.kind === "template");
+        expect(raw).toEqual([]);
+    });
 
-    expect(templates.length).toBeGreaterThanOrEqual(8);
+    const withUnits = (
+        units: LibraryUnit[],
+        over: Partial<LibrarySource> = {}
+    ) => source({ units, ...over });
 
-    for (const s of templates) {
-      const t = s.definition.targeting as Extract<NonNullable<LibrarySpell["definition"]["targeting"]>, { kind: "template" }>;
+    it('accepts valid units and indexes them', () => {
+        expect(
+            buildLibrary(withUnits([unit('u')])).unitByKey.get('u')?.name
+        ).toBe('Юніт u');
+    });
 
-      expect(s.description, s.key).not.toMatch(/^(До \d+ ворогів|Усі вороги)/);
-      expect(s.description, s.key).toContain(`${t.size} фт`);
-      expect(s.description, s.key).toContain("включно із союзниками");
-      expect(s.description, s.key).toContain(`Без карти — до ${t.maxTargets} ворогів на вибір`);
+    it('rejects duplicate keys and names', () => {
+        expect(() =>
+            buildLibrary(withUnits([unit('u'), unit('u', { name: 'Інший' })]))
+        ).toThrow(/дублікат key «u»/);
+        expect(() =>
+            buildLibrary(
+                withUnits([unit('a', { name: 'Х' }), unit('b', { name: 'Х' })])
+            )
+        ).toThrow(/дублікат name «Х»/);
+    });
 
-      if (t.range) expect(s.description, s.key).toContain(`у межах ${t.range} фт`);
-    }
-  });
+    it('rejects unknown races and tiers out of range', () => {
+        expect(() =>
+            buildLibrary(withUnits([unit('u', { raceKey: 'nope' })]))
+        ).toThrow(/невідома раса «nope»/);
+        expect(() => buildLibrary(withUnits([unit('u', { tier: 8 })]))).toThrow(
+            /тір/
+        );
+        expect(() => buildLibrary(withUnits([unit('u', { tier: 0 })]))).toThrow(
+            /тір/
+        );
+    });
 
-  it("every template has a size up to 120 ft and zone only on templates", () => {
-    for (const s of SPELLS) {
-      const t = s.definition.targeting;
+    it('rejects unknown spell keys and broken abilities', () => {
+        expect(() =>
+            buildLibrary(withUnits([unit('u', { spellKeys: ['nope'] })]))
+        ).toThrow(/закляття «nope»/);
+        expect(() =>
+            buildLibrary(
+                withUnits([
+                    unit('u', {
+                        abilities: [
+                            {
+                                id: 'x',
+                                name: 'x',
+                                trigger: { event: 'passive' },
+                                effects: [],
+                            },
+                        ],
+                    }),
+                ])
+            )
+        ).toThrow(/Юніт «u»/);
+        expect(() =>
+            buildLibrary(
+                withUnits([
+                    unit('u', {
+                        abilities: [
+                            {
+                                id: 'x',
+                                name: 'x',
+                                trigger: { event: 'passive' },
+                                effects: [
+                                    {
+                                        kind: 'flag',
+                                        flag: 'spellImmunity',
+                                        spellIds: ['nope'],
+                                    },
+                                ],
+                            },
+                        ],
+                    }),
+                ])
+            )
+        ).toThrow(/«nope»/);
+    });
 
-      if (t.kind === "template") expect(t.size, s.key).toBeLessThanOrEqual(120);
-      else expect("zone" in t, s.key).toBe(false);
-    }
-  });
+    it('rejects unknown race names in targetRace', () => {
+        expect(() =>
+            buildLibrary(
+                withUnits([
+                    unit('u', { abilities: [hatred('Кара', ['Нікого'])] }),
+                ])
+            )
+        ).toThrow(/невідома раса «Нікого»/);
+    });
 
-  it.each([
-    ["fireball", "circle", 10, 120],
-    ["circle-of-winter", "circle", 10, 60],
-    ["wasp-swarm", "circle", 5, 60],
-    ["stone-spikes", "cross", 5, 60],
-    ["entangle", "cube", 15, 60],
-    ["meteor-shower", "circle", 20, 120],
-    ["earthquake", "circle", 20, 60],
-  ] as const)("%s is a %s template of %i ft", (key, shape, size, range) => {
-    expect(byKey(key)).toMatchObject({ kind: "template", shape, size, ...(range ? { range } : {}) });
-  });
+    it('requires falloff for multi-target attacks', () => {
+        const attacks: LibraryUnit['attacks'] = [
+            {
+                name: 'Залп',
+                type: 'ranged',
+                dice: '1d6',
+                damageType: 'piercing',
+                targets: 2,
+            },
+        ];
 
-  it("circle of winter is a ring: hollow circle, its description says so", () => {
-    expect(byKey("circle-of-winter")).toMatchObject({ hollow: true });
-    expect(SPELLS.find((s) => s.key === "circle-of-winter")?.description).toContain("центральна клітинка не вражається");
-  });
+        expect(() => buildLibrary(withUnits([unit('u', { attacks })]))).toThrow(
+            /multiTargetFalloff/
+        );
+        expect(() =>
+            buildLibrary(
+                withUnits([
+                    unit('u', { attacks, abilities: [falloff('Залп')] }),
+                ])
+            )
+        ).not.toThrow();
+    });
 
-  it("fire wall is a 30 ft line with a 3-round hazard and immediate fire damage", () => {
-    const spell = SPELLS.find((s) => s.key === "fire-wall");
+    it('requires unique ability ids within a unit', () => {
+        expect(() =>
+            buildLibrary(
+                withUnits([
+                    unit('u', { abilities: [falloff('a'), falloff('b')] }),
+                ])
+            )
+        ).toThrow(/id «unit-falloff» повторюється/);
+    });
 
-    expect(spell?.definition.targeting).toMatchObject({ kind: "template", shape: "line", size: 30, zone: { rounds: 3 } });
-    expect(spell?.definition.effects).toEqual([expect.objectContaining({ kind: "dealDamage", damageType: "fire" })]);
-  });
+    it('requires summoned unit keys to exist', () => {
+        expect(() =>
+            buildLibrary(
+                withUnits([unit('u', { abilities: [raiseOnKill('ghost')] })])
+            )
+        ).toThrow(/юніт «ghost»/);
+        expect(() =>
+            buildLibrary(
+                withUnits([
+                    unit('u', { abilities: [raiseOnKill('u2')] }),
+                    unit('u2'),
+                ])
+            )
+        ).not.toThrow();
 
-  it("chain lightning is a chain of 4 enemies with range 60", () => {
-    expect(byKey("chain-lightning")).toMatchObject({ kind: "area", side: "enemy", maxTargets: 4, range: 60, chain: true });
-  });
+        const summoning = spell('s', {
+            definition: {
+                ...spell('s').definition,
+                effects: [{ kind: 'summon', unitId: 'ghost' }],
+            },
+        });
 
-  it.each([
-    ["eldritch-arrow", 120],
-    ["lightning-bolt", 120],
-    ["divine-retribution", 120],
-    ["weakness", 60],
-    ["blindness", 60],
-    ["thorny-vines", 60],
-    ["haste", 60],
-    ["resurrection", 60],
-  ] as const)("%s has range %i", (key, range) => {
-    expect(byKey(key)).toMatchObject({ range });
-  });
+        expect(() =>
+            buildLibrary(withUnits([], { spells: [summoning] }))
+        ).toThrow(/юніт «ghost»/);
+        expect(() =>
+            buildLibrary(withUnits([unit('ghost')], { spells: [summoning] }))
+        ).not.toThrow();
+    });
 
-  it.each(["word-of-light", "curse-of-the-netherworld", "nature-storm", "armageddon", "healing-wave", "forest-rebirth"])("%s stays global", (key) => {
-    expect(byKey(key)).not.toHaveProperty("range");
-    expect(["allEnemies", "everyone", "allAllies", "allAlliesDead"]).toContain(byKey(key)?.kind);
-  });
+    it('requires exactly 21 units per race, 3 per tier with distinct roles', () => {
+        const r = race('r');
+
+        const full = raceUnits('r');
+
+        expect(() =>
+            buildLibrary(
+                withUnits(full, { branches: [branch('b')], races: [r] })
+            )
+        ).not.toThrow();
+        expect(() =>
+            buildLibrary(
+                withUnits(full.slice(1), {
+                    branches: [branch('b')],
+                    races: [r],
+                })
+            )
+        ).toThrow(/21 юніт/);
+
+        const skewed = full.map((u, i) =>
+            i === 1 ? { ...u, role: 'base' as const } : u
+        );
+
+        expect(() =>
+            buildLibrary(
+                withUnits(skewed, { branches: [branch('b')], races: [r] })
+            )
+        ).toThrow(/ролі/);
+    });
+});
+
+describe('library content', () => {
+    it('builds without issues', () => {
+        expect(() => buildLibrary(LIBRARY_SOURCE)).not.toThrow();
+    });
+
+    const content = it.skipIf(!LIBRARY_COMPLETE);
+
+    content('only the listed large creatures occupy 2x2', () => {
+        const large = UNITS.filter((u) => (u.gridSize ?? 1) > 1);
+
+        expect(large.every((u) => u.gridSize === 2)).toBe(true);
+        expect(large.map((u) => u.key).sort()).toEqual([
+            'dark-elves-black-dragon',
+            'dark-elves-dark-rider',
+            'dark-elves-deep-hydra',
+            'dark-elves-gloom-rider',
+            'dark-elves-hydra',
+            'dark-elves-red-dragon',
+            'dark-elves-rotting-hydra',
+            'dark-elves-shadow-dragon',
+            'dark-elves-swift-rider',
+            'demons-archdemon',
+            'demons-archdevil',
+            'demons-cave-abomination',
+            'demons-cave-demon',
+            'demons-cave-lord',
+            'demons-devil',
+            'demons-gloom',
+            'demons-hell-nightmare',
+            'demons-nightmare',
+            'dwarves-arkat-dragon',
+            'dwarves-bear-rider',
+            'dwarves-black-bear-rider',
+            'dwarves-earl',
+            'dwarves-fire-dragon',
+            'dwarves-jarl',
+            'dwarves-lava-dragon',
+            'dwarves-thane',
+            'dwarves-white-bear-rider',
+            'elves-ancient-ent',
+            'elves-crystal-dragon',
+            'elves-emerald-dragon',
+            'elves-ent',
+            'elves-green-dragon',
+            'elves-light-unicorn',
+            'elves-unicorn',
+            'elves-war-unicorn',
+            'elves-wild-ent',
+            'humans-angel',
+            'humans-archangel',
+            'humans-battle-griffin',
+            'humans-champion',
+            'humans-griffin',
+            'humans-knight',
+            'humans-paladin',
+            'humans-royal-griffin',
+            'humans-seraph',
+            'mages-colossus',
+            'mages-genie',
+            'mages-genie-sultan',
+            'mages-genie-vizier',
+            'mages-rakshasa-kshatriya',
+            'mages-rakshasa-princess',
+            'mages-rakshasa-raja',
+            'mages-storm-lord',
+            'mages-titan',
+            'necromancers-archlich',
+            'necromancers-bone-dragon',
+            'necromancers-high-lich',
+            'necromancers-lich',
+            'necromancers-sorrow-dragon',
+            'necromancers-spectral-dragon',
+            'neutral-death-avatar',
+            'neutral-phoenix',
+        ]);
+    });
+
+    content('has 8 branches with 3 levels and 3/2/1 slots', () => {
+        expect(BRANCHES).toHaveLength(8);
+
+        for (const b of BRANCHES) {
+            expect(b.levels, b.key).toHaveLength(3);
+            expect(
+                b.slots.map((s) => s.length),
+                b.key
+            ).toEqual([3, 2, 1]);
+        }
+    });
+
+    content(
+        'gives every race a passive with stat bonuses and one trait',
+        () => {
+            const expected: Record<string, Record<string, number>> = {
+                humans: { strength: 2, charisma: 1 },
+                demons: { strength: 2, charisma: 1 },
+                elves: { dexterity: 2, wisdom: 1 },
+                necromancers: { intelligence: 2, constitution: 1 },
+                mages: { intelligence: 2, wisdom: 1 },
+                'dark-elves': { dexterity: 2, charisma: 1 },
+                dwarves: { constitution: 2, strength: 1 },
+            };
+
+            for (const r of RACES) {
+                expect(r.passive.stats, r.key).toEqual(expected[r.key]);
+                expect(r.passive.trait, r.key).toHaveLength(2);
+                expect(racePassiveAbilities(r)[0].id, r.key).toBe(
+                    `${r.key}-stats`
+                );
+                expect(Object.keys(racePassiveStatModifiers(r)), r.key).toEqual(
+                    Object.keys(expected[r.key])
+                );
+            }
+        }
+    );
+
+    content(
+        'has 4 elemental summon spells pointing at scaling neutral units',
+        () => {
+            const spells = SPELLS.filter((sp) =>
+                sp.name.startsWith('Прикликання елементаля')
+            );
+
+            expect(spells).toHaveLength(4);
+
+            for (const sp of spells) {
+                const summon = sp.definition.effects.find(
+                    (e) => e.kind === 'summon'
+                );
+
+                const unit = UNITS.find(
+                    (u) => summon?.kind === 'summon' && u.key === summon.unitId
+                );
+
+                expect(unit?.raceKey, sp.key).toBeNull();
+                expect(unit?.levelScaling, sp.key).toBeDefined();
+                expect(sp.level, sp.key).toBe(3);
+            }
+        }
+    );
+
+    content(
+        '«Призив Фенікса» summons the scaling Phoenix that is reborn once at half HP',
+        () => {
+            const spell = must(
+                SPELLS.find((sp) => sp.key === 'call-of-the-beast')
+            );
+
+            expect(spell.name).toBe('Призив Фенікса');
+            expect(spell.formerNames).toEqual(['Поклик звіра']);
+            expect(spell.level).toBe(5);
+            expect(spell.definition.effects).toEqual([
+                { kind: 'summon', unitId: 'neutral-phoenix' },
+            ]);
+
+            const phoenix = must(
+                UNITS.find((u) => u.key === 'neutral-phoenix')
+            );
+
+            expect(phoenix).toMatchObject({
+                name: 'Фенікс',
+                raceKey: null,
+                tier: 7,
+                flying: true,
+                levelScaling: {
+                    hpPerLevel: 10,
+                    damagePerLevel: 1,
+                    attackPerTwoLevels: 1,
+                },
+            });
+
+            const rebirth = phoenix.abilities.find(
+                (a) => a.trigger.event === 'lethalDamage'
+            );
+
+            expect(rebirth?.limits).toEqual({ perBattle: 1 });
+            expect(rebirth?.effects).toEqual([
+                {
+                    kind: 'heal',
+                    amount: { percentOf: 'maxHp', value: 50 },
+                    revive: true,
+                    target: 'self',
+                },
+            ]);
+        }
+    );
+
+    content('scales the earth elemental to 73 HP at level 6', () => {
+        const earth = must(
+            UNITS.find((u) => u.key === 'neutral-earth-elemental')
+        );
+
+        const p = {
+            combatStats: { maxHp: earth.hp, currentHp: earth.hp },
+            battleData: { attacks: [{ damageDice: '2d8', attackBonus: 3 }] },
+        } as unknown as BattleParticipant;
+
+        expect(scaleSummon(p, earth.levelScaling, 6).combatStats.maxHp).toBe(
+            73
+        );
+    });
+
+    content('has 7 races with 4 skills each', () => {
+        expect(RACES).toHaveLength(7);
+
+        for (const r of RACES) expect(raceSkills(r), r.key).toHaveLength(4);
+    });
+
+    content('race trees use the agreed branch sets', () => {
+        const keys = Object.fromEntries(
+            RACES.map((r) => [r.key, r.branchKeys])
+        );
+
+        expect(keys).toEqual({
+            humans: ['leadership', 'ranged', 'attack', 'defense', 'light'],
+            necromancers: ['ranged', 'attack', 'defense', 'dark'],
+            demons: [
+                'attack',
+                'defense',
+                'ranged',
+                'dark',
+                'leadership',
+                'chaos',
+            ],
+            elves: ['leadership', 'ranged', 'attack', 'defense', 'nature'],
+            dwarves: ['leadership', 'ranged', 'attack', 'defense', 'light'],
+            mages: [
+                'light',
+                'dark',
+                'chaos',
+                'nature',
+                'defense',
+                'leadership',
+            ],
+            'dark-elves': ['attack', 'defense', 'ranged', 'dark', 'chaos'],
+        });
+    });
+
+    content('has 10 personal abilities', () => {
+        expect(PERSONAL).toHaveLength(10);
+    });
+
+    content('has spells in 5 schools', () => {
+        expect(buildLibrary().schools).toHaveLength(5);
+        expect(SPELLS.length).toBeGreaterThanOrEqual(48);
+    });
+
+    content('has icons that exist and long appearance texts', () => {
+        const lib = buildLibrary();
+
+        const icons = new Set([
+            ...Object.keys(SKILL_ICONS),
+            ...Object.keys(BRANCH_ICONS),
+        ]);
+
+        const entries = [
+            ...lib.spells,
+            ...lib.branches,
+            ...lib.races,
+            ...lib.skills,
+        ];
+
+        for (const e of entries) {
+            expect(e.description.trim(), e.key).not.toBe('');
+            expect(
+                e.appearanceDescription.length,
+                e.key
+            ).toBeGreaterThanOrEqual(MIN_APPEARANCE_LENGTH);
+
+            if (e.iconKey)
+                expect(
+                    (SPELLS.includes(e as never)
+                        ? Object.keys(SPELL_ICONS)
+                        : [...icons]
+                    ).includes(e.iconKey),
+                    e.key
+                ).toBe(true);
+        }
+    });
+
+    content(
+        'branch levels are absolute: the highest level replaces lower ones',
+        () => {
+            const value = (b: string, i: number) => {
+                const effect = BRANCHES.find((x) => x.key === b)?.levels[i]
+                    .abilities[0].effects[0] as {
+                    percent?: number;
+                    flat?: number;
+                };
+
+                return effect.percent ?? effect.flat;
+            };
+
+            for (const b of ['attack', 'ranged', 'defense'])
+                expect([0, 1, 2].map((i) => value(b, i))).toEqual([10, 20, 30]);
+
+            expect([0, 1, 2].map((i) => value('leadership', i))).toEqual([
+                1, 2, 3,
+            ]);
+
+            for (const e of [...BRANCHES, ...RACES])
+                expect(
+                    `${e.description} ${[...e.levels].map((l) => l.description).join(' ')}`,
+                    e.key
+                ).not.toMatch(/разом із|ще \+/);
+        }
+    );
+});
+
+describe('spell map templates and ranges', () => {
+    const byKey = (key: string) =>
+        SPELLS.find((s) => s.key === key)?.definition.targeting;
+
+    it('опис template-заклинання відповідає шаблону: розмір і дальність у футах, союзники в зоні, режим без карти', () => {
+        const templates = SPELLS.filter(
+            (s) => s.definition.targeting?.kind === 'template'
+        );
+
+        expect(templates.length).toBeGreaterThanOrEqual(8);
+
+        for (const s of templates) {
+            const t = s.definition.targeting as Extract<
+                NonNullable<LibrarySpell['definition']['targeting']>,
+                { kind: 'template' }
+            >;
+
+            expect(s.description, s.key).not.toMatch(
+                /^(До \d+ ворогів|Усі вороги)/
+            );
+            expect(s.description, s.key).toContain(`${t.size} фт`);
+            expect(s.description, s.key).toContain('включно із союзниками');
+            expect(s.description, s.key).toContain(
+                `Без карти — до ${t.maxTargets} ворогів на вибір`
+            );
+
+            if (t.range)
+                expect(s.description, s.key).toContain(`у межах ${t.range} фт`);
+        }
+    });
+
+    it('every template has a size up to 120 ft and zone only on templates', () => {
+        for (const s of SPELLS) {
+            const t = s.definition.targeting;
+
+            if (t.kind === 'template')
+                expect(t.size, s.key).toBeLessThanOrEqual(120);
+            else expect('zone' in t, s.key).toBe(false);
+        }
+    });
+
+    it.each([
+        ['fireball', 'circle', 10, 120],
+        ['circle-of-winter', 'circle', 10, 60],
+        ['wasp-swarm', 'circle', 5, 60],
+        ['stone-spikes', 'cross', 5, 60],
+        ['entangle', 'cube', 15, 60],
+        ['meteor-shower', 'circle', 20, 120],
+        ['earthquake', 'circle', 20, 60],
+    ] as const)('%s is a %s template of %i ft', (key, shape, size, range) => {
+        expect(byKey(key)).toMatchObject({
+            kind: 'template',
+            shape,
+            size,
+            ...(range ? { range } : {}),
+        });
+    });
+
+    it('circle of winter is a ring: hollow circle, its description says so', () => {
+        expect(byKey('circle-of-winter')).toMatchObject({ hollow: true });
+        expect(
+            SPELLS.find((s) => s.key === 'circle-of-winter')?.description
+        ).toContain('центральна клітинка не вражається');
+    });
+
+    it('fire wall is a 30 ft line with a 3-round hazard and immediate fire damage', () => {
+        const spell = SPELLS.find((s) => s.key === 'fire-wall');
+
+        expect(spell?.definition.targeting).toMatchObject({
+            kind: 'template',
+            shape: 'line',
+            size: 30,
+            zone: { rounds: 3 },
+        });
+        expect(spell?.definition.effects).toEqual([
+            expect.objectContaining({ kind: 'dealDamage', damageType: 'fire' }),
+        ]);
+    });
+
+    it('chain lightning is a chain of 4 enemies with range 60', () => {
+        expect(byKey('chain-lightning')).toMatchObject({
+            kind: 'area',
+            side: 'enemy',
+            maxTargets: 4,
+            range: 60,
+            chain: true,
+        });
+    });
+
+    it.each([
+        ['eldritch-arrow', 120],
+        ['lightning-bolt', 120],
+        ['divine-retribution', 120],
+        ['weakness', 60],
+        ['blindness', 60],
+        ['thorny-vines', 60],
+        ['haste', 60],
+        ['resurrection', 60],
+    ] as const)('%s has range %i', (key, range) => {
+        expect(byKey(key)).toMatchObject({ range });
+    });
+
+    it.each([
+        'word-of-light',
+        'curse-of-the-netherworld',
+        'nature-storm',
+        'armageddon',
+        'healing-wave',
+        'forest-rebirth',
+    ])('%s stays global', (key) => {
+        expect(byKey(key)).not.toHaveProperty('range');
+        expect([
+            'allEnemies',
+            'everyone',
+            'allAllies',
+            'allAlliesDead',
+        ]).toContain(byKey(key)?.kind);
+    });
 });

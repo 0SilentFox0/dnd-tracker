@@ -1,97 +1,223 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
-import { ParticipantSide } from "@/lib/constants/battle";
-import { textOf } from "@/lib/i18n/test/text";
-import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
-import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
-import { advanceTurn } from "@/lib/utils/battle/turn/advance-turn";
-import { runAdvanceTurnLoop } from "@/lib/utils/battle/turn/run-advance-turn-loop";
-import { processStartOfRound, processStartOfTurn } from "@/lib/utils/battle/turn/start-end";
-import { DEFAULT_RULES } from "@/lib/utils/rules";
-import { applyPendingMoraleCheck } from "@/systems/morale/rules/turn/apply-pending";
+import { ParticipantSide } from '@/lib/constants/battle';
+import { textOf } from '@/lib/i18n/test/text';
+import {
+    makeParticipant,
+    resolved,
+    seq,
+} from '@/lib/utils/abilities/__tests__/fixtures';
+import { runAbilities } from '@/lib/utils/abilities/engine/core/run-abilities';
+import { advanceTurn } from '@/lib/utils/battle/turn/advance-turn';
+import { runAdvanceTurnLoop } from '@/lib/utils/battle/turn/run-advance-turn-loop';
+import {
+    processStartOfRound,
+    processStartOfTurn,
+} from '@/lib/utils/battle/turn/start-end';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { applyPendingMoraleCheck } from '@/systems/morale/rules/turn/apply-pending';
 
-describe("turn events", () => {
-  it("turnStart лікує, perTurn скидається", () => {
-    const regen = resolved({ trigger: { event: "turnStart" }, limits: { perTurn: 1 }, effects: [{ kind: "heal", amount: 3 }] });
+describe('turn events', () => {
+    it('turnStart лікує, perTurn скидається', () => {
+        const regen = resolved({
+            trigger: { event: 'turnStart' },
+            limits: { perTurn: 1 },
+            effects: [{ kind: 'heal', amount: 3 }],
+        });
 
-    const p = makeParticipant({ id: "a", hp: 10, abilities: [regen] });
+        const p = makeParticipant({ id: 'a', hp: 10, abilities: [regen] });
 
-    const r = processStartOfTurn(p, 1, [p], seq(0), undefined, DEFAULT_RULES);
+        const r = processStartOfTurn(
+            p,
+            1,
+            [p],
+            seq(0),
+            undefined,
+            DEFAULT_RULES
+        );
 
-    expect(r.participants[0].combatStats.currentHp).toBe(13);
-    expect(textOf(r.abilityMessages[0])).toContain("💚");
-    expect(textOf(r.abilityMessages[0])).not.toContain("(a)");
-  });
-
-  it("смерть від DOT дає kill-подію союзникам", () => {
-    const base = makeParticipant({ id: "a", hp: 1 });
-
-    const dying = { ...base, battleData: { ...base.battleData, activeEffects: [{ id: "d", name: "Отрута", type: "debuff" as const, duration: 2, appliedAt: { round: 1, timestamp: new Date() }, effects: [], dotDamage: { damagePerRound: 5, damageType: "poison" } }] } };
-
-    const mourn = resolved({ trigger: { event: "kill", role: "victimSide" }, effects: [{ kind: "changeMorale", delta: -1 }] });
-
-    const ally = makeParticipant({ id: "b", abilities: [mourn] });
-
-    const r = processStartOfTurn(dying, 1, [dying, ally], seq(0), undefined, DEFAULT_RULES);
-
-    expect(r.participants.find((p) => p.basicInfo.id === "b")?.combatStats.morale).toBe(-1);
-  });
-
-  it("roundStart і roundEnd у циклі ходів", () => {
-    const rally = resolved({ trigger: { event: "roundStart" }, effects: [{ kind: "changeMorale", delta: 1 }] });
-
-    const tired = resolved({ trigger: { event: "roundEnd" }, effects: [{ kind: "changeMorale", delta: -1 }] }, { id: "t" });
-
-    const a = makeParticipant({ id: "a", abilities: [rally] });
-
-    const b = makeParticipant({ id: "b", abilities: [tired] });
-
-    const r = runAdvanceTurnLoop({ rules: DEFAULT_RULES, initiativeOrder: [a, b], currentTurnIndex: 1, currentRound: 1, battleId: "b1", currentBattleLogLength: 0, pendingSummons: [] });
-
-    expect(r.updatedInitiativeOrder.find((p) => p.basicInfo.id === "a")?.combatStats.morale).toBe(1);
-    expect(r.updatedInitiativeOrder.find((p) => p.basicInfo.id === "b")?.combatStats.morale).toBe(-1);
-  });
-
-  it("moraleCheck: успіх власника і перевірка союзника", () => {
-    const proud = resolved({ trigger: { event: "moraleCheck", result: "success", whose: "self" }, effects: [{ kind: "heal", amount: 2 }] });
-
-    const a = makeParticipant({ id: "a", hp: 10, abilities: [proud] });
-
-    const r = applyPendingMoraleCheck({
-      participants: [a, makeParticipant({ id: "e", side: ParticipantSide.ENEMY })],
-      payload: { participantId: "a", d10Roll: 10, moraleResult: { shouldSkipTurn: false, hasExtraTurn: false, message: "Мораль тримається", moralePositive: true } },
-      scene: { round: 1, id: "b1", eventSeq: 0 },
-      rules: DEFAULT_RULES,
-      run: runAbilities,
+        expect(r.participants[0].combatStats.currentHp).toBe(13);
+        expect(textOf(r.abilityMessages[0])).toContain('💚');
+        expect(textOf(r.abilityMessages[0])).not.toContain('(a)');
     });
 
-    expect(r.updatedInitiativeOrder[0].combatStats.currentHp).toBe(12);
-  });
+    it('смерть від DOT дає kill-подію союзникам', () => {
+        const base = makeParticipant({ id: 'a', hp: 1 });
 
-  it("roundStart лише для новачків у battleStart", () => {
-    const rally = resolved({ trigger: { event: "battleStart" }, effects: [{ kind: "changeMorale", delta: 1 }] });
+        const dying = {
+            ...base,
+            battleData: {
+                ...base.battleData,
+                activeEffects: [
+                    {
+                        id: 'd',
+                        name: 'Отрута',
+                        type: 'debuff' as const,
+                        duration: 2,
+                        appliedAt: { round: 1, timestamp: new Date() },
+                        effects: [],
+                        dotDamage: { damagePerRound: 5, damageType: 'poison' },
+                    },
+                ],
+            },
+        };
 
-    const veteran = { ...makeParticipant({ id: "a", abilities: [rally] }) };
+        const mourn = resolved({
+            trigger: { event: 'kill', role: 'victimSide' },
+            effects: [{ kind: 'changeMorale', delta: -1 }],
+        });
 
-    const r = processStartOfRound([veteran], 2, [], undefined, undefined, DEFAULT_RULES);
+        const ally = makeParticipant({ id: 'b', abilities: [mourn] });
 
-    expect(r.updatedInitiativeOrder[0].combatStats.morale).toBe(0);
-  });
+        const r = processStartOfTurn(
+            dying,
+            1,
+            [dying, ally],
+            seq(0),
+            undefined,
+            DEFAULT_RULES
+        );
 
-  it("turnEnd — для того, чий хід закінчився, навіть коли далі екстра-хід", () => {
-    const tired = resolved({ trigger: { event: "turnEnd" }, effects: [{ kind: "changeMorale", delta: -1 }] });
+        expect(
+            r.participants.find((p) => p.basicInfo.id === 'b')?.combatStats
+                .morale
+        ).toBe(-1);
+    });
 
-    const a = { ...makeParticipant({ id: "a" }), actionFlags: { ...makeParticipant({ id: "a" }).actionFlags, hasExtraTurn: true } };
+    it('roundStart і roundEnd у циклі ходів', () => {
+        const rally = resolved({
+            trigger: { event: 'roundStart' },
+            effects: [{ kind: 'changeMorale', delta: 1 }],
+        });
 
-    const b = makeParticipant({ id: "b", abilities: [tired] });
+        const tired = resolved(
+            {
+                trigger: { event: 'roundEnd' },
+                effects: [{ kind: 'changeMorale', delta: -1 }],
+            },
+            { id: 't' }
+        );
 
-    const scene = { id: "b1", campaignId: "c1", status: "active" as const, round: 1, turnIndex: 1, version: 1, eventSeq: 0, pendingMoraleCheck: null, pendingChoice: null, startedAt: null, completedAt: null };
+        const a = makeParticipant({ id: 'a', abilities: [rally] });
 
-    const r = advanceTurn({ rules: DEFAULT_RULES, participants: [a, b], pending: [], scene });
+        const b = makeParticipant({ id: 'b', abilities: [tired] });
 
-    expect(r.scene.turnIndex).toBe(0);
-    expect(r.participants.find((p) => p.basicInfo.id === "b")?.combatStats.morale).toBe(-1);
-    expect(r.participants.find((p) => p.basicInfo.id === "a")?.combatStats.morale).toBe(0);
-  });
+        const r = runAdvanceTurnLoop({
+            rules: DEFAULT_RULES,
+            initiativeOrder: [a, b],
+            currentTurnIndex: 1,
+            currentRound: 1,
+            battleId: 'b1',
+            currentBattleLogLength: 0,
+            pendingSummons: [],
+        });
+
+        expect(
+            r.updatedInitiativeOrder.find((p) => p.basicInfo.id === 'a')
+                ?.combatStats.morale
+        ).toBe(1);
+        expect(
+            r.updatedInitiativeOrder.find((p) => p.basicInfo.id === 'b')
+                ?.combatStats.morale
+        ).toBe(-1);
+    });
+
+    it('moraleCheck: успіх власника і перевірка союзника', () => {
+        const proud = resolved({
+            trigger: { event: 'moraleCheck', result: 'success', whose: 'self' },
+            effects: [{ kind: 'heal', amount: 2 }],
+        });
+
+        const a = makeParticipant({ id: 'a', hp: 10, abilities: [proud] });
+
+        const r = applyPendingMoraleCheck({
+            participants: [
+                a,
+                makeParticipant({ id: 'e', side: ParticipantSide.ENEMY }),
+            ],
+            payload: {
+                participantId: 'a',
+                d10Roll: 10,
+                moraleResult: {
+                    shouldSkipTurn: false,
+                    hasExtraTurn: false,
+                    message: 'Мораль тримається',
+                    moralePositive: true,
+                },
+            },
+            scene: { round: 1, id: 'b1', eventSeq: 0 },
+            rules: DEFAULT_RULES,
+            run: runAbilities,
+        });
+
+        expect(r.updatedInitiativeOrder[0].combatStats.currentHp).toBe(12);
+    });
+
+    it('roundStart лише для новачків у battleStart', () => {
+        const rally = resolved({
+            trigger: { event: 'battleStart' },
+            effects: [{ kind: 'changeMorale', delta: 1 }],
+        });
+
+        const veteran = { ...makeParticipant({ id: 'a', abilities: [rally] }) };
+
+        const r = processStartOfRound(
+            [veteran],
+            2,
+            [],
+            undefined,
+            undefined,
+            DEFAULT_RULES
+        );
+
+        expect(r.updatedInitiativeOrder[0].combatStats.morale).toBe(0);
+    });
+
+    it('turnEnd — для того, чий хід закінчився, навіть коли далі екстра-хід', () => {
+        const tired = resolved({
+            trigger: { event: 'turnEnd' },
+            effects: [{ kind: 'changeMorale', delta: -1 }],
+        });
+
+        const a = {
+            ...makeParticipant({ id: 'a' }),
+            actionFlags: {
+                ...makeParticipant({ id: 'a' }).actionFlags,
+                hasExtraTurn: true,
+            },
+        };
+
+        const b = makeParticipant({ id: 'b', abilities: [tired] });
+
+        const scene = {
+            id: 'b1',
+            campaignId: 'c1',
+            status: 'active' as const,
+            round: 1,
+            turnIndex: 1,
+            version: 1,
+            eventSeq: 0,
+            pendingMoraleCheck: null,
+            pendingChoice: null,
+            startedAt: null,
+            completedAt: null,
+        };
+
+        const r = advanceTurn({
+            rules: DEFAULT_RULES,
+            participants: [a, b],
+            pending: [],
+            scene,
+        });
+
+        expect(r.scene.turnIndex).toBe(0);
+        expect(
+            r.participants.find((p) => p.basicInfo.id === 'b')?.combatStats
+                .morale
+        ).toBe(-1);
+        expect(
+            r.participants.find((p) => p.basicInfo.id === 'a')?.combatStats
+                .morale
+        ).toBe(0);
+    });
 });
-

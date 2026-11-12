@@ -1,357 +1,795 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
-import { CombatStatus, ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
-import { textOf } from "@/lib/i18n/test/text";
-import { makeEffect, makeParticipant, seq } from "@/lib/utils/abilities/__tests__/fixtures";
-import type { Effect } from "@/lib/utils/abilities/schema";
-import { uniqueCastId } from "@/lib/utils/battle/concentration";
-import { removeEffects } from "@/lib/utils/battle/conditions/query";
-import { applyDamageConsequences } from "@/lib/utils/battle/damage/consequences";
-import { hazardHit, hazardUnder } from "@/lib/utils/battle/grid";
-import { textsOf } from "@/lib/utils/battle/log/__tests__/event-text";
-import { castSpell } from "@/lib/utils/battle/spell";
-import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
-import { DEFAULT_RULES, type Ruleset } from "@/lib/utils/rules";
-import { concentrationCheck } from "@/systems/d20/rules/concentration/check";
-import { beginConcentration, dropConcentration, dropOrphanedConcentration, isZoneConcentrationLive } from "@/systems/d20/rules/concentration/sustain";
-import { applyCondition5e } from "@/systems/d20/rules/conditions/apply";
-import { DEATH_SAVES_TIMED_KEY } from "@/systems/d20/rules/death-saves/state";
-import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
+import {
+    CombatStatus,
+    ParticipantSide,
+    ParticipantSourceType,
+} from '@/lib/constants/battle';
+import { textOf } from '@/lib/i18n/test/text';
+import {
+    makeEffect,
+    makeParticipant,
+    seq,
+} from '@/lib/utils/abilities/__tests__/fixtures';
+import type { Effect } from '@/lib/utils/abilities/schema';
+import { uniqueCastId } from '@/lib/utils/battle/concentration';
+import { removeEffects } from '@/lib/utils/battle/conditions/query';
+import { applyDamageConsequences } from '@/lib/utils/battle/damage/consequences';
+import { hazardHit, hazardUnder } from '@/lib/utils/battle/grid';
+import { textsOf } from '@/lib/utils/battle/log/__tests__/event-text';
+import { castSpell } from '@/lib/utils/battle/spell';
+import type { CastableSpell } from '@/lib/utils/battle/types/spell-process';
+import { DEFAULT_RULES, type Ruleset } from '@/lib/utils/rules';
+import { concentrationCheck } from '@/systems/d20/rules/concentration/check';
+import {
+    beginConcentration,
+    dropConcentration,
+    dropOrphanedConcentration,
+    isZoneConcentrationLive,
+} from '@/systems/d20/rules/concentration/sustain';
+import { applyCondition5e } from '@/systems/d20/rules/conditions/apply';
+import { DEATH_SAVES_TIMED_KEY } from '@/systems/d20/rules/death-saves/state';
+import type { BattleMapConfig, BattleParticipant } from '@/types/battle';
 
-const rulesOn = (dcCap: number | null = null): Ruleset => ({ ...DEFAULT_RULES, concentration: { enabled: true, dcCap } });
+const rulesOn = (dcCap: number | null = null): Ruleset => ({
+    ...DEFAULT_RULES,
+    concentration: { enabled: true, dcCap },
+});
 
-const slowEffect: Effect = { kind: "modifyStat", stat: "armor", flat: -2, duration: { rounds: 3 } };
+const slowEffect: Effect = {
+    kind: 'modifyStat',
+    stat: 'armor',
+    flat: -2,
+    duration: { rounds: 3 },
+};
 
-const spellOf = (concentration: boolean, effects: Effect[] = [slowEffect]): CastableSpell => ({
-  id: "sp",
-  name: "Сповільнення",
-  level: 1,
-  groupId: "chaos",
-  definition: { dice: 0, cost: "action", targeting: { kind: "area", side: "enemy", maxTargets: 2 }, resolution: { kind: "auto" }, effects, raceModifiers: [], ...(concentration && { concentration: true }) },
+const spellOf = (
+    concentration: boolean,
+    effects: Effect[] = [slowEffect]
+): CastableSpell => ({
+    id: 'sp',
+    name: 'Сповільнення',
+    level: 1,
+    groupId: 'chaos',
+    definition: {
+        dice: 0,
+        cost: 'action',
+        targeting: { kind: 'area', side: 'enemy', maxTargets: 2 },
+        resolution: { kind: 'auto' },
+        effects,
+        raceModifiers: [],
+        ...(concentration && { concentration: true }),
+    },
 });
 
 const caster = (): BattleParticipant => {
-  const p = makeParticipant({ id: "c" });
+    const p = makeParticipant({ id: 'c' });
 
-  return { ...p, spellcasting: { ...p.spellcasting, spellSlots: { "1": { max: 3, current: 3 } } } };
+    return {
+        ...p,
+        spellcasting: {
+            ...p.spellcasting,
+            spellSlots: { '1': { max: 3, current: 3 } },
+        },
+    };
 };
 
-const foe = (id: string) => makeParticipant({ id, side: ParticipantSide.ENEMY, hp: 100, maxHp: 100 });
+const foe = (id: string) =>
+    makeParticipant({ id, side: ParticipantSide.ENEMY, hp: 100, maxHp: 100 });
 
-const cast = (spell: CastableSpell, ps: BattleParticipant[], rules: Ruleset = DEFAULT_RULES) =>
-  castSpell({ caster: ps[0], spell, targetIds: ["e1", "e2"], allParticipants: ps, currentRound: 1, battleId: "b", diceRolls: [], rng: seq(0.5), rules });
+const cast = (
+    spell: CastableSpell,
+    ps: BattleParticipant[],
+    rules: Ruleset = DEFAULT_RULES
+) =>
+    castSpell({
+        caster: ps[0],
+        spell,
+        targetIds: ['e1', 'e2'],
+        allParticipants: ps,
+        currentRound: 1,
+        battleId: 'b',
+        diceRolls: [],
+        rng: seq(0.5),
+        rules,
+    });
 
-const effectsOf = (ps: BattleParticipant[], id: string) => ps.find((p) => p.basicInfo.id === id)?.battleData.activeEffects ?? [];
+const effectsOf = (ps: BattleParticipant[], id: string) =>
+    ps.find((p) => p.basicInfo.id === id)?.battleData.activeEffects ?? [];
 
 const concentrating = (): BattleParticipant[] => {
-  const c = caster();
+    const c = caster();
 
-  const begun = beginConcentration([c, foe("e1"), foe("e2")], "c", "c:sp@1#0", "Сповільнення", 3);
+    const begun = beginConcentration(
+        [c, foe('e1'), foe('e2')],
+        'c',
+        'c:sp@1#0',
+        'Сповільнення',
+        3
+    );
 
-  return begun.participants.map((p) => (p.basicInfo.id === "c" ? p : { ...p, battleData: { ...p.battleData, activeEffects: [makeEffect("slow", { concentrationOf: { casterId: "c", castId: "c:sp@1#0" } })] } }));
+    return begun.participants.map((p) =>
+        p.basicInfo.id === 'c'
+            ? p
+            : {
+                  ...p,
+                  battleData: {
+                      ...p.battleData,
+                      activeEffects: [
+                          makeEffect('slow', {
+                              concentrationOf: {
+                                  casterId: 'c',
+                                  castId: 'c:sp@1#0',
+                              },
+                          }),
+                      ],
+                  },
+              }
+    );
 };
 
-describe("каст із концентрацією", () => {
-  it("ставить маркер на кастера й тегує ефекти цілей одним castId", () => {
-    const r = cast(spellOf(true), [caster(), foe("e1"), foe("e2")], rulesOn());
+describe('каст із концентрацією', () => {
+    it('ставить маркер на кастера й тегує ефекти цілей одним castId', () => {
+        const r = cast(
+            spellOf(true),
+            [caster(), foe('e1'), foe('e2')],
+            rulesOn()
+        );
 
-    const marker = effectsOf(r.allParticipantsUpdated, "c").find((e) => e.concentration);
+        const marker = effectsOf(r.allParticipantsUpdated, 'c').find(
+            (e) => e.concentration
+        );
 
-    expect(marker?.name).toBe("Сповільнення");
-    expect(marker?.label && textOf(marker.label)).toBe("Концентрація: Сповільнення");
-    expect(marker?.duration).toBe(3);
-    expect(effectsOf(r.allParticipantsUpdated, "e1")[0].concentrationOf?.castId).toBe(marker?.concentration?.castId);
-    expect(effectsOf(r.allParticipantsUpdated, "e2")[0].concentrationOf?.castId).toBe(marker?.concentration?.castId);
-  });
-
-  it("концентрація знімається, коли в заклинання не лишилось живих ефектів", () => {
-    const r = cast(spellOf(true), [caster(), foe("e1"), foe("e2")], rulesOn());
-
-    const stripped = (ids: string[]) => r.allParticipantsUpdated.map((p) => (ids.includes(p.basicInfo.id) ? removeEffects(p, (e) => !e.concentration).participant : p));
-
-    const one = dropOrphanedConcentration(stripped(["e1"]));
-
-    expect(one.messages).toEqual([]);
-    expect(effectsOf(one.participants, "c").some((e) => e.concentration)).toBe(true);
-
-    const none = dropOrphanedConcentration(stripped(["e1", "e2"]));
-
-    expect(textOf(none.messages[0])).toContain("втрачає концентрацію");
-    expect(effectsOf(none.participants, "c")).toEqual([]);
-  });
-
-  describe("інші носії концентрації тримають її", () => {
-    const bare = () => cast(spellOf(true), [caster(), foe("e1"), foe("e2")], rulesOn()).allParticipantsUpdated.map((p) => removeEffects(p, (e) => !e.concentration).participant);
-
-    const tagOf = (ps: BattleParticipant[]) => ({ casterId: "c", castId: effectsOf(ps, "c").find((e) => e.concentration)?.concentration?.castId as string });
-
-    const survives = (ps: BattleParticipant[], map?: BattleMapConfig) => effectsOf(dropOrphanedConcentration(ps, map, 1).participants, "c").some((e) => e.concentration);
-
-    const onE1 = (ps: BattleParticipant[], patch: (p: BattleParticipant) => BattleParticipant) => ps.map((p) => (p.basicInfo.id === "e1" ? patch(p) : p));
-
-    it("без носіїв знімається", () => {
-      expect(survives(bare())).toBe(false);
+        expect(marker?.name).toBe('Сповільнення');
+        expect(marker?.label && textOf(marker.label)).toBe(
+            'Концентрація: Сповільнення'
+        );
+        expect(marker?.duration).toBe(3);
+        expect(
+            effectsOf(r.allParticipantsUpdated, 'e1')[0].concentrationOf?.castId
+        ).toBe(marker?.concentration?.castId);
+        expect(
+            effectsOf(r.allParticipantsUpdated, 'e2')[0].concentrationOf?.castId
+        ).toBe(marker?.concentration?.castId);
     });
 
-    it("зона мапи", () => {
-      const ps = bare();
+    it('концентрація знімається, коли в заклинання не лишилось живих ефектів', () => {
+        const r = cast(
+            spellOf(true),
+            [caster(), foe('e1'), foe('e2')],
+            rulesOn()
+        );
 
-      const map = { spellZones: { z: { casterId: "c", spellId: "sp", spellName: "x", dc: 10, side: "enemies", triggers: {}, untilRound: 5, concentrationOf: tagOf(ps) } } } as unknown as BattleMapConfig;
+        const stripped = (ids: string[]) =>
+            r.allParticipantsUpdated.map((p) =>
+                ids.includes(p.basicInfo.id)
+                    ? removeEffects(p, (e) => !e.concentration).participant
+                    : p
+            );
 
-      expect(survives(ps, map)).toBe(true);
+        const one = dropOrphanedConcentration(stripped(['e1']));
+
+        expect(one.messages).toEqual([]);
+        expect(
+            effectsOf(one.participants, 'c').some((e) => e.concentration)
+        ).toBe(true);
+
+        const none = dropOrphanedConcentration(stripped(['e1', 'e2']));
+
+        expect(textOf(none.messages[0])).toContain('втрачає концентрацію');
+        expect(effectsOf(none.participants, 'c')).toEqual([]);
     });
 
-    it("небезпечна клітинка", () => {
-      const ps = bare();
+    describe('інші носії концентрації тримають її', () => {
+        const bare = () =>
+            cast(
+                spellOf(true),
+                [caster(), foe('e1'), foe('e2')],
+                rulesOn()
+            ).allParticipantsUpdated.map(
+                (p) => removeEffects(p, (e) => !e.concentration).participant
+            );
 
-      const map = { terrain: { "1:1": { kind: "hazard", damage: { type: "fire", amount: 1, concentrationOf: tagOf(ps) } } } } as unknown as BattleMapConfig;
+        const tagOf = (ps: BattleParticipant[]) => ({
+            casterId: 'c',
+            castId: effectsOf(ps, 'c').find((e) => e.concentration)
+                ?.concentration?.castId as string,
+        });
 
-      expect(survives(ps, map)).toBe(true);
+        const survives = (ps: BattleParticipant[], map?: BattleMapConfig) =>
+            effectsOf(
+                dropOrphanedConcentration(ps, map, 1).participants,
+                'c'
+            ).some((e) => e.concentration);
+
+        const onE1 = (
+            ps: BattleParticipant[],
+            patch: (p: BattleParticipant) => BattleParticipant
+        ) => ps.map((p) => (p.basicInfo.id === 'e1' ? patch(p) : p));
+
+        it('без носіїв знімається', () => {
+            expect(survives(bare())).toBe(false);
+        });
+
+        it('зона мапи', () => {
+            const ps = bare();
+
+            const map = {
+                spellZones: {
+                    z: {
+                        casterId: 'c',
+                        spellId: 'sp',
+                        spellName: 'x',
+                        dc: 10,
+                        side: 'enemies',
+                        triggers: {},
+                        untilRound: 5,
+                        concentrationOf: tagOf(ps),
+                    },
+                },
+            } as unknown as BattleMapConfig;
+
+            expect(survives(ps, map)).toBe(true);
+        });
+
+        it('небезпечна клітинка', () => {
+            const ps = bare();
+
+            const map = {
+                terrain: {
+                    '1:1': {
+                        kind: 'hazard',
+                        damage: {
+                            type: 'fire',
+                            amount: 1,
+                            concentrationOf: tagOf(ps),
+                        },
+                    },
+                },
+            } as unknown as BattleMapConfig;
+
+            expect(survives(ps, map)).toBe(true);
+        });
+
+        it('предмет: активний тримає, знищений ні', () => {
+            const ps = bare();
+
+            const obj = (status: BattleParticipant['combatStats']['status']) =>
+                onE1(ps, (p) => ({
+                    ...p,
+                    combatStats: { ...p.combatStats, status },
+                    battleData: {
+                        ...p.battleData,
+                        object: { spellId: 'sp', concentrationOf: tagOf(ps) },
+                    },
+                }));
+
+            expect(survives(obj(CombatStatus.ACTIVE))).toBe(true);
+            expect(survives(obj(CombatStatus.DEAD))).toBe(false);
+        });
+
+        it('грант тримає, поки не спливе', () => {
+            const ps = bare();
+
+            const grant = (expiresRound: number) =>
+                onE1(ps, (p) => ({
+                    ...p,
+                    spellcasting: {
+                        ...p.spellcasting,
+                        grants: [
+                            {
+                                spellId: 'sp',
+                                key: 'k',
+                                cost: 0,
+                                expiresRound,
+                                concentrationOf: tagOf(ps),
+                            },
+                        ],
+                    },
+                }));
+
+            expect(survives(grant(3))).toBe(true);
+            expect(survives(grant(0))).toBe(false);
+        });
     });
 
-    it("предмет: активний тримає, знищений ні", () => {
-      const ps = bare();
+    it('заклинання без тегованих ефектів (зона) не знімається', () => {
+        const r = cast(
+            spellOf(true, [{ kind: 'note', text: 'x' } as Effect]),
+            [caster(), foe('e1'), foe('e2')],
+            rulesOn()
+        );
 
-      const obj = (status: BattleParticipant["combatStats"]["status"]) => onE1(ps, (p) => ({ ...p, combatStats: { ...p.combatStats, status }, battleData: { ...p.battleData, object: { spellId: "sp", concentrationOf: tagOf(ps) } } }));
-
-      expect(survives(obj(CombatStatus.ACTIVE))).toBe(true);
-      expect(survives(obj(CombatStatus.DEAD))).toBe(false);
+        expect(
+            dropOrphanedConcentration(r.allParticipantsUpdated).messages
+        ).toEqual([]);
     });
 
-    it("грант тримає, поки не спливе", () => {
-      const ps = bare();
+    it('без правила або без прапорця заклинання нічого не змінює', () => {
+        const ps = () => [caster(), foe('e1'), foe('e2')];
 
-      const grant = (expiresRound: number) => onE1(ps, (p) => ({ ...p, spellcasting: { ...p.spellcasting, grants: [{ spellId: "sp", key: "k", cost: 0, expiresRound, concentrationOf: tagOf(ps) }] } }));
+        const base = cast(spellOf(false), ps(), rulesOn());
 
-      expect(survives(grant(3))).toBe(true);
-      expect(survives(grant(0))).toBe(false);
+        expect(effectsOf(base.allParticipantsUpdated, 'c')).toEqual([]);
+        expect(
+            effectsOf(base.allParticipantsUpdated, 'e1')[0].concentrationOf
+        ).toBeUndefined();
+
+        const off = cast(spellOf(true), ps(), DEFAULT_RULES);
+
+        expect(effectsOf(off.allParticipantsUpdated, 'c')).toEqual([]);
+        expect(
+            effectsOf(off.allParticipantsUpdated, 'e1')[0]
+        ).not.toHaveProperty('concentrationOf');
     });
-  });
 
-  it("заклинання без тегованих ефектів (зона) не знімається", () => {
-    const r = cast(spellOf(true, [{ kind: "note", text: "x" } as Effect]), [caster(), foe("e1"), foe("e2")], rulesOn());
+    it('тривалість маркера — 10 раундів, якщо в ефектів немає тривалості', () => {
+        const r = cast(
+            spellOf(true, [
+                {
+                    kind: 'dealDamage',
+                    amount: { spellRoll: 100 },
+                    damageType: 'fire',
+                },
+            ]),
+            [caster(), foe('e1'), foe('e2')],
+            rulesOn()
+        );
 
-    expect(dropOrphanedConcentration(r.allParticipantsUpdated).messages).toEqual([]);
-  });
+        expect(
+            effectsOf(r.allParticipantsUpdated, 'c').find(
+                (e) => e.concentration
+            )?.duration
+        ).toBe(10);
+    });
 
-  it("без правила або без прапорця заклинання нічого не змінює", () => {
-    const ps = () => [caster(), foe("e1"), foe("e2")];
+    it('новий каст знімає ефекти попереднього', () => {
+        const first = cast(
+            spellOf(true),
+            [caster(), foe('e1'), foe('e2')],
+            rulesOn()
+        );
 
-    const base = cast(spellOf(false), ps(), rulesOn());
+        const second = castSpell({
+            caster: first.casterUpdated,
+            spell: {
+                ...spellOf(true),
+                id: 'sp2',
+                name: 'Інше',
+                definition: { ...spellOf(true).definition, effects: [] },
+            },
+            targetIds: ['e1'],
+            allParticipants: first.allParticipantsUpdated,
+            currentRound: 2,
+            battleId: 'b',
+            diceRolls: [],
+            rng: seq(0.5),
+            rules: rulesOn(),
+        });
 
-    expect(effectsOf(base.allParticipantsUpdated, "c")).toEqual([]);
-    expect(effectsOf(base.allParticipantsUpdated, "e1")[0].concentrationOf).toBeUndefined();
-
-    const off = cast(spellOf(true), ps(), DEFAULT_RULES);
-
-    expect(effectsOf(off.allParticipantsUpdated, "c")).toEqual([]);
-    expect(effectsOf(off.allParticipantsUpdated, "e1")[0]).not.toHaveProperty("concentrationOf");
-  });
-
-  it("тривалість маркера — 10 раундів, якщо в ефектів немає тривалості", () => {
-    const r = cast(spellOf(true, [{ kind: "dealDamage", amount: { spellRoll: 100 }, damageType: "fire" }]), [caster(), foe("e1"), foe("e2")], rulesOn());
-
-    expect(effectsOf(r.allParticipantsUpdated, "c").find((e) => e.concentration)?.duration).toBe(10);
-  });
-
-  it("новий каст знімає ефекти попереднього", () => {
-    const first = cast(spellOf(true), [caster(), foe("e1"), foe("e2")], rulesOn());
-
-    const second = castSpell({ caster: first.casterUpdated, spell: { ...spellOf(true), id: "sp2", name: "Інше", definition: { ...spellOf(true).definition, effects: [] } }, targetIds: ["e1"], allParticipants: first.allParticipantsUpdated, currentRound: 2, battleId: "b", diceRolls: [], rng: seq(0.5), rules: rulesOn() });
-
-    expect(effectsOf(second.allParticipantsUpdated, "e1")).toEqual([]);
-    expect(effectsOf(second.allParticipantsUpdated, "c").filter((e) => e.concentration)).toHaveLength(1);
-    expect(effectsOf(second.allParticipantsUpdated, "c")[0].concentration?.spellName).toBe("Інше");
-  });
+        expect(effectsOf(second.allParticipantsUpdated, 'e1')).toEqual([]);
+        expect(
+            effectsOf(second.allParticipantsUpdated, 'c').filter(
+                (e) => e.concentration
+            )
+        ).toHaveLength(1);
+        expect(
+            effectsOf(second.allParticipantsUpdated, 'c')[0].concentration
+                ?.spellName
+        ).toBe('Інше');
+    });
 });
 
-describe("перевірка концентрації", () => {
-  const hit = (damage: number, rng: () => number, rules = rulesOn()) => {
-    const ps = concentrating();
+describe('перевірка концентрації', () => {
+    const hit = (damage: number, rng: () => number, rules = rulesOn()) => {
+        const ps = concentrating();
 
-    const caster = ps[0];
+        const caster = ps[0];
 
-    return concentrationCheck({ caster: { ...caster, combatStats: { ...caster.combatStats, currentHp: 15 } }, damage, participants: ps, rules, rng });
-  };
-
-  it.each([
-    [30, 15],
-    [8, 10],
-  ])("шкода %i — СК %i", (damage, dc) => {
-    expect(textsOf(hit(damage, () => 0.5).messages)[0]).toContain(`проти СК ${dc}`);
-  });
-
-  it("dcCap обмежує СК; без нього СК = ½ шкоди", () => {
-    expect(textsOf(hit(100, () => 0.5, rulesOn(30)).messages)[0]).toContain("проти СК 30");
-    expect(textsOf(hit(100, () => 0.5, rulesOn(null)).messages)[0]).toContain("проти СК 50");
-  });
-
-  it("провал знімає ефекти з усіх цілей і маркер", () => {
-    const r = hit(30, () => 0);
-
-    expect(textsOf(r.messages).join(" ")).toContain("втрачає концентрацію на «Сповільнення»");
-    expect(effectsOf(r.participants, "e1")).toEqual([]);
-    expect(effectsOf(r.participants, "e2")).toEqual([]);
-    expect(effectsOf(r.participants, "c")).toEqual([]);
-  });
-
-  it("успіх лишає все", () => {
-    const r = hit(8, () => 0.99);
-
-    expect(textsOf(r.messages)[0]).toContain("утримує");
-    expect(effectsOf(r.participants, "e1")).toHaveLength(1);
-    expect(effectsOf(r.participants, "c")).toHaveLength(1);
-  });
-
-  it("хук шкоди: провал і 0 HP без кидка", () => {
-    const ps = concentrating();
-
-    const before = ps[0];
-
-    const failed = applyDamageConsequences({ before, after: { ...before, combatStats: { ...before.combatStats, currentHp: 10 } }, amount: 30, rules: rulesOn(), rng: () => 0, participants: ps });
-
-    expect(effectsOf(failed.participants, "e1")).toEqual([]);
-    expect(failed.participant.battleData.activeEffects).toEqual([]);
-
-    const downed = applyDamageConsequences({ before, after: { ...before, combatStats: { ...before.combatStats, currentHp: 0, status: CombatStatus.UNCONSCIOUS } }, amount: 3, rules: rulesOn(), rng: () => 0.99, participants: ps });
-
-    expect(effectsOf(downed.participants, "e1")).toEqual([]);
-    expect(textsOf(downed.messages)[0]).toContain("втрачає концентрацію");
-  });
-
-  it("правило вимкнене: хук нічого не кидає", () => {
-    const ps = concentrating();
-
-    const r = applyDamageConsequences({ before: ps[0], after: ps[0], amount: 30, rules: DEFAULT_RULES, rng: () => 0, participants: ps });
-
-    expect(textsOf(r.messages)).toEqual([]);
-    expect(effectsOf(r.participants, "e1")).toHaveLength(1);
-  });
-});
-
-describe("недієздатність", () => {
-  it.each(["incapacitated", "stunned"] as const)("%s знімає концентрацію", (key) => {
-    const r = applyCondition5e(concentrating(), "c", { key, rounds: 2, source: undefined, sourceName: "X", timedKey: "t", round: 1, rules: DEFAULT_RULES });
-
-    expect(effectsOf(r.participants, "e1")).toEqual([]);
-    expect(effectsOf(r.participants, "c").some((e) => e.concentration)).toBe(false);
-    expect(textsOf(r.messages).join(" ")).toContain("втрачає концентрацію");
-  });
-});
-
-describe("зона", () => {
-  const tag = { casterId: "c", castId: "c:sp@1#0" };
-
-  const map: BattleMapConfig = { cols: 5, rows: 5, background: null, opacity: 0.3, terrain: { "1:1": { kind: "hazard", damage: { amount: 5, type: "fire", concentrationOf: tag } } } };
-
-  const target = { ...foe("e1"), battleData: { ...foe("e1").battleData, position: { x: 1, y: 1 } } };
-
-  it("живе, поки кастер концентрується", () => {
-    const ps = concentrating();
-
-    expect(isZoneConcentrationLive(ps, tag)).toBe(true);
-    expect(hazardUnder(map, target, undefined, { participants: ps, rules: DEFAULT_RULES })).not.toBeNull();
-    expect(hazardHit(target, map.terrain!["1:1"], 1, ps, () => 0, DEFAULT_RULES)?.damage).toBe(5);
-  });
-
-  it("після втрати концентрації не шкодить", () => {
-    const ps = dropConcentration(concentrating(), "c", "").participants;
-
-    expect(isZoneConcentrationLive(ps, tag)).toBe(false);
-    expect(hazardUnder(map, target, undefined, { participants: ps, rules: DEFAULT_RULES })).toBeNull();
-    expect(hazardHit(target, map.terrain!["1:1"], 1, ps, () => 0, DEFAULT_RULES)).toBeNull();
-  });
-});
-
-describe("review fixes", () => {
-  it("тегує лише ефекти самого заклинання: непритомність героя від шкоди лишається", () => {
-    const hero = (): BattleParticipant => {
-      const p = foe("e1");
-
-      return { ...p, basicInfo: { ...p.basicInfo, sourceType: ParticipantSourceType.CHARACTER }, combatStats: { ...p.combatStats, currentHp: 3, maxHp: 500 } };
+        return concentrationCheck({
+            caster: {
+                ...caster,
+                combatStats: { ...caster.combatStats, currentHp: 15 },
+            },
+            damage,
+            participants: ps,
+            rules,
+            rng,
+        });
     };
 
-    const rules: Ruleset = { ...rulesOn(), deathSaves: { ...DEFAULT_RULES.deathSaves, enabled: true } };
+    it.each([
+        [30, 15],
+        [8, 10],
+    ])('шкода %i — СК %i', (damage, dc) => {
+        expect(textsOf(hit(damage, () => 0.5).messages)[0]).toContain(
+            `проти СК ${dc}`
+        );
+    });
 
-    const base = spellOf(true, [{ kind: "dealDamage", amount: { spellRoll: 100 }, damageType: "fire" }]);
+    it('dcCap обмежує СК; без нього СК = ½ шкоди', () => {
+        expect(textsOf(hit(100, () => 0.5, rulesOn(30)).messages)[0]).toContain(
+            'проти СК 30'
+        );
+        expect(
+            textsOf(hit(100, () => 0.5, rulesOn(null)).messages)[0]
+        ).toContain('проти СК 50');
+    });
 
-    const spell = { ...base, definition: { ...base.definition, dice: 2 } };
+    it('провал знімає ефекти з усіх цілей і маркер', () => {
+        const r = hit(30, () => 0);
 
-    const r = castSpell({ caster: caster(), spell, targetIds: ["e1"], allParticipants: [caster(), hero()], currentRound: 1, battleId: "b", diceRolls: [3, 3], rng: seq(0.5), rules });
+        expect(textsOf(r.messages).join(' ')).toContain(
+            'втрачає концентрацію на «Сповільнення»'
+        );
+        expect(effectsOf(r.participants, 'e1')).toEqual([]);
+        expect(effectsOf(r.participants, 'e2')).toEqual([]);
+        expect(effectsOf(r.participants, 'c')).toEqual([]);
+    });
 
-    const down = effectsOf(r.allParticipantsUpdated, "e1").find((e) => e.abilityKey === DEATH_SAVES_TIMED_KEY);
+    it('успіх лишає все', () => {
+        const r = hit(8, () => 0.99);
 
-    expect(down).toBeDefined();
-    expect(down?.concentrationOf).toBeUndefined();
+        expect(textsOf(r.messages)[0]).toContain('утримує');
+        expect(effectsOf(r.participants, 'e1')).toHaveLength(1);
+        expect(effectsOf(r.participants, 'c')).toHaveLength(1);
+    });
 
-    const marker = effectsOf(r.allParticipantsUpdated, "c").find((e) => e.concentration);
+    it('хук шкоди: провал і 0 HP без кидка', () => {
+        const ps = concentrating();
 
-    const ended = dropConcentration(r.allParticipantsUpdated, "c", "");
+        const before = ps[0];
 
-    expect(marker).toBeDefined();
-    expect(effectsOf(ended.participants, "e1").some((e) => e.abilityKey === DEATH_SAVES_TIMED_KEY)).toBe(true);
-  });
+        const failed = applyDamageConsequences({
+            before,
+            after: {
+                ...before,
+                combatStats: { ...before.combatStats, currentHp: 10 },
+            },
+            amount: 30,
+            rules: rulesOn(),
+            rng: () => 0,
+            participants: ps,
+        });
 
-  it("тривалість концентрації враховує зону", () => {
-    const spell: CastableSpell = {
-      ...spellOf(true),
-      definition: { ...spellOf(true).definition, targeting: { kind: "template", shape: "circle", size: 20, side: "enemy", maxTargets: 2, zone: { rounds: 6 } } },
-    };
+        expect(effectsOf(failed.participants, 'e1')).toEqual([]);
+        expect(failed.participant.battleData.activeEffects).toEqual([]);
 
-    const r = cast(spell, [caster(), foe("e1"), foe("e2")], rulesOn());
+        const downed = applyDamageConsequences({
+            before,
+            after: {
+                ...before,
+                combatStats: {
+                    ...before.combatStats,
+                    currentHp: 0,
+                    status: CombatStatus.UNCONSCIOUS,
+                },
+            },
+            amount: 3,
+            rules: rulesOn(),
+            rng: () => 0.99,
+            participants: ps,
+        });
 
-    expect(effectsOf(r.allParticipantsUpdated, "c").find((e) => e.concentration)?.duration).toBe(6);
-  });
+        expect(effectsOf(downed.participants, 'e1')).toEqual([]);
+        expect(textsOf(downed.messages)[0]).toContain('втрачає концентрацію');
+    });
 
-  it("зона згасає, коли кастер мертвий", () => {
-    const tag = { casterId: "c", castId: "c:sp@1#0" };
+    it('правило вимкнене: хук нічого не кидає', () => {
+        const ps = concentrating();
 
-    const ps = concentrating().map((p) => (p.basicInfo.id === "c" ? { ...p, combatStats: { ...p.combatStats, status: CombatStatus.DEAD } } : p));
+        const r = applyDamageConsequences({
+            before: ps[0],
+            after: ps[0],
+            amount: 30,
+            rules: DEFAULT_RULES,
+            rng: () => 0,
+            participants: ps,
+        });
 
-    expect(isZoneConcentrationLive(ps, tag)).toBe(false);
-  });
-
-  it("смерть від виснаження знімає концентрацію", () => {
-    const r = applyCondition5e(concentrating(), "c", { key: "exhaustion", levels: 6, rounds: 2, source: undefined, sourceName: "X", timedKey: "t", round: 1, rules: DEFAULT_RULES });
-
-    expect(r.participants.find((p) => p.basicInfo.id === "c")?.combatStats.status).toBe(CombatStatus.DEAD);
-    expect(effectsOf(r.participants, "c").some((e) => e.concentration)).toBe(false);
-    expect(effectsOf(r.participants, "e1")).toEqual([]);
-  });
+        expect(textsOf(r.messages)).toEqual([]);
+        expect(effectsOf(r.participants, 'e1')).toHaveLength(1);
+    });
 });
 
-describe("uniqueCastId", () => {
-  const base = "c:sp@1#";
+describe('недієздатність', () => {
+    it.each(['incapacitated', 'stunned'] as const)(
+        '%s знімає концентрацію',
+        (key) => {
+            const r = applyCondition5e(concentrating(), 'c', {
+                key,
+                rounds: 2,
+                source: undefined,
+                sourceName: 'X',
+                timedKey: 't',
+                round: 1,
+                rules: DEFAULT_RULES,
+            });
 
-  it("вільний id — #0", () => {
-    expect(uniqueCastId([caster()], null, "c", "sp", 1)).toBe(`${base}0`);
-  });
+            expect(effectsOf(r.participants, 'e1')).toEqual([]);
+            expect(
+                effectsOf(r.participants, 'c').some((e) => e.concentration)
+            ).toBe(false);
+            expect(textsOf(r.messages).join(' ')).toContain(
+                'втрачає концентрацію'
+            );
+        }
+    );
+});
 
-  it("зайняті ефектом, грантом, предметом чи зоною — наступний seq", () => {
-    const c = caster();
+describe('зона', () => {
+    const tag = { casterId: 'c', castId: 'c:sp@1#0' };
 
-    const withEffect = [{ ...c, battleData: { ...c.battleData, activeEffects: [makeEffect("x", { concentrationOf: { casterId: "c", castId: `${base}0` } })] } }];
+    const map: BattleMapConfig = {
+        cols: 5,
+        rows: 5,
+        background: null,
+        opacity: 0.3,
+        terrain: {
+            '1:1': {
+                kind: 'hazard',
+                damage: { amount: 5, type: 'fire', concentrationOf: tag },
+            },
+        },
+    };
 
-    expect(uniqueCastId(withEffect, null, "c", "sp", 1)).toBe(`${base}1`);
+    const target = {
+        ...foe('e1'),
+        battleData: { ...foe('e1').battleData, position: { x: 1, y: 1 } },
+    };
 
-    const withGrant = [{ ...c, spellcasting: { ...c.spellcasting, grants: [{ spellId: "sp", key: `cast:${base}0:0`, cost: 0 }] } }];
+    it('живе, поки кастер концентрується', () => {
+        const ps = concentrating();
 
-    expect(uniqueCastId(withGrant, null, "c", "sp", 1)).toBe(`${base}1`);
+        expect(isZoneConcentrationLive(ps, tag)).toBe(true);
+        expect(
+            hazardUnder(map, target, undefined, {
+                participants: ps,
+                rules: DEFAULT_RULES,
+            })
+        ).not.toBeNull();
+        expect(
+            hazardHit(
+                target,
+                map.terrain!['1:1'],
+                1,
+                ps,
+                () => 0,
+                DEFAULT_RULES
+            )?.damage
+        ).toBe(5);
+    });
 
-    const withObject = [c, makeParticipant({ id: `inline:${base}0:1` }), makeParticipant({ id: `inline:${base}1:1` })];
+    it('після втрати концентрації не шкодить', () => {
+        const ps = dropConcentration(concentrating(), 'c', '').participants;
 
-    expect(uniqueCastId(withObject, null, "c", "sp", 1)).toBe(`${base}2`);
+        expect(isZoneConcentrationLive(ps, tag)).toBe(false);
+        expect(
+            hazardUnder(map, target, undefined, {
+                participants: ps,
+                rules: DEFAULT_RULES,
+            })
+        ).toBeNull();
+        expect(
+            hazardHit(
+                target,
+                map.terrain!['1:1'],
+                1,
+                ps,
+                () => 0,
+                DEFAULT_RULES
+            )
+        ).toBeNull();
+    });
+});
 
-    const map = { spellZones: { [`${base}0@1`]: {} } } as unknown as BattleMapConfig;
+describe('review fixes', () => {
+    it('тегує лише ефекти самого заклинання: непритомність героя від шкоди лишається', () => {
+        const hero = (): BattleParticipant => {
+            const p = foe('e1');
 
-    expect(uniqueCastId([c], map, "c", "sp", 1)).toBe(`${base}1`);
-  });
+            return {
+                ...p,
+                basicInfo: {
+                    ...p.basicInfo,
+                    sourceType: ParticipantSourceType.CHARACTER,
+                },
+                combatStats: { ...p.combatStats, currentHp: 3, maxHp: 500 },
+            };
+        };
 
-  it("інший раунд чи заклинання не заважає", () => {
-    const c = caster();
+        const rules: Ruleset = {
+            ...rulesOn(),
+            deathSaves: { ...DEFAULT_RULES.deathSaves, enabled: true },
+        };
 
-    const ps = [{ ...c, battleData: { ...c.battleData, activeEffects: [makeEffect("x", { concentrationOf: { casterId: "c", castId: "c:sp@2#0" } })] } }];
+        const base = spellOf(true, [
+            {
+                kind: 'dealDamage',
+                amount: { spellRoll: 100 },
+                damageType: 'fire',
+            },
+        ]);
 
-    expect(uniqueCastId(ps, null, "c", "sp", 1)).toBe(`${base}0`);
-  });
+        const spell = { ...base, definition: { ...base.definition, dice: 2 } };
+
+        const r = castSpell({
+            caster: caster(),
+            spell,
+            targetIds: ['e1'],
+            allParticipants: [caster(), hero()],
+            currentRound: 1,
+            battleId: 'b',
+            diceRolls: [3, 3],
+            rng: seq(0.5),
+            rules,
+        });
+
+        const down = effectsOf(r.allParticipantsUpdated, 'e1').find(
+            (e) => e.abilityKey === DEATH_SAVES_TIMED_KEY
+        );
+
+        expect(down).toBeDefined();
+        expect(down?.concentrationOf).toBeUndefined();
+
+        const marker = effectsOf(r.allParticipantsUpdated, 'c').find(
+            (e) => e.concentration
+        );
+
+        const ended = dropConcentration(r.allParticipantsUpdated, 'c', '');
+
+        expect(marker).toBeDefined();
+        expect(
+            effectsOf(ended.participants, 'e1').some(
+                (e) => e.abilityKey === DEATH_SAVES_TIMED_KEY
+            )
+        ).toBe(true);
+    });
+
+    it('тривалість концентрації враховує зону', () => {
+        const spell: CastableSpell = {
+            ...spellOf(true),
+            definition: {
+                ...spellOf(true).definition,
+                targeting: {
+                    kind: 'template',
+                    shape: 'circle',
+                    size: 20,
+                    side: 'enemy',
+                    maxTargets: 2,
+                    zone: { rounds: 6 },
+                },
+            },
+        };
+
+        const r = cast(spell, [caster(), foe('e1'), foe('e2')], rulesOn());
+
+        expect(
+            effectsOf(r.allParticipantsUpdated, 'c').find(
+                (e) => e.concentration
+            )?.duration
+        ).toBe(6);
+    });
+
+    it('зона згасає, коли кастер мертвий', () => {
+        const tag = { casterId: 'c', castId: 'c:sp@1#0' };
+
+        const ps = concentrating().map((p) =>
+            p.basicInfo.id === 'c'
+                ? {
+                      ...p,
+                      combatStats: {
+                          ...p.combatStats,
+                          status: CombatStatus.DEAD,
+                      },
+                  }
+                : p
+        );
+
+        expect(isZoneConcentrationLive(ps, tag)).toBe(false);
+    });
+
+    it('смерть від виснаження знімає концентрацію', () => {
+        const r = applyCondition5e(concentrating(), 'c', {
+            key: 'exhaustion',
+            levels: 6,
+            rounds: 2,
+            source: undefined,
+            sourceName: 'X',
+            timedKey: 't',
+            round: 1,
+            rules: DEFAULT_RULES,
+        });
+
+        expect(
+            r.participants.find((p) => p.basicInfo.id === 'c')?.combatStats
+                .status
+        ).toBe(CombatStatus.DEAD);
+        expect(
+            effectsOf(r.participants, 'c').some((e) => e.concentration)
+        ).toBe(false);
+        expect(effectsOf(r.participants, 'e1')).toEqual([]);
+    });
+});
+
+describe('uniqueCastId', () => {
+    const base = 'c:sp@1#';
+
+    it('вільний id — #0', () => {
+        expect(uniqueCastId([caster()], null, 'c', 'sp', 1)).toBe(`${base}0`);
+    });
+
+    it('зайняті ефектом, грантом, предметом чи зоною — наступний seq', () => {
+        const c = caster();
+
+        const withEffect = [
+            {
+                ...c,
+                battleData: {
+                    ...c.battleData,
+                    activeEffects: [
+                        makeEffect('x', {
+                            concentrationOf: {
+                                casterId: 'c',
+                                castId: `${base}0`,
+                            },
+                        }),
+                    ],
+                },
+            },
+        ];
+
+        expect(uniqueCastId(withEffect, null, 'c', 'sp', 1)).toBe(`${base}1`);
+
+        const withGrant = [
+            {
+                ...c,
+                spellcasting: {
+                    ...c.spellcasting,
+                    grants: [
+                        { spellId: 'sp', key: `cast:${base}0:0`, cost: 0 },
+                    ],
+                },
+            },
+        ];
+
+        expect(uniqueCastId(withGrant, null, 'c', 'sp', 1)).toBe(`${base}1`);
+
+        const withObject = [
+            c,
+            makeParticipant({ id: `inline:${base}0:1` }),
+            makeParticipant({ id: `inline:${base}1:1` }),
+        ];
+
+        expect(uniqueCastId(withObject, null, 'c', 'sp', 1)).toBe(`${base}2`);
+
+        const map = {
+            spellZones: { [`${base}0@1`]: {} },
+        } as unknown as BattleMapConfig;
+
+        expect(uniqueCastId([c], map, 'c', 'sp', 1)).toBe(`${base}1`);
+    });
+
+    it('інший раунд чи заклинання не заважає', () => {
+        const c = caster();
+
+        const ps = [
+            {
+                ...c,
+                battleData: {
+                    ...c.battleData,
+                    activeEffects: [
+                        makeEffect('x', {
+                            concentrationOf: {
+                                casterId: 'c',
+                                castId: 'c:sp@2#0',
+                            },
+                        }),
+                    ],
+                },
+            },
+        ];
+
+        expect(uniqueCastId(ps, null, 'c', 'sp', 1)).toBe(`${base}0`);
+    });
 });

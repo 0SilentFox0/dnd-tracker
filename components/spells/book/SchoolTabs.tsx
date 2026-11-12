@@ -1,39 +1,72 @@
-import { useTranslations } from "next-intl";
+import { useTranslations } from 'next-intl';
 
-import { spellSchoolColor } from "@/lib/constants/spells";
-import { ALL_SCHOOLS } from "@/lib/hooks/spells";
-import { contrastTextColor, normalizeHexColor } from "@/lib/theme/contrast-text-color";
-import { cn } from "@/lib/utils";
-import { NO_SCHOOL } from "@/lib/utils/spells/group-by-school";
+import { spellSchoolColor } from '@/lib/constants/spells';
+import { ALL_SCHOOLS } from '@/lib/hooks/spells';
+import {
+    contrastTextColor,
+    normalizeHexColor,
+} from '@/lib/theme/contrast-text-color';
+import { cn } from '@/lib/utils';
+import { NO_SCHOOL } from '@/lib/utils/spells/group-by-school';
 
-export function SchoolTabs({ schools, active, countOf, onPick }: { schools: { name: string; color?: string | null }[]; active: string; countOf: (name: string) => number; onPick: (name: string) => void }) {
-  const t = useTranslations("spells.book");
+export function SchoolTabs({
+    schools,
+    active,
+    countOf,
+    onPick,
+}: {
+    schools: { name: string; color?: string | null }[];
+    active: string;
+    countOf: (name: string) => number;
+    onPick: (name: string) => void;
+}) {
+    const t = useTranslations('spells.book');
 
-  const tabs = [{ name: ALL_SCHOOLS, label: t("allSchools"), color: "#2a2018" }, ...schools.map((school) => ({ name: school.name, label: school.name === NO_SCHOOL ? t("noSchool") : school.name, color: spellSchoolColor(school) }))];
+    const tabs = [
+        { name: ALL_SCHOOLS, label: t('allSchools'), color: '#2a2018' },
+        ...schools.map((school) => ({
+            name: school.name,
+            label: school.name === NO_SCHOOL ? t('noSchool') : school.name,
+            color: spellSchoolColor(school),
+        })),
+    ];
 
-  return (
-    <div role="group" aria-label={t("schoolsAria")} className="spell-book-tabs sticky top-0 z-10 -mx-5 -mt-4 mb-2 flex flex-wrap items-start gap-1.5 bg-[var(--book-page,#e9dec5)] px-5 pb-1">
-      {tabs.map((t) => {
-        const count = t.name === ALL_SCHOOLS ? undefined : countOf(t.name);
+    return (
+        <div
+            role="group"
+            aria-label={t('schoolsAria')}
+            className="spell-book-tabs sticky top-0 z-10 -mx-5 -mt-4 mb-2 flex flex-wrap items-start gap-1.5 bg-[var(--book-page,#e9dec5)] px-5 pb-1"
+        >
+            {tabs.map((t) => {
+                const count =
+                    t.name === ALL_SCHOOLS ? undefined : countOf(t.name);
 
-        const backgroundColor = normalizeHexColor(t.color);
+                const backgroundColor = normalizeHexColor(t.color);
 
-        return (
-          <button
-            key={t.name}
-            type="button"
-            aria-pressed={active === t.name}
-            onClick={() => onPick(t.name)}
-            style={{ backgroundColor, color: contrastTextColor(backgroundColor) }}
-            className={cn(
-              "hud-sc flex items-start justify-center px-3 pt-1 text-[13px] font-bold [clip-path:polygon(0_0,100%_0,100%_100%,50%_82%,0_100%)]",
-              active === t.name ? "h-11" : "h-8 hover:h-9",
-            )}
-          >
-            {t.label}{count !== undefined && <span className="ml-1 font-sans text-[11px]">{count}</span>}
-          </button>
-        );
-      })}
-    </div>
-  );
+                return (
+                    <button
+                        key={t.name}
+                        type="button"
+                        aria-pressed={active === t.name}
+                        onClick={() => onPick(t.name)}
+                        style={{
+                            backgroundColor,
+                            color: contrastTextColor(backgroundColor),
+                        }}
+                        className={cn(
+                            'hud-sc flex items-start justify-center px-3 pt-1 text-[13px] font-bold [clip-path:polygon(0_0,100%_0,100%_100%,50%_82%,0_100%)]',
+                            active === t.name ? 'h-11' : 'h-8 hover:h-9'
+                        )}
+                    >
+                        {t.label}
+                        {count !== undefined && (
+                            <span className="ml-1 font-sans text-[11px]">
+                                {count}
+                            </span>
+                        )}
+                    </button>
+                );
+            })}
+        </div>
+    );
 }

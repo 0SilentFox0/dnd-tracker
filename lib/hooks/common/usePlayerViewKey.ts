@@ -1,29 +1,29 @@
-"use client";
+'use client';
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef } from 'react';
 
-import { shortcutBlocked } from "./shortcut-guard";
+import { shortcutBlocked } from './shortcut-guard';
 
 /** P toggles the player view; matched by e.code so it works on any keyboard layout. */
 export function usePlayerViewKey(onToggle: () => void, active: boolean): void {
-  const latest = useRef(onToggle);
+    const latest = useRef(onToggle);
 
-  useEffect(() => {
-    latest.current = onToggle;
-  });
+    useEffect(() => {
+        latest.current = onToggle;
+    });
 
-  useEffect(() => {
-    if (!active) return;
+    useEffect(() => {
+        if (!active) return;
 
-    const onKey = (e: KeyboardEvent) => {
-      if (e.code !== "KeyP" || e.repeat || shortcutBlocked(e)) return;
+        const onKey = (e: KeyboardEvent) => {
+            if (e.code !== 'KeyP' || e.repeat || shortcutBlocked(e)) return;
 
-      e.preventDefault();
-      latest.current();
-    };
+            e.preventDefault();
+            latest.current();
+        };
 
-    window.addEventListener("keydown", onKey);
+        window.addEventListener('keydown', onKey);
 
-    return () => window.removeEventListener("keydown", onKey);
-  }, [active]);
+        return () => window.removeEventListener('keydown', onKey);
+    }, [active]);
 }

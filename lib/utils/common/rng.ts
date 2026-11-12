@@ -1,22 +1,23 @@
 export type Rng = () => number;
 
 export function mulberry32(seed: number): Rng {
-  let a = seed >>> 0;
+    let a = seed >>> 0;
 
-  return () => {
-    a = (a + 0x6d2b79f5) >>> 0;
+    return () => {
+        a = (a + 0x6d2b79f5) >>> 0;
 
-    let t = a;
+        let t = a;
 
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+        t = Math.imul(t ^ (t >>> 15), t | 1);
+        t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
 
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
 }
 
 export function seedFrom(rng: Rng): number {
-  return Math.floor(rng() * 4294967296) >>> 0;
+    return Math.floor(rng() * 4294967296) >>> 0;
 }
 
-export const rngOf = (source: { rng?: Rng } | null | undefined): Rng => source?.rng ?? Math.random;
+export const rngOf = (source: { rng?: Rng } | null | undefined): Rng =>
+    source?.rng ?? Math.random;

@@ -1,194 +1,315 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
-import { AttackType, CombatStatus, ParticipantSide } from "@/lib/constants/battle";
-import { makeParticipant, seq } from "@/lib/utils/abilities/__tests__/fixtures";
-import { processAttack } from "@/lib/utils/battle/attack/process";
-import { resolveServerAttack } from "@/lib/utils/battle/attack/server-attack";
-import type { ActionFlow } from "@/lib/utils/battle/common/action-flow";
-import { DEFAULT_RULES } from "@/lib/utils/rules";
-import { momentumOf, sceneOf, slotOf } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
-import { attackOf } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
-import { DEFAULT_CHARACTERISTICS } from "@/systems/wfrp/rules/characteristics/keys";
-import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
-import type { SceneMomentum } from "@/systems/wfrp/rules/slots";
-import type { BattleAttack, BattleParticipant } from "@/types/battle";
+import {
+    AttackType,
+    CombatStatus,
+    ParticipantSide,
+} from '@/lib/constants/battle';
+import { makeParticipant, seq } from '@/lib/utils/abilities/__tests__/fixtures';
+import { processAttack } from '@/lib/utils/battle/attack/process';
+import { resolveServerAttack } from '@/lib/utils/battle/attack/server-attack';
+import type { ActionFlow } from '@/lib/utils/battle/common/action-flow';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
+import {
+    momentumOf,
+    sceneOf,
+    slotOf,
+} from '@/systems/wfrp/rules/__tests__/slot-fixtures';
+import { attackOf } from '@/systems/wfrp/rules/__tests__/slot-fixtures';
+import { DEFAULT_CHARACTERISTICS } from '@/systems/wfrp/rules/characteristics/keys';
+import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
+import type { SceneMomentum } from '@/systems/wfrp/rules/slots';
+import type { BattleAttack, BattleParticipant } from '@/types/battle';
 
-const sword: BattleAttack = { id: "sw", name: "Sword", type: AttackType.MELEE, attackBonus: 0, damageDice: "1d6", damageType: "slashing" };
-
-const bow: BattleAttack = { ...sword, id: "bw", type: AttackType.RANGED };
-
-const fighter = (id: string, side: ParticipantSide, over: { characteristics?: boolean; position?: { x: number; y: number } } = {}): BattleParticipant => {
-  const p = makeParticipant({ id, side, hp: 20, maxHp: 20 });
-
-  const { characteristics = true, position } = over;
-
-  return {
-    ...p,
-    abilities: { ...p.abilities, ...(characteristics && { system: slotOf({ ...DEFAULT_CHARACTERISTICS, base: { ...DEFAULT_CHARACTERISTICS.base, ws: 40, bs: 40, ag: 40 } }) }) },
-    battleData: { ...p.battleData, attacks: [sword, bow], ...(position && { position }) },
-  };
+const sword: BattleAttack = {
+    id: 'sw',
+    name: 'Sword',
+    type: AttackType.MELEE,
+    attackBonus: 0,
+    damageDice: '1d6',
+    damageType: 'slashing',
 };
 
-function strike(roll: number, defenderRoll: number, opts: { attack?: BattleAttack; attacker?: BattleParticipant; target?: BattleParticipant; others?: BattleParticipant[]; rules?: typeof WFRP_RULES; momentum?: SceneMomentum } = {}) {
-  const attacker = opts.attacker ?? fighter("a", ParticipantSide.ALLY);
+const bow: BattleAttack = { ...sword, id: 'bw', type: AttackType.RANGED };
 
-  const target = opts.target ?? fighter("t", ParticipantSide.ENEMY);
+const fighter = (
+    id: string,
+    side: ParticipantSide,
+    over: {
+        characteristics?: boolean;
+        position?: { x: number; y: number };
+    } = {}
+): BattleParticipant => {
+    const p = makeParticipant({ id, side, hp: 20, maxHp: 20 });
 
-  const rng = seq((defenderRoll - 0.5) / 100);
+    const { characteristics = true, position } = over;
 
-  return processAttack({
-    attacker,
-    target,
-    attack: opts.attack ?? sword,
-    d20Roll: roll,
-    damageRolls: [4],
-    allParticipants: [attacker, target, ...(opts.others ?? [])],
-    currentRound: 1,
-    battleId: "b",
-    rng,
-    rules: opts.rules ?? WFRP_RULES,
-    sceneState: opts.momentum && sceneOf(opts.momentum),
-  });
+    return {
+        ...p,
+        abilities: {
+            ...p.abilities,
+            ...(characteristics && {
+                system: slotOf({
+                    ...DEFAULT_CHARACTERISTICS,
+                    base: {
+                        ...DEFAULT_CHARACTERISTICS.base,
+                        ws: 40,
+                        bs: 40,
+                        ag: 40,
+                    },
+                }),
+            }),
+        },
+        battleData: {
+            ...p.battleData,
+            attacks: [sword, bow],
+            ...(position && { position }),
+        },
+    };
+};
+
+function strike(
+    roll: number,
+    defenderRoll: number,
+    opts: {
+        attack?: BattleAttack;
+        attacker?: BattleParticipant;
+        target?: BattleParticipant;
+        others?: BattleParticipant[];
+        rules?: typeof WFRP_RULES;
+        momentum?: SceneMomentum;
+    } = {}
+) {
+    const attacker = opts.attacker ?? fighter('a', ParticipantSide.ALLY);
+
+    const target = opts.target ?? fighter('t', ParticipantSide.ENEMY);
+
+    const rng = seq((defenderRoll - 0.5) / 100);
+
+    return processAttack({
+        attacker,
+        target,
+        attack: opts.attack ?? sword,
+        d20Roll: roll,
+        damageRolls: [4],
+        allParticipants: [attacker, target, ...(opts.others ?? [])],
+        currentRound: 1,
+        battleId: 'b',
+        rng,
+        rules: opts.rules ?? WFRP_RULES,
+        sceneState: opts.momentum && sceneOf(opts.momentum),
+    });
 }
 
-describe("WFRP percentile attack", () => {
-  it("opposed hit: attacker succeeds, defender fails", () => {
-    const r = strike(30, 80);
+describe('WFRP percentile attack', () => {
+    it('opposed hit: attacker succeeds, defender fails', () => {
+        const r = strike(30, 80);
 
-    expect(r.success).toBe(true);
-    expect(attackOf(r.attackRoll)).toMatchObject({ roll: 30, target: 40, sl: 1, netSl: 5, defender: { roll: 80 } });
-    expect(attackOf(r.battleAction.actionDetails)?.location).toBe("head");
-  });
+        expect(r.success).toBe(true);
+        expect(attackOf(r.attackRoll)).toMatchObject({
+            roll: 30,
+            target: 40,
+            sl: 1,
+            netSl: 5,
+            defender: { roll: 80 },
+        });
+        expect(attackOf(r.battleAction.actionDetails)?.location).toBe('head');
+    });
 
-  it("miss when the attacker fails", () => {
-    const r = strike(70, 10);
+    it('miss when the attacker fails', () => {
+        const r = strike(70, 10);
 
-    expect(r.success).toBe(false);
-    expect(r.attackRoll.isHit).toBe(false);
-  });
+        expect(r.success).toBe(false);
+        expect(r.attackRoll.isHit).toBe(false);
+    });
 
-  it("natural 96+ fails even with a huge target", () => {
-    const attacker = fighter("a", ParticipantSide.ALLY);
+    it('natural 96+ fails even with a huge target', () => {
+        const attacker = fighter('a', ParticipantSide.ALLY);
 
-    const strong = { ...attacker, abilities: { ...attacker.abilities, system: slotOf({ ...DEFAULT_CHARACTERISTICS, base: { ...DEFAULT_CHARACTERISTICS.base, ws: 100 } }) } };
+        const strong = {
+            ...attacker,
+            abilities: {
+                ...attacker.abilities,
+                system: slotOf({
+                    ...DEFAULT_CHARACTERISTICS,
+                    base: { ...DEFAULT_CHARACTERISTICS.base, ws: 100 },
+                }),
+            },
+        };
 
-    expect(strike(97, 99, { attacker: strong }).success).toBe(false);
-  });
+        expect(strike(97, 99, { attacker: strong }).success).toBe(false);
+    });
 
-  it("tie goes to the attacker", () => {
-    const r = strike(30, 30);
+    it('tie goes to the attacker', () => {
+        const r = strike(30, 30);
 
-    expect(attackOf(r.attackRoll)?.netSl).toBe(0);
-    expect(r.success).toBe(true);
-  });
+        expect(attackOf(r.attackRoll)?.netSl).toBe(0);
+        expect(r.success).toBe(true);
+    });
 
-  it("higher defender SL wins", () => {
-    expect(strike(38, 5).success).toBe(false);
-  });
+    it('higher defender SL wins', () => {
+        expect(strike(38, 5).success).toBe(false);
+    });
 
-  it("ranged: simple BS test with no defender", () => {
-    const r = strike(20, 99, { attack: bow });
+    it('ranged: simple BS test with no defender', () => {
+        const r = strike(20, 99, { attack: bow });
 
-    expect(r.success).toBe(true);
-    expect(attackOf(r.attackRoll)?.defender).toBeUndefined();
-  });
+        expect(r.success).toBe(true);
+        expect(attackOf(r.attackRoll)?.defender).toBeUndefined();
+    });
 
-  it("doubles on a hit are critical, on a miss they only log", () => {
-    const hit = strike(22, 90);
+    it('doubles on a hit are critical, on a miss they only log', () => {
+        const hit = strike(22, 90);
 
-    expect(hit.attackRoll.isCritical).toBe(true);
+        expect(hit.attackRoll.isCritical).toBe(true);
 
-    const miss = strike(77, 10);
+        const miss = strike(77, 10);
 
-    expect(miss.success).toBe(false);
-    expect(miss.attackRoll.isCritical).toBe(false);
-    expect(miss.attackRoll.isCriticalFail).toBe(false);
-    expect(miss.criticalEffectApplied).toBeUndefined();
-    expect(JSON.stringify(miss.battleAction)).toContain("battleLog.percentile.doublesMiss");
-  });
+        expect(miss.success).toBe(false);
+        expect(miss.attackRoll.isCritical).toBe(false);
+        expect(miss.attackRoll.isCriticalFail).toBe(false);
+        expect(miss.criticalEffectApplied).toBeUndefined();
+        expect(JSON.stringify(miss.battleAction)).toContain(
+            'battleLog.percentile.doublesMiss'
+        );
+    });
 
-  it("winner gains Momentum for the side, spending adds an SL", () => {
-    expect(momentumOf(strike(30, 80).sceneState)).toEqual({ ally: true });
+    it('winner gains Momentum for the side, spending adds an SL', () => {
+        expect(momentumOf(strike(30, 80).sceneState)).toEqual({ ally: true });
 
-    const spent = strike(30, 80, { momentum: { ally: true } });
+        const spent = strike(30, 80, { momentum: { ally: true } });
 
-    expect(attackOf(spent.attackRoll)).toMatchObject({ sl: 2, momentumUsed: true });
-    expect(momentumOf(spent.sceneState)).toEqual({ ally: true });
+        expect(attackOf(spent.attackRoll)).toMatchObject({
+            sl: 2,
+            momentumUsed: true,
+        });
+        expect(momentumOf(spent.sceneState)).toEqual({ ally: true });
 
-    expect(momentumOf(strike(70, 10, { momentum: { ally: true } }).sceneState)).toEqual({ enemy: true });
-  });
+        expect(
+            momentumOf(strike(70, 10, { momentum: { ally: true } }).sceneState)
+        ).toEqual({ enemy: true });
+    });
 
-  it("the defender's Momentum is spent when it applies and the loser side never keeps one", () => {
-    const won = strike(30, 80, { momentum: { enemy: true } });
+    it("the defender's Momentum is spent when it applies and the loser side never keeps one", () => {
+        const won = strike(30, 80, { momentum: { enemy: true } });
 
-    expect(attackOf(won.attackRoll)?.defender?.sl).toBe((attackOf(strike(30, 80).attackRoll)?.defender?.sl ?? 0) + 1);
-    expect(momentumOf(won.sceneState)).toEqual({ ally: true });
+        expect(attackOf(won.attackRoll)?.defender?.sl).toBe(
+            (attackOf(strike(30, 80).attackRoll)?.defender?.sl ?? 0) + 1
+        );
+        expect(momentumOf(won.sceneState)).toEqual({ ally: true });
 
-    expect(momentumOf(strike(30, 80, { momentum: { ally: true, enemy: true } }).sceneState)).toEqual({ ally: true });
+        expect(
+            momentumOf(
+                strike(30, 80, { momentum: { ally: true, enemy: true } })
+                    .sceneState
+            )
+        ).toEqual({ ally: true });
 
-    const defended = strike(70, 10, { momentum: { enemy: true } });
+        const defended = strike(70, 10, { momentum: { enemy: true } });
 
-    expect(momentumOf(defended.sceneState)).toEqual({ enemy: true });
-  });
+        expect(momentumOf(defended.sceneState)).toEqual({ enemy: true });
+    });
 
-  it("server attacks read and write flow.sceneState", () => {
-    const attacker = fighter("a", ParticipantSide.ENEMY);
+    it('server attacks read and write flow.sceneState', () => {
+        const attacker = fighter('a', ParticipantSide.ENEMY);
 
-    const target = fighter("t", ParticipantSide.ALLY);
+        const target = fighter('t', ParticipantSide.ALLY);
 
-    const flow = (momentum: SceneMomentum): ActionFlow => ({ ps: [attacker, target], messages: [], summons: [], ctx: { round: 1, rng: seq(0.1), rules: WFRP_RULES }, sceneState: sceneOf(momentum) });
+        const flow = (momentum: SceneMomentum): ActionFlow => ({
+            ps: [attacker, target],
+            messages: [],
+            summons: [],
+            ctx: { round: 1, rng: seq(0.1), rules: WFRP_RULES },
+            sceneState: sceneOf(momentum),
+        });
 
-    const input = (f: ActionFlow) => ({ flow: f, attackerId: "a", targetId: "t", attack: sword, currentRound: 1, battleId: "b", rng: f.ctx.rng, label: "retaliation" as const });
+        const input = (f: ActionFlow) => ({
+            flow: f,
+            attackerId: 'a',
+            targetId: 't',
+            attack: sword,
+            currentRound: 1,
+            battleId: 'b',
+            rng: f.ctx.rng,
+            label: 'retaliation' as const,
+        });
 
-    const f1 = flow({});
+        const f1 = flow({});
 
-    resolveServerAttack(input(f1));
+        resolveServerAttack(input(f1));
 
-    expect(momentumOf(f1.sceneState)).toEqual({ enemy: true });
+        expect(momentumOf(f1.sceneState)).toEqual({ enemy: true });
 
-    const f2 = flow({ enemy: true });
+        const f2 = flow({ enemy: true });
 
-    const r = resolveServerAttack(input(f2));
+        const r = resolveServerAttack(input(f2));
 
-    expect(attackOf(r.battleAction.actionDetails)?.momentumUsed).toBe(true);
-    expect(momentumOf(f2.sceneState)).toEqual({ enemy: true });
-  });
+        expect(attackOf(r.battleAction.actionDetails)?.momentumUsed).toBe(true);
+        expect(momentumOf(f2.sceneState)).toEqual({ enemy: true });
+    });
 
-  it("outnumbering adds a bonus to the attacker target", () => {
-    const cell = (x: number, y: number) => ({ x, y });
+    it('outnumbering adds a bonus to the attacker target', () => {
+        const cell = (x: number, y: number) => ({ x, y });
 
-    const attacker = fighter("a", ParticipantSide.ALLY, { position: cell(0, 0) });
+        const attacker = fighter('a', ParticipantSide.ALLY, {
+            position: cell(0, 0),
+        });
 
-    const target = fighter("t", ParticipantSide.ENEMY, { position: cell(1, 0) });
+        const target = fighter('t', ParticipantSide.ENEMY, {
+            position: cell(1, 0),
+        });
 
-    const friend = fighter("f", ParticipantSide.ALLY, { position: cell(1, 1) });
+        const friend = fighter('f', ParticipantSide.ALLY, {
+            position: cell(1, 1),
+        });
 
-    expect(attackOf(strike(30, 80, { attacker, target }).attackRoll)?.target).toBe(40);
-    expect(attackOf(strike(30, 80, { attacker, target, others: [friend] }).attackRoll)?.target).toBe(50);
-  });
+        expect(
+            attackOf(strike(30, 80, { attacker, target }).attackRoll)?.target
+        ).toBe(40);
+        expect(
+            attackOf(
+                strike(30, 80, { attacker, target, others: [friend] })
+                    .attackRoll
+            )?.target
+        ).toBe(50);
+    });
 
-  it("an unconscious target aborts without crashing", () => {
-    const target = fighter("t", ParticipantSide.ENEMY);
+    it('an unconscious target aborts without crashing', () => {
+        const target = fighter('t', ParticipantSide.ENEMY);
 
-    const down = { ...target, combatStats: { ...target.combatStats, currentHp: 0, status: CombatStatus.UNCONSCIOUS } };
+        const down = {
+            ...target,
+            combatStats: {
+                ...target.combatStats,
+                currentHp: 0,
+                status: CombatStatus.UNCONSCIOUS,
+            },
+        };
 
-    const r = strike(30, 80, { target: down });
+        const r = strike(30, 80, { target: down });
 
-    expect(r.success).toBe(false);
-    expect(attackOf(r.attackRoll)).toBeUndefined();
-  });
+        expect(r.success).toBe(false);
+        expect(attackOf(r.attackRoll)).toBeUndefined();
+    });
 
-  it("missing characteristics fall back to defaults without NaN", () => {
-    const r = strike(25, 90, { attacker: fighter("a", ParticipantSide.ALLY, { characteristics: false }), target: fighter("t", ParticipantSide.ENEMY, { characteristics: false }) });
+    it('missing characteristics fall back to defaults without NaN', () => {
+        const r = strike(25, 90, {
+            attacker: fighter('a', ParticipantSide.ALLY, {
+                characteristics: false,
+            }),
+            target: fighter('t', ParticipantSide.ENEMY, {
+                characteristics: false,
+            }),
+        });
 
-    expect(attackOf(r.attackRoll)?.target).toBe(30);
-    expect(Number.isNaN(attackOf(r.attackRoll)?.netSl)).toBe(false);
-  });
+        expect(attackOf(r.attackRoll)?.target).toBe(30);
+        expect(Number.isNaN(attackOf(r.attackRoll)?.netSl)).toBe(false);
+    });
 
-  it("rules without combat hooks use the d20 path", () => {
-    const r = strike(15, 50, { rules: DEFAULT_RULES as typeof WFRP_RULES });
+    it('rules without combat hooks use the d20 path', () => {
+        const r = strike(15, 50, { rules: DEFAULT_RULES as typeof WFRP_RULES });
 
-    expect(attackOf(r.attackRoll)).toBeUndefined();
-    expect(r.attackRoll.chosenD20).toBe(15);
-  });
+        expect(attackOf(r.attackRoll)).toBeUndefined();
+        expect(r.attackRoll.chosenD20).toBe(15);
+    });
 });

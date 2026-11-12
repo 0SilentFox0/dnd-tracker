@@ -1,48 +1,48 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useTranslations } from "next-intl";
-import { Check, Copy } from "lucide-react";
+import { useState } from 'react';
+import { useTranslations } from 'next-intl';
+import { Check, Copy } from 'lucide-react';
 
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 
 interface InviteCodeDisplayProps {
-  inviteCode: string;
+    inviteCode: string;
 }
 
 export function InviteCodeDisplay({ inviteCode }: InviteCodeDisplayProps) {
-  const t = useTranslations("campaigns");
+    const t = useTranslations('campaigns');
 
-  const [copied, setCopied] = useState(false);
+    const [copied, setCopied] = useState(false);
 
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(inviteCode);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error("Failed to copy:", err);
-    }
-  };
+    const handleCopy = async () => {
+        try {
+            await navigator.clipboard.writeText(inviteCode);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        } catch (err) {
+            console.error('Failed to copy:', err);
+        }
+    };
 
-  return (
-    <div className="flex items-center gap-2">
-      <code className="rounded bg-hud-field px-2 py-1 font-mono text-lg font-semibold text-hud-ink">
-        {inviteCode}
-      </code>
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={handleCopy}
-        className="h-8 w-8"
-        title={t("settings.copyCode")}
-      >
-        {copied ? (
-          <Check className="h-4 w-4 text-hud-gold" />
-        ) : (
-          <Copy className="h-4 w-4" />
-        )}
-      </Button>
-    </div>
-  );
+    return (
+        <div className="flex items-center gap-2">
+            <code className="rounded bg-hud-field px-2 py-1 font-mono text-lg font-semibold text-hud-ink">
+                {inviteCode}
+            </code>
+            <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleCopy}
+                className="h-8 w-8"
+                title={t('settings.copyCode')}
+            >
+                {copied ? (
+                    <Check className="h-4 w-4 text-hud-gold" />
+                ) : (
+                    <Copy className="h-4 w-4" />
+                )}
+            </Button>
+        </div>
+    );
 }

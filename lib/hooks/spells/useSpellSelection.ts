@@ -1,59 +1,61 @@
-import { useCallback, useMemo,useState } from "react";
+import { useCallback, useMemo, useState } from 'react';
 
 import {
-  filterSelectedSpells,
-  groupSpellsByGroup,
-} from "@/lib/utils/spells/spells";
-import type { Spell } from "@/types/spells";
+    filterSelectedSpells,
+    groupSpellsByGroup,
+} from '@/lib/utils/spells/spells';
+import type { Spell } from '@/types/spells';
 
 interface UseSpellSelectionProps {
-  spells: Spell[];
-  selectedSpellIds: string[];
-  onSelectionChange: (spellIds: string[]) => void;
+    spells: Spell[];
+    selectedSpellIds: string[];
+    onSelectionChange: (spellIds: string[]) => void;
 }
 
 /**
  * Хук для управління вибором заклинань
  */
 export function useSpellSelection({
-  spells,
-  selectedSpellIds,
-  onSelectionChange,
+    spells,
+    selectedSpellIds,
+    onSelectionChange,
 }: UseSpellSelectionProps) {
-  const [open, setOpen] = useState(false);
+    const [open, setOpen] = useState(false);
 
-  const groupedSpells = useMemo(() => {
-    return Array.from(groupSpellsByGroup(spells).entries());
-  }, [spells]);
+    const groupedSpells = useMemo(() => {
+        return Array.from(groupSpellsByGroup(spells).entries());
+    }, [spells]);
 
-  const selectedSpells = useMemo(() => {
-    return filterSelectedSpells(spells, selectedSpellIds);
-  }, [spells, selectedSpellIds]);
+    const selectedSpells = useMemo(() => {
+        return filterSelectedSpells(spells, selectedSpellIds);
+    }, [spells, selectedSpellIds]);
 
-  const toggleSpell = useCallback(
-    (spellId: string) => {
-      if (selectedSpellIds.includes(spellId)) {
-        onSelectionChange(selectedSpellIds.filter((id) => id !== spellId));
-      } else {
-        onSelectionChange([...selectedSpellIds, spellId]);
-      }
-    },
-    [selectedSpellIds, onSelectionChange]
-  );
+    const toggleSpell = useCallback(
+        (spellId: string) => {
+            if (selectedSpellIds.includes(spellId)) {
+                onSelectionChange(
+                    selectedSpellIds.filter((id) => id !== spellId)
+                );
+            } else {
+                onSelectionChange([...selectedSpellIds, spellId]);
+            }
+        },
+        [selectedSpellIds, onSelectionChange]
+    );
 
-  const removeSpell = useCallback(
-    (spellId: string) => {
-      onSelectionChange(selectedSpellIds.filter((id) => id !== spellId));
-    },
-    [selectedSpellIds, onSelectionChange]
-  );
+    const removeSpell = useCallback(
+        (spellId: string) => {
+            onSelectionChange(selectedSpellIds.filter((id) => id !== spellId));
+        },
+        [selectedSpellIds, onSelectionChange]
+    );
 
-  return {
-    open,
-    setOpen,
-    groupedSpells,
-    selectedSpells,
-    toggleSpell,
-    removeSpell,
-  };
+    return {
+        open,
+        setOpen,
+        groupedSpells,
+        selectedSpells,
+        toggleSpell,
+        removeSpell,
+    };
 }

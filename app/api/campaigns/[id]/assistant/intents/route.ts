@@ -1,3 +1,3 @@
-import { assistantRoute } from "@/lib/server/assistant/http";
+import { assistantRoute } from '@/lib/server/assistant/http';
 
-export const GET = assistantRoute("list");
+export const GET = assistantRoute('list');

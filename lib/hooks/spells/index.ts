@@ -1,26 +1,26 @@
-export { useComponentsLine } from "./useComponentsLine";
-export { ALL_SCHOOLS, useSchoolFilter } from "./useSchoolFilter";
-export { useSpellComponents } from "./useSpellComponents";
-export { useSpellFormSync } from "./useSpellFormSync";
-export { useSpellGroupActions } from "./useSpellGroupActions";
-export { useSpellIssueText } from "./useSpellIssueText";
-export { useSpellLabels } from "./useSpellLabels";
-export { useSpellRefs } from "./useSpellRefs";
+export { useComponentsLine } from './useComponentsLine';
+export { ALL_SCHOOLS, useSchoolFilter } from './useSchoolFilter';
+export { useSpellComponents } from './useSpellComponents';
+export { useSpellFormSync } from './useSpellFormSync';
+export { useSpellGroupActions } from './useSpellGroupActions';
+export { useSpellIssueText } from './useSpellIssueText';
+export { useSpellLabels } from './useSpellLabels';
+export { useSpellRefs } from './useSpellRefs';
 export {
-  useCreateSpell,
-  useCreateSpellGroup,
-  useDeleteAllSpells,
-  useDeleteSpell,
-  useDeleteSpellsByLevel,
-  useMoveSpellToGroup,
-  useRemoveSpellFromGroup,
-  useSpell,
-  useSpellGroups,
-  useSpells,
-  useUpdateSpell,
-  useUpdateSpellGroup,
-} from "./useSpells";
-export { usePrefetchSpellsByIds, useSpellsByIds } from "./useSpellsByIds";
-export { useSpellSelection } from "./useSpellSelection";
-export { useSpellsList } from "./useSpellsList";
-export { useUpdateSpellAppearance } from "./useUpdateSpellAppearance";
+    useCreateSpell,
+    useCreateSpellGroup,
+    useDeleteAllSpells,
+    useDeleteSpell,
+    useDeleteSpellsByLevel,
+    useMoveSpellToGroup,
+    useRemoveSpellFromGroup,
+    useSpell,
+    useSpellGroups,
+    useSpells,
+    useUpdateSpell,
+    useUpdateSpellGroup,
+} from './useSpells';
+export { usePrefetchSpellsByIds, useSpellsByIds } from './useSpellsByIds';
+export { useSpellSelection } from './useSpellSelection';
+export { useSpellsList } from './useSpellsList';
+export { useUpdateSpellAppearance } from './useUpdateSpellAppearance';

@@ -1,37 +1,79 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from 'vitest';
 
-import { resolveLearnedSpellsAndMastery } from "@/lib/server/battles/participant/from-character-learned-spells";
-import { buildTreeJson } from "@/lib/utils/skills/progression";
+import { resolveLearnedSpellsAndMastery } from '@/lib/server/battles/participant/from-character-learned-spells';
+import { buildTreeJson } from '@/lib/utils/skills/progression';
 
-vi.mock("@/lib/db", () => ({ prisma: {} }));
+vi.mock('@/lib/db', () => ({ prisma: {} }));
 
-const tree = { id: "row-tree", race: "Ельф", skills: buildTreeJson({ race: "Ельф", branches: [{ id: "light", name: "Світло", color: "y" }] }) };
+const tree = {
+    id: 'row-tree',
+    race: 'Ельф',
+    skills: buildTreeJson({
+        race: 'Ельф',
+        branches: [{ id: 'light', name: 'Світло', color: 'y' }],
+    }),
+};
 
 const context = {
-  skillTreeByRace: { Ельф: tree },
-  mainSkills: [{ id: "light", spellGroupId: "sg", name: "Світло" }],
-  spells: [{ id: "s1", level: 1, spellGroup: { id: "sg" } }],
-  allSkills: [],
+    skillTreeByRace: { Ельф: tree },
+    mainSkills: [{ id: 'light', spellGroupId: 'sg', name: 'Світло' }],
+    spells: [{ id: 's1', level: 1, spellGroup: { id: 'sg' } }],
+    allSkills: [],
 } as never;
 
-describe("resolveLearnedSpellsAndMastery", () => {
-  it("рівень гілки зі школою магії додає заклинання до knownSpells", async () => {
-    const character = { id: "c", race: "Ельф", campaignId: "camp", skillTreeProgress: { "row-tree": { unlockedSkills: ["light_basic_level"] } } } as never;
+describe('resolveLearnedSpellsAndMastery', () => {
+    it('рівень гілки зі школою магії додає заклинання до knownSpells', async () => {
+        const character = {
+            id: 'c',
+            race: 'Ельф',
+            campaignId: 'camp',
+            skillTreeProgress: {
+                'row-tree': { unlockedSkills: ['light_basic_level'] },
+            },
+        } as never;
 
-    expect((await resolveLearnedSpellsAndMastery(character, ["k"], context)).knownSpells).toEqual(["k", "s1"]);
-  });
+        expect(
+            (await resolveLearnedSpellsAndMastery(character, ['k'], context))
+                .knownSpells
+        ).toEqual(['k', 's1']);
+    });
 
-  it("без дерева — лише knownSpells", async () => {
-    const character = { id: "c", race: "Гном", campaignId: "camp", skillTreeProgress: {} } as never;
+    it('без дерева — лише knownSpells', async () => {
+        const character = {
+            id: 'c',
+            race: 'Гном',
+            campaignId: 'camp',
+            skillTreeProgress: {},
+        } as never;
 
-    expect((await resolveLearnedSpellsAndMastery(character, ["k"], { ...(context as object), skillTreeByRace: {} } as never)).knownSpells).toEqual(["k"]);
-  });
+        expect(
+            (
+                await resolveLearnedSpellsAndMastery(character, ['k'], {
+                    ...(context as object),
+                    skillTreeByRace: {},
+                } as never)
+            ).knownSpells
+        ).toEqual(['k']);
+    });
 
-  it("персональне вміння додає своє закляття навіть без дерева", async () => {
-    const character = { id: "c", race: "Гном", campaignId: "camp", skillTreeProgress: {}, personalSkillId: "ps" } as never;
+    it('персональне вміння додає своє закляття навіть без дерева', async () => {
+        const character = {
+            id: 'c',
+            race: 'Гном',
+            campaignId: 'camp',
+            skillTreeProgress: {},
+            personalSkillId: 'ps',
+        } as never;
 
-    const ctx = { ...(context as object), skillTreeByRace: {}, allSkills: [{ id: "ps", grantedSpellId: "avatar" }] } as never;
+        const ctx = {
+            ...(context as object),
+            skillTreeByRace: {},
+            allSkills: [{ id: 'ps', grantedSpellId: 'avatar' }],
+        } as never;
 
-    expect((await resolveLearnedSpellsAndMastery(character, ["k"], ctx)).knownSpells).toEqual(["k", "avatar"]);
-  });
+        expect(
+            (await resolveLearnedSpellsAndMastery(character, ['k'], ctx))
+                .knownSpells
+        ).toEqual(['k', 'avatar']);
+    });
 });

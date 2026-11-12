@@ -3,617 +3,987 @@
  *
  * Тест: два гравці, підписані на канал бою, отримують однаковий стан після battle-delta.
  */
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { act, cleanup, render, screen, waitFor } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { act, cleanup, render, screen, waitFor } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { RESYNC_AFTER_HIDDEN_MS } from "../useBattleResync";
-import { usePusherBattleSync } from "../usePusherBattleSync";
+import { RESYNC_AFTER_HIDDEN_MS } from '../useBattleResync';
+import { usePusherBattleSync } from '../usePusherBattleSync';
 
-import { getBattleVersion } from "@/lib/api/battles";
-import { audioState } from "@/lib/utils/audio/__tests__/fixtures";
-import { DEFAULT_RULES } from "@/lib/utils/rules";
-import type { BattleScene } from "@/types/api";
+import { getBattleVersion } from '@/lib/api/battles';
+import { audioState } from '@/lib/utils/audio/__tests__/fixtures';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
+import type { BattleScene } from '@/types/api';
 
-vi.mock("@/lib/api/battles", () => ({ getBattleVersion: vi.fn() }));
+vi.mock('@/lib/api/battles', () => ({ getBattleVersion: vi.fn() }));
 
 // Стан для симуляції Pusher: зберігає callbacks по channel+event
-const channelBindings = new Map<string, Map<string, Set<(data: unknown) => void>>>();
+const channelBindings = new Map<
+    string,
+    Map<string, Set<(data: unknown) => void>>
+>();
 
 function getOrCreateChannel(channelName: string) {
-  if (!channelBindings.has(channelName)) {
-    channelBindings.set(channelName, new Map());
-  }
+    if (!channelBindings.has(channelName)) {
+        channelBindings.set(channelName, new Map());
+    }
 
-  const ch = channelBindings.get(channelName);
+    const ch = channelBindings.get(channelName);
 
-  if (!ch) throw new Error("Channel not found");
+    if (!ch) throw new Error('Channel not found');
 
-  return ch;
+    return ch;
 }
 
 function subscribeToChannel(channelName: string) {
-  const events = getOrCreateChannel(channelName);
+    const events = getOrCreateChannel(channelName);
 
-  return {
-    bind: (eventName: string, callback: (data: unknown) => void) => {
-      let set = events.get(eventName);
+    return {
+        bind: (eventName: string, callback: (data: unknown) => void) => {
+            let set = events.get(eventName);
 
-      if (!set) {
-        set = new Set();
-        events.set(eventName, set);
-      }
+            if (!set) {
+                set = new Set();
+                events.set(eventName, set);
+            }
 
-      set.add(callback);
-    },
-    unbind: (eventName: string, callback: (data: unknown) => void) => {
-      events.get(eventName)?.delete(callback);
-    },
-  };
+            set.add(callback);
+        },
+        unbind: (eventName: string, callback: (data: unknown) => void) => {
+            events.get(eventName)?.delete(callback);
+        },
+    };
 }
 
-function simulateTrigger(channelName: string, eventName: string, data: unknown) {
-  const events = channelBindings.get(channelName);
+function simulateTrigger(
+    channelName: string,
+    eventName: string,
+    data: unknown
+) {
+    const events = channelBindings.get(channelName);
 
-  if (!events) return;
+    if (!events) return;
 
-  const callbacks = events.get(eventName);
+    const callbacks = events.get(eventName);
 
-  if (!callbacks) return;
+    if (!callbacks) return;
 
-  callbacks.forEach((cb) => cb(data));
+    callbacks.forEach((cb) => cb(data));
 }
 
 function unsubscribeChannel(channelName: string) {
-  channelBindings.delete(channelName);
+    channelBindings.delete(channelName);
 }
 
-const stateListeners = new Set<(states: { previous: string; current: string }) => void>();
+const stateListeners = new Set<
+    (states: { previous: string; current: string }) => void
+>();
 
 function changeState(previous: string, current: string) {
-  stateListeners.forEach((cb) => cb({ previous, current }));
+    stateListeners.forEach((cb) => cb({ previous, current }));
 }
 
 function setVisibility(state: DocumentVisibilityState) {
-  Object.defineProperty(document, "visibilityState", { value: state, configurable: true });
-  document.dispatchEvent(new Event("visibilitychange"));
+    Object.defineProperty(document, 'visibilityState', {
+        value: state,
+        configurable: true,
+    });
+    document.dispatchEvent(new Event('visibilitychange'));
 }
 
 let mockPusherInstance: ReturnType<typeof createMockPusher> | null = null;
 
 function createMockPusher() {
-  return {
-    subscribe: (channelName: string) => subscribeToChannel(channelName),
-    unsubscribe: (channelName: string) => unsubscribeChannel(channelName),
-    connection: {
-      state: "connected",
-      bind: vi.fn((event: string, cb: (states: { previous: string; current: string }) => void) => {
-        if (event === "state_change") stateListeners.add(cb);
-      }),
-      unbind: vi.fn((_event: string, cb: (states: { previous: string; current: string }) => void) => {
-        stateListeners.delete(cb);
-      }),
-    },
-  };
+    return {
+        subscribe: (channelName: string) => subscribeToChannel(channelName),
+        unsubscribe: (channelName: string) => unsubscribeChannel(channelName),
+        connection: {
+            state: 'connected',
+            bind: vi.fn(
+                (
+                    event: string,
+                    cb: (states: { previous: string; current: string }) => void
+                ) => {
+                    if (event === 'state_change') stateListeners.add(cb);
+                }
+            ),
+            unbind: vi.fn(
+                (
+                    _event: string,
+                    cb: (states: { previous: string; current: string }) => void
+                ) => {
+                    stateListeners.delete(cb);
+                }
+            ),
+        },
+    };
 }
 
-vi.mock("@/lib/pusher/client", () => ({
-  getPusherClient: () => {
-    if (!mockPusherInstance) mockPusherInstance = createMockPusher();
+vi.mock('@/lib/pusher/client', () => ({
+    getPusherClient: () => {
+        if (!mockPusherInstance) mockPusherInstance = createMockPusher();
 
-    return mockPusherInstance;
-  },
+        return mockPusherInstance;
+    },
 }));
 
 function makeBattlePayload(overrides: Partial<BattleScene> = {}): BattleScene {
-  return {
-    id: "battle-1",
-    campaignId: "camp-1",
-    name: "Test Battle",
-    status: "active",
-    participants: [],
-    currentRound: 1,
-    currentTurnIndex: 1,
-    initiativeOrder: [
-      { basicInfo: { id: "p-1", name: "Айвен", side: "ally" } },
-      { basicInfo: { id: "p-2", name: "Аграїл", side: "ally" } },
-    ] as BattleScene["initiativeOrder"],
-    rules: DEFAULT_RULES,
-    battleLog: [],
-    createdAt: new Date().toISOString(),
-    ...overrides,
-  };
+    return {
+        id: 'battle-1',
+        campaignId: 'camp-1',
+        name: 'Test Battle',
+        status: 'active',
+        participants: [],
+        currentRound: 1,
+        currentTurnIndex: 1,
+        initiativeOrder: [
+            { basicInfo: { id: 'p-1', name: 'Айвен', side: 'ally' } },
+            { basicInfo: { id: 'p-2', name: 'Аграїл', side: 'ally' } },
+        ] as BattleScene['initiativeOrder'],
+        rules: DEFAULT_RULES,
+        battleLog: [],
+        createdAt: new Date().toISOString(),
+        ...overrides,
+    };
 }
 
 function PlayerSync({
-  campaignId,
-  battleId,
-  userId,
-  client,
-  isDM = false,
+    campaignId,
+    battleId,
+    userId,
+    client,
+    isDM = false,
 }: {
-  campaignId: string;
-  battleId: string;
-  userId: string;
-  client: QueryClient;
-  isDM?: boolean;
+    campaignId: string;
+    battleId: string;
+    userId: string;
+    client: QueryClient;
+    isDM?: boolean;
 }) {
-  return (
-    <QueryClientProvider client={client}>
-      <PlayerSyncInner campaignId={campaignId} battleId={battleId} userId={userId} isDM={isDM} />
-    </QueryClientProvider>
-  );
+    return (
+        <QueryClientProvider client={client}>
+            <PlayerSyncInner
+                campaignId={campaignId}
+                battleId={battleId}
+                userId={userId}
+                isDM={isDM}
+            />
+        </QueryClientProvider>
+    );
 }
 
 function PlayerSyncInner({
-  campaignId,
-  battleId,
-  userId,
-  isDM,
+    campaignId,
+    battleId,
+    userId,
+    isDM,
 }: {
-  campaignId: string;
-  battleId: string;
-  userId: string;
-  isDM: boolean;
+    campaignId: string;
+    battleId: string;
+    userId: string;
+    isDM: boolean;
 }) {
-  usePusherBattleSync(campaignId, battleId, userId, vi.fn(), isDM);
+    usePusherBattleSync(campaignId, battleId, userId, vi.fn(), isDM);
 
-  return <span data-testid={`player-${userId}`}>ok</span>;
+    return <span data-testid={`player-${userId}`}>ok</span>;
 }
 
-describe("usePusherBattleSync — two players receive same battle state", () => {
-  const campaignId = "camp-1";
+describe('usePusherBattleSync — two players receive same battle state', () => {
+    const campaignId = 'camp-1';
 
-  const battleId = "battle-1";
+    const battleId = 'battle-1';
 
-  const channelName = `private-battle-${battleId}`;
+    const channelName = `private-battle-${battleId}`;
 
-  beforeEach(() => {
-    process.env.NEXT_PUBLIC_PUSHER_KEY = "test-key";
-    channelBindings.clear();
-    stateListeners.clear();
-    mockPusherInstance = null;
-    vi.mocked(getBattleVersion).mockReset();
-  });
-
-  afterEach(() => {
-    cleanup();
-    delete process.env.NEXT_PUBLIC_PUSHER_KEY;
-  });
-
-  const key = ["battle", campaignId, battleId];
-
-  const delta = (version: number, turnIndex = 1) => ({
-    battleId,
-    version,
-    scene: { status: "active", round: 1, turnIndex, pendingMoraleCheck: null, pendingChoice: null },
-    upserted: [{ basicInfo: { id: "p-2", name: "Аграїл (поранений)", side: "ally" } }],
-    removed: [],
-    log: [],
-  });
-
-  async function subscribed() {
-    await waitFor(() => {
-      expect(channelBindings.get(channelName)?.has("battle-delta")).toBe(true);
-    });
-  }
-
-  it("обидва гравці застосовують battle-delta і мають однаковий стан", async () => {
-    const qc1 = new QueryClient();
-
-    const qc2 = new QueryClient();
-
-    qc1.setQueryData(key, makeBattlePayload({ version: 1, currentTurnIndex: 0 }));
-    qc2.setQueryData(key, makeBattlePayload({ version: 1, currentTurnIndex: 0 }));
-
-    render(
-      <>
-        <PlayerSync campaignId={campaignId} battleId={battleId} userId="user-1" client={qc1} />
-        <PlayerSync campaignId={campaignId} battleId={battleId} userId="user-2" client={qc2} />
-      </>,
-    );
-
-    await subscribed();
-
-    act(() => {
-      simulateTrigger(channelName, "battle-delta", delta(2));
+    beforeEach(() => {
+        process.env.NEXT_PUBLIC_PUSHER_KEY = 'test-key';
+        channelBindings.clear();
+        stateListeners.clear();
+        mockPusherInstance = null;
+        vi.mocked(getBattleVersion).mockReset();
     });
 
-    await waitFor(() => {
-      const data = qc1.getQueryData<BattleScene>(key) ?? qc2.getQueryData<BattleScene>(key);
-
-      expect(data?.version).toBe(2);
-      expect(data?.currentTurnIndex).toBe(1);
-      expect(data?.initiativeOrder?.[1]?.basicInfo?.name).toBe("Аграїл (поранений)");
+    afterEach(() => {
+        cleanup();
+        delete process.env.NEXT_PUBLIC_PUSHER_KEY;
     });
 
-    const d1 = qc1.getQueryData<BattleScene>(key);
+    const key = ['battle', campaignId, battleId];
 
-    const d2 = qc2.getQueryData<BattleScene>(key);
-
-    if (d1?.version === 2 && d2?.version === 2) expect(d1.initiativeOrder).toEqual(d2.initiativeOrder);
-  });
-
-  it("зміна currentUserId перепідписує лише user-канал, канал бою лишається", async () => {
-    const qc = new QueryClient();
-
-    const { rerender } = render(<PlayerSync campaignId={campaignId} battleId={battleId} userId="user-1" client={qc} />);
-
-    await subscribed();
-    await waitFor(() => expect(channelBindings.has("private-user-user-1")).toBe(true));
-
-    const pusher = mockPusherInstance;
-
-    if (!pusher) throw new Error("no pusher");
-
-    const subscribe = vi.spyOn(pusher, "subscribe");
-
-    rerender(<PlayerSync campaignId={campaignId} battleId={battleId} userId="user-2" client={qc} />);
-
-    await waitFor(() => expect(channelBindings.has("private-user-user-2")).toBe(true));
-    expect(subscribe.mock.calls.map(([name]) => name)).toEqual(["private-user-user-2"]);
-    expect(channelBindings.has("private-user-user-1")).toBe(false);
-    expect(channelBindings.get(channelName)?.has("battle-delta")).toBe(true);
-  });
-
-  it("refetch-сигнал новішої версії — одна інвалідація; версія, яку кеш уже має, — нічого", async () => {
-    const qc = new QueryClient();
-
-    qc.setQueryData(key, makeBattlePayload({ version: 5 }));
-
-    const invalidate = vi.spyOn(qc, "invalidateQueries");
-
-    render(<PlayerSync campaignId={campaignId} battleId={battleId} userId="user-1" client={qc} />);
-
-    await subscribed();
-    invalidate.mockClear();
-
-    act(() => {
-      simulateTrigger(channelName, "battle-delta", { battleId, version: 5, refetch: true });
+    const delta = (version: number, turnIndex = 1) => ({
+        battleId,
+        version,
+        scene: {
+            status: 'active',
+            round: 1,
+            turnIndex,
+            pendingMoraleCheck: null,
+            pendingChoice: null,
+        },
+        upserted: [
+            {
+                basicInfo: {
+                    id: 'p-2',
+                    name: 'Аграїл (поранений)',
+                    side: 'ally',
+                },
+            },
+        ],
+        removed: [],
+        log: [],
     });
 
-    expect(invalidate).not.toHaveBeenCalled();
-
-    act(() => {
-      simulateTrigger(channelName, "battle-delta", { battleId, version: 6, refetch: true });
-    });
-
-    expect(invalidate).toHaveBeenCalledTimes(1);
-    expect(invalidate).toHaveBeenCalledWith({ queryKey: key });
-  });
-
-  it("пропуск версії в дельті — інвалідація замість патчу", async () => {
-    const qc = new QueryClient();
-
-    qc.setQueryData(key, makeBattlePayload({ version: 1 }));
-
-    const invalidate = vi.spyOn(qc, "invalidateQueries");
-
-    render(<PlayerSync campaignId={campaignId} battleId={battleId} userId="user-1" client={qc} />);
-
-    await subscribed();
-    invalidate.mockClear();
-
-    act(() => {
-      simulateTrigger(channelName, "battle-delta", delta(3));
-    });
-
-    expect(invalidate).toHaveBeenCalledWith({ queryKey: key });
-    expect(qc.getQueryData<BattleScene>(key)?.version).toBe(1);
-  });
-
-  it("помилка авторизації каналу бою — не вважаємо себе підключеними, щоб працював polling", async () => {
-    const qc = new QueryClient();
-
-    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
-
-    function StateProbe() {
-      const { connectionState } = usePusherBattleSync(campaignId, battleId, "user-1", vi.fn());
-
-      return <span data-testid="state">{String(connectionState)}</span>;
+    async function subscribed() {
+        await waitFor(() => {
+            expect(channelBindings.get(channelName)?.has('battle-delta')).toBe(
+                true
+            );
+        });
     }
 
-    render(
-      <QueryClientProvider client={qc}>
-        <StateProbe />
-      </QueryClientProvider>,
-    );
+    it('обидва гравці застосовують battle-delta і мають однаковий стан', async () => {
+        const qc1 = new QueryClient();
 
-    await waitFor(() => expect(screen.getByTestId("state").textContent).toBe("connected"));
-    await waitFor(() => expect(channelBindings.get(channelName)?.has("pusher:subscription_error")).toBe(true));
+        const qc2 = new QueryClient();
 
-    act(() => simulateTrigger(channelName, "pusher:subscription_error", { status: 404 }));
+        qc1.setQueryData(
+            key,
+            makeBattlePayload({ version: 1, currentTurnIndex: 0 })
+        );
+        qc2.setQueryData(
+            key,
+            makeBattlePayload({ version: 1, currentTurnIndex: 0 })
+        );
 
-    expect(screen.getByTestId("state").textContent).toBe("unavailable");
-    expect(warn).toHaveBeenCalled();
+        render(
+            <>
+                <PlayerSync
+                    campaignId={campaignId}
+                    battleId={battleId}
+                    userId="user-1"
+                    client={qc1}
+                />
+                <PlayerSync
+                    campaignId={campaignId}
+                    battleId={battleId}
+                    userId="user-2"
+                    client={qc2}
+                />
+            </>
+        );
 
-    act(() => changeState("connecting", "connected"));
-    expect(screen.getByTestId("state").textContent).toBe("unavailable");
-    warn.mockRestore();
-  });
+        await subscribed();
 
-  const audioKey = ["battle-audio", campaignId, battleId];
+        act(() => {
+            simulateTrigger(channelName, 'battle-delta', delta(2));
+        });
 
-  const audioAt = (seq: number) => audioState({ startedAt: 1_000, seq });
+        await waitFor(() => {
+            const data =
+                qc1.getQueryData<BattleScene>(key) ??
+                qc2.getQueryData<BattleScene>(key);
 
-  it("battle-audio пише лише кеш музики: новіший seq — так, старіший — ні; сцену й версію не чіпає", async () => {
-    const qc = new QueryClient();
+            expect(data?.version).toBe(2);
+            expect(data?.currentTurnIndex).toBe(1);
+            expect(data?.initiativeOrder?.[1]?.basicInfo?.name).toBe(
+                'Аграїл (поранений)'
+            );
+        });
 
-    qc.setQueryData(key, makeBattlePayload({ version: 4 }));
+        const d1 = qc1.getQueryData<BattleScene>(key);
 
-    const invalidate = vi.spyOn(qc, "invalidateQueries");
+        const d2 = qc2.getQueryData<BattleScene>(key);
 
-    render(<PlayerSync campaignId={campaignId} battleId={battleId} userId="u1" client={qc} />);
-
-    await waitFor(() => expect(channelBindings.get(channelName)?.has("battle-audio")).toBe(true));
-
-    act(() => simulateTrigger(channelName, "battle-audio", { battleId, audio: audioAt(2) }));
-    expect(qc.getQueryData(audioKey)).toEqual({ audio: audioAt(2), clockOffsetMs: null });
-
-    act(() => simulateTrigger(channelName, "battle-audio", { battleId, audio: audioAt(1) }));
-    expect((qc.getQueryData(audioKey) as { audio: { seq: number } }).audio.seq).toBe(2);
-
-    act(() => simulateTrigger(channelName, "battle-audio", { battleId }));
-    expect((qc.getQueryData(audioKey) as { audio: { seq: number } }).audio.seq).toBe(2);
-
-    expect((qc.getQueryData(key) as BattleScene).version).toBe(4);
-    expect(invalidate).not.toHaveBeenCalled();
-  });
-
-  it("перепідключення інвалідовує й кеш музики (пропущені battle-audio)", async () => {
-    vi.mocked(getBattleVersion).mockResolvedValue({ version: 1 });
-
-    const qc = new QueryClient();
-
-    qc.setQueryData(key, makeBattlePayload({ version: 1 }));
-
-    const invalidate = vi.spyOn(qc, "invalidateQueries");
-
-    render(<PlayerSync campaignId={campaignId} battleId={battleId} userId="u1" client={qc} />);
-
-    await subscribed();
-
-    act(() => changeState("connected", "disconnected"));
-    act(() => changeState("disconnected", "connected"));
-
-    await waitFor(() => expect(invalidate).toHaveBeenCalledWith({ queryKey: audioKey }));
-    expect(invalidate).not.toHaveBeenCalledWith({ queryKey: key });
-  });
-
-  describe("ресинхронізація після розриву", () => {
-    async function mounted(version = 5) {
-      const qc = new QueryClient();
-
-      qc.setQueryData(key, makeBattlePayload({ version }));
-
-      const invalidate = vi.spyOn(qc, "invalidateQueries");
-
-      render(<PlayerSync campaignId={campaignId} battleId={battleId} userId="user-1" client={qc} />);
-
-      await subscribed();
-      await waitFor(() => expect(stateListeners.size).toBe(1));
-      invalidate.mockClear();
-
-      return invalidate;
-    }
-
-    it("перша успішна підписка — одна перевірка версії: дельти між серверним HTML і підпискою не губляться", async () => {
-      vi.mocked(getBattleVersion).mockResolvedValue({ version: 6 });
-
-      const invalidate = await mounted();
-
-      await act(async () => simulateTrigger(channelName, "pusher:subscription_succeeded", {}));
-      await waitFor(() => expect(invalidate).toHaveBeenCalledWith({ queryKey: key }));
-
-      await act(async () => simulateTrigger(channelName, "pusher:subscription_succeeded", {}));
-      expect(getBattleVersion).toHaveBeenCalledTimes(1);
+        if (d1?.version === 2 && d2?.version === 2)
+            expect(d1.initiativeOrder).toEqual(d2.initiativeOrder);
     });
 
-    it("перша підписка без кешу сцени — нічого не перечитуємо", async () => {
-      vi.mocked(getBattleVersion).mockResolvedValue({ version: 6 });
+    it('зміна currentUserId перепідписує лише user-канал, канал бою лишається', async () => {
+        const qc = new QueryClient();
 
-      const qc = new QueryClient();
+        const { rerender } = render(
+            <PlayerSync
+                campaignId={campaignId}
+                battleId={battleId}
+                userId="user-1"
+                client={qc}
+            />
+        );
 
-      const invalidate = vi.spyOn(qc, "invalidateQueries");
+        await subscribed();
+        await waitFor(() =>
+            expect(channelBindings.has('private-user-user-1')).toBe(true)
+        );
 
-      render(<PlayerSync campaignId={campaignId} battleId={battleId} userId="user-1" client={qc} />);
-      await subscribed();
-      await act(async () => simulateTrigger(channelName, "pusher:subscription_succeeded", {}));
+        const pusher = mockPusherInstance;
 
-      expect(invalidate).not.toHaveBeenCalledWith({ queryKey: key });
+        if (!pusher) throw new Error('no pusher');
+
+        const subscribe = vi.spyOn(pusher, 'subscribe');
+
+        rerender(
+            <PlayerSync
+                campaignId={campaignId}
+                battleId={battleId}
+                userId="user-2"
+                client={qc}
+            />
+        );
+
+        await waitFor(() =>
+            expect(channelBindings.has('private-user-user-2')).toBe(true)
+        );
+        expect(subscribe.mock.calls.map(([name]) => name)).toEqual([
+            'private-user-user-2',
+        ]);
+        expect(channelBindings.has('private-user-user-1')).toBe(false);
+        expect(channelBindings.get(channelName)?.has('battle-delta')).toBe(
+            true
+        );
     });
 
-    it("перша підписка з актуальним кешем — без повного GET", async () => {
-      vi.mocked(getBattleVersion).mockResolvedValue({ version: 5 });
+    it('refetch-сигнал новішої версії — одна інвалідація; версія, яку кеш уже має, — нічого', async () => {
+        const qc = new QueryClient();
 
-      const invalidate = await mounted();
+        qc.setQueryData(key, makeBattlePayload({ version: 5 }));
 
-      await act(async () => simulateTrigger(channelName, "pusher:subscription_succeeded", {}));
-      await waitFor(() => expect(getBattleVersion).toHaveBeenCalledTimes(1));
-      expect(invalidate).not.toHaveBeenCalledWith({ queryKey: key });
+        const invalidate = vi.spyOn(qc, 'invalidateQueries');
+
+        render(
+            <PlayerSync
+                campaignId={campaignId}
+                battleId={battleId}
+                userId="user-1"
+                client={qc}
+            />
+        );
+
+        await subscribed();
+        invalidate.mockClear();
+
+        act(() => {
+            simulateTrigger(channelName, 'battle-delta', {
+                battleId,
+                version: 5,
+                refetch: true,
+            });
+        });
+
+        expect(invalidate).not.toHaveBeenCalled();
+
+        act(() => {
+            simulateTrigger(channelName, 'battle-delta', {
+                battleId,
+                version: 6,
+                refetch: true,
+            });
+        });
+
+        expect(invalidate).toHaveBeenCalledTimes(1);
+        expect(invalidate).toHaveBeenCalledWith({ queryKey: key });
     });
 
-    it("будь-який вихід із connected і повернення — запит версії; новіша → повний GET", async () => {
-      vi.mocked(getBattleVersion).mockResolvedValue({ version: 6 });
+    it('пропуск версії в дельті — інвалідація замість патчу', async () => {
+        const qc = new QueryClient();
 
-      const invalidate = await mounted();
+        qc.setQueryData(key, makeBattlePayload({ version: 1 }));
 
-      act(() => changeState("connected", "connecting"));
-      act(() => changeState("connecting", "connected"));
+        const invalidate = vi.spyOn(qc, 'invalidateQueries');
 
-      await waitFor(() => expect(invalidate).toHaveBeenCalledWith({ queryKey: key }));
-      expect(getBattleVersion).toHaveBeenCalledWith(campaignId, battleId);
+        render(
+            <PlayerSync
+                campaignId={campaignId}
+                battleId={battleId}
+                userId="user-1"
+                client={qc}
+            />
+        );
+
+        await subscribed();
+        invalidate.mockClear();
+
+        act(() => {
+            simulateTrigger(channelName, 'battle-delta', delta(3));
+        });
+
+        expect(invalidate).toHaveBeenCalledWith({ queryKey: key });
+        expect(qc.getQueryData<BattleScene>(key)?.version).toBe(1);
     });
 
-    it("версія не новіша за кеш — без повного GET", async () => {
-      vi.mocked(getBattleVersion).mockResolvedValue({ version: 5 });
+    it('помилка авторизації каналу бою — не вважаємо себе підключеними, щоб працював polling', async () => {
+        const qc = new QueryClient();
 
-      const invalidate = await mounted();
+        const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
-      act(() => changeState("connected", "unavailable"));
-      act(() => changeState("unavailable", "connected"));
+        function StateProbe() {
+            const { connectionState } = usePusherBattleSync(
+                campaignId,
+                battleId,
+                'user-1',
+                vi.fn()
+            );
 
-      await waitFor(() => expect(getBattleVersion).toHaveBeenCalledTimes(1));
-      await Promise.resolve();
-      expect(invalidate).not.toHaveBeenCalledWith({ queryKey: key });
+            return <span data-testid="state">{String(connectionState)}</span>;
+        }
+
+        render(
+            <QueryClientProvider client={qc}>
+                <StateProbe />
+            </QueryClientProvider>
+        );
+
+        await waitFor(() =>
+            expect(screen.getByTestId('state').textContent).toBe('connected')
+        );
+        await waitFor(() =>
+            expect(
+                channelBindings
+                    .get(channelName)
+                    ?.has('pusher:subscription_error')
+            ).toBe(true)
+        );
+
+        act(() =>
+            simulateTrigger(channelName, 'pusher:subscription_error', {
+                status: 404,
+            })
+        );
+
+        expect(screen.getByTestId('state').textContent).toBe('unavailable');
+        expect(warn).toHaveBeenCalled();
+
+        act(() => changeState('connecting', 'connected'));
+        expect(screen.getByTestId('state').textContent).toBe('unavailable');
+        warn.mockRestore();
     });
 
-    it("вкладка схована довше за поріг — перевірка версії при поверненні; коротко — нічого", async () => {
-      vi.mocked(getBattleVersion).mockResolvedValue({ version: 7 });
+    const audioKey = ['battle-audio', campaignId, battleId];
 
-      const now = vi.spyOn(Date, "now");
+    const audioAt = (seq: number) => audioState({ startedAt: 1_000, seq });
 
-      const invalidate = await mounted();
+    it('battle-audio пише лише кеш музики: новіший seq — так, старіший — ні; сцену й версію не чіпає', async () => {
+        const qc = new QueryClient();
 
-      now.mockReturnValue(1_000);
-      act(() => setVisibility("hidden"));
-      now.mockReturnValue(1_000 + RESYNC_AFTER_HIDDEN_MS / 2);
-      act(() => setVisibility("visible"));
-      expect(getBattleVersion).not.toHaveBeenCalled();
+        qc.setQueryData(key, makeBattlePayload({ version: 4 }));
 
-      now.mockReturnValue(10_000);
-      act(() => setVisibility("hidden"));
-      now.mockReturnValue(10_000 + RESYNC_AFTER_HIDDEN_MS + 1);
-      act(() => setVisibility("visible"));
+        const invalidate = vi.spyOn(qc, 'invalidateQueries');
 
-      await waitFor(() => expect(invalidate).toHaveBeenCalledWith({ queryKey: key }));
-      now.mockRestore();
+        render(
+            <PlayerSync
+                campaignId={campaignId}
+                battleId={battleId}
+                userId="u1"
+                client={qc}
+            />
+        );
+
+        await waitFor(() =>
+            expect(channelBindings.get(channelName)?.has('battle-audio')).toBe(
+                true
+            )
+        );
+
+        act(() =>
+            simulateTrigger(channelName, 'battle-audio', {
+                battleId,
+                audio: audioAt(2),
+            })
+        );
+        expect(qc.getQueryData(audioKey)).toEqual({
+            audio: audioAt(2),
+            clockOffsetMs: null,
+        });
+
+        act(() =>
+            simulateTrigger(channelName, 'battle-audio', {
+                battleId,
+                audio: audioAt(1),
+            })
+        );
+        expect(
+            (qc.getQueryData(audioKey) as { audio: { seq: number } }).audio.seq
+        ).toBe(2);
+
+        act(() => simulateTrigger(channelName, 'battle-audio', { battleId }));
+        expect(
+            (qc.getQueryData(audioKey) as { audio: { seq: number } }).audio.seq
+        ).toBe(2);
+
+        expect((qc.getQueryData(key) as BattleScene).version).toBe(4);
+        expect(invalidate).not.toHaveBeenCalled();
     });
 
-    it("повернення вкладки й перепідключення одночасно — один запит версії й одна інвалідація", async () => {
-      let resolve: (v: { version: number }) => void = () => {};
+    it('перепідключення інвалідовує й кеш музики (пропущені battle-audio)', async () => {
+        vi.mocked(getBattleVersion).mockResolvedValue({ version: 1 });
 
-      vi.mocked(getBattleVersion).mockImplementation(() => new Promise((r) => { resolve = r; }));
+        const qc = new QueryClient();
 
-      const now = vi.spyOn(Date, "now");
+        qc.setQueryData(key, makeBattlePayload({ version: 1 }));
 
-      const invalidate = await mounted();
+        const invalidate = vi.spyOn(qc, 'invalidateQueries');
 
-      now.mockReturnValue(1_000);
-      act(() => setVisibility("hidden"));
-      act(() => changeState("connected", "connecting"));
-      now.mockReturnValue(1_000 + RESYNC_AFTER_HIDDEN_MS + 1);
-      act(() => setVisibility("visible"));
-      act(() => changeState("connecting", "connected"));
+        render(
+            <PlayerSync
+                campaignId={campaignId}
+                battleId={battleId}
+                userId="u1"
+                client={qc}
+            />
+        );
 
-      expect(getBattleVersion).toHaveBeenCalledTimes(1);
+        await subscribed();
 
-      await act(async () => resolve({ version: 9 }));
-      await waitFor(() => expect(invalidate).toHaveBeenCalledWith({ queryKey: key }));
-      expect(invalidate.mock.calls.filter(([f]) => JSON.stringify(f?.queryKey) === JSON.stringify(key))).toHaveLength(1);
-      now.mockRestore();
+        act(() => changeState('connected', 'disconnected'));
+        act(() => changeState('disconnected', 'connected'));
+
+        await waitFor(() =>
+            expect(invalidate).toHaveBeenCalledWith({ queryKey: audioKey })
+        );
+        expect(invalidate).not.toHaveBeenCalledWith({ queryKey: key });
     });
-  });
+
+    describe('ресинхронізація після розриву', () => {
+        async function mounted(version = 5) {
+            const qc = new QueryClient();
+
+            qc.setQueryData(key, makeBattlePayload({ version }));
+
+            const invalidate = vi.spyOn(qc, 'invalidateQueries');
+
+            render(
+                <PlayerSync
+                    campaignId={campaignId}
+                    battleId={battleId}
+                    userId="user-1"
+                    client={qc}
+                />
+            );
+
+            await subscribed();
+            await waitFor(() => expect(stateListeners.size).toBe(1));
+            invalidate.mockClear();
+
+            return invalidate;
+        }
+
+        it('перша успішна підписка — одна перевірка версії: дельти між серверним HTML і підпискою не губляться', async () => {
+            vi.mocked(getBattleVersion).mockResolvedValue({ version: 6 });
+
+            const invalidate = await mounted();
+
+            await act(async () =>
+                simulateTrigger(
+                    channelName,
+                    'pusher:subscription_succeeded',
+                    {}
+                )
+            );
+            await waitFor(() =>
+                expect(invalidate).toHaveBeenCalledWith({ queryKey: key })
+            );
+
+            await act(async () =>
+                simulateTrigger(
+                    channelName,
+                    'pusher:subscription_succeeded',
+                    {}
+                )
+            );
+            expect(getBattleVersion).toHaveBeenCalledTimes(1);
+        });
+
+        it('перша підписка без кешу сцени — нічого не перечитуємо', async () => {
+            vi.mocked(getBattleVersion).mockResolvedValue({ version: 6 });
+
+            const qc = new QueryClient();
+
+            const invalidate = vi.spyOn(qc, 'invalidateQueries');
+
+            render(
+                <PlayerSync
+                    campaignId={campaignId}
+                    battleId={battleId}
+                    userId="user-1"
+                    client={qc}
+                />
+            );
+            await subscribed();
+            await act(async () =>
+                simulateTrigger(
+                    channelName,
+                    'pusher:subscription_succeeded',
+                    {}
+                )
+            );
+
+            expect(invalidate).not.toHaveBeenCalledWith({ queryKey: key });
+        });
+
+        it('перша підписка з актуальним кешем — без повного GET', async () => {
+            vi.mocked(getBattleVersion).mockResolvedValue({ version: 5 });
+
+            const invalidate = await mounted();
+
+            await act(async () =>
+                simulateTrigger(
+                    channelName,
+                    'pusher:subscription_succeeded',
+                    {}
+                )
+            );
+            await waitFor(() =>
+                expect(getBattleVersion).toHaveBeenCalledTimes(1)
+            );
+            expect(invalidate).not.toHaveBeenCalledWith({ queryKey: key });
+        });
+
+        it('будь-який вихід із connected і повернення — запит версії; новіша → повний GET', async () => {
+            vi.mocked(getBattleVersion).mockResolvedValue({ version: 6 });
+
+            const invalidate = await mounted();
+
+            act(() => changeState('connected', 'connecting'));
+            act(() => changeState('connecting', 'connected'));
+
+            await waitFor(() =>
+                expect(invalidate).toHaveBeenCalledWith({ queryKey: key })
+            );
+            expect(getBattleVersion).toHaveBeenCalledWith(campaignId, battleId);
+        });
+
+        it('версія не новіша за кеш — без повного GET', async () => {
+            vi.mocked(getBattleVersion).mockResolvedValue({ version: 5 });
+
+            const invalidate = await mounted();
+
+            act(() => changeState('connected', 'unavailable'));
+            act(() => changeState('unavailable', 'connected'));
+
+            await waitFor(() =>
+                expect(getBattleVersion).toHaveBeenCalledTimes(1)
+            );
+            await Promise.resolve();
+            expect(invalidate).not.toHaveBeenCalledWith({ queryKey: key });
+        });
+
+        it('вкладка схована довше за поріг — перевірка версії при поверненні; коротко — нічого', async () => {
+            vi.mocked(getBattleVersion).mockResolvedValue({ version: 7 });
+
+            const now = vi.spyOn(Date, 'now');
+
+            const invalidate = await mounted();
+
+            now.mockReturnValue(1_000);
+            act(() => setVisibility('hidden'));
+            now.mockReturnValue(1_000 + RESYNC_AFTER_HIDDEN_MS / 2);
+            act(() => setVisibility('visible'));
+            expect(getBattleVersion).not.toHaveBeenCalled();
+
+            now.mockReturnValue(10_000);
+            act(() => setVisibility('hidden'));
+            now.mockReturnValue(10_000 + RESYNC_AFTER_HIDDEN_MS + 1);
+            act(() => setVisibility('visible'));
+
+            await waitFor(() =>
+                expect(invalidate).toHaveBeenCalledWith({ queryKey: key })
+            );
+            now.mockRestore();
+        });
+
+        it('повернення вкладки й перепідключення одночасно — один запит версії й одна інвалідація', async () => {
+            let resolve: (v: { version: number }) => void = () => {};
+
+            vi.mocked(getBattleVersion).mockImplementation(
+                () =>
+                    new Promise((r) => {
+                        resolve = r;
+                    })
+            );
+
+            const now = vi.spyOn(Date, 'now');
+
+            const invalidate = await mounted();
+
+            now.mockReturnValue(1_000);
+            act(() => setVisibility('hidden'));
+            act(() => changeState('connected', 'connecting'));
+            now.mockReturnValue(1_000 + RESYNC_AFTER_HIDDEN_MS + 1);
+            act(() => setVisibility('visible'));
+            act(() => changeState('connecting', 'connected'));
+
+            expect(getBattleVersion).toHaveBeenCalledTimes(1);
+
+            await act(async () => resolve({ version: 9 }));
+            await waitFor(() =>
+                expect(invalidate).toHaveBeenCalledWith({ queryKey: key })
+            );
+            expect(
+                invalidate.mock.calls.filter(
+                    ([f]) => JSON.stringify(f?.queryKey) === JSON.stringify(key)
+                )
+            ).toHaveLength(1);
+            now.mockRestore();
+        });
+    });
 });
 
-describe("usePusherBattleSync: dm-канал", () => {
-  const key = ["battle", "camp-1", "battle-1"];
+describe('usePusherBattleSync: dm-канал', () => {
+    const key = ['battle', 'camp-1', 'battle-1'];
 
-  const entry = (text: string) => ({ id: "battle-1-6", actionIndex: 6, log: [text] });
+    const entry = (text: string) => ({
+        id: 'battle-1-6',
+        actionIndex: 6,
+        log: [text],
+    });
 
-  const delta = (log: unknown[], redacted?: true) => ({
-    battleId: "battle-1",
-    version: 5,
-    scene: { status: "active", round: 1, turnIndex: 1, pendingMoraleCheck: null, pendingChoice: null },
-    upserted: [],
-    removed: [],
-    log,
-    ...(redacted && { redacted }),
-  });
+    const delta = (log: unknown[], redacted?: true) => ({
+        battleId: 'battle-1',
+        version: 5,
+        scene: {
+            status: 'active',
+            round: 1,
+            turnIndex: 1,
+            pendingMoraleCheck: null,
+            pendingChoice: null,
+        },
+        upserted: [],
+        removed: [],
+        log,
+        ...(redacted && { redacted }),
+    });
 
-  beforeEach(() => {
-    process.env.NEXT_PUBLIC_PUSHER_KEY = "test-key";
-    channelBindings.clear();
-    stateListeners.clear();
-    mockPusherInstance = null;
-    vi.mocked(getBattleVersion).mockReset();
-  });
+    beforeEach(() => {
+        process.env.NEXT_PUBLIC_PUSHER_KEY = 'test-key';
+        channelBindings.clear();
+        stateListeners.clear();
+        mockPusherInstance = null;
+        vi.mocked(getBattleVersion).mockReset();
+    });
 
-  afterEach(() => {
-    cleanup();
-    delete process.env.NEXT_PUBLIC_PUSHER_KEY;
-  });
+    afterEach(() => {
+        cleanup();
+        delete process.env.NEXT_PUBLIC_PUSHER_KEY;
+    });
 
-  it("ДМ ігнорує redacted публічну дельту і приймає повну з dm-каналу тієї ж версії", async () => {
-    const qc = new QueryClient();
+    it('ДМ ігнорує redacted публічну дельту і приймає повну з dm-каналу тієї ж версії', async () => {
+        const qc = new QueryClient();
 
-    qc.setQueryData(key, makeBattlePayload({ version: 4 }));
-    render(<PlayerSync campaignId="camp-1" battleId="battle-1" userId="dm" client={qc} isDM />);
-    await waitFor(() => expect(channelBindings.get("private-battle-dm-battle-1")?.has("battle-delta")).toBe(true));
-    await waitFor(() => expect(channelBindings.get("private-battle-battle-1")?.has("battle-delta")).toBe(true));
-    act(() => simulateTrigger("private-battle-dm-battle-1", "pusher:subscription_succeeded", {}));
+        qc.setQueryData(key, makeBattlePayload({ version: 4 }));
+        render(
+            <PlayerSync
+                campaignId="camp-1"
+                battleId="battle-1"
+                userId="dm"
+                client={qc}
+                isDM
+            />
+        );
+        await waitFor(() =>
+            expect(
+                channelBindings
+                    .get('private-battle-dm-battle-1')
+                    ?.has('battle-delta')
+            ).toBe(true)
+        );
+        await waitFor(() =>
+            expect(
+                channelBindings
+                    .get('private-battle-battle-1')
+                    ?.has('battle-delta')
+            ).toBe(true)
+        );
+        act(() =>
+            simulateTrigger(
+                'private-battle-dm-battle-1',
+                'pusher:subscription_succeeded',
+                {}
+            )
+        );
 
-    act(() => simulateTrigger("private-battle-battle-1", "battle-delta", delta([entry("прихований")], true)));
-    expect(qc.getQueryData<BattleScene>(key)?.version).toBe(4);
+        act(() =>
+            simulateTrigger(
+                'private-battle-battle-1',
+                'battle-delta',
+                delta([entry('прихований')], true)
+            )
+        );
+        expect(qc.getQueryData<BattleScene>(key)?.version).toBe(4);
 
-    act(() => simulateTrigger("private-battle-dm-battle-1", "battle-delta", delta([entry("повний")])));
-    await waitFor(() => expect(qc.getQueryData<BattleScene>(key)?.version).toBe(5));
-    expect(JSON.stringify(qc.getQueryData<BattleScene>(key)?.battleLog)).toContain("повний");
-  });
+        act(() =>
+            simulateTrigger(
+                'private-battle-dm-battle-1',
+                'battle-delta',
+                delta([entry('повний')])
+            )
+        );
+        await waitFor(() =>
+            expect(qc.getQueryData<BattleScene>(key)?.version).toBe(5)
+        );
+        expect(
+            JSON.stringify(qc.getQueryData<BattleScene>(key)?.battleLog)
+        ).toContain('повний');
+    });
 
-  it("гравець не підписаний на dm-канал і приймає redacted", async () => {
-    const qc = new QueryClient();
+    it('гравець не підписаний на dm-канал і приймає redacted', async () => {
+        const qc = new QueryClient();
 
-    qc.setQueryData(key, makeBattlePayload({ version: 4 }));
-    render(<PlayerSync campaignId="camp-1" battleId="battle-1" userId="u1" client={qc} />);
-    await waitFor(() => expect(channelBindings.get("private-battle-battle-1")?.has("battle-delta")).toBe(true));
-    expect(channelBindings.has("private-battle-dm-battle-1")).toBe(false);
+        qc.setQueryData(key, makeBattlePayload({ version: 4 }));
+        render(
+            <PlayerSync
+                campaignId="camp-1"
+                battleId="battle-1"
+                userId="u1"
+                client={qc}
+            />
+        );
+        await waitFor(() =>
+            expect(
+                channelBindings
+                    .get('private-battle-battle-1')
+                    ?.has('battle-delta')
+            ).toBe(true)
+        );
+        expect(channelBindings.has('private-battle-dm-battle-1')).toBe(false);
 
-    act(() => simulateTrigger("private-battle-battle-1", "battle-delta", delta([entry("прихований")], true)));
-    await waitFor(() => expect(qc.getQueryData<BattleScene>(key)?.version).toBe(5));
-    expect(JSON.stringify(qc.getQueryData<BattleScene>(key)?.battleLog)).toContain("прихований");
-  });
+        act(() =>
+            simulateTrigger(
+                'private-battle-battle-1',
+                'battle-delta',
+                delta([entry('прихований')], true)
+            )
+        );
+        await waitFor(() =>
+            expect(qc.getQueryData<BattleScene>(key)?.version).toBe(5)
+        );
+        expect(
+            JSON.stringify(qc.getQueryData<BattleScene>(key)?.battleLog)
+        ).toContain('прихований');
+    });
 
-  it("поки dm-канал не підписаний, ДМ приймає redacted дельту", async () => {
-    const qc = new QueryClient();
+    it('поки dm-канал не підписаний, ДМ приймає redacted дельту', async () => {
+        const qc = new QueryClient();
 
-    qc.setQueryData(key, makeBattlePayload({ version: 4 }));
-    render(<PlayerSync campaignId="camp-1" battleId="battle-1" userId="dm" client={qc} isDM />);
-    await waitFor(() => expect(channelBindings.get("private-battle-battle-1")?.has("battle-delta")).toBe(true));
+        qc.setQueryData(key, makeBattlePayload({ version: 4 }));
+        render(
+            <PlayerSync
+                campaignId="camp-1"
+                battleId="battle-1"
+                userId="dm"
+                client={qc}
+                isDM
+            />
+        );
+        await waitFor(() =>
+            expect(
+                channelBindings
+                    .get('private-battle-battle-1')
+                    ?.has('battle-delta')
+            ).toBe(true)
+        );
 
-    act(() => simulateTrigger("private-battle-battle-1", "battle-delta", delta([entry("прихований")], true)));
-    await waitFor(() => expect(qc.getQueryData<BattleScene>(key)?.version).toBe(5));
-  });
+        act(() =>
+            simulateTrigger(
+                'private-battle-battle-1',
+                'battle-delta',
+                delta([entry('прихований')], true)
+            )
+        );
+        await waitFor(() =>
+            expect(qc.getQueryData<BattleScene>(key)?.version).toBe(5)
+        );
+    });
 
-  it("помилка підписки dm-каналу: unavailable і знову приймає redacted", async () => {
-    const qc = new QueryClient();
+    it('помилка підписки dm-каналу: unavailable і знову приймає redacted', async () => {
+        const qc = new QueryClient();
 
-    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+        const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
-    qc.setQueryData(key, makeBattlePayload({ version: 4 }));
+        qc.setQueryData(key, makeBattlePayload({ version: 4 }));
 
-    function Probe() {
-      const { connectionState } = usePusherBattleSync("camp-1", "battle-1", "dm", vi.fn(), true);
+        function Probe() {
+            const { connectionState } = usePusherBattleSync(
+                'camp-1',
+                'battle-1',
+                'dm',
+                vi.fn(),
+                true
+            );
 
-      return <span data-testid="state">{String(connectionState)}</span>;
-    }
+            return <span data-testid="state">{String(connectionState)}</span>;
+        }
 
-    render(
-      <QueryClientProvider client={qc}>
-        <Probe />
-      </QueryClientProvider>,
-    );
-    await waitFor(() => expect(channelBindings.get("private-battle-dm-battle-1")?.has("pusher:subscription_error")).toBe(true));
-    act(() => simulateTrigger("private-battle-dm-battle-1", "pusher:subscription_succeeded", {}));
-    act(() => simulateTrigger("private-battle-dm-battle-1", "pusher:subscription_error", { status: 403 }));
+        render(
+            <QueryClientProvider client={qc}>
+                <Probe />
+            </QueryClientProvider>
+        );
+        await waitFor(() =>
+            expect(
+                channelBindings
+                    .get('private-battle-dm-battle-1')
+                    ?.has('pusher:subscription_error')
+            ).toBe(true)
+        );
+        act(() =>
+            simulateTrigger(
+                'private-battle-dm-battle-1',
+                'pusher:subscription_succeeded',
+                {}
+            )
+        );
+        act(() =>
+            simulateTrigger(
+                'private-battle-dm-battle-1',
+                'pusher:subscription_error',
+                { status: 403 }
+            )
+        );
 
-    expect(screen.getByTestId("state").textContent).toBe("unavailable");
+        expect(screen.getByTestId('state').textContent).toBe('unavailable');
 
-    act(() => simulateTrigger("private-battle-battle-1", "battle-delta", delta([entry("прихований")], true)));
-    await waitFor(() => expect(qc.getQueryData<BattleScene>(key)?.version).toBe(5));
-    warn.mockRestore();
-  });
+        act(() =>
+            simulateTrigger(
+                'private-battle-battle-1',
+                'battle-delta',
+                delta([entry('прихований')], true)
+            )
+        );
+        await waitFor(() =>
+            expect(qc.getQueryData<BattleScene>(key)?.version).toBe(5)
+        );
+        warn.mockRestore();
+    });
 
-  it("підписка dm-каналу запускає перевірку версії", async () => {
-    vi.mocked(getBattleVersion).mockResolvedValue({ version: 4 });
+    it('підписка dm-каналу запускає перевірку версії', async () => {
+        vi.mocked(getBattleVersion).mockResolvedValue({ version: 4 });
 
-    const qc = new QueryClient();
+        const qc = new QueryClient();
 
-    qc.setQueryData(key, makeBattlePayload({ version: 4 }));
-    render(<PlayerSync campaignId="camp-1" battleId="battle-1" userId="dm" client={qc} isDM />);
-    await waitFor(() => expect(channelBindings.get("private-battle-dm-battle-1")?.has("battle-delta")).toBe(true));
+        qc.setQueryData(key, makeBattlePayload({ version: 4 }));
+        render(
+            <PlayerSync
+                campaignId="camp-1"
+                battleId="battle-1"
+                userId="dm"
+                client={qc}
+                isDM
+            />
+        );
+        await waitFor(() =>
+            expect(
+                channelBindings
+                    .get('private-battle-dm-battle-1')
+                    ?.has('battle-delta')
+            ).toBe(true)
+        );
 
-    await act(async () => simulateTrigger("private-battle-dm-battle-1", "pusher:subscription_succeeded", {}));
-    expect(getBattleVersion).toHaveBeenCalled();
-  });
+        await act(async () =>
+            simulateTrigger(
+                'private-battle-dm-battle-1',
+                'pusher:subscription_succeeded',
+                {}
+            )
+        );
+        expect(getBattleVersion).toHaveBeenCalled();
+    });
 });

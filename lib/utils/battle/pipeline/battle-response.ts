@@ -1,126 +1,221 @@
-import { PUSHER_DELTA_LIMIT_BYTES } from "./limits";
-import { publicPending } from "./public-pending";
+import { PUSHER_DELTA_LIMIT_BYTES } from './limits';
+import { publicPending } from './public-pending';
 
-import { BattleStatus } from "@/lib/constants/battle";
-import { CampaignRole } from "@/lib/constants/campaigns";
-import { CONTROLLED_BY_DM } from "@/lib/constants/characters";
-import { battleChannelName, battleDmChannelName, userChannelName } from "@/lib/pusher/channels";
-import { reserveOf } from "@/lib/utils/battle/participant/reserve";
-import type { BattleSceneState, LoadedBattle } from "@/lib/utils/battle/store";
-import { checkVictoryConditions } from "@/lib/utils/battle/turn/victory";
-import { redactLogForPlayers, redactParticipantsForPlayers, redactPatchesForPlayers } from "@/lib/utils/battle/view/visibility";
-import { stripPlayerHiddenRules } from "@/lib/utils/rules/player-hidden";
-import type { Ruleset } from "@/lib/utils/rules/schema";
-import type { BattleRefetchSignal, BattleScene, ClientBattleDelta } from "@/types/api";
-import type { BattleAction, BattleParticipant } from "@/types/battle";
+import { BattleStatus } from '@/lib/constants/battle';
+import { CampaignRole } from '@/lib/constants/campaigns';
+import { CONTROLLED_BY_DM } from '@/lib/constants/characters';
+import {
+    battleChannelName,
+    battleDmChannelName,
+    userChannelName,
+} from '@/lib/pusher/channels';
+import { reserveOf } from '@/lib/utils/battle/participant/reserve';
+import type { BattleSceneState, LoadedBattle } from '@/lib/utils/battle/store';
+import { checkVictoryConditions } from '@/lib/utils/battle/turn/victory';
+import {
+    redactLogForPlayers,
+    redactParticipantsForPlayers,
+    redactPatchesForPlayers,
+} from '@/lib/utils/battle/view/visibility';
+import { stripPlayerHiddenRules } from '@/lib/utils/rules/player-hidden';
+import type { Ruleset } from '@/lib/utils/rules/schema';
+import type {
+    BattleRefetchSignal,
+    BattleScene,
+    ClientBattleDelta,
+} from '@/types/api';
+import type { BattleAction, BattleParticipant } from '@/types/battle';
 
 export interface BattleResponseView {
-  isDM?: boolean;
+    isDM?: boolean;
 }
 
 export interface PusherMessage {
-  channel: string;
-  event: string;
-  payload: unknown;
+    channel: string;
+    event: string;
+    payload: unknown;
 }
 
 export function toBattleResponse(
-  loaded: Pick<LoadedBattle, "meta">,
-  scene: BattleSceneState,
-  participants: BattleParticipant[],
-  pending: BattleParticipant[],
-  log: { mode: "append" | "full"; entries: BattleAction[]; cancelledFrom?: number },
-  view?: BattleResponseView,
+    loaded: Pick<LoadedBattle, 'meta'>,
+    scene: BattleSceneState,
+    participants: BattleParticipant[],
+    pending: BattleParticipant[],
+    log: {
+        mode: 'append' | 'full';
+        entries: BattleAction[];
+        cancelledFrom?: number;
+    },
+    view?: BattleResponseView
 ): BattleScene {
-  const { meta } = loaded;
+    const { meta } = loaded;
 
-  const hide = view && !view.isDM;
+    const hide = view && !view.isDM;
 
-  return {
-    id: scene.id,
-    campaignId: scene.campaignId,
-    name: meta.name,
-    description: meta.description ?? undefined,
-    status: scene.status,
-    participants: scene.status === BattleStatus.PREPARED ? meta.setup : [],
-    currentRound: scene.round,
-    currentTurnIndex: scene.turnIndex,
-    initiativeOrder: hide ? redactParticipantsForPlayers(participants) : participants,
-    pendingSummons: hide ? redactParticipantsForPlayers(pending) : pending,
-    pendingMoraleCheck: scene.pendingMoraleCheck,
-    pendingChoice: publicPending(scene.pendingChoice),
-    ...(scene.sceneState && { system: scene.sceneState }),
-    map: meta.map,
-    audio: meta.audio ?? null,
-    rules: hide ? stripPlayerHiddenRules(meta.rules) : meta.rules,
-    turnTimerSeconds: meta.turnTimerSeconds ?? null,
-    battleLog: log.entries,
-    ...(log.mode === "append" && { battleLogMode: "append" as const }),
-    ...(log.cancelledFrom !== undefined && { battleLogCancelledFrom: log.cancelledFrom }),
-    version: scene.version,
-    createdAt: meta.createdAt.toISOString(),
-    startedAt: scene.startedAt?.toISOString(),
-    turnStartedAt: scene.turnStartedAt?.toISOString(),
-    completedAt: scene.completedAt?.toISOString(),
-    campaign: { id: scene.campaignId, friendlyFire: meta.friendlyFire },
-    ...(view && { isDM: Boolean(view.isDM), userRole: view.isDM ? CampaignRole.DM : CampaignRole.PLAYER }),
-  };
+    return {
+        id: scene.id,
+        campaignId: scene.campaignId,
+        name: meta.name,
+        description: meta.description ?? undefined,
+        status: scene.status,
+        participants: scene.status === BattleStatus.PREPARED ? meta.setup : [],
+        currentRound: scene.round,
+        currentTurnIndex: scene.turnIndex,
+        initiativeOrder: hide
+            ? redactParticipantsForPlayers(participants)
+            : participants,
+        pendingSummons: hide ? redactParticipantsForPlayers(pending) : pending,
+        pendingMoraleCheck: scene.pendingMoraleCheck,
+        pendingChoice: publicPending(scene.pendingChoice),
+        ...(scene.sceneState && { system: scene.sceneState }),
+        map: meta.map,
+        audio: meta.audio ?? null,
+        rules: hide ? stripPlayerHiddenRules(meta.rules) : meta.rules,
+        turnTimerSeconds: meta.turnTimerSeconds ?? null,
+        battleLog: log.entries,
+        ...(log.mode === 'append' && { battleLogMode: 'append' as const }),
+        ...(log.cancelledFrom !== undefined && {
+            battleLogCancelledFrom: log.cancelledFrom,
+        }),
+        version: scene.version,
+        createdAt: meta.createdAt.toISOString(),
+        startedAt: scene.startedAt?.toISOString(),
+        turnStartedAt: scene.turnStartedAt?.toISOString(),
+        completedAt: scene.completedAt?.toISOString(),
+        campaign: { id: scene.campaignId, friendlyFire: meta.friendlyFire },
+        ...(view && {
+            isDM: Boolean(view.isDM),
+            userRole: view.isDM ? CampaignRole.DM : CampaignRole.PLAYER,
+        }),
+    };
 }
 
-export function redactDeltaForPlayers(delta: ClientBattleDelta, participants: BattleParticipant[], rules: Ruleset): { delta: ClientBattleDelta; changed: boolean } {
-  const { entries, changed: logChanged } = redactLogForPlayers(delta.log, { participants, rules });
+export function redactDeltaForPlayers(
+    delta: ClientBattleDelta,
+    participants: BattleParticipant[],
+    rules: Ruleset
+): { delta: ClientBattleDelta; changed: boolean } {
+    const { entries, changed: logChanged } = redactLogForPlayers(delta.log, {
+        participants,
+        rules,
+    });
 
-  const upserted = redactParticipantsForPlayers(delta.upserted);
+    const upserted = redactParticipantsForPlayers(delta.upserted);
 
-  const patched = delta.patched && redactPatchesForPlayers(delta.patched, participants);
+    const patched =
+        delta.patched && redactPatchesForPlayers(delta.patched, participants);
 
-  const pending = delta.pending && redactParticipantsForPlayers(delta.pending);
+    const pending =
+        delta.pending && redactParticipantsForPlayers(delta.pending);
 
-  const changed = logChanged || upserted !== delta.upserted || patched !== delta.patched || pending !== delta.pending;
+    const changed =
+        logChanged ||
+        upserted !== delta.upserted ||
+        patched !== delta.patched ||
+        pending !== delta.pending;
 
-  return { delta: changed ? { ...delta, log: entries, upserted, ...(patched && { patched }), ...(pending && { pending }) } : delta, changed };
+    return {
+        delta: changed
+            ? {
+                  ...delta,
+                  log: entries,
+                  upserted,
+                  ...(patched && { patched }),
+                  ...(pending && { pending }),
+              }
+            : delta,
+        changed,
+    };
 }
 
-function fitOrRefetch(delta: ClientBattleDelta): ClientBattleDelta | BattleRefetchSignal {
-  const fits = Buffer.byteLength(JSON.stringify(delta), "utf8") <= PUSHER_DELTA_LIMIT_BYTES;
+function fitOrRefetch(
+    delta: ClientBattleDelta
+): ClientBattleDelta | BattleRefetchSignal {
+    const fits =
+        Buffer.byteLength(JSON.stringify(delta), 'utf8') <=
+        PUSHER_DELTA_LIMIT_BYTES;
 
-  return fits ? delta : { battleId: delta.battleId, version: delta.version, refetch: true, ...(delta.redacted && { redacted: true as const }) };
+    return fits
+        ? delta
+        : {
+              battleId: delta.battleId,
+              version: delta.version,
+              refetch: true,
+              ...(delta.redacted && { redacted: true as const }),
+          };
 }
 
 export function buildPusherMessages(args: {
-  before: BattleSceneState;
-  after: BattleSceneState;
-  participants: BattleParticipant[];
-  rules: Ruleset;
-  pending?: BattleParticipant[];
-  wasAwaiting?: boolean;
-  delta: ClientBattleDelta;
+    before: BattleSceneState;
+    after: BattleSceneState;
+    participants: BattleParticipant[];
+    rules: Ruleset;
+    pending?: BattleParticipant[];
+    wasAwaiting?: boolean;
+    delta: ClientBattleDelta;
 }): PusherMessage[] {
-  const { before, after, participants, rules, pending = [], wasAwaiting = false, delta } = args;
+    const {
+        before,
+        after,
+        participants,
+        rules,
+        pending = [],
+        wasAwaiting = false,
+        delta,
+    } = args;
 
-  const channel = battleChannelName(after.id);
+    const channel = battleChannelName(after.id);
 
-  const { delta: redactedDelta, changed } = redactDeltaForPlayers(delta, participants, rules);
+    const { delta: redactedDelta, changed } = redactDeltaForPlayers(
+        delta,
+        participants,
+        rules
+    );
 
-  const publicDelta: ClientBattleDelta = changed ? { ...redactedDelta, redacted: true } : delta;
+    const publicDelta: ClientBattleDelta = changed
+        ? { ...redactedDelta, redacted: true }
+        : delta;
 
-  const messages: PusherMessage[] = [{ channel, event: "battle-delta", payload: fitOrRefetch(publicDelta) }];
+    const messages: PusherMessage[] = [
+        { channel, event: 'battle-delta', payload: fitOrRefetch(publicDelta) },
+    ];
 
-  if (changed) messages.push({ channel: battleDmChannelName(after.id), event: "battle-delta", payload: fitOrRefetch(delta) });
+    if (changed)
+        messages.push({
+            channel: battleDmChannelName(after.id),
+            event: 'battle-delta',
+            payload: fitOrRefetch(delta),
+        });
 
-  const turnMoved = before.round !== after.round || before.turnIndex !== after.turnIndex || before.status !== after.status || wasAwaiting;
+    const turnMoved =
+        before.round !== after.round ||
+        before.turnIndex !== after.turnIndex ||
+        before.status !== after.status ||
+        wasAwaiting;
 
-  const active = participants[after.turnIndex];
+    const active = participants[after.turnIndex];
 
-  const awaiting = checkVictoryConditions(participants, reserveOf(pending)).awaiting !== null;
+    const awaiting =
+        checkVictoryConditions(participants, reserveOf(pending)).awaiting !==
+        null;
 
-  if (after.status === BattleStatus.ACTIVE && !awaiting && turnMoved && active && active.basicInfo.controlledBy !== CONTROLLED_BY_DM) {
-    messages.push({
-      channel: userChannelName(active.basicInfo.controlledBy),
-      event: "turn-started",
-      payload: { battleId: after.id, participantId: active.basicInfo.id, participantName: active.basicInfo.name },
-    });
-  }
+    if (
+        after.status === BattleStatus.ACTIVE &&
+        !awaiting &&
+        turnMoved &&
+        active &&
+        active.basicInfo.controlledBy !== CONTROLLED_BY_DM
+    ) {
+        messages.push({
+            channel: userChannelName(active.basicInfo.controlledBy),
+            event: 'turn-started',
+            payload: {
+                battleId: after.id,
+                participantId: active.basicInfo.id,
+                participantName: active.basicInfo.name,
+            },
+        });
+    }
 
-  return messages;
+    return messages;
 }

@@ -1,46 +1,73 @@
-import { createCritGate } from "./gate";
-import type { CritPicker, CritResume } from "./types";
+import { createCritGate } from './gate';
+import type { CritPicker, CritResume } from './types';
 
-import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
-import type { Rng } from "@/lib/utils/common/rng";
-import { mulberry32 } from "@/lib/utils/common/rng";
+import type {
+    BattleMutationContext,
+    MutationResult,
+} from '@/lib/utils/battle/pipeline/run-battle-mutation';
+import type { Rng } from '@/lib/utils/common/rng';
+import { mulberry32 } from '@/lib/utils/common/rng';
 
 interface RunWithCritChoiceOptions {
-  action: "attack" | "spell";
-  actorId: string;
-  request: unknown;
-  enabled: boolean;
-  serverRolls?: boolean;
-  resume?: CritResume;
-  run(env: { rng: Rng; crit: CritPicker }): MutationResult | Promise<MutationResult>;
+    action: 'attack' | 'spell';
+    actorId: string;
+    request: unknown;
+    enabled: boolean;
+    serverRolls?: boolean;
+    resume?: CritResume;
+    run(env: {
+        rng: Rng;
+        crit: CritPicker;
+    }): MutationResult | Promise<MutationResult>;
 }
 
-export async function runWithCritChoice(ctx: BattleMutationContext, opts: RunWithCritChoiceOptions): Promise<MutationResult> {
-  const seed = opts.resume?.seed ?? Math.floor(Math.random() * 2 ** 32);
+export async function runWithCritChoice(
+    ctx: BattleMutationContext,
+    opts: RunWithCritChoiceOptions
+): Promise<MutationResult> {
+    const seed = opts.resume?.seed ?? Math.floor(Math.random() * 2 ** 32);
 
-  // скриптовий ctx.rng (тести, sweep) діє напряму; повтор після паузи завжди йде за seed
-  const rng = !opts.resume && ctx.rng ? ctx.rng : mulberry32(seed);
+    // скриптовий ctx.rng (тести, sweep) діє напряму; повтор після паузи завжди йде за seed
+    const rng = !opts.resume && ctx.rng ? ctx.rng : mulberry32(seed);
 
-  const { criticals } = ctx.meta.rules;
+    const { criticals } = ctx.meta.rules;
 
-  const gate = createCritGate({ rng, choices: opts.resume?.choices, disabled: { success: criticals.disabledSuccess, fail: criticals.disabledFail } });
+    const gate = createCritGate({
+        rng,
+        choices: opts.resume?.choices,
+        disabled: {
+            success: criticals.disabledSuccess,
+            fail: criticals.disabledFail,
+        },
+    });
 
-  const result = await opts.run({ rng, crit: gate.pick });
+    const result = await opts.run({ rng, crit: gate.pick });
 
-  if (opts.resume) return { ...result, scene: { ...result.scene, pendingChoice: null } };
+    if (opts.resume)
+        return { ...result, scene: { ...result.scene, pendingChoice: null } };
 
-  if (!opts.enabled || gate.triggers.length === 0) return result;
+    if (!opts.enabled || gate.triggers.length === 0) return result;
 
-  return {
-    participants: ctx.participants,
-    pending: ctx.pending,
-    events: [],
-    scene: {
-      pendingChoice: {
-        shown: { action: opts.action, actorId: opts.actorId, triggers: gate.triggers },
-        hidden: { request: opts.request, seed, ...(opts.serverRolls && { serverRolls: true }), userId: ctx.userId, isDM: ctx.isDM },
-      },
-    },
-    response: { pendingChoice: true },
-  };
+    return {
+        participants: ctx.participants,
+        pending: ctx.pending,
+        events: [],
+        scene: {
+            pendingChoice: {
+                shown: {
+                    action: opts.action,
+                    actorId: opts.actorId,
+                    triggers: gate.triggers,
+                },
+                hidden: {
+                    request: opts.request,
+                    seed,
+                    ...(opts.serverRolls && { serverRolls: true }),
+                    userId: ctx.userId,
+                    isDM: ctx.isDM,
+                },
+            },
+        },
+        response: { pendingChoice: true },
+    };
 }

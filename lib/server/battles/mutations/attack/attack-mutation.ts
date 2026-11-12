@@ -1,157 +1,280 @@
-import type { Spell } from "@prisma/client";
-import type { z } from "zod";
+import type { Spell } from '@prisma/client';
+import type { z } from 'zod';
 
-import { getCachedSpells, getCachedSummonPool } from "@/lib/cache/reference-data";
-import { API_ERRORS } from "@/lib/constants/api-errors";
-import { attackBodyInputSchema } from "@/lib/schemas/battles";
-import { parseSystemInput } from "@/lib/server/battles/system-input";
-import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
-import { findParticipant, replaceParticipant, withSelf } from "@/lib/utils/abilities/engine/core/participants";
-import { ammoStatus, spendAmmo } from "@/lib/utils/battle/ammo";
-import { canUseInspiration, spendInspiration } from "@/lib/utils/battle/attack/inspiration";
-import { findAttack, requestedTargetIds } from "@/lib/utils/battle/attack-phase/request";
-import { runAttackPhase } from "@/lib/utils/battle/attack-phase/run-attack-phase";
-import { runWithCritChoice } from "@/lib/utils/battle/crit-choice/run-with-crit-choice";
-import type { CritResume } from "@/lib/utils/battle/crit-choice/types";
-import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
-import { attackReachError } from "@/lib/utils/battle/grid";
-import { withLines } from "@/lib/utils/battle/log/lines";
-import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
-import { sceneStatePatch } from "@/lib/utils/battle/scene-state";
-import { toCastableSpell } from "@/lib/utils/battle/spell/to-castable";
-import { battleActionToEvent,BattleRuleError } from "@/lib/utils/battle/store";
-import { ruleErrorOf } from "@/lib/utils/battle/store/errors";
-import { applyAbilitySummons, type SummonDeps } from "@/lib/utils/battle/summon/ability-summons";
-import { advanceTurn, assertCanAct } from "@/lib/utils/battle/turn";
-import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
-import { assertAttackRolls } from "@/lib/utils/battle/validation/dice-checks";
-import type { BattleAttack, BattleParticipant } from "@/types/battle";
-
+import {
+    getCachedSpells,
+    getCachedSummonPool,
+} from '@/lib/cache/reference-data';
+import { API_ERRORS } from '@/lib/constants/api-errors';
+import { attackBodyInputSchema } from '@/lib/schemas/battles';
+import { parseSystemInput } from '@/lib/server/battles/system-input';
+import { findFlags } from '@/lib/utils/abilities/engine/core/collect-modifiers';
+import {
+    findParticipant,
+    replaceParticipant,
+    withSelf,
+} from '@/lib/utils/abilities/engine/core/participants';
+import { ammoStatus, spendAmmo } from '@/lib/utils/battle/ammo';
+import {
+    canUseInspiration,
+    spendInspiration,
+} from '@/lib/utils/battle/attack/inspiration';
+import {
+    findAttack,
+    requestedTargetIds,
+} from '@/lib/utils/battle/attack-phase/request';
+import { runAttackPhase } from '@/lib/utils/battle/attack-phase/run-attack-phase';
+import { runWithCritChoice } from '@/lib/utils/battle/crit-choice/run-with-crit-choice';
+import type { CritResume } from '@/lib/utils/battle/crit-choice/types';
+import { heroAttackDamageParts } from '@/lib/utils/battle/damage/hero-damage';
+import { attackReachError } from '@/lib/utils/battle/grid';
+import { withLines } from '@/lib/utils/battle/log/lines';
+import type {
+    BattleMutationContext,
+    MutationResult,
+} from '@/lib/utils/battle/pipeline/run-battle-mutation';
+import { sceneStatePatch } from '@/lib/utils/battle/scene-state';
+import { toCastableSpell } from '@/lib/utils/battle/spell/to-castable';
+import { battleActionToEvent, BattleRuleError } from '@/lib/utils/battle/store';
+import { ruleErrorOf } from '@/lib/utils/battle/store/errors';
+import {
+    applyAbilitySummons,
+    type SummonDeps,
+} from '@/lib/utils/battle/summon/ability-summons';
+import { advanceTurn, assertCanAct } from '@/lib/utils/battle/turn';
+import type { CastableSpell } from '@/lib/utils/battle/types/spell-process';
+import { assertAttackRolls } from '@/lib/utils/battle/validation/dice-checks';
+import type { BattleAttack, BattleParticipant } from '@/types/battle';
 
 export type AttackBody = z.infer<typeof attackBodyInputSchema>;
 
-export function assertAmmo(attacker: BattleParticipant, attack: BattleAttack): void {
-  const ammo = ammoStatus(attacker, attack);
+export function assertAmmo(
+    attacker: BattleParticipant,
+    attack: BattleAttack
+): void {
+    const ammo = ammoStatus(attacker, attack);
 
-  if (ammo !== "ok") throw ruleErrorOf("action_rejected", ammo === "empty" ? API_ERRORS.OUT_OF_AMMO : API_ERRORS.WEAPON_RELOADING);
+    if (ammo !== 'ok')
+        throw ruleErrorOf(
+            'action_rejected',
+            ammo === 'empty'
+                ? API_ERRORS.OUT_OF_AMMO
+                : API_ERRORS.WEAPON_RELOADING
+        );
 }
 
-function assertAttackInput(ctx: BattleMutationContext, data: Omit<AttackBody, "endTurn">): void {
-  const attacker = findParticipant(ctx.participants, data.attackerId);
+function assertAttackInput(
+    ctx: BattleMutationContext,
+    data: Omit<AttackBody, 'endTurn'>
+): void {
+    const attacker = findParticipant(ctx.participants, data.attackerId);
 
-  const attack = attacker && findAttack(attacker, data.attackId, data.offHand);
+    const attack =
+        attacker && findAttack(attacker, data.attackId, data.offHand);
 
-  // без атакуючого чи атаки помилку дасть сама фаза атаки
-  if (!attacker || !attack) return;
+    // без атакуючого чи атаки помилку дасть сама фаза атаки
+    if (!attacker || !attack) return;
 
-  assertAmmo(attacker, attack);
+    assertAmmo(attacker, attack);
 
-  const targetIds = requestedTargetIds(data);
+    const targetIds = requestedTargetIds(data);
 
-  // клієнт героя кидає кубики зброї разом із кубиками рівня (PlayerTurnViewDialogs)
-  assertAttackRolls(heroAttackDamageParts(attacker, attack).formula, { damageRolls: data.damageRolls, targetCount: targetIds.length });
+    // клієнт героя кидає кубики зброї разом із кубиками рівня (PlayerTurnViewDialogs)
+    assertAttackRolls(heroAttackDamageParts(attacker, attack).formula, {
+        damageRolls: data.damageRolls,
+        targetCount: targetIds.length,
+    });
 
-  const targets = targetIds.flatMap((id) => findParticipant(ctx.participants, id) ?? []);
+    const targets = targetIds.flatMap(
+        (id) => findParticipant(ctx.participants, id) ?? []
+    );
 
-  const reach = attackReachError(ctx.meta.map, ctx.participants, attacker, attack, targets, ctx.meta.rules);
+    const reach = attackReachError(
+        ctx.meta.map,
+        ctx.participants,
+        attacker,
+        attack,
+        targets,
+        ctx.meta.rules
+    );
 
-  if (reach) throw ruleErrorOf("action_rejected", reach);
+    if (reach) throw ruleErrorOf('action_rejected', reach);
 }
 
 export interface AttackMutationDeps extends SummonDeps {
-  loadSpells(campaignId: string, ids: string[]): Promise<Spell[]>;
+    loadSpells(campaignId: string, ids: string[]): Promise<Spell[]>;
 }
 
 const defaultDeps: AttackMutationDeps = {
-  loadPool: getCachedSummonPool,
-  loadSpells: async (campaignId, ids) => (await getCachedSpells(campaignId)).filter((s) => ids.includes(s.id)),
+    loadPool: getCachedSummonPool,
+    loadSpells: async (campaignId, ids) =>
+        (await getCachedSpells(campaignId)).filter((s) => ids.includes(s.id)),
 };
 
-async function loadHitSpells(ctx: BattleMutationContext, attackerId: string, deps: AttackMutationDeps): Promise<Map<string, CastableSpell>> {
-  const attacker = findParticipant(ctx.participants, attackerId);
+async function loadHitSpells(
+    ctx: BattleMutationContext,
+    attackerId: string,
+    deps: AttackMutationDeps
+): Promise<Map<string, CastableSpell>> {
+    const attacker = findParticipant(ctx.participants, attackerId);
 
-  if (!attacker) return new Map();
+    if (!attacker) return new Map();
 
-  const ids = [...new Set(findFlags(withSelf(ctx.participants, attacker), attackerId, "castSpellOnHit").flatMap((f) => f.spellIds))];
+    const ids = [
+        ...new Set(
+            findFlags(
+                withSelf(ctx.participants, attacker),
+                attackerId,
+                'castSpellOnHit'
+            ).flatMap((f) => f.spellIds)
+        ),
+    ];
 
-  if (ids.length === 0) return new Map();
+    if (ids.length === 0) return new Map();
 
-  const rows = await deps.loadSpells(ctx.scene.campaignId, ids);
+    const rows = await deps.loadSpells(ctx.scene.campaignId, ids);
 
-  return new Map(rows.map((r) => [r.id, toCastableSpell(r)]));
+    return new Map(rows.map((r) => [r.id, toCastableSpell(r)]));
 }
 
-export function createAttackMutation(deps: AttackMutationDeps = defaultDeps, options: { serverRolls?: boolean } = {}) {
-  return async (ctx: BattleMutationContext, body: AttackBody, resume?: CritResume, replay: { serverRolls?: boolean } = {}): Promise<MutationResult> => {
-    const serverRolls = replay.serverRolls ?? options.serverRolls;
+export function createAttackMutation(
+    deps: AttackMutationDeps = defaultDeps,
+    options: { serverRolls?: boolean } = {}
+) {
+    return async (
+        ctx: BattleMutationContext,
+        body: AttackBody,
+        resume?: CritResume,
+        replay: { serverRolls?: boolean } = {}
+    ): Promise<MutationResult> => {
+        const serverRolls = replay.serverRolls ?? options.serverRolls;
 
-    const { endTurn, ...rest } = body;
+        const { endTurn, ...rest } = body;
 
-    const data = { ...rest, system: await parseSystemInput(ctx.meta.rules, "attackInput", rest, !!serverRolls || !!rest.serverRoll) };
-
-    assertAttackInput(ctx, data);
-    assertCanAct(ctx, data.attackerId);
-
-    let participants = ctx.participants;
-
-    if (data.useInspiration) {
-      if (!canUseInspiration(findParticipant(participants, data.attackerId), ctx.meta.rules)) throw new BattleRuleError("action_rejected", API_ERRORS.NO_INSPIRATION);
-
-      participants = spendInspiration(participants, data.attackerId);
-    }
-
-    const hitSpells = await loadHitSpells(ctx, data.attackerId, deps);
-
-    return runWithCritChoice(ctx, {
-      action: "attack",
-      actorId: data.attackerId,
-      request: body,
-      enabled: ctx.meta.critChoiceByDm,
-      serverRolls,
-      resume,
-      run: async ({ rng, crit }) => {
-        const phase = runAttackPhase({
-          battle: { initiativeOrder: participants, currentRound: ctx.scene.round, currentTurnIndex: ctx.scene.turnIndex },
-          data,
-          battleId: ctx.scene.id,
-          userId: ctx.userId,
-          isDM: ctx.isDM,
-          rng,
-          crit,
-          serverRolls,
-          map: ctx.meta.map,
-          rules: ctx.meta.rules,
-          hitSpells,
-          sceneState: ctx.scene.sceneState,
-        });
-
-        const summoned = await applyAbilitySummons(phase.summons, phase.finalInitiativeOrder, { campaignId: ctx.scene.campaignId, battleId: ctx.scene.id, rng, rules: ctx.meta.rules, deps });
-
-        const spent = findParticipant(summoned.order, data.attackerId);
-
-        const spentAttack = spent && findAttack(spent, data.attackId, data.offHand);
-
-        const order = spent && spentAttack ? replaceParticipant(summoned.order, spendAmmo(spent, spentAttack)) : summoned.order;
-
-        const actions = phase.allBattleActions.map((a, i, all) => (i === all.length - 1 ? withLines(a, summoned.messages) : a));
-
-        const events = actions.map(battleActionToEvent);
-
-        const patch = sceneStatePatch(ctx.scene.sceneState, phase.sceneState);
-
-        if (!endTurn) return { participants: order, pending: ctx.pending, events, ...(Object.keys(patch).length > 0 && { scene: patch }) };
-
-        const advanced = advanceTurn({ participants: order, pending: ctx.pending, scene: ctx.scene, rng, map: ctx.meta.map, rules: ctx.meta.rules });
-
-        return {
-          participants: advanced.participants,
-          pending: advanced.pending,
-          scene: { ...patch, ...advanced.scene },
-          events: [...events, ...advanced.actions.map(battleActionToEvent)],
+        const data = {
+            ...rest,
+            system: await parseSystemInput(
+                ctx.meta.rules,
+                'attackInput',
+                rest,
+                !!serverRolls || !!rest.serverRoll
+            ),
         };
-      },
-    });
-  };
+
+        assertAttackInput(ctx, data);
+        assertCanAct(ctx, data.attackerId);
+
+        let participants = ctx.participants;
+
+        if (data.useInspiration) {
+            if (
+                !canUseInspiration(
+                    findParticipant(participants, data.attackerId),
+                    ctx.meta.rules
+                )
+            )
+                throw new BattleRuleError(
+                    'action_rejected',
+                    API_ERRORS.NO_INSPIRATION
+                );
+
+            participants = spendInspiration(participants, data.attackerId);
+        }
+
+        const hitSpells = await loadHitSpells(ctx, data.attackerId, deps);
+
+        return runWithCritChoice(ctx, {
+            action: 'attack',
+            actorId: data.attackerId,
+            request: body,
+            enabled: ctx.meta.critChoiceByDm,
+            serverRolls,
+            resume,
+            run: async ({ rng, crit }) => {
+                const phase = runAttackPhase({
+                    battle: {
+                        initiativeOrder: participants,
+                        currentRound: ctx.scene.round,
+                        currentTurnIndex: ctx.scene.turnIndex,
+                    },
+                    data,
+                    battleId: ctx.scene.id,
+                    userId: ctx.userId,
+                    isDM: ctx.isDM,
+                    rng,
+                    crit,
+                    serverRolls,
+                    map: ctx.meta.map,
+                    rules: ctx.meta.rules,
+                    hitSpells,
+                    sceneState: ctx.scene.sceneState,
+                });
+
+                const summoned = await applyAbilitySummons(
+                    phase.summons,
+                    phase.finalInitiativeOrder,
+                    {
+                        campaignId: ctx.scene.campaignId,
+                        battleId: ctx.scene.id,
+                        rng,
+                        rules: ctx.meta.rules,
+                        deps,
+                    }
+                );
+
+                const spent = findParticipant(summoned.order, data.attackerId);
+
+                const spentAttack =
+                    spent && findAttack(spent, data.attackId, data.offHand);
+
+                const order =
+                    spent && spentAttack
+                        ? replaceParticipant(
+                              summoned.order,
+                              spendAmmo(spent, spentAttack)
+                          )
+                        : summoned.order;
+
+                const actions = phase.allBattleActions.map((a, i, all) =>
+                    i === all.length - 1 ? withLines(a, summoned.messages) : a
+                );
+
+                const events = actions.map(battleActionToEvent);
+
+                const patch = sceneStatePatch(
+                    ctx.scene.sceneState,
+                    phase.sceneState
+                );
+
+                if (!endTurn)
+                    return {
+                        participants: order,
+                        pending: ctx.pending,
+                        events,
+                        ...(Object.keys(patch).length > 0 && { scene: patch }),
+                    };
+
+                const advanced = advanceTurn({
+                    participants: order,
+                    pending: ctx.pending,
+                    scene: ctx.scene,
+                    rng,
+                    map: ctx.meta.map,
+                    rules: ctx.meta.rules,
+                });
+
+                return {
+                    participants: advanced.participants,
+                    pending: advanced.pending,
+                    scene: { ...patch, ...advanced.scene },
+                    events: [
+                        ...events,
+                        ...advanced.actions.map(battleActionToEvent),
+                    ],
+                };
+            },
+        });
+    };
 }
 
 export const attackMutation = createAttackMutation();

@@ -1,155 +1,170 @@
 // @vitest-environment happy-dom
-import { createRef } from "react";
-import { act, cleanup, render } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { createRef } from 'react';
+import { act, cleanup, render } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const h = vi.hoisted(() => ({
-  createThreeDice: vi.fn(),
-  engine: { roll: vi.fn(async () => undefined), cancel: vi.fn(), dispose: vi.fn() },
+    createThreeDice: vi.fn(),
+    engine: {
+        roll: vi.fn(async () => undefined),
+        cancel: vi.fn(),
+        dispose: vi.fn(),
+    },
 }));
 
-vi.mock("../scene", () => ({ createThreeDice: h.createThreeDice }));
+vi.mock('../scene', () => ({ createThreeDice: h.createThreeDice }));
 
-import { DiceStage, type DiceStageHandle, sceneLoader } from "../DiceStage";
+import { DiceStage, type DiceStageHandle, sceneLoader } from '../DiceStage';
 
-import type { DiceThrowSpec } from "@/lib/utils/battle/fx/dice";
+import type { DiceThrowSpec } from '@/lib/utils/battle/fx/dice';
 
 const spec: DiceThrowSpec = { seed: 3, groups: [[{ sides: 20, value: 15 }]] };
 
 const mount = () => {
-  const ref = createRef<DiceStageHandle>();
+    const ref = createRef<DiceStageHandle>();
 
-  const view = render(<DiceStage ref={ref} />);
+    const view = render(<DiceStage ref={ref} />);
 
-  return { ref, view };
+    return { ref, view };
 };
 
 beforeEach(() => {
-  h.createThreeDice.mockReset().mockReturnValue(h.engine);
-  h.engine.roll.mockClear();
-  h.engine.cancel.mockClear();
-  h.engine.dispose.mockClear();
+    h.createThreeDice.mockReset().mockReturnValue(h.engine);
+    h.engine.roll.mockClear();
+    h.engine.cancel.mockClear();
+    h.engine.dispose.mockClear();
 });
 
 afterEach(cleanup);
 
-describe("DiceStage", () => {
-  it("loads the scene once for two throws and rolls each spec", async () => {
-    const { ref } = mount();
+describe('DiceStage', () => {
+    it('loads the scene once for two throws and rolls each spec', async () => {
+        const { ref } = mount();
 
-    await act(async () => {
-      await ref.current?.play(spec);
-      await ref.current?.play({ ...spec, seed: 4 });
+        await act(async () => {
+            await ref.current?.play(spec);
+            await ref.current?.play({ ...spec, seed: 4 });
+        });
+
+        expect(h.createThreeDice).toHaveBeenCalledTimes(1);
+        expect(h.engine.roll).toHaveBeenCalledTimes(2);
+        expect(h.engine.roll).toHaveBeenNthCalledWith(1, spec);
     });
 
-    expect(h.createThreeDice).toHaveBeenCalledTimes(1);
-    expect(h.engine.roll).toHaveBeenCalledTimes(2);
-    expect(h.engine.roll).toHaveBeenNthCalledWith(1, spec);
-  });
+    it('no WebGL: play resolves without rolling and warns once', async () => {
+        const warn = vi
+            .spyOn(console, 'warn')
+            .mockImplementation(() => undefined);
 
-  it("no WebGL: play resolves without rolling and warns once", async () => {
-    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+        h.createThreeDice.mockImplementation(() => {
+            throw new Error('WebGL unavailable');
+        });
 
-    h.createThreeDice.mockImplementation(() => {
-      throw new Error("WebGL unavailable");
+        const { ref } = mount();
+
+        await act(async () => {
+            await expect(ref.current?.play(spec)).resolves.toBeUndefined();
+            await expect(ref.current?.play(spec)).resolves.toBeUndefined();
+        });
+
+        expect(h.engine.roll).not.toHaveBeenCalled();
+        expect(warn).toHaveBeenCalledTimes(1);
+        warn.mockRestore();
     });
 
-    const { ref } = mount();
+    it('a cancel while the scene is loading drops the waiting throw', async () => {
+        const { ref } = mount();
 
-    await act(async () => {
-      await expect(ref.current?.play(spec)).resolves.toBeUndefined();
-      await expect(ref.current?.play(spec)).resolves.toBeUndefined();
+        await act(async () => {
+            const played = ref.current?.play(spec);
+
+            ref.current?.cancel();
+            await played;
+        });
+
+        expect(h.engine.roll).not.toHaveBeenCalled();
     });
 
-    expect(h.engine.roll).not.toHaveBeenCalled();
-    expect(warn).toHaveBeenCalledTimes(1);
-    warn.mockRestore();
-  });
+    it('cancel reaches the engine', async () => {
+        const { ref } = mount();
 
-  it("a cancel while the scene is loading drops the waiting throw", async () => {
-    const { ref } = mount();
+        await act(async () => {
+            await ref.current?.play(spec);
+            ref.current?.cancel();
+            await Promise.resolve();
+        });
 
-    await act(async () => {
-      const played = ref.current?.play(spec);
-
-      ref.current?.cancel();
-      await played;
+        expect(h.engine.cancel).toHaveBeenCalledTimes(1);
     });
 
-    expect(h.engine.roll).not.toHaveBeenCalled();
-  });
+    it('unmount disposes the engine', async () => {
+        const { ref, view } = mount();
 
-  it("cancel reaches the engine", async () => {
-    const { ref } = mount();
+        await act(async () => {
+            await ref.current?.play(spec);
+        });
+        view.unmount();
+        await Promise.resolve();
+        await Promise.resolve();
 
-    await act(async () => {
-      await ref.current?.play(spec);
-      ref.current?.cancel();
-      await Promise.resolve();
+        expect(h.engine.dispose).toHaveBeenCalledTimes(1);
     });
 
-    expect(h.engine.cancel).toHaveBeenCalledTimes(1);
-  });
+    it('чанк, що вантажиться довше 800 мс: play повертається без кидка, наступний кидок використовує завантажене', async () => {
+        vi.useFakeTimers();
 
-  it("unmount disposes the engine", async () => {
-    const { ref, view } = mount();
+        h.createThreeDice.mockImplementation(
+            () =>
+                new Promise((resolve) =>
+                    setTimeout(() => resolve(h.engine), 1000)
+                )
+        );
 
-    await act(async () => {
-      await ref.current?.play(spec);
-    });
-    view.unmount();
-    await Promise.resolve();
-    await Promise.resolve();
+        const { ref } = mount();
 
-    expect(h.engine.dispose).toHaveBeenCalledTimes(1);
-  });
+        await act(async () => {
+            const played = ref.current?.play(spec);
 
-  it("чанк, що вантажиться довше 800 мс: play повертається без кидка, наступний кидок використовує завантажене", async () => {
-    vi.useFakeTimers();
+            await vi.advanceTimersByTimeAsync(850);
+            await played;
+        });
 
-    h.createThreeDice.mockImplementation(() => new Promise((resolve) => setTimeout(() => resolve(h.engine), 1000)));
+        expect(h.engine.roll).not.toHaveBeenCalled();
 
-    const { ref } = mount();
+        await act(async () => {
+            await vi.advanceTimersByTimeAsync(300);
+            await ref.current?.play(spec);
+        });
 
-    await act(async () => {
-      const played = ref.current?.play(spec);
-
-      await vi.advanceTimersByTimeAsync(850);
-      await played;
-    });
-
-    expect(h.engine.roll).not.toHaveBeenCalled();
-
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(300);
-      await ref.current?.play(spec);
+        expect(h.engine.roll).toHaveBeenCalledTimes(1);
+        expect(h.createThreeDice).toHaveBeenCalledTimes(1);
+        vi.useRealTimers();
     });
 
-    expect(h.engine.roll).toHaveBeenCalledTimes(1);
-    expect(h.createThreeDice).toHaveBeenCalledTimes(1);
-    vi.useRealTimers();
-  });
+    it('невдалий import: наступний кидок пробує знову', async () => {
+        const warn = vi
+            .spyOn(console, 'warn')
+            .mockImplementation(() => undefined);
 
-  it("невдалий import: наступний кидок пробує знову", async () => {
-    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+        const load = vi
+            .spyOn(sceneLoader, 'load')
+            .mockRejectedValueOnce(new Error('chunk'));
 
-    const load = vi.spyOn(sceneLoader, "load").mockRejectedValueOnce(new Error("chunk"));
+        const { ref } = mount();
 
-    const { ref } = mount();
+        await act(async () => {
+            await ref.current?.play(spec);
+        });
 
-    await act(async () => {
-      await ref.current?.play(spec);
+        expect(h.engine.roll).not.toHaveBeenCalled();
+
+        load.mockRestore();
+
+        await act(async () => {
+            await ref.current?.play(spec);
+        });
+
+        expect(h.engine.roll).toHaveBeenCalledTimes(1);
+        warn.mockRestore();
     });
-
-    expect(h.engine.roll).not.toHaveBeenCalled();
-
-    load.mockRestore();
-
-    await act(async () => {
-      await ref.current?.play(spec);
-    });
-
-    expect(h.engine.roll).toHaveBeenCalledTimes(1);
-    warn.mockRestore();
-  });
 });

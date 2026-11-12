@@ -1,744 +1,874 @@
-import { NextResponse } from "next/server";
-import { beforeEach,describe, expect, it, vi } from "vitest";
+import { NextResponse } from 'next/server';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { createRequest,getResponseJson, getResponseStatus } from "./helpers";
+import { createRequest, getResponseJson, getResponseStatus } from './helpers';
 
-import { API_ERRORS } from "@/lib/constants/api-errors";
-import { prisma } from "@/lib/db";
-import * as apiAuth from "@/lib/utils/api/api-auth";
-import { DEFAULT_RULES } from "@/lib/utils/rules";
+import { API_ERRORS } from '@/lib/constants/api-errors';
+import { prisma } from '@/lib/db';
+import * as apiAuth from '@/lib/utils/api/api-auth';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
 
-vi.mock("@/lib/utils/api/api-auth", () => ({
-  requireAuth: vi.fn(),
-  requireDM: vi.fn(),
-  requireCampaignAccess: vi.fn(),
+vi.mock('@/lib/utils/api/api-auth', () => ({
+    requireAuth: vi.fn(),
+    requireDM: vi.fn(),
+    requireCampaignAccess: vi.fn(),
 }));
 
-vi.mock("next/cache", () => ({ revalidateTag: vi.fn() }));
+vi.mock('next/cache', () => ({ revalidateTag: vi.fn() }));
 
-vi.mock("@/lib/db", async () => {
-  const { contentDatabaseDouble } = await import("@/lib/server/content/__tests__/database-double");
-
-  return { prisma: contentDatabaseDouble({
-    skill: {
-      findMany: vi.fn(),
-      create: vi.fn(),
-      findUnique: vi.fn(),
-      findFirst: vi.fn(),
-      update: vi.fn(),
-      delete: vi.fn(),
-      deleteMany: vi.fn(),
-    },
-    spell: { count: vi.fn() },
-  }) };
-});
-
-describe("GET /api/campaigns/[id]/skills", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it("повертає 403, якщо немає доступу до кампанії", async () => {
-    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(
-      NextResponse.json({ error: "Forbidden" }, { status: 403 }),
+vi.mock('@/lib/db', async () => {
+    const { contentDatabaseDouble } = await import(
+        '@/lib/server/content/__tests__/database-double'
     );
 
-    const { GET } = await import("@/app/api/campaigns/[id]/skills/route");
-
-    const request = createRequest("http://localhost/api/campaigns/c1/skills");
-
-    const response = await GET(request, {
-      params: Promise.resolve({ id: "c1" }),
-    });
-
-    expect(await getResponseStatus(response)).toBe(403);
-  });
-
-  it("повертає 200 та масив скілів при успішному доступі", async () => {
-    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue({
-      userId: "user-1",
-      isDM: false,
-      campaign: {
-        kind: "campaign",
-        rules: DEFAULT_RULES,
-        id: "c1",
-        maxLevel: 20,
-        allowPlayerEdit: true,
-        members: [{ userId: "user-1", role: "player" }],
-      },
-    });
-
-    const mockSkills = [
-      {
-        id: "skill-1",
-        campaignId: "c1",
-        name: "Fireball",
-        description: null,
-        icon: null,
-        basicInfo: { name: "Fireball", description: null },
-        bonuses: {},
-        combatStats: {},
-        spellData: null,
-        mainSkillData: null,
-        skillTriggers: [],
-        spell: null,
-        spellGroup: null,
-        grantedSpell: null,
-        mainSkill: null,
-        image: null,
-        damage: null,
-        armor: null,
-        speed: null,
-        physicalResistance: null,
-        magicalResistance: null,
-        spellId: null,
-        spellGroupId: null,
-        grantedSpellId: null,
-        mainSkillId: null,
-        spellNewSpellId: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-    ];
-
-    vi.mocked(prisma.skill.findMany).mockResolvedValue(mockSkills as never);
-
-    const { GET } = await import("@/app/api/campaigns/[id]/skills/route");
-
-    const request = createRequest("http://localhost/api/campaigns/c1/skills");
-
-    const response = await GET(request, {
-      params: Promise.resolve({ id: "c1" }),
-    });
-
-    expect(await getResponseStatus(response)).toBe(200);
-
-    const data = await getResponseJson(response);
-
-    expect(Array.isArray(data)).toBe(true);
-    expect((data as unknown[]).length).toBe(1);
-  });
-
-  it("повертає порожній масив, якщо скілів немає", async () => {
-    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue({
-      userId: "user-1",
-      isDM: false,
-      campaign: {
-        kind: "campaign",
-        rules: DEFAULT_RULES,
-        id: "c1",
-        maxLevel: 20,
-        allowPlayerEdit: true,
-        members: [{ userId: "user-1", role: "player" }],
-      },
-    });
-    vi.mocked(prisma.skill.findMany).mockResolvedValue([]);
-
-    const { GET } = await import("@/app/api/campaigns/[id]/skills/route");
-
-    const request = createRequest("http://localhost/api/campaigns/c1/skills");
-
-    const response = await GET(request, {
-      params: Promise.resolve({ id: "c1" }),
-    });
-
-    expect(await getResponseStatus(response)).toBe(200);
-
-    const data = await getResponseJson(response);
-
-    expect(Array.isArray(data)).toBe(true);
-    expect((data as unknown[]).length).toBe(0);
-  });
-
-  it("?mainSkillId фільтрує за основним навиком і читає лише вузькі поля", async () => {
-    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue({
-      userId: "user-1",
-      isDM: false,
-      campaign: { kind: "campaign", id: "c1", maxLevel: 20, rules: DEFAULT_RULES, allowPlayerEdit: true, members: [{ userId: "user-1", role: "player" }] },
-    });
-    vi.mocked(prisma.skill.findMany).mockResolvedValue([{ id: "s1", name: "Поклик", icon: null, description: null }] as never);
-
-    const { GET } = await import("@/app/api/campaigns/[id]/skills/route");
-
-    const response = await GET(createRequest("http://localhost/api/campaigns/c1/skills?mainSkillId=m1"), { params: Promise.resolve({ id: "c1" }) });
-
-    expect(await getResponseStatus(response)).toBe(200);
-    expect(await getResponseJson(response)).toEqual([{ id: "s1", name: "Поклик", icon: null, description: null }]);
-
-    const args = vi.mocked(prisma.skill.findMany).mock.calls[0][0] as { where: unknown; select: unknown; include?: unknown };
-
-    expect(args.where).toEqual({ campaignId: "c1", mainSkillId: "m1" });
-    expect(args.select).toEqual({ id: true, name: true, icon: true, description: true });
-    expect(args.include).toBeUndefined();
-  });
-});
-
-describe("POST /api/campaigns/[id]/skills", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it("повертає 403, якщо користувач не DM", async () => {
-    vi.mocked(apiAuth.requireDM).mockResolvedValue(
-      NextResponse.json({ error: "Forbidden" }, { status: 403 }),
-    );
-
-    const { POST } = await import("@/app/api/campaigns/[id]/skills/route");
-
-    const request = createRequest("http://localhost/api/campaigns/c1/skills", {
-      method: "POST",
-      body: JSON.stringify({
-        basicInfo: { name: "New Skill" },
-        combatStats: {},
-      }),
-      headers: { "Content-Type": "application/json" },
-    });
-
-    const response = await POST(request, {
-      params: Promise.resolve({ id: "c1" }),
-    });
-
-    expect(await getResponseStatus(response)).toBe(403);
-  });
-
-  it("повертає 400 при невалідному body (відсутнє basicInfo.name)", async () => {
-    const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-
-    vi.mocked(apiAuth.requireDM).mockResolvedValue({
-      userId: "dm-1",
-      isDM: false,
-      campaign: {
-        kind: "campaign",
-        rules: DEFAULT_RULES,
-        id: "c1",
-        maxLevel: 20,
-        allowPlayerEdit: true,
-        members: [{ userId: "dm-1", role: "dm" }],
-      },
-    });
-
-    const { POST } = await import("@/app/api/campaigns/[id]/skills/route");
-
-    const request = createRequest("http://localhost/api/campaigns/c1/skills", {
-      method: "POST",
-      body: JSON.stringify({ basicInfo: {}, combatStats: {} }),
-      headers: { "Content-Type": "application/json" },
-    });
-
-    const response = await POST(request, {
-      params: Promise.resolve({ id: "c1" }),
-    });
-
-    expect(await getResponseStatus(response)).toBe(400);
-    consoleErrorSpy.mockRestore();
-  });
-
-  it("повертає 201 та створений скіл при валідному body", async () => {
-    vi.mocked(apiAuth.requireDM).mockResolvedValue({
-      userId: "dm-1",
-      isDM: false,
-      campaign: {
-        kind: "campaign",
-        rules: DEFAULT_RULES,
-        id: "c1",
-        maxLevel: 20,
-        allowPlayerEdit: true,
-        members: [{ userId: "dm-1", role: "dm" }],
-      },
-    });
-
-    const created = {
-      id: "skill-new",
-      campaignId: "c1",
-      name: "New Skill",
-      description: null,
-      icon: null,
-      basicInfo: { name: "New Skill" },
-      bonuses: {},
-      combatStats: {},
-      spellData: null,
-      mainSkillData: null,
-      skillTriggers: [],
-      spell: null,
-      spellGroup: null,
-      grantedSpell: null,
-      mainSkill: null,
-      image: null,
-      damage: null,
-      armor: null,
-      speed: null,
-      physicalResistance: null,
-      magicalResistance: null,
-      spellId: null,
-      spellGroupId: null,
-      grantedSpellId: null,
-      mainSkillId: null,
-      spellNewSpellId: null,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+    return {
+        prisma: contentDatabaseDouble({
+            skill: {
+                findMany: vi.fn(),
+                create: vi.fn(),
+                findUnique: vi.fn(),
+                findFirst: vi.fn(),
+                update: vi.fn(),
+                delete: vi.fn(),
+                deleteMany: vi.fn(),
+            },
+            spell: { count: vi.fn() },
+        }),
     };
-
-    vi.mocked(prisma.skill.create).mockResolvedValue(created as never);
-
-    const { POST } = await import("@/app/api/campaigns/[id]/skills/route");
-
-    const request = createRequest("http://localhost/api/campaigns/c1/skills", {
-      method: "POST",
-      body: JSON.stringify({
-        basicInfo: { name: "New Skill" },
-        combatStats: {},
-        spellData: {},
-        mainSkillData: {},
-      }),
-      headers: { "Content-Type": "application/json" },
-    });
-
-    const response = await POST(request, {
-      params: Promise.resolve({ id: "c1" }),
-    });
-
-    expect(await getResponseStatus(response)).toBe(201);
-
-    const data = await getResponseJson(response) as { id: string; name: string };
-
-    expect(data.id).toBe("skill-new");
-    expect(data.name).toBe("New Skill");
-    expect(prisma.skill.update).not.toHaveBeenCalled();
-  });
-
-  it("заклинання з іншої кампанії — 400 без створення", async () => {
-    vi.mocked(apiAuth.requireDM).mockResolvedValue({ userId: "dm-1", isDM: true } as never);
-    vi.mocked(prisma.spell.count).mockResolvedValue(0);
-
-    const { POST } = await import("@/app/api/campaigns/[id]/skills/route");
-
-    const request = createRequest("http://localhost/api/campaigns/c1/skills", {
-      method: "POST",
-      body: JSON.stringify({ basicInfo: { name: "S" }, spellData: { spellId: "foreign" }, mainSkillData: {} }),
-      headers: { "Content-Type": "application/json" },
-    });
-
-    const response = await POST(request, { params: Promise.resolve({ id: "c1" }) });
-
-    expect(await getResponseStatus(response)).toBe(400);
-    expect(vi.mocked(prisma.spell.count).mock.calls[0][0]).toEqual({ where: { campaignId: "c1", id: { in: ["foreign"] } } });
-    expect(prisma.skill.create).not.toHaveBeenCalled();
-  });
 });
 
-describe("DELETE /api/campaigns/[id]/skills (delete all)", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it("повертає 403, якщо користувач не DM", async () => {
-    vi.mocked(apiAuth.requireDM).mockResolvedValue(
-      NextResponse.json({ error: "Forbidden" }, { status: 403 }),
-    );
-
-    const { DELETE } = await import("@/app/api/campaigns/[id]/skills/route");
-
-    const request = createRequest("http://localhost/api/campaigns/c1/skills", {
-      method: "DELETE",
+describe('GET /api/campaigns/[id]/skills', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
     });
 
-    const response = await DELETE(request, {
-      params: Promise.resolve({ id: "c1" }),
+    it('повертає 403, якщо немає доступу до кампанії', async () => {
+        vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(
+            NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+        );
+
+        const { GET } = await import('@/app/api/campaigns/[id]/skills/route');
+
+        const request = createRequest(
+            'http://localhost/api/campaigns/c1/skills'
+        );
+
+        const response = await GET(request, {
+            params: Promise.resolve({ id: 'c1' }),
+        });
+
+        expect(await getResponseStatus(response)).toBe(403);
     });
 
-    expect(await getResponseStatus(response)).toBe(403);
-  });
+    it('повертає 200 та масив скілів при успішному доступі', async () => {
+        vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue({
+            userId: 'user-1',
+            isDM: false,
+            campaign: {
+                kind: 'campaign',
+                rules: DEFAULT_RULES,
+                id: 'c1',
+                maxLevel: 20,
+                allowPlayerEdit: true,
+                members: [{ userId: 'user-1', role: 'player' }],
+            },
+        });
 
-  it("повертає deleted, а не deletedCount", async () => {
-    vi.mocked(apiAuth.requireDM).mockResolvedValue({
-      userId: "dm-1",
-      isDM: false,
-      campaign: {
-        kind: "campaign",
-        rules: DEFAULT_RULES,
-        id: "c1",
-        maxLevel: 20,
-        allowPlayerEdit: true,
-        members: [{ userId: "dm-1", role: "dm" }],
-      },
+        const mockSkills = [
+            {
+                id: 'skill-1',
+                campaignId: 'c1',
+                name: 'Fireball',
+                description: null,
+                icon: null,
+                basicInfo: { name: 'Fireball', description: null },
+                bonuses: {},
+                combatStats: {},
+                spellData: null,
+                mainSkillData: null,
+                skillTriggers: [],
+                spell: null,
+                spellGroup: null,
+                grantedSpell: null,
+                mainSkill: null,
+                image: null,
+                damage: null,
+                armor: null,
+                speed: null,
+                physicalResistance: null,
+                magicalResistance: null,
+                spellId: null,
+                spellGroupId: null,
+                grantedSpellId: null,
+                mainSkillId: null,
+                spellNewSpellId: null,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            },
+        ];
+
+        vi.mocked(prisma.skill.findMany).mockResolvedValue(mockSkills as never);
+
+        const { GET } = await import('@/app/api/campaigns/[id]/skills/route');
+
+        const request = createRequest(
+            'http://localhost/api/campaigns/c1/skills'
+        );
+
+        const response = await GET(request, {
+            params: Promise.resolve({ id: 'c1' }),
+        });
+
+        expect(await getResponseStatus(response)).toBe(200);
+
+        const data = await getResponseJson(response);
+
+        expect(Array.isArray(data)).toBe(true);
+        expect((data as unknown[]).length).toBe(1);
     });
-    vi.mocked(prisma.skill.deleteMany).mockResolvedValue({ count: 5 });
 
-    const { DELETE } = await import("@/app/api/campaigns/[id]/skills/route");
+    it('повертає порожній масив, якщо скілів немає', async () => {
+        vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue({
+            userId: 'user-1',
+            isDM: false,
+            campaign: {
+                kind: 'campaign',
+                rules: DEFAULT_RULES,
+                id: 'c1',
+                maxLevel: 20,
+                allowPlayerEdit: true,
+                members: [{ userId: 'user-1', role: 'player' }],
+            },
+        });
+        vi.mocked(prisma.skill.findMany).mockResolvedValue([]);
 
-    const request = createRequest("http://localhost/api/campaigns/c1/skills", {
-      method: "DELETE",
+        const { GET } = await import('@/app/api/campaigns/[id]/skills/route');
+
+        const request = createRequest(
+            'http://localhost/api/campaigns/c1/skills'
+        );
+
+        const response = await GET(request, {
+            params: Promise.resolve({ id: 'c1' }),
+        });
+
+        expect(await getResponseStatus(response)).toBe(200);
+
+        const data = await getResponseJson(response);
+
+        expect(Array.isArray(data)).toBe(true);
+        expect((data as unknown[]).length).toBe(0);
     });
 
-    const response = await DELETE(request, {
-      params: Promise.resolve({ id: "c1" }),
+    it('?mainSkillId фільтрує за основним навиком і читає лише вузькі поля', async () => {
+        vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue({
+            userId: 'user-1',
+            isDM: false,
+            campaign: {
+                kind: 'campaign',
+                id: 'c1',
+                maxLevel: 20,
+                rules: DEFAULT_RULES,
+                allowPlayerEdit: true,
+                members: [{ userId: 'user-1', role: 'player' }],
+            },
+        });
+        vi.mocked(prisma.skill.findMany).mockResolvedValue([
+            { id: 's1', name: 'Поклик', icon: null, description: null },
+        ] as never);
+
+        const { GET } = await import('@/app/api/campaigns/[id]/skills/route');
+
+        const response = await GET(
+            createRequest(
+                'http://localhost/api/campaigns/c1/skills?mainSkillId=m1'
+            ),
+            { params: Promise.resolve({ id: 'c1' }) }
+        );
+
+        expect(await getResponseStatus(response)).toBe(200);
+        expect(await getResponseJson(response)).toEqual([
+            { id: 's1', name: 'Поклик', icon: null, description: null },
+        ]);
+
+        const args = vi.mocked(prisma.skill.findMany).mock.calls[0][0] as {
+            where: unknown;
+            select: unknown;
+            include?: unknown;
+        };
+
+        expect(args.where).toEqual({ campaignId: 'c1', mainSkillId: 'm1' });
+        expect(args.select).toEqual({
+            id: true,
+            name: true,
+            icon: true,
+            description: true,
+        });
+        expect(args.include).toBeUndefined();
     });
-
-    expect(await getResponseStatus(response)).toBe(200);
-
-    const data = await getResponseJson(response) as { ok: boolean; deleted: number };
-
-    expect(data).toEqual({ ok: true, deleted: 5 });
-  });
 });
 
-describe("GET /api/campaigns/[id]/skills/[skillId]", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it("повертає 403, якщо немає доступу до кампанії", async () => {
-    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(
-      NextResponse.json({ error: "Forbidden" }, { status: 403 }),
-    );
-
-    const { GET } = await import("@/app/api/campaigns/[id]/skills/[skillId]/route");
-
-    const request = createRequest("http://localhost/api/campaigns/c1/skills/skill-1");
-
-    const response = await GET(request, {
-      params: Promise.resolve({ id: "c1", skillId: "skill-1" }),
+describe('POST /api/campaigns/[id]/skills', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
     });
 
-    expect(await getResponseStatus(response)).toBe(403);
-  });
+    it('повертає 403, якщо користувач не DM', async () => {
+        vi.mocked(apiAuth.requireDM).mockResolvedValue(
+            NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+        );
 
-  it("повертає 404, якщо скіл не знайдено або з іншої кампанії", async () => {
-    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue({
-      userId: "user-1",
-      isDM: false,
-      campaign: {
-        kind: "campaign",
-        rules: DEFAULT_RULES,
-        id: "c1",
-        maxLevel: 20,
-        allowPlayerEdit: true,
-        members: [{ userId: "user-1", role: "player" }],
-      },
-    });
-    vi.mocked(prisma.skill.findFirst).mockResolvedValue(null);
+        const { POST } = await import('@/app/api/campaigns/[id]/skills/route');
 
-    const { GET } = await import("@/app/api/campaigns/[id]/skills/[skillId]/route");
+        const request = createRequest(
+            'http://localhost/api/campaigns/c1/skills',
+            {
+                method: 'POST',
+                body: JSON.stringify({
+                    basicInfo: { name: 'New Skill' },
+                    combatStats: {},
+                }),
+                headers: { 'Content-Type': 'application/json' },
+            }
+        );
 
-    const request = createRequest("http://localhost/api/campaigns/c1/skills/skill-1");
+        const response = await POST(request, {
+            params: Promise.resolve({ id: 'c1' }),
+        });
 
-    const response = await GET(request, {
-      params: Promise.resolve({ id: "c1", skillId: "skill-1" }),
-    });
-
-    expect(await getResponseStatus(response)).toBe(404);
-
-    const data = await getResponseJson<{ error: string }>(response);
-
-    expect(data.error).toBe(API_ERRORS.SKILL_NOT_FOUND);
-  });
-
-  it("повертає 404, якщо скіл належить іншій кампанії", async () => {
-    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue({
-      userId: "user-1",
-      isDM: false,
-      campaign: {
-        kind: "campaign",
-        rules: DEFAULT_RULES,
-        id: "c1",
-        maxLevel: 20,
-        allowPlayerEdit: true,
-        members: [{ userId: "user-1", role: "player" }],
-      },
-    });
-    vi.mocked(prisma.skill.findFirst).mockResolvedValue(null);
-
-    const { GET } = await import("@/app/api/campaigns/[id]/skills/[skillId]/route");
-
-    const request = createRequest("http://localhost/api/campaigns/c1/skills/skill-1");
-
-    const response = await GET(request, {
-      params: Promise.resolve({ id: "c1", skillId: "skill-1" }),
+        expect(await getResponseStatus(response)).toBe(403);
     });
 
-    expect(await getResponseStatus(response)).toBe(404);
-  });
+    it('повертає 400 при невалідному body (відсутнє basicInfo.name)', async () => {
+        const consoleErrorSpy = vi
+            .spyOn(console, 'error')
+            .mockImplementation(() => {});
 
-  it("повертає 200 та скіл при успіху", async () => {
-    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue({
-      userId: "user-1",
-      isDM: false,
-      campaign: {
-        kind: "campaign",
-        rules: DEFAULT_RULES,
-        id: "c1",
-        maxLevel: 20,
-        allowPlayerEdit: true,
-        members: [{ userId: "user-1", role: "player" }],
-      },
+        vi.mocked(apiAuth.requireDM).mockResolvedValue({
+            userId: 'dm-1',
+            isDM: false,
+            campaign: {
+                kind: 'campaign',
+                rules: DEFAULT_RULES,
+                id: 'c1',
+                maxLevel: 20,
+                allowPlayerEdit: true,
+                members: [{ userId: 'dm-1', role: 'dm' }],
+            },
+        });
+
+        const { POST } = await import('@/app/api/campaigns/[id]/skills/route');
+
+        const request = createRequest(
+            'http://localhost/api/campaigns/c1/skills',
+            {
+                method: 'POST',
+                body: JSON.stringify({ basicInfo: {}, combatStats: {} }),
+                headers: { 'Content-Type': 'application/json' },
+            }
+        );
+
+        const response = await POST(request, {
+            params: Promise.resolve({ id: 'c1' }),
+        });
+
+        expect(await getResponseStatus(response)).toBe(400);
+        consoleErrorSpy.mockRestore();
     });
 
-    const mockSkill = {
-      id: "skill-1",
-      campaignId: "c1",
-      name: "Fireball",
-      description: null,
-      icon: null,
-      basicInfo: { name: "Fireball" },
-      combatStats: null,
-      bonuses: {},
-      spellData: null,
-      mainSkillData: null,
-      skillTriggers: [],
-      image: null,
-      damage: null,
-      armor: null,
-      speed: null,
-      physicalResistance: null,
-      magicalResistance: null,
-      spellId: null,
-      spellGroupId: null,
-      mainSkillId: null,
-      spellNewSpellId: null,
-      grantedSpellId: null,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      spell: null,
-      spellGroup: null,
-      grantedSpell: null,
-    };
+    it('повертає 201 та створений скіл при валідному body', async () => {
+        vi.mocked(apiAuth.requireDM).mockResolvedValue({
+            userId: 'dm-1',
+            isDM: false,
+            campaign: {
+                kind: 'campaign',
+                rules: DEFAULT_RULES,
+                id: 'c1',
+                maxLevel: 20,
+                allowPlayerEdit: true,
+                members: [{ userId: 'dm-1', role: 'dm' }],
+            },
+        });
 
-    vi.mocked(prisma.skill.findFirst).mockResolvedValue(mockSkill as never);
+        const created = {
+            id: 'skill-new',
+            campaignId: 'c1',
+            name: 'New Skill',
+            description: null,
+            icon: null,
+            basicInfo: { name: 'New Skill' },
+            bonuses: {},
+            combatStats: {},
+            spellData: null,
+            mainSkillData: null,
+            skillTriggers: [],
+            spell: null,
+            spellGroup: null,
+            grantedSpell: null,
+            mainSkill: null,
+            image: null,
+            damage: null,
+            armor: null,
+            speed: null,
+            physicalResistance: null,
+            magicalResistance: null,
+            spellId: null,
+            spellGroupId: null,
+            grantedSpellId: null,
+            mainSkillId: null,
+            spellNewSpellId: null,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        };
 
-    const { GET } = await import("@/app/api/campaigns/[id]/skills/[skillId]/route");
+        vi.mocked(prisma.skill.create).mockResolvedValue(created as never);
 
-    const request = createRequest("http://localhost/api/campaigns/c1/skills/skill-1");
+        const { POST } = await import('@/app/api/campaigns/[id]/skills/route');
 
-    const response = await GET(request, {
-      params: Promise.resolve({ id: "c1", skillId: "skill-1" }),
+        const request = createRequest(
+            'http://localhost/api/campaigns/c1/skills',
+            {
+                method: 'POST',
+                body: JSON.stringify({
+                    basicInfo: { name: 'New Skill' },
+                    combatStats: {},
+                    spellData: {},
+                    mainSkillData: {},
+                }),
+                headers: { 'Content-Type': 'application/json' },
+            }
+        );
+
+        const response = await POST(request, {
+            params: Promise.resolve({ id: 'c1' }),
+        });
+
+        expect(await getResponseStatus(response)).toBe(201);
+
+        const data = (await getResponseJson(response)) as {
+            id: string;
+            name: string;
+        };
+
+        expect(data.id).toBe('skill-new');
+        expect(data.name).toBe('New Skill');
+        expect(prisma.skill.update).not.toHaveBeenCalled();
     });
 
-    expect(await getResponseStatus(response)).toBe(200);
+    it('заклинання з іншої кампанії — 400 без створення', async () => {
+        vi.mocked(apiAuth.requireDM).mockResolvedValue({
+            userId: 'dm-1',
+            isDM: true,
+        } as never);
+        vi.mocked(prisma.spell.count).mockResolvedValue(0);
 
-    const data = await getResponseJson(response) as { id: string; name: string };
+        const { POST } = await import('@/app/api/campaigns/[id]/skills/route');
 
-    expect(data.id).toBe("skill-1");
-    expect(data.name).toBe("Fireball");
-  });
+        const request = createRequest(
+            'http://localhost/api/campaigns/c1/skills',
+            {
+                method: 'POST',
+                body: JSON.stringify({
+                    basicInfo: { name: 'S' },
+                    spellData: { spellId: 'foreign' },
+                    mainSkillData: {},
+                }),
+                headers: { 'Content-Type': 'application/json' },
+            }
+        );
+
+        const response = await POST(request, {
+            params: Promise.resolve({ id: 'c1' }),
+        });
+
+        expect(await getResponseStatus(response)).toBe(400);
+        expect(vi.mocked(prisma.spell.count).mock.calls[0][0]).toEqual({
+            where: { campaignId: 'c1', id: { in: ['foreign'] } },
+        });
+        expect(prisma.skill.create).not.toHaveBeenCalled();
+    });
 });
 
-describe("PATCH /api/campaigns/[id]/skills/[skillId]", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it("повертає 403, якщо користувач не DM", async () => {
-    vi.mocked(apiAuth.requireDM).mockResolvedValue(
-      NextResponse.json({ error: "Forbidden" }, { status: 403 }),
-    );
-
-    const { PATCH } = await import("@/app/api/campaigns/[id]/skills/[skillId]/route");
-
-    const request = createRequest("http://localhost/api/campaigns/c1/skills/skill-1", {
-      method: "PATCH",
-      body: JSON.stringify({ basicInfo: { name: "Updated" } }),
-      headers: { "Content-Type": "application/json" },
+describe('DELETE /api/campaigns/[id]/skills (delete all)', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
     });
 
-    const response = await PATCH(request, {
-      params: Promise.resolve({ id: "c1", skillId: "skill-1" }),
+    it('повертає 403, якщо користувач не DM', async () => {
+        vi.mocked(apiAuth.requireDM).mockResolvedValue(
+            NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+        );
+
+        const { DELETE } = await import(
+            '@/app/api/campaigns/[id]/skills/route'
+        );
+
+        const request = createRequest(
+            'http://localhost/api/campaigns/c1/skills',
+            {
+                method: 'DELETE',
+            }
+        );
+
+        const response = await DELETE(request, {
+            params: Promise.resolve({ id: 'c1' }),
+        });
+
+        expect(await getResponseStatus(response)).toBe(403);
     });
 
-    expect(await getResponseStatus(response)).toBe(403);
-  });
+    it('повертає deleted, а не deletedCount', async () => {
+        vi.mocked(apiAuth.requireDM).mockResolvedValue({
+            userId: 'dm-1',
+            isDM: false,
+            campaign: {
+                kind: 'campaign',
+                rules: DEFAULT_RULES,
+                id: 'c1',
+                maxLevel: 20,
+                allowPlayerEdit: true,
+                members: [{ userId: 'dm-1', role: 'dm' }],
+            },
+        });
+        vi.mocked(prisma.skill.deleteMany).mockResolvedValue({ count: 5 });
 
-  it("повертає 404, якщо скіл не знайдено", async () => {
-    vi.mocked(apiAuth.requireDM).mockResolvedValue({
-      userId: "dm-1",
-      isDM: false,
-      campaign: {
-        kind: "campaign",
-        rules: DEFAULT_RULES,
-        id: "c1",
-        maxLevel: 20,
-        allowPlayerEdit: true,
-        members: [{ userId: "dm-1", role: "dm" }],
-      },
+        const { DELETE } = await import(
+            '@/app/api/campaigns/[id]/skills/route'
+        );
+
+        const request = createRequest(
+            'http://localhost/api/campaigns/c1/skills',
+            {
+                method: 'DELETE',
+            }
+        );
+
+        const response = await DELETE(request, {
+            params: Promise.resolve({ id: 'c1' }),
+        });
+
+        expect(await getResponseStatus(response)).toBe(200);
+
+        const data = (await getResponseJson(response)) as {
+            ok: boolean;
+            deleted: number;
+        };
+
+        expect(data).toEqual({ ok: true, deleted: 5 });
     });
-    vi.mocked(prisma.skill.findFirst).mockResolvedValue(null);
-
-    const { PATCH } = await import("@/app/api/campaigns/[id]/skills/[skillId]/route");
-
-    const request = createRequest("http://localhost/api/campaigns/c1/skills/skill-1", {
-      method: "PATCH",
-      body: JSON.stringify({ basicInfo: { name: "Updated" } }),
-      headers: { "Content-Type": "application/json" },
-    });
-
-    const response = await PATCH(request, {
-      params: Promise.resolve({ id: "c1", skillId: "skill-1" }),
-    });
-
-    expect(await getResponseStatus(response)).toBe(404);
-  });
-
-  it("повертає 200 та оновлений скіл при успіху", async () => {
-    vi.mocked(apiAuth.requireDM).mockResolvedValue({
-      userId: "dm-1",
-      isDM: false,
-      campaign: {
-        kind: "campaign",
-        rules: DEFAULT_RULES,
-        id: "c1",
-        maxLevel: 20,
-        allowPlayerEdit: true,
-        members: [{ userId: "dm-1", role: "dm" }],
-      },
-    });
-
-    const existingSkill = {
-      id: "skill-1",
-      campaignId: "c1",
-      name: "Old Name",
-      description: null,
-      icon: null,
-      basicInfo: {},
-      combatStats: null,
-      bonuses: {},
-      spellData: null,
-      mainSkillData: null,
-      skillTriggers: [],
-      image: null,
-      damage: null,
-      armor: null,
-      speed: null,
-      physicalResistance: null,
-      magicalResistance: null,
-      spellId: null,
-      spellGroupId: null,
-      mainSkillId: null,
-      spellNewSpellId: null,
-      grantedSpellId: null,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    vi.mocked(prisma.skill.findFirst).mockResolvedValue(existingSkill as never);
-
-    const updatedSkill = {
-      ...existingSkill,
-      name: "Updated Name",
-      basicInfo: { name: "Updated Name" },
-    };
-
-    vi.mocked(prisma.skill.update).mockResolvedValue({
-      ...updatedSkill,
-      spell: null,
-      spellGroup: null,
-      grantedSpell: null,
-      mainSkill: null,
-    } as never);
-
-    const { PATCH } = await import("@/app/api/campaigns/[id]/skills/[skillId]/route");
-
-    const request = createRequest("http://localhost/api/campaigns/c1/skills/skill-1", {
-      method: "PATCH",
-      body: JSON.stringify({ basicInfo: { name: "Updated Name" } }),
-      headers: { "Content-Type": "application/json" },
-    });
-
-    const response = await PATCH(request, {
-      params: Promise.resolve({ id: "c1", skillId: "skill-1" }),
-    });
-
-    expect(await getResponseStatus(response)).toBe(200);
-
-    const data = await getResponseJson(response) as { id: string; name: string };
-
-    expect(data.id).toBe("skill-1");
-    expect(data.name).toBe("Updated Name");
-  });
 });
 
-describe("DELETE /api/campaigns/[id]/skills/[skillId]", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it("повертає 403, якщо користувач не DM", async () => {
-    vi.mocked(apiAuth.requireDM).mockResolvedValue(
-      NextResponse.json({ error: "Forbidden" }, { status: 403 }),
-    );
-
-    const { DELETE } = await import("@/app/api/campaigns/[id]/skills/[skillId]/route");
-
-    const request = createRequest("http://localhost/api/campaigns/c1/skills/skill-1", {
-      method: "DELETE",
+describe('GET /api/campaigns/[id]/skills/[skillId]', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
     });
 
-    const response = await DELETE(request, {
-      params: Promise.resolve({ id: "c1", skillId: "skill-1" }),
+    it('повертає 403, якщо немає доступу до кампанії', async () => {
+        vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(
+            NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+        );
+
+        const { GET } = await import(
+            '@/app/api/campaigns/[id]/skills/[skillId]/route'
+        );
+
+        const request = createRequest(
+            'http://localhost/api/campaigns/c1/skills/skill-1'
+        );
+
+        const response = await GET(request, {
+            params: Promise.resolve({ id: 'c1', skillId: 'skill-1' }),
+        });
+
+        expect(await getResponseStatus(response)).toBe(403);
     });
 
-    expect(await getResponseStatus(response)).toBe(403);
-  });
+    it('повертає 404, якщо скіл не знайдено або з іншої кампанії', async () => {
+        vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue({
+            userId: 'user-1',
+            isDM: false,
+            campaign: {
+                kind: 'campaign',
+                rules: DEFAULT_RULES,
+                id: 'c1',
+                maxLevel: 20,
+                allowPlayerEdit: true,
+                members: [{ userId: 'user-1', role: 'player' }],
+            },
+        });
+        vi.mocked(prisma.skill.findFirst).mockResolvedValue(null);
 
-  it("повертає 404, якщо скіл не знайдено", async () => {
-    vi.mocked(apiAuth.requireDM).mockResolvedValue({
-      userId: "dm-1",
-      isDM: false,
-      campaign: {
-        kind: "campaign",
-        rules: DEFAULT_RULES,
-        id: "c1",
-        maxLevel: 20,
-        allowPlayerEdit: true,
-        members: [{ userId: "dm-1", role: "dm" }],
-      },
-    });
-    vi.mocked(prisma.skill.findFirst).mockResolvedValue(null);
+        const { GET } = await import(
+            '@/app/api/campaigns/[id]/skills/[skillId]/route'
+        );
 
-    const { DELETE } = await import("@/app/api/campaigns/[id]/skills/[skillId]/route");
+        const request = createRequest(
+            'http://localhost/api/campaigns/c1/skills/skill-1'
+        );
 
-    const request = createRequest("http://localhost/api/campaigns/c1/skills/skill-1", {
-      method: "DELETE",
-    });
+        const response = await GET(request, {
+            params: Promise.resolve({ id: 'c1', skillId: 'skill-1' }),
+        });
 
-    const response = await DELETE(request, {
-      params: Promise.resolve({ id: "c1", skillId: "skill-1" }),
-    });
+        expect(await getResponseStatus(response)).toBe(404);
 
-    expect(await getResponseStatus(response)).toBe(404);
-  });
+        const data = await getResponseJson<{ error: string }>(response);
 
-  it("повертає 200 при успішному видаленні", async () => {
-    vi.mocked(apiAuth.requireDM).mockResolvedValue({
-      userId: "dm-1",
-      isDM: false,
-      campaign: {
-        kind: "campaign",
-        rules: DEFAULT_RULES,
-        id: "c1",
-        maxLevel: 20,
-        allowPlayerEdit: true,
-        members: [{ userId: "dm-1", role: "dm" }],
-      },
-    });
-    vi.mocked(prisma.skill.findFirst).mockResolvedValue({
-      id: "skill-1",
-      campaignId: "c1",
-    } as never);
-    vi.mocked(prisma.skill.delete).mockResolvedValue({} as never);
-
-    const { DELETE } = await import("@/app/api/campaigns/[id]/skills/[skillId]/route");
-
-    const request = createRequest("http://localhost/api/campaigns/c1/skills/skill-1", {
-      method: "DELETE",
+        expect(data.error).toBe(API_ERRORS.SKILL_NOT_FOUND);
     });
 
-    const response = await DELETE(request, {
-      params: Promise.resolve({ id: "c1", skillId: "skill-1" }),
+    it('повертає 404, якщо скіл належить іншій кампанії', async () => {
+        vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue({
+            userId: 'user-1',
+            isDM: false,
+            campaign: {
+                kind: 'campaign',
+                rules: DEFAULT_RULES,
+                id: 'c1',
+                maxLevel: 20,
+                allowPlayerEdit: true,
+                members: [{ userId: 'user-1', role: 'player' }],
+            },
+        });
+        vi.mocked(prisma.skill.findFirst).mockResolvedValue(null);
+
+        const { GET } = await import(
+            '@/app/api/campaigns/[id]/skills/[skillId]/route'
+        );
+
+        const request = createRequest(
+            'http://localhost/api/campaigns/c1/skills/skill-1'
+        );
+
+        const response = await GET(request, {
+            params: Promise.resolve({ id: 'c1', skillId: 'skill-1' }),
+        });
+
+        expect(await getResponseStatus(response)).toBe(404);
     });
 
-    expect(await getResponseStatus(response)).toBe(200);
+    it('повертає 200 та скіл при успіху', async () => {
+        vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue({
+            userId: 'user-1',
+            isDM: false,
+            campaign: {
+                kind: 'campaign',
+                rules: DEFAULT_RULES,
+                id: 'c1',
+                maxLevel: 20,
+                allowPlayerEdit: true,
+                members: [{ userId: 'user-1', role: 'player' }],
+            },
+        });
 
-    const data = await getResponseJson(response) as { ok: boolean };
+        const mockSkill = {
+            id: 'skill-1',
+            campaignId: 'c1',
+            name: 'Fireball',
+            description: null,
+            icon: null,
+            basicInfo: { name: 'Fireball' },
+            combatStats: null,
+            bonuses: {},
+            spellData: null,
+            mainSkillData: null,
+            skillTriggers: [],
+            image: null,
+            damage: null,
+            armor: null,
+            speed: null,
+            physicalResistance: null,
+            magicalResistance: null,
+            spellId: null,
+            spellGroupId: null,
+            mainSkillId: null,
+            spellNewSpellId: null,
+            grantedSpellId: null,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            spell: null,
+            spellGroup: null,
+            grantedSpell: null,
+        };
 
-    expect(data.ok).toBe(true);
-  });
+        vi.mocked(prisma.skill.findFirst).mockResolvedValue(mockSkill as never);
+
+        const { GET } = await import(
+            '@/app/api/campaigns/[id]/skills/[skillId]/route'
+        );
+
+        const request = createRequest(
+            'http://localhost/api/campaigns/c1/skills/skill-1'
+        );
+
+        const response = await GET(request, {
+            params: Promise.resolve({ id: 'c1', skillId: 'skill-1' }),
+        });
+
+        expect(await getResponseStatus(response)).toBe(200);
+
+        const data = (await getResponseJson(response)) as {
+            id: string;
+            name: string;
+        };
+
+        expect(data.id).toBe('skill-1');
+        expect(data.name).toBe('Fireball');
+    });
+});
+
+describe('PATCH /api/campaigns/[id]/skills/[skillId]', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+    });
+
+    it('повертає 403, якщо користувач не DM', async () => {
+        vi.mocked(apiAuth.requireDM).mockResolvedValue(
+            NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+        );
+
+        const { PATCH } = await import(
+            '@/app/api/campaigns/[id]/skills/[skillId]/route'
+        );
+
+        const request = createRequest(
+            'http://localhost/api/campaigns/c1/skills/skill-1',
+            {
+                method: 'PATCH',
+                body: JSON.stringify({ basicInfo: { name: 'Updated' } }),
+                headers: { 'Content-Type': 'application/json' },
+            }
+        );
+
+        const response = await PATCH(request, {
+            params: Promise.resolve({ id: 'c1', skillId: 'skill-1' }),
+        });
+
+        expect(await getResponseStatus(response)).toBe(403);
+    });
+
+    it('повертає 404, якщо скіл не знайдено', async () => {
+        vi.mocked(apiAuth.requireDM).mockResolvedValue({
+            userId: 'dm-1',
+            isDM: false,
+            campaign: {
+                kind: 'campaign',
+                rules: DEFAULT_RULES,
+                id: 'c1',
+                maxLevel: 20,
+                allowPlayerEdit: true,
+                members: [{ userId: 'dm-1', role: 'dm' }],
+            },
+        });
+        vi.mocked(prisma.skill.findFirst).mockResolvedValue(null);
+
+        const { PATCH } = await import(
+            '@/app/api/campaigns/[id]/skills/[skillId]/route'
+        );
+
+        const request = createRequest(
+            'http://localhost/api/campaigns/c1/skills/skill-1',
+            {
+                method: 'PATCH',
+                body: JSON.stringify({ basicInfo: { name: 'Updated' } }),
+                headers: { 'Content-Type': 'application/json' },
+            }
+        );
+
+        const response = await PATCH(request, {
+            params: Promise.resolve({ id: 'c1', skillId: 'skill-1' }),
+        });
+
+        expect(await getResponseStatus(response)).toBe(404);
+    });
+
+    it('повертає 200 та оновлений скіл при успіху', async () => {
+        vi.mocked(apiAuth.requireDM).mockResolvedValue({
+            userId: 'dm-1',
+            isDM: false,
+            campaign: {
+                kind: 'campaign',
+                rules: DEFAULT_RULES,
+                id: 'c1',
+                maxLevel: 20,
+                allowPlayerEdit: true,
+                members: [{ userId: 'dm-1', role: 'dm' }],
+            },
+        });
+
+        const existingSkill = {
+            id: 'skill-1',
+            campaignId: 'c1',
+            name: 'Old Name',
+            description: null,
+            icon: null,
+            basicInfo: {},
+            combatStats: null,
+            bonuses: {},
+            spellData: null,
+            mainSkillData: null,
+            skillTriggers: [],
+            image: null,
+            damage: null,
+            armor: null,
+            speed: null,
+            physicalResistance: null,
+            magicalResistance: null,
+            spellId: null,
+            spellGroupId: null,
+            mainSkillId: null,
+            spellNewSpellId: null,
+            grantedSpellId: null,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        };
+
+        vi.mocked(prisma.skill.findFirst).mockResolvedValue(
+            existingSkill as never
+        );
+
+        const updatedSkill = {
+            ...existingSkill,
+            name: 'Updated Name',
+            basicInfo: { name: 'Updated Name' },
+        };
+
+        vi.mocked(prisma.skill.update).mockResolvedValue({
+            ...updatedSkill,
+            spell: null,
+            spellGroup: null,
+            grantedSpell: null,
+            mainSkill: null,
+        } as never);
+
+        const { PATCH } = await import(
+            '@/app/api/campaigns/[id]/skills/[skillId]/route'
+        );
+
+        const request = createRequest(
+            'http://localhost/api/campaigns/c1/skills/skill-1',
+            {
+                method: 'PATCH',
+                body: JSON.stringify({ basicInfo: { name: 'Updated Name' } }),
+                headers: { 'Content-Type': 'application/json' },
+            }
+        );
+
+        const response = await PATCH(request, {
+            params: Promise.resolve({ id: 'c1', skillId: 'skill-1' }),
+        });
+
+        expect(await getResponseStatus(response)).toBe(200);
+
+        const data = (await getResponseJson(response)) as {
+            id: string;
+            name: string;
+        };
+
+        expect(data.id).toBe('skill-1');
+        expect(data.name).toBe('Updated Name');
+    });
+});
+
+describe('DELETE /api/campaigns/[id]/skills/[skillId]', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+    });
+
+    it('повертає 403, якщо користувач не DM', async () => {
+        vi.mocked(apiAuth.requireDM).mockResolvedValue(
+            NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+        );
+
+        const { DELETE } = await import(
+            '@/app/api/campaigns/[id]/skills/[skillId]/route'
+        );
+
+        const request = createRequest(
+            'http://localhost/api/campaigns/c1/skills/skill-1',
+            {
+                method: 'DELETE',
+            }
+        );
+
+        const response = await DELETE(request, {
+            params: Promise.resolve({ id: 'c1', skillId: 'skill-1' }),
+        });
+
+        expect(await getResponseStatus(response)).toBe(403);
+    });
+
+    it('повертає 404, якщо скіл не знайдено', async () => {
+        vi.mocked(apiAuth.requireDM).mockResolvedValue({
+            userId: 'dm-1',
+            isDM: false,
+            campaign: {
+                kind: 'campaign',
+                rules: DEFAULT_RULES,
+                id: 'c1',
+                maxLevel: 20,
+                allowPlayerEdit: true,
+                members: [{ userId: 'dm-1', role: 'dm' }],
+            },
+        });
+        vi.mocked(prisma.skill.findFirst).mockResolvedValue(null);
+
+        const { DELETE } = await import(
+            '@/app/api/campaigns/[id]/skills/[skillId]/route'
+        );
+
+        const request = createRequest(
+            'http://localhost/api/campaigns/c1/skills/skill-1',
+            {
+                method: 'DELETE',
+            }
+        );
+
+        const response = await DELETE(request, {
+            params: Promise.resolve({ id: 'c1', skillId: 'skill-1' }),
+        });
+
+        expect(await getResponseStatus(response)).toBe(404);
+    });
+
+    it('повертає 200 при успішному видаленні', async () => {
+        vi.mocked(apiAuth.requireDM).mockResolvedValue({
+            userId: 'dm-1',
+            isDM: false,
+            campaign: {
+                kind: 'campaign',
+                rules: DEFAULT_RULES,
+                id: 'c1',
+                maxLevel: 20,
+                allowPlayerEdit: true,
+                members: [{ userId: 'dm-1', role: 'dm' }],
+            },
+        });
+        vi.mocked(prisma.skill.findFirst).mockResolvedValue({
+            id: 'skill-1',
+            campaignId: 'c1',
+        } as never);
+        vi.mocked(prisma.skill.delete).mockResolvedValue({} as never);
+
+        const { DELETE } = await import(
+            '@/app/api/campaigns/[id]/skills/[skillId]/route'
+        );
+
+        const request = createRequest(
+            'http://localhost/api/campaigns/c1/skills/skill-1',
+            {
+                method: 'DELETE',
+            }
+        );
+
+        const response = await DELETE(request, {
+            params: Promise.resolve({ id: 'c1', skillId: 'skill-1' }),
+        });
+
+        expect(await getResponseStatus(response)).toBe(200);
+
+        const data = (await getResponseJson(response)) as { ok: boolean };
+
+        expect(data.ok).toBe(true);
+    });
 });

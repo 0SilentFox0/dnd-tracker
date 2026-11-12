@@ -1,260 +1,470 @@
-import { joinLines, textRef } from "@/lib/i18n/text-ref";
-import type { CunningStrikeEffect } from "@/lib/utils/abilities/schema";
-import type { PredictedAttack } from "@/lib/utils/battle/attack/bonus";
-import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
-import type { AttackData } from "@/types/api";
-import type { LogLine } from "@/types/text";
+import { joinLines, textRef } from '@/lib/i18n/text-ref';
+import type { CunningStrikeEffect } from '@/lib/utils/abilities/schema';
+import type { PredictedAttack } from '@/lib/utils/battle/attack/bonus';
+import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
+import type { AttackData } from '@/types/api';
+import type { LogLine } from '@/types/text';
 
-export type AttackMode = "normal" | "advantage" | "disadvantage";
+export type AttackMode = 'normal' | 'advantage' | 'disadvantage';
 
-export type RollOutcome = "hit" | "crit" | "miss" | "critFail";
+export type RollOutcome = 'hit' | 'crit' | 'miss' | 'critFail';
 
 /** Режим, який задають навички/ефекти (зокрема взаємне скасування) — гравець його не змінює */
 export interface ForcedMode {
-  mode: AttackMode;
-  reason: LogLine;
+    mode: AttackMode;
+    reason: LogLine;
 }
 
 export interface Strike {
-  targetId: string;
-  forced?: ForcedMode;
-  d20?: number;
-  second?: number;
-  outcome?: RollOutcome;
-  damage: number[];
+    targetId: string;
+    forced?: ForcedMode;
+    d20?: number;
+    second?: number;
+    outcome?: RollOutcome;
+    damage: number[];
 }
 
 export interface AttackOutcomeSummary {
-  kind: "miss" | "hit" | "crit";
-  targetId: string;
-  damage: number;
-  downed: boolean;
-  /** Вторинна шкода (вогняна хвиля, стріла сили), не удар */
-  splash?: boolean;
+    kind: 'miss' | 'hit' | 'crit';
+    targetId: string;
+    damage: number;
+    downed: boolean;
+    /** Вторинна шкода (вогняна хвиля, стріла сили), не удар */
+    splash?: boolean;
 }
 
 export interface AttackFlowState {
-  step: "closed" | "weapon" | "target" | "roll" | "damage" | "summary" | "submitting" | "result";
-  weaponCount: number;
-  attackId?: string;
-  maxTargets: number;
-  diceSlots: number[];
-  targetIds: string[];
-  mode: AttackMode;
-  strikes: Strike[];
-  index: number;
-  error?: LogLine;
-  results: AttackOutcomeSummary[];
-  /** сервер зупинив атаку: ДМ обирає ефект крита */
-  waitingCrit?: boolean;
-  /** Зброю й ціль вибрано кліком по карті чи списку — майстер одразу на кидку */
-  picked?: boolean;
-  offHand?: boolean;
-  inspiration?: boolean;
-  /** server-judged systems decide hit/miss on the server, so there is no damage step */
-  judge?: "server";
-  cunningStrike?: CunningStrikeEffect[];
-  /** the system's own input of the attack, sent as is */
-  system?: SystemSlot;
+    step:
+        | 'closed'
+        | 'weapon'
+        | 'target'
+        | 'roll'
+        | 'damage'
+        | 'summary'
+        | 'submitting'
+        | 'result';
+    weaponCount: number;
+    attackId?: string;
+    maxTargets: number;
+    diceSlots: number[];
+    targetIds: string[];
+    mode: AttackMode;
+    strikes: Strike[];
+    index: number;
+    error?: LogLine;
+    results: AttackOutcomeSummary[];
+    /** сервер зупинив атаку: ДМ обирає ефект крита */
+    waitingCrit?: boolean;
+    /** Зброю й ціль вибрано кліком по карті чи списку — майстер одразу на кидку */
+    picked?: boolean;
+    offHand?: boolean;
+    inspiration?: boolean;
+    /** server-judged systems decide hit/miss on the server, so there is no damage step */
+    judge?: 'server';
+    cunningStrike?: CunningStrikeEffect[];
+    /** the system's own input of the attack, sent as is */
+    system?: SystemSlot;
 }
 
 export type AttackFlowAction =
-  | { type: "OPEN"; weaponCount: number; attackId: string; maxTargets: number; diceSlots: number[]; targetIds?: string[]; picked?: boolean; offHand?: boolean }
-  | { type: "SELECT_WEAPON"; attackId: string; maxTargets: number; diceSlots: number[] }
-  | { type: "CHANGE_WEAPON" }
-  | { type: "TOGGLE_TARGET"; id: string }
-  | { type: "SET_TARGETS"; ids: string[] }
-  | { type: "CONFIRM_TARGETS"; forced?: Record<string, ForcedMode | undefined> }
-  | { type: "SET_MODE"; mode: AttackMode }
-  | { type: "SET_INSPIRATION"; value: boolean; forced?: ForcedMode }
-  | { type: "SET_SYSTEM_INPUT"; value: SystemSlot | null }
-  | { type: "SET_CUNNING_STRIKE"; effects: CunningStrikeEffect[] }
-  | { type: "ROLL"; d20?: number; second?: number; outcome: RollOutcome; judge?: "server"; damage?: number[] }
-  | { type: "DAMAGE"; values: number[] }
-  | { type: "BACK" }
-  | { type: "SUBMIT" }
-  | { type: "WAIT_CRIT" }
-  | { type: "SUCCESS"; results: AttackOutcomeSummary[] }
-  | { type: "FAIL"; error: LogLine }
-  | { type: "CLOSE" };
+    | {
+          type: 'OPEN';
+          weaponCount: number;
+          attackId: string;
+          maxTargets: number;
+          diceSlots: number[];
+          targetIds?: string[];
+          picked?: boolean;
+          offHand?: boolean;
+      }
+    | {
+          type: 'SELECT_WEAPON';
+          attackId: string;
+          maxTargets: number;
+          diceSlots: number[];
+      }
+    | { type: 'CHANGE_WEAPON' }
+    | { type: 'TOGGLE_TARGET'; id: string }
+    | { type: 'SET_TARGETS'; ids: string[] }
+    | {
+          type: 'CONFIRM_TARGETS';
+          forced?: Record<string, ForcedMode | undefined>;
+      }
+    | { type: 'SET_MODE'; mode: AttackMode }
+    | { type: 'SET_INSPIRATION'; value: boolean; forced?: ForcedMode }
+    | { type: 'SET_SYSTEM_INPUT'; value: SystemSlot | null }
+    | { type: 'SET_CUNNING_STRIKE'; effects: CunningStrikeEffect[] }
+    | {
+          type: 'ROLL';
+          d20?: number;
+          second?: number;
+          outcome: RollOutcome;
+          judge?: 'server';
+          damage?: number[];
+      }
+    | { type: 'DAMAGE'; values: number[] }
+    | { type: 'BACK' }
+    | { type: 'SUBMIT' }
+    | { type: 'WAIT_CRIT' }
+    | { type: 'SUCCESS'; results: AttackOutcomeSummary[] }
+    | { type: 'FAIL'; error: LogLine }
+    | { type: 'CLOSE' };
 
 export const initialAttackFlow: AttackFlowState = {
-  step: "closed", weaponCount: 0, maxTargets: 1, diceSlots: [], targetIds: [], mode: "normal", strikes: [], index: 0, results: [],
+    step: 'closed',
+    weaponCount: 0,
+    maxTargets: 1,
+    diceSlots: [],
+    targetIds: [],
+    mode: 'normal',
+    strikes: [],
+    index: 0,
+    results: [],
 };
 
-const isHit = (s: Strike) => s.outcome === "hit" || s.outcome === "crit";
+const isHit = (s: Strike) => s.outcome === 'hit' || s.outcome === 'crit';
 
-const nextHit = (strikes: Strike[], from: number) => strikes.findIndex((s, i) => i >= from && isHit(s));
+const nextHit = (strikes: Strike[], from: number) =>
+    strikes.findIndex((s, i) => i >= from && isHit(s));
 
 const prevHit = (strikes: Strike[], before: number) => {
-  for (let i = before - 1; i >= 0; i -= 1) if (isHit(strikes[i])) return i;
+    for (let i = before - 1; i >= 0; i -= 1) if (isHit(strikes[i])) return i;
 
-  return -1;
+    return -1;
 };
 
 const withSingleSystemInput = (s: AttackFlowState): AttackFlowState => {
-  if (s.targetIds.length <= 1) return s;
+    if (s.targetIds.length <= 1) return s;
 
-  const { system: _s, ...rest } = s;
+    const { system: _s, ...rest } = s;
 
-  return rest;
+    return rest;
 };
 
-export function attackFlow(s: AttackFlowState, a: AttackFlowAction): AttackFlowState {
-  switch (a.type) {
-    case "OPEN":
-      return { ...initialAttackFlow, step: a.weaponCount > 1 ? "weapon" : "target", weaponCount: a.weaponCount, attackId: a.attackId, maxTargets: a.maxTargets, diceSlots: a.diceSlots, targetIds: (a.targetIds ?? []).slice(0, a.maxTargets), ...(a.picked && { picked: true }), ...(a.offHand && { offHand: true }) };
-    case "SELECT_WEAPON":
-      return { ...s, step: "target", attackId: a.attackId, maxTargets: a.maxTargets, diceSlots: a.diceSlots, targetIds: s.targetIds.slice(0, a.maxTargets) };
-    case "CHANGE_WEAPON":
-      return s.weaponCount > 1 && s.step === "roll" ? { ...s, step: "weapon", strikes: [], index: 0, error: undefined, picked: false } : s;
-    case "TOGGLE_TARGET": {
-      if (s.maxTargets <= 1) return { ...s, targetIds: [a.id] };
+export function attackFlow(
+    s: AttackFlowState,
+    a: AttackFlowAction
+): AttackFlowState {
+    switch (a.type) {
+        case 'OPEN':
+            return {
+                ...initialAttackFlow,
+                step: a.weaponCount > 1 ? 'weapon' : 'target',
+                weaponCount: a.weaponCount,
+                attackId: a.attackId,
+                maxTargets: a.maxTargets,
+                diceSlots: a.diceSlots,
+                targetIds: (a.targetIds ?? []).slice(0, a.maxTargets),
+                ...(a.picked && { picked: true }),
+                ...(a.offHand && { offHand: true }),
+            };
+        case 'SELECT_WEAPON':
+            return {
+                ...s,
+                step: 'target',
+                attackId: a.attackId,
+                maxTargets: a.maxTargets,
+                diceSlots: a.diceSlots,
+                targetIds: s.targetIds.slice(0, a.maxTargets),
+            };
+        case 'CHANGE_WEAPON':
+            return s.weaponCount > 1 && s.step === 'roll'
+                ? {
+                      ...s,
+                      step: 'weapon',
+                      strikes: [],
+                      index: 0,
+                      error: undefined,
+                      picked: false,
+                  }
+                : s;
+        case 'TOGGLE_TARGET': {
+            if (s.maxTargets <= 1) return { ...s, targetIds: [a.id] };
 
-      if (s.targetIds.includes(a.id)) return withSingleSystemInput({ ...s, targetIds: s.targetIds.filter((id) => id !== a.id) });
+            if (s.targetIds.includes(a.id))
+                return withSingleSystemInput({
+                    ...s,
+                    targetIds: s.targetIds.filter((id) => id !== a.id),
+                });
 
-      return s.targetIds.length >= s.maxTargets ? s : withSingleSystemInput({ ...s, targetIds: [...s.targetIds, a.id] });
+            return s.targetIds.length >= s.maxTargets
+                ? s
+                : withSingleSystemInput({
+                      ...s,
+                      targetIds: [...s.targetIds, a.id],
+                  });
+        }
+        case 'SET_TARGETS':
+            return withSingleSystemInput({
+                ...s,
+                targetIds: a.ids.slice(0, s.maxTargets),
+            });
+        case 'SET_SYSTEM_INPUT': {
+            const { system: _old, ...rest } = s;
+
+            return a.value ? { ...rest, system: a.value } : rest;
+        }
+        case 'CONFIRM_TARGETS':
+            return s.targetIds.length === 0
+                ? s
+                : {
+                      ...s,
+                      step: 'roll',
+                      index: 0,
+                      error: undefined,
+                      inspiration: undefined,
+                      strikes: s.targetIds.map((targetId) => ({
+                          targetId,
+                          damage: [],
+                          ...(a.forced?.[targetId] && {
+                              forced: a.forced[targetId],
+                          }),
+                      })),
+                  };
+        case 'SET_MODE':
+            return s.step === 'roll' && s.strikes[s.index]?.forced
+                ? s
+                : { ...s, mode: a.mode };
+        case 'SET_INSPIRATION': {
+            if (
+                s.step !== 'roll' ||
+                s.index !== 0 ||
+                s.strikes[0]?.d20 !== undefined
+            )
+                return s;
+
+            const strikes = s.strikes.map((st, i) => {
+                if (i !== 0) return st;
+
+                const { forced: _old, ...rest } = st;
+
+                return a.forced ? { ...rest, forced: a.forced } : rest;
+            });
+
+            return { ...s, strikes, inspiration: a.value || undefined };
+        }
+        case 'SET_CUNNING_STRIKE':
+            return {
+                ...s,
+                cunningStrike: a.effects.length > 0 ? a.effects : undefined,
+            };
+        case 'ROLL': {
+            const strikes = s.strikes.map((st, i) =>
+                i === s.index
+                    ? {
+                          ...st,
+                          d20: a.d20,
+                          second: a.second,
+                          outcome: a.outcome,
+                          damage: a.damage ?? [],
+                      }
+                    : st
+            );
+
+            if (s.index + 1 < strikes.length)
+                return {
+                    ...s,
+                    strikes,
+                    index: s.index + 1,
+                    ...(a.judge && { judge: a.judge }),
+                };
+
+            if (a.judge)
+                return {
+                    ...s,
+                    strikes,
+                    step: 'submitting',
+                    judge: a.judge,
+                    error: undefined,
+                };
+
+            const first = nextHit(strikes, 0);
+
+            return first === -1
+                ? { ...s, strikes, step: 'submitting', error: undefined }
+                : { ...s, strikes, step: 'damage', index: first };
+        }
+        case 'DAMAGE': {
+            const strikes = s.strikes.map((st, i) =>
+                i === s.index ? { ...st, damage: a.values } : st
+            );
+
+            const next = nextHit(strikes, s.index + 1);
+
+            return next === -1
+                ? { ...s, strikes, step: 'summary' }
+                : { ...s, strikes, index: next };
+        }
+        case 'BACK': {
+            if (s.step === 'summary')
+                return {
+                    ...s,
+                    step: 'damage',
+                    index: prevHit(s.strikes, s.strikes.length),
+                    error: undefined,
+                };
+
+            if (s.step === 'damage') {
+                const prev = prevHit(s.strikes, s.index);
+
+                return prev === -1
+                    ? { ...s, step: 'roll', index: s.strikes.length - 1 }
+                    : { ...s, index: prev };
+            }
+
+            if (s.step === 'roll')
+                return s.index > 0
+                    ? { ...s, index: s.index - 1 }
+                    : { ...s, step: 'target', picked: false };
+
+            if (s.step === 'target' && s.weaponCount > 1)
+                return { ...s, step: 'weapon' };
+
+            return s;
+        }
+        case 'SUBMIT':
+            return s.step === 'summary'
+                ? { ...s, step: 'submitting', error: undefined }
+                : s;
+        case 'WAIT_CRIT':
+            return s.step === 'submitting' ? { ...s, waitingCrit: true } : s;
+        case 'SUCCESS':
+            return {
+                ...s,
+                step: 'result',
+                results: a.results,
+                error: undefined,
+                waitingCrit: false,
+            };
+        case 'FAIL': {
+            const toSummary = s.strikes.some(isHit) && s.judge !== 'server';
+
+            return {
+                ...s,
+                waitingCrit: false,
+                step: toSummary ? 'summary' : 'roll',
+                index: toSummary ? s.index : s.strikes.length - 1,
+                error: a.error,
+            };
+        }
+        case 'CLOSE':
+            return initialAttackFlow;
     }
-    case "SET_TARGETS":
-      return withSingleSystemInput({ ...s, targetIds: a.ids.slice(0, s.maxTargets) });
-    case "SET_SYSTEM_INPUT": {
-      const { system: _old, ...rest } = s;
-
-      return a.value ? { ...rest, system: a.value } : rest;
-    }
-    case "CONFIRM_TARGETS":
-      return s.targetIds.length === 0
-        ? s
-        : { ...s, step: "roll", index: 0, error: undefined, inspiration: undefined, strikes: s.targetIds.map((targetId) => ({ targetId, damage: [], ...(a.forced?.[targetId] && { forced: a.forced[targetId] }) })) };
-    case "SET_MODE":
-      return s.step === "roll" && s.strikes[s.index]?.forced ? s : { ...s, mode: a.mode };
-    case "SET_INSPIRATION": {
-      if (s.step !== "roll" || s.index !== 0 || s.strikes[0]?.d20 !== undefined) return s;
-
-      const strikes = s.strikes.map((st, i) => {
-        if (i !== 0) return st;
-
-        const { forced: _old, ...rest } = st;
-
-        return a.forced ? { ...rest, forced: a.forced } : rest;
-      });
-
-      return { ...s, strikes, inspiration: a.value || undefined };
-    }
-    case "SET_CUNNING_STRIKE":
-      return { ...s, cunningStrike: a.effects.length > 0 ? a.effects : undefined };
-    case "ROLL": {
-      const strikes = s.strikes.map((st, i) => (i === s.index ? { ...st, d20: a.d20, second: a.second, outcome: a.outcome, damage: a.damage ?? [] } : st));
-
-      if (s.index + 1 < strikes.length) return { ...s, strikes, index: s.index + 1, ...(a.judge && { judge: a.judge }) };
-
-      if (a.judge) return { ...s, strikes, step: "submitting", judge: a.judge, error: undefined };
-
-      const first = nextHit(strikes, 0);
-
-      return first === -1 ? { ...s, strikes, step: "submitting", error: undefined } : { ...s, strikes, step: "damage", index: first };
-    }
-    case "DAMAGE": {
-      const strikes = s.strikes.map((st, i) => (i === s.index ? { ...st, damage: a.values } : st));
-
-      const next = nextHit(strikes, s.index + 1);
-
-      return next === -1 ? { ...s, strikes, step: "summary" } : { ...s, strikes, index: next };
-    }
-    case "BACK": {
-      if (s.step === "summary") return { ...s, step: "damage", index: prevHit(s.strikes, s.strikes.length), error: undefined };
-
-      if (s.step === "damage") {
-        const prev = prevHit(s.strikes, s.index);
-
-        return prev === -1 ? { ...s, step: "roll", index: s.strikes.length - 1 } : { ...s, index: prev };
-      }
-
-      if (s.step === "roll") return s.index > 0 ? { ...s, index: s.index - 1 } : { ...s, step: "target", picked: false };
-
-      if (s.step === "target" && s.weaponCount > 1) return { ...s, step: "weapon" };
-
-      return s;
-    }
-    case "SUBMIT":
-      return s.step === "summary" ? { ...s, step: "submitting", error: undefined } : s;
-    case "WAIT_CRIT":
-      return s.step === "submitting" ? { ...s, waitingCrit: true } : s;
-    case "SUCCESS":
-      return { ...s, step: "result", results: a.results, error: undefined, waitingCrit: false };
-    case "FAIL": {
-      const toSummary = s.strikes.some(isHit) && s.judge !== "server";
-
-      return { ...s, waitingCrit: false, step: toSummary ? "summary" : "roll", index: toSummary ? s.index : s.strikes.length - 1, error: a.error };
-    }
-    case "CLOSE":
-      return initialAttackFlow;
-  }
 }
 
-export function forcedModeOf(p: Pick<PredictedAttack, "mode" | "forced" | "reasons">): ForcedMode | undefined {
-  if (!p.forced) return undefined;
+export function forcedModeOf(
+    p: Pick<PredictedAttack, 'mode' | 'forced' | 'reasons'>
+): ForcedMode | undefined {
+    if (!p.forced) return undefined;
 
-  const { advantage, disadvantage } = p.reasons;
+    const { advantage, disadvantage } = p.reasons;
 
-  if (p.mode === "advantage") return { mode: p.mode, reason: textRef("battleWizards.flow.forced.advantage", { reasons: joinLines(advantage, ", ") }) };
+    if (p.mode === 'advantage')
+        return {
+            mode: p.mode,
+            reason: textRef('battleWizards.flow.forced.advantage', {
+                reasons: joinLines(advantage, ', '),
+            }),
+        };
 
-  if (p.mode === "disadvantage") return { mode: p.mode, reason: textRef("battleWizards.flow.forced.disadvantage", { reasons: joinLines(disadvantage, ", ") }) };
+    if (p.mode === 'disadvantage')
+        return {
+            mode: p.mode,
+            reason: textRef('battleWizards.flow.forced.disadvantage', {
+                reasons: joinLines(disadvantage, ', '),
+            }),
+        };
 
-  return { mode: "normal", reason: textRef("battleWizards.flow.forced.cancelled", { advantage: joinLines(advantage, ", "), disadvantage: joinLines(disadvantage, ", ") }) };
+    return {
+        mode: 'normal',
+        reason: textRef('battleWizards.flow.forced.cancelled', {
+            advantage: joinLines(advantage, ', '),
+            disadvantage: joinLines(disadvantage, ', '),
+        }),
+    };
 }
 
 /** server-judged: the roll source is fixed by the first strike; undefined while it is still free to choose */
-export function lockedRollSource(s: Pick<AttackFlowState, "strikes" | "index">): "server" | "manual" | undefined {
-  if (s.index === 0 || s.strikes.length === 0) return undefined;
+export function lockedRollSource(
+    s: Pick<AttackFlowState, 'strikes' | 'index'>
+): 'server' | 'manual' | undefined {
+    if (s.index === 0 || s.strikes.length === 0) return undefined;
 
-  return s.strikes[0].d20 === undefined ? "server" : "manual";
+    return s.strikes[0].d20 === undefined ? 'server' : 'manual';
 }
 
-export function strikeMode(s: Pick<AttackFlowState, "mode">, strike: Strike | undefined): AttackMode {
-  return strike?.forced?.mode ?? s.mode;
+export function strikeMode(
+    s: Pick<AttackFlowState, 'mode'>,
+    strike: Strike | undefined
+): AttackMode {
+    return strike?.forced?.mode ?? s.mode;
 }
 
 export function effectiveD20(strike: Strike, mode: AttackMode): number {
-  const d = strike.d20 ?? 0;
+    const d = strike.d20 ?? 0;
 
-  if (strike.second === undefined || mode === "normal") return d;
+    if (strike.second === undefined || mode === 'normal') return d;
 
-  return mode === "advantage" ? Math.max(d, strike.second) : Math.min(d, strike.second);
+    return mode === 'advantage'
+        ? Math.max(d, strike.second)
+        : Math.min(d, strike.second);
 }
 
-export function attackPayload(s: AttackFlowState, attackerId: string): AttackData & { endTurn: boolean } {
-  const serverRoll = s.strikes.some((st) => st.d20 === undefined);
+export function attackPayload(
+    s: AttackFlowState,
+    attackerId: string
+): AttackData & { endTurn: boolean } {
+    const serverRoll = s.strikes.some((st) => st.d20 === undefined);
 
-  const manual = s.mode !== "normal" && s.strikes.some((st) => !st.forced);
+    const manual = s.mode !== 'normal' && s.strikes.some((st) => !st.forced);
 
-  const base = { attackerId, attackId: s.attackId, ...(s.offHand && { offHand: true }), ...(s.inspiration && { useInspiration: true }), ...(s.cunningStrike && { cunningStrike: s.cunningStrike }), ...(manual && { rollMode: s.mode }), endTurn: false };
+    const base = {
+        attackerId,
+        attackId: s.attackId,
+        ...(s.offHand && { offHand: true }),
+        ...(s.inspiration && { useInspiration: true }),
+        ...(s.cunningStrike && { cunningStrike: s.cunningStrike }),
+        ...(manual && { rollMode: s.mode }),
+        endTurn: false,
+    };
 
-  if (s.strikes.length === 1) {
-    const [st] = s.strikes;
+    if (s.strikes.length === 1) {
+        const [st] = s.strikes;
 
-    const mode = strikeMode(s, st);
+        const mode = strikeMode(s, st);
 
+        return {
+            ...base,
+            targetIds: [st.targetId],
+            ...(serverRoll ? { serverRoll } : { attackRoll: st.d20 }),
+            ...(st.second !== undefined &&
+                s.judge !== 'server' &&
+                mode === 'advantage' && { advantageRoll: st.second }),
+            ...(st.second !== undefined &&
+                s.judge !== 'server' &&
+                mode === 'disadvantage' && { disadvantageRoll: st.second }),
+            ...(s.system && { system: s.system }),
+            ...(s.system &&
+                s.judge === 'server' &&
+                st.second !== undefined &&
+                !serverRoll && { secondRoll: st.second }),
+            damageRolls: isHit(st) ? st.damage : [],
+        } as AttackData & { endTurn: boolean };
+    }
+
+    const hits = s.strikes.filter(isHit);
+
+    // промахи теж ідуть на сервер з кидками: їх видно в журналі й спрацьовують реакції цілей
     return {
-      ...base,
-      targetIds: [st.targetId],
-      ...(serverRoll ? { serverRoll } : { attackRoll: st.d20 }),
-      ...(st.second !== undefined && s.judge !== "server" && mode === "advantage" && { advantageRoll: st.second }),
-      ...(st.second !== undefined && s.judge !== "server" && mode === "disadvantage" && { disadvantageRoll: st.second }),
-      ...(s.system && { system: s.system }),
-      ...(s.system && s.judge === "server" && st.second !== undefined && !serverRoll && { secondRoll: st.second }),
-      damageRolls: isHit(st) ? st.damage : [],
+        ...base,
+        targetIds: s.strikes.map((st) => st.targetId),
+        ...(serverRoll
+            ? { serverRoll }
+            : { attackRolls: s.strikes.map((st) => st.d20 ?? 0) }),
+        ...(s.judge !== 'server' &&
+            s.strikes.some((st) => st.second !== undefined) && {
+                secondRolls: s.strikes.map((st) => st.second ?? null),
+            }),
+        damageRolls: hits.flatMap((st) => st.damage),
     } as AttackData & { endTurn: boolean };
-  }
-
-  const hits = s.strikes.filter(isHit);
-
-  // промахи теж ідуть на сервер з кидками: їх видно в журналі й спрацьовують реакції цілей
-  return {
-    ...base,
-    targetIds: s.strikes.map((st) => st.targetId),
-    ...(serverRoll ? { serverRoll } : { attackRolls: s.strikes.map((st) => st.d20 ?? 0) }),
-    ...(s.judge !== "server" && s.strikes.some((st) => st.second !== undefined) && { secondRolls: s.strikes.map((st) => st.second ?? null) }),
-    damageRolls: hits.flatMap((st) => st.damage),
-  } as AttackData & { endTurn: boolean };
 }
