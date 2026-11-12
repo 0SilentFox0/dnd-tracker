@@ -15,6 +15,7 @@ function input(over: Partial<SheetInput> = {}, resources?: unknown): SheetInput 
     participant: createMockParticipant(),
     viewer: { isDM: true, isOwner: false },
     maxLevel: 20,
+    rules: DEFAULT_RULES,
     character: {
       id: "c", name: "Hans", avatar: null, level: 1, class: "Hero", subclass: null, race: "Human", alignment: null,
       strength: 10, dexterity: 10, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10,
@@ -32,21 +33,12 @@ function input(over: Partial<SheetInput> = {}, resources?: unknown): SheetInput 
 }
 
 describe("buildCharacterSheet system", () => {
-  it("d20 without rules is homm with no wfrp block", () => {
+  it("default rules are homm with no wfrp block", () => {
     const sheet = buildCharacterSheet(input());
 
     expect(sheet.system).toBe("homm");
     expect(sheet.systemSlot).toBeUndefined();
     expect(sheet.abilities).toHaveLength(6);
-  });
-
-  it("d20 with default rules equals no rules apart from system", () => {
-    const { system: a, ...withRules } = buildCharacterSheet(input({ rules: DEFAULT_RULES }));
-
-    const { system: b, ...without } = buildCharacterSheet(input());
-
-    expect(a).toBe(b);
-    expect(withRules).toEqual(without);
   });
 
   it("wfrp builds the characteristics block and empties d20 fields", () => {

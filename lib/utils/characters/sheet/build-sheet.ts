@@ -16,7 +16,7 @@ import { readResources } from "@/lib/utils/characters/resources/schema";
 import { sheetLineKey } from "@/lib/utils/characters/sheet/line-key";
 import { buildRestBlock } from "@/lib/utils/characters/sheet/rest-block";
 import { signed } from "@/lib/utils/common/format";
-import { DEFAULT_RULES, type Ruleset } from "@/lib/utils/rules";
+import type { Ruleset } from "@/lib/utils/rules";
 import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { SheetBlockCtx, SheetBlockPart } from "@/lib/utils/rules/systems/types";
 import type { BattleParticipant } from "@/types/battle";
@@ -29,7 +29,7 @@ export interface SheetInput {
   participant: BattleParticipant;
   viewer: CharacterSheet["viewer"];
   maxLevel: number;
-  rules?: Ruleset;
+  rules: Ruleset;
   classes?: ResolvedClassEntry[];
   chapters?: StoryChapter[];
   attunement?: { used: number; limit: number } | null;
@@ -89,7 +89,7 @@ export function buildCharacterSheet(input: SheetInput): CharacterSheet {
 
   const showSubrace = !!input.choices && (!!classEntries || input.choices.selections.lineage !== null);
 
-  const rules = input.rules ?? DEFAULT_RULES;
+  const { rules } = input;
 
   const hp = characterBaseHp(c, { entries: input.classes, rules, characteristics: c.characteristics });
 
@@ -139,7 +139,7 @@ export function buildCharacterSheet(input: SheetInput): CharacterSheet {
     ...(classEntries && { classTable: classTableLines(classEntries), classProgression: classEntries.flatMap((e) => (e.class ? [buildClassProgression(e.class, e)] : [])) }),
     pact: pactSlot(p),
     slots: slotLevels(p).filter((s) => s.max > 0).map((s) => ({ level: s.level, count: s.max, current: s.current })),
-    rest: buildRestBlock({ participant: p, character: c, classes: input.classes, rules: input.rules, maxLevel: input.maxLevel }),
+    rest: buildRestBlock({ participant: p, character: c, classes: input.classes, rules, maxLevel: input.maxLevel }),
     spells: input.spells,
     items: { grid, artifacts: input.artifacts, sets: p.battleData.artifactSets ?? [], ...(input.attunement && { attunement: input.attunement }) },
     personalSkill: input.personalSkill,

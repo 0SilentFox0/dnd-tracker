@@ -4,6 +4,7 @@ import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/moc
 import { asi } from "@/lib/utils/characters/choices/__tests__/fixtures";
 import type { ChoiceSelections } from "@/lib/utils/characters/choices/selections";
 import { buildCharacterSheet, type SheetInput } from "@/lib/utils/characters/sheet";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 
 function input(over: Partial<SheetInput> = {}, character: Partial<SheetInput["character"]> = {}): SheetInput {
   const p = createMockParticipant();
@@ -14,6 +15,7 @@ function input(over: Partial<SheetInput> = {}, character: Partial<SheetInput["ch
     participant: p,
     viewer: { isDM: true, isOwner: false },
     maxLevel: 20,
+    rules: DEFAULT_RULES,
     character: {
       id: "h", name: "Лія", avatar: null, level: 4, class: "Rogue", subclass: null, race: "Elf", alignment: null,
       strength: 10, dexterity: 14, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10,
