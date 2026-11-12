@@ -1,42 +1,19 @@
 import { releaseGrapples } from "./grapple-links";
 import { exhaustionLevel, hasCondition, MAX_EXHAUSTION, removeEffects, syncExhaustion } from "./query";
-import { type Condition5eKey, conditionEffectInput, customConditionDef, customConditionInput } from "./registry";
+import { conditionEffectInput, customConditionDef, customConditionInput } from "./registry";
+import type { ApplyConditionOptions, ApplyConditionResult, ConditionKey } from "./set";
 
-import type { AbilityKey } from "@/lib/constants/abilities";
 import { CombatStatus, EffectMarker } from "@/lib/constants/battle";
 import { DEFAULT_RULES_EDITION } from "@/lib/constants/rules";
 import { dynamicTextRef, textRef } from "@/lib/i18n/text-ref";
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { findParticipant, updateParticipant, withActiveEffects } from "@/lib/utils/abilities/engine/core/participants";
-import { type CustomConditionKey, isCustomConditionKey } from "@/lib/utils/abilities/schema/kinds";
+import { type Condition5eKey, isCustomConditionKey } from "@/lib/utils/abilities/schema/kinds";
 import { DODGE_KEY_PREFIX, upsertLabeled } from "@/lib/utils/battle/actions/effects";
 import { concentrationBroken, dropConcentration } from "@/lib/utils/battle/concentration";
 import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
-import { spellSaveDc } from "@/lib/utils/battle/spell/power";
-import type { Ruleset } from "@/lib/utils/rules";
-import type { ActiveEffect, BattleParticipant } from "@/types/battle";
+import type { BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
-
-export type ConditionKey = Condition5eKey | CustomConditionKey;
-
-export interface ApplyCondition5eOptions {
-  key: ConditionKey;
-  rounds: number;
-  permanent?: boolean;
-  levels?: number;
-  saveEnds?: { ability: AbilityKey; dc: number };
-  source: ActiveEffect["source"];
-  sourceName: LogLine;
-  timedKey: string;
-  round: number;
-  rules?: Ruleset;
-}
-
-export interface ApplyCondition5eResult {
-  participants: BattleParticipant[];
-  messages: LogLine[];
-  blocked: boolean;
-}
 
 function immune(ps: BattleParticipant[], id: string, key: ConditionKey): boolean {
   return findFlags(ps, id, "conditionImmunity").some((f) => f.conditions === "all" || (f.conditions as string[]).includes(key));
@@ -64,7 +41,7 @@ function halveMaxHp(p: BattleParticipant, timedKey: string): BattleParticipant {
   return { ...halved, combatStats: { ...p.combatStats, maxHp: nextMax, currentHp: Math.min(currentHp, nextMax) } };
 }
 
-export function applyCondition5e(ps: BattleParticipant[], targetId: string, opts: ApplyCondition5eOptions): ApplyCondition5eResult {
+export function applyCondition5e(ps: BattleParticipant[], targetId: string, opts: ApplyConditionOptions): ApplyConditionResult {
   const target = findParticipant(ps, targetId);
 
   if (!target) return { participants: ps, messages: [], blocked: false };
@@ -112,8 +89,4 @@ export function applyCondition5e(ps: BattleParticipant[], targetId: string, opts
   const released = releaseGrapples(dropped.participants, targetId, textRef("battleActions.grapple.reasons.incapacitated"));
 
   return { participants: released.participants, messages: [...messages, ...dropped.messages, ...released.messages], blocked: false };
-}
-
-export function saveEndsFor(owner: BattleParticipant | undefined, ability: AbilityKey, saveDcBase: number): { ability: AbilityKey; dc: number } {
-  return { ability, dc: owner ? spellSaveDc(owner, undefined, saveDcBase) : 10 };
 }

@@ -11,8 +11,9 @@ import type { ConditionImmunityKey, Effect } from "@/lib/utils/abilities/schema"
 import { isCondition5eKey, isCustomConditionKey } from "@/lib/utils/abilities/schema/kinds";
 import { seg, type Segment, segmentsLine } from "@/lib/utils/abilities/segments";
 import { helpEffect } from "@/lib/utils/battle/actions/effects";
-import { applyCondition5e, type ConditionKey, saveEndsFor } from "@/lib/utils/battle/conditions/apply";
+import { applyCondition5e } from "@/lib/utils/battle/conditions/apply";
 import { removeEffects } from "@/lib/utils/battle/conditions/query";
+import { type ConditionKey, saveEndsFor } from "@/lib/utils/battle/conditions/set";
 import { grantExtraActions } from "@/lib/utils/battle/participant/helpers";
 import { spellSaveDc } from "@/lib/utils/battle/spell/power";
 import { slotLevel, slotRestoreOrder } from "@/lib/utils/spells/slot-keys";

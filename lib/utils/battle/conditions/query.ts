@@ -1,4 +1,4 @@
-import { exhaustionEffects } from "./registry";
+import { exhaustionEffects } from "./exhaustion";
 
 import { DEFAULT_RULES_EDITION } from "@/lib/constants/rules";
 import { findParticipant, replaceParticipant, withActiveEffects } from "@/lib/utils/abilities/engine/core/participants";

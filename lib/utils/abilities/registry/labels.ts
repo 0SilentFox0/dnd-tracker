@@ -1,11 +1,10 @@
 import { DAMAGE_ELEMENT_OPTIONS } from "@/lib/constants/damage";
-import type { AbilityTarget, Amount, AnyConditionKey, Condition5eKey, CustomConditionKey, DamageFilterKind, Flat, Limits, StatKey } from "@/lib/utils/abilities/schema";
-import { ABILITY_TARGETS, CONDITION_KEYS, isCustomConditionKey } from "@/lib/utils/abilities/schema/kinds";
+import type { AbilityTarget, Amount, AnyConditionKey, CustomConditionKey, DamageFilterKind, Flat, Limits, StatKey } from "@/lib/utils/abilities/schema";
+import { ABILITY_TARGETS, CONDITION_5E_KEYS, CONDITION_KEYS, isCustomConditionKey } from "@/lib/utils/abilities/schema/kinds";
 import { seg,type Segment } from "@/lib/utils/abilities/segments";
-import { CONDITION_5E_REGISTRY } from "@/lib/utils/battle/conditions/registry";
 import { signed } from "@/lib/utils/common/format";
 
-export const CONDITION_KEYS_ALL: readonly AnyConditionKey[] = [...CONDITION_KEYS, ...(Object.keys(CONDITION_5E_REGISTRY) as Condition5eKey[])];
+export const CONDITION_KEYS_ALL: readonly AnyConditionKey[] = [...CONDITION_KEYS, ...CONDITION_5E_KEYS];
 
 export const TARGET_KEYS: readonly AbilityTarget[] = ABILITY_TARGETS;
 

@@ -1,15 +1,13 @@
+import { exhaustionEffects } from "./exhaustion";
+import type { ConditionEffectOptions, ExhaustionVariant } from "./set";
+
 import { EffectMarker } from "@/lib/constants/battle";
-import { type RulesEdition } from "@/lib/constants/rules";
 import { dynamicTextRef } from "@/lib/i18n/text-ref";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import { type Condition5eKey, type CustomConditionKey } from "@/lib/utils/abilities/schema/kinds";
 import type { LabeledEffectInput } from "@/lib/utils/battle/actions/effects";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { ActiveEffect } from "@/types/battle";
-
-export { CONDITION_5E_KEYS, type Condition5eKey } from "@/lib/utils/abilities/schema/kinds";
-
-export type ExhaustionVariant = RulesEdition;
 
 interface Condition5eDef {
   markers: string[];
@@ -86,26 +84,6 @@ export const CONDITION_5E_REGISTRY = {
   },
 } satisfies Record<Condition5eKey, Condition5eDef>;
 
-export function exhaustionEffects(level: number, variant: ExhaustionVariant): StaticEffect[] {
-  if (level < 1) return [];
-
-  if (variant === "2024") {
-    return [
-      { kind: "modifyStat", stat: "attackBonus", flat: -2 * level },
-      { kind: "modifyStat", stat: "savingThrow", flat: -2 * level },
-      { kind: "modifyStat", stat: "speed", flat: -5 * level },
-    ];
-  }
-
-  const effects: StaticEffect[] = [];
-
-  if (level >= 2) effects.push({ kind: "modifyStat", stat: "speed", percent: level >= 5 ? -100 : -50 });
-
-  if (level >= 3) effects.push(flag({ flag: "disadvantage" }), flag({ flag: "saveDisadvantage", abilities: "all" }));
-
-  return effects;
-}
-
 function closure(key: Condition5eKey, seen: Condition5eKey[] = []): Condition5eKey[] {
   if (seen.includes(key)) return seen;
 
@@ -143,18 +121,6 @@ export function expandCondition5e(key: Condition5eKey, opts: { exhaustion: Exhau
   }
 
   return { markers, flags };
-}
-
-export const PERMANENT_ROUNDS = 99;
-
-export interface ConditionEffectOptions {
-  timedKey: string;
-  rounds: number;
-  exhaustion: ExhaustionVariant;
-  permanent?: boolean;
-  levels?: number;
-  saveEnds?: ActiveEffect["saveEnds"];
-  source?: ActiveEffect["source"];
 }
 
 export function conditionEffectInput(key: Condition5eKey, opts: ConditionEffectOptions): LabeledEffectInput {

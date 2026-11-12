@@ -3,7 +3,7 @@ import type { CritResult } from "./crit-table";
 
 import { textRef } from "@/lib/i18n/text-ref";
 import { upsertLabeled } from "@/lib/utils/battle/actions/effects";
-import { PERMANENT_ROUNDS } from "@/lib/utils/battle/conditions/registry";
+import { PERMANENT_ROUNDS } from "@/lib/utils/battle/conditions/set";
 import type { BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
