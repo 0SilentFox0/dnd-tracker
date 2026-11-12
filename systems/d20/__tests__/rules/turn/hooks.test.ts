@@ -4,8 +4,8 @@ import { d20LairRoundStart } from "../../../rules/turn/on-round-start";
 import { d20DropStalePendingCast } from "../../../rules/turn/on-turn-end";
 
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
-import { beginConcentration } from "@/lib/utils/battle/concentration";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
+import { beginConcentration } from "@/systems/d20/rules/concentration/sustain";
 
 const ctx = (participants: ReturnType<typeof createMockParticipant>[], id: string, round: number) => ({ participants, id, round, rng: () => 0.5, rules: DEFAULT_RULES });
 

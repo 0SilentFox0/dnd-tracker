@@ -82,3 +82,34 @@ describe("magic.saveDc and magic.upcast", () => {
     expect(wfrp.tested).toBeDefined();
   });
 });
+
+describe("magic.sustain", () => {
+  const rulesOn = { ...DEFAULT_RULES, concentration: { enabled: true, dcCap: null } };
+
+  it("d20 holds a concentration spell only while the rule is on", () => {
+    expect(magic.sustain.holds(rulesOn, { concentration: true })).toBe(true);
+    expect(magic.sustain.holds(rulesOn, {})).toBe(false);
+    expect(magic.sustain.holds({ ...DEFAULT_RULES, concentration: { enabled: false, dcCap: null } }, { concentration: true })).toBe(false);
+  });
+
+  it("begin marks the caster, drop clears it with the bound effects", () => {
+    const p = caster({});
+
+    const begun = magic.sustain.begin([p], "c", "c:sp@1#0", "Spell", 3, 1);
+
+    expect(magic.sustain.holding(begun.participants[0])).toBe(true);
+    expect(magic.sustain.holding(magic.sustain.drop(begun.participants, "c", "").participants[0])).toBe(false);
+  });
+
+  it("wfrp holds nothing and leaves the participants untouched", () => {
+    const { sustain } = ruleSystemOf(WFRP_RULES).magic;
+
+    const ps = [caster({})];
+
+    expect(sustain.holds(WFRP_RULES, { concentration: true })).toBe(false);
+    expect(sustain.begin(ps, "c", "x", "Spell", 3).participants).toBe(ps);
+    expect(sustain.drop(ps, "c", "").participants).toBe(ps);
+    expect(sustain.dropOrphaned(ps).participants).toBe(ps);
+    expect(sustain.tag(ps, ps, { casterId: "c", castId: "x" }, "a")).toBe(ps);
+  });
+});

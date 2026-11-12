@@ -4,7 +4,7 @@ import { resolveTargetIds } from "@/lib/utils/abilities/engine/core/targets";
 import { HIDDEN_MARKER } from "@/lib/utils/battle/actions/effects";
 import { actionReason } from "@/lib/utils/battle/actions/reasons";
 import { type ActionFlow, fire, getP } from "@/lib/utils/battle/common/action-flow";
-import { beginConcentration, tagConcentration, uniqueCastId } from "@/lib/utils/battle/concentration";
+import { uniqueCastId } from "@/lib/utils/battle/concentration";
 import { removeEffects } from "@/lib/utils/battle/conditions/query";
 import { runAutoReactions } from "@/lib/utils/battle/spell/auto-reaction";
 import { applyAnchoredZones } from "@/lib/utils/battle/spell/cast/anchored-zone";
@@ -147,7 +147,9 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
     return finishSpellAction(state, { before, targetsBefore, allParticipants, battleId, round: currentRound, sourceEffects: source.definition.effects, details: settle.cast.details, fizzled: true });
   }
 
-  const concentrates = !!params.rules?.concentration.enabled && def.concentration === true;
+  const { sustain } = ruleSystemOf(params.rules).magic;
+
+  const concentrates = sustain.holds(params.rules, def);
 
   const castId = uniqueCastId(flow.ps, params.map, casterId, spell.id, currentRound);
 
@@ -158,7 +160,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
 
     const rounds = Math.max(zoneRounds, ...def.effects.map((e) => ("duration" in e ? (e.duration?.rounds ?? 0) : 0)));
 
-    const begun = beginConcentration(flow.ps, casterId, tag.castId, spell.name, rounds || DEFAULT_CONCENTRATION_ROUNDS, currentRound);
+    const begun = sustain.begin(flow.ps, casterId, tag.castId, spell.name, rounds || DEFAULT_CONCENTRATION_ROUNDS, currentRound);
 
     flow.ps = begun.participants;
     flow.messages.push(...begun.messages);
@@ -206,7 +208,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
     for (const id of targetIds) runAutoReactions(flow, { attackerId: casterId, targetId: id, targetHpBefore: findParticipant(before, id)?.combatStats.currentHp ?? 0 }, castSpell);
   }
 
-  if (tag) flow.ps = tagConcentration(psBeforeEffects, flow.ps, tag, state.ability.key);
+  if (tag) flow.ps = sustain.tag(psBeforeEffects, flow.ps, tag, state.ability.key);
 
   applyGrantCasts({ flow, effects: source.definition.effects, casterId, targetIds, spell, castId, round: currentRound, concentrationOf: tag });
 

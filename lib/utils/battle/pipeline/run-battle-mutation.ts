@@ -12,7 +12,6 @@ import type { Rng } from "@/lib/utils/abilities/engine/core/types";
 import { syncMapAuras } from "@/lib/utils/abilities/engine/effects/map-auras";
 import type { BATTLE_RATE_LIMITS, RateLimitResult } from "@/lib/utils/api/rate-limit";
 import { controls, currentOf } from "@/lib/utils/battle/common/control";
-import { dropOrphanedConcentration } from "@/lib/utils/battle/concentration";
 import { placeParticipants } from "@/lib/utils/battle/grid/placement";
 import { placeRevived } from "@/lib/utils/battle/grid/revive-placement";
 import { lineText } from "@/lib/utils/battle/log/lines";
@@ -153,7 +152,7 @@ function withPlacement(map: BattleMapConfig | null, scene: { status: BattleStatu
 
   if (swept !== result.participants) result = { ...result, participants: swept };
 
-  const orphaned = dropOrphanedConcentration(result.participants, map, result.scene?.round ?? scene.round);
+  const orphaned = ruleSystemOf(rules).magic.sustain.dropOrphaned(result.participants, map, result.scene?.round ?? scene.round);
 
   if (orphaned.participants !== result.participants) result = { ...result, participants: orphaned.participants, events: [...result.events, systemEvent(result.scene?.round ?? scene.round, lineText(orphaned.messages, "; "))] };
 

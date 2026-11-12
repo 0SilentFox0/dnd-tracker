@@ -112,7 +112,7 @@ describe("d20 / HOMM names and rule-section readers leaving core", () => {
     heroScaling: 5,
     criticals: 6,
     deathSaves: 1,
-    concentration: 2,
+    concentration: 1,
     conditions: 3,
     actions: 2,
     classes: 19,

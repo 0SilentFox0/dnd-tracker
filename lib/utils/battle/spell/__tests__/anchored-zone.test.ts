@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 
 import { ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
-import { dropConcentration } from "@/lib/utils/battle/concentration";
 import { textsOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
 import { castSpell } from "@/lib/utils/battle/spell";
@@ -11,6 +10,7 @@ import { zoneMove, zoneTurnStart } from "@/lib/utils/battle/spell/zone-triggers"
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { AnchoredZoneEffect, SpellEffect } from "@/lib/utils/spells/model/schema";
+import { dropConcentration } from "@/systems/d20/rules/concentration/sustain";
 import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 
 const map: BattleMapConfig = { cols: 30, rows: 10, background: null, opacity: 0.3 };

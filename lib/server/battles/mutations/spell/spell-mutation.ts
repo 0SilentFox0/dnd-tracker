@@ -14,7 +14,6 @@ import { spendLair } from "@/lib/utils/battle/actions/lair";
 import { legendaryCostOf, spendLegendary } from "@/lib/utils/battle/actions/legendary-options";
 import { isFiveE } from "@/lib/utils/battle/attack/ability";
 import { requireActor } from "@/lib/utils/battle/common/control";
-import { dropConcentration } from "@/lib/utils/battle/concentration";
 import { runWithCritChoice } from "@/lib/utils/battle/crit-choice/run-with-crit-choice";
 import type { CritPicker, CritResume } from "@/lib/utils/battle/crit-choice/types";
 import { spellDiceRolls } from "@/lib/utils/battle/dice-record";
@@ -115,7 +114,7 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
     });
 
     if (data.cancelCasting) {
-      const dropped = dropConcentration(order, caster.basicInfo.id, textRef("battleLog.concentration.reasons.castCancelled"));
+      const dropped = ruleSystemOf(ctx.meta.rules).magic.sustain.drop(order, caster.basicInfo.id, textRef("battleLog.concentration.reasons.castCancelled"));
 
       return { participants: dropped.participants, pending: ctx.pending, events: [systemEvent(ctx.scene.round, textRef("battleLog.spell.castCancelled", { name: caster.basicInfo.name }))] };
     }

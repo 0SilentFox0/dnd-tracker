@@ -1,7 +1,7 @@
 import { textRef } from "@/lib/i18n/text-ref";
 import { findParticipant, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
-import { dropConcentration, hasConcentration } from "@/lib/utils/battle/concentration";
 import type { TurnHook, TurnSubjectCtx } from "@/lib/utils/rules/systems/types";
+import { dropConcentration, hasConcentration } from "@/systems/d20/rules/concentration/sustain";
 
 /** A long cast ends with its caster's turn when concentration is gone or its round has passed */
 export const d20DropStalePendingCast: TurnHook<TurnSubjectCtx> = ({ participants, id, round }) => {

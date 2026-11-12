@@ -373,8 +373,29 @@ export interface RuleSystemTestedMagic {
   badge(p: BattleParticipant): ActiveEffect | null;
 }
 
+export interface SustainResult {
+  participants: BattleParticipant[];
+  messages: LogLine[];
+}
+
+/** Binds the duration of a spell's effects, objects, zones and grants to its caster (5e concentration) */
+export interface RuleSystemSustain {
+  /** The cast has to be held: the rule is on and the spell asks for it */
+  holds(rules: Ruleset, spell: { concentration?: boolean }): boolean;
+  holding(p: BattleParticipant): boolean;
+  /** Replaces what the caster held before */
+  begin(ps: BattleParticipant[], casterId: string, castId: string, spellName: string, rounds: number, round?: number): SustainResult;
+  /** Ends the held cast with everything bound to it */
+  drop(ps: BattleParticipant[], casterId: string, reason: LogLine): SustainResult;
+  /** Binds the effects the cast just added to the caster's hold */
+  tag(before: BattleParticipant[], after: BattleParticipant[], tag: NonNullable<ActiveEffect["concentrationOf"]>, abilityKey: string): BattleParticipant[];
+  /** Ends a hold whose effects, zones, objects and grants are all gone */
+  dropOrphaned(ps: BattleParticipant[], map?: BattleMapConfig | null, round?: number): SustainResult;
+}
+
 export interface RuleSystemMagic {
   resource?: RuleSystemMagicResource;
+  sustain: RuleSystemSustain;
   /** Save DC of a spell; `ability` overrides the caster's spellcasting ability */
   saveDc(caster: BattleParticipant, ability: AbilityKey | undefined, base: number): number;
   upcast: { steps(spellLevel: number, castLevel: number): number };

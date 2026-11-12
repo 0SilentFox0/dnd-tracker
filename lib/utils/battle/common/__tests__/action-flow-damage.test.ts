@@ -3,8 +3,8 @@ import { describe, expect, it } from "vitest";
 import { type ActionFlow,applyFlowDamage } from "../action-flow";
 
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
-import { beginConcentration } from "@/lib/utils/battle/concentration";
 import { DEFAULT_RULES, type Ruleset } from "@/lib/utils/rules";
+import { beginConcentration } from "@/systems/d20/rules/concentration/sustain";
 import type { BattleParticipant } from "@/types/battle";
 
 const rules: Ruleset = { ...DEFAULT_RULES, deathSaves: { ...DEFAULT_RULES.deathSaves, enabled: false }, concentration: { ...DEFAULT_RULES.concentration, enabled: false } };

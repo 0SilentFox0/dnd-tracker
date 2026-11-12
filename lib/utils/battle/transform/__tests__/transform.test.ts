@@ -3,7 +3,6 @@ import { describe, expect, it } from "vitest";
 import { CombatStatus, ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { textOf } from "@/lib/i18n/test/text";
 import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
-import { dropConcentration } from "@/lib/utils/battle/concentration";
 import { applyDamageConsequences } from "@/lib/utils/battle/damage/consequences";
 import { textsOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { castSpell } from "@/lib/utils/battle/spell";
@@ -12,6 +11,7 @@ import { revertExpiredTransforms } from "@/lib/utils/battle/transform/revert";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import { DEFAULT_RULES, type Ruleset } from "@/lib/utils/rules";
 import { SpellDefinitionSchema, type SpellEffect } from "@/lib/utils/spells/model/schema";
+import { dropConcentration } from "@/systems/d20/rules/concentration/sustain";
 import type { BattleParticipant } from "@/types/battle";
 
 const rules = { ...DEFAULT_RULES, concentration: { enabled: true, dcCap: null }, deathSaves: { ...DEFAULT_RULES.deathSaves, enabled: true } };

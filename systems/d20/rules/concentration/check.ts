@@ -1,8 +1,8 @@
 import { CombatStatus } from "@/lib/constants/battle";
 import { textRef } from "@/lib/i18n/text-ref";
 import { findParticipant, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
-import { concentrationOn, dropConcentration, stripConcentration } from "@/lib/utils/battle/concentration";
 import type { Ruleset } from "@/lib/utils/rules";
+import { concentrationOn, dropConcentration, stripConcentration } from "@/systems/d20/rules/concentration/sustain";
 import { resolveSave } from "@/systems/d20/rules/saves/legendary";
 import { rollSave } from "@/systems/d20/rules/saves/roll-save";
 import type { BattleParticipant } from "@/types/battle";
