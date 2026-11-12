@@ -51,6 +51,7 @@ export interface SystemHandlerCtx {
 export interface SystemHandler {
     access: 'member' | 'dm';
     schema?: ZodType;
+    /** `input` is the parsed body, the query result, or `{ query, body }` when both are set */
     query?: (searchParams: URLSearchParams) => unknown;
     handle(ctx: SystemHandlerCtx): Promise<Response>;
 }

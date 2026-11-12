@@ -19,4 +19,9 @@ export const SYSTEM_ROUTE_REWRITES: readonly {
     system(character, 'downtime', 'downtime'),
     system(campaign, 'downtime/period', 'downtime.period'),
     system(campaign, 'downtime/period-undo', 'downtime.period-undo'),
+    system(campaign, 'race-profiles', 'race-profiles'),
+    {
+        source: `${campaign}/races/:raceId/profile`,
+        destination: `${campaign}/system/race-profile?raceId=:raceId`,
+    },
 ];

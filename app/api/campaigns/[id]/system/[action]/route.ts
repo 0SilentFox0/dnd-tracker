@@ -1,3 +1,3 @@
 import { systemRoutes } from '@/lib/server/systems/routes';
 
-export const { POST } = systemRoutes('campaign');
+export const { GET, POST, PUT } = systemRoutes('campaign');

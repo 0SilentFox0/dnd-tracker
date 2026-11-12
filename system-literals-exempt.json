@@ -1,8 +1,6 @@
 {
   "app/api/campaigns/[id]/characters/[characterId]/draft/update-draft.ts": 4,
   "app/api/campaigns/[id]/characters/draft/create-draft.ts": 4,
-  "app/api/campaigns/[id]/race-profiles/route.ts": 1,
-  "app/api/campaigns/[id]/races/[raceId]/profile/route.ts": 3,
   "app/campaigns/[id]/dm/careers/careers-client.tsx": 1,
   "components/character-profile/rest/SheetRollDialog.tsx": 1,
   "lib/constants/api-errors.ts": 4,

@@ -13,6 +13,10 @@ import { WfrpItemStatsSchema } from '@/systems/wfrp/rules/equipment/stats';
 import { WFRP_AI } from '@/systems/wfrp/server/ai';
 import { WfrpFortuneInputSchema } from '@/systems/wfrp/server/attack-input';
 import { WFRP_OPERATIONS } from '@/systems/wfrp/server/operations';
+import {
+    raceProfileSaveHandler,
+    raceProfilesHandler,
+} from '@/systems/wfrp/server/race-profile-routes';
 
 export const WFRP_MODULE_SERVER: SystemServer = {
     schemas: {
@@ -49,6 +53,8 @@ export const WFRP_MODULE_SERVER: SystemServer = {
             'downtime.period-undo': {
                 POST: { operation: 'downtime.period.undo' },
             },
+            'race-profiles': { GET: raceProfilesHandler },
+            'race-profile': { PUT: raceProfileSaveHandler },
         },
     },
     battle: {

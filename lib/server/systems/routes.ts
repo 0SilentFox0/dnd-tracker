@@ -85,13 +85,16 @@ export async function runSystemRoute(
         if (target.access === 'dm' && !access.isDM)
             return errorResponse(API_ERRORS.DM_ONLY, 403);
 
-        const input = target.query
-            ? target.query(searchParams)
-            : target.schema
-              ? await parseBody(target.schema, request)
-              : undefined;
+        const query = target.query?.(searchParams);
 
-        if (input instanceof NextResponse) return input;
+        const body = target.schema
+            ? await parseBody(target.schema, request)
+            : undefined;
+
+        if (body instanceof NextResponse) return body;
+
+        const input =
+            target.schema && target.query ? { query, body } : (body ?? query);
 
         return await target.handle({ campaignId, access, input, searchParams });
     } catch (error) {

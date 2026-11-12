@@ -8,14 +8,6 @@
     "reason": "route"
   },
   {
-    "file": "app/api/campaigns/[id]/race-profiles/route.ts",
-    "reason": "route"
-  },
-  {
-    "file": "app/api/campaigns/[id]/races/[raceId]/profile/route.ts",
-    "reason": "route"
-  },
-  {
     "file": "lib/schemas/careers.ts",
     "reason": "content-kind"
   },

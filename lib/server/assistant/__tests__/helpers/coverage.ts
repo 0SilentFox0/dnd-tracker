@@ -730,6 +730,13 @@ export const ASSISTANT_ROUTE_COVERAGE: readonly RouteCoverage[] = [
         state: 'active',
     },
     {
+        route: 'campaigns/[id]/system/[action]',
+        methods: ['GET', 'PUT'],
+        task: 0,
+        adapter: 'handoffs',
+        state: 'handoff',
+    },
+    {
         route: 'campaigns/[id]/characters/[characterId]/arcane-recovery',
         methods: ['POST'],
         task: 9,
@@ -1134,20 +1141,6 @@ export const ASSISTANT_ROUTE_COVERAGE: readonly RouteCoverage[] = [
         task: 5,
         adapter: 'content',
         state: 'active',
-    },
-    {
-        route: 'campaigns/[id]/race-profiles',
-        methods: ['GET'],
-        task: 0,
-        adapter: 'handoffs',
-        state: 'handoff',
-    },
-    {
-        route: 'campaigns/[id]/races/[raceId]/profile',
-        methods: ['PUT'],
-        task: 0,
-        adapter: 'handoffs',
-        state: 'handoff',
     },
     {
         route: 'campaigns/[id]/rest',
