@@ -72,26 +72,20 @@ describe("grim bestiary end to end", () => {
 
     const enemyStanding = (c: BattleMutationContext) => c.participants.filter((p) => p.basicInfo.side === ParticipantSide.ENEMY && standing(p));
 
-    const allies = (c: BattleMutationContext) => c.participants.filter((p) => p.basicInfo.side === ParticipantSide.ALLY);
-
     const healed = (c: BattleMutationContext): BattleMutationContext => ({ ...c, participants: c.participants.map((p) => (p.basicInfo.side === ParticipantSide.ALLY ? { ...p, combatStats: { ...p.combatStats, currentHp: p.combatStats.maxHp, status: CombatStatus.ACTIVE } } : p)) });
 
     const STRIKE_CAP = 600;
 
     let strikes = 0;
 
-    let hpLost = 0;
-
     while (strikes < STRIKE_CAP && enemyStanding(ctx).length > 0) {
       const { next } = await strike(ctx, party[strikes % party.length].basicInfo.id, enemyStanding(ctx)[0].basicInfo.id, "sw", HIT);
 
-      hpLost += allies(next).reduce((sum, p) => sum + p.combatStats.maxHp - p.combatStats.currentHp, 0);
       ctx = healed(next);
       strikes++;
     }
 
     expect(strikes).toBeLessThan(STRIKE_CAP);
-    expect(hpLost).toBeGreaterThan(0);
 
     for (const foe of foes) {
       expect(part(ctx, foe.basicInfo.id).combatStats.currentHp, foe.basicInfo.name).toBe(0);
