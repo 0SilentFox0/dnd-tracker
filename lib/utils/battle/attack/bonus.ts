@@ -1,4 +1,3 @@
-import { AttackType } from "@/lib/constants/battle";
 import { textRef } from "@/lib/i18n/text-ref";
 import { collectModifiers, statWithModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { findParticipant, isActive, withSelf } from "@/lib/utils/abilities/engine/core/participants";
@@ -9,10 +8,11 @@ import { INSPIRATION_LABEL } from "@/lib/utils/battle/attack/inspiration";
 import { attackSourceOf } from "@/lib/utils/battle/attack/source";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { effectName } from "@/lib/utils/battle/common/terms";
+import { isAdjacentAttack } from "@/lib/utils/battle/grid/adjacent-attack";
 import { rangeDisadvantageReasons } from "@/lib/utils/battle/grid/attack-reach";
 import { cellFeetOf } from "@/lib/utils/battle/grid/cell-feet";
 import { footprintDistance } from "@/lib/utils/battle/grid/geometry";
-import { cellsOf, isAdjacent, isOnMap } from "@/lib/utils/battle/grid/occupancy";
+import { cellsOf, isOnMap } from "@/lib/utils/battle/grid/occupancy";
 import { isObscured } from "@/lib/utils/battle/grid/terrain";
 import { uniqueLines } from "@/lib/utils/battle/log/lines";
 import { ARMOR_PENALTY_LABEL, armorPenalty, armorPenaltyAffects, isWeaponProficient } from "@/lib/utils/battle/proficiency";
@@ -31,11 +31,6 @@ export function calculateAttackBonus(
   const base = (attack.attackBonus || 0) + statModifier + (isWeaponProficient(attacker, attack) ? attacker.abilities.proficiencyBonus : 0);
 
   return base + collectModifiers(withSelf(participants, attacker), attacker.basicInfo.id, { stat: "attackBonus", attackKind: attackKindOf(attack.type) }, extra).flat;
-}
-
-/** Суміжна атака: на мапі — за клітинками, без мапи — ближня. */
-export function isAdjacentAttack(attacker: BattleParticipant, target: BattleParticipant, attack: BattleAttack): boolean {
-  return isOnMap(attacker) && isOnMap(target) ? isAdjacent(attacker, target) : attack.type === AttackType.MELEE;
 }
 
 export type RollMode = "advantage" | "disadvantage" | "normal";

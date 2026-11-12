@@ -1,6 +1,6 @@
 import { DURATION_FIELD, type FieldMeta, TARGET_FIELD } from "../fields";
 import { damageFilterSegment, flatSegment, percentSegment, statSegment } from "../labels";
-import { immuneTo } from "./state";
+import { immuneTo } from "./each";
 import type { EffectApplyInput, EffectApplyResult } from "./types";
 
 import { ABILITY_KEYS } from "@/lib/constants/abilities";

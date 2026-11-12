@@ -1,13 +1,13 @@
+import { each, immuneTo } from "./each";
 import type { EffectApplyInput, EffectApplyResult } from "./types";
 
 import { EffectMarker } from "@/lib/constants/battle";
 import { textRef } from "@/lib/i18n/text-ref";
-import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
-import { findParticipant, participantNames, updateParticipant, withActiveEffects } from "@/lib/utils/abilities/engine/core/participants";
+import { findParticipant, updateParticipant, withActiveEffects } from "@/lib/utils/abilities/engine/core/participants";
 import { restoreCharm } from "@/lib/utils/abilities/engine/effects/charm";
 import { countMarks, GUARD_KEY, markKey } from "@/lib/utils/abilities/engine/effects/marks";
 import { effectSource, upsertTimedEffect } from "@/lib/utils/abilities/engine/effects/timed-effects";
-import type { ConditionImmunityKey, Effect } from "@/lib/utils/abilities/schema";
+import type { Effect } from "@/lib/utils/abilities/schema";
 import { isCondition5eKey, isCustomConditionKey } from "@/lib/utils/abilities/schema/kinds";
 import { seg, type Segment, segmentsLine } from "@/lib/utils/abilities/segments";
 import { helpEffect } from "@/lib/utils/battle/actions/effects";
@@ -22,46 +22,7 @@ import type { LogLine } from "@/types/text";
 
 type Of<K extends Effect["kind"]> = Extract<Effect, { kind: K }>;
 
-export function each(
-  input: EffectApplyInput,
-  fn: (p: BattleParticipant) => BattleParticipant | null,
-  message: (names: string) => LogLine,
-  immune?: (p: BattleParticipant) => boolean,
-): EffectApplyResult {
-  let ps = input.participants;
-
-  const touched: string[] = [];
-
-  const blocked: string[] = [];
-
-  for (const id of input.targetIds) {
-    const p = findParticipant(ps, id);
-
-    if (p && immune?.(p)) {
-      blocked.push(id);
-      continue;
-    }
-
-    const next = p ? fn(p) : null;
-
-    if (!next) continue;
-
-    ps = updateParticipant(ps, id, () => next);
-    touched.push(id);
-  }
-
-  const messages = touched.length ? [message(participantNames(ps, touched))] : [];
-
-  if (blocked.length) messages.push(textRef("abilityText.log.immune", { ability: input.ability.name, target: participantNames(ps, blocked) }));
-
-  return { participants: ps, messages };
-}
-
 const flag = (value: unknown): string => String(!!value);
-
-export function immuneTo(ps: BattleParticipant[], id: string, key: ConditionImmunityKey): boolean {
-  return findFlags(ps, id, "conditionImmunity").some((f) => f.conditions === "all" || f.conditions.includes(key));
-}
 
 function applyConditionToTargets(input: EffectApplyInput<Of<"applyCondition">>, key: ConditionKey): EffectApplyResult {
   const { ability, effect, ctx } = input;

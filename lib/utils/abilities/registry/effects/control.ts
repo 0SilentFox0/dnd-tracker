@@ -1,4 +1,4 @@
-import { immuneTo } from "./state";
+import { immuneTo } from "./each";
 import type { EffectApplyInput, EffectApplyResult } from "./types";
 
 import { ParticipantSourceType } from "@/lib/constants/battle";
