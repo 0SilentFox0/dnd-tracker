@@ -3,9 +3,10 @@ import { type Fired, fireTrigger, type TriggerKind, type ZoneCtx } from "./zone-
 
 import { textRef } from "@/lib/i18n/text-ref";
 import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
-import { isZoneConcentrationLive } from "@/lib/utils/battle/concentration";
 import { canStand, cellDistance, cellKey, footprint, movementBudget, parseCellKey, sizeOf } from "@/lib/utils/battle/grid";
 import { replaceTerrain } from "@/lib/utils/battle/grid/terrain";
+import type { Ruleset } from "@/lib/utils/rules";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
@@ -24,10 +25,12 @@ export function zonesAt(map: BattleMapConfig | null | undefined, p: BattlePartic
 }
 
 /** Прибирає клітинки зон, чия концентрація скінчилась; null — нічого не змінилось. */
-export function sweepDeadZones(map: BattleMapConfig | null | undefined, participants: BattleParticipant[]): BattleMapConfig | null {
+export function sweepDeadZones(map: BattleMapConfig | null | undefined, participants: BattleParticipant[], rules: Ruleset): BattleMapConfig | null {
   if (!map?.spellZones) return null;
 
-  const dead = new Set(Object.entries(map.spellZones).filter(([, z]) => z.concentrationOf && !isZoneConcentrationLive(participants, z.concentrationOf)).map(([id]) => id));
+  const { anchorLive } = ruleSystemOf(rules).magic.sustain;
+
+  const dead = new Set(Object.entries(map.spellZones).filter(([, z]) => z.concentrationOf && !anchorLive(participants, z.concentrationOf)).map(([id]) => id));
 
   if (dead.size === 0) return null;
 

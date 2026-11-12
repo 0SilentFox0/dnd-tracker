@@ -129,9 +129,9 @@ describe("wfrpCastTest", () => {
 
 describe("castPreview and badge", () => {
   it("shows both targets, banked SL and armour", async () => {
-    const { WFRP_MAGIC } = await import("../index");
+    const { WFRP_TESTED_MAGIC } = await import("../index");
 
-    expect(WFRP_MAGIC.castPreview(caster({ channelledSl: 2 }))).toEqual({ target: 50, channelTarget: 40, channelled: 2, armourSl: 0 });
+    expect(WFRP_TESTED_MAGIC.castPreview(caster({ channelledSl: 2 }))).toEqual({ target: 50, channelTarget: 40, channelled: 2, armourSl: 0 });
   });
 
   it("badge only while SL is banked", async () => {
@@ -195,8 +195,8 @@ describe("prayers", () => {
   });
 
   it("preview of a prayer ignores channelling and armour", async () => {
-    const { WFRP_MAGIC } = await import("../index");
+    const { WFRP_TESTED_MAGIC } = await import("../index");
 
-    expect(WFRP_MAGIC.castPreview(caster({ base: { fel: 35 }, channelledSl: 2, ap: { head: 1, arm: 1, body: 1, leg: 1 } }), "blessing")).toMatchObject({ target: 35, channelled: 0, armourSl: 0 });
+    expect(WFRP_TESTED_MAGIC.castPreview(caster({ base: { fel: 35 }, channelledSl: 2, ap: { head: 1, arm: 1, body: 1, leg: 1 } }), "blessing")).toMatchObject({ target: 35, channelled: 0, armourSl: 0 });
   });
 });

@@ -7,8 +7,10 @@ import { channelTargetOf, wfrpChannel } from "./channel";
 import { wfrpMiscast } from "./miscast";
 
 import { textRef } from "@/lib/i18n/text-ref";
+import { upcastSteps } from "@/lib/utils/battle/spell/caster-dice";
+import { noMagic } from "@/lib/utils/battle/spell/none";
 import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
-import type { RuleSystemMagic } from "@/lib/utils/rules/systems/types";
+import type { RuleSystemMagic, RuleSystemTestedMagic } from "@/lib/utils/rules/systems/types";
 
 const withoutMiscast = (details: SystemSlot): SystemSlot => {
   const slot = ACTION_SLOT.read(details);
@@ -16,8 +18,7 @@ const withoutMiscast = (details: SystemSlot): SystemSlot => {
   return slot?.cast ? ACTION_SLOT.write({ ...slot, cast: { ...slot.cast, miscast: null } }, details) : details;
 };
 
-export const WFRP_MAGIC: RuleSystemMagic = {
-  slots: false,
+export const WFRP_TESTED_MAGIC: RuleSystemTestedMagic = {
   ingredients: "avertMiscast",
   avertMiscast: (cast, who) => (cast.miscast && cast.miscast !== "wrath" ? { ...cast, miscast: null, details: withoutMiscast(cast.details), lines: [...cast.lines, textRef("wfrpMagic.log.ingredientAverts", who)] } : cast),
   castTest: wfrpCastTest,
@@ -31,3 +32,5 @@ export const WFRP_MAGIC: RuleSystemMagic = {
   attribute: wfrpLoreAttribute,
   badge: channelBadge,
 };
+
+export const WFRP_MAGIC: RuleSystemMagic = { ...noMagic, upcast: { steps: upcastSteps }, tested: WFRP_TESTED_MAGIC };

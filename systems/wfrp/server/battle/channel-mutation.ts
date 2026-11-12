@@ -20,7 +20,7 @@ export const channelSchema = z.object({ participantId: z.string().min(1), roll: 
 export type ChannelBody = z.infer<typeof channelSchema>;
 
 export function channelMutation(ctx: BattleMutationContext, body: ChannelBody): MutationResult {
-  const { magic } = ruleSystemOf(ctx.meta.rules);
+  const magic = ruleSystemOf(ctx.meta.rules).magic.tested;
 
   if (!magic) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_CHANNEL_UNSUPPORTED);
 

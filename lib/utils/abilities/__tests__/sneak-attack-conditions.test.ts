@@ -4,7 +4,7 @@ import { ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import type { Condition } from "@/lib/utils/abilities/schema";
-import { eventRollMode } from "@/lib/utils/battle/attack/roll";
+import { eventRollMode } from "@/lib/utils/battle/attack/event-roll-mode";
 import type { AttackRollResult } from "@/lib/utils/battle/types/attack";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { AbilityEvent } from "@/types/abilities";

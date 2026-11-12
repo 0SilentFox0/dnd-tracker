@@ -1,5 +1,6 @@
 import { noActions, noReactions } from "@/lib/utils/battle/actions/none";
 import { noProficiency, noSaves } from "@/lib/utils/battle/saves/none";
+import { noMagic } from "@/lib/utils/battle/spell/none";
 import { rollDie } from "@/lib/utils/common/dice";
 import type { RuleSystemDefinition } from "@/lib/utils/rules/systems";
 import { defineSlot } from "@/lib/utils/rules/systems/slot";
@@ -44,6 +45,7 @@ export const D6POOL_SYSTEM: RuleSystemDefinition = {
     hitModel: { offense: () => 4, defense: () => 4, winChance: () => 0.5, damage: () => 3, refHit: 0.5 },
   },
   conditionSet: { apply: (ps) => ({ participants: ps, messages: [], blocked: true }), effectInput: () => null },
+  magic: noMagic,
   identity: { alignments: false },
   lineage: false,
   classes: false,

@@ -12,10 +12,10 @@ import { dealsNoDamage } from "@/lib/utils/battle/participant/state";
 import { applyResistance, immunityNote } from "@/lib/utils/battle/resistance";
 import { outcomeFor } from "@/lib/utils/battle/spell/cast/outcome";
 import { isDamageEffect, NO_TARGET_KINDS, type SpellCastState, usesRoll } from "@/lib/utils/battle/spell/cast/state";
-import { upcastSteps } from "@/lib/utils/battle/spell/caster-dice";
 import { computeSpellPower } from "@/lib/utils/battle/spell/power";
 import { objectsNear } from "@/lib/utils/battle/summon/objects-near";
 import { rollDice } from "@/lib/utils/common/dice";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { AbilityEvent } from "@/types/abilities";
 
 const casterIdOf = (state: SpellCastState) => state.caster.basicInfo.id;
@@ -50,7 +50,7 @@ function absorbSpellDamage(state: SpellCastState, id: string, damage: number): v
 
     if (target.combatStats.currentHp <= 0) continue;
 
-    const { participant, healed } = applyRawHeal(target, Math.floor((damage * f.percent) / 100));
+    const { participant, healed } = applyRawHeal(target, Math.floor((damage * f.percent) / 100), ruleSystemOf(flow.ctx.rules).combat.onRevived);
 
     if (healed <= 0) continue;
 
@@ -123,7 +123,7 @@ const DICE_COUNT = /^(\d+)d(\d+)$/;
 function rangeDice(state: SpellCastState, dice: string): string {
   const { definition, level } = state.spell;
 
-  const extra = definition.fixedDice ? 0 : (definition.upcastDice ?? 0) * upcastSteps(level, state.castLevel);
+  const extra = definition.fixedDice ? 0 : (definition.upcastDice ?? 0) * ruleSystemOf(state.flow.ctx.rules).magic.upcast.steps(level, state.castLevel);
 
   const m = DICE_COUNT.exec(dice);
 

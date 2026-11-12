@@ -1,9 +1,9 @@
 import { D20_CONDITION_SET } from "../conditions";
+import { DEATH_SAVES_TIMED_KEY, FRESH_DEATH_SAVES } from "./state";
 
 import { CombatStatus } from "@/lib/constants/battle";
 import { upsertLabeled } from "@/lib/utils/battle/actions/effects";
 import { PERMANENT_ROUNDS } from "@/lib/utils/battle/conditions/set";
-import { DEATH_SAVES_TIMED_KEY, FRESH_DEATH_SAVES } from "@/lib/utils/battle/death-saves";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleParticipant } from "@/types/battle";
 

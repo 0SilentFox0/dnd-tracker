@@ -280,7 +280,7 @@ async function call(label: string, options: any, body: any = {}, as?: string): P
 
     if (/NaN|undefined|\[object|null\b/.test(resultTextOf(e) ?? "")) issue("error", `підозрілий текст логу: ${resultTextOf(e)}`);
 
-    const rolled = (e.actionType === "attack" && !/ціль загинула до атаки/.test(resultTextOf(e) ?? "") && !(resultTextOf(e) ?? "").startsWith("🤬 Шал")) || (e.actionType === "spell" && (e.actionDetails?.damageBreakdown?.includes("сума кубиків") || e.actionDetails?.savingThrows?.length));
+    const rolled = (e.actionType === "attack" && !/ціль загинула до атаки/.test(resultTextOf(e) ?? "") && !(resultTextOf(e) ?? "").startsWith("🤬 Шал")) || (e.actionType === "spell" && (e.actionDetails?.damageBreakdown?.includes("сума кубиків") || e.actionDetails?.savingThrows?.some((s: { autoFail?: boolean }) => !s.autoFail)));
 
     const dice = e.actionDetails?.diceRolls as Array<{ dice: Array<{ sides: number; value: number }> }> | undefined;
 

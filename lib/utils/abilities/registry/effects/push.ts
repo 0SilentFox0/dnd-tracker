@@ -50,7 +50,7 @@ export function applyPush(input: EffectApplyInput<PushEffect>): EffectApplyResul
     ps = replaceParticipant(ps, moved);
     messages.push(textRef("abilityText.log.pushed", { ability: ability.name, target: target.basicInfo.name, feet: steps * cellFeet }));
 
-    const cell = hazardUnder(map, moved, undefined, ps);
+    const cell = hazardUnder(map, moved, undefined, { participants: ps, rules: ctx.rules });
 
     const hit = cell && hazardHit(moved, cell, ctx.round, ps, ctx.rng, ctx.rules);
 

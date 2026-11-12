@@ -112,7 +112,7 @@ describe("hazardOnMove", () => {
 
     const mover = at({ x: 0, y: 0 });
 
-    expect(hazardOnMove(m, [mover], mover, { x: 2, y: 0 }, 2)).toEqual(fire);
+    expect(hazardOnMove(m, [mover], mover, { x: 2, y: 0 }, 2, DEFAULT_RULES)).toEqual(fire);
   });
 
   it("лишається на тій самій небезпеці (велика істота зсувається) — не вхід", () => {
@@ -120,7 +120,7 @@ describe("hazardOnMove", () => {
 
     const mover = at({ x: 0, y: 0 }, 2);
 
-    expect(hazardOnMove(m, [mover], mover, { x: 1, y: 0 }, 1)).toBeNull();
+    expect(hazardOnMove(m, [mover], mover, { x: 1, y: 0 }, 1, DEFAULT_RULES)).toBeNull();
   });
 
   it("прохід повз, коли є обхід тієї ж вартості, — без шкоди", () => {
@@ -128,7 +128,7 @@ describe("hazardOnMove", () => {
 
     const mover = at({ x: 0, y: 0 });
 
-    expect(hazardOnMove(m, [mover], mover, { x: 2, y: 0 }, 2)).toBeNull();
+    expect(hazardOnMove(m, [mover], mover, { x: 2, y: 0 }, 2, DEFAULT_RULES)).toBeNull();
   });
 
   it("прохід через небезпеку без обходу тієї ж вартості — найсильніша небезпека в радіусі cost", () => {
@@ -137,7 +137,7 @@ describe("hazardOnMove", () => {
     const mover = at({ x: 0, y: 1 });
 
     // 0:2 не на шляху, але в радіусі 2 — консервативно береться найсильніша
-    expect(hazardOnMove(m, [mover], mover, { x: 2, y: 1 }, 2)).toEqual(acid);
+    expect(hazardOnMove(m, [mover], mover, { x: 2, y: 1 }, 2, DEFAULT_RULES)).toEqual(acid);
   });
 
   it("небезпека без damage не рахується", () => {
@@ -145,6 +145,6 @@ describe("hazardOnMove", () => {
 
     const mover = at({ x: 0, y: 1 });
 
-    expect(hazardOnMove(m, [mover], mover, { x: 2, y: 1 }, 2)).toBeNull();
+    expect(hazardOnMove(m, [mover], mover, { x: 2, y: 1 }, 2, DEFAULT_RULES)).toBeNull();
   });
 });

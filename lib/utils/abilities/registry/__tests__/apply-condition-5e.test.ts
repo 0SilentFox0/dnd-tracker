@@ -8,7 +8,7 @@ import type { Effect } from "@/lib/utils/abilities/schema";
 import { effectName } from "@/lib/utils/battle/common/terms";
 import { exhaustionLevel, restoreExhaustionHp, syncExhaustion } from "@/lib/utils/battle/conditions";
 import { movementBudget } from "@/lib/utils/battle/grid/path";
-import { spellSaveDc } from "@/lib/utils/battle/spell/power";
+import { spellSaveDc } from "@/lib/utils/battle/spell/save-dc";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -103,7 +103,7 @@ describe("applyCondition 5e", () => {
 
     const e = target(apply(cond("stunned", { saveEnds: { ability: "wisdom" } }))).battleData.activeEffects[0];
 
-    expect(e.saveEnds).toEqual({ ability: "wisdom", dc: spellSaveDc(owner, undefined, 8) });
+    expect(e.saveEnds).toEqual({ ability: "wisdom", dc: spellSaveDc(DEFAULT_RULES, owner) });
   });
 
   it("two different abilities applying prone give two effects", () => {

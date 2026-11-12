@@ -5,7 +5,7 @@ import { textRef } from "@/lib/i18n/text-ref";
 import { findParticipant, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { cellsOf, footprintDistance, isOnMap } from "@/lib/utils/battle/grid";
 import { savesOf } from "@/lib/utils/battle/saves/access";
-import { spellSaveDc } from "@/lib/utils/battle/spell/power";
+import { spellSaveDc } from "@/lib/utils/battle/spell/save-dc";
 import type { BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
@@ -22,7 +22,7 @@ export function fireBurst(ps: BattleParticipant[], input: ManeuverInput): Maneuv
 
   const full = attackShare(actor, ps, input.percentOfAttack, input.rng);
 
-  const dc = spellSaveDc(actor, undefined, input.rules.formulas.saveDcBase);
+  const dc = spellSaveDc(input.rules, actor);
 
   const notes = new Map<string, LogLine>();
 

@@ -4,9 +4,9 @@ import { context, goblin, hero } from "./fixtures";
 
 import { CombatStatus } from "@/lib/constants/battle";
 import { patchParticipantMutation } from "@/lib/server/battles/mutations/participants/patch-participant-mutation";
-import { beginConcentration } from "@/lib/utils/battle/concentration";
 import { hasCondition } from "@/lib/utils/battle/conditions";
 import { DEFAULT_RULES, type Ruleset } from "@/lib/utils/rules";
+import { beginConcentration } from "@/systems/d20/rules/concentration/sustain";
 import { startDying } from "@/systems/d20/rules/death-saves/start";
 import type { BattleParticipant } from "@/types/battle";
 

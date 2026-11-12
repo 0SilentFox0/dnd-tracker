@@ -38,7 +38,7 @@ export function MyTurnControls({ hero, strip }: { hero: BattleParticipant; strip
 
   const { anyPending, battle, intents } = useBattleScene();
 
-  const { actionEconomy, magic, spells } = useBattleRules();
+  const { actionEconomy, tested, spells } = useBattleRules();
 
   const { attack: attackIntent, clearAttack: clearAttackIntent, mapAim, mapPick, setAttackReady } = intents;
 
@@ -66,7 +66,7 @@ export function MyTurnControls({ hero, strip }: { hero: BattleParticipant; strip
 
   const actionAbilities = usableAbilities(hero, "action", battle.currentRound);
 
-  const hasMagic = (!magic && Object.values(hero.spellcasting?.spellSlots ?? {}).some((s) => s.current > 0)) || (hero.spellcasting?.knownSpells.length ?? 0) > 0;
+  const hasMagic = (!tested && Object.values(hero.spellcasting?.spellSlots ?? {}).some((s) => s.current > 0)) || (hero.spellcasting?.knownSpells.length ?? 0) > 0;
 
   const { phase, status: { actionUsed, attackLeft, skipped } } = turn;
 
@@ -114,7 +114,7 @@ export function MyTurnControls({ hero, strip }: { hero: BattleParticipant; strip
           turn={turn}
           channelLabel={systemUi?.ChannelLabel && <systemUi.ChannelLabel />}
           pending={anyPending}
-          available={{ channel: !!systemUi?.ChannelDialog && magic && hasMagic, magic: hasMagic, magicTile: spells, bonus: bonusAbilities.length > 0 || canOffHandAttack(hero), bonusTile: actionEconomy.bonusAction, ability: actionAbilities.length > 0, core: coreActionsOn(battle.rules) }}
+          available={{ channel: !!systemUi?.ChannelDialog && tested && hasMagic, magic: hasMagic, magicTile: spells, bonus: bonusAbilities.length > 0 || canOffHandAttack(hero), bonusTile: actionEconomy.bonusAction, ability: actionAbilities.length > 0, core: coreActionsOn(battle.rules) }}
           actions={{ channel: channel.actions.open, attack: () => attack.actions.open(), magic: () => book.actions.open(), bonus: () => setBonusOpen(true), ability: () => setAbilityOpen(true), core: () => setCoreOpen(true) }}
         />
       )}
@@ -134,7 +134,7 @@ export function MyTurnControls({ hero, strip }: { hero: BattleParticipant; strip
       {turn.phase === "countdown" && <TurnCountdown seconds={COUNTDOWN_SECONDS} onElapsed={() => void turn.actions.endTurn()} onStay={turn.actions.stay} />}
       <AttackWizard wizard={attack} />
       <SpellBook book={book} />
-      {magic && systemUi?.ChannelDialog && <systemUi.ChannelDialog channel={channel} />}
+      {tested && systemUi?.ChannelDialog && <systemUi.ChannelDialog channel={channel} />}
       {coreActionsOn(battle.rules) && <CoreActionsDialog participant={hero} open={coreOpen} onOpenChange={setCoreOpen} onDone={turn.actions.afterAction} />}
       {actionEconomy.bonusAction && <BonusActionPicker participant={hero} open={bonusOpen} onOpenChange={setBonusOpen} onDone={turn.actions.afterAction} onOffHand={() => attack.actions.open(undefined, undefined, { offHand: true })} />}
       <BonusActionPicker participant={hero} trigger="action" open={abilityOpen} onOpenChange={setAbilityOpen} onDone={turn.actions.afterAction} />

@@ -2,16 +2,16 @@ import { getP, put } from "@/lib/utils/battle/common/action-flow";
 import { applyDamageConsequences } from "@/lib/utils/battle/damage/consequences";
 import type { SpellCastState } from "@/lib/utils/battle/spell/cast/state";
 import type { CastSpellParams } from "@/lib/utils/battle/types/spell-process";
-import type { CastTestCtx, CastTestResult, RuleSystemMagic } from "@/lib/utils/rules/systems/types";
+import type { CastTestCtx, CastTestResult, RuleSystemTestedMagic } from "@/lib/utils/rules/systems/types";
 import type { SpellMagic } from "@/lib/utils/spells/model/schema";
 
 interface Settle {
-  magic: RuleSystemMagic;
+  magic: RuleSystemTestedMagic;
   spellMagic: SpellMagic;
   cast: CastTestResult;
 }
 
-export function rollCastTest(magic: RuleSystemMagic, ctx: Omit<CastTestCtx, "presetRoll" | "system">, input: CastSpellParams["castTest"]): CastTestResult {
+export function rollCastTest(magic: RuleSystemTestedMagic, ctx: Omit<CastTestCtx, "presetRoll" | "system">, input: CastSpellParams["castTest"]): CastTestResult {
   const manual = !input?.serverRoll;
 
   return magic.castTest({ ...ctx, ...(manual && input?.roll !== undefined && { presetRoll: input.roll }), ...(input?.system && { system: input.system }) });

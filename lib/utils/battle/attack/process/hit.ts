@@ -11,7 +11,7 @@ import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { isActive } from "@/lib/utils/abilities/engine/core/participants";
 import type { CunningStrikeEffect, StaticEffect } from "@/lib/utils/abilities/schema";
 import { applyCunningStrikeEffects, cunningStrikeCost, cunningStrikeOffer } from "@/lib/utils/battle/attack/cunning-strike";
-import { eventRollMode } from "@/lib/utils/battle/attack/roll";
+import { eventRollMode } from "@/lib/utils/battle/attack/event-roll-mode";
 import { attackSourceOf } from "@/lib/utils/battle/attack/source";
 import { type ActionFlow, applyFlowDamage, fire, getP, put, settleDowned } from "@/lib/utils/battle/common/action-flow";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
@@ -149,7 +149,7 @@ export function resolveHit(p: ResolveHitParams): { hitDamage: ComputeHitDamageRe
     flow.messages.push(...cast.messages);
   }
 
-  const vampirism = applyVampirism(flow.ps, attackerId, hitDamage.totalFinalDamage, attack.type);
+  const vampirism = applyVampirism(flow.ps, attackerId, hitDamage.totalFinalDamage, attack.type, flow.ctx.rules);
 
   if (vampirism.updatedAttacker) put(flow, vampirism.updatedAttacker);
 

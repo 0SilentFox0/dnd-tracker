@@ -1,7 +1,6 @@
 import type { AbilityKey } from "@/lib/constants/abilities";
 import type { RulesEdition } from "@/lib/constants/rules";
 import type { Condition5eKey, CustomConditionKey } from "@/lib/utils/abilities/schema/kinds";
-import { spellSaveDc } from "@/lib/utils/battle/spell/power";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { ActiveEffect, BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
@@ -43,6 +42,3 @@ export interface ConditionEffectOptions {
   source?: ActiveEffect["source"];
 }
 
-export function saveEndsFor(owner: BattleParticipant | undefined, ability: AbilityKey, saveDcBase: number): { ability: AbilityKey; dc: number } {
-  return { ability, dc: owner ? spellSaveDc(owner, undefined, saveDcBase) : 10 };
-}

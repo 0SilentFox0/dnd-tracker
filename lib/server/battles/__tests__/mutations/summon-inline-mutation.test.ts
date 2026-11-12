@@ -6,6 +6,7 @@ import { context, goblin, participant } from "./fixtures";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { createSpellMutation } from "@/lib/server/battles/mutations/spell/spell-mutation";
 import { dismissExpiredSummons } from "@/lib/utils/battle/summon/dismiss";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 
 const map: BattleMapConfig = { cols: 20, rows: 10, background: null, opacity: 0.3 };
@@ -79,6 +80,6 @@ describe("summonInline через spell-mutation", () => {
   it("за межами тривалості кущ зникає", async () => {
     const out = await run({});
 
-    expect(bushes(dismissExpiredSummons(out.participants, 22).participants)[0].battleData.dismissed).toBe(true);
+    expect(bushes(dismissExpiredSummons(out.participants, 22, DEFAULT_RULES).participants)[0].battleData.dismissed).toBe(true);
   });
 });

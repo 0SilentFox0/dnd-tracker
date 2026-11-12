@@ -5,38 +5,45 @@ import { reachable } from "./path";
 import { textRef } from "@/lib/i18n/text-ref";
 import type { Rng } from "@/lib/utils/abilities/engine/core/types";
 import { applyRawDamage } from "@/lib/utils/abilities/engine/effects/hp";
-import { isZoneConcentrationLive } from "@/lib/utils/battle/concentration";
 import { applyDamageConsequences } from "@/lib/utils/battle/damage/consequences";
 import { dealsNoDamage } from "@/lib/utils/battle/participant/state";
 import { applyResistance } from "@/lib/utils/battle/resistance";
 import { participantImmuneToSpell } from "@/lib/utils/battle/spell/spell-immunity";
 import { diceAverage, rollDice } from "@/lib/utils/common/dice";
 import type { Ruleset } from "@/lib/utils/rules";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { BattleMapConfig, BattleParticipant, GridPoint, TerrainCell } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
 const strength = (c: TerrainCell) => (c.damage?.dice ? diceAverage(c.damage.dice) : (c.damage?.amount ?? 0));
 
-function damagingHazards(map: Pick<BattleMapConfig, "terrain">, participants?: BattleParticipant[]): Map<string, TerrainCell> {
-  return new Map(Object.entries(map.terrain ?? {}).filter(([, c]) => c.kind === "hazard" && c.damage && (!participants || !c.damage.concentrationOf || isZoneConcentrationLive(participants, c.damage.concentrationOf))));
+export interface HazardLiveness {
+  participants: BattleParticipant[];
+  rules: Ruleset;
+}
+
+function damagingHazards(map: Pick<BattleMapConfig, "terrain">, live?: HazardLiveness): Map<string, TerrainCell> {
+  const anchorLive = live && ruleSystemOf(live.rules).magic.sustain.anchorLive;
+
+  return new Map(Object.entries(map.terrain ?? {}).filter(([, c]) => c.kind === "hazard" && c.damage && (!anchorLive || !c.damage.concentrationOf || anchorLive(live.participants, c.damage.concentrationOf))));
 }
 
 function strongest(cells: (TerrainCell | undefined)[]): TerrainCell | null {
   return cells.reduce<TerrainCell | null>((best, c) => (c && (!best || strength(c) > strength(best)) ? c : best), null);
 }
 
-export function hazardUnder(map: BattleMapConfig, p: BattleParticipant, at?: GridPoint, participants?: BattleParticipant[]): TerrainCell | null {
+export function hazardUnder(map: BattleMapConfig, p: BattleParticipant, at?: GridPoint, live?: HazardLiveness): TerrainCell | null {
   const anchor = at ?? p.battleData.position;
 
   if (!anchor) return null;
 
-  const hazards = damagingHazards(map, participants);
+  const hazards = damagingHazards(map, live);
 
   return strongest(footprint(anchor, sizeOf(p)).map((c) => hazards.get(cellKey(c))));
 }
 
-export function hazardOnMove(map: BattleMapConfig, participants: BattleParticipant[], mover: BattleParticipant, to: GridPoint, cost: number): TerrainCell | null {
-  const hazards = damagingHazards(map, participants);
+export function hazardOnMove(map: BattleMapConfig, participants: BattleParticipant[], mover: BattleParticipant, to: GridPoint, cost: number, rules: Ruleset): TerrainCell | null {
+  const hazards = damagingHazards(map, { participants, rules });
 
   const start = new Set(cellsOf(mover).map(cellKey));
 
@@ -68,7 +75,7 @@ export function hazardHit(
 
   if (!hazard || p.battleData.hazardHitRound === round) return null;
 
-  if (!isZoneConcentrationLive(participants, hazard.concentrationOf)) return null;
+  if (!ruleSystemOf(rules).magic.sustain.anchorLive(participants, hazard.concentrationOf)) return null;
 
   if (hazard.spellId && participantImmuneToSpell(p, hazard.spellId, participants)) return null;
 

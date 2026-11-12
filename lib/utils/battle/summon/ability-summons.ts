@@ -70,7 +70,7 @@ export async function applyAbilitySummons(
 
       if (!owner || !source) continue;
 
-      const dismissed = dismissPhantoms(next, req.ownerId, req.castId ?? req.spellId ?? "x");
+      const dismissed = dismissPhantoms(next, req.ownerId, opts.rules, req.castId ?? req.spellId ?? "x");
 
       const { finalOrder, added } = appendToInitiativeEnd(dismissed.order, buildPhantom({ source, owner, order: dismissed.order, castId: req.castId ?? req.spellId ?? "x", map: opts.map }));
 

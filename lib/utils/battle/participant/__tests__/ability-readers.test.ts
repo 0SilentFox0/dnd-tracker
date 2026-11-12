@@ -3,11 +3,12 @@ import { describe, expect, it } from "vitest";
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { immunityAbilities } from "@/lib/utils/abilities/build/immunities";
-import { calculateAttackBonus, calculateAttackRoll, hasAdvantage, hasDisadvantage, predictAttack } from "@/lib/utils/battle/attack";
+import { calculateAttackBonus, hasAdvantage, hasDisadvantage, predictAttack } from "@/lib/utils/battle/attack";
 import { calculateDamageWithModifiers } from "@/lib/utils/battle/damage";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant";
 import { applyResistance } from "@/lib/utils/battle/resistance";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
+import { calculateAttackRoll } from "@/systems/d20/rules/attack/roll";
 import type { BattleAttack } from "@/types/battle";
 
 const bow: BattleAttack = { name: "Лук", type: AttackType.RANGED, attackBonus: 0, damageDice: "1d8", damageType: "piercing" };

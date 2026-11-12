@@ -5,8 +5,8 @@ import { endTurnCleanup, finishTurnEffects } from "../end-turn-cleanup";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { makeEffect } from "@/lib/utils/abilities/__tests__/fixtures";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
-import { beginConcentration, dropConcentration } from "@/lib/utils/battle/concentration";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
+import { beginConcentration, dropConcentration } from "@/systems/d20/rules/concentration/sustain";
 import type { ActiveEffect } from "@/types/battle";
 
 const withEffects = (effects: ActiveEffect[]) => {

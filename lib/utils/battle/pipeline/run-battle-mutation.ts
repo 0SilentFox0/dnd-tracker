@@ -12,7 +12,6 @@ import type { Rng } from "@/lib/utils/abilities/engine/core/types";
 import { syncMapAuras } from "@/lib/utils/abilities/engine/effects/map-auras";
 import type { BATTLE_RATE_LIMITS, RateLimitResult } from "@/lib/utils/api/rate-limit";
 import { controls, currentOf } from "@/lib/utils/battle/common/control";
-import { dropOrphanedConcentration } from "@/lib/utils/battle/concentration";
 import { placeParticipants } from "@/lib/utils/battle/grid/placement";
 import { placeRevived } from "@/lib/utils/battle/grid/revive-placement";
 import { lineText } from "@/lib/utils/battle/log/lines";
@@ -133,11 +132,11 @@ function withVictory(scene: BattleSceneState, result: MutationResult, rules: Rul
 }
 
 function withPlacement(map: BattleMapConfig | null, scene: { status: BattleStatus; round: number; participants: BattleParticipant[] }, result: MutationResult, place: boolean, rules: Ruleset): MutationResult {
-  const dismissed = dismissExpiredSummons(result.participants, result.scene?.round ?? scene.round);
+  const dismissed = dismissExpiredSummons(result.participants, result.scene?.round ?? scene.round, rules);
 
   if (dismissed.participants !== result.participants) result = { ...result, participants: dismissed.participants, events: [...result.events, systemEvent(result.scene?.round ?? scene.round, lineText(dismissed.messages, "; "))] };
 
-  const reverted = revertExpiredTransforms(result.participants, result.scene?.round ?? scene.round);
+  const reverted = revertExpiredTransforms(result.participants, result.scene?.round ?? scene.round, rules);
 
   if (reverted.participants !== result.participants) result = { ...result, participants: reverted.participants, events: [...result.events, systemEvent(result.scene?.round ?? scene.round, lineText(reverted.messages, "; "))] };
 
@@ -153,7 +152,7 @@ function withPlacement(map: BattleMapConfig | null, scene: { status: BattleStatu
 
   if (swept !== result.participants) result = { ...result, participants: swept };
 
-  const orphaned = dropOrphanedConcentration(result.participants, map, result.scene?.round ?? scene.round);
+  const orphaned = ruleSystemOf(rules).magic.sustain.dropOrphaned(result.participants, map, result.scene?.round ?? scene.round);
 
   if (orphaned.participants !== result.participants) result = { ...result, participants: orphaned.participants, events: [...result.events, systemEvent(result.scene?.round ?? scene.round, lineText(orphaned.messages, "; "))] };
 
@@ -256,7 +255,7 @@ export async function runGuardedBattleOperationCore<TBody>(
 
   const unswept = withPlacement(mutatedMap, { status: loaded.scene.status, round: loaded.scene.round, participants: loaded.participants }, mutated, !isDryRun, loaded.meta.rules);
 
-  const swept = sweepDeadZones(mutatedMap, unswept.participants);
+  const swept = sweepDeadZones(mutatedMap, unswept.participants, loaded.meta.rules);
 
   const map = swept ?? mutatedMap;
 

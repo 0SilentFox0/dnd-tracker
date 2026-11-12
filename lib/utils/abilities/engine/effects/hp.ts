@@ -1,6 +1,5 @@
 import { CombatStatus } from "@/lib/constants/battle";
 import { removeEffects } from "@/lib/utils/battle/conditions/query";
-import { clearDeathSaves } from "@/lib/utils/battle/death-saves";
 import type { BattleParticipant, BattleParticipantCombatStats } from "@/types/battle";
 
 function downStatus(hp: number): BattleParticipantCombatStats["status"] {
@@ -13,7 +12,8 @@ export function dropBreakOnDamage(p: BattleParticipant, damage: number): BattleP
   return removeEffects(p, (e) => !!e.breakOnDamage).participant;
 }
 
-export function applyRawHeal(p: BattleParticipant, amount: number): { participant: BattleParticipant; healed: number } {
+/** `onRevived`: `combat.onRevived` of the rule system, applied when the heal lifts the participant above 0 HP */
+export function applyRawHeal(p: BattleParticipant, amount: number, onRevived?: (p: BattleParticipant) => BattleParticipant): { participant: BattleParticipant; healed: number } {
   const healed = Math.max(0, Math.min(amount, p.combatStats.maxHp - p.combatStats.currentHp));
 
   if (healed === 0) return { participant: p, healed };
@@ -22,7 +22,7 @@ export function applyRawHeal(p: BattleParticipant, amount: number): { participan
 
   const healedP = { ...p, combatStats: { ...p.combatStats, currentHp: hp } };
 
-  return { participant: hp > 0 && p.battleData.deathSaves ? { ...clearDeathSaves(healedP), combatStats: { ...healedP.combatStats, status: CombatStatus.ACTIVE } } : healedP, healed };
+  return { participant: hp > 0 && onRevived ? onRevived(healedP) : healedP, healed };
 }
 
 export function applyRawDamage(p: BattleParticipant, amount: number): BattleParticipant {

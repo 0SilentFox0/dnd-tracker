@@ -24,12 +24,12 @@ export function attackDiceRolls(input: { attackerId: string; targetId: string; d
   return [{ kind: "attack", rollerId, targetId, dice: d20s }, ...(damage.length > 0 ? [{ kind: "damage" as const, rollerId, targetId, dice: damage }] : [])];
 }
 
-export function spellDiceRolls(input: { casterId: string; sides: number; rolls: number[]; heal: boolean; saves: Array<{ participantId: string; roll: number }>; presetSaveIds: ReadonlySet<string> }): DiceRollGroup[] {
+export function spellDiceRolls(input: { casterId: string; sides: number; rolls: number[]; heal: boolean; saves: Array<{ participantId: string; roll: number; autoFail?: boolean }>; presetSaveIds: ReadonlySet<string> }): DiceRollGroup[] {
   const { sides } = input;
 
   const power: DiceRollGroup[] = isSides(sides) && input.rolls.length > 0 ? [{ kind: input.heal ? "heal" : "damage", rollerId: input.casterId, dice: input.rolls.map((value) => ({ sides, value })) }] : [];
 
-  const saves = input.saves.map((s): DiceRollGroup => ({ kind: "save", rollerId: s.participantId, dice: [{ sides: 20, value: s.roll, ...(!input.presetSaveIds.has(s.participantId) && { server: true }) }] }));
+  const saves = input.saves.filter((s) => !s.autoFail).map((s): DiceRollGroup => ({ kind: "save", rollerId: s.participantId, dice: [{ sides: 20, value: s.roll, ...(!input.presetSaveIds.has(s.participantId) && { server: true }) }] }));
 
   return [...power, ...saves];
 }

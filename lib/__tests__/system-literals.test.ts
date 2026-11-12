@@ -110,14 +110,14 @@ describe("d20 / HOMM names and rule-section readers leaving core", () => {
   const RULES_SECTION_READERS: Record<string, number> = {
     morale: 5,
     heroScaling: 5,
-    criticals: 6,
+    criticals: 5,
     deathSaves: 1,
-    concentration: 2,
+    concentration: 1,
     conditions: 3,
     actions: 2,
     classes: 19,
     encounters: 9,
-    formulas: 8,
+    formulas: 5,
     initiative: 7,
     saves: 1,
   };

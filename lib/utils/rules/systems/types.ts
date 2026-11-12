@@ -1,5 +1,6 @@
 import type { SystemData, SystemSlot } from "./slot";
 
+import type { AbilityKey } from "@/lib/constants/abilities";
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
 import type { Coin } from "@/lib/constants/inventory";
 import type { Translator } from "@/lib/i18n/translator";
@@ -341,8 +342,25 @@ export interface CastTestResult {
   casterData?: Partial<BattleParticipant["battleData"]>;
 }
 
-export interface RuleSystemMagic {
-  slots: false;
+export type CastResourceGate = { ok: true; castLevel?: number } | { ok: false; error: string };
+
+export interface CastResourceChoice {
+  level: number;
+  /** The caster's explicit choice of the resource; absent: the default one */
+  slotKey?: string;
+}
+
+/** What a cast spends (spell slots); a system without one lets every cast through */
+export interface RuleSystemMagicResource {
+  /** The caster chooses which slot to cast from (a request's `slotKey` is validated only for these); others spend the default one */
+  picksSlot(caster: BattleParticipant): boolean;
+  /** `castLevel` is set when the choice raises the cast above the spell's level */
+  canCast(caster: BattleParticipant, choice: CastResourceChoice): CastResourceGate;
+  spend(caster: BattleParticipant, choice: CastResourceChoice): BattleParticipant;
+}
+
+/** Casting-test magic: the cast is a roll with a miscast, not a spent resource */
+export interface RuleSystemTestedMagic {
   /** Ingredients are optional: spending one cancels the miscast instead of gating the cast */
   ingredients?: "avertMiscast";
   /** Drops the miscast of a cast that used an ingredient */
@@ -355,6 +373,37 @@ export interface RuleSystemMagic {
   attribute(ps: BattleParticipant[], targetIds: string[], magic: SpellMagic, round: number): SystemConditionResult;
   /** Token badge for banked channelling */
   badge(p: BattleParticipant): ActiveEffect | null;
+}
+
+export interface SustainResult {
+  participants: BattleParticipant[];
+  messages: LogLine[];
+}
+
+/** Binds the duration of a spell's effects, objects, zones and grants to its caster (5e concentration) */
+export interface RuleSystemSustain {
+  /** The cast has to be held: the rule is on and the spell asks for it */
+  holds(rules: Ruleset, spell: { concentration?: boolean }): boolean;
+  holding(p: BattleParticipant): boolean;
+  /** Replaces what the caster held before */
+  begin(ps: BattleParticipant[], casterId: string, castId: string, spellName: string, rounds: number, round?: number): SustainResult;
+  /** Ends the held cast with everything bound to it */
+  drop(ps: BattleParticipant[], casterId: string, reason: LogLine): SustainResult;
+  /** Binds the effects the cast just added to the caster's hold */
+  tag(before: BattleParticipant[], after: BattleParticipant[], tag: NonNullable<ActiveEffect["concentrationOf"]>, abilityKey: string): BattleParticipant[];
+  /** A zone, object, form or grant bound to a hold is alive while the hold is; an untagged one always is */
+  anchorLive(ps: BattleParticipant[], tag: NonNullable<ActiveEffect["concentrationOf"]> | undefined): boolean;
+  /** Ends a hold whose effects, zones, objects and grants are all gone */
+  dropOrphaned(ps: BattleParticipant[], map?: BattleMapConfig | null, round?: number): SustainResult;
+}
+
+export interface RuleSystemMagic {
+  resource?: RuleSystemMagicResource;
+  sustain: RuleSystemSustain;
+  /** Save DC of a spell; `ability` overrides the caster's spellcasting ability */
+  saveDc(caster: BattleParticipant, ability: AbilityKey | undefined, base: number): number;
+  upcast: { steps(spellLevel: number, castLevel: number): number };
+  tested?: RuleSystemTestedMagic;
 }
 
 export interface ActionDetailsView {
@@ -397,6 +446,8 @@ export interface RuleSystemCombat {
   /** Falling to 0 HP (dying, death, unconsciousness); `ctx.manual` is a DM status change settled the same way */
   onZeroHp(ctx: ZeroHpCtx): DamageConsequencesResult;
   onDamaged?: readonly DamagedHook[];
+  /** A participant raised above 0 HP (heal, victory revive) leaves the system's dying state */
+  onRevived?(p: BattleParticipant): BattleParticipant;
   turn?: RuleSystemTurn;
   actions: RuleSystemActions;
   reactions: RuleSystemReactions;
@@ -453,7 +504,7 @@ export interface RuleSystemDefinition {
   combat: RuleSystemCombat;
   conditionSet: RuleSystemConditionSet;
   conditions?: RuleSystemConditions;
-  magic?: RuleSystemMagic;
+  magic: RuleSystemMagic;
   advancement?: RuleSystemAdvancement;
   equipment?: RuleSystemEquipment;
   traits?: RuleSystemTraits;

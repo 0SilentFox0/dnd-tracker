@@ -37,7 +37,7 @@ export function runAutoReactions(flow: ActionFlow, { attackerId, targetId, targe
 
     const target = getP(flow, targetId);
 
-    if (!grant?.inline?.anchorMarkId || !isGrantLive(grant, flow.ctx.round, flow.ps) || !isActive(attacker)) continue;
+    if (!grant?.inline?.anchorMarkId || !isGrantLive(grant, flow.ctx.round, flow.ps, flow.ctx.rules) || !isActive(attacker)) continue;
 
     if (targetHpBefore <= 0) continue;
 

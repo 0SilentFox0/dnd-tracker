@@ -3,7 +3,6 @@ import { describe, expect, it } from "vitest";
 import { AttackType, EffectMarker, ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import type { CunningStrikeEffect } from "@/lib/utils/abilities/schema";
-import { calculateAttackRoll } from "@/lib/utils/battle/attack";
 import { cunningStrikeCost, cunningStrikeOffer, toggleCunningStrike } from "@/lib/utils/battle/attack/cunning-strike";
 import { resolveHit } from "@/lib/utils/battle/attack/process/hit";
 import { validateAttackRequest } from "@/lib/utils/battle/attack-phase/request";
@@ -12,6 +11,7 @@ import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
 import { REJECT } from "@/lib/utils/battle/store/reject";
 import { forgoDice } from "@/lib/utils/common/dice";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
+import { calculateAttackRoll } from "@/systems/d20/rules/attack/roll";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 const SWORD: BattleAttack = { id: "s", name: "Кинджал", type: AttackType.MELEE, attackBonus: 5, damageDice: "1d4", damageType: "piercing" };

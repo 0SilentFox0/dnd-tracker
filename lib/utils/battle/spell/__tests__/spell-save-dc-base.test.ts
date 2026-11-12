@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
-import { spellSaveDc } from "@/lib/utils/battle/spell/power";
+import { spellSaveDc } from "@/lib/utils/battle/spell/save-dc";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 
 describe("spellSaveDc з базою кампанії", () => {
   const p = createMockParticipant();
@@ -11,7 +12,7 @@ describe("spellSaveDc з базою кампанії", () => {
 
     const mod = p.abilities.modifiers.wisdom;
 
-    expect(spellSaveDc(p, "wisdom", 8)).toBe(8 + prof + mod);
-    expect(spellSaveDc(p, "wisdom", 10)).toBe(10 + prof + mod);
+    expect(spellSaveDc(DEFAULT_RULES, p, "wisdom")).toBe(8 + prof + mod);
+    expect(spellSaveDc({ ...DEFAULT_RULES, formulas: { ...DEFAULT_RULES.formulas, saveDcBase: 10 } }, p, "wisdom")).toBe(10 + prof + mod);
   });
 });

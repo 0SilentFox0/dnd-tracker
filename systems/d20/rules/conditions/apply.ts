@@ -6,11 +6,11 @@ import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { findParticipant, updateParticipant, withActiveEffects } from "@/lib/utils/abilities/engine/core/participants";
 import { type Condition5eKey, isCustomConditionKey } from "@/lib/utils/abilities/schema/kinds";
 import { DODGE_KEY_PREFIX, upsertLabeled } from "@/lib/utils/battle/actions/effects";
-import { concentrationBroken, dropConcentration } from "@/lib/utils/battle/concentration";
 import { releaseGrapples } from "@/lib/utils/battle/conditions/grapple-links";
 import { exhaustionLevel, hasCondition, MAX_EXHAUSTION, removeEffects, syncExhaustion } from "@/lib/utils/battle/conditions/query";
 import type { ApplyConditionOptions, ApplyConditionResult, ConditionKey } from "@/lib/utils/battle/conditions/set";
 import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
+import { concentrationBroken, dropConcentration } from "@/systems/d20/rules/concentration/sustain";
 import type { BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 

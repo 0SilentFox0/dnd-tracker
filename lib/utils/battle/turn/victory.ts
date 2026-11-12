@@ -5,7 +5,6 @@ import { CombatStatus, ParticipantSide, SYSTEM_ACTOR } from "@/lib/constants/bat
 import { textRef } from "@/lib/i18n/text-ref";
 import { isActive, isEscaped } from "@/lib/utils/abilities/engine/core/participants";
 import { restoreCharm } from "@/lib/utils/abilities/engine/effects/charm";
-import { clearDeathSaves } from "@/lib/utils/battle/death-saves";
 import { logFields } from "@/lib/utils/battle/log/lines";
 import type { Ruleset } from "@/lib/utils/rules";
 import { ruleSystemOf } from "@/lib/utils/rules/systems";
@@ -105,7 +104,7 @@ export function completeBattle(
   const revived = result === "victory" && !keepDowned ? restored.filter(revivesOnVictory) : [];
 
   const updatedParticipants = restored.map((p) =>
-    revived.includes(p) ? { ...clearDeathSaves(p), combatStats: { ...p.combatStats, currentHp: reviveHp(p), status: CombatStatus.ACTIVE } } : p,
+    revived.includes(p) ? { ...(ruleSystemOf(rules).combat.onRevived?.(p) ?? p), combatStats: { ...p.combatStats, currentHp: reviveHp(p), status: CombatStatus.ACTIVE } } : p,
   );
 
   const award = result === "victory" && autoXpEnabled(rules) ? battleXpAward(updatedParticipants) : null;

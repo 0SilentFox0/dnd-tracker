@@ -1,8 +1,9 @@
 import { CombatStatus, ParticipantSourceType } from "@/lib/constants/battle";
 import { textRef } from "@/lib/i18n/text-ref";
 import { isActive } from "@/lib/utils/abilities/engine/core/participants";
-import { dropConcentration } from "@/lib/utils/battle/concentration";
 import { nearestStandable } from "@/lib/utils/battle/grid/occupancy";
+import { DEFAULT_RULES, type Ruleset } from "@/lib/utils/rules";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
@@ -45,7 +46,7 @@ const isPhantomOf = (p: BattleParticipant, ownerId: string) =>
   p.battleData.phantomOf === ownerId || (p.basicInfo.id.startsWith("phantom:") && p.battleData.summonedBy === ownerId);
 
 /** `keepCastId`: фантоми цього касту лишаються (мультицільовий каст = кілька запитів одного власника). */
-export function dismissPhantoms(order: BattleParticipant[], ownerId: string, keepCastId?: string): { order: BattleParticipant[]; messages: LogLine[] } {
+export function dismissPhantoms(order: BattleParticipant[], ownerId: string, rules: Ruleset = DEFAULT_RULES, keepCastId?: string): { order: BattleParticipant[]; messages: LogLine[] } {
   const messages: LogLine[] = [];
 
   const dismissedIds: string[] = [];
@@ -64,7 +65,7 @@ export function dismissPhantoms(order: BattleParticipant[], ownerId: string, kee
   if (!messages.length) return { order, messages };
 
   for (const id of dismissedIds) {
-    const dropped = dropConcentration(next, id, "");
+    const dropped = ruleSystemOf(rules).magic.sustain.drop(next, id, "");
 
     next = dropped.participants;
     messages.push(...dropped.messages);

@@ -31,7 +31,7 @@ describe("useBattleRules", () => {
       serverJudged: true,
       d20Stats: false,
       spells: true,
-      magic: true,
+      tested: true,
       actionEconomy: { bonusAction: false, reaction: false },
       distance: { unit: "yd", perCell: 2 },
       hpTerm: "wounds",

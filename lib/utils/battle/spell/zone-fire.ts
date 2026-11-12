@@ -3,11 +3,12 @@ import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abili
 import { resolveDowned } from "@/lib/utils/abilities/engine/core/run-abilities";
 import type { Rng } from "@/lib/utils/abilities/engine/core/types";
 import { applyEffect } from "@/lib/utils/abilities/registry/effects";
-import { type ConcentrationTag, isZoneConcentrationLive } from "@/lib/utils/battle/concentration";
+import type { ConcentrationTag } from "@/lib/utils/battle/concentration";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant/helpers";
 import { savesOf } from "@/lib/utils/battle/saves/access";
 import { rollDie } from "@/lib/utils/common/dice";
 import type { Ruleset } from "@/lib/utils/rules";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { ZoneTrigger } from "@/lib/utils/spells/model/schema";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
@@ -55,7 +56,7 @@ export function fireTrigger(ps: BattleParticipant[], src: FireSource, trigger: Z
 
   const none: Fired = { participants: ps, messages: [], failed: false };
 
-  if (!trigger || !target || !owner || !isActive(target) || target.basicInfo.id === src.excludeId || !isZoneConcentrationLive(ps, src.concentrationOf) || !sideAllows(src.side, target, owner)) return none;
+  if (!trigger || !target || !owner || !isActive(target) || target.basicInfo.id === src.excludeId || !ruleSystemOf(ctx.rules).magic.sustain.anchorLive(ps, src.concentrationOf) || !sideAllows(src.side, target, owner)) return none;
 
   const once = kind !== "onTurnStart";
 

@@ -1,12 +1,11 @@
-import type { AttackRollResult } from "../types/attack";
-import { calculateAttackBonus, forcedRollMode, type RollMode, rollModeReasons } from "./bonus";
-
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
 import { getRandomCriticalEffect } from "@/lib/constants/critical-effects";
 import { withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
+import { calculateAttackBonus, forcedRollMode, type RollMode, rollModeReasons } from "@/lib/utils/battle/attack/bonus";
 import { critThresholdOf } from "@/lib/utils/battle/attack/crit-threshold";
 import type { CritPicker } from "@/lib/utils/battle/crit-choice/types";
+import type { AttackRollResult } from "@/lib/utils/battle/types/attack";
 import { rollDie } from "@/lib/utils/common/dice";
 import { type Ruleset } from "@/lib/utils/rules";
 import type { BattleAttack, BattleMapConfig, BattleParticipant } from "@/types/battle";
@@ -82,9 +81,4 @@ export function calculateAttackRoll(
     chosenD20: finalRoll,
     ...(secondRoll && { secondRoll }),
   };
-}
-
-/** Режим кидка для подій hit / attack after: лише перевага чи недолік, звичайний — без поля. */
-export function eventRollMode(roll: AttackRollResult): { rollMode?: "advantage" | "disadvantage" } {
-  return roll.secondRoll ? { rollMode: roll.secondRoll.mode } : {};
 }

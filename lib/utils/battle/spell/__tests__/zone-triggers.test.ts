@@ -151,11 +151,11 @@ describe("sweepDeadZones", () => {
   const map = zoneMap(exitZone, { concentrationOf: tag });
 
   it("поки кастер концентрується — зона на місці", () => {
-    expect(sweepDeadZones(map, [live, foe({ x: 4, y: 4 })])).toBeNull();
+    expect(sweepDeadZones(map, [live, foe({ x: 4, y: 4 })], DEFAULT_RULES)).toBeNull();
   });
 
   it("зламана концентрація прибирає клітинки й зону", () => {
-    const swept = sweepDeadZones(map, [caster, foe({ x: 4, y: 4 })]);
+    const swept = sweepDeadZones(map, [caster, foe({ x: 4, y: 4 })], DEFAULT_RULES);
 
     expect(swept?.terrain).toBeUndefined();
     expect(swept?.spellZones).toBeUndefined();

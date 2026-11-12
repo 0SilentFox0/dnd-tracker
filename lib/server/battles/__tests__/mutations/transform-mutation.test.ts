@@ -5,6 +5,7 @@ import { context, goblin, participant } from "./fixtures";
 
 import { createSpellMutation } from "@/lib/server/battles/mutations/spell/spell-mutation";
 import { revertExpiredTransforms } from "@/lib/utils/battle/transform/revert";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleParticipant } from "@/types/battle";
 
 const frog = {
@@ -42,7 +43,7 @@ describe("transform через spell-mutation", () => {
     expect(target.combatStats).toMatchObject({ maxHp: 4, currentHp: 4, armorClass: 11 });
     expect(target.battleData.transform?.saved.maxHp).toBe(goblin.combatStats.maxHp);
 
-    const back = revertExpiredTransforms(out.participants, 7).participants.find((p) => p.basicInfo.id === "gob") as BattleParticipant;
+    const back = revertExpiredTransforms(out.participants, 7, DEFAULT_RULES).participants.find((p) => p.basicInfo.id === "gob") as BattleParticipant;
 
     expect(back.combatStats.maxHp).toBe(goblin.combatStats.maxHp);
     expect(back.battleData.transform).toBeUndefined();

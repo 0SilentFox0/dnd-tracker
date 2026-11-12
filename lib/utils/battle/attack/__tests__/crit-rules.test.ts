@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 
-import { calculateAttackRoll } from "../roll";
 import { SWORD } from "./helpers";
 
 import { CRITICAL_FAIL_EFFECTS, CRITICAL_SUCCESS_EFFECTS } from "@/lib/constants/critical-effects";
@@ -11,6 +10,7 @@ import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/moc
 import { resolveAttackRoll } from "@/lib/utils/battle/common/attack-roll-helpers";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { parseRules } from "@/lib/utils/rules/schema";
+import { calculateAttackRoll } from "@/systems/d20/rules/attack/roll";
 
 const attacker = createMockParticipant();
 

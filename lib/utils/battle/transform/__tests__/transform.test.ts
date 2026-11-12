@@ -3,7 +3,6 @@ import { describe, expect, it } from "vitest";
 import { CombatStatus, ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { textOf } from "@/lib/i18n/test/text";
 import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
-import { dropConcentration } from "@/lib/utils/battle/concentration";
 import { applyDamageConsequences } from "@/lib/utils/battle/damage/consequences";
 import { textsOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { castSpell } from "@/lib/utils/battle/spell";
@@ -12,6 +11,7 @@ import { revertExpiredTransforms } from "@/lib/utils/battle/transform/revert";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import { DEFAULT_RULES, type Ruleset } from "@/lib/utils/rules";
 import { SpellDefinitionSchema, type SpellEffect } from "@/lib/utils/spells/model/schema";
+import { dropConcentration } from "@/systems/d20/rules/concentration/sustain";
 import type { BattleParticipant } from "@/types/battle";
 
 const rules = { ...DEFAULT_RULES, concentration: { enabled: true, dcCap: null }, deathSaves: { ...DEFAULT_RULES.deathSaves, enabled: true } };
@@ -188,9 +188,9 @@ describe("transform: згасання", () => {
   it("за часом відновлює все; ще не час — той самий масив", async () => {
     const { out } = await transformed();
 
-    expect(revertExpiredTransforms(out.order, 7).participants).toBe(out.order);
+    expect(revertExpiredTransforms(out.order, 7, rules).participants).toBe(out.order);
 
-    const { participants, messages } = revertExpiredTransforms(out.order, 8);
+    const { participants, messages } = revertExpiredTransforms(out.order, 8, rules);
 
     const orc = participants.find((p) => p.basicInfo.id === "orc") as BattleParticipant;
 
@@ -206,11 +206,11 @@ describe("transform: згасання", () => {
 
     const withConc = out.order;
 
-    expect(revertExpiredTransforms(withConc, 3).participants).toBe(withConc);
+    expect(revertExpiredTransforms(withConc, 3, rules).participants).toBe(withConc);
 
     const dropped = dropConcentration(withConc, "mage", "").participants;
 
-    const orc = revertExpiredTransforms(dropped, 3).participants.find((p) => p.basicInfo.id === "orc") as BattleParticipant;
+    const orc = revertExpiredTransforms(dropped, 3, rules).participants.find((p) => p.basicInfo.id === "orc") as BattleParticipant;
 
     expect(orc.battleData.transform).toBeUndefined();
     expect(orc.combatStats.maxHp).toBe(40);

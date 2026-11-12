@@ -4,7 +4,7 @@ import { resolveTargetIds } from "@/lib/utils/abilities/engine/core/targets";
 import { HIDDEN_MARKER } from "@/lib/utils/battle/actions/effects";
 import { actionReason } from "@/lib/utils/battle/actions/reasons";
 import { type ActionFlow, fire, getP } from "@/lib/utils/battle/common/action-flow";
-import { beginConcentration, tagConcentration, uniqueCastId } from "@/lib/utils/battle/concentration";
+import { uniqueCastId } from "@/lib/utils/battle/concentration";
 import { removeEffects } from "@/lib/utils/battle/conditions/query";
 import { runAutoReactions } from "@/lib/utils/battle/spell/auto-reaction";
 import { applyAnchoredZones } from "@/lib/utils/battle/spell/cast/anchored-zone";
@@ -19,8 +19,8 @@ import { phantomRequests } from "@/lib/utils/battle/spell/cast/phantom";
 import { abilityOf, actionOf, type ChosenSpell, expandChosen, hasMoveSelf, isPerTarget, readsEventDamage, type SpellCastState, targetOf } from "@/lib/utils/battle/spell/cast/state";
 import { inlineSummonRequests } from "@/lib/utils/battle/spell/cast/summon-inline";
 import { transformRequests } from "@/lib/utils/battle/spell/cast/transform";
-import { computeSpellPower, spellSaveDc } from "@/lib/utils/battle/spell/power";
-import { spellNeedsSlot, spellSlotKey } from "@/lib/utils/battle/spell/slot";
+import { computeSpellPower } from "@/lib/utils/battle/spell/power";
+import { spellSaveDc } from "@/lib/utils/battle/spell/save-dc";
 import type { CastSpellParams, CastSpellResult } from "@/lib/utils/battle/types/spell-process";
 import { rollGroups } from "@/lib/utils/common/dice";
 import { rngOf } from "@/lib/utils/common/rng";
@@ -62,7 +62,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
 
   const readyCaster = getP(flow, casterId);
 
-  const magic = params.rules ? ruleSystemOf(params.rules).magic : undefined;
+  const magic = ruleSystemOf(params.rules).magic.tested;
 
   const percentile = magic && !isDMCast && !params.isLegendaryCast && !params.grant ? magic : undefined;
 
@@ -90,13 +90,11 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
 
   const info = castLevel !== chosenLevel ? { ...baseInfo, castLevel } : baseInfo;
 
-  const slotKey = params.slotKey ?? spellSlotKey(readyCaster, spell.level);
+  const resource = !isDMCast && !params.isLegendaryCast && !params.grant ? ruleSystemOf(params.rules).magic.resource : undefined;
 
-  const slot = readyCaster.spellcasting.spellSlots[slotKey];
+  const cost = { resource, slotKey: params.slotKey, isDMCast, isLegendaryCast: params.isLegendaryCast, grant: params.grant };
 
-  const usesSlot = !magic && !isDMCast && !params.isLegendaryCast && !params.grant && spellNeedsSlot(spell.level);
-
-  if (usesSlot && (!slot || slot.current <= 0)) {
+  if (resource && !resource.canCast(readyCaster, { level: spell.level, slotKey: params.slotKey }).ok) {
     return {
       success: false,
       casterUpdated: readyCaster,
@@ -119,7 +117,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
     ability: abilityOf(spell),
     grant: params.grant,
     power: computeSpellPower({ caster: readyCaster, groupId: spell.groupId, rolls: allRolls, participants: flow.ps, extra: actionModifiers[casterId], addAbilityMod: def.addAbilityMod, damageBonus: def.damageBonus }),
-    saveDc: params.grant?.dc ?? spellSaveDc(readyCaster, params.grant?.dcAbility, params.rules.formulas.saveDcBase),
+    saveDc: params.grant?.dc ?? spellSaveDc(params.rules, readyCaster, params.grant?.dcAbility),
     attackBonus: params.grant?.attackBonus,
     battleId,
     actionModifiers,
@@ -143,13 +141,15 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
   const settle = percentile && spellMagic && test ? { magic: percentile, spellMagic, cast: test } : undefined;
 
   if (settle && !settle.cast.success) {
-    spendCastCost(state, { slotKey, usesSlot, isDMCast, isLegendaryCast: params.isLegendaryCast, grant: params.grant });
+    spendCastCost(state, cost);
     settleCastTest(state, settle);
 
     return finishSpellAction(state, { before, targetsBefore, allParticipants, battleId, round: currentRound, sourceEffects: source.definition.effects, details: settle.cast.details, fizzled: true });
   }
 
-  const concentrates = !!params.rules?.concentration.enabled && def.concentration === true;
+  const { sustain } = ruleSystemOf(params.rules).magic;
+
+  const concentrates = sustain.holds(params.rules, def);
 
   const castId = uniqueCastId(flow.ps, params.map, casterId, spell.id, currentRound);
 
@@ -160,7 +160,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
 
     const rounds = Math.max(zoneRounds, ...def.effects.map((e) => ("duration" in e ? (e.duration?.rounds ?? 0) : 0)));
 
-    const begun = beginConcentration(flow.ps, casterId, tag.castId, spell.name, rounds || DEFAULT_CONCENTRATION_ROUNDS, currentRound);
+    const begun = sustain.begin(flow.ps, casterId, tag.castId, spell.name, rounds || DEFAULT_CONCENTRATION_ROUNDS, currentRound);
 
     flow.ps = begun.participants;
     flow.messages.push(...begun.messages);
@@ -208,7 +208,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
     for (const id of targetIds) runAutoReactions(flow, { attackerId: casterId, targetId: id, targetHpBefore: findParticipant(before, id)?.combatStats.currentHp ?? 0 }, castSpell);
   }
 
-  if (tag) flow.ps = tagConcentration(psBeforeEffects, flow.ps, tag, state.ability.key);
+  if (tag) flow.ps = sustain.tag(psBeforeEffects, flow.ps, tag, state.ability.key);
 
   applyGrantCasts({ flow, effects: source.definition.effects, casterId, targetIds, spell, castId, round: currentRound, concentrationOf: tag });
 
@@ -220,7 +220,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
 
   if (settle) applyCastAttribute(state, settle);
 
-  spendCastCost(state, { slotKey, usesSlot, isDMCast, isLegendaryCast: params.isLegendaryCast, grant: params.grant });
+  spendCastCost(state, cost);
 
   if (settle) settleCastTest(state, settle);
 

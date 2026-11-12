@@ -5,10 +5,10 @@ import { createCritGate } from "../gate";
 import { AttackType,ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { makeParticipant, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { resolveRetaliation } from "@/lib/utils/battle/attack/retaliation";
-import { calculateAttackRoll } from "@/lib/utils/battle/attack/roll";
 import { critEffectsFor } from "@/lib/utils/battle/crit-choice/catalog";
 import { mulberry32 } from "@/lib/utils/common/rng";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
+import { calculateAttackRoll } from "@/systems/d20/rules/attack/roll";
 import type { BattleAttack } from "@/types/battle";
 
 const info = { source: "attack", kind: "success", actorId: "a", targetId: "t" } as const;
