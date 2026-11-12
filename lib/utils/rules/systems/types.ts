@@ -196,6 +196,10 @@ export interface RuleSystemTurn {
   onTurnStart?: readonly TurnHook<TurnStartCtx>[];
   /** A downed participant's turn comes up and is skipped */
   onSkippedTurn?: readonly TurnHook<TurnSubjectCtx>[];
+  /** The subject's turn ends, after its save-ends rolls and before effect durations count down */
+  onTurnEnd?: readonly TurnHook<TurnSubjectCtx>[];
+  /** A new round begins, after the round-start abilities; messages go to the round log */
+  onRoundStart?: readonly TurnHook<TurnHookCtx>[];
   /** Participants enter the fight (start, reveal, summon, late join) */
   onJoin?: readonly TurnHook<TurnJoinCtx>[];
 }
