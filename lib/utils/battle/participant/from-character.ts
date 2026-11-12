@@ -34,10 +34,10 @@ import { classSaves, classSpellcastingAbility } from "@/lib/utils/characters/cla
 import { applyClassArmor } from "@/lib/utils/characters/classes/armor-class";
 import { characterBaseHp } from "@/lib/utils/characters/hero-hp";
 import { applyCharacterResources, storedCharacterState } from "@/lib/utils/characters/resources/battle";
-import { getAbilityModifier, spellcastingDerived } from "@/lib/utils/common/calculations";
+import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import { isRecord } from "@/lib/utils/common/is-record";
 import { attunedRefs } from "@/lib/utils/items/resolve";
-import { DEFAULT_RULES, heroHpFormula, proficiencyForLevel, type Ruleset } from "@/lib/utils/rules";
+import { DEFAULT_RULES, heroHpFormula, type Ruleset } from "@/lib/utils/rules";
 import { currencyValueOf, ruleSystemOf } from "@/lib/utils/rules/systems";
 import { composition } from "@/lib/utils/rules/systems/catalog";
 import { systemSlotOf } from "@/lib/utils/rules/systems/slot";
@@ -179,12 +179,14 @@ async function characterTalentGroups(character: CharacterFromPrisma, rules: Rule
 }
 
 function finalizeCharacter(participant: BattleParticipant, character: CharacterFromPrisma, classMode: boolean, spellcastingAbility: string | null | undefined, rules: Ruleset): BattleParticipant {
-  const baked = bakePassives(runParticipantParts(ruleSystemOf(rules).participant?.fromCharacter, participant, { row: character, rules, refs: {} }));
+  const system = ruleSystemOf(rules);
+
+  const baked = bakePassives(runParticipantParts(system.participant?.fromCharacter, participant, { row: character, rules, refs: {} }));
 
   const armored = proficiencyOf(rules).withGranted(resolveLimitFormulas(classMode ? applyClassArmor(baked) : baked));
 
   // СК і бонус заклять — від характеристики з расовими/артефактними бонусами, тож після запікання
-  const spell = spellcastingDerived(character.level, spellcastingAbility, armored.abilities, rules.formulas);
+  const spell = system.magic.spellcasting?.({ level: character.level, ability: spellcastingAbility, scores: armored.abilities, rules }) ?? null;
 
   const ready = { ...armored, spellcasting: { ...armored.spellcasting, spellSaveDC: spell?.saveDC, spellAttackBonus: spell?.attackBonus } };
 
@@ -214,7 +216,7 @@ export async function createBattleParticipantFromCharacter(
 
   const { skills, artifactRows, consumables, equippedArtifacts, completed, resolvedClasses, attacks, race } = refs;
 
-  const proficiencyBonus = proficiencyForLevel(character.level, rules.formulas);
+  const proficiencyBonus = ruleSystemOf(rules).progression.proficiency?.(character.level, rules) ?? 0;
 
   const { selections, schoolMastery, grantPools, spellcastingAbility, spellcasting } = await characterSpellcasting(character, refs, proficiencyBonus, context);
 

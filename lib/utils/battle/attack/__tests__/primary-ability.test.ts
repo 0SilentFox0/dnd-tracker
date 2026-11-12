@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { AttackType } from "@/lib/constants/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { calculateAttackBonus } from "@/lib/utils/battle/attack";
-import { getAttackAbilityModifier, spellcastingDerived } from "@/lib/utils/common/calculations";
+import { getAttackAbilityModifier } from "@/lib/utils/common/calculations";
 import type { BattleAttack } from "@/types/battle";
 
 const sword = { id: "s", name: "Меч", type: AttackType.MELEE, attackBonus: 1, damageDice: "1d8" } as BattleAttack;
@@ -30,10 +30,5 @@ describe("primaryAbility", () => {
 
     expect(calculateAttackBonus(p, sword)).toBe(4 + 9 + 1);
     expect(calculateAttackBonus(p, bow)).toBe(4 + 9);
-  });
-
-  it("СЛ і атака заклинанням від рівня", () => {
-    expect(spellcastingDerived(30, "intelligence", scores)).toEqual({ saveDC: 8 + 9 + 3, attackBonus: 9 + 3 });
-    expect(spellcastingDerived(30, null, scores)).toBeNull();
   });
 });

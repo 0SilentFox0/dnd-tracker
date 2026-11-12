@@ -7,11 +7,8 @@ import { getUnitStats } from "@/lib/utils/battle/balance/stats";
 import { createBattleParticipantFromUnit } from "@/lib/utils/battle/participant/from-unit";
 import { spellSaveDc } from "@/lib/utils/battle/spell/save-dc";
 import type { UnitFromPrisma } from "@/lib/utils/battle/types/participant";
-import { spellcastingDerived } from "@/lib/utils/common/calculations";
-import { DEFAULT_RULES, proficiencyForLevel } from "@/lib/utils/rules";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { parseRules } from "@/lib/utils/rules/schema";
-
-const scores = { strength: 10, dexterity: 10, constitution: 10, intelligence: 16, wisdom: 14, charisma: 10 };
 
 const custom = parseRules({ formulas: { saveDcBase: 10, proficiencyBase: 1, proficiencyEvery: 2 } });
 
@@ -43,18 +40,6 @@ const unit = (knownSpells: string[]) =>
     minTargets: 1,
     abilities: [],
   }) as unknown as UnitFromPrisma;
-
-describe("формули кампанії: герой", () => {
-  it("DEFAULT_RULES: майстерність 3, СК 14 на 5-му рівні при INT 16", () => {
-    expect(proficiencyForLevel(5, DEFAULT_RULES.formulas)).toBe(3);
-    expect(spellcastingDerived(5, "intelligence", scores)).toEqual({ saveDC: 14, attackBonus: 6 });
-  });
-
-  it("власні формули: майстерність 3, СК 16", () => {
-    expect(proficiencyForLevel(5, custom.formulas)).toBe(3);
-    expect(spellcastingDerived(5, "intelligence", scores, custom.formulas)).toEqual({ saveDC: 16, attackBonus: 6 });
-  });
-});
 
 describe("формули кампанії: юніт", () => {
   it("СК юніта = база кампанії + майстерність + тір", async () => {

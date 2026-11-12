@@ -1,7 +1,6 @@
 // Утиліти для розрахунків D&D
 
 import { AttackType } from "@/lib/constants/battle";
-import { DEFAULT_RULES, proficiencyForLevel, type Ruleset } from "@/lib/utils/rules";
 import type { AbilityKey } from "@/types/characters";
 
 /**
@@ -49,7 +48,6 @@ export function isHit(attackRoll: number, targetAC: number): boolean {
   return attackRoll >= targetAC;
 }
 
-
 type AttackAbilities = { strength: number; dexterity: number; primaryAbility?: AbilityKey | null } & Partial<Record<AbilityKey, number>>;
 
 export function attackAbilityKey(abilities: { primaryAbility?: AbilityKey | null }, attackType: AttackType | string): AbilityKey {
@@ -58,19 +56,4 @@ export function attackAbilityKey(abilities: { primaryAbility?: AbilityKey | null
 
 export function getAttackAbilityModifier(abilities: AttackAbilities, attackType: AttackType | string): number {
   return getAbilityModifier(abilities[attackAbilityKey(abilities, attackType)] ?? 10);
-}
-
-export function spellcastingDerived(
-  level: number,
-  ability: string | null | undefined,
-  scores: Record<AbilityKey, number>,
-  formulas: Ruleset["formulas"] = DEFAULT_RULES.formulas,
-): { saveDC: number; attackBonus: number } | null {
-  if (!ability || !(ability in scores)) return null;
-
-  const prof = proficiencyForLevel(level, formulas);
-
-  const mod = getAbilityModifier(scores[ability as AbilityKey]);
-
-  return { saveDC: getSpellSaveDC(prof, mod, formulas.saveDcBase), attackBonus: getSpellAttackBonus(prof, mod) };
 }

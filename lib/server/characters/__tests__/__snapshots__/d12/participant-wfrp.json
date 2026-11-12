@@ -26,7 +26,7 @@
       "wisdom": 0,
       "charisma": 3
     },
-    "proficiencyBonus": 2,
+    "proficiencyBonus": 0,
     "race": "Людина",
     "creatureType": "humanoid",
     "moraleCap": 0,

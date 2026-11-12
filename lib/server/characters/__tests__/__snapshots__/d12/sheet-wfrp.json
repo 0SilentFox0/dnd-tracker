@@ -449,7 +449,7 @@
       "name": "Unarmed Strike",
       "kind": "melee",
       "toHit": {
-        "total": 2,
+        "total": 0,
         "lines": [
           {
             "label": "gameTerms.abilities.strength.label",
@@ -458,7 +458,7 @@
           },
           {
             "label": "characterProfile.sheet.lines.proficiency",
-            "value": "+2",
+            "value": "+0",
             "source": "proficiency"
           }
         ]
@@ -487,7 +487,7 @@
       "name": "Ranged Attack",
       "kind": "ranged",
       "toHit": {
-        "total": 3,
+        "total": 1,
         "lines": [
           {
             "label": "gameTerms.abilities.dexterity.label",
@@ -496,7 +496,7 @@
           },
           {
             "label": "characterProfile.sheet.lines.proficiency",
-            "value": "+2",
+            "value": "+0",
             "source": "proficiency"
           }
         ]
@@ -521,7 +521,7 @@
       }
     }
   ],
-  "bestToHit": 3,
+  "bestToHit": 1,
   "saves": [],
   "skills": [],
   "passives": {

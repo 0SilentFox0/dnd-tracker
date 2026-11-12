@@ -3,7 +3,7 @@ import { useTranslations } from "next-intl";
 import { NumberField } from "@/components/rules/NumberField";
 import { RulesSection } from "@/components/rules/RulesSection";
 import type { RulesFormState } from "@/lib/hooks/campaigns";
-import { proficiencyForLevel } from "@/lib/utils/rules";
+import { proficiencyForLevel } from "@/systems/d20/rules/proficiency/level";
 
 export function FormulasSection({ form }: { form: RulesFormState }) {
   const t = useTranslations("rules");

@@ -9,6 +9,7 @@ import { reviveFromDying } from "./rules/death-saves/state";
 import { d20Initiative, d20TieBreak } from "./rules/initiative";
 import { D20_MAGIC } from "./rules/magic";
 import { d20UnitSpellDc } from "./rules/participant/unit-spell-dc";
+import { proficiencyForLevel } from "./rules/proficiency/level";
 import { D20_REACTIONS, d20ProvokedOpportunity } from "./rules/reactions";
 import { D20_PROFICIENCY, D20_SAVES } from "./rules/saves";
 import { rollFromSheet } from "./rules/sheet-roll";
@@ -19,7 +20,7 @@ import type { SheetRollSubject } from "@/types/characters";
 
 export const D20_MODULE: RuleSystemDefinition = {
   key: "d20",
-  progression: { levels: true, hpTerm: "hp", maxHp: () => null },
+  progression: { levels: true, hpTerm: "hp", maxHp: () => null, proficiency: (level, rules) => proficiencyForLevel(level, rules.formulas) },
   characteristics: { persisted: false, defaults: () => undefined, isEmpty: (v) => v == null || (typeof v === "object" && Object.keys(v).length === 0), sheetBlock: () => undefined },
   sheetTest: {
     accepts: (body) => body.kind !== "test",
