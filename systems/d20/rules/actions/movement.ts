@@ -6,8 +6,9 @@ import { findParticipant, replaceParticipant } from "@/lib/utils/abilities/engin
 import { actionReason } from "@/lib/utils/battle/actions/reasons";
 import type { MovementInput, MovementResult } from "@/lib/utils/battle/actions/types";
 import { releaseGrapples } from "@/lib/utils/battle/conditions/grapple-links";
-import { battleActionToEvent, type NewBattleEvent } from "@/lib/utils/battle/store";
 import { ruleErrorOf } from "@/lib/utils/battle/store/errors";
+import { battleActionToEvent } from "@/lib/utils/battle/store/event-mapping";
+import type { NewBattleEvent } from "@/lib/utils/battle/store/types";
 import type { LogLine } from "@/types/text";
 
 export function resolveMovement(input: MovementInput): MovementResult {
