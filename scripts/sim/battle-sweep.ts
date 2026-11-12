@@ -2286,7 +2286,10 @@ async function mazeCheck() {
 
   const sleeper = enemies().find((e) => e.battleData.dormant && posOf(e));
 
-  const nearCell = watcher && neighbors(posOf(watcher) as any).find((n) => inBounds(state.map, n) && freeMazeCell(cellKey(n)) && canStep(mazeGrid(), wallSet(mazeGrid().maze), posOf(watcher) as any, n));
+  const stepNear = (w: any) => neighbors(posOf(w) as any).find((n) => inBounds(state.map, n) && freeMazeCell(cellKey(n)) && canStep(mazeGrid(), wallSet(mazeGrid().maze), posOf(w) as any, n));
+
+  const nearCell = [watcher, ...P().filter(isMazeAlly)].filter(Boolean).map(stepNear).find(Boolean);
+
 
   const home = sleeper && posOf(sleeper);
 
