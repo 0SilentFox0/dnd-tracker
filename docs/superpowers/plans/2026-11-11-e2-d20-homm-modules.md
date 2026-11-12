@@ -138,6 +138,15 @@
 
 **Prod.** `rules-parse-report` на prod (читання) — за «так», перед деплоєм. **Модель.** Sonnet. **Ревʼю.** Opus.
 
+**Хвости Ч3 (виконати в наступних частинах; зафіксовано 2026-11-12).**
+- **`DEFAULT_RULES.advancement` → секція wfrp (Ч4, перша задача).** `lib/utils/rules/defaults.ts` імпортує `DEFAULT_ADVANCEMENT_RULES` з `@/systems/wfrp/rules/advancement/rules`; це +1 запис у `system-imports-exempt.json` (ріст ratchet, прийнято тимчасово). Прибрати можна лише перенісши володіння `DEFAULT_RULES.advancement` у секцію wfrp (дефолт береться з `items[...].default` секції через реєстр, без прямого імпорту й без `zod` у клієнтському графі — тести `client-entry-imports`, `wfrp-import-cycle`). Після цього запис видалити й `--write`.
+- **`formulas.ts` (Ч5/Ч8/Ч10, з переписом читачів).** `proficiencyForLevel` → d20, `heroDiceTable`/`heroHpFormula` → heroscaling, `moraleCapFromRules` → morale: ~10 читачів у core, перенос без нових exempt лише разом із їх переписом.
+- **`ruleset-section` лишається в `system-imports-exempt.json`** (запис перейшов у `section-shapes.ts`) до моменту, коли `Ruleset` виводиться з композиції (не пізніше Ч17).
+- **PATCH-валідація не обмежена композицією** (сервер приймає всі секції) — вмикається після Ч13 (D2 бекфіл `modules`).
+- **`parseRules` повертає всі legacy-секції** (паритет, дефолтний `morale.enabled=true` не має протікати в dnd5e); типізований доступ `d20Rules/moraleRules/…` без викликачів, читачі переписуються в Ч5–Ч10.
+- **`rules-parse-report` не запускався на БД** (порт 54322 зайнятий контейнером wfrp): запуск на prodcopy — за рішенням власника, перед деплоєм Ч3; prod — за «так».
+- **Документи:** `docs/architecture/rule-systems.md` і `docs/STATUS.md` оновити в кінці Ч3 (секції за власниками, шляхи, без `unusedMechanics`).
+
 ## Ч4. Вміння: ефекти, змінні, джерела, стани
 
 **Мета.** Реєстр умінь core не містить рядків баз і модулів; закрито борг `SystemEffectRow.system` + `traits-guard`.
@@ -371,7 +380,7 @@
 
 **Задачі.**
 
-1. Нулі: `rules-section-readers` = 0 → видалити `legacy-sections.ts`; «імена-протікання» = 0; пресет `homm` отримує `tokens: ["homm"]`; перегенерувати `system-literals-exempt.json` і звірити з критерієм 2.
+1. Нулі (включно з хвостами Ч3: `ruleset-section` і записом `defaults.ts` у `system-imports-exempt.json`, `formulas.ts` розкладено за власниками): `rules-section-readers` = 0 → видалити `legacy-sections.ts`; «імена-протікання» = 0; пресет `homm` отримує `tokens: ["homm"]`; перегенерувати `system-literals-exempt.json` і звірити з критерієм 2.
 2. Чистка dual-read (не раніше ніж через реліз після Ч14/Ч15 і при 0 знімків старої форми в `active-battles-report`): `@deprecated` поля, старий розбір `fortune`, `rewrites`/`redirects`, скрипт downgrade.
 3. `lib/__tests__/d6pool-battle.test.ts`: база-фікстура проводить старт → атака → 0 HP → наступний хід; граф імпортів тесту без `systems/*`.
 4. Гард spec 3.4: доступи core до колонок статблока у правилах = 0 поза будівниками й мапперами.
