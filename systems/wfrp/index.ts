@@ -12,6 +12,7 @@ import { wfrpOnZeroHp } from "./rules/combat/on-zero-hp";
 import { participantStats, wfrpBaseStats, wfrpParticipantFields } from "./rules/combat/participant";
 import { resolveWfrpAttack, wfrpAttackTarget } from "./rules/combat/resolve-attack";
 import { WFRP_CONDITIONS } from "./rules/conditions";
+import { WFRP_CONDITION_SET } from "./rules/conditions/standard-set";
 import { WFRP_EQUIPMENT } from "./rules/equipment";
 import { WFRP_MAGIC } from "./rules/magic";
 import { onSession } from "./rules/session";
@@ -46,6 +47,7 @@ export const WFRP_MODULE: RuleSystemDefinition = {
     roll: rollWfrpSheetTest,
   },
   rest: { kinds: false, onSession },
+  conditionSet: WFRP_CONDITION_SET,
   conditions: WFRP_CONDITIONS,
   magic: WFRP_MAGIC,
   advancement: WFRP_ADVANCEMENT,

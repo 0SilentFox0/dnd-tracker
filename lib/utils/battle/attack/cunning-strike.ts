@@ -5,10 +5,10 @@ import { withinLimits } from "@/lib/utils/abilities/engine/core/usage";
 import type { CunningStrikeEffect } from "@/lib/utils/abilities/schema";
 import { disengageEffect, upsertLabeled } from "@/lib/utils/battle/actions/effects";
 import { type ActionFlow, getP, put } from "@/lib/utils/battle/common/action-flow";
-import { applyCondition5e } from "@/lib/utils/battle/conditions/apply";
 import { rollSave } from "@/lib/utils/battle/saves";
 import { REJECT } from "@/lib/utils/battle/store/reject";
 import { diceCount } from "@/lib/utils/common/dice";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { BattleParticipant } from "@/types/battle";
 import type { TextRef } from "@/types/text";
 
@@ -109,7 +109,7 @@ export function applyCunningStrikeEffects(flow: ActionFlow, attackerId: string, 
 
     flow.messages.push(textRef("battleLog.cunning.failed", { label, target: target.basicInfo.name, dc, total: save.total }));
 
-    const r = applyCondition5e(flow.ps, targetId, {
+    const r = ruleSystemOf(flow.ctx.rules).conditionSet.apply(flow.ps, targetId, {
       key: effect === "poison" ? "poisoned" : "prone",
       rounds: CONDITION_ROUNDS,
       permanent: effect === "trip",

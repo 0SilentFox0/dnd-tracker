@@ -66,6 +66,13 @@ describe("system exhaustiveness", () => {
     for (const meta of bases) expect(meta.tokens?.length, `${meta.module}.tokens`).toBeGreaterThan(0);
   });
 
+  it.each(keys)("%s provides the mandatory conditionSet hook", (key) => {
+    const set = RULE_SYSTEM_REGISTRY[key].conditionSet;
+
+    expect(typeof set?.apply).toBe("function");
+    expect(typeof set?.effectInput).toBe("function");
+  });
+
   it.each(keys)("%s passes the system contract", (key) => {
     const meta = metaOf(key);
 

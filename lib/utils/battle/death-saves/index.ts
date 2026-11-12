@@ -1,9 +1,6 @@
 import { CombatStatus } from "@/lib/constants/battle";
 import { textRef } from "@/lib/i18n/text-ref";
 import { isDying } from "@/lib/utils/abilities/engine/core/participants";
-import { upsertLabeled } from "@/lib/utils/battle/actions/effects";
-import { conditionEffectInput } from "@/lib/utils/battle/conditions/registry";
-import { PERMANENT_ROUNDS } from "@/lib/utils/battle/conditions/set";
 import { rollDie } from "@/lib/utils/common/dice";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleParticipant } from "@/types/battle";
@@ -11,7 +8,7 @@ import type { LogLine } from "@/types/text";
 
 export const DEATH_SAVES_TIMED_KEY = "death-saves:unconscious";
 
-const FRESH_DEATH_SAVES = { successes: 0, failures: 0, stable: false };
+export const FRESH_DEATH_SAVES = { successes: 0, failures: 0, stable: false };
 
 const FAILURES_TO_DIE = 3;
 
@@ -27,16 +24,6 @@ export function clearDeathSaves(p: BattleParticipant): BattleParticipant {
   const { deathSaves: _removed, ...battleData } = p.battleData;
 
   return { ...p, battleData: { ...battleData, activeEffects: battleData.activeEffects.filter((e) => e.abilityKey !== DEATH_SAVES_TIMED_KEY) } };
-}
-
-export function startDying(p: BattleParticipant, rules: Ruleset): BattleParticipant {
-  const down = upsertLabeled(p, conditionEffectInput("unconscious", { timedKey: DEATH_SAVES_TIMED_KEY, rounds: PERMANENT_ROUNDS, permanent: true, exhaustion: rules.conditions.exhaustion }), 0);
-
-  return {
-    ...down,
-    combatStats: { ...down.combatStats, currentHp: 0, status: CombatStatus.UNCONSCIOUS },
-    battleData: { ...down.battleData, deathSaves: { ...FRESH_DEATH_SAVES } },
-  };
 }
 
 function withFailures(p: BattleParticipant, add: number): BattleParticipant {

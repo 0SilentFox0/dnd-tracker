@@ -6,7 +6,8 @@ import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/moc
 import { beginConcentration } from "@/lib/utils/battle/concentration";
 import { hasCondition } from "@/lib/utils/battle/conditions";
 import { applyDamageConsequences, settleStatusChange } from "@/lib/utils/battle/damage/consequences";
-import { clearDeathSaves, deathSaveDamage, rollDeathSave, startDying } from "@/lib/utils/battle/death-saves";
+import { clearDeathSaves, deathSaveDamage, rollDeathSave } from "@/lib/utils/battle/death-saves";
+import { startDying } from "@/lib/utils/battle/death-saves/start";
 import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { textsOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import type { BattleSceneState } from "@/lib/utils/battle/store";

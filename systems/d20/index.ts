@@ -1,3 +1,5 @@
+import { D20_CONDITION_SET } from "./rules/conditions";
+
 import { rollFromSheet } from "@/lib/utils/characters/resources/sheet-roll";
 import type { RuleSystemDefinition } from "@/lib/utils/rules/systems/types";
 import type { SheetRollSubject } from "@/types/characters";
@@ -13,6 +15,7 @@ export const D20_MODULE: RuleSystemDefinition = {
   },
   rest: { kinds: true },
   combat: { judge: "client", dice: 20, actionEconomy: { bonusAction: true, reaction: true } },
+  conditionSet: D20_CONDITION_SET,
   identity: { alignments: true },
   lineage: true,
   classes: true,

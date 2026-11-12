@@ -11,11 +11,11 @@ import type { ConditionImmunityKey, Effect } from "@/lib/utils/abilities/schema"
 import { isCondition5eKey, isCustomConditionKey } from "@/lib/utils/abilities/schema/kinds";
 import { seg, type Segment, segmentsLine } from "@/lib/utils/abilities/segments";
 import { helpEffect } from "@/lib/utils/battle/actions/effects";
-import { applyCondition5e } from "@/lib/utils/battle/conditions/apply";
 import { removeEffects } from "@/lib/utils/battle/conditions/query";
 import { type ConditionKey, saveEndsFor } from "@/lib/utils/battle/conditions/set";
 import { grantExtraActions } from "@/lib/utils/battle/participant/helpers";
 import { spellSaveDc } from "@/lib/utils/battle/spell/power";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import { slotLevel, slotRestoreOrder } from "@/lib/utils/spells/slot-keys";
 import type { BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
@@ -63,7 +63,7 @@ export function immuneTo(ps: BattleParticipant[], id: string, key: ConditionImmu
   return findFlags(ps, id, "conditionImmunity").some((f) => f.conditions === "all" || f.conditions.includes(key));
 }
 
-function applyCondition5eToTargets(input: EffectApplyInput<Of<"applyCondition">>, key: ConditionKey): EffectApplyResult {
+function applyConditionToTargets(input: EffectApplyInput<Of<"applyCondition">>, key: ConditionKey): EffectApplyResult {
   const { ability, effect, ctx } = input;
 
   const owner = findParticipant(input.participants, input.ownerId);
@@ -75,7 +75,7 @@ function applyCondition5eToTargets(input: EffectApplyInput<Of<"applyCondition">>
   const messages: LogLine[] = [];
 
   for (const id of input.targetIds) {
-    const result = applyCondition5e(ps, id, {
+    const result = ruleSystemOf(ctx.rules).conditionSet.apply(ps, id, {
       key,
       rounds: effect.duration.rounds,
       levels: effect.levels,
@@ -102,7 +102,7 @@ const withEscapeDc = (p: BattleParticipant, timedKey: string, escapeDc: number):
 export function applyCondition(input: EffectApplyInput<Of<"applyCondition">>): EffectApplyResult {
   const { ability, effect, ctx } = input;
 
-  if (isCondition5eKey(effect.condition) || isCustomConditionKey(effect.condition)) return applyCondition5eToTargets(input, effect.condition);
+  if (isCondition5eKey(effect.condition) || isCustomConditionKey(effect.condition)) return applyConditionToTargets(input, effect.condition);
 
   const condition = effect.condition;
 

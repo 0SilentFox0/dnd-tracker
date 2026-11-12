@@ -6,7 +6,7 @@ import { CombatStatus } from "@/lib/constants/battle";
 import { patchParticipantMutation } from "@/lib/server/battles/mutations/participants/patch-participant-mutation";
 import { beginConcentration } from "@/lib/utils/battle/concentration";
 import { hasCondition } from "@/lib/utils/battle/conditions";
-import { startDying } from "@/lib/utils/battle/death-saves";
+import { startDying } from "@/lib/utils/battle/death-saves/start";
 import { DEFAULT_RULES, type Ruleset } from "@/lib/utils/rules";
 import type { BattleParticipant } from "@/types/battle";
 

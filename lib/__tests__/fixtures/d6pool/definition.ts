@@ -20,6 +20,7 @@ export const D6POOL_SYSTEM: RuleSystemDefinition = {
   sheetTest: { accepts: (body) => body.kind === "test", roll: () => ({ kind: "test" }) as never },
   rest: { kinds: false },
   combat: { judge: "client", dice: 6, actionEconomy: { bonusAction: false, reaction: false } },
+  conditionSet: { apply: (ps) => ({ participants: ps, messages: [], blocked: true }), effectInput: () => null },
   identity: { alignments: false },
   lineage: false,
   classes: false,

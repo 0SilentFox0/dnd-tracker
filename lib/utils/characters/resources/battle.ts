@@ -3,8 +3,8 @@ import { readResources } from "./schema";
 
 import { CombatStatus } from "@/lib/constants/battle";
 import { textRef } from "@/lib/i18n/text-ref";
-import { applyCondition5e, exhaustionLevel, PERMANENT_ROUNDS } from "@/lib/utils/battle/conditions";
-import { startDying } from "@/lib/utils/battle/death-saves";
+import { exhaustionLevel, PERMANENT_ROUNDS } from "@/lib/utils/battle/conditions";
+import { startDying } from "@/lib/utils/battle/death-saves/start";
 import { isCastPool, isConsumablePool } from "@/lib/utils/items/pools";
 import type { Ruleset } from "@/lib/utils/rules";
 import { ruleSystemOf } from "@/lib/utils/rules/systems";
@@ -28,7 +28,7 @@ export function storedCharacterState(character: { resources?: unknown; inspirati
 function withExhaustion(p: BattleParticipant, level: number, rules: Ruleset): BattleParticipant {
   if (level <= 0) return p;
 
-  const applied = applyCondition5e([p], p.basicInfo.id, {
+  const applied = ruleSystemOf(rules).conditionSet.apply([p], p.basicInfo.id, {
     key: "exhaustion",
     rounds: PERMANENT_ROUNDS,
     permanent: true,

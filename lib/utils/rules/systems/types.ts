@@ -2,7 +2,10 @@ import type { SystemData, SystemSlot } from "./slot";
 
 import type { Coin } from "@/lib/constants/inventory";
 import type { Translator } from "@/lib/i18n/translator";
+import type { Condition5eKey } from "@/lib/utils/abilities/schema/kinds";
 import type { Recipe } from "@/lib/utils/abilities/templates/types";
+import type { LabeledEffectInput } from "@/lib/utils/battle/actions/effects";
+import type { ApplyConditionOptions, ApplyConditionResult, ConditionEffectOptions } from "@/lib/utils/battle/conditions/set";
 import type { DamageConsequencesInput, DamageConsequencesResult } from "@/lib/utils/battle/damage/consequences";
 import type { DieFx } from "@/lib/utils/battle/fx/dice/types";
 import type { EquippedArtifactRow } from "@/lib/utils/battle/participant/extract-artifacts";
@@ -168,6 +171,14 @@ export interface RuleSystemConditions {
   ): SystemConditionResult & { success: boolean };
 }
 
+/** Standard conditions (blinded, prone, exhaustion…) that core rules apply; unlike `conditions`, every base provides it */
+export interface RuleSystemConditionSet {
+  /** `blocked`: the target is immune, or the system has no such condition */
+  apply(ps: BattleParticipant[], targetId: string, opts: ApplyConditionOptions): ApplyConditionResult;
+  /** null: the system has no such condition */
+  effectInput(key: Condition5eKey, opts: ConditionEffectOptions): LabeledEffectInput | null;
+}
+
 export interface CastTestCtx {
   caster: BattleParticipant;
   spell: CastableSpell;
@@ -288,6 +299,7 @@ export interface RuleSystemDefinition {
   sheetTest: { accepts(body: { kind: string }): boolean; roll(input: SheetTestInput): SheetTestResult };
   rest: { kinds: boolean; onSession?(resources: CharacterResources, characteristics: unknown): CharacterResources };
   combat: RuleSystemCombat;
+  conditionSet: RuleSystemConditionSet;
   conditions?: RuleSystemConditions;
   magic?: RuleSystemMagic;
   advancement?: RuleSystemAdvancement;

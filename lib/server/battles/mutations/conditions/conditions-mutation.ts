@@ -6,10 +6,11 @@ import { CONDITION_LIMITS } from "@/lib/constants/battle";
 import { textRef } from "@/lib/i18n/text-ref";
 import { findParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { CustomConditionKeySchema } from "@/lib/utils/abilities/schema";
-import { applyCondition5e, CONDITION_5E_KEYS, MAX_EXHAUSTION, PERMANENT_ROUNDS, removeCondition5e } from "@/lib/utils/battle/conditions";
+import { CONDITION_5E_KEYS, MAX_EXHAUSTION, PERMANENT_ROUNDS, removeCondition5e } from "@/lib/utils/battle/conditions";
 import { lineText } from "@/lib/utils/battle/log/lines";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleRuleError, dmEvent } from "@/lib/utils/battle/store";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
 
 const ConditionKeySchema = z.union([z.enum(CONDITION_5E_KEYS), CustomConditionKeySchema]);
 
@@ -37,7 +38,7 @@ export function battleConditionsMutation(ctx: BattleMutationContext, body: Battl
   const targets = [{ participantId: target.basicInfo.id, participantName: target.basicInfo.name }];
 
   if (body.action === "apply") {
-    const result = applyCondition5e(ctx.participants, body.participantId, {
+    const result = ruleSystemOf(ctx.meta.rules).conditionSet.apply(ctx.participants, body.participantId, {
       key: body.condition,
       rounds: body.rounds ?? PERMANENT_ROUNDS,
       permanent: !body.rounds,

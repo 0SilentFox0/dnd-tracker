@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { CombatStatus, ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, seq } from "@/lib/utils/abilities/__tests__/fixtures";
-import { startDying } from "@/lib/utils/battle/death-saves";
+import { startDying } from "@/lib/utils/battle/death-saves/start";
 import { castSpell } from "@/lib/utils/battle/spell";
 import { resolveSpellTargets } from "@/lib/utils/battle/spell/spell-targeting";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";

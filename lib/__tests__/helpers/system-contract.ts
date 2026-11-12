@@ -46,6 +46,9 @@ export function assertSystemContract(meta: SystemMeta, definition: RuleSystemDef
 
   if (combat.hitModel) expect(combat.hitModel.refHit).toBeGreaterThan(0);
 
+  expect(typeof definition.conditionSet?.apply).toBe("function");
+  expect(typeof definition.conditionSet?.effectInput).toBe("function");
+
   if (definition.conditions) expect(definition.conditions.catalog.length).toBeGreaterThan(0);
 
   for (const component of [ui.HeroStats, ui.StatsTab, ui.RollDialogBody, ui.StatsFields, ui.UnitStatsFields]) expect(typeof component).toBe("function");

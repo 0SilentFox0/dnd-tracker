@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { CombatStatus, ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
-import { startDying } from "@/lib/utils/battle/death-saves";
+import { startDying } from "@/lib/utils/battle/death-saves/start";
 import { spellTargetCandidates } from "@/lib/utils/battle/flows";
 import { DEFAULT_RULES, type Ruleset } from "@/lib/utils/rules";
 import type { BattleParticipant } from "@/types/battle";
