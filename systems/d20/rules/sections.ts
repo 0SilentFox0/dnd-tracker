@@ -1,36 +1,34 @@
-import { DEFAULT_RULES } from "@/lib/utils/rules/defaults";
-import { CRITICALS_ORDER_MESSAGE, INITIATIVE_ORDER_MESSAGE, sectionSchemas } from "@/lib/utils/rules/section-shapes";
-import { itemsFromShape, type SectionsContribution } from "@/lib/utils/rules/sections";
-
-const part = <K extends keyof typeof sectionSchemas>(name: K, keys?: readonly string[]) => itemsFromShape(sectionSchemas[name].shape as never, DEFAULT_RULES[name] as never, keys);
+import { sectionItems } from "@/lib/utils/rules/section-items";
+import { CRITICALS_ORDER_MESSAGE, INITIATIVE_ORDER_MESSAGE } from "@/lib/utils/rules/section-shapes";
+import type { SectionsContribution } from "@/lib/utils/rules/sections";
 
 export const D20_SECTIONS: SectionsContribution = {
   sections: {
     criticals: {
       owner: "d20",
       mechanic: true,
-      items: part("criticals"),
+      items: sectionItems("criticals"),
       refine: (v) => typeof v.critOn !== "number" || typeof v.fumbleOn !== "number" || v.fumbleOn < v.critOn,
       refineMessage: CRITICALS_ORDER_MESSAGE,
     },
-    formulas: { owner: "d20", mechanic: true, items: part("formulas") },
+    formulas: { owner: "d20", mechanic: true, items: sectionItems("formulas") },
     initiative: {
       owner: "d20",
       mechanic: true,
-      items: part("initiative"),
+      items: sectionItems("initiative"),
       refine: (v) => typeof v.heroMin !== "number" || typeof v.heroMax !== "number" || v.heroMin <= v.heroMax,
       refineMessage: INITIATIVE_ORDER_MESSAGE,
     },
-    saves: { owner: "d20", mechanic: true, items: part("saves") },
-    deathSaves: { owner: "d20", mechanic: true, items: part("deathSaves") },
-    concentration: { owner: "d20", mechanic: true, items: part("concentration") },
-    conditions: { owner: "d20", mechanic: true, items: part("conditions") },
-    actions: { owner: "d20", mechanic: true, items: part("actions", ["enabled", "opportunityAttacks", "variant"]) },
-    classes: { owner: "d20", mechanic: true, items: part("classes") },
+    saves: { owner: "d20", mechanic: true, items: sectionItems("saves") },
+    deathSaves: { owner: "d20", mechanic: true, items: sectionItems("deathSaves") },
+    concentration: { owner: "d20", mechanic: true, items: sectionItems("concentration") },
+    conditions: { owner: "d20", mechanic: true, items: sectionItems("conditions") },
+    actions: { owner: "d20", mechanic: true, items: sectionItems("actions", ["enabled", "opportunityAttacks", "variant"]) },
+    classes: { owner: "d20", mechanic: true, items: sectionItems("classes") },
   },
   extend: {
-    outOfCombat: part("outOfCombat", ["longRestHitDice", "inspiration"]),
-    encounters: part("encounters", ["edition", "autoXp"]),
-    items: part("items", ["attunementLimit"]),
+    outOfCombat: sectionItems("outOfCombat", ["longRestHitDice", "inspiration"]),
+    encounters: sectionItems("encounters", ["edition", "autoXp"]),
+    items: sectionItems("items", ["attunementLimit"]),
   },
 };

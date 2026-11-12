@@ -68,22 +68,22 @@ export function RulesForm({ campaignId }: { campaignId: string }) {
     <>
       <SystemSection form={form} locked={systemLocked} />
       <RulesPathsProvider value={pathsValue}>
-      <HudForm
-        id={FORM_ID}
-        onSubmit={onSubmit}
-        tabs={tabs}
-        triggerClassName="flex-none px-3"
-        actions={
-          <>
-            <Button type="button" variant="outline" disabled={!isDirty || isSaving} onClick={reset}>
-              {tc("actions.cancel")}
-            </Button>
-            <Button type="submit" disabled={!isDirty || isSaving}>
-              {tc("actions.save")}
-            </Button>
-          </>
-        }
-      />
+        <HudForm
+          id={FORM_ID}
+          onSubmit={onSubmit}
+          tabs={tabs}
+          triggerClassName="flex-none px-3"
+          actions={
+            <>
+              <Button type="button" variant="outline" disabled={!isDirty || isSaving} onClick={reset}>
+                {tc("actions.cancel")}
+              </Button>
+              <Button type="submit" disabled={!isDirty || isSaving}>
+                {tc("actions.save")}
+              </Button>
+            </>
+          }
+        />
       </RulesPathsProvider>
       <p className="px-4 pb-4 text-xs text-hud-muted">{t("form.hint")}</p>
     </>
