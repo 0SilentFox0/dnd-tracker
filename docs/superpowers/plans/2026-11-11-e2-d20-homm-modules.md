@@ -266,6 +266,8 @@
 
 **Prod.** Немає. **Модель.** Sonnet. **Ревʼю.** Opus.
 
+**Виконано 2026-11-12 з відхиленнями (власник прийняв).** Реальний обсяг ≈ 60–80 файлів, а не ~180: `git mv` неможливий, поки читачі лишаються в core. Не переїхали й чекають читачів: константи й типи контенту (`abilities`-extras, `skills`, `classes`, `choices`, `types/classes|backgrounds`, `class-columns` → Ч11), `spell-slots`/`class-slots` (→ Ч12/Ч17), `sheet-bonuses` (→ Ч10), `isFiveE` у читачах (→ Ч12). Задача 7 (види контенту) — хвіст Ч11. wfrp-учасник: `proficiencyBonus: 0`; wfrp create відкидає `subclass`. Ч10 спирається на `stats.columns.owns` (`archetype` → `heroscaling`) і на `heroHpFallback` у `systems/d20/rules/progression/hero-hp.ts` (→ claim `heroscaling`). Деталі: `docs/STATUS.md` «E2 Ч9».
+
 ## Ч10. Модулі Heroes у персонажах (трек B)
 
 **Мета.** `heroscaling`, `skilltrees`, `artifactsets` мають повні шари персонажа; вимкнення й повторне вмикання модуля не губить дані (D16).
