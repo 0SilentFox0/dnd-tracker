@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('server-only', () => ({}));
 vi.mock('@/lib/utils/api/actor', () => ({
@@ -123,6 +123,10 @@ const CASES: Array<
 ];
 
 describe('нестандартні роути контенту кличуть resolveActor з правильними правами', () => {
+    beforeAll(async () => {
+        for (const [, load] of CASES) await load();
+    }, 30_000);
+
     beforeEach(() => vi.clearAllMocks());
 
     it.each(CASES)('%s', async (_name, load, method, extra, need) => {

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { Prisma } from '@prisma/client';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { getResponseJson } from './helpers';
 
@@ -88,6 +88,11 @@ const post = async (action: string, body?: unknown) => {
 };
 
 describe('progression actions', () => {
+    beforeAll(async () => {
+        await import('@/lib/server/systems/registry');
+        await import('@/app/api/campaigns/[id]/characters/[characterId]/route');
+    }, 30_000);
+
     beforeEach(() => {
         vi.clearAllMocks();
         vi.mocked(prisma.character.findFirst).mockResolvedValue({

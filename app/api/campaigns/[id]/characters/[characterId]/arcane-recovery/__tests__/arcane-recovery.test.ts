@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { prisma } from '@/lib/db';
@@ -111,6 +111,10 @@ const post = async (body: object) => {
 const open = { shortRestOpen: true, slotsSpent: { '1': 2, '2': 1, '6': 1 } };
 
 describe('POST arcane-recovery', () => {
+    beforeAll(async () => {
+        await import('../route');
+    }, 30_000);
+
     beforeEach(() => vi.clearAllMocks());
 
     it('restores the picked slots, marks the day and logs', async () => {

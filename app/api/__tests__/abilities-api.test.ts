@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('@/lib/utils/api/api-auth', () => ({
     requireDM: vi.fn(async () => ({ userId: 'u1' })),
@@ -45,6 +45,11 @@ const ctx = <T extends Record<string, string>>(params: T) => ({
 
 const req = (url: string, init?: RequestInit) =>
     new Request(`http://localhost${url}`, init);
+
+beforeAll(async () => {
+    await import('@/lib/server/systems/registry');
+    await import('@/app/api/campaigns/[id]/skills/[skillId]/route');
+}, 30_000);
 
 describe('abilities API', () => {
     beforeEach(() => vi.clearAllMocks());

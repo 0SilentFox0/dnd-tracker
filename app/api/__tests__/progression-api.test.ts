@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { getResponseJson } from './helpers';
 
@@ -60,6 +60,13 @@ const TREE_ROW = {
 const params = { params: Promise.resolve({ id: 'camp', characterId: 'ch' }) };
 
 describe('GET progression', () => {
+    beforeAll(async () => {
+        await import('@/lib/server/systems/registry');
+        await import(
+            '@/app/api/campaigns/[id]/characters/[characterId]/progression/route'
+        );
+    }, 30_000);
+
     beforeEach(() => {
         vi.clearAllMocks();
         vi.mocked(prisma.character.findFirst).mockResolvedValue(CHAR as never);

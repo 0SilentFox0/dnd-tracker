@@ -33,7 +33,11 @@ async function main() {
             },
         });
 
-        const rows = classlessD20Characters(campaigns, characters);
+        const classes = await prisma.gameClass.findMany({
+            select: { id: true, campaignId: true },
+        });
+
+        const rows = classlessD20Characters(campaigns, characters, classes);
 
         if (flags.has('--json'))
             console.log(

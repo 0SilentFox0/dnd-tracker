@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { prisma } from '@/lib/db';
@@ -131,6 +131,10 @@ const base = {
 };
 
 describe('POST level-up (classes)', () => {
+    beforeAll(async () => {
+        await import('../route');
+    }, 30_000);
+
     beforeEach(() => {
         vi.clearAllMocks();
         vi.mocked(apiAuth.requireDM).mockResolvedValue({

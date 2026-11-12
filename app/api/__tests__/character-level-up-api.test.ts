@@ -1,5 +1,13 @@
 import { NextResponse } from 'next/server';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import {
+    afterEach,
+    beforeAll,
+    beforeEach,
+    describe,
+    expect,
+    it,
+    vi,
+} from 'vitest';
 
 import { getResponseJson } from './helpers';
 
@@ -59,6 +67,12 @@ const post = async () => {
 const random = vi.spyOn(Math, 'random');
 
 describe('POST level-up', () => {
+    beforeAll(async () => {
+        await import(
+            '@/app/api/campaigns/[id]/characters/[characterId]/level-up/route'
+        );
+    }, 30_000);
+
     beforeEach(() => {
         vi.clearAllMocks();
         random.mockReturnValue(0);

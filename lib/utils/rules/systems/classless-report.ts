@@ -1,3 +1,4 @@
+import { CharacterClassesSchema } from '@/lib/schemas/classes';
 import { parseRules } from '@/lib/utils/rules/schema';
 import { ruleSystemOf } from '@/lib/utils/rules/systems/registry';
 import { statColumnsOf } from '@/lib/utils/rules/systems/stats';
@@ -23,8 +24,23 @@ export interface ClasslessRow {
     level: number;
 }
 
-const hasClass = ({ class: name, classes }: ReportCharacter) =>
-    name.trim() !== '' || (Array.isArray(classes) && classes.length > 0);
+export interface ReportClass {
+    id: string;
+    campaignId: string;
+}
+
+/** same test as the engine (from-character): classes enabled, valid `classes`, at least one entry resolves to a campaign class */
+const hasEngineClass = (
+    { classes }: ReportCharacter,
+    classesEnabled: boolean,
+    classIds: ReadonlySet<string> | undefined
+) => {
+    if (!classesEnabled || !classIds) return false;
+
+    const parsed = CharacterClassesSchema.safeParse(classes);
+
+    return parsed.success && parsed.data.some((e) => classIds.has(e.classId));
+};
 
 /** compositions that own `classes` but not `archetype` (d20 without hero scaling): classless characters there get HP 1 */
 export const exposedCampaignIds = (
@@ -42,12 +58,37 @@ export const exposedCampaignIds = (
 
 export function classlessD20Characters(
     campaigns: readonly ReportCampaign[],
-    characters: readonly ReportCharacter[]
+    characters: readonly ReportCharacter[],
+    classes: readonly ReportClass[]
 ): ClasslessRow[] {
     const exposed = exposedCampaignIds(campaigns);
 
+    const enabled = new Map(
+        campaigns.map(({ id, rules }) => [
+            id,
+            parseRules(rules).classes.enabled,
+        ])
+    );
+
+    const idsByCampaign = new Map<string, Set<string>>();
+
+    for (const { id, campaignId } of classes) {
+        const ids = idsByCampaign.get(campaignId) ?? new Set<string>();
+
+        ids.add(id);
+        idsByCampaign.set(campaignId, ids);
+    }
+
     return characters
-        .filter((c) => exposed.has(c.campaignId) && !hasClass(c))
+        .filter(
+            (c) =>
+                exposed.has(c.campaignId) &&
+                !hasEngineClass(
+                    c,
+                    enabled.get(c.campaignId) ?? false,
+                    idsByCampaign.get(c.campaignId)
+                )
+        )
         .map((c) => ({
             campaignId: c.campaignId,
             characterId: c.id,

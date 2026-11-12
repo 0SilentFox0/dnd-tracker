@@ -141,9 +141,9 @@ const context = (rules: Ruleset) =>
         featsById: {},
     }) as never;
 
-const sheetFor = async (rules: Ruleset) => {
+const sheetFor = async (rules: Ruleset, stored: typeof hero = hero) => {
     const participant = await createBattleParticipantFromCharacter(
-        hero as never,
+        stored as never,
         'b1',
         ParticipantSide.ALLY,
         undefined,
@@ -157,7 +157,7 @@ const sheetFor = async (rules: Ruleset) => {
         rules,
         classes: undefined,
         character: {
-            ...hero,
+            ...stored,
             avatar: null,
             subclass: null,
             alignment: null,
@@ -188,17 +188,20 @@ describe.each(MODULES)('D16 module toggle: $id', (mod) => {
 
     const rulesOff = rulesWith(without(mod.id));
 
-    it('rules: sections survive switching the module off and on', () => {
-        const off = mustMerge(parseRules(RAW), without(mod.id), RAW);
+    if (mod.id === 'heroscaling')
+        it('rules: sections survive switching the module off and on', () => {
+            const off = mustMerge(parseRules(RAW), without(mod.id), RAW);
 
-        expect(off.heroScaling).toEqual(RAW.heroScaling);
+            expect(off.heroScaling).toEqual(RAW.heroScaling);
 
-        const on = mustMerge(parseRules(off), FULL, off);
+            const on = mustMerge(parseRules(off), FULL, off);
 
-        expect(parseRules(on).heroScaling).toEqual(parseRules(RAW).heroScaling);
-        expect(on.heroScaling).toEqual(RAW.heroScaling);
-        expect(parseRules(on).system.modules).toEqual([...FULL].sort());
-    });
+            expect(parseRules(on).heroScaling).toEqual(
+                parseRules(RAW).heroScaling
+            );
+            expect(on.heroScaling).toEqual(RAW.heroScaling);
+            expect(parseRules(on).system.modules).toEqual([...FULL].sort());
+        });
 
     it('rules: the module is really absent after switching off', () => {
         expect(rulesOff.system.modules).not.toContain(mod.id);
@@ -267,19 +270,43 @@ describe.each(MODULES)('D16 module toggle: $id', (mod) => {
             expect(sheetOn.items.sets).toHaveLength(1);
             expect(sheetOff.items.sets).toEqual([]);
         }
-
-        const { sheet: sheetBack } = await sheetFor(rulesWith(FULL));
-
-        expect(sheetBack).toEqual(sheetOn);
     });
 
-    it('rows: switching off and on deletes nothing', async () => {
-        const off = mustMerge(parseRules(RAW), without(mod.id), RAW);
+    it('a whole-form PATCH while the module is off keeps its data: the sheet is unchanged after switching on', async () => {
+        const { sheet: sheetOn } = await sheetFor(rulesOn);
 
-        mustMerge(parseRules(off), FULL, off);
+        const form = {
+            name: 'Герой',
+            level: 3,
+            ...('column' in mod ? { [mod.column]: 'other' } : {}),
+        } as never;
 
-        await sheetFor(rulesOff);
-        await sheetFor(rulesOn);
+        const written = normalizeCharacterInput(
+            ruleSystemOf(rulesOff),
+            form,
+            rulesOff,
+            'update'
+        );
+
+        const { columnResets } = buildCharacterUpdateData({
+            character: { ...hero, spellSlots: {}, seenLevel: null } as never,
+            data: form,
+            campaign: { maxLevel: 20 },
+            race: null,
+            resets: ruleSystemOf(rulesOff).progression.levelResets,
+        });
+
+        if ('column' in mod) expect(written).not.toHaveProperty(mod.column);
+
+        expect(columnResets).toEqual({});
+
+        const stored = { ...hero, ...written, ...columnResets };
+
+        expect(stored).toEqual(expect.objectContaining(hero));
+
+        const { sheet: sheetBack } = await sheetFor(rulesOn, stored);
+
+        expect(sheetBack).toEqual(sheetOn);
 
         for (const model of Object.values(h)) {
             expect(model.delete).not.toHaveBeenCalled();

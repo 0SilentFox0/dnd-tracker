@@ -64,6 +64,9 @@ const CORE_OPERATIONS: Record<string, CharacterOperation> = {
     ),
 };
 
+const isCampaignScope = (gate: unknown): gate is CampaignScope =>
+    typeof gate === 'object' && gate !== null && 'access' in gate;
+
 /** Registry imports its modules, so a module's own gate cannot ask it whether the operation is in the composition. */
 const inCompositionOnly = (
     operation: CharacterOperation
@@ -72,11 +75,10 @@ const inCompositionOnly = (
     gate: async (ctx) => {
         const gate = await operation.gate(ctx);
 
-        return gate instanceof NextResponse ||
-            operationInComposition(
-                (gate as CampaignScope).access.campaign.rules,
-                operation.name
-            )
+        if (gate instanceof NextResponse) return gate;
+
+        return isCampaignScope(gate) &&
+            operationInComposition(gate.access.campaign.rules, operation.name)
             ? gate
             : errorResponse(API_ERRORS.NOT_FOUND, 404);
     },
