@@ -1,6 +1,6 @@
 import { BUNDLE_SETTING_KEYS, BUNDLE_TABLES, type BundleTableDef, pick } from "@/lib/server/templates/bundle";
 import { collectKeysAndStrings, remapIds } from "@/lib/server/templates/remap-ids";
-import { MECHANIC_KEYS, rowHash, settingsHash } from "@/lib/server/templates/sync/hash";
+import { mechanicKeysOf, rowHash, settingsHash } from "@/lib/server/templates/sync/hash";
 import { indexOf, type SyncIndex } from "@/lib/server/templates/sync/index";
 import { getEntry } from "@/lib/server/templates/sync/state";
 import { IGNORED_DELETED, type SyncContext, type SyncItem } from "@/lib/server/templates/sync/types";
@@ -104,7 +104,9 @@ function classifyRules(ctx: SyncContext, ruleLabel: (key: string) => string): Sy
 
   const loc = parseRules(ctx.target.rules) as Record<string, unknown>;
 
-  return MECHANIC_KEYS.flatMap((key): SyncItem[] => {
+  const keys = [...new Set([...mechanicKeysOf(ctx.sourceBundle.rules), ...mechanicKeysOf(ctx.target.rules)])];
+
+  return keys.flatMap((key): SyncItem[] => {
     const s = hashJson(src[key]);
 
     const l = hashJson(loc[key]);

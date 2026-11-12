@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { layeredModels } from "@/lib/db/layer/config";
 import { BUNDLE_TABLES, emptyBundle } from "@/lib/server/templates/bundle";
-import { baselineFromBundle, rowHash, rulesHashes, settingsHash } from "@/lib/server/templates/sync/hash";
+import { baselineFromBundle, mechanicKeysOf, rowHash, rulesHashes, settingsHash } from "@/lib/server/templates/sync/hash";
 import { hashJson } from "@/lib/utils/battle/store/stable-json";
 import { contentRowHash } from "@/lib/utils/content/row-hash";
 import { MECHANIC_REGISTRY } from "@/lib/utils/rules/registry";
@@ -58,15 +58,47 @@ describe("sync hashes", () => {
     expect(rowHash({ ...row, componentFlags: { v: true, s: true, m: true } }, spells)).not.toBe(rowHash(row, spells));
   });
 
-  it("rulesHashes covers every mechanic and treats {} as defaults", () => {
+  it("rulesHashes covers every mechanic of the composition and treats {} as defaults", () => {
     const h = rulesHashes({});
 
-    expect(Object.keys(h).sort()).toEqual(Object.keys(MECHANIC_REGISTRY).sort());
-    expect(h.morale).toBe(hashJson(parseRules({}).morale));
+    expect(Object.keys(h).sort()).toEqual(mechanicKeysOf({}).sort());
+    expect(Object.keys(rulesHashes(WFRP_RULES)).every((k) => k in MECHANIC_REGISTRY)).toBe(true);
+    expect(rulesHashes({ system: { key: "dnd5e", modules: ["morale"] } }).morale).toBe(hashJson(parseRules({ system: { key: "dnd5e", modules: ["morale"] } }).morale));
   });
 
   it("rulesHashes does not treat system as a mechanic", () => {
     expect(Object.keys(rulesHashes(WFRP_RULES))).not.toContain("system");
+  });
+
+  it("rulesHashes keys follow the composition; modules on/off", () => {
+    const off = rulesHashes({ system: { key: "dnd5e", modules: [] } });
+
+    const on = rulesHashes({ system: { key: "dnd5e", modules: ["morale"] } });
+
+    expect(off).not.toHaveProperty("morale");
+    expect(on.morale).toBe(hashJson(parseRules({ system: { key: "dnd5e", modules: ["morale"] } }).morale));
+    expect(Object.keys(on)).toEqual(expect.arrayContaining(Object.keys(off)));
+  });
+
+  it("rulesHashes ignores unknown keys", () => {
+    const base = rulesHashes({});
+
+    expect(rulesHashes({ unknownSection: { a: 1 } })).toEqual(base);
+    expect(rulesHashes({ morale: { bogusKey: 1 } })).toEqual(rulesHashes({ morale: {} }));
+  });
+
+  it("every preset keeps the pre-composition hash for each key it still covers", () => {
+    for (const key of ["dnd5e", "homm", "wfrp"]) {
+      const rules = { system: { key } };
+
+      const parsed = parseRules(rules) as Record<string, unknown>;
+
+      for (const [k, h] of Object.entries(rulesHashes(rules))) expect(h, `${key}.${k}`).toBe(hashJson(parsed[k]));
+    }
+  });
+
+  it("mechanicKeysOf never includes system", () => {
+    expect(mechanicKeysOf({})).not.toContain("system");
   });
 
   it("settingsHash depends only on the four settings", () => {
