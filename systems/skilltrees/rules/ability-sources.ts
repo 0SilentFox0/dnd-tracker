@@ -32,6 +32,7 @@ const pickSkillEntries = (skills: SkillEntry[]): SkillEntry[] => pickHighestPerL
 
 export const SKILLTREES_ABILITY_SOURCES: readonly AbilitySourceHook[] = [
   {
+    types: ["skill"],
     at: "head",
     collect: ({ skills }) =>
       pickSkillEntries(skills).flatMap((entry) => resolveAbilities(skillSource(entry), inheritSchool(skillAbilities(entry.row), entry.row.spellGroupId ?? entry.mainSkillSpellGroupId))),
