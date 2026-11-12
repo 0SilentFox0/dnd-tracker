@@ -1,30 +1,19 @@
-import { pickHighestPerLine, resolveAbilities } from "./resolve";
+import { resolveAbilities } from "./resolve";
+import type { ArtifactSetRowLike, SkillEntry } from "./source-types";
+import { SYSTEM_ABILITY_SOURCES } from "./system-sources";
 
 import { applyClassScale } from "@/lib/utils/abilities/class-columns";
-import { artifactAbilities, artifactSetAbilities, raceAbilities, skillAbilities, unitAbilities } from "@/lib/utils/abilities/read";
+import { artifactAbilities, raceAbilities, unitAbilities } from "@/lib/utils/abilities/read";
+import { ownedIn } from "@/lib/utils/abilities/registry/owned";
 import type { Ability } from "@/lib/utils/abilities/schema";
 import type { ChoiceGroup } from "@/lib/utils/characters/choices/selections";
 import { itemStatsFromRow } from "@/lib/utils/items/item-row";
 import { consumablePoolKey, itemPoolKey, withItemPool } from "@/lib/utils/items/pools";
-import type { AbilitySource, ResolvedAbility } from "@/types/abilities";
+import type { Composition } from "@/lib/utils/rules/systems/catalog";
+import type { ResolvedAbility } from "@/types/abilities";
 import type { ResolvedClassEntry } from "@/types/classes";
 
-export interface SkillRowLike {
-  id: string;
-  name: string;
-  icon?: string | null;
-  spellGroupId?: string | null;
-  abilities?: unknown;
-}
-
-export interface SkillEntry {
-  row: SkillRowLike;
-  mainSkillId: string | null;
-  level: string | null;
-  levelNode?: boolean;
-  mainSkillSpellGroupId: string | null;
-  personal?: boolean;
-}
+export type { ArtifactSetRowLike, SkillEntry, SkillRowLike } from "./source-types";
 
 export interface RaceRowLike {
   id: string;
@@ -41,46 +30,10 @@ export interface ArtifactRowLike {
   modifiers?: unknown;
 }
 
-export interface ArtifactSetRowLike {
-  id: string;
-  name: string;
-  icon?: string | null;
-  setBonus?: unknown;
-  abilities?: unknown;
-}
-
 export interface UnitRowLike {
   id: string;
   name: string;
   abilities?: unknown;
-}
-
-function inheritSchool(abilities: Ability[], school: string | null): Ability[] {
-  if (!school) return abilities;
-
-  return abilities.map((a) => ({
-    ...a,
-    effects: a.effects.map((e) =>
-      e.kind === "damageBonus" && e.filter.kind === "magic" && !e.filter.school ? { ...e, filter: { ...e.filter, school } } : e,
-    ),
-  }));
-}
-
-function skillSource(entry: SkillEntry): AbilitySource {
-  const { row, mainSkillId, level } = entry;
-
-  return {
-    type: "skill",
-    id: row.id,
-    name: row.name,
-    icon: row.icon ?? null,
-    ...(mainSkillId && level && { line: { mainSkillId, level, ...(entry.levelNode !== undefined && { levelNode: entry.levelNode }) } }),
-    ...(entry.personal && { personal: true }),
-  };
-}
-
-function pickSkillEntries(skills: SkillEntry[]): SkillEntry[] {
-  return pickHighestPerLine(skills.map((item) => ({ item, source: skillSource(item) }))).map((x) => x.item);
 }
 
 function raceResolved(race: RaceRowLike | null): ResolvedAbility[] {
@@ -111,10 +64,10 @@ export function collectCharacterAbilities(input: {
   classes?: ResolvedClassEntry[];
   consumables?: Array<{ itemId: string; row: ArtifactRowLike }>;
   choiceGroups?: readonly ChoiceGroup[];
-}): ResolvedAbility[] {
-  const fromSkills = pickSkillEntries(input.skills).flatMap((entry) =>
-    resolveAbilities(skillSource(entry), inheritSchool(skillAbilities(entry.row), entry.row.spellGroupId ?? entry.mainSkillSpellGroupId)),
-  );
+}, c: Composition): ResolvedAbility[] {
+  const sources = ownedIn(SYSTEM_ABILITY_SOURCES, c).flat();
+
+  const from = (at: "head" | "afterArtifacts") => sources.filter((s) => s.at === at).flatMap((s) => s.collect(input));
 
   const fromArtifacts = input.artifacts.flatMap((a) => {
     const list = artifactAbilities(a);
@@ -122,17 +75,13 @@ export function collectCharacterAbilities(input: {
     return resolveAbilities({ type: "artifact", id: a.id, name: a.name, icon: a.icon ?? null }, itemStatsFromRow(a)?.charges ? withItemPool(list, itemPoolKey(a.id)) : list);
   });
 
-  const fromSets = input.completedSets.flatMap((s) =>
-    resolveAbilities({ type: "artifactSet", id: s.id, name: s.name, icon: s.icon ?? null }, artifactSetAbilities(s)),
-  );
-
   const fromConsumables = (input.consumables ?? []).flatMap(({ itemId, row }) =>
     resolveAbilities({ type: "artifact", id: `consumable:${itemId}`, name: row.name, icon: row.icon ?? null }, withItemPool(artifactAbilities(row), consumablePoolKey(itemId))),
   );
 
   const fromChoices = (input.choiceGroups ?? []).flatMap((g) => resolveAbilities(g.source, g.scale ? applyClassScale(g.abilities, g.scale) : g.abilities));
 
-  return [...fromSkills, ...raceResolved(input.race), ...classResolved(input.classes ?? []), ...fromChoices, ...fromArtifacts, ...fromSets, ...fromConsumables];
+  return [...from("head"), ...raceResolved(input.race), ...classResolved(input.classes ?? []), ...fromChoices, ...fromArtifacts, ...from("afterArtifacts"), ...fromConsumables];
 }
 
 export function collectUnitAbilities(unit: UnitRowLike, race: RaceRowLike | null): ResolvedAbility[] {

@@ -6,6 +6,7 @@ import { applyClassScale, classPools } from "@/lib/utils/abilities/class-columns
 import type { Ability } from "@/lib/utils/abilities/schema";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { classPoolKey } from "@/lib/utils/items/pools";
+import { composition } from "@/lib/utils/rules/systems/catalog";
 import type { ClassColumn, GameClassData, ResolvedClassEntry } from "@/types/classes";
 
 const levels = (f: (l: number) => string) => Array.from({ length: 20 }, (_, i) => f(i + 1));
@@ -103,7 +104,7 @@ describe("multiclass and subclass", () => {
   ];
 
   it("each class uses its own level; the subclass uses its class columns and pool", () => {
-    const list = collectCharacterAbilities({ skills: [], race: null, artifacts: [], completedSets: [], classes: entries });
+    const list = collectCharacterAbilities({ skills: [], race: null, artifacts: [], completedSets: [], classes: entries }, composition({ key: "homm" }));
 
     expect(list.find((a) => a.id === "sw")?.effects[0]).toMatchObject({ amount: { formula: "3" } });
     expect(list.find((a) => a.id === "wb")).toMatchObject({ effects: [{ amount: { formula: "5" } }], limits: { pool: { key: "pool:monk:focus-points" } } });

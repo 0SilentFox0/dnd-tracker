@@ -102,6 +102,27 @@ export const ROOT_SPECS: readonly RootSpec[] = [
     ],
   },
   {
+    file: "lib/utils/abilities/registry/system-variables.ts",
+    blocks: [
+      { layer: (id) => `systems/${id}/rules/ability-variables.ts`, name: (id) => `${upper(id)}_ABILITY_VARIABLES`, line: imp((id) => `${upper(id)}_ABILITY_VARIABLES`, (id) => `@/systems/${id}/rules/ability-variables`) },
+      { layer: (id) => `systems/${id}/rules/ability-variables.ts`, name: (id) => `${upper(id)}_ABILITY_VARIABLES`, line: (id) => `{ system: "${id}", items: ${upper(id)}_ABILITY_VARIABLES },` },
+    ],
+  },
+  {
+    file: "lib/utils/abilities/templates/system-recipes.ts",
+    blocks: [
+      { layer: (id) => `systems/${id}/rules/ability-recipes.ts`, name: (id) => `${upper(id)}_ABILITY_RECIPES`, line: imp((id) => `${upper(id)}_ABILITY_RECIPES`, (id) => `@/systems/${id}/rules/ability-recipes`) },
+      { layer: (id) => `systems/${id}/rules/ability-recipes.ts`, name: (id) => `${upper(id)}_ABILITY_RECIPES`, line: (id) => `{ system: "${id}", items: ${upper(id)}_ABILITY_RECIPES },` },
+    ],
+  },
+  {
+    file: "lib/utils/abilities/build/system-sources.ts",
+    blocks: [
+      { layer: (id) => `systems/${id}/rules/ability-sources.ts`, name: (id) => `${upper(id)}_ABILITY_SOURCES`, line: imp((id) => `${upper(id)}_ABILITY_SOURCES`, (id) => `@/systems/${id}/rules/ability-sources`) },
+      { layer: (id) => `systems/${id}/rules/ability-sources.ts`, name: (id) => `${upper(id)}_ABILITY_SOURCES`, line: (id) => `{ system: "${id}", items: ${upper(id)}_ABILITY_SOURCES },` },
+    ],
+  },
+  {
     file: "lib/utils/rules/systems/sections.ts",
     blocks: [
       { layer: (id) => `systems/${id}/rules/sections.ts`, line: imp((id) => `${upper(id)}_SECTIONS`, (id) => `@/systems/${id}/rules/sections`) },

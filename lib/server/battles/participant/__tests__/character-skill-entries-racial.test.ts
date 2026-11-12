@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { RACES } from "@/data/library/races";
 import { resolveCharacterSkillEntries } from "@/lib/server/battles/participant/character-skill-entries";
 import { collectCharacterAbilities } from "@/lib/utils/abilities/build/collect";
+import { composition } from "@/lib/utils/rules/systems/catalog";
 import { buildTreeJson, racialNodeId } from "@/lib/utils/skills/progression";
 
 async function learnedRacial(raceKey: string, levels: Array<"basic" | "advanced" | "expert">) {
@@ -20,7 +21,7 @@ async function learnedRacial(raceKey: string, levels: Array<"basic" | "advanced"
 
   const entries = await resolveCharacterSkillEntries(character as never, "c1", rows as never, new Map(), tree as never);
 
-  return collectCharacterAbilities({ skills: entries as never, race: null, artifacts: [], completedSets: [] });
+  return collectCharacterAbilities({ skills: entries as never, race: null, artifacts: [], completedSets: [] }, composition({ key: "homm" }));
 }
 
 const ALL = ["basic", "advanced", "expert"] as const;

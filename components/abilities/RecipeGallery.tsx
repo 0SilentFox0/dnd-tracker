@@ -18,7 +18,8 @@ import { useRuleSystem } from "@/lib/hooks/systems/useRuleSystem";
 import { useTranslator } from "@/lib/i18n/use-translator";
 import type { Ability } from "@/lib/utils/abilities/schema";
 import { summarizeAbility } from "@/lib/utils/abilities/summary";
-import { buildRecipe, buildScratchAbility, type Recipe, RECIPE_CATEGORIES, type RecipeCategory, type RecipeResult, RECIPES } from "@/lib/utils/abilities/templates";
+import { buildRecipe, buildScratchAbility, type Recipe, RECIPE_CATEGORIES, type RecipeCategory, type RecipeResult, RECIPES, recipesOf } from "@/lib/utils/abilities/templates";
+import { composition } from "@/lib/utils/rules/systems/catalog";
 import type { SpellEffect } from "@/lib/utils/spells/model/schema";
 
 type SpellPick = { effects: SpellEffect[]; concentration?: boolean };
@@ -67,7 +68,9 @@ export function RecipeGallery(props: RecipeGalleryProps) {
 
   const form = useRecipeValues(selected, ctx);
 
-  const recipes = useMemo(() => [...RECIPES, ...traitRecipes].filter((r) => r.scopes.includes(scope) && (category === ALL || r.category === category)), [scope, category, traitRecipes]);
+  const baseRecipes = useMemo(() => (rule.ready ? recipesOf(composition({ key: rule.key })) : RECIPES), [rule]);
+
+  const recipes = useMemo(() => [...baseRecipes, ...traitRecipes].filter((r) => r.scopes.includes(scope) && (category === ALL || r.category === category)), [scope, category, baseRecipes, traitRecipes]);
 
   const cardCtx = useMemo(() => (r: Recipe) => ({ scope, name: text(r, "defaultName"), note }), [scope, text, note]);
 

@@ -4,6 +4,7 @@ import { ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { applyBakedAuras, bakePassives } from "@/lib/utils/abilities/build/bake";
 import { collectCharacterAbilities } from "@/lib/utils/abilities/build/collect";
+import { composition } from "@/lib/utils/rules/systems/catalog";
 
 describe("bake", () => {
   it("запікає maxHp, ініціативу, Силу (з модифікатором) і слоти", () => {
@@ -75,7 +76,7 @@ describe("collectCharacterAbilities", () => {
       race: null,
       artifacts: [],
       completedSets: [],
-    });
+    }, composition({ key: "homm" }));
 
     expect(list).toHaveLength(1);
     expect(list[0].effects[0]).toEqual({ kind: "damageBonus", filter: { kind: "magic", school: "chaos" }, percent: 30 });

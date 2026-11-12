@@ -1,51 +1,12 @@
-import type { ParamDef, Recipe, RecipeCategory, RecipeContext, RecipeScope, RecipeValues } from "./types";
+import { ability, both,damageType, dice, dual, fx, num, PASSIVE, range, rounds } from "./kit";
+import type { Recipe, RecipeCategory } from "./types";
 
-import { DAMAGE_ELEMENT_OPTIONS } from "@/lib/constants/damage";
-import { newEffect } from "@/lib/utils/abilities/editor";
-import type { Effect, EffectKind, Trigger } from "@/lib/utils/abilities/schema";
-import { CONDITION_5E_KEYS, CONDITION_KEYS, DAMAGE_FILTER_KINDS, STAT_KEYS } from "@/lib/utils/abilities/schema/kinds";
-import { SPELL_EFFECT_TRIGGER } from "@/lib/utils/spells/editor/spell-only";
-import type { SpellEffect } from "@/lib/utils/spells/model/schema";
+import type { Trigger } from "@/lib/utils/abilities/schema";
+import { DAMAGE_FILTER_KINDS, STAT_KEYS } from "@/lib/utils/abilities/schema/kinds";
 
 export const RECIPE_CATEGORIES: readonly RecipeCategory[] = ["defense", "offense", "support", "resource", "control"];
 
-const PASSIVE: Trigger = { event: "passive" };
-
-const range = (from: number, to: number, step = 1) => Array.from({ length: Math.floor((to - from) / step) + 1 }, (_, i) => String(from + i * step));
-
-const DAMAGE_TYPES = DAMAGE_ELEMENT_OPTIONS.map((o) => o.value);
-
-const fx = (kind: EffectKind, trigger: Trigger, patch: Record<string, unknown> = {}) => {
-  const effect: Record<string, unknown> = { ...newEffect(kind, trigger), ...patch };
-
-  for (const key of Object.keys(effect)) if (effect[key] === undefined) delete effect[key];
-
-  return effect as Effect;
-};
-
-const num = (key: string, def: number, min: number, max: number): ParamDef => ({ key, kind: "number", default: def, min, max });
-
-const dice = (def: string): ParamDef => ({ key: "dice", kind: "dice", default: def });
-
-const damageType = (def: string): ParamDef => ({ key: "damageType", kind: "damageType", default: def, options: DAMAGE_TYPES });
-
-const rounds = (def: number) => num("rounds", def, 1, 10);
-
-function ability(trigger: Trigger, effects: Effect[], limits?: { perBattle: number }) {
-  return (_v: RecipeValues, ctx: RecipeContext) => ({ ability: { name: ctx.name, trigger, ...(limits ? { limits } : {}), effects } });
-}
-
-function dual(make: (v: RecipeValues, trigger: Trigger) => Effect[], opts: { concentration?: boolean } = {}): Recipe["build"] {
-  return (v, ctx) => {
-    if (ctx.scope === "spell") return { spell: make(v, SPELL_EFFECT_TRIGGER) as SpellEffect[], ...(opts.concentration ? { concentration: true } : {}) };
-
-    return { ability: { name: ctx.name, trigger: SPELL_EFFECT_TRIGGER, limits: { perBattle: 1 }, effects: make(v, SPELL_EFFECT_TRIGGER) } };
-  };
-}
-
-const both: readonly RecipeScope[] = ["ability", "spell"];
-
-export const RECIPES: readonly Recipe[] = [
+export const CORE_RECIPES: readonly Recipe[] = [
   {
     id: "stats",
     category: "support",
@@ -108,13 +69,6 @@ export const RECIPES: readonly Recipe[] = [
     },
   },
   {
-    id: "spellSlots",
-    category: "resource",
-    scopes: ["ability"],
-    params: [{ key: "level", kind: "select", default: 1, options: range(1, 9) }, num("count", 1, 1, 5)],
-    build: (v, ctx) => ability(PASSIVE, [fx("modifyStat", PASSIVE, { stat: "spellSlots", spellLevels: [Number(v.level)], flat: v.count })])(v, ctx),
-  },
-  {
     id: "damageSpell",
     category: "offense",
     scopes: both,
@@ -143,13 +97,6 @@ export const RECIPES: readonly Recipe[] = [
     build: dual((v, t) => [fx("hot", t, { healPerRound: v.dice, duration: { rounds: v.rounds } })]),
   },
   {
-    id: "condition",
-    category: "control",
-    scopes: both,
-    params: [{ key: "condition", kind: "select", default: "stunned", options: [...CONDITION_5E_KEYS, ...CONDITION_KEYS] }, rounds(1)],
-    build: dual((v, t) => [fx("applyCondition", t, { condition: v.condition, duration: { rounds: v.rounds } })]),
-  },
-  {
     id: "pushBack",
     category: "control",
     scopes: both,
@@ -169,19 +116,5 @@ export const RECIPES: readonly Recipe[] = [
     scopes: both,
     params: [],
     build: dual((_v, t) => [fx("cleanse", t)]),
-  },
-  {
-    id: "morale",
-    category: "support",
-    scopes: both,
-    params: [{ key: "delta", kind: "select", default: 1, options: range(-3, 3).filter((s) => s !== "0") }],
-    build: dual((v, t) => [fx("changeMorale", t, { delta: Number(v.delta) })]),
-  },
-  {
-    id: "concentrationBuff",
-    category: "support",
-    scopes: ["spell"],
-    params: [num("value", 2, 1, 5), rounds(5)],
-    build: dual((v, t) => [fx("modifyStat", t, { stat: "armor", flat: v.value, duration: { rounds: v.rounds } })], { concentration: true }),
   },
 ];

@@ -37,6 +37,7 @@ import { isRecord } from "@/lib/utils/common/is-record";
 import { attunedRefs } from "@/lib/utils/items/resolve";
 import { DEFAULT_RULES, heroDiceTable, heroHpFormula, moraleCapFromRules, proficiencyForLevel, type Ruleset } from "@/lib/utils/rules";
 import { currencyValueOf, ruleSystemOf } from "@/lib/utils/rules/systems";
+import { composition } from "@/lib/utils/rules/systems/catalog";
 import { systemSlotOf } from "@/lib/utils/rules/systems/slot";
 import { resolveClassEntries } from "@/lib/utils/spells/class-slots";
 import { buildIngredientStock } from "@/lib/utils/spells/ingredients/stock";
@@ -249,7 +250,7 @@ export async function createBattleParticipantFromCharacter(
     consumables: consumables.map(({ itemId, row }) => ({ itemId, row })),
     ...(resolvedClasses && { classes: resolvedClasses }),
     ...(choiceGroups.length > 0 && { choiceGroups }),
-  }),
+  }, composition(rules.system)),
     ...immunityAbilities(getCharacterImmunities(character), { type: "character", id: character.id }),
   ];
 

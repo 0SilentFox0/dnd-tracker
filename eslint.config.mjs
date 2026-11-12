@@ -70,6 +70,9 @@ const SYSTEM_ROOTS = [
   "lib/utils/abilities/registry/effects/system-flag-rows.ts",
   "lib/utils/abilities/schema/module-effects.ts",
   "lib/utils/abilities/registry/effects/module-effect-rows.ts",
+  "lib/utils/abilities/registry/system-variables.ts",
+  "lib/utils/abilities/templates/system-recipes.ts",
+  "lib/utils/abilities/build/system-sources.ts",
   "scripts/templates/systems/index.ts",
   "scripts/templates/systems/adapters.ts",
 ];
