@@ -31,10 +31,10 @@ const apply = (target: BattleParticipant, key: string, over: Record<string, unkn
 const pacify = (p: BattleParticipant) => apply(p, "custom:pacified").participants[0];
 
 describe("правила: custom-стани", () => {
-  it("кампанія без custom не отримує ключа; невалідний запис скидає секцію", () => {
+  it("кампанія без custom не отримує ключа; невалідний запис скидає лише custom", () => {
     expect(parseRules({}).conditions).toEqual(DEFAULT_RULES.conditions);
     expect("custom" in parseRules({}).conditions).toBe(false);
-    expect(parseRules({ conditions: { enabled: true, custom: [{ key: "bad key", name: "x", description: "", markers: [] }] } }).conditions).toEqual(DEFAULT_RULES.conditions);
+    expect(parseRules({ conditions: { enabled: true, custom: [{ key: "bad key", name: "x", description: "", markers: [] }] } }).conditions).toEqual({ ...DEFAULT_RULES.conditions, enabled: true });
     expect(parseRules({ conditions: { custom: [{ ...PACIFIED, markers: ["unknown"] }] } }).conditions.custom).toBeUndefined();
   });
 

@@ -11,10 +11,10 @@ describe("rules: сумісність збережених даних і patch",
     expect(rules.morale).toEqual({ enabled: false, cap: 7 });
   });
 
-  it("невідоме вкладене поле скидає всю секцію, невідоме верхнє поле ігнорується", () => {
+  it("невідоме вкладене поле ігнорується без скидання секції (по пунктах), невідоме верхнє поле ігнорується", () => {
     const rules = parseRules({ items: { enabled: true, attunementLimit: 5, unknown: true }, future: { enabled: true } });
 
-    expect(rules).toEqual(DEFAULT_RULES);
+    expect(rules).toEqual({ ...DEFAULT_RULES, items: { enabled: true, attunementLimit: 5 } });
     expect(RulesetSchema.safeParse({ items: { enabled: true, unknown: true } }).success).toBe(false);
   });
 

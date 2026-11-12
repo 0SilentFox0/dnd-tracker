@@ -1,7 +1,9 @@
 import { z } from "zod";
 
 import { DEFAULT_RULES } from "./defaults";
+import { ALL_SECTIONS } from "./section-registry";
 import { CRITICALS_ORDER_MESSAGE, INITIATIVE_ORDER_MESSAGE, type Ruleset, sectionSchemas } from "./section-shapes";
+import { parseSection } from "./sections";
 
 import { CUSTOM_CONDITION_KEY_RE } from "@/lib/utils/abilities/schema/kinds";
 import { isRecord } from "@/lib/utils/common/is-record";
@@ -94,27 +96,31 @@ export const RulesetSchema = z
     }
   });
 
+const warnedModules = new Set<string>();
+
+function warnDroppedModules(system: { key: string; modules?: readonly string[] }) {
+  const id = `${system.key}:${(system.modules ?? []).join(",")}`;
+
+  if (warnedModules.has(id)) return;
+
+  warnedModules.add(id);
+  console.warn(`rules.system.modules ignored: ${id}`);
+}
+
 export function parseRules(raw: unknown): Ruleset {
   const obj = isRecord(raw) ? raw : {};
 
-  const rules = Object.fromEntries(
-    (Object.keys(sections) as (keyof Sections)[]).filter((k): k is Exclude<keyof Sections, "system"> => k !== "system").map((k) => {
-      const parsed = sections[k].safeParse(obj[k] ?? {});
-
-      const valid =
-        parsed.success &&
-        (k !== "initiative" || initiativeOrdered(parsed.data as Ruleset["initiative"])) &&
-        (k !== "criticals" || criticalsOrdered(parsed.data as Ruleset["criticals"]));
-
-      return [k, valid ? parsed.data : DEFAULT_RULES[k]];
-    }),
-  ) as Omit<Ruleset, "system">;
+  const rules = Object.fromEntries(Object.entries(ALL_SECTIONS).filter(([name]) => name !== "system").map(([name, section]) => [name, parseSection(section, obj[name])])) as Omit<Ruleset, "system">;
 
   const system = sectionSchemas.system.safeParse(obj.system);
 
   if (!system.success) return { ...rules, system: { key: rules.classes.enabled ? "dnd5e" : "homm" } };
 
-  return { ...rules, system: validateComposition(system.data).length > 0 ? { key: system.data.key } : system.data };
+  if (validateComposition(system.data).length === 0) return { ...rules, system: system.data };
+
+  warnDroppedModules(system.data);
+
+  return { ...rules, system: { key: system.data.key } };
 }
 
 const RULES_CACHE_LIMIT = 50;

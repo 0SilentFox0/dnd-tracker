@@ -11,3 +11,5 @@ export const sectionsOfSystem = (system: SystemSelection): SectionMap => section
 /** Every registered section regardless of the active composition (transitional: readers still see the full Ruleset) */
 export const allSections = (): SectionMap =>
   mergeContributions([{ id: "core", contribution: CORE_SECTIONS }, ...Object.entries(SECTION_CONTRIBUTIONS).map(([id, contribution]) => ({ id, contribution }))]);
+
+export const ALL_SECTIONS: SectionMap = allSections();

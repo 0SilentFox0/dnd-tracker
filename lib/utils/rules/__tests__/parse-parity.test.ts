@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { parseRules } from "../schema";
 
@@ -37,7 +37,31 @@ describe("parseRules parity with frozen pre-Ч3 parse", () => {
     "system modules deduped and sorted": { ...srd, system: { key: "dnd5e", modules: ["b", "a", "a"] } },
   };
 
+  // Item-level fallback is by design (Ч3): path of the section that differs, the expected new value and why.
+  const BY_DESIGN: Record<string, { section: keyof ReturnType<typeof parseRules>; expected: unknown; reason: string }> = {
+    "unknown extra key in section": { section: "saves", expected: { proficiency: true }, reason: "an unknown sub-key no longer drops the whole section to defaults" },
+    "invalid custom condition item": { section: "conditions", expected: { enabled: true, exhaustion: "2014" }, reason: "an invalid conditions.custom falls back to its own default, enabled/exhaustion are kept" },
+  };
+
   it.each(Object.keys(CASES))("synthetic: %s", (name) => {
-    expect(parseRules(CASES[name])).toEqual(legacyParseRules(CASES[name]));
+    const next = parseRules(CASES[name]);
+
+    const legacy = legacyParseRules(CASES[name]);
+
+    const difference = BY_DESIGN[name];
+
+    if (!difference) return expect(next).toEqual(legacy);
+
+    expect(next[difference.section], difference.reason).toEqual(difference.expected);
+    expect({ ...next, [difference.section]: legacy[difference.section] }).toEqual(legacy);
+  });
+
+  it("invalid system.modules are dropped from the parse result but reported", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+
+    expect(parseRules({ system: { key: "dnd5e", modules: ["definitely-not-a-module"] } }).system).toEqual({ key: "dnd5e" });
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining("definitely-not-a-module"));
+
+    warn.mockRestore();
   });
 });
