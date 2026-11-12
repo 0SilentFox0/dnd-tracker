@@ -104,7 +104,7 @@ function classifyRules(ctx: SyncContext, ruleLabel: (key: string) => string): Sy
 
   const loc = parseRules(ctx.target.rules) as Record<string, unknown>;
 
-  const keys = [...new Set([...mechanicKeysOf(ctx.sourceBundle.rules), ...mechanicKeysOf(ctx.target.rules)])];
+  const keys = mechanicKeysOf(ctx.sourceBundle.rules);
 
   return keys.flatMap((key): SyncItem[] => {
     const s = hashJson(src[key]);

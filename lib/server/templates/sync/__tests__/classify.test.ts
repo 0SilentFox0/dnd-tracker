@@ -162,6 +162,14 @@ describe("classify", () => {
     expect(visible(c)).toEqual([expect.objectContaining({ scope: "rules", key: "morale", status: "updated" })]);
   });
 
+  it("rules: a module the source pack lacks is not synced (enabled later with changed settings)", () => {
+    const c = ctx({ rules: { system: { key: "dnd5e", modules: [] } } }, [], {});
+
+    c.target.rules = { system: { key: "dnd5e", modules: ["morale"] }, morale: { enabled: false } };
+
+    expect(visible(c).filter((i) => i.scope === "rules")).toEqual([]);
+  });
+
   it("settings: one item with changed field names", () => {
     const c = ctx({ settings: { ...emptyBundle().settings, maxLevel: 10 } }, [], {});
 

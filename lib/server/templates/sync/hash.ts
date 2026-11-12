@@ -13,7 +13,7 @@ const activeMechanicKeys = (parsed: ReturnType<typeof parseRules>): string[] =>
     .filter(([, section]) => section.mechanic)
     .map(([name]) => name);
 
-/** Mechanic sections present in the composition of this rules JSON; keys unknown to it are neither hashed nor synced */
+/** Mechanic sections present in the composition of this rules JSON; keys unknown to it are neither hashed nor synced; sync classifies only the source pack's keys (the pack owns nothing else) */
 export const mechanicKeysOf = (rules: unknown): string[] => activeMechanicKeys(parseRules(rules));
 
 export function rulesHashes(rules: unknown): Record<string, string> {
