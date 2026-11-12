@@ -32,6 +32,10 @@ export interface SystemSchemas {
 export interface SystemOperation {
     operation: CharacterOperation;
     input: ZodType;
+    /** Assistant: a read action (scope `characters:read`) that needs no confirmation */
+    read?: true;
+    /** Assistant: a write that is never auto-applied */
+    confirm?: 'always';
 }
 
 export type SystemHttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';

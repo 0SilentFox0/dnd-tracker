@@ -5,21 +5,14 @@ import { getTranslator } from '@/lib/i18n/translator';
 import { withCharacterOperation } from '@/lib/server/characters/operation-context';
 import {
     PROGRESSION_INPUTS,
+    progressionAlwaysHuman,
     progressionReads,
     progressionState,
     runCharacterProgression,
+    systemProgressionOperations,
 } from '@/lib/server/characters/progression-service';
 import { requestDigest } from '@/lib/utils/battle/store/stable-json';
 import { jsonContent } from '@/lib/utils/common/json';
-
-const alwaysHuman = new Set([
-    'progression.reset',
-    'progression.unlearn',
-    'choices',
-    'resources',
-    'inventory.patch',
-    'stash.apply',
-]);
 
 export const CHARACTER_PROGRESSION_ACTIONS: readonly AssistantActionDef[] =
     Object.entries(PROGRESSION_INPUTS).map(
@@ -40,6 +33,9 @@ export const CHARACTER_PROGRESSION_ACTIONS: readonly AssistantActionDef[] =
                         ? ('characters:read' as const)
                         : ('characters:write' as const),
                 },
+                ...(systemProgressionOperations.has(operation) && {
+                    systemOperation: operation,
+                }),
             };
 
             if (read)
@@ -59,7 +55,7 @@ export const CHARACTER_PROGRESSION_ACTIONS: readonly AssistantActionDef[] =
             return {
                 ...base,
                 effect: 'write',
-                confirmation: alwaysHuman.has(operation)
+                confirmation: progressionAlwaysHuman.has(operation)
                     ? 'always'
                     : 'standard',
                 prepare: async (caller, raw) => {

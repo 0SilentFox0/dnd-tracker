@@ -161,7 +161,7 @@ export async function buildInstructions({
     const domains = [
         ...new Set(
             assistantCatalog
-                .listActions(actor)
+                .listActions(actor, rules)
                 .map((action) => action.id.split('.')[0])
         ),
     ].sort();

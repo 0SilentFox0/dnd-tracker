@@ -79,6 +79,7 @@ export const SKILLTREES_OPERATIONS: Record<string, SystemOperation> = {
     progression: {
         operation: erased(progressionOperation),
         input: characterIdSchema,
+        read: true,
     },
     'progression.learn': {
         operation: erased(learnOperation),
@@ -87,9 +88,11 @@ export const SKILLTREES_OPERATIONS: Record<string, SystemOperation> = {
     'progression.unlearn': {
         operation: erased(unlearnOperation),
         input: characterIdSchema.extend({ nodeIds }).strict(),
+        confirm: 'always',
     },
     'progression.reset': {
         operation: erased(resetOperation),
         input: characterIdSchema,
+        confirm: 'always',
     },
 };
