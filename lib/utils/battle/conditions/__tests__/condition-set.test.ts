@@ -4,9 +4,9 @@ import { CombatStatus } from "@/lib/constants/battle";
 import { goblin, hero } from "@/lib/server/battles/__tests__/mutations/fixtures";
 import { hasCondition, PERMANENT_ROUNDS } from "@/lib/utils/battle/conditions";
 import { DEATH_SAVES_TIMED_KEY } from "@/lib/utils/battle/death-saves";
-import { startDying } from "@/lib/utils/battle/death-saves/start";
 import { DEFAULT_RULES, type Ruleset } from "@/lib/utils/rules";
 import { ruleSystemOf } from "@/lib/utils/rules/systems";
+import { startDying } from "@/systems/d20/rules/death-saves/start";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 
 const DND5E: Ruleset = { ...DEFAULT_RULES, system: { key: "dnd5e" } };
@@ -32,16 +32,11 @@ describe("conditionSet hook", () => {
     expect(result).toEqual({ participants: ps, messages: [], blocked: true });
   });
 
-  it("startDying adds the unconscious condition through the hook only where the set has it", () => {
+  it("startDying adds the unconscious condition with the death-saves timer", () => {
     const d20 = startDying(hero, DND5E);
 
     expect(hasCondition(d20, "unconscious")).toBe(true);
     expect(d20.battleData.activeEffects.some((e) => e.abilityKey === DEATH_SAVES_TIMED_KEY)).toBe(true);
-
-    const wfrp = startDying(hero, WFRP);
-
-    expect(wfrp.battleData.activeEffects).toEqual(hero.battleData.activeEffects);
-    expect(wfrp.combatStats.status).toBe(CombatStatus.UNCONSCIOUS);
-    expect(wfrp.battleData.deathSaves).toEqual({ successes: 0, failures: 0, stable: false });
+    expect(d20.combatStats.status).toBe(CombatStatus.UNCONSCIOUS);
   });
 });

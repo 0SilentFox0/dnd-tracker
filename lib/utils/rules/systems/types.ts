@@ -141,6 +141,9 @@ export interface DamageResult {
 
 export type ZeroHpCtx = DamageConsequencesInput & { rules: Ruleset; manual?: boolean };
 
+/** Runs after `onZeroHp`, folding over its result: what else a blow does to the target (breaks concentration, drops a bank) */
+export type DamagedHook = (ctx: ZeroHpCtx, result: DamageConsequencesResult) => DamageConsequencesResult;
+
 export interface InitiativeScore {
   total: number;
   roll: number | null;
@@ -247,8 +250,6 @@ export interface RuleSystemMagic {
   attribute(ps: BattleParticipant[], targetIds: string[], magic: SpellMagic, round: number): SystemConditionResult;
   /** Token badge for banked channelling */
   badge(p: BattleParticipant): ActiveEffect | null;
-  /** Channelled SL lost when the caster takes damage */
-  onDamaged(p: BattleParticipant): BattleParticipant;
 }
 
 export interface ActionDetailsView {
@@ -288,7 +289,9 @@ export interface RuleSystemCombat {
   attackTarget?(attacker: BattleParticipant, attack: BattleAttack): { label: LogLine; target: number };
   /** Crit-dice rule and, when `ctx.hit` is set, the system's own damage mitigation of that hit */
   damage(ctx: DamageCtx): DamageResult;
-  onZeroHp?(ctx: ZeroHpCtx): DamageConsequencesResult;
+  /** Falling to 0 HP (dying, death, unconsciousness); `ctx.manual` is a DM status change settled the same way */
+  onZeroHp(ctx: ZeroHpCtx): DamageConsequencesResult;
+  onDamaged?: readonly DamagedHook[];
   /** Base score before flat modifiers; `roll`/`die` are null when nothing was rolled (static mode, pinned) */
   initiative(p: BattleParticipant, ctx: { rules: Pick<Ruleset, "initiative">; rng: Rng }): InitiativeScore;
   /** Starting values the participant builders use instead of the d20 sheet columns */

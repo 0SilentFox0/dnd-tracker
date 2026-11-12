@@ -7,13 +7,13 @@ import { beginConcentration } from "@/lib/utils/battle/concentration";
 import { hasCondition } from "@/lib/utils/battle/conditions";
 import { applyDamageConsequences, settleStatusChange } from "@/lib/utils/battle/damage/consequences";
 import { clearDeathSaves, deathSaveDamage, rollDeathSave } from "@/lib/utils/battle/death-saves";
-import { startDying } from "@/lib/utils/battle/death-saves/start";
 import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { textsOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import type { BattleSceneState } from "@/lib/utils/battle/store";
 import { advanceTurn } from "@/lib/utils/battle/turn";
 import { checkVictoryConditions } from "@/lib/utils/battle/turn/victory";
 import { DEFAULT_RULES, type Ruleset } from "@/lib/utils/rules";
+import { startDying } from "@/systems/d20/rules/death-saves/start";
 import type { BattleParticipant } from "@/types/battle";
 
 const on: Ruleset = { ...DEFAULT_RULES, deathSaves: { ...DEFAULT_RULES.deathSaves, enabled: true } };
