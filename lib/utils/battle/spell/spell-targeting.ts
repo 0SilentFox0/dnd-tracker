@@ -14,9 +14,9 @@ import { aimInRange, feetToCells, templateAimAllowed, templateArea, templateCent
 import { isHostile,modeAimHiddenText, modeSightedTargets, modeTargetHiddenText } from "@/lib/utils/battle/modes/engine";
 import { isReserved } from "@/lib/utils/battle/participant/reserve";
 import { findEffectMarker } from "@/lib/utils/battle/participant/state";
-import { upcastSteps } from "@/lib/utils/battle/spell/caster-dice";
 import { matchesTargetFilter } from "@/lib/utils/battle/spell/target-filter";
 import type { Ruleset } from "@/lib/utils/rules/schema";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { SpellTargeting as SpellTargetingDef } from "@/lib/utils/spells/model/schema";
 import type { BattleMapConfig, BattleParticipant, GridPoint, SpellTemplate } from "@/types/battle";
 import type { LogLine } from "@/types/text";
@@ -299,7 +299,7 @@ function resolveRaw(
 }
 
 const upcastExtra = (caster: BattleParticipant, spell: SpellRef, mapCtx?: SpellMapContext): number =>
-  isFiveE(caster) && mapCtx?.castLevel !== undefined && mapCtx.upcastTargets ? mapCtx.upcastTargets * upcastSteps(spell.level, mapCtx.castLevel) : 0;
+  isFiveE(caster) && mapCtx?.castLevel !== undefined && mapCtx.upcastTargets ? mapCtx.upcastTargets * ruleSystemOf(mapCtx.rules).magic.upcast.steps(spell.level, mapCtx.castLevel) : 0;
 
 const HOSTILE_KINDS = new Set(["enemy", "area", "template", "allEnemies"]);
 
