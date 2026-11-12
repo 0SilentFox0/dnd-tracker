@@ -12,7 +12,7 @@ export interface DamageConsequencesInput {
   /** шкода після опорів, до обрізання на 0 */
   amount: number;
   crit?: boolean;
-  rules?: Ruleset;
+  rules: Ruleset;
   rng: () => number;
   participants: BattleParticipant[];
   location?: string;
@@ -36,20 +36,12 @@ export function applyDamageConsequences(input: DamageConsequencesInput): DamageC
     return { ...inner, messages: [note, ...inner.messages] };
   }
 
-  const { after, rules, participants } = input;
+  const { combat } = ruleSystemOf(input.rules);
 
-  if (!rules) return { participant: after, participants, messages: [] };
-
-  const { combat } = ruleSystemOf(rules);
-
-  const ctx = { ...input, rules };
-
-  return (combat.onDamaged ?? []).reduce((result, hook) => hook(ctx, result), combat.onZeroHp(ctx));
+  return (combat.onDamaged ?? []).reduce((result, hook) => hook(input, result), combat.onZeroHp(input));
 }
 
 /** DM-зміна статусу (HP, воскресіння, вбивство): ті самі наслідки, що й від шкоди. `participants` уже містять `after`. */
-export function settleStatusChange(before: BattleParticipant, after: BattleParticipant, participants: BattleParticipant[], rules: Ruleset | undefined): DamageConsequencesResult {
-  if (!rules) return { participant: after, participants, messages: [] };
-
+export function settleStatusChange(before: BattleParticipant, after: BattleParticipant, participants: BattleParticipant[], rules: Ruleset): DamageConsequencesResult {
   return ruleSystemOf(rules).combat.onZeroHp({ before, after, amount: 0, rules, rng: () => 0, participants, manual: true });
 }

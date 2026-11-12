@@ -2,9 +2,12 @@ import { describe, expect, it } from "vitest";
 
 import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { bakePassives } from "@/lib/utils/abilities/build/bake";
-import { rollInitiative } from "@/lib/utils/battle/turn/roll-initiative";
+import { rollInitiative as roll } from "@/lib/utils/battle/turn/roll-initiative";
 import { mulberry32 } from "@/lib/utils/common/rng";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleParticipant } from "@/types/battle";
+
+const rollInitiative = (ps: BattleParticipant[], rng: () => number) => roll(ps, rng, DEFAULT_RULES);
 
 const mk = (id: string, over: { dex?: number; bonus?: number; base?: number; abilities?: ReturnType<typeof resolved>[] } = {}): BattleParticipant => {
   const p = makeParticipant({ id, abilities: over.abilities });

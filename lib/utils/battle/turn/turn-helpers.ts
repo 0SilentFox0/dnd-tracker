@@ -11,7 +11,7 @@ export interface ApplyVictoryParams {
   currentBattleLogLength: number;
   newLogEntries: BattleAction[];
   reserve?: BattleParticipant[];
-  rules?: Ruleset;
+  rules: Ruleset;
   getStateBeforeForEntry: () =>
     | {
         initiativeOrder: BattleParticipant[];

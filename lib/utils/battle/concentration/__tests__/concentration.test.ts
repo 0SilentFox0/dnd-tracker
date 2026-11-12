@@ -250,7 +250,7 @@ describe("зона", () => {
 
     expect(isZoneConcentrationLive(ps, tag)).toBe(true);
     expect(hazardUnder(map, target, undefined, ps)).not.toBeNull();
-    expect(hazardHit(target, map.terrain!["1:1"], 1, ps, () => 0)?.damage).toBe(5);
+    expect(hazardHit(target, map.terrain!["1:1"], 1, ps, () => 0, DEFAULT_RULES)?.damage).toBe(5);
   });
 
   it("після втрати концентрації не шкодить", () => {
@@ -258,7 +258,7 @@ describe("зона", () => {
 
     expect(isZoneConcentrationLive(ps, tag)).toBe(false);
     expect(hazardUnder(map, target, undefined, ps)).toBeNull();
-    expect(hazardHit(target, map.terrain!["1:1"], 1, ps, () => 0)).toBeNull();
+    expect(hazardHit(target, map.terrain!["1:1"], 1, ps, () => 0, DEFAULT_RULES)).toBeNull();
   });
 });
 

@@ -39,9 +39,7 @@ export function fire(flow: ActionFlow, event: AbilityEvent): AbilityRunResult {
 }
 
 export function applyFlowDamage(flow: ActionFlow, before: BattleParticipant, amount: number, crit?: boolean, location?: string): void {
-  const { rules } = flow.ctx;
-
-  if (!rules || amount <= 0) return;
+  if (amount <= 0) return;
 
   const r = applyDamageConsequences({ before, after: getP(flow, before.basicInfo.id), amount, crit, rules: flow.ctx.rules, rng: flow.ctx.rng, participants: flow.ps, location, round: flow.ctx.round });
 

@@ -62,7 +62,7 @@ export function hazardHit(
   round: number,
   participants: BattleParticipant[],
   rng: Rng,
-  rules?: Ruleset,
+  rules: Ruleset,
 ): { participant: BattleParticipant; participants: BattleParticipant[]; message: LogLine; damage: number; consequences: LogLine[] } | null {
   const hazard = cell.damage;
 
