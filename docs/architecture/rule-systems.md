@@ -17,7 +17,7 @@ Core бачить систему лише через **корені** (`SYSTEM_R
 
 Ключ `RuleSystemKey` не існує: `string`, валідація в `RulesetSchema` (`isRuleSystemKey`; невідомий ключ → `rules.validation.unknownSystem`). `gameTerms.ruleSystem.<key>` потрібен для кожного ключа (тест `system-contract`).
 
-`SystemMeta` (`systems/<id>/meta.ts`, легкий опис без логіки): `module`, `keys`, `i18n` (`battle | campaign | member | dm | pages{character, dmCharacters, dmCharacter, dmRules, draft}` + `budgetKb{battle,member,dm,pages}` — wfrp: battle 106, member 108, dm 112 KB gzip після merge з main), `unusedMechanics` (механіки, що ховаються на сторінці правил), `dmSections`. Із нього виводяться `Namespace` (`systemNamespaces()`), `systemScope(key, slot)` (`lib/i18n/system-scope.ts`) і бюджети `scope-size`.
+`SystemMeta` (`systems/<id>/meta.ts`, легкий опис без логіки): `module`, `keys`, `i18n` (`battle | campaign | member | dm | pages{character, dmCharacters, dmCharacter, dmRules, draft}` + `budgetKb{battle,member,dm,pages}` — wfrp: battle 106, member 108, dm 112 KB gzip після merge з main), `dmSections`. Із нього виводяться `Namespace` (`systemNamespaces()`), `systemScope(key, slot)` (`lib/i18n/system-scope.ts`) і бюджети `scope-size`.
 
 **Слот** (`lib/utils/rules/systems/slot.ts`): `SystemSlot = { key, data }`, `defineSlot(key, parse)` → `{ read, write }`; чужий ключ → `read()` повертає `undefined`. Слоти в core-типах: `abilities.system` (характеристики й стати учасника), `attack.system`, `sheet.systemSlot`, `actionDetails.system` / `AttackRollResult.system`, `scene.system` (стан сцени, колонка `battle_scenes.system_state`; core лише передає непрозорий `sceneState` у `combat.resolveAttack` і порівнює `sceneStatePatch` через `hashJson`). Колонка `characteristics` у рядках — непрозорий `SystemData`; дефолт і «порожність» дає система. Нейтральні поля атаки, які читає сітка: `ammo`, `reachCells`, `blastRadius`, `noLevelDice`, `ignoresEngagement`.
 
@@ -34,6 +34,12 @@ Core бачить систему лише через **корені** (`SYSTEM_R
 - **ESLint:** `SYSTEM_SELF_PATTERNS(id)` дозволяє `@/systems/<other>/**` лише для тек із `requires` (розбір першого `requires: [...]` у `meta.ts`, `scripts/shared/system-requires.mjs`; тест контракту звіряє з `META.requires`).
 - **Контракт:** матриця композицій (`lib/__tests__/helpers/composition-matrix.ts`, `system-composition-matrix.test.ts`) на реальних мета й фікстурах `d6pool`, `d6pool-plus` (модуль), `d6pool-alt` (той самий `claims`); `system-literals.test` має таблиці «імена-протікання» і `rules-section-readers` (максимуми лише падають).
 - **`include` між пакетами:** `SYSTEM_MODULE` береться через `presetsOf`; пакет може включати рядки пакета з тією самою базою.
+
+### Секції правил (E2 Ч3)
+
+Секції правил мають власників (core, база, модуль) і адресуються шляхами `секція.пункт`; `parseRules` розбирає по пунктах (відсутній/невалідний пункт → `default` через `upgrade`, зайві під-ключі не валять секцію). Типи `RulesItem`/`RulesSection`/`extendSection`/`sectionsOf(composition)`/`rulePaths`/`getRule`/`setRule`, корінь `lib/utils/rules/systems/sections.ts`; секції реєструються в `systems/{d20,wfrp,morale,retaliation,heroscaling}/rules/sections.ts` (хелпер `sectionItems`). Колізія шляху між власниками — помилка (`validateSections` у `RulesetSchema.superRefine`; `duplicateClaim` ловить префікси `magic` vs `magic.slots`). `mergeRules` пише поверх сирого JSON: секції й пункти неактивних модулів зберігаються (D4), патч зливається вглиб по пунктах; зміна `system.key` скидає `modules`. `RulesetPatchSchema`, `MECHANIC_REGISTRY`, `stripPlayerHiddenRules` — від секцій композиції. Sync D6: `classifyRules`/`rulesHashes` дивляться лише на ключі композиції пакета-джерела. `RulesForm`: вкладки = секції композиції, редактори в `systems/{d20,morale,heroscaling,retaliation}/ui`, пункти за шляхом через `SystemUi.rulesItems`/`rulesSections`. `tables-schema`/`advancement*` переїхали в `systems/wfrp/rules`. Заморожений еталон старого розбору — `scripts/db/lib/legacy-rules-parse/` + `parse-parity.test.ts` + `pnpm rules:parse-report` (read-only; `--templates`, `--json`, `--allow-remote`).
+
+Хвости: `DEFAULT_RULES.advancement` → секція wfrp (прибрати +1 запис `defaults.ts` в `system-imports-exempt.json`); `formulas.ts` за власниками; `ruleset-section` exempt до виведення `Ruleset` з композиції; `sync/apply.ts` пише розібраний обʼєкт замість сирого JSON. Деталі: план E2, «Хвости Ч3».
 
 ## Хуки
 
@@ -62,7 +68,7 @@ Core бачить систему лише через **корені** (`SYSTEM_R
 - **Шари всередині системи** наслідують правила core: `rules/**` = `lib/utils` (без `@/lib/db`, `@/lib/server`; з `lib/utils/api` лише `content-error`), `ui/**` = `components` (без `@/lib/api`, `@/systems/*/api` крім типів, без сервера), `hooks/**` = `lib/hooks`, `api/**` = `lib/api`, `server/**` — без обмежень шару. Система не імпортує іншу систему, `@/app/*`, `@/scripts/*`; `meta.ts` — лише `import type`.
 - **Ratchet** (корінь репозиторію): `system-imports-exempt.json` (`[{file, reason}]`, причини лише `route` | `content-kind` | `ruleset-section`, ціль ≤ 30 файлів; ESLint читає його як `ignores`) і `system-literals-exempt.json` (`{файл: max}`, літерали ключів і модулів систем та ключів `TEMPLATE_REGISTRY` поза теками систем; лічильник може лише падати). Перегенерація: `pnpm exec tsx scripts/shared/system-ratchet.ts --write`. Тест `system-literals` додатково забороняє `=== "wfrp"`, `isWfrpCampaign`, `WFRP_*`, `.wfrp` у нетестовому core і wfrp-літерали поза route/content-kind/ruleset-section, `whats-new`, `api-errors`, `character-coverage` і сторінкою кар'єр.
 - **Контракт систем** (`lib/__tests__/system-contract.test.ts`): ключі meta = логіка = UI = сервер = `PACK_HOOKS`; теки `systems/*` = модулі meta (d20 — звичайна база), кожна з `meta.ts` і `index.ts`; кожен namespace meta має файл у `messages/{uk,en}`; `assertSystemContract` проходять і реальні системи, і фікстурна `d6pool` (`lib/__tests__/fixtures/d6pool`), яка живе лише в тестах і не імпортує нічого з `@/systems`.
-- `system` не механіка: `MechanicKey` без неї, sync шаблон→кампанія й вкладки правил її не бачать; `unusedMechanics` з meta ховає механіки на сторінці правил.
+- `system` не механіка: `MechanicKey` без неї, sync шаблон→кампанія й вкладки правил її не бачать: вкладки правил = секції композиції.
 - Блокування: `updateCampaignRules` рахує `characters` + `units`; якщо >0 і патч змінює `system.key` → 409 `SYSTEM_LOCKED`. `rules.get` повертає `systemLocked`.
 - Відсутня секція `system` у збережених правилах: `parseRules` виводить `dnd5e` (якщо `classes.enabled`) або `homm`; бекфіла БД нема.
 - Прапорець `classes` (d20 `true`, wfrp `false`): форма/редагування ховають клас і підклас; сервер (`normalizeCharacterInput`) вимагає клас лише в системах з `classes`.
@@ -90,7 +96,7 @@ Core бачить систему лише через **корені** (`SYSTEM_R
 
 ## Як додати систему
 
-1. `systems/<id>/meta.ts` (`<ID>_META as const satisfies SystemMeta`: `module`, `keys`, `i18n`, `unusedMechanics`, `dmSections`), `index.ts` (`<ID>_SYSTEM`), за потреби `rules/`, `ui/index.ts` (`<ID>_UI`), `server/index.ts` (`<ID>_SERVER`), `rules/ability-effects.ts` + `ability-effect-rows.ts`; для пакета — `scripts/templates/systems/<id>/index.ts` (`<ID>_HOOKS`).
+1. `systems/<id>/meta.ts` (`<ID>_META as const satisfies SystemMeta`: `module`, `keys`, `i18n`, `dmSections`), `index.ts` (`<ID>_SYSTEM`), за потреби `rules/`, `ui/index.ts` (`<ID>_UI`), `server/index.ts` (`<ID>_SERVER`), `rules/ability-effects.ts` + `ability-effect-rows.ts`; для пакета — `scripts/templates/systems/<id>/index.ts` (`<ID>_HOOKS`).
 2. `pnpm systems:index` дописує рядки в усі корені; ESLint-зони й ratchet підхоплюють теку автоматично (`fs.readdirSync("systems")`).
 3. `gameTerms.ruleSystem.<key>` і `messages/{uk,en}/<ns>.json` для кожного namespace з meta; пресет правил; запис у `whats-new` і help.
 4. Звірити: `pnpm test:run lib/__tests__/system-contract.test.ts lib/__tests__/systems-index.test.ts lib/utils/rules/systems` — exhaustiveness і `assertSystemContract` скажуть, чого бракує. Новий шаблон додається разом зі своїм профілем `battle-sweep`.
@@ -112,7 +118,7 @@ Core бачить систему лише через **корені** (`SYSTEM_R
 4. Таблиця хуків тепер повна: `identity`, `lineage`, `attacks`, `inventory`, `currency`, `equipment`, `advancement`, `creation`, `attackTarget`, `conditions.*`.
 5. `distance` не «лише декларація»: його читає `cellFeetOf`.
 6. «Як додати систему» враховує корені, генератор, meta, ESLint-зони, `system-contract`, ratchet і `systemScope` (раніше пропускало ESLint-патерн, `NAMESPACES`/`scopes.ts`, перевірки `kind`, AI-проєкції); `map-modes.md` посилається сюди.
-7. Приховані вкладки правил — `unusedMechanics` з meta (хардкод `WFRP_ONLY` видалено).
+7. Вкладки правил — секції композиції (`unusedMechanics` видалено в E2 Ч3; раніше хардкод `WFRP_ONLY`).
 8. `battle.supported` видалено (усі системи `true`, гілка була недосяжна).
 9. `balance.kind: "none"` видалено (жодна система не використовувала).
 10. `SYSTEM_STATS` (`schemas.systemStats`): d20 відхиляє не-null, реєстр `Record<string, …>` з exhaustiveness-тестом.
@@ -120,7 +126,7 @@ Core бачить систему лише через **корені** (`SYSTEM_R
 
 ## Ratchet наприкінці E1
 
-Імпорти (`system-imports-exempt.json`): 18 файлів — 12 `route` (`app/api/**`), 5 `content-kind` (`careers`, профіль виду), 1 `ruleset-section` (`tables-schema.ts`); початок E1 — 14 (облік бареля D69 підняв до 23). Літерали (`system-literals-exempt.json`): 35 файлів / 73 влучання (перший знімок `520a01ef3`: 107 / 469; перед хвилею mid-review: 81 / 317; решта — літерали `homm`/`dnd5e`/ключів шаблонів у d20-core, до E2). Борги E2: маршрути `/system/[action]` замість route-файлів, реєстрація виду `careers`, `rules.tables`/`rules.advancement` у слот правил, лічильники `battleData.{fortune,channelledSl,sin,conditionTests,psychologyTested}`, форма `skillTrees`, `systems/d20` і `systems/homm`, Minor 13.
+Імпорти (`system-imports-exempt.json`): 18 файлів — 12 `route` (`app/api/**`), 5 `content-kind` (`careers`, профіль виду), 1 `ruleset-section` (`section-shapes.ts`, +1 `defaults.ts` після E2 Ч3); початок E1 — 14 (облік бареля D69 підняв до 23). Літерали (`system-literals-exempt.json`): 35 файлів / 73 влучання (перший знімок `520a01ef3`: 107 / 469; перед хвилею mid-review: 81 / 317; решта — літерали `homm`/`dnd5e`/ключів шаблонів у d20-core, до E2). Борги E2: маршрути `/system/[action]` замість route-файлів, реєстрація виду `careers`, `rules.tables`/`rules.advancement` у слот правил, лічильники `battleData.{fortune,channelledSl,sin,conditionTests,psychologyTested}`, форма `skillTrees`, `systems/d20` і `systems/homm`, Minor 13.
 
 ## Межі 5b-2
 
