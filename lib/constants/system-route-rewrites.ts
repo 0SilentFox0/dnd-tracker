@@ -2,6 +2,8 @@ const campaign = '/api/campaigns/:id';
 
 const character = `${campaign}/characters/:characterId`;
 
+const battle = `${campaign}/battles/:battleId`;
+
 const system = (scope: string, from: string, action: string) => ({
     source: `${scope}/${from}`,
     destination: `${scope}/system/${action}`,
@@ -26,6 +28,14 @@ export const SYSTEM_ROUTE_REWRITES: readonly {
     system(character, 'progression/reset', 'progression.reset'),
     system(campaign, 'downtime/period', 'downtime.period'),
     system(campaign, 'downtime/period-undo', 'downtime.period-undo'),
+    ...[
+        'channel',
+        'crit-choice',
+        'morale-check',
+        'condition-test',
+        'system-condition',
+        'core-action',
+    ].map((action) => system(battle, action, action)),
     system(campaign, 'race-profiles', 'race-profiles'),
     {
         source: `${campaign}/races/:raceId/profile`,

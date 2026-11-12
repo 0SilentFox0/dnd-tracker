@@ -1,4 +1,5 @@
 import { campaignPatch, campaignPost } from './client';
+import { systemPath } from './system';
 
 import type { AbilityKey } from '@/lib/constants/abilities';
 import type {
@@ -157,9 +158,9 @@ export const battleOps = {
         mapResponse: withHpChanges,
     }),
     moraleCheck: op<MoraleCheckData, { moraleResult: MoraleCheckResult }>({
-        path: '/morale-check',
+        path: systemPath.battle('morale-check'),
     }),
-    critChoice: op<CritChoiceData>({ path: '/crit-choice' }),
+    critChoice: op<CritChoiceData>({ path: systemPath.battle('crit-choice') }),
     abilityAction: op<AbilityActionData>({ path: '/ability-action' }),
     auraZone: op<AuraZoneData>({ path: '/aura-zone' }),
     move: op<MoveParticipantData>({ path: '/move' }),
@@ -183,7 +184,7 @@ export const battleOps = {
         path: '/spell',
         mapResponse: withHpChanges,
     }),
-    channel: op<ChannelData>({ path: '/channel' }),
+    channel: op<ChannelData>({ path: systemPath.battle('channel') }),
     start: op<object>({ path: '/start', invalidate: BATTLES_AND_ACTIVE }),
     reset: op<object>({ path: '/reset', invalidate: BATTLES }),
     complete: op<{ result?: 'victory' | 'defeat' }>({
@@ -197,13 +198,17 @@ export const battleOps = {
     addParticipant: op<AddParticipantData>({ path: '/add-participant' }),
     reveal: op<{ participantIds: string[] }>({ path: '/reveal-participant' }),
     conditions: op<BattleConditionsBody>({ path: '/conditions' }),
-    systemCondition: op<SystemConditionBody>({ path: '/system-condition' }),
-    conditionTest: op<ConditionTestBody>({ path: '/condition-test' }),
+    systemCondition: op<SystemConditionBody>({
+        path: systemPath.battle('system-condition'),
+    }),
+    conditionTest: op<ConditionTestBody>({
+        path: systemPath.battle('condition-test'),
+    }),
     initiativeReorder: op<InitiativeReorderBody>({
         path: '/initiative-reorder',
     }),
     initiativeRoll: op<InitiativeRollBody>({ path: '/initiative-roll' }),
-    coreAction: op<CoreActionBody>({ path: '/core-action' }),
+    coreAction: op<CoreActionBody>({ path: systemPath.battle('core-action') }),
     scaleUnits: op<{ direction: 'buff' | 'debuff' }>({ path: '/scale-units' }),
     unitControl: op<UnitControlData>({ path: '/unit-control' }),
     refreshSources: op<Record<string, never>>({ path: '/refresh-sources' }),

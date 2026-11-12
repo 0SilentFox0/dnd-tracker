@@ -352,13 +352,6 @@ export const ASSISTANT_ROUTE_COVERAGE: readonly RouteCoverage[] = [
         state: 'active',
     },
     {
-        route: 'campaigns/[id]/battles/[battleId]/crit-choice',
-        methods: ['POST'],
-        task: 10,
-        adapter: 'battle-crit-choice-handoff',
-        state: 'handoff',
-    },
-    {
         route: 'campaigns/[id]/battles/[battleId]/complete',
         methods: ['POST'],
         task: 10,
@@ -374,34 +367,6 @@ export const ASSISTANT_ROUTE_COVERAGE: readonly RouteCoverage[] = [
     },
     {
         route: 'campaigns/[id]/battles/[battleId]/system/[action]',
-        methods: ['POST'],
-        task: 0,
-        adapter: 'module battle operations, assistant adapter after the epic',
-        state: 'planned',
-    },
-    {
-        route: 'campaigns/[id]/battles/[battleId]/condition-test',
-        methods: ['POST'],
-        task: 0,
-        adapter: 'wfrp rule system, assistant adapter after the epic',
-        state: 'planned',
-    },
-    {
-        route: 'campaigns/[id]/battles/[battleId]/channel',
-        methods: ['POST'],
-        task: 0,
-        adapter: 'wfrp rule system, assistant adapter after the epic',
-        state: 'planned',
-    },
-    {
-        route: 'campaigns/[id]/battles/[battleId]/system-condition',
-        methods: ['POST'],
-        task: 0,
-        adapter: 'wfrp rule system, assistant adapter after the epic',
-        state: 'planned',
-    },
-    {
-        route: 'campaigns/[id]/battles/[battleId]/core-action',
         methods: ['POST'],
         task: 10,
         adapter: 'battles',
@@ -465,13 +430,6 @@ export const ASSISTANT_ROUTE_COVERAGE: readonly RouteCoverage[] = [
     },
     {
         route: 'campaigns/[id]/battles/[battleId]/maze-mark',
-        methods: ['POST'],
-        task: 10,
-        adapter: 'battles',
-        state: 'active',
-    },
-    {
-        route: 'campaigns/[id]/battles/[battleId]/morale-check',
         methods: ['POST'],
         task: 10,
         adapter: 'battles',
