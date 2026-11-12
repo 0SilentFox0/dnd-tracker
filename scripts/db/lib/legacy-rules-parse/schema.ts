@@ -11,7 +11,7 @@ import { CONDITION_KEYS, CUSTOM_CONDITION_KEY_RE } from "@/lib/utils/abilities/s
 import { isRecord } from "@/lib/utils/common/is-record";
 import { validateComposition } from "@/lib/utils/rules/systems/compose";
 import { RULE_SYSTEM_KEYS } from "@/lib/utils/rules/systems/meta";
-import { TablesRulesSchema } from "@/lib/utils/rules/tables-schema";
+import { TablesRulesSchema } from "@/systems/wfrp/rules/tables/schema";
 
 const level = z.string().regex(/^([1-9]|1\d|20)$/);
 

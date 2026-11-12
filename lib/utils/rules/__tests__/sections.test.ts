@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
 
-import { allSections, sectionsOfSystem } from "../section-registry";
+import { allSections, sectionsOfSystem, validateSections } from "../section-registry";
 import { extendSection, getRule, mergeContributions, parseSection, rulePaths, type RulesItem, type RulesSection, setRule } from "../sections";
 
+import { composition } from "@/lib/utils/rules/systems/catalog";
 import { CompositionError } from "@/lib/utils/rules/systems/compose";
 
 const item = <T>(schema: z.ZodType<T>, def: T): RulesItem<T> => ({ schema, default: def });
@@ -121,5 +122,22 @@ describe("parseSection (per item)", () => {
 
   it("an optional item without a value stays absent", () => {
     expect(parseSection(allSections().encounters, {})).toEqual({ balance: "fair", edition: "2014", autoXp: false });
+  });
+});
+
+describe("validateSections", () => {
+  it("real compositions have no section collisions", () => {
+    for (const key of ["dnd5e", "homm", "wfrp"]) expect(validateSections(composition({ key }))).toEqual([]);
+  });
+
+  it("reports a collision as a composition issue instead of throwing", () => {
+    const clash = { sections: { morale: { owner: "x", mechanic: true, items: {} } } };
+
+    const c = composition({ key: "homm" });
+
+    const issues = validateSections(c, Object.fromEntries([c.base, ...c.modules].map((id) => [id, clash])));
+
+    expect(issues).toHaveLength(1);
+    expect(issues[0].code).toBe("sectionCollision");
   });
 });

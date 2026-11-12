@@ -10,7 +10,7 @@ export interface Composition {
   modules: readonly string[];
 }
 
-export type CompositionIssueCode = "unknownKey" | "unknownModule" | "wrongBase" | "missingRequires" | "conflict" | "duplicateClaim" | "cycle";
+export type CompositionIssueCode = "unknownKey" | "unknownModule" | "wrongBase" | "missingRequires" | "conflict" | "duplicateClaim" | "cycle" | "sectionCollision";
 
 export interface CompositionIssue {
   code: CompositionIssueCode;

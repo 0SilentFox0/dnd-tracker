@@ -1,12 +1,13 @@
 import { z } from "zod";
 
 import { DEFAULT_RULES } from "./defaults";
-import { ALL_SECTIONS } from "./section-registry";
+import { ALL_SECTIONS, validateSections } from "./section-registry";
 import { CRITICALS_ORDER_MESSAGE, INITIATIVE_ORDER_MESSAGE, type Ruleset, sectionSchemas } from "./section-shapes";
 import { parseSection, type RulesSection, type SectionMap } from "./sections";
 
 import { CUSTOM_CONDITION_KEY_RE } from "@/lib/utils/abilities/schema/kinds";
 import { isRecord } from "@/lib/utils/common/is-record";
+import { composition } from "@/lib/utils/rules/systems/catalog";
 import { validateComposition } from "@/lib/utils/rules/systems/compose";
 
 export type { Ruleset };
@@ -84,7 +85,11 @@ export const RulesetSchema = z
   .refine((r) => initiativeOrdered(r.initiative), { message: INITIATIVE_ORDER_MESSAGE, path: ["initiative"] })
   .refine((r) => criticalsOrdered(r.criticals), { message: CRITICALS_ORDER_MESSAGE, path: ["criticals"] })
   .superRefine((r, ctx) => {
-    for (const issue of validateComposition(r.system)) {
+    const issues = validateComposition(r.system);
+
+    if (issues.length === 0) issues.push(...validateSections(composition(r.system)));
+
+    for (const issue of issues) {
       if (issue.code !== "unknownKey") ctx.addIssue({ code: "custom", message: issue.code === "unknownModule" ? UNKNOWN_MODULE_MESSAGE : INVALID_COMPOSITION_MESSAGE, path: ["system", "modules"] });
     }
   });

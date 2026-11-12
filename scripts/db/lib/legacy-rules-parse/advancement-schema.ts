@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { FREE_POINT_MAX, FREE_POINT_MIN } from "@/lib/utils/rules/advancement";
+import { FREE_POINT_MAX, FREE_POINT_MIN } from "@/systems/wfrp/rules/advancement/rules";
 
 const CHARACTERISTIC_COUNT = 10;
 

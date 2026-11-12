@@ -396,7 +396,7 @@ const eslintConfig = defineConfig([
   },
   {
     files: ["app/**/*.{ts,tsx}", "components/**/*.{ts,tsx}", "lib/**/*.{ts,tsx}", "types/**/*.{ts,tsx}", "scripts/**/*.{ts,tsx}"],
-    ignores: ["**/__tests__/**", "**/*.test.{ts,tsx}", ...SYSTEM_ROOTS, ...SYSTEM_IMPORT_EXEMPT, "scripts/templates/systems/*/**", "scripts/assets/grim-icons/**"],
+    ignores: ["**/__tests__/**", "**/*.test.{ts,tsx}", ...SYSTEM_ROOTS, ...SYSTEM_IMPORT_EXEMPT, "scripts/templates/systems/*/**", "scripts/assets/grim-icons/**", "scripts/db/lib/legacy-rules-parse/**"],
     plugins: { systems: { rules: { zone: builtinRules.get("no-restricted-imports") } } },
     rules: { "systems/zone": ["error", { patterns: [SYSTEM_ZONE_PATTERN] }] },
   },
