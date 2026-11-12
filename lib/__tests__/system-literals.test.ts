@@ -117,7 +117,7 @@ describe("d20 / HOMM names and rule-section readers leaving core", () => {
     actions: 2,
     classes: 19,
     encounters: 9,
-    formulas: 8,
+    formulas: 5,
     initiative: 7,
     saves: 1,
   };
