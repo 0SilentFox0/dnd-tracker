@@ -40,7 +40,7 @@ const build = (rules: Ruleset, character: object, classesById: Record<string, Ga
   return createBattleParticipantFromCharacter({ ...base, ...character } as never, "b1", ParticipantSide.ALLY, undefined, context);
 };
 
-const enabled = parseRules({ classes: { enabled: true } });
+const enabled = parseRules({ system: { key: "homm" }, classes: { enabled: true } });
 
 describe("учасник від класів", () => {
   it("HOMM без змін: класи ввімкнені, але у персонажа їх немає", async () => {
