@@ -7,6 +7,7 @@ import { channelTargetOf, wfrpChannel } from "./channel";
 import { wfrpMiscast } from "./miscast";
 
 import { textRef } from "@/lib/i18n/text-ref";
+import { upcastSteps } from "@/lib/utils/battle/spell/caster-dice";
 import { noMagic } from "@/lib/utils/battle/spell/none";
 import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
 import type { RuleSystemMagic, RuleSystemTestedMagic } from "@/lib/utils/rules/systems/types";
@@ -32,4 +33,4 @@ export const WFRP_TESTED_MAGIC: RuleSystemTestedMagic = {
   badge: channelBadge,
 };
 
-export const WFRP_MAGIC: RuleSystemMagic = { ...noMagic, tested: WFRP_TESTED_MAGIC };
+export const WFRP_MAGIC: RuleSystemMagic = { ...noMagic, upcast: { steps: upcastSteps }, tested: WFRP_TESTED_MAGIC };
