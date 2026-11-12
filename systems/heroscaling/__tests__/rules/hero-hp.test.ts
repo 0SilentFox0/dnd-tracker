@@ -6,7 +6,7 @@ import { translateIssue } from '@/lib/i18n/translate-issue';
 import type { Translator } from '@/lib/i18n/translator';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 import type { CharacterHpInput } from '@/lib/utils/rules/systems/types';
-import { heroBaseHp as baseHp } from '@/systems/d20/rules/progression/hero-hp';
+import { heroBaseHp as baseHp } from '@/systems/heroscaling/rules/hero-hp';
 
 const heroBaseHp = (c: CharacterHpInput) =>
     baseHp(c, DEFAULT_RULES.heroScaling);

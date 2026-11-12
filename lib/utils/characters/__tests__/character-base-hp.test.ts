@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { characterBaseHp } from '@/lib/utils/characters/hero-hp';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
-import { heroBaseHp } from '@/systems/d20/rules/progression/hero-hp';
+import { heroBaseHp } from '@/systems/heroscaling/rules/hero-hp';
 import type { GameClassData, ResolvedClassEntry } from '@/types/classes';
 
 const fighter = {

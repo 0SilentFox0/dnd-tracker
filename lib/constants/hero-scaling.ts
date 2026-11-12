@@ -4,9 +4,6 @@
  */
 
 import { AttackType } from '@/lib/constants/battle';
-import { heroArchetype } from '@/lib/constants/hero-archetypes';
-import { getAbilityModifier } from '@/lib/utils/common/calculations';
-import type { TextRef } from '@/types/choices';
 
 /** Коефіцієнти масштабування (можна перевизначити на рівні кампанії) */
 export interface HeroScalingOptions {
@@ -59,53 +56,6 @@ function getDiceForLevel(
     const clamped = Math.max(1, Math.min(20, level));
 
     return table?.[clamped] ?? DEFAULT_DICE_BY_LEVEL[clamped] ?? '1d4';
-}
-
-export interface HeroHpFormula {
-    baseLevels: number;
-    conCoefficient: number;
-}
-
-export function getHeroMaxHpBreakdown(
-    level: number,
-    constitution: number,
-    archetype: string | null | undefined,
-    hp: HeroHpFormula
-): { total: number; breakdown: TextRef[] } {
-    const a = heroArchetype(archetype);
-
-    const conMod = getAbilityModifier(constitution);
-
-    const base = hp.baseLevels * a.hpPerLevel;
-
-    const perLevel = a.hpPerLevel + conMod * hp.conCoefficient;
-
-    const total = Math.max(1, Math.floor(base + level * perLevel));
-
-    return {
-        total,
-        breakdown: [
-            {
-                message: 'characterProfile.sheet.heroHp.formula',
-                params: {
-                    archetype: a.key ?? 'universal',
-                    baseLevels: String(hp.baseLevels),
-                    hpPerLevel: String(a.hpPerLevel),
-                    conMod: String(conMod),
-                    conCoefficient: String(hp.conCoefficient),
-                },
-            },
-            {
-                message: 'characterProfile.sheet.heroHp.total',
-                params: {
-                    base: String(base),
-                    level: String(level),
-                    perLevel: String(perLevel),
-                    total: String(total),
-                },
-            },
-        ],
-    };
 }
 
 /**

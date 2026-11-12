@@ -1,6 +1,7 @@
 import { useTranslations } from 'next-intl';
 
-import { DiceTableEditor } from '@/components/rules/DiceTableEditor';
+import { DiceTableEditor } from './DiceTableEditor';
+
 import { NumberField } from '@/components/rules/NumberField';
 import { RulesSection } from '@/components/rules/RulesSection';
 import { AttackType } from '@/lib/constants/battle';
