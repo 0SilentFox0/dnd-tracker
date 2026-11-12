@@ -1,4 +1,5 @@
 import { ownershipOf } from "./ownership";
+import { SYSTEM_FLAG_OWNERS } from "./system-flag-rows";
 import type { SystemEffectRow, SystemEffectRowInput } from "./system-row";
 
 // <systems:generated>
@@ -21,4 +22,4 @@ const KINDS = new Set(SYSTEM_EFFECT_ROWS.map((r) => r.kind));
 
 export const isSystemEffectKind = (kind: string): boolean => KINDS.has(kind);
 
-export const SYSTEM_EFFECT_OWNERSHIP = ownershipOf(SYSTEM_EFFECT_ROWS);
+export const SYSTEM_EFFECT_OWNERSHIP = ownershipOf(SYSTEM_EFFECT_ROWS, SYSTEM_FLAG_OWNERS);

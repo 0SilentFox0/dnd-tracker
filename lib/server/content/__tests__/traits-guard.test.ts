@@ -33,4 +33,14 @@ describe("assertEffectsInComposition", () => {
   it("looks inside randomOf options", () => {
     expect(() => assertEffectsInComposition({ key: "dnd5e" }, ability({ kind: "randomOf", options: [{ kind: "wfrpWard", value: 9 }] }))).toThrowError(expect.objectContaining({ status: 422 }));
   });
+
+  it("real registry: morale flag needs the morale module", () => {
+    expect(() => assertEffectsInComposition({ key: "dnd5e" }, morale)).toThrowError(expect.objectContaining({ status: 422 }));
+    expect(() => assertEffectsInComposition({ key: "dnd5e", modules: ["morale"] }, morale)).not.toThrow();
+    expect(() => assertEffectsInComposition({ key: "homm" }, morale)).not.toThrow();
+  });
+
+  it("real registry: d20 proficiency flags are rejected outside a d20 base", () => {
+    expect(() => assertEffectsInComposition({ key: "wfrp" }, ability({ kind: "flag", flag: "saveProficiency", abilities: ["wisdom"] }))).toThrowError(expect.objectContaining({ status: 422 }));
+  });
 });

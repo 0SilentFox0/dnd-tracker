@@ -11,6 +11,11 @@ describe("effect ownership", () => {
     expect(SYSTEM_EFFECT_OWNERSHIP.kinds.wfrpWard).toBe("wfrp");
   });
 
+  it("module flags are owned by their modules", () => {
+    expect(SYSTEM_EFFECT_OWNERSHIP.flags).toMatchObject({ moraleChance: "morale", minMorale: "morale", noRetaliation: "retaliation", extraRetaliations: "retaliation", saveProficiency: "d20", proficiency: "d20" });
+    expect(SYSTEM_EFFECT_OWNERSHIP.flags.advantage).toBeUndefined();
+  });
+
   it("effectKindsOf lists only the owned keys of active modules", () => {
     expect([...effectKindsOf({ base: "d20", modules: ["morale"] }, own)].sort()).toEqual(["changeMorale", "flag:moraleChance"]);
     expect([...effectKindsOf({ base: "d20", modules: [] }, own)]).toEqual([]);
