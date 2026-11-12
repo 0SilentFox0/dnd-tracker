@@ -10,6 +10,10 @@ vi.mock('@/components/hud/fonts', () => ({
     hudFontClassName: '',
     HUD_SURFACE: 'hud-surface',
 }));
+vi.mock('@/lib/hooks/campaigns', async (orig) => ({
+    ...(await orig<object>()),
+    useCampaignRules: () => ({ data: undefined }),
+}));
 vi.mock('@/lib/hooks/characters', async (orig) => ({
     ...(await orig<object>()),
     useCharacterGoals: () => ({ save: vi.fn(), isPending: false }),

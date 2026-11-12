@@ -1,6 +1,11 @@
 // @vitest-environment happy-dom
 import { cleanup, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+
+vi.mock('@/lib/hooks/campaigns', async (orig) => ({
+    ...(await orig<object>()),
+    useCampaignRules: () => ({ data: undefined }),
+}));
 
 import { sheetFixture } from '@/components/character-profile/__tests__/sheet-fixture';
 import { ProfileProvider } from '@/components/character-profile/ProfileContext';

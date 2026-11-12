@@ -6,18 +6,21 @@ import { useProfile } from '../ProfileContext';
 
 import { HudPill } from '@/components/hud/page';
 import { systemUiOf } from '@/components/systems';
-import { RULE_SYSTEM_REGISTRY } from '@/lib/utils/rules/systems';
+import { useCampaignSystem } from '@/lib/hooks/systems';
 
 export function RestBadges() {
     const t = useTranslations('rest.badges');
 
-    const { sheet } = useProfile();
+    const { campaignId, sheet } = useProfile();
 
     const rest = sheet.rest;
 
-    const system = RULE_SYSTEM_REGISTRY[sheet.system];
+    const { def: system, system: current } = useCampaignSystem(
+        campaignId,
+        sheet.system
+    );
 
-    const Badges = systemUiOf(sheet.system).RestBadges;
+    const Badges = systemUiOf(current.key, current.modules).RestBadges;
 
     if (!rest) return null;
 

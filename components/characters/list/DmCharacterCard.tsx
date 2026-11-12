@@ -50,7 +50,8 @@ export function DmCharacterCard({
 
     const d20Stats = !!columns?.has('armorClass');
 
-    const hideProgression = !ready || systemUiOf(systemKey).hideProgression;
+    const hideProgression =
+        !ready || systemUiOf(systemKey, rules?.system.modules).hideProgression;
 
     const wounds = system?.progression.hpTerm === 'wounds';
 

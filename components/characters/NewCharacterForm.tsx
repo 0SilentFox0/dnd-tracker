@@ -32,7 +32,7 @@ import {
 } from '@/lib/hooks/characters';
 import { useClassMode } from '@/lib/hooks/classes';
 import { useRaces } from '@/lib/hooks/races';
-import { useRuleSystem } from '@/lib/hooks/systems';
+import { useCampaignSystem } from '@/lib/hooks/systems';
 import { pruneFormChoices } from '@/lib/utils/characters/choices/prune';
 import { statColumnsOf } from '@/lib/utils/rules/systems/stats';
 
@@ -61,9 +61,9 @@ export function NewCharacterForm({
 
     const classMode = useClassMode(id);
 
-    const { system } = useRuleSystem({ key: systemKey });
+    const { def: system, system: current } = useCampaignSystem(id, systemKey);
 
-    const Ui = systemUiOf(systemKey);
+    const Ui = systemUiOf(current.key, current.modules);
 
     const hasClasses = statColumnsOf(system).has('classes');
 

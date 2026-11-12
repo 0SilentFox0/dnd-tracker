@@ -14,8 +14,8 @@ import { HudSection } from '@/components/hud/form';
 import { systemUiOf } from '@/components/systems';
 import { AttackType } from '@/lib/constants/battle';
 import { useCampaignRules } from '@/lib/hooks/campaigns';
+import { useCampaignSystem } from '@/lib/hooks/systems';
 import { signed } from '@/lib/utils/common/format';
-import { RULE_SYSTEM_REGISTRY } from '@/lib/utils/rules/systems';
 import { statColumnsOf } from '@/lib/utils/rules/systems/stats';
 
 export function CombatTab() {
@@ -27,9 +27,12 @@ export function CombatTab() {
 
     const { data: rules } = useCampaignRules(campaignId);
 
-    const Ui = systemUiOf(sheet.system, rules?.system.modules);
+    const { def: system, system: ref } = useCampaignSystem(
+        campaignId,
+        sheet.system
+    );
 
-    const system = RULE_SYSTEM_REGISTRY[sheet.system];
+    const Ui = systemUiOf(ref.key, ref.modules);
 
     const d20Stats = statColumnsOf(system).has('armorClass');
 

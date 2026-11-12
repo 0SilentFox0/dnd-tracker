@@ -32,10 +32,11 @@ import { PlayerSheetHint } from '@/components/onboarding/OnboardingHint';
 import { LevelUpOverlay } from '@/components/skill-tree/progression';
 import { systemUiOf } from '@/components/systems';
 import { Button } from '@/components/ui/button';
+import { useCampaignRules } from '@/lib/hooks/campaigns';
 import { useCharacterSheet } from '@/lib/hooks/characters';
 import { useSeenOnOpen } from '@/lib/hooks/notifications';
+import { campaignSystemOf } from '@/lib/hooks/systems';
 import { cn } from '@/lib/utils';
-import { RULE_SYSTEM_REGISTRY } from '@/lib/utils/rules/systems';
 
 const ProfileEditor = dynamic(
     () => import('./ProfileEditor').then((m) => m.ProfileEditor),
@@ -194,6 +195,8 @@ export function CharacterProfile({
 
     const query = useCharacterSheet(campaignId, characterId);
 
+    const { data: rules } = useCampaignRules(campaignId);
+
     const [tab, setTabState] = useState<ProfileTabId>(() => asTab(initialTab));
 
     const [seenInitialTab, setSeenInitialTab] = useState(initialTab);
@@ -225,21 +228,24 @@ export function CharacterProfile({
     return (
         <QueryState query={query}>
             {(sheet) => {
-                const system = RULE_SYSTEM_REGISTRY[sheet.system];
+                const { def: system, system: current } = campaignSystemOf(
+                    rules,
+                    sheet.system
+                );
+
+                const ui = systemUiOf(current.key, current.modules);
 
                 const tabs = viewTabs(
                     {
                         withLog: !!sheet.rest,
-                        withPath: !systemUiOf(sheet.system).hideProgression,
-                        withMagic:
-                            system.spells &&
-                            (systemUiOf(sheet.system).MagicTab ?? MagicTab),
+                        withPath: !ui.hideProgression,
+                        withMagic: system.spells && (ui.MagicTab ?? MagicTab),
                         withAdvancement:
                             (sheet.viewer.isDM || sheet.viewer.isOwner) &&
-                            (systemUiOf(sheet.system).AdvancementTab ?? false),
+                            (ui.AdvancementTab ?? false),
                         withDowntime:
                             (sheet.viewer.isDM || sheet.viewer.isOwner) &&
-                            (systemUiOf(sheet.system).DowntimeTab ?? false),
+                            (ui.DowntimeTab ?? false),
                         withItems: system.inventory,
                     },
                     (id) => t(`tabs.${id}`)
@@ -264,8 +270,7 @@ export function CharacterProfile({
                                         ref={hero.ref}
                                         badge={
                                             <>
-                                                {!systemUiOf(sheet.system)
-                                                    .hideProgression && (
+                                                {!ui.hideProgression && (
                                                     <LevelUpBadge
                                                         free={
                                                             sheet.progression
@@ -330,8 +335,7 @@ export function CharacterProfile({
                                             hero.past ? <CompactHero /> : null
                                         }
                                     />
-                                    {!systemUiOf(sheet.system)
-                                        .hideProgression && (
+                                    {!ui.hideProgression && (
                                         <LevelUpOverlay
                                             campaignId={campaignId}
                                             characterId={characterId}

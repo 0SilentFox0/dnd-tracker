@@ -12,8 +12,8 @@ import { useProfile } from './ProfileContext';
 
 import { OptimizedImage } from '@/components/common/OptimizedImage';
 import { systemUiOf } from '@/components/systems';
+import { useCampaignSystem } from '@/lib/hooks/systems';
 import { signed } from '@/lib/utils/common/format';
-import { RULE_SYSTEM_REGISTRY } from '@/lib/utils/rules/systems';
 import { statColumnsOf } from '@/lib/utils/rules/systems/stats';
 
 export function ProfileHero({
@@ -25,7 +25,7 @@ export function ProfileHero({
     badge?: ReactNode;
     ref?: Ref<HTMLElement>;
 }) {
-    const { sheet, canEdit } = useProfile();
+    const { campaignId, sheet, canEdit } = useProfile();
 
     const t = useTranslations('characterProfile.hero');
 
@@ -33,9 +33,12 @@ export function ProfileHero({
 
     const id = sheet.identity;
 
-    const Ui = systemUiOf(sheet.system);
+    const { def: system, system: current } = useCampaignSystem(
+        campaignId,
+        sheet.system
+    );
 
-    const system = RULE_SYSTEM_REGISTRY[sheet.system];
+    const Ui = systemUiOf(current.key, current.modules);
 
     const hpKey = Ui.hideProgression
         ? ({ current: 'woundsCurrent', total: 'woundsTotal' } as const)
@@ -128,11 +131,16 @@ export function ProfileHero({
 }
 
 export function CompactHero() {
-    const { sheet } = useProfile();
+    const { campaignId, sheet } = useProfile();
 
     const t = useTranslations('characterProfile.hero');
 
-    const hideProgression = systemUiOf(sheet.system).hideProgression;
+    const { system } = useCampaignSystem(campaignId, sheet.system);
+
+    const hideProgression = systemUiOf(
+        system.key,
+        system.modules
+    ).hideProgression;
 
     const hp = sheet.rest?.hp
         ? t(hideProgression ? 'woundsCurrent' : 'hpCurrent', {

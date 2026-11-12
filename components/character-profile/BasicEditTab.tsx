@@ -12,9 +12,9 @@ import { Button } from '@/components/ui/button';
 import { useCampaignRules } from '@/lib/hooks/campaigns';
 import type { DmCharacterEditor } from '@/lib/hooks/characters';
 import { useClassMode } from '@/lib/hooks/classes';
+import { useCampaignSystem } from '@/lib/hooks/systems';
 import { characterBaseHp } from '@/lib/utils/characters/hero-hp';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
-import { RULE_SYSTEM_REGISTRY } from '@/lib/utils/rules/systems';
 import { statColumnsOf } from '@/lib/utils/rules/systems/stats';
 import { resolveClassEntries } from '@/lib/utils/spells/class-slots';
 
@@ -46,6 +46,10 @@ export function BasicEditTab({
 
     const { data: rules } = useCampaignRules(campaignId);
 
+    const { def, system } = useCampaignSystem(campaignId, sheet.system);
+
+    const ui = systemUiOf(system.key, system.modules);
+
     const classHp =
         classUi && classEntries.some((e) => e.class)
             ? characterBaseHp(
@@ -74,30 +78,22 @@ export function BasicEditTab({
                 basicInfo={form.basicInfo}
                 campaignMembers={options.members}
                 races={options.races}
-                hideProgression={systemUiOf(sheet.system).hideProgression}
-                hideLineage={!RULE_SYSTEM_REGISTRY[sheet.system].lineage}
-                hideClass={
-                    !statColumnsOf(RULE_SYSTEM_REGISTRY[sheet.system]).has(
-                        'classes'
-                    )
-                }
-                hideAlignment={
-                    !RULE_SYSTEM_REGISTRY[sheet.system].identity.alignments
-                }
+                hideProgression={ui.hideProgression}
+                hideLineage={!def.lineage}
+                hideClass={!statColumnsOf(def).has('classes')}
+                hideAlignment={!def.identity.alignments}
                 classMode={classUi ? classMode : undefined}
             />
-            {classMode.enabled &&
-                !classUi &&
-                !systemUiOf(sheet.system).hideProgression && (
-                    <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setConverting(true)}
-                    >
-                        {t('toClasses')}
-                    </Button>
-                )}
+            {classMode.enabled && !classUi && !ui.hideProgression && (
+                <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setConverting(true)}
+                >
+                    {t('toClasses')}
+                </Button>
+            )}
             <CharacterHpPreview hp={hp} />
             <Button
                 type="button"

@@ -37,7 +37,7 @@ import {
     useCharacterRoster,
     useDmCharacterEditor,
 } from '@/lib/hooks/characters';
-import { RULE_SYSTEM_REGISTRY } from '@/lib/utils/rules/systems';
+import { useCampaignSystem } from '@/lib/hooks/systems';
 
 export function ProfileEditor({ onDone }: { onDone: () => void }) {
     const { campaignId, characterId, sheet } = useProfile();
@@ -62,6 +62,11 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
 
     const classesEnabled = !!useCampaignRules(campaignId).data?.classes.enabled;
 
+    const { def: system, system: current } = useCampaignSystem(
+        campaignId,
+        sheet.system
+    );
+
     const roster = useCharacterRoster(campaignId);
 
     const holders = useMemo(() => {
@@ -84,9 +89,7 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
 
     const { formData, abilityScores, skills, abilities, spellcasting } = form;
 
-    const Ui = systemUiOf(sheet.system);
-
-    const system = RULE_SYSTEM_REGISTRY[sheet.system];
+    const Ui = systemUiOf(current.key, current.modules);
 
     const heroClasses = (formData.basicInfo.classes ?? []).filter(
         (e) => e.classId
