@@ -1,10 +1,10 @@
 import { canStandUp, coreActionAvailability, coreActionCost, coreActionTargets } from "./availability";
 import { releaseInvalidGrapples } from "./grapple";
-import { legendaryAttack } from "./legendary";
 import { resolveMovement } from "./movement";
 import { CORE_ACTION_REGISTRY } from "./registry";
 import { runCoreAction } from "./run";
 
+import { legendaryAttack } from "@/lib/utils/battle/actions/legendary-attack";
 import type { RuleSystemActions } from "@/lib/utils/rules/systems/types";
 
 export const D20_ACTIONS: RuleSystemActions = {

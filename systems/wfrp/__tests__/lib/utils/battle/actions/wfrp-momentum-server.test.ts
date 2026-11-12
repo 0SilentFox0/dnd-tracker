@@ -2,12 +2,12 @@ import { describe, expect, it } from "vitest";
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
+import { legendaryAttack } from "@/lib/utils/battle/actions/legendary-attack";
 import { resolveServerAttack } from "@/lib/utils/battle/attack/server-attack";
 import { pathTo } from "@/lib/utils/battle/grid/path";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
 import { D20_ACTIONS } from "@/systems/d20/rules/actions";
-import { legendaryAttack } from "@/systems/d20/rules/actions/legendary";
 import { resolveMovement } from "@/systems/d20/rules/actions/movement";
 import { resolveOpportunityAttacks } from "@/systems/d20/rules/reactions/opportunity";
 import { momentumOf, sceneOf, slotOf } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
