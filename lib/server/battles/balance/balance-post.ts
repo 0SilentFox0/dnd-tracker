@@ -7,7 +7,7 @@ import { loadUnitLibraryStats } from "@/lib/server/battles/balance/unit-library"
 import type { UnitStats } from "@/lib/utils/battle/balance";
 import { buildPartyPower, computeFairScaling, heroMember, pickEnemyRoster, unitMember } from "@/lib/utils/battle/balance";
 import { pickXpRoster, resolveXpDifficulty, type XpEdition } from "@/lib/utils/battle/balance/xp-budget";
-import type { Ruleset } from "@/lib/utils/rules";
+import { DEFAULT_RULES, type Ruleset } from "@/lib/utils/rules";
 import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { AllyStats, SuggestedEnemy } from "@/types/battle-setup";
 
@@ -50,7 +50,7 @@ export async function postBalanceResponse(campaignId: string, data: BalancePostD
     allyCount += quantity;
   }
 
-  const party = buildPartyPower(members, rules ? ruleSystemOf(rules).combat.hitModel : undefined);
+  const party = buildPartyPower(members, ruleSystemOf(rules ?? DEFAULT_RULES).combat.hitModel);
 
   const allyStats: AllyStats = {
     dpr: round1(party.dpr),

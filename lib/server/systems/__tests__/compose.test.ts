@@ -10,7 +10,7 @@ import { CompositionError } from "@/lib/utils/rules/systems/compose";
 
 const op = (): SystemOperation => ({ operation: vi.fn() as never, input: z.object({}) });
 
-const base: SystemServer = { schemas: {}, operations: { rest: op() }, ai: { promptLine: "base", toolNotes: { get_party: "a" }, heroSelect: { hp: true } } };
+const base: SystemServer = { schemas: {}, balance: { heroPower: vi.fn() as never, unitStats: (unit) => unit, readsBuiltRules: false }, operations: { rest: op() }, ai: { promptLine: "base", toolNotes: { get_party: "a" }, heroSelect: { hp: true } } };
 
 describe("composeServer", () => {
   it("merges operations, toolNotes and heroSelect dictionaries of addons", () => {

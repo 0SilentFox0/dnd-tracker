@@ -37,6 +37,7 @@ export interface PartyPower {
   spellResist?: Record<string, number>;
   hit?: HitFn;
   refHit?: number;
+  refHitUnit?: number;
 }
 
 export interface PartyMember {
@@ -71,8 +72,8 @@ function averageRecords(records: Array<{ values: Partial<Record<string, number>>
   return Object.fromEntries(Object.entries(sum).map(([k, v]) => [k, v / total]));
 }
 
-export function buildPartyPower(members: Array<{ stats: PartyMember; quantity?: number; hero: boolean }>, model?: { winChance: HitFn; refHit: number }): PartyPower {
-  const party: PartyPower = { dpr: 0, hp: 0, heroCount: 0, ...(model && { hit: model.winChance, refHit: model.refHit }) };
+export function buildPartyPower(members: Array<{ stats: PartyMember; quantity?: number; hero: boolean }>, model?: { winChance: HitFn; refHit: number; refHitUnit?: number }): PartyPower {
+  const party: PartyPower = { dpr: 0, hp: 0, heroCount: 0, ...(model && { hit: model.winChance, refHit: model.refHit, refHitUnit: model.refHitUnit ?? model.refHit }) };
 
   let hitWeight = 0;
 

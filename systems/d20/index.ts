@@ -1,5 +1,7 @@
 import { d20AbortedRoll, resolveD20Attack } from "./rules/attack";
+import { d20HitModel } from "./rules/balance";
 import { D20_CONDITION_SET } from "./rules/conditions";
+import { d20Initiative, d20TieBreak } from "./rules/initiative";
 
 import { rollFromSheet } from "@/lib/utils/characters/resources/sheet-roll";
 import type { RuleSystemDefinition } from "@/lib/utils/rules/systems/types";
@@ -14,7 +16,7 @@ export const D20_MODULE: RuleSystemDefinition = {
     roll: (i) => rollFromSheet(i.participant, i.body as SheetRollSubject, i),
   },
   rest: { kinds: true },
-  combat: { judge: "client", dice: 20, actionEconomy: { bonusAction: true, reaction: true }, resolveAttack: resolveD20Attack, abortedRoll: d20AbortedRoll },
+  combat: { judge: "client", dice: 20, actionEconomy: { bonusAction: true, reaction: true }, resolveAttack: resolveD20Attack, abortedRoll: d20AbortedRoll, initiative: d20Initiative, tieBreak: d20TieBreak, hitModel: d20HitModel },
   conditionSet: D20_CONDITION_SET,
   identity: { alignments: true },
   lineage: true,

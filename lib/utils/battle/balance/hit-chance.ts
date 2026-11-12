@@ -43,6 +43,7 @@ export interface FactorParty {
   /** Системна модель влучання замість d20 (offense/defense замість to-hit/AC) і її еталон. */
   hit?: HitFn;
   refHit?: number;
+  refHitUnit?: number;
 }
 
 export type HitFn = (toHit: number, ac: number) => number;
@@ -87,7 +88,7 @@ export function armorFactors(unit: FactorUnit, party: FactorParty): ArmorFactors
 }
 
 function unitHitFactor(attackBonus: number | undefined, party: FactorParty): number {
-  return attackBonus !== undefined && party.ac !== undefined ? clamp((party.hit ?? hitChance)(attackBonus, party.ac) / (party.refHit ?? REF_UNIT_HIT), ARMOR_FACTOR_MIN, ARMOR_FACTOR_MAX) : 1;
+  return attackBonus !== undefined && party.ac !== undefined ? clamp((party.hit ?? hitChance)(attackBonus, party.ac) / (party.refHitUnit ?? REF_UNIT_HIT), ARMOR_FACTOR_MIN, ARMOR_FACTOR_MAX) : 1;
 }
 
 function failedSaveShare(save: UnitSpellPower["save"], party: FactorParty): number {

@@ -1,13 +1,12 @@
 import { ParticipantSide } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
-import { hitModelUnitStats } from "@/lib/utils/battle/balance/hit-model";
+import { systemServerOf } from "@/lib/server/systems/registry";
 import { unitResistances } from "@/lib/utils/battle/balance/resist";
 import type { UnitStats } from "@/lib/utils/battle/balance/stats";
 import { summonedUnitIds, UNIT_SPELL_SELECT, unitRowStats, type UnitSpellRow } from "@/lib/utils/battle/balance/unit-library";
 import { createBattleParticipantFromUnit } from "@/lib/utils/battle/participant/from-unit";
 import type { UnitFromPrisma } from "@/lib/utils/battle/types/participant";
 import { DEFAULT_RULES, type Ruleset } from "@/lib/utils/rules";
-import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { BattleParticipant } from "@/types/battle";
 import type { RaceRow } from "@/types/races";
 
@@ -42,9 +41,9 @@ async function loadSummonSources(campaignId: string): Promise<unknown[]> {
 export async function loadUnitLibraryStats(campaignId: string, rules: Ruleset = DEFAULT_RULES): Promise<UnitStats[]> {
   const [rows, races, summonSources] = await Promise.all([prisma.unit.findMany({ where: { campaignId } }), prisma.race.findMany({ where: { campaignId } }), loadSummonSources(campaignId)]);
 
-  const model = ruleSystemOf(rules).combat.hitModel;
+  const { balance } = systemServerOf(rules);
 
-  const [spellsById, builtById] = await Promise.all([loadSpellsForUnits(campaignId, rows), builtUnitsById(rows, races, model ? rules : undefined)]);
+  const [spellsById, builtById] = await Promise.all([loadSpellsForUnits(campaignId, rows), builtUnitsById(rows, races, balance.readsBuiltRules ? rules : undefined)]);
 
   const summoned = summonedUnitIds([...summonSources, ...rows.map((u) => u.abilities), ...races.map((r) => r.abilities)]);
 
@@ -53,7 +52,7 @@ export async function loadUnitLibraryStats(campaignId: string, rules: Ruleset = 
 
     const base = unitRowStats(u, spellsById, built && unitResistances(built), rules.formulas.saveDcBase);
 
-    const stats = model && built ? hitModelUnitStats(base, built, model) : base;
+    const stats = built ? balance.unitStats(base, built) : base;
 
     return summoned.has(u.id) ? { ...stats, summon: true } : stats;
   });

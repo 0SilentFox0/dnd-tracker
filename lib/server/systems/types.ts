@@ -1,6 +1,9 @@
 import type { ZodType } from "zod";
 
 import type { CharacterOperation } from "@/lib/server/characters/operation-runner";
+import type { getCharacterStats, UnitStats } from "@/lib/utils/battle/balance";
+import type { CampaignSpellContext } from "@/lib/utils/battle/types/participant";
+import type { branchLevels } from "@/lib/utils/skills/progression";
 import type { BattleParticipant } from "@/types/battle";
 
 export interface SystemSchemas {
@@ -26,8 +29,18 @@ export interface SystemAi {
   unitView?(row: { characteristics?: unknown }): Record<string, unknown>;
 }
 
+export interface SystemBalance {
+  /** Hero numbers for the setup UI and the fair-scaling pass, from the participant built out of the character */
+  heroPower(input: { built: BattleParticipant; character: { race: string; skillTreeProgress?: unknown }; campaignContext: CampaignSpellContext | undefined }): { levels: ReturnType<typeof branchLevels>; stats: ReturnType<typeof getCharacterStats> };
+  /** Library unit numbers; `base` is the d20 reading of the row, `built` the participant the unit would become */
+  unitStats(base: UnitStats, built: BattleParticipant): UnitStats;
+  /** Library units are built with the campaign rules before they are read */
+  readsBuiltRules: boolean;
+}
+
 export interface SystemServer {
   schemas: SystemSchemas;
+  balance: SystemBalance;
   operations?: Record<string, SystemOperation>;
   ai?: SystemAi;
 }
