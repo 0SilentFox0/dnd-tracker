@@ -167,4 +167,6 @@ export interface SystemUi {
   resourceDefaults?(sheet: CharacterSheet): Record<string, string>;
   ActionResult?: ComponentType<ActionResultProps>;
   rulesSections?: Partial<Record<MechanicKey, ComponentType<RulesSectionProps>>>;
+  /** Editors of items a module adds to another module's section, keyed `section.item` */
+  rulesItems?: Record<string, ComponentType<RulesSectionProps>>;
 }

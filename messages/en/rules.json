@@ -4,8 +4,7 @@
   },
   "form": {
     "hint": "Changes apply to new battles; a battle already in progress uses the rules fixed at its start",
-    "saveFailed": "Could not save the rules",
-    "unusedInSystem": "This system does not use this mechanic; its settings have no effect."
+    "saveFailed": "Could not save the rules"
   },
   "diceTable": {
     "reset": "Reset to defaults",

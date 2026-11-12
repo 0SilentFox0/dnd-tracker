@@ -8,6 +8,7 @@ import { ItemsSection } from "./sections/ItemsSection";
 import { OutOfCombatSection } from "./sections/OutOfCombatSection";
 import { SpellIngredientsSection } from "./sections/SpellIngredientsSection";
 import { SystemSection } from "./sections/SystemSection";
+import { RulesPathsProvider } from "./RulesPaths";
 
 import { ErrorState, LoadingState } from "@/components/common/states";
 import { HudForm, type HudTab } from "@/components/hud/form";
@@ -18,11 +19,12 @@ import { useRulesForm } from "@/lib/hooks/campaigns";
 import { useTranslator } from "@/lib/i18n/use-translator";
 import type { MechanicKey } from "@/lib/utils/rules";
 import { sectionsOfComposition } from "@/lib/utils/rules/section-registry";
+import { rulePaths } from "@/lib/utils/rules/sections";
 import { composition } from "@/lib/utils/rules/systems/catalog";
 
 const FORM_ID = "campaign-rules-form";
 
-const SECTIONS: Partial<Record<MechanicKey, ComponentType<RulesSectionProps>>> = {
+const CORE_EDITORS: Partial<Record<MechanicKey, ComponentType<RulesSectionProps>>> = {
   defaultAttacks: DefaultAttacksSection,
   outOfCombat: OutOfCombatSection,
   encounters: EncountersSection,
@@ -41,26 +43,21 @@ export function RulesForm({ campaignId }: { campaignId: string }) {
 
   if (isLoading) return <LoadingState />;
 
-  const sections = { ...SECTIONS, ...systemUiOf(form.data.system.key).rulesSections };
+  const ui = systemUiOf(form.data.system.key, form.data.system.modules);
 
   const active = sectionsOfComposition(composition(form.data.system));
 
-  const unused = (Object.keys(sections) as string[]).filter((k) => !(k in active));
+  const editors = { ...CORE_EDITORS, ...ui.rulesSections };
 
-  const tabs: HudTab<MechanicKey>[] = (Object.keys(sections) as MechanicKey[]).map((key) => {
-    const Section = sections[key] as ComponentType<RulesSectionProps>;
+  const keys = (Object.keys(active) as MechanicKey[]).filter((key) => active[key].mechanic && editors[key]);
 
-    return {
-      id: key,
-      label: t(`mechanics.${key}.label`),
-      content: (
-        <>
-          {unused.includes(key) && <p className="mb-3 text-xs text-hud-muted">{t("form.unusedInSystem")}</p>}
-          <Section form={form} />
-        </>
-      ),
-    };
+  const tabs: HudTab<MechanicKey>[] = keys.map((key) => {
+    const Section = editors[key] as ComponentType<RulesSectionProps>;
+
+    return { id: key, label: t(`mechanics.${key}.label`), content: <Section form={form} /> };
   });
+
+  const pathsValue = { paths: new Set(rulePaths(active)), items: ui.rulesItems ?? {} };
 
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -70,6 +67,7 @@ export function RulesForm({ campaignId }: { campaignId: string }) {
   return (
     <>
       <SystemSection form={form} locked={systemLocked} />
+      <RulesPathsProvider value={pathsValue}>
       <HudForm
         id={FORM_ID}
         onSubmit={onSubmit}
@@ -86,6 +84,7 @@ export function RulesForm({ campaignId }: { campaignId: string }) {
           </>
         }
       />
+      </RulesPathsProvider>
       <p className="px-4 pb-4 text-xs text-hud-muted">{t("form.hint")}</p>
     </>
   );
