@@ -19,7 +19,8 @@ import { phantomRequests } from "@/lib/utils/battle/spell/cast/phantom";
 import { abilityOf, actionOf, type ChosenSpell, expandChosen, hasMoveSelf, isPerTarget, readsEventDamage, type SpellCastState, targetOf } from "@/lib/utils/battle/spell/cast/state";
 import { inlineSummonRequests } from "@/lib/utils/battle/spell/cast/summon-inline";
 import { transformRequests } from "@/lib/utils/battle/spell/cast/transform";
-import { computeSpellPower, spellSaveDc } from "@/lib/utils/battle/spell/power";
+import { computeSpellPower } from "@/lib/utils/battle/spell/power";
+import { spellSaveDc } from "@/lib/utils/battle/spell/save-dc";
 import { spellNeedsSlot, spellSlotKey } from "@/lib/utils/battle/spell/slot";
 import type { CastSpellParams, CastSpellResult } from "@/lib/utils/battle/types/spell-process";
 import { rollGroups } from "@/lib/utils/common/dice";
@@ -119,7 +120,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
     ability: abilityOf(spell),
     grant: params.grant,
     power: computeSpellPower({ caster: readyCaster, groupId: spell.groupId, rolls: allRolls, participants: flow.ps, extra: actionModifiers[casterId], addAbilityMod: def.addAbilityMod, damageBonus: def.damageBonus }),
-    saveDc: params.grant?.dc ?? spellSaveDc(readyCaster, params.grant?.dcAbility, params.rules.formulas.saveDcBase),
+    saveDc: params.grant?.dc ?? spellSaveDc(params.rules, readyCaster, params.grant?.dcAbility),
     attackBonus: params.grant?.attackBonus,
     battleId,
     actionModifiers,

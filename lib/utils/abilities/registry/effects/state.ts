@@ -12,9 +12,9 @@ import { isCondition5eKey, isCustomConditionKey } from "@/lib/utils/abilities/sc
 import { seg, type Segment, segmentsLine } from "@/lib/utils/abilities/segments";
 import { helpEffect } from "@/lib/utils/battle/actions/effects";
 import { removeEffects } from "@/lib/utils/battle/conditions/query";
-import { type ConditionKey, saveEndsFor } from "@/lib/utils/battle/conditions/set";
+import type { ConditionKey } from "@/lib/utils/battle/conditions/set";
 import { grantExtraActions } from "@/lib/utils/battle/participant/helpers";
-import { spellSaveDc } from "@/lib/utils/battle/spell/power";
+import { spellSaveDc } from "@/lib/utils/battle/spell/save-dc";
 import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import { slotLevel, slotRestoreOrder } from "@/lib/utils/spells/slot-keys";
 import type { BattleParticipant } from "@/types/battle";
@@ -40,7 +40,7 @@ function applyConditionToTargets(input: EffectApplyInput<Of<"applyCondition">>, 
       key,
       rounds: effect.duration.rounds,
       levels: effect.levels,
-      saveEnds: effect.saveEnds ? saveEndsFor(owner, effect.saveEnds.ability, ctx.rules.formulas.saveDcBase) : undefined,
+      saveEnds: effect.saveEnds ? { ability: effect.saveEnds.ability, dc: owner ? spellSaveDc(ctx.rules, owner) : 10 } : undefined,
       source,
       sourceName: ability.name,
       timedKey: `${ability.key}#${input.effectIndex}@${input.ownerId}`,
@@ -51,7 +51,7 @@ function applyConditionToTargets(input: EffectApplyInput<Of<"applyCondition">>, 
     ps = result.participants;
     messages.push(...result.messages);
 
-    if (effect.escapeDc && owner && !result.blocked) ps = updateParticipant(ps, id, (p) => withEscapeDc(p, `${ability.key}#${input.effectIndex}@${input.ownerId}`, spellSaveDc(owner, undefined, ctx.rules.formulas.saveDcBase)));
+    if (effect.escapeDc && owner && !result.blocked) ps = updateParticipant(ps, id, (p) => withEscapeDc(p, `${ability.key}#${input.effectIndex}@${input.ownerId}`, spellSaveDc(ctx.rules, owner)));
   }
 
   return { participants: ps, messages };

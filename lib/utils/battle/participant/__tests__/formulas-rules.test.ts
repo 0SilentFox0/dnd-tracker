@@ -5,7 +5,7 @@ vi.mock("@/lib/db", () => ({ prisma: { race: { findFirst: vi.fn().mockResolvedVa
 import { ParticipantSide } from "@/lib/constants/battle";
 import { getUnitStats } from "@/lib/utils/battle/balance/stats";
 import { createBattleParticipantFromUnit } from "@/lib/utils/battle/participant/from-unit";
-import { spellSaveDc } from "@/lib/utils/battle/spell/power";
+import { spellSaveDc } from "@/lib/utils/battle/spell/save-dc";
 import type { UnitFromPrisma } from "@/lib/utils/battle/types/participant";
 import { spellcastingDerived } from "@/lib/utils/common/calculations";
 import { DEFAULT_RULES, proficiencyForLevel } from "@/lib/utils/rules";
@@ -60,13 +60,13 @@ describe("формули кампанії: юніт", () => {
   it("СК юніта = база кампанії + майстерність + тір", async () => {
     const p = await createBattleParticipantFromUnit(unit(["s1"]), "b", ParticipantSide.ENEMY, 1, undefined, custom);
 
-    expect(spellSaveDc(p, undefined, 8)).toBe(13);
+    expect(spellSaveDc(custom, p)).toBe(13);
   });
 
   it("DEFAULT_RULES: СК юніта 8 + майстерність + тір", async () => {
     const p = await createBattleParticipantFromUnit(unit(["s1"]), "b", ParticipantSide.ENEMY, 1);
 
-    expect(spellSaveDc(p, undefined, 8)).toBe(11);
+    expect(spellSaveDc(DEFAULT_RULES, p)).toBe(11);
   });
 });
 

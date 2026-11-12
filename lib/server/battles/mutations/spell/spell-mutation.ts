@@ -28,8 +28,8 @@ import { casterSpellDice } from "@/lib/utils/battle/spell/caster-dice";
 import { ingredientsGate, spendIngredients, spentSummary } from "@/lib/utils/battle/spell/ingredients";
 import { peekInlineGrant, withInlineDefinition } from "@/lib/utils/battle/spell/inline-grant";
 import { prepareLongCast } from "@/lib/utils/battle/spell/long-cast";
-import { spellSaveDc } from "@/lib/utils/battle/spell/power";
 import { resolveSpellSource } from "@/lib/utils/battle/spell/resolve-source";
+import { spellSaveDc } from "@/lib/utils/battle/spell/save-dc";
 import { splitSaveRolls } from "@/lib/utils/battle/spell/save-rolls";
 import { resolveChosenSlot, spellNeedsSlot, spellSlotKey } from "@/lib/utils/battle/spell/slot";
 import { pacifiedBlock, resolveSpellTargets } from "@/lib/utils/battle/spell/spell-targeting";
@@ -376,7 +376,7 @@ async function finalizeCast(plan: CastPlan, result: ReturnType<typeof castSpell>
 
   const action = withLines(result.battleAction, summoned.messages);
 
-  const dc = grant?.dc ?? spellSaveDc(caster, grant?.dcAbility, ctx.meta.rules.formulas.saveDcBase);
+  const dc = grant?.dc ?? spellSaveDc(ctx.meta.rules, caster, grant?.dcAbility);
 
   const zoneMap = spellZoneHazard({ map: ctx.meta.map, spell, cells: resolution.cells, round: ctx.scene.round, spellDamage: result.spellDamage, concentrationOf: result.concentration, casterId: caster.basicInfo.id, dc, centre: resolution.centre, castKey: result.concentration?.castId });
 

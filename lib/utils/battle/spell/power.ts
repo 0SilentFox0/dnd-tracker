@@ -5,7 +5,6 @@ import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import { isFiveE } from "@/lib/utils/battle/attack/ability";
 import { archetypeRef, heroMagicMultiplier } from "@/lib/utils/battle/damage/hero-dm-multiplier";
 import { multiplierRow, stepRow } from "@/lib/utils/battle/damage/rows";
-import { getSpellSaveDC } from "@/lib/utils/common/calculations";
 import { signed } from "@/lib/utils/common/format";
 import type { BattleParticipant, DamageRow } from "@/types/battle";
 
@@ -26,14 +25,6 @@ function weaponModifier(p: BattleParticipant): { mod: number; label: string } {
   const { strength, dexterity } = p.abilities.modifiers;
 
   return strength >= dexterity ? { mod: strength, label: ABILITY_LABELS.strength } : { mod: dexterity, label: ABILITY_LABELS.dexterity };
-}
-
-export function spellSaveDc(caster: BattleParticipant, ability: keyof BattleParticipant["abilities"]["modifiers"] | undefined, saveDcBase: number): number {
-  const modifier = ability ? caster.abilities.modifiers[ability] : spellcastingModifier(caster).mod;
-
-  const computed = getSpellSaveDC(caster.abilities.proficiencyBonus, modifier, saveDcBase);
-
-  return ability ? computed : (caster.spellcasting.spellSaveDC ?? computed);
 }
 
 export function spellAttackBonus(caster: BattleParticipant, weapon = false): number {
