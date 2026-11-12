@@ -4,6 +4,7 @@ import { useMemo } from "react";
 
 import { useBattleSceneData } from "./useBattleScene";
 
+import { distanceOf } from "@/lib/utils/battle/grid/cell-feet";
 import { ruleSystemOf } from "@/lib/utils/rules/systems";
 export function useBattleRules() {
   const { battle } = useBattleSceneData();
@@ -11,7 +12,7 @@ export function useBattleRules() {
   const { rules, system } = battle;
 
   return useMemo(() => {
-    const { combat, d20Stats, distance, progression, spells, magic } = ruleSystemOf(rules);
+    const { combat, d20Stats, progression, spells, magic } = ruleSystemOf(rules);
 
     return {
       dice: combat.dice,
@@ -21,7 +22,7 @@ export function useBattleRules() {
       d20Stats,
       spells,
       magic: !!magic,
-      distance,
+      distance: distanceOf(rules),
       hpTerm: progression.hpTerm,
       systemKey: rules.system.key,
       sceneState: system,

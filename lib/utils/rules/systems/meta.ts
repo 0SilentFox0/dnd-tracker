@@ -34,6 +34,8 @@ export interface SystemMeta {
   claims?: readonly string[];
   after?: readonly string[];
   toggle?: "free" | "setup";
+  /** Cell scale of a base; read by `cellFeetOf` without touching the registry */
+  distance?: { unit: "ft" | "yd"; perCell: number };
   tokens?: readonly string[];
   i18n: SystemI18n;
   dmSections?: readonly string[];

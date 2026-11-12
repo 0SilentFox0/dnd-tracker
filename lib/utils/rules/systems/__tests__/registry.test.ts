@@ -7,6 +7,7 @@ import { RULE_SYSTEM_REGISTRY, ruleSystemOf, systemKeyOf } from "../registry";
 
 import { SYSTEM_UI } from "@/components/systems/registry";
 import { SYSTEM_SERVER } from "@/lib/server/systems/registry";
+import { distanceOf } from "@/lib/utils/battle/grid/cell-feet";
 import { DEFAULT_RULES } from "@/lib/utils/rules/defaults";
 import { must } from "@/systems/wfrp/rules/traits/__tests__/fixtures";
 
@@ -79,7 +80,7 @@ describe("rule system registry", () => {
       expect(s.characteristics.sheetBlock(sheetInput)).toBeUndefined();
       expect(s.sheetTest.accepts({ kind: "check" })).toBe(true);
       expect(s.sheetTest.accepts({ kind: "test" })).toBe(false);
-      expect(s.distance).toEqual({ unit: "ft", perCell: 5 });
+      expect(distanceOf({ system: { key } })).toEqual({ unit: "ft", perCell: 5 });
       expect(s.progression.levels).toBe(true);
       expect(s).toMatchObject({ lineage: true, attacks: true });
     }
@@ -91,7 +92,7 @@ describe("rule system registry", () => {
     expect(s.sheetTest.accepts({ kind: "test" })).toBe(true);
     expect(s.sheetTest.accepts({ kind: "check" })).toBe(false);
     expect(s.combat.hitModel).toBeDefined();
-    expect(s.distance).toEqual({ unit: "yd", perCell: 2 });
+    expect(distanceOf({ system: { key: "wfrp" } })).toEqual({ unit: "yd", perCell: 2 });
     expect(s.progression.levels).toBe(false);
     expect(s).toMatchObject({ lineage: false, attacks: false });
   });

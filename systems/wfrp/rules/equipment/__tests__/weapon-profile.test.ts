@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { weaponProfile,WFRP_CELL_FEET } from "../weapon-profile";
 
-import { RULE_SYSTEM_REGISTRY } from "@/lib/utils/rules/systems";
+import { cellFeetOf } from "@/lib/utils/battle/grid/cell-feet";
 
 const sword = { type: "weapon", group: "basic", reach: "average", damage: { addSb: true, flat: 4 }, qualities: [{ key: "damaging" }], flaws: [], twoHanded: false, weight: 1, price: 10 };
 
@@ -10,9 +10,7 @@ const bow = { type: "weapon", group: "bow", range: 60, damage: { addSb: false, f
 
 describe("weaponProfile", () => {
   it("cell size matches the wfrp distance setting", () => {
-    const { unit, perCell } = RULE_SYSTEM_REGISTRY.wfrp.distance;
-
-    expect(unit === "yd" ? perCell * 3 : perCell).toBe(WFRP_CELL_FEET);
+    expect(cellFeetOf({ system: { key: "wfrp" } })).toBe(WFRP_CELL_FEET);
   });
 
   it("melee: average reach is 1 cell", () => {

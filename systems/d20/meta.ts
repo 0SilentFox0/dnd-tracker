@@ -5,5 +5,6 @@ export const D20_META = {
   kind: "base",
   keys: ["dnd5e"],
   tokens: ["dnd5e"],
+  distance: { unit: "ft", perCell: 5 },
   i18n: {},
 } as const satisfies SystemMeta;

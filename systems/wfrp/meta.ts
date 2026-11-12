@@ -5,6 +5,7 @@ export const WFRP_META = {
   kind: "base",
   keys: ["wfrp"],
   tokens: ["wfrp"],
+  distance: { unit: "yd", perCell: 2 },
   i18n: {
     battle: ["battleWfrp"],
     campaign: ["wfrpMagic", "wfrpAdvancement"],
