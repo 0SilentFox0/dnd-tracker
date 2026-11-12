@@ -97,7 +97,7 @@ describe("CoreActionsDialog", () => {
   });
 
   it("лежачий може підвестися", () => {
-    setup((p) => applyCondition5e([p], "me", { key: "prone", rounds: 99, permanent: true, round: 1, source: { participantId: "x", name: "X" }, sourceName: "X", timedKey: "test:prone" }).participants[0]);
+    setup((p) => applyCondition5e([p], "me", { key: "prone", rounds: 99, permanent: true, round: 1, source: { participantId: "x", name: "X" }, sourceName: "X", timedKey: "test:prone", rules: DEFAULT_RULES }).participants[0]);
 
     expect(row("Підвестися").disabled).toBe(false);
     expect(row("Вирватися").disabled).toBe(true);
@@ -105,7 +105,7 @@ describe("CoreActionsDialog", () => {
   });
 
   it("схоплений може вирватися", () => {
-    setup((p) => applyCondition5e([p], "me", { key: "grappled", rounds: 99, permanent: true, round: 1, source: { participantId: "x", name: "X" }, sourceName: "X", timedKey: "test:grappled" }).participants[0]);
+    setup((p) => applyCondition5e([p], "me", { key: "grappled", rounds: 99, permanent: true, round: 1, source: { participantId: "x", name: "X" }, sourceName: "X", timedKey: "test:grappled", rules: DEFAULT_RULES }).participants[0]);
 
     expect(row("Вирватися").disabled).toBe(false);
   });

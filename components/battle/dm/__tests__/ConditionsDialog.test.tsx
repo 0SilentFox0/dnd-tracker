@@ -8,6 +8,7 @@ import { ConditionsDialog } from "@/components/battle/dm/ConditionsDialog";
 import { render } from "@/lib/i18n/test/render-uk";
 import { hero } from "@/lib/server/battles/__tests__/mutations/fixtures";
 import { CONDITION_5E_KEYS } from "@/lib/utils/battle/conditions";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { applyCondition5e } from "@/systems/d20/rules/conditions/apply";
 
 vi.unmock("next-intl");
@@ -52,7 +53,7 @@ describe("ConditionsDialog", () => {
   it("поточний стан має «Зняти»", () => {
     const onSubmit = vi.fn();
 
-    const [afflicted] = applyCondition5e([hero], "hero", { key: "prone", rounds: 2, source: undefined, sourceName: "ДМ", timedKey: "t", round: 1 }).participants;
+    const [afflicted] = applyCondition5e([hero], "hero", { key: "prone", rounds: 2, source: undefined, sourceName: "ДМ", timedKey: "t", round: 1, rules: DEFAULT_RULES }).participants;
 
     render(<ConditionsDialog participant={afflicted} onClose={vi.fn()} onSubmit={onSubmit} />);
 
@@ -66,7 +67,7 @@ describe("ConditionsDialog", () => {
 
     expect(screen.queryByText("Поточні стани")).toBeNull();
 
-    const [afflicted] = applyCondition5e([hero], "hero", { key: "prone", rounds: 2, source: undefined, sourceName: "ДМ", timedKey: "t", round: 1 }).participants;
+    const [afflicted] = applyCondition5e([hero], "hero", { key: "prone", rounds: 2, source: undefined, sourceName: "ДМ", timedKey: "t", round: 1, rules: DEFAULT_RULES }).participants;
 
     rerender(<ConditionsDialog participant={afflicted} onClose={vi.fn()} onSubmit={vi.fn()} />);
 

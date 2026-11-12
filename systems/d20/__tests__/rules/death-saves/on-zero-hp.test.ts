@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { CombatStatus, ParticipantSourceType } from "@/lib/constants/battle";
+import { CombatStatus, ParticipantSourceType, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
 import { applyRawDamage } from "@/lib/utils/abilities/engine/effects/hp";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { DEFAULT_RULES, type Ruleset } from "@/lib/utils/rules";
@@ -9,7 +9,7 @@ import type { BattleParticipant } from "@/types/battle";
 
 const rules: Ruleset = { ...DEFAULT_RULES, deathSaves: { ...DEFAULT_RULES.deathSaves, enabled: true, unitsDieAtZero: true } };
 
-const mock = (sourceType: ParticipantSourceType, hp: number, maxHp = 20): BattleParticipant => {
+const mock = (sourceType: ParticipantSourceTypeValue, hp: number, maxHp = 20): BattleParticipant => {
   const base = createMockParticipant();
 
   return createMockParticipant({ basicInfo: { ...base.basicInfo, sourceType }, combatStats: { ...base.combatStats, currentHp: hp, maxHp, tempHp: 0 } });

@@ -1,4 +1,4 @@
-import type { CoreActionKey } from "./registry";
+import type { CoreActionKey } from "./keys";
 
 import { EffectMarker } from "@/lib/constants/battle";
 import { textRef } from "@/lib/i18n/text-ref";
