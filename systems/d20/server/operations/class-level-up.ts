@@ -9,8 +9,8 @@ import { CharacterClassesSchema } from "@/lib/schemas/classes";
 import { applyClasses, type ClassesApplied } from "@/lib/server/characters/apply-classes";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { multiclassBlockedBy } from "@/lib/utils/characters/classes/multiclass";
-import { nextClassEntries } from "@/lib/utils/characters/level-up/class-level-up";
 import type { Ruleset } from "@/lib/utils/rules/schema";
+import { nextClassEntries } from "@/systems/d20/rules/level-up/class-level-up";
 
 export const LevelUpBodySchema = z.object({ classId: z.string().min(1).optional(), subclassId: z.string().min(1).nullable().optional(), choices: PicksSchema.optional() });
 

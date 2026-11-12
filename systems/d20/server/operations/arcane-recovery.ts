@@ -1,8 +1,8 @@
-import { requireCharacterAccess } from "../access";
-import { characterRoute, defineCharacterOperation, gateOptions } from "../operation-runner";
+import { arcaneRecoveryFor } from "./handlers/arcane-recovery-handler";
 
 import { arcaneRecoverySchema } from "@/lib/schemas/out-of-combat";
-import { arcaneRecoveryFor } from "@/lib/server/characters/core/arcane-recovery-handler";
+import { requireCharacterAccess } from "@/lib/server/characters/access";
+import { defineCharacterOperation, gateOptions } from "@/lib/server/characters/operation-runner";
 
 export const arcaneRecoveryOperation = defineCharacterOperation({
   name: "arcane-recovery",
@@ -11,5 +11,3 @@ export const arcaneRecoveryOperation = defineCharacterOperation({
   gate: ctx => requireCharacterAccess(ctx.campaignId, ctx.characterId, gateOptions(ctx)),
   run: arcaneRecoveryFor,
 });
-
-export const POST = characterRoute(arcaneRecoveryOperation);

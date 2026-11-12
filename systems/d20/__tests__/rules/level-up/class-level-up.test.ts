@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { nextClassEntries } from "../class-level-up";
+import { nextClassEntries } from "@/systems/d20/rules/level-up/class-level-up";
 
 describe("nextClassEntries", () => {
   it("наявний клас: рівень +1", () => {

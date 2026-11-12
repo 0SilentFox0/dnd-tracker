@@ -1,19 +1,19 @@
 import type { NextResponse } from "next/server";
 import type { Prisma } from "@prisma/client";
 
-import { requireCharacterRecord } from "../access";
-import { characterRoute, defineCharacterOperation, dmCharacterGate, orThrow } from "../operation-runner";
+import { classLevelUp, LevelUpBodySchema, type LevelUpPick, readLevelUpPick } from "./class-level-up";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { CharacterLogKind } from "@/lib/constants/character-log";
 import { prisma } from "@/lib/db";
+import { requireCharacterRecord } from "@/lib/server/characters/access";
 import { assertNotInActiveBattle } from "@/lib/server/characters/battle-lock";
 import { loadChoiceRefs } from "@/lib/server/characters/choices/load-refs";
 import { characterClassMode, resolveCharacterChoices } from "@/lib/server/characters/choices/resolve-choices";
-import { classLevelUp, LevelUpBodySchema, type LevelUpPick, readLevelUpPick } from "@/lib/server/characters/class-level-up";
 import { loadRaceProgression } from "@/lib/server/characters/core/load-race-progression";
 import { lockCharacters } from "@/lib/server/characters/lock";
 import { writeCharacterLog } from "@/lib/server/characters/log";
+import { defineCharacterOperation, dmCharacterGate, orThrow } from "@/lib/server/characters/operation-runner";
 import { ContentError } from "@/lib/server/content/errors";
 import { notifyCharacterOwners } from "@/lib/server/notifications/notify";
 import { PUBLIC_USER_SELECT } from "@/lib/server/users/db-user";
@@ -141,5 +141,3 @@ export const levelUpOperation = defineCharacterOperation({
   body: readLevelUpPick,
   run: levelUpCore,
 });
-
-export const POST = characterRoute(levelUpOperation);

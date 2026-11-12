@@ -3,14 +3,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { prisma } from "@/lib/db";
 import { loadChoiceRefs } from "@/lib/server/characters/choices/load-refs";
-import { classLevelUp } from "@/lib/server/characters/class-level-up";
 import { refs, scores, sorcerer } from "@/lib/utils/characters/choices/__tests__/fixtures";
 import { DEFAULT_RULES } from "@/lib/utils/rules/defaults";
+import { classLevelUp } from "@/systems/d20/server/operations/class-level-up";
 
 vi.mock("@/lib/server/notifications/notify", () => ({ notifyCharacterOwners: vi.fn().mockResolvedValue(0) }));
 vi.mock("server-only", () => ({}));
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireDM: vi.fn(async () => ({ userId: "dm", isDM: true, campaign: { id: "camp", maxLevel: 20, rules: { ...DEFAULT_RULES, classes: { enabled: true } } } })) }));
-vi.mock("@/lib/server/characters/class-level-up", async (importOriginal) => ({ ...(await importOriginal<object>()), classLevelUp: vi.fn() }));
+vi.mock("@/systems/d20/server/operations/class-level-up", async (importOriginal) => ({ ...(await importOriginal<object>()), classLevelUp: vi.fn() }));
 vi.mock("@/lib/server/characters/choices/load-refs", () => ({ loadChoiceRefs: vi.fn(async () => refs) }));
 vi.mock("@/lib/server/characters/core/load-race-progression", () => ({ loadRaceProgression: vi.fn(async () => null) }));
 vi.mock("@/lib/db", () => {

@@ -56,8 +56,14 @@ export const systemBattleOperationOf = (rules: Pick<Ruleset, "system">, name: st
 export function mergeSystemOperations<T>(core: Record<string, T>, pick: (op: SystemOperation) => T): Record<string, T> {
   const merged = { ...core };
 
+  const seen = new Map<string, SystemOperation>();
+
   for (const [key, op] of Object.values(SYSTEM_SERVER).flatMap((s) => Object.entries(s.operations ?? {}))) {
+    if (seen.get(key) === op) continue;
+
     if (Object.hasOwn(merged, key)) throw new Error(`Duplicate character operation: ${key}`);
+
+    seen.set(key, op);
 
     merged[key] = pick(op);
   }

@@ -1,5 +1,4 @@
 import { type CharacterOperation } from "../operation-runner";
-import { arcaneRecoveryOperation } from "./arcane-recovery";
 import { choicesOperation } from "./choices";
 import { createOperation } from "./create";
 import { deleteOperation } from "./delete";
@@ -7,10 +6,8 @@ import { deleteAllOperation } from "./delete-all";
 import { experienceOperation } from "./experience";
 import { getOperation } from "./get";
 import { goalsOperation } from "./goals";
-import { hitDiceOperation } from "./hit-dice";
 import { inspirationOperation } from "./inspiration";
 import { inventoryUpdateOperation } from "./inventory-update";
-import { levelUpOperation } from "./level-up";
 import { listOperation } from "./list";
 import { notesOperation } from "./notes";
 import { patchOperation } from "./patch";
@@ -43,14 +40,11 @@ const CORE_OPERATIONS: Record<string, CharacterOperation> = {
   goals: erased(goalsOperation),
   "tokens.create": erased(tokensCreateOperation),
   "tokens.delete": erased(tokensDeleteOperation),
-  "level-up": erased(levelUpOperation),
   choices: erased(choicesOperation),
   resources: erased(resourcesOperation),
   "inventory.patch": erased(inventoryUpdateOperation),
   "stash.apply": erased(stashUpdateOperation),
   transfer: erased(transferOperation),
-  "hit-dice": erased(hitDiceOperation),
-  "arcane-recovery": erased(arcaneRecoveryOperation),
   inspiration: erased(inspirationOperation),
   rest: erased(restOperation),
   experience: erased(experienceOperation),

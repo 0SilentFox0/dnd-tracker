@@ -56,7 +56,7 @@ afterEach(() => vi.restoreAllMocks());
 describe("gate runs once per HTTP request", () => {
   it.each([
     ["roll", () => import("@/lib/server/characters/operations/roll").then(m => m.POST), { kind: "check", skill: "stealth" }],
-    ["hit-dice", () => import("@/lib/server/characters/operations/hit-dice").then(m => m.POST), { classId: "c" }],
+    ["hit-dice", () => import("@/lib/server/characters/system-route").then(m => m.systemCharacterRoute("hit-dice")), { classId: "c" }],
     ["resources", () => import("@/lib/server/characters/operations/resources").then(m => m.PATCH), { hp: 3 }],
   ])("%s: one access check, one character read, no request clone", async (_name, load, body) => {
     const clone = vi.spyOn(Request.prototype, "clone");

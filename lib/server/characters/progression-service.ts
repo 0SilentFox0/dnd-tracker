@@ -4,7 +4,6 @@ import { updateInventorySchema } from "./operations/inventory-update";
 import { CHARACTER_OPERATIONS } from "./operations/registry";
 import { transferSchema } from "./operations/transfer";
 import { characterIdSchema } from "./action-service";
-import { LevelUpBodySchema } from "./class-level-up";
 import { characterIds, withCharacterOperation } from "./operation-context";
 import { actorDmAccess, runCharacterOperation as runOperationCore } from "./operation-runner";
 import { characterReferenceHash } from "./reference-state";
@@ -14,7 +13,7 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n/config";
 import { ChoicesBodySchema } from "@/lib/schemas/choices";
-import { arcaneRecoverySchema, experienceSchema, hitDieSchema, inspirationSchema, resourcesEditSchema, restSchema, sheetRollSchema } from "@/lib/schemas/out-of-combat";
+import { experienceSchema, inspirationSchema, resourcesEditSchema, restSchema, sheetRollSchema } from "@/lib/schemas/out-of-combat";
 import { actionResult } from "@/lib/server/assistant/json";
 import { resultLabel } from "@/lib/server/assistant/result-labels";
 import type { ActionResult } from "@/lib/server/assistant/types";
@@ -33,10 +32,10 @@ const stashWithId = z.union(stashActionSchema.options.map(schema => schema.exten
 const serverRoll = z.union(sheetRollSchema.options.map(schema => schema.extend({ ...characterIdSchema.shape, mode: z.literal("server") }).strict()));
 
 const CORE_INPUTS: Record<string, z.ZodType> = {
-  "level-up": withId(LevelUpBodySchema), choices: withId(ChoicesBodySchema), resources: withId(resourcesEditSchema),
+  choices: withId(ChoicesBodySchema), resources: withId(resourcesEditSchema),
   "inventory.patch": withId(updateInventorySchema), "inventory": characterIdSchema,
   "stash": characterIdSchema, "stash.apply": stashWithId, "transfer": withId(transferSchema),
-  "hit-dice": withId(hitDieSchema), "arcane-recovery": withId(arcaneRecoverySchema), inspiration: withId(inspirationSchema), rest: restSchema.strict(), experience: experienceSchema.strict(),
+  inspiration: withId(inspirationSchema), rest: restSchema.strict(), experience: experienceSchema.strict(),
   roll: serverRoll, sheet: characterIdSchema, progression: characterIdSchema,
   "progression.learn": characterIdSchema.extend({ nodeId: z.string().min(1) }).strict(),
   "progression.unlearn": characterIdSchema.extend({ nodeIds: z.array(z.string().min(1)).min(1).max(100) }).strict(),

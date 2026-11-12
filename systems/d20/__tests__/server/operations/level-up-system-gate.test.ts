@@ -2,10 +2,9 @@ import { describe, expect, it, vi } from "vitest";
 
 vi.mock("@/lib/db", () => ({ prisma: {} }));
 
-import { levelUpOperation } from "../level-up";
-
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { ContentError } from "@/lib/server/content/errors";
+import { levelUpOperation } from "@/systems/d20/server/operations/level-up";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 
 describe("level-up system gate", () => {
