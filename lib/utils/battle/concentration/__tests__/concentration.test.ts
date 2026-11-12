@@ -230,7 +230,7 @@ describe("перевірка концентрації", () => {
 
 describe("недієздатність", () => {
   it.each(["incapacitated", "stunned"] as const)("%s знімає концентрацію", (key) => {
-    const r = applyCondition5e(concentrating(), "c", { key, rounds: 2, source: undefined, sourceName: "X", timedKey: "t", round: 1 });
+    const r = applyCondition5e(concentrating(), "c", { key, rounds: 2, source: undefined, sourceName: "X", timedKey: "t", round: 1, rules: DEFAULT_RULES });
 
     expect(effectsOf(r.participants, "e1")).toEqual([]);
     expect(effectsOf(r.participants, "c").some((e) => e.concentration)).toBe(false);
@@ -311,7 +311,7 @@ describe("review fixes", () => {
   });
 
   it("смерть від виснаження знімає концентрацію", () => {
-    const r = applyCondition5e(concentrating(), "c", { key: "exhaustion", levels: 6, rounds: 2, source: undefined, sourceName: "X", timedKey: "t", round: 1 });
+    const r = applyCondition5e(concentrating(), "c", { key: "exhaustion", levels: 6, rounds: 2, source: undefined, sourceName: "X", timedKey: "t", round: 1, rules: DEFAULT_RULES });
 
     expect(r.participants.find((p) => p.basicInfo.id === "c")?.combatStats.status).toBe(CombatStatus.DEAD);
     expect(effectsOf(r.participants, "c").some((e) => e.concentration)).toBe(false);

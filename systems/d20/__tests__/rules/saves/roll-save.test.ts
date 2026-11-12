@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import { makeEffect, makeParticipant, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
-import { rollSave, saveRollMode } from "@/lib/utils/battle/saves/roll-save";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
+import { rollSave, saveRollMode } from "@/systems/d20/rules/saves/roll-save";
 import type { BattleParticipant } from "@/types/battle";
 
 const base = (): BattleParticipant => {

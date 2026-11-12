@@ -3,8 +3,8 @@ import { describe, expect, it } from "vitest";
 import { makeT } from "@/lib/i18n/test/mock-t";
 import { seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
-import { rollFromSheet } from "@/lib/utils/characters/resources/sheet-roll";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
+import { rollFromSheet } from "@/systems/d20/rules/sheet-roll";
 import type { BattleParticipant } from "@/types/battle";
 
 const rogue = (exhausted = false): BattleParticipant => {

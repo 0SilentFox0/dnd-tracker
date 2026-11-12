@@ -3,9 +3,9 @@ import { describe, expect, it, vi } from "vitest";
 import { makeEffect, makeParticipant, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import * as collect from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
-import { passivePerception, rollCheck } from "@/lib/utils/battle/checks";
-import { rollSave } from "@/lib/utils/battle/saves/roll-save";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
+import { passivePerception, rollCheck } from "@/systems/d20/rules/checks/roll-check";
+import { rollSave } from "@/systems/d20/rules/saves/roll-save";
 import type { BattleParticipant } from "@/types/battle";
 
 const loaded = (...effects: StaticEffect[]): BattleParticipant => {
@@ -33,7 +33,7 @@ describe("проходи модифікаторів", () => {
 
     spy.mockClear();
 
-    const r = rollCheck({ actor: t, subject: { skill: "stealth" }, participants: [t], rng: seq(0.1, 0.9) });
+    const r = rollCheck({ actor: t, subject: { skill: "stealth" }, participants: [t], rules: DEFAULT_RULES, rng: seq(0.1, 0.9) });
 
     expect(spy.mock.calls.length).toBeLessThanOrEqual(2);
     expect(r).toMatchObject({ mode: "advantage", bonus: 6 });
@@ -44,7 +44,7 @@ describe("проходи модифікаторів", () => {
 
     spy.mockClear();
 
-    expect(passivePerception(t, [t])).toBeGreaterThanOrEqual(15);
+    expect(passivePerception(t, [t], DEFAULT_RULES)).toBeGreaterThanOrEqual(15);
     expect(spy.mock.calls.length).toBe(1);
   });
 });

@@ -28,7 +28,7 @@ describe("turnExhausted", () => {
 });
 
 describe("turnExhausted · дії 5e", () => {
-  const prone = () => applyCondition5e([used()], "p1", { key: "prone", rounds: 99, permanent: true, round: 1, source: { participantId: "x", name: "X" }, sourceName: "X", timedKey: "test:prone" }).participants[0];
+  const prone = () => applyCondition5e([used()], "p1", { key: "prone", rounds: 99, permanent: true, round: 1, source: { participantId: "x", name: "X" }, sourceName: "X", timedKey: "test:prone", rules: DEFAULT_RULES }).participants[0];
 
   it("лежачий із запасом руху при ввімкнених діях ще може підвестися", () => {
     expect(turnExhausted(prone(), [], DEFAULT_RULES, { coreActions: true })).toBe(false);

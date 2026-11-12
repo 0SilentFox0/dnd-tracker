@@ -111,15 +111,15 @@ describe("d20 / HOMM names and rule-section readers leaving core", () => {
     morale: 5,
     heroScaling: 5,
     criticals: 6,
-    deathSaves: 5,
-    concentration: 5,
-    conditions: 5,
-    actions: 10,
+    deathSaves: 1,
+    concentration: 2,
+    conditions: 3,
+    actions: 2,
     classes: 19,
     encounters: 9,
-    formulas: 9,
+    formulas: 8,
     initiative: 7,
-    saves: 2,
+    saves: 1,
   };
 
   it("leaked names stay under their maximum", () => check(LEAK_NAMES, (p) => new RegExp(p)));

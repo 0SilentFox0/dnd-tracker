@@ -1,15 +1,13 @@
 import type { AbilityKey } from "@/lib/constants/abilities";
-import { DEFAULT_RULES_EDITION } from "@/lib/constants/rules";
 import { DND_SKILL_META,type DndSkill } from "@/lib/constants/skills";
 import { collectModifiers, type ModifierResult } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/core/participants";
+import { rollD20WithMode } from "@/lib/utils/battle/common/roll-d20";
 import { exhaustionLevel } from "@/lib/utils/battle/conditions/query";
 import { armorPenalty, armorPenaltyAffects } from "@/lib/utils/battle/proficiency";
-import { type D20Mode, rollD20WithMode } from "@/lib/utils/battle/saves/roll-d20";
-import type { Ruleset } from "@/lib/utils/rules";
+import type { CheckRollInput, CheckRollResult, CheckSubject, D20Mode } from "@/lib/utils/battle/saves/types";
+import type { Ruleset } from "@/lib/utils/rules/schema";
 import type { BattleParticipant } from "@/types/battle";
-
-export type CheckSubject = { skill: DndSkill } | { ability: AbilityKey };
 
 const covers = (skills: readonly DndSkill[] | "all", skill: DndSkill | undefined) => skills === "all" || (!!skill && skills.includes(skill));
 
@@ -17,8 +15,8 @@ const abilityOf = (subject: CheckSubject): AbilityKey => ("skill" in subject ? D
 
 const skillOf = (subject: CheckSubject): DndSkill | undefined => ("skill" in subject ? subject.skill : undefined);
 
-function exhaustionVariant(p: BattleParticipant, rules?: Ruleset) {
-  return p.battleData.activeEffects.find((e) => e.exhaustionVariant)?.exhaustionVariant ?? rules?.conditions.exhaustion ?? DEFAULT_RULES_EDITION;
+function exhaustionVariant(p: BattleParticipant, rules: Ruleset) {
+  return p.battleData.activeEffects.find((e) => e.exhaustionVariant)?.exhaustionVariant ?? rules.conditions.exhaustion;
 }
 
 const CHECK_FLAGS = ["checkAdvantage", "checkDisadvantage", "skillProficiency", "skillExpertise"] as const;
@@ -27,7 +25,7 @@ type CheckFlags = ModifierResult["flags"];
 
 const checkFlags = (actor: BattleParticipant, participants: BattleParticipant[]): CheckFlags => collectModifiers(withSelf(participants, actor), actor.basicInfo.id, { flags: CHECK_FLAGS }).flags;
 
-function modeFrom(actor: BattleParticipant, subject: CheckSubject, flags: CheckFlags, rules?: Ruleset, extraAdvantage = false): D20Mode {
+function modeFrom(actor: BattleParticipant, subject: CheckSubject, flags: CheckFlags, rules: Ruleset, extraAdvantage = false): D20Mode {
   const skill = skillOf(subject);
 
   const has = (flag: "checkAdvantage" | "checkDisadvantage") => flags.some((f) => f.flag === flag && covers(f.skills, skill));
@@ -39,7 +37,7 @@ function modeFrom(actor: BattleParticipant, subject: CheckSubject, flags: CheckF
   return adv && !dis ? "advantage" : dis && !adv ? "disadvantage" : "normal";
 }
 
-function bonusFrom(actor: BattleParticipant, subject: CheckSubject, flags: CheckFlags, rules?: Ruleset): { mod: number; bonus: number } {
+function bonusFrom(actor: BattleParticipant, subject: CheckSubject, flags: CheckFlags, rules: Ruleset): { mod: number; bonus: number } {
   const skill = skillOf(subject);
 
   const listed = (flag: "skillProficiency" | "skillExpertise", s: DndSkill) => flags.some((f) => f.flag === flag && f.skills.includes(s));
@@ -53,19 +51,11 @@ function bonusFrom(actor: BattleParticipant, subject: CheckSubject, flags: Check
   return { mod: actor.abilities.modifiers[abilityOf(subject)], bonus: proficiency + exhaustion };
 }
 
-export function checkBonus(actor: BattleParticipant, subject: CheckSubject, participants: BattleParticipant[], rules?: Ruleset): { mod: number; bonus: number } {
+export function checkBonus(actor: BattleParticipant, subject: CheckSubject, participants: BattleParticipant[], rules: Ruleset): { mod: number; bonus: number } {
   return bonusFrom(actor, subject, checkFlags(actor, participants), rules);
 }
 
-export function rollCheck(input: {
-  actor: BattleParticipant;
-  subject: CheckSubject;
-  participants: BattleParticipant[];
-  rules?: Ruleset;
-  rng: () => number;
-  presetRoll?: number;
-  advantage?: boolean;
-}): { roll: number; rolls: number[]; mod: number; bonus: number; total: number; mode: D20Mode } {
+export function rollCheck(input: CheckRollInput): CheckRollResult {
   const { actor, subject, participants, rules, rng, presetRoll } = input;
 
   const flags = checkFlags(actor, participants);
@@ -79,7 +69,7 @@ export function rollCheck(input: {
   return { roll, rolls, mod, bonus, total: roll + mod + bonus, mode };
 }
 
-export function passivePerception(p: BattleParticipant, participants: BattleParticipant[], rules?: Ruleset): number {
+export function passivePerception(p: BattleParticipant, participants: BattleParticipant[], rules: Ruleset): number {
   const flags = checkFlags(p, participants);
 
   const { mod, bonus } = bonusFrom(p, { skill: "perception" }, flags, rules);

@@ -24,7 +24,7 @@ export interface ApplyConditionOptions {
   sourceName: LogLine;
   timedKey: string;
   round: number;
-  rules?: Ruleset;
+  rules: Ruleset;
 }
 
 export interface ApplyConditionResult {

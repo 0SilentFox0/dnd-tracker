@@ -1,7 +1,7 @@
 import type { Translator } from "@/lib/i18n/translator";
-import { rollCheck } from "@/lib/utils/battle/checks/roll-check";
-import { rollSave } from "@/lib/utils/battle/saves/roll-save";
 import type { Ruleset } from "@/lib/utils/rules";
+import { rollCheck } from "@/systems/d20/rules/checks/roll-check";
+import { rollSave } from "@/systems/d20/rules/saves/roll-save";
 import type { BattleParticipant } from "@/types/battle";
 import type { SheetD20RollResult, SheetRollSubject } from "@/types/characters";
 

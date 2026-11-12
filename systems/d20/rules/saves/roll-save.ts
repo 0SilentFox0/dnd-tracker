@@ -1,15 +1,13 @@
-import { rollD20WithMode } from "./roll-d20";
-
 import type { AbilityKey } from "@/lib/constants/abilities";
 import { collectModifiers, type ModifierResult } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/core/participants";
+import { rollD20WithMode } from "@/lib/utils/battle/common/roll-d20";
 import { uniqueLines } from "@/lib/utils/battle/log/lines";
 import { ARMOR_PENALTY_LABEL, armorPenalty, armorPenaltyAffects } from "@/lib/utils/battle/proficiency";
-import type { Ruleset } from "@/lib/utils/rules";
+import type { SaveRollInput, SaveRollMode, SaveRollResult } from "@/lib/utils/battle/saves/types";
+import type { Ruleset } from "@/lib/utils/rules/schema";
 import type { BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
-
-export type SaveRollMode = "advantage" | "disadvantage" | "normal";
 
 const covers = (abilities: readonly AbilityKey[] | "all", ability: AbilityKey) => abilities === "all" || abilities.includes(ability);
 
@@ -46,8 +44,8 @@ export function saveRollMode(
   return modeFrom(saveFlagEntries(withSelf(participants, target), target.basicInfo.id), ability, opts.vsSpell, armorPenalty(target));
 }
 
-function proficiencyBonus(target: BattleParticipant, ability: AbilityKey, entries: SaveFlagEntries, rules?: Ruleset): number {
-  const byRules = !!rules?.saves.proficiency && !!target.abilities.saveProficiencies?.includes(ability);
+function proficiencyBonus(target: BattleParticipant, ability: AbilityKey, entries: SaveFlagEntries, rules: Ruleset): number {
+  const byRules = rules.saves.proficiency &&!!target.abilities.saveProficiencies?.includes(ability);
 
   const byFlag = entries.some((e) => e.flag?.flag === "saveProficiency" && e.flag.abilities.includes(ability));
 
@@ -55,7 +53,7 @@ function proficiencyBonus(target: BattleParticipant, ability: AbilityKey, entrie
 }
 
 /** Краща з двох характеристик за бонусом кидка (при рівності — перша). */
-export function bestSaveAbility(target: BattleParticipant, [first, second]: [AbilityKey, AbilityKey], participants: BattleParticipant[], rules?: Ruleset): AbilityKey {
+export function bestSaveAbility(target: BattleParticipant, [first, second]: [AbilityKey, AbilityKey], participants: BattleParticipant[], rules: Ruleset): AbilityKey {
   const entries = saveFlagEntries(withSelf(participants, target), target.basicInfo.id);
 
   const bonus = (a: AbilityKey) => target.abilities.modifiers[a] + proficiencyBonus(target, a, entries, rules);
@@ -63,17 +61,7 @@ export function bestSaveAbility(target: BattleParticipant, [first, second]: [Abi
   return bonus(second) > bonus(first) ? second : first;
 }
 
-export function rollSave(input: {
-  target: BattleParticipant;
-  ability: AbilityKey;
-  dc: number;
-  participants: BattleParticipant[];
-  rules?: Ruleset;
-  rng: () => number;
-  presetRoll?: number;
-  vsSpell?: boolean;
-  advantage?: boolean;
-}): { roll: number; rolls: number[]; mod: number; bonus: number; total: number; success: boolean; mode: SaveRollMode; autoFail: boolean } {
+export function rollSave(input: SaveRollInput): SaveRollResult {
   const { target, ability, dc, participants, rules, rng, presetRoll, vsSpell } = input;
 
   const mod = target.abilities.modifiers[ability];

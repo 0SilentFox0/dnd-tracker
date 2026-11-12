@@ -43,6 +43,7 @@ const grappled = (a: BattleParticipant, b: BattleParticipant, ps: BattleParticip
     sourceName: a.basicInfo.name,
     timedKey: `core:grapple:${a.basicInfo.id}`,
     round: 1,
+    rules: DEFAULT_RULES,
   }).participants;
 
 describe("contest", () => {
@@ -161,7 +162,7 @@ describe("grapple / shove / escape", () => {
 
     expect(grappledBy(ps, "g")).toHaveLength(1);
 
-    const out = applyCondition5e(ps, "g", { key: "incapacitated", rounds: 2, source: undefined, sourceName: "ДМ", timedKey: "dm:incapacitated@1", round: 1 });
+    const out = applyCondition5e(ps, "g", { key: "incapacitated", rounds: 2, source: undefined, sourceName: "ДМ", timedKey: "dm:incapacitated@1", round: 1, rules: DEFAULT_RULES });
 
     expect(grappledBy(out.participants, "g")).toHaveLength(0);
     expect(out.messages.map((m) => textOf(m)).join(";")).toContain("відпускає");
@@ -279,7 +280,7 @@ describe("releaseInvalidGrapples", () => {
   });
 
   it("недієздатний схоплювач без applyCondition5e (маркер на ефекті) — ціль вільна", () => {
-    const stunned = applyCondition5e(grappled(g, e), "g", { key: "incapacitated", rounds: 2, source: undefined, sourceName: "ДМ", timedKey: "dm:inc", round: 1 }).participants;
+    const stunned = applyCondition5e(grappled(g, e), "g", { key: "incapacitated", rounds: 2, source: undefined, sourceName: "ДМ", timedKey: "dm:inc", round: 1, rules: DEFAULT_RULES }).participants;
 
     const reGrappled = grappled(get(stunned, "g"), get(stunned, "e"), stunned);
 

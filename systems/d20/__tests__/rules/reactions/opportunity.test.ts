@@ -96,7 +96,7 @@ describe("resolveOpportunityAttacks", () => {
 
     const e = mk("e", "enemy", 0, 1, [sword]);
 
-    const stunned = applyCondition5e([m, e], "e", { key: "incapacitated", rounds: 3, source: { participantId: "m", name: "m" }, sourceName: "m", timedKey: "t", round: 1 }).participants;
+    const stunned = applyCondition5e([m, e], "e", { key: "incapacitated", rounds: 3, source: { participantId: "m", name: "m" }, sourceName: "m", timedKey: "t", round: 1, rules: DEFAULT_RULES }).participants;
 
     expect(go([m, stunned[1]], { x: 3, y: 0 }).actions).toHaveLength(0);
     expect(go([m, mk("e", "enemy", 0, 1, [bow])], { x: 3, y: 0 }).actions).toHaveLength(0);
@@ -128,11 +128,11 @@ describe("resolveOpportunityAttacks", () => {
   it("ворог, зачарований мувером, не атакує його", () => {
     const e = mk("e", "enemy", 0, 1, [sword]);
 
-    const charmed = applyCondition5e([m, e], "e", { key: "charmed", rounds: 3, source: { participantId: "m", name: "m" }, sourceName: "m", timedKey: "t", round: 1 }).participants;
+    const charmed = applyCondition5e([m, e], "e", { key: "charmed", rounds: 3, source: { participantId: "m", name: "m" }, sourceName: "m", timedKey: "t", round: 1, rules: DEFAULT_RULES }).participants;
 
     expect(go(charmed, { x: 3, y: 0 }).actions).toHaveLength(0);
 
-    const byOther = applyCondition5e([m, e], "e", { key: "charmed", rounds: 3, source: { participantId: "other", name: "o" }, sourceName: "o", timedKey: "t", round: 1 }).participants;
+    const byOther = applyCondition5e([m, e], "e", { key: "charmed", rounds: 3, source: { participantId: "other", name: "o" }, sourceName: "o", timedKey: "t", round: 1, rules: DEFAULT_RULES }).participants;
 
     expect(go(byOther, { x: 3, y: 0 }).actions).toHaveLength(1);
   });

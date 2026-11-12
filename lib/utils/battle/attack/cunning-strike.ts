@@ -5,7 +5,7 @@ import { withinLimits } from "@/lib/utils/abilities/engine/core/usage";
 import type { CunningStrikeEffect } from "@/lib/utils/abilities/schema";
 import { disengageEffect, upsertLabeled } from "@/lib/utils/battle/actions/effects";
 import { type ActionFlow, getP, put } from "@/lib/utils/battle/common/action-flow";
-import { rollSave } from "@/lib/utils/battle/saves";
+import { savesOf } from "@/lib/utils/battle/saves/access";
 import { REJECT } from "@/lib/utils/battle/store/reject";
 import { diceCount } from "@/lib/utils/common/dice";
 import { ruleSystemOf } from "@/lib/utils/rules/systems";
@@ -98,7 +98,7 @@ export function applyCunningStrikeEffects(flow: ActionFlow, attackerId: string, 
 
     const dc = cunningStrikeDc(attacker);
 
-    const save = rollSave({ target, ability, dc, participants: flow.ps, rules: flow.ctx.rules, rng: flow.ctx.rng });
+    const save = savesOf(flow.ctx.rules).roll({ target, ability, dc, participants: flow.ps, rules: flow.ctx.rules, rng: flow.ctx.rng });
 
     const label = textRef("battleLog.cunning.label", { effect: CUNNING_STRIKE_LABELS[effect] });
 

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { checkBonus } from "@/lib/utils/battle/checks/roll-check";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
+import { checkBonus } from "@/systems/d20/rules/checks/roll-check";
 import type { BattleParticipant } from "@/types/battle";
 
 const actor = (flags: object[], skillProficiencies: string[] = []) =>
@@ -15,9 +16,9 @@ describe("checkBonus: expertise", () => {
   it("doubles proficiency only for a proficient skill", () => {
     const expert = { kind: "flag", flag: "skillExpertise", skills: ["stealth"] };
 
-    expect(checkBonus(actor([expert], ["stealth"]), { skill: "stealth" }, []).bonus).toBe(6);
-    expect(checkBonus(actor([], ["stealth"]), { skill: "stealth" }, []).bonus).toBe(3);
-    expect(checkBonus(actor([expert]), { skill: "stealth" }, []).bonus).toBe(0);
-    expect(checkBonus(actor([expert, { kind: "flag", flag: "skillProficiency", skills: ["stealth"] }]), { skill: "stealth" }, []).bonus).toBe(6);
+    expect(checkBonus(actor([expert], ["stealth"]), { skill: "stealth" }, [], DEFAULT_RULES).bonus).toBe(6);
+    expect(checkBonus(actor([], ["stealth"]), { skill: "stealth" }, [], DEFAULT_RULES).bonus).toBe(3);
+    expect(checkBonus(actor([expert]), { skill: "stealth" }, [], DEFAULT_RULES).bonus).toBe(0);
+    expect(checkBonus(actor([expert, { kind: "flag", flag: "skillProficiency", skills: ["stealth"] }]), { skill: "stealth" }, [], DEFAULT_RULES).bonus).toBe(6);
   });
 });

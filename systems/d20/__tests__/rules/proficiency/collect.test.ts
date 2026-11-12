@@ -4,7 +4,7 @@ import classes from "@/data/templates/srd-5.2/classes.json";
 import { ArtifactSlot } from "@/lib/constants/artifacts";
 import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { armorPenalty, isWeaponProficient, parseArmorProficiency } from "@/lib/utils/battle/proficiency";
-import { classProficiencies, withGrantedProficiencies } from "@/lib/utils/battle/proficiency/collect";
+import { classProficiencies, withGrantedProficiencies } from "@/systems/d20/rules/proficiency/collect";
 import type { BattleParticipant } from "@/types/battle";
 import type { GameClassData } from "@/types/classes";
 

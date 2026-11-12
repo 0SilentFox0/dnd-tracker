@@ -7,8 +7,8 @@ import { textRef } from "@/lib/i18n/text-ref";
 import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
 import { calculateAttackBonus, rollModeReasons } from "@/lib/utils/battle/attack/bonus";
 import { armorPenalty, isWeaponProficient, parseArmorProficiency, parseWeaponProficiency } from "@/lib/utils/battle/proficiency";
-import { rollSave } from "@/lib/utils/battle/saves/roll-save";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
+import { rollSave } from "@/systems/d20/rules/saves/roll-save";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 const byName = (n: string) => classes.find((c) => c.name === n)!.proficiencies;
@@ -71,7 +71,7 @@ describe("володіння зброєю й бронею (5e)", () => {
     expect(armorPenalty(wizard)).toBe(true);
     expect(rollModeReasons(wizard, sword, [wizard], { rules: DEFAULT_RULES }).disadvantage).toContainEqual(textRef("battleLog.rollMode.armorPenalty"));
 
-    const save = (p: BattleParticipant, ability: "strength" | "wisdom") => rollSave({ target: p, ability, dc: 10, participants: [p], rng: () => 0.5 }).mode;
+    const save = (p: BattleParticipant, ability: "strength" | "wisdom") => rollSave({ target: p, ability, dc: 10, participants: [p], rules: DEFAULT_RULES, rng: () => 0.5 }).mode;
 
     expect(save(wizard, "strength")).toBe("disadvantage");
     expect(save(wizard, "wisdom")).toBe("normal");

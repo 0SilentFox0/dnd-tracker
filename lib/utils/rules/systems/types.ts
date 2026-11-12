@@ -15,6 +15,7 @@ import type { CritPicker } from "@/lib/utils/battle/crit-choice/types";
 import type { DamageConsequencesInput, DamageConsequencesResult } from "@/lib/utils/battle/damage/consequences";
 import type { DieFx } from "@/lib/utils/battle/fx/dice/types";
 import type { EquippedArtifactRow } from "@/lib/utils/battle/participant/extract-artifacts";
+import type { RuleSystemProficiency, RuleSystemSaves } from "@/lib/utils/battle/saves/types";
 import type { BattleSceneState } from "@/lib/utils/battle/store";
 import type { AttackRollResult } from "@/lib/utils/battle/types/attack";
 import type { ExtractedAttack } from "@/lib/utils/battle/types/participant";
@@ -395,6 +396,8 @@ export interface RuleSystemCombat {
   turn?: RuleSystemTurn;
   actions: RuleSystemActions;
   reactions: RuleSystemReactions;
+  saves: RuleSystemSaves;
+  proficiency: RuleSystemProficiency;
   /** Hooks after each strike of an attack, base first, then modules */
   afterAttack?: readonly AfterAttackHook[];
   /** Base score before flat modifiers; `roll`/`die` are null when nothing was rolled (static mode, pinned) */

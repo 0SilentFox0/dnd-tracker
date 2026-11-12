@@ -8,14 +8,12 @@ import { critThresholdOf } from "@/lib/utils/battle/attack/crit-threshold";
 import { applyAttackCritToFlow, applyCriticalEffect, critFlavorIndex, critNameRef } from "@/lib/utils/battle/attack/critical";
 import { getP, put } from "@/lib/utils/battle/common/action-flow";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
+import { rollD20WithMode } from "@/lib/utils/battle/common/roll-d20";
 import { type CritKind, randomCritEffect } from "@/lib/utils/battle/crit-choice/catalog";
 import { isAdjacent, isOnMap } from "@/lib/utils/battle/grid/occupancy";
 import { isHostile } from "@/lib/utils/battle/modes/engine";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant/helpers";
-import { evasionFactor, hasEvasion } from "@/lib/utils/battle/saves/evasion";
-import { resolveSave } from "@/lib/utils/battle/saves/legendary";
-import { rollD20WithMode } from "@/lib/utils/battle/saves/roll-d20";
-import { bestSaveAbility, rollSave } from "@/lib/utils/battle/saves/roll-save";
+import { savesOf } from "@/lib/utils/battle/saves/access";
 import type { Outcome, SpellCastState } from "@/lib/utils/battle/spell/cast/state";
 import { spellAttackBonus } from "@/lib/utils/battle/spell/power";
 import { participantImmuneToSpell } from "@/lib/utils/battle/spell/spell-immunity";
@@ -172,11 +170,13 @@ export function resolveOutcome(state: SpellCastState, id: string, withSave: bool
   if (withSave && def.resolution.kind === "save") {
     const { ability: baseAbility, orAbility, onSuccess } = def.resolution;
 
-    const saveAbility = orAbility ? bestSaveAbility(target, [baseAbility, orAbility], flow.ps, flow.ctx.rules) : baseAbility;
+    const saves = savesOf(flow.ctx.rules);
+
+    const saveAbility = orAbility ? saves.bestAbility(target, [baseAbility, orAbility], flow.ps, flow.ctx.rules) : baseAbility;
 
     const dc = state.saveDc;
 
-    const r = rollSave({ target, ability: saveAbility, dc, participants: flow.ps, rules: flow.ctx.rules, rng: state.rng, presetRoll: state.saveRolls.find((s) => s.participantId === id)?.roll, vsSpell: true });
+    const r = saves.roll({ target, ability: saveAbility, dc, participants: flow.ps, rules: flow.ctx.rules, rng: state.rng, presetRoll: state.saveRolls.find((s) => s.participantId === id)?.roll, vsSpell: true });
 
     // союзник кастера сам хоче провалити корисне заклинання — опір не витрачається
     const { roll, mod, bonus, total } = r;
@@ -186,7 +186,7 @@ export function resolveOutcome(state: SpellCastState, id: string, withSave: bool
     // нат. 20/1 визначають результат лише там, де діють криті; Легендарний опір діє вже на цей результат
     const base = saveCrit ? { ...r, success: roll === 20 } : r;
 
-    const resisted = isHostile(flow.ctx.map, state.caster, target) ? resolveSave(target, base) : { result: base, participant: target, message: null };
+    const resisted = isHostile(flow.ctx.map, state.caster, target) ? saves.resolve(target, base) : { result: base, participant: target, message: null };
 
     if (resisted.message) flow.ps = replaceParticipant(flow.ps, resisted.participant);
 
@@ -194,9 +194,9 @@ export function resolveOutcome(state: SpellCastState, id: string, withSave: bool
 
     state.saves.push({ participantId: id, ability: saveAbility, roll, result: success ? "success" : "fail", ...(r.mode !== "normal" && { mode: r.mode, rolls: r.rolls }), ...(r.autoFail && { autoFail: true }) });
 
-    const evasive = saveAbility === "dexterity" && onSuccess === "half" && hasEvasion(flow.ps, target);
+    const evasive = saveAbility === "dexterity" && onSuccess === "half" && saves.evasion.has(flow.ps, target);
 
-    if (evasive) factor = evasionFactor(success, true);
+    if (evasive) factor = saves.evasion.factor(success, true);
     else if (success) factor = onSuccess === "half" ? 0.5 : 0;
 
     const extra = bonus ? `${bonus < 0 ? "-" : "+"}${Math.abs(bonus)}` : "";

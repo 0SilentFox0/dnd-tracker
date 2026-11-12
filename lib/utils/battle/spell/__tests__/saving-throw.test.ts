@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
-import { rollSave } from "@/lib/utils/battle/saves/roll-save";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
+import { rollSave } from "@/systems/d20/rules/saves/roll-save";
 
 const rollSavingThrow = (t: ReturnType<typeof target>, ability: "dexterity", dc: number, rng: () => number, presetRoll?: number) => {
-  const { roll, mod, total, success } = rollSave({ target: t, ability, dc, participants: [t], rng, presetRoll });
+  const { roll, mod, total, success } = rollSave({ target: t, ability, dc, participants: [t], rules: DEFAULT_RULES, rng, presetRoll });
 
   return { roll, mod, total, success };
 };

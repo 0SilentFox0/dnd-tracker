@@ -4,9 +4,7 @@ import type { ManeuverInput, ManeuverResult } from "./types";
 import { textRef } from "@/lib/i18n/text-ref";
 import { findParticipant, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { cellsOf, footprintDistance, isOnMap } from "@/lib/utils/battle/grid";
-import { evasionFactor, hasEvasion } from "@/lib/utils/battle/saves/evasion";
-import { resolveSave } from "@/lib/utils/battle/saves/legendary";
-import { rollSave } from "@/lib/utils/battle/saves/roll-save";
+import { savesOf } from "@/lib/utils/battle/saves/access";
 import { spellSaveDc } from "@/lib/utils/battle/spell/power";
 import type { BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
@@ -32,21 +30,23 @@ export function fireBurst(ps: BattleParticipant[], input: ManeuverInput): Maneuv
 
   const resisted: LogLine[] = [];
 
-  const hits = targets.map((t) => {
-    const rolled = rollSave({ target: t, ability: "dexterity", dc, participants: ps, rules: input.rules, rng: input.rng });
+  const saves = savesOf(input.rules);
 
-    const { result, participant, message } = resolveSave(t, rolled);
+  const hits = targets.map((t) => {
+    const rolled = saves.roll({ target: t, ability: "dexterity", dc, participants: ps, rules: input.rules, rng: input.rng });
+
+    const { result, participant, message } = saves.resolve(t, rolled);
 
     if (message) {
       next = replaceParticipant(next, participant);
       resisted.push(message);
     }
 
-    const evasive = hasEvasion(ps, t);
+    const evasive = saves.evasion.has(ps, t);
 
     notes.set(t.basicInfo.id, textRef("battleLog.maneuver.fireNote", { total: rolled.total, dc, detail: evasive ? textRef(result.success ? "battleLog.maneuver.evaded" : "battleLog.maneuver.evadedHalf") : result.success ? textRef("battleLog.maneuver.half") : "" }));
 
-    return { targetId: t.basicInfo.id, amount: Math.floor(full * evasionFactor(result.success, evasive)) };
+    return { targetId: t.basicInfo.id, amount: Math.floor(full * saves.evasion.factor(result.success, evasive)) };
   });
 
   return strikeAll(maneuverResult(next, resisted), hits, { actorId: actor.basicInfo.id, damageType: "fire", name: input.name, rules: input.rules, rng: input.rng, note: (id) => notes.get(id) ?? "" });

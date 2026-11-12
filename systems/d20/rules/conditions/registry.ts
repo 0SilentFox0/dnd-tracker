@@ -145,8 +145,8 @@ export function conditionEffectInput(key: Condition5eKey, opts: ConditionEffectO
 
 export type CustomConditionDef = NonNullable<Ruleset["conditions"]["custom"]>[number];
 
-export function customConditionDef(key: CustomConditionKey, rules?: Ruleset): CustomConditionDef | undefined {
-  return rules?.conditions.custom?.find((c) => c.key === key);
+export function customConditionDef(key: CustomConditionKey, rules: Ruleset): CustomConditionDef | undefined {
+  return rules.conditions.custom?.find((c) => c.key === key);
 }
 
 export function customConditionInput(def: CustomConditionDef, opts: ConditionEffectOptions): LabeledEffectInput {

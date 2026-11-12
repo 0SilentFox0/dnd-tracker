@@ -7,6 +7,7 @@ import { context, goblin, hero } from "@/lib/server/battles/__tests__/mutations/
 import { beginConcentration, hasConcentration } from "@/lib/utils/battle/concentration";
 import { hasCondition } from "@/lib/utils/battle/conditions";
 import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { applyCondition5e } from "@/systems/d20/rules/conditions/apply";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -33,7 +34,7 @@ describe("battleConditionsMutation", () => {
   });
 
   it("імунітет блокує", () => {
-    const withFlag = applyCondition5e([hero, goblin], "gob", { key: "petrified", rounds: 3, source: undefined, sourceName: "X", timedKey: "t", round: 1 }).participants;
+    const withFlag = applyCondition5e([hero, goblin], "gob", { key: "petrified", rounds: 3, source: undefined, sourceName: "X", timedKey: "t", round: 1, rules: DEFAULT_RULES }).participants;
 
     expect(() => battleConditionsMutation(dmCtx(withFlag), { action: "apply", participantId: "gob", condition: "poisoned" })).toThrow(API_ERRORS.CONDITION_IMMUNE);
   });
@@ -41,9 +42,9 @@ describe("battleConditionsMutation", () => {
   it("remove prone знімає всі ефекти з цим ключем, але не чужі через implies", () => {
     let ps = [hero, goblin];
 
-    ps = applyCondition5e(ps, "gob", { key: "prone", rounds: 3, source: undefined, sourceName: "ДМ", timedKey: "a", round: 1 }).participants;
-    ps = applyCondition5e(ps, "gob", { key: "prone", rounds: 3, source: { participantId: "hero", abilityId: "x", abilityName: "X" } as never, sourceName: "X", timedKey: "b", round: 1 }).participants;
-    ps = applyCondition5e(ps, "gob", { key: "paralyzed", rounds: 3, source: undefined, sourceName: "ДМ", timedKey: "c", round: 1 }).participants;
+    ps = applyCondition5e(ps, "gob", { key: "prone", rounds: 3, source: undefined, sourceName: "ДМ", timedKey: "a", round: 1, rules: DEFAULT_RULES }).participants;
+    ps = applyCondition5e(ps, "gob", { key: "prone", rounds: 3, source: { participantId: "hero", abilityId: "x", abilityName: "X" } as never, sourceName: "X", timedKey: "b", round: 1, rules: DEFAULT_RULES }).participants;
+    ps = applyCondition5e(ps, "gob", { key: "paralyzed", rounds: 3, source: undefined, sourceName: "ДМ", timedKey: "c", round: 1, rules: DEFAULT_RULES }).participants;
 
     const out = battleConditionsMutation(dmCtx(ps), { action: "remove", participantId: "gob", condition: "prone" });
 
@@ -53,7 +54,7 @@ describe("battleConditionsMutation", () => {
   });
 
   it("remove incapacitated не знімає paralyzed", () => {
-    const ps = applyCondition5e([hero, goblin], "gob", { key: "paralyzed", rounds: 3, source: undefined, sourceName: "ДМ", timedKey: "c", round: 1 }).participants;
+    const ps = applyCondition5e([hero, goblin], "gob", { key: "paralyzed", rounds: 3, source: undefined, sourceName: "ДМ", timedKey: "c", round: 1, rules: DEFAULT_RULES }).participants;
 
     expect(() => battleConditionsMutation(dmCtx(ps), { action: "remove", participantId: "gob", condition: "incapacitated" })).toThrow(API_ERRORS.CONDITION_ABSENT);
     expect(hasCondition(byId(ps, "gob"), "paralyzed")).toBe(true);
@@ -62,7 +63,7 @@ describe("battleConditionsMutation", () => {
   it("remove exhaustion відновлює maxHp", () => {
     const start = byId([goblin], "gob").combatStats.maxHp;
 
-    let ps = applyCondition5e([hero, goblin], "gob", { key: "exhaustion", levels: 4, rounds: 99, permanent: true, source: undefined, sourceName: "ДМ", timedKey: "e", round: 1 }).participants;
+    let ps = applyCondition5e([hero, goblin], "gob", { key: "exhaustion", levels: 4, rounds: 99, permanent: true, source: undefined, sourceName: "ДМ", timedKey: "e", round: 1, rules: DEFAULT_RULES }).participants;
 
     expect(byId(ps, "gob").combatStats.maxHp).toBeLessThan(start);
 

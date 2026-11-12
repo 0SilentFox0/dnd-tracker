@@ -24,6 +24,7 @@ const withCondition = (ps: BattleParticipant[], id: string, key: Condition5eKey,
     sourceName: "X",
     timedKey: `t-${key}`,
     round: 1,
+    rules: DEFAULT_RULES,
   }).participants;
 
 const ally = (at?: { x: number; y: number }) => placed("a", { side: ParticipantSide.ALLY, at });

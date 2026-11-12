@@ -8,13 +8,13 @@ import { beginConcentration } from "@/lib/utils/battle/concentration";
 import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { textsOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { ABILITIES, byId, hp, MAP, percentOfAttack, perform, unit } from "@/lib/utils/battle/maneuvers/__tests__/fixtures";
-import { resolveSave } from "@/lib/utils/battle/saves/legendary";
-import { rollSaveEnds } from "@/lib/utils/battle/saves/save-ends";
 import { castSpell } from "@/lib/utils/battle/spell";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { contest } from "@/systems/d20/rules/actions/grapple";
 import { concentrationCheck } from "@/systems/d20/rules/concentration/check";
+import { resolveSave } from "@/systems/d20/rules/saves/legendary";
+import { rollSaveEnds } from "@/systems/d20/rules/saves/save-ends";
 import type { BattleParticipant } from "@/types/battle";
 
 const legendaryOf = (p: BattleParticipant, resistLeft: number): BattleParticipant => ({ ...p, battleData: { ...p.battleData, legendary: { actions: 0, actionsLeft: 0, resistLeft } } });
@@ -49,7 +49,7 @@ describe("виклики rollSave", () => {
 
     const p = { ...base, battleData: { ...base.battleData, activeEffects: [makeEffect("paralyzed", { name: "paralyzed", saveEnds: { ability: "wisdom", dc: 14 } })] } };
 
-    const r = rollSaveEnds(p, [p], undefined, seq(0.1));
+    const r = rollSaveEnds(p, [p], DEFAULT_RULES, seq(0.1));
 
     expect(r.participant.battleData.activeEffects).toHaveLength(0);
     expect(r.participant.battleData.legendary?.resistLeft).toBe(0);

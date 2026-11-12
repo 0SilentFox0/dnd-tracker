@@ -2,8 +2,9 @@ import { describe, expect, it } from "vitest";
 
 import { makeEffect, makeParticipant, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
-import { passivePerception, rollCheck } from "@/lib/utils/battle/checks";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { parseRules } from "@/lib/utils/rules/schema";
+import { passivePerception, rollCheck } from "@/systems/d20/rules/checks/roll-check";
 import type { BattleParticipant } from "@/types/battle";
 
 const base = (skillProficiencies?: BattleParticipant["abilities"]["skillProficiencies"]): BattleParticipant => {
@@ -23,7 +24,7 @@ const withExhaustion = (p: BattleParticipant, level: number, variant: "2014" | "
 });
 
 const run = (actor: BattleParticipant, subject: Parameters<typeof rollCheck>[0]["subject"], over: Partial<Parameters<typeof rollCheck>[0]> = {}) =>
-  rollCheck({ actor, subject, participants: [actor], rng: seq(0.1, 0.9), ...over });
+  rollCheck({ actor, subject, participants: [actor], rules: DEFAULT_RULES, rng: seq(0.1, 0.9), ...over });
 
 describe("rollCheck", () => {
   it("навичка бере характеристику з DND_SKILL_META", () => {
@@ -70,18 +71,18 @@ describe("rollCheck", () => {
 
 describe("passivePerception", () => {
   it("10 + мод + майстерність", () => {
-    expect(passivePerception(base(), [base()])).toBe(11);
-    expect(passivePerception(base(["perception"]), [base()])).toBe(14);
+    expect(passivePerception(base(), [base()], DEFAULT_RULES)).toBe(11);
+    expect(passivePerception(base(["perception"]), [base()], DEFAULT_RULES)).toBe(14);
   });
 
   it("перевага +5, недолік -5", () => {
-    expect(passivePerception(withEffects(base(), { kind: "flag", flag: "checkAdvantage", skills: ["perception"] }), [])).toBe(16);
-    expect(passivePerception(withEffects(base(), { kind: "flag", flag: "checkDisadvantage", skills: "all" }), [])).toBe(6);
+    expect(passivePerception(withEffects(base(), { kind: "flag", flag: "checkAdvantage", skills: ["perception"] }), [], DEFAULT_RULES)).toBe(16);
+    expect(passivePerception(withEffects(base(), { kind: "flag", flag: "checkDisadvantage", skills: "all" }), [], DEFAULT_RULES)).toBe(6);
   });
 
   it("виснаження: 2014 — перешкода (-5), 2024 — -2 за рівень без -5", () => {
-    expect(passivePerception(withExhaustion(base(), 1, "2014"), [])).toBe(6);
-    expect(passivePerception(withExhaustion(base(), 2, "2024"), [])).toBe(7);
+    expect(passivePerception(withExhaustion(base(), 1, "2014"), [], DEFAULT_RULES)).toBe(6);
+    expect(passivePerception(withExhaustion(base(), 2, "2024"), [], DEFAULT_RULES)).toBe(7);
   });
 
   it("варіант виснаження береться з правил кампанії", () => {

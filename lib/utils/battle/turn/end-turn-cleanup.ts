@@ -3,7 +3,7 @@ import { restoreCharm } from "@/lib/utils/abilities/engine/effects/charm";
 import { dropConcentration, hasConcentration } from "@/lib/utils/battle/concentration";
 import { restoreExhaustionHp, syncExhaustion } from "@/lib/utils/battle/conditions/query";
 import { setExtraActionPool } from "@/lib/utils/battle/participant/helpers";
-import { rollSaveEnds } from "@/lib/utils/battle/saves/save-ends";
+import { savesOf } from "@/lib/utils/battle/saves/access";
 import { decreaseEffectDurations } from "@/lib/utils/battle/turn/effects";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleParticipant } from "@/types/battle";
@@ -12,12 +12,12 @@ import type { LogLine } from "@/types/text";
 export interface SaveEndsContext {
   participants: BattleParticipant[];
   round?: number;
-  rules?: Ruleset;
+  rules: Ruleset;
   rng: () => number;
 }
 
 export function finishTurnEffects(source: BattleParticipant, saves?: SaveEndsContext): { participant: BattleParticipant; expired: LogLine[]; messages: LogLine[] } {
-  const rolled = saves ? rollSaveEnds(source, saves.participants, saves.rules, saves.rng) : { participant: source, messages: [] };
+  const rolled = saves ? savesOf(saves.rules).rollEnds(source, saves.participants, saves.rules, saves.rng) : { participant: source, messages: [] };
 
   let p = rolled.participant;
 

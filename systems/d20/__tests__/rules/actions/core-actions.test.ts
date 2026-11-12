@@ -5,7 +5,6 @@ import { createMockParticipant, grantPassive } from "@/lib/utils/battle/__tests_
 import { runCoreAction } from "@/lib/utils/battle/actions/dispatch";
 import { coreActionSchema } from "@/lib/utils/battle/actions/schema";
 import { activeEffectIds, consumeAttackEffects } from "@/lib/utils/battle/attack/consume-effects";
-import { passivePerception } from "@/lib/utils/battle/checks";
 import { baseMovement, remainingMovement } from "@/lib/utils/battle/grid/path";
 import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { finishTurnEffects } from "@/lib/utils/battle/turn/end-turn-cleanup";
@@ -13,6 +12,7 @@ import { processStartOfTurn } from "@/lib/utils/battle/turn/start-end";
 import { resetTurnState } from "@/lib/utils/battle/turn/turn-state";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { canStandUp, coreActionAvailability, coreActionCost } from "@/systems/d20/rules/actions/availability";
+import { passivePerception } from "@/systems/d20/rules/checks/roll-check";
 import { applyCondition5e } from "@/systems/d20/rules/conditions/apply";
 import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
 

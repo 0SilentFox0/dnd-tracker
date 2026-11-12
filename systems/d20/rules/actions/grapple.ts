@@ -5,14 +5,15 @@ import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abili
 import { coreTimedKey } from "@/lib/utils/battle/actions/effects";
 import { reject } from "@/lib/utils/battle/actions/errors";
 import { actionReason } from "@/lib/utils/battle/actions/reasons";
-import { checkBonus, rollCheck } from "@/lib/utils/battle/checks";
 import { conditionSourceIds, hasCondition, PERMANENT_ROUNDS, removeEffects } from "@/lib/utils/battle/conditions";
 import { GRAPPLE_KEY_PREFIX, grappledBy, grappleKey, releaseGrapples } from "@/lib/utils/battle/conditions/grapple-links";
 import { canStand, isAdjacent } from "@/lib/utils/battle/grid/occupancy";
 import { awayStep } from "@/lib/utils/battle/grid/push";
-import { resolveSave, rollSave } from "@/lib/utils/battle/saves";
 import { getSpellSaveDC } from "@/lib/utils/common/calculations";
 import type { Ruleset } from "@/lib/utils/rules";
+import { checkBonus, rollCheck } from "@/systems/d20/rules/checks/roll-check";
+import { resolveSave } from "@/systems/d20/rules/saves/legendary";
+import { rollSave } from "@/systems/d20/rules/saves/roll-save";
 import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 

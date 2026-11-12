@@ -1,16 +1,17 @@
+import { resolveSave } from "./legendary";
+import { rollSave } from "./roll-save";
+
 import { textRef } from "@/lib/i18n/text-ref";
 import { abilityRef, effectName } from "@/lib/utils/battle/common/terms";
 import { removeEffects } from "@/lib/utils/battle/conditions/query";
-import { resolveSave } from "@/lib/utils/battle/saves/legendary";
-import { rollSave } from "@/lib/utils/battle/saves/roll-save";
-import type { Ruleset } from "@/lib/utils/rules";
+import type { Ruleset } from "@/lib/utils/rules/schema";
 import type { BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
 export function rollSaveEnds(
   p: BattleParticipant,
   participants: BattleParticipant[],
-  rules: Ruleset | undefined,
+  rules: Ruleset,
   rng: () => number,
 ): { participant: BattleParticipant; messages: LogLine[] } {
   const messages: LogLine[] = [];
