@@ -4,10 +4,10 @@ import { skippedTurnAt } from "../skipped-turn";
 
 import { CombatStatus, ParticipantSide } from "@/lib/constants/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
-import { rollDyingAt } from "@/lib/utils/battle/death-saves";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { Ruleset } from "@/lib/utils/rules/schema";
 import { ruleSystemOf } from "@/lib/utils/rules/systems";
+import { rollDyingAt } from "@/systems/d20/rules/death-saves/roll";
 import { DEFAULT_CHARACTERISTICS } from "@/systems/wfrp/rules/characteristics/keys";
 import { wfrpAbilitiesOf } from "@/systems/wfrp/rules/combat/participant";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
@@ -80,9 +80,5 @@ describe("skippedTurnAt", () => {
   it("wfrp active and dead: null", () => {
     expect(skippedTurnAt([downed(CombatStatus.ACTIVE, 3)], 0, { rules: WFRP_RULES, rng: () => 0, round: 2 })).toBeNull();
     expect(skippedTurnAt([downed(CombatStatus.DEAD, 3)], 0, { rules: WFRP_RULES, rng: () => 0, round: 2 })).toBeNull();
-  });
-
-  it("no rules: null", () => {
-    expect(skippedTurnAt([downed(CombatStatus.UNCONSCIOUS)], 0, { rules: undefined, rng: () => 0, round: 2 })).toBeNull();
   });
 });

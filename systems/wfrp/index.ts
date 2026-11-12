@@ -21,6 +21,7 @@ import { onSession } from "./rules/session";
 import { acceptsWfrpSheetTest, rollWfrpSheetTest } from "./rules/sheet-test";
 import { PARTICIPANT_SLOT } from "./rules/slots";
 import { WFRP_TRAITS } from "./rules/traits";
+import { WFRP_TURN } from "./rules/turn";
 
 import { COINS } from "@/lib/constants/inventory";
 import type { SystemData } from "@/lib/utils/rules/systems/slot";
@@ -59,7 +60,7 @@ export const WFRP_MODULE: RuleSystemDefinition = {
   traits: WFRP_TRAITS,
   currency: { coins: COINS, value: { gp: 240, sp: 12, cp: 1 }, labelKeys: { gp: "wfrpEquipment.money.gc", sp: "wfrpEquipment.money.ss", cp: "wfrpEquipment.money.d" } },
   identity: { alignments: false },
-  combat: { input: { assert: assertWfrpInput }, judge: "server", dice: 100, actionEconomy: { bonusAction: false, reaction: false }, attacksOf: extractWfrpAttacks, participantFields: wfrpParticipantFields, tieBreak: (p) => participantStats(p)?.ag ?? p.abilities.dexterity, baseStats: wfrpBaseStats, initiative: wfrpInitiative, resolveAttack: resolveWfrpAttack, abortedRoll: wfrpAbortedRoll, details: wfrpActionDetails, attackTarget: wfrpAttackTarget, damage: wfrpDamage, onZeroHp: wfrpOnZeroHp, onDamaged: [wfrpLoseChannelled], hitModel: wfrpHitModel },
+  combat: { input: { assert: assertWfrpInput }, judge: "server", dice: 100, actionEconomy: { bonusAction: false, reaction: false }, attacksOf: extractWfrpAttacks, participantFields: wfrpParticipantFields, tieBreak: (p) => participantStats(p)?.ag ?? p.abilities.dexterity, baseStats: wfrpBaseStats, initiative: wfrpInitiative, resolveAttack: resolveWfrpAttack, abortedRoll: wfrpAbortedRoll, details: wfrpActionDetails, attackTarget: wfrpAttackTarget, damage: wfrpDamage, onZeroHp: wfrpOnZeroHp, onDamaged: [wfrpLoseChannelled], turn: WFRP_TURN,hitModel: wfrpHitModel },
   lineage: false,
   classes: false,
   attacks: false,

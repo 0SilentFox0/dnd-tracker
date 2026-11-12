@@ -1,6 +1,5 @@
-import { applyPendingMoraleCheck } from "./apply-pending-morale";
 import { finishTurnEffects } from "./end-turn-cleanup";
-import type { PendingMoraleCheckPayload } from "./pending-morale";
+import { beforeAdvanceHooks, runTurnHooks } from "./hooks";
 import { runAdvanceTurnLoop } from "./run-advance-turn-loop";
 import { applyVictoryCompletion } from "./turn-helpers";
 import { resetTurnState } from "./turn-state";
@@ -53,13 +52,10 @@ function advanceFrom({ participants, pending, scene, rng, map, rules }: AdvanceT
 
   const actions: BattleAction[] = [];
 
-  if (scene.pendingMoraleCheck) {
-    const morale = applyPendingMoraleCheck(order, scene.pendingMoraleCheck as PendingMoraleCheckPayload, scene.round, scene.id, scene.eventSeq, undefined, rules);
+  const before = runTurnHooks(beforeAdvanceHooks(rules), { participants: order, scene, round: scene.round, rng: rng ?? Math.random, rules, map });
 
-    order = morale.updatedInitiativeOrder;
-
-    if (morale.moraleLogEntry) actions.push(morale.moraleLogEntry);
-  }
+  order = before.participants;
+  actions.push(...(before.actions ?? []));
 
   const ending = skipEnding ? undefined : order[scene.turnIndex];
 

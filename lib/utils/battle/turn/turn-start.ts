@@ -1,4 +1,5 @@
 import { applyDOTEffects, applyHOTEffects, armEffects, countDownAtTurnStart } from "./effects";
+import { runTurnHooks } from "./hooks";
 import { resetTurnState } from "./turn-state";
 
 import { CombatStatus, EffectMarker,isRecharge } from "@/lib/constants/battle";
@@ -145,13 +146,15 @@ function applyStartOfTurnDamage(
     killedByRules = updatedParticipant.combatStats.status === CombatStatus.DEAD;
     damageMessages.push(...dotResult.damageMessages, ...(dotRules?.messages ?? []));
 
-    const ticks = ruleSystemOf(rules).conditions?.turnStart(replaceParticipant(others, updatedParticipant), updatedParticipant.basicInfo.id, { round: currentRound, rng, rules, applyDamage: applyDamageConsequences });
+    const startHooks = ruleSystemOf(rules).combat.turn?.onTurnStart;
+
+    const ticks = startHooks && runTurnHooks(startHooks, { participants: replaceParticipant(others, updatedParticipant), id: updatedParticipant.basicInfo.id, round: currentRound, rng, rules, applyDamage: applyDamageConsequences });
 
     if (ticks) {
       others = ticks.participants;
       updatedParticipant = findParticipant(others, updatedParticipant.basicInfo.id) ?? updatedParticipant;
       damageMessages.push(...ticks.messages);
-      systemDowned = ticks.downed;
+      systemDowned = ticks.downed === true;
     }
 
     const hazard = map && updatedParticipant.combatStats.currentHp > 0 ? hazardUnder(map, updatedParticipant, undefined, others) : null;

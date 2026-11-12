@@ -1,11 +1,12 @@
 import { dropBrokenConcentration } from "../concentration/damaged";
+import { deathSaveDamage } from "./roll";
 import { startDying } from "./start";
 
 import { CombatStatus, ParticipantSourceType } from "@/lib/constants/battle";
 import { textRef } from "@/lib/i18n/text-ref";
 import { findParticipant, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import type { DamageConsequencesResult } from "@/lib/utils/battle/damage/consequences";
-import { clearDeathSaves, deathSaveDamage } from "@/lib/utils/battle/death-saves";
+import { clearDeathSaves } from "@/lib/utils/battle/death-saves";
 import type { ZeroHpCtx } from "@/lib/utils/rules/systems/types";
 import type { BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";

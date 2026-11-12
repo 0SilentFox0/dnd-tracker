@@ -1,3 +1,5 @@
+import { runTurnHooks } from "./hooks";
+
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import type { Rng } from "@/lib/utils/abilities/engine/core/types";
 import type { Ruleset } from "@/lib/utils/rules";
@@ -19,11 +21,13 @@ interface PsychologyCtx {
 }
 
 export function runPsychology(participants: BattleParticipant[], ctx: PsychologyCtx, newcomerIds?: readonly string[]): { participants: BattleParticipant[]; psychology: JoinTriggersResult["psychology"] } {
-  const tested = ruleSystemOf(ctx.rules).traits?.psychology?.(participants, { round: ctx.round, rng: ctx.rng, map: ctx.map, newcomerIds });
+  const hooks = ruleSystemOf(ctx.rules).combat.turn?.onJoin;
 
-  if (!tested) return { participants, psychology: { lines: [], targets: [] } };
+  if (!hooks) return { participants, psychology: { lines: [], targets: [] } };
 
-  const targets = tested.testerIds.flatMap((id) => {
+  const tested = runTurnHooks(hooks, { participants, round: ctx.round, rng: ctx.rng, rules: ctx.rules, map: ctx.map, newcomerIds });
+
+  const targets = (tested.testerIds ?? []).flatMap((id) => {
     const p = tested.participants.find((x) => x.basicInfo.id === id);
 
     return p ? [{ participantId: id, participantName: p.basicInfo.name }] : [];

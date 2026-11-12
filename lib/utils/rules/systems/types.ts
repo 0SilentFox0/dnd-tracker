@@ -12,6 +12,7 @@ import type { CritPicker } from "@/lib/utils/battle/crit-choice/types";
 import type { DamageConsequencesInput, DamageConsequencesResult } from "@/lib/utils/battle/damage/consequences";
 import type { DieFx } from "@/lib/utils/battle/fx/dice/types";
 import type { EquippedArtifactRow } from "@/lib/utils/battle/participant/extract-artifacts";
+import type { BattleSceneState } from "@/lib/utils/battle/store";
 import type { AttackRollResult } from "@/lib/utils/battle/types/attack";
 import type { ExtractedAttack } from "@/lib/utils/battle/types/participant";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
@@ -21,7 +22,7 @@ import type { Rng } from "@/lib/utils/common/rng";
 import type { Ruleset } from "@/lib/utils/rules/schema";
 import type { SpellMagic, SpellMagicKind } from "@/lib/utils/spells/model/schema";
 import type { ResolvedAbility } from "@/types/abilities";
-import type { ActiveEffect, BattleAttack, BattleMapConfig, BattleParticipant } from "@/types/battle";
+import type { ActiveEffect, BattleAction, BattleAttack, BattleMapConfig, BattleParticipant } from "@/types/battle";
 import type { CharacterResources, SheetRollBody, SheetRollResult } from "@/types/characters";
 import type { FeatData } from "@/types/choices";
 import type { LogLine, TextRef } from "@/types/text";
@@ -144,6 +145,57 @@ export type ZeroHpCtx = DamageConsequencesInput & { rules: Ruleset; manual?: boo
 /** Runs after `onZeroHp`, folding over its result: what else a blow does to the target (breaks concentration, drops a bank) */
 export type DamagedHook = (ctx: ZeroHpCtx, result: DamageConsequencesResult) => DamageConsequencesResult;
 
+export interface TurnHookCtx {
+  participants: BattleParticipant[];
+  round: number;
+  rng: Rng;
+  rules: Ruleset;
+  map?: BattleMapConfig | null;
+}
+
+export interface TurnSubjectCtx extends TurnHookCtx {
+  id: string;
+}
+
+export interface TurnStartCtx extends TurnSubjectCtx {
+  applyDamage: ApplyDamageConsequences;
+}
+
+export interface TurnJoinCtx extends TurnHookCtx {
+  newcomerIds?: readonly string[];
+}
+
+export interface TurnAdvanceCtx extends TurnHookCtx {
+  scene: BattleSceneState;
+}
+
+export interface TurnHookResult {
+  participants: BattleParticipant[];
+  messages: LogLine[];
+  actions?: BattleAction[];
+  /** The turn of the subject is skipped: the list stops here */
+  skipTurn?: true;
+  /** The turn waits for a decision: the list stops here */
+  pending?: true;
+  /** onTurnStart: the subject went down */
+  downed?: boolean;
+  /** onJoin: who was tested */
+  testerIds?: string[];
+}
+
+export type TurnHook<C extends TurnHookCtx = TurnHookCtx> = (ctx: C) => TurnHookResult;
+
+/** Hook lists run in order, base first, then modules (`runTurnHooks`) */
+export interface RuleSystemTurn {
+  /** Before the turn passes on; core runs its own pending morale check ahead of these */
+  beforeAdvance?: readonly TurnHook<TurnAdvanceCtx>[];
+  onTurnStart?: readonly TurnHook<TurnStartCtx>[];
+  /** A downed participant's turn comes up and is skipped */
+  onSkippedTurn?: readonly TurnHook<TurnSubjectCtx>[];
+  /** Participants enter the fight (start, reveal, summon, late join) */
+  onJoin?: readonly TurnHook<TurnJoinCtx>[];
+}
+
 export interface InitiativeScore {
   total: number;
   roll: number | null;
@@ -189,9 +241,6 @@ export interface RuleSystemConditions {
   list(p: BattleParticipant): SystemConditionLevel[];
   apply(ps: BattleParticipant[], targetId: string, input: SystemConditionApply): SystemConditionResult;
   reduce(ps: BattleParticipant[], targetId: string, key: string, by: 1 | "all"): SystemConditionResult & { removed: boolean };
-  turnStart(ps: BattleParticipant[], id: string, ctx: { round: number; rng: Rng; rules: Ruleset; applyDamage: ApplyDamageConsequences }): SystemConditionResult & { downed: boolean };
-  /** Called when a downed participant's turn is skipped (e.g. bleeding out) */
-  skippedTurn?(ps: BattleParticipant[], id: string, ctx: { round: number; rng: Rng }): SystemConditionResult;
   /** Downed allies stay at 0 HP after a victory (healing raises them) */
   keepDownedAfterVictory?: true;
   /** Effects that survive a participant going UNCONSCIOUS (cleared on death) */
@@ -292,6 +341,7 @@ export interface RuleSystemCombat {
   /** Falling to 0 HP (dying, death, unconsciousness); `ctx.manual` is a DM status change settled the same way */
   onZeroHp(ctx: ZeroHpCtx): DamageConsequencesResult;
   onDamaged?: readonly DamagedHook[];
+  turn?: RuleSystemTurn;
   /** Base score before flat modifiers; `roll`/`die` are null when nothing was rolled (static mode, pinned) */
   initiative(p: BattleParticipant, ctx: { rules: Pick<Ruleset, "initiative">; rng: Rng }): InitiativeScore;
   /** Starting values the participant builders use instead of the d20 sheet columns */
@@ -374,7 +424,6 @@ export interface UnitBuild {
 export interface RuleSystemTraits {
   recipes: readonly Recipe[];
   unitBuild(row: { id: string; characteristics?: unknown }, abilities: readonly ResolvedAbility[]): UnitBuild;
-  psychology?(ps: BattleParticipant[], ctx: { round: number; rng: Rng; map?: BattleMapConfig | null; newcomerIds?: readonly string[] }): SystemConditionResult & { testerIds: string[] };
 }
 
 export interface RuleSystemAdvancement {
