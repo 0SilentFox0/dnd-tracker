@@ -65,12 +65,16 @@ export function mergeContributions(order: readonly { id: string; contribution: S
   return out;
 }
 
-const cache = new Map<string, SectionMap>();
+const caches = new WeakMap<object, Map<string, SectionMap>>();
 
 export function sectionsOf(composition: Composition, contributions: Readonly<Record<string, SectionsContribution>>, core: SectionsContribution, metas: Metas = SYSTEM_META): SectionMap {
   const cacheable = metas === SYSTEM_META;
 
   const key = `${composition.base}+${composition.modules.join(",")}`;
+
+  const cache = caches.get(contributions) ?? new Map<string, SectionMap>();
+
+  caches.set(contributions, cache);
 
   const hit = cacheable ? cache.get(key) : undefined;
 
