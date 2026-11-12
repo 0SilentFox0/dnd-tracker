@@ -104,7 +104,7 @@ export async function createDraft(
 
         const created = await tx.character.create({
             data: {
-                ...draftFields(data),
+                ...draftFields(data, campaign.rules),
                 campaignId,
                 type: CharacterType.PLAYER,
                 status: CharacterStatus.PENDING,

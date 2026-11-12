@@ -16,7 +16,6 @@
     "armorClass": 15,
     "initiative": 12,
     "speed": 35,
-    "archetype": "ranger",
     "spellSlots": {
       "1": {
         "max": 1,

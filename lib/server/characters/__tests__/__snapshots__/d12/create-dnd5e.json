@@ -8,7 +8,7 @@
     "class": "Воїн",
     "subclass": "Чемпіон",
     "classes": [],
-    "archetype": "ranger",
+    "archetype": null,
     "race": "Людина",
     "strength": 14,
     "dexterity": 12,

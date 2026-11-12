@@ -15,9 +15,9 @@ import { D20_REACTIONS, d20ProvokedOpportunity } from './rules/reactions';
 import { D20_PROFICIENCY, D20_SAVES } from './rules/saves';
 import { d20SheetBlock } from './rules/sheet/block';
 import { rollFromSheet } from './rules/sheet-roll';
+import { D20_STAT_COLUMNS } from './rules/stats';
 import { D20_TURN } from './rules/turn';
 
-import { CHARACTER_SYSTEM_COLUMNS } from '@/lib/constants/stat-columns';
 import type { RuleSystemDefinition } from '@/lib/utils/rules/systems/types';
 import type { SheetRollSubject } from '@/types/characters';
 
@@ -30,7 +30,7 @@ export const D20_MODULE: RuleSystemDefinition = {
         proficiency: (level, rules) =>
             proficiencyForLevel(level, rules.formulas),
     },
-    stats: { columns: [{ owns: CHARACTER_SYSTEM_COLUMNS }] },
+    stats: { columns: [{ owns: D20_STAT_COLUMNS }] },
     sheet: { blocks: [d20SheetBlock] },
     characteristics: {
         persisted: false,

@@ -62,6 +62,7 @@ import { DEFAULT_RULES, type Ruleset } from '@/lib/utils/rules';
 import { currencyValueOf, ruleSystemOf } from '@/lib/utils/rules/systems';
 import { composition } from '@/lib/utils/rules/systems/catalog';
 import { systemSlotOf } from '@/lib/utils/rules/systems/slot';
+import { statColumnsOf } from '@/lib/utils/rules/systems/stats';
 import { resolveClassEntries } from '@/lib/utils/spells/class-slots';
 import { buildIngredientStock } from '@/lib/utils/spells/ingredients/stock';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
@@ -427,7 +428,7 @@ export async function createBattleParticipantFromCharacter(
     );
 
     const archetype = heroArchetype(
-        resolvedClasses
+        resolvedClasses || !statColumnsOf(ruleSystemOf(rules)).has('archetype')
             ? null
             : (character as { archetype?: string | null }).archetype
     );

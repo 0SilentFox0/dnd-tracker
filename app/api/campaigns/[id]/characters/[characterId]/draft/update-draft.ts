@@ -112,7 +112,7 @@ export async function updateDraft(
     const updated = await prisma.character.update({
         where: { id: characterId },
         data: {
-            ...draftFields(data, character.goals),
+            ...draftFields(data, campaign.rules, character.goals),
             ...asClass?.fields,
             ...(choices?.ok && choices.fields),
             avatar: avatar.avatar,

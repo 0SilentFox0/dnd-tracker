@@ -18,6 +18,7 @@ import { buildRestBlock } from '@/lib/utils/characters/sheet/rest-block';
 import { signed } from '@/lib/utils/common/format';
 import type { Ruleset } from '@/lib/utils/rules';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
+import { statColumnsOf } from '@/lib/utils/rules/systems/stats';
 import type {
     SheetBlockCtx,
     SheetBlockPart,
@@ -183,7 +184,10 @@ export function buildCharacterSheet(input: SheetInput): CharacterSheet {
             avatar: c.avatar,
             level: c.level,
             className: c.class,
-            archetype: heroArchetype(c.archetype).key ?? 'universal',
+            archetype:
+                heroArchetype(
+                    statColumnsOf(system).has('archetype') ? c.archetype : null
+                ).key ?? 'universal',
             subclass: c.subclass,
             race: c.race,
             ...(showSubrace && c.subrace && { subrace: c.subrace }),

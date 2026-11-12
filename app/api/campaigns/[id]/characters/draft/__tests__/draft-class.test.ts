@@ -6,6 +6,7 @@ import { classDraftSchema, draftSchema } from '../draft-schema';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { parseRules } from '@/lib/utils/rules/schema';
 
 const mocks = vi.hoisted(() => ({
     getCachedClasses: vi.fn(),
@@ -143,9 +144,22 @@ describe('draft schemas', () => {
 
         expect(parsed).toMatchObject({ classId: 'c1' });
         expect(parsed).not.toHaveProperty('archetype');
-        expect(draftFields(parsed)).toMatchObject({
+        expect(draftFields(parsed, DEFAULT_RULES)).toMatchObject({
             class: '',
             archetype: null,
         });
+    });
+
+    it('draftFields leaves archetype alone without heroscaling', () => {
+        const parsed = draftSchema.parse({
+            ...base,
+            class: 'Wizard',
+            archetype: 'mage',
+        });
+
+        const bare = parseRules({ system: { key: 'dnd5e' } });
+
+        expect(draftFields(parsed, bare).archetype).toBeUndefined();
+        expect(draftFields(parsed, DEFAULT_RULES).archetype).toBe('mage');
     });
 });

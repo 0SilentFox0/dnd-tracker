@@ -7,4 +7,5 @@ import type { RuleSystemDefinition } from '@/lib/utils/rules/systems/types';
 export const HEROSCALING_MODULE = defineAddon<RuleSystemDefinition>((prev) => ({
     progression: { maxHp: heroMaxHp(prev.progression.maxHp) },
     participant: { fromCharacter: [heroDicePart] },
+    stats: { columns: [{ owns: ['archetype'] }] },
 }));
