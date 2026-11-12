@@ -14,10 +14,13 @@ const payload = (shouldSkipTurn: boolean) => ({
   moraleResult: { shouldSkipTurn, hasExtraTurn: false, message: "", moralePositive: false },
 });
 
+const check = (participants: Parameters<typeof applyPendingMoraleCheck>[0]["participants"], pending: ReturnType<typeof payload>, rng?: () => number) =>
+  applyPendingMoraleCheck({ participants, payload: pending, scene: { round: 1, id: "b1", eventSeq: 0 }, rng, rules: DEFAULT_RULES, run: runAbilities });
+
 describe("applyPendingMoraleCheck", () => {
   it("паніка: до власного наступного ходу учасник не відповідає на удари", () => {
-    expect(applyPendingMoraleCheck([p], payload(true), 1, "b1", 0, seq(0.5), DEFAULT_RULES, runAbilities).updatedInitiativeOrder[0].actionFlags.hasUsedReaction).toBe(true);
-    expect(applyPendingMoraleCheck([p], payload(false), 1, "b1", 0, seq(0.5), DEFAULT_RULES, runAbilities).updatedInitiativeOrder[0].actionFlags.hasUsedReaction).toBe(false);
+    expect(check([p], payload(true), seq(0.5)).updatedInitiativeOrder[0].actionFlags.hasUsedReaction).toBe(true);
+    expect(check([p], payload(false), seq(0.5)).updatedInitiativeOrder[0].actionFlags.hasUsedReaction).toBe(false);
   });
 
   it("у лог іде ефективна мораль з тимчасовим бонусом", () => {
@@ -30,17 +33,17 @@ describe("applyPendingMoraleCheck", () => {
       },
     };
 
-    const { moraleLogEntry } = applyPendingMoraleCheck([boosted], payload(false), 1, "b1", 0, seq(0.5), DEFAULT_RULES, runAbilities);
+    const { moraleLogEntry } = check([boosted], payload(false), seq(0.5));
 
     expect(moraleLogEntry.actionDetails?.morale).toBe(1);
   });
 
   it("у лог пишеться d10Roll без diceRolls (кубик грає при зміні pending)", () => {
-    const { moraleLogEntry } = applyPendingMoraleCheck([p], payload(false), 1, "b1", 0, seq(0.5), DEFAULT_RULES, runAbilities);
+    const { moraleLogEntry } = check([p], payload(false), seq(0.5));
 
     expect(moraleLogEntry.actionDetails?.d10Roll).toBe(10);
     expect(moraleLogEntry.actionDetails?.diceRolls).toBeUndefined();
-    expect(applyPendingMoraleCheck([], payload(false), 1, "b1", 0, undefined, DEFAULT_RULES, runAbilities).moraleLogEntry.actionDetails?.diceRolls).toBeUndefined();
+    expect(check([], payload(false)).moraleLogEntry.actionDetails?.diceRolls).toBeUndefined();
   });
 
   it("у польоті додатковий хід за мораль не видається", () => {
@@ -48,7 +51,7 @@ describe("applyPendingMoraleCheck", () => {
 
     const extra = { ...payload(false), moraleResult: { ...payload(false).moraleResult, hasExtraTurn: true } };
 
-    expect(applyPendingMoraleCheck([flying], extra, 1, "b1", 0, seq(0.5), DEFAULT_RULES, runAbilities).updatedInitiativeOrder[0].actionFlags.hasExtraTurn).toBe(false);
-    expect(applyPendingMoraleCheck([p], extra, 1, "b1", 0, seq(0.5), DEFAULT_RULES, runAbilities).updatedInitiativeOrder[0].actionFlags.hasExtraTurn).toBe(true);
+    expect(check([flying], extra, seq(0.5)).updatedInitiativeOrder[0].actionFlags.hasExtraTurn).toBe(false);
+    expect(check([p], extra, seq(0.5)).updatedInitiativeOrder[0].actionFlags.hasExtraTurn).toBe(true);
   });
 });

@@ -57,7 +57,13 @@ describe("turn events", () => {
 
     const a = makeParticipant({ id: "a", hp: 10, abilities: [proud] });
 
-    const r = applyPendingMoraleCheck([a, makeParticipant({ id: "e", side: ParticipantSide.ENEMY })], { participantId: "a", d10Roll: 10, moraleResult: { shouldSkipTurn: false, hasExtraTurn: false, message: "Мораль тримається", moralePositive: true } }, 1, "b1", 0, undefined, DEFAULT_RULES, runAbilities);
+    const r = applyPendingMoraleCheck({
+      participants: [a, makeParticipant({ id: "e", side: ParticipantSide.ENEMY })],
+      payload: { participantId: "a", d10Roll: 10, moraleResult: { shouldSkipTurn: false, hasExtraTurn: false, message: "Мораль тримається", moralePositive: true } },
+      scene: { round: 1, id: "b1", eventSeq: 0 },
+      rules: DEFAULT_RULES,
+      run: runAbilities,
+    });
 
     expect(r.updatedInitiativeOrder[0].combatStats.currentHp).toBe(12);
   });

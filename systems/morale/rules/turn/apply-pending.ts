@@ -14,16 +14,18 @@ export interface ApplyPendingMoraleResult {
   moraleLogEntry: BattleAction;
 }
 
-export function applyPendingMoraleCheck(
-  initiativeOrder: BattleParticipant[],
-  payload: PendingMoraleCheckPayload,
-  currentRound: number,
-  battleId: string,
-  battleLogLength: number,
-  rng: () => number = Math.random,
-  rules: Ruleset,
-  runAbilities: RunAbilities,
-): ApplyPendingMoraleResult {
+export interface ApplyPendingMoraleInput {
+  participants: BattleParticipant[];
+  payload: PendingMoraleCheckPayload;
+  scene: { round: number; id: string; eventSeq: number };
+  rng?: () => number;
+  rules: Ruleset;
+  run: RunAbilities;
+}
+
+export function applyPendingMoraleCheck({ participants: initiativeOrder, payload, scene, rng = Math.random, rules, run: runAbilities }: ApplyPendingMoraleInput): ApplyPendingMoraleResult {
+  const { round: currentRound, id: battleId, eventSeq: battleLogLength } = scene;
+
   const { participantId, d10Roll, moraleResult } = payload;
 
   const participant = findParticipant(initiativeOrder, participantId);
@@ -97,7 +99,7 @@ export function applyPendingMoraleCheck(
 export const applyPendingMorale: TurnHook<TurnAdvanceCtx> = ({ participants, scene, rules, run }) => {
   if (!scene.pendingMoraleCheck) return { participants, messages: [] };
 
-  const morale = applyPendingMoraleCheck(participants, scene.pendingMoraleCheck as PendingMoraleCheckPayload, scene.round, scene.id, scene.eventSeq, undefined, rules, run);
+  const morale = applyPendingMoraleCheck({ participants, payload: scene.pendingMoraleCheck as PendingMoraleCheckPayload, scene, rules, run });
 
   return { participants: morale.updatedInitiativeOrder, messages: [], actions: morale.moraleLogEntry ? [morale.moraleLogEntry] : [] };
 };
