@@ -4,11 +4,11 @@ import { ParticipantSide } from "@/lib/constants/battle";
 import { makeEffect, makeParticipant, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import type { Effect } from "@/lib/utils/abilities/schema";
 import { grantPassive } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
-import { evasionFactor, hasEvasion } from "@/lib/utils/battle/saves/evasion";
 import { castSpell } from "@/lib/utils/battle/spell";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { SpellDefinition } from "@/lib/utils/spells/model/schema";
+import { evasionFactor, hasEvasion } from "@/systems/d20/rules/saves/evasion";
 import type { BattleParticipant } from "@/types/battle";
 
 const fire: Effect = { kind: "dealDamage", amount: { spellRoll: 100 }, damageType: "fire" };

@@ -4,14 +4,14 @@ import { ParticipantSide } from "@/lib/constants/battle";
 import { textOf } from "@/lib/i18n/test/text";
 import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
 import { createMockParticipant, grantPassive } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
-import { runEscape } from "@/lib/utils/battle/actions/grapple";
 import { removeEffects } from "@/lib/utils/battle/conditions";
 import { applyResistance } from "@/lib/utils/battle/resistance";
-import { bestSaveAbility } from "@/lib/utils/battle/saves";
 import { castSpell } from "@/lib/utils/battle/spell";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { SpellEffect } from "@/lib/utils/spells/model/schema";
+import { runEscape } from "@/systems/d20/rules/actions/grapple";
+import { bestSaveAbility } from "@/systems/d20/rules/saves/roll-save";
 import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 const map: BattleMapConfig = { cols: 20, rows: 10, background: null, opacity: 0.3 };
@@ -103,8 +103,8 @@ describe("bestSaveAbility", () => {
   const t = withMods(createMockParticipant(), { strength: 0, dexterity: 3 });
 
   it("picks the higher bonus, ties keep the first", () => {
-    expect(bestSaveAbility(t, ["strength", "dexterity"], [t])).toBe("dexterity");
-    expect(bestSaveAbility(withMods(t, { strength: 3 }), ["strength", "dexterity"], [t])).toBe("strength");
+    expect(bestSaveAbility(t, ["strength", "dexterity"], [t], DEFAULT_RULES)).toBe("dexterity");
+    expect(bestSaveAbility(withMods(t, { strength: 3 }), ["strength", "dexterity"], [t], DEFAULT_RULES)).toBe("strength");
   });
 });
 

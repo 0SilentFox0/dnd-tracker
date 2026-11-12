@@ -4,13 +4,14 @@ import { attackCounter, attacksPerAction, canAttackFromPool, spendAttack } from 
 
 import { AttackType } from "@/lib/constants/battle";
 import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
-import { resolveOpportunityAttacks } from "@/lib/utils/battle/actions/opportunity";
-import { runCoreAction } from "@/lib/utils/battle/actions/run";
+import { runCoreAction } from "@/lib/utils/battle/actions/dispatch";
+import { resolveServerAttack } from "@/lib/utils/battle/attack/server-attack";
 import { validateAttackRequest } from "@/lib/utils/battle/attack-phase/request";
 import { applyMainActionUsed } from "@/lib/utils/battle/participant";
 import { resetTurnState } from "@/lib/utils/battle/turn/turn-state";
 import { turnExhausted } from "@/lib/utils/battle/view/turn-exhausted";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
+import { resolveOpportunityAttacks } from "@/systems/d20/rules/reactions/opportunity";
 import type { BattleAttack, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 const sword: BattleAttack = { id: "sw", name: "Меч", type: AttackType.MELEE, attackBonus: 5, damageDice: "1d6", damageType: "slashing" };
@@ -156,7 +157,7 @@ describe("extra attack in core actions and off-turn", () => {
 
     const e = at({ ...spendAttack(fighter, [fighter], sword), battleData: { ...spendAttack(fighter, [fighter], sword).battleData, attacks: [sword] } }, "enemy", 0, 1);
 
-    const out = resolveOpportunityAttacks({ participants: [mover, e], moverId: "m", path: [{ x: 2, y: 0 }, { x: 3, y: 0 }], start: { x: 1, y: 0 }, map, round: 1, battleId: "b1", rules, rng: () => 0.99 });
+    const out = resolveOpportunityAttacks({ strike: resolveServerAttack, participants: [mover, e], moverId: "m", path: [{ x: 2, y: 0 }, { x: 3, y: 0 }], start: { x: 1, y: 0 }, map, round: 1, battleId: "b1", rules, rng: () => 0.99 });
 
     expect(out.actions).toHaveLength(1);
     expect(out.participants.find((p) => p.basicInfo.id === "f")!.battleData.attacksLeft).toBe(1);

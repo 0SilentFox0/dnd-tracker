@@ -8,6 +8,7 @@ import { extractWfrpAttacks } from "./rules/combat/extract-attacks";
 import { wfrpHitModel } from "./rules/combat/hit-model";
 import { wfrpInitiative } from "./rules/combat/initiative";
 import { assertWfrpInput } from "./rules/combat/input";
+import { wfrpLoseChannelled } from "./rules/combat/lose-channelled";
 import { wfrpDamage } from "./rules/combat/mitigate";
 import { wfrpOnZeroHp } from "./rules/combat/on-zero-hp";
 import { participantStats, wfrpBaseStats, wfrpParticipantFields } from "./rules/combat/participant";
@@ -20,8 +21,11 @@ import { onSession } from "./rules/session";
 import { acceptsWfrpSheetTest, rollWfrpSheetTest } from "./rules/sheet-test";
 import { PARTICIPANT_SLOT } from "./rules/slots";
 import { WFRP_TRAITS } from "./rules/traits";
+import { WFRP_TURN } from "./rules/turn";
 
 import { COINS } from "@/lib/constants/inventory";
+import { noActions, noReactions } from "@/lib/utils/battle/actions/none";
+import { noProficiency, noSaves } from "@/lib/utils/battle/saves/none";
 import type { SystemData } from "@/lib/utils/rules/systems/slot";
 import type { RuleSystemDefinition } from "@/lib/utils/rules/systems/types";
 
@@ -58,7 +62,7 @@ export const WFRP_MODULE: RuleSystemDefinition = {
   traits: WFRP_TRAITS,
   currency: { coins: COINS, value: { gp: 240, sp: 12, cp: 1 }, labelKeys: { gp: "wfrpEquipment.money.gc", sp: "wfrpEquipment.money.ss", cp: "wfrpEquipment.money.d" } },
   identity: { alignments: false },
-  combat: { input: { assert: assertWfrpInput }, judge: "server", dice: 100, actionEconomy: { bonusAction: false, reaction: false }, attacksOf: extractWfrpAttacks, participantFields: wfrpParticipantFields, tieBreak: (p) => participantStats(p)?.ag ?? p.abilities.dexterity, baseStats: wfrpBaseStats, initiative: wfrpInitiative, resolveAttack: resolveWfrpAttack, abortedRoll: wfrpAbortedRoll, details: wfrpActionDetails, attackTarget: wfrpAttackTarget, damage: wfrpDamage, onZeroHp: wfrpOnZeroHp, hitModel: wfrpHitModel },
+  combat: { input: { assert: assertWfrpInput }, judge: "server", dice: 100, actionEconomy: { bonusAction: false, reaction: false }, attacksOf: extractWfrpAttacks, participantFields: wfrpParticipantFields, tieBreak: (p) => participantStats(p)?.ag ?? p.abilities.dexterity, baseStats: wfrpBaseStats, initiative: wfrpInitiative, resolveAttack: resolveWfrpAttack, abortedRoll: wfrpAbortedRoll, details: wfrpActionDetails, attackTarget: wfrpAttackTarget, damage: wfrpDamage, onZeroHp: wfrpOnZeroHp, onDamaged: [wfrpLoseChannelled], turn: WFRP_TURN, actions: noActions, reactions: noReactions, saves: noSaves, proficiency: noProficiency, hitModel: wfrpHitModel },
   lineage: false,
   classes: false,
   attacks: false,

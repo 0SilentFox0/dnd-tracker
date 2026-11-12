@@ -1,4 +1,5 @@
 import { applyDOTEffects, applyHOTEffects, armEffects, countDownAtTurnStart } from "./effects";
+import { runTurnHooks } from "./hooks";
 import { resetTurnState } from "./turn-state";
 
 import { CombatStatus, EffectMarker,isRecharge } from "@/lib/constants/battle";
@@ -35,6 +36,9 @@ export interface StartOfTurnResult {
   abilityMessages: LogLine[];
   rechargeMessages: LogLine[];
   statusChanged: boolean; // чи змінився статус (unconscious/dead)
+  /** an onTurnStart hook skips this turn / holds it for a decision */
+  skipTurn?: true;
+  pending?: true;
   hazard?: StartOfTurnHazard;
 }
 
@@ -81,6 +85,8 @@ interface StartOfTurnDamage {
   hazard?: StartOfTurnHazard;
   killedByRules: boolean;
   systemDowned: boolean;
+  systemSkip: boolean;
+  systemPending: boolean;
 }
 
 // DoT/HoT — на початку ходу цілі; тривалості зменшуються наприкінці ходу (endTurnCleanup)
@@ -107,6 +113,10 @@ function applyStartOfTurnDamage(
   let killedByRules = false;
 
   let systemDowned = false;
+
+  let systemSkip = false;
+
+  let systemPending = false;
 
   if (updatedParticipant.battleData.pendingHits?.length) {
     const hits = resolvePendingHits(replaceParticipant(allParticipants, updatedParticipant), updatedParticipant.basicInfo.id, { round: currentRound, rng, rules });
@@ -145,13 +155,17 @@ function applyStartOfTurnDamage(
     killedByRules = updatedParticipant.combatStats.status === CombatStatus.DEAD;
     damageMessages.push(...dotResult.damageMessages, ...(dotRules?.messages ?? []));
 
-    const ticks = ruleSystemOf(rules).conditions?.turnStart(replaceParticipant(others, updatedParticipant), updatedParticipant.basicInfo.id, { round: currentRound, rng, rules, applyDamage: applyDamageConsequences });
+    const startHooks = ruleSystemOf(rules).combat.turn?.onTurnStart;
+
+    const ticks = startHooks && runTurnHooks(startHooks, { participants: replaceParticipant(others, updatedParticipant), id: updatedParticipant.basicInfo.id, round: currentRound, rng, rules, applyDamage: applyDamageConsequences });
 
     if (ticks) {
       others = ticks.participants;
       updatedParticipant = findParticipant(others, updatedParticipant.basicInfo.id) ?? updatedParticipant;
       damageMessages.push(...ticks.messages);
-      systemDowned = ticks.downed;
+      systemDowned = ticks.downed === true;
+      systemSkip = ticks.skipTurn === true;
+      systemPending = ticks.pending === true;
     }
 
     const hazard = map && updatedParticipant.combatStats.currentHp > 0 ? hazardUnder(map, updatedParticipant, undefined, others) : null;
@@ -199,7 +213,7 @@ function applyStartOfTurnDamage(
     };
   }
 
-  return { participant: updatedParticipant, others, damageMessages, healMessages, expiredEffects, hazard: hazardResult, killedByRules, systemDowned };
+  return { participant: updatedParticipant, others, damageMessages, healMessages, expiredEffects, hazard: hazardResult, killedByRules, systemDowned, systemSkip, systemPending };
 }
 
 // Скидаємо флаги дій; ефекти no_bonus_action / no_reaction блокують відповідні дії
@@ -315,5 +329,7 @@ export function processStartOfTurn(
     rechargeMessages,
     statusChanged,
     ...(damage.hazard && { hazard: damage.hazard }),
+    ...(damage.systemSkip && { skipTurn: true as const }),
+    ...(damage.systemPending && { pending: true as const }),
   };
 }

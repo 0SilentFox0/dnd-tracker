@@ -11,7 +11,7 @@ import { useSpellCastSubmit } from "./useSpellCastSubmit";
 
 import { joinLines, textRef } from "@/lib/i18n/text-ref";
 import { useText } from "@/lib/i18n/use-text";
-import { reactionBlocker } from "@/lib/utils/battle/actions/reaction";
+import { reactionBlockerOf } from "@/lib/utils/battle/actions/access";
 import {
   buildSpellPick,
   casterUsesUniversalSlot,
@@ -162,7 +162,7 @@ export function useSpellBook(
       bypassCost,
       special: !!special,
       isDM: scene.viewer.isDM,
-      isMyTurn: order[scene.battle.currentTurnIndex]?.basicInfo.id === caster?.basicInfo.id, reactionBlocked: !!caster && !!reactionBlocker(caster),
+      isMyTurn: order[scene.battle.currentTurnIndex]?.basicInfo.id === caster?.basicInfo.id, reactionBlocked: !!caster && !!reactionBlockerOf(scene.battle.rules, caster),
     }),
   };
 

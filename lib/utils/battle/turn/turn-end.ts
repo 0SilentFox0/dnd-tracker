@@ -17,7 +17,7 @@ export function processEndOfTurn(
   currentTurnIndex: number,
   initiativeOrder: BattleParticipant[],
   currentRound: number,
-  deathSaves?: { rules?: Ruleset; rng?: () => number },
+  deathSaves: { rules: Ruleset; rng?: () => number },
 ): { nextTurnIndex: number; nextRound: number; participants?: BattleParticipant[]; messages?: LogLine[] } {
   let order = initiativeOrder;
 
@@ -41,7 +41,7 @@ export function processEndOfTurn(
     }
 
     // у новому раунді черга перевпорядковується: кидки для нього робить цикл ходу
-    const rolled = nextRound === currentRound ? skippedTurnAt(order, nextTurnIndex, { rules: deathSaves?.rules, rng: rngOf(deathSaves), round: nextRound }) : null;
+    const rolled = nextRound === currentRound ? skippedTurnAt(order, nextTurnIndex, { rules: deathSaves.rules, rng: rngOf(deathSaves), round: nextRound }) : null;
 
     if (rolled) {
       order = rolled.participants;

@@ -1,6 +1,5 @@
-import { applyPendingMoraleCheck } from "./apply-pending-morale";
 import { finishTurnEffects } from "./end-turn-cleanup";
-import type { PendingMoraleCheckPayload } from "./pending-morale";
+import { beforeAdvanceHooks, runTurnHooks } from "./hooks";
 import { runAdvanceTurnLoop } from "./run-advance-turn-loop";
 import { applyVictoryCompletion } from "./turn-helpers";
 import { resetTurnState } from "./turn-state";
@@ -53,15 +52,19 @@ function advanceFrom({ participants, pending, scene, rng, map, rules }: AdvanceT
 
   const actions: BattleAction[] = [];
 
-  if (scene.pendingMoraleCheck) {
-    const morale = applyPendingMoraleCheck(order, scene.pendingMoraleCheck as PendingMoraleCheckPayload, scene.round, scene.id, scene.eventSeq, undefined, rules);
+  const before = runTurnHooks(beforeAdvanceHooks(rules), { participants: order, scene, round: scene.round, rng: rng ?? Math.random, rules, map });
 
-    order = morale.updatedInitiativeOrder;
+  order = before.participants;
+  actions.push(...(before.actions ?? []));
 
-    if (morale.moraleLogEntry) actions.push(morale.moraleLogEntry);
-  }
+  const current0 = order[scene.turnIndex];
 
-  const ending = skipEnding ? undefined : order[scene.turnIndex];
+  if (before.messages.length > 0 && current0) actions.push(turnEndAction(current0, scene, before.messages));
+
+  // a hook waits for a decision: the turn does not pass on
+  if (before.pending) return { participants: order, pending, scene: { turnIndex: scene.turnIndex, round: scene.round, status: scene.status, pendingMoraleCheck: null }, actions };
+
+  const ending = skipEnding || before.skipTurn ? undefined : current0;
 
   // невикористані додаткові дії згорають разом із ходом
   if (ending) order = replaceParticipant(order, setExtraActionPool(ending, 0));

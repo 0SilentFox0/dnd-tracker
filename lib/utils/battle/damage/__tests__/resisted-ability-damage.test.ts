@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 
 import { createMockParticipant, grantPassive } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
-import { dealResistedDamage, dealResistedHits } from "@/lib/utils/battle/damage/resisted-ability-damage";
+import { dealResistedDamage as dealDamage, dealResistedHits as dealHits } from "@/lib/utils/battle/damage/resisted-ability-damage";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
+
+const dealResistedDamage = (ps: Parameters<typeof dealDamage>[0], id: string, amount: number, type: string) => dealDamage(ps, id, amount, type, { rules: DEFAULT_RULES });
+
+const dealResistedHits = (ps: Parameters<typeof dealHits>[0], hits: Parameters<typeof dealHits>[1], opts: { actorId: string; damageType: string }) => dealHits(ps, hits, { ...opts, rules: DEFAULT_RULES });
 
 function setup(percent?: number) {
   const target = createMockParticipant({ basicInfo: { ...createMockParticipant().basicInfo, id: "t1", name: "Ціль" } });

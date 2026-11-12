@@ -31,17 +31,6 @@ describe("applyDamageConsequences", () => {
     expect(rng).not.toHaveBeenCalled();
   });
 
-  it("is a no-op without rules", () => {
-    const { before, after } = downed(ParticipantSourceType.UNIT);
-
-    const ps = [after];
-
-    const r = applyDamageConsequences({ before, after, amount: 5, rng: () => 0.5, participants: ps });
-
-    expect(r.participant).toBe(after);
-    expect(r.participants).toBe(ps);
-  });
-
   it("kills a unit that drops to 0 HP when death saves are on", () => {
     const { before, after } = downed(ParticipantSourceType.UNIT);
 
@@ -81,12 +70,12 @@ describe("dealResistedDamage with rules", () => {
     expect(r?.downed).toBe(true);
   });
 
-  it("keeps UNCONSCIOUS without rules", () => {
+  it("keeps UNCONSCIOUS under the default rules", () => {
     const unit = createMockParticipant();
 
     unit.basicInfo = { ...unit.basicInfo, sourceType: ParticipantSourceType.UNIT };
 
-    const r = dealResistedDamage([unit], unit.basicInfo.id, 999, "fire");
+    const r = dealResistedDamage([unit], unit.basicInfo.id, 999, "fire", { rules: DEFAULT_RULES });
 
     expect(r?.participants[0].combatStats.status).toBe(CombatStatus.UNCONSCIOUS);
   });

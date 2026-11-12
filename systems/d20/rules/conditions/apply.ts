@@ -1,7 +1,6 @@
 import { conditionEffectInput, customConditionDef, customConditionInput } from "./registry";
 
 import { CombatStatus, EffectMarker } from "@/lib/constants/battle";
-import { DEFAULT_RULES_EDITION } from "@/lib/constants/rules";
 import { dynamicTextRef, textRef } from "@/lib/i18n/text-ref";
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { findParticipant, updateParticipant, withActiveEffects } from "@/lib/utils/abilities/engine/core/participants";
@@ -52,7 +51,7 @@ export function applyCondition5e(ps: BattleParticipant[], targetId: string, opts
 
   if (immune(ps, targetId, opts.key)) return { participants: ps, messages: [textRef("battleActions.condition.immune", { source: opts.sourceName, target: target.basicInfo.name })], blocked: true };
 
-  const variant = opts.rules?.conditions.exhaustion ?? DEFAULT_RULES_EDITION;
+  const variant = opts.rules.conditions.exhaustion;
 
   const messages: LogLine[] = [textRef(opts.permanent ? "battleActions.condition.applied" : "battleActions.condition.appliedTimed", { source: opts.sourceName, target: target.basicInfo.name, condition: custom ? custom.name : dynamicTextRef(`battleActions.condition.lower.${opts.key}`), rounds: opts.rounds })];
 

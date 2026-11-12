@@ -2,8 +2,11 @@ import { describe, expect, it } from "vitest";
 
 import { textOf } from "@/lib/i18n/test/text";
 import { createMockParticipant, grantPassive } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
-import { hazardHit, hazardOnMove, hazardUnder, reachable } from "@/lib/utils/battle/grid";
+import { hazardHit as hit, hazardOnMove, hazardUnder, reachable } from "@/lib/utils/battle/grid";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleMapConfig, BattleParticipant, GridPoint, TerrainCell } from "@/types/battle";
+
+const hazardHit = (p: Parameters<typeof hit>[0], cell: Parameters<typeof hit>[1], round: number, ps: Parameters<typeof hit>[3], rng: () => number) => hit(p, cell, round, ps, rng, DEFAULT_RULES);
 
 const fire: TerrainCell = { kind: "hazard", label: "Вогонь", damage: { amount: 5, type: "fire" } };
 

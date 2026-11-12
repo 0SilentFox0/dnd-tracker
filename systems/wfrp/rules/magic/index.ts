@@ -9,9 +9,6 @@ import { wfrpMiscast } from "./miscast";
 import { textRef } from "@/lib/i18n/text-ref";
 import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
 import type { RuleSystemMagic } from "@/lib/utils/rules/systems/types";
-import type { BattleParticipant } from "@/types/battle";
-
-const dropChannelled = (p: BattleParticipant): BattleParticipant => (p.battleData.channelledSl ? { ...p, battleData: { ...p.battleData, channelledSl: 0 } } : p);
 
 const withoutMiscast = (details: SystemSlot): SystemSlot => {
   const slot = ACTION_SLOT.read(details);
@@ -33,5 +30,4 @@ export const WFRP_MAGIC: RuleSystemMagic = {
   miscast: wfrpMiscast,
   attribute: wfrpLoreAttribute,
   badge: channelBadge,
-  onDamaged: dropChannelled,
 };

@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { useCoreActions } from "@/lib/hooks/battle";
 import { useText } from "@/lib/i18n/use-text";
-import type { CoreActionKey } from "@/lib/utils/battle/actions/registry";
+import type { CoreActionKey } from "@/lib/utils/battle/actions/keys";
 import type { BattleParticipant } from "@/types/battle";
 
 const SHOVE_MODES = ["prone", "push"] as const;

@@ -9,7 +9,7 @@ import { removeEffects } from "@/lib/utils/battle/conditions/query";
 import { applyBalanceDamageMultiplier } from "@/lib/utils/battle/damage/balance-multiplier";
 import { dealsNoDamage } from "@/lib/utils/battle/participant/state";
 import { applyResistance } from "@/lib/utils/battle/resistance";
-import { rollSave } from "@/lib/utils/battle/saves/roll-save";
+import { savesOf } from "@/lib/utils/battle/saves/access";
 import { rollDice } from "@/lib/utils/common/dice";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { ActiveEffect, BattleAttack, BattleParticipant } from "@/types/battle";
@@ -49,7 +49,7 @@ function riderSave(flow: ActionFlow, rider: ActiveEffect, attackerId: string, ta
 
   const target = getP(flow, targetId);
 
-  const result = rollSave({ target, ability: state.save.ability, dc: state.save.dc, participants: flow.ps, rules: flow.ctx.rules, rng: flow.ctx.rng, vsSpell: true });
+  const result = savesOf(flow.ctx.rules).roll({ target, ability: state.save.ability, dc: state.save.dc, participants: flow.ps, rules: flow.ctx.rules, rng: flow.ctx.rng, vsSpell: true });
 
   flow.messages.push(textRef("battleLog.spellFx.riderSave", { target: target.basicInfo.name, rider: rider.name, ability: state.save.ability.toUpperCase(), total: result.total, dc: state.save.dc, success: String(result.success) }));
 

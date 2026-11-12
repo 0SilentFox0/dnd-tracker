@@ -6,6 +6,7 @@ import { ParticipantSide } from "@/lib/constants/battle";
 import { makeEffect } from "@/lib/utils/abilities/__tests__/fixtures";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { beginConcentration, dropConcentration } from "@/lib/utils/battle/concentration";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { ActiveEffect } from "@/types/battle";
 
 const withEffects = (effects: ActiveEffect[]) => {
@@ -26,7 +27,7 @@ describe("endTurnCleanup", () => {
 
     expect(dropConcentration([p], p.basicInfo.id, "damage").participants[0].battleData.pendingCast).toBeUndefined();
 
-    const ended = finishTurnEffects(p, { participants: [p], rng: () => 0.5, round: 2 });
+    const ended = finishTurnEffects(p, { participants: [p], rules: DEFAULT_RULES, rng: () => 0.5, round: 2 });
 
     expect(ended.participant.battleData.pendingCast).toBeUndefined();
     expect(ended.participant.battleData.activeEffects.some((e) => e.concentration)).toBe(false);

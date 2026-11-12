@@ -1,13 +1,12 @@
 import { describe, expect, it } from "vitest";
 
 import { createMockParticipant, grantPassive } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
-import { coreActionAvailability } from "@/lib/utils/battle/actions/availability";
-import { reactionBlocker } from "@/lib/utils/battle/actions/reaction";
 import { actionReason } from "@/lib/utils/battle/actions/reasons";
 import { baseMovement } from "@/lib/utils/battle/grid/path";
 import { calculateInitiative, compareInitiative } from "@/lib/utils/battle/turn/initiative";
 import { rollInitiative } from "@/lib/utils/battle/turn/roll-initiative";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import { type Characteristics, DEFAULT_CHARACTERISTICS } from "@/systems/wfrp/rules/characteristics/keys";
 import { wfrpAbilitiesOf, wfrpBaseStats } from "@/systems/wfrp/rules/combat/participant";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
@@ -70,19 +69,23 @@ describe("wfrp initiative", () => {
 describe("wfrp action economy", () => {
   const cunning = (p: BattleParticipant) => grantPassive(p, [{ kind: "flag", flag: "cunningAction" }], "Cunning Action");
 
-  it("a bonus-cost action is unavailable without bonus actions, available in d20", () => {
+  it("core actions are off in wfrp (empty catalog), available in d20", () => {
     const wf = cunning(wfrp("a"));
 
-    expect(coreActionAvailability("dash", wf, [wf], null, WFRP_RULES)).toEqual({ ok: false, reason: actionReason("noBonusAction") });
+    const { actions } = ruleSystemOf(WFRP_RULES).combat;
+
+    expect(actions.catalog).toEqual({});
+    expect(actions.enabled(WFRP_RULES)).toBe(false);
+    expect(actions.available("dash", wf, [wf], null, WFRP_RULES).ok).toBe(false);
 
     const d = cunning(createMockParticipant());
 
-    expect(coreActionAvailability("dash", d, [d], null, DEFAULT_RULES).ok).toBe(true);
+    expect(ruleSystemOf(DEFAULT_RULES).combat.actions.available("dash", d, [d], null, DEFAULT_RULES).ok).toBe(true);
   });
 
   it("reactions are blocked in wfrp only", () => {
-    expect(reactionBlocker(wfrp("a"), WFRP_RULES)).toEqual(actionReason("noReaction"));
-    expect(reactionBlocker(createMockParticipant(), DEFAULT_RULES)).toBeNull();
+    expect(ruleSystemOf(WFRP_RULES).combat.reactions.blocker(wfrp("a"))).toEqual(actionReason("noReaction"));
+    expect(ruleSystemOf(DEFAULT_RULES).combat.reactions.blocker(createMockParticipant())).toBeNull();
   });
 });
 

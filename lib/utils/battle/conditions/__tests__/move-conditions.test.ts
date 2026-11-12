@@ -4,6 +4,7 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { context, goblin, hero } from "@/lib/server/battles/__tests__/mutations/fixtures";
 import { moveMutation } from "@/lib/server/battles/mutations/move/move-mutation";
 import { frightenedBlocksMove } from "@/lib/utils/battle/grid";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { applyCondition5e } from "@/systems/d20/rules/conditions/apply";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -23,6 +24,7 @@ const scared = (): BattleParticipant[] =>
     sourceName: "X",
     timedKey: "t",
     round: 1,
+    rules: DEFAULT_RULES,
   }).participants;
 
 describe("наляканий і рух", () => {

@@ -56,7 +56,7 @@ function finishTurn(participants: BattleParticipant[], actions: BattleAction[], 
 
   const ended = runAbilities(participants, { type: "turnEnd", actorId: id }, { round: params.round, rng: params.rng, map: params.map, rules: params.rules });
 
-  const order = updateParticipant(ended.participants, id, endTurnCleanup);
+  const order = updateParticipant(ended.participants, id, (p) => endTurnCleanup(p, { participants: ended.participants, rules: params.rules, rng: params.rng, round: params.round }));
 
   const turnEnd = ended.messages.length > 0 ? [{ ...note(findParticipant(order, id) as BattleParticipant, { ...params, actionIndex: params.actionIndex + actions.length }, [textRef("battleLog.triggers.turnEnd"), ...ended.messages]) }] : [];
 

@@ -1,7 +1,6 @@
 import { textRef } from "@/lib/i18n/text-ref";
 import { isActive } from "@/lib/utils/abilities/engine/core/participants";
 import { markKey } from "@/lib/utils/abilities/engine/effects/marks";
-import { canReact } from "@/lib/utils/battle/actions/reaction";
 import { type ActionFlow, getP } from "@/lib/utils/battle/common/action-flow";
 import { cellsOf, footprintDistance, isOnMap } from "@/lib/utils/battle/grid";
 import { cellFeetOf } from "@/lib/utils/battle/grid/cell-feet";
@@ -10,6 +9,7 @@ import { isGrantLive, withInlineDefinition } from "@/lib/utils/battle/spell/inli
 import type { CastSpellParams, CastSpellResult } from "@/lib/utils/battle/types/spell-process";
 import { rollDiceList } from "@/lib/utils/common/dice";
 import type { Ruleset } from "@/lib/utils/rules/schema";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { BattleParticipant, SpellGrant } from "@/types/battle";
 
 const anchoredOn = (target: BattleParticipant, holderId: string, markId: string) =>
@@ -45,7 +45,7 @@ export function runAutoReactions(flow: ActionFlow, { attackerId, targetId, targe
 
     if (holderId === attackerId || attacker.basicInfo.side === holder.basicInfo.side) continue;
 
-    if (!canReact(holder, flow.ctx.rules) || !anchoredOn(target, holderId, grant.inline.anchorMarkId) || !inRange(grant, target, attacker, !!flow.ctx.map, flow.ctx.rules)) continue;
+    if (ruleSystemOf(flow.ctx.rules).combat.reactions.blocker(holder) || !anchoredOn(target, holderId, grant.inline.anchorMarkId) || !inRange(grant, target, attacker, !!flow.ctx.map, flow.ctx.rules)) continue;
 
     const spell = withInlineDefinition({ id: grant.spellId, name: typeof grant.label === "string" ? grant.label : grant.spellId, level: 0, groupId: null, definition: { dice: 0, cost: "reaction", targeting: { kind: "self" }, resolution: { kind: "auto" }, effects: [], raceModifiers: [] } }, grant);
 

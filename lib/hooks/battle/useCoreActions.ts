@@ -6,10 +6,11 @@ import { useBattleScene } from "./useBattleScene";
 
 import type { CoreActionBody } from "@/lib/hooks/battles";
 import { isAttackable } from "@/lib/utils/abilities/engine/core/participants";
-import { coreActionAvailability, coreActionCost, coreActionTargets } from "@/lib/utils/battle/actions/availability";
-import { reactionBlocker } from "@/lib/utils/battle/actions/reaction";
-import { CORE_ACTION_KEYS, CORE_ACTION_REGISTRY, type CoreActionKey } from "@/lib/utils/battle/actions/registry";
+import { coreActionsOn, reactionBlockerOf } from "@/lib/utils/battle/actions/access";
+import { CORE_ACTION_KEYS, type CoreActionKey } from "@/lib/utils/battle/actions/keys";
 import { isHostile } from "@/lib/utils/battle/modes/engine";
+import type { Ruleset } from "@/lib/utils/rules/schema";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { BattleParticipant } from "@/types/battle";
 
 export interface CoreActionChoice {
@@ -32,7 +33,7 @@ function bodyFor(participantId: string, { key, targetId = "", mode = "prone" }: 
   }
 }
 
-export const canReadiedAttack = (rulesEnabled: boolean, p: BattleParticipant) => rulesEnabled && !!p.battleData.readied && reactionBlocker(p) === null;
+export const canReadiedAttack = (rules: Ruleset | null | undefined, p: BattleParticipant) => coreActionsOn(rules) && !!p.battleData.readied && reactionBlockerOf(rules, p) === null;
 
 export function useSendCoreAction(onDone?: () => void) {
   const { actions } = useBattleScene();
@@ -58,7 +59,7 @@ export function useReadiedAttack(participant: BattleParticipant, onDone?: () => 
   const { send, isPending } = useSendCoreAction(onDone);
 
   return {
-    available: canReadiedAttack(!!battle.rules?.actions.enabled, participant),
+    available: canReadiedAttack(battle.rules, participant),
     targets: battle.initiativeOrder.filter((p) => isHostile(battle.map, participant, p) && isAttackable(p) && !p.battleData.reserved),
     attack: (targetId: string) => send({ action: "readiedAttack", participantId: participant.basicInfo.id, targetId }),
     isPending,
@@ -74,12 +75,21 @@ export function useCoreActions(participant: BattleParticipant, onDone?: () => vo
 
   const readied = useReadiedAttack(participant, onDone);
 
-  const items = useMemo(() => CORE_ACTION_KEYS.map((key) => ({ key, def: CORE_ACTION_REGISTRY[key], cost: coreActionCost(key, participant, initiativeOrder), ...coreActionAvailability(key, participant, initiativeOrder, map, battle.rules) })), [participant, initiativeOrder, map, battle.rules]);
+  const { actions } = ruleSystemOf(battle.rules).combat;
+
+  const items = useMemo(
+    () => CORE_ACTION_KEYS.flatMap((key) => {
+      const def = actions.catalog[key];
+
+      return def ? [{ key, def, cost: actions.cost(key, participant, initiativeOrder), ...actions.available(key, participant, initiativeOrder, map, battle.rules) }] : [];
+    }),
+    [actions, participant, initiativeOrder, map, battle.rules],
+  );
 
   return {
-    enabled: !!battle.rules?.actions.enabled,
+    enabled: coreActionsOn(battle.rules),
     items,
-    targetsFor: (key: CoreActionKey) => coreActionTargets(key, participant, initiativeOrder, map),
+    targetsFor: (key: CoreActionKey) => actions.targets(key, participant, initiativeOrder, map),
     run: (choice: CoreActionChoice) => send(bodyFor(participant.basicInfo.id, choice)),
     isPending,
     readied,

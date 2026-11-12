@@ -1,17 +1,22 @@
 import type { SystemData, SystemSlot } from "./slot";
 
+import type { CriticalEffect } from "@/lib/constants/critical-effects";
 import type { Coin } from "@/lib/constants/inventory";
 import type { Translator } from "@/lib/i18n/translator";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import type { Condition5eKey } from "@/lib/utils/abilities/schema/kinds";
 import type { Recipe } from "@/lib/utils/abilities/templates/types";
 import type { LabeledEffectInput } from "@/lib/utils/battle/actions/effects";
+import type { CoreActionDef, CoreActionKey } from "@/lib/utils/battle/actions/keys";
+import type { CoreActionAvailability, LegendaryAttackInput, LegendaryAttackResult, MovementInput, MovementResult, RunCoreActionInput, RunCoreActionResult } from "@/lib/utils/battle/actions/types";
 import type { RollMode } from "@/lib/utils/battle/attack/bonus";
 import type { ApplyConditionOptions, ApplyConditionResult, ConditionEffectOptions } from "@/lib/utils/battle/conditions/set";
 import type { CritPicker } from "@/lib/utils/battle/crit-choice/types";
 import type { DamageConsequencesInput, DamageConsequencesResult } from "@/lib/utils/battle/damage/consequences";
 import type { DieFx } from "@/lib/utils/battle/fx/dice/types";
 import type { EquippedArtifactRow } from "@/lib/utils/battle/participant/extract-artifacts";
+import type { RuleSystemProficiency, RuleSystemSaves } from "@/lib/utils/battle/saves/types";
+import type { BattleSceneState } from "@/lib/utils/battle/store";
 import type { AttackRollResult } from "@/lib/utils/battle/types/attack";
 import type { ExtractedAttack } from "@/lib/utils/battle/types/participant";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
@@ -21,7 +26,7 @@ import type { Rng } from "@/lib/utils/common/rng";
 import type { Ruleset } from "@/lib/utils/rules/schema";
 import type { SpellMagic, SpellMagicKind } from "@/lib/utils/spells/model/schema";
 import type { ResolvedAbility } from "@/types/abilities";
-import type { ActiveEffect, BattleAttack, BattleMapConfig, BattleParticipant } from "@/types/battle";
+import type { ActiveEffect, BattleAction, BattleAttack, BattleMapConfig, BattleParticipant } from "@/types/battle";
 import type { CharacterResources, SheetRollBody, SheetRollResult } from "@/types/characters";
 import type { FeatData } from "@/types/choices";
 import type { LogLine, TextRef } from "@/types/text";
@@ -141,6 +146,112 @@ export interface DamageResult {
 
 export type ZeroHpCtx = DamageConsequencesInput & { rules: Ruleset; manual?: boolean };
 
+/** Runs after `onZeroHp`, folding over its result: what else a blow does to the target (breaks concentration, drops a bank) */
+export type DamagedHook = (ctx: ZeroHpCtx, result: DamageConsequencesResult) => DamageConsequencesResult;
+
+export interface TurnHookCtx {
+  participants: BattleParticipant[];
+  round: number;
+  rng: Rng;
+  rules: Ruleset;
+  map?: BattleMapConfig | null;
+}
+
+export interface TurnSubjectCtx extends TurnHookCtx {
+  id: string;
+}
+
+export interface TurnStartCtx extends TurnSubjectCtx {
+  applyDamage: ApplyDamageConsequences;
+}
+
+export interface TurnJoinCtx extends TurnHookCtx {
+  newcomerIds?: readonly string[];
+}
+
+export interface TurnAdvanceCtx extends TurnHookCtx {
+  scene: BattleSceneState;
+}
+
+export interface TurnHookResult {
+  participants: BattleParticipant[];
+  messages: LogLine[];
+  actions?: BattleAction[];
+  /** The turn of the subject is skipped: the list stops here */
+  skipTurn?: true;
+  /** The turn waits for a decision: the list stops here */
+  pending?: true;
+  /** onTurnStart: the subject went down */
+  downed?: boolean;
+  /** onJoin: who was tested */
+  testerIds?: string[];
+}
+
+export type TurnHook<C extends TurnHookCtx = TurnHookCtx> = (ctx: C) => TurnHookResult;
+
+/** Hook lists run in order, base first, then modules (`runTurnHooks`) */
+export interface RuleSystemTurn {
+  /** Before the turn passes on; core runs its own pending morale check ahead of these */
+  beforeAdvance?: readonly TurnHook<TurnAdvanceCtx>[];
+  onTurnStart?: readonly TurnHook<TurnStartCtx>[];
+  /** A downed participant's turn comes up and is skipped */
+  onSkippedTurn?: readonly TurnHook<TurnSubjectCtx>[];
+  /** The subject's turn ends, after its save-ends rolls and before effect durations count down */
+  onTurnEnd?: readonly TurnHook<TurnSubjectCtx>[];
+  /** A new round begins, after the round-start abilities; messages go to the round log */
+  onRoundStart?: readonly TurnHook<TurnHookCtx>[];
+  /** Participants enter the fight (start, reveal, summon, late join) */
+  onJoin?: readonly TurnHook<TurnJoinCtx>[];
+}
+
+/** Core actions (dash, grapple, …), movement and legendary strikes; a system without them answers with `noActions` */
+export interface RuleSystemActions {
+  /** The rules' `actions` section is switched on */
+  enabled(rules: Ruleset): boolean;
+  catalog: Partial<Record<CoreActionKey, CoreActionDef>>;
+  cost(key: CoreActionKey, actor: BattleParticipant, participants: BattleParticipant[]): CoreActionDef["cost"];
+  targets(key: CoreActionKey, actor: BattleParticipant, participants: BattleParticipant[], map: BattleMapConfig | null | undefined): BattleParticipant[];
+  available(key: CoreActionKey, actor: BattleParticipant, participants: BattleParticipant[], map: BattleMapConfig | null | undefined, rules: Ruleset): CoreActionAvailability;
+  /** Standing up from prone is possible with the movement left */
+  canStandUp(p: BattleParticipant, rules: Ruleset): boolean;
+  run(input: RunCoreActionInput): RunCoreActionResult;
+  legendaryAttack(input: LegendaryAttackInput): LegendaryAttackResult;
+  /** A move with whatever it provokes (opportunity strikes, dragging a grappled foe) */
+  move(input: MovementInput): MovementResult;
+  /** Drops holds whose grappler fell or is no longer adjacent; same array when there are none */
+  releaseInvalidGrapples(ps: BattleParticipant[], map?: BattleMapConfig | null): { participants: BattleParticipant[]; messages: LogLine[] };
+}
+
+export interface RuleSystemReactions {
+  /** Why the participant cannot react now; null when it can */
+  blocker(p: BattleParticipant): LogLine | null;
+}
+
+export interface AfterAttackCtx {
+  participants: BattleParticipant[];
+  attackerId: string;
+  defenderId: string;
+  criticalEffect?: CriticalEffect;
+  /** First strike of the volley */
+  first: boolean;
+  round: number;
+  rules: Ruleset;
+  sceneState?: SystemSlot;
+  /** The target's answer to this strike (core retaliation); `provoked` skips the reaction accounting */
+  retaliate(provoked: boolean, from?: { participants: BattleParticipant[]; sceneState?: SystemSlot }): AfterAttackResult | null;
+}
+
+export interface AfterAttackResult {
+  participants: BattleParticipant[];
+  actions: BattleAction[];
+  sceneState?: SystemSlot;
+  /** The strike has answered itself: core skips its own retaliation */
+  handled?: true;
+}
+
+/** Runs after a strike resolved (`runAfterAttack`); null = nothing to add */
+export type AfterAttackHook = (ctx: AfterAttackCtx) => AfterAttackResult | null;
+
 export interface InitiativeScore {
   total: number;
   roll: number | null;
@@ -186,9 +297,6 @@ export interface RuleSystemConditions {
   list(p: BattleParticipant): SystemConditionLevel[];
   apply(ps: BattleParticipant[], targetId: string, input: SystemConditionApply): SystemConditionResult;
   reduce(ps: BattleParticipant[], targetId: string, key: string, by: 1 | "all"): SystemConditionResult & { removed: boolean };
-  turnStart(ps: BattleParticipant[], id: string, ctx: { round: number; rng: Rng; rules: Ruleset; applyDamage: ApplyDamageConsequences }): SystemConditionResult & { downed: boolean };
-  /** Called when a downed participant's turn is skipped (e.g. bleeding out) */
-  skippedTurn?(ps: BattleParticipant[], id: string, ctx: { round: number; rng: Rng }): SystemConditionResult;
   /** Downed allies stay at 0 HP after a victory (healing raises them) */
   keepDownedAfterVictory?: true;
   /** Effects that survive a participant going UNCONSCIOUS (cleared on death) */
@@ -247,8 +355,6 @@ export interface RuleSystemMagic {
   attribute(ps: BattleParticipant[], targetIds: string[], magic: SpellMagic, round: number): SystemConditionResult;
   /** Token badge for banked channelling */
   badge(p: BattleParticipant): ActiveEffect | null;
-  /** Channelled SL lost when the caster takes damage */
-  onDamaged(p: BattleParticipant): BattleParticipant;
 }
 
 export interface ActionDetailsView {
@@ -288,7 +394,16 @@ export interface RuleSystemCombat {
   attackTarget?(attacker: BattleParticipant, attack: BattleAttack): { label: LogLine; target: number };
   /** Crit-dice rule and, when `ctx.hit` is set, the system's own damage mitigation of that hit */
   damage(ctx: DamageCtx): DamageResult;
-  onZeroHp?(ctx: ZeroHpCtx): DamageConsequencesResult;
+  /** Falling to 0 HP (dying, death, unconsciousness); `ctx.manual` is a DM status change settled the same way */
+  onZeroHp(ctx: ZeroHpCtx): DamageConsequencesResult;
+  onDamaged?: readonly DamagedHook[];
+  turn?: RuleSystemTurn;
+  actions: RuleSystemActions;
+  reactions: RuleSystemReactions;
+  saves: RuleSystemSaves;
+  proficiency: RuleSystemProficiency;
+  /** Hooks after each strike of an attack, base first, then modules */
+  afterAttack?: readonly AfterAttackHook[];
   /** Base score before flat modifiers; `roll`/`die` are null when nothing was rolled (static mode, pinned) */
   initiative(p: BattleParticipant, ctx: { rules: Pick<Ruleset, "initiative">; rng: Rng }): InitiativeScore;
   /** Starting values the participant builders use instead of the d20 sheet columns */
@@ -371,7 +486,6 @@ export interface UnitBuild {
 export interface RuleSystemTraits {
   recipes: readonly Recipe[];
   unitBuild(row: { id: string; characteristics?: unknown }, abilities: readonly ResolvedAbility[]): UnitBuild;
-  psychology?(ps: BattleParticipant[], ctx: { round: number; rng: Rng; map?: BattleMapConfig | null; newcomerIds?: readonly string[] }): SystemConditionResult & { testerIds: string[] };
 }
 
 export interface RuleSystemAdvancement {

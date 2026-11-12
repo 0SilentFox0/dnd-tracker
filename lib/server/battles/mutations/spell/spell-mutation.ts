@@ -12,7 +12,6 @@ import { recordUse } from "@/lib/utils/abilities/engine/core/usage";
 import { evaluateCondition } from "@/lib/utils/abilities/registry/conditions";
 import { spendLair } from "@/lib/utils/battle/actions/lair";
 import { legendaryCostOf, spendLegendary } from "@/lib/utils/battle/actions/legendary-options";
-import { reactionBlocker } from "@/lib/utils/battle/actions/reaction";
 import { isFiveE } from "@/lib/utils/battle/attack/ability";
 import { requireActor } from "@/lib/utils/battle/common/control";
 import { dropConcentration } from "@/lib/utils/battle/concentration";
@@ -235,7 +234,7 @@ function assertActionAvailable(ctx: BattleMutationContext, caster: BattlePartici
   const { definition } = spell;
 
   if (definition.cost === "reaction" && !free) {
-    const blocker = reactionBlocker(caster, ctx.meta.rules);
+    const blocker = ruleSystemOf(ctx.meta.rules).combat.reactions.blocker(caster);
 
     if (blocker) throw ruleErrorOf("action_rejected", blocker);
   } else assertCanAct(ctx, caster.basicInfo.id, { skipMorale: free });

@@ -21,7 +21,7 @@ export interface ResistedHitsResult {
 }
 
 export interface ResistedDamageOptions {
-  rules?: Ruleset;
+  rules: Ruleset;
   rng?: () => number;
 }
 
@@ -30,7 +30,7 @@ export function dealResistedDamage(
   targetId: string,
   amount: number,
   damageType: string,
-  opts: ResistedDamageOptions = {},
+  opts: ResistedDamageOptions,
 ): { participants: BattleParticipant[]; dealt: number; downed: boolean; messages: LogLine[] } | null {
   const target = findParticipant(ps, targetId);
 

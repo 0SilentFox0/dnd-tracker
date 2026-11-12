@@ -12,7 +12,7 @@ import type { BattleParticipant } from "@/types/battle";
 
 const sensed = (sense: string, range = 30) => placed("monster", { at: { x: 0, y: 0 }, abilities: [resolved({ name: "Чуття", trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "sense", sense, range } as never] })] });
 
-const condition = (ps: BattleParticipant[], id: string, key: Condition5eKey) => applyCondition5e(ps, id, { key, rounds: 5, source: { participantId: "src", name: "X" }, sourceName: "X", timedKey: key, round: 1 }).participants;
+const condition = (ps: BattleParticipant[], id: string, key: Condition5eKey) => applyCondition5e(ps, id, { key, rounds: 5, source: { participantId: "src", name: "X" }, sourceName: "X", timedKey: key, round: 1, rules: DEFAULT_RULES }).participants;
 
 const reasons = (ps: BattleParticipant[]) => {
   const r = rollModeReasons(ps[0], CLAWS, ps, { rules: DEFAULT_RULES, targetId: ps[1].basicInfo.id });

@@ -4,7 +4,6 @@ import { readResources } from "./schema";
 import { CombatStatus } from "@/lib/constants/battle";
 import { textRef } from "@/lib/i18n/text-ref";
 import { exhaustionLevel, PERMANENT_ROUNDS } from "@/lib/utils/battle/conditions";
-import { startDying } from "@/lib/utils/battle/death-saves/start";
 import { isCastPool, isConsumablePool } from "@/lib/utils/items/pools";
 import type { Ruleset } from "@/lib/utils/rules";
 import { ruleSystemOf } from "@/lib/utils/rules/systems";
@@ -88,9 +87,11 @@ function withHpState(p: BattleParticipant, r: CharacterResources, rules: Ruleset
 
   if (hp > 0) return { ...p, combatStats: { ...stats, currentHp: hp, tempHp } };
 
-  const down = { ...p, combatStats: { ...stats, tempHp } };
+  const before = { ...p, combatStats: { ...stats, currentHp: 1 } };
 
-  return rules.deathSaves.enabled ? startDying(down, rules) : { ...down, combatStats: { ...down.combatStats, currentHp: 0, status: CombatStatus.UNCONSCIOUS } };
+  const after = { ...p, combatStats: { ...stats, tempHp, currentHp: 0, status: CombatStatus.UNCONSCIOUS } };
+
+  return ruleSystemOf(rules).combat.onZeroHp({ before, after, amount: 0, rules, rng: () => 0, participants: [after], manual: true }).participant;
 }
 
 export function applyCharacterResources(p: BattleParticipant, state: StoredCharacterState, rules: Ruleset): BattleParticipant {

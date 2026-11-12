@@ -91,16 +91,16 @@ export function completeBattle(
   initiativeOrder: BattleParticipant[],
   result: "victory" | "defeat",
   currentRound: number,
-  rules?: Ruleset,
+  rules: Ruleset,
 ): {
   updatedParticipants: BattleParticipant[];
   battleAction: BattleAction;
 } {
-  const reviveHp = (p: BattleParticipant) => (rules?.outOfCombat.persistResources ? 1 : p.combatStats.maxHp);
+  const reviveHp = (p: BattleParticipant) => (rules.outOfCombat.persistResources ? 1 : p.combatStats.maxHp);
 
   const restored = initiativeOrder.map(restoreCharm);
 
-  const keepDowned = !!rules && !!ruleSystemOf(rules).conditions?.keepDownedAfterVictory;
+  const keepDowned = !!ruleSystemOf(rules).conditions?.keepDownedAfterVictory;
 
   const revived = result === "victory" && !keepDowned ? restored.filter(revivesOnVictory) : [];
 

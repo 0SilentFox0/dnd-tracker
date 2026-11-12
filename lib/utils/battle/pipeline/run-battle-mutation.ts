@@ -11,7 +11,6 @@ import type { Locale } from "@/lib/i18n/config";
 import type { Rng } from "@/lib/utils/abilities/engine/core/types";
 import { syncMapAuras } from "@/lib/utils/abilities/engine/effects/map-auras";
 import type { BATTLE_RATE_LIMITS, RateLimitResult } from "@/lib/utils/api/rate-limit";
-import { releaseInvalidGrapples } from "@/lib/utils/battle/actions/grapple";
 import { controls, currentOf } from "@/lib/utils/battle/common/control";
 import { dropOrphanedConcentration } from "@/lib/utils/battle/concentration";
 import { placeParticipants } from "@/lib/utils/battle/grid/placement";
@@ -46,6 +45,7 @@ import { checkVictoryConditions, completeBattle } from "@/lib/utils/battle/turn/
 import type { BattleKnowledge } from "@/lib/utils/battle/view/knowledge";
 import { alwaysSeesEnemyStats, redactLogForPlayers } from "@/lib/utils/battle/view/visibility";
 import type { Ruleset } from "@/lib/utils/rules";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { BattleScene, ClientBattleDelta } from "@/types/api";
 import type { BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
@@ -145,7 +145,7 @@ function withPlacement(map: BattleMapConfig | null, scene: { status: BattleStatu
 
   if (cleared !== result.participants) result = { ...result, participants: cleared };
 
-  const released = releaseInvalidGrapples(result.participants, map);
+  const released = ruleSystemOf(rules).combat.actions.releaseInvalidGrapples(result.participants, map);
 
   if (released.participants !== result.participants) result = { ...result, participants: released.participants, events: [...result.events, systemEvent(result.scene?.round ?? scene.round, lineText(released.messages, "; "))] };
 

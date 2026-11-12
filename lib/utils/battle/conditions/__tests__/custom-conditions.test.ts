@@ -141,9 +141,9 @@ describe("pacified: шкода", () => {
 
     const victim = createMockParticipant();
 
-    const live = hazardHit(victim, zone, 1, [makeParticipant({ id: "c" })], () => 0);
+    const live = hazardHit(victim, zone, 1, [makeParticipant({ id: "c" })], () => 0, DEFAULT_RULES);
 
-    const calm = hazardHit(victim, zone, 1, [pacify(makeParticipant({ id: "c" }))], () => 0);
+    const calm = hazardHit(victim, zone, 1, [pacify(makeParticipant({ id: "c" }))], () => 0, DEFAULT_RULES);
 
     expect(live?.damage).toBe(5);
     expect(calm?.damage).toBe(0);

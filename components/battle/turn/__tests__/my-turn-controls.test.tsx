@@ -4,6 +4,7 @@ import { cleanup, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { render } from "@/lib/i18n/test/render-uk";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 
 vi.unmock("next-intl");
 
@@ -34,7 +35,7 @@ vi.mock("@/lib/hooks/battle", () => ({
   useBattleRules: () => rules.current,
   useBattleScene: () => ({
     anyPending: false,
-    battle: { initiativeOrder: [], currentRound: 1, currentTurnIndex: 0, rules: { actions: { enabled: false } }, map: null },
+    battle: { initiativeOrder: [], currentRound: 1, currentTurnIndex: 0, rules: { ...DEFAULT_RULES, actions: { ...DEFAULT_RULES.actions, enabled: false } }, map: null },
     intents: { attack: null, clearAttack: vi.fn(), mapAim: null, mapPick: null, setAttackReady: vi.fn() },
   }),
   useBonusSpells: () => ({}),

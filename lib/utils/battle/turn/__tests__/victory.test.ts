@@ -3,11 +3,15 @@ import { describe, expect, it } from "vitest";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { textRef } from "@/lib/i18n/text-ref";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
-import { applyVictoryCompletion } from "@/lib/utils/battle/turn/turn-helpers";
-import { checkVictoryConditions, completeBattle } from "@/lib/utils/battle/turn/victory";
+import { applyVictoryCompletion as applyVictory, type ApplyVictoryParams } from "@/lib/utils/battle/turn/turn-helpers";
+import { checkVictoryConditions, completeBattle as complete } from "@/lib/utils/battle/turn/victory";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
-import type { BattleAction } from "@/types/battle";
+import type { BattleAction, BattleParticipant } from "@/types/battle";
+
+const completeBattle = (ps: BattleParticipant[], result: "victory" | "defeat", round: number, rules = DEFAULT_RULES) => complete(ps, result, round, rules);
+
+const applyVictoryCompletion = (params: Omit<ApplyVictoryParams, "rules">) => applyVictory({ ...params, rules: DEFAULT_RULES });
 
 describe("completeBattle", () => {
   it("перемога: hpChanges містять відроджених союзників", () => {

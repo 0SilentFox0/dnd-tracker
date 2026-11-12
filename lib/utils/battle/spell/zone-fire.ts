@@ -5,7 +5,7 @@ import type { Rng } from "@/lib/utils/abilities/engine/core/types";
 import { applyEffect } from "@/lib/utils/abilities/registry/effects";
 import { type ConcentrationTag, isZoneConcentrationLive } from "@/lib/utils/battle/concentration";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant/helpers";
-import { rollSave } from "@/lib/utils/battle/saves/roll-save";
+import { savesOf } from "@/lib/utils/battle/saves/access";
 import { rollDie } from "@/lib/utils/common/dice";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { ZoneTrigger } from "@/lib/utils/spells/model/schema";
@@ -68,7 +68,7 @@ export function fireTrigger(ps: BattleParticipant[], src: FireSource, trigger: Z
   const messages: LogLine[] = [];
 
   if (trigger.save) {
-    const res = rollSave({ target: findParticipant(next, targetId) ?? target, ability: trigger.save.ability, dc: src.dc, participants: next, rules: ctx.rules, rng: ctx.rng, vsSpell: true });
+    const res = savesOf(ctx.rules).roll({ target: findParticipant(next, targetId) ?? target, ability: trigger.save.ability, dc: src.dc, participants: next, rules: ctx.rules, rng: ctx.rng, vsSpell: true });
 
     messages.push(textRef("battleLog.spellFx.zoneSave", { target: target.basicInfo.name, spell: src.spellName, ability: trigger.save.ability.toUpperCase(), total: res.total, dc: src.dc, success: String(res.success) }));
 

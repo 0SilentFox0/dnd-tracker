@@ -4,7 +4,7 @@ import { CombatStatus, ParticipantSide, ParticipantSourceType } from "@/lib/cons
 import { textOf } from "@/lib/i18n/test/text";
 import { makeEffect, makeParticipant, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import type { Effect } from "@/lib/utils/abilities/schema";
-import { beginConcentration, concentrationCheck, dropConcentration, dropOrphanedConcentration, isZoneConcentrationLive, uniqueCastId } from "@/lib/utils/battle/concentration";
+import { beginConcentration, dropConcentration, dropOrphanedConcentration, isZoneConcentrationLive, uniqueCastId } from "@/lib/utils/battle/concentration";
 import { removeEffects } from "@/lib/utils/battle/conditions/query";
 import { applyDamageConsequences } from "@/lib/utils/battle/damage/consequences";
 import { DEATH_SAVES_TIMED_KEY } from "@/lib/utils/battle/death-saves";
@@ -13,6 +13,7 @@ import { textsOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { castSpell } from "@/lib/utils/battle/spell";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import { DEFAULT_RULES, type Ruleset } from "@/lib/utils/rules";
+import { concentrationCheck } from "@/systems/d20/rules/concentration/check";
 import { applyCondition5e } from "@/systems/d20/rules/conditions/apply";
 import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
 
@@ -229,7 +230,7 @@ describe("перевірка концентрації", () => {
 
 describe("недієздатність", () => {
   it.each(["incapacitated", "stunned"] as const)("%s знімає концентрацію", (key) => {
-    const r = applyCondition5e(concentrating(), "c", { key, rounds: 2, source: undefined, sourceName: "X", timedKey: "t", round: 1 });
+    const r = applyCondition5e(concentrating(), "c", { key, rounds: 2, source: undefined, sourceName: "X", timedKey: "t", round: 1, rules: DEFAULT_RULES });
 
     expect(effectsOf(r.participants, "e1")).toEqual([]);
     expect(effectsOf(r.participants, "c").some((e) => e.concentration)).toBe(false);
@@ -249,7 +250,7 @@ describe("зона", () => {
 
     expect(isZoneConcentrationLive(ps, tag)).toBe(true);
     expect(hazardUnder(map, target, undefined, ps)).not.toBeNull();
-    expect(hazardHit(target, map.terrain!["1:1"], 1, ps, () => 0)?.damage).toBe(5);
+    expect(hazardHit(target, map.terrain!["1:1"], 1, ps, () => 0, DEFAULT_RULES)?.damage).toBe(5);
   });
 
   it("після втрати концентрації не шкодить", () => {
@@ -257,7 +258,7 @@ describe("зона", () => {
 
     expect(isZoneConcentrationLive(ps, tag)).toBe(false);
     expect(hazardUnder(map, target, undefined, ps)).toBeNull();
-    expect(hazardHit(target, map.terrain!["1:1"], 1, ps, () => 0)).toBeNull();
+    expect(hazardHit(target, map.terrain!["1:1"], 1, ps, () => 0, DEFAULT_RULES)).toBeNull();
   });
 });
 
@@ -310,7 +311,7 @@ describe("review fixes", () => {
   });
 
   it("смерть від виснаження знімає концентрацію", () => {
-    const r = applyCondition5e(concentrating(), "c", { key: "exhaustion", levels: 6, rounds: 2, source: undefined, sourceName: "X", timedKey: "t", round: 1 });
+    const r = applyCondition5e(concentrating(), "c", { key: "exhaustion", levels: 6, rounds: 2, source: undefined, sourceName: "X", timedKey: "t", round: 1, rules: DEFAULT_RULES });
 
     expect(r.participants.find((p) => p.basicInfo.id === "c")?.combatStats.status).toBe(CombatStatus.DEAD);
     expect(effectsOf(r.participants, "c").some((e) => e.concentration)).toBe(false);
