@@ -1,5 +1,7 @@
 import { SYSTEM_META, type SystemKind, type SystemMeta } from './meta';
 
+import { CORE_CONTENT_KINDS } from '@/lib/constants/content-kinds';
+
 export interface SystemSelection {
     key: string;
     modules?: readonly string[];
@@ -139,3 +141,24 @@ export function moduleCatalog(metas: Metas = ALL_META): ModuleCatalog {
         })),
     };
 }
+
+export function contentKindsOf(
+    system: SystemSelection,
+    metas: Metas = ALL_META
+): ReadonlySet<string> {
+    const { base, modules } = composition(system, metas);
+
+    const kinds = new Set<string>(CORE_CONTENT_KINDS);
+
+    for (const id of [base, ...modules])
+        for (const kind of moduleMetaOf(id, metas)?.contentKinds ?? [])
+            kinds.add(kind);
+
+    return kinds;
+}
+
+export const ownerOfContentKind = (
+    kind: string,
+    metas: Metas = ALL_META
+): string | undefined =>
+    metas.find((m) => m.contentKinds?.includes(kind))?.module;

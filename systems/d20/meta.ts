@@ -7,4 +7,5 @@ export const D20_META = {
     tokens: ['dnd5e'],
     distance: { unit: 'ft', perCell: 5 },
     i18n: {},
+    contentKinds: ['classes', 'backgrounds'],
 } as const satisfies SystemMeta;

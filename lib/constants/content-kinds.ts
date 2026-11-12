@@ -15,3 +15,13 @@ export const CONTENT_KINDS = [
 ] as const;
 
 export type ContentKind = (typeof CONTENT_KINDS)[number];
+
+export const CORE_CONTENT_KINDS = [
+    'units',
+    'races',
+    'feats',
+    'spells',
+    'spell-groups',
+    'artifacts',
+    'tracks',
+] as const satisfies readonly ContentKind[];

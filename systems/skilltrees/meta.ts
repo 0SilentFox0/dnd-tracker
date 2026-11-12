@@ -7,4 +7,5 @@ export const SKILLTREES_META = {
     requires: ['d20'],
     toggle: 'setup',
     i18n: {},
+    contentKinds: ['main-skills', 'skills'],
 } as const satisfies SystemMeta;
