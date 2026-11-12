@@ -9,10 +9,11 @@ import { CharacterBasicInfo } from "@/components/characters/basic/CharacterBasic
 import { CharacterHpPreview } from "@/components/characters/stats/CharacterHpPreview";
 import { systemUiOf } from "@/components/systems";
 import { Button } from "@/components/ui/button";
+import { useCampaignRules } from "@/lib/hooks/campaigns";
 import type { DmCharacterEditor } from "@/lib/hooks/characters";
 import { useClassMode } from "@/lib/hooks/classes";
-import { classHp, hitDiceLabel } from "@/lib/utils/characters/classes";
-import { sheetLineKey } from "@/lib/utils/characters/sheet/line-key";
+import { characterBaseHp } from "@/lib/utils/characters/hero-hp";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { RULE_SYSTEM_REGISTRY } from "@/lib/utils/rules/systems";
 import { resolveClassEntries } from "@/lib/utils/spells/class-slots";
 
@@ -33,9 +34,11 @@ export function BasicEditTab({ editor, onDeleted }: { editor: DmCharacterEditor;
 
   const classEntries = resolveClassEntries(form.basicInfo.data.classes ?? [], classMode.byId);
 
-  const hp = classUi && classEntries.some((e) => e.class)
-    ? { total: classHp(classEntries, form.abilityScores.data.constitution), lines: [{ label: sheetLineKey("hitDice"), params: { dice: hitDiceLabel(classEntries) }, value: "" }] }
-    : sheet.hp;
+  const { data: rules } = useCampaignRules(campaignId);
+
+  const classHp = classUi && classEntries.some((e) => e.class) ? characterBaseHp({ level: form.basicInfo.data.level, constitution: form.abilityScores.data.constitution }, { entries: classEntries, rules: rules ?? DEFAULT_RULES }) : null;
+
+  const hp = classHp ? { total: classHp.total, lines: classHp.breakdown.map((b) => ({ ...b, value: "" })) } : sheet.hp;
 
   const remove = async () => {
     if (await editor.dmActions.remove()) onDeleted();

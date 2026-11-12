@@ -1,6 +1,7 @@
+import { classHp } from "./class-hp";
 import { heroHpFallback } from "./hero-hp";
 
-import { classHp, hitDiceLabel } from "@/lib/utils/characters/classes";
+import { hitDiceLabel } from "@/lib/utils/characters/classes";
 import { sheetLineKey } from "@/lib/utils/characters/sheet/line-key";
 import type { RuleSystemDefinition } from "@/lib/utils/rules/systems/types";
 
