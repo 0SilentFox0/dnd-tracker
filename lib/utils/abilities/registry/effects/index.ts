@@ -7,9 +7,9 @@ import { describeSpellOnly, isSpellOnlyEffect } from "./describe-spell-only";
 import { describeFlag, FLAG_FIELDS, FLAG_KEYS } from "./flags";
 import { applyDealDamage, applyDot, applyHeal, applyHot, describeDealDamage, describeDot, describeHeal, describeHot } from "./hp";
 import { applyManeuver, describeManeuver } from "./maneuver";
+import { MODULE_EFFECT_ROWS } from "./module-effect-rows";
 import { applyPush, describePush } from "./push";
 import {
-  applyChangeMorale,
   applyCleanse,
   applyCondition,
   applyDrainSpellSlot,
@@ -35,10 +35,10 @@ import type { Translator } from "@/lib/i18n/translator";
 import { resolveTargetIds } from "@/lib/utils/abilities/engine/core/targets";
 import type { Ability, AnyEffect, Effect, EffectKind } from "@/lib/utils/abilities/schema";
 import { CONDITION_5E_KEYS, MANEUVERS } from "@/lib/utils/abilities/schema/kinds";
+import type { ModuleEffectKind } from "@/lib/utils/abilities/schema/module-effects";
 import type { SystemEffect } from "@/lib/utils/abilities/schema/system-effects";
 import { joinSegments, seg, type Segment, segmentsLine } from "@/lib/utils/abilities/segments";
 import { pickOne } from "@/lib/utils/common/dice";
-import { signed } from "@/lib/utils/common/format";
 import type { SpellEffect } from "@/lib/utils/spells/model/schema";
 
 export type { EffectApplyInput, EffectApplyResult };
@@ -56,7 +56,7 @@ const AMOUNT: FieldMeta = { name: "amount", input: "amount" };
 
 const REQUIRED_DURATION: FieldMeta = { ...DURATION_FIELD, optional: false };
 
-const BASE_EFFECT_REGISTRY: { [K in Exclude<EffectKind, SystemEffect["kind"]>]: EffectDefinition<K> } = {
+const BASE_EFFECT_REGISTRY: { [K in Exclude<EffectKind, SystemEffect["kind"] | ModuleEffectKind>]: EffectDefinition<K> } = {
   modifyStat: { kind: "modifyStat", static: true, fields: modifyStatFields, describe: describeModifyStat, apply: (i) => applyStatic(i, describeEffectText) },
   damageBonus: { kind: "damageBonus", static: true, fields: damageBonusFields, describe: describeDamageBonus, apply: (i) => applyStatic(i, describeEffectText) },
   flag: {
@@ -130,7 +130,6 @@ const BASE_EFFECT_REGISTRY: { [K in Exclude<EffectKind, SystemEffect["kind"]>]: 
   },
   restoreSpellSlot: { kind: "restoreSpellSlot", static: false, fields: [{ name: "count", input: "number" }, TARGET_FIELD], describe: (e) => [seg("summary.effects.restoreSpellSlot", { count: e.count })], apply: applyRestoreSpellSlot },
   drainSpellSlot: { kind: "drainSpellSlot", static: false, fields: [{ name: "count", input: "number" }, TARGET_FIELD], describe: (e) => [seg("summary.effects.drainSpellSlot", { count: e.count })], apply: applyDrainSpellSlot },
-  changeMorale: { kind: "changeMorale", static: false, fields: [{ name: "delta", input: "number" }, TARGET_FIELD], describe: (e) => [seg("summary.effects.changeMorale", { delta: signed(e.delta) })], apply: applyChangeMorale },
   mark: { kind: "mark", static: false, fields: [{ name: "markId", input: "text" }, TARGET_FIELD, REQUIRED_DURATION], describe: (e) => [seg("summary.effects.mark", { rounds: e.duration.rounds })], apply: applyMark },
   copySpellBuffs: { kind: "copySpellBuffs", static: false, fields: [TARGET_FIELD], describe: () => [seg("summary.effects.copySpellBuffs")], apply: applyCopySpellBuffs },
   guard: { kind: "guard", static: false, fields: [{ name: "percent", input: "number" }, TARGET_FIELD, REQUIRED_DURATION], describe: (e) => [seg("summary.effects.guard", { percent: e.percent, rounds: e.duration.rounds })], apply: applyGuard },
@@ -170,7 +169,7 @@ const BASE_EFFECT_REGISTRY: { [K in Exclude<EffectKind, SystemEffect["kind"]>]: 
   },
 };
 
-const SYSTEM_EFFECT_REGISTRY = Object.fromEntries(SYSTEM_EFFECT_ROWS.map((r) => [r.kind, r.row]));
+const SYSTEM_EFFECT_REGISTRY = Object.fromEntries([...SYSTEM_EFFECT_ROWS, ...MODULE_EFFECT_ROWS].map((r) => [r.kind, r.row]));
 
 export const EFFECT_REGISTRY = { ...BASE_EFFECT_REGISTRY, ...SYSTEM_EFFECT_REGISTRY } as { [K in EffectKind]: EffectDefinition<K> };
 

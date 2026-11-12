@@ -11,6 +11,10 @@ describe("effect ownership", () => {
     expect(SYSTEM_EFFECT_OWNERSHIP.kinds.wfrpWard).toBe("wfrp");
   });
 
+  it("module effects are owned by their modules", () => {
+    expect(SYSTEM_EFFECT_OWNERSHIP.kinds.changeMorale).toBe("morale");
+  });
+
   it("module flags are owned by their modules", () => {
     expect(SYSTEM_EFFECT_OWNERSHIP.flags).toMatchObject({ moraleChance: "morale", minMorale: "morale", noRetaliation: "retaliation", extraRetaliations: "retaliation", saveProficiency: "d20", proficiency: "d20" });
     expect(SYSTEM_EFFECT_OWNERSHIP.flags.advantage).toBeUndefined();

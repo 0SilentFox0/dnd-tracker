@@ -6,7 +6,6 @@ import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { findParticipant, participantNames, updateParticipant, withActiveEffects } from "@/lib/utils/abilities/engine/core/participants";
 import { restoreCharm } from "@/lib/utils/abilities/engine/effects/charm";
 import { countMarks, GUARD_KEY, markKey } from "@/lib/utils/abilities/engine/effects/marks";
-import { clampMorale, moraleCapOf } from "@/lib/utils/abilities/engine/effects/morale";
 import { effectSource, upsertTimedEffect } from "@/lib/utils/abilities/engine/effects/timed-effects";
 import type { ConditionImmunityKey, Effect } from "@/lib/utils/abilities/schema";
 import { isCondition5eKey, isCustomConditionKey } from "@/lib/utils/abilities/schema/kinds";
@@ -16,14 +15,13 @@ import { applyCondition5e, type ConditionKey, saveEndsFor } from "@/lib/utils/ba
 import { removeEffects } from "@/lib/utils/battle/conditions/query";
 import { grantExtraActions } from "@/lib/utils/battle/participant/helpers";
 import { spellSaveDc } from "@/lib/utils/battle/spell/power";
-import { signed } from "@/lib/utils/common/format";
 import { slotLevel, slotRestoreOrder } from "@/lib/utils/spells/slot-keys";
 import type { BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
 type Of<K extends Effect["kind"]> = Extract<Effect, { kind: K }>;
 
-function each(
+export function each(
   input: EffectApplyInput,
   fn: (p: BattleParticipant) => BattleParticipant | null,
   message: (names: string) => LogLine,
@@ -224,21 +222,6 @@ export function applyDrainSpellSlot(input: EffectApplyInput<Of<"drainSpellSlot">
   }
 
   return { participants: ps, messages };
-}
-
-export function applyChangeMorale(input: EffectApplyInput<Of<"changeMorale">>): EffectApplyResult {
-  const { ability, effect } = input;
-
-  return each(
-    input,
-    (p) => {
-      const morale = clampMorale(p.combatStats.morale + effect.delta, moraleCapOf(p));
-
-      return morale === p.combatStats.morale ? null : { ...p, combatStats: { ...p.combatStats, morale } };
-    },
-    (names) => textRef("abilityText.log.morale", { ability: ability.name, target: names, delta: signed(effect.delta) }),
-    (p) => effect.delta < 0 && immuneTo(input.participants, p.basicInfo.id, "fear"),
-  );
 }
 
 export function applyCleanse(input: EffectApplyInput<Of<"cleanse">>): EffectApplyResult {

@@ -88,6 +88,20 @@ export const ROOT_SPECS: readonly RootSpec[] = [
     ],
   },
   {
+    file: "lib/utils/abilities/schema/module-effects.ts",
+    blocks: [
+      { layer: (id) => `systems/${id}/rules/ability-module-effects.ts`, line: imp((id) => `${upper(id)}_MODULE_EFFECT_SCHEMAS`, (id) => `@/systems/${id}/rules/ability-module-effects`) },
+      { layer: (id) => `systems/${id}/rules/ability-module-effects.ts`, line: (id) => `${upper(id)}_MODULE_EFFECT_SCHEMAS,` },
+    ],
+  },
+  {
+    file: "lib/utils/abilities/registry/effects/module-effect-rows.ts",
+    blocks: [
+      { layer: (id) => `systems/${id}/rules/ability-module-effect-rows.ts`, line: imp((id) => `${upper(id)}_MODULE_EFFECT_ROWS`, (id) => `@/systems/${id}/rules/ability-module-effect-rows`) },
+      { layer: (id) => `systems/${id}/rules/ability-module-effect-rows.ts`, line: (id) => `ownedBy("${id}", ${upper(id)}_MODULE_EFFECT_ROWS),` },
+    ],
+  },
+  {
     file: "lib/utils/rules/systems/sections.ts",
     blocks: [
       { layer: (id) => `systems/${id}/rules/sections.ts`, line: imp((id) => `${upper(id)}_SECTIONS`, (id) => `@/systems/${id}/rules/sections`) },

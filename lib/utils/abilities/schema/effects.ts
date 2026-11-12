@@ -3,6 +3,7 @@ import { z } from "zod";
 import { AbilityTargetSchema, AmountSchema, DurationSchema, FlatSchema, FormulaSchema } from "./common";
 import { flagBase } from "./flag-base";
 import { ATTACK_KINDS, CONDITION_5E_KEYS, CONDITION_KEYS, CUSTOM_CONDITION_KEY_RE, type CustomConditionKey, DAMAGE_FILTER_KINDS, DICE_RE, MANEUVERS, STAT_KEYS, type StatKey } from "./kinds";
+import { MODULE_EFFECT_SCHEMAS } from "./module-effects";
 import { SYSTEM_EFFECT_SCHEMAS,type SystemEffect } from "./system-effects";
 import { SYSTEM_FLAG_SCHEMAS } from "./system-flags";
 
@@ -225,12 +226,6 @@ const RestoreSpellSlotLevelsSchema = z.object({ kind: z.literal("restoreSpellSlo
 
 const DrainSpellSlotSchema = z.object({ kind: z.literal("drainSpellSlot"), count: z.number().int().min(1), ...target });
 
-const ChangeMoraleSchema = z.object({
-  kind: z.literal("changeMorale"),
-  delta: z.number().int().refine((d) => d !== 0),
-  ...target,
-});
-
 const CleanseSchema = z.object({ kind: z.literal("cleanse"), includeConditions: z.boolean().optional(), ...target });
 
 const GuardSchema = z.object({ kind: z.literal("guard"), percent: z.number().int().min(1).max(100), duration: DurationSchema, ...target });
@@ -275,7 +270,6 @@ export const BASE_EFFECTS = [
   RestoreSpellSlotSchema,
   RestoreSpellSlotLevelsSchema,
   DrainSpellSlotSchema,
-  ChangeMoraleSchema,
   CleanseSchema,
   MarkSchema,
   CopySpellBuffsSchema,
@@ -285,6 +279,7 @@ export const BASE_EFFECTS = [
   ManeuverSchema,
   HelpSchema,
   PushSchema,
+  ...MODULE_EFFECT_SCHEMAS,
 ] as const;
 
 export const StaticEffectSchema = z.discriminatedUnion("kind", [ModifyStatSchema, DamageBonusSchema, FlagSchema]);

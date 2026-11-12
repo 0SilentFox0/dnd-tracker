@@ -2,9 +2,11 @@ import type { ErrorParams } from "@/lib/constants/api-errors";
 import { issueParams } from "@/lib/i18n/translate-issue";
 import { columnRefIssues } from "@/lib/utils/abilities/class-columns";
 import { EFFECT_REGISTRY } from "@/lib/utils/abilities/registry/effects";
+import { MODULE_EFFECT_DEFAULTS } from "@/lib/utils/abilities/registry/effects/module-effect-rows";
 import { SYSTEM_EFFECT_DEFAULTS } from "@/lib/utils/abilities/registry/effects/system-rows";
 import { AbilitiesSchema, type Ability, AbilitySchema, type AnyEffect, type Effect, type EffectKind, isActionScopedTrigger, isStaticEffect, type Trigger, type TriggerEvent } from "@/lib/utils/abilities/schema";
 import { PASSIVE_TARGETS } from "@/lib/utils/abilities/schema/kinds";
+import type { ModuleEffectKind } from "@/lib/utils/abilities/schema/module-effects";
 import type { SystemEffect } from "@/lib/utils/abilities/schema/system-effects";
 import { ITEM_CHARGES_KEY } from "@/lib/utils/items/pools";
 import type { ClassColumn } from "@/types/classes";
@@ -23,7 +25,7 @@ export function allowedEffectKinds(trigger: Trigger): EffectKind[] {
 
 type WithoutKind<T> = T extends unknown ? Omit<T, "kind"> : never;
 
-const BASE_DEFAULTS: { [K in Exclude<EffectKind, SystemEffect["kind"]>]: WithoutKind<Extract<AnyEffect, { kind: K }>> } = {
+const BASE_DEFAULTS: { [K in Exclude<EffectKind, SystemEffect["kind"] | ModuleEffectKind>]: WithoutKind<Extract<AnyEffect, { kind: K }>> } = {
   modifyStat: { stat: "armor", flat: 1 },
   damageBonus: { filter: { kind: "all" }, percent: 10 },
   flag: { flag: "advantage", attackKind: "all" },
@@ -39,7 +41,6 @@ const BASE_DEFAULTS: { [K in Exclude<EffectKind, SystemEffect["kind"]>]: Without
   restoreSpellSlot: { count: 1 },
   restoreSpellSlotLevels: { budget: { formula: "ceil(class_level / 2)" }, maxSlotLevel: 5 },
   drainSpellSlot: { count: 1, target: "eventTarget" },
-  changeMorale: { delta: 1 },
   cleanse: {},
   copySpellBuffs: {},
   summon: { tier: 1 },
@@ -49,10 +50,10 @@ const BASE_DEFAULTS: { [K in Exclude<EffectKind, SystemEffect["kind"]>]: Without
   maneuver: { maneuver: "fireBurst", percentOfAttack: 50 },
   help: { target: "eventTarget" },
   push: { feet: 10, from: "caster", target: "eventTarget" },
-  randomOf: { options: [{ kind: "heal", amount: "1d4" }, { kind: "changeMorale", delta: 1 }] },
+  randomOf: { options: [{ kind: "heal", amount: "1d4" }, { kind: "heal", amount: "1d6" }] },
 };
 
-const EFFECT_DEFAULTS = { ...BASE_DEFAULTS, ...SYSTEM_EFFECT_DEFAULTS } as { [K in EffectKind]: WithoutKind<Extract<AnyEffect, { kind: K }>> };
+const EFFECT_DEFAULTS = { ...BASE_DEFAULTS, ...SYSTEM_EFFECT_DEFAULTS, ...MODULE_EFFECT_DEFAULTS } as { [K in EffectKind]: WithoutKind<Extract<AnyEffect, { kind: K }>> };
 
 const baseEffect = (kind: EffectKind, noteText: string): Effect => ({ kind, ...structuredClone(EFFECT_DEFAULTS[kind]), ...(kind === "note" && { text: noteText }) }) as Effect;
 
