@@ -9,6 +9,7 @@ import { type CreateSkillInput, createSkillSchema, type UpdateSkillInput, update
 import { assertCampaignRefs } from "@/lib/server/campaigns/campaign-refs";
 import { defineResource } from "@/lib/server/content/define-resource";
 import { parseInput } from "@/lib/server/content/errors";
+import { assertCampaignEffects } from "@/lib/server/content/traits-guard";
 import { buildSkillUpdateData } from "@/lib/server/skills/build-skill-update-data";
 import { formatSkillResponse } from "@/lib/server/skills/format-skill-response";
 import { readSkillsList } from "@/lib/server/skills/read-skills-list";
@@ -52,6 +53,7 @@ export const skillsResource = defineResource<SkillRow, CreateSkillInput, UpdateS
   toItem: (row) => formatSkillResponse(row),
   async create(actor, data) {
     await assertRefs(actor.campaignId, data);
+    await assertCampaignEffects(actor.campaignId, data.abilities);
 
     const { basicInfo, spellData, mainSkillData } = data;
 
@@ -75,6 +77,7 @@ export const skillsResource = defineResource<SkillRow, CreateSkillInput, UpdateS
   },
   async update(actor, existing, data) {
     await assertRefs(actor.campaignId, data);
+    await assertCampaignEffects(actor.campaignId, data.abilities);
 
     return prisma.skill.update({ where: { id: existing.id }, data: buildSkillUpdateData(data), include: withRefs });
   },

@@ -17,6 +17,7 @@ import { persistIcon } from "@/lib/server/artifacts/persist-icon";
 import { SyncArtifactSetError, syncArtifactSetMembers } from "@/lib/server/artifacts/sync-artifact-set-members";
 import { defineResource } from "@/lib/server/content/define-resource";
 import { ContentError } from "@/lib/server/content/errors";
+import { assertCampaignEffects } from "@/lib/server/content/traits-guard";
 import { withAbilityIssues } from "@/lib/utils/abilities/read";
 
 type SetRow = NonNullable<Awaited<ReturnType<typeof findArtifactSetInCampaign>>>;
@@ -49,6 +50,8 @@ export const artifactSetsResource = defineResource<SetRow, z.infer<typeof create
   prepareCreate: async (actor, data) => data.icon === undefined ? data : { ...data, icon: await persistIcon(actor.campaignId, data.icon, randomUUID()) },
   prepareUpdate: async (actor, existing, data) => data.icon === undefined || data.icon === existing.icon ? data : { ...data, icon: await persistIcon(actor.campaignId, data.icon, `${existing.id}-${randomUUID()}`) },
   async create(actor, data) {
+    await assertCampaignEffects(actor.campaignId, data.abilities);
+
     const icon = data.icon !== undefined ? await persistIcon(actor.campaignId, data.icon, randomUUID()) : undefined;
 
     const created = await insertArtifactSet(actor.campaignId, { name: data.name, description: data.description ?? null, setBonus: data.setBonus, icon, abilities: data.abilities });
@@ -58,6 +61,8 @@ export const artifactSetsResource = defineResource<SetRow, z.infer<typeof create
     return reloadArtifactSetDetail(actor.campaignId, created.id);
   },
   async update(actor, existing, data) {
+    await assertCampaignEffects(actor.campaignId, data.abilities);
+
     const patch = data.icon !== undefined && data.icon !== existing.icon ? { ...data, icon: await persistIcon(actor.campaignId, data.icon, `${existing.id}-${randomUUID()}`) } : data;
 
     const updateData = buildArtifactSetPatchInput(patch);

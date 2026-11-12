@@ -2,8 +2,12 @@ import { describe, expect, it, vi } from "vitest";
 
 vi.mock("server-only", () => ({}));
 
+const findUnique = vi.hoisted(() => vi.fn());
+
+vi.mock("@/lib/db", () => ({ prisma: { campaign: { findUnique } } }));
+
 import { API_ERRORS } from "@/lib/constants/api-errors";
-import { assertEffectsInComposition } from "@/lib/server/content/traits-guard";
+import { assertCampaignEffects, assertEffectsInComposition } from "@/lib/server/content/traits-guard";
 import { ownershipOf } from "@/lib/utils/abilities/registry/effects/ownership";
 
 const own = ownershipOf([], { moraleChance: "morale" });
@@ -42,5 +46,21 @@ describe("assertEffectsInComposition", () => {
 
   it("real registry: d20 proficiency flags are rejected outside a d20 base", () => {
     expect(() => assertEffectsInComposition({ key: "wfrp" }, ability({ kind: "flag", flag: "saveProficiency", abilities: ["wisdom"] }))).toThrowError(expect.objectContaining({ status: 422 }));
+  });
+});
+
+describe("assertCampaignEffects", () => {
+  it("uses the system of the campaign the row is written to", async () => {
+    findUnique.mockResolvedValue({ rules: { system: { key: "dnd5e" } } });
+    await expect(assertCampaignEffects("c1", morale)).rejects.toMatchObject({ status: 422 });
+
+    findUnique.mockResolvedValue({ rules: { system: { key: "homm" } } });
+    await expect(assertCampaignEffects("c1", morale)).resolves.toBeUndefined();
+  });
+
+  it("skips the campaign lookup when there are no abilities", async () => {
+    findUnique.mockClear();
+    await assertCampaignEffects("c1", undefined);
+    expect(findUnique).not.toHaveBeenCalled();
   });
 });

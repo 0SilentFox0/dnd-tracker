@@ -10,6 +10,7 @@ import { createFeatSchema, updateFeatSchema } from "@/lib/schemas";
 import { addedIds, assertCampaignRefs } from "@/lib/server/campaigns/campaign-refs";
 import { defineResource } from "@/lib/server/content/define-resource";
 import { ContentError } from "@/lib/server/content/errors";
+import { assertCampaignEffects } from "@/lib/server/content/traits-guard";
 import { featNameTaken } from "@/lib/server/feats/feat-name";
 import { featAsiUsedByBackground, featInUse } from "@/lib/server/feats/feat-usage";
 import { profileReferences } from "@/lib/server/races/profile-usage";
@@ -43,6 +44,7 @@ export const featsResource = defineResource<FeatRow, CreateInput, UpdateInput>({
   toItem: toFeatData,
   find: (actor, id) => prisma.feat.findFirst({ where: { id, campaignId: actor.campaignId } }),
   async create(actor, data) {
+    await assertCampaignEffects(actor.campaignId, data.abilities);
     await assertNameFree(actor.campaignId, data.name);
     await assertCampaignRefs(actor.campaignId, { spell: choiceSpellIds(data.choices) });
 
@@ -63,6 +65,7 @@ export const featsResource = defineResource<FeatRow, CreateInput, UpdateInput>({
     });
   },
   async update(actor, existing, data) {
+    await assertCampaignEffects(actor.campaignId, data.abilities);
     await assertCampaignRefs(actor.campaignId, { spell: addedIds(choiceSpellIds(data.choices), choiceSpellIds(readChoices(existing.choices)) ?? []) });
 
     if (data.name !== undefined) await assertNameFree(actor.campaignId, data.name, existing.id);

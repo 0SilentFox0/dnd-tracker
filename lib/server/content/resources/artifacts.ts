@@ -14,6 +14,7 @@ import { assertCampaignRefs } from "@/lib/server/campaigns/campaign-refs";
 import { loadRules } from "@/lib/server/campaigns/rules";
 import { defineResource } from "@/lib/server/content/define-resource";
 import { ContentError } from "@/lib/server/content/errors";
+import { assertCampaignEffects } from "@/lib/server/content/traits-guard";
 import { abilitiesJson, withAbilityIssues } from "@/lib/utils/abilities/read";
 import { type ArmorStats, armorStatsColumns } from "@/lib/utils/artifacts/armor-stats";
 import { type WeaponStats, weaponStatsColumns } from "@/lib/utils/artifacts/weapon-stats";
@@ -83,6 +84,7 @@ export const artifactsResource = defineResource<ArtifactRow, z.infer<typeof crea
     return data.icon === undefined || data.icon === existing.icon ? data : { ...data, icon: await persistIcon(actor.campaignId, data.icon, existing.id) };
   },
   async create(actor, data) {
+    await assertCampaignEffects(actor.campaignId, data.abilities);
     await assertCampaignRefs(actor.campaignId, { artifactSet: data.setId, spell: data.item?.spells?.map(({ spellId }) => spellId) });
 
     const icon = data.icon !== undefined ? await persistIcon(actor.campaignId, data.icon, randomUUID()) : undefined;
@@ -109,6 +111,7 @@ export const artifactsResource = defineResource<ArtifactRow, z.infer<typeof crea
   async update(actor, existing, data) {
     if (data.armor && (data.slot ?? existing.slot) !== ArtifactSlot.ARMOR) throw new ContentError(API_ERRORS.ARMOR_SLOT_ONLY, 400);
 
+    await assertCampaignEffects(actor.campaignId, data.abilities);
     await assertCampaignRefs(actor.campaignId, { artifactSet: data.setId, spell: data.item?.spells?.map(({ spellId }) => spellId) });
 
     const icon = data.icon === undefined ? undefined : data.icon === existing.icon ? data.icon : await persistIcon(actor.campaignId, data.icon, `${existing.id}-${randomUUID()}`);

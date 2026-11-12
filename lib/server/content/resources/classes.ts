@@ -11,6 +11,7 @@ import { addedIds, assertCampaignRefs } from "@/lib/server/campaigns/campaign-re
 import { classNameTaken } from "@/lib/server/classes/class-name";
 import { defineResource } from "@/lib/server/content/define-resource";
 import { ContentError } from "@/lib/server/content/errors";
+import { assertCampaignEffects } from "@/lib/server/content/traits-guard";
 import { columnRefIssues } from "@/lib/utils/abilities/class-columns";
 import { choiceColumnIssues } from "@/lib/utils/characters/choices/columns";
 import { choiceSpellIds } from "@/lib/utils/characters/choices/read";
@@ -23,6 +24,8 @@ type UpdateInput = z.infer<typeof updateClassSchema>;
 
 const spellRefs = (features: readonly ClassFeature[], subclasses: readonly Subclass[]) =>
   [...features, ...subclasses.flatMap(s => s.features)].flatMap(f => choiceSpellIds(f.choices) ?? []);
+
+const featureAbilities = (features: readonly ClassFeature[] = [], subclasses: readonly Subclass[] = []) => [...features, ...subclasses.flatMap((s) => s.features)].flatMap((f) => f.abilities ?? []);
 
 async function assertNameFree(campaignId: string, name: string, exceptId?: string) {
   if (await classNameTaken(campaignId, name, exceptId)) throw new ContentError(API_ERRORS.CLASS_NAME_TAKEN, 409, undefined, { name });
@@ -58,6 +61,7 @@ export const classesResource = defineResource<ClassRow, CreateInput, UpdateInput
   toItem: toGameClassData,
   find: (actor, id) => prisma.gameClass.findFirst({ where: { id, campaignId: actor.campaignId } }),
   async create(actor, data) {
+    await assertCampaignEffects(actor.campaignId, featureAbilities(data.features, data.subclasses));
     await assertNameFree(actor.campaignId, data.name);
     await assertCampaignRefs(actor.campaignId, { spell: spellRefs(data.features, data.subclasses) });
 
@@ -82,6 +86,8 @@ export const classesResource = defineResource<ClassRow, CreateInput, UpdateInput
     });
   },
   async update(actor, existing, data) {
+    await assertCampaignEffects(actor.campaignId, featureAbilities(data.features, data.subclasses));
+
     if (data.name !== undefined) await assertNameFree(actor.campaignId, data.name, existing.id);
 
     const stored = toGameClassData(existing);
