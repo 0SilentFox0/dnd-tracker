@@ -16,14 +16,14 @@ const fromLegacy = (raw: unknown): unknown => {
 };
 
 const Body = z.object({
-  system: z.object({ key: z.literal("wfrp"), data: z.object({ kind: z.enum(["reroll", "sl"]), manualReroll: roll.optional() }) }).optional(),
+  system: z.object({ key: z.literal("wfrp"), data: z.object({ kind: z.enum(["reroll", "sl"]) }) }).optional(),
   secondRoll: roll.optional(),
 });
 
 export const WfrpFortuneInputSchema = z.preprocess(fromLegacy, Body).transform(({ system, secondRoll }): SystemSlot | undefined => {
   if (!system) return undefined;
 
-  const { kind, manualReroll } = system.data;
+  const { kind } = system.data;
 
-  return FORTUNE_INPUT.write({ kind, ...(kind === "reroll" && (secondRoll ?? manualReroll) !== undefined && { manualReroll: secondRoll ?? manualReroll }) });
+  return FORTUNE_INPUT.write({ kind, ...(kind === "reroll" && secondRoll !== undefined && { manualReroll: secondRoll }) });
 });
