@@ -105,11 +105,14 @@ describe("d20 / HOMM names and rule-section readers leaving core", () => {
     applyCondition5e: 0,
     isHomm: 0,
     "HOMM_[A-Z]+": 2,
+    proficiencyForLevel: 0,
+    spellcastingDerived: 0,
+    heroHpFormula: 0,
   };
 
   const RULES_SECTION_READERS: Record<string, number> = {
     morale: 3,
-    heroScaling: 4,
+    heroScaling: 1,
     criticals: 5,
     deathSaves: 1,
     concentration: 1,
@@ -117,7 +120,7 @@ describe("d20 / HOMM names and rule-section readers leaving core", () => {
     actions: 1,
     classes: 19,
     encounters: 9,
-    formulas: 4,
+    formulas: 3,
     initiative: 7,
     saves: 1,
   };
