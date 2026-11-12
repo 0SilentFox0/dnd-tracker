@@ -279,18 +279,18 @@ describe.each(MODULES)('D16 module toggle: $id', (mod) => {
             name: 'Герой',
             level: 3,
             ...('column' in mod ? { [mod.column]: 'other' } : {}),
-        } as never;
+        };
 
-        const written = normalizeCharacterInput(
+        const written: Record<string, unknown> = normalizeCharacterInput(
             ruleSystemOf(rulesOff),
-            form,
+            form as never,
             rulesOff,
             'update'
         );
 
         const { columnResets } = buildCharacterUpdateData({
             character: { ...hero, spellSlots: {}, seenLevel: null } as never,
-            data: form,
+            data: form as never,
             campaign: { maxLevel: 20 },
             race: null,
             resets: ruleSystemOf(rulesOff).progression.levelResets,
