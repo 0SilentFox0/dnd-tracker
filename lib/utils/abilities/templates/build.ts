@@ -1,6 +1,5 @@
 import type { Recipe, RecipeContext, RecipeResult, RecipeValues } from "./types";
 
-import { newEffect } from "@/lib/utils/abilities/editor";
 import { type Ability, AbilitySchema } from "@/lib/utils/abilities/schema";
 import { DICE_PATTERN } from "@/lib/utils/common/dice";
 import { SpellEffectSchema } from "@/lib/utils/spells/model/schema";
@@ -10,7 +9,7 @@ export const FROM_SCRATCH_ID = "custom";
 const DICE_ISSUE = "abilities.validation.diceFormat";
 
 export function buildScratchAbility({ name, note }: { name: string; note: string }): Omit<Ability, "id"> {
-  return { name, trigger: { event: "passive" }, effects: [{ ...newEffect("note", { event: "passive" }), kind: "note", text: note }] };
+  return { name, trigger: { event: "passive" }, effects: [{ kind: "note", text: note }] };
 }
 
 const validDice = (s: string) => {

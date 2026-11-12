@@ -1,11 +1,12 @@
 import { z } from "zod";
 
 import { AbilityTargetSchema, AmountSchema, DurationSchema, FlatSchema, FormulaSchema } from "./common";
+import { flagBase } from "./flag-base";
 import { ATTACK_KINDS, CONDITION_5E_KEYS, CONDITION_KEYS, CUSTOM_CONDITION_KEY_RE, type CustomConditionKey, DAMAGE_FILTER_KINDS, DICE_RE, MANEUVERS, STAT_KEYS, type StatKey } from "./kinds";
 import { SYSTEM_EFFECT_SCHEMAS,type SystemEffect } from "./system-effects";
+import { SYSTEM_FLAG_SCHEMAS } from "./system-flags";
 
 import { ABILITY_KEYS } from "@/lib/constants/abilities";
-import { PROFICIENCY_KINDS } from "@/lib/constants/artifacts";
 import { DND_SKILLS } from "@/lib/constants/skills";
 
 export {
@@ -70,8 +71,6 @@ const DamageBonusSchema = z
   })
   .refine(hasValue, { message: "abilities.validation.needFlatOrPercent" });
 
-const flagBase = { kind: z.literal("flag"), ...timed };
-
 export const AbilityKeySchema = z.enum(ABILITY_KEYS);
 
 export const AnyConditionSchema = z.enum([...CONDITION_KEYS, ...CONDITION_5E_KEYS]);
@@ -120,17 +119,10 @@ const FlagSchema = z.discriminatedUnion("flag", [
   }),
   z.object({ ...flagBase, flag: z.literal("attackHitsAllEnemies") }),
   z.object({ ...flagBase, flag: z.literal("seeEnemyHp") }),
-  z.object({ ...flagBase, flag: z.literal("moraleChance"), percent: z.number().int().min(1).max(100) }),
   z.object({ ...flagBase, flag: z.literal("lifesteal"), percent: z.number().int().min(1).max(100) }),
   z.object({ ...flagBase, flag: z.literal("multiTargetFalloff"), percent: z.number().int().min(1).max(100) }),
   z.object({ ...flagBase, flag: z.literal("chainShot"), jumps: z.number().int().min(1).max(5), percent: z.number().int().min(1).max(100) }),
-  z.object({ ...flagBase, flag: z.literal("noRetaliation") }),
   z.object({ ...flagBase, flag: z.literal("strikeAndReturn") }),
-  z.object({ ...flagBase, flag: z.literal("unlimitedRetaliation") }),
-  z.object({ ...flagBase, flag: z.literal("extraRetaliations"), count: z.number().int().min(1).max(5) }),
-  z.object({ ...flagBase, flag: z.literal("noNegativeMorale") }),
-  z.object({ ...flagBase, flag: z.literal("ignoreMorale") }),
-  z.object({ ...flagBase, flag: z.literal("minMorale"), value: z.number().int().min(-3).max(3) }),
   z.object({ ...flagBase, flag: z.literal("damageThreshold"), value: z.number().int().min(1).max(100) }),
   z.object({ ...flagBase, flag: z.literal("extraSummons"), count: z.number().int().min(1).max(5), spellIds: z.array(z.string().min(1)).min(1).optional() }),
   z.object({ ...flagBase, flag: z.literal("piercingShot") }),
@@ -139,12 +131,8 @@ const FlagSchema = z.discriminatedUnion("flag", [
   z.object({ ...flagBase, flag: z.literal("saveAdvantage"), abilities: AbilitiesOrAll, vsSpells: z.boolean().optional() }),
   z.object({ ...flagBase, flag: z.literal("saveDisadvantage"), abilities: AbilitiesOrAll }),
   z.object({ ...flagBase, flag: z.literal("autoFailSave"), abilities: z.array(AbilityKeySchema).min(1) }),
-  z.object({ ...flagBase, flag: z.literal("saveProficiency"), abilities: z.array(AbilityKeySchema).min(1) }),
   z.object({ ...flagBase, flag: z.literal("checkAdvantage"), skills: SkillsOrAll }),
   z.object({ ...flagBase, flag: z.literal("checkDisadvantage"), skills: SkillsOrAll }),
-  z.object({ ...flagBase, flag: z.literal("skillProficiency"), skills: z.array(DndSkillSchema).min(1) }),
-  z.object({ ...flagBase, flag: z.literal("skillExpertise"), skills: z.array(DndSkillSchema).min(1) }),
-  z.object({ ...flagBase, flag: z.literal("proficiency"), kinds: z.array(z.enum(PROFICIENCY_KINDS)).min(1) }),
   z.object({ ...flagBase, flag: z.literal("autoCritAdjacent") }),
   z.object({ ...flagBase, flag: z.literal("proneDefense") }),
   z.object({ ...flagBase, flag: z.literal("twoWeaponFighting") }),
@@ -156,6 +144,7 @@ const FlagSchema = z.discriminatedUnion("flag", [
     flag: z.literal("conditionImmunity"),
     conditions: z.union([z.literal("all"), z.array(z.union([AnyConditionSchema, z.enum(["fear", "berserk", "charm"])])).min(1)]),
   }),
+  ...SYSTEM_FLAG_SCHEMAS,
 ]);
 
 const NoteSchema = z.object({ kind: z.literal("note"), text: z.string().min(1) });

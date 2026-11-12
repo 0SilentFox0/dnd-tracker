@@ -74,6 +74,20 @@ export const ROOT_SPECS: readonly RootSpec[] = [
     ],
   },
   {
+    file: "lib/utils/abilities/schema/system-flags.ts",
+    blocks: [
+      { layer: (id) => `systems/${id}/rules/ability-flags.ts`, line: imp((id) => `${upper(id)}_FLAG_SCHEMAS`, (id) => `@/systems/${id}/rules/ability-flags`) },
+      { layer: (id) => `systems/${id}/rules/ability-flags.ts`, line: (id) => `${upper(id)}_FLAG_SCHEMAS,` },
+    ],
+  },
+  {
+    file: "lib/utils/abilities/registry/effects/system-flag-rows.ts",
+    blocks: [
+      { layer: (id) => `systems/${id}/rules/ability-flag-rows.ts`, line: imp((id) => `${upper(id)}_FLAG_ROWS`, (id) => `@/systems/${id}/rules/ability-flag-rows`) },
+      { layer: (id) => `systems/${id}/rules/ability-flag-rows.ts`, line: (id) => `ownedFlags("${id}", ${upper(id)}_FLAG_ROWS),` },
+    ],
+  },
+  {
     file: "lib/utils/rules/systems/sections.ts",
     blocks: [
       { layer: (id) => `systems/${id}/rules/sections.ts`, line: imp((id) => `${upper(id)}_SECTIONS`, (id) => `@/systems/${id}/rules/sections`) },

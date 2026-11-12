@@ -1,22 +1,14 @@
 import type { FieldMeta } from "../fields";
 import { CONDITION_KEYS_ALL, conditionKeySegment, damageTypeSegment } from "../labels";
+import { ABILITY_OPTIONS, type FlagDefinition, flagSeg, listParams, plain, SKILL_OPTIONS } from "./flag-kit";
+import { SYSTEM_FLAG_ROWS } from "./system-flag-rows";
 
-import { ABILITY_KEYS, DEFAULT_AREA_TARGETS } from "@/lib/constants/abilities";
-import { PROFICIENCY_KINDS } from "@/lib/constants/artifacts";
+import { DEFAULT_AREA_TARGETS } from "@/lib/constants/abilities";
 import { AttackType } from "@/lib/constants/battle";
 import { MONSTER_SENSE_KEYS } from "@/lib/constants/monster";
-import { DND_SKILLS } from "@/lib/constants/skills";
 import type { FlagEffect, FlagKey } from "@/lib/utils/abilities/schema";
-import { seg, type Segment,type SegmentParam } from "@/lib/utils/abilities/segments";
-import { signed } from "@/lib/utils/common/format";
-
-type FlagOf<K extends FlagKey> = Extract<FlagEffect, { flag: K }>;
-
-interface FlagDefinition<K extends FlagKey> {
-  fields: readonly FieldMeta[];
-  defaults: Record<string, unknown>;
-  describe: (e: FlagOf<K>) => Segment[];
-}
+import type { SystemFlagKey } from "@/lib/utils/abilities/schema/system-flags";
+import { seg, type Segment } from "@/lib/utils/abilities/segments";
 
 const ATTACK_KIND_ALL = [
   { value: "all" },
@@ -26,26 +18,11 @@ const ATTACK_KIND_ALL = [
 
 const MELEE_RANGED = [{ value: AttackType.MELEE }, { value: AttackType.RANGED }];
 
-const plain = (key: FlagKey) => ({ fields: [] as readonly FieldMeta[], defaults: {} as Record<string, unknown>, describe: () => [flagSeg(key)] });
-
-const ABILITY_OPTIONS = ABILITY_KEYS.map((value) => ({ value }));
-
 const SAVE_ABILITY_OPTIONS = [{ value: "all" }, ...ABILITY_OPTIONS];
-
-const SKILL_OPTIONS = DND_SKILLS.map((value) => ({ value }));
 
 const SKILL_OR_ALL_OPTIONS = [{ value: "all" }, ...SKILL_OPTIONS];
 
-const PROFICIENCY_OPTIONS = PROFICIENCY_KINDS.map((value) => ({ value }));
-
-const flagSeg = (key: FlagKey, params?: Record<string, SegmentParam>) => seg(`summary.flags.${key}`, params);
-
-const listParams = (group: string, a: readonly string[] | "all") => ({
-  hasList: a === "all" ? "no" : "yes",
-  ...(a !== "all" && { list: { join: ", ", items: a.map((k) => seg(`options.${group}.${k}`)) } }),
-});
-
-export const FLAG_REGISTRY: { [K in FlagKey]: FlagDefinition<K> } = {
+const BASE_FLAG_REGISTRY: { [K in Exclude<FlagKey, SystemFlagKey>]: FlagDefinition<K> } = {
   sense: {
     fields: [{ name: "sense", input: "select", options: MONSTER_SENSE_KEYS.map((value) => ({ value })) }, { name: "range", input: "number" }],
     defaults: { sense: "blindsight", range: 30 },
@@ -148,26 +125,7 @@ export const FLAG_REGISTRY: { [K in FlagKey]: FlagDefinition<K> } = {
     defaults: { percent: 50 },
     describe: (e) => [flagSeg("lifesteal", { percent: e.percent })],
   },
-  moraleChance: {
-    fields: [{ name: "percent", input: "number" }],
-    defaults: { percent: 10 },
-    describe: (e) => [flagSeg("moraleChance", { percent: e.percent })],
-  },
-  noRetaliation: plain("noRetaliation"),
   strikeAndReturn: plain("strikeAndReturn"),
-  unlimitedRetaliation: plain("unlimitedRetaliation"),
-  extraRetaliations: {
-    fields: [{ name: "count", input: "number" }],
-    defaults: { count: 1 },
-    describe: (e) => [flagSeg("extraRetaliations", { count: e.count })],
-  },
-  noNegativeMorale: plain("noNegativeMorale"),
-  ignoreMorale: plain("ignoreMorale"),
-  minMorale: {
-    fields: [{ name: "value", input: "number" }],
-    defaults: { value: 1 },
-    describe: (e) => [flagSeg("minMorale", { value: signed(e.value) })],
-  },
   damageThreshold: {
     fields: [{ name: "value", input: "number" }],
     defaults: { value: 10 },
@@ -213,11 +171,6 @@ export const FLAG_REGISTRY: { [K in FlagKey]: FlagDefinition<K> } = {
     defaults: { abilities: ["strength", "dexterity"] },
     describe: (e) => [flagSeg("autoFailSave", listParams("abilities", e.abilities))],
   },
-  saveProficiency: {
-    fields: [{ name: "abilities", input: "multiselect", options: ABILITY_OPTIONS }],
-    defaults: { abilities: ["wisdom"] },
-    describe: (e) => [flagSeg("saveProficiency", listParams("abilities", e.abilities))],
-  },
   checkAdvantage: {
     fields: [{ name: "skills", input: "multiselect", options: SKILL_OR_ALL_OPTIONS }],
     defaults: { skills: "all" },
@@ -227,21 +180,6 @@ export const FLAG_REGISTRY: { [K in FlagKey]: FlagDefinition<K> } = {
     fields: [{ name: "skills", input: "multiselect", options: SKILL_OR_ALL_OPTIONS }],
     defaults: { skills: "all" },
     describe: (e) => [flagSeg("checkDisadvantage", listParams("skills", e.skills))],
-  },
-  skillProficiency: {
-    fields: [{ name: "skills", input: "multiselect", options: SKILL_OPTIONS }],
-    defaults: { skills: ["perception"] },
-    describe: (e) => [flagSeg("skillProficiency", listParams("skills", e.skills))],
-  },
-  skillExpertise: {
-    fields: [{ name: "skills", input: "multiselect", options: SKILL_OPTIONS }],
-    defaults: { skills: ["stealth"] },
-    describe: (e) => [flagSeg("skillExpertise", listParams("skills", e.skills))],
-  },
-  proficiency: {
-    fields: [{ name: "kinds", input: "multiselect", options: PROFICIENCY_OPTIONS }],
-    defaults: { kinds: ["heavy"] },
-    describe: (e) => [flagSeg("proficiency", { list: { join: ", ", items: e.kinds.map((k) => seg(`options.kinds.${k}`)) } })],
   },
   autoCritAdjacent: plain("autoCritAdjacent"),
   twoWeaponFighting: plain("twoWeaponFighting"),
@@ -272,6 +210,8 @@ export const FLAG_REGISTRY: { [K in FlagKey]: FlagDefinition<K> } = {
     ],
   },
 };
+
+export const FLAG_REGISTRY = { ...BASE_FLAG_REGISTRY, ...SYSTEM_FLAG_ROWS } as { [K in FlagKey]: FlagDefinition<K> };
 
 const entries = Object.entries(FLAG_REGISTRY) as [FlagKey, FlagDefinition<FlagKey>][];
 
