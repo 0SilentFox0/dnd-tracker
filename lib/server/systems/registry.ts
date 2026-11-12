@@ -43,6 +43,12 @@ export function systemBattleOperation(name: string): SystemBattleOperation | und
   return Object.values(SYSTEM_SERVER).find((s) => s.battle && Object.hasOwn(s.battle, name))?.battle?.[name];
 }
 
+export const systemBattleOperationOf = (rules: Pick<Ruleset, "system">, name: string): SystemBattleOperation | undefined => {
+  const { battle } = systemServerOf(rules);
+
+  return battle && Object.hasOwn(battle, name) ? battle[name] : undefined;
+};
+
 export function mergeSystemOperations<T>(core: Record<string, T>, pick: (op: SystemOperation) => T): Record<string, T> {
   const merged = { ...core };
 

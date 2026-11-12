@@ -2,9 +2,10 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { BattleStatus } from "@/lib/constants/battle";
 import { abilityActionSchema, attackBodySchema, auraZoneSchema, bonusActionSchema, castSpellSchema, mapBackgroundBodySchema, mapMotionSchema, mapTerrainSchema, mapWeatherSchema, mazeActionSchema, mazeMarkSchema, moveSchema, nextTurnSchema, patchParticipantSchema } from "@/lib/schemas/battles";
 import { ContentError } from "@/lib/server/content/errors";
-import { systemBattleOperation } from "@/lib/server/systems/registry";
-import { BattleAccess, type RunBattleMutationOptions } from "@/lib/utils/battle/pipeline/run-battle-mutation";
-import { BattleAccessError } from "@/lib/utils/battle/store";
+import { systemBattleOperation, systemBattleOperationOf } from "@/lib/server/systems/registry";
+import type { BattleOperationDeps } from "@/lib/server/systems/types";
+import { BattleAccess, type BattleMutationContext, type RunBattleMutationOptions } from "@/lib/utils/battle/pipeline/run-battle-mutation";
+import { BattleAccessError, BattleRuleError } from "@/lib/utils/battle/store";
 
 export type BattleOperationParams = { id: string; battleId: string; participantId?: string };
 type Definition = Omit<RunBattleMutationOptions<unknown>, "params">;
@@ -77,17 +78,29 @@ const OPERATIONS: Record<string, Loader> = {
     allowWhileCritPending: true,
     respond: "wrapped",
     load: async () => {
-      const op = systemBattleOperation("crit-choice");
+      const known = systemBattleOperation("crit-choice");
 
-      if (!op) throw new BattleAccessError(404, API_ERRORS.BATTLE_UNKNOWN_OPERATION);
+      if (!known) throw new BattleAccessError(404, API_ERRORS.BATTLE_UNKNOWN_OPERATION);
 
       const { createAttackMutation } = await import("@/lib/server/battles/mutations/attack/attack-mutation");
 
       const { createSpellMutation } = await import("@/lib/server/battles/mutations/spell/spell-mutation");
 
-      const spell = createSpellMutation();
+      const deps: BattleOperationDeps = { attack: (ctx, request, resume, replay) => createAttackMutation(undefined, replay)(ctx, request, resume), spell: createSpellMutation() };
 
-      return (await op.load({ attack: (ctx, request, resume, replay) => createAttackMutation(undefined, replay)(ctx, request, resume), spell })) as Loaded<unknown>;
+      const { schema } = await known.load(deps);
+
+      const mutate = async (ctx: BattleMutationContext, body: unknown) => {
+        const op = systemBattleOperationOf(ctx.meta.rules, "crit-choice");
+
+        if (!op) throw new BattleRuleError("action_rejected", API_ERRORS.CRIT_CHOICE_NONE);
+
+        const loaded = await op.load(deps);
+
+        return loaded.mutate(ctx, loaded.schema.parse(body) as never);
+      };
+
+      return { schema, mutate } as Loaded<unknown>;
     },
   }),
   complete: operation({
