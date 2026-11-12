@@ -195,6 +195,7 @@ async function computeUpdate(
         data: bodyData,
         campaign,
         race,
+        resets: ruleSystemOf(campaign.rules).progression.levelResets,
     });
 
     const classSeenLevel = fromClasses
@@ -283,9 +284,7 @@ function updateWriter({
                               | Prisma.InputJsonValue
                               | undefined),
                 ...classesData,
-                ...(computed.skillTreeProgressUpdate !== undefined && {
-                    skillTreeProgress: computed.skillTreeProgressUpdate,
-                }),
+                ...computed.columnResets,
                 ...(computed.seenLevel !== undefined && {
                     seenLevel: computed.seenLevel,
                 }),

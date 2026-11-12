@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
 import { buildCharacterUpdateData } from '@/lib/server/characters/core/build-character-update-data';
+import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
+import { parseRules } from '@/lib/utils/rules/schema';
+import { ruleSystemOf } from '@/lib/utils/rules/systems';
 
 const character = {
     level: 3,
@@ -35,17 +38,49 @@ describe('buildCharacterUpdateData', () => {
         ).toBeUndefined();
     });
 
-    it('не пише skillTreeProgress з тіла; зниження рівня скидає прогрес', () => {
+    it('не пише skillTreeProgress з тіла; зниження рівня скидає прогрес лише з частиною skilltrees', () => {
+        const resets = ruleSystemOf(DEFAULT_RULES).progression.levelResets;
+
         expect(
             buildCharacterUpdateData({
                 ...base,
+                resets,
                 character,
                 data: { skillTreeProgress: { t: { unlockedSkills: ['x'] } } },
-            }).skillTreeProgressUpdate
-        ).toBeUndefined();
+            }).columnResets
+        ).toEqual({});
         expect(
-            buildCharacterUpdateData({ ...base, character, data: { level: 2 } })
-                .skillTreeProgressUpdate
+            buildCharacterUpdateData({
+                ...base,
+                resets,
+                character,
+                data: { level: 2 },
+            }).columnResets
+        ).toEqual({ skillTreeProgress: {} });
+    });
+
+    it('без частин рівнів (голий dnd5e) пониження рівня дерево не чіпає', () => {
+        const bare = ruleSystemOf(parseRules({ system: { key: 'dnd5e' } }));
+
+        expect(bare.progression.levelResets ?? []).toEqual([]);
+        expect(
+            buildCharacterUpdateData({
+                ...base,
+                resets: bare.progression.levelResets,
+                character,
+                data: { level: 2 },
+            }).columnResets
+        ).toEqual({});
+    });
+
+    it('підвищення рівня нічого не скидає навіть з частинами', () => {
+        expect(
+            buildCharacterUpdateData({
+                ...base,
+                resets: ruleSystemOf(DEFAULT_RULES).progression.levelResets,
+                character,
+                data: { level: 4 },
+            }).columnResets
         ).toEqual({});
     });
 

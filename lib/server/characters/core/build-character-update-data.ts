@@ -1,8 +1,7 @@
-import { Prisma } from '@prisma/client';
-
 import { ABILITY_KEYS, type AbilityKey } from '@/lib/constants/abilities';
 import { applyLevelGain } from '@/lib/utils/characters/level-up/apply-level-gain';
 import { seenLevelOnLevelChange } from '@/lib/utils/characters/seen-level';
+import type { LevelResetPart } from '@/lib/utils/rules/systems/types';
 import {
     fullSpellSlots,
     type SpellSlots,
@@ -24,6 +23,7 @@ export interface BuildCharacterUpdateDataParams {
     };
     campaign: { maxLevel: number };
     race: { spellSlotProgression: unknown } | null;
+    resets?: readonly LevelResetPart[];
     rng?: () => number;
 }
 
@@ -32,7 +32,7 @@ export interface CharacterUpdateComputed {
     abilityScores?: AbilityScores;
     spellSlots?: SpellSlots;
     gained: AbilityKey[];
-    skillTreeProgressUpdate: Prisma.InputJsonValue | undefined;
+    columnResets: Record<string, unknown>;
     seenLevel: number | undefined;
 }
 
@@ -79,6 +79,7 @@ export function buildCharacterUpdateData({
     data,
     campaign,
     race,
+    resets = [],
     rng,
 }: BuildCharacterUpdateDataParams): CharacterUpdateComputed {
     const finalLevel = resolveFinalLevel(character, data);
@@ -96,7 +97,7 @@ export function buildCharacterUpdateData({
             finalLevel,
             character.seenLevel ?? null
         ),
-        skillTreeProgressUpdate: undefined as Prisma.InputJsonValue | undefined,
+        columnResets: {} as Record<string, unknown>,
     };
 
     if (finalLevel > character.level) {
@@ -132,7 +133,12 @@ export function buildCharacterUpdateData({
                     : null,
                 campaign.maxLevel
             ),
-            skillTreeProgressUpdate: {} as Prisma.InputJsonValue,
+            columnResets: Object.assign(
+                {},
+                ...resets.map((reset) =>
+                    reset({ from: character.level, to: finalLevel })
+                )
+            ),
         };
     }
 

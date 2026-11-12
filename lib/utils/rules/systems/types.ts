@@ -609,6 +609,11 @@ export interface SpellcastingInput {
     rules: Ruleset;
 }
 
+export type LevelResetPart = (change: {
+    from: number;
+    to: number;
+}) => Partial<Record<'skillTreeProgress', unknown>>;
+
 export interface StatColumnsPart {
     /** Columns this layer reads and writes; input for columns no layer owns is dropped */
     owns: readonly CharacterSystemColumn[];
@@ -766,6 +771,8 @@ export interface RuleSystemDefinition {
         hpTerm: 'hp' | 'wounds';
         /** Proficiency bonus of a level; none means the system has no such bonus */
         proficiency?(level: number, rules: Ruleset): number;
+        /** Columns a level change resets; parts of the composition are merged */
+        levelResets?: readonly LevelResetPart[];
     };
     stats?: { columns: readonly StatColumnsPart[] };
     sheet?: { blocks: readonly SheetBlock[] };
