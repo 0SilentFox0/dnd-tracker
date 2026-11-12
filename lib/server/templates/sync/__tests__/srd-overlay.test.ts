@@ -211,7 +211,7 @@ describe("SRD effective name reference graph", () => {
 });
 
 describe("localized Grim synchronization", () => {
-  const table = (text: string) => ({ tables: { miscastMinor: [{ max: 100, text, effects: [] }] } });
+  const table = (text: string) => ({ system: { key: "wfrp" }, tables: { miscastMinor: [{ max: 100, text, effects: [] }] } });
 
   beforeEach(() => {
     f.patchCampaign(source, { templateKey: "grim-d100", rules: table("A smell of scorched hair.") });
