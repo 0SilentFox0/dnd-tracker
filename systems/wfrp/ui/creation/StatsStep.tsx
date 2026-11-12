@@ -8,7 +8,7 @@ import type { WfrpDraftFormState } from "./types";
 
 import { BoundedNumberInput } from "@/components/ui/bounded-number-input";
 import { Button } from "@/components/ui/button";
-import { FREE_POINT_MAX, FREE_POINT_MIN } from "@/lib/utils/rules/advancement";
+import { FREE_POINT_MAX, FREE_POINT_MIN } from "@/systems/wfrp/rules/advancement/rules";
 import { CHARACTERISTIC_KEYS } from "@/systems/wfrp/rules/characteristics/keys";
 import { STAT_FLOOR } from "@/systems/wfrp/rules/creation";
 

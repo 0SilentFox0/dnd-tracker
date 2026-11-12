@@ -4,7 +4,7 @@ import { rollTable } from "./roll-table";
 import { dynamicTextRef } from "@/lib/i18n/text-ref";
 import type { Rng } from "@/lib/utils/common/rng";
 import type { Ruleset } from "@/lib/utils/rules/schema";
-import type { TableSlot } from "@/lib/utils/rules/tables-schema";
+import type { TableSlot } from "@/systems/wfrp/rules/tables/schema";
 import type { LogLine } from "@/types/text";
 
 export function resolveTable(rules: Pick<Ruleset, "tables">, slot: TableSlot): readonly ResolvedRow[] {

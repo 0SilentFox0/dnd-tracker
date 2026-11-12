@@ -7,8 +7,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useWfrpDraftForm } from "../useWfrpDraftForm";
 
 import { mulberry32 } from "@/lib/utils/common/rng";
-import { DEFAULT_ADVANCEMENT_RULES } from "@/lib/utils/rules/advancement";
 import { createWfrpDraft, updateWfrpDraftIdentity } from "@/systems/wfrp/api/characters";
+import { DEFAULT_ADVANCEMENT_RULES } from "@/systems/wfrp/rules/advancement/rules";
 
 const push = vi.hoisted(() => vi.fn());
 

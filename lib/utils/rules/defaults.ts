@@ -1,6 +1,6 @@
 import type { Ruleset } from "./section-shapes";
 
-import { DEFAULT_ADVANCEMENT_RULES } from "@/lib/utils/rules/advancement";
+import { DEFAULT_ADVANCEMENT_RULES } from "@/lib/utils/rules/section-shapes";
 
 export const DEFAULT_RULES: Ruleset = {
   morale: { enabled: true, cap: 3 },

@@ -6,7 +6,7 @@ import { RulesSection } from "@/components/rules/RulesSection";
 import { BoundedNumberInput } from "@/components/ui/bounded-number-input";
 import { Button } from "@/components/ui/button";
 import type { RulesFormState } from "@/lib/hooks/campaigns";
-import type { AdvancementTrack, CreationRules } from "@/lib/utils/rules/advancement";
+import type { AdvancementTrack, CreationRules } from "@/systems/wfrp/rules/advancement/rules";
 
 type TrackKey = "characteristic" | "skill";
 

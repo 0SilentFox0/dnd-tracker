@@ -6,8 +6,8 @@ import { TablesSection } from "../TablesSection";
 
 import "@/components/ui/__tests__/match-media";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
-import type { TableRow } from "@/lib/utils/rules/tables-schema";
 import { DEFAULT_TABLES } from "@/systems/wfrp/rules/tables/defaults";
+import type { TableRow } from "@/systems/wfrp/rules/tables/schema";
 
 const mount = (tables: Record<string, TableRow[] | null> = {}) => {
   const set = vi.fn();

@@ -4,7 +4,7 @@ import type { HitLocation } from "./constants";
 
 import type { Rng } from "@/lib/utils/common/rng";
 import type { Ruleset } from "@/lib/utils/rules/schema";
-import type { TableSlot } from "@/lib/utils/rules/tables-schema";
+import type { TableSlot } from "@/systems/wfrp/rules/tables/schema";
 import type { LogLine } from "@/types/text";
 
 export interface CritResult {

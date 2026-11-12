@@ -6,7 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { WfrpDraftForm } from "../WfrpDraftForm";
 
 import { ApiError } from "@/lib/api/client";
-import { DEFAULT_ADVANCEMENT_RULES } from "@/lib/utils/rules/advancement";
+import { DEFAULT_ADVANCEMENT_RULES } from "@/systems/wfrp/rules/advancement/rules";
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
 

@@ -7,8 +7,8 @@ import { rollCrit } from "../crit-table";
 import { dynamicTextRef } from "@/lib/i18n/text-ref";
 import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
 import { mulberry32 } from "@/lib/utils/common/rng";
-import type { TableRow } from "@/lib/utils/rules/tables-schema";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
+import type { TableRow } from "@/systems/wfrp/rules/tables/schema";
 
 const rng = mulberry32(1);
 

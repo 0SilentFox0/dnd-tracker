@@ -4,9 +4,11 @@ import { RULES_EDITIONS } from "@/lib/constants/rules";
 import { UnitGroupAppearancesSchema } from "@/lib/schemas/unit-groups";
 import { StaticEffectSchema } from "@/lib/utils/abilities/schema/effects";
 import { CONDITION_KEYS, CUSTOM_CONDITION_KEY_RE } from "@/lib/utils/abilities/schema/kinds";
-import { AdvancementRulesSchema } from "@/lib/utils/rules/advancement-schema";
 import { RULE_SYSTEM_KEYS } from "@/lib/utils/rules/systems/meta";
-import { TablesRulesSchema } from "@/lib/utils/rules/tables-schema";
+import { AdvancementRulesSchema } from "@/systems/wfrp/rules/advancement/schema";
+import { TablesRulesSchema } from "@/systems/wfrp/rules/tables/schema";
+
+export { DEFAULT_ADVANCEMENT_RULES } from "@/systems/wfrp/rules/advancement/rules";
 
 const level = z.string().regex(/^([1-9]|1\d|20)$/);
 

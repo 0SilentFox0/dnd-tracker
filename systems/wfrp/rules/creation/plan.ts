@@ -3,7 +3,7 @@ import type { AdvancementRules } from "../advancement/rules";
 import { CHARACTERISTIC_KEYS, type Characteristics, DEFAULT_CHARACTERISTICS } from "../characteristics/keys";
 import { isUsableProfile, type SpeciesProfile, STAT_FLOOR } from "./profile";
 
-import { FREE_POINT_MAX, FREE_POINT_MIN } from "@/lib/utils/rules/advancement";
+import { FREE_POINT_MAX, FREE_POINT_MIN } from "@/systems/wfrp/rules/advancement/rules";
 
 export type CreationPicks = {
   career: { mode: "rolled" | "choice" | "free"; careerId: string };

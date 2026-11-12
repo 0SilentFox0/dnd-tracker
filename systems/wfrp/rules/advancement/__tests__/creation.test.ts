@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import { DEFAULT_RULES } from "@/lib/utils/rules";
-import { DEFAULT_ADVANCEMENT_RULES } from "@/lib/utils/rules/advancement";
-import { AdvancementRulesSchema } from "@/lib/utils/rules/advancement-schema";
 import { parseRules } from "@/lib/utils/rules/schema";
+import { DEFAULT_ADVANCEMENT_RULES } from "@/systems/wfrp/rules/advancement/rules";
+import { AdvancementRulesSchema } from "@/systems/wfrp/rules/advancement/schema";
 
 const { creation: _creation, ...withoutCreation } = DEFAULT_ADVANCEMENT_RULES;
 

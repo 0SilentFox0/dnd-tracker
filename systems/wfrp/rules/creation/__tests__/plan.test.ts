@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { type CreationCtx, type CreationPicks, planDraft } from "../plan";
 import { parseProfile } from "../schema";
 
-import { DEFAULT_ADVANCEMENT_RULES } from "@/lib/utils/rules/advancement";
+import { DEFAULT_ADVANCEMENT_RULES } from "@/systems/wfrp/rules/advancement/rules";
 
 const profile = parseProfile({
   mods: { ws: 5, fel: -10 },

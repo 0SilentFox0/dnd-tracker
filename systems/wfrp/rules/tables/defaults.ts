@@ -1,4 +1,4 @@
-import type { TableRow, TableSlot } from "@/lib/utils/rules/tables-schema";
+import type { TableRow, TableSlot } from "@/systems/wfrp/rules/tables/schema";
 
 export interface ResolvedRow extends TableRow {
   textKey?: string;

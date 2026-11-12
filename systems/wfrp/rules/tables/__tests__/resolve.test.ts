@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { DEFAULT_TABLES } from "../defaults";
 import { resolveTable, rollSlot } from "../resolve";
 
-import { TABLE_SLOTS, type TableRow,TablesRulesSchema } from "@/lib/utils/rules/tables-schema";
+import { TABLE_SLOTS, type TableRow,TablesRulesSchema } from "@/systems/wfrp/rules/tables/schema";
 
 describe("DEFAULT_TABLES", () => {
   it("every slot passes TablesRulesSchema", () => {

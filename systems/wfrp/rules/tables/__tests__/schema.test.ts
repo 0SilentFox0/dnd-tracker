@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { mergeRules, parseRules } from "@/lib/utils/rules/schema";
-import { type TableRow,TablesRulesSchema } from "@/lib/utils/rules/tables-schema";
+import { type TableRow,TablesRulesSchema } from "@/systems/wfrp/rules/tables/schema";
 
 const rows = (n = 5): TableRow[] => Array.from({ length: n }, (_, i) => ({ max: (i + 1) * (100 / n), effects: [{ type: "damage", amount: 1 }] }));
 
