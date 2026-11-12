@@ -1,43 +1,16 @@
+import { resolveOpportunityAttacks } from "../reactions/opportunity";
 import { planDrag } from "./grapple";
-import { resolveOpportunityAttacks } from "./opportunity";
-import { actionReason } from "./reasons";
 
 import { textRef } from "@/lib/i18n/text-ref";
 import { findParticipant, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
+import { actionReason } from "@/lib/utils/battle/actions/reasons";
+import type { MovementInput, MovementResult } from "@/lib/utils/battle/actions/types";
 import { releaseGrapples } from "@/lib/utils/battle/conditions/grapple-links";
 import { battleActionToEvent, type NewBattleEvent } from "@/lib/utils/battle/store";
 import { ruleErrorOf } from "@/lib/utils/battle/store/errors";
-import type { Ruleset } from "@/lib/utils/rules";
-import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
-import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
-export interface Movement5eInput {
-  map: BattleMapConfig;
-  participants: BattleParticipant[];
-  mover: BattleParticipant;
-  to: GridPoint;
-  path: GridPoint[] | null;
-  budget: number;
-  cost: number;
-  round: number;
-  battleId: string;
-  rules: Ruleset;
-  rng: () => number;
-  sceneState?: SystemSlot;
-}
-
-export interface Movement5eResult {
-  participants: BattleParticipant[];
-  moved: BattleParticipant;
-  destination: GridPoint;
-  spent: number;
-  messages: LogLine[];
-  events: NewBattleEvent[];
-  sceneState?: SystemSlot;
-}
-
-export function resolveMovement5e(input: Movement5eInput): Movement5eResult {
+export function resolveMovement(input: MovementInput): MovementResult {
   const { map, participants, mover, to, path, budget, cost, rules } = input;
 
   const messages: LogLine[] = [];
@@ -56,7 +29,7 @@ export function resolveMovement5e(input: Movement5eInput): Movement5eResult {
 
   const opportunity =
     rules.actions.opportunityAttacks && path && start
-      ? resolveOpportunityAttacks({ participants, moverId: mover.basicInfo.id, path, start, map, round: input.round, battleId: input.battleId, rules, rng: input.rng, sceneState: input.sceneState })
+      ? resolveOpportunityAttacks({ strike: input.strike, participants, moverId: mover.basicInfo.id, path, start, map, round: input.round, battleId: input.battleId, rules, rng: input.rng, sceneState: input.sceneState })
       : null;
 
   if (opportunity) {

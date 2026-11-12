@@ -1,11 +1,4 @@
-export const CORE_ACTION_KEYS = ["dash", "disengage", "dodge", "help", "hide", "ready", "standUp", "grapple", "shove", "escape"] as const;
-
-export type CoreActionKey = (typeof CORE_ACTION_KEYS)[number];
-
-export type CoreActionDef = {
-  cost: "action" | "bonusAction" | "movement";
-  target: "none" | "allyAdjacent" | "enemyAdjacent";
-};
+import type { CoreActionDef, CoreActionKey } from "@/lib/utils/battle/actions/keys";
 
 export const CORE_ACTION_REGISTRY: Record<CoreActionKey, CoreActionDef> = {
   dash: { cost: "action", target: "none" },

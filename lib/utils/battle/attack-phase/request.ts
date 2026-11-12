@@ -3,12 +3,11 @@ import { AttackType } from "@/lib/constants/battle";
 import { findParticipant, isAirborne } from "@/lib/utils/abilities/engine/core/participants";
 import type { CunningStrikeEffect } from "@/lib/utils/abilities/schema";
 import { hasTrait, isFiveE } from "@/lib/utils/battle/attack/ability";
+import { assertAttackAllowed } from "@/lib/utils/battle/attack/assert-allowed";
 import { canAttackFromPool } from "@/lib/utils/battle/attack/attacks-left";
 import { cunningStrikeCost, cunningStrikeOffer } from "@/lib/utils/battle/attack/cunning-strike";
-import { getDisabledAttackKinds } from "@/lib/utils/battle/attack/disabled-attacks";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { type ActorScope, requireActor } from "@/lib/utils/battle/common/control";
-import { conditionSourceIds } from "@/lib/utils/battle/conditions/query";
 import { BattleAccessError, BattleRuleError, ruleErrorOf } from "@/lib/utils/battle/store/errors";
 import { REJECT } from "@/lib/utils/battle/store/reject";
 import { type Ruleset } from "@/lib/utils/rules";
@@ -57,19 +56,7 @@ export function findAttack(attacker: BattleParticipant, attackId: string | undef
   return (attackId ? attacks.find((a) => a.id === attackId || a.name === attackId) : undefined) ?? attacks.find((a) => a.hand !== "off");
 }
 
-export function assertAttackAllowed(attacker: BattleParticipant, attack: BattleAttack, targets: BattleParticipant[]): void {
-  const attackKind = attackKindOf(attack.type);
-
-  if (getDisabledAttackKinds(attacker)[attackKind]) {
-    throw new BattleRuleError("action_rejected", attackKind === AttackType.RANGED ? REJECT.cannotAttackRanged : REJECT.cannotAttackMelee);
-  }
-
-  const charmers = conditionSourceIds(attacker, "charmed");
-
-  if (targets.some((t) => charmers.includes(t.basicInfo.id))) {
-    throw new BattleRuleError("invalid_target", REJECT.charmedTarget, { name: attacker.basicInfo.name });
-  }
-}
+export { assertAttackAllowed };
 
 function assertOffHand(attacker: BattleParticipant, attack: BattleAttack): void {
   if (attacker.actionFlags.hasUsedBonusAction) throw new BattleRuleError("action_used", API_ERRORS.BONUS_ACTION_USED);

@@ -5,7 +5,7 @@ import { expectLabelKeys } from "../test/label-keys";
 import { CombatStatus } from "@/lib/constants/battle";
 import { WEATHER_KINDS } from "@/lib/constants/battle-weather";
 import { DAMAGE_ELEMENT_OPTIONS } from "@/lib/constants/damage";
-import { CORE_ACTION_KEYS } from "@/lib/utils/battle/actions/registry";
+import { CORE_ACTION_KEYS } from "@/lib/utils/battle/actions/keys";
 import { HEALTH_LABEL } from "@/lib/utils/battle/view";
 
 describe("battle has translations", () => {

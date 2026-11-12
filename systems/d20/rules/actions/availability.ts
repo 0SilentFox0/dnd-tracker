@@ -1,22 +1,18 @@
-import { actionReason } from "./reasons";
-import { CORE_ACTION_REGISTRY, type CoreActionDef, type CoreActionKey } from "./registry";
+import { CORE_ACTION_REGISTRY } from "./registry";
 
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { isActive, isAttackable, withSelf } from "@/lib/utils/abilities/engine/core/participants";
+import type { CoreActionDef, CoreActionKey } from "@/lib/utils/battle/actions/keys";
+import { actionReason } from "@/lib/utils/battle/actions/reasons";
+import type { CoreActionAvailability } from "@/lib/utils/battle/actions/types";
 import { canAttackFromPool } from "@/lib/utils/battle/attack/attacks-left";
 import { hasCondition } from "@/lib/utils/battle/conditions/query";
 import { bothOnMap, isAdjacent } from "@/lib/utils/battle/grid/occupancy";
 import { baseMovement, remainingMovement } from "@/lib/utils/battle/grid/path";
 import { isHostile } from "@/lib/utils/battle/modes/engine";
 import type { Ruleset } from "@/lib/utils/rules/schema";
-import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
-
-export interface CoreActionAvailability {
-  ok: boolean;
-  reason?: LogLine;
-}
 
 const STAND_UP_COST_DIVISOR = 2;
 
@@ -70,8 +66,6 @@ export function validateCoreAction(key: CoreActionKey, actor: BattleParticipant,
 
 export function coreActionAvailability(key: CoreActionKey, actor: BattleParticipant, participants: BattleParticipant[], map: BattleMapConfig | null | undefined, rules: Ruleset): CoreActionAvailability {
   const cost = coreActionCost(key, actor, participants);
-
-  if (cost === "bonusAction" && !ruleSystemOf(rules).combat.actionEconomy.bonusAction) return { ok: false, reason: actionReason("noBonusAction") };
 
   if (cost === "bonusAction" && actor.actionFlags.hasUsedBonusAction) return { ok: false, reason: actionReason("bonusUsed") };
 

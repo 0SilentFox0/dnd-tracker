@@ -7,8 +7,8 @@ import { findParticipant, updateParticipant } from "@/lib/utils/abilities/engine
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { cooldownLeft, recordUse, withinCountLimits } from "@/lib/utils/abilities/engine/core/usage";
 import { evaluateCondition } from "@/lib/utils/abilities/registry/conditions";
+import { legendaryAttack } from "@/lib/utils/battle/actions/dispatch";
 import { lairAbilities, lairBlocker, spendLair } from "@/lib/utils/battle/actions/lair";
-import { legendaryAttack } from "@/lib/utils/battle/actions/legendary";
 import { legendaryAbilities, legendaryBlocker, legendaryCostOf, spendLegendary } from "@/lib/utils/battle/actions/legendary-options";
 import type { LegendaryActionBody } from "@/lib/utils/battle/actions/schema";
 import { currentOf } from "@/lib/utils/battle/common/control";

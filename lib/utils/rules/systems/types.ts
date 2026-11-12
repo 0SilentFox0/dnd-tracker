@@ -1,11 +1,14 @@
 import type { SystemData, SystemSlot } from "./slot";
 
+import type { CriticalEffect } from "@/lib/constants/critical-effects";
 import type { Coin } from "@/lib/constants/inventory";
 import type { Translator } from "@/lib/i18n/translator";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import type { Condition5eKey } from "@/lib/utils/abilities/schema/kinds";
 import type { Recipe } from "@/lib/utils/abilities/templates/types";
 import type { LabeledEffectInput } from "@/lib/utils/battle/actions/effects";
+import type { CoreActionDef, CoreActionKey } from "@/lib/utils/battle/actions/keys";
+import type { CoreActionAvailability, LegendaryAttackInput, LegendaryAttackResult, MovementInput, MovementResult, RunCoreActionInput, RunCoreActionResult } from "@/lib/utils/battle/actions/types";
 import type { RollMode } from "@/lib/utils/battle/attack/bonus";
 import type { ApplyConditionOptions, ApplyConditionResult, ConditionEffectOptions } from "@/lib/utils/battle/conditions/set";
 import type { CritPicker } from "@/lib/utils/battle/crit-choice/types";
@@ -196,6 +199,58 @@ export interface RuleSystemTurn {
   onJoin?: readonly TurnHook<TurnJoinCtx>[];
 }
 
+/** Core actions (dash, grapple, …), movement and legendary strikes; a system without them answers with `noActions` */
+export interface RuleSystemActions {
+  /** The rules' `actions` section is switched on */
+  enabled(rules: Ruleset): boolean;
+  catalog: Partial<Record<CoreActionKey, CoreActionDef>>;
+  cost(key: CoreActionKey, actor: BattleParticipant, participants: BattleParticipant[]): CoreActionDef["cost"];
+  targets(key: CoreActionKey, actor: BattleParticipant, participants: BattleParticipant[], map: BattleMapConfig | null | undefined): BattleParticipant[];
+  available(key: CoreActionKey, actor: BattleParticipant, participants: BattleParticipant[], map: BattleMapConfig | null | undefined, rules: Ruleset): CoreActionAvailability;
+  /** Standing up from prone is possible with the movement left */
+  canStandUp(p: BattleParticipant, rules: Ruleset): boolean;
+  run(input: RunCoreActionInput): RunCoreActionResult;
+  legendaryAttack(input: LegendaryAttackInput): LegendaryAttackResult;
+  /** A move with whatever it provokes (opportunity strikes, dragging a grappled foe) */
+  move(input: MovementInput): MovementResult;
+  /** Drops holds whose grappler fell or is no longer adjacent; same array when there are none */
+  releaseInvalidGrapples(ps: BattleParticipant[], map?: BattleMapConfig | null): { participants: BattleParticipant[]; messages: LogLine[] };
+}
+
+export interface RuleSystemReactions {
+  /** Why the participant cannot react now; null when it can */
+  blocker(p: BattleParticipant): LogLine | null;
+}
+
+export interface AfterAttackCtx {
+  participants: BattleParticipant[];
+  attackerId: string;
+  defenderId: string;
+  attack: BattleAttack;
+  attackRoll: Pick<AttackRollResult, "isCriticalFail">;
+  criticalEffect?: CriticalEffect;
+  /** First strike of the volley */
+  first: boolean;
+  round: number;
+  battleId: string;
+  rng: Rng;
+  crit?: CritPicker;
+  map?: BattleMapConfig | null;
+  rules: Ruleset;
+  sceneState?: SystemSlot;
+}
+
+export interface AfterAttackResult {
+  participants: BattleParticipant[];
+  actions: BattleAction[];
+  sceneState?: SystemSlot;
+  /** The strike has answered itself: core skips its own retaliation */
+  handled?: true;
+}
+
+/** Runs after a strike resolved (`runAfterAttack`); null = nothing to add */
+export type AfterAttackHook = (ctx: AfterAttackCtx) => AfterAttackResult | null;
+
 export interface InitiativeScore {
   total: number;
   roll: number | null;
@@ -342,6 +397,10 @@ export interface RuleSystemCombat {
   onZeroHp(ctx: ZeroHpCtx): DamageConsequencesResult;
   onDamaged?: readonly DamagedHook[];
   turn?: RuleSystemTurn;
+  actions: RuleSystemActions;
+  reactions: RuleSystemReactions;
+  /** Hooks after each strike of an attack, base first, then modules */
+  afterAttack?: readonly AfterAttackHook[];
   /** Base score before flat modifiers; `roll`/`die` are null when nothing was rolled (static mode, pinned) */
   initiative(p: BattleParticipant, ctx: { rules: Pick<Ruleset, "initiative">; rng: Rng }): InitiativeScore;
   /** Starting values the participant builders use instead of the d20 sheet columns */

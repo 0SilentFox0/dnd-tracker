@@ -7,8 +7,7 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { moveSchema } from "@/lib/schemas/battles";
 import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { resolveDowned } from "@/lib/utils/abilities/engine/core/run-abilities";
-import { releaseInvalidGrapples } from "@/lib/utils/battle/actions/grapple";
-import { resolveMovement5e } from "@/lib/utils/battle/actions/movement";
+import { moveWithReactions } from "@/lib/utils/battle/actions/dispatch";
 import { canStand, cellKey, checkReturnToStart, frightenedBlocksMove, hazardHit, hazardLabel, hazardOnMove, moveBudget, pathFrom, placeParticipants, searchPaths } from "@/lib/utils/battle/grid";
 import { lineText, logFields } from "@/lib/utils/battle/log/lines";
 import { activeMapMode, type MapModeKey } from "@/lib/utils/battle/modes";
@@ -20,6 +19,7 @@ import { BattleRuleError, type NewBattleEvent, systemEvent } from "@/lib/utils/b
 import { ruleErrorOf } from "@/lib/utils/battle/store/errors";
 import { assertCanAct } from "@/lib/utils/battle/turn";
 import { rngOf } from "@/lib/utils/common/rng";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
 import type { BattleMapConfig, BattleParticipant, GridPoint, TerrainCell } from "@/types/battle";
 import type { LogLine } from "@/types/text";
@@ -46,7 +46,9 @@ export function moveMutation(ctx: BattleMutationContext, data: MoveBody): Mutati
 
   const { rules } = ctx.meta;
 
-  const at = (p: BattleParticipant, position: GridPoint, movementUsed?: number) => ({ ...p, battleData: { ...p.battleData, position, ...(movementUsed !== undefined && { movementUsed }) } });
+  const { actions } = ruleSystemOf(rules).combat;
+
+  const at =(p: BattleParticipant, position: GridPoint, movementUsed?: number) => ({ ...p, battleData: { ...p.battleData, position, ...(movementUsed !== undefined && { movementUsed }) } });
 
   // розстановка ДМ (чужий хід або free) — без бюджету й шляху
   if (!ownTurn || (ctx.isDM && data.free === true)) {
@@ -56,7 +58,7 @@ export function moveMutation(ctx: BattleMutationContext, data: MoveBody): Mutati
 
     const placed = replaceParticipant(participants, moved);
 
-    const released = rules.actions.enabled ? releaseInvalidGrapples(placed, map) : { participants: placed, messages: [] };
+    const released = actions.releaseInvalidGrapples(placed, map);
 
     return finishMove(ctx, { participants: released.participants, moved, hazard: null, messages: released.messages, events: [] });
   }
@@ -73,7 +75,7 @@ export function moveMutation(ctx: BattleMutationContext, data: MoveBody): Mutati
 
   if (frightenedBlocksMove(map, participants, mover, data.to)) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_FRIGHTENED_NO_APPROACH);
 
-  if (!rules.actions.enabled) {
+  if (!actions.enabled(rules)) {
     const moved = at(mover, data.to, (mover.battleData.movementUsed ?? 0) + cost);
 
     const hazard = isActive(moved) ? hazardOnMove(map, participants, mover, data.to, cost) : null;
@@ -81,7 +83,7 @@ export function moveMutation(ctx: BattleMutationContext, data: MoveBody): Mutati
     return finishMove(ctx, { participants: replaceParticipant(participants, moved), moved, hazard, messages: [], events: [], trail: { from: mover.battleData.position, path: pathFrom(search, mover, data.to) ?? [] } });
   }
 
-  const out = resolveMovement5e({ map, participants, mover, to: data.to, path: pathFrom(search, mover, data.to), budget, cost, round: ctx.scene.round, battleId: ctx.scene.id, rules, rng: rngOf(ctx), sceneState: ctx.scene.sceneState });
+  const out = moveWithReactions({ map, participants, mover, to: data.to, path: pathFrom(search, mover, data.to), budget, cost, round: ctx.scene.round, battleId: ctx.scene.id, rules, rng: rngOf(ctx), sceneState: ctx.scene.sceneState });
 
   const hazard = isActive(out.moved) ? hazardOnMove(map, participants, mover, out.destination, out.spent) : null;
 

@@ -14,6 +14,7 @@ import { useSystemBattleUi } from "@/components/battle/use-system-battle-ui";
 import { AuraZonePicker } from "@/components/battle/wizards/AuraZonePicker";
 import { useAttackWizard, useAuraZones, useBattleRules, useBattleScene, useBonusSpells, useChannelAction, usePlayerTurn, useSpellBook } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
+import { coreActionsOn } from "@/lib/utils/battle/actions/access";
 import { canOffHandAttack } from "@/lib/utils/battle/attack/attacks-left";
 import { canConsumeIntent, COUNTDOWN_SECONDS, turnAllowsAttack } from "@/lib/utils/battle/flows";
 import { moraleTriggerRolls } from "@/lib/utils/battle/morale/check";
@@ -113,7 +114,7 @@ export function MyTurnControls({ hero, strip }: { hero: BattleParticipant; strip
           turn={turn}
           channelLabel={systemUi?.ChannelLabel && <systemUi.ChannelLabel />}
           pending={anyPending}
-          available={{ channel: !!systemUi?.ChannelDialog && magic && hasMagic, magic: hasMagic, magicTile: spells, bonus: bonusAbilities.length > 0 || canOffHandAttack(hero), bonusTile: actionEconomy.bonusAction, ability: actionAbilities.length > 0, core: !!battle.rules?.actions.enabled }}
+          available={{ channel: !!systemUi?.ChannelDialog && magic && hasMagic, magic: hasMagic, magicTile: spells, bonus: bonusAbilities.length > 0 || canOffHandAttack(hero), bonusTile: actionEconomy.bonusAction, ability: actionAbilities.length > 0, core: coreActionsOn(battle.rules) }}
           actions={{ channel: channel.actions.open, attack: () => attack.actions.open(), magic: () => book.actions.open(), bonus: () => setBonusOpen(true), ability: () => setAbilityOpen(true), core: () => setCoreOpen(true) }}
         />
       )}
@@ -134,7 +135,7 @@ export function MyTurnControls({ hero, strip }: { hero: BattleParticipant; strip
       <AttackWizard wizard={attack} />
       <SpellBook book={book} />
       {magic && systemUi?.ChannelDialog && <systemUi.ChannelDialog channel={channel} />}
-      {battle.rules?.actions.enabled && <CoreActionsDialog participant={hero} open={coreOpen} onOpenChange={setCoreOpen} onDone={turn.actions.afterAction} />}
+      {coreActionsOn(battle.rules) && <CoreActionsDialog participant={hero} open={coreOpen} onOpenChange={setCoreOpen} onDone={turn.actions.afterAction} />}
       {actionEconomy.bonusAction && <BonusActionPicker participant={hero} open={bonusOpen} onOpenChange={setBonusOpen} onDone={turn.actions.afterAction} onOffHand={() => attack.actions.open(undefined, undefined, { offHand: true })} />}
       <BonusActionPicker participant={hero} trigger="action" open={abilityOpen} onOpenChange={setAbilityOpen} onDone={turn.actions.afterAction} />
     </>

@@ -1,3 +1,4 @@
+import { noActions, noReactions } from "@/lib/utils/battle/actions/none";
 import { rollDie } from "@/lib/utils/common/dice";
 import type { RuleSystemDefinition } from "@/lib/utils/rules/systems";
 import { defineSlot } from "@/lib/utils/rules/systems/slot";
@@ -30,7 +31,7 @@ export const D6POOL_SYSTEM: RuleSystemDefinition = {
   },
   sheetTest: { accepts: (body) => body.kind === "test", roll: () => ({ kind: "test" }) as never },
   rest: { kinds: false },
-  combat: { judge: "client", dice: 6, actionEconomy: { bonusAction: false, reaction: false }, resolveAttack: d6Attack, damage: () => ({ doubleDice: false }), onZeroHp: (ctx) => ({ participant: ctx.after, participants: ctx.participants, messages: [] }), abortedRoll: (ctx) => ({ ...d6Attack({ ...ctx, manualRoll: ctx.manualRoll ?? 1 }).attackRoll, isHit: false }),
+  combat: { judge: "client", dice: 6, actionEconomy: { bonusAction: false, reaction: false }, actions: noActions, reactions: noReactions, resolveAttack: d6Attack, damage: () => ({ doubleDice: false }), onZeroHp: (ctx) => ({ participant: ctx.after, participants: ctx.participants, messages: [] }), abortedRoll: (ctx) => ({ ...d6Attack({ ...ctx, manualRoll: ctx.manualRoll ?? 1 }).attackRoll, isHit: false }),
     initiative: (p, ctx) => {
       if (ctx.rules.initiative.mode !== "roll") return { total: p.abilities.baseInitiative, roll: null, die: null };
 

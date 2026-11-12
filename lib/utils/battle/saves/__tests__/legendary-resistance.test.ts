@@ -4,7 +4,6 @@ import { ParticipantSide } from "@/lib/constants/battle";
 import { textOf } from "@/lib/i18n/test/text";
 import { makeEffect, makeParticipant, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import type { Effect } from "@/lib/utils/abilities/schema";
-import { contest } from "@/lib/utils/battle/actions/grapple";
 import { beginConcentration } from "@/lib/utils/battle/concentration";
 import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { textsOf } from "@/lib/utils/battle/log/__tests__/event-text";
@@ -14,6 +13,7 @@ import { rollSaveEnds } from "@/lib/utils/battle/saves/save-ends";
 import { castSpell } from "@/lib/utils/battle/spell";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
+import { contest } from "@/systems/d20/rules/actions/grapple";
 import { concentrationCheck } from "@/systems/d20/rules/concentration/check";
 import type { BattleParticipant } from "@/types/battle";
 

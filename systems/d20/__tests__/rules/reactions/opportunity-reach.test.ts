@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { resolveOpportunityAttacks } from "../opportunity";
-
 import { AttackType } from "@/lib/constants/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
+import { resolveServerAttack } from "@/lib/utils/battle/attack/server-attack";
 import { pathTo } from "@/lib/utils/battle/grid/path";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
+import { resolveOpportunityAttacks } from "@/systems/d20/rules/reactions/opportunity";
 import type { BattleAttack, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 const map: BattleMapConfig = { cols: 10, rows: 5, background: null, opacity: 0.3 };
@@ -31,7 +31,7 @@ const provoked = (fiveE: boolean) => {
 
   const path = pathTo(map, ps, ps[0], { x: 4, y: 0 }, 10) ?? [];
 
-  return resolveOpportunityAttacks({ participants: ps, moverId: "m", path, start: { x: 2, y: 0 }, map, round: 1, battleId: "b1", rules, rng: () => 0.99 }).actions.length > 0;
+  return resolveOpportunityAttacks({ strike: resolveServerAttack, participants: ps, moverId: "m", path, start: { x: 2, y: 0 }, map, round: 1, battleId: "b1", rules, rng: () => 0.99 }).actions.length > 0;
 };
 
 describe("досяжність при відході", () => {

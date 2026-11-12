@@ -1,52 +1,24 @@
+import { readiedAttack } from "../reactions/readied";
 import { coreActionCost, isAttackAction, standUpCost, validateCoreAction } from "./availability";
-import { disengageEffect, dodgeEffect, helpEffect, hiddenEffect, upsertLabeled } from "./effects";
-import { reject } from "./errors";
 import { runEscape, runGrapple, runShove } from "./grapple";
-import { pickMeleeAttack, reactionBlocker } from "./reaction";
-import { actionReason } from "./reasons";
-import { type CoreActionKey } from "./registry";
-import type { CoreActionBody } from "./schema";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { dynamicTextRef, textRef } from "@/lib/i18n/text-ref";
-import { findParticipant, isActive, isAttackable, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
+import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { type TimedEffectInput } from "@/lib/utils/abilities/engine/effects/timed-effects";
+import { disengageEffect, dodgeEffect, helpEffect, hiddenEffect, upsertLabeled } from "@/lib/utils/battle/actions/effects";
+import { reject } from "@/lib/utils/battle/actions/errors";
+import type { CoreActionKey } from "@/lib/utils/battle/actions/keys";
+import { actionReason } from "@/lib/utils/battle/actions/reasons";
+import type { RunCoreActionInput, RunCoreActionResult } from "@/lib/utils/battle/actions/types";
 import { canAttackFromPool, spendFromPool } from "@/lib/utils/battle/attack/attacks-left";
-import { getDisabledAttackKinds } from "@/lib/utils/battle/attack/disabled-attacks";
-import { resolveServerAttack } from "@/lib/utils/battle/attack/server-attack";
-import { assertAttackAllowed } from "@/lib/utils/battle/attack-phase/request";
 import { passivePerception, rollCheck } from "@/lib/utils/battle/checks";
-import { type ActionFlow } from "@/lib/utils/battle/common/action-flow";
-import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { removeEffects } from "@/lib/utils/battle/conditions";
-import { attackReachError } from "@/lib/utils/battle/grid/attack-reach";
 import { baseMovement } from "@/lib/utils/battle/grid/path";
-import { isHostile } from "@/lib/utils/battle/modes/engine";
 import { applyMainActionUsed } from "@/lib/utils/battle/participant/helpers";
 import { ruleErrorOf } from "@/lib/utils/battle/store/errors";
-import type { Ruleset } from "@/lib/utils/rules";
-import { ruleSystemOf } from "@/lib/utils/rules/systems";
-import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
-import type { BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
+import type { BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
-
-export interface RunCoreActionInput {
-  participants: BattleParticipant[];
-  body: CoreActionBody;
-  map: BattleMapConfig | null;
-  rules: Ruleset;
-  round: number;
-  rng: () => number;
-  battleId: string;
-  sceneState?: SystemSlot;
-}
-
-export interface RunCoreActionResult {
-  participants: BattleParticipant[];
-  messages: LogLine[];
-  actions?: BattleAction[];
-  sceneState?: SystemSlot;
-}
 
 const TIMED_ACTIONS = {
   disengage: { icon: "🛡", effect: disengageEffect },
@@ -73,8 +45,6 @@ export function runCoreAction(input: RunCoreActionInput): RunCoreActionResult {
   const name = actor.basicInfo.name;
 
   const cost = coreActionCost(body.action, actor, participants);
-
-  if (cost === "bonusAction" && !ruleSystemOf(rules).combat.actionEconomy.bonusAction) throw ruleErrorOf("action_rejected", actionReason("noBonusAction"));
 
   if (cost === "bonusAction" && actor.actionFlags.hasUsedBonusAction) throw ruleErrorOf("action_used", actionReason("bonusUsed"));
 
@@ -144,40 +114,4 @@ export function runCoreAction(input: RunCoreActionInput): RunCoreActionResult {
     case "escape":
       return out(runEscape(grappleInput()));
   }
-}
-
-function readiedAttack(input: RunCoreActionInput, actor: BattleParticipant, targetId: string): RunCoreActionResult {
-  const { participants, map, round, rng, rules } = input;
-
-  if (!actor.battleData.readied) return reject(actionReason("readiedMissing"));
-
-  const blocker = reactionBlocker(actor, rules);
-
-  if (blocker) return reject(blocker);
-
-  const target = findParticipant(participants, targetId);
-
-  if (!target || !isHostile(map, actor, target) || !isAttackable(target)) return reject(actionReason("enemyRequired"));
-
-  const disabled = getDisabledAttackKinds(actor);
-
-  const attack = pickMeleeAttack(actor) ?? actor.battleData.attacks.find((a) => a.hand !== "off" && !disabled[attackKindOf(a.type)]);
-
-  if (!attack) return reject(actionReason("noAttack"));
-
-  assertAttackAllowed(actor, attack, [target]);
-
-  const reach = attackReachError(map, participants, actor, attack, [target], input.rules);
-
-  if (reach) return reject(reach);
-
-  const flow: ActionFlow = { ps: participants, messages: [], summons: [], ctx: { round, rng, map, rules: input.rules }, sceneState: input.sceneState };
-
-  const { battleAction } = resolveServerAttack({ flow, attackerId: actor.basicInfo.id, targetId, attack, currentRound: round, battleId: input.battleId, rng, label: "readied" });
-
-  const fresh = findParticipant(flow.ps, actor.basicInfo.id) ?? actor;
-
-  const spent = { ...fresh, battleData: { ...fresh.battleData, readied: undefined }, actionFlags: { ...fresh.actionFlags, hasUsedReaction: true } };
-
-  return { participants: replaceParticipant(flow.ps, spent), messages: [], actions: [battleAction], sceneState: flow.sceneState };
 }

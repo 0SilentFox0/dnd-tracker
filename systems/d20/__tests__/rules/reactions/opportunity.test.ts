@@ -1,16 +1,16 @@
 import { describe, expect, it } from "vitest";
 
-import { resolveOpportunityAttacks } from "../opportunity";
-import { runCoreAction } from "../run";
-
 import { AttackType } from "@/lib/constants/battle";
 import { textOf } from "@/lib/i18n/test/text";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
+import { runCoreAction } from "@/lib/utils/battle/actions/dispatch";
+import { resolveServerAttack } from "@/lib/utils/battle/attack/server-attack";
 import { cellKey } from "@/lib/utils/battle/grid";
 import { pathTo, reachable } from "@/lib/utils/battle/grid/path";
 import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { applyCondition5e } from "@/systems/d20/rules/conditions/apply";
+import { resolveOpportunityAttacks } from "@/systems/d20/rules/reactions/opportunity";
 import type { BattleAttack, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 const map: BattleMapConfig = { cols: 10, rows: 5, background: null, opacity: 0.3 };
@@ -37,7 +37,7 @@ const go = (ps: BattleParticipant[], to: { x: number; y: number }, rng = () => 0
 
   const path = pathTo(map, ps, mover, to, 10)!;
 
-  return resolveOpportunityAttacks({ participants: ps, moverId: mover.basicInfo.id, path, start: mover.battleData.position!, map, round: 1, battleId: "b1", rules, rng });
+  return resolveOpportunityAttacks({ strike: resolveServerAttack, participants: ps, moverId: mover.basicInfo.id, path, start: mover.battleData.position!, map, round: 1, battleId: "b1", rules, rng });
 };
 
 describe("pathTo", () => {

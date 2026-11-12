@@ -1,9 +1,10 @@
-import { coreTimedKey } from "./effects";
-import { reject } from "./errors";
-import { actionReason } from "./reasons";
+import { D20_CONDITION_SET } from "../conditions";
 
 import { joinLines, textRef } from "@/lib/i18n/text-ref";
 import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
+import { coreTimedKey } from "@/lib/utils/battle/actions/effects";
+import { reject } from "@/lib/utils/battle/actions/errors";
+import { actionReason } from "@/lib/utils/battle/actions/reasons";
 import { checkBonus, rollCheck } from "@/lib/utils/battle/checks";
 import { conditionSourceIds, hasCondition, PERMANENT_ROUNDS, removeEffects } from "@/lib/utils/battle/conditions";
 import { GRAPPLE_KEY_PREFIX, grappledBy, grappleKey, releaseGrapples } from "@/lib/utils/battle/conditions/grapple-links";
@@ -12,7 +13,6 @@ import { awayStep } from "@/lib/utils/battle/grid/push";
 import { resolveSave, rollSave } from "@/lib/utils/battle/saves";
 import { getSpellSaveDC } from "@/lib/utils/common/calculations";
 import type { Ruleset } from "@/lib/utils/rules";
-import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
@@ -91,7 +91,7 @@ export interface GrappleActionResult {
 function applyHeld(input: GrappleActionInput, target: BattleParticipant, key: "grappled" | "prone", timedKey: string) {
   const { actor, participants, rules, round } = input;
 
-  return ruleSystemOf(rules).conditionSet.apply(participants, target.basicInfo.id, {
+  return D20_CONDITION_SET.apply(participants, target.basicInfo.id, {
     key,
     rounds: PERMANENT_ROUNDS,
     permanent: true,

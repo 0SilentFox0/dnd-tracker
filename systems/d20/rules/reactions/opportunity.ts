@@ -3,7 +3,7 @@ import { canReact, pickMeleeAttack } from "./reaction";
 import { EffectMarker } from "@/lib/constants/battle";
 import { textRef } from "@/lib/i18n/text-ref";
 import { findParticipant, isActive } from "@/lib/utils/abilities/engine/core/participants";
-import { resolveServerAttack } from "@/lib/utils/battle/attack/server-attack";
+import type { ServerStrike } from "@/lib/utils/battle/actions/types";
 import { type ActionFlow, put } from "@/lib/utils/battle/common/action-flow";
 import { conditionSourceIds } from "@/lib/utils/battle/conditions";
 import { cellsOf, footprint, footprintDistance, isOnMap, sizeOf } from "@/lib/utils/battle/grid";
@@ -16,6 +16,7 @@ import type { BattleAction, BattleMapConfig, BattleParticipant, GridPoint } from
 import type { LogLine } from "@/types/text";
 
 export interface OpportunityInput {
+  strike: ServerStrike;
   participants: BattleParticipant[];
   moverId: string;
   path: GridPoint[];
@@ -37,7 +38,7 @@ export interface OpportunityResult {
   sceneState?: SystemSlot;
 }
 
-const canProvoke = (e: BattleParticipant, moverId: string, rules: Ruleset) => canReact(e, rules) && isOnMap(e) && !conditionSourceIds(e, "charmed").includes(moverId);
+const canProvoke = (e: BattleParticipant, moverId: string) => canReact(e) &&isOnMap(e) && !conditionSourceIds(e, "charmed").includes(moverId);
 
 /** `stopAt` — клітинка, де мувер упав. */
 export function resolveOpportunityAttacks(input: OpportunityInput): OpportunityResult {
@@ -83,7 +84,7 @@ export function resolveOpportunityAttacks(input: OpportunityInput): OpportunityR
     for (const { id, reach } of enemies) {
       const e = findParticipant(flow.ps, id);
 
-      if (!e || !canProvoke(e, moverId, rules)) continue;
+      if (!e || !canProvoke(e, moverId)) continue;
 
       const { attack, range } = meleeOf(e);
 
@@ -98,7 +99,7 @@ export function resolveOpportunityAttacks(input: OpportunityInput): OpportunityR
 
       messages.push(textRef("battleActions.opportunity.attack", { attacker: e.basicInfo.name, mover: mover.basicInfo.name }));
 
-      const { battleAction } = resolveServerAttack({ flow, attackerId: id, targetId: moverId, attack, currentRound: round, battleId, rng, label: "opportunity" });
+      const { battleAction } = input.strike({ flow, attackerId: id, targetId: moverId, attack, currentRound: round, battleId, rng, label: "opportunity" });
 
       actions.push(battleAction);
 

@@ -5,7 +5,7 @@ import { expectLabelKeys } from "../test/label-keys";
 import { AttackType, BattleActionType } from "@/lib/constants/battle";
 import { WEATHER_KINDS } from "@/lib/constants/battle-weather";
 import { CUNNING_STRIKE_EFFECTS } from "@/lib/utils/abilities/schema/params";
-import { CORE_ACTION_KEYS } from "@/lib/utils/battle/actions/registry";
+import { CORE_ACTION_KEYS } from "@/lib/utils/battle/actions/keys";
 import { CONDITION_5E_KEYS } from "@/lib/utils/battle/conditions/set";
 
 describe("battleCommon has translations", () => {

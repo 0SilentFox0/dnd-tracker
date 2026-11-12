@@ -7,7 +7,7 @@ import { ReadiedAttackButton } from "../ReadiedAttackButton";
 
 import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
 import { render } from "@/lib/i18n/test/render-uk";
-import { CORE_ACTION_KEYS } from "@/lib/utils/battle/actions/registry";
+import { CORE_ACTION_KEYS } from "@/lib/utils/battle/actions/keys";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import battle from "@/messages/uk/battle.json";
 import battleCommon from "@/messages/uk/battleCommon.json";
