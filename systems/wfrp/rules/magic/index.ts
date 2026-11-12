@@ -16,7 +16,7 @@ const dropChannelled = (p: BattleParticipant): BattleParticipant => (p.battleDat
 const withoutMiscast = (details: SystemSlot): SystemSlot => {
   const slot = ACTION_SLOT.read(details);
 
-  return slot?.cast ? ACTION_SLOT.write({ ...slot, cast: { ...slot.cast, miscast: null } }) : details;
+  return slot?.cast ? ACTION_SLOT.write({ ...slot, cast: { ...slot.cast, miscast: null } }, details) : details;
 };
 
 export const WFRP_MAGIC: RuleSystemMagic = {

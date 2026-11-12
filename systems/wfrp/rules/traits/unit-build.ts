@@ -63,5 +63,5 @@ export function wfrpUnitBuild(row: { id: string; characteristics?: unknown }, ab
     }
   }
 
-  return { fields: PARTICIPANT_SLOT.write({ ...base, stats: { ...base.stats, ...(armoured && { ap }), ...(ward !== undefined && { ward }), ...(size !== undefined && { size }) } }), attacks };
+  return { fields: PARTICIPANT_SLOT.write({ ...base, stats: { ...base.stats, ...(armoured && { ap }), ...(ward !== undefined && { ward }), ...(size !== undefined && { size }) } }, baseSlot), attacks };
 }

@@ -58,7 +58,7 @@ function toResult(ctx: ResolveAttackCtx, details: PercentileAttackDetails, isHit
 
   return {
     isHit,
-    scene: SCENE_SLOT.write(next),
+    scene: SCENE_SLOT.write(next, ctx.sceneState),
     defenseValue: details.defender?.target ?? 0,
     lines: [...percentileLines(details, isHit), ...(gained ? [textRef("battleLog.percentile.momentum")] : [])],
     attackRoll: {
@@ -112,7 +112,7 @@ export function resolveWfrpAttack(ctx: ResolveAttackCtx): ResolvedAttack {
 
     const attack = ACTION_SLOT.read(r.attackRoll.system)?.attack;
 
-    return { ...r, fortune, fortuneLine, attackRoll: { ...r.attackRoll, ...(attack && { system: ACTION_SLOT.write({ attack: { ...attack, fortune } }) }) } };
+    return { ...r, fortune, fortuneLine, attackRoll: { ...r.attackRoll, ...(attack && { system: ACTION_SLOT.write({ attack: { ...attack, fortune } }, r.attackRoll.system) }) } };
   };
 
   if (attackKindOf(attack.type) === AttackType.RANGED) {

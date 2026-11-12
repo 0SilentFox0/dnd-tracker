@@ -42,7 +42,7 @@ export const wfrpActionDetails: RuleSystemActionDetails = {
 
     if (!attack && !cast) return undefined;
 
-    return changed ? ACTION_SLOT.write({ ...(attack && { attack }), ...(cast && { cast }) }) : details;
+    return changed ? ACTION_SLOT.write({ ...(attack && { attack }), ...(cast && { cast }) }, details) : details;
   },
 
   actorSecret: (details) => !!ACTION_SLOT.read(details)?.cast?.miscast,
