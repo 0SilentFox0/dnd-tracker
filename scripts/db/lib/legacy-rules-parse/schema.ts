@@ -1,0 +1,159 @@
+// Frozen copy of lib/utils/rules/schema.ts parse path (before E2 Ч3); reference for parity tests, do not edit.
+import { z } from "zod";
+
+import { AdvancementRulesSchema } from "./advancement-schema";
+import { DEFAULT_RULES } from "./defaults";
+
+import { RULES_EDITIONS } from "@/lib/constants/rules";
+import { UnitGroupAppearancesSchema } from "@/lib/schemas/unit-groups";
+import { StaticEffectSchema } from "@/lib/utils/abilities/schema/effects";
+import { CONDITION_KEYS, CUSTOM_CONDITION_KEY_RE } from "@/lib/utils/abilities/schema/kinds";
+import { isRecord } from "@/lib/utils/common/is-record";
+import { validateComposition } from "@/lib/utils/rules/systems/compose";
+import { RULE_SYSTEM_KEYS } from "@/lib/utils/rules/systems/meta";
+import { TablesRulesSchema } from "@/lib/utils/rules/tables-schema";
+
+const level = z.string().regex(/^([1-9]|1\d|20)$/);
+
+const DiceTable = z.record(level, z.string().regex(/^\d+d\d+([+-]\d+d\d+)*$/));
+
+const UNKNOWN_SYSTEM_MESSAGE = "rules.validation.unknownSystem";
+
+const CustomConditionSchema = z.object({
+  key: z.string().regex(CUSTOM_CONDITION_KEY_RE),
+  name: z.string().min(1).max(60),
+  description: z.string().max(2000),
+  markers: z.array(z.enum(CONDITION_KEYS)).max(10),
+  abilityEffects: z.array(StaticEffectSchema).max(10).optional(),
+});
+
+const sectionSchemas = {
+  morale: z.strictObject({ enabled: z.boolean(), cap: z.number().int().min(1).max(10) }),
+  criticals: z.strictObject({
+    critOn: z.number().int().min(2).max(20),
+    fumbleOn: z.number().int().min(0).max(5),
+    effects: z.boolean(),
+    doubleDice: z.boolean(),
+    disabledSuccess: z.array(z.string()),
+    disabledFail: z.array(z.string()),
+  }),
+  formulas: z.strictObject({
+    saveDcBase: z.number().int().min(0).max(20),
+    proficiencyBase: z.number().int().min(0).max(10),
+    proficiencyEvery: z.number().int().min(1).max(20),
+  }),
+  heroScaling: z.strictObject({
+    meleeDiceByLevel: DiceTable.nullable(),
+    rangedDiceByLevel: DiceTable.nullable(),
+    hpBaseLevels: z.number().int().min(0).max(10),
+    hpConCoefficient: z.number().min(0).max(5),
+  }),
+  initiative: z.strictObject({
+    heroMin: z.number().int().min(0).max(50),
+    heroMax: z.number().int().min(0).max(50),
+    mode: z.enum(["roll", "static"]),
+  }),
+  defaultAttacks: z.strictObject({
+    meleeName: z.string().trim().min(1).max(60),
+    rangedName: z.string().trim().min(1).max(60),
+    weaponName: z.string().trim().min(1).max(60),
+  }),
+  saves: z.strictObject({ proficiency: z.boolean() }),
+  deathSaves: z.strictObject({ enabled: z.boolean(), unitsDieAtZero: z.boolean() }),
+  concentration: z.strictObject({ enabled: z.boolean(), dcCap: z.number().int().min(10).max(99).nullable() }),
+  conditions: z.strictObject({ enabled: z.boolean(), exhaustion: z.enum(RULES_EDITIONS), custom: z.array(CustomConditionSchema).max(50).optional() }),
+  actions: z.strictObject({ enabled: z.boolean(), opportunityAttacks: z.boolean(), retaliation: z.boolean(), variant: z.enum(RULES_EDITIONS) }),
+  classes: z.strictObject({ enabled: z.boolean() }),
+  outOfCombat: z.strictObject({
+    persistResources: z.boolean(),
+    longRestHitDice: z.enum(["half", "all"]),
+    xp: z.boolean(),
+    inspiration: z.boolean(),
+  }),
+  encounters: z.strictObject({
+    balance: z.enum(["fair", "xp"]),
+    unitGroups: UnitGroupAppearancesSchema.optional(),
+    edition: z.enum(RULES_EDITIONS),
+    autoXp: z.boolean(),
+  }),
+  items: z.strictObject({ enabled: z.boolean(), attunementLimit: z.number().int().min(1).max(10) }),
+  spellIngredients: z.strictObject({ enabled: z.boolean(), autoPay: z.boolean() }),
+  advancement: AdvancementRulesSchema,
+  tables: TablesRulesSchema,
+  system: z.strictObject({
+    key: z.enum(RULE_SYSTEM_KEYS as [string, ...string[]], { message: UNKNOWN_SYSTEM_MESSAGE }),
+    modules: z.array(z.string()).transform((ids) => [...new Set(ids)].sort()).optional(),
+  }),
+};
+
+// Виводимо тип до застосування defaults: DEFAULT_RULES типізований через Ruleset.
+export type Ruleset = { [K in keyof typeof sectionSchemas]: z.output<(typeof sectionSchemas)[K]> };
+
+type Optional<F extends z.ZodType> = undefined extends z.output<F> ? F : never;
+
+type WithDefaults<S extends Record<string, z.ZodType>> = { [K in keyof S]: S[K] extends Optional<S[K]> ? S[K] : z.ZodDefault<S[K]> };
+
+function withDefaults<S extends Record<string, z.ZodType>>(
+  section: z.ZodObject<S>,
+  defaults: { [K in keyof S as S[K] extends Optional<S[K]> ? never : K]: z.core.util.NoUndefined<z.output<S[K]>> },
+) {
+  const fields = Object.entries(section.shape) as [keyof S, S[keyof S]][];
+
+  const shape = Object.fromEntries(
+    fields.map(([key, field]) => [key, key in defaults ? field.default((defaults as unknown as Record<keyof S, never>)[key]) : field]),
+  ) as WithDefaults<S>;
+
+  return z.strictObject(shape);
+}
+
+const sections = {
+  morale: withDefaults(sectionSchemas.morale, DEFAULT_RULES.morale),
+  criticals: withDefaults(sectionSchemas.criticals, DEFAULT_RULES.criticals),
+  formulas: withDefaults(sectionSchemas.formulas, DEFAULT_RULES.formulas),
+  heroScaling: withDefaults(sectionSchemas.heroScaling, DEFAULT_RULES.heroScaling),
+  initiative: withDefaults(sectionSchemas.initiative, DEFAULT_RULES.initiative),
+  defaultAttacks: withDefaults(sectionSchemas.defaultAttacks, DEFAULT_RULES.defaultAttacks),
+  saves: withDefaults(sectionSchemas.saves, DEFAULT_RULES.saves),
+  deathSaves: withDefaults(sectionSchemas.deathSaves, DEFAULT_RULES.deathSaves),
+  concentration: withDefaults(sectionSchemas.concentration, DEFAULT_RULES.concentration),
+  conditions: withDefaults(sectionSchemas.conditions, DEFAULT_RULES.conditions),
+  actions: withDefaults(sectionSchemas.actions, DEFAULT_RULES.actions),
+  classes: withDefaults(sectionSchemas.classes, DEFAULT_RULES.classes),
+  outOfCombat: withDefaults(sectionSchemas.outOfCombat, DEFAULT_RULES.outOfCombat),
+  encounters: withDefaults(sectionSchemas.encounters, DEFAULT_RULES.encounters),
+  items: withDefaults(sectionSchemas.items, DEFAULT_RULES.items),
+  spellIngredients: withDefaults(sectionSchemas.spellIngredients, DEFAULT_RULES.spellIngredients),
+  advancement: withDefaults(sectionSchemas.advancement, DEFAULT_RULES.advancement),
+  tables: withDefaults(sectionSchemas.tables, DEFAULT_RULES.tables),
+  system: withDefaults(sectionSchemas.system, DEFAULT_RULES.system),
+};
+
+type Sections = typeof sections;
+
+const criticalsOrdered = (v: { critOn: number; fumbleOn: number }) => v.fumbleOn < v.critOn;
+
+const initiativeOrdered = (v: { heroMin?: number; heroMax?: number }) =>
+  v.heroMin === undefined || v.heroMax === undefined || v.heroMin <= v.heroMax;
+
+export function legacyParseRules(raw: unknown): Ruleset {
+  const obj = isRecord(raw) ? raw : {};
+
+  const rules = Object.fromEntries(
+    (Object.keys(sections) as (keyof Sections)[]).filter((k): k is Exclude<keyof Sections, "system"> => k !== "system").map((k) => {
+      const parsed = sections[k].safeParse(obj[k] ?? {});
+
+      const valid =
+        parsed.success &&
+        (k !== "initiative" || initiativeOrdered(parsed.data as Ruleset["initiative"])) &&
+        (k !== "criticals" || criticalsOrdered(parsed.data as Ruleset["criticals"]));
+
+      return [k, valid ? parsed.data : DEFAULT_RULES[k]];
+    }),
+  ) as Omit<Ruleset, "system">;
+
+  const system = sectionSchemas.system.safeParse(obj.system);
+
+  if (!system.success) return { ...rules, system: { key: rules.classes.enabled ? "dnd5e" : "homm" } };
+
+  return { ...rules, system: validateComposition(system.data).length > 0 ? { key: system.data.key } : system.data };
+}
