@@ -12,6 +12,7 @@ import { useAbilityText } from "./use-ability-text";
 import { HudChipTabs } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
+import { useAbilityComposition } from "@/lib/hooks/abilities";
 import { useRecipeText } from "@/lib/hooks/abilities/useRecipeText";
 import { useRecipeValues } from "@/lib/hooks/abilities/useRecipeValues";
 import { useRuleSystem } from "@/lib/hooks/systems/useRuleSystem";
@@ -19,7 +20,6 @@ import { useTranslator } from "@/lib/i18n/use-translator";
 import type { Ability } from "@/lib/utils/abilities/schema";
 import { summarizeAbility } from "@/lib/utils/abilities/summary";
 import { buildRecipe, buildScratchAbility, type Recipe, RECIPE_CATEGORIES, type RecipeCategory, type RecipeResult, RECIPES, recipesOf } from "@/lib/utils/abilities/templates";
-import { composition } from "@/lib/utils/rules/systems/catalog";
 import type { SpellEffect } from "@/lib/utils/spells/model/schema";
 
 type SpellPick = { effects: SpellEffect[]; concentration?: boolean };
@@ -52,6 +52,8 @@ export function RecipeGallery(props: RecipeGalleryProps) {
 
   const rule = useRuleSystem({ campaignId });
 
+  const { composition: activeComposition } = useAbilityComposition(campaignId);
+
   const traitRecipes = useMemo(() => (rule.ready ? (rule.system.traits?.recipes ?? []) : []), [rule]);
 
   const [category, setCategory] = useState<RecipeCategory | typeof ALL>(ALL);
@@ -68,7 +70,7 @@ export function RecipeGallery(props: RecipeGalleryProps) {
 
   const form = useRecipeValues(selected, ctx);
 
-  const baseRecipes = useMemo(() => (rule.ready ? recipesOf(composition({ key: rule.key })) : RECIPES), [rule]);
+  const baseRecipes = useMemo(() => (activeComposition ? recipesOf(activeComposition) : RECIPES), [activeComposition]);
 
   const recipes = useMemo(() => [...baseRecipes, ...traitRecipes].filter((r) => r.scopes.includes(scope) && (category === ALL || r.category === category)), [scope, category, baseRecipes, traitRecipes]);
 

@@ -10,12 +10,15 @@ import { FieldErrors } from "../FieldErrors";
 import { NestedEffectsEditor } from "../NestedEffectsEditor";
 import { sectionId,SectionShell } from "./SectionShell";
 
-import { allowedEffectKinds, newEffect } from "@/lib/utils/abilities/editor";
+import { useAbilityComposition } from "@/lib/hooks/abilities";
+import { newEffect } from "@/lib/utils/abilities/editor";
 
 export function EffectsSection({ ability, path, onChange, state }: AbilitySectionProps) {
   const t = useTranslations("abilities.effects");
 
-  const { errorsByPath } = useAbilityEditor();
+  const { campaignId, errorsByPath } = useAbilityEditor();
+
+  const { kinds } = useAbilityComposition(campaignId);
 
   const frame = useRef<number>(undefined);
 
@@ -49,7 +52,7 @@ export function EffectsSection({ ability, path, onChange, state }: AbilitySectio
         className=""
         limits={{ min: 0 }}
         labels={{ add: t("add") }}
-        create={() => newEffect(allowedEffectKinds(ability.trigger)[0], ability.trigger)}
+        create={() => newEffect(kinds(ability.trigger)[0], ability.trigger)}
         onChange={change}
         renderCard={({ effect, path: p, actions }) => (
           <div data-effect-card className="space-y-1">

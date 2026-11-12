@@ -2,6 +2,8 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+vi.mock("@/lib/hooks/campaigns", () => ({ useCampaignRules: () => ({ data: undefined }) }));
+
 import { AmountField, parseSimpleDice } from "@/components/abilities/fields/AmountField";
 import type { LocalizedFieldMeta } from "@/lib/utils/abilities/registry/fields";
 

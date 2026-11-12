@@ -2,10 +2,12 @@
 
 import { useTranslations } from "next-intl";
 
+import { useAbilityEditor } from "@/components/abilities/editor-context";
 import { FieldRenderer } from "@/components/abilities/fields/FieldRenderer";
+import { useAbilityComposition } from "@/lib/hooks/abilities";
 import { useTranslator } from "@/lib/i18n/use-translator";
 import { getAtPath, setAtPath } from "@/lib/utils/abilities/editor";
-import { FLAG_DEFAULTS, FLAG_FIELDS, FLAG_KEYS } from "@/lib/utils/abilities/registry/effects/flags";
+import { FLAG_DEFAULTS, FLAG_FIELDS } from "@/lib/utils/abilities/registry/effects/flags";
 import { DURATION_FIELD, type LocalizedFieldMeta, TARGET_FIELD } from "@/lib/utils/abilities/registry/fields";
 import type { Effect, FlagEffect, FlagKey } from "@/lib/utils/abilities/schema";
 
@@ -14,7 +16,9 @@ export function FlagEditor({ effect, path, onChange }: { effect: FlagEffect; pat
 
   const tr = useTranslator("abilityRegistry");
 
-  const flagOptions = FLAG_KEYS.map((value) => ({ value, label: tr(`flags.${value}.label`) }));
+  const { flags } = useAbilityComposition(useAbilityEditor().campaignId);
+
+  const flagOptions = (flags.includes(effect.flag) ? flags : [effect.flag, ...flags]).map((value) => ({ value, label: tr(`flags.${value}.label`) }));
 
   const flagMeta: LocalizedFieldMeta = { name: "flag", label: t("flag"), input: "select", options: flagOptions };
 

@@ -3,6 +3,8 @@ import { useState } from "react";
 import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+vi.mock("@/lib/hooks/campaigns", () => ({ useCampaignRules: () => ({ data: undefined }) }));
+
 import { AbilityPanel } from "../AbilityPanel";
 import { DEFAULT_CONDITION } from "../ConditionEditor";
 import { AbilityEditorProvider } from "../editor-context";

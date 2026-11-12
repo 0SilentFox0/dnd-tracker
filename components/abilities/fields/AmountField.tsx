@@ -9,7 +9,7 @@ import { ScaleColumnSelect } from "./ScaleColumnSelect";
 import { useAbilityEditor } from "@/components/abilities/editor-context";
 import { Input } from "@/components/ui/input";
 import { SelectField } from "@/components/ui/select-field";
-import { FORMULA_VARIABLES } from "@/lib/utils/abilities/engine/core/amount";
+import { useAbilityComposition } from "@/lib/hooks/abilities";
 import type { Amount } from "@/lib/utils/abilities/schema";
 import { DICE_RE } from "@/lib/utils/abilities/schema/kinds";
 
@@ -83,7 +83,9 @@ function build(mode: Mode, text: string, firstColumn: string): Amount | undefine
 export function AmountField({ id, value, onChange }: FieldProps<Amount | undefined>) {
   const t = useTranslations("abilities.fields");
 
-  const columns = useAbilityEditor().classColumns;
+  const { campaignId, classColumns: columns } = useAbilityEditor();
+
+  const { variables } = useAbilityComposition(campaignId);
 
   const mode = modeOf(value);
 
@@ -139,7 +141,7 @@ export function AmountField({ id, value, onChange }: FieldProps<Amount | undefin
           />
         )}
       </div>
-      {mode === "formula" && <p className="text-xs text-muted-foreground">{t("variables", { list: FORMULA_VARIABLES.join(", ") })}</p>}
+      {mode === "formula" && <p className="text-xs text-muted-foreground">{t("variables", { list: variables.join(", ") })}</p>}
     </div>
   );
 }

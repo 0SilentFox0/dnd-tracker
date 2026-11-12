@@ -1,7 +1,9 @@
 // @vitest-environment happy-dom
 import { useState } from "react";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
+vi.mock("@/lib/hooks/campaigns", () => ({ useCampaignRules: () => ({ data: undefined }) }));
 
 import { AmountField } from "@/components/abilities/fields/AmountField";
 import { FlatField } from "@/components/abilities/fields/FlatField";

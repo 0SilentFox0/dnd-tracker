@@ -9,7 +9,7 @@ import { ScaleColumnSelect } from "./ScaleColumnSelect";
 import { useAbilityEditor } from "@/components/abilities/editor-context";
 import { Input } from "@/components/ui/input";
 import { SelectField } from "@/components/ui/select-field";
-import { FORMULA_VARIABLES } from "@/lib/utils/abilities/engine/core/amount";
+import { useAbilityComposition } from "@/lib/hooks/abilities";
 import type { Flat } from "@/lib/utils/abilities/schema";
 
 type Mode = "number" | "formula" | "scale";
@@ -19,7 +19,9 @@ const modeOf = (v: Flat | undefined): Mode => (typeof v === "object" && v !== nu
 export function FlatField({ id, value, onChange }: FieldProps<Flat | undefined>) {
   const t = useTranslations("abilities.fields");
 
-  const columns = useAbilityEditor().classColumns;
+  const { campaignId, classColumns: columns } = useAbilityEditor();
+
+  const { variables } = useAbilityComposition(campaignId);
 
   const mode = modeOf(value);
 
@@ -77,7 +79,7 @@ export function FlatField({ id, value, onChange }: FieldProps<Flat | undefined>)
           />
         )}
       </div>
-      {mode === "formula" && <p className="text-xs text-muted-foreground">{t("variables", { list: FORMULA_VARIABLES.join(", ") })}</p>}
+      {mode === "formula" && <p className="text-xs text-muted-foreground">{t("variables", { list: variables.join(", ") })}</p>}
     </div>
   );
 }

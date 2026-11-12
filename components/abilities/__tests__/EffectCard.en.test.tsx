@@ -2,6 +2,8 @@
 import { cleanup, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+vi.mock("@/lib/hooks/campaigns", () => ({ useCampaignRules: () => ({ data: undefined }) }));
+
 import { AbilityEditorProvider } from "../editor-context";
 import { EffectCard } from "../EffectCard";
 

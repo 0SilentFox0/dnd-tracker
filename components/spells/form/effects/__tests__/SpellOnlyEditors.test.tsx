@@ -3,6 +3,8 @@ import { useState } from "react";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+vi.mock("@/lib/hooks/campaigns", () => ({ useCampaignRules: () => ({ data: undefined }) }));
+
 vi.mock("@/components/ui/select-field", () => ({
   SelectField: ({ id, value, options, onValueChange }: { id?: string; value: string; options: { value: string; label: string }[]; onValueChange: (v: string) => void }) => (
     <select id={id} value={value} onChange={(e) => onValueChange(e.target.value)}>

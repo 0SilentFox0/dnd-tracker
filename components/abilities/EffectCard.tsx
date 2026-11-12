@@ -12,8 +12,9 @@ import { useAbilityText } from "./use-ability-text";
 
 import { Button } from "@/components/ui/button";
 import { SelectField } from "@/components/ui/select-field";
+import { useAbilityComposition } from "@/lib/hooks/abilities";
 import { useTranslator } from "@/lib/i18n/use-translator";
-import { allowedEffectKinds, changeEffectKind, getAtPath, newEffect, setAtPath } from "@/lib/utils/abilities/editor";
+import { changeEffectKind, getAtPath, newEffect, setAtPath } from "@/lib/utils/abilities/editor";
 import { EFFECT_REGISTRY } from "@/lib/utils/abilities/registry/effects";
 import type { Effect, EffectKind, Trigger } from "@/lib/utils/abilities/schema";
 
@@ -39,7 +40,11 @@ export function EffectCard({ effect, trigger, path, actions, kinds, extraKinds =
 
   const text = useAbilityText();
 
-  const kindErrors = useAbilityEditor().errorsByPath[`${path}.kind`] ?? [];
+  const { campaignId, errorsByPath } = useAbilityEditor();
+
+  const kindErrors = errorsByPath[`${path}.kind`] ?? [];
+
+  const pickable = useAbilityComposition(campaignId).kinds(trigger);
 
   if (!def) {
     return (
@@ -56,7 +61,9 @@ export function EffectCard({ effect, trigger, path, actions, kinds, extraKinds =
     );
   }
 
-  const options = [...(kinds ?? allowedEffectKinds(trigger)).map((k) => ({ value: k, label: tr(`effects.${k}.label`) })), ...extraKinds];
+  const shown = kinds ?? pickable;
+
+  const options = [...(shown.includes(effect.kind) ? shown : [effect.kind, ...shown]).map((k) => ({ value: k, label: tr(`effects.${k}.label`) })), ...extraKinds];
 
   const set = (name: string, v: unknown) => actions.onChange(setAtPath(effect, name, v));
 
@@ -96,7 +103,7 @@ type RandomOf = Extract<Effect, { kind: "randomOf" }>;
 function RandomOfEditor({ effect, trigger, path, onChange }: { effect: RandomOf; trigger: Trigger; path: string; onChange: (e: Effect) => void }) {
   const t = useTranslations("abilities.effect");
 
-  const kinds = allowedEffectKinds(trigger).filter((k) => k !== "randomOf");
+  const kinds = useAbilityComposition(useAbilityEditor().campaignId).kinds(trigger).filter((k) => k !== "randomOf");
 
   return (
     <NestedEffectsEditor

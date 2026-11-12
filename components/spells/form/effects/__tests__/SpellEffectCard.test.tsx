@@ -2,6 +2,8 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+vi.mock("@/lib/hooks/campaigns", () => ({ useCampaignRules: () => ({ data: undefined }) }));
+
 vi.mock("@/lib/hooks/units", () => ({ useUnits: vi.fn(() => ({ data: [{ id: "u1", name: "Вовк" }], isLoading: false })) }));
 
 vi.mock("@/components/ui/select-field", () => ({
