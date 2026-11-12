@@ -1,7 +1,21 @@
+import { SYSTEM_SERVER_UNION } from '@/lib/server/systems/registry';
+
 /** Implemented shared character adapters. Activation of model transports remains T14. */
 const base = 'campaigns/[id]/characters';
 
 const hero = `${base}/[characterId]`;
+
+/** One row per method and operation of the composed system routes; bare handlers have no assistant action */
+const systemRows = (scope: 'character' | 'campaign', route: string) =>
+    Object.values(SYSTEM_SERVER_UNION).flatMap((server) =>
+        Object.values(server.routes?.[scope] ?? {}).flatMap((systemRoute) =>
+            Object.entries(systemRoute).flatMap(([method, target]) =>
+                target && 'operation' in target
+                    ? [[method, route, target.operation, 'system-route']]
+                    : []
+            )
+        )
+    );
 
 export const CHARACTER_ACTION_COVERAGE = [
     ['GET', base, 'list', 'character-actions'],
@@ -71,16 +85,8 @@ export const CHARACTER_ACTION_COVERAGE = [
         'rest',
         'character-progression-storage.integration',
     ],
-    ['GET', `${hero}/system/[action]`, 'progression', 'system-route'],
-    ['POST', `${hero}/system/[action]`, 'level-up', 'system-route'],
-    ['PUT', `${hero}/system/[action]`, 'downtime.set', 'system-route'],
-    ['DELETE', `${hero}/system/[action]`, 'advance.undo', 'system-route'],
-    [
-        'POST',
-        'campaigns/[id]/system/[action]',
-        'downtime.period',
-        'system-route',
-    ],
+    ...systemRows('character', `${hero}/system/[action]`),
+    ...systemRows('campaign', 'campaigns/[id]/system/[action]'),
     [
         'POST',
         'campaigns/[id]/experience',

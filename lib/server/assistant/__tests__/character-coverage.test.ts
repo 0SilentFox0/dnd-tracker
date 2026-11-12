@@ -22,10 +22,14 @@ it('every character route method has one implemented action and test owner', () 
         .sort();
 
     expect(
-        CHARACTER_ACTION_COVERAGE.map(
-            (row) => `${row.method} ${row.route}`
-        ).sort()
-    ).toEqual(expected);
+        [
+            ...new Set(
+                CHARACTER_ACTION_COVERAGE.map(
+                    (row) => `${row.method} ${row.route}`
+                )
+            ),
+        ].sort()
+    ).toEqual([...new Set(expected)]);
     for (const row of CHARACTER_ACTION_COVERAGE) {
         expect(
             exportedHttpMethods(
