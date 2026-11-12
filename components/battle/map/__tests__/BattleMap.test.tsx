@@ -76,18 +76,18 @@ describe("BattleMap", () => {
   });
 
   it("fits a tall map into the container height", () => {
-    avail = { width: 1000, height: 500 };
+    avail = { width: 1000, height: 1000 };
 
     const { container } = render(<BattleMap map={{ ...square, cols: 10, rows: 15 }} participants={[]} />);
 
     const clip = container.querySelector("[data-fx-clip]") as HTMLElement;
 
-    expect(parseFloat(clip.style.height)).toBeLessThanOrEqual(500);
-    expect(parseFloat(clip.style.width)).toBeCloseTo(1000 / 3);
+    expect(parseFloat(clip.style.height)).toBeLessThanOrEqual(1000);
+    expect(parseFloat(clip.style.width)).toBeCloseTo(2000 / 3);
   });
 
   it("дрібні клітинки — карта росте до мінімальної клітинки й прокручується в обидва боки від краю", () => {
-    avail = { width: 1000, height: 500 };
+    avail = { width: 1000, height: 1000 };
 
     const { container } = render(<BattleMap map={{ ...square, cols: 20, rows: 40 }} participants={[]} />);
 
@@ -574,6 +574,14 @@ describe("BattleMap — телефон: прокрутка, дотик, коле
 
     expect(container.querySelector("[data-map-rotated]")).toBeNull();
     expect(container.querySelector("[data-map-tokens]")?.className).not.toContain("-rotate-90");
+  });
+
+  it("десктоп: висока карта в широкому контейнері повертається, щоб заповнити його", () => {
+    avail = { width: 1000, height: 500 };
+
+    const { container } = render(<BattleMap map={{ ...square, cols: 10, rows: 15 }} participants={[]} />);
+
+    expect(container.querySelector("[data-map-rotated]")).not.toBeNull();
   });
 
   it("десктоп у портретному контейнері не повертає й не обрізає поля", () => {

@@ -63,7 +63,7 @@ export function BattleResultScreen() {
   const exitHref = isDM ? `/campaigns/${campaignId}/dm/battles` : `/campaigns/${campaignId}`;
 
   return (
-    <div role="dialog" aria-label={t("aria")} className="fixed inset-0 z-[70] flex flex-col items-center overflow-y-auto bg-[radial-gradient(circle_at_50%_30%,rgba(60,48,24,.9),rgba(8,7,6,.97)_65%)] px-4 py-10 text-center">
+    <div role="dialog" aria-label={t("aria")} className="fixed inset-0 z-[70] flex flex-col items-center overflow-y-auto [--hud-muted:#b5aa98] [--ink:#efe5d2] bg-[radial-gradient(circle_at_50%_30%,rgba(60,48,24,.9),rgba(8,7,6,.97)_65%)] px-4 py-10 text-center">
       <div className="my-auto flex w-full max-w-xl flex-col items-center">
         <h2 className={cn("hud-sc text-[44px] font-extrabold tracking-[.14em]", HEADLINE[outcomeKey])}>{t(`outcome.${outcomeKey}`)}</h2>
         <p className="mt-1 text-sm text-[var(--hud-muted)]">{t("rounds", { rounds: summary.data?.rounds ?? battle.currentRound })}</p>

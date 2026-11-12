@@ -74,7 +74,7 @@ export function BattleMap({ map, participants, view, actions, className, editing
 
   const win = useMemo(() => (phone ? playableBounds(map) : { x: 0, y: 0, cols, rows }), [phone, map, cols, rows]);
 
-  const fit = fitMapView(avail, win, { rotatable: phone, fillWidth: phone, minCell: MIN_TAP_CELL_PX });
+  const fit = fitMapView(avail, win, { rotatable: phone, bothWays: !phone, fillWidth: phone, minCell: MIN_TAP_CELL_PX });
 
   const scrollsX = fit.width > avail.width + 0.5;
 

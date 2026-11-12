@@ -57,6 +57,11 @@ describe("fitMapView", () => {
     expect(fitMapView({ width: 600, height: 300 }, wide, { rotatable: true })).toEqual({ width: 500, height: 300, rotated: false });
   });
 
+  it("bothWays: висока карта в широкому контейнері — повернута; без bothWays — ні", () => {
+    expect(fitMapView({ width: 600, height: 300 }, { cols: 12, rows: 20 }, { bothWays: true })).toEqual({ width: 500, height: 300, rotated: true });
+    expect(fitMapView({ width: 600, height: 300 }, { cols: 12, rows: 20 }).rotated).toBe(false);
+  });
+
   it("майже квадратна карта — поворот майже нічого не дає, лишається як є", () => {
     expect(fitMapView({ width: 300, height: 600 }, { cols: 11, rows: 10 }, { rotatable: true }).rotated).toBe(false);
   });

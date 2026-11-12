@@ -91,10 +91,14 @@ export const MIN_TAP_CELL_PX = 30;
 export function fitMapView(
   avail: { width: number; height: number },
   map: Pick<BattleMapConfig, "cols" | "rows">,
-  { rotatable = false, fillWidth = false, minCell = 0 }: { rotatable?: boolean; fillWidth?: boolean; minCell?: number } = {},
+  { rotatable = false, bothWays = false, fillWidth = false, minCell = 0 }: { rotatable?: boolean; bothWays?: boolean; fillWidth?: boolean; minCell?: number } = {},
 ): MapView {
   // за орієнтацією, а не за виграшем площі: інакше карта перекидається, коли панель знизу росте
-  const rotated = rotatable && avail.height > avail.width && map.cols >= map.rows * ROTATE_MIN_RATIO;
+  const landscapeMapInPortrait = avail.height > avail.width && map.cols >= map.rows * ROTATE_MIN_RATIO;
+
+  const portraitMapInLandscape = bothWays && avail.width > avail.height && map.rows >= map.cols * ROTATE_MIN_RATIO;
+
+  const rotated = (rotatable && landscapeMapInPortrait) || portraitMapInLandscape;
 
   const shown = rotated ? { cols: map.rows, rows: map.cols } : map;
 
