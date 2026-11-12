@@ -33,6 +33,7 @@ import {
     uploadImageDataUrl,
     YEAR_CACHE_SECONDS,
 } from '@/lib/supabase/image-storage';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
 import { fullSpellSlots } from '@/lib/utils/spells/spell-slots';
 import type { CharacterGoal } from '@/types/characters';
 import type { SpellSlotProgression } from '@/types/races';
@@ -125,7 +126,8 @@ const heroInitiative = (dex: number, archetype: HeroArchetypeKey | null) =>
     clampHeroInitiative(
         11 +
             Math.max(0, Math.floor((dex - 10) / 2)) +
-            (archetype ? ARCHETYPE_INITIATIVE[archetype] : 1)
+            (archetype ? ARCHETYPE_INITIATIVE[archetype] : 1),
+        DEFAULT_RULES.initiative
     );
 
 const BUILDS: Record<string, Build> = {

@@ -18,21 +18,15 @@ export const ACTIVE_CHARACTER = { status: CharacterStatus.ACTIVE } as const;
 
 export const CONTROLLED_BY_DM = 'dm';
 
-// Як у HoMM5: стала величина без кидка, задає порядок ходу; юніти мають 5–19
-export const HERO_INITIATIVE = { MIN: 10, MAX: 16, DEFAULT: 10 } as const;
-
 export const HERO_INITIATIVE_BOUNDS = { MIN: 0, MAX: 50 } as const;
 
 export const clampHeroInitiative = (
     n: number | null | undefined,
-    range: { heroMin: number; heroMax: number } = {
-        heroMin: HERO_INITIATIVE.MIN,
-        heroMax: HERO_INITIATIVE.MAX,
-    }
+    range: { heroMin: number; heroMax: number }
 ) =>
     Math.min(
         range.heroMax,
-        Math.max(range.heroMin, Math.round(n ?? HERO_INITIATIVE.DEFAULT))
+        Math.max(range.heroMin, Math.round(n ?? range.heroMin))
     );
 
 export const GoalAuthor = { DM: 'dm', PLAYER: 'player' } as const;

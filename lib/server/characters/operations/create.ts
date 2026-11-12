@@ -84,7 +84,9 @@ async function createCharacterCore(
 
     const { heroMin, heroMax } = campaign.rules.initiative;
 
-    if (data.initiative < heroMin || data.initiative > heroMax)
+    const initiative = data.initiative ?? heroMin;
+
+    if (initiative < heroMin || initiative > heroMax)
         throw new ContentError(
             API_ERRORS.INITIATIVE_OUT_OF_RANGE_DETAIL,
             400,
@@ -195,7 +197,7 @@ async function createCharacterCore(
                 charisma: data.charisma,
 
                 armorClass: data.armorClass,
-                initiative: data.initiative,
+                initiative,
                 speed: data.speed,
 
                 savingThrows: data.savingThrows as Record<string, boolean>,

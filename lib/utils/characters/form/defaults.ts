@@ -1,4 +1,5 @@
-import { CharacterType, HERO_INITIATIVE } from '@/lib/constants/characters';
+import { CharacterType } from '@/lib/constants/characters';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
 import type { CharacterFormData } from '@/types/characters';
 
 export const defaultCharacterFormData: CharacterFormData = {
@@ -27,7 +28,7 @@ export const defaultCharacterFormData: CharacterFormData = {
     },
     combatStats: {
         armorClass: 10,
-        initiative: HERO_INITIATIVE.DEFAULT,
+        initiative: DEFAULT_RULES.initiative.heroMin,
         speed: 30,
         minTargets: 1,
         maxTargets: 1,

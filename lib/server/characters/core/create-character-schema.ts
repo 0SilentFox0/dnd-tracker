@@ -6,7 +6,6 @@ import {
 } from '@/lib/constants/abilities';
 import {
     CharacterType,
-    HERO_INITIATIVE,
     HERO_INITIATIVE_BOUNDS,
 } from '@/lib/constants/characters';
 import { HERO_ARCHETYPE_KEYS } from '@/lib/constants/hero-archetypes';
@@ -49,7 +48,7 @@ export const createCharacterSchema = z.object({
         .int()
         .min(HERO_INITIATIVE_BOUNDS.MIN)
         .max(HERO_INITIATIVE_BOUNDS.MAX)
-        .default(HERO_INITIATIVE.DEFAULT),
+        .optional(),
     speed: z.number().min(0).default(30),
 
     savingThrows: z.record(z.string(), z.boolean()).default({}),

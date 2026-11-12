@@ -4,11 +4,7 @@ import { wfrpDraftSchema } from './wfrp-draft-schema';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { CampaignRole } from '@/lib/constants/campaigns';
-import {
-    CharacterStatus,
-    CharacterType,
-    HERO_INITIATIVE,
-} from '@/lib/constants/characters';
+import { CharacterStatus, CharacterType } from '@/lib/constants/characters';
 import { prisma } from '@/lib/db';
 import { EMPTY_INVENTORY } from '@/lib/server/characters/core/derive-character-defaults';
 import { mergeDraftGoals } from '@/lib/server/characters/draft-goals';
@@ -17,6 +13,7 @@ import { resolveAvatarForPersistence } from '@/lib/supabase/avatar-storage';
 import { type CampaignAccessResult } from '@/lib/utils/api/api-auth';
 import { errorResponse } from '@/lib/utils/api/api-response';
 import { parseBody } from '@/lib/utils/api/parse-body';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import { isUsableProfile, planDraft } from '@/systems/wfrp/rules/creation';
 import { parseProfile } from '@/systems/wfrp/server/schemas';
@@ -121,7 +118,7 @@ export async function createWfrpDraft(
                 level: 1,
                 characteristics: plan.characteristics as never,
                 experience: plan.experience,
-                initiative: HERO_INITIATIVE.DEFAULT,
+                initiative: DEFAULT_RULES.initiative.heroMin,
                 avatar: avatar.avatar ?? undefined,
                 skillTreeProgress: {},
             },

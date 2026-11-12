@@ -183,6 +183,9 @@ describe('d20 / HOMM names and rule-section readers leaving core', () => {
         proficiencyForLevel: 0,
         spellcastingDerived: 0,
         heroHpFormula: 0,
+        'HERO_INITIATIVE\\b': 0,
+        getHeroMaxHpBreakdown: 0,
+        heroHpFallback: 0,
     };
 
     const RULES_SECTION_READERS: Record<string, number> = {

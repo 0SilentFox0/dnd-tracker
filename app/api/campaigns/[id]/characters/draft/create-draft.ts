@@ -7,11 +7,7 @@ import { resolveDraftParts } from './draft-resolve';
 import { draftRejection } from './draft-rules';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
-import {
-    CharacterStatus,
-    CharacterType,
-    HERO_INITIATIVE,
-} from '@/lib/constants/characters';
+import { CharacterStatus, CharacterType } from '@/lib/constants/characters';
 import { prisma } from '@/lib/db';
 import {
     deriveCharacterDefaults,
@@ -20,6 +16,7 @@ import {
 import { lockPlayerDrafts } from '@/lib/server/characters/draft-lock';
 import { requireCampaignAccess } from '@/lib/utils/api/api-auth';
 import { errorResponse } from '@/lib/utils/api/api-response';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
 import { ruleSystemOf } from '@/lib/utils/rules/systems/registry';
 import { statColumnsOf } from '@/lib/utils/rules/systems/stats';
 import { createWfrpDraft } from '@/systems/wfrp/server/draft/create-wfrp-draft';
@@ -112,7 +109,7 @@ export async function createDraft(
                 level: 1,
                 ...asClass?.fields,
                 ...(choices?.ok && choices.fields),
-                initiative: HERO_INITIATIVE.DEFAULT,
+                initiative: DEFAULT_RULES.initiative.heroMin,
                 avatar: avatar.avatar ?? undefined,
                 spellSlots,
                 skillTreeProgress: {},

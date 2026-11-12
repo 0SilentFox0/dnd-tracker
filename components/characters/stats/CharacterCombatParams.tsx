@@ -7,6 +7,7 @@ import { useCampaignRules } from '@/lib/hooks/campaigns';
 import { translateIssue } from '@/lib/i18n/translate-issue';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import type { CharacterFormBindings } from '@/lib/utils/characters/form/bindings';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
 import type { SheetTotal } from '@/types/characters';
 
 const intOr = (v: string, fallback: number) => {
@@ -34,7 +35,7 @@ export function CharacterCombatParams({
 
     const { data: rules } = useCampaignRules(campaignId);
 
-    const initiativeRange = rules?.initiative ?? { heroMin: 10, heroMax: 16 };
+    const initiativeRange = rules?.initiative ?? DEFAULT_RULES.initiative;
 
     const { armorClass, initiative, speed, minTargets, maxTargets } = data;
 
