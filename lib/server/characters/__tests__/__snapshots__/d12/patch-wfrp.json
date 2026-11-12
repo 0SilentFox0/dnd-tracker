@@ -1,0 +1,56 @@
+{
+  "where": {
+    "id": "hero"
+  },
+  "data": {
+    "name": "Renamed",
+    "characteristics": {
+      "base": {
+        "ws": 30,
+        "bs": 30,
+        "s": 30,
+        "t": 30,
+        "i": 30,
+        "ag": 30,
+        "dex": 30,
+        "int": 30,
+        "wp": 30,
+        "fel": 30
+      },
+      "advances": {
+        "ws": 0,
+        "bs": 0,
+        "s": 0,
+        "t": 0,
+        "i": 0,
+        "ag": 0,
+        "dex": 0,
+        "int": 0,
+        "wp": 0,
+        "fel": 0
+      },
+      "move": 4,
+      "skillAdvances": {},
+      "fate": 0,
+      "extraWounds": 0,
+      "talents": {},
+      "ledger": [],
+      "spentArchived": 0
+    },
+    "level": 1,
+    "immunities": []
+  },
+  "include": {
+    "user": {
+      "select": {
+        "id": true,
+        "displayName": true,
+        "avatar": true
+      }
+    },
+    "inventory": true
+  },
+  "omit": {
+    "notes": true
+  }
+}

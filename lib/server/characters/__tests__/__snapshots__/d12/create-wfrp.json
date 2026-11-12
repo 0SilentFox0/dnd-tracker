@@ -1,0 +1,83 @@
+{
+  "data": {
+    "campaignId": "camp",
+    "type": "npc_hero",
+    "controlledBy": "dm",
+    "name": "Hero",
+    "level": 1,
+    "class": "",
+    "subclass": "Чемпіон",
+    "classes": [],
+    "archetype": null,
+    "race": "Людина",
+    "strength": 10,
+    "dexterity": 10,
+    "constitution": 10,
+    "intelligence": 10,
+    "wisdom": 10,
+    "charisma": 10,
+    "armorClass": 10,
+    "initiative": 10,
+    "speed": 30,
+    "savingThrows": {},
+    "skills": {},
+    "spellSlots": {
+      "1": {
+        "max": 2,
+        "current": 2
+      }
+    },
+    "knownSpells": [],
+    "languages": [],
+    "immunities": [],
+    "proficiencies": {},
+    "personalSkillId": null,
+    "primaryAbility": null,
+    "skillTreeProgress": {},
+    "characteristics": {
+      "base": {
+        "ws": 30,
+        "bs": 30,
+        "s": 30,
+        "t": 30,
+        "i": 30,
+        "ag": 30,
+        "dex": 30,
+        "int": 30,
+        "wp": 30,
+        "fel": 30
+      },
+      "advances": {
+        "ws": 0,
+        "bs": 0,
+        "s": 0,
+        "t": 0,
+        "i": 0,
+        "ag": 0,
+        "dex": 0,
+        "int": 0,
+        "wp": 0,
+        "fel": 0
+      },
+      "move": 4,
+      "skillAdvances": {},
+      "fate": 0,
+      "extraWounds": 0,
+      "talents": {},
+      "ledger": [],
+      "spentArchived": 0
+    },
+    "resources": {
+      "fortune": 0
+    }
+  },
+  "include": {
+    "user": {
+      "select": {
+        "id": true,
+        "displayName": true,
+        "avatar": true
+      }
+    }
+  }
+}

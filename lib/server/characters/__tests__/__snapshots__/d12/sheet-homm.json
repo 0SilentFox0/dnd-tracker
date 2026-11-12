@@ -1,0 +1,460 @@
+{
+  "system": "homm",
+  "viewer": {
+    "isDM": true,
+    "isOwner": false
+  },
+  "review": {
+    "pending": false,
+    "note": null
+  },
+  "maxLevel": 20,
+  "identity": {
+    "id": "ch1",
+    "name": "Герой",
+    "avatar": null,
+    "level": 3,
+    "className": "",
+    "archetype": "ranger",
+    "subclass": null,
+    "race": "Людина",
+    "raceIcon": null,
+    "alignment": null
+  },
+  "abilities": [
+    {
+      "key": "strength",
+      "score": 10,
+      "mod": 0,
+      "isPrimary": false,
+      "lines": [
+        {
+          "label": "characterProfile.sheet.lines.base",
+          "value": "10",
+          "source": "base"
+        }
+      ]
+    },
+    {
+      "key": "dexterity",
+      "score": 12,
+      "mod": 1,
+      "isPrimary": false,
+      "lines": [
+        {
+          "label": "characterProfile.sheet.lines.base",
+          "value": "12",
+          "source": "base"
+        }
+      ]
+    },
+    {
+      "key": "constitution",
+      "score": 14,
+      "mod": 2,
+      "isPrimary": false,
+      "lines": [
+        {
+          "label": "characterProfile.sheet.lines.base",
+          "value": "14",
+          "source": "base"
+        }
+      ]
+    },
+    {
+      "key": "intelligence",
+      "score": 10,
+      "mod": 0,
+      "isPrimary": false,
+      "lines": [
+        {
+          "label": "characterProfile.sheet.lines.base",
+          "value": "10",
+          "source": "base"
+        }
+      ]
+    },
+    {
+      "key": "wisdom",
+      "score": 10,
+      "mod": 0,
+      "isPrimary": false,
+      "lines": [
+        {
+          "label": "characterProfile.sheet.lines.base",
+          "value": "10",
+          "source": "base"
+        }
+      ]
+    },
+    {
+      "key": "charisma",
+      "score": 16,
+      "mod": 3,
+      "isPrimary": false,
+      "lines": [
+        {
+          "label": "characterProfile.sheet.lines.base",
+          "value": "16",
+          "source": "base"
+        }
+      ]
+    }
+  ],
+  "primaryAbility": null,
+  "proficiency": 2,
+  "hp": {
+    "total": 63,
+    "lines": [
+      {
+        "label": "characterProfile.sheet.heroHp.formula",
+        "params": {
+          "archetype": "ranger",
+          "baseLevels": "3",
+          "hpPerLevel": "9",
+          "conMod": "2",
+          "conCoefficient": "1.5"
+        },
+        "value": "",
+        "source": "level"
+      },
+      {
+        "label": "characterProfile.sheet.heroHp.total",
+        "params": {
+          "base": "27",
+          "level": "3",
+          "perLevel": "12",
+          "total": "63"
+        },
+        "value": "",
+        "source": "level"
+      }
+    ]
+  },
+  "armorClass": {
+    "total": 12,
+    "lines": [
+      {
+        "label": "characterProfile.sheet.lines.base",
+        "value": "12",
+        "source": "base"
+      }
+    ]
+  },
+  "initiative": 0,
+  "speed": 30,
+  "morale": 1,
+  "targets": {
+    "min": 1,
+    "max": 1
+  },
+  "immunities": [],
+  "languages": [],
+  "proficiencies": [],
+  "attacks": [
+    {
+      "id": "default-melee",
+      "name": "Unarmed Strike",
+      "kind": "melee",
+      "toHit": {
+        "total": 2,
+        "lines": [
+          {
+            "label": "gameTerms.abilities.strength.label",
+            "value": "+0",
+            "source": "ability"
+          },
+          {
+            "label": "characterProfile.sheet.lines.proficiency",
+            "value": "+2",
+            "source": "proficiency"
+          }
+        ]
+      },
+      "avgDamage": {
+        "total": 5,
+        "lines": [
+          {
+            "label": "characterProfile.sheet.lines.levelDice",
+            "params": {
+              "dice": "2d4"
+            },
+            "value": "8.0",
+            "source": "level"
+          },
+          {
+            "label": "gameTerms.abilities.strength.label",
+            "value": "+0",
+            "source": "ability"
+          },
+          {
+            "label": "characterProfile.sheet.lines.dmMultiplier",
+            "value": "×0.7",
+            "source": "multiplier"
+          }
+        ]
+      }
+    },
+    {
+      "id": "default-ranged",
+      "name": "Ranged Attack",
+      "kind": "ranged",
+      "toHit": {
+        "total": 3,
+        "lines": [
+          {
+            "label": "gameTerms.abilities.dexterity.label",
+            "value": "+1",
+            "source": "ability"
+          },
+          {
+            "label": "characterProfile.sheet.lines.proficiency",
+            "value": "+2",
+            "source": "proficiency"
+          }
+        ]
+      },
+      "avgDamage": {
+        "total": 13,
+        "lines": [
+          {
+            "label": "characterProfile.sheet.lines.levelDice",
+            "params": {
+              "dice": "2d4"
+            },
+            "value": "8.0",
+            "source": "level"
+          },
+          {
+            "label": "gameTerms.abilities.dexterity.label",
+            "value": "+1",
+            "source": "ability"
+          },
+          {
+            "label": "characterProfile.sheet.lines.dmMultiplier",
+            "value": "×1.5",
+            "source": "multiplier"
+          }
+        ]
+      }
+    }
+  ],
+  "bestToHit": 3,
+  "saves": [
+    {
+      "key": "strength",
+      "label": "gameTerms.abilities.strength.label",
+      "ability": "strength",
+      "proficient": false,
+      "bonus": 0
+    },
+    {
+      "key": "dexterity",
+      "label": "gameTerms.abilities.dexterity.label",
+      "ability": "dexterity",
+      "proficient": false,
+      "bonus": 1
+    },
+    {
+      "key": "constitution",
+      "label": "gameTerms.abilities.constitution.label",
+      "ability": "constitution",
+      "proficient": false,
+      "bonus": 2
+    },
+    {
+      "key": "intelligence",
+      "label": "gameTerms.abilities.intelligence.label",
+      "ability": "intelligence",
+      "proficient": false,
+      "bonus": 0
+    },
+    {
+      "key": "wisdom",
+      "label": "gameTerms.abilities.wisdom.label",
+      "ability": "wisdom",
+      "proficient": false,
+      "bonus": 0
+    },
+    {
+      "key": "charisma",
+      "label": "gameTerms.abilities.charisma.label",
+      "ability": "charisma",
+      "proficient": false,
+      "bonus": 3
+    }
+  ],
+  "skills": [
+    {
+      "key": "acrobatics",
+      "label": "gameTerms.dndSkills.acrobatics",
+      "ability": "dexterity",
+      "proficient": false,
+      "bonus": 1
+    },
+    {
+      "key": "animalHandling",
+      "label": "gameTerms.dndSkills.animalHandling",
+      "ability": "wisdom",
+      "proficient": false,
+      "bonus": 0
+    },
+    {
+      "key": "arcana",
+      "label": "gameTerms.dndSkills.arcana",
+      "ability": "intelligence",
+      "proficient": false,
+      "bonus": 0
+    },
+    {
+      "key": "athletics",
+      "label": "gameTerms.dndSkills.athletics",
+      "ability": "strength",
+      "proficient": false,
+      "bonus": 0
+    },
+    {
+      "key": "deception",
+      "label": "gameTerms.dndSkills.deception",
+      "ability": "charisma",
+      "proficient": false,
+      "bonus": 3
+    },
+    {
+      "key": "history",
+      "label": "gameTerms.dndSkills.history",
+      "ability": "intelligence",
+      "proficient": false,
+      "bonus": 0
+    },
+    {
+      "key": "insight",
+      "label": "gameTerms.dndSkills.insight",
+      "ability": "wisdom",
+      "proficient": false,
+      "bonus": 0
+    },
+    {
+      "key": "intimidation",
+      "label": "gameTerms.dndSkills.intimidation",
+      "ability": "charisma",
+      "proficient": false,
+      "bonus": 3
+    },
+    {
+      "key": "investigation",
+      "label": "gameTerms.dndSkills.investigation",
+      "ability": "intelligence",
+      "proficient": false,
+      "bonus": 0
+    },
+    {
+      "key": "medicine",
+      "label": "gameTerms.dndSkills.medicine",
+      "ability": "wisdom",
+      "proficient": false,
+      "bonus": 0
+    },
+    {
+      "key": "nature",
+      "label": "gameTerms.dndSkills.nature",
+      "ability": "intelligence",
+      "proficient": false,
+      "bonus": 0
+    },
+    {
+      "key": "perception",
+      "label": "gameTerms.dndSkills.perception",
+      "ability": "wisdom",
+      "proficient": false,
+      "bonus": 0
+    },
+    {
+      "key": "performance",
+      "label": "gameTerms.dndSkills.performance",
+      "ability": "charisma",
+      "proficient": false,
+      "bonus": 3
+    },
+    {
+      "key": "persuasion",
+      "label": "gameTerms.dndSkills.persuasion",
+      "ability": "charisma",
+      "proficient": false,
+      "bonus": 3
+    },
+    {
+      "key": "religion",
+      "label": "gameTerms.dndSkills.religion",
+      "ability": "intelligence",
+      "proficient": false,
+      "bonus": 0
+    },
+    {
+      "key": "sleightOfHand",
+      "label": "gameTerms.dndSkills.sleightOfHand",
+      "ability": "dexterity",
+      "proficient": false,
+      "bonus": 1
+    },
+    {
+      "key": "stealth",
+      "label": "gameTerms.dndSkills.stealth",
+      "ability": "dexterity",
+      "proficient": false,
+      "bonus": 1
+    },
+    {
+      "key": "survival",
+      "label": "gameTerms.dndSkills.survival",
+      "ability": "wisdom",
+      "proficient": false,
+      "bonus": 0
+    }
+  ],
+  "passives": {
+    "perception": 10,
+    "investigation": 10,
+    "insight": 10
+  },
+  "magic": null,
+  "hitDice": null,
+  "pact": null,
+  "slots": [
+    {
+      "level": 1,
+      "count": 3,
+      "current": 3
+    }
+  ],
+  "rest": null,
+  "spells": [],
+  "items": {
+    "grid": {
+      "ring1": null,
+      "helmet": null,
+      "necklace": null,
+      "range_weapon": null,
+      "armor": null,
+      "shield": null,
+      "weapon": null,
+      "boots": null,
+      "cape": null
+    },
+    "artifacts": [],
+    "sets": []
+  },
+  "personalSkill": null,
+  "progression": {
+    "freePoints": 0,
+    "level": 3,
+    "seenLevel": null
+  },
+  "story": {
+    "biography": null,
+    "goals": [],
+    "notes": null,
+    "chapters": [],
+    "tokens": []
+  }
+}

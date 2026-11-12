@@ -1,0 +1,142 @@
+{
+  "basicInfo": {
+    "id": "participant",
+    "battleId": "b1",
+    "sourceId": "ch1",
+    "sourceType": "character",
+    "name": "Герой",
+    "side": "ally",
+    "controlledBy": "u1"
+  },
+  "abilities": {
+    "level": 3,
+    "initiative": 30,
+    "baseInitiative": 30,
+    "strength": 10,
+    "dexterity": 12,
+    "constitution": 14,
+    "intelligence": 10,
+    "wisdom": 10,
+    "charisma": 16,
+    "modifiers": {
+      "strength": 0,
+      "dexterity": 1,
+      "constitution": 2,
+      "intelligence": 0,
+      "wisdom": 0,
+      "charisma": 3
+    },
+    "proficiencyBonus": 2,
+    "race": "Людина",
+    "creatureType": "humanoid",
+    "moraleCap": 0,
+    "system": {
+      "key": "wfrp",
+      "data": {
+        "characteristics": {
+          "base": {
+            "ws": 30,
+            "bs": 30,
+            "s": 30,
+            "t": 30,
+            "i": 30,
+            "ag": 30,
+            "dex": 30,
+            "int": 30,
+            "wp": 30,
+            "fel": 30
+          },
+          "advances": {
+            "ws": 0,
+            "bs": 0,
+            "s": 0,
+            "t": 0,
+            "i": 0,
+            "ag": 0,
+            "dex": 0,
+            "int": 0,
+            "wp": 0,
+            "fel": 0
+          },
+          "move": 4,
+          "skillAdvances": {},
+          "fate": 0,
+          "extraWounds": 0,
+          "talents": {},
+          "ledger": [],
+          "spentArchived": 0
+        },
+        "stats": {
+          "sb": 3,
+          "ag": 30,
+          "tb": 3,
+          "ap": {
+            "head": 0,
+            "arm": 0,
+            "body": 0,
+            "leg": 0
+          }
+        }
+      }
+    },
+    "meleeMultiplier": 1,
+    "rangedMultiplier": 1,
+    "magicMultiplier": 1,
+    "archetypeKey": "universal"
+  },
+  "combatStats": {
+    "maxHp": 12,
+    "currentHp": 12,
+    "tempHp": 0,
+    "armorClass": 12,
+    "speed": 24,
+    "morale": 1,
+    "status": "active",
+    "minTargets": 1,
+    "maxTargets": 1
+  },
+  "spellcasting": {
+    "spellSlots": {
+      "1": {
+        "max": 3,
+        "current": 3
+      }
+    },
+    "slotSpells": [],
+    "knownSpells": []
+  },
+  "battleData": {
+    "attacks": [
+      {
+        "id": "default-melee",
+        "name": "Unarmed Strike",
+        "type": "melee",
+        "attackBonus": 0,
+        "damageDice": "",
+        "damageType": "physical"
+      },
+      {
+        "id": "default-ranged",
+        "name": "Ranged Attack",
+        "type": "ranged",
+        "attackBonus": 0,
+        "damageDice": "",
+        "damageType": "physical"
+      }
+    ],
+    "activeEffects": [],
+    "equippedArtifacts": [],
+    "artifactSets": [],
+    "resolvedAbilities": [],
+    "schoolMastery": {},
+    "abilityUsage": {},
+    "pendingExtraActions": 0,
+    "fortune": 0
+  },
+  "actionFlags": {
+    "hasUsedAction": false,
+    "hasUsedBonusAction": false,
+    "hasUsedReaction": false,
+    "hasExtraTurn": false
+  }
+}

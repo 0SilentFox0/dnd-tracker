@@ -1,0 +1,92 @@
+{
+  "basicInfo": {
+    "id": "participant",
+    "battleId": "b1",
+    "sourceId": "ch1",
+    "sourceType": "character",
+    "name": "Герой",
+    "side": "ally",
+    "controlledBy": "u1"
+  },
+  "abilities": {
+    "level": 3,
+    "initiative": 0,
+    "baseInitiative": 0,
+    "strength": 10,
+    "dexterity": 12,
+    "constitution": 14,
+    "intelligence": 10,
+    "wisdom": 10,
+    "charisma": 16,
+    "modifiers": {
+      "strength": 0,
+      "dexterity": 1,
+      "constitution": 2,
+      "intelligence": 0,
+      "wisdom": 0,
+      "charisma": 3
+    },
+    "proficiencyBonus": 2,
+    "race": "Людина",
+    "creatureType": "humanoid",
+    "moraleCap": 3,
+    "meleeMultiplier": 0.7,
+    "rangedMultiplier": 1.5,
+    "magicMultiplier": 0.7,
+    "archetypeKey": "ranger"
+  },
+  "combatStats": {
+    "maxHp": 63,
+    "currentHp": 63,
+    "tempHp": 0,
+    "armorClass": 12,
+    "speed": 30,
+    "morale": 1,
+    "status": "active",
+    "minTargets": 1,
+    "maxTargets": 1
+  },
+  "spellcasting": {
+    "spellSlots": {
+      "1": {
+        "max": 3,
+        "current": 3
+      }
+    },
+    "slotSpells": [],
+    "knownSpells": []
+  },
+  "battleData": {
+    "attacks": [
+      {
+        "id": "default-melee",
+        "name": "Unarmed Strike",
+        "type": "melee",
+        "attackBonus": 0,
+        "damageDice": "",
+        "damageType": "physical"
+      },
+      {
+        "id": "default-ranged",
+        "name": "Ranged Attack",
+        "type": "ranged",
+        "attackBonus": 0,
+        "damageDice": "",
+        "damageType": "physical"
+      }
+    ],
+    "activeEffects": [],
+    "equippedArtifacts": [],
+    "artifactSets": [],
+    "resolvedAbilities": [],
+    "schoolMastery": {},
+    "abilityUsage": {},
+    "pendingExtraActions": 0
+  },
+  "actionFlags": {
+    "hasUsedAction": false,
+    "hasUsedBonusAction": false,
+    "hasUsedReaction": false,
+    "hasExtraTurn": false
+  }
+}
