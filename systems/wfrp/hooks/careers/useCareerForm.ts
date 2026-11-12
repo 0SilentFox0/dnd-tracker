@@ -8,7 +8,7 @@ import type {
     CareerData,
     CareerFormData,
     CareerTierDef,
-} from '@/types/careers';
+} from '@/systems/wfrp/rules/careers/types';
 
 export const CAREER_TIERS = 4;
 

@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
-import { createCareerSchema, updateCareerSchema } from '../careers';
+import {
+    createCareerSchema,
+    updateCareerSchema,
+} from '@/systems/wfrp/server/careers/schema';
 
 const tier = (over = {}) => ({
     name: 'T',

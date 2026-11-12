@@ -4,7 +4,6 @@ import type {
     ContentKind,
 } from '@/lib/server/content/define-resource';
 import { artifactsResource } from '@/lib/server/content/resources/artifacts';
-import { careersResource } from '@/lib/server/content/resources/careers';
 import { featsResource } from '@/lib/server/content/resources/feats';
 import { racesResource } from '@/lib/server/content/resources/races';
 import { spellGroupsResource } from '@/lib/server/content/resources/spell-groups';
@@ -27,14 +26,10 @@ type ModuleKind = Exclude<ContentKind, keyof typeof CORE_CONTENT_RESOURCES>;
 
 export const CONTENT_RESOURCES = {
     ...CORE_CONTENT_RESOURCES,
-    careers: careersResource,
     ...Object.fromEntries(
         Object.entries(systemContentKinds()).map(([kind, k]) => [
             kind,
             k.resource,
         ])
     ),
-} as typeof CORE_CONTENT_RESOURCES &
-    Record<ModuleKind, AnyContentResource> & {
-        careers: typeof careersResource;
-    };
+} as typeof CORE_CONTENT_RESOURCES & Record<ModuleKind, AnyContentResource>;

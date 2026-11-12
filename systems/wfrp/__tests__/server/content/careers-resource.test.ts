@@ -28,8 +28,8 @@ vi.mock('@/lib/cache/reference-data', () => ({
 }));
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
-import { careersResource } from '@/lib/server/content/resources/careers';
 import type { Actor } from '@/lib/utils/api/actor';
+import { careersResource } from '@/systems/wfrp/server/content/careers';
 
 const actor: Actor = {
     campaignId: 'c',

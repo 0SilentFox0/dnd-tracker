@@ -43,7 +43,9 @@ vi.mock('@/lib/hooks/campaigns', () => ({
 }));
 vi.mock('@/lib/hooks/feats', () => ({ useFeats: () => mocks.feats }));
 vi.mock('@/lib/hooks/common', () => ({ useConfirm: () => vi.fn() }));
-vi.mock('@/lib/hooks/careers', () => ({ useCareers: () => mocks.careers }));
+vi.mock('@/systems/wfrp/hooks/careers', () => ({
+    useCareers: () => mocks.careers,
+}));
 
 const feat = (
     id: string,

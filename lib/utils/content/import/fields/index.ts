@@ -1,5 +1,4 @@
 import { ARTIFACTS_IMPORT } from './artifacts';
-import { CAREERS_IMPORT } from './careers';
 import { FEATS_IMPORT } from './feats';
 import { RACES_IMPORT } from './races';
 import { SPELL_GROUPS_IMPORT } from './spell-groups';
@@ -15,7 +14,6 @@ const CORE_IMPORT_SPECS = {
     'spell-groups': SPELL_GROUPS_IMPORT,
     races: RACES_IMPORT,
     feats: FEATS_IMPORT,
-    careers: CAREERS_IMPORT,
     artifacts: ARTIFACTS_IMPORT,
 } satisfies Partial<Record<ImportKind, ImportSpec>>;
 

@@ -1,7 +1,6 @@
 import { z, type ZodType } from 'zod';
 
 import 'server-only';
-import { careerTierSchema } from '@/lib/schemas/careers';
 import {
     ChoiceSchema,
     FeatPrerequisiteSchema,
@@ -13,6 +12,7 @@ import {
     UnitSpellGrantSchema,
     UnitStatblockSchema,
 } from '@/lib/schemas/units';
+import { systemContentKinds } from '@/lib/server/systems/registry';
 import {
     AbilitySchema,
     LimitsSchema,
@@ -61,7 +61,7 @@ export const effectKind = (s: ZodType) =>
             .propValues.kind,
     ][0];
 
-export const SHARED_SCHEMAS: ReadonlyArray<Entry> = [
+const CORE_SHARED_SCHEMAS: ReadonlyArray<Entry> = [
     [AbilitySchema, 'Ability'],
     [SpellGrantPolicySchema, 'SpellGrantPolicy'],
     [SpellCastingTimeSchema, 'SpellCastingTime'],
@@ -91,10 +91,16 @@ export const SHARED_SCHEMAS: ReadonlyArray<Entry> = [
     [ChoiceSchema, 'Choice'],
     [FeatPrerequisiteSchema, 'FeatPrerequisite'],
     [RulesetPatchSchema, 'RulesetPatch'],
-    [careerTierSchema, 'CareerTier'],
     [UnitStatblockSchema, 'UnitStatblock'],
     [UnitSpellcastingSchema, 'UnitSpellcasting'],
     [UnitSpellGrantSchema, 'UnitSpellGrant'],
+];
+
+export const sharedSchemas = (): ReadonlyArray<Entry> => [
+    ...CORE_SHARED_SCHEMAS,
+    ...Object.values(systemContentKinds()).flatMap(
+        (k) => k.sharedSchemas ?? []
+    ),
 ];
 
 const stripMeta = (s: object): Record<string, unknown> => {
@@ -114,7 +120,7 @@ export function toJsonSchemas(
 
     const registry = z.registry<{ id: string }>();
 
-    for (const [schema, id] of [...SHARED_SCHEMAS, ...entries]) {
+    for (const [schema, id] of [...sharedSchemas(), ...entries]) {
         if (!registry.has(schema)) registry.add(schema, { id });
     }
 

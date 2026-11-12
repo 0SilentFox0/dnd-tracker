@@ -4,12 +4,19 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { careerKeys, useCareerForm, useCareers } from '..';
+import {
+    createCareer,
+    getCareers,
+    updateCareer,
+} from '@/systems/wfrp/api/careers';
+import {
+    careerKeys,
+    useCareerForm,
+    useCareers,
+} from '@/systems/wfrp/hooks/careers';
+import type { CareerData } from '@/systems/wfrp/rules/careers/types';
 
-import { createCareer, getCareers, updateCareer } from '@/lib/api/careers';
-import type { CareerData } from '@/types/careers';
-
-vi.mock('@/lib/api/careers', () => ({
+vi.mock('@/systems/wfrp/api/careers', () => ({
     getCareers: vi.fn(),
     createCareer: vi.fn(),
     updateCareer: vi.fn(),

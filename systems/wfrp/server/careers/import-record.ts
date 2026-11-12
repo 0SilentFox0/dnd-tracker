@@ -1,10 +1,11 @@
 import type { Career } from '@prisma/client';
 
+import { toCareerData } from './row';
+
 import {
     careerTierKey,
     type CareerTierPart,
 } from '@/lib/constants/import-aliases';
-import { toCareerData } from '@/lib/utils/careers/row';
 import type { ImportRecord } from '@/types/content-import';
 
 export function careerToImportRecord(row: Career): ImportRecord {

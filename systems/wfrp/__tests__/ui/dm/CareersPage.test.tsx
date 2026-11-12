@@ -2,10 +2,9 @@
 import { cleanup, fireEvent, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { DMCareersPageClient } from '../careers-client';
-
 import '@/components/ui/__tests__/match-media';
 import { render } from '@/lib/i18n/test/render-uk';
+import { CareersPage } from '@/systems/wfrp/ui/dm/CareersPage';
 
 vi.unmock('next-intl');
 
@@ -23,7 +22,7 @@ const tier = (name: string) => ({
     trappings: [],
 });
 
-vi.mock('@/lib/hooks/careers', () => ({
+vi.mock('@/systems/wfrp/hooks/careers', () => ({
     useCareers: () => ({
         isLoading: false,
         data: [
@@ -37,6 +36,10 @@ vi.mock('@/lib/hooks/careers', () => ({
         ],
     }),
     useDeleteCareer: () => ({ mutateAsync: mocks.remove }),
+    useCareerForm: () => ({}),
+}));
+vi.mock('@/systems/wfrp/ui/careers/CareerForm', () => ({
+    CareerForm: () => null,
 }));
 vi.mock('@/lib/hooks/common', () => ({
     useConfirm: () => mocks.confirm,
@@ -48,9 +51,9 @@ afterEach(() => {
     vi.clearAllMocks();
 });
 
-describe('DMCareersPageClient', () => {
+describe('CareersPage', () => {
     it('lists careers with their tiers and offers create/edit/delete to the DM', () => {
-        render(<DMCareersPageClient systemKey="wfrp" campaignId="c" />);
+        render(<CareersPage campaignId="c" />);
 
         expect(screen.getByText('Воїн')).toBeTruthy();
         expect(screen.getByText('A › B › C › D')).toBeTruthy();
@@ -61,13 +64,7 @@ describe('DMCareersPageClient', () => {
     });
 
     it('hides editing in the demo', () => {
-        render(
-            <DMCareersPageClient
-                systemKey="wfrp"
-                campaignId="c"
-                canEdit={false}
-            />
-        );
+        render(<CareersPage campaignId="c" canEdit={false} />);
 
         expect(
             screen.queryByRole('button', { name: "Нова кар'єра" })
@@ -79,7 +76,7 @@ describe('DMCareersPageClient', () => {
         mocks.confirm.mockResolvedValue(true);
         mocks.remove.mockRejectedValue(new Error("Кар'єру мають герої"));
 
-        render(<DMCareersPageClient systemKey="wfrp" campaignId="c" />);
+        render(<CareersPage campaignId="c" />);
         fireEvent.click(screen.getByRole('button', { name: 'Видалити' }));
 
         await waitFor(() =>

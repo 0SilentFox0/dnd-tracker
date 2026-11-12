@@ -1,5 +1,8 @@
 import { createCampaignCrudApi } from '@/lib/api/client';
-import type { CareerData, CareerFormData } from '@/types/careers';
+import type {
+    CareerData,
+    CareerFormData,
+} from '@/systems/wfrp/rules/careers/types';
 
 const careersApi = createCampaignCrudApi<
     CareerData,

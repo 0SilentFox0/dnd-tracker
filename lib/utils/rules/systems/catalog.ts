@@ -157,6 +157,19 @@ export function contentKindsOf(
     return kinds;
 }
 
+export function dmSectionsOf(
+    system: SystemSelection,
+    metas: Metas = ALL_META
+): ReadonlySet<string> {
+    const { base, modules } = composition(system, metas);
+
+    return new Set(
+        [base, ...modules].flatMap(
+            (id) => moduleMetaOf(id, metas)?.dmSections ?? []
+        )
+    );
+}
+
 export const ownerOfContentKind = (
     kind: string,
     metas: Metas = ALL_META

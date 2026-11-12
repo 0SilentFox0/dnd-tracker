@@ -5,6 +5,7 @@ import type { Locale } from '@/lib/i18n/config';
 import { getTranslator } from '@/lib/i18n/translator';
 import { assertCan } from '@/lib/server/content/access';
 import { loadNames } from '@/lib/server/content/import/names';
+import { systemContentKinds } from '@/lib/server/systems/registry';
 import {
     artifactAbilities,
     artifactSetAbilities,
@@ -21,7 +22,6 @@ import {
     isWeaponSlot,
     weaponStatsFromRow,
 } from '@/lib/utils/artifacts/weapon-stats';
-import { careerToImportRecord } from '@/lib/utils/careers/import-record';
 import { IMPORT_SPECS } from '@/lib/utils/content/import/fields';
 import { refKindsOf } from '@/lib/utils/content/import/kinds';
 import { recordToCells } from '@/lib/utils/content/import/mapping';
@@ -42,6 +42,10 @@ const query = (campaignId: string) => ({
 });
 
 const asRecords = (rows: object[]) => rows as ImportRecord[];
+
+const moduleRecord = (kind: ImportKind) => (row: object) =>
+    (systemContentKinds()[kind]?.toImportRecord?.(row as never) ??
+        row) as ImportRecord;
 
 export const EXPORT_LOADERS: Record<
     ImportKind,
@@ -78,7 +82,9 @@ export const EXPORT_LOADERS: Record<
         asRecords(await prisma.background.findMany(query(c))),
     careers: async (c) =>
         asRecords(
-            (await prisma.career.findMany(query(c))).map(careerToImportRecord)
+            (await prisma.career.findMany(query(c))).map(
+                moduleRecord('careers')
+            )
         ),
     feats: async (c) =>
         asRecords(

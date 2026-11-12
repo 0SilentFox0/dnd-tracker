@@ -4,10 +4,7 @@ import { z } from 'zod';
 vi.mock('server-only', () => ({}));
 
 import { createUnitSchema } from '@/lib/schemas';
-import {
-    SHARED_SCHEMAS,
-    toJsonSchemas,
-} from '@/lib/server/content/json-schema';
+import { sharedSchemas, toJsonSchemas } from '@/lib/server/content/json-schema';
 
 const json = (v: unknown) => JSON.stringify(v);
 
@@ -15,7 +12,7 @@ describe('toJsonSchemas', () => {
     const schemas = toJsonSchemas([[createUnitSchema, 'UnitsCreate']]);
 
     it('спільні схеми — окремі компоненти, юніт посилається на Ability через $ref', () => {
-        for (const [, id] of SHARED_SCHEMAS) expect(schemas[id]).toBeDefined();
+        for (const [, id] of sharedSchemas()) expect(schemas[id]).toBeDefined();
         expect(json(schemas.UnitsCreate)).toContain(
             '"$ref":"#/components/schemas/Ability"'
         );

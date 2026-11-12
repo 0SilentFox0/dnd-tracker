@@ -27,6 +27,11 @@ const nextConfig: NextConfig = {
     async redirects() {
         return [
             {
+                source: '/campaigns/:id/dm/careers',
+                destination: '/campaigns/:id/dm/system/careers',
+                permanent: false,
+            },
+            {
                 source: '/campaigns/:id/dm/artifacts/sets/new',
                 destination: '/campaigns/:id/dm/artifact-sets/new',
                 permanent: false,

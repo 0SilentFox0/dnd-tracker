@@ -7,7 +7,7 @@ import { CareerForm } from '../CareerForm';
 
 import '@/components/ui/__tests__/match-media';
 import { render } from '@/lib/i18n/test/render-uk';
-import type { CareerFormData } from '@/types/careers';
+import type { CareerFormData } from '@/systems/wfrp/rules/careers/types';
 
 vi.unmock('next-intl');
 
@@ -21,7 +21,7 @@ const empty = () => ({
     trappings: [],
 });
 
-vi.mock('@/lib/hooks/careers', () => ({
+vi.mock('@/systems/wfrp/hooks/careers', () => ({
     useCareerForm: () => {
         const [data, set] = useState<CareerFormData>({
             name: '',

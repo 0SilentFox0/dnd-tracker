@@ -7,27 +7,23 @@ import { Briefcase, Edit, Plus, Trash2 } from 'lucide-react';
 import { DmCardGrid, DmListBody } from '@/components/common/DmListBody';
 import { EmptyState } from '@/components/common/states';
 import { HudPage, HudPageHeader, HudPanel } from '@/components/hud/page';
-import { systemUiOf } from '@/components/systems';
 import { Button } from '@/components/ui/button';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
-import { useCareers, useDeleteCareer } from '@/lib/hooks/careers';
 import { useConfirm, useNotify } from '@/lib/hooks/common';
 import { errorMessage } from '@/lib/utils/common/error-message';
-import type { CareerData } from '@/types/careers';
+import { useCareers, useDeleteCareer } from '@/systems/wfrp/hooks/careers';
+import type { CareerData } from '@/systems/wfrp/rules/careers/types';
+import { CareerForm } from '@/systems/wfrp/ui/careers/CareerForm';
 
 const FORM_ID = 'career-form';
 
-export function DMCareersPageClient({
+export function CareersPage({
     campaignId,
-    systemKey,
     canEdit = true,
 }: {
     campaignId: string;
-    systemKey: string;
     canEdit?: boolean;
 }) {
-    const CareerForm = systemUiOf(systemKey).CareerForm;
-
     const t = useTranslations('wfrpCareers');
 
     const tc = useTranslations('common.actions');
@@ -168,7 +164,7 @@ export function DMCareersPageClient({
                     </>
                 }
             >
-                {editing && CareerForm && (
+                {editing && (
                     <CareerForm
                         key={editing === 'new' ? 'new' : editing.id}
                         formId={FORM_ID}

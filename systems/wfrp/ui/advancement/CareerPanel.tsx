@@ -9,13 +9,13 @@ import { HudSection } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
 import { SelectField } from '@/components/ui/select-field';
 import { useCampaignRules } from '@/lib/hooks/campaigns';
-import { useCareers } from '@/lib/hooks/careers';
 import { useConfirm } from '@/lib/hooks/common';
 import { useFeats } from '@/lib/hooks/feats';
 import { useCareerOps } from '@/systems/wfrp/hooks';
+import { useCareers } from '@/systems/wfrp/hooks/careers';
+import type { CareerData } from '@/systems/wfrp/rules/careers/types';
 import type { Characteristics } from '@/systems/wfrp/rules/characteristics/keys';
 import { parseSkillAdvanceKey } from '@/systems/wfrp/rules/skills/catalog';
-import type { CareerData } from '@/types/careers';
 
 interface Props {
     campaignId: string;

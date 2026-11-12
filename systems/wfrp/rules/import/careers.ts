@@ -1,11 +1,15 @@
-import { defineSpec, type FieldDef, nameField, textField } from './common';
-
 import {
     CAREER_TIER_COUNT,
     CAREER_TIER_PARTS,
     careerTierKey,
     type CareerTierPart,
 } from '@/lib/constants/import-aliases';
+import {
+    defineSpec,
+    type FieldDef,
+    nameField,
+    textField,
+} from '@/lib/utils/content/import/fields/common';
 import { CHARACTERISTIC_KEYS } from '@/systems/wfrp/rules/characteristics/keys';
 import type { ImportRecord } from '@/types/content-import';
 

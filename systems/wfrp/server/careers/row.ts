@@ -1,7 +1,8 @@
 import type { Career } from '@prisma/client';
 
-import { careerTierSchema } from '@/lib/schemas/careers';
-import type { CareerData } from '@/types/careers';
+import { careerTierSchema } from './schema';
+
+import type { CareerData } from '@/systems/wfrp/rules/careers/types';
 
 export function toCareerData(row: Career): CareerData {
     const tiers = Array.isArray(row.tiers)

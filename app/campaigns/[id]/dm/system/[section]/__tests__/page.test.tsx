@@ -12,48 +12,53 @@ vi.mock('@/lib/server/campaigns/access', () => ({
     requireCampaignDMOrDemo: mocks.requireCampaignDMOrDemo,
 }));
 vi.mock('next/navigation', () => ({ notFound: mocks.notFound }));
-vi.mock('../careers-client', () => ({ DMCareersPageClient: () => null }));
+vi.mock('@/components/systems/SystemDmPage', () => ({
+    SystemDmPage: () => null,
+}));
 
-import DMCareersPage from '../page';
+import DMSystemSectionPage from '../page';
 
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 
 const rulesOf = (key: string) => ({ ...DEFAULT_RULES, system: { key } });
 
+const call = (section: string) =>
+    DMSystemSectionPage({ params: Promise.resolve({ id: 'c1', section }) });
+
 beforeEach(() => vi.clearAllMocks());
 
-describe('DM careers page (server)', () => {
-    it('renders the client for a wfrp campaign', async () => {
+describe('DM system section page (server)', () => {
+    it('renders the section of a composition that owns it', async () => {
         mocks.requireCampaignDMOrDemo.mockResolvedValue({
             campaign: { rules: rulesOf('wfrp') },
             isDemo: false,
         });
 
-        const el = (await DMCareersPage({
-            params: Promise.resolve({ id: 'c1' }),
-        })) as ReactElement<Record<string, unknown>>;
+        const el = (await call('careers')) as ReactElement<
+            Record<string, unknown>
+        >;
 
-        expect(el.props).toMatchObject({ campaignId: 'c1', canEdit: true });
+        expect(el.props).toMatchObject({
+            campaignId: 'c1',
+            section: 'careers',
+            canEdit: true,
+        });
     });
 
-    it('returns 404 outside wfrp', async () => {
+    it('is not found when the composition lacks the section', async () => {
         mocks.requireCampaignDMOrDemo.mockResolvedValue({
             campaign: { rules: rulesOf('dnd5e') },
             isDemo: false,
         });
 
-        await expect(
-            DMCareersPage({ params: Promise.resolve({ id: 'c1' }) })
-        ).rejects.toThrow('NEXT_NOT_FOUND');
+        await expect(call('careers')).rejects.toThrow('NEXT_NOT_FOUND');
     });
 
-    it('a non-DM guard error is propagated', async () => {
+    it('propagates a guard error', async () => {
         mocks.requireCampaignDMOrDemo.mockRejectedValue(
             new Error('NEXT_REDIRECT')
         );
 
-        await expect(
-            DMCareersPage({ params: Promise.resolve({ id: 'c1' }) })
-        ).rejects.toThrow('NEXT_REDIRECT');
+        await expect(call('careers')).rejects.toThrow('NEXT_REDIRECT');
     });
 });

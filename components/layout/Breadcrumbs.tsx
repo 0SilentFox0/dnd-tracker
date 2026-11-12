@@ -97,6 +97,7 @@ export function Breadcrumbs() {
         if (
             segment === 'dm' ||
             segment === 'settings' ||
+            (segment === 'system' && !isLastSegment) ||
             (segment === 'battles' && !isLastSegment)
         ) {
             previousDisplaySegment = segment;

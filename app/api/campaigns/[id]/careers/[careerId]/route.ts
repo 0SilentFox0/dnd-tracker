@@ -1,4 +1,3 @@
-import { careersResource } from '@/lib/server/content/resources/careers';
-import { itemRoutes } from '@/lib/utils/api/content-routes';
+import { kindItemRoutes } from '@/lib/utils/api/content-routes';
 
-export const { GET, PATCH, DELETE } = itemRoutes(careersResource);
+export const { GET, PATCH, DELETE } = kindItemRoutes('careers');

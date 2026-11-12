@@ -2,16 +2,19 @@ import { useQuery } from '@tanstack/react-query';
 
 import { careerKeys } from './keys';
 
+import { characterKeys } from '@/lib/hooks/characters/keys';
+import { useCrudMutation } from '@/lib/hooks/common';
+import { REFERENCE_STALE_MS } from '@/lib/providers/query-provider';
 import {
     createCareer,
     deleteCareer,
     getCareers,
     updateCareer,
-} from '@/lib/api/careers';
-import { characterKeys } from '@/lib/hooks/characters/keys';
-import { useCrudMutation } from '@/lib/hooks/common';
-import { REFERENCE_STALE_MS } from '@/lib/providers/query-provider';
-import type { CareerData, CareerFormData } from '@/types/careers';
+} from '@/systems/wfrp/api/careers';
+import type {
+    CareerData,
+    CareerFormData,
+} from '@/systems/wfrp/rules/careers/types';
 
 const careerDependentKeys = (campaignId: string) => [
     careerKeys.list(campaignId),

@@ -12,6 +12,9 @@ import { wfrpHitModel } from '@/systems/wfrp/rules/combat/hit-model';
 import { WfrpItemStatsSchema } from '@/systems/wfrp/rules/equipment/stats';
 import { WFRP_AI } from '@/systems/wfrp/server/ai';
 import { WfrpFortuneInputSchema } from '@/systems/wfrp/server/attack-input';
+import { careerToImportRecord } from '@/systems/wfrp/server/careers/import-record';
+import { careerTierSchema } from '@/systems/wfrp/server/careers/schema';
+import { careersResource } from '@/systems/wfrp/server/content/careers';
 import { WFRP_OPERATIONS } from '@/systems/wfrp/server/operations';
 import {
     raceProfileSaveHandler,
@@ -34,6 +37,13 @@ export const WFRP_MODULE_SERVER: SystemServer = {
         unitStats: (base, built) =>
             hitModelUnitStats(base, built, wfrpHitModel),
         readsBuiltRules: true,
+    },
+    contentKinds: {
+        careers: {
+            resource: careersResource,
+            toImportRecord: careerToImportRecord,
+            sharedSchemas: [[careerTierSchema, 'CareerTier']],
+        },
     },
     drafts: {
         create: async (request, campaign, access) =>

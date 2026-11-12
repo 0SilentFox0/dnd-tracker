@@ -6,6 +6,7 @@ const MODULES = {
     d20: () => import('@/systems/d20/server'),
     skilltrees: () => import('@/systems/skilltrees/server'),
     artifactsets: () => import('@/systems/artifactsets/server'),
+    wfrp: () => import('@/systems/wfrp/server'),
 };
 
 describe('content resources import cold', () => {

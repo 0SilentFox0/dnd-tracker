@@ -191,6 +191,7 @@ describe('d20 / HOMM names and rule-section readers leaving core', () => {
         conditionTestMutation: 0,
         systemConditionMutation: 0,
         coreActionMutation: 0,
+        careersResource: 0,
     };
 
     const RULES_SECTION_READERS: Record<string, number> = {

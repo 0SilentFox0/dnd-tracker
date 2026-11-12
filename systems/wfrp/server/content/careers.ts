@@ -6,15 +6,18 @@ import { getCachedCareers } from '@/lib/cache/reference-data';
 import { ReferenceKind } from '@/lib/cache/tags';
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { prisma } from '@/lib/db';
-import { createCareerSchema, updateCareerSchema } from '@/lib/schemas/careers';
 import { assertCampaignRefs } from '@/lib/server/campaigns/campaign-refs';
-import { careerNameTaken } from '@/lib/server/careers/career-name';
 import { defineResource } from '@/lib/server/content/define-resource';
 import { ContentError } from '@/lib/server/content/errors';
 import { profileReferences } from '@/lib/server/races/profile-usage';
-import { toCareerData } from '@/lib/utils/careers/row';
 import { toInputJson } from '@/lib/utils/common/json';
-import type { CareerTierDef } from '@/types/careers';
+import type { CareerTierDef } from '@/systems/wfrp/rules/careers/types';
+import { careerNameTaken } from '@/systems/wfrp/server/careers/career-name';
+import { toCareerData } from '@/systems/wfrp/server/careers/row';
+import {
+    createCareerSchema,
+    updateCareerSchema,
+} from '@/systems/wfrp/server/careers/schema';
 
 const talentIds = (tiers?: CareerTierDef[]) =>
     tiers?.flatMap((t) => t.talents) ?? [];

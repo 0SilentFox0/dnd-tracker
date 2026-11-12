@@ -33,7 +33,7 @@ vi.mock('@/components/ui/select-field', () => ({
 
 const mutate = vi.hoisted(() => vi.fn());
 
-vi.mock('@/lib/hooks/careers', () => ({
+vi.mock('@/systems/wfrp/hooks/careers', () => ({
     useCareers: () => ({
         data: [
             { id: 'ca', name: 'Soldier' },

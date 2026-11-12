@@ -1,9 +1,5 @@
 [
   {
-    "file": "lib/schemas/careers.ts",
-    "reason": "content-kind"
-  },
-  {
     "file": "lib/server/races/profile-usage.ts",
     "reason": "content-kind"
   },
@@ -12,15 +8,7 @@
     "reason": "content-kind"
   },
   {
-    "file": "lib/utils/content/import/fields/careers.ts",
-    "reason": "content-kind"
-  },
-  {
     "file": "lib/utils/rules/section-shapes.ts",
     "reason": "ruleset-section"
-  },
-  {
-    "file": "types/careers.ts",
-    "reason": "content-kind"
   }
 ]
