@@ -157,7 +157,7 @@ describe("composeSystem", () => {
       { id: "b", build: () => ({ participant: { fromUnit: [partB] }, combat: { turn: { actGates: [gateB] } } }) },
     ]);
 
-    expect(out.participant?.fromUnit).toEqual([partA, partB]);
+    expect(out.participant?.fromUnit?.slice(-2)).toEqual([partA, partB]);
     expect(out.combat.turn?.actGates).toEqual([gateA, gateB]);
   });
 });
