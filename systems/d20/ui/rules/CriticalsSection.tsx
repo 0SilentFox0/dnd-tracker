@@ -1,9 +1,8 @@
 import { useTranslations } from "next-intl";
 
-import { NumberField } from "../NumberField";
-import { RulesSection } from "../RulesSection";
-
 import { HudSection } from "@/components/hud/form";
+import { NumberField } from "@/components/rules/NumberField";
+import { RulesSection } from "@/components/rules/RulesSection";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { SwitchField } from "@/components/ui/switch-field";

@@ -1,7 +1,6 @@
 import { useTranslations } from "next-intl";
 
-import { RulesSection } from "../RulesSection";
-
+import { RulesSection } from "@/components/rules/RulesSection";
 import { SwitchField } from "@/components/ui/switch-field";
 import type { RulesFormState } from "@/lib/hooks/campaigns";
 

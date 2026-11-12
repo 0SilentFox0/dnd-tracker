@@ -2,21 +2,10 @@
 
 import type { ComponentType, FormEvent } from "react";
 
-import { ActionsSection } from "./sections/ActionsSection";
-import { ClassesSection } from "./sections/ClassesSection";
-import { ConcentrationSection } from "./sections/ConcentrationSection";
-import { ConditionsSection } from "./sections/ConditionsSection";
-import { CriticalsSection } from "./sections/CriticalsSection";
-import { DeathSavesSection } from "./sections/DeathSavesSection";
 import { DefaultAttacksSection } from "./sections/DefaultAttacksSection";
 import { EncountersSection } from "./sections/EncountersSection";
-import { FormulasSection } from "./sections/FormulasSection";
-import { HeroScalingSection } from "./sections/HeroScalingSection";
-import { InitiativeSection } from "./sections/InitiativeSection";
 import { ItemsSection } from "./sections/ItemsSection";
-import { MoraleSection } from "./sections/MoraleSection";
 import { OutOfCombatSection } from "./sections/OutOfCombatSection";
-import { SavesSection } from "./sections/SavesSection";
 import { SpellIngredientsSection } from "./sections/SpellIngredientsSection";
 import { SystemSection } from "./sections/SystemSection";
 
@@ -34,18 +23,7 @@ import { composition } from "@/lib/utils/rules/systems/catalog";
 const FORM_ID = "campaign-rules-form";
 
 const SECTIONS: Partial<Record<MechanicKey, ComponentType<RulesSectionProps>>> = {
-  morale: MoraleSection,
-  criticals: CriticalsSection,
-  formulas: FormulasSection,
-  heroScaling: HeroScalingSection,
-  initiative: InitiativeSection,
   defaultAttacks: DefaultAttacksSection,
-  saves: SavesSection,
-  deathSaves: DeathSavesSection,
-  concentration: ConcentrationSection,
-  conditions: ConditionsSection,
-  actions: ActionsSection,
-  classes: ClassesSection,
   outOfCombat: OutOfCombatSection,
   encounters: EncountersSection,
   items: ItemsSection,

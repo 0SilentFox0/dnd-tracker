@@ -2,7 +2,7 @@
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { ConditionsSection } from "../sections/ConditionsSection";
+import { ConditionsSection } from "../ConditionsSection";
 
 import "@/components/ui/__tests__/match-media";
 import type { RulesFormState } from "@/lib/hooks/campaigns";

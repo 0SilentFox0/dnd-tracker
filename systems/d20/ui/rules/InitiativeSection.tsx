@@ -1,8 +1,7 @@
 import { useTranslations } from "next-intl";
 
-import { NumberField } from "../NumberField";
-import { RulesSection } from "../RulesSection";
-
+import { NumberField } from "@/components/rules/NumberField";
+import { RulesSection } from "@/components/rules/RulesSection";
 import { SelectField } from "@/components/ui/select-field";
 import type { RulesFormState } from "@/lib/hooks/campaigns";
 

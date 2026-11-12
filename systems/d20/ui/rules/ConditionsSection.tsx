@@ -3,8 +3,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { Trash2 } from "lucide-react";
 
-import { RulesSection } from "../RulesSection";
-
+import { RulesSection } from "@/components/rules/RulesSection";
 import { Button } from "@/components/ui/button";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { SwitchField } from "@/components/ui/switch-field";
