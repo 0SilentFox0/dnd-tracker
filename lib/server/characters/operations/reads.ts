@@ -4,7 +4,6 @@ import { z } from 'zod';
 import {
     type CharacterOpCtx,
     defineCharacterOperation,
-    responseBody,
 } from '../operation-runner';
 
 import { buildProgressionDto } from '@/lib/server/characters/core/get-progression-handler';
@@ -39,7 +38,7 @@ function viaResponse<I extends { characterId?: string }>(
         schema,
         unlocked: true,
         gate: async (ctx: CharacterOpCtx) => ctx,
-        run: async (ctx, input) => responseBody(await call(ctx, input)),
+        run: call,
     });
 }
 

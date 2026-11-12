@@ -33,6 +33,7 @@ export interface CharacterOperation<I = unknown, G = unknown> {
     action: string;
     schema: ZodType<I>;
     gate: (ctx: CharacterOpCtx) => Promise<G | NextResponse>;
+    /** May return a NextResponse, which HTTP passes through and the assistant unwraps. */
     run: (gate: G, input: I) => Promise<unknown>;
     parseMessage?: string;
     /** Input from path/query for bodiless operations; the schema still validates assistant input. */
@@ -159,8 +160,13 @@ export async function runCharacterOperation<I, G>(
 
     if (gate instanceof NextResponse) return errorStatusMessage(gate);
 
-    return op.run(gate, input);
+    const result = await op.run(gate, input);
+
+    return result instanceof NextResponse ? responseBody(result) : result;
 }
+
+const jsonOf = (data: unknown, init?: { status: number }) =>
+    data instanceof NextResponse ? data : NextResponse.json(data, init);
 
 type RouteCall = {
     campaignId: string;
@@ -200,8 +206,7 @@ export async function executeCharacterRoute<I, G>(
 
         const init = op.status ? { status: op.status } : undefined;
 
-        if (op.unlocked)
-            return NextResponse.json(await op.run(gate, parsed as I), init);
+        if (op.unlocked) return jsonOf(await op.run(gate, parsed as I), init);
 
         const input = op.prepare
             ? await op.prepare(gate, parsed as I)
@@ -214,7 +219,7 @@ export async function executeCharacterRoute<I, G>(
             () => op.run(gate, input)
         );
 
-        return NextResponse.json(data, init);
+        return jsonOf(data, init);
     } catch (error) {
         return handleApiError(error, { action: op.action });
     }
