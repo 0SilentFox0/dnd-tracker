@@ -13,6 +13,8 @@ Core бачить систему лише через **корені** (`SYSTEM_R
 | `components/systems/registry.ts` | `SYSTEM_UI`, `systemUiOf`, `systemUiByKey` | `systems/<id>/ui/index.ts` |
 | `lib/server/systems/registry.ts` | `SYSTEM_SERVER`, `systemServerOf` | `systems/<id>/server/index.ts` |
 | `lib/utils/abilities/schema/system-effects.ts`, `lib/utils/abilities/registry/effects/system-rows.ts` | схеми й рядки ability-ефектів системи (два корені: реєстр клієнтського графа без zod) | `systems/<id>/rules/ability-effects.ts`, `ability-effect-rows.ts` |
+| `lib/utils/abilities/schema/system-flags.ts`, `registry/effects/system-flag-rows.ts` | прапорці-вміння модулів (`flag`): схеми типізовані в `FlagSchema`, рядки зливаються у `FLAG_REGISTRY`; власник прапорця = модуль-джерело (`SYSTEM_FLAG_OWNERS`) | `systems/<id>/rules/ability-flags.ts`, `ability-flag-rows.ts` |
+| `lib/utils/abilities/schema/module-effects.ts`, `registry/effects/module-effect-rows.ts` | ефекти модулів (типізовані в `BASE_EFFECTS`, на відміну від wfrp-trait-ефектів), рядок має `system` | `systems/<id>/rules/ability-module-effects.ts`, `ability-module-effect-rows.ts` |
 | `scripts/templates/systems/index.ts` | `PACK_HOOKS`; `SYSTEM_MODULE` береться з meta (`modules.ts`) | `scripts/templates/systems/<id>/index.ts` (`<ID>_HOOKS`) |
 
 Ключ `RuleSystemKey` не існує: `string`, валідація в `RulesetSchema` (`isRuleSystemKey`; невідомий ключ → `rules.validation.unknownSystem`). `gameTerms.ruleSystem.<key>` потрібен для кожного ключа (тест `system-contract`).
