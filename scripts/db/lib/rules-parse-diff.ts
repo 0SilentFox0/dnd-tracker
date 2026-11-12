@@ -26,15 +26,13 @@ export function diffRules(raw: unknown): { system: string; differences: RulesDif
 
     if (isDeepStrictEqual(before, after)) continue;
 
-    const byDesign = expectedDifferenceFor(section, raw, next)?.reason;
-
     if (!isPlain(before) || !isPlain(after)) {
-      differences.push({ path: section, legacy: before, next: after, byDesign });
+      differences.push({ path: section, legacy: before, next: after, byDesign: expectedDifferenceFor(section, raw, next)?.reason });
       continue;
     }
 
     for (const item of new Set([...Object.keys(before), ...Object.keys(after)])) {
-      if (!isDeepStrictEqual(before[item], after[item])) differences.push({ path: `${section}.${item}`, legacy: before[item], next: after[item], byDesign });
+      if (!isDeepStrictEqual(before[item], after[item])) differences.push({ path: `${section}.${item}`, legacy: before[item], next: after[item], byDesign: expectedDifferenceFor(`${section}.${item}`, raw, next)?.reason });
     }
   }
 

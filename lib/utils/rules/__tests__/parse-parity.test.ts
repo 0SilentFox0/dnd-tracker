@@ -2,9 +2,10 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
 
-import { EXPECTED_DIFFERENCES } from "../parse-parity-expected";
+import { EXPECTED_DIFFERENCES, expectedDifferenceFor } from "../parse-parity-expected";
 import { parseRules } from "../schema";
 
+import { diffRules } from "@/scripts/db/lib/rules-parse-diff";
 import { legacyParseRules } from "@/scripts/db/lib/legacy-rules-parse";
 
 const TEMPLATES = ["grim-d100", "grim-d100-empty", "heroes-homm", "srd-5.2", "srd-5.2-empty"];
@@ -58,6 +59,33 @@ describe("parseRules parity with frozen pre-Ч3 parse", () => {
 
     expect(next[shared.section], shared.reason).toEqual(difference.expected);
     expect({ ...next, [shared.section]: legacy[shared.section] }).toEqual(legacy);
+  });
+
+  it("by-design differences are explained per exact path only", () => {
+    for (const name of Object.keys(BY_DESIGN)) {
+      const { differences } = diffRules(CASES[name]);
+
+      expect(differences.length, name).toBeGreaterThan(0);
+      expect(differences.filter((d) => !d.byDesign), name).toEqual([]);
+    }
+  });
+
+  it("predicates do not cover other paths or a changed kept value", () => {
+    const rawSaves = { saves: { proficiency: true, bogus: 1 } };
+
+    expect(expectedDifferenceFor("saves.proficiency", rawSaves, parseRules(rawSaves))).toBeDefined();
+    expect(expectedDifferenceFor("saves.other", rawSaves, parseRules(rawSaves))).toBeUndefined();
+    expect(expectedDifferenceFor("saves.proficiency", rawSaves, parseRules({ saves: { proficiency: false } }))).toBeUndefined();
+
+    const badCustom = { conditions: { enabled: true, exhaustion: "2014", custom: [{ key: "BAD KEY" }] } };
+
+    expect(expectedDifferenceFor("conditions.enabled", badCustom, parseRules(badCustom))).toBeDefined();
+    expect(expectedDifferenceFor("conditions.enabled", badCustom, parseRules({ conditions: { enabled: false } }))).toBeUndefined();
+    expect(expectedDifferenceFor("conditions.other", badCustom, parseRules(badCustom))).toBeUndefined();
+
+    const validCustom = { conditions: { enabled: true, exhaustion: "2014", custom: [] } };
+
+    expect(expectedDifferenceFor("conditions.enabled", validCustom, parseRules(validCustom))).toBeUndefined();
   });
 
   it("invalid system.modules are dropped from the parse result but reported", () => {

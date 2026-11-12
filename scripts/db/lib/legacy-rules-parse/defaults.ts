@@ -1,6 +1,6 @@
 import type { Ruleset } from "./schema";
 
-import { DEFAULT_ADVANCEMENT_RULES } from "@/systems/wfrp/rules/advancement/rules";
+import { DEFAULT_ADVANCEMENT_RULES } from "./wfrp-frozen";
 
 export const DEFAULT_RULES: Ruleset = {
   morale: { enabled: true, cap: 3 },

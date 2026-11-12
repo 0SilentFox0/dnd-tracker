@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { FREE_POINT_MAX, FREE_POINT_MIN } from "@/systems/wfrp/rules/advancement/rules";
+import { FREE_POINT_MAX, FREE_POINT_MIN } from "./wfrp-frozen";
 
 const CHARACTERISTIC_COUNT = 10;
 
