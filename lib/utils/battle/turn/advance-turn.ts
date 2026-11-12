@@ -57,7 +57,14 @@ function advanceFrom({ participants, pending, scene, rng, map, rules }: AdvanceT
   order = before.participants;
   actions.push(...(before.actions ?? []));
 
-  const ending = skipEnding ? undefined : order[scene.turnIndex];
+  const current0 = order[scene.turnIndex];
+
+  if (before.messages.length > 0 && current0) actions.push(turnEndAction(current0, scene, before.messages));
+
+  // a hook waits for a decision: the turn does not pass on
+  if (before.pending) return { participants: order, pending, scene: { turnIndex: scene.turnIndex, round: scene.round, status: scene.status, pendingMoraleCheck: null }, actions };
+
+  const ending = skipEnding || before.skipTurn ? undefined : current0;
 
   // невикористані додаткові дії згорають разом із ходом
   if (ending) order = replaceParticipant(order, setExtraActionPool(ending, 0));

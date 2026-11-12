@@ -263,6 +263,14 @@ export function runAdvanceTurnLoop(
 
     if (beforeAuto.result) break;
 
+    if (turnResult.skipTurn && !turnResult.pending) continue;
+
+    if (turnResult.pending) {
+      if (isActive(turnResult.participant)) activeParticipantFound = true;
+
+      continue;
+    }
+
     // у очікуванні рішення ДМ автоматичні дії не виконуються; цикл лише шукає живого поточного
     if (beforeAuto.awaiting) {
       if (!st.order.some(isActive)) break;

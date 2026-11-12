@@ -26,7 +26,7 @@ import { rngOf } from "@/lib/utils/common/rng";
 import { type Ruleset } from "@/lib/utils/rules";
 import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
-import type { AfterAttackResult } from "@/lib/utils/rules/systems/types";
+import type { AfterAttackCtx, AfterAttackResult } from "@/lib/utils/rules/systems/types";
 import type { ActiveEffect, BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 export type AttackPhaseInput = {
@@ -284,12 +284,12 @@ function strikeAt(ctx: PhaseCtx, st: PhaseState, target: BattleParticipant, i: n
   return attackResult;
 }
 
-function retaliationOf(ctx: PhaseCtx, st: PhaseState, target: BattleParticipant, attackResult: ProcessAttackResult): (provoked: boolean) => AfterAttackResult | null {
+function retaliationOf(ctx: PhaseCtx, st: PhaseState, target: BattleParticipant, attackResult: ProcessAttackResult): AfterAttackCtx["retaliate"] {
   const { input, request, rng } = ctx;
 
-  return (provoked) => {
+  return (provoked, from) => {
     const retaliation = resolveRetaliation({
-      participants: st.order,
+      participants: from?.participants ?? st.order,
       attackerId: request.attacker.basicInfo.id,
       defenderId: target.basicInfo.id,
       attack: request.attack,
@@ -302,7 +302,7 @@ function retaliationOf(ctx: PhaseCtx, st: PhaseState, target: BattleParticipant,
       crit: input.crit,
       map: input.map,
       rules: input.rules,
-      sceneState: st.sceneState,
+      sceneState: from ? from.sceneState : st.sceneState,
     });
 
     return retaliation && { participants: retaliation.participants, actions: [retaliation.battleAction], sceneState: retaliation.sceneState };

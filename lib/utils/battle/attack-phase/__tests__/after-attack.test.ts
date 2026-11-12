@@ -34,6 +34,28 @@ describe("runAfterAttack", () => {
     expect(out?.handled).toBeUndefined();
   });
 
+  it("retaliate from a later hook starts from the state the earlier hook left", () => {
+    const calls: Array<{ count: number; scene: unknown }> = [];
+
+    const base = { ...ctx(), retaliate: (_p: boolean, from?: { participants: unknown[]; sceneState?: unknown }) => {
+      calls.push({ count: from?.participants.length ?? -1, scene: from?.sceneState });
+
+      return null;
+    } } as AfterAttackCtx;
+
+    const first: AfterAttackHook = (c) => ({ participants: [...c.participants, createMockParticipant()], actions: [], sceneState: { changed: true } as never });
+
+    const second: AfterAttackHook = (c) => {
+      c.retaliate(true);
+
+      return null;
+    };
+
+    runAfterAttack([first, second], base);
+
+    expect(calls).toEqual([{ count: 2, scene: { changed: true } }]);
+  });
+
   it("is handled once any hook says so, and null when no hook adds anything", () => {
     expect(runAfterAttack([() => null], ctx())).toBeNull();
     expect(runAfterAttack([], ctx())).toBeNull();

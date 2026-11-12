@@ -234,7 +234,7 @@ export interface AfterAttackCtx {
   rules: Ruleset;
   sceneState?: SystemSlot;
   /** The target's answer to this strike (core retaliation); `provoked` skips the reaction accounting */
-  retaliate(provoked: boolean): AfterAttackResult | null;
+  retaliate(provoked: boolean, from?: { participants: BattleParticipant[]; sceneState?: SystemSlot }): AfterAttackResult | null;
 }
 
 export interface AfterAttackResult {
