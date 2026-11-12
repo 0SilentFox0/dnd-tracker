@@ -203,10 +203,13 @@ const attackBodyShape = {
     endTurn: z.boolean().default(false),
   };
 
+// one release: flat pre-`system` request keys reach the system's input schema, nothing else passes through
+const LEGACY_SYSTEM_KEYS = { fortune: z.unknown().optional(), fortuneRoll: z.unknown().optional() };
+
 export const attackBodyInputSchema = z.object(attackBodyShape);
 
 export const attackBodySchema = z
-  .looseObject(attackBodyShape)
+  .object({ ...attackBodyShape, ...LEGACY_SYSTEM_KEYS })
   .refine(
     (d) => d.serverRoll === true || d.d20Roll !== undefined || d.attackRoll !== undefined || (Array.isArray(d.attackRolls) && d.attackRolls.length > 0),
     { message: REJECT.rollsRequired, path: ["d20Roll"] },
@@ -282,7 +285,7 @@ const castSpellShape = {
 
 export const castSpellInputSchema = z.object(castSpellShape);
 
-export const castSpellSchema = z.looseObject(castSpellShape);
+export const castSpellSchema = z.object({ ...castSpellShape, ...LEGACY_SYSTEM_KEYS });
 
 export type SpellRequestData = z.infer<typeof castSpellInputSchema>;
 

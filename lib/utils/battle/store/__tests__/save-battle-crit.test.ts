@@ -13,7 +13,7 @@ describe("prepareSave: pending крита", () => {
     const { delta } = prepareSave({ ...c, scene: { ...c.scene, pendingChoice: null } }, { participants: c.participants, pending: c.pending, events: [], scene: { pendingChoice } });
 
     expect(delta.version).toBe(c.scene.version + 1);
-    expect(delta.scene.pendingChoice).toBe(pendingChoice.shown);
+    expect(delta.scene.pendingChoice).toBe(pendingChoice);
     expect(delta.events).toEqual([]);
   });
 });

@@ -11,7 +11,7 @@ export async function parseSystemInput(rules: Ruleset, kind: "attackInput" | "ca
 
   if (!schema) return undefined;
 
-  const parsed = schema.safeParse(serverRolled ? { ...body, secondRoll: undefined } : body);
+  const parsed = schema.safeParse(serverRolled ? { ...body, secondRoll: undefined, fortuneRoll: undefined } : body);
 
   if (!parsed.success) throw ruleErrorOf("action_rejected", API_ERRORS.INVALID_BODY);
 
