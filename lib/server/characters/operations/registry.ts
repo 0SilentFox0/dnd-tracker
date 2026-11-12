@@ -1,4 +1,9 @@
-import { type CharacterOperation } from '../operation-runner';
+import { NextResponse } from 'next/server';
+
+import {
+    type CampaignScope,
+    type CharacterOperation,
+} from '../operation-runner';
 import { choicesOperation } from './choices';
 import { createOperation } from './create';
 import { deleteOperation } from './delete';
@@ -22,7 +27,12 @@ import { tokensCreateOperation } from './tokens-create';
 import { tokensDeleteOperation } from './tokens-delete';
 import { transferOperation } from './transfer';
 
-import { mergeSystemOperations } from '@/lib/server/systems/registry';
+import { API_ERRORS } from '@/lib/constants/api-errors';
+import {
+    mergeSystemOperations,
+    operationInComposition,
+} from '@/lib/server/systems/registry';
+import { errorResponse } from '@/lib/utils/api/api-response';
 
 const erased = (op: unknown) => op as CharacterOperation;
 
@@ -54,7 +64,26 @@ const CORE_OPERATIONS: Record<string, CharacterOperation> = {
     ),
 };
 
+/** Registry imports its modules, so a module's own gate cannot ask it whether the operation is in the composition. */
+const inCompositionOnly = (
+    operation: CharacterOperation
+): CharacterOperation => ({
+    ...operation,
+    gate: async (ctx) => {
+        const gate = await operation.gate(ctx);
+
+        return gate instanceof NextResponse ||
+            operationInComposition(
+                (gate as CampaignScope).access.campaign.rules,
+                operation.name
+            )
+            ? gate
+            : errorResponse(API_ERRORS.NOT_FOUND, 404);
+    },
+});
+
 export const CHARACTER_OPERATIONS = mergeSystemOperations(
     CORE_OPERATIONS,
-    ({ operation }) => operation
+    ({ operation, scoped }) =>
+        scoped ? inCompositionOnly(operation) : operation
 );

@@ -17,6 +17,7 @@ import {
 import { ARTIFACTSETS_MODULE_SERVER } from "@/systems/artifactsets/server";
 import { D20_MODULE_SERVER } from "@/systems/d20/server";
 import { MORALE_MODULE_SERVER } from "@/systems/morale/server";
+import { SKILLTREES_MODULE_SERVER } from "@/systems/skilltrees/server";
 import { WFRP_MODULE_SERVER } from "@/systems/wfrp/server";
 // </systems:generated>
 
@@ -27,6 +28,7 @@ export const MODULE_SERVER: Record<string, ModuleEntry<SystemServer>> = {
     artifactsets: ARTIFACTSETS_MODULE_SERVER,
     d20: D20_MODULE_SERVER,
     morale: MORALE_MODULE_SERVER,
+    skilltrees: SKILLTREES_MODULE_SERVER,
     wfrp: WFRP_MODULE_SERVER,
     // </systems:generated>
 };
@@ -53,6 +55,11 @@ export const systemServerOf = (
 
     return resolve(rules.system);
 };
+
+export const operationInComposition = (
+    rules: Pick<Ruleset, 'system'>,
+    name: string
+): boolean => Object.hasOwn(systemServerOf(rules).operations ?? {}, name);
 
 export const withSystemNotes = (base: string, tool: SystemToolNote): string => {
     const notes = Object.values(SYSTEM_SERVER).flatMap(

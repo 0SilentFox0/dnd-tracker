@@ -1,10 +1,9 @@
 import type { Prisma } from '@prisma/client';
 
-import type { ProgressionContext } from './load-progression-context';
+import type { ProgressionContext } from './context';
 
 import { prisma } from '@/lib/db';
 import { skillAbilities } from '@/lib/utils/abilities/read';
-import { damageAffinity } from '@/lib/utils/abilities/sheet-bonuses';
 import { abilitySummary } from '@/lib/utils/abilities/summary';
 import {
     normalizeTree,
@@ -13,6 +12,7 @@ import {
     stripTreeForClient,
 } from '@/lib/utils/skills/progression';
 import { toSpellSkillInfo } from '@/lib/utils/spells';
+import { damageAffinity } from '@/systems/skilltrees/rules/damage-affinity';
 import type { CharacterProgressionDto } from '@/types/progression';
 
 export const PROGRESSION_SKILL_SELECT = {

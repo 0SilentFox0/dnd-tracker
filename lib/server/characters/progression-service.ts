@@ -64,14 +64,6 @@ const CORE_INPUTS: Record<string, z.ZodType> = {
     experience: experienceSchema.strict(),
     roll: serverRoll,
     sheet: characterIdSchema,
-    progression: characterIdSchema,
-    'progression.learn': characterIdSchema
-        .extend({ nodeId: z.string().min(1) })
-        .strict(),
-    'progression.unlearn': characterIdSchema
-        .extend({ nodeIds: z.array(z.string().min(1)).min(1).max(100) })
-        .strict(),
-    'progression.reset': characterIdSchema,
     'progression.seen-level': characterIdSchema,
     log: characterIdSchema.extend({ cursor: z.string().max(100).optional() }),
     'stash.log': characterIdSchema.extend({

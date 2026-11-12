@@ -28,6 +28,8 @@ export interface SystemSchemas {
 export interface SystemOperation {
     operation: CharacterOperation;
     input: ZodType;
+    /** The gate yields a `CampaignScope`; the registry then answers 404 where the campaign's composition lacks the operation. */
+    scoped?: true;
 }
 
 export type SystemToolNote =
@@ -81,9 +83,7 @@ export interface BattleOperationDeps {
 }
 
 export interface SystemBattleOperation {
-    load(
-        deps: BattleOperationDeps
-    ): Promise<{
+    load(deps: BattleOperationDeps): Promise<{
         schema: ZodType;
         mutate(
             ctx: BattleMutationContext,

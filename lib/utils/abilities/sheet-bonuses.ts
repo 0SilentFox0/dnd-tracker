@@ -1,7 +1,5 @@
 import type { Ability, StatKey } from './schema';
 
-import { AttackType } from '@/lib/constants/battle';
-
 export type SheetStatKey =
     | 'strength'
     | 'dexterity'
@@ -36,7 +34,7 @@ const STAT_TO_SHEET: Partial<Record<StatKey, SheetStatKey>> = {
     maxTargets: 'maxTargets',
 };
 
-const unconditionalPassives = (abilities: Ability[]) =>
+export const unconditionalPassives = (abilities: Ability[]) =>
     abilities.filter((a) => a.trigger.event === 'passive' && !a.condition);
 
 /** Flat, unconditional, self-only stat bonuses — what the character sheet can show without a battle. */
@@ -72,33 +70,4 @@ export function sheetStatBonuses(abilities: Ability[]): SheetStatBonuses {
         if (v === 0) delete out.stats[k as SheetStatKey];
 
     return out;
-}
-
-export type DamageAffinityType = AttackType | 'magic';
-
-export function damageAffinity(abilities: Ability[]): {
-    affectsDamage: boolean;
-    damageType: DamageAffinityType | null;
-} {
-    const kinds = new Set<string>();
-
-    for (const a of unconditionalPassives(abilities)) {
-        for (const e of a.effects)
-            if (e.kind === 'damageBonus') kinds.add(e.filter.kind);
-    }
-
-    if (kinds.size === 0) return { affectsDamage: false, damageType: null };
-
-    const [only] = [...kinds];
-
-    return {
-        affectsDamage: true,
-        damageType:
-            kinds.size === 1 &&
-            (only === AttackType.MELEE ||
-                only === AttackType.RANGED ||
-                only === 'magic')
-                ? only
-                : null,
-    };
 }

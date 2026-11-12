@@ -5,6 +5,7 @@ import { getResponseJson } from './helpers';
 
 import { prisma } from '@/lib/db';
 import * as apiAuth from '@/lib/utils/api/api-auth';
+import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
 import { buildTreeJson } from '@/lib/utils/skills/progression';
 
 vi.mock('@/lib/utils/api/api-auth', () => ({ requireCampaignAccess: vi.fn() }));
@@ -23,7 +24,12 @@ const access = (userId: string, role: 'dm' | 'player') =>
     ({
         userId,
         isDM: role === 'dm',
-        campaign: { id: 'camp', maxLevel: 20, members: [{ userId, role }] },
+        campaign: {
+            id: 'camp',
+            maxLevel: 20,
+            rules: DEFAULT_RULES,
+            members: [{ userId, role }],
+        },
     }) as never;
 
 const CHAR = {

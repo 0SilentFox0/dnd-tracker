@@ -3,8 +3,7 @@ import { Prisma } from '@prisma/client';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { prisma } from '@/lib/db';
-import { operationAccess } from '@/lib/server/characters/operation-context';
-import type { Actor } from '@/lib/utils/api/actor';
+import type { CampaignAccessResult } from '@/lib/utils/api/api-auth';
 import { errorResponse } from '@/lib/utils/api/api-response';
 
 export interface ProgressionContext {
@@ -23,14 +22,10 @@ export interface ProgressionContext {
 }
 
 export async function loadProgressionContext(
+    access: CampaignAccessResult,
     campaignId: string,
-    characterId: string,
-    actor?: Actor
+    characterId: string
 ): Promise<ProgressionContext | NextResponse> {
-    const access = await operationAccess(campaignId, false, actor);
-
-    if (access instanceof NextResponse) return access;
-
     const character = await prisma.character.findFirst({
         where: { id: characterId, campaignId },
         select: {

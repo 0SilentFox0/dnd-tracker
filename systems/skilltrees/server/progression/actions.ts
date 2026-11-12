@@ -1,15 +1,11 @@
 import { NextResponse } from 'next/server';
 import type { Prisma } from '@prisma/client';
 
-import { loadProgressionContext } from './load-progression-context';
+import { loadProgressionContext } from './context';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { prisma } from '@/lib/db';
-import {
-    operationAccess,
-    withCharacterOperation,
-} from '@/lib/server/characters/operation-context';
-import type { Actor } from '@/lib/utils/api/actor';
+import type { CampaignAccessResult } from '@/lib/utils/api/api-auth';
 import { errorResponse } from '@/lib/utils/api/api-response';
 import {
     canLearn,
@@ -58,13 +54,13 @@ function unlearnAll(
     return { ok: true, unlocked };
 }
 
-export async function runProgressionActionUnlocked(
+export async function runProgressionAction(
+    access: CampaignAccessResult,
     campaignId: string,
     characterId: string,
-    action: ProgressionAction,
-    actor?: Actor
+    action: ProgressionAction
 ): Promise<NextResponse> {
-    const ctx = await loadProgressionContext(campaignId, characterId, actor);
+    const ctx = await loadProgressionContext(access, campaignId, characterId);
 
     if (ctx instanceof NextResponse) return ctx;
 
@@ -121,31 +117,3 @@ export async function runProgressionActionUnlocked(
 
     return NextResponse.json({ unlocked });
 }
-
-async function locked(
-    campaignId: string,
-    characterId: string,
-    actor: Actor | undefined,
-    run: () => Promise<NextResponse>
-) {
-    const access = await operationAccess(campaignId, false, actor);
-
-    if (access instanceof NextResponse) return access;
-
-    return withCharacterOperation(
-        campaignId,
-        'progression',
-        { characterId },
-        run
-    );
-}
-
-export const runProgressionAction = (
-    campaignId: string,
-    characterId: string,
-    action: ProgressionAction,
-    actor?: Actor
-) =>
-    locked(campaignId, characterId, actor, () =>
-        runProgressionActionUnlocked(campaignId, characterId, action, actor)
-    );
