@@ -8,8 +8,6 @@ import { RULE_SYSTEM_KEYS } from "@/lib/utils/rules/systems/meta";
 import { AdvancementRulesSchema } from "@/systems/wfrp/rules/advancement/schema";
 import { TablesRulesSchema } from "@/systems/wfrp/rules/tables/schema";
 
-export { DEFAULT_ADVANCEMENT_RULES } from "@/systems/wfrp/rules/advancement/rules";
-
 const level = z.string().regex(/^([1-9]|1\d|20)$/);
 
 const DiceTable = z.record(level, z.string().regex(/^\d+d\d+([+-]\d+d\d+)*$/));
