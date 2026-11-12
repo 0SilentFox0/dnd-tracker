@@ -15,7 +15,7 @@ const scene: BattleSceneState = {
   turnIndex: 1,
   version: 5,
   eventSeq: 9,
-  pendingMoraleCheck: null, pendingCritChoice: null,
+  pendingMoraleCheck: null, pendingChoice: null,
   startedAt: null,
   completedAt: null,
 };

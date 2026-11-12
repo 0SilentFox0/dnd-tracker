@@ -91,7 +91,7 @@ describe("CritChoiceDialog", () => {
 describe("CritChoiceWaitingBanner", () => {
   const render = (isDM: boolean, pending: boolean) =>
     renderWithConfirm(
-      <BattleSceneContext.Provider value={{ viewer: { isDM }, battle: { pendingCritChoice: pending ? { action: "attack", actorId: "me", triggers: [] } : null } } as unknown as BattleSceneValue}>
+      <BattleSceneContext.Provider value={{ viewer: { isDM }, battle: { pendingChoice: pending ? { action: "attack", actorId: "me", triggers: [] } : null } } as unknown as BattleSceneValue}>
         <CritChoiceWaitingBanner />
       </BattleSceneContext.Provider>,
     );

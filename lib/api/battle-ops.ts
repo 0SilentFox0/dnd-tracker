@@ -53,7 +53,7 @@ export type UnitControlData = { mode: "assign"; participantId: string; controlle
 export interface AttackResponse {
   hpChanges: BattleAction["hpChanges"];
   /** дію зупинено: ефект крита обирає ДМ, результат прийде пізніше */
-  pendingCritChoice?: true;
+  pendingChoice?: true;
 }
 
 export interface BattleOp<TBody extends object, TRes = Record<string, unknown>> {
@@ -75,7 +75,7 @@ const op = <TBody extends object, TRes = Record<string, unknown>>(def: BattleOp<
 
 const withHpChanges = (res: BattleMutationResponse): BattleMutationResponse<AttackResponse> => ({
   ...res,
-  response: { hpChanges: res.delta.log.flatMap((a) => a.hpChanges ?? []), ...(res.response?.pendingCritChoice === true && { pendingCritChoice: true as const }) },
+  response: { hpChanges: res.delta.log.flatMap((a) => a.hpChanges ?? []), ...(res.response?.pendingChoice === true && { pendingChoice: true as const }) },
 });
 
 const BATTLES: ("battles" | "active-battles")[] = ["battles"];

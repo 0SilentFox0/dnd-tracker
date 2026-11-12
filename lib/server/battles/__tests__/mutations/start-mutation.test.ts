@@ -7,7 +7,7 @@ import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-batt
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 
 const ctx = {
-  scene: { id: "b1", campaignId: "c1", status: "prepared", round: 1, turnIndex: 0, version: 0, eventSeq: 0, pendingMoraleCheck: null, pendingCritChoice: null, startedAt: null, completedAt: null },
+  scene: { id: "b1", campaignId: "c1", status: "prepared", round: 1, turnIndex: 0, version: 0, eventSeq: 0, pendingMoraleCheck: null, pendingChoice: null, startedAt: null, completedAt: null },
   meta: { name: "Бій", description: null, setup: [{ id: "u1", type: "unit", side: "enemy" }], friendlyFire: false, rules: DEFAULT_RULES, critChoiceByDm: false, map: null, createdAt: new Date() },
   participants: [],
   pending: [],
@@ -25,7 +25,7 @@ describe("start mutation", () => {
 
     expect(build).toHaveBeenCalledWith("b1", "c1", ctx.meta.setup, ctx.meta.map, DEFAULT_RULES);
     expect(out.participants).toEqual([hero]);
-    expect(out.scene).toMatchObject({ status: "active", round: 1, turnIndex: 0, pendingMoraleCheck: null, pendingCritChoice: null, completedAt: null });
+    expect(out.scene).toMatchObject({ status: "active", round: 1, turnIndex: 0, pendingMoraleCheck: null, pendingChoice: null, completedAt: null });
     expect(out.scene?.startedAt).toBeInstanceOf(Date);
     expect(out.history).toEqual({ clear: true });
   });

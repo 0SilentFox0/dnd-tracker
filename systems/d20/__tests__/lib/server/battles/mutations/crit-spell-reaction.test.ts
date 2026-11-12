@@ -79,22 +79,22 @@ describe("авто-реакція: крит атаки заклинанням", 
 
     vi.restoreAllMocks();
 
-    const pending = paused.scene?.pendingCritChoice;
+    const pending = paused.scene?.pendingChoice;
 
-    expect(paused.response).toEqual({ pendingCritChoice: true });
-    expect(pending).toMatchObject({ action: "attack", triggers: [expect.objectContaining({ source: "attack", kind: "success", key: "attack:h:gob:0" })] });
+    expect(paused.response).toEqual({ pendingChoice: true });
+    expect(pending).toMatchObject({ shown: { action: "attack", triggers: [expect.objectContaining({ source: "attack", kind: "success", key: "attack:h:gob:0" })] } });
     expect(paused.participants).toBe(pausedCtx.participants);
 
-    const resumed = await critChoice({ ...ctxOf(true), scene: { ...ctxOf(true).scene, pendingCritChoice: pending! } }, { choices: { "attack:h:gob:0": "random" } });
+    const resumed = await critChoice({ ...ctxOf(true), scene: { ...ctxOf(true).scene, pendingChoice: pending! } }, { choices: { "attack:h:gob:0": "random" } });
 
     const off = await attack(ctxOf(false, { rng: mulberry32(seed) }), body);
 
-    expect(resumed.scene?.pendingCritChoice).toBeNull();
+    expect(resumed.scene?.pendingChoice).toBeNull();
     expect(foeHp(resumed)).toBe(foeHp(off));
 
-    const chosen = await critChoice({ ...ctxOf(true), scene: { ...ctxOf(true).scene, pendingCritChoice: pending! } }, { choices: { "attack:h:gob:0": CRITICAL_SUCCESS_EFFECTS.find((e) => e.effect.type === "double_damage")!.id } });
+    const chosen = await critChoice({ ...ctxOf(true), scene: { ...ctxOf(true).scene, pendingChoice: pending! } }, { choices: { "attack:h:gob:0": CRITICAL_SUCCESS_EFFECTS.find((e) => e.effect.type === "double_damage")!.id } });
 
-    expect(chosen.scene?.pendingCritChoice).toBeNull();
+    expect(chosen.scene?.pendingChoice).toBeNull();
     expect(text(chosen)).toContain("атака заклинанням 20");
   });
 
@@ -103,11 +103,11 @@ describe("авто-реакція: крит атаки заклинанням", 
 
     vi.spyOn(Math, "random").mockReturnValue(seed / 2 ** 32);
 
-    const pending = (await attack(ctxOf(true, { rng: mulberry32(seed) }), body)).scene?.pendingCritChoice as { seed: number };
+    const pending = (await attack(ctxOf(true, { rng: mulberry32(seed) }), body)).scene?.pendingChoice as { hidden: { seed: number } };
 
     vi.restoreAllMocks();
 
-    const replay = await attack(ctxOf(true), body, { seed: pending.seed, choices: {} });
+    const replay = await attack(ctxOf(true), body, { seed: pending.hidden.seed, choices: {} });
 
     const off = await attack(ctxOf(false, { rng: mulberry32(seed) }), body);
 

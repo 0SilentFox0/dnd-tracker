@@ -264,7 +264,7 @@ describe("Темрява — бібліотечні заклинання", () =>
 
       const { seen } = turnsOf(blinded(), "orc", 2);
 
-      const scene = { id: "b", campaignId: "c1", status: "active", round: 2, turnIndex: 0, version: 1, eventSeq: 0, pendingMoraleCheck: null, pendingCritChoice: null, startedAt: null, completedAt: null } as BattleSceneState;
+      const scene = { id: "b", campaignId: "c1", status: "active", round: 2, turnIndex: 0, version: 1, eventSeq: 0, pendingMoraleCheck: null, pendingChoice: null, startedAt: null, completedAt: null } as BattleSceneState;
 
       const blocked = await Promise.all(
         seen.map((orc) => {

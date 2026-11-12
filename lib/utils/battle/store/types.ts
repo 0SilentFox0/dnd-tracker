@@ -1,10 +1,15 @@
 import type { BattleStatus } from "@/lib/constants/battle";
-import type { StoredPendingCritChoice } from "@/lib/utils/battle/crit-choice/types";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
 import type { AbilityUsageCounter } from "@/types/abilities";
 import type { BattleAudioState } from "@/types/audio";
 import type { AirborneState, BattleMapConfig, BattleParticipant, BattlePreparationParticipant, Direction8, GridPoint, IngredientStock, PendingHit } from "@/types/battle";
+
+/** A pause the system raised for a decision: `shown` goes to clients, `hidden` stays on the server */
+export interface PendingChoice {
+  shown: unknown;
+  hidden: unknown;
+}
 
 export interface BattleSceneState {
   id: string;
@@ -15,7 +20,7 @@ export interface BattleSceneState {
   version: number;
   eventSeq: number;
   pendingMoraleCheck: unknown | null;
-  pendingCritChoice: StoredPendingCritChoice | null;
+  pendingChoice: PendingChoice | null;
   sceneState?: SystemSlot;
   startedAt: Date | null;
   turnStartedAt?: Date | null;
@@ -116,7 +121,7 @@ export interface LoadedBattle {
 }
 
 export type ScenePatch = Partial<
-  Pick<BattleSceneState, "status" | "round" | "turnIndex" | "pendingMoraleCheck" | "pendingCritChoice" | "startedAt" | "completedAt">
+  Pick<BattleSceneState, "status" | "round" | "turnIndex" | "pendingMoraleCheck" | "pendingChoice" | "startedAt" | "completedAt">
 > & { map?: BattleMapConfig | null; rules?: Ruleset; sceneState?: SystemSlot | null };
 
 export interface BattleMutationOutcome {
@@ -132,7 +137,7 @@ export interface BattleMutationOutcome {
 export interface BattleDelta {
   battleId: string;
   version: number;
-  scene: Pick<BattleSceneState, "status" | "round" | "turnIndex" | "pendingMoraleCheck" | "pendingCritChoice" | "turnStartedAt"> & { sceneState?: SystemSlot };
+  scene: Pick<BattleSceneState, "status" | "round" | "turnIndex" | "pendingMoraleCheck" | "pendingChoice" | "turnStartedAt"> & { sceneState?: SystemSlot };
   upserted: BattleParticipant[];
   /** нові учасники й ті, чий знімок змінився */
   fullIds: string[];

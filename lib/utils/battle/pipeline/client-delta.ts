@@ -1,5 +1,6 @@
+import { publicPending } from "./public-pending";
+
 import { BattleStatus } from "@/lib/constants/battle";
-import { toPublicPendingCrit } from "@/lib/utils/battle/crit-choice/public";
 import { diffTerrain } from "@/lib/utils/battle/grid/terrain";
 import type { MapModeKey } from "@/lib/utils/battle/modes";
 import { isModeMapKey, modeDeltas } from "@/lib/utils/battle/modes/client";
@@ -93,7 +94,7 @@ export function buildClientDelta(args: {
       round: after.round,
       turnIndex: after.turnIndex,
       pendingMoraleCheck: after.pendingMoraleCheck,
-      pendingCritChoice: toPublicPendingCrit(after.pendingCritChoice),
+      pendingChoice: publicPending(after.pendingChoice),
       ...(after.turnStartedAt && after.turnStartedAt.getTime() !== before.scene.turnStartedAt?.getTime() && { turnStartedAt: after.turnStartedAt.toISOString() }),
       ...(!jsonEqual(before.scene.sceneState ?? null, after.sceneState ?? null) && { system: after.sceneState ?? null }),
       ...(after.startedAt ? { startedAt: after.startedAt.toISOString() } : before.scene.startedAt && { startedAt: null }),

@@ -39,7 +39,7 @@ function memoryBattle(init: { participants: BattleParticipant[]; pending?: Battl
     turnIndex: 0,
     version: 1,
     eventSeq: 0,
-    pendingMoraleCheck: null, pendingCritChoice: null,
+    pendingMoraleCheck: null, pendingChoice: null,
     startedAt: new Date("2026-01-01T00:00:00.000Z"),
     completedAt: null,
     ...init.scene,

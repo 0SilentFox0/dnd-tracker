@@ -13,7 +13,7 @@ function loaded(over: Partial<LoadedBattle & { isMember: boolean }> = {}): Loade
   return {
     scene: {
       id: "b1", campaignId: "c1", status: "active", round: 1, turnIndex: 0, version: 3, eventSeq: 4,
-      pendingMoraleCheck: null, pendingCritChoice: null, startedAt: null, completedAt: null,
+      pendingMoraleCheck: null, pendingChoice: null, startedAt: null, completedAt: null,
     },
     meta: { name: "Бій", description: null, setup: [], friendlyFire: false, rules: DEFAULT_RULES, critChoiceByDm: false, map: null, createdAt: new Date("2026-01-01") },
     participants: [hero],

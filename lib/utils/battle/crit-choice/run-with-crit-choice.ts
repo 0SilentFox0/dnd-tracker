@@ -27,7 +27,7 @@ export async function runWithCritChoice(ctx: BattleMutationContext, opts: RunWit
 
   const result = await opts.run({ rng, crit: gate.pick });
 
-  if (opts.resume) return { ...result, scene: { ...result.scene, pendingCritChoice: null } };
+  if (opts.resume) return { ...result, scene: { ...result.scene, pendingChoice: null } };
 
   if (!opts.enabled || gate.triggers.length === 0) return result;
 
@@ -35,7 +35,12 @@ export async function runWithCritChoice(ctx: BattleMutationContext, opts: RunWit
     participants: ctx.participants,
     pending: ctx.pending,
     events: [],
-    scene: { pendingCritChoice: { action: opts.action, actorId: opts.actorId, triggers: gate.triggers, request: opts.request, seed, ...(opts.serverRolls && { serverRolls: true }), userId: ctx.userId, isDM: ctx.isDM } },
-    response: { pendingCritChoice: true },
+    scene: {
+      pendingChoice: {
+        shown: { action: opts.action, actorId: opts.actorId, triggers: gate.triggers },
+        hidden: { request: opts.request, seed, ...(opts.serverRolls && { serverRolls: true }), userId: ctx.userId, isDM: ctx.isDM },
+      },
+    },
+    response: { pendingChoice: true },
   };
 }

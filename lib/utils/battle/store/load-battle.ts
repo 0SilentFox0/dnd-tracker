@@ -6,7 +6,7 @@ import type { BattleSceneState, LoadedBattle, ParticipantColumns, ParticipantSna
 
 import { BattleStatus } from "@/lib/constants/battle";
 import { CampaignRole, isDemoKind } from "@/lib/constants/campaigns";
-import type { StoredPendingCritChoice } from "@/lib/utils/battle/crit-choice/types";
+import { pendingFromStored } from "@/lib/utils/battle/crit-choice/pending";
 import { parseRulesCached } from "@/lib/utils/rules/schema";
 import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
 import type { BattleAudioState } from "@/types/audio";
@@ -143,7 +143,7 @@ export async function loadBattle(
     version: row.version,
     eventSeq: row.eventSeq,
     pendingMoraleCheck: row.pendingMoraleCheck ?? null,
-    pendingCritChoice: (row.pendingCritChoice ?? null) as StoredPendingCritChoice | null,
+    pendingChoice: pendingFromStored(row.pendingCritChoice),
     ...(row.systemState && { sceneState: row.systemState as unknown as SystemSlot }),
     startedAt: row.startedAt,
     turnStartedAt: row.turnStartedAt,

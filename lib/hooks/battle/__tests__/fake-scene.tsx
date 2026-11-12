@@ -80,7 +80,7 @@ export function fakeScene(opts: FakeSceneOptions = {}) {
   const battle = {
     id: "b1", campaignId: "c1", name: "Засідка", status: opts.status ?? "active", participants: [], currentRound: 3, currentTurnIndex: opts.isMyTurn === false ? 1 : 0,
     initiativeOrder: order, pendingSummons: [], rules: opts.system ? { ...DEFAULT_RULES, system: { key: opts.system } } : DEFAULT_RULES, ...(opts.momentum && { system: sceneOf(opts.momentum) }), battleLog: [], createdAt: "", version: 5, isDM: opts.isDM ?? opts.playerView ?? false,
-    campaign: { id: "c1", friendlyFire: false }, pendingMoraleCheck: null, pendingCritChoice: opts.critPending ? { triggers: [{ key: "k", source: "attack", kind: "success", actorId: "me", targetId: "gob" }] } : null, map: opts.map ?? null, audio: opts.audio ?? null,
+    campaign: { id: "c1", friendlyFire: false }, pendingMoraleCheck: null, pendingChoice: opts.critPending ? { triggers: [{ key: "k", source: "attack", kind: "success", actorId: "me", targetId: "gob" }] } : null, map: opts.map ?? null, audio: opts.audio ?? null,
   } as BattleScene;
 
   const usedMe = { ...me, actionFlags: { ...me.actionFlags, hasUsedAction: true, hasUsedBonusAction: true } };

@@ -186,7 +186,7 @@ describe("usePusherBattleSync — two players receive same battle state", () => 
   const delta = (version: number, turnIndex = 1) => ({
     battleId,
     version,
-    scene: { status: "active", round: 1, turnIndex, pendingMoraleCheck: null, pendingCritChoice: null },
+    scene: { status: "active", round: 1, turnIndex, pendingMoraleCheck: null, pendingChoice: null },
     upserted: [{ basicInfo: { id: "p-2", name: "Аграїл (поранений)", side: "ally" } }],
     removed: [],
     log: [],
@@ -514,7 +514,7 @@ describe("usePusherBattleSync: dm-канал", () => {
   const delta = (log: unknown[], redacted?: true) => ({
     battleId: "battle-1",
     version: 5,
-    scene: { status: "active", round: 1, turnIndex: 1, pendingMoraleCheck: null, pendingCritChoice: null },
+    scene: { status: "active", round: 1, turnIndex: 1, pendingMoraleCheck: null, pendingChoice: null },
     upserted: [],
     removed: [],
     log,

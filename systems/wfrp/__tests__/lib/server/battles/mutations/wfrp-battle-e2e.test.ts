@@ -219,10 +219,10 @@ describe("wfrp battle end to end (engine)", () => {
 
       const paused = await attackMutation(on, d20Body(20));
 
-      expect(paused.scene?.pendingCritChoice).toBeTruthy();
+      expect(paused.scene?.pendingChoice).toBeTruthy();
       expect(paused.scene).not.toHaveProperty("sceneState");
 
-      const { seed } = paused.scene?.pendingCritChoice as unknown as { seed: number };
+      const { seed } = (paused.scene?.pendingChoice as unknown as { hidden: { seed: number } }).hidden;
 
       const resume: CritResume = { seed, choices: {} };
 

@@ -87,7 +87,7 @@ export function useAttackSubmit({ attacker, attack, flow: { state, dispatch }, o
       return;
     }
 
-    if (res?.pendingCritChoice) {
+    if (res?.pendingChoice) {
       pauseCrit(seen);
       dispatch({ type: "WAIT_CRIT" });
 

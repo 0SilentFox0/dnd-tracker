@@ -6,6 +6,7 @@ import type { AttackBody } from "@/lib/server/battles/mutations/attack/attack-mu
 import { createAttackMutation } from "@/lib/server/battles/mutations/attack/attack-mutation";
 import { createSpellMutation } from "@/lib/server/battles/mutations/spell/spell-mutation";
 import { enabledCritEffects } from "@/lib/utils/battle/crit-choice/catalog";
+import { critPendingOf } from "@/lib/utils/battle/crit-choice/pending";
 import type { CritResume } from "@/lib/utils/battle/crit-choice/types";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleRuleError, dmEvent } from "@/lib/utils/battle/store";
@@ -19,15 +20,15 @@ interface CritChoiceDeps {
 
 export function createCritChoiceMutation(deps: CritChoiceDeps) {
   return async (ctx: BattleMutationContext, body: CritChoiceBody): Promise<MutationResult> => {
-    const pending = ctx.scene.pendingCritChoice;
+    const pending = critPendingOf(ctx.scene.pendingChoice);
 
     if (!pending) throw new BattleRuleError("action_rejected", API_ERRORS.CRIT_CHOICE_NONE);
 
     if ("cancel" in body) {
-      return { participants: ctx.participants, pending: ctx.pending, events: [dmEvent(ctx.scene.round, textRef("battleLog.dm.cancelled"))], scene: { pendingCritChoice: null } };
+      return { participants: ctx.participants, pending: ctx.pending, events: [dmEvent(ctx.scene.round, textRef("battleLog.dm.cancelled"))], scene: { pendingChoice: null } };
     }
 
-    const triggers = new Map(pending.triggers.map((t) => [t.key, t]));
+    const triggers = new Map(pending.shown.triggers.map((t) => [t.key, t]));
 
     const keys = Object.keys(body.choices);
 
@@ -47,11 +48,13 @@ export function createCritChoiceMutation(deps: CritChoiceDeps) {
       choices[key] = choice;
     }
 
-    const resume = { seed: pending.seed, choices };
+    const { hidden } = pending;
 
-    const requester = { ...ctx, userId: pending.userId, isDM: pending.isDM };
+    const resume = { seed: hidden.seed, choices };
 
-    return pending.action === "attack" ? deps.attack(requester, pending.request as AttackBody, resume, { serverRolls: pending.serverRolls }) : deps.spell(requester, pending.request as SpellRequestData, resume);
+    const requester = { ...ctx, userId: hidden.userId, isDM: hidden.isDM };
+
+    return pending.shown.action === "attack" ? deps.attack(requester, hidden.request as AttackBody, resume, { serverRolls: hidden.serverRolls }) : deps.spell(requester, hidden.request as SpellRequestData, resume);
   };
 }
 

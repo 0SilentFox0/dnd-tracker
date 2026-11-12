@@ -359,7 +359,7 @@ export function guardBattleContext<TBody>(userId: string, loaded: LoadedBattle &
     throw new BattleRuleError("awaiting_dm", API_ERRORS.BATTLE_AWAITING_DM);
   }
 
-  if (loaded.scene.pendingCritChoice && !options.allowWhileCritPending && !isDryRun) {
+  if (loaded.scene.pendingChoice && !options.allowWhileCritPending && !isDryRun) {
     throw new BattleRuleError("crit_pending", API_ERRORS.CRIT_PENDING);
   }
 

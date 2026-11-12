@@ -58,7 +58,7 @@ export function useSpellCastSubmit({ caster, selected, flow: { state, dispatch }
         ...(cast.finishLong && caster.battleData.pendingCast && { castingRounds: caster.battleData.pendingCast.remainingRounds }),
       });
 
-      if (res?.pendingCritChoice) {
+      if (res?.pendingChoice) {
         pauseCrit(seen);
         dispatch({ type: "WAIT_CRIT" });
 

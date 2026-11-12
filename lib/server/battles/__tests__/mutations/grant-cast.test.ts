@@ -149,7 +149,7 @@ describe("grantCast", () => {
 
     const out = await run(spell, caster, { grantKey: key, targetIds: ["gob"], diceRolls: [5], saveRolls: [{ participantId: "gob", roll: 20 }] }, { critChoice: true });
 
-    expect(out.scene?.pendingCritChoice).toMatchObject({ action: "spell", actorId: "hero" });
+    expect(out.scene?.pendingChoice).toMatchObject({ shown: { action: "spell", actorId: "hero" } });
   });
 
   it("start of turn drops dead inline grants with their pools", async () => {

@@ -32,7 +32,7 @@ function loaded(over: Partial<LoadedBattle> = {}): LoadedBattle & { isMember: bo
       turnIndex: 0,
       version: 3,
       eventSeq: 4,
-      pendingMoraleCheck: null, pendingCritChoice: null,
+      pendingMoraleCheck: null, pendingChoice: null,
       startedAt: null,
       completedAt: null,
     },
@@ -55,7 +55,7 @@ function delta(): BattleDelta {
   return {
     battleId: "b1",
     version: 4,
-    scene: { status: "active", round: 1, turnIndex: 0, pendingMoraleCheck: null, pendingCritChoice: null },
+    scene: { status: "active", round: 1, turnIndex: 0, pendingMoraleCheck: null, pendingChoice: null },
     upserted: [],
     fullIds: [],
     removed: [],
@@ -642,12 +642,12 @@ describe("runBattleMutation: недійсні захоплення", () => {
 });
 
 describe("runBattleMutation: pending крита", () => {
-  const stored = { action: "attack" as const, actorId: "hero", triggers: [], request: { secret: "req" }, seed: 424242, userId: "u", isDM: false };
+  const stored = { shown: { action: "attack" as const, actorId: "hero", triggers: [] }, hidden: { request: { secret: "req" }, seed: 424242, userId: "u", isDM: false } };
 
   const pendingLoaded = () => {
     const base = loaded({ isDM: true });
 
-    return { ...base, scene: { ...base.scene, pendingCritChoice: stored } };
+    return { ...base, scene: { ...base.scene, pendingChoice: stored } };
   };
 
   const dmDeps = (over: Partial<PipelineDeps> = {}) => deps({ getUserId: vi.fn(async () => "dm"), loadBattle: vi.fn(async () => pendingLoaded()), ...over });
@@ -674,18 +674,18 @@ describe("runBattleMutation: pending крита", () => {
 
     const res = await runBattleMutation(
       req(),
-      { params, access: "member", mutate: (ctx) => ({ participants: ctx.participants, pending: ctx.pending, events: [], scene: { pendingCritChoice: stored } }) },
+      { params, access: "member", mutate: (ctx) => ({ participants: ctx.participants, pending: ctx.pending, events: [], scene: { pendingChoice: stored } }) },
       d,
     );
 
     const json = await res.json();
 
     expect(json.delta.version).toBe(4);
-    expect(json.delta.scene.pendingCritChoice).toEqual({ action: "attack", actorId: "hero", triggers: [] });
+    expect(json.delta.scene.pendingChoice).toEqual({ action: "attack", actorId: "hero", triggers: [] });
 
     const sent = JSON.stringify(publish.mock.calls);
 
-    expect(sent).toContain("pendingCritChoice");
+    expect(sent).toContain("pendingChoice");
     expect(sent).not.toContain("424242");
     expect(sent).not.toContain("secret");
     expect(JSON.stringify(json)).not.toContain("424242");

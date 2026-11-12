@@ -4,7 +4,8 @@ import { useBattleScene } from "./useBattleScene";
 
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
 import { enabledCritEffects } from "@/lib/utils/battle/crit-choice/catalog";
-import type { CritTrigger, PendingCritChoice } from "@/lib/utils/battle/crit-choice/types";
+import { asShownCrit } from "@/lib/utils/battle/crit-choice/pending";
+import type { CritTrigger } from "@/lib/utils/battle/crit-choice/types";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 
 export interface CritChoiceRow {
@@ -19,7 +20,7 @@ export function useCritChoiceDialog() {
 
   const crit = (battle.rules ?? DEFAULT_RULES).criticals;
 
-  const pending: PendingCritChoice | null = battle.pendingCritChoice ?? null;
+  const pending = asShownCrit(battle.pendingChoice);
 
   const nameOf = (id: string) => battle.initiativeOrder.find((p) => p.basicInfo.id === id)?.basicInfo.name ?? "";
 

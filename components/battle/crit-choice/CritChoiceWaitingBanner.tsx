@@ -10,7 +10,7 @@ export function CritChoiceWaitingBanner() {
 
   const { battle, viewer: { isDM } } = useBattleScene();
 
-  if (isDM || !battle.pendingCritChoice) return null;
+  if (isDM || !battle.pendingChoice) return null;
 
   return (
     <div role="status" className="flex min-h-10 items-center justify-center gap-3 border-y border-[var(--gold)]/60 bg-[var(--gold)]/10 px-3 py-1.5 text-center">

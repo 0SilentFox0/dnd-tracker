@@ -26,7 +26,7 @@ const cached: BattleScene = {
 
 const delta = (over: Partial<ClientBattleDelta> = {}): ClientBattleDelta => ({
   battleId: "b1", version: 6,
-  scene: { status: "active", round: 1, turnIndex: 1, pendingMoraleCheck: null, pendingCritChoice: null },
+  scene: { status: "active", round: 1, turnIndex: 1, pendingMoraleCheck: null, pendingChoice: null },
   upserted: [], removed: [], log: [], ...over,
 });
 
@@ -63,7 +63,7 @@ describe("applyBattleDelta", () => {
 
     const terrain = { ...map, terrain: { "1:1": { kind: "barrier" as const, untilRound: 2 } } };
 
-    const scene = { status: "active" as const, round: 1, turnIndex: 1, pendingMoraleCheck: null, pendingCritChoice: null, map: terrain };
+    const scene = { status: "active" as const, round: 1, turnIndex: 1, pendingMoraleCheck: null, pendingChoice: null, map: terrain };
 
     expect((applyBattleDelta(withMap, delta({ scene })) as BattleScene).map).toEqual(terrain);
   });
@@ -75,7 +75,7 @@ describe("applyBattleDelta", () => {
 
     const terrain = { set: [{ cell: { kind: "hazard" as const, label: "Лава" }, keys: ["3:3", "4:4"] }], removed: ["1:1"] };
 
-    const scene = { status: "active" as const, round: 1, turnIndex: 1, pendingMoraleCheck: null, pendingCritChoice: null, terrain };
+    const scene = { status: "active" as const, round: 1, turnIndex: 1, pendingMoraleCheck: null, pendingChoice: null, terrain };
 
     const next = applyBattleDelta(withMap, delta({ scene })) as BattleScene;
 
@@ -143,7 +143,7 @@ describe("applyBattleDelta", () => {
     const setup = [{ id: "u1", type: "unit" as const, side: ParticipantSide.ENEMY }];
 
     const next = applyBattleDelta(cached, delta({
-      scene: { status: "prepared", round: 1, turnIndex: 0, pendingMoraleCheck: null, pendingCritChoice: null },
+      scene: { status: "prepared", round: 1, turnIndex: 0, pendingMoraleCheck: null, pendingChoice: null },
       removed: ["a", "b"], order: [], setup, cancelledFrom: 0,
     })) as BattleScene;
 
@@ -166,7 +166,7 @@ describe("applyBattleDelta — відкат завершеного бою", () =
   it("completedAt: null прибирає дату завершення з кешу", () => {
     const done = { ...cached, status: "completed" as const, completedAt: "2026-01-02T00:00:00.000Z" };
 
-    const next = applyBattleDelta(done, delta({ scene: { status: "active", round: 1, turnIndex: 0, pendingMoraleCheck: null, pendingCritChoice: null, completedAt: null } })) as BattleScene;
+    const next = applyBattleDelta(done, delta({ scene: { status: "active", round: 1, turnIndex: 0, pendingMoraleCheck: null, pendingChoice: null, completedAt: null } })) as BattleScene;
 
     expect(next.status).toBe("active");
     expect(next.completedAt).toBeUndefined();
@@ -174,7 +174,7 @@ describe("applyBattleDelta — відкат завершеного бою", () =
 });
 
 describe("applyBattleDelta — system state", () => {
-  const scene = { status: "active" as const, round: 1, turnIndex: 1, pendingMoraleCheck: null, pendingCritChoice: null };
+  const scene = { status: "active" as const, round: 1, turnIndex: 1, pendingMoraleCheck: null, pendingChoice: null };
 
   it("кладе стан системи у кеш, відсутнє поле зберігає, null очищає", () => {
     const withTokens = applyBattleDelta(cached, delta({ scene: { ...scene, system: sceneOf({ ally: true }) } })) as BattleScene;

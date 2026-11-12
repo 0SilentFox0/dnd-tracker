@@ -9,7 +9,7 @@ import { DEFAULT_RULES } from "@/lib/utils/rules";
 const base = createMockParticipant();
 
 const ctx = {
-  scene: { id: "b1", campaignId: "c1", status: "active", round: 1, turnIndex: 0, version: 2, eventSeq: 3, pendingMoraleCheck: null, pendingCritChoice: null, startedAt: null, completedAt: null },
+  scene: { id: "b1", campaignId: "c1", status: "active", round: 1, turnIndex: 0, version: 2, eventSeq: 3, pendingMoraleCheck: null, pendingChoice: null, startedAt: null, completedAt: null },
   participants: [
     createMockParticipant({ basicInfo: { ...base.basicInfo, id: "hero" } }),
     createMockParticipant({ basicInfo: { ...base.basicInfo, id: "gob", side: ParticipantSide.ENEMY, controlledBy: "dm" } }),

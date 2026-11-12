@@ -162,7 +162,7 @@ describe("pacified: шкода", () => {
       const gob = createMockParticipant({ basicInfo: { ...base.basicInfo, id: "gob", side: ParticipantSide.ENEMY, controlledBy: "dm" }, combatStats: { ...base.combatStats, maxHp: 100, currentHp: 100 } });
 
       return {
-        scene: { id: "b1", campaignId: "c1", status: "active", round: 1, turnIndex: 0, version: 2, eventSeq: 3, pendingMoraleCheck: null, pendingCritChoice: null, startedAt: null, completedAt: null },
+        scene: { id: "b1", campaignId: "c1", status: "active", round: 1, turnIndex: 0, version: 2, eventSeq: 3, pendingMoraleCheck: null, pendingChoice: null, startedAt: null, completedAt: null },
         participants: [marked ? { ...hero, battleData: { ...hero.battleData, activeEffects: [{ id: "e", name: "М", type: "condition", duration: 3, effects: [{ type: "no_damage_dealt", value: 1 }] }] } } : hero, gob],
         pending: [],
         meta: { map: null, rules: DEFAULT_RULES },

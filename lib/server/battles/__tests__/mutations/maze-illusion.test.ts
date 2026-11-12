@@ -80,7 +80,7 @@ describe("illusion auto-clear through the pipeline", () => {
 
     const killed = loaded.participants.map((p) => (p.basicInfo.id === "gob" ? { ...p, combatStats: { ...p.combatStats, status: CombatStatus.DEAD, currentHp: 0 } } : p));
 
-    const saveBattle = vi.fn(async () => ({ battleId: "b1", version: 3, scene: { status: BattleStatus.COMPLETED, round: 1, turnIndex: 0, pendingMoraleCheck: null, pendingCritChoice: null }, upserted: [], fullIds: [], removed: [], events: [] }));
+    const saveBattle = vi.fn(async () => ({ battleId: "b1", version: 3, scene: { status: BattleStatus.COMPLETED, round: 1, turnIndex: 0, pendingMoraleCheck: null, pendingChoice: null }, upserted: [], fullIds: [], removed: [], events: [] }));
 
     const deps: PipelineDeps = {
       getUserId: async () => loaded.userId,

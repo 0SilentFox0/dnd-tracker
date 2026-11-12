@@ -173,8 +173,8 @@ describe("useAttackWizard", () => {
 
     const scene = fakeScene({ afterLog: critLog });
 
-    scene.battle.pendingCritChoice = { action: "attack", actorId: "me", triggers: [] };
-    scene.mutateAsync.mockResolvedValue({ hpChanges: [], pendingCritChoice: true });
+    scene.battle.pendingChoice = { action: "attack", actorId: "me", triggers: [] };
+    scene.mutateAsync.mockResolvedValue({ hpChanges: [], pendingChoice: true });
 
     const hook = renderHook(() => useAttackWizard(scene.me), { wrapper: scene.wrapper });
 
@@ -188,7 +188,7 @@ describe("useAttackWizard", () => {
     await waitFor(() => expect(hook.result.current.state.waitingCrit).toBe(true));
     expect(scene.showResult).not.toHaveBeenCalled();
 
-    scene.battle.pendingCritChoice = null;
+    scene.battle.pendingChoice = null;
     hook.rerender();
 
     await waitFor(() => expect(scene.showResult).toHaveBeenCalledWith(expect.objectContaining({ kind: "hit", damage: 12, critEffect: expect.objectContaining({ name: "Точний удар" }) })));
@@ -198,8 +198,8 @@ describe("useAttackWizard", () => {
   it("pending знято без нових записів (скасування, відкат): помилка замість вигаданого результату", async () => {
     const scene = fakeScene({ afterLog: [] });
 
-    scene.battle.pendingCritChoice = { action: "attack", actorId: "me", triggers: [] };
-    scene.mutateAsync.mockResolvedValue({ hpChanges: [], pendingCritChoice: true });
+    scene.battle.pendingChoice = { action: "attack", actorId: "me", triggers: [] };
+    scene.mutateAsync.mockResolvedValue({ hpChanges: [], pendingChoice: true });
 
     const hook = renderHook(() => useAttackWizard(scene.me), { wrapper: scene.wrapper });
 
@@ -212,7 +212,7 @@ describe("useAttackWizard", () => {
 
     await waitFor(() => expect(hook.result.current.state.waitingCrit).toBe(true));
 
-    scene.battle.pendingCritChoice = null;
+    scene.battle.pendingChoice = null;
     hook.rerender();
 
     await waitFor(() => expect(hook.result.current.state).toMatchObject({ waitingCrit: false, error: { message: "battleWizards.critCancelled" } }));

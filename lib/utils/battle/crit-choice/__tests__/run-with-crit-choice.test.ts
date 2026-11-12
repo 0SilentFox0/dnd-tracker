@@ -1,11 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { toPublicPendingCrit } from "../public";
+import { pendingFromStored } from "../pending";
 import { runWithCritChoice } from "../run-with-crit-choice";
 import type { CritTriggerInfo } from "../types";
 
 import { context } from "@/lib/server/battles/__tests__/mutations/fixtures";
 import { critEffectsFor } from "@/lib/utils/battle/crit-choice/catalog";
+import { publicPending } from "@/lib/utils/battle/pipeline/public-pending";
 import type { MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 
@@ -33,7 +34,7 @@ describe("runWithCritChoice", () => {
     const out = await runWithCritChoice(ctx, opts({ enabled: false }));
 
     expect(out.events).toHaveLength(1);
-    expect(out.scene?.pendingCritChoice).toBeUndefined();
+    expect(out.scene?.pendingChoice).toBeUndefined();
   });
 
   it("прапор on і тригер: нічого не застосовано, pending зі seed і request", async () => {
@@ -41,15 +42,10 @@ describe("runWithCritChoice", () => {
 
     expect(out.participants).toBe(ctx.participants);
     expect(out.events).toEqual([]);
-    expect(out.response).toEqual({ pendingCritChoice: true });
-    expect(out.scene?.pendingCritChoice).toMatchObject({
-      action: "attack",
-      actorId: "hero",
-      request: { attackerId: "hero" },
-      seed: expect.any(Number),
-      userId: "user-1",
-      isDM: false,
-      triggers: [{ ...info, key: "attack:hero:gob:0" }],
+    expect(out.response).toEqual({ pendingChoice: true });
+    expect(out.scene?.pendingChoice).toMatchObject({
+      shown: { action: "attack", actorId: "hero", triggers: [{ ...info, key: "attack:hero:gob:0" }] },
+      hidden: { request: { attackerId: "hero" }, seed: expect.any(Number), userId: "user-1", isDM: false },
     });
   });
 
@@ -57,7 +53,7 @@ describe("runWithCritChoice", () => {
     const out = await runWithCritChoice(ctx, opts({ run: () => done() }));
 
     expect(out.events).toHaveLength(1);
-    expect(out.scene?.pendingCritChoice).toBeUndefined();
+    expect(out.scene?.pendingChoice).toBeUndefined();
   });
 
   it("resume: застосовує вибір, очищає pending і детермінований за seed", async () => {
@@ -75,7 +71,7 @@ describe("runWithCritChoice", () => {
 
     await runWithCritChoice(ctx, opts({ resume, run }));
 
-    expect(a.scene?.pendingCritChoice).toBeNull();
+    expect(a.scene?.pendingChoice).toBeNull();
     expect(a.events).toHaveLength(1);
     expect(picked[0]).toEqual(picked[1]);
   });
@@ -122,10 +118,15 @@ describe("runWithCritChoice", () => {
     expect(chosen).toBe(all[0]);
   });
 
-  it("toPublicPendingCrit прибирає request і seed", () => {
-    const pub = toPublicPendingCrit({ action: "spell", actorId: "hero", triggers: [], request: { secret: 1 }, seed: 5, userId: "u", isDM: false });
+  it("publicPending shows only the shown part", () => {
+    expect(publicPending({ shown: { action: "spell", actorId: "hero", triggers: [] }, hidden: { request: { secret: 1 }, seed: 5 } })).toEqual({ action: "spell", actorId: "hero", triggers: [] });
+    expect(publicPending(null)).toBeNull();
+  });
 
-    expect(pub).toEqual({ action: "spell", actorId: "hero", triggers: [] });
-    expect(toPublicPendingCrit(null)).toBeNull();
+  it("a row stored before the shown/hidden split is wrapped", () => {
+    const flat = { action: "spell", actorId: "hero", triggers: [], request: { secret: 1 }, seed: 5, userId: "u", isDM: false };
+
+    expect(pendingFromStored(flat)).toEqual({ shown: { action: "spell", actorId: "hero", triggers: [] }, hidden: flat });
+    expect(pendingFromStored(null)).toBeNull();
   });
 });

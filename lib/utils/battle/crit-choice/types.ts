@@ -21,7 +21,7 @@ export interface PendingCritChoice {
   triggers: CritTrigger[];
 }
 
-export interface StoredPendingCritChoice extends PendingCritChoice {
+export interface CritPendingHidden {
   request: unknown;
   seed: number;
   serverRolls?: boolean;

@@ -79,7 +79,7 @@ export function applyBattleDelta(cached: BattleScene, delta: ClientBattleDelta):
     currentRound: scene.round,
     currentTurnIndex: scene.turnIndex,
     pendingMoraleCheck: scene.pendingMoraleCheck,
-    pendingCritChoice: scene.pendingCritChoice,
+    pendingChoice: scene.pendingChoice,
     system: scene.system === null ? undefined : (scene.system ?? cached.system),
     ...(map !== cached.map && { map }),
     startedAt: scene.startedAt === null ? undefined : (scene.startedAt ?? cached.startedAt),

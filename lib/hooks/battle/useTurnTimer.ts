@@ -44,7 +44,7 @@ export function useTurnTimer(): { secondsLeft: number | null } {
 
   const mine = viewer.isDM || (!!viewer.userId && turn.current?.basicInfo.controlledBy === viewer.userId);
 
-  const paused = !!battle.pendingCritChoice || anyPending;
+  const paused = !!battle.pendingChoice || anyPending;
 
   const expired = secondsLeft === 0 && mine && !paused;
 

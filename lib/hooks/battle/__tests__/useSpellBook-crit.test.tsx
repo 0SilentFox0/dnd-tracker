@@ -24,8 +24,8 @@ describe("useSpellBook: пауза на вибір крита ДМ", () => {
 
     const scene = fakeScene({ knownSpells: ["ray"], slots: { "2": { max: 2, current: 2 } }, afterLog: log });
 
-    scene.battle.pendingCritChoice = { action: "spell", actorId: "me", triggers: [] };
-    scene.castSpell.mockResolvedValue({ hpChanges: [], pendingCritChoice: true });
+    scene.battle.pendingChoice = { action: "spell", actorId: "me", triggers: [] };
+    scene.castSpell.mockResolvedValue({ hpChanges: [], pendingChoice: true });
 
     const hook = renderHook(() => useSpellBook({ ...scene.me, basicInfo: { ...scene.me.basicInfo, sourceType: "character" } }), { wrapper: scene.wrapper });
 
@@ -42,7 +42,7 @@ describe("useSpellBook: пауза на вибір крита ДМ", () => {
     await waitFor(() => expect(hook.result.current.state.waitingCrit).toBe(true));
     expect(scene.showResult).not.toHaveBeenCalled();
 
-    scene.battle.pendingCritChoice = null;
+    scene.battle.pendingChoice = null;
     hook.rerender();
 
     await waitFor(() => expect(scene.showResult).toHaveBeenCalledWith(expect.objectContaining({ kind: "spell", changes: [{ name: "Гоблін", change: 9 }] })));
@@ -52,8 +52,8 @@ describe("useSpellBook: пауза на вибір крита ДМ", () => {
   it("pending знято без нових записів: помилка замість порожнього результату", async () => {
     const scene = fakeScene({ knownSpells: ["ray"], slots: { "2": { max: 2, current: 2 } }, afterLog: [] });
 
-    scene.battle.pendingCritChoice = { action: "spell", actorId: "me", triggers: [] };
-    scene.castSpell.mockResolvedValue({ hpChanges: [], pendingCritChoice: true });
+    scene.battle.pendingChoice = { action: "spell", actorId: "me", triggers: [] };
+    scene.castSpell.mockResolvedValue({ hpChanges: [], pendingChoice: true });
 
     const hook = renderHook(() => useSpellBook({ ...scene.me, basicInfo: { ...scene.me.basicInfo, sourceType: "character" } }), { wrapper: scene.wrapper });
 
@@ -69,7 +69,7 @@ describe("useSpellBook: пауза на вибір крита ДМ", () => {
 
     await waitFor(() => expect(hook.result.current.state.waitingCrit).toBe(true));
 
-    scene.battle.pendingCritChoice = null;
+    scene.battle.pendingChoice = null;
     hook.rerender();
 
     await waitFor(() => expect(hook.result.current.state).toMatchObject({ waitingCrit: false, step: "summary", error: { message: "battleWizards.critCancelled" } }));

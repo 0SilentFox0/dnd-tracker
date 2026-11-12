@@ -17,7 +17,7 @@ export function useCritPause({ waiting, actorId, onResolved, onCancelled }: Crit
 
   const seenRef = useRef(new Set<number>());
 
-  const critPending = !!scene.battle.pendingCritChoice;
+  const critPending = !!scene.battle.pendingChoice;
 
   const resolved = useEffectEvent(onResolved);
 

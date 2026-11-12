@@ -8,7 +8,7 @@ import { DEFAULT_RULES } from "@/lib/utils/rules";
 
 const scene: BattleSceneState = {
   id: "b1", campaignId: "c1", status: "active", round: 1, turnIndex: 0, version: 3,
-  eventSeq: 4, pendingMoraleCheck: null, pendingCritChoice: null, startedAt: null, completedAt: null,
+  eventSeq: 4, pendingMoraleCheck: null, pendingChoice: null, startedAt: null, completedAt: null,
 };
 
 const WFRP_RULES = { ...DEFAULT_RULES, system: { key: "wfrp" as const } };
@@ -65,7 +65,7 @@ describe("toBattleResponse", () => {
 });
 
 describe("buildPusherMessages", () => {
-  const payload = { battleId: "b1", version: 4, scene: { status: "active" as const, round: 1, turnIndex: 0, pendingMoraleCheck: null, pendingCritChoice: null }, upserted: [], removed: [], log: [] };
+  const payload = { battleId: "b1", version: 4, scene: { status: "active" as const, round: 1, turnIndex: 0, pendingMoraleCheck: null, pendingChoice: null }, upserted: [], removed: [], log: [] };
 
   it("зміна ходу на гравця — battle-delta + turn-started у його канал", () => {
     const messages = buildPusherMessages({ before: { ...scene, turnIndex: 1 }, after: scene, rules: WFRP_RULES, participants: [hero, goblin], delta: payload });
@@ -152,7 +152,7 @@ describe("приховані miscast-стани ворога", () => {
 
   const cursed = { ...goblin, battleData: { ...goblin.battleData, activeEffects: [hiddenEffect] } };
 
-  const delta = { battleId: "b1", version: 4, scene: { status: "active" as const, round: 1, turnIndex: 0, pendingMoraleCheck: null, pendingCritChoice: null }, upserted: [cursed], patched: [{ id: "gob", battleData: { activeEffects: [hiddenEffect] } }], removed: [], log: [] };
+  const delta = { battleId: "b1", version: 4, scene: { status: "active" as const, round: 1, turnIndex: 0, pendingMoraleCheck: null, pendingChoice: null }, upserted: [cursed], patched: [{ id: "gob", battleData: { activeEffects: [hiddenEffect] } }], removed: [], log: [] };
 
   it("GET/SSR: гравець не бачить стан, ДМ бачить", () => {
     const row = (isDM: boolean) => toBattleResponse({ meta }, scene, [hero, cursed], [], { mode: "full", entries: [] }, { isDM }).initiativeOrder[1];
@@ -183,7 +183,7 @@ describe("P7: деталі дії у Pusher-каналах", () => {
 
   const entry = (actorId: string, data: object) => ({ actionIndex: 1, actionType: "attack", actorId, targets: [{ participantId: "hero", participantName: "x" }], actionDetails: { system: { key: "wfrp", data } }, log: [] }) as never;
 
-  const delta = (log: never[]) => ({ battleId: "b1", version: 4, scene: { status: "active" as const, round: 1, turnIndex: 0, pendingMoraleCheck: null, pendingCritChoice: null }, upserted: [], removed: [], log });
+  const delta = (log: never[]) => ({ battleId: "b1", version: 4, scene: { status: "active" as const, round: 1, turnIndex: 0, pendingMoraleCheck: null, pendingChoice: null }, upserted: [], removed: [], log });
 
   it("публічний канал без захисника й miscast, dm-канал повний", () => {
     const [pub, dm] = buildPusherMessages({ before: scene, after: scene, rules: WFRP_RULES, participants: [hero, visibleFoe], delta: delta([entry("foe", { attack, cast })]) });

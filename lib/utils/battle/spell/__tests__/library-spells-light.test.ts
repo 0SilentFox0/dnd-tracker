@@ -45,7 +45,7 @@ const unit = (id: string, side: ParticipantSide = ParticipantSide.ALLY, over: { 
 };
 
 const scene = (round: number, turnIndex: number): BattleSceneState => ({
-  id: "b", campaignId: "c", status: "active", round, turnIndex, version: 1, eventSeq: 0, pendingMoraleCheck: null, pendingCritChoice: null, startedAt: null, completedAt: null,
+  id: "b", campaignId: "c", status: "active", round, turnIndex, version: 1, eventSeq: 0, pendingMoraleCheck: null, pendingChoice: null, startedAt: null, completedAt: null,
 });
 
 const get = (ps: BattleParticipant[], id: string) => findParticipant(ps, id) as BattleParticipant;

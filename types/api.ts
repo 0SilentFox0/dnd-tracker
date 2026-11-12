@@ -21,7 +21,6 @@ import type {
   moveSchema,
   patchParticipantSchema,
 } from "@/lib/schemas/battles";
-import type { PendingCritChoice } from "@/lib/utils/battle/crit-choice/types";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
 import type { BattleAudioState } from "@/types/audio";
@@ -86,7 +85,8 @@ export interface BattleScene {
   /** Записи з actionIndex ≥ цього значення скасовано відкатом */
   battleLogCancelledFrom?: number;
   pendingMoraleCheck?: unknown;
-  pendingCritChoice?: PendingCritChoice | null;
+  /** Public part of a pause the system is waiting on; its shape belongs to the system */
+  pendingChoice?: unknown;
   /** Стан сцени, яким керує система; відсутнє = немає */
   system?: SystemSlot;
   map?: BattleMapConfig | null;
@@ -108,7 +108,7 @@ export interface ClientBattleDelta {
     round: number;
     turnIndex: number;
     pendingMoraleCheck: unknown;
-    pendingCritChoice: PendingCritChoice | null;
+    pendingChoice: unknown;
     /** відсутнє = без змін, null = стан скинуто */
     system?: SystemSlot | null;
     /** null — дату скинуто (reset, відкат завершеного бою) */

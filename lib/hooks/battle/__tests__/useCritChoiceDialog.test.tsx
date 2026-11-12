@@ -22,7 +22,7 @@ describe("useCritChoiceDialog", () => {
   it("рядки: імена учасників і опції за джерелом та видом тригера", () => {
     const scene = fakeScene({ isDM: true });
 
-    scene.battle.pendingCritChoice = pending;
+    scene.battle.pendingChoice = pending;
 
     const { result } = renderHook(() => useCritChoiceDialog(), { wrapper: scene.wrapper });
 
@@ -36,7 +36,7 @@ describe("useCritChoiceDialog", () => {
 
     const all = critEffectsFor("attack", "success");
 
-    scene.battle.pendingCritChoice = pending;
+    scene.battle.pendingChoice = pending;
     scene.battle.rules = { ...DEFAULT_RULES, criticals: { ...DEFAULT_RULES.criticals, disabledSuccess: [String(all[0].id)] } };
 
     const { result } = renderHook(() => useCritChoiceDialog(), { wrapper: scene.wrapper });
@@ -48,13 +48,13 @@ describe("useCritChoiceDialog", () => {
   it("open: лише для ДМ із pending", () => {
     const dm = fakeScene({ isDM: true });
 
-    dm.battle.pendingCritChoice = pending;
+    dm.battle.pendingChoice = pending;
 
     expect(renderHook(() => useCritChoiceDialog(), { wrapper: dm.wrapper }).result.current.open).toBe(true);
 
     const player = fakeScene({ isDM: false });
 
-    player.battle.pendingCritChoice = pending;
+    player.battle.pendingChoice = pending;
 
     expect(renderHook(() => useCritChoiceDialog(), { wrapper: player.wrapper }).result.current.open).toBe(false);
   });
@@ -62,7 +62,7 @@ describe("useCritChoiceDialog", () => {
   it("cancel відправляє { cancel: true }", () => {
     const scene = fakeScene({ isDM: true });
 
-    scene.battle.pendingCritChoice = pending;
+    scene.battle.pendingChoice = pending;
 
     const { result } = renderHook(() => useCritChoiceDialog(), { wrapper: scene.wrapper });
 
@@ -74,7 +74,7 @@ describe("useCritChoiceDialog", () => {
   it("submit відправляє choices мутацією; isSubmitting береться з мутації", () => {
     const scene = fakeScene({ isDM: true });
 
-    scene.battle.pendingCritChoice = pending;
+    scene.battle.pendingChoice = pending;
 
     const { result } = renderHook(() => useCritChoiceDialog(), { wrapper: scene.wrapper });
 

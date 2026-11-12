@@ -14,9 +14,10 @@ import { createSpellMutation } from "@/lib/server/battles/mutations/spell/spell-
 import { runBattleMutation } from "@/lib/server/battles/run-mutation";
 import { critNameRef } from "@/lib/utils/battle/attack/critical";
 import { critEffectsFor } from "@/lib/utils/battle/crit-choice/catalog";
-import type { StoredPendingCritChoice } from "@/lib/utils/battle/crit-choice/types";
+import { critPendingOf } from "@/lib/utils/battle/crit-choice/pending";
 import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import type { BattleMutationContext, PipelineDeps } from "@/lib/utils/battle/pipeline/run-battle-mutation";
+import type { PendingChoice } from "@/lib/utils/battle/store";
 import { diffParticipants, splitParticipant } from "@/lib/utils/battle/store";
 import { buildSnapshotState } from "@/lib/utils/battle/store/snapshot-state";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
@@ -40,14 +41,14 @@ const on = () => {
   return { ...c, meta: { ...c.meta, critChoiceByDm: true } };
 };
 
-async function pendingCtx(over: Record<string, unknown> = {}): Promise<{ ctx: BattleMutationContext; pending: StoredPendingCritChoice }> {
+async function pendingCtx(over: Record<string, unknown> = {}): Promise<{ ctx: BattleMutationContext; pending: PendingChoice }> {
   const c = on();
 
   const out = await attack(c, body(over));
 
-  const pending = out.scene?.pendingCritChoice as StoredPendingCritChoice;
+  const pending = out.scene?.pendingChoice as PendingChoice;
 
-  return { ctx: { ...c, scene: { ...c.scene, pendingCritChoice: pending } }, pending };
+  return { ctx: { ...c, scene: { ...c.scene, pendingChoice: pending } }, pending };
 }
 
 const KEY = "attack:hero:gob:0";
@@ -60,7 +61,7 @@ describe("crit-choice mutation", () => {
 
     const out = await critChoice(ctx, { choices: { [KEY]: effect.id } });
 
-    expect(out.scene?.pendingCritChoice).toBeNull();
+    expect(out.scene?.pendingChoice).toBeNull();
     expect(out.events).toHaveLength(1);
     expect(eventTextOf(out.events[0])).toContain(textOf(critNameRef(effect)));
   });
@@ -98,9 +99,9 @@ describe("crit-choice mutation", () => {
 
     const out = await attack(withRules, body());
 
-    const pending = out.scene?.pendingCritChoice as StoredPendingCritChoice;
+    const pending = out.scene?.pendingChoice as PendingChoice;
 
-    const ctx = { ...withRules, scene: { ...withRules.scene, pendingCritChoice: pending } };
+    const ctx = { ...withRules, scene: { ...withRules.scene, pendingChoice: pending } };
 
     await expect(critChoice(ctx, { choices: { [KEY]: all[0].id } })).rejects.toMatchObject({ message: API_ERRORS.CRIT_EFFECT_UNKNOWN });
 
@@ -116,17 +117,17 @@ describe("crit-choice mutation", () => {
 
     const out = await serverAttack(c, body({ d20Roll: 1 }));
 
-    const pending = out.scene?.pendingCritChoice as StoredPendingCritChoice;
+    const pending = out.scene?.pendingChoice as PendingChoice;
 
-    expect(pending.serverRolls).toBe(true);
+    expect(critPendingOf(pending)?.hidden.serverRolls).toBe(true);
 
     const replayAttack = vi.fn(async () => out);
 
     const mutation = createCritChoiceMutation({ attack: replayAttack, spell: createSpellMutation(deps) });
 
-    await mutation({ ...c, scene: { ...c.scene, pendingCritChoice: pending } }, { choices: { [KEY]: effect.id } });
+    await mutation({ ...c, scene: { ...c.scene, pendingChoice: pending } }, { choices: { [KEY]: effect.id } });
 
-    expect(replayAttack).toHaveBeenCalledWith(expect.anything(), expect.anything(), expect.objectContaining({ seed: pending.seed }), { serverRolls: true });
+    expect(replayAttack).toHaveBeenCalledWith(expect.anything(), expect.anything(), expect.objectContaining({ seed: critPendingOf(pending)?.hidden.seed }), { serverRolls: true });
   });
 
   it("атака з endTurn завершує хід після вибору", async () => {
@@ -134,7 +135,7 @@ describe("crit-choice mutation", () => {
 
     const out = await critChoice(ctx, { choices: { [KEY]: "random" } });
 
-    expect(out.scene).toMatchObject({ turnIndex: 1, pendingCritChoice: null });
+    expect(out.scene).toMatchObject({ turnIndex: 1, pendingChoice: null });
   });
 
   it("прапор кампанії вимкнено до розв'язання — вибір усе одно працює", async () => {
@@ -145,7 +146,7 @@ describe("crit-choice mutation", () => {
     const out = await critChoice(off, { choices: { [KEY]: effect.id } });
 
     expect(out.events).toHaveLength(1);
-    expect(out.scene?.pendingCritChoice).toBeNull();
+    expect(out.scene?.pendingChoice).toBeNull();
   });
 
   it("cancel: pending знято, стан без змін, одна подія", async () => {
@@ -153,7 +154,7 @@ describe("crit-choice mutation", () => {
 
     const out = await critChoice(ctx, { cancel: true });
 
-    expect(out.scene?.pendingCritChoice).toBeNull();
+    expect(out.scene?.pendingChoice).toBeNull();
     expect(out.participants).toBe(ctx.participants);
     expect(out.events).toHaveLength(1);
     expect(eventTextOf(out.events[0])).toBe("ДМ скасував дію");
@@ -176,7 +177,7 @@ describe("crit-choice mutation", () => {
       getUserId: vi.fn(async () => "u"),
       rateLimit: vi.fn(async () => ({ allowed: true, count: 1, limit: 30, retryAfterSeconds: 10 })),
       loadBattle: vi.fn(async () => loaded(isDM)),
-      saveBattle: vi.fn(async () => ({ battleId: "b1", version: 3, scene: { status: BattleStatus.ACTIVE, round: 1, turnIndex: 0, pendingMoraleCheck: null, pendingCritChoice: null }, upserted: [], fullIds: [], removed: [], events: [] })),
+      saveBattle: vi.fn(async () => ({ battleId: "b1", version: 3, scene: { status: BattleStatus.ACTIVE, round: 1, turnIndex: 0, pendingMoraleCheck: null, pendingChoice: null }, upserted: [], fullIds: [], removed: [], events: [] })),
       publish: vi.fn(),
       loadRecentEvents: vi.fn(async () => []),
     });
@@ -189,22 +190,22 @@ describe("crit-choice mutation", () => {
     const res = await run(mk(true));
 
     expect(res.status).toBe(200);
-    expect((await res.json()).delta.scene.pendingCritChoice).toBeNull();
+    expect((await res.json()).delta.scene.pendingChoice).toBeNull();
   });
 });
 
 describe("очищення pending", () => {
-  const stored: StoredPendingCritChoice = { action: "attack", actorId: "hero", triggers: [], request: {}, seed: 1, userId: "u", isDM: false };
+  const stored: PendingChoice = { shown: { action: "attack", actorId: "hero", triggers: [] }, hidden: { request: {}, seed: 1, userId: "u", isDM: false } };
 
   const withPending = () => {
     const c = context();
 
-    return { ...c, scene: { ...c.scene, pendingCritChoice: stored } };
+    return { ...c, scene: { ...c.scene, pendingChoice: stored } };
   };
 
   it("reset і complete скидають pending", () => {
-    expect(resetMutation(withPending()).scene?.pendingCritChoice).toBeNull();
-    expect(completeMutation(withPending(), {}).scene?.pendingCritChoice).toBeNull();
+    expect(resetMutation(withPending()).scene?.pendingChoice).toBeNull();
+    expect(completeMutation(withPending(), {}).scene?.pendingChoice).toBeNull();
   });
 
   it("rollback скидає pending, навіть якщо знімок його не знає", async () => {
@@ -212,10 +213,10 @@ describe("очищення pending", () => {
 
     const s = [splitParticipant(hero, { orderIndex: 0, isPending: false })];
 
-    const snapshot = { seq: 4, state: buildSnapshotState({ ...c.scene, pendingCritChoice: null }, s, diffParticipants(s, s)) };
+    const snapshot = { seq: 4, state: buildSnapshotState({ ...c.scene, pendingChoice: null }, s, diffParticipants(s, s)) };
 
     const out = await createRollbackMutation(vi.fn(async () => [snapshot]), vi.fn(async () => true))(c, { actionIndex: 4 });
 
-    expect(out.scene?.pendingCritChoice).toBeNull();
+    expect(out.scene?.pendingChoice).toBeNull();
   });
 });

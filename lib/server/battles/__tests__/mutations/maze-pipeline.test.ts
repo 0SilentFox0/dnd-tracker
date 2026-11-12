@@ -33,7 +33,7 @@ const mapOf = (over: Partial<MazeConfig> = {}, size = 8): BattleMapConfig => maz
 
 const scene0: BattleSceneState = {
   id: "b1", campaignId: "c1", status: "active", round: 1, turnIndex: 0, version: 1,
-  eventSeq: 0, pendingMoraleCheck: null, pendingCritChoice: null, startedAt: new Date("2026-01-01T00:00:00.000Z"), completedAt: null,
+  eventSeq: 0, pendingMoraleCheck: null, pendingChoice: null, startedAt: new Date("2026-01-01T00:00:00.000Z"), completedAt: null,
 };
 
 /** Сховище в пам'яті з тими самими split/join, prepareSave і знімками, що й saveBattle, плюс карта бою */
@@ -248,7 +248,7 @@ describe("дельта лабіринту", () => {
 
     const marks = { "2:2": { symbol: "cross" as const, color: "#22c55e", by: "hero" } };
 
-    const delta = { battleId: "b1", version: 2, scene: { status: "active", round: 1, turnIndex: 0, pendingMoraleCheck: null, pendingCritChoice: null, maze: { marks, dark: true } }, upserted: [], removed: [], log: [] } as BattleMutationResponse["delta"];
+    const delta = { battleId: "b1", version: 2, scene: { status: "active", round: 1, turnIndex: 0, pendingMoraleCheck: null, pendingChoice: null, maze: { marks, dark: true } }, upserted: [], removed: [], log: [] } as BattleMutationResponse["delta"];
 
     const out = applyBattleDelta(cached, delta) as BattleScene;
 

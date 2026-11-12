@@ -54,7 +54,7 @@ describe("атака: вибір крита ДМ-ом", () => {
     const out = await attack({ ...c, meta: { ...c.meta, critChoiceByDm: false } }, body());
 
     expect(out.events).toHaveLength(1);
-    expect(out.scene?.pendingCritChoice).toBeUndefined();
+    expect(out.scene?.pendingChoice).toBeUndefined();
   });
 
   it("прапор on + тригер: учасники без змін, подій немає, pending має seed і request", async () => {
@@ -64,13 +64,10 @@ describe("атака: вибір крита ДМ-ом", () => {
 
     expect(out.participants).toBe(c.participants);
     expect(out.events).toEqual([]);
-    expect(out.response).toEqual({ pendingCritChoice: true });
-    expect(out.scene?.pendingCritChoice).toMatchObject({
-      action: "attack",
-      actorId: "hero",
-      seed: expect.any(Number),
-      request: expect.objectContaining({ attackerId: "hero" }),
-      triggers: [expect.objectContaining({ source: "attack", kind: "success", key: "attack:hero:gob:0" })],
+    expect(out.response).toEqual({ pendingChoice: true });
+    expect(out.scene?.pendingChoice).toMatchObject({
+      shown: { action: "attack", actorId: "hero", triggers: [expect.objectContaining({ source: "attack", kind: "success", key: "attack:hero:gob:0" })] },
+      hidden: { seed: expect.any(Number), request: expect.objectContaining({ attackerId: "hero" }) },
     });
   });
 
@@ -78,19 +75,19 @@ describe("атака: вибір крита ДМ-ом", () => {
     const out = await attack(on(), body({ d20Roll: 12 }));
 
     expect(out.events).toHaveLength(1);
-    expect(out.scene?.pendingCritChoice).toBeUndefined();
+    expect(out.scene?.pendingChoice).toBeUndefined();
   });
 
   it("resume з порожнім вибором однаковий за seed і очищає pending", async () => {
-    const pending = (await attack(on(), body())).scene?.pendingCritChoice as { seed: number };
+    const pending = (await attack(on(), body())).scene?.pendingChoice as { hidden: { seed: number } };
 
-    const resume = { seed: pending.seed, choices: {} };
+    const resume = { seed: pending.hidden.seed, choices: {} };
 
     const a = await attack(on(), body(), resume);
 
     const b = await attack(on(), body(), resume);
 
-    expect(a.scene?.pendingCritChoice).toBeNull();
+    expect(a.scene?.pendingChoice).toBeNull();
     expect(a.events).toHaveLength(1);
     expect(hpOf(a)).toBe(hpOf(b));
     expect(eventTextOf(a.events[0])).toBe(eventTextOf(b.events[0]));
@@ -111,9 +108,9 @@ describe("атака: вибір крита ДМ-ом", () => {
 
     const paused = seeded(true);
 
-    const pending = (await attack(paused, body())).scene?.pendingCritChoice;
+    const pending = (await attack(paused, body())).scene?.pendingChoice;
 
-    const resumed = await critChoice({ ...paused, scene: { ...paused.scene, pendingCritChoice: pending! } }, { choices: { "attack:hero:gob:0": "random" } });
+    const resumed = await critChoice({ ...paused, scene: { ...paused.scene, pendingChoice: pending! } }, { choices: { "attack:hero:gob:0": "random" } });
 
     random.mockRestore();
 
@@ -127,7 +124,7 @@ describe("атака: вибір крита ДМ-ом", () => {
     expect(parsed).not.toHaveProperty("critChoices");
     expect(parsed).not.toHaveProperty("seed");
 
-    expect((await attack(on(), parsed)).scene?.pendingCritChoice).toBeTruthy();
+    expect((await attack(on(), parsed)).scene?.pendingChoice).toBeTruthy();
   });
 });
 
@@ -140,7 +137,7 @@ describe("заклинання: вибір крита ДМ-ом", () => {
     const out = await spell(dm(), data() as never);
 
     expect(out.events).toEqual([]);
-    expect(out.scene?.pendingCritChoice).toMatchObject({ action: "spell", triggers: [expect.objectContaining({ source: "save" })] });
+    expect(out.scene?.pendingChoice).toMatchObject({ shown: { action: "spell", triggers: [expect.objectContaining({ source: "save" })] } });
   });
 
   it("повтор після вибору йде від імені гравця: free від гравця не робить каст безкоштовним", async () => {
@@ -153,10 +150,10 @@ describe("заклинання: вибір крита ДМ-ом", () => {
     for (let seed = 1; !pending && seed < 500; seed++) {
       player = on({ rng: mulberry32(seed) });
 
-      pending = (await spell(player, data({ free: true, saveRolls: [] }) as never)).scene?.pendingCritChoice;
+      pending = (await spell(player, data({ free: true, saveRolls: [] }) as never)).scene?.pendingChoice;
     }
 
-    const dmCtx = { ...dm(), scene: { ...player.scene, pendingCritChoice: pending! } };
+    const dmCtx = { ...dm(), scene: { ...player.scene, pendingChoice: pending! } };
 
     const out = await critChoice(dmCtx, { choices: { "save:hero:gob:0": "random" } });
 
@@ -169,7 +166,7 @@ describe("заклинання: вибір крита ДМ-ом", () => {
   it("preview pending не створює", async () => {
     const out = await spell(dm(), data({ preview: true, diceRolls: [] }) as never);
 
-    expect(out.scene?.pendingCritChoice).toBeUndefined();
+    expect(out.scene?.pendingChoice).toBeUndefined();
     expect(out.response).toMatchObject({ preview: true });
   });
 
@@ -179,7 +176,7 @@ describe("заклинання: вибір крита ДМ-ом", () => {
     const out = await spell({ ...c, meta: { ...c.meta, critChoiceByDm: false } }, data() as never);
 
     expect(out.events).toHaveLength(1);
-    expect(out.scene?.pendingCritChoice).toBeUndefined();
+    expect(out.scene?.pendingChoice).toBeUndefined();
   });
 });
 
@@ -207,20 +204,20 @@ describe("заклинання-атака: вибір крита ДМ-ом", () 
 
     expect(out.participants).toBe(c.participants);
     expect(out.events).toEqual([]);
-    expect(out.response).toEqual({ pendingCritChoice: true });
-    expect(out.scene?.pendingCritChoice).toMatchObject({ action: "spell", triggers: [expect.objectContaining({ source: "attack", kind: "success", key: "attack:hero:gob:0" })] });
+    expect(out.response).toEqual({ pendingChoice: true });
+    expect(out.scene?.pendingChoice).toMatchObject({ shown: { action: "spell", triggers: [expect.objectContaining({ source: "attack", kind: "success", key: "attack:hero:gob:0" })] } });
   });
 
   it("вибраний double_damage застосовано, pending очищено", async () => {
     const c = dm();
 
-    const pending = (await bolt(c, data as never)).scene?.pendingCritChoice;
+    const pending = (await bolt(c, data as never)).scene?.pendingChoice;
 
     const plain = await bolt({ ...c, meta: { ...c.meta, critChoiceByDm: false, rules: { ...c.meta.rules, criticals: { ...c.meta.rules.criticals, effects: false } } } }, data as never);
 
-    const out = await critChoice({ ...c, scene: { ...c.scene, pendingCritChoice: pending! } }, { choices: { "attack:hero:gob:0": CRITICAL_SUCCESS_EFFECTS.find((e) => e.effect.type === "double_damage")!.id } });
+    const out = await critChoice({ ...c, scene: { ...c.scene, pendingChoice: pending! } }, { choices: { "attack:hero:gob:0": CRITICAL_SUCCESS_EFFECTS.find((e) => e.effect.type === "double_damage")!.id } });
 
-    expect(out.scene?.pendingCritChoice).toBeNull();
+    expect(out.scene?.pendingChoice).toBeNull();
     expect(100 - (hpOf(out) as number)).toBe(2 * (100 - (hpOf(plain) as number)));
   });
 });
