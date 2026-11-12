@@ -10,7 +10,7 @@ const FAILURES_TO_DIE = 3;
 
 const SUCCESSES_TO_STABILIZE = 3;
 
-export const needsDeathSave = (p: BattleParticipant): boolean => isDying(p) && !p.battleData.deathSaves?.stable;
+const needsDeathSave = (p: BattleParticipant): boolean => isDying(p) && !p.battleData.deathSaves?.stable;
 
 function withFailures(p: BattleParticipant, add: number): BattleParticipant {
   const current = p.battleData.deathSaves ?? FRESH_DEATH_SAVES;

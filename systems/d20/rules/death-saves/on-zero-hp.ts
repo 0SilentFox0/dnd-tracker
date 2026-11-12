@@ -11,7 +11,7 @@ import type { ZeroHpCtx } from "@/lib/utils/rules/systems/types";
 import type { BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
-export function unitDiesAtZero(after: BattleParticipant, ctx: Pick<ZeroHpCtx, "rules">): BattleParticipant {
+function unitDiesAtZero(after: BattleParticipant, ctx: Pick<ZeroHpCtx, "rules">): BattleParticipant {
   const { rules } = ctx;
 
   const isUnit = after.basicInfo.sourceType === ParticipantSourceType.UNIT;
@@ -23,7 +23,7 @@ export function unitDiesAtZero(after: BattleParticipant, ctx: Pick<ZeroHpCtx, "r
   return { ...after, combatStats: { ...after.combatStats, status: CombatStatus.DEAD } };
 }
 
-export function heroGoesDown(ctx: ZeroHpCtx): { participant: BattleParticipant; messages: LogLine[] } {
+function heroGoesDown(ctx: ZeroHpCtx): { participant: BattleParticipant; messages: LogLine[] } {
   const { before, after, amount, crit, rules } = ctx;
 
   const none = { participant: after, messages: [] };
