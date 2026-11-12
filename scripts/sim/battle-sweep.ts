@@ -22,7 +22,7 @@ import { join } from "node:path";
 import { assertLocalProdcopy, parseTemplateKeys } from "./battle-sweep/args";
 import { modeRuns, moraleExpectation, type SweepProfile } from "./battle-sweep/profiles";
 import { diffRowCounts, overallExit, type SweepRunResult } from "./battle-sweep/row-counts";
-import { openTemplateRun,snapshotRowCounts, type TemplateRun } from "./battle-sweep/template-campaign";
+import { openTemplateRun, snapshotRowCounts, type TemplateRun } from "./battle-sweep/template-campaign";
 import { resultTextOf } from "./log-text";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
@@ -46,7 +46,7 @@ import { revealParticipantMutation, revealParticipantSchema } from "@/lib/server
 import { createSpellMutation } from "@/lib/server/battles/mutations/spell/spell-mutation";
 import { createStartMutation } from "@/lib/server/battles/mutations/start/start-mutation";
 import { unitControlMutation, unitControlSchema } from "@/lib/server/battles/mutations/unit-control/unit-control-mutation";
-import { loadSystemOperation } from "@/lib/server/battles/operations";
+import { mutateSystemOperation } from "@/lib/server/battles/operations";
 import { runBattleMutation } from "@/lib/server/battles/run-mutation";
 import { loadSpellsFromDb } from "@/lib/server/battles/spell/load-spells-db";
 import { abilityLabel } from "@/lib/utils/abilities/build/resolve";
@@ -334,7 +334,7 @@ const COND = { access: "dm", requireStatus: "active", schema: battleConditionsSc
 
 const AURA_ZONE = { access: "member", requireStatus: "active", blockedByMode: true, schema: auraZoneSchema, mutate: auraZoneMutation };
 
-const MORALE = { access: "member", requireStatus: "active", blockedByMode: true, schema: moraleCheckSchema, respond: "wrapped", mutate: async (c: any, b: any) => (await loadSystemOperation("morale-check", "morale disabled")).mutate(c, b) };
+const MORALE = { access: "member", requireStatus: "active", blockedByMode: true, schema: moraleCheckSchema, respond: "wrapped", mutate: mutateSystemOperation("morale-check", "morale disabled") };
 
 const PATCH = (id: string) => ({ access: "dm", requireStatus: "active", schema: patchParticipantSchema, mutate: (c: any, b: any) => patchParticipantMutation(c, id, b) });
 

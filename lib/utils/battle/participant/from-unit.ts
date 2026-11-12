@@ -19,7 +19,7 @@ import { getUnitImmunities } from "@/lib/utils/races/race-effects";
 import { DEFAULT_RULES, type Ruleset } from "@/lib/utils/rules";
 import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import { systemSlotOf } from "@/lib/utils/rules/systems/slot";
-import { bestMentalAbility, isMonster5e,monsterSenseAbilities, multiattackAbilities, readSaveProficiencies, unitXp } from "@/lib/utils/units/monster";
+import { bestMentalAbility, isMonster5e, monsterSenseAbilities, multiattackAbilities, readSaveProficiencies, unitXp } from "@/lib/utils/units/monster";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { AbilityPool, BattleAttack, BattleParticipant, BattleParticipantSpellcasting } from "@/types/battle";
 import type { Unit } from "@/types/units";

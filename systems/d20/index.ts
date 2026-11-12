@@ -26,7 +26,7 @@ export const D20_MODULE: RuleSystemDefinition = {
     roll: (i) => rollFromSheet(i.participant, i.body as SheetRollSubject, i),
   },
   rest: { kinds: true },
-  combat: { judge: "client", dice: 20, actionEconomy: { bonusAction: true, reaction: true }, resolveAttack: resolveD20Attack, damage: d20Damage, abortedRoll: d20AbortedRoll, onZeroHp: d20OnZeroHp, onDamaged: [concentrationFallout], onRevived: reviveFromDying, turn: D20_TURN, actions: D20_ACTIONS, reactions: D20_REACTIONS, saves: D20_SAVES, proficiency: D20_PROFICIENCY, afterAttack: [d20ProvokedOpportunity],initiative: d20Initiative, tieBreak: d20TieBreak, hitModel: d20HitModel },
+  combat: { judge: "client", dice: 20, actionEconomy: { bonusAction: true, reaction: true }, resolveAttack: resolveD20Attack, damage: d20Damage, abortedRoll: d20AbortedRoll, onZeroHp: d20OnZeroHp, onDamaged: [concentrationFallout], onRevived: reviveFromDying, turn: D20_TURN, actions: D20_ACTIONS, reactions: D20_REACTIONS, saves: D20_SAVES, proficiency: D20_PROFICIENCY, afterAttack: [d20ProvokedOpportunity], initiative: d20Initiative, tieBreak: d20TieBreak, hitModel: d20HitModel },
   participant: { fromUnit: [d20UnitSpellDc] },
   conditionSet: D20_CONDITION_SET,
   magic: D20_MAGIC,

@@ -283,7 +283,7 @@ function counterStrikeOf(ctx: PhaseCtx, st: PhaseState, target: BattleParticipan
   const { input, request, rng } = ctx;
 
   return (provoked, from) => {
-    const retaliation = counterStrike({
+    const answer = counterStrike({
       participants: from?.participants ?? st.order,
       attackerId: request.attacker.basicInfo.id,
       defenderId: target.basicInfo.id,
@@ -299,7 +299,7 @@ function counterStrikeOf(ctx: PhaseCtx, st: PhaseState, target: BattleParticipan
       sceneState: from ? from.sceneState : st.sceneState,
     });
 
-    return retaliation && { participants: retaliation.participants, actions: [retaliation.battleAction], sceneState: retaliation.sceneState };
+    return answer && { participants: answer.participants, actions: [answer.battleAction], sceneState: answer.sceneState };
   };
 }
 

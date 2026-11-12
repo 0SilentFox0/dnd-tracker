@@ -18,14 +18,12 @@ function firstBlock(ctx: GateCtx, participantId: string, phase: "act" | "end", s
   return null;
 }
 
-export function assertCanAct(ctx: GateCtx, participantId: string, opts: { skipMorale?: boolean } = {}): void {
-  const block = firstBlock(ctx, participantId, "act", opts.skipMorale);
+function assertNoBlock(ctx: GateCtx, participantId: string, phase: "act" | "end", skipCheck?: boolean): void {
+  const block = firstBlock(ctx, participantId, phase, skipCheck);
 
   if (block) throw new BattleRuleError(block.code, block.key);
 }
 
-export function assertCanEndTurn(ctx: GateCtx, participantId: string): void {
-  const block = firstBlock(ctx, participantId, "end");
+export const assertCanAct = (ctx: GateCtx, participantId: string, opts: { skipMorale?: boolean } = {}): void => assertNoBlock(ctx, participantId, "act", opts.skipMorale);
 
-  if (block) throw new BattleRuleError(block.code, block.key);
-}
+export const assertCanEndTurn = (ctx: GateCtx, participantId: string): void => assertNoBlock(ctx, participantId, "end");

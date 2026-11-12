@@ -17,7 +17,9 @@ function operation<T>({ load, ...settings }: Settings<T> & { load: (params: Batt
   return async (params) => ({ requireStatus: BattleStatus.ACTIVE, ...settings, ...(await load(params)) }) as Definition;
 }
 
-export async function loadSystemOperation(name: string, missing: string): Promise<Loaded<unknown>> {
+export const mutateSystemOperation = (name: string, missing: string) => async (ctx: BattleMutationContext, body: unknown) => (await loadSystemOperation(name, missing)).mutate(ctx, body as never);
+
+async function loadSystemOperation(name: string, missing: string): Promise<Loaded<unknown>> {
   const known = systemBattleOperation(name);
 
   if (!known) throw new BattleAccessError(404, API_ERRORS.BATTLE_UNKNOWN_OPERATION);

@@ -26,7 +26,7 @@ import { patchParticipantMutation } from "@/lib/server/battles/mutations/partici
 import { createRollbackMutation, rollbackSchema } from "@/lib/server/battles/mutations/rollback/rollback-mutation";
 import { createSpellMutation } from "@/lib/server/battles/mutations/spell/spell-mutation";
 import { createStartMutation } from "@/lib/server/battles/mutations/start/start-mutation";
-import { loadSystemOperation } from "@/lib/server/battles/operations";
+import { mutateSystemOperation } from "@/lib/server/battles/operations";
 import { runBattleMutation } from "@/lib/server/battles/run-mutation";
 import { loadSpellsFromDb } from "@/lib/server/battles/spell/load-spells-db";
 import { collectModifiers, statWithModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
@@ -300,7 +300,7 @@ const SPELL = { access: "member" as const, requireStatus: "active" as const, sch
 
 const ROLLBACK = { access: "dm" as const, schema: rollbackSchema, mutate: createRollbackMutation() };
 
-const MORALE = { access: "member" as const, requireStatus: "active" as const, schema: moraleCheckSchema, respond: "wrapped" as const, mutate: async (c: any, b: any) => (await loadSystemOperation("morale-check", "morale disabled")).mutate(c, b) };
+const MORALE = { access: "member" as const, requireStatus: "active" as const, schema: moraleCheckSchema, respond: "wrapped" as const, mutate: mutateSystemOperation("morale-check", "morale disabled") };
 
 const RACE_PASSIVES_CAMPAIGN_NAME = "SIM: расові пасивки";
 

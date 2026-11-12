@@ -10,9 +10,7 @@ export function isPanicking(pendingMoraleCheck: unknown, participantId: string):
 }
 
 export const moraleGate: ActGate = (scope, participantId, { phase, skipCheck }) => {
-  if (phase === "end" || !skipCheck) {
-    if (awaitsMoraleCheck(scope, participantId)) return { code: "action_rejected", key: REJECT.moraleFirst };
-  }
+  if ((phase === "end" || !skipCheck) && awaitsMoraleCheck(scope, participantId)) return { code: "action_rejected", key: REJECT.moraleFirst };
 
   if (phase === "act" && isPanicking(scope.scene.pendingMoraleCheck, participantId)) return { code: "action_used", key: REJECT.panicSkip };
 
