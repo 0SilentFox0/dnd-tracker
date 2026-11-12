@@ -23,7 +23,7 @@ const CORE_DEFAULTS: CoreRuleset = {
   system: { key: "homm" },
 };
 
-/** `advancement` is owned by the wfrp section and absent here (typed as Ruleset for the many readers): full defaults come from `defaultRulesFor` */
+/** `advancement` is owned by a system section and absent here (typed as Ruleset for the many readers): full defaults come from `defaultRulesFor` */
 export const DEFAULT_RULES = CORE_DEFAULTS as Ruleset;
 
 export function localizedDefaultAttacks(t: (key: string) => string): CoreRuleset["defaultAttacks"] {
