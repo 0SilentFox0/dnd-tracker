@@ -21,7 +21,7 @@ export const effectKey = (effect: EffectLike): string => (effect.kind === "flag"
 
 const ownerOf = (effect: EffectLike, own: EffectOwnership): string | undefined => (effect.kind === "flag" && typeof effect.flag === "string" ? own.flags[effect.flag] : own.kinds[effect.kind]);
 
-const activeIds = (c: Composition): Set<string> => new Set([c.base, ...c.modules]);
+export const activeIds = (c: Composition): Set<string> => new Set([c.base, ...c.modules]);
 
 /** Keys (`kind` or `flag:<key>`) of the owned effects whose module is active. */
 export function effectKindsOf(c: Composition, own: EffectOwnership): ReadonlySet<string> {

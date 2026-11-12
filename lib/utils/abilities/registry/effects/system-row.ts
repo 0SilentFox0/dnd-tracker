@@ -22,3 +22,5 @@ export interface SystemEffectRow extends SystemEffectRowInput {
   /** Owning module id, stamped at the generated root */
   system: string;
 }
+
+export const ownedBy = (system: string, rows: readonly SystemEffectRowInput[]): SystemEffectRow[] => rows.map((row) => ({ ...row, system }));

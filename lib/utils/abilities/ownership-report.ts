@@ -1,5 +1,5 @@
 import { SYSTEM_ABILITY_SOURCES } from "./build/system-sources";
-import { effectKey, type EffectOwnership, isEffectInComposition } from "./registry/effects/ownership";
+import { activeIds, effectKey, type EffectOwnership, isEffectInComposition } from "./registry/effects/ownership";
 import { SYSTEM_EFFECT_OWNERSHIP } from "./registry/effects/system-rows";
 import { SYSTEM_ABILITY_VARIABLES } from "./registry/system-variables";
 import { AbilitySchema } from "./schema/ability";
@@ -54,8 +54,6 @@ export function partsOf(table: string, row: Record<string, unknown>): AbilityPar
 
   return [{ path: "abilities", abilities: row.abilities }];
 }
-
-const activeIds = (c: Composition) => new Set([c.base, ...c.modules]);
 
 const variableOwners = new Map(SYSTEM_ABILITY_VARIABLES.flatMap((o) => Object.keys(o.items).map((name) => [name, o.system] as const)));
 

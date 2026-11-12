@@ -1,13 +1,11 @@
 import { MODULE_EFFECT_ROWS } from "./module-effect-rows";
 import { ownershipOf } from "./ownership";
 import { SYSTEM_FLAG_OWNERS } from "./system-flag-rows";
-import type { SystemEffectRow, SystemEffectRowInput } from "./system-row";
+import { ownedBy, type SystemEffectRow } from "./system-row";
 
 // <systems:generated>
 import { WFRP_EFFECT_ROWS } from "@/systems/wfrp/rules/ability-effect-rows";
 // </systems:generated>
-
-const ownedBy = (system: string, rows: readonly SystemEffectRowInput[]): SystemEffectRow[] => rows.map((row) => ({ ...row, system }));
 
 const SYSTEM_EFFECT_ROW_LISTS = [
   // <systems:generated>
