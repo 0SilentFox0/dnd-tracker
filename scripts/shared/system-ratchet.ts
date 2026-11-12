@@ -16,7 +16,7 @@ export const SCAN_DIRS = ["lib", "app", "components", "types", "scripts"] as con
 
 export const SYSTEM_ROOTS = ROOT_SPECS.map((spec) => spec.file);
 
-const SKIP_DIRS = new Set(["node_modules", ".next", "__tests__", "grim-icons"]);
+const SKIP_DIRS = new Set(["node_modules", ".next", "__tests__", "grim-icons", "legacy-rules-parse"]);
 
 const TEST_FILE = /\.test\.tsx?$/;
 
