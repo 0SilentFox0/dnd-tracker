@@ -17,7 +17,7 @@ import { persistIcon } from "@/lib/server/artifacts/persist-icon";
 import { SyncArtifactSetError, syncArtifactSetMembers } from "@/lib/server/artifacts/sync-artifact-set-members";
 import { defineResource } from "@/lib/server/content/define-resource";
 import { ContentError } from "@/lib/server/content/errors";
-import { assertCampaignEffects } from "@/lib/server/content/traits-guard";
+import { assertCampaignEffects, storedEffectOwners } from "@/lib/server/content/traits-guard";
 import { withAbilityIssues } from "@/lib/utils/abilities/read";
 
 type SetRow = NonNullable<Awaited<ReturnType<typeof findArtifactSetInCampaign>>>;
@@ -61,7 +61,7 @@ export const artifactSetsResource = defineResource<SetRow, z.infer<typeof create
     return reloadArtifactSetDetail(actor.campaignId, created.id);
   },
   async update(actor, existing, data) {
-    await assertCampaignEffects(actor.campaignId, data.abilities);
+    await assertCampaignEffects(actor.campaignId, data.abilities, storedEffectOwners(existing.abilities));
 
     const patch = data.icon !== undefined && data.icon !== existing.icon ? { ...data, icon: await persistIcon(actor.campaignId, data.icon, `${existing.id}-${randomUUID()}`) } : data;
 

@@ -12,7 +12,7 @@ import { parseSystemData } from "@/lib/server/characters/core/system-fields";
 import { defineResource } from "@/lib/server/content/define-resource";
 import { detachRefs } from "@/lib/server/content/detach-refs";
 import { toJsonInput } from "@/lib/server/content/errors";
-import { assertEffectsInComposition } from "@/lib/server/content/traits-guard";
+import { assertEffectsInComposition, storedEffectOwners } from "@/lib/server/content/traits-guard";
 import { abilitiesJson, abilitySpellIds, withAbilityIssues } from "@/lib/utils/abilities/read";
 import { parseRules, type Ruleset } from "@/lib/utils/rules/schema";
 import { ruleSystemOf } from "@/lib/utils/rules/systems/registry";
@@ -64,7 +64,7 @@ export const unitsResource = defineResource<UnitRow, z.infer<typeof createUnitSc
 
     const loaded = await loadCampaignSystem(actor.campaignId);
 
-    assertEffectsInComposition((loaded?.rules ?? parseRules(null)).system, data.abilities);
+    assertEffectsInComposition((loaded?.rules ?? parseRules(null)).system, data.abilities, storedEffectOwners(existing.abilities));
 
     const unit = await prisma.unit.update({
       where: { id: existing.id },

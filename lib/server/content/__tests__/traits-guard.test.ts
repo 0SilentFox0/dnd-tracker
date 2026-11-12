@@ -7,7 +7,7 @@ const findUnique = vi.hoisted(() => vi.fn());
 vi.mock("@/lib/db", () => ({ prisma: { campaign: { findUnique } } }));
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
-import { assertCampaignEffects, assertEffectsInComposition } from "@/lib/server/content/traits-guard";
+import { assertCampaignEffects, assertEffectsInComposition, storedEffectOwners } from "@/lib/server/content/traits-guard";
 import { ownershipOf } from "@/lib/utils/abilities/registry/effects/ownership";
 
 const own = ownershipOf([], { moraleChance: "morale" });
@@ -27,11 +27,11 @@ describe("assertEffectsInComposition", () => {
   });
 
   it("morale flag passes in dnd5e + morale", () => {
-    expect(() => assertEffectsInComposition({ key: "dnd5e", modules: ["morale"] }, morale, own)).not.toThrow();
+    expect(() => assertEffectsInComposition({ key: "dnd5e", modules: ["morale"] }, morale, [], own)).not.toThrow();
   });
 
   it("morale flag in bare dnd5e → 422", () => {
-    expect(() => assertEffectsInComposition({ key: "dnd5e", modules: [] }, morale, own)).toThrowError(expect.objectContaining({ status: 422 }));
+    expect(() => assertEffectsInComposition({ key: "dnd5e", modules: [] }, morale, [], own)).toThrowError(expect.objectContaining({ status: 422 }));
   });
 
   it("looks inside randomOf options", () => {
@@ -46,6 +46,20 @@ describe("assertEffectsInComposition", () => {
 
   it("real registry: d20 proficiency flags are rejected outside a d20 base", () => {
     expect(() => assertEffectsInComposition({ key: "wfrp" }, ability({ kind: "flag", flag: "saveProficiency", abilities: ["wisdom"] }))).toThrowError(expect.objectContaining({ status: 422 }));
+  });
+});
+
+describe("update keeps legacy effects", () => {
+  const bare = { key: "dnd5e" };
+
+  it("existing morale flag: resubmitting it passes, adding a new morale flag fails", () => {
+    expect(() => assertEffectsInComposition(bare, morale, morale)).not.toThrow();
+    expect(() => assertEffectsInComposition(bare, [...morale, ...ability({ kind: "flag", flag: "minMorale", value: 1 })], morale)).toThrowError(expect.objectContaining({ status: 422 }));
+  });
+
+  it("storedEffectOwners tolerates garbage", () => {
+    expect(storedEffectOwners(null)).toEqual([]);
+    expect(storedEffectOwners([null, { effects: [] }, { name: "x" }])).toEqual([{ effects: [] }]);
   });
 });
 

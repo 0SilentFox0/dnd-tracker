@@ -12,7 +12,7 @@ import { addedIds, assertCampaignRefs } from "@/lib/server/campaigns/campaign-re
 import { defineResource } from "@/lib/server/content/define-resource";
 import { detachRefs } from "@/lib/server/content/detach-refs";
 import { ContentError } from "@/lib/server/content/errors";
-import { assertCampaignEffects } from "@/lib/server/content/traits-guard";
+import { assertCampaignEffects, storedEffectOwners } from "@/lib/server/content/traits-guard";
 import { raceNameTaken } from "@/lib/server/races/race-name";
 import { updateRaceCascade } from "@/lib/server/races/update-race";
 import { abilitiesJson, withAbilityIssues } from "@/lib/utils/abilities/read";
@@ -60,7 +60,7 @@ export const racesResource = defineResource<RaceRow, z.infer<typeof createRaceSc
     });
   },
   async update(actor, existing, data) {
-    await assertCampaignEffects(actor.campaignId, data.abilities);
+    await assertCampaignEffects(actor.campaignId, data.abilities, storedEffectOwners(existing.abilities));
 
     if (data.name !== undefined) await assertNameFree(actor.campaignId, data.name, existing.id);
 

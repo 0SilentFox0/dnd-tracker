@@ -86,11 +86,11 @@ export const classesResource = defineResource<ClassRow, CreateInput, UpdateInput
     });
   },
   async update(actor, existing, data) {
-    await assertCampaignEffects(actor.campaignId, featureAbilities(data.features, data.subclasses));
+    const stored = toGameClassData(existing);
+
+    await assertCampaignEffects(actor.campaignId, featureAbilities(data.features, data.subclasses), featureAbilities(stored.features, stored.subclasses));
 
     if (data.name !== undefined) await assertNameFree(actor.campaignId, data.name, existing.id);
-
-    const stored = toGameClassData(existing);
 
     await assertCampaignRefs(actor.campaignId, { spell: addedIds(spellRefs(data.features ?? stored.features, data.subclasses ?? stored.subclasses), spellRefs(stored.features, stored.subclasses)) });
 
