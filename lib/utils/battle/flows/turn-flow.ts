@@ -1,4 +1,4 @@
-import type { MoraleCheckResult } from "@/lib/utils/battle/morale/check";
+import type { MoraleCheckResult } from "@/lib/utils/battle/morale/threshold";
 
 export type MoraleOutcome = "extra" | "skip" | "none";
 

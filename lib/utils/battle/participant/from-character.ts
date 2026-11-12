@@ -4,6 +4,7 @@ import { type EquippedArtifactRow, loadConsumableEntries, loadEquippedArtifactRo
 import { extractAttacksFromCharacter } from "./extract-attacks";
 import { loadClassesById } from "./load-classes";
 import { loadFeatsById } from "./load-feats";
+import { runParticipantParts } from "./parts";
 
 import { ABILITY_KEYS, type AbilityKey } from "@/lib/constants/abilities";
 import { CombatStatus,ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
@@ -35,7 +36,7 @@ import { applyCharacterResources, storedCharacterState } from "@/lib/utils/chara
 import { getAbilityModifier, spellcastingDerived } from "@/lib/utils/common/calculations";
 import { isRecord } from "@/lib/utils/common/is-record";
 import { attunedRefs } from "@/lib/utils/items/resolve";
-import { DEFAULT_RULES, heroDiceTable, heroHpFormula, moraleCapFromRules, proficiencyForLevel, type Ruleset } from "@/lib/utils/rules";
+import { DEFAULT_RULES, heroDiceTable, heroHpFormula, proficiencyForLevel, type Ruleset } from "@/lib/utils/rules";
 import { currencyValueOf, ruleSystemOf } from "@/lib/utils/rules/systems";
 import { composition } from "@/lib/utils/rules/systems/catalog";
 import { systemSlotOf } from "@/lib/utils/rules/systems/slot";
@@ -172,7 +173,7 @@ async function characterTalentGroups(character: CharacterFromPrisma, rules: Rule
 }
 
 function finalizeCharacter(participant: BattleParticipant, character: CharacterFromPrisma, classMode: boolean, spellcastingAbility: string | null | undefined, rules: Ruleset): BattleParticipant {
-  const baked = bakePassives(participant);
+  const baked = bakePassives(runParticipantParts(ruleSystemOf(rules).participant?.fromCharacter, participant, { row: character, rules, refs: {} }));
 
   const armored = proficiencyOf(rules).withGranted(resolveLimitFormulas(classMode ? applyClassArmor(baked) : baked));
 
@@ -288,7 +289,7 @@ export async function createBattleParticipantFromCharacter(
       race: character.race,
       creatureType: isRecord(race?.passiveAbility) && typeof race.passiveAbility.creatureType === "string" ? race.passiveAbility.creatureType.trim().toLowerCase() : "humanoid",
       raceId: (race as { id?: string } | null)?.id,
-      moraleCap: moraleCapFromRules(rules),
+      moraleCap: 0,
       ...(resolvedClasses && { damageModel: "5e" as const }),
       ...systemSlotOf(ruleSystemOf(rules).combat.participantFields?.(character, equipmentGear)),
       heroDice: meleeDice || rangedDice ? { melee: meleeDice, ranged: rangedDice } : undefined,

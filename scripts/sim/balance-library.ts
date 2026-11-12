@@ -23,10 +23,10 @@ import { loadUnitLibraryStats } from "@/lib/server/battles/balance/unit-library"
 import { createAbilityActionMutation } from "@/lib/server/battles/mutations/ability-action/ability-action-mutation";
 import { createAttackMutation } from "@/lib/server/battles/mutations/attack/attack-mutation";
 import { createBonusActionMutation } from "@/lib/server/battles/mutations/bonus-action/bonus-action-mutation";
-import { moraleCheckMutation } from "@/lib/server/battles/mutations/morale-check/morale-check-mutation";
 import { nextTurnMutation } from "@/lib/server/battles/mutations/next-turn/next-turn-mutation";
 import { createSpellMutation } from "@/lib/server/battles/mutations/spell/spell-mutation";
 import { createStartMutation } from "@/lib/server/battles/mutations/start/start-mutation";
+import { loadSystemOperation } from "@/lib/server/battles/operations";
 import { runBattleMutation } from "@/lib/server/battles/run-mutation";
 import { loadSpellsFromDb } from "@/lib/server/battles/spell/load-spells-db";
 import { findCompletedSets } from "@/lib/utils/battle/artifact-sets";
@@ -174,7 +174,7 @@ async function call<T>(label: string, options: Omit<RunBattleMutationOptions<T>,
 
 const START = { access: "dm" as const, requireStatus: "prepared" as const, mutate: createStartMutation() };
 
-const MORALE = { access: "member" as const, requireStatus: "active" as const, schema: moraleCheckSchema, respond: "wrapped" as const, mutate: moraleCheckMutation };
+const MORALE = { access: "member" as const, requireStatus: "active" as const, schema: moraleCheckSchema, respond: "wrapped" as const, mutate: async (c: any, b: any) => (await loadSystemOperation("morale-check", "morale disabled")).mutate(c, b) };
 
 const NEXT = { access: "currentController" as const, requireStatus: "active" as const, mutate: nextTurnMutation };
 

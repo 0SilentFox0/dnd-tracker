@@ -1,28 +1,20 @@
-import { awaitsMoraleCheck, type MoraleScope } from "@/lib/utils/battle/morale/awaits-check";
-import type { MoraleCheckResult } from "@/lib/utils/battle/morale/check";
-import { BattleRuleError } from "@/lib/utils/battle/store/errors";
+import { awaitsMoraleCheck } from "@/lib/utils/battle/morale/awaits-check";
+import type { PendingMoraleCheckPayload } from "@/lib/utils/battle/morale/threshold";
 import { REJECT } from "@/lib/utils/battle/store/reject";
+import type { ActGate } from "@/lib/utils/rules/systems/types";
 
-export interface PendingMoraleCheckPayload {
-  participantId: string;
-  d10Roll: number;
-  moraleResult: MoraleCheckResult;
-}
-
-export function assertNotPanicking(pendingMoraleCheck: unknown, participantId: string): void {
+export function isPanicking(pendingMoraleCheck: unknown, participantId: string): boolean {
   const pending = pendingMoraleCheck as PendingMoraleCheckPayload | null;
 
-  if (pending?.participantId === participantId && pending.moraleResult.shouldSkipTurn) {
-    throw new BattleRuleError("action_used", REJECT.panicSkip);
+  return pending?.participantId === participantId && pending.moraleResult.shouldSkipTurn;
+}
+
+export const moraleGate: ActGate = (scope, participantId, { phase, skipCheck }) => {
+  if (phase === "end" || !skipCheck) {
+    if (awaitsMoraleCheck(scope, participantId)) return { code: "action_rejected", key: REJECT.moraleFirst };
   }
-}
 
-export function assertMoraleResolved(scope: MoraleScope, participantId: string): void {
-  if (awaitsMoraleCheck(scope, participantId)) throw new BattleRuleError("action_rejected", REJECT.moraleFirst);
-}
+  if (phase === "act" && isPanicking(scope.scene.pendingMoraleCheck, participantId)) return { code: "action_used", key: REJECT.panicSkip };
 
-export function assertCanAct(scope: MoraleScope, participantId: string, opts: { skipMorale?: boolean } = {}): void {
-  if (!opts.skipMorale) assertMoraleResolved(scope, participantId);
-
-  assertNotPanicking(scope.scene.pendingMoraleCheck, participantId);
-}
+  return null;
+};

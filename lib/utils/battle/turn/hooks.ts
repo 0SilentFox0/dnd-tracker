@@ -1,6 +1,3 @@
-import { applyPendingMoraleCheck } from "./apply-pending-morale";
-import type { PendingMoraleCheckPayload } from "./pending-morale";
-
 import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { TurnAdvanceCtx, TurnHook, TurnHookCtx, TurnHookResult } from "@/lib/utils/rules/systems/types";
 
@@ -33,12 +30,4 @@ export function runTurnHooks<C extends TurnHookCtx>(list: readonly TurnHook<C>[]
   return out;
 }
 
-const pendingMorale: TurnHook<TurnAdvanceCtx> = ({ participants, scene, rules }) => {
-  if (!scene.pendingMoraleCheck) return { participants, messages: [] };
-
-  const morale = applyPendingMoraleCheck(participants, scene.pendingMoraleCheck as PendingMoraleCheckPayload, scene.round, scene.id, scene.eventSeq, undefined, rules);
-
-  return { participants: morale.updatedInitiativeOrder, messages: [], actions: morale.moraleLogEntry ? [morale.moraleLogEntry] : [] };
-};
-
-export const beforeAdvanceHooks = (rules: TurnAdvanceCtx["rules"]): readonly TurnHook<TurnAdvanceCtx>[] => [pendingMorale, ...(ruleSystemOf(rules).combat.turn?.beforeAdvance ?? [])];
+export const beforeAdvanceHooks = (rules: TurnAdvanceCtx["rules"]): readonly TurnHook<TurnAdvanceCtx>[] => ruleSystemOf(rules).combat.turn?.beforeAdvance ?? [];

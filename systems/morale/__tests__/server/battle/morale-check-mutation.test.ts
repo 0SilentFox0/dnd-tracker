@@ -1,11 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { context, hero } from "./fixtures";
-
 import { API_ERRORS } from "@/lib/constants/api-errors";
-import { moraleCheckMutation } from "@/lib/server/battles/mutations/morale-check/morale-check-mutation";
+import { context, hero } from "@/lib/server/battles/__tests__/mutations/fixtures";
 import { BattleAccessError } from "@/lib/utils/battle/store";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
+import { moraleCheckMutation } from "@/systems/morale/server/battle/morale-check-mutation";
 
 describe("morale-check mutation", () => {
   it("зберігає результат у pendingMoraleCheck і повертає moraleResult", () => {

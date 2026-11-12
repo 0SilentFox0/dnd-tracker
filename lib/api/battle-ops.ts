@@ -2,7 +2,7 @@ import { campaignPatch, campaignPost } from "./client";
 
 import type { AbilityKey } from "@/lib/constants/abilities";
 import type { Condition5eKey, CustomConditionKey } from "@/lib/utils/abilities/schema/kinds";
-import type { MoraleCheckResult } from "@/lib/utils/battle/morale/check";
+import type { MoraleCheckResult } from "@/lib/utils/battle/morale/threshold";
 import type {
   AbilityActionData,
   AttackData,

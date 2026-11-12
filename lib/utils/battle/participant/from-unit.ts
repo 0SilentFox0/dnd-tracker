@@ -1,6 +1,7 @@
 import type { Prisma } from "@prisma/client";
 
 import type { UnitFromPrisma } from "../types/participant";
+import { runParticipantParts } from "./parts";
 
 import type { AbilityKey } from "@/lib/constants/abilities";
 import { AttackType, CombatStatus, ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
@@ -16,7 +17,7 @@ import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import { logger } from "@/lib/utils/common/logger";
 import { spellGrantFields, spellPoolKey } from "@/lib/utils/items/pools";
 import { getUnitImmunities } from "@/lib/utils/races/race-effects";
-import { DEFAULT_RULES, moraleCapFromRules, type Ruleset } from "@/lib/utils/rules";
+import { DEFAULT_RULES, type Ruleset } from "@/lib/utils/rules";
 import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import { systemSlotOf } from "@/lib/utils/rules/systems/slot";
 import { bestMentalAbility, isMonster5e, monsterSaveDc, monsterSenseAbilities, multiattackAbilities, readSaveProficiencies, unitXp } from "@/lib/utils/units/monster";
@@ -173,7 +174,7 @@ function unitAbilities(unit: UnitFromPrisma, race: UnitRace, rules: Ruleset, mon
     proficiencyBonus: unit.proficiencyBonus,
     race: race?.name ?? "",
     raceId: race?.id,
-    moraleCap: moraleCapFromRules(rules),
+    moraleCap: 0,
     ...(monster && { damageModel: "5e" as const }),
     ...systemSlotOf(traits ? traits.fields : ruleSystemOf(rules).combat.participantFields?.(unit)),
     ...(statblock.creatureType && { creatureType: statblock.creatureType }),
@@ -271,5 +272,5 @@ export async function createBattleParticipantFromUnit(
     },
   };
 
-  return resolveLimitFormulas(bakePassives(participant));
+  return resolveLimitFormulas(bakePassives(runParticipantParts(ruleSystemOf(rules).participant?.fromUnit, participant, { row: unit, rules, refs: {} })));
 }

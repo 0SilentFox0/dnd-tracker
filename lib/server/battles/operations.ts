@@ -17,16 +17,23 @@ function operation<T>({ load, ...settings }: Settings<T> & { load: (params: Batt
   return async (params) => ({ requireStatus: BattleStatus.ACTIVE, ...settings, ...(await load(params)) }) as Definition;
 }
 
-async function loadSystemOperation(name: string, missing: string): Promise<Loaded<unknown>> {
+export async function loadSystemOperation(name: string, missing: string): Promise<Loaded<unknown>> {
   const known = systemBattleOperation(name);
 
   if (!known) throw new BattleAccessError(404, API_ERRORS.BATTLE_UNKNOWN_OPERATION);
 
-  const { createAttackMutation } = await import("@/lib/server/battles/mutations/attack/attack-mutation");
+  const deps: BattleOperationDeps = {
+    attack: async (ctx, request, resume, replay) => {
+      const { createAttackMutation } = await import("@/lib/server/battles/mutations/attack/attack-mutation");
 
-  const { createSpellMutation } = await import("@/lib/server/battles/mutations/spell/spell-mutation");
+      return createAttackMutation(undefined, replay)(ctx, request, resume);
+    },
+    spell: async (ctx, request, resume) => {
+      const { createSpellMutation } = await import("@/lib/server/battles/mutations/spell/spell-mutation");
 
-  const deps: BattleOperationDeps = { attack: (ctx, request, resume, replay) => createAttackMutation(undefined, replay)(ctx, request, resume), spell: createSpellMutation() };
+      return createSpellMutation()(ctx, request, resume);
+    },
+  };
 
   const { schema } = await known.load(deps);
 
@@ -236,13 +243,7 @@ const OPERATIONS: Record<string, Loader> = {
     blockedByMode: true,
     allowWhileAwaitingDm: true,
     respond: "wrapped",
-    load: async () => {
-      const { moraleCheckMutation } = await import("@/lib/server/battles/mutations/morale-check/morale-check-mutation");
-
-      const { moraleCheckSchema } = await import("@/lib/schemas");
-
-      return { schema: moraleCheckSchema, mutate: moraleCheckMutation };
-    },
+    load: () => loadSystemOperation("morale-check", API_ERRORS.BATTLE_MORALE_DISABLED),
   }),
   move: operation({
     access: MEMBER,

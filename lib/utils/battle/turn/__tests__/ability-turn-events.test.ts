@@ -3,11 +3,12 @@ import { describe, expect, it } from "vitest";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { textOf } from "@/lib/i18n/test/text";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
+import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { advanceTurn } from "@/lib/utils/battle/turn/advance-turn";
-import { applyPendingMoraleCheck } from "@/lib/utils/battle/turn/apply-pending-morale";
 import { runAdvanceTurnLoop } from "@/lib/utils/battle/turn/run-advance-turn-loop";
 import { processStartOfRound, processStartOfTurn } from "@/lib/utils/battle/turn/start-end";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
+import { applyPendingMoraleCheck } from "@/systems/morale/rules/turn/apply-pending";
 
 describe("turn events", () => {
   it("turnStart лікує, perTurn скидається", () => {
@@ -56,7 +57,7 @@ describe("turn events", () => {
 
     const a = makeParticipant({ id: "a", hp: 10, abilities: [proud] });
 
-    const r = applyPendingMoraleCheck([a, makeParticipant({ id: "e", side: ParticipantSide.ENEMY })], { participantId: "a", d10Roll: 10, moraleResult: { shouldSkipTurn: false, hasExtraTurn: false, message: "Мораль тримається", moralePositive: true } }, 1, "b1", 0, undefined, DEFAULT_RULES);
+    const r = applyPendingMoraleCheck([a, makeParticipant({ id: "e", side: ParticipantSide.ENEMY })], { participantId: "a", d10Roll: 10, moraleResult: { shouldSkipTurn: false, hasExtraTurn: false, message: "Мораль тримається", moralePositive: true } }, 1, "b1", 0, undefined, DEFAULT_RULES, runAbilities);
 
     expect(r.updatedInitiativeOrder[0].combatStats.currentHp).toBe(12);
   });

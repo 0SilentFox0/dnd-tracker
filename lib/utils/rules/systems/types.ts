@@ -170,8 +170,12 @@ export interface TurnJoinCtx extends TurnHookCtx {
   newcomerIds?: readonly string[];
 }
 
+export type RunAbilities = typeof import("@/lib/utils/abilities/engine/core/run-abilities").runAbilities;
+
 export interface TurnAdvanceCtx extends TurnHookCtx {
   scene: BattleSceneState;
+  /** Fires ability triggers; injected because system code cannot import the engine back */
+  run: RunAbilities;
 }
 
 export interface TurnHookResult {

@@ -39,7 +39,6 @@ import { battleConditionsMutation, battleConditionsSchema } from "@/lib/server/b
 import { mapTerrainMutation } from "@/lib/server/battles/mutations/map-terrain/map-terrain-mutation";
 import { mazeMutation } from "@/lib/server/battles/mutations/maze/maze-mutation";
 import { mazeMarkMutation } from "@/lib/server/battles/mutations/maze-mark/maze-mark-mutation";
-import { moraleCheckMutation } from "@/lib/server/battles/mutations/morale-check/morale-check-mutation";
 import { moveMutation } from "@/lib/server/battles/mutations/move/move-mutation";
 import { nextTurnMutation } from "@/lib/server/battles/mutations/next-turn/next-turn-mutation";
 import { patchParticipantMutation } from "@/lib/server/battles/mutations/participants/patch-participant-mutation";
@@ -47,6 +46,7 @@ import { revealParticipantMutation, revealParticipantSchema } from "@/lib/server
 import { createSpellMutation } from "@/lib/server/battles/mutations/spell/spell-mutation";
 import { createStartMutation } from "@/lib/server/battles/mutations/start/start-mutation";
 import { unitControlMutation, unitControlSchema } from "@/lib/server/battles/mutations/unit-control/unit-control-mutation";
+import { loadSystemOperation } from "@/lib/server/battles/operations";
 import { runBattleMutation } from "@/lib/server/battles/run-mutation";
 import { loadSpellsFromDb } from "@/lib/server/battles/spell/load-spells-db";
 import { abilityLabel } from "@/lib/utils/abilities/build/resolve";
@@ -320,7 +320,7 @@ const COND = { access: "dm", requireStatus: "active", schema: battleConditionsSc
 
 const AURA_ZONE = { access: "member", requireStatus: "active", blockedByMode: true, schema: auraZoneSchema, mutate: auraZoneMutation };
 
-const MORALE = { access: "member", requireStatus: "active", blockedByMode: true, schema: moraleCheckSchema, respond: "wrapped", mutate: moraleCheckMutation };
+const MORALE = { access: "member", requireStatus: "active", blockedByMode: true, schema: moraleCheckSchema, respond: "wrapped", mutate: async (c: any, b: any) => (await loadSystemOperation("morale-check", "morale disabled")).mutate(c, b) };
 
 const PATCH = (id: string) => ({ access: "dm", requireStatus: "active", schema: patchParticipantSchema, mutate: (c: any, b: any) => patchParticipantMutation(c, id, b) });
 
