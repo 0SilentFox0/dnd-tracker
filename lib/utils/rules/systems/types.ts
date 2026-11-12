@@ -226,18 +226,14 @@ export interface AfterAttackCtx {
   participants: BattleParticipant[];
   attackerId: string;
   defenderId: string;
-  attack: BattleAttack;
-  attackRoll: Pick<AttackRollResult, "isCriticalFail">;
   criticalEffect?: CriticalEffect;
   /** First strike of the volley */
   first: boolean;
   round: number;
-  battleId: string;
-  rng: Rng;
-  crit?: CritPicker;
-  map?: BattleMapConfig | null;
   rules: Ruleset;
   sceneState?: SystemSlot;
+  /** The target's answer to this strike (core retaliation); `provoked` skips the reaction accounting */
+  retaliate(provoked: boolean): AfterAttackResult | null;
 }
 
 export interface AfterAttackResult {

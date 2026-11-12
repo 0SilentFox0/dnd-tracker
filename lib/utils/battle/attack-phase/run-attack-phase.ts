@@ -1,3 +1,4 @@
+import { runAfterAttack } from "./after-attack";
 import { holdBackNewEffects, restoreHeldBack } from "./hold-back";
 import { type AttackRequest, requestedTargetIds, validateAttackRequest } from "./request";
 import { damageDiceCursor, damageFractions, strikeRoll } from "./strike-rolls";
@@ -25,6 +26,7 @@ import { rngOf } from "@/lib/utils/common/rng";
 import { type Ruleset } from "@/lib/utils/rules";
 import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
+import type { AfterAttackResult } from "@/lib/utils/rules/systems/types";
 import type { ActiveEffect, BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 export type AttackPhaseInput = {
@@ -251,9 +253,27 @@ function strikeAt(ctx: PhaseCtx, st: PhaseState, target: BattleParticipant, i: n
 
   st.actions.push(attackResult.battleAction);
 
-  const provoked = attackResult.criticalEffectApplied?.effect.type === "provoke_opportunity_attack";
+  const retaliate = retaliationOf(ctx, st, target, attackResult);
 
-  if (i === 0 || provoked) retaliate(ctx, st, target, attackResult, provoked);
+  const after = runAfterAttack(ruleSystemOf(input.rules).combat.afterAttack ?? [], {
+    participants: st.order,
+    attackerId: ctx.request.attacker.basicInfo.id,
+    defenderId: target.basicInfo.id,
+    criticalEffect: attackResult.criticalEffectApplied,
+    first: i === 0,
+    round: input.battle.currentRound,
+    rules: input.rules,
+    sceneState: st.sceneState,
+    retaliate,
+  });
+
+  if (after) applyAfter(ctx, st, after);
+
+  if (!after?.handled && i === 0) {
+    const answer = retaliate(false);
+
+    if (answer) applyAfter(ctx, st, answer);
+  }
 
   const held = holdBackNewEffects(st.order, st.attacker, ctx.effectsBeforeVolley);
 
@@ -264,32 +284,34 @@ function strikeAt(ctx: PhaseCtx, st: PhaseState, target: BattleParticipant, i: n
   return attackResult;
 }
 
-function retaliate(ctx: PhaseCtx, st: PhaseState, target: BattleParticipant, attackResult: ProcessAttackResult, provoked: boolean): void {
+function retaliationOf(ctx: PhaseCtx, st: PhaseState, target: BattleParticipant, attackResult: ProcessAttackResult): (provoked: boolean) => AfterAttackResult | null {
   const { input, request, rng } = ctx;
 
-  const { attacker } = request;
+  return (provoked) => {
+    const retaliation = resolveRetaliation({
+      participants: st.order,
+      attackerId: request.attacker.basicInfo.id,
+      defenderId: target.basicInfo.id,
+      attack: request.attack,
+      attackRoll: attackResult.attackRoll,
+      criticalEffect: attackResult.criticalEffectApplied,
+      provoked,
+      round: input.battle.currentRound,
+      battleId: input.battleId,
+      rng,
+      crit: input.crit,
+      map: input.map,
+      rules: input.rules,
+      sceneState: st.sceneState,
+    });
 
-  const retaliation = resolveRetaliation({
-    participants: st.order,
-    attackerId: attacker.basicInfo.id,
-    defenderId: target.basicInfo.id,
-    attack: request.attack,
-    attackRoll: attackResult.attackRoll,
-    criticalEffect: attackResult.criticalEffectApplied,
-    provoked,
-    round: input.battle.currentRound,
-    battleId: input.battleId,
-    rng,
-    crit: input.crit,
-    map: input.map,
-    rules: input.rules,
-    sceneState: st.sceneState,
-  });
+    return retaliation && { participants: retaliation.participants, actions: [retaliation.battleAction], sceneState: retaliation.sceneState };
+  };
+}
 
-  if (!retaliation) return;
-
-  st.sceneState = retaliation.sceneState;
-  st.order = mergeParticipants(st.order, retaliation.participants);
-  st.attacker = findParticipant(retaliation.participants, attacker.basicInfo.id) ?? st.attacker;
-  st.actions.push(retaliation.battleAction);
+function applyAfter(ctx: PhaseCtx, st: PhaseState, result: AfterAttackResult): void {
+  st.sceneState = result.sceneState;
+  st.order = mergeParticipants(st.order, result.participants);
+  st.attacker = findParticipant(result.participants, ctx.request.attacker.basicInfo.id) ?? st.attacker;
+  st.actions.push(...result.actions);
 }
