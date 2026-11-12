@@ -21,7 +21,6 @@ import { inlineSummonRequests } from "@/lib/utils/battle/spell/cast/summon-inlin
 import { transformRequests } from "@/lib/utils/battle/spell/cast/transform";
 import { computeSpellPower } from "@/lib/utils/battle/spell/power";
 import { spellSaveDc } from "@/lib/utils/battle/spell/save-dc";
-import { spellNeedsSlot, spellSlotKey } from "@/lib/utils/battle/spell/slot";
 import type { CastSpellParams, CastSpellResult } from "@/lib/utils/battle/types/spell-process";
 import { rollGroups } from "@/lib/utils/common/dice";
 import { rngOf } from "@/lib/utils/common/rng";
@@ -91,13 +90,11 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
 
   const info = castLevel !== chosenLevel ? { ...baseInfo, castLevel } : baseInfo;
 
-  const slotKey = params.slotKey ?? spellSlotKey(readyCaster, spell.level);
+  const resource = !isDMCast && !params.isLegendaryCast && !params.grant ? ruleSystemOf(params.rules).magic.resource : undefined;
 
-  const slot = readyCaster.spellcasting.spellSlots[slotKey];
+  const cost = { resource, slotKey: params.slotKey, isDMCast, isLegendaryCast: params.isLegendaryCast, grant: params.grant };
 
-  const usesSlot = !magic && !isDMCast && !params.isLegendaryCast && !params.grant && spellNeedsSlot(spell.level);
-
-  if (usesSlot && (!slot || slot.current <= 0)) {
+  if (resource && !resource.canCast(readyCaster, { level: spell.level, slotKey: params.slotKey }).ok) {
     return {
       success: false,
       casterUpdated: readyCaster,
@@ -144,7 +141,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
   const settle = percentile && spellMagic && test ? { magic: percentile, spellMagic, cast: test } : undefined;
 
   if (settle && !settle.cast.success) {
-    spendCastCost(state, { slotKey, usesSlot, isDMCast, isLegendaryCast: params.isLegendaryCast, grant: params.grant });
+    spendCastCost(state, cost);
     settleCastTest(state, settle);
 
     return finishSpellAction(state, { before, targetsBefore, allParticipants, battleId, round: currentRound, sourceEffects: source.definition.effects, details: settle.cast.details, fizzled: true });
@@ -221,7 +218,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
 
   if (settle) applyCastAttribute(state, settle);
 
-  spendCastCost(state, { slotKey, usesSlot, isDMCast, isLegendaryCast: params.isLegendaryCast, grant: params.grant });
+  spendCastCost(state, cost);
 
   if (settle) settleCastTest(state, settle);
 

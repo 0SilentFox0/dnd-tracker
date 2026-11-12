@@ -31,7 +31,6 @@ import { prepareLongCast } from "@/lib/utils/battle/spell/long-cast";
 import { resolveSpellSource } from "@/lib/utils/battle/spell/resolve-source";
 import { spellSaveDc } from "@/lib/utils/battle/spell/save-dc";
 import { splitSaveRolls } from "@/lib/utils/battle/spell/save-rolls";
-import { resolveChosenSlot, spellNeedsSlot, spellSlotKey } from "@/lib/utils/battle/spell/slot";
 import { pacifiedBlock, resolveSpellTargets } from "@/lib/utils/battle/spell/spell-targeting";
 import { toCastableSpell } from "@/lib/utils/battle/spell/to-castable";
 import { spellTerrainEffects, spellZoneHazard } from "@/lib/utils/battle/spell/zone-hazard";
@@ -46,6 +45,7 @@ import { rollDiceList } from "@/lib/utils/common/dice";
 import { rngOf } from "@/lib/utils/common/rng";
 import { currencyValueOf, ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
+import type { CastResourceGate } from "@/lib/utils/rules/systems/types";
 import type { IngredientPlan } from "@/lib/utils/spells/ingredients/plan";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -70,7 +70,7 @@ type SpellSource = ReturnType<typeof resolveSpellSource>;
 
 type Resolution = Extract<ReturnType<typeof resolveSpellTargets>, { ok: true }>;
 
-type ChosenSlot = ReturnType<typeof resolveChosenSlot> | null;
+type ChosenSlot = CastResourceGate | null;
 
 interface CastPlan {
   ctx: BattleMutationContext;
@@ -140,7 +140,9 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
 
     if (armorPenalty(caster)) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_CASTER_ARMOR_NOT_PROFICIENT);
 
-    const chosen = !free && !legendaryAbility && !grant && data.slotKey && isFiveE(caster) && spellNeedsSlot(spell.level) ? resolveChosenSlot(caster, spell.level, data.slotKey) : null;
+    const resource = ruleSystemOf(ctx.meta.rules).magic.resource;
+
+    const chosen = resource && !free && !legendaryAbility && !grant && data.slotKey && isFiveE(caster) ? resource.canCast(caster, { level: spell.level, slotKey: data.slotKey }) : null;
 
     if (chosen && !chosen.ok) throw ruleErrorOf("action_rejected", chosen.error);
 
@@ -256,7 +258,9 @@ function beginLongCast(
   data: SpellRequestData,
   opts: { grantKey: string | undefined; castLevel: number | undefined; hasGrant: boolean },
 ): { result: MutationResult } | { caster: BattleParticipant; order: BattleParticipant[] } {
-  if (!opts.hasGrant && spellNeedsSlot(spell.level) && (caster.spellcasting.spellSlots[data.slotKey ?? spellSlotKey(caster, spell.level)]?.current ?? 0) <= 0) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_NO_FREE_SLOT_TO_CAST);
+  const resource = ruleSystemOf(ctx.meta.rules).magic.resource;
+
+  if (!opts.hasGrant && resource && !resource.canCast(caster, { level: spell.level, slotKey: data.slotKey }).ok) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_NO_FREE_SLOT_TO_CAST);
 
   const prepared = prepareLongCast({ ...ctx, participants: order }, caster, spell, { grantKey: opts.grantKey, slotKey: data.slotKey, castLevel: opts.castLevel }, data.castingRounds);
 

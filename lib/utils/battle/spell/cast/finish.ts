@@ -8,17 +8,14 @@ import { diffAppliedEffects } from "@/lib/utils/battle/spell/applied-effects";
 import { actionOf, flatEffects, isDamageEffect, SPELL_ONLY_KINDS, type SpellCastState } from "@/lib/utils/battle/spell/cast/state";
 import type { CastSpellResult } from "@/lib/utils/battle/types/spell-process";
 import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
+import type { RuleSystemMagicResource } from "@/lib/utils/rules/systems/types";
 import type { BattleParticipant, SpellGrant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
-export function spendCastCost(state: SpellCastState, cost: { slotKey: string; usesSlot: boolean; isDMCast: boolean; isLegendaryCast?: boolean; grant?: SpellGrant }): void {
+export function spendCastCost(state: SpellCastState, cost: { resource?: RuleSystemMagicResource; slotKey?: string; isDMCast: boolean; isLegendaryCast?: boolean; grant?: SpellGrant }): void {
   let caster = getP(state.flow, state.caster.basicInfo.id);
 
-  const spent = caster.spellcasting.spellSlots[cost.slotKey];
-
-  if (cost.usesSlot && spent) {
-    caster = { ...caster, spellcasting: { ...caster.spellcasting, spellSlots: { ...caster.spellcasting.spellSlots, [cost.slotKey]: { ...spent, current: spent.current - 1 } } } };
-  }
+  if (cost.resource) caster = cost.resource.spend(caster, { level: state.spell.level, slotKey: cost.slotKey });
 
   const poolKey = cost.grant?.pool;
 
