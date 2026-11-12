@@ -17,14 +17,15 @@ import { resolveCharacterSkillEntries } from "@/lib/server/battles/participant/c
 import { resolveLearnedSpellsAndMastery } from "@/lib/server/battles/participant/from-character-learned-spells";
 import { resolveSpellSlotsFromCharacter } from "@/lib/server/battles/participant/from-character-spell-slots";
 import { loadRace } from "@/lib/server/battles/participant/load-race";
+import { systemServerOf } from "@/lib/server/systems/registry";
 import { bakePassives } from "@/lib/utils/abilities/build/bake";
+import type { ArtifactSetRowLike } from "@/lib/utils/abilities/build/collect";
 import { collectCharacterAbilities } from "@/lib/utils/abilities/build/collect";
 import { immunityAbilities } from "@/lib/utils/abilities/build/immunities";
 import { resolveLimitFormulas } from "@/lib/utils/abilities/build/limit-formulas";
 import { classPools } from "@/lib/utils/abilities/class-columns";
 import { readChoiceList } from "@/lib/utils/abilities/read";
 import { initAmmo } from "@/lib/utils/battle/ammo";
-import { findCompletedSets } from "@/lib/utils/battle/artifact-sets";
 import { proficiencyOf } from "@/lib/utils/battle/saves/access";
 import { getCharacterImmunities } from "@/lib/utils/characters/character-race-effects";
 import { choicesStateOf } from "@/lib/utils/characters/choices/picks";
@@ -43,6 +44,7 @@ import { systemSlotOf } from "@/lib/utils/rules/systems/slot";
 import { resolveClassEntries } from "@/lib/utils/spells/class-slots";
 import { buildIngredientStock } from "@/lib/utils/spells/ingredients/stock";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
+import type { SetProgress } from "@/types/characters";
 import type { ResolvedClassEntry } from "@/types/classes";
 
 async function resolveCharacterClassEntries(character: CharacterFromPrisma, rules: Ruleset, context?: CampaignSpellContext): Promise<ResolvedClassEntry[]> {
@@ -76,7 +78,11 @@ async function loadCharacterBuildRefs(character: CharacterFromPrisma, rules: Rul
 
   const equippedArtifacts = toEquippedArtifacts(artifactRows);
 
-  const completed = await findCompletedSets(equippedArtifacts, character.campaignId, context);
+  const loaders = systemServerOf(rules).participant?.characterRefs ?? [];
+
+  const loaded = await Promise.all(loaders.map((load) => load({ equipped: equippedArtifacts, campaignId: character.campaignId, context })));
+
+  const completed = loaded.reduce((acc, r) => r.completed ?? acc, { sets: [] as ArtifactSetRowLike[], progress: [] as SetProgress[] });
 
   const resolvedEntries = preloaded?.classEntries ?? (await resolveCharacterClassEntries(character, rules, context));
 

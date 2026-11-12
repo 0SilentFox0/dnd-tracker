@@ -3,13 +3,15 @@ import type { ZodType } from "zod";
 import type { SpellRequestData } from "@/lib/schemas/battles";
 import type { AttackBody } from "@/lib/server/battles/mutations/attack/attack-mutation";
 import type { CharacterOperation } from "@/lib/server/characters/operation-runner";
+import type { ArtifactSetRowLike } from "@/lib/utils/abilities/build/collect";
 import type { getCharacterStats, UnitStats } from "@/lib/utils/battle/balance";
 import type { CritResume } from "@/lib/utils/battle/crit-choice/types";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import type { CampaignSpellContext } from "@/lib/utils/battle/types/participant";
 import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
 import type { branchLevels } from "@/lib/utils/skills/progression";
-import type { BattleParticipant } from "@/types/battle";
+import type { BattleParticipant, EquippedArtifact } from "@/types/battle";
+import type { SetProgress } from "@/types/characters";
 
 export interface SystemSchemas {
   characteristics?: ZodType;
@@ -58,8 +60,18 @@ export interface SystemBattleOperation {
   load(deps: BattleOperationDeps): Promise<{ schema: ZodType; mutate(ctx: BattleMutationContext, body: never): MutationResult | Promise<MutationResult> }>;
 }
 
+export type CharacterRefLoader = (input: { equipped: EquippedArtifact[]; campaignId: string; context?: CampaignSpellContext }) => Promise<Partial<{ completed: { sets: ArtifactSetRowLike[]; progress: SetProgress[] } }>>;
+
+export type ContextPreparer = (campaignId: string, context: CampaignSpellContext) => Promise<void>;
+
+export interface SystemParticipantServer {
+  characterRefs?: readonly CharacterRefLoader[];
+  prepareContext?: readonly ContextPreparer[];
+}
+
 export interface SystemServer {
   schemas: SystemSchemas;
+  participant?: SystemParticipantServer;
   balance: SystemBalance;
   operations?: Record<string, SystemOperation>;
   /** Battle operations the route layer resolves by name; the core settings (access, gates) stay with the route */

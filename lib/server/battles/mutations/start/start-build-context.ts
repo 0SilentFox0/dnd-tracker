@@ -1,7 +1,7 @@
 import { Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/db";
-import { attachArtifactSetsToSpellContext } from "@/lib/utils/battle/artifact-sets";
+import { systemServerOf } from "@/lib/server/systems/registry";
 import { referencedSkillIds } from "@/lib/utils/battle/participant/extract-skills";
 import { loadClassesById } from "@/lib/utils/battle/participant/load-classes";
 import type { CampaignSpellContext } from "@/lib/utils/battle/types/participant";
@@ -150,7 +150,7 @@ export async function buildCampaignContextForStart(
 
     if (campaignContext.rules.classes.enabled) campaignContext.classesById = await loadClassesById(campaignId);
 
-    await attachArtifactSetsToSpellContext(campaignId, campaignContext);
+    for (const prepare of systemServerOf(campaignContext.rules).participant?.prepareContext ?? []) await prepare(campaignId, campaignContext);
   }
 
   return { campaignContext, racesById };

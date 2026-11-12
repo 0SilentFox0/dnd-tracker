@@ -1,8 +1,9 @@
-import type { CampaignSpellContext } from "../types/participant";
+import { type ArtifactSetBattleMaps, loadArtifactSetBattleMaps } from "./load-maps";
 
-import { type ArtifactSetBattleMaps, loadArtifactSetBattleMaps } from "@/lib/server/battles/artifact-sets/load-maps";
+import type { CharacterRefLoader } from "@/lib/server/systems/types";
 import type { ArtifactSetRowLike } from "@/lib/utils/abilities/build/collect";
 import { abilitySummary } from "@/lib/utils/abilities/summary";
+import type { CampaignSpellContext } from "@/lib/utils/battle/types/participant";
 import { refArtifactIds } from "@/lib/utils/items/ref";
 import type { EquippedArtifact } from "@/types/battle";
 import type { SetProgress } from "@/types/characters";
@@ -55,3 +56,5 @@ export async function findCompletedSets(
 
   return { sets, progress };
 }
+
+export const completedSetsLoader: CharacterRefLoader = async ({ equipped, campaignId, context }) => ({ completed: await findCompletedSets(equipped, campaignId, context) });

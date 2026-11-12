@@ -29,7 +29,7 @@ import { createStartMutation } from "@/lib/server/battles/mutations/start/start-
 import { loadSystemOperation } from "@/lib/server/battles/operations";
 import { runBattleMutation } from "@/lib/server/battles/run-mutation";
 import { loadSpellsFromDb } from "@/lib/server/battles/spell/load-spells-db";
-import { findCompletedSets } from "@/lib/utils/battle/artifact-sets";
+import { systemServerOf } from "@/lib/server/systems/registry";
 import { buildPartyPower, computeFairScaling, heroMember, pickEnemyRoster } from "@/lib/utils/battle/balance";
 import { applyBattleDelta } from "@/lib/utils/battle/client/apply-delta";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
@@ -40,6 +40,7 @@ import { spellTargetingFor } from "@/lib/utils/battle/spell/spell-targeting";
 import { loadBattle, loadRecentEvents, saveBattle } from "@/lib/utils/battle/store";
 import { bonusTargetCandidates, needsBonusTarget, needsMoraleCheck, usableAbilities } from "@/lib/utils/battle/view";
 import { rollDiceList } from "@/lib/utils/common/dice";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { branchLevelNodeId, canLearn, normalizeTree, racialNodeId, type TreeNodes } from "@/lib/utils/skills/progression";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleMutationResponse, BattleScene } from "@/types/api";
@@ -542,7 +543,9 @@ async function createParty(partyKey: string, level: number, trees: Map<string, T
 
       const eq = toEquippedArtifacts(loadEquippedArtifactRows({ ...row, inventory: { equipped } } as never, artifactsById));
 
-      const { progress } = await findCompletedSets(eq, campaignId);
+      const loaded = await Promise.all((systemServerOf(DEFAULT_RULES).participant?.characterRefs ?? []).map((load) => load({ equipped: eq, campaignId })));
+
+      const progress = loaded.flatMap((r) => r.completed?.progress ?? []);
 
       console.info(`   set check ${buildKey}: ${JSON.stringify(progress.map((p) => ({ n: p.name, have: p.have, total: p.total, complete: p.complete })))}`);
     }
