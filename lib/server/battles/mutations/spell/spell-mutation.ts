@@ -12,7 +12,6 @@ import { recordUse } from "@/lib/utils/abilities/engine/core/usage";
 import { evaluateCondition } from "@/lib/utils/abilities/registry/conditions";
 import { spendLair } from "@/lib/utils/battle/actions/lair";
 import { legendaryCostOf, spendLegendary } from "@/lib/utils/battle/actions/legendary-options";
-import { isFiveE } from "@/lib/utils/battle/attack/ability";
 import { requireActor } from "@/lib/utils/battle/common/control";
 import { runWithCritChoice } from "@/lib/utils/battle/crit-choice/run-with-crit-choice";
 import type { CritPicker, CritResume } from "@/lib/utils/battle/crit-choice/types";
@@ -141,7 +140,7 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
 
     const resource = ruleSystemOf(ctx.meta.rules).magic.resource;
 
-    const chosen = resource && !free && !legendaryAbility && !grant && data.slotKey && isFiveE(caster) ? resource.canCast(caster, { level: spell.level, slotKey: data.slotKey }) : null;
+    const chosen = resource && !free && !legendaryAbility && !grant && data.slotKey && resource.picksSlot(caster) ? resource.canCast(caster, { level: spell.level, slotKey: data.slotKey }) : null;
 
     if (chosen && !chosen.ok) throw ruleErrorOf("action_rejected", chosen.error);
 

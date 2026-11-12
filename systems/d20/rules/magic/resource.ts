@@ -1,4 +1,5 @@
 import { API_ERRORS } from "@/lib/constants/api-errors";
+import { isFiveE } from "@/lib/utils/battle/attack/ability";
 import { resolveChosenSlot, spellNeedsSlot, spellSlotKey } from "@/lib/utils/battle/spell/slot";
 import type { CastResourceChoice, CastResourceGate, RuleSystemMagicResource } from "@/lib/utils/rules/systems/types";
 import type { BattleParticipant } from "@/types/battle";
@@ -29,4 +30,4 @@ function spendSlot(caster: BattleParticipant, { level, slotKey }: CastResourceCh
   return { ...caster, spellcasting: { ...caster.spellcasting, spellSlots: { ...caster.spellcasting.spellSlots, [key]: { ...spent, current: spent.current - 1 } } } };
 }
 
-export const D20_SPELL_RESOURCE: RuleSystemMagicResource = { canCast: canCastWithSlot, spend: spendSlot };
+export const D20_SPELL_RESOURCE: RuleSystemMagicResource = { picksSlot: isFiveE, canCast: canCastWithSlot, spend: spendSlot };

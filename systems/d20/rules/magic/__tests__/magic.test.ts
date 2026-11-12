@@ -43,6 +43,13 @@ describe("d20 magic.resource", () => {
     expect(resource.spend(p, { level: 2 }).spellcasting.spellSlots.pact.current).toBe(1);
   });
 
+  it("only damageModel 5e casters pick a slot; a summoned or phantom d20 participant spends the default one", () => {
+    const base = caster({ "3": { max: 1, current: 1 } });
+
+    expect(resource.picksSlot(base)).toBe(false);
+    expect(resource.picksSlot({ ...base, abilities: { ...base.abilities, damageModel: "5e" } })).toBe(true);
+  });
+
   it("a unit spends the universal slot", () => {
     const p = caster({ universal: { max: 3, current: 3 } }, ParticipantSourceType.UNIT);
 

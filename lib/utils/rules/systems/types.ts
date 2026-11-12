@@ -352,6 +352,8 @@ export interface CastResourceChoice {
 
 /** What a cast spends (spell slots); a system without one lets every cast through */
 export interface RuleSystemMagicResource {
+  /** The caster chooses which slot to cast from (a request's `slotKey` is validated only for these); others spend the default one */
+  picksSlot(caster: BattleParticipant): boolean;
   /** `castLevel` is set when the choice raises the cast above the spell's level */
   canCast(caster: BattleParticipant, choice: CastResourceChoice): CastResourceGate;
   spend(caster: BattleParticipant, choice: CastResourceChoice): BattleParticipant;
