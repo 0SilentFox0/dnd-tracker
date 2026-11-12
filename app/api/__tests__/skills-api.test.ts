@@ -16,6 +16,10 @@ vi.mock('@/lib/utils/api/api-auth', () => ({
 
 vi.mock('next/cache', () => ({ revalidateTag: vi.fn() }));
 
+vi.mock('@/lib/server/content/kind-active', () => ({
+    isKindActive: async () => true,
+    assertKindActive: async () => undefined,
+}));
 vi.mock('@/lib/db', async () => {
     const { contentDatabaseDouble } = await import(
         '@/lib/server/content/__tests__/database-double'

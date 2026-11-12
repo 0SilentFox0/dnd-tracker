@@ -25,6 +25,10 @@ const resolveIcon = vi.hoisted(() => vi.fn());
 const sync = vi.hoisted(() => vi.fn());
 
 vi.mock('server-only', () => ({}));
+vi.mock('@/lib/server/content/kind-active', () => ({
+    isKindActive: async () => true,
+    assertKindActive: async () => undefined,
+}));
 vi.mock('@/lib/db', () => ({ prisma: db }));
 vi.mock('@/lib/supabase/artifact-icon-storage', () => ({
     resolveArtifactIconForPersistence: resolveIcon,
