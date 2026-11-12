@@ -1,12 +1,11 @@
+import { CLASS_CASTERS } from '@/lib/constants/classes';
 import {
     ABILITY_ENUM,
     defineSpec,
     jsonField,
     nameField,
     textField,
-} from './common';
-
-import { CLASS_CASTERS } from '@/lib/constants/classes';
+} from '@/lib/utils/content/import/fields/common';
 export const CLASSES_IMPORT = defineSpec({
     kind: 'classes',
     fields: [

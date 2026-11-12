@@ -4,7 +4,7 @@ import {
     jsonField,
     nameField,
     textField,
-} from './common';
+} from '@/lib/utils/content/import/fields/common';
 
 export const ARTIFACT_SETS_IMPORT = defineSpec({
     kind: 'artifact-sets',

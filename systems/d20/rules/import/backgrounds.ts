@@ -1,4 +1,9 @@
-import { defineSpec, jsonField, nameField, textField } from './common';
+import {
+    defineSpec,
+    jsonField,
+    nameField,
+    textField,
+} from '@/lib/utils/content/import/fields/common';
 
 export const BACKGROUNDS_IMPORT = defineSpec({
     kind: 'backgrounds',

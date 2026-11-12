@@ -1,6 +1,9 @@
-import { defineSpec, nameField, textField } from './common';
-
 import { MAIN_SKILL_ROLES } from '@/lib/constants/main-skills';
+import {
+    defineSpec,
+    nameField,
+    textField,
+} from '@/lib/utils/content/import/fields/common';
 export const MAIN_SKILLS_IMPORT = defineSpec({
     kind: 'main-skills',
     fields: [

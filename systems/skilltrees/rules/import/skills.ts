@@ -4,8 +4,7 @@ import {
     type FieldDef,
     nameField,
     textField,
-} from './common';
-
+} from '@/lib/utils/content/import/fields/common';
 import type { ImportRecord } from '@/types/content-import';
 
 const fields: FieldDef[] = [
