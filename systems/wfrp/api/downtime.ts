@@ -1,4 +1,5 @@
 import { campaignPost, campaignPut } from '@/lib/api/client';
+import { systemPath } from '@/lib/api/system';
 import type {
     DowntimePeriodBody,
     DowntimePeriodResult,
@@ -14,14 +15,19 @@ export const putDowntime = (
 ) =>
     campaignPut<DowntimeSetResult>(
         campaignId,
-        `/characters/${characterId}/downtime`,
+        systemPath.character(characterId, 'downtime'),
         body
     );
 
 export const postDowntimePeriod = (
     campaignId: string,
     body: DowntimePeriodBody
-) => campaignPost<DowntimePeriodResult>(campaignId, '/downtime/period', body);
+) =>
+    campaignPost<DowntimePeriodResult>(
+        campaignId,
+        systemPath.campaign('downtime.period'),
+        body
+    );
 
 export const postDowntimePeriodUndo = (
     campaignId: string,
@@ -29,6 +35,6 @@ export const postDowntimePeriodUndo = (
 ) =>
     campaignPost<DowntimePeriodResult>(
         campaignId,
-        '/downtime/period-undo',
+        systemPath.campaign('downtime.period-undo'),
         body
     );

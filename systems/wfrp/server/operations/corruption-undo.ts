@@ -1,6 +1,5 @@
 import { requireCharacterAccess } from '@/lib/server/characters/access';
 import {
-    characterRoute,
     defineCharacterOperation,
     gateOptions,
 } from '@/lib/server/characters/operation-runner';
@@ -19,5 +18,3 @@ export const corruptionUndoOperation = defineCharacterOperation({
         ),
     run: undoCorruption,
 });
-
-export const POST = characterRoute(corruptionUndoOperation);

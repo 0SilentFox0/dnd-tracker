@@ -18,7 +18,7 @@ const BARREL_MAX_SYSTEM_IMPORT_LINES = 0;
 
 const REASON = /^(route|content-kind|ruleset-section)$/;
 
-const MAX_EXEMPT_FILES = 30;
+const MAX_EXEMPT_FILES = 10;
 
 describe('system imports ratchet', () => {
     const exempt = readImportsExempt();

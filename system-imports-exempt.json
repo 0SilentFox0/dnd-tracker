@@ -1,42 +1,10 @@
 [
   {
-    "file": "app/api/campaigns/[id]/characters/[characterId]/advance/route.ts",
-    "reason": "route"
-  },
-  {
-    "file": "app/api/campaigns/[id]/characters/[characterId]/career/advance/route.ts",
-    "reason": "route"
-  },
-  {
-    "file": "app/api/campaigns/[id]/characters/[characterId]/career/route.ts",
-    "reason": "route"
-  },
-  {
-    "file": "app/api/campaigns/[id]/characters/[characterId]/corruption/route.ts",
-    "reason": "route"
-  },
-  {
-    "file": "app/api/campaigns/[id]/characters/[characterId]/corruption/undo/route.ts",
-    "reason": "route"
-  },
-  {
-    "file": "app/api/campaigns/[id]/characters/[characterId]/downtime/route.ts",
-    "reason": "route"
-  },
-  {
     "file": "app/api/campaigns/[id]/characters/[characterId]/draft/update-draft.ts",
     "reason": "route"
   },
   {
     "file": "app/api/campaigns/[id]/characters/draft/create-draft.ts",
-    "reason": "route"
-  },
-  {
-    "file": "app/api/campaigns/[id]/downtime/period-undo/route.ts",
-    "reason": "route"
-  },
-  {
-    "file": "app/api/campaigns/[id]/downtime/period/route.ts",
     "reason": "route"
   },
   {

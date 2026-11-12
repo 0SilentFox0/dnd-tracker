@@ -1,6 +1,5 @@
 import { requireCharacterAccess } from '@/lib/server/characters/access';
 import {
-    characterRoute,
     defineCharacterOperation,
     gateOptions,
 } from '@/lib/server/characters/operation-runner';
@@ -35,5 +34,3 @@ export const careerAdvanceOperation = defineCharacterOperation({
         ),
     run: advanceCareer,
 });
-
-export const POST = characterRoute(careerSetOperation);

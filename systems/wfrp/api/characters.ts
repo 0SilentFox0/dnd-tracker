@@ -7,6 +7,7 @@ import type {
 } from './types';
 
 import { campaignDelete, campaignPatch, campaignPost } from '@/lib/api/client';
+import { systemPath } from '@/lib/api/system';
 import type { Character } from '@/types/characters';
 
 export const createWfrpDraft = (campaignId: string, body: WfrpDraftInput) =>
@@ -30,14 +31,14 @@ export const advanceCharacter = (
 ) =>
     campaignPost<AdvanceResult>(
         campaignId,
-        `/characters/${characterId}/advance`,
+        systemPath.character(characterId, 'advance'),
         body
     );
 
 export const undoCharacterAdvance = (campaignId: string, characterId: string) =>
     campaignDelete<AdvanceResult>(
         campaignId,
-        `/characters/${characterId}/advance`
+        systemPath.character(characterId, 'advance')
     );
 
 export const setCharacterCareer = (
@@ -47,7 +48,7 @@ export const setCharacterCareer = (
 ) =>
     campaignPost<CareerResult>(
         campaignId,
-        `/characters/${characterId}/career`,
+        systemPath.character(characterId, 'career'),
         { careerId }
     );
 
@@ -58,6 +59,6 @@ export const advanceCharacterCareer = (
 ) =>
     campaignPost<CareerResult>(
         campaignId,
-        `/characters/${characterId}/career/advance`,
+        systemPath.character(characterId, 'career.advance'),
         { force }
     );

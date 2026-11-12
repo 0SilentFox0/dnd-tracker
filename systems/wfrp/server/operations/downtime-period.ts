@@ -1,6 +1,5 @@
 import {
     campaignGate,
-    characterRoute,
     defineCharacterOperation,
 } from '@/lib/server/characters/operation-runner';
 import { passPeriod } from '@/systems/wfrp/server/downtime-handler';
@@ -13,5 +12,3 @@ export const downtimePeriodOperation = defineCharacterOperation({
     gate: campaignGate,
     run: passPeriod,
 });
-
-export const POST = characterRoute(downtimePeriodOperation);

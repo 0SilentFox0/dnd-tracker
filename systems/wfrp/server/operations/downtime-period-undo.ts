@@ -1,6 +1,5 @@
 import {
     campaignGate,
-    characterRoute,
     defineCharacterOperation,
 } from '@/lib/server/characters/operation-runner';
 import { undoPeriod } from '@/systems/wfrp/server/downtime-handler';
@@ -13,5 +12,3 @@ export const downtimePeriodUndoOperation = defineCharacterOperation({
     gate: campaignGate,
     run: undoPeriod,
 });
-
-export const POST = characterRoute(downtimePeriodUndoOperation);

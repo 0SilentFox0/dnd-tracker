@@ -1,6 +1,8 @@
 import type { NextConfig } from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
 
+import { SYSTEM_ROUTE_REWRITES } from './lib/constants/system-route-rewrites';
+
 const withNextIntl = createNextIntlPlugin('./lib/i18n/request.ts');
 
 const nextConfig: NextConfig = {
@@ -18,6 +20,9 @@ const nextConfig: NextConfig = {
                 ],
             },
         ];
+    },
+    async rewrites() {
+        return [...SYSTEM_ROUTE_REWRITES];
     },
     async redirects() {
         return [
