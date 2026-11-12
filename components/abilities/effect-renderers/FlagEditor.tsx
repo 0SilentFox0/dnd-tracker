@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 
 import { useAbilityEditor } from "@/components/abilities/editor-context";
 import { FieldRenderer } from "@/components/abilities/fields/FieldRenderer";
-import { useAbilityComposition } from "@/lib/hooks/abilities";
+import { useAbilityComposition } from "@/lib/hooks/abilities/useAbilityComposition";
 import { useTranslator } from "@/lib/i18n/use-translator";
 import { getAtPath, setAtPath } from "@/lib/utils/abilities/editor";
 import { FLAG_DEFAULTS, FLAG_FIELDS } from "@/lib/utils/abilities/registry/effects/flags";

@@ -9,7 +9,7 @@ import { ScaleColumnSelect } from "./ScaleColumnSelect";
 import { useAbilityEditor } from "@/components/abilities/editor-context";
 import { Input } from "@/components/ui/input";
 import { SelectField } from "@/components/ui/select-field";
-import { useAbilityComposition } from "@/lib/hooks/abilities";
+import { useAbilityComposition } from "@/lib/hooks/abilities/useAbilityComposition";
 import type { Amount } from "@/lib/utils/abilities/schema";
 import { DICE_RE } from "@/lib/utils/abilities/schema/kinds";
 

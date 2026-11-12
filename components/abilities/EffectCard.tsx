@@ -12,7 +12,7 @@ import { useAbilityText } from "./use-ability-text";
 
 import { Button } from "@/components/ui/button";
 import { SelectField } from "@/components/ui/select-field";
-import { useAbilityComposition } from "@/lib/hooks/abilities";
+import { useAbilityComposition } from "@/lib/hooks/abilities/useAbilityComposition";
 import { useTranslator } from "@/lib/i18n/use-translator";
 import { changeEffectKind, getAtPath, newEffect, setAtPath } from "@/lib/utils/abilities/editor";
 import { EFFECT_REGISTRY } from "@/lib/utils/abilities/registry/effects";
