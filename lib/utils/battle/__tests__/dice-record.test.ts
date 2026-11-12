@@ -54,6 +54,12 @@ describe("spellDiceRolls", () => {
     ]);
   });
 
+  it("автопровал рятунку не кидає кубик: групи немає", () => {
+    expect(spellDiceRolls({ casterId: "c", sides: 6, rolls: [], heal: false, saves: [{ participantId: "x", roll: 0, autoFail: true }, { participantId: "y", roll: 7 }], presetSaveIds: new Set() })).toEqual([
+      { kind: "save", rollerId: "y", dice: [{ sides: 20, value: 7, server: true }] },
+    ]);
+  });
+
   it("лікування; без кубиків і рятунків — порожньо", () => {
     expect(spellDiceRolls({ casterId: "c", sides: 8, rolls: [7], heal: true, saves: [], presetSaveIds: new Set() })[0].kind).toBe("heal");
     expect(spellDiceRolls({ casterId: "c", sides: 8, rolls: [], heal: false, saves: [], presetSaveIds: new Set() })).toEqual([]);
