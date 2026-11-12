@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
-import { dmSectionsFor, dmTilesFor } from '@/lib/constants/campaigns';
+import {
+    dmSectionHref,
+    dmSectionsFor,
+    dmTilesFor,
+} from '@/lib/constants/campaigns';
 
 const paths = (s: { path: string }[]) => s.map((x) => x.path);
 
@@ -34,18 +38,73 @@ describe('dmSectionsFor', () => {
     });
 
     it('hides skill libraries in class (5e) campaigns only', () => {
+        const homm = { key: 'homm' };
+
         expect(
-            paths(dmSectionsFor({ isTemplate: false, classesEnabled: true }))
+            paths(
+                dmSectionsFor({
+                    isTemplate: false,
+                    classesEnabled: true,
+                    system: homm,
+                })
+            )
         ).not.toContain('skills');
         expect(
-            paths(dmSectionsFor({ isTemplate: false, classesEnabled: true }))
+            paths(
+                dmSectionsFor({
+                    isTemplate: false,
+                    classesEnabled: true,
+                    system: homm,
+                })
+            )
         ).not.toContain('skill-trees');
         expect(
-            paths(dmSectionsFor({ isTemplate: false, classesEnabled: false }))
+            paths(
+                dmSectionsFor({
+                    isTemplate: false,
+                    classesEnabled: false,
+                    system: homm,
+                })
+            )
         ).toEqual(expect.arrayContaining(['skills', 'skill-trees']));
         expect(
-            paths(dmTilesFor({ isTemplate: false, classesEnabled: true }))
+            paths(
+                dmTilesFor({
+                    isTemplate: false,
+                    classesEnabled: true,
+                    system: homm,
+                })
+            )
         ).not.toContain('skills');
+    });
+
+    it('module sections follow the composition (wfrp, bare dnd5e, homm)', () => {
+        const menu = (system: { key: string }, classesEnabled = true) =>
+            paths(dmSectionsFor({ isTemplate: false, classesEnabled, system }));
+
+        expect(menu({ key: 'wfrp' }, false)).not.toContain('skills');
+        expect(menu({ key: 'wfrp' }, false)).not.toContain('classes');
+        expect(menu({ key: 'dnd5e' }, false)).not.toContain('skills');
+        expect(menu({ key: 'dnd5e' })).toEqual(
+            expect.arrayContaining(['classes', 'backgrounds'])
+        );
+        expect(menu({ key: 'dnd5e' })).not.toContain('artifact-sets');
+        expect(menu({ key: 'homm' })).toContain('artifact-sets');
+        expect(menu({ key: 'homm' }, false)).toEqual(
+            expect.arrayContaining(['skills', 'skill-trees'])
+        );
+    });
+
+    it('careers link to the system page', () => {
+        const careers = dmSectionsFor({
+            isTemplate: false,
+            classesEnabled: false,
+            system: { key: 'wfrp' },
+        }).find((s) => s.path === 'careers')!;
+
+        expect(dmSectionHref('c1', careers)).toBe(
+            '/campaigns/c1/dm/system/careers'
+        );
     });
 
     it('template menu keeps the API tokens entry', () => {
@@ -56,7 +115,13 @@ describe('dmSectionsFor', () => {
 
     it('template with classes shows the class library', () => {
         expect(
-            paths(dmSectionsFor({ isTemplate: true, classesEnabled: true }))
+            paths(
+                dmSectionsFor({
+                    isTemplate: true,
+                    classesEnabled: true,
+                    system: { key: 'dnd5e' },
+                })
+            )
         ).toEqual(expect.arrayContaining(['classes', 'feats', 'backgrounds']));
     });
 
@@ -102,7 +167,7 @@ describe('dmSectionsFor', () => {
                 dmSectionsFor({
                     isTemplate: false,
                     classesEnabled: false,
-                    systemKey: 'wfrp',
+                    system: { key: 'wfrp' },
                 })
             )
         ).toContain('careers');
@@ -111,18 +176,18 @@ describe('dmSectionsFor', () => {
                 dmTilesFor({
                     isTemplate: false,
                     classesEnabled: false,
-                    systemKey: 'wfrp',
+                    system: { key: 'wfrp' },
                 })
             )
         ).toContain('careers');
 
-        for (const systemKey of ['dnd5e', 'homm', undefined])
+        for (const system of [{ key: 'dnd5e' }, { key: 'homm' }, undefined])
             expect(
                 paths(
                     dmSectionsFor({
                         isTemplate: false,
                         classesEnabled: true,
-                        systemKey,
+                        system,
                     })
                 )
             ).not.toContain('careers');
@@ -132,7 +197,7 @@ describe('dmSectionsFor', () => {
                 dmSectionsFor({
                     isTemplate: true,
                     classesEnabled: false,
-                    systemKey: 'wfrp',
+                    system: { key: 'wfrp' },
                 })
             )
         ).not.toContain('careers');

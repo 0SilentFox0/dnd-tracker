@@ -30,7 +30,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { HudPortalClassProvider } from '@/components/ui/portal-class';
-import { dmSectionsFor } from '@/lib/constants/campaigns';
+import { dmSectionHref, dmSectionsFor } from '@/lib/constants/campaigns';
 import { useSessionUser, useSwitchGoogleAccount } from '@/lib/hooks/auth';
 import { useCampaignRules, useIsTemplateCampaign } from '@/lib/hooks/campaigns';
 import { useTranslator } from '@/lib/i18n/use-translator';
@@ -103,7 +103,7 @@ export function Header() {
     const dmSections = dmSectionsFor({
         isTemplate,
         classesEnabled: !!rules?.classes.enabled,
-        systemKey: rules?.system.key,
+        system: rules?.system,
     });
 
     const isBattlePage = BATTLE_PATH.test(pathname ?? '');
@@ -145,18 +145,22 @@ export function Header() {
                                     {isDMPage && (
                                         <>
                                             <DropdownMenuSeparator />
-                                            {dmSections.map(({ path }) => (
-                                                <Fragment key={path}>
+                                            {dmSections.map((section) => (
+                                                <Fragment key={section.path}>
                                                     <DropdownMenuItem asChild>
                                                         <Link
-                                                            href={`/campaigns/${campaignId}/dm/${path}`}
+                                                            href={dmSectionHref(
+                                                                campaignId,
+                                                                section
+                                                            )}
                                                         >
                                                             {tCommon(
-                                                                `dmMenu.${path}`
+                                                                `dmMenu.${section.path}`
                                                             )}
                                                         </Link>
                                                     </DropdownMenuItem>
-                                                    {path === 'characters' && (
+                                                    {section.path ===
+                                                        'characters' && (
                                                         <DropdownMenuItem
                                                             asChild
                                                         >

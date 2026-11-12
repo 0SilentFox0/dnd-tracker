@@ -21,7 +21,11 @@ import {
     Wand2,
 } from 'lucide-react';
 
-import { metaOf } from '@/lib/utils/rules/systems/meta';
+import {
+    dmSectionsOf,
+    type SystemSelection,
+} from '@/lib/utils/rules/systems/catalog';
+import { SYSTEM_META, type SystemMeta } from '@/lib/utils/rules/systems/meta';
 
 export const CampaignRole = { DM: 'dm', PLAYER: 'player' } as const;
 
@@ -62,8 +66,8 @@ export interface DmSection {
     icon: LucideIcon;
     templateVisible: boolean;
     requiresClasses?: boolean;
-    /** shown only when the active system declares the path in meta.dmSections */
-    systemSection?: true;
+    /** the page lives at dm/system/<path> and is rendered by the owning module */
+    systemPage?: true;
     /** skill libraries have no use in 5e class campaigns */
     hiddenWithClasses?: boolean;
     /** campaign page tile: in every kind, only on templates, or none (menu only) */
@@ -117,7 +121,7 @@ export const DM_SECTIONS: readonly DmSection[] = [
         path: 'careers',
         icon: Briefcase,
         templateVisible: false,
-        systemSection: true,
+        systemPage: true,
         tile: 'all',
     },
     { path: 'battles', icon: Swords, templateVisible: false, tile: 'all' },
@@ -135,27 +139,34 @@ export const DM_SECTIONS: readonly DmSection[] = [
     { path: 'ai', icon: Cpu, templateVisible: true, tile: 'all' },
 ];
 
-interface DmSectionContext {
+export interface DmSectionContext {
     isTemplate: boolean;
     classesEnabled: boolean;
-    systemKey?: string;
+    system?: SystemSelection;
 }
+
+const OWNED_SECTIONS: ReadonlySet<string> = new Set(
+    (SYSTEM_META as readonly SystemMeta[]).flatMap((m) => m.dmSections ?? [])
+);
+
+export const dmSectionHref = (campaignId: string, s: DmSection) =>
+    `/campaigns/${campaignId}/dm/${s.systemPage ? 'system/' : ''}${s.path}`;
 
 export const dmSectionsFor = ({
     isTemplate,
     classesEnabled,
-    systemKey,
-}: DmSectionContext): DmSection[] =>
-    DM_SECTIONS.filter(
+    system,
+}: DmSectionContext): DmSection[] => {
+    const active = system ? dmSectionsOf(system) : new Set<string>();
+
+    return DM_SECTIONS.filter(
         (s) =>
             (!isTemplate || s.templateVisible) &&
-            (!s.systemSection ||
-                !!(
-                    systemKey && metaOf(systemKey)?.dmSections?.includes(s.path)
-                )) &&
+            (!OWNED_SECTIONS.has(s.path) || active.has(s.path)) &&
             (!s.requiresClasses || classesEnabled) &&
             !(s.hiddenWithClasses && classesEnabled)
     );
+};
 
 export const dmTilesFor = (ctx: DmSectionContext): DmSection[] =>
     dmSectionsFor(ctx).filter(
