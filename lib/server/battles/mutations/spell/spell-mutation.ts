@@ -115,7 +115,9 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
     if (data.cancelCasting) {
       const dropped = ruleSystemOf(ctx.meta.rules).magic.sustain.drop(order, caster.basicInfo.id, textRef("battleLog.concentration.reasons.castCancelled"));
 
-      return { participants: dropped.participants, pending: ctx.pending, events: [systemEvent(ctx.scene.round, textRef("battleLog.spell.castCancelled", { name: caster.basicInfo.name }))] };
+      const cleared = updateParticipant(dropped.participants, caster.basicInfo.id, (p) => (p.battleData.pendingCast ? { ...p, battleData: { ...p.battleData, pendingCast: undefined } } : p));
+
+      return { participants: cleared, pending: ctx.pending, events: [systemEvent(ctx.scene.round, textRef("battleLog.spell.castCancelled", { name: caster.basicInfo.name }))] };
     }
 
     const source = resolveSpellSource(ctx, caster, spell, data);

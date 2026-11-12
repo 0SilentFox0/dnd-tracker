@@ -1,9 +1,9 @@
 import type { RuleSystemMagic, RuleSystemSustain } from "@/lib/utils/rules/systems/types";
 
-/** Nothing is held: casts bind no duration to the caster */
+/** Nothing is held: casts bind no duration to the caster; a long cast stays alive through its pendingCast alone */
 export const noSustain: RuleSystemSustain = {
   holds: () => false,
-  holding: () => false,
+  holding: (p) => !!p.battleData.pendingCast,
   begin: (ps) => ({ participants: ps, messages: [] }),
   drop: (ps) => ({ participants: ps, messages: [] }),
   tag: (_before, after) => after,
