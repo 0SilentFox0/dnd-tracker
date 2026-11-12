@@ -61,6 +61,7 @@ const SYSTEM_IDS = readdirSync(new URL("./systems", import.meta.url), { withFile
 const SYSTEM_ROOTS = [
   "lib/utils/rules/systems/meta.ts",
   "lib/utils/rules/systems/registry.ts",
+  "lib/utils/rules/systems/sections.ts",
   "components/systems/registry.ts",
   "lib/server/systems/registry.ts",
   "lib/utils/abilities/schema/system-effects.ts",

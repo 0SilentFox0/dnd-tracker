@@ -74,6 +74,13 @@ export const ROOT_SPECS: readonly RootSpec[] = [
     ],
   },
   {
+    file: "lib/utils/rules/systems/sections.ts",
+    blocks: [
+      { layer: (id) => `systems/${id}/rules/sections.ts`, line: imp((id) => `${upper(id)}_SECTIONS`, (id) => `@/systems/${id}/rules/sections`) },
+      { layer: (id) => `systems/${id}/rules/sections.ts`, line: (id) => `${id}: ${upper(id)}_SECTIONS,` },
+    ],
+  },
+  {
     file: "scripts/templates/systems/index.ts",
     blocks: [
       { layer: scriptsLayer, line: imp((id) => `${upper(id)}_MODULE_HOOKS`, (id) => `@/scripts/templates/systems/${id}`) },
