@@ -28,11 +28,14 @@ import { tokensDeleteOperation } from './tokens-delete';
 import { transferOperation } from './transfer';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
+import { loadRules } from '@/lib/server/campaigns/rules';
 import {
     mergeSystemOperations,
     operationInComposition,
 } from '@/lib/server/systems/registry';
+import type { CampaignAccessResult } from '@/lib/utils/api/api-auth';
 import { errorResponse } from '@/lib/utils/api/api-response';
+import type { Ruleset } from '@/lib/utils/rules/schema';
 
 const erased = (op: unknown) => op as CharacterOperation;
 
@@ -67,9 +70,22 @@ const CORE_OPERATIONS: Record<string, CharacterOperation> = {
 const isCampaignScope = (gate: unknown): gate is CampaignScope =>
     typeof gate === 'object' && gate !== null && 'access' in gate;
 
-/** Registry imports its modules, so a module's own gate cannot ask it whether the operation is in the composition. */
-const inCompositionOnly = (
-    operation: CharacterOperation
+const isAccess = (
+    gate: unknown
+): gate is Pick<CampaignAccessResult, 'campaign'> =>
+    typeof gate === 'object' && gate !== null && 'campaign' in gate;
+
+const rulesOfGate = (gate: unknown): Ruleset | undefined =>
+    isCampaignScope(gate)
+        ? gate.access.campaign.rules
+        : isAccess(gate)
+          ? gate.campaign.rules
+          : undefined;
+
+/** Registry imports its modules, so a module's own gate cannot ask it whether the operation is in the composition; `key` is the registry key, not `operation.name`. */
+const inComposition = (
+    operation: CharacterOperation,
+    key: string
 ): CharacterOperation => ({
     ...operation,
     gate: async (ctx) => {
@@ -77,8 +93,12 @@ const inCompositionOnly = (
 
         if (gate instanceof NextResponse) return gate;
 
-        return isCampaignScope(gate) &&
-            operationInComposition(gate.access.campaign.rules, operation.name)
+        const rules =
+            ctx.access?.campaign.rules ??
+            rulesOfGate(gate) ??
+            (await loadRules(ctx.campaignId));
+
+        return operationInComposition(rules, key)
             ? gate
             : errorResponse(API_ERRORS.NOT_FOUND, 404);
     },
@@ -86,6 +106,5 @@ const inCompositionOnly = (
 
 export const CHARACTER_OPERATIONS = mergeSystemOperations(
     CORE_OPERATIONS,
-    ({ operation, scoped }) =>
-        scoped ? inCompositionOnly(operation) : operation
+    ({ operation }, key) => inComposition(operation, key)
 );

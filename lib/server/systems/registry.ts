@@ -8,7 +8,12 @@ import type {
 
 import 'server-only';
 import type { Ruleset } from '@/lib/utils/rules/schema';
-import { RULE_SYSTEM_KEYS } from '@/lib/utils/rules/systems/meta';
+import { kindOf } from '@/lib/utils/rules/systems/catalog';
+import {
+    RULE_SYSTEM_KEYS,
+    SYSTEM_META,
+    type SystemMeta,
+} from '@/lib/utils/rules/systems/meta';
 import {
     type ModuleEntry,
     resolveSystem,
@@ -45,6 +50,28 @@ const resolve = (system: Pick<Ruleset, 'system'>['system']): SystemServer =>
 export const SYSTEM_SERVER: Readonly<Record<string, SystemServer>> =
     Object.fromEntries(RULE_SYSTEM_KEYS.map((key) => [key, resolve({ key })]));
 
+/** Per base: the base plus every addon that requires it, keyed by the base's bare preset key */
+export const SYSTEM_SERVER_UNION: Readonly<Record<string, SystemServer>> =
+    Object.fromEntries(
+        (SYSTEM_META as readonly SystemMeta[])
+            .filter((meta) => kindOf(meta) === 'base')
+            .map((base) => [
+                base.keys[0],
+                resolve({
+                    key: base.keys[0],
+                    modules: (SYSTEM_META as readonly SystemMeta[])
+                        .filter(
+                            (m) =>
+                                kindOf(m) === 'addon' &&
+                                m.requires?.includes(base.module)
+                        )
+                        .map((m) => m.module),
+                }),
+            ])
+    );
+
+const unionServers = (): SystemServer[] => Object.values(SYSTEM_SERVER_UNION);
+
 export const systemServerOf = (
     rules: Pick<Ruleset, 'system'>
 ): SystemServer => {
@@ -62,7 +89,7 @@ export const operationInComposition = (
 ): boolean => Object.hasOwn(systemServerOf(rules).operations ?? {}, name);
 
 export const withSystemNotes = (base: string, tool: SystemToolNote): string => {
-    const notes = Object.values(SYSTEM_SERVER).flatMap(
+    const notes = unionServers().flatMap(
         (s) => s.ai?.toolNotes?.[tool] ?? []
     );
 
@@ -72,9 +99,8 @@ export const withSystemNotes = (base: string, tool: SystemToolNote): string => {
 export function systemBattleOperation(
     name: string
 ): SystemBattleOperation | undefined {
-    return Object.values(SYSTEM_SERVER).find(
-        (s) => s.battle && Object.hasOwn(s.battle, name)
-    )?.battle?.[name];
+    return unionServers().find((s) => s.battle && Object.hasOwn(s.battle, name))
+        ?.battle?.[name];
 }
 
 export const systemBattleOperationOf = (
@@ -88,23 +114,17 @@ export const systemBattleOperationOf = (
 
 export function mergeSystemOperations<T>(
     core: Record<string, T>,
-    pick: (op: SystemOperation) => T
+    pick: (op: SystemOperation, key: string) => T
 ): Record<string, T> {
     const merged = { ...core };
 
-    const seen = new Map<string, SystemOperation>();
-
-    for (const [key, op] of Object.values(SYSTEM_SERVER).flatMap((s) =>
+    for (const [key, op] of unionServers().flatMap((s) =>
         Object.entries(s.operations ?? {})
     )) {
-        if (seen.get(key) === op) continue;
-
         if (Object.hasOwn(merged, key))
             throw new Error(`Duplicate character operation: ${key}`);
 
-        seen.set(key, op);
-
-        merged[key] = pick(op);
+        merged[key] = pick(op, key);
     }
 
     return merged;
