@@ -2,7 +2,7 @@ import { skillTarget, value } from "../characteristics/derive";
 import { participantChars } from "../combat/participant";
 import { selfTestMod } from "../conditions/test-mod";
 import { type PercentileTestResult, resolvePercentileTest } from "../percentile";
-import { applyFortune } from "../percentile/fortune";
+import { applyFortune, FORTUNE_INPUT, spentFortune } from "../percentile/fortune";
 import { ACTION_SLOT } from "../slots";
 import { armourSl } from "./armour";
 import { CAST_SKILL, MAJOR_MISCAST_ROLLS, MAX_OVERCAST_STEPS, NO_OVERCAST_KINDS, OVERCAST_SL_STEP, PRAY_SKILL, PRAYER_KINDS } from "./constants";
@@ -39,11 +39,13 @@ export function wfrpCastTest(ctx: CastTestCtx): CastTestResult {
 
   const cn = magic.kind === "blessing" ? 0 : magic.cn;
 
-  const slModifier = channelled - armour + (ctx.fortune?.kind === "sl" ? 1 : 0);
+  const fortuneInput = FORTUNE_INPUT.read(ctx.system);
+
+  const slModifier = channelled - armour + (fortuneInput?.kind === "sl" ? 1 : 0);
 
   const passes = (t: PercentileTestResult) => (t.outcome === "success" || t.outcome === "critical") && t.sl >= cn;
 
-  const { result: test, fortune } = applyFortune((preset) => resolvePercentileTest({ target, slModifier, doubles: true, rng, presetRoll: preset }), ctx.fortune, passes, presetRoll);
+  const { result: test, fortune } = applyFortune((preset) => resolvePercentileTest({ target, slModifier, doubles: true, rng, presetRoll: preset }), fortuneInput, passes, presetRoll);
 
   const success = passes(test);
 
@@ -73,6 +75,6 @@ export function wfrpCastTest(ctx: CastTestCtx): CastTestResult {
     ...(prayer && { keepChannelled: true as const }),
     details: ACTION_SLOT.write({ cast: { roll: test.roll, target: test.target, sl: test.sl, cn, channelled, armourSl: armour, doubles: test.doubles, outcome, overcastSteps, miscast, ...(fortune && { fortune }) } }),
     lines,
-    ...(fortune && { fortune }),
+    ...(fortune && { casterData: spentFortune(caster) }),
   };
 }

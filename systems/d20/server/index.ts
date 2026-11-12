@@ -7,12 +7,12 @@ export const D20_MODULE_SERVER: SystemServer = {
   balance: D20_BALANCE,
   battle: {
     "crit-choice": {
-      load: async () => {
+      load: async (deps) => {
         const { critChoiceSchema } = await import("@/lib/schemas");
 
-        const { critChoiceMutation } = await import("./battle/crit-choice-mutation");
+        const { createCritChoiceMutation } = await import("./battle/crit-choice-mutation");
 
-        return { schema: critChoiceSchema, mutate: critChoiceMutation };
+        return { schema: critChoiceSchema, mutate: createCritChoiceMutation(deps) };
       },
     },
   },

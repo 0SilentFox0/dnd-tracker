@@ -3,20 +3,13 @@ import { textRef } from "@/lib/i18n/text-ref";
 import type { CritChoiceBody } from "@/lib/schemas";
 import type { SpellRequestData } from "@/lib/schemas/battles";
 import type { AttackBody } from "@/lib/server/battles/mutations/attack/attack-mutation";
-import { createAttackMutation } from "@/lib/server/battles/mutations/attack/attack-mutation";
-import { createSpellMutation } from "@/lib/server/battles/mutations/spell/spell-mutation";
+import type { BattleOperationDeps } from "@/lib/server/systems/types";
 import { enabledCritEffects } from "@/lib/utils/battle/crit-choice/catalog";
 import { critPendingOf } from "@/lib/utils/battle/crit-choice/pending";
-import type { CritResume } from "@/lib/utils/battle/crit-choice/types";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleRuleError, dmEvent } from "@/lib/utils/battle/store";
 
-type Resumable<T> = (ctx: BattleMutationContext, request: T, resume: CritResume, replay?: { serverRolls?: boolean }) => Promise<MutationResult>;
-
-interface CritChoiceDeps {
-  attack: Resumable<AttackBody>;
-  spell: Resumable<SpellRequestData>;
-}
+export type CritChoiceDeps = BattleOperationDeps;
 
 export function createCritChoiceMutation(deps: CritChoiceDeps) {
   return async (ctx: BattleMutationContext, body: CritChoiceBody): Promise<MutationResult> => {
@@ -57,5 +50,3 @@ export function createCritChoiceMutation(deps: CritChoiceDeps) {
     return pending.shown.action === "attack" ? deps.attack(requester, hidden.request as AttackBody, resume, { serverRolls: hidden.serverRolls }) : deps.spell(requester, hidden.request as SpellRequestData, resume);
   };
 }
-
-export const critChoiceMutation = createCritChoiceMutation({ attack: (ctx, request, resume, replay) => createAttackMutation(undefined, replay)(ctx, request, resume), spell: createSpellMutation() });

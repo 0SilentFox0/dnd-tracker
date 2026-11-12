@@ -17,7 +17,6 @@ export function useBattleRules() {
     return {
       dice: combat.dice,
       serverJudged: combat.judge === "server",
-      fortune: !!combat.fortune,
       actionEconomy: combat.actionEconomy,
       d20Stats,
       spells,

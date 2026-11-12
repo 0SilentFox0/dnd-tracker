@@ -1,9 +1,13 @@
 import type { ZodType } from "zod";
 
+import type { SpellRequestData } from "@/lib/schemas/battles";
+import type { AttackBody } from "@/lib/server/battles/mutations/attack/attack-mutation";
 import type { CharacterOperation } from "@/lib/server/characters/operation-runner";
 import type { getCharacterStats, UnitStats } from "@/lib/utils/battle/balance";
+import type { CritResume } from "@/lib/utils/battle/crit-choice/types";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import type { CampaignSpellContext } from "@/lib/utils/battle/types/participant";
+import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
 import type { branchLevels } from "@/lib/utils/skills/progression";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -11,6 +15,9 @@ export interface SystemSchemas {
   characteristics?: ZodType;
   unitCharacteristics?: ZodType;
   systemStats?: ZodType;
+  /** Whole attack body in, the system's own slot out (or undefined); the legacy request shape is mapped here */
+  attackInput?: ZodType<SystemSlot | undefined>;
+  castInput?: ZodType<SystemSlot | undefined>;
 }
 
 export interface SystemOperation {
@@ -39,8 +46,16 @@ export interface SystemBalance {
   readsBuiltRules: boolean;
 }
 
+type Resumable<T> = (ctx: BattleMutationContext, request: T, resume: CritResume, replay?: { serverRolls?: boolean }) => Promise<MutationResult>;
+
+/** Core mutations a system operation replays; injected by the route layer so system code never imports the mutations back */
+export interface BattleOperationDeps {
+  attack: Resumable<AttackBody>;
+  spell: Resumable<SpellRequestData>;
+}
+
 export interface SystemBattleOperation {
-  load(): Promise<{ schema: ZodType; mutate(ctx: BattleMutationContext, body: never): MutationResult | Promise<MutationResult> }>;
+  load(deps: BattleOperationDeps): Promise<{ schema: ZodType; mutate(ctx: BattleMutationContext, body: never): MutationResult | Promise<MutationResult> }>;
 }
 
 export interface SystemServer {

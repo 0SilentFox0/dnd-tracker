@@ -165,7 +165,7 @@ function attackCtx(run: AttackRun, modifiers?: Modifiers): ResolveAttackCtx {
     rng: flow.ctx.rng,
     manualRoll: params.d20Roll,
     sceneState: flow.sceneState,
-    fortune: params.fortune,
+    system: params.system,
     roll: { advantage: params.advantageRoll, disadvantage: params.disadvantageRoll, mode: params.rollMode, inspiration: params.inspiration },
     modifiers,
     map: flow.ctx.map,
@@ -186,12 +186,10 @@ function judge(run: AttackRun, actionModifiers: Modifiers): Judged {
 
   flow.messages.push(...r.lines);
 
-  if (r.fortune) {
+  if (r.attackerData) {
     const spender = getP(flow, attackerId);
 
-    put(flow, { ...spender, battleData: { ...spender.battleData, fortune: Math.max(0, (spender.battleData.fortune ?? 0) - 1) } });
-
-    if (r.fortuneLine) flow.messages.push(r.fortuneLine);
+    put(flow, { ...spender, battleData: { ...spender.battleData, ...r.attackerData } });
   }
 
   return { second: r.attackRoll.secondRoll, targetAC: r.defenseValue ?? 0, isHit: r.isHit, attackRoll: r.attackRoll };

@@ -35,6 +35,7 @@ import {
 } from "@/lib/utils/battle/flows";
 import { slotLevels } from "@/lib/utils/battle/view";
 import { cryptoRandom, rollDie } from "@/lib/utils/common/dice";
+import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
 import { groupSpellsByLevel, levelsWithSpells } from "@/lib/utils/spells/group-by-level";
 import type { BattleParticipant } from "@/types/battle";
 import type { BookSpell } from "@/types/spells";
@@ -50,7 +51,7 @@ export function useSpellBook(
 ) {
   const scene = useBattleScene();
 
-  const { magic, fortune } = useBattleRules();
+  const { magic } = useBattleRules();
 
   const text = useText();
 
@@ -112,7 +113,8 @@ export function useSpellBook(
   const castPreview = magic && caster && selected && state.pick?.castTest ? castPreviewOf(caster, scene.battle.rules, selected.casting?.magic?.kind) : null;
 
   const view = {
-    cast: castPreview && { ...castPreview, cn: selected?.casting?.magic?.cn ?? 0, fortune: { available: fortune && (caster?.battleData.fortune ?? 0) >= 1, left: caster?.battleData.fortune ?? 0, value: state.castFortune ?? null } },
+    cast: castPreview && { ...castPreview, cn: selected?.casting?.magic?.cn ?? 0 },
+    caster,
     spells,
     byLevel,
     selected,
@@ -253,7 +255,7 @@ export function useSpellBook(
     },
     setCastRoll: (roll?: number, second?: number) => dispatch({ type: "SET_CAST_ROLL", roll, second }),
     setUseIngredient: (value: boolean) => dispatch({ type: "SET_CAST_INGREDIENT", value }),
-    setCastFortune: (value: "reroll" | "sl" | null) => dispatch({ type: "SET_CAST_FORTUNE", value }),
+    setCastSystem: (value: SystemSlot | null) => dispatch({ type: "SET_CAST_SYSTEM", value }),
     toSummary: () => dispatch({ type: "TO_SUMMARY" }),
     back: () => dispatch({ type: "BACK" }),
     submit: () => dispatch({ type: "SUBMIT" }),

@@ -7,6 +7,7 @@ import { wfrpActionDetails } from "./rules/combat/details";
 import { extractWfrpAttacks } from "./rules/combat/extract-attacks";
 import { wfrpHitModel } from "./rules/combat/hit-model";
 import { wfrpInitiative } from "./rules/combat/initiative";
+import { assertWfrpInput } from "./rules/combat/input";
 import { wfrpDamage } from "./rules/combat/mitigate";
 import { wfrpOnZeroHp } from "./rules/combat/on-zero-hp";
 import { participantStats, wfrpBaseStats, wfrpParticipantFields } from "./rules/combat/participant";
@@ -57,7 +58,7 @@ export const WFRP_MODULE: RuleSystemDefinition = {
   traits: WFRP_TRAITS,
   currency: { coins: COINS, value: { gp: 240, sp: 12, cp: 1 }, labelKeys: { gp: "wfrpEquipment.money.gc", sp: "wfrpEquipment.money.ss", cp: "wfrpEquipment.money.d" } },
   identity: { alignments: false },
-  combat: { fortune: true, judge: "server", dice: 100, actionEconomy: { bonusAction: false, reaction: false }, attacksOf: extractWfrpAttacks, participantFields: wfrpParticipantFields, tieBreak: (p) => participantStats(p)?.ag ?? p.abilities.dexterity, baseStats: wfrpBaseStats, initiative: wfrpInitiative, resolveAttack: resolveWfrpAttack, abortedRoll: wfrpAbortedRoll, details: wfrpActionDetails, attackTarget: wfrpAttackTarget, damage: wfrpDamage, onZeroHp: wfrpOnZeroHp, hitModel: wfrpHitModel },
+  combat: { input: { assert: assertWfrpInput }, judge: "server", dice: 100, actionEconomy: { bonusAction: false, reaction: false }, attacksOf: extractWfrpAttacks, participantFields: wfrpParticipantFields, tieBreak: (p) => participantStats(p)?.ag ?? p.abilities.dexterity, baseStats: wfrpBaseStats, initiative: wfrpInitiative, resolveAttack: resolveWfrpAttack, abortedRoll: wfrpAbortedRoll, details: wfrpActionDetails, attackTarget: wfrpAttackTarget, damage: wfrpDamage, onZeroHp: wfrpOnZeroHp, hitModel: wfrpHitModel },
   lineage: false,
   classes: false,
   attacks: false,

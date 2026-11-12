@@ -34,7 +34,7 @@ export interface ProcessAttackParams {
   offHand?: boolean;
   /** Підступний удар (Rogue): ефекти замість кубиків Прихованої атаки */
   cunningStrike?: CunningStrikeEffect[];
-  fortune?: { kind: "reroll" | "sl"; manualReroll?: number };
+  system?: SystemSlot;
   /** «Перешкода»: шкода влучання ×0.5 після всіх модифікаторів і опорів */
   obstacle?: boolean;
   rng?: () => number;

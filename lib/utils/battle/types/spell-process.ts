@@ -45,7 +45,7 @@ export interface CastSpellParams {
   rules: Ruleset;
   /** an ingredient was spent on this cast (optional-ingredient systems) */
   ingredientUsed?: boolean;
-  castTest?: { roll?: number; serverRoll?: true; fortune?: "reroll" | "sl"; fortuneRoll?: number };
+  castTest?: { roll?: number; serverRoll?: true; system?: SystemSlot };
   /** прев'ю: без кидка тесту й без списань */
   dryRun?: boolean;
 }

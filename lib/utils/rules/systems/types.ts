@@ -50,7 +50,16 @@ export interface SheetTestInput {
 
 export type SheetTestResult = SheetRollResult;
 
-export type FortuneKind = "reroll" | "sl";
+export type SystemInputCtx =
+  | { kind: "attack"; actor: BattleParticipant; targetCount: number }
+  | {
+      kind: "cast";
+      actor: BattleParticipant;
+      /** A cast outside the cost rules (DM-granted) */
+      free: boolean;
+      /** The cast has a casting test */
+      tested: boolean;
+    };
 
 export interface ResolveAttackCtx {
   attacker: BattleParticipant;
@@ -62,7 +71,8 @@ export interface ResolveAttackCtx {
   manualRoll?: number;
   /** Scene-level state of the system, as the previous attack left it */
   sceneState?: SystemSlot;
-  fortune?: { kind: FortuneKind; manualReroll?: number };
+  /** The system's own input of the request, parsed by `SystemServer.schemas.attackInput` */
+  system?: SystemSlot;
   /** Player-side dice and options of an attack made on the actor's turn */
   roll?: { advantage?: number; disadvantage?: number; mode?: RollMode; inspiration?: boolean };
   /** Modifiers of the action events fired before the attack, by participant id */
@@ -83,9 +93,8 @@ export interface ResolvedAttack {
   lines: LogLine[];
   /** Next scene state; absent = unchanged */
   scene?: SystemSlot;
-  /** Only when Fortune actually took effect */
-  fortune?: { kind: FortuneKind; firstRoll?: number };
-  fortuneLine?: LogLine;
+  /** Battle data the attacker ends with, merged by the pipeline (a spent resource) */
+  attackerData?: Partial<BattleParticipant["battleData"]>;
 }
 
 export interface MitigateStep {
@@ -209,7 +218,8 @@ export interface CastTestCtx {
   rules: Ruleset;
   rng: Rng;
   presetRoll?: number;
-  fortune?: { kind: FortuneKind; manualReroll?: number };
+  /** The system's own input of the request, parsed by `SystemServer.schemas.castInput` */
+  system?: SystemSlot;
 }
 
 export interface CastTestResult {
@@ -221,7 +231,8 @@ export interface CastTestResult {
   keepChannelled?: true;
   details: SystemSlot;
   lines: LogLine[];
-  fortune?: { kind: FortuneKind; firstRoll?: number };
+  /** Battle data the caster ends with, merged by the pipeline (a spent resource) */
+  casterData?: Partial<BattleParticipant["battleData"]>;
 }
 
 export interface RuleSystemMagic {
@@ -262,7 +273,8 @@ export interface RuleSystemActionDetails {
 
 export interface RuleSystemCombat {
   details?: RuleSystemActionDetails;
-  fortune?: true;
+  /** Validates the system's input of an attack or a cast before it runs */
+  input?: { assert(system: SystemSlot, ctx: SystemInputCtx): void };
   /** Who judges an attack: the client rolls and the server checks vs AC, or the server resolves the whole test */
   judge: "client" | "server";
   dice: number;

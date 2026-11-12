@@ -3,7 +3,8 @@ import type { z } from "zod";
 
 import { getCachedSpells, getCachedSummonPool } from "@/lib/cache/reference-data";
 import { API_ERRORS } from "@/lib/constants/api-errors";
-import { attackBodySchema } from "@/lib/schemas/battles";
+import { attackBodyInputSchema } from "@/lib/schemas/battles";
+import { parseSystemInput } from "@/lib/server/battles/system-input";
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { findParticipant, replaceParticipant, withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import { ammoStatus, spendAmmo } from "@/lib/utils/battle/ammo";
@@ -27,7 +28,7 @@ import { assertAttackRolls } from "@/lib/utils/battle/validation/dice-checks";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 
-export type AttackBody = z.infer<typeof attackBodySchema>;
+export type AttackBody = z.infer<typeof attackBodyInputSchema>;
 
 export function assertAmmo(attacker: BattleParticipant, attack: BattleAttack): void {
   const ammo = ammoStatus(attacker, attack);
@@ -84,7 +85,9 @@ export function createAttackMutation(deps: AttackMutationDeps = defaultDeps, opt
   return async (ctx: BattleMutationContext, body: AttackBody, resume?: CritResume, replay: { serverRolls?: boolean } = {}): Promise<MutationResult> => {
     const serverRolls = replay.serverRolls ?? options.serverRolls;
 
-    const { endTurn, ...data } = body;
+    const { endTurn, ...rest } = body;
+
+    const data = { ...rest, system: await parseSystemInput(ctx.meta.rules, "attackInput", rest, !!serverRolls || !!rest.serverRoll) };
 
     assertAttackInput(ctx, data);
     assertCanAct(ctx, data.attackerId);

@@ -81,7 +81,13 @@ const OPERATIONS: Record<string, Loader> = {
 
       if (!op) throw new BattleAccessError(404, API_ERRORS.BATTLE_UNKNOWN_OPERATION);
 
-      return (await op.load()) as Loaded<unknown>;
+      const { createAttackMutation } = await import("@/lib/server/battles/mutations/attack/attack-mutation");
+
+      const { createSpellMutation } = await import("@/lib/server/battles/mutations/spell/spell-mutation");
+
+      const spell = createSpellMutation();
+
+      return (await op.load({ attack: (ctx, request, resume, replay) => createAttackMutation(undefined, replay)(ctx, request, resume), spell })) as Loaded<unknown>;
     },
   }),
   complete: operation({

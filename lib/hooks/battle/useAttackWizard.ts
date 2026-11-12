@@ -24,12 +24,13 @@ import { enemiesInReach } from "@/lib/utils/battle/grid";
 import { canSeeExactStats, strikeDamageSteps, weaponPreview } from "@/lib/utils/battle/view";
 import { cryptoRandom, rollDie } from "@/lib/utils/common/dice";
 import { ruleSystemOf } from "@/lib/utils/rules/systems";
+import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
 import type { BattleAttack, BattleParticipant, DamageStep } from "@/types/battle";
 
 export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () => void) {
   const scene = useBattleScene();
 
-  const { dice, serverJudged, sceneState, fortune } = useBattleRules();
+  const { dice, serverJudged, sceneState } = useBattleRules();
 
   const [state, dispatch] = useReducer(attackFlow, initialAttackFlow);
 
@@ -147,7 +148,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
       maxEffects: cunningOffer.maxEffects,
       sneakDice: cunningOffer.sneakDice,
     },
-    fortune: { available: serverJudged && fortune && (attacker?.battleData.fortune ?? 0) >= 1 && state.targetIds.length === 1, left: attacker?.battleData.fortune ?? 0 },
+    attacker,
     ammo: attacker ? Object.fromEntries(attacks.flatMap((a) => (a.id && a.ammo?.capacity ? [[a.id, { status: ammoStatus(attacker, a), left: attacker.battleData.ammo?.[a.id] ?? a.ammo.capacity, capacity: a.ammo.capacity }] as const] : []))) : {},
     attack, attacks, targets, steps, estimate, cover, unreachable, unknownDefense, previews, dice, serverJudged, judged,
     attackKind: attack ? (attackKindOf(attack.type) === AttackType.RANGED ? ("ranged" as const) : ("melee" as const)) : null,
@@ -214,7 +215,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
     selectAllEnemies: () => dispatch({ type: "SET_TARGETS", ids: enemyTargets.filter((p) => !unreachable.has(p.basicInfo.id)).map((p) => p.basicInfo.id) }),
     toggleCunning: (effect: CunningStrikeEffect) => cunningOffer && dispatch({ type: "SET_CUNNING_STRIKE", effects: toggleCunningStrike(state.cunningStrike ?? [], effect, cunningOffer) }),
     setMode: (mode: AttackMode) => dispatch({ type: "SET_MODE", mode }),
-    setFortune: (value: "reroll" | "sl" | null) => dispatch({ type: "SET_FORTUNE", value }),
+    setSystemInput: (value: SystemSlot | null) => dispatch({ type: "SET_SYSTEM_INPUT", value }),
     setInspiration: (value: boolean) => {
       const t = byId(state.strikes[0]?.targetId ?? "");
 

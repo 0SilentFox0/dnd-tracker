@@ -1,6 +1,7 @@
 import { joinLines, textRef } from "@/lib/i18n/text-ref";
 import type { CunningStrikeEffect } from "@/lib/utils/abilities/schema";
 import type { PredictedAttack } from "@/lib/utils/battle/attack/bonus";
+import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
 import type { AttackData } from "@/types/api";
 import type { LogLine } from "@/types/text";
 
@@ -53,7 +54,8 @@ export interface AttackFlowState {
   /** server-judged systems decide hit/miss on the server, so there is no damage step */
   judge?: "server";
   cunningStrike?: CunningStrikeEffect[];
-  fortune?: "reroll" | "sl";
+  /** the system's own input of the attack, sent as is */
+  system?: SystemSlot;
 }
 
 export type AttackFlowAction =
@@ -65,7 +67,7 @@ export type AttackFlowAction =
   | { type: "CONFIRM_TARGETS"; forced?: Record<string, ForcedMode | undefined> }
   | { type: "SET_MODE"; mode: AttackMode }
   | { type: "SET_INSPIRATION"; value: boolean; forced?: ForcedMode }
-  | { type: "SET_FORTUNE"; value: "reroll" | "sl" | null }
+  | { type: "SET_SYSTEM_INPUT"; value: SystemSlot | null }
   | { type: "SET_CUNNING_STRIKE"; effects: CunningStrikeEffect[] }
   | { type: "ROLL"; d20?: number; second?: number; outcome: RollOutcome; judge?: "server"; damage?: number[] }
   | { type: "DAMAGE"; values: number[] }
@@ -90,10 +92,10 @@ const prevHit = (strikes: Strike[], before: number) => {
   return -1;
 };
 
-const withSingleFortune = (s: AttackFlowState): AttackFlowState => {
+const withSingleSystemInput = (s: AttackFlowState): AttackFlowState => {
   if (s.targetIds.length <= 1) return s;
 
-  const { fortune: _f, ...rest } = s;
+  const { system: _s, ...rest } = s;
 
   return rest;
 };
@@ -109,16 +111,16 @@ export function attackFlow(s: AttackFlowState, a: AttackFlowAction): AttackFlowS
     case "TOGGLE_TARGET": {
       if (s.maxTargets <= 1) return { ...s, targetIds: [a.id] };
 
-      if (s.targetIds.includes(a.id)) return withSingleFortune({ ...s, targetIds: s.targetIds.filter((id) => id !== a.id) });
+      if (s.targetIds.includes(a.id)) return withSingleSystemInput({ ...s, targetIds: s.targetIds.filter((id) => id !== a.id) });
 
-      return s.targetIds.length >= s.maxTargets ? s : withSingleFortune({ ...s, targetIds: [...s.targetIds, a.id] });
+      return s.targetIds.length >= s.maxTargets ? s : withSingleSystemInput({ ...s, targetIds: [...s.targetIds, a.id] });
     }
     case "SET_TARGETS":
-      return withSingleFortune({ ...s, targetIds: a.ids.slice(0, s.maxTargets) });
-    case "SET_FORTUNE": {
-      const { fortune: _old, ...rest } = s;
+      return withSingleSystemInput({ ...s, targetIds: a.ids.slice(0, s.maxTargets) });
+    case "SET_SYSTEM_INPUT": {
+      const { system: _old, ...rest } = s;
 
-      return a.value ? { ...rest, fortune: a.value } : rest;
+      return a.value ? { ...rest, system: a.value } : rest;
     }
     case "CONFIRM_TARGETS":
       return s.targetIds.length === 0
@@ -239,8 +241,8 @@ export function attackPayload(s: AttackFlowState, attackerId: string): AttackDat
       ...(serverRoll ? { serverRoll } : { attackRoll: st.d20 }),
       ...(st.second !== undefined && s.judge !== "server" && mode === "advantage" && { advantageRoll: st.second }),
       ...(st.second !== undefined && s.judge !== "server" && mode === "disadvantage" && { disadvantageRoll: st.second }),
-      ...(s.fortune && { fortune: s.fortune }),
-      ...(s.fortune === "reroll" && s.judge === "server" && st.second !== undefined && !serverRoll && { fortuneRoll: st.second }),
+      ...(s.system && { system: s.system }),
+      ...(s.system && s.judge === "server" && st.second !== undefined && !serverRoll && { secondRoll: st.second }),
       damageRolls: isHit(st) ? st.damage : [],
     } as AttackData & { endTurn: boolean };
   }

@@ -24,7 +24,7 @@ export function rollsComplete(s: SpellFlowState): boolean {
 function castTestRolled(s: SpellFlowState): boolean {
   if (s.castServer) return true;
 
-  return s.castRoll !== undefined && (s.castFortune !== "reroll" || s.castSecond !== undefined);
+  return s.castRoll !== undefined;
 }
 
 const afterTargets = (s: SpellFlowState): SpellFlowState =>
@@ -76,7 +76,7 @@ export function spellFlow(s: SpellFlowState, a: SpellFlowAction): SpellFlowState
       return { ...initialSpellFlow, step: "book", casterId: s.casterId, level: a.level, levelPinned: true };
     case "PICK":
 
-      return { ...s, step: "spell", pick: a.pick, slotKey: a.slotKey, grantKey: a.grantKey, castLevel: a.castLevel, optionIndex: undefined, inputCount: a.pick.inputDice ? 1 : undefined, targetIds: [], aim: undefined, saves: {}, attacks: {}, damage: a.pick.diceSlots.map(() => undefined), castRoll: undefined, castSecond: undefined, castServer: undefined, castFortune: undefined, useIngredient: undefined, error: undefined };
+      return { ...s, step: "spell", pick: a.pick, slotKey: a.slotKey, grantKey: a.grantKey, castLevel: a.castLevel, optionIndex: undefined, inputCount: a.pick.inputDice ? 1 : undefined, targetIds: [], aim: undefined, saves: {}, attacks: {}, damage: a.pick.diceSlots.map(() => undefined), castRoll: undefined, castSecond: undefined, castServer: undefined, castSystem: undefined, useIngredient: undefined, error: undefined };
     case "SET_SLOT":
       return reconcileSpellPick(s, a.pick, { slotKey: a.slotKey, grantKey: undefined, castLevel: undefined });
     case "SET_GRANT":
@@ -144,8 +144,8 @@ export function spellFlow(s: SpellFlowState, a: SpellFlowAction): SpellFlowState
     case "SET_CAST_INGREDIENT":
       return { ...s, useIngredient: a.value };
 
-    case "SET_CAST_FORTUNE":
-      return { ...s, castFortune: a.value ?? undefined, castRoll: undefined, castSecond: undefined, castServer: undefined };
+    case "SET_CAST_SYSTEM":
+      return { ...s, castSystem: a.value ?? undefined, castRoll: undefined, castSecond: undefined, castServer: undefined };
     case "TO_SUMMARY":
 
       return rollsComplete(s) ? { ...s, step: "summary", error: undefined } : s;
@@ -215,10 +215,10 @@ export function spellPayload(s: SpellFlowState): SpellCastData {
   };
 }
 
-function castTestPayload(s: SpellFlowState): Pick<SpellCastData, "castRoll" | "serverRoll" | "fortune" | "fortuneRoll"> {
+function castTestPayload(s: SpellFlowState): Pick<SpellCastData, "castRoll" | "serverRoll" | "system" | "secondRoll"> {
   return {
     ...(s.castServer ? { serverRoll: true as const } : s.castRoll !== undefined && { castRoll: s.castRoll }),
-    ...(s.castFortune && { fortune: s.castFortune }),
-    ...(s.castFortune === "reroll" && !s.castServer && s.castSecond !== undefined && { fortuneRoll: s.castSecond }),
+    ...(s.castSystem && { system: s.castSystem }),
+    ...(s.castSystem && !s.castServer && s.castSecond !== undefined && { secondRoll: s.castSecond }),
   };
 }

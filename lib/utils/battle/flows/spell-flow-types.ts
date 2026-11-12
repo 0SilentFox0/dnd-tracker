@@ -1,5 +1,6 @@
 import type { Segment } from "@/lib/utils/abilities/segments";
 import type { SkillRadius, SpellChain } from "@/lib/utils/battle/spell/spell-targeting";
+import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
 import type { SpellTargetFilter } from "@/lib/utils/spells/model/schema";
 import type { GridPoint, SpellTemplate } from "@/types/battle";
 import type { LogLine } from "@/types/text";
@@ -61,11 +62,11 @@ export interface SpellFlowState {
   optionIndex?: number;
   inputCount?: number;
   damage: (number | undefined)[];
-  /** casting test: manual roll (and the second one for a Fortune reroll) or the server roll */
+  /** casting test: manual roll (and the second one some systems ask for) or the server roll */
   castRoll?: number;
   castSecond?: number;
   castServer?: boolean;
-  castFortune?: "reroll" | "sl";
+  castSystem?: SystemSlot;
   /** optional-ingredient systems: spend an ingredient to cancel a miscast */
   useIngredient?: boolean;
   error?: LogLine;
@@ -93,7 +94,7 @@ export type SpellFlowAction =
   | { type: "SET_DAMAGE"; index: number; value: number | undefined }
   | { type: "SET_CAST_ROLL"; roll?: number; second?: number }
   | { type: "SET_CAST_INGREDIENT"; value: boolean }
-  | { type: "SET_CAST_FORTUNE"; value: "reroll" | "sl" | null }
+  | { type: "SET_CAST_SYSTEM"; value: SystemSlot | null }
   | { type: "TO_SUMMARY" }
   | { type: "BACK" }
   | { type: "SUBMIT" }

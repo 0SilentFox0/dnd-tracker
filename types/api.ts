@@ -6,10 +6,10 @@ import { BattleStatus, type CombatStatusType } from "@/lib/constants/battle";
 import { type CampaignRoleValue } from "@/lib/constants/campaigns";
 import type {
   abilityActionSchema,
-  attackBodySchema,
+  attackBodyInputSchema,
   auraZoneSchema,
   bonusActionSchema,
-  castSpellSchema,
+  castSpellInputSchema,
   critChoiceSchema,
   mapBackgroundBodySchema,
   mapMotionSchema,
@@ -176,7 +176,7 @@ export interface BattleMutationResponse<R = Record<string, unknown>> {
   response?: R;
 }
 
-export type AttackData = Omit<z.input<typeof attackBodySchema>, "damageRolls"> & { damageRolls: number[] };
+export type AttackData = Omit<z.input<typeof attackBodyInputSchema>, "damageRolls"> & { damageRolls: number[] };
 
 export type MoraleCheckData = z.infer<typeof moraleCheckSchema>;
 
@@ -211,7 +211,7 @@ export type PatchParticipantData = z.infer<typeof patchParticipantSchema>;
 
 export type ChannelData = { participantId: string; roll?: number; serverRoll?: true };
 
-export type SpellCastData = Omit<z.input<typeof castSpellSchema>, "targetIds" | "diceRolls"> & { targetIds: string[]; diceRolls: number[] };
+export type SpellCastData = Omit<z.input<typeof castSpellInputSchema>, "targetIds" | "diceRolls"> & { targetIds: string[]; diceRolls: number[] };
 
 // Skill Trees API
 

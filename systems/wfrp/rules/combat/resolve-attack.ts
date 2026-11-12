@@ -4,7 +4,7 @@ import { qualityFumbleFrom, qualityToHit } from "../equipment/quality-effects";
 import { type PercentileTestResult, resolvePercentileTest } from "../percentile";
 import type { PercentileAttackDetails } from "../percentile/details";
 import { DIFFICULTY_SL } from "../percentile/difficulty";
-import { applyFortune } from "../percentile/fortune";
+import { applyFortune, FORTUNE_INPUT, spentFortune } from "../percentile/fortune";
 import { ACTION_SLOT, ATTACK_SLOT, SCENE_SLOT } from "../slots";
 import { sizeHitMod } from "../traits/size";
 import { MOMENTUM_SL_BONUS, OUTNUMBERING_BONUS } from "./constants";
@@ -106,16 +106,18 @@ export function resolveWfrpAttack(ctx: ResolveAttackCtx): ResolvedAttack {
 
   const talentSl = collectModifiers(withSelf(participants, attacker), attacker.basicInfo.id, { stat: "attackBonus", attackKind: attackKindOf(attack.type) }).flat;
 
-  const slBonus = (ctx.fortune?.kind === "sl" ? 1 : 0) + talentSl;
+  const fortuneInput = FORTUNE_INPUT.read(ctx.system);
 
-  const marked = (r: ResolvedAttack, fortune?: ResolvedAttack["fortune"]): ResolvedAttack => {
+  const slBonus = (fortuneInput?.kind === "sl" ? 1 : 0) + talentSl;
+
+  const marked = (r: ResolvedAttack, fortune?: ReturnType<typeof applyFortune>["fortune"]): ResolvedAttack => {
     if (!fortune) return r;
 
     const fortuneLine = textRef(fortune.kind === "reroll" ? "battleWfrp.log.fortuneReroll" : "battleWfrp.log.fortuneSl", { name: attacker.basicInfo.name, first: fortune.firstRoll ?? 0 });
 
     const attack = ACTION_SLOT.read(r.attackRoll.system)?.attack;
 
-    return { ...r, fortune, fortuneLine, attackRoll: { ...r.attackRoll, ...(attack && { system: ACTION_SLOT.write({ attack: { ...attack, fortune } }, r.attackRoll.system) }) } };
+    return { ...r, lines: [...r.lines, fortuneLine], attackerData: spentFortune(attacker), attackRoll: { ...r.attackRoll, ...(attack && { system: ACTION_SLOT.write({ attack: { ...attack, fortune } }, r.attackRoll.system) }) } };
   };
 
   if (attackKindOf(attack.type) === AttackType.RANGED) {
@@ -127,7 +129,7 @@ export function resolveWfrpAttack(ctx: ResolveAttackCtx): ResolvedAttack {
       return { roll: test.roll, result: toResult(ctx, detailsOf(test, test.sl), isHit, { spent: false, gainedBy: null }) };
     };
 
-    const { result, fortune } = applyFortune<ReturnType<typeof rangedOnce>>((preset) => rangedOnce(preset), ctx.fortune, (r) => r.result.isHit, manualRoll);
+    const { result, fortune } = applyFortune<ReturnType<typeof rangedOnce>>((preset) => rangedOnce(preset), fortuneInput, (r) => r.result.isHit, manualRoll);
 
     return marked(result.result, fortune);
   }
@@ -164,7 +166,7 @@ export function resolveWfrpAttack(ctx: ResolveAttackCtx): ResolvedAttack {
 
   const { result, fortune } = applyFortune<ReturnType<typeof meleeOnce>>(
     (preset, first) => meleeOnce(first ? { attacker: preset, defender: first.defenderRaw } : { attacker: preset }),
-    ctx.fortune,
+    fortuneInput,
     (r) => r.resolved.isHit,
     manualRoll,
   );

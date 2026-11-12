@@ -9,7 +9,7 @@ import { ruleErrorOf } from "@/lib/utils/battle/store/errors";
 import { rollDie } from "@/lib/utils/common/dice";
 import { rngOf } from "@/lib/utils/common/rng";
 
-const rollKeys = new Set(["d10Roll", "d20Roll", "attackRoll", "attackRolls", "secondRolls", "advantageRoll", "disadvantageRoll", "damageRolls", "diceRolls", "saveRolls", "roll", "rolls", "castRoll", "fortuneRoll"]);
+const rollKeys = new Set(["d10Roll", "d20Roll", "attackRoll", "attackRolls", "secondRolls", "advantageRoll", "disadvantageRoll", "damageRolls", "diceRolls", "saveRolls", "roll", "rolls", "castRoll", "secondRoll", "fortuneRoll"]);
 
 export function assertDiceMode(body: Record<string, unknown>, mode: string) {
   if (mode !== "manual" && Object.keys(body).some(key => rollKeys.has(key))) throw new ContentError(API_ERRORS.ASSISTANT_DICE_NEED_MANUAL, 400);

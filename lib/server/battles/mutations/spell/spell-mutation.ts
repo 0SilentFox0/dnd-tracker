@@ -5,6 +5,7 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { textRef } from "@/lib/i18n/text-ref";
 import type { SpellRequestData } from "@/lib/schemas/battles";
+import { parseSystemInput } from "@/lib/server/battles/system-input";
 import { findParticipant, replaceParticipant, updateParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import type { Rng } from "@/lib/utils/abilities/engine/core/types";
 import { recordUse } from "@/lib/utils/abilities/engine/core/usage";
@@ -45,6 +46,7 @@ import { assertSpellRolls } from "@/lib/utils/battle/validation/dice-checks";
 import { rollDiceList } from "@/lib/utils/common/dice";
 import { rngOf } from "@/lib/utils/common/rng";
 import { currencyValueOf, ruleSystemOf } from "@/lib/utils/rules/systems";
+import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
 import type { IngredientPlan } from "@/lib/utils/spells/ingredients/plan";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -87,6 +89,7 @@ interface CastPlan {
   diceRolls: number[];
   saves: ReturnType<typeof splitSaveRolls>;
   serverRolls: boolean;
+  system: SystemSlot | undefined;
 }
 
 export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, options: { serverRolls?: boolean } = {}) {
@@ -126,7 +129,9 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
 
     if (tested && (!definition.casting?.magic || definition.resolution.kind !== "auto" || definition.cost === "long")) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_SPELL_SYSTEM_MISMATCH);
 
-    if (data.fortune && (!tested || !ruleSystemOf(ctx.meta.rules).combat.fortune || (caster.battleData.fortune ?? 0) < 1)) throw new BattleRuleError("action_rejected", API_ERRORS.NO_FORTUNE);
+    const system = await parseSystemInput(ctx.meta.rules, "castInput", data, !!options.serverRolls || !!data.serverRoll);
+
+    if (system) ruleSystemOf(ctx.meta.rules).combat.input?.assert(system, { kind: "cast", actor: caster, free: !!data.free, tested });
 
     if (!data.preview && !legendaryAbility) assertActionAvailable(ctx, caster, spell, free);
 
@@ -201,7 +206,7 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
 
     const saves = splitSaveRolls(ctx, order, data.saveRolls);
 
-    const plan: CastPlan = { ctx, data, deps, spell, caster, order, source, chosen, ingredients, castLevel, resolution, expected, diceRolls, saves, serverRolls: !!options.serverRolls };
+    const plan: CastPlan = { ctx, data, deps, spell, caster, order, source, chosen, ingredients, castLevel, resolution, expected, diceRolls, saves, serverRolls: !!options.serverRolls, system };
 
     return runWithCritChoice(ctx, {
       action: "spell",
@@ -291,7 +296,7 @@ async function executeCast(plan: CastPlan, { rng, crit }: { rng: Rng; crit: Crit
     rules: ctx.meta.rules,
     ...(data.preview && { dryRun: true }),
     ...(plan.ingredients && { ingredientUsed: true }),
-    ...(!free && !legendaryAbility && !grant && { castTest: { roll: data.castRoll, serverRoll: data.serverRoll ?? (plan.serverRolls ? true : undefined), fortune: data.fortune, fortuneRoll: data.fortuneRoll } }),
+    ...(!free && !legendaryAbility && !grant && { castTest: { roll: data.castRoll, serverRoll: data.serverRoll ?? (plan.serverRolls ? true : undefined), system: plan.system } }),
   });
 
   if (result.reason === "systemMismatch") throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_SPELL_SYSTEM_MISMATCH);

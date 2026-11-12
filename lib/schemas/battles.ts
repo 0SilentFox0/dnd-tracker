@@ -175,8 +175,9 @@ export type CritChoiceBody = z.infer<typeof critChoiceSchema>;
 
 export type MoraleCheckInput = z.infer<typeof moraleCheckSchema>;
 
-export const attackBodySchema = z
-  .object({
+export const systemInputSchema = z.object({ key: z.string(), data: z.unknown() });
+
+const attackBodyShape = {
     attackerId: z.string(),
     targetId: z.string().optional(),
     targetIds: z.array(z.string()).optional(),
@@ -195,12 +196,17 @@ export const attackBodySchema = z
     damageRolls: z.array(z.number()).default([]),
     offHand: z.boolean().optional(),
     useInspiration: z.boolean().optional(),
-    fortune: z.enum(["reroll", "sl"]).optional(),
-    fortuneRoll: z.number().int().min(1).max(100).optional(),
+    system: systemInputSchema.optional(),
+    secondRoll: z.number().int().min(1).max(100).optional(),
     /** Підступний удар (Rogue): ефекти замість кубиків Прихованої атаки */
     cunningStrike: z.array(z.enum(CUNNING_STRIKE_EFFECTS)).min(1).max(3).optional(),
     endTurn: z.boolean().default(false),
-  })
+  };
+
+export const attackBodyInputSchema = z.object(attackBodyShape);
+
+export const attackBodySchema = z
+  .looseObject(attackBodyShape)
   .refine(
     (d) => d.serverRoll === true || d.d20Roll !== undefined || d.attackRoll !== undefined || (Array.isArray(d.attackRolls) && d.attackRolls.length > 0),
     { message: REJECT.rollsRequired, path: ["d20Roll"] },
@@ -208,10 +214,6 @@ export const attackBodySchema = z
   .refine((d) => d.targetId !== undefined || (d.targetIds !== undefined && d.targetIds.length > 0), {
     message: REJECT.oneTargetRequired,
     path: ["targetIds"],
-  })
-  .refine((d) => !d.fortune || ((d.targetIds?.length ?? 0) + (d.targetId ? 1 : 0) === 1), {
-    message: REJECT.oneTargetRequired,
-    path: ["fortune"],
   });
 
 export const auraZoneSchema = z.object({
@@ -252,7 +254,7 @@ export const mapBackgroundBodySchema = z.object({ background: mapBackgroundSchem
 
 export const mapMotionSchema = z.object({ motion: motionConfigSchema.nullable() });
 
-export const castSpellSchema = z.object({
+const castSpellShape = {
   casterId: z.string(),
   legendaryKey: z.string().min(1).optional(),
   spellId: z.string(),
@@ -273,12 +275,16 @@ export const castSpellSchema = z.object({
   slotKey: z.string().regex(/^([1-9]|pact)$/).optional(),
   castRoll: z.number().int().min(1).max(100).optional(),
   serverRoll: z.literal(true).optional(),
-  fortune: z.enum(["reroll", "sl"]).optional(),
-  fortuneRoll: z.number().int().min(1).max(100).optional(),
+  system: systemInputSchema.optional(),
+  secondRoll: z.number().int().min(1).max(100).optional(),
   useIngredient: z.literal(true).optional(),
-}).refine((d) => !d.fortune || !d.free, { message: REJECT.fortuneNotFree, path: ["fortune"] });
+};
 
-export type SpellRequestData = z.infer<typeof castSpellSchema>;
+export const castSpellInputSchema = z.object(castSpellShape);
+
+export const castSpellSchema = z.looseObject(castSpellShape);
+
+export type SpellRequestData = z.infer<typeof castSpellInputSchema>;
 
 export const abilityActionSchema = z.object({
   participantId: z.string(),

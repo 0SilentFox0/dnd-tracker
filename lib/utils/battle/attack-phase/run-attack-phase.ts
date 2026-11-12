@@ -227,7 +227,7 @@ function strikeAt(ctx: PhaseCtx, st: PhaseState, target: BattleParticipant, i: n
     damageMultiplier: opts.multiplier,
     obstacle,
     cunningStrike: i === 0 ? data.cunningStrike : undefined,
-    fortune: i === 0 && data.fortune ? { kind: data.fortune, ...(data.fortuneRoll !== undefined && !input.serverRolls && !data.serverRoll && { manualReroll: data.fortuneRoll }) } : undefined,
+    system: i === 0 ? data.system : undefined,
     map: input.map,
     rules: input.rules,
     hitSpells: input.hitSpells,

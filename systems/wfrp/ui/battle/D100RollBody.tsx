@@ -1,6 +1,7 @@
 import { useTranslations } from "next-intl";
 
 import { heldBy } from "../../rules/combat/momentum";
+import { FORTUNE_INPUT } from "../../rules/percentile/fortune";
 import { SCENE_SLOT } from "../../rules/slots";
 import { D100RollPicker } from "./D100RollPicker";
 
@@ -17,7 +18,9 @@ export function D100RollBody({ wizard: { state, view, actions } }: RollBodyProps
 
   const text = useText();
 
-  const { judged, fortune } = view;
+  const { judged, attacker } = view;
+
+  const left = attacker?.battleData.fortune ?? 0;
 
   const momentum = judged.attackerSide !== undefined && heldBy(SCENE_SLOT.read(judged.sceneState) ?? {}, judged.attackerSide);
 
@@ -28,7 +31,7 @@ export function D100RollBody({ wizard: { state, view, actions } }: RollBodyProps
       <div className="mt-1 text-sm text-[var(--hud-muted)]">{momentum ? t("momentum.held", { side: t("momentum.side") }) : t("momentum.none")}</div>
       <D100RollPicker
         locked={lockedRollSource(state)}
-        fortune={{ available: fortune.available && state.index === 0, left: fortune.left, value: state.fortune ?? null, onChange: actions.setFortune }}
+        fortune={{ available: left >= 1 && state.targetIds.length === 1 && state.index === 0, left, value: FORTUNE_INPUT.read(state.system)?.kind ?? null, onChange: (kind) => actions.setSystemInput(kind && FORTUNE_INPUT.write({ kind })) }}
         onRoll={actions.roll}
         onAuto={actions.aiRoll}
       />

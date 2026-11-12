@@ -11,10 +11,10 @@ interface Settle {
   cast: CastTestResult;
 }
 
-export function rollCastTest(magic: RuleSystemMagic, ctx: Omit<CastTestCtx, "presetRoll" | "fortune">, input: CastSpellParams["castTest"]): CastTestResult {
+export function rollCastTest(magic: RuleSystemMagic, ctx: Omit<CastTestCtx, "presetRoll" | "system">, input: CastSpellParams["castTest"]): CastTestResult {
   const manual = !input?.serverRoll;
 
-  return magic.castTest({ ...ctx, ...(manual && input?.roll !== undefined && { presetRoll: input.roll }), ...(input?.fortune && { fortune: { kind: input.fortune, ...(manual && input.fortuneRoll !== undefined && { manualReroll: input.fortuneRoll }) } }) });
+  return magic.castTest({ ...ctx, ...(manual && input?.roll !== undefined && { presetRoll: input.roll }), ...(input?.system && { system: input.system }) });
 }
 
 export function affectedIds(state: SpellCastState): string[] {
@@ -29,13 +29,13 @@ export function applyCastAttribute(state: SpellCastState, { magic, spellMagic }:
   state.flow.messages.push(...r.messages);
 }
 
-/** After the cost is paid: Fortune is spent, channelled SL is gone, then the miscast (if any) lands on the caster. */
+/** After the cost is paid: the system's spent resource is applied, channelled SL is gone, then the miscast (if any) lands on the caster. */
 export function settleCastTest(state: SpellCastState, { magic, cast }: Settle): void {
   const casterId = state.caster.basicInfo.id;
 
   const caster = getP(state.flow, casterId);
 
-  put(state.flow, { ...caster, battleData: { ...caster.battleData, ...(!cast.keepChannelled && { channelledSl: 0 }), ...(cast.fortune && { fortune: Math.max(0, (caster.battleData.fortune ?? 0) - 1) }) } });
+  put(state.flow, { ...caster, battleData: { ...caster.battleData, ...(!cast.keepChannelled && { channelledSl: 0 }), ...cast.casterData } });
 
   if (!cast.miscast) return;
 
