@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { type Addon, composeCached, composeParts, composeSystem, compositionOrder, validateComposition } from "@/lib/utils/rules/systems/compose";
 import type { SystemMeta } from "@/lib/utils/rules/systems/meta";
 import { ruleSystemByKey } from "@/lib/utils/rules/systems/registry";
+import type { ActGate, ParticipantPart, UnitPartRow } from "@/lib/utils/rules/systems/types";
 
 const m = (module: string, extra: Partial<SystemMeta> = {}): SystemMeta => ({ module, kind: "addon", keys: [], requires: ["core"], i18n: {}, ...extra });
 
@@ -136,6 +137,28 @@ describe("composeSystem", () => {
     expect(claimed).not.toBe(plain);
     expect(claimed.progression.maxHp).not.toBe(d20.progression.maxHp);
     expect(plain.progression.maxHp).toBe(d20.progression.maxHp);
+  });
+
+  it("concatenates participant parts and act gates of several addons in composition order", () => {
+    const d20 = ruleSystemByKey("dnd5e");
+
+    if (!d20) throw new Error("dnd5e missing");
+
+    const partA: ParticipantPart<UnitPartRow> = (p) => p;
+
+    const partB: ParticipantPart<UnitPartRow> = (p) => p;
+
+    const gateA: ActGate = () => null;
+
+    const gateB: ActGate = () => null;
+
+    const out = composeSystem(d20, [
+      { id: "a", build: () => ({ participant: { fromUnit: [partA] }, combat: { turn: { actGates: [gateA] } } }) },
+      { id: "b", build: () => ({ participant: { fromUnit: [partB] }, combat: { turn: { actGates: [gateB] } } }) },
+    ]);
+
+    expect(out.participant?.fromUnit).toEqual([partA, partB]);
+    expect(out.combat.turn?.actGates).toEqual([gateA, gateB]);
   });
 });
 

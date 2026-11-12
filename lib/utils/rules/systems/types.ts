@@ -190,10 +190,27 @@ export interface TurnHookResult {
 
 export type TurnHook<C extends TurnHookCtx = TurnHookCtx> = (ctx: C) => TurnHookResult;
 
+export interface ActGateScope {
+  participants: BattleParticipant[];
+  scene: Pick<BattleSceneState, "turnIndex" | "pendingMoraleCheck">;
+  rules: Ruleset;
+}
+
+export interface ActGateBlock {
+  code: "action_used" | "action_rejected";
+  /** REJECT / API_ERRORS key */
+  key: string;
+}
+
+/** Blocks acting (`phase: "act"`) or ending the turn (`"end"`); `skipCheck` waives the pending-check part of an act */
+export type ActGate = (scope: ActGateScope, participantId: string, opts: { phase: "act" | "end"; skipCheck?: boolean }) => ActGateBlock | null;
+
 /** Hook lists run in order, base first, then modules (`runTurnHooks`) */
 export interface RuleSystemTurn {
-  /** Before the turn passes on; core runs its own pending morale check ahead of these */
+  /** Before the turn passes on */
   beforeAdvance?: readonly TurnHook<TurnAdvanceCtx>[];
+  /** Gates before a participant acts or ends its turn; the first block wins */
+  actGates?: readonly ActGate[];
   onTurnStart?: readonly TurnHook<TurnStartCtx>[];
   /** A downed participant's turn comes up and is skipped */
   onSkippedTurn?: readonly TurnHook<TurnSubjectCtx>[];
@@ -474,8 +491,35 @@ export interface RuleSystemCombat {
   };
 }
 
+export interface ParticipantRefs {
+  [key: string]: unknown;
+}
+
+export interface CharacterPartRow {
+  level: number;
+}
+
+export interface UnitPartRow {
+  level: number;
+}
+
+export interface ParticipantPartCtx<R> {
+  row: R;
+  rules: Ruleset;
+  refs: ParticipantRefs;
+}
+
+/** A builder step: base first, then modules; runs before passives are baked */
+export type ParticipantPart<R> = (p: BattleParticipant, ctx: ParticipantPartCtx<R>) => BattleParticipant;
+
+export interface RuleSystemParticipant {
+  fromCharacter?: readonly ParticipantPart<CharacterPartRow>[];
+  fromUnit?: readonly ParticipantPart<UnitPartRow>[];
+}
+
 export interface RuleSystemDefinition {
   key: string;
+  participant?: RuleSystemParticipant;
   progression: {
     levels: boolean;
     maxHp(input: { character: CharacterHpInput; characteristics: unknown; rules: Ruleset }): { total: number; breakdown: HpBreakdownLine[] } | null;
