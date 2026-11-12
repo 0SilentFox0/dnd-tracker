@@ -31,8 +31,6 @@ export function CombatTab() {
 
   const system = RULE_SYSTEM_REGISTRY[sheet.system];
 
-  const showAttacks = system.attacks;
-
   const d20Stats = statColumnsOf(system).has("armorClass");
 
   const [openAttack, setOpenAttack] = useState<string | null>(null);
@@ -44,7 +42,7 @@ export function CombatTab() {
   return (
     <>
       <Ui.StatsTab section="top" onRoll={setRollRequest} canRoll={canRoll} />
-      {showAttacks && (
+      {system.attacks && (
       <HudSection title={t("attacks")}>
         {sheet.attacks.length === 0 ? (
           <EmptyState title={t("noAttacks")} className="border-hud-rule py-6 text-hud-muted" />
@@ -82,7 +80,7 @@ export function CombatTab() {
           </>
         )}
         {rules && Ui.sheet?.combatRows?.map((Extra, i) => <Extra key={i} sheet={sheet} rules={rules} />)}
-        {showAttacks && <CombatRow label={t("targets")} value={sheet.targets.min === sheet.targets.max ? String(sheet.targets.max) : `${sheet.targets.min}–${sheet.targets.max}`} />}
+        {system.attacks && <CombatRow label={t("targets")} value={sheet.targets.min === sheet.targets.max ? String(sheet.targets.max) : `${sheet.targets.min}–${sheet.targets.max}`} />}
         {sheet.immunities.length > 0 && <CombatRow label={t("immunities")} value={sheet.immunities.join(", ")} />}
       </HudSection>
       <Ui.StatsTab section="bottom" onRoll={setRollRequest} canRoll={canRoll} />

@@ -45,6 +45,8 @@ export function NewCharacterForm({ campaignId: id, characterType, systemKey }: N
 
   const Ui = systemUiOf(systemKey);
 
+  const hasClasses = statColumnsOf(system).has("classes");
+
   const refsRef = useRef<ChoiceRefsView | null>(null);
 
   const {
@@ -58,7 +60,7 @@ export function NewCharacterForm({ campaignId: id, characterType, systemKey }: N
   } = useCharacterForm({
     type: characterType,
     requireRace: system.lineage,
-    requireClass: statColumnsOf(system).has("classes"),
+    requireClass: hasClasses,
     seedCharacteristics: system.characteristics.defaults,
     recommendScores: classMode.byId,
     onSubmit: async (data) => {
@@ -81,7 +83,7 @@ export function NewCharacterForm({ campaignId: id, characterType, systemKey }: N
     {
       id: CHARACTER_FORM_TAB.basic,
       label: tc("tabs.basic"),
-      content: <CharacterBasicInfo basicInfo={basicInfo} campaignMembers={members} races={races} hideProgression={!!Ui?.hideProgression} hideLineage={!system.lineage} hideClass={!statColumnsOf(system).has("classes")} hideAlignment={!system.identity.alignments} classMode={classMode.enabled && Ui && !Ui.hideProgression ? classMode : undefined} />,
+      content: <CharacterBasicInfo basicInfo={basicInfo} campaignMembers={members} races={races} hideProgression={!!Ui?.hideProgression} hideLineage={!system.lineage} hideClass={!hasClasses} hideAlignment={!system.identity.alignments} classMode={classMode.enabled && Ui && !Ui.hideProgression ? classMode : undefined} />,
     },
     {
       id: CHARACTER_FORM_TAB.combat,
