@@ -8,6 +8,7 @@ import type { SpellDefinition, SpellMagic } from "@/lib/utils/spells/model/schem
 import { castOf } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
 import { conditionLevel } from "@/systems/wfrp/rules/conditions/levels";
 import { caster as wfrpCaster } from "@/systems/wfrp/rules/magic/__tests__/fixtures";
+import { FORTUNE_INPUT } from "@/systems/wfrp/rules/percentile/fortune";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
 
@@ -146,7 +147,7 @@ describe("castSpell in a percentile magic system", () => {
   it("a Fortune reroll is paid for", () => {
     const caster = at({ ...wfrpCaster(), battleData: { ...wfrpCaster().battleData, fortune: 2 } }, 0);
 
-    const r = run(spellOf(magicOf()), { castTest: { roll: 90, fortune: "reroll", fortuneRoll: 30 } }, caster);
+    const r = run(spellOf(magicOf()), { castTest: { roll: 90, system: FORTUNE_INPUT.write({ kind: "reroll", manualReroll: 30 }) } }, caster);
 
     expect(r.fizzled).toBeUndefined();
     expect(castOf(r.battleAction.actionDetails)?.fortune).toMatchObject({ kind: "reroll", firstRoll: 90 });

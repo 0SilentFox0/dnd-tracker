@@ -19,7 +19,7 @@ vi.unmock("next-intl");
 const target = { basicInfo: { id: "t", name: "Орк" } } as unknown as BattleParticipant;
 
 const wizard = (serverJudged: boolean) => {
-  const actions = { roll: vi.fn(), aiRoll: vi.fn(), back: vi.fn(), setFortune: vi.fn(), setMode: vi.fn(), setInspiration: vi.fn() };
+  const actions = { roll: vi.fn(), aiRoll: vi.fn(), back: vi.fn(), setSystemInput: vi.fn(), setMode: vi.fn(), setInspiration: vi.fn() };
 
   return {
     state: { index: 0, diceSlots: [8], strikes: [{ targetId: "t", damage: [] }] },
@@ -28,7 +28,7 @@ const wizard = (serverJudged: boolean) => {
       cover: new Set<string>(),
       rollMode: "normal",
       inspirationAvailable: false,
-      fortune: { available: false, left: 0 },
+      attacker: { battleData: {} },
       judged: { target: { target: 41, label: "WS" }, sceneState: undefined, attackerSide: "ally" },
     },
     actions,

@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "" }));
 
+import { FORTUNE_INPUT } from "../../../rules/percentile/fortune";
 import { CastTestBody } from "../CastTestBody";
 
 import { render } from "@/lib/i18n/test/render-uk";
@@ -13,11 +14,11 @@ vi.unmock("next-intl");
 type Props = Parameters<typeof CastTestBody>[0];
 
 const model = (over: { fortune?: boolean; state?: object } = {}) => {
-  const actions = { setCastRoll: vi.fn(), setCastFortune: vi.fn() };
+  const actions = { setCastRoll: vi.fn(), setCastSystem: vi.fn() };
 
   const book = {
     state: { ...over.state },
-    view: { cast: { cn: 6, target: 50, channelTarget: 40, channelled: 2, armourSl: 0, fortune: { available: !!over.fortune, left: 2, value: null } } },
+    view: { cast: { cn: 6, target: 50, channelTarget: 40, channelled: 2, armourSl: 0 }, caster: { battleData: { fortune: over.fortune ? 2 : 0 } } },
     actions,
   } as unknown as Props["book"];
 
@@ -60,7 +61,7 @@ describe("CastTestBody", () => {
 
     render(<CastTestBody book={book} />);
     fireEvent.click(screen.getByRole("button", { name: "Перекинути" }));
-    expect(actions.setCastFortune).toHaveBeenCalledWith("reroll");
+    expect(actions.setCastSystem).toHaveBeenCalledWith(FORTUNE_INPUT.write({ kind: "reroll" }));
   });
 
   it("confirms an accepted roll", () => {

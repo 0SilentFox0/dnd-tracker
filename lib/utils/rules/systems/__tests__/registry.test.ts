@@ -103,13 +103,13 @@ describe("rule system registry", () => {
     expect(RULE_SYSTEM_REGISTRY.dnd5e.creation).toBeUndefined();
   });
 
-  it("conditions and fortune hooks exist only for wfrp", () => {
+  it("conditions and input hooks exist only for wfrp", () => {
     expect(RULE_SYSTEM_REGISTRY.wfrp.conditions).toBeDefined();
-    expect(RULE_SYSTEM_REGISTRY.wfrp.combat.fortune).toBe(true);
+    expect(RULE_SYSTEM_REGISTRY.wfrp.combat.input).toBeDefined();
 
     for (const key of ["homm", "dnd5e"] as const) {
       expect(RULE_SYSTEM_REGISTRY[key].conditions).toBeUndefined();
-      expect(RULE_SYSTEM_REGISTRY[key].combat.fortune).toBeUndefined();
+      expect(RULE_SYSTEM_REGISTRY[key].combat.input).toBeUndefined();
     }
 
     const catalog = must(RULE_SYSTEM_REGISTRY.wfrp.conditions).catalog;

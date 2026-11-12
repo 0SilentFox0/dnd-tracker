@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { applyWfrpConditionTo } from "../../conditions/apply";
+import { FORTUNE_INPUT } from "../../percentile/fortune";
 import { ACTION_SLOT } from "../../slots";
 import { wfrpCastTest } from "../cast-test";
 import { MAX_OVERCAST_STEPS } from "../constants";
@@ -100,24 +101,24 @@ describe("wfrpCastTest", () => {
   });
 
   it("Fortune sl adds a level and is reported", () => {
-    const r = run(30, {}, { fortune: { kind: "sl" } });
+    const r = run(30, {}, { system: FORTUNE_INPUT.write({ kind: "sl" }) });
 
     expect(r.margin).toBe(3);
-    expect(r.fortune).toEqual({ kind: "sl" });
+    expect(r.casterData).toEqual({ fortune: 0 });
   });
 
   it("Fortune reroll is not spent on a first-roll success", () => {
-    const r = run(30, {}, { fortune: { kind: "reroll", manualReroll: 10 } });
+    const r = run(30, {}, { system: FORTUNE_INPUT.write({ kind: "reroll", manualReroll: 10 }) });
 
-    expect(r.fortune).toBeUndefined();
+    expect(r.casterData).toBeUndefined();
     expect(castOf(r)?.roll).toBe(30);
   });
 
   it("Fortune reroll replaces a failed roll", () => {
-    const r = run(60, {}, { fortune: { kind: "reroll", manualReroll: 30 } });
+    const r = run(60, {}, { system: FORTUNE_INPUT.write({ kind: "reroll", manualReroll: 30 }) });
 
     expect(r.success).toBe(true);
-    expect(r.fortune).toEqual({ kind: "reroll", firstRoll: 60 });
+    expect(r.casterData).toEqual({ fortune: 0 });
   });
 
   it("success and failure lines carry name, spell, roll, target, sl and cn", () => {

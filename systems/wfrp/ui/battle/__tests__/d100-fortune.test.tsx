@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "" }));
 
+import { FORTUNE_INPUT } from "../../../rules/percentile/fortune";
 import { D100RollBody } from "../D100RollBody";
 
 import type { RollBodyProps } from "@/components/systems/types";
@@ -12,11 +13,11 @@ import { render } from "@/lib/i18n/test/render-uk";
 vi.unmock("next-intl");
 
 const model = (available: boolean, fortune?: "reroll" | "sl") => {
-  const actions = { roll: vi.fn(), aiRoll: vi.fn(), back: vi.fn(), setFortune: vi.fn() };
+  const actions = { roll: vi.fn(), aiRoll: vi.fn(), back: vi.fn(), setSystemInput: vi.fn() };
 
   const wizard = {
-    state: { index: 0, diceSlots: [], strikes: [{ targetId: "t", damage: [] }], ...(fortune && { fortune }) },
-    view: { judged: { target: null, attackerSide: undefined }, fortune: { available, left: 2 } },
+    state: { index: 0, diceSlots: [], strikes: [{ targetId: "t", damage: [] }], targetIds: ["t"], ...(fortune && { system: FORTUNE_INPUT.write({ kind: fortune }) }) },
+    view: { judged: { target: null, attackerSide: undefined }, attacker: { battleData: { fortune: available ? 2 : 0 } } },
     actions,
   } as unknown as RollBodyProps["wizard"];
 
@@ -38,7 +39,7 @@ describe("D100RollBody Fortune", () => {
     expect(screen.getByText("Залишилось Удачі: 2")).toBeTruthy();
 
     fireEvent.click(screen.getByRole("button", { name: "Перекинути" }));
-    expect(actions.setFortune).toHaveBeenCalledWith("reroll");
+    expect(actions.setSystemInput).toHaveBeenCalledWith(FORTUNE_INPUT.write({ kind: "reroll" }));
   });
 
   it("manual reroll asks for a second roll before sending both", () => {

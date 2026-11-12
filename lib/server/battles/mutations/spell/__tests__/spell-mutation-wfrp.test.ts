@@ -65,9 +65,9 @@ describe("castSpellSchema, percentile fields", () => {
     expect(castSpellSchema.safeParse({ ...base, castRoll: 100 }).success).toBe(true);
   });
 
-  it("rejects a fortune on a free cast", () => {
-    expect(castSpellSchema.safeParse({ ...base, free: true, fortune: "sl" }).success).toBe(false);
+  it("accepts both request shapes of a fortune", () => {
     expect(castSpellSchema.safeParse({ ...base, fortune: "sl" }).success).toBe(true);
+    expect(castSpellSchema.safeParse({ ...base, system: { key: "wfrp", data: { kind: "sl" } } }).success).toBe(true);
   });
 });
 
@@ -115,6 +115,17 @@ describe("spell mutation in WFRP", () => {
 
   it("Fortune needs a point", async () => {
     await expect(run(bolt, { castRoll: 90, fortune: "reroll" })).rejects.toMatchObject({ message: "errors.noFortune" });
+  });
+
+  it("rejects a fortune on a free cast", async () => {
+    await expect(run(bolt, { castRoll: 90, free: true, fortune: "sl" }, { c: caster(2) })).rejects.toMatchObject({ message: "battleLog.reject.fortuneNotFree" });
+  });
+
+  it("the new request shape spends Fortune like the old one", async () => {
+    const out = await run(bolt, { castRoll: 90, system: { key: "wfrp", data: { kind: "reroll" } }, secondRoll: 30 }, { c: caster(1) });
+
+    expect(castOf(details(out))?.outcome).toBe("success");
+    expect(out.participants.find((p) => p.basicInfo.id === "hero")?.battleData.fortune).toBe(0);
   });
 
   it("Fortune reroll with a point is spent", async () => {

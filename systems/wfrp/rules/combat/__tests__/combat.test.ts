@@ -4,6 +4,7 @@ import { applyWfrpConditionTo } from "../../conditions/apply";
 import type { WfrpConditionKey } from "../../conditions/catalog";
 import { conditionLevel } from "../../conditions/levels";
 import { reverseRoll } from "../../percentile";
+import { FORTUNE_INPUT } from "../../percentile/fortune";
 import { LOCATIONS } from "../constants";
 import { applyWfrpCrit } from "../crit-effect";
 import { type CritResult, rollCrit } from "../crit-table";
@@ -257,31 +258,32 @@ describe("resolveWfrpAttack fortune", () => {
   };
 
   it("melee reroll after a miss rerolls the attacker against the same defender roll", () => {
-    const r = run(sword, { manualRoll: 90, fortune: { kind: "reroll", manualReroll: 20 } });
+    const r = run(sword, { manualRoll: 90, system: FORTUNE_INPUT.write({ kind: "reroll", manualReroll: 20 }) });
 
     expect(r.isHit).toBe(true);
-    expect(r.fortune).toEqual({ kind: "reroll", firstRoll: 90 });
+    expect(r.attackerData).toEqual({ fortune: 0 });
+    expect(JSON.stringify(r.lines)).toContain("battleWfrp.log.fortuneReroll");
     expect(attackOf(r.attackRoll)?.defender?.roll).toBe(51);
     expect(attackOf(r.attackRoll)?.fortune).toEqual({ kind: "reroll", firstRoll: 90 });
   });
 
   it("melee reroll is not spent when the first roll hits", () => {
-    const r = run(sword, { manualRoll: 20, fortune: { kind: "reroll", manualReroll: 10 } });
+    const r = run(sword, { manualRoll: 20, system: FORTUNE_INPUT.write({ kind: "reroll", manualReroll: 10 }) });
 
-    expect(r.fortune).toBeUndefined();
+    expect(r.attackerData).toBeUndefined();
     expect(attackOf(r.attackRoll)?.fortune).toBeUndefined();
     expect(attackOf(r.attackRoll)?.roll).toBe(20);
   });
 
   it("ranged reroll after a miss", () => {
-    const r = run(bow, { manualRoll: 90, fortune: { kind: "reroll", manualReroll: 10 } });
+    const r = run(bow, { manualRoll: 90, system: FORTUNE_INPUT.write({ kind: "reroll", manualReroll: 10 }) });
 
     expect(r.isHit).toBe(true);
-    expect(r.fortune).toEqual({ kind: "reroll", firstRoll: 90 });
+    expect(r.attackerData).toEqual({ fortune: 0 });
   });
 
   it("ranged reroll without a manual roll uses rng", () => {
-    const r = run(bow, { manualRoll: 90, rng: () => 0.05, fortune: { kind: "reroll" } });
+    const r = run(bow, { manualRoll: 90, rng: () => 0.05, system: FORTUNE_INPUT.write({ kind: "reroll" }) });
 
     expect(r.isHit).toBe(true);
     expect(attackOf(r.attackRoll)?.roll).toBe(6);
@@ -290,10 +292,10 @@ describe("resolveWfrpAttack fortune", () => {
   it("sl adds one SL even on a miss", () => {
     const plain = run(sword, { manualRoll: 90 });
 
-    const boosted = run(sword, { manualRoll: 90, fortune: { kind: "sl" } });
+    const boosted = run(sword, { manualRoll: 90, system: FORTUNE_INPUT.write({ kind: "sl" }) });
 
     expect(boosted.attackRoll.margin).toBe((plain.attackRoll.margin ?? 0) + 1);
-    expect(boosted.fortune).toEqual({ kind: "sl" });
+    expect(boosted.attackerData).toEqual({ fortune: 0 });
     expect(attackOf(boosted.attackRoll)?.fortune).toEqual({ kind: "sl" });
   });
 });

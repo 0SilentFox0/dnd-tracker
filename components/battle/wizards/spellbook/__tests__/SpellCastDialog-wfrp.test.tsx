@@ -30,14 +30,14 @@ const book = (cast: object | null) => ({
     formulaOf: () => "",
     chain: [],
   },
-  actions: { back: vi.fn(), close: vi.fn(), setSave: vi.fn(), setAttack: vi.fn(), setCastRoll: vi.fn(), setCastFortune: vi.fn(), aiDamage: vi.fn(), toSummary: vi.fn() },
+  actions: { back: vi.fn(), close: vi.fn(), setSave: vi.fn(), setAttack: vi.fn(), setCastRoll: vi.fn(), setCastSystem: vi.fn(), aiDamage: vi.fn(), toSummary: vi.fn() },
 }) as unknown as Props["book"];
 
 describe("SpellCastDialog rolls step", () => {
   afterEach(cleanup);
 
   it("percentile casting: CN line, no slot select, no save rolls", () => {
-    render(<SpellCastDialog book={book({ cn: 6, target: 50, channelTarget: 40, channelled: 2, armourSl: 0, fortune: { available: false, left: 0, value: null } })} />);
+    render(<SpellCastDialog book={book({ cn: 6, target: 50, channelTarget: 40, channelled: 2, armourSl: 0 })} />);
     expect(screen.getByText("СН 6 · ціль 50 · Скерування +2 · броня −0")).toBeTruthy();
     expect(screen.queryByRole("combobox")).toBeNull();
     expect(screen.queryByText(/· Гоблін/)).toBeNull();

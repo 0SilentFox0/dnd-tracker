@@ -71,17 +71,33 @@ describe("wfrp fortune in attacks", () => {
     await expect(attackMutation(wfrpCtx(f), body({ fortune: "sl" }))).rejects.toThrow(API_ERRORS.NO_FORTUNE);
   });
 
-  it("rejects Fortune in a d20 battle", async () => {
+  it("the system input of a d20 battle is dropped, no Fortune is spent", async () => {
     const swordHero = { ...hero, battleData: { ...hero.battleData, fortune: 2, attacks: [{ id: "sword", name: "Sword", type: AttackType.MELEE, attackBonus: 5, damageDice: "1d8", damageType: "slashing" } as BattleAttack] } };
 
-    const b = attackBodySchema.parse({ attackerId: "hero", targetId: "gob", attackId: "sword", d20Roll: 15, damageRolls: [4], fortune: "sl" });
+    const b = attackBodySchema.parse({ attackerId: "hero", targetId: "gob", attackId: "sword", d20Roll: 15, damageRolls: [4], system: { key: "wfrp", data: { kind: "sl" } }, fortune: "sl" });
 
-    await expect(attackMutation(context({ participants: [swordHero, goblin], isDM: true }), b)).rejects.toThrow(API_ERRORS.NO_FORTUNE);
+    const out = await attackMutation(context({ participants: [swordHero, goblin], isDM: true }), b);
+
+    expect(out.participants.find((p) => p.basicInfo.id === "hero")?.battleData.fortune).toBe(2);
   });
 
-  it("schema rejects fortune with several targets and an out-of-range fortuneRoll", () => {
-    expect(attackBodySchema.safeParse({ attackerId: "a", targetIds: ["t", "u"], d20Roll: 30, damageRolls: [], fortune: "sl" }).success).toBe(false);
-    expect(attackBodySchema.safeParse({ attackerId: "a", targetId: "t", d20Roll: 30, damageRolls: [], fortune: "reroll", fortuneRoll: 101 }).success).toBe(false);
+  it("rejects Fortune with several targets", async () => {
+    const ctx = context({ participants: [fighter("a", ParticipantSide.ALLY, 2), fighter("t", ParticipantSide.ENEMY), fighter("u", ParticipantSide.ENEMY)], isDM: true });
+
+    await expect(attackMutation({ ...ctx, meta: { ...ctx.meta, rules: WFRP_RULES }, scene: { ...ctx.scene, turnIndex: 0 } }, body({ targetId: undefined, targetIds: ["t", "u"], fortune: "sl" }))).rejects.toThrow(API_ERRORS.NO_FORTUNE);
+  });
+
+  it("rejects an out-of-range second roll", async () => {
+    await expect(attackMutation(wfrpCtx(2), body({ fortune: "reroll", fortuneRoll: 101 }))).rejects.toThrow(API_ERRORS.INVALID_BODY);
+  });
+
+  it("the new request shape acts like the old one", async () => {
+    const legacy = await attackMutation({ ...wfrpCtx(2), rng: () => 0.795 }, body({ fortune: "reroll", fortuneRoll: 20 }));
+
+    const next = await attackMutation({ ...wfrpCtx(2), rng: () => 0.795 }, body({ system: { key: "wfrp", data: { kind: "reroll" } }, secondRoll: 20 }));
+
+    expect(fortuneOf(next)).toBe(fortuneOf(legacy));
+    expect(JSON.stringify(next.events)).toBe(JSON.stringify(legacy.events));
   });
 
   it("server rolls ignore the client fortuneRoll", async () => {

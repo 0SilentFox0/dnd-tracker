@@ -32,22 +32,22 @@ describe("spell flow with a casting test", () => {
     expect(spellPayload(s)).not.toHaveProperty("serverRoll");
   });
 
-  it("a Fortune reroll needs the second roll and sends it as fortuneRoll", () => {
-    const s = run({ type: "OPEN", casterId: "me", level: 0 }, { type: "PICK", pick: bolt }, { type: "TO_TARGETS" }, { type: "PICK_TARGET", id: "gob" }, { type: "SET_CAST_FORTUNE", value: "reroll" }, { type: "SET_CAST_ROLL", roll: 70 });
+  it("a system input is sent as system with the second roll", () => {
+    const sys = { key: "x", data: { kind: "reroll" } };
 
-    expect(rollsComplete(s)).toBe(false);
+    const s = run({ type: "OPEN", casterId: "me", level: 0 }, { type: "PICK", pick: bolt }, { type: "TO_TARGETS" }, { type: "PICK_TARGET", id: "gob" }, { type: "SET_CAST_SYSTEM", value: sys }, { type: "SET_CAST_ROLL", roll: 70, second: 12 });
 
-    const done = spellFlow(s, { type: "SET_CAST_ROLL", roll: 70, second: 12 });
-
-    expect(rollsComplete(done)).toBe(true);
-    expect(spellPayload(done)).toMatchObject({ castRoll: 70, fortune: "reroll", fortuneRoll: 12 });
+    expect(rollsComplete(s)).toBe(true);
+    expect(spellPayload(s)).toMatchObject({ castRoll: 70, system: sys, secondRoll: 12 });
   });
 
-  it("changing Fortune clears the roll", () => {
-    const s = spellFlow(spellFlow(picked(), { type: "SET_CAST_ROLL", roll: 30 }), { type: "SET_CAST_FORTUNE", value: "sl" });
+  it("changing the system input clears the roll", () => {
+    const sys = { key: "x", data: { kind: "sl" } };
+
+    const s = spellFlow(spellFlow(picked(), { type: "SET_CAST_ROLL", roll: 30 }), { type: "SET_CAST_SYSTEM", value: sys });
 
     expect(rollsComplete(s)).toBe(false);
-    expect(s.castFortune).toBe("sl");
+    expect(s.castSystem).toEqual(sys);
   });
 
   it("a spell without a test keeps the old payload", () => {

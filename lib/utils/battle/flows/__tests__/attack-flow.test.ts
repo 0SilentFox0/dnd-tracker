@@ -309,37 +309,43 @@ describe("attackFlow", () => {
   });
 });
 
-describe("Fortune in attack flow", () => {
+describe("System input in attack flow", () => {
+  const slot = (kind: string) => ({ key: "x", data: { kind } });
+
   const pct = (...extra: AttackFlowAction[]) => run(open(1, 2), { type: "TOGGLE_TARGET", id: "e1" }, { type: "CONFIRM_TARGETS" }, ...extra);
 
-  it("SET_FORTUNE sets state; payload carries fortune and fortuneRoll", () => {
-    const s = pct({ type: "SET_FORTUNE", value: "reroll" }, { type: "ROLL", d20: 90, second: 20, outcome: "hit", judge: "server" });
+  it("SET_SYSTEM_INPUT sets state; payload carries system and the second roll", () => {
+    const s = pct({ type: "SET_SYSTEM_INPUT", value: slot("reroll") }, { type: "ROLL", d20: 90, second: 20, outcome: "hit", judge: "server" });
 
-    expect(s.fortune).toBe("reroll");
-    expect(attackPayload(s, "a1")).toMatchObject({ fortune: "reroll", fortuneRoll: 20, attackRoll: 90 });
+    expect(s.system).toEqual(slot("reroll"));
+    expect(attackPayload(s, "a1")).toMatchObject({ system: slot("reroll"), secondRoll: 20, attackRoll: 90 });
+    expect(attackPayload(s, "a1")).not.toHaveProperty("advantageRoll");
   });
 
-  it("server roll: no fortuneRoll; sl: no fortuneRoll", () => {
-    const server = pct({ type: "SET_FORTUNE", value: "reroll" }, { type: "ROLL", outcome: "hit", judge: "server" });
+  it("server roll: no secondRoll; no system: no secondRoll", () => {
+    const server = pct({ type: "SET_SYSTEM_INPUT", value: slot("reroll") }, { type: "ROLL", outcome: "hit", judge: "server" });
 
-    expect(attackPayload(server, "a1")).toMatchObject({ fortune: "reroll" });
-    expect(attackPayload(server, "a1")).not.toHaveProperty("fortuneRoll");
+    expect(attackPayload(server, "a1")).toMatchObject({ system: slot("reroll") });
+    expect(attackPayload(server, "a1")).not.toHaveProperty("secondRoll");
 
-    const sl = pct({ type: "SET_FORTUNE", value: "sl" }, { type: "ROLL", d20: 90, second: 20, outcome: "hit", judge: "server" });
+    const bare = pct({ type: "ROLL", d20: 90, second: 20, outcome: "hit", judge: "server" });
 
-    expect(attackPayload(sl, "a1")).toMatchObject({ fortune: "sl" });
-    expect(attackPayload(sl, "a1")).not.toHaveProperty("fortuneRoll");
-    expect(attackPayload(sl, "a1")).not.toHaveProperty("advantageRoll");
+    expect(attackPayload(bare, "a1")).not.toHaveProperty("system");
+    expect(attackPayload(bare, "a1")).not.toHaveProperty("secondRoll");
   });
 
-  it("two targets: no fortune in body; SET_TARGETS/TOGGLE_TARGET to >1 clears it", () => {
-    const base = run(open(1, 3), { type: "SET_FORTUNE", value: "sl" });
+  it("SET_SYSTEM_INPUT null clears it", () => {
+    expect(run(open(1, 3), { type: "SET_SYSTEM_INPUT", value: slot("sl") }, { type: "SET_SYSTEM_INPUT", value: null }).system).toBeUndefined();
+  });
 
-    expect(run(open(1, 3), { type: "SET_FORTUNE", value: "sl" }, { type: "SET_TARGETS", ids: ["a", "b"] }).fortune).toBeUndefined();
-    expect(attackFlow({ ...base, targetIds: ["a"] }, { type: "TOGGLE_TARGET", id: "b" }).fortune).toBeUndefined();
+  it("two targets: no system in body; SET_TARGETS/TOGGLE_TARGET to >1 clears it", () => {
+    const base = run(open(1, 3), { type: "SET_SYSTEM_INPUT", value: slot("sl") });
+
+    expect(run(open(1, 3), { type: "SET_SYSTEM_INPUT", value: slot("sl") }, { type: "SET_TARGETS", ids: ["a", "b"] }).system).toBeUndefined();
+    expect(attackFlow({ ...base, targetIds: ["a"] }, { type: "TOGGLE_TARGET", id: "b" }).system).toBeUndefined();
 
     const two = run(open(1, 2), { type: "SET_TARGETS", ids: ["a", "b"] }, { type: "CONFIRM_TARGETS" }, { type: "ROLL", d20: 10, outcome: "miss", judge: "server" }, { type: "ROLL", d20: 10, outcome: "miss", judge: "server" });
 
-    expect(attackPayload({ ...two, fortune: "sl" }, "a1")).not.toHaveProperty("fortune");
+    expect(attackPayload({ ...two, system: slot("sl") }, "a1")).not.toHaveProperty("system");
   });
 });
