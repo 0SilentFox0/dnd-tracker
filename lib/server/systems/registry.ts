@@ -6,7 +6,9 @@ import type { Ruleset } from "@/lib/utils/rules/schema";
 import { RULE_SYSTEM_KEYS } from "@/lib/utils/rules/systems/meta";
 import { type ModuleEntry, resolveSystem } from "@/lib/utils/rules/systems/resolve";
 // <systems:generated>
+import { ARTIFACTSETS_MODULE_SERVER } from "@/systems/artifactsets/server";
 import { D20_MODULE_SERVER } from "@/systems/d20/server";
+import { MORALE_MODULE_SERVER } from "@/systems/morale/server";
 import { WFRP_MODULE_SERVER } from "@/systems/wfrp/server";
 // </systems:generated>
 
@@ -14,7 +16,9 @@ export type { SystemSchemas, SystemServer } from "./types";
 
 export const MODULE_SERVER: Record<string, ModuleEntry<SystemServer>> = {
   // <systems:generated>
+  artifactsets: ARTIFACTSETS_MODULE_SERVER,
   d20: D20_MODULE_SERVER,
+  morale: MORALE_MODULE_SERVER,
   wfrp: WFRP_MODULE_SERVER,
   // </systems:generated>
 };

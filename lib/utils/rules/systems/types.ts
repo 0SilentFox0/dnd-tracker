@@ -19,7 +19,7 @@ import type { EquippedArtifactRow } from "@/lib/utils/battle/participant/extract
 import type { RuleSystemProficiency, RuleSystemSaves } from "@/lib/utils/battle/saves/types";
 import type { BattleSceneState } from "@/lib/utils/battle/store";
 import type { AttackRollResult } from "@/lib/utils/battle/types/attack";
-import type { ExtractedAttack } from "@/lib/utils/battle/types/participant";
+import type { ExtractedAttack, UnitFromPrisma } from "@/lib/utils/battle/types/participant";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import type { ChoiceGroup } from "@/lib/utils/characters/choices/selections";
 import type { HpBreakdownLine } from "@/lib/utils/characters/hero-hp";
@@ -170,8 +170,12 @@ export interface TurnJoinCtx extends TurnHookCtx {
   newcomerIds?: readonly string[];
 }
 
+export type RunAbilities = typeof import("@/lib/utils/abilities/engine/core/run-abilities").runAbilities;
+
 export interface TurnAdvanceCtx extends TurnHookCtx {
   scene: BattleSceneState;
+  /** Fires ability triggers; injected because system code cannot import the engine back */
+  run: RunAbilities;
 }
 
 export interface TurnHookResult {
@@ -190,10 +194,27 @@ export interface TurnHookResult {
 
 export type TurnHook<C extends TurnHookCtx = TurnHookCtx> = (ctx: C) => TurnHookResult;
 
+export interface ActGateScope {
+  participants: BattleParticipant[];
+  scene: Pick<BattleSceneState, "turnIndex" | "pendingMoraleCheck">;
+  rules: Ruleset;
+}
+
+export interface ActGateBlock {
+  code: "action_used" | "action_rejected";
+  /** REJECT / API_ERRORS key */
+  key: string;
+}
+
+/** Blocks acting (`phase: "act"`) or ending the turn (`"end"`); `skipCheck` waives the pending-check part of an act */
+export type ActGate = (scope: ActGateScope, participantId: string, opts: { phase: "act" | "end"; skipCheck?: boolean }) => ActGateBlock | null;
+
 /** Hook lists run in order, base first, then modules (`runTurnHooks`) */
 export interface RuleSystemTurn {
-  /** Before the turn passes on; core runs its own pending morale check ahead of these */
+  /** Before the turn passes on */
   beforeAdvance?: readonly TurnHook<TurnAdvanceCtx>[];
+  /** Gates before a participant acts or ends its turn; the first block wins */
+  actGates?: readonly ActGate[];
   onTurnStart?: readonly TurnHook<TurnStartCtx>[];
   /** A downed participant's turn comes up and is skipped */
   onSkippedTurn?: readonly TurnHook<TurnSubjectCtx>[];
@@ -238,8 +259,12 @@ export interface AfterAttackCtx {
   round: number;
   rules: Ruleset;
   sceneState?: SystemSlot;
-  /** The target's answer to this strike (core retaliation); `provoked` skips the reaction accounting */
-  retaliate(provoked: boolean, from?: { participants: BattleParticipant[]; sceneState?: SystemSlot }): AfterAttackResult | null;
+  /** The attack missed critically (natural 1) */
+  critFail?: boolean;
+  /** An earlier hook already answered the strike */
+  handled?: true;
+  /** The target's free strike back at the attacker (core primitive: no limits, no accounting); `provoked` ignores the reaction rules */
+  counterStrike(provoked: boolean, from?: { participants: BattleParticipant[]; sceneState?: SystemSlot }): AfterAttackResult | null;
 }
 
 export interface AfterAttackResult {
@@ -474,8 +499,33 @@ export interface RuleSystemCombat {
   };
 }
 
+export interface ParticipantRefs {
+  [key: string]: unknown;
+}
+
+export interface CharacterPartRow {
+  level: number;
+}
+
+export type UnitPartRow = UnitFromPrisma;
+
+export interface ParticipantPartCtx<R> {
+  row: R;
+  rules: Ruleset;
+  refs: ParticipantRefs;
+}
+
+/** A builder step: base first, then modules; runs before passives are baked */
+export type ParticipantPart<R> = (p: BattleParticipant, ctx: ParticipantPartCtx<R>) => BattleParticipant;
+
+export interface RuleSystemParticipant {
+  fromCharacter?: readonly ParticipantPart<CharacterPartRow>[];
+  fromUnit?: readonly ParticipantPart<UnitPartRow>[];
+}
+
 export interface RuleSystemDefinition {
   key: string;
+  participant?: RuleSystemParticipant;
   progression: {
     levels: boolean;
     maxHp(input: { character: CharacterHpInput; characteristics: unknown; rules: Ruleset }): { total: number; breakdown: HpBreakdownLine[] } | null;

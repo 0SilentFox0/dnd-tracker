@@ -4,6 +4,7 @@ import { type EquippedArtifactRow, loadConsumableEntries, loadEquippedArtifactRo
 import { extractAttacksFromCharacter } from "./extract-attacks";
 import { loadClassesById } from "./load-classes";
 import { loadFeatsById } from "./load-feats";
+import { runParticipantParts } from "./parts";
 
 import { ABILITY_KEYS, type AbilityKey } from "@/lib/constants/abilities";
 import { CombatStatus,ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
@@ -16,14 +17,15 @@ import { resolveCharacterSkillEntries } from "@/lib/server/battles/participant/c
 import { resolveLearnedSpellsAndMastery } from "@/lib/server/battles/participant/from-character-learned-spells";
 import { resolveSpellSlotsFromCharacter } from "@/lib/server/battles/participant/from-character-spell-slots";
 import { loadRace } from "@/lib/server/battles/participant/load-race";
+import { systemServerOf } from "@/lib/server/systems/registry";
 import { bakePassives } from "@/lib/utils/abilities/build/bake";
+import type { ArtifactSetRowLike } from "@/lib/utils/abilities/build/collect";
 import { collectCharacterAbilities } from "@/lib/utils/abilities/build/collect";
 import { immunityAbilities } from "@/lib/utils/abilities/build/immunities";
 import { resolveLimitFormulas } from "@/lib/utils/abilities/build/limit-formulas";
 import { classPools } from "@/lib/utils/abilities/class-columns";
 import { readChoiceList } from "@/lib/utils/abilities/read";
 import { initAmmo } from "@/lib/utils/battle/ammo";
-import { findCompletedSets } from "@/lib/utils/battle/artifact-sets";
 import { proficiencyOf } from "@/lib/utils/battle/saves/access";
 import { getCharacterImmunities } from "@/lib/utils/characters/character-race-effects";
 import { choicesStateOf } from "@/lib/utils/characters/choices/picks";
@@ -35,13 +37,14 @@ import { applyCharacterResources, storedCharacterState } from "@/lib/utils/chara
 import { getAbilityModifier, spellcastingDerived } from "@/lib/utils/common/calculations";
 import { isRecord } from "@/lib/utils/common/is-record";
 import { attunedRefs } from "@/lib/utils/items/resolve";
-import { DEFAULT_RULES, heroDiceTable, heroHpFormula, moraleCapFromRules, proficiencyForLevel, type Ruleset } from "@/lib/utils/rules";
+import { DEFAULT_RULES, heroHpFormula, proficiencyForLevel, type Ruleset } from "@/lib/utils/rules";
 import { currencyValueOf, ruleSystemOf } from "@/lib/utils/rules/systems";
 import { composition } from "@/lib/utils/rules/systems/catalog";
 import { systemSlotOf } from "@/lib/utils/rules/systems/slot";
 import { resolveClassEntries } from "@/lib/utils/spells/class-slots";
 import { buildIngredientStock } from "@/lib/utils/spells/ingredients/stock";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
+import type { SetProgress } from "@/types/characters";
 import type { ResolvedClassEntry } from "@/types/classes";
 
 async function resolveCharacterClassEntries(character: CharacterFromPrisma, rules: Ruleset, context?: CampaignSpellContext): Promise<ResolvedClassEntry[]> {
@@ -75,7 +78,11 @@ async function loadCharacterBuildRefs(character: CharacterFromPrisma, rules: Rul
 
   const equippedArtifacts = toEquippedArtifacts(artifactRows);
 
-  const completed = await findCompletedSets(equippedArtifacts, character.campaignId, context);
+  const loaders = systemServerOf(rules).participant?.characterRefs ?? [];
+
+  const loaded = await Promise.all(loaders.map((load) => load({ equipped: equippedArtifacts, campaignId: character.campaignId, context })));
+
+  const completed = loaded.reduce((acc, r) => r.completed ?? acc, { sets: [] as ArtifactSetRowLike[], progress: [] as SetProgress[] });
 
   const resolvedEntries = preloaded?.classEntries ?? (await resolveCharacterClassEntries(character, rules, context));
 
@@ -172,7 +179,7 @@ async function characterTalentGroups(character: CharacterFromPrisma, rules: Rule
 }
 
 function finalizeCharacter(participant: BattleParticipant, character: CharacterFromPrisma, classMode: boolean, spellcastingAbility: string | null | undefined, rules: Ruleset): BattleParticipant {
-  const baked = bakePassives(participant);
+  const baked = bakePassives(runParticipantParts(ruleSystemOf(rules).participant?.fromCharacter, participant, { row: character, rules, refs: {} }));
 
   const armored = proficiencyOf(rules).withGranted(resolveLimitFormulas(classMode ? applyClassArmor(baked) : baked));
 
@@ -214,10 +221,6 @@ export async function createBattleParticipantFromCharacter(
   const equipmentGear = ruleSystemOf(rules).equipment?.armourAp(artifactRows.filter((r) => !r.carried).map(({ row, slot }) => ({ slot, systemStats: row.systemStats })));
 
   const archetype = heroArchetype(resolvedClasses ? null : (character as { archetype?: string | null }).archetype);
-
-  const meleeDice = heroDiceTable(rules, "melee");
-
-  const rangedDice = heroDiceTable(rules, "ranged");
 
   const primaryAbility = (ABILITY_KEYS as readonly string[]).includes(character.primaryAbility ?? "") ? (character.primaryAbility as AbilityKey) : undefined;
 
@@ -288,10 +291,9 @@ export async function createBattleParticipantFromCharacter(
       race: character.race,
       creatureType: isRecord(race?.passiveAbility) && typeof race.passiveAbility.creatureType === "string" ? race.passiveAbility.creatureType.trim().toLowerCase() : "humanoid",
       raceId: (race as { id?: string } | null)?.id,
-      moraleCap: moraleCapFromRules(rules),
+      moraleCap: 0,
       ...(resolvedClasses && { damageModel: "5e" as const }),
       ...systemSlotOf(ruleSystemOf(rules).combat.participantFields?.(character, equipmentGear)),
-      heroDice: meleeDice || rangedDice ? { melee: meleeDice, ranged: rangedDice } : undefined,
       primaryAbility,
       meleeMultiplier: archetype.melee,
       rangedMultiplier: archetype.ranged,

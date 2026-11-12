@@ -78,8 +78,8 @@ describe("wfrp scene momentum in the attack phase", () => {
   it("a second strike of the same action sees the Momentum won by the first", () => {
     const r = run(["t", "u"], [30, 30], byCall(MISS, MISS, HIT, HIT, 0.5, 0.5, MISS));
 
-    expect(r.allBattleActions.map((a) => a.actionType)).toEqual(["attack", "retaliation", "attack"]);
-    expect(used(r)).toEqual([false, false, true]);
+    expect(r.allBattleActions.map((a) => a.actionType)).toEqual(["attack", "attack"]);
+    expect(used(r)).toEqual([false, true]);
     expect(momentumOf(r.sceneState)).toEqual({ ally: true });
   });
 
@@ -89,11 +89,10 @@ describe("wfrp scene momentum in the attack phase", () => {
     expect(used(r)[0]).toBe(true);
   });
 
-  it("a won retaliation hands Momentum to the other side and drops the earlier token", () => {
+  it("wfrp has no retaliation: the target does not answer a strike", () => {
     const r = run(["t"], [30], byCall(MISS, HIT, MISS));
 
-    expect(r.allBattleActions.map((a) => a.actionType)).toEqual(["attack", "retaliation"]);
-    expect(momentumOf(r.sceneState)).toEqual({ enemy: true });
+    expect(r.allBattleActions.map((a) => a.actionType)).toEqual(["attack"]);
   });
 
   it("a lost strike gives the defending side the Momentum when none is passed in", () => {

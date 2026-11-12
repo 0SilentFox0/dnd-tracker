@@ -1,10 +1,10 @@
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import type { MoraleCheckInput } from "@/lib/schemas";
 import { requireActor } from "@/lib/utils/battle/common/control";
-import { checkMorale } from "@/lib/utils/battle/morale/check";
+import type { PendingMoraleCheckPayload } from "@/lib/utils/battle/morale/threshold";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleRuleError, rejectAction } from "@/lib/utils/battle/store";
-import type { PendingMoraleCheckPayload } from "@/lib/utils/battle/turn";
+import { checkMorale } from "@/systems/morale/rules/check";
 
 export function moraleCheckMutation(ctx: BattleMutationContext, data: MoraleCheckInput): MutationResult {
   if (!ctx.meta.rules.morale.enabled) rejectAction(API_ERRORS.BATTLE_MORALE_DISABLED);

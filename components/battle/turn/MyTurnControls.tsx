@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils";
 import { coreActionsOn } from "@/lib/utils/battle/actions/access";
 import { canOffHandAttack } from "@/lib/utils/battle/attack/attacks-left";
 import { canConsumeIntent, COUNTDOWN_SECONDS, turnAllowsAttack } from "@/lib/utils/battle/flows";
-import { moraleTriggerRolls } from "@/lib/utils/battle/morale/check";
+import { moraleTriggerRolls } from "@/lib/utils/battle/morale/threshold";
 import { usableAbilities } from "@/lib/utils/battle/view";
 import { cryptoRandom, rollDie } from "@/lib/utils/common/dice";
 import type { BattleParticipant } from "@/types/battle";

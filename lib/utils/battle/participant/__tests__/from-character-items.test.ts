@@ -170,7 +170,7 @@ describe("battle participant: item refs", () => {
       } as never, "b1", ParticipantSide.ALLY, 2, {
         skillTreeByRace: {}, mainSkills: [], spells: [], allSkills: [], racesByName: { "Людина": race },
         campaign: { maxLevel: 20 }, skillsById: {}, artifactsById: { ring, scroll }, artifactSetsById: {}, artifactSetMemberIds: {},
-        rules: parseRules({ classes: { enabled: true }, items: { enabled: true }, outOfCombat: { persistResources: true } }),
+        rules: parseRules({ system: { key: "homm" }, classes: { enabled: true }, items: { enabled: true }, outOfCombat: { persistResources: true } }),
         classesById, featsById: {}, backgroundsById: {},
       } as never);
 

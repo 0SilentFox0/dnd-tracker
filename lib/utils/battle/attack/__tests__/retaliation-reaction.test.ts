@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { retaliate, retaliateTimes, SWORD, swordUnit } from "./helpers";
+import { resolveRetaliation, retaliate, retaliateTimes, SWORD, swordUnit } from "./helpers";
 
 import { extraRetaliations, fireWave } from "@/data/library/unit-abilities";
 import { ParticipantSide } from "@/lib/constants/battle";
@@ -9,7 +9,6 @@ import { makeEffect, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtu
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
 import { applyCriticalEffect } from "@/lib/utils/battle/attack";
-import { resolveRetaliation } from "@/lib/utils/battle/attack/retaliation";
 import { processStartOfTurn } from "@/lib/utils/battle/turn/start-end";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { parseRules } from "@/lib/utils/rules/schema";

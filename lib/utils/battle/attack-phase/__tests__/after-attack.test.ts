@@ -9,7 +9,7 @@ import type { BattleAction } from "@/types/battle";
 
 const action = (id: string) => ({ id }) as unknown as BattleAction;
 
-const ctx = (): AfterAttackCtx => ({ participants: [createMockParticipant()], attackerId: "a", defenderId: "d", first: true, round: 1, rules: DEFAULT_RULES, retaliate: () => null });
+const ctx = (): AfterAttackCtx => ({ participants: [createMockParticipant()], attackerId: "a", defenderId: "d", first: true, round: 1, rules: DEFAULT_RULES, counterStrike: () => null });
 
 describe("runAfterAttack", () => {
   it("runs the hooks in order, each seeing the previous result", () => {
@@ -34,10 +34,10 @@ describe("runAfterAttack", () => {
     expect(out?.handled).toBeUndefined();
   });
 
-  it("retaliate from a later hook starts from the state the earlier hook left", () => {
+  it("counterStrike from a later hook starts from the state the earlier hook left", () => {
     const calls: Array<{ count: number; scene: unknown }> = [];
 
-    const base = { ...ctx(), retaliate: (_p: boolean, from?: { participants: unknown[]; sceneState?: unknown }) => {
+    const base = { ...ctx(), counterStrike: (_p: boolean, from?: { participants: unknown[]; sceneState?: unknown }) => {
       calls.push({ count: from?.participants.length ?? -1, scene: from?.sceneState });
 
       return null;
@@ -46,7 +46,7 @@ describe("runAfterAttack", () => {
     const first: AfterAttackHook = (c) => ({ participants: [...c.participants, createMockParticipant()], actions: [], sceneState: { changed: true } as never });
 
     const second: AfterAttackHook = (c) => {
-      c.retaliate(true);
+      c.counterStrike(true);
 
       return null;
     };

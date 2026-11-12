@@ -4,7 +4,7 @@ import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/p
 import { actorEvent, battleActionToEvent } from "@/lib/utils/battle/store";
 import { BattleRuleError } from "@/lib/utils/battle/store/errors";
 import { REJECT } from "@/lib/utils/battle/store/reject";
-import { advanceTurn, assertMoraleResolved } from "@/lib/utils/battle/turn";
+import { advanceTurn, assertCanEndTurn } from "@/lib/utils/battle/turn";
 
 export const TURN_TIMER_GRACE_MS = 2000;
 
@@ -23,7 +23,7 @@ export function nextTurnMutation(ctx: BattleMutationContext, data: { auto?: true
 
   const skipText = modeAutoSkipText(ctx.meta.map);
 
-  if (ended && !ctx.isDM && !skipText && !data.auto) assertMoraleResolved(ctx, ended.basicInfo.id);
+  if (ended && !ctx.isDM && !skipText && !data.auto) assertCanEndTurn(ctx, ended.basicInfo.id);
 
   const out = advanceTurn({ participants: ctx.participants, pending: ctx.pending, scene: ctx.scene, rng: ctx.rng, map: ctx.meta.map, rules: ctx.meta.rules });
 

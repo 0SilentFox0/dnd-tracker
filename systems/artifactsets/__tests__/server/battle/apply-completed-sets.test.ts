@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 vi.mock("@/lib/db", () => ({ prisma: {} }));
 
-import { findCompletedSets, findSetProgress } from "@/lib/utils/battle/artifact-sets/apply-completed-sets";
+import { findCompletedSets, findSetProgress } from "@/systems/artifactsets/server/battle/apply-completed-sets";
 
 const equipped = [
   { artifactId: "a1", setId: "s1" },

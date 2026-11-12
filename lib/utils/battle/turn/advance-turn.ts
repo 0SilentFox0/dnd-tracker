@@ -52,7 +52,7 @@ function advanceFrom({ participants, pending, scene, rng, map, rules }: AdvanceT
 
   const actions: BattleAction[] = [];
 
-  const before = runTurnHooks(beforeAdvanceHooks(rules), { participants: order, scene, round: scene.round, rng: rng ?? Math.random, rules, map });
+  const before = runTurnHooks(beforeAdvanceHooks(rules), { participants: order, scene, round: scene.round, rng: rng ?? Math.random, rules, map, run: runAbilities });
 
   order = before.participants;
   actions.push(...(before.actions ?? []));

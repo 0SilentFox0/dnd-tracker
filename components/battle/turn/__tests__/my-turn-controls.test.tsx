@@ -29,7 +29,7 @@ vi.mock("@/components/battle/wizards/AuraZonePicker", () => ({ AuraZonePicker: (
 vi.mock("@/components/battle/scene/MapStrip", () => ({ MapStripRow: () => null }));
 vi.mock("@/components/battle/modes", () => ({ modeUiOf: () => undefined }));
 vi.mock("@/lib/utils/battle/attack/attacks-left", () => ({ canOffHandAttack: () => true }));
-vi.mock("@/lib/utils/battle/morale/check", () => ({ moraleTriggerRolls: () => ({ rolls: [] }) }));
+vi.mock("@/lib/utils/battle/morale/threshold", () => ({ moraleTriggerRolls: () => ({ rolls: [] }) }));
 vi.mock("@/lib/utils/battle/view", () => ({ usableAbilities: () => [] }));
 vi.mock("@/lib/hooks/battle", () => ({
   useBattleRules: () => rules.current,

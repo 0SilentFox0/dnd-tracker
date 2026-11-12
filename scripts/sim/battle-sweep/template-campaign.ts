@@ -5,6 +5,7 @@ import type { RowCounts } from "./row-counts";
 import { heroRowData, heroSpecsFor } from "./seed-template-heroes";
 
 import { prisma } from "@/lib/db";
+import { mergeRules, parseRules } from "@/lib/utils/rules/schema";
 import { importPack } from "@/scripts/templates/lib/import-pack";
 
 export interface TemplateRun {
@@ -35,25 +36,62 @@ async function importTemporaryTemplate(key: string) {
 export async function openTemplateRun(profile: SweepProfile, campaignId: string | undefined): Promise<TemplateRun> {
   if (profile.source.kind !== "template") throw new Error(`${profile.key} runs on an existing campaign`);
 
-  let campaign: any = campaignId ? await prisma.campaign.findUniqueOrThrow({ where: { id: campaignId } }) : await prisma.campaign.findFirst({ where: { kind: "template", templateKey: profile.key } });
+  const templateKey = profile.template ?? profile.key;
+
+  let campaign: any = campaignId ? await prisma.campaign.findUniqueOrThrow({ where: { id: campaignId } }) : await prisma.campaign.findFirst({ where: { kind: "template", templateKey } });
 
   let dropTemplate = async () => {};
 
   if (!campaign) {
-    if (!profile.source.importIfMissing) throw new Error(`template campaign "${profile.key}" is missing in this database`);
+    if (!profile.source.importIfMissing) throw new Error(`template campaign "${templateKey}" is missing in this database`);
 
-    const imported = await importTemporaryTemplate(profile.key);
+    const imported = await importTemporaryTemplate(templateKey);
 
     campaign = imported.campaign;
     dropTemplate = imported.cleanup;
   }
 
-  try {
-    return await seedHeroes(profile, campaign, dropTemplate);
-  } catch (e) {
+  let restoreRules = async () => {};
+
+  const dropAll = async () => {
+    await restoreRules();
     await dropTemplate();
+  };
+
+  try {
+    restoreRules = await patchRules(profile, campaign);
+
+    return await seedHeroes(profile, campaign, dropAll);
+  } catch (e) {
+    await dropAll();
     throw e;
   }
+}
+
+/** writes the profile's rules over the campaign for the run; the returned restore puts the raw stored JSON back */
+async function patchRules(profile: SweepProfile, campaign: any): Promise<() => Promise<void>> {
+  if (!profile.rules) return async () => {};
+
+  const raw = campaign.rules;
+
+  const merged = mergeRules(parseRules(raw), profile.rules.patch as Parameters<typeof mergeRules>[1], raw);
+
+  if (!merged.ok) throw new Error(`rules patch for ${profile.key} is invalid: ${JSON.stringify(merged.issues)}`);
+
+  const stored = merged.stored as Record<string, unknown>;
+
+  const next = { ...stored, system: { ...(stored.system as object), modules: [...profile.rules.modules] } };
+
+  const modules = parseRules(next).system.modules ?? [];
+
+  if (profile.rules.modules.some((m) => !modules.includes(m))) throw new Error(`modules ${profile.rules.modules.join(",")} are not valid for the ${campaign.templateKey ?? profile.key} base system`);
+
+  await prisma.campaign.update({ where: { id: campaign.id }, data: { rules: next as any } });
+  campaign.rules = next;
+
+  return async () => {
+    await prisma.campaign.update({ where: { id: campaign.id }, data: { rules: raw } });
+  };
 }
 
 async function seedHeroes(profile: SweepProfile, campaign: any, dropTemplate: () => Promise<void>): Promise<TemplateRun> {
@@ -71,7 +109,7 @@ async function seedHeroes(profile: SweepProfile, campaign: any, dropTemplate: ()
 
   const ammoWeapon = artifacts.find((a) => (a.systemStats as { ammoCapacity?: number } | null)?.ammoCapacity);
 
-  for (const [i, spec] of heroSpecsFor(races, classes, profile.heroCount).entries()) {
+  for (const [i, spec] of heroSpecsFor(races, classes, profile.heroCount, profile.heroMorale).entries()) {
     const data = heroRowData(spec, profile, { campaignId: campaign.id, controlledBy: campaign.dmUserId, spellIds: picked.map((s) => s.id) });
 
     const row = await prisma.character.create({ data: { ...data, ...(i === 0 && ammoWeapon && { inventory: { create: { equipped: { weapon: ammoWeapon.id } } } }) } as any });

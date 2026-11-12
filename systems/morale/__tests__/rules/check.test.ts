@@ -4,7 +4,7 @@ import { ParticipantSide } from "@/lib/constants/battle";
 import { textOf } from "@/lib/i18n/test/text";
 import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import type { FlagEffect } from "@/lib/utils/abilities/schema";
-import { checkMorale } from "@/lib/utils/battle/morale/check";
+import { checkMorale } from "@/systems/morale/rules/check";
 
 const p = (morale: number, flag?: FlagEffect) => {
   const base = makeParticipant({ id: "p", abilities: flag ? [resolved({ trigger: { event: "passive" }, effects: [flag] })] : [] });

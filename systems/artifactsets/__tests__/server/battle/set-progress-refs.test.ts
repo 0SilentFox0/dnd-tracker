@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 vi.mock("@/lib/db", () => ({ prisma: {} }));
 
-import { findSetProgress } from "@/lib/utils/battle/artifact-sets/apply-completed-sets";
+import { findSetProgress } from "@/systems/artifactsets/server/battle/apply-completed-sets";
 
 describe("findSetProgress with composed refs", () => {
   it("a property inside a composed ref counts as a set member", () => {

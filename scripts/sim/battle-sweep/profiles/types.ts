@@ -10,4 +10,10 @@ export interface SweepProfile {
   unitsPerBattle: number;
   heroCount: number;
   heroLevel: number;
+  /** template campaign to open when it differs from `key` */
+  template?: string;
+  /** campaign rules written for the duration of the run (merged over the stored JSON) and restored byte for byte afterwards */
+  rules?: { modules: readonly string[]; patch: Record<string, unknown> };
+  /** morale column of the seeded heroes: odd ones get it negated, so both an extra turn and a skip occur */
+  heroMorale?: number;
 }

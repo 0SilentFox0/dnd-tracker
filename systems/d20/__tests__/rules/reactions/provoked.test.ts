@@ -6,7 +6,7 @@ import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { AfterAttackCtx } from "@/lib/utils/rules/systems/types";
 import { d20ProvokedOpportunity } from "@/systems/d20/rules/reactions/provoked";
 
-const base = (over: Partial<AfterAttackCtx> = {}): AfterAttackCtx => ({ participants: [createMockParticipant()], attackerId: "a", defenderId: "d", first: true, round: 1, rules: DEFAULT_RULES, retaliate: () => null, ...over });
+const base = (over: Partial<AfterAttackCtx> = {}): AfterAttackCtx => ({ participants: [createMockParticipant()], attackerId: "a", defenderId: "d", first: true, round: 1, rules: DEFAULT_RULES, counterStrike: () => null, ...over });
 
 describe("d20 provoked opportunity as an afterAttack hook", () => {
   it("is registered on the d20 combat", () => {
@@ -14,20 +14,20 @@ describe("d20 provoked opportunity as an afterAttack hook", () => {
   });
 
   it("does nothing without the provoking critical effect", () => {
-    const retaliate = vi.fn();
+    const counterStrike = vi.fn();
 
-    expect(d20ProvokedOpportunity(base({ retaliate }))).toBeNull();
-    expect(retaliate).not.toHaveBeenCalled();
+    expect(d20ProvokedOpportunity(base({ counterStrike }))).toBeNull();
+    expect(counterStrike).not.toHaveBeenCalled();
   });
 
   it("answers with the provoked strike and claims the strike", () => {
-    const retaliate = vi.fn(() => ({ participants: [createMockParticipant()], actions: [], sceneState: undefined }));
+    const counterStrike = vi.fn(() => ({ participants: [createMockParticipant()], actions: [], sceneState: undefined }));
 
     const criticalEffect = { effect: { type: "provoke_opportunity_attack" } } as AfterAttackCtx["criticalEffect"];
 
-    const out = d20ProvokedOpportunity(base({ retaliate, criticalEffect }));
+    const out = d20ProvokedOpportunity(base({ counterStrike, criticalEffect }));
 
-    expect(retaliate).toHaveBeenCalledWith(true);
+    expect(counterStrike).toHaveBeenCalledWith(true);
     expect(out?.handled).toBe(true);
   });
 

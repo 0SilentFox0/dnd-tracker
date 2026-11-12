@@ -1,13 +1,12 @@
-import type { PendingMoraleCheckPayload } from "./pending-morale";
-
 import { ParticipantSide } from "@/lib/constants/battle";
 import { textRef } from "@/lib/i18n/text-ref";
 import { findParticipant, updateParticipant } from "@/lib/utils/abilities/engine/core/participants";
-import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { newBattleAction } from "@/lib/utils/battle/common/new-action";
 import { lineText, logFields } from "@/lib/utils/battle/log/lines";
 import { effectiveMorale } from "@/lib/utils/battle/morale/effective-morale";
+import type { PendingMoraleCheckPayload } from "@/lib/utils/battle/morale/threshold";
 import type { Ruleset } from "@/lib/utils/rules";
+import type { RunAbilities, TurnAdvanceCtx, TurnHook } from "@/lib/utils/rules/systems/types";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
 export interface ApplyPendingMoraleResult {
@@ -23,6 +22,7 @@ export function applyPendingMoraleCheck(
   battleLogLength: number,
   rng: () => number = Math.random,
   rules: Ruleset,
+  runAbilities: RunAbilities,
 ): ApplyPendingMoraleResult {
   const { participantId, d10Roll, moraleResult } = payload;
 
@@ -93,3 +93,11 @@ export function applyPendingMoraleCheck(
 
   return { updatedInitiativeOrder, moraleLogEntry };
 }
+
+export const applyPendingMorale: TurnHook<TurnAdvanceCtx> = ({ participants, scene, rules, run }) => {
+  if (!scene.pendingMoraleCheck) return { participants, messages: [] };
+
+  const morale = applyPendingMoraleCheck(participants, scene.pendingMoraleCheck as PendingMoraleCheckPayload, scene.round, scene.id, scene.eventSeq, undefined, rules, run);
+
+  return { participants: morale.updatedInitiativeOrder, messages: [], actions: morale.moraleLogEntry ? [morale.moraleLogEntry] : [] };
+};

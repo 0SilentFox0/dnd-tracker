@@ -1,11 +1,8 @@
-import type { CampaignSpellContext } from "../types/participant";
+import { loadArtifactSetBattleMaps } from "./load-maps";
 
-import { loadArtifactSetBattleMaps } from "@/lib/server/battles/artifact-sets/load-maps";
+import type { ContextPreparer } from "@/lib/server/systems/types";
 
-export async function attachArtifactSetsToSpellContext(
-  campaignId: string,
-  context: CampaignSpellContext,
-): Promise<void> {
+export const attachArtifactSetsToSpellContext: ContextPreparer = async (campaignId, context) => {
   if (!context.artifactsById) return;
 
   const setIds = new Set<string>();
@@ -20,4 +17,4 @@ export async function attachArtifactSetsToSpellContext(
 
   context.artifactSetsById = maps.artifactSetsById;
   context.artifactSetMemberIds = maps.artifactSetMemberIds;
-}
+};

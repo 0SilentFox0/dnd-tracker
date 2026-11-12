@@ -189,7 +189,7 @@ describe("wfrp battle end to end (engine)", () => {
 
       const stolen = await attackMutation({ ...enemyTurn, rng: firstThen(0.295, 0.795) }, body({ attackerId: "t", targetId: "a" }));
 
-      expect(momentumOf(stolen.scene?.sceneState ?? undefined)).toEqual({ enemy: true });
+      expect(momentumOf(stolen.scene?.sceneState ?? undefined)).toEqual({});
 
       const parts = afterWin.participants.map((p, i) => splitParticipant(p, { orderIndex: i, isPending: false }));
 

@@ -4,7 +4,7 @@ import { rangedRetaliation } from "@/data/library/unit-abilities";
 import { AttackType, ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import type { FlagKey } from "@/lib/utils/abilities/schema";
-import { resolveRetaliation } from "@/lib/utils/battle/attack/retaliation";
+import { resolveRetaliation } from "@/lib/utils/battle/attack/__tests__/helpers";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
