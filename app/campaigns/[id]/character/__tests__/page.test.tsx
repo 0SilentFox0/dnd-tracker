@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { campaignKeys } from "@/lib/hooks/campaigns/keys";
 import { characterKeys } from "@/lib/hooks/characters/keys";
 import { PrefetchedQuery } from "@/lib/providers/prefetched-query";
-import { DEFAULT_RULES } from "@/lib/utils/rules";
+import { defaultRulesFor } from "@/lib/utils/rules/section-registry";
 
 const readCharacterSheet = vi.hoisted(() => vi.fn());
 
@@ -23,6 +23,8 @@ vi.mock("@/lib/i18n/extend-locale-scope", () => ({ ExtendLocaleScope: ({ childre
 vi.mock("@/components/character-profile", () => ({ CharacterProfile: () => null }));
 
 import CharacterPage from "../page";
+
+const DEFAULT_RULES = defaultRulesFor({ key: "homm" });
 
 const render = () =>
   CharacterPage({ params: Promise.resolve({ id: "c1" }), searchParams: Promise.resolve({ tab: "magic" }) }) as Promise<

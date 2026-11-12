@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { mergeRules, parseRules, RulesetPatchSchema, RulesetSchema } from "@/lib/utils/rules/schema";
+import { defaultRulesFor } from "@/lib/utils/rules/section-registry";
 import { DEFAULT_ADVANCEMENT_RULES } from "@/systems/wfrp/rules/advancement/rules";
+
+const DEFAULT_RULES = defaultRulesFor({ key: "homm" });
 
 describe("parseRules", () => {
   it("DEFAULT_RULES збігається з RulesetSchema.parse({})", () => {

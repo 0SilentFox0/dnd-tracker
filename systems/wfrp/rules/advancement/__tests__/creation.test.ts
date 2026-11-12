@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 
-import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { parseRules } from "@/lib/utils/rules/schema";
 import { DEFAULT_ADVANCEMENT_RULES } from "@/systems/wfrp/rules/advancement/rules";
 import { AdvancementRulesSchema } from "@/systems/wfrp/rules/advancement/schema";
@@ -16,7 +15,7 @@ describe("advancement.creation", () => {
     const rules = parseRules({ advancement: { ...withoutCreation, talentCostMultiplier: 3 } });
 
     expect(rules.advancement.talentCostMultiplier).toBe(3);
-    expect(rules.advancement.creation).toEqual(DEFAULT_RULES.advancement.creation);
+    expect(rules.advancement.creation).toEqual(DEFAULT_ADVANCEMENT_RULES.creation);
   });
 
   it("rejects a free budget nobody can reach (outside 40..180)", () => {

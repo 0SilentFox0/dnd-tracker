@@ -1,8 +1,8 @@
 import type { Ruleset } from "./section-shapes";
 
-import { DEFAULT_ADVANCEMENT_RULES } from "@/systems/wfrp/rules/advancement/rules";
+type CoreRuleset = Omit<Ruleset, "advancement">;
 
-export const DEFAULT_RULES: Ruleset = {
+const CORE_DEFAULTS: CoreRuleset = {
   morale: { enabled: true, cap: 3 },
   criticals: { critOn: 20, fumbleOn: 1, effects: true, doubleDice: false, disabledSuccess: [], disabledFail: [] },
   formulas: { saveDcBase: 8, proficiencyBase: 2, proficiencyEvery: 4 },
@@ -19,11 +19,13 @@ export const DEFAULT_RULES: Ruleset = {
   encounters: { balance: "fair", edition: "2014", autoXp: false },
   items: { enabled: false, attunementLimit: 3 },
   spellIngredients: { enabled: false, autoPay: true },
-  advancement: DEFAULT_ADVANCEMENT_RULES,
   tables: {},
   system: { key: "homm" },
 };
 
-export function localizedDefaultAttacks(t: (key: string) => string): Ruleset["defaultAttacks"] {
+/** `advancement` is owned by the wfrp section and absent here (typed as Ruleset for the many readers): full defaults come from `defaultRulesFor` */
+export const DEFAULT_RULES = CORE_DEFAULTS as Ruleset;
+
+export function localizedDefaultAttacks(t: (key: string) => string): CoreRuleset["defaultAttacks"] {
   return { meleeName: t("defaultNames.meleeAttack"), rangedName: t("defaultNames.rangedAttack"), weaponName: t("defaultNames.weapon") };
 }

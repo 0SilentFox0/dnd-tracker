@@ -4,8 +4,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { GET, PATCH } from "@/app/api/campaigns/[id]/rules/route";
 import { prisma } from "@/lib/db";
 import * as apiAuth from "@/lib/utils/api/api-auth";
-import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { parseRules } from "@/lib/utils/rules/schema";
+import { defaultRulesFor } from "@/lib/utils/rules/section-registry";
+
+const DEFAULT_RULES = defaultRulesFor({ key: "homm" });
 
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireDM: vi.fn(), requireCampaignAccess: vi.fn() }));
 vi.mock("@/lib/db", () => {

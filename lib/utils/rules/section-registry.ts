@@ -1,5 +1,7 @@
 import { CORE_SECTIONS } from "./core-sections";
-import { mergeContributions, type SectionMap, type SectionsContribution, sectionsOf } from "./sections";
+import { DEFAULT_RULES } from "./defaults";
+import type { Ruleset } from "./section-shapes";
+import { defaultsOf, mergeContributions, type SectionMap, type SectionsContribution, sectionsOf } from "./sections";
 
 import { type Composition, composition, type CompositionIssue, type SystemSelection } from "@/lib/utils/rules/systems/catalog";
 import { CompositionError } from "@/lib/utils/rules/systems/compose";
@@ -26,3 +28,12 @@ export function validateSections(c: Composition, contributions: Readonly<Record<
     throw e;
   }
 }
+
+/** Full defaults: core defaults plus the default of every section from the registry (system-owned sections such as advancement) */
+export const defaultRulesFor = (system: SystemSelection): Ruleset => {
+  const rules: Record<string, unknown> = { ...DEFAULT_RULES, advancement: defaultsOf(ALL_SECTIONS.advancement) };
+
+  for (const [name, section] of Object.entries(sectionsOfSystem(system))) rules[name] = { ...(rules[name] as object), ...defaultsOf(section) };
+
+  return { ...rules, system } as Ruleset;
+};

@@ -1,11 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
 
-import { allSections, sectionsOfSystem, validateSections } from "../section-registry";
+import { allSections, defaultRulesFor, sectionsOfSystem, validateSections } from "../section-registry";
 import { extendSection, getRule, mergeContributions, parseSection, rulePaths, type RulesItem, type RulesSection, setRule } from "../sections";
 
+import { DEFAULT_RULES } from "@/lib/utils/rules/defaults";
 import { composition } from "@/lib/utils/rules/systems/catalog";
 import { CompositionError } from "@/lib/utils/rules/systems/compose";
+import { DEFAULT_ADVANCEMENT_RULES } from "@/systems/wfrp/rules/advancement/rules";
 
 const item = <T>(schema: z.ZodType<T>, def: T): RulesItem<T> => ({ schema, default: def });
 
@@ -139,5 +141,17 @@ describe("validateSections", () => {
 
     expect(issues).toHaveLength(1);
     expect(issues[0].code).toBe("sectionCollision");
+  });
+});
+
+describe("defaultRulesFor", () => {
+  it("wfrp carries the advancement defaults owned by its section", () => {
+    expect(defaultRulesFor({ key: "wfrp" }).advancement).toEqual(DEFAULT_ADVANCEMENT_RULES);
+  });
+
+  it("dnd5e: core defaults unchanged, system kept", () => {
+    const rules = defaultRulesFor({ key: "dnd5e" });
+
+    expect(rules).toEqual({ ...DEFAULT_RULES, advancement: DEFAULT_ADVANCEMENT_RULES, system: { key: "dnd5e" } });
   });
 });

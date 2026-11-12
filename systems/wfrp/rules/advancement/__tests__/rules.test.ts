@@ -2,13 +2,13 @@ import { describe, expect, it } from "vitest";
 
 import { DEFAULT_ADVANCEMENT_RULES } from "../defaults";
 
-import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { mergeRules, parseRules, RulesetPatchSchema, RulesetSchema } from "@/lib/utils/rules/schema";
+import { defaultRulesFor } from "@/lib/utils/rules/section-registry";
 
 describe("rules.advancement", () => {
   it("parse({}) carries default advancement", () => {
     expect(RulesetSchema.parse({}).advancement).toEqual(DEFAULT_ADVANCEMENT_RULES);
-    expect(DEFAULT_RULES.advancement).toEqual(DEFAULT_ADVANCEMENT_RULES);
+    expect(defaultRulesFor({ key: "wfrp" }).advancement).toEqual(DEFAULT_ADVANCEMENT_RULES);
     expect(parseRules({}).advancement).toEqual(DEFAULT_ADVANCEMENT_RULES);
   });
 
@@ -29,7 +29,7 @@ describe("rules.advancement", () => {
   it("patch merges the multiplier", () => {
     const patch = RulesetPatchSchema.parse({ advancement: { talentCostMultiplier: 2 } });
 
-    const merged = mergeRules(DEFAULT_RULES, patch);
+    const merged = mergeRules(defaultRulesFor({ key: "wfrp" }), patch);
 
     expect(merged.ok && merged.rules.advancement.talentCostMultiplier).toBe(2);
   });

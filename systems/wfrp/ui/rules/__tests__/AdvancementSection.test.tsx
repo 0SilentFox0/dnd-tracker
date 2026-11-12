@@ -5,7 +5,9 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { AdvancementSection } from "../AdvancementSection";
 
 import "@/components/ui/__tests__/match-media";
-import { DEFAULT_RULES } from "@/lib/utils/rules";
+import { defaultRulesFor } from "@/lib/utils/rules/section-registry";
+
+const DEFAULT_RULES = defaultRulesFor({ key: "wfrp" });
 
 const mount = () => {
   const set = vi.fn();

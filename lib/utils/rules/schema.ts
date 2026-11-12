@@ -3,7 +3,7 @@ import { z } from "zod";
 import { DEFAULT_RULES } from "./defaults";
 import { ALL_SECTIONS, validateSections } from "./section-registry";
 import { CRITICALS_ORDER_MESSAGE, INITIATIVE_ORDER_MESSAGE, type Ruleset, sectionSchemas } from "./section-shapes";
-import { parseSection, type RulesSection, type SectionMap } from "./sections";
+import { defaultsOf, parseSection, type RulesSection, type SectionMap } from "./sections";
 
 import { CUSTOM_CONDITION_KEY_RE } from "@/lib/utils/abilities/schema/kinds";
 import { isRecord } from "@/lib/utils/common/is-record";
@@ -50,7 +50,7 @@ const sections = {
   encounters: withDefaults(sectionSchemas.encounters, DEFAULT_RULES.encounters),
   items: withDefaults(sectionSchemas.items, DEFAULT_RULES.items),
   spellIngredients: withDefaults(sectionSchemas.spellIngredients, DEFAULT_RULES.spellIngredients),
-  advancement: withDefaults(sectionSchemas.advancement, DEFAULT_RULES.advancement),
+  advancement: withDefaults(sectionSchemas.advancement, defaultsOf(ALL_SECTIONS.advancement) as Ruleset["advancement"]),
   tables: withDefaults(sectionSchemas.tables, DEFAULT_RULES.tables),
   system: withDefaults(sectionSchemas.system, DEFAULT_RULES.system),
 };

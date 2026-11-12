@@ -2,7 +2,9 @@ import { describe, expect, it, vi } from "vitest";
 
 import { type BattleDb, loadBattle } from "../load-battle";
 
-import { DEFAULT_RULES } from "@/lib/utils/rules";
+import { defaultRulesFor } from "@/lib/utils/rules/section-registry";
+
+const DEFAULT_RULES = defaultRulesFor({ key: "homm" });
 
 function fakeDb(row: { status: string; rules: unknown; campaignRules: unknown }) {
   const findFirst = vi.fn(async (args?: { select?: { campaign?: { select?: Record<string, unknown> } } }) => args?.select?.campaign?.select?.rules ? { campaign: { rules: row.campaignRules } } : ({
