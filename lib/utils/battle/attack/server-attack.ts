@@ -78,7 +78,7 @@ export function resolveServerAttack(input: ServerAttackInput): { battleAction: B
 
     const single = attack.noLevelDice ? [] : rollGroups(parseDiceLenient(formula).groups, rng);
 
-    const damageRolls = critDoublesDice(flow.ctx.rules, roll.isCritical) && !ruleSystemOf(flow.ctx.rules).combat.mitigateDamage ? critDamageRolls({ formula, rolls: single, rng }).rolls : single;
+    const damageRolls = critDoublesDice(flow.ctx.rules, roll.isCritical) ? critDamageRolls({ formula, rolls: single, rng }).rolls : single;
 
     const { hitDamage } = resolveHit({
       flow,

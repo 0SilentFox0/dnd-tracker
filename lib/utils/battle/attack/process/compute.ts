@@ -260,23 +260,25 @@ function mitigateHit(
   params: ComputeHitDamageParams & { rules: Ruleset },
   input: { attacker: BattleParticipant; target: BattleParticipant; weapon: number; amount: number },
 ): { amount: number; steps: DamageStep[]; rows: DamageRow[]; afterHit?: MitigateResult["afterHit"] } | null {
-  const hook = ruleSystemOf(params.rules).combat.mitigateDamage;
-
   const { margin, location, totalAttackValue } = params.attackRoll;
 
-  if (!hook || margin === undefined) return null;
+  if (margin === undefined) return null;
 
-  const result = hook({
-    ...input,
-    weapon: input.weapon + (params.attack.damageBonus ?? 0),
-    margin,
-    location: location ?? "",
-    crit: params.attackRoll.isCritical,
-    attackRoll: totalAttackValue,
-    attack: params.attack,
-    rng: params.rng ?? Math.random,
+  const result = ruleSystemOf(params.rules).combat.damage({
     rules: params.rules,
-  });
+    crit: params.attackRoll.isCritical,
+    hit: {
+      ...input,
+      weapon: input.weapon + (params.attack.damageBonus ?? 0),
+      margin,
+      location: location ?? "",
+      attackRoll: totalAttackValue,
+      attack: params.attack,
+      rng: params.rng ?? Math.random,
+    },
+  }).mitigated;
+
+  if (!result) return null;
 
   let running = 0;
 

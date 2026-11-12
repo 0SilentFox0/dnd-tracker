@@ -120,6 +120,18 @@ export interface MitigateResult {
   afterHit?(target: BattleParticipant, round: number): { participant: BattleParticipant; message: LogLine };
 }
 
+export interface DamageCtx {
+  rules: Ruleset;
+  crit: boolean;
+  hit?: Omit<MitigateCtx, "rules" | "crit">;
+}
+
+export interface DamageResult {
+  /** A critical rolls the damage dice twice */
+  doubleDice: boolean;
+  mitigated?: MitigateResult;
+}
+
 export type ZeroHpCtx = DamageConsequencesInput & { rules: Ruleset; manual?: boolean };
 
 export interface InitiativeScore {
@@ -264,7 +276,8 @@ export interface RuleSystemCombat {
   abortedRoll(ctx: ResolveAttackCtx): AttackRollResult;
   /** Characteristic and base target an attack is rolled against, before situational modifiers (percentile systems only) */
   attackTarget?(attacker: BattleParticipant, attack: BattleAttack): { label: LogLine; target: number };
-  mitigateDamage?(ctx: MitigateCtx): MitigateResult;
+  /** Crit-dice rule and, when `ctx.hit` is set, the system's own damage mitigation of that hit */
+  damage(ctx: DamageCtx): DamageResult;
   onZeroHp?(ctx: ZeroHpCtx): DamageConsequencesResult;
   /** Base score before flat modifiers; `roll`/`die` are null when nothing was rolled (static mode, pinned) */
   initiative(p: BattleParticipant, ctx: { rules: Pick<Ruleset, "initiative">; rng: Rng }): InitiativeScore;

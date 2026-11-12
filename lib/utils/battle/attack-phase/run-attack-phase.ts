@@ -238,7 +238,7 @@ function strikeAt(ctx: PhaseCtx, st: PhaseState, target: BattleParticipant, i: n
     serverRolled: { d20: strike.serverRolled, ...(strikeDice.serverRolled && { damageFrom: strikeDice.rolls.length - strikeDice.serverRolled.length }) },
   });
 
-  if (attackResult.success) ctx.dice.hit(critDoublesDice(input.rules, !!attackResult.attackRoll?.isCritical) && !ruleSystemOf(input.rules).combat.mitigateDamage);
+  if (attackResult.success) ctx.dice.hit(critDoublesDice(input.rules, !!attackResult.attackRoll?.isCritical));
 
   st.sceneState = attackResult.sceneState;
   st.order = mergeParticipants(st.order, attackResult.allParticipantsUpdated ?? []);

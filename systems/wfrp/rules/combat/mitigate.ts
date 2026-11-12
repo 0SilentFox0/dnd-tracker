@@ -9,7 +9,7 @@ import { asLocation } from "./location";
 import { participantStats } from "./participant";
 
 import { dynamicTextRef, textRef } from "@/lib/i18n/text-ref";
-import type { MitigateCtx, MitigateResult,MitigateStep } from "@/lib/utils/rules/systems/types";
+import type { DamageCtx, DamageResult, MitigateCtx, MitigateResult, MitigateStep } from "@/lib/utils/rules/systems/types";
 
 const step = (key: string, value: number): MitigateStep => ({
   key,
@@ -64,3 +64,5 @@ export function mitigateWfrpDamage(ctx: MitigateCtx): MitigateResult {
 
   return { amount: base.total + crit.bonusDamage, steps, totalLabel, afterHit: (p, round) => applyWfrpCrit(p, crit, round) };
 }
+
+export const wfrpDamage = (ctx: DamageCtx): DamageResult => ({ doubleDice: false, mitigated: ctx.hit && mitigateWfrpDamage({ ...ctx.hit, rules: ctx.rules, crit: ctx.crit }) });

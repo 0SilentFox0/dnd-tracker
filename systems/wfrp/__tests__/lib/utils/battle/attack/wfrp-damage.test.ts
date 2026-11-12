@@ -162,7 +162,7 @@ describe("WFRP damage", () => {
   });
 
   it("d20 rules have no wfrp hooks", () => {
-    expect(ruleSystemOf(DEFAULT_RULES).combat.mitigateDamage).toBeUndefined();
+    expect(ruleSystemOf(DEFAULT_RULES).combat.damage({ rules: DEFAULT_RULES, crit: true }).mitigated).toBeUndefined();
     expect(ruleSystemOf(DEFAULT_RULES).combat.onZeroHp).toBeUndefined();
   });
 });

@@ -30,7 +30,7 @@ export const D6POOL_SYSTEM: RuleSystemDefinition = {
   },
   sheetTest: { accepts: (body) => body.kind === "test", roll: () => ({ kind: "test" }) as never },
   rest: { kinds: false },
-  combat: { judge: "client", dice: 6, actionEconomy: { bonusAction: false, reaction: false }, resolveAttack: d6Attack, abortedRoll: (ctx) => ({ ...d6Attack({ ...ctx, manualRoll: ctx.manualRoll ?? 1 }).attackRoll, isHit: false }),
+  combat: { judge: "client", dice: 6, actionEconomy: { bonusAction: false, reaction: false }, resolveAttack: d6Attack, damage: () => ({ doubleDice: false }), abortedRoll: (ctx) => ({ ...d6Attack({ ...ctx, manualRoll: ctx.manualRoll ?? 1 }).attackRoll, isHit: false }),
     initiative: (p, ctx) => {
       if (ctx.rules.initiative.mode !== "roll") return { total: p.abilities.baseInitiative, roll: null, die: null };
 
