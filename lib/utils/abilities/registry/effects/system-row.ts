@@ -12,8 +12,13 @@ export interface SystemEffectRegistryRow {
   apply: (input: never) => EffectApplyResult;
 }
 
-export interface SystemEffectRow {
+export interface SystemEffectRowInput {
   kind: string;
   row: SystemEffectRegistryRow;
   defaults: Record<string, unknown>;
+}
+
+export interface SystemEffectRow extends SystemEffectRowInput {
+  /** Owning module id, stamped at the generated root */
+  system: string;
 }

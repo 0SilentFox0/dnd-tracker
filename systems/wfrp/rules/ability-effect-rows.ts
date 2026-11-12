@@ -1,4 +1,4 @@
-import type { SystemEffectRow } from "@/lib/utils/abilities/registry/effects/system-row";
+import type { SystemEffectRowInput } from "@/lib/utils/abilities/registry/effects/system-row";
 import type { FieldMeta } from "@/lib/utils/abilities/registry/fields";
 import { seg, type Segment } from "@/lib/utils/abilities/segments";
 import type { WfrpEffect } from "@/systems/wfrp/rules/ability-effects";
@@ -75,4 +75,4 @@ const attack = {
   defaults: { attack: "bite", damage: 3 },
 } as const;
 
-export const WFRP_EFFECT_ROWS = [armour, ward, size, psychology, attack] as const satisfies readonly SystemEffectRow[];
+export const WFRP_EFFECT_ROWS = [armour, ward, size, psychology, attack] as const satisfies readonly SystemEffectRowInput[];

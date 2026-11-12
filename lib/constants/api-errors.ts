@@ -81,7 +81,7 @@ export const API_ERRORS = {
   INVALID_RULES: "errors.invalidRules",
   SYSTEM_LOCKED: "errors.systemLocked",
   SYSTEM_LEVELS_UNSUPPORTED: "errors.systemLevelsUnsupported",
-  SYSTEM_TRAITS_UNSUPPORTED: "errors.systemTraitsUnsupported",
+  EFFECT_OUTSIDE_COMPOSITION: "errors.effectOutsideComposition",
   SYSTEM_DRAFTS_UNSUPPORTED: "errors.systemDraftsUnsupported",
   ROLL_KIND_MISMATCH: "errors.rollKindMismatch",
   ROLL_OUT_OF_RANGE: "errors.rollOutOfRange",

@@ -45,7 +45,7 @@ describe("unitsResource", () => {
     expect(db.unit.update.mock.calls[1][0].data.characteristics).toEqual(DEFAULT_CHARACTERISTICS);
   });
 
-  it("rejects trait effects outside wfrp before writing, accepts them in wfrp", async () => {
+  it("rejects wfrp effects outside the composition (422) before writing, accepts them in wfrp", async () => {
     db.unit.create.mockResolvedValue({ id: "u1" });
     db.unit.update.mockResolvedValue({ id: "u1" });
 
@@ -54,8 +54,8 @@ describe("unitsResource", () => {
     const input = createUnitSchema.parse({ name: "X", abilities }) as never;
 
     db.campaign.findUnique.mockResolvedValue({ rules: {} });
-    await expect(unitsResource.create(actor, input)).rejects.toMatchObject({ message: API_ERRORS.SYSTEM_TRAITS_UNSUPPORTED, status: 400 });
-    await expect(unitsResource.update(actor, { id: "u1", knownSpells: [] } as never, input)).rejects.toMatchObject({ message: API_ERRORS.SYSTEM_TRAITS_UNSUPPORTED, status: 400 });
+    await expect(unitsResource.create(actor, input)).rejects.toMatchObject({ message: API_ERRORS.EFFECT_OUTSIDE_COMPOSITION, status: 422 });
+    await expect(unitsResource.update(actor, { id: "u1", knownSpells: [] } as never, input)).rejects.toMatchObject({ message: API_ERRORS.EFFECT_OUTSIDE_COMPOSITION, status: 422 });
     expect(db.unit.create).not.toHaveBeenCalled();
     expect(db.unit.update).not.toHaveBeenCalled();
 

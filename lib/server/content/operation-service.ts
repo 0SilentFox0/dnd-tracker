@@ -19,7 +19,7 @@ import { importContent } from "@/lib/server/content/import/import-content";
 import { loadNames } from "@/lib/server/content/import/names";
 import { translateImportReport } from "@/lib/server/content/import/translate-report";
 import { CONTENT_OPERATIONS } from "@/lib/server/content/operations";
-import { assertTraitsSupported } from "@/lib/server/content/traits-guard";
+import { assertEffectsInComposition } from "@/lib/server/content/traits-guard";
 import { withCampaignContentWrite } from "@/lib/server/content/write";
 import { afterContentCommit } from "@/lib/server/content/write-context";
 import { listSkillTrees, saveSkillTree } from "@/lib/server/skills/skill-tree-service";
@@ -191,7 +191,7 @@ export async function runContentOperation(operationId: ContentOperationId, actor
 
         const rules = await loadRules(actor.campaignId);
 
-        assertTraitsSupported(ruleSystemOf(rules), units.flatMap((unit) => unit.abilities ?? []));
+        assertEffectsInComposition(rules.system, units.flatMap((unit) => unit.abilities ?? []));
 
         await assertCampaignRefs(actor.campaignId, { spell: [...units.flatMap((unit) => unit.knownSpells), ...units.flatMap((unit) => abilitySpellIds(unit.abilities))] });
 

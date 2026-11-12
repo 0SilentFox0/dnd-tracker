@@ -70,7 +70,7 @@ export const ROOT_SPECS: readonly RootSpec[] = [
     file: "lib/utils/abilities/registry/effects/system-rows.ts",
     blocks: [
       { layer: (id) => `systems/${id}/rules/ability-effect-rows.ts`, line: imp((id) => `${upper(id)}_EFFECT_ROWS`, (id) => `@/systems/${id}/rules/ability-effect-rows`) },
-      { layer: (id) => `systems/${id}/rules/ability-effect-rows.ts`, line: (id) => `${upper(id)}_EFFECT_ROWS,` },
+      { layer: (id) => `systems/${id}/rules/ability-effect-rows.ts`, line: (id) => `ownedBy("${id}", ${upper(id)}_EFFECT_ROWS),` },
     ],
   },
   {

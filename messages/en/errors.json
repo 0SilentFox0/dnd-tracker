@@ -546,5 +546,5 @@
   "wfrpDraftInvalid": "The hero creation choices are invalid",
   "outOfAmmo": "Out of ammunition",
   "weaponReloading": "The weapon is reloading",
-  "systemTraitsUnsupported": "This rule system does not support unit traits"
+  "effectOutsideComposition": "The effect belongs to a module outside this campaign's rule system"
 }
