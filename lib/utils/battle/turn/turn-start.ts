@@ -168,7 +168,7 @@ function applyStartOfTurnDamage(
       systemPending = ticks.pending === true;
     }
 
-    const hazard = map && updatedParticipant.combatStats.currentHp > 0 ? hazardUnder(map, updatedParticipant, undefined, others) : null;
+    const hazard = map && updatedParticipant.combatStats.currentHp > 0 ? hazardUnder(map, updatedParticipant, undefined, { participants: others, rules }) : null;
 
     const hit = hazard && hazardHit(updatedParticipant, hazard, currentRound, others, rng, rules);
 
@@ -280,7 +280,7 @@ export function processStartOfTurn(
 
   const { skippedBy } = reset;
 
-  updatedParticipant = pruneDeadInlineGrants(reset.participant, currentRound, allParticipants);
+  updatedParticipant = pruneDeadInlineGrants(reset.participant, currentRound, allParticipants, rules);
 
   const id = participant.basicInfo.id;
 

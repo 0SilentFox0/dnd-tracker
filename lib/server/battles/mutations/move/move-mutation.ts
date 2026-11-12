@@ -78,14 +78,14 @@ export function moveMutation(ctx: BattleMutationContext, data: MoveBody): Mutati
   if (!actions.enabled(rules)) {
     const moved = at(mover, data.to, (mover.battleData.movementUsed ?? 0) + cost);
 
-    const hazard = isActive(moved) ? hazardOnMove(map, participants, mover, data.to, cost) : null;
+    const hazard = isActive(moved) ? hazardOnMove(map, participants, mover, data.to, cost, rules) : null;
 
     return finishMove(ctx, { participants: replaceParticipant(participants, moved), moved, hazard, messages: [], events: [], trail: { from: mover.battleData.position, path: pathFrom(search, mover, data.to) ?? [] } });
   }
 
   const out = moveWithReactions({ map, participants, mover, to: data.to, path: pathFrom(search, mover, data.to), budget, cost, round: ctx.scene.round, battleId: ctx.scene.id, rules, rng: rngOf(ctx), sceneState: ctx.scene.sceneState });
 
-  const hazard = isActive(out.moved) ? hazardOnMove(map, participants, mover, out.destination, out.spent) : null;
+  const hazard = isActive(out.moved) ? hazardOnMove(map, participants, mover, out.destination, out.spent, rules) : null;
 
   const full = pathFrom(search, mover, data.to) ?? [];
 

@@ -7,6 +7,7 @@ export const noSustain: RuleSystemSustain = {
   begin: (ps) => ({ participants: ps, messages: [] }),
   drop: (ps) => ({ participants: ps, messages: [] }),
   tag: (_before, after) => after,
+  anchorLive: () => true,
   dropOrphaned: (ps) => ({ participants: ps, messages: [] }),
 };
 

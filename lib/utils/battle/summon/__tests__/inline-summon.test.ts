@@ -184,9 +184,9 @@ describe("summonInline: зникнення", () => {
   it("зникає після закінчення тривалості: мертвий, dismissed, знятий з мапи", async () => {
     const { order } = await summon(bush({ duration: { rounds: 3 } }));
 
-    expect(dismissExpiredSummons(order, 5).participants).toBe(order);
+    expect(dismissExpiredSummons(order, 5, rules).participants).toBe(order);
 
-    const out = dismissExpiredSummons(order, 6);
+    const out = dismissExpiredSummons(order, 6, rules);
 
     const [b] = bushes(out.participants);
 
@@ -205,11 +205,11 @@ describe("summonInline: зникнення", () => {
 
     const built = await applyAbilitySummons(r.summons.map((s) => ({ ...s, atCell: { x: 4, y: 5 } })), r.allParticipantsUpdated as BattleParticipant[], { campaignId: "c", battleId: "b", rng: () => 0.5, deps: { loadPool: async () => ({ units: [], races: [] }) }, map, round: 2 });
 
-    expect(dismissExpiredSummons(built.order, 3).participants).toBe(built.order);
+    expect(dismissExpiredSummons(built.order, 3, rules).participants).toBe(built.order);
 
     const dropped = dropConcentration(built.order, "druid", "тест").participants;
 
-    expect(bushes(dismissExpiredSummons(dropped, 3).participants)[0].battleData.dismissed).toBe(true);
+    expect(bushes(dismissExpiredSummons(dropped, 3, rules).participants)[0].battleData.dismissed).toBe(true);
   });
 });
 

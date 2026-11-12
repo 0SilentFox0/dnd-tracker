@@ -32,7 +32,7 @@ const knownBy = (spells: BookSpell[] | undefined, who: BattleParticipant | null,
 function useGrantLiveness(): (g: SpellGrant) => boolean {
   const { battle } = useBattleScene();
 
-  return useCallback((g) => isGrantLive(g, battle.currentRound, battle.initiativeOrder), [battle.currentRound, battle.initiativeOrder]);
+  return useCallback((g) => isGrantLive(g, battle.currentRound, battle.initiativeOrder, battle.rules), [battle.currentRound, battle.initiativeOrder, battle.rules]);
 }
 
 /** Прогріває закляття бою, поки він простоює. */

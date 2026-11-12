@@ -130,7 +130,16 @@ export function concentrationBroken(p: BattleParticipant): boolean {
   return p.combatStats.status === CombatStatus.DEAD || p.combatStats.currentHp <= 0 || hasCondition(p, "incapacitated");
 }
 
+export function isZoneConcentrationLive(ps: BattleParticipant[], tag: ConcentrationTag | undefined): boolean {
+  if (!tag) return true;
+
+  const caster = findParticipant(ps, tag.casterId);
+
+  return !!caster && caster.combatStats.status !== CombatStatus.DEAD && caster.battleData.activeEffects.some((e) => e.concentration?.castId === tag.castId);
+}
+
 export const D20_SUSTAIN: RuleSystemSustain = {
+  anchorLive: isZoneConcentrationLive,
   holds: (rules, spell) => rules.concentration.enabled && spell.concentration === true,
   holding: hasConcentration,
   begin: beginConcentration,

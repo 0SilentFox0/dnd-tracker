@@ -188,9 +188,9 @@ describe("transform: згасання", () => {
   it("за часом відновлює все; ще не час — той самий масив", async () => {
     const { out } = await transformed();
 
-    expect(revertExpiredTransforms(out.order, 7).participants).toBe(out.order);
+    expect(revertExpiredTransforms(out.order, 7, rules).participants).toBe(out.order);
 
-    const { participants, messages } = revertExpiredTransforms(out.order, 8);
+    const { participants, messages } = revertExpiredTransforms(out.order, 8, rules);
 
     const orc = participants.find((p) => p.basicInfo.id === "orc") as BattleParticipant;
 
@@ -206,11 +206,11 @@ describe("transform: згасання", () => {
 
     const withConc = out.order;
 
-    expect(revertExpiredTransforms(withConc, 3).participants).toBe(withConc);
+    expect(revertExpiredTransforms(withConc, 3, rules).participants).toBe(withConc);
 
     const dropped = dropConcentration(withConc, "mage", "").participants;
 
-    const orc = revertExpiredTransforms(dropped, 3).participants.find((p) => p.basicInfo.id === "orc") as BattleParticipant;
+    const orc = revertExpiredTransforms(dropped, 3, rules).participants.find((p) => p.basicInfo.id === "orc") as BattleParticipant;
 
     expect(orc.battleData.transform).toBeUndefined();
     expect(orc.combatStats.maxHp).toBe(40);

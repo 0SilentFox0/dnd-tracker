@@ -132,11 +132,11 @@ function withVictory(scene: BattleSceneState, result: MutationResult, rules: Rul
 }
 
 function withPlacement(map: BattleMapConfig | null, scene: { status: BattleStatus; round: number; participants: BattleParticipant[] }, result: MutationResult, place: boolean, rules: Ruleset): MutationResult {
-  const dismissed = dismissExpiredSummons(result.participants, result.scene?.round ?? scene.round);
+  const dismissed = dismissExpiredSummons(result.participants, result.scene?.round ?? scene.round, rules);
 
   if (dismissed.participants !== result.participants) result = { ...result, participants: dismissed.participants, events: [...result.events, systemEvent(result.scene?.round ?? scene.round, lineText(dismissed.messages, "; "))] };
 
-  const reverted = revertExpiredTransforms(result.participants, result.scene?.round ?? scene.round);
+  const reverted = revertExpiredTransforms(result.participants, result.scene?.round ?? scene.round, rules);
 
   if (reverted.participants !== result.participants) result = { ...result, participants: reverted.participants, events: [...result.events, systemEvent(result.scene?.round ?? scene.round, lineText(reverted.messages, "; "))] };
 
@@ -255,7 +255,7 @@ export async function runGuardedBattleOperationCore<TBody>(
 
   const unswept = withPlacement(mutatedMap, { status: loaded.scene.status, round: loaded.scene.round, participants: loaded.participants }, mutated, !isDryRun, loaded.meta.rules);
 
-  const swept = sweepDeadZones(mutatedMap, unswept.participants);
+  const swept = sweepDeadZones(mutatedMap, unswept.participants, loaded.meta.rules);
 
   const map = swept ?? mutatedMap;
 

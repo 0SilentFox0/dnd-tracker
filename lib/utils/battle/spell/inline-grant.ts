@@ -1,10 +1,11 @@
 import { findParticipant } from "@/lib/utils/abilities/engine/core/participants";
-import { isZoneConcentrationLive } from "@/lib/utils/battle/concentration";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
+import type { Ruleset } from "@/lib/utils/rules";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { BattleParticipant, SpellGrant } from "@/types/battle";
 
-export function isGrantLive(grant: SpellGrant, round: number, ps: BattleParticipant[]): boolean {
-  return (grant.expiresRound === undefined || round <= grant.expiresRound) && isZoneConcentrationLive(ps, grant.concentrationOf);
+export function isGrantLive(grant: SpellGrant, round: number, ps: BattleParticipant[], rules: Ruleset): boolean {
+  return (grant.expiresRound === undefined || round <= grant.expiresRound) && ruleSystemOf(rules).magic.sustain.anchorLive(ps, grant.concentrationOf);
 }
 
 export const peekInlineGrant = (ps: BattleParticipant[], casterId: string, data: { spellId: string; grantKey?: string }): SpellGrant | undefined =>
@@ -26,10 +27,10 @@ export function withInlineDefinition(spell: CastableSpell, grant: SpellGrant): C
   };
 }
 
-export function pruneDeadInlineGrants(p: BattleParticipant, round: number, ps: BattleParticipant[]): BattleParticipant {
+export function pruneDeadInlineGrants(p: BattleParticipant, round: number, ps: BattleParticipant[], rules: Ruleset): BattleParticipant {
   const grants = p.spellcasting.grants ?? [];
 
-  const dead = grants.filter((g) => g.inline && !isGrantLive(g, round, ps));
+  const dead = grants.filter((g) => g.inline && !isGrantLive(g, round, ps, rules));
 
   if (dead.length === 0) return p;
 

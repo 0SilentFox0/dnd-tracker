@@ -1,5 +1,3 @@
-import { CombatStatus } from "@/lib/constants/battle";
-import { findParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import type { ActiveEffect, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 export type ConcentrationTag = NonNullable<ActiveEffect["concentrationOf"]>;
@@ -29,13 +27,4 @@ export function uniqueCastId(ps: BattleParticipant[], map: BattleMapConfig | nul
   while (castIdTaken(ps, map, castIdFor(casterId, spellId, round, seq))) seq += 1;
 
   return castIdFor(casterId, spellId, round, seq);
-}
-
-/** Річ, прив'язана до касту (зона, предмет, грант), живе, поки живий маркер тримача з тим самим castId. */
-export function isZoneConcentrationLive(ps: BattleParticipant[], tag: ConcentrationTag | undefined): boolean {
-  if (!tag) return true;
-
-  const caster = findParticipant(ps, tag.casterId);
-
-  return !!caster && caster.combatStats.status !== CombatStatus.DEAD && caster.battleData.activeEffects.some((e) => e.concentration?.castId === tag.castId);
 }

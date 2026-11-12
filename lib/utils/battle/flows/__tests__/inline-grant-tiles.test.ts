@@ -4,6 +4,7 @@ import { textOf } from "@/lib/i18n/test/text";
 import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
 import { buildSpellPick, grantsFor, initialSpellFlow, inlineSpellTiles, spellFlow, spellPayload } from "@/lib/utils/battle/flows";
 import { isGrantLive } from "@/lib/utils/battle/spell/inline-grant";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { SpellGrant } from "@/types/battle";
 import type { BookSpell } from "@/types/spells";
 
@@ -46,7 +47,7 @@ describe("inline grant tiles", () => {
   });
 
   it("liveness follows the expiry round", () => {
-    expect(isGrantLive(grant, 3, [caster])).toBe(true);
-    expect(isGrantLive(grant, 4, [caster])).toBe(false);
+    expect(isGrantLive(grant, 3, [caster], DEFAULT_RULES)).toBe(true);
+    expect(isGrantLive(grant, 4, [caster], DEFAULT_RULES)).toBe(false);
   });
 });

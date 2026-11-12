@@ -389,6 +389,8 @@ export interface RuleSystemSustain {
   drop(ps: BattleParticipant[], casterId: string, reason: LogLine): SustainResult;
   /** Binds the effects the cast just added to the caster's hold */
   tag(before: BattleParticipant[], after: BattleParticipant[], tag: NonNullable<ActiveEffect["concentrationOf"]>, abilityKey: string): BattleParticipant[];
+  /** A zone, object, form or grant bound to a hold is alive while the hold is; an untagged one always is */
+  anchorLive(ps: BattleParticipant[], tag: NonNullable<ActiveEffect["concentrationOf"]> | undefined): boolean;
   /** Ends a hold whose effects, zones, objects and grants are all gone */
   dropOrphaned(ps: BattleParticipant[], map?: BattleMapConfig | null, round?: number): SustainResult;
 }

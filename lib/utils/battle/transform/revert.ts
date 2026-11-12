@@ -1,9 +1,10 @@
 import { CombatStatus } from "@/lib/constants/battle";
 import { textRef } from "@/lib/i18n/text-ref";
 import { applyRawDamage } from "@/lib/utils/abilities/engine/effects/hp";
-import { isZoneConcentrationLive } from "@/lib/utils/battle/concentration";
 import { removeEffects } from "@/lib/utils/battle/conditions/query";
 import { isFallen } from "@/lib/utils/battle/grid/occupancy";
+import type { Ruleset } from "@/lib/utils/rules";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { BattleParticipant, TransformState } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
@@ -48,27 +49,27 @@ export function revertOnZero(before: BattleParticipant, after: BattleParticipant
   return { before: real, after: applyRawDamage(real, overflow), overflow };
 }
 
-const expired = (p: BattleParticipant, round: number, ps: BattleParticipant[]) => {
+const expired = (p: BattleParticipant, round: number, ps: BattleParticipant[], rules: Ruleset) => {
   const t = p.battleData.transform;
 
   if (!t) return false;
 
   return (
     (t.expiresRound !== undefined && round > t.expiresRound) ||
-    !isZoneConcentrationLive(ps, t.concentrationOf) ||
+    !ruleSystemOf(rules).magic.sustain.anchorLive(ps, t.concentrationOf) ||
     !p.battleData.activeEffects.some((e) => e.abilityKey === transformKey(t.castId)) ||
     isFallen(p)
   );
 };
 
 /** Форма закінчилась (час, концентрація, знятий маркер, смерть): стани звичайної форми повертаються. */
-export function revertExpiredTransforms(ps: BattleParticipant[], round: number): { participants: BattleParticipant[]; messages: LogLine[] } {
-  if (!ps.some((p) => expired(p, round, ps))) return { participants: ps, messages: [] };
+export function revertExpiredTransforms(ps: BattleParticipant[], round: number, rules: Ruleset): { participants: BattleParticipant[]; messages: LogLine[] } {
+  if (!ps.some((p) => expired(p, round, ps, rules))) return { participants: ps, messages: [] };
 
   const messages: LogLine[] = [];
 
   const participants = ps.map((p) => {
-    if (!expired(p, round, ps)) return p;
+    if (!expired(p, round, ps, rules)) return p;
 
     const t = p.battleData.transform as TransformState;
 
