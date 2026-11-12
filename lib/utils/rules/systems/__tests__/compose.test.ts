@@ -15,6 +15,9 @@ const metas: SystemMeta[] = [
   m("x", { claims: ["slot"], conflicts: ["y"] }),
   m("y", { claims: ["slot"], conflicts: ["x"] }),
   m("z", { claims: ["slot"] }),
+  m("p", { claims: ["magic"] }),
+  m("q", { claims: ["magic.slots"] }),
+  m("pq", { claims: ["magic", "magic.slots"] }),
   m("needs-b", { requires: ["core", "b"] }),
   m("foreign", { requires: ["other"] }),
   m("loop1", { requires: ["core", "loop2"] }),
@@ -45,6 +48,16 @@ describe("validateComposition", () => {
     expect(codes(["foreign"])).toEqual(["wrongBase"]);
     expect(codes(["nope"])).toEqual(["unknownModule"]);
     expect(validateComposition({ key: "nope" }, metas).map((i) => i.code)).toEqual(["unknownKey"]);
+  });
+
+  it("reports a prefix collision between different owners", () => {
+    expect(codes(["p", "q"])).toEqual(["duplicateClaim"]);
+    expect(codes(["q", "p"])).toEqual(["duplicateClaim"]);
+  });
+
+  it("allows one owner to claim a slot and its sub-slot, and unrelated prefixes", () => {
+    expect(codes(["pq"])).toEqual([]);
+    expect(codes(["q", "a"])).toEqual([]);
   });
 
   it("reports a conflict pair once", () => expect(codes(["x", "y"]).filter((c) => c === "conflict")).toHaveLength(1));

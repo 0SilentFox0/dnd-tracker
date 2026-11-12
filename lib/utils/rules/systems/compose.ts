@@ -81,6 +81,16 @@ export function validateComposition(system: SystemSelection, metas: Metas = SYST
 
   for (const [slot, ids] of claimants) if (ids.length > 1) issues.push({ code: "duplicateClaim", module: slot, detail: ids.sort().join(",") });
 
+  for (const [slot, ids] of claimants) {
+    for (const [inner, innerIds] of claimants) {
+      if (!inner.startsWith(`${slot}.`)) continue;
+
+      const owners = [...new Set([...ids, ...innerIds])];
+
+      if (owners.length > 1) issues.push({ code: "duplicateClaim", module: slot, detail: owners.sort().join(",") });
+    }
+  }
+
   try {
     compositionOrder(base, modules, metas);
   } catch {
