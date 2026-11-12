@@ -7,7 +7,7 @@ import { textRef } from "@/lib/i18n/text-ref";
 import { restoreCharm } from "@/lib/utils/abilities/engine/effects/charm";
 import { conditionEventForTarget, evaluateCondition, hasCreatureTypeCondition } from "@/lib/utils/abilities/registry/conditions";
 import { applyEffect } from "@/lib/utils/abilities/registry/effects";
-import { filterEffectsForSystem } from "@/lib/utils/abilities/registry/effects/ownership";
+import { isEffectInSystem } from "@/lib/utils/abilities/registry/effects/ownership";
 import { SYSTEM_EFFECT_OWNERSHIP } from "@/lib/utils/abilities/registry/effects/system-rows";
 import { triggerMatches } from "@/lib/utils/abilities/registry/triggers";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
@@ -56,7 +56,9 @@ export function runAbilities(participants: BattleParticipant[], event: AbilityEv
 
       if (ability.condition && !perTarget && !evaluateCondition(ability.condition, { owner, event, participants: ps, sourceId: ability.source.id })) continue;
 
-      const effects = filterEffectsForSystem(ability.effects, ctx.rules.system, SYSTEM_EFFECT_OWNERSHIP).map((effect, effectIndex) => ({ effect, effectIndex, targetIds: resolveTargetIds("target" in effect ? effect.target : undefined, ownerId, event, ps, ctx).filter((id) => !perTarget || !ability.condition || evaluateCondition(ability.condition, { owner, event: conditionEventForTarget(event, id), participants: ps, sourceId: ability.source.id })) }));
+      const effects = ability.effects.map((effect, effectIndex) => ({ effect, effectIndex })).filter(({ effect }) => isEffectInSystem(effect, ctx.rules.system, SYSTEM_EFFECT_OWNERSHIP)).map(({ effect, effectIndex }) => ({ effect, effectIndex, targetIds: resolveTargetIds("target" in effect ? effect.target : undefined, ownerId, event, ps, ctx).filter((id) => !perTarget || !ability.condition || evaluateCondition(ability.condition, { owner, event: conditionEventForTarget(event, id), participants: ps, sourceId: ability.source.id })) }));
+
+      if (effects.length === 0 && ability.effects.length > 0) continue;
 
       if (perTarget && !effects.some(({ targetIds }) => targetIds.length > 0)) continue;
 

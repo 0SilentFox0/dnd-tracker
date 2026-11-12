@@ -59,3 +59,5 @@ const compositionOf = (system: SystemSelection): Composition => {
 
 /** Engine-side skip: stored effects of modules outside the campaign composition stay in the row but do nothing. */
 export const filterEffectsForSystem = <E extends EffectLike>(effects: readonly E[], system: SystemSelection, own: EffectOwnership): readonly E[] => (hasOwners(own) ? filterEffectsInComposition(effects, compositionOf(system), own) : effects);
+
+export const isEffectInSystem = (effect: EffectLike, system: SystemSelection, own: EffectOwnership): boolean => !hasOwners(own) || isEffectInComposition(effect, compositionOf(system), own);

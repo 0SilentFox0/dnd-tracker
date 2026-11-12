@@ -8,6 +8,7 @@ import { describeFlag, FLAG_FIELDS, FLAG_KEYS } from "./flags";
 import { applyDealDamage, applyDot, applyHeal, applyHot, describeDealDamage, describeDot, describeHeal, describeHot } from "./hp";
 import { applyManeuver, describeManeuver } from "./maneuver";
 import { MODULE_EFFECT_ROWS } from "./module-effect-rows";
+import { isEffectInSystem } from "./ownership";
 import { applyPush, describePush } from "./push";
 import {
   applyCleanse,
@@ -28,7 +29,7 @@ import {
   modifyStatFields,
 } from "./static";
 import { applyRaiseDead, applySummon, describeRaiseDead, describeSummon } from "./summon";
-import { SYSTEM_EFFECT_ROWS } from "./system-rows";
+import { SYSTEM_EFFECT_OWNERSHIP, SYSTEM_EFFECT_ROWS } from "./system-rows";
 import type { EffectApplyInput, EffectApplyResult } from "./types";
 
 import type { Translator } from "@/lib/i18n/translator";
@@ -174,6 +175,8 @@ const SYSTEM_EFFECT_REGISTRY = Object.fromEntries([...SYSTEM_EFFECT_ROWS, ...MOD
 export const EFFECT_REGISTRY = { ...BASE_EFFECT_REGISTRY, ...SYSTEM_EFFECT_REGISTRY } as { [K in EffectKind]: EffectDefinition<K> };
 
 export function applyEffect(input: EffectApplyInput): EffectApplyResult {
+  if (!isEffectInSystem(input.effect, input.ctx.rules.system, SYSTEM_EFFECT_OWNERSHIP)) return { participants: input.participants, messages: [] };
+
   const def = EFFECT_REGISTRY[input.effect.kind] as EffectDefinition<EffectKind>;
 
   return def.apply(input as never);
