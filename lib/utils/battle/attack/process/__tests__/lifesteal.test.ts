@@ -11,14 +11,14 @@ const vamp = (percent: number, hp = 10) => makeParticipant({ id: "v", hp, maxHp:
 
 describe("lifesteal", () => {
   it("лікує на відсоток завданої шкоди, не вище max HP", () => {
-    expect(applyVampirism([vamp(50)], "v", 9, "melee")).toMatchObject({ vampirismHeal: 4, updatedAttacker: { combatStats: { currentHp: 14 } } });
-    expect(applyVampirism([vamp(100, 28)], "v", 9, "melee")).toMatchObject({ vampirismHeal: 2 });
+    expect(applyVampirism([vamp(50)], "v", 9, "melee", DEFAULT_RULES)).toMatchObject({ vampirismHeal: 4, updatedAttacker: { combatStats: { currentHp: 14 } } });
+    expect(applyVampirism([vamp(100, 28)], "v", 9, "melee", DEFAULT_RULES)).toMatchObject({ vampirismHeal: 2 });
   });
 
   it("без прапорця, без шкоди чи від заклинання — нічого", () => {
-    expect(applyVampirism([makeParticipant({ id: "v" })], "v", 9, "melee").vampirismHeal).toBe(0);
-    expect(applyVampirism([vamp(50)], "v", 0, "melee").vampirismHeal).toBe(0);
-    expect(applyVampirism([vamp(50)], "v", 9, "magic").vampirismHeal).toBe(0);
+    expect(applyVampirism([makeParticipant({ id: "v" })], "v", 9, "melee", DEFAULT_RULES).vampirismHeal).toBe(0);
+    expect(applyVampirism([vamp(50)], "v", 0, "melee", DEFAULT_RULES).vampirismHeal).toBe(0);
+    expect(applyVampirism([vamp(50)], "v", 9, "magic", DEFAULT_RULES).vampirismHeal).toBe(0);
   });
 
   it("Вампіризм: заклинання вішає тимчасовий прапорець на союзника", () => {
@@ -30,6 +30,6 @@ describe("lifesteal", () => {
 
     const r = castSpell({ rules: DEFAULT_RULES, caster, spell, targetIds: ["a"], allParticipants: [caster, ally, makeParticipant({ id: "e", side: ParticipantSide.ENEMY })], currentRound: 1, battleId: "b", diceRolls: [], rng: seq(0.5) });
 
-    expect(applyVampirism(r.allParticipantsUpdated, "a", 10, "ranged").vampirismHeal).toBe(5);
+    expect(applyVampirism(r.allParticipantsUpdated, "a", 10, "ranged", DEFAULT_RULES).vampirismHeal).toBe(5);
   });
 });

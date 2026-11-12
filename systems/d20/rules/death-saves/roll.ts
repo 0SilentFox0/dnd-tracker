@@ -1,6 +1,8 @@
+import { clearDeathSaves, FRESH_DEATH_SAVES } from "./state";
+
 import { CombatStatus } from "@/lib/constants/battle";
 import { textRef } from "@/lib/i18n/text-ref";
-import { clearDeathSaves, FRESH_DEATH_SAVES, isDying } from "@/lib/utils/battle/death-saves";
+import { isDying } from "@/lib/utils/battle/death-saves";
 import { rollDie } from "@/lib/utils/common/dice";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleParticipant } from "@/types/battle";

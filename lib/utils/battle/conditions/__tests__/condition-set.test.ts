@@ -3,10 +3,10 @@ import { describe, expect, it } from "vitest";
 import { CombatStatus } from "@/lib/constants/battle";
 import { goblin, hero } from "@/lib/server/battles/__tests__/mutations/fixtures";
 import { hasCondition, PERMANENT_ROUNDS } from "@/lib/utils/battle/conditions";
-import { DEATH_SAVES_TIMED_KEY } from "@/lib/utils/battle/death-saves";
 import { DEFAULT_RULES, type Ruleset } from "@/lib/utils/rules";
 import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import { startDying } from "@/systems/d20/rules/death-saves/start";
+import { DEATH_SAVES_TIMED_KEY } from "@/systems/d20/rules/death-saves/state";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
 
 const DND5E: Ruleset = { ...DEFAULT_RULES, system: { key: "dnd5e" } };

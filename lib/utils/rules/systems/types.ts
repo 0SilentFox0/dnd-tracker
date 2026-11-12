@@ -444,6 +444,8 @@ export interface RuleSystemCombat {
   /** Falling to 0 HP (dying, death, unconsciousness); `ctx.manual` is a DM status change settled the same way */
   onZeroHp(ctx: ZeroHpCtx): DamageConsequencesResult;
   onDamaged?: readonly DamagedHook[];
+  /** A participant raised above 0 HP (heal, victory revive) leaves the system's dying state */
+  onRevived?(p: BattleParticipant): BattleParticipant;
   turn?: RuleSystemTurn;
   actions: RuleSystemActions;
   reactions: RuleSystemReactions;

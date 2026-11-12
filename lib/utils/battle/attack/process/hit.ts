@@ -149,7 +149,7 @@ export function resolveHit(p: ResolveHitParams): { hitDamage: ComputeHitDamageRe
     flow.messages.push(...cast.messages);
   }
 
-  const vampirism = applyVampirism(flow.ps, attackerId, hitDamage.totalFinalDamage, attack.type);
+  const vampirism = applyVampirism(flow.ps, attackerId, hitDamage.totalFinalDamage, attack.type, flow.ctx.rules);
 
   if (vampirism.updatedAttacker) put(flow, vampirism.updatedAttacker);
 

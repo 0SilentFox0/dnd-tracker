@@ -5,16 +5,17 @@ import { applyRawDamage, applyRawHeal } from "@/lib/utils/abilities/engine/effec
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { hasCondition } from "@/lib/utils/battle/conditions";
 import { applyDamageConsequences, settleStatusChange } from "@/lib/utils/battle/damage/consequences";
-import { clearDeathSaves } from "@/lib/utils/battle/death-saves";
 import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { textsOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import type { BattleSceneState } from "@/lib/utils/battle/store";
 import { advanceTurn } from "@/lib/utils/battle/turn";
 import { checkVictoryConditions } from "@/lib/utils/battle/turn/victory";
 import { DEFAULT_RULES, type Ruleset } from "@/lib/utils/rules";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import { beginConcentration } from "@/systems/d20/rules/concentration/sustain";
 import { deathSaveDamage, rollDeathSave } from "@/systems/d20/rules/death-saves/roll";
 import { startDying } from "@/systems/d20/rules/death-saves/start";
+import { clearDeathSaves } from "@/systems/d20/rules/death-saves/state";
 import type { BattleParticipant } from "@/types/battle";
 
 const on: Ruleset = { ...DEFAULT_RULES, deathSaves: { ...DEFAULT_RULES.deathSaves, enabled: true } };
@@ -119,11 +120,15 @@ describe("rollDeathSave", () => {
 
 describe("healing", () => {
   it("raw heal wakes a dying hero", () => {
-    const { participant } = applyRawHeal(dying(), 4);
+    const { participant } = applyRawHeal(dying(), 4, ruleSystemOf(DEFAULT_RULES).combat.onRevived);
 
     expect(participant.combatStats).toMatchObject({ currentHp: 4, status: CombatStatus.ACTIVE });
     expect(participant.battleData.deathSaves).toBeUndefined();
     expect(hasCondition(participant, "unconscious")).toBe(false);
+  });
+
+  it("raw heal without a revive hook (non-d20 systems) leaves the dying state alone", () => {
+    expect(applyRawHeal(dying(), 4).participant.battleData.deathSaves).toBeDefined();
   });
 
   it("clearDeathSaves removes state and counters", () => {

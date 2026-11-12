@@ -11,9 +11,10 @@ import { effectSource, upsertTimedEffect } from "@/lib/utils/abilities/engine/ef
 import type { Effect } from "@/lib/utils/abilities/schema";
 import { seg, type Segment } from "@/lib/utils/abilities/segments";
 import { applyDamageConsequences } from "@/lib/utils/battle/damage/consequences";
-import { clearDeathSaves, isDying } from "@/lib/utils/battle/death-saves";
+import { isDying } from "@/lib/utils/battle/death-saves";
 import { hasImmunity } from "@/lib/utils/battle/resistance";
 import { forgoDice } from "@/lib/utils/common/dice";
+import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
@@ -89,7 +90,7 @@ export function applyHeal(input: EffectApplyInput<Of<"heal">>): EffectApplyResul
       combatStats: { ...t.combatStats, currentHp: hp, status: hp > 0 ? CombatStatus.ACTIVE : t.combatStats.status },
     };
 
-    ps = replaceParticipant(ps, hp > 0 ? clearDeathSaves(healed) : healed);
+    ps = replaceParticipant(ps, hp > 0 ? (ruleSystemOf(ctx.rules).combat.onRevived?.(healed) ?? healed) : healed);
     messages.push(
       isActive(t)
         ? textRef("abilityText.log.heal", { label, target: t.basicInfo.name, amount: hp - before })

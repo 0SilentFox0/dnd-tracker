@@ -50,7 +50,7 @@ function absorbSpellDamage(state: SpellCastState, id: string, damage: number): v
 
     if (target.combatStats.currentHp <= 0) continue;
 
-    const { participant, healed } = applyRawHeal(target, Math.floor((damage * f.percent) / 100));
+    const { participant, healed } = applyRawHeal(target, Math.floor((damage * f.percent) / 100), ruleSystemOf(flow.ctx.rules).combat.onRevived);
 
     if (healed <= 0) continue;
 
