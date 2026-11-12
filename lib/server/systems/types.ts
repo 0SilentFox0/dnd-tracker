@@ -1,3 +1,4 @@
+import type { NextResponse } from 'next/server';
 import type { ZodType } from 'zod';
 
 import type { SpellRequestData } from '@/lib/schemas/battles';
@@ -158,8 +159,25 @@ export interface SystemParticipantServer {
     prepareContext?: readonly ContextPreparer[];
 }
 
+/** Player-draft creation of a base whose characters are built by a creation flow instead of the d20 draft */
+export interface SystemDrafts {
+    create(
+        request: Request,
+        campaign: CampaignAccessResult['campaign'],
+        access: CampaignAccessResult
+    ): Promise<NextResponse>;
+    update(
+        request: Request,
+        campaignId: string,
+        characterId: string,
+        access: CampaignAccessResult
+    ): Promise<NextResponse>;
+}
+
 export interface SystemServer {
     schemas: SystemSchemas;
+    /** Exclusive slot of a base; an addon never sets it */
+    drafts?: SystemDrafts;
     participant?: SystemParticipantServer;
     balance: SystemBalance;
     operations?: Record<string, SystemOperation>;

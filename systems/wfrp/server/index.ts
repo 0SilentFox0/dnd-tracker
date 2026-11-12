@@ -35,6 +35,21 @@ export const WFRP_MODULE_SERVER: SystemServer = {
             hitModelUnitStats(base, built, wfrpHitModel),
         readsBuiltRules: true,
     },
+    drafts: {
+        create: async (request, campaign, access) =>
+            (await import('./draft/create-wfrp-draft')).createWfrpDraft(
+                request,
+                campaign,
+                access
+            ),
+        update: async (request, campaignId, characterId, access) =>
+            (await import('./draft/patch-wfrp-draft')).patchWfrpDraft(
+                request,
+                campaignId,
+                characterId,
+                access
+            ),
+    },
     operations: WFRP_OPERATIONS,
     routes: {
         character: {

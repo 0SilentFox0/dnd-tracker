@@ -1,13 +1,5 @@
 [
   {
-    "file": "app/api/campaigns/[id]/characters/[characterId]/draft/update-draft.ts",
-    "reason": "route"
-  },
-  {
-    "file": "app/api/campaigns/[id]/characters/draft/create-draft.ts",
-    "reason": "route"
-  },
-  {
     "file": "lib/schemas/careers.ts",
     "reason": "content-kind"
   },
