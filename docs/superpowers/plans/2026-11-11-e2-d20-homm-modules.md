@@ -321,6 +321,8 @@
 
 **Prod.** Немає. **Модель.** Sonnet. **Ревʼю.** Opus.
 
+**Додаток до Ч13 (ревʼю Ч4, I1, 2026-11-12).** Бекфіл `modules` має додавати також `skilltrees` і `artifactsets` (і за потреби `unitstacks`/`heroscaling`): у `dnd5e` без `modules` персонажі вже не отримують вміння з дерев навичок і наборів у бою (collect.ts), хоча аркуш їх показує. Гейт перед деплоєм: `scripts/db/abilities-ownership-report.ts` на prodcopy = 0 порушень.
+
 ## Ч14. Дані II: лічильники wfrp у слот (D7)
 
 **Мета.** `battleData.{fortune,channelledSl,sin,conditionTests,psychologyTested}` → `battleData.system` (слот `wfrp`).
