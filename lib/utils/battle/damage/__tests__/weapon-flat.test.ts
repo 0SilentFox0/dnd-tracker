@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { AttackType, ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { CRITICAL_SUCCESS_EFFECTS, type CriticalEffect } from "@/lib/constants/critical-effects";
 import { makeParticipant, seq } from "@/lib/utils/abilities/__tests__/fixtures";
-import { resolveRetaliation } from "@/lib/utils/battle/attack/counter-strike";
+import { resolveRetaliation } from "@/lib/utils/battle/attack/__tests__/helpers";
 import { computeHitDamage } from "@/lib/utils/battle/attack/process/compute";
 import { averageAttackDamage } from "@/lib/utils/battle/damage/average";
 import { computeDamageBreakdown } from "@/lib/utils/battle/damage/breakdown";

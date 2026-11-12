@@ -11,7 +11,7 @@ import { findParticipant, isActive, mergeParticipants, withSelf } from "@/lib/ut
 import type { Rng, SummonRequest } from "@/lib/utils/abilities/engine/core/types";
 import { processAttack } from "@/lib/utils/battle/attack";
 import { activeEffectIds } from "@/lib/utils/battle/attack/consume-effects";
-import { resolveRetaliation } from "@/lib/utils/battle/attack/counter-strike";
+import { counterStrike } from "@/lib/utils/battle/attack/counter-strike";
 import { critDoublesDice } from "@/lib/utils/battle/attack/crit-dice";
 import { nextChainTarget } from "@/lib/utils/battle/attack/process/chain";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
@@ -253,7 +253,7 @@ function strikeAt(ctx: PhaseCtx, st: PhaseState, target: BattleParticipant, i: n
 
   st.actions.push(attackResult.battleAction);
 
-  const retaliate = retaliationOf(ctx, st, target, attackResult);
+  const strikeBack = counterStrikeOf(ctx, st, target, attackResult);
 
   const after = runAfterAttack(ruleSystemOf(input.rules).combat.afterAttack ?? [], {
     participants: st.order,
@@ -264,16 +264,11 @@ function strikeAt(ctx: PhaseCtx, st: PhaseState, target: BattleParticipant, i: n
     round: input.battle.currentRound,
     rules: input.rules,
     sceneState: st.sceneState,
-    retaliate,
+    critFail: attackResult.attackRoll?.isCriticalFail,
+    counterStrike: strikeBack,
   });
 
   if (after) applyAfter(ctx, st, after);
-
-  if (!after?.handled && i === 0) {
-    const answer = retaliate(false);
-
-    if (answer) applyAfter(ctx, st, answer);
-  }
 
   const held = holdBackNewEffects(st.order, st.attacker, ctx.effectsBeforeVolley);
 
@@ -284,16 +279,15 @@ function strikeAt(ctx: PhaseCtx, st: PhaseState, target: BattleParticipant, i: n
   return attackResult;
 }
 
-function retaliationOf(ctx: PhaseCtx, st: PhaseState, target: BattleParticipant, attackResult: ProcessAttackResult): AfterAttackCtx["retaliate"] {
+function counterStrikeOf(ctx: PhaseCtx, st: PhaseState, target: BattleParticipant, attackResult: ProcessAttackResult): AfterAttackCtx["counterStrike"] {
   const { input, request, rng } = ctx;
 
   return (provoked, from) => {
-    const retaliation = resolveRetaliation({
+    const retaliation = counterStrike({
       participants: from?.participants ?? st.order,
       attackerId: request.attacker.basicInfo.id,
       defenderId: target.basicInfo.id,
       attack: request.attack,
-      attackRoll: attackResult.attackRoll,
       criticalEffect: attackResult.criticalEffectApplied,
       provoked,
       round: input.battle.currentRound,

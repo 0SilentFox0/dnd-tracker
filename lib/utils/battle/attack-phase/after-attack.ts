@@ -1,6 +1,6 @@
 import type { AfterAttackCtx, AfterAttackHook, AfterAttackResult } from "@/lib/utils/rules/systems/types";
 
-/** Runs the hooks in order, each seeing the previous one's participants and scene state (also through `retaliate`); `handled` once any hook answered the strike */
+/** Runs the hooks in order, each seeing the previous one's participants and scene state (also through `counterStrike`); `handled` once any hook answered the strike */
 export function runAfterAttack(list: readonly AfterAttackHook[], ctx: AfterAttackCtx): AfterAttackResult | null {
   let out = null as AfterAttackResult | null;
 
@@ -9,7 +9,7 @@ export function runAfterAttack(list: readonly AfterAttackHook[], ctx: AfterAttac
 
     const sceneState = out ? out.sceneState : ctx.sceneState;
 
-    const r = hook({ ...ctx, participants, sceneState, retaliate: (provoked) => ctx.retaliate(provoked, { participants, sceneState }) });
+    const r = hook({ ...ctx, participants, sceneState, handled: out?.handled, counterStrike: (provoked, from) => ctx.counterStrike(provoked, from ?? { participants, sceneState }) });
 
     if (!r) continue;
 

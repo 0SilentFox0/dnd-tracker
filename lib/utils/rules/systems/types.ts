@@ -259,8 +259,12 @@ export interface AfterAttackCtx {
   round: number;
   rules: Ruleset;
   sceneState?: SystemSlot;
-  /** The target's answer to this strike (core retaliation); `provoked` skips the reaction accounting */
-  retaliate(provoked: boolean, from?: { participants: BattleParticipant[]; sceneState?: SystemSlot }): AfterAttackResult | null;
+  /** The attack missed critically (natural 1) */
+  critFail?: boolean;
+  /** An earlier hook already answered the strike */
+  handled?: true;
+  /** The target's free strike back at the attacker (core primitive: no limits, no accounting); `provoked` ignores the reaction rules */
+  counterStrike(provoked: boolean, from?: { participants: BattleParticipant[]; sceneState?: SystemSlot }): AfterAttackResult | null;
 }
 
 export interface AfterAttackResult {
