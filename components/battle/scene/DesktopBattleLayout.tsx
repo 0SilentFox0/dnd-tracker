@@ -83,7 +83,7 @@ export function DesktopBattleLayout({ onComplete }: { onComplete: () => void }) 
         </aside>
         {battle.map ? (
           <main className="flex min-h-0 flex-col">
-            <div data-tour="battle.map-tools" className="relative grid grid-cols-[1fr_auto_1fr] items-center gap-3 px-3 pt-2">
+            <div data-tour="battle.map-tools" className="relative grid grid-cols-[1fr_auto_1fr] items-center gap-3 px-1 pt-1">
               <div ref={setToolsSlot} className="flex min-w-0 items-center" />
               <HudChipTabs
                 ariaLabel={t("viewMode")}
@@ -94,7 +94,7 @@ export function DesktopBattleLayout({ onComplete }: { onComplete: () => void }) 
               />
             </div>
             {viewMode === "map" ? (
-              <div className="min-h-0 flex-1 p-3">
+              <div className="min-h-0 flex-1 p-1">
                 <MapToolsSlotContext.Provider value={toolsSlot}><BattleMapPanel /></MapToolsSlotContext.Provider>
               </div>
             ) : (

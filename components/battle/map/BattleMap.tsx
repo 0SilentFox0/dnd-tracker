@@ -37,6 +37,9 @@ export interface BattleMapEditing {
 
 const NO_EDITING: BattleMapEditing = {};
 
+// на десктопі карта може бути вищою за область (до цього множника), щоб розтягнутись по ширині; зайве прокручується
+const DESKTOP_MAX_TALLER = 1.4;
+
 export function BattleMap({ map, participants, view, actions, className, editing = NO_EDITING, phone = false }: BattleMapProps) {
   const { clickableBlocked, showBlocked, strokeTool } = editing;
 
@@ -74,7 +77,7 @@ export function BattleMap({ map, participants, view, actions, className, editing
 
   const win = useMemo(() => (phone ? playableBounds(map) : { x: 0, y: 0, cols, rows }), [phone, map, cols, rows]);
 
-  const fit = fitMapView(avail, win, { rotatable: phone, bothWays: !phone, fillWidth: phone, minCell: MIN_TAP_CELL_PX });
+  const fit = fitMapView(avail, win, { rotatable: phone, bothWays: !phone, fillWidth: phone, taller: phone ? 1 : DESKTOP_MAX_TALLER, minCell: MIN_TAP_CELL_PX });
 
   const scrollsX = fit.width > avail.width + 0.5;
 

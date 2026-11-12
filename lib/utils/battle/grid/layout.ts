@@ -91,7 +91,7 @@ export const MIN_TAP_CELL_PX = 30;
 export function fitMapView(
   avail: { width: number; height: number },
   map: Pick<BattleMapConfig, "cols" | "rows">,
-  { rotatable = false, bothWays = false, fillWidth = false, minCell = 0 }: { rotatable?: boolean; bothWays?: boolean; fillWidth?: boolean; minCell?: number } = {},
+  { rotatable = false, bothWays = false, fillWidth = false, taller = 1, minCell = 0 }: { rotatable?: boolean; bothWays?: boolean; fillWidth?: boolean; taller?: number; minCell?: number } = {},
 ): MapView {
   // за орієнтацією, а не за виграшем площі: інакше карта перекидається, коли панель знизу росте
   const landscapeMapInPortrait = avail.height > avail.width && map.cols >= map.rows * ROTATE_MIN_RATIO;
@@ -102,7 +102,7 @@ export function fitMapView(
 
   const shown = rotated ? { cols: map.rows, rows: map.cols } : map;
 
-  const box = fillWidth ? { width: avail.width, height: (avail.width * shown.rows) / shown.cols } : fitMapBox(avail, shown);
+  const box = fillWidth ? { width: avail.width, height: (avail.width * shown.rows) / shown.cols } : fitMapBox({ width: avail.width, height: avail.height * taller }, shown);
 
   const grow = box.width > 0 ? Math.max(1, (minCell * shown.cols) / box.width) : 1;
 

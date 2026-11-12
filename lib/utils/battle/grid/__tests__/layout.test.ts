@@ -62,6 +62,10 @@ describe("fitMapView", () => {
     expect(fitMapView({ width: 600, height: 300 }, { cols: 12, rows: 20 }).rotated).toBe(false);
   });
 
+  it("taller: карта розтягується по ширині до заданої надвисоти", () => {
+    expect(fitMapView({ width: 600, height: 300 }, wide, { taller: 1.4 })).toEqual({ width: 600, height: 360, rotated: false });
+  });
+
   it("майже квадратна карта — поворот майже нічого не дає, лишається як є", () => {
     expect(fitMapView({ width: 300, height: 600 }, { cols: 11, rows: 10 }, { rotatable: true }).rotated).toBe(false);
   });

@@ -82,21 +82,21 @@ describe("BattleMap", () => {
 
     const clip = container.querySelector("[data-fx-clip]") as HTMLElement;
 
-    expect(parseFloat(clip.style.height)).toBeLessThanOrEqual(1000);
-    expect(parseFloat(clip.style.width)).toBeCloseTo(2000 / 3);
+    expect(parseFloat(clip.style.height)).toBeLessThanOrEqual(1400);
+    expect(parseFloat(clip.style.width)).toBeCloseTo(1400 * (2 / 3));
   });
 
   it("дрібні клітинки — карта росте до мінімальної клітинки й прокручується в обидва боки від краю", () => {
     avail = { width: 1000, height: 1000 };
 
-    const { container } = render(<BattleMap map={{ ...square, cols: 20, rows: 40 }} participants={[]} />);
+    const { container } = render(<BattleMap map={{ ...square, cols: 30, rows: 80 }} participants={[]} />);
 
     const clip = container.querySelector("[data-fx-clip]") as HTMLElement;
 
     const outer = clip.parentElement as HTMLElement;
 
-    expect(parseFloat(clip.style.width)).toBe(20 * MIN_TAP_CELL_PX);
-    expect(parseFloat(clip.style.height)).toBe(40 * MIN_TAP_CELL_PX);
+    expect(parseFloat(clip.style.width)).toBe(30 * MIN_TAP_CELL_PX);
+    expect(parseFloat(clip.style.height)).toBe(80 * MIN_TAP_CELL_PX);
     expect(outer.className).toContain("overflow-auto");
     expect(outer.className).toContain("items-start");
     expect(outer.className).toContain("justify-center");
