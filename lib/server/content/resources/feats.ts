@@ -22,7 +22,6 @@ import {
     featAsiUsedByBackground,
     featInUse,
 } from '@/lib/server/feats/feat-usage';
-import { profileReferences } from '@/lib/server/races/profile-usage';
 import { abilitiesJson } from '@/lib/utils/abilities/read';
 import { backgroundAsiRules } from '@/lib/utils/backgrounds/asi';
 import {
@@ -140,12 +139,11 @@ export const featsResource = defineResource<FeatRow, CreateInput, UpdateInput>({
             },
         });
     },
-    async remove(actor, existing) {
+    async remove(actor, existing, assertUnreferenced) {
         if (await featInUse(actor.campaignId, existing.id))
             throw new ContentError(API_ERRORS.FEAT_IN_USE, 409);
 
-        if (await profileReferences(actor.campaignId, { featId: existing.id }))
-            throw new ContentError(API_ERRORS.FEAT_IN_SPECIES_TABLE, 409);
+        await assertUnreferenced?.();
 
         await prisma.feat.deleteMany({
             where: { id: existing.id, campaignId: actor.campaignId },

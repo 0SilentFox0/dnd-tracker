@@ -45,8 +45,8 @@ import {
 import { assertSrdNameReferences } from '@/lib/server/templates/sync/name-references';
 import {
     createRefChecker,
-    danglingProfileWarnings,
-} from '@/lib/server/templates/sync/profile-refs';
+    danglingWarnings,
+} from '@/lib/server/templates/sync/ref-checker';
 import {
     keyOf,
     sourceChanged,
@@ -335,7 +335,7 @@ async function deleteRemoved(
                 where: { id: i.localId, campaignId: ctx.campaignId },
             });
 
-            refs.deleted(t.key);
+            await refs.deleted(t.key);
         }
     }
 
@@ -581,7 +581,7 @@ async function writeTables(
 
     const blocked = await deleteRemoved(db, ctx, selected, warnings);
 
-    warnings.push(...(await danglingProfileWarnings(db, ctx.campaignId)));
+    warnings.push(...(await danglingWarnings(db, ctx.campaignId)));
 
     if (db.compendiumEntry && db.compendiumSource) {
         await syncCompendiumProvenance(

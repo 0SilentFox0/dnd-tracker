@@ -15,6 +15,7 @@ import {
     assertKindActive,
     isKindActive,
 } from '@/lib/server/content/kind-active';
+import { unreferencedGuard } from '@/lib/server/content/referenced';
 import type { Actor } from '@/lib/utils/api/actor';
 import { NEED } from '@/lib/utils/api/need';
 
@@ -136,7 +137,11 @@ export async function removeContent(
     await assertKindActive(r.kind, actor);
 
     await write(r, actor, async () => {
-        await r.remove(actor, await found(r, actor, id, 'write'));
+        await r.remove(
+            actor,
+            await found(r, actor, id, 'write'),
+            unreferencedGuard(actor.campaignId, r.kind, id)
+        );
 
         if (prisma.compendiumEntry)
             await prisma.compendiumEntry.deleteMany({

@@ -25,9 +25,9 @@ import {
 } from '@/lib/server/templates/sync/layered';
 import {
     createRefChecker,
-    danglingProfileWarnings,
+    danglingWarnings,
     type RefChecker,
-} from '@/lib/server/templates/sync/profile-refs';
+} from '@/lib/server/templates/sync/ref-checker';
 import { keyOf, sourceSelection } from '@/lib/server/templates/sync/selection';
 import {
     cloneState,
@@ -149,7 +149,7 @@ export async function applyLayered(
         if (count !== 1) throw new ContentError(API_ERRORS.SOURCE_CHANGED, 409);
     }
 
-    warnings.push(...(await danglingProfileWarnings(db, campaignId)));
+    warnings.push(...(await danglingWarnings(db, campaignId)));
 
     return {
         applied: items.length,
@@ -230,7 +230,7 @@ async function applyItem(
             })
         );
 
-        refs.deleted(i.scope);
+        await refs.deleted(i.scope);
     } else {
         const pinned =
             i.status === 'deletedInSource' && e.baseline

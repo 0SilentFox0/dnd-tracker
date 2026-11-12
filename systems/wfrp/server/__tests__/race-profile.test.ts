@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { prisma } from '@/lib/db';
-import { profileReferences } from '@/lib/server/races/profile-usage';
 import type { SpeciesProfile } from '@/systems/wfrp/rules/creation';
+import { WFRP_CONTENT_REFS } from '@/systems/wfrp/server/content/refs';
 import {
     listRaceProfiles,
     saveRaceProfile,
@@ -110,22 +110,30 @@ describe('listRaceProfiles', () => {
     });
 });
 
-describe('profileReferences', () => {
+describe('WFRP_CONTENT_REFS', () => {
+    const db = {
+        race: prisma.race,
+        career: { findMany: vi.fn(async () => []) },
+        character: { findMany: vi.fn(async () => []) },
+    } as never;
+
+    const used = async (kind: string) =>
+        WFRP_CONTENT_REFS.find((s) => s.kind === kind)!.referenced(db, 'camp');
+
     beforeEach(() =>
         vi
             .mocked(prisma.race.findMany)
-            .mockResolvedValue([{ id: 'r1', profile: profile() }] as never)
+            .mockResolvedValue([{ profile: profile() }] as never)
     );
 
     it('finds careers, talents and random talents', async () => {
-        expect(await profileReferences('camp', { careerId: 'c1' })).toBe(true);
-        expect(await profileReferences('camp', { featId: 'f1' })).toBe(true);
-        expect(await profileReferences('camp', { featId: 'f2' })).toBe(true);
+        expect((await used('careers')).has('c1')).toBe(true);
+        expect((await used('feats')).has('f1')).toBe(true);
+        expect((await used('feats')).has('f2')).toBe(true);
     });
 
     it('false when nothing references the id', async () => {
-        expect(await profileReferences('camp', { careerId: 'zz' })).toBe(false);
-        expect(await profileReferences('camp', { featId: 'zz' })).toBe(false);
-        expect(await profileReferences('camp', {})).toBe(false);
+        expect((await used('careers')).has('zz')).toBe(false);
+        expect((await used('feats')).has('zz')).toBe(false);
     });
 });

@@ -1,6 +1,7 @@
 import { composeServer } from './compose';
 import type {
     ContentKindServer,
+    ContentRefSource,
     SystemBattleOperation,
     SystemOperation,
     SystemServer,
@@ -75,6 +76,9 @@ const unionServers = (): SystemServer[] => Object.values(SYSTEM_SERVER_UNION);
 
 export const systemContentKinds = (): Record<string, ContentKindServer> =>
     Object.assign({}, ...unionServers().map((s) => s.contentKinds ?? {}));
+
+export const systemContentRefs = (): ContentRefSource[] =>
+    unionServers().flatMap((s) => s.contentRefs ?? []);
 
 export const systemServerOf = (
     rules: Pick<Ruleset, 'system'>

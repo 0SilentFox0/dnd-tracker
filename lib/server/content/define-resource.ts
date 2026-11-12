@@ -46,7 +46,12 @@ export interface ContentResource<
     checkImport?(actor: Actor, input: Create | Update): Promise<void>;
     create(actor: Actor, input: Create): Promise<Row>;
     update(actor: Actor, existing: Row, input: Update): Promise<Row>;
-    remove(actor: Actor, existing: Row): Promise<void>;
+    /** `assertUnreferenced` (from the service) throws 409 while module data still references the row */
+    remove(
+        actor: Actor,
+        existing: Row,
+        assertUnreferenced?: () => Promise<void>
+    ): Promise<void>;
     /** absent → bulk delete is not offered (405) */
     removeAll?(actor: Actor): Promise<number>;
 }

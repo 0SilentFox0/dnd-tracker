@@ -3,8 +3,6 @@
   "lib/constants/api-errors.ts": 4,
   "lib/constants/site.ts": 1,
   "lib/onboarding/whats-new.ts": 6,
-  "lib/server/races/profile-usage.ts": 2,
-  "lib/server/templates/sync/profile-refs.ts": 1,
   "lib/utils/battle/log/codec.ts": 1,
   "lib/utils/rules/defaults.ts": 1,
   "lib/utils/rules/schema.ts": 2,

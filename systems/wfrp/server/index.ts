@@ -15,6 +15,7 @@ import { WfrpFortuneInputSchema } from '@/systems/wfrp/server/attack-input';
 import { careerToImportRecord } from '@/systems/wfrp/server/careers/import-record';
 import { careerTierSchema } from '@/systems/wfrp/server/careers/schema';
 import { careersResource } from '@/systems/wfrp/server/content/careers';
+import { WFRP_CONTENT_REFS } from '@/systems/wfrp/server/content/refs';
 import { WFRP_OPERATIONS } from '@/systems/wfrp/server/operations';
 import {
     raceProfileSaveHandler,
@@ -45,6 +46,7 @@ export const WFRP_MODULE_SERVER: SystemServer = {
             sharedSchemas: [[careerTierSchema, 'CareerTier']],
         },
     },
+    contentRefs: WFRP_CONTENT_REFS,
     drafts: {
         create: async (request, campaign, access) =>
             (await import('./draft/create-wfrp-draft')).createWfrpDraft(

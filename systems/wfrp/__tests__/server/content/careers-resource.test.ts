@@ -28,6 +28,7 @@ vi.mock('@/lib/cache/reference-data', () => ({
 }));
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
+import { ContentError } from '@/lib/server/content/errors';
 import type { Actor } from '@/lib/utils/api/actor';
 import { careersResource } from '@/systems/wfrp/server/content/careers';
 
@@ -156,16 +157,13 @@ describe('careersResource', () => {
         });
     });
 
-    it('remove while a species table lists it -> 409 CAREER_IN_SPECIES_TABLE (after CAREER_IN_USE)', async () => {
-        db.race.findMany.mockResolvedValue([
-            {
-                id: 'r',
-                profile: { careerTable: [{ max: 100, careerId: 'k' }] },
-            },
-        ]);
+    it('remove while the service guard reports a reference -> 409 (after CAREER_IN_USE)', async () => {
+        const guard = vi.fn(async () => {
+            throw new ContentError(API_ERRORS.CAREER_IN_SPECIES_TABLE, 409);
+        });
 
         await expect(
-            careersResource.remove(actor, { id: 'k' } as never)
+            careersResource.remove(actor, { id: 'k' } as never, guard)
         ).rejects.toMatchObject({
             message: API_ERRORS.CAREER_IN_SPECIES_TABLE,
             status: 409,
@@ -173,8 +171,10 @@ describe('careersResource', () => {
         expect(db.career.deleteMany).not.toHaveBeenCalled();
 
         db.character.count.mockResolvedValue(1);
+        guard.mockClear();
         await expect(
-            careersResource.remove(actor, { id: 'k' } as never)
+            careersResource.remove(actor, { id: 'k' } as never, guard)
         ).rejects.toMatchObject({ message: API_ERRORS.CAREER_IN_USE });
+        expect(guard).not.toHaveBeenCalled();
     });
 });

@@ -9,7 +9,6 @@ import { prisma } from '@/lib/db';
 import { assertCampaignRefs } from '@/lib/server/campaigns/campaign-refs';
 import { defineResource } from '@/lib/server/content/define-resource';
 import { ContentError } from '@/lib/server/content/errors';
-import { profileReferences } from '@/lib/server/races/profile-usage';
 import { toInputJson } from '@/lib/utils/common/json';
 import type { CareerTierDef } from '@/systems/wfrp/rules/careers/types';
 import { careerNameTaken } from '@/systems/wfrp/server/careers/career-name';
@@ -99,14 +98,11 @@ export const careersResource = defineResource<
             },
         });
     },
-    async remove(actor, existing) {
+    async remove(actor, existing, assertUnreferenced) {
         if (await careerInUse(actor.campaignId, existing.id))
             throw new ContentError(API_ERRORS.CAREER_IN_USE, 409);
 
-        if (
-            await profileReferences(actor.campaignId, { careerId: existing.id })
-        )
-            throw new ContentError(API_ERRORS.CAREER_IN_SPECIES_TABLE, 409);
+        await assertUnreferenced?.();
 
         await prisma.career.deleteMany({
             where: { id: existing.id, campaignId: actor.campaignId },

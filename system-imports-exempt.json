@@ -1,13 +1,5 @@
 [
   {
-    "file": "lib/server/races/profile-usage.ts",
-    "reason": "content-kind"
-  },
-  {
-    "file": "lib/server/templates/sync/profile-refs.ts",
-    "reason": "content-kind"
-  },
-  {
     "file": "lib/utils/rules/section-shapes.ts",
     "reason": "ruleset-section"
   }

@@ -28,7 +28,7 @@ vi.mock('@/lib/server/campaigns/version', () => ({
     bumpContentVersion: vi.fn(),
 }));
 
-import { profileReferences } from '@/lib/server/races/profile-usage';
+import { WFRP_CONTENT_REFS } from '@/systems/wfrp/server/content/refs';
 import {
     listRaceProfiles,
     saveRaceProfile,
@@ -56,6 +56,12 @@ const profile = {
     randomTalents: [],
     careerTable: [{ max: 100, careerId: ids.career }],
 };
+
+const used = async (kind: string) =>
+    WFRP_CONTENT_REFS.find((s) => s.kind === kind)!.referenced(
+        scoped as never,
+        ids.clone
+    );
 
 const campaign = (id: string, extra: object = {}) =>
     raw.campaign.create({
@@ -134,16 +140,12 @@ describe.skipIf(!isLocalDevDatabaseEnv())('race profile over layers', () => {
         ]);
     });
 
-    it('profileReferences sees the career and talent of the base profile', async () => {
-        expect(
-            await profileReferences(ids.clone, { careerId: ids.career })
-        ).toBe(true);
-        expect(await profileReferences(ids.clone, { featId: ids.feat })).toBe(
-            true
-        );
-        expect(await profileReferences(ids.clone, { careerId: 'none' })).toBe(
-            false
-        );
+    it('the content refs see the career and talent of the base profile', async () => {
+        const careers = await used('careers');
+
+        expect(careers.has(ids.career)).toBe(true);
+        expect(careers.has('none')).toBe(false);
+        expect((await used('feats')).has(ids.feat)).toBe(true);
     });
 
     it('save on a base species creates an override and keeps the base id public', async () => {

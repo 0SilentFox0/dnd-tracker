@@ -1,5 +1,7 @@
 import { Prisma } from '@prisma/client';
 
+import { API_ERRORS } from '@/lib/constants/api-errors';
+import type { ContentRefSource } from '@/lib/server/systems/types';
 import { collectKeysAndStrings } from '@/lib/server/templates/remap-ids';
 import type { SyncDb } from '@/lib/server/templates/sync/context';
 import { isRecord } from '@/lib/utils/common/is-record';
@@ -7,11 +9,6 @@ import {
     parseSpeciesProfile,
     profileRefIds,
 } from '@/systems/wfrp/server/profile-refs';
-
-export type RefScope = 'feats' | 'careers' | 'artifacts';
-
-export const isRefScope = (scope: string): scope is RefScope =>
-    scope === 'feats' || scope === 'careers' || scope === 'artifacts';
 
 const speciesProfiles = async (db: SyncDb, campaignId: string) =>
     (
@@ -21,7 +18,8 @@ const speciesProfiles = async (db: SyncDb, campaignId: string) =>
         })
     ).flatMap((r) => (r.profile == null ? [] : [r.profile]));
 
-/** Profiles and tiers reference rows by id inside JSON, so no FK stops a sync delete. */
+const EMPTY_PROFILE = { careerTable: [], talents: [], randomTalents: [] };
+
 async function featRefs(db: SyncDb, campaignId: string): Promise<Set<string>> {
     const [profiles, careers] = await Promise.all([
         speciesProfiles(db, campaignId),
@@ -53,13 +51,8 @@ async function careerRefs(
     const used = new Set<string>();
 
     for (const p of profiles)
-        for (const id of profileRefIds(
-            parseSpeciesProfile(p) ?? {
-                careerTable: [],
-                talents: [],
-                randomTalents: [],
-            }
-        ).careers)
+        for (const id of profileRefIds(parseSpeciesProfile(p) ?? EMPTY_PROFILE)
+            .careers)
             used.add(id);
 
     for (const { characteristics } of characters) {
@@ -74,71 +67,7 @@ async function careerRefs(
     return used;
 }
 
-/** Inventories hold artifact ids in JSON (equipped, backpack, stash), so no FK stops a sync delete. */
-async function artifactRefs(
-    db: SyncDb,
-    campaignId: string
-): Promise<Set<string>> {
-    const inventories = await db.characterInventory.findMany({
-        where: { character: { campaignId } },
-        select: { equipped: true, backpack: true, stash: true },
-    });
-
-    return collectKeysAndStrings(
-        inventories.flatMap((i) => [i.equipped, i.backpack, i.stash])
-    );
-}
-
-const REFS = {
-    feats: featRefs,
-    careers: careerRefs,
-    artifacts: artifactRefs,
-} as const;
-
-const BLOCKED_TEXT: Record<RefScope, string> = {
-    feats: 'used by a species profile or career',
-    careers: 'used by a species profile or character',
-    artifacts: 'in a character inventory',
-};
-
-const blockedText = (scope: RefScope, name: string) =>
-    `${scope} ${name}: not deleted, ${BLOCKED_TEXT[scope]}`;
-
-/** Lazy per-sync memo of reference sets, so N deleted rows cost one read per scope. */
-export function createRefChecker(db: SyncDb, campaignId: string) {
-    const memo = new Map<RefScope, Promise<Set<string>>>();
-
-    const refs = (scope: RefScope) => {
-        if (!memo.has(scope)) memo.set(scope, REFS[scope](db, campaignId));
-
-        return memo.get(scope)!;
-    };
-
-    return {
-        /** Warning when the row is still referenced (caller skips the delete), otherwise null. */
-        async blockedBy(
-            scope: string,
-            ids: string[],
-            name: string
-        ): Promise<string | null> {
-            if (!isRefScope(scope)) return null;
-
-            const used = await refs(scope);
-
-            return ids.some((id) => used.has(id))
-                ? blockedText(scope, name)
-                : null;
-        },
-        /** A deleted career stops referencing its tier talents. */
-        deleted(scope: string) {
-            if (scope === 'careers') memo.delete('feats');
-        },
-    };
-}
-
-export type RefChecker = ReturnType<typeof createRefChecker>;
-
-export async function danglingProfileWarnings(
+async function danglingProfileWarnings(
     db: SyncDb,
     campaignId: string
 ): Promise<string[]> {
@@ -177,3 +106,21 @@ export async function danglingProfileWarnings(
             : [];
     });
 }
+
+/** Profiles and tiers reference rows by id inside JSON, so no FK stops a delete */
+export const WFRP_CONTENT_REFS: readonly ContentRefSource[] = [
+    {
+        kind: 'feats',
+        reason: 'used by a species profile or career',
+        error: API_ERRORS.FEAT_IN_SPECIES_TABLE,
+        referenced: featRefs,
+        dangling: danglingProfileWarnings,
+    },
+    {
+        kind: 'careers',
+        reason: 'used by a species profile or character',
+        error: API_ERRORS.CAREER_IN_SPECIES_TABLE,
+        referenced: careerRefs,
+        invalidatesOnDelete: ['feats'],
+    },
+];

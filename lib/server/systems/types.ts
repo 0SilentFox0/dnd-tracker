@@ -5,6 +5,7 @@ import type { SpellRequestData } from '@/lib/schemas/battles';
 import type { AttackBody } from '@/lib/server/battles/mutations/attack/attack-mutation';
 import type { CharacterOperation } from '@/lib/server/characters/operation-runner';
 import type { AnyContentResource } from '@/lib/server/content/define-resource';
+import type { SyncDb } from '@/lib/server/templates/sync/context';
 import type { ArtifactSetRowLike } from '@/lib/utils/abilities/build/collect';
 import type { CampaignAccessResult } from '@/lib/utils/api/api-auth';
 import type { LegendaryActionBody } from '@/lib/utils/battle/actions/schema';
@@ -189,9 +190,23 @@ export interface ContentKindServer {
     sharedSchemas?: readonly (readonly [ZodType, string])[];
 }
 
+/** How a module's data points at core rows by id (JSON, no FK): blocks deletes of `kind` rows and sync deletes */
+export interface ContentRefSource {
+    kind: string;
+    /** Tail of the sync warning: "<kind> <name>: not deleted, <reason>" */
+    reason: string;
+    /** API_ERRORS key answered when a content delete hits a referenced row; absent = sync-only source */
+    error?: string;
+    referenced(db: SyncDb, campaignId: string): Promise<Set<string>>;
+    dangling?(db: SyncDb, campaignId: string): Promise<string[]>;
+    /** Deleting a row of `kind` makes the reference sets of these kinds stale */
+    invalidatesOnDelete?: readonly string[];
+}
+
 export interface SystemServer {
     schemas: SystemSchemas;
     contentKinds?: Record<string, ContentKindServer>;
+    contentRefs?: readonly ContentRefSource[];
     /** Exclusive slot of a base; an addon never sets it */
     drafts?: SystemDrafts;
     participant?: SystemParticipantServer;
