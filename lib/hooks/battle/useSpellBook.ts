@@ -51,7 +51,7 @@ export function useSpellBook(
 ) {
   const scene = useBattleScene();
 
-  const { magic } = useBattleRules();
+  const { tested: magic } = useBattleRules();
 
   const text = useText();
 

@@ -47,7 +47,7 @@ export function SpellFormBody({
 
   const Fields = key && systemUiOf(key).SpellMagicFields;
 
-  const magic = system?.magic && Fields ? { conditions: system.conditions?.catalog ?? [], Fields } : undefined;
+  const magic = system?.magic.tested && Fields ? { conditions: system.conditions?.catalog ?? [], Fields } : undefined;
 
   const tabs: HudTab<SpellFormTabId>[] = [
     {

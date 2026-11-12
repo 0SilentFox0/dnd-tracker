@@ -20,7 +20,7 @@ export function useBattleRules() {
       actionEconomy: combat.actionEconomy,
       d20Stats,
       spells,
-      magic: !!magic.tested,
+      tested: !!magic.tested,
       distance: distanceOf(rules),
       hpTerm: progression.hpTerm,
       systemKey: rules.system.key,
