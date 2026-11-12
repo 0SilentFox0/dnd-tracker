@@ -4,7 +4,7 @@ import { AttackType, ParticipantSide, ParticipantSourceType } from "@/lib/consta
 import { CRITICAL_FAIL_EFFECTS, CRITICAL_SUCCESS_EFFECTS, type CriticalEffect } from "@/lib/constants/critical-effects";
 import { textRef } from "@/lib/i18n/text-ref";
 import { makeEffect, makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
-import { resolveRetaliation, type RetaliationInput } from "@/lib/utils/battle/attack/retaliation";
+import { resolveRetaliation, type RetaliationInput } from "@/lib/utils/battle/attack/counter-strike";
 import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { ResolvedAbility } from "@/types/abilities";

@@ -1,6 +1,6 @@
 import { AttackType, ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { makeParticipant, seq } from "@/lib/utils/abilities/__tests__/fixtures";
-import { resolveRetaliation } from "@/lib/utils/battle/attack/retaliation";
+import { resolveRetaliation } from "@/lib/utils/battle/attack/counter-strike";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleAttack, BattleMapConfig, BattleParticipant } from "@/types/battle";

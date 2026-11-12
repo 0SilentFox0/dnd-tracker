@@ -4,7 +4,7 @@ import { createCritGate } from "../gate";
 
 import { AttackType,ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { makeParticipant, seq } from "@/lib/utils/abilities/__tests__/fixtures";
-import { resolveRetaliation } from "@/lib/utils/battle/attack/retaliation";
+import { resolveRetaliation } from "@/lib/utils/battle/attack/counter-strike";
 import { critEffectsFor } from "@/lib/utils/battle/crit-choice/catalog";
 import { mulberry32 } from "@/lib/utils/common/rng";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
