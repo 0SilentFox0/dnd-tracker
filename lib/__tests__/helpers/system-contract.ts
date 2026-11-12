@@ -8,7 +8,11 @@ import type { RuleSystemDefinition } from '@/lib/utils/rules/systems';
 import type { SystemMeta } from '@/lib/utils/rules/systems/meta';
 import { statColumnFillOf } from '@/lib/utils/rules/systems/stats';
 
-const NULLABLE_COLUMNS: readonly string[] = ['subclass', 'archetype'];
+const NULLABLE_COLUMNS: readonly string[] = [
+    'subclass',
+    'archetype',
+    'personalSkillId',
+];
 
 const FLAGS = ['lineage', 'attacks', 'spells', 'items', 'inventory'] as const;
 

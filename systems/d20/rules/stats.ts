@@ -4,4 +4,6 @@ import {
 } from '@/lib/constants/stat-columns';
 
 export const D20_STAT_COLUMNS: readonly CharacterSystemColumn[] =
-    CHARACTER_SYSTEM_COLUMNS.filter((column) => column !== 'archetype');
+    CHARACTER_SYSTEM_COLUMNS.filter(
+        (column) => column !== 'archetype' && column !== 'personalSkillId'
+    );

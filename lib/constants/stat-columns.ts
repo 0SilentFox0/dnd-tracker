@@ -11,6 +11,7 @@ export const CHARACTER_SYSTEM_COLUMNS = [
     ...STAT_COLUMNS,
     'armorClass',
     'archetype',
+    'personalSkillId',
     'class',
     'subclass',
     'classes',
