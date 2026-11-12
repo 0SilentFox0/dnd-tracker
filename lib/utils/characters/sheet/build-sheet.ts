@@ -18,7 +18,7 @@ import { sheetLineKey } from "@/lib/utils/characters/sheet/line-key";
 import { buildRestBlock } from "@/lib/utils/characters/sheet/rest-block";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import { signed } from "@/lib/utils/common/format";
-import { heroHpFormula, type Ruleset } from "@/lib/utils/rules";
+import { DEFAULT_RULES, type Ruleset } from "@/lib/utils/rules";
 import { ruleSystemOf } from "@/lib/utils/rules/systems";
 import type { BattleParticipant } from "@/types/battle";
 import type { CharacterSheet, SheetArtifact, TokenColor } from "@/types/characters";
@@ -116,7 +116,7 @@ export function buildCharacterSheet(input: SheetInput): CharacterSheet {
 
   const showSubrace = !!input.choices && (!!classEntries || input.choices.selections.lineage !== null);
 
-  const hp = characterBaseHp(c, { entries: input.classes, formula: input.rules && heroHpFormula(input.rules.heroScaling), rules: input.rules, characteristics: c.characteristics });
+  const hp = characterBaseHp(c, { entries: input.classes, rules: input.rules ?? DEFAULT_RULES, characteristics: c.characteristics });
 
   const hpBonus = p.combatStats.maxHp - hp.total;
 

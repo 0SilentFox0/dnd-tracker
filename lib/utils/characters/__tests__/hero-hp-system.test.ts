@@ -18,11 +18,11 @@ describe("characterBaseHp with rule system", () => {
     expect(hp.breakdown[0].label).toBe("characterProfile.sheet.lines.wounds");
   });
 
-  it("DEFAULT_RULES equals no rules", () => {
+  it("d20 ignores stored characteristics", () => {
     const entries: ResolvedClassEntry[] = [{ classId: "f", level: 3, class: fighter, subclass: null }];
 
     for (const opts of [{}, { entries }]) {
-      expect(characterBaseHp(c, { ...opts, rules: DEFAULT_RULES, characteristics: {} })).toEqual(characterBaseHp(c, opts));
+      expect(characterBaseHp(c, { ...opts, rules: DEFAULT_RULES, characteristics: {} })).toEqual(characterBaseHp(c, { ...opts, rules: DEFAULT_RULES }));
     }
   });
 });

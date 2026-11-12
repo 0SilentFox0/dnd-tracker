@@ -6,8 +6,6 @@
 import { AttackType } from "@/lib/constants/battle";
 import { heroArchetype } from "@/lib/constants/hero-archetypes";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
-import { DEFAULT_RULES } from "@/lib/utils/rules/defaults";
-import { heroHpFormula } from "@/lib/utils/rules/formulas";
 import type { TextRef } from "@/types/choices";
 
 /** Коефіцієнти масштабування (можна перевизначити на рівні кампанії) */
@@ -65,7 +63,7 @@ export function getHeroMaxHpBreakdown(
   level: number,
   constitution: number,
   archetype: string | null | undefined,
-  hp: HeroHpFormula = heroHpFormula(DEFAULT_RULES.heroScaling),
+  hp: HeroHpFormula,
 ): { total: number; breakdown: TextRef[] } {
   const a = heroArchetype(archetype);
 

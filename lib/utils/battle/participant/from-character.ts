@@ -37,7 +37,7 @@ import { applyCharacterResources, storedCharacterState } from "@/lib/utils/chara
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import { isRecord } from "@/lib/utils/common/is-record";
 import { attunedRefs } from "@/lib/utils/items/resolve";
-import { DEFAULT_RULES, heroHpFormula, type Ruleset } from "@/lib/utils/rules";
+import { DEFAULT_RULES, type Ruleset } from "@/lib/utils/rules";
 import { currencyValueOf, ruleSystemOf } from "@/lib/utils/rules/systems";
 import { composition } from "@/lib/utils/rules/systems/catalog";
 import { systemSlotOf } from "@/lib/utils/rules/systems/slot";
@@ -242,7 +242,7 @@ export async function createBattleParticipantFromCharacter(
     ? DND_SKILLS.filter((k) => (rawSkills as Record<string, unknown>)[k] === true)
     : [];
 
-  const computedMaxHp = characterBaseHp(character, { entries: resolvedClasses, formula: heroHpFormula(rules.heroScaling), rules, characteristics: character.characteristics }).total;
+  const computedMaxHp = characterBaseHp(character, { entries: resolvedClasses, rules, characteristics: character.characteristics }).total;
 
   const choiceGroups = [...(selections?.groups ?? []), ...(await characterTalentGroups(character, rules, context))];
 

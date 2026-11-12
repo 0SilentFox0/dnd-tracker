@@ -4,7 +4,11 @@ import { describe, expect, it } from "vitest";
 import { localSource } from "@/lib/i18n/local-source";
 import { translateIssue } from "@/lib/i18n/translate-issue";
 import type { Translator } from "@/lib/i18n/translator";
-import { heroBaseHp } from "@/lib/utils/characters/hero-hp";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
+import type { CharacterHpInput } from "@/lib/utils/rules/systems/types";
+import { heroBaseHp as baseHp } from "@/systems/d20/rules/progression/hero-hp";
+
+const heroBaseHp = (c: CharacterHpInput) => baseHp(c, DEFAULT_RULES.heroScaling);
 
 describe("heroBaseHp", () => {
   it("3 × HP/рівень + рівень × (HP/рівень + мод. ВИТ × 1.5)", () => {

@@ -558,7 +558,7 @@ export interface RuleSystemDefinition {
   participant?: RuleSystemParticipant;
   progression: {
     levels: boolean;
-    maxHp(input: { character: CharacterHpInput; characteristics: unknown; rules: Ruleset }): { total: number; breakdown: HpBreakdownLine[] } | null;
+    maxHp(input: { character: CharacterHpInput; entries?: readonly ResolvedClassEntry[] | null; characteristics: unknown; rules: Ruleset }): { total: number; breakdown: HpBreakdownLine[] };
     hpTerm: "hp" | "wounds";
     /** Proficiency bonus of a level; none means the system has no such bonus */
     proficiency?(level: number, rules: Ruleset): number;
