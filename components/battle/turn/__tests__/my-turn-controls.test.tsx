@@ -20,7 +20,7 @@ vi.mock("next/dynamic", () => ({
 
 vi.mock("@/components/battle/wizards/AttackWizard", () => ({ AttackWizard: () => null }));
 vi.mock("@/components/battle/use-system-battle-ui", () => ({
-  useSystemBattleUi: () => (rules.current.magic ? { ChannelDialog: () => <div data-testid="channel-dialog" />, ChannelLabel: () => <>Скерування</> } : undefined),
+  useSystemBattleUi: () => (rules.current.tested ? { ChannelDialog: () => <div data-testid="channel-dialog" />, ChannelLabel: () => <>Скерування</> } : undefined),
 }));
 vi.mock("@/components/battle/wizards/SpellBook", () => ({ SpellBook: () => null }));
 vi.mock("@/components/battle/turn/CoreActionsDialog", () => ({ CoreActionsDialog: () => null }));
@@ -78,20 +78,20 @@ describe("MyTurnControls: gating за прапорцями правил", () => 
   });
 
   it("wfrp показує плитку Скерування, d20 — ні", async () => {
-    rules.current = { actionEconomy: { bonusAction: false, reaction: false }, spells: true, magic: true };
+    rules.current = { actionEconomy: { bonusAction: false, reaction: false }, spells: true, tested: true };
     render(<MyTurnControls hero={hero} />);
     expect(screen.getByRole("button", { name: /Скерування/ })).toBeInTheDocument();
     expect(await screen.findByTestId("channel-dialog")).toBeInTheDocument();
     cleanup();
 
-    rules.current = { actionEconomy: { bonusAction: true, reaction: true }, spells: true, magic: false };
+    rules.current = { actionEconomy: { bonusAction: true, reaction: true }, spells: true, tested: false };
     render(<MyTurnControls hero={hero} />);
     expect(screen.queryByRole("button", { name: /Скерування/ })).not.toBeInTheDocument();
     expect(screen.queryByTestId("channel-dialog")).not.toBeInTheDocument();
   });
 
   it("hides the Channel tile for a wfrp hero without spells", () => {
-    rules.current = { actionEconomy: { bonusAction: false, reaction: false }, spells: true, magic: true };
+    rules.current = { actionEconomy: { bonusAction: false, reaction: false }, spells: true, tested: true };
 
     const mundane = { basicInfo: { id: "h2" }, spellcasting: { spellSlots: {}, knownSpells: [] } } as unknown as BattleParticipant;
 
@@ -100,7 +100,7 @@ describe("MyTurnControls: gating за прапорцями правил", () => 
   });
 
   it("hides the Channel tile for a wfrp unit that only has universal slots", () => {
-    rules.current = { actionEconomy: { bonusAction: false, reaction: false }, spells: true, magic: true };
+    rules.current = { actionEconomy: { bonusAction: false, reaction: false }, spells: true, tested: true };
 
     const unit = { basicInfo: { id: "u1" }, spellcasting: { spellSlots: { universal: { current: 3 } }, knownSpells: [] } } as unknown as BattleParticipant;
 
