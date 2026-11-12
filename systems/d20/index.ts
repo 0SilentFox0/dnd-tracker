@@ -16,12 +16,14 @@ import { D20_PROFICIENCY, D20_SAVES } from "./rules/saves";
 import { rollFromSheet } from "./rules/sheet-roll";
 import { D20_TURN } from "./rules/turn";
 
+import { CHARACTER_SYSTEM_COLUMNS } from "@/lib/constants/stat-columns";
 import type { RuleSystemDefinition } from "@/lib/utils/rules/systems/types";
 import type { SheetRollSubject } from "@/types/characters";
 
 export const D20_MODULE: RuleSystemDefinition = {
   key: "d20",
   progression: { levels: true, hpTerm: "hp", maxHp: d20MaxHp, proficiency: (level, rules) => proficiencyForLevel(level, rules.formulas) },
+  stats: { columns: [{ owns: CHARACTER_SYSTEM_COLUMNS }] },
   characteristics: { persisted: false, defaults: () => undefined, isEmpty: (v) => v == null || (typeof v === "object" && Object.keys(v).length === 0), sheetBlock: () => undefined },
   sheetTest: {
     accepts: (body) => body.kind !== "test",

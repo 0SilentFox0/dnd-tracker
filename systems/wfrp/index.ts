@@ -40,6 +40,12 @@ export const WFRP_MODULE: RuleSystemDefinition = {
       return { total: woundsMax(c), breakdown: woundsBreakdown(c) };
     },
   },
+  stats: {
+    columns: [{
+      owns: [],
+      fill: (rules) => ({ level: 1, strength: 10, dexterity: 10, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10, armorClass: 10, archetype: null, class: "", classes: [], initiative: rules.initiative.heroMin, speed: 30 }),
+    }],
+  },
   characteristics: { persisted: true, defaults: () => structuredClone(DEFAULT_CHARACTERISTICS) as unknown as SystemData, isEmpty: isEmptyCharacteristics, sheetBlock: wfrpSheetBlock, reconcile: reconcileCharacteristics, redact: redactCharacteristics, initial: initialCharacteristics },
   resources: {
     limits: (row) => ({ fateMax: readCharacteristics(row).fate }),
