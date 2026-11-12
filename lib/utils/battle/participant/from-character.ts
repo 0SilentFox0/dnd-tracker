@@ -36,7 +36,7 @@ import { applyCharacterResources, storedCharacterState } from "@/lib/utils/chara
 import { getAbilityModifier, spellcastingDerived } from "@/lib/utils/common/calculations";
 import { isRecord } from "@/lib/utils/common/is-record";
 import { attunedRefs } from "@/lib/utils/items/resolve";
-import { DEFAULT_RULES, heroDiceTable, heroHpFormula, proficiencyForLevel, type Ruleset } from "@/lib/utils/rules";
+import { DEFAULT_RULES, heroHpFormula, proficiencyForLevel, type Ruleset } from "@/lib/utils/rules";
 import { currencyValueOf, ruleSystemOf } from "@/lib/utils/rules/systems";
 import { composition } from "@/lib/utils/rules/systems/catalog";
 import { systemSlotOf } from "@/lib/utils/rules/systems/slot";
@@ -216,10 +216,6 @@ export async function createBattleParticipantFromCharacter(
 
   const archetype = heroArchetype(resolvedClasses ? null : (character as { archetype?: string | null }).archetype);
 
-  const meleeDice = heroDiceTable(rules, "melee");
-
-  const rangedDice = heroDiceTable(rules, "ranged");
-
   const primaryAbility = (ABILITY_KEYS as readonly string[]).includes(character.primaryAbility ?? "") ? (character.primaryAbility as AbilityKey) : undefined;
 
   const rawSaves = character.savingThrows;
@@ -292,7 +288,6 @@ export async function createBattleParticipantFromCharacter(
       moraleCap: 0,
       ...(resolvedClasses && { damageModel: "5e" as const }),
       ...systemSlotOf(ruleSystemOf(rules).combat.participantFields?.(character, equipmentGear)),
-      heroDice: meleeDice || rangedDice ? { melee: meleeDice, ranged: rangedDice } : undefined,
       primaryAbility,
       meleeMultiplier: archetype.melee,
       rangedMultiplier: archetype.ranged,

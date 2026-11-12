@@ -10,7 +10,6 @@ exports[`battle participant: item refs > frozen complete participant keeps grant
     "creatureType": "humanoid",
     "damageModel": "5e",
     "dexterity": 14,
-    "heroDice": undefined,
     "initiative": 0,
     "intelligence": 10,
     "level": 5,
