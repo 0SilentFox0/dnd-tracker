@@ -58,6 +58,14 @@ describe("system exhaustiveness", () => {
     for (const ns of systemNamespaces()) expect(fs.existsSync(path.join(ROOT, `messages/${locale}/${ns}.json`)), `${locale}/${ns}`).toBe(true);
   });
 
+  it("every base system declares ratchet tokens", () => {
+    const bases = (SYSTEM_META as readonly SystemMeta[]).filter((m) => (m.kind ?? "base") === "base");
+
+    expect(bases.length).toBeGreaterThan(0);
+
+    for (const meta of bases) expect(meta.tokens?.length, `${meta.module}.tokens`).toBeGreaterThan(0);
+  });
+
   it.each(keys)("%s passes the system contract", (key) => {
     const meta = metaOf(key);
 
