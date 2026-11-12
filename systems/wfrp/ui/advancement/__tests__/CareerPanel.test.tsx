@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { CareerPanel } from "../CareerPanel";
 
 import { render } from "@/lib/i18n/test/render-uk";
-import { DEFAULT_RULES } from "@/lib/utils/rules/defaults";
+import { defaultRulesFor } from "@/lib/utils/rules/section-registry";
 
 vi.unmock("next-intl");
 
@@ -14,7 +14,7 @@ const mocks = vi.hoisted(() => ({ setCareer: vi.fn(), advanceCareer: vi.fn(), co
 const tier = (name: string, over = {}) => ({ name, characteristics: [], skills: [], talents: [], trappings: [], ...over });
 
 vi.mock("@/lib/hooks/careers", () => ({ useCareers: () => ({ data: [{ id: "car", name: "Воїн", icon: null, class: null, tiers: [tier("Новобранець"), tier("B"), tier("C"), tier("D")] }] }) }));
-vi.mock("@/lib/hooks/campaigns", () => ({ useCampaignRules: () => ({ data: DEFAULT_RULES }) }));
+vi.mock("@/lib/hooks/campaigns", () => ({ useCampaignRules: () => ({ data: defaultRulesFor({ key: "wfrp" }) }) }));
 vi.mock("@/lib/hooks/feats", () => ({ useFeats: () => ({ data: [{ id: "f1", name: "Меткий" }] }) }));
 vi.mock("@/systems/wfrp/hooks", async (orig) => ({ ...(await orig<object>()), useCareerOps: () => ({ setCareer: mocks.setCareer, advanceCareer: mocks.advanceCareer, isPending: false }) }));
 vi.mock("@/lib/hooks/common", () => ({ useConfirm: () => mocks.confirm }));

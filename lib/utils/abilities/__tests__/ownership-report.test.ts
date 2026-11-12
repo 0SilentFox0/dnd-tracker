@@ -15,17 +15,24 @@ const row = (effects: unknown[], extra: Record<string, unknown> = {}, table = "u
 
 describe("rowViolations", () => {
   it("core effects pass anywhere", () => {
-    expect(rowViolations(row([{ kind: "heal", trigger: undefined, amount: 1 }]), BARE)).toEqual([]);
+    expect(rowViolations(row([{ kind: "note", text: "x" }]), BARE)).toEqual([]);
   });
 
   it("morale flag and changeMorale need the morale module", () => {
-    const effects = [{ kind: "flag", flag: "moraleChance", value: 10 }, { kind: "changeMorale", delta: 1 }];
+    const data = {
+      abilities: [
+        { ...passive, effects: [{ kind: "flag", flag: "moraleChance", percent: 10 }] },
+        { id: "b", name: "B", trigger: { event: "action" }, effects: [{ kind: "changeMorale", delta: 1 }] },
+      ],
+    };
 
-    expect(rowViolations(row(effects), BARE).map((v) => [v.path, v.kind, v.reason])).toEqual([
+    const morale = { table: "units", id: "r1", data };
+
+    expect(rowViolations(morale, BARE).map((v) => [v.path, v.kind, v.reason])).toEqual([
       ["abilities[0].effects[0]", "flag:moraleChance", "effect"],
-      ["abilities[0].effects[1]", "changeMorale", "effect"],
+      ["abilities[1].effects[0]", "changeMorale", "effect"],
     ]);
-    expect(rowViolations(row(effects), HOMM).filter((v) => v.reason === "effect")).toEqual([]);
+    expect(rowViolations(morale, HOMM).filter((v) => v.reason === "effect")).toEqual([]);
   });
 
   it("looks inside randomOf options", () => {

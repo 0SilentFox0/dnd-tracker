@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { mergeRules, parseRules, RulesetPatchSchema, RulesetSchema } from "@/lib/utils/rules/schema";
+import { defaultRulesFor } from "@/lib/utils/rules/section-registry";
+
+const DEFAULT_RULES = defaultRulesFor({ key: "homm" });
 
 describe("rules: сумісність збережених даних і patch", () => {
   it.each([null, undefined, [], "invalid"])("відновлює всю некоректну секцію %j, зберігаючи інші", (items) => {

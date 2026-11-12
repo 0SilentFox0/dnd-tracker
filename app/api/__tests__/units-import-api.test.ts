@@ -41,7 +41,7 @@ describe("POST units/import", () => {
 
       const res = await post({ units: [{ name: "Shade", abilities: [ward] }] });
 
-      expect(res.status).toBe(400);
+      expect(res.status).toBe(422);
     }
 
     expect(db.unit.createMany).not.toHaveBeenCalled();

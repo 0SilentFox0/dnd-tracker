@@ -7,7 +7,7 @@ import { AdvancementTab } from "../AdvancementTab";
 import { sheetFixture } from "@/components/character-profile/__tests__/sheet-fixture";
 import { ProfileProvider } from "@/components/character-profile/ProfileContext";
 import { render } from "@/lib/i18n/test/render-uk";
-import { DEFAULT_RULES } from "@/lib/utils/rules/defaults";
+import { defaultRulesFor } from "@/lib/utils/rules/section-registry";
 import type { CharacterSheet } from "@/types/characters";
 import type { FeatData } from "@/types/choices";
 
@@ -23,7 +23,7 @@ vi.mock("@/systems/wfrp/hooks", async (orig) => ({
   useCareerOps: () => ({ setCareer: vi.fn(), advanceCareer: vi.fn(), isPending: false }),
   useAdvance: () => ({ buy: mocks.buy, undo: mocks.undo, isPending: false, error: null }),
 }));
-vi.mock("@/lib/hooks/campaigns", () => ({ useCampaignRules: () => ({ data: DEFAULT_RULES }) }));
+vi.mock("@/lib/hooks/campaigns", () => ({ useCampaignRules: () => ({ data: defaultRulesFor({ key: "wfrp" }) }) }));
 vi.mock("@/lib/hooks/feats", () => ({ useFeats: () => mocks.feats }));
 vi.mock("@/lib/hooks/common", () => ({ useConfirm: () => vi.fn() }));
 vi.mock("@/lib/hooks/careers", () => ({ useCareers: () => mocks.careers }));

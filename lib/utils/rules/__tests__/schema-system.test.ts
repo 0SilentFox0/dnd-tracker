@@ -1,11 +1,13 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import { DEFAULT_RULES } from "../defaults";
 import { mergeRules, parseRules, RulesetPatchSchema, RulesetSchema } from "../schema";
+import { defaultRulesFor } from "../section-registry";
 
 import srdRules from "@/data/templates/srd-5.2/rules.json";
 import { SYSTEM_META, type SystemMeta } from "@/lib/utils/rules/systems/meta";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
+
+const DEFAULT_RULES = defaultRulesFor({ key: "homm" });
 
 const SRD_RULES = RulesetSchema.parse(srdRules);
 

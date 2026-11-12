@@ -7,7 +7,7 @@ describe("recipe catalog", () => {
     const ids = RECIPES.map((r) => r.id);
 
     expect(new Set(ids).size).toBe(ids.length);
-    expect(ids).toEqual(["stats", "damage", "onHit", "resistance", "aura", "survive", "bonusAction", "spellSlots", "damageSpell", "healSpell", "dotSpell", "hotSpell", "condition", "pushBack", "buffArmor", "cleanse", "morale", "concentrationBuff"]);
+    expect(ids).toEqual(["stats", "damage", "onHit", "resistance", "aura", "survive", "bonusAction", "damageSpell", "healSpell", "dotSpell", "hotSpell", "pushBack", "buffArmor", "cleanse", "spellSlots", "condition", "concentrationBuff", "morale"]);
   });
 
   it("categories are known and defaults respect bounds", () => {

@@ -58,7 +58,17 @@ describe("systems index", () => {
   it("two full systems (wfrp + d6pool) keep the same order in every block of every root", () => {
     const root = fixture(["wfrp", "d6pool"]);
 
-    for (const id of ["wfrp", "d6pool"]) for (const layer of new Set(ROOT_SPECS.flatMap((spec) => spec.blocks.map((b) => b.layer(id))))) write(root, layer, `export const ${id.toUpperCase()}_MODULE = 1;\n`);
+    for (const id of ["wfrp", "d6pool"]) {
+      const exportsByLayer = new Map<string, Set<string>>();
+
+      for (const block of ROOT_SPECS.flatMap((spec) => spec.blocks)) {
+        const layer = block.layer(id);
+
+        exportsByLayer.set(layer, (exportsByLayer.get(layer) ?? new Set([`${id.toUpperCase()}_MODULE`])).add(block.name?.(id) ?? `${id.toUpperCase()}_MODULE`));
+      }
+
+      for (const [layer, names] of exportsByLayer) write(root, layer, [...names].map((name) => `export const ${name} = 1;\n`).join(""));
+    }
 
     syncSystemsIndex(root);
 
