@@ -79,7 +79,7 @@ describe("module graph contract", () => {
   });
 
   it("a preset that fails validateComposition is a violation", () => {
-    const preset: SystemMeta = { module: "d6preset", kind: "preset", keys: ["d6preset"], preset: { base: "d6pool", modules: ["d6pool-plus", "d6pool-alt"] }, i18n: {}, unusedMechanics: [] };
+    const preset: SystemMeta = { module: "d6preset", kind: "preset", keys: ["d6preset"], preset: { base: "d6pool", modules: ["d6pool-plus", "d6pool-alt"] }, i18n: {} };
 
     expect(graphViolations([...FIXTURE_METAS, preset]).some((v) => v.startsWith("preset d6preset"))).toBe(true);
   });

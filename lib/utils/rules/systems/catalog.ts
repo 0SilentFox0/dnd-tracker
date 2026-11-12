@@ -91,6 +91,6 @@ export function moduleCatalog(metas: Metas = ALL_META): ModuleCatalog {
   return {
     bases: metas.filter((m) => kindOf(m) === "base").map(entryOf),
     addons: metas.filter((m) => kindOf(m) === "addon").map(entryOf),
-    presets: Object.entries(presets).map(([key, composition]) => ({ ...entryOf(moduleMetaOf(composition.base, metas) ?? { module: composition.base, keys: [], i18n: {}, unusedMechanics: [] }), key, composition })),
+    presets: Object.entries(presets).map(([key, composition]) => ({ ...entryOf(moduleMetaOf(composition.base, metas) ?? { module: composition.base, keys: [], i18n: {} }), key, composition })),
   };
 }

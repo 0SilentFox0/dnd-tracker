@@ -54,7 +54,7 @@ describe("rules.system", () => {
 });
 
 describe("rules.system.modules", () => {
-  const addon: SystemMeta = { module: "t-addon", kind: "addon", requires: ["d20"], keys: [], i18n: {}, unusedMechanics: [] };
+  const addon: SystemMeta = { module: "t-addon", kind: "addon", requires: ["d20"], keys: [], i18n: {} };
 
   beforeAll(() => (SYSTEM_META as unknown as SystemMeta[]).push(addon));
 

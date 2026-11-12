@@ -7,5 +7,4 @@ export const SKILLTREES_META = {
   requires: ["d20"],
   toggle: "setup",
   i18n: {},
-  unusedMechanics: [],
 } as const satisfies SystemMeta;

@@ -19,6 +19,5 @@ export const WFRP_META = {
     },
     budgetKb: { battle: 106, member: 108, dm: 112, pages: { character: 4, dmCharacter: 4, dmCharacters: 2 } },
   },
-  unusedMechanics: ["morale", "criticals", "formulas", "heroScaling", "initiative", "saves", "deathSaves", "concentration", "conditions", "actions", "classes", "encounters"],
   dmSections: ["careers"],
 } as const satisfies SystemMeta;

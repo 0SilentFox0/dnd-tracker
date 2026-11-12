@@ -6,5 +6,4 @@ export const D20_META = {
   keys: ["dnd5e"],
   tokens: ["dnd5e"],
   i18n: {},
-  unusedMechanics: ["advancement", "tables"],
 } as const satisfies SystemMeta;

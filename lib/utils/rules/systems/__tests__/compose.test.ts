@@ -4,11 +4,11 @@ import { type Addon, composeCached, composeParts, composeSystem, compositionOrde
 import type { SystemMeta } from "@/lib/utils/rules/systems/meta";
 import { ruleSystemByKey } from "@/lib/utils/rules/systems/registry";
 
-const m = (module: string, extra: Partial<SystemMeta> = {}): SystemMeta => ({ module, kind: "addon", keys: [], requires: ["core"], i18n: {}, unusedMechanics: [], ...extra });
+const m = (module: string, extra: Partial<SystemMeta> = {}): SystemMeta => ({ module, kind: "addon", keys: [], requires: ["core"], i18n: {}, ...extra });
 
 const metas: SystemMeta[] = [
-  { module: "core", kind: "base", keys: ["plain"], i18n: {}, unusedMechanics: [] },
-  { module: "other", kind: "base", keys: ["otherkey"], i18n: {}, unusedMechanics: [] },
+  { module: "core", kind: "base", keys: ["plain"], i18n: {} },
+  { module: "other", kind: "base", keys: ["otherkey"], i18n: {} },
   m("a"),
   m("b", { requires: ["core", "a"] }),
   m("c", { after: ["b"] }),

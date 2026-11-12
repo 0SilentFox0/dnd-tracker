@@ -183,7 +183,7 @@ describe("validatePack on heroes-homm guards (D25, D25b, D25c)", () => {
 });
 
 describe("systemBases", () => {
-  const meta = (module: string, keys: string[], extra: Partial<SystemMeta> = {}): SystemMeta => ({ module, keys, i18n: {}, unusedMechanics: [], ...extra });
+  const meta = (module: string, keys: string[], extra: Partial<SystemMeta> = {}): SystemMeta => ({ module, keys, i18n: {}, ...extra });
 
   it("maps every key, presets included, to its base module", () => {
     const metas = [meta("d20", ["dnd5e"], { kind: "base" }), meta("homm", ["homm"], { kind: "preset", preset: { base: "d20", modules: ["homm-units"] } }), meta("wfrp", ["wfrp"])];

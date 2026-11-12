@@ -12,7 +12,6 @@ export function assertSystemContract(meta: SystemMeta, definition: RuleSystemDef
   expect(meta.keys.length).toBeGreaterThan(0);
   expect(new Set(meta.keys).size).toBe(meta.keys.length);
   expect(meta.keys).toContain(definition.key);
-  expect(Array.isArray(meta.unusedMechanics)).toBe(true);
 
   expect(["ft", "yd"]).toContain(definition.distance.unit);
   expect(definition.distance.perCell).toBeGreaterThan(0);

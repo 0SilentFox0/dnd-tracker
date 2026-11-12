@@ -7,5 +7,4 @@ export const D6POOL_PLUS_META = {
   requires: ["d6pool"],
   claims: ["turn.order"],
   i18n: {},
-  unusedMechanics: [],
 } as const satisfies SystemMeta;

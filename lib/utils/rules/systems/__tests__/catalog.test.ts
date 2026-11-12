@@ -5,10 +5,10 @@ import type { SystemMeta } from "@/lib/utils/rules/systems/meta";
 import { RULE_SYSTEM_KEYS } from "@/lib/utils/rules/systems/meta";
 
 const metas: SystemMeta[] = [
-  { module: "core", kind: "base", keys: ["plain"], i18n: {}, unusedMechanics: [] },
-  { module: "a", kind: "addon", keys: [], requires: ["core"], i18n: {}, unusedMechanics: [] },
-  { module: "b", kind: "addon", keys: [], requires: ["core"], toggle: "setup", i18n: {}, unusedMechanics: [] },
-  { module: "combo", kind: "preset", keys: ["combo"], preset: { base: "core", modules: ["b", "a"] }, i18n: {}, unusedMechanics: [] },
+  { module: "core", kind: "base", keys: ["plain"], i18n: {} },
+  { module: "a", kind: "addon", keys: [], requires: ["core"], i18n: {} },
+  { module: "b", kind: "addon", keys: [], requires: ["core"], toggle: "setup", i18n: {} },
+  { module: "combo", kind: "preset", keys: ["combo"], preset: { base: "core", modules: ["b", "a"] }, i18n: {} },
 ];
 
 describe("catalog", () => {

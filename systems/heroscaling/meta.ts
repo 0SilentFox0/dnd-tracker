@@ -8,5 +8,4 @@ export const HEROSCALING_META = {
   claims: ["progression.maxHp"],
   toggle: "setup",
   i18n: {},
-  unusedMechanics: [],
 } as const satisfies SystemMeta;

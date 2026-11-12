@@ -6,5 +6,4 @@ export const HOMM_META = {
   keys: ["homm"],
   preset: { base: "d20", modules: ["morale", "retaliation", "heroscaling", "skilltrees", "artifactsets", "unitstacks"] },
   i18n: {},
-  unusedMechanics: ["advancement", "tables"],
 } as const satisfies SystemMeta;

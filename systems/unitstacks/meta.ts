@@ -7,5 +7,4 @@ export const UNITSTACKS_META = {
   requires: ["d20"],
   claims: ["combat.hitModel.damage"],
   i18n: {},
-  unusedMechanics: [],
 } as const satisfies SystemMeta;

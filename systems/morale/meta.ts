@@ -6,5 +6,4 @@ export const MORALE_META = {
   keys: [],
   requires: ["d20"],
   i18n: {},
-  unusedMechanics: [],
 } as const satisfies SystemMeta;

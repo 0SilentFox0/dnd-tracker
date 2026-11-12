@@ -36,7 +36,6 @@ export interface SystemMeta {
   toggle?: "free" | "setup";
   tokens?: readonly string[];
   i18n: SystemI18n;
-  unusedMechanics: readonly string[];
   dmSections?: readonly string[];
 }
 

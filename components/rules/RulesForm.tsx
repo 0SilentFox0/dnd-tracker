@@ -28,7 +28,8 @@ import { Button } from "@/components/ui/button";
 import { useRulesForm } from "@/lib/hooks/campaigns";
 import { useTranslator } from "@/lib/i18n/use-translator";
 import type { MechanicKey } from "@/lib/utils/rules";
-import { metaOf } from "@/lib/utils/rules/systems/meta";
+import { sectionsOfComposition } from "@/lib/utils/rules/section-registry";
+import { composition } from "@/lib/utils/rules/systems/catalog";
 
 const FORM_ID = "campaign-rules-form";
 
@@ -62,9 +63,11 @@ export function RulesForm({ campaignId }: { campaignId: string }) {
 
   if (isLoading) return <LoadingState />;
 
-  const unused: readonly string[] = metaOf(form.data.system.key)?.unusedMechanics ?? [];
-
   const sections = { ...SECTIONS, ...systemUiOf(form.data.system.key).rulesSections };
+
+  const active = sectionsOfComposition(composition(form.data.system));
+
+  const unused = (Object.keys(sections) as string[]).filter((k) => !(k in active));
 
   const tabs: HudTab<MechanicKey>[] = (Object.keys(sections) as MechanicKey[]).map((key) => {
     const Section = sections[key] as ComponentType<RulesSectionProps>;
