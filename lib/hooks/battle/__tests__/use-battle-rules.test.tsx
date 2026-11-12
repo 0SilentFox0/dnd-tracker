@@ -17,7 +17,7 @@ const render = (key: string, momentum?: { ally?: true }) => {
 };
 
 describe("useBattleRules", () => {
-  it("homm: d20 flags", () => {
+  it("homm: d20 flags (d20Stats comes from the armorClass column)", () => {
     expect(render("homm")).toMatchObject({ dice: 20, serverJudged: false, d20Stats: true, spells: true, hpTerm: "hp", distance: { unit: "ft", perCell: 5 } });
   });
 

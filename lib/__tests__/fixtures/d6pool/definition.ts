@@ -48,10 +48,8 @@ export const D6POOL_SYSTEM: RuleSystemDefinition = {
   magic: noMagic,
   identity: { alignments: false },
   lineage: false,
-  classes: false,
   attacks: true,
   spells: false,
   items: true,
   inventory: true,
-  d20Stats: false,
 };

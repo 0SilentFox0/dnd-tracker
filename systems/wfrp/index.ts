@@ -70,10 +70,8 @@ export const WFRP_MODULE: RuleSystemDefinition = {
   identity: { alignments: false },
   combat: { input: { assert: assertWfrpInput }, judge: "server", dice: 100, actionEconomy: { bonusAction: false, reaction: false }, attacksOf: extractWfrpAttacks, participantFields: wfrpParticipantFields, tieBreak: (p) => participantStats(p)?.ag ?? p.abilities.dexterity, baseStats: wfrpBaseStats, initiative: wfrpInitiative, resolveAttack: resolveWfrpAttack, abortedRoll: wfrpAbortedRoll, details: wfrpActionDetails, attackTarget: wfrpAttackTarget, damage: wfrpDamage, onZeroHp: wfrpOnZeroHp, onDamaged: [wfrpLoseChannelled], turn: WFRP_TURN, actions: noActions, reactions: noReactions, saves: noSaves, proficiency: noProficiency, hitModel: wfrpHitModel },
   lineage: false,
-  classes: false,
   attacks: false,
   spells: true,
   items: false,
   inventory: true,
-  d20Stats: false,
 };

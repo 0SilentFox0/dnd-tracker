@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { SYSTEM_UI, systemUiOf } from "../registry";
 
 import { RULE_SYSTEM_REGISTRY } from "@/lib/utils/rules/systems";
+import { statColumnsOf } from "@/lib/utils/rules/systems/stats";
 
 describe("system ui registry", () => {
   it("has the three systems, homm and dnd5e share the d20 ui", () => {
@@ -60,12 +61,12 @@ describe("system ui registry", () => {
     for (const key of ["homm", "dnd5e"] as const) {
       const sys = RULE_SYSTEM_REGISTRY[key];
 
-      expect([sys.spells, sys.items, sys.d20Stats, sys.rest.kinds]).toEqual([true, true, true, true]);
+      expect([sys.spells, sys.items, statColumnsOf(sys).has("armorClass"), sys.rest.kinds]).toEqual([true, true, true, true]);
     }
 
     const wfrp = RULE_SYSTEM_REGISTRY.wfrp;
 
-    expect([wfrp.spells, wfrp.items, wfrp.d20Stats, wfrp.rest.kinds]).toEqual([true, false, false, false]);
+    expect([wfrp.spells, wfrp.items, statColumnsOf(wfrp).has("armorClass"), wfrp.rest.kinds]).toEqual([true, false, false, false]);
   });
 });
 

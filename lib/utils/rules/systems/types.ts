@@ -599,12 +599,10 @@ export interface RuleSystemDefinition {
   identity: { alignments: boolean };
   creation?: true;
   lineage: boolean;
-  classes: boolean;
   attacks: boolean;
   spells: boolean;
   items: boolean;
   inventory: boolean;
-  d20Stats: boolean;
 }
 
 export interface ArmourGear {

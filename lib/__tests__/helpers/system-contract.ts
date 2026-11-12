@@ -1,11 +1,12 @@
 import { expect } from "vitest";
 
 import type { SystemUi } from "@/components/systems/types";
+import { CHARACTER_SYSTEM_COLUMNS } from "@/lib/constants/stat-columns";
 import type { SystemServer } from "@/lib/server/systems/types";
 import type { RuleSystemDefinition } from "@/lib/utils/rules/systems";
 import type { SystemMeta } from "@/lib/utils/rules/systems/meta";
 
-const FLAGS = ["lineage", "classes", "attacks", "spells", "items", "inventory", "d20Stats"] as const;
+const FLAGS = ["lineage", "attacks", "spells", "items", "inventory"] as const;
 
 export function assertSystemContract(meta: SystemMeta, definition: RuleSystemDefinition, ui: SystemUi, server: SystemServer): void {
   expect(meta.module).toMatch(/^[a-z0-9]+$/);
@@ -22,6 +23,8 @@ export function assertSystemContract(meta: SystemMeta, definition: RuleSystemDef
   expect(["hp", "wounds"]).toContain(definition.progression.hpTerm);
   expect(typeof definition.progression.maxHp).toBe("function");
   for (const flag of FLAGS) expect(typeof definition[flag]).toBe("boolean");
+  expect(Array.isArray(definition.stats?.columns ?? [])).toBe(true);
+  for (const part of definition.stats?.columns ?? []) for (const column of part.owns) expect(CHARACTER_SYSTEM_COLUMNS).toContain(column);
   expect(typeof definition.identity.alignments).toBe("boolean");
   expect(typeof definition.rest.kinds).toBe("boolean");
   expect(typeof definition.sheetTest.accepts).toBe("function");

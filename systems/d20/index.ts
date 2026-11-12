@@ -38,10 +38,8 @@ export const D20_MODULE: RuleSystemDefinition = {
   magic: D20_MAGIC,
   identity: { alignments: true },
   lineage: true,
-  classes: true,
   attacks: true,
   spells: true,
   items: true,
   inventory: true,
-  d20Stats: true,
 };
