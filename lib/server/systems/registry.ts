@@ -1,5 +1,5 @@
 import { composeServer } from "./compose";
-import type { SystemOperation, SystemServer, SystemToolNote } from "./types";
+import type { SystemBattleOperation, SystemOperation, SystemServer, SystemToolNote } from "./types";
 
 import "server-only";
 import type { Ruleset } from "@/lib/utils/rules/schema";
@@ -38,6 +38,10 @@ export const withSystemNotes = (base: string, tool: SystemToolNote): string => {
 
   return notes.length > 0 ? `${base} ${notes.join(" ")}` : base;
 };
+
+export function systemBattleOperation(name: string): SystemBattleOperation | undefined {
+  return Object.values(SYSTEM_SERVER).find((s) => s.battle && Object.hasOwn(s.battle, name))?.battle?.[name];
+}
 
 export function mergeSystemOperations<T>(core: Record<string, T>, pick: (op: SystemOperation) => T): Record<string, T> {
   const merged = { ...core };

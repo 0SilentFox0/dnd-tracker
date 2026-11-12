@@ -2,6 +2,7 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { BattleStatus } from "@/lib/constants/battle";
 import { abilityActionSchema, attackBodySchema, auraZoneSchema, bonusActionSchema, castSpellSchema, mapBackgroundBodySchema, mapMotionSchema, mapTerrainSchema, mapWeatherSchema, mazeActionSchema, mazeMarkSchema, moveSchema, nextTurnSchema, patchParticipantSchema } from "@/lib/schemas/battles";
 import { ContentError } from "@/lib/server/content/errors";
+import { systemBattleOperation } from "@/lib/server/systems/registry";
 import { BattleAccess, type RunBattleMutationOptions } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError } from "@/lib/utils/battle/store";
 
@@ -76,11 +77,11 @@ const OPERATIONS: Record<string, Loader> = {
     allowWhileCritPending: true,
     respond: "wrapped",
     load: async () => {
-      const { critChoiceMutation } = await import("@/lib/server/battles/mutations/crit-choice/crit-choice-mutation");
+      const op = systemBattleOperation("crit-choice");
 
-      const { critChoiceSchema } = await import("@/lib/schemas");
+      if (!op) throw new BattleAccessError(404, API_ERRORS.BATTLE_UNKNOWN_OPERATION);
 
-      return { schema: critChoiceSchema, mutate: critChoiceMutation };
+      return (await op.load()) as Loaded<unknown>;
     },
   }),
   complete: operation({

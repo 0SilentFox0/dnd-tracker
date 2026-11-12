@@ -1,17 +1,16 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { context, participant } from "./fixtures";
-
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { CRITICAL_SUCCESS_EFFECTS } from "@/lib/constants/critical-effects";
 import { attackBodySchema } from "@/lib/schemas/battles";
+import { context, participant } from "@/lib/server/battles/__tests__/mutations/fixtures";
 import { createAttackMutation } from "@/lib/server/battles/mutations/attack/attack-mutation";
-import { createCritChoiceMutation } from "@/lib/server/battles/mutations/crit-choice/crit-choice-mutation";
 import { createSpellMutation } from "@/lib/server/battles/mutations/spell/spell-mutation";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { mulberry32 } from "@/lib/utils/common/rng";
+import { createCritChoiceMutation } from "@/systems/d20/server/battle/crit-choice-mutation";
 import type { BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 

@@ -2,6 +2,7 @@ import type { ZodType } from "zod";
 
 import type { CharacterOperation } from "@/lib/server/characters/operation-runner";
 import type { getCharacterStats, UnitStats } from "@/lib/utils/battle/balance";
+import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import type { CampaignSpellContext } from "@/lib/utils/battle/types/participant";
 import type { branchLevels } from "@/lib/utils/skills/progression";
 import type { BattleParticipant } from "@/types/battle";
@@ -38,9 +39,15 @@ export interface SystemBalance {
   readsBuiltRules: boolean;
 }
 
+export interface SystemBattleOperation {
+  load(): Promise<{ schema: ZodType; mutate(ctx: BattleMutationContext, body: never): MutationResult | Promise<MutationResult> }>;
+}
+
 export interface SystemServer {
   schemas: SystemSchemas;
   balance: SystemBalance;
   operations?: Record<string, SystemOperation>;
+  /** Battle operations the route layer resolves by name; the core settings (access, gates) stay with the route */
+  battle?: Record<string, SystemBattleOperation>;
   ai?: SystemAi;
 }

@@ -1,15 +1,13 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { context, goblin as baseGoblin, hero as baseHero } from "./fixtures";
-
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { AttackType, BattleStatus } from "@/lib/constants/battle";
 import { textOf } from "@/lib/i18n/test/text";
 import { critChoiceSchema } from "@/lib/schemas";
 import { attackBodySchema } from "@/lib/schemas/battles";
+import { context, goblin as baseGoblin, hero as baseHero } from "@/lib/server/battles/__tests__/mutations/fixtures";
 import { createAttackMutation } from "@/lib/server/battles/mutations/attack/attack-mutation";
 import { completeMutation } from "@/lib/server/battles/mutations/complete/complete-mutation";
-import { createCritChoiceMutation } from "@/lib/server/battles/mutations/crit-choice/crit-choice-mutation";
 import { resetMutation } from "@/lib/server/battles/mutations/reset/reset-mutation";
 import { createRollbackMutation } from "@/lib/server/battles/mutations/rollback/rollback-mutation";
 import { createSpellMutation } from "@/lib/server/battles/mutations/spell/spell-mutation";
@@ -22,6 +20,7 @@ import type { BattleMutationContext, PipelineDeps } from "@/lib/utils/battle/pip
 import { diffParticipants, splitParticipant } from "@/lib/utils/battle/store";
 import { buildSnapshotState } from "@/lib/utils/battle/store/snapshot-state";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
+import { createCritChoiceMutation } from "@/systems/d20/server/battle/crit-choice-mutation";
 
 const hero = { ...baseHero, battleData: { ...baseHero.battleData, attacks: [{ id: "sword", name: "Меч", type: AttackType.MELEE, attackBonus: 5, damageDice: "1d8", damageType: "slashing" }] } };
 
