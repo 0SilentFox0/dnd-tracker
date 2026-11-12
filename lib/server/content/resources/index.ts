@@ -3,32 +3,38 @@ import type {
     AnyContentResource,
     ContentKind,
 } from '@/lib/server/content/define-resource';
-import { artifactSetsResource } from '@/lib/server/content/resources/artifact-sets';
 import { artifactsResource } from '@/lib/server/content/resources/artifacts';
-import { backgroundsResource } from '@/lib/server/content/resources/backgrounds';
 import { careersResource } from '@/lib/server/content/resources/careers';
-import { classesResource } from '@/lib/server/content/resources/classes';
 import { featsResource } from '@/lib/server/content/resources/feats';
-import { mainSkillsResource } from '@/lib/server/content/resources/main-skills';
 import { racesResource } from '@/lib/server/content/resources/races';
-import { skillsResource } from '@/lib/server/content/resources/skills';
 import { spellGroupsResource } from '@/lib/server/content/resources/spell-groups';
 import { spellsResource } from '@/lib/server/content/resources/spells';
 import { tracksResource } from '@/lib/server/content/resources/tracks';
 import { unitsResource } from '@/lib/server/content/resources/units';
+import { systemContentKinds } from '@/lib/server/systems/registry';
 
-export const CONTENT_RESOURCES = {
+export const CORE_CONTENT_RESOURCES = {
     units: unitsResource,
     races: racesResource,
-    classes: classesResource,
     feats: featsResource,
-    backgrounds: backgroundsResource,
-    careers: careersResource,
     spells: spellsResource,
     'spell-groups': spellGroupsResource,
-    'main-skills': mainSkillsResource,
-    skills: skillsResource,
     artifacts: artifactsResource,
-    'artifact-sets': artifactSetsResource,
     tracks: tracksResource,
-} satisfies Record<ContentKind, AnyContentResource>;
+} satisfies Partial<Record<ContentKind, AnyContentResource>>;
+
+type ModuleKind = Exclude<ContentKind, keyof typeof CORE_CONTENT_RESOURCES>;
+
+export const CONTENT_RESOURCES = {
+    ...CORE_CONTENT_RESOURCES,
+    careers: careersResource,
+    ...Object.fromEntries(
+        Object.entries(systemContentKinds()).map(([kind, k]) => [
+            kind,
+            k.resource,
+        ])
+    ),
+} as typeof CORE_CONTENT_RESOURCES &
+    Record<ModuleKind, AnyContentResource> & {
+        careers: typeof careersResource;
+    };

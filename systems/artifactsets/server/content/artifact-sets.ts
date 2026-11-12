@@ -1,12 +1,10 @@
 import { randomUUID } from 'crypto';
 import type { z } from 'zod';
 
+import { createArtifactSetSchema, patchArtifactSetSchema } from './schema';
+
 import 'server-only';
 import { API_ERRORS } from '@/lib/constants/api-errors';
-import {
-    createArtifactSetSchema,
-    patchArtifactSetSchema,
-} from '@/lib/schemas/artifact-sets';
 import {
     buildArtifactSetPatchInput,
     deleteArtifactSetAndClearArtifacts,

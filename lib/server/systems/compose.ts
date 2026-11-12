@@ -11,6 +11,7 @@ export const composeServer = (
         dictionaries: [
             'operations',
             'battle',
+            'contentKinds',
             'routes.campaign',
             'routes.character',
             'ai.heroSelect',

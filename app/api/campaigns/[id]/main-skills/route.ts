@@ -1,4 +1,3 @@
-import { mainSkillsResource } from '@/lib/server/content/resources/main-skills';
-import { collectionRoutes } from '@/lib/utils/api/content-routes';
+import { kindCollectionRoutes } from '@/lib/utils/api/content-routes';
 
-export const { GET, POST } = collectionRoutes(mainSkillsResource);
+export const { GET, POST } = kindCollectionRoutes('main-skills');

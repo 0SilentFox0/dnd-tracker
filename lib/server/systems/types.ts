@@ -4,6 +4,7 @@ import type { ZodType } from 'zod';
 import type { SpellRequestData } from '@/lib/schemas/battles';
 import type { AttackBody } from '@/lib/server/battles/mutations/attack/attack-mutation';
 import type { CharacterOperation } from '@/lib/server/characters/operation-runner';
+import type { AnyContentResource } from '@/lib/server/content/define-resource';
 import type { ArtifactSetRowLike } from '@/lib/utils/abilities/build/collect';
 import type { CampaignAccessResult } from '@/lib/utils/api/api-auth';
 import type { LegendaryActionBody } from '@/lib/utils/battle/actions/schema';
@@ -22,6 +23,7 @@ import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
 import type { BranchLevel, branchLevels } from '@/lib/utils/skills/progression';
 import type { BattleParticipant, EquippedArtifact } from '@/types/battle';
 import type { SetProgress } from '@/types/characters';
+import type { ImportRecord } from '@/types/content-import';
 
 export interface SystemSchemas {
     characteristics?: ZodType;
@@ -180,8 +182,16 @@ export interface SystemDrafts {
     ): Promise<NextResponse>;
 }
 
+/** A content kind a module owns: its CRUD resource, an export mapper and the schemas it adds to the OpenAPI components */
+export interface ContentKindServer {
+    resource: AnyContentResource;
+    toImportRecord?(row: never): ImportRecord;
+    sharedSchemas?: readonly (readonly [ZodType, string])[];
+}
+
 export interface SystemServer {
     schemas: SystemSchemas;
+    contentKinds?: Record<string, ContentKindServer>;
     /** Exclusive slot of a base; an addon never sets it */
     drafts?: SystemDrafts;
     participant?: SystemParticipantServer;

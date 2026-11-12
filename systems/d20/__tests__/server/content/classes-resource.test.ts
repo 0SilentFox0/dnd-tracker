@@ -18,8 +18,8 @@ vi.mock('@/lib/server/classes/class-name', () => ({
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { createClassSchema } from '@/lib/schemas';
-import { classesResource } from '@/lib/server/content/resources/classes';
 import type { Actor } from '@/lib/utils/api/actor';
+import { classesResource } from '@/systems/d20/server/content/classes';
 
 const actor: Actor = {
     campaignId: 'c1',

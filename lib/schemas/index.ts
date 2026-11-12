@@ -1,4 +1,3 @@
-export * from './artifact-sets';
 export * from './artifacts';
 export * from './backgrounds';
 export * from './battles';

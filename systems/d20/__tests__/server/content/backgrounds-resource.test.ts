@@ -15,8 +15,8 @@ const db = vi.hoisted(() => ({
 
 vi.mock('server-only', () => ({}));
 vi.mock('@/lib/db', () => ({ prisma: db }));
-import { backgroundsResource } from '@/lib/server/content/resources/backgrounds';
 import type { Actor } from '@/lib/utils/api/actor';
+import { backgroundsResource } from '@/systems/d20/server/content/backgrounds';
 
 const actor: Actor = {
     campaignId: 'c',

@@ -5,7 +5,6 @@ import { exampleOf } from '@/lib/constants/import-aliases';
 import type { Locale } from '@/lib/i18n/config';
 import {
     createArtifactSchema,
-    createArtifactSetSchema,
     createBackgroundSchema,
     createCareerSchema,
     createClassSchema,
@@ -24,6 +23,7 @@ import {
     normalizeHeader,
     transformRow,
 } from '@/lib/utils/content/import';
+import { createArtifactSetSchema } from '@/systems/artifactsets/server/content/schema';
 import type { ImportKind } from '@/types/content-import';
 
 const CREATE: Record<ImportKind, ZodType> = {

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import type { z, ZodType } from 'zod';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
+import type { ContentKind } from '@/lib/constants/content-kinds';
 import type { AnyContentResource } from '@/lib/server/content/define-resource';
 import { ContentError } from '@/lib/server/content/errors';
 import type { ContentOperation } from '@/lib/server/content/operations';
@@ -138,6 +139,30 @@ export function collectionRoutes(r: AnyContentResource) {
             ),
     };
 }
+
+type Handler = (req: Request, ctx: RouteCtx) => Promise<NextResponse>;
+
+/** The resource is looked up per request, so a route file of a module kind never loads the registry at import */
+const resourceOf = async (kind: ContentKind): Promise<AnyContentResource> =>
+    (await import('@/lib/server/content/resources')).CONTENT_RESOURCES[kind];
+
+export const kindCollectionRoutes = (kind: ContentKind) => {
+    const run =
+        (method: 'GET' | 'POST' | 'DELETE'): Handler =>
+        async (req, ctx) =>
+            collectionRoutes(await resourceOf(kind))[method](req, ctx);
+
+    return { GET: run('GET'), POST: run('POST'), DELETE: run('DELETE') };
+};
+
+export const kindItemRoutes = (kind: ContentKind) => {
+    const run =
+        (method: 'GET' | 'PATCH' | 'DELETE'): Handler =>
+        async (req, ctx) =>
+            itemRoutes(await resourceOf(kind))[method](req, ctx);
+
+    return { GET: run('GET'), PATCH: run('PATCH'), DELETE: run('DELETE') };
+};
 
 export function itemRoutes(r: AnyContentResource) {
     return {

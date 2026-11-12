@@ -36,10 +36,10 @@ import {
     createRaceSchema,
     createSpellSchema,
 } from '@/lib/schemas';
-import { classesResource } from '@/lib/server/content/resources/classes';
 import { racesResource } from '@/lib/server/content/resources/races';
 import { spellsResource } from '@/lib/server/content/resources/spells';
 import type { Actor } from '@/lib/utils/api/actor';
+import { classesResource } from '@/systems/d20/server/content/classes';
 
 const actor: Actor = {
     campaignId: 'c1',

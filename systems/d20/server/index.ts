@@ -1,3 +1,5 @@
+import { backgroundsResource } from './content/backgrounds';
+import { classesResource } from './content/classes';
 import { D20_BALANCE } from './balance';
 import { D20_OPERATIONS } from './operations';
 
@@ -14,6 +16,10 @@ export const D20_MODULE_SERVER: SystemServer = {
     schemas: {},
     balance: D20_BALANCE,
     operations: D20_OPERATIONS,
+    contentKinds: {
+        classes: { resource: classesResource },
+        backgrounds: { resource: backgroundsResource },
+    },
     routes: {
         character: {
             'level-up': { POST: { operation: 'level-up' } },
