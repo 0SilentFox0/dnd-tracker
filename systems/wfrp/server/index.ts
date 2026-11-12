@@ -11,5 +11,14 @@ export const WFRP_MODULE_SERVER: SystemServer = {
   schemas: { characteristics: CharacteristicsSchema, unitCharacteristics: UnitCharacteristicsSchema, systemStats: WfrpItemStatsSchema, attackInput: WfrpFortuneInputSchema, castInput: WfrpFortuneInputSchema },
   balance: { heroPower: ({ built }) => ({ levels: {}, stats: hitModelHeroStats(built, wfrpHitModel) }), unitStats: (base, built) => hitModelUnitStats(base, built, wfrpHitModel), readsBuiltRules: true },
   operations: WFRP_OPERATIONS,
+  battle: {
+    channel: {
+      load: async () => {
+        const { channelMutation, channelSchema } = await import("./battle/channel-mutation");
+
+        return { schema: channelSchema, mutate: channelMutation };
+      },
+    },
+  },
   ai: WFRP_AI,
 };

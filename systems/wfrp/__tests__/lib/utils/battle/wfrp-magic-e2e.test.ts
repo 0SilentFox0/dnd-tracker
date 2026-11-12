@@ -3,7 +3,6 @@ import { describe, expect, it, vi } from "vitest";
 
 import { ParticipantSide } from "@/lib/constants/battle";
 import { context, goblin, participant } from "@/lib/server/battles/__tests__/mutations/fixtures";
-import { channelMutation } from "@/lib/server/battles/mutations/channel/channel-mutation";
 import { createSpellMutation } from "@/lib/server/battles/mutations/spell/spell-mutation";
 import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { splitParticipant } from "@/lib/utils/battle/store";
@@ -14,6 +13,7 @@ import { castOf } from "@/systems/wfrp/rules/__tests__/slot-fixtures";
 import { DEFAULT_CHARACTERISTICS } from "@/systems/wfrp/rules/characteristics/keys";
 import { wfrpAbilitiesOf } from "@/systems/wfrp/rules/combat/participant";
 import { WFRP_RULES } from "@/systems/wfrp/rules/rules-preset";
+import { channelMutation } from "@/systems/wfrp/server/battle/channel-mutation";
 import type { BattleParticipant } from "@/types/battle";
 
 const bolt = {
