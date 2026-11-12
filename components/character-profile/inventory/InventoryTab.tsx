@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { useProfile } from '../ProfileContext';
-import { SetList } from '../SetList';
 import { GrantArtifactDialog } from '../stash/GrantArtifactDialog';
 import { InventoryLogPanel } from '../stash/InventoryLogPanel';
 import { ItemDialog } from '../stash/ItemDialog';
@@ -29,7 +28,7 @@ import { Button } from '@/components/ui/button';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { useInventory } from '@/lib/hooks/characters';
 import { useSeenOnOpen } from '@/lib/hooks/notifications';
-import { useCurrency } from '@/lib/hooks/systems';
+import { useCampaignSystem, useCurrency } from '@/lib/hooks/systems';
 import type { SpecialItem } from '@/types/inventory';
 
 export function InventoryTab() {
@@ -41,7 +40,11 @@ export function InventoryTab() {
 
     const currency = useCurrency(campaignId);
 
-    const EquippedSummary = systemUiOf(sheet.system).EquippedSummary;
+    const { system } = useCampaignSystem(campaignId, sheet.system);
+
+    const ui = systemUiOf(system.key, system.modules);
+
+    const EquippedSummary = ui.EquippedSummary;
 
     const newIds = useSeenOnOpen(campaignId, {
         types: ['item'],
@@ -130,7 +133,9 @@ export function InventoryTab() {
                     </HudPanel>
                 )}
             </div>
-            <SetList sets={sheet.items.sets} />
+            {ui.sheet?.itemSections?.map((Section, i) => (
+                <Section key={i} sheet={sheet} variant="inventory" />
+            ))}
             {!inv.access.pending && (
                 <div className="space-y-2">
                     <Button

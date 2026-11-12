@@ -12,7 +12,6 @@ import { MagicTab } from './MagicTab';
 import { useProfile } from './ProfileContext';
 import { ProfileHero } from './ProfileHero';
 import { type ProfileTabId, ProfileTabs } from './ProfileTabs';
-import { SetList } from './SetList';
 import { SkillsTab } from './SkillsTab';
 
 import { CharacterAbilitiesSection } from '@/components/characters/abilities/CharacterAbilitiesSection';
@@ -23,7 +22,6 @@ import { CharacterChoicesPanel } from '@/components/choices/CharacterChoicesPane
 import { ActionBar } from '@/components/common/ActionBar';
 import { FormAlert } from '@/components/common/states';
 import { LoadingState } from '@/components/common/states';
-import { HudSection } from '@/components/hud/form';
 import { systemUiOf } from '@/components/systems';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -330,14 +328,14 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
                                               holders={holders}
                                               onEquippedChange={setEquipped}
                                           />
-                                          {sheet.items.sets.length > 0 && (
-                                              <HudSection
-                                                  title={t('sets.title')}
-                                              >
-                                                  <SetList
-                                                      sets={sheet.items.sets}
+                                          {Ui.sheet?.itemSections?.map(
+                                              (Section, i) => (
+                                                  <Section
+                                                      key={i}
+                                                      sheet={sheet}
+                                                      variant="editor"
                                                   />
-                                              </HudSection>
+                                              )
                                           )}
                                       </div>
                                   ),
