@@ -2,10 +2,13 @@ import type { SystemData, SystemSlot } from "./slot";
 
 import type { Coin } from "@/lib/constants/inventory";
 import type { Translator } from "@/lib/i18n/translator";
+import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import type { Condition5eKey } from "@/lib/utils/abilities/schema/kinds";
 import type { Recipe } from "@/lib/utils/abilities/templates/types";
 import type { LabeledEffectInput } from "@/lib/utils/battle/actions/effects";
+import type { RollMode } from "@/lib/utils/battle/attack/bonus";
 import type { ApplyConditionOptions, ApplyConditionResult, ConditionEffectOptions } from "@/lib/utils/battle/conditions/set";
+import type { CritPicker } from "@/lib/utils/battle/crit-choice/types";
 import type { DamageConsequencesInput, DamageConsequencesResult } from "@/lib/utils/battle/damage/consequences";
 import type { DieFx } from "@/lib/utils/battle/fx/dice/types";
 import type { EquippedArtifactRow } from "@/lib/utils/battle/participant/extract-artifacts";
@@ -21,7 +24,7 @@ import type { ResolvedAbility } from "@/types/abilities";
 import type { ActiveEffect, BattleAttack, BattleMapConfig, BattleParticipant } from "@/types/battle";
 import type { CharacterResources, SheetRollBody, SheetRollResult } from "@/types/characters";
 import type { FeatData } from "@/types/choices";
-import type { LogLine } from "@/types/text";
+import type { LogLine, TextRef } from "@/types/text";
 
 export interface CharacterHpInput {
   level: number;
@@ -60,6 +63,14 @@ export interface ResolveAttackCtx {
   /** Scene-level state of the system, as the previous attack left it */
   sceneState?: SystemSlot;
   fortune?: { kind: FortuneKind; manualReroll?: number };
+  /** Player-side dice and options of an attack made on the actor's turn */
+  roll?: { advantage?: number; disadvantage?: number; mode?: RollMode; inspiration?: boolean };
+  /** Modifiers of the action events fired before the attack, by participant id */
+  modifiers?: Record<string, StaticEffect[]>;
+  map?: BattleMapConfig | null;
+  crit?: CritPicker;
+  /** Server-rolled strike outside the actor's turn (retaliation, opportunity, readied, legendary) */
+  offTurn?: { noun: TextRef };
 }
 
 export interface ResolvedAttack {
@@ -248,7 +259,9 @@ export interface RuleSystemCombat {
   /** Ranks participants with equal initiative: higher wins */
   tieBreak?(p: BattleParticipant): number;
   actionEconomy: { bonusAction: boolean; reaction: boolean };
-  resolveAttack?(ctx: ResolveAttackCtx): ResolvedAttack;
+  resolveAttack(ctx: ResolveAttackCtx): ResolvedAttack;
+  /** The roll recorded for an attack that never happened (the target or the attacker dropped out first) */
+  abortedRoll(ctx: ResolveAttackCtx): AttackRollResult;
   /** Characteristic and base target an attack is rolled against, before situational modifiers (percentile systems only) */
   attackTarget?(attacker: BattleParticipant, attack: BattleAttack): { label: LogLine; target: number };
   mitigateDamage?(ctx: MitigateCtx): MitigateResult;
@@ -272,7 +285,6 @@ export interface RuleSystemCombat {
 
 export interface RuleSystemDefinition {
   key: string;
-  distance: { unit: "ft" | "yd"; perCell: number };
   progression: {
     levels: boolean;
     maxHp(input: { character: CharacterHpInput; characteristics: unknown; rules: Ruleset }): { total: number; breakdown: HpBreakdownLine[] } | null;

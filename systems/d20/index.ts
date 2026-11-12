@@ -1,3 +1,4 @@
+import { d20AbortedRoll, resolveD20Attack } from "./rules/attack";
 import { D20_CONDITION_SET } from "./rules/conditions";
 
 import { rollFromSheet } from "@/lib/utils/characters/resources/sheet-roll";
@@ -6,7 +7,6 @@ import type { SheetRollSubject } from "@/types/characters";
 
 export const D20_MODULE: RuleSystemDefinition = {
   key: "d20",
-  distance: { unit: "ft", perCell: 5 },
   progression: { levels: true, hpTerm: "hp", maxHp: () => null },
   characteristics: { persisted: false, defaults: () => undefined, isEmpty: (v) => v == null || (typeof v === "object" && Object.keys(v).length === 0), sheetBlock: () => undefined },
   sheetTest: {
@@ -14,7 +14,7 @@ export const D20_MODULE: RuleSystemDefinition = {
     roll: (i) => rollFromSheet(i.participant, i.body as SheetRollSubject, i),
   },
   rest: { kinds: true },
-  combat: { judge: "client", dice: 20, actionEconomy: { bonusAction: true, reaction: true } },
+  combat: { judge: "client", dice: 20, actionEconomy: { bonusAction: true, reaction: true }, resolveAttack: resolveD20Attack, abortedRoll: d20AbortedRoll },
   conditionSet: D20_CONDITION_SET,
   identity: { alignments: true },
   lineage: true,

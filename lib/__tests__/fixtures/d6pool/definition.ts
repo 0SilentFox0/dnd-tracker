@@ -1,5 +1,7 @@
+import { rollDie } from "@/lib/utils/common/dice";
 import type { RuleSystemDefinition } from "@/lib/utils/rules/systems";
 import { defineSlot } from "@/lib/utils/rules/systems/slot";
+import type { ResolveAttackCtx, ResolvedAttack } from "@/lib/utils/rules/systems/types";
 
 export interface D6PoolData {
   pool: number;
@@ -7,9 +9,18 @@ export interface D6PoolData {
 
 export const D6POOL_SLOT = defineSlot<D6PoolData>("d6pool", (raw) => (raw && typeof raw === "object" && typeof (raw as D6PoolData).pool === "number" ? (raw as D6PoolData) : undefined));
 
+const d6Roll = (ctx: ResolveAttackCtx): number => ctx.manualRoll ?? rollDie(6, ctx.rng);
+
+const d6Attack = (ctx: ResolveAttackCtx): ResolvedAttack => {
+  const roll = d6Roll(ctx);
+
+  const isHit = roll >= 4;
+
+  return { isHit, lines: [], defenseValue: 4, attackRoll: { isHit, isCritical: false, isCriticalFail: false, totalAttackValue: roll, attackBonus: 0, advantageUsed: false, chosenD20: roll } };
+};
+
 export const D6POOL_SYSTEM: RuleSystemDefinition = {
   key: "d6pool",
-  distance: { unit: "yd", perCell: 1 },
   progression: { levels: false, hpTerm: "wounds", maxHp: () => ({ total: 10, breakdown: [] }) },
   characteristics: {
     persisted: true,
@@ -19,7 +30,7 @@ export const D6POOL_SYSTEM: RuleSystemDefinition = {
   },
   sheetTest: { accepts: (body) => body.kind === "test", roll: () => ({ kind: "test" }) as never },
   rest: { kinds: false },
-  combat: { judge: "client", dice: 6, actionEconomy: { bonusAction: false, reaction: false } },
+  combat: { judge: "client", dice: 6, actionEconomy: { bonusAction: false, reaction: false }, resolveAttack: d6Attack, abortedRoll: (ctx) => ({ ...d6Attack({ ...ctx, manualRoll: ctx.manualRoll ?? 1 }).attackRoll, isHit: false }) },
   conditionSet: { apply: (ps) => ({ participants: ps, messages: [], blocked: true }), effectInput: () => null },
   identity: { alignments: false },
   lineage: false,

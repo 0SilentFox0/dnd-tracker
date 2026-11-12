@@ -5,28 +5,24 @@ import { spendRidersOnMiss } from "./hit-rider";
 import { handleMiss } from "./miss";
 
 import { textRef } from "@/lib/i18n/text-ref";
-import { collectModifiers, findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { isActive, isAttackable, withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import { spendAttack } from "@/lib/utils/battle/attack/attacks-left";
-import { isAdjacentAttack } from "@/lib/utils/battle/attack/bonus";
 import { activeEffectIds, consumeAttackEffects } from "@/lib/utils/battle/attack/consume-effects";
 import { critDamageRolls, critDoublesDice } from "@/lib/utils/battle/attack/crit-dice";
-import { cancelCritIfImmune } from "@/lib/utils/battle/attack/crit-immunity";
 import { type CritFlavor, critFlavorOf } from "@/lib/utils/battle/attack/critical";
-import { calculateAttackRoll, eventRollMode } from "@/lib/utils/battle/attack/roll";
+import { eventRollMode } from "@/lib/utils/battle/attack/roll";
 import { attackSourceOf } from "@/lib/utils/battle/attack/source";
 import { type ActionFlow, appendHpChanges, fire, getP, put } from "@/lib/utils/battle/common/action-flow";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { damageDiceSlots, heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { attackDiceRolls } from "@/lib/utils/battle/dice-record";
-import { getEffectiveArmorClass } from "@/lib/utils/battle/participant";
 import { castSpell } from "@/lib/utils/battle/spell";
 import { runAutoReactions } from "@/lib/utils/battle/spell/auto-reaction";
 import type { AttackRollResult } from "@/lib/utils/battle/types/attack";
 import type { ProcessAttackParams, ProcessAttackResult } from "@/lib/utils/battle/types/attack-process";
 import { rngOf } from "@/lib/utils/common/rng";
 import { ruleSystemOf } from "@/lib/utils/rules/systems";
-import type { RuleSystemCombat } from "@/lib/utils/rules/systems/types";
+import type { ResolveAttackCtx } from "@/lib/utils/rules/systems/types";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
 export type { ProcessAttackParams, ProcessAttackResult };
@@ -76,9 +72,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
 
   if (!isAttackable(getP(flow, targetId)) || !isActive(getP(flow, attackerId))) return abortedResult(run);
 
-  const resolveHook = ruleSystemOf(flow.ctx.rules).combat.resolveAttack;
-
-  const judged = resolveHook ? judgeBySystem(run, resolveHook) : judgeD20(run, actionModifiers);
+  const judged = judge(run, actionModifiers);
 
   const { second, targetAC, isHit, attackRoll } = judged;
 
@@ -159,65 +153,34 @@ function abortedResult(run: AttackRun): ProcessAttackResult {
   };
 }
 
-function abortedRoll(run: AttackRun): AttackRollResult {
-  const { flow, attackerId, params } = run;
-
-  if (ruleSystemOf(flow.ctx.rules).combat.resolveAttack) {
-    return { isHit: false, isCritical: false, isCriticalFail: false, totalAttackValue: params.d20Roll, attackBonus: 0, advantageUsed: false, chosenD20: params.d20Roll };
-  }
-
-  return calculateAttackRoll(getP(flow, attackerId), params.attack, params.d20Roll, params.advantageRoll, params.disadvantageRoll, { participants: flow.ps, rng: flow.ctx.rng, manualMode: params.rollMode, rules: flow.ctx.rules, map: flow.ctx.map, inspiration: params.inspiration });
-}
-
-function judgeD20(run: AttackRun, actionModifiers: Modifiers): Judged {
+function attackCtx(run: AttackRun, modifiers?: Modifiers): ResolveAttackCtx {
   const { flow, attackerId, targetId, params } = run;
 
-  const { attack, d20Roll, advantageRoll, disadvantageRoll } = params;
-
-  const rolled = calculateAttackRoll(getP(flow, attackerId), attack, d20Roll, advantageRoll, disadvantageRoll, {
-    participants: flow.ps,
-    extra: actionModifiers[attackerId],
-    targetId,
-    targetExtra: actionModifiers[targetId],
-    rng: flow.ctx.rng,
-    manualMode: params.rollMode,
-    rules: flow.ctx.rules,
-    map: flow.ctx.map,
-    inspiration: params.inspiration,
-    crit: flow.ctx.crit,
-  });
-
-  const second = rolled.secondRoll;
-
-  if (second) {
-    flow.messages.push(textRef("battleLog.roll.second", { mode: textRef(second.mode === "advantage" ? "battleLog.roll.advantage" : "battleLog.roll.disadvantage"), manual: second.manual ? textRef("battleLog.roll.manualTag") : "", value: second.value, server: second.serverRolled ? textRef("battleLog.roll.serverTag") : "", chosen: rolled.chosenD20 }));
-  }
-
-  const targetAC = getEffectiveArmorClass(getP(flow, targetId), flow.ps, actionModifiers[targetId]);
-
-  return { second, targetAC, ...judgeHit(run, rolled, targetAC, actionModifiers) };
-}
-
-function judgeBySystem(run: AttackRun, resolve: NonNullable<RuleSystemCombat["resolveAttack"]>): Judged {
-  const { flow, attackerId, targetId, params } = run;
-
-  const attacker = getP(flow, attackerId);
-
-  const target = getP(flow, targetId);
-
-  const rules = flow.ctx.rules;
-
-  const r = resolve({
-    attacker,
-    target,
+  return {
+    attacker: getP(flow, attackerId),
+    target: getP(flow, targetId),
     attack: params.attack,
     participants: flow.ps,
-    rules,
+    rules: flow.ctx.rules,
     rng: flow.ctx.rng,
     manualRoll: params.d20Roll,
     sceneState: flow.sceneState,
     fortune: params.fortune,
-  });
+    roll: { advantage: params.advantageRoll, disadvantage: params.disadvantageRoll, mode: params.rollMode, inspiration: params.inspiration },
+    modifiers,
+    map: flow.ctx.map,
+    crit: flow.ctx.crit,
+  };
+}
+
+function abortedRoll(run: AttackRun): AttackRollResult {
+  return ruleSystemOf(run.flow.ctx.rules).combat.abortedRoll(attackCtx(run));
+}
+
+function judge(run: AttackRun, actionModifiers: Modifiers): Judged {
+  const { flow, attackerId } = run;
+
+  const r = ruleSystemOf(flow.ctx.rules).combat.resolveAttack(attackCtx(run, actionModifiers));
 
   if (r.scene) flow.sceneState = r.scene;
 
@@ -231,28 +194,7 @@ function judgeBySystem(run: AttackRun, resolve: NonNullable<RuleSystemCombat["re
     if (r.fortuneLine) flow.messages.push(r.fortuneLine);
   }
 
-  return { second: undefined, targetAC: r.defenseValue ?? 0, isHit: r.isHit, attackRoll: r.attackRoll };
-}
-
-function judgeHit(run: AttackRun, rolled: AttackRollResult, targetAC: number, actionModifiers: Modifiers): { isHit: boolean; attackRoll: AttackRollResult } {
-  const { flow, attackerId, targetId, params } = run;
-
-  const guaranteedHit = findFlags(flow.ps, attackerId, "guaranteedHit", actionModifiers[attackerId]).length > 0;
-
-  const isHit = !rolled.isCriticalFail && (rolled.isCritical || guaranteedHit || rolled.totalAttackValue >= targetAC);
-
-  const adjacentCrit =
-    isHit && !rolled.isCritical && collectModifiers(flow.ps, targetId, { flag: "autoCritAdjacent" }, actionModifiers[targetId]).entries.length > 0 && isAdjacentAttack(getP(flow, attackerId), getP(flow, targetId), params.attack);
-
-  const critRoll = adjacentCrit ? { ...rolled, isCritical: true } : rolled;
-
-  if (adjacentCrit) flow.messages.push(textRef("battleLog.crit.adjacent"));
-
-  const immune = isHit ? cancelCritIfImmune(critRoll, flow.ps, targetId, actionModifiers[targetId]) : { roll: critRoll, cancelled: false };
-
-  if (immune.cancelled) flow.messages.push(textRef("battleLog.crit.cancelled"));
-
-  return { isHit, attackRoll: immune.roll };
+  return { second: r.attackRoll.secondRoll, targetAC: r.defenseValue ?? 0, isHit: r.isHit, attackRoll: r.attackRoll };
 }
 
 function withRollDetails<T extends { actionDetails: BattleAction["actionDetails"] }>(run: AttackRun, action: T, attackRoll: AttackRollResult, second: SecondRoll, dice: DiceState): T {

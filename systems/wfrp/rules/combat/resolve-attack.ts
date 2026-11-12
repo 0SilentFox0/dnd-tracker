@@ -20,7 +20,8 @@ import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modi
 import { isActive, withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { isAdjacent } from "@/lib/utils/battle/grid/occupancy";
-import type { ResolveAttackCtx,ResolvedAttack } from "@/lib/utils/rules/systems/types";
+import type { AttackRollResult } from "@/lib/utils/battle/types/attack";
+import type { ResolveAttackCtx, ResolvedAttack } from "@/lib/utils/rules/systems/types";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 const attackCharacteristicOf = (attack: BattleAttack) => (attackKindOf(attack.type) === AttackType.RANGED ? "bs" : "ws") as "bs" | "ws";
@@ -40,6 +41,8 @@ function isOutnumbering(attacker: BattleParticipant, target: BattleParticipant, 
 
   return near(target, attacker.basicInfo.side) >= 2 * near(attacker, target.basicInfo.side);
 }
+
+export const wfrpAbortedRoll = (ctx: ResolveAttackCtx): AttackRollResult => ({ isHit: false, isCritical: false, isCriticalFail: false, totalAttackValue: ctx.manualRoll ?? 0, attackBonus: 0, advantageUsed: false, chosenD20: ctx.manualRoll ?? 0 });
 
 const sidesOf = (ctx: ResolveAttackCtx) => ({ attacker: ctx.attacker.basicInfo.side, target: ctx.target.basicInfo.side });
 

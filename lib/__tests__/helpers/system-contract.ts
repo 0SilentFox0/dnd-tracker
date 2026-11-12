@@ -13,8 +13,11 @@ export function assertSystemContract(meta: SystemMeta, definition: RuleSystemDef
   expect(new Set(meta.keys).size).toBe(meta.keys.length);
   expect(meta.keys).toContain(definition.key);
 
-  expect(["ft", "yd"]).toContain(definition.distance.unit);
-  expect(definition.distance.perCell).toBeGreaterThan(0);
+  if (meta.kind === undefined || meta.kind === "base") {
+    expect(["ft", "yd"]).toContain(meta.distance?.unit);
+    expect(meta.distance?.perCell).toBeGreaterThan(0);
+  }
+
   expect(typeof definition.progression.levels).toBe("boolean");
   expect(["hp", "wounds"]).toContain(definition.progression.hpTerm);
   expect(typeof definition.progression.maxHp).toBe("function");
@@ -42,7 +45,8 @@ export function assertSystemContract(meta: SystemMeta, definition: RuleSystemDef
   expect(typeof combat.actionEconomy.bonusAction).toBe("boolean");
   expect(typeof combat.actionEconomy.reaction).toBe("boolean");
 
-  if (combat.judge === "server") expect(combat.resolveAttack).toBeDefined();
+  expect(typeof combat.resolveAttack).toBe("function");
+  expect(typeof combat.abortedRoll).toBe("function");
 
   if (combat.hitModel) expect(combat.hitModel.refHit).toBeGreaterThan(0);
 
