@@ -58,7 +58,7 @@ describe("campaign rules API", () => {
     expect(prisma.campaign.update).not.toHaveBeenCalled();
   });
 
-  it("PATCH від ДМ зливає по секціях і зберігає злитий об'єкт", async () => {
+  it("PATCH від ДМ зливає по секціях і пише патч поверх збереженого JSON", async () => {
     const res = await patch({ morale: { enabled: false } });
 
     const { systemLocked, ...body } = await res.json();
@@ -67,7 +67,7 @@ describe("campaign rules API", () => {
     expect(systemLocked).toBe(false);
     expect(body.morale).toEqual({ enabled: false, cap: 3 });
     expect(body.criticals).toEqual(DEFAULT_RULES.criticals);
-    expect(prisma.campaign.update).toHaveBeenCalledWith({ where: { id: "c1" }, data: { rules: body } });
+    expect(prisma.campaign.update).toHaveBeenCalledWith({ where: { id: "c1" }, data: { rules: { morale: { enabled: false }, system: DEFAULT_RULES.system } } });
   });
 
   it("PATCH {morale:{cap}} не вмикає вимкнену мораль", async () => {

@@ -3,7 +3,7 @@ import { z } from "zod";
 import { DEFAULT_RULES } from "./defaults";
 import { ALL_SECTIONS } from "./section-registry";
 import { CRITICALS_ORDER_MESSAGE, INITIATIVE_ORDER_MESSAGE, type Ruleset, sectionSchemas } from "./section-shapes";
-import { parseSection } from "./sections";
+import { parseSection, type RulesSection, type SectionMap } from "./sections";
 
 import { CUSTOM_CONDITION_KEY_RE } from "@/lib/utils/abilities/schema/kinds";
 import { isRecord } from "@/lib/utils/common/is-record";
@@ -54,14 +54,7 @@ const sections = {
   system: withDefaults(sectionSchemas.system, DEFAULT_RULES.system),
 };
 
-type Sections = typeof sections;
-
 const criticalsOrdered = (v: { critOn: number; fumbleOn: number }) => v.fumbleOn < v.critOn;
-
-const optionalWithoutDefault = (shape: z.ZodRawShape) =>
-  z.strictObject(Object.fromEntries(Object.entries(shape).map(([k, v]) => [k, ((v instanceof z.ZodDefault ? v.unwrap() : v) as z.ZodType).optional()])));
-
-const patchSection = <K extends keyof Sections>(k: K) => optionalWithoutDefault(sections[k].shape) as z.ZodObject<{ [F in keyof Sections[K]["shape"]]: z.ZodOptional<z.ZodType<z.output<Sections[K]["shape"][F]>>> }, z.core.$strict>;
 
 const initiativeOrdered = (v: { heroMin?: number; heroMax?: number }) =>
   v.heroMin === undefined || v.heroMax === undefined || v.heroMin <= v.heroMax;
@@ -148,36 +141,63 @@ export function parseRulesCached(raw: unknown): Ruleset {
   return parsed;
 }
 
-export const RulesetPatchSchema = z
-  .strictObject({
-    morale: patchSection("morale").optional(),
-    criticals: patchSection("criticals").optional(),
-    formulas: patchSection("formulas").optional(),
-    heroScaling: patchSection("heroScaling").optional(),
-    initiative: patchSection("initiative").optional(),
-    defaultAttacks: patchSection("defaultAttacks").optional(),
-    saves: patchSection("saves").optional(),
-    deathSaves: patchSection("deathSaves").optional(),
-    concentration: patchSection("concentration").optional(),
-    conditions: patchSection("conditions").optional(),
-    actions: patchSection("actions").optional(),
-    classes: patchSection("classes").optional(),
-    outOfCombat: patchSection("outOfCombat").optional(),
-    encounters: patchSection("encounters").optional(),
-    items: patchSection("items").optional(),
-    spellIngredients: patchSection("spellIngredients").optional(),
-    advancement: patchSection("advancement").optional(),
-    tables: patchSection("tables").optional(),
-    system: patchSection("system").omit({ modules: true }).optional(),
-    removeCustomConditions: z.array(z.string().regex(CUSTOM_CONDITION_KEY_RE)).min(1).max(50).optional(),
-  })
-  .refine((p) => !p.initiative || initiativeOrdered(p.initiative), { message: INITIATIVE_ORDER_MESSAGE, path: ["initiative"] });
+type PatchOf<K extends keyof Ruleset> = { [F in keyof Ruleset[K]]?: Ruleset[K][F] };
 
-export type MergeRulesResult = { ok: true; rules: Ruleset } | { ok: false; issues: z.core.$ZodIssue[] };
+export type RulesetPatch = Omit<{ [K in keyof Ruleset]?: PatchOf<K> }, "system"> & { system?: { key?: string }; removeCustomConditions?: string[] };
+
+const patchOfSection = (section: RulesSection) => {
+  const object = z.strictObject(Object.fromEntries(Object.entries(section.items).map(([key, item]) => [key, item.schema.optional()])));
+
+  const { refine } = section;
+
+  return refine ? object.refine((value) => refine(value), { message: section.refineMessage ?? "rules.validation.invalidSection" }) : object;
+};
+
+export function rulesetPatchSchemaFor(sections: SectionMap): z.ZodType<RulesetPatch> {
+  const shape: Record<string, z.ZodType> = Object.fromEntries(Object.entries(sections).map(([name, section]) => [name, patchOfSection(section).optional()]));
+
+  if (sections.conditions?.items.custom) shape.removeCustomConditions = z.array(z.string().regex(CUSTOM_CONDITION_KEY_RE)).min(1).max(50).optional();
+
+  return z.strictObject(shape) as unknown as z.ZodType<RulesetPatch>;
+}
+
+export const RulesetPatchSchema = rulesetPatchSchemaFor(ALL_SECTIONS);
+
+export type MergeRulesResult = { ok: true; rules: Ruleset; stored?: Record<string, unknown> } | { ok: false; issues: z.core.$ZodIssue[] };
 
 type MergePatch = Record<string, Record<string, unknown> | string[] | undefined> & { removeCustomConditions?: string[] };
 
-export function mergeRules(current: Ruleset, patch: MergePatch): MergeRulesResult {
+function writeOverRaw(raw: unknown, next: Record<string, Record<string, unknown>>, patch: Record<string, unknown>, opts: { removedCustom: boolean; keyChanged: boolean }): Record<string, unknown> {
+  const stored: Record<string, unknown> = isRecord(raw) ? { ...raw } : {};
+
+  for (const [name, body] of Object.entries(patch)) {
+    if (!isRecord(body)) continue;
+
+    const section = isRecord(stored[name]) ? { ...stored[name] } : {};
+
+    for (const key of Object.keys(body)) {
+      const value = next[name]?.[key];
+
+      if (value === undefined || (name === "tables" && value === null)) delete section[key];
+      else section[key] = value;
+    }
+
+    stored[name] = section;
+  }
+
+  if (opts.removedCustom) stored.conditions = { ...(isRecord(stored.conditions) ? stored.conditions : {}), custom: next.conditions?.custom };
+
+  const system: Record<string, unknown> = { ...(isRecord(stored.system) ? stored.system : {}), key: next.system.key };
+
+  if (opts.keyChanged) delete system.modules;
+
+  stored.system = system;
+
+  return stored;
+}
+
+/** `raw` is the stored JSON: with it the result also carries `stored`, the raw JSON with the patch written over it (unknown and inactive sections stay) */
+export function mergeRules(current: Ruleset, patch: MergePatch, raw?: unknown): MergeRulesResult {
   const removed = new Set(patch.removeCustomConditions ?? []);
 
   const sections = patch as Record<string, Record<string, unknown> | undefined>;
@@ -187,6 +207,12 @@ export function mergeRules(current: Ruleset, patch: MergePatch): MergeRulesResul
   if (conflict) return { ok: false, issues: [{ code: "custom", message: "validation.rulesCustomConflict", path: ["removeCustomConditions"], input: patch.removeCustomConditions }] };
 
   const next = Object.fromEntries((Object.keys(current) as (keyof Ruleset)[]).map((k) => [k, { ...current[k], ...(sections[k] ?? {}) }]));
+
+  const newKey = sections.system?.key;
+
+  const keyChanged = typeof newKey === "string" && newKey !== current.system.key;
+
+  if (keyChanged) next.system = { key: newKey };
 
   if (isRecord(sections.tables)) next.tables = Object.fromEntries(Object.entries(next.tables).filter(([, rows]) => rows !== null));
 
@@ -216,7 +242,9 @@ export function mergeRules(current: Ruleset, patch: MergePatch): MergeRulesResul
 
   const parsed = RulesetSchema.safeParse(next);
 
-  return parsed.success ? { ok: true, rules: parsed.data } : { ok: false, issues: parsed.error.issues };
-}
+  if (!parsed.success) return { ok: false, issues: parsed.error.issues };
 
-export type RulesetPatch = z.infer<typeof RulesetPatchSchema>;
+  if (raw === undefined) return { ok: true, rules: parsed.data };
+
+  return { ok: true, rules: parsed.data, stored: writeOverRaw(raw, next as Record<string, Record<string, unknown>>, patch as Record<string, unknown>, { removedCustom: removed.size > 0, keyChanged }) };
+}

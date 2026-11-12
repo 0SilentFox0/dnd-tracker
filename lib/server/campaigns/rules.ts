@@ -16,12 +16,16 @@ import type { Ruleset, RulesetPatch } from "@/lib/utils/rules/schema";
 import { mergeRules, parseRules } from "@/lib/utils/rules/schema";
 import type { CampaignRulesView, ConditionUsage } from "@/types/campaigns";
 
-export async function loadRules(campaignId: string): Promise<Ruleset> {
+async function loadStoredRules(campaignId: string): Promise<{ raw: unknown; rules: Ruleset }> {
   const campaign = await prisma.campaign.findUnique({ where: { id: campaignId }, select: { rules: true } });
 
   if (!campaign) throw new ContentError(API_ERRORS.CAMPAIGN_NOT_FOUND, 404);
 
-  return parseRules(campaign.rules);
+  return { raw: campaign.rules, rules: parseRules(campaign.rules) };
+}
+
+export async function loadRules(campaignId: string): Promise<Ruleset> {
+  return (await loadStoredRules(campaignId)).rules;
 }
 
 type CountClient = Pick<Prisma.TransactionClient, "character" | "unit">;
@@ -44,7 +48,7 @@ export async function updateCampaignRules(actor: Actor, patch: RulesetPatch): Pr
   assertCan(actor, CONTENT_OPERATIONS["rules.update"].need);
 
   return withCampaignContentWrite(actor.campaignId, async (tx) => {
-    const current = await loadRules(actor.campaignId);
+    const { raw, rules: current } = await loadStoredRules(actor.campaignId);
 
     for (const key of patch.removeCustomConditions ?? []) {
       const condition = current.conditions.custom?.find((c) => c.key === key);
@@ -56,11 +60,11 @@ export async function updateCampaignRules(actor: Actor, patch: RulesetPatch): Pr
 
     if (systemLocked && patch.system?.key && patch.system.key !== current.system.key) throw new ContentError(API_ERRORS.SYSTEM_LOCKED, 409);
 
-    const merged = mergeRules(current, patch);
+    const merged = mergeRules(current, patch, raw);
 
     if (!merged.ok) throw new ContentError(API_ERRORS.INVALID_RULES, 400, merged.issues);
 
-    await prisma.campaign.update({ where: { id: actor.campaignId }, data: { rules: merged.rules as Prisma.InputJsonObject } });
+    await prisma.campaign.update({ where: { id: actor.campaignId }, data: { rules: (merged.stored ?? merged.rules) as Prisma.InputJsonObject } });
 
     return { ...merged.rules, systemLocked };
   });
