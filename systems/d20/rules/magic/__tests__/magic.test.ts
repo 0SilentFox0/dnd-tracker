@@ -74,11 +74,11 @@ describe("magic.saveDc and magic.upcast", () => {
     expect(magic.upcast.steps(3, 1)).toBe(0);
   });
 
-  it("wfrp has no resource and no upcast", () => {
+  it("wfrp has no resource and overcast raises the cast level", () => {
     const wfrp = ruleSystemOf(WFRP_RULES).magic;
 
     expect(wfrp.resource).toBeUndefined();
-    expect(wfrp.upcast.steps(1, 5)).toBe(0);
+    expect(wfrp.upcast.steps(1, 5)).toBe(4);
     expect(wfrp.tested).toBeDefined();
   });
 });
