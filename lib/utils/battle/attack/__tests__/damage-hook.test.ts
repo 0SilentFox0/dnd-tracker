@@ -52,7 +52,7 @@ describe("damage goes through combat.damage only", () => {
   });
 
   it("a hit takes its damage from the hook's mitigation", () => {
-    damage.mockImplementation((ctx: DamageCtx) => ({ doubleDice: false, ...(ctx.hit && { mitigated: { amount: 7, steps: [], totalLabel: textRef("x") } }) }));
+    damage.mockImplementation((ctx: DamageCtx) => ({ doubleDice: false, ...(ctx.hit && { mitigated: { amount: 7, steps: [], totalLabel: textRef("battleLog.damage.steps.obstacle") } }) }));
 
     expect(strike().targetUpdated.combatStats.currentHp).toBe(13);
   });

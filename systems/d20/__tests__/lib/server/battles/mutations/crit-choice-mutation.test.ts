@@ -71,7 +71,7 @@ describe("crit-choice mutation", () => {
 
     const viaRoute = await critChoice(ctx, { choices: { [KEY]: "random" } });
 
-    const direct = await attack(on(), body(), { seed: pending.seed, choices: {} });
+    const direct = await attack(on(), body(), { seed: (pending.hidden as { seed: number }).seed, choices: {} });
 
     expect(eventTextOf(viaRoute.events[0])).toBe(eventTextOf(direct.events[0]));
     expect(viaRoute.participants.map((p) => p.combatStats.currentHp)).toEqual(direct.participants.map((p) => p.combatStats.currentHp));
