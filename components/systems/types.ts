@@ -103,6 +103,15 @@ export interface CombatRowProps {
     rules: Ruleset;
 }
 
+export interface PathPanelProps {
+    manage: boolean;
+}
+
+export interface ItemSectionProps {
+    sheet: CharacterSheet;
+    variant: 'editor' | 'inventory';
+}
+
 export interface RaceProfileEditorProps {
     campaignId: string;
     raceId: string;
@@ -191,7 +200,13 @@ export interface SystemUi {
     /** Extra fields of the character form's combat block; lists concatenate across modules */
     forms?: { fields?: readonly ComponentType<FormFieldProps>[] };
     /** Extra rows of the sheet's defense section */
-    sheet?: { combatRows?: readonly ComponentType<CombatRowProps>[] };
+    sheet?: {
+        combatRows?: readonly ComponentType<CombatRowProps>[];
+        /** Panels of the «Path» tab a module adds; data comes from `useProfile()` */
+        pathPanels?: readonly ComponentType<PathPanelProps>[];
+        /** Extra sections of the editor and the inventory tab */
+        itemSections?: readonly ComponentType<ItemSectionProps>[];
+    };
     ActionResult?: ComponentType<ActionResultProps>;
     rulesSections?: Partial<
         Record<MechanicKey, ComponentType<RulesSectionProps>>

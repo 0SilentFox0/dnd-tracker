@@ -32,7 +32,10 @@ vi.mock('@/lib/hooks/characters', async (orig) => ({
 }));
 vi.mock('@/lib/hooks/campaigns', () => ({
     useCampaignRules: () => ({
-        data: { system: { key: 'dnd5e' }, classes: { enabled: false } },
+        data: {
+            system: { key: 'dnd5e', modules: ['skilltrees', 'artifactsets'] },
+            classes: { enabled: false },
+        },
     }),
 }));
 vi.mock('@/lib/hooks/races', () => ({ useRaces: () => ({ data: [] }) }));

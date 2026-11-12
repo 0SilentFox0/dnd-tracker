@@ -45,6 +45,10 @@ vi.mock('@/components/character-profile/ClassLevelUpDialog', () => ({
 vi.mock('@/components/skill-tree/progression', () => ({
     ProgressionPanel: () => <div data-testid="panel" />,
 }));
+vi.mock('@/lib/hooks/campaigns', async (orig) => ({
+    ...(await orig<object>()),
+    useCampaignRules: () => ({ data: undefined }),
+}));
 
 const cls = makeClass({
     id: 'f',

@@ -48,6 +48,27 @@ describe('composeUi', () => {
         expect(out.sheet?.combatRows).toEqual([B]);
     });
 
+    it('concatenates sheet.pathPanels and sheet.itemSections across addons', () => {
+        const A = () => null;
+
+        const B = () => null;
+
+        const out = composeUi(
+            { ...base, sheet: { pathPanels: [A], itemSections: [A] } },
+            [
+                {
+                    id: 'm',
+                    build: () => ({
+                        sheet: { pathPanels: [B], itemSections: [B] },
+                    }),
+                },
+            ]
+        );
+
+        expect(out.sheet?.pathPanels).toEqual([A, B]);
+        expect(out.sheet?.itemSections).toEqual([A, B]);
+    });
+
     it('throws on a duplicate rulesSections key', () => {
         expect(() =>
             composeUi(base, [

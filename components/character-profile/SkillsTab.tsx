@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import dynamic from 'next/dynamic';
-import { useTranslations } from 'next-intl';
 
 import { ChargesList } from './rest/ChargesList';
 import { ClassLevelUpDialog } from './ClassLevelUpDialog';
@@ -18,8 +17,8 @@ import {
 import { useProfile } from './ProfileContext';
 import { RacePassive } from './RacePassive';
 
-import { EntityIcon } from '@/components/common/EntityIcon';
-import { ProgressionPanel } from '@/components/skill-tree/progression';
+import { systemUiOf } from '@/components/systems';
+import { useCampaignSystem } from '@/lib/hooks/systems';
 import { classSectionOpen } from '@/lib/utils/characters/classes/path';
 
 const ChoicesDialog = dynamic(() => import('./ChoicesDialog'), { ssr: false });
@@ -33,9 +32,9 @@ export function SkillsTab({
 }) {
     const { campaignId, characterId, sheet } = useProfile();
 
-    const t = useTranslations('characterProfile.skills');
+    const { system } = useCampaignSystem(campaignId, sheet.system);
 
-    const personal = sheet.personalSkill;
+    const ui = systemUiOf(system.key, system.modules);
 
     const [choices, setChoices] = useState<{ startAt?: string } | null>(null);
 
@@ -107,39 +106,9 @@ export function SkillsTab({
             <FeatsBlock />
             <RacePassive />
             <ChargesList />
-            {personal && (
-                <section className="mb-3 flex gap-3 rounded-[10px] border border-hud-gold/40 bg-hud-field p-3">
-                    <EntityIcon
-                        src={sheet.identity.avatar || personal.icon}
-                        name={personal.name}
-                        alt={sheet.identity.name}
-                        size={48}
-                        className="hud-sc size-12 rounded-md border border-hud-line bg-hud-raised text-inherit"
-                    />
-                    <div className="min-w-0">
-                        <p className="text-[11px] text-hud-gold uppercase">
-                            {t('personal')}
-                        </p>
-                        <h3 className="hud-sc text-base text-hud-ink">
-                            {personal.name}
-                        </h3>
-                        {personal.description && (
-                            <p className="mt-1 text-[13px] leading-snug text-hud-soft">
-                                {personal.description}
-                            </p>
-                        )}
-                    </div>
-                </section>
-            )}
-            {!sheet.classProgression?.length && (
-                <div className="-mx-4">
-                    <ProgressionPanel
-                        campaignId={campaignId}
-                        characterId={characterId}
-                        canManage={manage}
-                    />
-                </div>
-            )}
+            {ui.sheet?.pathPanels?.map((Panel, i) => (
+                <Panel key={i} manage={manage} />
+            ))}
         </>
     );
 }
