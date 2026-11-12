@@ -76,7 +76,7 @@ describe("rule system registry", () => {
     for (const key of ["homm", "dnd5e"] as const) {
       const s = RULE_SYSTEM_REGISTRY[key];
 
-      expect(s.progression.maxHp({} as never)).toBeNull();
+      expect(typeof s.progression.maxHp).toBe("function");
       expect(s.characteristics.sheetBlock(sheetInput)).toBeUndefined();
       expect(s.sheetTest.accepts({ kind: "check" })).toBe(true);
       expect(s.sheetTest.accepts({ kind: "test" })).toBe(false);

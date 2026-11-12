@@ -9,6 +9,7 @@ import { CharacterAbilitiesSection } from "@/components/characters/abilities/Cha
 import { CharacterBasicInfo } from "@/components/characters/basic/CharacterBasicInfo";
 import { CHARACTER_FORM_TAB, type CharacterFormTabId } from "@/components/characters/character-form-tabs";
 import { CharacterSkillsSection } from "@/components/characters/skills/CharacterSkillsSection";
+import { SystemFormFields } from "@/components/characters/stats/SystemFormFields";
 import { CharacterChoicesTab } from "@/components/choices/CharacterChoicesTab";
 import { HudForm, HudFormPage, HudSection, type HudTab } from "@/components/hud/form";
 import { systemUiOf } from "@/components/systems";
@@ -85,7 +86,7 @@ export function NewCharacterForm({ campaignId: id, characterType, systemKey }: N
     {
       id: CHARACTER_FORM_TAB.combat,
       label: t("form.tabs.combat"),
-      content: Ui && <Ui.StatsFields bindings={{ basicInfo, skills, abilities, ...bindings }} campaignId={id} mode="create" classArmor={classMode.enabled && (basicInfo.data.classes ?? []).length > 0 ? null : undefined} />,
+      content: Ui && <Ui.StatsFields bindings={{ basicInfo, skills, abilities, ...bindings }} campaignId={id} mode="create" extraFields={<SystemFormFields campaignId={id} combatStats={bindings.combatStats} />} classArmor={classMode.enabled && (basicInfo.data.classes ?? []).length > 0 ? null : undefined} />,
     },
     {
       id: CHARACTER_FORM_TAB.skills,

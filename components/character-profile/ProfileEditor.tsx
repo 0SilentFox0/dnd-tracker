@@ -18,6 +18,7 @@ import { SkillsTab } from "./SkillsTab";
 import { CharacterAbilitiesSection } from "@/components/characters/abilities/CharacterAbilitiesSection";
 import { CharacterArtifactsSection } from "@/components/characters/artifacts/CharacterArtifactsSection";
 import { CharacterSkillsSection } from "@/components/characters/skills/CharacterSkillsSection";
+import { SystemFormFields } from "@/components/characters/stats/SystemFormFields";
 import { CharacterChoicesPanel } from "@/components/choices/CharacterChoicesPanel";
 import { ActionBar } from "@/components/common/ActionBar";
 import { FormAlert } from "@/components/common/states";
@@ -113,7 +114,7 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
             label: t("tabs.combat"),
             content: (
               <div className="space-y-6">
-                <Ui.StatsFields bindings={form} campaignId={campaignId} mode="edit" classArmor={classesEnabled && (formData.basicInfo.classes ?? []).length > 0 ? sheet.armorClass : undefined} />
+                <Ui.StatsFields bindings={form} campaignId={campaignId} mode="edit" extraFields={<SystemFormFields campaignId={campaignId} combatStats={form.combatStats} />} classArmor={classesEnabled && (formData.basicInfo.classes ?? []).length > 0 ? sheet.armorClass : undefined} />
                 {!Ui.hideProgression && <CharacterSkillsSection skills={skills} />}
               </div>
             ),

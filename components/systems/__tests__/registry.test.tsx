@@ -9,11 +9,12 @@ describe("system ui registry", () => {
   it("has the three systems, homm and dnd5e share the d20 ui", () => {
     expect(Object.keys(SYSTEM_UI).sort()).toEqual(["dnd5e", "homm", "wfrp"]);
 
-    const { rulesSections: hommSections, rulesItems: hommItems, ...hommRest } = systemUiOf("homm");
+    const { rulesSections: hommSections, rulesItems: hommItems, forms: hommForms, sheet: hommSheet, ...hommRest } = systemUiOf("homm");
 
-    const { rulesSections: dndSections, rulesItems: dndItems, ...dndRest } = systemUiOf("dnd5e");
+    const { rulesSections: dndSections, rulesItems: dndItems, forms: dndForms, sheet: dndSheet, ...dndRest } = systemUiOf("dnd5e");
 
     expect(hommRest).toEqual(dndRest);
+    expect([hommForms?.fields?.length, hommSheet?.combatRows?.length, dndForms, dndSheet]).toEqual([1, 1, undefined, undefined]);
     expect(hommSections).toMatchObject(dndSections ?? {});
     expect(Object.keys(hommSections ?? {})).toEqual(expect.arrayContaining(["morale", "heroScaling"]));
     expect(dndItems ?? {}).toEqual({});

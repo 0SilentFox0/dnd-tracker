@@ -6,6 +6,7 @@ import { Crosshair, Swords } from "lucide-react";
 
 import { SheetRollDialog, type SheetRollRequest } from "./rest/SheetRollDialog";
 import { Breakdown } from "./Breakdown";
+import { CombatRow } from "./CombatRow";
 import { useProfile } from "./ProfileContext";
 
 import { EmptyState } from "@/components/common/states";
@@ -16,23 +17,6 @@ import { useCampaignRules } from "@/lib/hooks/campaigns";
 import { signed } from "@/lib/utils/common/format";
 import { RULE_SYSTEM_REGISTRY } from "@/lib/utils/rules/systems";
 import { statColumnsOf } from "@/lib/utils/rules/systems/stats";
-import type { SheetLine } from "@/types/characters";
-
-function Row({ label, value, lines }: { label: string; value: string; lines?: SheetLine[] }) {
-  const [open, setOpen] = useState(false);
-
-  const expandable = !!lines && lines.length > 1;
-
-  return (
-    <div className="border-b border-hud-raised py-1.5 text-sm">
-      <button type="button" disabled={!expandable} aria-expanded={expandable ? open : undefined} onClick={() => setOpen((v) => !v)} className="flex min-h-8 w-full items-center justify-between gap-3 text-left disabled:cursor-default">
-        <span>{label}</span>
-        <span className="tabular-nums text-hud-ink">{value}</span>
-      </button>
-      {open && lines && <Breakdown lines={lines} />}
-    </div>
-  );
-}
 
 export function CombatTab() {
   const { campaignId, sheet } = useProfile();
@@ -43,7 +27,7 @@ export function CombatTab() {
 
   const { data: rules } = useCampaignRules(campaignId);
 
-  const Ui = systemUiOf(sheet.system);
+  const Ui = systemUiOf(sheet.system, rules?.system.modules);
 
   const system = RULE_SYSTEM_REGISTRY[sheet.system];
 
@@ -92,14 +76,14 @@ export function CombatTab() {
       <HudSection title={t("defense")}>
         {d20Stats && (
           <>
-            <Row label="AC" value={String(sheet.armorClass.total)} lines={sheet.armorClass.lines} />
-            <Row label={tg("stats.initiative")} value={String(sheet.initiative)} />
-            <Row label={tg("stats.speed")} value={String(sheet.speed)} />
+            <CombatRow label="AC" value={String(sheet.armorClass.total)} lines={sheet.armorClass.lines} />
+            <CombatRow label={tg("stats.initiative")} value={String(sheet.initiative)} />
+            <CombatRow label={tg("stats.speed")} value={String(sheet.speed)} />
           </>
         )}
-        {d20Stats && rules?.morale.enabled !== false && <Row label={tg("stats.moral")} value={signed(sheet.morale)} />}
-        {showAttacks && <Row label={t("targets")} value={sheet.targets.min === sheet.targets.max ? String(sheet.targets.max) : `${sheet.targets.min}–${sheet.targets.max}`} />}
-        {sheet.immunities.length > 0 && <Row label={t("immunities")} value={sheet.immunities.join(", ")} />}
+        {rules && Ui.sheet?.combatRows?.map((Extra, i) => <Extra key={i} sheet={sheet} rules={rules} />)}
+        {showAttacks && <CombatRow label={t("targets")} value={sheet.targets.min === sheet.targets.max ? String(sheet.targets.max) : `${sheet.targets.min}–${sheet.targets.max}`} />}
+        {sheet.immunities.length > 0 && <CombatRow label={t("immunities")} value={sheet.immunities.join(", ")} />}
       </HudSection>
       <Ui.StatsTab section="bottom" onRoll={setRollRequest} canRoll={canRoll} />
       {canRoll && <SheetRollDialog request={rollRequest} onClose={() => setRollRequest(null)} />}

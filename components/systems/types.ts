@@ -1,4 +1,4 @@
-import type { ComponentType } from "react";
+import type { ComponentType, ReactNode } from "react";
 
 import type { SpellFormFieldsProps } from "@/components/spells/form/SpellFormBasicFields";
 import type { useAttackWizard, useChannelAction, useSpellBook } from "@/lib/hooks/battle";
@@ -6,6 +6,7 @@ import type { SystemConditionBody } from "@/lib/hooks/battles";
 import type { RulesFormState } from "@/lib/hooks/campaigns";
 import type { CharacterFormBindings } from "@/lib/utils/characters/form/bindings";
 import type { MechanicKey } from "@/lib/utils/rules/registry";
+import type { Ruleset } from "@/lib/utils/rules/schema";
 import type { SystemConditionInfo } from "@/lib/utils/rules/systems";
 import type { SystemSlot } from "@/lib/utils/rules/systems/slot";
 import type { BattleParticipant } from "@/types/battle";
@@ -36,6 +37,8 @@ export interface StatsFieldsProps {
   campaignId: string;
   mode: "create" | "edit";
   classArmor?: SheetTotal | null;
+  /** Rendered after the combat fields (module-provided `forms.fields`); built by the caller to keep the registry out of this subtree */
+  extraFields?: ReactNode;
 }
 
 export interface AdvancementEditorProps {
@@ -78,6 +81,16 @@ export interface ResourceFieldsProps {
   sheet: CharacterSheet;
   values: Record<string, string>;
   onChange: (key: string, value: string) => void;
+}
+
+export interface FormFieldProps {
+  combatStats: CharacterFormBindings["combatStats"];
+  rules: Ruleset;
+}
+
+export interface CombatRowProps {
+  sheet: CharacterSheet;
+  rules: Ruleset;
 }
 
 export interface RaceProfileEditorProps {
@@ -165,6 +178,10 @@ export interface SystemUi {
   RestBadges?: ComponentType<RestBadgesProps>;
   ResourceFields?: ComponentType<ResourceFieldsProps>;
   resourceDefaults?(sheet: CharacterSheet): Record<string, string>;
+  /** Extra fields of the character form's combat block; lists concatenate across modules */
+  forms?: { fields?: readonly ComponentType<FormFieldProps>[] };
+  /** Extra rows of the sheet's defense section */
+  sheet?: { combatRows?: readonly ComponentType<CombatRowProps>[] };
   ActionResult?: ComponentType<ActionResultProps>;
   rulesSections?: Partial<Record<MechanicKey, ComponentType<RulesSectionProps>>>;
   /** Editors of items a module adds to another module's section, keyed `section.item` */

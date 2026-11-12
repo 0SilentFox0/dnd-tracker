@@ -7,14 +7,14 @@ import { CharacterCombatParams } from "@/components/characters/stats/CharacterCo
 import { HudSection } from "@/components/hud/form";
 import type { StatsFieldsProps } from "@/components/systems/types";
 
-export function StatsFields({ bindings: { abilityScores, combatStats }, campaignId, mode, classArmor }: StatsFieldsProps) {
+export function StatsFields({ bindings: { abilityScores, combatStats }, campaignId, mode, classArmor, extraFields }: StatsFieldsProps) {
   const t = useTranslations("characters");
 
   if (mode === "edit") {
     return (
       <>
         <CharacterAbilityScores abilityScores={abilityScores} withPrimary />
-        <CharacterCombatParams campaignId={campaignId} combatStats={combatStats} classArmor={classArmor} />
+        <CharacterCombatParams campaignId={campaignId} combatStats={combatStats} classArmor={classArmor} extraFields={extraFields} />
       </>
     );
   }
@@ -25,7 +25,7 @@ export function StatsFields({ bindings: { abilityScores, combatStats }, campaign
         <CharacterAbilityScores abilityScores={abilityScores} />
       </HudSection>
       <HudSection title={t("form.sections.combatParams")}>
-        <CharacterCombatParams campaignId={campaignId} combatStats={combatStats} classArmor={classArmor} />
+        <CharacterCombatParams campaignId={campaignId} combatStats={combatStats} classArmor={classArmor} extraFields={extraFields} />
       </HudSection>
     </>
   );

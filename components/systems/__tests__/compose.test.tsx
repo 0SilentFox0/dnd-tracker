@@ -21,6 +21,17 @@ describe("composeUi", () => {
     expect(out.rulesSections?.saves).toBe(Other);
   });
 
+  it("concatenates forms.fields and sheet.combatRows across addons", () => {
+    const A = () => null;
+
+    const B = () => null;
+
+    const out = composeUi({ ...base, forms: { fields: [A] } }, [{ id: "m", build: () => ({ forms: { fields: [B] }, sheet: { combatRows: [B] } }) }]);
+
+    expect(out.forms?.fields).toEqual([A, B]);
+    expect(out.sheet?.combatRows).toEqual([B]);
+  });
+
   it("throws on a duplicate rulesSections key", () => {
     expect(() => composeUi(base, [{ id: "m", build: () => ({ rulesSections: { morale: Section } }) }])).toThrow(CompositionError);
   });
