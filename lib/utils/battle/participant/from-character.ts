@@ -26,7 +26,6 @@ import { DND_SKILLS } from '@/lib/constants/skills';
 import { CharacterClassesSchema } from '@/lib/schemas/classes';
 import { loadBackground } from '@/lib/server/backgrounds/load';
 import { resolveCharacterSkillEntries } from '@/lib/server/battles/participant/character-skill-entries';
-import { resolveLearnedSpellsAndMastery } from '@/lib/server/battles/participant/from-character-learned-spells';
 import { resolveSpellSlotsFromCharacter } from '@/lib/server/battles/participant/from-character-spell-slots';
 import { loadRace } from '@/lib/server/battles/participant/load-race';
 import { systemServerOf } from '@/lib/server/systems/registry';
@@ -63,6 +62,7 @@ import { currencyValueOf, ruleSystemOf } from '@/lib/utils/rules/systems';
 import { composition } from '@/lib/utils/rules/systems/catalog';
 import { systemSlotOf } from '@/lib/utils/rules/systems/slot';
 import { statColumnsOf } from '@/lib/utils/rules/systems/stats';
+import type { BranchLevel } from '@/lib/utils/skills/progression';
 import { resolveClassEntries } from '@/lib/utils/spells/class-slots';
 import { buildIngredientStock } from '@/lib/utils/spells/ingredients/stock';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
@@ -203,7 +203,8 @@ async function characterSpellcasting(
     character: CharacterFromPrisma,
     refs: BuildRefs,
     proficiencyBonus: number,
-    context: CampaignSpellContext | undefined
+    context: CampaignSpellContext | undefined,
+    rules: Ruleset
 ) {
     const { race, resolvedClasses, artifactRows, consumables } = refs;
 
@@ -256,11 +257,16 @@ async function characterSpellcasting(
         ? (rawKnown as unknown[]).map((id) => String(id)).filter(Boolean)
         : [];
 
-    const { knownSpells, schoolMastery } = await resolveLearnedSpellsAndMastery(
-        character,
-        baseKnownSpells,
-        context
-    );
+    let knownSpells = baseKnownSpells;
+
+    let schoolMastery: Record<string, BranchLevel> = {};
+
+    for (const load of systemServerOf(rules).participant?.learnedSpells ?? []) {
+        const learned = await load({ character, knownSpells, context });
+
+        knownSpells = learned.knownSpells;
+        schoolMastery = { ...schoolMastery, ...learned.schoolMastery };
+    }
 
     const resolvedSpellSlots = await resolveSpellSlotsFromCharacter(
         character,
@@ -419,7 +425,13 @@ export async function createBattleParticipantFromCharacter(
         grantPools,
         spellcastingAbility,
         spellcasting,
-    } = await characterSpellcasting(character, refs, proficiencyBonus, context);
+    } = await characterSpellcasting(
+        character,
+        refs,
+        proficiencyBonus,
+        context,
+        rules
+    );
 
     const equipmentGear = ruleSystemOf(rules).equipment?.armourAp(
         artifactRows

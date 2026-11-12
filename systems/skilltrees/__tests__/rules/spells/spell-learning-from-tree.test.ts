@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { learnedSpellIdsFromNodes } from '@/lib/utils/spells';
+import { learnedSpellIdsFromNodes } from '@/systems/skilltrees/rules/spells/spell-learning-from-tree';
 
 const spells = [
     { id: 's1', level: 1, spellGroup: { id: 'sg' } },

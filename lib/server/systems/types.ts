@@ -10,9 +10,12 @@ import type {
     BattleMutationContext,
     MutationResult,
 } from '@/lib/utils/battle/pipeline/run-battle-mutation';
-import type { CampaignSpellContext } from '@/lib/utils/battle/types/participant';
+import type {
+    CampaignSpellContext,
+    CharacterFromPrisma,
+} from '@/lib/utils/battle/types/participant';
 import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
-import type { branchLevels } from '@/lib/utils/skills/progression';
+import type { BranchLevel, branchLevels } from '@/lib/utils/skills/progression';
 import type { BattleParticipant, EquippedArtifact } from '@/types/battle';
 import type { SetProgress } from '@/types/characters';
 
@@ -107,7 +110,17 @@ export type ContextPreparer = (
     context: CampaignSpellContext
 ) => Promise<void>;
 
+export type LearnedSpellsLoader = (input: {
+    character: CharacterFromPrisma;
+    knownSpells: string[];
+    context?: CampaignSpellContext;
+}) => Promise<{
+    knownSpells: string[];
+    schoolMastery: Record<string, BranchLevel>;
+}>;
+
 export interface SystemParticipantServer {
+    learnedSpells?: readonly LearnedSpellsLoader[];
     characterRefs?: readonly CharacterRefLoader[];
     prepareContext?: readonly ContextPreparer[];
 }

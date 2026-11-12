@@ -11,8 +11,8 @@ import {
     readUnlocked,
     stripTreeForClient,
 } from '@/lib/utils/skills/progression';
-import { toSpellSkillInfo } from '@/lib/utils/spells';
 import { damageAffinity } from '@/systems/skilltrees/rules/damage-affinity';
+import { toSpellSkillInfo } from '@/systems/skilltrees/rules/spells/spell-learning-internals';
 import type { CharacterProgressionDto } from '@/types/progression';
 
 export const PROGRESSION_SKILL_SELECT = {

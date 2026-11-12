@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/db';
+import type { LearnedSpellsLoader } from '@/lib/server/systems/types';
 import type {
     CampaignSpellContext,
     CharacterFromPrisma,
@@ -9,8 +10,9 @@ import {
     normalizeTree,
     resolveLearned,
 } from '@/lib/utils/skills/progression';
-import { learnedSpellIdsFromNodes, toSpellSkillInfo } from '@/lib/utils/spells';
 import { schoolMasteryFromLearned } from '@/lib/utils/spells/model/dice';
+import { learnedSpellIdsFromNodes } from '@/systems/skilltrees/rules/spells/spell-learning-from-tree';
+import { toSpellSkillInfo } from '@/systems/skilltrees/rules/spells/spell-learning-internals';
 
 // персональне вміння не лежить у дереві, тож його закляття додаємо окремо
 async function personalSpellIds(
@@ -32,14 +34,11 @@ async function personalSpellIds(
     return spellId ? [spellId] : [];
 }
 
-export async function resolveLearnedSpellsAndMastery(
-    character: CharacterFromPrisma,
-    knownSpells: string[],
-    context?: CampaignSpellContext
-): Promise<{
-    knownSpells: string[];
-    schoolMastery: Record<string, BranchLevel>;
-}> {
+export const resolveLearnedSpellsAndMastery: LearnedSpellsLoader = async ({
+    character,
+    knownSpells,
+    context,
+}) => {
     let baseKnownSpells = knownSpells;
 
     const none = () => ({ knownSpells: baseKnownSpells, schoolMastery: {} });
@@ -144,4 +143,4 @@ export async function resolveLearnedSpellsAndMastery(
 
         return none();
     }
-}
+};
