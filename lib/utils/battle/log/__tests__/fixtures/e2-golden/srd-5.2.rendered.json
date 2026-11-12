@@ -1,0 +1,272 @@
+[
+ {
+  "seq": 1,
+  "type": "spell",
+  "text": "Gold Dragon Wyrmling #1 застосовує Fire Breath (Gold Dragon Wyrmling) (шкода: 48 (TEST sweep hero 1 Dragonborn 11, Giant Vulture #1 11, Commoner #1 4, Young Green Dragon #1 11, TEST sweep hero 3 Elf 11)) | 🎲 TEST sweep hero 1 Dragonborn: рятівний кидок 1+2+3=6 проти СК 13 — провал | 🎲 Giant Vulture #1: рятівний кидок 1+0=1 проти СК 13 — провал | 🎲 Commoner #1: рятівний кидок 1+0=1 проти СК 13 — провал | 🎲 Young Green Dragon #1: рятівний кидок 1+1+3=5 проти СК 13 — провал | 🎲 TEST sweep hero 3 Elf: рятівний кидок 1+2=3 проти СК 13 — провал"
+ },
+ {
+  "seq": 2,
+  "type": "ability",
+  "text": "🎯 Bardic Inspiration: Gold Dragon Wyrmling #1 — мітка (1)"
+ },
+ {
+  "seq": 3,
+  "type": "spell",
+  "text": "TEST sweep hero 1 Dragonborn застосовує Bane | 🎲 Gold Dragon Wyrmling #1: рятівний кидок 1+3=4 проти СК 12 — провал | 🎲 Succubus #1: рятівний кидок 1+5=6 проти СК 12 — провал | 🎲 Hydra #1: рятівний кидок 1-2=-1 проти СК 12 — провал | ✨ Bane: бонус атаки -2 → Gold Dragon Wyrmling #1 (10 р.) | ✨ Bane: рятівні кидки -2 → Gold Dragon Wyrmling #1 (10 р.) | ✨ Bane: бонус атаки -2 → Succubus #1 (10 р.) | ✨ Bane: рятівні кидки -2 → Succubus #1 (10 р.) | ✨ Bane: бонус атаки -2 → Hydra #1 (10 р.) | ✨ Bane: рятівні кидки -2 → Hydra #1 (10 р.)"
+ },
+ {
+  "seq": 4,
+  "type": "spell",
+  "text": "Succubus #1 застосовує Dominate Person | 🎲 Young Green Dragon #1: рятівний кидок 1+1+3=5 проти СК 15 — провал | ⛓ Dominate Person: Young Green Dragon #1 — зачарований (10 р.)"
+ },
+ {
+  "seq": 5,
+  "type": "attack",
+  "text": "Hydra #1 → TEST sweep hero 1 Dragonborn: 6 шкоди | 🎲 TEST sweep hero 1 Dragonborn: концентрація — рятівний кидок ВИТ 9 проти СК 10 — втрачає концентрацію на «Bane»"
+ },
+ {
+  "seq": 6,
+  "type": "ability",
+  "text": "💚 Lay on Hands (TEST sweep hero 4 Gnome): TEST sweep hero 1 Dragonborn +5 HP"
+ },
+ {
+  "seq": 7,
+  "type": "attack",
+  "text": "TEST sweep hero 4 Gnome → TEST sweep hero 1 Dragonborn: 2 шкоди"
+ },
+ {
+  "seq": 8,
+  "type": "attack",
+  "text": "Giant Vulture #1 → Succubus #1: промах"
+ },
+ {
+  "seq": 9,
+  "type": "ability",
+  "text": "✨ Stonecunning: Чуття вібрацій 60 фт → TEST sweep hero 2 Dwarf (99 р.)"
+ },
+ {
+  "seq": 10,
+  "type": "ability",
+  "text": "💚 Divine Spark (TEST sweep hero 2 Dwarf): TEST sweep hero 1 Dragonborn +2 HP | 💚 Divine Spark (TEST sweep hero 2 Dwarf): TEST sweep hero 1 Dragonborn +1 HP"
+ },
+ {
+  "seq": 11,
+  "type": "spell",
+  "text": "Young Green Dragon #1 застосовує Poison Breath (Young Green Dragon) (шкода: 159 (Gold Dragon Wyrmling #1 46, Hydra #1 46, TEST sweep hero 4 Gnome 44, TEST sweep hero 2 Dwarf 23)) | 🎲 Gold Dragon Wyrmling #1: рятівний кидок 1+3=4 проти СК 14 — провал | 🎲 Hydra #1: рятівний кидок 1+5=6 проти СК 14 — провал | 🎲 TEST sweep hero 4 Gnome: рятівний кидок 1+2=3 проти СК 14 — провал | 🎲 TEST sweep hero 2 Dwarf: рятівний кидок 1+2=3 проти СК 14 — провал | 💤 TEST sweep hero 4 Gnome непритомніє"
+ },
+ {
+  "seq": 12,
+  "type": "ability",
+  "text": "Кінець ходу | 🎲 Young Green Dragon #1: рятівний кидок Мудрість 15 проти СК 15 — звільняється від стану «Зачарований»"
+ },
+ {
+  "seq": 13,
+  "type": "ability",
+  "text": "🔮 Succubus #1 втрачає концентрацію на «Dominate Person» (ефекти заклинання завершилися)"
+ },
+ {
+  "seq": 14,
+  "type": "ability",
+  "text": "💚 Wild Shape: TEST sweep hero 3 Elf +5 HP | 🎯 Wild Shape: TEST sweep hero 3 Elf — мітка (1)"
+ },
+ {
+  "seq": 15,
+  "type": "spell",
+  "text": "TEST sweep hero 3 Elf застосовує Detect Evil and Good"
+ },
+ {
+  "seq": 16,
+  "type": "ability",
+  "text": "🔄 cmvs6ek7s00dreyicnab50xt6 не перезарядилась (3)"
+ },
+ {
+  "seq": 17,
+  "type": "attack",
+  "text": "Gold Dragon Wyrmling #1 → TEST sweep hero 1 Dragonborn: 7 шкоди"
+ },
+ {
+  "seq": 18,
+  "type": "spell",
+  "text": "TEST sweep hero 1 Dragonborn застосовує Detect Magic"
+ },
+ {
+  "seq": 19,
+  "type": "spell",
+  "text": "Succubus #1 застосовує Draining Kiss (Succubus) (шкода: 11) | 🎲 TEST sweep hero 1 Dragonborn: рятівний кидок 1+2=3 проти СК 15 — провал | 🎲 TEST sweep hero 1 Dragonborn: концентрація — рятівний кидок ВИТ 3 проти СК 10 — втрачає концентрацію на «Detect Magic»"
+ },
+ {
+  "seq": 20,
+  "type": "attack",
+  "text": "Hydra #1 → TEST sweep hero 3 Elf: 21 шкоди (КРИТИЧНЕ ПОПАДАННЯ!) | 🎲 крит: кубики шкоди подвоєно (сервер: 6) | 🎲 TEST sweep hero 3 Elf: концентрація — рятівний кидок ВИТ 10 проти СК 10 — утримує"
+ },
+ {
+  "seq": 21,
+  "type": "ability",
+  "text": "🎲 TEST sweep hero 4 Gnome: кидок смерті 5 — провал (1/3)"
+ },
+ {
+  "seq": 22,
+  "type": "attack",
+  "text": "Giant Vulture #1 → TEST sweep hero 2 Dwarf: 7 шкоди"
+ },
+ {
+  "seq": 23,
+  "type": "ability",
+  "text": "✨ Stonecunning: Чуття вібрацій 60 фт → TEST sweep hero 2 Dwarf (99 р.)"
+ },
+ {
+  "seq": 24,
+  "type": "ability",
+  "text": ""
+ },
+ {
+  "seq": 25,
+  "type": "ability",
+  "text": "🔄 cmvs6hd0700s1eyicyfpmb5ir не перезарядилась (3)"
+ },
+ {
+  "seq": 26,
+  "type": "attack",
+  "text": "Young Green Dragon #1 → Gold Dragon Wyrmling #1: 20 шкоди (КРИТИЧНЕ ПОПАДАННЯ!) | 🎲 крит: кубики шкоди подвоєно (сервер: 4, 5)"
+ },
+ {
+  "seq": 27,
+  "type": "ability",
+  "text": "💚 Wild Shape: TEST sweep hero 3 Elf +5 HP | 🎯 Wild Shape: TEST sweep hero 3 Elf — мітка (2)"
+ },
+ {
+  "seq": 28,
+  "type": "spell",
+  "text": "TEST sweep hero 3 Elf застосовує Detect Poison and Disease | 🔮 TEST sweep hero 3 Elf втрачає концентрацію на «Detect Evil and Good» (нове заклинання)"
+ },
+ {
+  "seq": 29,
+  "type": "ability",
+  "text": "🔄 cmvs6ek7s00dreyicnab50xt6 не перезарядилась (1)"
+ },
+ {
+  "seq": 30,
+  "type": "spell",
+  "text": "TEST sweep hero 1 Dragonborn застосовує Ensnaring Strike (шкода: 4) | 🎲 Hydra #1: рятівний кидок 1+5=6 проти СК 12 — провал"
+ },
+ {
+  "seq": 31,
+  "type": "spell",
+  "text": "Succubus #1 застосовує Dominate Person | 🎲 TEST sweep hero 1 Dragonborn: рятівний кидок 1+1=2 проти СК 15 — провал | ⛓ Dominate Person: TEST sweep hero 1 Dragonborn — зачарований (10 р.)"
+ },
+ {
+  "seq": 32,
+  "type": "attack",
+  "text": "Hydra #1 → Young Green Dragon #1: 9 шкоди"
+ },
+ {
+  "seq": 33,
+  "type": "ability",
+  "text": "🎲 TEST sweep hero 4 Gnome: кидок смерті 6 — провал (2/3)"
+ },
+ {
+  "seq": 34,
+  "type": "attack",
+  "text": "Giant Vulture #1 → TEST sweep hero 2 Dwarf: 15 шкоди (КРИТИЧНЕ ПОПАДАННЯ!) | 🎲 крит: кубики шкоди подвоєно (сервер: 1, 2) | 💤 TEST sweep hero 2 Dwarf непритомніє"
+ },
+ {
+  "seq": 35,
+  "type": "ability",
+  "text": "🎲 TEST sweep hero 2 Dwarf: кидок смерті 1 — провал (2/3)"
+ },
+ {
+  "seq": 36,
+  "type": "ability",
+  "text": "🔄 cmvs6hd0700s1eyicyfpmb5ir перезарядилась (6)"
+ },
+ {
+  "seq": 37,
+  "type": "spell",
+  "text": "Young Green Dragon #1 застосовує Poison Breath (Young Green Dragon) (шкода: 55 (Succubus #1 18, Hydra #1 37)) | 🎲 Succubus #1: рятівний кидок 1+1=2 проти СК 14 — провал | 🎲 Hydra #1: рятівний кидок 1+5=6 проти СК 14 — провал | 🎲 Succubus #1: концентрація — рятівний кидок ВИТ 11 проти СК 10 — утримує"
+ },
+ {
+  "seq": 38,
+  "type": "spell",
+  "text": "TEST sweep hero 3 Elf застосовує Entangle | 🔮 TEST sweep hero 3 Elf втрачає концентрацію на «Detect Poison and Disease» (нове заклинання) | 🎲 Succubus #1: рятівний кидок 1-1=0 проти СК 12 — провал | 🎲 Hydra #1: рятівний кидок 1+5=6 проти СК 12 — провал | ⛓ Entangle: Succubus #1 — скутий (10 р.) | ⛓ Entangle: Hydra #1 — скутий (10 р.)"
+ },
+ {
+  "seq": 39,
+  "type": "ability",
+  "text": "🔄 cmvs6ek7s00dreyicnab50xt6 не перезарядилась (1)"
+ },
+ {
+  "seq": 40,
+  "type": "spell",
+  "text": "TEST sweep hero 1 Dragonborn застосовує Expeditious Retreat | 🔮 TEST sweep hero 1 Dragonborn втрачає концентрацію на «Ensnaring Strike» (нове заклинання) | ✨ Expeditious Retreat: швидкість +30 → TEST sweep hero 1 Dragonborn (99 р.)"
+ },
+ {
+  "seq": 41,
+  "type": "ability",
+  "text": "Кінець ходу | 🎲 TEST sweep hero 1 Dragonborn: рятівний кидок Мудрість 15 проти СК 15 — звільняється від стану «Зачарований»"
+ },
+ {
+  "seq": 42,
+  "type": "ability",
+  "text": "🔮 Succubus #1 втрачає концентрацію на «Dominate Person» (ефекти заклинання завершилися)"
+ },
+ {
+  "seq": 43,
+  "type": "spell",
+  "text": "Succubus #1 застосовує Draining Kiss (Succubus) (шкода: 19) | 🎲 Young Green Dragon #1: рятівний кидок 1+3=4 проти СК 15 — провал"
+ },
+ {
+  "seq": 44,
+  "type": "ability",
+  "text": "Кінець ходу | 🎲 Succubus #1: рятівний кидок Сила 3 проти СК 12 — стан «Скутий» лишається"
+ },
+ {
+  "seq": 45,
+  "type": "attack",
+  "text": "Hydra #1 → TEST sweep hero 3 Elf: 6 шкоди | 🎲 недолік: другий d20 = 15 (сервер), обрано 15 | 🎲 TEST sweep hero 3 Elf: концентрація — рятівний кидок ВИТ 3 проти СК 10 — втрачає концентрацію на «Entangle»"
+ },
+ {
+  "seq": 46,
+  "type": "ability",
+  "text": "🎲 TEST sweep hero 4 Gnome: кидок смерті 11 — успіх (1/3)"
+ },
+ {
+  "seq": 47,
+  "type": "attack",
+  "text": "Giant Vulture #1 → Succubus #1: промах"
+ },
+ {
+  "seq": 48,
+  "type": "ability",
+  "text": "💀 TEST sweep hero 2 Dwarf: кидок смерті 8 — помирає"
+ },
+ {
+  "seq": 49,
+  "type": "ability",
+  "text": "🔄 cmvs6hd0700s1eyicyfpmb5ir перезарядилась (5)"
+ },
+ {
+  "seq": 50,
+  "type": "attack",
+  "text": "Young Green Dragon #1 → Hydra #1: 11 шкоди"
+ },
+ {
+  "seq": 51,
+  "type": "spell",
+  "text": "TEST sweep hero 3 Elf застосовує Acid Breath (Adult Black Dragon) (шкода: 109 (Succubus #1 53, Hydra #1 56)) | 🎲 Succubus #1: рятівний кидок 1+3=4 проти СК 12 — провал | 🎲 Hydra #1: рятівний кидок 1+1=2 проти СК 12 — провал"
+ },
+ {
+  "seq": 52,
+  "type": "ability",
+  "text": "🔄 cmvs6ek7s00dreyicnab50xt6 не перезарядилась (4)"
+ },
+ {
+  "seq": 53,
+  "type": "spell",
+  "text": "TEST sweep hero 1 Dragonborn застосовує Acid Breath (Adult Copper Dragon) (шкода: 30) | 🎲 Hydra #1: рятівний кидок 1+1=2 проти СК 12 — провал"
+ },
+ {
+  "seq": 54,
+  "type": "end_turn",
+  "text": "💀 Бій завершено! Поразка союзників!"
+ }
+]

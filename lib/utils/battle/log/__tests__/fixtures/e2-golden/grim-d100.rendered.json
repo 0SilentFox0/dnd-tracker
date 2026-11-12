@@ -1,0 +1,282 @@
+[
+ {
+  "seq": 1,
+  "type": "ability",
+  "text": "TEST sweep hero 1 Delver: Жах 2 від Gilded Voice #1 — тест 10 / 35, РУ 2: стійкість | TEST sweep hero 1 Delver: Страх 2 від Gilded Voice #1 — тест 44 / 35, РУ -1: провал | TEST sweep hero 1 Delver: Зламаний (Gilded Voice #1) | TEST sweep hero 2 Hearthkin: Жах 2 від Forge Colossus #1 — тест 45 / 35, РУ -1: провал | TEST sweep hero 2 Hearthkin: Зламаний ×2 (Forge Colossus #1) | TEST sweep hero 2 Hearthkin: Страх 2 від Forge Colossus #1 — тест 17 / 15, РУ 0: провал | TEST sweep hero 2 Hearthkin: Зламаний (Forge Colossus #1) | TEST sweep hero 3 Lowlander: Жах 2 від Gilded Voice #1 — тест 42 / 35, РУ -1: провал | TEST sweep hero 3 Lowlander: Зламаний ×2 (Gilded Voice #1) | TEST sweep hero 3 Lowlander: Страх 2 від Gilded Voice #1 — тест 33 / 15, РУ -2: провал | TEST sweep hero 3 Lowlander: Зламаний (Gilded Voice #1) | TEST sweep hero 4 Veyl: Жах 2 від Forge Colossus #1 — тест 95 / 35, РУ -6: провал | TEST sweep hero 4 Veyl: Зламаний ×7 (Forge Colossus #1) | TEST sweep hero 4 Veyl: Страх 2 від Forge Colossus #1 — тест 30 / -35, РУ -7: провал | TEST sweep hero 4 Veyl: Зламаний (Forge Colossus #1) | Thornback Boar #1: Жах 2 від Gilded Voice #1 — тест 96 / 30, РУ -6: провал | Thornback Boar #1: Зламаний ×7 (Gilded Voice #1) | Thornback Boar #1: Страх 2 від Gilded Voice #1 — тест 83 / -40, РУ -12: провал | Thornback Boar #1: Зламаний (Gilded Voice #1) | Broadhelm Captain #1: Жах 2 від Forge Colossus #1 — тест 64 / 48, РУ -2: провал | Broadhelm Captain #1: Зламаний ×3 (Forge Colossus #1) | Broadhelm Captain #1: Страх 2 від Forge Colossus #1 — тест 64 / 18, РУ -5: провал | Broadhelm Captain #1: Зламаний (Forge Colossus #1) | Ash Hound #1: Жах 2 від Forge Colossus #1 — тест 20 / 25, РУ 0: провал | Ash Hound #1: Зламаний (Forge Colossus #1) | Ash Hound #1: Страх 2 від Forge Colossus #1 — тест 76 / 15, РУ -6: провал | Ash Hound #1: Зламаний (Forge Colossus #1) | Scarred Brute #1: Жах 2 від Gilded Voice #1 — тест 16 / 30, РУ 2: стійкість | Scarred Brute #1: Страх 2 від Gilded Voice #1 — тест 52 / 30, РУ -2: провал | Scarred Brute #1: Зламаний (Gilded Voice #1)"
+ },
+ {
+  "seq": 2,
+  "type": "spell",
+  "text": "Gilded Voice #1 невдало застосовує Hearthfire Smite | Gilded Voice #1 читає «Hearthfire Smite»: 17 / 70, РУ 6 (СН 7) — невдача"
+ },
+ {
+  "seq": 3,
+  "type": "attack",
+  "text": "Broadhelm Captain #1 → TEST sweep hero 1 Delver: промах | 🎲 Тест: 92 проти -2 (РУ -10)"
+ },
+ {
+  "seq": 4,
+  "type": "attack",
+  "text": "Ash Hound #1 → Forge Colossus #1: промах | 🎲 Протиборство: 72 проти 38 (РУ -4) — захист парирування: 6 проти 65 (РУ 6), різниця -10 | ⚡ Імпульс переходить до переможця"
+ },
+ {
+  "seq": 5,
+  "type": "retaliation",
+  "text": "Відсіч: Forge Colossus #1 → Ash Hound #1: d100 45, 81 шкоди | 🎲 Протиборство: 45 проти 65 (РУ 3) — захист ухилення: 98 проти 20 (РУ -7), різниця 10 | 💤 Ash Hound #1 падає на 0 Ран і втрачає свідомість | 🩸 Критична рана для Ash Hound #1: Ребра тріщать, але тримаються."
+ },
+ {
+  "seq": 6,
+  "type": "spell",
+  "text": "TEST sweep hero 1 Delver невдало застосовує Ember Dart | TEST sweep hero 1 Delver читає «Ember Dart»: 1 / 25, РУ 2 (СН 4) — невдача"
+ },
+ {
+  "seq": 7,
+  "type": "spell",
+  "text": "TEST sweep hero 2 Hearthkin невдало застосовує Fen Fog | TEST sweep hero 2 Hearthkin читає «Fen Fog»: 1 / 5, РУ 0 (СН 5) — невдача"
+ },
+ {
+  "seq": 8,
+  "type": "spell",
+  "text": "TEST sweep hero 3 Lowlander невдало застосовує Gloam Daze | TEST sweep hero 3 Lowlander читає «Gloam Daze»: 1 / 5, РУ 0 (СН 7) — невдача"
+ },
+ {
+  "seq": 9,
+  "type": "attack",
+  "text": "TEST sweep hero 4 Veyl → Forge Colossus #1: промах | 🎲 Протиборство: 55 проти -20 (РУ -7) — захист парирування: 17 проти 65 (РУ 6), різниця -13 | 🎲 Дублі на промаху — крит не застосовується"
+ },
+ {
+  "seq": 10,
+  "type": "attack",
+  "text": "Forge Colossus #1 → Broadhelm Captain #1: 26 шкоди | 🎲 Тест: 4 проти 30 (РУ 3) | 💤 Broadhelm Captain #1 падає на 0 Ран і втрачає свідомість | 🩸 Критична рана для Broadhelm Captain #1: Кістки руки ниють від удару."
+ },
+ {
+  "seq": 11,
+  "type": "attack",
+  "text": "Scarred Brute #1 → TEST sweep hero 4 Veyl: промах | 🎲 Протиборство: 65 проти 30 (РУ -2) — захист ухилення: 33 проти 0 (РУ -3), різниця 1 | ⚡ Імпульс переходить до переможця"
+ },
+ {
+  "seq": 12,
+  "type": "retaliation",
+  "text": "Відсіч: TEST sweep hero 4 Veyl → Scarred Brute #1: d100 10, промах | 🎲 Протиборство: 10 проти -40 (РУ -4) — захист парирування: 11 проти 30 (РУ 2), різниця -6 | ⚡ Імпульс переходить до переможця"
+ },
+ {
+  "seq": 13,
+  "type": "attack",
+  "text": "Thornback Boar #1 → TEST sweep hero 4 Veyl: промах | 🎲 Протиборство: 8 проти -40 (РУ -3) — захист ухилення: 52 проти 0 (РУ -5), різниця 2 | ⚡ Імпульс переходить до переможця"
+ },
+ {
+  "seq": 14,
+  "type": "spell",
+  "text": "Gilded Voice #1 застосовує Hearthfire Smite (шкода: 39) | Gilded Voice #1 читає «Hearthfire Smite»: 1 / 70, РУ 7 (СН 7) — успіх | Forge Colossus #1: Горіння (Горіння)"
+ },
+ {
+  "seq": 15,
+  "type": "spell",
+  "text": "TEST sweep hero 1 Delver невдало застосовує Bramble Snare | TEST sweep hero 1 Delver читає «Bramble Snare»: 1 / 25, РУ 2 (СН 6) — невдача"
+ },
+ {
+  "seq": 16,
+  "type": "attack",
+  "text": "TEST sweep hero 2 Hearthkin → TEST sweep hero 1 Delver: промах | 🎲 Протиборство: 58 проти 10 (РУ -3) — захист парирування: 71 проти 30 (РУ -4), різниця 1 | ⚡ Імпульс переходить до переможця"
+ },
+ {
+  "seq": 17,
+  "type": "retaliation",
+  "text": "Відсіч: TEST sweep hero 1 Delver → TEST sweep hero 2 Hearthkin: d100 18, 8 шкоди | 🎲 Протиборство: 18 проти 30 (РУ 3) — захист парирування: 52 проти 10 (РУ -4), різниця 7"
+ },
+ {
+  "seq": 18,
+  "type": "attack",
+  "text": "TEST sweep hero 3 Lowlander → TEST sweep hero 4 Veyl: промах | 🎲 Тест: 38 проти 10 (РУ -2)"
+ },
+ {
+  "seq": 19,
+  "type": "spell",
+  "text": "TEST sweep hero 4 Veyl невдало застосовує Chill Breath | TEST sweep hero 4 Veyl читає «Chill Breath»: 28 / -45, РУ -7 (СН 1) — невдача"
+ },
+ {
+  "seq": 20,
+  "type": "end_turn",
+  "text": "Forge Colossus #1: горить, −1 Wounds"
+ },
+ {
+  "seq": 21,
+  "type": "attack",
+  "text": "Forge Colossus #1 → TEST sweep hero 2 Hearthkin: промах | 🎲 Протиборство: 87 проти 65 (РУ -1) — захист парирування: 78 проти 10 (РУ -6), різниця 5 | ⚡ Імпульс переходить до переможця"
+ },
+ {
+  "seq": 22,
+  "type": "retaliation",
+  "text": "Відсіч: TEST sweep hero 2 Hearthkin → Forge Colossus #1: d100 71, промах | 🎲 Протиборство: 71 проти 30 (РУ -3) — захист парирування: 87 проти 65 (РУ -2), різниця -1 | ⚡ Імпульс переходить до переможця"
+ },
+ {
+  "seq": 23,
+  "type": "attack",
+  "text": "Scarred Brute #1 → TEST sweep hero 4 Veyl: промах | 🎲 Протиборство: 41 проти 30 (РУ 0) — захист ухилення: 66 проти 0 (РУ -6), різниця 6 | ⚡ Імпульс переходить до переможця"
+ },
+ {
+  "seq": 24,
+  "type": "retaliation",
+  "text": "Відсіч: TEST sweep hero 4 Veyl → Scarred Brute #1: d100 33, промах | 🎲 Протиборство: 33 проти -40 (РУ -6) — захист парирування: 25 проти 30 (РУ 1), різниця -7 | 🎲 Дублі на промаху — крит не застосовується | ⚡ Імпульс переходить до переможця"
+ },
+ {
+  "seq": 25,
+  "type": "attack",
+  "text": "Thornback Boar #1 → TEST sweep hero 2 Hearthkin: промах | 🎲 Протиборство: 72 проти -40 (РУ -10) — захист парирування: 25 проти 10 (РУ -1), різниця -9 | ⚡ Імпульс переходить до переможця"
+ },
+ {
+  "seq": 26,
+  "type": "spell",
+  "text": "Gilded Voice #1 невдало застосовує Hearthfire Smite | Gilded Voice #1 читає «Hearthfire Smite»: 13 / 70, РУ 6 (СН 7) — невдача"
+ },
+ {
+  "seq": 27,
+  "type": "attack",
+  "text": "TEST sweep hero 1 Delver → TEST sweep hero 2 Hearthkin: промах | 🎲 Протиборство: 95 проти 30 (РУ -6) — захист парирування: 72 проти 10 (РУ -5), різниця -1"
+ },
+ {
+  "seq": 28,
+  "type": "attack",
+  "text": "TEST sweep hero 2 Hearthkin → TEST sweep hero 3 Lowlander: промах | 🎲 Тест: 45 проти 10 (РУ -3)"
+ },
+ {
+  "seq": 29,
+  "type": "spell",
+  "text": "TEST sweep hero 3 Lowlander невдало застосовує Cinder Cloud | TEST sweep hero 3 Lowlander читає «Cinder Cloud»: 1 / 5, РУ 0 (СН 8) — невдача"
+ },
+ {
+  "seq": 30,
+  "type": "spell",
+  "text": "TEST sweep hero 4 Veyl невдало застосовує Crow-Knot Curse | TEST sweep hero 4 Veyl читає «Crow-Knot Curse»: 1 / -45, РУ 0 (СН 10) — невдача"
+ },
+ {
+  "seq": 31,
+  "type": "end_turn",
+  "text": "Forge Colossus #1: горить, −1 Wounds"
+ },
+ {
+  "seq": 32,
+  "type": "attack",
+  "text": "Forge Colossus #1 → TEST sweep hero 2 Hearthkin: промах | 🎲 Протиборство: 71 проти 65 (РУ -1) — захист парирування: 77 проти 10 (РУ -5), різниця 4"
+ },
+ {
+  "seq": 33,
+  "type": "retaliation",
+  "text": "Відсіч: TEST sweep hero 2 Hearthkin → Forge Colossus #1: d100 22, промах | 🎲 Протиборство: 22 проти 30 (РУ 2) — захист парирування: 1 проти 65 (РУ 6), різниця -4 | 🎲 Дублі на промаху — крит не застосовується | ⚡ Імпульс переходить до переможця"
+ },
+ {
+  "seq": 34,
+  "type": "attack",
+  "text": "Scarred Brute #1 → TEST sweep hero 2 Hearthkin: промах | 🎲 Протиборство: 95 проти 30 (РУ -5) — захист парирування: 30 проти 10 (РУ -2), різниця -3 | ⚡ Імпульс переходить до переможця"
+ },
+ {
+  "seq": 35,
+  "type": "attack",
+  "text": "Thornback Boar #1 → TEST sweep hero 4 Veyl: промах | 🎲 Протиборство: 64 проти -40 (РУ -10) — захист ухилення: 12 проти 0 (РУ 0), різниця -10"
+ },
+ {
+  "seq": 36,
+  "type": "retaliation",
+  "text": "Відсіч: TEST sweep hero 4 Veyl → Thornback Boar #1: d100 55, промах | 🎲 Протиборство: 55 проти -40 (РУ -8) — захист ухилення: 46 проти 0 (РУ -4), різниця -4 | 🎲 Дублі на промаху — крит не застосовується | ⚡ Імпульс переходить до переможця"
+ },
+ {
+  "seq": 37,
+  "type": "attack",
+  "text": "Gilded Voice #1 → Scarred Brute #1: промах | 🎲 Тест: 53 проти 40 (РУ -1)"
+ },
+ {
+  "seq": 38,
+  "type": "attack",
+  "text": "TEST sweep hero 1 Delver → TEST sweep hero 2 Hearthkin: промах | 🎲 Протиборство: 73 проти 30 (РУ -4) — захист парирування: 88 проти 10 (РУ -7), різниця 3 | ⚡ Імпульс переходить до переможця"
+ },
+ {
+  "seq": 39,
+  "type": "attack",
+  "text": "TEST sweep hero 2 Hearthkin → Scarred Brute #1: промах | 🎲 Тест: 21 проти 10 (РУ -1)"
+ },
+ {
+  "seq": 40,
+  "type": "attack",
+  "text": "TEST sweep hero 3 Lowlander → TEST sweep hero 4 Veyl: промах | 🎲 Протиборство: 19 проти 10 (РУ 0) — захист ухилення: 33 проти 0 (РУ -2), різниця 2"
+ },
+ {
+  "seq": 41,
+  "type": "attack",
+  "text": "TEST sweep hero 4 Veyl → TEST sweep hero 3 Lowlander: промах | 🎲 Тест: 10 проти -40 (РУ -5)"
+ },
+ {
+  "seq": 42,
+  "type": "end_turn",
+  "text": "Forge Colossus #1: горить, −1 Wounds"
+ },
+ {
+  "seq": 43,
+  "type": "attack",
+  "text": "Forge Colossus #1 → TEST sweep hero 4 Veyl: промах | 🎲 Протиборство: 72 проти 65 (РУ -1) — захист ухилення: 1 проти 0 (РУ 1), різниця -2"
+ },
+ {
+  "seq": 44,
+  "type": "retaliation",
+  "text": "Відсіч: TEST sweep hero 4 Veyl → Forge Colossus #1: d100 98, промах | 🎲 Протиборство: 98 проти -20 (РУ -10) — захист парирування: 51 проти 65 (РУ 1), різниця -11 | ⚡ Імпульс переходить до переможця"
+ },
+ {
+  "seq": 45,
+  "type": "attack",
+  "text": "Scarred Brute #1 → TEST sweep hero 2 Hearthkin: 11 шкоди | 🎲 Протиборство: 28 проти 30 (РУ 2) — захист парирування: 37 проти 10 (РУ -2), різниця 4 | 💤 TEST sweep hero 2 Hearthkin падає на 0 Ран і втрачає свідомість | 🩸 Критична рана для TEST sweep hero 2 Hearthkin: Сухожилля перерізано, ворог падає, волаючи."
+ },
+ {
+  "seq": 46,
+  "type": "attack",
+  "text": "Thornback Boar #1 → TEST sweep hero 4 Veyl: промах | 🎲 Протиборство: 62 проти -40 (РУ -9) — захист ухилення: 25 проти 0 (РУ -2), різниця -7 | ⚡ Імпульс переходить до переможця"
+ },
+ {
+  "seq": 47,
+  "type": "spell",
+  "text": "Gilded Voice #1 застосовує Spark Flick (шкода: 12) | Gilded Voice #1 читає «Spark Flick»: 1 / 65, РУ 4 (СН 1) — успіх | 💤 TEST sweep hero 3 Lowlander падає на 0 Ран і втрачає свідомість | 🩸 Критична рана для TEST sweep hero 3 Lowlander: Подих вибито з грудей - хрипить і кашляє."
+ },
+ {
+  "seq": 48,
+  "type": "spell",
+  "text": "TEST sweep hero 1 Delver невдало застосовує Dazzle | TEST sweep hero 1 Delver читає «Dazzle»: 94 / 25, РУ -7 (СН 2) — невдача"
+ },
+ {
+  "seq": 49,
+  "type": "ability",
+  "text": "TEST sweep hero 3 Lowlander непритомний — хід пропущено"
+ },
+ {
+  "seq": 50,
+  "type": "attack",
+  "text": "TEST sweep hero 4 Veyl → Scarred Brute #1: промах | 🎲 Тест: 21 проти -40 (РУ -6)"
+ },
+ {
+  "seq": 51,
+  "type": "end_turn",
+  "text": "Forge Colossus #1: горить, −1 Wounds"
+ },
+ {
+  "seq": 52,
+  "type": "attack",
+  "text": "Forge Colossus #1 → Gilded Voice #1: 0 шкоди | 🎲 Протиборство: 1 проти 65 (РУ 6) — захист парирування: 1 проти 55 (РУ 6), різниця 0 | ⚡ Імпульс переходить до переможця"
+ },
+ {
+  "seq": 53,
+  "type": "retaliation",
+  "text": "Відсіч: Gilded Voice #1 → Forge Colossus #1: d100 43, промах | 🎲 Протиборство: 43 проти 75 (РУ 3) — захист парирування: 31 проти 65 (РУ 4), різниця -1"
+ },
+ {
+  "seq": 54,
+  "type": "attack",
+  "text": "Scarred Brute #1 → Gilded Voice #1: промах | 🎲 Протиборство: 55 проти 30 (РУ -1) — захист парирування: 72 проти 55 (РУ -2), різниця 1 | 🎲 Дублі на промаху — крит не застосовується | ⚡ Імпульс переходить до переможця"
+ },
+ {
+  "seq": 55,
+  "type": "attack",
+  "text": "Thornback Boar #1 → TEST sweep hero 4 Veyl: промах | 🎲 Протиборство: 82 проти -40 (РУ -12) — захист ухилення: 80 проти 0 (РУ -7), різниця -5"
+ },
+ {
+  "seq": 56,
+  "type": "retaliation",
+  "text": "Відсіч: TEST sweep hero 4 Veyl → Thornback Boar #1: d100 94, промах | 🎲 Протиборство: 94 проти -40 (РУ -12) — захист ухилення: 70 проти 0 (РУ -7), різниця -5 | ⚡ Імпульс переходить до переможця"
+ }
+]

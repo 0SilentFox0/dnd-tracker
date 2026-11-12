@@ -1,0 +1,1850 @@
+[
+ {
+  "seq": 1,
+  "round": 1,
+  "type": "spell",
+  "resultText": "Gold Dragon Wyrmling #1 застосовує Fire Breath (Gold Dragon Wyrmling) (шкода: 48 (TEST sweep hero 1 Dragonborn 11, Giant Vulture #1 11, Commoner #1 4, Young Green Dragon #1 11, TEST sweep hero 3 Elf 11)) | 🎲 TEST sweep hero 1 Dragonborn: рятівний кидок 1+2+3=6 проти СК 13 — провал | 🎲 Giant Vulture #1: рятівний кидок 1+0=1 проти СК 13 — провал | 🎲 Commoner #1: рятівний кидок 1+0=1 проти СК 13 — провал | 🎲 Young Green Dragon #1: рятівний кидок 1+1+3=5 проти СК 13 — провал | 🎲 TEST sweep hero 3 Elf: рятівний кидок 1+2=3 проти СК 13 — провал",
+  "details": {
+   "log": [
+    {
+     "m": "s|castCaption",
+     "p": {
+      "n": "Gold Dragon Wyrmling #1",
+      "p": "Fire Breath (Gold Dragon Wyrmling)",
+      "caption": {
+       "m": "j|",
+       "p": {
+        "p0": {
+         "m": "s|captionDamageHits",
+         "p": {
+          "hits": "TEST sweep hero 1 Dragonborn 11, Giant Vulture #1 11, Commoner #1 4, Young Green Dragon #1 11, TEST sweep hero 3 Elf 11",
+          "dealt": 48
+         }
+        },
+        "separator": ", "
+       }
+      }
+     }
+    },
+    {
+     "m": "s|save",
+     "p": {
+      "l": 1,
+      "t": "TEST sweep hero 1 Dragonborn",
+      "dc": 13,
+      "mod": "+2",
+      "extra": "+3",
+      "total": 6,
+      "evasive": "no",
+      "outcome": "fail"
+     }
+    },
+    {
+     "m": "s|save",
+     "p": {
+      "l": 1,
+      "t": "Giant Vulture #1",
+      "dc": 13,
+      "mod": "+0",
+      "total": 1,
+      "evasive": "no",
+      "outcome": "fail"
+     }
+    },
+    {
+     "m": "s|save",
+     "p": {
+      "l": 1,
+      "t": "Commoner #1",
+      "dc": 13,
+      "mod": "+0",
+      "total": 1,
+      "evasive": "no",
+      "outcome": "fail"
+     }
+    },
+    {
+     "m": "s|save",
+     "p": {
+      "l": 1,
+      "t": "Young Green Dragon #1",
+      "dc": 13,
+      "mod": "+1",
+      "extra": "+3",
+      "total": 5,
+      "evasive": "no",
+      "outcome": "fail"
+     }
+    },
+    {
+     "m": "s|save",
+     "p": {
+      "l": 1,
+      "t": "TEST sweep hero 3 Elf",
+      "dc": 13,
+      "mod": "+2",
+      "total": 3,
+      "evasive": "no",
+      "outcome": "fail"
+     }
+    }
+   ]
+  }
+ },
+ {
+  "seq": 2,
+  "round": 1,
+  "type": "ability",
+  "resultText": "🎯 Bardic Inspiration: Gold Dragon Wyrmling #1 — мітка (1)",
+  "details": {
+   "log": [
+    {
+     "m": "a|mark",
+     "p": {
+      "a": "Bardic Inspiration",
+      "c": 1,
+      "t": "Gold Dragon Wyrmling #1",
+      "w": "true"
+     }
+    }
+   ]
+  }
+ },
+ {
+  "seq": 3,
+  "round": 1,
+  "type": "spell",
+  "resultText": "TEST sweep hero 1 Dragonborn застосовує Bane | 🎲 Gold Dragon Wyrmling #1: рятівний кидок 1+3=4 проти СК 12 — провал | 🎲 Succubus #1: рятівний кидок 1+5=6 проти СК 12 — провал | 🎲 Hydra #1: рятівний кидок 1-2=-1 проти СК 12 — провал | ✨ Bane: бонус атаки -2 → Gold Dragon Wyrmling #1 (10 р.) | ✨ Bane: рятівні кидки -2 → Gold Dragon Wyrmling #1 (10 р.) | ✨ Bane: бонус атаки -2 → Succubus #1 (10 р.) | ✨ Bane: рятівні кидки -2 → Succubus #1 (10 р.) | ✨ Bane: бонус атаки -2 → Hydra #1 (10 р.) | ✨ Bane: рятівні кидки -2 → Hydra #1 (10 р.)",
+  "details": {
+   "log": [
+    {
+     "m": "s|cast",
+     "p": {
+      "n": "TEST sweep hero 1 Dragonborn",
+      "p": "Bane"
+     }
+    },
+    {
+     "m": "s|save",
+     "p": {
+      "l": 1,
+      "t": "Gold Dragon Wyrmling #1",
+      "dc": 12,
+      "mod": "+3",
+      "total": 4,
+      "evasive": "no",
+      "outcome": "fail"
+     }
+    },
+    {
+     "m": "s|save",
+     "p": {
+      "l": 1,
+      "t": "Succubus #1",
+      "dc": 12,
+      "mod": "+5",
+      "total": 6,
+      "evasive": "no",
+      "outcome": "fail"
+     }
+    },
+    {
+     "m": "s|save",
+     "p": {
+      "l": 1,
+      "t": "Hydra #1",
+      "dc": 12,
+      "mod": "-2",
+      "total": -1,
+      "evasive": "no",
+      "outcome": "fail"
+     }
+    },
+    {
+     "m": "a|applied",
+     "p": {
+      "a": "Bane",
+      "e": {
+       "m": "abilityRegistry.summary.effects.stat",
+       "p": {
+        "stat": {
+         "m": "abilityRegistry.stats.attackBonus"
+        },
+        "value": {
+         "m": "abilityRegistry.summary.text",
+         "p": {
+          "value": {
+           "m": "abilityRegistry.summary.flat.number",
+           "p": {
+            "value": "-2"
+           }
+          }
+         }
+        },
+        "hasLevels": "no"
+       }
+      },
+      "r": 10,
+      "t": "Gold Dragon Wyrmling #1"
+     }
+    },
+    {
+     "m": "a|applied",
+     "p": {
+      "a": "Bane",
+      "e": {
+       "m": "abilityRegistry.summary.effects.stat",
+       "p": {
+        "stat": {
+         "m": "abilityRegistry.stats.savingThrow"
+        },
+        "value": {
+         "m": "abilityRegistry.summary.text",
+         "p": {
+          "value": {
+           "m": "abilityRegistry.summary.flat.number",
+           "p": {
+            "value": "-2"
+           }
+          }
+         }
+        },
+        "hasLevels": "no"
+       }
+      },
+      "r": 10,
+      "t": "Gold Dragon Wyrmling #1"
+     }
+    },
+    {
+     "m": "a|applied",
+     "p": {
+      "a": "Bane",
+      "e": {
+       "m": "abilityRegistry.summary.effects.stat",
+       "p": {
+        "stat": {
+         "m": "abilityRegistry.stats.attackBonus"
+        },
+        "value": {
+         "m": "abilityRegistry.summary.text",
+         "p": {
+          "value": {
+           "m": "abilityRegistry.summary.flat.number",
+           "p": {
+            "value": "-2"
+           }
+          }
+         }
+        },
+        "hasLevels": "no"
+       }
+      },
+      "r": 10,
+      "t": "Succubus #1"
+     }
+    },
+    {
+     "m": "a|applied",
+     "p": {
+      "a": "Bane",
+      "e": {
+       "m": "abilityRegistry.summary.effects.stat",
+       "p": {
+        "stat": {
+         "m": "abilityRegistry.stats.savingThrow"
+        },
+        "value": {
+         "m": "abilityRegistry.summary.text",
+         "p": {
+          "value": {
+           "m": "abilityRegistry.summary.flat.number",
+           "p": {
+            "value": "-2"
+           }
+          }
+         }
+        },
+        "hasLevels": "no"
+       }
+      },
+      "r": 10,
+      "t": "Succubus #1"
+     }
+    },
+    {
+     "m": "a|applied",
+     "p": {
+      "a": "Bane",
+      "e": {
+       "m": "abilityRegistry.summary.effects.stat",
+       "p": {
+        "stat": {
+         "m": "abilityRegistry.stats.attackBonus"
+        },
+        "value": {
+         "m": "abilityRegistry.summary.text",
+         "p": {
+          "value": {
+           "m": "abilityRegistry.summary.flat.number",
+           "p": {
+            "value": "-2"
+           }
+          }
+         }
+        },
+        "hasLevels": "no"
+       }
+      },
+      "r": 10,
+      "t": "Hydra #1"
+     }
+    },
+    {
+     "m": "a|applied",
+     "p": {
+      "a": "Bane",
+      "e": {
+       "m": "abilityRegistry.summary.effects.stat",
+       "p": {
+        "stat": {
+         "m": "abilityRegistry.stats.savingThrow"
+        },
+        "value": {
+         "m": "abilityRegistry.summary.text",
+         "p": {
+          "value": {
+           "m": "abilityRegistry.summary.flat.number",
+           "p": {
+            "value": "-2"
+           }
+          }
+         }
+        },
+        "hasLevels": "no"
+       }
+      },
+      "r": 10,
+      "t": "Hydra #1"
+     }
+    }
+   ]
+  }
+ },
+ {
+  "seq": 4,
+  "round": 1,
+  "type": "spell",
+  "resultText": "Succubus #1 застосовує Dominate Person | 🎲 Young Green Dragon #1: рятівний кидок 1+1+3=5 проти СК 15 — провал | ⛓ Dominate Person: Young Green Dragon #1 — зачарований (10 р.)",
+  "details": {
+   "log": [
+    {
+     "m": "s|cast",
+     "p": {
+      "n": "Succubus #1",
+      "p": "Dominate Person"
+     }
+    },
+    {
+     "m": "s|save",
+     "p": {
+      "l": 1,
+      "t": "Young Green Dragon #1",
+      "dc": 15,
+      "mod": "+1",
+      "extra": "+3",
+      "total": 5,
+      "evasive": "no",
+      "outcome": "fail"
+     }
+    },
+    {
+     "m": "battleActions.condition.appliedTimed",
+     "p": {
+      "r": 10,
+      "t": "Young Green Dragon #1",
+      "source": "Dominate Person",
+      "condition": {
+       "m": "battleActions.condition.lower.charmed"
+      }
+     }
+    }
+   ]
+  }
+ },
+ {
+  "seq": 5,
+  "round": 1,
+  "type": "attack",
+  "resultText": "Hydra #1 → TEST sweep hero 1 Dragonborn: 6 шкоди | 🎲 TEST sweep hero 1 Dragonborn: концентрація — рятівний кидок ВИТ 9 проти СК 10 — втрачає концентрацію на «Bane»",
+  "details": {
+   "log": [
+    {
+     "m": "k|hit",
+     "p": {
+      "d": 6,
+      "k": "Hydra #1",
+      "t": "TEST sweep hero 1 Dragonborn"
+     }
+    },
+    {
+     "m": "b|concentration.broke",
+     "p": {
+      "p": "Bane",
+      "head": {
+       "m": "b|concentration.check",
+       "p": {
+        "n": "TEST sweep hero 1 Dragonborn",
+        "dc": 10,
+        "total": 9
+       }
+      }
+     }
+    }
+   ]
+  }
+ },
+ {
+  "seq": 6,
+  "round": 1,
+  "type": "ability",
+  "resultText": "💚 Lay on Hands (TEST sweep hero 4 Gnome): TEST sweep hero 1 Dragonborn +5 HP",
+  "details": {
+   "log": [
+    {
+     "m": "a|heal",
+     "p": {
+      "b": "Lay on Hands (TEST sweep hero 4 Gnome)",
+      "t": "TEST sweep hero 1 Dragonborn",
+      "u": 5
+     }
+    }
+   ]
+  }
+ },
+ {
+  "seq": 7,
+  "round": 1,
+  "type": "attack",
+  "resultText": "TEST sweep hero 4 Gnome → TEST sweep hero 1 Dragonborn: 2 шкоди",
+  "details": {
+   "log": [
+    {
+     "m": "k|hit",
+     "p": {
+      "d": 2,
+      "k": "TEST sweep hero 4 Gnome",
+      "t": "TEST sweep hero 1 Dragonborn"
+     }
+    }
+   ]
+  }
+ },
+ {
+  "seq": 8,
+  "round": 1,
+  "type": "attack",
+  "resultText": "Giant Vulture #1 → Succubus #1: промах",
+  "details": {
+   "log": [
+    {
+     "m": "k|miss",
+     "p": {
+      "k": "Giant Vulture #1",
+      "t": "Succubus #1"
+     }
+    }
+   ]
+  }
+ },
+ {
+  "seq": 9,
+  "round": 1,
+  "type": "ability",
+  "resultText": "✨ Stonecunning: Чуття вібрацій 60 фт → TEST sweep hero 2 Dwarf (99 р.)",
+  "details": {
+   "log": [
+    {
+     "m": "a|applied",
+     "p": {
+      "a": "Stonecunning",
+      "e": {
+       "m": "abilityRegistry.summary.flags.sense",
+       "p": {
+        "range": 60,
+        "sense": {
+         "m": "p|sense.tremorsense"
+        }
+       }
+      },
+      "r": 99,
+      "t": "TEST sweep hero 2 Dwarf"
+     }
+    }
+   ]
+  }
+ },
+ {
+  "seq": 10,
+  "round": 1,
+  "type": "ability",
+  "resultText": "💚 Divine Spark (TEST sweep hero 2 Dwarf): TEST sweep hero 1 Dragonborn +2 HP | 💚 Divine Spark (TEST sweep hero 2 Dwarf): TEST sweep hero 1 Dragonborn +1 HP",
+  "details": {
+   "log": [
+    {
+     "m": "a|heal",
+     "p": {
+      "b": "Divine Spark (TEST sweep hero 2 Dwarf)",
+      "t": "TEST sweep hero 1 Dragonborn",
+      "u": 2
+     }
+    },
+    {
+     "m": "a|heal",
+     "p": {
+      "b": "Divine Spark (TEST sweep hero 2 Dwarf)",
+      "t": "TEST sweep hero 1 Dragonborn",
+      "u": 1
+     }
+    }
+   ]
+  }
+ },
+ {
+  "seq": 11,
+  "round": 1,
+  "type": "spell",
+  "resultText": "Young Green Dragon #1 застосовує Poison Breath (Young Green Dragon) (шкода: 159 (Gold Dragon Wyrmling #1 46, Hydra #1 46, TEST sweep hero 4 Gnome 44, TEST sweep hero 2 Dwarf 23)) | 🎲 Gold Dragon Wyrmling #1: рятівний кидок 1+3=4 проти СК 14 — провал | 🎲 Hydra #1: рятівний кидок 1+5=6 проти СК 14 — провал | 🎲 TEST sweep hero 4 Gnome: рятівний кидок 1+2=3 проти СК 14 — провал | 🎲 TEST sweep hero 2 Dwarf: рятівний кидок 1+2=3 проти СК 14 — провал | 💤 TEST sweep hero 4 Gnome непритомніє",
+  "details": {
+   "log": [
+    {
+     "m": "s|castCaption",
+     "p": {
+      "n": "Young Green Dragon #1",
+      "p": "Poison Breath (Young Green Dragon)",
+      "caption": {
+       "m": "j|",
+       "p": {
+        "p0": {
+         "m": "s|captionDamageHits",
+         "p": {
+          "hits": "Gold Dragon Wyrmling #1 46, Hydra #1 46, TEST sweep hero 4 Gnome 44, TEST sweep hero 2 Dwarf 23",
+          "dealt": 159
+         }
+        },
+        "separator": ", "
+       }
+      }
+     }
+    },
+    {
+     "m": "s|save",
+     "p": {
+      "l": 1,
+      "t": "Gold Dragon Wyrmling #1",
+      "dc": 14,
+      "mod": "+3",
+      "total": 4,
+      "evasive": "no",
+      "outcome": "fail"
+     }
+    },
+    {
+     "m": "s|save",
+     "p": {
+      "l": 1,
+      "t": "Hydra #1",
+      "dc": 14,
+      "mod": "+5",
+      "total": 6,
+      "evasive": "no",
+      "outcome": "fail"
+     }
+    },
+    {
+     "m": "s|save",
+     "p": {
+      "l": 1,
+      "t": "TEST sweep hero 4 Gnome",
+      "dc": 14,
+      "mod": "+2",
+      "total": 3,
+      "evasive": "no",
+      "outcome": "fail"
+     }
+    },
+    {
+     "m": "s|save",
+     "p": {
+      "l": 1,
+      "t": "TEST sweep hero 2 Dwarf",
+      "dc": 14,
+      "mod": "+2",
+      "total": 3,
+      "evasive": "no",
+      "outcome": "fail"
+     }
+    },
+    {
+     "m": "b|death.unconscious",
+     "p": {
+      "n": "TEST sweep hero 4 Gnome"
+     }
+    }
+   ]
+  }
+ },
+ {
+  "seq": 12,
+  "round": 1,
+  "type": "ability",
+  "resultText": "Кінець ходу | 🎲 Young Green Dragon #1: рятівний кидок Мудрість 15 проти СК 15 — звільняється від стану «Зачарований»",
+  "details": {
+   "log": [
+    {
+     "m": "g|turnEnd"
+    },
+    {
+     "m": "b|saves.freed",
+     "p": {
+      "e": {
+       "m": "battleCommon.conditions.charmed.label"
+      },
+      "head": {
+       "m": "b|saves.head",
+       "p": {
+        "a": {
+         "m": "gameTerms.abilities.wisdom.label"
+        },
+        "n": "Young Green Dragon #1",
+        "dc": 15,
+        "total": 15
+       }
+      }
+     }
+    }
+   ]
+  }
+ },
+ {
+  "seq": 13,
+  "round": 1,
+  "type": "ability",
+  "resultText": "🔮 Succubus #1 втрачає концентрацію на «Dominate Person» (ефекти заклинання завершилися)",
+  "details": {
+   "log": [
+    {
+     "m": "b|concentration.lost",
+     "p": {
+      "n": "Succubus #1",
+      "p": "Dominate Person",
+      "reason": {
+       "m": "b|concentration.reasonTail",
+       "p": {
+        "reason": {
+         "m": "b|concentration.reasons.effectsEnded"
+        }
+       }
+      }
+     }
+    }
+   ]
+  }
+ },
+ {
+  "seq": 14,
+  "round": 1,
+  "type": "ability",
+  "resultText": "💚 Wild Shape: TEST sweep hero 3 Elf +5 HP | 🎯 Wild Shape: TEST sweep hero 3 Elf — мітка (1)",
+  "details": {
+   "log": [
+    {
+     "m": "a|heal",
+     "p": {
+      "b": "Wild Shape",
+      "t": "TEST sweep hero 3 Elf",
+      "u": 5
+     }
+    },
+    {
+     "m": "a|mark",
+     "p": {
+      "a": "Wild Shape",
+      "c": 1,
+      "t": "TEST sweep hero 3 Elf",
+      "w": "true"
+     }
+    }
+   ]
+  }
+ },
+ {
+  "seq": 15,
+  "round": 1,
+  "type": "spell",
+  "resultText": "TEST sweep hero 3 Elf застосовує Detect Evil and Good",
+  "details": {
+   "log": [
+    {
+     "m": "s|cast",
+     "p": {
+      "n": "TEST sweep hero 3 Elf",
+      "p": "Detect Evil and Good"
+     }
+    }
+   ]
+  }
+ },
+ {
+  "seq": 16,
+  "round": 2,
+  "type": "ability",
+  "resultText": "🔄 cmvs6ek7s00dreyicnab50xt6 не перезарядилась (3)",
+  "details": {
+   "log": [
+    {
+     "m": "u|notRecharged",
+     "p": {
+      "l": 3,
+      "pool": "cmvs6ek7s00dreyicnab50xt6"
+     }
+    }
+   ]
+  }
+ },
+ {
+  "seq": 17,
+  "round": 2,
+  "type": "attack",
+  "resultText": "Gold Dragon Wyrmling #1 → TEST sweep hero 1 Dragonborn: 7 шкоди",
+  "details": {
+   "log": [
+    {
+     "m": "k|hit",
+     "p": {
+      "d": 7,
+      "k": "Gold Dragon Wyrmling #1",
+      "t": "TEST sweep hero 1 Dragonborn"
+     }
+    }
+   ]
+  }
+ },
+ {
+  "seq": 18,
+  "round": 2,
+  "type": "spell",
+  "resultText": "TEST sweep hero 1 Dragonborn застосовує Detect Magic",
+  "details": {
+   "log": [
+    {
+     "m": "s|cast",
+     "p": {
+      "n": "TEST sweep hero 1 Dragonborn",
+      "p": "Detect Magic"
+     }
+    }
+   ]
+  }
+ },
+ {
+  "seq": 19,
+  "round": 2,
+  "type": "spell",
+  "resultText": "Succubus #1 застосовує Draining Kiss (Succubus) (шкода: 11) | 🎲 TEST sweep hero 1 Dragonborn: рятівний кидок 1+2=3 проти СК 15 — провал | 🎲 TEST sweep hero 1 Dragonborn: концентрація — рятівний кидок ВИТ 3 проти СК 10 — втрачає концентрацію на «Detect Magic»",
+  "details": {
+   "log": [
+    {
+     "m": "s|castCaption",
+     "p": {
+      "n": "Succubus #1",
+      "p": "Draining Kiss (Succubus)",
+      "caption": {
+       "m": "j|",
+       "p": {
+        "p0": {
+         "m": "s|captionDamage",
+         "p": {
+          "dealt": 11
+         }
+        },
+        "separator": ", "
+       }
+      }
+     }
+    },
+    {
+     "m": "s|save",
+     "p": {
+      "l": 1,
+      "t": "TEST sweep hero 1 Dragonborn",
+      "dc": 15,
+      "mod": "+2",
+      "total": 3,
+      "evasive": "no",
+      "outcome": "fail"
+     }
+    },
+    {
+     "m": "b|concentration.broke",
+     "p": {
+      "p": "Detect Magic",
+      "head": {
+       "m": "b|concentration.check",
+       "p": {
+        "n": "TEST sweep hero 1 Dragonborn",
+        "dc": 10,
+        "total": 3
+       }
+      }
+     }
+    }
+   ]
+  }
+ },
+ {
+  "seq": 20,
+  "round": 2,
+  "type": "attack",
+  "resultText": "Hydra #1 → TEST sweep hero 3 Elf: 21 шкоди (КРИТИЧНЕ ПОПАДАННЯ!) | 🎲 крит: кубики шкоди подвоєно (сервер: 6) | 🎲 TEST sweep hero 3 Elf: концентрація — рятівний кидок ВИТ 10 проти СК 10 — утримує",
+  "details": {
+   "log": [
+    {
+     "m": "k|hit",
+     "p": {
+      "d": 21,
+      "k": "Hydra #1",
+      "t": "TEST sweep hero 3 Elf",
+      "crit": {
+       "m": "k|critPlain"
+      }
+     }
+    },
+    {
+     "m": "b|crit.doubled",
+     "p": {
+      "server": {
+       "m": "b|crit.doubledServer",
+       "p": {
+        "rolls": "6"
+       }
+      }
+     }
+    },
+    {
+     "m": "b|concentration.holds",
+     "p": {
+      "head": {
+       "m": "b|concentration.check",
+       "p": {
+        "n": "TEST sweep hero 3 Elf",
+        "dc": 10,
+        "total": 10
+       }
+      }
+     }
+    }
+   ]
+  }
+ },
+ {
+  "seq": 21,
+  "round": 2,
+  "type": "ability",
+  "resultText": "🎲 TEST sweep hero 4 Gnome: кидок смерті 5 — провал (1/3)",
+  "details": {
+   "log": [
+    {
+     "m": "b|death.fail",
+     "p": {
+      "c": 1,
+      "l": 5,
+      "n": "TEST sweep hero 4 Gnome",
+      "max": 3
+     }
+    }
+   ]
+  }
+ },
+ {
+  "seq": 22,
+  "round": 2,
+  "type": "attack",
+  "resultText": "Giant Vulture #1 → TEST sweep hero 2 Dwarf: 7 шкоди",
+  "details": {
+   "log": [
+    {
+     "m": "k|hit",
+     "p": {
+      "d": 7,
+      "k": "Giant Vulture #1",
+      "t": "TEST sweep hero 2 Dwarf"
+     }
+    }
+   ]
+  }
+ },
+ {
+  "seq": 23,
+  "round": 2,
+  "type": "ability",
+  "resultText": "✨ Stonecunning: Чуття вібрацій 60 фт → TEST sweep hero 2 Dwarf (99 р.)",
+  "details": {
+   "log": [
+    {
+     "m": "a|applied",
+     "p": {
+      "a": "Stonecunning",
+      "e": {
+       "m": "abilityRegistry.summary.flags.sense",
+       "p": {
+        "range": 60,
+        "sense": {
+         "m": "p|sense.tremorsense"
+        }
+       }
+      },
+      "r": 99,
+      "t": "TEST sweep hero 2 Dwarf"
+     }
+    }
+   ]
+  }
+ },
+ {
+  "seq": 24,
+  "round": 2,
+  "type": "ability",
+  "resultText": "📜 Turn Undead: Turn Undead",
+  "details": {
+   "log": []
+  }
+ },
+ {
+  "seq": 25,
+  "round": 2,
+  "type": "ability",
+  "resultText": "🔄 cmvs6hd0700s1eyicyfpmb5ir не перезарядилась (3)",
+  "details": {
+   "log": [
+    {
+     "m": "u|notRecharged",
+     "p": {
+      "l": 3,
+      "pool": "cmvs6hd0700s1eyicyfpmb5ir"
+     }
+    }
+   ]
+  }
+ },
+ {
+  "seq": 26,
+  "round": 2,
+  "type": "attack",
+  "resultText": "Young Green Dragon #1 → Gold Dragon Wyrmling #1: 20 шкоди (КРИТИЧНЕ ПОПАДАННЯ!) | 🎲 крит: кубики шкоди подвоєно (сервер: 4, 5)",
+  "details": {
+   "log": [
+    {
+     "m": "k|hit",
+     "p": {
+      "d": 20,
+      "k": "Young Green Dragon #1",
+      "t": "Gold Dragon Wyrmling #1",
+      "crit": {
+       "m": "k|critPlain"
+      }
+     }
+    },
+    {
+     "m": "b|crit.doubled",
+     "p": {
+      "server": {
+       "m": "b|crit.doubledServer",
+       "p": {
+        "rolls": "4, 5"
+       }
+      }
+     }
+    }
+   ]
+  }
+ },
+ {
+  "seq": 27,
+  "round": 2,
+  "type": "ability",
+  "resultText": "💚 Wild Shape: TEST sweep hero 3 Elf +5 HP | 🎯 Wild Shape: TEST sweep hero 3 Elf — мітка (2)",
+  "details": {
+   "log": [
+    {
+     "m": "a|heal",
+     "p": {
+      "b": "Wild Shape",
+      "t": "TEST sweep hero 3 Elf",
+      "u": 5
+     }
+    },
+    {
+     "m": "a|mark",
+     "p": {
+      "a": "Wild Shape",
+      "c": 2,
+      "t": "TEST sweep hero 3 Elf",
+      "w": "true"
+     }
+    }
+   ]
+  }
+ },
+ {
+  "seq": 28,
+  "round": 2,
+  "type": "spell",
+  "resultText": "TEST sweep hero 3 Elf застосовує Detect Poison and Disease | 🔮 TEST sweep hero 3 Elf втрачає концентрацію на «Detect Evil and Good» (нове заклинання)",
+  "details": {
+   "log": [
+    {
+     "m": "s|cast",
+     "p": {
+      "n": "TEST sweep hero 3 Elf",
+      "p": "Detect Poison and Disease"
+     }
+    },
+    {
+     "m": "b|concentration.lost",
+     "p": {
+      "n": "TEST sweep hero 3 Elf",
+      "p": "Detect Evil and Good",
+      "reason": {
+       "m": "b|concentration.reasonTail",
+       "p": {
+        "reason": {
+         "m": "b|concentration.reasons.newSpell"
+        }
+       }
+      }
+     }
+    }
+   ]
+  }
+ },
+ {
+  "seq": 29,
+  "round": 3,
+  "type": "ability",
+  "resultText": "🔄 cmvs6ek7s00dreyicnab50xt6 не перезарядилась (1)",
+  "details": {
+   "log": [
+    {
+     "m": "u|notRecharged",
+     "p": {
+      "l": 1,
+      "pool": "cmvs6ek7s00dreyicnab50xt6"
+     }
+    }
+   ]
+  }
+ },
+ {
+  "seq": 30,
+  "round": 3,
+  "type": "spell",
+  "resultText": "TEST sweep hero 1 Dragonborn застосовує Ensnaring Strike (шкода: 4) | 🎲 Hydra #1: рятівний кидок 1+5=6 проти СК 12 — провал",
+  "details": {
+   "log": [
+    {
+     "m": "s|castCaption",
+     "p": {
+      "n": "TEST sweep hero 1 Dragonborn",
+      "p": "Ensnaring Strike",
+      "caption": {
+       "m": "j|",
+       "p": {
+        "p0": {
+         "m": "s|captionDamage",
+         "p": {
+          "dealt": 4
+         }
+        },
+        "separator": ", "
+       }
+      }
+     }
+    },
+    {
+     "m": "s|save",
+     "p": {
+      "l": 1,
+      "t": "Hydra #1",
+      "dc": 12,
+      "mod": "+5",
+      "total": 6,
+      "evasive": "no",
+      "outcome": "fail"
+     }
+    }
+   ]
+  }
+ },
+ {
+  "seq": 31,
+  "round": 3,
+  "type": "spell",
+  "resultText": "Succubus #1 застосовує Dominate Person | 🎲 TEST sweep hero 1 Dragonborn: рятівний кидок 1+1=2 проти СК 15 — провал | ⛓ Dominate Person: TEST sweep hero 1 Dragonborn — зачарований (10 р.)",
+  "details": {
+   "log": [
+    {
+     "m": "s|cast",
+     "p": {
+      "n": "Succubus #1",
+      "p": "Dominate Person"
+     }
+    },
+    {
+     "m": "s|save",
+     "p": {
+      "l": 1,
+      "t": "TEST sweep hero 1 Dragonborn",
+      "dc": 15,
+      "mod": "+1",
+      "total": 2,
+      "evasive": "no",
+      "outcome": "fail"
+     }
+    },
+    {
+     "m": "battleActions.condition.appliedTimed",
+     "p": {
+      "r": 10,
+      "t": "TEST sweep hero 1 Dragonborn",
+      "source": "Dominate Person",
+      "condition": {
+       "m": "battleActions.condition.lower.charmed"
+      }
+     }
+    }
+   ]
+  }
+ },
+ {
+  "seq": 32,
+  "round": 3,
+  "type": "attack",
+  "resultText": "Hydra #1 → Young Green Dragon #1: 9 шкоди",
+  "details": {
+   "log": [
+    {
+     "m": "k|hit",
+     "p": {
+      "d": 9,
+      "k": "Hydra #1",
+      "t": "Young Green Dragon #1"
+     }
+    }
+   ]
+  }
+ },
+ {
+  "seq": 33,
+  "round": 3,
+  "type": "ability",
+  "resultText": "🎲 TEST sweep hero 4 Gnome: кидок смерті 6 — провал (2/3)",
+  "details": {
+   "log": [
+    {
+     "m": "b|death.fail",
+     "p": {
+      "c": 2,
+      "l": 6,
+      "n": "TEST sweep hero 4 Gnome",
+      "max": 3
+     }
+    }
+   ]
+  }
+ },
+ {
+  "seq": 34,
+  "round": 3,
+  "type": "attack",
+  "resultText": "Giant Vulture #1 → TEST sweep hero 2 Dwarf: 15 шкоди (КРИТИЧНЕ ПОПАДАННЯ!) | 🎲 крит: кубики шкоди подвоєно (сервер: 1, 2) | 💤 TEST sweep hero 2 Dwarf непритомніє",
+  "details": {
+   "log": [
+    {
+     "m": "k|hit",
+     "p": {
+      "d": 15,
+      "k": "Giant Vulture #1",
+      "t": "TEST sweep hero 2 Dwarf",
+      "crit": {
+       "m": "k|critPlain"
+      }
+     }
+    },
+    {
+     "m": "b|crit.doubled",
+     "p": {
+      "server": {
+       "m": "b|crit.doubledServer",
+       "p": {
+        "rolls": "1, 2"
+       }
+      }
+     }
+    },
+    {
+     "m": "b|death.unconscious",
+     "p": {
+      "n": "TEST sweep hero 2 Dwarf"
+     }
+    }
+   ]
+  }
+ },
+ {
+  "seq": 35,
+  "round": 3,
+  "type": "ability",
+  "resultText": "🎲 TEST sweep hero 2 Dwarf: кидок смерті 1 — провал (2/3)",
+  "details": {
+   "log": [
+    {
+     "m": "b|death.fail",
+     "p": {
+      "c": 2,
+      "l": 1,
+      "n": "TEST sweep hero 2 Dwarf",
+      "max": 3
+     }
+    }
+   ]
+  }
+ },
+ {
+  "seq": 36,
+  "round": 3,
+  "type": "ability",
+  "resultText": "🔄 cmvs6hd0700s1eyicyfpmb5ir перезарядилась (6)",
+  "details": {
+   "log": [
+    {
+     "m": "u|recharged",
+     "p": {
+      "l": 6,
+      "pool": "cmvs6hd0700s1eyicyfpmb5ir"
+     }
+    }
+   ]
+  }
+ },
+ {
+  "seq": 37,
+  "round": 3,
+  "type": "spell",
+  "resultText": "Young Green Dragon #1 застосовує Poison Breath (Young Green Dragon) (шкода: 55 (Succubus #1 18, Hydra #1 37)) | 🎲 Succubus #1: рятівний кидок 1+1=2 проти СК 14 — провал | 🎲 Hydra #1: рятівний кидок 1+5=6 проти СК 14 — провал | 🎲 Succubus #1: концентрація — рятівний кидок ВИТ 11 проти СК 10 — утримує",
+  "details": {
+   "log": [
+    {
+     "m": "s|castCaption",
+     "p": {
+      "n": "Young Green Dragon #1",
+      "p": "Poison Breath (Young Green Dragon)",
+      "caption": {
+       "m": "j|",
+       "p": {
+        "p0": {
+         "m": "s|captionDamageHits",
+         "p": {
+          "hits": "Succubus #1 18, Hydra #1 37",
+          "dealt": 55
+         }
+        },
+        "separator": ", "
+       }
+      }
+     }
+    },
+    {
+     "m": "s|save",
+     "p": {
+      "l": 1,
+      "t": "Succubus #1",
+      "dc": 14,
+      "mod": "+1",
+      "total": 2,
+      "evasive": "no",
+      "outcome": "fail"
+     }
+    },
+    {
+     "m": "s|save",
+     "p": {
+      "l": 1,
+      "t": "Hydra #1",
+      "dc": 14,
+      "mod": "+5",
+      "total": 6,
+      "evasive": "no",
+      "outcome": "fail"
+     }
+    },
+    {
+     "m": "b|concentration.holds",
+     "p": {
+      "head": {
+       "m": "b|concentration.check",
+       "p": {
+        "n": "Succubus #1",
+        "dc": 10,
+        "total": 11
+       }
+      }
+     }
+    }
+   ]
+  }
+ },
+ {
+  "seq": 38,
+  "round": 3,
+  "type": "spell",
+  "resultText": "TEST sweep hero 3 Elf застосовує Entangle | 🔮 TEST sweep hero 3 Elf втрачає концентрацію на «Detect Poison and Disease» (нове заклинання) | 🎲 Succubus #1: рятівний кидок 1-1=0 проти СК 12 — провал | 🎲 Hydra #1: рятівний кидок 1+5=6 проти СК 12 — провал | ⛓ Entangle: Succubus #1 — скутий (10 р.) | ⛓ Entangle: Hydra #1 — скутий (10 р.)",
+  "details": {
+   "log": [
+    {
+     "m": "s|cast",
+     "p": {
+      "n": "TEST sweep hero 3 Elf",
+      "p": "Entangle"
+     }
+    },
+    {
+     "m": "b|concentration.lost",
+     "p": {
+      "n": "TEST sweep hero 3 Elf",
+      "p": "Detect Poison and Disease",
+      "reason": {
+       "m": "b|concentration.reasonTail",
+       "p": {
+        "reason": {
+         "m": "b|concentration.reasons.newSpell"
+        }
+       }
+      }
+     }
+    },
+    {
+     "m": "s|save",
+     "p": {
+      "l": 1,
+      "t": "Succubus #1",
+      "dc": 12,
+      "mod": "-1",
+      "total": 0,
+      "evasive": "no",
+      "outcome": "fail"
+     }
+    },
+    {
+     "m": "s|save",
+     "p": {
+      "l": 1,
+      "t": "Hydra #1",
+      "dc": 12,
+      "mod": "+5",
+      "total": 6,
+      "evasive": "no",
+      "outcome": "fail"
+     }
+    },
+    {
+     "m": "battleActions.condition.appliedTimed",
+     "p": {
+      "r": 10,
+      "t": "Succubus #1",
+      "source": "Entangle",
+      "condition": {
+       "m": "battleActions.condition.lower.restrained"
+      }
+     }
+    },
+    {
+     "m": "battleActions.condition.appliedTimed",
+     "p": {
+      "r": 10,
+      "t": "Hydra #1",
+      "source": "Entangle",
+      "condition": {
+       "m": "battleActions.condition.lower.restrained"
+      }
+     }
+    }
+   ]
+  }
+ },
+ {
+  "seq": 39,
+  "round": 4,
+  "type": "ability",
+  "resultText": "🔄 cmvs6ek7s00dreyicnab50xt6 не перезарядилась (1)",
+  "details": {
+   "log": [
+    {
+     "m": "u|notRecharged",
+     "p": {
+      "l": 1,
+      "pool": "cmvs6ek7s00dreyicnab50xt6"
+     }
+    }
+   ]
+  }
+ },
+ {
+  "seq": 40,
+  "round": 4,
+  "type": "spell",
+  "resultText": "TEST sweep hero 1 Dragonborn застосовує Expeditious Retreat | 🔮 TEST sweep hero 1 Dragonborn втрачає концентрацію на «Ensnaring Strike» (нове заклинання) | ✨ Expeditious Retreat: швидкість +30 → TEST sweep hero 1 Dragonborn (99 р.)",
+  "details": {
+   "log": [
+    {
+     "m": "s|cast",
+     "p": {
+      "n": "TEST sweep hero 1 Dragonborn",
+      "p": "Expeditious Retreat"
+     }
+    },
+    {
+     "m": "b|concentration.lost",
+     "p": {
+      "n": "TEST sweep hero 1 Dragonborn",
+      "p": "Ensnaring Strike",
+      "reason": {
+       "m": "b|concentration.reasonTail",
+       "p": {
+        "reason": {
+         "m": "b|concentration.reasons.newSpell"
+        }
+       }
+      }
+     }
+    },
+    {
+     "m": "a|applied",
+     "p": {
+      "a": "Expeditious Retreat",
+      "e": {
+       "m": "abilityRegistry.summary.effects.stat",
+       "p": {
+        "stat": {
+         "m": "abilityRegistry.stats.speed"
+        },
+        "value": {
+         "m": "abilityRegistry.summary.text",
+         "p": {
+          "value": {
+           "m": "abilityRegistry.summary.flat.number",
+           "p": {
+            "value": "+30"
+           }
+          }
+         }
+        },
+        "hasLevels": "no"
+       }
+      },
+      "r": 99,
+      "t": "TEST sweep hero 1 Dragonborn"
+     }
+    }
+   ]
+  }
+ },
+ {
+  "seq": 41,
+  "round": 4,
+  "type": "ability",
+  "resultText": "Кінець ходу | 🎲 TEST sweep hero 1 Dragonborn: рятівний кидок Мудрість 15 проти СК 15 — звільняється від стану «Зачарований»",
+  "details": {
+   "log": [
+    {
+     "m": "g|turnEnd"
+    },
+    {
+     "m": "b|saves.freed",
+     "p": {
+      "e": {
+       "m": "battleCommon.conditions.charmed.label"
+      },
+      "head": {
+       "m": "b|saves.head",
+       "p": {
+        "a": {
+         "m": "gameTerms.abilities.wisdom.label"
+        },
+        "n": "TEST sweep hero 1 Dragonborn",
+        "dc": 15,
+        "total": 15
+       }
+      }
+     }
+    }
+   ]
+  }
+ },
+ {
+  "seq": 42,
+  "round": 4,
+  "type": "ability",
+  "resultText": "🔮 Succubus #1 втрачає концентрацію на «Dominate Person» (ефекти заклинання завершилися)",
+  "details": {
+   "log": [
+    {
+     "m": "b|concentration.lost",
+     "p": {
+      "n": "Succubus #1",
+      "p": "Dominate Person",
+      "reason": {
+       "m": "b|concentration.reasonTail",
+       "p": {
+        "reason": {
+         "m": "b|concentration.reasons.effectsEnded"
+        }
+       }
+      }
+     }
+    }
+   ]
+  }
+ },
+ {
+  "seq": 43,
+  "round": 4,
+  "type": "spell",
+  "resultText": "Succubus #1 застосовує Draining Kiss (Succubus) (шкода: 19) | 🎲 Young Green Dragon #1: рятівний кидок 1+3=4 проти СК 15 — провал",
+  "details": {
+   "log": [
+    {
+     "m": "s|castCaption",
+     "p": {
+      "n": "Succubus #1",
+      "p": "Draining Kiss (Succubus)",
+      "caption": {
+       "m": "j|",
+       "p": {
+        "p0": {
+         "m": "s|captionDamage",
+         "p": {
+          "dealt": 19
+         }
+        },
+        "separator": ", "
+       }
+      }
+     }
+    },
+    {
+     "m": "s|save",
+     "p": {
+      "l": 1,
+      "t": "Young Green Dragon #1",
+      "dc": 15,
+      "mod": "+3",
+      "total": 4,
+      "evasive": "no",
+      "outcome": "fail"
+     }
+    }
+   ]
+  }
+ },
+ {
+  "seq": 44,
+  "round": 4,
+  "type": "ability",
+  "resultText": "Кінець ходу | 🎲 Succubus #1: рятівний кидок Сила 3 проти СК 12 — стан «Скутий» лишається",
+  "details": {
+   "log": [
+    {
+     "m": "g|turnEnd"
+    },
+    {
+     "m": "b|saves.kept",
+     "p": {
+      "e": {
+       "m": "battleCommon.conditions.restrained.label"
+      },
+      "head": {
+       "m": "b|saves.head",
+       "p": {
+        "a": {
+         "m": "gameTerms.abilities.strength.label"
+        },
+        "n": "Succubus #1",
+        "dc": 12,
+        "total": 3
+       }
+      }
+     }
+    }
+   ]
+  }
+ },
+ {
+  "seq": 45,
+  "round": 4,
+  "type": "attack",
+  "resultText": "Hydra #1 → TEST sweep hero 3 Elf: 6 шкоди | 🎲 недолік: другий d20 = 15 (сервер), обрано 15 | 🎲 TEST sweep hero 3 Elf: концентрація — рятівний кидок ВИТ 3 проти СК 10 — втрачає концентрацію на «Entangle»",
+  "details": {
+   "log": [
+    {
+     "m": "k|hit",
+     "p": {
+      "d": 6,
+      "k": "Hydra #1",
+      "t": "TEST sweep hero 3 Elf"
+     }
+    },
+    {
+     "m": "r|second",
+     "p": {
+      "mode": {
+       "m": "r|disadvantage"
+      },
+      "value": 15,
+      "chosen": 15,
+      "server": {
+       "m": "r|serverTag"
+      }
+     }
+    },
+    {
+     "m": "b|concentration.broke",
+     "p": {
+      "p": "Entangle",
+      "head": {
+       "m": "b|concentration.check",
+       "p": {
+        "n": "TEST sweep hero 3 Elf",
+        "dc": 10,
+        "total": 3
+       }
+      }
+     }
+    }
+   ]
+  }
+ },
+ {
+  "seq": 46,
+  "round": 4,
+  "type": "ability",
+  "resultText": "🎲 TEST sweep hero 4 Gnome: кидок смерті 11 — успіх (1/3)",
+  "details": {
+   "log": [
+    {
+     "m": "b|death.success",
+     "p": {
+      "c": 1,
+      "l": 11,
+      "n": "TEST sweep hero 4 Gnome",
+      "max": 3
+     }
+    }
+   ]
+  }
+ },
+ {
+  "seq": 47,
+  "round": 4,
+  "type": "attack",
+  "resultText": "Giant Vulture #1 → Succubus #1: промах",
+  "details": {
+   "log": [
+    {
+     "m": "k|miss",
+     "p": {
+      "k": "Giant Vulture #1",
+      "t": "Succubus #1"
+     }
+    }
+   ]
+  }
+ },
+ {
+  "seq": 48,
+  "round": 4,
+  "type": "ability",
+  "resultText": "💀 TEST sweep hero 2 Dwarf: кидок смерті 8 — помирає",
+  "details": {
+   "log": [
+    {
+     "m": "b|death.dies",
+     "p": {
+      "l": 8,
+      "n": "TEST sweep hero 2 Dwarf"
+     }
+    }
+   ]
+  }
+ },
+ {
+  "seq": 49,
+  "round": 4,
+  "type": "ability",
+  "resultText": "🔄 cmvs6hd0700s1eyicyfpmb5ir перезарядилась (5)",
+  "details": {
+   "log": [
+    {
+     "m": "u|recharged",
+     "p": {
+      "l": 5,
+      "pool": "cmvs6hd0700s1eyicyfpmb5ir"
+     }
+    }
+   ]
+  }
+ },
+ {
+  "seq": 50,
+  "round": 4,
+  "type": "attack",
+  "resultText": "Young Green Dragon #1 → Hydra #1: 11 шкоди",
+  "details": {
+   "log": [
+    {
+     "m": "k|hit",
+     "p": {
+      "d": 11,
+      "k": "Young Green Dragon #1",
+      "t": "Hydra #1"
+     }
+    }
+   ]
+  }
+ },
+ {
+  "seq": 51,
+  "round": 4,
+  "type": "spell",
+  "resultText": "TEST sweep hero 3 Elf застосовує Acid Breath (Adult Black Dragon) (шкода: 109 (Succubus #1 53, Hydra #1 56)) | 🎲 Succubus #1: рятівний кидок 1+3=4 проти СК 12 — провал | 🎲 Hydra #1: рятівний кидок 1+1=2 проти СК 12 — провал",
+  "details": {
+   "log": [
+    {
+     "m": "s|castCaption",
+     "p": {
+      "n": "TEST sweep hero 3 Elf",
+      "p": "Acid Breath (Adult Black Dragon)",
+      "caption": {
+       "m": "j|",
+       "p": {
+        "p0": {
+         "m": "s|captionDamageHits",
+         "p": {
+          "hits": "Succubus #1 53, Hydra #1 56",
+          "dealt": 109
+         }
+        },
+        "separator": ", "
+       }
+      }
+     }
+    },
+    {
+     "m": "s|save",
+     "p": {
+      "l": 1,
+      "t": "Succubus #1",
+      "dc": 12,
+      "mod": "+3",
+      "total": 4,
+      "evasive": "no",
+      "outcome": "fail"
+     }
+    },
+    {
+     "m": "s|save",
+     "p": {
+      "l": 1,
+      "t": "Hydra #1",
+      "dc": 12,
+      "mod": "+1",
+      "total": 2,
+      "evasive": "no",
+      "outcome": "fail"
+     }
+    }
+   ]
+  }
+ },
+ {
+  "seq": 52,
+  "round": 5,
+  "type": "ability",
+  "resultText": "🔄 cmvs6ek7s00dreyicnab50xt6 не перезарядилась (4)",
+  "details": {
+   "log": [
+    {
+     "m": "u|notRecharged",
+     "p": {
+      "l": 4,
+      "pool": "cmvs6ek7s00dreyicnab50xt6"
+     }
+    }
+   ]
+  }
+ },
+ {
+  "seq": 53,
+  "round": 5,
+  "type": "spell",
+  "resultText": "TEST sweep hero 1 Dragonborn застосовує Acid Breath (Adult Copper Dragon) (шкода: 30) | 🎲 Hydra #1: рятівний кидок 1+1=2 проти СК 12 — провал",
+  "details": {
+   "log": [
+    {
+     "m": "s|castCaption",
+     "p": {
+      "n": "TEST sweep hero 1 Dragonborn",
+      "p": "Acid Breath (Adult Copper Dragon)",
+      "caption": {
+       "m": "j|",
+       "p": {
+        "p0": {
+         "m": "s|captionDamage",
+         "p": {
+          "dealt": 30
+         }
+        },
+        "separator": ", "
+       }
+      }
+     }
+    },
+    {
+     "m": "s|save",
+     "p": {
+      "l": 1,
+      "t": "Hydra #1",
+      "dc": 12,
+      "mod": "+1",
+      "total": 2,
+      "evasive": "no",
+      "outcome": "fail"
+     }
+    }
+   ]
+  }
+ },
+ {
+  "seq": 54,
+  "round": 5,
+  "type": "end_turn",
+  "resultText": "💀 Бій завершено! Поразка союзників!",
+  "details": {
+   "log": [
+    {
+     "m": "b|victory.completeLost"
+    }
+   ]
+  }
+ }
+]
