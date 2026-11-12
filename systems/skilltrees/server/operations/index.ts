@@ -12,7 +12,9 @@ import {
 } from '@/lib/server/characters/operation-runner';
 import type { SystemOperation } from '@/lib/server/systems/types';
 
-const nodeIds = z.array(z.string().min(1)).min(1).max(100);
+const nodeId = z.string().min(1);
+
+const nodeIds = z.array(nodeId).min(1).max(100);
 
 const progressionOperation = defineCharacterOperation({
     name: 'progression',
@@ -37,7 +39,7 @@ const progressionOperation = defineCharacterOperation({
 const learnOperation = defineCharacterOperation({
     name: 'progression.learn',
     action: 'learn skill node',
-    schema: z.object({ nodeId: z.string().min(1) }),
+    schema: z.object({ nodeId }),
     gate: memberScope,
     run: ({ access, campaignId, characterId }, { nodeId }) =>
         runProgressionAction(access, campaignId, characterId, {
@@ -81,7 +83,7 @@ export const SKILLTREES_OPERATIONS: Record<string, SystemOperation> = {
     },
     'progression.learn': {
         operation: erased(learnOperation),
-        input: characterIdSchema.extend({ nodeId: z.string().min(1) }).strict(),
+        input: characterIdSchema.extend({ nodeId }).strict(),
         scoped: true,
     },
     'progression.unlearn': {
