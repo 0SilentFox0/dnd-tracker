@@ -25,7 +25,9 @@ export function initialRules(
 ): Record<string, unknown> {
     const { base, modules } = composition(system);
 
-    const meta = SYSTEM_META.find((m) => m.keys.includes(system.key));
+    const meta = SYSTEM_META.find((m) =>
+        (m.keys as readonly string[]).includes(system.key)
+    );
 
     const rules: Record<string, unknown> = {};
 
