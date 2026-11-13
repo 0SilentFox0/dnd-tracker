@@ -3,7 +3,7 @@
 import { ShowDeckStrip } from './ShowDeckStrip';
 import { ShowTransport } from './ShowTransport';
 
-import { ShowWorldControls } from '@/components/world/show/ShowWorldControls';
+import { ShowWorldControls } from '@/components/show/world/ShowWorldControls';
 import type { ShowControl } from '@/lib/hooks/show';
 import type { ShowState } from '@/types/show';
 

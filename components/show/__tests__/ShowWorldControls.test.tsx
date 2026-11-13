@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { cleanup, fireEvent, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { ShowWorldControls } from '../show/ShowWorldControls';
+import { ShowWorldControls } from '@/components/show/world/ShowWorldControls';
 
 import { render } from '@/components/ui/__tests__/uk-intl';
 import { getWorldMap, getWorldMaps } from '@/lib/api/world';
@@ -17,7 +17,7 @@ vi.mock('@/lib/api/world', () => ({
     getWorldMaps: vi.fn(),
     getWorldMap: vi.fn(),
 }));
-vi.mock('@/components/world/show/WorldTravelDialog', () => ({
+vi.mock('@/components/show/world/WorldTravelDialog', () => ({
     WorldTravelDialog: (p: { open: boolean; onMoved(e: unknown): void }) =>
         p.open ? (
             <button
