@@ -2,8 +2,8 @@
 import { cleanup, fireEvent, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { AbilityScoresGrid } from '@/components/common/AbilityScoresGrid';
 import { renderWithIntl } from '@/lib/i18n/test/render-with-intl';
+import { AbilityScoresGrid } from '@/systems/d20/ui/stats/AbilityScoresGrid';
 
 vi.unmock('next-intl');
 

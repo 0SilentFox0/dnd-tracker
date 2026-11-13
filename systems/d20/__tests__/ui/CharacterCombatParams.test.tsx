@@ -6,7 +6,7 @@ vi.mock('@/lib/hooks/campaigns', () => ({
     useCampaignRules: () => ({ data: undefined }),
 }));
 
-import { CharacterCombatParams } from '@/components/characters/stats/CharacterCombatParams';
+import { CharacterCombatParams } from '@/systems/d20/ui/stats/CharacterCombatParams';
 
 const combatStats = {
     data: {

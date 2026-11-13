@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { BiographyEditor } from '@/components/character-profile/BiographyEditor';
 import { LevelUpAction } from '@/components/character-profile/LevelUpAction';
-import { PrimaryAbilityPicker } from '@/components/characters/stats/PrimaryAbilityPicker';
+import { PrimaryAbilityPicker } from '@/systems/d20/ui/stats/PrimaryAbilityPicker';
 
 describe('редактор ДМа', () => {
     afterEach(cleanup);

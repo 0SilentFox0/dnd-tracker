@@ -1,7 +1,7 @@
 import { PrimaryAbilityPicker } from './PrimaryAbilityPicker';
 
-import { AbilityScoresGrid } from '@/components/common/AbilityScoresGrid';
 import type { CharacterFormBindings } from '@/lib/utils/characters/form/bindings';
+import { AbilityScoresGrid } from '@/systems/d20/ui/stats/AbilityScoresGrid';
 
 interface CharacterAbilityScoresProps {
     abilityScores: CharacterFormBindings['abilityScores'];

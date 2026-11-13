@@ -2,10 +2,10 @@
 
 import { useTranslations } from 'next-intl';
 
-import { CharacterAbilityScores } from '@/components/characters/stats/CharacterAbilityScores';
-import { CharacterCombatParams } from '@/components/characters/stats/CharacterCombatParams';
 import { HudSection } from '@/components/hud/form';
 import type { StatsFieldsProps } from '@/components/systems/types';
+import { CharacterAbilityScores } from '@/systems/d20/ui/stats/CharacterAbilityScores';
+import { CharacterCombatParams } from '@/systems/d20/ui/stats/CharacterCombatParams';
 
 export function StatsFields({
     bindings: { abilityScores, combatStats },
