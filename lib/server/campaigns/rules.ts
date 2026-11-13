@@ -129,14 +129,13 @@ export async function updateCampaignRules(
 
             assertValidSystem(next);
 
-            if (modules)
-                await assertModuleChange(
-                    tx,
-                    actor.campaignId,
-                    current.system,
-                    next,
-                    confirm === true
-                );
+            await assertModuleChange(
+                tx,
+                actor.campaignId,
+                current.system,
+                next,
+                confirm === true
+            );
         }
 
         const merged = mergeRules(

@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const db = vi.hoisted(() => ({
     campaign: { findUnique: vi.fn(), update: vi.fn() },
+    battleScene: { count: vi.fn().mockResolvedValue(0) },
     character: { count: vi.fn() },
     unit: { count: vi.fn() },
 }));

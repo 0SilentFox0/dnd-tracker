@@ -49,6 +49,24 @@ describe('useRulesForm', () => {
         expect(result.current.isDirty).toBe(false);
     });
 
+    it('switching the system key away and back keeps explicit modules and stays clean', async () => {
+        const system = { key: 'homm', modules: ['morale'] };
+
+        vi.mocked(getCampaignRules).mockResolvedValue({
+            ...DEFAULT_RULES,
+            system,
+        } as typeof DEFAULT_RULES);
+
+        const { result } = await setup();
+
+        act(() => result.current.form.set('system', { key: 'dnd5e' }));
+        expect(result.current.isDirty).toBe(true);
+
+        act(() => result.current.form.set('system', { key: 'homm' }));
+        expect(result.current.isDirty).toBe(false);
+        expect(result.current.form.data.system).toEqual(system);
+    });
+
     it('set marks the form dirty and save patches only changed sections', async () => {
         const { result } = await setup();
 

@@ -81,7 +81,16 @@ export function useRulesForm(campaignId: string) {
     const form: RulesFormState = {
         campaignId,
         data,
-        set: (key, value) => setChanges((prev) => ({ ...prev, [key]: value })),
+        set: (key, value) =>
+            setChanges((prev) => ({
+                ...prev,
+                [key]:
+                    key === 'system' &&
+                    (value as Ruleset['system']).key === server.system.key &&
+                    !(value as Ruleset['system']).modules
+                        ? server.system
+                        : value,
+            })),
     };
 
     const save = async () => {

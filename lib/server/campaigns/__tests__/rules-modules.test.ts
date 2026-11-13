@@ -267,6 +267,17 @@ describe('module toggle through updateCampaignRules', () => {
         expect(system()).toEqual({ key: 'dnd5e' });
     });
 
+    it('a key-only change is blocked by an active battle', async () => {
+        setup({ system: { key: 'homm', modules: FULL } }, { battle: 1 });
+
+        await expect(
+            updateCampaignRules(dm, { system: { key: 'dnd5e' } })
+        ).rejects.toMatchObject({
+            message: API_ERRORS.SYSTEM_MODULES_IN_BATTLE,
+            status: 409,
+        });
+    });
+
     it('the stored JSON never gets the confirm flag', async () => {
         setup({ system: { key: 'dnd5e' } });
 

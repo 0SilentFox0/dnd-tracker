@@ -30,6 +30,7 @@ export function SwitchField({
             <Switch
                 id={id}
                 aria-label={ariaLabel}
+                aria-describedby={description ? `${id}-desc` : undefined}
                 checked={checked}
                 onCheckedChange={onCheckedChange}
                 disabled={disabled}
@@ -37,7 +38,10 @@ export function SwitchField({
             <div className="space-y-0.5">
                 <Label htmlFor={id}>{label}</Label>
                 {description && (
-                    <p className="text-xs text-muted-foreground">
+                    <p
+                        id={`${id}-desc`}
+                        className="text-xs text-muted-foreground"
+                    >
                         {description}
                     </p>
                 )}

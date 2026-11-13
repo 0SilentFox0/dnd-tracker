@@ -121,10 +121,15 @@ export function operationPreview(
             const { confirm: _confirm, ...patch } =
                 RulesetPatchSchema.parse(body);
 
-            if (patch.system?.modules)
+            if (
+                patch.system?.modules ||
+                (patch.system?.key && patch.system.key !== before.system.key)
+            )
                 assertValidSystem({
                     key: patch.system.key ?? before.system.key,
-                    modules: patch.system.modules,
+                    ...(patch.system.modules && {
+                        modules: patch.system.modules,
+                    }),
                 });
 
             const merged = mergeRules(before, patch);

@@ -229,7 +229,7 @@
       "requiredBy": "Required by the \"{module}\" module.",
       "dirtyHint": "Save or discard your rule changes to switch modules.",
       "confirmTitle": "Change a rule module?",
-      "confirmBody": "The \"{module}\" module changes how hit points and progression of existing heroes are calculated. Nothing is deleted: turn the module back on and everything returns. Skill tree nodes learned beyond the current level stay.",
+      "confirmBody": "The \"{module}\" module changes how existing heroes are calculated. Nothing is deleted: turn the module back on and everything returns.",
       "confirmAction": "Change"
     }
   }
