@@ -1,6 +1,6 @@
 import { useTranslations } from 'next-intl';
 
-import { CritWaitingNote } from '@/components/battle/crit-choice/CritWaitingNote';
+import { PendingChoiceNote } from '@/components/battle/wizards/PendingChoiceNote';
 import { useText } from '@/lib/i18n/use-text';
 import type { SpellFlowState } from '@/lib/utils/battle/flows';
 import { targetingLabel } from '@/lib/utils/spells/model/labels';
@@ -75,7 +75,7 @@ export function SpellSummary({
                     </p>
                 )}
             </div>
-            {state.waitingCrit && <CritWaitingNote />}
+            {state.waitingCrit && <PendingChoiceNote />}
             {state.error && (
                 <p className="mt-2 text-sm text-[#e9a08f]">
                     {text(state.error)}

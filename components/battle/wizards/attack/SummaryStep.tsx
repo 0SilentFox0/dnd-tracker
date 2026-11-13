@@ -3,7 +3,7 @@ import { Loader2, Swords } from 'lucide-react';
 
 import { type AttackWizardModel, btn, primaryBtn } from './shared';
 
-import { CritWaitingNote } from '@/components/battle/crit-choice/CritWaitingNote';
+import { PendingChoiceNote } from '@/components/battle/wizards/PendingChoiceNote';
 import { useText } from '@/lib/i18n/use-text';
 import { cn } from '@/lib/utils';
 import { formatDamageStep } from '@/lib/utils/battle/view';
@@ -84,7 +84,7 @@ export function SummaryStep({
                     </div>
                 </div>
             )}
-            {state.waitingCrit && <CritWaitingNote />}
+            {state.waitingCrit && <PendingChoiceNote />}
             <div className="mt-3 grid grid-cols-2 gap-2">
                 <button
                     type="button"

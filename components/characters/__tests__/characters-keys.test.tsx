@@ -5,8 +5,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { AbilityScoresPicker } from '@/components/characters/player-draft/AbilityScoresPicker';
 import { DraftBanner } from '@/components/characters/player-draft/DraftBanner';
 import { NoCharacterState } from '@/components/characters/player-draft/NoCharacterState';
-import { PrimaryAbilityPicker } from '@/systems/d20/ui/stats/PrimaryAbilityPicker';
 import { renderWithConfirm } from '@/components/ui/__tests__/render-with-confirm';
+import { PrimaryAbilityPicker } from '@/systems/d20/ui/stats/PrimaryAbilityPicker';
 
 const returnWithNote = vi.fn().mockResolvedValue(undefined);
 

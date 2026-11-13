@@ -1,6 +1,6 @@
 import { useTranslations } from 'next-intl';
 
-export function CritWaitingNote() {
+export function PendingChoiceNote() {
     const t = useTranslations('battle.critChoice');
 
     return (
