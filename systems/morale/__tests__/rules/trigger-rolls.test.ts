@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
-import { moraleTriggerRolls } from '@/lib/utils/battle/morale/threshold';
+import { moraleTriggerRolls } from '@/systems/morale/rules/trigger-rolls';
 
 const withMorale = (morale: number) => {
     const p = createMockParticipant();

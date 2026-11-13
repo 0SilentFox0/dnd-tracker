@@ -8,6 +8,7 @@ import type {
 } from '@/lib/hooks/battle';
 import type { SystemConditionBody } from '@/lib/hooks/battles';
 import type { RulesFormState } from '@/lib/hooks/campaigns';
+import type { TurnGateOutcome } from '@/lib/utils/battle/flows';
 import type { BattleKnowledge } from '@/lib/utils/battle/view/knowledge';
 import type { CharacterFormBindings } from '@/lib/utils/characters/form/bindings';
 import type { MechanicKey } from '@/lib/utils/rules/registry';
@@ -183,6 +184,16 @@ export interface BattleBadgeProps {
     place: 'hero' | 'row';
 }
 
+export interface TurnGateControls {
+    resolve(outcome: TurnGateOutcome): void;
+    skipTurn(): void;
+}
+
+export interface TurnStartPanelProps {
+    hero: BattleParticipant;
+    gate: TurnGateControls;
+}
+
 /** Every slot is optional: a missing slot is a missing mechanic */
 export interface SystemBattleUi {
     HeroStats?: ComponentType<HeroStatsProps>;
@@ -194,6 +205,11 @@ export interface SystemBattleUi {
     badges?: readonly ComponentType<BattleBadgeProps>[];
     dialogs?: readonly ComponentType[];
     notices?: readonly ComponentType[];
+    /** One module claims it: the check a participant resolves before the first action */
+    turnStart?: {
+        Panel: ComponentType<TurnStartPanelProps>;
+        Label: ComponentType<{ outcome?: TurnGateOutcome }>;
+    };
     RollBody?: ComponentType<RollBodyProps>;
     RollTitle?: ComponentType;
     CastTest?: ComponentType<CastTestProps>;

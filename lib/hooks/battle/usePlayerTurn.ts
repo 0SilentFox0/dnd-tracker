@@ -3,23 +3,20 @@
 import { useEffect, useReducer, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { afterMoraleDice } from './morale-dice';
 import { turnStartDue, turnStartOutcome } from './turn-start-check';
 import { useBattleScene } from './useBattleScene';
-import { useFxEnabled } from './useFxEnabled';
 
 import { BattleStatus } from '@/lib/constants/battle';
-import { useConfirm, usePageHidden } from '@/lib/hooks/common';
+import { useConfirm } from '@/lib/hooks/common';
 import { coreActionsOn } from '@/lib/utils/battle/actions/access';
 import { canAttackFromPool } from '@/lib/utils/battle/attack/attacks-left';
 import {
     initialTurnFlow,
-    moraleOutcome,
     TURN_SKIP_MS,
     turnFlow,
+    type TurnGateOutcome,
 } from '@/lib/utils/battle/flows';
 import { checkReturnToStart } from '@/lib/utils/battle/grid';
-import { effectiveMorale } from '@/lib/utils/battle/morale/effective-morale';
 import { canCastBonusSpell, turnExhausted } from '@/lib/utils/battle/view';
 import type { BattleParticipant } from '@/types/battle';
 
@@ -34,12 +31,6 @@ export function usePlayerTurn(
     const scene = useBattleScene();
 
     const confirm = useConfirm();
-
-    const fx = useFxEnabled();
-
-    const hidden = usePageHidden();
-
-    const fxActive = fx.enabled && !hidden;
 
     const [state, dispatch] = useReducer(turnFlow, initialTurnFlow, (s) =>
         turnFlow(s, {
@@ -134,63 +125,6 @@ export function usePlayerTurn(
             )
                 dispatch({ type: 'EXHAUSTED' });
         },
-        rollMorale: async (d10: number) => {
-            let res;
-
-            try {
-                res = await scene.actions.moraleCheck.mutateAsync({
-                    participantId: id,
-                    d10Roll: d10,
-                });
-            } catch {
-                return;
-            }
-
-            const result = moraleOutcome(res?.moraleResult);
-
-            dispatch({ type: 'GATE_RESULT', result });
-
-            const base = {
-                name: participant.basicInfo.name,
-                d10,
-                morale: effectiveMorale(
-                    participant,
-                    scene.readBattle()?.initiativeOrder ?? []
-                ).value,
-            };
-
-            if (fxActive && result !== 'none') {
-                const signal = lifetime.current?.signal;
-
-                await afterMoraleDice(signal);
-
-                if (signal?.aborted) return;
-            }
-
-            if (result === 'extra')
-                scene.result.show({ kind: 'morale-extra', ...base });
-            else if (result === 'skip') {
-                scene.result.show({ kind: 'morale-skip', ...base });
-
-                // версія фіксується одразу: якщо DM встигне передати хід сам, таймер отримає 409, а не пропустить наступного
-                const expectedVersion = scene.readBattle()?.version;
-
-                skipTimer.current = setTimeout(
-                    () =>
-                        scene.actions.nextTurn.mutate(
-                            { expectedVersion },
-                            { onError: () => dispatch({ type: 'RECOVER' }) }
-                        ),
-                    TURN_SKIP_MS
-                );
-            } else
-                scene.toast.show(
-                    t('moraleUnchanged', {
-                        name: participant.basicInfo.name,
-                        d10,
-                    })
-                );
-        },
         stay: () => dispatch({ type: 'STAY' }),
         endTurn,
     };
@@ -207,9 +141,28 @@ export function usePlayerTurn(
 
     const strikeAndReturn = { available: canReturn, run: returnToStart };
 
+    const gate = {
+        resolve: (result: TurnGateOutcome) =>
+            dispatch({ type: 'GATE_RESULT', result }),
+        skipTurn: () => {
+            // версія фіксується одразу: якщо DM встигне передати хід сам, таймер отримає 409, а не пропустить наступного
+            const expectedVersion = scene.readBattle()?.version;
+
+            skipTimer.current = setTimeout(
+                () =>
+                    scene.actions.nextTurn.mutate(
+                        { expectedVersion },
+                        { onError: () => dispatch({ type: 'RECOVER' }) }
+                    ),
+                TURN_SKIP_MS
+            );
+        },
+    };
+
     return {
         phase: state.phase,
         gateResult,
+        gate,
         status: {
             actionUsed: participant.actionFlags.hasUsedAction,
             attackLeft: canAttackFromPool(participant),

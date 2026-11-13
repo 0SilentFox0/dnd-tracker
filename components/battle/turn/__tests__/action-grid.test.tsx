@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { ActionGrid } from '@/components/battle/turn/ActionGrid';
 import { render } from '@/lib/i18n/test/render-uk';
+import { MoraleLabel } from '@/systems/morale/ui/battle/MoraleLabel';
 
 vi.unmock('next-intl');
 
@@ -16,7 +17,6 @@ const turn = (skipped: boolean, gateResult?: 'extra' | 'skip' | 'none') =>
         actions: {
             endTurn: vi.fn(),
             afterAction: vi.fn(),
-            rollMorale: vi.fn(),
             stay: vi.fn(),
         },
     }) as never;
@@ -74,7 +74,13 @@ describe('ActionGrid', () => {
     });
 
     it("плитка моралі з'являється лише з результатом і називає його", () => {
-        render(<ActionGrid turn={turn(false, 'extra')} {...props} />);
+        render(
+            <ActionGrid
+                turn={turn(false, 'extra')}
+                gateLabel={<MoraleLabel outcome="extra" />}
+                {...props}
+            />
+        );
 
         expect(
             (
@@ -86,11 +92,23 @@ describe('ActionGrid', () => {
         expect(screen.getByRole('button', { name: /^Атака$/ })).toBeTruthy();
         cleanup();
 
-        render(<ActionGrid turn={turn(true, 'skip')} {...props} />);
+        render(
+            <ActionGrid
+                turn={turn(true, 'skip')}
+                gateLabel={<MoraleLabel outcome="skip" />}
+                {...props}
+            />
+        );
         expect(screen.getByRole('button', { name: 'Паніка' })).toBeTruthy();
         cleanup();
 
-        render(<ActionGrid turn={turn(false, 'none')} {...props} />);
+        render(
+            <ActionGrid
+                turn={turn(false, 'none')}
+                gateLabel={<MoraleLabel outcome="none" />}
+                {...props}
+            />
+        );
         expect(screen.getByRole('button', { name: 'Мораль' })).toBeTruthy();
         cleanup();
 

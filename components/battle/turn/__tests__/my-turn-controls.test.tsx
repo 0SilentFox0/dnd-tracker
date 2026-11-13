@@ -10,6 +10,8 @@ vi.unmock('next-intl');
 
 const rules = vi.hoisted(() => ({ current: {} as Record<string, unknown> }));
 
+const turnState = vi.hoisted(() => ({ phase: 'acting', turnStart: false }));
+
 vi.mock('next/dynamic', () => ({
     default: (loader: () => Promise<React.ComponentType<object>>) => {
         const Lazy = lazy(() => loader().then((c) => ({ default: c })));
@@ -27,13 +29,22 @@ vi.mock('@/components/battle/wizards/AttackWizard', () => ({
     AttackWizard: () => null,
 }));
 vi.mock('@/components/battle/use-system-battle-ui', () => ({
-    useSystemBattleUi: () =>
-        rules.current.tested
+    useSystemBattleUi: () => ({
+        ...(rules.current.tested
             ? {
                   ChannelDialog: () => <div data-testid="channel-dialog" />,
                   ChannelLabel: () => <>Скерування</>,
               }
-            : {},
+            : {}),
+        ...(turnState.turnStart
+            ? {
+                  turnStart: {
+                      Panel: () => <div data-testid="turn-start-panel" />,
+                      Label: () => <>Мітка</>,
+                  },
+              }
+            : {}),
+    }),
 }));
 vi.mock('@/components/battle/wizards/SpellBook', () => ({
     SpellBook: () => null,
@@ -55,9 +66,6 @@ vi.mock('@/components/battle/scene/MapStrip', () => ({
 vi.mock('@/components/battle/modes', () => ({ modeUiOf: () => undefined }));
 vi.mock('@/lib/utils/battle/attack/attacks-left', () => ({
     canOffHandAttack: () => true,
-}));
-vi.mock('@/lib/utils/battle/morale/threshold', () => ({
-    moraleTriggerRolls: () => ({ rolls: [] }),
 }));
 vi.mock('@/lib/utils/battle/view', () => ({ usableAbilities: () => [] }));
 vi.mock('@/lib/hooks/battle', () => ({
@@ -88,7 +96,8 @@ vi.mock('@/lib/hooks/battle', () => ({
     useAttackWizard: () => ({ actions: { open: vi.fn() } }),
     useChannelAction: () => ({ view: {}, actions: { open: vi.fn() } }),
     usePlayerTurn: () => ({
-        phase: 'acting',
+        phase: turnState.phase,
+        gate: { resolve: vi.fn(), skipTurn: vi.fn() },
         status: {
             actionUsed: false,
             attackLeft: true,
@@ -109,7 +118,29 @@ const hero = {
 } as unknown as BattleParticipant;
 
 describe('MyTurnControls: gating за прапорцями правил', () => {
-    afterEach(cleanup);
+    afterEach(() => {
+        cleanup();
+        turnState.phase = 'acting';
+        turnState.turnStart = false;
+    });
+
+    it('у фазі gate панель старту ходу береться зі слота; без слота її немає', () => {
+        rules.current = {
+            actionEconomy: { bonusAction: true, reaction: true },
+            spells: true,
+        };
+        turnState.phase = 'gate';
+        turnState.turnStart = true;
+        render(<MyTurnControls hero={hero} />);
+        expect(screen.getByTestId('turn-start-panel')).toBeInTheDocument();
+        cleanup();
+
+        turnState.turnStart = false;
+        render(<MyTurnControls hero={hero} />);
+        expect(
+            screen.queryByTestId('turn-start-panel')
+        ).not.toBeInTheDocument();
+    });
 
     it('wfrp ховає магію, бонусну плитку та бонусний пікер', async () => {
         rules.current = {

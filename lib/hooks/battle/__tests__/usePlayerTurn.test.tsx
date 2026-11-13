@@ -3,14 +3,25 @@ import { act, renderHook } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { moraleDiceDone } from '../morale-dice';
-import { usePlayerTurn } from '../usePlayerTurn';
+import { usePlayerTurn as useTurn } from '../usePlayerTurn';
 import { fakeScene } from './fake-scene';
+
+import { useMoraleRoll } from '@/systems/morale/hooks/useMoraleRoll';
 
 const fx = vi.hoisted(() => ({ enabled: false }));
 
 vi.mock('../useFxEnabled', () => ({
     useFxEnabled: () => ({ enabled: fx.enabled }),
 }));
+
+// the morale module drives the gate: its roll hook is composed here the way the morale panel does
+const usePlayerTurn = (...args: Parameters<typeof useTurn>) => {
+    const turn = useTurn(...args);
+
+    const { roll } = useMoraleRoll(args[0], turn.gate);
+
+    return { ...turn, actions: { ...turn.actions, rollMorale: roll } };
+};
 
 describe('usePlayerTurn', () => {
     it('мораль ≠ 0 — фаза morale; «додатковий хід» → оверлей і дії', async () => {

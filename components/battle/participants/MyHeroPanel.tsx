@@ -22,15 +22,12 @@ import {
     useFxImpacts,
     useHitFx,
 } from '@/lib/hooks/battle';
-import { cn } from '@/lib/utils';
-import { effectiveMorale } from '@/lib/utils/battle/morale/effective-morale';
 import {
     abilityCharges,
     NO_EFFECTS,
     poolViews,
     turnsUntil,
 } from '@/lib/utils/battle/view';
-import { signed } from '@/lib/utils/common/format';
 import type { BattleParticipant } from '@/types/battle';
 
 export const MyHeroPanel = memo(function MyHeroPanel({
@@ -67,8 +64,6 @@ export const MyHeroPanel = memo(function MyHeroPanel({
 
     const pools = poolViews(hero);
 
-    const morale = effectiveMorale(hero, battle.initiativeOrder).value;
-
     return (
         <div ref={shakeRef} data-tour="battle.hero" className="relative">
             <HitFrame change={change} />
@@ -100,18 +95,6 @@ export const MyHeroPanel = memo(function MyHeroPanel({
                                     place="hero"
                                 />
                             ))}
-                            {morale !== 0 && (
-                                <span
-                                    className={cn(
-                                        'shrink-0 font-sans text-sm font-medium tracking-normal',
-                                        morale > 0
-                                            ? 'text-hud-good'
-                                            : 'text-hud-danger'
-                                    )}
-                                >
-                                    {t('morale', { value: signed(morale) })}
-                                </span>
-                            )}
                         </span>
                         <span className="shrink-0 pl-2 font-sans text-sm font-normal tracking-normal whitespace-nowrap text-hud-soft italic">
                             {compact ? (

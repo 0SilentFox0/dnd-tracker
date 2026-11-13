@@ -1,15 +1,4 @@
-import type { MoraleCheckResult } from '@/lib/utils/battle/morale/threshold';
-
 export type TurnGateOutcome = 'extra' | 'skip' | 'none';
-
-export function moraleOutcome(
-    r:
-        | Pick<MoraleCheckResult, 'hasExtraTurn' | 'shouldSkipTurn'>
-        | null
-        | undefined
-): TurnGateOutcome {
-    return r?.hasExtraTurn ? 'extra' : r?.shouldSkipTurn ? 'skip' : 'none';
-}
 
 export interface TurnFlowState {
     phase: 'waiting' | 'gate' | 'acting' | 'countdown' | 'ended';
