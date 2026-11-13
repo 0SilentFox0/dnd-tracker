@@ -8,7 +8,7 @@ import { GripVertical, X } from 'lucide-react';
 import { UnitQuickStatsEditor } from './UnitQuickStatsEditor';
 
 import { AbilityFlowList } from '@/components/abilities/AbilityFlow';
-import { MonsterStatblock } from '@/components/common/MonsterStatblock';
+import { MonsterStatblock } from '@/components/units/MonsterStatblock';
 import { ZoomableEntityIcon } from '@/components/common/ZoomableEntityIcon';
 import { HudCard } from '@/components/hud/page';
 import { Badge } from '@/components/ui/badge';

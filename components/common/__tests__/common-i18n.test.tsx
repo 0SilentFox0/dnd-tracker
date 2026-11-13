@@ -6,7 +6,6 @@ import { AbbreviationsInfoDialog } from '@/components/common/AbbreviationsInfoDi
 import { ColorField } from '@/components/common/ColorField';
 import { ColorSwatch } from '@/components/common/ColorSwatch';
 import { ImportDialog } from '@/components/common/ImportDialog';
-import { MonsterStatblock } from '@/components/common/MonsterStatblock';
 import { RenameGroupDialog } from '@/components/common/RenameGroupDialog';
 import { SearchEmptyState } from '@/components/common/SearchEmptyState';
 import { SearchInput } from '@/components/common/SearchInput';
@@ -115,28 +114,6 @@ describe('common components use translation keys', () => {
         expect(
             container.querySelector('[title="common.color.pick"]')
         ).toBeTruthy();
-    });
-
-    it('MonsterStatblock labels', () => {
-        render(
-            <MonsterStatblock
-                block={
-                    {
-                        languages: 'x',
-                        telepathy: 30,
-                        movement: { hover: true, fly: 30 },
-                        senses: { passivePerception: 12 },
-                    } as never
-                }
-            />
-        );
-
-        expect(screen.getByText(/gameTerms\.monster\.languages/)).toBeTruthy();
-        expect(screen.getByText(/gameTerms\.monster\.telepathy/)).toBeTruthy();
-        expect(
-            screen.getByText(/gameTerms\.monster\.passivePerception/)
-        ).toBeTruthy();
-        expect(screen.getByText(/gameTerms\.monster\.hover/)).toBeTruthy();
     });
 
     it('SearchEmptyState and SearchInput', () => {

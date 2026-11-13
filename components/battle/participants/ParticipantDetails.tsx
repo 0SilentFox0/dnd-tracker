@@ -15,7 +15,7 @@ import {
     ZoomablePortrait,
 } from '@/components/battle/hud';
 import { useSystemBattleUi } from '@/components/battle/use-system-battle-ui';
-import { MonsterStatblock } from '@/components/common/MonsterStatblock';
+import { MonsterStatblock } from '@/components/units/MonsterStatblock';
 import {
     useBattleRules,
     useBattleSceneData,
