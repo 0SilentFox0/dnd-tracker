@@ -291,6 +291,24 @@ export const ROOT_SPECS: readonly RootSpec[] = [
         ],
     },
     {
+        file: 'lib/utils/rules/systems/rules-presets.ts',
+        blocks: [
+            {
+                layer: (id) => `systems/${id}/rules/rules-preset.ts`,
+                name: (id) => `${upper(id)}_RULES_PRESET`,
+                line: imp(
+                    (id) => `${upper(id)}_RULES_PRESET`,
+                    (id) => `@/systems/${id}/rules/rules-preset`
+                ),
+            },
+            {
+                layer: (id) => `systems/${id}/rules/rules-preset.ts`,
+                name: (id) => `${upper(id)}_RULES_PRESET`,
+                line: (id) => `${id}: ${upper(id)}_RULES_PRESET,`,
+            },
+        ],
+    },
+    {
         file: 'scripts/templates/systems/index.ts',
         blocks: [
             {
