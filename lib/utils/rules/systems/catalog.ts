@@ -142,6 +142,124 @@ export function moduleCatalog(metas: Metas = ALL_META): ModuleCatalog {
     };
 }
 
+export interface ModuleToggle {
+    id: string;
+    active: boolean;
+    available: boolean;
+    reason?: {
+        code: 'missingRequires' | 'conflict' | 'requiredBy';
+        module: string;
+    };
+    toggle: 'free' | 'setup';
+}
+
+const isBaseMeta = (meta: SystemMeta | undefined): boolean =>
+    !!meta && kindOf(meta) === 'base';
+
+export function moduleToggles(
+    system: SystemSelection,
+    metas: Metas = ALL_META
+): ModuleToggle[] {
+    const { base, modules } = composition(system, metas);
+
+    const active = new Set(modules);
+
+    return metas
+        .filter((m) => kindOf(m) === 'addon')
+        .filter((m) => {
+            const bases = (m.requires ?? []).filter((r) =>
+                isBaseMeta(moduleMetaOf(r, metas))
+            );
+
+            return bases.length === 0 || bases.includes(base);
+        })
+        .map((meta): ModuleToggle => {
+            const isActive = active.has(meta.module);
+
+            const dependent = isActive
+                ? modules.find((id) =>
+                      moduleMetaOf(id, metas)?.requires?.includes(meta.module)
+                  )
+                : undefined;
+
+            const missing = isActive
+                ? undefined
+                : (meta.requires ?? []).find(
+                      (r) =>
+                          !active.has(r) && !isBaseMeta(moduleMetaOf(r, metas))
+                  );
+
+            const conflicting = isActive
+                ? undefined
+                : modules.find(
+                      (id) =>
+                          meta.conflicts?.includes(id) ||
+                          moduleMetaOf(id, metas)?.conflicts?.includes(
+                              meta.module
+                          )
+                  );
+
+            const reason: ModuleToggle['reason'] = dependent
+                ? { code: 'requiredBy', module: dependent }
+                : missing
+                  ? { code: 'missingRequires', module: missing }
+                  : conflicting
+                    ? { code: 'conflict', module: conflicting }
+                    : undefined;
+
+            return {
+                id: meta.module,
+                active: isActive,
+                available: !reason,
+                ...(reason && { reason }),
+                toggle: meta.toggle ?? 'free',
+            };
+        })
+        .sort((a, b) => a.id.localeCompare(b.id));
+}
+
+/** Always an explicit full set: `[]` is a bare base, not "preset default" */
+export function withModule(
+    system: SystemSelection,
+    id: string,
+    on: boolean,
+    metas: Metas = ALL_META
+): SystemSelection {
+    const current = composition(system, metas).modules;
+
+    return {
+        key: system.key,
+        modules: sortedUnique(
+            on ? [...current, id] : current.filter((m) => m !== id)
+        ),
+    };
+}
+
+export function moduleChange(
+    current: SystemSelection,
+    next: SystemSelection,
+    metas: Metas = ALL_META
+): { changed: boolean; added: string[]; removed: string[]; setup: string[] } {
+    const before = new Set(composition(current, metas).modules);
+
+    const after = new Set(composition(next, metas).modules);
+
+    const added = [...after].filter((id) => !before.has(id)).sort();
+
+    const removed = [...before].filter((id) => !after.has(id)).sort();
+
+    const setup = [...added, ...removed]
+        .filter((id) => moduleMetaOf(id, metas)?.toggle === 'setup')
+        .sort();
+
+    return {
+        changed: current.key !== next.key || added.length + removed.length > 0,
+        added,
+        removed,
+        setup,
+    };
+}
+
 export function contentKindsOf(
     system: SystemSelection,
     metas: Metas = ALL_META

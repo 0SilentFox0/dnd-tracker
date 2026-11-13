@@ -15,7 +15,10 @@ import {
     type CompositionIssue,
     type SystemSelection,
 } from '@/lib/utils/rules/systems/catalog';
-import { CompositionError } from '@/lib/utils/rules/systems/compose';
+import {
+    CompositionError,
+    validateComposition,
+} from '@/lib/utils/rules/systems/compose';
 import { SECTION_CONTRIBUTIONS } from '@/lib/utils/rules/systems/sections';
 
 export const sectionsOfComposition = (c: Composition): SectionMap =>
@@ -52,6 +55,13 @@ export function validateSections(
 
         throw e;
     }
+}
+
+/** One check for server, campaign creation and `template validate`: composition rules, then section collisions */
+export function systemIssues(system: SystemSelection): CompositionIssue[] {
+    const issues = validateComposition(system);
+
+    return issues.length > 0 ? issues : validateSections(composition(system));
 }
 
 /** Full defaults: core defaults plus the default of every section from the registry (system-owned sections such as advancement) */
