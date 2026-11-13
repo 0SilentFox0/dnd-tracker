@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 import { DEFAULT_RULES } from './defaults';
-import { ALL_SECTIONS, validateSections } from './section-registry';
+import { ALL_SECTIONS, systemIssues } from './section-registry';
 import {
     CRITICALS_ORDER_MESSAGE,
     INITIATIVE_ORDER_MESSAGE,
@@ -17,7 +17,7 @@ import {
 
 import { CUSTOM_CONDITION_KEY_RE } from '@/lib/utils/abilities/schema/kinds';
 import { isRecord } from '@/lib/utils/common/is-record';
-import { composition } from '@/lib/utils/rules/systems/catalog';
+import { moduleCatalog } from '@/lib/utils/rules/systems/catalog';
 import { validateComposition } from '@/lib/utils/rules/systems/compose';
 
 export type { Ruleset };
@@ -147,12 +147,7 @@ export const RulesetSchema = z
         path: ['criticals'],
     })
     .superRefine((r, ctx) => {
-        const issues = validateComposition(r.system);
-
-        if (issues.length === 0)
-            issues.push(...validateSections(composition(r.system)));
-
-        for (const issue of issues) {
+        for (const issue of systemIssues(r.system)) {
             if (issue.code !== 'unknownKey')
                 ctx.addIssue({
                     code: 'custom',
@@ -237,7 +232,13 @@ type PatchOf<K extends keyof Ruleset> = {
 export type RulesetPatch = Omit<
     { [K in keyof Ruleset]?: PatchOf<K> },
     'system'
-> & { system?: { key?: string }; removeCustomConditions?: string[] };
+> & {
+    system?: { key?: string; modules?: string[] };
+    removeCustomConditions?: string[];
+    confirm?: true;
+};
+
+const MODULE_ID_RE = /^[a-z0-9]+$/;
 
 const patchOfSection = (section: RulesSection) => {
     const object = z.strictObject(
@@ -269,6 +270,24 @@ export function rulesetPatchSchemaFor(
         ])
     );
 
+    if (sections.system)
+        shape.system = z
+            .strictObject({
+                key: sections.system.items.key.schema.optional(),
+                modules: z
+                    .array(z.string().regex(MODULE_ID_RE))
+                    .max(32)
+                    .describe(
+                        `Complete list of enabled add-on module ids; allowed: ${moduleCatalog()
+                            .addons.map((a) => a.id)
+                            .join(', ')}`
+                    )
+                    .optional(),
+            })
+            .optional();
+
+    shape.confirm = z.literal(true).optional();
+
     if (sections.conditions?.items.custom)
         shape.removeCustomConditions = z
             .array(z.string().regex(CUSTOM_CONDITION_KEY_RE))
@@ -287,14 +306,18 @@ export type MergeRulesResult =
 
 type MergePatch = Record<
     string,
-    Record<string, unknown> | string[] | undefined
-> & { removeCustomConditions?: string[] };
+    Record<string, unknown> | string[] | true | undefined
+> & { removeCustomConditions?: string[]; confirm?: true };
 
 function writeOverRaw(
     raw: unknown,
     next: Record<string, Record<string, unknown>>,
     patch: Record<string, unknown>,
-    opts: { removedCustom: boolean; keyChanged: boolean }
+    opts: {
+        removedCustom: boolean;
+        keyChanged: boolean;
+        patchHasModules: boolean;
+    }
 ): Record<string, unknown> {
     const stored: Record<string, unknown> = isRecord(raw) ? { ...raw } : {};
 
@@ -325,7 +348,7 @@ function writeOverRaw(
         key: next.system.key,
     };
 
-    if (opts.keyChanged) delete system.modules;
+    if (opts.keyChanged && !opts.patchHasModules) delete system.modules;
 
     stored.system = system;
 
@@ -376,7 +399,15 @@ export function mergeRules(
     const keyChanged =
         typeof newKey === 'string' && newKey !== current.system.key;
 
-    if (keyChanged) next.system = { key: newKey };
+    const patchModules = Array.isArray(sections.system?.modules)
+        ? (sections.system.modules as string[])
+        : undefined;
+
+    if (keyChanged)
+        next.system = {
+            key: newKey,
+            ...(patchModules && { modules: patchModules }),
+        };
 
     if (isRecord(sections.tables))
         next.tables = Object.fromEntries(
@@ -435,7 +466,11 @@ export function mergeRules(
             raw,
             next as Record<string, Record<string, unknown>>,
             patch as Record<string, unknown>,
-            { removedCustom: removed.size > 0, keyChanged }
+            {
+                removedCustom: removed.size > 0,
+                keyChanged,
+                patchHasModules: !!patchModules,
+            }
         ),
     };
 }

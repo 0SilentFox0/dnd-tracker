@@ -85,6 +85,29 @@ describe('mergeRules over the raw JSON (D4)', () => {
         });
     });
 
+    it('a key change keeps the modules the same patch carries', () => {
+        const raw = { system: { key: 'homm' } };
+
+        const { stored } = merge(raw, {
+            system: { key: 'dnd5e', modules: ['morale'] },
+        });
+
+        expect(stored?.system).toEqual({ key: 'dnd5e', modules: ['morale'] });
+        expect(merge(raw, { system: { key: 'dnd5e' } }).stored?.system).toEqual(
+            { key: 'dnd5e' }
+        );
+    });
+
+    it('never writes confirm into the stored JSON', () => {
+        const { stored } = merge(
+            { system: { key: 'dnd5e' } },
+            { system: { modules: ['morale'] }, confirm: true }
+        );
+
+        expect(stored).not.toHaveProperty('confirm');
+        expect(stored?.system).toEqual({ key: 'dnd5e', modules: ['morale'] });
+    });
+
     it('keeps invalid stored modules raw instead of erasing them', () => {
         const raw = { system: { key: 'dnd5e', modules: ['from-the-future'] } };
 

@@ -145,11 +145,20 @@ describe('rules.system.modules', () => {
         ).toEqual({ key: 'dnd5e' });
     });
 
-    it('a patch with modules is rejected until the setup UI exists', () => {
+    it('a patch takes well-formed module ids and a confirm flag', () => {
         expect(
-            RulesetPatchSchema.safeParse({ system: { modules: ['t-addon'] } })
+            RulesetPatchSchema.safeParse({
+                system: { modules: ['morale'] },
+                confirm: true,
+            }).success
+        ).toBe(true);
+        expect(
+            RulesetPatchSchema.safeParse({ system: { modules: ['Bad id'] } })
                 .success
         ).toBe(false);
+        expect(RulesetPatchSchema.safeParse({ confirm: false }).success).toBe(
+            false
+        );
         expect(
             RulesetPatchSchema.safeParse({ system: { key: 'dnd5e' } }).success
         ).toBe(true);

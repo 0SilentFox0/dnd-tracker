@@ -16,6 +16,17 @@
     "unknownSystem": "Невідома рульова система",
     "unknownModule": "Невідомий модуль правил",
     "invalidComposition": "Недопустима комбінація модулів правил",
+    "composition": {
+      "unknownKey": "Невідома рульова система «{detail}»",
+      "unknownModule": "Невідомий модуль правил «{module}»",
+      "wrongBase": "Модуль «{module}» не підходить до бази «{detail}»",
+      "missingRequires": "Модуль «{module}» потребує модуля «{detail}»",
+      "conflict": "Модуль «{module}» конфліктує з модулем «{detail}»",
+      "duplicateClaim": "Кілька модулів претендують на «{module}»: {detail}",
+      "cycle": "Модулі залежать один від одного по колу",
+      "sectionCollision": "Секції модулів перетинаються: {detail}"
+    },
+    "moduleNeedsConfirm": "Модуль «{module}» змінює розрахунок наявних героїв: потрібне підтвердження",
     "tablesOrder": "Верхні межі рядків мають зростати",
     "tablesLast": "Останній рядок має закінчуватись на 100",
     "tablesEffect": "Цей тип ефекту не дозволений у цій таблиці"

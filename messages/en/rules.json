@@ -16,6 +16,17 @@
     "unknownSystem": "Unknown rule system",
     "unknownModule": "Unknown rules module",
     "invalidComposition": "Invalid combination of rules modules",
+    "composition": {
+      "unknownKey": "Unknown rule system \"{detail}\"",
+      "unknownModule": "Unknown rule module \"{module}\"",
+      "wrongBase": "Module \"{module}\" does not fit the \"{detail}\" base",
+      "missingRequires": "Module \"{module}\" requires module \"{detail}\"",
+      "conflict": "Module \"{module}\" conflicts with module \"{detail}\"",
+      "duplicateClaim": "Several modules claim \"{module}\": {detail}",
+      "cycle": "Modules depend on each other in a cycle",
+      "sectionCollision": "Module sections overlap: {detail}"
+    },
+    "moduleNeedsConfirm": "Module \"{module}\" changes how existing heroes are calculated: confirmation required",
     "tablesOrder": "Rows must be in ascending order of the upper bound",
     "tablesLast": "The last row must end at 100",
     "tablesEffect": "This effect type is not allowed in this table"

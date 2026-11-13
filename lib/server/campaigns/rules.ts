@@ -4,6 +4,10 @@ import 'server-only';
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { prisma } from '@/lib/db';
 import { findCustomConditionUsage } from '@/lib/server/campaigns/condition-usage';
+import {
+    assertModuleChange,
+    assertValidSystem,
+} from '@/lib/server/campaigns/modules';
 import { assertCan } from '@/lib/server/content/access';
 import { ContentError } from '@/lib/server/content/errors';
 import { CONTENT_OPERATIONS } from '@/lib/server/content/operations';
@@ -17,6 +21,7 @@ import { isConditionUsed } from '@/lib/utils/rules/condition-usage';
 import { stripPlayerHiddenRules } from '@/lib/utils/rules/player-hidden';
 import type { Ruleset, RulesetPatch } from '@/lib/utils/rules/schema';
 import { mergeRules, parseRules } from '@/lib/utils/rules/schema';
+import { composition } from '@/lib/utils/rules/systems/catalog';
 import type { CampaignRulesView, ConditionUsage } from '@/types/campaigns';
 
 async function loadStoredRules(
@@ -63,6 +68,7 @@ export async function readCampaignRules(
     return {
         ...(actor.isDM ? rules : stripPlayerHiddenRules(rules)),
         systemLocked,
+        composition: composition(rules.system),
     };
 }
 
@@ -107,7 +113,40 @@ export async function updateCampaignRules(
         )
             throw new ContentError(API_ERRORS.SYSTEM_LOCKED, 409);
 
-        const merged = mergeRules(current, patch, raw);
+        const { confirm, ...rest } = patch;
+
+        const modules = patch.system?.modules && [
+            ...new Set(patch.system.modules),
+        ];
+
+        modules?.sort();
+
+        const keyChanged =
+            !!patch.system?.key && patch.system.key !== current.system.key;
+
+        if (modules || keyChanged) {
+            const next = {
+                key: patch.system?.key ?? current.system.key,
+                ...(modules && { modules }),
+            };
+
+            assertValidSystem(next);
+
+            if (modules)
+                await assertModuleChange(
+                    tx,
+                    actor.campaignId,
+                    current.system,
+                    next,
+                    confirm === true
+                );
+        }
+
+        const merged = mergeRules(
+            current,
+            modules ? { ...rest, system: { ...rest.system, modules } } : rest,
+            raw
+        );
 
         if (!merged.ok)
             throw new ContentError(
@@ -124,7 +163,11 @@ export async function updateCampaignRules(
             },
         });
 
-        return { ...merged.rules, systemLocked };
+        return {
+            ...merged.rules,
+            systemLocked,
+            composition: composition(merged.rules.system),
+        };
     });
 }
 

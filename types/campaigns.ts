@@ -1,6 +1,7 @@
 import type { BattleStatus } from '@/lib/constants/battle';
 import type { SYNC_SCOPES, SYNC_STATUSES } from '@/lib/constants/source-sync';
 import type { Ruleset } from '@/lib/utils/rules';
+import type { Composition } from '@/lib/utils/rules/systems/catalog';
 import type { TemplateContentLocale } from '@/lib/utils/templates/manifest';
 
 export interface Campaign {
@@ -199,4 +200,7 @@ export interface ConditionUsage {
     statusEffects: { id: string; name: string }[];
 }
 
-export type CampaignRulesView = Ruleset & { systemLocked?: boolean };
+export type CampaignRulesView = Ruleset & {
+    systemLocked?: boolean;
+    composition?: Composition;
+};
