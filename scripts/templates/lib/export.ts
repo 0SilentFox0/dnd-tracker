@@ -258,7 +258,10 @@ export function bundleToPack(
 
     const rules = RulesetSchema.parse({
         ...(bundle.rules as Record<string, unknown>),
-        system: { key: manifest.system },
+        system: {
+            key: manifest.system,
+            ...(manifest.modules && { modules: [...manifest.modules] }),
+        },
     });
 
     return {

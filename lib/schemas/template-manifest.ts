@@ -15,6 +15,7 @@ const locale = z.enum(TEMPLATE_CONTENT_LOCALES);
 const manifestShape = z.strictObject({
     key: z.string().regex(TEMPLATE_KEY_PATTERN),
     system: z.string().min(1),
+    modules: z.array(z.string()).optional(),
     names: z.record(locale, z.string().min(1)),
     locales: z.array(locale).min(1),
     rules: z.strictObject({ file: z.literal('rules.json') }),

@@ -56,11 +56,16 @@ export async function exportCommand(args: string[]): Promise<void> {
             )
         ) as SlugMap;
 
+        const campaignModules = (
+            bundle.rules as { system?: { modules?: string[] } } | undefined
+        )?.system?.modules;
+
         const base: TemplateManifest = listPackKeys().includes(key)
             ? readManifest(key)
             : {
                   key,
                   system: options['--system'] ?? '',
+                  ...(campaignModules && { modules: campaignModules }),
                   names: {
                       en: options['--name'] ?? key,
                       uk: options['--name'] ?? key,

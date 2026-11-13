@@ -21,6 +21,8 @@ import {
     nameKey,
 } from '@/lib/utils/content/import';
 import { RulesetSchema } from '@/lib/utils/rules/schema';
+import { systemIssues } from '@/lib/utils/rules/section-registry';
+import { contentKindsOf } from '@/lib/utils/rules/systems/catalog';
 import { RULE_SYSTEM_REGISTRY } from '@/lib/utils/rules/systems/registry';
 import { statusOf, type TranslationsV2 } from '@/lib/utils/templates/i18n/keys';
 import {
@@ -29,9 +31,10 @@ import {
     placeholders,
     translatedNames,
 } from '@/lib/utils/templates/i18n/overlay';
-import type {
-    PackKind,
-    TemplateManifest,
+import {
+    PACK_KIND_CONTENT,
+    type PackKind,
+    type TemplateManifest,
 } from '@/lib/utils/templates/manifest';
 import { TEMPLATE_REGISTRY } from '@/lib/utils/templates/registry';
 import { isSlug } from '@/lib/utils/templates/slug';
@@ -75,6 +78,38 @@ function manifestIssues(
             )
         );
 
+    if (Object.hasOwn(RULE_SYSTEM_REGISTRY, manifest.system)) {
+        const selection = { key: manifest.system, modules: manifest.modules };
+
+        const composed = systemIssues(selection);
+
+        for (const issue of composed)
+            issues.push(
+                error(
+                    `manifest: modules ${issue.code}${issue.module ? ` "${issue.module}"` : ''}${issue.detail ? ` (${issue.detail})` : ''}`
+                )
+            );
+
+        if (composed.length === 0) {
+            const active = contentKindsOf(selection);
+
+            const wanted = new Set<PackKind>([
+                ...manifest.kinds,
+                ...(manifest.include ?? []).flatMap(
+                    ({ kinds }) => Object.keys(kinds) as PackKind[]
+                ),
+            ]);
+
+            for (const kind of wanted)
+                if (!active.has(PACK_KIND_CONTENT[kind] ?? kind))
+                    issues.push(
+                        error(
+                            `manifest: kind "${kind}" is not active in the composition of "${manifest.system}" (enable its module in modules)`
+                        )
+                    );
+        }
+    }
+
     for (const { from } of manifest.include ?? []) {
         const source = Object.hasOwn(registry, from)
             ? registry[from]
@@ -105,13 +140,28 @@ function rulesIssues(pack: Pack): PackIssue[] {
             error(`rules: ${i.path.join('.') || 'rules'} ${i.message}`)
         );
 
-    return parsed.data.system.key === pack.manifest.system
-        ? []
-        : [
-              error(
-                  `rules: system.key "${parsed.data.system.key}" does not match manifest system "${pack.manifest.system}"`
-              ),
-          ];
+    const { system } = parsed.data;
+
+    const issues: PackIssue[] = [];
+
+    if (system.key !== pack.manifest.system)
+        issues.push(
+            error(
+                `rules: system.key "${system.key}" does not match manifest system "${pack.manifest.system}"`
+            )
+        );
+
+    const sorted = (ids: readonly string[] | undefined) =>
+        ids && JSON.stringify([...ids].sort());
+
+    if (sorted(system.modules) !== sorted(pack.manifest.modules))
+        issues.push(
+            error(
+                `rules: system.modules ${JSON.stringify(system.modules ?? null)} does not match manifest modules ${JSON.stringify(pack.manifest.modules ?? null)}`
+            )
+        );
+
+    return issues;
 }
 
 function rowIssues(kind: PackKind, rows: PackRow[]): PackIssue[] {

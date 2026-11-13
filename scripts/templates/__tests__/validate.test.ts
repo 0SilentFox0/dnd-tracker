@@ -8,6 +8,7 @@ import { validatePack } from '../lib/validate';
 import { type PackIssue, systemBases } from '../systems';
 import { treeFromPack } from '../systems/homm/skill-trees';
 
+import { PRESETS } from '@/lib/utils/rules/systems/catalog';
 import type { SystemMeta } from '@/lib/utils/rules/systems/meta';
 import type { TemplateManifest } from '@/lib/utils/templates/manifest';
 
@@ -89,6 +90,35 @@ describe('validatePack on the fixture pack', () => {
         expect(errorsOf(pack)).toEqual([
             'rules: system.key "wfrp" does not match manifest system "dnd5e"',
         ]);
+    });
+
+    it('accepts modules that match between the manifest and the rules', () => {
+        const pack = load();
+
+        pack.manifest = { ...pack.manifest, modules: ['morale'] };
+        pack.rules = {
+            ...pack.rules,
+            system: { key: 'dnd5e', modules: ['morale'] },
+        };
+        expect(errorsOf(pack)).toEqual([]);
+    });
+
+    it('flags manifest modules that the rules do not carry', () => {
+        const pack = load();
+
+        pack.manifest = { ...pack.manifest, modules: ['morale'] };
+        expect(errorsOf(pack)).toEqual([
+            'rules: system.modules null does not match manifest modules ["morale"]',
+        ]);
+    });
+
+    it('flags an unknown module in the manifest', () => {
+        const pack = load();
+
+        pack.manifest = { ...pack.manifest, modules: ['zzz'] };
+        expect(errorsOf(pack)).toContain(
+            'manifest: modules unknownModule "zzz"'
+        );
     });
 
     it('flags wrong counts', () => {
@@ -192,6 +222,24 @@ describe('validatePack on heroes-homm guards (D25, D25b, D25c)', () => {
 
     it('is valid as it is', () => {
         expect(heroesErrors(heroes())).toEqual([]);
+    });
+
+    it('errors on a kind whose module is not in the manifest modules', () => {
+        const pack = heroes();
+
+        const modules = PRESETS.homm.modules.filter((m) => m !== 'skilltrees');
+
+        pack.manifest = { ...pack.manifest, modules };
+        pack.rules = {
+            ...pack.rules,
+            system: { key: 'homm', modules },
+        };
+        expect(heroesErrors(pack)).toEqual(
+            ['main-skills', 'skills', 'skillTrees'].map(
+                (kind) =>
+                    `manifest: kind "${kind}" is not active in the composition of "homm" (enable its module in modules)`
+            )
+        );
     });
 
     it('errors on a raw id and on an unknown slug inside JSON columns', () => {
