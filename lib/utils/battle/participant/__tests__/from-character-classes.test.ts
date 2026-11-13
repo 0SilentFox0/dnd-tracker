@@ -149,6 +149,33 @@ describe('учасник від класів', () => {
         expect(a).toEqual(b);
     });
 
+    it('без system, класи ввімкнені — здогадка dnd5e до Задачі 3 Ч13', async () => {
+        const guessed = parseRules({ classes: { enabled: true } });
+
+        expect(guessed.system).toEqual({ key: 'dnd5e' });
+
+        const strip = (p: Awaited<ReturnType<typeof build>>) => ({
+            ...p,
+            basicInfo: { ...p.basicInfo, id: 'x' },
+        });
+
+        const character = { classes: [{ classId: 'fighter', level: 3 }] };
+
+        const a = strip(await build(guessed, character));
+
+        const b = strip(
+            await build(
+                parseRules({
+                    system: { key: 'dnd5e' },
+                    classes: { enabled: true },
+                }),
+                character
+            )
+        );
+
+        expect(a).toEqual(b);
+    });
+
     it('клас вимкнено правилами — поле classes ігнорується', async () => {
         const p = await build(DEFAULT_RULES, {
             classes: [{ classId: 'fighter', level: 3 }],
