@@ -13,7 +13,7 @@
 
 ## Чернетки гравця
 
-- `characters.status`: `pending` (чернетка) → `active` (схвалено DM). Гравець без активного героя створює чернетку (`POST …/characters/draft`), редагує її (`PATCH …/[characterId]/draft`), DM схвалює або повертає з коментарем (`…/review`).
+- `characters.status`: `pending` (чернетка) → `active` (схвалено DM). Гравець без активного героя створює чернетку (`POST …/characters/draft`), редагує її (`PATCH …/[characterId]/draft`), DM схвалює або повертає з коментарем (`…/review`). Чернетка d20 вимагає повного набору виборів раси/класу/передісторії (сервер `requireComplete` → `CHOICE_INCOMPLETE`, клієнт `usePlayerDraftForm` блокує відправку, відкриті вибори показує `ChoicesEditor`).
 - **Кожен запит героїв для бою, балансу, ростера, AI й підсумку партії мусить містити `ACTIVE_CHARACTER`** (`lib/constants/characters.ts`) — чернетка ніколи не потрапляє в бій. Нові запити по `character` без цього фільтра — помилка.
 - **wfrp** (системи з `creation`): `POST …/characters/draft` приймає `WfrpDraftInput` (вид, кар'єра, характеристики, таланти + особисте), сервер перераховує `characteristics`/XP через `creation.planDraft` (400 `WFRP_DRAFT_INVALID` з `issues`, 422 `SPECIES_PROFILE_NOT_READY`) і пише чернетку `pending`; `PATCH …/[characterId]/draft` змінює лише особисте (ім'я, світогляд, передісторія, аватар, цілі). Далі як у HOMM: DM схвалює (`active`) або повертає. Майстер — `SystemUi.DraftForm`; деталі — «Межі 5e-3» у [rule-systems.md](rule-systems.md).
 - Одна чернетка на гравця: перевірка й створення під `pg_advisory_xact_lock` (`lib/server/characters/draft-lock.ts`); ще до завантаження аватара — швидка перевірка, щоб відмова не лишала файлів у сховищі.

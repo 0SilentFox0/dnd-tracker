@@ -79,7 +79,7 @@ Core бачить `systems/*` лише через корені (`SYSTEM_ROOTS`, 
 
 **D15 (види контенту й композиція).** Вид, чий власник — модуль поза композицією кампанії, прихований: список `[]`, інші дії й імпорт 404, рядки не видаляються. Гейт — `lib/server/content/kind-active.ts` (`isKindActive`/`assertKindActive`); `abilities.sources` — таблиця `{ source, contentKind, load }` із фільтром `isKindActive`; імпорт компендіуму пропускає рядки неактивного виду з попередженням `KIND_INACTIVE`. Sync гейта не проходить.
 
-**Читання характеристик статблока в core — лише через хуки:** модифікатори рятунків — `combat.saves.modifiers(p)` (баланс: `hitModel.saves(p)`), бонус майстерності — `combat.proficiency.bonus(p)`, бонус атаки закляття — `magic.spellAttackBonus`; система без цього віддає нулі.
+**Читання характеристик статблока в core — лише через хуки:** модифікатори рятунків — `combat.saves.modifiers(p)` (баланс: `hitModel.saves(p)`), бонус майстерності — `combat.proficiency.bonus(p)`, бонус атаки закляття — `magic.spellAttackBonus`; система без цього віддає нулі. Необовʼязковий `combat.holdsOn?(p)` (Ч18c; d20 — `systems/d20/rules/death-saves/holds.ts`, поруч з `onRevived`): полеглий учасник, що ще в бою (d20: вмирає й не стабільний); core не читає `stable` слота, а `checkVictoryConditions` бере хук, щоб не віддавати поразку, поки герой робить кидки смерті.
 
 **Винятки й домовленості контракту.**
 - d6pool (і будь-яка база без `magic.resource`) кастує вільно: слотів/ресурсу немає, `picksSlot` відсутній (Ч7-M2).
@@ -106,7 +106,7 @@ Core бачить `systems/*` лише через корені (`SYSTEM_ROOTS`, 
 - `system-literals-exempt.json`: 6 файлів / 11 влучань, лише тексти й назва кубика (`log/codec.ts`, `site.ts`, `whats-new.ts`, фікстура `defaults.ts`, `'d20'` у `types/characters.ts` і `SheetRollDialog.tsx`). Дані й активи (`scripts/assets/**`, `scripts/seed/**`, `scripts/srd/**`, профілі sweep) скан літералів не дивиться: виняток у `isLiteralAllowed` (`DATA_DIRS`), а не в `SKIP_DIRS` (той діє й на скан імпортів). Було 15 / 56 після Ч17 (зростання від токена `homm` у даних).
 - `RULES_SECTION_READERS` (читання `rules.<секція>` у core) = 0 за всіма секціями (пункти, які тримає core, як `encounters.balance/unitGroups`, не рахуються: `OWNED_ITEMS`).
 - `LEAK_NAMES`: `isFiveE` 0; поля колишнього dual-read (`channelledSl`, `conditionTests`, `psychologyTested`, `attackedWithLight`, `inspirationSpent`, `retaliationsUsed`) = 0 (forward-скрипт і `battle-state-shapes` очищено в Ч18); `useChannelAction` 0; `HOMM_[A-Z]+` 0 (профілі sweep поза скан, Ч18); **`CONDITION_5E_` 11** (словник станів у схемі ефектів core) → E3.
-- Гард колонок статблока: 1 файл (`lib/utils/abilities/engine/effects/morale.ts`, `moraleCapOf` читає `abilities.moraleCap`; перенос у слот потребує міграції даних) — 10 читань у 7 файлах закрито в Ч18b (хуки `saves.modifiers`, `proficiency.bonus`, `magic.spellAttackBonus`, `hitModel.saves`; `ability-modifier.ts` → `systems/d20/rules/magic`), ціль 0 → епік.
+- Гард колонок статблока: `MAX = {}`, 0 читань (Ч18c: `moraleCap` перенесено в `combatStats.moraleCap`, `moraleCapOf` читає його; upgrade-on-read у `joinParticipant`) — 10 читань у 7 файлах закрито в Ч18b (хуки `saves.modifiers`, `proficiency.bonus`, `magic.spellAttackBonus`, `hitModel.saves`; `ability-modifier.ts` → `systems/d20/rules/magic`), ціль 0 → епік.
 
 ## Як додати модуль
 

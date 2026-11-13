@@ -102,7 +102,7 @@ _Оновлено: 2026-11-13._
    - **Іконки Grim d100 (крок завантаження всіх іконок):** згенеровано 186/186 PNG 768×768 без тексту; шлях `/Users/silentfox/Downloads/fantasy-tokens/output-grim/icons/<kind>/<slug>.png` (units 30, spells 30, artifacts 56, feats 50, careers 16, races 4; розкладка = `row.file` у `scripts/assets/grim-icons/prompts.ts`). Команда: `pnpm assets:grim-icons upload <templateId> --dry-run`, далі без `--dry-run` (`--dir` за замовчуванням `~/Downloads/fantasy-tokens/output-grim/icons`; webp 256 px, units 384). Перед завантаженням очима переглянути якість (перший unit «leech swarm» не схожий на промпт), реальне завантаження й `--allow-remote` лише за окремим «так» користувача. Зміни `scripts/assets/grim-icons/{cli,prompts}.ts` (за словами тієї сесії, неcommitted) у цьому worktree на 2026-11-11 не знайдено: звірити.
 
 8. E1 (інтерфейс системи, `feat/wfrp`, частини 1–6 реалізовано 2026-11-11; план [e1-neutral-rule-system](archive/superpowers/plans/2026-11-11-e1-neutral-rule-system.md), опис — [rule-systems.md](architecture/rule-systems.md)): wfrp переїхав у `systems/wfrp/`, core не знає систем (слоти `SystemSlot`, хуки `RuleSystemDefinition`/`SystemUi`/`SystemServer`/`PackHooks`, корені + генератор `pnpm systems:index`, ESLint-зона й ratchet-файли `system-imports-exempt.json` / `system-literals-exempt.json`), ключ системи відкритий (`string`), мертві `balance.kind`/`battle.supported` видалено, `wfrp-*.test` лежать у `systems/wfrp/__tests__`, fixture-система `d6pool` у `lib/__tests__/fixtures`. Ratchet наприкінці: імпорти 18 файлів (12 route, 5 content-kind, 1 ruleset-section), літерали 35 файлів / 73 влучання. Ще треба: фінальне Opus-рев'ю діапазону E1, `/simplify`, `battle-sweep` усіх трьох шаблонів на prodcopy, повний `pnpm test:run` і repo-wide lint (за окремим «так»).
-   - **Борги E2 (закрито в Ч17–Ч18b, лишились Minor 13 і `CONDITION_5E_`; було):** ефекти системи не привʼязані до системи (`SystemEffectRow.system` + перевірка `kind` проти ефектів системи кампанії в `traits-guard.ts`; зараз недосяжно, ефекти лише у wfrp); маршрут `/system/[action]` замість route-файлів (`channel`, `condition-test`, `corruption`, `downtime`, `career`, `advance`, `draft`, `race-profiles`); реєстрація виду контенту `careers` із системи; `rules.tables`/`rules.advancement` у слот правил системи (`rules.system.data` + міграція збережених правил); лічильники `battleData.{fortune,channelledSl,sin,conditionTests,psychologyTested}` у слот; форма `skillTrees` у core; `systems/d20` і `systems/homm`; Minor 13 (`contentVersion` за рядок) окремо.
+   - **Борги E2 (закрито в Ч17–Ч18c, лишився `CONDITION_5E_`; було):** ефекти системи не привʼязані до системи (`SystemEffectRow.system` + перевірка `kind` проти ефектів системи кампанії в `traits-guard.ts`; зараз недосяжно, ефекти лише у wfrp); маршрут `/system/[action]` замість route-файлів (`channel`, `condition-test`, `corruption`, `downtime`, `career`, `advance`, `draft`, `race-profiles`); реєстрація виду контенту `careers` із системи; `rules.tables`/`rules.advancement` у слот правил системи (`rules.system.data` + міграція збережених правил); лічильники `battleData.{fortune,channelledSl,sin,conditionTests,psychologyTested}` у слот; форма `skillTrees` у core; `systems/d20` і `systems/homm`; Minor 13 (`contentVersion` за рядок) окремо.
 
 ### Prod-runbook WFRP / E0 (єдиний порядок)
 
@@ -118,7 +118,7 @@ _Оновлено: 2026-11-13._
 6. **Іконки Grim:** `pnpm assets:grim-icons upload <templateId> --dry-run` → без `--dry-run` → повторний `template publish grim-d100`.
 7. **Перевірка:** клони `uk` і `en` з кожного шаблону; sync у наявному uk-клоні SRD і в клоні Heroes — порожній diff (для Heroes: 5 змінених + 5 видалених рядків Сар-Ісси і `rules.defaultAttacks`).
 8. **Не атомарність імпорту (M5):** рядок пакета = окрема транзакція (`withCampaignContentWrite`); помилка рядка (`ContentError` чи будь-яка інша) не перериває імпорт, а потрапляє в звіт зі статусом `error`, решта рядків застосовується. Тож збій дає шаблон, оновлений частково, але без рваних рядків. Єдине побічне джерело поза БД: `persistIcon` для artifacts/artifact-sets пише в Supabase Storage (`upload` з `upsert`, новий обʼєкт на кожне збереження: `randomUUID()` у імені) і викликається в `prepareBody` до транзакції рядка; відкат рядка лишає осиротілий файл у бакеті (безпечний, лише сміття). Єдина транзакція на пакет не робилась свідомо: Storage не відкочується, а довга транзакція з завантаженням картинок тримає зʼєднання пулера. Повторний запуск ідемпотентний (`--prune`/`skipUnchanged`), uk-клони читають через накладку за slug і не ламаються; після збою перевірити `error` у звіті й повторити крок. `--dry-run` виконує справжній `update` у транзакції з відкатом.
-9. **Окремо, не блокує:** wfrp-кампанії вмикають `spellIngredients` вручну; DROP `race_profiles` окремою міграцією пізніше; `--allow-untranslated` у SRD знімається після перекладу 676 ключів.
+9. **Окремо, не блокує:** wfrp-кампанії вмикають `spellIngredients` вручну; DROP `race_profiles` — міграція Ч18c (після prod-перевірки порожності й «так» власника); `--allow-untranslated` у SRD знімається після перекладу 676 ключів.
 
 Відкат: колонки лишаються (expand-only), а Heroes на prod після кроку 4 уже англійський — старий код покаже нові клони Heroes англійською. Тому крок 4 робити лише після перевірки кроків 1–3.
 
@@ -162,13 +162,25 @@ _Оновлено: 2026-11-13._
 
 **Ratchet після Ч18b:** `system-imports-exempt.json` `[]`; `system-literals-exempt.json` 6 файлів / 11 влучань; `RULES_SECTION_READERS` 0; `isFiveE` 0; `CONDITION_5E_` 11 (E3-a); гард колонок статблока 1 файл (було 7).
 
+### E2 Ч18c: два баги live-run, moraleCap, Minor 13, DROP race_profiles (2026-11-13, `feat/e2-ch18c`, не змерджена й не запушена)
+
+**Закрито.**
+- **Чернетка d20 без виборів:** сервер вимагає повний набір (`planChoices({ requireComplete })`, `pendingIssues`, `CHOICE_INCOMPLETE`; порожні `choices` теж перевіряються), клієнт `usePlayerDraftForm` блокує відправку. Для персонажів ДМ і level-up недобір лишається бейджем `pending`.
+- **Єдиний герой на 0 HP → одразу Defeat:** хук `combat.holdsOn?` (d20: `isDying && !stable`), `checkVictoryConditions(order, reserve, rules)` з обовʼязковим `rules`; тест «all heroes down with death saves count as defeated» змінено свідомо; інтеграційні тести (атака, поразка від кидків смерті, старт з hp 0).
+- **`moraleCap`:** `abilities.moraleCap` → `combatStats.moraleCap`, upgrade-on-read у `joinParticipant`; гард статблока `MAX = {}`. Відкат коду лише без активних боїв.
+- **Minor 13:** `withBatchedContentBump` — один бамп `contentVersion` на вид (`importContent`) і на пакет (`importPack`).
+- **DROP `race_profiles`:** модель прибрано зі схеми, міграція `DROP TABLE IF EXISTS "race_profiles"` (дані давно в `races.profile`).
+
+**Чекає власника.** DROP йде в міграції на prod лише після перевірки, що `race_profiles` на prod порожня, і явного «так» власника перед пушем.
+
+**Лишилось (E3).** `CONDITION_5E_` (E3-a) — після Ч19; переклад 676 ключів SRD (uk) — окрема контентна сесія.
+
 **Лишилось як епіки (E3):**
 - (а) Словник станів і дій від системи: `CONDITION_5E_` (11 файлів, Zod-схеми вмінь статичні), 5e-ключі дій у core (`actions/{keys,schema,effects}.ts`, `cunning-strike`, Ч6 I3).
 - (б) UI видів контенту модулів, FX (→ `components/fx`, мораль-FX) і компоненти з > 7 пропсів.
 - (в) Холодний імпорт реєстрів і цикл `d20 → registry` (Ч11 M9, таймаути 2,7–6 с).
-- (г) Minor 13 (`contentVersion`) і `DROP race_profiles`.
-- (д) Переклад 676 ключів SRD (`--allow-untranslated` знімається після цього).
-- (е) `moraleCap` у слот учасника: потребує міграції даних, знімає останній виняток гарда.
+- (г) Minor 13 і `moraleCap` — закрито в Ч18c; `DROP race_profiles` — код готовий, деплой чекає (див. Ч18c).
+- (д) Переклад 676 ключів SRD (`--allow-untranslated` знімається після цього) — окрема контентна сесія.
 
 **Питання власнику:**
 - Header-пропс для меню (Ч11-M7): меню з модульними розділами зараз зʼявляється після гідратації; повний варіант (у першому HTML) вимагає пропса `Header` з кореневого layout, що ламає його статичність.
@@ -300,7 +312,7 @@ _Оновлено: 2026-11-13._
 
 Гілка `feat/e2-part2-shells` (від main 744035d64), **не змерджена й не запушена**; prod-кроків немає. Зроблено: d20 = звичайна база `systems/d20/{meta,index,ui,server}`, пресет `systems/homm`, шість порожніх модулів, реєстри повністю згенеровані, `fallbackBase`, `D20_BASES`, `SYSTEM_IMPORT_PATTERN`, виняток d20 у `isLiteralAllowed` видалено; ratchet-файли не змінились (18 імпортів; 35 файлів / 73 літерали). Гейти: tsc чистий, `test:run` 15357 зелених, ESLint 0 помилок, контрактні тести зелені, `pnpm template validate` по всіх 5 пакетах 0 помилок. Видима відмінність: порядок `RULE_SYSTEM_KEYS` тепер `dnd5e, homm, wfrp` (за алфавітом тек) — змінився порядок у селекторі системи. **Sweep не виконано**: Docker-БД на 54322 належить проєкту wfrp (`dnd-tracker-wfrp-db-1`), а `prodcopy-db.sh` працює через `docker compose exec db` цього проєкту. Хвости Ч1 (п. 1–5 «Лишилось у Ч3») лишаються в Ч3.
 
-### Борги E2 (з Fable-ревʼю E0+E1, 2026-11-11; закрито в Ч17, лишились Minor 13, M5 і борги БД)
+### Борги E2 (з Fable-ревʼю E0+E1, 2026-11-11; закрито в Ч17; Minor 13 закрито в Ч18c, лишились M5 і борги БД)
 
 - **M2 (закрито, Ч17: адаптери пакетів генеруються в `scripts/templates/systems/adapters.ts`, корінь вручну не правиться; було:)** `scripts/templates/systems/index.ts` вручну імпортує `../grim-d100/validate` і тримає `PACK_ADAPTERS["grim-d100"]`: новий пакет з адаптером = правка кореня. Фікс: адаптер у `scripts/templates/<key>/index.ts` + генерований рядок або `forbiddenTermIssues` у `WFRP_HOOKS.validatePack`.
 - **M4 (закрито, Ч12 — зроблено b78355102).** `lib/utils/battle/pipeline/client-delta.ts`: `scene.system` іде в кожній дельті wfrp-бою, навіть без зміни, і не вміє сигналити очищення. Фікс: слати лише коли `hashJson(before) !== hashJson(after)`, `null` для очищення (egress).
