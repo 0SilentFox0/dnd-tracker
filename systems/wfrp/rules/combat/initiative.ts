@@ -15,7 +15,7 @@ export function wfrpInitiative(
     const { baseInitiative } = p.abilities;
 
     if (
-        !(ctx.roll || ctx.rules.initiative.mode === 'roll') ||
+        !(ctx.roll ?? ctx.rules.initiative.mode === 'roll') ||
         baseInitiative >= PINNED_INITIATIVE
     )
         return { total: baseInitiative, roll: null, die: null };

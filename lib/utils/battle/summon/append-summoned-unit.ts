@@ -1,8 +1,8 @@
 import { ParticipantSourceType } from '@/lib/constants/battle';
 import { applyBakedAuras } from '@/lib/utils/abilities/build/bake';
 import {
-    calculateInitiative,
     type InitiativeRules,
+    staticInitiative,
 } from '@/lib/utils/battle/turn/initiative';
 import type { BattleParticipant } from '@/types/battle';
 
@@ -31,7 +31,7 @@ export function appendToInitiativeEnd(
 
     const added = finalOrder[finalOrder.length - 1];
 
-    const calc = calculateInitiative(added, [added], { rules });
+    const calc = staticInitiative(added, [added], rules);
 
     added.abilities.initiative = calc;
     added.abilities.baseInitiative = calc;

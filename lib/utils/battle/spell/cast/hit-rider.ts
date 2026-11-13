@@ -61,14 +61,13 @@ export function applyHitRiders({
                         chargesLeft: effect.charges,
                         casterId,
                         ...(effect.consumeOnMiss && { consumeOnMiss: true }),
-                        ...(effect.save &&
-                            saveDc !== undefined && {
-                                save: {
-                                    ability: effect.save.ability,
-                                    dc: saveDc,
-                                    onFail: effect.save.onFail,
-                                },
-                            }),
+                        ...(effect.save && {
+                            save: {
+                                ability: effect.save.ability,
+                                ...(saveDc !== undefined && { dc: saveDc }),
+                                onFail: effect.save.onFail,
+                            },
+                        }),
                     },
                 },
                 round

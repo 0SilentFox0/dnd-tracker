@@ -5,7 +5,7 @@ import { ARTIFACT_GRID_9 } from '@/lib/constants/artifacts';
 import { CharacterStatus } from '@/lib/constants/characters';
 import { heroArchetype } from '@/lib/constants/hero-archetypes';
 import { parseGoals } from '@/lib/schemas/character-goals';
-import { calculateInitiative } from '@/lib/utils/battle/turn/initiative';
+import { staticInitiative } from '@/lib/utils/battle/turn/initiative';
 import { pactSlot, slotLevels } from '@/lib/utils/battle/view';
 import { describeFeatPicks } from '@/lib/utils/characters/choices/describe';
 import type { ChoiceSelections } from '@/lib/utils/characters/choices/selections';
@@ -218,7 +218,7 @@ export function buildCharacterSheet(input: SheetInput): CharacterSheet {
             ],
         },
         armorClass: blocks.armorClass,
-        initiative: calculateInitiative(p, [p], { rules }),
+        initiative: staticInitiative(p, [p], rules),
         speed: p.combatStats.speed,
         morale: p.combatStats.morale,
         targets: {

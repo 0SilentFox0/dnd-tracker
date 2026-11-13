@@ -60,7 +60,7 @@ Core бачить `systems/*` лише через корені (`SYSTEM_ROOTS`, 
 | `characteristics`, `sheetTest`, `rest` | обов'язковий | дані системи в рядку, тест з листа, відпочинок |
 | `resources?`, `advancement?`, `equipment?`, `traits?`, `currency?`, `downtime?`, `corruption?`, `creation?` | необов'язковий | wfrp-подібні можливості; наявність = ознака для UI/сервера |
 | `participant` | списки | `fromCharacter`, `fromUnit` (частини учасника, напр. `heroscaling`, `morale`), `fromStored`, `persist` |
-| `combat` | обов'язковий (ядро) | `resolveAttack`, `abortedRoll`, `initiative`, `tieBreak`, `hitModel`, `damage`, `onZeroHp`, `actions`, `reactions`, `saves { modifiers, bonus, … }`, `proficiency`, `judge`, `dice`, `actionEconomy` |
+| `combat` | обов'язковий (ядро) | `resolveAttack`, `abortedRoll`, `initiative`, `tieBreak`, `hitModel`, `damage`, `onZeroHp`, `actions`, `reactions`, `saves { modifiers, … }`, `proficiency { bonus, … }`, `judge`, `dice`, `actionEconomy` |
 | `combat.attackAbility?`, `reach?`, `crit?`, `autoXp?`, `offHand?`, `inspiration?`, `input?`, `details?` | необов'язковий | характеристика атаки (`{ key, roll, damage }`), досяжність і штрафи дальньої, параметри критів, авто-XP, друга рука, натхнення; без хука: 1 клітинка, нат. 20 = крит, без штрафів |
 | `combat.damageParts?` | список | `DamagePart(p, attack) => { dice?, flat? } \| null`; core `attackDamageParts` складає частини (кубики рівня героя й `+level` — `heroscaling`, `systems/heroscaling/rules/damage.ts`; без модуля герой wfrp і безкласовий герой голого `dnd5e` їх не мають: це зміна реальної шкоди в бою, прийнято за П6) |
 | `combat.onDamaged`, `afterAttack`, `turn { resetState, beforeAdvance, onTurnStart, onSkippedTurn, onTurnEnd, onRoundStart, onJoin, actGates, startCheck }` | списки | хуки з `runTurnHooks`; перед модулями йде база. Порядок `afterAttack` значущий: хук, що ставить `handled` раніше за `retaliation`, придушує відсіч (тест у `systems/retaliation`). `resolveAttack`/`castTest` віддають не дані слота, а `attackerUpdate`/`casterUpdate` (функція над свіжим учасником); `magic.saveDc` = `undefined` означає «рятунку немає» (DC в зони/ефекти не пишеться); `sustain.begin(ps, { casterId, castId, spellName, rounds, round? })` |
@@ -79,7 +79,7 @@ Core бачить `systems/*` лише через корені (`SYSTEM_ROOTS`, 
 
 **D15 (види контенту й композиція).** Вид, чий власник — модуль поза композицією кампанії, прихований: список `[]`, інші дії й імпорт 404, рядки не видаляються. Гейт — `lib/server/content/kind-active.ts` (`isKindActive`/`assertKindActive`); `abilities.sources` — таблиця `{ source, contentKind, load }` із фільтром `isKindActive`; імпорт компендіуму пропускає рядки неактивного виду з попередженням `KIND_INACTIVE`. Sync гейта не проходить.
 
-**Читання характеристик статблока в core — лише через хуки:** модифікатори рятунків — `combat.saves.modifiers(p)` (баланс: `hitModel.saves(p)`), бонус майстерності — `combat.saves.bonus(p)`/`combat.proficiency`, бонус атаки закляття — `magic.spellAttackBonus`; система без цього віддає нулі.
+**Читання характеристик статблока в core — лише через хуки:** модифікатори рятунків — `combat.saves.modifiers(p)` (баланс: `hitModel.saves(p)`), бонус майстерності — `combat.proficiency.bonus(p)`, бонус атаки закляття — `magic.spellAttackBonus`; система без цього віддає нулі.
 
 **Винятки й домовленості контракту.**
 - d6pool (і будь-яка база без `magic.resource`) кастує вільно: слотів/ресурсу немає, `picksSlot` відсутній (Ч7-M2).
@@ -87,7 +87,6 @@ Core бачить `systems/*` лише через корені (`SYSTEM_ROOTS`, 
 - Змінені коди відмов (Ч11-M3): `condition-test`/`system-condition` без wfrp — `action_rejected` замість `invalid_target` (ключ `CONDITION_UNSUPPORTED` той самий, статус 422); `PUT race-profile` гравцем — `DM_ONLY` замість `FORBIDDEN`; `PUT race-profile` без `creation` — тіло парситься першим, невалідне = 400 замість 409; `race-profiles` у не-wfrp кампанії — 404 замість 200. Права (404/403 учасника кампанії) перевіряються до парсингу тіла операції.
 - Гарди DM-сторінок у `layout.tsx` не перевиконуються при клієнтській навігації; прийнято, бо CRUD-маршрути самі дають 404 (Ч11-M6). Меню з модульними розділами з'являється після гідратації правил, не в першому HTML (повний варіант потребує пропса `Header` з кореневого layout).
 - Тести core можуть брати фікстури систем (`WFRP_RULES`, `withD20State`, …): тести поза ESLint-зонами. Імпорт UI системи в тест core (як `PrimaryAbilityPicker`) — ні, такий тест лежить у `systems/<id>/__tests__/ui/`.
-- `resolveAttack`/`castTest` віддають `attackerUpdate`/`casterUpdate`, не дані слота; `magic.saveDc?` = `undefined` — рятунку немає.
 
 ## Правила зони
 

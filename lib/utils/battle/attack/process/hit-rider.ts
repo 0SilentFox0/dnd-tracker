@@ -113,7 +113,7 @@ function riderSave(
             rider: rider.name,
             ability: state.save.ability.toUpperCase(),
             total: result.total,
-            dc: state.save.dc,
+            dc: state.save.dc ?? '-',
             success: String(result.success),
         })
     );

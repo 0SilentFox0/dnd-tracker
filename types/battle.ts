@@ -48,7 +48,7 @@ export interface HitRiderState {
     chargesLeft: number;
     casterId: string;
     consumeOnMiss?: boolean;
-    save?: { ability: AbilityKey; dc: number; onFail: NonRandomEffect[] };
+    save?: { ability: AbilityKey; dc?: number; onFail: NonRandomEffect[] };
 }
 
 export interface ActiveEffect {

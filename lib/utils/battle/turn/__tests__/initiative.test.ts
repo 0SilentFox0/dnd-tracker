@@ -6,9 +6,11 @@ import {
     resolved,
 } from '@/lib/utils/abilities/__tests__/fixtures';
 import { bakePassives } from '@/lib/utils/abilities/build/bake';
+import { appendToInitiativeEnd } from '@/lib/utils/battle/summon/append-summoned-unit';
 import {
     calculateInitiative,
     sortByInitiative,
+    staticInitiative,
 } from '@/lib/utils/battle/turn/initiative';
 import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
 import { parseRules, RulesetSchema } from '@/lib/utils/rules/schema';
@@ -78,6 +80,33 @@ describe('initiative mode', () => {
                 rng: fixed(20),
             })
         ).toBe(5);
+    });
+
+    it('staticInitiative never rolls, even in roll mode', () => {
+        const p = withDex('a', 16);
+
+        const values = new Set(
+            Array.from({ length: 20 }, () =>
+                staticInitiative(p, [p], rollRules)
+            )
+        );
+
+        expect(values.size).toBe(1);
+        expect([...values][0]).toBe(p.abilities.baseInitiative);
+    });
+
+    it('a summon is appended with its static initiative in roll mode', () => {
+        const p = withDex('s', 16, 7);
+
+        const values = new Set(
+            Array.from({ length: 20 }, () => {
+                const { added } = appendToInitiativeEnd([], p, rollRules);
+
+                return added.abilities.initiative;
+            })
+        );
+
+        expect([...values]).toEqual([7]);
     });
 
     it('the SRD preset rolls', () => {

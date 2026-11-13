@@ -258,6 +258,43 @@ describe('hitRider', () => {
         );
     });
 
+    it('a rider save without a DC (no-saves system) is an automatic failure', () => {
+        const ps = armed(
+            [
+                rider({
+                    save: {
+                        ability: 'strength',
+                        onFail: [{ kind: 'push', feet: 15, from: 'caster' }],
+                    },
+                }),
+            ],
+            30
+        ).map((p) =>
+            p.basicInfo.id !== 'c'
+                ? p
+                : {
+                      ...p,
+                      battleData: {
+                          ...p.battleData,
+                          activeEffects: p.battleData.activeEffects.map((e) => {
+                              if (!e.hitRider?.save) return e;
+
+                              const { dc: _dc, ...save } = e.hitRider.save;
+
+                              return {
+                                  ...e,
+                                  hitRider: { ...e.hitRider, save },
+                              };
+                          }),
+                      },
+                  }
+        );
+
+        expect(strike(ps, bow, 15).targetUpdated.battleData.position?.x).toBe(
+            4
+        );
+    });
+
     it('the rider that downs the target does not trigger the save', () => {
         const ps = armed(
             [

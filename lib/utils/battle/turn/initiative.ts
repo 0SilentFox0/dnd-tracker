@@ -9,7 +9,7 @@ export type InitiativeRules = Pick<Ruleset, 'initiative' | 'system'>;
 export interface InitiativeRoll {
     rules: InitiativeRules;
     rng?: () => number;
-    /** Roll regardless of the static/roll mode of the initiative section */
+    /** Overrides the static/roll mode of the initiative section: true always rolls, false never */
     roll?: boolean;
 }
 
@@ -47,6 +47,14 @@ export const calculateInitiative = (
     participants: BattleParticipant[] = [participant],
     roll: InitiativeRoll
 ): number => scoreInitiative(participant, participants, roll).total;
+
+/** Stored base plus bonuses, never rolled, whatever the rules mode (character sheet, summons). */
+export const staticInitiative = (
+    participant: BattleParticipant,
+    participants: BattleParticipant[],
+    rules: InitiativeRules
+): number =>
+    calculateInitiative(participant, participants, { rules, roll: false });
 
 export function compareInitiative(
     a: BattleParticipant,

@@ -428,7 +428,11 @@ const formatted = async (file: string, text: string): Promise<string> => {
             ...(await prettier.resolveConfig(file)),
             filepath: file,
         });
-    } catch {
+    } catch (error) {
+        console.warn(
+            `systems-index: prettier failed on ${file}, using unformatted text: ${error instanceof Error ? error.message.split('\n')[0] : String(error)}`
+        );
+
         return text;
     }
 };
