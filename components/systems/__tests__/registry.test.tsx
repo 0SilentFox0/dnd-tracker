@@ -18,6 +18,7 @@ describe('system ui registry', () => {
             rulesItems: hommItems,
             forms: hommForms,
             sheet: hommSheet,
+            battle: hommBattle,
             ...hommRest
         } = systemUiOf('homm');
 
@@ -26,10 +27,22 @@ describe('system ui registry', () => {
             rulesItems: dndItems,
             forms: dndForms,
             sheet: dndSheet,
+            battle: dndBattle,
             ...dndRest
         } = systemUiOf('dnd5e');
 
         expect(hommRest).toEqual(dndRest);
+        expect(hommBattle.turnStart).toBeDefined();
+        expect(dndBattle.turnStart).toBeUndefined();
+        expect(hommBattle.badges?.map((b) => b.name)).toEqual([
+            'DeathSaveBadge',
+            'MoraleBadge',
+        ]);
+        expect(dndBattle.badges?.map((b) => b.name)).toEqual([
+            'DeathSaveBadge',
+        ]);
+        expect(hommBattle.dialogs).toHaveLength(2);
+        expect(dndBattle.dialogs).toHaveLength(1);
         expect([
             hommForms?.fields?.length,
             hommSheet?.combatRows?.length,
