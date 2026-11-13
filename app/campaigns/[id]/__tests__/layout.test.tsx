@@ -49,6 +49,24 @@ vi.mock('@/lib/i18n/extend-locale-scope', () => ({
         namespaces: string[];
     }) => <div data-scope={namespaces.join(',')}>{children}</div>,
 }));
+vi.mock('@/lib/providers/prefetched-query', () => ({
+    PrefetchedQuery: ({
+        queryKey,
+        data,
+        children,
+    }: {
+        queryKey: unknown[];
+        data: unknown;
+        children: React.ReactNode;
+    }) => (
+        <div
+            data-seed-key={queryKey.join(':')}
+            data-seed={JSON.stringify(data)}
+        >
+            {children}
+        </div>
+    ),
+}));
 vi.mock('@/components/notifications/NotificationsHost', () => ({
     NotificationsHost: () => <div data-testid="notifications-host" />,
 }));
@@ -86,6 +104,17 @@ describe('CampaignLayout', () => {
 
         expect(markup).not.toContain('tour-coordinator');
         expect(markup).toContain('notifications-host');
+    });
+
+    it('seeds the campaign system for the header from the layout read', async () => {
+        mocks.kind = 'campaign';
+
+        const markup = await html();
+
+        expect(markup).toContain('data-seed-key="campaign-system:c1"');
+        expect(markup).toContain(
+            'data-seed="{&quot;key&quot;:&quot;homm&quot;}"'
+        );
     });
 
     it('shows the unknown-system message instead of the page when rules carry no valid system', async () => {

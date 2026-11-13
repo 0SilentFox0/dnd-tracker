@@ -5,10 +5,12 @@ import { NotificationsHost } from '@/components/notifications/NotificationsHost'
 import { DemoTourCoordinator } from '@/components/onboarding/DemoTourCoordinator';
 import { getSessionUserId } from '@/lib/auth';
 import { CampaignRole, isDemoKind } from '@/lib/constants/campaigns';
+import { campaignKeys } from '@/lib/hooks/campaigns/keys';
 import { ExtendLocaleScope } from '@/lib/i18n/extend-locale-scope';
 import { getRequestLocale } from '@/lib/i18n/request-locale';
 import { systemScope } from '@/lib/i18n/system-scope';
 import { getTranslator } from '@/lib/i18n/translator';
+import { PrefetchedQuery } from '@/lib/providers/prefetched-query';
 import { getCampaignForLayout } from '@/lib/server/campaigns/access';
 import { systemOfCampaign } from '@/lib/server/systems/campaign-system';
 import { isRuleSystemKey } from '@/lib/utils/rules/systems/meta';
@@ -58,7 +60,7 @@ export default async function CampaignLayout({
     ];
 
     return (
-        <>
+        <PrefetchedQuery queryKey={campaignKeys.system(id)} data={scope}>
             {namespaces.length ? (
                 <ExtendLocaleScope namespaces={namespaces}>
                     {content}
@@ -67,6 +69,6 @@ export default async function CampaignLayout({
                 content
             )}
             {!isDemo && <NotificationsHost campaignId={id} userId={userId} />}
-        </>
+        </PrefetchedQuery>
     );
 }

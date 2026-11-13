@@ -12,6 +12,7 @@ export {
     useUpdateCampaign,
 } from './useCampaignMutations';
 export { useCampaignRules, useUpdateCampaignRules } from './useCampaignRules';
+export { useCampaignSystemSelection } from './useCampaignSystemSelection';
 export { useBundleFilePicker, useImportCampaign } from './useImportCampaign';
 export { useInfoReferenceFilters } from './useInfoReferenceFilters';
 export { useJoinBattle } from './useJoinBattle';

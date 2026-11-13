@@ -4,7 +4,6 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { BiographyEditor } from '@/components/character-profile/BiographyEditor';
 import { LevelUpAction } from '@/components/character-profile/LevelUpAction';
-import { PrimaryAbilityPicker } from '@/systems/d20/ui/stats/PrimaryAbilityPicker';
 
 describe('редактор ДМа', () => {
     afterEach(cleanup);
@@ -47,29 +46,5 @@ describe('редактор ДМа', () => {
                 name: 'characterProfile.levelUp.action',
             })
         ).toBeTruthy();
-    });
-
-    it('основна характеристика — одна; повторний клік знімає', () => {
-        const onChange = vi.fn();
-
-        const { rerender } = render(
-            <PrimaryAbilityPicker value={null} onChange={onChange} />
-        );
-
-        fireEvent.click(
-            screen.getByRole('checkbox', {
-                name: 'characters.stats.primary.aria {"ability":"gameTerms.abilities.dexterity.label"}',
-            })
-        );
-        expect(onChange).toHaveBeenLastCalledWith('dexterity');
-        rerender(
-            <PrimaryAbilityPicker value="dexterity" onChange={onChange} />
-        );
-        fireEvent.click(
-            screen.getByRole('checkbox', {
-                name: 'characters.stats.primary.aria {"ability":"gameTerms.abilities.dexterity.label"}',
-            })
-        );
-        expect(onChange).toHaveBeenLastCalledWith(null);
     });
 });

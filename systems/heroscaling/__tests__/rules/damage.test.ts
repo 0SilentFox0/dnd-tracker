@@ -8,6 +8,7 @@ import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/moc
 import { attackDamageParts } from '@/lib/utils/battle/damage/attack-parts';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 import type { Ruleset } from '@/lib/utils/rules/schema';
+import { defaultRulesFor } from '@/lib/utils/rules/section-registry';
 import type { BattleAttack } from '@/types/battle';
 
 const base = createMockParticipant();
@@ -78,14 +79,9 @@ describe('heroLevelDamage', () => {
 
     it('golden: a classless level-5 hero of bare dnd5e has no level dice and no +level, with heroscaling it has both', () => {
         const withModules = (modules: string[]) =>
-            ({
-                ...DEFAULT_RULES,
-                system: { key: 'dnd5e', modules },
-            }) as Ruleset;
+            defaultRulesFor({ key: 'dnd5e', modules });
 
-        expect(
-            attackDamageParts(hero, sword, withModules([]))
-        ).toEqual({
+        expect(attackDamageParts(hero, sword, withModules([]))).toEqual({
             weaponDice: '1d8',
             extraDice: '',
             formula: '1d8',

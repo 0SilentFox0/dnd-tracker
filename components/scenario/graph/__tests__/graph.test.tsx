@@ -416,6 +416,7 @@ describe('ScenarioGraph', () => {
         const img = node('unit:g').querySelector('image');
 
         expect(img).not.toBeNull();
+        expect(img?.getAttribute('referrerPolicy')).toBe('no-referrer');
 
         fireEvent.error(img as Element);
 

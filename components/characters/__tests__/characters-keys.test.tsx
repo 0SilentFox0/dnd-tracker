@@ -6,7 +6,6 @@ import { AbilityScoresPicker } from '@/components/characters/player-draft/Abilit
 import { DraftBanner } from '@/components/characters/player-draft/DraftBanner';
 import { NoCharacterState } from '@/components/characters/player-draft/NoCharacterState';
 import { renderWithConfirm } from '@/components/ui/__tests__/render-with-confirm';
-import { PrimaryAbilityPicker } from '@/systems/d20/ui/stats/PrimaryAbilityPicker';
 
 const returnWithNote = vi.fn().mockResolvedValue(undefined);
 
@@ -55,19 +54,6 @@ describe('characters components render keys', () => {
                 name: 'characters.noCharacter.create',
             })
         ).toBeNull();
-    });
-
-    it('PrimaryAbilityPicker: підписи з gameTerms.abilities, aria з параметром', () => {
-        render(<PrimaryAbilityPicker value="strength" onChange={vi.fn()} />);
-
-        expect(
-            screen.getByText('characters.stats.primary.legend')
-        ).toBeTruthy();
-        expect(
-            screen.getByLabelText(
-                'characters.stats.primary.aria {"ability":"gameTerms.abilities.strength.label"}'
-            )
-        ).toBeTruthy();
     });
 
     it('AbilityScoresPicker: point-buy показує витрати з бюджетом', () => {

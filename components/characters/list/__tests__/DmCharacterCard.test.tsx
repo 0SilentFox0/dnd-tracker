@@ -137,7 +137,9 @@ describe('DmCharacterCard HP before the ruleset loads', () => {
         renderCard(character);
 
         expect(screen.getByText('—')).toBeTruthy();
-        expect(screen.queryByText('0/0')).toBeNull();
+        expect(screen.getByText('HP').parentElement?.textContent).not.toMatch(
+            /0/
+        );
     });
 });
 

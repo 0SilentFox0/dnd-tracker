@@ -32,7 +32,11 @@ import {
 import { HudPortalClassProvider } from '@/components/ui/portal-class';
 import { dmSectionHref, dmSectionsFor } from '@/lib/constants/campaigns';
 import { useSessionUser, useSwitchGoogleAccount } from '@/lib/hooks/auth';
-import { useCampaignRules, useIsTemplateCampaign } from '@/lib/hooks/campaigns';
+import {
+    useCampaignRules,
+    useCampaignSystemSelection,
+    useIsTemplateCampaign,
+} from '@/lib/hooks/campaigns';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import { cn } from '@/lib/utils';
 import { classesEnabled } from '@/lib/utils/characters/classes/classes-enabled';
@@ -99,12 +103,16 @@ export function Header() {
 
     const isPlayerPage = !isDMPage && isCampaignPage;
 
-    const rules = useCampaignRules(isDMPage ? (campaignId ?? '') : '').data;
+    const dmCampaignId = isDMPage ? (campaignId ?? '') : '';
+
+    const rules = useCampaignRules(dmCampaignId).data;
+
+    const system = useCampaignSystemSelection(dmCampaignId);
 
     const dmSections = dmSectionsFor({
         isTemplate,
         classesEnabled: classesEnabled(rules),
-        system: rules?.system,
+        system,
     });
 
     const isBattlePage = BATTLE_PATH.test(pathname ?? '');

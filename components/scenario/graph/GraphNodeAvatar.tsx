@@ -49,10 +49,8 @@ export function GraphNodeAvatar({
                 preserveAspectRatio="xMidYMid slice"
                 clipPath={`url(#${clipId})`}
                 pointerEvents="none"
-                {...{
-                    referrerpolicy: 'no-referrer',
-                    onError: () => setFailed(url),
-                }}
+                referrerPolicy="no-referrer"
+                {...{ onError: () => setFailed(url) }}
             />
         </>
     );

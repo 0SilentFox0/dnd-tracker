@@ -47,6 +47,28 @@ describe('useMoraleRoll', () => {
         expect(calls).toEqual(['resolve', 'show', 'skipTurn']);
     });
 
+    it('extra turn shows the result without skipping', async () => {
+        const scene = fakeScene({ morale: 2 });
+
+        scene.moraleCheck.mockResolvedValue(outcome(true, false));
+
+        const gate = { resolve: vi.fn(), skipTurn: vi.fn() };
+
+        const { result } = renderHook(() => useMoraleRoll(scene.me, gate), {
+            wrapper: scene.wrapper,
+        });
+
+        await act(async () => result.current.roll(9));
+
+        expect(gate.resolve).toHaveBeenCalledWith('extra');
+        expect(scene.showResult).toHaveBeenCalledWith(
+            expect.objectContaining({
+                data: expect.objectContaining({ outcome: 'extra' }),
+            })
+        );
+        expect(gate.skipTurn).not.toHaveBeenCalled();
+    });
+
     it('an unchanged morale only toasts and does not skip', async () => {
         const scene = fakeScene({ morale: 2 });
 
