@@ -1,3 +1,5 @@
+import { wfrpState } from '../state';
+
 import { defineSlot } from '@/lib/utils/rules/systems/slot';
 import type { BattleParticipant } from '@/types/battle';
 
@@ -19,7 +21,7 @@ export const FORTUNE_INPUT = defineSlot<FortuneInput>('wfrp', (raw) => {
 });
 
 export const spentFortune = (p: BattleParticipant): { fortune: number } => ({
-    fortune: Math.max(0, (p.battleData.fortune ?? 0) - 1),
+    fortune: Math.max(0, (wfrpState(p).fortune ?? 0) - 1),
 });
 
 /** `test(preset, first)` runs one test; a reroll receives the first result. An `sl` Fortune is the caller's job (it adds the bonus inside `test`). */

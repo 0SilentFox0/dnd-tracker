@@ -13,6 +13,7 @@ import {
     spentFortune,
 } from '../percentile/fortune';
 import { ACTION_SLOT, ATTACK_SLOT, SCENE_SLOT } from '../slots';
+import { wfrpStateData } from '../state';
 import { sizeHitMod } from '../traits/size';
 import { MOMENTUM_SL_BONUS, OUTNUMBERING_BONUS } from './constants';
 import { hitLocation } from './location';
@@ -207,7 +208,7 @@ export function resolveWfrpAttack(ctx: ResolveAttackCtx): ResolvedAttack {
         return {
             ...r,
             lines: [...r.lines, fortuneLine],
-            attackerData: spentFortune(attacker),
+            attackerData: wfrpStateData(attacker, spentFortune(attacker)),
             attackRoll: {
                 ...r.attackRoll,
                 ...(attack && {

@@ -1,15 +1,14 @@
+import { wfrpState, withWfrpState } from '../state';
+
 import { replaceParticipant } from '@/lib/utils/abilities/engine/core/participants';
 import type { DamagedHook } from '@/lib/utils/rules/systems/types';
 
 export const wfrpLoseChannelled: DamagedHook = (ctx, result) => {
     const { participant } = result;
 
-    if (ctx.amount <= 0 || !participant.battleData.channelledSl) return result;
+    if (ctx.amount <= 0 || !wfrpState(participant).channelledSl) return result;
 
-    const dropped = {
-        ...participant,
-        battleData: { ...participant.battleData, channelledSl: 0 },
-    };
+    const dropped = withWfrpState(participant, { channelledSl: undefined });
 
     return {
         ...result,

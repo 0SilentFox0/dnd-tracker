@@ -3,6 +3,7 @@ import { useTranslations } from 'next-intl';
 import { heldBy } from '../../rules/combat/momentum';
 import { FORTUNE_INPUT } from '../../rules/percentile/fortune';
 import { SCENE_SLOT } from '../../rules/slots';
+import { wfrpState } from '../../rules/state';
 import { D100RollPicker } from './D100RollPicker';
 
 import { btn } from '@/components/battle/wizards/attack/shared';
@@ -22,7 +23,7 @@ export function D100RollBody({
 
     const { judged, attacker } = view;
 
-    const left = attacker?.battleData.fortune ?? 0;
+    const left = (attacker && wfrpState(attacker).fortune) ?? 0;
 
     const momentum =
         judged.attackerSide !== undefined &&

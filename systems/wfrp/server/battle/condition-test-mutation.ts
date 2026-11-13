@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { wfrpState, withWfrpState } from '../../rules/state';
+
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { currentOf, requireActor } from '@/lib/utils/battle/common/control';
 import { newBattleAction } from '@/lib/utils/battle/common/new-action';
@@ -66,7 +68,7 @@ export function conditionTestMutation(
         !info ||
         info.endTest === null ||
         !conditions.list(actor).some((c) => c.key === body.condition) ||
-        (actor.battleData.conditionTests ?? []).includes(body.condition)
+        (wfrpState(actor).conditionTests ?? []).includes(body.condition)
     )
         throw unavailable();
 
@@ -86,16 +88,12 @@ export function conditionTestMutation(
 
     const participants = r.participants.map((p) =>
         p.basicInfo.id === actor.basicInfo.id
-            ? {
-                  ...p,
-                  battleData: {
-                      ...p.battleData,
-                      conditionTests: [
-                          ...(actor.battleData.conditionTests ?? []),
-                          body.condition,
-                      ],
-                  },
-              }
+            ? withWfrpState(p, {
+                  conditionTests: [
+                      ...(wfrpState(actor).conditionTests ?? []),
+                      body.condition,
+                  ],
+              })
             : p
     );
 

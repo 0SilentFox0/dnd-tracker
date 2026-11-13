@@ -15,6 +15,7 @@ import { castOf } from '@/systems/wfrp/rules/__tests__/slot-fixtures';
 import { DEFAULT_CHARACTERISTICS } from '@/systems/wfrp/rules/characteristics/keys';
 import { wfrpAbilitiesOf } from '@/systems/wfrp/rules/combat/participant';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
+import { wfrpState } from '@/systems/wfrp/rules/state';
 import type { BattleParticipant } from '@/types/battle';
 
 const magic = { cn: 2, kind: 'arcane', overcast: null };
@@ -240,7 +241,7 @@ describe('spell mutation in WFRP', () => {
 
         expect(castOf(details(out))?.outcome).toBe('success');
         expect(
-            out.participants.find((p) => p.basicInfo.id === 'hero')?.battleData
+            wfrpState(out.participants.find((p) => p.basicInfo.id === 'hero')!)
                 .fortune
         ).toBe(0);
     });
@@ -254,7 +255,7 @@ describe('spell mutation in WFRP', () => {
 
         expect(castOf(details(out))?.outcome).toBe('success');
         expect(
-            out.participants.find((p) => p.basicInfo.id === 'hero')?.battleData
+            wfrpState(out.participants.find((p) => p.basicInfo.id === 'hero')!)
                 .fortune
         ).toBe(0);
     });
@@ -271,7 +272,7 @@ describe('spell mutation in WFRP, fizzle with Fortune', () => {
         expect(castOf(details(out))?.outcome).toBe('failure');
         expect(hp(out, 'gob')).toBe(goblin.combatStats.currentHp);
         expect(
-            out.participants.find((p) => p.basicInfo.id === 'hero')?.battleData
+            wfrpState(out.participants.find((p) => p.basicInfo.id === 'hero')!)
                 .fortune
         ).toBe(1);
     });

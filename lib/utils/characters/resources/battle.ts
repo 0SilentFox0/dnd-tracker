@@ -186,25 +186,11 @@ export function applyCharacterResources(
           )
         : inspired;
 
-    const fortune = r?.fortune ?? ruleSystemOf(rules).resources?.fortuneOf?.(p);
-
-    const seeded =
-        fortune === undefined && r?.sin === undefined
-            ? out
-            : {
-                  ...out,
-                  battleData: {
-                      ...out.battleData,
-                      ...(fortune !== undefined && { fortune }),
-                      ...(r?.sin !== undefined && { sin: r.sin }),
-                  },
-              };
-
     const parts = ruleSystemOf(rules).participant?.fromStored ?? [];
 
     return parts.reduce(
         (acc, part) => part(acc, { stored: state, rules }),
-        seeded
+        out
     );
 }
 
@@ -272,7 +258,6 @@ export function applyBattleResult(
         slotsSpent: spentSlots(p),
         charges: battleCharges(r.charges, p),
         exhaustion: exhaustionLevel(p),
-        fortune: p.battleData.fortune ?? r.fortune,
         shortRestOpen: undefined,
     };
 

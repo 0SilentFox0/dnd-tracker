@@ -18,7 +18,6 @@ export function resetTurnState(
             readied: undefined,
             attacksLeft: undefined,
             attackedWithLight: undefined,
-            ...(p.battleData.conditionTests && { conditionTests: undefined }),
             ...(p.battleData.legendary &&
                 !opts.keepLegendary && {
                     legendary: {

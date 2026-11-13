@@ -16,6 +16,7 @@ import { parseRules } from '@/lib/utils/rules/schema';
 import { DEFAULT_CHARACTERISTICS } from '@/systems/wfrp/rules/characteristics/keys';
 import { wfrpAbilitiesOf } from '@/systems/wfrp/rules/combat/participant';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
+import { wfrpState } from '@/systems/wfrp/rules/state';
 import { trait } from '@/systems/wfrp/rules/traits/__tests__/fixtures';
 import type { BattleParticipant } from '@/types/battle';
 
@@ -515,7 +516,7 @@ describe('add-participant: психологія wfrp', () => {
             { participantId: 'hero', participantName: hero.basicInfo.name },
         ]);
         expect(
-            out.participants.find((p) => p.basicInfo.id === 'hero')?.battleData
+            wfrpState(out.participants.find((p) => p.basicInfo.id === 'hero')!)
                 .psychologyTested
         ).toEqual({ fear: 1 });
     });

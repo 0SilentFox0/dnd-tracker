@@ -1,10 +1,12 @@
+import { wfrpState } from '../state';
+
 import { textRef } from '@/lib/i18n/text-ref';
 import type { ActiveEffect, BattleParticipant } from '@/types/battle';
 
 const EPOCH = new Date(0);
 
 export function channelBadge(p: BattleParticipant): ActiveEffect | null {
-    const sl = p.battleData.channelledSl ?? 0;
+    const sl = wfrpState(p).channelledSl ?? 0;
 
     if (sl <= 0) return null;
 

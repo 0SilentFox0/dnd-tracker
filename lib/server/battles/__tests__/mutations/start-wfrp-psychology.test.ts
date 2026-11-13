@@ -31,6 +31,7 @@ import { DEFAULT_RULES } from '@/lib/utils/rules';
 import { DEFAULT_CHARACTERISTICS } from '@/systems/wfrp/rules/characteristics/keys';
 import { wfrpAbilitiesOf } from '@/systems/wfrp/rules/combat/participant';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
+import { wfrpState } from '@/systems/wfrp/rules/state';
 import { trait } from '@/systems/wfrp/rules/traits/__tests__/fixtures';
 
 const setup = [
@@ -80,7 +81,7 @@ describe('buildStartOrder: психологія wfrp', () => {
             { participantId: 'h1', participantName: 'h1' },
         ]);
         expect(
-            out.order.find((p) => p.basicInfo.id === 'h1')?.battleData
+            wfrpState(out.order.find((p) => p.basicInfo.id === 'h1')!)
                 .psychologyTested
         ).toEqual({ fear: 1 });
     });

@@ -6,6 +6,7 @@ import { applyDamageConsequences } from '@/lib/utils/battle/damage/consequences'
 import { dealResistedDamage } from '@/lib/utils/battle/damage/resisted-ability-damage';
 import { DEFAULT_RULES, type Ruleset } from '@/lib/utils/rules';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
+import { wfrpState } from '@/systems/wfrp/rules/state';
 import type { BattleParticipant } from '@/types/battle';
 
 const withRules = (deathSaves: Partial<Ruleset['deathSaves']>): Ruleset => ({
@@ -175,16 +176,18 @@ describe('applyDamageConsequences: channelled SL', () => {
 
         const r = applyDamageConsequences({ ...i, participants: [i.after] });
 
-        expect(r.participant.battleData.channelledSl).toBe(0);
-        expect(r.participants[0].battleData.channelledSl).toBe(0);
+        expect(wfrpState(r.participant).channelledSl).toBeUndefined();
+        expect(wfrpState(r.participants[0]).channelledSl).toBeUndefined();
     });
 
     it('no damage keeps it', () => {
         const i = input(0, WFRP_RULES);
 
         expect(
-            applyDamageConsequences({ ...i, participants: [i.after] })
-                .participant.battleData.channelledSl
+            wfrpState(
+                applyDamageConsequences({ ...i, participants: [i.after] })
+                    .participant
+            ).channelledSl
         ).toBe(3);
     });
 

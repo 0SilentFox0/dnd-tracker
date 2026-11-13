@@ -49,7 +49,7 @@ export function applyCastAttribute(
     state.flow.messages.push(...r.messages);
 }
 
-/** After the cost is paid: the system's spent resource is applied, channelled SL is gone, then the miscast (if any) lands on the caster. */
+/** After the cost is paid: the system's spent resource is applied, then the miscast (if any) lands on the caster. */
 export function settleCastTest(
     state: SpellCastState,
     { magic, cast }: Settle
@@ -62,7 +62,6 @@ export function settleCastTest(
         ...caster,
         battleData: {
             ...caster.battleData,
-            ...(!cast.keepChannelled && { channelledSl: 0 }),
             ...cast.casterData,
         },
     });

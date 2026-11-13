@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { wfrpState } from '../../state';
 import { wfrpChannel } from '../channel';
 import { CHANNEL_MAX_SL } from '../constants';
 import { caster } from './fixtures';
@@ -16,26 +17,32 @@ describe('wfrpChannel', () => {
     it('banks SL and accumulates over repeated successes', () => {
         const once = channel(p, 20);
 
-        expect(once.participant.battleData.channelledSl).toBe(2);
+        expect(wfrpState(once.participant).channelledSl).toBe(2);
+        expect(once.participant.battleData.channelledSl).toBeUndefined();
 
         expect(
-            channel(once.participant, 20).participant.battleData.channelledSl
+            wfrpState(channel(once.participant, 20).participant).channelledSl
         ).toBe(4);
     });
 
     it('caps at CHANNEL_MAX_SL', () => {
         expect(
-            channel(
-                caster({ skillAdvances: {}, channelledSl: CHANNEL_MAX_SL - 1 }),
-                20
-            ).participant.battleData.channelledSl
+            wfrpState(
+                channel(
+                    caster({
+                        skillAdvances: {},
+                        channelledSl: CHANNEL_MAX_SL - 1,
+                    }),
+                    20
+                ).participant
+            ).channelledSl
         ).toBe(CHANNEL_MAX_SL);
     });
 
     it('a failure leaves the bank unchanged', () => {
         const r = channel(caster({ skillAdvances: {}, channelledSl: 3 }), 70);
 
-        expect(r.participant.battleData.channelledSl).toBe(3);
+        expect(wfrpState(r.participant).channelledSl).toBe(3);
         expect(r.lines[0]).toMatchObject({
             message: 'wfrpMagic.log.channelFail',
         });

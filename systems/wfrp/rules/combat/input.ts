@@ -1,4 +1,5 @@
 import { FORTUNE_INPUT } from '../percentile/fortune';
+import { wfrpState } from '../state';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { ruleErrorOf } from '@/lib/utils/battle/store/errors';
@@ -16,6 +17,6 @@ export function assertWfrpInput(system: SystemSlot, ctx: SystemInputCtx): void {
 
     const allowed = ctx.kind === 'attack' ? ctx.targetCount === 1 : ctx.tested;
 
-    if (!allowed || (actor.battleData.fortune ?? 0) < 1)
+    if (!allowed || (wfrpState(actor).fortune ?? 0) < 1)
         throw ruleErrorOf('action_rejected', API_ERRORS.NO_FORTUNE);
 }

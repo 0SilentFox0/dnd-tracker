@@ -7,6 +7,7 @@ import { DEFAULT_RULES } from '@/lib/utils/rules';
 import { slotOf } from '@/systems/wfrp/rules/__tests__/slot-fixtures';
 import { DEFAULT_CHARACTERISTICS } from '@/systems/wfrp/rules/characteristics/keys';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
+import { wfrpState } from '@/systems/wfrp/rules/state';
 import type { BattleParticipant } from '@/types/battle';
 
 const wfrp = (): BattleParticipant => {
@@ -24,28 +25,34 @@ const wfrp = (): BattleParticipant => {
 describe('applyCharacterResources fortune', () => {
     it('falls back to Fate when nothing is saved', () => {
         expect(
-            applyCharacterResources(
-                wfrp(),
-                { resources: {}, inspiration: null },
-                WFRP_RULES
-            ).battleData.fortune
+            wfrpState(
+                applyCharacterResources(
+                    wfrp(),
+                    { resources: {}, inspiration: null },
+                    WFRP_RULES
+                )
+            ).fortune
         ).toBe(2);
         expect(
-            applyCharacterResources(
-                wfrp(),
-                { resources: null, inspiration: null },
-                WFRP_RULES
-            ).battleData.fortune
+            wfrpState(
+                applyCharacterResources(
+                    wfrp(),
+                    { resources: null, inspiration: null },
+                    WFRP_RULES
+                )
+            ).fortune
         ).toBe(2);
     });
 
     it('prefers the saved value, including 0', () => {
         expect(
-            applyCharacterResources(
-                wfrp(),
-                { resources: { fortune: 0 }, inspiration: null },
-                WFRP_RULES
-            ).battleData.fortune
+            wfrpState(
+                applyCharacterResources(
+                    wfrp(),
+                    { resources: { fortune: 0 }, inspiration: null },
+                    WFRP_RULES
+                )
+            ).fortune
         ).toBe(0);
     });
 

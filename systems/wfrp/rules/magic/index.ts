@@ -1,4 +1,5 @@
 import { ACTION_SLOT } from '../slots';
+import { wfrpState } from '../state';
 import { armourSl } from './armour';
 import { wfrpLoreAttribute } from './attribute';
 import { channelBadge } from './badge';
@@ -52,7 +53,7 @@ export const WFRP_TESTED_MAGIC: RuleSystemTestedMagic = {
         return {
             target: prayer ? prayTargetOf(caster) : castTargetOf(caster),
             channelTarget: channelTargetOf(caster),
-            channelled: prayer ? 0 : (caster.battleData.channelledSl ?? 0),
+            channelled: prayer ? 0 : (wfrpState(caster).channelledSl ?? 0),
             armourSl: prayer ? 0 : armourSl(caster),
         };
     },

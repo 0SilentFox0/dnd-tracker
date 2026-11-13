@@ -20,6 +20,7 @@ import { castOf } from '@/systems/wfrp/rules/__tests__/slot-fixtures';
 import { DEFAULT_CHARACTERISTICS } from '@/systems/wfrp/rules/characteristics/keys';
 import { wfrpAbilitiesOf } from '@/systems/wfrp/rules/combat/participant';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
+import { wfrpState } from '@/systems/wfrp/rules/state';
 import { channelMutation } from '@/systems/wfrp/server/battle/channel-mutation';
 import type { BattleParticipant } from '@/types/battle';
 
@@ -117,7 +118,7 @@ describe('wfrp magic end to end (engine)', () => {
         };
 
         apply(channelMutation(ctx, { participantId: 'hero', roll: 20 }));
-        expect(find(ctx.participants, 'hero').battleData.channelledSl).toBe(2);
+        expect(wfrpState(find(ctx.participants, 'hero')).channelledSl).toBe(2);
 
         const hit = await cast(ctx, {
             casterId: 'hero',
@@ -146,7 +147,9 @@ describe('wfrp magic end to end (engine)', () => {
         expect(conditions.list(find(ctx.participants, 'gob'))).toContainEqual(
             expect.objectContaining({ key: 'ablaze' })
         );
-        expect(find(ctx.participants, 'hero').battleData.channelledSl).toBe(0);
+        expect(
+            wfrpState(find(ctx.participants, 'hero')).channelledSl ?? 0
+        ).toBe(0);
         expect(
             find(ctx.participants, 'gob').combatStats.currentHp
         ).toBeLessThan(goblin.combatStats.currentHp);

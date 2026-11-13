@@ -33,6 +33,7 @@ import {
 import { DEFAULT_CHARACTERISTICS } from '@/systems/wfrp/rules/characteristics/keys';
 import { wfrpAbilitiesOf } from '@/systems/wfrp/rules/combat/participant';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
+import { wfrpState } from '@/systems/wfrp/rules/state';
 import { conditionTestMutation } from '@/systems/wfrp/server/battle/condition-test-mutation';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
 
@@ -312,7 +313,7 @@ describe('wfrp battle end to end (engine)', () => {
         const healed = tested.participants.find((p) => p.basicInfo.id === 't')!;
 
         expect(conditions.list(healed)).toEqual([]);
-        expect(healed.battleData.conditionTests).toEqual(['bleeding']);
+        expect(wfrpState(healed).conditionTests).toEqual(['bleeding']);
         expect(() =>
             conditionTestMutation(
                 { ...afterTurn, participants: tested.participants },

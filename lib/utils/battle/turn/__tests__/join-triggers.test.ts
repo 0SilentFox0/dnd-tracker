@@ -8,6 +8,7 @@ import { DEFAULT_RULES } from '@/lib/utils/rules';
 import { DEFAULT_CHARACTERISTICS } from '@/systems/wfrp/rules/characteristics/keys';
 import { wfrpAbilitiesOf } from '@/systems/wfrp/rules/combat/participant';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
+import { wfrpState } from '@/systems/wfrp/rules/state';
 import { trait } from '@/systems/wfrp/rules/traits/__tests__/fixtures';
 
 const hero = () => {
@@ -56,7 +57,7 @@ describe('runJoinTriggers', () => {
         expect(r.psychology).toEqual({ lines: [], targets: [] });
         expect(
             r.participants.every(
-                (p) => p.battleData.psychologyTested === undefined
+                (p) => wfrpState(p).psychologyTested === undefined
             )
         ).toBe(true);
     });

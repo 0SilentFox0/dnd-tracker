@@ -85,3 +85,43 @@ export const SCENE_SLOT = defineSlot<SceneMomentum>('wfrp', (raw) => {
         Object.entries(raw).filter(([, v]) => v === true)
     ) as SceneMomentum;
 });
+
+export interface WfrpParticipantState {
+    fortune?: number;
+    channelledSl?: number;
+    sin?: number;
+    conditionTests?: string[];
+    psychologyTested?: Partial<Record<string, number>>;
+}
+
+const finite = (v: unknown): v is number =>
+    typeof v === 'number' && Number.isFinite(v);
+
+export const PARTICIPANT_STATE = defineSlot<WfrpParticipantState>(
+    'wfrp',
+    (raw) => {
+        if (!isRec(raw)) return undefined;
+
+        const tested = isRec(raw.psychologyTested)
+            ? Object.fromEntries(
+                  Object.entries(raw.psychologyTested).filter(([, v]) =>
+                      finite(v)
+                  )
+              )
+            : undefined;
+
+        return {
+            ...(finite(raw.fortune) && { fortune: raw.fortune }),
+            ...(finite(raw.channelledSl) && { channelledSl: raw.channelledSl }),
+            ...(finite(raw.sin) && { sin: raw.sin }),
+            ...(Array.isArray(raw.conditionTests) && {
+                conditionTests: raw.conditionTests.filter(
+                    (k): k is string => typeof k === 'string'
+                ),
+            }),
+            ...(tested && {
+                psychologyTested: tested as Record<string, number>,
+            }),
+        };
+    }
+);

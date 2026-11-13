@@ -16,6 +16,7 @@ import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import { DEFAULT_CHARACTERISTICS } from '@/systems/wfrp/rules/characteristics/keys';
 import { wfrpAbilitiesOf } from '@/systems/wfrp/rules/combat/participant';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
+import { wfrpState } from '@/systems/wfrp/rules/state';
 import { must } from '@/systems/wfrp/rules/traits/__tests__/fixtures';
 import { TRAIT_RECIPES } from '@/systems/wfrp/rules/traits/recipes';
 import type { BattleParticipant } from '@/types/battle';
@@ -233,7 +234,7 @@ describe('wfrp unit traits end to end', () => {
         expect(JSON.stringify(joined.psychology.lines)).toContain(
             'psychologyFail'
         );
-        expect(hero.battleData.psychologyTested).toEqual({ fear: 1 });
+        expect(wfrpState(hero).psychologyTested).toEqual({ fear: 1 });
         expect(ruleSystemOf(WFRP_RULES).conditions?.list(hero)).toContainEqual(
             expect.objectContaining({ key: 'broken' })
         );

@@ -8,6 +8,7 @@ import { makeParticipant } from '@/lib/utils/abilities/__tests__/fixtures';
 import { DEFAULT_CHARACTERISTICS } from '@/systems/wfrp/rules/characteristics/keys';
 import { wfrpAbilitiesOf } from '@/systems/wfrp/rules/combat/participant';
 import { conditionLevel } from '@/systems/wfrp/rules/conditions/levels';
+import { wfrpState } from '@/systems/wfrp/rules/state';
 import type { BattleParticipant } from '@/types/battle';
 
 const HERO_WP = {
@@ -69,7 +70,7 @@ describe('wfrpPsychology', () => {
         });
 
         expect(conditionLevel(find(r.participants, 'h'), 'broken')).toBe(0);
-        expect(find(r.participants, 'h').battleData.psychologyTested).toEqual({
+        expect(wfrpState(find(r.participants, 'h')).psychologyTested).toEqual({
             fear: 1,
         });
         expect(r.testerIds).toEqual(['h']);
@@ -116,7 +117,7 @@ describe('wfrpPsychology', () => {
         expect(conditionLevel(find(r.participants, 'h'), 'broken')).toBe(
             1 + 3 + 1
         );
-        expect(find(r.participants, 'h').battleData.psychologyTested).toEqual({
+        expect(wfrpState(find(r.participants, 'h')).psychologyTested).toEqual({
             terror: 2,
             fear: 2,
         });

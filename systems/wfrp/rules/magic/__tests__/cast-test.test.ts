@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { applyWfrpConditionTo } from '../../conditions/apply';
 import { FORTUNE_INPUT } from '../../percentile/fortune';
 import { ACTION_SLOT } from '../../slots';
+import { withWfrpState } from '../../state';
 import { wfrpCastTest } from '../cast-test';
 import { MAX_OVERCAST_STEPS } from '../constants';
 import { caster } from './fixtures';
@@ -169,7 +170,9 @@ describe('wfrpCastTest', () => {
         const r = run(30, {}, { system: FORTUNE_INPUT.write({ kind: 'sl' }) });
 
         expect(r.margin).toBe(3);
-        expect(r.casterData).toEqual({ fortune: 0 });
+        expect(r.casterData).toEqual({
+            system: { key: 'wfrp', data: { fortune: 0 } },
+        });
     });
 
     it('Fortune reroll is not spent on a first-roll success', () => {
@@ -201,7 +204,9 @@ describe('wfrpCastTest', () => {
         );
 
         expect(r.success).toBe(true);
-        expect(r.casterData).toEqual({ fortune: 0 });
+        expect(r.casterData).toEqual({
+            system: { key: 'wfrp', data: { fortune: 0 } },
+        });
     });
 
     it('success and failure lines carry name, spell, roll, target, sl and cn', () => {
@@ -313,11 +318,28 @@ describe('prayers', () => {
 
         expect(r.success).toBe(false);
         expect(castOf(r)?.channelled).toBe(0);
-        expect(r.keepChannelled).toBe(true);
+        expect(r.casterData).toBeUndefined();
     });
 
-    it('an ordinary spell does not keep channelled SL', () => {
-        expect(run(30).keepChannelled).toBeUndefined();
+    it('an ordinary spell spends the banked channelled SL (legacy field)', () => {
+        const r = run(30, { cn: 0 }, { caster: caster({ channelledSl: 2 }) });
+
+        expect(r.casterData).toHaveProperty('channelledSl', undefined);
+        expect(r.casterData).not.toHaveProperty('system');
+    });
+
+    it('an ordinary spell spends the banked channelled SL (slot)', () => {
+        const banked = withWfrpState(caster(), { channelledSl: 2 });
+
+        const r = run(30, { cn: 0 }, { caster: banked });
+
+        expect(r.casterData).toEqual({
+            system: { key: 'wfrp', data: {} },
+        });
+    });
+
+    it('an ordinary spell with nothing banked leaves the caster alone', () => {
+        expect(run(30).casterData).toBeUndefined();
     });
 
     it('preview of a prayer ignores channelling and armour', async () => {

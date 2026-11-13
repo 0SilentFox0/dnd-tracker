@@ -478,11 +478,9 @@ export interface CastTestResult {
     margin: number;
     overcastSteps: number;
     miscast: string | null;
-    /** Prayers neither use nor spend banked channelling */
-    keepChannelled?: true;
     details: SystemSlot;
     lines: LogLine[];
-    /** Battle data the caster ends with, merged by the pipeline (a spent resource) */
+    /** Battle data the caster ends with, merged by the pipeline (spent resources, banked state) */
     casterData?: Partial<BattleParticipant['battleData']>;
 }
 
@@ -848,8 +846,6 @@ export interface RuleSystemDefinition {
     resources?: {
         limits?(row: { characteristics?: unknown }): { fateMax?: number };
         seed?(characteristics: unknown): Partial<CharacterResources>;
-        /** Starting Fortune of a participant without stored resources */
-        fortuneOf?(p: BattleParticipant): number | undefined;
     };
     sheetTest: {
         accepts(body: { kind: string }): boolean;

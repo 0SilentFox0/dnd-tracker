@@ -11,6 +11,7 @@ import {
     spentFortune,
 } from '../percentile/fortune';
 import { ACTION_SLOT } from '../slots';
+import { wfrpState, wfrpStateData } from '../state';
 import { armourSl } from './armour';
 import {
     CAST_SKILL,
@@ -58,7 +59,7 @@ export function wfrpCastTest(ctx: CastTestCtx): CastTestResult {
 
     const target = prayer ? prayTargetOf(caster) : castTargetOf(caster);
 
-    const channelled = prayer ? 0 : (caster.battleData.channelledSl ?? 0);
+    const channelled = prayer ? 0 : (wfrpState(caster).channelledSl ?? 0);
 
     const armour = prayer ? 0 : armourSl(caster);
 
@@ -90,7 +91,7 @@ export function wfrpCastTest(ctx: CastTestCtx): CastTestResult {
 
     const critical = success && test.outcome === 'critical';
 
-    const sin = caster.battleData.sin ?? 0;
+    const sin = wfrpState(caster).sin ?? 0;
 
     const wrath = test.doubles && sin > 0 && test.roll % 10 <= sin;
 
@@ -150,12 +151,21 @@ export function wfrpCastTest(ctx: CastTestCtx): CastTestResult {
             )
         );
 
+    const statePatch = {
+        ...(fortune && spentFortune(caster)),
+        ...(channelled > 0 && { channelledSl: undefined }),
+    };
+
+    const casterData =
+        Object.keys(statePatch).length > 0
+            ? wfrpStateData(caster, statePatch)
+            : undefined;
+
     return {
         success,
         margin: test.sl,
         overcastSteps,
         miscast,
-        ...(prayer && { keepChannelled: true as const }),
         details: ACTION_SLOT.write({
             cast: {
                 roll: test.roll,
@@ -172,6 +182,6 @@ export function wfrpCastTest(ctx: CastTestCtx): CastTestResult {
             },
         }),
         lines,
-        ...(fortune && { casterData: spentFortune(caster) }),
+        ...(casterData && { casterData }),
     };
 }

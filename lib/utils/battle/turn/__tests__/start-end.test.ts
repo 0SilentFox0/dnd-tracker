@@ -23,6 +23,7 @@ import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
 import { DEFAULT_CHARACTERISTICS } from '@/systems/wfrp/rules/characteristics/keys';
 import { wfrpAbilitiesOf } from '@/systems/wfrp/rules/combat/participant';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
+import { wfrpState } from '@/systems/wfrp/rules/state';
 import { trait } from '@/systems/wfrp/rules/traits/__tests__/fixtures';
 import type {
     ActiveEffect,
@@ -712,8 +713,9 @@ it('processStartOfRound: призваний із Fear тестує наявни�
         { participantId: 'hero', participantName: hero.basicInfo.name },
     ]);
     expect(
-        out.updatedInitiativeOrder.find((p) => p.basicInfo.id === 'hero')
-            ?.battleData.psychologyTested
+        wfrpState(
+            out.updatedInitiativeOrder.find((p) => p.basicInfo.id === 'hero')!
+        ).psychologyTested
     ).toEqual({ fear: 1 });
     expect(
         processStartOfRound([hero], 2, [], () => 0.5, undefined, WFRP_RULES)

@@ -16,6 +16,7 @@ import { conditionLevel } from '@/systems/wfrp/rules/conditions/levels';
 import { caster as wfrpCaster } from '@/systems/wfrp/rules/magic/__tests__/fixtures';
 import { FORTUNE_INPUT } from '@/systems/wfrp/rules/percentile/fortune';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
+import { wfrpState } from '@/systems/wfrp/rules/state';
 import type { BattleMapConfig, BattleParticipant } from '@/types/battle';
 
 const map: BattleMapConfig = {
@@ -143,7 +144,7 @@ describe('castSpell in a percentile magic system', () => {
         expect(r.fizzled).toBe(true);
         expect(hpLost(r)).toBe(0);
         expect(r.casterUpdated.actionFlags.hasUsedAction).toBe(true);
-        expect(r.casterUpdated.battleData.channelledSl).toBe(0);
+        expect(wfrpState(r.casterUpdated).channelledSl ?? 0).toBe(0);
         expect(castOf(r.battleAction.actionDetails)?.outcome).toBe('failure');
     });
 
@@ -306,7 +307,7 @@ describe('castSpell in a percentile magic system', () => {
             kind: 'reroll',
             firstRoll: 90,
         });
-        expect(r.casterUpdated.battleData.fortune).toBe(1);
+        expect(wfrpState(r.casterUpdated).fortune).toBe(1);
     });
 });
 
@@ -320,9 +321,9 @@ describe('prayers in castSpell', () => {
             caster
         );
 
-        expect(r.casterUpdated.battleData.channelledSl).toBe(2);
+        expect(wfrpState(r.casterUpdated).channelledSl).toBe(2);
         expect(castOf(r.battleAction.actionDetails)?.miscast).toBe('wrath');
-        expect(r.casterUpdated.battleData.sin).toBe(3);
+        expect(wfrpState(r.casterUpdated).sin).toBe(3);
         expect(
             r.messages.some(
                 (m) =>

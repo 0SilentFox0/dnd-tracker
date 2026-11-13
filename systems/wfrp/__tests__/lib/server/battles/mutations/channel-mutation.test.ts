@@ -9,6 +9,7 @@ import {
 import { DEFAULT_CHARACTERISTICS } from '@/systems/wfrp/rules/characteristics/keys';
 import { wfrpAbilitiesOf } from '@/systems/wfrp/rules/combat/participant';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
+import { wfrpState } from '@/systems/wfrp/rules/state';
 import {
     channelMutation,
     channelSchema,
@@ -48,7 +49,7 @@ describe('channelMutation', () => {
 
         const hero = heroOf(out);
 
-        expect(hero.battleData.channelledSl).toBe(2);
+        expect(wfrpState(hero).channelledSl).toBe(2);
         expect(hero.actionFlags.hasUsedAction).toBe(true);
         expect(text(out)).toContain('wfrpMagic.log.channelSuccess');
     });
@@ -59,13 +60,13 @@ describe('channelMutation', () => {
             serverRoll: true,
         });
 
-        expect(heroOf(out).battleData.channelledSl).toBeGreaterThan(0);
+        expect(wfrpState(heroOf(out)).channelledSl).toBeGreaterThan(0);
     });
 
     it('failure logs the fail line and still spends the action', () => {
         const out = channelMutation(ctx(), { participantId: 'hero', roll: 90 });
 
-        expect(heroOf(out).battleData.channelledSl ?? 0).toBe(0);
+        expect(wfrpState(heroOf(out)).channelledSl ?? 0).toBe(0);
         expect(heroOf(out).actionFlags.hasUsedAction).toBe(true);
         expect(text(out)).toContain('wfrpMagic.log.channelFail');
     });

@@ -17,6 +17,7 @@ import type { BattleMutationContext } from '@/lib/utils/battle/pipeline/run-batt
 import { DEFAULT_CHARACTERISTICS } from '@/systems/wfrp/rules/characteristics/keys';
 import { wfrpAbilitiesOf } from '@/systems/wfrp/rules/combat/participant';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
+import { wfrpState } from '@/systems/wfrp/rules/state';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
 
 const sword: BattleAttack = {
@@ -91,7 +92,7 @@ const body = (over: Record<string, unknown> = {}) =>
     });
 
 const fortuneOf = (out: { participants: BattleParticipant[] }) =>
-    out.participants.find((p) => p.basicInfo.id === 'a')!.battleData.fortune;
+    wfrpState(out.participants.find((p) => p.basicInfo.id === 'a')!).fortune;
 
 const hpOf = (out: { participants: BattleParticipant[] }) =>
     out.participants.find((p) => p.basicInfo.id === 't')!.combatStats.currentHp;

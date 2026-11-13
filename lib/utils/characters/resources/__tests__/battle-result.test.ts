@@ -8,6 +8,7 @@ import {
     battleResultLogData,
 } from '@/lib/utils/characters/resources/battle';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
+import { wfrpState } from '@/systems/wfrp/rules/state';
 import type { BattleParticipant } from '@/types/battle';
 
 const surge = resolved(
@@ -140,11 +141,13 @@ describe('applyBattleResult', () => {
 describe('Fortune sheet <-> battle', () => {
     it('applyCharacterResources copies fortune to battleData; absent -> no field', () => {
         expect(
-            applyCharacterResources(
-                hero(),
-                { inspiration: null, resources: { fortune: 2 } },
-                WFRP_RULES
-            ).battleData.fortune
+            wfrpState(
+                applyCharacterResources(
+                    hero(),
+                    { inspiration: null, resources: { fortune: 2 } },
+                    WFRP_RULES
+                )
+            ).fortune
         ).toBe(2);
         expect(
             applyCharacterResources(

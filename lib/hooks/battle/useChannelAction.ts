@@ -41,7 +41,7 @@ export function useChannelAction(hero: BattleParticipant, onDone?: () => void) {
         pending: channel.isPending,
         error,
         target: preview?.channelTarget ?? 0,
-        banked: hero.battleData.channelledSl ?? 0,
+        banked: preview?.channelled ?? 0,
     };
 
     const actions = {

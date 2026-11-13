@@ -3,6 +3,7 @@
 import { useBattleScene } from '@/lib/hooks/battle';
 import { dynamicTextRef } from '@/lib/i18n/text-ref';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
+import { wfrpState } from '@/systems/wfrp/rules/state';
 import type { BattleParticipant } from '@/types/battle';
 import type { LogLine } from '@/types/text';
 
@@ -29,7 +30,7 @@ export function useConditionTestPanel(
     if (!conditions || turn.current?.basicInfo.id !== hero.basicInfo.id)
         return null;
 
-    const tried = hero.battleData.conditionTests ?? [];
+    const tried = wfrpState(hero).conditionTests ?? [];
 
     const items = conditions
         .list(hero)

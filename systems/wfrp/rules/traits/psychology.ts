@@ -3,6 +3,7 @@ import { participantChars } from '../combat/participant';
 import { applyWfrpCondition } from '../conditions/apply';
 import { selfTestMod } from '../conditions/test-mod';
 import { resolvePercentileTest } from '../percentile';
+import { wfrpState, withWfrpState } from '../state';
 import { PSYCHOLOGY_PASS_SL } from './constants';
 import { traitEffects } from './read';
 
@@ -108,7 +109,7 @@ export function wfrpPsychology(
                 null
             );
 
-        const done = tester.battleData.psychologyTested ?? {};
+        const done = wfrpState(tester).psychologyTested ?? {};
 
         if (!top || top.value <= (done[top.kind] ?? 0)) continue;
 
@@ -184,10 +185,7 @@ export function wfrpPsychology(
 
         participants = participants.map((p) =>
             p.basicInfo.id === tester.basicInfo.id
-                ? {
-                      ...p,
-                      battleData: { ...p.battleData, psychologyTested: tested },
-                  }
+                ? withWfrpState(p, { psychologyTested: tested })
                 : p
         );
     }

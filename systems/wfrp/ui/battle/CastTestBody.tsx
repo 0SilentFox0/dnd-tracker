@@ -1,6 +1,7 @@
 import { useTranslations } from 'next-intl';
 
 import { FORTUNE_INPUT } from '../../rules/percentile/fortune';
+import { wfrpState } from '../../rules/state';
 import { D100RollPicker } from './D100RollPicker';
 
 import type { CastTestProps } from '@/components/systems/types';
@@ -12,7 +13,7 @@ export function CastTestBody({
 
     const { cast, caster } = view;
 
-    const left = caster?.battleData.fortune ?? 0;
+    const left = (caster && wfrpState(caster).fortune) ?? 0;
 
     if (!cast) return null;
 

@@ -9,6 +9,7 @@ import { editResources } from '@/lib/utils/characters/resources/edit';
 import { applyRest } from '@/lib/utils/characters/resources/rest';
 import { CharacterResourcesSchema } from '@/lib/utils/characters/resources/schema';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
+import { wfrpState, withWfrpState } from '@/systems/wfrp/rules/state';
 
 describe('sin resource', () => {
     it('schema accepts 0-10 only', () => {
@@ -53,9 +54,9 @@ describe('sin resource', () => {
             WFRP_RULES
         );
 
-        expect(p.battleData.sin).toBe(3);
+        expect(wfrpState(p).sin).toBe(3);
 
-        const changed = { ...p, battleData: { ...p.battleData, sin: 9 } };
+        const changed = withWfrpState(p, { sin: 9 });
 
         expect(applyBattleResult({ sin: 3 }, changed, WFRP_RULES).sin).toBe(3);
     });

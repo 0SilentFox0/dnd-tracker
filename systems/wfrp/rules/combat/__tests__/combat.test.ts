@@ -498,7 +498,9 @@ describe('resolveWfrpAttack fortune', () => {
         });
 
         expect(r.isHit).toBe(true);
-        expect(r.attackerData).toEqual({ fortune: 0 });
+        expect(r.attackerData).toEqual({
+            system: { key: 'wfrp', data: { fortune: 0 } },
+        });
         expect(JSON.stringify(r.lines)).toContain(
             'battleWfrp.log.fortuneReroll'
         );
@@ -527,7 +529,9 @@ describe('resolveWfrpAttack fortune', () => {
         });
 
         expect(r.isHit).toBe(true);
-        expect(r.attackerData).toEqual({ fortune: 0 });
+        expect(r.attackerData).toEqual({
+            system: { key: 'wfrp', data: { fortune: 0 } },
+        });
     });
 
     it('ranged reroll without a manual roll uses rng', () => {
@@ -552,7 +556,9 @@ describe('resolveWfrpAttack fortune', () => {
         expect(boosted.attackRoll.margin).toBe(
             (plain.attackRoll.margin ?? 0) + 1
         );
-        expect(boosted.attackerData).toEqual({ fortune: 0 });
+        expect(boosted.attackerData).toEqual({
+            system: { key: 'wfrp', data: { fortune: 0 } },
+        });
         expect(attackOf(boosted.attackRoll)?.fortune).toEqual({ kind: 'sl' });
     });
 });

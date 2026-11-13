@@ -9,6 +9,7 @@ import {
 import { resetTurnState } from '@/lib/utils/battle/turn/turn-state';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
+import { wfrpState } from '@/systems/wfrp/rules/state';
 import {
     conditionTestMutation,
     conditionTestSchema,
@@ -64,7 +65,7 @@ describe('conditionTestMutation', () => {
         const p = heroOf(out);
 
         expect(levelOf(p, 'bleeding')).toBe(1);
-        expect(p.battleData.conditionTests).toEqual(['bleeding']);
+        expect(wfrpState(p).conditionTests).toEqual(['bleeding']);
         expect(p.actionFlags).toEqual(c.participants[0].actionFlags);
         expect(out.events).toHaveLength(1);
     });
@@ -96,7 +97,7 @@ describe('conditionTestMutation', () => {
         const p = heroOf(conditionTestMutation(ctx(), body({ roll: 95 })));
 
         expect(levelOf(p, 'bleeding')).toBe(2);
-        expect(p.battleData.conditionTests).toContain('bleeding');
+        expect(wfrpState(p).conditionTests).toContain('bleeding');
     });
 
     it('player off turn gets 403; DM on non-current gets unavailable', () => {

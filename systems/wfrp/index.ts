@@ -35,7 +35,7 @@ import { WFRP_EQUIPMENT } from './rules/equipment';
 import { WFRP_MAGIC } from './rules/magic';
 import { onSession } from './rules/session';
 import { acceptsWfrpSheetTest, rollWfrpSheetTest } from './rules/sheet-test';
-import { PARTICIPANT_SLOT } from './rules/slots';
+import { wfrpFromStored, wfrpPersist } from './rules/state-parts';
 import { WFRP_TRAITS } from './rules/traits';
 import { WFRP_TURN } from './rules/turn';
 
@@ -47,6 +47,7 @@ import type { RuleSystemDefinition } from '@/lib/utils/rules/systems/types';
 
 export const WFRP_MODULE: RuleSystemDefinition = {
     key: 'wfrp',
+    participant: { fromStored: [wfrpFromStored], persist: [wfrpPersist] },
     progression: {
         levels: false,
         hpTerm: 'wounds',
@@ -93,8 +94,6 @@ export const WFRP_MODULE: RuleSystemDefinition = {
         seed: (characteristics) => ({
             fortune: readCharacteristics({ characteristics }).fate,
         }),
-        fortuneOf: (p) =>
-            PARTICIPANT_SLOT.read(p.abilities.system)?.characteristics.fate,
     },
     sheetTest: {
         accepts: acceptsWfrpSheetTest,

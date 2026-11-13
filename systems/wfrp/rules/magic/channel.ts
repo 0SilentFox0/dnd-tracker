@@ -2,6 +2,7 @@ import { skillTarget, value } from '../characteristics/derive';
 import { participantChars } from '../combat/participant';
 import { selfTestMod } from '../conditions/test-mod';
 import { resolvePercentileTest } from '../percentile';
+import { wfrpState, withWfrpState } from '../state';
 import { CHANNEL_MAX_SL, WORST_ROLL } from './constants';
 
 import { textRef } from '@/lib/i18n/text-ref';
@@ -39,15 +40,14 @@ export function wfrpChannel(
 
     const miscast = test.roll === WORST_ROLL ? 'minor' : null;
 
+    const held = wfrpState(p).channelledSl ?? 0;
+
     const banked = success
-        ? Math.min(
-              CHANNEL_MAX_SL,
-              (p.battleData.channelledSl ?? 0) + Math.max(0, test.sl)
-          )
-        : (p.battleData.channelledSl ?? 0);
+        ? Math.min(CHANNEL_MAX_SL, held + Math.max(0, test.sl))
+        : held;
 
     const participant = success
-        ? { ...p, battleData: { ...p.battleData, channelledSl: banked } }
+        ? withWfrpState(p, { channelledSl: banked })
         : p;
 
     const line = textRef(
