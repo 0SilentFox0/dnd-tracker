@@ -360,6 +360,171 @@ describe('downgradeHistory', () => {
         }));
 });
 
+describe('death saves, inspiration, off-hand and the ext counter', () => {
+    const SAVES = { successes: 1, failures: 2, stable: false };
+
+    const d20Row = (
+        data: Record<string, unknown>,
+        snapshotBattleData: Record<string, unknown> = {},
+        state: Record<string, unknown> = {}
+    ) =>
+        row(
+            { basicInfo: { id: 'p1' }, battleData: snapshotBattleData },
+            {
+                activeEffects: [],
+                ...state,
+                system: { key: 'sys', data },
+            }
+        );
+
+    it('shapeOf sees the flat fields of the new codec as legacy', () => {
+        for (const battleData of [
+            { deathSaves: SAVES },
+            { inspiration: true },
+            { inspirationSpent: true },
+            { attackedWithLight: true },
+        ])
+            expect(shapeOf(row({ battleData }, {}))).toBe('legacy');
+
+        expect(shapeOf(row({ battleData: {} }, { retaliationsUsed: 1 }))).toBe(
+            'legacy'
+        );
+    });
+
+    it('moves slot values to the snapshot and drops the dying flag with the slot', () => {
+        const result = downgradeParticipant(
+            d20Row(
+                {
+                    deathSaves: SAVES,
+                    inspiration: true,
+                    inspirationSpent: true,
+                    attackedWithLight: true,
+                },
+                {},
+                { dying: true }
+            )
+        );
+
+        expect(result.unmapped).toEqual([]);
+        expect(result.snapshot).toEqual({
+            basicInfo: { id: 'p1' },
+            battleData: {
+                deathSaves: SAVES,
+                inspiration: true,
+                inspirationSpent: true,
+                attackedWithLight: true,
+            },
+        });
+        expect(result.state).toEqual({ activeEffects: [] });
+        expect(result.snapshotHash).toBe(hashJson(result.snapshot));
+    });
+
+    it('removes stale flat copies that the slot no longer has', () => {
+        const result = downgradeParticipant(
+            d20Row(
+                { inspirationSpent: true },
+                { inspiration: false, attackedWithLight: true }
+            )
+        );
+
+        expect(result.snapshot).toEqual({
+            basicInfo: { id: 'p1' },
+            battleData: { inspirationSpent: true },
+        });
+    });
+
+    it('fieldsOf lists an ext value under the name of its flat counterpart', () => {
+        const { slot } = fieldsOf(
+            d20Row({ inspiration: true, ext: { retaliation: { used: 1 } } })
+        );
+
+        expect(slot).toEqual({ inspiration: true, retaliationsUsed: 1 });
+    });
+
+    it('maps ext.retaliation.used back to state.retaliationsUsed', () => {
+        const result = downgradeParticipant(
+            d20Row(
+                { ext: { retaliation: { used: 2 } } },
+                {},
+                { retaliationsUsed: 9 }
+            )
+        );
+
+        expect(result.unmapped).toEqual([]);
+        expect(result.state).toEqual({
+            activeEffects: [],
+            retaliationsUsed: 2,
+        });
+    });
+
+    it('keeps the flat counter when the slot has no retaliation ext', () => {
+        const result = downgradeParticipant(
+            d20Row({ inspiration: true }, {}, { retaliationsUsed: 1 })
+        );
+
+        expect(result.state).toEqual({
+            activeEffects: [],
+            retaliationsUsed: 1,
+        });
+    });
+
+    it('is a fixed point and keeps the hash consistent', () => {
+        const once = downgradeParticipant(
+            d20Row(
+                { deathSaves: SAVES, ext: { retaliation: { used: 1 } } },
+                {},
+                { dying: true }
+            )
+        );
+
+        const twice = downgradeParticipant({
+            ...d20Row({}),
+            snapshot: once.snapshot,
+            state: once.state,
+            snapshotHash: once.snapshotHash,
+        });
+
+        expect(twice.changed).toBe(false);
+        expect(hashMismatch({ ...legacyRow(), ...once })).toBe(false);
+    });
+
+    it('aligns the history rows the same way', () => {
+        const input = {
+            participants: [
+                {
+                    columns: { id: 'p1' },
+                    state: {
+                        activeEffects: [],
+                        dying: true,
+                        system: {
+                            key: 'sys',
+                            data: {
+                                deathSaves: SAVES,
+                                ext: { retaliation: { used: 1 } },
+                            },
+                        },
+                    },
+                },
+            ],
+            changedSnapshots: { p1: { battleData: {} } },
+        };
+
+        const result = downgradeHistory(input);
+
+        expect(result.unmapped).toEqual([]);
+        expect(result.state).toMatchObject({
+            participants: [
+                { state: { activeEffects: [], retaliationsUsed: 1 } },
+            ],
+            changedSnapshots: { p1: { battleData: { deathSaves: SAVES } } },
+        });
+        expect(
+            (result.state as { participants: { state: object }[] })
+                .participants[0].state
+        ).not.toHaveProperty('dying');
+    });
+});
+
 describe('ratchet', () => {
     it('keeps system names out of the CLIs and libs', () => {
         const files = [

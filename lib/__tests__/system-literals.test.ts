@@ -206,6 +206,10 @@ describe('d20 / HOMM names and rule-section readers leaving core', () => {
         '\\bconditionTests\\b': 2,
         '\\bpsychologyTested\\b': 5,
         'battleData\\??\\.(fortune|sin)\\b': 0,
+        '\\battackedWithLight\\b': 2,
+        '\\binspirationSpent\\b': 3,
+        '\\bretaliationsUsed\\b': 5,
+        'battleData\\??\\.(deathSaves|inspiration|attackedWithLight|retaliationsUsed)\\b': 1,
     };
 
     const RULES_SECTION_READERS: Record<string, number> = {

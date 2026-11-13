@@ -10,15 +10,21 @@ export const LEGACY_SNAPSHOT_FIELDS: readonly string[] = [
     'channelledSl',
     'sin',
     'conditionTests',
+    'deathSaves',
+    'inspiration',
+    'inspirationSpent',
+    'attackedWithLight',
 ];
 
 export const LEGACY_STATE_FIELDS: readonly string[] = ['psychologyTested'];
 
 /** slot `ext[module][from]` goes back to the flat `state[to]` */
-export const EXT_TO_LEGACY: Record<string, { from: string; to: string }> = {};
+export const EXT_TO_LEGACY: Record<string, { from: string; to: string }> = {
+    retaliation: { from: 'used', to: 'retaliationsUsed' },
+};
 
 /** neutral flags that only exist next to a slot and are dropped on downgrade */
-export const NEUTRAL_STATE_FIELDS: readonly string[] = [];
+export const NEUTRAL_STATE_FIELDS: readonly string[] = ['dying'];
 
 export type ParticipantShape = 'none' | 'legacy' | 'slot' | 'mixed';
 
@@ -110,9 +116,28 @@ export function fieldsOf(row: Pick<ParticipantRow, 'snapshot' | 'state'>): {
 
     return {
         ...(slot && { slotKey: slot.key }),
-        slot: slot?.data ?? {},
+        slot: slot ? flatSlotData(slot) : {},
         legacy: legacyOf(row.snapshot, row.state),
     };
+}
+
+/** slot data with each known ext value listed under the name of its flat counterpart, so slot and legacy compare field by field */
+function flatSlotData(slot: SlotShape): Json {
+    const { ext, ...rest } = slot.data;
+
+    const flat: Json = { ...rest };
+
+    if (isRecord(ext))
+        for (const [module, value] of Object.entries(ext)) {
+            const map = EXT_TO_LEGACY[module];
+
+            if (map && isRecord(value) && value[map.from] !== undefined)
+                flat[map.to] = value[map.from];
+            else flat[`ext.${module}`] = value;
+        }
+    else if (ext !== undefined) flat.ext = ext;
+
+    return flat;
 }
 
 export const hashMismatch = (
@@ -123,12 +148,16 @@ function splitSlot(slot: SlotShape): {
     snapshotValues: Json;
     stateValues: Json;
     unmapped: string[];
+    /** flat state fields whose module has an ext in the slot: the slot overrides them */
+    extOwned: string[];
 } {
     const snapshotValues: Json = {};
 
     const stateValues: Json = {};
 
     const unmapped: string[] = [];
+
+    const extOwned: string[] = [];
 
     for (const [name, value] of Object.entries(slot.data)) {
         if (name === 'ext') continue;
@@ -152,20 +181,27 @@ function splitSlot(slot: SlotShape): {
                 continue;
             }
 
+            extOwned.push(map.to);
+
             if (value[map.from] !== undefined)
                 stateValues[map.to] = value[map.from];
         }
     }
 
-    return { snapshotValues, stateValues, unmapped };
+    return { snapshotValues, stateValues, unmapped, extOwned };
 }
 
-function alignState(state: unknown, stateValues: Json): Json {
+/** a flat field of an ext module stays when the slot has no ext for it: readers fall back to it there */
+function alignState(state: unknown, stateValues: Json, extOwned: string[]): Json {
     const next: Json = isRecord(state) ? { ...state } : {};
 
     delete next.system;
 
-    for (const name of [...NEUTRAL_STATE_FIELDS, ...stateLegacyNames()])
+    for (const name of [
+        ...NEUTRAL_STATE_FIELDS,
+        ...LEGACY_STATE_FIELDS,
+        ...extOwned,
+    ])
         delete next[name];
 
     return Object.assign(next, stateValues);
@@ -195,11 +231,11 @@ function downgradeStored(stored: {
 
     if (!slot) return { ...stored, changed: false, unmapped: [] };
 
-    const { snapshotValues, stateValues, unmapped } = splitSlot(slot);
+    const { snapshotValues, stateValues, unmapped, extOwned } = splitSlot(slot);
 
     const snapshot = alignSnapshot(stored.snapshot, snapshotValues);
 
-    const state = alignState(stored.state, stateValues);
+    const state = alignState(stored.state, stateValues, extOwned);
 
     const snapshotHash = hashJson(snapshot);
 
@@ -253,7 +289,10 @@ export function downgradeHistory(state: unknown): DowngradedHistory {
                     split.snapshotValues
                 );
 
-            return { ...p, state: alignState(p.state, split.stateValues) };
+            return {
+                ...p,
+                state: alignState(p.state, split.stateValues, split.extOwned),
+            };
         });
 
     if (changedSnapshots) next.changedSnapshots = changedSnapshots;
