@@ -114,7 +114,11 @@ function resolveSpellAttack(
 
     const bonus =
         (state.attackBonus ??
-            spellAttackBonus(caster, spell.definition.addAbilityMod === true)) +
+            spellAttackBonus(
+                caster,
+                flow.ctx.rules,
+                spell.definition.addAbilityMod === true
+            )) +
         collectModifiers(mods, caster.basicInfo.id, {
             stat: 'attackBonus',
             attackKind: attackKindOf(pseudoAttack.type),

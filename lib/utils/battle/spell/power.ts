@@ -7,10 +7,6 @@ import {
     heroMagicMultiplier,
 } from '@/lib/utils/battle/damage/hero-dm-multiplier';
 import { multiplierRow, stepRow } from '@/lib/utils/battle/damage/rows';
-import {
-    spellcastingModifier,
-    weaponModifier,
-} from '@/lib/utils/battle/spell/ability-modifier';
 import { signed } from '@/lib/utils/common/format';
 import { type Ruleset } from '@/lib/utils/rules';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
@@ -18,14 +14,15 @@ import type { BattleParticipant, DamageRow } from '@/types/battle';
 
 export function spellAttackBonus(
     caster: BattleParticipant,
+    rules: Ruleset,
     weapon = false
 ): number {
-    if (weapon && !caster.spellcasting.spellcastingAbility)
-        return caster.abilities.proficiencyBonus + weaponModifier(caster).mod;
+    const { magic } = ruleSystemOf(rules);
 
     return (
+        magic.spellAttackBonus?.(caster, weapon) ??
         caster.spellcasting.spellAttackBonus ??
-        caster.abilities.proficiencyBonus + spellcastingModifier(caster).mod
+        0
     );
 }
 

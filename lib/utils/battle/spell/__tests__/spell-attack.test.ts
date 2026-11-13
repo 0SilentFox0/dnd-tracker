@@ -115,7 +115,7 @@ function cast(
 
 describe('spellAttackBonus', () => {
     it('takes the explicit bonus, else proficiency plus the casting modifier', () => {
-        expect(spellAttackBonus(caster())).toBe(5);
+        expect(spellAttackBonus(caster(), DEFAULT_RULES)).toBe(5);
 
         const p = caster();
 
@@ -133,7 +133,7 @@ describe('spellAttackBonus', () => {
             },
         };
 
-        expect(spellAttackBonus(wizard)).toBe(7);
+        expect(spellAttackBonus(wizard, DEFAULT_RULES)).toBe(7);
     });
 });
 

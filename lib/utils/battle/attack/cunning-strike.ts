@@ -19,6 +19,7 @@ import {
 import { savesOf } from '@/lib/utils/battle/saves/access';
 import { REJECT } from '@/lib/utils/battle/store/reject';
 import { diceCount } from '@/lib/utils/common/dice';
+import type { Ruleset } from '@/lib/utils/rules/schema';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { BattleParticipant } from '@/types/battle';
 import type { TextRef } from '@/types/text';
@@ -111,10 +112,16 @@ const SAVE_ABILITY: Record<'poison' | 'trip', AbilityKey> = {
     trip: 'dexterity',
 };
 
-export const cunningStrikeDc = (attacker: BattleParticipant): number =>
-    8 +
-    attacker.abilities.modifiers.dexterity +
-    attacker.abilities.proficiencyBonus;
+export const cunningStrikeDc = (
+    attacker: BattleParticipant,
+    rules: Ruleset
+): number => {
+    const { saves, proficiency } = ruleSystemOf(rules).combat;
+
+    return (
+        8 + saves.modifiers(attacker).dexterity + proficiency.bonus(attacker)
+    );
+};
 
 export function applyCunningStrikeEffects(
     flow: ActionFlow,
@@ -149,7 +156,7 @@ export function applyCunningStrikeEffects(
 
         const ability = SAVE_ABILITY[effect];
 
-        const dc = cunningStrikeDc(attacker);
+        const dc = cunningStrikeDc(attacker, flow.ctx.rules);
 
         const save = savesOf(flow.ctx.rules).roll({
             target,

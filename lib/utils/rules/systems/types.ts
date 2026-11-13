@@ -628,6 +628,8 @@ export interface RuleSystemMagic {
     spellAbilityMod?(
         caster: BattleParticipant
     ): { mod: number; label: string } | null;
+    /** Attack roll bonus of a spell (`weapon`: the spell makes a weapon attack); absent means the caster's own stored bonus or 0 */
+    spellAttackBonus?(caster: BattleParticipant, weapon: boolean): number;
     /** Dice of a spell for this caster; null means the caster is not covered and the default dice apply */
     casterDice?(
         caster: BattleParticipant,
@@ -834,6 +836,8 @@ export interface RuleSystemCombat {
         damage(p: BattleParticipant): number;
         /** Multiplier on effective HP for protection that offense/defense do not capture (armour, ward) */
         durability?(p: BattleParticipant): number;
+        /** Save modifiers the balance of a party member reports; absent means none */
+        saves?(p: BattleParticipant): Partial<Record<string, number>>;
         /** Hit chance of an average matchup; party/unit factors are relative to it */
         refHit: number;
         /** Reference for library units when it differs from the hero one */

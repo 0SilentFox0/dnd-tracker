@@ -483,6 +483,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
         ...inlineSummonRequests({
             effects: source.definition.effects,
             caster: readyCaster,
+            rules: flow.ctx.rules,
             spell,
             castLevel,
             saveDc: state.saveDc,

@@ -48,6 +48,7 @@ function bestHitAverage(p: BattleParticipant): number {
 
 export const wfrpHitModel: NonNullable<RuleSystemCombat['hitModel']> = {
     offense: (p) => value(participantChars(p), 'ws'),
+    saves: (p) => p.abilities.modifiers,
     defense: (p) => {
         const c = participantChars(p);
 

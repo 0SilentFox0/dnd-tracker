@@ -124,8 +124,8 @@ describe('weapon object for a non-caster', () => {
 
         expect(power.damage).toBe(8);
         expect(rowLines(power.breakdown)).toContain('Мод. DEX +4');
-        expect(spellAttackBonus(fighter, true)).toBe(6);
-        expect(spellAttackBonus(fighter)).toBe(2);
+        expect(spellAttackBonus(fighter, DEFAULT_RULES, true)).toBe(6);
+        expect(spellAttackBonus(fighter, DEFAULT_RULES)).toBe(2);
     });
 });
 

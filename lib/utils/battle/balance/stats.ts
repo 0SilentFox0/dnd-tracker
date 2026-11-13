@@ -14,6 +14,7 @@ import {
     heroMagicMultiplier,
 } from '@/lib/utils/battle/damage/hero-dm-multiplier';
 import { getEffectiveArmorClass } from '@/lib/utils/battle/participant/helpers';
+import { savesOf } from '@/lib/utils/battle/saves/access';
 import { getAbilityModifier } from '@/lib/utils/common/calculations';
 import {
     averageOf,
@@ -391,7 +392,7 @@ export function getCharacterStats({
         ac: getEffectiveArmorClass(participant),
         weaponDpr,
         damageKey: damageKey(attackKindOf(best.type), best.damageType),
-        saves: participant.abilities.modifiers,
+        saves: savesOf(rules).modifiers(participant),
         spellResist: spellResistances(participant),
         dprBreakdown: {
             physicalDpr,

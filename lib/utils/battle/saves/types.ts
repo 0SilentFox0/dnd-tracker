@@ -62,6 +62,8 @@ export interface CheckRollResult {
 /** Saving throws the engine asks of a system: zones, effects, spells, maneuvers */
 export interface RuleSystemSaves {
     roll(input: SaveRollInput): SaveRollResult;
+    /** Save modifier of each ability before proficiency and bonuses; a system without saves reports zeros */
+    modifiers(p: BattleParticipant): Record<AbilityKey, number>;
     /** A failed save the target may still turn into a success (legendary resistance) */
     resolve<T extends { success: boolean }>(
         participant: BattleParticipant,
@@ -99,4 +101,6 @@ export interface RuleSystemProficiency {
         )[]
     ): { armor: string[]; weapons: string[] } | undefined;
     withGranted(p: BattleParticipant): BattleParticipant;
+    /** Proficiency bonus of a participant; a system without one reports 0 */
+    bonus(p: BattleParticipant): number;
 }

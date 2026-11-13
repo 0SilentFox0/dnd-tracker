@@ -1,5 +1,6 @@
 import type { getCharacterStats, UnitStats } from './index';
 
+import { noSaves } from '@/lib/utils/battle/saves/none';
 import type { RuleSystemCombat } from '@/lib/utils/rules/systems/types';
 import type { BattleParticipant } from '@/types/battle';
 
@@ -31,7 +32,7 @@ export function hitModelHeroStats(
         ac: finite(model.defense(p), 0),
         weaponDpr: dpr,
         damageKey: MELEE_KEY,
-        saves: p.abilities.modifiers,
+        saves: { ...noSaves.modifiers(p), ...model.saves?.(p) },
         spellResist: {},
         dprBreakdown: {
             physicalDpr: dpr,

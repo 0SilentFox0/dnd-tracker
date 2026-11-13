@@ -32,6 +32,7 @@ import {
     isWeaponProficient,
 } from '@/lib/utils/battle/proficiency';
 import type { Ruleset } from '@/lib/utils/rules/schema';
+import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type {
     BattleAttack,
     BattleMapConfig,
@@ -52,7 +53,7 @@ export function calculateAttackBonus(
         (attack.attackBonus || 0) +
         statModifier +
         (isWeaponProficient(attacker, attack)
-            ? attacker.abilities.proficiencyBonus
+            ? ruleSystemOf(rules).combat.proficiency.bonus(attacker)
             : 0);
 
     return (

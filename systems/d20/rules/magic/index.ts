@@ -1,10 +1,11 @@
 import { isFiveE } from '../damage-model';
+import { weaponModifier } from './ability-modifier';
 import { d20CasterDice } from './caster-dice';
 import { D20_SPELL_RESOURCE } from './resource';
 import { d20SpellSaveDc } from './save-dc';
+import { d20SpellAttackBonus } from './spell-attack';
 import { d20Spellcasting } from './spellcasting';
 
-import { weaponModifier } from '@/lib/utils/battle/spell/ability-modifier';
 import { upcastSteps } from '@/lib/utils/battle/spell/upcast';
 import type { RuleSystemMagic } from '@/lib/utils/rules/systems/types';
 import { D20_SUSTAIN } from '@/systems/d20/rules/concentration/sustain';
@@ -18,5 +19,6 @@ export const D20_MAGIC: RuleSystemMagic = {
     casterDice: d20CasterDice,
     spellAbilityMod: (caster) =>
         isFiveE(caster) ? weaponModifier(caster) : null,
+    spellAttackBonus: d20SpellAttackBonus,
     spellcasting: d20Spellcasting,
 };

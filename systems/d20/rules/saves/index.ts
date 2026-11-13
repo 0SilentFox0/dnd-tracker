@@ -14,6 +14,7 @@ import type {
 
 export const D20_SAVES: RuleSystemSaves = {
     roll: rollSave,
+    modifiers: (p) => p.abilities.modifiers,
     resolve: resolveSave,
     bestAbility: bestSaveAbility,
     evasion: { has: hasEvasion, factor: evasionFactor },
@@ -23,4 +24,5 @@ export const D20_SAVES: RuleSystemSaves = {
 export const D20_PROFICIENCY: RuleSystemProficiency = {
     fromClasses: classProficiencies,
     withGranted: withGrantedProficiencies,
+    bonus: (p) => p.abilities.proficiencyBonus,
 };

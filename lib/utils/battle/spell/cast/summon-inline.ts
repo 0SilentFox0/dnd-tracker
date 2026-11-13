@@ -1,5 +1,6 @@
 import type { SummonRequest } from '@/lib/utils/abilities/engine/core/types';
 import { spellAttackBonus } from '@/lib/utils/battle/spell/power';
+import type { Ruleset } from '@/lib/utils/rules/schema';
 import type {
     SpellEffect,
     SummonInlineEffect,
@@ -9,6 +10,7 @@ import type { AnchoredZoneState, BattleParticipant } from '@/types/battle';
 interface SummonInlineInput {
     effects: SpellEffect[];
     caster: BattleParticipant;
+    rules: Ruleset;
     spell: { id: string; name: string; level: number };
     castLevel: number;
     saveDc: number | undefined;
@@ -23,6 +25,7 @@ const isSummonInline = (e: SpellEffect): e is SummonInlineEffect =>
 export function inlineSummonRequests({
     effects,
     caster,
+    rules,
     spell,
     castLevel,
     saveDc,
@@ -47,7 +50,7 @@ export function inlineSummonRequests({
             ...(e.aura.onEnter && { onEnter: e.aura.onEnter }),
             ...(e.aura.onTurnStart && { onTurnStart: e.aura.onTurnStart }),
             ...(e.aura.onEnter?.attack || e.aura.onTurnStart?.attack
-                ? { attackBonus: spellAttackBonus(caster) }
+                ? { attackBonus: spellAttackBonus(caster, rules) }
                 : {}),
         };
 

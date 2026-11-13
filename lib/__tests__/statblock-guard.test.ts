@@ -23,12 +23,6 @@ const STATBLOCK =
 /** Only goes down; target 0 is E3. */
 const MAX: Record<string, number> = {
     'lib/utils/abilities/engine/effects/morale.ts': 1,
-    'lib/utils/battle/attack/bonus.ts': 1,
-    'lib/utils/battle/attack/cunning-strike.ts': 2,
-    'lib/utils/battle/balance/hit-model.ts': 1,
-    'lib/utils/battle/balance/stats.ts': 1,
-    'lib/utils/battle/spell/ability-modifier.ts': 2,
-    'lib/utils/battle/spell/power.ts': 2,
 };
 
 const countStatblockReads = (text: string) =>
