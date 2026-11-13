@@ -9,7 +9,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { useTheme } from '@/lib/providers/theme-provider';
+import { useTheme } from '@/components/layout/ThemeProvider';
 import { PALETTE_IDS, PALETTE_SWATCHES } from '@/lib/theme/palettes';
 import type { PaletteId } from '@/types/theme';
 
