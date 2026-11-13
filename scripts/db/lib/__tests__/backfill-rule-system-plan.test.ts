@@ -407,7 +407,12 @@ describe('summary and idempotence', () => {
 });
 
 describe('no system literals in the CLI sources', () => {
-    it.each(['scripts/db/lib/backfill-rule-system-plan.ts'])('%s', (file) => {
+    it.each([
+        'scripts/db/lib/backfill-rule-system-plan.ts',
+        'scripts/db/lib/backfill-rule-system-snapshot.ts',
+        'scripts/db/lib/backfill-rule-system-db.ts',
+        'scripts/db/backfill-rule-system.ts',
+    ])('%s', (file) => {
         const text = readFileSync(join(process.cwd(), file), 'utf8');
 
         expect(countLiterals(text, literalTokens())).toBe(0);

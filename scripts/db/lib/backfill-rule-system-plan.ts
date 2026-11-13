@@ -63,6 +63,7 @@ export interface RowPlan {
     row: Omit<RulesRow, 'text'>;
     action: 'write' | 'unchanged' | 'skip';
     skip?: SkipReason;
+    beforeText: string;
     before: unknown;
     after?: { key: string; modules?: string[] };
     keyFrom: 'stored' | 'guess' | null;
@@ -179,6 +180,7 @@ export function planRow(
     const plan: RowPlan = {
         row: meta,
         action: 'unchanged',
+        beforeText: text,
         before: undefined,
         keyFrom: null,
         added: [],
