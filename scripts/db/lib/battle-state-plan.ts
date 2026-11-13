@@ -101,7 +101,7 @@ const csv = (value: string | undefined): string[] =>
         .filter(Boolean);
 
 function statusOf(value: string | undefined): StatusFilter {
-    if (value === undefined) return 'active';
+    if (value === undefined) return 'all';
 
     if (value !== 'active' && value !== 'all')
         throw new Error('--status: active або all');

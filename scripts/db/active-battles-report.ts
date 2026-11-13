@@ -3,7 +3,7 @@
  * Read-only: for each battle scene, the storage shape of participant state (legacy flat fields, system slot, mixed),
  * snapshot hash consistency, undo history rows and paused decisions.
  *
- *   pnpm exec tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/db/active-battles-report.ts [--status active|all] [--campaign <id,…>] [--json] [--allow-remote]
+ *   pnpm exec tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/db/active-battles-report.ts [--status all|active] [--campaign <id,…>] [--json] [--allow-remote]
  */
 import type { RawDb } from '@/scripts/db/lib/battle-state-db';
 import {

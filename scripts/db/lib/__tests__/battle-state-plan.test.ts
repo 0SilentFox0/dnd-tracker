@@ -58,9 +58,9 @@ const slot = () =>
     );
 
 describe('parse args', () => {
-    it('report defaults to active', () =>
+    it('report defaults to all statuses', () =>
         expect(parseReportArgs([])).toEqual({
-            status: 'active',
+            status: 'all',
             campaignIds: [],
             json: false,
             allowRemote: false,
@@ -78,7 +78,7 @@ describe('parse args', () => {
     it('downgrade is a dry-run by default', () =>
         expect(parseDowngradeArgs([])).toMatchObject({
             apply: false,
-            status: 'active',
+            status: 'all',
             sceneIds: [],
             force: false,
         }));
