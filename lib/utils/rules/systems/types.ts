@@ -68,6 +68,7 @@ import type {
     CharacterSheet,
     SheetRollBody,
     SheetRollResult,
+    StoredCharacterState,
 } from '@/types/characters';
 import type { FeatData } from '@/types/choices';
 import type { ResolvedClassEntry } from '@/types/classes';
@@ -280,8 +281,16 @@ export interface TurnStartCheck {
     ): TurnGateOutcome | undefined;
 }
 
+/** Clears the per-turn part of a participant's system state; 'reaction' = only what a regained reaction restores */
+export type TurnStateReset = (
+    p: BattleParticipant,
+    scope: 'turn' | 'reaction'
+) => BattleParticipant;
+
 /** Hook lists run in order, base first, then modules (`runTurnHooks`) */
 export interface RuleSystemTurn {
+    /** Resets system state when a turn begins (or a reaction is regained) */
+    resetState?: readonly TurnStateReset[];
     /** Client turn gate (a check before the first action) */
     startCheck?: TurnStartCheck;
     /** Before the turn passes on */
@@ -770,9 +779,32 @@ export type ParticipantPart<R> = (
     ctx: ParticipantPartCtx<R>
 ) => BattleParticipant;
 
+export interface StoredPartCtx {
+    stored: StoredCharacterState;
+    rules: Ruleset;
+}
+
+/** What the saved sheet puts into a participant at battle start */
+export type StoredPart = (
+    p: BattleParticipant,
+    ctx: StoredPartCtx
+) => BattleParticipant;
+
+export interface PersistOutcome {
+    resources: CharacterResources;
+}
+
+/** What a participant writes back to the sheet when the battle ends */
+export type PersistPart = (
+    ctx: { participant: BattleParticipant; rules: Ruleset },
+    acc: PersistOutcome
+) => PersistOutcome;
+
 export interface RuleSystemParticipant {
     fromCharacter?: readonly ParticipantPart<CharacterPartRow>[];
     fromUnit?: readonly ParticipantPart<UnitPartRow>[];
+    fromStored?: readonly StoredPart[];
+    persist?: readonly PersistPart[];
 }
 
 export interface RuleSystemDefinition {

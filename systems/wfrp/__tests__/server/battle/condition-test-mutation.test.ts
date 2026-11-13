@@ -171,7 +171,7 @@ describe('conditionTestMutation', () => {
 
         const reset = {
             ...heroOf(out),
-            battleData: resetTurnState(heroOf(out)),
+            battleData: resetTurnState(heroOf(out), { rules: WFRP_RULES }),
         };
 
         expect(

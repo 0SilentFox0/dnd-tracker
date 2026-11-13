@@ -78,8 +78,10 @@ export interface ParticipantState {
     mazeWakeRound?: number;
     ingredientStock?: IngredientStock;
     ammo?: Record<string, number>;
+    /** @deprecated dual-read until E2 part 17 */
     psychologyTested?: Partial<Record<string, number>>;
     reload?: Record<string, number>;
+    system?: SystemSlot;
     spellSlotsCurrent: Record<string, number>;
 }
 

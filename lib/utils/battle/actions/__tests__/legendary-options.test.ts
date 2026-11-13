@@ -15,6 +15,7 @@ import {
     spendLegendary,
 } from '@/lib/utils/battle/actions/legendary-options';
 import { resetTurnState } from '@/lib/utils/battle/turn/turn-state';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
 import type { BattleParticipant } from '@/types/battle';
 
 const wing = resolved({
@@ -111,11 +112,15 @@ describe('legendary options', () => {
             'Леґ. дії 1/3 · Леґ. опір 1'
         );
         expect(legendaryBadge(other)).toBeNull();
-        expect(resetTurnState(spent).legendary).toEqual({
+        expect(
+            resetTurnState(spent, { rules: DEFAULT_RULES }).legendary
+        ).toEqual({
             actions: 3,
             actionsLeft: 3,
             resistLeft: 1,
         });
-        expect(resetTurnState(other)).not.toHaveProperty('legendary');
+        expect(
+            resetTurnState(other, { rules: DEFAULT_RULES })
+        ).not.toHaveProperty('legendary');
     });
 });

@@ -95,7 +95,9 @@ describe('core actions', () => {
 
         expect(out.actionFlags.hasUsedAction).toBe(true);
         expect(remainingMovement(out, DEFAULT_RULES)).toBe(before * 2);
-        expect(resetTurnState(out).extraMovement).toBeUndefined();
+        expect(
+            resetTurnState(out, { rules: DEFAULT_RULES }).extraMovement
+        ).toBeUndefined();
     });
 
     it('повторний dash додає базову швидкість, а не накопичений бюджет', () => {
@@ -422,7 +424,9 @@ describe('hide / ready / readiedAttack', () => {
 
         expect(out.battleData.readied).toEqual({ kind: 'attack', round: 1 });
         expect(out.actionFlags.hasUsedAction).toBe(true);
-        expect(resetTurnState(out).readied).toBeUndefined();
+        expect(
+            resetTurnState(out, { rules: DEFAULT_RULES }).readied
+        ).toBeUndefined();
     });
 
     const sword = {

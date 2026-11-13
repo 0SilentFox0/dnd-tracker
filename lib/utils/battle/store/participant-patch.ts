@@ -34,6 +34,7 @@ const CORE_PATCHABLE_FIELDS = {
         'ammo',
         'reload',
         'psychologyTested',
+        'system',
     ],
     actionFlags: [
         'hasUsedAction',

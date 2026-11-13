@@ -48,8 +48,11 @@ function hero(usage: Record<string, number> = {}): BattleParticipant {
 describe('item charges between battles', () => {
     it('battle result stores item pools (rest null too), never consumable pools', () => {
         expect(
-            applyBattleResult({}, hero({ [WAND]: 1, [RING]: 2, [POT]: 1 }))
-                .charges
+            applyBattleResult(
+                {},
+                hero({ [WAND]: 1, [RING]: 2, [POT]: 1 }),
+                rules
+            ).charges
         ).toEqual({
             [WAND]: { used: 1, rest: 'long' },
             [RING]: { used: 2, rest: null },

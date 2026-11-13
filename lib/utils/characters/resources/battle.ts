@@ -11,14 +11,12 @@ import { isCastPool, isConsumablePool } from '@/lib/utils/items/pools';
 import type { Ruleset } from '@/lib/utils/rules';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { BattleParticipant } from '@/types/battle';
-import type { CharacterResources } from '@/types/characters';
+import type {
+    CharacterResources,
+    StoredCharacterState,
+} from '@/types/characters';
 
 export const REST_EXHAUSTION_KEY = 'rest:exhaustion';
-
-export interface StoredCharacterState {
-    resources: CharacterResources | null;
-    inspiration: boolean | null;
-}
 
 export function storedCharacterState(
     character: { resources?: unknown; inspiration?: boolean | null },
@@ -190,16 +188,24 @@ export function applyCharacterResources(
 
     const fortune = r?.fortune ?? ruleSystemOf(rules).resources?.fortuneOf?.(p);
 
-    return fortune === undefined && r?.sin === undefined
-        ? out
-        : {
-              ...out,
-              battleData: {
-                  ...out.battleData,
-                  ...(fortune !== undefined && { fortune }),
-                  ...(r?.sin !== undefined && { sin: r.sin }),
-              },
-          };
+    const seeded =
+        fortune === undefined && r?.sin === undefined
+            ? out
+            : {
+                  ...out,
+                  battleData: {
+                      ...out.battleData,
+                      ...(fortune !== undefined && { fortune }),
+                      ...(r?.sin !== undefined && { sin: r.sin }),
+                  },
+              };
+
+    const parts = ruleSystemOf(rules).participant?.fromStored ?? [];
+
+    return parts.reduce(
+        (acc, part) => part(acc, { stored: state, rules }),
+        seeded
+    );
 }
 
 export function spentSlots(p: BattleParticipant): Record<string, number> {
@@ -252,7 +258,8 @@ function battleCharges(
 
 export function applyBattleResult(
     r: CharacterResources,
-    p: BattleParticipant
+    p: BattleParticipant,
+    rules: Ruleset
 ): CharacterResources {
     const { maxHp, currentHp: hp, tempHp, status } = p.combatStats;
 
@@ -269,8 +276,16 @@ export function applyBattleResult(
         shortRestOpen: undefined,
     };
 
+    const written = dead
+        ? { ...next, hp: 0 }
+        : withHp(next, Math.max(0, hp), maxHp);
+
+    const parts = ruleSystemOf(rules).participant?.persist ?? [];
+
     return compactResources(
-        dead ? { ...next, hp: 0 } : withHp(next, Math.max(0, hp), maxHp)
+        parts.reduce((acc, part) => part({ participant: p, rules }, acc), {
+            resources: written,
+        }).resources
     );
 }
 

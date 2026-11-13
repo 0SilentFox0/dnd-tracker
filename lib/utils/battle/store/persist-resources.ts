@@ -73,7 +73,8 @@ export async function persistCharacterResources(
                 data: {
                     resources: applyBattleResult(
                         before,
-                        hero
+                        hero,
+                        battle.rules
                     ) as Prisma.InputJsonValue,
                 },
             });

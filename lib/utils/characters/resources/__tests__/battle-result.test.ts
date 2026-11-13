@@ -76,7 +76,8 @@ describe('applyBattleResult', () => {
         expect(
             applyBattleResult(
                 { shortRestOpen: true, hitDiceSpent: { fighter: 1 } },
-                hero({ hp: 7, temp: 3, usage: 1 })
+                hero({ hp: 7, temp: 3, usage: 1 }),
+                WFRP_RULES
             )
         ).toEqual({
             hp: 7,
@@ -92,7 +93,7 @@ describe('applyBattleResult', () => {
 
         fresh.spellcasting.spellSlots = {};
 
-        expect(applyBattleResult({ hp: 3 }, fresh)).toEqual({});
+        expect(applyBattleResult({ hp: 3 }, fresh, WFRP_RULES)).toEqual({});
     });
 
     it('keeps charges of abilities the hero does not have, drops unused own ones', () => {
@@ -104,21 +105,23 @@ describe('applyBattleResult', () => {
                         [surge.key]: { used: 1, rest: 'short' },
                     },
                 },
-                hero()
+                hero(),
+                WFRP_RULES
             ).charges
         ).toEqual({ other: { used: 2, rest: 'long' } });
     });
 
     it('dead hero: dead flag and 0 HP', () => {
         expect(
-            applyBattleResult({}, hero({ hp: 0, status: 'dead' }))
+            applyBattleResult({}, hero({ hp: 0, status: 'dead' }), WFRP_RULES)
         ).toMatchObject({ hp: 0, dead: true });
     });
 
     it('exhaustion level from effects', () => {
-        expect(applyBattleResult({}, hero({ exhaustion: 2 })).exhaustion).toBe(
-            2
-        );
+        expect(
+            applyBattleResult({}, hero({ exhaustion: 2 }), WFRP_RULES)
+                .exhaustion
+        ).toBe(2);
     });
 
     it('log data: HP before/after', () => {
@@ -158,8 +161,14 @@ describe('Fortune sheet <-> battle', () => {
             battleData: { ...hero().battleData, fortune: 1 },
         };
 
-        expect(applyBattleResult({ fortune: 2 }, withFortune).fortune).toBe(1);
-        expect(applyBattleResult({ fortune: 2 }, hero()).fortune).toBe(2);
-        expect(applyBattleResult({}, hero())).not.toHaveProperty('fortune');
+        expect(
+            applyBattleResult({ fortune: 2 }, withFortune, WFRP_RULES).fortune
+        ).toBe(1);
+        expect(
+            applyBattleResult({ fortune: 2 }, hero(), WFRP_RULES).fortune
+        ).toBe(2);
+        expect(applyBattleResult({}, hero(), WFRP_RULES)).not.toHaveProperty(
+            'fortune'
+        );
     });
 });

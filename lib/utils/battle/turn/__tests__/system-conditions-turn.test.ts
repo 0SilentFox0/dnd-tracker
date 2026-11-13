@@ -184,11 +184,19 @@ describe('resetTurnState condition tests', () => {
         const p = bleed('a', 10);
 
         expect(
-            resetTurnState({
-                ...p,
-                battleData: { ...p.battleData, conditionTests: ['bleeding'] },
-            }).conditionTests
+            resetTurnState(
+                {
+                    ...p,
+                    battleData: {
+                        ...p.battleData,
+                        conditionTests: ['bleeding'],
+                    },
+                },
+                { rules: DEFAULT_RULES }
+            ).conditionTests
         ).toBeUndefined();
-        expect('conditionTests' in resetTurnState(p)).toBe(false);
+        expect(
+            'conditionTests' in resetTurnState(p, { rules: DEFAULT_RULES })
+        ).toBe(false);
     });
 });

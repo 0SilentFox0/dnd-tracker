@@ -394,6 +394,11 @@ export interface DraftInput {
 
 export type RestKindValue = 'short' | 'long';
 
+export interface StoredCharacterState {
+    resources: CharacterResources | null;
+    inspiration: boolean | null;
+}
+
 export interface CharacterResources {
     hp?: number;
     tempHp?: number;

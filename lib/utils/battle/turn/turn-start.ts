@@ -340,7 +340,8 @@ function resetTurnFlags(
     updated: BattleParticipant,
     original: BattleParticipant,
     allParticipants: BattleParticipant[],
-    rng: Rng
+    rng: Rng,
+    rules: Ruleset
 ): {
     participant: BattleParticipant;
     skippedBy: { name: LogLine; percent: number } | undefined;
@@ -369,7 +370,7 @@ function resetTurnFlags(
                 EffectMarker.NO_REACTION
             ),
         },
-        battleData: resetTurnState(updated),
+        battleData: resetTurnState(updated, { rules }),
     };
 
     // додаткові дії, отримані поза своїм ходом, не переносяться — пул ходу це лише actionsPerTurn
@@ -440,7 +441,8 @@ export function processStartOfTurn(
         updatedParticipant,
         participant,
         allParticipants,
-        rng
+        rng,
+        rules
     );
 
     const { skippedBy } = reset;

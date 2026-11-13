@@ -53,7 +53,8 @@ describe('pools between battles', () => {
         expect(
             applyBattleResult(
                 {},
-                hero({ [FOCUS]: 1, [SORC]: 2, [MAGIC_INITIATE]: 1 })
+                hero({ [FOCUS]: 1, [SORC]: 2, [MAGIC_INITIATE]: 1 }),
+                rules
             ).charges
         ).toEqual({
             [FOCUS]: { used: 1, rest: 'short' },

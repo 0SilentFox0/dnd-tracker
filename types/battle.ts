@@ -615,6 +615,9 @@ export interface BattleParticipantBattleData {
     ingredientStock?: IngredientStock;
     /** attack id → shots left; seeded at battle start from the weapon capacity, never persisted between battles */
     ammo?: Record<string, number>;
+    /** Per-system participant state; stored in the `state` column, not the snapshot */
+    system?: SystemSlot;
+    /** @deprecated dual-read until E2 part 17 */
     psychologyTested?: Partial<Record<string, number>>;
     /** attack id → owner turn ends left until the magazine refills */
     reload?: Record<string, number>;
@@ -637,13 +640,13 @@ export interface BattleParticipantBattleData {
     /** Атаки дії «Атака», що лишилися цього ходу */
     attacksLeft?: number;
     inspiration?: boolean;
-    /** Fortune left this battle; seeded at battle start from the sheet (saved fortune, else Fate) */
+    /** @deprecated dual-read until E2 part 17 */
     fortune?: number;
-    /** Channelled SL banked for the next cast; lost on damage */
+    /** @deprecated dual-read until E2 part 17 */
     channelledSl?: number;
-    /** Sin snapshot from the sheet; read-only in battle (the DM edits it on the sheet) */
+    /** @deprecated dual-read until E2 part 17 */
     sin?: number;
-    /** Condition keys whose end test was already attempted this turn */
+    /** @deprecated dual-read until E2 part 17 */
     conditionTests?: string[];
     /** Натхнення витрачено в цьому бою: після бою знімається з листа (ніколи не виставляється з бою) */
     inspirationSpent?: boolean;

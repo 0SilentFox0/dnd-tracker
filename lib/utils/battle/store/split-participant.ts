@@ -51,6 +51,7 @@ export function splitParticipant(
         ammo,
         reload,
         psychologyTested,
+        system,
         ...battleDataWithScoped
     } = p.battleData;
 
@@ -105,6 +106,7 @@ export function splitParticipant(
         ...(ammo !== undefined && { ammo }),
         ...(reload !== undefined && { reload }),
         ...(psychologyTested !== undefined && { psychologyTested }),
+        ...(system !== undefined && { system }),
         spellSlotsCurrent,
     };
 
@@ -231,6 +233,7 @@ export function joinParticipant(
             ...(state.psychologyTested !== undefined && {
                 psychologyTested: state.psychologyTested,
             }),
+            ...(state.system !== undefined && { system: state.system }),
         },
         actionFlags: {
             hasUsedAction: c.hasUsedAction,

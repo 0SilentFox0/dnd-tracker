@@ -211,7 +211,10 @@ function advanceFrom(
                           hasExtraTurn: false,
                       },
                       battleData: {
-                          ...resetTurnState(p, { keepLegendary: true }),
+                          ...resetTurnState(p, {
+                              rules,
+                              keepLegendary: true,
+                          }),
                           extraTurnActive: true,
                           pendingExtraActions: actionsPerTurnPool(p, order),
                       },

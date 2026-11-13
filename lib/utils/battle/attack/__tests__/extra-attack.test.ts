@@ -173,14 +173,17 @@ describe('extra attack', () => {
 
     it('reset at turn start', () => {
         expect(
-            resetTurnState({
-                ...fighter,
-                battleData: {
-                    ...fighter.battleData,
-                    attacksLeft: 1,
-                    attackedWithLight: true,
+            resetTurnState(
+                {
+                    ...fighter,
+                    battleData: {
+                        ...fighter.battleData,
+                        attacksLeft: 1,
+                        attackedWithLight: true,
+                    },
                 },
-            })
+                { rules: DEFAULT_RULES }
+            )
         ).toMatchObject({
             attacksLeft: undefined,
             attackedWithLight: undefined,

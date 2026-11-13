@@ -57,6 +57,6 @@ describe('sin resource', () => {
 
         const changed = { ...p, battleData: { ...p.battleData, sin: 9 } };
 
-        expect(applyBattleResult({ sin: 3 }, changed).sin).toBe(3);
+        expect(applyBattleResult({ sin: 3 }, changed, WFRP_RULES).sin).toBe(3);
     });
 });

@@ -424,9 +424,9 @@ describe('grantCast', () => {
         );
 
         expect(
-            Object.keys(applyBattleResult({}, used).charges ?? {}).filter((k) =>
-                k.startsWith('pool:cast:')
-            )
+            Object.keys(
+                applyBattleResult({}, used, DEFAULT_RULES).charges ?? {}
+            ).filter((k) => k.startsWith('pool:cast:'))
         ).toEqual([]);
     });
 });
