@@ -11,6 +11,7 @@ import { prisma } from '@/lib/db';
 import { invalidateCampaignLayer } from '@/lib/db/content-layer';
 import { DEFAULT_LOCALE, type Locale } from '@/lib/i18n/config';
 import { getTranslator } from '@/lib/i18n/translator';
+import { assertValidSystem } from '@/lib/server/campaigns/modules';
 import { ContentError } from '@/lib/server/content/errors';
 import { type Bundle, TemplateLeakError } from '@/lib/server/templates/bundle';
 import { importBundle } from '@/lib/server/templates/import-bundle';
@@ -28,7 +29,9 @@ import {
     isInviteCodeClash,
 } from '@/lib/utils/campaigns/invite-code';
 import { localizedDefaultAttacks } from '@/lib/utils/rules/defaults';
+import { initialRules } from '@/lib/utils/rules/initial-rules';
 import { parseRules, type Ruleset } from '@/lib/utils/rules/schema';
+import type { SystemSelection } from '@/lib/utils/rules/systems/catalog';
 import type { TemplateContentLocale } from '@/lib/utils/templates/manifest';
 
 export { TemplateLeakError };
@@ -53,6 +56,7 @@ interface CreateFromBundleInput {
     settings?: Partial<Bundle['settings']>;
     critChoiceByDm?: boolean;
     defaultAttacks?: Ruleset['defaultAttacks'];
+    system?: SystemSelection;
 }
 
 const defined = <T extends object>(obj: T) =>
@@ -94,9 +98,17 @@ function campaignData(
                       ...(input.bundle.rules as object | undefined),
                   }) as Prisma.InputJsonObject,
               }
-            : input.defaultAttacks && {
-                  rules: { defaultAttacks: input.defaultAttacks },
-              }),
+            : input.system
+              ? {
+                    rules: initialRules(input.system, {
+                        ...(input.defaultAttacks && {
+                            defaultAttacks: input.defaultAttacks,
+                        }),
+                    }) as Prisma.InputJsonObject,
+                }
+              : input.defaultAttacks && {
+                    rules: { defaultAttacks: input.defaultAttacks },
+                }),
         ...(input.bundle?.credits !== undefined && {
             credits: input.bundle.credits,
         }),
@@ -201,6 +213,7 @@ type CreateCampaignData = {
     maxLevel?: number;
     allowPlayerEdit?: boolean;
     critChoiceByDm?: boolean;
+    system?: SystemSelection;
 };
 
 type CampaignSource = PreparedCampaignSource;
@@ -215,6 +228,8 @@ export async function createCampaignForUser(
     } = {}
 ) {
     let source = options.source ?? null;
+
+    if (data.system) assertValidSystem(data.system);
 
     if (!source && data.templateId) {
         try {
@@ -251,6 +266,7 @@ export async function createCampaignForUser(
             allowPlayerEdit: data.allowPlayerEdit,
         },
         critChoiceByDm: data.critChoiceByDm,
+        system: data.system,
         defaultAttacks: localizedDefaultAttacks(
             await getTranslator(options.locale ?? DEFAULT_LOCALE, 'rules')
         ),

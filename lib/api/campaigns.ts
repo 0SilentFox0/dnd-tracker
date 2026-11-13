@@ -49,6 +49,7 @@ export async function createCampaign(data: {
     templateId?: string;
     contentLocale?: TemplateContentLocale;
     critChoiceByDm?: boolean;
+    system?: { key: string; modules?: string[] };
 }): Promise<CampaignWithWarnings> {
     return request<CampaignWithWarnings>('/api/campaigns', {
         method: 'POST',

@@ -5,6 +5,40 @@ import {
     updateCampaignSchema,
 } from '@/lib/schemas/campaigns';
 
+describe('create with a system', () => {
+    it('accepts a key with modules', () => {
+        expect(
+            createCampaignSchema.safeParse({
+                name: 'A',
+                system: { key: 'dnd5e', modules: ['morale'] },
+            }).success
+        ).toBe(true);
+    });
+
+    it('rejects a system together with a template', () => {
+        const result = createCampaignSchema.safeParse({
+            name: 'A',
+            templateId: 't1',
+            system: { key: 'dnd5e' },
+        });
+
+        expect(result.success).toBe(false);
+        expect(result.error?.issues[0]).toMatchObject({
+            path: ['system'],
+            message: 'validation.systemWithTemplate',
+        });
+    });
+
+    it('rejects malformed module ids', () => {
+        expect(
+            createCampaignSchema.safeParse({
+                name: 'A',
+                system: { key: 'dnd5e', modules: ['Bad'] },
+            }).success
+        ).toBe(false);
+    });
+});
+
 describe('critChoiceByDm', () => {
     it('update-схема приймає boolean і відкидає інше', () => {
         expect(

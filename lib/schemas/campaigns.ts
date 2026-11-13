@@ -3,15 +3,33 @@ import { z } from 'zod';
 import { CampaignStatus, CampaignVisibility } from '@/lib/constants/campaigns';
 import { TEMPLATE_CONTENT_LOCALES } from '@/lib/utils/templates/manifest';
 
-export const createCampaignSchema = z.object({
-    name: z.string().min(1).max(100),
-    description: z.string().optional(),
-    maxLevel: z.number().min(1).max(30).optional(),
-    allowPlayerEdit: z.boolean().optional(),
-    critChoiceByDm: z.boolean().default(false),
-    templateId: z.string().min(1).optional(),
-    contentLocale: z.enum(TEMPLATE_CONTENT_LOCALES).optional(),
-});
+export const createCampaignSchema = z
+    .object({
+        name: z.string().min(1).max(100),
+        description: z.string().optional(),
+        maxLevel: z.number().min(1).max(30).optional(),
+        allowPlayerEdit: z.boolean().optional(),
+        critChoiceByDm: z.boolean().default(false),
+        templateId: z.string().min(1).optional(),
+        contentLocale: z.enum(TEMPLATE_CONTENT_LOCALES).optional(),
+        system: z
+            .strictObject({
+                key: z.string().min(1),
+                modules: z
+                    .array(z.string().regex(/^[a-z0-9]+$/))
+                    .max(32)
+                    .optional(),
+            })
+            .optional(),
+    })
+    .superRefine((data, ctx) => {
+        if (data.system && data.templateId)
+            ctx.addIssue({
+                code: 'custom',
+                path: ['system'],
+                message: 'validation.systemWithTemplate',
+            });
+    });
 
 export const updateCampaignSchema = z.object({
     name: z.string().min(1).max(100).optional(),
