@@ -448,7 +448,7 @@ export function resolveOutcome(
             r.autoFail
                 ? textRef('battleActions.spell.saveAutoFail', {
                       target: target.basicInfo.name,
-                      dc,
+                      dc: dc ?? '—',
                   })
                 : textRef('battleActions.spell.save', {
                       target: target.basicInfo.name,
@@ -456,7 +456,7 @@ export function resolveOutcome(
                       mod: `${mod < 0 ? '-' : '+'}${Math.abs(mod)}`,
                       extra,
                       total,
-                      dc,
+                      dc: dc ?? '—',
                       note,
                       outcome,
                       evasive: evasive ? 'yes' : 'no',

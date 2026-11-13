@@ -654,8 +654,9 @@ export interface SpellcastingInput {
     rules: Ruleset;
 }
 
-export type LevelResetColumns = Partial<
-    Record<keyof Prisma.CharacterUncheckedUpdateInput, unknown>
+export type LevelResetColumns = Pick<
+    Prisma.CharacterUncheckedUpdateInput,
+    'skillTreeProgress'
 >;
 
 export type LevelResetPart = (change: {

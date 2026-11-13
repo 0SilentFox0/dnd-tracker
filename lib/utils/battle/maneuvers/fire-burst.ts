@@ -94,7 +94,7 @@ export function fireBurst(
             t.basicInfo.id,
             textRef('battleLog.maneuver.fireNote', {
                 total: rolled.total,
-                dc,
+                dc: dc ?? '—',
                 detail: evasive
                     ? textRef(
                           result.success

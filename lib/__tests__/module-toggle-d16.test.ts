@@ -300,7 +300,11 @@ describe.each(MODULES)('D16 module toggle: $id', (mod) => {
 
         expect(columnResets).toEqual({});
 
-        const stored = { ...hero, ...written, ...columnResets };
+        const stored = {
+            ...hero,
+            ...written,
+            ...columnResets,
+        } as typeof hero;
 
         expect(stored).toEqual(expect.objectContaining(hero));
 

@@ -10,6 +10,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import { BalanceSummary } from '@/components/battle/setup/BalanceSummary';
 import { useFairBalance } from '@/lib/hooks/battles/setup/useFairBalance';
+import { D20_MODEL } from '@/lib/utils/battle/balance/__tests__/d20-model';
 import type {
     SetupBalanceParticipant,
     SetupBalanceStats,
@@ -66,7 +67,7 @@ describe('BalanceSummary', () => {
 
     it('зміна складу перераховує підсумки та підказки', () => {
         const { result, rerender } = renderHook(
-            ({ list }) => useFairBalance(list, stats),
+            ({ list }) => useFairBalance(list, stats, null, D20_MODEL),
             { initialProps: { list: [...heroes, ...enemies(4)] } }
         );
 
@@ -91,7 +92,9 @@ describe('BalanceSummary', () => {
     });
 
     it('герої без ворогів: стан «порожньо»', () => {
-        const { result } = renderHook(() => useFairBalance(heroes, stats));
+        const { result } = renderHook(() =>
+            useFairBalance(heroes, stats, null, D20_MODEL)
+        );
 
         render(<BalanceSummary fair={result.current} />);
 
@@ -113,7 +116,9 @@ describe('BalanceSummary', () => {
             ...enemies(3),
         ];
 
-        const { result } = renderHook(() => useFairBalance(list, withNpc));
+        const { result } = renderHook(() =>
+            useFairBalance(list, withNpc, null, D20_MODEL)
+        );
 
         render(<BalanceSummary fair={result.current} />);
 
