@@ -252,6 +252,9 @@ export async function createCampaignForUser(
         }
     }
 
+    if (source && data.system)
+        throw new ContentError(API_ERRORS.SYSTEM_WITH_TEMPLATE, 400);
+
     if (!source && data.contentLocale !== undefined)
         throw new ContentError(API_ERRORS.TEMPLATE_CONTENT_LOCALE, 400);
 

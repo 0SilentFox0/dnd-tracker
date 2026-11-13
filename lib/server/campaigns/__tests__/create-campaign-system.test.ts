@@ -64,6 +64,20 @@ describe('createCampaignForUser with a system selection', () => {
         expect(m.db.campaign.create).not.toHaveBeenCalled();
     });
 
+    it('a source together with a system is 400, not a silent ignore', async () => {
+        await expect(
+            createCampaignForUser(
+                'u1',
+                { name: 'N', system: { key: 'dnd5e' } },
+                { source: { bundle: emptyBundle() } as never }
+            )
+        ).rejects.toMatchObject({
+            message: API_ERRORS.SYSTEM_WITH_TEMPLATE,
+            status: 400,
+        });
+        expect(m.db.campaign.create).not.toHaveBeenCalled();
+    });
+
     it('without a template or system is a RulesSystemError and nothing is created', async () => {
         await expect(
             createCampaignForUser('u1', { name: 'N' })

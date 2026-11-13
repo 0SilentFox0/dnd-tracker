@@ -76,6 +76,7 @@ describe('campaign rules API', () => {
         expect(await res.json()).toEqual({
             ...DEFAULT_RULES,
             systemLocked: false,
+            hasCharacters: false,
             composition: expect.any(Object),
         });
     });
@@ -98,7 +99,7 @@ describe('campaign rules API', () => {
     it('PATCH від ДМ зливає по секціях і пише патч поверх збереженого JSON', async () => {
         const res = await patch({ morale: { enabled: false } });
 
-        const { systemLocked, ...body } = await res.json();
+        const { systemLocked, hasCharacters: _h, ...body } = await res.json();
 
         expect(res.status).toBe(200);
         expect(systemLocked).toBe(false);

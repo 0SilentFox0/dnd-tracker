@@ -93,6 +93,15 @@ describe('rule system lock', () => {
 
         expect((await readCampaignRules(actor)).systemLocked).toBe(true);
 
+        expect((await readCampaignRules(actor)).hasCharacters).toBe(true);
+
+        content(0, 2);
+
+        const unitsOnly = await readCampaignRules(actor);
+
+        expect(unitsOnly.systemLocked).toBe(true);
+        expect(unitsOnly.hasCharacters).toBe(false);
+
         content(0);
 
         expect((await readCampaignRules(actor)).systemLocked).toBe(false);

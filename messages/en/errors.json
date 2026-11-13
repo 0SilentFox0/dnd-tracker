@@ -510,6 +510,7 @@
   "templateNotReady": "The template is not ready for localization yet: its rows have no identifiers. Ask an administrator and try again later.",
   "srdNameReferences": "Select the related name and reference updates together: {rows}",
   "systemLocked": "The rule system cannot be changed while the campaign has characters or units",
+  "systemWithTemplate": "A rule system cannot be set together with a template or package: it comes from the source",
   "systemLevelsUnsupported": "This rule system has no levels",
   "systemDraftsUnsupported": "This rule system does not support player drafts yet",
   "systemActionUnknown": "This action is not available in the campaign rule system",

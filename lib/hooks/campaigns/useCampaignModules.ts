@@ -74,7 +74,7 @@ export function useCampaignModules(campaignId: string): {
             });
 
         try {
-            if (setup && data.systemLocked) {
+            if (setup && data.hasCharacters) {
                 if (!(await askConfirm(id))) return;
 
                 await send(true);

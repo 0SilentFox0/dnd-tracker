@@ -30,8 +30,14 @@ vi.mock('@/lib/hooks/common', () => ({
 
 const view = (
     system: { key: string; modules?: string[] },
-    systemLocked = false
-): CampaignRulesView => ({ ...DEFAULT_RULES, system, systemLocked });
+    systemLocked = false,
+    hasCharacters = systemLocked
+): CampaignRulesView => ({
+    ...DEFAULT_RULES,
+    system,
+    systemLocked,
+    hasCharacters,
+});
 
 const setup = (rules: CampaignRulesView) => {
     const client = new QueryClient({
@@ -104,6 +110,22 @@ describe('useCampaignModules', () => {
         expect(vi.mocked(updateCampaignRules).mock.calls[0][1]).toMatchObject({
             confirm: true,
         });
+    });
+
+    it('a campaign with units only does not ask for a setup module', async () => {
+        vi.mocked(updateCampaignRules).mockResolvedValue(
+            view({ key: 'homm', modules: [] }, true, false)
+        );
+
+        const { result } = setup(view({ key: 'homm' }, true, false));
+
+        await act(() => result.current.toggle('heroscaling', false));
+
+        expect(confirm).not.toHaveBeenCalled();
+        expect(updateCampaignRules).toHaveBeenCalledTimes(1);
+        expect(
+            vi.mocked(updateCampaignRules).mock.calls[0][1]
+        ).not.toHaveProperty('confirm');
     });
 
     it('declining the confirmation sends nothing', async () => {

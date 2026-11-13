@@ -44,16 +44,19 @@ export async function loadRules(campaignId: string): Promise<Ruleset> {
 
 type CountClient = Pick<Prisma.TransactionClient, 'character' | 'unit'>;
 
-async function hasSystemBoundContent(
+async function systemBoundContent(
     db: CountClient,
     campaignId: string
-): Promise<boolean> {
+): Promise<{ systemLocked: boolean; hasCharacters: boolean }> {
     const [characters, units] = await Promise.all([
         db.character.count({ where: { campaignId } }),
         db.unit.count({ where: { campaignId } }),
     ]);
 
-    return characters + units > 0;
+    return {
+        systemLocked: characters + units > 0,
+        hasCharacters: characters > 0,
+    };
 }
 
 export async function readCampaignRules(
@@ -61,14 +64,14 @@ export async function readCampaignRules(
 ): Promise<CampaignRulesView> {
     assertCan(actor, CONTENT_OPERATIONS['rules.get'].need);
 
-    const [rules, systemLocked] = await Promise.all([
+    const [rules, bound] = await Promise.all([
         loadRules(actor.campaignId),
-        hasSystemBoundContent(prisma, actor.campaignId),
+        systemBoundContent(prisma, actor.campaignId),
     ]);
 
     return {
         ...(actor.isDM ? rules : stripPlayerHiddenRules(rules)),
-        systemLocked,
+        ...bound,
         composition: composition(rules.system),
     };
 }
@@ -105,10 +108,10 @@ export async function updateCampaignRules(
                 );
         }
 
-        const systemLocked = await hasSystemBoundContent(tx, actor.campaignId);
+        const bound = await systemBoundContent(tx, actor.campaignId);
 
         if (
-            systemLocked &&
+            bound.systemLocked &&
             patch.system?.key &&
             patch.system.key !== current.system.key
         )
@@ -162,7 +165,7 @@ export async function updateCampaignRules(
 
         return {
             ...merged.rules,
-            systemLocked,
+            ...bound,
             composition: composition(merged.rules.system),
         };
     });

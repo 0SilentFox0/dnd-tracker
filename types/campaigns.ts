@@ -202,5 +202,6 @@ export interface ConditionUsage {
 
 export type CampaignRulesView = Ruleset & {
     systemLocked?: boolean;
+    hasCharacters?: boolean;
     composition?: Composition;
 };
