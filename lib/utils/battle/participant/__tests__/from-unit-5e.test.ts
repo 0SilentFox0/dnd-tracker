@@ -122,9 +122,13 @@ describe('createBattleParticipantFromUnit: HOMM без змін', () => {
         expect(after.spellcasting.spellSaveDC).toBe(8 + 2 + 3);
         expect(after.spellcasting.spellcastingAbility).toBeUndefined();
         expect(attacksPerAction(after, [after])).toBe(0);
-        expect(attackDamageModifier(after, after.battleData.attacks[0])).toBe(
-            0
-        );
+        expect(
+            attackDamageModifier(
+                after,
+                after.battleData.attacks[0],
+                DEFAULT_RULES
+            )
+        ).toBe(0);
     });
 
     it('HOMM ignores populated monster-only fields and retains universal slots', async () => {
@@ -214,7 +218,9 @@ describe('createBattleParticipantFromUnit: монстр 5e', () => {
         const p = await build(monster());
 
         expect(attacksPerAction(p, [p])).toBe(1);
-        expect(attackDamageModifier(p, p.battleData.attacks[0])).toBe(4);
+        expect(
+            attackDamageModifier(p, p.battleData.attacks[0], DEFAULT_RULES)
+        ).toBe(4);
     });
 
     it('ручне XP перекриває таблицю; без легендарного — без legendary', async () => {

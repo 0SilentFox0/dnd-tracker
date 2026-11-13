@@ -6,7 +6,7 @@ import { attackBodySchema } from '@/lib/schemas/battles';
 import { attackMutation } from '@/lib/server/battles/mutations/attack/attack-mutation';
 import { resolved } from '@/lib/utils/abilities/__tests__/fixtures';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
-import { heroAttackDamageParts } from '@/lib/utils/battle/damage/hero-damage';
+import { attackDamageParts } from '@/lib/utils/battle/damage/attack-parts';
 import type { BattleMutationContext } from '@/lib/utils/battle/pipeline/run-battle-mutation';
 import { BattleAccessError, BattleRuleError } from '@/lib/utils/battle/store';
 import { REJECT } from '@/lib/utils/battle/store/reject';
@@ -131,7 +131,8 @@ describe('attack mutation', () => {
         );
 
         const [firstSlot] = diceSlots(
-            heroAttackDamageParts(hero, hero.battleData.attacks[0]).formula
+            attackDamageParts(hero, hero.battleData.attacks[0], DEFAULT_RULES)
+                .formula
         );
 
         expect(out.events[0].details).toMatchObject({

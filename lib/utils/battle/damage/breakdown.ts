@@ -2,9 +2,9 @@ import type {
     ComputeDamageBreakdownParams,
     DamageBreakdownResult,
 } from '../types/damage-breakdown';
+import { attackDamageContext, attackDamageParts } from './attack-parts';
 import { applyBalanceDamageMultiplier } from './balance-multiplier';
 import { getDefenderResistanceBreakdown } from './breakdown-helpers';
-import { heroAttackDamageParts, heroDamageContext } from './hero-damage';
 import { applyHeroDmDamageMultiplier } from './hero-dm-multiplier';
 import { calculateDamageWithModifiersImpl } from './impl';
 import { multiplierRow, ruleRow } from './rows';
@@ -15,7 +15,6 @@ import { textRef } from '@/lib/i18n/text-ref';
 import {
     attackAbilityFor,
     attackDamageModifier,
-    isFiveE,
 } from '@/lib/utils/battle/attack/ability';
 import { critDoublesDice } from '@/lib/utils/battle/attack/crit-dice';
 import { attackKindOf } from '@/lib/utils/battle/common/attack-kind';
@@ -43,7 +42,7 @@ export function computeDamageBreakdown(
     const doubleDice = critDoublesDice(rules, isCritical);
 
     const set = doubleDice
-        ? diceCount(heroAttackDamageParts(attacker, attack).formula)
+        ? diceCount(attackDamageParts(attacker, attack, rules).formula)
         : 0;
 
     const hasSecondSet = set > 0 && damageRolls.length >= 2 * set;
@@ -69,6 +68,7 @@ export function computeDamageBreakdown(
     const statModifier = attackDamageModifier(
         attacker,
         attack,
+        rules,
         allParticipants
     );
 
@@ -84,10 +84,8 @@ export function computeDamageBreakdown(
             allParticipants,
             targetId: target.basicInfo.id,
             additionalDamage: additionalDamageModifiers,
-            ...heroDamageContext(attacker, attack, contextRolls),
-            ...(isFiveE(attacker) && {
-                statKey: attackAbilityFor(attacker, attack),
-            }),
+            ...attackDamageContext(attacker, attack, contextRolls, rules),
+            statKey: attackAbilityFor(attacker, attack, rules),
         }
     );
 

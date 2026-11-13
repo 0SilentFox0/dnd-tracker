@@ -21,6 +21,7 @@ import {
     unitMember,
     type UnitStats,
 } from '@/lib/utils/battle/balance';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
 
 const unit = (
@@ -205,7 +206,7 @@ describe('getUnitStats: КД і влучання', () => {
         });
 
         expect(stats.ac).toBe(15);
-        expect(stats.attackBonus).toBe(calculateAttackBonus(p, volley, [p]));
+        expect(stats.attackBonus).toBe(calculateAttackBonus(p, volley, DEFAULT_RULES, [p]));
     });
 
     it('юніт, чия сила в закляттях, не має влучання; без майстерності — теж', () => {

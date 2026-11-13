@@ -14,6 +14,7 @@ import {
     spellEffectsFormula,
     spellFormulaLabel,
 } from '@/lib/utils/battle/spell/caster-dice';
+import type { Ruleset } from '@/lib/utils/rules/schema';
 import type { BattleParticipant } from '@/types/battle';
 import type { BookSpell } from '@/types/spells';
 import type { LogLine } from '@/types/text';
@@ -23,7 +24,8 @@ export function spellSourceModel(
     caster: BattleParticipant | null,
     flow: SpellFlowState,
     selected: BookSpell | null,
-    bypassCost: boolean
+    bypassCost: boolean,
+    rules: Pick<Ruleset, 'system'>
 ) {
     const grantsOf = (s: BookSpell) => grantsFor(caster, s.id);
 
@@ -33,7 +35,7 @@ export function spellSourceModel(
 
     const slotChoices =
         selected && !bypassCost && canSlot(selected)
-            ? slotOptions(caster, selected.level)
+            ? slotOptions(caster, selected.level, rules)
             : [];
 
     const selectedGrant = selected ? grantOf(selected) : undefined;
@@ -48,8 +50,9 @@ export function spellSourceModel(
         if (!caster || !flow.slotKey || flow.pick?.spellId !== s.id)
             return undefined;
 
-        return slotOptions(caster, s.level).find((o) => o.key === flow.slotKey)
-            ?.castLevel;
+        return slotOptions(caster, s.level, rules).find(
+            (o) => o.key === flow.slotKey
+        )?.castLevel;
     };
 
     const formulaOf = (s: BookSpell): LogLine => {
@@ -75,6 +78,7 @@ export function spellSourceModel(
                 upcastDice: s.upcastDice,
                 fixedDice: s.fixedDice,
             },
+            rules,
             castLevelOf(s)
         );
     };

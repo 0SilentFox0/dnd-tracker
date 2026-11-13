@@ -11,7 +11,7 @@ import {
 } from '@/lib/utils/skills/progression';
 
 export const D20_BALANCE: SystemBalance = {
-    heroPower: ({ built, character, campaignContext }) => {
+    heroPower: ({ built, rules, character, campaignContext }) => {
         const [participant] = applyBakedAuras(
             [built],
             new Set([built.basicInfo.id])
@@ -34,6 +34,7 @@ export const D20_BALANCE: SystemBalance = {
             levels,
             stats: getCharacterStats({
                 participant,
+                rules,
                 branchLevels: levels,
                 magicMainSkillIds: magicMainSkillIds(mainSkills),
             }),

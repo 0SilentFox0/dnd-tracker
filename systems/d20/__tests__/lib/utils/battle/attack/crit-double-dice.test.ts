@@ -5,7 +5,7 @@ import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/moc
 import { critDamageRolls } from '@/lib/utils/battle/attack/crit-dice';
 import { processAttack } from '@/lib/utils/battle/attack/process';
 import { computeDamageBreakdown } from '@/lib/utils/battle/damage';
-import { heroAttackDamageParts } from '@/lib/utils/battle/damage/hero-damage';
+import { attackDamageParts } from '@/lib/utils/battle/damage/attack-parts';
 import { eventTextOf } from '@/lib/utils/battle/log/__tests__/event-text';
 import { diceCount } from '@/lib/utils/common/dice';
 import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
@@ -188,7 +188,9 @@ describe('HOMM hero crit with doubleDice', () => {
         damageType: 'slashing',
     };
 
-    const set = diceCount(heroAttackDamageParts(hommHero, sword).formula);
+    const set = diceCount(
+        attackDamageParts(hommHero, sword, DEFAULT_RULES).formula
+    );
 
     const rolls = Array(2 * set).fill(3);
 

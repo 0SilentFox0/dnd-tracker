@@ -38,7 +38,7 @@ export const griffin = (ability: keyof typeof ABILITIES, at?: GridPoint) =>
 export const percentOfAttack = (owner: BattleParticipant, value: number) =>
     resolveAmount(
         { percentOf: 'ownerAttack', value },
-        { owner, rng: () => 0, participants: [owner] }
+        { owner, rng: () => 0, participants: [owner], rules: DEFAULT_RULES }
     );
 
 export const hp = hpOf;

@@ -174,11 +174,15 @@ function castBody(
         groupId: null;
     };
 
-    const { count } = casterSpellDice(part(ctx, casterId), {
-        dice: spell.dice,
-        groupId: spell.groupId,
-        level: 1,
-    });
+    const { count } = casterSpellDice(
+        part(ctx, casterId),
+        {
+            dice: spell.dice,
+            groupId: spell.groupId,
+            level: 1,
+        },
+        ctx.meta.rules
+    );
 
     return {
         casterId,

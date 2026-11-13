@@ -4,6 +4,7 @@ import { spellDice5e } from '../dice';
 
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import { casterSpellDice } from '@/lib/utils/battle/spell/caster-dice';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
 
 describe('spellDice5e', () => {
     const fireBolt = { dice: 1, level: 0, dieSides: 10 };
@@ -43,8 +44,15 @@ describe('casterSpellDice', () => {
 
     it('HOMM branch ignores castLevel', () => {
         expect(
-            casterSpellDice(homm, { dice: 3, groupId: null, level: 1 }, 5)
-        ).toEqual(casterSpellDice(homm, { dice: 3, groupId: null }));
+            casterSpellDice(
+                homm,
+                { dice: 3, groupId: null, level: 1 },
+                DEFAULT_RULES,
+                5
+            )
+        ).toEqual(
+            casterSpellDice(homm, { dice: 3, groupId: null }, DEFAULT_RULES)
+        );
     });
 
     it('5e caster uses spellDice5e', () => {
@@ -61,6 +69,7 @@ describe('casterSpellDice', () => {
             casterSpellDice(
                 wizard,
                 { dice: 8, groupId: null, level: 3, upcastDice: 1 },
+                DEFAULT_RULES,
                 4
             )
         ).toEqual({ count: 9, sides: 6 });
@@ -85,12 +94,16 @@ describe('casterSpellDice', () => {
             fixedDice: true,
         };
 
-        expect(casterSpellDice(monster, spell, 5)).toEqual({
+        expect(casterSpellDice(monster, spell, DEFAULT_RULES, 5)).toEqual({
             count: 2,
             sides: 8,
         });
-        expect(casterSpellDice(homm, spell, 5)).toEqual(
-            casterSpellDice(homm, { dice: 2, groupId: null, level: 1 })
+        expect(casterSpellDice(homm, spell, DEFAULT_RULES, 5)).toEqual(
+            casterSpellDice(
+                homm,
+                { dice: 2, groupId: null, level: 1 },
+                DEFAULT_RULES
+            )
         );
     });
 
@@ -105,13 +118,17 @@ describe('casterSpellDice', () => {
         };
 
         expect(
-            casterSpellDice(monster, {
-                dice: 1,
-                groupId: null,
-                level: 0,
-                dieSides: 10,
-                fixedDice: true,
-            })
+            casterSpellDice(
+                monster,
+                {
+                    dice: 1,
+                    groupId: null,
+                    level: 0,
+                    dieSides: 10,
+                    fixedDice: true,
+                },
+                DEFAULT_RULES
+            )
         ).toEqual({ count: 1, sides: 10 });
     });
 });

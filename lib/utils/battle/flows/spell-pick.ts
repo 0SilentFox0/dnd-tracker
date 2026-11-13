@@ -6,7 +6,6 @@ import type {
 
 import { textRef } from '@/lib/i18n/text-ref';
 import { describeEffect } from '@/lib/utils/abilities/registry/effects';
-import { isFiveE } from '@/lib/utils/battle/attack/ability';
 import { isDying } from '@/lib/utils/battle/death-saves';
 import { footprintDistance } from '@/lib/utils/battle/grid/geometry';
 import { cellsOf, isOnMap } from '@/lib/utils/battle/grid/occupancy';
@@ -21,10 +20,8 @@ import {
 } from '@/lib/utils/battle/modes/engine';
 import { isUp } from '@/lib/utils/battle/participant/state';
 import { inputDiceOf } from '@/lib/utils/battle/spell/cast/state';
-import {
-    casterSpellDice,
-    upcastSteps,
-} from '@/lib/utils/battle/spell/caster-dice';
+import { casterSpellDice } from '@/lib/utils/battle/spell/caster-dice';
+import { casterPicksSlot } from '@/lib/utils/battle/spell/picks-slot';
 import {
     type AimScene,
     SKILL_AREA_TEMPLATE,
@@ -35,6 +32,7 @@ import {
     spellWideningOf,
 } from '@/lib/utils/battle/spell/spell-targeting';
 import { matchesTargetFilter } from '@/lib/utils/battle/spell/target-filter';
+import { upcastSteps } from '@/lib/utils/battle/spell/upcast';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import type {
     BattleMapConfig,
@@ -81,6 +79,7 @@ export function buildSpellPick(
     order: BattleParticipant[],
     caster: BattleParticipant | null,
     s: BookSpell,
+    rules: Pick<Ruleset, 'system'>,
     map: BattleMapConfig | null = null,
     opts: { castLevel?: number; castTest?: boolean } = {}
 ): SpellPick {
@@ -97,7 +96,7 @@ export function buildSpellPick(
 
     const extra =
         caster &&
-        isFiveE(caster) &&
+        casterPicksSlot(caster, rules) &&
         opts.castLevel !== undefined &&
         s.upcastTargets
             ? s.upcastTargets * upcastSteps(s.level, opts.castLevel)
@@ -170,6 +169,7 @@ export function buildSpellPick(
                   upcastDice: s.upcastDice,
                   fixedDice: s.fixedDice,
               },
+              rules,
               opts.castLevel
           )
         : { count: def.dice, sides: 6 };

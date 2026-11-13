@@ -5,6 +5,7 @@ import { textOf } from '@/lib/i18n/test/text';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import { averageAttackDamage } from '@/lib/utils/battle/damage/average';
 import { attackSheet } from '@/lib/utils/characters/sheet/lines';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
 import type { BattleAttack } from '@/types/battle';
 
 const bow = {
@@ -19,9 +20,14 @@ describe('averageAttackDamage with weapon damageBonus', () => {
     it('adds damageBonus to the total and exposes a flat step; unchanged without it', () => {
         const p = createMockParticipant();
 
-        const plain = averageAttackDamage(p, bow, [p]);
+        const plain = averageAttackDamage(p, bow, DEFAULT_RULES, [p]);
 
-        const magic = averageAttackDamage(p, { ...bow, damageBonus: 1 }, [p]);
+        const magic = averageAttackDamage(
+            p,
+            { ...bow, damageBonus: 1 },
+            DEFAULT_RULES,
+            [p]
+        );
 
         expect(magic.total).toBe(plain.total + 1);
         expect(magic.steps).toHaveLength(plain.steps.length + 1);
@@ -35,7 +41,7 @@ describe('averageAttackDamage with weapon damageBonus', () => {
         const p = createMockParticipant();
 
         const labels = (a: BattleAttack) =>
-            attackSheet(p, a).avgDamage.lines.map(
+            attackSheet(p, a, DEFAULT_RULES).avgDamage.lines.map(
                 (l) => `${l.label}:${l.value}`
             );
 

@@ -16,6 +16,7 @@ import {
 import { applyRawDamage } from '@/lib/utils/abilities/engine/effects/hp';
 import { upsertTimedEffect } from '@/lib/utils/abilities/engine/effects/timed-effects';
 import { rollDice } from '@/lib/utils/common/dice';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
 
 describe('amount', () => {
     it('кидає кубики через rng', () => {
@@ -27,17 +28,22 @@ describe('amount', () => {
 
         const rng = seq(0);
 
-        expect(resolveAmount({ formula: '2*hero_level' }, { owner, rng })).toBe(
-            8
-        );
+        const rules = DEFAULT_RULES;
+
+        expect(
+            resolveAmount({ formula: '2*hero_level' }, { owner, rng, rules })
+        ).toBe(8);
         expect(
             resolveAmount(
                 { percentOf: 'eventDamage', value: 50 },
-                { owner, eventDamage: 9, rng }
+                { owner, eventDamage: 9, rng, rules }
             )
         ).toBe(4);
         expect(
-            resolveAmount({ percentOf: 'maxHp', value: 25 }, { owner, rng })
+            resolveAmount(
+                { percentOf: 'maxHp', value: 25 },
+                { owner, rng, rules }
+            )
         ).toBe(5);
     });
 });

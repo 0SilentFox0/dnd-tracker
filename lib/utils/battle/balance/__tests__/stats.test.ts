@@ -34,6 +34,9 @@ const bow = {
     damageType: 'piercing',
 } as BattleAttack;
 
+const stats = (params: Omit<Parameters<typeof getCharacterStats>[0], 'rules'>) =>
+    getCharacterStats({ rules: DEFAULT_RULES, ...params });
+
 function hero(
     attacks: BattleAttack[],
     abilities = makeParticipant({ id: 'h' }).battleData.resolvedAbilities
@@ -51,13 +54,13 @@ describe('getCharacterStats з учасника бою', () => {
     it('ближня і дальня — середнє реального удару; фізичний DPR — краща; HP — з учасника', () => {
         const p = hero([sword, bow]);
 
-        const s = getCharacterStats({ participant: p });
+        const s = stats({ participant: p });
 
         expect(s.dprBreakdown.meleeAvg).toBe(
-            averageAttackDamage(p, sword, [p]).total
+            averageAttackDamage(p, sword, DEFAULT_RULES, [p]).total
         );
         expect(s.dprBreakdown.rangedAvg).toBe(
-            averageAttackDamage(p, bow, [p]).total
+            averageAttackDamage(p, bow, DEFAULT_RULES, [p]).total
         );
         expect(s.dpr).toBe(
             Math.max(s.dprBreakdown.meleeAvg, s.dprBreakdown.rangedAvg)
@@ -74,10 +77,10 @@ describe('getCharacterStats з учасника бою', () => {
         });
 
         expect(
-            getCharacterStats({ participant: hero([sword], [rage]) })
+            stats({ participant: hero([sword], [rage]) })
                 .dprBreakdown.meleeAvg
         ).toBeGreaterThan(
-            getCharacterStats({ participant: hero([sword]) }).dprBreakdown
+            stats({ participant: hero([sword]) }).dprBreakdown
                 .meleeAvg
         );
     });
@@ -85,7 +88,7 @@ describe('getCharacterStats з учасника бою', () => {
     it('влучання — рушій для кращої атаки, КД — ефективний, шкода зброєю без гілок шкіл магії', () => {
         const p = hero([sword, bow]);
 
-        const s = getCharacterStats({
+        const s = stats({
             participant: p,
             branchLevels: { attack: SkillLevel.BASIC, chaos: SkillLevel.BASIC },
             magicMainSkillIds: new Set(['chaos']),
@@ -94,7 +97,7 @@ describe('getCharacterStats з учасника бою', () => {
         const best =
             s.dprBreakdown.rangedAvg > s.dprBreakdown.meleeAvg ? bow : sword;
 
-        expect(s.toHit).toBe(calculateAttackBonus(p, best, [p]));
+        expect(s.toHit).toBe(calculateAttackBonus(p, best, DEFAULT_RULES, [p]));
         expect(s.ac).toBe(getEffectiveArmorClass(p));
         expect(s.weaponDpr).toBe(
             s.dprBreakdown.physicalDpr +
@@ -114,8 +117,8 @@ describe('getCharacterStats з учасника бою', () => {
         } as BattleAttack;
 
         expect(
-            getCharacterStats({ participant: p }).dprBreakdown.meleeAvg
-        ).toBe(averageAttackDamage(p, fists, [p]).total);
+            stats({ participant: p }).dprBreakdown.meleeAvg
+        ).toBe(averageAttackDamage(p, fists, DEFAULT_RULES, [p]).total);
     });
 });
 
@@ -137,12 +140,12 @@ describe('getCharacterStats: архетип і раса в оцінці сили
     it('школа із spellGroupId рахується магією, навіть без збігу назви', () => {
         const levels = { chaos: SkillLevel.BASIC };
 
-        const plain = getCharacterStats({
+        const plain = stats({
             participant: hero([sword]),
             branchLevels: levels,
         });
 
-        const school = getCharacterStats({
+        const school = stats({
             participant: hero([sword]),
             branchLevels: levels,
             magicMainSkillIds: new Set(['chaos']),
@@ -159,12 +162,12 @@ describe('getCharacterStats: архетип і раса в оцінці сили
     it('множник архетипу найкращої зброї множить і табличний немагічний DPR', () => {
         const levels = { attack: SkillLevel.BASIC };
 
-        const base = getCharacterStats({
+        const base = stats({
             participant: asCharacter(hero([sword]), { meleeMultiplier: 1 }),
             branchLevels: levels,
         });
 
-        const boosted = getCharacterStats({
+        const boosted = stats({
             participant: asCharacter(hero([sword]), { meleeMultiplier: 1.5 }),
             branchLevels: levels,
         });
@@ -183,12 +186,12 @@ describe('getCharacterStats: архетип і раса в оцінці сили
             magicMainSkillIds: new Set(['chaos']),
         };
 
-        const base = getCharacterStats({
+        const base = stats({
             participant: asCharacter(hero([sword]), { magicMultiplier: 1 }),
             ...params,
         }).spellDpr;
 
-        const arche = getCharacterStats({
+        const arche = stats({
             participant: asCharacter(hero([sword]), { magicMultiplier: 1.2 }),
             ...params,
         }).spellDpr;
@@ -200,7 +203,7 @@ describe('getCharacterStats: архетип і раса в оцінці сили
             ],
         });
 
-        const race = getCharacterStats({
+        const race = stats({
             participant: asCharacter(hero([sword]), { magicMultiplier: 1 }, [
                 racial,
             ]),
@@ -301,7 +304,7 @@ describe('баланс: середня шкода з кубиків', () => {
                 attacks: [attack],
             }).dpr;
 
-            const engine = averageAttackDamage(p, attack, [p]);
+            const engine = averageAttackDamage(p, attack, DEFAULT_RULES, [p]);
 
             expect(engine.statMod).toBe(attack === sword ? 4 : 2);
             expect(estimate).toBe(engine.weaponAvg + engine.statMod);

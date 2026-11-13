@@ -25,11 +25,12 @@ export function attackShare(
     owner: BattleParticipant,
     ps: BattleParticipant[],
     percent: number,
-    rng: Rng
+    rng: Rng,
+    rules: Ruleset
 ): number {
     return resolveAmount(
         { percentOf: 'ownerAttack', value: percent },
-        { owner, rng, participants: ps }
+        { owner, rng, participants: ps, rules }
     );
 }
 

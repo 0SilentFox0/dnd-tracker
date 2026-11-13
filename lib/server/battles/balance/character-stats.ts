@@ -43,6 +43,7 @@ export async function loadCharacterBalanceStats(
                 character,
                 ...systemServerOf(rules).balance.heroPower({
                     built,
+                    rules,
                     character,
                     campaignContext,
                 }),

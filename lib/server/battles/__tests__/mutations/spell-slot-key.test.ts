@@ -6,6 +6,7 @@ import { context, goblin, participant } from './fixtures';
 import { ParticipantSide } from '@/lib/constants/battle';
 import { createSpellMutation } from '@/lib/server/battles/mutations/spell/spell-mutation';
 import { casterSpellDice } from '@/lib/utils/battle/spell/caster-dice';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
 import type { BattleParticipant } from '@/types/battle';
 
 const fireball = {
@@ -125,7 +126,11 @@ describe('spell slotKey', () => {
 
         const hero = caster(false);
 
-        const dice = casterSpellDice(hero, { dice: 1, groupId: null });
+        const dice = casterSpellDice(
+            hero,
+            { dice: 1, groupId: null },
+            DEFAULT_RULES
+        );
 
         const out = await run(bolt, hero, {
             slotKey: '5',

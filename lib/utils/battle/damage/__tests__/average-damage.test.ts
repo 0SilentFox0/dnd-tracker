@@ -6,6 +6,7 @@ import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/moc
 import { averageAttackDamage } from '@/lib/utils/battle/damage/average';
 import { weaponPreview } from '@/lib/utils/battle/view';
 import { diceAverage } from '@/lib/utils/common/dice';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
 import type { BattleAttack } from '@/types/battle';
 
 const sword = {
@@ -34,10 +35,12 @@ describe('averageAttackDamage', () => {
                 2
         );
 
-        expect(averageAttackDamage(p, sword, [p]).total).toBe(expected);
+        expect(averageAttackDamage(p, sword, DEFAULT_RULES, [p]).total).toBe(
+            expected
+        );
 
         p.abilities.meleeMultiplier = 2;
-        expect(averageAttackDamage(p, sword, [p]).total).toBe(
+        expect(averageAttackDamage(p, sword, DEFAULT_RULES, [p]).total).toBe(
             Math.floor(expected * 2)
         );
     });
@@ -46,8 +49,8 @@ describe('averageAttackDamage', () => {
         const p = createMockParticipant();
 
         p.abilities = { ...p.abilities, level: 10 };
-        expect(weaponPreview(p, sword, [p]).estimate).toBe(
-            averageAttackDamage(p, sword, [p]).total
+        expect(weaponPreview(p, sword, DEFAULT_RULES, [p]).estimate).toBe(
+            averageAttackDamage(p, sword, DEFAULT_RULES, [p]).total
         );
     });
 });

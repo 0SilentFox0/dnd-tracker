@@ -1,5 +1,6 @@
+import { isFiveE } from '../damage-model';
+
 import { API_ERRORS } from '@/lib/constants/api-errors';
-import { isFiveE } from '@/lib/utils/battle/attack/ability';
 import {
     resolveChosenSlot,
     spellNeedsSlot,

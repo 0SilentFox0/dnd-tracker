@@ -437,6 +437,7 @@ export function createSpellMutation(
                 upcastDice: definition.upcastDice,
                 fixedDice: definition.fixedDice,
             },
+            ctx.meta.rules,
             castLevel
         );
 

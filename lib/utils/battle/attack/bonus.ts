@@ -42,10 +42,11 @@ import type { LogLine } from '@/types/text';
 export function calculateAttackBonus(
     attacker: BattleParticipant,
     attack: BattleAttack,
+    rules: Pick<Ruleset, 'system'>,
     participants: BattleParticipant[] = [attacker],
     extra?: StaticEffect[]
 ): number {
-    const statModifier = attackRollModifier(attacker, attack);
+    const statModifier = attackRollModifier(attacker, attack, rules);
 
     const base =
         (attack.attackBonus || 0) +
@@ -178,7 +179,7 @@ export function rollModeReasons(
                         e.flag.attackKind === kind) &&
                     (!e.flag.attackAbility ||
                         e.flag.attackAbility ===
-                            attackAbilityFor(attacker, attack))
+                            attackAbilityFor(attacker, attack, opts.rules))
             )
         ),
         ...(opts.targetId
@@ -216,7 +217,7 @@ export function rollModeReasons(
         ...frightenedLabels,
         ...(attackerBlind ? [OBSCURED_ATTACKER_LABEL] : []),
         ...(armorPenalty(attacker) &&
-        armorPenaltyAffects(attackAbilityFor(attacker, attack))
+        armorPenaltyAffects(attackAbilityFor(attacker, attack, opts.rules))
             ? [ARMOR_PENALTY_LABEL]
             : []),
         ...(target
@@ -358,7 +359,7 @@ export function predictAttack(
     });
 
     return {
-        totalBonus: calculateAttackBonus(self, attack, ps, extra),
+        totalBonus: calculateAttackBonus(self, attack, opts.rules, ps, extra),
         targetAC: statWithModifiers(
             ps,
             target.basicInfo.id,

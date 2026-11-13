@@ -1,4 +1,4 @@
-import { upcastSteps } from '@/lib/utils/battle/spell/caster-dice';
+import { upcastSteps } from '@/lib/utils/battle/spell/upcast';
 import type { SpellTargetFilter } from '@/lib/utils/spells/model/schema';
 import type { BattleParticipant } from '@/types/battle';
 

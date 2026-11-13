@@ -210,20 +210,24 @@ describe('Хаос: кубики і множники', () => {
 
         const g = { dice: sp.definition.dice, groupId: CHAOS };
 
-        expect(casterSpellDice(hero('c', 20, { level: 1 }), g)).toEqual({
+        expect(
+            casterSpellDice(hero('c', 20, { level: 1 }), g, DEFAULT_RULES)
+        ).toEqual({
             count: 3,
             sides: 6,
         });
         expect(
             casterSpellDice(
                 hero('c', 20, { level: 6, mastery: { [CHAOS]: 'advanced' } }),
-                g
+                g,
+                DEFAULT_RULES
             )
         ).toEqual({ count: 5, sides: 8 });
         expect(
             casterSpellDice(
                 hero('c', 20, { level: 9, mastery: { [CHAOS]: 'expert' } }),
-                g
+                g,
+                DEFAULT_RULES
             )
         ).toEqual({ count: 6, sides: 10 });
     });
@@ -234,7 +238,8 @@ describe('Хаос: кубики і множники', () => {
         expect(
             casterSpellDice(
                 { ...u, abilities: { ...u.abilities, level: 6 } },
-                { dice: 3, groupId: CHAOS }
+                { dice: 3, groupId: CHAOS },
+                DEFAULT_RULES
             )
         ).toEqual({ count: 6, sides: 8 });
     });

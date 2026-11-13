@@ -26,6 +26,7 @@ export const legendaryAttack = (
     ruleSystemOf(input.rules).combat.actions.legendaryAttack({
         ...input,
         strike: resolveServerAttack,
+        reach: ruleSystemOf(input.rules).combat.reach,
     });
 
 export const moveWithReactions = (

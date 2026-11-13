@@ -13,8 +13,8 @@ import { channelTargetOf, wfrpChannel } from './channel';
 import { wfrpMiscast } from './miscast';
 
 import { textRef } from '@/lib/i18n/text-ref';
-import { upcastSteps } from '@/lib/utils/battle/spell/caster-dice';
 import { noMagic } from '@/lib/utils/battle/spell/none';
+import { upcastSteps } from '@/lib/utils/battle/spell/upcast';
 import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
 import type {
     RuleSystemMagic,

@@ -5,7 +5,6 @@ import {
     isAirborne,
 } from '@/lib/utils/abilities/engine/core/participants';
 import type { CunningStrikeEffect } from '@/lib/utils/abilities/schema';
-import { hasTrait } from '@/lib/utils/battle/attack/ability';
 import { assertAttackAllowed } from '@/lib/utils/battle/attack/assert-allowed';
 import { canAttackFromPool } from '@/lib/utils/battle/attack/attacks-left';
 import {
@@ -17,6 +16,7 @@ import {
     type ActorScope,
     requireActor,
 } from '@/lib/utils/battle/common/control';
+import { hasTrait } from '@/lib/utils/battle/common/weapon-trait';
 import {
     BattleAccessError,
     BattleRuleError,

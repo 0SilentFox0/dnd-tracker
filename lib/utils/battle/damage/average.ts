@@ -1,17 +1,16 @@
-import { heroAttackDamageParts, heroDamageContext } from './hero-damage';
+import { attackDamageContext, attackDamageParts } from './attack-parts';
 import { applyHeroDmDamageMultiplier } from './hero-dm-multiplier';
 import { calculateDamageWithModifiers } from './index';
 import { WEAPON_FLAT_LABEL } from './weapon-flat';
 
 import type { AbilityKey } from '@/lib/constants/abilities';
-import { ParticipantSourceType } from '@/lib/constants/battle';
 import {
-    attackAbilityFor,
+    attackAbilityOf,
     attackDamageModifier,
-    isFiveE,
 } from '@/lib/utils/battle/attack/ability';
 import { attackKindOf } from '@/lib/utils/battle/common/attack-kind';
 import { diceAverage } from '@/lib/utils/common/dice';
+import type { Ruleset } from '@/lib/utils/rules/schema';
 import type {
     BattleAttack,
     BattleParticipant,
@@ -32,27 +31,34 @@ export interface AverageDamage {
 export function averageAttackDamage(
     p: BattleParticipant,
     attack: BattleAttack,
+    rules: Pick<Ruleset, 'system'>,
     all: BattleParticipant[]
 ): AverageDamage {
     const type = attackKindOf(attack.type);
 
-    const isHero = p.basicInfo.sourceType === ParticipantSourceType.CHARACTER;
-
-    const { weaponDice, heroDice } = heroAttackDamageParts(p, attack);
+    const { weaponDice, extraDice: heroDice } = attackDamageParts(
+        p,
+        attack,
+        rules
+    );
 
     const heroDiceAvg = diceAverage(heroDice);
 
     const weaponAvg = diceAverage(weaponDice);
 
-    const statMod = attackDamageModifier(p, attack, all);
+    const statMod = attackDamageModifier(p, attack, rules, all);
+
+    const { key: statKey } = attackAbilityOf(rules, p, attack);
+
+    const { heroLevelPart } = attackDamageContext(p, attack, [], rules);
 
     const calc = calculateDamageWithModifiers(p, weaponAvg, statMod, type, {
         allParticipants: all,
-        heroLevelPart: heroDamageContext(p, attack, []).heroLevelPart,
+        heroLevelPart,
         heroDicePart: heroDiceAvg,
         heroDiceNotation: heroDice,
         weaponDiceNotation: attack.damageDice ?? undefined,
-        statKey: attackAbilityFor(p, attack),
+        statKey,
     });
 
     const bonus = attack.damageBonus ?? 0;
@@ -74,10 +80,10 @@ export function averageAttackDamage(
 
     return {
         total: dm.damage,
-        statKey: attackAbilityFor(p, attack),
+        statKey,
         weaponAvg,
         heroDice,
-        heroPart: isHero && !isFiveE(p) ? p.abilities.level + heroDiceAvg : 0,
+        heroPart: heroLevelPart + heroDiceAvg,
         statMod,
         steps,
         multiplier: dm.multiplier,

@@ -2,13 +2,14 @@ import type { SlotOption } from './spell-flow-types';
 
 import { spellLevelRoman } from '@/lib/constants/spells';
 import { textRef } from '@/lib/i18n/text-ref';
-import { isFiveE } from '@/lib/utils/battle/attack/ability';
+import { casterPicksSlot } from '@/lib/utils/battle/spell/picks-slot';
 import {
     resolveChosenSlot,
     spellNeedsSlot,
     spellSlotKey,
     spellSlotLeft,
 } from '@/lib/utils/battle/spell/slot';
+import type { Ruleset } from '@/lib/utils/rules/schema';
 import { PACT_KEY, slotRestoreOrder } from '@/lib/utils/spells/slot-keys';
 import type { BattleParticipant } from '@/types/battle';
 import type { BookSpell } from '@/types/spells';
@@ -16,11 +17,13 @@ import type { LogLine } from '@/types/text';
 
 export function slotOptions(
     caster: BattleParticipant | null,
-    spellLevel: number
+    spellLevel: number,
+    rules: Pick<Ruleset, 'system'>
 ): SlotOption[] {
     const slots = caster?.spellcasting?.spellSlots;
 
-    if (!caster || !slots || !isFiveE(caster) || spellLevel < 1) return [];
+    if (!caster || !slots || !casterPicksSlot(caster, rules) || spellLevel < 1)
+        return [];
 
     return slotRestoreOrder(slots).flatMap((key) => {
         const chosen = resolveChosenSlot(caster, spellLevel, key);
@@ -65,14 +68,15 @@ export const casterUsesUniversalSlot = (
 export const spellBlockedBySlots = (
     caster: BattleParticipant | null,
     level: number,
-    free: boolean
+    free: boolean,
+    rules: Pick<Ruleset, 'system'>
 ): boolean =>
     !!caster &&
-    isFiveE(caster) &&
+    casterPicksSlot(caster, rules) &&
     !casterUsesUniversalSlot(caster) &&
     !free &&
     level > 0 &&
-    slotOptions(caster, level).length === 0;
+    slotOptions(caster, level, rules).length === 0;
 
 export function spellSlotCostLabel(
     spell: BookSpell,

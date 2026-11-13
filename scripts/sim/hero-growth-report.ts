@@ -127,10 +127,11 @@ async function cell(
                 damageDice: '1d8',
                 damageType: 'physical',
             } as BattleAttack,
+            DEFAULT_RULES,
             [p]
         ).total;
 
-    const d = casterSpellDice(mage, { dice: 8, groupId: null });
+    const d = casterSpellDice(mage, { dice: 8, groupId: null }, DEFAULT_RULES);
 
     const magic = computeSpellPower({
         caster: mage,

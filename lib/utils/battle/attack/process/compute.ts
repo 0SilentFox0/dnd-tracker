@@ -1,12 +1,12 @@
 import { calculateDamageWithModifiers } from '../../damage';
 import {
+    attackDamageContext,
+    attackDamageParts,
+} from '../../damage/attack-parts';
+import {
     applyBalanceDamageMultiplier,
     scaleAdditionalDamage,
 } from '../../damage/balance-multiplier';
-import {
-    heroAttackDamageParts,
-    heroDamageContext,
-} from '../../damage/hero-damage';
 import { applyHeroDmDamageMultiplier } from '../../damage/hero-dm-multiplier';
 import { applyObstacle, obstacleStep } from '../../damage/obstacle';
 import { multiplierRow, ruleRow, stepRow, totalRow } from '../../damage/rows';
@@ -117,6 +117,7 @@ export function computeHitDamage(
     const statModifier = attackDamageModifier(
         updatedAttacker,
         attack,
+        params.rules,
         allParticipants
     );
 
@@ -132,9 +133,14 @@ export function computeHitDamage(
             allParticipants,
             targetId: target.basicInfo.id,
             additionalDamage: additionalDamageModifiers,
-            ...heroDamageContext(updatedAttacker, attack, damageRolls),
+            ...attackDamageContext(
+                updatedAttacker,
+                attack,
+                damageRolls,
+                params.rules
+            ),
             actionModifiers: params.actionModifiers,
-            statKey: attackAbilityFor(updatedAttacker, attack),
+            statKey: attackAbilityFor(updatedAttacker, attack, params.rules),
         }
     );
 
@@ -170,6 +176,7 @@ export function computeHitDamage(
         attacker: updatedAttacker,
         attack,
         statModifier,
+        rules: params.rules,
         rng: params.rng,
     });
     applyWeaponFlatStep(state, criticalEffectApplied, attack);
@@ -301,6 +308,7 @@ function applyCriticalDamage(
         attacker: BattleParticipant;
         attack: BattleAttack;
         statModifier: number;
+        rules: Ruleset;
         rng?: () => number;
     }
 ): void {
@@ -318,9 +326,10 @@ function applyCriticalDamage(
     if (effect?.effect.type === 'max_damage') {
         const before = state.damage;
 
-        const { formula, weaponDice } = heroAttackDamageParts(
+        const { formula, weaponDice } = attackDamageParts(
             ctx.attacker,
-            ctx.attack
+            ctx.attack,
+            ctx.rules
         );
 
         const weaponFlat =

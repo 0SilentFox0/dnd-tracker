@@ -13,7 +13,7 @@ import { assertAttackAllowed } from '@/lib/utils/battle/attack/assert-allowed';
 import { getDisabledAttackKinds } from '@/lib/utils/battle/attack/disabled-attacks';
 import type { ActionFlow } from '@/lib/utils/battle/common/action-flow';
 import { attackKindOf } from '@/lib/utils/battle/common/attack-kind';
-import { attackReachError } from '@/lib/utils/battle/grid/attack-reach';
+import { attackReachError } from '@/lib/utils/battle/grid/reach-check';
 import { isHostile } from '@/lib/utils/battle/modes/engine';
 
 export function legendaryAttack(
@@ -62,7 +62,8 @@ export function legendaryAttack(
         actor,
         attack,
         [target],
-        rules
+        rules,
+        input.reach
     );
 
     if (reach) return reject(reach);

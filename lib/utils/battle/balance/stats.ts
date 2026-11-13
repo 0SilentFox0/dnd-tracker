@@ -20,6 +20,7 @@ import {
     diceAverage,
     parseDiceLenient,
 } from '@/lib/utils/common/dice';
+import type { Ruleset } from '@/lib/utils/rules/schema';
 import type { BranchLevel } from '@/lib/utils/skills/progression';
 import { spellDice } from '@/lib/utils/spells/model/dice';
 import {
@@ -61,6 +62,7 @@ export interface UnitStats {
 
 export interface GetCharacterStatsParams {
     participant: BattleParticipant;
+    rules: Ruleset;
     branchLevels?: Record<string, BranchLevel> | null;
     magicMainSkillIds?: Set<string> | null;
 }
@@ -288,7 +290,8 @@ const round1 = (n: number) => Math.round(n * 10) / 10;
 
 function bestAttack(
     p: BattleParticipant,
-    type: AttackType
+    type: AttackType,
+    rules: Ruleset
 ): { avg: number; attack: BattleAttack } {
     const own = p.battleData.attacks.filter(
         (a) => attackKindOf(a.type) === type
@@ -309,7 +312,7 @@ function bestAttack(
 
     return options
         .map((attack) => ({
-            avg: averageAttackDamage(p, attack, [p]).total,
+            avg: averageAttackDamage(p, attack, rules, [p]).total,
             attack,
         }))
         .reduce((best, o) => (o.avg > best.avg ? o : best));
@@ -317,6 +320,7 @@ function bestAttack(
 
 export function getCharacterStats({
     participant,
+    rules,
     branchLevels,
     magicMainSkillIds,
 }: GetCharacterStatsParams): {
@@ -333,9 +337,9 @@ export function getCharacterStats({
     spellResist: Record<string, number>;
     dprBreakdown: CharacterDprBreakdown;
 } {
-    const melee = bestAttack(participant, AttackType.MELEE);
+    const melee = bestAttack(participant, AttackType.MELEE, rules);
 
-    const ranged = bestAttack(participant, AttackType.RANGED);
+    const ranged = bestAttack(participant, AttackType.RANGED, rules);
 
     const meleeAvg = melee.avg;
 
@@ -345,7 +349,7 @@ export function getCharacterStats({
 
     const best = (rangedAvg > meleeAvg ? ranged : melee).attack;
 
-    const toHit = calculateAttackBonus(participant, best, [participant]);
+    const toHit = calculateAttackBonus(participant, best, rules, [participant]);
 
     const levels = branchLevels ?? {};
 

@@ -7,7 +7,7 @@ import {
 } from '@/lib/constants/critical-effects';
 import { makeParticipant } from '@/lib/utils/abilities/__tests__/fixtures';
 import { computeHitDamage } from '@/lib/utils/battle/attack/process/compute';
-import { heroAttackDamageParts } from '@/lib/utils/battle/damage/hero-damage';
+import { attackDamageParts } from '@/lib/utils/battle/damage/attack-parts';
 import { getAttackAbilityModifier } from '@/lib/utils/common/calculations';
 import { diceMax } from '@/lib/utils/common/dice';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
@@ -68,7 +68,7 @@ describe('крит max_damage', () => {
         };
 
         expect(crit(hero)).toBe(
-            diceMax(heroAttackDamageParts(hero, club).formula) +
+            diceMax(attackDamageParts(hero, club, DEFAULT_RULES).formula) +
                 getAttackAbilityModifier(hero.abilities, AttackType.MELEE)
         );
     });

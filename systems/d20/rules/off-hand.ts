@@ -1,8 +1,9 @@
+import { isFiveE } from './damage-model';
 import { d20State, withD20State } from './state';
 
 import { AttackType } from '@/lib/constants/battle';
-import { hasTrait, isFiveE } from '@/lib/utils/battle/attack/ability';
 import { attackKindOf } from '@/lib/utils/battle/common/attack-kind';
+import { hasTrait } from '@/lib/utils/battle/common/weapon-trait';
 import type { OffHandRules } from '@/lib/utils/rules/systems/types';
 
 export const D20_OFF_HAND: OffHandRules = {

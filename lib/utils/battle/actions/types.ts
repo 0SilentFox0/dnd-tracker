@@ -4,6 +4,7 @@ import type { ServerAttackInput } from '@/lib/utils/battle/attack/server-attack'
 import type { NewBattleEvent } from '@/lib/utils/battle/store';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
+import type { ReachRules } from '@/lib/utils/rules/systems/types';
 import type {
     BattleAction,
     BattleMapConfig,
@@ -46,6 +47,8 @@ export interface LegendaryAttackInput {
     actorId: string;
     attackIndex: number;
     strike: ServerStrike;
+    /** The system's reach hook, handed over so the system does not import core back */
+    reach?: ReachRules;
     targetId: string;
     map: BattleMapConfig | null;
     rules: Ruleset;

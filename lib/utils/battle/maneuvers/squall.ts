@@ -60,7 +60,13 @@ export function squall(
         rng: input.rng,
     };
 
-    const amount = attackShare(actor, ps, input.percentOfAttack, input.rng);
+    const amount = attackShare(
+        actor,
+        ps,
+        input.percentOfAttack,
+        input.rng,
+        input.rules
+    );
 
     const start = actor.battleData.position;
 

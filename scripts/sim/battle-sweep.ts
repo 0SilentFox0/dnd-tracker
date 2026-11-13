@@ -100,7 +100,7 @@ import {
 import { isAreaTarget } from '@/lib/utils/abilities/schema/kinds';
 import { applyBattleDelta } from '@/lib/utils/battle/client/apply-delta';
 import { attackKindOf } from '@/lib/utils/battle/common/attack-kind';
-import { heroAttackDamageParts } from '@/lib/utils/battle/damage/hero-damage';
+import { attackDamageParts } from '@/lib/utils/battle/damage/attack-parts';
 import {
     cellDistance,
     cellKey,
@@ -143,6 +143,7 @@ import {
 import { REJECT } from '@/lib/utils/battle/store/reject';
 import { checkVictoryConditions } from '@/lib/utils/battle/turn/victory';
 import { rollDiceList } from '@/lib/utils/common/dice';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
 import { ruleSystemByKey } from '@/lib/utils/rules/systems';
 import {
     branchLevelNodeId,
@@ -1571,14 +1572,18 @@ async function castSpell(actor: any, spell: any) {
         if (targets === 'needDead') return null;
     }
 
-    const dice = casterSpellDice(actor, {
-        dice: spell.dice ?? 0,
-        groupId: spell.groupId ?? null,
-        level: spell.level,
-        dieSides: spell.dieSides,
-        upcastDice: spell.upcastDice,
-        fixedDice: spell.fixedDice,
-    });
+    const dice = casterSpellDice(
+        actor,
+        {
+            dice: spell.dice ?? 0,
+            groupId: spell.groupId ?? null,
+            level: spell.level,
+            dieSides: spell.dieSides,
+            upcastDice: spell.upcastDice,
+            fixedDice: spell.fixedDice,
+        },
+        DEFAULT_RULES
+    );
 
     const diceRolls =
         dice.count > 0 ? rollDiceList(`${dice.count}d${dice.sides}`, rng) : [];
@@ -1726,7 +1731,7 @@ async function attack(actor: any) {
 
     const target = pick(foes);
 
-    const formula = heroAttackDamageParts(actor, weapon).formula;
+    const formula = attackDamageParts(actor, weapon, DEFAULT_RULES).formula;
 
     const d20 = rng() < 0.1 ? 20 : 6 + Math.floor(rng() * 15);
 
@@ -2520,7 +2525,7 @@ async function systemChecks(spells: Map<string, any>) {
         attackId: weapon.id,
         ...roll,
         damageRolls: rollDiceList(
-            heroAttackDamageParts(hero(), weapon).formula,
+            attackDamageParts(hero(), weapon, DEFAULT_RULES).formula,
             rng
         ),
         endTurn: false,
@@ -2648,7 +2653,10 @@ async function hitBy(
         d20Roll: d20,
         disadvantageRoll: d20,
         advantageRoll: d20,
-        damageRolls: rollDiceList(heroAttackDamageParts(a, w).formula, rng),
+        damageRolls: rollDiceList(
+            attackDamageParts(a, w, DEFAULT_RULES).formula,
+            rng
+        ),
         endTurn: false,
     });
 
@@ -2675,7 +2683,10 @@ const attackWith = (att: any, target: any, w: any) =>
         d20Roll: 20,
         disadvantageRoll: 20,
         advantageRoll: 20,
-        damageRolls: rollDiceList(heroAttackDamageParts(att, w).formula, rng),
+        damageRolls: rollDiceList(
+            attackDamageParts(att, w, DEFAULT_RULES).formula,
+            rng
+        ),
         endTurn: false,
     });
 
@@ -3440,10 +3451,14 @@ async function targeted(spells: Map<string, any>) {
 
         const ec = current();
 
-        const dice = casterSpellDice(ec, {
-            dice: bolt.dice,
-            groupId: bolt.groupId,
-        });
+        const dice = casterSpellDice(
+            ec,
+            {
+                dice: bolt.dice,
+                groupId: bolt.groupId,
+            },
+            DEFAULT_RULES
+        );
 
         const r = await call('spell', SPELL, {
             casterId: ec.basicInfo.id,
@@ -3628,7 +3643,10 @@ async function controlCheck(spells: Map<string, any>) {
         targetId: foe.basicInfo.id,
         attackId: w.id,
         d20Roll: 15,
-        damageRolls: rollDiceList(heroAttackDamageParts(u, w).formula, rng),
+        damageRolls: rollDiceList(
+            attackDamageParts(u, w, DEFAULT_RULES).formula,
+            rng
+        ),
         endTurn: false,
     };
 
@@ -3871,10 +3889,14 @@ async function level5Check(spells: Map<string, any>) {
 
             const targets = spellTargets(byName(casterName), sp);
 
-            const dice = casterSpellDice(byName(casterName), {
-                dice: sp.dice ?? 0,
-                groupId: sp.groupId ?? null,
-            });
+            const dice = casterSpellDice(
+                byName(casterName),
+                {
+                    dice: sp.dice ?? 0,
+                    groupId: sp.groupId ?? null,
+                },
+                DEFAULT_RULES
+            );
 
             const before = snap(P().map((p: any) => p.basicInfo.id));
 
@@ -4412,10 +4434,14 @@ async function mapCheck(spells: Map<string, any>) {
 
     const fdice =
         fire &&
-        casterSpellDice(caster, {
-            dice: fire.dice ?? 0,
-            groupId: fire.groupId ?? null,
-        });
+        casterSpellDice(
+            caster,
+            {
+                dice: fire.dice ?? 0,
+                groupId: fire.groupId ?? null,
+            },
+            DEFAULT_RULES
+        );
 
     // мінімальні кубики — щоб куля не завершила бій до перевірки небезпеки
     const fr =
@@ -4552,10 +4578,14 @@ async function mapSkillAllCheck(spells: Map<string, any>) {
         .filter((f) => !f.battleData.airborne)
         .map((f) => f.basicInfo.id as string);
 
-    const dice = casterSpellDice(found.p, {
-        dice: found.s.dice ?? 0,
-        groupId: found.s.groupId ?? null,
-    });
+    const dice = casterSpellDice(
+        found.p,
+        {
+            dice: found.s.dice ?? 0,
+            groupId: found.s.groupId ?? null,
+        },
+        DEFAULT_RULES
+    );
 
     const r = await call('spell', SPELL, {
         casterId: found.p.basicInfo.id,
@@ -4616,10 +4646,14 @@ async function mapRingAndEmptyCheck(spells: Map<string, any>) {
     const castAt = async (spell: any, targetCell: { x: number; y: number }) => {
         const caster = current();
 
-        const dice = casterSpellDice(caster, {
-            dice: spell.dice ?? 0,
-            groupId: spell.groupId ?? null,
-        });
+        const dice = casterSpellDice(
+            caster,
+            {
+                dice: spell.dice ?? 0,
+                groupId: spell.groupId ?? null,
+            },
+            DEFAULT_RULES
+        );
 
         const r = await call('spell', SPELL, {
             casterId: caster.basicInfo.id,

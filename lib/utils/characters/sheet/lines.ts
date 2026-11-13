@@ -13,6 +13,7 @@ import {
     labelParts,
 } from '@/lib/utils/characters/sheet/line-parts';
 import { signed } from '@/lib/utils/common/format';
+import type { Ruleset } from '@/lib/utils/rules/schema';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
 import type { SheetAttack, SheetLine } from '@/types/characters';
 import type { LogLine } from '@/types/text';
@@ -24,15 +25,16 @@ const HERO_LEVEL_STEP = 'battleLog.damage.steps.heroLevel';
 
 export function attackSheet(
     p: BattleParticipant,
-    attack: BattleAttack
+    attack: BattleAttack,
+    rules: Ruleset
 ): SheetAttack {
     const type = attackKindOf(attack.type);
 
-    const statMod = attackDamageModifier(p, attack);
+    const statMod = attackDamageModifier(p, attack, rules);
 
-    const hitMod = attackRollModifier(p, attack);
+    const hitMod = attackRollModifier(p, attack, rules);
 
-    const avg = averageAttackDamage(p, attack, [p]);
+    const avg = averageAttackDamage(p, attack, rules, [p]);
 
     const star = p.abilities.primaryAbility ? ' ★' : undefined;
 
@@ -136,7 +138,9 @@ export function attackSheet(
         id: attack.id ?? attack.name,
         name: attack.name,
         kind: type,
-        toHit: { total: calculateAttackBonus(p, attack), lines: toHitLines },
+        toHit: { total: calculateAttackBonus(p, attack, rules),
+            lines: toHitLines,
+        },
         avgDamage: { total: avg.total, lines: damageLines },
     };
 }

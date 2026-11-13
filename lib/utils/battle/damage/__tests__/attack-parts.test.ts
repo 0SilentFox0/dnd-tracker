@@ -5,12 +5,12 @@ import type { CriticalEffect } from '@/lib/constants/critical-effects';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import { computeHitDamage } from '@/lib/utils/battle/attack/process/compute';
 import { computeDamageBreakdown } from '@/lib/utils/battle/damage';
-import { averageAttackDamage } from '@/lib/utils/battle/damage/average';
 import {
+    attackDamageContext,
+    attackDamageParts,
     damageDiceSlots,
-    heroAttackDamageParts,
-    heroDamageContext,
-} from '@/lib/utils/battle/damage/hero-damage';
+} from '@/lib/utils/battle/damage/attack-parts';
+import { averageAttackDamage } from '@/lib/utils/battle/damage/average';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
 
@@ -86,13 +86,17 @@ describe('шкода атаки: числа до дедупу', () => {
     });
 
     it('середня шкода й слоти кубиків', () => {
-        expect(averageAttackDamage(hero, sword, [hero]).total).toBe(20);
-        expect(averageAttackDamage(unit, sword, [unit]).total).toBe(8);
-        expect(damageDiceSlots(hero, sword)).toEqual([6, 6, 8]);
-        expect(damageDiceSlots(unit, sword)).toEqual([8]);
-        expect(damageDiceSlots(unit, { ...sword, damageDice: '' })).toEqual([
-            6,
-        ]);
+        expect(averageAttackDamage(hero, sword, DEFAULT_RULES, [hero]).total).toBe(
+            20
+        );
+        expect(averageAttackDamage(unit, sword, DEFAULT_RULES, [unit]).total).toBe(
+            8
+        );
+        expect(damageDiceSlots(hero, sword, DEFAULT_RULES)).toEqual([6, 6, 8]);
+        expect(damageDiceSlots(unit, sword, DEFAULT_RULES)).toEqual([8]);
+        expect(
+            damageDiceSlots(unit, { ...sword, damageDice: '' }, DEFAULT_RULES)
+        ).toEqual([6]);
     });
 
     it('юніт: кидки + характеристика', () => {
@@ -113,27 +117,29 @@ describe('шкода атаки: числа до дедупу', () => {
     });
 });
 
-describe('heroAttackDamageParts', () => {
+describe('attackDamageParts', () => {
     it('герой: зброя + кубики рівня', () => {
-        expect(heroAttackDamageParts(hero, sword)).toEqual({
+        expect(attackDamageParts(hero, sword, DEFAULT_RULES)).toEqual({
             weaponDice: '1d8+2',
-            heroDice: '2d6',
+            extraDice: '2d6',
             formula: '2d6+1d8',
+            flat: 5,
         });
     });
 
     it('не герой: лише зброя', () => {
-        expect(heroAttackDamageParts(unit, sword)).toEqual({
+        expect(attackDamageParts(unit, sword, DEFAULT_RULES)).toEqual({
             weaponDice: '1d8+2',
-            heroDice: '',
+            extraDice: '',
             formula: '1d8+2',
+            flat: 0,
         });
     });
 });
 
-describe('heroDamageContext', () => {
+describe('attackDamageContext', () => {
     it('один кидок героя — кубики рівня середнім', () => {
-        expect(heroDamageContext(hero, sword, [5])).toEqual({
+        expect(attackDamageContext(hero, sword, [5], DEFAULT_RULES)).toEqual({
             heroLevelPart: 5,
             heroDicePart: 7,
             heroDiceNotation: '2d6',
@@ -142,7 +148,9 @@ describe('heroDamageContext', () => {
     });
 
     it("повні кидки героя — об'єднана формула, без середнього", () => {
-        expect(heroDamageContext(hero, sword, [5, 3, 4])).toEqual({
+        expect(
+            attackDamageContext(hero, sword, [5, 3, 4], DEFAULT_RULES)
+        ).toEqual({
             heroLevelPart: 5,
             heroDicePart: 0,
             heroDiceNotation: '',
@@ -151,15 +159,19 @@ describe('heroDamageContext', () => {
     });
 
     it('юніт', () => {
-        expect(heroDamageContext(unit, sword, [5])).toEqual({
+        expect(attackDamageContext(unit, sword, [5], DEFAULT_RULES)).toEqual({
             heroLevelPart: 0,
             heroDicePart: 0,
             heroDiceNotation: '',
             weaponDiceNotation: '1d8+2',
         });
         expect(
-            heroDamageContext(unit, { ...sword, damageDice: '' }, [3])
-                .weaponDiceNotation
+            attackDamageContext(
+                unit,
+                { ...sword, damageDice: '' },
+                [3],
+                DEFAULT_RULES
+            ).weaponDiceNotation
         ).toBeUndefined();
     });
 });

@@ -624,6 +624,18 @@ export interface RuleSystemMagic {
     spellAbilityMod?(
         caster: BattleParticipant
     ): { mod: number; label: string } | null;
+    /** Dice of a spell for this caster; null means the caster is not covered and the default dice apply */
+    casterDice?(
+        caster: BattleParticipant,
+        spell: {
+            dice: number;
+            level?: number;
+            dieSides?: number | null;
+            upcastDice?: number | null;
+            fixedDice?: boolean;
+        },
+        castLevel?: number
+    ): { count: number; sides: number } | null;
     tested?: RuleSystemTestedMagic;
     /** Derived save DC and attack bonus of a caster; none means the system has no such derivation */
     spellcasting?(
@@ -706,6 +718,30 @@ export interface OffHandRules {
     arm(attacker: BattleParticipant, attack: BattleAttack): BattleParticipant;
 }
 
+export interface AttackAbilityResult {
+    key: AbilityKey;
+    roll: number;
+    damage: number;
+}
+
+export interface ReachRules {
+    /** Cells a melee attack reaches, before the attack's own `reachCells` */
+    meleeCells(p: BattleParticipant, attack: BattleAttack): number;
+    /** Ranged attacks of this attacker take range and nearby-enemy penalties, thrown melee counts as ranged, and shooting is never blocked by engagement */
+    rangedPenalties(p: BattleParticipant): boolean;
+}
+
+export interface DamagePartResult {
+    dice?: string;
+    flat?: number;
+}
+
+/** One contribution to the damage of an attack besides its weapon dice and ability modifier */
+export type DamagePart = (
+    p: BattleParticipant,
+    attack: BattleAttack
+) => DamagePartResult | null;
+
 export interface InspirationRules {
     available(p: BattleParticipant): boolean;
     spend(p: BattleParticipant): BattleParticipant;
@@ -726,6 +762,16 @@ export interface RuleSystemCombat {
     input?: { assert(system: SystemSlot, ctx: SystemInputCtx): void };
     /** Off-hand attacks; absent means never */
     offHand?: OffHandRules;
+    /** Ability of an attack and its roll and damage modifiers; absent means the attack type's default ability */
+    attackAbility?(
+        p: BattleParticipant,
+        attack: BattleAttack,
+        participants: BattleParticipant[]
+    ): AttackAbilityResult;
+    /** Melee reach and ranged-attack penalties; absent means one cell and no penalties */
+    reach?: ReachRules;
+    /** Extra dice and flat damage of an attack, base first, then modules */
+    damageParts?: readonly DamagePart[];
     /** A spendable boost to one attack roll; absent means none */
     inspiration?: InspirationRules;
     /** Who judges an attack: the client rolls and the server checks vs AC, or the server resolves the whole test */

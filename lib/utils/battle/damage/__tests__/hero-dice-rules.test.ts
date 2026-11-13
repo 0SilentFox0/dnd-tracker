@@ -3,7 +3,8 @@ import { describe, expect, it } from 'vitest';
 import { AttackType } from '@/lib/constants/battle';
 import { getHeroDamageDiceForLevel } from '@/lib/constants/hero-scaling';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
-import { heroAttackDamageParts } from '@/lib/utils/battle/damage/hero-damage';
+import { attackDamageParts } from '@/lib/utils/battle/damage/attack-parts';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
 
 const base = createMockParticipant();
@@ -34,32 +35,42 @@ const ranged: BattleAttack = {
 
 describe('кубики героя з правил кампанії', () => {
     it('без heroDice — типова прогресія', () => {
-        expect(heroAttackDamageParts(heroAt(5), melee).heroDice).toBe(
-            getHeroDamageDiceForLevel(5, AttackType.MELEE)
-        );
+        expect(
+            attackDamageParts(heroAt(5), melee, DEFAULT_RULES).extraDice
+        ).toBe(getHeroDamageDiceForLevel(5, AttackType.MELEE));
     });
 
     it('таблиця melee діє на своєму рівні, ranged лишається типовим', () => {
         const p = heroAt(5, { melee: { 5: '2d10' } });
 
-        expect(heroAttackDamageParts(p, melee).heroDice).toBe('2d10');
-        expect(heroAttackDamageParts(p, ranged).heroDice).toBe(
+        expect(attackDamageParts(p, melee, DEFAULT_RULES).extraDice).toBe(
+            '2d10'
+        );
+        expect(attackDamageParts(p, ranged, DEFAULT_RULES).extraDice).toBe(
             getHeroDamageDiceForLevel(5, AttackType.RANGED)
         );
     });
 
     it('часткова таблиця: рівні поза нею беруться зі стандартної прогресії', () => {
-        const standard = heroAttackDamageParts(heroAt(6), melee).heroDice;
+        const standard = attackDamageParts(
+            heroAt(6),
+            melee,
+            DEFAULT_RULES
+        ).extraDice;
 
         expect(
-            heroAttackDamageParts(
+            attackDamageParts(
                 heroAt(6, { melee: { 5: '2d10', 20: '9d4' } }),
-                melee
-            ).heroDice
+                melee,
+                DEFAULT_RULES
+            ).extraDice
         ).toBe(standard);
         expect(
-            heroAttackDamageParts(heroAt(5, { melee: { 5: '2d10' } }), melee)
-                .heroDice
+            attackDamageParts(
+                heroAt(5, { melee: { 5: '2d10' } }),
+                melee,
+                DEFAULT_RULES
+            ).extraDice
         ).toBe('2d10');
     });
 });

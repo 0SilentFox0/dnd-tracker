@@ -4,6 +4,7 @@ import { AttackType } from '@/lib/constants/battle';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import { calculateAttackBonus } from '@/lib/utils/battle/attack';
 import { getAttackAbilityModifier } from '@/lib/utils/common/calculations';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
 import type { BattleAttack } from '@/types/battle';
 
 const sword = {
@@ -63,7 +64,7 @@ describe('primaryAbility', () => {
             proficiencyBonus: 9,
         };
 
-        expect(calculateAttackBonus(p, sword)).toBe(4 + 9 + 1);
-        expect(calculateAttackBonus(p, bow)).toBe(4 + 9);
+        expect(calculateAttackBonus(p, sword, DEFAULT_RULES)).toBe(4 + 9 + 1);
+        expect(calculateAttackBonus(p, bow, DEFAULT_RULES)).toBe(4 + 9);
     });
 });

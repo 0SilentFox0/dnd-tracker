@@ -53,7 +53,13 @@ export function fireBurst(
             ],
         };
 
-    const full = attackShare(actor, ps, input.percentOfAttack, input.rng);
+    const full = attackShare(
+        actor,
+        ps,
+        input.percentOfAttack,
+        input.rng,
+        input.rules
+    );
 
     const dc = spellSaveDc(input.rules, actor);
 

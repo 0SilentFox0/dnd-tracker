@@ -9,6 +9,7 @@ import { makeParticipant } from '@/lib/utils/abilities/__tests__/fixtures';
 import { attackDamageModifier } from '@/lib/utils/battle/attack/ability';
 import { calculateAttackBonus } from '@/lib/utils/battle/attack/bonus';
 import { parseDice } from '@/lib/utils/common/dice';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
 import type { BattleAttack } from '@/types/battle';
 
 const base = {
@@ -75,10 +76,10 @@ function engineTotals(entry: ReturnType<typeof adapt>, index = 0) {
     };
 
     return {
-        toHit: calculateAttackBonus(participant, attack),
+        toHit: calculateAttackBonus(participant, attack, DEFAULT_RULES),
         damageFlat:
             (parseDice(row.damageDice)?.flat ?? 0) +
-            attackDamageModifier(participant, attack),
+            attackDamageModifier(participant, attack, DEFAULT_RULES),
     };
 }
 

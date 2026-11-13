@@ -112,8 +112,8 @@ describe('parse SRD-рядків', () => {
 describe('володіння зброєю й бронею (5e)', () => {
     it('мартіал без володіння не дає бонус майстерності', () => {
         expect(
-            calculateAttackBonus(withProf('Fighter'), sword) -
-                calculateAttackBonus(withProf('Wizard'), sword)
+            calculateAttackBonus(withProf('Fighter'), sword, DEFAULT_RULES) -
+                calculateAttackBonus(withProf('Wizard'), sword, DEFAULT_RULES)
         ).toBe(3);
     });
 
@@ -124,8 +124,8 @@ describe('володіння зброєю й бронею (5e)', () => {
 
         const homm = makeParticipant({ id: 'h' });
 
-        expect(calculateAttackBonus(homm, sword)).toBe(
-            calculateAttackBonus(homm, plain)
+        expect(calculateAttackBonus(homm, sword, DEFAULT_RULES)).toBe(
+            calculateAttackBonus(homm, plain, DEFAULT_RULES)
         );
     });
 

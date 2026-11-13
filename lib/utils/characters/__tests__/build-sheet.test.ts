@@ -149,7 +149,7 @@ describe('buildCharacterSheet', () => {
         const dagger = s.attacks.find((a) => a.id === 'sw');
 
         expect(dagger?.toHit.total).toBe(
-            calculateAttackBonus(input.participant, sword)
+            calculateAttackBonus(input.participant, sword, DEFAULT_RULES)
         );
         expect(dagger?.toHit.total).toBe(4 + 9);
         expect(dagger?.toHit.lines[0]).toMatchObject({

@@ -45,7 +45,7 @@ import {
     pickEnemyRoster,
 } from '@/lib/utils/battle/balance';
 import { applyBattleDelta } from '@/lib/utils/battle/client/apply-delta';
-import { heroAttackDamageParts } from '@/lib/utils/battle/damage/hero-damage';
+import { attackDamageParts } from '@/lib/utils/battle/damage/attack-parts';
 import { awaitsMoraleCheck } from '@/lib/utils/battle/morale/awaits-check';
 import {
     loadEquippedArtifactRows,
@@ -419,10 +419,14 @@ function pickSpell(
         else if (targeting.kind === 'allEnemies') targets = sorted;
         else continue;
 
-        const dice = casterSpellDice(actor, {
-            dice: spell.dice,
-            groupId: spell.groupId,
-        });
+        const dice = casterSpellDice(
+            actor,
+            {
+                dice: spell.dice,
+                groupId: spell.groupId,
+            },
+            DEFAULT_RULES
+        );
 
         const save =
             (spell.resolution as { kind: string }).kind === 'save' ? 0.75 : 1;
@@ -596,10 +600,14 @@ async function playTurn(actor: BattleParticipant, foes: BattleParticipant[]) {
                     `   pick ${pick.spell.name} by ${actor.basicInfo.name} slots ${JSON.stringify(actor.spellcasting.spellSlots)}`
                 );
 
-            const dice = casterSpellDice(actor, {
-                dice: pick.spell.dice,
-                groupId: pick.spell.groupId,
-            });
+            const dice = casterSpellDice(
+                actor,
+                {
+                    dice: pick.spell.dice,
+                    groupId: pick.spell.groupId,
+                },
+                DEFAULT_RULES
+            );
 
             const rolls = Array.from(
                 { length: dice.count },
@@ -642,7 +650,7 @@ async function playTurn(actor: BattleParticipant, foes: BattleParticipant[]) {
             ? weakest.slice(0, Math.max(1, actor.combatStats.maxTargets ?? 1))
             : weakest.slice(0, 1);
 
-    const formula = heroAttackDamageParts(actor, weapon).formula;
+    const formula = attackDamageParts(actor, weapon, DEFAULT_RULES).formula;
 
     const status = await call('attack', ATTACK, {
         attackerId: actor.basicInfo.id,

@@ -81,8 +81,8 @@ const enemyAt = (x: number) => mk('e', ParticipantSide.ENEMY, x);
 
 describe('досяжність і дальність 5e', () => {
     it('reach weapon hits at 2 cells in 5e only', () => {
-        expect(meleeReachCells(fiveE, glaive)).toBe(2);
-        expect(meleeReachCells(homm, glaive)).toBe(1);
+        expect(meleeReachCells(fiveE, glaive, DEFAULT_RULES)).toBe(2);
+        expect(meleeReachCells(homm, glaive, DEFAULT_RULES)).toBe(1);
         expect(
             attackReachError(
                 map,

@@ -29,9 +29,9 @@ import { nextChainTarget } from '@/lib/utils/battle/attack/process/chain';
 import { attackKindOf } from '@/lib/utils/battle/common/attack-kind';
 import type { CritPicker } from '@/lib/utils/battle/crit-choice/types';
 import {
+    attackDamageParts,
     damageDiceSlots,
-    heroAttackDamageParts,
-} from '@/lib/utils/battle/damage/hero-damage';
+} from '@/lib/utils/battle/damage/attack-parts';
 import { lineOfFire } from '@/lib/utils/battle/grid';
 import { withLines } from '@/lib/utils/battle/log/lines';
 import type { ProcessAttackResult } from '@/lib/utils/battle/types/attack-process';
@@ -202,7 +202,7 @@ function runPhase(input: AttackPhaseInput): AttackPhaseResult {
 
     const damageFormula =
         (volley && (targets.length > 1 || expanded)) || chain
-            ? heroAttackDamageParts(attacker, attack).formula
+            ? attackDamageParts(attacker, attack, input.rules).formula
             : null;
 
     const ctx: PhaseCtx = {
@@ -325,7 +325,9 @@ function rollStrike(
           );
 
     const serverDamage = input.serverRolls
-        ? damageDiceSlots(attacker, attack).map((sides) => rollDie(sides, rng))
+        ? damageDiceSlots(attacker, attack, input.rules).map((sides) =>
+              rollDie(sides, rng)
+          )
         : null;
 
     const strikeDice = serverDamage

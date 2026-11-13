@@ -1,17 +1,11 @@
 import { ParticipantSourceType } from '@/lib/constants/battle';
 import { joinLines, textRef } from '@/lib/i18n/text-ref';
-import { isFiveE } from '@/lib/utils/battle/attack/ability';
-import {
-    type SpellDice,
-    spellDice,
-    spellDice5e,
-} from '@/lib/utils/spells/model/dice';
+import type { Ruleset } from '@/lib/utils/rules/schema';
+import { ruleSystemOf } from '@/lib/utils/rules/systems';
+import { type SpellDice, spellDice } from '@/lib/utils/spells/model/dice';
 import type { SpellEffect } from '@/lib/utils/spells/model/schema';
 import type { BattleParticipant } from '@/types/battle';
 import type { LogLine } from '@/types/text';
-
-export const upcastSteps = (spellLevel: number, castLevel: number): number =>
-    Math.max(0, castLevel - spellLevel);
 
 export function casterSpellDice(
     caster: BattleParticipant,
@@ -23,21 +17,16 @@ export function casterSpellDice(
         upcastDice?: number | null;
         fixedDice?: boolean;
     },
+    rules: Pick<Ruleset, 'system'>,
     castLevel?: number
 ): SpellDice {
-    if (isFiveE(caster))
-        return spellDice5e(
-            {
-                dice: spell.dice,
-                level: spell.level ?? 0,
-                dieSides: spell.dieSides ?? undefined,
-                upcastDice: spell.fixedDice
-                    ? 0
-                    : (spell.upcastDice ?? undefined),
-            },
-            spell.fixedDice ? 1 : caster.abilities.level,
-            castLevel ?? spell.level ?? 0
-        );
+    const system = ruleSystemOf(rules).magic.casterDice?.(
+        caster,
+        spell,
+        castLevel
+    );
+
+    if (system) return system;
 
     const kind =
         caster.basicInfo.sourceType === ParticipantSourceType.CHARACTER
@@ -57,9 +46,10 @@ export function casterSpellDice(
 export function spellFormulaLabel(
     caster: BattleParticipant,
     spell: Parameters<typeof casterSpellDice>[1],
+    rules: Pick<Ruleset, 'system'>,
     castLevel?: number
 ): LogLine {
-    const { count, sides } = casterSpellDice(caster, spell, castLevel);
+    const { count, sides } = casterSpellDice(caster, spell, rules, castLevel);
 
     return count === 0
         ? textRef('battleActions.spell.noDice')

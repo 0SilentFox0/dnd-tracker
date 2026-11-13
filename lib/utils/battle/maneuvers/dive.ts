@@ -128,7 +128,13 @@ export function landDive(
         [
             {
                 targetId: victim.basicInfo.id,
-                amount: attackShare(actor, next, airborne.percent, ctx.rng),
+                amount: attackShare(
+                    actor,
+                    next,
+                    airborne.percent,
+                    ctx.rng,
+                    ctx.rules
+                ),
             },
         ],
         {

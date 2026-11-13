@@ -1,3 +1,4 @@
+import { D20_REACH } from '../attack/ability';
 import { canReact, pickMeleeAttack } from './reaction';
 
 import { EffectMarker } from '@/lib/constants/battle';
@@ -16,7 +17,6 @@ import {
     isOnMap,
     sizeOf,
 } from '@/lib/utils/battle/grid';
-import { meleeReachCells } from '@/lib/utils/battle/grid/attack-reach';
 import { isHostile } from '@/lib/utils/battle/modes/engine';
 import { hasEffectMarker } from '@/lib/utils/battle/participant/state';
 import type { Ruleset } from '@/lib/utils/rules';
@@ -107,7 +107,9 @@ export function resolveOpportunityAttacks(
 
         const entry = {
             attack,
-            range: attack ? meleeReachCells(e, attack) : 0,
+            range: attack
+                ? attack.reachCells || D20_REACH.meleeCells(e, attack)
+                : 0,
         };
 
         melee.set(e.basicInfo.id, entry);

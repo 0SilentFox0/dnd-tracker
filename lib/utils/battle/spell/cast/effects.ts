@@ -209,6 +209,7 @@ function dealSpellDamage(
                 spellRoll: roll,
                 rng: state.rng,
                 participants: flow.ps,
+                rules: flow.ctx.rules,
             }),
         0
     );

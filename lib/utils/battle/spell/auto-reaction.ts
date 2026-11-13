@@ -127,13 +127,17 @@ export function runAutoReactions(
             grant
         );
 
-        const dice = casterSpellDice(holder, {
-            dice: grant.inline.dice,
-            groupId: null,
-            level: 0,
-            dieSides: grant.inline.dieSides,
-            fixedDice: true,
-        });
+        const dice = casterSpellDice(
+            holder,
+            {
+                dice: grant.inline.dice,
+                groupId: null,
+                level: 0,
+                dieSides: grant.inline.dieSides,
+                fixedDice: true,
+            },
+            flow.ctx.rules
+        );
 
         const diceRolls =
             dice.count > 0

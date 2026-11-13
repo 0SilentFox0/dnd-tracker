@@ -6,11 +6,11 @@ import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/moc
 import { attackAbilityFor } from '@/lib/utils/battle/attack/ability';
 import { calculateAttackBonus } from '@/lib/utils/battle/attack/bonus';
 import { computeHitDamage } from '@/lib/utils/battle/attack/process/compute';
-import { averageAttackDamage } from '@/lib/utils/battle/damage/average';
 import {
-    heroAttackDamageParts,
-    heroDamageContext,
-} from '@/lib/utils/battle/damage/hero-damage';
+    attackDamageContext,
+    attackDamageParts,
+} from '@/lib/utils/battle/damage/attack-parts';
+import { averageAttackDamage } from '@/lib/utils/battle/damage/average';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
 
@@ -112,26 +112,32 @@ const withAbility = (
 
 describe('шкода атаки 5e', () => {
     it('formula has no hero dice or level', () => {
-        expect(heroAttackDamageParts(fiveE, rapier).formula).toBe('1d8');
-        expect(heroDamageContext(fiveE, rapier, [5]).heroLevelPart).toBe(0);
+        expect(attackDamageParts(fiveE, rapier, DEFAULT_RULES).formula).toBe(
+            '1d8'
+        );
+        expect(
+            attackDamageContext(fiveE, rapier, [5], DEFAULT_RULES).heroLevelPart
+        ).toBe(0);
     });
 
     it('finesse uses the better of STR/DEX', () => {
         expect(hit(fiveE, rapier, [5])).toBe(9);
-        expect(calculateAttackBonus(fiveE, rapier)).toBe(
+        expect(calculateAttackBonus(fiveE, rapier, DEFAULT_RULES)).toBe(
             4 + fiveE.abilities.proficiencyBonus
         );
     });
 
     it('plain melee uses STR, ranged DEX, thrown melee STR', () => {
         expect(hit(fiveE, club, [3])).toBe(5);
-        expect(attackAbilityFor(fiveE, bow)).toBe('dexterity');
-        expect(attackAbilityFor(fiveE, javelin)).toBe('strength');
+        expect(attackAbilityFor(fiveE, bow, DEFAULT_RULES)).toBe('dexterity');
+        expect(attackAbilityFor(fiveE, javelin, DEFAULT_RULES)).toBe(
+            'strength'
+        );
     });
 
     it('off-hand drops positive modifier unless twoWeaponFighting', () => {
         expect(hit(fiveE, dagger, [3])).toBe(3);
-        expect(calculateAttackBonus(fiveE, dagger)).toBe(
+        expect(calculateAttackBonus(fiveE, dagger, DEFAULT_RULES)).toBe(
             4 + fiveE.abilities.proficiencyBonus
         );
         expect(
@@ -162,7 +168,9 @@ describe('шкода атаки 5e', () => {
     });
 
     it('average equals real hit', () => {
-        expect(averageAttackDamage(fiveE, rapier, [fiveE]).total).toBe(8);
+        expect(
+            averageAttackDamage(fiveE, rapier, DEFAULT_RULES, [fiveE]).total
+        ).toBe(8);
     });
 });
 

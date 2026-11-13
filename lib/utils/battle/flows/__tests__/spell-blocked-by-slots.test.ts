@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { ParticipantSourceType } from '@/lib/constants/battle';
 import { makeParticipant } from '@/lib/utils/abilities/__tests__/fixtures';
 import { spellBlockedBySlots } from '@/lib/utils/battle/flows/spell-flow';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
 import type { BattleParticipant } from '@/types/battle';
 
 const caster = (
@@ -28,8 +29,12 @@ describe('spellBlockedBySlots', () => {
             universal: { current: 2, max: 2 },
         });
 
-        expect(spellBlockedBySlots(monster, 1, false)).toBe(false);
-        expect(spellBlockedBySlots(monster, 3, false)).toBe(false);
+        expect(spellBlockedBySlots(monster, 1, false, DEFAULT_RULES)).toBe(
+            false
+        );
+        expect(spellBlockedBySlots(monster, 3, false, DEFAULT_RULES)).toBe(
+            false
+        );
     });
 
     it('5e-герой без слотів заблокований, зі слотом — ні; free і кантрип — ні', () => {
@@ -41,9 +46,9 @@ describe('spellBlockedBySlots', () => {
             '1': { current: 1, max: 2 },
         });
 
-        expect(spellBlockedBySlots(empty, 1, false)).toBe(true);
-        expect(spellBlockedBySlots(full, 1, false)).toBe(false);
-        expect(spellBlockedBySlots(empty, 1, true)).toBe(false);
-        expect(spellBlockedBySlots(empty, 0, false)).toBe(false);
+        expect(spellBlockedBySlots(empty, 1, false, DEFAULT_RULES)).toBe(true);
+        expect(spellBlockedBySlots(full, 1, false, DEFAULT_RULES)).toBe(false);
+        expect(spellBlockedBySlots(empty, 1, true, DEFAULT_RULES)).toBe(false);
+        expect(spellBlockedBySlots(empty, 0, false, DEFAULT_RULES)).toBe(false);
     });
 });

@@ -114,7 +114,7 @@ export function useSpellBook(
         s: BookSpell,
         opts: { castLevel?: number; test?: boolean } = {}
     ) =>
-        buildSpellPick(order, caster, s, map, {
+        buildSpellPick(order, caster, s, scene.battle.rules, map, {
             castLevel: opts.castLevel,
             castTest: magic && !costFree && opts.test !== false,
         });
@@ -157,7 +157,7 @@ export function useSpellBook(
         sourceOptions,
         castLevelOptions,
         formulaOf,
-    } = spellSourceModel(caster, flow, selected, bypassCost);
+    } = spellSourceModel(caster, flow, selected, bypassCost, scene.battle.rules);
 
     const ingredients = useIngredientPlan(
         caster,
@@ -254,7 +254,13 @@ export function useSpellBook(
         },
         slot: { options: slotChoices, value: state.slotKey },
         noSlot: (s: BookSpell) =>
-            !canSlot(s) && spellBlockedBySlots(caster, s.level, bypassCost),
+            !canSlot(s) &&
+            spellBlockedBySlots(
+                caster,
+                s.level,
+                bypassCost,
+                scene.battle.rules
+            ),
         attackTargets: state.pick?.needsAttackRolls
             ? targets.filter((t) => state.targetIds.includes(t.basicInfo.id))
             : [],
@@ -297,7 +303,9 @@ export function useSpellBook(
             const grants = grantsOf(s);
 
             const choices =
-                !bypassCost && canSlot(s) ? slotOptions(caster, s.level) : [];
+                !bypassCost && canSlot(s)
+                    ? slotOptions(caster, s.level, scene.battle.rules)
+                    : [];
 
             const first = grants.length === 0 ? choices[0] : undefined;
 

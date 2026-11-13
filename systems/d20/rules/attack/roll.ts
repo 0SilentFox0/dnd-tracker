@@ -45,6 +45,7 @@ export function calculateAttackRoll(
     const attackBonus = calculateAttackBonus(
         attacker,
         attack,
+        opts.rules,
         participants,
         opts.extra
     );

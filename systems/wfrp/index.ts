@@ -41,6 +41,7 @@ import { WFRP_TURN } from './rules/turn';
 
 import { COINS } from '@/lib/constants/inventory';
 import { noActions, noReactions } from '@/lib/utils/battle/actions/none';
+import { heroLevelDamage } from '@/lib/utils/battle/damage/hero-level-part';
 import { noProficiency, noSaves } from '@/lib/utils/battle/saves/none';
 import type { SystemData } from '@/lib/utils/rules/systems/slot';
 import type { RuleSystemDefinition } from '@/lib/utils/rules/systems/types';
@@ -122,6 +123,7 @@ export const WFRP_MODULE: RuleSystemDefinition = {
     combat: {
         input: { assert: assertWfrpInput },
         judge: 'server',
+        damageParts: [heroLevelDamage],
         dice: 100,
         actionEconomy: { bonusAction: false, reaction: false },
         attacksOf: extractWfrpAttacks,

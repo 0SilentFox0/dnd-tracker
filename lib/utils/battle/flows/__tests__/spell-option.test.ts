@@ -8,6 +8,7 @@ import {
     spellFlow,
     spellPayload,
 } from '@/lib/utils/battle/flows/spell-flow';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
 import type { BookSpell } from '@/types/spells';
 
 const spell = {
@@ -39,7 +40,8 @@ const caster = makeParticipant({ id: 'c' });
 const picked = () =>
     spellFlow(
         { ...initialSpellFlow, step: 'book', casterId: 'c' },
-        { type: 'PICK', pick: buildSpellPick([caster], caster, spell) }
+        { type: 'PICK', pick: buildSpellPick([caster], caster, spell, DEFAULT_RULES),
+        }
     );
 
 describe('spell option picker state', () => {
@@ -65,7 +67,10 @@ describe('spell option picker state', () => {
 
         const again = spellFlow(
             spellFlow(s, { type: 'SET_OPTION', index: 0 }),
-            { type: 'PICK', pick: buildSpellPick([caster], caster, spell) }
+            {
+                type: 'PICK',
+                pick: buildSpellPick([caster], caster, spell, DEFAULT_RULES),
+            }
         );
 
         expect(again.optionIndex).toBeUndefined();
@@ -79,7 +84,8 @@ describe('spell option picker state', () => {
 
         const s = spellFlow(
             { ...initialSpellFlow, step: 'book', casterId: 'c' },
-            { type: 'PICK', pick: buildSpellPick([caster], caster, plain) }
+            { type: 'PICK', pick: buildSpellPick([caster], caster, plain, DEFAULT_RULES),
+            }
         );
 
         expect(s.pick?.options).toBeUndefined();

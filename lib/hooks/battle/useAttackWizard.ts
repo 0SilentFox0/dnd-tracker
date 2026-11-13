@@ -22,7 +22,7 @@ import {
 import { canUseInspiration } from '@/lib/utils/battle/attack/inspiration';
 import { attackMaxTargets } from '@/lib/utils/battle/attack/max-targets';
 import { attackKindOf } from '@/lib/utils/battle/common/attack-kind';
-import { damageDiceSlots } from '@/lib/utils/battle/damage/hero-damage';
+import { damageDiceSlots } from '@/lib/utils/battle/damage/attack-parts';
 import {
     attackFlow,
     type AttackFlowAction,
@@ -135,11 +135,11 @@ export function useAttackWizard(
                 ? Object.fromEntries(
                       attacks.map((a) => [
                           a.id ?? a.name,
-                          weaponPreview(attacker, a, order),
+                          weaponPreview(attacker, a, scene.battle.rules, order),
                       ])
                   )
                 : {},
-        [attacker, attacks, order, isOpen]
+        [attacker, attacks, order, isOpen, scene.battle.rules]
     );
 
     const attackTarget = ruleSystemOf(scene.battle.rules).combat.attackTarget;
@@ -197,7 +197,7 @@ export function useAttackWizard(
             maxTargets: hitsAll
                 ? Math.max(maxTargets, enemyTargets.length)
                 : maxTargets,
-            diceSlots: attacker ? damageDiceSlots(attacker, a) : [6],
+            diceSlots: attacker ? damageDiceSlots(attacker, a, scene.battle.rules) : [6],
         };
     };
 

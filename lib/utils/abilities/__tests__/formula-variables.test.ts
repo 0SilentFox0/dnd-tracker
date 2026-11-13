@@ -6,6 +6,7 @@ import {
     resolveFlat,
 } from '@/lib/utils/abilities/engine/core/amount';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
 import type { BattleParticipant } from '@/types/battle';
 
 function owner(
@@ -55,7 +56,7 @@ describe('formula variables', () => {
         expect(
             resolveAmount(
                 { formula: 'wis_mod + 1' },
-                { owner: owner(), rng: () => 0.5 }
+                { owner: owner(), rng: () => 0.5, rules: DEFAULT_RULES }
             )
         ).toBe(1);
     });

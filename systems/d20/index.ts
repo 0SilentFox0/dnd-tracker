@@ -1,5 +1,6 @@
 import { D20_ACTIONS } from './rules/actions';
 import { d20AbortedRoll, resolveD20Attack } from './rules/attack';
+import { D20_REACH,d20AttackAbility } from './rules/attack/ability';
 import { d20HitModel } from './rules/balance';
 import { concentrationFallout } from './rules/concentration/damaged';
 import { D20_CONDITION_SET } from './rules/conditions';
@@ -21,6 +22,7 @@ import { d20FromStored, d20Persist } from './rules/state-parts';
 import { D20_STAT_COLUMNS } from './rules/stats';
 import { D20_TURN } from './rules/turn';
 
+import { heroLevelDamage } from '@/lib/utils/battle/damage/hero-level-part';
 import type { RuleSystemDefinition } from '@/lib/utils/rules/systems/types';
 import type { SheetRollSubject } from '@/types/characters';
 
@@ -58,6 +60,9 @@ export const D20_MODULE: RuleSystemDefinition = {
         crit: (rules) => rules.criticals,
         autoXp: (rules) => rules.encounters.autoXp,
         offHand: D20_OFF_HAND,
+        attackAbility: d20AttackAbility,
+        reach: D20_REACH,
+        damageParts: [heroLevelDamage],
         inspiration: D20_INSPIRATION,
         dice: 20,
         actionEconomy: { bonusAction: true, reaction: true },

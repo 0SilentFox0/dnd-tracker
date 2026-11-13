@@ -6,8 +6,16 @@ import { makeParticipant } from '@/lib/utils/abilities/__tests__/fixtures';
 import { initialSpellFlow } from '@/lib/utils/battle/flows/spell-flow';
 import type { SpellFlowState } from '@/lib/utils/battle/flows/spell-flow-types';
 import { spellSourceModel } from '@/lib/utils/battle/flows/spell-source';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
 import type { BattleParticipant, SpellGrant } from '@/types/battle';
 import type { BookSpell } from '@/types/spells';
+
+const source = (...args: [...Parameters<typeof spellSourceModel>] extends [
+    ...infer A,
+    unknown,
+]
+    ? A
+    : never) => spellSourceModel(...args, DEFAULT_RULES);
 
 const fireball = (over: Record<string, unknown> = {}) =>
     ({
@@ -68,7 +76,7 @@ describe('spellSourceModel formulaOf (castLevelOf)', () => {
     it('an explicit flow cast level wins over a grant and a slot', () => {
         const grant: SpellGrant = { spellId: 's1', key: 'g', castLevel: 4 };
 
-        const model = spellSourceModel(
+        const model = source(
             caster(slots, [grant]),
             flow({ castLevel: 5, slotKey: '3', pick: pickOf() }),
             fireball(),
@@ -83,7 +91,7 @@ describe('spellSourceModel formulaOf (castLevelOf)', () => {
 
         expect(
             textOf(
-                spellSourceModel(
+                source(
                     caster({}, [grant]),
                     flow(),
                     fireball(),
@@ -94,7 +102,7 @@ describe('spellSourceModel formulaOf (castLevelOf)', () => {
     });
 
     it('the chosen slot sets the level only for the picked spell', () => {
-        const model = spellSourceModel(
+        const model = source(
             caster(slots),
             flow({ slotKey: '5', pick: pickOf() }),
             fireball(),
@@ -108,7 +116,7 @@ describe('spellSourceModel formulaOf (castLevelOf)', () => {
     it('without any source it falls back to the spell level', () => {
         expect(
             textOf(
-                spellSourceModel(
+                source(
                     caster(slots),
                     flow(),
                     fireball(),
@@ -123,7 +131,7 @@ describe('spellSourceModel formulaOf', () => {
     it('is empty without a caster', () => {
         expect(
             textOf(
-                spellSourceModel(null, flow(), fireball(), false).formulaOf(
+                source(null, flow(), fireball(), false).formulaOf(
                     fireball()
                 )
             )
@@ -138,7 +146,7 @@ describe('spellSourceModel formulaOf', () => {
 
         expect(
             textOf(
-                spellSourceModel(
+                source(
                     caster(),
                     flow({ pick }),
                     fireball(),
@@ -156,12 +164,12 @@ describe('spellSourceModel formulaOf', () => {
 
         expect(
             textOf(
-                spellSourceModel(caster(), flow(), heal, false).formulaOf(heal)
+                source(caster(), flow(), heal, false).formulaOf(heal)
             )
         ).toBe('2к8');
         expect(
             textOf(
-                spellSourceModel(
+                source(
                     caster(),
                     flow(),
                     fireball({ dice: 0 }),
@@ -177,14 +185,14 @@ describe('spellSourceModel slotChoices', () => {
         const c = caster({ '3': { current: 1, max: 2 } });
 
         expect(
-            spellSourceModel(c, flow(), fireball(), false).slotChoices.map(
+            source(c, flow(), fireball(), false).slotChoices.map(
                 (o) => o.key
             )
         ).toEqual(['3']);
         expect(
-            spellSourceModel(c, flow(), fireball(), true).slotChoices
+            source(c, flow(), fireball(), true).slotChoices
         ).toEqual([]);
-        expect(spellSourceModel(c, flow(), null, false).slotChoices).toEqual(
+        expect(source(c, flow(), null, false).slotChoices).toEqual(
             []
         );
     });

@@ -17,11 +17,12 @@ import {
 } from '@/lib/utils/abilities/target-rules';
 import { calculateAttackBonus } from '@/lib/utils/battle/attack/bonus';
 import { attackKindOf } from '@/lib/utils/battle/common/attack-kind';
+import { attackDamageParts } from '@/lib/utils/battle/damage/attack-parts';
 import { averageAttackDamage } from '@/lib/utils/battle/damage/average';
-import { heroAttackDamageParts } from '@/lib/utils/battle/damage/hero-damage';
 import { isHostile } from '@/lib/utils/battle/modes/engine';
 import { isUp } from '@/lib/utils/battle/participant/state';
 import { spellNeedsSlot, spellSlotLeft } from '@/lib/utils/battle/spell/slot';
+import type { Ruleset } from '@/lib/utils/rules/schema';
 import { PACT_KEY } from '@/lib/utils/spells/slot-keys';
 import type { ResolvedAbility } from '@/types/abilities';
 import type {
@@ -311,6 +312,7 @@ export function lastAction(log: BattleAction[]): BattleAction | null {
 export function weaponPreview(
     p: BattleParticipant,
     attack: BattleAttack,
+    rules: Ruleset,
     all: BattleParticipant[]
 ) {
     const mods = collectModifiers(withSelf(all, p), p.basicInfo.id, {
@@ -326,12 +328,12 @@ export function weaponPreview(
             icon: e.icon,
         }));
 
-    const estimate = averageAttackDamage(p, attack, all).total;
+    const estimate = averageAttackDamage(p, attack, rules, all).total;
 
     return {
         bonuses,
         estimate,
-        toHit: calculateAttackBonus(p, attack, all),
-        formula: heroAttackDamageParts(p, attack).formula,
+        toHit: calculateAttackBonus(p, attack, rules, all),
+        formula: attackDamageParts(p, attack, rules).formula,
     };
 }

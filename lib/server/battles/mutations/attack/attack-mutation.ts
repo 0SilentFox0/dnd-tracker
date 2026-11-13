@@ -26,7 +26,7 @@ import {
 import { runAttackPhase } from '@/lib/utils/battle/attack-phase/run-attack-phase';
 import { runWithCritChoice } from '@/lib/utils/battle/crit-choice/run-with-crit-choice';
 import type { CritResume } from '@/lib/utils/battle/crit-choice/types';
-import { heroAttackDamageParts } from '@/lib/utils/battle/damage/hero-damage';
+import { attackDamageParts } from '@/lib/utils/battle/damage/attack-parts';
 import { attackReachError } from '@/lib/utils/battle/grid';
 import { withLines } from '@/lib/utils/battle/log/lines';
 import type {
@@ -80,7 +80,7 @@ function assertAttackInput(
     const targetIds = requestedTargetIds(data);
 
     // клієнт героя кидає кубики зброї разом із кубиками рівня (PlayerTurnViewDialogs)
-    assertAttackRolls(heroAttackDamageParts(attacker, attack).formula, {
+    assertAttackRolls(attackDamageParts(attacker, attack, ctx.meta.rules).formula, {
         damageRolls: data.damageRolls,
         targetCount: targetIds.length,
     });

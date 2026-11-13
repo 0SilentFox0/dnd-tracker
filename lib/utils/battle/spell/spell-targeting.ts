@@ -10,7 +10,6 @@ import {
     isTargetable,
 } from '@/lib/utils/abilities/engine/core/participants';
 import type { FlagEffect } from '@/lib/utils/abilities/schema';
-import { isFiveE } from '@/lib/utils/battle/attack/ability';
 import { conditionSourceIds } from '@/lib/utils/battle/conditions/query';
 import { isDying } from '@/lib/utils/battle/death-saves';
 import { footprintDistance, inBounds } from '@/lib/utils/battle/grid/geometry';
@@ -30,6 +29,7 @@ import {
 } from '@/lib/utils/battle/modes/engine';
 import { isReserved } from '@/lib/utils/battle/participant/reserve';
 import { findEffectMarker } from '@/lib/utils/battle/participant/state';
+import { casterPicksSlot } from '@/lib/utils/battle/spell/picks-slot';
 import { matchesTargetFilter } from '@/lib/utils/battle/spell/target-filter';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
@@ -554,7 +554,9 @@ const upcastExtra = (
     spell: SpellRef,
     mapCtx?: SpellMapContext
 ): number =>
-    isFiveE(caster) && mapCtx?.castLevel !== undefined && mapCtx.upcastTargets
+    mapCtx?.castLevel !== undefined &&
+    mapCtx.upcastTargets &&
+    casterPicksSlot(caster, mapCtx.rules)
         ? mapCtx.upcastTargets *
           ruleSystemOf(mapCtx.rules).magic.upcast.steps(
               spell.level,

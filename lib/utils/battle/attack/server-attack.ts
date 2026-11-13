@@ -13,7 +13,7 @@ import {
     getP,
     put,
 } from '@/lib/utils/battle/common/action-flow';
-import { heroAttackDamageParts } from '@/lib/utils/battle/damage/hero-damage';
+import { attackDamageParts } from '@/lib/utils/battle/damage/attack-parts';
 import type { AttackRollResult } from '@/lib/utils/battle/types/attack';
 import { parseDiceLenient, rollGroups } from '@/lib/utils/common/dice';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
@@ -127,9 +127,10 @@ export function resolveServerAttack(input: ServerAttackInput): {
     let hit: BuildOffTurnParams['hit'] = null;
 
     if (isHit) {
-        const formula = heroAttackDamageParts(
+        const formula = attackDamageParts(
             getP(flow, attackerId),
-            attack
+            attack,
+            flow.ctx.rules
         ).formula;
 
         const single = attack.noLevelDice

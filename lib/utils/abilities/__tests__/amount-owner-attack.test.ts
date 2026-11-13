@@ -34,12 +34,14 @@ describe('percentOf ownerAttack', () => {
     const amount = { percentOf: 'ownerAttack' as const, value: 50 };
 
     it('is a share of the average primary attack', () => {
-        const total = averageAttackDamage(owner, sword, [owner]).total;
+        const total = averageAttackDamage(owner, sword, DEFAULT_RULES, [
+            owner,
+        ]).total;
 
         expect(total).toBeGreaterThan(0);
-        expect(resolveAmount(amount, { owner, rng: seq(0) })).toBe(
-            Math.floor(total / 2)
-        );
+        expect(
+            resolveAmount(amount, { owner, rng: seq(0), rules: DEFAULT_RULES })
+        ).toBe(Math.floor(total / 2));
     });
 
     it('is 0 without attacks', () => {
@@ -50,6 +52,7 @@ describe('percentOf ownerAttack', () => {
                     battleData: { ...owner.battleData, attacks: [] },
                 },
                 rng: seq(0),
+                rules: DEFAULT_RULES,
             })
         ).toBe(0);
     });
@@ -71,7 +74,7 @@ describe('percentOf ownerAttack', () => {
         const owner = withAttack('h', [dot]);
 
         const expected = Math.floor(
-            averageAttackDamage(owner, sword, [owner]).total / 2
+            averageAttackDamage(owner, sword, DEFAULT_RULES, [owner]).total / 2
         );
 
         const ps = [

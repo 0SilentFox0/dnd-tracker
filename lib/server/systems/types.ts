@@ -93,6 +93,7 @@ export interface SystemBalance {
     /** Hero numbers for the setup UI and the fair-scaling pass, from the participant built out of the character */
     heroPower(input: {
         built: BattleParticipant;
+        rules: Ruleset;
         character: { race: string; skillTreeProgress?: unknown };
         campaignContext: CampaignSpellContext | undefined;
     }): {

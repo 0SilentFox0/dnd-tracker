@@ -13,6 +13,7 @@ import {
     spellTier,
     weaponPreview,
 } from '@/lib/utils/battle/view';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
 import type { ResolvedAbility } from '@/types/abilities';
 import type { BattleAction } from '@/types/battle';
 
@@ -241,12 +242,12 @@ describe('мій герой', () => {
 
         const bow = { ...sword, name: 'Лук', type: AttackType.RANGED };
 
-        const s = weaponPreview(me, sword, [me]);
+        const s = weaponPreview(me, sword, DEFAULT_RULES, [me]);
 
         expect(s.bonuses.map((b) => [b.label, b.percent])).toEqual([
             ['Експертна атака', 25],
         ]);
-        expect(weaponPreview(me, bow, [me]).bonuses).toEqual([]);
+        expect(weaponPreview(me, bow, DEFAULT_RULES, [me]).bonuses).toEqual([]);
         expect(s.estimate).toBeGreaterThan(
             weaponPreview(
                 {
@@ -254,6 +255,7 @@ describe('мій герой', () => {
                     battleData: { ...me.battleData, resolvedAbilities: [] },
                 },
                 sword,
+                DEFAULT_RULES,
                 [me]
             ).estimate
         );

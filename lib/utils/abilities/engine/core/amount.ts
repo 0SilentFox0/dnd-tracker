@@ -5,6 +5,7 @@ import type { Amount } from '@/lib/utils/abilities/schema';
 import { evaluateFormula } from '@/lib/utils/battle/common/formula-evaluator';
 import { averageAttackDamage } from '@/lib/utils/battle/damage/average';
 import { rollDice } from '@/lib/utils/common/dice';
+import type { Ruleset } from '@/lib/utils/rules/schema';
 import type { BattleParticipant } from '@/types/battle';
 
 export { FORMULA_VARIABLES, resolveFlat } from './flat';
@@ -16,6 +17,7 @@ function percentBase(
         target?: BattleParticipant;
         eventDamage?: number;
         participants?: BattleParticipant[];
+        rules: Pick<Ruleset, 'system'>;
     }
 ): number {
     if (of === 'eventDamage') return input.eventDamage ?? 0;
@@ -28,6 +30,7 @@ function percentBase(
         ? averageAttackDamage(
               input.owner,
               attack,
+              input.rules,
               input.participants ?? [input.owner]
           ).total
         : 0;
@@ -42,6 +45,7 @@ export function resolveAmount(
         spellRoll?: number;
         rng: Rng;
         participants?: BattleParticipant[];
+        rules: Pick<Ruleset, 'system'>;
     }
 ): number {
     if (typeof amount === 'number') return amount;

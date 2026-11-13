@@ -70,7 +70,7 @@ import {
 import { runAbilities } from '@/lib/utils/abilities/engine/core/run-abilities';
 import { countMarks } from '@/lib/utils/abilities/engine/effects/marks';
 import { applyBattleDelta } from '@/lib/utils/battle/client/apply-delta';
-import { heroAttackDamageParts } from '@/lib/utils/battle/damage/hero-damage';
+import { attackDamageParts } from '@/lib/utils/battle/damage/attack-parts';
 import { awaitsMoraleCheck } from '@/lib/utils/battle/morale/awaits-check';
 import { effectiveMorale } from '@/lib/utils/battle/morale/effective-morale';
 import { createBattleParticipantFromCharacter } from '@/lib/utils/battle/participant/from-character';
@@ -1547,7 +1547,7 @@ async function fairRun(
             continue;
         }
 
-        const formula = heroAttackDamageParts(actor, weapon).formula;
+        const formula = attackDamageParts(actor, weapon, DEFAULT_RULES).formula;
 
         const d20 = 1 + Math.floor(rng() * 20);
 
@@ -1879,7 +1879,7 @@ async function newMechanics() {
         dieSides: light.dieSides,
         upcastDice: light.upcastDice,
         fixedDice: light.fixedDice === true,
-    }).count;
+    }, DEFAULT_RULES).count;
 
     const cast = await call(
         'spell',
@@ -2385,10 +2385,14 @@ async function spellModel() {
     const dice = (caster: string, id: string) => {
         const row = Object.values(spells).find((s) => s.id === id);
 
-        return casterSpellDice(P(caster), {
-            dice: row?.dice ?? 0,
-            groupId: null,
-        });
+        return casterSpellDice(
+            P(caster),
+            {
+                dice: row?.dice ?? 0,
+                groupId: null,
+            },
+            DEFAULT_RULES
+        );
     };
 
     const hpOf = (name: string) => hp(P(name));

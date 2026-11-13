@@ -46,10 +46,14 @@ export function castHitSpell(input: HitSpellInput): {
 
     if (!spell || !target) return { participants, messages: [] };
 
-    const dice = casterSpellDice(attacker, {
-        dice: spell.definition.dice,
-        groupId: spell.groupId,
-    });
+    const dice = casterSpellDice(
+        attacker,
+        {
+            dice: spell.definition.dice,
+            groupId: spell.groupId,
+        },
+        input.rules
+    );
 
     const diceRolls =
         dice.count > 0 ? rollDiceList(`${dice.count}d${dice.sides}`, rng) : [];

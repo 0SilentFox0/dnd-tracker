@@ -9,7 +9,7 @@ import {
 import { runAbilities } from '@/lib/utils/abilities/engine/core/run-abilities';
 import { processAttack } from '@/lib/utils/battle/attack';
 import { getDisabledAttackKinds } from '@/lib/utils/battle/attack/disabled-attacks';
-import { heroAttackDamageParts } from '@/lib/utils/battle/damage/hero-damage';
+import { attackDamageParts } from '@/lib/utils/battle/damage/attack-parts';
 import { logFields, withPrefix } from '@/lib/utils/battle/log/lines';
 import { endTurnCleanup } from '@/lib/utils/battle/turn/end-turn-cleanup';
 import { pickOne, rollDiceList, rollDie } from '@/lib/utils/common/dice';
@@ -177,7 +177,7 @@ export function runBerserkTurn(params: BerserkTurnParams): {
         attack,
         d20Roll: rollDie(ruleSystemOf(params.rules).combat.dice, rng),
         damageRolls: rollDiceList(
-            heroAttackDamageParts(berserker, attack).formula,
+            attackDamageParts(berserker, attack, params.rules).formula,
             rng
         ),
         allParticipants: participants,

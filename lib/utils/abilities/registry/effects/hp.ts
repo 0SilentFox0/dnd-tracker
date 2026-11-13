@@ -62,6 +62,7 @@ export function applyDealDamage(
             spellRoll: eventSpellRoll(input.event),
             rng: ctx.rng,
             participants: input.participants,
+            rules: ctx.rules,
         });
 
         const amount = effect.falloff
@@ -134,6 +135,7 @@ export function applyHeal(
             spellRoll: eventSpellRoll(input.event),
             rng: ctx.rng,
             participants: input.participants,
+            rules: ctx.rules,
         });
 
         const before = Math.max(0, t.combatStats.currentHp);
@@ -227,6 +229,7 @@ export function applyDot(
             spellRoll: eventSpellRoll(input.event),
             rng: ctx.rng,
             participants: input.participants,
+            rules: ctx.rules,
         });
 
         if (dmg <= 0) continue;
@@ -304,6 +307,7 @@ export function applyHot(
             spellRoll: eventSpellRoll(input.event),
             rng: ctx.rng,
             participants: input.participants,
+            rules: ctx.rules,
         });
 
         if (heal <= 0) continue;

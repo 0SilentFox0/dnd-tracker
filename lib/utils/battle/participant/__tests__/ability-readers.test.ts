@@ -85,9 +85,13 @@ describe('readers', () => {
             ],
         });
 
-        const base = calculateAttackBonus(makeParticipant({ id: 'z' }), bow);
+        const base = calculateAttackBonus(
+            makeParticipant({ id: 'z' }),
+            bow,
+            DEFAULT_RULES
+        );
 
-        expect(calculateAttackBonus(archer, bow) - base).toBe(1);
+        expect(calculateAttackBonus(archer, bow, DEFAULT_RULES) - base).toBe(1);
         expect(
             hasAdvantage(archer, bow, [archer], undefined, {
                 rules: DEFAULT_RULES,
@@ -243,7 +247,11 @@ describe('readers', () => {
 
         expect(r.targetAC).toBe(16);
         expect(r.totalBonus).toBe(
-            calculateAttackBonus(makeParticipant({ id: 'z' }), bow) + 1
+            calculateAttackBonus(
+                makeParticipant({ id: 'z' }),
+                bow,
+                DEFAULT_RULES
+            ) + 1
         );
     });
     it('юніт з імунітетом до вогню не отримує вогняної шкоди', () => {

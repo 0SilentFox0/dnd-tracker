@@ -34,9 +34,9 @@ import {
 } from '@/lib/utils/battle/common/action-flow';
 import { attackKindOf } from '@/lib/utils/battle/common/attack-kind';
 import {
+    attackDamageParts,
     damageDiceSlots,
-    heroAttackDamageParts,
-} from '@/lib/utils/battle/damage/hero-damage';
+} from '@/lib/utils/battle/damage/attack-parts';
 import { attackDiceRolls } from '@/lib/utils/battle/dice-record';
 import { castSpell } from '@/lib/utils/battle/spell';
 import { runAutoReactions } from '@/lib/utils/battle/spell/auto-reaction';
@@ -135,7 +135,7 @@ export function processAttack(
     const { second, targetAC, isHit, attackRoll } = judged;
 
     const dice: DiceState = {
-        slots: damageDiceSlots(getP(flow, attackerId), attack),
+        slots: damageDiceSlots(getP(flow, attackerId), attack, flow.ctx.rules),
         damageFrom: params.serverRolled?.damageFrom,
         damageRolls: params.damageRolls,
     };
@@ -394,8 +394,11 @@ function doubleCritDice(
     if (!critDoublesDice(flow.ctx.rules, attackRoll.isCritical)) return;
 
     const doubled = critDamageRolls({
-        formula: heroAttackDamageParts(getP(flow, attackerId), params.attack)
-            .formula,
+        formula: attackDamageParts(
+            getP(flow, attackerId),
+            params.attack,
+            flow.ctx.rules
+        ).formula,
         rolls: dice.damageRolls,
         rng: flow.ctx.rng,
     });

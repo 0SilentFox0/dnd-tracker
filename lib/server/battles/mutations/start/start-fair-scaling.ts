@@ -64,6 +64,7 @@ export async function scaleEnemiesForFairBattle(
             if (slot.type === ParticipantSourceType.CHARACTER) {
                 const { dpr, hp } = balance.heroPower({
                     built: built[i],
+                    rules,
                     character: slot.character,
                     campaignContext,
                 }).stats;
@@ -80,6 +81,7 @@ export async function scaleEnemiesForFairBattle(
                 stats: heroMember(
                     balance.heroPower({
                         built: built[i],
+                        rules,
                         character: slot.character,
                         campaignContext,
                     }).stats

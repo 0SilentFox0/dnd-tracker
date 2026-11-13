@@ -3,6 +3,8 @@ import { useEffect } from 'react';
 import { cleanup, fireEvent, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { DEFAULT_RULES } from '@/lib/utils/rules';
+
 vi.mock('@/components/hud/fonts', () => ({ hudFontClassName: '' }));
 
 vi.mock('next-intl', async () => (await import('./uk-intl')).catalogIntl());
@@ -86,7 +88,7 @@ describe('slotOptions', () => {
         const { caster } = fakeScene({ slots: SLOTS });
 
         const keys = (level: number, p = hero(caster, '5e')) =>
-            slotOptions(p, level).map((o) => `${o.key}:${textOf(o.label)}`);
+            slotOptions(p, level, DEFAULT_RULES).map((o) => `${o.key}:${textOf(o.label)}`);
 
         expect(keys(1)).toEqual(['1:Коло 1', '3:Коло 3', 'pact:Пакт · коло 3']);
         expect(keys(2)).toEqual(['3:Коло 3', 'pact:Пакт · коло 3']);

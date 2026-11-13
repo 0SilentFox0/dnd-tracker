@@ -143,7 +143,10 @@ describe('бонус зброї «+N» у damageDice', () => {
         const expectedAvg = hit(attack, [3, 4]).physicalDamage;
 
         expect(
-            averageAttackDamage(attacker, attack, [attacker, target]).total
+            averageAttackDamage(attacker, attack, DEFAULT_RULES, [
+                attacker,
+                target,
+            ]).total
         ).toBe(expectedAvg);
     });
 

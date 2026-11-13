@@ -36,6 +36,14 @@ import { DEFAULT_RULES } from '@/lib/utils/rules';
 import type { BattleMapConfig, GridPoint } from '@/types/battle';
 import type { BookSpell } from '@/types/spells';
 
+const pickOf = (
+    order: Parameters<typeof buildSpellPick>[0],
+    caster: Parameters<typeof buildSpellPick>[1],
+    s: Parameters<typeof buildSpellPick>[2],
+    map: Parameters<typeof buildSpellPick>[4] = null,
+    opts: Parameters<typeof buildSpellPick>[5] = {}
+) => buildSpellPick(order, caster, s, DEFAULT_RULES, map, opts);
+
 const run = (...a: SpellFlowAction[]) =>
     a.reduce<SpellFlowState>(spellFlow, initialSpellFlow);
 
@@ -360,11 +368,11 @@ describe('цілі й слоти закляття', () => {
 
     it('buildSpellPick: автоціль без вибору, область з maxTargets, рятунок', () => {
         expect(
-            buildSpellPick(order, hero, spell({ kind: 'allEnemies' }))
+            pickOf(order, hero, spell({ kind: 'allEnemies' }))
                 .targetMode
         ).toBe('none');
 
-        const area = buildSpellPick(
+        const area = pickOf(
             order,
             hero,
             spell(
@@ -539,7 +547,7 @@ describe('шаблон і дальність', () => {
             y: 9,
         });
 
-        const pick = buildSpellPick(
+        const pick = pickOf(
             [hero, corner, edge, outside],
             hero,
             exact,
@@ -572,7 +580,7 @@ describe('шаблон і дальність', () => {
         };
 
         expect(
-            buildSpellPick(
+            pickOf(
                 order,
                 monster,
                 {
@@ -609,18 +617,18 @@ describe('шаблон і дальність', () => {
     });
 
     it('buildSpellPick: template на карті з позицією заклинателя; без карти чи позиції — multi', () => {
-        expect(buildSpellPick(order, hero, fireball, map)).toMatchObject({
+        expect(pickOf(order, hero, fireball, map)).toMatchObject({
             targetMode: 'template',
             template: { shape: 'circle', size: 20 },
             range: 150,
         });
-        expect(buildSpellPick(order, hero, fireball, null)).toMatchObject({
+        expect(pickOf(order, hero, fireball, null)).toMatchObject({
             targetMode: 'multi',
             maxTargets: 4,
             targetSide: 'enemy',
         });
         expect(
-            buildSpellPick(
+            pickOf(
                 order,
                 placed('h', ParticipantSide.ALLY),
                 fireball,
@@ -638,7 +646,7 @@ describe('шаблон і дальність', () => {
             targeting: { kind: 'enemy', range: 30 },
         } as unknown as BookSpell;
 
-        expect(buildSpellPick(order, hero, bolt, map)).toMatchObject({
+        expect(pickOf(order, hero, bolt, map)).toMatchObject({
             targetMode: 'single',
             range: 30,
         });
@@ -736,8 +744,8 @@ describe('шаблон і дальність', () => {
             },
         } as unknown as BookSpell;
 
-        expect(buildSpellPick(order, hero, wallSpell, map).zone).toBe(true);
-        expect(buildSpellPick(order, hero, fireball, map).zone).toBeUndefined();
+        expect(pickOf(order, hero, wallSpell, map).zone).toBe(true);
+        expect(pickOf(order, hero, fireball, map).zone).toBeUndefined();
     });
 
     it('withLiveAimTargets: цілі шаблону — ті, кого точка зачіпає зараз; рятунки тих, хто вийшов, відкидаються', () => {
@@ -964,7 +972,7 @@ describe('шаблон і дальність', () => {
         it('на карті area → коло 10 футів з лімітом; all → без наведення, уся сторона', () => {
             const area = widened('area');
 
-            expect(buildSpellPick([area, foe], area, bolt, map)).toMatchObject({
+            expect(pickOf([area, foe], area, bolt, map)).toMatchObject({
                 targetMode: 'template',
                 template: { shape: 'circle', size: 10 },
                 targetSide: 'enemy',
@@ -974,7 +982,7 @@ describe('шаблон і дальність', () => {
 
             const all = widened('all');
 
-            const pick = buildSpellPick([all, foe], all, bolt, map);
+            const pick = pickOf([all, foe], all, bolt, map);
 
             expect(pick).toMatchObject({
                 targetMode: 'all',
@@ -987,11 +995,11 @@ describe('шаблон і дальність', () => {
         it('без карти чи позиції — список, як раніше', () => {
             const area = widened('area');
 
-            expect(buildSpellPick([area, foe], area, bolt, null)).toMatchObject(
+            expect(pickOf([area, foe], area, bolt, null)).toMatchObject(
                 { targetMode: 'multi', maxTargets: 1 }
             );
             expect(
-                buildSpellPick([area, foe], area, bolt, null).skillRadius
+                pickOf([area, foe], area, bolt, null).skillRadius
             ).toBeUndefined();
 
             const all = widened('all');
@@ -1002,7 +1010,7 @@ describe('шаблон і дальність', () => {
             };
 
             expect(
-                buildSpellPick([unplaced, foe], unplaced, bolt, map).targetMode
+                pickOf([unplaced, foe], unplaced, bolt, map).targetMode
             ).toBe('all');
         });
 
@@ -1028,7 +1036,7 @@ describe('шаблон і дальність', () => {
 
             const participants = [area, foe, near, invisible];
 
-            const pick = buildSpellPick(participants, area, bolt, map);
+            const pick = pickOf(participants, area, bolt, map);
 
             expect(
                 spellAimTargets(
@@ -1056,7 +1064,7 @@ describe('шаблон і дальність', () => {
         it('reducer: радіус проходить шлях шаблону — точка, превʼю, targetCell у payload', () => {
             const area = widened('area');
 
-            const pick = buildSpellPick([area, foe], area, bolt, map);
+            const pick = pickOf([area, foe], area, bolt, map);
 
             const aimed = run(
                 { type: 'OPEN', casterId: 'h', level: 1 },
@@ -1090,7 +1098,7 @@ describe('шаблон і дальність', () => {
         } as unknown as BookSpell;
 
         it('buildSpellPick: на карті — одна перша ціль зі списку і ланцюг; без карти — ручний вибір до maxTargets', () => {
-            const onMapPick = buildSpellPick(order, hero, chainSpell, map);
+            const onMapPick = pickOf(order, hero, chainSpell, map);
 
             expect(onMapPick).toMatchObject({
                 targetMode: 'single',
@@ -1100,7 +1108,7 @@ describe('шаблон і дальність', () => {
             });
             expect(onMapPick.maxTargets).toBeUndefined();
 
-            const listPick = buildSpellPick(order, hero, chainSpell, null);
+            const listPick = pickOf(order, hero, chainSpell, null);
 
             expect(listPick).toMatchObject({
                 targetMode: 'multi',
@@ -1110,7 +1118,7 @@ describe('шаблон і дальність', () => {
         });
 
         it('withChainTargets: цілі — ланцюг від першої; payload несе лише першу', () => {
-            const pick = buildSpellPick(order, hero, chainSpell, map);
+            const pick = pickOf(order, hero, chainSpell, map);
 
             const s = run(
                 { type: 'OPEN', casterId: 'h', level: 4 },
@@ -1290,7 +1298,7 @@ it('AoE preview і server cast вражають невидимого учасн�
         },
     };
 
-    const pick = buildSpellPick(
+    const pick = pickOf(
         participants,
         caster,
         {
