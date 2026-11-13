@@ -4,9 +4,9 @@ import { useEffect, useMemo, useReducer, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { turnStartDue, turnStartOutcome } from './turn-start-check';
+import type { TurnGateControls } from './types';
 import { useBattleScene } from './useBattleScene';
 
-import type { TurnGateControls } from '@/components/systems/types';
 import { BattleStatus } from '@/lib/constants/battle';
 import { useConfirm } from '@/lib/hooks/common';
 import { coreActionsOn } from '@/lib/utils/battle/actions/access';

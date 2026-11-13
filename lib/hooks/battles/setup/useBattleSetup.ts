@@ -16,7 +16,7 @@ import { useCampaignRules } from '@/lib/hooks/campaigns';
 import { sharedEnemyRace } from '@/lib/utils/battle/balance/setup';
 import { SECTION_DEFAULTS } from '@/lib/utils/rules/defaults';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
-import { RULE_SYSTEM_KEYS } from '@/lib/utils/rules/systems/meta';
+import { FALLBACK_SYSTEM_KEY } from '@/lib/utils/rules/systems/catalog';
 import type {
     BattleMapConfig,
     BattlePreparationParticipant,
@@ -49,7 +49,7 @@ export function useBattleSetup(
     const encounters = rules?.encounters ?? SECTION_DEFAULTS.encounters;
 
     const ruleSystem = ruleSystemOf(
-        rules ?? { system: { key: RULE_SYSTEM_KEYS[0] } }
+        rules ?? { system: { key: FALLBACK_SYSTEM_KEY } }
     );
 
     const balanceKind: 'fair' | 'xp' =

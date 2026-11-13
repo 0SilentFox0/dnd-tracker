@@ -1,6 +1,6 @@
 'use client';
 
-import { useBattleScene } from '@/lib/hooks/battle';
+import { isSystemActionPending, useBattleScene } from '@/lib/hooks/battle';
 import { dynamicTextRef } from '@/lib/i18n/text-ref';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import { conditionTestOp } from '@/systems/wfrp/api/battle';
@@ -61,6 +61,6 @@ export function useConditionTestPanel(
                     ...(roll === undefined ? { serverRoll: true } : { roll }),
                 })
             ),
-        isPending: actions.system.isPending,
+        isPending: isSystemActionPending(actions.system, 'condition-test'),
     };
 }

@@ -1,4 +1,4 @@
 import { defaultRulesFor } from '@/lib/utils/rules/section-registry';
-import { RULE_SYSTEM_KEYS } from '@/lib/utils/rules/systems/meta';
+import { FALLBACK_SYSTEM_KEY } from '@/lib/utils/rules/systems/catalog';
 
-export const PREVIEW_RULES = defaultRulesFor({ key: RULE_SYSTEM_KEYS[0] });
+export const PREVIEW_RULES = defaultRulesFor({ key: FALLBACK_SYSTEM_KEY });

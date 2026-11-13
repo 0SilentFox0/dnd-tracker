@@ -4,7 +4,7 @@ import type { BattleLogHistory } from '@/lib/hooks/battle/useBattleLogHistory';
 import type { BattleToastApi } from '@/lib/hooks/battle/useBattleToast';
 import type { PusherConnectionState } from '@/lib/hooks/battle/usePusherBattleSync';
 import type { BattleOpMutation } from '@/lib/hooks/battles';
-import type { AttackIntent } from '@/lib/utils/battle/flows';
+import type { AttackIntent, TurnGateOutcome } from '@/lib/utils/battle/flows';
 import type { MapAim, MapPick } from '@/lib/utils/battle/grid';
 import type { DisplayEffect } from '@/lib/utils/battle/view';
 import type { Viewer } from '@/lib/utils/battle/view/visibility';
@@ -16,6 +16,13 @@ import type {
     BattleSceneTurn,
     DmControl,
 } from '@/types/battle-scene';
+
+export interface TurnGateControls {
+    /** Aborts when the whole player turn unmounts, not just the gate panel */
+    readonly signal?: AbortSignal;
+    resolve(outcome: TurnGateOutcome): void;
+    skipTurn(): void;
+}
 
 /** Наміри гравця, що їх карта передає майстрам (не мутації — ті в `actions`). */
 export interface BattleSceneIntents {

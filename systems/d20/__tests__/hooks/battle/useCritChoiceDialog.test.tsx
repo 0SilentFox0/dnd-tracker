@@ -146,4 +146,29 @@ describe('useCritChoiceDialog', () => {
         });
         expect(result.current.isSubmitting).toBe(false);
     });
+
+    it('isSubmitting: лише для crit-choice, чужа дія pending не рахується', () => {
+        const scene = fakeScene({ isDM: true });
+
+        scene.battle.pendingChoice = pending;
+
+        const pendingAction = (action: string) =>
+            Object.assign(scene.value.actions.system, {
+                isPending: true,
+                variables: { action, body: {} },
+            });
+
+        pendingAction('morale-check');
+
+        const { result, rerender } = renderHook(() => useCritChoiceDialog(), {
+            wrapper: scene.wrapper,
+        });
+
+        expect(result.current.isSubmitting).toBe(false);
+
+        pendingAction('crit-choice');
+        rerender();
+
+        expect(result.current.isSubmitting).toBe(true);
+    });
 });

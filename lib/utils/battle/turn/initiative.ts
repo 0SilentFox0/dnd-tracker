@@ -3,7 +3,7 @@ import { withSelf } from '@/lib/utils/abilities/engine/core/participants';
 import { SECTION_DEFAULTS } from '@/lib/utils/rules/defaults';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import { ruleSystemByKey, ruleSystemOf } from '@/lib/utils/rules/systems';
-import { RULE_SYSTEM_KEYS } from '@/lib/utils/rules/systems/meta';
+import { FALLBACK_SYSTEM_KEY } from '@/lib/utils/rules/systems/catalog';
 import { BattleParticipant } from '@/types/battle';
 
 export interface InitiativeRoll {
@@ -15,7 +15,7 @@ export interface InitiativeRoll {
 
 const systemOfParticipant = (p: BattleParticipant) =>
     ruleSystemByKey(p.abilities.system?.key ?? '') ??
-    ruleSystemOf({ system: { key: RULE_SYSTEM_KEYS[0] } });
+    ruleSystemOf({ system: { key: FALLBACK_SYSTEM_KEY } });
 
 export interface InitiativeResult {
     total: number;

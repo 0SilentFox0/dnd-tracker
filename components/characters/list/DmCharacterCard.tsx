@@ -69,10 +69,10 @@ export function DmCharacterCard({
               rules,
               characteristics: character.characteristics,
           }).total
-        : 0;
+        : null;
 
     const hp =
-        ooc?.persistResources && character.resources
+        maxHp !== null && ooc?.persistResources && character.resources
             ? currentHp(character.resources, maxHp)
             : maxHp;
 
@@ -175,11 +175,13 @@ export function DmCharacterCard({
                         short={wounds ? t('wounds') : 'HP'}
                         label={wounds ? t('wounds') : 'HP'}
                         value={
-                            ooc?.persistResources
-                                ? character.resources?.dead
-                                    ? t('dead')
-                                    : `${hp}/${maxHp}`
-                                : maxHp
+                            maxHp === null
+                                ? '—'
+                                : ooc?.persistResources
+                                  ? character.resources?.dead
+                                      ? t('dead')
+                                      : `${hp}/${maxHp}`
+                                  : maxHp
                         }
                     />
                 )}

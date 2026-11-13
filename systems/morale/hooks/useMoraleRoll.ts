@@ -2,9 +2,9 @@
 
 import { useTranslations } from 'next-intl';
 
-import type { TurnGateControls } from '@/components/systems/types';
 import {
     afterMoraleDice,
+    type TurnGateControls,
     useBattleScene,
     useFxEnabled,
 } from '@/lib/hooks/battle';

@@ -123,6 +123,25 @@ describe('DmCharacterCard before the rules load', () => {
     });
 });
 
+describe('DmCharacterCard HP before the ruleset loads', () => {
+    afterEach(cleanup);
+
+    it('shows a dash instead of 0/0 while the system is ready but rules are not', () => {
+        mocks.system.mockReturnValue({
+            key: 'dnd5e',
+            system: RULE_SYSTEM_REGISTRY.dnd5e,
+            ready: true,
+        });
+        mocks.rules.mockReturnValue({ data: undefined });
+        mocks.classMode.mockReturnValue({ enabled: false, byId: {} });
+        renderCard(character);
+
+        expect(screen.getByText('—')).toBeTruthy();
+        expect(screen.queryByText('0/0')).toBeNull();
+        expect(screen.queryByText('0')).toBeNull();
+    });
+});
+
 describe('DmCharacterCard class line', () => {
     afterEach(cleanup);
 

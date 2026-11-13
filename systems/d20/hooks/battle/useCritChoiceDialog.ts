@@ -1,7 +1,7 @@
 'use client';
 
 import type { CriticalEffect } from '@/lib/constants/critical-effects';
-import { useBattleScene } from '@/lib/hooks/battle';
+import { isSystemActionPending, useBattleScene } from '@/lib/hooks/battle';
 import { critRulesOf } from '@/lib/utils/battle/attack/crit-rules';
 import { enabledCritEffects } from '@/lib/utils/battle/crit-choice/catalog';
 import { asShownCrit } from '@/lib/utils/battle/crit-choice/pending';
@@ -42,6 +42,6 @@ export function useCritChoiceDialog() {
         submit: (choices: Record<string, number | 'random'>) =>
             actions.system.mutate(critChoiceOp({ choices })),
         cancel: () => actions.system.mutate(critChoiceOp({ cancel: true })),
-        isSubmitting: actions.system.isPending,
+        isSubmitting: isSystemActionPending(actions.system, 'crit-choice'),
     };
 }

@@ -75,4 +75,27 @@ describe('heroLevelDamage', () => {
             flat: 0,
         });
     });
+
+    it('golden: a classless level-5 hero of bare dnd5e has no level dice and no +level, with heroscaling it has both', () => {
+        const withModules = (modules: string[]) =>
+            ({
+                ...DEFAULT_RULES,
+                system: { key: 'dnd5e', modules },
+            }) as Ruleset;
+
+        expect(
+            attackDamageParts(hero, sword, withModules([]))
+        ).toEqual({
+            weaponDice: '1d8',
+            extraDice: '',
+            formula: '1d8',
+            flat: 0,
+        });
+        expect(
+            attackDamageParts(hero, sword, withModules(['heroscaling']))
+        ).toMatchObject({
+            flat: 5,
+            extraDice: getHeroDamageDiceForLevel(5, AttackType.MELEE),
+        });
+    });
 });
