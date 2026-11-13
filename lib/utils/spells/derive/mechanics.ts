@@ -156,9 +156,7 @@ export const spellSide = (f: SpellFacts, kind: SpellKind): SpellSide =>
           ? 'enemy'
           : 'ally';
 
-function templateShape(
-    f: SpellFacts
-): {
+function templateShape(f: SpellFacts): {
     shape: 'circle' | 'cube' | 'cone' | 'line' | 'emanation';
     size: number;
 } | null {

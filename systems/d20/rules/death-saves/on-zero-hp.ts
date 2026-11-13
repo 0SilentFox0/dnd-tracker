@@ -144,12 +144,7 @@ function settleManual(ctx: ZeroHpCtx): DamageConsequencesResult {
         after.combatStats.currentHp <= 0 &&
         after.combatStats.status === CombatStatus.UNCONSCIOUS;
 
-    if (
-        rules.deathSaves.enabled &&
-        isHero &&
-        wentDown &&
-        !deathSavesOf(next)
-    )
+    if (rules.deathSaves.enabled && isHero && wentDown && !deathSavesOf(next))
         next = startDying(next, rules);
 
     const ps =

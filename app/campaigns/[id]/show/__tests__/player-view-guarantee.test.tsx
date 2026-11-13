@@ -35,7 +35,7 @@ vi.mock('@/lib/api/world', () => ({
     getWorldMap: vi.fn(),
     listWorldMaps: vi.fn().mockResolvedValue([]),
 }));
- 
+
 vi.mock('next/image', () => ({
     default: (p: { src: string; alt: string }) => (
         <img src={p.src} alt={p.alt} />

@@ -2,9 +2,7 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 interface UseFileImportOptions<T> {
-    onImport: (
-        data: T[]
-    ) => Promise<{
+    onImport: (data: T[]) => Promise<{
         imported: number;
         total: number;
         skipped?: number;

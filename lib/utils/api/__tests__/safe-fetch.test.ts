@@ -109,14 +109,12 @@ describe('safe-fetch', () => {
     });
 
     it('rejects redirect to a private host', async () => {
-        const fetchMock = vi
-            .fn()
-            .mockResolvedValueOnce(
-                new Response(null, {
-                    status: 302,
-                    headers: { location: 'https://internal.example/x.png' },
-                })
-            );
+        const fetchMock = vi.fn().mockResolvedValueOnce(
+            new Response(null, {
+                status: 302,
+                headers: { location: 'https://internal.example/x.png' },
+            })
+        );
 
         vi.stubGlobal('fetch', fetchMock);
         lookupMock.mockImplementation(async (h: string) => [
@@ -136,15 +134,13 @@ describe('safe-fetch', () => {
     it('follows at most 3 redirects', async () => {
         vi.stubGlobal(
             'fetch',
-            vi
-                .fn()
-                .mockImplementation(
-                    async () =>
-                        new Response(null, {
-                            status: 302,
-                            headers: { location: 'https://ok.example/n' },
-                        })
-                )
+            vi.fn().mockImplementation(
+                async () =>
+                    new Response(null, {
+                        status: 302,
+                        headers: { location: 'https://ok.example/n' },
+                    })
+            )
         );
 
         await expect(
@@ -191,14 +187,12 @@ describe('safe-fetch', () => {
     it('rejects redirect to http and to a host resolving to 10.0.0.1', async () => {
         vi.stubGlobal(
             'fetch',
-            vi
-                .fn()
-                .mockResolvedValueOnce(
-                    new Response(null, {
-                        status: 301,
-                        headers: { location: 'http://ok.example/n' },
-                    })
-                )
+            vi.fn().mockResolvedValueOnce(
+                new Response(null, {
+                    status: 301,
+                    headers: { location: 'http://ok.example/n' },
+                })
+            )
         );
         await expect(
             safeFetchBuffer('https://ok.example/a.png', OPTS)
@@ -206,14 +200,12 @@ describe('safe-fetch', () => {
 
         vi.stubGlobal(
             'fetch',
-            vi
-                .fn()
-                .mockResolvedValueOnce(
-                    new Response(null, {
-                        status: 301,
-                        headers: { location: 'https://10.0.0.1/n' },
-                    })
-                )
+            vi.fn().mockResolvedValueOnce(
+                new Response(null, {
+                    status: 301,
+                    headers: { location: 'https://10.0.0.1/n' },
+                })
+            )
         );
         await expect(
             safeFetchBuffer('https://ok.example/a.png', OPTS)
@@ -231,14 +223,12 @@ describe('safe-fetch', () => {
 
         vi.stubGlobal(
             'fetch',
-            vi
-                .fn()
-                .mockResolvedValueOnce(
-                    new Response(stream, {
-                        status: 200,
-                        headers: { 'content-type': 'image/png' },
-                    })
-                )
+            vi.fn().mockResolvedValueOnce(
+                new Response(stream, {
+                    status: 200,
+                    headers: { 'content-type': 'image/png' },
+                })
+            )
         );
         await expect(
             safeFetchBuffer('https://ok.example/a.png', OPTS)

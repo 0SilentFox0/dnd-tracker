@@ -1,9 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import {
-    FALLBACK_SYSTEM_KEY,
-    kindOf,
-} from '@/lib/utils/rules/systems/catalog';
+import { FALLBACK_SYSTEM_KEY, kindOf } from '@/lib/utils/rules/systems/catalog';
 import { metaOf, RULE_SYSTEM_KEYS } from '@/lib/utils/rules/systems/meta';
 
 describe('FALLBACK_SYSTEM_KEY', () => {

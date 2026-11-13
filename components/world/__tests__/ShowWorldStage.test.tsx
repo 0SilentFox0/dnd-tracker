@@ -15,7 +15,7 @@ vi.mock('@/lib/api/world', () => ({
     getWorldView: vi.fn(),
     getWorldMap: vi.fn(),
 }));
- 
+
 vi.mock('next/image', () => ({
     default: (p: { alt: string }) => <img alt={p.alt} />,
 }));

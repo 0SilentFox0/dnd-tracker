@@ -86,13 +86,11 @@ function TemplateGroupTile({ group }: { group: TemplateGroup<TemplateTile> }) {
 export function TemplateTiles({ templates }: { templates: TemplateTile[] }) {
     // Canonical SRD browsing always opens its stored English content. Private copies
     // remain independent even if older data retained the official template key.
-    const canonical = templates
-        .filter(isCanonicalTemplate)
-        .map((template) => ({
-            key: template.id,
-            cards: { en: template },
-            locales: ['en'],
-        }));
+    const canonical = templates.filter(isCanonicalTemplate).map((template) => ({
+        key: template.id,
+        cards: { en: template },
+        locales: ['en'],
+    }));
 
     const other = groupTemplates(
         templates.filter(

@@ -168,19 +168,17 @@ export async function publishTemplateVersion(
 
         for (let i = 0; i < inserts.length; i += CHUNK) {
             await delegate.createMany({
-                data: inserts
-                    .slice(i, i + CHUNK)
-                    .map((row) =>
-                        toPrismaJson(
-                            {
-                                ...pick(row, t.columns),
-                                sourceCampaignId: templateId,
-                                validFrom: version,
-                                ...stamp,
-                            },
-                            t
-                        )
-                    ),
+                data: inserts.slice(i, i + CHUNK).map((row) =>
+                    toPrismaJson(
+                        {
+                            ...pick(row, t.columns),
+                            sourceCampaignId: templateId,
+                            validFrom: version,
+                            ...stamp,
+                        },
+                        t
+                    )
+                ),
             });
         }
 

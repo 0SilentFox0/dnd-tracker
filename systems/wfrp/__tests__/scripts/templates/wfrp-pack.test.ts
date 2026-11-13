@@ -791,7 +791,7 @@ describe('validatePack: wfrp artifacts', () => {
     type Mutate = (
         sword: Record<string, any>,
         jack: Record<string, any>
-    ) => void;  
+    ) => void;
 
     const cases: Array<[string, Mutate, string]> = [
         [

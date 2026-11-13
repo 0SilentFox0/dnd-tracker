@@ -87,13 +87,11 @@ const bearer = (method: string, body?: string) =>
     });
 
 const scopes = (s: string[]) =>
-    vi
-        .mocked(verifyApiToken)
-        .mockResolvedValue({
-            campaignId: 'c1',
-            userId: 'dm',
-            scopes: s,
-        } as never);
+    vi.mocked(verifyApiToken).mockResolvedValue({
+        campaignId: 'c1',
+        userId: 'dm',
+        scopes: s,
+    } as never);
 
 const json = async (res: Response) => ({
     status: res.status,

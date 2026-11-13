@@ -24,20 +24,18 @@ vi.mock('@/lib/db', () => {
 });
 
 const asDM = (xp = true) =>
-    vi
-        .mocked(apiAuth.requireDM)
-        .mockResolvedValue({
-            userId: 'dm',
-            isDM: true,
-            campaign: {
-                id: 'camp',
-                maxLevel: 20,
-                rules: {
-                    ...DEFAULT_RULES,
-                    outOfCombat: { ...DEFAULT_RULES.outOfCombat, xp },
-                },
+    vi.mocked(apiAuth.requireDM).mockResolvedValue({
+        userId: 'dm',
+        isDM: true,
+        campaign: {
+            id: 'camp',
+            maxLevel: 20,
+            rules: {
+                ...DEFAULT_RULES,
+                outOfCombat: { ...DEFAULT_RULES.outOfCombat, xp },
             },
-        } as never);
+        },
+    } as never);
 
 const post = async (body: object) => {
     const { POST } = await import('../route');

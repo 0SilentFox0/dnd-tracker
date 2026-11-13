@@ -230,9 +230,8 @@ describe('battle start from stored resources', () => {
                 .inspiration
         ).toBe(true);
         expect(
-            d20State(
-                await build({ inspiration: true }, { inspiration: false })
-            ).inspiration
+            d20State(await build({ inspiration: true }, { inspiration: false }))
+                .inspiration
         ).toBeUndefined();
         expect(
             d20State(await build({ inspiration: false }, { inspiration: true }))

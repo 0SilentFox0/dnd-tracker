@@ -23,13 +23,11 @@ const respond = (
     contentType: string | null = 'image/png',
     status = 200
 ) =>
-    vi
-        .fn()
-        .mockResolvedValue({
-            status,
-            contentType,
-            body,
-        }) as unknown as typeof safeFetchBuffer;
+    vi.fn().mockResolvedValue({
+        status,
+        contentType,
+        body,
+    }) as unknown as typeof safeFetchBuffer;
 
 describe('fetchImportImage', () => {
     it.each([

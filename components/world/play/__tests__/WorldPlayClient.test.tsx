@@ -27,7 +27,6 @@ vi.mock('next/navigation', () => ({
     usePathname: () => '/campaigns/c1/world',
 }));
 
- 
 vi.mock('next/image', () => ({
     default: (p: { alt: string }) => <img alt={p.alt} />,
 }));

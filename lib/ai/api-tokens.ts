@@ -101,9 +101,7 @@ export async function revokeApiToken(
     );
 }
 
-export async function verifyApiToken(
-    raw: string
-): Promise<{
+export async function verifyApiToken(raw: string): Promise<{
     id: string;
     campaignId: string;
     userId: string;

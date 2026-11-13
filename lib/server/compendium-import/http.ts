@@ -162,21 +162,19 @@ export function compendiumRoute(
                 });
 
                 return privateJson({
-                    runs: runs
-                        .slice(0, 20)
-                        .map((run) =>
-                            runId
-                                ? {
-                                      ...run,
-                                      report: mediaPresentation(
-                                          translateCompendiumReport(
-                                              t,
-                                              run.report as unknown as CompendiumReport
-                                          )
-                                      ),
-                                  }
-                                : { id: run.id, createdAt: run.createdAt }
-                        ),
+                    runs: runs.slice(0, 20).map((run) =>
+                        runId
+                            ? {
+                                  ...run,
+                                  report: mediaPresentation(
+                                      translateCompendiumReport(
+                                          t,
+                                          run.report as unknown as CompendiumReport
+                                      )
+                                  ),
+                              }
+                            : { id: run.id, createdAt: run.createdAt }
+                    ),
                     hasMore: runs.length > 20,
                 });
             }
@@ -211,21 +209,19 @@ export function compendiumRoute(
                 });
 
                 return privateJson({
-                    entries: entries
-                        .slice(0, 50)
-                        .map((entry) => ({
-                            ...entry,
-                            issues: Array.isArray(entry.issues)
-                                ? entry.issues.map((item) =>
-                                      isRecord(item)
-                                          ? translateCompendiumIssue(
-                                                t,
-                                                item as unknown as ImportIssue
-                                            )
-                                          : item
-                                  )
-                                : entry.issues,
-                        })),
+                    entries: entries.slice(0, 50).map((entry) => ({
+                        ...entry,
+                        issues: Array.isArray(entry.issues)
+                            ? entry.issues.map((item) =>
+                                  isRecord(item)
+                                      ? translateCompendiumIssue(
+                                            t,
+                                            item as unknown as ImportIssue
+                                        )
+                                      : item
+                              )
+                            : entry.issues,
+                    })),
                     hasMore: entries.length > 50,
                 });
             }

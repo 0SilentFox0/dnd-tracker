@@ -9,7 +9,6 @@ import type { WorldMapDetail, WorldMarker } from '@/types/world';
 
 vi.unmock('next-intl');
 
- 
 vi.mock('next/image', () => ({
     default: (p: { alt: string }) => <img alt={p.alt} />,
 }));

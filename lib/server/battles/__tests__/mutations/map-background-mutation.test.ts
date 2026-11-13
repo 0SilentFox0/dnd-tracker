@@ -31,12 +31,10 @@ const ctx = (m: BattleMapConfig | null = map) => {
 };
 
 beforeEach(() =>
-    resolve
-        .mockReset()
-        .mockImplementation(async (bg: string | null) => ({
-            ok: true,
-            background: bg,
-        }))
+    resolve.mockReset().mockImplementation(async (bg: string | null) => ({
+        ok: true,
+        background: bg,
+    }))
 );
 
 describe('map-background schema', () => {

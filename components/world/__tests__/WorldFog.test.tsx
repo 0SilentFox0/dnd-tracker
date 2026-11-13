@@ -7,7 +7,6 @@ import { WorldMapView } from '../WorldMapView';
 
 import type { RevealShape, WorldHero, WorldMapDetail } from '@/types/world';
 
- 
 vi.mock('next/image', () => ({
     default: (p: { alt: string }) => <img alt={p.alt} />,
 }));

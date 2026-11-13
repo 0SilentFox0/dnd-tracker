@@ -17,14 +17,12 @@ export function BattleLog() {
 
     const entries = useMemo(
         () =>
-            [...(battleLog ?? [])]
-                .reverse()
-                .map((e) =>
-                    sanitizeLogEntry(e, viewer, {
-                        participants: initiativeOrder,
-                        rules,
-                    })
-                ),
+            [...(battleLog ?? [])].reverse().map((e) =>
+                sanitizeLogEntry(e, viewer, {
+                    participants: initiativeOrder,
+                    rules,
+                })
+            ),
         [battleLog, viewer, initiativeOrder, rules]
     );
 

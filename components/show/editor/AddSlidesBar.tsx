@@ -84,16 +84,14 @@ export function AddSlidesBar({
                         e.target.value = '';
 
                         if (file)
-                            upload
-                                .addPuzzle(file)
-                                .catch(
-                                    () =>
-                                        void notify(
-                                            t('puzzle.addFailed', {
-                                                name: file.name,
-                                            })
-                                        )
-                                );
+                            upload.addPuzzle(file).catch(
+                                () =>
+                                    void notify(
+                                        t('puzzle.addFailed', {
+                                            name: file.name,
+                                        })
+                                    )
+                            );
                     }}
                 />
                 <Button

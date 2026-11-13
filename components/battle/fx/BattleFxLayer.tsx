@@ -10,10 +10,7 @@ import {
 } from '@/components/battle/fx/runtime/play';
 import { cancelLayer } from '@/components/battle/fx/runtime/stage';
 import { useFxBadgeLabels } from '@/components/battle/fx/use-badge-labels';
-import {
-    DiceStage,
-    type DiceStageHandle,
-} from '@/components/dice/DiceStage';
+import { DiceStage, type DiceStageHandle } from '@/components/dice/DiceStage';
 import {
     fireFxImpact,
     useBattleFxQueue,

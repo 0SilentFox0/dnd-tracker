@@ -47,36 +47,30 @@ describe('bundle: careers table', () => {
     it('exports and imports careers, remapping talent ids in tiers and in a species profile', async () => {
         const source = createFakeDb();
 
-        source.store
-            .get('feat')!
-            .push({
-                id: FT,
+        source.store.get('feat')!.push({
+            id: FT,
+            campaignId: 'src',
+            name: 'Alert',
+            type: 'general',
+        });
+        source.store.get('career')!.push(
+            {
+                id: C1,
                 campaignId: 'src',
-                name: 'Alert',
-                type: 'general',
-            });
-        source.store
-            .get('career')!
-            .push(
-                {
-                    id: C1,
-                    campaignId: 'src',
-                    name: 'Soldier',
-                    tiers: tiers(FT),
-                },
-                { id: C2, campaignId: 'src', name: 'Scribe', tiers: [] }
-            );
-        source.store
-            .get('race')!
-            .push({
-                id: RC,
-                campaignId: 'src',
-                name: 'Elf',
-                profile: {
-                    careerTable: [{ max: 100, careerId: C1 }],
-                    talents: [FT],
-                },
-            });
+                name: 'Soldier',
+                tiers: tiers(FT),
+            },
+            { id: C2, campaignId: 'src', name: 'Scribe', tiers: [] }
+        );
+        source.store.get('race')!.push({
+            id: RC,
+            campaignId: 'src',
+            name: 'Elf',
+            profile: {
+                careerTable: [{ max: 100, careerId: C1 }],
+                talents: [FT],
+            },
+        });
 
         const bundle = await exportCampaign(source.db, 'src');
 

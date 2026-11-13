@@ -22,16 +22,14 @@ function picksAt(raw: unknown, depth: number): Picks {
                 ? [
                       [
                           key,
-                          list
-                              .filter(isPick)
-                              .map((p) =>
-                                  depth > 0 && isRecord(p.picks)
-                                      ? {
-                                            id: p.id,
-                                            picks: picksAt(p.picks, depth - 1),
-                                        }
-                                      : { id: p.id }
-                              ),
+                          list.filter(isPick).map((p) =>
+                              depth > 0 && isRecord(p.picks)
+                                  ? {
+                                        id: p.id,
+                                        picks: picksAt(p.picks, depth - 1),
+                                    }
+                                  : { id: p.id }
+                          ),
                       ],
                   ]
                 : []

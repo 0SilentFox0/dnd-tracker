@@ -118,13 +118,11 @@ export function mediaProgress(
         skipped: Object.values(state.skipped).reduce((a, b) => a + (b ?? 0), 0),
         pending: state.items.filter((i) => i.status === 'pending').length,
         retryable: failed.filter((i) => i.retryable).length,
-        failures: failed
-            .slice(0, MEDIA_LIMITS.failuresShown)
-            .map((i) => ({
-                id: i.id,
-                ...hostAndFile(i.url),
-                reason: i.reason ?? 'MEDIA_FETCH_FAILED',
-                ...(i.params && { params: i.params }),
-            })),
+        failures: failed.slice(0, MEDIA_LIMITS.failuresShown).map((i) => ({
+            id: i.id,
+            ...hostAndFile(i.url),
+            reason: i.reason ?? 'MEDIA_FETCH_FAILED',
+            ...(i.params && { params: i.params }),
+        })),
     };
 }

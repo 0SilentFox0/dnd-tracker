@@ -155,11 +155,7 @@ describe('buildReport', () => {
     });
 
     it('formats lines with pauses and summarizes', () => {
-        const [r] = buildReport(
-            [scene({ pendingChoice: true })],
-            [slot()],
-            []
-        );
+        const [r] = buildReport([scene({ pendingChoice: true })], [slot()], []);
 
         const text = formatReport(r).join('\n');
 

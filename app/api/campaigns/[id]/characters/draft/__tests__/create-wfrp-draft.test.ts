@@ -70,17 +70,15 @@ const post = (data: object) =>
     );
 
 const asUser = (role: string) =>
-    vi
-        .mocked(apiAuth.requireCampaignAccess)
-        .mockResolvedValue({
-            userId: 'u1',
-            campaign: {
-                id: 'camp',
-                maxLevel: 20,
-                rules: WFRP_RULES,
-                members: [{ userId: 'u1', role }],
-            },
-        } as never);
+    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue({
+        userId: 'u1',
+        campaign: {
+            id: 'camp',
+            maxLevel: 20,
+            rules: WFRP_RULES,
+            members: [{ userId: 'u1', role }],
+        },
+    } as never);
 
 beforeEach(() => {
     vi.clearAllMocks();

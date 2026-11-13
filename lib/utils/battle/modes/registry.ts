@@ -41,9 +41,7 @@ export function activeMapMode(
 }
 
 /** Активний режим разом із його конфігом (для викликів хуків). */
-export function activeModeWithConfig(
-    map: BattleMapConfig | null | undefined
-): {
+export function activeModeWithConfig(map: BattleMapConfig | null | undefined): {
     mode: MapModeDefinition<unknown>;
     config: unknown;
     map: BattleMapConfig;

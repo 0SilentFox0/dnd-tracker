@@ -55,9 +55,7 @@ export async function refreshSummaryFreshness(
     }
 }
 
-export async function loadSummaryRow(
-    pageId: string
-): Promise<{
+export async function loadSummaryRow(pageId: string): Promise<{
     version: number;
     summary: PageSummary;
     model: string;

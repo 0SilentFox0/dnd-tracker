@@ -46,13 +46,11 @@ const rules = (persistResources: boolean) => ({
 });
 
 const asDM = (persist = true) =>
-    vi
-        .mocked(apiAuth.requireDM)
-        .mockResolvedValue({
-            userId: 'dm',
-            isDM: true,
-            campaign: { id: 'camp', maxLevel: 20, rules: rules(persist) },
-        } as never);
+    vi.mocked(apiAuth.requireDM).mockResolvedValue({
+        userId: 'dm',
+        isDM: true,
+        campaign: { id: 'camp', maxLevel: 20, rules: rules(persist) },
+    } as never);
 
 const post = async (body: object) => {
     const { POST } = await import('../route');

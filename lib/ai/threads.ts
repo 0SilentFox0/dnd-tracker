@@ -162,14 +162,12 @@ export async function loadMessages(
         select: { id: true, role: true, parts: true, metadata: true },
     });
 
-    return rows
-        .reverse()
-        .map((r) => ({
-            id: r.id,
-            role: r.role as 'user' | 'assistant',
-            parts: r.parts as unknown[],
-            metadata: r.metadata as AiMessageMetadata,
-        }));
+    return rows.reverse().map((r) => ({
+        id: r.id,
+        role: r.role as 'user' | 'assistant',
+        parts: r.parts as unknown[],
+        metadata: r.metadata as AiMessageMetadata,
+    }));
 }
 
 const textOf = (parts: unknown[]) =>

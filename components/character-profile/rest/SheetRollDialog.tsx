@@ -7,10 +7,7 @@ import { useProfile } from '../ProfileContext';
 
 import '@/components/battle/fx/fx.css';
 import { FormAlert } from '@/components/common/states';
-import {
-    DiceStage,
-    type DiceStageHandle,
-} from '@/components/dice/DiceStage';
+import { DiceStage, type DiceStageHandle } from '@/components/dice/DiceStage';
 import { type SheetRollRequest, systemUiOf } from '@/components/systems';
 import { Button } from '@/components/ui/button';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';

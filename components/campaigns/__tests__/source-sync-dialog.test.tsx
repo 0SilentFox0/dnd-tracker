@@ -72,14 +72,12 @@ const render = (onOpenChange = vi.fn()) => renderWithConfirm(ui(onOpenChange));
 describe('SourceSyncDialog', () => {
     beforeEach(() => {
         mockMatchMedia(false);
-        mocks.apply
-            .mockReset()
-            .mockResolvedValue({
-                applied: 1,
-                ignored: 1,
-                autoAdded: [],
-                warnings: [],
-            });
+        mocks.apply.mockReset().mockResolvedValue({
+            applied: 1,
+            ignored: 1,
+            autoAdded: [],
+            warnings: [],
+        });
         mocks.isFetching = false;
         mocks.items = [
             item({ key: 'fireball', name: 'Fireball' }),
