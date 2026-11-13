@@ -19,6 +19,7 @@ const db = vi.hoisted(() => ({
         delete: vi.fn(),
         deleteMany: vi.fn(),
     },
+    campaign: { findUnique: vi.fn() },
     skill: { updateMany: vi.fn() },
     mainSkill: { updateMany: vi.fn() },
     spellGroup: {
@@ -136,6 +137,9 @@ describe('spells API', () => {
         vi.clearAllMocks();
         auth.requireDM.mockResolvedValue({ userId: 'dm' });
         auth.requireCampaignAccess.mockResolvedValue({ userId: 'dm' });
+        db.campaign.findUnique.mockResolvedValue({
+            rules: { system: { key: 'dnd5e' } },
+        });
         db.spell.create.mockResolvedValue({ id: 's9' });
         db.spell.createMany.mockResolvedValue({ count: 1 });
         db.spell.findFirst.mockResolvedValue({ id: 's1', campaignId: 'c1' });

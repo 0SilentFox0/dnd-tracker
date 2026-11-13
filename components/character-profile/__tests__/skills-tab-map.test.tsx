@@ -43,7 +43,7 @@ vi.mock('@/components/character-profile/ClassLevelUpDialog', () => ({
         />
     ),
 }));
-vi.mock('@/components/skill-tree/progression', () => ({
+vi.mock('@/components/skill-tree/progression/ProgressionPanel', () => ({
     ProgressionPanel: () => <div data-testid="panel" />,
 }));
 vi.mock('@/lib/hooks/campaigns', async (orig) => ({

@@ -39,7 +39,7 @@ vi.mock('@/lib/hooks/campaigns', () => ({
     }),
 }));
 vi.mock('@/lib/hooks/races', () => ({ useRaces: () => ({ data: [] }) }));
-vi.mock('@/components/skill-tree/progression', () => ({
+vi.mock('@/components/skill-tree/progression/ProgressionPanel', () => ({
     ProgressionPanel: () => <div>прокачка</div>,
 }));
 
