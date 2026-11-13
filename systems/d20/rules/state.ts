@@ -96,6 +96,7 @@ export function d20StateData(
 
     return {
         ...cleared,
+        ...(!hasSlot && data.deathSaves && { dying: true as const }),
         system: D20_STATE.write(data, p.battleData.system),
     };
 }

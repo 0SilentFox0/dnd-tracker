@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
+import { CombatStatus } from '@/lib/constants/battle';
 import { makeParticipant } from '@/lib/utils/abilities/__tests__/fixtures';
+import { isDying } from '@/lib/utils/abilities/engine/core/participants';
 import {
     D20_STATE,
     d20State,
@@ -184,5 +186,26 @@ describe('withD20State', () => {
             attackedWithLight: true,
         });
         expect(next.battleData.inspirationSpent).toBeUndefined();
+    });
+});
+
+describe('legacy dying hero', () => {
+    it('keeps isDying when another d20 write migrates the old deathSaves', () => {
+        const base = of({ deathSaves: SAVES });
+
+        const legacy = {
+            ...base,
+            combatStats: {
+                ...base.combatStats,
+                status: CombatStatus.UNCONSCIOUS,
+            },
+        };
+
+        expect(isDying(legacy)).toBe(true);
+
+        const next = withD20State(legacy, { attackedWithLight: undefined });
+
+        expect(next.battleData.deathSaves).toBeUndefined();
+        expect(isDying(next)).toBe(true);
     });
 });
