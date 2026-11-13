@@ -27,7 +27,6 @@ const SKIP_DIRS = new Set([
     '.next',
     '__tests__',
     'grim-icons',
-    'legacy-rules-parse',
 ]);
 
 const TEST_FILE = /\.test\.tsx?$/;

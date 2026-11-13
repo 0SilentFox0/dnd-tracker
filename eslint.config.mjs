@@ -667,7 +667,6 @@ const eslintConfig = defineConfig([
             ...SYSTEM_IMPORT_EXEMPT,
             'scripts/templates/systems/*/**',
             'scripts/assets/grim-icons/**',
-            'scripts/db/lib/legacy-rules-parse/**',
         ],
         plugins: {
             systems: {

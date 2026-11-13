@@ -1,6 +1,5 @@
 import { Prisma } from '@prisma/client';
 
-import type { RawDb } from '@/scripts/db/lib/backfill-rule-system-db';
 import type {
     DowngradePlan,
     DowngradeSnapshotBody,
@@ -9,6 +8,7 @@ import type {
     StatusFilter,
     StoredRow,
 } from '@/scripts/db/lib/battle-state-plan';
+import type { RawDb } from '@/scripts/db/lib/raw-db';
 
 export type { RawDb };
 

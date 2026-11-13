@@ -1,1 +1,0 @@
-export { legacyParseRules } from './schema';

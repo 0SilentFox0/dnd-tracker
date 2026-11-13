@@ -33,7 +33,6 @@
     "assets:grim-icons": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/assets/grim-icons/cli.ts",
     "assets:icon-prompts": "tsx --tsconfig tsconfig.scripts.json scripts/assets/build-icon-prompts.ts",
     "constructor:copy-heroes": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/constructor/copy-test-heroes.ts",
-    "rules:parse-report": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/db/rules-parse-report.ts",
     "constructor:backfill": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/constructor/backfill-content-fields.ts",
     "constructor:srd-template": "pnpm template import srd-5.2 --publish --allow-untranslated",
     "constructor:empty-5e-template": "pnpm template import srd-5.2-empty --publish",
