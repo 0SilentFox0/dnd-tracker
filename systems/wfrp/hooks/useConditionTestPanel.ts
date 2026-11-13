@@ -1,7 +1,6 @@
 'use client';
 
-import { useBattleScene } from './useBattleScene';
-
+import { useBattleScene } from '@/lib/hooks/battle';
 import { dynamicTextRef } from '@/lib/i18n/text-ref';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { BattleParticipant } from '@/types/battle';

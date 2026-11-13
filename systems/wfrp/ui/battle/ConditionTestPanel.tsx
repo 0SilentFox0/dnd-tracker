@@ -7,9 +7,9 @@ import { D100Input } from './D100Input';
 
 import { AiRollButton } from '@/components/battle/hud/DiceInput';
 import type { ConditionTestPanelProps } from '@/components/systems/types';
-import { useConditionTestPanel } from '@/lib/hooks/battle';
 import { useText } from '@/lib/i18n/use-text';
 import { cn } from '@/lib/utils';
+import { useConditionTestPanel } from '@/systems/wfrp/hooks';
 
 const SOURCES = ['server', 'manual'] as const;
 

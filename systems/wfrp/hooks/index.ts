@@ -5,6 +5,11 @@ export {
     useArtifactStatsDraft,
 } from './useArtifactStatsDraft';
 export { useCareerOps } from './useCareerOps';
+export {
+    type ConditionTestItem,
+    type ConditionTestPanel,
+    useConditionTestPanel,
+} from './useConditionTestPanel';
 export { useGrantCorruption, useUndoCorruption } from './useCorruption';
 export {
     useDowntime,
