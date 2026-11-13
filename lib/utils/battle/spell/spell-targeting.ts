@@ -246,7 +246,9 @@ function resolveTemplate(
 ): SpellTargetResolution {
     const passing = (targets: BattleParticipant[]) =>
         targets
-            .filter((p) => matchesTargetFilter(p, targeting.filter, level))
+            .filter((p) =>
+                matchesTargetFilter(p, targeting.filter, level, rules)
+            )
             .map((p) => p.basicInfo.id);
 
     if (targeting.shape === 'emanation') {
@@ -504,10 +506,15 @@ function resolveRaw(
             if (
                 picked.some(
                     (p) =>
-                        !matchesTargetFilter(p, targeting.filter, {
-                            spellLevel: spell.level,
-                            castLevel: mapCtx?.castLevel,
-                        })
+                        !matchesTargetFilter(
+                            p,
+                            targeting.filter,
+                            {
+                                spellLevel: spell.level,
+                                castLevel: mapCtx?.castLevel,
+                            },
+                            mapCtx?.rules
+                        )
                 )
             )
                 return fail(API_ERRORS.BATTLE_SPELL_TARGET_FILTER);

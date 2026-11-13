@@ -11,7 +11,7 @@ interface SummonInlineInput {
     caster: BattleParticipant;
     spell: { id: string; name: string; level: number };
     castLevel: number;
-    saveDc: number;
+    saveDc: number | undefined;
     round: number;
     castId: string;
     concentrationOf?: { casterId: string; castId: string };
@@ -41,7 +41,7 @@ export function inlineSummonRequests({
             casterId: ownerId,
             spellId: spell.id,
             spellName: spell.name,
-            dc: saveDc,
+            ...(saveDc !== undefined && { dc: saveDc }),
             radiusFeet: e.aura.radiusFeet,
             side: e.aura.side,
             ...(e.aura.onEnter && { onEnter: e.aura.onEnter }),
@@ -61,7 +61,7 @@ export function inlineSummonRequests({
             inline: {
                 name: e.name,
                 size: e.size,
-                ac: e.ac === 'spellDc' ? saveDc : e.ac,
+                ac: e.ac === 'spellDc' ? (saveDc ?? 10) : e.ac,
                 hp: e.hp,
                 ...(e.attacks && { attacks: e.attacks }),
                 ...(zone && { zone, zoneRounds: e.duration.rounds }),

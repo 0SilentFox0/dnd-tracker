@@ -11,7 +11,7 @@ import {
     spentFortune,
 } from '../percentile/fortune';
 import { ACTION_SLOT } from '../slots';
-import { wfrpState, wfrpStateData } from '../state';
+import { wfrpState, withWfrpState } from '../state';
 import { armourSl } from './armour';
 import {
     CAST_SKILL,
@@ -151,14 +151,17 @@ export function wfrpCastTest(ctx: CastTestCtx): CastTestResult {
             )
         );
 
-    const statePatch = {
-        ...(fortune && spentFortune(caster)),
-        ...(channelled > 0 && { channelledSl: undefined }),
-    };
+    const spendFortune = Boolean(fortune);
 
-    const casterData =
-        Object.keys(statePatch).length > 0
-            ? wfrpStateData(caster, statePatch)
+    const dropChannelled = channelled > 0;
+
+    const casterUpdate =
+        spendFortune || dropChannelled
+            ? (p: BattleParticipant) =>
+                  withWfrpState(p, {
+                      ...(spendFortune && spentFortune(p)),
+                      ...(dropChannelled && { channelledSl: undefined }),
+                  })
             : undefined;
 
     return {
@@ -182,6 +185,6 @@ export function wfrpCastTest(ctx: CastTestCtx): CastTestResult {
             },
         }),
         lines,
-        ...(casterData && { casterData }),
+        ...(casterUpdate && { casterUpdate }),
     };
 }

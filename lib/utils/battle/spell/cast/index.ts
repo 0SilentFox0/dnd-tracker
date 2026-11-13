@@ -357,14 +357,13 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
             )
         );
 
-        const begun = sustain.begin(
-            flow.ps,
+        const begun = sustain.begin(flow.ps, {
             casterId,
-            tag.castId,
-            spell.name,
-            rounds || DEFAULT_CONCENTRATION_ROUNDS,
-            currentRound
-        );
+            castId: tag.castId,
+            spellName: spell.name,
+            rounds: rounds || DEFAULT_CONCENTRATION_ROUNDS,
+            round: currentRound,
+        });
 
         flow.ps = begun.participants;
         flow.messages.push(...begun.messages);

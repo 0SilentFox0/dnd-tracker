@@ -204,7 +204,7 @@ export function rollSave(input: SaveRollInput): SaveRollResult {
         mod,
         bonus,
         total,
-        success: total >= dc,
+        success: dc !== undefined && total >= dc,
         mode,
         autoFail: false,
     };

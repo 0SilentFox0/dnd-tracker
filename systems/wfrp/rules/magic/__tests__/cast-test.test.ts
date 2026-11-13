@@ -170,8 +170,9 @@ describe('wfrpCastTest', () => {
         const r = run(30, {}, { system: FORTUNE_INPUT.write({ kind: 'sl' }) });
 
         expect(r.margin).toBe(3);
-        expect(r.casterData).toEqual({
-            system: { key: 'wfrp', data: { fortune: 0 } },
+        expect(r.casterUpdate?.(caster()).battleData.system).toEqual({
+            key: 'wfrp',
+            data: { fortune: 0 },
         });
     });
 
@@ -187,7 +188,7 @@ describe('wfrpCastTest', () => {
             }
         );
 
-        expect(r.casterData).toBeUndefined();
+        expect(r.casterUpdate).toBeUndefined();
         expect(castOf(r)?.roll).toBe(30);
     });
 
@@ -204,8 +205,9 @@ describe('wfrpCastTest', () => {
         );
 
         expect(r.success).toBe(true);
-        expect(r.casterData).toEqual({
-            system: { key: 'wfrp', data: { fortune: 0 } },
+        expect(r.casterUpdate?.(caster()).battleData.system).toEqual({
+            key: 'wfrp',
+            data: { fortune: 0 },
         });
     });
 
@@ -318,7 +320,7 @@ describe('prayers', () => {
 
         expect(r.success).toBe(false);
         expect(castOf(r)?.channelled).toBe(0);
-        expect(r.casterData).toBeUndefined();
+        expect(r.casterUpdate).toBeUndefined();
     });
 
     it('an ordinary spell spends the banked channelled SL', () => {
@@ -326,13 +328,14 @@ describe('prayers', () => {
 
         const r = run(30, { cn: 0 }, { caster: banked });
 
-        expect(r.casterData).toEqual({
-            system: { key: 'wfrp', data: {} },
+        expect(r.casterUpdate?.(banked).battleData.system).toEqual({
+            key: 'wfrp',
+            data: {},
         });
     });
 
     it('an ordinary spell with nothing banked leaves the caster alone', () => {
-        expect(run(30).casterData).toBeUndefined();
+        expect(run(30).casterUpdate).toBeUndefined();
     });
 
     it('preview of a prayer ignores channelling and armour', async () => {

@@ -328,14 +328,7 @@ function judge(run: AttackRun, actionModifiers: Modifiers): Judged {
 
     flow.messages.push(...r.lines);
 
-    if (r.attackerData) {
-        const spender = getP(flow, attackerId);
-
-        put(flow, {
-            ...spender,
-            battleData: { ...spender.battleData, ...r.attackerData },
-        });
-    }
+    if (r.attackerUpdate) put(flow, r.attackerUpdate(getP(flow, attackerId)));
 
     return {
         second: r.attackRoll.secondRoll,

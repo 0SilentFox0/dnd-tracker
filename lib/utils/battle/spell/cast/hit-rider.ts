@@ -18,7 +18,7 @@ interface HitRiderInput {
     casterId: string;
     targetIds: string[];
     ability: ResolvedAbility;
-    saveDc: number;
+    saveDc: number | undefined;
     round: number;
 }
 
@@ -61,13 +61,14 @@ export function applyHitRiders({
                         chargesLeft: effect.charges,
                         casterId,
                         ...(effect.consumeOnMiss && { consumeOnMiss: true }),
-                        ...(effect.save && {
-                            save: {
-                                ability: effect.save.ability,
-                                dc: saveDc,
-                                onFail: effect.save.onFail,
-                            },
-                        }),
+                        ...(effect.save &&
+                            saveDc !== undefined && {
+                                save: {
+                                    ability: effect.save.ability,
+                                    dc: saveDc,
+                                    onFail: effect.save.onFail,
+                                },
+                            }),
                     },
                 },
                 round

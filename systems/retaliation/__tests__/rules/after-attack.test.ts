@@ -97,6 +97,22 @@ describe('retaliation module on d20', () => {
         expect(out?.handled).toBe(true);
     });
 
+    it('order matters: a hook that handles the strike before retaliation suppresses it, after it does not', () => {
+        const handles = () => ({ ...answer, handled: true as const });
+
+        const before = ctxOf(defender());
+
+        runAfterAttack([handles, retaliationAfterAttack], before);
+
+        expect(before.strike).not.toHaveBeenCalled();
+
+        const after = ctxOf(defender());
+
+        runAfterAttack([retaliationAfterAttack, handles], after);
+
+        expect(after.strike).toHaveBeenCalledTimes(1);
+    });
+
     it('a plain strike is answered once and the reaction is counted', () => {
         const ctx = ctxOf(defender());
 

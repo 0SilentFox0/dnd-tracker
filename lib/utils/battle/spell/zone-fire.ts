@@ -32,7 +32,7 @@ export interface FireSource {
     casterId: string;
     spellId: string;
     spellName: string;
-    dc: number;
+    dc?: number;
     side: 'enemies' | 'allies' | 'all';
     concentrationOf?: ConcentrationTag;
     hitKey: string;
@@ -137,7 +137,7 @@ export function fireTrigger(
                 spell: src.spellName,
                 ability: trigger.save.ability.toUpperCase(),
                 total: res.total,
-                dc: src.dc,
+                dc: src.dc ?? '-',
                 success: String(res.success),
             })
         );

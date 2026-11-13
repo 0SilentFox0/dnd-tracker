@@ -388,7 +388,7 @@ export interface AnchoredZoneState {
     casterId: string;
     spellId: string;
     spellName: string;
-    dc: number;
+    dc?: number;
     radiusFeet: number;
     side: 'enemies' | 'allies' | 'all';
     excludeBearer?: boolean;
@@ -412,7 +412,7 @@ export interface SpellZoneRuntime {
     casterId: string;
     spellId: string;
     spellName: string;
-    dc: number;
+    dc?: number;
     side: 'enemies' | 'all';
     centre?: GridPoint;
     triggers: {

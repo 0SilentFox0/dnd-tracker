@@ -107,7 +107,7 @@ describe('channelled SL through the slot', () => {
     });
 
     it('a prayer keeps the bank', () => {
-        expect(cast(banked(), 'blessing').casterData).toBeUndefined();
+        expect(cast(banked(), 'blessing').casterUpdate).toBeUndefined();
     });
 
     it('a spell spends the bank', () => {
@@ -115,10 +115,7 @@ describe('channelled SL through the slot', () => {
 
         const r = cast(p, 'arcane');
 
-        const after = {
-            ...p,
-            battleData: { ...p.battleData, ...r.casterData },
-        };
+        const after = r.casterUpdate?.(p) ?? p;
 
         expect(wfrpState(after).channelledSl).toBeUndefined();
     });

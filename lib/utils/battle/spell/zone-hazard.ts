@@ -111,7 +111,7 @@ export function spellZoneHazard({
         casterId,
         spellId: spell.id,
         spellName: spell.name,
-        dc: dc ?? 10,
+        dc,
         side: zone.side ?? 'enemies',
         ...(centre && { centre }),
         triggers: {
@@ -222,7 +222,7 @@ export function spellTerrainEffects(
                 casterId: caster.basicInfo.id,
                 spellId: spell.id,
                 spellName: spell.name,
-                dc: dc ?? 10,
+                dc,
                 side: 'enemies',
                 triggers: {},
                 untilRound: cell.untilRound as number,

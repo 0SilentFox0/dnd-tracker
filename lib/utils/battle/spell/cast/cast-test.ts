@@ -56,15 +56,8 @@ export function settleCastTest(
 ): void {
     const casterId = state.caster.basicInfo.id;
 
-    const caster = getP(state.flow, casterId);
-
-    put(state.flow, {
-        ...caster,
-        battleData: {
-            ...caster.battleData,
-            ...cast.casterData,
-        },
-    });
+    if (cast.casterUpdate)
+        put(state.flow, cast.casterUpdate(getP(state.flow, casterId)));
 
     if (!cast.miscast) return;
 

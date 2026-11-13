@@ -169,7 +169,13 @@ describe('magic.sustain', () => {
     it('begin marks the caster, drop clears it with the bound effects', () => {
         const p = caster({});
 
-        const begun = magic.sustain.begin([p], 'c', 'c:sp@1#0', 'Spell', 3, 1);
+        const begun = magic.sustain.begin([p], {
+            casterId: 'c',
+            castId: 'c:sp@1#0',
+            spellName: 'Spell',
+            rounds: 3,
+            round: 1,
+        });
 
         expect(magic.sustain.holding(begun.participants[0])).toBe(true);
         expect(
@@ -185,7 +191,14 @@ describe('magic.sustain', () => {
         const ps = [caster({})];
 
         expect(sustain.holds(WFRP_RULES, { concentration: true })).toBe(false);
-        expect(sustain.begin(ps, 'c', 'x', 'Spell', 3).participants).toBe(ps);
+        expect(
+            sustain.begin(ps, {
+                casterId: 'c',
+                castId: 'x',
+                spellName: 'Spell',
+                rounds: 3,
+            }).participants
+        ).toBe(ps);
         expect(sustain.drop(ps, 'c', '').participants).toBe(ps);
         expect(sustain.dropOrphaned(ps).participants).toBe(ps);
         expect(sustain.tag(ps, ps, { casterId: 'c', castId: 'x' }, 'a')).toBe(

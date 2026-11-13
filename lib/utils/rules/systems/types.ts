@@ -145,8 +145,8 @@ export interface ResolvedAttack {
     lines: LogLine[];
     /** Next scene state; absent = unchanged */
     scene?: SystemSlot;
-    /** Battle data the attacker ends with, merged by the pipeline (a spent resource) */
-    attackerData?: Partial<BattleParticipant['battleData']>;
+    /** Applied by the pipeline to the up-to-date attacker (a spent resource) */
+    attackerUpdate?: (p: BattleParticipant) => BattleParticipant;
 }
 
 export interface MitigateStep {
@@ -484,8 +484,8 @@ export interface CastTestResult {
     miscast: string | null;
     details: SystemSlot;
     lines: LogLine[];
-    /** Battle data the caster ends with, merged by the pipeline (spent resources, banked state) */
-    casterData?: Partial<BattleParticipant['battleData']>;
+    /** Applied by the pipeline to the up-to-date caster (spent resources, banked state) */
+    casterUpdate?: (p: BattleParticipant) => BattleParticipant;
 }
 
 export type CastResourceGate =
@@ -576,11 +576,13 @@ export interface RuleSystemSustain {
     /** Replaces what the caster held before */
     begin(
         ps: BattleParticipant[],
-        casterId: string,
-        castId: string,
-        spellName: string,
-        rounds: number,
-        round?: number
+        hold: {
+            casterId: string;
+            castId: string;
+            spellName: string;
+            rounds: number;
+            round?: number;
+        }
     ): SustainResult;
     /** Ends the held cast with everything bound to it */
     drop(
@@ -613,12 +615,12 @@ export interface RuleSystemMagic {
     sustain: RuleSystemSustain;
     /** Base of a spell save DC from the campaign rules; absent means the section default */
     saveDcBase?(rules: Ruleset): number;
-    /** Save DC of a spell; `ability` overrides the caster's spellcasting ability */
+    /** Save DC of a spell; `ability` overrides the caster's spellcasting ability; undefined = no save exists */
     saveDc(
         caster: BattleParticipant,
         ability: AbilityKey | undefined,
         base: number
-    ): number;
+    ): number | undefined;
     upcast: { steps(spellLevel: number, castLevel: number): number };
     /** Ability modifier added to a spell's damage when the spell asks for it; none means no modifier */
     spellAbilityMod?(

@@ -58,7 +58,7 @@ export interface SpellCastState {
     ability: ResolvedAbility;
     grant?: SpellGrant;
     power: SpellPower;
-    saveDc: number;
+    saveDc: number | undefined;
     attackBonus?: number;
     battleId: string;
     actionModifiers: Record<string, StaticEffect[]>;

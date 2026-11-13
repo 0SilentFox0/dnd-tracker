@@ -71,10 +71,20 @@ describe('matchesTargetFilter', () => {
         const cr3 = foe('b', { creatureType: ' BEAST ', cr: 3 });
 
         expect(
-            matchesTargetFilter(cr3, filter, { spellLevel: 4, castLevel: 5 })
+            matchesTargetFilter(
+                cr3,
+                filter,
+                { spellLevel: 4, castLevel: 5 },
+                DEFAULT_RULES
+            )
         ).toBe(true);
         expect(
-            matchesTargetFilter(cr3, filter, { spellLevel: 4, castLevel: 4 })
+            matchesTargetFilter(
+                cr3,
+                filter,
+                { spellLevel: 4, castLevel: 4 },
+                DEFAULT_RULES
+            )
         ).toBe(false);
     });
 

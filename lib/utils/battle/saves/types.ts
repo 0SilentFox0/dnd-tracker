@@ -12,7 +12,7 @@ export type SaveRollMode = D20Mode;
 export interface SaveRollInput {
     target: BattleParticipant;
     ability: AbilityKey;
-    dc: number;
+    dc?: number;
     participants: BattleParticipant[];
     rules: Ruleset;
     rng: () => number;

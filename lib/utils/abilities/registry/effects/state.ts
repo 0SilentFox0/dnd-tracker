@@ -57,17 +57,17 @@ function applyConditionToTargets(
 
     const messages: LogLine[] = [];
 
+    const saveDc = owner ? spellSaveDc(ctx.rules, owner) : 10;
+
     for (const id of input.targetIds) {
         const result = ruleSystemOf(ctx.rules).conditionSet.apply(ps, id, {
             key,
             rounds: effect.duration.rounds,
             levels: effect.levels,
-            saveEnds: effect.saveEnds
-                ? {
-                      ability: effect.saveEnds.ability,
-                      dc: owner ? spellSaveDc(ctx.rules, owner) : 10,
-                  }
-                : undefined,
+            saveEnds:
+                effect.saveEnds && saveDc !== undefined
+                    ? { ability: effect.saveEnds.ability, dc: saveDc }
+                    : undefined,
             source,
             sourceName: ability.name,
             timedKey: `${ability.key}#${input.effectIndex}@${input.ownerId}`,
@@ -78,12 +78,12 @@ function applyConditionToTargets(
         ps = result.participants;
         messages.push(...result.messages);
 
-        if (effect.escapeDc && owner && !result.blocked)
+        if (effect.escapeDc && owner && saveDc !== undefined && !result.blocked)
             ps = updateParticipant(ps, id, (p) =>
                 withEscapeDc(
                     p,
                     `${ability.key}#${input.effectIndex}@${input.ownerId}`,
-                    spellSaveDc(ctx.rules, owner)
+                    saveDc
                 )
             );
     }

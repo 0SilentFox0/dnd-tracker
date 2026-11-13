@@ -83,14 +83,18 @@ export function prepareLongCast(
 
     const begun = pending
         ? { participants: ctx.participants }
-        : sustain.begin(
-              ctx.participants,
-              caster.basicInfo.id,
-              castIdFor(caster.basicInfo.id, spell.id, ctx.scene.round, 0),
-              spell.name,
-              total + 1,
-              ctx.scene.round
-          );
+        : sustain.begin(ctx.participants, {
+              casterId: caster.basicInfo.id,
+              castId: castIdFor(
+                  caster.basicInfo.id,
+                  spell.id,
+                  ctx.scene.round,
+                  0
+              ),
+              spellName: spell.name,
+              rounds: total + 1,
+              round: ctx.scene.round,
+          });
 
     const current =
         findParticipant(begun.participants, caster.basicInfo.id) ?? caster;

@@ -32,8 +32,8 @@ import {
     spellWideningOf,
 } from '@/lib/utils/battle/spell/spell-targeting';
 import { matchesTargetFilter } from '@/lib/utils/battle/spell/target-filter';
-import { upcastSteps } from '@/lib/utils/battle/spell/upcast';
 import type { Ruleset } from '@/lib/utils/rules/schema';
+import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type {
     BattleMapConfig,
     BattleParticipant,
@@ -99,7 +99,8 @@ export function buildSpellPick(
         casterPicksSlot(caster, rules) &&
         opts.castLevel !== undefined &&
         s.upcastTargets
-            ? s.upcastTargets * upcastSteps(s.level, opts.castLevel)
+            ? s.upcastTargets *
+              ruleSystemOf(rules).magic.upcast.steps(s.level, opts.castLevel)
             : 0;
 
     const skill =
@@ -249,10 +250,12 @@ export function spellAimTargets(
         : [];
 
     return targets.filter((p) =>
-        matchesTargetFilter(p, pick.filter, {
-            spellLevel: pick.level,
-            castLevel: pick.castLevel,
-        })
+        matchesTargetFilter(
+            p,
+            pick.filter,
+            { spellLevel: pick.level, castLevel: pick.castLevel },
+            scene.rules
+        )
     );
 }
 

@@ -16,7 +16,7 @@ export const noSustain: RuleSystemSustain = {
 
 /** A system with no spell slots, save DCs or upcasting; a casting test is added on top */
 export const noMagic: RuleSystemMagic = {
-    saveDc: () => 10,
+    saveDc: () => undefined,
     upcast: { steps: () => 0 },
     sustain: noSustain,
 };

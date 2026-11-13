@@ -12,5 +12,5 @@ export const spellSaveDc = (
     rules: Ruleset,
     caster: BattleParticipant,
     ability?: AbilityKey
-): number =>
+): number | undefined =>
     ruleSystemOf(rules).magic.saveDc(caster, ability, saveDcBaseOf(rules));

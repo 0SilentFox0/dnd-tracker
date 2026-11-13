@@ -5,6 +5,7 @@ import type { WfrpConditionKey } from '../../conditions/catalog';
 import { conditionLevel } from '../../conditions/levels';
 import { reverseRoll } from '../../percentile';
 import { FORTUNE_INPUT } from '../../percentile/fortune';
+import { SCENE_SLOT } from '../../slots';
 import { LOCATIONS } from '../constants';
 import { applyWfrpCrit } from '../crit-effect';
 import { type CritResult, rollCrit } from '../crit-table';
@@ -15,7 +16,11 @@ import { resolveOpposed } from '../opposed';
 import { wfrpAbilitiesOf } from '../participant';
 import { resolveWfrpAttack } from '../resolve-attack';
 
-import { AttackType, CombatStatus } from '@/lib/constants/battle';
+import {
+    AttackType,
+    CombatStatus,
+    ParticipantSide,
+} from '@/lib/constants/battle';
 import { dynamicTextRef, textRef } from '@/lib/i18n/text-ref';
 import {
     makeParticipant,
@@ -498,8 +503,9 @@ describe('resolveWfrpAttack fortune', () => {
         });
 
         expect(r.isHit).toBe(true);
-        expect(r.attackerData).toEqual({
-            system: { key: 'wfrp', data: { fortune: 0 } },
+        expect(r.attackerUpdate?.(fighter('a')).battleData.system).toEqual({
+            key: 'wfrp',
+            data: { fortune: 0 },
         });
         expect(JSON.stringify(r.lines)).toContain(
             'battleWfrp.log.fortuneReroll'
@@ -517,7 +523,7 @@ describe('resolveWfrpAttack fortune', () => {
             system: FORTUNE_INPUT.write({ kind: 'reroll', manualReroll: 10 }),
         });
 
-        expect(r.attackerData).toBeUndefined();
+        expect(r.attackerUpdate).toBeUndefined();
         expect(attackOf(r.attackRoll)?.fortune).toBeUndefined();
         expect(attackOf(r.attackRoll)?.roll).toBe(20);
     });
@@ -529,8 +535,9 @@ describe('resolveWfrpAttack fortune', () => {
         });
 
         expect(r.isHit).toBe(true);
-        expect(r.attackerData).toEqual({
-            system: { key: 'wfrp', data: { fortune: 0 } },
+        expect(r.attackerUpdate?.(fighter('a')).battleData.system).toEqual({
+            key: 'wfrp',
+            data: { fortune: 0 },
         });
     });
 
@@ -556,8 +563,11 @@ describe('resolveWfrpAttack fortune', () => {
         expect(boosted.attackRoll.margin).toBe(
             (plain.attackRoll.margin ?? 0) + 1
         );
-        expect(boosted.attackerData).toEqual({
-            system: { key: 'wfrp', data: { fortune: 0 } },
+        expect(
+            boosted.attackerUpdate?.(fighter('a')).battleData.system
+        ).toEqual({
+            key: 'wfrp',
+            data: { fortune: 0 },
         });
         expect(attackOf(boosted.attackRoll)?.fortune).toEqual({ kind: 'sl' });
     });
@@ -657,6 +667,68 @@ describe('resolveWfrpAttack attackBonus talent', () => {
         );
         expect(run(bow, fighter('a', 2, 'ranged')).attackRoll.margin).toBe(
             (run(bow, fighter('a')).attackRoll.margin ?? 0) + 2
+        );
+    });
+});
+
+describe('resolveWfrpAttack as a strike back', () => {
+    const sword: BattleAttack = {
+        id: 'sw',
+        name: 'Sword',
+        type: AttackType.MELEE,
+        attackBonus: 0,
+        damageDice: '1d6',
+        damageType: 'slashing',
+    };
+
+    const unit = (id: string, side: ParticipantSide): BattleParticipant => {
+        const p = makeParticipant({ id, hp: 20, maxHp: 20, side });
+
+        return {
+            ...p,
+            abilities: {
+                ...p.abilities,
+                ...wfrpAbilitiesOf(DEFAULT_CHARACTERISTICS, {
+                    ap: { head: 0, arm: 0, body: 0, leg: 0 },
+                }),
+            },
+        };
+    };
+
+    const strike = (
+        attacker: BattleParticipant,
+        target: BattleParticipant,
+        held: ParticipantSide
+    ) =>
+        resolveWfrpAttack({
+            attacker,
+            target,
+            attack: sword,
+            participants: [attacker, target],
+            rules: WFRP_RULES,
+            rng: () => 0.5,
+            sceneState: SCENE_SLOT.write({ [held]: true }),
+            manualRoll: 30,
+        });
+
+    it('reads and settles Momentum for the side of whoever strikes, so the answer mirrors the first blow', () => {
+        const a = unit('a', ParticipantSide.ALLY);
+
+        const e = unit('e', ParticipantSide.ENEMY);
+
+        const first = strike(a, e, ParticipantSide.ALLY);
+
+        const back = strike(e, a, ParticipantSide.ENEMY);
+
+        const mirror = (m: Partial<Record<ParticipantSide, true>>) =>
+            Object.keys(m).map((k) =>
+                k === ParticipantSide.ALLY
+                    ? ParticipantSide.ENEMY
+                    : ParticipantSide.ALLY
+            );
+
+        expect(Object.keys(SCENE_SLOT.read(back.scene) ?? {}).sort()).toEqual(
+            mirror(SCENE_SLOT.read(first.scene) ?? {}).sort()
         );
     });
 });

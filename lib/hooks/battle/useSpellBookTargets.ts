@@ -51,10 +51,15 @@ export function useSpellBookTargets(
     );
 
     const filteredOut = (t: BattleParticipant) =>
-        !matchesTargetFilter(t, flow.pick?.filter, {
-            spellLevel: flow.pick?.level ?? 0,
-            castLevel: flow.pick?.castLevel,
-        });
+        !matchesTargetFilter(
+            t,
+            flow.pick?.filter,
+            {
+                spellLevel: flow.pick?.level ?? 0,
+                castLevel: flow.pick?.castLevel,
+            },
+            scene.battle.rules
+        );
 
     const inRange = (t: BattleParticipant) =>
         spellTargetInRange(
