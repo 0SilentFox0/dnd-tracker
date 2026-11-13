@@ -22,11 +22,13 @@ describe('Вишкіл війська', () => {
             })
         );
 
-        const { participants } = runAbilities(
+        const { participants, messages } = runAbilities(
             ps,
             { type: 'battleStart' },
             { rules: DEFAULT_RULES, round: 1, rng: seq(0.5) }
         );
+
+        expect(messages).toHaveLength(1);
 
         for (const p of participants)
             expect(

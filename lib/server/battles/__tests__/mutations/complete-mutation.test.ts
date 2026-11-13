@@ -14,6 +14,32 @@ describe('complete mutation', () => {
         expect(eventTextOf(out.events[0])).toContain('Поразка');
     });
 
+    it('скидає паузу моралі', () => {
+        const ctx = context();
+
+        const out = completeMutation(
+            {
+                ...ctx,
+                scene: {
+                    ...ctx.scene,
+                    pendingMoraleCheck: {
+                        participantId: 'hero',
+                        d10Roll: 1,
+                        moraleResult: {
+                            shouldSkipTurn: true,
+                            hasExtraTurn: false,
+                            moralePositive: false,
+                            message: '',
+                        },
+                    },
+                },
+            },
+            {}
+        );
+
+        expect(out.scene?.pendingMoraleCheck).toBeNull();
+    });
+
     it('без результату — перемога за замовчуванням', () => {
         expect(
             eventTextOf(completeMutation(context(), {}).events[0])

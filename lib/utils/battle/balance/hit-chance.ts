@@ -7,8 +7,6 @@ import {
     DEFENSE_FACTOR_MAX,
     FALLBACK_SAVE_SUCCESS,
     MIN_UNIT_STAT,
-    REF_HERO_HIT,
-    REF_UNIT_HIT,
     TARGET_ROUNDS,
     UNIT_SPELL_SLOTS,
 } from '@/lib/constants/battle-balance';
@@ -40,9 +38,9 @@ export interface FactorParty {
     /** Середній опір партії до шкоди заклять за типом, %. */
     spellResist?: Record<string, number>;
     /** Системна модель влучання замість d20 (offense/defense замість to-hit/AC) і її еталон. */
-    hit?: HitFn;
-    refHit?: number;
-    refHitUnit?: number;
+    hit: HitFn;
+    refHit: number;
+    refHitUnit: number;
 }
 
 export type HitFn = (toHit: number, ac: number) => number;
@@ -54,8 +52,7 @@ const taken = (resist: Record<string, number> | undefined, key: string) =>
 function landedDamage(unit: FactorUnit, party: FactorParty): number | null {
     const hit =
         unit.ac !== undefined && party.toHit !== undefined
-            ? (party.hit ?? hitChance)(party.toHit, unit.ac) /
-              (party.refHit ?? REF_HERO_HIT)
+            ? party.hit(party.toHit, unit.ac) / party.refHit
             : null;
 
     const resist =
@@ -111,8 +108,7 @@ function unitHitFactor(
 ): number {
     return attackBonus !== undefined && party.ac !== undefined
         ? clamp(
-              (party.hit ?? hitChance)(attackBonus, party.ac) /
-                  (party.refHitUnit ?? REF_UNIT_HIT),
+              party.hit(attackBonus, party.ac) / party.refHitUnit,
               ARMOR_FACTOR_MIN,
               ARMOR_FACTOR_MAX
           )

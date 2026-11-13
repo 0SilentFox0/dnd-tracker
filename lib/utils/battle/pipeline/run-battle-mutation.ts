@@ -445,6 +445,11 @@ export async function runGuardedBattleOperationCore<TBody>(
             rate
         );
 
+    if (!loaded) throw new BattleAccessError(404, API_ERRORS.NOT_FOUND);
+
+    if (!loaded.isMember)
+        throw new BattleAccessError(403, API_ERRORS.FORBIDDEN);
+
     const parsed = options.schema
         ? options.schema.safeParse(raw)
         : { success: true as const, data: undefined as TBody };
@@ -457,11 +462,6 @@ export async function runGuardedBattleOperationCore<TBody>(
         );
 
     const body = parsed.data;
-
-    if (!loaded) throw new BattleAccessError(404, API_ERRORS.NOT_FOUND);
-
-    if (!loaded.isMember)
-        throw new BattleAccessError(403, API_ERRORS.FORBIDDEN);
 
     const { ctx, awaiting, isDryRun } = guardBattleContext(
         userId,

@@ -69,6 +69,7 @@ import {
 } from '@/lib/utils/battle/view';
 import { rollDiceList } from '@/lib/utils/common/dice';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import {
     branchLevelNodeId,
     canLearn,
@@ -1123,7 +1124,8 @@ async function main() {
                 stats.map(({ stats: s }) => ({
                     stats: heroMember(s),
                     hero: true,
-                }))
+                })),
+                ruleSystemOf(DEFAULT_RULES).combat.hitModel
             );
 
             console.info(

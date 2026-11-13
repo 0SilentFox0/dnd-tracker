@@ -218,7 +218,7 @@ export function buildCharacterSheet(input: SheetInput): CharacterSheet {
             ],
         },
         armorClass: blocks.armorClass,
-        initiative: calculateInitiative(p),
+        initiative: calculateInitiative(p, [p], { rules }),
         speed: p.combatStats.speed,
         morale: p.combatStats.morale,
         targets: {

@@ -262,9 +262,9 @@ export function createAddParticipantMutation(
 
             let at: number;
 
-            if (current && compareInitiative(p, current) < 0) {
+            if (current && compareInitiative(p, current, ctx.meta.rules) < 0) {
                 // місце в цьому раунді вже минуло: поточний лишається поточним, новачок ходить з наступного раунду
-                at = initiativeSlot(order, p);
+                at = initiativeSlot(order, p, ctx.meta.rules);
                 turnIndex++;
             } else {
                 // порядок після розкриттів не монотонний: шукаємо лише серед тих, хто ще має ходити (після щойно введених)
@@ -272,7 +272,7 @@ export function createAddParticipantMutation(
 
                 while (order[afterRun]?.battleData.revealPending) afterRun++;
 
-                at = initiativeSlot(order, p, afterRun);
+                at = initiativeSlot(order, p, ctx.meta.rules, afterRun);
             }
 
             order = [...order.slice(0, at), p, ...order.slice(at)];

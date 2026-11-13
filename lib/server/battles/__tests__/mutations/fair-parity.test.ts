@@ -151,6 +151,7 @@ vi.mock('@/lib/db', () => {
 
 import { getBalancePayload } from '@/lib/server/battles/balance/balance-get';
 import { buildStartOrder } from '@/lib/server/battles/mutations/start/start-battle-handler';
+import { D20_MODEL } from '@/lib/utils/battle/balance/__tests__/d20-model';
 import {
     type SetupBalanceStats,
     setupFairScaling,
@@ -182,7 +183,12 @@ describe('паритет: екран складу і старт бою дают�
             DEFAULT_RULES
         )) as unknown as SetupBalanceStats;
 
-        const { scaling } = setupFairScaling(setup, payload);
+        const { scaling } = setupFairScaling(
+            setup,
+            payload,
+            undefined,
+            D20_MODEL
+        );
 
         const { order } = await buildStartOrder(
             'b1',
@@ -220,11 +226,18 @@ describe('паритет: екран складу і старт бою дают�
             DEFAULT_RULES
         )) as unknown as SetupBalanceStats;
 
-        const withNpc = setupFairScaling(setup, payload).scaling;
+        const withNpc = setupFairScaling(
+            setup,
+            payload,
+            undefined,
+            D20_MODEL
+        ).scaling;
 
         const without = setupFairScaling(
             setup.filter((p) => p.id !== 'npc'),
-            payload
+            payload,
+            undefined,
+            D20_MODEL
         ).scaling;
 
         expect(withNpc.units.rat.hpMult).toBeLessThan(without.units.rat.hpMult);

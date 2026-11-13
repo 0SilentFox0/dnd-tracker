@@ -1,18 +1,31 @@
 import { describe, expect, it } from 'vitest';
 
+import { D20_MODEL, type PartialModelParty, withD20Model } from './d20-model';
+
 import {
     TARGET_ROUNDS,
     UNIT_SPELL_SLOTS,
 } from '@/lib/constants/battle-balance';
 import {
-    buildPartyPower,
+    buildPartyPower as buildPartyPowerWith,
     effectiveUnit,
     type PartyPower,
     type UnitStats,
 } from '@/lib/utils/battle/balance';
-import { hitChance, unitSpellDpr } from '@/lib/utils/battle/balance/hit-chance';
+import {
+    hitChance,
+    unitSpellDpr as unitSpellDprFor,
+} from '@/lib/utils/battle/balance/hit-chance';
 import { summonedUnitIds } from '@/lib/utils/battle/balance/unit-library';
 import type { UnitSpellPower } from '@/types/battle-setup';
+
+const unitSpellDpr = (
+    spell: UnitSpellPower,
+    p: PartialModelParty<Parameters<typeof unitSpellDprFor>[1]>
+) => unitSpellDprFor(spell, withD20Model(p));
+
+const buildPartyPower = (members: Parameters<typeof buildPartyPowerWith>[0]) =>
+    buildPartyPowerWith(members, D20_MODEL);
 
 const fireball: UnitSpellPower = { dpr: 54, damageType: 'fire', weaponDpr: 10 };
 
@@ -84,12 +97,12 @@ describe('unitSpellDpr', () => {
             spell: fireball,
         };
 
-        const party: PartyPower = {
+        const party = withD20Model<PartyPower>({
             dpr: 100,
             hp: 400,
             heroCount: 3,
             spellResist: { fire: 50 },
-        };
+        });
 
         expect(effectiveUnit(u, party).dpr).toBeCloseTo(share(27, 10));
     });

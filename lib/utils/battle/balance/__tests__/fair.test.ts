@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
+import { D20_MODEL, type PartialModelParty, withD20Model } from './d20-model';
+
 import {
     HERO_EDGE,
     HIGH_LEVEL_DPR_BOOST,
@@ -11,11 +13,11 @@ import {
     TARGET_ROUNDS,
 } from '@/lib/constants/battle-balance';
 import {
-    buildPartyPower,
-    computeFairScaling,
+    buildPartyPower as buildPartyPowerWith,
+    computeFairScaling as computeFairScalingFor,
     type PartyPower,
-    pickEnemyRoster,
-    targetEnemyPower,
+    pickEnemyRoster as pickEnemyRosterFor,
+    targetEnemyPower as targetEnemyPowerFor,
     type UnitStats,
 } from '@/lib/utils/battle/balance';
 import { sharedEnemyRace } from '@/lib/utils/battle/balance/setup';
@@ -45,7 +47,32 @@ const LIBRARY: UnitStats[] = [
     unit('troll', 5, 180, 70),
 ];
 
-const party = (heroes: number): PartyPower => ({
+type Party = PartialModelParty<PartyPower>;
+
+const buildPartyPower = (members: Parameters<typeof buildPartyPowerWith>[0]) =>
+    buildPartyPowerWith(members, D20_MODEL);
+
+const computeFairScaling = (
+    p: Party,
+    ...rest: Parameters<typeof computeFairScalingFor> extends [
+        unknown,
+        ...infer R,
+    ]
+        ? R
+        : never
+) => computeFairScalingFor(withD20Model<PartyPower>(p), ...rest);
+
+const pickEnemyRoster = (
+    p: Party,
+    ...rest: Parameters<typeof pickEnemyRosterFor> extends [unknown, ...infer R]
+        ? R
+        : never
+) => pickEnemyRosterFor(withD20Model<PartyPower>(p), ...rest);
+
+const targetEnemyPower = (p: Party) =>
+    targetEnemyPowerFor(withD20Model<PartyPower>(p));
+
+const party = (heroes: number): Party => ({
     dpr: heroes * 14,
     hp: heroes * 60,
     heroCount: heroes,
@@ -239,7 +266,7 @@ describe('pickEnemyRoster', () => {
             unit('orc', 3, 50, 22),
         ];
 
-        const p: PartyPower = { dpr: 380, hp: 490, heroCount: 4 };
+        const p: Party = { dpr: 380, hp: 490, heroCount: 4 };
 
         const pick = pickEnemyRoster(p, lib);
 
@@ -418,7 +445,7 @@ describe('sharedEnemyRace', () => {
 });
 
 describe('поправка для високих рівнів', () => {
-    const party = (heroLevel?: number): PartyPower => ({
+    const party = (heroLevel?: number): Party => ({
         dpr: 100,
         hp: 400,
         heroCount: 4,

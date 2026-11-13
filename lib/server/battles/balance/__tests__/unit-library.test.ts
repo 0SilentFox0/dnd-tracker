@@ -15,7 +15,11 @@ vi.mock('@/lib/db', () => ({
 }));
 
 import { loadUnitLibraryStats } from '@/lib/server/battles/balance/unit-library';
-import { computeFairScaling } from '@/lib/utils/battle/balance/fair';
+import { withD20Model } from '@/lib/utils/battle/balance/__tests__/d20-model';
+import {
+    computeFairScaling,
+    type PartyPower,
+} from '@/lib/utils/battle/balance/fair';
 import * as fromUnit from '@/lib/utils/battle/participant/from-unit';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 
@@ -102,7 +106,11 @@ describe('loadUnitLibraryStats: заклинання юнітів', () => {
 
         expect(mage?.dpr).toBe(8 * 3.5 * 2);
 
-        const party = { dpr: 4 * 12, hp: 4 * 40, heroCount: 4 };
+        const party = withD20Model<PartyPower>({
+            dpr: 4 * 12,
+            hp: 4 * 40,
+            heroCount: 4,
+        });
 
         const scaling = computeFairScaling(
             party,

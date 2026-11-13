@@ -38,6 +38,7 @@ export function completeMutation(
             status: BattleStatus.COMPLETED,
             completedAt: new Date(),
             pendingChoice: null,
+            pendingMoraleCheck: null,
             sceneState: null,
         },
         events: [battleActionToEvent(battleAction)],

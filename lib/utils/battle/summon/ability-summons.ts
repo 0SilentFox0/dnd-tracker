@@ -135,7 +135,8 @@ export async function applyAbilitySummons(
                     order: dismissed.order,
                     castId: req.castId ?? req.spellId ?? 'x',
                     map: opts.map,
-                })
+                }),
+                opts.rules
             );
 
             next = finalOrder;
@@ -163,7 +164,8 @@ export async function applyAbilitySummons(
 
                 const { finalOrder, added } = appendToInitiativeEnd(
                     next,
-                    built
+                    built,
+                    opts.rules
                 );
 
                 next = finalOrder;
@@ -240,7 +242,8 @@ export async function applyAbilitySummons(
 
             const { finalOrder, added } = appendToInitiativeEnd(
                 next,
-                weakened.participant
+                weakened.participant,
+                opts.rules
             );
 
             next = finalOrder;

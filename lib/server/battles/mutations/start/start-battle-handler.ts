@@ -244,7 +244,7 @@ function applyStartOfBattleAndSort(
         };
     });
 
-    const order = sortByInitiative(withCalculatedInitiative);
+    const order = sortByInitiative(withCalculatedInitiative, rules);
 
     const triggerLogEntries: BattleAction[] = [];
 

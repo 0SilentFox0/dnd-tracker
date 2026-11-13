@@ -215,8 +215,14 @@ describe('Корені (roots)', () => {
 
         expect(hasEffectMarker(e1, 'disable_melee_attacks')).toBe(true);
         expect(hasEffectMarker(e1, 'disable_ranged_attacks')).toBe(true);
-        expect(calculateInitiative(e1, r.allParticipantsUpdated)).toBe(
-            calculateInitiative(unit('e1')) - 2
+        expect(
+            calculateInitiative(e1, r.allParticipantsUpdated, {
+                rules: DEFAULT_RULES,
+            })
+        ).toBe(
+            calculateInitiative(unit('e1'), undefined, {
+                rules: DEFAULT_RULES,
+            }) - 2
         );
     });
 
@@ -403,8 +409,14 @@ describe('Рій ос (wasp-swarm)', () => {
             const p = byId(r.allParticipantsUpdated, id);
 
             expect(p.combatStats.currentHp).toBe(93);
-            expect(calculateInitiative(p, r.allParticipantsUpdated)).toBe(
-                calculateInitiative(unit(id)) - 2
+            expect(
+                calculateInitiative(p, r.allParticipantsUpdated, {
+                    rules: DEFAULT_RULES,
+                })
+            ).toBe(
+                calculateInitiative(unit(id), undefined, {
+                    rules: DEFAULT_RULES,
+                }) - 2
             );
         }
     });

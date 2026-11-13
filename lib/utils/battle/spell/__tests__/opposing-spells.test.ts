@@ -101,7 +101,9 @@ describe('протилежні заклинання знімають одне о
         const ps = castAll(['haste', 'slow']);
 
         expect(names(ps)).toEqual(['Сповільнення']);
-        expect(calculateInitiative(target(ps), ps)).toBe(7);
+        expect(
+            calculateInitiative(target(ps), ps, { rules: DEFAULT_RULES })
+        ).toBe(7);
         expect(movementBudget(target(ps), DEFAULT_RULES)).toBe(
             movementBudget(base, DEFAULT_RULES) - 2
         );
@@ -116,7 +118,8 @@ describe('протилежні заклинання знімають одне о
         expect(
             calculateInitiative(
                 target(out.allParticipantsUpdated),
-                out.allParticipantsUpdated
+                out.allParticipantsUpdated,
+                { rules: DEFAULT_RULES }
             )
         ).toBe(13);
         expect(eventTextOf(out.battleAction)).toContain(

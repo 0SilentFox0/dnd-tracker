@@ -1,6 +1,9 @@
 import { ParticipantSourceType } from '@/lib/constants/battle';
 import { applyBakedAuras } from '@/lib/utils/abilities/build/bake';
-import { calculateInitiative } from '@/lib/utils/battle/turn/initiative';
+import {
+    calculateInitiative,
+    type InitiativeRules,
+} from '@/lib/utils/battle/turn/initiative';
 import type { BattleParticipant } from '@/types/battle';
 
 export function nextInstanceNumber(
@@ -18,7 +21,8 @@ export function nextInstanceNumber(
 
 export function appendToInitiativeEnd(
     order: BattleParticipant[],
-    built: BattleParticipant
+    built: BattleParticipant,
+    rules: InitiativeRules
 ): { finalOrder: BattleParticipant[]; added: BattleParticipant } {
     const finalOrder = applyBakedAuras(
         [...order, built],
@@ -27,7 +31,7 @@ export function appendToInitiativeEnd(
 
     const added = finalOrder[finalOrder.length - 1];
 
-    const calc = calculateInitiative(added);
+    const calc = calculateInitiative(added, [added], { rules });
 
     added.abilities.initiative = calc;
     added.abilities.baseInitiative = calc;

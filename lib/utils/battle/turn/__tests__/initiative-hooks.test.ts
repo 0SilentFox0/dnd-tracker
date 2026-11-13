@@ -58,7 +58,11 @@ describe('initiative through system hooks only', () => {
 
     it("ties are broken by the system's stat", () => {
         expect(
-            compareInitiative(withInit('a', 5, 5, 4), withInit('b', 5, 5, 1))
+            compareInitiative(
+                withInit('a', 5, 5, 4),
+                withInit('b', 5, 5, 1),
+                DEFAULT_RULES
+            )
         ).toBeLessThan(0);
     });
 });

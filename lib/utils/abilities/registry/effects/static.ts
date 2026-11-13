@@ -63,6 +63,20 @@ export function applyStatic(
 
     const cancelled: LogLine[] = [];
 
+    // race passives fire once per same-race unit but land once per side: keep a single log line
+    const alreadyApplied = (id: string) =>
+        ability.source?.type === 'race' &&
+        !ability.stackable &&
+        !!findParticipant(
+            input.participants,
+            id
+        )?.battleData.activeEffects.some(
+            (e) =>
+                e.abilityKey === timedKey &&
+                e.appliedAt.round === ctx.round &&
+                e.source?.participantId !== input.ownerId
+        );
+
     const fearBlocked =
         effect.kind === 'modifyStat' &&
         effect.stat === 'morale' &&
@@ -85,6 +99,8 @@ export function applyStatic(
     const blocked = fearBlocked
         ? targetIds.filter((id) => immuneTo(input.participants, id, 'fear'))
         : [];
+
+    const repeated = new Set(targetIds.filter(alreadyApplied));
 
     for (const id of targetIds.filter((t) => !blocked.includes(t))) {
         ps = updateParticipant(ps, id, (target) => {
@@ -123,7 +139,9 @@ export function applyStatic(
         });
     }
 
-    const applied = targetIds.filter((t) => !blocked.includes(t));
+    const applied = targetIds.filter(
+        (t) => !blocked.includes(t) && !repeated.has(t)
+    );
 
     const messages: LogLine[] = [
         ...new Map(cancelled.map((line) => [lineKey(line), line])).values(),

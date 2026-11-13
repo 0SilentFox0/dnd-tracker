@@ -257,7 +257,9 @@ describe('Темрява — бібліотечні заклинання', () =>
             [hero(), fast, slowGob]
         ).allParticipantsUpdated;
 
-        expect(calculateInitiative(find(ps, 'orc'), ps)).toBe(9);
+        expect(
+            calculateInitiative(find(ps, 'orc'), ps, { rules: DEFAULT_RULES })
+        ).toBe(9);
         expect(movementBudget(find(ps, 'orc'), DEFAULT_RULES)).toBe(
             movementBudget(fast, DEFAULT_RULES) - 2
         );

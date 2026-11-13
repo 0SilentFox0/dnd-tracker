@@ -4,6 +4,7 @@ import { UNITS } from '@/data/library/units';
 import { ParticipantSide } from '@/lib/constants/battle';
 import { immunityAbilities } from '@/lib/utils/abilities/build/immunities';
 import { buildPartyPower, pickEnemyRoster } from '@/lib/utils/battle/balance';
+import { D20_MODEL } from '@/lib/utils/battle/balance/__tests__/d20-model';
 import { unitResistances } from '@/lib/utils/battle/balance/resist';
 import {
     unitRowStats,
@@ -61,7 +62,8 @@ const heroes = (damageKey: string) =>
                 damageKey,
             },
             hero: true,
-        }))
+        })),
+        D20_MODEL
     );
 
 const size = (roster: Array<{ quantity: number }> | undefined) =>

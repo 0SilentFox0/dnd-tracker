@@ -61,7 +61,7 @@ export function rollInitiative(
 
     for (const s of scored) s.key = rng();
 
-    scored.sort((a, b) => compareInitiative(a.p, b.p) || a.key - b.key);
+    scored.sort((a, b) => compareInitiative(a.p, b.p, rules) || a.key - b.key);
 
     return { participants: [...scored.map((s) => s.p), ...objects], rolls };
 }

@@ -105,7 +105,9 @@ describe('wfrp initiative', () => {
         const b = wfrp('b', { i: 30, ag: 35 });
 
         expect(
-            [b, a].sort(compareInitiative).map((p) => p.basicInfo.id)
+            [b, a]
+                .sort((x, y) => compareInitiative(x, y, WFRP_RULES))
+                .map((p) => p.basicInfo.id)
         ).toEqual(['a', 'b']);
     });
 

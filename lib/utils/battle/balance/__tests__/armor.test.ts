@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
+import { D20_MODEL, type PartialModelParty, withD20Model } from './d20-model';
+
 import { AttackType } from '@/lib/constants/battle';
 import {
     ARMOR_FACTOR_MIN,
@@ -10,8 +12,8 @@ import {
 import { makeParticipant } from '@/lib/utils/abilities/__tests__/fixtures';
 import { calculateAttackBonus } from '@/lib/utils/battle/attack/bonus';
 import {
-    armorFactors,
-    buildPartyPower,
+    armorFactors as armorFactorsFor,
+    buildPartyPower as buildPartyPowerWith,
     computeFairScaling,
     effectiveUnit,
     getUnitStats,
@@ -40,12 +42,21 @@ const unit = (
     ...extra,
 });
 
-const party = (extra: Partial<PartyPower> = {}): PartyPower => ({
-    dpr: 42,
-    hp: 180,
-    heroCount: 3,
-    ...extra,
-});
+const party = (extra: Partial<PartyPower> = {}): PartyPower =>
+    withD20Model<PartyPower>({
+        dpr: 42,
+        hp: 180,
+        heroCount: 3,
+        ...extra,
+    });
+
+const armorFactors = (
+    u: Parameters<typeof armorFactorsFor>[0],
+    p: PartialModelParty<Parameters<typeof armorFactorsFor>[1]>
+) => armorFactorsFor(u, withD20Model(p));
+
+const buildPartyPower = (members: Parameters<typeof buildPartyPowerWith>[0]) =>
+    buildPartyPowerWith(members, D20_MODEL);
 
 describe('hitChance', () => {
     it('d20 + бонус ≥ КД', () => {
@@ -274,7 +285,7 @@ describe('buildPartyPower', () => {
     it('без КД і влучання — лише сума, як раніше', () => {
         expect(
             buildPartyPower([{ stats: { dpr: 10, hp: 50 }, hero: true }])
-        ).toEqual({ dpr: 10, hp: 50, heroCount: 1 });
+        ).toMatchObject({ dpr: 10, hp: 50, heroCount: 1 });
     });
 });
 

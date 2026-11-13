@@ -276,6 +276,26 @@ describe('runBattleMutation', () => {
         expect(res.status).toBe(403);
     });
 
+    it('не учасник з невалідним тілом — 403, а не 400', async () => {
+        const res = await runBattleMutation(
+            req({ targetId: 5 }),
+            {
+                params,
+                access: 'member',
+                schema: z.object({ targetId: z.string() }),
+                mutate: noop,
+            },
+            deps({
+                loadBattle: vi.fn(async () => ({
+                    ...loaded(),
+                    isMember: false,
+                })),
+            })
+        );
+
+        expect(res.status).toBe(403);
+    });
+
     it('Demo battle is read-only and is rejected before mutation or save', async () => {
         const mutate = vi.fn(noop);
 

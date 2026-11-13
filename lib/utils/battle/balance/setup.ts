@@ -52,7 +52,7 @@ function unitLibraryFromStats(
 function setupPartyPower(
     participants: SetupBalanceParticipant[],
     stats: SetupBalanceStats,
-    model?: HitModel
+    model: HitModel
 ): PartyPower {
     const members: Parameters<typeof buildPartyPower>[0] = [];
 
@@ -82,8 +82,8 @@ function setupPartyPower(
 export function setupFairScaling(
     participants: SetupBalanceParticipant[],
     stats: SetupBalanceStats,
-    raceId?: string | null,
-    model?: HitModel
+    raceId: string | null | undefined,
+    model: HitModel
 ): { party: PartyPower; scaling: FairScaling } {
     const library = unitLibraryFromStats(stats.unitStats);
 

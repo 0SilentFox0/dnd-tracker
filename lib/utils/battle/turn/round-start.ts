@@ -46,7 +46,7 @@ export function processStartOfRound(
     const summons = summonsOf(pendingSummons);
 
     const updatedOrder = summons.reduce((order, s) => {
-        const at = initiativeSlot(order, s);
+        const at = initiativeSlot(order, s, rules);
 
         return [...order.slice(0, at), s, ...order.slice(at)];
     }, baseOrder);

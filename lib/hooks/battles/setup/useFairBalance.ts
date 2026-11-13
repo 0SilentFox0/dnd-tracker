@@ -12,8 +12,8 @@ import {
 export function useFairBalance(
     participants: SetupBalanceParticipant[],
     stats: SetupBalanceStats | null | undefined,
-    raceId?: string | null,
-    model?: HitModel
+    raceId: string | null | undefined,
+    model: HitModel
 ) {
     return useMemo(
         () =>

@@ -89,7 +89,9 @@ export function revealParticipantMutation(
                   ...p,
                   abilities: {
                       ...p.abilities,
-                      initiative: calculateInitiative(p, joined.participants),
+                      initiative: calculateInitiative(p, joined.participants, {
+                          rules: ctx.meta.rules,
+                      }),
                   },
               }
             : p

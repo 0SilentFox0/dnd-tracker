@@ -37,7 +37,9 @@ describe('calculateInitiative', () => {
     it('does not special-case names any more', () => {
         const p = withBase('Файдаен', 12);
 
-        expect(calculateInitiative(p)).toBe(12);
+        expect(
+            calculateInitiative(p, undefined, { rules: DEFAULT_RULES })
+        ).toBe(12);
     });
 
     it('the always-first ability puts a participant first', () => {
@@ -48,7 +50,9 @@ describe('calculateInitiative', () => {
         const other = withBase('b', 20);
 
         expect(first.abilities.baseInitiative).toBe(1011);
-        expect(sortByInitiative([other, first])[0].basicInfo.id).toBe('a');
+        expect(
+            sortByInitiative([other, first], DEFAULT_RULES)[0].basicInfo.id
+        ).toBe('a');
     });
 });
 

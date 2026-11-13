@@ -1,21 +1,17 @@
 import { collectModifiers } from '@/lib/utils/abilities/engine/core/collect-modifiers';
 import { withSelf } from '@/lib/utils/abilities/engine/core/participants';
-import { SECTION_DEFAULTS } from '@/lib/utils/rules/defaults';
 import type { Ruleset } from '@/lib/utils/rules/schema';
-import { ruleSystemByKey, ruleSystemOf } from '@/lib/utils/rules/systems';
-import { FALLBACK_SYSTEM_KEY } from '@/lib/utils/rules/systems/catalog';
+import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import { BattleParticipant } from '@/types/battle';
 
+export type InitiativeRules = Pick<Ruleset, 'initiative' | 'system'>;
+
 export interface InitiativeRoll {
-    rules?: Pick<Ruleset, 'initiative'> & Partial<Pick<Ruleset, 'system'>>;
+    rules: InitiativeRules;
     rng?: () => number;
     /** Roll regardless of the static/roll mode of the initiative section */
     roll?: boolean;
 }
-
-const systemOfParticipant = (p: BattleParticipant) =>
-    ruleSystemByKey(p.abilities.system?.key ?? '') ??
-    ruleSystemOf({ system: { key: FALLBACK_SYSTEM_KEY } });
 
 export interface InitiativeResult {
     total: number;
@@ -23,11 +19,11 @@ export interface InitiativeResult {
     die: number | null;
 }
 
-/** Roll mode: the system's roll (d20 + DEX for d20 systems); pinned (always-first) bases stay static. Without rules the participant's own system is used. */
+/** Roll mode: the system's roll (d20 + DEX for d20 systems); pinned (always-first) bases stay static. */
 export function scoreInitiative(
     participant: BattleParticipant,
     participants: BattleParticipant[] = [participant],
-    roll: InitiativeRoll = {}
+    roll: InitiativeRoll
 ): InitiativeResult {
     const bonus = collectModifiers(
         withSelf(participants, participant),
@@ -37,12 +33,8 @@ export function scoreInitiative(
 
     const { rules } = roll;
 
-    const system = rules?.system
-        ? ruleSystemOf({ system: rules.system })
-        : systemOfParticipant(participant);
-
-    const score = system.combat.initiative(participant, {
-        rules: rules ?? { initiative: SECTION_DEFAULTS.initiative },
+    const score = ruleSystemOf(rules).combat.initiative(participant, {
+        rules,
         rng: roll.rng ?? Math.random,
         roll: roll.roll,
     });
@@ -53,15 +45,13 @@ export function scoreInitiative(
 export const calculateInitiative = (
     participant: BattleParticipant,
     participants: BattleParticipant[] = [participant],
-    roll: InitiativeRoll = {}
+    roll: InitiativeRoll
 ): number => scoreInitiative(participant, participants, roll).total;
-
-const tieBreakStat = (p: BattleParticipant) =>
-    systemOfParticipant(p).combat.tieBreak(p);
 
 export function compareInitiative(
     a: BattleParticipant,
-    b: BattleParticipant
+    b: BattleParticipant,
+    rules: InitiativeRules
 ): number {
     if (b.abilities.initiative !== a.abilities.initiative)
         return b.abilities.initiative - a.abilities.initiative;
@@ -69,17 +59,20 @@ export function compareInitiative(
     if (b.abilities.baseInitiative !== a.abilities.baseInitiative)
         return b.abilities.baseInitiative - a.abilities.baseInitiative;
 
-    return tieBreakStat(b) - tieBreakStat(a);
+    const { tieBreak } = ruleSystemOf(rules).combat;
+
+    return tieBreak(b) - tieBreak(a);
 }
 
 /** Index at which `p` fits into `order` (first slot it outranks at or after `from`), or `order.length`. */
 export function initiativeSlot(
     order: BattleParticipant[],
     p: BattleParticipant,
+    rules: InitiativeRules,
     from = 0
 ): number {
     const at = order.findIndex(
-        (other, i) => i >= from && compareInitiative(p, other) < 0
+        (other, i) => i >= from && compareInitiative(p, other, rules) < 0
     );
 
     return at === -1 ? order.length : at;
@@ -87,7 +80,8 @@ export function initiativeSlot(
 
 /** Порядок: initiative (desc) → baseInitiative (desc) → dexterity / system tie-break stat (desc). */
 export function sortByInitiative(
-    participants: BattleParticipant[]
+    participants: BattleParticipant[],
+    rules: InitiativeRules
 ): BattleParticipant[] {
-    return [...participants].sort(compareInitiative);
+    return [...participants].sort((a, b) => compareInitiative(a, b, rules));
 }
