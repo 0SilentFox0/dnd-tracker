@@ -1,3 +1,5 @@
+import type { Prisma } from '@prisma/client';
+
 import type { SystemData, SystemSlot } from './slot';
 
 import type { AbilityKey } from '@/lib/constants/abilities';
@@ -652,10 +654,14 @@ export interface SpellcastingInput {
     rules: Ruleset;
 }
 
+export type LevelResetColumns = Partial<
+    Record<keyof Prisma.CharacterUncheckedUpdateInput, unknown>
+>;
+
 export type LevelResetPart = (change: {
     from: number;
     to: number;
-}) => Partial<Record<'skillTreeProgress', unknown>>;
+}) => LevelResetColumns;
 
 export interface StatColumnsPart {
     /** Columns this layer reads and writes; input for columns no layer owns is dropped */

@@ -1,7 +1,10 @@
 import { ABILITY_KEYS, type AbilityKey } from '@/lib/constants/abilities';
 import { applyLevelGain } from '@/lib/utils/characters/level-up/apply-level-gain';
 import { seenLevelOnLevelChange } from '@/lib/utils/characters/seen-level';
-import type { LevelResetPart } from '@/lib/utils/rules/systems/types';
+import type {
+    LevelResetColumns,
+    LevelResetPart,
+} from '@/lib/utils/rules/systems/types';
 import {
     fullSpellSlots,
     type SpellSlots,
@@ -32,7 +35,7 @@ export interface CharacterUpdateComputed {
     abilityScores?: AbilityScores;
     spellSlots?: SpellSlots;
     gained: AbilityKey[];
-    columnResets: Record<string, unknown>;
+    columnResets: LevelResetColumns;
     seenLevel: number | undefined;
 }
 
@@ -97,7 +100,7 @@ export function buildCharacterUpdateData({
             finalLevel,
             character.seenLevel ?? null
         ),
-        columnResets: {} as Record<string, unknown>,
+        columnResets: {} as LevelResetColumns,
     };
 
     if (finalLevel > character.level) {
