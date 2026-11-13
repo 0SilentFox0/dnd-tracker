@@ -378,7 +378,7 @@
   },
   "dm-rule-systems": {
     "title": "Rule systems",
-    "summary": "How to pick a campaign system (HoMM, D&D 5e, Grim d100), what changes on the sheet and when the system can no longer be changed.",
+    "summary": "How to pick a campaign system (HoMM, D&D 5e, Grim d100), how to turn rule modules on and off, what changes on the sheet and when the system can no longer be changed.",
     "sections": {
       "s0": {
         "heading": "What a rule system is",
@@ -422,6 +422,11 @@
         "heading": "Corruption and mutations",
         "b0": "The DM grants corruption with a button on the hero's sheet: 1 to 10 points with a reason. The threshold is the Toughness bonus plus the Willpower bonus. An Endurance test is needed only when the total goes above the threshold; exactly at the threshold there is no test, and every further grant above it tests again. A failure gives a mutation (up to 20 per hero); past the limit the grant adds no new mutation.",
         "b1": "Mutations are rolled on the \"Mutations: body\" and \"Mutations: mind\" tables in the campaign rules (the tables section). A mutation's effects are a characteristic, Move or max Wounds with a sign. Mutations apply on the sheet and in battle. Only the latest grant can be undone, and corruption cannot be granted or undone during an active battle."
+      },
+      "s9": {
+        "heading": "Rule modules",
+        "b0": "A system is a base plus modules: morale, retaliation, hero scaling, skill trees, artifact sets and unit stacks. HoMM is the d20 base with every module; D&D 5e is the same base with none. You switch modules in the campaign rules, the System section: a switch applies at once, separately from the Save button, and stays disabled while the form has unsaved changes.",
+        "b1": "Modules cannot be changed during an active battle. If the campaign already has heroes, Hero scaling and Skill trees ask for confirmation first because they change how heroes are calculated. Nothing is deleted: settings and learned skills stay, and everything returns when you turn the module back on."
       }
     }
   }

@@ -1,4 +1,8 @@
 {
+  "2026-11-13-rule-modules": {
+    "title": "Rule modules",
+    "body": "In the campaign rules, the System section, you can now turn modules on and off: morale, retaliation, hero scaling, skill trees, artifact sets and unit stacks. Turning a module off deletes nothing."
+  },
   "2026-11-08-maze-illusion": {
     "title": "Illusion swap in the maze",
     "body": "In the maze the DM can put two heroes under an illusion: each sees the other as an enemy in disguise, while the fight stays real. Use the “Swap” button on the maze toolbar; “Restore allies” removes every swap."

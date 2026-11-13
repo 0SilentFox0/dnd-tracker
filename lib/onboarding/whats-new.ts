@@ -4,6 +4,12 @@ import type { WhatsNewEntry } from '@/lib/onboarding/types';
 export const WHATS_NEW_BUNDLED = 15;
 
 export const WHATS_NEW: WhatsNewEntry[] = [
+    {
+        id: '2026-11-13-rule-modules',
+        date: '2026-11-13',
+        audience: 'dm',
+        href: '/help/dm-rule-systems',
+    },
     { id: '2026-11-09-wfrp-corruption', date: '2026-11-09', audience: 'all' },
     { id: '2026-11-08-maze-illusion', date: '2026-11-08', audience: 'dm' },
     { id: '2026-11-08-turn-timer', date: '2026-11-08', audience: 'dm' },
