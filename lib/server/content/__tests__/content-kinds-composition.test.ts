@@ -61,13 +61,15 @@ const resourceOf = (kind: ContentKind) =>
         removeAll: async () => 1,
     });
 
-const actor = {
+const newActor = () => ({
     campaignId: 'c1',
     userId: 'u1',
     isDM: true,
     via: 'session' as const,
     scopes: null,
-};
+});
+
+let actor = newActor();
 
 const rules = (system: { key: string; modules?: string[] }) =>
     parseRules({ system });
@@ -85,6 +87,18 @@ const notFound = async (p: Promise<unknown>) => {
 describe('content kinds follow the campaign composition (D15)', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        actor = newActor();
+    });
+
+    it('loads the rules once for two calls of the same actor', async () => {
+        loadRules.mockResolvedValue(rules({ key: 'homm' }));
+
+        const r = resourceOf('main-skills');
+
+        await listContent(r, actor, new URLSearchParams());
+        await listContent(r, actor, new URLSearchParams());
+
+        expect(loadRules).toHaveBeenCalledTimes(1);
     });
 
     it('main-skills in a bare dnd5e: list is empty, the rest is 404', async () => {
@@ -128,6 +142,7 @@ describe('content kinds follow the campaign composition (D15)', () => {
         ).toEqual([]);
 
         loadRules.mockResolvedValue(rules({ key: 'wfrp' }));
+        actor = newActor();
 
         expect(
             await listContent(
