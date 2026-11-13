@@ -49,13 +49,13 @@ async function startedBattle() {
             side: ParticipantSide.ALLY,
             hp: 20,
             attacks: [SPEAR],
-            at: { col: 1, row: 1 },
+            at: { x: 1, y: 1 },
         }),
         placed('t', {
             side: ParticipantSide.ENEMY,
             hp: 2,
             attacks: [SPEAR],
-            at: { col: 2, row: 1 },
+            at: { x: 2, y: 1 },
         }),
     ];
 
@@ -117,7 +117,7 @@ describe('start, attack and next-turn on a d6pool base', () => {
             participants: hit.participants ?? active.participants,
             pending: hit.pending ?? active.pending,
             scene: { ...active.scene, ...hit.scene },
-        });
+        } as BattleMutationContext);
 
         expect(moved.scene).toMatchObject({ round: 2, turnIndex: 0 });
         expect(moved.participants?.length).toBe(2);
