@@ -123,7 +123,6 @@ describe('resetTurnState system hooks', () => {
             extraMovement: undefined,
             readied: undefined,
             attacksLeft: undefined,
-            attackedWithLight: undefined,
         });
     });
 });

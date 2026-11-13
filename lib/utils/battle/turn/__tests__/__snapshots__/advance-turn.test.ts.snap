@@ -316,7 +316,6 @@ exports[`детермінований контракт turn loop > зберіг�
               "type": "buff",
             },
           ],
-          "attackedWithLight": undefined,
           "attacks": [],
           "attacksLeft": undefined,
           "equippedArtifacts": [],

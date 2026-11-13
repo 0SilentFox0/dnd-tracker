@@ -39,8 +39,8 @@ describe('d20 offHand and spellAbilityMod', () => {
         (_n, rules) => {
             const { combat } = ruleSystemOf(rules);
 
-            expect(combat.offHand?.(withModel('5e'))).toBe(true);
-            expect(combat.offHand?.(withModel())).toBe(false);
+            expect(combat.offHand?.allowed(withModel('5e'))).toBe(true);
+            expect(combat.offHand?.allowed(withModel())).toBe(false);
         }
     );
 

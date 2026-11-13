@@ -11,11 +11,11 @@ import { OptimizedImage } from '@/components/common/OptimizedImage';
 import { HUD_SURFACE } from '@/components/hud';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { ParticipantSide } from '@/lib/constants/battle';
-import { useAbilityPicker } from '@/lib/hooks/battle';
+import { useAbilityPicker, useBattleScene } from '@/lib/hooks/battle';
 import { useText } from '@/lib/i18n/use-text';
 import { cn } from '@/lib/utils';
 import { abilityLabel } from '@/lib/utils/abilities/build/resolve';
-import { canOffHandAttack } from '@/lib/utils/battle/attack/attacks-left';
+import { canOffHandAttack } from '@/lib/utils/battle/attack/off-hand';
 import type { BattleParticipant } from '@/types/battle';
 
 export function BonusActionPicker({
@@ -34,6 +34,8 @@ export function BonusActionPicker({
     onOffHand?: () => void;
 }) {
     const t = useTranslations('battleWizards');
+
+    const { battle } = useBattleScene();
 
     const text = useText();
 
@@ -76,7 +78,7 @@ export function BonusActionPicker({
                     {!ability &&
                         trigger === 'bonusAction' &&
                         onOffHand &&
-                        canOffHandAttack(participant) && (
+                        canOffHandAttack(participant, battle.rules) && (
                             <button
                                 type="button"
                                 disabled={isPending}

@@ -10,7 +10,6 @@ import {
     isAttackable,
     withSelf,
 } from '@/lib/utils/abilities/engine/core/participants';
-import { spendAttack } from '@/lib/utils/battle/attack/attacks-left';
 import {
     activeEffectIds,
     consumeAttackEffects,
@@ -24,6 +23,7 @@ import {
     critFlavorOf,
 } from '@/lib/utils/battle/attack/critical';
 import { eventRollMode } from '@/lib/utils/battle/attack/event-roll-mode';
+import { spendAttack } from '@/lib/utils/battle/attack/off-hand';
 import { attackSourceOf } from '@/lib/utils/battle/attack/source';
 import {
     type ActionFlow,
@@ -234,7 +234,7 @@ function spendAttackAction(run: AttackRun): void {
                       hasUsedBonusAction: true,
                   },
               }
-            : spendAttack(attacker, flow.ps, params.attack)
+            : spendAttack(attacker, flow.ps, params.attack, flow.ctx.rules)
     );
 }
 

@@ -1,9 +1,7 @@
 import { canCastBonusSpell } from './hero';
 
-import {
-    canAttackFromPool,
-    canOffHandAttack,
-} from '@/lib/utils/battle/attack/attacks-left';
+import { canAttackFromPool } from '@/lib/utils/battle/attack/attacks-left';
+import { canOffHandAttack } from '@/lib/utils/battle/attack/off-hand';
 import { remainingMovement } from '@/lib/utils/battle/grid/path';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
@@ -30,7 +28,7 @@ export function turnExhausted(
         p.actionFlags.hasUsedAction &&
         !canAttackFromPool(p) &&
         !bonusLeft &&
-        !canOffHandAttack(p) &&
+        !canOffHandAttack(p, rules) &&
         !canCastBonusSpell(p, bonusSpells) &&
         !canReturn &&
         !(

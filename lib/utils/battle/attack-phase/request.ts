@@ -87,12 +87,13 @@ export { assertAttackAllowed };
 
 function assertOffHand(
     attacker: BattleParticipant,
-    attack: BattleAttack
+    attack: BattleAttack,
+    rules: Ruleset
 ): void {
     if (attacker.actionFlags.hasUsedBonusAction)
         throw new BattleRuleError('action_used', API_ERRORS.BONUS_ACTION_USED);
 
-    if (!attacker.battleData.attackedWithLight)
+    if (!ruleSystemOf(rules).combat.offHand?.ready(attacker))
         throw new BattleRuleError(
             'action_rejected',
             API_ERRORS.OFF_HAND_NEEDS_ATTACK
@@ -182,7 +183,7 @@ export function validateAttackRequest(
             targetCount: chosenTargets.length,
         });
 
-    if (data.offHand && !ruleSystemOf(rules).combat.offHand?.(attacker))
+    if (data.offHand && !ruleSystemOf(rules).combat.offHand?.allowed(attacker))
         throw new BattleRuleError(
             'action_rejected',
             API_ERRORS.OFF_HAND_NOT_ALLOWED
@@ -205,7 +206,7 @@ export function validateAttackRequest(
                 : REJECT.noAttackAvailable
         );
 
-    if (data.offHand) assertOffHand(attacker, attack);
+    if (data.offHand) assertOffHand(attacker, attack, rules);
     else if (attack.hand === 'off')
         throw new BattleRuleError(
             'action_rejected',

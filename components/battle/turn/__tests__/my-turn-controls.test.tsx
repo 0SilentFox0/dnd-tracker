@@ -64,7 +64,7 @@ vi.mock('@/components/battle/scene/MapStrip', () => ({
     MapStripRow: () => null,
 }));
 vi.mock('@/components/battle/modes', () => ({ modeUiOf: () => undefined }));
-vi.mock('@/lib/utils/battle/attack/attacks-left', () => ({
+vi.mock('@/lib/utils/battle/attack/off-hand', () => ({
     canOffHandAttack: () => true,
 }));
 vi.mock('@/lib/utils/battle/view', () => ({ usableAbilities: () => [] }));

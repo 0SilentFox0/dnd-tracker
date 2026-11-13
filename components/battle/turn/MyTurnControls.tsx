@@ -22,7 +22,7 @@ import {
     useSpellBook,
 } from '@/lib/hooks/battle';
 import { coreActionsOn } from '@/lib/utils/battle/actions/access';
-import { canOffHandAttack } from '@/lib/utils/battle/attack/attacks-left';
+import { canOffHandAttack } from '@/lib/utils/battle/attack/off-hand';
 import {
     canConsumeIntent,
     COUNTDOWN_SECONDS,
@@ -207,7 +207,8 @@ export function MyTurnControls({
                         magic: hasMagic,
                         magicTile: spells,
                         bonus:
-                            bonusAbilities.length > 0 || canOffHandAttack(hero),
+                            bonusAbilities.length > 0 ||
+                            canOffHandAttack(hero, battle.rules),
                         bonusTile: actionEconomy.bonusAction,
                         ability: actionAbilities.length > 0,
                         core: coreActionsOn(battle.rules),

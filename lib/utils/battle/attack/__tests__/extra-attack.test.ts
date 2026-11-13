@@ -4,8 +4,8 @@ import {
     attackCounter,
     attacksPerAction,
     canAttackFromPool,
-    spendAttack,
 } from '../attacks-left';
+import { spendAttack as spend } from '../off-hand';
 
 import { AttackType } from '@/lib/constants/battle';
 import {
@@ -19,12 +19,20 @@ import { applyMainActionUsed } from '@/lib/utils/battle/participant';
 import { resetTurnState } from '@/lib/utils/battle/turn/turn-state';
 import { turnExhausted } from '@/lib/utils/battle/view/turn-exhausted';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { parseRules } from '@/lib/utils/rules/schema';
 import { resolveOpportunityAttacks } from '@/systems/d20/rules/reactions/opportunity';
+import { d20State } from '@/systems/d20/rules/state';
 import type {
     BattleAttack,
     BattleMapConfig,
     BattleParticipant,
 } from '@/types/battle';
+
+const spendAttack = (
+    p: BattleParticipant,
+    ps: BattleParticipant[],
+    attack: BattleAttack
+) => spend(p, ps, attack, DEFAULT_RULES);
 
 const sword: BattleAttack = {
     id: 'sw',
@@ -120,28 +128,48 @@ describe('extra attack', () => {
         };
 
         expect(
-            spendAttack(five, [five], light).battleData.attackedWithLight
+            d20State(spendAttack(five, [five], light)).attackedWithLight
         ).toBe(true);
         expect(
-            spendAttack(five, [five], { ...light, hand: 'off' }).battleData
+            d20State(spendAttack(five, [five], { ...light, hand: 'off' }))
                 .attackedWithLight
         ).toBeUndefined();
         expect(
-            spendAttack(five, [five], { ...light, type: AttackType.RANGED })
-                .battleData.attackedWithLight
+            d20State(
+                spendAttack(five, [five], { ...light, type: AttackType.RANGED })
+            ).attackedWithLight
         ).toBeUndefined();
         expect(
-            spendAttack(five, [five], sword).battleData.attackedWithLight
+            d20State(spendAttack(five, [five], sword)).attackedWithLight
         ).toBeUndefined();
     });
 
     it('does not mark attackedWithLight for a non-5e participant', () => {
         expect(
-            spendAttack(fighter, [fighter], {
-                ...sword,
-                traits: ['light' as const],
-            }).battleData.attackedWithLight
+            d20State(
+                spendAttack(fighter, [fighter], {
+                    ...sword,
+                    traits: ['light' as const],
+                })
+            ).attackedWithLight
         ).toBeUndefined();
+    });
+
+    it('a system without off-hand attacks marks nothing', () => {
+        const five = {
+            ...fighter,
+            abilities: { ...fighter.abilities, damageModel: '5e' as const },
+        };
+
+        const next = spend(
+            five,
+            [five],
+            { ...sword, traits: ['light' as const] },
+            parseRules({ system: { key: 'wfrp' } })
+        );
+
+        expect(next.battleData.system).toBeUndefined();
+        expect(next.battleData.attackedWithLight).toBeUndefined();
     });
 
     describe('attackCounter', () => {

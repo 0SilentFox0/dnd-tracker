@@ -691,6 +691,15 @@ export interface RuleSystemActionDetails {
     failed(details: SystemSlot): boolean;
 }
 
+export interface OffHandRules {
+    /** The attacker may make off-hand attacks at all */
+    allowed(attacker: BattleParticipant): boolean;
+    /** An off-hand attack can be made right now */
+    ready(attacker: BattleParticipant): boolean;
+    /** Records a main-hand attack so that an off-hand follow-up becomes ready */
+    arm(attacker: BattleParticipant, attack: BattleAttack): BattleParticipant;
+}
+
 export interface InspirationRules {
     available(p: BattleParticipant): boolean;
     spend(p: BattleParticipant): BattleParticipant;
@@ -700,8 +709,8 @@ export interface RuleSystemCombat {
     details?: RuleSystemActionDetails;
     /** Validates the system's input of an attack or a cast before it runs */
     input?: { assert(system: SystemSlot, ctx: SystemInputCtx): void };
-    /** Whether the attacker may make an off-hand attack; absent means never */
-    offHand?(attacker: BattleParticipant): boolean;
+    /** Off-hand attacks; absent means never */
+    offHand?: OffHandRules;
     /** A spendable boost to one attack roll; absent means none */
     inspiration?: InspirationRules;
     /** Who judges an attack: the client rolls and the server checks vs AC, or the server resolves the whole test */

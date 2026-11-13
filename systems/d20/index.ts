@@ -9,6 +9,7 @@ import { reviveFromDying } from './rules/death-saves/state';
 import { d20Initiative, d20TieBreak } from './rules/initiative';
 import { D20_INSPIRATION } from './rules/inspiration';
 import { D20_MAGIC } from './rules/magic';
+import { D20_OFF_HAND } from './rules/off-hand';
 import { d20UnitSpellDc } from './rules/participant/unit-spell-dc';
 import { proficiencyForLevel } from './rules/proficiency/level';
 import { d20MaxHp } from './rules/progression/max-hp';
@@ -20,7 +21,6 @@ import { d20FromStored, d20Persist } from './rules/state-parts';
 import { D20_STAT_COLUMNS } from './rules/stats';
 import { D20_TURN } from './rules/turn';
 
-import { isFiveE } from '@/lib/utils/battle/attack/ability';
 import type { RuleSystemDefinition } from '@/lib/utils/rules/systems/types';
 import type { SheetRollSubject } from '@/types/characters';
 
@@ -50,7 +50,7 @@ export const D20_MODULE: RuleSystemDefinition = {
     rest: { kinds: true },
     combat: {
         judge: 'client',
-        offHand: isFiveE,
+        offHand: D20_OFF_HAND,
         inspiration: D20_INSPIRATION,
         dice: 20,
         actionEconomy: { bonusAction: true, reaction: true },
