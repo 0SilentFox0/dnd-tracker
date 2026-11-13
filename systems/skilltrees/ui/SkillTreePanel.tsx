@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl';
 
 import { useProfile } from '@/components/character-profile/ProfileContext';
 import { EntityIcon } from '@/components/common/EntityIcon';
-import { ProgressionPanel } from '@/components/skill-tree/progression';
+import { ProgressionPanel } from '@/components/skill-tree/progression/ProgressionPanel';
 import type { PathPanelProps } from '@/components/systems/types';
 
 export function SkillTreePanel({ manage }: PathPanelProps) {

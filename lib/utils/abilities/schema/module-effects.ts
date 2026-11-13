@@ -1,7 +1,7 @@
 import type { z } from 'zod';
 
 // <systems:generated>
-import { MORALE_MODULE_EFFECT_SCHEMAS } from "@/systems/morale/rules/ability-module-effects";
+import { MORALE_MODULE_EFFECT_SCHEMAS } from '@/systems/morale/rules/ability-module-effects';
 // </systems:generated>
 
 const MODULE_EFFECT_SCHEMA_LISTS = [

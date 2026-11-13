@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import * as prettier from 'prettier';
 
 const OPEN = '// <systems:generated>';
 
@@ -421,10 +422,21 @@ export interface IndexResult {
     written: string[];
 }
 
-export const syncSystemsIndex = (
+const formatted = async (file: string, text: string): Promise<string> => {
+    try {
+        return await prettier.format(text, {
+            ...(await prettier.resolveConfig(file)),
+            filepath: file,
+        });
+    } catch {
+        return text;
+    }
+};
+
+export const syncSystemsIndex = async (
     root: string,
     mode: 'check' | 'write' = 'write'
-): IndexResult => {
+): Promise<IndexResult> => {
     const ids = systemIdsIn(root);
 
     const packs = packKeysIn(root);
@@ -438,7 +450,10 @@ export const syncSystemsIndex = (
 
         const before = fs.readFileSync(file, 'utf8');
 
-        const after = render(spec, before, ids, packs, root);
+        const after = await formatted(
+            file,
+            render(spec, before, ids, packs, root)
+        );
 
         if (before === after) continue;
 
@@ -456,21 +471,26 @@ export const syncSystemsIndex = (
 if (require.main === module) {
     const check = process.argv.includes('--check');
 
-    const { stale } = syncSystemsIndex(
+    syncSystemsIndex(
         path.resolve(__dirname, '../..'),
         check ? 'check' : 'write'
-    );
+    )
+        .then(({ stale }) => {
+            if (check && stale.length) {
+                console.error(
+                    `systems index is stale: ${stale.join(', ')} (run pnpm systems:index)`
+                );
+                process.exit(1);
+            }
 
-    if (check && stale.length) {
-        console.error(
-            `systems index is stale: ${stale.join(', ')} (run pnpm systems:index)`
-        );
-        process.exit(1);
-    }
-
-    console.info(
-        stale.length
-            ? `updated: ${stale.join(', ')}`
-            : 'systems index is up to date'
-    );
+            console.info(
+                stale.length
+                    ? `updated: ${stale.join(', ')}`
+                    : 'systems index is up to date'
+            );
+        })
+        .catch((e) => {
+            console.error(e);
+            process.exit(1);
+        });
 }

@@ -3,9 +3,9 @@ import type { OwnedFlagRows } from './system-flag-row';
 
 import type { FlagKey } from '@/lib/utils/abilities/schema';
 // <systems:generated>
-import { D20_FLAG_ROWS } from "@/systems/d20/rules/ability-flag-rows";
-import { MORALE_FLAG_ROWS } from "@/systems/morale/rules/ability-flag-rows";
-import { RETALIATION_FLAG_ROWS } from "@/systems/retaliation/rules/ability-flag-rows";
+import { D20_FLAG_ROWS } from '@/systems/d20/rules/ability-flag-rows';
+import { MORALE_FLAG_ROWS } from '@/systems/morale/rules/ability-flag-rows';
+import { RETALIATION_FLAG_ROWS } from '@/systems/retaliation/rules/ability-flag-rows';
 // </systems:generated>
 
 const ownedFlags = (
@@ -15,9 +15,9 @@ const ownedFlags = (
 
 const SYSTEM_FLAG_ROW_LISTS: readonly OwnedFlagRows[] = [
     // <systems:generated>
-    ownedFlags("d20", D20_FLAG_ROWS),
-    ownedFlags("morale", MORALE_FLAG_ROWS),
-    ownedFlags("retaliation", RETALIATION_FLAG_ROWS),
+    ownedFlags('d20', D20_FLAG_ROWS),
+    ownedFlags('morale', MORALE_FLAG_ROWS),
+    ownedFlags('retaliation', RETALIATION_FLAG_ROWS),
     // </systems:generated>
 ];
 

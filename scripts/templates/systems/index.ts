@@ -6,9 +6,9 @@ import type { PackHooks, PackIssue } from './types';
 import { PRESETS } from '@/lib/utils/rules/systems/catalog';
 import { metaOf } from '@/lib/utils/rules/systems/meta';
 // <systems:generated>
-import { D20_MODULE_HOOKS } from "@/scripts/templates/systems/d20";
-import { HOMM_MODULE_HOOKS } from "@/scripts/templates/systems/homm";
-import { WFRP_MODULE_HOOKS } from "@/scripts/templates/systems/wfrp";
+import { D20_MODULE_HOOKS } from '@/scripts/templates/systems/d20';
+import { HOMM_MODULE_HOOKS } from '@/scripts/templates/systems/homm';
+import { WFRP_MODULE_HOOKS } from '@/scripts/templates/systems/wfrp';
 // </systems:generated>
 
 export { SYSTEM_MODULE, systemBases };

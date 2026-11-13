@@ -45,10 +45,11 @@ afterEach(() => {
 });
 
 describe('systems index', () => {
-    it('the real tree is up to date (--check exits 0)', () =>
-        expect(syncSystemsIndex(REAL_ROOT, 'check').stale).toEqual([]));
+    it('the real tree is up to date (--check exits 0)', async () => {
+        expect((await syncSystemsIndex(REAL_ROOT, 'check')).stale).toEqual([]);
+    });
 
-    it('emits entries in alphabetical id order, only for existing layers', () => {
+    it('emits entries in alphabetical id order, only for existing layers', async () => {
         const root = fixture(['zeta', 'alpha']);
 
         write(
@@ -57,7 +58,7 @@ describe('systems index', () => {
             'export const ALPHA_MODULE = 1;\n'
         );
 
-        syncSystemsIndex(root);
+        await syncSystemsIndex(root);
 
         const meta = fs.readFileSync(
             path.join(root, 'lib/utils/rules/systems/meta.ts'),
@@ -80,7 +81,7 @@ describe('systems index', () => {
         expect(registry).not.toContain('ZETA_MODULE');
     });
 
-    it('two full systems (wfrp + d6pool) keep the same order in every block of every root', () => {
+    it('two full systems (wfrp + d6pool) keep the same order in every block of every root', async () => {
         const root = fixture(['wfrp', 'd6pool']);
 
         for (const id of ['wfrp', 'd6pool']) {
@@ -108,7 +109,7 @@ describe('systems index', () => {
                 );
         }
 
-        syncSystemsIndex(root);
+        await syncSystemsIndex(root);
 
         for (const spec of ROOT_SPECS) {
             const text = fs.readFileSync(path.join(root, spec.file), 'utf8');
@@ -122,21 +123,21 @@ describe('systems index', () => {
             );
         }
 
-        expect(syncSystemsIndex(root, 'check').stale).toEqual([]);
+        expect((await syncSystemsIndex(root, 'check')).stale).toEqual([]);
     });
 
-    it('is idempotent', () => {
+    it('is idempotent', async () => {
         const root = fixture(['alpha']);
 
-        syncSystemsIndex(root);
+        await syncSystemsIndex(root);
 
-        expect(syncSystemsIndex(root, 'check').stale).toEqual([]);
+        expect((await syncSystemsIndex(root, 'check')).stale).toEqual([]);
     });
 
-    it('check names the root whose generated block was edited by hand', () => {
+    it('check names the root whose generated block was edited by hand', async () => {
         const root = fixture(['alpha']);
 
-        syncSystemsIndex(root);
+        await syncSystemsIndex(root);
 
         const file = path.join(root, 'lib/utils/rules/systems/meta.ts');
 
@@ -145,7 +146,7 @@ describe('systems index', () => {
             fs.readFileSync(file, 'utf8').replace('ALPHA_META', 'HAND_EDITED')
         );
 
-        expect(syncSystemsIndex(root, 'check').stale).toEqual([
+        expect((await syncSystemsIndex(root, 'check')).stale).toEqual([
             'lib/utils/rules/systems/meta.ts',
         ]);
     });
@@ -160,12 +161,12 @@ describe('systems index', () => {
         );
     });
 
-    it('rejects a root with the wrong number of generated blocks', () => {
+    it('rejects a root with the wrong number of generated blocks', async () => {
         const root = fixture(['alpha']);
 
         write(root, 'lib/utils/rules/systems/meta.ts', `${OPEN}\n${CLOSE}\n`);
 
-        expect(() => syncSystemsIndex(root)).toThrow(
+        await expect(syncSystemsIndex(root)).rejects.toThrow(
             'lib/utils/rules/systems/meta.ts'
         );
     });

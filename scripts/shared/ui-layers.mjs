@@ -7,7 +7,7 @@ export const SYSTEM_UI_KIT = [
     '@/components/battle/hud/DiceInput',
     '@/components/battle/wizards/attack/shared',
     '@/components/battle/participants/Section',
-    '@/components/skill-tree/progression',
+    '@/components/skill-tree/progression/ProgressionPanel',
     '@/components/spells/book/SpellBookPages',
     '@/components/characters/rest/CharacterPickList',
 ];

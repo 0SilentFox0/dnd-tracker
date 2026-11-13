@@ -19,7 +19,7 @@ import { appendFileSync, mkdirSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import { assertLocalProdcopy, parseTemplateKeys } from './battle-sweep/args';
+import { assertLocalProdcopy, keepBattles, parseTemplateKeys } from './battle-sweep/args';
 import {
     modeRuns,
     moraleExpectation,
@@ -178,7 +178,7 @@ const OUT = arg('out') ?? join(tmpdir(), 'battle-sweep');
 
 const CONSISTENCY = argv.includes('--consistency');
 
-const KEEP_BATTLES = argv.includes('--keep-battles');
+const KEEP_BATTLES = keepBattles(argv);
 
 const WORKER = argv.includes('--worker');
 
@@ -920,7 +920,7 @@ function learnLegally(tree: any, order: string[], level: number, who: string) {
 }
 
 async function prepareTemplate() {
-    templateRun = await openTemplateRun(PROFILE, CAMPAIGN);
+    templateRun = await openTemplateRun(PROFILE, CAMPAIGN, KEEP_BATTLES);
     campaign = templateRun.campaign;
     ctx.campaignId = campaign.id;
     dmId = campaign.dmUserId;

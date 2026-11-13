@@ -7,13 +7,13 @@ import {
     resolveSystem,
 } from '@/lib/utils/rules/systems/resolve';
 // <systems:generated>
-import { ARTIFACTSETS_MODULE_UI } from "@/systems/artifactsets/ui";
-import { D20_MODULE_UI } from "@/systems/d20/ui";
-import { HEROSCALING_MODULE_UI } from "@/systems/heroscaling/ui";
-import { MORALE_MODULE_UI } from "@/systems/morale/ui";
-import { RETALIATION_MODULE_UI } from "@/systems/retaliation/ui";
-import { SKILLTREES_MODULE_UI } from "@/systems/skilltrees/ui";
-import { WFRP_MODULE_UI } from "@/systems/wfrp/ui";
+import { ARTIFACTSETS_MODULE_UI } from '@/systems/artifactsets/ui';
+import { D20_MODULE_UI } from '@/systems/d20/ui';
+import { HEROSCALING_MODULE_UI } from '@/systems/heroscaling/ui';
+import { MORALE_MODULE_UI } from '@/systems/morale/ui';
+import { RETALIATION_MODULE_UI } from '@/systems/retaliation/ui';
+import { SKILLTREES_MODULE_UI } from '@/systems/skilltrees/ui';
+import { WFRP_MODULE_UI } from '@/systems/wfrp/ui';
 // </systems:generated>
 
 export const MODULE_UI: Record<string, ModuleEntry<SystemUi>> = {

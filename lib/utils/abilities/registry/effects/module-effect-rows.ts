@@ -1,12 +1,12 @@
 import { ownedBy, type SystemEffectRow } from './system-row';
 
 // <systems:generated>
-import { MORALE_MODULE_EFFECT_ROWS } from "@/systems/morale/rules/ability-module-effect-rows";
+import { MORALE_MODULE_EFFECT_ROWS } from '@/systems/morale/rules/ability-module-effect-rows';
 // </systems:generated>
 
 const MODULE_EFFECT_ROW_LISTS = [
     // <systems:generated>
-    ownedBy("morale", MORALE_MODULE_EFFECT_ROWS),
+    ownedBy('morale', MORALE_MODULE_EFFECT_ROWS),
     // </systems:generated>
 ] as const satisfies readonly (readonly SystemEffectRow[])[];
 

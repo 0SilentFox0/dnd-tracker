@@ -119,7 +119,7 @@ describe('wfrp leaks outside the allowed files', () => {
 
     const literals = readLiteralsExempt();
 
-    it('only route / content-kind / ruleset-section files, whats-new, api-errors, character-coverage and the careers page mention wfrp', () => {
+    it('only route / content-kind / ruleset-section files, whats-new, api-errors and character-coverage mention wfrp', () => {
         const leaks = Object.keys(literals).filter(
             (file) =>
                 /wfrp/i.test(fs.readFileSync(path.join(ROOT, file), 'utf8')) &&

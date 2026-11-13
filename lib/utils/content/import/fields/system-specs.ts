@@ -1,8 +1,8 @@
 // <systems:generated>
-import { ARTIFACTSETS_IMPORT_SPECS } from "@/systems/artifactsets/rules/import-specs";
-import { D20_IMPORT_SPECS } from "@/systems/d20/rules/import-specs";
-import { SKILLTREES_IMPORT_SPECS } from "@/systems/skilltrees/rules/import-specs";
-import { WFRP_IMPORT_SPECS } from "@/systems/wfrp/rules/import-specs";
+import { ARTIFACTSETS_IMPORT_SPECS } from '@/systems/artifactsets/rules/import-specs';
+import { D20_IMPORT_SPECS } from '@/systems/d20/rules/import-specs';
+import { SKILLTREES_IMPORT_SPECS } from '@/systems/skilltrees/rules/import-specs';
+import { WFRP_IMPORT_SPECS } from '@/systems/wfrp/rules/import-specs';
 // </systems:generated>
 import type { ImportSpec } from '@/types/content-import';
 

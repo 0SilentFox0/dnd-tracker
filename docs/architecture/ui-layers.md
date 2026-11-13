@@ -27,12 +27,12 @@
 
 ## Кіт core-UI для систем
 
-Явний список `SYSTEM_UI_KIT` у `scripts/shared/ui-layers.mjs` (нових barrel-файлів немає, виняток — наявний `skill-tree/progression`: barrel у клієнтському чанку тягне всі модулі). Імпорт дозволений лише дослівно за цим шляхом:
+Явний список `SYSTEM_UI_KIT` у `scripts/shared/ui-layers.mjs` (barrel-файлів немає). Імпорт дозволений лише дослівно за цим шляхом:
 
 - `character-profile/ProfileContext` (дані листа), `character-profile/CombatRow`
 - `rules/RulesSection`, `rules/NumberField`, `rules/RulesPaths`
 - `battle/hud/DiceInput`, `battle/wizards/attack/shared`, `battle/participants/Section`
-- `skill-tree/progression`, `spells/book/SpellBookPages`, `characters/rest/CharacterPickList`
+- `skill-tree/progression/ProgressionPanel`, `spells/book/SpellBookPages`, `characters/rest/CharacterPickList`
 
 Новий пункт кіта = правка списку (видно в ревʼю) + рядок тут.
 

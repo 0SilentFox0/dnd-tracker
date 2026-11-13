@@ -1,7 +1,7 @@
 import type { z } from 'zod';
 
 // <systems:generated>
-import { WFRP_EFFECT_SCHEMAS } from "@/systems/wfrp/rules/ability-effects";
+import { WFRP_EFFECT_SCHEMAS } from '@/systems/wfrp/rules/ability-effects';
 // </systems:generated>
 
 const SYSTEM_EFFECT_SCHEMA_LISTS = [

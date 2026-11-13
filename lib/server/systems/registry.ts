@@ -21,11 +21,11 @@ import {
     resolveSystem,
 } from '@/lib/utils/rules/systems/resolve';
 // <systems:generated>
-import { ARTIFACTSETS_MODULE_SERVER } from "@/systems/artifactsets/server";
-import { D20_MODULE_SERVER } from "@/systems/d20/server";
-import { MORALE_MODULE_SERVER } from "@/systems/morale/server";
-import { SKILLTREES_MODULE_SERVER } from "@/systems/skilltrees/server";
-import { WFRP_MODULE_SERVER } from "@/systems/wfrp/server";
+import { ARTIFACTSETS_MODULE_SERVER } from '@/systems/artifactsets/server';
+import { D20_MODULE_SERVER } from '@/systems/d20/server';
+import { MORALE_MODULE_SERVER } from '@/systems/morale/server';
+import { SKILLTREES_MODULE_SERVER } from '@/systems/skilltrees/server';
+import { WFRP_MODULE_SERVER } from '@/systems/wfrp/server';
 // </systems:generated>
 
 export type { SystemSchemas, SystemServer } from './types';
@@ -97,9 +97,7 @@ export const operationInComposition = (
 ): boolean => Object.hasOwn(systemServerOf(rules).operations ?? {}, name);
 
 export const withSystemNotes = (base: string, tool: SystemToolNote): string => {
-    const notes = unionServers().flatMap(
-        (s) => s.ai?.toolNotes?.[tool] ?? []
-    );
+    const notes = unionServers().flatMap((s) => s.ai?.toolNotes?.[tool] ?? []);
 
     return notes.length > 0 ? `${base} ${notes.join(' ')}` : base;
 };

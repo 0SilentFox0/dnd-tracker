@@ -18,7 +18,7 @@ vi.mock('@/components/character-profile/ProfileContext', () => ({
         canEdit: true,
     }),
 }));
-vi.mock('@/components/skill-tree/progression', () => ({
+vi.mock('@/components/skill-tree/progression/ProgressionPanel', () => ({
     ProgressionPanel: () => <div data-testid="panel" />,
 }));
 

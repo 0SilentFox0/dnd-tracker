@@ -99,6 +99,10 @@ describe('ui layers ratchet', () => {
     const listed = new Set(exempt.map((e) => e.file));
 
     for (const zone of UI_LAYER_ZONES) {
+        it(`zone ${zone.name} matches files`, () => {
+            expect(zoneFiles(zone).length).toBeGreaterThan(0);
+        });
+
         it(`zone ${zone.name} has no violators outside the exempt list`, () => {
             const found = zoneFiles(zone)
                 .filter((f) => !listed.has(f))

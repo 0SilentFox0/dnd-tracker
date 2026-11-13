@@ -1,13 +1,13 @@
 // <systems:generated>
-import { ARTIFACTSETS_META } from "@/systems/artifactsets/meta";
-import { D20_META } from "@/systems/d20/meta";
-import { HEROSCALING_META } from "@/systems/heroscaling/meta";
-import { HOMM_META } from "@/systems/homm/meta";
-import { MORALE_META } from "@/systems/morale/meta";
-import { RETALIATION_META } from "@/systems/retaliation/meta";
-import { SKILLTREES_META } from "@/systems/skilltrees/meta";
-import { UNITSTACKS_META } from "@/systems/unitstacks/meta";
-import { WFRP_META } from "@/systems/wfrp/meta";
+import { ARTIFACTSETS_META } from '@/systems/artifactsets/meta';
+import { D20_META } from '@/systems/d20/meta';
+import { HEROSCALING_META } from '@/systems/heroscaling/meta';
+import { HOMM_META } from '@/systems/homm/meta';
+import { MORALE_META } from '@/systems/morale/meta';
+import { RETALIATION_META } from '@/systems/retaliation/meta';
+import { SKILLTREES_META } from '@/systems/skilltrees/meta';
+import { UNITSTACKS_META } from '@/systems/unitstacks/meta';
+import { WFRP_META } from '@/systems/wfrp/meta';
 // </systems:generated>
 
 export type SystemPageScope =

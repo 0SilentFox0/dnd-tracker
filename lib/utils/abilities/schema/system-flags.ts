@@ -1,9 +1,9 @@
 import type { z } from 'zod';
 
 // <systems:generated>
-import { D20_FLAG_SCHEMAS } from "@/systems/d20/rules/ability-flags";
-import { MORALE_FLAG_SCHEMAS } from "@/systems/morale/rules/ability-flags";
-import { RETALIATION_FLAG_SCHEMAS } from "@/systems/retaliation/rules/ability-flags";
+import { D20_FLAG_SCHEMAS } from '@/systems/d20/rules/ability-flags';
+import { MORALE_FLAG_SCHEMAS } from '@/systems/morale/rules/ability-flags';
+import { RETALIATION_FLAG_SCHEMAS } from '@/systems/retaliation/rules/ability-flags';
 // </systems:generated>
 
 const SYSTEM_FLAG_SCHEMA_LISTS = [

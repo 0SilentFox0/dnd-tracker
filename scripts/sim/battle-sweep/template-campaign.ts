@@ -2,6 +2,12 @@ import { randomUUID } from 'node:crypto';
 
 import type { SweepProfile } from './profiles';
 import type { RowCounts } from './row-counts';
+import {
+    dropRestoreFile,
+    keptRunNotice,
+    recoverRules,
+    saveRestoreFile,
+} from './rules-restore';
 import { heroRowData, heroSpecsFor } from './seed-template-heroes';
 
 import { prisma } from '@/lib/db';
@@ -62,10 +68,27 @@ async function importTemporaryTemplate(key: string) {
     };
 }
 
+async function recoverLeftoverRules(): Promise<void> {
+    const restored = await recoverRules(async ({ campaignId, raw }) => {
+        await prisma.campaign.updateMany({
+            where: { id: campaignId },
+            data: { rules: raw as any },
+        });
+    });
+
+    if (restored.length)
+        console.info(
+            `restored rules left by an interrupted sweep: ${restored.join(', ')}`
+        );
+}
+
 export async function openTemplateRun(
     profile: SweepProfile,
-    campaignId: string | undefined
+    campaignId: string | undefined,
+    keep = false
 ): Promise<TemplateRun> {
+    await recoverLeftoverRules();
+
     if (profile.source.kind !== 'template')
         throw new Error(`${profile.key} runs on an existing campaign`);
 
@@ -79,6 +102,8 @@ export async function openTemplateRun(
 
     let dropTemplate = async () => {};
 
+    let importedTemplate = false;
+
     if (!campaign) {
         if (!profile.source.importIfMissing)
             throw new Error(
@@ -89,6 +114,7 @@ export async function openTemplateRun(
 
         campaign = imported.campaign;
         dropTemplate = imported.cleanup;
+        importedTemplate = true;
     }
 
     let restoreRules = async () => {};
@@ -101,7 +127,13 @@ export async function openTemplateRun(
     try {
         restoreRules = await patchRules(profile, campaign);
 
-        return await seedHeroes(profile, campaign, dropAll);
+        return await seedHeroes(
+            profile,
+            campaign,
+            dropAll,
+            keep,
+            importedTemplate
+        );
     } catch (e) {
         await dropAll();
         throw e;
@@ -145,6 +177,7 @@ async function patchRules(
             `modules ${profile.rules.modules.join(',')} are not valid for the ${campaign.templateKey ?? profile.key} base system`
         );
 
+    saveRestoreFile(campaign.id, raw);
     await prisma.campaign.update({
         where: { id: campaign.id },
         data: { rules: next as any },
@@ -156,13 +189,16 @@ async function patchRules(
             where: { id: campaign.id },
             data: { rules: raw },
         });
+        dropRestoreFile(campaign.id);
     };
 }
 
 async function seedHeroes(
     profile: SweepProfile,
     campaign: any,
-    dropTemplate: () => Promise<void>
+    dropAll: () => Promise<void>,
+    keep: boolean,
+    importedTemplate: boolean
 ): Promise<TemplateRun> {
     const races = await prisma.race.findMany({
         where: { campaignId: campaign.id },
@@ -232,11 +268,17 @@ async function seedHeroes(
     }
 
     const cleanup = async () => {
+        if (keep) {
+            console.info(keptRunNotice(campaign, heroIds, importedTemplate));
+
+            return;
+        }
+
         await prisma.battleScene.deleteMany({
             where: { campaignId: campaign.id, name: { startsWith: 'ТЕСТ' } },
         });
         await prisma.character.deleteMany({ where: { id: { in: heroIds } } });
-        await dropTemplate();
+        await dropAll();
     };
 
     return { campaign, heroIds, cleanup };

@@ -139,6 +139,10 @@ const SYSTEM_IMPORT_EXEMPT = JSON.parse(
     )
 ).map((e) => e.file.replace(/[[\]]/g, '\\$&'));
 
+const uiLayersPlugin = {
+    rules: { zone: builtinRules.get('no-restricted-imports') },
+};
+
 const UI_LAYERS_EXEMPT = JSON.parse(
     readFileSync(new URL('./ui-layers-exempt.json', import.meta.url), 'utf8')
 ).map((e) => e.file.replace(/[[\]]/g, '\\$&'));
@@ -707,14 +711,15 @@ const eslintConfig = defineConfig([
             'fixtures/zone': [
                 'error',
                 {
-                    paths: ['@/lib/utils/rules', '@/lib/utils/rules/defaults'].map(
-                        (name) => ({
-                            name,
-                            importNames: ['DEFAULT_RULES'],
-                            message:
-                                'DEFAULT_RULES is a test fixture: take the rules of the campaign, SECTION_DEFAULTS for neutral section defaults',
-                        })
-                    ),
+                    paths: [
+                        '@/lib/utils/rules',
+                        '@/lib/utils/rules/defaults',
+                    ].map((name) => ({
+                        name,
+                        importNames: ['DEFAULT_RULES'],
+                        message:
+                            'DEFAULT_RULES is a test fixture: take the rules of the campaign, SECTION_DEFAULTS for neutral section defaults',
+                    })),
                 },
             ],
         },
@@ -722,11 +727,7 @@ const eslintConfig = defineConfig([
     ...UI_LAYER_ZONES.map((zone) => ({
         files: zone.files,
         ignores: [...UI_LAYER_IGNORES, ...UI_LAYERS_EXEMPT],
-        plugins: {
-            'ui-layers': {
-                rules: { zone: builtinRules.get('no-restricted-imports') },
-            },
-        },
+        plugins: { 'ui-layers': uiLayersPlugin },
         rules: {
             'ui-layers/zone': [
                 'error',

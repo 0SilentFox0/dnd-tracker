@@ -4,12 +4,12 @@ import { SYSTEM_FLAG_OWNERS } from './system-flag-rows';
 import { ownedBy, type SystemEffectRow } from './system-row';
 
 // <systems:generated>
-import { WFRP_EFFECT_ROWS } from "@/systems/wfrp/rules/ability-effect-rows";
+import { WFRP_EFFECT_ROWS } from '@/systems/wfrp/rules/ability-effect-rows';
 // </systems:generated>
 
 const SYSTEM_EFFECT_ROW_LISTS = [
     // <systems:generated>
-    ownedBy("wfrp", WFRP_EFFECT_ROWS),
+    ownedBy('wfrp', WFRP_EFFECT_ROWS),
     // </systems:generated>
 ] as const satisfies readonly (readonly SystemEffectRow[])[];
 

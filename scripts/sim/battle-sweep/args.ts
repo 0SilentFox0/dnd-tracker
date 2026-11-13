@@ -20,6 +20,9 @@ export function parseTemplateKeys(argv: readonly string[]): SweepProfile[] {
     return [profile];
 }
 
+export const keepBattles = (argv: readonly string[]): boolean =>
+    argv.includes('--keep-battles');
+
 const LOCAL_DB =
     /^postgres(?:ql)?:\/\/[^@]*@(?:localhost|127\.0\.0\.1):54322\/prodcopy(?:_\w+)?(?:\?.*)?$/;
 
