@@ -21,8 +21,7 @@ const legacy = (over: Partial<BattleParticipant['actionFlags']> = {}) => {
 
     return {
         ...p,
-        abilities: { ...p.abilities, moraleCap: 3 },
-        combatStats: { ...p.combatStats, morale: 2 },
+        combatStats: { ...p.combatStats, morale: 2, moraleCap: 3 },
         actionFlags: { ...p.actionFlags, ...over },
     } as BattleParticipant;
 };

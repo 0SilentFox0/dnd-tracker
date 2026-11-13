@@ -29,7 +29,6 @@
     "proficiencyBonus": 2,
     "race": "Людина",
     "creatureType": "humanoid",
-    "moraleCap": 3,
     "damageModel": "5e",
     "saveProficiencies": [
       "wisdom",
@@ -43,6 +42,7 @@
     "armorClass": 11,
     "speed": 30,
     "morale": 1,
+    "moraleCap": 3,
     "status": "active",
     "minTargets": 1,
     "maxTargets": 1

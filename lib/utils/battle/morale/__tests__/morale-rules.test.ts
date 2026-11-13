@@ -30,8 +30,7 @@ function withCap(
 
     return {
         ...p,
-        abilities: { ...p.abilities, moraleCap },
-        combatStats: { ...p.combatStats, morale },
+        combatStats: { ...p.combatStats, morale, moraleCap },
     };
 }
 

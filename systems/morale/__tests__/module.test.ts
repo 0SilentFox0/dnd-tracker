@@ -81,14 +81,14 @@ describe('morale module on d20', () => {
                 row: { level: 1 },
                 rules: withMorale,
                 refs: {},
-            }).abilities.moraleCap
+            }).combatStats.moraleCap
         ).toBe(4);
         expect(
             moraleCapPart(hero, {
                 row: { level: 1 },
                 rules: { ...withMorale, morale: { enabled: false, cap: 4 } },
                 refs: {},
-            }).abilities.moraleCap
+            }).combatStats.moraleCap
         ).toBe(0);
     });
 

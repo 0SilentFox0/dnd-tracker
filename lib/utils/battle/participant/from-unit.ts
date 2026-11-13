@@ -274,7 +274,6 @@ function unitAbilities(
         proficiencyBonus: unit.proficiencyBonus,
         race: race?.name ?? '',
         raceId: race?.id,
-        moraleCap: 0,
         ...(monster && { damageModel: '5e' as const }),
         ...systemSlotOf(
             traits
@@ -299,6 +298,7 @@ function unitCombatStats(
         speed: ruleSystemOf(rules).combat.baseStats?.(unit).speed ?? unit.speed,
         gridSize: unit.gridSize ?? 1,
         morale: (unit as { morale?: number }).morale || 0,
+        moraleCap: 0,
         status: CombatStatus.ACTIVE,
         minTargets: unit.minTargets ?? 1,
         maxTargets: unit.maxTargets ?? 1,

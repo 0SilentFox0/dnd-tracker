@@ -21,9 +21,7 @@ const STATBLOCK =
     /\babilities\.(?:strength|dexterity|constitution|intelligence|wisdom|charisma|modifiers|proficiencyBonus|armorClass|speed|spellSlots|morale|moraleCap|minTargets|maxTargets)\b|\babilities\[/g;
 
 /** Only goes down; target 0 is E3. */
-const MAX: Record<string, number> = {
-    'lib/utils/abilities/engine/effects/morale.ts': 1,
-};
+const MAX: Record<string, number> = {};
 
 const countStatblockReads = (text: string) =>
     text.match(STATBLOCK)?.length ?? 0;

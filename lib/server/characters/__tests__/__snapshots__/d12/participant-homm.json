@@ -29,7 +29,6 @@
     "proficiencyBonus": 2,
     "race": "Людина",
     "creatureType": "humanoid",
-    "moraleCap": 3,
     "meleeMultiplier": 0.7,
     "rangedMultiplier": 1.5,
     "magicMultiplier": 0.7,
@@ -42,6 +41,7 @@
     "armorClass": 12,
     "speed": 30,
     "morale": 1,
+    "moraleCap": 3,
     "status": "active",
     "minTargets": 1,
     "maxTargets": 1

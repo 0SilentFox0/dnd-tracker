@@ -74,7 +74,7 @@ describe('createBattleParticipantFromCharacter: правила бою без п�
             { artifactRows: [], rules }
         );
 
-        expect(p.abilities.moraleCap).toBe(0);
+        expect(p.combatStats.moraleCap).toBe(0);
         expect(
             awaitsMoraleCheck(
                 {
@@ -96,7 +96,7 @@ describe('createBattleParticipantFromCharacter: правила бою без п�
             { rules: DEFAULT_RULES }
         );
 
-        expect(p.abilities.moraleCap).toBe(3);
+        expect(p.combatStats.moraleCap).toBe(3);
     });
 });
 

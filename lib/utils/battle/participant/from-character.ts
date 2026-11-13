@@ -555,7 +555,6 @@ export async function createBattleParticipantFromCharacter(
                     ? race.passiveAbility.creatureType.trim().toLowerCase()
                     : 'humanoid',
             raceId: (race as { id?: string } | null)?.id,
-            moraleCap: 0,
             ...(resolvedClasses && { damageModel: '5e' as const }),
             ...systemSlotOf(
                 ruleSystemOf(rules).combat.participantFields?.(
@@ -577,6 +576,7 @@ export async function createBattleParticipantFromCharacter(
             armorClass: character.armorClass,
             speed: baseStats?.speed ?? character.speed,
             morale: (character as { morale?: number }).morale || 0,
+            moraleCap: 0,
             status:
                 computedMaxHp <= 0 ? CombatStatus.DEAD : CombatStatus.ACTIVE,
             minTargets: character.minTargets ?? 1,

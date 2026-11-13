@@ -167,6 +167,13 @@ export function joinParticipant(
         };
     }
 
+    const { moraleCap: legacyCap, ...abilitiesRest } = s.abilities;
+
+    const combatSnap =
+        legacyCap !== undefined && s.combatStats.moraleCap === undefined
+            ? { ...s.combatStats, moraleCap: legacyCap }
+            : s.combatStats;
+
     return {
         basicInfo: {
             ...s.basicInfo,
@@ -177,9 +184,9 @@ export function joinParticipant(
             side: c.side,
             controlledBy: c.controlledBy,
         },
-        abilities: { ...s.abilities, initiative: c.initiative },
+        abilities: { ...abilitiesRest, initiative: c.initiative },
         combatStats: {
-            ...s.combatStats,
+            ...combatSnap,
             currentHp: c.currentHp,
             tempHp: c.tempHp,
             maxHp: c.maxHp,

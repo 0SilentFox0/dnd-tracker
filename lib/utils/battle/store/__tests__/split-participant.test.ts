@@ -318,3 +318,43 @@ describe('ammo and reload live in state', () => {
         ).toMatchObject({ ammo: { bow: 2 }, reload: {} });
     });
 });
+
+describe('moraleCap upgrade on read', () => {
+    const place = { orderIndex: 0, isPending: false };
+
+    it('moves a legacy abilities.moraleCap into combatStats', () => {
+        const stored = splitParticipant(createMockParticipant(), place);
+
+        const legacy = {
+            ...stored,
+            snapshot: {
+                ...stored.snapshot,
+                abilities: { ...stored.snapshot.abilities, moraleCap: 0 },
+            },
+        };
+
+        const joined = joinParticipant(legacy, 'b1');
+
+        expect(joined.combatStats.moraleCap).toBe(0);
+        expect(joined.abilities).not.toHaveProperty('moraleCap');
+    });
+
+    it('re-splitting the upgraded participant is idempotent', () => {
+        const p = createMockParticipant();
+
+        const withCap = {
+            ...p,
+            combatStats: { ...p.combatStats, moraleCap: 2 },
+        };
+
+        const first = splitParticipant(withCap, place);
+
+        const second = splitParticipant(
+            joinParticipant(first, p.basicInfo.battleId),
+            place
+        );
+
+        expect(second.snapshotHash).toBe(first.snapshotHash);
+        expect(first.snapshot.combatStats).toMatchObject({ moraleCap: 2 });
+    });
+});

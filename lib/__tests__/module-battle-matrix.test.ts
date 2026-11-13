@@ -147,10 +147,10 @@ describe.each(CASES)('module matrix: $name', ({ rules }) => {
                     typeof part
                 >[1]),
             hero
-        ).abilities.moraleCap;
+        ).combatStats.moraleCap;
 
         if (hasMorale(rules)) expect(cap).toBe(rules.morale.cap);
-        else expect(cap).toBe(hero.abilities.moraleCap);
+        else expect(cap).toBe(hero.combatStats.moraleCap);
     });
 });
 

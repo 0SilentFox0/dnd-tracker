@@ -241,8 +241,6 @@ export interface BattleParticipantAbilities {
     race: string;
     /** Race.id для расових модифікаторів заклинань */
     raceId?: string;
-    /** Межа моралі кампанії; 0 — мораль вимкнена, відсутнє — 3 */
-    moraleCap?: number;
     primaryAbility?: AbilityKey;
     /** Множник шкоди ближнього бою від архетипу (лише character) */
     meleeMultiplier?: number;
@@ -522,6 +520,8 @@ export interface BattleParticipantCombatStats {
     /** Сторона footprint у клітинках (1–3); немає = 1 */
     gridSize?: number;
     morale: number; // від -3 до +3, default 0
+    /** Межа моралі кампанії; 0 — мораль вимкнена, відсутнє — 3 */
+    moraleCap?: number;
     status: CombatStatusType;
     minTargets: number;
     maxTargets: number;

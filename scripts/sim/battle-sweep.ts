@@ -1308,7 +1308,7 @@ function passiveApplies(p: any, a: any): true | 'baked' | string {
 
             if (!subject || !hero) return 'baked';
 
-            const cap = subject.abilities.moraleCap ?? 3;
+            const cap = subject.combatStats.moraleCap ?? 3;
 
             const raw =
                 (hero[e.stat] ?? (e.stat === 'morale' ? 0 : 1)) +
