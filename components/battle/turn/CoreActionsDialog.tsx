@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { OptionButton } from '@/components/hud/OptionButton';
-import { TargetRadioList } from '@/components/hud/TargetRadioList';
+import { TargetRadioList } from '@/components/battle/hud/TargetRadioList';
 import { Button } from '@/components/ui/button';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { useCoreActions } from '@/lib/hooks/battle';
