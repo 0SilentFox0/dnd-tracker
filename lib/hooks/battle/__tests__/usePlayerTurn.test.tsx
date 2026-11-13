@@ -257,6 +257,14 @@ describe('usePlayerTurn', () => {
         expect(scene.nextTurn).toHaveBeenCalledWith({});
     });
 
+    it('голий dnd5e: навіть з мораллю ≠ 0 хід стартує в acting (M1)', () => {
+        const { me, wrapper } = fakeScene({ morale: 2, system: 'dnd5e' });
+
+        const { result } = renderHook(() => usePlayerTurn(me), { wrapper });
+
+        expect(result.current.phase).toBe('acting');
+    });
+
     it('результат моралі: без перевірки — undefined; уже перевірена в цьому ході — з pendingMoraleCheck', () => {
         const plain = fakeScene();
 

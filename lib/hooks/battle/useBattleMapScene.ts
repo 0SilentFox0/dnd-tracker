@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 
 import { type ModeTools, useModeTools } from './modes/tools';
 import { useModeView } from './modes/useModeView';
+import { turnStartDue } from './turn-start-check';
 import { useBattleScene } from './useBattleScene';
 import { useExclusivePalettes } from './useExclusivePalettes';
 import { useFxImpacts } from './useFxImpacts';
@@ -30,7 +31,6 @@ import {
     type MapSceneActor,
     type MapSceneMode,
 } from '@/lib/utils/battle/grid';
-import { awaitsMoraleCheck } from '@/lib/utils/battle/morale/awaits-check';
 import { NO_ORDER } from '@/lib/utils/battle/view';
 import type {
     BattleMapActions,
@@ -106,20 +106,14 @@ export function useBattleMapScene(): BattleMapScene | null {
 
     const order = battle.initiativeOrder ?? NO_ORDER;
 
-    const moraleDue =
+    const gateDue =
         !!current &&
-        awaitsMoraleCheck(
-            {
-                participants: order,
-                scene: {
-                    turnIndex: battle.currentTurnIndex,
-                    pendingMoraleCheck: battle.pendingMoraleCheck,
-                },
-            },
+        turnStartDue(
+            { ...battle, initiativeOrder: order },
             current.basicInfo.id
         );
 
-    const canAct = isMyTurn && !anyPending && !!current && !moraleDue;
+    const canAct = isMyTurn && !anyPending && !!current && !gateDue;
 
     const actor = useMemo<MapSceneActor>(
         () => ({ current, viewer, canAct, isDM, attackReady }),

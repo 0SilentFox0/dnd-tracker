@@ -33,6 +33,7 @@ import type {
     DamageConsequencesInput,
     DamageConsequencesResult,
 } from '@/lib/utils/battle/damage/consequences';
+import type { TurnGateOutcome } from '@/lib/utils/battle/flows/turn-flow';
 import type { DieFx } from '@/lib/utils/battle/fx/dice/types';
 import type { EquippedArtifactRow } from '@/lib/utils/battle/participant/extract-artifacts';
 import type {
@@ -270,8 +271,19 @@ export type ActGate = (
     opts: { phase: 'act' | 'end'; skipCheck?: boolean }
 ) => ActGateBlock | null;
 
+/** The client-side check a participant must resolve before acting; `outcomeOf` reads a stored pending check */
+export interface TurnStartCheck {
+    due(scope: ActGateScope, participantId: string): boolean;
+    outcomeOf(
+        pending: unknown,
+        participantId: string
+    ): TurnGateOutcome | undefined;
+}
+
 /** Hook lists run in order, base first, then modules (`runTurnHooks`) */
 export interface RuleSystemTurn {
+    /** Client turn gate (a check before the first action) */
+    startCheck?: TurnStartCheck;
     /** Before the turn passes on */
     beforeAdvance?: readonly TurnHook<TurnAdvanceCtx>[];
     /** Gates before a participant acts or ends its turn; the first block wins */

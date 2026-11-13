@@ -4,6 +4,7 @@ import { useEffect, useReducer, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { afterMoraleDice } from './morale-dice';
+import { turnStartDue, turnStartOutcome } from './turn-start-check';
 import { useBattleScene } from './useBattleScene';
 import { useFxEnabled } from './useFxEnabled';
 
@@ -19,12 +20,7 @@ import {
 } from '@/lib/utils/battle/flows';
 import { checkReturnToStart } from '@/lib/utils/battle/grid';
 import { effectiveMorale } from '@/lib/utils/battle/morale/effective-morale';
-import type { PendingMoraleCheckPayload } from '@/lib/utils/battle/turn';
-import {
-    canCastBonusSpell,
-    needsMoraleCheck,
-    turnExhausted,
-} from '@/lib/utils/battle/view';
+import { canCastBonusSpell, turnExhausted } from '@/lib/utils/battle/view';
 import type { BattleParticipant } from '@/types/battle';
 
 type BonusSpell = Parameters<typeof canCastBonusSpell>[1][number];
@@ -48,24 +44,13 @@ export function usePlayerTurn(
     const [state, dispatch] = useReducer(turnFlow, initialTurnFlow, (s) =>
         turnFlow(s, {
             type: 'BEGIN',
-            gated: needsMoraleCheck(
-                participant,
-                scene.battle.initiativeOrder,
-                scene.battle.pendingMoraleCheck
-            ),
+            gated: turnStartDue(scene.battle, participant.basicInfo.id),
         })
     );
 
     const id = participant.basicInfo.id;
 
-    const pending = scene.battle
-        .pendingMoraleCheck as PendingMoraleCheckPayload | null;
-
-    const gateResult =
-        state.gateResult ??
-        (pending?.participantId === id
-            ? moraleOutcome(pending.moraleResult)
-            : undefined);
+    const gateResult = state.gateResult ?? turnStartOutcome(scene.battle, id);
 
     const skipTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
