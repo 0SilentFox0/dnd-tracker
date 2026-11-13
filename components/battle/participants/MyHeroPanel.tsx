@@ -2,7 +2,7 @@
 
 import { memo } from 'react';
 import { useTranslations } from 'next-intl';
-import { Heart, Shield } from 'lucide-react';
+import { Heart } from 'lucide-react';
 
 import { HitFrame, PortraitFx } from '@/components/battle/fx/PortraitFx';
 import {
@@ -25,7 +25,6 @@ import {
 } from '@/lib/hooks/battle';
 import { cn } from '@/lib/utils';
 import { effectiveMorale } from '@/lib/utils/battle/morale/effective-morale';
-import { getEffectiveArmorClass } from '@/lib/utils/battle/participant/helpers';
 import {
     abilityCharges,
     NO_EFFECTS,
@@ -50,9 +49,9 @@ export const MyHeroPanel = memo(function MyHeroPanel({
         effects,
     } = useBattleSceneData();
 
-    const { d20Stats, hpTerm, spells } = useBattleRules();
+    const { hpTerm, spells } = useBattleRules();
 
-    const ConditionTestPanel = useSystemBattleUi().ConditionTestPanel;
+    const { ConditionTestPanel, HeroStats } = useSystemBattleUi();
 
     const heroEffects = effects.get(live.basicInfo.id) ?? NO_EFFECTS;
 
@@ -114,8 +113,9 @@ export const MyHeroPanel = memo(function MyHeroPanel({
                                         participant={hero}
                                         wounds={hpTerm === 'wounds'}
                                     />
-                                    {d20Stats &&
-                                        ` · AC ${getEffectiveArmorClass(hero, battle.initiativeOrder)}`}
+                                    {HeroStats && (
+                                        <HeroStats hero={hero} compact />
+                                    )}
                                 </>
                             ) : battle.status !== BattleStatus.ACTIVE ? (
                                 ''
@@ -140,14 +140,8 @@ export const MyHeroPanel = memo(function MyHeroPanel({
                                     wounds={hpTerm === 'wounds'}
                                 />
                             </span>
-                            {d20Stats && (
-                                <span className="flex items-center gap-1.5">
-                                    <Shield className="size-4 text-hud-soft" />
-                                    {getEffectiveArmorClass(
-                                        hero,
-                                        battle.initiativeOrder
-                                    )}
-                                </span>
+                            {HeroStats && (
+                                <HeroStats hero={hero} compact={false} />
                             )}
                         </div>
                     )}

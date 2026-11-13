@@ -6,7 +6,6 @@ import { useBattleSceneData } from './useBattleScene';
 
 import { distanceOf } from '@/lib/utils/battle/grid/cell-feet';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
-import { statColumnsOf } from '@/lib/utils/rules/systems/stats';
 export function useBattleRules() {
     const { battle } = useBattleSceneData();
 
@@ -21,7 +20,6 @@ export function useBattleRules() {
             dice: combat.dice,
             serverJudged: combat.judge === 'server',
             actionEconomy: combat.actionEconomy,
-            d20Stats: statColumnsOf(def).has('armorClass'),
             spells,
             tested: !!magic.tested,
             distance: distanceOf(rules),

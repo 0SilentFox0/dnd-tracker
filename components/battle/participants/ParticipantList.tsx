@@ -5,6 +5,7 @@ import { memo, useMemo } from 'react';
 import { ParticipantRow } from './ParticipantRow';
 import { ReserveParticipantRow } from './ReserveParticipantRow';
 
+import { useSystemBattleUi } from '@/components/battle/use-system-battle-ui';
 import { ParticipantSide } from '@/lib/constants/battle';
 import {
     useBattleRules,
@@ -13,13 +14,7 @@ import {
     useModeView,
 } from '@/lib/hooks/battle';
 import { cn } from '@/lib/utils';
-import { getEffectiveArmorClass } from '@/lib/utils/battle/participant/helpers';
-import {
-    canSeeExactStats,
-    formatKnownArmorClass,
-    NO_EFFECTS,
-    resolveKnownArmorClass,
-} from '@/lib/utils/battle/view';
+import { canSeeExactStats, NO_EFFECTS } from '@/lib/utils/battle/view';
 
 export const ParticipantList = memo(function ParticipantList({
     side,
@@ -37,7 +32,9 @@ export const ParticipantList = memo(function ParticipantList({
         effects,
     } = useBattleSceneData();
 
-    const { d20Stats, hpTerm } = useBattleRules();
+    const { hpTerm } = useBattleRules();
+
+    const { defense } = useSystemBattleUi();
 
     const impactFor = useFxImpacts();
 
@@ -54,21 +51,17 @@ export const ParticipantList = memo(function ParticipantList({
             list.map((p) => {
                 const exact = canSeeExactStats(p, viewer);
 
-                const acText = !d20Stats
-                    ? null
-                    : exact
-                      ? String(getEffectiveArmorClass(p, order))
-                      : formatKnownArmorClass(
-                            resolveKnownArmorClass(
-                                battleLog ?? [],
-                                p.basicInfo.id,
-                                knowledge
-                            )
-                        );
+                const acText =
+                    defense?.(p, {
+                        order,
+                        log: battleLog ?? [],
+                        knowledge,
+                        exact,
+                    }) ?? null;
 
                 return { participant: p, exact, acText };
             }),
-        [list, viewer, order, battleLog, knowledge, d20Stats]
+        [list, viewer, order, battleLog, knowledge, defense]
     );
 
     return (

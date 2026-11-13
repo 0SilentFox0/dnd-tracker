@@ -26,11 +26,13 @@ const render = (key: string, momentum?: { ally?: true }) => {
 };
 
 describe('useBattleRules', () => {
-    it('homm: d20 flags (d20Stats comes from the armorClass column)', () => {
-        expect(render('homm')).toMatchObject({
+    it('homm: d20 flags', () => {
+        const rules = render('homm');
+
+        expect(rules).not.toHaveProperty('d20Stats');
+        expect(rules).toMatchObject({
             dice: 20,
             serverJudged: false,
-            d20Stats: true,
             spells: true,
             hpTerm: 'hp',
             distance: { unit: 'ft', perCell: 5 },
@@ -45,7 +47,6 @@ describe('useBattleRules', () => {
         expect(rules).toMatchObject({
             dice: 100,
             serverJudged: true,
-            d20Stats: false,
             spells: true,
             tested: true,
             actionEconomy: { bonusAction: false, reaction: false },
