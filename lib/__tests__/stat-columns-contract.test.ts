@@ -1,3 +1,5 @@
+import fs from 'node:fs';
+import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 import { D6POOL_SYSTEM } from './fixtures/d6pool/definition';
@@ -17,21 +19,40 @@ import {
 } from '@/lib/utils/rules/systems/stats';
 import type { RuleSystemDefinition } from '@/lib/utils/rules/systems/types';
 
-// NOT NULL columns of `Character` in prisma/schema.prisma that CHARACTER_SYSTEM_COLUMNS lists.
-const NOT_NULL: readonly CharacterSystemColumn[] = [
-    'strength',
-    'dexterity',
-    'constitution',
-    'intelligence',
-    'wisdom',
-    'charisma',
-    'armorClass',
-    'class',
-    'classes',
-    'initiative',
-    'speed',
-    'level',
-];
+const characterModel = () => {
+    const schema = fs.readFileSync(
+        path.resolve(__dirname, '../../prisma/schema.prisma'),
+        'utf8'
+    );
+
+    const body = /^model Character \{\n([\s\S]*?)^\}/m.exec(schema)?.[1] ?? '';
+
+    return new Map(
+        [...body.matchAll(/^\s{2}(\w+)\s+(\w+)(\?|\[\])?\s/gm)].map((m) => [
+            m[1],
+            m[3] !== '?',
+        ])
+    );
+};
+
+const model = characterModel();
+
+const NOT_NULL = CHARACTER_SYSTEM_COLUMNS.filter(
+    (c): c is CharacterSystemColumn => model.get(c) === true
+);
+
+describe('NOT NULL columns come from the Prisma schema', () => {
+    it('every system column is a Character field', () =>
+        expect(CHARACTER_SYSTEM_COLUMNS.filter((c) => !model.has(c))).toEqual(
+            []
+        ));
+
+    it('the optional ones are not demanded', () => {
+        expect(NOT_NULL).toContain('class');
+        expect(NOT_NULL).not.toContain('subclass');
+        expect(NOT_NULL).not.toContain('archetype');
+    });
+});
 
 const compositions: [string, RuleSystemDefinition][] = [
     ...RULE_SYSTEM_KEYS.map((key): [string, RuleSystemDefinition] => [
