@@ -9,7 +9,7 @@ const importers = (graph: ReturnType<typeof staticGraph>, pkg: string) =>
 
 describe('entry-чанки гравця', () => {
     const battle = staticGraph([
-        'app/campaigns/[id]/battles/[battleId]/BattlePageClient.tsx',
+        'app/campaigns/[id]/battles/[battleId]/page-client.tsx',
     ]);
 
     const profile = staticGraph([

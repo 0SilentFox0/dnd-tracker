@@ -1,4 +1,4 @@
-import { BattlePageClient } from './BattlePageClient';
+import { BattlePageClient } from './page-client';
 
 import { PlayerViewGuard } from '@/components/common/PlayerViewGuard';
 import { getSessionUserId } from '@/lib/auth';

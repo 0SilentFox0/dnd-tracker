@@ -17,7 +17,7 @@ vi.mock('@/lib/server/campaigns/access', () => ({
 vi.mock('@/lib/server/battles/demo-encounter', () => ({
     buildDemoEncounter: vi.fn(async () => []),
 }));
-vi.mock('../BattlePageClient', () => ({ BattlePageClient: () => null }));
+vi.mock('../page-client', () => ({ BattlePageClient: () => null }));
 
 import BattlePage from '../page';
 
