@@ -109,8 +109,8 @@ describe('gate runs once per HTTP request', () => {
         [
             'hit-dice',
             () =>
-                import('@/lib/server/characters/system-route').then((m) =>
-                    m.systemCharacterRoute('hit-dice')
+                import('@/lib/server/characters/operation-runner').then((m) =>
+                    m.characterRoute(CHARACTER_OPERATIONS['hit-dice'])
                 ),
             { classId: 'c' },
         ],

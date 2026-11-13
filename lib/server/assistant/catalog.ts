@@ -4,8 +4,11 @@ import type { AssistantActionDef } from './types';
 import 'server-only';
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { ContentError } from '@/lib/server/content/errors';
+import { operationInComposition } from '@/lib/server/systems/registry';
 import type { Actor } from '@/lib/utils/api/actor';
 import { needFailure } from '@/lib/utils/api/need';
+import type { Ruleset } from '@/lib/utils/rules/schema';
+import { contentKindsOf } from '@/lib/utils/rules/systems/catalog';
 
 export function createActionCatalog(
     definitions: readonly AssistantActionDef[]
@@ -34,14 +37,30 @@ export function createActionCatalog(
 
             return action;
         },
-        listActions(actor: Actor): AssistantActionDef[] {
+        listActions(
+            actor: Actor,
+            rules?: Pick<Ruleset, 'system'>
+        ): AssistantActionDef[] {
             if (!actor.isDM || (actor.via === 'token' && !actor.scopes))
                 return [];
 
             // sessionOnly restricts execution, not preparing a proposal for session review.
             return [...actions.values()].filter(
                 (def) =>
-                    !needFailure(actor, { ...def.need, sessionOnly: undefined })
+                    !needFailure(actor, {
+                        ...def.need,
+                        sessionOnly: undefined,
+                    }) &&
+                    (!rules ||
+                        ((!def.systemOperation ||
+                            operationInComposition(
+                                rules,
+                                def.systemOperation
+                            )) &&
+                            (!def.contentKind ||
+                                contentKindsOf(rules.system).has(
+                                    def.contentKind
+                                ))))
             );
         },
     };

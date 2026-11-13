@@ -9,10 +9,10 @@ import { BoundedNumberInput } from '@/components/ui/bounded-number-input';
 import { Button } from '@/components/ui/button';
 import { FormField } from '@/components/ui/labeled-input';
 import { SelectField } from '@/components/ui/select-field';
-import { useCareers } from '@/lib/hooks/careers';
 import { useFeats } from '@/lib/hooks/feats';
 import { errorMessage } from '@/lib/utils/common/error-message';
 import { useRaceProfiles, useSaveRaceProfile } from '@/systems/wfrp/hooks';
+import { useCareers } from '@/systems/wfrp/hooks/careers';
 import { CHARACTERISTIC_KEYS } from '@/systems/wfrp/rules/characteristics/keys';
 import type { SpeciesProfile } from '@/systems/wfrp/rules/creation';
 import {

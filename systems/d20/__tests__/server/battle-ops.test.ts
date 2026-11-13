@@ -9,6 +9,7 @@ describe('D20_MODULE_SERVER.battle', () => {
         const op = await D20_MODULE_SERVER.battle?.['crit-choice'].load({
             attack: vi.fn(),
             spell: vi.fn(),
+            legendary: vi.fn(),
         });
 
         expect(op?.schema.safeParse({ cancel: true }).success).toBe(true);

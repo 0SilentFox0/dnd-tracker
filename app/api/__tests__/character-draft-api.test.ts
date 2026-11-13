@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { prisma } from '@/lib/db';
@@ -90,6 +90,10 @@ const createRoute = () =>
 const ctx = { params: Promise.resolve({ id: 'camp', characterId: 'a' }) };
 
 describe('player draft API', () => {
+    beforeAll(async () => {
+        await import('@/lib/server/systems/registry');
+    }, 30_000);
+
     beforeEach(() => {
         vi.clearAllMocks();
         vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(

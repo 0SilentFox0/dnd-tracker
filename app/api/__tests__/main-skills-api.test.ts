@@ -24,6 +24,10 @@ const auth = vi.hoisted(() => {
     };
 });
 
+vi.mock('@/lib/server/content/kind-active', () => ({
+    isKindActive: async () => true,
+    assertKindActive: async () => undefined,
+}));
 vi.mock('@/lib/db', async () => {
     const { contentDatabaseDouble } = await import(
         '@/lib/server/content/__tests__/database-double'

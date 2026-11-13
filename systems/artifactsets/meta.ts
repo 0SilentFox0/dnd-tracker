@@ -6,4 +6,6 @@ export const ARTIFACTSETS_META = {
     keys: [],
     requires: ['d20'],
     i18n: {},
+    dmSections: ['artifact-sets'],
+    contentKinds: ['artifact-sets'],
 } as const satisfies SystemMeta;

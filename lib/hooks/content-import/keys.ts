@@ -3,7 +3,6 @@ import type { QueryKey } from '@tanstack/react-query';
 import { artifactSetKeys } from '@/lib/hooks/artifact-sets/keys';
 import { artifactKeys } from '@/lib/hooks/artifacts/keys';
 import { backgroundKeys } from '@/lib/hooks/backgrounds/keys';
-import { careerKeys } from '@/lib/hooks/careers/keys';
 import { classKeys } from '@/lib/hooks/classes/keys';
 import { featKeys } from '@/lib/hooks/feats/keys';
 import { raceKeys } from '@/lib/hooks/races/keys';
@@ -17,7 +16,10 @@ export const contentImportKeys = {
         ['content-import-ai', campaignId, kind] as const,
 };
 
-const INVALIDATE: Record<ImportKind, (campaignId: string) => QueryKey[]> = {
+/** Kinds a module owns keep the `[kind, campaignId]` list key */
+const INVALIDATE: Partial<
+    Record<ImportKind, (campaignId: string) => QueryKey[]>
+> = {
     units: unitWriteKeys,
     spells: (c) => [spellKeys.list(c)],
     skills: (c) => [skillKeys.list(c)],
@@ -26,7 +28,6 @@ const INVALIDATE: Record<ImportKind, (campaignId: string) => QueryKey[]> = {
     races: (c) => [raceKeys.list(c), unitKeys.list(c)],
     classes: (c) => [classKeys.list(c)],
     backgrounds: (c) => [backgroundKeys.list(c)],
-    careers: (c) => [careerKeys.list(c)],
     feats: (c) => [featKeys.list(c)],
     artifacts: (c) => [artifactKeys.list(c), artifactSetKeys.list(c)],
     'artifact-sets': (c) => [artifactSetKeys.list(c), artifactKeys.list(c)],
@@ -35,4 +36,4 @@ const INVALIDATE: Record<ImportKind, (campaignId: string) => QueryKey[]> = {
 export const importInvalidateKeys = (
     campaignId: string,
     kind: ImportKind
-): QueryKey[] => INVALIDATE[kind](campaignId);
+): QueryKey[] => INVALIDATE[kind]?.(campaignId) ?? [[kind, campaignId]];

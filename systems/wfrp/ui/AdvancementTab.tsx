@@ -13,10 +13,10 @@ import { useProfile } from '@/components/character-profile/ProfileContext';
 import { LoadingState } from '@/components/common/states';
 import { HudSection } from '@/components/hud/form';
 import { useCampaignRules } from '@/lib/hooks/campaigns';
-import { useCareers } from '@/lib/hooks/careers';
 import { useCharacter } from '@/lib/hooks/characters';
 import { useFeats } from '@/lib/hooks/feats';
 import { useAdvance } from '@/systems/wfrp/hooks';
+import { useCareers } from '@/systems/wfrp/hooks/careers';
 import {
     advanceCost,
     availableXp,

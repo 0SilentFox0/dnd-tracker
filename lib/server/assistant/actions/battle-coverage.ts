@@ -1,5 +1,13 @@
 import { BATTLE_COMMANDS } from './battle-actions';
 
+import { SYSTEM_SERVER_UNION } from '@/lib/server/systems/registry';
+
+const systemOperations = new Set(
+    Object.values(SYSTEM_SERVER_UNION).flatMap((server) =>
+        Object.keys(server.battle ?? {})
+    )
+);
+
 const base = 'campaigns/[id]/battles';
 
 const battle = `${base}/[battleId]`;
@@ -22,7 +30,9 @@ export const BATTLE_ACTION_COVERAGE = [
     ...BATTLE_COMMANDS.map((operation) =>
         operation === 'participants.patch'
             ? ['PATCH', `${battle}/participants/[participantId]`, operation]
-            : ['POST', `${battle}/${operation}`, operation]
+            : systemOperations.has(operation)
+              ? ['POST', `${battle}/system/[action]`, operation]
+              : ['POST', `${battle}/${operation}`, operation]
     ),
 ].map(([method, route, operation]) => ({
     method,

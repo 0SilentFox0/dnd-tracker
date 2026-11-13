@@ -11,6 +11,11 @@ import type {
     FindPurpose,
 } from '@/lib/server/content/define-resource';
 import { ContentError, parseInput } from '@/lib/server/content/errors';
+import {
+    assertKindActive,
+    isKindActive,
+} from '@/lib/server/content/kind-active';
+import { unreferencedGuard } from '@/lib/server/content/referenced';
 import type { Actor } from '@/lib/utils/api/actor';
 import { NEED } from '@/lib/utils/api/need';
 
@@ -45,12 +50,14 @@ const invalidate = (r: AnyContentResource, actor: Actor) => {
         );
 };
 
-export function listContent(
+export async function listContent(
     r: AnyContentResource,
     actor: Actor,
     query: URLSearchParams
 ) {
     assertCan(actor, NEED.read(r.access.list));
+
+    if (!(await isKindActive(r.kind, actor))) return [];
 
     return r.list(actor, query);
 }
@@ -61,6 +68,8 @@ export async function getContent(
     id: string
 ) {
     assertCan(actor, NEED.read(r.access.item));
+
+    await assertKindActive(r.kind, actor);
 
     const row = await found(r, actor, id, 'read');
 
@@ -73,6 +82,8 @@ export async function createContent(
     raw: unknown
 ) {
     assertCan(actor, NEED.write);
+
+    await assertKindActive(r.kind, actor);
 
     let data = parseInput(r.schemas.create, raw);
 
@@ -92,6 +103,8 @@ export async function updateContent(
     raw: unknown
 ) {
     assertCan(actor, NEED.write);
+
+    await assertKindActive(r.kind, actor);
 
     if (r.prepareUpdate) {
         const existing = await found(r, actor, id, 'write');
@@ -121,8 +134,14 @@ export async function removeContent(
 ): Promise<void> {
     assertCan(actor, NEED.write);
 
+    await assertKindActive(r.kind, actor);
+
     await write(r, actor, async () => {
-        await r.remove(actor, await found(r, actor, id, 'write'));
+        await r.remove(
+            actor,
+            await found(r, actor, id, 'write'),
+            unreferencedGuard(actor.campaignId, r.kind, id)
+        );
 
         if (prisma.compendiumEntry)
             await prisma.compendiumEntry.deleteMany({
@@ -142,6 +161,8 @@ export async function removeAllContent(
     actor: Actor
 ): Promise<number> {
     assertCan(actor, NEED.writeAll);
+
+    await assertKindActive(r.kind, actor);
 
     if (!r.removeAll)
         throw new ContentError(API_ERRORS.METHOD_NOT_ALLOWED, 405);

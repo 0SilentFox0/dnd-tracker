@@ -6,11 +6,11 @@ import {
     goblin,
     hero,
 } from '@/lib/server/battles/__tests__/mutations/fixtures';
-import { coreActionMutation } from '@/lib/server/battles/mutations/core-action/core-action-mutation';
 import { legendaryMutation } from '@/lib/server/battles/mutations/core-action/legendary-mutation';
 import { makeParticipant } from '@/lib/utils/abilities/__tests__/fixtures';
 import type { BattleMutationContext } from '@/lib/utils/battle/pipeline/run-battle-mutation';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { coreActionMutation } from '@/systems/d20/server/battle/core-action-mutation';
 import {
     momentumOf,
     sceneOf,

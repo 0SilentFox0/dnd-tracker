@@ -105,6 +105,10 @@ type ActionBase = {
     description: string;
     input: z.ZodType;
     need: ActorNeed;
+    /** Registry key of the module operation the action runs; hidden where the campaign's composition lacks it */
+    systemOperation?: string;
+    /** Content kind the action works on; hidden where the campaign's composition lacks it */
+    contentKind?: string;
 };
 export type AssistantReadAction = ActionBase & {
     effect: 'read';

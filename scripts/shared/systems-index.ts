@@ -257,6 +257,24 @@ export const ROOT_SPECS: readonly RootSpec[] = [
         ],
     },
     {
+        file: 'lib/utils/content/import/fields/system-specs.ts',
+        blocks: [
+            {
+                layer: (id) => `systems/${id}/rules/import-specs.ts`,
+                name: (id) => `${upper(id)}_IMPORT_SPECS`,
+                line: imp(
+                    (id) => `${upper(id)}_IMPORT_SPECS`,
+                    (id) => `@/systems/${id}/rules/import-specs`
+                ),
+            },
+            {
+                layer: (id) => `systems/${id}/rules/import-specs.ts`,
+                name: (id) => `${upper(id)}_IMPORT_SPECS`,
+                line: (id) => `...${upper(id)}_IMPORT_SPECS,`,
+            },
+        ],
+    },
+    {
         file: 'lib/utils/rules/systems/sections.ts',
         blocks: [
             {

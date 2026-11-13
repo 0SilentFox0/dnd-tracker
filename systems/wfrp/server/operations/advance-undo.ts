@@ -2,7 +2,6 @@ import { z } from 'zod';
 
 import { requireCharacterAccess } from '@/lib/server/characters/access';
 import {
-    characterRoute,
     defineCharacterOperation,
     gateOptions,
 } from '@/lib/server/characters/operation-runner';
@@ -21,5 +20,3 @@ export const advanceUndoOperation = defineCharacterOperation({
     query: () => ({}),
     run: (gate, _input) => undoAdvance(gate),
 });
-
-export const DELETE = characterRoute(advanceUndoOperation);

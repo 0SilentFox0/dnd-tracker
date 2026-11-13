@@ -9,7 +9,6 @@ import { characteristicsJson } from '@/lib/server/characters/core/characteristic
 import { lockCharacters } from '@/lib/server/characters/lock';
 import { writeCharacterLog } from '@/lib/server/characters/log';
 import { ContentError } from '@/lib/server/content/errors';
-import { toCareerData } from '@/lib/utils/careers/row';
 import { ruleSystemOf } from '@/lib/utils/rules/systems/registry';
 import {
     availableXp,
@@ -22,6 +21,7 @@ import type {
     LedgerEntry,
 } from '@/systems/wfrp/rules/characteristics/keys';
 import { readCharacteristics } from '@/systems/wfrp/rules/characteristics/keys';
+import { toCareerData } from '@/systems/wfrp/server/careers/row';
 import type { AdvanceInput } from '@/systems/wfrp/server/progression-schemas';
 
 export type AdvanceResult = {

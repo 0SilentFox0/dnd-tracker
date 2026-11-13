@@ -21,6 +21,12 @@ vi.mock('@/lib/db', async () => {
     };
 });
 
+vi.mock('@/lib/server/campaigns/rules', async () => {
+    const { parseRules } = await import('@/lib/utils/rules/schema');
+
+    return { loadRules: vi.fn(async () => parseRules({})) };
+});
+
 vi.mock('@/lib/supabase/admin', () => ({
     createAdminClient: () => ({
         storage: {

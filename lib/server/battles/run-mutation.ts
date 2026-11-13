@@ -6,6 +6,8 @@ import { defaultPipelineDeps } from './pipeline-deps';
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { getRequestLocale } from '@/lib/i18n/request-locale';
 import { ContentError } from '@/lib/server/content/errors';
+import { systemBattleOperation } from '@/lib/server/systems/registry';
+import { errorResponse } from '@/lib/utils/api/api-response';
 import { rateLimitResponse } from '@/lib/utils/api/rate-limit';
 import { apiErrorJson } from '@/lib/utils/api/translate-error';
 import type {
@@ -143,4 +145,16 @@ export async function runBattleMutation<TBody>(
     } catch (err) {
         return battleErrorResponse(err);
     }
+}
+
+/** `battles/[battleId]/system/[action]`: only module battle operations; core ones are not reachable here */
+export async function runSystemBattleRoute(
+    req: Request,
+    params: { id: string; battleId: string },
+    action: string
+): Promise<NextResponse> {
+    if (!systemBattleOperation(action))
+        return errorResponse(API_ERRORS.BATTLE_UNKNOWN_OPERATION, 404);
+
+    return runBattleMutation(req, { params, operation: action });
 }

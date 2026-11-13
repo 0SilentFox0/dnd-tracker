@@ -14,12 +14,12 @@ import {
     EMPTY_INVENTORY,
 } from '@/lib/server/characters/core/derive-character-defaults';
 import { lockPlayerDrafts } from '@/lib/server/characters/draft-lock';
+import { systemServerOf } from '@/lib/server/systems/registry';
 import { requireCampaignAccess } from '@/lib/utils/api/api-auth';
 import { errorResponse } from '@/lib/utils/api/api-response';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 import { ruleSystemOf } from '@/lib/utils/rules/systems/registry';
 import { statColumnsOf } from '@/lib/utils/rules/systems/stats';
-import { createWfrpDraft } from '@/systems/wfrp/server/draft/create-wfrp-draft';
 import type { CharacterClassEntry } from '@/types/classes';
 
 export async function createDraft(
@@ -32,8 +32,9 @@ export async function createDraft(
 
     const { campaign } = access;
 
-    if (ruleSystemOf(campaign.rules).creation)
-        return createWfrpDraft(request, campaign, access);
+    const drafts = systemServerOf(campaign.rules).drafts;
+
+    if (drafts) return drafts.create(request, campaign, access);
 
     if (!statColumnsOf(ruleSystemOf(campaign.rules)).has('classes'))
         return errorResponse(API_ERRORS.SYSTEM_DRAFTS_UNSUPPORTED, 409);

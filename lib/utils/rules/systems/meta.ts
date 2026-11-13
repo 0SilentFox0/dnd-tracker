@@ -49,6 +49,7 @@ export interface SystemMeta {
     tokens?: readonly string[];
     i18n: SystemI18n;
     dmSections?: readonly string[];
+    contentKinds?: readonly string[];
 }
 
 export const SYSTEM_META = [

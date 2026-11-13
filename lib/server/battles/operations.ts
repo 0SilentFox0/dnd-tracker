@@ -89,6 +89,13 @@ async function loadSystemOperation(
 
             return createSpellMutation()(ctx, request, resume);
         },
+        legendary: async (ctx, request) => {
+            const { legendaryMutation } = await import(
+                '@/lib/server/battles/mutations/core-action/legendary-mutation'
+            );
+
+            return legendaryMutation(ctx, request);
+        },
     };
 
     const { schema } = await known.load(deps);
@@ -178,14 +185,6 @@ const OPERATIONS: Record<string, Loader> = {
             return { schema: bonusActionSchema, mutate: bonusActionMutation };
         },
     }),
-    'crit-choice': operation({
-        access: DM,
-        allowWhileAwaitingDm: true,
-        allowWhileCritPending: true,
-        respond: 'wrapped',
-        load: () =>
-            loadSystemOperation('crit-choice', API_ERRORS.CRIT_CHOICE_NONE),
-    }),
     complete: operation({
         access: DM,
         allowWhileAwaitingDm: true,
@@ -209,45 +208,6 @@ const OPERATIONS: Record<string, Loader> = {
             return {
                 schema: battleConditionsSchema,
                 mutate: battleConditionsMutation,
-            };
-        },
-    }),
-    'condition-test': operation({
-        access: MEMBER,
-        blockedByMode: true,
-        rateLimitScope: 'attack',
-        load: async () => {
-            const { conditionTestMutation, conditionTestSchema } = await import(
-                '@/lib/server/battles/mutations/condition-test/condition-test-mutation'
-            );
-
-            return {
-                schema: conditionTestSchema,
-                mutate: conditionTestMutation,
-            };
-        },
-    }),
-    channel: operation({
-        access: MEMBER,
-        blockedByMode: true,
-        rateLimitScope: 'attack',
-        load: () =>
-            loadSystemOperation(
-                'channel',
-                API_ERRORS.BATTLE_CHANNEL_UNSUPPORTED
-            ),
-    }),
-    'system-condition': operation({
-        access: DM,
-        load: async () => {
-            const { systemConditionMutation, systemConditionSchema } =
-                await import(
-                    '@/lib/server/battles/mutations/system-condition/system-condition-mutation'
-                );
-
-            return {
-                schema: systemConditionSchema,
-                mutate: systemConditionMutation,
             };
         },
     }),
@@ -276,31 +236,6 @@ const OPERATIONS: Record<string, Loader> = {
             return {
                 schema: initiativeRollSchema,
                 mutate: initiativeRollMutation,
-            };
-        },
-    }),
-    'core-action': operation({
-        access: MEMBER,
-        blockedByMode: true,
-        load: async () => {
-            const { coreActionMutation } = await import(
-                '@/lib/server/battles/mutations/core-action/core-action-mutation'
-            );
-
-            const { legendaryMutation } = await import(
-                '@/lib/server/battles/mutations/core-action/legendary-mutation'
-            );
-
-            const { coreActionRouteSchema } = await import(
-                '@/lib/utils/battle/actions/schema'
-            );
-
-            return {
-                schema: coreActionRouteSchema,
-                mutate: (ctx, body) =>
-                    body.action === 'legendary'
-                        ? legendaryMutation(ctx, body)
-                        : coreActionMutation(ctx, body),
             };
         },
     }),
@@ -373,17 +308,6 @@ const OPERATIONS: Record<string, Loader> = {
 
             return { schema: mazeMarkSchema, mutate: mazeMarkMutation };
         },
-    }),
-    'morale-check': operation({
-        access: MEMBER,
-        blockedByMode: true,
-        allowWhileAwaitingDm: true,
-        respond: 'wrapped',
-        load: () =>
-            loadSystemOperation(
-                'morale-check',
-                API_ERRORS.BATTLE_MORALE_DISABLED
-            ),
     }),
     move: operation({
         access: MEMBER,
@@ -539,10 +463,17 @@ export async function getBattleOperation(
     name: string,
     params: BattleOperationParams
 ): Promise<Definition> {
-    const load = Object.hasOwn(OPERATIONS, name) ? OPERATIONS[name] : undefined;
+    if (Object.hasOwn(OPERATIONS, name)) return OPERATIONS[name](params);
 
-    if (!load)
+    const system = systemBattleOperation(name);
+
+    if (!system)
         throw new BattleAccessError(404, API_ERRORS.BATTLE_UNKNOWN_OPERATION);
 
-    return load(params);
+    const { missing, ...settings } = system.settings;
+
+    return operation({
+        ...settings,
+        load: () => loadSystemOperation(name, missing),
+    })(params);
 }

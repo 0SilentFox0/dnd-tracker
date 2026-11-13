@@ -8,5 +8,13 @@ export const composeServer = (
     addons: readonly Addon<SystemServer>[]
 ): SystemServer =>
     composeParts(base, addons, {
-        dictionaries: ['operations', 'battle', 'ai.heroSelect', 'ai.toolNotes'],
+        dictionaries: [
+            'operations',
+            'battle',
+            'contentKinds',
+            'routes.campaign',
+            'routes.character',
+            'ai.heroSelect',
+            'ai.toolNotes',
+        ],
     });

@@ -1,4 +1,5 @@
 import { campaignPost } from '@/lib/api/client';
+import { systemPath } from '@/lib/api/system';
 import type {
     CorruptionGrantBody,
     CorruptionGrantResult,
@@ -13,7 +14,7 @@ export const postCorruptionGrant = (
 ) =>
     campaignPost<CorruptionGrantResult>(
         campaignId,
-        `/characters/${characterId}/corruption`,
+        systemPath.character(characterId, 'corruption'),
         body
     );
 
@@ -24,6 +25,6 @@ export const postCorruptionUndo = (
 ) =>
     campaignPost<CorruptionUndoResult>(
         campaignId,
-        `/characters/${characterId}/corruption/undo`,
+        systemPath.character(characterId, 'corruption.undo'),
         body
     );

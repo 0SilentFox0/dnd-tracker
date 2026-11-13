@@ -10,7 +10,6 @@ vi.mock('next/cache', () => ({
 
 import { prisma } from '@/lib/db';
 import { detachRefs } from '@/lib/server/content/detach-refs';
-import { mainSkillsResource } from '@/lib/server/content/resources/main-skills';
 import { racesResource } from '@/lib/server/content/resources/races';
 import { spellGroupsResource } from '@/lib/server/content/resources/spell-groups';
 import { spellsResource } from '@/lib/server/content/resources/spells';
@@ -20,6 +19,7 @@ import {
     isLocalDevDatabaseEnv,
     singleConnectionDatabaseUrl,
 } from '@/lib/server/test-support/local-db';
+import { mainSkillsResource } from '@/systems/skilltrees/server/content/main-skills';
 
 const raw = new PrismaClient({
     datasources: { db: { url: singleConnectionDatabaseUrl('DATABASE_URL') } },

@@ -1,14 +1,20 @@
+import type { NextResponse } from 'next/server';
 import type { ZodType } from 'zod';
 
 import type { SpellRequestData } from '@/lib/schemas/battles';
 import type { AttackBody } from '@/lib/server/battles/mutations/attack/attack-mutation';
 import type { CharacterOperation } from '@/lib/server/characters/operation-runner';
+import type { AnyContentResource } from '@/lib/server/content/define-resource';
+import type { SyncDb } from '@/lib/server/templates/sync/context';
 import type { ArtifactSetRowLike } from '@/lib/utils/abilities/build/collect';
+import type { CampaignAccessResult } from '@/lib/utils/api/api-auth';
+import type { LegendaryActionBody } from '@/lib/utils/battle/actions/schema';
 import type { getCharacterStats, UnitStats } from '@/lib/utils/battle/balance';
 import type { CritResume } from '@/lib/utils/battle/crit-choice/types';
 import type {
     BattleMutationContext,
     MutationResult,
+    RunBattleMutationOptions,
 } from '@/lib/utils/battle/pipeline/run-battle-mutation';
 import type {
     CampaignSpellContext,
@@ -18,6 +24,7 @@ import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
 import type { BranchLevel, branchLevels } from '@/lib/utils/skills/progression';
 import type { BattleParticipant, EquippedArtifact } from '@/types/battle';
 import type { SetProgress } from '@/types/characters';
+import type { ImportRecord } from '@/types/content-import';
 
 export interface SystemSchemas {
     characteristics?: ZodType;
@@ -31,9 +38,33 @@ export interface SystemSchemas {
 export interface SystemOperation {
     operation: CharacterOperation;
     input: ZodType;
-    /** The gate yields a `CampaignScope`; the registry then answers 404 where the campaign's composition lacks the operation. */
-    scoped?: true;
+    /** Assistant: a read action (scope `characters:read`) that needs no confirmation */
+    read?: true;
+    /** Assistant: a write that is never auto-applied */
+    confirm?: 'always';
 }
+
+export type SystemHttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+
+export interface SystemHandlerCtx {
+    campaignId: string;
+    access: CampaignAccessResult;
+    input: unknown;
+    searchParams: URLSearchParams;
+}
+
+export interface SystemHandler {
+    access: 'member' | 'dm';
+    schema?: ZodType;
+    /** `input` is the parsed body, the query result, or `{ query, body }` when both are set */
+    query?: (searchParams: URLSearchParams) => unknown;
+    handle(ctx: SystemHandlerCtx): Promise<Response>;
+}
+
+/** `{ operation }` is a key of the same module's `operations`; the character operation gates its own access */
+export type SystemRouteTarget = { operation: string } | SystemHandler;
+
+export type SystemRoute = Partial<Record<SystemHttpMethod, SystemRouteTarget>>;
 
 export type SystemToolNote =
     | 'get_party'
@@ -83,9 +114,21 @@ type Resumable<T> = (
 export interface BattleOperationDeps {
     attack: Resumable<AttackBody>;
     spell: Resumable<SpellRequestData>;
+    /** Legendary and lair actions: they run the core summon and spell pipelines, which reach the registry */
+    legendary(
+        ctx: BattleMutationContext,
+        request: LegendaryActionBody
+    ): Promise<MutationResult>;
 }
 
+/** Route settings of a battle operation; `missing` is the API_ERRORS key answered when the battle's composition lacks it */
+export type SystemBattleSettings = Omit<
+    RunBattleMutationOptions<unknown>,
+    'params' | 'schema' | 'mutate' | 'operation'
+> & { missing: string };
+
 export interface SystemBattleOperation {
+    settings: SystemBattleSettings;
     load(deps: BattleOperationDeps): Promise<{
         schema: ZodType;
         mutate(
@@ -125,12 +168,56 @@ export interface SystemParticipantServer {
     prepareContext?: readonly ContextPreparer[];
 }
 
+/** Player-draft creation of a base whose characters are built by a creation flow instead of the d20 draft */
+export interface SystemDrafts {
+    create(
+        request: Request,
+        campaign: CampaignAccessResult['campaign'],
+        access: CampaignAccessResult
+    ): Promise<NextResponse>;
+    update(
+        request: Request,
+        campaignId: string,
+        characterId: string,
+        access: CampaignAccessResult
+    ): Promise<NextResponse>;
+}
+
+/** A content kind a module owns: its CRUD resource, an export mapper and the schemas it adds to the OpenAPI components */
+export interface ContentKindServer {
+    resource: AnyContentResource;
+    toImportRecord?(row: never): ImportRecord;
+    sharedSchemas?: readonly (readonly [ZodType, string])[];
+}
+
+/** How a module's data points at core rows by id (JSON, no FK): blocks deletes of `kind` rows and sync deletes */
+export interface ContentRefSource {
+    kind: string;
+    /** Tail of the sync warning: "<kind> <name>: not deleted, <reason>" */
+    reason: string;
+    /** API_ERRORS key answered when a content delete hits a referenced row; absent = sync-only source */
+    error?: string;
+    referenced(db: SyncDb, campaignId: string): Promise<Set<string>>;
+    dangling?(db: SyncDb, campaignId: string): Promise<string[]>;
+    /** Deleting a row of `kind` makes the reference sets of these kinds stale */
+    invalidatesOnDelete?: readonly string[];
+}
+
 export interface SystemServer {
     schemas: SystemSchemas;
+    contentKinds?: Record<string, ContentKindServer>;
+    contentRefs?: readonly ContentRefSource[];
+    /** Exclusive slot of a base; an addon never sets it */
+    drafts?: SystemDrafts;
     participant?: SystemParticipantServer;
     balance: SystemBalance;
     operations?: Record<string, SystemOperation>;
     /** Battle operations the route layer resolves by name; the core settings (access, gates) stay with the route */
     battle?: Record<string, SystemBattleOperation>;
+    /** Keys are old paths with `/` as `.`; the method picks the target */
+    routes?: {
+        campaign?: Record<string, SystemRoute>;
+        character?: Record<string, SystemRoute>;
+    };
     ai?: SystemAi;
 }

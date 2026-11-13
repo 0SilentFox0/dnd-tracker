@@ -5,7 +5,7 @@ import type { AnyContentResource } from '@/lib/server/content/define-resource';
 import {
     inputJsonSchema,
     pascal,
-    SHARED_SCHEMAS,
+    sharedSchemas,
     toJsonSchemas,
 } from '@/lib/server/content/json-schema';
 import {
@@ -203,7 +203,7 @@ export function buildOpenApi(): OpenApiDocument {
 
     const idBySchema = new Map<ZodType, string>();
 
-    for (const [schema, id] of [...SHARED_SCHEMAS, ...entries]) {
+    for (const [schema, id] of [...sharedSchemas(), ...entries]) {
         if (!idBySchema.has(schema)) idBySchema.set(schema, id);
     }
 

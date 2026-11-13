@@ -1,4 +1,5 @@
 import { campaignGet, campaignPost } from '@/lib/api/client';
+import { systemPath } from '@/lib/api/system';
 import type { CharacterProgressionDto } from '@/types/progression';
 
 const base = (characterId: string) => `/characters/${characterId}/progression`;
@@ -6,7 +7,11 @@ const base = (characterId: string) => `/characters/${characterId}/progression`;
 export const getCharacterProgression = (
     campaignId: string,
     characterId: string
-) => campaignGet<CharacterProgressionDto>(campaignId, base(characterId));
+) =>
+    campaignGet<CharacterProgressionDto>(
+        campaignId,
+        systemPath.character(characterId, 'progression')
+    );
 
 export const learnNode = (
     campaignId: string,
@@ -15,7 +20,7 @@ export const learnNode = (
 ) =>
     campaignPost<{ unlocked: string[] }>(
         campaignId,
-        `${base(characterId)}/learn`,
+        systemPath.character(characterId, 'progression.learn'),
         { nodeId }
     );
 
@@ -26,14 +31,14 @@ export const unlearnNodes = (
 ) =>
     campaignPost<{ unlocked: string[] }>(
         campaignId,
-        `${base(characterId)}/unlearn`,
+        systemPath.character(characterId, 'progression.unlearn'),
         { nodeIds }
     );
 
 export const resetProgression = (campaignId: string, characterId: string) =>
     campaignPost<{ unlocked: string[] }>(
         campaignId,
-        `${base(characterId)}/reset`,
+        systemPath.character(characterId, 'progression.reset'),
         {}
     );
 

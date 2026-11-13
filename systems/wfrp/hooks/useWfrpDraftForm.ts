@@ -6,7 +6,6 @@ import { useRaceProfiles } from './useRaceProfiles';
 
 import { ApiError } from '@/lib/api/client';
 import { useCampaignRules } from '@/lib/hooks/campaigns';
-import { useCareers } from '@/lib/hooks/careers';
 import { characterKeys } from '@/lib/hooks/characters/keys';
 import { useRollReveal } from '@/lib/hooks/characters/useRollReveal';
 import { useFeats } from '@/lib/hooks/feats';
@@ -23,6 +22,7 @@ import type {
     WfrpDraftIdentityInput,
     WfrpDraftInput,
 } from '@/systems/wfrp/api/types';
+import { useCareers } from '@/systems/wfrp/hooks/careers';
 import { CHARACTERISTIC_KEYS } from '@/systems/wfrp/rules/characteristics/keys';
 import {
     type CreationPicks,

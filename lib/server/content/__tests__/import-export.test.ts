@@ -13,13 +13,13 @@ import { exampleCsv } from '@/lib/server/content/import/example';
 import { exportCsv } from '@/lib/server/content/import/export';
 import { buildOpenApi } from '@/lib/server/content/openapi';
 import type { Actor } from '@/lib/utils/api/actor';
-import { careerToImportRecord } from '@/lib/utils/careers/import-record';
 import {
     autoMap,
     IMPORT_SPECS,
     parseTable,
     transformRow,
 } from '@/lib/utils/content/import';
+import { careerToImportRecord } from '@/systems/wfrp/server/careers/import-record';
 import type { IdName } from '@/types/common';
 import type { ImportKind } from '@/types/content-import';
 

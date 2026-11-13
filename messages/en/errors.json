@@ -512,6 +512,7 @@
   "systemLocked": "The rule system cannot be changed while the campaign has characters or units",
   "systemLevelsUnsupported": "This rule system has no levels",
   "systemDraftsUnsupported": "This rule system does not support player drafts yet",
+  "systemActionUnknown": "This action is not available in the campaign rule system",
   "rollKindMismatch": "This roll type does not fit the campaign rule system",
   "rollOutOfRange": "Roll is outside the system die range",
   "skillUntrained": "The skill is untrained, so the test is not possible",

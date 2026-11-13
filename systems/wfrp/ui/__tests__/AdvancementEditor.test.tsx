@@ -32,7 +32,7 @@ vi.mock('@/components/ui/select-field', () => ({
         </select>
     ),
 }));
-vi.mock('@/lib/hooks/careers', () => ({
+vi.mock('@/systems/wfrp/hooks/careers', () => ({
     useCareers: () => ({ data: [{ id: 'car', name: 'Soldier' }] }),
 }));
 vi.mock('@/lib/hooks/feats', () => ({

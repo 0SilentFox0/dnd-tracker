@@ -64,7 +64,7 @@ vi.mock('@/lib/hooks/campaigns', () => ({
     }),
 }));
 
-vi.mock('@/lib/hooks/careers', () => ({
+vi.mock('@/systems/wfrp/hooks/careers', () => ({
     useCareers: () => ({
         data: [
             { id: 'ca', name: 'Soldier' },

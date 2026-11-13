@@ -14,7 +14,6 @@ import type { Ruleset } from '@/lib/utils/rules/schema';
 import type { SystemConditionInfo } from '@/lib/utils/rules/systems';
 import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
 import type { BattleParticipant } from '@/types/battle';
-import type { CareerData } from '@/types/careers';
 import type {
     CharacterListItem,
     CharacterSheet,
@@ -54,14 +53,6 @@ export interface StatsFieldsProps {
 export interface AdvancementEditorProps {
     bindings: CharacterFormBindings;
     campaignId: string;
-}
-
-export interface CareerFormProps {
-    formId: string;
-    campaignId: string;
-    career?: CareerData;
-    onDone: () => void;
-    onSavingChange?: (saving: boolean) => void;
 }
 
 export interface UnitStatsFieldsProps {
@@ -186,7 +177,10 @@ export interface SystemUi {
     MagicTab?: ComponentType;
     AdvancementTab?: ComponentType;
     AdvancementEditor?: ComponentType<AdvancementEditorProps>;
-    CareerForm?: ComponentType<CareerFormProps>;
+    dmPages?: Record<
+        string,
+        ComponentType<{ campaignId: string; canEdit: boolean }>
+    >;
     DraftForm?: ComponentType<DraftFormProps>;
     RaceProfileEditor?: ComponentType<RaceProfileEditorProps>;
     battleConditionsDialog?: ComponentType<SystemConditionsDialogProps>;

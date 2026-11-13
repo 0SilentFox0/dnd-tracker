@@ -184,9 +184,13 @@ describe('T11 battle adapters', () => {
             .sort();
 
         expect(
-            BATTLE_ACTION_COVERAGE.map(
-                (row) => `${row.method} ${row.route}`
-            ).sort()
+            [
+                ...new Set(
+                    BATTLE_ACTION_COVERAGE.map(
+                        (row) => `${row.method} ${row.route}`
+                    )
+                ),
+            ].sort()
         ).toEqual(expected);
         for (const row of BATTLE_ACTION_COVERAGE) {
             expect(

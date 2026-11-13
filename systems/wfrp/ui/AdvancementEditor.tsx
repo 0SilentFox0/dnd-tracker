@@ -10,8 +10,8 @@ import type { AdvancementEditorProps } from '@/components/systems/types';
 import { BoundedNumberInput } from '@/components/ui/bounded-number-input';
 import { Button } from '@/components/ui/button';
 import { SelectField } from '@/components/ui/select-field';
-import { useCareers } from '@/lib/hooks/careers';
 import { useFeats } from '@/lib/hooks/feats';
+import { useCareers } from '@/systems/wfrp/hooks/careers';
 
 const TIERS = ['1', '2', '3', '4'];
 

@@ -32,4 +32,5 @@ export const WFRP_META = {
         },
     },
     dmSections: ['careers'],
+    contentKinds: ['careers'],
 } as const satisfies SystemMeta;

@@ -9,13 +9,12 @@ import { API_ERRORS } from '@/lib/constants/api-errors';
 import { CharacterStatus } from '@/lib/constants/characters';
 import { prisma } from '@/lib/db';
 import { deriveCharacterDefaults } from '@/lib/server/characters/core/derive-character-defaults';
+import { systemServerOf } from '@/lib/server/systems/registry';
 import { requireCampaignAccess } from '@/lib/utils/api/api-auth';
 import { errorResponse } from '@/lib/utils/api/api-response';
 import { loadOwned } from '@/lib/utils/api/load-owned';
 import { storedDraftChoices } from '@/lib/utils/characters/choices/picks';
 import { validateAbilityScores } from '@/lib/utils/characters/generate';
-import { ruleSystemOf } from '@/lib/utils/rules/systems';
-import { patchWfrpDraft } from '@/systems/wfrp/server/draft/patch-wfrp-draft';
 import type { CharacterClassEntry } from '@/types/classes';
 
 export async function updateDraft(
@@ -27,8 +26,9 @@ export async function updateDraft(
 
     if (access instanceof NextResponse) return access;
 
-    if (ruleSystemOf(access.campaign.rules).creation)
-        return patchWfrpDraft(request, campaignId, characterId, access);
+    const drafts = systemServerOf(access.campaign.rules).drafts;
+
+    if (drafts) return drafts.update(request, campaignId, characterId, access);
 
     const character = await loadOwned(
         prisma.character.findUnique({

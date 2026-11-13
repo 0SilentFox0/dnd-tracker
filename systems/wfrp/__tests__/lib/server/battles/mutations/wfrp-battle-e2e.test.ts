@@ -17,7 +17,6 @@ import {
     attackMutation,
     createAttackMutation,
 } from '@/lib/server/battles/mutations/attack/attack-mutation';
-import { conditionTestMutation } from '@/lib/server/battles/mutations/condition-test/condition-test-mutation';
 import { initiativeRollMutation } from '@/lib/server/battles/mutations/initiative/initiative-roll-mutation';
 import { createRollbackMutation } from '@/lib/server/battles/mutations/rollback/rollback-mutation';
 import { makeParticipant, seq } from '@/lib/utils/abilities/__tests__/fixtures';
@@ -34,6 +33,7 @@ import {
 import { DEFAULT_CHARACTERISTICS } from '@/systems/wfrp/rules/characteristics/keys';
 import { wfrpAbilitiesOf } from '@/systems/wfrp/rules/combat/participant';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
+import { conditionTestMutation } from '@/systems/wfrp/server/battle/condition-test-mutation';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
 
 const sword: BattleAttack = {

@@ -122,6 +122,7 @@ const SYSTEM_ROOTS = [
     'lib/utils/abilities/registry/system-variables.ts',
     'lib/utils/abilities/templates/system-recipes.ts',
     'lib/utils/abilities/build/system-sources.ts',
+    'lib/utils/content/import/fields/system-specs.ts',
     'scripts/templates/systems/index.ts',
     'scripts/templates/systems/adapters.ts',
 ];

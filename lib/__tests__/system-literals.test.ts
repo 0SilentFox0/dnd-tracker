@@ -188,6 +188,16 @@ describe('d20 / HOMM names and rule-section readers leaving core', () => {
         heroHpFallback: 0,
         learnedSpellIdsFromNodes: 0,
         resolveLearnedSpellsAndMastery: 0,
+        conditionTestMutation: 0,
+        systemConditionMutation: 0,
+        coreActionMutation: 0,
+        careersResource: 0,
+        createWfrpDraft: 0,
+        patchWfrpDraft: 0,
+        saveRaceProfile: 0,
+        systemCharacterRoute: 0,
+        listRaceProfiles: 0,
+        profileRefIds: 0,
     };
 
     const RULES_SECTION_READERS: Record<string, number> = {

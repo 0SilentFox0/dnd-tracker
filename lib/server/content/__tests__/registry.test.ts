@@ -29,11 +29,11 @@ describe('CONTENT_RESOURCES', () => {
 
             const item = `${ROOT}${r.path}/[${r.idParam}]/route.ts`;
 
-            expect(readFileSync(collection, 'utf8')).toContain(
-                'collectionRoutes('
+            expect(readFileSync(collection, 'utf8')).toMatch(
+                /\b(kindC|c)ollectionRoutes\(/
             );
-            expect(existsSync(item) && readFileSync(item, 'utf8')).toContain(
-                'itemRoutes('
+            expect(existsSync(item) && readFileSync(item, 'utf8')).toMatch(
+                /\b(kindI|i)temRoutes\(/
             );
         }
     );

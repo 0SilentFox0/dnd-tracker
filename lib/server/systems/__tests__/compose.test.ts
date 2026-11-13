@@ -70,6 +70,39 @@ describe('composeServer', () => {
         ).toThrow(/duplicate key "get_party" in ai.toolNotes/);
     });
 
+    it('merges route dictionaries of addons and throws when two modules give one route key', () => {
+        const route = { POST: { operation: 'rest' } };
+
+        const out = composeServer(base, [
+            {
+                id: 'a',
+                build: () => ({ routes: { character: { x: route } } }),
+            },
+            {
+                id: 'b',
+                build: () => ({
+                    routes: { character: { y: route }, campaign: { x: route } },
+                }),
+            },
+        ]);
+
+        expect(Object.keys(out.routes?.character ?? {})).toEqual(['x', 'y']);
+        expect(Object.keys(out.routes?.campaign ?? {})).toEqual(['x']);
+
+        expect(() =>
+            composeServer(base, [
+                {
+                    id: 'a',
+                    build: () => ({ routes: { character: { x: route } } }),
+                },
+                {
+                    id: 'b',
+                    build: () => ({ routes: { character: { x: route } } }),
+                },
+            ])
+        ).toThrow(/duplicate key "x" in routes.character/);
+    });
+
     it('rejects replacing a value without a claim and hands the claimant prev', () => {
         expect(() =>
             composeServer(base, [

@@ -1,7 +1,21 @@
+import { SYSTEM_SERVER_UNION } from '@/lib/server/systems/registry';
+
 /** Implemented shared character adapters. Activation of model transports remains T14. */
 const base = 'campaigns/[id]/characters';
 
 const hero = `${base}/[characterId]`;
+
+/** One row per method and operation of the composed system routes; bare handlers have no assistant action */
+const systemRows = (scope: 'character' | 'campaign', route: string) =>
+    Object.values(SYSTEM_SERVER_UNION).flatMap((server) =>
+        Object.values(server.routes?.[scope] ?? {}).flatMap((systemRoute) =>
+            Object.entries(systemRoute).flatMap(([method, target]) =>
+                target && 'operation' in target
+                    ? [[method, route, target.operation, 'system-route']]
+                    : []
+            )
+        )
+    );
 
 export const CHARACTER_ACTION_COVERAGE = [
     ['GET', base, 'list', 'character-actions'],
@@ -20,12 +34,6 @@ export const CHARACTER_ACTION_COVERAGE = [
         `${hero}/tokens/[tokenId]`,
         'tokens.delete',
         'character-tokens-api',
-    ],
-    [
-        'POST',
-        `${hero}/level-up`,
-        'level-up',
-        'character-progression-storage.integration',
     ],
     ['PUT', `${hero}/choices`, 'choices', 'character-progression-actions'],
     [
@@ -56,8 +64,6 @@ export const CHARACTER_ACTION_COVERAGE = [
         'stash.free-artifacts',
         'stash-api',
     ],
-    ['POST', `${hero}/hit-dice`, 'hit-dice', 'hit-dice'],
-    ['POST', `${hero}/arcane-recovery`, 'arcane-recovery', 'arcane-recovery'],
     ['POST', `${hero}/inspiration`, 'inspiration', 'inspiration'],
     [
         'POST',
@@ -67,25 +73,6 @@ export const CHARACTER_ACTION_COVERAGE = [
     ],
     ['GET', `${hero}/sheet`, 'sheet', 'character-sheet-api'],
     ['GET', `${hero}/log`, 'log', 'log'],
-    ['GET', `${hero}/progression`, 'progression', 'progression-api'],
-    [
-        'POST',
-        `${hero}/progression/learn`,
-        'progression.learn',
-        'progression-actions-api',
-    ],
-    [
-        'POST',
-        `${hero}/progression/unlearn`,
-        'progression.unlearn',
-        'progression-actions-api',
-    ],
-    [
-        'POST',
-        `${hero}/progression/reset`,
-        'progression.reset',
-        'character-progression-actions',
-    ],
     [
         'POST',
         `${hero}/progression/seen-level`,
@@ -98,30 +85,8 @@ export const CHARACTER_ACTION_COVERAGE = [
         'rest',
         'character-progression-storage.integration',
     ],
-    ['POST', `${hero}/advance`, 'advance', 'advance'],
-    ['DELETE', `${hero}/advance`, 'advance.undo', 'advance'],
-    ['POST', `${hero}/career`, 'career.set', 'career'],
-    ['POST', `${hero}/career/advance`, 'career.advance', 'career'],
-    ['POST', `${hero}/corruption`, 'corruption.grant', 'wfrp-corruption-e2e'],
-    [
-        'POST',
-        `${hero}/corruption/undo`,
-        'corruption.undo',
-        'wfrp-corruption-e2e',
-    ],
-    ['PUT', `${hero}/downtime`, 'downtime.set', 'wfrp-downtime-e2e'],
-    [
-        'POST',
-        'campaigns/[id]/downtime/period',
-        'downtime.period',
-        'wfrp-downtime-e2e',
-    ],
-    [
-        'POST',
-        'campaigns/[id]/downtime/period-undo',
-        'downtime.period.undo',
-        'wfrp-downtime-e2e',
-    ],
+    ...systemRows('character', `${hero}/system/[action]`),
+    ...systemRows('campaign', 'campaigns/[id]/system/[action]'),
     [
         'POST',
         'campaigns/[id]/experience',

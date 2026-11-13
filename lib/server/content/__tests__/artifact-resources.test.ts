@@ -25,6 +25,10 @@ const resolveIcon = vi.hoisted(() => vi.fn());
 const sync = vi.hoisted(() => vi.fn());
 
 vi.mock('server-only', () => ({}));
+vi.mock('@/lib/server/content/kind-active', () => ({
+    isKindActive: async () => true,
+    assertKindActive: async () => undefined,
+}));
 vi.mock('@/lib/db', () => ({ prisma: db }));
 vi.mock('@/lib/supabase/artifact-icon-storage', () => ({
     resolveArtifactIconForPersistence: resolveIcon,
@@ -38,10 +42,10 @@ vi.mock(
 );
 
 import { SyncArtifactSetError } from '@/lib/server/artifacts/sync-artifact-set-members';
-import { artifactSetsResource } from '@/lib/server/content/resources/artifact-sets';
 import { artifactsResource } from '@/lib/server/content/resources/artifacts';
 import { createContent, updateContent } from '@/lib/server/content/service';
 import type { Actor } from '@/lib/utils/api/actor';
+import { artifactSetsResource } from '@/systems/artifactsets/server/content/artifact-sets';
 
 const actor: Actor = {
     campaignId: 'c1',

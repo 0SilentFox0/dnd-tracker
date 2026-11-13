@@ -11,6 +11,7 @@ import { API_ERRORS } from '@/lib/constants/api-errors';
 import { authorizeAssistant } from '@/lib/server/assistant/authorize';
 import { assistantCatalog } from '@/lib/server/assistant/catalog';
 import { dispatchAction } from '@/lib/server/assistant/execute';
+import { loadRules } from '@/lib/server/campaigns/rules';
 import { ContentError } from '@/lib/server/content/errors';
 import { inputJsonSchema } from '@/lib/server/content/json-schema';
 import { windowOf } from '@/lib/utils/api/page-of';
@@ -41,7 +42,10 @@ export const assistantCapabilitiesTool = defineTool({
 
         await authorizeDiscovery(caller);
 
-        const actions = assistantCatalog.listActions(caller.actor);
+        const actions = assistantCatalog.listActions(
+            caller.actor,
+            await loadRules(caller.actor.campaignId)
+        );
 
         const { items: selected, ...window } = windowOf(actions, offset, limit);
 

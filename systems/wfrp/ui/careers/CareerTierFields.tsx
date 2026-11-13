@@ -11,12 +11,12 @@ import { CommaListInput } from '@/components/ui/comma-list-input';
 import { Input } from '@/components/ui/input';
 import { FormField } from '@/components/ui/labeled-input';
 import { SelectField } from '@/components/ui/select-field';
+import type { CareerTierDef } from '@/systems/wfrp/rules/careers/types';
 import {
     CHARACTERISTIC_KEYS,
     type CharacteristicKey,
 } from '@/systems/wfrp/rules/characteristics/keys';
 import { parseSkillAdvanceKey } from '@/systems/wfrp/rules/skills/catalog';
-import type { CareerTierDef } from '@/types/careers';
 import type { FeatData } from '@/types/choices';
 
 interface Props {

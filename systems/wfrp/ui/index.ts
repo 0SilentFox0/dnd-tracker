@@ -5,8 +5,8 @@ import { CastTestBody } from './battle/CastTestBody';
 import { ChannelLabel } from './battle/ChannelLabel';
 import { D100RollBody } from './battle/D100RollBody';
 import { D100RollTitle } from './battle/D100RollTitle';
-import { CareerForm } from './careers/CareerForm';
 import { WfrpDraftForm } from './creation/WfrpDraftForm';
+import { CareersPage } from './dm/CareersPage';
 import { AdvancementEditor } from './AdvancementEditor';
 import { AdvancementTab } from './AdvancementTab';
 import { HeroStats } from './HeroStats';
@@ -91,7 +91,7 @@ export const WFRP_MODULE_UI: SystemUi = {
     MagicTab,
     AdvancementTab,
     AdvancementEditor,
-    CareerForm,
+    dmPages: { careers: CareersPage },
     DraftForm: WfrpDraftForm,
     RaceProfileEditor: SpeciesProfileEditor,
     battleConditionsDialog: SystemConditionsDialog,

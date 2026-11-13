@@ -5,13 +5,23 @@ import { useTranslations } from 'next-intl';
 
 import { CareerTierFields } from './CareerTierFields';
 
-import type { CareerFormProps } from '@/components/systems/types';
 import { Input } from '@/components/ui/input';
 import { FormField } from '@/components/ui/labeled-input';
-import { useCareerForm } from '@/lib/hooks/careers';
 import { useFeats } from '@/lib/hooks/feats';
 import { errorMessage } from '@/lib/utils/common/error-message';
-import type { CareerTierDef } from '@/types/careers';
+import { useCareerForm } from '@/systems/wfrp/hooks/careers';
+import type {
+    CareerData,
+    CareerTierDef,
+} from '@/systems/wfrp/rules/careers/types';
+
+export interface CareerFormProps {
+    formId: string;
+    campaignId: string;
+    career?: CareerData;
+    onDone: () => void;
+    onSavingChange?: (saving: boolean) => void;
+}
 
 export function CareerForm({
     formId,

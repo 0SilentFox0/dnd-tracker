@@ -1,6 +1,8 @@
 import type { NextConfig } from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
 
+import { SYSTEM_ROUTE_REWRITES } from './lib/constants/system-route-rewrites';
+
 const withNextIntl = createNextIntlPlugin('./lib/i18n/request.ts');
 
 const nextConfig: NextConfig = {
@@ -19,8 +21,16 @@ const nextConfig: NextConfig = {
             },
         ];
     },
+    async rewrites() {
+        return [...SYSTEM_ROUTE_REWRITES];
+    },
     async redirects() {
         return [
+            {
+                source: '/campaigns/:id/dm/careers',
+                destination: '/campaigns/:id/dm/system/careers',
+                permanent: false,
+            },
             {
                 source: '/campaigns/:id/dm/artifacts/sets/new',
                 destination: '/campaigns/:id/dm/artifact-sets/new',

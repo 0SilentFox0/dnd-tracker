@@ -23,7 +23,7 @@ import {
     Wand2,
 } from 'lucide-react';
 
-import { dmTilesFor } from '@/lib/constants/campaigns';
+import { type DmSectionContext, dmTilesFor } from '@/lib/constants/campaigns';
 
 export type DashboardGroupKey = 'game' | 'heroes' | 'libraries' | 'player';
 
@@ -75,7 +75,7 @@ export const DM_DASHBOARD_SECTIONS: DashboardSection[] = [
     },
     {
         key: 'careers',
-        href: dm('careers'),
+        href: dm('system/careers'),
         icon: Briefcase,
         group: 'libraries',
     },
@@ -108,11 +108,7 @@ export function dashboardHiddenKeys({
 
 const CAMPAIGN_LEVEL_KEYS = new Set(['info', 'acquaintances']);
 
-export interface DashboardContext {
-    isTemplate: boolean;
-    classesEnabled: boolean;
-    systemKey?: string;
-}
+export type DashboardContext = DmSectionContext;
 
 export const DEFAULT_DASHBOARD_CONTEXT: DashboardContext = {
     isTemplate: false,

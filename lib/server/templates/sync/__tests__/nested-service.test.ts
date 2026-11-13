@@ -10,7 +10,10 @@ vi.mock('@/lib/db', async () => {
 
 const invalidate = vi.hoisted(() => vi.fn());
 
-vi.mock('@/lib/cache/tags', () => ({ invalidateAllReference: invalidate }));
+vi.mock('@/lib/cache/tags', async (importOriginal) => ({
+    ...(await importOriginal<typeof import('@/lib/cache/tags')>()),
+    invalidateAllReference: invalidate,
+}));
 
 import { clone, createFakeSyncDb } from './fake-sync-db';
 import { id } from './helpers';

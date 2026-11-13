@@ -21,6 +21,10 @@ const revalidateTag = vi.hoisted(() => vi.fn());
 
 const requireDM = vi.hoisted(() => vi.fn());
 
+vi.mock('@/lib/server/content/kind-active', () => ({
+    isKindActive: async () => true,
+    assertKindActive: async () => undefined,
+}));
 vi.mock('@/lib/db', () => ({ prisma: db }));
 vi.mock('next/cache', () => ({ revalidateTag }));
 vi.mock('@/lib/utils/api/api-auth', async (orig) => ({

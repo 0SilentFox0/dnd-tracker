@@ -14,6 +14,7 @@ import {
     tableOfKind,
     writeSlug,
 } from '@/lib/server/content/import/slug';
+import { assertKindActive } from '@/lib/server/content/kind-active';
 import { CONTENT_RESOURCES } from '@/lib/server/content/resources';
 import {
     withCampaignContentWrite,
@@ -58,6 +59,7 @@ export interface ImportDeps {
         slug: string
     ): Promise<void>;
     invalidate?(kinds: readonly ReferenceKindValue[], campaignId: string): void;
+    assertKind?(actor: Actor, kind: ImportKind): Promise<void>;
     transactional?: boolean;
     skipUnchanged?: boolean;
 }
@@ -66,11 +68,14 @@ export const DEFAULT_IMPORT_DEPS: ImportDeps = {
     resource: (kind) => CONTENT_RESOURCES[kind] as AnyContentResource,
     loadKeys,
     writeSlug,
+    assertKind: (actor, kind) => assertKindActive(kind, actor),
     transactional: true,
 };
 
+/** Pack import: the template campaign may not exist yet (dry run) and a pack's kinds are in its own rules (D14) */
 export const OFFLINE_IMPORT_DEPS: ImportDeps = {
     ...DEFAULT_IMPORT_DEPS,
+    assertKind: undefined,
     invalidate: () => undefined,
     skipUnchanged: true,
 };
@@ -616,6 +621,8 @@ export async function importContent(
     deps: ImportDeps = DEFAULT_IMPORT_DEPS
 ): Promise<ImportReport> {
     assertCan(actor, NEED.write);
+
+    await deps.assertKind?.(actor, kind);
 
     const spec = IMPORT_SPECS[kind];
 

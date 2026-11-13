@@ -4,6 +4,10 @@ import { z } from 'zod';
 const invalidateReference = vi.hoisted(() => vi.fn());
 
 vi.mock('server-only', () => ({}));
+vi.mock('@/lib/server/content/kind-active', () => ({
+    isKindActive: async () => true,
+    assertKindActive: async () => undefined,
+}));
 vi.mock('@/lib/cache/tags', () => ({ invalidateReference }));
 vi.mock('@/lib/db', () => ({
     prisma: {

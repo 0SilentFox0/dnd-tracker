@@ -39,7 +39,7 @@ import * as artifactSets from '@/app/api/campaigns/[id]/artifact-sets/route';
 import * as artifacts from '@/app/api/campaigns/[id]/artifacts/route';
 import * as battleAudio from '@/app/api/campaigns/[id]/battles/[battleId]/audio/route';
 import * as inventory from '@/app/api/campaigns/[id]/characters/[characterId]/inventory/route';
-import * as levelUp from '@/app/api/campaigns/[id]/characters/[characterId]/level-up/route';
+import * as characterSystem from '@/app/api/campaigns/[id]/characters/[characterId]/system/[action]/route';
 import * as characters from '@/app/api/campaigns/[id]/characters/route';
 import * as deckOne from '@/app/api/campaigns/[id]/decks/[deckId]/route';
 import * as decks from '@/app/api/campaigns/[id]/decks/route';
@@ -80,6 +80,7 @@ const ids = {
     trackId: 't1',
     battleId: 'b1',
     deckId: 'd1',
+    action: 'level-up',
 };
 
 const cases: Array<[string, Handler]> = [
@@ -95,7 +96,7 @@ const cases: Array<[string, Handler]> = [
     ['DELETE artifact-sets/:setId', artifactSetOne.DELETE],
     ['POST artifacts', artifacts.POST],
     ['PATCH characters/:characterId/inventory', inventory.PATCH],
-    ['POST characters/:characterId/level-up', levelUp.POST],
+    ['POST characters/:characterId/system/level-up', characterSystem.POST],
     ['POST characters', characters.POST],
     ['POST skills/:skillId/duplicate', duplicateSkill.POST],
     ['POST races', races.POST],

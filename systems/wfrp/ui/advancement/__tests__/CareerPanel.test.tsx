@@ -24,7 +24,7 @@ const tier = (name: string, over = {}) => ({
     ...over,
 });
 
-vi.mock('@/lib/hooks/careers', () => ({
+vi.mock('@/systems/wfrp/hooks/careers', () => ({
     useCareers: () => ({
         data: [
             {

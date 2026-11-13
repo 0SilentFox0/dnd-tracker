@@ -150,7 +150,7 @@ export default async function CampaignDetailPage({
                         context={{
                             isTemplate,
                             classesEnabled,
-                            systemKey: rules.system.key,
+                            system: rules.system,
                         }}
                         hiddenKeys={hiddenKeys}
                     />

@@ -15,9 +15,7 @@ import { API_ERRORS } from '@/lib/constants/api-errors';
 import { exampleOf } from '@/lib/constants/import-aliases';
 import {
     createArtifactSchema,
-    createArtifactSetSchema,
     createBackgroundSchema,
-    createCareerSchema,
     createClassSchema,
     createFeatSchema,
     createMainSkillSchema,
@@ -38,6 +36,8 @@ import {
 } from '@/lib/server/content/import/import-content';
 import type { Actor } from '@/lib/utils/api/actor';
 import { IMPORT_KINDS, IMPORT_SPECS } from '@/lib/utils/content/import';
+import { createArtifactSetSchema } from '@/systems/artifactsets/server/content/schema';
+import { createCareerSchema } from '@/systems/wfrp/server/careers/schema';
 import type { IdName } from '@/types/common';
 import type { ImportKind, ImportMode } from '@/types/content-import';
 

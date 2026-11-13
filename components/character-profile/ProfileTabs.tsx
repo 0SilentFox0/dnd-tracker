@@ -35,7 +35,6 @@ export function ProfileTabs({
             value={value}
             onValueChange={onValueChange}
             header={header}
-            triggerClassName="min-w-0 shrink px-1"
         />
     );
 }

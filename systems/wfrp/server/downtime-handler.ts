@@ -18,7 +18,6 @@ import { writeCharacterLog } from '@/lib/server/characters/log';
 import { ContentError } from '@/lib/server/content/errors';
 import { writeInventoryLog } from '@/lib/server/inventory/log';
 import type { CampaignAccessResult } from '@/lib/utils/api/api-auth';
-import { toCareerData } from '@/lib/utils/careers/row';
 import { characterBaseHp } from '@/lib/utils/characters/hero-hp';
 import {
     applyStashAction,
@@ -38,6 +37,7 @@ import type {
     Ailment,
     DowntimeState,
 } from '@/systems/wfrp/rules/downtime/types';
+import { toCareerData } from '@/systems/wfrp/server/careers/row';
 import type {
     DowntimePeriodInput,
     DowntimePeriodUndoInput,

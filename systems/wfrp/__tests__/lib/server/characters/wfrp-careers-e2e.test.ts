@@ -33,12 +33,12 @@ vi.mock('@/lib/cache/reference-data', () => ({
 }));
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
-import { careersResource } from '@/lib/server/content/resources/careers';
 import type { Actor } from '@/lib/utils/api/actor';
 import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import { DEFAULT_CHARACTERISTICS } from '@/systems/wfrp/rules/characteristics/keys';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
+import { careersResource } from '@/systems/wfrp/server/content/careers';
 import { advanceOperation } from '@/systems/wfrp/server/operations/advance';
 import { advanceUndoOperation } from '@/systems/wfrp/server/operations/advance-undo';
 import {

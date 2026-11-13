@@ -8,8 +8,6 @@ const nameTaken = vi.hoisted(() => vi.fn());
 
 const inUse = vi.hoisted(() => vi.fn());
 
-const inProfile = vi.hoisted(() => vi.fn());
-
 vi.mock('server-only', () => ({}));
 vi.mock('@/lib/db', () => ({ prisma: db }));
 vi.mock('@/lib/cache/reference-data', () => ({
@@ -17,12 +15,10 @@ vi.mock('@/lib/cache/reference-data', () => ({
 }));
 vi.mock('@/lib/server/feats/feat-name', () => ({ featNameTaken: nameTaken }));
 vi.mock('@/lib/server/feats/feat-usage', () => ({ featInUse: inUse }));
-vi.mock('@/lib/server/races/profile-usage', () => ({
-    profileReferences: inProfile,
-}));
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { createFeatSchema } from '@/lib/schemas';
+import { ContentError } from '@/lib/server/content/errors';
 import { featsResource } from '@/lib/server/content/resources/feats';
 import type { Actor } from '@/lib/utils/api/actor';
 
@@ -41,7 +37,6 @@ describe('featsResource', () => {
         vi.clearAllMocks();
         nameTaken.mockResolvedValue(false);
         inUse.mockResolvedValue(false);
-        inProfile.mockResolvedValue(false);
     });
 
     it('creates with schema defaults; a taken name is 409', async () => {
@@ -100,21 +95,24 @@ describe('featsResource', () => {
         });
     });
 
-    it('delete: 409 FEAT_IN_SPECIES_TABLE after the in-use check', async () => {
-        inProfile.mockResolvedValue(true);
+    it('delete: the service guard runs after the in-use check and blocks the delete', async () => {
+        const guard = vi.fn(async () => {
+            throw new ContentError(API_ERRORS.FEAT_IN_SPECIES_TABLE, 409);
+        });
 
         await expect(
-            featsResource.remove(actor, existing)
+            featsResource.remove(actor, existing, guard)
         ).rejects.toMatchObject({
             status: 409,
             message: API_ERRORS.FEAT_IN_SPECIES_TABLE,
         });
-        expect(inProfile).toHaveBeenCalledWith('c1', { featId: 'f1' });
         expect(db.feat.deleteMany).not.toHaveBeenCalled();
 
         inUse.mockResolvedValue(true);
+        guard.mockClear();
         await expect(
-            featsResource.remove(actor, existing)
+            featsResource.remove(actor, existing, guard)
         ).rejects.toMatchObject({ message: API_ERRORS.FEAT_IN_USE });
+        expect(guard).not.toHaveBeenCalled();
     });
 });

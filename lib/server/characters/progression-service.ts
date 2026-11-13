@@ -30,6 +30,7 @@ import { stashActionSchema } from '@/lib/server/characters/core/stash-schema';
 import { assertCan } from '@/lib/server/content/access';
 import { ContentError, parseInput } from '@/lib/server/content/errors';
 import { mergeSystemOperations } from '@/lib/server/systems/registry';
+import type { SystemOperation } from '@/lib/server/systems/types';
 import type { Actor } from '@/lib/utils/api/actor';
 import { requestDigest } from '@/lib/utils/battle/store/stable-json';
 import { parseItemRef, refArtifactIds } from '@/lib/utils/items/ref';
@@ -76,15 +77,42 @@ export const PROGRESSION_INPUTS = mergeSystemOperations(
     CORE_INPUTS,
     ({ input }) => input
 );
-export const progressionReads = new Set([
+
+const CORE_READS = [
     'inventory',
     'stash',
     'sheet',
-    'progression',
     'log',
     'stash.log',
     'stash.free-artifacts',
-]);
+];
+
+const flagged = (
+    core: readonly string[],
+    flag: (op: SystemOperation) => boolean
+) =>
+    new Set(
+        Object.entries(
+            mergeSystemOperations(
+                Object.fromEntries(core.map((key) => [key, true])),
+                flag
+            )
+        )
+            .filter(([, on]) => on)
+            .map(([key]) => key)
+    );
+
+export const progressionReads = flagged(CORE_READS, (op) => op.read === true);
+
+export const progressionAlwaysHuman = flagged(
+    ['choices', 'resources', 'inventory.patch', 'stash.apply'],
+    (op) => op.confirm === 'always'
+);
+
+/** Operations that come from a module; the catalog hides them where the campaign's composition lacks the module */
+export const systemProgressionOperations = new Set(
+    Object.keys(mergeSystemOperations({}, () => true))
+);
 
 export async function progressionState(
     actor: Actor,

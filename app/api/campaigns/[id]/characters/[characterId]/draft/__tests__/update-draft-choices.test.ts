@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { draftChoiceFields } from '../../../draft/draft-choices';
 
@@ -66,6 +66,10 @@ const put = async (data: object) => {
 };
 
 describe('updateDraft keeps stored picks when the form sends none', () => {
+    beforeAll(async () => {
+        await import('@/lib/server/systems/registry');
+    }, 30_000);
+
     beforeEach(() => {
         vi.clearAllMocks();
         vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue({

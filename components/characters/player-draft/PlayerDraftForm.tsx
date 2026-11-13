@@ -30,7 +30,10 @@ import {
     usePlayerDraftForm,
 } from '@/lib/hooks/characters';
 import { useRaces } from '@/lib/hooks/races';
+import { useCampaignSystem } from '@/lib/hooks/systems';
 import { useTranslator } from '@/lib/i18n/use-translator';
+import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
+import { statColumnsOf } from '@/lib/utils/rules/systems/stats';
 import type { DraftInput } from '@/types/characters';
 
 interface PlayerDraftFormProps {
@@ -51,6 +54,10 @@ export function PlayerDraftForm({
     const tAny = useTranslator();
 
     const { options: archetypes } = useArchetypeOptions();
+
+    const { def } = useCampaignSystem(campaignId, DEFAULT_RULES.system.key);
+
+    const hasArchetype = statColumnsOf(def).has('archetype');
 
     const { data: races = [] } = useRaces(campaignId);
 
@@ -259,27 +266,29 @@ export function PlayerDraftForm({
                                     </RollingField>
                                 ) : (
                                     <>
-                                        <RollingField
-                                            id="draft-archetype"
-                                            label={t('archetype')}
-                                            spinning={spinning('archetype')}
-                                            settled={settled('archetype')}
-                                            display={archetypeLabel(
-                                                shown('archetype')
-                                            )}
-                                        >
-                                            <SelectField
+                                        {hasArchetype && (
+                                            <RollingField
                                                 id="draft-archetype"
-                                                value={values.archetype}
-                                                onValueChange={(v) =>
-                                                    setArchetype(
-                                                        v as DraftInput['archetype']
-                                                    )
-                                                }
-                                                options={archetypes}
-                                                triggerClassName="w-full"
-                                            />
-                                        </RollingField>
+                                                label={t('archetype')}
+                                                spinning={spinning('archetype')}
+                                                settled={settled('archetype')}
+                                                display={archetypeLabel(
+                                                    shown('archetype')
+                                                )}
+                                            >
+                                                <SelectField
+                                                    id="draft-archetype"
+                                                    value={values.archetype}
+                                                    onValueChange={(v) =>
+                                                        setArchetype(
+                                                            v as DraftInput['archetype']
+                                                        )
+                                                    }
+                                                    options={archetypes}
+                                                    triggerClassName="w-full"
+                                                />
+                                            </RollingField>
+                                        )}
 
                                         <RollingField
                                             id="draft-class"
