@@ -5,7 +5,7 @@ import {
     isAirborne,
 } from '@/lib/utils/abilities/engine/core/participants';
 import type { CunningStrikeEffect } from '@/lib/utils/abilities/schema';
-import { hasTrait, isFiveE } from '@/lib/utils/battle/attack/ability';
+import { hasTrait } from '@/lib/utils/battle/attack/ability';
 import { assertAttackAllowed } from '@/lib/utils/battle/attack/assert-allowed';
 import { canAttackFromPool } from '@/lib/utils/battle/attack/attacks-left';
 import {
@@ -182,7 +182,7 @@ export function validateAttackRequest(
             targetCount: chosenTargets.length,
         });
 
-    if (data.offHand && !isFiveE(attacker))
+    if (data.offHand && !ruleSystemOf(rules).combat.offHand?.(attacker))
         throw new BattleRuleError(
             'action_rejected',
             API_ERRORS.OFF_HAND_NOT_ALLOWED

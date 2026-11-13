@@ -201,6 +201,7 @@ describe('d20 / HOMM names and rule-section readers leaving core', () => {
         moraleOutcome: 0,
         moraleTriggerRolls: 0,
         needsMoraleCheck: 0,
+        isFiveE: 10,
     };
 
     const RULES_SECTION_READERS: Record<string, number> = {

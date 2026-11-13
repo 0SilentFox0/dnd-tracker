@@ -2,48 +2,19 @@ import { textRef } from '@/lib/i18n/text-ref';
 import { collectModifiers } from '@/lib/utils/abilities/engine/core/collect-modifiers';
 import { withSelf } from '@/lib/utils/abilities/engine/core/participants';
 import type { StaticEffect } from '@/lib/utils/abilities/schema';
-import { isFiveE } from '@/lib/utils/battle/attack/ability';
 import {
     archetypeRef,
     heroMagicMultiplier,
 } from '@/lib/utils/battle/damage/hero-dm-multiplier';
 import { multiplierRow, stepRow } from '@/lib/utils/battle/damage/rows';
+import {
+    spellcastingModifier,
+    weaponModifier,
+} from '@/lib/utils/battle/spell/ability-modifier';
 import { signed } from '@/lib/utils/common/format';
+import { type Ruleset } from '@/lib/utils/rules';
+import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { BattleParticipant, DamageRow } from '@/types/battle';
-
-const ABILITY_LABELS = {
-    strength: 'STR',
-    dexterity: 'DEX',
-    constitution: 'CON',
-    intelligence: 'INT',
-    wisdom: 'WIS',
-    charisma: 'CHA',
-} as const;
-
-function spellcastingModifier(p: BattleParticipant): {
-    mod: number;
-    label: string;
-} {
-    const ability = p.spellcasting?.spellcastingAbility;
-
-    if (!ability) return { mod: 0, label: '' };
-
-    return {
-        mod: p.abilities.modifiers[ability],
-        label: ABILITY_LABELS[ability],
-    };
-}
-
-/** Предмет-зброя із заклинання: мод. від характеристики кастера, а без неї — від кращої з STR/DEX власника. */
-function weaponModifier(p: BattleParticipant): { mod: number; label: string } {
-    if (p.spellcasting?.spellcastingAbility) return spellcastingModifier(p);
-
-    const { strength, dexterity } = p.abilities.modifiers;
-
-    return strength >= dexterity
-        ? { mod: strength, label: ABILITY_LABELS.strength }
-        : { mod: dexterity, label: ABILITY_LABELS.dexterity };
-}
 
 export function spellAttackBonus(
     caster: BattleParticipant,
@@ -66,6 +37,7 @@ export interface SpellPower {
 
 export function computeSpellPower(input: {
     caster: BattleParticipant;
+    rules: Ruleset;
     groupId: string | null;
     rolls: number[];
     participants: BattleParticipant[];
@@ -106,8 +78,9 @@ export function computeSpellPower(input: {
             );
     }
 
-    const abilityMod =
-        isFiveE(caster) && input.addAbilityMod ? weaponModifier(caster) : null;
+    const abilityMod = input.addAbilityMod
+        ? (ruleSystemOf(input.rules).magic.spellAbilityMod?.(caster) ?? null)
+        : null;
 
     if (abilityMod)
         breakdown.push(

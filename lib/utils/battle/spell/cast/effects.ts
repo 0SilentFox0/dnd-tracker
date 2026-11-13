@@ -331,6 +331,7 @@ function distanceDamage(
 
     return computeSpellPower({
         caster: me,
+        rules: state.flow.ctx.rules,
         groupId: state.spell.groupId,
         rolls: [rolled],
         participants: flow.ps,

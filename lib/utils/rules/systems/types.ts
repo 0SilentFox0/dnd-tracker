@@ -607,6 +607,10 @@ export interface RuleSystemMagic {
         base: number
     ): number;
     upcast: { steps(spellLevel: number, castLevel: number): number };
+    /** Ability modifier added to a spell's damage when the spell asks for it; none means no modifier */
+    spellAbilityMod?(
+        caster: BattleParticipant
+    ): { mod: number; label: string } | null;
     tested?: RuleSystemTestedMagic;
     /** Derived save DC and attack bonus of a caster; none means the system has no such derivation */
     spellcasting?(
@@ -684,6 +688,8 @@ export interface RuleSystemCombat {
     details?: RuleSystemActionDetails;
     /** Validates the system's input of an attack or a cast before it runs */
     input?: { assert(system: SystemSlot, ctx: SystemInputCtx): void };
+    /** Whether the attacker may make an off-hand attack; absent means never */
+    offHand?(attacker: BattleParticipant): boolean;
     /** Who judges an attack: the client rolls and the server checks vs AC, or the server resolves the whole test */
     judge: 'client' | 'server';
     dice: number;
