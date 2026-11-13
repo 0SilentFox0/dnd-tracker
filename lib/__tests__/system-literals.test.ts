@@ -92,6 +92,16 @@ describe('system literals ratchet', () => {
         expect(
             isLiteralAllowed('scripts/sim/battle-sweep/run.ts', tokens)
         ).toBe(false);
+        expect(
+            isLiteralAllowed('scripts/assets/build-icon-prompts.ts', tokens)
+        ).toBe(true);
+        expect(isLiteralAllowed('scripts/seed/seed-library.ts', tokens)).toBe(
+            true
+        );
+        expect(isLiteralAllowed('scripts/srd/lib/source.ts', tokens)).toBe(
+            true
+        );
+        expect(isLiteralAllowed('scripts/db/foo.ts', tokens)).toBe(false);
         expect(isLiteralAllowed('lib/utils/battle/foo.ts', tokens)).toBe(false);
         expect(isLiteralAllowed('scripts/templates/lib/foo.ts', tokens)).toBe(
             false
@@ -145,7 +155,10 @@ describe('d20 / HOMM names and rule-section readers leaving core', () => {
     const roots = new Set(SYSTEM_ROOTS);
 
     const files = sourceFiles().filter(
-        (f) => !roots.has(f) && !f.startsWith('scripts/templates/systems/')
+        (f) =>
+            !roots.has(f) &&
+            !f.startsWith('scripts/templates/systems/') &&
+            !f.startsWith('scripts/sim/battle-sweep/profiles/')
     );
 
     const texts = new Map(
@@ -178,7 +191,7 @@ describe('d20 / HOMM names and rule-section readers leaving core', () => {
         CONDITION_5E_: 11,
         applyCondition5e: 0,
         isHomm: 0,
-        'HOMM_[A-Z]+': 2,
+        'HOMM_[A-Z]+': 0,
         proficiencyForLevel: 0,
         spellcastingDerived: 0,
         heroHpFormula: 0,

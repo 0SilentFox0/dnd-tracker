@@ -103,6 +103,14 @@ export const countLiterals = (text: string, tokens: LiteralTokens): number => {
     return sub + lit;
 };
 
+/** Data and assets (sweep profiles, icon prompts, seeds, the SRD pipeline) name systems by design. */
+const DATA_DIRS = [
+    'scripts/sim/battle-sweep/profiles/',
+    'scripts/assets/',
+    'scripts/seed/',
+    'scripts/srd/',
+] as const;
+
 export const isLiteralAllowed = (
     file: string,
     tokens: LiteralTokens
@@ -113,7 +121,7 @@ export const isLiteralAllowed = (
     )
         return true;
 
-    if (file.startsWith('scripts/sim/battle-sweep/profiles/')) return true;
+    if (DATA_DIRS.some((dir) => file.startsWith(dir))) return true;
 
     const owners = new Set([
         ...tokens.substring,

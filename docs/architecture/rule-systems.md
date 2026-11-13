@@ -88,12 +88,12 @@ Core бачить `systems/*` лише через корені (`SYSTEM_ROOTS`, 
 - Блокування: зміна `system.key` у кампанії з `characters`/`units` → 409 `SYSTEM_LOCKED`; зміна `modules` — 422 `SYSTEM_MODULES_INVALID`, 409 `SYSTEM_MODULES_IN_BATTLE` (лише активний бій), 409 `SYSTEM_MODULE_CONFIRM` (`toggle: "setup"`).
 - `system` не механіка: вкладки правил = секції композиції.
 
-## Ratchet (після Ч17)
+## Ratchet (після Ч18)
 
 Перегенерація: `pnpm exec tsx scripts/shared/system-ratchet.ts --write`; числа лише падають.
 
 - `system-imports-exempt.json` = `[]` (було 18 в E1, 1 до Ч17).
-- `system-literals-exempt.json`: 15 файлів / 56 влучань, лише сховища даних і тексти (`log/codec.ts`, `site.ts`, `whats-new.ts`, `scripts/assets/*`, `scripts/srd/lib/*`, сиди, фікстура `defaults.ts`, назва кубика `'d20'` у `types/characters.ts` і `SheetRollDialog.tsx`). Зростання 29 → 56 влучань у Ч17 — не регрес: пресет `homm` отримав `tokens: ["homm"]`, і скан вперше рахує дані/активи (`build-icon-prompts` 24, `seed-homm5-characters` 7 та ін.); файли core пішли вниз.
+- `system-literals-exempt.json`: 6 файлів / 11 влучань, лише тексти й назва кубика (`log/codec.ts`, `site.ts`, `whats-new.ts`, фікстура `defaults.ts`, `'d20'` у `types/characters.ts` і `SheetRollDialog.tsx`). Дані й активи (`scripts/assets/**`, `scripts/seed/**`, `scripts/srd/**`, профілі sweep) скан літералів не дивиться: виняток у `isLiteralAllowed` (`DATA_DIRS`), а не в `SKIP_DIRS` (той діє й на скан імпортів). Було 15 / 56 після Ч17 (зростання від токена `homm` у даних).
 - `RULES_SECTION_READERS` (читання `rules.<секція>` у core) = 0 за всіма секціями (пункти, які тримає core, як `encounters.balance/unitGroups`, не рахуються: `OWNED_ITEMS`).
 - `LEAK_NAMES`: `isFiveE` 0; поля колишнього dual-read (`channelledSl`, `conditionTests`, `psychologyTested`, `attackedWithLight`, `inspirationSpent`, `retaliationsUsed`) = 0 (forward-скрипт і `battle-state-shapes` очищено в Ч18); `useChannelAction` 0; `HOMM_[A-Z]+` 0 (профілі sweep поза скан, Ч18); **`CONDITION_5E_` 11** (словник станів у схемі ефектів core) → E3.
 - Гард колонок статблока: 7 файлів (`effects/morale` 1, `attack/bonus` 1, `cunning-strike` 2, `hit-model` 1, `balance/stats` 1, `spell/ability-modifier` 2, `spell/power` 2), ціль 0 → E3.
