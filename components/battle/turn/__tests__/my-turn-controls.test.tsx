@@ -94,7 +94,6 @@ vi.mock('@/lib/hooks/battle', () => ({
     useAuraZones: () => null,
     useSpellBook: () => ({ actions: { open: vi.fn() } }),
     useAttackWizard: () => ({ actions: { open: vi.fn() } }),
-    useChannelAction: () => ({ view: {}, actions: { open: vi.fn() } }),
     usePlayerTurn: () => ({
         phase: turnState.phase,
         gate: { resolve: vi.fn(), skipTurn: vi.fn() },

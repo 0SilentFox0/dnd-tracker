@@ -1,11 +1,7 @@
 import type { ComponentType, ReactNode } from 'react';
 
 import type { SpellFormFieldsProps } from '@/components/spells/form/SpellFormBasicFields';
-import type {
-    useAttackWizard,
-    useChannelAction,
-    useSpellBook,
-} from '@/lib/hooks/battle';
+import type { useAttackWizard, useSpellBook } from '@/lib/hooks/battle';
 import type { SystemConditionBody } from '@/lib/hooks/battles';
 import type { RulesFormState } from '@/lib/hooks/campaigns';
 import type { TurnGateOutcome } from '@/lib/utils/battle/flows';
@@ -147,7 +143,10 @@ export interface CastTestProps {
 }
 
 export interface ChannelDialogProps {
-    channel: ReturnType<typeof useChannelAction>;
+    hero: BattleParticipant;
+    open: boolean;
+    onClose(): void;
+    onDone?(): void;
 }
 
 export interface ConditionTestPanelProps {

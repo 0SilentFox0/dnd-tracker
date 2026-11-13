@@ -2,6 +2,7 @@ export { useFxBusy } from './fx-busy';
 export { fireFxImpact, onFxImpact } from './fx-impact';
 export * from './modes';
 export { afterMoraleDice } from './morale-dice';
+export { isSystemActionPending } from './system-action';
 export { useAbilityMapAim } from './useAbilityMapAim';
 export { useAbilityPicker } from './useAbilityPicker';
 export { ACTION_RESULT_MS, useActionResult } from './useActionResult';
@@ -27,7 +28,6 @@ export {
 } from './useBattleScene';
 export { useBattleTitle } from './useBattleTitle';
 export { type BattleViewMode, useBattleViewMode } from './useBattleViewMode';
-export { useChannelAction } from './useChannelAction';
 export {
     canReadiedAttack,
     type CoreActionChoice,

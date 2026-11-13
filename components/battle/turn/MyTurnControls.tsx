@@ -17,7 +17,6 @@ import {
     useBattleRules,
     useBattleScene,
     useBonusSpells,
-    useChannelAction,
     usePlayerTurn,
     useSpellBook,
 } from '@/lib/hooks/battle';
@@ -91,7 +90,7 @@ export function MyTurnControls({
 
     const book = useSpellBook(hero, { onDone: turn.actions.afterAction });
 
-    const channel = useChannelAction(hero, turn.actions.afterAction);
+    const [channelOpen, setChannelOpen] = useState(false);
 
     const systemUi = useSystemBattleUi();
 
@@ -214,7 +213,7 @@ export function MyTurnControls({
                         core: coreActionsOn(battle.rules),
                     }}
                     actions={{
-                        channel: channel.actions.open,
+                        channel: () => setChannelOpen(true),
                         attack: () => attack.actions.open(),
                         magic: () => book.actions.open(),
                         bonus: () => setBonusOpen(true),
@@ -254,7 +253,12 @@ export function MyTurnControls({
             <AttackWizard wizard={attack} />
             <SpellBook book={book} />
             {tested && systemUi.ChannelDialog && (
-                <systemUi.ChannelDialog channel={channel} />
+                <systemUi.ChannelDialog
+                    hero={hero}
+                    open={channelOpen}
+                    onClose={() => setChannelOpen(false)}
+                    onDone={turn.actions.afterAction}
+                />
             )}
             {coreActionsOn(battle.rules) && (
                 <CoreActionsDialog

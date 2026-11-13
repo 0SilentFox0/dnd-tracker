@@ -201,6 +201,7 @@ describe('d20 / HOMM names and rule-section readers leaving core', () => {
         moraleTriggerRolls: 0,
         needsMoraleCheck: 0,
         isFiveE: 0,
+        useChannelAction: 0,
         '\\bchannelledSl\\b': 0,
         '\\bconditionTests\\b': 0,
         '\\bpsychologyTested\\b': 0,

@@ -2,22 +2,27 @@
 
 import { useState } from 'react';
 
-import { useBattleScene } from './useBattleScene';
-
+import { isSystemActionPending, useBattleScene } from '@/lib/hooks/battle';
 import { castPreviewOf } from '@/lib/utils/battle/flows';
 import type { BattleParticipant } from '@/types/battle';
 
-export function useChannelAction(hero: BattleParticipant, onDone?: () => void) {
+export function useChannelAction(
+    hero: BattleParticipant,
+    { onClose, onDone }: { onClose: () => void; onDone?: () => void }
+) {
     const {
         battle,
         actions: { system: channel },
     } = useBattleScene();
 
-    const [open, setOpen] = useState(false);
-
     const [error, setError] = useState<string>();
 
     const preview = castPreviewOf(hero, battle.rules);
+
+    const close = () => {
+        setError(undefined);
+        onClose();
+    };
 
     const send = async (roll?: number) => {
         setError(undefined);
@@ -32,7 +37,7 @@ export function useChannelAction(hero: BattleParticipant, onDone?: () => void) {
                         : { roll }),
                 },
             });
-            setOpen(false);
+            onClose();
             onDone?.();
         } catch (e) {
             setError(e instanceof Error ? e.message : undefined);
@@ -40,19 +45,14 @@ export function useChannelAction(hero: BattleParticipant, onDone?: () => void) {
     };
 
     const view = {
-        open,
-        pending: channel.isPending,
+        pending: isSystemActionPending(channel, 'channel'),
         error,
         target: preview?.channelTarget ?? 0,
         banked: preview?.channelled ?? 0,
     };
 
     const actions = {
-        open: () => {
-            setError(undefined);
-            setOpen(true);
-        },
-        close: () => setOpen(false),
+        close,
         roll: (roll: number) => send(roll),
         auto: () => send(),
     };

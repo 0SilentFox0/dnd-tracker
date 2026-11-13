@@ -9,17 +9,23 @@ import { HUD_SURFACE } from '@/components/hud';
 import type { ChannelDialogProps } from '@/components/systems/types';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { cn } from '@/lib/utils';
+import { useChannelAction } from '@/systems/wfrp/hooks/useChannelAction';
 
 export function ChannelDialog({
-    channel: { view, actions },
+    hero,
+    open,
+    onClose,
+    onDone,
 }: ChannelDialogProps) {
+    const { view, actions } = useChannelAction(hero, { onClose, onDone });
+
     const t = useTranslations('wfrpMagic.ui.channel');
 
     const tc = useTranslations('common.actions');
 
     return (
         <ResponsiveDialog
-            open={view.open}
+            open={open}
             onOpenChange={(o) => !o && actions.close()}
             title={t('title')}
             className={cn(HUD_SURFACE, 'border-white/25')}
