@@ -1,6 +1,6 @@
 # Рульові системи: база, модулі, пресети
 
-Довідник для коду після E2 Ч17. Історія (межі wfrp 5a–5h, розділи Ч1–Ч16, ratchet E1) — [docs/archive/architecture/rule-systems-history-2026-11.md](../archive/architecture/rule-systems-history-2026-11.md); специфікації: [E1](../superpowers/specs/2026-11-10-architecture-modularity-design.md), [E2](../superpowers/specs/2026-11-11-e2-d20-homm-modules-design.md).
+Довідник для коду після E2 Ч17. Історія (межі wfrp 5a–5h, розділи Ч1–Ч16, ratchet E1) — [docs/archive/architecture/rule-systems-history-2026-11.md](../archive/architecture/rule-systems-history-2026-11.md); специфікації: [E1](../superpowers/specs/2026-11-10-architecture-modularity-design.md), [E2](../archive/superpowers/specs/2026-11-11-e2-d20-homm-modules-design.md).
 
 Кампанія грає за **композицією** `rules.system = { key, modules? }`; `key` обов'язковий (без нього `parseRules` кидає `RulesSystemError`, API відповідає 422). Три шари: **core** (бій, лист, шаблони, не називає ні систем, ні модулів), **`systems/<id>/`** і **пакет шаблону** (`data/templates/<key>/` + хуки `scripts/templates/systems/<id>/`).
 
@@ -60,13 +60,13 @@ Core бачить `systems/*` лише через корені (`SYSTEM_ROOTS`, 
 | `characteristics`, `sheetTest`, `rest` | обов'язковий | дані системи в рядку, тест з листа, відпочинок |
 | `resources?`, `advancement?`, `equipment?`, `traits?`, `currency?`, `downtime?`, `corruption?`, `creation?` | необов'язковий | wfrp-подібні можливості; наявність = ознака для UI/сервера |
 | `participant` | списки | `fromCharacter`, `fromUnit` (частини учасника, напр. `heroscaling`, `morale`), `fromStored`, `persist` |
-| `combat` | обов'язковий (ядро) | `resolveAttack`, `abortedRoll`, `initiative`, `tieBreak`, `hitModel`, `damage`, `onZeroHp`, `actions`, `reactions`, `saves`, `proficiency`, `judge`, `dice`, `actionEconomy` |
+| `combat` | обов'язковий (ядро) | `resolveAttack`, `abortedRoll`, `initiative`, `tieBreak`, `hitModel`, `damage`, `onZeroHp`, `actions`, `reactions`, `saves { modifiers, bonus, … }`, `proficiency`, `judge`, `dice`, `actionEconomy` |
 | `combat.attackAbility?`, `reach?`, `crit?`, `autoXp?`, `offHand?`, `inspiration?`, `input?`, `details?` | необов'язковий | характеристика атаки (`{ key, roll, damage }`), досяжність і штрафи дальньої, параметри критів, авто-XP, друга рука, натхнення; без хука: 1 клітинка, нат. 20 = крит, без штрафів |
 | `combat.damageParts?` | список | `DamagePart(p, attack) => { dice?, flat? } \| null`; core `attackDamageParts` складає частини (кубики рівня героя й `+level` — `heroscaling`, `systems/heroscaling/rules/damage.ts`; без модуля герой wfrp і безкласовий герой голого `dnd5e` їх не мають: це зміна реальної шкоди в бою, прийнято за П6) |
 | `combat.onDamaged`, `afterAttack`, `turn { resetState, beforeAdvance, onTurnStart, onSkippedTurn, onTurnEnd, onRoundStart, onJoin, actGates, startCheck }` | списки | хуки з `runTurnHooks`; перед модулями йде база. Порядок `afterAttack` значущий: хук, що ставить `handled` раніше за `retaliation`, придушує відсіч (тест у `systems/retaliation`). `resolveAttack`/`castTest` віддають не дані слота, а `attackerUpdate`/`casterUpdate` (функція над свіжим учасником); `magic.saveDc` = `undefined` означає «рятунку немає» (DC в зони/ефекти не пишеться); `sustain.begin(ps, { casterId, castId, spellName, rounds, round? })` |
 | `conditionSet` | обов'язковий | стандартні стани (`apply`, `effectInput`); `enabled`/`custom` для набору й кастомних станів |
 | `conditions?` | необов'язковий | системні стани (wfrp) |
-| `magic` | обов'язковий | `sustain`, `saveDc`, `upcast`; необов'язкові `resource` (`picksSlot`), `saveDcBase`, `spellAbilityMod`, `casterDice`, `spellcasting`, `tested` |
+| `magic` | обов'язковий | `sustain`, `saveDc`, `upcast`; необов'язкові `resource` (`picksSlot`), `saveDcBase`, `spellAbilityMod`, `spellAttackBonus(caster, weapon)`, `casterDice`, `spellcasting`, `tested` |
 | `identity`, `lineage`, `attacks`, `spells`, `items`, `inventory` | обов'язковий | що показують форма, лист і бій |
 
 `SystemServer` (`lib/server/systems/types.ts`): `schemas`, `operations` (операції персонажа; `scoped: true` обгортає `inCompositionOnly`), `battle` (бойові операції за назвою, `lazy load`), `routes` за областями `campaign | character | battle` (єдина точка входу `runSystemRoute`), `contentKinds`, `contentRefs` (список), `drafts` (виключний слот бази), `balance` (`edition`, `heroPower`, …), `ai`. Бойові дії модулів і бази йдуть одним маршрутом `…/battles/:battleId/system/:action` (`runSystemBattleRoute`); дія вимкненого модуля чи невідома — 404 `systemActionUnknown`.
@@ -79,6 +79,16 @@ Core бачить `systems/*` лише через корені (`SYSTEM_ROOTS`, 
 
 **D15 (види контенту й композиція).** Вид, чий власник — модуль поза композицією кампанії, прихований: список `[]`, інші дії й імпорт 404, рядки не видаляються. Гейт — `lib/server/content/kind-active.ts` (`isKindActive`/`assertKindActive`); `abilities.sources` — таблиця `{ source, contentKind, load }` із фільтром `isKindActive`; імпорт компендіуму пропускає рядки неактивного виду з попередженням `KIND_INACTIVE`. Sync гейта не проходить.
 
+**Читання характеристик статблока в core — лише через хуки:** модифікатори рятунків — `combat.saves.modifiers(p)` (баланс: `hitModel.saves(p)`), бонус майстерності — `combat.saves.bonus(p)`/`combat.proficiency`, бонус атаки закляття — `magic.spellAttackBonus`; система без цього віддає нулі.
+
+**Винятки й домовленості контракту.**
+- d6pool (і будь-яка база без `magic.resource`) кастує вільно: слотів/ресурсу немає, `picksSlot` відсутній (Ч7-M2).
+- Бойова операція, якої немає в базі кампанії, дає 422 `action_rejected` (з `missing`); 404 `systemActionUnknown` лише коли такої дії немає в жодній системі чи модулі композиції (Ч7-M7).
+- Змінені коди відмов (Ч11-M3): `condition-test`/`system-condition` без wfrp — `action_rejected` замість `invalid_target` (ключ `CONDITION_UNSUPPORTED` той самий, статус 422); `PUT race-profile` гравцем — `DM_ONLY` замість `FORBIDDEN`; `PUT race-profile` без `creation` — тіло парситься першим, невалідне = 400 замість 409; `race-profiles` у не-wfrp кампанії — 404 замість 200. Права (404/403 учасника кампанії) перевіряються до парсингу тіла операції.
+- Гарди DM-сторінок у `layout.tsx` не перевиконуються при клієнтській навігації; прийнято, бо CRUD-маршрути самі дають 404 (Ч11-M6). Меню з модульними розділами з'являється після гідратації правил, не в першому HTML (повний варіант потребує пропса `Header` з кореневого layout).
+- Тести core можуть брати фікстури систем (`WFRP_RULES`, `withD20State`, …): тести поза ESLint-зонами. Імпорт UI системи в тест core (як `PrimaryAbilityPicker`) — ні, такий тест лежить у `systems/<id>/__tests__/ui/`.
+- `resolveAttack`/`castTest` віддають `attackerUpdate`/`casterUpdate`, не дані слота; `magic.saveDc?` = `undefined` — рятунку немає.
+
 ## Правила зони
 
 - **Зона.** Поза коренями й `system-imports-exempt.json` нічого не імпортує `@/systems/*` (ESLint `systems/zone`).
@@ -88,7 +98,7 @@ Core бачить `systems/*` лише через корені (`SYSTEM_ROOTS`, 
 - Блокування: зміна `system.key` у кампанії з `characters`/`units` → 409 `SYSTEM_LOCKED`; зміна `modules` — 422 `SYSTEM_MODULES_INVALID`, 409 `SYSTEM_MODULES_IN_BATTLE` (лише активний бій), 409 `SYSTEM_MODULE_CONFIRM` (`toggle: "setup"`).
 - `system` не механіка: вкладки правил = секції композиції.
 
-## Ratchet (після Ч18)
+## Ratchet (після Ч18b)
 
 Перегенерація: `pnpm exec tsx scripts/shared/system-ratchet.ts --write`; числа лише падають.
 
@@ -97,7 +107,7 @@ Core бачить `systems/*` лише через корені (`SYSTEM_ROOTS`, 
 - `system-literals-exempt.json`: 6 файлів / 11 влучань, лише тексти й назва кубика (`log/codec.ts`, `site.ts`, `whats-new.ts`, фікстура `defaults.ts`, `'d20'` у `types/characters.ts` і `SheetRollDialog.tsx`). Дані й активи (`scripts/assets/**`, `scripts/seed/**`, `scripts/srd/**`, профілі sweep) скан літералів не дивиться: виняток у `isLiteralAllowed` (`DATA_DIRS`), а не в `SKIP_DIRS` (той діє й на скан імпортів). Було 15 / 56 після Ч17 (зростання від токена `homm` у даних).
 - `RULES_SECTION_READERS` (читання `rules.<секція>` у core) = 0 за всіма секціями (пункти, які тримає core, як `encounters.balance/unitGroups`, не рахуються: `OWNED_ITEMS`).
 - `LEAK_NAMES`: `isFiveE` 0; поля колишнього dual-read (`channelledSl`, `conditionTests`, `psychologyTested`, `attackedWithLight`, `inspirationSpent`, `retaliationsUsed`) = 0 (forward-скрипт і `battle-state-shapes` очищено в Ч18); `useChannelAction` 0; `HOMM_[A-Z]+` 0 (профілі sweep поза скан, Ч18); **`CONDITION_5E_` 11** (словник станів у схемі ефектів core) → E3.
-- Гард колонок статблока: 7 файлів (`effects/morale` 1, `attack/bonus` 1, `cunning-strike` 2, `hit-model` 1, `balance/stats` 1, `spell/ability-modifier` 2, `spell/power` 2), ціль 0 → E3.
+- Гард колонок статблока: 1 файл (`lib/utils/abilities/engine/effects/morale.ts`, `moraleCapOf` читає `abilities.moraleCap`; перенос у слот потребує міграції даних) — 10 читань у 7 файлах закрито в Ч18b (хуки `saves.modifiers`, `proficiency.bonus`, `magic.spellAttackBonus`, `hitModel.saves`; `ability-modifier.ts` → `systems/d20/rules/magic`), ціль 0 → епік.
 
 ## Як додати модуль
 
