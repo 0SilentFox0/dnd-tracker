@@ -4,9 +4,6 @@ import { describe, expect, it } from 'vitest';
 
 import { hashJson } from '@/lib/utils/battle/store/stable-json';
 import {
-    downgradeHistory,
-    downgradeParticipant,
-    EXT_TO_LEGACY,
     fieldsOf,
     hashMismatch,
     type ParticipantRow,
@@ -105,6 +102,25 @@ describe('fieldsOf', () => {
             psychologyTested: { fear: 1 },
         });
     });
+
+    it('lists an ext value under the name of its flat counterpart', () => {
+        const { slot } = fieldsOf(
+            row(
+                { basicInfo: { id: 'p1' }, battleData: {} },
+                {
+                    system: {
+                        key: 'sys',
+                        data: {
+                            inspiration: true,
+                            ext: { retaliation: { used: 1 } },
+                        },
+                    },
+                }
+            )
+        );
+
+        expect(slot).toEqual({ inspiration: true, retaliationsUsed: 1 });
+    });
 });
 
 describe('hashMismatch', () => {
@@ -114,272 +130,10 @@ describe('hashMismatch', () => {
     });
 });
 
-describe('downgradeParticipant', () => {
-    it('writes slot values back to the flat fields and drops the slot', () => {
-        const result = downgradeParticipant(slotRow());
-
-        expect(result.changed).toBe(true);
-        expect(result.unmapped).toEqual([]);
-        expect(result.snapshot).toEqual({
-            basicInfo: { id: 'p1' },
-            battleData: { fortune: 1, conditionTests: ['x'] },
-        });
-        expect(result.state).toEqual({ activeEffects: [] });
-    });
-
-    it('keeps the hash consistent with the new snapshot', () => {
-        const result = downgradeParticipant(slotRow());
-
-        expect(result.snapshotHash).toBe(hashJson(result.snapshot));
-        expect(hashMismatch({ ...slotRow(), ...result })).toBe(false);
-    });
-
-    it('moves state-bound slot fields into state', () => {
-        const result = downgradeParticipant(
-            row(
-                { battleData: {} },
-                {
-                    system: {
-                        key: 'sys',
-                        data: { psychologyTested: { fear: 2 } },
-                    },
-                }
-            )
-        );
-
-        expect(result.state).toEqual({ psychologyTested: { fear: 2 } });
-        expect(result.snapshot).toEqual({ battleData: {} });
-    });
-
-    it('removes a stale legacy field that has no pair in the slot', () => {
-        const result = downgradeParticipant(
-            row(
-                { battleData: { fortune: 5, channelledSl: 2 } },
-                {
-                    psychologyTested: { fear: 1 },
-                    system: { key: 'sys', data: { fortune: 1 } },
-                }
-            )
-        );
-
-        expect(result.snapshot).toEqual({ battleData: { fortune: 1 } });
-        expect(result.state).toEqual({});
-    });
-
-    it('slot wins over the old copy of the same field', () => {
-        const result = downgradeParticipant(
-            row(
-                { battleData: { fortune: 5 } },
-                { system: { key: 'sys', data: { fortune: 1 } } }
-            )
-        );
-
-        expect(result.snapshot).toEqual({ battleData: { fortune: 1 } });
-    });
-
-    it('leaves a row without a slot unchanged', () => {
-        const input = legacyRow();
-
-        const result = downgradeParticipant(input);
-
-        expect(result).toMatchObject({
-            changed: false,
-            unmapped: [],
-            snapshot: input.snapshot,
-            state: input.state,
-            snapshotHash: input.snapshotHash,
-        });
-    });
-
-    it('reports unknown data keys and ext modules as unmapped', () => {
-        const result = downgradeParticipant(
-            row(
-                { battleData: {} },
-                {
-                    system: {
-                        key: 'sys',
-                        data: { fortune: 1, mystery: 1, ext: { other: {} } },
-                    },
-                }
-            )
-        );
-
-        expect(result.unmapped).toEqual(['data.mystery', 'ext.other']);
-    });
-
-    it('is idempotent', () => {
-        const once = downgradeParticipant(slotRow());
-
-        const twice = downgradeParticipant({
-            ...slotRow(),
-            snapshot: once.snapshot,
-            state: once.state,
-            snapshotHash: once.snapshotHash,
-        });
-
-        expect(twice.changed).toBe(false);
-        expect(twice.snapshot).toEqual(once.snapshot);
-        expect(twice.state).toEqual(once.state);
-    });
-
-    it('maps ext through EXT_TO_LEGACY when configured', () => {
-        EXT_TO_LEGACY.mod = { from: 'used', to: 'usedLegacy' };
-
-        try {
-            const result = downgradeParticipant(
-                row(
-                    { battleData: {} },
-                    {
-                        usedLegacy: 9,
-                        system: {
-                            key: 'sys',
-                            data: { ext: { mod: { used: 2 } } },
-                        },
-                    }
-                )
-            );
-
-            expect(result.unmapped).toEqual([]);
-            expect(result.state).toEqual({ usedLegacy: 2 });
-        } finally {
-            delete EXT_TO_LEGACY.mod;
-        }
-    });
-});
-
-describe('downgradeHistory', () => {
-    const history = () => ({
-        scene: { round: 1 },
-        participants: [
-            {
-                columns: { id: 'p1' },
-                state: {
-                    activeEffects: [],
-                    system: {
-                        key: 'sys',
-                        data: { fortune: 1, psychologyTested: { a: 1 } },
-                    },
-                },
-            },
-            { columns: { id: 'p2' }, state: { activeEffects: [] } },
-        ],
-        changedSnapshots: {
-            p1: { battleData: { fortune: 4 } },
-        },
-    });
-
-    it('aligns state fields exactly and injects snapshot fields into changedSnapshots', () => {
-        const result = downgradeHistory(history());
-
-        expect(result.changed).toBe(true);
-        expect(result.state).toMatchObject({
-            participants: [
-                {
-                    state: {
-                        activeEffects: [],
-                        psychologyTested: { a: 1 },
-                    },
-                },
-                { state: { activeEffects: [] } },
-            ],
-            changedSnapshots: { p1: { battleData: { fortune: 1 } } },
-        });
-        expect(
-            (result.state as { participants: { state: object }[] })
-                .participants[0].state
-        ).not.toHaveProperty('system');
-    });
-
-    it('does not invent changedSnapshots for a participant without one', () => {
-        const input = history();
-
-        delete (input as { changedSnapshots?: unknown }).changedSnapshots;
-
-        const result = downgradeHistory(input);
-
-        expect(result.state).not.toHaveProperty('changedSnapshots');
-    });
-
-    it('aligns removed participants fully, hash included', () => {
-        const input = {
-            participants: [],
-            removed: [
-                {
-                    columns: { id: 'p3' },
-                    snapshot: { battleData: { fortune: 7 } },
-                    state: { system: { key: 'sys', data: { sin: 2 } } },
-                    snapshotHash: 'old',
-                },
-            ],
-        };
-
-        const { state } = downgradeHistory(input);
-
-        const [removed] = (
-            state as {
-                removed: {
-                    snapshot: unknown;
-                    state: unknown;
-                    snapshotHash: string;
-                }[];
-            }
-        ).removed;
-
-        expect(removed.snapshot).toEqual({ battleData: { sin: 2 } });
-        expect(removed.state).toEqual({});
-        expect(removed.snapshotHash).toBe(hashJson(removed.snapshot));
-    });
-
-    it('collects unmapped keys', () => {
-        const input = history();
-
-        const [first] = input.participants as unknown as {
-            state: { system: { data: unknown } };
-        }[];
-
-        first.state.system.data = { zzz: 1 };
-
-        expect(downgradeHistory(input).unmapped).toEqual(['data.zzz']);
-    });
-
-    it('leaves rows without slots unchanged and is idempotent', () => {
-        const plain = { participants: [{ columns: { id: 'p' }, state: {} }] };
-
-        expect(downgradeHistory(plain).changed).toBe(false);
-
-        const once = downgradeHistory(history());
-
-        expect(downgradeHistory(once.state).changed).toBe(false);
-    });
-
-    it('tolerates a non-object state', () =>
-        expect(downgradeHistory(null)).toEqual({
-            state: null,
-            changed: false,
-            unmapped: [],
-        }));
-});
-
-describe('death saves, inspiration, off-hand and the ext counter', () => {
-    const SAVES = { successes: 1, failures: 2, stable: false };
-
-    const d20Row = (
-        data: Record<string, unknown>,
-        snapshotBattleData: Record<string, unknown> = {},
-        state: Record<string, unknown> = {}
-    ) =>
-        row(
-            { basicInfo: { id: 'p1' }, battleData: snapshotBattleData },
-            {
-                activeEffects: [],
-                ...state,
-                system: { key: 'sys', data },
-            }
-        );
-
-    it('shapeOf sees the flat fields of the new codec as legacy', () => {
+describe('shapeOf on the flat fields of the d20 codec', () => {
+    it('sees them as legacy', () => {
         for (const battleData of [
-            { deathSaves: SAVES },
+            { deathSaves: { successes: 1, failures: 2, stable: false } },
             { inspiration: true },
             { inspirationSpent: true },
             { attackedWithLight: true },
@@ -390,146 +144,12 @@ describe('death saves, inspiration, off-hand and the ext counter', () => {
             'legacy'
         );
     });
-
-    it('moves slot values to the snapshot and drops the dying flag with the slot', () => {
-        const result = downgradeParticipant(
-            d20Row(
-                {
-                    deathSaves: SAVES,
-                    inspiration: true,
-                    inspirationSpent: true,
-                    attackedWithLight: true,
-                },
-                {},
-                { dying: true }
-            )
-        );
-
-        expect(result.unmapped).toEqual([]);
-        expect(result.snapshot).toEqual({
-            basicInfo: { id: 'p1' },
-            battleData: {
-                deathSaves: SAVES,
-                inspiration: true,
-                inspirationSpent: true,
-                attackedWithLight: true,
-            },
-        });
-        expect(result.state).toEqual({ activeEffects: [] });
-        expect(result.snapshotHash).toBe(hashJson(result.snapshot));
-    });
-
-    it('removes stale flat copies that the slot no longer has', () => {
-        const result = downgradeParticipant(
-            d20Row(
-                { inspirationSpent: true },
-                { inspiration: false, attackedWithLight: true }
-            )
-        );
-
-        expect(result.snapshot).toEqual({
-            basicInfo: { id: 'p1' },
-            battleData: { inspirationSpent: true },
-        });
-    });
-
-    it('fieldsOf lists an ext value under the name of its flat counterpart', () => {
-        const { slot } = fieldsOf(
-            d20Row({ inspiration: true, ext: { retaliation: { used: 1 } } })
-        );
-
-        expect(slot).toEqual({ inspiration: true, retaliationsUsed: 1 });
-    });
-
-    it('maps ext.retaliation.used back to state.retaliationsUsed', () => {
-        const result = downgradeParticipant(
-            d20Row(
-                { ext: { retaliation: { used: 2 } } },
-                {},
-                { retaliationsUsed: 9 }
-            )
-        );
-
-        expect(result.unmapped).toEqual([]);
-        expect(result.state).toEqual({
-            activeEffects: [],
-            retaliationsUsed: 2,
-        });
-    });
-
-    it('keeps the flat counter when the slot has no retaliation ext', () => {
-        const result = downgradeParticipant(
-            d20Row({ inspiration: true }, {}, { retaliationsUsed: 1 })
-        );
-
-        expect(result.state).toEqual({
-            activeEffects: [],
-            retaliationsUsed: 1,
-        });
-    });
-
-    it('is a fixed point and keeps the hash consistent', () => {
-        const once = downgradeParticipant(
-            d20Row(
-                { deathSaves: SAVES, ext: { retaliation: { used: 1 } } },
-                {},
-                { dying: true }
-            )
-        );
-
-        const twice = downgradeParticipant({
-            ...d20Row({}),
-            snapshot: once.snapshot,
-            state: once.state,
-            snapshotHash: once.snapshotHash,
-        });
-
-        expect(twice.changed).toBe(false);
-        expect(hashMismatch({ ...legacyRow(), ...once })).toBe(false);
-    });
-
-    it('aligns the history rows the same way', () => {
-        const input = {
-            participants: [
-                {
-                    columns: { id: 'p1' },
-                    state: {
-                        activeEffects: [],
-                        dying: true,
-                        system: {
-                            key: 'sys',
-                            data: {
-                                deathSaves: SAVES,
-                                ext: { retaliation: { used: 1 } },
-                            },
-                        },
-                    },
-                },
-            ],
-            changedSnapshots: { p1: { battleData: {} } },
-        };
-
-        const result = downgradeHistory(input);
-
-        expect(result.unmapped).toEqual([]);
-        expect(result.state).toMatchObject({
-            participants: [
-                { state: { activeEffects: [], retaliationsUsed: 1 } },
-            ],
-            changedSnapshots: { p1: { battleData: { deathSaves: SAVES } } },
-        });
-        expect(
-            (result.state as { participants: { state: object }[] })
-                .participants[0].state
-        ).not.toHaveProperty('dying');
-    });
 });
 
 describe('ratchet', () => {
     it('keeps system names out of the CLIs and libs', () => {
         const files = [
             'active-battles-report.ts',
-            'battle-state-downgrade.ts',
             'lib/battle-state-shapes.ts',
             'lib/battle-state-plan.ts',
             'lib/battle-state-db.ts',

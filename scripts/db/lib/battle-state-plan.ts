@@ -1,8 +1,6 @@
 import { isRecord } from '@/lib/utils/common/is-record';
 import { composition } from '@/lib/utils/rules/systems/catalog';
 import {
-    downgradeHistory,
-    downgradeParticipant,
     fieldsOf,
     hashMismatch,
     historyHasLegacy,
@@ -54,11 +52,11 @@ export interface ReportArgs {
     expectClean: boolean;
 }
 
-export interface ForwardArgs extends DowngradeArgs {
+export interface ForwardArgs extends StateArgs {
     revertFile?: string;
 }
 
-export interface DowngradeArgs {
+export interface StateArgs {
     apply: boolean;
     allowRemote: boolean;
     status: StatusFilter;
@@ -140,7 +138,7 @@ const STATE_VALUES = ['--status', '--scene', '--snapshot-dir'] as const;
 function stateArgs(
     bools: Set<string>,
     values: Map<string, string>
-): DowngradeArgs {
+): StateArgs {
     return {
         apply: bools.has('--apply'),
         allowRemote: bools.has('--allow-remote'),
@@ -150,15 +148,6 @@ function stateArgs(
         force: bools.has('--force'),
         json: bools.has('--json'),
     };
-}
-
-export function parseDowngradeArgs(argv: readonly string[]): DowngradeArgs {
-    const { bools, values } = parseFlags(argv, {
-        bools: STATE_BOOLS,
-        values: STATE_VALUES,
-    });
-
-    return stateArgs(bools, values);
 }
 
 export function parseForwardArgs(argv: readonly string[]): ForwardArgs {
@@ -366,83 +355,12 @@ export interface HistoryChange {
     unmapped: string[];
 }
 
-export interface DowngradePlan {
+export interface StatePlan {
     scenes: { id: string; name: string; version: number }[];
     participants: ParticipantChange[];
     history: HistoryChange[];
     unmapped: string[];
 }
-
-export function planDowngrade(
-    scenes: readonly SceneRow[],
-    participants: readonly StoredRow[],
-    history: readonly HistoryRow[]
-): DowngradePlan {
-    const participantChanges: ParticipantChange[] = [];
-
-    for (const row of participants) {
-        const result = downgradeParticipant(row);
-
-        if (!result.changed) continue;
-
-        participantChanges.push({
-            id: row.id,
-            battleId: row.battleId,
-            before: {
-                snapshot: row.snapshotText,
-                state: row.stateText,
-                snapshotHash: row.snapshotHash,
-            },
-            after: {
-                snapshot: result.snapshot,
-                state: result.state,
-                snapshotHash: result.snapshotHash,
-            },
-            unmapped: result.unmapped,
-        });
-    }
-
-    const historyChanges: HistoryChange[] = [];
-
-    for (const row of history) {
-        const result = downgradeHistory(row.state);
-
-        if (!result.changed) continue;
-
-        historyChanges.push({
-            battleId: row.battleId,
-            seq: row.seq,
-            before: row.text,
-            after: result.state,
-            unmapped: result.unmapped,
-        });
-    }
-
-    const touched = new Set([
-        ...participantChanges.map((c) => c.battleId),
-        ...historyChanges.map((c) => c.battleId),
-    ]);
-
-    return {
-        scenes: scenes
-            .filter((s) => touched.has(s.id))
-            .map((s) => ({ id: s.id, name: s.name, version: s.version })),
-        participants: participantChanges,
-        history: historyChanges,
-        unmapped: [
-            ...participantChanges.flatMap((c) =>
-                c.unmapped.map((name) => `participant ${c.id}: ${name}`)
-            ),
-            ...historyChanges.flatMap((c) =>
-                c.unmapped.map(
-                    (name) => `history ${c.battleId}#${c.seq}: ${name}`
-                )
-            ),
-        ],
-    };
-}
-
-export type StatePlan = DowngradePlan;
 
 export interface ForwardPlan extends StatePlan {
     unresolved: string[];
@@ -595,7 +513,7 @@ export function formatPlan(plan: StatePlan | ForwardPlan): string[] {
     return lines;
 }
 
-export interface DowngradeSnapshot {
+export interface StateSnapshot {
     version: 1;
     createdAt: string;
     host: string;
@@ -615,8 +533,8 @@ export interface DowngradeSnapshot {
     }[];
 }
 
-export type DowngradeSnapshotBody = Pick<
-    DowngradeSnapshot,
+export type StateSnapshotBody = Pick<
+    StateSnapshot,
     'scenes' | 'participants' | 'history'
 >;
 

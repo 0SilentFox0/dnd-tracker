@@ -15,12 +15,12 @@ import {
     withSnapshotFile,
 } from '@/scripts/db/lib/battle-state-file';
 import {
-    type DowngradeSnapshot,
-    type DowngradeSnapshotBody,
     formatPlan,
     parseForwardArgs,
     planForward,
     snapshotFileName,
+    type StateSnapshot,
+    type StateSnapshotBody,
 } from '@/scripts/db/lib/battle-state-plan';
 import { assertSeedTarget } from '@/scripts/seed/seed-library-lib';
 
@@ -91,7 +91,7 @@ async function main() {
             args.apply && plan.scenes.length > 0
                 ? await withSnapshotFile(
                       file,
-                      (body: DowngradeSnapshotBody): DowngradeSnapshot => ({
+                      (body: StateSnapshotBody): StateSnapshot => ({
                           version: 1,
                           createdAt: now.toISOString(),
                           host,

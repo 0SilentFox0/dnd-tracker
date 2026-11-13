@@ -8,9 +8,9 @@ import {
 import { dirname } from 'node:path';
 
 import { isRecord } from '@/lib/utils/common/is-record';
-import type { DowngradeSnapshot } from '@/scripts/db/lib/battle-state-plan';
+import type { StateSnapshot } from '@/scripts/db/lib/battle-state-plan';
 
-export function readSnapshotFile(file: string): DowngradeSnapshot {
+export function readSnapshotFile(file: string): StateSnapshot {
     const parsed: unknown = JSON.parse(readFileSync(file, 'utf8'));
 
     if (
@@ -22,7 +22,7 @@ export function readSnapshotFile(file: string): DowngradeSnapshot {
     )
         throw new Error(`${file}: невірний формат знімка`);
 
-    return parsed as unknown as DowngradeSnapshot;
+    return parsed as unknown as StateSnapshot;
 }
 
 /** the audit file appears under its final name only after the transaction has committed */

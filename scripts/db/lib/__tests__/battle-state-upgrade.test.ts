@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 
 import { hashJson } from '@/lib/utils/battle/store/stable-json';
 import {
-    downgradeParticipant,
     historyHasLegacy,
     shapeOf,
     upgradeHistory,
@@ -177,33 +176,6 @@ describe('upgradeStored', () => {
         expect(twice.changed).toBe(false);
     });
 
-    it('downgrade after forward restores the flat form for rows with a slot', () => {
-        const withSlot = stored(
-            { battleData: { fortune: 2 } },
-            { psychologyTested: { a: 1 }, retaliationsUsed: 1 }
-        );
-
-        const up = upgradeStored(withSlot, BASE);
-
-        const down = downgradeParticipant({
-            id: 'p1',
-            battleId: 'b1',
-            snapshot: up.snapshot,
-            state: up.state,
-            snapshotHash: up.snapshotHash,
-        });
-
-        expect(down.snapshot).toEqual(withSlot.snapshot);
-        expect(down.state).toEqual({
-            psychologyTested: { a: 1 },
-            retaliationsUsed: 1,
-        });
-
-        const again = upgradeStored(down, BASE);
-
-        expect(again.state).toEqual(up.state);
-        expect(again.snapshot).toEqual(up.snapshot);
-    });
 });
 
 describe('upgradeHistory', () => {

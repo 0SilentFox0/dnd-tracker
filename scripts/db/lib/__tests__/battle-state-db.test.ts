@@ -2,12 +2,12 @@ import type { Prisma } from '@prisma/client';
 import { describe, expect, it, vi } from 'vitest';
 
 import {
-    applyDowngrade,
+    applyStatePlan,
     loadParticipants,
     loadScenes,
     type RawDb,
 } from '@/scripts/db/lib/battle-state-db';
-import type { DowngradePlan } from '@/scripts/db/lib/battle-state-plan';
+import type { StatePlan } from '@/scripts/db/lib/battle-state-plan';
 
 interface Store {
     sceneVersion: number;
@@ -96,7 +96,7 @@ const initial: Store = {
     history: '{"h":1}',
 };
 
-const plan = (over: Partial<DowngradePlan> = {}): DowngradePlan => ({
+const plan = (over: Partial<StatePlan> = {}): StatePlan => ({
     scenes: [{ id: 's1', name: 'S', version: 4 }],
     participants: [
         {
@@ -124,7 +124,7 @@ const plan = (over: Partial<DowngradePlan> = {}): DowngradePlan => ({
     ...over,
 });
 
-describe('applyDowngrade', () => {
+describe('applyStatePlan', () => {
     it('bumps the version, writes every row and calls write last', async () => {
         const { db, store, log } = fakeDb(initial);
 
@@ -132,7 +132,7 @@ describe('applyDowngrade', () => {
 
         const write = vi.fn(() => order.push(`write after ${log.join(',')}`));
 
-        const body = await applyDowngrade(db, plan(), write);
+        const body = await applyStatePlan(db, plan(), write);
 
         expect(store.sceneVersion).toBe(5);
         expect(store.participant).toEqual({
@@ -155,7 +155,7 @@ describe('applyDowngrade', () => {
 
         const write = vi.fn();
 
-        await expect(applyDowngrade(db, plan(), write)).rejects.toThrow(
+        await expect(applyStatePlan(db, plan(), write)).rejects.toThrow(
             'battle_scenes s1'
         );
         expect(store.participant.snapshot).toBe('{"a":1}');
@@ -170,7 +170,7 @@ describe('applyDowngrade', () => {
 
         const write = vi.fn();
 
-        await expect(applyDowngrade(db, plan(), write)).rejects.toThrow(
+        await expect(applyStatePlan(db, plan(), write)).rejects.toThrow(
             'battle_participants p1'
         );
         expect(store.sceneVersion).toBe(4);
@@ -182,7 +182,7 @@ describe('applyDowngrade', () => {
 
         const write = vi.fn();
 
-        await expect(applyDowngrade(db, plan(), write)).rejects.toThrow(
+        await expect(applyStatePlan(db, plan(), write)).rejects.toThrow(
             'battle_snapshots s1#1'
         );
         expect(store.sceneVersion).toBe(4);

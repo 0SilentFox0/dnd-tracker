@@ -7,8 +7,8 @@ import {
     revertStatePlan,
 } from '@/scripts/db/lib/battle-state-db';
 import type {
-    DowngradeSnapshotBody,
     StatePlan,
+    StateSnapshotBody,
 } from '@/scripts/db/lib/battle-state-plan';
 
 interface Store {
@@ -124,13 +124,13 @@ const plan: StatePlan = {
 async function applied() {
     const { db, store } = fakeDb(initial);
 
-    let body: DowngradeSnapshotBody | undefined;
+    let body: StateSnapshotBody | undefined;
 
     await applyStatePlan(db, plan, (b) => {
         body = b;
     });
 
-    return { db, store, body: body as DowngradeSnapshotBody };
+    return { db, store, body: body as StateSnapshotBody };
 }
 
 describe('revertStatePlan', () => {

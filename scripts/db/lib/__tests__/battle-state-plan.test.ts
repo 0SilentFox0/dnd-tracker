@@ -3,11 +3,8 @@ import { describe, expect, it } from 'vitest';
 import { hashJson } from '@/lib/utils/battle/store/stable-json';
 import {
     buildReport,
-    formatPlan,
     formatReport,
-    parseDowngradeArgs,
     parseReportArgs,
-    planDowngrade,
     type SceneRow,
     snapshotFileName,
     type StoredRow,
@@ -76,40 +73,10 @@ describe('parse args', () => {
             json: true,
         }));
 
-    it('downgrade is a dry-run by default', () =>
-        expect(parseDowngradeArgs([])).toMatchObject({
-            apply: false,
-            status: 'all',
-            sceneIds: [],
-            force: false,
-        }));
-
-    it('downgrade reads every option', () =>
-        expect(
-            parseDowngradeArgs([
-                '--apply',
-                '--scene',
-                'x,y',
-                '--snapshot-dir',
-                'out',
-                '--force',
-                '--allow-remote',
-            ])
-        ).toMatchObject({
-            apply: true,
-            sceneIds: ['x', 'y'],
-            snapshotDir: 'out',
-            force: true,
-            allowRemote: true,
-        }));
-
     it('rejects unknown options, bad status and missing values', () => {
         expect(() => parseReportArgs(['--nope'])).toThrow('Невідома опція');
-        expect(() => parseDowngradeArgs(['--revert'])).toThrow(
-            'Невідома опція'
-        );
         expect(() => parseReportArgs(['--status', 'x'])).toThrow('--status');
-        expect(() => parseDowngradeArgs(['--scene'])).toThrow('потребує');
+        expect(() => parseReportArgs(['--campaign'])).toThrow('потребує');
     });
 });
 
@@ -196,63 +163,6 @@ describe('buildReport', () => {
             campaigns: 1,
             shapes: { none: 1, legacy: 1, slot: 1, mixed: 0 },
         });
-    });
-});
-
-describe('planDowngrade', () => {
-    it('plans only rows that change and the scenes that own them', () => {
-        const plan = planDowngrade(
-            [scene(), scene({ id: 'b2', name: 'Інший' })],
-            [legacy(), slot()],
-            []
-        );
-
-        expect(plan.participants.map((p) => p.id)).toEqual(['p2']);
-        expect(plan.scenes).toEqual([{ id: 'b1', name: 'Бій', version: 7 }]);
-        expect(plan.unmapped).toEqual([]);
-
-        const [change] = plan.participants;
-
-        expect(change.before.state).toBe(slot().stateText);
-        expect(change.after.snapshotHash).toBe(hashJson(change.after.snapshot));
-    });
-
-    it('includes history rows and labels unmapped keys', () => {
-        const state = {
-            participants: [
-                {
-                    columns: { id: 'p2' },
-                    state: { system: { key: 'sys', data: { zzz: 1 } } },
-                },
-            ],
-        };
-
-        const plan = planDowngrade(
-            [scene()],
-            [],
-            [{ battleId: 'b1', seq: 3, text: JSON.stringify(state), state }]
-        );
-
-        expect(plan.history).toHaveLength(1);
-        expect(plan.unmapped).toEqual(['history b1#3: data.zzz']);
-        expect(formatPlan(plan).join('\n')).toContain('version 7 → 8');
-    });
-
-    it('is a no-op once downgraded', () => {
-        const first = planDowngrade([scene()], [slot()], []);
-
-        const [{ after }] = first.participants;
-
-        const row = stored(
-            'p2',
-            after.snapshot as Record<string, unknown>,
-            after.state as Record<string, unknown>
-        );
-
-        const again = planDowngrade([scene()], [row], []);
-
-        expect(again.scenes).toEqual([]);
-        expect(again.participants).toEqual([]);
     });
 });
 

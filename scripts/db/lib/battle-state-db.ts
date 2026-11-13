@@ -1,10 +1,10 @@
 import { Prisma } from '@prisma/client';
 
 import type {
-    DowngradeSnapshotBody,
     HistoryRow,
     SceneRow,
     StatePlan,
+    StateSnapshotBody,
     StatusFilter,
     StoredRow,
 } from '@/scripts/db/lib/battle-state-plan';
@@ -92,10 +92,10 @@ const changed = (what: string) =>
 export async function applyStatePlan(
     db: RawDb,
     plan: StatePlan,
-    write: (body: DowngradeSnapshotBody) => void
-): Promise<DowngradeSnapshotBody> {
+    write: (body: StateSnapshotBody) => void
+): Promise<StateSnapshotBody> {
     return db.$transaction(async (tx) => {
-        const body: DowngradeSnapshotBody = {
+        const body: StateSnapshotBody = {
             scenes: [],
             participants: [],
             history: [],
@@ -154,15 +154,13 @@ export async function applyStatePlan(
     }, TX_OPTIONS);
 }
 
-export const applyDowngrade = applyStatePlan;
-
 const diverged = (what: string) =>
     new Error(`${what}: рядок змінився після застосування, відкат скасовано`);
 
 /** puts `before` back only where the stored text still equals `after`; any other row aborts the whole revert */
 export async function revertStatePlan(
     db: RawDb,
-    body: DowngradeSnapshotBody
+    body: StateSnapshotBody
 ): Promise<{ scenes: number; participants: number; history: number }> {
     return db.$transaction(async (tx) => {
         for (const scene of body.scenes) {
