@@ -131,7 +131,12 @@
     "schoolMastery": {},
     "abilityUsage": {},
     "pendingExtraActions": 0,
-    "fortune": 0
+    "system": {
+      "key": "wfrp",
+      "data": {
+        "fortune": 0
+      }
+    }
   },
   "actionFlags": {
     "hasUsedAction": false,
