@@ -106,7 +106,11 @@ export function useDmParticipantActions({ onChangeHp, onDone }: Options) {
             ? (p) => setLegendaryId(p.basicInfo.id)
             : undefined,
         conditionsEnabled:
-            (battle.rules?.conditions.enabled ?? false) ||
+            (battle.rules
+                ? (ruleSystemOf(battle.rules).conditionSet.enabled?.(
+                      battle.rules
+                  ) ?? false)
+                : false) ||
             !!(battle.rules && ruleSystemOf(battle.rules).conditions) ||
             (battle.initiativeOrder ?? []).some(hasAnyCondition5e),
         onKill: isActive ? (p) => update(p, { kill: true }) : undefined,
@@ -134,7 +138,9 @@ export function useDmParticipantActions({ onChangeHp, onDone }: Options) {
         row,
         conditions: {
             target: conditionsTarget,
-            custom: battle.rules?.conditions.custom,
+            custom:
+                battle.rules &&
+                ruleSystemOf(battle.rules).conditionSet.custom?.(battle.rules),
             close: () => setConditionsId(null),
             submit: actions.conditions.mutate,
             isPending: actions.conditions.isPending,

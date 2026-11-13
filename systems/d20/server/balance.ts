@@ -39,6 +39,6 @@ export const D20_BALANCE: SystemBalance = {
             }),
         };
     },
+    edition: (rules) => rules.encounters.edition,
     unitStats: (base) => base,
-    readsBuiltRules: false,
 };

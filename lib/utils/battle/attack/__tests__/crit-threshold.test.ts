@@ -18,7 +18,10 @@ describe('critThresholdOf', () => {
         ).toBe(20);
         expect(
             critThresholdOf(
-                { criticals: { ...DEFAULT_RULES.criticals, critOn: 19 } },
+                {
+                    ...DEFAULT_RULES,
+                    criticals: { ...DEFAULT_RULES.criticals, critOn: 19 },
+                },
                 [attacker],
                 attacker.basicInfo.id
             )

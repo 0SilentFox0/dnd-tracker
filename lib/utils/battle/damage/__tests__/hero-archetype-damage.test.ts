@@ -129,6 +129,7 @@ describe('hero archetype damage', () => {
         };
 
         const context = {
+            rules: DEFAULT_RULES,
             skillTreeByRace: {},
             mainSkills: [],
             spells: [],

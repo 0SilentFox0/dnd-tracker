@@ -9,6 +9,7 @@ vi.mock('@/lib/db', () => ({
 import { ParticipantSide } from '@/lib/constants/battle';
 import { createBattleParticipantFromUnit } from '@/lib/utils/battle/participant/from-unit';
 import type { UnitFromPrisma } from '@/lib/utils/battle/types/participant';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
 
 const orc = {
     id: 'r1',
@@ -90,7 +91,8 @@ describe('createBattleParticipantFromUnit + raceId', () => {
             'b1',
             ParticipantSide.ENEMY,
             1,
-            { r1: orc as never }
+            { r1: orc as never },
+            DEFAULT_RULES
         );
 
         expect(p.abilities.race).toBe('Орк');
@@ -105,7 +107,9 @@ describe('createBattleParticipantFromUnit + raceId', () => {
             unit(),
             'b1',
             ParticipantSide.ENEMY,
-            1
+            1,
+            undefined,
+            DEFAULT_RULES
         );
 
         expect(findFirst).toHaveBeenCalledWith({
@@ -119,7 +123,9 @@ describe('createBattleParticipantFromUnit + raceId', () => {
             unit({ raceId: null }),
             'b1',
             ParticipantSide.ENEMY,
-            1
+            1,
+            undefined,
+            DEFAULT_RULES
         );
 
         expect(p.abilities.race).toBe('');
@@ -132,7 +138,9 @@ describe('createBattleParticipantFromUnit + raceId', () => {
             unit({ level: 6, proficiencyBonus: 4, raceId: null }),
             'b1',
             ParticipantSide.ENEMY,
-            1
+            1,
+            undefined,
+            DEFAULT_RULES
         );
 
         expect(p.spellcasting.spellSaveDC).toBe(18);

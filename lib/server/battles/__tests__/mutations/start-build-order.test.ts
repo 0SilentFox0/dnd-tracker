@@ -35,6 +35,7 @@ import {
     makeParticipant,
     resolved,
 } from '@/lib/utils/abilities/__tests__/fixtures';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
 
 describe('buildStartOrder: резерв', () => {
     it('резерв не отримує ауру й не потрапляє в чергу, але лишається масштабованим', async () => {
@@ -58,10 +59,22 @@ describe('buildStartOrder: резерв', () => {
                 makeParticipant({ id: `w${n}`, side: ParticipantSide.ALLY })
         );
 
-        const { order, reserve } = await buildStartOrder('b1', 'c1', [
-            { id: 'h1', type: 'character', side: 'ally' },
-            { id: 'u1', type: 'unit', side: 'ally', quantity: 2, reserved: 1 },
-        ]);
+        const { order, reserve } = await buildStartOrder(
+            'b1',
+            'c1',
+            [
+                { id: 'h1', type: 'character', side: 'ally' },
+                {
+                    id: 'u1',
+                    type: 'unit',
+                    side: 'ally',
+                    quantity: 2,
+                    reserved: 1,
+                },
+            ],
+            null,
+            DEFAULT_RULES
+        );
 
         expect(prisma.character.findMany).toHaveBeenCalledWith(
             expect.objectContaining({

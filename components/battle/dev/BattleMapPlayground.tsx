@@ -6,8 +6,8 @@ import { HudChipTabs, HudPanel } from '@/components/hud/page';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { useBattleMapPlayground } from '@/lib/hooks/battle/useBattleMapPlayground';
 import { cn } from '@/lib/utils';
+import { PREVIEW_RULES } from '@/lib/utils/battle/fx/preview-rules';
 import { remainingMovement } from '@/lib/utils/battle/grid';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
 
 const FIELD =
     'h-8 w-full rounded-md border border-hud-rule bg-black/30 px-2 text-sm';
@@ -184,7 +184,7 @@ export function BattleMapPlayground() {
                             <div className="text-hud-muted">
                                 HP {active.combatStats.currentHp}/
                                 {active.combatStats.maxHp} · Movement left:{' '}
-                                {remainingMovement(active, DEFAULT_RULES)} cells
+                                {remainingMovement(active, PREVIEW_RULES)} cells
                             </div>
                             {attack && (
                                 <div className="text-hud-muted">

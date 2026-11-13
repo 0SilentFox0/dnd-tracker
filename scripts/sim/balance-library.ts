@@ -1061,7 +1061,7 @@ async function main() {
         ).map((k) => [k.id, k.name])
     );
 
-    const library = await loadUnitLibraryStats(campaignId);
+    const library = await loadUnitLibraryStats(campaignId, DEFAULT_RULES);
 
     const raceRows = await prisma.race.findMany({
         where: { campaignId },
@@ -1107,7 +1107,8 @@ async function main() {
                           skillNames,
                           false
                       )
-                    : heroIds
+                    : heroIds,
+                DEFAULT_RULES
             );
 
             const party = buildPartyPower(

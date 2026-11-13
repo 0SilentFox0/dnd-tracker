@@ -5,6 +5,7 @@ import { systemServerOf } from '@/lib/server/systems/registry';
 import { referencedSkillIds } from '@/lib/utils/battle/participant/extract-skills';
 import { loadClassesById } from '@/lib/utils/battle/participant/load-classes';
 import type { CampaignSpellContext } from '@/lib/utils/battle/types/participant';
+import { classesEnabled } from '@/lib/utils/characters/classes/classes-enabled';
 import { inventoryArtifactIds } from '@/lib/utils/items/resolve';
 import { parseRules } from '@/lib/utils/rules/schema';
 
@@ -196,7 +197,7 @@ export async function buildCampaignContextForStart(
                     : undefined,
         };
 
-        if (campaignContext.rules.classes.enabled)
+        if (classesEnabled(campaignContext.rules))
             campaignContext.classesById = await loadClassesById(campaignId);
 
         for (const prepare of systemServerOf(campaignContext.rules).participant

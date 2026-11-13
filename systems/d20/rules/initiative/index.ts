@@ -11,12 +11,12 @@ const INITIATIVE_DIE = 20;
 /** `static` = the stored base; `roll` = d20 + DEX modifier + bonus (pinned bases stay static). */
 export function d20Initiative(
     p: BattleParticipant,
-    ctx: { rules: Pick<Ruleset, 'initiative'>; rng: Rng }
+    ctx: { rules: Pick<Ruleset, 'initiative'>; rng: Rng; roll?: boolean }
 ): InitiativeScore {
     const { baseInitiative, dexterity, initiativeBonus = 0 } = p.abilities;
 
     if (
-        ctx.rules.initiative.mode !== 'roll' ||
+        !(ctx.roll || ctx.rules.initiative.mode === 'roll') ||
         baseInitiative >= PINNED_INITIATIVE
     )
         return { total: baseInitiative, roll: null, die: null };

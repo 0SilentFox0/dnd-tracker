@@ -65,7 +65,9 @@ describe('формули кампанії: юніт', () => {
             unit(['s1']),
             'b',
             ParticipantSide.ENEMY,
-            1
+            1,
+            undefined,
+            DEFAULT_RULES
         );
 
         expect(spellSaveDc(DEFAULT_RULES, p)).toBe(11);

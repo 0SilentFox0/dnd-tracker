@@ -75,7 +75,7 @@ interface BuildInput {
     opts: {
         campaignId: string;
         battleId: string;
-        rules?: Ruleset;
+        rules: Ruleset;
         map?: BattleMapConfig | null;
         round?: number;
     };

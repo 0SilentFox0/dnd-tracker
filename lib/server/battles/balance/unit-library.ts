@@ -10,8 +10,9 @@ import {
     type UnitSpellRow,
 } from '@/lib/utils/battle/balance/unit-library';
 import { createBattleParticipantFromUnit } from '@/lib/utils/battle/participant/from-unit';
+import { saveDcBaseOf } from '@/lib/utils/battle/spell/save-dc';
 import type { UnitFromPrisma } from '@/lib/utils/battle/types/participant';
-import { DEFAULT_RULES, type Ruleset } from '@/lib/utils/rules';
+import { type Ruleset } from '@/lib/utils/rules';
 import type { BattleParticipant } from '@/types/battle';
 import type { RaceRow } from '@/types/races';
 
@@ -19,7 +20,7 @@ import type { RaceRow } from '@/types/races';
 async function builtUnitsById(
     units: UnitFromPrisma[],
     races: RaceRow[],
-    rules?: Ruleset
+    rules: Ruleset
 ): Promise<Map<string, BattleParticipant>> {
     const racesById = Object.fromEntries(races.map((r) => [r.id, r]));
 
@@ -75,7 +76,7 @@ async function loadSummonSources(campaignId: string): Promise<unknown[]> {
 
 export async function loadUnitLibraryStats(
     campaignId: string,
-    rules: Ruleset = DEFAULT_RULES
+    rules: Ruleset
 ): Promise<UnitStats[]> {
     const [rows, races, summonSources] = await Promise.all([
         prisma.unit.findMany({ where: { campaignId } }),
@@ -87,11 +88,7 @@ export async function loadUnitLibraryStats(
 
     const [spellsById, builtById] = await Promise.all([
         loadSpellsForUnits(campaignId, rows),
-        builtUnitsById(
-            rows,
-            races,
-            balance.readsBuiltRules ? rules : undefined
-        ),
+        builtUnitsById(rows, races, rules),
     ]);
 
     const summoned = summonedUnitIds([
@@ -107,7 +104,7 @@ export async function loadUnitLibraryStats(
             u,
             spellsById,
             built && unitResistances(built),
-            rules.formulas.saveDcBase
+            saveDcBaseOf(rules)
         );
 
         const stats = built ? balance.unitStats(base, built) : base;

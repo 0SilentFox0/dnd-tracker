@@ -35,6 +35,7 @@ import {
     resolved,
 } from '@/lib/utils/abilities/__tests__/fixtures';
 import { mazeMap } from '@/lib/utils/battle/modes/maze/__tests__/fixtures';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
 
 const roar = resolved({
     trigger: { event: 'battleStart' },
@@ -61,7 +62,13 @@ describe('buildStartOrder: лабіринт', () => {
 
         const map = mazeMap();
 
-        const inMaze = await buildStartOrder('b1', 'c1', setup as never, map);
+        const inMaze = await buildStartOrder(
+            'b1',
+            'c1',
+            setup as never,
+            map,
+            DEFAULT_RULES
+        );
 
         expect(
             inMaze.order.find((p) => p.basicInfo.id === 'h1')?.combatStats
@@ -72,7 +79,13 @@ describe('buildStartOrder: лабіринт', () => {
                 .dormant
         ).toBe(true);
 
-        const open = await buildStartOrder('b1', 'c1', setup as never);
+        const open = await buildStartOrder(
+            'b1',
+            'c1',
+            setup as never,
+            null,
+            DEFAULT_RULES
+        );
 
         expect(
             open.order.find((p) => p.basicInfo.id === 'h1')?.combatStats

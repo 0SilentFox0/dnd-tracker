@@ -711,7 +711,10 @@ async function racePassivesCheck() {
         return createBattleParticipantFromCharacter(
             { ...hero, inventory: null },
             'b1',
-            ParticipantSide.ALLY
+            ParticipantSide.ALLY,
+            undefined,
+            undefined,
+            { rules: DEFAULT_RULES }
         );
     };
 
@@ -1592,10 +1595,14 @@ async function fairBattleRuns() {
 
     const { campaignId, heroIds } = await seedFair();
 
-    const suggestion = await postBalanceResponse(campaignId, {
-        allyParticipants: { characterIds: heroIds, units: [] },
-        suggest: true,
-    });
+    const suggestion = await postBalanceResponse(
+        campaignId,
+        {
+            allyParticipants: { characterIds: heroIds, units: [] },
+            suggest: true,
+        },
+        DEFAULT_RULES
+    );
 
     const roster = suggestion.suggestedEnemies ?? [];
 

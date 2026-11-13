@@ -678,6 +678,40 @@ const eslintConfig = defineConfig([
         },
     },
     {
+        files: [
+            'app/**/*.{ts,tsx}',
+            'components/**/*.{ts,tsx}',
+            'lib/**/*.{ts,tsx}',
+            'systems/**/*.{ts,tsx}',
+            'types/**/*.{ts,tsx}',
+        ],
+        ignores: [
+            '**/__tests__/**',
+            '**/*.test.{ts,tsx}',
+            'lib/utils/rules/index.ts',
+        ],
+        plugins: {
+            fixtures: {
+                rules: { zone: builtinRules.get('no-restricted-imports') },
+            },
+        },
+        rules: {
+            'fixtures/zone': [
+                'error',
+                {
+                    paths: ['@/lib/utils/rules', '@/lib/utils/rules/defaults'].map(
+                        (name) => ({
+                            name,
+                            importNames: ['DEFAULT_RULES'],
+                            message:
+                                'DEFAULT_RULES is a test fixture: take the rules of the campaign, SECTION_DEFAULTS for neutral section defaults',
+                        })
+                    ),
+                },
+            ],
+        },
+    },
+    {
         files: [DICE_SCENE_FILE],
         rules: {
             'no-restricted-imports': [

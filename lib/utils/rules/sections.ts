@@ -24,6 +24,8 @@ export interface RulesSection {
     refineMessage?: string;
     mechanic: boolean;
     playerHidden?: true;
+    /** Patch-body keys beside the items that only this section reads */
+    patchExtras?: Record<string, z.ZodType>;
     /** Replaces the shallow `{ ...current, ...patch }` of a patch; `touched` lists keys changed beyond those in the patch body; `whole` is the full patch */
     merge?(
         current: Record<string, unknown>,

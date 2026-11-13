@@ -112,6 +112,7 @@ vi.mock('@/lib/db', () => {
 
 import { postBalanceResponse } from '@/lib/server/battles/balance/balance-post';
 import { balanceSchema } from '@/lib/server/battles/balance/balance-schema';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
 
 const allies = { characterIds: ['h1', 'h2', 'h3', 'h4'], units: [] };
 
@@ -123,7 +124,8 @@ describe('POST balance', () => {
     it('без suggest — лише сила союзників', async () => {
         const res = await postBalanceResponse(
             'camp',
-            balanceSchema.parse({ allyParticipants: allies })
+            balanceSchema.parse({ allyParticipants: allies }),
+            DEFAULT_RULES
         );
 
         expect(res.allyStats.allyCount).toBe(4);
@@ -133,7 +135,8 @@ describe('POST balance', () => {
     it('suggest: склад із множниками, кількість у [N/2, 2N]', async () => {
         const res = await postBalanceResponse(
             'camp',
-            balanceSchema.parse({ allyParticipants: allies, suggest: true })
+            balanceSchema.parse({ allyParticipants: allies, suggest: true }),
+            DEFAULT_RULES
         );
 
         const total = (res.suggestedEnemies ?? []).reduce(
@@ -177,7 +180,8 @@ describe('POST balance', () => {
                     units: [{ id: 'ogre', quantity: 10 }],
                 },
                 suggest: true,
-            })
+            }),
+            DEFAULT_RULES
         );
 
         const total = (res.suggestedEnemies ?? []).reduce(

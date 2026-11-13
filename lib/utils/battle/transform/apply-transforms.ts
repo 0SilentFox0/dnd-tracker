@@ -120,7 +120,7 @@ export async function applyTransforms(
     opts: {
         campaignId: string;
         battleId: string;
-        rules?: Ruleset;
+        rules: Ruleset;
         deps: SummonDeps;
         round: number;
     }

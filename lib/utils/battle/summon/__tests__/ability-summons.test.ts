@@ -11,6 +11,7 @@ import {
     type SummonDeps,
 } from '@/lib/utils/battle/summon/ability-summons';
 import type { UnitFromPrisma } from '@/lib/utils/battle/types/participant';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
 import type { BattleParticipant } from '@/types/battle';
 
 const elemental = {
@@ -70,7 +71,7 @@ const run = (order: BattleParticipant[], spellId?: string) =>
     applyAbilitySummons(
         [{ ownerId: 'druid', unitId: 'u-fire', count: 1, spellId }],
         order,
-        { campaignId: 'c1', battleId: 'b1', rng: () => 0, deps }
+        { campaignId: 'c1', battleId: 'b1', rng: () => 0, rules: DEFAULT_RULES, deps }
     );
 
 const summoned = (order: BattleParticipant[]) =>

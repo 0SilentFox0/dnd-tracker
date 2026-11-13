@@ -13,7 +13,6 @@ import {
     type SectionMap,
 } from './sections';
 
-import { CUSTOM_CONDITION_KEY_RE } from '@/lib/utils/abilities/schema/kinds';
 import { isRecord } from '@/lib/utils/common/is-record';
 import { MODULE_ID_RE, moduleCatalog } from '@/lib/utils/rules/systems/catalog';
 import { validateComposition } from '@/lib/utils/rules/systems/compose';
@@ -227,12 +226,8 @@ export function rulesetPatchSchemaFor(
 
     shape.confirm = z.literal(true).optional();
 
-    if (sections.conditions?.items.custom)
-        shape.removeCustomConditions = z
-            .array(z.string().regex(CUSTOM_CONDITION_KEY_RE))
-            .min(1)
-            .max(50)
-            .optional();
+    for (const section of Object.values(sections))
+        Object.assign(shape, section.patchExtras);
 
     return z.strictObject(shape) as unknown as z.ZodType<RulesetPatch>;
 }

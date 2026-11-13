@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { buildMockParticipants } from '@/lib/hooks/battle/mock-participants';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
 import type { BattleScene } from '@/types/api';
 
 const findMany = vi.hoisted(() => vi.fn());
@@ -45,7 +46,7 @@ describe('buildDemoEncounter', () => {
     });
 
     it('builds one participant per unit copy from seeded unit rows, skipping reserved and unknown entries', async () => {
-        const built = await buildDemoEncounter(scene);
+        const built = await buildDemoEncounter(scene, DEFAULT_RULES);
 
         expect(findMany).toHaveBeenCalledWith({
             where: {
@@ -62,7 +63,9 @@ describe('buildDemoEncounter', () => {
             { id: 'u-foe' },
             'b1',
             'enemy',
-            2
+            2,
+            undefined,
+            DEFAULT_RULES
         );
         expect(built.every((p) => p.battleData.position)).toBe(true);
     });

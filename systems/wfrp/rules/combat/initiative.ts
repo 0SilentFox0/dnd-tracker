@@ -10,12 +10,12 @@ const INITIATIVE_DIE = 10;
 /** `static` = the Initiative characteristic; `roll` = I + d10 (pinned bases stay static). */
 export function wfrpInitiative(
     p: BattleParticipant,
-    ctx: { rules: Pick<Ruleset, 'initiative'>; rng: Rng }
+    ctx: { rules: Pick<Ruleset, 'initiative'>; rng: Rng; roll?: boolean }
 ): InitiativeScore {
     const { baseInitiative } = p.abilities;
 
     if (
-        ctx.rules.initiative.mode !== 'roll' ||
+        !(ctx.roll || ctx.rules.initiative.mode === 'roll') ||
         baseInitiative >= PINNED_INITIATIVE
     )
         return { total: baseInitiative, roll: null, die: null };

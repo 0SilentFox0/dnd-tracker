@@ -55,6 +55,8 @@ export const D20_MODULE: RuleSystemDefinition = {
     rest: { kinds: true },
     combat: {
         judge: 'client',
+        crit: (rules) => rules.criticals,
+        autoXp: (rules) => rules.encounters.autoXp,
         offHand: D20_OFF_HAND,
         inspiration: D20_INSPIRATION,
         dice: 20,

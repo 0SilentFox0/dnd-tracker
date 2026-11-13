@@ -5,7 +5,7 @@ import { heroMember } from '@/lib/utils/battle/balance';
 import type { Ruleset } from '@/lib/utils/rules';
 import type { EntityStats, UnitEntityStats } from '@/types/battle-setup';
 
-export async function getBalancePayload(campaignId: string, rules?: Ruleset) {
+export async function getBalancePayload(campaignId: string, rules: Ruleset) {
     const characters = await loadCharacterBalanceStats(
         campaignId,
         undefined,

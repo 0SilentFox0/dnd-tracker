@@ -2,6 +2,7 @@ import type { AttackMode, RollOutcome } from './attack-flow';
 import type { AttackContext } from './forced-for';
 
 import { predictAttack } from '@/lib/utils/battle/attack/bonus';
+import { critRulesOf } from '@/lib/utils/battle/attack/crit-rules';
 import { critThresholdOf } from '@/lib/utils/battle/attack/crit-threshold';
 import { resolveAttackRoll } from '@/lib/utils/battle/common/attack-roll-helpers';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
@@ -28,7 +29,7 @@ export function rollOutcomeOf(
         { round: ctx.round, map: ctx.map, rules: ctx.rules }
     );
 
-    const crit = ctx.rules.criticals;
+    const crit = critRulesOf(ctx.rules);
 
     const { d20, second, mode } = roll;
 

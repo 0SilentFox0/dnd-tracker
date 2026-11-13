@@ -67,7 +67,14 @@ const HOMM_DEFAULTS = {
 } as Partial<UnitFromPrisma>;
 
 const build = (u: UnitFromPrisma) =>
-    createBattleParticipantFromUnit(u, 'b1', ParticipantSide.ENEMY, 1, {});
+    createBattleParticipantFromUnit(
+        u,
+        'b1',
+        ParticipantSide.ENEMY,
+        1,
+        {},
+        DEFAULT_RULES
+    );
 
 it('builds passive senses only for CR monsters', async () => {
     const fields = {

@@ -13,6 +13,7 @@ import type {
 } from '@/lib/utils/battle/types/participant';
 import { choicesStateOf } from '@/lib/utils/characters/choices/picks';
 import { selectionNeedsFeats } from '@/lib/utils/characters/choices/selections';
+import { classesEnabled } from '@/lib/utils/characters/classes/classes-enabled';
 import { inventoryArtifactIds } from '@/lib/utils/items/resolve';
 import type { Ruleset } from '@/lib/utils/rules';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
@@ -147,11 +148,13 @@ export async function loadCharacterContext(
 
     const skills = library?.skills ?? [];
 
-    const classesById = rules.classes.enabled
+    const withClasses = classesEnabled(rules);
+
+    const classesById = withClasses
         ? await loadClassesById(campaignId)
         : undefined;
 
-    const parsedClasses = rules.classes.enabled
+    const parsedClasses = withClasses
         ? CharacterClassesSchema.safeParse(character.classes)
         : null;
 

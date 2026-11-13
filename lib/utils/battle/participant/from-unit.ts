@@ -21,7 +21,7 @@ import { getAbilityModifier } from '@/lib/utils/common/calculations';
 import { logger } from '@/lib/utils/common/logger';
 import { spellGrantFields, spellPoolKey } from '@/lib/utils/items/pools';
 import { getUnitImmunities } from '@/lib/utils/races/race-effects';
-import { DEFAULT_RULES, type Ruleset } from '@/lib/utils/rules';
+import { type Ruleset } from '@/lib/utils/rules';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import { systemSlotOf } from '@/lib/utils/rules/systems/slot';
 import {
@@ -348,8 +348,8 @@ export async function createBattleParticipantFromUnit(
     battleId: string,
     side: ParticipantSide,
     instanceNumber: number,
-    racesById?: Record<string, Prisma.RaceGetPayload<object> | null>,
-    rules: Ruleset = DEFAULT_RULES
+    racesById: Record<string, Prisma.RaceGetPayload<object> | null> | undefined,
+    rules: Ruleset
 ): Promise<BattleParticipant> {
     const race = await loadRaceSafe(unit, racesById);
 

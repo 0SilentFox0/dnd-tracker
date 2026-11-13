@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { ParticipantSide } from '@/lib/constants/battle';
 import { awaitsMoraleCheck } from '@/lib/utils/battle/morale/awaits-check';
 import { createBattleParticipantFromCharacter } from '@/lib/utils/battle/participant/from-character';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
 import { parseRules } from '@/lib/utils/rules/schema';
 
 const character = {
@@ -91,7 +92,8 @@ describe('createBattleParticipantFromCharacter: правила бою без п�
             'b1',
             ParticipantSide.ALLY,
             undefined,
-            context
+            context,
+            { rules: DEFAULT_RULES }
         );
 
         expect(p.abilities.moraleCap).toBe(3);
@@ -105,7 +107,8 @@ describe('createBattleParticipantFromCharacter: навички героя', () =
             'b1',
             ParticipantSide.ALLY,
             undefined,
-            context
+            context,
+            { rules: DEFAULT_RULES }
         );
 
         expect(p.abilities.skillProficiencies).toEqual(['stealth']);
@@ -115,7 +118,8 @@ describe('createBattleParticipantFromCharacter: навички героя', () =
             'b1',
             ParticipantSide.ALLY,
             undefined,
-            context
+            context,
+            { rules: DEFAULT_RULES }
         );
 
         expect('skillProficiencies' in q.abilities).toBe(false);

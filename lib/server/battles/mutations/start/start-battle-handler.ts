@@ -28,7 +28,7 @@ import {
     sortByInitiative,
 } from '@/lib/utils/battle/turn/initiative';
 import { runJoinTriggers } from '@/lib/utils/battle/turn/join-triggers';
-import { DEFAULT_RULES, type Ruleset } from '@/lib/utils/rules';
+import { type Ruleset } from '@/lib/utils/rules';
 import type {
     BattleAction,
     BattleMapConfig,
@@ -41,8 +41,8 @@ export async function buildStartOrder(
     battleId: string,
     campaignId: string,
     setup: BattlePreparationParticipant[],
-    map: BattleMapConfig | null = null,
-    rules: Ruleset = DEFAULT_RULES
+    map: BattleMapConfig | null,
+    rules: Ruleset
 ): Promise<{
     order: BattleParticipant[];
     reserve: BattleParticipant[];

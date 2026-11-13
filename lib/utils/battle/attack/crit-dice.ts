@@ -1,5 +1,4 @@
 import { parseDiceLenient, rollGroups } from '@/lib/utils/common/dice';
-import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 
@@ -7,12 +6,10 @@ export function critDoublesDice(
     rules: Ruleset | undefined,
     isCritical: boolean
 ): boolean {
-    const ruleset = rules ?? DEFAULT_RULES;
+    if (!rules) return false;
 
-    return ruleSystemOf(ruleset).combat.damage({
-        rules: ruleset,
-        crit: isCritical,
-    }).doubleDice;
+    return ruleSystemOf(rules).combat.damage({ rules, crit: isCritical })
+        .doubleDice;
 }
 
 export function critDamageRolls(input: {

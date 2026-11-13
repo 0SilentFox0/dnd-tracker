@@ -48,6 +48,7 @@ import {
     classSpellcastingAbility,
 } from '@/lib/utils/characters/classes';
 import { applyClassArmor } from '@/lib/utils/characters/classes/armor-class';
+import { classesEnabled } from '@/lib/utils/characters/classes/classes-enabled';
 import { characterBaseHp } from '@/lib/utils/characters/hero-hp';
 import {
     applyCharacterResources,
@@ -56,7 +57,7 @@ import {
 import { getAbilityModifier } from '@/lib/utils/common/calculations';
 import { isRecord } from '@/lib/utils/common/is-record';
 import { attunedRefs } from '@/lib/utils/items/resolve';
-import { DEFAULT_RULES, type Ruleset } from '@/lib/utils/rules';
+import { type Ruleset } from '@/lib/utils/rules';
 import { currencyValueOf, ruleSystemOf } from '@/lib/utils/rules/systems';
 import { composition } from '@/lib/utils/rules/systems/catalog';
 import { systemSlotOf } from '@/lib/utils/rules/systems/slot';
@@ -72,7 +73,7 @@ async function resolveCharacterClassEntries(
     rules: Ruleset,
     context?: CampaignSpellContext
 ): Promise<ResolvedClassEntry[]> {
-    const parsed = rules.classes.enabled
+    const parsed = classesEnabled(rules)
         ? CharacterClassesSchema.safeParse(character.classes)
         : null;
 
@@ -384,7 +385,9 @@ export async function createBattleParticipantFromCharacter(
     context?: CampaignSpellContext,
     preloaded?: BuildPreloaded
 ): Promise<BattleParticipant> {
-    const rules = context?.rules ?? preloaded?.rules ?? DEFAULT_RULES;
+    const rules = context?.rules ?? preloaded?.rules;
+
+    if (!rules) throw new Error('Character participant needs campaign rules');
 
     const modifiers = {
         strength: getAbilityModifier(character.strength),

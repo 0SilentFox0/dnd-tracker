@@ -4,13 +4,13 @@ import { prisma } from '@/lib/db';
 import { buildCampaignContextForStart } from '@/lib/server/battles/mutations/start/start-build-context';
 import { systemServerOf } from '@/lib/server/systems/registry';
 import { createBattleParticipantFromCharacter } from '@/lib/utils/battle/participant';
-import { DEFAULT_RULES, type Ruleset } from '@/lib/utils/rules';
+import { type Ruleset } from '@/lib/utils/rules';
 
 /** Same participants as at battle start, from one context load (no per-character queries). */
 export async function loadCharacterBalanceStats(
     campaignId: string,
-    characterIds?: string[],
-    rules: Ruleset = DEFAULT_RULES
+    characterIds: string[] | undefined,
+    rules: Ruleset
 ) {
     const characters = await prisma.character.findMany({
         where: {

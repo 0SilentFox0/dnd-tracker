@@ -37,7 +37,6 @@ export const WFRP_MODULE_SERVER: SystemServer = {
         }),
         unitStats: (base, built) =>
             hitModelUnitStats(base, built, wfrpHitModel),
-        readsBuiltRules: true,
     },
     contentKinds: {
         careers: {

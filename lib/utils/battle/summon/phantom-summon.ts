@@ -2,7 +2,7 @@ import { CombatStatus, ParticipantSourceType } from '@/lib/constants/battle';
 import { textRef } from '@/lib/i18n/text-ref';
 import { isActive } from '@/lib/utils/abilities/engine/core/participants';
 import { nearestStandable } from '@/lib/utils/battle/grid/occupancy';
-import { DEFAULT_RULES, type Ruleset } from '@/lib/utils/rules';
+import { type Ruleset } from '@/lib/utils/rules';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { BattleMapConfig, BattleParticipant } from '@/types/battle';
 import type { LogLine } from '@/types/text';
@@ -119,7 +119,7 @@ const isPhantomOf = (p: BattleParticipant, ownerId: string) =>
 export function dismissPhantoms(
     order: BattleParticipant[],
     ownerId: string,
-    rules: Ruleset = DEFAULT_RULES,
+    rules: Ruleset,
     keepCastId?: string
 ): { order: BattleParticipant[]; messages: LogLine[] } {
     const messages: LogLine[] = [];

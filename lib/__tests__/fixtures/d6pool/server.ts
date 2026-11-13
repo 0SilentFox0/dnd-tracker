@@ -9,7 +9,6 @@ export const D6POOL_SERVER: SystemServer = {
             stats: {} as ReturnType<SystemBalance['heroPower']>['stats'],
         }),
         unitStats: (base) => base,
-        readsBuiltRules: false,
     },
     schemas: { characteristics: z.object({ pool: z.number().int().min(1) }) },
 };

@@ -11,6 +11,7 @@ import {
 } from '@/lib/utils/battle/balance/unit-library';
 import { createBattleParticipantFromUnit } from '@/lib/utils/battle/participant/from-unit';
 import type { UnitFromPrisma } from '@/lib/utils/battle/types/participant';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
 import { unitRow } from '@/scripts/seed/seed-library-lib';
 
 const maps = {
@@ -35,7 +36,8 @@ async function libraryUnit(key: string) {
         '',
         ParticipantSide.ENEMY,
         1,
-        {}
+        {},
+        DEFAULT_RULES
     );
 
     const resist = unitResistances(participant);

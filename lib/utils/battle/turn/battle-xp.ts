@@ -7,6 +7,7 @@ import {
 } from '@/lib/constants/battle';
 import { xpShare } from '@/lib/constants/experience';
 import type { Ruleset } from '@/lib/utils/rules';
+import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { BattleParticipant } from '@/types/battle';
 
 export interface BattleXpAward {
@@ -16,7 +17,9 @@ export interface BattleXpAward {
 }
 
 export const autoXpEnabled = (rules?: Ruleset): boolean =>
-    !!rules && rules.encounters.autoXp && rules.outOfCombat.xp;
+    !!rules &&
+    (ruleSystemOf(rules).combat.autoXp?.(rules) ?? false) &&
+    rules.outOfCombat.xp;
 
 const defeated = (p: BattleParticipant) =>
     p.combatStats.status === CombatStatus.DEAD ||

@@ -83,7 +83,7 @@ describe('loadUnitLibraryStats: заклинання юнітів', () => {
                     : []
         );
 
-        const library = await loadUnitLibraryStats('camp');
+        const library = await loadUnitLibraryStats('camp', DEFAULT_RULES);
 
         const known = spellQueries().filter((c) => c.where.id);
 
@@ -122,7 +122,7 @@ describe('loadUnitLibraryStats: заклинання юнітів', () => {
         ]);
         db.spellFindMany.mockResolvedValue([]);
 
-        await loadUnitLibraryStats('camp');
+        await loadUnitLibraryStats('camp', DEFAULT_RULES);
 
         expect(spellQueries().filter((c) => c.where.id)).toHaveLength(0);
         expect(spellQueries()[0].select).toEqual({ spellEffects: true });
@@ -149,7 +149,7 @@ describe('loadUnitLibraryStats: заклинання юнітів', () => {
             { spellEffects: [{ kind: 'summon', unitId: 'phoenix' }] },
         ]);
 
-        const library = await loadUnitLibraryStats('camp');
+        const library = await loadUnitLibraryStats('camp', DEFAULT_RULES);
 
         expect(
             library
@@ -170,7 +170,7 @@ describe('loadUnitLibraryStats: правила системи', () => {
         ]);
     });
 
-    it('wfrp-правила доходять до побудови учасника, d20 — без них', async () => {
+    it('правила кампанії доходять до побудови учасника', async () => {
         const spy = vi.spyOn(fromUnit, 'createBattleParticipantFromUnit');
 
         await loadUnitLibraryStats('camp', {
@@ -184,9 +184,9 @@ describe('loadUnitLibraryStats: правила системи', () => {
 
         spy.mockClear();
 
-        await loadUnitLibraryStats('camp');
+        await loadUnitLibraryStats('camp', DEFAULT_RULES);
 
-        expect(spy.mock.calls[0][5]).toBeUndefined();
+        expect(spy.mock.calls[0][5]).toBe(DEFAULT_RULES);
         spy.mockRestore();
     });
 });

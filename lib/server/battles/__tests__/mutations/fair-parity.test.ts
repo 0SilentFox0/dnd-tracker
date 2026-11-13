@@ -155,6 +155,7 @@ import {
     type SetupBalanceStats,
     setupFairScaling,
 } from '@/lib/utils/battle/balance/setup';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
 
 const setup = [
     ...['h1', 'h2', 'h3', 'h4'].map((id) => ({
@@ -177,12 +178,19 @@ const setup = [
 describe('паритет: екран складу і старт бою дають однакові множники', () => {
     it('hpMult / dmgMult кожного юніта збігаються, NPC-ворог входить у базу', async () => {
         const payload = (await getBalancePayload(
-            'camp'
+            'camp',
+            DEFAULT_RULES
         )) as unknown as SetupBalanceStats;
 
         const { scaling } = setupFairScaling(setup, payload);
 
-        const { order } = await buildStartOrder('b1', 'camp', setup as never);
+        const { order } = await buildStartOrder(
+            'b1',
+            'camp',
+            setup as never,
+            null,
+            DEFAULT_RULES
+        );
 
         for (const id of ['rat', 'wolf', 'mage']) {
             const started = order.find((p) => p.basicInfo.sourceId === id);
@@ -208,7 +216,8 @@ describe('паритет: екран складу і старт бою дают�
 
     it('NPC-ворог відбирає частку цілі в масштабованих юнітів', async () => {
         const payload = (await getBalancePayload(
-            'camp'
+            'camp',
+            DEFAULT_RULES
         )) as unknown as SetupBalanceStats;
 
         const withNpc = setupFairScaling(setup, payload).scaling;

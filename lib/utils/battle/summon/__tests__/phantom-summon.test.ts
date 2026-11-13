@@ -7,6 +7,7 @@ import {
 } from '@/lib/utils/abilities/__tests__/fixtures';
 import { applyAbilitySummons } from '@/lib/utils/battle/summon/ability-summons';
 import { dismissPhantoms } from '@/lib/utils/battle/summon/phantom-summon';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
 
 const run = (
     order: ReturnType<typeof makeParticipant>[],
@@ -20,6 +21,7 @@ const run = (
             campaignId: 'c1',
             battleId: 'b1',
             rng: () => 0,
+            rules: DEFAULT_RULES,
             deps: { loadPool: async () => ({ units: [], races: [] }) },
         }
     );
@@ -175,6 +177,7 @@ describe('phantom clone', () => {
             campaignId: 'c1',
             battleId: 'b1',
             rng: () => 0,
+            rules: DEFAULT_RULES,
             deps: { loadPool: async () => ({ units: [], races: [] }) },
         };
 
@@ -252,7 +255,11 @@ describe('phantom clone', () => {
             },
         };
 
-        const { order } = dismissPhantoms([mage, buffed, phantom], 'mage');
+        const { order } = dismissPhantoms(
+            [mage, buffed, phantom],
+            'mage',
+            DEFAULT_RULES
+        );
 
         expect(
             order.find((p) => p.basicInfo.id === 'ally')?.battleData
@@ -280,7 +287,11 @@ describe('phantom clone', () => {
             battleData: { ...ph.battleData, summonedBy: 'mage' },
         };
 
-        const { order, messages } = dismissPhantoms([mage, legacy], 'mage');
+        const { order, messages } = dismissPhantoms(
+            [mage, legacy],
+            'mage',
+            DEFAULT_RULES
+        );
 
         expect(order[1].combatStats.status).toBe(CombatStatus.DEAD);
         expect(messages).toHaveLength(1);

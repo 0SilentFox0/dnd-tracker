@@ -94,7 +94,7 @@ export async function applyAbilitySummons(
         campaignId: string;
         battleId: string;
         rng: () => number;
-        rules?: Ruleset;
+        rules: Ruleset;
         deps: SummonDeps;
         map?: BattleMapConfig | null;
         round?: number;

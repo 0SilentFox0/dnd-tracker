@@ -13,11 +13,6 @@ export interface InitiativeRollEntry {
     total: number;
 }
 
-const rollRules = (rules: Ruleset) => ({
-    ...rules,
-    initiative: { ...rules.initiative, mode: 'roll' as const },
-});
-
 /** Rolls the system initiative (d20 + modifiers by default) for everyone and sorts; pinned (always-first) participants keep their static value. */
 export function rollInitiative(
     participants: BattleParticipant[],
@@ -36,7 +31,8 @@ export function rollInitiative(
         let raw: number | null = null;
 
         const score = scoreInitiative(p, all, {
-            rules: rollRules(rules),
+            rules,
+            roll: true,
             rng: () => {
                 raw ??= rng();
 

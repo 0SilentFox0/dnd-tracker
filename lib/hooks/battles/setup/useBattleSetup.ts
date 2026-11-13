@@ -14,8 +14,9 @@ import { useXpBalance } from './useXpBalance';
 import { CharacterType } from '@/lib/constants/characters';
 import { useCampaignRules } from '@/lib/hooks/campaigns';
 import { sharedEnemyRace } from '@/lib/utils/battle/balance/setup';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { SECTION_DEFAULTS } from '@/lib/utils/rules/defaults';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
+import { RULE_SYSTEM_KEYS } from '@/lib/utils/rules/systems/meta';
 import type {
     BattleMapConfig,
     BattlePreparationParticipant,
@@ -45,11 +46,11 @@ export function useBattleSetup(
 
     const { data: rules } = useCampaignRules(campaignId);
 
-    const encounters = rules?.encounters ?? DEFAULT_RULES.encounters;
+    const encounters = rules?.encounters ?? SECTION_DEFAULTS.encounters;
 
-    const ruleSystem = ruleSystemOf({
-        system: rules?.system ?? DEFAULT_RULES.system,
-    });
+    const ruleSystem = ruleSystemOf(
+        rules ?? { system: { key: RULE_SYSTEM_KEYS[0] } }
+    );
 
     const balanceKind: 'fair' | 'xp' =
         encounters.balance === 'xp' ? 'xp' : 'fair';

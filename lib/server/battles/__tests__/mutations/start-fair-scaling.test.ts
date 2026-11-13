@@ -106,6 +106,7 @@ vi.mock('@/lib/db', () => {
 });
 
 import { buildStartOrder } from '@/lib/server/battles/mutations/start/start-battle-handler';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
 
 const setup = [
     ...DATA.heroes.map((h) => ({
@@ -119,14 +120,22 @@ const setup = [
 
 describe('старт бою: рівні бої', () => {
     it('HP ворогів масштабується, damageMultiplier і hpMultiplier лежать у battleData, герої без змін', async () => {
-        const { order } = await buildStartOrder('b1', 'camp', setup as never);
+        const { order } = await buildStartOrder(
+            'b1',
+            'camp',
+            setup as never,
+            null,
+            DEFAULT_RULES
+        );
 
         const rats = order.filter((p) => p.basicInfo.sourceId === 'rat');
 
         const alone = await buildStartOrder(
             'b1',
             'camp',
-            setup.filter((x) => x.side === 'ally') as never
+            setup.filter((x) => x.side === 'ally') as never,
+            null,
+            DEFAULT_RULES
         );
 
         const heroes = order.filter(
@@ -158,7 +167,13 @@ describe('старт бою: рівні бої', () => {
     });
 
     it('стеля тіру: щур після масштабування не міцніший за вовка', async () => {
-        const { order } = await buildStartOrder('b1', 'camp', setup as never);
+        const { order } = await buildStartOrder(
+            'b1',
+            'camp',
+            setup as never,
+            null,
+            DEFAULT_RULES
+        );
 
         const rat = order.find((p) => p.basicInfo.sourceId === 'rat');
 
@@ -169,7 +184,9 @@ describe('старт бою: рівні бої', () => {
         const { order } = await buildStartOrder(
             'b1',
             'camp',
-            setup.filter((s) => s.side === 'ally') as never
+            setup.filter((s) => s.side === 'ally') as never,
+            null,
+            DEFAULT_RULES
         );
 
         expect(
@@ -181,7 +198,9 @@ describe('старт бою: рівні бої', () => {
         const { order } = await buildStartOrder(
             'b1',
             'camp',
-            setup.filter((s) => s.side === 'enemy') as never
+            setup.filter((s) => s.side === 'enemy') as never,
+            null,
+            DEFAULT_RULES
         );
 
         const rat = order.find((p) => p.basicInfo.sourceId === 'rat');

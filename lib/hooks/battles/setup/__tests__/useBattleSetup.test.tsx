@@ -37,7 +37,11 @@ vi.mock('@/lib/api/client', async (orig) => {
     return {
         ...actual,
         campaignGet: vi.fn(async (_id: string, path: string) =>
-            path === '/battles/balance' ? server.stats : []
+            path === '/battles/balance'
+                ? server.stats
+                : path === '/rules'
+                  ? DEFAULT_RULES
+                  : []
         ),
         campaignPost: vi.fn(async (_id: string, path: string) =>
             path === '/battles/balance'
@@ -60,6 +64,8 @@ vi.mock('@/lib/api/units', () => ({ getUnits: vi.fn(async () => []) }));
 vi.mock('@/lib/api/races', () => ({ getRaces: vi.fn(async () => []) }));
 
 import { useBattleSetup } from '../useBattleSetup';
+
+import { DEFAULT_RULES } from '@/lib/utils/rules';
 
 let client: QueryClient;
 

@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { ParticipantSide } from '@/lib/constants/battle';
 import { makeParticipant } from '@/lib/utils/abilities/__tests__/fixtures';
 import { applyAbilitySummons } from '@/lib/utils/battle/summon/ability-summons';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
 
 describe('phantom clone does not inherit the source system state', () => {
     it('drops the slot, the dying flag, the counters and the inspiration', async () => {
@@ -46,6 +47,7 @@ describe('phantom clone does not inherit the source system state', () => {
                 campaignId: 'c1',
                 battleId: 'b1',
                 rng: () => 0,
+                rules: DEFAULT_RULES,
                 deps: { loadPool: async () => ({ units: [], races: [] }) },
             }
         );

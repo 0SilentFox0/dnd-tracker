@@ -95,7 +95,14 @@ async function hero(
         inventory: null,
     } as unknown as CharacterFromPrisma;
 
-    return createBattleParticipantFromCharacter(fake, '', ParticipantSide.ALLY);
+    return createBattleParticipantFromCharacter(
+        fake,
+        '',
+        ParticipantSide.ALLY,
+        undefined,
+        undefined,
+        { rules: DEFAULT_RULES }
+    );
 }
 
 async function cell(

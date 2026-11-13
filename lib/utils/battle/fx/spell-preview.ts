@@ -3,6 +3,7 @@ import { frameKindOf, type FxFrameKind } from './frame-kind';
 import { impactFor } from './impact';
 import { mapAction } from './map-action';
 import { previewParticipant } from './preview-participant';
+import { PREVIEW_RULES } from './preview-rules';
 import { PREVIEW_UNITS, type PreviewUnitId } from './preview-units';
 import type { SpellFx } from './spells';
 import type { FxAuraKind, FxSpec } from './types';
@@ -13,7 +14,6 @@ import { describeEffect } from '@/lib/utils/abilities/registry/effects';
 import { type Segment, uniqueLines } from '@/lib/utils/abilities/segments';
 import { castSpell } from '@/lib/utils/battle/spell';
 import type { CastableSpell } from '@/lib/utils/battle/types/spell-process';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
 import { targetingLabel } from '@/lib/utils/spells/model/labels';
 import { readSpellDefinition } from '@/lib/utils/spells/model/read';
 import type { SpellTargeting } from '@/lib/utils/spells/model/schema';
@@ -195,7 +195,7 @@ export function previewCastFx(castable: CastableSpell): SpellFxResult {
                 roll: 1,
             })),
             rng: () => 0.01,
-            rules: DEFAULT_RULES,
+            rules: PREVIEW_RULES,
         });
 
         if (!result.success) return failed('the spell did not take effect');

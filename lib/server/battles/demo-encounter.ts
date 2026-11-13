@@ -2,11 +2,13 @@ import { DEFAULT_BATTLE_MAP } from '@/lib/constants/battle';
 import { prisma } from '@/lib/db';
 import { placeParticipants } from '@/lib/utils/battle/grid';
 import { createBattleParticipantFromUnit } from '@/lib/utils/battle/participant/from-unit';
+import type { Ruleset } from '@/lib/utils/rules';
 import type { BattleScene } from '@/types/api';
 import type { BattleMapConfig, BattleParticipant } from '@/types/battle';
 
 export async function buildDemoEncounter(
-    scene: BattleScene
+    scene: BattleScene,
+    rules: Ruleset
 ): Promise<BattleParticipant[]> {
     const units = await prisma.unit.findMany({
         where: {
@@ -32,7 +34,9 @@ export async function buildDemoEncounter(
                           unit,
                           scene.id,
                           entry.side,
-                          index + 1
+                          index + 1,
+                          undefined,
+                          rules
                       )
                   )
                 : [];

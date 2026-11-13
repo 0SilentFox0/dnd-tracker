@@ -11,6 +11,7 @@ import { D20_SUSTAIN } from '@/systems/d20/rules/concentration/sustain';
 export const D20_MAGIC: RuleSystemMagic = {
     resource: D20_SPELL_RESOURCE,
     sustain: D20_SUSTAIN,
+    saveDcBase: (rules) => rules.formulas.saveDcBase,
     saveDc: d20SpellSaveDc,
     upcast: { steps: upcastSteps },
     spellAbilityMod: (caster) =>

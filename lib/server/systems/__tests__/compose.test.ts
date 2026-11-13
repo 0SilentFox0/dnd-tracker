@@ -18,7 +18,6 @@ const base: SystemServer = {
     balance: {
         heroPower: vi.fn() as never,
         unitStats: (unit) => unit,
-        readsBuiltRules: false,
     },
     operations: { rest: op() },
     ai: {

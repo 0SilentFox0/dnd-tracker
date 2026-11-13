@@ -449,6 +449,10 @@ export interface RuleSystemConditions {
 
 /** Standard conditions (blinded, prone, exhaustion…) that core rules apply; unlike `conditions`, every base provides it */
 export interface RuleSystemConditionSet {
+    /** Whether the campaign rules switch standard conditions on; absent means never */
+    enabled?(rules: Ruleset): boolean;
+    /** Campaign-defined conditions; absent means none */
+    custom?(rules: Ruleset): Ruleset['conditions']['custom'];
     /** `blocked`: the target is immune, or the system has no such condition */
     apply(
         ps: BattleParticipant[],
@@ -607,6 +611,8 @@ export interface RuleSystemSustain {
 export interface RuleSystemMagic {
     resource?: RuleSystemMagicResource;
     sustain: RuleSystemSustain;
+    /** Base of a spell save DC from the campaign rules; absent means the section default */
+    saveDcBase?(rules: Ruleset): number;
     /** Save DC of a spell; `ability` overrides the caster's spellcasting ability */
     saveDc(
         caster: BattleParticipant,
@@ -705,7 +711,16 @@ export interface InspirationRules {
     spend(p: BattleParticipant): BattleParticipant;
 }
 
+export type CritRules = Pick<
+    Ruleset['criticals'],
+    'critOn' | 'fumbleOn' | 'effects' | 'disabledSuccess' | 'disabledFail'
+>;
+
 export interface RuleSystemCombat {
+    /** Critical-hit thresholds and effects of the campaign rules; absent means the neutral defaults */
+    crit?(rules: Ruleset): CritRules;
+    /** Whether a won battle awards XP on its own; absent means never */
+    autoXp?(rules: Ruleset): boolean;
     details?: RuleSystemActionDetails;
     /** Validates the system's input of an attack or a cast before it runs */
     input?: { assert(system: SystemSlot, ctx: SystemInputCtx): void };
@@ -749,7 +764,7 @@ export interface RuleSystemCombat {
     /** Base score before flat modifiers; `roll`/`die` are null when nothing was rolled (static mode, pinned) */
     initiative(
         p: BattleParticipant,
-        ctx: { rules: Pick<Ruleset, 'initiative'>; rng: Rng }
+        ctx: { rules: Pick<Ruleset, 'initiative'>; rng: Rng; roll?: boolean }
     ): InitiativeScore;
     /** Starting values the participant builders use instead of the d20 sheet columns */
     baseStats?(row: { characteristics?: unknown }): {

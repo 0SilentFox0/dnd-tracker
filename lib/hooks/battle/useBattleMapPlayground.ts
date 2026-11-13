@@ -9,6 +9,7 @@ import {
     DEFAULT_BATTLE_MAP,
     MAZE_MARK_SYMBOLS,
 } from '@/lib/constants/battle';
+import { PREVIEW_RULES } from '@/lib/utils/battle/fx/preview-rules';
 import {
     aimView,
     cellKey,
@@ -22,7 +23,6 @@ import {
     targetMarks,
     templateArea,
 } from '@/lib/utils/battle/grid';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
 import type {
     BattleMapActions,
     BattleMapConfig,
@@ -139,13 +139,13 @@ export function useBattleMapPlayground(
         mode === 'template'
             ? (hover &&
                   aimView(
-                      { map, participants, rules: DEFAULT_RULES },
+                      { map, participants, rules: PREVIEW_RULES },
                       mapAim,
                       hover
                   )) ||
               (aim &&
                   aimView(
-                      { map, participants, rules: DEFAULT_RULES },
+                      { map, participants, rules: PREVIEW_RULES },
                       mapAim,
                       aim
                   ))
@@ -155,7 +155,7 @@ export function useBattleMapPlayground(
         () =>
             mode === 'move'
                 ? moveZoneMarks(map, participants, active, {
-                      rules: DEFAULT_RULES,
+                      rules: PREVIEW_RULES,
                   })
                 : mode === 'attack' && attack
                   ? targetMarks(
@@ -163,14 +163,14 @@ export function useBattleMapPlayground(
                         participants,
                         active,
                         [attack],
-                        DEFAULT_RULES
+                        PREVIEW_RULES
                     )
                   : new Map(),
         [mode, map, participants, active, attack]
     );
 
     const costs = useMemo(
-        () => moveMarks(map, participants, active, { rules: DEFAULT_RULES }),
+        () => moveMarks(map, participants, active, { rules: PREVIEW_RULES }),
         [map, participants, active]
     );
 
@@ -182,7 +182,7 @@ export function useBattleMapPlayground(
                       participants,
                       marks,
                       current: active,
-                      rules: DEFAULT_RULES,
+                      rules: PREVIEW_RULES,
                   },
                   hover
               )
@@ -274,7 +274,7 @@ export function useBattleMapPlayground(
             if (mode === 'template') {
                 if (
                     !aimView(
-                        { map, participants, rules: DEFAULT_RULES },
+                        { map, participants, rules: PREVIEW_RULES },
                         mapAim,
                         p
                     )
@@ -287,7 +287,7 @@ export function useBattleMapPlayground(
                     active,
                     DEMO_TEMPLATE,
                     p,
-                    DEFAULT_RULES
+                    PREVIEW_RULES
                 ).targets;
 
                 setAim(p);

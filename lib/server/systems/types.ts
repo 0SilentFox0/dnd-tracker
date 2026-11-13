@@ -1,6 +1,7 @@
 import type { NextResponse } from 'next/server';
 import type { ZodType } from 'zod';
 
+import type { RulesEdition } from '@/lib/constants/rules';
 import type { SpellRequestData } from '@/lib/schemas/battles';
 import type { AttackBody } from '@/lib/server/battles/mutations/attack/attack-mutation';
 import type { CharacterOperation } from '@/lib/server/characters/operation-runner';
@@ -20,6 +21,7 @@ import type {
     CampaignSpellContext,
     CharacterFromPrisma,
 } from '@/lib/utils/battle/types/participant';
+import type { Ruleset } from '@/lib/utils/rules/schema';
 import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
 import type { BranchLevel, branchLevels } from '@/lib/utils/skills/progression';
 import type { BattleParticipant, EquippedArtifact } from '@/types/battle';
@@ -99,8 +101,8 @@ export interface SystemBalance {
     };
     /** Library unit numbers; `base` is the d20 reading of the row, `built` the participant the unit would become */
     unitStats(base: UnitStats, built: BattleParticipant): UnitStats;
-    /** Library units are built with the campaign rules before they are read */
-    readsBuiltRules: boolean;
+    /** Rules edition of the XP encounter table; absent means the default edition */
+    edition?(rules: Ruleset): RulesEdition;
 }
 
 type Resumable<T> = (

@@ -2,10 +2,10 @@
 
 import type { CriticalEffect } from '@/lib/constants/critical-effects';
 import { useBattleScene } from '@/lib/hooks/battle';
+import { critRulesOf } from '@/lib/utils/battle/attack/crit-rules';
 import { enabledCritEffects } from '@/lib/utils/battle/crit-choice/catalog';
 import { asShownCrit } from '@/lib/utils/battle/crit-choice/pending';
 import type { CritTrigger } from '@/lib/utils/battle/crit-choice/types';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
 
 export interface CritChoiceRow {
     trigger: CritTrigger;
@@ -17,7 +17,7 @@ export interface CritChoiceRow {
 export function useCritChoiceDialog() {
     const { battle, viewer, actions } = useBattleScene();
 
-    const crit = (battle.rules ?? DEFAULT_RULES).criticals;
+    const crit = critRulesOf(battle.rules);
 
     const pending = asShownCrit(battle.pendingChoice);
 

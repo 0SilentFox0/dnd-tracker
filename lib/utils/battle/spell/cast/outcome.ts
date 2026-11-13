@@ -14,6 +14,7 @@ import {
     rollModeReasons,
 } from '@/lib/utils/battle/attack/bonus';
 import { critDoublesDice } from '@/lib/utils/battle/attack/crit-dice';
+import { critRulesOf } from '@/lib/utils/battle/attack/crit-rules';
 import { critThresholdOf } from '@/lib/utils/battle/attack/crit-threshold';
 import {
     applyAttackCritToFlow,
@@ -126,7 +127,7 @@ function resolveSpellAttack(
     const crit =
         roll >= critThresholdOf(flow.ctx.rules, mods, caster.basicInfo.id);
 
-    const fumble = roll <= (flow.ctx.rules?.criticals.fumbleOn ?? 1);
+    const fumble = roll <= critRulesOf(flow.ctx.rules).fumbleOn;
 
     const hit = !fumble && (crit || total >= ac);
 
@@ -164,8 +165,8 @@ function resolveSpellAttack(
     const rules = flow.ctx.rules;
 
     const effect =
-        kind && rules.criticals.effects
-            ? pickAttackCrit(state, id, kind)
+        kind && critRulesOf(rules).effects
+            ?pickAttackCrit(state, id, kind)
             : undefined;
 
     const type = effect?.effect.type;
@@ -268,7 +269,7 @@ function pickAttackCrit(
 
     if (flow.ctx.crit) return flow.ctx.crit(info);
 
-    const c = flow.ctx.rules.criticals;
+    const c = critRulesOf(flow.ctx.rules);
 
     return randomCritEffect('attack', kind, state.rng, {
         success: c.disabledSuccess,
@@ -398,7 +399,7 @@ export function resolveOutcome(
 
         const saveCrit =
             !!flow.ctx.crit &&
-            flow.ctx.rules.criticals.effects &&
+            critRulesOf(flow.ctx.rules).effects &&
             !r.autoFail &&
             (roll === 20 || roll === 1);
 

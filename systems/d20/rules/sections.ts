@@ -1,3 +1,6 @@
+import { z } from 'zod';
+
+import { CUSTOM_CONDITION_KEY_RE } from '@/lib/utils/abilities/schema/kinds';
 import { isRecord } from '@/lib/utils/common/is-record';
 import { sectionItems } from '@/lib/utils/rules/section-items';
 import {
@@ -99,6 +102,13 @@ export const D20_SECTIONS: SectionsContribution = {
             owner: 'd20',
             mechanic: true,
             items: sectionItems('conditions'),
+            patchExtras: {
+                removeCustomConditions: z
+                    .array(z.string().regex(CUSTOM_CONDITION_KEY_RE))
+                    .min(1)
+                    .max(50)
+                    .optional(),
+            },
             merge: mergeConditions,
         },
         actions: {

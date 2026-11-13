@@ -3,7 +3,9 @@ import type { z } from 'zod';
 import type { balanceSchema } from './balance-schema';
 import { loadCharacterBalanceStats } from './character-stats';
 
+import { DEFAULT_RULES_EDITION } from '@/lib/constants/rules';
 import { loadUnitLibraryStats } from '@/lib/server/battles/balance/unit-library';
+import { systemServerOf } from '@/lib/server/systems/registry';
 import type { UnitStats } from '@/lib/utils/battle/balance';
 import {
     buildPartyPower,
@@ -17,7 +19,7 @@ import {
     resolveXpDifficulty,
     type XpEdition,
 } from '@/lib/utils/battle/balance/xp-budget';
-import { DEFAULT_RULES, type Ruleset } from '@/lib/utils/rules';
+import { type Ruleset } from '@/lib/utils/rules';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { AllyStats, SuggestedEnemy } from '@/types/battle-setup';
 
@@ -63,7 +65,7 @@ function xpSuggestion(
 export async function postBalanceResponse(
     campaignId: string,
     data: BalancePostData,
-    rules?: Ruleset
+    rules: Ruleset
 ) {
     const { allyParticipants, suggest, raceId } = data;
 
@@ -97,7 +99,7 @@ export async function postBalanceResponse(
 
     const party = buildPartyPower(
         members,
-        ruleSystemOf(rules ?? DEFAULT_RULES).combat.hitModel
+        ruleSystemOf(rules).combat.hitModel
     );
 
     const allyStats: AllyStats = {
@@ -112,13 +114,14 @@ export async function postBalanceResponse(
         suggestedEnemies?: SuggestedEnemy[];
     } = { allyStats };
 
-    if (suggest && rules?.encounters.balance === 'xp') {
+    if (suggest && rules.encounters.balance === 'xp') {
         response.suggestedEnemies = xpSuggestion(
             heroes.map((h) => h.character.level),
             library,
             byId,
             data,
-            rules.encounters.edition
+            systemServerOf(rules).balance.edition?.(rules) ??
+                DEFAULT_RULES_EDITION
         );
     } else if (suggest) {
         const pick = pickEnemyRoster(party, library, raceId);

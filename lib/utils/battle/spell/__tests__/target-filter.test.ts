@@ -231,7 +231,9 @@ describe('abilities.cr in the snapshot', () => {
             unit(0.5),
             'b',
             ParticipantSide.ENEMY,
-            1
+            1,
+            undefined,
+            DEFAULT_RULES
         );
 
         expect(monster.abilities.cr).toBe(0.5);
@@ -240,7 +242,9 @@ describe('abilities.cr in the snapshot', () => {
             unit(),
             'b',
             ParticipantSide.ENEMY,
-            1
+            1,
+            undefined,
+            DEFAULT_RULES
         );
 
         expect(plain.abilities.cr).toBeUndefined();

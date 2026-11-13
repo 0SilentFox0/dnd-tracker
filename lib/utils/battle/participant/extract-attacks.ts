@@ -17,7 +17,8 @@ import { AttackType } from '@/lib/constants/battle';
 import { parseWeaponTraits } from '@/lib/constants/weapon-traits';
 import { weaponCategoryFromText } from '@/lib/utils/artifacts/weapon-slot';
 import { resolveItemRow } from '@/lib/utils/items/resolve';
-import { DEFAULT_RULES, type Ruleset } from '@/lib/utils/rules';
+import { type Ruleset } from '@/lib/utils/rules';
+import { SECTION_DEFAULTS } from '@/lib/utils/rules/defaults';
 
 // 5e: безоружний удар = 1 + Сил (плоска «1»)
 // Без зброї свого виду герой б'є лише кубиками рівня — так само рахує баланс (bestAttack у balance/stats.ts)
@@ -66,7 +67,7 @@ export const weaponCategoryOf = (
 export function extractAttacksFromCharacter(
     character: CharacterFromPrisma,
     artifactsById: Record<string, Prisma.ArtifactGetPayload<object>>,
-    names: Ruleset['defaultAttacks'] = DEFAULT_RULES.defaultAttacks,
+    names: Ruleset['defaultAttacks'] = SECTION_DEFAULTS.defaultAttacks,
     opts: {
         fiveE?: boolean;
         items?: { enabled: boolean; attuned: readonly string[] };
