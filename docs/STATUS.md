@@ -162,7 +162,7 @@ _Оновлено: 2026-11-13._
 
 **Ratchet після Ч18b:** `system-imports-exempt.json` `[]`; `system-literals-exempt.json` 6 файлів / 11 влучань; `RULES_SECTION_READERS` 0; `isFiveE` 0; `CONDITION_5E_` 11 (E3-a); гард колонок статблока 1 файл (було 7).
 
-### E2 Ч18c: два баги live-run, moraleCap, Minor 13, DROP race_profiles (2026-11-13, `feat/e2-ch18c`, не змерджена й не запушена)
+### E2 Ч18c: два баги live-run, moraleCap, Minor 13, DROP race_profiles (2026-11-13/14, змерджено й запушено, main 385a9f763 + тести)
 
 **Закрито.**
 - **Чернетка d20 без виборів:** сервер вимагає повний набір (`planChoices({ requireComplete })`, `pendingIssues`, `CHOICE_INCOMPLETE`; порожні `choices` теж перевіряються), клієнт `usePlayerDraftForm` блокує відправку. Для персонажів ДМ і level-up недобір лишається бейджем `pending`.
@@ -171,7 +171,7 @@ _Оновлено: 2026-11-13._
 - **Minor 13:** `withBatchedContentBump` — один бамп `contentVersion` на вид (`importContent`) і на пакет (`importPack`).
 - **DROP `race_profiles`:** модель прибрано зі схеми, міграція `DROP TABLE IF EXISTS "race_profiles"` (дані давно в `races.profile`).
 
-**Чекає власника.** DROP йде в міграції на prod лише після перевірки, що `race_profiles` на prod порожня, і явного «так» власника перед пушем.
+**Prod (2026-11-14):** міграція `20261201000000_drop_race_profiles` застосована деплоєм; таблиця була порожня в усіх бекапах (0 рядків, до 13.11); `active-battles-report` після деплою: 0 активних/на паузі, hashMismatch 0. Живий прогін (форма без виборів, бій з одним героєм) не виконано.
 
 **Лишилось (E3).** `CONDITION_5E_` (E3-a) — після Ч19; переклад 676 ключів SRD (uk) — окрема контентна сесія.
 
@@ -179,7 +179,7 @@ _Оновлено: 2026-11-13._
 - (а) Словник станів і дій від системи: `CONDITION_5E_` (11 файлів, Zod-схеми вмінь статичні), 5e-ключі дій у core (`actions/{keys,schema,effects}.ts`, `cunning-strike`, Ч6 I3).
 - (б) UI видів контенту модулів, FX (→ `components/fx`, мораль-FX) і компоненти з > 7 пропсів.
 - (в) Холодний імпорт реєстрів і цикл `d20 → registry` (Ч11 M9, таймаути 2,7–6 с).
-- (г) Minor 13 і `moraleCap` — закрито в Ч18c; `DROP race_profiles` — код готовий, деплой чекає (див. Ч18c).
+- (г) Minor 13 і `moraleCap` — закрито в Ч18c; `DROP race_profiles` — застосовано на prod (див. Ч18c).
 - (д) Переклад 676 ключів SRD (`--allow-untranslated` знімається після цього) — окрема контентна сесія.
 
 **Питання власнику:**
