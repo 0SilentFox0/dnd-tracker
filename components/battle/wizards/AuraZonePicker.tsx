@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 
-import { useAbilityText } from '@/components/abilities/use-ability-text';
+import { useAbilityText } from '@/lib/hooks/abilities';
 import { TargetButton } from '@/components/battle/wizards/TargetButton';
 import type { AuraZoneStep } from '@/lib/hooks/battle';
 

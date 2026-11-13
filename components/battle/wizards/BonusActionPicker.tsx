@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { Swords, Zap } from 'lucide-react';
 
-import { useAbilityText } from '@/components/abilities/use-ability-text';
+import { useAbilityText } from '@/lib/hooks/abilities';
 import { HealthLabel } from '@/components/battle/hud';
 import { AbilityAimPanel } from '@/components/battle/wizards/AbilityAimPanel';
 import { TargetButton } from '@/components/battle/wizards/TargetButton';

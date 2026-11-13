@@ -8,7 +8,7 @@ import { SaveRolls } from './SaveRolls';
 import { SlotSelect } from './SlotSelect';
 import { SpellSummary } from './SpellSummary';
 
-import { useAbilityText } from '@/components/abilities/use-ability-text';
+import { useAbilityText } from '@/lib/hooks/abilities';
 import { AiRollButton, DamageDice } from '@/components/battle/hud/DiceInput';
 import { useSystemBattleUi } from '@/components/battle/use-system-battle-ui';
 import { HUD_SURFACE } from '@/components/hud';

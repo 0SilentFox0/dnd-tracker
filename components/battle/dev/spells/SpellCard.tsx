@@ -3,7 +3,7 @@ import { Play } from 'lucide-react';
 
 import type { SpellCardData } from './types';
 
-import { useAbilityText } from '@/components/abilities/use-ability-text';
+import { useAbilityText } from '@/lib/hooks/abilities';
 import {
     ARCHETYPE_LABEL,
     AURA_LABEL,

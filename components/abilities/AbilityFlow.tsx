@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { ChevronRight } from 'lucide-react';
 
 import { FLOW_BORDER, FLOW_TEXT, type FlowPart } from './flow-part';
-import { useAbilityText } from './use-ability-text';
+import { useAbilityText } from '@/lib/hooks/abilities';
 
 import { cn } from '@/lib/utils';
 import type {

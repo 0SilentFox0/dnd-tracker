@@ -7,7 +7,7 @@ import { AbilityCopySourcePicker } from './AbilityCopySourcePicker';
 import { AbilityFlow } from './AbilityFlow';
 import { useAbilityEditor } from './editor-context';
 import { RecipeForm } from './RecipeForm';
-import { useAbilityText } from './use-ability-text';
+import { useAbilityText } from '@/lib/hooks/abilities';
 
 import { HudChipTabs } from '@/components/hud/page';
 import { Button } from '@/components/ui/button';

@@ -9,7 +9,7 @@ import type { SpellOnlyEditorProps } from './spell-only-types';
 import { useFieldErrors } from '@/components/abilities/editor-context';
 import { EffectCard } from '@/components/abilities/EffectCard';
 import { FieldErrors } from '@/components/abilities/FieldErrors';
-import { useAbilityText } from '@/components/abilities/use-ability-text';
+import { useAbilityText } from '@/lib/hooks/abilities';
 import { Button } from '@/components/ui/button';
 import { SelectField } from '@/components/ui/select-field';
 import { useText } from '@/lib/i18n/use-text';
