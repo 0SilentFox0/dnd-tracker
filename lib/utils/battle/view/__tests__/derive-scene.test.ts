@@ -5,6 +5,7 @@ import { canSeeExactStats } from '../visibility';
 
 import { ParticipantSide } from '@/lib/constants/battle';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
 import type { BattleScene } from '@/types/api';
 
 const p = (
@@ -27,6 +28,7 @@ const battle = (turnIndex: number) =>
         ],
         currentTurnIndex: turnIndex,
         status: 'active',
+        rules: DEFAULT_RULES,
     }) as unknown as BattleScene;
 
 describe('deriveTurn', () => {
@@ -124,6 +126,7 @@ describe('резерв і очікування рішення ДМ', () => {
             status: 'active',
             isDM,
             pendingSummons,
+            rules: DEFAULT_RULES,
         }) as unknown as BattleScene;
 
     it('DM бачить резерв і awaiting', () => {
@@ -188,6 +191,7 @@ describe('deriveScene: playerView', () => {
             status: 'active',
             isDM: true,
             pendingSummons: [imp],
+            rules: DEFAULT_RULES,
         }) as unknown as BattleScene;
 
     it('DM + playerView: не DM, readOnly, без резерву, без свого ходу і героя', () => {

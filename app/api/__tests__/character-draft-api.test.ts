@@ -34,6 +34,10 @@ vi.mock('@/lib/supabase/avatar-storage', () => ({
     })),
 }));
 
+vi.mock('@/app/api/campaigns/[id]/characters/draft/draft-choices', () => ({
+    draftChoiceFields: vi.fn(async () => ({ ok: true, fields: {} })),
+}));
+
 const gen = vi.hoisted(() => ({
     generateObject: vi.fn(),
     pickDmTextModel: vi.fn(),
