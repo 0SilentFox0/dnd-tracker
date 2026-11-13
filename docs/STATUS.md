@@ -143,6 +143,10 @@ _Оновлено: 2026-11-11._
 
 **Гейти:** `tsc`, `test:run`, sweep, `next build` — оновить контролер. Фікс гейтів Ч15: тести `consequences`, `spell-candidates-dying`, `advance-after-removal` (знімок) оновлено під слот d20 + `dying` (помилки тестів, не регресія коду); `homm5-legacy-state` — конфлікт імені `join` і порівняння дії без `id`/`timestamp`.
 
+**Гейти Ч15:** `tsc` чисто; `test:run` 2256 файлів / 16197 тестів зелено; `next build` rc=0; sweep 4 профілі exit 0 (guard «row counts» впав лише через залишки тестових сцен репетиції в `prodcopy_ch14`, не код); sweep буде перезапущено.
+
+**Хвости після ревʼю Ч15 (Minor):** (1) виправлено: перший запис d20 у героя зі старим `deathSaves` ставить `dying`. (2) `.snap` `advance-after-removal`: зʼявився `"deathSaves": undefined` при nat-20 (`clearDeathSaves` над старою формою), поведінка JSON/`hashJson` не змінилась. (3) Бої, створені до Ч15, лишаються `mixed`: плаский `retaliationsUsed: 0` поруч зі слотом нешкідливий; у runbook очікувати `mixed`, а не `slot` для Grim. (4) Наближення П7 для d20: після downgrade undo старим кодом до моменту «вмирає» може лишити піднятого героя UNCONSCIOUS без кидків смерті; ризик лише при відкаті з активним боєм, тому відкат Ч15 — лише за відсутності активних боїв.
+
 ### E2 Ч14: стан учасника бою в слоті системи (2026-11-13)
 
 Гілка `feat/e2-part14-15-battle-state` (worktree `../dnd-tracker-e2-ch14`, від main 53c290ed8), **не змерджена й не запушена**; prod-кроків немає. Зроблено: лічильники wfrp (`fortune`, `channelledSl`, `sin`, `conditionTests`, `psychologyTested`) переїхали з полів core в `battleData.system` (колонка `state`) з кодеком `PARTICIPANT_STATE` і dual-read; нові хуки `combat.turn.resetState`, `participant.fromStored`, `participant.persist` (порожні в d20/HOMM); `resetTurnState`/`applyBattleResult` отримують `rules`; скрипти `scripts/db/active-battles-report.ts` (читання) і `scripts/db/battle-state-downgrade.ts`; хук `useConditionTestPanel` перенесено в `systems/wfrp/hooks` (поза barrel). Деталі — `rule-systems.md` («Ч14»), `battle.md`.
