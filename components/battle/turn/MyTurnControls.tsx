@@ -243,12 +243,11 @@ export function MyTurnControls({
                 <ActionGrid
                     turn={turn}
                     channelLabel={
-                        systemUi?.ChannelLabel && <systemUi.ChannelLabel />
+                        systemUi.ChannelLabel && <systemUi.ChannelLabel />
                     }
                     pending={anyPending}
                     available={{
-                        channel:
-                            !!systemUi?.ChannelDialog && tested && hasMagic,
+                        channel: !!systemUi.ChannelDialog && tested && hasMagic,
                         magic: hasMagic,
                         magicTile: spells,
                         bonus:
@@ -295,7 +294,7 @@ export function MyTurnControls({
             )}
             <AttackWizard wizard={attack} />
             <SpellBook book={book} />
-            {tested && systemUi?.ChannelDialog && (
+            {tested && systemUi.ChannelDialog && (
                 <systemUi.ChannelDialog channel={channel} />
             )}
             {coreActionsOn(battle.rules) && (

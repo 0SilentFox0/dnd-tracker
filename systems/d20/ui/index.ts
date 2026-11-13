@@ -18,6 +18,7 @@ import { UnitStatsFields } from './UnitStatsFields';
 import type { SystemUi } from '@/components/systems/types';
 
 export const D20_MODULE_UI: SystemUi = {
+    battle: {},
     rulesSections: {
         criticals: CriticalsSection,
         formulas: FormulasSection,

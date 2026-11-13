@@ -33,7 +33,7 @@ vi.mock('@/components/battle/use-system-battle-ui', () => ({
                   ChannelDialog: () => <div data-testid="channel-dialog" />,
                   ChannelLabel: () => <>Скерування</>,
               }
-            : undefined,
+            : {},
 }));
 vi.mock('@/components/battle/wizards/SpellBook', () => ({
     SpellBook: () => null,

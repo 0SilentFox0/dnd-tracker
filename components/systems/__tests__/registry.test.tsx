@@ -72,18 +72,23 @@ describe('system ui registry', () => {
     });
 
     it('only wfrp has battle slots and the spell magic editor', () => {
-        expect(Object.keys(systemUiOf('wfrp').battle ?? {}).sort()).toEqual([
+        const wfrpOnly = [
             'CastTest',
             'ChannelDialog',
             'ChannelLabel',
             'ConditionTestPanel',
+            'ConditionsDialog',
             'RollBody',
             'RollTitle',
-        ]);
+        ];
+
+        expect(Object.keys(systemUiOf('wfrp').battle).sort()).toEqual(wfrpOnly);
         expect(systemUiOf('wfrp').SpellMagicFields).toBeDefined();
 
         for (const key of ['homm', 'dnd5e'] as const) {
-            expect(systemUiOf(key).battle).toBeUndefined();
+            const keys = Object.keys(systemUiOf(key).battle);
+
+            expect(keys.filter((k) => wfrpOnly.includes(k))).toEqual([]);
             expect(systemUiOf(key).SpellMagicFields).toBeUndefined();
         }
     });

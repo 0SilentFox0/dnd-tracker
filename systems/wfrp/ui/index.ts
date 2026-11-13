@@ -76,6 +76,7 @@ const battle: SystemBattleUi = {
     ChannelDialog,
     ChannelLabel,
     ConditionTestPanel,
+    ConditionsDialog: SystemConditionsDialog,
 };
 
 export const WFRP_MODULE_UI: SystemUi = {
@@ -94,7 +95,6 @@ export const WFRP_MODULE_UI: SystemUi = {
     dmPages: { careers: CareersPage },
     DraftForm: WfrpDraftForm,
     RaceProfileEditor: SpeciesProfileEditor,
-    battleConditionsDialog: SystemConditionsDialog,
     ArtifactStatsEditor,
     EquippedSummary,
     DowntimeTab,

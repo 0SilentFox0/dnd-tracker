@@ -52,7 +52,7 @@ export const MyHeroPanel = memo(function MyHeroPanel({
 
     const { d20Stats, hpTerm, spells } = useBattleRules();
 
-    const ConditionTestPanel = useSystemBattleUi()?.ConditionTestPanel;
+    const ConditionTestPanel = useSystemBattleUi().ConditionTestPanel;
 
     const heroEffects = effects.get(live.basicInfo.id) ?? NO_EFFECTS;
 
