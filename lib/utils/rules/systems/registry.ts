@@ -1,7 +1,8 @@
+import { moduleCatalog, PRESETS } from './catalog';
 import { composeSystem } from './compose';
 import { RULE_SYSTEM_KEYS } from './meta';
 import { type ModuleEntry, resolveSystem } from './resolve';
-import type { RuleSystemDefinition } from './types';
+import type { LevelResetPart, RuleSystemDefinition } from './types';
 
 import { type Coin, COIN_VALUE } from '@/lib/constants/inventory';
 import type { Ruleset } from '@/lib/utils/rules/schema';
@@ -48,6 +49,30 @@ const resolve = (
 
 export const RULE_SYSTEM_REGISTRY: Record<string, RuleSystemDefinition> =
     Object.fromEntries(RULE_SYSTEM_KEYS.map((key) => [key, resolve({ key })]));
+
+let levelResets: readonly LevelResetPart[] | undefined;
+
+/** Resets of every module regardless of the campaign composition: column integrity is not a game rule, a level-down must not leave stale data behind a switched-off module */
+export function allLevelResets(): readonly LevelResetPart[] {
+    levelResets ??= [
+        ...new Set(
+            Object.entries(PRESETS)
+                .filter(([, { modules }]) => modules.length === 0)
+                .flatMap(([key, { base }]) => {
+                    const addons = moduleCatalog()
+                        .addons.filter((a) => a.requires.includes(base))
+                        .map((a) => a.id);
+
+                    return (
+                        resolve({ key, modules: addons }).progression
+                            .levelResets ?? []
+                    );
+                })
+        ),
+    ];
+
+    return levelResets;
+}
 
 export const isEmptySystemData = (value: unknown): boolean =>
     Object.values(RULE_SYSTEM_REGISTRY).some((system) =>

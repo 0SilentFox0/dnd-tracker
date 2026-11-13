@@ -23,8 +23,9 @@ vi.mock('@/lib/server/characters/core/read-sheet', () => ({
 vi.mock('@/lib/server/campaigns/rules', () => ({
     loadRules: vi.fn(async () => ({ morale: { enabled: false } })),
 }));
-vi.mock('@/lib/server/campaigns/system-key', () => ({
-    systemKeyOfCampaign: () => Promise.resolve(wfrp.is ? 'wfrp' : 'homm'),
+vi.mock('@/lib/server/systems/campaign-system', () => ({
+    systemOfCampaign: () =>
+        Promise.resolve({ key: wfrp.is ? 'wfrp' : 'homm' }),
 }));
 vi.mock('@/lib/i18n/extend-locale-scope', () => ({
     ExtendLocaleScope: ({

@@ -8,8 +8,8 @@ import { ExtendLocaleScope } from '@/lib/i18n/extend-locale-scope';
 import { systemScope } from '@/lib/i18n/system-scope';
 import { PrefetchedQuery } from '@/lib/providers/prefetched-query';
 import { requireCampaignMember } from '@/lib/server/campaigns/access';
-import { systemKeyOfCampaign } from '@/lib/server/campaigns/system-key';
 import { readCharacterSheet } from '@/lib/server/characters/core/read-sheet';
+import { systemOfCampaign } from '@/lib/server/systems/campaign-system';
 import { readOkJson } from '@/lib/utils/api/read-json';
 import { stripPlayerHiddenRules } from '@/lib/utils/rules/player-hidden';
 import { parseRules } from '@/lib/utils/rules/schema';
@@ -75,7 +75,7 @@ export default async function CharacterPage({
         </PrefetchedQuery>
     );
 
-    const namespaces = systemScope(await systemKeyOfCampaign(id), 'character');
+    const namespaces = systemScope(await systemOfCampaign(id), 'character');
 
     return namespaces.length ? (
         <ExtendLocaleScope namespaces={namespaces}>{profile}</ExtendLocaleScope>

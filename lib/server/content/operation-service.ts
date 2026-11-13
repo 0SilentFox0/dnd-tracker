@@ -30,7 +30,10 @@ import {
 import { importContent } from '@/lib/server/content/import/import-content';
 import { loadNames } from '@/lib/server/content/import/names';
 import { translateImportReport } from '@/lib/server/content/import/translate-report';
-import { assertKindActive } from '@/lib/server/content/kind-active';
+import {
+    assertKindActive,
+    isKindActive,
+} from '@/lib/server/content/kind-active';
 import { CONTENT_OPERATIONS } from '@/lib/server/content/operations';
 import { assertEffectsInComposition } from '@/lib/server/content/traits-guard';
 import { withCampaignContentWrite } from '@/lib/server/content/write';
@@ -104,6 +107,69 @@ const bodyOf = <K extends ContentOperationId>(_id: K, body: unknown) =>
     body as BodyOf<K>;
 
 const kindOf = (value: unknown) => value as (typeof IMPORT_KINDS)[number];
+
+type SourceRow = { id: string; name: string };
+
+const ABILITY_SOURCES: readonly {
+    source: string;
+    contentKind: string;
+    load(where: { campaignId: string }): Promise<SourceRow[]>;
+}[] = [
+    {
+        source: 'skill',
+        contentKind: 'skills',
+        load: (where) =>
+            prisma.skill.findMany({
+                where,
+                select: { id: true, name: true },
+            }),
+    },
+    {
+        source: 'race',
+        contentKind: 'races',
+        load: (where) =>
+            prisma.race.findMany({ where, select: { id: true, name: true } }),
+    },
+    {
+        source: 'artifact',
+        contentKind: 'artifacts',
+        load: (where) =>
+            prisma.artifact.findMany({
+                where,
+                select: { id: true, name: true },
+            }),
+    },
+    {
+        source: 'artifactSet',
+        contentKind: 'artifact-sets',
+        load: (where) =>
+            prisma.artifactSet.findMany({
+                where,
+                select: { id: true, name: true },
+            }),
+    },
+    {
+        source: 'unit',
+        contentKind: 'units',
+        load: (where) =>
+            prisma.unit.findMany({ where, select: { id: true, name: true } }),
+    },
+    {
+        source: 'class',
+        contentKind: 'classes',
+        load: (where) =>
+            prisma.gameClass.findMany({
+                where,
+                select: { id: true, name: true },
+            }),
+    },
+    {
+        source: 'feat',
+        contentKind: 'feats',
+        load: (where) =>
+            prisma.feat.findMany({ where, select: { id: true, name: true } }),
+    },
+];
 
 async function owned<T extends { campaignId: string }>(
     row: T | null,
@@ -237,34 +303,21 @@ export async function runContentOperation(
                     locale: locale ?? undefined,
                 });
             case 'abilities.sources': {
-                const where = { campaignId: actor.campaignId },
-                    select = { id: true, name: true } as const;
+                const where = { campaignId: actor.campaignId };
 
-                const groups = await Promise.all([
-                    prisma.skill.findMany({ where, select }),
-                    prisma.race.findMany({ where, select }),
-                    prisma.artifact.findMany({ where, select }),
-                    prisma.artifactSet.findMany({ where, select }),
-                    prisma.unit.findMany({ where, select }),
-                    prisma.gameClass.findMany({ where, select }),
-                    prisma.feat.findMany({ where, select }),
-                ]);
-
-                const kinds = [
-                    'skill',
-                    'race',
-                    'artifact',
-                    'artifactSet',
-                    'unit',
-                    'class',
-                    'feat',
-                ];
+                const groups = await Promise.all(
+                    ABILITY_SOURCES.map(async (s) =>
+                        (await isKindActive(s.contentKind, actor))
+                            ? { kind: s.source, rows: await s.load(where) }
+                            : { kind: s.source, rows: [] }
+                    )
+                );
 
                 return {
-                    sources: groups.flatMap((rows, i) =>
+                    sources: groups.flatMap(({ kind, rows }) =>
                         rows
                             .map((row) => ({
-                                kind: kinds[i],
+                                kind,
                                 id: row.id,
                                 name: row.name,
                             }))

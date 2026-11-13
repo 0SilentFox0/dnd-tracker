@@ -1,6 +1,10 @@
 import type { Namespace } from './config';
 
-import { composition, moduleMetaOf } from '@/lib/utils/rules/systems/catalog';
+import {
+    composition,
+    moduleMetaOf,
+    unknownIds,
+} from '@/lib/utils/rules/systems/catalog';
 import {
     metaOf,
     type SystemMeta,
@@ -41,37 +45,24 @@ const slotOf = (
     return (list ?? []) as readonly Namespace[];
 };
 
-const metasOfComposition = (system: {
-    key: string;
-    modules?: readonly string[];
-}): (SystemMeta | undefined)[] => {
-    try {
-        const { base, modules } = composition(system);
-
-        return [
-            metaOf(system.key),
-            moduleMetaOf(base),
-            ...modules.map((id) => moduleMetaOf(id)),
-        ];
-    } catch {
-        return [];
-    }
-};
-
 export function systemScope(
-    system: string | SystemScopeInput | null,
+    system: SystemScopeInput | null,
     slot: SystemScopeSlot
 ): readonly Namespace[] {
-    if (!system) return [];
+    if (!system?.key) return [];
 
-    if (typeof system === 'string') return slotOf(metaOf(system), slot);
+    const selection = { key: system.key, modules: system.modules };
 
-    if (!system.key) return [];
+    if (unknownIds(selection).some((issue) => issue.code === 'unknownKey'))
+        return [];
 
-    const metas = metasOfComposition({
-        key: system.key,
-        modules: system.modules,
-    });
+    const { base, modules } = composition(selection);
+
+    const metas = [
+        metaOf(system.key),
+        moduleMetaOf(base),
+        ...modules.map((id) => moduleMetaOf(id)),
+    ];
 
     return [...new Set(metas.flatMap((meta) => slotOf(meta, slot)))];
 }

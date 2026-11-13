@@ -6,8 +6,8 @@ import { systemScope } from '@/lib/i18n/system-scope';
 import { PrefetchedQuery } from '@/lib/providers/prefetched-query';
 import { requireCampaignDMOrDemo } from '@/lib/server/campaigns/access';
 import { loadRules } from '@/lib/server/campaigns/rules';
-import { systemKeyOfCampaign } from '@/lib/server/campaigns/system-key';
 import { readCharacterSheet } from '@/lib/server/characters/core/read-sheet';
+import { systemOfCampaign } from '@/lib/server/systems/campaign-system';
 import { readOkJson } from '@/lib/utils/api/read-json';
 import type { CharacterSheet } from '@/types/characters';
 
@@ -62,7 +62,7 @@ export default async function DmCharacterPage({
     );
 
     const namespaces = systemScope(
-        await systemKeyOfCampaign(id),
+        await systemOfCampaign(id),
         'dmCharacter'
     );
 

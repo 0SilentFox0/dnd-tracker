@@ -20,8 +20,9 @@ vi.mock('@/lib/server/characters/core/read-sheet', () => ({
 }));
 vi.mock('@/lib/server/campaigns/access', () => ({ requireCampaignMember }));
 vi.mock('@/lib/db', () => ({ prisma: { character: { findFirst } } }));
-vi.mock('@/lib/server/campaigns/system-key', () => ({
-    systemKeyOfCampaign: () => Promise.resolve(wfrp.is ? 'wfrp' : 'homm'),
+vi.mock('@/lib/server/systems/campaign-system', () => ({
+    systemOfCampaign: () =>
+        Promise.resolve({ key: wfrp.is ? 'wfrp' : 'homm' }),
 }));
 vi.mock('@/lib/i18n/extend-locale-scope', () => ({
     ExtendLocaleScope: ({

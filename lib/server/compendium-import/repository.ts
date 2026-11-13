@@ -32,6 +32,7 @@ import { weaponStatsFromRow } from '@/lib/utils/artifacts/weapon-stats';
 import { asRecord, jsonContentInput } from '@/lib/utils/common/json';
 import { itemStatsFromRow } from '@/lib/utils/items/item-row';
 import { parseRules } from '@/lib/utils/rules/schema';
+import { contentKindsOf } from '@/lib/utils/rules/systems/catalog';
 import {
     compendiumTemplateKeys,
     templateKeyWhere,
@@ -462,6 +463,7 @@ export const prismaImportRepository: ImportRepository = {
             customConditionKeys: (
                 parseRules(settings.rules).conditions.custom ?? []
             ).map((c) => c.key),
+            activeKinds: contentKindsOf(parseRules(settings.rules).system),
         };
     },
     async findRun(actor, key) {

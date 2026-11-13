@@ -615,6 +615,30 @@ describe('classes mode in the report', () => {
         expect(report.readyToImport).toBe(true);
     });
 
+    it('skips entries of a kind the composition does not have and warns once', async () => {
+        const report = await preview({
+            activeKinds: new Set(['units']),
+            hasCharacters: true,
+        });
+
+        expect(report.rows).toEqual([]);
+        expect(
+            report.nextActions.filter((a) => a.code === 'KIND_INACTIVE')
+        ).toEqual([
+            expect.objectContaining({ path: 'feats', severity: 'warning' }),
+        ]);
+        expect(report.readyToImport).toBe(true);
+    });
+
+    it('imports every kind when the context names no active kinds', async () => {
+        const report = await preview({ hasCharacters: true });
+
+        expect(report.rows).toHaveLength(1);
+        expect(report.nextActions.map((a) => a.code)).not.toContain(
+            'KIND_INACTIVE'
+        );
+    });
+
     it('asks for base classes when the mode is on but no classes exist', async () => {
         expect(
             (

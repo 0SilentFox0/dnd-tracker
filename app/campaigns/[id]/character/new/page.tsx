@@ -33,13 +33,13 @@ export default async function NewPlayerCharacterPage({
 
     if (existing) redirect(`/campaigns/${id}/character`);
 
-    const systemKey = parseRules(campaign.rules).system.key;
+    const { system } = parseRules(campaign.rules);
 
-    const DraftForm = systemUiOf(systemKey).DraftForm;
+    const DraftForm = systemUiOf(system.key).DraftForm;
 
     if (DraftForm) {
         return (
-            <ExtendLocaleScope namespaces={systemScope(systemKey, 'draft')}>
+            <ExtendLocaleScope namespaces={systemScope(system, 'draft')}>
                 <DraftForm campaignId={id} />
             </ExtendLocaleScope>
         );

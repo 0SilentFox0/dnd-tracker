@@ -33,13 +33,13 @@ const systemScopes = SYSTEM_META.filter(
         };
     };
 
-    const battle = systemScope(key, 'battle');
+    const battle = systemScope({ key }, 'battle');
 
     const member = [
         ...BASE,
         ...battle,
-        ...systemScope(key, 'campaign'),
-        ...systemScope(key, 'member'),
+        ...systemScope({ key }, 'campaign'),
+        ...systemScope({ key }, 'member'),
     ];
 
     const addons = SYSTEM_META.filter(
@@ -80,7 +80,7 @@ const systemScopes = SYSTEM_META.filter(
             ? [
                   {
                       name: `${key} DM`,
-                      namespaces: [...member, ...systemScope(key, 'dm')],
+                      namespaces: [...member, ...systemScope({ key }, 'dm')],
                       limit: budgetKb.dm,
                   },
               ]
@@ -88,7 +88,7 @@ const systemScopes = SYSTEM_META.filter(
         ...Object.entries(budgetKb?.pages ?? {}).map(([page, limit]) => ({
             name: `${key} ${page} page extra`,
             namespaces: systemScope(
-                key,
+                { key },
                 page as Parameters<typeof systemScope>[1]
             ),
             limit,
@@ -150,8 +150,8 @@ describe('message scope size', () => {
             'dmRules',
             'draft',
         ] as const) {
-            expect(systemScope('homm', slot)).toEqual([]);
-            expect(systemScope('dnd5e', slot)).toEqual([]);
+            expect(systemScope({ key: 'homm', modules: [] }, slot)).toEqual([]);
+            expect(systemScope({ key: 'dnd5e' }, slot)).toEqual([]);
             expect(systemScope(null, slot)).toEqual([]);
         }
     });

@@ -10,7 +10,7 @@ import { getRequestLocale } from '@/lib/i18n/request-locale';
 import { systemScope } from '@/lib/i18n/system-scope';
 import { getTranslator } from '@/lib/i18n/translator';
 import { getCampaignForLayout } from '@/lib/server/campaigns/access';
-import { systemKeyOfCampaign } from '@/lib/server/campaigns/system-key';
+import { systemOfCampaign } from '@/lib/server/systems/campaign-system';
 import { isRuleSystemKey } from '@/lib/utils/rules/systems/meta';
 
 export default async function CampaignLayout({
@@ -22,14 +22,14 @@ export default async function CampaignLayout({
 }) {
     const [{ id }, userId] = await Promise.all([params, getSessionUserId()]);
 
-    const [campaign, systemKey] = userId
+    const [campaign, system] = userId
         ? await Promise.all([
               getCampaignForLayout(id, userId),
-              systemKeyOfCampaign(id),
+              systemOfCampaign(id),
           ])
         : [null, null];
 
-    if (campaign && !isRuleSystemKey(systemKey)) {
+    if (campaign && !isRuleSystemKey(system?.key)) {
         const t = await getTranslator(await getRequestLocale(), 'rules');
 
         return <ErrorState error={new Error(t('validation.unknownSystem'))} />;
@@ -49,12 +49,12 @@ export default async function CampaignLayout({
         children
     );
 
-    const key = campaign ? systemKey : null;
+    const scope = campaign ? system : null;
 
     const namespaces = [
-        ...systemScope(key, 'campaign'),
-        ...systemScope(key, 'member'),
-        ...(isDM ? systemScope(key, 'dm') : []),
+        ...systemScope(scope, 'campaign'),
+        ...systemScope(scope, 'member'),
+        ...(isDM ? systemScope(scope, 'dm') : []),
     ];
 
     return (

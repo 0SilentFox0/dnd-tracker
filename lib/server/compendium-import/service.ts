@@ -147,6 +147,8 @@ export interface RepositoryContext extends PlanContext {
     classesEnabled?: boolean;
     hasClasses?: boolean;
     customConditionKeys?: string[];
+    /** Content kinds of the campaign composition; absent means all of them */
+    activeKinds?: ReadonlySet<string>;
 }
 export interface ImportRepository {
     authorize(actor: Actor): Promise<void>;
@@ -517,11 +519,15 @@ async function planFor(
     if (ctx.campaignId !== actor.campaignId)
         throw new CompendiumError('FORBIDDEN');
 
+    const kindActive = (entry: AdaptedEntry) =>
+        !ctx.activeKinds ||
+        entry.kind === 'scenarioPages' ||
+        ctx.activeKinds.has(entry.kind);
+
+    const entries = [...adapted.entries, ...(ctx.extraEntries ?? [])];
+
     const plan = buildImportPlan(
-        {
-            ...adapted,
-            entries: [...adapted.entries, ...(ctx.extraEntries ?? [])],
-        },
+        { ...adapted, entries: entries.filter(kindActive) },
         {
             ...ctx,
             overwriteKeys: input.overwriteKeys,
@@ -529,6 +535,11 @@ async function planFor(
             allowMixedEdition: input.allowMixedEdition,
         }
     );
+
+    for (const kind of new Set(
+        entries.filter((e) => !kindActive(e)).map((e) => e.kind)
+    ))
+        plan.warnings.push(issue('KIND_INACTIVE', kind, 'warning'));
 
     if (Date.now() - started > 15_000)
         throw new CompendiumError('PLANNING_TIMEOUT');

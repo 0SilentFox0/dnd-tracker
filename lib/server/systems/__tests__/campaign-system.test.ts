@@ -1,31 +1,38 @@
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('server-only', () => ({}));
-vi.mock('@/lib/db', () => ({ prisma: { $queryRaw: vi.fn() } }));
+vi.mock('react', async (orig) => ({
+    ...(await orig<typeof import('react')>()),
+    cache: <T>(fn: T) => fn,
+}));
 
-import { systemOfRules } from '../campaign-system';
+const queryRaw = vi.fn();
 
-import { RulesSystemError } from '@/lib/utils/rules/schema';
+vi.mock('@/lib/db', () => ({
+    prisma: { $queryRaw: (...args: unknown[]) => queryRaw(...args) },
+}));
 
-describe('systemOfRules', () => {
-    it('reads the key and the modules', () => {
-        expect(
-            systemOfRules({ system: { key: 'dnd5e', modules: ['morale'] } })
-        ).toEqual({ key: 'dnd5e', modules: ['morale'] });
-    });
+import { systemOfCampaign } from '../campaign-system';
 
-    it('a missing system is an error, not a guess', () => {
-        expect(() => systemOfRules({ classes: { enabled: true } })).toThrow(
-            RulesSystemError
-        );
-        expect(() => systemOfRules(null)).toThrow(RulesSystemError);
-    });
+describe('systemOfCampaign', () => {
+    beforeEach(() => queryRaw.mockReset());
 
-    it('drops an invalid composition the way the client does', () => {
-        expect(
-            systemOfRules({
-                system: { key: 'homm', modules: ['morale', 'bogus'] },
-            })
-        ).toEqual({ key: 'homm' });
+    it.each([
+        [[{ system: { key: 'wfrp' } }], { key: 'wfrp' }],
+        [
+            [{ system: { key: 'dnd5e', modules: ['morale'] } }],
+            { key: 'dnd5e', modules: ['morale'] },
+        ],
+        [
+            [{ system: { key: 'homm', modules: ['morale', 7] } }],
+            { key: 'homm', modules: ['morale'] },
+        ],
+        [[{ system: null }], null],
+        [[{ system: { modules: ['morale'] } }], null],
+        [[], null],
+    ])('%j -> %j', async (rows, expected) => {
+        queryRaw.mockResolvedValue(rows);
+
+        expect(await systemOfCampaign('c1')).toEqual(expected);
     });
 });

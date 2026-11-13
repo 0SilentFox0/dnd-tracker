@@ -44,7 +44,7 @@ import {
     levelNotificationEvents,
     spellNotificationEvents,
 } from '@/lib/utils/notifications/events';
-import { ruleSystemOf } from '@/lib/utils/rules/systems';
+import { allLevelResets, ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { SpellSlots } from '@/lib/utils/spells/spell-slots';
 import type { SpellSlotProgression } from '@/types/races';
 
@@ -198,7 +198,7 @@ async function computeUpdate(
         data: bodyData,
         campaign,
         race,
-        resets: ruleSystemOf(campaign.rules).progression.levelResets,
+        resets: allLevelResets(),
     });
 
     const classSeenLevel = fromClasses

@@ -381,6 +381,7 @@
     "SPELL_RIDER_MANUAL": "Additional spell effects are not automated",
     "CHARACTERS_REQUIRED": "Create characters first",
     "CLASSES_MODE_REQUIRED": "Enable 5e classes mode",
+    "KIND_INACTIVE": "Skipped: this content kind is off in the campaign's rule system",
     "UNRESOLVED_REF": "Unresolved dependencies",
     "FEATURE_REF_UNRESOLVED": "Unresolved feature references",
     "BACKGROUND_FEAT_INVALID": "Invalid background feat",

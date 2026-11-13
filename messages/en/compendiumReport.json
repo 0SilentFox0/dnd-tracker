@@ -3,6 +3,7 @@
     "default": "Check the description and configure manually",
     "TEMPLATE_DEPENDENCY": "A base entry from the explicitly chosen template was added",
     "CHARACTERS_REQUIRED": "Create characters in a populated campaign",
+    "KIND_INACTIVE": "Entries of a content kind that is off in the campaign's rule system were skipped",
     "CLASSES_MODE_REQUIRED": "Enable classes mode and add the base classes (an SRD dependency), otherwise races, backgrounds and feats are not assembled on the hero sheet",
     "MANUAL_CUSTOM_SKILL": "Track the custom skill manually",
     "MANUAL_CONDITION_TEXT": "The condition text could not be reduced to engine markers: the condition is added with its description, configure the action manually",

@@ -21,11 +21,13 @@ vi.mock('@/components/onboarding/DemoTourCoordinator', () => ({
         <div data-testid="tour-coordinator">{children}</div>
     ),
 }));
-vi.mock('@/lib/server/campaigns/system-key', () => ({
-    systemKeyOfCampaign: () =>
-        Promise.resolve(
-            mocks.key !== undefined ? mocks.key : mocks.wfrp ? 'wfrp' : 'homm'
-        ),
+vi.mock('@/lib/server/systems/campaign-system', () => ({
+    systemOfCampaign: () => {
+        const key =
+            mocks.key !== undefined ? mocks.key : mocks.wfrp ? 'wfrp' : 'homm';
+
+        return Promise.resolve(key === null ? null : { key });
+    },
 }));
 vi.mock('@/lib/i18n/request-locale', () => ({
     getRequestLocale: () => Promise.resolve('en'),
