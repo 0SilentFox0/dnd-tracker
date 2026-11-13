@@ -63,7 +63,7 @@ async function main() {
         '@/lib/server/campaigns/create-campaign'
     );
 
-    const { moduleCatalog } = await import('@/lib/utils/rules/systems/catalog');
+    const { DEFAULT_RULES } = await import('@/lib/utils/rules/defaults');
 
     const { categoryInventory, projectInput } = await import(
         '@/lib/utils/compendium-import/flow'
@@ -88,7 +88,7 @@ async function main() {
             userId,
             name: `Coverage report ${userId}`,
             bundle: null,
-            system: { key: moduleCatalog().presets[0].key },
+            system: { key: DEFAULT_RULES.system.key },
         })
     ).campaign.id;
 
