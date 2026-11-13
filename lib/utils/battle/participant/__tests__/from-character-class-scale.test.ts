@@ -97,9 +97,15 @@ const build = (rules: Ruleset, character: object) =>
 
 describe('числа класу на учаснику', () => {
     it('Monk 5: пул Focus 5/5 і ключ пулу на вмінні', async () => {
-        const p = await build(parseRules({ classes: { enabled: true } }), {
-            classes: [{ classId: 'monk', level: 5 }],
-        });
+        const p = await build(
+            parseRules({
+                system: { key: 'dnd5e' },
+                classes: { enabled: true },
+            }),
+            {
+                classes: [{ classId: 'monk', level: 5 }],
+            }
+        );
 
         expect(p.battleData.pools).toEqual({
             'pool:monk:focus-points': {

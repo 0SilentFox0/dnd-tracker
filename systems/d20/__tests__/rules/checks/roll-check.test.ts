@@ -188,6 +188,7 @@ describe('rollCheck', () => {
                 { skill: 'stealth' },
                 {
                     rules: parseRules({
+                        system: { key: 'dnd5e' },
                         conditions: { enabled: true, exhaustion: '2024' },
                     }),
                 }
@@ -278,6 +279,7 @@ describe('passivePerception', () => {
                 p,
                 [],
                 parseRules({
+                    system: { key: 'dnd5e' },
                     conditions: { enabled: true, exhaustion: '2024' },
                 })
             )

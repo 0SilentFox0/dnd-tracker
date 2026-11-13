@@ -20,11 +20,13 @@ vi.mock('@/components/ui/select-field', () => ({
         value,
         onValueChange,
         groups,
+        options,
         'aria-label': label,
     }: {
         value: string;
         onValueChange: (v: string) => void;
-        groups: { options: { value: string; label: string }[] }[];
+        groups?: { options: { value: string; label: string }[] }[];
+        options?: { value: string; label: string }[];
         'aria-label': string;
     }) => (
         <select
@@ -32,13 +34,11 @@ vi.mock('@/components/ui/select-field', () => ({
             value={value}
             onChange={(e) => onValueChange(e.target.value)}
         >
-            {groups
-                .flatMap((g) => g.options)
-                .map((o) => (
-                    <option key={o.value} value={o.value}>
-                        {o.label}
-                    </option>
-                ))}
+            {(options ?? (groups ?? []).flatMap((g) => g.options)).map((o) => (
+                <option key={o.value} value={o.value}>
+                    {o.label}
+                </option>
+            ))}
         </select>
     ),
 }));
@@ -105,6 +105,9 @@ describe('NewCampaignForm default template', () => {
         expect(
             vi.mocked(createCampaign).mock.calls[0][0].templateId
         ).toBeUndefined();
+        expect(vi.mocked(createCampaign).mock.calls[0][0].system).toEqual({
+            key: expect.any(String),
+        });
     });
 
     it.each([undefined, 'en'] as const)(

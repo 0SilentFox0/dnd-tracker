@@ -89,6 +89,7 @@ const build = (outOfCombat: object, character: object, extra: object = {}) => {
         artifactSetsById: {},
         artifactSetMemberIds: {},
         rules: parseRules({
+            system: { key: 'dnd5e' },
             classes: { enabled: true },
             outOfCombat,
             ...extra,

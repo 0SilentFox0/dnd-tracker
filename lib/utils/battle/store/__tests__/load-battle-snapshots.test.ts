@@ -51,6 +51,7 @@ function fakeDb(rows = stored) {
         eventSeq: 0,
         pendingMoraleCheck: null,
         pendingCritChoice: null,
+        rules: { system: { key: 'homm' } },
         audio: {
             trackId: 't1',
             track: null,

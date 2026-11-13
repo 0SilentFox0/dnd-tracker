@@ -23,7 +23,9 @@ import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
 describe('partySummary', () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        vi.mocked(loadRules).mockResolvedValue(parseRules({}));
+        vi.mocked(loadRules).mockResolvedValue(
+            parseRules({ system: { key: 'homm' } })
+        );
     });
 
     it('лише активні гравці — чернетки не потрапляють в AI-контекст', async () => {
@@ -102,7 +104,11 @@ describe('partySummary', () => {
     });
 
     it('explicit rules skip loadRules', async () => {
-        await partySummary('camp', undefined, parseRules({}));
+        await partySummary(
+            'camp',
+            undefined,
+            parseRules({ system: { key: 'homm' } })
+        );
 
         expect(loadRules).not.toHaveBeenCalled();
     });

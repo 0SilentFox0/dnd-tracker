@@ -96,7 +96,10 @@ describe('add-participant mutation', () => {
     });
 
     it('героя будують із зафіксованими правилами бою', async () => {
-        const rules = parseRules({ morale: { enabled: false } });
+        const rules = parseRules({
+            system: { key: 'homm' },
+            morale: { enabled: false },
+        });
 
         const d = deps();
 

@@ -87,7 +87,10 @@ const base = {
 
 const build = (
     inventory: object,
-    rules = parseRules({ items: { enabled: true } })
+    rules = parseRules({
+        system: { key: 'homm' },
+        items: { enabled: true },
+    })
 ) =>
     createBattleParticipantFromCharacter(
         { ...base, inventory } as never,

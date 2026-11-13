@@ -5,20 +5,47 @@ import {
     parseRules,
     RulesetPatchSchema,
     RulesetSchema,
+    RulesSystemError,
+    safeParseRules,
 } from '@/lib/utils/rules/schema';
 import { defaultRulesFor } from '@/lib/utils/rules/section-registry';
 import { DEFAULT_ADVANCEMENT_RULES } from '@/systems/wfrp/rules/advancement/rules';
 
 const DEFAULT_RULES = defaultRulesFor({ key: 'homm' });
 
+const SYS = { system: { key: 'homm' } };
+
 describe('parseRules', () => {
-    it('DEFAULT_RULES збігається з RulesetSchema.parse({})', () => {
-        expect(DEFAULT_RULES).toEqual(RulesetSchema.parse({}));
+    it('DEFAULT_RULES збігається з RulesetSchema.parse({ system })', () => {
+        expect(DEFAULT_RULES).toEqual(RulesetSchema.parse(SYS));
     });
 
-    it("empty / null / garbage → defaults equal to today's constants", () => {
-        for (const raw of [{}, null, undefined, 'x', 42])
-            expect(parseRules(raw)).toEqual(DEFAULT_RULES);
+    it('без system розбір кидає RulesSystemError, без здогадки', () => {
+        for (const raw of [
+            {},
+            null,
+            undefined,
+            'x',
+            42,
+            { classes: { enabled: true } },
+            { system: { key: 'nope' } },
+        ]) {
+            expect(() => parseRules(raw)).toThrow(RulesSystemError);
+            expect(safeParseRules(raw)).toEqual({
+                ok: false,
+                error: 'rules.validation.unknownSystem',
+            });
+        }
+
+        expect(RulesetSchema.safeParse({}).success).toBe(false);
+    });
+
+    it("system only → defaults equal to today's constants", () => {
+        expect(parseRules(SYS)).toEqual(DEFAULT_RULES);
+        expect(safeParseRules(SYS)).toEqual({
+            ok: true,
+            rules: DEFAULT_RULES,
+        });
 
         expect(DEFAULT_RULES).toEqual({
             morale: { enabled: true, cap: 3 },
@@ -75,6 +102,7 @@ describe('parseRules', () => {
 
     it('keeps valid sections and falls back only for a broken one', () => {
         const r = parseRules({
+            ...SYS,
             morale: { enabled: false },
             criticals: { critOn: 99 },
         });
@@ -84,16 +112,18 @@ describe('parseRules', () => {
     });
 
     it('drops unknown top-level keys', () => {
-        expect(parseRules({ luck: { enabled: true } })).toEqual(DEFAULT_RULES);
+        expect(parseRules({ ...SYS, luck: { enabled: true } })).toEqual(
+            DEFAULT_RULES
+        );
     });
 
     it('initiative mode defaults to static and accepts roll', () => {
         expect(
-            parseRules({ initiative: { heroMin: 1, heroMax: 5 } }).initiative
-                .mode
+            parseRules({ ...SYS, initiative: { heroMin: 1, heroMax: 5 } })
+                .initiative.mode
         ).toBe('static');
         expect(
-            parseRules({ initiative: { mode: 'roll' } }).initiative.mode
+            parseRules({ ...SYS, initiative: { mode: 'roll' } }).initiative.mode
         ).toBe('roll');
         expect(
             RulesetPatchSchema.safeParse({ initiative: { mode: 'bogus' } })
@@ -103,7 +133,8 @@ describe('parseRules', () => {
 
     it('falls back for inverted initiative range', () => {
         expect(
-            parseRules({ initiative: { heroMin: 20, heroMax: 10 } }).initiative
+            parseRules({ ...SYS, initiative: { heroMin: 20, heroMax: 10 } })
+                .initiative
         ).toEqual(DEFAULT_RULES.initiative);
     });
 });
@@ -152,7 +183,10 @@ describe('mergeRules', () => {
 
         expect(patch).toEqual({ morale: { cap: 5 } });
 
-        const current = parseRules({ morale: { enabled: false, cap: 3 } });
+        const current = parseRules({
+            ...SYS,
+            morale: { enabled: false, cap: 3 },
+        });
 
         expect(mergeRules(current, patch)).toMatchObject({
             ok: true,
@@ -162,6 +196,7 @@ describe('mergeRules', () => {
 
     it('патч однієї секції не стирає кастомні таблиці та списки', () => {
         const current = parseRules({
+            ...SYS,
             heroScaling: { meleeDiceByLevel: { '1': '1d6' } },
             criticals: { disabledSuccess: ['1'] },
         });
@@ -192,7 +227,8 @@ describe('mergeRules', () => {
                 .ok
         ).toBe(false);
         expect(
-            parseRules({ criticals: { critOn: 3, fumbleOn: 3 } }).criticals
+            parseRules({ ...SYS, criticals: { critOn: 3, fumbleOn: 3 } })
+                .criticals
         ).toEqual(DEFAULT_RULES.criticals);
     });
 });
@@ -201,11 +237,15 @@ describe('parseRulesCached', () => {
     it("той самий JSON дає той самий об'єкт, інший — новий", async () => {
         const { parseRulesCached } = await import('../schema');
 
-        const a = parseRulesCached({ morale: { enabled: false } });
+        const a = parseRulesCached({ ...SYS, morale: { enabled: false } });
 
-        expect(parseRulesCached({ morale: { enabled: false } })).toBe(a);
-        expect(parseRulesCached({ morale: { enabled: true } })).not.toBe(a);
-        expect(parseRulesCached(null)).toEqual(parseRulesCached({}));
+        expect(parseRulesCached({ ...SYS, morale: { enabled: false } })).toBe(
+            a
+        );
+        expect(
+            parseRulesCached({ ...SYS, morale: { enabled: true } })
+        ).not.toBe(a);
+        expect(() => parseRulesCached(null)).toThrow(RulesSystemError);
     });
 });
 
@@ -218,6 +258,7 @@ describe('mergeRules removeCustomConditions', () => {
     });
 
     const current = parseRules({
+        ...SYS,
         conditions: {
             enabled: true,
             exhaustion: '2014',
@@ -284,6 +325,7 @@ describe('mergeRules removeCustomConditions', () => {
 describe('unit group presentation', () => {
     it('persists edits by group key without overwriting other groups or encounter rules', () => {
         const current = parseRules({
+            ...SYS,
             encounters: {
                 balance: 'xp',
                 unitGroups: {

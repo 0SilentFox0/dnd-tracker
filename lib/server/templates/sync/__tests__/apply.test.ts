@@ -211,7 +211,7 @@ describe('applySourceChanges', () => {
     it('applies rules per mechanic and settings', async () => {
         f.patchCampaign(SRC, {
             maxLevel: 10,
-            rules: { morale: { enabled: false } },
+            rules: { system: { key: 'homm' }, morale: { enabled: false } },
         });
 
         const items = await visible();
@@ -803,7 +803,7 @@ it('sync preview includes the actual before for rules and settings', async () =>
 
     f.patchCampaign(SRC, {
         maxLevel: 10,
-        rules: { morale: { enabled: false } },
+        rules: { system: { key: 'homm' }, morale: { enabled: false } },
     });
 
     const selected = (await visible()).filter(

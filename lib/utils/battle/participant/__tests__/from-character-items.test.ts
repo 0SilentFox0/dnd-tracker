@@ -186,6 +186,7 @@ const build = (rules: Ruleset, inventory: object, character: object = {}) => {
 };
 
 const items = parseRules({
+    system: { key: 'dnd5e' },
     items: { enabled: true },
     classes: { enabled: true },
 });

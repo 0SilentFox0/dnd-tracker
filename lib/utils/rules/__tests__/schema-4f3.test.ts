@@ -13,19 +13,21 @@ const SRD_RULES = RulesetSchema.parse(srdRules);
 
 const OFF = { enabled: false, attunementLimit: 3 };
 
+const SYS = { system: { key: 'homm' } };
+
 describe('rules.items', () => {
     it('defaults to off with the 5e attunement limit', () => {
         expect(DEFAULT_RULES.items).toEqual(OFF);
-        expect(parseRules({}).items).toEqual(OFF);
+        expect(parseRules(SYS).items).toEqual(OFF);
     });
 
     it('falls back to default on an invalid section', () => {
-        expect(parseRules({ items: { attunementLimit: 0 } }).items).toEqual(
-            OFF
-        );
-        expect(parseRules({ items: { attunementLimit: 11 } }).items).toEqual(
-            OFF
-        );
+        expect(
+            parseRules({ ...SYS, items: { attunementLimit: 0 } }).items
+        ).toEqual(OFF);
+        expect(
+            parseRules({ ...SYS, items: { attunementLimit: 11 } }).items
+        ).toEqual(OFF);
     });
 
     it('patches one field', () => {

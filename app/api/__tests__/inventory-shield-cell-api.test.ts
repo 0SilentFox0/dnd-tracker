@@ -46,7 +46,11 @@ describe('shield cell validation in inventory PATCH', () => {
         vi.mocked(apiAuth.requireDM).mockResolvedValue({
             userId: 'dm',
             isDM: true,
-            campaign: { id: 'camp', members: [] },
+            campaign: {
+                id: 'camp',
+                rules: { system: { key: 'homm' } },
+                members: [],
+            },
         } as never);
         vi.mocked(prisma.character.findUnique).mockResolvedValue({
             id: 'a',
@@ -69,7 +73,9 @@ describe('shield cell validation in inventory PATCH', () => {
             bonuses: {},
             modifiers: [],
         });
-        tx.campaign.findUnique.mockResolvedValue({ rules: {} });
+        tx.campaign.findUnique.mockResolvedValue({
+            rules: { system: { key: 'homm' } },
+        });
     });
 
     it('unchanged legacy non-shield in the shield cell is accepted', async () => {

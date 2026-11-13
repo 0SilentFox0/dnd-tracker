@@ -52,7 +52,24 @@ describe('critChoiceByDm', () => {
 
     it('create-схема за замовчуванням false', () => {
         expect(
-            createCampaignSchema.parse({ name: 'Зоря' }).critChoiceByDm
+            createCampaignSchema.parse({
+                name: 'Зоря',
+                system: { key: 'dnd5e' },
+            }).critChoiceByDm
         ).toBe(false);
+    });
+
+    it('create-схема вимагає шаблон або систему', () => {
+        const result = createCampaignSchema.safeParse({ name: 'Зоря' });
+
+        expect(result.success).toBe(false);
+        expect(result.error?.issues[0]).toMatchObject({
+            path: ['system'],
+            message: 'validation.systemRequired',
+        });
+        expect(
+            createCampaignSchema.safeParse({ name: 'Зоря', templateId: 't1' })
+                .success
+        ).toBe(true);
     });
 });

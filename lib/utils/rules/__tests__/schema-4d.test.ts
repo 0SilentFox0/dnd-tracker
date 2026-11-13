@@ -14,15 +14,18 @@ const OFF = {
     inspiration: false,
 };
 
+const SYS = { system: { key: 'homm' } };
+
 describe('rules.outOfCombat', () => {
     it('defaults to everything off', () => {
         expect(DEFAULT_RULES.outOfCombat).toEqual(OFF);
-        expect(parseRules({}).outOfCombat).toEqual(OFF);
+        expect(parseRules(SYS).outOfCombat).toEqual(OFF);
     });
 
     it('falls back to default on an invalid section', () => {
         expect(
-            parseRules({ outOfCombat: { longRestHitDice: 'some' } }).outOfCombat
+            parseRules({ ...SYS, outOfCombat: { longRestHitDice: 'some' } })
+                .outOfCombat
         ).toEqual(OFF);
     });
 

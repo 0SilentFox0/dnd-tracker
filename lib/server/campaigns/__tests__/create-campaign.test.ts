@@ -28,7 +28,6 @@ import {
     loadTemplateForUser,
 } from '@/lib/server/campaigns/create-campaign';
 import { type Bundle, TemplateLeakError } from '@/lib/server/templates/bundle';
-import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
 
 const bundle = {
     formatVersion: 1,
@@ -38,7 +37,7 @@ const bundle = {
         allowPlayerEdit: false,
         friendlyFire: true,
     },
-    rules: {},
+    rules: { system: { key: 'homm' } },
 } as Bundle;
 
 const clash = () =>
@@ -83,6 +82,7 @@ describe('createCampaignFromBundle', () => {
             userId: 'u1',
             name: 'N',
             bundle: null,
+            system: { key: 'homm' },
         });
 
         expect(res).toEqual({ campaign: { id: 'c1' }, warnings: [] });
@@ -95,7 +95,7 @@ describe('createCampaignFromBundle', () => {
         expect(m.importBundle).not.toHaveBeenCalled();
     });
 
-    it('без бандла у rules зберігаються defaultAttacks і типовий ключ системи', async () => {
+    it('без бандла у rules зберігаються defaultAttacks і вибрана система', async () => {
         m.db.campaign.create.mockResolvedValue({ id: 'c1' });
 
         const defaultAttacks = {
@@ -108,12 +108,13 @@ describe('createCampaignFromBundle', () => {
             userId: 'u1',
             name: 'N',
             bundle: null,
+            system: { key: 'homm' },
             defaultAttacks,
         });
 
-        expect(m.db.campaign.create.mock.calls[0][0].data.rules).toEqual({
+        expect(m.db.campaign.create.mock.calls[0][0].data.rules).toMatchObject({
             defaultAttacks,
-            system: { key: DEFAULT_RULES.system.key },
+            system: { key: 'homm', modules: expect.any(Array) },
         });
     });
 

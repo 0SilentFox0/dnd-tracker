@@ -162,8 +162,10 @@ describe('rules.tables wiring', () => {
 
     it('invalid raw section falls back to defaults', () => {
         expect(
-            parseRules({ tables: { critHead: [{ max: 50, effects: [] }] } })
-                .tables
+            parseRules({
+                system: { key: 'wfrp' },
+                tables: { critHead: [{ max: 50, effects: [] }] },
+            }).tables
         ).toEqual({});
     });
 

@@ -65,7 +65,7 @@ describe('artifact systemStats', () => {
     });
 
     it('d20 campaign rejects non-null systemStats', async () => {
-        setRules({});
+        setRules({ system: { key: 'dnd5e' } });
 
         const error = await createContent(artifactsResource, actor, {
             name: 'Mail',
@@ -81,7 +81,7 @@ describe('artifact systemStats', () => {
     });
 
     it('dry-run preview rejects systemStats in a d20 campaign', async () => {
-        setRules({});
+        setRules({ system: { key: 'dnd5e' } });
 
         const rows = [{ name: 'Plate', slot: 'armor', systemStats: armour }];
 
@@ -183,7 +183,7 @@ describe('artifact systemStats', () => {
     });
 
     it('null clears and omitted keeps (even on d20)', async () => {
-        setRules({});
+        setRules({ system: { key: 'dnd5e' } });
         await updateContent(artifactsResource, actor, 'a1', {
             systemStats: null,
         });
@@ -226,7 +226,10 @@ describe('artifact import systemStats', () => {
     });
 
     it('wfrp stores systemStats from an import row; dnd5e rejects the row and creates nothing', async () => {
-        for (const rules of [{}, { system: { key: 'dnd5e' } }]) {
+        for (const rules of [
+            { system: { key: 'homm' } },
+            { system: { key: 'dnd5e' } },
+        ]) {
             setRules(rules);
 
             const report = await importContent(

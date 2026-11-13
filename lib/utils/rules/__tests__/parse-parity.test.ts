@@ -6,7 +6,7 @@ import {
     EXPECTED_DIFFERENCES,
     expectedDifferenceFor,
 } from '../parse-parity-expected';
-import { parseRules } from '../schema';
+import { parseRules, RulesSystemError } from '../schema';
 
 import { legacyParseRules } from '@/scripts/db/lib/legacy-rules-parse';
 import { diffRules } from '@/scripts/db/lib/rules-parse-diff';
@@ -100,7 +100,27 @@ describe('parseRules parity with frozen pre-Ч3 parse', () => {
         },
     };
 
+    const NO_SYSTEM = new Set([
+        'null',
+        'not an object',
+        'empty object',
+        'missing sections',
+        'invalid system key',
+    ]);
+
     it.each(Object.keys(CASES))('synthetic: %s', (name) => {
+        if (NO_SYSTEM.has(name)) {
+            expect(() => parseRules(CASES[name])).toThrow(RulesSystemError);
+            expect(diffRules(CASES[name]).differences).toEqual([
+                expect.objectContaining({
+                    path: 'system',
+                    next: 'rules.validation.unknownSystem',
+                }),
+            ]);
+
+            return;
+        }
+
         const next = parseRules(CASES[name]);
 
         const legacy = legacyParseRules(CASES[name]);
@@ -135,7 +155,10 @@ describe('parseRules parity with frozen pre-Ч3 parse', () => {
     });
 
     it('predicates do not cover other paths or a changed kept value', () => {
-        const rawSaves = { saves: { proficiency: true, bogus: 1 } };
+        const rawSaves = {
+            system: { key: 'homm' },
+            saves: { proficiency: true, bogus: 1 },
+        };
 
         expect(
             expectedDifferenceFor(
@@ -151,11 +174,15 @@ describe('parseRules parity with frozen pre-Ч3 parse', () => {
             expectedDifferenceFor(
                 'saves.proficiency',
                 rawSaves,
-                parseRules({ saves: { proficiency: false } })
+                parseRules({
+                    system: { key: 'homm' },
+                    saves: { proficiency: false },
+                })
             )
         ).toBeUndefined();
 
         const badCustom = {
+            system: { key: 'homm' },
             conditions: {
                 enabled: true,
                 exhaustion: '2014',
@@ -174,7 +201,10 @@ describe('parseRules parity with frozen pre-Ч3 parse', () => {
             expectedDifferenceFor(
                 'conditions.enabled',
                 badCustom,
-                parseRules({ conditions: { enabled: false } })
+                parseRules({
+                    system: { key: 'homm' },
+                    conditions: { enabled: false },
+                })
             )
         ).toBeUndefined();
         expect(
@@ -186,6 +216,7 @@ describe('parseRules parity with frozen pre-Ч3 parse', () => {
         ).toBeUndefined();
 
         const validCustom = {
+            system: { key: 'homm' },
             conditions: { enabled: true, exhaustion: '2014', custom: [] },
         };
 

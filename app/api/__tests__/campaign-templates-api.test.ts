@@ -83,7 +83,7 @@ const bundle = {
         allowPlayerEdit: true,
         friendlyFire: false,
     },
-    rules: {},
+    rules: { system: { key: 'homm' } },
     spellGroups: [],
     races: [],
     units: [],
@@ -421,6 +421,7 @@ describe('campaign templates API', () => {
                               name: 'O',
                               description: null,
                               visibility: 'official',
+                              rules: { system: { key: 'homm' } },
                               _count: { spellGroups: 2, races: 0 },
                           },
                       ]
@@ -430,6 +431,7 @@ describe('campaign templates API', () => {
                               name: 'M',
                               description: null,
                               visibility: 'private',
+                              rules: { system: { key: 'homm' } },
                               _count: { spellGroups: 0, races: 0 },
                           },
                       ]

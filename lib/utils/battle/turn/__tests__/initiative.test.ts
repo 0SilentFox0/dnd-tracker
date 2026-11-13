@@ -54,6 +54,7 @@ describe('calculateInitiative', () => {
 
 describe('initiative mode', () => {
     const rollRules = parseRules({
+        system: { key: 'homm' },
         initiative: { heroMin: 0, heroMax: 20, mode: 'roll' },
     });
 

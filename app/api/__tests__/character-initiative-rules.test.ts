@@ -38,7 +38,10 @@ const access = (rules: unknown) =>
             id: 'camp',
             maxLevel: 20,
             allowPlayerEdit: true,
-            rules: parseRules(rules),
+            rules: parseRules({
+                system: { key: 'homm' },
+                ...(rules as object),
+            }),
         },
     }) as never;
 

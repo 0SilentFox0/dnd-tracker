@@ -30,7 +30,10 @@ const PACIFIED = {
 } as const;
 
 const rules = (custom: unknown[] = [PACIFIED]): Ruleset =>
-    parseRules({ conditions: { enabled: true, custom } });
+    parseRules({
+        system: { key: 'homm' },
+        conditions: { enabled: true, custom },
+    });
 
 const apply = (
     target: BattleParticipant,
@@ -54,10 +57,13 @@ const pacify = (p: BattleParticipant) =>
 
 describe('правила: custom-стани', () => {
     it('кампанія без custom не отримує ключа; невалідний запис скидає лише custom', () => {
-        expect(parseRules({}).conditions).toEqual(DEFAULT_RULES.conditions);
-        expect('custom' in parseRules({}).conditions).toBe(false);
+        const SYS = { system: { key: 'homm' } };
+
+        expect(parseRules(SYS).conditions).toEqual(DEFAULT_RULES.conditions);
+        expect('custom' in parseRules(SYS).conditions).toBe(false);
         expect(
             parseRules({
+                ...SYS,
                 conditions: {
                     enabled: true,
                     custom: [
@@ -73,6 +79,7 @@ describe('правила: custom-стани', () => {
         ).toEqual({ ...DEFAULT_RULES.conditions, enabled: true });
         expect(
             parseRules({
+                ...SYS,
                 conditions: { custom: [{ ...PACIFIED, markers: ['unknown'] }] },
             }).conditions.custom
         ).toBeUndefined();
@@ -156,7 +163,12 @@ describe('накладання custom-стану', () => {
             'не визначено в правилах кампанії'
         );
         expect(
-            apply(target, 'custom:pacified', {}, parseRules({})).participants[0]
+            apply(
+                target,
+                'custom:pacified',
+                {},
+                parseRules({ system: { key: 'homm' } })
+            ).participants[0]
         ).toBe(target);
     });
 

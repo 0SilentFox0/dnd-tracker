@@ -30,7 +30,7 @@ vi.mock('@/lib/utils/api/api-auth', () => ({
     requireDM: vi.fn(async () => ({
         userId: 'u',
         isDM: true,
-        campaign: { rules: {} },
+        campaign: { rules: { system: { key: 'homm' } } },
     })),
 }));
 vi.mock('@/lib/utils/api/load-owned', () => ({

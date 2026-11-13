@@ -24,7 +24,9 @@ vi.mock('@/lib/db', async () => {
 vi.mock('@/lib/server/campaigns/rules', async () => {
     const { parseRules } = await import('@/lib/utils/rules/schema');
 
-    return { loadRules: vi.fn(async () => parseRules({})) };
+    return {
+        loadRules: vi.fn(async () => parseRules({ system: { key: 'homm' } })),
+    };
 });
 
 vi.mock('@/lib/supabase/admin', () => ({

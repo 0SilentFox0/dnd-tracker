@@ -82,10 +82,10 @@ const json = (body: unknown) =>
 
 function renderPage(
     units: Unit[],
-    initialRules: unknown = {},
+    initialRules: Record<string, unknown> = {},
     failSave = false
 ) {
-    let rules = parseRules(initialRules);
+    let rules = parseRules({ system: { key: 'homm' }, ...initialRules });
 
     vi.stubGlobal(
         'fetch',

@@ -45,7 +45,11 @@ describe('DM equip via inventory PATCH', () => {
         vi.mocked(apiAuth.requireDM).mockResolvedValue({
             userId: 'dm',
             isDM: true,
-            campaign: { id: 'camp', members: [] },
+            campaign: {
+                id: 'camp',
+                rules: { system: { key: 'homm' } },
+                members: [],
+            },
         } as never);
         vi.mocked(prisma.character.findUnique).mockResolvedValue({
             id: 'a',

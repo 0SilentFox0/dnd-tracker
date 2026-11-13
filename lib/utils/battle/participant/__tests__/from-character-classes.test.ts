@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { ParticipantSide } from '@/lib/constants/battle';
 import { createBattleParticipantFromCharacter } from '@/lib/utils/battle/participant/from-character';
 import { DEFAULT_RULES, type Ruleset } from '@/lib/utils/rules';
-import { parseRules } from '@/lib/utils/rules/schema';
+import { parseRules, RulesSystemError } from '@/lib/utils/rules/schema';
 import * as classSlots from '@/lib/utils/spells/class-slots';
 import type { GameClassData } from '@/types/classes';
 
@@ -149,31 +149,10 @@ describe('учасник від класів', () => {
         expect(a).toEqual(b);
     });
 
-    it('без system, класи ввімкнені — здогадка dnd5e до Задачі 3 Ч13', async () => {
-        const guessed = parseRules({ classes: { enabled: true } });
-
-        expect(guessed.system).toEqual({ key: 'dnd5e' });
-
-        const strip = (p: Awaited<ReturnType<typeof build>>) => ({
-            ...p,
-            basicInfo: { ...p.basicInfo, id: 'x' },
-        });
-
-        const character = { classes: [{ classId: 'fighter', level: 3 }] };
-
-        const a = strip(await build(guessed, character));
-
-        const b = strip(
-            await build(
-                parseRules({
-                    system: { key: 'dnd5e' },
-                    classes: { enabled: true },
-                }),
-                character
-            )
+    it('без system, класи ввімкнені — RulesSystemError, без здогадки', () => {
+        expect(() => parseRules({ classes: { enabled: true } })).toThrow(
+            RulesSystemError
         );
-
-        expect(a).toEqual(b);
     });
 
     it('клас вимкнено правилами — поле classes ігнорується', async () => {

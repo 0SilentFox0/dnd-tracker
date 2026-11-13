@@ -54,7 +54,9 @@ function fakeDb(row: {
 const load = (db: BattleDb) =>
     loadBattle(db, { battleId: 'b1', campaignId: 'c1', userId: 'dm' });
 
-const campaignRules = { morale: { enabled: false } };
+const SYS = { system: { key: 'homm' } };
+
+const campaignRules = { ...SYS, morale: { enabled: false } };
 
 describe('loadBattle: правила бою', () => {
     it('prepared без копії бере живі правила кампанії', async () => {
@@ -67,7 +69,7 @@ describe('loadBattle: правила бою', () => {
 
     it('active з копією на старті не підхоплює пізніші зміни кампанії', async () => {
         const loaded = await load(
-            fakeDb({ status: 'active', rules: {}, campaignRules })
+            fakeDb({ status: 'active', rules: SYS, campaignRules })
         );
 
         expect(loaded?.meta.rules).toEqual(DEFAULT_RULES);
@@ -77,26 +79,26 @@ describe('loadBattle: правила бою', () => {
         const loaded = await load(
             fakeDb({
                 status: 'active',
-                rules: { morale: { enabled: false } },
-                campaignRules: {},
+                rules: { ...SYS, morale: { enabled: false } },
+                campaignRules: SYS,
             })
         );
 
         expect(loaded?.meta.rules.morale.enabled).toBe(false);
     });
 
-    it('active без копії (бій до деплою) — старі константи', async () => {
+    it('active без копії (бій до деплою) — правила кампанії', async () => {
         const loaded = await load(
             fakeDb({ status: 'active', rules: null, campaignRules })
         );
 
-        expect(loaded?.meta.rules).toEqual(DEFAULT_RULES);
+        expect(loaded?.meta.rules.morale.enabled).toBe(false);
     });
 
     it('active не читає campaign.rules', async () => {
         const db = fakeDb({
             status: 'active',
-            rules: {},
+            rules: SYS,
             campaignRules,
         }) as ReturnType<typeof fakeDb>;
 

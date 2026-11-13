@@ -133,7 +133,11 @@ vi.mock('@/lib/db', () => {
                     if (name === 'spell' && method === 'findMany')
                         return pick(DATA.spells, args);
 
-                    if (name === 'campaign') return { maxLevel: 20 };
+                    if (name === 'campaign')
+                        return {
+                            maxLevel: 20,
+                            rules: { system: { key: 'homm' } },
+                        };
 
                     return method === 'findMany' ? [] : null;
                 },

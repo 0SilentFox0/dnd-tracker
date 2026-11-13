@@ -9,7 +9,9 @@ const db = vi.hoisted(() => ({
             $queryRaw: async () => [{ id: 'c1' }],
             campaign: { update: async () => ({ contentVersion: 1 }) },
         }),
-    campaign: { findUnique: vi.fn(async () => ({ rules: {} })) },
+    campaign: {
+        findUnique: vi.fn(async () => ({ rules: { system: { key: 'homm' } } })),
+    },
     race: { findMany: vi.fn() },
     spell: { count: vi.fn() },
     unit: { findMany: vi.fn(), createMany: vi.fn() },
@@ -35,7 +37,9 @@ const post = (body: unknown) =>
 describe('POST units/import', () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        db.campaign.findUnique.mockResolvedValue({ rules: {} });
+        db.campaign.findUnique.mockResolvedValue({
+            rules: { system: { key: 'homm' } },
+        });
         db.race.findMany.mockResolvedValue([{ id: 'r1', name: 'Гобліни' }]);
         db.unit.findMany.mockResolvedValue([]);
         db.spell.count.mockResolvedValue(1);
@@ -52,7 +56,10 @@ describe('POST units/import', () => {
             effects: [{ kind: 'wfrpWard', value: 9 }],
         };
 
-        for (const rules of [{}, { system: { key: 'dnd5e' } }]) {
+        for (const rules of [
+            { system: { key: 'homm' } },
+            { system: { key: 'dnd5e' } },
+        ]) {
             db.campaign.findUnique.mockResolvedValue({ rules } as never);
 
             const res = await post({

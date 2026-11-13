@@ -15,7 +15,11 @@ vi.mock('@/lib/db', () => ({
                 $queryRaw: async () => [{ id: 'c1' }],
                 campaign: { update: async () => ({ contentVersion: 1 }) },
             }),
-        campaign: { findUnique: vi.fn(async () => ({ rules: {} })) },
+        campaign: {
+            findUnique: vi.fn(async () => ({
+                rules: { system: { key: 'homm' } },
+            })),
+        },
         skill: {
             findFirst: vi.fn(),
             findMany: vi.fn(async () => [{ id: 's1', name: 'Лють' }]),

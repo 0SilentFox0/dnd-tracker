@@ -94,7 +94,11 @@ vi.mock('@/lib/db', () => {
                     if (name === 'unit' && method === 'findMany')
                         return DATA.units;
 
-                    if (name === 'campaign') return { maxLevel: 20 };
+                    if (name === 'campaign')
+                        return {
+                            maxLevel: 20,
+                            rules: { system: { key: 'homm' } },
+                        };
 
                     return method === 'findMany' ? [] : null;
                 },

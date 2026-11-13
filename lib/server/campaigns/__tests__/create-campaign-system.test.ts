@@ -21,7 +21,8 @@ import {
     createCampaignForUser,
     createCampaignFromBundle,
 } from '@/lib/server/campaigns/create-campaign';
-import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
+import { emptyBundle } from '@/lib/server/templates/bundle';
+import { RulesSystemError } from '@/lib/utils/rules/schema';
 
 const rulesOf = () => m.db.campaign.create.mock.calls[0][0].data.rules;
 
@@ -63,28 +64,28 @@ describe('createCampaignForUser with a system selection', () => {
         expect(m.db.campaign.create).not.toHaveBeenCalled();
     });
 
-    it('without a template or system stores the default key beside defaultAttacks', async () => {
-        await createCampaignForUser('u1', { name: 'N' });
-
-        expect(rulesOf()).toEqual({
-            defaultAttacks: {
-                meleeName: 'defaultNames.meleeAttack',
-                rangedName: 'defaultNames.rangedAttack',
-                weaponName: 'defaultNames.weapon',
-            },
-            system: { key: DEFAULT_RULES.system.key },
-        });
+    it('without a template or system is a RulesSystemError and nothing is created', async () => {
+        await expect(
+            createCampaignForUser('u1', { name: 'N' })
+        ).rejects.toThrow(RulesSystemError);
+        await expect(
+            createCampaignFromBundle({ userId: 'u1', name: 'N', bundle: null })
+        ).rejects.toThrow(RulesSystemError);
+        expect(m.db.campaign.create).not.toHaveBeenCalled();
     });
 
-    it('without defaultAttacks the rules still carry the system', async () => {
-        await createCampaignFromBundle({
-            userId: 'u1',
-            name: 'N',
-            bundle: null,
-        });
+    it('a bundle whose rules carry no system is a RulesSystemError', async () => {
+        m.db.$transaction.mockImplementation(
+            async (fn: (tx: unknown) => unknown) =>
+                fn({ campaign: { create: vi.fn() } })
+        );
 
-        expect(rulesOf()).toEqual({
-            system: { key: DEFAULT_RULES.system.key },
-        });
+        await expect(
+            createCampaignFromBundle({
+                userId: 'u1',
+                name: 'N',
+                bundle: { ...emptyBundle(), rules: {} },
+            })
+        ).rejects.toThrow(RulesSystemError);
     });
 });

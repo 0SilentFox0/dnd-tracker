@@ -5,6 +5,8 @@ vi.mock('@/lib/db', () => ({ prisma: { $queryRaw: vi.fn() } }));
 
 import { systemOfRules } from '../campaign-system';
 
+import { RulesSystemError } from '@/lib/utils/rules/schema';
+
 describe('systemOfRules', () => {
     it('reads the key and the modules', () => {
         expect(
@@ -12,14 +14,11 @@ describe('systemOfRules', () => {
         ).toEqual({ key: 'dnd5e', modules: ['morale'] });
     });
 
-    it('falls back to the preset by classes.enabled when system is missing', () => {
-        expect(systemOfRules({ classes: { enabled: false } })).toEqual({
-            key: 'homm',
-        });
-        expect(systemOfRules({ classes: { enabled: true } })).toEqual({
-            key: 'dnd5e',
-        });
-        expect(systemOfRules(null)).toEqual({ key: 'homm' });
+    it('a missing system is an error, not a guess', () => {
+        expect(() => systemOfRules({ classes: { enabled: true } })).toThrow(
+            RulesSystemError
+        );
+        expect(() => systemOfRules(null)).toThrow(RulesSystemError);
     });
 
     it('drops an invalid composition the way the client does', () => {

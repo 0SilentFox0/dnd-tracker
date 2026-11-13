@@ -10,7 +10,7 @@ export function createFakeDb(
         xpMultiplier: 2.5,
         allowPlayerEdit: true,
         friendlyFire: false,
-        rules: {},
+        rules: { system: { key: 'homm' } },
     }
 ) {
     const dbNullToNull = (r: Row): Row =>

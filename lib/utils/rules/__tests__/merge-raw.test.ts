@@ -14,7 +14,9 @@ const merge = (
     raw: Record<string, unknown>,
     patch: Parameters<typeof mergeRules>[1]
 ) => {
-    const result = mergeRules(parseRules(raw), patch, raw);
+    const full = { system: { key: 'homm' }, ...raw };
+
+    const result = mergeRules(parseRules(full), patch, full);
 
     if (!result.ok) throw new Error(JSON.stringify(result.issues));
 
@@ -157,7 +159,9 @@ describe('mergeRules over the raw JSON (D4)', () => {
 
     it('without raw there is no stored', () => {
         expect(
-            mergeRules(parseRules({}), { saves: { proficiency: true } })
+            mergeRules(parseRules({ system: { key: 'homm' } }), {
+                saves: { proficiency: true },
+            })
         ).not.toHaveProperty('stored');
     });
 });
@@ -203,6 +207,7 @@ describe('composition-driven registries', () => {
 
     it('stripPlayerHiddenRules clears exactly the playerHidden sections', () => {
         const rules = parseRules({
+            system: { key: 'wfrp' },
             tables: { critHead: [{ max: 100, effects: [] }] },
         });
 

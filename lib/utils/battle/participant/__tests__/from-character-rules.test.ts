@@ -59,7 +59,10 @@ const context = {
 
 describe('createBattleParticipantFromCharacter: правила бою без повного контексту', () => {
     it('мораль вимкнена в зафіксованих правилах: moraleCap 0 і ходу ніщо не блокує', async () => {
-        const rules = parseRules({ morale: { enabled: false } });
+        const rules = parseRules({
+            system: { key: 'homm' },
+            morale: { enabled: false },
+        });
 
         const p = await createBattleParticipantFromCharacter(
             character as never,

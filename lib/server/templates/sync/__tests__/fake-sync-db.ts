@@ -289,7 +289,7 @@ export function createFakeSyncDb() {
                 xpMultiplier: 2.5,
                 allowPlayerEdit: true,
                 friendlyFire: false,
-                rules: {},
+                rules: { system: { key: 'homm' } },
                 ...c,
             })
         ),

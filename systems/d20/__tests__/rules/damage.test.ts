@@ -6,7 +6,10 @@ import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
 import { parseRules } from '@/lib/utils/rules/schema';
 
 describe('d20Damage', () => {
-    const on = parseRules({ criticals: { doubleDice: true } });
+    const on = parseRules({
+        system: { key: 'dnd5e' },
+        criticals: { doubleDice: true },
+    });
 
     it('doubles dice only on a crit with the rule on', () => {
         expect(d20Damage({ rules: on, crit: true }).doubleDice).toBe(true);

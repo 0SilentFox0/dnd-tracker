@@ -109,7 +109,10 @@ const build = (rules: Ruleset, character: object) => {
     );
 };
 
-const enabled = parseRules({ classes: { enabled: true } });
+const enabled = parseRules({
+    system: { key: 'dnd5e' },
+    classes: { enabled: true },
+});
 
 const wearing = { inventory: { equipped: { armor: 'art1' } } };
 

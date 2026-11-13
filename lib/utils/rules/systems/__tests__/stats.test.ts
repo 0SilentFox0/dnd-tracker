@@ -33,7 +33,7 @@ describe('stat columns helpers', () => {
     });
 
     it('fill merges parts and is empty without hooks', () => {
-        const rules = parseRules({});
+        const rules = parseRules({ system: { key: 'homm' } });
 
         expect(statColumnFillOf(def([{ owns: [] }]), rules)).toEqual({});
         expect(

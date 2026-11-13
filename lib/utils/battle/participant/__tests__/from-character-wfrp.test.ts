@@ -219,7 +219,7 @@ describe('participant: WFRP equipment', () => {
             context,
             {
                 artifactRows: [row('m', 'armor', mail)] as never,
-                rules: parseRules({}),
+                rules: parseRules({ system: { key: 'dnd5e' } }),
             }
         );
 
@@ -266,7 +266,7 @@ describe('participant: WFRP characteristics', () => {
     it('d20 system: fields absent, JSON identical to the shape without them (snapshotHash unchanged)', async () => {
         const p = await build(
             { characteristics: { base: { s: 45 } } },
-            parseRules({})
+            parseRules({ system: { key: 'dnd5e' } })
         );
 
         expect(p.abilities).not.toHaveProperty('wfrp');
@@ -283,7 +283,7 @@ describe('participant: WFRP characteristics', () => {
 
         expect(slotStats(out.abilities.system)?.sb).toBe(6);
 
-        const d20 = await build({}, parseRules({}));
+        const d20 = await build({}, parseRules({ system: { key: 'dnd5e' } }));
 
         expect(refreshFromSource(d20, d20).abilities).not.toHaveProperty(
             'wfrp'

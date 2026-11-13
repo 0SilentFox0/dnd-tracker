@@ -59,7 +59,9 @@ const ctx = {
 describe('context tools', () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        vi.mocked(loadRules).mockResolvedValue(parseRules({}));
+        vi.mocked(loadRules).mockResolvedValue(
+            parseRules({ system: { key: 'homm' } })
+        );
     });
 
     it('get_party: лише герої гравців цієї кампанії', async () => {

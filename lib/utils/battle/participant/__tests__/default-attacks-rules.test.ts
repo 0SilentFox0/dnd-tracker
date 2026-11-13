@@ -12,6 +12,7 @@ const hero = {
 describe('базові атаки героя з правил кампанії', () => {
     it('назви беруться з rules.defaultAttacks', async () => {
         const { defaultAttacks } = parseRules({
+            system: { key: 'homm' },
             defaultAttacks: {
                 meleeName: 'Кулак',
                 rangedName: 'Камінь',

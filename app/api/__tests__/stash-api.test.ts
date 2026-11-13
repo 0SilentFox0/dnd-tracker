@@ -35,7 +35,11 @@ const access = (userId: string, role: 'dm' | 'player') =>
     ({
         userId,
         isDM: role === 'dm',
-        campaign: { id: 'camp', members: [{ userId, role }] },
+        campaign: {
+            id: 'camp',
+            rules: { system: { key: 'homm' } },
+            members: [{ userId, role }],
+        },
     }) as never;
 
 const params = { params: Promise.resolve({ id: 'camp', characterId: 'a' }) };
@@ -65,15 +69,13 @@ const get = async (path: 'stash' | 'log') => {
 };
 
 const setChar = (over: Record<string, unknown> = {}) =>
-    vi
-        .mocked(prisma.character.findUnique)
-        .mockResolvedValue({
-            id: 'a',
-            campaignId: 'camp',
-            controlledBy: 'owner',
-            status: 'active',
-            ...over,
-        } as never);
+    vi.mocked(prisma.character.findUnique).mockResolvedValue({
+        id: 'a',
+        campaignId: 'camp',
+        controlledBy: 'owner',
+        status: 'active',
+        ...over,
+    } as never);
 
 const inv = (over: Record<string, unknown> = {}) => ({
     characterId: 'a',

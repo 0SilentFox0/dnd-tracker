@@ -9,15 +9,17 @@ import {
 
 const OFF = { balance: 'fair', edition: '2014', autoXp: false };
 
+const SYS = { system: { key: 'homm' } };
+
 describe('rules.encounters', () => {
     it('defaults to HOMM fair balance without auto XP', () => {
         expect(DEFAULT_RULES.encounters).toEqual(OFF);
-        expect(parseRules({}).encounters).toEqual(OFF);
+        expect(parseRules(SYS).encounters).toEqual(OFF);
     });
 
     it('falls back to default on an invalid section', () => {
         expect(
-            parseRules({ encounters: { balance: 'cr' } }).encounters
+            parseRules({ ...SYS, encounters: { balance: 'cr' } }).encounters
         ).toEqual(OFF);
     });
 

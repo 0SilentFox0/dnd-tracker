@@ -70,6 +70,7 @@ describe('buildInstructions', () => {
         vi.mocked(prisma.campaign.findUnique).mockResolvedValue({
             name: 'Асхан',
             description: 'Темне фентезі',
+            rules: { system: { key: 'homm' } },
         } as never);
         vi.mocked(prisma.scenarioPage.findFirst).mockResolvedValue({
             id: 'p1',
@@ -233,13 +234,12 @@ describe('buildInstructions', () => {
 
     describe('постійні інструкції', () => {
         const withInstructions = (text: string | null) =>
-            vi
-                .mocked(prisma.campaign.findUnique)
-                .mockResolvedValue({
-                    name: 'Асхан',
-                    description: 'Темне фентезі',
-                    aiInstructions: text,
-                } as never);
+            vi.mocked(prisma.campaign.findUnique).mockResolvedValue({
+                name: 'Асхан',
+                description: 'Темне фентезі',
+                aiInstructions: text,
+                rules: { system: { key: 'homm' } },
+            } as never);
 
         it.each(['live', 'scenario'] as const)(
             '%s: блок стоїть перед правилами режиму',

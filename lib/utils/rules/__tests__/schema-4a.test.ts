@@ -6,9 +6,11 @@ import {
     RulesetPatchSchema,
 } from '@/lib/utils/rules/schema';
 
+const SYS = { system: { key: 'homm' } };
+
 describe('rules 4a sections', () => {
     it('defaults keep 5e mechanics off', () => {
-        const r = parseRules({});
+        const r = parseRules(SYS);
 
         expect(r.saves).toEqual({ proficiency: false });
         expect(r.deathSaves).toEqual({ enabled: false, unitsDieAtZero: true });
@@ -18,6 +20,7 @@ describe('rules 4a sections', () => {
 
     it('invalid section falls back to defaults, others survive', () => {
         const r = parseRules({
+            ...SYS,
             conditions: { exhaustion: '1999' },
             deathSaves: { enabled: true },
         });
@@ -27,7 +30,7 @@ describe('rules 4a sections', () => {
     });
 
     it('patch merges and validates dcCap', () => {
-        const base = parseRules({});
+        const base = parseRules(SYS);
 
         expect(
             RulesetPatchSchema.safeParse({ concentration: { dcCap: 30 } })

@@ -33,8 +33,9 @@ describe('listTemplates system badge', () => {
             .mockResolvedValueOnce([])
             .mockResolvedValueOnce([
                 row('grim', WFRP_RULES),
-                row('old5e', { classes: { enabled: true } }),
-                row('plain', {}),
+                row('old5e', { system: { key: 'dnd5e' } }),
+                row('plain', { system: { key: 'homm' } }),
+                row('nosystem', { classes: { enabled: true } }),
             ]);
 
         const { mine } = await listTemplates('u');

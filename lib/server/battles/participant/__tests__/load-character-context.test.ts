@@ -63,7 +63,10 @@ const feat = {
 
 const settings = {
     maxLevel: 20,
-    rules: parseRules({ classes: { enabled: true } }),
+    rules: parseRules({
+        system: { key: 'dnd5e' },
+        classes: { enabled: true },
+    }),
 };
 
 describe('loadCharacterContext choice refs', () => {
@@ -156,7 +159,7 @@ describe('loadCharacterContext choice refs', () => {
                 backgroundId: null,
                 raceChoices: { gift: [{ id: 'f' }] },
             },
-            { ...settings, rules: parseRules({}) }
+            { ...settings, rules: parseRules({ system: { key: 'homm' } }) }
         );
 
         expect(context.featsById?.f.name).toBe('Own feat');

@@ -82,7 +82,9 @@ const ROWS = [
 
 const byId = (id: string) => ROWS.find((r) => r.id === id) ?? null;
 
-const access = (rules = parseRules({ items: { enabled: true } })) =>
+const access = (
+    rules = parseRules({ system: { key: 'homm' }, items: { enabled: true } })
+) =>
     ({
         userId: 'dm',
         isDM: true,
@@ -238,7 +240,12 @@ describe('stash API: magic items', () => {
                 ROWS.filter((r) => where.id.in.includes(r.id))
         );
         vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(
-            access(parseRules({ items: { enabled: true, attunementLimit: 1 } }))
+            access(
+                parseRules({
+                    system: { key: 'homm' },
+                    items: { enabled: true, attunementLimit: 1 },
+                })
+            )
         );
 
         const full = await post({ action: 'attune', ref: 'ring' });
@@ -256,7 +263,7 @@ describe('stash API: magic items', () => {
         );
 
         vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(
-            access(parseRules({}))
+            access(parseRules({ system: { key: 'homm' } }))
         );
 
         const off = await post({ action: 'attune', ref: 'ring' });

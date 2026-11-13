@@ -23,6 +23,7 @@ describe('listTemplates', () => {
                 credits: null,
                 locale: 'uk',
                 templateKey: 'srd-5.2',
+                rules: { system: { key: 'dnd5e' } },
                 _count: { units: 2 },
             },
         ]);
@@ -50,6 +51,7 @@ describe('listTemplates', () => {
         credits: 'CC-BY',
         locale,
         templateKey: 'srd-5.2',
+        rules: { system: { key: 'dnd5e' } },
         _count: { classes: 12 },
     });
 

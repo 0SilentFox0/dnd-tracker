@@ -38,7 +38,11 @@ const access = (userId: string, role: 'dm' | 'player') =>
     ({
         userId,
         isDM: role === 'dm',
-        campaign: { id: 'camp', members: [{ userId, role }] },
+        campaign: {
+            id: 'camp',
+            rules: { system: { key: 'homm' } },
+            members: [{ userId, role }],
+        },
     }) as never;
 
 const params = { params: Promise.resolve({ id: 'camp', characterId: 'a' }) };

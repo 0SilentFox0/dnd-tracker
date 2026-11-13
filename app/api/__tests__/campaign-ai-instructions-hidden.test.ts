@@ -54,6 +54,7 @@ const campaignRow = {
     aiInstructions: SECRET,
     status: CampaignStatus.ACTIVE,
     inviteCode: 'ABC',
+    rules: { system: { key: 'homm' } },
     members: [{ userId: 'player', role: 'PLAYER' }],
     dm: { id: 'dm' },
 };

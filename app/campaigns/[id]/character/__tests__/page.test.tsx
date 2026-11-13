@@ -65,7 +65,7 @@ describe('CharacterPage (server)', () => {
         requireCampaignMember.mockResolvedValue({
             userId: 'u1',
             isDM: false,
-            campaign: { maxLevel: 20 },
+            campaign: { maxLevel: 20, rules: { system: { key: 'homm' } } },
         });
         findFirst.mockResolvedValue({ id: 'ch1' });
         wfrp.is = false;

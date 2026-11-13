@@ -20,7 +20,7 @@ const attacker = createMockParticipant();
 const attack = SWORD;
 
 const rulesWith = (criticals: Partial<typeof DEFAULT_RULES.criticals>) =>
-    parseRules({ criticals });
+    parseRules({ system: { key: 'homm' }, criticals });
 
 const roll = (
     d20: number,

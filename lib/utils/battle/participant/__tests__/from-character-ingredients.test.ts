@@ -54,7 +54,7 @@ const build = (rules: object, hero: object = character) => {
         artifactsById: {},
         artifactSetsById: {},
         artifactSetMemberIds: {},
-        rules: parseRules(rules),
+        rules: parseRules({ system: { key: 'homm' }, ...rules }),
     } as never;
 
     return createBattleParticipantFromCharacter(

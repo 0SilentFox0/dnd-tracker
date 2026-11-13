@@ -32,6 +32,7 @@ const campaign = (role?: CampaignRoleValue) => ({
     id: 'c1',
     kind: 'campaign',
     maxLevel: 20,
+    rules: { system: { key: 'homm' } },
     members: role ? [{ userId: 'u1', role }] : [],
 });
 

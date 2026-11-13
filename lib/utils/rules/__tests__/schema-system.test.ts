@@ -5,6 +5,7 @@ import {
     parseRules,
     RulesetPatchSchema,
     RulesetSchema,
+    RulesSystemError,
 } from '../schema';
 import { defaultRulesFor } from '../section-registry';
 
@@ -17,14 +18,14 @@ const DEFAULT_RULES = defaultRulesFor({ key: 'homm' });
 const SRD_RULES = RulesetSchema.parse(srdRules);
 
 describe('rules.system', () => {
-    it('falls back to homm for empty rules', () => {
-        expect(parseRules({}).system).toEqual({ key: 'homm' });
+    it('empty rules have no system and throw', () => {
+        expect(() => parseRules({})).toThrow(RulesSystemError);
     });
 
-    it('legacy rules with classes enabled mean dnd5e', () => {
-        expect(parseRules({ classes: { enabled: true } }).system).toEqual({
-            key: 'dnd5e',
-        });
+    it('classes enabled do not imply a system', () => {
+        expect(() => parseRules({ classes: { enabled: true } })).toThrow(
+            RulesSystemError
+        );
     });
 
     it('explicit system wins over classes', () => {
@@ -34,14 +35,13 @@ describe('rules.system', () => {
         ).toEqual({ key: 'wfrp' });
     });
 
-    it('invalid system falls back instead of the default', () => {
-        expect(
+    it('invalid system is an error, not a guess', () => {
+        expect(() =>
             parseRules({ system: { key: 'x' }, classes: { enabled: true } })
-                .system
-        ).toEqual({ key: 'dnd5e' });
-        expect(parseRules({ system: { key: 'x' } }).system).toEqual({
-            key: 'homm',
-        });
+        ).toThrow(RulesSystemError);
+        expect(() => parseRules({ system: { key: 'x' } })).toThrow(
+            RulesSystemError
+        );
     });
 
     it('presets carry their system', () => {

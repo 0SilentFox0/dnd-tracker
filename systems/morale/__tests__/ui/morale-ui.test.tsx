@@ -34,7 +34,10 @@ describe('morale ui slots', () => {
         const { unmount } = render(
             <MoraleField
                 combatStats={combatStats}
-                rules={parseRules({ morale: { enabled: true, cap: 5 } })}
+                rules={parseRules({
+                    system: { key: 'homm' },
+                    morale: { enabled: true, cap: 5 },
+                })}
             />
         );
 
@@ -48,7 +51,10 @@ describe('morale ui slots', () => {
         render(
             <MoraleField
                 combatStats={combatStats}
-                rules={parseRules({ morale: { enabled: false, cap: 5 } })}
+                rules={parseRules({
+                    system: { key: 'homm' },
+                    morale: { enabled: false, cap: 5 },
+                })}
             />
         );
 
@@ -59,7 +65,7 @@ describe('morale ui slots', () => {
         const { unmount } = render(
             <MoraleRow
                 sheet={{ ...sheetFixture, morale: 2 }}
-                rules={parseRules({})}
+                rules={parseRules({ system: { key: 'homm' } })}
             />
         );
 
@@ -69,7 +75,10 @@ describe('morale ui slots', () => {
         render(
             <MoraleRow
                 sheet={{ ...sheetFixture, morale: 2 }}
-                rules={parseRules({ morale: { enabled: false, cap: 3 } })}
+                rules={parseRules({
+                    system: { key: 'homm' },
+                    morale: { enabled: false, cap: 3 },
+                })}
             />
         );
 

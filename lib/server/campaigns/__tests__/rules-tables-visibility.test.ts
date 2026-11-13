@@ -4,6 +4,7 @@ vi.mock('server-only', () => ({}));
 
 const h = vi.hoisted(() => ({
     rules: {
+        system: { key: 'wfrp' },
         tables: {
             critHead: [{ max: 100, text: 'x', effects: [] }],
             mutationPhysical: [

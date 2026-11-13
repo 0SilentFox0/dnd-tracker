@@ -31,7 +31,10 @@ const create = () =>
     POST(
         new Request('http://x', {
             method: 'POST',
-            body: JSON.stringify({ name: 'Кампанія' }),
+            body: JSON.stringify({
+                name: 'Кампанія',
+                system: { key: 'homm' },
+            }),
         })
     );
 
@@ -49,6 +52,18 @@ describe('POST /campaigns', () => {
             /^[0-9A-Z]{6}$/
         );
         expect(kvDel).toHaveBeenCalledWith('campaigns:u1');
+    });
+
+    it('без шаблону й без system — 400, кампанія не створюється', async () => {
+        const res = await POST(
+            new Request('http://x', {
+                method: 'POST',
+                body: JSON.stringify({ name: 'Кампанія' }),
+            })
+        );
+
+        expect(res.status).toBe(400);
+        expect(db.campaign.create).not.toHaveBeenCalled();
     });
 
     it('колізія коду запрошення — повтор з новим кодом', async () => {

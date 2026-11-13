@@ -58,6 +58,7 @@ const attackWith = (opts: {
         recordDice: true,
         rng: opts.rng ?? (() => 0.5),
         rules: parseRules({
+            system: { key: 'dnd5e' },
             criticals: { doubleDice: opts.doubleDice, effects: false },
         }),
     });
@@ -131,6 +132,7 @@ describe('processAttack crit with doubleDice', () => {
 
 describe('breakdown preview with doubleDice', () => {
     const rules = parseRules({
+        system: { key: 'dnd5e' },
         criticals: { doubleDice: true, effects: false },
     });
 
@@ -163,7 +165,10 @@ describe('breakdown preview with doubleDice', () => {
         expect(preview([5])).toBe((5 + 4) * 2);
         expect(
             preview([5], {
-                rules: parseRules({ criticals: { effects: false } }),
+                rules: parseRules({
+                    system: { key: 'dnd5e' },
+                    criticals: { effects: false },
+                }),
             })
         ).toBe((5 + 4) * 2);
     });
@@ -189,6 +194,7 @@ describe('HOMM hero crit with doubleDice', () => {
 
     it('server damage equals the preview when both dice sets are sent', () => {
         const rules = parseRules({
+            system: { key: 'dnd5e' },
             criticals: { doubleDice: true, effects: false },
         });
 

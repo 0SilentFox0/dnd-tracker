@@ -47,6 +47,7 @@ describe('campaign owner template tiles', () => {
             name: '5e SRD 5.2',
             templateKey: 'srd-5.2',
             description: null,
+            rules: { system: { key: 'dnd5e' } },
         };
 
         findMany

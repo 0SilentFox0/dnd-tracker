@@ -150,6 +150,7 @@ describe('source lifecycle through the database boundary', () => {
     it('uses an exact prepared bundle without exporting or localizing it again', async () => {
         const bundle = {
             ...emptyBundle(),
+            rules: { system: { key: 'homm' } },
             spells: [{ id: id('x'), name: 'Already localized' }],
         };
 

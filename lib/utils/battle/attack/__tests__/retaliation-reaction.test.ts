@@ -41,7 +41,10 @@ const startTurn = (d: BattleParticipant) =>
     ).participant;
 
 describe('перемикач rules.actions.retaliation', () => {
-    const off = parseRules({ actions: { retaliation: false } });
+    const off = parseRules({
+        system: { key: 'homm' },
+        actions: { retaliation: false },
+    });
 
     it('вимкнено: ціль не відповідає і не витрачає реакцію', () => {
         const res = resolveRetaliation({
@@ -60,7 +63,7 @@ describe('перемикач rules.actions.retaliation', () => {
     });
 
     it('увімкнено (і за відсутності правил): відповідає, як раніше', () => {
-        const on = parseRules({});
+        const on = parseRules({ system: { key: 'homm' } });
 
         expect(
             resolveRetaliation({

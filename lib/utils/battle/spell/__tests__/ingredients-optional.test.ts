@@ -5,7 +5,10 @@ import { parseRules } from '@/lib/utils/rules/schema';
 import { buildIngredientStock } from '@/lib/utils/spells/ingredients/stock';
 import type { BattleParticipant } from '@/types/battle';
 
-const rules = parseRules({ spellIngredients: { enabled: true } });
+const rules = parseRules({
+    system: { key: 'homm' },
+    spellIngredients: { enabled: true },
+});
 
 const spell = {
     ingredients: [

@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 vi.mock('server-only', () => ({}));
 
 const h = vi.hoisted(() => ({
-    rules: {} as Record<string, unknown>,
+    rules: { system: { key: 'homm' } } as Record<string, unknown>,
     usage: vi.fn(),
     update: vi.fn(),
 }));
@@ -82,6 +82,7 @@ const remove = (...keys: string[]) =>
 
 beforeEach(() => {
     h.rules = {
+        system: { key: 'homm' },
         conditions: {
             enabled: true,
             exhaustion: '2014',

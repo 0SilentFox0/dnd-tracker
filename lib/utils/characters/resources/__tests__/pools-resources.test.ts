@@ -17,6 +17,7 @@ const SORC = 'pool:sorc:sorcery-points';
 const MAGIC_INITIATE = 'pool:grant:feat%3Af-mi:cantrips:sp-guidance';
 
 const rules = parseRules({
+    system: { key: 'dnd5e' },
     classes: { enabled: true },
     outOfCombat: { persistResources: true },
 });

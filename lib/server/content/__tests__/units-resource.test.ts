@@ -3,7 +3,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const db = vi.hoisted(() => ({
     race: { count: vi.fn() },
     spell: { count: vi.fn(), updateMany: vi.fn() },
-    campaign: { findUnique: vi.fn(async () => ({ rules: {} })) },
+    campaign: {
+        findUnique: vi.fn(async () => ({ rules: { system: { key: 'homm' } } })),
+    },
     unit: {
         create: vi.fn(),
         update: vi.fn(),
@@ -92,7 +94,9 @@ describe('unitsResource', () => {
 
         const input = createUnitSchema.parse({ name: 'X', abilities }) as never;
 
-        db.campaign.findUnique.mockResolvedValue({ rules: {} });
+        db.campaign.findUnique.mockResolvedValue({
+            rules: { system: { key: 'homm' } },
+        });
         await expect(unitsResource.create(actor, input)).rejects.toMatchObject({
             message: API_ERRORS.EFFECT_OUTSIDE_COMPOSITION,
             status: 422,

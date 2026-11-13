@@ -73,6 +73,7 @@ describe('world action preview fingerprint', () => {
         ]);
         mocks.findCampaign.mockImplementation(async () => ({
             rules: {
+                system: { key: 'dnd5e' },
                 outOfCombat: {
                     persistResources: true,
                     longRestHitDice: 'half',
@@ -93,6 +94,7 @@ describe('world action preview fingerprint', () => {
 
         mocks.findCampaign.mockResolvedValue({
             rules: {
+                system: { key: 'dnd5e' },
                 outOfCombat: { persistResources: true, longRestHitDice: 'all' },
                 classes: { enabled: true },
             },

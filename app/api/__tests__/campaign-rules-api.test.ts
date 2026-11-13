@@ -35,7 +35,7 @@ vi.mock('@/lib/db', () => {
 
 const params = { params: Promise.resolve({ id: 'c1' }) };
 
-const access = (isDM: boolean, rules: unknown = {}) =>
+const access = (isDM: boolean, rules: unknown = { system: { key: 'homm' } }) =>
     ({
         userId: 'u',
         isDM,
@@ -66,7 +66,7 @@ describe('campaign rules API', () => {
             access(false)
         );
         vi.mocked(apiAuth.requireDM).mockResolvedValue(access(true));
-        stored({});
+        stored({ system: { key: 'homm' } });
     });
 
     it('GET від гравця: 200 і типові правила для {}', async () => {
@@ -116,7 +116,7 @@ describe('campaign rules API', () => {
     });
 
     it('PATCH {morale:{cap}} не вмикає вимкнену мораль', async () => {
-        stored({ morale: { enabled: false, cap: 3 } });
+        stored({ system: { key: 'homm' }, morale: { enabled: false, cap: 3 } });
 
         const res = await patch({ morale: { cap: 5 } });
 
@@ -133,7 +133,10 @@ describe('campaign rules API', () => {
     });
 
     it('PATCH heroMin 20 при збереженому heroMax 16: 400 (refine на злитому значенні)', async () => {
-        stored({ initiative: { heroMin: 10, heroMax: 16 } });
+        stored({
+            system: { key: 'homm' },
+            initiative: { heroMin: 10, heroMax: 16 },
+        });
 
         const res = await patch({ initiative: { heroMin: 20 } });
 

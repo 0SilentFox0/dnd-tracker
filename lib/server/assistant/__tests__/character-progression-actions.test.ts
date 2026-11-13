@@ -64,7 +64,7 @@ beforeEach(() => {
         kind: 'campaign',
         maxLevel: 20,
         allowPlayerEdit: true,
-        rules: parseRules(null),
+        rules: parseRules({ system: { key: 'homm' } }),
         members: [{ userId: 'dm', role: 'dm' }],
     });
     h.character.findMany.mockResolvedValue([hero]);

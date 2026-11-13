@@ -17,6 +17,7 @@ describe('advancement.creation', () => {
 
     it('fills creation when the stored advancement lacks it and keeps other values', () => {
         const rules = parseRules({
+            system: { key: 'wfrp' },
             advancement: { ...withoutCreation, talentCostMultiplier: 3 },
         });
 
@@ -44,6 +45,7 @@ describe('advancement.creation', () => {
 
     it('keeps a partial creation and defaults the rest', () => {
         const rules = parseRules({
+            system: { key: 'wfrp' },
             advancement: {
                 ...DEFAULT_ADVANCEMENT_RULES,
                 creation: { freeBudget: 90 },
@@ -58,6 +60,7 @@ describe('advancement.creation', () => {
 
     it('rejects out-of-range values and falls back per section', () => {
         const bad = parseRules({
+            system: { key: 'wfrp' },
             advancement: {
                 ...DEFAULT_ADVANCEMENT_RULES,
                 creation: { careerBonus: { rolled: -1 } },
@@ -67,6 +70,7 @@ describe('advancement.creation', () => {
         expect(bad.advancement).toEqual(DEFAULT_ADVANCEMENT_RULES);
 
         const high = parseRules({
+            system: { key: 'wfrp' },
             advancement: {
                 ...DEFAULT_ADVANCEMENT_RULES,
                 creation: { freeBudget: 1001 },
@@ -78,6 +82,7 @@ describe('advancement.creation', () => {
 
     it('accepts the bounds', () => {
         const rules = parseRules({
+            system: { key: 'wfrp' },
             advancement: {
                 ...DEFAULT_ADVANCEMENT_RULES,
                 creation: { freeBudget: 40, statBonus: { rolled: 1000 } },

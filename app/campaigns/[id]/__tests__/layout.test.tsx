@@ -6,6 +6,7 @@ const mocks = vi.hoisted(() => ({
     kind: 'demo',
     wfrp: false,
     role: 'player',
+    key: null as string | null | undefined,
 }));
 
 vi.mock('@/lib/auth', () => ({
@@ -21,7 +22,21 @@ vi.mock('@/components/onboarding/DemoTourCoordinator', () => ({
     ),
 }));
 vi.mock('@/lib/server/campaigns/system-key', () => ({
-    systemKeyOfCampaign: () => Promise.resolve(mocks.wfrp ? 'wfrp' : 'homm'),
+    systemKeyOfCampaign: () =>
+        Promise.resolve(
+            mocks.key !== undefined ? mocks.key : mocks.wfrp ? 'wfrp' : 'homm'
+        ),
+}));
+vi.mock('@/lib/i18n/request-locale', () => ({
+    getRequestLocale: () => Promise.resolve('en'),
+}));
+vi.mock('@/lib/i18n/translator', () => ({
+    getTranslator: () => Promise.resolve((key: string) => key),
+}));
+vi.mock('@/components/common/states', () => ({
+    ErrorState: ({ error }: { error: Error }) => (
+        <div data-testid="error-state">{error.message}</div>
+    ),
 }));
 vi.mock('@/lib/i18n/extend-locale-scope', () => ({
     ExtendLocaleScope: ({
@@ -42,6 +57,7 @@ afterEach(() => {
     mocks.kind = 'demo';
     mocks.wfrp = false;
     mocks.role = 'player';
+    mocks.key = undefined;
 });
 
 describe('CampaignLayout', () => {
@@ -68,6 +84,19 @@ describe('CampaignLayout', () => {
 
         expect(markup).not.toContain('tour-coordinator');
         expect(markup).toContain('notifications-host');
+    });
+
+    it('shows the unknown-system message instead of the page when rules carry no valid system', async () => {
+        mocks.kind = 'campaign';
+
+        for (const key of [null, 'nope']) {
+            mocks.key = key;
+
+            const markup = await html();
+
+            expect(markup).toContain('validation.unknownSystem');
+            expect(markup).not.toContain('campaign</main>');
+        }
     });
 
     it('adds the wfrpMagic scope only for wfrp campaigns', async () => {

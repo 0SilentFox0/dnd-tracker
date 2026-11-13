@@ -4,7 +4,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const db = vi.hoisted(() => ({
     race: { count: vi.fn() },
     spell: { updateMany: vi.fn() },
-    campaign: { findUnique: vi.fn(async () => ({ rules: {} })) },
+    campaign: {
+        findUnique: vi.fn(async () => ({ rules: { system: { key: 'homm' } } })),
+    },
     unit: {
         create: vi.fn(),
         findUnique: vi.fn(),

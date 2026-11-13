@@ -24,15 +24,25 @@ const S1 = id('a'),
     U1 = id('u'),
     LU = id('v');
 
+const HOMM_RULES = { system: { key: 'homm' } };
+
 function ctx(
     source: Partial<Bundle>,
     local: LocalRow[],
     baselineRows: Partial<Bundle>,
     ignored: SyncContext['ignored'] = { tables: {}, rules: {} }
 ): SyncContext {
-    const sourceBundle = { ...emptyBundle(), ...source } as Bundle;
+    const sourceBundle = {
+        ...emptyBundle(),
+        rules: HOMM_RULES,
+        ...source,
+    } as Bundle;
 
-    const base = { ...emptyBundle(), ...baselineRows } as Bundle;
+    const base = {
+        ...emptyBundle(),
+        rules: HOMM_RULES,
+        ...baselineRows,
+    } as Bundle;
 
     const tables = Object.fromEntries(
         BUNDLE_TABLES.map((t) => [
@@ -50,7 +60,11 @@ function ctx(
             contentVersion: 0,
         },
         sourceBundle,
-        target: { settings: emptyBundle().settings, rules: {}, rows: local },
+        target: {
+            settings: emptyBundle().settings,
+            rules: HOMM_RULES,
+            rows: local,
+        },
         baseline: baselineFromBundle(base, tables),
         ignored,
         syncedAt: null,
@@ -339,7 +353,11 @@ describe('classify', () => {
     });
 
     it('rules: per mechanic statuses', () => {
-        const c = ctx({ rules: { morale: { enabled: false } } }, [], {});
+        const c = ctx(
+            { rules: { ...HOMM_RULES, morale: { enabled: false } } },
+            [],
+            {}
+        );
 
         const items = visible(c);
 
@@ -354,7 +372,11 @@ describe('classify', () => {
     });
 
     it('rules: absent baseline entry is not a conflict', () => {
-        const c = ctx({ rules: { morale: { enabled: false } } }, [], {});
+        const c = ctx(
+            { rules: { ...HOMM_RULES, morale: { enabled: false } } },
+            [],
+            {}
+        );
 
         c.baseline.rules = {};
 

@@ -2,7 +2,12 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const db = vi.hoisted(() => ({
     race: { findMany: vi.fn() },
-    campaign: { findUnique: vi.fn(async () => ({ maxLevel: 20 })) },
+    campaign: {
+        findUnique: vi.fn(async () => ({
+            maxLevel: 20,
+            rules: { system: { key: 'homm' } },
+        })),
+    },
     skillTree: { findMany: vi.fn(async () => []) },
     mainSkill: { findMany: vi.fn(async () => []) },
     spell: { findMany: vi.fn(async () => []) },

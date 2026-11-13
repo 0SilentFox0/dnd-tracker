@@ -10,23 +10,27 @@ import {
 } from '@/lib/utils/rules/schema';
 import { defaultRulesFor } from '@/lib/utils/rules/section-registry';
 
+const SYS = { system: { key: 'wfrp' } };
+
 describe('rules.advancement', () => {
-    it('parse({}) carries default advancement', () => {
-        expect(RulesetSchema.parse({}).advancement).toEqual(
+    it('parse(system only) carries default advancement', () => {
+        expect(RulesetSchema.parse(SYS).advancement).toEqual(
             DEFAULT_ADVANCEMENT_RULES
         );
         expect(defaultRulesFor({ key: 'wfrp' }).advancement).toEqual(
             DEFAULT_ADVANCEMENT_RULES
         );
-        expect(parseRules({}).advancement).toEqual(DEFAULT_ADVANCEMENT_RULES);
+        expect(parseRules(SYS).advancement).toEqual(DEFAULT_ADVANCEMENT_RULES);
     });
 
     it('rejects unknown keys', () => {
         expect(
-            RulesetSchema.safeParse({ advancement: { extra: 1 } }).success
+            RulesetSchema.safeParse({ ...SYS, advancement: { extra: 1 } })
+                .success
         ).toBe(false);
         expect(
             RulesetSchema.safeParse({
+                ...SYS,
                 advancement: { characteristic: { extra: 1 } },
             }).success
         ).toBe(false);
@@ -36,7 +40,7 @@ describe('rules.advancement', () => {
         const track = (
             brackets: { upTo: number; cost: number }[],
             max: number
-        ) => ({ advancement: { characteristic: { brackets, max } } });
+        ) => ({ ...SYS, advancement: { characteristic: { brackets, max } } });
 
         expect(
             RulesetSchema.safeParse(
@@ -96,14 +100,15 @@ describe('rules.advancement', () => {
 
         const { career: _career, ...old } = DEFAULT_ADVANCEMENT_RULES;
 
-        expect(parseRules({ advancement: old }).advancement.career).toEqual(
-            DEFAULT_ADVANCEMENT_RULES.career
-        );
+        expect(
+            parseRules({ ...SYS, advancement: old }).advancement.career
+        ).toEqual(DEFAULT_ADVANCEMENT_RULES.career);
     });
 
     it('rejects bad career rules', () => {
         const career = (c: unknown) =>
-            RulesetSchema.safeParse({ advancement: { career: c } }).success;
+            RulesetSchema.safeParse({ ...SYS, advancement: { career: c } })
+                .success;
 
         expect(
             career({ ticksRequired: [10, 12, 14], outOfCareerMultiplier: 0.5 })

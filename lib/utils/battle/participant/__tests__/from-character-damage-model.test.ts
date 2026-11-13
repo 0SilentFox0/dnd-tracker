@@ -63,7 +63,10 @@ const build = (
         artifactsById: {},
         artifactSetsById: {},
         artifactSetMemberIds: {},
-        rules: parseRules(rules),
+        rules: parseRules({
+            system: { key: 'classes' in rules ? 'dnd5e' : 'homm' },
+            ...rules,
+        }),
         classesById: { fighter },
     } as never;
 

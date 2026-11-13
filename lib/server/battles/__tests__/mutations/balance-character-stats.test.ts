@@ -74,7 +74,11 @@ vi.mock('@/lib/db', () => {
                             },
                         ];
 
-                    if (key === 'campaign.findUnique') return { maxLevel: 20 };
+                    if (key === 'campaign.findUnique')
+                        return {
+                            maxLevel: 20,
+                            rules: { system: { key: 'homm' } },
+                        };
 
                     return method === 'findMany' ? [] : null;
                 },

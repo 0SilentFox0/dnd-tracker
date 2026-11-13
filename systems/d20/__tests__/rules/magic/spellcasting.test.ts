@@ -16,6 +16,7 @@ const scores = {
 };
 
 const custom = parseRules({
+    system: { key: 'dnd5e' },
     formulas: { saveDcBase: 10, proficiencyBase: 1, proficiencyEvery: 2 },
 });
 

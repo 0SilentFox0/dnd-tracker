@@ -7,7 +7,10 @@ import { buildIngredientStock } from '@/lib/utils/spells/ingredients/stock';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
 import type { BattleParticipant, IngredientStock } from '@/types/battle';
 
-const rules = parseRules({ spellIngredients: { enabled: true } });
+const rules = parseRules({
+    system: { key: 'homm' },
+    spellIngredients: { enabled: true },
+});
 
 const spell = {
     ingredients: [
@@ -85,6 +88,7 @@ describe('ingredientsGate', () => {
 
         it('d20 stays on 100 cp per gp', () => {
             const d20 = parseRules({
+                system: { key: 'homm' },
                 spellIngredients: { enabled: true, autoPay: true },
             });
 

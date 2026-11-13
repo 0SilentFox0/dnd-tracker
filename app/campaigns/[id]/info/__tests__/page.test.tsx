@@ -33,7 +33,9 @@ const findMany = vi.fn<(args?: unknown) => Promise<unknown[]>>(async () => [
 
 vi.mock('next/cache', () => ({ unstable_cache: (fn: () => unknown) => fn }));
 
-const access = vi.hoisted(() => ({ rules: {} as unknown }));
+const access = vi.hoisted(() => ({
+    rules: { system: { key: 'homm' } } as unknown,
+}));
 
 vi.mock('@/lib/server/campaigns/access', () => ({
     requireCampaignMember: vi.fn(async () => ({
@@ -117,13 +119,13 @@ describe('сторінка info', () => {
     });
 
     it('у класовому режимі віддає класи й ховає скіли', async () => {
-        access.rules = { classes: { enabled: true } };
+        access.rules = { system: { key: 'dnd5e' }, classes: { enabled: true } };
 
         const props = findProps(
             await CampaignInfoPage({ params: Promise.resolve({ id: 'c1' }) })
         );
 
-        access.rules = {};
+        access.rules = { system: { key: 'homm' } };
 
         expect(props?.skills).toEqual([]);
         expect(props?.classes).toEqual([

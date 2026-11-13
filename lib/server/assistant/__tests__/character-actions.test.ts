@@ -68,7 +68,7 @@ beforeEach(() => {
         id: 'c',
         kind: 'campaign',
         maxLevel: 20,
-        rules: parseRules(null),
+        rules: parseRules({ system: { key: 'homm' } }),
         allowPlayerEdit: true,
         members: [{ userId: 'dm', role: 'dm' }],
     });

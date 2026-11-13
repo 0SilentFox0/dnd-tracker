@@ -167,6 +167,7 @@ describe('planGrant', () => {
         const { parseRules } = await import('@/lib/utils/rules/schema');
 
         const rules = parseRules({
+            system: { key: 'wfrp' },
             tables: { mutationPhysical: [{ max: 50, effects: [] }] },
         });
 

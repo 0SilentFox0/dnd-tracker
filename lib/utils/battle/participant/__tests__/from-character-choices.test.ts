@@ -143,7 +143,10 @@ const choiceRefs = {
     backgroundsById: { [background.id]: background },
 };
 
-const classRules = parseRules({ classes: { enabled: true } });
+const classRules = parseRules({
+    system: { key: 'dnd5e' },
+    classes: { enabled: true },
+});
 
 const classCharacter = {
     classes: [{ classId: sorcerer.id, level: 4 }],
@@ -297,7 +300,10 @@ describe('participant from choices', () => {
     it('class mode: origin feat Alert adds proficiency to initiative; feats load once', async () => {
         getCachedFeats.mockResolvedValueOnce([featRow]);
 
-        const rules = parseRules({ classes: { enabled: true } });
+        const rules = parseRules({
+            system: { key: 'dnd5e' },
+            classes: { enabled: true },
+        });
 
         const p = await build(
             {

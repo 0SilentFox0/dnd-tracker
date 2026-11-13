@@ -42,7 +42,7 @@ const tileLinks = () => screen.getAllByRole('link');
 const FULL_CONTEXT = {
     isTemplate: false,
     classesEnabled: false,
-    system: parseRules({}).system,
+    system: parseRules({ system: { key: 'homm' } }).system,
 };
 
 describe('DashboardGroups', () => {

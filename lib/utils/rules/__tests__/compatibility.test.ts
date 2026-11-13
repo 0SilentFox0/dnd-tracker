@@ -10,11 +10,14 @@ import { defaultRulesFor } from '@/lib/utils/rules/section-registry';
 
 const DEFAULT_RULES = defaultRulesFor({ key: 'homm' });
 
+const SYS = { system: { key: 'homm' } };
+
 describe('rules: сумісність збережених даних і patch', () => {
     it.each([null, undefined, [], 'invalid'])(
         'відновлює всю некоректну секцію %j, зберігаючи інші',
         (items) => {
             const rules = parseRules({
+                ...SYS,
                 items,
                 morale: { enabled: false, cap: 7 },
             });
@@ -26,6 +29,7 @@ describe('rules: сумісність збережених даних і patch',
 
     it('невідоме вкладене поле ігнорується без скидання секції (по пунктах), невідоме верхнє поле ігнорується', () => {
         const rules = parseRules({
+            ...SYS,
             items: { enabled: true, attunementLimit: 5, unknown: true },
             future: { enabled: true },
         });
@@ -35,8 +39,10 @@ describe('rules: сумісність збережених даних і patch',
             items: { enabled: true, attunementLimit: 5 },
         });
         expect(
-            RulesetSchema.safeParse({ items: { enabled: true, unknown: true } })
-                .success
+            RulesetSchema.safeParse({
+                ...SYS,
+                items: { enabled: true, unknown: true },
+            }).success
         ).toBe(false);
     });
 
@@ -44,6 +50,7 @@ describe('rules: сумісність збережених даних і patch',
         'disabled механіки зберігають параметри %s після parse і merge',
         (edition) => {
             const raw = {
+                ...SYS,
                 conditions: { enabled: false, exhaustion: edition },
                 actions: {
                     enabled: false,
@@ -74,7 +81,9 @@ describe('rules: сумісність збережених даних і patch',
     it('disabled механіки перевіряють параметри й повертають точний шлях помилки', () => {
         const raw = { items: { enabled: false, attunementLimit: 0 } };
 
-        expect(parseRules(raw).items).toEqual(DEFAULT_RULES.items);
+        expect(parseRules({ ...SYS, ...raw }).items).toEqual(
+            DEFAULT_RULES.items
+        );
 
         const patch = RulesetPatchSchema.safeParse(raw);
 
@@ -97,6 +106,7 @@ describe('rules: сумісність збережених даних і patch',
 
     it('порожні секції patch не отримують defaults і не змінюють поточні параметри', () => {
         const current = parseRules({
+            ...SYS,
             morale: { enabled: false, cap: 7 },
             items: { enabled: true, attunementLimit: 5 },
         });
@@ -111,7 +121,10 @@ describe('rules: сумісність збережених даних і patch',
     });
 
     it('явне undefined у полі patch використовує default, відсутнє поле зберігає поточне', () => {
-        const current = parseRules({ morale: { enabled: false, cap: 7 } });
+        const current = parseRules({
+            ...SYS,
+            morale: { enabled: false, cap: 7 },
+        });
 
         const patch = RulesetPatchSchema.parse({ morale: { cap: undefined } });
 
@@ -123,6 +136,7 @@ describe('rules: сумісність збережених даних і patch',
 
     it('частковий patch перевіряє міжпольові обмеження після merge з точними шляхами', () => {
         const current = parseRules({
+            ...SYS,
             initiative: { heroMin: 10, heroMax: 16 },
             criticals: { critOn: 3, fumbleOn: 1 },
         });

@@ -18,6 +18,7 @@ const RING = 'pool:item:ring';
 const POT = 'pool:consumable:p1';
 
 const rules = parseRules({
+    system: { key: 'homm' },
     items: { enabled: true },
     outOfCombat: { persistResources: true },
 });

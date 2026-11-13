@@ -17,6 +17,8 @@ import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
 
 const spells = BUNDLE_TABLES.find((t) => t.key === 'spells')!;
 
+const SYS = { system: { key: 'homm' } };
+
 describe('sync hashes', () => {
     it('rowHash ignores columns outside the bundle', () => {
         const row = { id: 'c' + 'a'.repeat(24), name: 'Fireball' };
@@ -119,9 +121,9 @@ describe('sync hashes', () => {
     });
 
     it('rulesHashes covers every mechanic of the composition and treats {} as defaults', () => {
-        const h = rulesHashes({});
+        const h = rulesHashes(SYS);
 
-        expect(Object.keys(h).sort()).toEqual(mechanicKeysOf({}).sort());
+        expect(Object.keys(h).sort()).toEqual(mechanicKeysOf(SYS).sort());
         expect(
             Object.keys(rulesHashes(WFRP_RULES)).every(
                 (k) => k in MECHANIC_REGISTRY
@@ -162,11 +164,11 @@ describe('sync hashes', () => {
     });
 
     it('rulesHashes ignores unknown keys', () => {
-        const base = rulesHashes({});
+        const base = rulesHashes(SYS);
 
-        expect(rulesHashes({ unknownSection: { a: 1 } })).toEqual(base);
-        expect(rulesHashes({ morale: { bogusKey: 1 } })).toEqual(
-            rulesHashes({ morale: {} })
+        expect(rulesHashes({ ...SYS, unknownSection: { a: 1 } })).toEqual(base);
+        expect(rulesHashes({ ...SYS, morale: { bogusKey: 1 } })).toEqual(
+            rulesHashes({ ...SYS, morale: {} })
         );
     });
 
@@ -182,7 +184,7 @@ describe('sync hashes', () => {
     });
 
     it('mechanicKeysOf never includes system', () => {
-        expect(mechanicKeysOf({})).not.toContain('system');
+        expect(mechanicKeysOf(SYS)).not.toContain('system');
     });
 
     it('settingsHash depends only on the four settings', () => {
@@ -198,7 +200,7 @@ describe('sync hashes', () => {
     });
 
     it('baselineFromBundle keeps table hashes and adds rules/settings', () => {
-        const b = emptyBundle();
+        const b = { ...emptyBundle(), rules: SYS };
 
         const base = baselineFromBundle(b, { spells: { a: 'h1' } });
 

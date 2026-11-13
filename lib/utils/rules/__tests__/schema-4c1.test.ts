@@ -7,14 +7,18 @@ import {
     RulesetPatchSchema,
 } from '@/lib/utils/rules/schema';
 
+const SYS = { system: { key: 'homm' } };
+
 describe('rules.classes', () => {
     it('defaults to disabled', () => {
         expect(DEFAULT_RULES.classes).toEqual({ enabled: false });
-        expect(parseRules({}).classes).toEqual({ enabled: false });
+        expect(parseRules(SYS).classes).toEqual({ enabled: false });
     });
 
     it('falls back to default on invalid section', () => {
-        expect(parseRules({ classes: { enabled: 'yes' } }).classes).toEqual({
+        expect(
+            parseRules({ ...SYS, classes: { enabled: 'yes' } }).classes
+        ).toEqual({
             enabled: false,
         });
     });

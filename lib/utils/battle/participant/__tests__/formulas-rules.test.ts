@@ -13,6 +13,7 @@ import { DEFAULT_RULES } from '@/lib/utils/rules';
 import { parseRules } from '@/lib/utils/rules/schema';
 
 const custom = parseRules({
+    system: { key: 'homm' },
     formulas: { saveDcBase: 10, proficiencyBase: 1, proficiencyEvery: 2 },
 });
 
