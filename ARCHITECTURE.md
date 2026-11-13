@@ -277,7 +277,7 @@ React-провайдери: **`query-provider.tsx`** (TanStack Query), можл�
 
 ## 8. Типові потоки даних
 
-1. **Відкриття бою:** серверна сторінка `app/campaigns/[id]/battles/[battleId]/page.tsx` (userId) → `BattlePageClient` → `useBattleSceneValue` + `BattleSceneProvider` → `BattleScreen`; мутації через `useBattleAction`, оновлення — дельтами (відповідь і Pusher `battle-delta`).
+1. **Відкриття бою:** серверна сторінка `app/campaigns/[id]/battles/[battleId]/page.tsx` (userId) → `page-client.tsx` (`BattlePageClient`) → `useBattleSceneValue` + `BattleSceneProvider` → `BattleScreen`; мутації через `useBattleAction`, оновлення — дельтами (відповідь і Pusher `battle-delta`).
 2. **Атака:** «Атака» → `AttackWizard` + `useAttackWizard` (редʼюсер `flows/attack-flow`: зброя → ціль → кидок → шкода → підсумок) → API `attack` → `lib/utils/battle/attack*` та **`damage/`** на сервері (кроки шкоди пишуться в `actionDetails.damageSteps`) → дельта в кеш → `ResultOverlay`.
 3. **Форма скіла:** сторінка DM → **`useSkillForm`** → **`SkillCreateForm`** / **`SkillEditForm`** → **`buildSkillFormPayload`** → API **PATCH/POST** skills.
 4. **Прокачка:** гравець — **`ProgressionPanel`** → **`useCharacterProgression`** (GET `…/progression`) і **`useProgressionActions`** (`learn` тощо, патч кешу без рефетчу); DM — **`SkillTreeEditor`** → **`useSkillTreeEditor`** → PATCH `skill-trees`.
