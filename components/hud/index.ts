@@ -4,5 +4,4 @@ export {
     CIRCLE_METAL,
     metalClass,
     spellLevelMetal,
-    type SpellTier,
 } from './metal';
