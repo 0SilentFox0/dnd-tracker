@@ -310,6 +310,8 @@
 
 ## Ч12. UI бою і клієнтські flow
 
+**Виконано 2026-11-13 з відхиленнями (дизайн `part12-design.md`, рекомендації прийняті).** Змінено проти плану: слоти за місцем (`HeroStats`/`defense`/`ParticipantStats`/списки) замість одного `HeroPanel`; `store/types.ts` і `view/**` лишились core (форма зберігання, Ч14/Ч15); `unitstacks`/відсіч — нічого в UI; M4 і `attack-flow.system` уже були зроблені; `isFiveE` лише у 2 з 12 місць (решта → Ч17); множники архетипу/`hero-damage` → Ч15; FX моралі → Ч18; i18n через `systemScope` за композицією й `battleMorale`. Хвости, гейти, live-run: `docs/STATUS.md` «E2 Ч12»; контракт: `docs/architecture/rule-systems.md` «Ч12».
+
 **Мета.** `components/battle` і `lib/hooks/battle` показують КБ, слоти, концентрацію, рятунки від смерті, мораль лише через `SystemUi.battle`; flow нейтральні; закрито M4.
 
 **Обсяг.** `components/battle/**` (MIXED/D20/HOMM за класифікацією), `lib/hooks/battle/**`, `lib/utils/battle/{flows/**,store/**,view/**,client/**,pipeline/client-delta.ts}`, `types/battle.ts` (типи view), `components/systems/types.ts`, `systems/*/ui/battle`.
