@@ -5,14 +5,15 @@
  * lock (scene version is bumped, rows are matched by their stored text) and writes a before/after file for audit.
  * No --revert: the current code reads the legacy form too. Re-running is idempotent.
  *
- *   pnpm exec tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/db/battle-state-downgrade.ts [--apply] [--allow-remote] [--status active|all] [--scene <id,…>] [--snapshot-dir <dir>] [--force] [--json]
+ *   pnpm exec tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/db/battle-state-downgrade.ts [--apply] [--allow-remote] [--status all|active] [--scene <id,…>] [--snapshot-dir <dir>] [--force] [--json]
  */
-import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import type { RawDb } from '@/scripts/db/lib/battle-state-db';
+import { withSnapshotFile } from '@/scripts/db/lib/battle-state-file';
 import {
     type DowngradeSnapshot,
+    type DowngradeSnapshotBody,
     formatPlan,
     parseDowngradeArgs,
     planDowngrade,
@@ -65,18 +66,17 @@ async function main() {
 
         const applied =
             args.apply && plan.scenes.length > 0
-                ? await applyDowngrade(db, plan, (body) => {
-                      const snapshot: DowngradeSnapshot = {
+                ? await withSnapshotFile(
+                      file,
+                      (body: DowngradeSnapshotBody): DowngradeSnapshot => ({
                           version: 1,
                           createdAt: now.toISOString(),
                           host,
                           database,
                           ...body,
-                      };
-
-                      mkdirSync(args.snapshotDir, { recursive: true });
-                      writeFileSync(file, JSON.stringify(snapshot, null, 2));
-                  })
+                      }),
+                      (write) => applyDowngrade(db, plan, write)
+                  )
                 : null;
 
         if (args.json) {
