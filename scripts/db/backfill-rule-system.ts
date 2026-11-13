@@ -8,6 +8,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
+import type { RawDb } from '@/scripts/db/lib/backfill-rule-system-db';
 import {
     formatPlan,
     planAll,
@@ -25,12 +26,15 @@ import { assertSeedTarget } from '@/scripts/seed/seed-library-lib';
 
 type Db = typeof import('@/lib/db').prisma;
 
+/** the extended client's overloaded `$transaction` does not unify with the narrow interface */
+const raw = (prisma: Db) => prisma as unknown as RawDb;
+
 async function plan(prisma: Db, args: CliArgs) {
     const { loadFacts, loadRows } = await import(
         '@/scripts/db/lib/backfill-rule-system-db'
     );
 
-    const rows = await loadRows(prisma);
+    const rows = await loadRows(raw(prisma));
 
     const facts = await loadFacts(
         prisma,
@@ -73,7 +77,7 @@ async function revert(prisma: Db, args: CliArgs, header: string) {
     console.log(`${header} · REVERT ${args.revertFile}`);
 
     const { restored, skipped } = await revertSnapshot(
-        prisma,
+        raw(prisma),
         snapshot,
         args.force
     );
@@ -81,7 +85,7 @@ async function revert(prisma: Db, args: CliArgs, header: string) {
     for (const s of skipped)
         console.log(`⚠ ${snapshotKey(s.row)}: ${s.action}`);
 
-    const current = await currentTexts(prisma, snapshot.rows);
+    const current = await currentTexts(raw(prisma), snapshot.rows);
 
     const present = snapshot.rows.filter((r) => current.has(snapshotKey(r)));
 
@@ -111,7 +115,7 @@ async function apply(
 
     const file = join(args.snapshotDir, snapshotFileName(host, database, now));
 
-    const rows = await applyPlans(prisma, result.plans, (written) => {
+    const rows = await applyPlans(raw(prisma), result.plans, (written) => {
         const snapshot: RuleSystemSnapshot = {
             version: 1,
             createdAt: now.toISOString(),
