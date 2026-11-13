@@ -64,6 +64,7 @@ describe('parse args', () => {
             campaignIds: [],
             json: false,
             allowRemote: false,
+            expectClean: false,
         }));
 
     it('report reads values and flags', () =>
@@ -153,7 +154,7 @@ describe('buildReport', () => {
         expect(r.pending).toBe(1);
         expect(r.shapes).toEqual({ none: 1, legacy: 1, slot: 1, mixed: 0 });
         expect(r.fields).toEqual({ fortune: { slot: 1, legacy: 1 } });
-        expect(r.history).toEqual({ rows: 2, withSlot: 1 });
+        expect(r.history).toEqual({ rows: 2, withSlot: 1, withLegacy: 0 });
         expect(r.hashMismatch).toBe(0);
     });
 

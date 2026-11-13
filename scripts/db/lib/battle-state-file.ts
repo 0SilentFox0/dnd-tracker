@@ -1,5 +1,29 @@
-import { mkdirSync, renameSync, rmSync, writeFileSync } from 'node:fs';
+import {
+    mkdirSync,
+    readFileSync,
+    renameSync,
+    rmSync,
+    writeFileSync,
+} from 'node:fs';
 import { dirname } from 'node:path';
+
+import { isRecord } from '@/lib/utils/common/is-record';
+import type { DowngradeSnapshot } from '@/scripts/db/lib/battle-state-plan';
+
+export function readSnapshotFile(file: string): DowngradeSnapshot {
+    const parsed: unknown = JSON.parse(readFileSync(file, 'utf8'));
+
+    if (
+        !isRecord(parsed) ||
+        parsed.version !== 1 ||
+        !Array.isArray(parsed.scenes) ||
+        !Array.isArray(parsed.participants) ||
+        !Array.isArray(parsed.history)
+    )
+        throw new Error(`${file}: невірний формат знімка`);
+
+    return parsed as unknown as DowngradeSnapshot;
+}
 
 /** the audit file appears under its final name only after the transaction has committed */
 export async function withSnapshotFile<B>(

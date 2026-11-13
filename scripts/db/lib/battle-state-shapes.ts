@@ -192,7 +192,11 @@ function splitSlot(slot: SlotShape): {
 }
 
 /** a flat field of an ext module stays when the slot has no ext for it: readers fall back to it there */
-function alignState(state: unknown, stateValues: Json, extOwned: string[]): Json {
+function alignState(
+    state: unknown,
+    stateValues: Json,
+    extOwned: string[]
+): Json {
     const next: Json = isRecord(state) ? { ...state } : {};
 
     delete next.system;
@@ -325,4 +329,204 @@ export function downgradeHistory(state: unknown): DowngradedHistory {
         changed: stableStringify(next) !== stableStringify(state),
         unmapped,
     };
+}
+
+export interface UpgradedParticipant {
+    snapshot: unknown;
+    state: unknown;
+    snapshotHash: string;
+    changed: boolean;
+    unmapped: string[];
+}
+
+export interface UpgradedHistory {
+    state: unknown;
+    changed: boolean;
+    unmapped: string[];
+}
+
+interface UpgradedFields {
+    snapshot: unknown;
+    state: unknown;
+    changed: boolean;
+    unmapped: string[];
+}
+
+function upgradeFields(
+    snapshot: unknown,
+    state: unknown,
+    baseKey: string
+): UpgradedFields {
+    const legacy = legacyOf(snapshot, state);
+
+    if (Object.keys(legacy).length === 0)
+        return { snapshot, state, changed: false, unmapped: [] };
+
+    const slot = readSlot(state);
+
+    if (slot && slot.key !== baseKey)
+        return {
+            snapshot,
+            state,
+            changed: false,
+            unmapped: [`slot.key ${slot.key}`],
+        };
+
+    const flatNames = Object.values(EXT_TO_LEGACY).map((m) => m.to);
+
+    const ext: Json =
+        slot && isRecord(slot.data.ext) ? { ...slot.data.ext } : {};
+
+    for (const [module, map] of Object.entries(EXT_TO_LEGACY))
+        if (legacy[map.to] !== undefined && !(module in ext))
+            ext[module] = { [map.from]: legacy[map.to] };
+
+    const baseFields = Object.fromEntries(
+        Object.entries(legacy).filter(([name]) => !flatNames.includes(name))
+    );
+
+    const data: Json = slot ? { ...slot.data } : { ...baseFields };
+
+    if (Object.keys(ext).length > 0) data.ext = ext;
+
+    const nextState: Json = isRecord(state) ? { ...state } : {};
+
+    for (const name of [...LEGACY_STATE_FIELDS, ...flatNames])
+        delete nextState[name];
+
+    nextState.system = {
+        ...(isRecord(nextState.system) ? nextState.system : {}),
+        key: baseKey,
+        data,
+    };
+
+    if (!slot && baseFields.deathSaves !== undefined) nextState.dying = true;
+
+    return {
+        snapshot: alignSnapshot(snapshot, {}),
+        state: nextState,
+        changed: true,
+        unmapped: [],
+    };
+}
+
+/** mirror of the dual-read: a missing base slot is built from the flat fields, an existing one just drops them */
+export function upgradeStored(
+    row: {
+        snapshot: unknown;
+        state: unknown;
+        snapshotHash: string;
+    },
+    baseKey: string
+): UpgradedParticipant {
+    const result = upgradeFields(row.snapshot, row.state, baseKey);
+
+    if (!result.changed) return { ...row, ...result };
+
+    return { ...result, snapshotHash: hashJson(result.snapshot) };
+}
+
+export function upgradeHistory(
+    state: unknown,
+    baseKey: string
+): UpgradedHistory {
+    if (!isRecord(state)) return { state, changed: false, unmapped: [] };
+
+    const unmapped: string[] = [];
+
+    const changedSnapshots = isRecord(state.changedSnapshots)
+        ? { ...state.changedSnapshots }
+        : undefined;
+
+    const next: Json = { ...state };
+
+    if (Array.isArray(state.participants))
+        next.participants = state.participants.map((p: unknown) => {
+            const id = idOf(p);
+
+            if (!isRecord(p) || id === undefined) return p;
+
+            const result = upgradeFields(
+                changedSnapshots?.[id],
+                p.state,
+                baseKey
+            );
+
+            unmapped.push(...result.unmapped);
+
+            if (!result.changed) return p;
+
+            if (changedSnapshots && id in changedSnapshots)
+                changedSnapshots[id] = result.snapshot;
+
+            return { ...p, state: result.state };
+        });
+
+    if (changedSnapshots) next.changedSnapshots = changedSnapshots;
+
+    if (Array.isArray(state.removed))
+        next.removed = state.removed.map((r: unknown) => {
+            if (!isRecord(r)) return r;
+
+            const result = upgradeStored(
+                {
+                    snapshot: r.snapshot,
+                    state: r.state,
+                    snapshotHash:
+                        typeof r.snapshotHash === 'string'
+                            ? r.snapshotHash
+                            : '',
+                },
+                baseKey
+            );
+
+            unmapped.push(...result.unmapped);
+
+            if (!result.changed) return r;
+
+            return {
+                ...r,
+                snapshot: result.snapshot,
+                state: result.state,
+                snapshotHash: result.snapshotHash,
+            };
+        });
+
+    return {
+        state: next,
+        changed: stableStringify(next) !== stableStringify(state),
+        unmapped,
+    };
+}
+
+/** counts the same places `upgradeHistory` rewrites */
+export function historyHasLegacy(state: unknown): boolean {
+    if (!isRecord(state)) return false;
+
+    const changedSnapshots = isRecord(state.changedSnapshots)
+        ? state.changedSnapshots
+        : undefined;
+
+    const inParticipants =
+        Array.isArray(state.participants) &&
+        state.participants.some((p: unknown) => {
+            const id = idOf(p);
+
+            return (
+                isRecord(p) &&
+                id !== undefined &&
+                Object.keys(legacyOf(changedSnapshots?.[id], p.state)).length >
+                    0
+            );
+        });
+
+    const inRemoved =
+        Array.isArray(state.removed) &&
+        state.removed.some(
+            (r: unknown) =>
+                isRecord(r) &&
+                Object.keys(legacyOf(r.snapshot, r.state)).length > 0
+        );
+
+    return inParticipants || inRemoved;
 }

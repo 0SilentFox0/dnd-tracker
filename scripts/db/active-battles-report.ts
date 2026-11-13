@@ -3,12 +3,13 @@
  * Read-only: for each battle scene, the storage shape of participant state (legacy flat fields, system slot, mixed),
  * snapshot hash consistency, undo history rows and paused decisions.
  *
- *   pnpm exec tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/db/active-battles-report.ts [--status all|active] [--campaign <id,…>] [--json] [--allow-remote]
+ *   pnpm exec tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/db/active-battles-report.ts [--status all|active] [--campaign <id,…>] [--json] [--allow-remote] [--expect-clean]
  */
 import type { RawDb } from '@/scripts/db/lib/battle-state-db';
 import {
     buildReport,
     formatReport,
+    isClean,
     parseReportArgs,
     summarizeReports,
 } from '@/scripts/db/lib/battle-state-plan';
@@ -45,6 +46,8 @@ async function main() {
 
         const summary = summarizeReports(reports);
 
+        if (args.expectClean && !isClean(summary)) process.exitCode = 1;
+
         if (args.json) {
             console.log(JSON.stringify({ summary, scenes: reports }, null, 2));
 
@@ -61,7 +64,7 @@ async function main() {
         const { shapes } = summary;
 
         console.log(
-            `підсумок: активних сцен ${summary.activeScenes} · кампаній ${summary.campaigns} · учасників legacy ${shapes.legacy} · slot ${shapes.slot} · mixed ${shapes.mixed} · none ${shapes.none} · hashMismatch ${summary.hashMismatch}`
+            `підсумок: активних сцен ${summary.activeScenes} · кампаній ${summary.campaigns} · учасників legacy ${shapes.legacy} · slot ${shapes.slot} · mixed ${shapes.mixed} · none ${shapes.none} · історія зі старими полями ${summary.historyWithLegacy} · hashMismatch ${summary.hashMismatch}`
         );
     } finally {
         await prisma.$disconnect();

@@ -2,10 +2,10 @@ import { Prisma } from '@prisma/client';
 
 import type { RawDb } from '@/scripts/db/lib/backfill-rule-system-db';
 import type {
-    DowngradePlan,
     DowngradeSnapshotBody,
     HistoryRow,
     SceneRow,
+    StatePlan,
     StatusFilter,
     StoredRow,
 } from '@/scripts/db/lib/battle-state-plan';
@@ -89,9 +89,9 @@ export async function loadHistory(
 const changed = (what: string) =>
     new Error(`${what}: рядок змінився з часу читання`);
 
-export async function applyDowngrade(
+export async function applyStatePlan(
     db: RawDb,
-    plan: DowngradePlan,
+    plan: StatePlan,
     write: (body: DowngradeSnapshotBody) => void
 ): Promise<DowngradeSnapshotBody> {
     return db.$transaction(async (tx) => {
@@ -151,5 +151,49 @@ export async function applyDowngrade(
         write(body);
 
         return body;
+    }, TX_OPTIONS);
+}
+
+export const applyDowngrade = applyStatePlan;
+
+const diverged = (what: string) =>
+    new Error(`${what}: рядок змінився після застосування, відкат скасовано`);
+
+/** puts `before` back only where the stored text still equals `after`; any other row aborts the whole revert */
+export async function revertStatePlan(
+    db: RawDb,
+    body: DowngradeSnapshotBody
+): Promise<{ scenes: number; participants: number; history: number }> {
+    return db.$transaction(async (tx) => {
+        for (const scene of body.scenes) {
+            const [bumped] = await tx.$queryRaw<{ version: number }[]>(
+                Prisma.sql`UPDATE battle_scenes SET version = version + 1 WHERE id = ${scene.id} RETURNING version`
+            );
+
+            if (!bumped) throw changed(`battle_scenes ${scene.id}`);
+        }
+
+        for (const p of body.participants) {
+            const [updated] = await tx.$queryRaw<{ id: string }[]>(
+                Prisma.sql`UPDATE battle_participants SET snapshot = ${p.before.snapshot}::jsonb, state = ${p.before.state}::jsonb, "snapshotHash" = ${p.before.snapshotHash} WHERE id = ${p.id} AND "battleId" = ${p.battleId} AND snapshot::text = ${p.after.snapshot} AND state::text = ${p.after.state} AND "snapshotHash" = ${p.after.snapshotHash} RETURNING id`
+            );
+
+            if (!updated) throw diverged(`battle_participants ${p.id}`);
+        }
+
+        for (const h of body.history) {
+            const [updated] = await tx.$queryRaw<{ seq: number }[]>(
+                Prisma.sql`UPDATE battle_snapshots SET state = ${h.before}::jsonb WHERE "battleId" = ${h.battleId} AND seq = ${h.seq} AND state::text = ${h.after} RETURNING seq`
+            );
+
+            if (!updated)
+                throw diverged(`battle_snapshots ${h.battleId}#${h.seq}`);
+        }
+
+        return {
+            scenes: body.scenes.length,
+            participants: body.participants.length,
+            history: body.history.length,
+        };
     }, TX_OPTIONS);
 }
