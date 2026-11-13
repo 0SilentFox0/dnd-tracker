@@ -6,7 +6,7 @@ const mocks = vi.hoisted(() => ({
     kind: 'demo',
     wfrp: false,
     role: 'player',
-    key: null as string | null | undefined,
+    key: undefined as string | null | undefined,
 }));
 
 vi.mock('@/lib/auth', () => ({
