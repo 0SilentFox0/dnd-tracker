@@ -333,7 +333,11 @@ describe('downgradeHistory', () => {
     it('collects unmapped keys', () => {
         const input = history();
 
-        input.participants[0].state.system.data = { zzz: 1 } as never;
+        const [first] = input.participants as unknown as {
+            state: { system: { data: unknown } };
+        }[];
+
+        first.state.system.data = { zzz: 1 };
 
         expect(downgradeHistory(input).unmapped).toEqual(['data.zzz']);
     });

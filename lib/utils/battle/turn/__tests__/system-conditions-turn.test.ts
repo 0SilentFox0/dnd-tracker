@@ -192,11 +192,11 @@ describe('resetTurnState condition tests', () => {
                         conditionTests: ['bleeding'],
                     },
                 },
-                { rules: DEFAULT_RULES }
+                { rules: WFRP_RULES }
             ).conditionTests
         ).toBeUndefined();
         expect(
-            'conditionTests' in resetTurnState(p, { rules: DEFAULT_RULES })
+            'conditionTests' in resetTurnState(p, { rules: WFRP_RULES })
         ).toBe(false);
     });
 });

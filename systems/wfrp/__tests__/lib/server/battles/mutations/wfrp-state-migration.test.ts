@@ -137,10 +137,9 @@ describe('migration of an old-form battle participant', () => {
         });
         expect(stored.state).not.toHaveProperty('psychologyTested');
 
-        const battleData = stored.snapshot.battleData as Record<
-            string,
-            unknown
-        >;
+        const battleData = JSON.parse(
+            JSON.stringify(stored.snapshot.battleData)
+        ) as Record<string, unknown>;
 
         for (const k of OLD_KEYS) expect(battleData).not.toHaveProperty(k);
 

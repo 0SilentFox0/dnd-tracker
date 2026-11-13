@@ -25,6 +25,7 @@ import {
     slotStats,
 } from '@/systems/wfrp/rules/__tests__/slot-fixtures';
 import { ATTACK_SLOT } from '@/systems/wfrp/rules/slots';
+import { wfrpState } from '@/systems/wfrp/rules/state';
 import { must } from '@/systems/wfrp/rules/traits/__tests__/fixtures';
 
 vi.mock('@/lib/db', () => ({ prisma: { race: { findFirst: vi.fn() } } }));
@@ -139,7 +140,7 @@ describe('grim bestiary end to end', () => {
                 )
             );
 
-            expect(tested.battleData.psychologyTested).toEqual({
+            expect(wfrpState(tested).psychologyTested).toEqual({
                 terror: 2,
                 fear: 2,
             });
