@@ -47,7 +47,7 @@ export function DmCharacterCard({
 
     const columns = system ? statColumnsOf(system) : undefined;
 
-    const armorStats =!!columns?.has('armorClass');
+    const armorStats = !!columns?.has('armorClass');
 
     const hideProgression =
         !ready || systemUiOf(systemKey, rules?.system.modules).hideProgression;

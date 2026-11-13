@@ -24,13 +24,13 @@ export const UI_LAYER_ZONES = [
         name: 'ui',
         files: ['components/ui/**/*.{ts,tsx}'],
         forbidden: [
-            '^@/components/(?!ui/|hud/fonts$|hud/hud\\.css$)',
+            '^@/components/(?!ui/|hud/fonts$|hud/surface$|hud/hud\\.css$)',
             '^@/types/',
             '^@/lib/utils/(?!common/)',
             ...BOTTOM_COMMON,
         ],
         message:
-            'components/ui is the lowest UI layer: it may import only ui, hud/fonts and common lib code (docs/architecture/ui-layers.md)',
+            'components/ui is the lowest UI layer: it may import only ui, hud/fonts, hud/surface and common lib code (docs/architecture/ui-layers.md)',
     },
     {
         name: 'hud',

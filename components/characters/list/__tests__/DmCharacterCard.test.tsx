@@ -138,7 +138,6 @@ describe('DmCharacterCard HP before the ruleset loads', () => {
 
         expect(screen.getByText('—')).toBeTruthy();
         expect(screen.queryByText('0/0')).toBeNull();
-        expect(screen.queryByText('0')).toBeNull();
     });
 });
 

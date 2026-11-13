@@ -62,6 +62,7 @@ const violations = (zone: (typeof UI_LAYER_ZONES)[number], file: string) => {
 
 const zoneFiles = (zone: (typeof UI_LAYER_ZONES)[number]) => {
     const matchers = zone.files.map(globToRe);
+
     const top = [...new Set(zone.files.map((f) => f.split('/')[0]))];
 
     return top
@@ -109,6 +110,7 @@ describe('ui layers ratchet', () => {
 
     it('ui may take hud tokens only from fonts and hud.css', () => {
         expect(allowed('ui', '@/components/hud/fonts')).toBe(true);
+        expect(allowed('ui', '@/components/hud/surface')).toBe(true);
         expect(allowed('ui', '@/components/hud/hud.css')).toBe(true);
         expect(allowed('ui', '@/components/hud')).toBe(false);
         expect(allowed('ui', '@/components/hud/metal')).toBe(false);

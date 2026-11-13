@@ -19,7 +19,7 @@
 
 | Шар | Може брати | Не може |
 |---|---|---|
-| `ui` | `ui`, `@/components/hud/fonts`, `hud/hud.css`, `@/lib/utils` (корінь, `cn`), `lib/utils/common`, `lib/hooks/common` | інші `hud`/`common`/домени, `@/types/*`, `lib/api`, `lib/server`, `systems` |
+| `ui` | `ui`, `@/components/hud/fonts`, `@/components/hud/surface`, `hud/hud.css`, `@/lib/utils` (корінь, `cn`), `lib/utils/common`, `lib/hooks/common` | інші `hud`/`common`/домени, `@/types/*`, `lib/api`, `lib/server`, `systems` |
 | `hud` | `ui`, `hud`, ті самі `lib` | `common`, домени, `@/types/*`, `lib/api`, `lib/server`, `systems` |
 | `common` | `ui`, `hud`, `common`, `@/types/theme`, `lib/utils/{common,text}`, `lib/hooks/common`, `lib/constants` | доменні компоненти й типи, `lib/api`, `lib/server`, `systems` |
 | системний UI | `ui`, `hud`, `common`, `components/systems/types` і кіт (нижче) | будь-який інший core-компонент |

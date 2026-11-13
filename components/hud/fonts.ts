@@ -7,5 +7,3 @@ export const HUD_PRELOAD_FONTS = [
     '/fonts/AlegreyaSC-Bold.woff2',
     '/fonts/AlegreyaSans-Regular.woff2',
 ];
-
-export const HUD_SURFACE = 'hud-surface';
