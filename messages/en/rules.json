@@ -219,6 +219,18 @@
   "system": {
     "label": "Rule system",
     "description": "Defines how the campaign rolls tests, computes hit points and balances encounters.",
-    "lockedHint": "The system cannot be changed while the campaign has characters or units."
+    "lockedHint": "The system cannot be changed while the campaign has characters or units.",
+    "modules": {
+      "title": "Rule modules",
+      "hint": "Each module adds its own part of the rules. A change applies at once; turning a module off deletes nothing.",
+      "setupBadge": "changes heroes",
+      "requires": "Requires the \"{module}\" module.",
+      "conflicts": "Conflicts with the \"{module}\" module.",
+      "requiredBy": "Required by the \"{module}\" module.",
+      "dirtyHint": "Save or discard your rule changes to switch modules.",
+      "confirmTitle": "Change a rule module?",
+      "confirmBody": "The \"{module}\" module changes how hit points and progression of existing heroes are calculated. Nothing is deleted: turn the module back on and everything returns. Skill tree nodes learned beyond the current level stay.",
+      "confirmAction": "Change"
+    }
   }
 }

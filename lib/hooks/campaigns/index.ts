@@ -2,6 +2,7 @@ export { useActiveSessions } from './useActiveSessions';
 export { useCampaignExportUrl } from './useCampaignExportUrl';
 export { useIsTemplateCampaign } from './useCampaignKind';
 export { useCampaignMembers } from './useCampaignMembers';
+export { useCampaignModules } from './useCampaignModules';
 export {
     useCreateCampaign,
     useDeleteCampaign,

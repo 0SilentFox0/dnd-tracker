@@ -15,7 +15,7 @@ import { HudForm, type HudTab } from '@/components/hud/form';
 import { systemUiOf } from '@/components/systems';
 import type { RulesSectionProps } from '@/components/systems/types';
 import { Button } from '@/components/ui/button';
-import { useRulesForm } from '@/lib/hooks/campaigns';
+import { useCampaignModules, useRulesForm } from '@/lib/hooks/campaigns';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import type { MechanicKey } from '@/lib/utils/rules';
 import { sectionsOfComposition } from '@/lib/utils/rules/section-registry';
@@ -50,6 +50,8 @@ export function RulesForm({ campaignId }: { campaignId: string }) {
         reload,
         systemLocked,
     } = useRulesForm(campaignId);
+
+    const modules = useCampaignModules(campaignId);
 
     if (loadError) return <ErrorState error={loadError} onRetry={reload} />;
 
@@ -87,7 +89,12 @@ export function RulesForm({ campaignId }: { campaignId: string }) {
 
     return (
         <>
-            <SystemSection form={form} locked={systemLocked} />
+            <SystemSection
+                form={form}
+                locked={systemLocked}
+                modules={modules}
+                dirty={isDirty}
+            />
             <RulesPathsProvider value={pathsValue}>
                 <HudForm
                     id={FORM_ID}

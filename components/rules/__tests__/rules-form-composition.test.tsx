@@ -20,6 +20,13 @@ vi.mock('@/lib/hooks/campaigns/useRemoveCustomCondition', () => ({
         closeUsage: vi.fn(),
     }),
 }));
+vi.mock('@/lib/hooks/campaigns/useCampaignModules', () => ({
+    useCampaignModules: () => ({
+        toggles: [],
+        toggle: vi.fn(),
+        isPending: false,
+    }),
+}));
 vi.mock('@/lib/hooks/campaigns/useCampaignRules', () => ({
     useCampaignRules: () => ({
         data: {

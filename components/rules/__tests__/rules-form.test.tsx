@@ -28,6 +28,13 @@ vi.mock('@/lib/hooks/campaigns/useRemoveCustomCondition', () => ({
     }),
 }));
 
+vi.mock('@/lib/hooks/campaigns/useCampaignModules', () => ({
+    useCampaignModules: () => ({
+        toggles: [],
+        toggle: vi.fn(),
+        isPending: false,
+    }),
+}));
 vi.mock('@/lib/hooks/campaigns/useCampaignRules', () => ({
     useCampaignRules: () => ({ data: DEFAULT_RULES, isLoading: false }),
     useUpdateCampaignRules: () => ({ mutateAsync, isPending: false }),

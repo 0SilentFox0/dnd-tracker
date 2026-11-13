@@ -11,6 +11,18 @@ export const invalidateCampaignQueries = (
         refetchType: 'active',
     });
 
+/** Everything of the campaign but the rules query, which the caller has just refreshed itself */
+export const invalidateCampaignExceptRules = (
+    queryClient: QueryClient,
+    campaignId: string
+) =>
+    queryClient.invalidateQueries({
+        predicate: (q) =>
+            q.queryKey.includes(campaignId) &&
+            q.queryKey[0] !== campaignKeys.rules(campaignId)[0],
+        refetchType: 'active',
+    });
+
 export const invalidateCampaignRules = (
     queryClient: QueryClient,
     campaignId: string
