@@ -24,7 +24,7 @@ import type {
     RunCoreActionInput,
     RunCoreActionResult,
 } from '@/lib/utils/battle/actions/types';
-import type { RollMode } from '@/lib/utils/battle/attack/bonus';
+import type { RollMode } from '@/lib/utils/battle/attack/bonus-math';
 import type {
     ApplyConditionOptions,
     ApplyConditionResult,

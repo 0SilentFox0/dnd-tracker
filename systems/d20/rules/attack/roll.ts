@@ -1,13 +1,17 @@
+import { D20_PROFICIENCY } from '../saves';
+import { D20_REACH, d20AttackAbility } from './ability';
+
 import type { CriticalEffect } from '@/lib/constants/critical-effects';
 import { getRandomCriticalEffect } from '@/lib/constants/critical-effects';
 import { withSelf } from '@/lib/utils/abilities/engine/core/participants';
 import type { StaticEffect } from '@/lib/utils/abilities/schema';
 import {
-    calculateAttackBonus,
+    attackBonusOf,
+    type AttackMathSystem,
     forcedRollMode,
     type RollMode,
-    rollModeReasons,
-} from '@/lib/utils/battle/attack/bonus';
+    rollModeReasonsOf,
+} from '@/lib/utils/battle/attack/bonus-math';
 import { critThresholdOf } from '@/lib/utils/battle/attack/crit-threshold';
 import type { CritPicker } from '@/lib/utils/battle/crit-choice/types';
 import type { AttackRollResult } from '@/lib/utils/battle/types/attack';
@@ -18,6 +22,13 @@ import type {
     BattleMapConfig,
     BattleParticipant,
 } from '@/types/battle';
+
+const D20_MATH: AttackMathSystem = {
+    abilityOf: (p, attack, participants = [p]) =>
+        d20AttackAbility(p, attack, participants),
+    proficiencyBonus: D20_PROFICIENCY.bonus,
+    reach: D20_REACH,
+};
 
 export function calculateAttackRoll(
     attacker: BattleParticipant,
@@ -42,16 +53,16 @@ export function calculateAttackRoll(
 
     const participants = withSelf(opts.participants ?? [], attacker);
 
-    const attackBonus = calculateAttackBonus(
+    const attackBonus = attackBonusOf(
+        D20_MATH,
         attacker,
         attack,
-        opts.rules,
         participants,
         opts.extra
     );
 
     const forced = forcedRollMode(
-        rollModeReasons(attacker, attack, participants, opts)
+        rollModeReasonsOf(D20_MATH, attacker, attack, participants, opts)
     );
 
     // вибір гравця діє лише тоді, коли навички нічого не вирішують
