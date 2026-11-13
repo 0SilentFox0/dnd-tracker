@@ -17,7 +17,7 @@ const cta =
 
 /** Мораль — на весь екран: вона визначає хід. Підсумки атак і заклинань — у кутовій картці (ActionResultCard). */
 export function MoraleResultOverlay() {
-    const t = useTranslations('battle.morale');
+    const t = useTranslations('battleMorale');
 
     const {
         result: { fx, show },

@@ -5,9 +5,7 @@ import { useTranslations } from 'next-intl';
 import type { TurnGateOutcome } from '@/lib/utils/battle/flows';
 
 export function MoraleLabel({ outcome }: { outcome?: TurnGateOutcome }) {
-    const tm = useTranslations('battle.morale');
+    const t = useTranslations('battleMorale');
 
-    const tc = useTranslations('battle.turnControls');
-
-    return <>{outcome ? tm(`outcome.${outcome}`) : tc('strip.gate')}</>;
+    return <>{outcome ? t(`outcome.${outcome}`) : t('strip')}</>;
 }

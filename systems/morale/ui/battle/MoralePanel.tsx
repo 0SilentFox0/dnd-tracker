@@ -11,7 +11,7 @@ import { useMoraleRoll } from '@/systems/morale/hooks/useMoraleRoll';
 import { moraleTriggerRolls } from '@/systems/morale/rules/trigger-rolls';
 
 export function MoralePanel({ hero, gate }: TurnStartPanelProps) {
-    const tm = useTranslations('battle.morale');
+    const tm = useTranslations('battleMorale');
 
     const { battle } = useBattleScene();
 

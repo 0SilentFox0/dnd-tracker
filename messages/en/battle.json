@@ -185,22 +185,6 @@
     "exit": "Back to menu",
     "review": "Review the battle"
   },
-  "morale": {
-    "extraTitle": "Fighting spirit",
-    "extraText": "{name} gets an extra turn at the end of the round",
-    "detail": "d10 = {d10} · morale {morale}",
-    "toBattle": "Back to battle",
-    "skipTitle": "Panic",
-    "skipText": "{name} loses the turn",
-    "checkD10": "Morale check · d10",
-    "extraOn": "Extra turn on {rolls}",
-    "skipOn": "Turn skipped on {rolls}",
-    "outcome": {
-      "none": "Morale",
-      "extra": "Fighting spirit",
-      "skip": "Panic"
-    }
-  },
   "details": {
     "statblock": "Stat block",
     "armor": "Armor",
@@ -217,7 +201,6 @@
     "immunity": "immunity"
   },
   "hero": {
-    "morale": "Morale {value}",
     "yourTurn": "your turn",
     "acting": "acting",
     "turnIn": "turn in {count}",
@@ -272,7 +255,6 @@
   "turnControls": {
     "strip": {
       "waiting": "Your turn",
-      "gate": "Morale check",
       "acting": "Your turn · Actions",
       "ended": "Your turn"
     },
@@ -297,7 +279,6 @@
     "endTurnTitle": "End the turn?",
     "endTurnDescription": "The action has not been used yet.",
     "endTurnConfirm": "End turn",
-    "moraleUnchanged": "{name} · morale: unchanged (d10 = {d10})",
     "skippedCells": "{count, plural, one {Skipped # cell} other {Skipped # cells}} (occupied or off the map)"
   },
   "unitControl": {

@@ -19,7 +19,7 @@ export function useMoraleRoll(
     participant: BattleParticipant,
     gate: TurnGateControls
 ) {
-    const t = useTranslations('battle.notify');
+    const t = useTranslations('battleMorale');
 
     const scene = useBattleScene();
 
@@ -80,7 +80,7 @@ export function useMoraleRoll(
             gate.skipTurn();
         } else
             scene.toast.show(
-                t('moraleUnchanged', { name: participant.basicInfo.name, d10 })
+                t('unchanged', { name: participant.basicInfo.name, d10 })
             );
     };
 

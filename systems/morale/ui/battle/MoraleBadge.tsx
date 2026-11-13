@@ -9,7 +9,7 @@ import { effectiveMorale } from '@/lib/utils/battle/morale/effective-morale';
 import { signed } from '@/lib/utils/common/format';
 
 export function MoraleBadge({ participant, place }: BattleBadgeProps) {
-    const t = useTranslations('battle.hero');
+    const t = useTranslations('battleMorale');
 
     const { battle } = useBattleSceneData();
 
@@ -26,7 +26,7 @@ export function MoraleBadge({ participant, place }: BattleBadgeProps) {
                 morale > 0 ? 'text-hud-good' : 'text-hud-danger'
             )}
         >
-            {t('morale', { value: signed(morale) })}
+            {t('badge', { value: signed(morale) })}
         </span>
     );
 }

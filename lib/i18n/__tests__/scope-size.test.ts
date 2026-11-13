@@ -42,6 +42,12 @@ const systemScopes = SYSTEM_META.filter(
         ...systemScope(key, 'member'),
     ];
 
+    const addons = SYSTEM_META.filter(
+        (m) =>
+            m.kind === 'addon' &&
+            (m.requires as readonly string[] | undefined)?.includes(meta.module)
+    ).map((m) => m.module);
+
     return [
         {
             name: `${key} battle`,
@@ -49,6 +55,15 @@ const systemScopes = SYSTEM_META.filter(
                 ...CAMPAIGN_NAMESPACES,
                 ...BATTLE_NAMESPACES,
                 ...battle,
+            ],
+            ...(budgetKb?.battle && { limit: budgetKb.battle }),
+        },
+        {
+            name: `${key} battle + modules`,
+            namespaces: [
+                ...CAMPAIGN_NAMESPACES,
+                ...BATTLE_NAMESPACES,
+                ...systemScope({ key, modules: addons }, 'battle'),
             ],
             ...(budgetKb?.battle && { limit: budgetKb.battle }),
         },
