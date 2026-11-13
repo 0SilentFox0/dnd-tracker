@@ -665,23 +665,22 @@ model Skill {
 }
 
 model Race {
-  id                   String       @id @default(cuid())
+  id                   String   @id @default(cuid())
   campaignId           String
   name                 String
-  availableSkills      Json         @default("[]")
-  disabledSkills       Json         @default("[]")
+  availableSkills      Json     @default("[]")
+  disabledSkills       Json     @default("[]")
   passiveAbility       Json?
-  createdAt            DateTime     @default(now())
-  updatedAt            DateTime     @updatedAt
-  spellSlotProgression Json         @default("[]")
-  abilities            Json         @default("[]")
-  choices              Json         @default("[]")
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  spellSlotProgression Json     @default("[]")
+  abilities            Json     @default("[]")
+  choices              Json     @default("[]")
   icon                 String?
   color                String?
   profile              Json?
-  campaign             Campaign     @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  campaign             Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   units                Unit[]
-  legacyProfile        RaceProfile?
   sourceId             String?
   sourceHash           String?
   slug                 String?
@@ -689,18 +688,6 @@ model Race {
   @@index([campaignId, name])
   @@index([campaignId, sourceId])
   @@map("races")
-}
-
-model RaceProfile {
-  raceId     String   @id
-  campaignId String
-  profile    Json     @default("{}")
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  race       Race     @relation(fields: [raceId], references: [id], onDelete: Cascade)
-
-  @@index([campaignId])
-  @@map("race_profiles")
 }
 
 model GameClass {
