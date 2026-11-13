@@ -105,7 +105,6 @@ describe('wfrp leaks outside the allowed files', () => {
         'lib/onboarding/whats-new.ts',
         'lib/constants/api-errors.ts',
         'lib/server/assistant/actions/character-coverage.ts',
-        'app/campaigns/[id]/dm/careers/careers-client.tsx',
     ]);
 
     const literals = readLiteralsExempt();

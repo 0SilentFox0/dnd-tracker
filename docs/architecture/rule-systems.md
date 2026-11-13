@@ -62,7 +62,7 @@ Core бачить `systems/*` лише через корені (`SYSTEM_ROOTS`, 
 | `participant` | списки | `fromCharacter`, `fromUnit` (частини учасника, напр. `heroscaling`, `morale`), `fromStored`, `persist` |
 | `combat` | обов'язковий (ядро) | `resolveAttack`, `abortedRoll`, `initiative`, `tieBreak`, `hitModel`, `damage`, `onZeroHp`, `actions`, `reactions`, `saves`, `proficiency`, `judge`, `dice`, `actionEconomy` |
 | `combat.attackAbility?`, `reach?`, `crit?`, `autoXp?`, `offHand?`, `inspiration?`, `input?`, `details?` | необов'язковий | характеристика атаки (`{ key, roll, damage }`), досяжність і штрафи дальньої, параметри критів, авто-XP, друга рука, натхнення; без хука: 1 клітинка, нат. 20 = крит, без штрафів |
-| `combat.damageParts?` | список | `DamagePart(p, attack) => { dice?, flat? } \| null`; core `attackDamageParts` складає частини (кубики рівня героя й `+level` — `heroscaling`, `systems/heroscaling/rules/damage.ts`) |
+| `combat.damageParts?` | список | `DamagePart(p, attack) => { dice?, flat? } \| null`; core `attackDamageParts` складає частини (кубики рівня героя й `+level` — `heroscaling`, `systems/heroscaling/rules/damage.ts`; без модуля герой wfrp і безкласовий герой голого `dnd5e` їх не мають: це зміна реальної шкоди в бою, прийнято за П6) |
 | `combat.onDamaged`, `afterAttack`, `turn { resetState, beforeAdvance, onTurnStart, onSkippedTurn, onTurnEnd, onRoundStart, onJoin, actGates, startCheck }` | списки | хуки з `runTurnHooks`; перед модулями йде база |
 | `conditionSet` | обов'язковий | стандартні стани (`apply`, `effectInput`); `enabled`/`custom` для набору й кастомних станів |
 | `conditions?` | необов'язковий | системні стани (wfrp) |
