@@ -21,7 +21,7 @@ export function parseTemplateKeys(argv: readonly string[]): SweepProfile[] {
 }
 
 const LOCAL_DB =
-    /^postgres(?:ql)?:\/\/[^@]*@(?:localhost|127\.0\.0\.1):54322\/prodcopy(?:\?.*)?$/;
+    /^postgres(?:ql)?:\/\/[^@]*@(?:localhost|127\.0\.0\.1):54322\/prodcopy(?:_\w+)?(?:\?.*)?$/;
 
 export function assertLocalProdcopy(url: string | undefined): void {
     if (!LOCAL_DB.test(url ?? ''))
