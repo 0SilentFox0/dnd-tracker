@@ -14,6 +14,10 @@ import {
     foreignSystemGroup,
     readRequires,
 } from './scripts/shared/system-requires.mjs';
+import {
+    UI_LAYER_IGNORES,
+    UI_LAYER_ZONES,
+} from './scripts/shared/ui-layers.mjs';
 
 const DIALOG_RESTRICTED_PATHS = [
     {
@@ -133,6 +137,10 @@ const SYSTEM_IMPORT_EXEMPT = JSON.parse(
         new URL('./system-imports-exempt.json', import.meta.url),
         'utf8'
     )
+).map((e) => e.file.replace(/[[\]]/g, '\\$&'));
+
+const UI_LAYERS_EXEMPT = JSON.parse(
+    readFileSync(new URL('./ui-layers-exempt.json', import.meta.url), 'utf8')
 ).map((e) => e.file.replace(/[[\]]/g, '\\$&'));
 
 const SYSTEM_ZONE_PATTERN = {
@@ -711,6 +719,26 @@ const eslintConfig = defineConfig([
             ],
         },
     },
+    ...UI_LAYER_ZONES.map((zone) => ({
+        files: zone.files,
+        ignores: [...UI_LAYER_IGNORES, ...UI_LAYERS_EXEMPT],
+        plugins: {
+            'ui-layers': {
+                rules: { zone: builtinRules.get('no-restricted-imports') },
+            },
+        },
+        rules: {
+            'ui-layers/zone': [
+                'error',
+                {
+                    patterns: zone.forbidden.map((regex) => ({
+                        regex,
+                        message: zone.message,
+                    })),
+                },
+            ],
+        },
+    })),
     {
         files: [DICE_SCENE_FILE],
         rules: {

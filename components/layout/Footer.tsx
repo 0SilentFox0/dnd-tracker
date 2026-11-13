@@ -1,7 +1,7 @@
 'use client';
 
 import { LocaleSwitcher } from '@/components/common/LocaleSwitcher';
-import { PaletteSwitcher } from '@/components/common/PaletteSwitcher';
+import { PaletteSwitcher } from '@/components/layout/PaletteSwitcher';
 
 export function Footer() {
     return (
