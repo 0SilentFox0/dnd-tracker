@@ -76,6 +76,7 @@ describe('campaign rules API', () => {
         expect(await res.json()).toEqual({
             ...DEFAULT_RULES,
             systemLocked: false,
+            composition: expect.any(Object),
         });
     });
 
