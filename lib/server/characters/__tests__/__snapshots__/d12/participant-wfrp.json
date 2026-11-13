@@ -78,11 +78,7 @@
           }
         }
       }
-    },
-    "meleeMultiplier": 1,
-    "rangedMultiplier": 1,
-    "magicMultiplier": 1,
-    "archetypeKey": "universal"
+    }
   },
   "combatStats": {
     "maxHp": 12,

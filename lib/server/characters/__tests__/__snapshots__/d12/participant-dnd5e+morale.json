@@ -31,10 +31,6 @@
     "creatureType": "humanoid",
     "moraleCap": 3,
     "damageModel": "5e",
-    "meleeMultiplier": 1,
-    "rangedMultiplier": 1,
-    "magicMultiplier": 1,
-    "archetypeKey": "universal",
     "saveProficiencies": [
       "wisdom",
       "charisma"
