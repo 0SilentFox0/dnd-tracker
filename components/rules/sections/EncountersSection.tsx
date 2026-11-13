@@ -1,16 +1,15 @@
-import { useTranslations } from 'next-intl';
-
 import { useHasRule } from '../RulesPaths';
 import { RulesSection } from '../RulesSection';
 
 import { SwitchField } from '@/components/ui/switch-field';
 import type { RulesFormState } from '@/lib/hooks/campaigns';
+import { useTranslator } from '@/lib/i18n/use-translator';
 import type { Ruleset } from '@/lib/utils/rules';
 
 const SECTION = 'encounters';
 
 export function EncountersSection({ form }: { form: RulesFormState }) {
-    const t = useTranslations('rules');
+    const t = useTranslator('rules');
 
     const label = (key: string) => t(`sections.${SECTION}.${key}`);
 

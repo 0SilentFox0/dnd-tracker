@@ -118,7 +118,9 @@ export type CoreRuleset = {
 };
 
 /** Sections owned by a system add themselves here through module augmentation */
- 
 export interface RulesetExtensions {}
 
-export type Ruleset = CoreRuleset & RulesetExtensions;
+/** The mapped form keeps the implicit index signature that an interface would lose (JSON columns, `Record<string, unknown>` readers) */
+export type Ruleset = CoreRuleset & {
+    [K in keyof RulesetExtensions]: RulesetExtensions[K];
+};

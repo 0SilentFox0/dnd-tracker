@@ -9,6 +9,8 @@ export const sectionItems = (
 ) =>
     itemsFromShape(
         sectionSchemas[name].shape as never,
-        (SECTION_DEFAULTS as Record<string, never>)[name] ?? {},
+        (SECTION_DEFAULTS as unknown as Record<string, Record<string, unknown>>)[
+            name
+        ] ?? {},
         keys
     );
