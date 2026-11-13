@@ -8,7 +8,7 @@ import {
     battleResultLogData,
 } from '@/lib/utils/characters/resources/battle';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
-import { wfrpState } from '@/systems/wfrp/rules/state';
+import { wfrpState, withWfrpState } from '@/systems/wfrp/rules/state';
 import type { BattleParticipant } from '@/types/battle';
 
 const surge = resolved(
@@ -159,10 +159,7 @@ describe('Fortune sheet <-> battle', () => {
     });
 
     it("applyBattleResult writes the participant's fortune back, falling back to the sheet", () => {
-        const withFortune = {
-            ...hero(),
-            battleData: { ...hero().battleData, fortune: 1 },
-        };
+        const withFortune = withWfrpState(hero(), { fortune: 1 });
 
         expect(
             applyBattleResult({ fortune: 2 }, withFortune, WFRP_RULES).fortune

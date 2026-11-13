@@ -10,6 +10,7 @@ import { systemUiOf } from '@/components/systems';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { fakeScene } from '@/lib/hooks/battle/__tests__/fake-scene';
 import { render } from '@/lib/i18n/test/render-uk';
+import { withDeathSaves } from '@/systems/d20/rules/death-saves/state';
 
 vi.unmock('next-intl');
 
@@ -26,13 +27,11 @@ const view = {
 const renderRow = (system?: string) => {
     const { wrapper, me } = fakeScene({ system });
 
-    const downed = {
-        ...me,
-        battleData: {
-            ...me.battleData,
-            deathSaves: { successes: 1, failures: 2, stable: false },
-        },
-    };
+    const downed = withDeathSaves(me, {
+        successes: 1,
+        failures: 2,
+        stable: false,
+    });
 
     render(
         <TooltipProvider>

@@ -80,18 +80,4 @@ describe('participant system slot storage', () => {
             battleData: { system: { key: 'test', data: { counter: 2 } } },
         });
     });
-
-    it('a legacy psychologyTested in state is still joined', () => {
-        const stored = splitParticipant(createMockParticipant(), place);
-
-        const joined = joinParticipant(
-            {
-                ...stored,
-                state: { ...stored.state, psychologyTested: { fear: 2 } },
-            },
-            'b1'
-        );
-
-        expect(joined.battleData.psychologyTested).toEqual({ fear: 2 });
-    });
 });

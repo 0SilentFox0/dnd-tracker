@@ -7,7 +7,7 @@ import { attackMutation } from '@/lib/server/battles/mutations/attack/attack-mut
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import type { BattleMutationContext } from '@/lib/utils/battle/pipeline/run-battle-mutation';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
-import { d20State } from '@/systems/d20/rules/state';
+import { d20State, withD20State } from '@/systems/d20/rules/state';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
 
 const base = createMockParticipant();
@@ -33,12 +33,20 @@ const hero = (
     inspiration: boolean,
     maxTargets = 1,
     attacks = [sword]
-): BattleParticipant => ({
-    ...base,
-    basicInfo: { ...base.basicInfo, id: 'hero', controlledBy: 'user-1' },
-    combatStats: { ...base.combatStats, maxTargets },
-    battleData: { ...base.battleData, attacks, inspiration },
-});
+): BattleParticipant =>
+    withD20State(
+        {
+            ...base,
+            basicInfo: {
+                ...base.basicInfo,
+                id: 'hero',
+                controlledBy: 'user-1',
+            },
+            combatStats: { ...base.combatStats, maxTargets },
+            battleData: { ...base.battleData, attacks },
+        },
+        { inspiration: inspiration ? (true as const) : undefined }
+    );
 
 const goblin = (id: string) =>
     createMockParticipant({

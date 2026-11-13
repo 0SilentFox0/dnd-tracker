@@ -4,7 +4,7 @@ import { makeParticipant } from '@/lib/utils/abilities/__tests__/fixtures';
 import { resetTurnState } from '@/lib/utils/battle/turn/turn-state';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 import { parseRules } from '@/lib/utils/rules/schema';
-import { D20_STATE, d20State, withD20State } from '@/systems/d20/rules/state';
+import { d20State, withD20State } from '@/systems/d20/rules/state';
 import {
     RETALIATION_STATE,
     retaliationResetState,
@@ -41,25 +41,13 @@ describe('retaliation count read', () => {
         expect(retaliationsUsedOf(of({ system: slotOf(2) }))).toBe(2);
     });
 
-    it('reads the old flat field', () => {
-        expect(retaliationsUsedOf(of({ retaliationsUsed: 1 }))).toBe(1);
-    });
-
-    it('the ext wins over the old field', () => {
+    it('a d20 slot without the ext has no count', () => {
         expect(
-            retaliationsUsedOf(of({ retaliationsUsed: 5, system: slotOf(1) }))
-        ).toBe(1);
+            retaliationsUsedOf(of({ system: { key: 'd20', data: {} } }))
+        ).toBeUndefined();
     });
 
-    it('a d20 slot without the ext falls back to the old field', () => {
-        expect(
-            retaliationsUsedOf(
-                of({ retaliationsUsed: 1, system: { key: 'd20', data: {} } })
-            )
-        ).toBe(1);
-    });
-
-    it('is undefined with neither, and the reaction flag then stands for one', () => {
+    it('is undefined without a slot, and the reaction flag then stands for one', () => {
         expect(retaliationsUsedOf(of())).toBeUndefined();
         expect(retaliationUsed(of())).toBe(0);
         expect(retaliationUsed(of({}, true))).toBe(1);
@@ -99,29 +87,10 @@ describe('retaliationStateData', () => {
         expect(d20State(next)).toEqual({ inspiration: true });
     });
 
-    it('the ext write does not drop the d20 state that was still in the old fields', () => {
-        const data = retaliationStateData(
-            of({ deathSaves: { successes: 1, failures: 0, stable: false } }),
-            1
-        );
+    it('writes the count into a fresh slot', () => {
+        const data = retaliationStateData(of(), 2);
 
-        expect(D20_STATE.read(data.system)).toEqual({
-            deathSaves: { successes: 1, failures: 0, stable: false },
-        });
-        expect(data).toHaveProperty('deathSaves', undefined);
-    });
-
-    it('clears the old flat counter', () => {
-        const data = retaliationStateData(of({ retaliationsUsed: 1 }), 2);
-
-        expect(data).toHaveProperty('retaliationsUsed', undefined);
         expect(RETALIATION_STATE.read(data.system)).toEqual({ used: 2 });
-    });
-
-    it('does not touch the flat counter when there was none', () => {
-        expect(retaliationStateData(of(), 1)).not.toHaveProperty(
-            'retaliationsUsed'
-        );
     });
 });
 
@@ -132,13 +101,6 @@ describe('retaliationResetState', () => {
 
             expect(retaliationsUsedOf(next)).toBe(0);
         }
-    });
-
-    it('zeroes an old flat count and clears it', () => {
-        const next = retaliationResetState(of({ retaliationsUsed: 2 }), 'turn');
-
-        expect(retaliationsUsedOf(next)).toBe(0);
-        expect(next.battleData.retaliationsUsed).toBeUndefined();
     });
 
     it('is a no-op at zero or without a count', () => {

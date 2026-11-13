@@ -9,6 +9,7 @@ import { hpOf } from '@/lib/utils/battle/__tests__/fixtures/placed';
 import type { BattleSceneState } from '@/lib/utils/battle/store';
 import { advanceAfterRemoval, advanceTurn } from '@/lib/utils/battle/turn';
 import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
+import { withDeathSaves } from '@/systems/d20/rules/death-saves/state';
 
 const scene: BattleSceneState = {
     id: 'b1',
@@ -100,18 +101,17 @@ it('removal зберігає death-save event, participants, turn/round і єд�
             side: ParticipantSide.ENEMY,
         });
 
-        const dying = {
-            ...base,
-            combatStats: {
-                ...base.combatStats,
-                currentHp: 0,
-                status: 'unconscious' as const,
+        const dying = withDeathSaves(
+            {
+                ...base,
+                combatStats: {
+                    ...base.combatStats,
+                    currentHp: 0,
+                    status: 'unconscious' as const,
+                },
             },
-            battleData: {
-                ...base.battleData,
-                deathSaves: { successes: 0, failures: 0, stable: false },
-            },
-        };
+            { successes: 0, failures: 0, stable: false }
+        );
 
         const rng = vi.fn(() => 0.99);
 

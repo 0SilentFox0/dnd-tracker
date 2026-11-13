@@ -27,6 +27,7 @@ import { startDying } from '@/systems/d20/rules/death-saves/start';
 import {
     clearDeathSaves,
     deathSavesOf,
+    withDeathSaves,
 } from '@/systems/d20/rules/death-saves/state';
 import type { BattleParticipant } from '@/types/battle';
 
@@ -66,19 +67,6 @@ const hit = (
     });
 
 const dying = (id = 'hero') => startDying(hero({ currentHp: 0 }, id), on);
-
-/** The pre-slot flat form of the counters (dual-read) */
-const withSaves = (
-    p: BattleParticipant,
-    deathSaves: NonNullable<BattleParticipant['battleData']['deathSaves']>
-): BattleParticipant => ({
-    ...p,
-    battleData: {
-        ...p.battleData,
-        system: undefined,
-        deathSaves,
-    },
-});
 
 describe('startDying', () => {
     it('sets unconscious state and zeroed counters', () => {
@@ -136,7 +124,7 @@ describe('damage consequences', () => {
 
         expect(deathSavesOf(crit.participant)?.failures).toBe(2);
 
-        const stable = withSaves(dying(), {
+        const stable = withDeathSaves(dying(), {
             successes: 3,
             failures: 0,
             stable: true,
@@ -286,7 +274,7 @@ describe('advanceTurn with death saves', () => {
     });
 
     it('stable hero does not roll', () => {
-        const stable = withSaves(dying('b'), {
+        const stable = withDeathSaves(dying('b'), {
             successes: 3,
             failures: 0,
             stable: true,
@@ -367,7 +355,7 @@ describe('victory', () => {
 
 describe('review fixes', () => {
     it('stabilising resets both counters, so later damage starts from one failure', () => {
-        let p = withSaves(dying(), {
+        let p = withDeathSaves(dying(), {
             successes: 2,
             failures: 2,
             stable: false,

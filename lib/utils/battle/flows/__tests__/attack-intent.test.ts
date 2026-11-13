@@ -10,6 +10,7 @@ import {
 import { AttackType, ParticipantSide } from '@/lib/constants/battle';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { withDeathSaves } from '@/systems/d20/rules/death-saves/state';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
 
 const intent = { targetId: 'e', actorId: 'h1', round: 2, turnIndex: 3 };
@@ -173,7 +174,9 @@ describe('participantAttackIntent: герой, що вмирає', () => {
         failures: number;
         stable: boolean;
     }) => {
-        const p = unit('d', ParticipantSide.ALLY, { deathSaves });
+        const base = unit('d', ParticipantSide.ALLY);
+
+        const p = deathSaves ? withDeathSaves(base, deathSaves) : base;
 
         return {
             ...p,

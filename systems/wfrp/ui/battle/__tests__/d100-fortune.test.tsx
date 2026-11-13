@@ -30,7 +30,14 @@ const model = (available: boolean, fortune?: 'reroll' | 'sl') => {
         },
         view: {
             judged: { target: null, attackerSide: undefined },
-            attacker: { battleData: { fortune: available ? 2 : 0 } },
+            attacker: {
+                battleData: {
+                    system: {
+                        key: 'wfrp',
+                        data: { fortune: available ? 2 : 0 },
+                    },
+                },
+            },
         },
         actions,
     } as unknown as RollBodyProps['wizard'];

@@ -16,7 +16,7 @@ import { conditionLevel } from '@/systems/wfrp/rules/conditions/levels';
 import { caster as wfrpCaster } from '@/systems/wfrp/rules/magic/__tests__/fixtures';
 import { FORTUNE_INPUT } from '@/systems/wfrp/rules/percentile/fortune';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
-import { wfrpState } from '@/systems/wfrp/rules/state';
+import { wfrpState, withWfrpState } from '@/systems/wfrp/rules/state';
 import type { BattleMapConfig, BattleParticipant } from '@/types/battle';
 
 const map: BattleMapConfig = {
@@ -280,13 +280,7 @@ describe('castSpell in a percentile magic system', () => {
     });
 
     it('a Fortune reroll is paid for', () => {
-        const caster = at(
-            {
-                ...wfrpCaster(),
-                battleData: { ...wfrpCaster().battleData, fortune: 2 },
-            },
-            0
-        );
+        const caster = at(withWfrpState(wfrpCaster(), { fortune: 2 }), 0);
 
         const r = run(
             spellOf(magicOf()),

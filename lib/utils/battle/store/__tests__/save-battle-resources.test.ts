@@ -195,13 +195,10 @@ describe('saveBattle: resources write-back', () => {
     });
 
     it('dead hero is written; inspiration cleared only when spent in the battle', async () => {
-        const a = hero('pa', 'ch-a', { currentHp: 0, status: 'dead' });
-
-        a.battleData = {
-            ...a.battleData,
-            inspiration: false,
-            inspirationSpent: true,
-        };
+        const a = withD20State(
+            hero('pa', 'ch-a', { currentHp: 0, status: 'dead' }),
+            { inspirationSpent: true }
+        );
 
         const { db, tx } = fakeDb([{ id: 'ch-a', resources: {} }]);
 
@@ -249,9 +246,9 @@ describe('saveBattle: resources write-back', () => {
     });
 
     it('never writes inspiration true from a battle (stale participant value, unspent)', async () => {
-        const a = hero('pa', 'ch-a', { currentHp: 5 });
-
-        a.battleData = { ...a.battleData, inspiration: true };
+        const a = withD20State(hero('pa', 'ch-a', { currentHp: 5 }), {
+            inspiration: true,
+        });
 
         const { db, tx } = fakeDb([{ id: 'ch-a', resources: {} }]);
 

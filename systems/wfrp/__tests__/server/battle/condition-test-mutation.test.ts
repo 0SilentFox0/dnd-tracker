@@ -57,7 +57,7 @@ const body = (over: Record<string, unknown> = {}) => ({
 });
 
 describe('conditionTestMutation', () => {
-    it('refuses a second test of the same condition in a turn, also from the old-form list', () => {
+    it('refuses a second test of the same condition in a turn', () => {
         const c = ctx();
 
         const second = conditionTestMutation(c, body({ roll: 95 }));
@@ -65,20 +65,6 @@ describe('conditionTestMutation', () => {
         expect(() =>
             conditionTestMutation(
                 { ...c, participants: second.participants },
-                body()
-            )
-        ).toThrow(API_ERRORS.CONDITION_TEST_UNAVAILABLE);
-
-        const [h, ...rest] = c.participants;
-
-        const legacy = {
-            ...h,
-            battleData: { ...h.battleData, conditionTests: ['bleeding'] },
-        } as BattleParticipant;
-
-        expect(() =>
-            conditionTestMutation(
-                { ...c, participants: [legacy, ...rest] },
                 body()
             )
         ).toThrow(API_ERRORS.CONDITION_TEST_UNAVAILABLE);

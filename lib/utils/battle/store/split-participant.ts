@@ -42,7 +42,6 @@ export function splitParticipant(
         hazardHitRound,
         zoneHits,
         pendingHits,
-        retaliationsUsed,
         dying,
         dormant,
         facing,
@@ -51,7 +50,6 @@ export function splitParticipant(
         ingredientStock,
         ammo,
         reload,
-        psychologyTested,
         system,
         ...battleDataWithScoped
     } = p.battleData;
@@ -98,7 +96,6 @@ export function splitParticipant(
         ...(hazardHitRound !== undefined && { hazardHitRound }),
         ...(zoneHits !== undefined && { zoneHits }),
         ...(pendingHits !== undefined && { pendingHits }),
-        ...(retaliationsUsed !== undefined && { retaliationsUsed }),
         ...(dying !== undefined && { dying }),
         ...(dormant !== undefined && { dormant }),
         ...(facing !== undefined && { facing }),
@@ -107,7 +104,6 @@ export function splitParticipant(
         ...(ingredientStock !== undefined && { ingredientStock }),
         ...(ammo !== undefined && { ammo }),
         ...(reload !== undefined && { reload }),
-        ...(psychologyTested !== undefined && { psychologyTested }),
         ...(system !== undefined && { system }),
         spellSlotsCurrent,
     };
@@ -218,9 +214,6 @@ export function joinParticipant(
             ...(state.pendingHits !== undefined && {
                 pendingHits: state.pendingHits,
             }),
-            ...(state.retaliationsUsed !== undefined && {
-                retaliationsUsed: state.retaliationsUsed,
-            }),
             ...(state.dying !== undefined && { dying: state.dying }),
             ...(state.dormant !== undefined && { dormant: state.dormant }),
             ...(state.facing !== undefined && { facing: state.facing }),
@@ -233,9 +226,6 @@ export function joinParticipant(
             }),
             ...(state.ammo !== undefined && { ammo: state.ammo }),
             ...(state.reload !== undefined && { reload: state.reload }),
-            ...(state.psychologyTested !== undefined && {
-                psychologyTested: state.psychologyTested,
-            }),
             ...(state.system !== undefined && { system: state.system }),
         },
         actionFlags: {

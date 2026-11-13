@@ -5,6 +5,7 @@ import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/moc
 import { clearFallenEffects } from '@/lib/utils/battle/participant/fallen';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
+import { withDeathSaves } from '@/systems/d20/rules/death-saves/state';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
 import type { ActiveEffect, BattleParticipant } from '@/types/battle';
 
@@ -54,15 +55,11 @@ describe('clearFallenEffects', () => {
 
 describe('clearFallenEffects: герой, що вмирає (5e)', () => {
     const dying = (): BattleParticipant => {
-        const p = charmed(CombatStatus.UNCONSCIOUS);
-
-        return {
-            ...p,
-            battleData: {
-                ...p.battleData,
-                deathSaves: { successes: 0, failures: 0, stable: false },
-            },
-        };
+        return withDeathSaves(charmed(CombatStatus.UNCONSCIOUS), {
+            successes: 0,
+            failures: 0,
+            stable: false,
+        });
     };
 
     it('зберігає ефекти й стани', () => {

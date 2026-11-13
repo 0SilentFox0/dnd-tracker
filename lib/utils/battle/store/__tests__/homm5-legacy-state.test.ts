@@ -15,7 +15,7 @@ import { DEFAULT_RULES } from '@/lib/utils/rules';
 import { retaliationsUsedOf } from '@/systems/retaliation/rules/state';
 import type { BattleParticipant } from '@/types/battle';
 
-// two rows of a completed HOMM5 battle (hero + unit) as stored before the d20 slot existed
+// two rows of a completed HOMM5 battle (hero + unit) with the counter moved into the d20 slot
 const ROWS = JSON.parse(
     readFileSync(
         joinPath(__dirname, 'fixtures/e2-legacy/homm5-participants.json'),
@@ -23,13 +23,15 @@ const ROWS = JSON.parse(
     )
 ) as StoredParticipant[];
 
-const [HERO_ROW, UNIT_ROW] = ROWS;
-
 const place = { orderIndex: 0, isPending: false };
 
-/** the same values in the slot form: the counter moves from state.retaliationsUsed into the d20 slot ext */
+const HERO_ID = ROWS[0].columns.id;
+
 function lifted(row: StoredParticipant): StoredParticipant {
-    const { retaliationsUsed, ...state } = row.state;
+    const { retaliationsUsed, ...state } = row.state as unknown as Record<
+        string,
+        unknown
+    >;
 
     return {
         ...row,
@@ -37,17 +39,17 @@ function lifted(row: StoredParticipant): StoredParticipant {
             ...state,
             system: {
                 key: 'd20',
-                data: { ext: { retaliation: { used: retaliationsUsed ?? 0 } } },
+                data: {
+                    ext: {
+                        retaliation: { used: (retaliationsUsed as number) ?? 0 },
+                    },
+                },
             },
         },
-    };
+    } as unknown as StoredParticipant;
 }
 
-const stable = (action: object | undefined) => ({
-    ...action,
-    id: undefined,
-    timestamp: undefined,
-});
+const [HERO_ROW, UNIT_ROW] = ROWS.map(lifted);
 
 const join = (row: StoredParticipant): BattleParticipant => {
     const p = joinParticipant(row, 'b1');
@@ -89,65 +91,49 @@ beforeAll(async () => {
     await import('@/lib/utils/rules/systems/registry');
 }, 30_000);
 
-describe('HOMM5 participants stored before the d20 slot', () => {
-    it('the fixture rows are the legacy shape with consistent hashes', () => {
+describe('HOMM5 participants in the d20 slot form', () => {
+    it('the fixture rows have consistent hashes and the counter in the slot', () => {
         for (const row of ROWS) {
             expect(row.snapshotHash).toBe(hashJson(row.snapshot));
             expect(row.state.system).toBeUndefined();
         }
 
-        expect(HERO_ROW.state.retaliationsUsed).toBe(0);
+        expect(HERO_ROW.state.system).toEqual({
+            key: 'd20',
+            data: { ext: { retaliation: { used: 0 } } },
+        });
     });
 
-    it('a retaliation gives the same result over the old and the lifted form', () => {
-        const legacy = play(join(HERO_ROW), join(UNIT_ROW));
+    it('a retaliation is given once', () => {
+        const run = play(join(HERO_ROW), join(UNIT_ROW));
 
-        const slot = play(join(lifted(HERO_ROW)), join(lifted(UNIT_ROW)));
-
-        expect(legacy.first).not.toBeNull();
-        expect(slot.first).not.toBeNull();
-        expect(legacy.first?.battleAction).toBeDefined();
-        expect(stable(slot.first?.battleAction)).toEqual(
-            stable(legacy.first?.battleAction)
-        );
-        expect(slot.after.map((p) => p.combatStats)).toEqual(
-            legacy.after.map((p) => p.combatStats)
-        );
-        expect(slot.after.map((p) => p.actionFlags)).toEqual(
-            legacy.after.map((p) => p.actionFlags)
-        );
-        expect(legacy.second).toBeNull();
-        expect(slot.second).toBeNull();
+        expect(run.first?.battleAction).toBeDefined();
+        expect(run.second).toBeNull();
     });
 
-    it('rows after the mutation are in the new form with a consistent hash', () => {
-        for (const row of [HERO_ROW, lifted(HERO_ROW)]) {
-            const { after } = play(join(row), join(UNIT_ROW));
+    it('rows after the mutation keep the slot with a consistent hash', () => {
+        const { after } = play(join(HERO_ROW), join(UNIT_ROW));
 
-            const hero = after.find(
-                (p) => p.basicInfo.id === HERO_ROW.columns.id
-            ) as BattleParticipant;
+        const hero = after.find(
+            (p) => p.basicInfo.id === HERO_ID
+        ) as BattleParticipant;
 
-            const stored = splitParticipant(hero, place);
+        const stored = splitParticipant(hero, place);
 
-            expect(stored.state.system).toEqual({
-                key: 'd20',
-                data: { ext: { retaliation: { used: 1 } } },
-            });
-            expect('retaliationsUsed' in stored.state).toBe(false);
-            expect(stored.snapshotHash).toBe(hashJson(stored.snapshot));
-        }
+        expect(stored.state.system).toEqual({
+            key: 'd20',
+            data: { ext: { retaliation: { used: 1 } } },
+        });
+        expect(stored.snapshotHash).toBe(hashJson(stored.snapshot));
     });
 
-    it('the next turn gives the reaction back in either form', () => {
-        for (const row of [HERO_ROW, lifted(HERO_ROW)]) {
-            const { turned } = play(join(row), join(UNIT_ROW));
+    it('the next turn gives the reaction back', () => {
+        const { turned } = play(join(HERO_ROW), join(UNIT_ROW));
 
-            const hero = turned.find(
-                (p) => p.basicInfo.id === HERO_ROW.columns.id
-            ) as BattleParticipant;
+        const hero = turned.find(
+            (p) => p.basicInfo.id === HERO_ID
+        ) as BattleParticipant;
 
-            expect(retaliationsUsedOf(hero)).toBe(0);
-        }
+        expect(retaliationsUsedOf(hero)).toBe(0);
     });
 });

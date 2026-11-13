@@ -4,26 +4,8 @@ import type { BattleParticipant } from '@/types/battle';
 
 type BattleData = BattleParticipant['battleData'];
 
-const LEGACY_KEYS = [
-    'fortune',
-    'channelledSl',
-    'sin',
-    'conditionTests',
-    'psychologyTested',
-] as const satisfies ReadonlyArray<keyof WfrpParticipantState>;
-
-/** The slot wins whenever it carries our key; otherwise the pre-slot flat fields are read */
-export function wfrpState(p: BattleParticipant): WfrpParticipantState {
-    const slot = PARTICIPANT_STATE.read(p.battleData.system);
-
-    if (slot) return slot;
-
-    return Object.fromEntries(
-        LEGACY_KEYS.flatMap((k) =>
-            p.battleData[k] === undefined ? [] : [[k, p.battleData[k]]]
-        )
-    ) as WfrpParticipantState;
-}
+export const wfrpState = (p: BattleParticipant): WfrpParticipantState =>
+    PARTICIPANT_STATE.read(p.battleData.system) ?? {};
 
 /** A `patch` key set to `undefined` drops the field; an empty state is never written into a missing slot */
 export function wfrpStateData(
@@ -36,21 +18,11 @@ export function wfrpStateData(
         )
     ) as WfrpParticipantState;
 
-    const cleared = Object.fromEntries(
-        LEGACY_KEYS.filter((k) => p.battleData[k] !== undefined).map((k) => [
-            k,
-            undefined,
-        ])
-    ) as Partial<BattleData>;
-
     const hasSlot = PARTICIPANT_STATE.read(p.battleData.system) !== undefined;
 
-    if (!hasSlot && Object.keys(data).length === 0) return cleared;
+    if (!hasSlot && Object.keys(data).length === 0) return {};
 
-    return {
-        ...cleared,
-        system: PARTICIPANT_STATE.write(data, p.battleData.system),
-    };
+    return { system: PARTICIPANT_STATE.write(data, p.battleData.system) };
 }
 
 export const withWfrpState = (

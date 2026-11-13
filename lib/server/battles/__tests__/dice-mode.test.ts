@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { assertDiceMode } from '../dice';
 
 describe('assertDiceMode', () => {
-    it.each(['castRoll', 'fortuneRoll'])(
+    it.each(['castRoll', 'secondRoll'])(
         'rejects %s outside manual dice mode',
         (key) => {
             expect(() => assertDiceMode({ [key]: 50 }, 'server')).toThrow();

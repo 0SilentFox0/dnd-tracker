@@ -21,7 +21,7 @@ import { turnExhausted } from '@/lib/utils/battle/view/turn-exhausted';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 import { parseRules } from '@/lib/utils/rules/schema';
 import { resolveOpportunityAttacks } from '@/systems/d20/rules/reactions/opportunity';
-import { d20State } from '@/systems/d20/rules/state';
+import { d20State, withD20State } from '@/systems/d20/rules/state';
 import type {
     BattleAttack,
     BattleMapConfig,
@@ -169,7 +169,6 @@ describe('extra attack', () => {
         );
 
         expect(next.battleData.system).toBeUndefined();
-        expect(next.battleData.attackedWithLight).toBeUndefined();
     });
 
     describe('attackCounter', () => {
@@ -200,22 +199,21 @@ describe('extra attack', () => {
     });
 
     it('reset at turn start', () => {
+        const armed = withD20State(
+            {
+                ...fighter,
+                battleData: { ...fighter.battleData, attacksLeft: 1 },
+            },
+            { attackedWithLight: true }
+        );
+
+        const next = resetTurnState(armed, { rules: DEFAULT_RULES });
+
+        expect(next).toMatchObject({ attacksLeft: undefined });
         expect(
-            resetTurnState(
-                {
-                    ...fighter,
-                    battleData: {
-                        ...fighter.battleData,
-                        attacksLeft: 1,
-                        attackedWithLight: true,
-                    },
-                },
-                { rules: DEFAULT_RULES }
-            )
-        ).toMatchObject({
-            attacksLeft: undefined,
-            attackedWithLight: undefined,
-        });
+            d20State({ ...armed, battleData: { ...armed.battleData, ...next } })
+                .attackedWithLight
+        ).toBeUndefined();
     });
 
     it('pool keeps the turn open', () => {

@@ -6,21 +6,6 @@ import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
 
 const roll = z.number().int().min(1).max(100);
 
-const isRecord = (v: unknown): v is Record<string, unknown> =>
-    typeof v === 'object' && v !== null && !Array.isArray(v);
-
-// one release: the flat `fortune`/`fortuneRoll` request shape still maps onto `system`/`secondRoll`
-const fromLegacy = (raw: unknown): unknown => {
-    if (!isRecord(raw) || raw.system !== undefined || raw.fortune === undefined)
-        return raw;
-
-    return {
-        ...raw,
-        system: { key: 'wfrp', data: { kind: raw.fortune } },
-        secondRoll: raw.secondRoll ?? raw.fortuneRoll,
-    };
-};
-
 const Body = z.object({
     system: z
         .object({
@@ -31,9 +16,7 @@ const Body = z.object({
     secondRoll: roll.optional(),
 });
 
-export const WfrpFortuneInputSchema = z
-    .preprocess(fromLegacy, Body)
-    .transform(({ system, secondRoll }): SystemSlot | undefined => {
+export const WfrpFortuneInputSchema = Body.transform(({ system, secondRoll }): SystemSlot | undefined => {
         if (!system) return undefined;
 
         const { kind } = system.data;

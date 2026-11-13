@@ -40,10 +40,6 @@ describe('d20 off-hand', () => {
         expect(D20_OFF_HAND.ready(armed)).toBe(true);
     });
 
-    it('the old flat attackedWithLight is read as ready', () => {
-        expect(D20_OFF_HAND.ready(five({ attackedWithLight: true }))).toBe(true);
-    });
-
     it('is not ready without the light attack, without an off-hand weapon, or with the bonus action spent', () => {
         expect(D20_OFF_HAND.ready(five())).toBe(false);
 
@@ -89,20 +85,13 @@ describe('d20 off-hand', () => {
         ).toBeUndefined();
     });
 
-    it('a new turn clears the readiness in either form', () => {
+    it('a new turn clears the readiness', () => {
         const slot = resetTurnState(
             withD20State(five(), { attackedWithLight: true }),
             { rules: DEFAULT_RULES }
         );
 
-        const flat = resetTurnState(five({ attackedWithLight: true }), {
-            rules: DEFAULT_RULES,
-        });
-
         expect(d20State({ ...five(), battleData: slot }).attackedWithLight).toBe(
-            undefined
-        );
-        expect(d20State({ ...five(), battleData: flat }).attackedWithLight).toBe(
             undefined
         );
     });

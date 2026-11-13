@@ -21,33 +21,23 @@ const down = (
     };
 };
 
-const SAVES = { successes: 0, failures: 0, stable: false };
-
 describe('isDying', () => {
-    it('the neutral flag marks a dying hero (new form)', () => {
+    it('the neutral flag marks a dying hero', () => {
         expect(isDying(down({ dying: true }))).toBe(true);
     });
 
-    it('the old death saves counters still mark a dying hero (old form)', () => {
-        expect(isDying(down({ deathSaves: SAVES }))).toBe(true);
-    });
-
-    it('an unconscious participant without either is not dying', () => {
+    it('an unconscious participant without the flag is not dying', () => {
         expect(isDying(down({}))).toBe(false);
     });
 
-    it('a dead one is not dying, whichever form it is in', () => {
+    it('a dead one is not dying', () => {
         expect(isDying(down({ dying: true }, CombatStatus.DEAD))).toBe(false);
-        expect(isDying(down({ deathSaves: SAVES }, CombatStatus.DEAD))).toBe(
-            false
-        );
     });
 });
 
 describe('isAttackable', () => {
-    it('a dying hero in either form can be attacked, a plain unconscious one cannot', () => {
+    it('a dying hero can be attacked, a plain unconscious one cannot', () => {
         expect(isAttackable(down({ dying: true }))).toBe(true);
-        expect(isAttackable(down({ deathSaves: SAVES }))).toBe(true);
         expect(isAttackable(down({}))).toBe(false);
     });
 });

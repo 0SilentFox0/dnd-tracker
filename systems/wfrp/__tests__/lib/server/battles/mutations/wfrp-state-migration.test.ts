@@ -1,24 +1,7 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 
 import { AttackType, ParticipantSide } from '@/lib/constants/battle';
-import { attackBodySchema } from '@/lib/schemas/battles';
-import { context } from '@/lib/server/battles/__tests__/mutations/fixtures';
-import { attackMutation } from '@/lib/server/battles/mutations/attack/attack-mutation';
 import { makeParticipant } from '@/lib/utils/abilities/__tests__/fixtures';
-import type { BattleMutationContext } from '@/lib/utils/battle/pipeline/run-battle-mutation';
-import { diffParticipants } from '@/lib/utils/battle/store/diff-participants';
-import { restoreParticipantsAt } from '@/lib/utils/battle/store/history';
-import {
-    buildParticipantPatch,
-    FULL_PARTICIPANT,
-} from '@/lib/utils/battle/store/participant-patch';
-import { buildSnapshotState } from '@/lib/utils/battle/store/snapshot-state';
-import {
-    joinParticipant,
-    splitParticipant,
-} from '@/lib/utils/battle/store/split-participant';
-import { hashJson } from '@/lib/utils/battle/store/stable-json';
-import type { LoadedBattle } from '@/lib/utils/battle/store/types';
 import { resetTurnState } from '@/lib/utils/battle/turn/turn-state';
 import { mulberry32 } from '@/lib/utils/common/rng';
 import type { DamagedHook } from '@/lib/utils/rules/systems/types';
@@ -38,16 +21,6 @@ beforeAll(async () => {
     await import('@/lib/server/systems/registry');
 }, 30_000);
 
-const place = { orderIndex: 0, isPending: false };
-
-const OLD_KEYS = [
-    'fortune',
-    'channelledSl',
-    'sin',
-    'conditionTests',
-    'psychologyTested',
-];
-
 const sword: BattleAttack = {
     id: 'sw',
     name: 'Sword',
@@ -57,11 +30,7 @@ const sword: BattleAttack = {
     damageType: 'slashing',
 };
 
-const fighter = (
-    id: string,
-    side: ParticipantSide,
-    legacy: Partial<BattleParticipant['battleData']> = {}
-): BattleParticipant => {
+const fighter = (id: string, side: ParticipantSide): BattleParticipant => {
     const p = makeParticipant({ id, side, hp: 20, maxHp: 20 });
 
     const characteristics = {
@@ -85,190 +54,9 @@ const fighter = (
                 ap: { head: 0, arm: 0, body: 0, leg: 0 },
             }),
         },
-        battleData: { ...p.battleData, attacks: [sword], ...legacy },
+        battleData: { ...p.battleData, attacks: [sword] },
     };
 };
-
-const OLD_FORM = {
-    fortune: 2,
-    channelledSl: 3,
-    conditionTests: ['x'],
-    psychologyTested: { fear: 1 },
-};
-
-const wfrpCtx = (attacker: BattleParticipant): BattleMutationContext => {
-    const base = context({
-        participants: [attacker, fighter('t', ParticipantSide.ENEMY)],
-        isDM: true,
-    });
-
-    return {
-        ...base,
-        meta: { ...base.meta, rules: WFRP_RULES },
-        scene: { ...base.scene, turnIndex: 0 },
-        rng: () => 0.795,
-    };
-};
-
-const reroll = () =>
-    attackBodySchema.parse({
-        attackerId: 'a',
-        targetId: 't',
-        attackId: 'sw',
-        d20Roll: 90,
-        damageRolls: [4],
-        fortune: 'reroll',
-        fortuneRoll: 20,
-    });
-
-const attackerOf = (ps: BattleParticipant[]) =>
-    ps.find((p) => p.basicInfo.id === 'a') as BattleParticipant;
-
-describe('migration of an old-form battle participant', () => {
-    const before = fighter('a', ParticipantSide.ALLY, OLD_FORM);
-
-    it('the first write moves the counters into the slot and drops the old keys', async () => {
-        const out = await attackMutation(wfrpCtx(before), reroll());
-
-        const after = attackerOf(out.participants);
-
-        const stored = splitParticipant(after, place);
-
-        expect(stored.state.system).toEqual({
-            key: 'wfrp',
-            data: { ...OLD_FORM, fortune: 1 },
-        });
-        expect(stored.state).not.toHaveProperty('psychologyTested');
-
-        const battleData = JSON.parse(
-            JSON.stringify(stored.snapshot.battleData)
-        ) as Record<string, unknown>;
-
-        for (const k of OLD_KEYS) expect(battleData).not.toHaveProperty(k);
-
-        expect(stored.snapshotHash).toBe(hashJson(stored.snapshot));
-        expect(buildParticipantPatch(before, after)).toBe(FULL_PARTICIPANT);
-
-        const { updated } = diffParticipants(
-            [splitParticipant(before, place)],
-            [stored]
-        );
-
-        expect(updated[0]).toMatchObject({ snapshotChanged: true });
-    });
-
-    it('a second write travels as a state patch of battleData.system', async () => {
-        const migrated = attackerOf(
-            (await attackMutation(wfrpCtx(before), reroll())).participants
-        );
-
-        const next = withWfrpState(migrated, { fortune: 0 });
-
-        expect(buildParticipantPatch(migrated, next)).toEqual({
-            id: 'a',
-            battleData: {
-                system: { key: 'wfrp', data: { ...OLD_FORM, fortune: 0 } },
-            },
-        });
-        expect(splitParticipant(next, place).snapshotHash).toBe(
-            splitParticipant(migrated, place).snapshotHash
-        );
-    });
-
-    it('rolling back to the rows before the migration reads the old form', () => {
-        const rows = splitParticipant(before, place);
-
-        const back = joinParticipant(rows, 'b1');
-
-        expect(back.battleData.system).toBeUndefined();
-        expect(wfrpState(back)).toEqual(OLD_FORM);
-    });
-});
-
-describe('undo history across the migration', () => {
-    const scene = {
-        id: 'b1',
-        campaignId: 'c1',
-        status: 'active' as const,
-        round: 1,
-        turnIndex: 0,
-        version: 1,
-        eventSeq: 0,
-        pendingMoraleCheck: null,
-        pendingChoice: null,
-        startedAt: null,
-        completedAt: null,
-    };
-
-    const meta = {
-        name: 'B',
-        description: null,
-        setup: [],
-        friendlyFire: false,
-        rules: WFRP_RULES,
-        critChoiceByDm: false,
-        map: null,
-        createdAt: new Date(),
-    };
-
-    const current = (p: BattleParticipant): LoadedBattle => ({
-        scene: { ...scene, eventSeq: 2 },
-        meta,
-        participants: [p],
-        pending: [],
-        isDM: true,
-    });
-
-    it('restores the old form before the migration and the slot after it', async () => {
-        const old = fighter('a', ParticipantSide.ALLY, OLD_FORM);
-
-        const migrated = attackerOf(
-            (await attackMutation(wfrpCtx(old), reroll())).participants
-        );
-
-        const spent = withWfrpState(migrated, { fortune: 0 });
-
-        const s0 = [splitParticipant(old, place)];
-
-        const s1 = [splitParticipant(migrated, place)];
-
-        const s2 = [splitParticipant(spent, place)];
-
-        const snapshots = [
-            {
-                seq: 1,
-                state: buildSnapshotState(scene, s0, diffParticipants(s0, s1)),
-            },
-            {
-                seq: 2,
-                state: buildSnapshotState(
-                    { ...scene, eventSeq: 1 },
-                    s1,
-                    diffParticipants(s1, s2)
-                ),
-            },
-        ];
-
-        const [beforeMigration] = restoreParticipantsAt(
-            snapshots,
-            current(spent)
-        ).participants;
-
-        expect(beforeMigration.battleData.system).toBeUndefined();
-        expect(wfrpState(beforeMigration)).toEqual(OLD_FORM);
-
-        const [afterMigration] = restoreParticipantsAt(
-            snapshots.slice(1),
-            current(spent)
-        ).participants;
-
-        expect(afterMigration.battleData.system).toEqual({
-            key: 'wfrp',
-            data: { ...OLD_FORM, fortune: 1 },
-        });
-        expect(wfrpState(afterMigration).fortune).toBe(1);
-    });
-});
 
 describe('channelled SL through the slot', () => {
     const spell = {
@@ -299,9 +87,8 @@ describe('channelled SL through the slot', () => {
             presetRoll: 20,
         }).participant;
 
-    it('channel banks SL into the slot, not the old field', () => {
+    it('channel banks SL into the slot', () => {
         expect(wfrpState(banked()).channelledSl).toBe(2);
-        expect(banked().battleData.channelledSl).toBeUndefined();
     });
 
     it('damage empties the bank', () => {
@@ -354,20 +141,6 @@ describe('condition tests through the slot', () => {
         expect(wfrpState(next)).toEqual({ fortune: 1 });
     });
 
-    it('a new turn clears an old-form attempt list too', () => {
-        const p = fighter('a', ParticipantSide.ALLY, {
-            conditionTests: ['bleeding'],
-        });
-
-        const next = {
-            ...p,
-            battleData: resetTurnState(p, { rules: WFRP_RULES }),
-        };
-
-        expect(wfrpState(next).conditionTests).toBeUndefined();
-        expect(next.battleData.conditionTests).toBeUndefined();
-    });
-
     it('a participant without attempts is not touched', () => {
         const p = base();
 
@@ -390,8 +163,7 @@ describe('psychology tests through the slot', () => {
     const make = (
         id: string,
         side: ParticipantSide,
-        effects: unknown[] = [],
-        over: Partial<BattleParticipant['battleData']> = {}
+        effects: unknown[] = []
     ): BattleParticipant => {
         const p = makeParticipant({
             id,
@@ -404,7 +176,6 @@ describe('psychology tests through the slot', () => {
         return {
             ...p,
             abilities: { ...p.abilities, ...wfrpAbilitiesOf(HERO_WP) },
-            battleData: { ...p.battleData, ...over },
         };
     };
 
@@ -427,19 +198,5 @@ describe('psychology tests through the slot', () => {
         });
 
         expect(again.testerIds).toEqual([]);
-    });
-
-    it('an old-form record still counts as tested', () => {
-        const r = wfrpPsychology(
-            [
-                make('h', ParticipantSide.ALLY, [], {
-                    psychologyTested: { fear: 1 },
-                }),
-                scary(),
-            ],
-            { round: 2, rng: rollOf(70) }
-        );
-
-        expect(r.testerIds).toEqual([]);
     });
 });

@@ -617,8 +617,6 @@ export interface BattleParticipantBattleData {
     ammo?: Record<string, number>;
     /** Per-system participant state; stored in the `state` column, not the snapshot */
     system?: SystemSlot;
-    /** @deprecated dual-read until E2 part 17 */
-    psychologyTested?: Partial<Record<string, number>>;
     /** attack id → owner turn ends left until the magazine refills */
     reload?: Record<string, number>;
     pendingCast?: {
@@ -639,22 +637,8 @@ export interface BattleParticipantBattleData {
     pendingExtraActions?: number;
     /** Атаки дії «Атака», що лишилися цього ходу */
     attacksLeft?: number;
-    /** @deprecated dual-read until E2 part 17 */
-    inspiration?: boolean;
     /** The participant lies at 0 HP rolling death saves; set by the system together with its slot */
     dying?: true;
-    /** @deprecated dual-read until E2 part 17 */
-    fortune?: number;
-    /** @deprecated dual-read until E2 part 17 */
-    channelledSl?: number;
-    /** @deprecated dual-read until E2 part 17 */
-    sin?: number;
-    /** @deprecated dual-read until E2 part 17 */
-    conditionTests?: string[];
-    /** @deprecated dual-read until E2 part 17 */
-    inspirationSpent?: boolean;
-    /** @deprecated dual-read until E2 part 17 */
-    attackedWithLight?: boolean;
     /** Хто прикликав або підняв учасника здібністю */
     summonedBy?: string;
     /** Двійник заклинання Phantom: id кастера; у кастера лише один живий */
@@ -675,8 +659,6 @@ export interface BattleParticipantBattleData {
     reserved?: boolean;
     /** Щойно введений з резерву: ходить після поточного, у порядку введення */
     revealPending?: boolean;
-    /** @deprecated dual-read until E2 part 17 */
-    deathSaves?: { successes: number; failures: number; stable: boolean };
     resolvedAbilities: ResolvedAbility[];
     abilityUsage?: Record<string, AbilityUsageCounter>;
     /** Спільні пули вмінь класу (ключ pool:<classId>:<колонка>); витрачено — abilityUsage[ключ].battle */
@@ -706,8 +688,6 @@ export interface BattleParticipantBattleData {
     returnedThisTurn?: boolean;
     /** Злетів «Пікіруванням»: поза картою й поза досяжністю до початку свого наступного ходу */
     airborne?: AirborneState;
-    /** @deprecated dual-read until E2 part 17 */
-    retaliationsUsed?: number;
     /** Раунд, у якому учасник востаннє отримав шкоду від небезпечної клітинки */
     hazardHitRound?: number;
     /** Відкладені удари заклинань кастера: число вже кинуте, прибувають на початку його ходу в раунді atRound */

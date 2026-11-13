@@ -26,7 +26,6 @@ const CORE_PATCHABLE_FIELDS = {
         'hazardHitRound',
         'zoneHits',
         'pendingHits',
-        'retaliationsUsed',
         'dying',
         'dormant',
         'escaped',
@@ -34,7 +33,6 @@ const CORE_PATCHABLE_FIELDS = {
         'ingredientStock',
         'ammo',
         'reload',
-        'psychologyTested',
         'system',
     ],
     actionFlags: [

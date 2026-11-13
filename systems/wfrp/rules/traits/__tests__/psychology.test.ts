@@ -8,7 +8,8 @@ import { makeParticipant } from '@/lib/utils/abilities/__tests__/fixtures';
 import { DEFAULT_CHARACTERISTICS } from '@/systems/wfrp/rules/characteristics/keys';
 import { wfrpAbilitiesOf } from '@/systems/wfrp/rules/combat/participant';
 import { conditionLevel } from '@/systems/wfrp/rules/conditions/levels';
-import { wfrpState } from '@/systems/wfrp/rules/state';
+import type { WfrpParticipantState } from '@/systems/wfrp/rules/slots';
+import { wfrpState, withWfrpState } from '@/systems/wfrp/rules/state';
 import type { BattleParticipant } from '@/types/battle';
 
 const HERO_WP = {
@@ -26,7 +27,7 @@ const make = (
     id: string,
     side: ParticipantSide,
     effects: unknown[] = [],
-    over: Partial<BattleParticipant['battleData']> = {}
+    over: Partial<WfrpParticipantState> = {}
 ): BattleParticipant => {
     const p = makeParticipant({
         id,
@@ -34,11 +35,10 @@ const make = (
         abilities: effects.length ? [trait(effects, { key: `t-${id}` })] : [],
     });
 
-    return {
-        ...p,
-        abilities: { ...p.abilities, ...wfrpAbilitiesOf(HERO_WP) },
-        battleData: { ...p.battleData, ...over },
-    };
+    return withWfrpState(
+        { ...p, abilities: { ...p.abilities, ...wfrpAbilitiesOf(HERO_WP) } },
+        over
+    );
 };
 
 const fear = (value: number) => ({
@@ -53,7 +53,7 @@ const terror = (value: number) => ({
     value,
 });
 
-const hero = (id = 'h', over: Partial<BattleParticipant['battleData']> = {}) =>
+const hero = (id = 'h', over: Partial<WfrpParticipantState> = {}) =>
     make(id, ParticipantSide.ALLY, [], over);
 
 const monster = (id: string, ...effects: unknown[]) =>
@@ -270,7 +270,13 @@ describe('wfrpPsychology', () => {
         ).toEqual([]);
         expect(
             wfrpPsychology(
-                [hero('h', { dormant: true }), monster('m', fear(1))],
+                [
+                    {
+                        ...hero('h'),
+                        battleData: { ...hero('h').battleData, dormant: true },
+                    },
+                    monster('m', fear(1)),
+                ],
                 { round: 1, rng: rollOf(10) }
             ).testerIds
         ).toEqual([]);

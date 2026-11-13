@@ -7,6 +7,7 @@ import { attackMutation } from '@/lib/server/battles/mutations/attack/attack-mut
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import type { BattleMutationContext } from '@/lib/utils/battle/pipeline/run-battle-mutation';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { withD20State } from '@/systems/d20/rules/state';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
 
 const base = createMockParticipant();
@@ -28,21 +29,28 @@ const off: BattleAttack = {
     hand: 'off',
 };
 
-const hero = (fiveE: boolean): BattleParticipant => ({
-    ...base,
-    basicInfo: { ...base.basicInfo, id: 'hero', controlledBy: 'user-1' },
-    abilities: {
-        ...base.abilities,
-        ...(fiveE ? { damageModel: '5e' as const } : {}),
-    },
-    actionFlags: { ...base.actionFlags, hasUsedAction: true },
-    battleData: {
-        ...base.battleData,
-        attacks: [main, off],
-        attackedWithLight: true,
-        attacksLeft: 0,
-    },
-});
+const hero = (fiveE: boolean): BattleParticipant =>
+    withD20State(
+        {
+            ...base,
+            basicInfo: {
+                ...base.basicInfo,
+                id: 'hero',
+                controlledBy: 'user-1',
+            },
+            abilities: {
+                ...base.abilities,
+                ...(fiveE ? { damageModel: '5e' as const } : {}),
+            },
+            actionFlags: { ...base.actionFlags, hasUsedAction: true },
+            battleData: {
+                ...base.battleData,
+                attacks: [main, off],
+                attacksLeft: 0,
+            },
+        },
+        { attackedWithLight: true }
+    );
 
 const goblin = createMockParticipant({
     basicInfo: {

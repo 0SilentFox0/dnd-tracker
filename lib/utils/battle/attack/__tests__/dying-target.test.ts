@@ -8,6 +8,7 @@ import {
 import { makeParticipant, seq } from '@/lib/utils/abilities/__tests__/fixtures';
 import { processAttack } from '@/lib/utils/battle/attack/process';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { withDeathSaves } from '@/systems/d20/rules/death-saves/state';
 import { d20State } from '@/systems/d20/rules/state';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
 
@@ -54,15 +55,16 @@ const downed = (deathSaves?: {
 }): BattleParticipant => {
     const t = makeParticipant({ id: 't', hp: 0, maxHp: 20 });
 
-    return {
+    const down = {
         ...t,
         combatStats: {
             ...t.combatStats,
             currentHp: 0,
             status: CombatStatus.UNCONSCIOUS,
         },
-        battleData: { ...t.battleData, deathSaves },
     };
+
+    return deathSaves ? withDeathSaves(down, deathSaves) : down;
 };
 
 describe('атака по герою, що вмирає', () => {

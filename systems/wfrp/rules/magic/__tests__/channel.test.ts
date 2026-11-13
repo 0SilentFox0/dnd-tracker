@@ -18,7 +18,6 @@ describe('wfrpChannel', () => {
         const once = channel(p, 20);
 
         expect(wfrpState(once.participant).channelledSl).toBe(2);
-        expect(once.participant.battleData.channelledSl).toBeUndefined();
 
         expect(
             wfrpState(channel(once.participant, 20).participant).channelledSl

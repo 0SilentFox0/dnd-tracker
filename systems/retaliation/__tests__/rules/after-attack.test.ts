@@ -117,7 +117,6 @@ describe('retaliation module on d20', () => {
         const d = from.participants.find((p) => p.basicInfo.id === 'd');
 
         expect(d && retaliationsUsedOf(d)).toBe(1);
-        expect(d?.battleData.retaliationsUsed).toBeUndefined();
         expect(d?.actionFlags.hasUsedReaction).toBe(true);
     });
 });

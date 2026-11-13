@@ -44,10 +44,7 @@ describe('inspiration in attacks', () => {
     it('canUseInspiration needs the rule and the flag', () => {
         const p = createMockParticipant();
 
-        const inspired = {
-            ...p,
-            battleData: { ...p.battleData, inspiration: true },
-        };
+        const inspired = withD20State(p, { inspiration: true });
 
         expect(canUseInspiration(inspired, on)).toBe(true);
         expect(canUseInspiration(inspired, DEFAULT_RULES)).toBe(false);
@@ -55,13 +52,7 @@ describe('inspiration in attacks', () => {
     });
 
     it('spendInspiration clears only the attacker', () => {
-        const a = {
-            ...createMockParticipant(),
-            battleData: {
-                ...createMockParticipant().battleData,
-                inspiration: true,
-            },
-        };
+        const a = withD20State(createMockParticipant(), { inspiration: true });
 
         const other = createMockParticipant();
 
@@ -72,7 +63,6 @@ describe('inspiration in attacks', () => {
         );
 
         expect(d20State(after)).toEqual({ inspirationSpent: true });
-        expect(after.battleData.inspiration).toBeUndefined();
         expect(untouched.battleData.system).toBeUndefined();
     });
 

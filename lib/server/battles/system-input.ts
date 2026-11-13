@@ -17,9 +17,7 @@ export async function parseSystemInput(
     if (!schema) return undefined;
 
     const parsed = schema.safeParse(
-        serverRolled
-            ? { ...body, secondRoll: undefined, fortuneRoll: undefined }
-            : body
+        serverRolled ? { ...body, secondRoll: undefined } : body
     );
 
     if (!parsed.success)

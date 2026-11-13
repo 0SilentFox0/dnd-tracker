@@ -321,14 +321,7 @@ describe('prayers', () => {
         expect(r.casterData).toBeUndefined();
     });
 
-    it('an ordinary spell spends the banked channelled SL (legacy field)', () => {
-        const r = run(30, { cn: 0 }, { caster: caster({ channelledSl: 2 }) });
-
-        expect(r.casterData).toHaveProperty('channelledSl', undefined);
-        expect(r.casterData).not.toHaveProperty('system');
-    });
-
-    it('an ordinary spell spends the banked channelled SL (slot)', () => {
+    it('an ordinary spell spends the banked channelled SL', () => {
         const banked = withWfrpState(caster(), { channelledSl: 2 });
 
         const r = run(30, { cn: 0 }, { caster: banked });

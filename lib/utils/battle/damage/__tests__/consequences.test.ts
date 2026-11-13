@@ -7,7 +7,7 @@ import { dealResistedDamage } from '@/lib/utils/battle/damage/resisted-ability-d
 import { DEFAULT_RULES, type Ruleset } from '@/lib/utils/rules';
 import { deathSavesOf } from '@/systems/d20/rules/death-saves/state';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
-import { wfrpState } from '@/systems/wfrp/rules/state';
+import { wfrpState, withWfrpState } from '@/systems/wfrp/rules/state';
 import type { BattleParticipant } from '@/types/battle';
 
 const withRules = (deathSaves: Partial<Ruleset['deathSaves']>): Ruleset => ({
@@ -150,9 +150,9 @@ describe('dealResistedDamage with rules', () => {
 
 describe('applyDamageConsequences: channelled SL', () => {
     const channelling = () => {
-        const before = createMockParticipant();
-
-        before.battleData = { ...before.battleData, channelledSl: 3 };
+        const before = withWfrpState(createMockParticipant(), {
+            channelledSl: 3,
+        });
 
         return {
             before,

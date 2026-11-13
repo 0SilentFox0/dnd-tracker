@@ -30,7 +30,6 @@ const rollKeys = new Set([
     'rolls',
     'castRoll',
     'secondRoll',
-    'fortuneRoll',
 ]);
 
 export function assertDiceMode(body: Record<string, unknown>, mode: string) {

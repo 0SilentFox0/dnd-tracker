@@ -1,6 +1,7 @@
 import type { Characteristics } from '../../characteristics/keys';
 import { DEFAULT_CHARACTERISTICS } from '../../characteristics/keys';
 import { wfrpAbilitiesOf } from '../../combat/participant';
+import { withWfrpState } from '../../state';
 
 import { makeParticipant } from '@/lib/utils/abilities/__tests__/fixtures';
 import type { BattleParticipant } from '@/types/battle';
@@ -27,16 +28,14 @@ export function caster(
 
     const p = makeParticipant({ id: 'c', hp: 20, maxHp: 20 });
 
-    return {
-        ...p,
-        abilities: {
-            ...p.abilities,
-            ...wfrpAbilitiesOf(characteristics, over.ap && { ap: over.ap }),
+    return withWfrpState(
+        {
+            ...p,
+            abilities: {
+                ...p.abilities,
+                ...wfrpAbilitiesOf(characteristics, over.ap && { ap: over.ap }),
+            },
         },
-        battleData: {
-            ...p.battleData,
-            channelledSl: over.channelledSl,
-            ...(over.sin !== undefined && { sin: over.sin }),
-        },
-    };
+        { channelledSl: over.channelledSl, sin: over.sin }
+    );
 }

@@ -17,7 +17,7 @@ import type { BattleMutationContext } from '@/lib/utils/battle/pipeline/run-batt
 import { DEFAULT_CHARACTERISTICS } from '@/systems/wfrp/rules/characteristics/keys';
 import { wfrpAbilitiesOf } from '@/systems/wfrp/rules/combat/participant';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
-import { wfrpState } from '@/systems/wfrp/rules/state';
+import { wfrpState, withWfrpState } from '@/systems/wfrp/rules/state';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
 
 const sword: BattleAttack = {
@@ -48,7 +48,7 @@ const fighter = (
         },
     };
 
-    return {
+    const built: BattleParticipant = {
         ...p,
         basicInfo: { ...p.basicInfo, battleId: 'b1', controlledBy: 'dm' },
         abilities: {
@@ -57,13 +57,18 @@ const fighter = (
                 ap: { head: 0, arm: 0, body: 0, leg: 0 },
             }),
         },
-        battleData: {
-            ...p.battleData,
-            attacks: [sword],
-            ...(fortune !== undefined && { fortune }),
-        },
+        battleData: { ...p.battleData, attacks: [sword] },
     };
+
+    return fortune === undefined ? built : withWfrpState(built, { fortune });
 };
+
+const SL = { system: { key: 'wfrp', data: { kind: 'sl' } } };
+
+const REROLL = (secondRoll: number) => ({
+    system: { key: 'wfrp', data: { kind: 'reroll' } },
+    secondRoll,
+});
 
 const wfrpCtx = (fortune?: number): BattleMutationContext => {
     const base = context({
@@ -101,7 +106,7 @@ describe('wfrp fortune in attacks', () => {
     it('reroll after a miss hits, spends one Fortune and marks the action and log', async () => {
         const out = await attackMutation(
             { ...wfrpCtx(2), rng: () => 0.795 },
-            body({ fortune: 'reroll', fortuneRoll: 20 })
+            body(REROLL(20))
         );
 
         expect(hpOf(out)).toBeLessThan(20);
@@ -116,7 +121,7 @@ describe('wfrp fortune in attacks', () => {
     it('reroll is not spent when the first roll hits', async () => {
         const out = await attackMutation(
             { ...wfrpCtx(2), rng: () => 0.795 },
-            body({ d20Roll: 20, fortune: 'reroll', fortuneRoll: 10 })
+            body({ d20Roll: 20, ...REROLL(10) })
         );
 
         expect(hpOf(out)).toBeLessThan(20);
@@ -129,7 +134,7 @@ describe('wfrp fortune in attacks', () => {
     it('sl spends one Fortune', async () => {
         const out = await attackMutation(
             { ...wfrpCtx(2), rng: () => 0.795 },
-            body({ d20Roll: 30, fortune: 'sl' })
+            body({ d20Roll: 30, ...SL })
         );
 
         expect(fortuneOf(out)).toBe(1);
@@ -142,7 +147,7 @@ describe('wfrp fortune in attacks', () => {
         'rejects Fortune when the attacker has %s',
         async (f) => {
             await expect(
-                attackMutation(wfrpCtx(f), body({ fortune: 'sl' }))
+                attackMutation(wfrpCtx(f), body(SL))
             ).rejects.toThrow(API_ERRORS.NO_FORTUNE);
         }
     );
@@ -152,7 +157,7 @@ describe('wfrp fortune in attacks', () => {
             ...hero,
             battleData: {
                 ...hero.battleData,
-                fortune: 2,
+                system: { key: 'wfrp', data: { fortune: 2 } },
                 attacks: [
                     {
                         id: 'sword',
@@ -172,8 +177,7 @@ describe('wfrp fortune in attacks', () => {
             attackId: 'sword',
             d20Roll: 15,
             damageRolls: [4],
-            system: { key: 'wfrp', data: { kind: 'sl' } },
-            fortune: 'sl',
+            ...SL,
         });
 
         const out = await attackMutation(
@@ -182,7 +186,7 @@ describe('wfrp fortune in attacks', () => {
         );
 
         expect(
-            out.participants.find((p) => p.basicInfo.id === 'hero')?.battleData
+            wfrpState(out.participants.find((p) => p.basicInfo.id === 'hero')!)
                 .fortune
         ).toBe(2);
     });
@@ -207,45 +211,22 @@ describe('wfrp fortune in attacks', () => {
                 body({
                     targetId: undefined,
                     targetIds: ['t', 'u'],
-                    fortune: 'sl',
+                    ...SL,
                 })
             )
         ).rejects.toThrow(API_ERRORS.NO_FORTUNE);
     });
 
-    it('rejects an out-of-range second roll', async () => {
-        await expect(
-            attackMutation(
-                wfrpCtx(2),
-                body({ fortune: 'reroll', fortuneRoll: 101 })
-            )
-        ).rejects.toThrow(API_ERRORS.INVALID_BODY);
+    it('rejects an out-of-range second roll', () => {
+        expect(() => body(REROLL(101))).toThrow();
     });
 
-    it('the new request shape acts like the old one', async () => {
-        const legacy = await attackMutation(
-            { ...wfrpCtx(2), rng: () => 0.795 },
-            body({ fortune: 'reroll', fortuneRoll: 20 })
-        );
-
-        const next = await attackMutation(
-            { ...wfrpCtx(2), rng: () => 0.795 },
-            body({
-                system: { key: 'wfrp', data: { kind: 'reroll' } },
-                secondRoll: 20,
-            })
-        );
-
-        expect(fortuneOf(next)).toBe(fortuneOf(legacy));
-        expect(JSON.stringify(next.events)).toBe(JSON.stringify(legacy.events));
-    });
-
-    it('server rolls ignore the client fortuneRoll', async () => {
+    it('server rolls ignore the client second roll', async () => {
         const out = await createAttackMutation(undefined, {
             serverRolls: true,
         })(
             { ...wfrpCtx(2), rng: seq(0.895, 0.795, 0.01) },
-            body({ serverRoll: true, fortune: 'reroll', fortuneRoll: 5 })
+            body({ serverRoll: true, ...REROLL(5) })
         );
 
         expect(JSON.stringify(out.events)).not.toContain('"roll":5,');

@@ -24,7 +24,7 @@ describe('contentRowHash', () => {
         ).toBe(contentRowHash('Feat', { name: 'Grappler' }));
     });
 
-    it('Unit characteristics hash to the pre-slot constants', () => {
+    it('Unit characteristics hash to the recorded constants', () => {
         const unit = (characteristics?: unknown) =>
             contentRowHash('Unit', {
                 name: 'U',

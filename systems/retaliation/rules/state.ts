@@ -17,16 +17,15 @@ export const RETALIATION_STATE = D20_STATE.extend<RetaliationState>(
             : undefined
 );
 
-/** Retaliations given since the owner's turn began, as stored; the slot wins over the old flat field */
+/** Retaliations given since the owner's turn began, as stored */
 export const retaliationsUsedOf = (p: BattleParticipant): number | undefined =>
-    RETALIATION_STATE.read(p.battleData.system)?.used ??
-    p.battleData.retaliationsUsed;
+    RETALIATION_STATE.read(p.battleData.system)?.used;
 
 /** Without a count the reaction flag stands for one retaliation */
 export const retaliationUsed = (p: BattleParticipant): number =>
     retaliationsUsedOf(p) ?? (p.actionFlags.hasUsedReaction ? 1 : 0);
 
-/** Battle data with the count in the d20 slot; the base state moves in with it, the old flat field is cleared */
+/** Battle data with the count in the d20 slot; the base state moves in with it */
 export function retaliationStateData(
     p: BattleParticipant,
     used: number
@@ -39,9 +38,6 @@ export function retaliationStateData(
             { used },
             base.system ?? p.battleData.system
         ),
-        ...(p.battleData.retaliationsUsed !== undefined && {
-            retaliationsUsed: undefined,
-        }),
     };
 }
 

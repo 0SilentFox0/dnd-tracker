@@ -7,6 +7,7 @@ vi.mock('@/components/hud/fonts', () => ({ hudFontClassName: '' }));
 import { BonusActionPicker } from '@/components/battle/wizards/BonusActionPicker';
 import { fakeScene } from '@/lib/hooks/battle/__tests__/fake-scene';
 import { render } from '@/lib/i18n/test/render-uk';
+import { withD20State } from '@/systems/d20/rules/state';
 import type { BattleParticipant } from '@/types/battle';
 
 vi.unmock('next-intl');
@@ -26,25 +27,27 @@ function hero(
     me: BattleParticipant,
     over: { model?: '5e'; light?: boolean; bonusUsed?: boolean; off?: boolean }
 ): BattleParticipant {
-    return {
-        ...me,
-        abilities: {
-            ...me.abilities,
-            ...(over.model && { damageModel: over.model }),
+    return withD20State(
+        {
+            ...me,
+            abilities: {
+                ...me.abilities,
+                ...(over.model && { damageModel: over.model }),
+            },
+            actionFlags: {
+                ...me.actionFlags,
+                hasUsedBonusAction: !!over.bonusUsed,
+            },
+            battleData: {
+                ...me.battleData,
+                attacks:
+                    over.off === false
+                        ? me.battleData.attacks
+                        : [...me.battleData.attacks, OFF as never],
+            },
         },
-        actionFlags: {
-            ...me.actionFlags,
-            hasUsedBonusAction: !!over.bonusUsed,
-        },
-        battleData: {
-            ...me.battleData,
-            attackedWithLight: over.light,
-            attacks:
-                over.off === false
-                    ? me.battleData.attacks
-                    : [...me.battleData.attacks, OFF as never],
-        },
-    };
+        { attackedWithLight: over.light ? (true as const) : undefined }
+    );
 }
 
 describe('Атака другою рукою в бонусних діях', () => {

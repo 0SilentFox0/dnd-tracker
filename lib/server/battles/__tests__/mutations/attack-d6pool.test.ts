@@ -82,8 +82,6 @@ describe('attack mutation on a d6pool base, no d20 and no wfrp in the registry',
             ctx(),
             body({
                 system: { key: 'x', data: { kind: 'sl' } },
-                fortune: 'sl',
-                fortuneRoll: 10,
             })
         );
 

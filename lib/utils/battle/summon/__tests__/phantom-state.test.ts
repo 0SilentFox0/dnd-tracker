@@ -6,7 +6,7 @@ import { applyAbilitySummons } from '@/lib/utils/battle/summon/ability-summons';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 
 describe('phantom clone does not inherit the source system state', () => {
-    it('drops the slot, the dying flag, the counters and the inspiration', async () => {
+    it('drops the slot and the dying flag', async () => {
         const mage = makeParticipant({
             id: 'mage',
             side: ParticipantSide.ALLY,
@@ -26,9 +26,6 @@ describe('phantom clone does not inherit the source system state', () => {
                     data: { inspiration: true, attackedWithLight: true },
                 },
                 dying: true as const,
-                deathSaves: { successes: 0, failures: 1, stable: false },
-                inspiration: true,
-                inspirationSpent: true,
             },
         };
 
@@ -59,8 +56,5 @@ describe('phantom clone does not inherit the source system state', () => {
         expect(phantom).toBeDefined();
         expect(phantom?.battleData.system).toBeUndefined();
         expect(phantom?.battleData.dying).toBeUndefined();
-        expect(phantom?.battleData.deathSaves).toBeUndefined();
-        expect(phantom?.battleData.inspiration).toBeUndefined();
-        expect(phantom?.battleData.inspirationSpent).toBeUndefined();
     });
 });

@@ -26,49 +26,20 @@ describe('wfrpState read', () => {
         expect(wfrpState(p)).toEqual({ fortune: 2, channelledSl: 1 });
     });
 
-    it('reads the old flat fields, psychologyTested included', () => {
-        const p = of({
-            fortune: 1,
-            sin: 3,
-            conditionTests: ['bleeding'],
-            psychologyTested: { fear: 2 },
-        });
-
-        expect(wfrpState(p)).toEqual({
-            fortune: 1,
-            sin: 3,
-            conditionTests: ['bleeding'],
-            psychologyTested: { fear: 2 },
-        });
+    it('an empty slot is an empty state', () => {
+        expect(wfrpState(of({ system: { key: 'wfrp', data: {} } }))).toEqual(
+            {}
+        );
     });
 
-    it('the slot wins over the old fields, even when it is empty', () => {
-        expect(
-            wfrpState(of({ fortune: 5, system: { key: 'wfrp', data: {} } }))
-        ).toEqual({});
-        expect(
-            wfrpState(
-                of({
-                    fortune: 5,
-                    system: { key: 'wfrp', data: { fortune: 1 } },
-                })
-            )
-        ).toEqual({ fortune: 1 });
-    });
-
-    it('has nothing without either', () => {
+    it('has nothing without a slot', () => {
         expect(wfrpState(of({}))).toEqual({});
     });
 
-    it("another system's slot is ignored and the old fields are read", () => {
+    it("another system's slot is ignored", () => {
         expect(
-            wfrpState(
-                of({
-                    fortune: 4,
-                    system: { key: 'other', data: { fortune: 9 } },
-                })
-            )
-        ).toEqual({ fortune: 4 });
+            wfrpState(of({ system: { key: 'other', data: { fortune: 9 } } }))
+        ).toEqual({});
     });
 
     it('drops an invalid field and keeps the rest', () => {
@@ -93,20 +64,15 @@ describe('wfrpState read', () => {
 });
 
 describe('wfrpStateData', () => {
-    it('writes the slot and clears only the old keys that are present', () => {
-        const p = of({ fortune: 2, channelledSl: 1 });
+    it('writes the slot with the patch merged in', () => {
+        const p = of({
+            system: { key: 'wfrp', data: { fortune: 2, channelledSl: 1 } },
+        });
 
-        const data = wfrpStateData(p, { fortune: 1 });
-
-        expect(data.system).toEqual({
+        expect(wfrpStateData(p, { fortune: 1 }).system).toEqual({
             key: 'wfrp',
             data: { fortune: 1, channelledSl: 1 },
         });
-        expect(data).toHaveProperty('fortune', undefined);
-        expect(data).toHaveProperty('channelledSl', undefined);
-        expect(data).not.toHaveProperty('sin');
-        expect(data).not.toHaveProperty('conditionTests');
-        expect(data).not.toHaveProperty('psychologyTested');
     });
 
     it('keeps the ext of other modules from the previous slot', () => {
@@ -143,15 +109,6 @@ describe('wfrpStateData', () => {
         expect(wfrpStateData(of({}), { channelledSl: undefined })).toEqual({});
     });
 
-    it('only clears the old key when the result is empty', () => {
-        const data = wfrpStateData(of({ channelledSl: 3 }), {
-            channelledSl: undefined,
-        });
-
-        expect(data).not.toHaveProperty('system');
-        expect(data).toHaveProperty('channelledSl', undefined);
-    });
-
     it('an already written slot stays even when it empties', () => {
         const p = of({ system: { key: 'wfrp', data: { fortune: 1 } } });
 
@@ -164,9 +121,11 @@ describe('wfrpStateData', () => {
 
 describe('withWfrpState', () => {
     it('returns the participant with the written state', () => {
-        const next = withWfrpState(of({ sin: 2 }), { fortune: 3 });
+        const next = withWfrpState(
+            of({ system: { key: 'wfrp', data: { sin: 2 } } }),
+            { fortune: 3 }
+        );
 
         expect(wfrpState(next)).toEqual({ sin: 2, fortune: 3 });
-        expect(next.battleData.sin).toBeUndefined();
     });
 });

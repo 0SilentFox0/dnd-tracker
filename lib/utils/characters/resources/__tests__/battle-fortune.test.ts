@@ -62,7 +62,7 @@ describe('applyCharacterResources fortune', () => {
                 createMockParticipant(),
                 { resources: {}, inspiration: null },
                 DEFAULT_RULES
-            ).battleData.fortune
+            ).battleData.system
         ).toBeUndefined();
     });
 });

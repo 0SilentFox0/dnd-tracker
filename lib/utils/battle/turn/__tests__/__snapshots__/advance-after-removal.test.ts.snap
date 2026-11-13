@@ -131,12 +131,16 @@ exports[`removal зберігає death-save event, participants, turn/round і 
           "activeEffects": [],
           "attacks": [],
           "attacksLeft": undefined,
-          "deathSaves": undefined,
+          "dying": undefined,
           "equippedArtifacts": [],
           "extraMovement": undefined,
           "readied": undefined,
           "resolvedAbilities": [],
           "returnedThisTurn": undefined,
+          "system": {
+            "data": {},
+            "key": "d20",
+          },
           "turnStartPosition": undefined,
         },
         "combatStats": {

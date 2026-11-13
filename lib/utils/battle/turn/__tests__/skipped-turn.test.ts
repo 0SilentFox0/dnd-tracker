@@ -8,6 +8,7 @@ import { DEFAULT_RULES } from '@/lib/utils/rules';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import { rollDyingAt } from '@/systems/d20/rules/death-saves/roll';
+import { withDeathSaves } from '@/systems/d20/rules/death-saves/state';
 import { DEFAULT_CHARACTERISTICS } from '@/systems/wfrp/rules/characteristics/keys';
 import { wfrpAbilitiesOf } from '@/systems/wfrp/rules/combat/participant';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
@@ -53,13 +54,11 @@ describe('skippedTurnAt', () => {
     it('dnd5e dying: same as rollDyingAt', () => {
         const base = downed(CombatStatus.UNCONSCIOUS);
 
-        const p: BattleParticipant = {
-            ...base,
-            battleData: {
-                ...base.battleData,
-                deathSaves: { successes: 0, failures: 0, stable: false },
-            },
-        };
+        const p = withDeathSaves(base, {
+            successes: 0,
+            failures: 0,
+            stable: false,
+        });
 
         const got = skippedTurnAt([p], 0, {
             rules: DND,

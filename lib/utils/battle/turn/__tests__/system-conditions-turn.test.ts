@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
 import { processStartOfTurn } from '../turn-start';
-import { resetTurnState } from '../turn-state';
 
 import { CombatStatus } from '@/lib/constants/battle';
 import { isActive } from '@/lib/utils/abilities/engine/core/participants';
@@ -176,27 +175,5 @@ describe('system condition ticks at turn start', () => {
         );
 
         expect(out.participant.combatStats.currentHp).toBe(10);
-    });
-});
-
-describe('resetTurnState condition tests', () => {
-    it('clears conditionTests only when present', () => {
-        const p = bleed('a', 10);
-
-        expect(
-            resetTurnState(
-                {
-                    ...p,
-                    battleData: {
-                        ...p.battleData,
-                        conditionTests: ['bleeding'],
-                    },
-                },
-                { rules: WFRP_RULES }
-            ).conditionTests
-        ).toBeUndefined();
-        expect(
-            'conditionTests' in resetTurnState(p, { rules: WFRP_RULES })
-        ).toBe(false);
     });
 });

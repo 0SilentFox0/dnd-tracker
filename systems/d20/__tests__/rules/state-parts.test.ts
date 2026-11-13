@@ -38,7 +38,6 @@ describe('d20 fromStored', () => {
         );
 
         expect(p.battleData.system).toBeUndefined();
-        expect(p.battleData.inspiration).toBeUndefined();
     });
 
     it('seeds nothing when the rule is off', () => {
@@ -60,20 +59,6 @@ describe('d20 persist', () => {
     it('asks to clear the sheet inspiration when it was spent', () => {
         expect(
             battleResultOutcome({}, spent, rulesWith(true)).clearInspiration
-        ).toBe(true);
-    });
-
-    it('the old flat inspirationSpent clears it as well', () => {
-        const old = {
-            ...createMockParticipant(),
-            battleData: {
-                ...createMockParticipant().battleData,
-                inspirationSpent: true,
-            },
-        };
-
-        expect(
-            battleResultOutcome({}, old, rulesWith(true)).clearInspiration
         ).toBe(true);
     });
 

@@ -26,7 +26,14 @@ const model = (over: { fortune?: boolean; state?: object } = {}) => {
                 channelled: 2,
                 armourSl: 0,
             },
-            caster: { battleData: { fortune: over.fortune ? 2 : 0 } },
+            caster: {
+                battleData: {
+                    system: {
+                        key: 'wfrp',
+                        data: { fortune: over.fortune ? 2 : 0 },
+                    },
+                },
+            },
         },
         actions,
     } as unknown as Props['book'];

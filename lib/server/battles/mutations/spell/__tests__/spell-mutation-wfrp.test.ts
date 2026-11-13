@@ -15,10 +15,12 @@ import { castOf } from '@/systems/wfrp/rules/__tests__/slot-fixtures';
 import { DEFAULT_CHARACTERISTICS } from '@/systems/wfrp/rules/characteristics/keys';
 import { wfrpAbilitiesOf } from '@/systems/wfrp/rules/combat/participant';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
-import { wfrpState } from '@/systems/wfrp/rules/state';
+import { wfrpState, withWfrpState } from '@/systems/wfrp/rules/state';
 import type { BattleParticipant } from '@/types/battle';
 
 const magic = { cn: 2, kind: 'arcane', overcast: null };
+
+const REROLL = { key: 'wfrp', data: { kind: 'reroll' } };
 
 const bolt = {
     id: 's1',
@@ -58,16 +60,18 @@ const caster = (fortune = 0): BattleParticipant => {
         skillAdvances: { 'language:magick': 10 },
     };
 
-    return {
-        ...p,
-        abilities: { ...p.abilities, ...wfrpAbilitiesOf(characteristics) },
-        battleData: { ...p.battleData, fortune },
-        spellcasting: {
-            ...p.spellcasting,
-            spellSlots: {},
-            knownSpells: ['s1'],
+    return withWfrpState(
+        {
+            ...p,
+            abilities: { ...p.abilities, ...wfrpAbilitiesOf(characteristics) },
+            spellcasting: {
+                ...p.spellcasting,
+                spellSlots: {},
+                knownSpells: ['s1'],
+            },
         },
-    };
+        { fortune }
+    );
 };
 
 const run = (
@@ -123,10 +127,7 @@ describe('castSpellSchema, percentile fields', () => {
         ).toBe(true);
     });
 
-    it('accepts both request shapes of a fortune', () => {
-        expect(
-            castSpellSchema.safeParse({ ...base, fortune: 'sl' }).success
-        ).toBe(true);
+    it('accepts the system request shape of a fortune', () => {
         expect(
             castSpellSchema.safeParse({
                 ...base,
@@ -214,7 +215,7 @@ describe('spell mutation in WFRP', () => {
 
     it('Fortune needs a point', async () => {
         await expect(
-            run(bolt, { castRoll: 90, fortune: 'reroll' })
+            run(bolt, { castRoll: 90, system: REROLL })
         ).rejects.toMatchObject({ message: 'errors.noFortune' });
     });
 
@@ -222,34 +223,20 @@ describe('spell mutation in WFRP', () => {
         await expect(
             run(
                 bolt,
-                { castRoll: 90, free: true, fortune: 'sl' },
+                {
+                    castRoll: 90,
+                    free: true,
+                    system: { key: 'wfrp', data: { kind: 'sl' } },
+                },
                 { c: caster(2) }
             )
         ).rejects.toMatchObject({ message: 'battleLog.reject.fortuneNotFree' });
     });
 
-    it('the new request shape spends Fortune like the old one', async () => {
-        const out = await run(
-            bolt,
-            {
-                castRoll: 90,
-                system: { key: 'wfrp', data: { kind: 'reroll' } },
-                secondRoll: 30,
-            },
-            { c: caster(1) }
-        );
-
-        expect(castOf(details(out))?.outcome).toBe('success');
-        expect(
-            wfrpState(out.participants.find((p) => p.basicInfo.id === 'hero')!)
-                .fortune
-        ).toBe(0);
-    });
-
     it('Fortune reroll with a point is spent', async () => {
         const out = await run(
             bolt,
-            { castRoll: 90, fortune: 'reroll', fortuneRoll: 30 },
+            { castRoll: 90, system: REROLL, secondRoll: 30 },
             { c: caster(1) }
         );
 
@@ -265,7 +252,7 @@ describe('spell mutation in WFRP, fizzle with Fortune', () => {
     it('spends Fortune exactly once', async () => {
         const out = await run(
             bolt,
-            { castRoll: 90, fortune: 'reroll', fortuneRoll: 80 },
+            { castRoll: 90, system: REROLL, secondRoll: 80 },
             { c: caster(2) }
         );
 

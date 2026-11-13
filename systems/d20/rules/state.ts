@@ -3,7 +3,11 @@ import type { BattleParticipant } from '@/types/battle';
 
 type BattleData = BattleParticipant['battleData'];
 
-export type DeathSaves = NonNullable<BattleData['deathSaves']>;
+export interface DeathSaves {
+    successes: number;
+    failures: number;
+    stable: boolean;
+}
 
 export interface D20ParticipantState {
     deathSaves?: DeathSaves;
@@ -43,39 +47,8 @@ export const D20_STATE = defineSlot<D20ParticipantState>('d20', (raw) => {
     };
 });
 
-const LEGACY_KEYS = [
-    'deathSaves',
-    'inspiration',
-    'inspirationSpent',
-    'attackedWithLight',
-] as const satisfies ReadonlyArray<keyof BattleData>;
-
-/** The slot wins whenever it carries our key; otherwise the pre-slot flat fields are read */
-export function d20State(p: BattleParticipant): D20ParticipantState {
-    const slot = D20_STATE.read(p.battleData.system);
-
-    if (slot) return slot;
-
-    const { deathSaves, inspiration, inspirationSpent, attackedWithLight } =
-        p.battleData;
-
-    return {
-        ...(deathSaves && { deathSaves }),
-        ...(inspiration === true && { inspiration: true as const }),
-        ...(inspirationSpent === true && { inspirationSpent: true as const }),
-        ...(attackedWithLight === true && {
-            attackedWithLight: true as const,
-        }),
-    };
-}
-
-const clearedLegacy = (p: BattleParticipant): Partial<BattleData> =>
-    Object.fromEntries(
-        LEGACY_KEYS.filter((k) => p.battleData[k] !== undefined).map((k) => [
-            k,
-            undefined,
-        ])
-    ) as Partial<BattleData>;
+export const d20State = (p: BattleParticipant): D20ParticipantState =>
+    D20_STATE.read(p.battleData.system) ?? {};
 
 /** A `patch` key set to `undefined` drops the field; an empty state is never written into a missing slot */
 export function d20StateData(
@@ -88,17 +61,11 @@ export function d20StateData(
         )
     ) as D20ParticipantState;
 
-    const cleared = clearedLegacy(p);
-
     const hasSlot = D20_STATE.read(p.battleData.system) !== undefined;
 
-    if (!hasSlot && Object.keys(data).length === 0) return cleared;
+    if (!hasSlot && Object.keys(data).length === 0) return {};
 
-    return {
-        ...cleared,
-        ...(!hasSlot && data.deathSaves && { dying: true as const }),
-        system: D20_STATE.write(data, p.battleData.system),
-    };
+    return { system: D20_STATE.write(data, p.battleData.system) };
 }
 
 export const withD20State = (

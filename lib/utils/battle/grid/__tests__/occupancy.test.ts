@@ -4,6 +4,7 @@ import { bothOnMap, isAdjacent, isFallen, isOnMap } from '../occupancy';
 
 import { CombatStatus } from '@/lib/constants/battle';
 import { placed, testMap } from '@/lib/utils/battle/__tests__/fixtures/placed';
+import { withDeathSaves } from '@/systems/d20/rules/death-saves/state';
 
 describe('bothOnMap', () => {
     const a = placed('a', { at: { x: 1, y: 1 } });
@@ -22,15 +23,18 @@ describe('герой, що вмирає (5e), лишається на полі',
     const down = (
         p: ReturnType<typeof placed>,
         deathSaves?: { successes: number; failures: number; stable: boolean }
-    ) => ({
-        ...p,
-        combatStats: {
-            ...p.combatStats,
-            currentHp: 0,
-            status: CombatStatus.UNCONSCIOUS,
-        },
-        battleData: { ...p.battleData, deathSaves },
-    });
+    ) => {
+        const downed = {
+            ...p,
+            combatStats: {
+                ...p.combatStats,
+                currentHp: 0,
+                status: CombatStatus.UNCONSCIOUS,
+            },
+        };
+
+        return deathSaves ? withDeathSaves(downed, deathSaves) : downed;
+    };
 
     it('з кидками смерті займає клітинку й суміжний', () => {
         const dying = down(placed('a', { at: { x: 1, y: 1 } }), {

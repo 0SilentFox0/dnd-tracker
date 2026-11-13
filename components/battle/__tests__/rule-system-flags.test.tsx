@@ -16,6 +16,7 @@ import { fakeScene } from '@/lib/hooks/battle/__tests__/fake-scene';
 import { render } from '@/lib/i18n/test/render-uk';
 import { textRef } from '@/lib/i18n/text-ref';
 import { applyWfrpConditionTo } from '@/systems/wfrp/rules/conditions/apply';
+import { withWfrpState } from '@/systems/wfrp/rules/state';
 import type { BattleParticipant } from '@/types/battle';
 
 vi.unmock('next-intl');
@@ -152,13 +153,9 @@ describe('прапорці системи правил у HUD бою', () => {
                 }),
             }).participant;
 
-            return {
-                ...bled,
-                battleData: {
-                    ...bled.battleData,
-                    ...(tests && { conditionTests: tests }),
-                },
-            };
+            return tests
+                ? withWfrpState(bled, { conditionTests: tests })
+                : bled;
         };
 
         const wfrp = scene('wfrp');
