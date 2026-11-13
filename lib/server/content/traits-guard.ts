@@ -77,8 +77,10 @@ export async function assertCampaignEffects(
         select: { rules: true },
     });
 
+    if (!campaign) throw new ContentError(API_ERRORS.NOT_FOUND, 404);
+
     assertEffectsInComposition(
-        parseRules(campaign?.rules ?? null).system,
+        parseRules(campaign.rules).system,
         abilities,
         existing
     );

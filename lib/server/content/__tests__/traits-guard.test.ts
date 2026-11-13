@@ -155,6 +155,13 @@ describe('assertCampaignEffects', () => {
         ).resolves.toBeUndefined();
     });
 
+    it('an unknown campaign is 404, not a rules parse error', async () => {
+        findUnique.mockResolvedValue(null);
+        await expect(
+            assertCampaignEffects('gone', morale)
+        ).rejects.toMatchObject({ message: API_ERRORS.NOT_FOUND, status: 404 });
+    });
+
     it('skips the campaign lookup when there are no abilities', async () => {
         findUnique.mockClear();
         await assertCampaignEffects('c1', undefined);

@@ -17,12 +17,19 @@ import { defineResource } from '@/lib/server/content/define-resource';
 import { detachRefs } from '@/lib/server/content/detach-refs';
 import { parseInput, toJsonInput } from '@/lib/server/content/errors';
 import { ContentError } from '@/lib/server/content/errors';
+import {
+    assertCampaignEffects,
+    storedEffectOwners,
+} from '@/lib/server/content/traits-guard';
 import { loadBookSpellsByIds } from '@/lib/server/spells/book-spells-by-ids';
 import { resolveIngredientsUpdate } from '@/lib/server/spells/ingredients-update';
 import { assertManualActivation } from '@/lib/utils/spells/model/execution';
 import { spellDefinitionColumns } from '@/lib/utils/spells/model/read';
 
 const withGroup = { spellGroup: true } as const;
+
+const effectOwners = (effects: readonly { kind: string }[] | undefined) =>
+    effects?.length ? [{ effects }] : undefined;
 
 export const spellsResource = defineResource<
     SpellRow,
@@ -61,6 +68,10 @@ export const spellsResource = defineResource<
             ...(purpose === 'read' && { include: withGroup }),
         }),
     create: async (actor, data) => {
+        await assertCampaignEffects(
+            actor.campaignId,
+            effectOwners(data.spellEffects)
+        );
         await assertCampaignRefs(actor.campaignId, {
             spellGroup: data.groupId,
         });
@@ -116,6 +127,11 @@ export const spellsResource = defineResource<
                 422
             );
         }
+        await assertCampaignEffects(
+            actor.campaignId,
+            effectOwners(data.spellEffects),
+            storedEffectOwners([{ effects: existing.spellEffects }])
+        );
         await assertCampaignRefs(actor.campaignId, {
             spellGroup: data.groupId,
         });
