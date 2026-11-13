@@ -93,6 +93,7 @@ Core бачить `systems/*` лише через корені (`SYSTEM_ROOTS`, 
 Перегенерація: `pnpm exec tsx scripts/shared/system-ratchet.ts --write`; числа лише падають.
 
 - `system-imports-exempt.json` = `[]` (було 18 в E1, 1 до Ч17).
+- Межі UI системних тек (`systems/*/{ui,hooks}` беруть з core лише `ui`/`hud`/`common`, `components/systems/types` і кіт) — ESLint `ui-layers/zone`, `ui-layers-exempt.json` = `[]`; див. [ui-layers.md](ui-layers.md).
 - `system-literals-exempt.json`: 6 файлів / 11 влучань, лише тексти й назва кубика (`log/codec.ts`, `site.ts`, `whats-new.ts`, фікстура `defaults.ts`, `'d20'` у `types/characters.ts` і `SheetRollDialog.tsx`). Дані й активи (`scripts/assets/**`, `scripts/seed/**`, `scripts/srd/**`, профілі sweep) скан літералів не дивиться: виняток у `isLiteralAllowed` (`DATA_DIRS`), а не в `SKIP_DIRS` (той діє й на скан імпортів). Було 15 / 56 після Ч17 (зростання від токена `homm` у даних).
 - `RULES_SECTION_READERS` (читання `rules.<секція>` у core) = 0 за всіма секціями (пункти, які тримає core, як `encounters.balance/unitGroups`, не рахуються: `OWNED_ITEMS`).
 - `LEAK_NAMES`: `isFiveE` 0; поля колишнього dual-read (`channelledSl`, `conditionTests`, `psychologyTested`, `attackedWithLight`, `inspirationSpent`, `retaliationsUsed`) = 0 (forward-скрипт і `battle-state-shapes` очищено в Ч18); `useChannelAction` 0; `HOMM_[A-Z]+` 0 (профілі sweep поза скан, Ч18); **`CONDITION_5E_` 11** (словник станів у схемі ефектів core) → E3.

@@ -15,4 +15,8 @@ paths:
 - Confirmations and notices: `useConfirm()` / `useNotify()` from `@/lib/hooks/common`, never `window.confirm`/`alert` (ESLint enforces). Component tests render them inside `ConfirmProvider` (`components/ui/__tests__/render-with-confirm.tsx`).
 - Forms: `HudFormPage` + `HudForm` (tabs via `HudTab`, section headings via `HudSection`) from `components/hud/form`; form dialogs use `ResponsiveDialog hud`. Inside `.hud-surface` the shadcn tokens are HUD-coloured and the HUD text variable is `--hud-muted`. Accordions only in lists, never in forms.
 - Pages (lists, dashboards): `HudPage` + `HudPageHeader`, items as `HudCard` / `HudTile`, filters as `HudChipTabs`, panels `HudPanel` (`components/hud/page`); the section art (`body::before`, picked in `app/globals.css` by the `data-screen-bg` marker that a segment `layout.tsx` renders via `screenBackgroundLayout` from `components/layout/screen-background.tsx`; no marker → tavern) stays visible behind the translucent panels. Print pages (`dm/print/*`) stay light.
+- Layers: `ui` → `hud` → `common` → domain → `systems/<id>/ui` → `app`; imports go down only (ESLint `ui-layers/zone`, ratchet `ui-layers-exempt.json`, details in `docs/architecture/ui-layers.md`).
+- `common` has no domain types or domain components; a widget shared by two domains lives in the folder of the data owner.
+- System UI takes from core only `ui`/`hud`/`common`, `components/systems/types` and the kit (`SYSTEM_UI_KIT` in `scripts/shared/ui-layers.mjs`).
+- `ActionBar` is `components/ui/action-bar`, `ImageUpload` is `components/common`; dice are `components/dice`.
 - Page states: `components/common/states` (`QueryState`, `EmptyState`, `LoadingState`, `ErrorState`); form buttons: `ActionBar`.

@@ -39,6 +39,8 @@ pnpm exec prisma migrate dev --name X  # create + apply a migration locally
 
 6. **`systems/<id>/`** — a rule base, module (`addon`, `requires` its base) or preset (base + modules); a campaign plays a composition `{ key, modules? }`, core sees only `ruleSystemOf(rules)` and never a module directly. A folder (`meta.ts`, `index.ts`, `rules/`, `server/`, `ui/`, `hooks/`, `api/`, `constants/`, `__tests__/`) follows the same layering inside (`rules` = utils, `ui` = components, `hooks`, `api`). Core reaches it only through the generated roots (`lib/utils/rules/systems/{meta,registry}.ts`, `components/systems/registry.ts`, `lib/server/systems/registry.ts`, the two ability-effect roots, `scripts/templates/systems/index.ts`); after adding a folder run `pnpm systems:index`. Any other `@/systems/*` import is an ESLint error unless listed in `system-imports-exempt.json`.
 
+UI layers and the core-UI kit for systems: `docs/architecture/ui-layers.md` (ESLint `ui-layers/zone`).
+
 New endpoint = route → `lib/api/<domain>.ts` → hook → `types/<domain>.ts`. Cross-domain types: `@/types/<domain>` (no barrel); prefer an existing domain file over a new one.
 
 ### Cross-cutting rules
