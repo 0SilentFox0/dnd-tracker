@@ -25,6 +25,8 @@ Page `app/campaigns/[id]/battles/[battleId]/page.tsx` (server: `userId` from `ge
 
 **Форма знімка й стан учасника (Ч14).** `battle_participants` = колонки + `state` (легкий, пишеться щоразу) + `snapshot` (важкий, лише при зміні `snapshotHash`). Лічильники системи (`battleData.system`, wfrp: Fortune, канал, гріх, спроби тестів станів, психологія) ідуть у `state`, не в `snapshot`; у кожному рядку `battle_snapshots` вони теж є (`participants[].state`), тому undo нової форми точний. Правила: (1) читання dual-read (слот, інакше старі плоскі ключі); (2) перший запис стирає старі ключі й пише слот з `prev`; (3) порожній слот не пишемо, записаний не видаляємо; (4) усе, що пише `snapshot`, пише й `snapshotHash`. Деталі й runbook відкату — [rule-systems.md](rule-systems.md), «Ч14».
 
+**Стан d20 (Ч15).** Кидки смерті, натхнення, лівий кулак і лічильник відсічі (`ext.retaliation.used`) лежать у слоті `d20` так само; хто лежить на 0 HP — нейтральний прапорець `battleData.dying` (`isDying`, читає й старий `deathSaves`). Лівий кулак — `combat.offHand { allowed, ready, arm }`, натхнення — `combat.inspiration`. Деталі — [rule-systems.md](rule-systems.md), «Ч15».
+
 ## Mutation pipeline
 
 Every battle route is a Zod schema + `runBattleMutation` (`lib/server/battles/run-mutation.ts`, pure engine in `lib/utils/battle/pipeline/`) with a `<action>-mutation.ts` in `lib/server/battles/mutations/<action>/`. The pipeline:

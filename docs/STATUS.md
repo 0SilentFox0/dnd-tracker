@@ -131,6 +131,18 @@ _Оновлено: 2026-11-11._
 
 Гілка `feat/e2-part1-composition` (worktree `../dnd-tracker-e2-part1`), 11 комітів, **не змерджена й не запушена**; prod-кроків немає. Гейти: `tsc` чистий, повний `test:run` 15340 зелених, ESLint 0 помилок, `pnpm systems:index` ідемпотентний, ratchet-файли не зросли. Opus-огляд: blockers немає. Відкладено: baseline sweep і golden-журнали (Ч1 задача 0) — перед Ч5. Лишилось у Ч3: (1) `mergeRules` при зміні `key` має скидати `modules`, а невалідні `modules` не стирати мовчки при збереженні правил (`schema.ts` parseRules/mergeRules); (2) прокинути `prev` у всі `slot.write(...)` у `systems/wfrp/rules/**` до першого запису в `ext`; (3) `duplicateClaim` вважати префікс (`magic` і `magic.slots`) конфліктом; (4) `FieldKinds` розширити словниками нових секцій; (5) нова база без `tokens` мовчки випадає з substring-ratchet: додати перевірку в `system-contract`. Тимчасове: `fallbackBase` UI/server повертає d20 для будь-якого ключа (зникне в Ч2).
 
+### E2 Ч15: стан d20 у слоті, `dying`, множники (2026-11-13)
+
+Та сама гілка `feat/e2-part14-15-battle-state`, **не змерджена й не запушена**; prod-кроків немає. Зроблено: слот `d20` (`deathSaves`, `inspiration`, `attackedWithLight`, `ext.retaliation.used`) з dual-read; нейтральний прапорець `dying` (`isDying`); натхнення через `combat.inspiration` і `participant.persist`; `combat.offHand` з трьома методами `allowed/ready/arm`; відсіч у `ext.retaliation.used`; множники архетипу — частина `heroscaling` (Т15.3; відхилення: класовий режим через `damageModel === '5e'`); скрипти знають поля d20; `isFiveE` 10→9, нові числа `LEAK_NAMES` (див. `rule-systems.md`, «Ч15»). Деталі — там же та в `battle.md`.
+
+**Рішення** (прийняті за рекомендацією зі списку розд. 11 дизайну): `dying` + слот d20 у Ч15; натхнення — через слот d20; `combat.offHand { allowed, ready, arm }`; без окремого стану моралі; `hero-damage` → Ч17; деплой Ч15 окремо від Ч14.
+
+**Хвости:** (Minor 4 Ч14) `casterData` wfrp несе весь слот, не дельту; `canOffHandAttack`/`spendAttack` переїхали в `lib/utils/battle/attack/off-hand.ts` (no-cycle); `hero-damage` → Ч17; решта читачів `isFiveE` (9) → Ч17.
+
+**RUNBOOK Ч15 (prod, кожен крок за окремим «так»):** деплоїти окремо від Ч14 і лише без активного бою (`active-battles-report --status all` на prod). Відкат: `battle-state-downgrade --status all --apply` (dry-run спершу) до rollback коду. Після деплою тиждень спостереження до Ч17.
+
+**Гейти:** `tsc`, `test:run`, sweep, `next build` — оновить контролер. Фікс гейтів Ч15: тести `consequences`, `spell-candidates-dying`, `advance-after-removal` (знімок) оновлено під слот d20 + `dying` (помилки тестів, не регресія коду); `homm5-legacy-state` — конфлікт імені `join` і порівняння дії без `id`/`timestamp`.
+
 ### E2 Ч14: стан учасника бою в слоті системи (2026-11-13)
 
 Гілка `feat/e2-part14-15-battle-state` (worktree `../dnd-tracker-e2-ch14`, від main 53c290ed8), **не змерджена й не запушена**; prod-кроків немає. Зроблено: лічильники wfrp (`fortune`, `channelledSl`, `sin`, `conditionTests`, `psychologyTested`) переїхали з полів core в `battleData.system` (колонка `state`) з кодеком `PARTICIPANT_STATE` і dual-read; нові хуки `combat.turn.resetState`, `participant.fromStored`, `participant.persist` (порожні в d20/HOMM); `resetTurnState`/`applyBattleResult` отримують `rules`; скрипти `scripts/db/active-battles-report.ts` (читання) і `scripts/db/battle-state-downgrade.ts`; хук `useConditionTestPanel` перенесено в `systems/wfrp/hooks` (поза barrel). Деталі — `rule-systems.md` («Ч14»), `battle.md`.
