@@ -34,7 +34,7 @@ export const ParticipantList = memo(function ParticipantList({
 
     const { hpTerm } = useBattleRules();
 
-    const { defense } = useSystemBattleUi();
+    const { defense, badges } = useSystemBattleUi();
 
     const impactFor = useFxImpacts();
 
@@ -84,6 +84,7 @@ export const ParticipantList = memo(function ParticipantList({
                     }}
                     impact={impactFor(participant.basicInfo.id)}
                     onSelect={clickParticipant}
+                    badges={badges}
                 />
             ))}
             {reserved.map((p) => (

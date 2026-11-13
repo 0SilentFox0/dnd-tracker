@@ -9,7 +9,6 @@ import {
     EffectLine,
     HealthBar,
     HpFigure,
-    SlotGrid,
     TurnTimerBar,
     ZoomablePortrait,
 } from '@/components/battle/hud';
@@ -49,9 +48,10 @@ export const MyHeroPanel = memo(function MyHeroPanel({
         effects,
     } = useBattleSceneData();
 
-    const { hpTerm, spells } = useBattleRules();
+    const { hpTerm } = useBattleRules();
 
-    const { ConditionTestPanel, HeroStats } = useSystemBattleUi();
+    const { ConditionTestPanel, HeroStats, heroPanels, badges } =
+        useSystemBattleUi();
 
     const heroEffects = effects.get(live.basicInfo.id) ?? NO_EFFECTS;
 
@@ -93,6 +93,13 @@ export const MyHeroPanel = memo(function MyHeroPanel({
                             <span className="truncate">
                                 {hero.basicInfo.name}
                             </span>
+                            {badges?.map((Badge, i) => (
+                                <Badge
+                                    key={i}
+                                    participant={hero}
+                                    place="hero"
+                                />
+                            ))}
                             {morale !== 0 && (
                                 <span
                                     className={cn(
@@ -148,7 +155,8 @@ export const MyHeroPanel = memo(function MyHeroPanel({
                 </div>
             </div>
             {!compact && <TurnTimerBar />}
-            {!compact && spells && <SlotGrid participant={hero} />}
+            {!compact &&
+                heroPanels?.map((Panel, i) => <Panel key={i} hero={hero} />)}
             {!compact && (charges.length > 0 || pools.length > 0) && (
                 <div className="mt-2.5 flex h-6 items-center gap-4 text-sm text-hud-text">
                     {charges.map((c) => (

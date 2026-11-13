@@ -1,6 +1,8 @@
+import { DeathSaveBadge } from './battle/DeathSaveBadge';
 import { d20Defense } from './battle/defense';
 import { HeroStats as BattleHeroStats } from './battle/HeroStats';
 import { ParticipantStats } from './battle/ParticipantStats';
+import { SpellSlotsPanel } from './battle/SpellSlotsPanel';
 import { ResourceFields } from './rest/ResourceFields';
 import { RestBadges } from './rest/RestBadges';
 import { ActionsSection } from './rules/ActionsSection';
@@ -25,6 +27,8 @@ export const D20_MODULE_UI: SystemUi = {
         HeroStats: BattleHeroStats,
         defense: d20Defense,
         ParticipantStats,
+        heroPanels: [SpellSlotsPanel],
+        badges: [DeathSaveBadge],
     },
     rulesSections: {
         criticals: CriticalsSection,
