@@ -17,7 +17,7 @@ import {
 
 import { CUSTOM_CONDITION_KEY_RE } from '@/lib/utils/abilities/schema/kinds';
 import { isRecord } from '@/lib/utils/common/is-record';
-import { moduleCatalog } from '@/lib/utils/rules/systems/catalog';
+import { MODULE_ID_RE, moduleCatalog } from '@/lib/utils/rules/systems/catalog';
 import { validateComposition } from '@/lib/utils/rules/systems/compose';
 
 export type { Ruleset };
@@ -237,8 +237,6 @@ export type RulesetPatch = Omit<
     removeCustomConditions?: string[];
     confirm?: true;
 };
-
-const MODULE_ID_RE = /^[a-z0-9]+$/;
 
 const patchOfSection = (section: RulesSection) => {
     const object = z.strictObject(

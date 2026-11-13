@@ -76,14 +76,16 @@ export function SystemSection({
 
                         const summary = tTerms(`module.${toggle.id}.summary`);
 
+                        const name = tTerms(`module.${toggle.id}.name`);
+
                         return (
                             <SwitchField
                                 key={toggle.id}
                                 id={`rules-module-${toggle.id}`}
-                                ariaLabel={tTerms(`module.${toggle.id}.name`)}
+                                ariaLabel={name}
                                 label={
                                     <>
-                                        {tTerms(`module.${toggle.id}.name`)}
+                                        {name}
                                         {toggle.toggle === 'setup' && (
                                             <span className="ml-2 text-xs text-hud-muted">
                                                 {t('system.modules.setupBadge')}

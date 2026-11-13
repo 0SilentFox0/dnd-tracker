@@ -58,14 +58,14 @@ export function useCampaignModules(campaignId: string): {
             destructive: true,
         });
 
+    const toggles = data ? moduleToggles(data.system) : [];
+
     const toggle = async (id: string, on: boolean) => {
         if (!data) return;
 
         const modules = withModule(data.system, id, on).modules;
 
-        const setup =
-            moduleToggles(data.system).find((m) => m.id === id)?.toggle ===
-            'setup';
+        const setup = toggles.find((m) => m.id === id)?.toggle === 'setup';
 
         const send = (confirmed: boolean) =>
             mutation.mutateAsync({
@@ -108,7 +108,7 @@ export function useCampaignModules(campaignId: string): {
     };
 
     return {
-        toggles: data ? moduleToggles(data.system) : [],
+        toggles,
         toggle,
         isPending: mutation.isPending,
     };

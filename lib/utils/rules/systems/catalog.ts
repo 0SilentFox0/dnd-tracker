@@ -2,6 +2,8 @@ import { SYSTEM_META, type SystemKind, type SystemMeta } from './meta';
 
 import { CORE_CONTENT_KINDS } from '@/lib/constants/content-kinds';
 
+export const MODULE_ID_RE = /^[a-z0-9]+$/;
+
 export interface SystemSelection {
     key: string;
     modules?: readonly string[];

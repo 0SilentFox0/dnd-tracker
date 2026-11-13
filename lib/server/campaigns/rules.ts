@@ -115,11 +115,8 @@ export async function updateCampaignRules(
 
         const { confirm, ...rest } = patch;
 
-        const modules = patch.system?.modules && [
-            ...new Set(patch.system.modules),
-        ];
-
-        modules?.sort();
+        const modules =
+            patch.system?.modules && [...new Set(patch.system.modules)].sort();
 
         const keyChanged =
             !!patch.system?.key && patch.system.key !== current.system.key;

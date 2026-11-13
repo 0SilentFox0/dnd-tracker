@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { CampaignStatus, CampaignVisibility } from '@/lib/constants/campaigns';
+import { MODULE_ID_RE } from '@/lib/utils/rules/systems/catalog';
 import { TEMPLATE_CONTENT_LOCALES } from '@/lib/utils/templates/manifest';
 
 export const createCampaignSchema = z
@@ -16,7 +17,7 @@ export const createCampaignSchema = z
             .strictObject({
                 key: z.string().min(1),
                 modules: z
-                    .array(z.string().regex(/^[a-z0-9]+$/))
+                    .array(z.string().regex(MODULE_ID_RE))
                     .max(32)
                     .optional(),
             })
