@@ -7,7 +7,7 @@ import { Items } from '@/components/classes/progression/ProgressionRowView';
 import { SubclassesEditor } from '@/components/classes/SubclassesEditor';
 import type { ClassFormData, GameClassData } from '@/types/classes';
 
-vi.mock('@/components/ui/image-upload', () => ({
+vi.mock('@/components/common/ImageUpload', () => ({
     ImageUpload: ({
         value,
         onChange,

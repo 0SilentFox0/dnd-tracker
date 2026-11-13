@@ -8,10 +8,10 @@ import { FieldRenderer } from './fields/FieldRenderer';
 import { useAbilityEditor, useErrorsUnder } from './editor-context';
 import { FieldErrors } from './FieldErrors';
 import { NestedEffectsEditor } from './NestedEffectsEditor';
-import { useAbilityText } from './use-ability-text';
 
 import { Button } from '@/components/ui/button';
 import { SelectField } from '@/components/ui/select-field';
+import { useAbilityText } from '@/lib/hooks/abilities';
 import { useAbilityComposition } from '@/lib/hooks/abilities/useAbilityComposition';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import {

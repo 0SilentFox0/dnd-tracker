@@ -6,7 +6,7 @@ import { ShowWaiting } from './ShowWaiting';
 import { SlideCaption } from './SlideCaption';
 
 import { PuzzleStage } from '@/components/show/puzzle/PuzzleStage';
-import { ShowWorldStage } from '@/components/world/show/ShowWorldStage';
+import { ShowWorldStage } from '@/components/show/world/ShowWorldStage';
 import { SLIDE_CROSSFADE_MS } from '@/lib/constants/show';
 import { useSlideLayers } from '@/lib/hooks/show';
 import { cn } from '@/lib/utils';

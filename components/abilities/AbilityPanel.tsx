@@ -14,14 +14,13 @@ import { AbilityFlow } from './AbilityFlow';
 import { useErrorsUnder } from './editor-context';
 import { FieldErrors } from './FieldErrors';
 import type { FlowPart } from './flow-part';
-import { useAbilityText } from './use-ability-text';
 
+import { ImageUpload } from '@/components/common/ImageUpload';
 import { Button } from '@/components/ui/button';
-import { ImageUpload } from '@/components/ui/image-upload';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { useRevealOnError } from '@/lib/hooks/abilities';
+import { useAbilityText, useRevealOnError } from '@/lib/hooks/abilities';
 import type { Ability } from '@/lib/utils/abilities/schema';
 import { summarizeAbility } from '@/lib/utils/abilities/summary';
 

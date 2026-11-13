@@ -31,7 +31,7 @@ vi.mock('@/components/battle/fx/animations', () => ({
 vi.mock('@/components/battle/fx/runtime/stage', () => ({
     cancelLayer: h.cancelLayer,
 }));
-vi.mock('@/components/battle/fx/dice/DiceStage', () => ({
+vi.mock('@/components/dice/DiceStage', () => ({
     DiceStage: forwardRef(function DiceStage(_, ref) {
         useImperativeHandle(ref, () => ({
             play: h.dicePlay,

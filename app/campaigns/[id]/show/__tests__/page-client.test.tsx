@@ -47,7 +47,7 @@ vi.mock('@/components/audio/AudioDock', () => ({
     AudioDock: () => <div data-testid="audio-dock" />,
 }));
 
-vi.mock('@/components/common/DiceRoller', () => ({
+vi.mock('@/components/dice/DiceRoller', () => ({
     DiceRoller: () => <div data-testid="dice-roller" />,
 }));
 

@@ -5,15 +5,15 @@ import { useEffect, useRef } from 'react';
 import '@/components/battle/fx/fx.css';
 import { preloadAnimation } from '@/components/battle/fx/animations';
 import {
-    DiceStage,
-    type DiceStageHandle,
-} from '@/components/battle/fx/dice/DiceStage';
-import {
     FX_LOAD_TIMEOUT_MS,
     playFx,
 } from '@/components/battle/fx/runtime/play';
 import { cancelLayer } from '@/components/battle/fx/runtime/stage';
 import { useFxBadgeLabels } from '@/components/battle/fx/use-badge-labels';
+import {
+    DiceStage,
+    type DiceStageHandle,
+} from '@/components/dice/DiceStage';
 import {
     fireFxImpact,
     useBattleFxQueue,

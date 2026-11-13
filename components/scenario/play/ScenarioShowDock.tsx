@@ -10,7 +10,7 @@ import { OptimizedImage } from '@/components/common/OptimizedImage';
 import { ShowButton } from '@/components/show/stage/show-ui';
 import { ShowDeckStrip } from '@/components/show/stage/ShowDeckStrip';
 import { ShowTransport } from '@/components/show/stage/ShowTransport';
-import { ShowWorldControls } from '@/components/world/show/ShowWorldControls';
+import { ShowWorldControls } from '@/components/show/world/ShowWorldControls';
 import { useCssVarHeight, useNotify } from '@/lib/hooks/common';
 import { type ScenarioPlay, useShowDockExpanded } from '@/lib/hooks/scenario';
 import { useShowAudioHost, useShowKeys } from '@/lib/hooks/show';

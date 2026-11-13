@@ -10,9 +10,9 @@ import { SpeciesStep } from './SpeciesStep';
 import { StatsStep } from './StatsStep';
 import { TalentsStep } from './TalentsStep';
 
-import { ActionBar } from '@/components/common/ActionBar';
 import { StepIndicator } from '@/components/common/StepIndicator';
 import { HudFormPage } from '@/components/hud/form';
+import { ActionBar } from '@/components/ui/action-bar';
 import { Button } from '@/components/ui/button';
 import { errorMessage } from '@/lib/utils/common/error-message';
 import type { WfrpDraftIdentityInput } from '@/systems/wfrp/api/types';

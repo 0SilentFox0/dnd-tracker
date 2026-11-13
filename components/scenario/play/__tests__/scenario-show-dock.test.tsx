@@ -30,7 +30,7 @@ vi.mock('@/lib/hooks/common', async (importOriginal) => ({
     ...(await importOriginal<typeof import('@/lib/hooks/common')>()),
     useNotify: () => vi.fn(),
 }));
-vi.mock('@/components/world/show/ShowWorldControls', () => ({
+vi.mock('@/components/show/world/ShowWorldControls', () => ({
     ShowWorldControls: () => <div>world-controls</div>,
 }));
 vi.mock('@/lib/hooks/world', () => ({

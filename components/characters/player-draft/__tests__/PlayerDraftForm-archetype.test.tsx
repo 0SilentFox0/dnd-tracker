@@ -42,7 +42,7 @@ vi.mock('@/components/onboarding/OnboardingHint', () => ({
 vi.mock('@/components/choices/ChoicesEditor', () => ({
     ChoicesEditor: () => null,
 }));
-vi.mock('@/components/ui/image-upload', () => ({ ImageUpload: () => null }));
+vi.mock('@/components/common/ImageUpload', () => ({ ImageUpload: () => null }));
 vi.mock('../AbilityScoresPicker', () => ({ AbilityScoresPicker: () => null }));
 vi.mock('@/components/common/EntityIcon', () => ({ EntityIcon: () => null }));
 

@@ -3,9 +3,9 @@ import { CategoryChip } from './CategoryChip';
 import { CompendiumAdvanced } from './CompendiumAdvanced';
 import { CompendiumMaterials } from './CompendiumMaterials';
 
-import { ActionBar } from '@/components/common/ActionBar';
 import { HudSection } from '@/components/hud/form';
 import { HudPanel } from '@/components/hud/page';
+import { ActionBar } from '@/components/ui/action-bar';
 import { Button } from '@/components/ui/button';
 import type { CompendiumImportController } from '@/lib/hooks/compendium-import';
 import { useTranslator } from '@/lib/i18n/use-translator';

@@ -7,13 +7,13 @@ import { FooterGate } from '@/components/layout/FooterGate';
 import { HeaderGate } from '@/components/layout/HeaderGate';
 import { PageTransition } from '@/components/layout/PageTransition';
 import { ScreenBackground } from '@/components/layout/screen-background';
+import { ThemeProvider } from '@/components/layout/ThemeProvider';
 import { ConfirmProvider } from '@/components/ui/confirm-dialog';
 import { SITE_INDEXING, SITE_URL } from '@/lib/constants/site';
 import { ClientLocaleProvider } from '@/lib/i18n/client-locale-provider';
 import { loadStaticMessages } from '@/lib/i18n/messages';
 import { ROOT_NAMESPACES } from '@/lib/i18n/scopes';
 import { QueryProvider } from '@/lib/providers/query-provider';
-import { ThemeProvider } from '@/lib/providers/theme-provider';
 import { PALETTE_BOOTSTRAP } from '@/lib/theme/client';
 import { PALETTES_ENABLED } from '@/lib/theme/palettes';
 

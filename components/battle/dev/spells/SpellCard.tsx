@@ -3,7 +3,6 @@ import { Play } from 'lucide-react';
 
 import type { SpellCardData } from './types';
 
-import { useAbilityText } from '@/components/abilities/use-ability-text';
 import {
     ARCHETYPE_LABEL,
     AURA_LABEL,
@@ -13,6 +12,7 @@ import {
 import { PALETTE } from '@/components/battle/fx/runtime/palette';
 import { EntityIcon } from '@/components/common/EntityIcon';
 import { HudCard, HudPill } from '@/components/hud/page';
+import { useAbilityText } from '@/lib/hooks/abilities';
 import { useText } from '@/lib/i18n/use-text';
 
 function FxField({ label, children }: { label: string; children: ReactNode }) {

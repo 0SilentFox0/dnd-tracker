@@ -10,9 +10,9 @@ import {
 import { ArtifactSetMembersPicker } from './ArtifactSetMembersPicker';
 
 import { AbilityListEditor, withAbilityErrors } from '@/components/abilities';
+import { ImageUpload } from '@/components/common/ImageUpload';
 import { HudForm, type HudTab } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
-import { ImageUpload } from '@/components/ui/image-upload';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';

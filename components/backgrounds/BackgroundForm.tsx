@@ -3,10 +3,10 @@
 import { useTranslations } from 'next-intl';
 
 import { ChoiceListEditor } from '@/components/choices/ChoiceListEditor';
+import { ImageUpload } from '@/components/common/ImageUpload';
 import { HUD_SELECT_CLASS, HudForm, HudFormPage } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { ImageUpload } from '@/components/ui/image-upload';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';

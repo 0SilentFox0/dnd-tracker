@@ -2,8 +2,8 @@
 
 import { useTranslations } from 'next-intl';
 
-import { useAbilityText } from '@/components/abilities/use-ability-text';
 import { TargetButton } from '@/components/battle/wizards/TargetButton';
+import { useAbilityText } from '@/lib/hooks/abilities';
 import type { AuraZoneStep } from '@/lib/hooks/battle';
 
 export function AuraZonePicker({ step }: { step: AuraZoneStep }) {

@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl';
 
 import { CharacterClassesField } from '@/components/characters/basic/CharacterClassesField';
-import { ImageUpload } from '@/components/ui/image-upload';
+import { ImageUpload } from '@/components/common/ImageUpload';
 import { Label } from '@/components/ui/label';
 import { LabeledInput } from '@/components/ui/labeled-input';
 import { SelectField } from '@/components/ui/select-field';

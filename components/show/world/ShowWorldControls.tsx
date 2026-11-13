@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { Footprints, Map as MapIcon, Presentation } from 'lucide-react';
 
 import { SHOW_TONE, ShowButton } from '@/components/show/stage/show-ui';
-import { WorldTravelDialog } from '@/components/world/show/WorldTravelDialog';
+import { WorldTravelDialog } from '@/components/show/world/WorldTravelDialog';
 import { WorldMapLink } from '@/components/world/WorldMapLink';
 import type { ShowControl } from '@/lib/hooks/show';
 import { type TravelMoved, useWorldMap, useWorldMaps } from '@/lib/hooks/world';

@@ -3,7 +3,6 @@
 import { useTranslations } from 'next-intl';
 import { Swords, Zap } from 'lucide-react';
 
-import { useAbilityText } from '@/components/abilities/use-ability-text';
 import { HealthLabel } from '@/components/battle/hud';
 import { AbilityAimPanel } from '@/components/battle/wizards/AbilityAimPanel';
 import { TargetButton } from '@/components/battle/wizards/TargetButton';
@@ -11,6 +10,7 @@ import { OptimizedImage } from '@/components/common/OptimizedImage';
 import { HUD_SURFACE } from '@/components/hud';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { ParticipantSide } from '@/lib/constants/battle';
+import { useAbilityText } from '@/lib/hooks/abilities';
 import { useAbilityPicker, useBattleSceneData } from '@/lib/hooks/battle';
 import { useText } from '@/lib/i18n/use-text';
 import { cn } from '@/lib/utils';

@@ -1,8 +1,16 @@
-import type { SpellTier } from '@/lib/utils/battle/view';
+type MetalTier =
+    | 'iron'
+    | 'bronze'
+    | 'silver'
+    | 'gold'
+    | 'mithril'
+    | 'platinum'
+    | 'adamant'
+    | 'orichalcum'
+    | 'starmetal'
+    | 'void';
 
-export type { SpellTier };
-
-export const metalClass = (tier: SpellTier) => `metal-${tier}`;
+export const metalClass = (tier: MetalTier) => `metal-${tier}`;
 
 export const spellLevelMetal = (level: number) =>
     `circle-${Math.max(0, Math.min(9, level))}`;

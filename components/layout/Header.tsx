@@ -17,8 +17,8 @@ import {
 
 import { JoinBattleButton } from '@/components/campaigns/JoinBattleButton';
 import { WatchShowButton } from '@/components/campaigns/WatchShowButton';
-import { AbbreviationsInfoDialog } from '@/components/common/AbbreviationsInfoDialog';
 import { HUD_SURFACE } from '@/components/hud';
+import { AbbreviationsInfoDialog } from '@/components/layout/AbbreviationsInfoDialog';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 import { WhatsNewButton } from '@/components/onboarding/WhatsNewButton';
 import { Button } from '@/components/ui/button';

@@ -9,6 +9,7 @@ import { RollingField } from './RollingField';
 
 import { ChoicesEditor } from '@/components/choices/ChoicesEditor';
 import { EntityIcon } from '@/components/common/EntityIcon';
+import { ImageUpload } from '@/components/common/ImageUpload';
 import { HudForm, HudFormPage, HudSection } from '@/components/hud/form';
 import { OnboardingHint } from '@/components/onboarding/OnboardingHint';
 import { Button } from '@/components/ui/button';
@@ -18,7 +19,6 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { ImageUpload } from '@/components/ui/image-upload';
 import { Input } from '@/components/ui/input';
 import { SelectField } from '@/components/ui/select-field';
 import { Textarea } from '@/components/ui/textarea';

@@ -2,9 +2,9 @@
 
 import { useTranslations } from 'next-intl';
 
+import { ImageUpload } from '@/components/common/ImageUpload';
 import { HUD_SELECT_CLASS } from '@/components/hud/form';
 import { Checkbox } from '@/components/ui/checkbox';
-import { ImageUpload } from '@/components/ui/image-upload';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';

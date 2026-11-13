@@ -3,8 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { cleanup, fireEvent, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { WorldTravelDialog } from '../show/WorldTravelDialog';
-
+import { WorldTravelDialog } from '@/components/show/world/WorldTravelDialog';
 import { render } from '@/components/ui/__tests__/uk-intl';
 import * as api from '@/lib/api/world';
 import type { WorldMapSummary, WorldMarker } from '@/types/world';

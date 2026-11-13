@@ -8,7 +8,7 @@ import '@/components/battle/fx/fx.css';
 import {
     DiceStage,
     type DiceStageHandle,
-} from '@/components/battle/fx/dice/DiceStage';
+} from '@/components/dice/DiceStage';
 import {
     ROLLER_MAX_COUNT,
     ROLLER_SIDES,

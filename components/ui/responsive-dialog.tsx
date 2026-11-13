@@ -4,7 +4,7 @@ import { createContext, type ReactNode, useContext, useRef } from 'react';
 import { Drawer } from 'vaul';
 
 import '@/components/hud/hud.css';
-import { HUD_SURFACE } from '@/components/hud';
+import { HUD_SURFACE } from '@/components/hud/fonts';
 import {
     Dialog,
     DialogContent,
