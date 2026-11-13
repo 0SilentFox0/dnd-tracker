@@ -3,27 +3,21 @@ import { cache } from 'react';
 import 'server-only';
 import { prisma } from '@/lib/db';
 import type { SystemScopeInput } from '@/lib/i18n/system-scope';
+import { parseRules } from '@/lib/utils/rules/schema';
 
-export function parseSystemSelection(raw: unknown): SystemScopeInput {
-    if (typeof raw !== 'object' || raw === null) return { key: null };
+/** Same fallbacks as the client's `parseRules`, so the i18n scope and the battle UI agree on the composition */
+export function systemOfRules(raw: unknown): SystemScopeInput {
+    const { key, modules } = parseRules(raw).system;
 
-    const { key, modules } = raw as { key?: unknown; modules?: unknown };
-
-    return {
-        key: typeof key === 'string' ? key : null,
-        ...(Array.isArray(modules) &&
-            modules.every((m) => typeof m === 'string') && {
-                modules: modules as string[],
-            }),
-    };
+    return { key, ...(modules && { modules }) };
 }
 
 export const systemOfCampaign = cache(
     async (campaignId: string): Promise<SystemScopeInput> => {
         const rows = await prisma.$queryRaw<
-            { system: unknown }[]
-        >`SELECT rules->'system' AS system FROM campaigns WHERE id = ${campaignId}`;
+            { rules: unknown }[]
+        >`SELECT rules FROM campaigns WHERE id = ${campaignId}`;
 
-        return parseSystemSelection(rows[0]?.system);
+        return systemOfRules(rows[0]?.rules);
     }
 );
