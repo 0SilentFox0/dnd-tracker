@@ -84,7 +84,7 @@ export async function createWfrpDraft(
     );
 
     if (!plan.ok)
-        return errorResponse(API_ERRORS.WFRP_DRAFT_INVALID, 400, plan.errors);
+        return errorResponse(API_ERRORS.SYSTEM_DRAFT_INVALID, 400, plan.errors);
 
     const avatar = await resolveAvatarForPersistence(data.avatar, {
         campaignId,

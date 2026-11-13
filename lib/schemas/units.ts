@@ -40,7 +40,7 @@ export const unitAvatarSchema = z.preprocess(
 const challengeSchema = z
     .number()
     .refine(isChallengeRating, 'units.validation.challengeRating')
-    .describe('5e challenge rating (0.125 = 1/8); null for an HOMM unit');
+    .describe('5e challenge rating (0.125 = 1/8); null for a unit without one');
 
 const monsterFields = {
     cr: challengeSchema.nullable().optional(),

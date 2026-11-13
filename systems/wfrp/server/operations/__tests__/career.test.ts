@@ -136,7 +136,7 @@ describe('career-set', () => {
     it('non-wfrp: 409', async () => {
         await rejects(
             setCareer(gateOf(DEFAULT_RULES), { careerId: 'c1' }),
-            API_ERRORS.ADVANCE_NOT_WFRP,
+            API_ERRORS.ADVANCE_NOT_SUPPORTED,
             409
         );
     });
@@ -215,7 +215,7 @@ describe('career-advance', () => {
     it('non-wfrp: 409', async () => {
         await rejects(
             advanceCareer(gateOf(DEFAULT_RULES), {}),
-            API_ERRORS.ADVANCE_NOT_WFRP,
+            API_ERRORS.ADVANCE_NOT_SUPPORTED,
             409
         );
     });

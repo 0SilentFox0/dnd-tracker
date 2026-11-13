@@ -56,11 +56,11 @@ describe('system literals ratchet', () => {
                 countLiterals('const WFRP_X = wfrpThing; // Wfrp', tokens)
             ).toBe(3));
 
-        it('counts a d20 key only as a quoted literal', () => {
+        it('counts a base module id only as a quoted literal', () => {
             expect(
-                countLiterals('const a = "homm"; const b = homm;', tokens)
+                countLiterals('const a = "d20"; const b = d20;', tokens)
             ).toBe(1);
-            expect(countLiterals("key === 'dnd5e'", tokens)).toBe(1);
+            expect(countLiterals('const k = "homm";', tokens)).toBe(1);
         });
 
         it('counts a template key outside the registry', () =>

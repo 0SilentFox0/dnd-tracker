@@ -293,7 +293,7 @@ function finishProgression(
     return result;
 }
 
-/** Agent-supplied ids must resolve in this campaign, including legacy HOMM inventory refs. */
+/** Agent-supplied ids must resolve in this campaign, including legacy inventory refs. */
 export async function validateCharacterInputRefs(
     actor: Actor,
     operation: string,

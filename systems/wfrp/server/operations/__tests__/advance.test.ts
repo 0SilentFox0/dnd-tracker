@@ -190,18 +190,18 @@ describe('advance', () => {
         expect(h.state.logs).toHaveLength(1);
     });
 
-    it('non-wfrp campaigns: 409 ADVANCE_NOT_WFRP', async () => {
+    it('non-wfrp campaigns: 409 ADVANCE_NOT_SUPPORTED', async () => {
         await rejects(
             advance(gateOf(DEFAULT_RULES), {
                 kind: 'characteristic',
                 key: 'ws',
             }),
-            API_ERRORS.ADVANCE_NOT_WFRP,
+            API_ERRORS.ADVANCE_NOT_SUPPORTED,
             409
         );
         await rejects(
             undo(gateOf(DEFAULT_RULES, true), {}),
-            API_ERRORS.ADVANCE_NOT_WFRP,
+            API_ERRORS.ADVANCE_NOT_SUPPORTED,
             409
         );
     });

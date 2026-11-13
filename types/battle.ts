@@ -344,7 +344,7 @@ export interface SpellTemplate {
     size: number;
     /** Кільце: клітинка прицілу кола не вражається */
     hollow?: boolean;
-    /** 5e: euclidean disk rather than legacy HOMM square */
+    /** 5e: euclidean disk rather than the legacy square */
     exact?: boolean;
 }
 

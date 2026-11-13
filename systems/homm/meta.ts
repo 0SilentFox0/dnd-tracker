@@ -4,6 +4,7 @@ export const HOMM_META = {
     module: 'homm',
     kind: 'preset',
     keys: ['homm'],
+    tokens: ['homm'],
     preset: {
         base: 'd20',
         modules: [

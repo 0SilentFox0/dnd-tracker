@@ -1,13 +1,16 @@
 {
   "components/character-profile/rest/SheetRollDialog.tsx": 1,
-  "lib/constants/api-errors.ts": 4,
   "lib/constants/site.ts": 1,
   "lib/onboarding/whats-new.ts": 6,
   "lib/utils/battle/log/codec.ts": 1,
   "lib/utils/rules/defaults.ts": 1,
+  "scripts/assets/build-icon-prompts.ts": 24,
+  "scripts/assets/icon-prompts/compose.ts": 1,
   "scripts/assets/tokens-5e/upload-identity-icons.ts": 4,
   "scripts/assets/tokens-5e/upload-tokens-5e.ts": 4,
   "scripts/seed/seed-example-demo.ts": 1,
+  "scripts/seed/seed-homm5-characters.ts": 7,
+  "scripts/seed/seed-library.ts": 1,
   "scripts/srd/lib/data-files.ts": 2,
   "scripts/srd/lib/source.ts": 1,
   "types/characters.ts": 1

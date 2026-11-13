@@ -127,7 +127,7 @@ async function checkEquippedConflicts(
 
     const ids = Object.values(nextEquipped).filter((v): v is string => !!v);
 
-    // the legacy grid editor knows non-unique gear only for 5e item campaigns or composed refs: HOMM keeps one query-free check
+    // the legacy grid editor knows non-unique gear only for 5e item campaigns or composed refs: other campaigns keep one query-free check
     const rows =
         (rules.items.enabled ||
             ids.some(

@@ -21,7 +21,7 @@ export const hasTrait = (
 const modOf = (p: BattleParticipant, key: AbilityKey) =>
     getAbilityModifier(p.abilities[key] ?? 10);
 
-/** HOMM — attackAbilityKey; 5e — finesse: більша з Сил/Спр, дальня (не метальна ближня) — Спр, ближня — Сил. */
+/** Не-5e — attackAbilityKey; 5e — finesse: більша з Сил/Спр, дальня (не метальна ближня) — Спр, ближня — Сил. */
 export function attackAbilityFor(
     p: BattleParticipant,
     attack: BattleAttack

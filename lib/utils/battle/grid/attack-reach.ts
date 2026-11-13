@@ -60,7 +60,7 @@ const isThrownMelee = (attack: BattleAttack, rules: Ruleset) =>
     hasTrait(attack, 'thrown') &&
     rangeBands(attack.range, rules) !== null;
 
-/** Причини перешкоди дальньої атаки 5e: «Далека дистанція», «Ворог поруч». HOMM — []. */
+/** Причини перешкоди дальньої атаки 5e: «Далека дистанція», «Ворог поруч». Не-5e — []. */
 export function rangeDisadvantageReasons(
     map: BattleMapConfig | null | undefined,
     participants: BattleParticipant[],

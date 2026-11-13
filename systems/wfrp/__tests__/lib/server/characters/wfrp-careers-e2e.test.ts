@@ -234,7 +234,7 @@ describe('wfrp careers end to end', () => {
                     key: 'ws',
                 })
             ).rejects.toMatchObject({
-                message: API_ERRORS.ADVANCE_NOT_WFRP,
+                message: API_ERRORS.ADVANCE_NOT_SUPPORTED,
                 status: 409,
             });
         }

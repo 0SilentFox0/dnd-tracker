@@ -58,7 +58,7 @@ export function multiclassReasons(
     return out;
 }
 
-/** Classes without a requirement entry (custom, HOMM) never block. */
+/** Classes without a requirement entry (custom ones) never block. */
 export const multiclassBlockedBy = (
     current: readonly Pick<GameClassData, 'name'>[],
     next: Pick<GameClassData, 'name'>,

@@ -534,7 +534,7 @@
   "corruptionInBattle": "The hero is in an active battle — corruption cannot be granted",
   "corruptionStale": "This grant cannot be undone — corruption changed after it",
   "downtimeStale": "This period cannot be undone — the data changed after it",
-  "advanceNotWfrp": "Experience advancement is only available in WFRP",
+  "advanceNotSupported": "Experience advancement is not available in this rule system",
   "careerNotFound": "Career not found",
   "careerNoCareer": "The character has no career",
   "careerMaxTier": "The character is already at the last career tier",
@@ -546,7 +546,7 @@
   "careerInSpeciesTable": "The career is in a species table — remove it there first",
   "featInSpeciesTable": "The feat is in a species table — remove it there first",
   "speciesProfileNotReady": "This species has no creation profile yet",
-  "wfrpDraftInvalid": "The hero creation choices are invalid",
+  "systemDraftInvalid":"The hero creation choices are invalid",
   "outOfAmmo": "Out of ammunition",
   "weaponReloading": "The weapon is reloading",
   "effectOutsideComposition": "The effect belongs to a module outside this campaign's rule system"
