@@ -196,8 +196,8 @@ export function buildPusherMessages(args: {
     const active = participants[after.turnIndex];
 
     const awaiting =
-        checkVictoryConditions(participants, reserveOf(pending)).awaiting !==
-        null;
+        checkVictoryConditions(participants, reserveOf(pending), rules)
+            .awaiting !== null;
 
     if (
         after.status === BattleStatus.ACTIVE &&

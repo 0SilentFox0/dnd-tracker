@@ -5379,7 +5379,7 @@ async function mazeCheck() {
     const escapedAll =
         allies.length > 0 && allies.every((p) => p.battleData.escaped);
 
-    const awaiting = checkVictoryConditions(P()).awaiting;
+    const awaiting = checkVictoryConditions(P(), [], state.rules).awaiting;
 
     tcheck(
         'Лабіринт: усі союзники вибралися → очікування рішення ДМ',
@@ -5462,7 +5462,10 @@ async function mazeTunnelCheck() {
         `${rt.status} у ряд=${inLine} вихід ${JSON.stringify(maze.exit)} лише тунель=${onlyTunnel} у резерві ${leaving.filter((id) => inReserve.has(id)).length}/${leaving.length}${rt.status !== 200 ? ` ${JSON.stringify(rt.body).slice(0, 150)}` : ''}`
     );
 
-    if (checkVictoryConditions(P(), reserve()).awaiting && reserve().length > 0)
+    if (
+        checkVictoryConditions(P(), reserve(), state.rules).awaiting &&
+        reserve().length > 0
+    )
         await call('reveal-participant', REVEAL, {
             participantIds: reserve().map((p: any) => p.basicInfo.id),
         });

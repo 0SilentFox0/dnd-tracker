@@ -8,10 +8,11 @@ import {
     type ApplyVictoryParams,
 } from '@/lib/utils/battle/turn/turn-helpers';
 import {
-    checkVictoryConditions,
+    checkVictoryConditions as checkVictory,
     completeBattle as complete,
 } from '@/lib/utils/battle/turn/victory';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { d20StateData } from '@/systems/d20/rules/state';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
 import type { BattleAction, BattleParticipant } from '@/types/battle';
 
@@ -21,6 +22,12 @@ const completeBattle = (
     round: number,
     rules = DEFAULT_RULES
 ) => complete(ps, result, round, rules);
+
+const checkVictoryConditions = (
+    ps: BattleParticipant[],
+    reserve: BattleParticipant[] = [],
+    rules = DEFAULT_RULES
+) => checkVictory(ps, reserve, rules);
 
 const applyVictoryCompletion = (params: Omit<ApplyVictoryParams, 'rules'>) =>
     applyVictory({ ...params, rules: DEFAULT_RULES });
@@ -351,5 +358,115 @@ describe('перемога з резервом', () => {
             result: 'victory',
             awaiting: null,
         });
+    });
+});
+
+describe('поразка з death saves', () => {
+    const base = createMockParticipant();
+
+    const downedHero = (id: string, stable = false) =>
+        createMockParticipant({
+            basicInfo: { ...base.basicInfo, id, side: ParticipantSide.ALLY },
+            combatStats: {
+                ...base.combatStats,
+                currentHp: 0,
+                status: 'unconscious',
+            },
+            battleData: {
+                ...base.battleData,
+                dying: true,
+                ...d20StateData(createMockParticipant(), {
+                    deathSaves: { successes: 0, failures: 0, stable },
+                }),
+            },
+        });
+
+    const gob = createMockParticipant({
+        basicInfo: {
+            ...base.basicInfo,
+            id: 'gob',
+            side: ParticipantSide.ENEMY,
+        },
+        combatStats: { ...base.combatStats, currentHp: 5, status: 'active' },
+    });
+
+    const reserveAlly = createMockParticipant({
+        basicInfo: { ...base.basicInfo, id: 'pal', side: ParticipantSide.ALLY },
+        battleData: { ...base.battleData, reserved: true },
+    });
+
+    it('усі союзники вмирають, не стабілізовані: бій триває', () => {
+        expect(
+            checkVictoryConditions([downedHero('a'), downedHero('b'), gob])
+                .result
+        ).toBeNull();
+    });
+
+    it('усі стабілізовані: поразка', () => {
+        expect(
+            checkVictoryConditions([
+                downedHero('a', true),
+                downedHero('b', true),
+                gob,
+            ]).result
+        ).toBe('defeat');
+    });
+
+    it('один мертвий, інший вмирає: бій триває', () => {
+        const dead = {
+            ...downedHero('a'),
+            combatStats: {
+                ...downedHero('a').combatStats,
+                status: 'dead' as const,
+            },
+        };
+
+        expect(
+            checkVictoryConditions([dead, downedHero('b'), gob]).result
+        ).toBeNull();
+    });
+
+    it('вмираючий + резерв союзників: не очікування поразки', () => {
+        expect(
+            checkVictoryConditions([downedHero('a'), gob], [reserveAlly])
+        ).toMatchObject({ result: null, awaiting: null });
+    });
+
+    it('ворог-персонаж, що вмирає, не тримає бій', () => {
+        const hero = createMockParticipant({
+            basicInfo: {
+                ...base.basicInfo,
+                id: 'h',
+                side: ParticipantSide.ALLY,
+            },
+        });
+
+        const dyingEnemy = {
+            ...downedHero('e'),
+            basicInfo: {
+                ...downedHero('e').basicInfo,
+                side: ParticipantSide.ENEMY,
+            },
+        };
+
+        const deadGob = {
+            ...gob,
+            combatStats: {
+                ...gob.combatStats,
+                currentHp: 0,
+                status: 'dead' as const,
+            },
+        };
+
+        expect(checkVictoryConditions([hero, dyingEnemy, deadGob]).result).toBe(
+            'victory'
+        );
+    });
+
+    it('правила без хука (wfrp): вмираючий вважається переможеним', () => {
+        expect(
+            checkVictoryConditions([downedHero('a'), gob], [], WFRP_RULES)
+                .result
+        ).toBe('defeat');
     });
 });

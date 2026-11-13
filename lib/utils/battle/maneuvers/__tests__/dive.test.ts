@@ -18,10 +18,15 @@ import { grantPassive } from '@/lib/utils/battle/__tests__/fixtures/mock-partici
 import { cellKey, cellsOf } from '@/lib/utils/battle/grid';
 import { textsOf } from '@/lib/utils/battle/log/__tests__/event-text';
 import { processStartOfTurn } from '@/lib/utils/battle/turn/start-end';
-import { checkVictoryConditions } from '@/lib/utils/battle/turn/victory';
+import { checkVictoryConditions as checkVictory } from '@/lib/utils/battle/turn/victory';
 import { assertAbilityTargets } from '@/lib/utils/battle/validation/ability-targets';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 import type { BattleParticipant } from '@/types/battle';
+
+const checkVictoryConditions = (
+    order: BattleParticipant[],
+    reserve: BattleParticipant[] = []
+) => checkVictory(order, reserve, DEFAULT_RULES);
 
 const griffin = (at?: { x: number; y: number }) =>
     unit('g', {

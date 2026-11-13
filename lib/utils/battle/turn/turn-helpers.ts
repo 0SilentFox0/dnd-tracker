@@ -45,7 +45,7 @@ export function applyVictoryCompletion(
         getStateBeforeForEntry,
     } = params;
 
-    const { result } = checkVictoryConditions(order, reserve);
+    const { result } = checkVictoryConditions(order, reserve, rules);
 
     if (!result || battleStatus !== BattleStatus.ACTIVE)
         return {

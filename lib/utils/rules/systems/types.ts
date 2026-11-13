@@ -811,6 +811,8 @@ export interface RuleSystemCombat {
     onDamaged?: readonly DamagedHook[];
     /** A participant raised above 0 HP (heal, victory revive) leaves the system's dying state */
     onRevived?(p: BattleParticipant): BattleParticipant;
+    /** A downed participant still in the fight (d20: dying, not stable); its side has not lost yet */
+    holdsOn?(p: BattleParticipant): boolean;
     turn?: RuleSystemTurn;
     actions: RuleSystemActions;
     reactions: RuleSystemReactions;

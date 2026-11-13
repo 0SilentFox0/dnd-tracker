@@ -7,6 +7,7 @@ import {
 } from '@/lib/constants/battle';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import { summarizeBattle } from '@/lib/utils/battle/view/summary';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
 import type { BattleAction, BattleParticipant } from '@/types/battle';
 
 function member(
@@ -80,7 +81,11 @@ describe('summarizeBattle', () => {
             ev('orc', [['hero', 8, 3]]),
         ];
 
-        const { heroes } = summarizeBattle(events, [hero, buddy, orc]);
+        const { heroes } = summarizeBattle(
+            events,
+            [hero, buddy, orc],
+            DEFAULT_RULES
+        );
 
         expect(heroes.find((h) => h.participantId === 'hero')).toMatchObject({
             damageDealt: 10,
@@ -99,7 +104,8 @@ describe('summarizeBattle', () => {
     it('скасовані записи не враховуються', () => {
         const { heroes, rounds } = summarizeBattle(
             [ev('hero', [['orc', 10, 0]], { isCancelled: true, round: 9 })],
-            [hero, orc]
+            [hero, orc],
+            DEFAULT_RULES
         );
 
         expect(heroes[0]).toMatchObject({ damageDealt: 0, kills: 0 });
@@ -114,7 +120,8 @@ describe('summarizeBattle', () => {
                     ['hero', 10, 7],
                 ]),
             ],
-            [hero, buddy, orc]
+            [hero, buddy, orc],
+            DEFAULT_RULES
         );
 
         expect(heroes[0]).toMatchObject({
@@ -130,7 +137,8 @@ describe('summarizeBattle', () => {
 
         const { heroes } = summarizeBattle(
             [ev('wolf', [['orc', 10, 0]])],
-            [hero, summon, orc]
+            [hero, summon, orc],
+            DEFAULT_RULES
         );
 
         expect(heroes.map((h) => h.participantId)).toEqual(['hero']);
@@ -146,14 +154,21 @@ describe('summarizeBattle', () => {
             ev('hero', [], { round: 3 }),
         ];
 
-        expect(summarizeBattle(done, [hero, orc])).toMatchObject({
-            outcome: 'defeat',
-            rounds: 3,
-        });
-        expect(summarizeBattle([], [hero, orc]).outcome).toBe('victory');
+        expect(summarizeBattle(done, [hero, orc], DEFAULT_RULES)).toMatchObject(
+            {
+                outcome: 'defeat',
+                rounds: 3,
+            }
+        );
+        expect(summarizeBattle([], [hero, orc], DEFAULT_RULES).outcome).toBe(
+            'victory'
+        );
         expect(
-            summarizeBattle([], [hero, member('orc', ParticipantSide.ENEMY)])
-                .outcome
+            summarizeBattle(
+                [],
+                [hero, member('orc', ParticipantSide.ENEMY)],
+                DEFAULT_RULES
+            ).outcome
         ).toBeNull();
     });
 });

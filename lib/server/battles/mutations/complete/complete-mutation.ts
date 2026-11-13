@@ -21,7 +21,7 @@ export function completeMutation(
 ): MutationResult {
     const result =
         body.result ??
-        checkVictoryConditions(ctx.participants).result ??
+        checkVictoryConditions(ctx.participants, [], ctx.meta.rules).result ??
         'victory';
 
     const { updatedParticipants, battleAction } = completeBattle(

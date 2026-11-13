@@ -172,7 +172,11 @@ export async function readBattleSummary(
         if (!ctx) throw new BattleAccessError(404, API_ERRORS.NOT_FOUND);
 
         return NextResponse.json(
-            summarizeBattle(events, ctx.participants) satisfies BattleSummary
+            summarizeBattle(
+                events,
+                ctx.participants,
+                ctx.rules
+            ) satisfies BattleSummary
         );
     } catch (err) {
         return battleErrorResponse(err);

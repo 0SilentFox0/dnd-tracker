@@ -16,7 +16,7 @@ import {
 } from '@/lib/utils/battle/spell/anchored-zone';
 import { applyAbilitySummons } from '@/lib/utils/battle/summon/ability-summons';
 import { dismissExpiredSummons } from '@/lib/utils/battle/summon/dismiss';
-import { checkVictoryConditions } from '@/lib/utils/battle/turn/victory';
+import { checkVictoryConditions as checkVictory } from '@/lib/utils/battle/turn/victory';
 import type { CastableSpell } from '@/lib/utils/battle/types/spell-process';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 import type {
@@ -32,6 +32,11 @@ import type {
     BattleParticipant,
     GridPoint,
 } from '@/types/battle';
+
+const checkVictoryConditions = (
+    order: BattleParticipant[],
+    reserve: BattleParticipant[] = []
+) => checkVictory(order, reserve, DEFAULT_RULES);
 
 const map: BattleMapConfig = {
     cols: 20,

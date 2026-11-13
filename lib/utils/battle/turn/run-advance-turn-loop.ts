@@ -363,7 +363,7 @@ export function runAdvanceTurnLoop(
     const reserve = reserveOf(pendingSummons);
 
     const verdict = (order: BattleParticipant[]) =>
-        checkVictoryConditions(order, reserve);
+        checkVictoryConditions(order, reserve, params.rules);
 
     let activeParticipantFound = false;
 

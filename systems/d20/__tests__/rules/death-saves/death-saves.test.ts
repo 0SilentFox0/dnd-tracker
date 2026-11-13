@@ -15,7 +15,7 @@ import { eventTextOf } from '@/lib/utils/battle/log/__tests__/event-text';
 import { textsOf } from '@/lib/utils/battle/log/__tests__/event-text';
 import type { BattleSceneState } from '@/lib/utils/battle/store';
 import { advanceTurn } from '@/lib/utils/battle/turn';
-import { checkVictoryConditions } from '@/lib/utils/battle/turn/victory';
+import { checkVictoryConditions as checkVictory } from '@/lib/utils/battle/turn/victory';
 import { DEFAULT_RULES, type Ruleset } from '@/lib/utils/rules';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import { beginConcentration } from '@/systems/d20/rules/concentration/sustain';
@@ -30,6 +30,11 @@ import {
     withDeathSaves,
 } from '@/systems/d20/rules/death-saves/state';
 import type { BattleParticipant } from '@/types/battle';
+
+const checkVictoryConditions = (
+    order: BattleParticipant[],
+    reserve: BattleParticipant[] = []
+) => checkVictory(order, reserve, DEFAULT_RULES);
 
 const on: Ruleset = {
     ...DEFAULT_RULES,
@@ -348,8 +353,21 @@ describe('advanceTurn round wrap with a 20', () => {
 });
 
 describe('victory', () => {
-    it('all heroes down with death saves count as defeated', () => {
+    it('heroes still dying do not lose yet', () => {
         const r = checkVictoryConditions([dying('a'), dying('b'), gob()]);
+
+        expect(r.result).toBeNull();
+    });
+
+    it('all heroes stable count as defeated', () => {
+        const stable = (id: string) =>
+            withDeathSaves(dying(id), {
+                successes: 0,
+                failures: 0,
+                stable: true,
+            });
+
+        const r = checkVictoryConditions([stable('a'), stable('b'), gob()]);
 
         expect(r.result).toBe('defeat');
     });

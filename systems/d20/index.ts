@@ -5,6 +5,7 @@ import { d20HitModel } from './rules/balance';
 import { concentrationFallout } from './rules/concentration/damaged';
 import { D20_CONDITION_SET } from './rules/conditions';
 import { d20Damage } from './rules/damage';
+import { d20HoldsOn } from './rules/death-saves/holds';
 import { d20OnZeroHp } from './rules/death-saves/on-zero-hp';
 import { reviveFromDying } from './rules/death-saves/state';
 import { d20Initiative, d20TieBreak } from './rules/initiative';
@@ -70,6 +71,7 @@ export const D20_MODULE: RuleSystemDefinition = {
         onZeroHp: d20OnZeroHp,
         onDamaged: [concentrationFallout],
         onRevived: reviveFromDying,
+        holdsOn: d20HoldsOn,
         turn: D20_TURN,
         actions: D20_ACTIONS,
         reactions: D20_REACTIONS,

@@ -26,7 +26,7 @@ export function deriveScene(
 
     const awaiting =
         battle.status === BattleStatus.ACTIVE
-            ? checkVictoryConditions(order, reserveAll).awaiting
+            ? checkVictoryConditions(order, reserveAll, battle.rules).awaiting
             : null;
 
     const queue = turnQueue(

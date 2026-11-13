@@ -613,7 +613,8 @@ export async function readBattleAction(
             return result(
                 summarizeBattle(
                     await loadAllEvents(prisma, loaded.scene.id),
-                    loaded.participants
+                    loaded.participants,
+                    loaded.meta.rules
                 ),
                 loaded.scene.id
             );

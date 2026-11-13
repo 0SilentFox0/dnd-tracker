@@ -7,9 +7,14 @@ import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/moc
 import { mazeMap } from '@/lib/utils/battle/modes/maze/__tests__/fixtures';
 import type { BattleSceneState } from '@/lib/utils/battle/store';
 import { advanceTurn } from '@/lib/utils/battle/turn';
-import { checkVictoryConditions } from '@/lib/utils/battle/turn/victory';
+import { checkVictoryConditions as checkVictory } from '@/lib/utils/battle/turn/victory';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 import type { BattleParticipant } from '@/types/battle';
+
+const checkVictoryConditions = (
+    order: BattleParticipant[],
+    reserve: BattleParticipant[] = []
+) => checkVictory(order, reserve, DEFAULT_RULES);
 
 const scene: BattleSceneState = {
     id: 'b1',

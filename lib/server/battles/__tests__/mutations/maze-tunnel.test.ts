@@ -18,13 +18,19 @@ import { MAZE_TEXTS } from '@/lib/utils/battle/modes/maze/texts';
 import { isReserved } from '@/lib/utils/battle/participant/reserve';
 import type { BattleMutationContext } from '@/lib/utils/battle/pipeline/run-battle-mutation';
 import { buildSnapshotState, prepareSave } from '@/lib/utils/battle/store';
-import { checkVictoryConditions } from '@/lib/utils/battle/turn/victory';
+import { checkVictoryConditions as checkVictory } from '@/lib/utils/battle/turn/victory';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
 import type {
     BattleMapConfig,
     BattleParticipant,
     GridPoint,
     MazeConfig,
 } from '@/types/battle';
+
+const checkVictoryConditions = (
+    order: BattleParticipant[],
+    reserve: BattleParticipant[] = []
+) => checkVictory(order, reserve, DEFAULT_RULES);
 
 const SIZE = 9;
 

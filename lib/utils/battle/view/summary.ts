@@ -5,6 +5,7 @@ import {
 } from '@/lib/constants/battle';
 import { textRef } from '@/lib/i18n/text-ref';
 import { checkVictoryConditions } from '@/lib/utils/battle/turn/victory';
+import type { Ruleset } from '@/lib/utils/rules';
 import type { BattleSummary, BattleSummaryHero } from '@/types/api';
 import type { BattleAction, BattleParticipant } from '@/types/battle';
 import type { TextRef } from '@/types/text';
@@ -16,18 +17,20 @@ type SummaryEvent = Pick<
 
 export function resolveOutcome(
     events: SummaryEvent[],
-    participants: BattleParticipant[]
+    participants: BattleParticipant[],
+    rules: Ruleset
 ): BattleSummary['outcome'] {
     const recorded = events.findLast(
         (e) => !e.isCancelled && e.actionDetails?.battleResult
     )?.actionDetails?.battleResult;
 
-    return recorded ?? checkVictoryConditions(participants).result;
+    return recorded ?? checkVictoryConditions(participants, [], rules).result;
 }
 
 export function summarizeBattle(
     events: SummaryEvent[],
-    participants: BattleParticipant[]
+    participants: BattleParticipant[],
+    rules: Ruleset
 ): BattleSummary {
     const sideOf = new Map(
         participants.map((p) => [p.basicInfo.id, p.basicInfo.side])
@@ -90,7 +93,7 @@ export function summarizeBattle(
     }
 
     return {
-        outcome: resolveOutcome(events, participants),
+        outcome: resolveOutcome(events, participants, rules),
         rounds,
         heroes: [...stats.values()],
     };

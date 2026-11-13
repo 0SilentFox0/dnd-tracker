@@ -29,8 +29,11 @@ export interface VictoryCheckResult {
 /** Перевіряє умови перемоги. */
 export function checkVictoryConditions(
     initiativeOrder: BattleParticipant[],
-    reserve: BattleParticipant[] = []
+    reserve: BattleParticipant[],
+    rules: Ruleset
 ): VictoryCheckResult {
+    const holdsOn = ruleSystemOf(rules).combat.holdsOn;
+
     const reserveHas = (side: ParticipantSide) =>
         reserve.some((p) => p.basicInfo.side === side);
 
@@ -54,7 +57,8 @@ export function checkVictoryConditions(
     const allAlliesDefeated = allies.every(
         (ally) =>
             ally.combatStats.status === CombatStatus.DEAD ||
-            ally.combatStats.status === CombatStatus.UNCONSCIOUS
+            (ally.combatStats.status === CombatStatus.UNCONSCIOUS &&
+                !holdsOn?.(ally))
     );
 
     if (allEnemiesDefeated && enemies.length > 0) {

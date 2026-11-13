@@ -172,7 +172,8 @@ function withVictory(
 
     const victory = checkVictoryConditions(
         result.participants,
-        reserveOf(result.pending)
+        reserveOf(result.pending),
+        rules
     );
 
     if (!victory.result) return result;
@@ -652,7 +653,8 @@ export function guardBattleContext<TBody>(
         loaded.scene.status === BattleStatus.ACTIVE
             ? checkVictoryConditions(
                   loaded.participants,
-                  reserveOf(loaded.pending)
+                  reserveOf(loaded.pending),
+                  loaded.meta.rules
               ).awaiting
             : null;
 

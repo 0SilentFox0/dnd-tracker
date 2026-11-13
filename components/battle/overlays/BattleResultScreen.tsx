@@ -87,7 +87,11 @@ export function BattleResultScreen() {
 
     const outcome =
         summary.data?.outcome ??
-        resolveOutcome(battle.battleLog ?? [], battle.initiativeOrder);
+        resolveOutcome(
+            battle.battleLog ?? [],
+            battle.initiativeOrder,
+            battle.rules
+        );
 
     const outcomeKey = outcome ?? 'unknown';
 
