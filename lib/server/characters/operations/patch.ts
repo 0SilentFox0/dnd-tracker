@@ -244,6 +244,8 @@ function updateWriter({
 
     const { computed, classSeenLevel, restoredSlots } = computedState;
 
+    const { systemBaseline: _baseline, ...columns } = data;
+
     const classesData = fromClasses && {
         class: fromClasses.class,
         subclass: fromClasses.subclass,
@@ -262,7 +264,7 @@ function updateWriter({
         db.character.update({
             where: { id: character.id },
             data: {
-                ...data,
+                ...columns,
                 characteristics: (characteristics ?? data.characteristics) as
                     | Prisma.InputJsonValue
                     | undefined,
