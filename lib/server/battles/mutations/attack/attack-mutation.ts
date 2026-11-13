@@ -80,10 +80,13 @@ function assertAttackInput(
     const targetIds = requestedTargetIds(data);
 
     // клієнт героя кидає кубики зброї разом із кубиками рівня (PlayerTurnViewDialogs)
-    assertAttackRolls(attackDamageParts(attacker, attack, ctx.meta.rules).formula, {
-        damageRolls: data.damageRolls,
-        targetCount: targetIds.length,
-    });
+    assertAttackRolls(
+        attackDamageParts(attacker, attack, ctx.meta.rules).formula,
+        {
+            damageRolls: data.damageRolls,
+            targetCount: targetIds.length,
+        }
+    );
 
     const targets = targetIds.flatMap(
         (id) => findParticipant(ctx.participants, id) ?? []

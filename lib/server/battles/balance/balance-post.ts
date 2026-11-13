@@ -97,10 +97,7 @@ export async function postBalanceResponse(
         allyCount += quantity;
     }
 
-    const party = buildPartyPower(
-        members,
-        ruleSystemOf(rules).combat.hitModel
-    );
+    const party = buildPartyPower(members, ruleSystemOf(rules).combat.hitModel);
 
     const allyStats: AllyStats = {
         dpr: round1(party.dpr),

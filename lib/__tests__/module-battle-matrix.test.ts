@@ -155,21 +155,18 @@ describe.each(CASES)('module matrix: $name', ({ rules }) => {
 });
 
 describe('modules without a combat mechanic behave like d20 alone', () => {
-    it.each(['d20 + unitstacks', 'd20 + artifactsets'])(
-        '%s',
-        async (name) => {
-            const alone = await strike(ctxOf(rulesOf('d20 alone')));
+    it.each(['d20 + unitstacks', 'd20 + artifactsets'])('%s', async (name) => {
+        const alone = await strike(ctxOf(rulesOf('d20 alone')));
 
-            const withModule = await strike(ctxOf(rulesOf(name)));
+        const withModule = await strike(ctxOf(rulesOf(name)));
 
-            expect(withModule.events.map((e) => e.type)).toEqual(
-                alone.events.map((e) => e.type)
-            );
-            expect(
-                withModule.participants.map((p) => p.combatStats.currentHp)
-            ).toEqual(alone.participants.map((p) => p.combatStats.currentHp));
-        }
-    );
+        expect(withModule.events.map((e) => e.type)).toEqual(
+            alone.events.map((e) => e.type)
+        );
+        expect(
+            withModule.participants.map((p) => p.combatStats.currentHp)
+        ).toEqual(alone.participants.map((p) => p.combatStats.currentHp));
+    });
 });
 
 describe('level dice of a hero come only from the heroscaling module', () => {

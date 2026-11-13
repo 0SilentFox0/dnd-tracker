@@ -88,7 +88,9 @@ describe('slotOptions', () => {
         const { caster } = fakeScene({ slots: SLOTS });
 
         const keys = (level: number, p = hero(caster, '5e')) =>
-            slotOptions(p, level, DEFAULT_RULES).map((o) => `${o.key}:${textOf(o.label)}`);
+            slotOptions(p, level, DEFAULT_RULES).map(
+                (o) => `${o.key}:${textOf(o.label)}`
+            );
 
         expect(keys(1)).toEqual(['1:Коло 1', '3:Коло 3', 'pact:Пакт · коло 3']);
         expect(keys(2)).toEqual(['3:Коло 3', 'pact:Пакт · коло 3']);

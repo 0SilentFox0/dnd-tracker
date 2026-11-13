@@ -79,9 +79,7 @@ export default async function PlayerDraftPage({
         };
 
         return (
-            <ExtendLocaleScope
-                namespaces={systemScope(rules.system, 'draft')}
-            >
+            <ExtendLocaleScope namespaces={systemScope(rules.system, 'draft')}>
                 <DraftForm
                     campaignId={id}
                     characterId={c.id}

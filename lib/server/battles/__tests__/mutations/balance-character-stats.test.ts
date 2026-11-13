@@ -95,7 +95,11 @@ import { DEFAULT_RULES } from '@/lib/utils/rules';
 
 describe('loadCharacterBalanceStats', () => {
     it('один контекст на всіх: без запиту на кожного персонажа, запитів не більше, ніж було (4 + 2N)', async () => {
-        const rows = await loadCharacterBalanceStats('camp', undefined, DEFAULT_RULES);
+        const rows = await loadCharacterBalanceStats(
+            'camp',
+            undefined,
+            DEFAULT_RULES
+        );
 
         const total = Object.values(calls.byKey).reduce((a, b) => a + b, 0);
 

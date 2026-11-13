@@ -206,7 +206,9 @@ describe('getUnitStats: КД і влучання', () => {
         });
 
         expect(stats.ac).toBe(15);
-        expect(stats.attackBonus).toBe(calculateAttackBonus(p, volley, DEFAULT_RULES, [p]));
+        expect(stats.attackBonus).toBe(
+            calculateAttackBonus(p, volley, DEFAULT_RULES, [p])
+        );
     });
 
     it('юніт, чия сила в закляттях, не має влучання; без майстерності — теж', () => {

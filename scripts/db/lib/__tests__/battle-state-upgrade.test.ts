@@ -175,7 +175,6 @@ describe('upgradeStored', () => {
 
         expect(twice.changed).toBe(false);
     });
-
 });
 
 describe('upgradeHistory', () => {

@@ -34,8 +34,9 @@ const bow = {
     damageType: 'piercing',
 } as BattleAttack;
 
-const stats = (params: Omit<Parameters<typeof getCharacterStats>[0], 'rules'>) =>
-    getCharacterStats({ rules: DEFAULT_RULES, ...params });
+const stats = (
+    params: Omit<Parameters<typeof getCharacterStats>[0], 'rules'>
+) => getCharacterStats({ rules: DEFAULT_RULES, ...params });
 
 function hero(
     attacks: BattleAttack[],
@@ -77,11 +78,9 @@ describe('getCharacterStats з учасника бою', () => {
         });
 
         expect(
-            stats({ participant: hero([sword], [rage]) })
-                .dprBreakdown.meleeAvg
+            stats({ participant: hero([sword], [rage]) }).dprBreakdown.meleeAvg
         ).toBeGreaterThan(
-            stats({ participant: hero([sword]) }).dprBreakdown
-                .meleeAvg
+            stats({ participant: hero([sword]) }).dprBreakdown.meleeAvg
         );
     });
 
@@ -116,9 +115,9 @@ describe('getCharacterStats з учасника бою', () => {
             damageType: 'physical',
         } as BattleAttack;
 
-        expect(
-            stats({ participant: p }).dprBreakdown.meleeAvg
-        ).toBe(averageAttackDamage(p, fists, DEFAULT_RULES, [p]).total);
+        expect(stats({ participant: p }).dprBreakdown.meleeAvg).toBe(
+            averageAttackDamage(p, fists, DEFAULT_RULES, [p]).total
+        );
     });
 });
 

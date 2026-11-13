@@ -80,8 +80,7 @@ describe('system imports ratchet', () => {
             expect(await lint('lib/utils/battle/foo.ts')).toHaveLength(1);
             expect(await lint(SYSTEM_ROOTS[0])).toEqual([]);
 
-            for (const { file } of exempt)
-                expect(await lint(file)).toEqual([]);
+            for (const { file } of exempt) expect(await lint(file)).toEqual([]);
         }
     );
 });

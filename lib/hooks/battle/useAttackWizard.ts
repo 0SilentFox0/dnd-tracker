@@ -197,7 +197,9 @@ export function useAttackWizard(
             maxTargets: hitsAll
                 ? Math.max(maxTargets, enemyTargets.length)
                 : maxTargets,
-            diceSlots: attacker ? damageDiceSlots(attacker, a, scene.battle.rules) : [6],
+            diceSlots: attacker
+                ? damageDiceSlots(attacker, a, scene.battle.rules)
+                : [6],
         };
     };
 

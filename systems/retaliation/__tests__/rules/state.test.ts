@@ -97,7 +97,10 @@ describe('retaliationStateData', () => {
 describe('retaliationResetState', () => {
     it('zeroes a spent count for the turn and for a regained reaction', () => {
         for (const scope of ['turn', 'reaction'] as const) {
-            const next = retaliationResetState(of({ system: slotOf(2) }), scope);
+            const next = retaliationResetState(
+                of({ system: slotOf(2) }),
+                scope
+            );
 
             expect(retaliationsUsedOf(next)).toBe(0);
         }

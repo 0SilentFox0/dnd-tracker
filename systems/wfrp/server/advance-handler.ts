@@ -48,7 +48,8 @@ const UNDO_ERRORS = {
 function advancementOf({ access, character }: CharacterGate) {
     const advancement = ruleSystemOf(access.campaign.rules).advancement;
 
-    if (!advancement) throw new ContentError(API_ERRORS.ADVANCE_NOT_SUPPORTED, 409);
+    if (!advancement)
+        throw new ContentError(API_ERRORS.ADVANCE_NOT_SUPPORTED, 409);
 
     if (character.status !== CharacterStatus.ACTIVE)
         throw new ContentError(API_ERRORS.XP_CHARACTERS_INVALID, 400);

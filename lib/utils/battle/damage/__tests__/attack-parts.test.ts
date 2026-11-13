@@ -86,12 +86,12 @@ describe('шкода атаки: числа до дедупу', () => {
     });
 
     it('середня шкода й слоти кубиків', () => {
-        expect(averageAttackDamage(hero, sword, DEFAULT_RULES, [hero]).total).toBe(
-            20
-        );
-        expect(averageAttackDamage(unit, sword, DEFAULT_RULES, [unit]).total).toBe(
-            8
-        );
+        expect(
+            averageAttackDamage(hero, sword, DEFAULT_RULES, [hero]).total
+        ).toBe(20);
+        expect(
+            averageAttackDamage(unit, sword, DEFAULT_RULES, [unit]).total
+        ).toBe(8);
         expect(damageDiceSlots(hero, sword, DEFAULT_RULES)).toEqual([6, 6, 8]);
         expect(damageDiceSlots(unit, sword, DEFAULT_RULES)).toEqual([8]);
         expect(

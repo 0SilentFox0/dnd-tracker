@@ -368,8 +368,7 @@ describe('цілі й слоти закляття', () => {
 
     it('buildSpellPick: автоціль без вибору, область з maxTargets, рятунок', () => {
         expect(
-            pickOf(order, hero, spell({ kind: 'allEnemies' }))
-                .targetMode
+            pickOf(order, hero, spell({ kind: 'allEnemies' })).targetMode
         ).toBe('none');
 
         const area = pickOf(
@@ -628,12 +627,8 @@ describe('шаблон і дальність', () => {
             targetSide: 'enemy',
         });
         expect(
-            pickOf(
-                order,
-                placed('h', ParticipantSide.ALLY),
-                fireball,
-                map
-            ).targetMode
+            pickOf(order, placed('h', ParticipantSide.ALLY), fireball, map)
+                .targetMode
         ).toBe('multi');
     });
 
@@ -995,9 +990,10 @@ describe('шаблон і дальність', () => {
         it('без карти чи позиції — список, як раніше', () => {
             const area = widened('area');
 
-            expect(pickOf([area, foe], area, bolt, null)).toMatchObject(
-                { targetMode: 'multi', maxTargets: 1 }
-            );
+            expect(pickOf([area, foe], area, bolt, null)).toMatchObject({
+                targetMode: 'multi',
+                maxTargets: 1,
+            });
             expect(
                 pickOf([area, foe], area, bolt, null).skillRadius
             ).toBeUndefined();

@@ -22,12 +22,7 @@ export const SCAN_DIRS = [
 
 export const SYSTEM_ROOTS = ROOT_SPECS.map((spec) => spec.file);
 
-const SKIP_DIRS = new Set([
-    'node_modules',
-    '.next',
-    '__tests__',
-    'grim-icons',
-]);
+const SKIP_DIRS = new Set(['node_modules', '.next', '__tests__', 'grim-icons']);
 
 const TEST_FILE = /\.test\.tsx?$/;
 

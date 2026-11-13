@@ -91,8 +91,8 @@ describe('d20 off-hand', () => {
             { rules: DEFAULT_RULES }
         );
 
-        expect(d20State({ ...five(), battleData: slot }).attackedWithLight).toBe(
-            undefined
-        );
+        expect(
+            d20State({ ...five(), battleData: slot }).attackedWithLight
+        ).toBe(undefined);
     });
 });

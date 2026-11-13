@@ -85,11 +85,14 @@ describe('unresolved refs in the engine', () => {
     it('resolve to 0; a scale or formula perRest makes the ability unavailable', () => {
         expect(resolveFlat({ scale: 'rage-damage' }, owner)).toBe(0);
         expect(
-            resolveAmount({ scale: 'sneak-attack' }, {
-                owner,
-                rng: () => 0.5,
-                rules: DEFAULT_RULES,
-            })
+            resolveAmount(
+                { scale: 'sneak-attack' },
+                {
+                    owner,
+                    rng: () => 0.5,
+                    rules: DEFAULT_RULES,
+                }
+            )
         ).toBe(0);
         expect(
             restUses({ perRest: { rest: 'long', uses: { scale: 'rages' } } })

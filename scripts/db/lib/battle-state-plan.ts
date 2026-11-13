@@ -135,10 +135,7 @@ const STATE_BOOLS = ['--apply', '--allow-remote', '--force', '--json'] as const;
 
 const STATE_VALUES = ['--status', '--scene', '--snapshot-dir'] as const;
 
-function stateArgs(
-    bools: Set<string>,
-    values: Map<string, string>
-): StateArgs {
+function stateArgs(bools: Set<string>, values: Map<string, string>): StateArgs {
     return {
         apply: bools.has('--apply'),
         allowRemote: bools.has('--allow-remote'),

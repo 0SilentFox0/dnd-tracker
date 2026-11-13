@@ -40,7 +40,9 @@ const caster = makeParticipant({ id: 'c' });
 const picked = () =>
     spellFlow(
         { ...initialSpellFlow, step: 'book', casterId: 'c' },
-        { type: 'PICK', pick: buildSpellPick([caster], caster, spell, DEFAULT_RULES),
+        {
+            type: 'PICK',
+            pick: buildSpellPick([caster], caster, spell, DEFAULT_RULES),
         }
     );
 
@@ -84,7 +86,9 @@ describe('spell option picker state', () => {
 
         const s = spellFlow(
             { ...initialSpellFlow, step: 'book', casterId: 'c' },
-            { type: 'PICK', pick: buildSpellPick([caster], caster, plain, DEFAULT_RULES),
+            {
+                type: 'PICK',
+                pick: buildSpellPick([caster], caster, plain, DEFAULT_RULES),
             }
         );
 

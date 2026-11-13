@@ -10,9 +10,7 @@ const mergeEncounters: NonNullable<RulesSection['merge']> = (
     const next = { ...current, ...patch };
 
     if (isRecord(patch.unitGroups)) {
-        const unitGroups: Record<string, unknown> = isRecord(
-            current.unitGroups
-        )
+        const unitGroups: Record<string, unknown> = isRecord(current.unitGroups)
             ? { ...current.unitGroups }
             : {};
 

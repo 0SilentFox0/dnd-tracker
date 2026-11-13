@@ -10,12 +10,14 @@ import { DEFAULT_RULES } from '@/lib/utils/rules';
 import type { BattleParticipant, SpellGrant } from '@/types/battle';
 import type { BookSpell } from '@/types/spells';
 
-const source = (...args: [...Parameters<typeof spellSourceModel>] extends [
-    ...infer A,
-    unknown,
-]
-    ? A
-    : never) => spellSourceModel(...args, DEFAULT_RULES);
+const source = (
+    ...args: [...Parameters<typeof spellSourceModel>] extends [
+        ...infer A,
+        unknown,
+    ]
+        ? A
+        : never
+) => spellSourceModel(...args, DEFAULT_RULES);
 
 const fireball = (over: Record<string, unknown> = {}) =>
     ({
@@ -116,12 +118,9 @@ describe('spellSourceModel formulaOf (castLevelOf)', () => {
     it('without any source it falls back to the spell level', () => {
         expect(
             textOf(
-                source(
-                    caster(slots),
-                    flow(),
-                    fireball(),
-                    false
-                ).formulaOf(fireball())
+                source(caster(slots), flow(), fireball(), false).formulaOf(
+                    fireball()
+                )
             )
         ).toBe('8к6');
     });
@@ -131,9 +130,7 @@ describe('spellSourceModel formulaOf', () => {
     it('is empty without a caster', () => {
         expect(
             textOf(
-                source(null, flow(), fireball(), false).formulaOf(
-                    fireball()
-                )
+                source(null, flow(), fireball(), false).formulaOf(fireball())
             )
         ).toBe('');
     });
@@ -146,12 +143,9 @@ describe('spellSourceModel formulaOf', () => {
 
         expect(
             textOf(
-                source(
-                    caster(),
-                    flow({ pick }),
-                    fireball(),
-                    false
-                ).formulaOf(fireball())
+                source(caster(), flow({ pick }), fireball(), false).formulaOf(
+                    fireball()
+                )
             )
         ).toBe('3к6');
     });
@@ -163,9 +157,7 @@ describe('spellSourceModel formulaOf', () => {
         });
 
         expect(
-            textOf(
-                source(caster(), flow(), heal, false).formulaOf(heal)
-            )
+            textOf(source(caster(), flow(), heal, false).formulaOf(heal))
         ).toBe('2к8');
         expect(
             textOf(
@@ -185,15 +177,9 @@ describe('spellSourceModel slotChoices', () => {
         const c = caster({ '3': { current: 1, max: 2 } });
 
         expect(
-            source(c, flow(), fireball(), false).slotChoices.map(
-                (o) => o.key
-            )
+            source(c, flow(), fireball(), false).slotChoices.map((o) => o.key)
         ).toEqual(['3']);
-        expect(
-            source(c, flow(), fireball(), true).slotChoices
-        ).toEqual([]);
-        expect(source(c, flow(), null, false).slotChoices).toEqual(
-            []
-        );
+        expect(source(c, flow(), fireball(), true).slotChoices).toEqual([]);
+        expect(source(c, flow(), null, false).slotChoices).toEqual([]);
     });
 });

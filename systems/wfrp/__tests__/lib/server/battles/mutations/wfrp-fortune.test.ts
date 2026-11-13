@@ -146,9 +146,9 @@ describe('wfrp fortune in attacks', () => {
     it.each([0, undefined])(
         'rejects Fortune when the attacker has %s',
         async (f) => {
-            await expect(
-                attackMutation(wfrpCtx(f), body(SL))
-            ).rejects.toThrow(API_ERRORS.NO_FORTUNE);
+            await expect(attackMutation(wfrpCtx(f), body(SL))).rejects.toThrow(
+                API_ERRORS.NO_FORTUNE
+            );
         }
     );
 

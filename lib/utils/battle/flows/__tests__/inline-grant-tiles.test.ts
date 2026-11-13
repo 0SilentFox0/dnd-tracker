@@ -103,7 +103,9 @@ describe('inline grant tiles', () => {
 
         const s = spellFlow(
             { ...initialSpellFlow, step: 'book', casterId: 'c' },
-            { type: 'PICK', pick: buildSpellPick([caster], caster, tile, DEFAULT_RULES),
+            {
+                type: 'PICK',
+                pick: buildSpellPick([caster], caster, tile, DEFAULT_RULES),
             }
         );
 

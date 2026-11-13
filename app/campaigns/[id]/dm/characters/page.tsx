@@ -32,10 +32,7 @@ export default async function DMCharactersPage({
         />
     );
 
-    const namespaces = systemScope(
-        await systemOfCampaign(id),
-        'dmCharacters'
-    );
+    const namespaces = systemScope(await systemOfCampaign(id), 'dmCharacters');
 
     return namespaces.length ? (
         <ExtendLocaleScope namespaces={namespaces}>{client}</ExtendLocaleScope>

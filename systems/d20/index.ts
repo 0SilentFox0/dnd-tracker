@@ -1,6 +1,6 @@
 import { D20_ACTIONS } from './rules/actions';
 import { d20AbortedRoll, resolveD20Attack } from './rules/attack';
-import { D20_REACH,d20AttackAbility } from './rules/attack/ability';
+import { D20_REACH, d20AttackAbility } from './rules/attack/ability';
 import { d20HitModel } from './rules/balance';
 import { concentrationFallout } from './rules/concentration/damaged';
 import { D20_CONDITION_SET } from './rules/conditions';
@@ -60,7 +60,8 @@ export const D20_MODULE: RuleSystemDefinition = {
         autoXp: (rules) => rules.encounters.autoXp,
         offHand: D20_OFF_HAND,
         attackAbility: d20AttackAbility,
-        reach: D20_REACH,        inspiration: D20_INSPIRATION,
+        reach: D20_REACH,
+        inspiration: D20_INSPIRATION,
         dice: 20,
         actionEconomy: { bonusAction: true, reaction: true },
         resolveAttack: resolveD20Attack,

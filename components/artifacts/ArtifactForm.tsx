@@ -111,9 +111,7 @@ export function ArtifactForm({
     const itemsEnabled = !!rules?.items?.enabled;
 
     const hasArmor =
-        hasClasses &&
-        data.slot === ArtifactSlot.ARMOR &&
-        !data.item?.property;
+        hasClasses && data.slot === ArtifactSlot.ARMOR && !data.item?.property;
 
     const tabMissing = (id: ArtifactFormTabId) =>
         (id === ARTIFACT_FORM_TAB.weapon && !hasWeapon) ||

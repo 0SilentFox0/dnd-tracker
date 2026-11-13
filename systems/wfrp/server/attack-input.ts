@@ -16,7 +16,8 @@ const Body = z.object({
     secondRoll: roll.optional(),
 });
 
-export const WfrpFortuneInputSchema = Body.transform(({ system, secondRoll }): SystemSlot | undefined => {
+export const WfrpFortuneInputSchema = Body.transform(
+    ({ system, secondRoll }): SystemSlot | undefined => {
         if (!system) return undefined;
 
         const { kind } = system.data;
@@ -26,4 +27,5 @@ export const WfrpFortuneInputSchema = Body.transform(({ system, secondRoll }): S
             ...(kind === 'reroll' &&
                 secondRoll !== undefined && { manualReroll: secondRoll }),
         });
-    });
+    }
+);

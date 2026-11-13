@@ -1872,14 +1872,18 @@ async function newMechanics() {
         allies.map((p) => [p.basicInfo.id, hp(by(p.basicInfo.name))])
     );
 
-    const lightDiceCount = casterSpellDice(by(u('Жрець')), {
-        dice: light.dice ?? 0,
-        groupId: light.groupId,
-        level: light.level,
-        dieSides: light.dieSides,
-        upcastDice: light.upcastDice,
-        fixedDice: light.fixedDice === true,
-    }, DEFAULT_RULES).count;
+    const lightDiceCount = casterSpellDice(
+        by(u('Жрець')),
+        {
+            dice: light.dice ?? 0,
+            groupId: light.groupId,
+            level: light.level,
+            dieSides: light.dieSides,
+            upcastDice: light.upcastDice,
+            fixedDice: light.fixedDice === true,
+        },
+        DEFAULT_RULES
+    ).count;
 
     const cast = await call(
         'spell',

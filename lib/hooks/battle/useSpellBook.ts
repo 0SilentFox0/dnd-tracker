@@ -157,7 +157,13 @@ export function useSpellBook(
         sourceOptions,
         castLevelOptions,
         formulaOf,
-    } = spellSourceModel(caster, flow, selected, bypassCost, scene.battle.rules);
+    } = spellSourceModel(
+        caster,
+        flow,
+        selected,
+        bypassCost,
+        scene.battle.rules
+    );
 
     const ingredients = useIngredientPlan(
         caster,

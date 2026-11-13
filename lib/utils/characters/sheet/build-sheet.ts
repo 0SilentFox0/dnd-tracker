@@ -113,7 +113,9 @@ export function buildCharacterSheet(input: SheetInput): CharacterSheet {
 
     const primary = p.abilities.primaryAbility ?? null;
 
-    const attacks = p.battleData.attacks.map((a) => attackSheet(p, a, input.rules));
+    const attacks = p.battleData.attacks.map((a) =>
+        attackSheet(p, a, input.rules)
+    );
 
     const classEntries = input.classes?.some((e) => e.class)
         ? input.classes

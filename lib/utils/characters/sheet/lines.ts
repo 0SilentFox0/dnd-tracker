@@ -138,7 +138,8 @@ export function attackSheet(
         id: attack.id ?? attack.name,
         name: attack.name,
         kind: type,
-        toHit: { total: calculateAttackBonus(p, attack, rules),
+        toHit: {
+            total: calculateAttackBonus(p, attack, rules),
             lines: toHitLines,
         },
         avgDamage: { total: avg.total, lines: damageLines },

@@ -166,7 +166,7 @@ function resolveSpellAttack(
 
     const effect =
         kind && critRulesOf(rules).effects
-            ?pickAttackCrit(state, id, kind)
+            ? pickAttackCrit(state, id, kind)
             : undefined;
 
     const type = effect?.effect.type;

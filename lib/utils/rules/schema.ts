@@ -59,7 +59,8 @@ const rulesetSchema = z
                 ctx.addIssue({
                     code: 'custom',
                     message:
-                        section.refineMessage ?? 'rules.validation.invalidSection',
+                        section.refineMessage ??
+                        'rules.validation.invalidSection',
                     path: [name],
                 });
         }
@@ -314,7 +315,8 @@ export function mergeRules(
             (Object.keys(current) as (keyof Ruleset)[]).map((k) => {
                 const merge = ALL_SECTIONS[k]?.merge;
 
-                if (!merge) return [k, { ...current[k], ...(sections[k] ?? {}) }];
+                if (!merge)
+                    return [k, { ...current[k], ...(sections[k] ?? {}) }];
 
                 const merged = merge(
                     current[k] as Record<string, unknown>,
@@ -358,15 +360,10 @@ export function mergeRules(
     return {
         ok: true,
         rules: parsed.data,
-        stored: writeOverRaw(
-            raw,
-            next,
-            patch as Record<string, unknown>,
-            {
-                touched,
-                keyChanged,
-                patchHasModules: !!patchModules,
-            }
-        ),
+        stored: writeOverRaw(raw, next, patch as Record<string, unknown>, {
+            touched,
+            keyChanged,
+            patchHasModules: !!patchModules,
+        }),
     };
 }

@@ -61,10 +61,7 @@ export default async function DmCharacterPage({
         </PrefetchedQuery>
     );
 
-    const namespaces = systemScope(
-        await systemOfCampaign(id),
-        'dmCharacter'
-    );
+    const namespaces = systemScope(await systemOfCampaign(id), 'dmCharacter');
 
     return namespaces.length ? (
         <ExtendLocaleScope namespaces={namespaces}>{profile}</ExtendLocaleScope>

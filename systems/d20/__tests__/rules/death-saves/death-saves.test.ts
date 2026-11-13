@@ -215,7 +215,9 @@ describe('healing', () => {
     });
 
     it('raw heal without a revive hook (non-d20 systems) leaves the dying state alone', () => {
-        expect(deathSavesOf(applyRawHeal(dying(), 4).participant)).toBeDefined();
+        expect(
+            deathSavesOf(applyRawHeal(dying(), 4).participant)
+        ).toBeDefined();
     });
 
     it('clearDeathSaves removes state and counters', () => {

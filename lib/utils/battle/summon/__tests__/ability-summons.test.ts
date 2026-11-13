@@ -71,7 +71,13 @@ const run = (order: BattleParticipant[], spellId?: string) =>
     applyAbilitySummons(
         [{ ownerId: 'druid', unitId: 'u-fire', count: 1, spellId }],
         order,
-        { campaignId: 'c1', battleId: 'b1', rng: () => 0, rules: DEFAULT_RULES, deps }
+        {
+            campaignId: 'c1',
+            battleId: 'b1',
+            rng: () => 0,
+            rules: DEFAULT_RULES,
+            deps,
+        }
     );
 
 const summoned = (order: BattleParticipant[]) =>

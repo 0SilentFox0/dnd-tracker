@@ -64,7 +64,13 @@ describe('abilities.sources follows the composition (D15)', () => {
         const kinds = await sourceKinds();
 
         expect(kinds).toEqual(
-            expect.arrayContaining(['race', 'artifact', 'unit', 'class', 'feat'])
+            expect.arrayContaining([
+                'race',
+                'artifact',
+                'unit',
+                'class',
+                'feat',
+            ])
         );
         expect(kinds).not.toContain('skill');
         expect(kinds).not.toContain('artifactSet');

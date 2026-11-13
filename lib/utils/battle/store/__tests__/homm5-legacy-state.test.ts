@@ -41,7 +41,9 @@ function lifted(row: StoredParticipant): StoredParticipant {
                 key: 'd20',
                 data: {
                     ext: {
-                        retaliation: { used: (retaliationsUsed as number) ?? 0 },
+                        retaliation: {
+                            used: (retaliationsUsed as number) ?? 0,
+                        },
                     },
                 },
             },

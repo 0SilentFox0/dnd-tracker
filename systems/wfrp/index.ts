@@ -121,7 +121,8 @@ export const WFRP_MODULE: RuleSystemDefinition = {
     identity: { alignments: false },
     combat: {
         input: { assert: assertWfrpInput },
-        judge: 'server',        dice: 100,
+        judge: 'server',
+        dice: 100,
         actionEconomy: { bonusAction: false, reaction: false },
         attacksOf: extractWfrpAttacks,
         participantFields: wfrpParticipantFields,
