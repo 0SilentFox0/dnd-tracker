@@ -33,9 +33,16 @@ async function main() {
             },
         });
 
-        const classes = await prisma.gameClass.findMany({
-            select: { id: true, campaignId: true },
-        });
+        const classes: { id: string; campaignId: string }[] = [];
+
+        for (const { id: campaignId } of campaigns) {
+            const layered = await prisma.gameClass.findMany({
+                where: { campaignId },
+                select: { id: true },
+            });
+
+            classes.push(...layered.map(({ id }) => ({ id, campaignId })));
+        }
 
         const rows = classlessD20Characters(campaigns, characters, classes);
 
