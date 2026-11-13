@@ -8,12 +8,14 @@ import type {
 } from '@/lib/hooks/battle';
 import type { SystemConditionBody } from '@/lib/hooks/battles';
 import type { RulesFormState } from '@/lib/hooks/campaigns';
+import type { TurnGateOutcome } from '@/lib/utils/battle/flows';
+import type { BattleKnowledge } from '@/lib/utils/battle/view/knowledge';
 import type { CharacterFormBindings } from '@/lib/utils/characters/form/bindings';
 import type { MechanicKey } from '@/lib/utils/rules/registry';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import type { SystemConditionInfo } from '@/lib/utils/rules/systems';
 import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
-import type { BattleParticipant } from '@/types/battle';
+import type { BattleAction, BattleParticipant } from '@/types/battle';
 import type {
     CharacterListItem,
     CharacterSheet,
@@ -156,7 +158,60 @@ export interface SpellMagicFieldsProps extends SpellFormFieldsProps {
     conditions: readonly SystemConditionInfo[];
 }
 
+export interface DefenseCtx {
+    order: BattleParticipant[];
+    log: BattleAction[];
+    knowledge?: BattleKnowledge;
+    exact: boolean;
+}
+
+export interface HeroStatsProps {
+    hero: BattleParticipant;
+    compact: boolean;
+}
+
+export interface ParticipantStatsProps {
+    participant: BattleParticipant;
+    exact: boolean;
+}
+
+export interface HeroPanelProps {
+    hero: BattleParticipant;
+}
+
+export interface BattleBadgeProps {
+    participant: BattleParticipant;
+    place: 'hero' | 'row';
+}
+
+export interface TurnGateControls {
+    /** Aborts when the whole player turn unmounts, not just the gate panel */
+    readonly signal?: AbortSignal;
+    resolve(outcome: TurnGateOutcome): void;
+    skipTurn(): void;
+}
+
+export interface TurnStartPanelProps {
+    hero: BattleParticipant;
+    gate: TurnGateControls;
+}
+
+/** Every slot is optional: a missing slot is a missing mechanic */
 export interface SystemBattleUi {
+    HeroStats?: ComponentType<HeroStatsProps>;
+    defense?(participant: BattleParticipant, ctx: DefenseCtx): string | null;
+    ParticipantStats?: ComponentType<ParticipantStatsProps>;
+    ConditionsDialog?: ComponentType<SystemConditionsDialogProps>;
+    /** Lists concatenate across modules in composition order */
+    heroPanels?: readonly ComponentType<HeroPanelProps>[];
+    badges?: readonly ComponentType<BattleBadgeProps>[];
+    dialogs?: readonly ComponentType[];
+    notices?: readonly ComponentType[];
+    /** One module claims it: the check a participant resolves before the first action */
+    turnStart?: {
+        Panel: ComponentType<TurnStartPanelProps>;
+        Label: ComponentType<{ outcome?: TurnGateOutcome }>;
+    };
     RollBody?: ComponentType<RollBodyProps>;
     RollTitle?: ComponentType;
     CastTest?: ComponentType<CastTestProps>;
@@ -166,7 +221,7 @@ export interface SystemBattleUi {
 }
 
 export interface SystemUi {
-    battle?: SystemBattleUi;
+    battle: SystemBattleUi;
     SpellMagicFields?: ComponentType<SpellMagicFieldsProps>;
     HeroStats: ComponentType;
     StatsTab: ComponentType<StatsTabProps>;
@@ -183,7 +238,6 @@ export interface SystemUi {
     >;
     DraftForm?: ComponentType<DraftFormProps>;
     RaceProfileEditor?: ComponentType<RaceProfileEditorProps>;
-    battleConditionsDialog?: ComponentType<SystemConditionsDialogProps>;
     ArtifactStatsEditor?: ComponentType<ArtifactStatsEditorProps>;
     EquippedSummary?: ComponentType<EquippedSummaryProps>;
     DowntimeTab?: ComponentType;

@@ -10,6 +10,12 @@ vi.mock('@/lib/hooks/battle', () => ({
     useBattleRules: () => ({ systemKey: rules.systemKey }),
 }));
 
+vi.mock('@/components/battle/use-system-battle-ui', async () => {
+    const { systemUiOf } = await import('@/components/systems');
+
+    return { useSystemBattleUi: () => systemUiOf(rules.systemKey).battle };
+});
+
 import { RollStep } from '../RollStep';
 import type { AttackWizardModel } from '../shared';
 

@@ -59,9 +59,11 @@ export function ActionGrid({
     available,
     actions,
     channelLabel,
+    gateLabel,
 }: {
     turn: Turn;
     channelLabel?: ReactNode;
+    gateLabel?: ReactNode;
     pending: boolean;
     available: {
         channel?: boolean;
@@ -82,8 +84,6 @@ export function ActionGrid({
     };
 }) {
     const t = useTranslations('battle.actions');
-
-    const tm = useTranslations('battle.morale');
 
     return (
         <>
@@ -169,12 +169,8 @@ export function ActionGrid({
                         onClick={turn.strikeAndReturn.run}
                     />
                 )}
-                {turn.moraleResult && (
-                    <Tile
-                        icon={Hourglass}
-                        label={tm(`outcome.${turn.moraleResult}`)}
-                        used
-                    />
+                {turn.gateResult && gateLabel && (
+                    <Tile icon={Hourglass} label={gateLabel} used />
                 )}
             </div>
             {turn.phase !== 'countdown' && (

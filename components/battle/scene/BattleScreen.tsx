@@ -11,14 +11,12 @@ import { MobileBattleLayout } from './MobileBattleLayout';
 
 import { AudioDock } from '@/components/audio/AudioDock';
 import { BattleAudioProvider } from '@/components/battle/audio/BattleAudioProvider';
-import { CritChoiceDialog } from '@/components/battle/crit-choice/CritChoiceDialog';
-import { CritChoiceWaitingBanner } from '@/components/battle/crit-choice/CritChoiceWaitingBanner';
+import { useSystemBattleUi } from '@/components/battle/use-system-battle-ui';
 import { hudFontClassName } from '@/components/hud';
 import { OnboardingHint } from '@/components/onboarding/OnboardingHint';
 import { BattleStatus, ParticipantSide } from '@/lib/constants/battle';
 import {
     useBattleScene,
-    useCritChoiceDialog,
     useFxEnabled,
     useModeAutoSkip,
     useSpellBookPrefetch,
@@ -73,14 +71,6 @@ const ActionResultCard = dynamic(
     () =>
         import('@/components/battle/overlays/ActionResultCard').then(
             (m) => m.ActionResultCard
-        ),
-    { ssr: false }
-);
-
-const ResultOverlay = dynamic(
-    () =>
-        import('@/components/battle/overlays/ResultOverlay').then(
-            (m) => m.ResultOverlay
         ),
     { ssr: false }
 );
@@ -142,7 +132,8 @@ export function BattleScreen() {
 
     usePlayerViewKey(playerView.toggle, playerView.available);
 
-    const critChoice = useCritChoiceDialog();
+    const { notices: systemNotices, dialogs: systemDialogs } =
+        useSystemBattleUi();
 
     // перший HTML — мобільний макет: телефони не бачать підміни після гідратації
     const wide = useMediaQuery(DESKTOP_QUERY);
@@ -219,7 +210,6 @@ export function BattleScreen() {
                             <MobileBattleLayout />
                         </NoticeStackContext>
                     )}
-                    <ResultOverlay />
                     {battle.status === BattleStatus.COMPLETED && (
                         <BattleResultScreen />
                     )}
@@ -229,7 +219,9 @@ export function BattleScreen() {
                         className="pointer-events-none fixed inset-x-4 top-14 z-50 mx-auto flex max-w-md flex-col gap-2 *:pointer-events-auto"
                     >
                         <BattleToast />
-                        <CritChoiceWaitingBanner />
+                        {systemNotices?.map((Notice, i) => (
+                            <Notice key={i} />
+                        ))}
                         {/* не над мапою у свій хід і не для глядачів; ДМ бачить свою підказку на підготовці */}
                         {!isDM && hero && !isMyTurn && (
                             <OnboardingHint id="player.battle" />
@@ -245,7 +237,9 @@ export function BattleScreen() {
                         </CornerStack>
                     )}
                     {isDM && <DmRevivePrompt />}
-                    <CritChoiceDialog dialog={critChoice} />
+                    {systemDialogs?.map((Dialog, i) => (
+                        <Dialog key={i} />
+                    ))}
                     {Desktop && isDM && (
                         <CompleteBattleDialog
                             open={completeOpen}

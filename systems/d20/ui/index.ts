@@ -1,3 +1,10 @@
+import { CritChoiceDialog } from './battle/crit-choice/CritChoiceDialog';
+import { CritChoiceWaitingBanner } from './battle/crit-choice/CritChoiceWaitingBanner';
+import { DeathSaveBadge } from './battle/DeathSaveBadge';
+import { d20Defense } from './battle/defense';
+import { HeroStats as BattleHeroStats } from './battle/HeroStats';
+import { ParticipantStats } from './battle/ParticipantStats';
+import { SpellSlotsPanel } from './battle/SpellSlotsPanel';
 import { ResourceFields } from './rest/ResourceFields';
 import { RestBadges } from './rest/RestBadges';
 import { ActionsSection } from './rules/ActionsSection';
@@ -18,6 +25,15 @@ import { UnitStatsFields } from './UnitStatsFields';
 import type { SystemUi } from '@/components/systems/types';
 
 export const D20_MODULE_UI: SystemUi = {
+    battle: {
+        HeroStats: BattleHeroStats,
+        defense: d20Defense,
+        ParticipantStats,
+        heroPanels: [SpellSlotsPanel],
+        badges: [DeathSaveBadge],
+        dialogs: [CritChoiceDialog],
+        notices: [CritChoiceWaitingBanner],
+    },
     rulesSections: {
         criticals: CriticalsSection,
         formulas: FormulasSection,

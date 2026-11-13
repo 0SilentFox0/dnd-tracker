@@ -45,17 +45,9 @@ export type ResultFx =
           targetCount: number;
           system?: SystemSlot;
       }
-    | {
-          kind: 'morale-extra' | 'morale-skip';
-          name: string;
-          d10: number;
-          morale: number;
-      };
+    | { kind: 'system'; module: string; data: unknown };
 
-export type ActionResultFx = Extract<
-    ResultFx,
-    { kind: 'hit' | 'crit' | 'miss' | 'spell' }
->;
+export type ActionResultFx = Exclude<ResultFx, { kind: 'system' }>;
 
 export interface BattleLogState {
     open: boolean;

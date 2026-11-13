@@ -5,6 +5,5 @@ export { hitFlashClass, HitFloat } from './HitFloat';
 export { HpFigure } from './HpFigure';
 export { Portrait, type PortraitProps } from './Portrait';
 export { SideDot } from './SideDot';
-export { SlotGrid } from './SlotGrid';
 export { TurnTimerBar } from './TurnTimerBar';
 export { ZoomablePortrait } from './ZoomablePortrait';

@@ -24,7 +24,7 @@ export function RollStep({
 
     const { state, view } = wizard;
 
-    const { RollBody, RollTitle } = useSystemBattleUi() ?? {};
+    const { RollBody, RollTitle } = useSystemBattleUi();
 
     const serverJudged = view.serverJudged && !!RollBody;
 

@@ -1,7 +1,8 @@
 'use client';
 
-import type { ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
+
+import { Section } from './Section';
 
 import { HitFrame } from '@/components/battle/fx/PortraitFx';
 import {
@@ -13,6 +14,7 @@ import {
     HpFigure,
     ZoomablePortrait,
 } from '@/components/battle/hud';
+import { useSystemBattleUi } from '@/components/battle/use-system-battle-ui';
 import { MonsterStatblock } from '@/components/common/MonsterStatblock';
 import {
     useBattleRules,
@@ -25,27 +27,13 @@ import { useText } from '@/lib/i18n/use-text';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import { cn } from '@/lib/utils';
 import { effectName } from '@/lib/utils/battle/common/terms';
-import { getEffectiveArmorClass } from '@/lib/utils/battle/participant/helpers';
 import {
     canSeeExactStats,
     effectLines,
-    formatKnownArmorClass,
-    resolveKnownArmorClass,
     resolveObservedTraits,
     statblockOf,
 } from '@/lib/utils/battle/view';
 import type { ActiveEffect, BattleParticipant } from '@/types/battle';
-
-function Section({ title, children }: { title: string; children: ReactNode }) {
-    return (
-        <section className="mt-4">
-            <h4 className="hud-sc flex h-5 items-center text-[13px] tracking-[.08em] text-[var(--hud-muted)]">
-                {title}
-            </h4>
-            {children}
-        </section>
-    );
-}
 
 interface ParticipantDetailsProps {
     participant: BattleParticipant;
@@ -121,7 +109,9 @@ function ParticipantDetailsBody({
 
     const { battle, viewer, effects: allEffects } = useBattleSceneData();
 
-    const { d20Stats, hpTerm } = useBattleRules();
+    const { hpTerm } = useBattleRules();
+
+    const { ParticipantStats } = useSystemBattleUi();
 
     const impactFor = useFxImpacts();
 
@@ -138,12 +128,6 @@ function ParticipantDetailsBody({
     const log = battle.battleLog ?? [];
 
     const effects = allEffects.get(participant.basicInfo.id) ?? [];
-
-    const known = resolveKnownArmorClass(
-        log,
-        participant.basicInfo.id,
-        battle.knowledge
-    );
 
     const traits = exact
         ? []
@@ -194,34 +178,8 @@ function ParticipantDetailsBody({
                     <MonsterStatblock block={statblock} />
                 </Section>
             )}
-            {d20Stats && (
-                <Section title={t('armor')}>
-                    <div className="flex min-h-10 items-center justify-between border-b border-white/[.08]">
-                        <span>{exact ? t('ac') : t('acBetween')}</span>
-                        <span className="font-medium text-[var(--ink)]">
-                            {exact
-                                ? getEffectiveArmorClass(
-                                      participant,
-                                      battle.initiativeOrder
-                                  )
-                                : formatKnownArmorClass(known)}
-                        </span>
-                    </div>
-                    {!exact &&
-                        known.evidence.map((e, i) => (
-                            <div
-                                key={i}
-                                className="flex min-h-8 items-center text-[13px] text-[var(--hud-muted)]"
-                            >
-                                {t('evidence', {
-                                    hit: e.hit ? 'hit' : 'miss',
-                                    total: e.total,
-                                    actor: e.actorName,
-                                    round: e.round,
-                                })}
-                            </div>
-                        ))}
-                </Section>
+            {ParticipantStats && (
+                <ParticipantStats participant={participant} exact={exact} />
             )}
             <Section title={t('effects')}>
                 {effects.length === 0 && (

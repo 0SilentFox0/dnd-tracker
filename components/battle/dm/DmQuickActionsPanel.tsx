@@ -22,8 +22,8 @@ import { DmBattleLog } from './DmBattleLog';
 import { DmParticipantRow } from './DmParticipantRow';
 import { LegendaryActionDialog } from './LegendaryActionDialog';
 
+import { useSystemBattleUi } from '@/components/battle/use-system-battle-ui';
 import { HUD_SURFACE } from '@/components/hud';
-import { systemUiOf } from '@/components/systems';
 import { BattleStatus } from '@/lib/constants/battle';
 import {
     type BattlePageDialogs,
@@ -133,9 +133,7 @@ export function DmQuickActionsPanel({
         onDone: closePanel,
     });
 
-    const SystemDialog = battle.rules
-        ? systemUiOf(battle.rules.system.key).battleConditionsDialog
-        : undefined;
+    const SystemDialog = useSystemBattleUi().ConditionsDialog;
 
     if (!viewer.isDM || battle.status === BattleStatus.PREPARED) return null;
 

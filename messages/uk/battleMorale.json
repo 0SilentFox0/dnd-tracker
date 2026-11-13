@@ -1,0 +1,19 @@
+{
+  "extraTitle": "Бойовий дух",
+  "extraText": "{name} отримує додатковий хід наприкінці раунду",
+  "detail": "d10 = {d10} · мораль {morale}",
+  "toBattle": "До бою",
+  "skipTitle": "Паніка",
+  "skipText": "{name} втрачає хід",
+  "checkD10": "Перевірка моралі · d10",
+  "extraOn": "Додатковий хід на {rolls}",
+  "skipOn": "Пропуск ходу на {rolls}",
+  "outcome": {
+    "none": "Мораль",
+    "extra": "Бойовий дух",
+    "skip": "Паніка"
+  },
+  "badge": "Мораль {value}",
+  "unchanged": "{name} · мораль: без змін (d10 = {d10})",
+  "strip": "Перевірка моралі"
+}

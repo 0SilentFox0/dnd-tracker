@@ -185,22 +185,6 @@
     "exit": "Вийти в меню",
     "review": "Переглянути бій"
   },
-  "morale": {
-    "extraTitle": "Бойовий дух",
-    "extraText": "{name} отримує додатковий хід наприкінці раунду",
-    "detail": "d10 = {d10} · мораль {morale}",
-    "toBattle": "До бою",
-    "skipTitle": "Паніка",
-    "skipText": "{name} втрачає хід",
-    "checkD10": "Перевірка моралі · d10",
-    "extraOn": "Додатковий хід на {rolls}",
-    "skipOn": "Пропуск ходу на {rolls}",
-    "outcome": {
-      "none": "Мораль",
-      "extra": "Бойовий дух",
-      "skip": "Паніка"
-    }
-  },
   "details": {
     "statblock": "Статблок",
     "armor": "Броня",
@@ -217,7 +201,6 @@
     "immunity": "імунітет"
   },
   "hero": {
-    "morale": "Мораль {value}",
     "yourTurn": "твій хід",
     "acting": "ходить",
     "turnIn": "хід через {count}",
@@ -272,7 +255,6 @@
   "turnControls": {
     "strip": {
       "waiting": "Твій хід",
-      "morale": "Перевірка моралі",
       "acting": "Твій хід · Дії",
       "ended": "Твій хід"
     },
@@ -297,7 +279,6 @@
     "endTurnTitle": "Завершити хід?",
     "endTurnDescription": "Дію ще не використано.",
     "endTurnConfirm": "Завершити",
-    "moraleUnchanged": "{name} · мораль: без змін (d10 = {d10})",
     "skippedCells": "{count, plural, one {Пропущено # клітинку} few {Пропущено # клітинки} many {Пропущено # клітинок} other {Пропущено # клітинок}} (зайняті або поза полем)"
   },
   "unitControl": {

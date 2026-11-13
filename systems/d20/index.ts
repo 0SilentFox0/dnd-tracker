@@ -18,6 +18,7 @@ import { rollFromSheet } from './rules/sheet-roll';
 import { D20_STAT_COLUMNS } from './rules/stats';
 import { D20_TURN } from './rules/turn';
 
+import { isFiveE } from '@/lib/utils/battle/attack/ability';
 import type { RuleSystemDefinition } from '@/lib/utils/rules/systems/types';
 import type { SheetRollSubject } from '@/types/characters';
 
@@ -47,6 +48,7 @@ export const D20_MODULE: RuleSystemDefinition = {
     rest: { kinds: true },
     combat: {
         judge: 'client',
+        offHand: isFiveE,
         dice: 20,
         actionEconomy: { bonusAction: true, reaction: true },
         resolveAttack: resolveD20Attack,

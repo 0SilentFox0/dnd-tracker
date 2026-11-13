@@ -14,6 +14,7 @@ import {
     HpFigure,
     Portrait,
 } from '@/components/battle/hud';
+import type { SystemBattleUi } from '@/components/systems/types';
 import { useHitFx } from '@/lib/hooks/battle';
 import { useCreatureTypeLabel } from '@/lib/i18n/use-creature-type';
 import { useText } from '@/lib/i18n/use-text';
@@ -23,56 +24,6 @@ import type { FxImpact } from '@/lib/utils/battle/fx';
 import { isDown } from '@/lib/utils/battle/participant/state';
 import { type DisplayEffect, hpRatio } from '@/lib/utils/battle/view';
 import type { BattleParticipant } from '@/types/battle';
-
-function Pips({
-    count,
-    filled,
-    color,
-}: {
-    count: number;
-    filled: number;
-    color: string;
-}) {
-    return (
-        <span className="flex gap-0.5">
-            {Array.from({ length: count }, (_, i) => (
-                <span
-                    key={i}
-                    className="size-2 rounded-full border"
-                    style={{
-                        borderColor: color,
-                        background: i < filled ? color : 'transparent',
-                    }}
-                />
-            ))}
-        </span>
-    );
-}
-
-function DeathSavePips({
-    saves,
-}: {
-    saves: NonNullable<BattleParticipant['battleData']['deathSaves']>;
-}) {
-    const t = useTranslations('battle.participant');
-
-    return (
-        <div className="mt-1 flex items-center gap-2 text-xs text-[var(--hud-muted)]">
-            <span>{t('deathSaves')}</span>
-            <Pips
-                count={3}
-                filled={saves.successes}
-                color="var(--hud-good, #5fae5f)"
-            />
-            <Pips
-                count={3}
-                filled={saves.failures}
-                color="var(--hud-bad, #e04a35)"
-            />
-            {saves.stable && <span>{t('stable')}</span>}
-        </div>
-    );
-}
 
 export interface ParticipantRowView {
     exact: boolean;
@@ -88,6 +39,8 @@ interface ParticipantRowProps {
     view: ParticipantRowView;
     impact: FxImpact | null;
     onSelect: (id: string) => void;
+    /** From the parent, not the scene context, to keep the row's memo */
+    badges?: SystemBattleUi['badges'];
 }
 
 const sameView = (a: ParticipantRowView, b: ParticipantRowView) =>
@@ -102,6 +55,7 @@ const sameProps = (a: ParticipantRowProps, b: ParticipantRowProps) =>
     a.effects === b.effects &&
     a.impact === b.impact &&
     a.onSelect === b.onSelect &&
+    a.badges === b.badges &&
     sameView(a.view, b.view);
 
 export const ParticipantRow = memo(function ParticipantRow({
@@ -110,6 +64,7 @@ export const ParticipantRow = memo(function ParticipantRow({
     view: { exact, acText, wounds, current, masked },
     impact,
     onSelect,
+    badges,
 }: ParticipantRowProps) {
     const text = useText();
 
@@ -197,9 +152,9 @@ export const ParticipantRow = memo(function ParticipantRow({
                 </div>
                 <HealthBar participant={participant} exact={exact} />
                 <EffectLine effects={effects} hideLevels={!exact} />
-                {participant.battleData.deathSaves && (
-                    <DeathSavePips saves={participant.battleData.deathSaves} />
-                )}
+                {badges?.map((Badge, i) => (
+                    <Badge key={i} participant={participant} place="row" />
+                ))}
                 {badge && (
                     <div className="mt-1 text-xs text-[var(--hud-muted)]">
                         {text(badge)}

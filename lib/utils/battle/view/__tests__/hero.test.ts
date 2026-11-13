@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
 import { AttackType, ParticipantSide } from '@/lib/constants/battle';
-import { resolved } from '@/lib/utils/abilities/__tests__/fixtures';
 import type { FlagEffect } from '@/lib/utils/abilities/schema';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import { getEffectiveArmorClass } from '@/lib/utils/battle/participant/helpers';
@@ -10,7 +9,6 @@ import {
     bonusTargetSide,
     canCastBonusSpell,
     lastAction,
-    needsMoraleCheck,
     slotLevels,
     spellTier,
     weaponPreview,
@@ -206,62 +204,6 @@ describe('мій герой', () => {
 
         expect(lastAction(log)?.actionIndex).toBe(1);
         expect(lastAction([])).toBeNull();
-    });
-
-    it("needsMoraleCheck: мораль ≠ 0; noNegativeMorale гасить від'ємну; ignoreMorale — ніколи; назва раси не важить; вже перевірено — ні", () => {
-        const p = createMockParticipant();
-
-        const m = (
-            morale: number,
-            flags: FlagEffect[] = [],
-            race = 'Людина'
-        ) => ({
-            ...p,
-            abilities: { ...p.abilities, race },
-            combatStats: { ...p.combatStats, morale },
-            battleData: {
-                ...p.battleData,
-                resolvedAbilities: flags.length
-                    ? [
-                          resolved({
-                              trigger: { event: 'passive' },
-                              effects: flags,
-                          }),
-                      ]
-                    : [],
-            },
-        });
-
-        expect(needsMoraleCheck(m(1), [], null)).toBe(true);
-        expect(needsMoraleCheck(m(0), [], null)).toBe(false);
-        expect(needsMoraleCheck(m(-1, [], 'human'), [], null)).toBe(true);
-        expect(
-            needsMoraleCheck(
-                m(-1, [{ kind: 'flag', flag: 'noNegativeMorale' }]),
-                [],
-                null
-            )
-        ).toBe(false);
-        expect(
-            needsMoraleCheck(
-                m(2, [{ kind: 'flag', flag: 'ignoreMorale' }], 'necromancer'),
-                [],
-                null
-            )
-        ).toBe(false);
-        expect(
-            needsMoraleCheck(m(1), [], { participantId: p.basicInfo.id })
-        ).toBe(false);
-        expect(
-            needsMoraleCheck(
-                {
-                    ...m(1),
-                    battleData: { ...m(1).battleData, extraTurnActive: true },
-                },
-                [],
-                null
-            )
-        ).toBe(false);
     });
 
     it('weaponPreview: бонус ближнього бою видно на мечі, але не на луку; оцінка з бонусом', () => {

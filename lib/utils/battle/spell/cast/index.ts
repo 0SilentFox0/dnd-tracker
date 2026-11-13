@@ -278,6 +278,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
         grant: params.grant,
         power: computeSpellPower({
             caster: readyCaster,
+            rules: params.rules,
             groupId: spell.groupId,
             rolls: allRolls,
             participants: flow.ps,

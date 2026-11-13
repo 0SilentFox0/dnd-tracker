@@ -1,0 +1,19 @@
+{
+  "extraTitle": "Fighting spirit",
+  "extraText": "{name} gets an extra turn at the end of the round",
+  "detail": "d10 = {d10} · morale {morale}",
+  "toBattle": "Back to battle",
+  "skipTitle": "Panic",
+  "skipText": "{name} loses the turn",
+  "checkD10": "Morale check · d10",
+  "extraOn": "Extra turn on {rolls}",
+  "skipOn": "Turn skipped on {rolls}",
+  "outcome": {
+    "none": "Morale",
+    "extra": "Fighting spirit",
+    "skip": "Panic"
+  },
+  "badge": "Morale {value}",
+  "unchanged": "{name} · morale: unchanged (d10 = {d10})",
+  "strip": "Morale check"
+}

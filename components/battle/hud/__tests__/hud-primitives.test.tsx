@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 vi.mock('@/components/hud/fonts', () => ({ hudFontClassName: '' }));
 
-import { EffectLine, HealthBar, SlotGrid } from '@/components/battle/hud';
+import { EffectLine, HealthBar } from '@/components/battle/hud';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { ParticipantSide } from '@/lib/constants/battle';
 import { render } from '@/lib/i18n/test/render-uk';
@@ -89,25 +89,5 @@ describe('примітиви HUD', () => {
 
         expect(screen.getByText('при смерті')).toBeTruthy();
         expect(container.textContent).not.toContain('/');
-    });
-
-    it("слоти: п'ять кіл римськими, порожнє коло — без кристалів", () => {
-        const b = createMockParticipant();
-
-        render(
-            <SlotGrid
-                participant={{
-                    ...b,
-                    spellcasting: {
-                        ...b.spellcasting,
-                        spellSlots: { '1': { max: 3, current: 2 } },
-                    },
-                }}
-            />
-        );
-
-        for (const r of ['I', 'II', 'III', 'IV', 'V'])
-            expect(screen.getByText(r)).toBeTruthy();
-        expect(screen.getByLabelText('I коло: 2 з 3')).toBeTruthy();
     });
 });

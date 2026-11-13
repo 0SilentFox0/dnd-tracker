@@ -2,22 +2,33 @@
 import { cleanup, fireEvent, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { CritChoiceDialog } from '../CritChoiceDialog';
-import { CritChoiceWaitingBanner } from '../CritChoiceWaitingBanner';
+const hook = vi.hoisted(() => ({ current: null as unknown }));
 
-import type { useCritChoiceDialog } from '@/lib/hooks/battle';
+vi.mock('@/systems/d20/hooks/battle/useCritChoiceDialog', () => ({
+    useCritChoiceDialog: () => hook.current,
+}));
+
 import { BattleSceneContext } from '@/lib/hooks/battle';
 import type { BattleSceneValue } from '@/lib/hooks/battle/types';
 import { renderWithConfirm } from '@/lib/i18n/test/render-uk';
 import { textOf } from '@/lib/i18n/test/text';
 import { critNameRef } from '@/lib/utils/battle/attack/critical';
 import { critEffectsFor } from '@/lib/utils/battle/crit-choice/catalog';
+import type { useCritChoiceDialog } from '@/systems/d20/hooks/battle/useCritChoiceDialog';
+import { CritChoiceDialog } from '@/systems/d20/ui/battle/crit-choice/CritChoiceDialog';
+import { CritChoiceWaitingBanner } from '@/systems/d20/ui/battle/crit-choice/CritChoiceWaitingBanner';
 
 vi.unmock('next-intl');
 
 afterEach(cleanup);
 
 type Dialog = ReturnType<typeof useCritChoiceDialog>;
+
+const renderDialog = (dialog: Dialog) => {
+    hook.current = dialog;
+
+    return renderWithConfirm(<CritChoiceDialog />);
+};
 
 const triggers = [
     {
@@ -53,7 +64,7 @@ function dialogOf(submit = vi.fn(), cancel = vi.fn()): Dialog {
 
 describe('CritChoiceDialog', () => {
     it('заголовки рядків: атака — «актор → ціль», рятівний кидок — «Рятівний кидок: ціль»', () => {
-        renderWithConfirm(<CritChoiceDialog dialog={dialogOf()} />);
+        renderDialog(dialogOf());
 
         expect(
             screen.getByText('Фрейда → Гоблін: Критична удача')
@@ -64,7 +75,7 @@ describe('CritChoiceDialog', () => {
     it('«Підтвердити» неактивне, доки не обрано кожен рядок; потім відправляє id ефектів', () => {
         const submit = vi.fn();
 
-        renderWithConfirm(<CritChoiceDialog dialog={dialogOf(submit)} />);
+        renderDialog(dialogOf(submit));
 
         const confirm = screen.getByRole('button', {
             name: 'Підтвердити',
@@ -93,7 +104,7 @@ describe('CritChoiceDialog', () => {
     it('«Випадково для всіх» відправляє random для кожного ключа', () => {
         const submit = vi.fn();
 
-        renderWithConfirm(<CritChoiceDialog dialog={dialogOf(submit)} />);
+        renderDialog(dialogOf(submit));
 
         fireEvent.click(
             screen.getByRole('button', { name: 'Випадково для всіх' })
@@ -104,18 +115,14 @@ describe('CritChoiceDialog', () => {
     it('«Скасувати дію» викликає cancel', () => {
         const cancel = vi.fn();
 
-        renderWithConfirm(
-            <CritChoiceDialog dialog={dialogOf(vi.fn(), cancel)} />
-        );
+        renderDialog(dialogOf(vi.fn(), cancel));
 
         fireEvent.click(screen.getByRole('button', { name: 'Скасувати дію' }));
         expect(cancel).toHaveBeenCalledTimes(1);
     });
 
     it('закрите: нічого не рендерить', () => {
-        renderWithConfirm(
-            <CritChoiceDialog dialog={{ ...dialogOf(), open: false }} />
-        );
+        renderDialog({ ...dialogOf(), open: false });
         expect(screen.queryByText('Підтвердити')).toBeNull();
     });
 });

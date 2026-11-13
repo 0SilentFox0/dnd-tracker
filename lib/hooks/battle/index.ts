@@ -1,6 +1,7 @@
 export { useFxBusy } from './fx-busy';
 export { fireFxImpact, onFxImpact } from './fx-impact';
 export * from './modes';
+export { afterMoraleDice } from './morale-dice';
 export { useAbilityMapAim } from './useAbilityMapAim';
 export { useAbilityPicker } from './useAbilityPicker';
 export { ACTION_RESULT_MS, useActionResult } from './useActionResult';
@@ -38,7 +39,6 @@ export {
     useCoreActions,
     useReadiedAttack,
 } from './useCoreActions';
-export { type CritChoiceRow, useCritChoiceDialog } from './useCritChoiceDialog';
 export { useDmCaster } from './useDmCaster';
 export {
     type DmParticipantActions,

@@ -111,7 +111,7 @@ function TargetsStep({ book }: { book: Book }) {
 function RollsStep({ book }: { book: Book }) {
     const tw = useTranslations('battleWizards.spell.cast');
 
-    const CastTest = useSystemBattleUi()?.CastTest;
+    const CastTest = useSystemBattleUi().CastTest;
 
     const { state, view, actions } = book;
 

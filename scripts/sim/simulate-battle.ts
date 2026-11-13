@@ -71,6 +71,7 @@ import { runAbilities } from '@/lib/utils/abilities/engine/core/run-abilities';
 import { countMarks } from '@/lib/utils/abilities/engine/effects/marks';
 import { applyBattleDelta } from '@/lib/utils/battle/client/apply-delta';
 import { heroAttackDamageParts } from '@/lib/utils/battle/damage/hero-damage';
+import { awaitsMoraleCheck } from '@/lib/utils/battle/morale/awaits-check';
 import { effectiveMorale } from '@/lib/utils/battle/morale/effective-morale';
 import { createBattleParticipantFromCharacter } from '@/lib/utils/battle/participant/from-character';
 import { PUSHER_DELTA_LIMIT_BYTES } from '@/lib/utils/battle/pipeline/limits';
@@ -87,7 +88,6 @@ import {
 } from '@/lib/utils/battle/store';
 import { PATCHABLE_PARTICIPANT_FIELDS } from '@/lib/utils/battle/store/participant-patch';
 import { stableStringify } from '@/lib/utils/battle/store/stable-json';
-import { needsMoraleCheck } from '@/lib/utils/battle/view';
 import { rollDiceList } from '@/lib/utils/common/dice';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 import {
@@ -561,6 +561,18 @@ const by = (name: string) => {
 
 const current = () => state.initiativeOrder[state.currentTurnIndex];
 
+const awaitsMorale = (name: string) =>
+    awaitsMoraleCheck(
+        {
+            participants: state.initiativeOrder,
+            scene: {
+                turnIndex: state.currentTurnIndex,
+                pendingMoraleCheck: state.pendingMoraleCheck,
+            },
+        },
+        by(name).basicInfo.id
+    );
+
 const hp = (p: BattleParticipant) => p.combatStats.currentHp;
 
 const effectNames = (p: BattleParticipant) =>
@@ -975,11 +987,7 @@ async function scenario() {
 
     check(
         'ignoreMorale: Лірі з моральлю +2 перевірка не потрібна',
-        !needsMoraleCheck(
-            by('Ліра'),
-            state.initiativeOrder,
-            state.pendingMoraleCheck
-        ),
+        !awaitsMorale('Ліра'),
         `мораль ${by('Ліра').combatStats.morale}`
     );
 
@@ -1027,11 +1035,7 @@ async function scenario() {
 
     check(
         'noNegativeMorale: Мирону з моральлю −2 перевірка не потрібна',
-        !needsMoraleCheck(
-            by('Мирон'),
-            state.initiativeOrder,
-            state.pendingMoraleCheck
-        ),
+        !awaitsMorale('Мирон'),
         `мораль ${by('Мирон').combatStats.morale}`
     );
 

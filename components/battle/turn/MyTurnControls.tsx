@@ -7,7 +7,6 @@ import { useTranslations } from 'next-intl';
 import { ActionGrid } from './ActionGrid';
 import { TurnCountdown } from './TurnCountdown';
 
-import { AiRollButton, DiceGrid } from '@/components/battle/hud/DiceInput';
 import { modeUiOf } from '@/components/battle/modes';
 import { MapStripRow } from '@/components/battle/scene/MapStrip';
 import { useSystemBattleUi } from '@/components/battle/use-system-battle-ui';
@@ -22,7 +21,6 @@ import {
     usePlayerTurn,
     useSpellBook,
 } from '@/lib/hooks/battle';
-import { cn } from '@/lib/utils';
 import { coreActionsOn } from '@/lib/utils/battle/actions/access';
 import { canOffHandAttack } from '@/lib/utils/battle/attack/attacks-left';
 import {
@@ -30,9 +28,7 @@ import {
     COUNTDOWN_SECONDS,
     turnAllowsAttack,
 } from '@/lib/utils/battle/flows';
-import { moraleTriggerRolls } from '@/lib/utils/battle/morale/threshold';
 import { usableAbilities } from '@/lib/utils/battle/view';
-import { cryptoRandom, rollDie } from '@/lib/utils/common/dice';
 import type { BattleParticipant } from '@/types/battle';
 
 const AttackWizard = dynamic(
@@ -77,8 +73,6 @@ export function MyTurnControls({
 }) {
     const t = useTranslations('battle.turnControls');
 
-    const tm = useTranslations('battle.morale');
-
     const { anyPending, battle, intents } = useBattleScene();
 
     const { actionEconomy, tested, spells } = useBattleRules();
@@ -102,8 +96,6 @@ export function MyTurnControls({
     const systemUi = useSystemBattleUi();
 
     const zone = useAuraZones(hero);
-
-    const morale = moraleTriggerRolls(hero, battle.initiativeOrder);
 
     const [bonusOpen, setBonusOpen] = useState(false);
 
@@ -188,51 +180,8 @@ export function MyTurnControls({
 
     const full = (
         <>
-            {turn.phase === 'morale' && (
-                <div className="pt-3">
-                    <div className="hud-sc text-lg font-bold">
-                        {tm('checkD10')}
-                    </div>
-                    {morale.kind && (
-                        <div
-                            className={cn(
-                                'mt-1 text-sm',
-                                morale.kind === 'extra'
-                                    ? 'text-hud-gold-bright'
-                                    : 'text-hud-bad'
-                            )}
-                        >
-                            {tm(
-                                morale.kind === 'extra' ? 'extraOn' : 'skipOn',
-                                { rolls: morale.rolls.join(', ') }
-                            )}
-                        </div>
-                    )}
-                    <DiceGrid
-                        sides={10}
-                        onPick={(v) => void turn.actions.rollMorale(v)}
-                        highlight={
-                            morale.kind
-                                ? {
-                                      rolls: morale.rolls,
-                                      tone:
-                                          morale.kind === 'extra'
-                                              ? 'gold'
-                                              : 'danger',
-                                  }
-                                : undefined
-                        }
-                    />
-                    <div className="mt-2">
-                        <AiRollButton
-                            onClick={() =>
-                                void turn.actions.rollMorale(
-                                    rollDie(10, cryptoRandom)
-                                )
-                            }
-                        />
-                    </div>
-                </div>
+            {turn.phase === 'gate' && systemUi.turnStart && (
+                <systemUi.turnStart.Panel hero={hero} gate={turn.gate} />
             )}
             {turn.phase === 'acting' && zone && (
                 <div className="pt-3">
@@ -243,12 +192,18 @@ export function MyTurnControls({
                 <ActionGrid
                     turn={turn}
                     channelLabel={
-                        systemUi?.ChannelLabel && <systemUi.ChannelLabel />
+                        systemUi.ChannelLabel && <systemUi.ChannelLabel />
+                    }
+                    gateLabel={
+                        systemUi.turnStart && (
+                            <systemUi.turnStart.Label
+                                outcome={turn.gateResult}
+                            />
+                        )
                     }
                     pending={anyPending}
                     available={{
-                        channel:
-                            !!systemUi?.ChannelDialog && tested && hasMagic,
+                        channel: !!systemUi.ChannelDialog && tested && hasMagic,
                         magic: hasMagic,
                         magicTile: spells,
                         bonus:
@@ -278,7 +233,9 @@ export function MyTurnControls({
             <span className="hud-sc tracking-[.12em]">
                 {phase === 'acting' && zone
                     ? t('pickAuraZone')
-                    : t(`strip.${phase}`)}
+                    : phase === 'gate'
+                      ? systemUi.turnStart && <systemUi.turnStart.Label />
+                      : t(`strip.${phase}`)}
             </span>
         </MapStripRow>
     );
@@ -295,7 +252,7 @@ export function MyTurnControls({
             )}
             <AttackWizard wizard={attack} />
             <SpellBook book={book} />
-            {tested && systemUi?.ChannelDialog && (
+            {tested && systemUi.ChannelDialog && (
                 <systemUi.ChannelDialog channel={channel} />
             )}
             {coreActionsOn(battle.rules) && (

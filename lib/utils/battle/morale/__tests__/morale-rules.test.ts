@@ -8,7 +8,6 @@ import {
 import { applyEffect } from '@/lib/utils/abilities/registry/effects';
 import { awaitsMoraleCheck } from '@/lib/utils/battle/morale/awaits-check';
 import { effectiveMorale } from '@/lib/utils/battle/morale/effective-morale';
-import { needsMoraleCheck } from '@/lib/utils/battle/view';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 import type { BattleParticipant } from '@/types/battle';
 
@@ -50,7 +49,6 @@ describe('morale rules', () => {
                 'p'
             )
         ).toBe(false);
-        expect(needsMoraleCheck(p, [p], null)).toBe(false);
     });
 
     it('cap 5 дозволяє мораль 5; відсутня межа (старий знімок) — 3', () => {

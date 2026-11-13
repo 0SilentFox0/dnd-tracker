@@ -32,7 +32,7 @@ export function SkillsTab({
 }) {
     const { campaignId, characterId, sheet } = useProfile();
 
-    const { system } = useCampaignSystem(campaignId, sheet.system);
+    const { system, ready } = useCampaignSystem(campaignId, sheet.system);
 
     const ui = systemUiOf(system.key, system.modules);
 
@@ -106,9 +106,10 @@ export function SkillsTab({
             <FeatsBlock />
             <RacePassive />
             <ChargesList />
-            {ui.sheet?.pathPanels?.map((Panel, i) => (
-                <Panel key={i} manage={manage} />
-            ))}
+            {ready &&
+                ui.sheet?.pathPanels?.map((Panel, i) => (
+                    <Panel key={i} manage={manage} />
+                ))}
         </>
     );
 }

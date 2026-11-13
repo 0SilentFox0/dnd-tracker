@@ -1,8 +1,3 @@
-import {
-    effectiveMorale,
-    moraleChanceBonus,
-} from '@/lib/utils/battle/morale/effective-morale';
-import type { BattleParticipant } from '@/types/battle';
 import type { LogLine } from '@/types/text';
 
 export interface MoraleCheckResult {
@@ -32,30 +27,4 @@ export function moraleThreshold(
               threshold: Math.max(1, 11 - n - Math.floor(bonusPercent / 10)),
           }
         : { kind: 'skip', threshold: n };
-}
-
-/** Значення d10, на яких спрацює мораль: додатковий хід (позитивна) чи пропуск ходу (негативна). */
-export function moraleTriggerRolls(
-    participant: BattleParticipant,
-    participants: BattleParticipant[] = [participant]
-): { kind: 'extra' | 'skip' | null; rolls: number[] } {
-    const { value, ignored } = effectiveMorale(participant, participants);
-
-    if (ignored || value === 0) return { kind: null, rolls: [] };
-
-    const { kind, threshold } = moraleThreshold(
-        value,
-        value > 0 ? moraleChanceBonus(participant, participants) : 0
-    );
-
-    return {
-        kind,
-        rolls:
-            kind === 'extra'
-                ? Array.from(
-                      { length: 11 - threshold },
-                      (_, i) => threshold + i
-                  )
-                : Array.from({ length: threshold }, (_, i) => i + 1),
-    };
 }

@@ -2,14 +2,13 @@
 
 import { memo } from 'react';
 import { useTranslations } from 'next-intl';
-import { Heart, Shield } from 'lucide-react';
+import { Heart } from 'lucide-react';
 
 import { HitFrame, PortraitFx } from '@/components/battle/fx/PortraitFx';
 import {
     EffectLine,
     HealthBar,
     HpFigure,
-    SlotGrid,
     TurnTimerBar,
     ZoomablePortrait,
 } from '@/components/battle/hud';
@@ -23,16 +22,12 @@ import {
     useFxImpacts,
     useHitFx,
 } from '@/lib/hooks/battle';
-import { cn } from '@/lib/utils';
-import { effectiveMorale } from '@/lib/utils/battle/morale/effective-morale';
-import { getEffectiveArmorClass } from '@/lib/utils/battle/participant/helpers';
 import {
     abilityCharges,
     NO_EFFECTS,
     poolViews,
     turnsUntil,
 } from '@/lib/utils/battle/view';
-import { signed } from '@/lib/utils/common/format';
 import type { BattleParticipant } from '@/types/battle';
 
 export const MyHeroPanel = memo(function MyHeroPanel({
@@ -50,9 +45,10 @@ export const MyHeroPanel = memo(function MyHeroPanel({
         effects,
     } = useBattleSceneData();
 
-    const { d20Stats, hpTerm, spells } = useBattleRules();
+    const { hpTerm } = useBattleRules();
 
-    const ConditionTestPanel = useSystemBattleUi()?.ConditionTestPanel;
+    const { ConditionTestPanel, HeroStats, heroPanels, badges } =
+        useSystemBattleUi();
 
     const heroEffects = effects.get(live.basicInfo.id) ?? NO_EFFECTS;
 
@@ -67,8 +63,6 @@ export const MyHeroPanel = memo(function MyHeroPanel({
     const charges = abilityCharges(hero, battle.currentRound);
 
     const pools = poolViews(hero);
-
-    const morale = effectiveMorale(hero, battle.initiativeOrder).value;
 
     return (
         <div ref={shakeRef} data-tour="battle.hero" className="relative">
@@ -94,18 +88,13 @@ export const MyHeroPanel = memo(function MyHeroPanel({
                             <span className="truncate">
                                 {hero.basicInfo.name}
                             </span>
-                            {morale !== 0 && (
-                                <span
-                                    className={cn(
-                                        'shrink-0 font-sans text-sm font-medium tracking-normal',
-                                        morale > 0
-                                            ? 'text-hud-good'
-                                            : 'text-hud-danger'
-                                    )}
-                                >
-                                    {t('morale', { value: signed(morale) })}
-                                </span>
-                            )}
+                            {badges?.map((Badge, i) => (
+                                <Badge
+                                    key={i}
+                                    participant={hero}
+                                    place="hero"
+                                />
+                            ))}
                         </span>
                         <span className="shrink-0 pl-2 font-sans text-sm font-normal tracking-normal whitespace-nowrap text-hud-soft italic">
                             {compact ? (
@@ -114,8 +103,9 @@ export const MyHeroPanel = memo(function MyHeroPanel({
                                         participant={hero}
                                         wounds={hpTerm === 'wounds'}
                                     />
-                                    {d20Stats &&
-                                        ` · AC ${getEffectiveArmorClass(hero, battle.initiativeOrder)}`}
+                                    {HeroStats && (
+                                        <HeroStats hero={hero} compact />
+                                    )}
                                 </>
                             ) : battle.status !== BattleStatus.ACTIVE ? (
                                 ''
@@ -140,21 +130,16 @@ export const MyHeroPanel = memo(function MyHeroPanel({
                                     wounds={hpTerm === 'wounds'}
                                 />
                             </span>
-                            {d20Stats && (
-                                <span className="flex items-center gap-1.5">
-                                    <Shield className="size-4 text-hud-soft" />
-                                    {getEffectiveArmorClass(
-                                        hero,
-                                        battle.initiativeOrder
-                                    )}
-                                </span>
+                            {HeroStats && (
+                                <HeroStats hero={hero} compact={false} />
                             )}
                         </div>
                     )}
                 </div>
             </div>
             {!compact && <TurnTimerBar />}
-            {!compact && spells && <SlotGrid participant={hero} />}
+            {!compact &&
+                heroPanels?.map((Panel, i) => <Panel key={i} hero={hero} />)}
             {!compact && (charges.length > 0 || pools.length > 0) && (
                 <div className="mt-2.5 flex h-6 items-center gap-4 text-sm text-hud-text">
                     {charges.map((c) => (

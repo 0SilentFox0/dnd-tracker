@@ -3,14 +3,25 @@ import { act, renderHook } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { moraleDiceDone } from '../morale-dice';
-import { usePlayerTurn } from '../usePlayerTurn';
+import { usePlayerTurn as useTurn } from '../usePlayerTurn';
 import { fakeScene } from './fake-scene';
+
+import { useMoraleRoll } from '@/systems/morale/hooks/useMoraleRoll';
 
 const fx = vi.hoisted(() => ({ enabled: false }));
 
 vi.mock('../useFxEnabled', () => ({
     useFxEnabled: () => ({ enabled: fx.enabled }),
 }));
+
+// the morale module drives the gate: its roll hook is composed here the way the morale panel does
+const usePlayerTurn = (...args: Parameters<typeof useTurn>) => {
+    const turn = useTurn(...args);
+
+    const { roll } = useMoraleRoll(args[0], turn.gate);
+
+    return { ...turn, actions: { ...turn.actions, rollMorale: roll } };
+};
 
 describe('usePlayerTurn', () => {
     it('мораль ≠ 0 — фаза morale; «додатковий хід» → оверлей і дії', async () => {
@@ -20,7 +31,7 @@ describe('usePlayerTurn', () => {
 
         const { result } = renderHook(() => usePlayerTurn(me), { wrapper });
 
-        expect(result.current.phase).toBe('morale');
+        expect(result.current.phase).toBe('gate');
 
         await act(async () => result.current.actions.rollMorale(9));
 
@@ -29,7 +40,11 @@ describe('usePlayerTurn', () => {
             d10Roll: 9,
         });
         expect(showResult).toHaveBeenCalledWith(
-            expect.objectContaining({ kind: 'morale-extra', d10: 9 })
+            expect.objectContaining({
+                kind: 'system',
+                module: 'morale',
+                data: expect.objectContaining({ outcome: 'extra', d10: 9 }),
+            })
         );
         expect(result.current.phase).toBe('acting');
     });
@@ -54,7 +69,11 @@ describe('usePlayerTurn', () => {
             await rolled;
         });
         expect(showResult).toHaveBeenCalledWith(
-            expect.objectContaining({ kind: 'morale-extra', d10: 9 })
+            expect.objectContaining({
+                kind: 'system',
+                module: 'morale',
+                data: expect.objectContaining({ outcome: 'extra', d10: 9 }),
+            })
         );
         fx.enabled = false;
     });
@@ -257,13 +276,21 @@ describe('usePlayerTurn', () => {
         expect(scene.nextTurn).toHaveBeenCalledWith({});
     });
 
+    it('голий dnd5e: навіть з мораллю ≠ 0 хід стартує в acting (M1)', () => {
+        const { me, wrapper } = fakeScene({ morale: 2, system: 'dnd5e' });
+
+        const { result } = renderHook(() => usePlayerTurn(me), { wrapper });
+
+        expect(result.current.phase).toBe('acting');
+    });
+
     it('результат моралі: без перевірки — undefined; уже перевірена в цьому ході — з pendingMoraleCheck', () => {
         const plain = fakeScene();
 
         expect(
             renderHook(() => usePlayerTurn(plain.me), {
                 wrapper: plain.wrapper,
-            }).result.current.moraleResult
+            }).result.current.gateResult
         ).toBeUndefined();
 
         const checked = fakeScene({ morale: 2 });
@@ -284,6 +311,6 @@ describe('usePlayerTurn', () => {
         });
 
         expect(result.current.phase).toBe('acting');
-        expect(result.current.moraleResult).toBe('extra');
+        expect(result.current.gateResult).toBe('extra');
     });
 });

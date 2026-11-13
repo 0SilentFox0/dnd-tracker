@@ -20,7 +20,6 @@ import { attackKindOf } from '@/lib/utils/battle/common/attack-kind';
 import { averageAttackDamage } from '@/lib/utils/battle/damage/average';
 import { heroAttackDamageParts } from '@/lib/utils/battle/damage/hero-damage';
 import { isHostile } from '@/lib/utils/battle/modes/engine';
-import { effectiveMorale } from '@/lib/utils/battle/morale/effective-morale';
 import { isUp } from '@/lib/utils/battle/participant/state';
 import { spellNeedsSlot, spellSlotLeft } from '@/lib/utils/battle/spell/slot';
 import { PACT_KEY } from '@/lib/utils/spells/slot-keys';
@@ -307,21 +306,6 @@ export function lastAction(log: BattleAction[]): BattleAction | null {
     }
 
     return null;
-}
-
-export function needsMoraleCheck(
-    p: BattleParticipant,
-    participants: BattleParticipant[],
-    pendingMoraleCheck: unknown
-): boolean {
-    if (
-        p.battleData.extraTurnActive ||
-        (pendingMoraleCheck as { participantId?: string } | null)
-            ?.participantId === p.basicInfo.id
-    )
-        return false;
-
-    return effectiveMorale(p, participants).value !== 0;
 }
 
 export function weaponPreview(

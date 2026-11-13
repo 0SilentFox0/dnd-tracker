@@ -1,8 +1,7 @@
 'use client';
 
-import { useBattleScene } from './useBattleScene';
-
 import type { CriticalEffect } from '@/lib/constants/critical-effects';
+import { useBattleScene } from '@/lib/hooks/battle';
 import { enabledCritEffects } from '@/lib/utils/battle/crit-choice/catalog';
 import { asShownCrit } from '@/lib/utils/battle/crit-choice/pending';
 import type { CritTrigger } from '@/lib/utils/battle/crit-choice/types';

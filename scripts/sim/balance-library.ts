@@ -46,6 +46,7 @@ import {
 } from '@/lib/utils/battle/balance';
 import { applyBattleDelta } from '@/lib/utils/battle/client/apply-delta';
 import { heroAttackDamageParts } from '@/lib/utils/battle/damage/hero-damage';
+import { awaitsMoraleCheck } from '@/lib/utils/battle/morale/awaits-check';
 import {
     loadEquippedArtifactRows,
     toEquippedArtifacts,
@@ -64,7 +65,6 @@ import {
 import {
     bonusTargetCandidates,
     needsBonusTarget,
-    needsMoraleCheck,
     usableAbilities,
 } from '@/lib/utils/battle/view';
 import { rollDiceList } from '@/lib/utils/common/dice';
@@ -516,7 +516,16 @@ async function playUnitAbilities(
 
 async function playTurn(actor: BattleParticipant, foes: BattleParticipant[]) {
     if (
-        needsMoraleCheck(actor, state.initiativeOrder, state.pendingMoraleCheck)
+        awaitsMoraleCheck(
+            {
+                participants: state.initiativeOrder,
+                scene: {
+                    turnIndex: state.currentTurnIndex,
+                    pendingMoraleCheck: state.pendingMoraleCheck,
+                },
+            },
+            actor.basicInfo.id
+        )
     ) {
         const status = await call('morale-check', MORALE, {
             participantId: actor.basicInfo.id,

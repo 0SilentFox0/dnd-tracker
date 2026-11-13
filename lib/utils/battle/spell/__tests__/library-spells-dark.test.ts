@@ -222,6 +222,7 @@ describe('Темрява — бібліотечні заклинання', () =>
 
         const power = computeSpellPower({
             caster: orc,
+            rules: DEFAULT_RULES,
             groupId: 'chaos',
             rolls: [10, 10],
             participants: ps,

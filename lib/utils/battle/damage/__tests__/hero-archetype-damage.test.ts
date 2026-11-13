@@ -10,6 +10,7 @@ import { applyHeroDmDamageMultiplier } from '@/lib/utils/battle/damage/hero-dm-m
 import { rowLines } from '@/lib/utils/battle/log/__tests__/event-text';
 import { createBattleParticipantFromCharacter } from '@/lib/utils/battle/participant/from-character';
 import { computeSpellPower } from '@/lib/utils/battle/spell/power';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
 import type { BattleParticipant } from '@/types/battle';
 
 function hero(
@@ -88,6 +89,7 @@ describe('hero archetype damage', () => {
 
         const power = computeSpellPower({
             caster,
+            rules: DEFAULT_RULES,
             groupId: null,
             rolls: [4, 4],
             participants: [caster],
