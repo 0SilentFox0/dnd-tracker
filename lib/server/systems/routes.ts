@@ -96,7 +96,13 @@ export async function runSystemRoute(
         const input =
             target.schema && target.query ? { query, body } : (body ?? query);
 
-        return await target.handle({ campaignId, access, input, searchParams });
+        return await target.handle({
+            campaignId,
+            characterId,
+            access,
+            input,
+            searchParams,
+        });
     } catch (error) {
         return handleApiError(error, { action: `system route ${action}` });
     }
@@ -108,14 +114,10 @@ export const systemRoutes = (scope: SystemRouteScope) =>
     Object.fromEntries(
         METHODS.map((method) => [
             method,
-            async (request: Request, { params }: RouteContext, actor?: Actor) =>
-                runSystemRoute(scope, request, await params, actor),
+            async (request: Request, { params }: RouteContext) =>
+                runSystemRoute(scope, request, await params),
         ])
     ) as Record<
         SystemHttpMethod,
-        (
-            request: Request,
-            context: RouteContext,
-            actor?: Actor
-        ) => Promise<Response>
+        (request: Request, context: RouteContext) => Promise<Response>
     >;

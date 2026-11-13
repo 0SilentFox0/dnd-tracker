@@ -50,6 +50,8 @@ export type SystemHttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
 export interface SystemHandlerCtx {
     campaignId: string;
+    /** Set for the `character` route scope */
+    characterId?: string;
     access: CampaignAccessResult;
     input: unknown;
     searchParams: URLSearchParams;
@@ -141,6 +143,7 @@ export interface SystemBattleOperation {
     }>;
 }
 
+/** Loaders run in composition order; the last one that returns `completed` wins */
 export type CharacterRefLoader = (input: {
     equipped: EquippedArtifact[];
     campaignId: string;

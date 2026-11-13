@@ -53,6 +53,15 @@ describe('composeServer', () => {
         expect(out.ai?.heroSelect).toEqual({ hp: true, mana: true });
     });
 
+    it('an addon that sets drafts is a composition error', () => {
+        const drafts = { create: vi.fn(), update: vi.fn() } as never;
+
+        expect(() =>
+            composeServer(base, [{ id: 'm', build: () => ({ drafts }) }])
+        ).toThrowError(CompositionError);
+        expect(composeServer({ ...base, drafts }, []).drafts).toBe(drafts);
+    });
+
     it('throws on a duplicate key in an operations or toolNotes dictionary', () => {
         expect(() =>
             composeServer(base, [

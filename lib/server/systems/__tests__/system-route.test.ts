@@ -237,6 +237,29 @@ describe('runSystemRoute', () => {
             expect(handle).not.toHaveBeenCalled();
         });
 
+        it('passes characterId to a character-scope handler', async () => {
+            fixture.server = {
+                schemas: {},
+                balance: {} as never,
+                routes: {
+                    character: { who: { GET: { access: 'member', handle } } },
+                },
+            } satisfies SystemServer;
+
+            vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(
+                access({ key: 'homm' }, 'player')
+            );
+
+            await call('character', 'who', 'GET');
+
+            expect(handle).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    campaignId: 'camp',
+                    characterId: 'ch',
+                })
+            );
+        });
+
         it('passes the parsed body to a member handler and rejects a bad one with 400', async () => {
             vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(
                 access({ key: 'homm' }, 'player')
