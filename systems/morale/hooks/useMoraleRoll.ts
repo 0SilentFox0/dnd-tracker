@@ -11,6 +11,7 @@ import {
 } from '@/lib/hooks/battle';
 import { usePageHidden } from '@/lib/hooks/common';
 import { effectiveMorale } from '@/lib/utils/battle/morale/effective-morale';
+import { moraleResultFx } from '@/systems/morale/rules/result-fx';
 import { moraleOutcome } from '@/systems/morale/rules/turn/outcome';
 import type { BattleParticipant } from '@/types/battle';
 
@@ -72,9 +73,9 @@ export function useMoraleRoll(
         }
 
         if (result === 'extra')
-            scene.result.show({ kind: 'morale-extra', ...base });
+            scene.result.show(moraleResultFx({ outcome: result, ...base }));
         else if (result === 'skip') {
-            scene.result.show({ kind: 'morale-skip', ...base });
+            scene.result.show(moraleResultFx({ outcome: result, ...base }));
 
             gate.skipTurn();
         } else

@@ -40,7 +40,11 @@ describe('usePlayerTurn', () => {
             d10Roll: 9,
         });
         expect(showResult).toHaveBeenCalledWith(
-            expect.objectContaining({ kind: 'morale-extra', d10: 9 })
+            expect.objectContaining({
+                kind: 'system',
+                module: 'morale',
+                data: expect.objectContaining({ outcome: 'extra', d10: 9 }),
+            })
         );
         expect(result.current.phase).toBe('acting');
     });
@@ -65,7 +69,11 @@ describe('usePlayerTurn', () => {
             await rolled;
         });
         expect(showResult).toHaveBeenCalledWith(
-            expect.objectContaining({ kind: 'morale-extra', d10: 9 })
+            expect.objectContaining({
+                kind: 'system',
+                module: 'morale',
+                data: expect.objectContaining({ outcome: 'extra', d10: 9 }),
+            })
         );
         fx.enabled = false;
     });

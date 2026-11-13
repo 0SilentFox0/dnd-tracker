@@ -116,7 +116,7 @@ describe('entry-чанки гравця', () => {
             'components/battle/dm/dialogs/ChangeHpDialog.tsx',
             'components/battle/dm/dialogs/DmCasterPickerDialog.tsx',
             'components/battle/overlays/BattlePreparationView.tsx',
-            'components/battle/overlays/ResultOverlay.tsx',
+            'systems/morale/ui/battle/MoraleResultOverlay.tsx',
             'components/battle/wizards/AttackWizard.tsx',
             'components/battle/wizards/SpellBook.tsx',
             'components/battle/wizards/BonusActionPicker.tsx',

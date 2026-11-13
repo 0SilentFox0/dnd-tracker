@@ -344,7 +344,7 @@ describe('ActionResultCard', () => {
 
     it('мораль — не для картки', () => {
         const { wrapper } = fakeScene({
-            result: { kind: 'morale-extra', name: 'Фрейда', d10: 9, morale: 2 },
+            result: { kind: 'system', module: 'morale', data: {} },
         });
 
         render(<ActionResultCard />, { wrapper });

@@ -75,14 +75,6 @@ const ActionResultCard = dynamic(
     { ssr: false }
 );
 
-const ResultOverlay = dynamic(
-    () =>
-        import('@/components/battle/overlays/ResultOverlay').then(
-            (m) => m.ResultOverlay
-        ),
-    { ssr: false }
-);
-
 const BattleResultScreen = dynamic(
     () =>
         import('@/components/battle/overlays/BattleResultScreen').then(
@@ -218,7 +210,6 @@ export function BattleScreen() {
                             <MobileBattleLayout />
                         </NoticeStackContext>
                     )}
-                    <ResultOverlay />
                     {battle.status === BattleStatus.COMPLETED && (
                         <BattleResultScreen />
                     )}
