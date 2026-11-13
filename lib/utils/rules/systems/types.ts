@@ -761,6 +761,7 @@ export interface ParticipantRefs {
 
 export interface CharacterPartRow {
     level: number;
+    archetype?: string | null;
 }
 
 export type UnitPartRow = UnitFromPrisma;

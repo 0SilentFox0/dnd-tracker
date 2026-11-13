@@ -21,7 +21,6 @@ import {
     ParticipantSourceType,
 } from '@/lib/constants/battle';
 import { CONTROLLED_BY_DM } from '@/lib/constants/characters';
-import { heroArchetype } from '@/lib/constants/hero-archetypes';
 import { DND_SKILLS } from '@/lib/constants/skills';
 import { CharacterClassesSchema } from '@/lib/schemas/classes';
 import { loadBackground } from '@/lib/server/backgrounds/load';
@@ -61,7 +60,6 @@ import { DEFAULT_RULES, type Ruleset } from '@/lib/utils/rules';
 import { currencyValueOf, ruleSystemOf } from '@/lib/utils/rules/systems';
 import { composition } from '@/lib/utils/rules/systems/catalog';
 import { systemSlotOf } from '@/lib/utils/rules/systems/slot';
-import { statColumnsOf } from '@/lib/utils/rules/systems/stats';
 import type { BranchLevel } from '@/lib/utils/skills/progression';
 import { resolveClassEntries } from '@/lib/utils/spells/class-slots';
 import { buildIngredientStock } from '@/lib/utils/spells/ingredients/stock';
@@ -439,12 +437,6 @@ export async function createBattleParticipantFromCharacter(
             .map(({ row, slot }) => ({ slot, systemStats: row.systemStats }))
     );
 
-    const archetype = heroArchetype(
-        resolvedClasses || !statColumnsOf(ruleSystemOf(rules)).has('archetype')
-            ? null
-            : (character as { archetype?: string | null }).archetype
-    );
-
     const primaryAbility = (ABILITY_KEYS as readonly string[]).includes(
         character.primaryAbility ?? ''
     )
@@ -569,10 +561,6 @@ export async function createBattleParticipantFromCharacter(
                 )
             ),
             primaryAbility,
-            meleeMultiplier: archetype.melee,
-            rangedMultiplier: archetype.ranged,
-            magicMultiplier: archetype.magic,
-            archetypeKey: archetype.key ?? 'universal',
             ...(classProficiency && { proficiencies: classProficiency }),
             ...(saveProficiencies.length && { saveProficiencies }),
             ...(dndSkillProficiencies.length && {
