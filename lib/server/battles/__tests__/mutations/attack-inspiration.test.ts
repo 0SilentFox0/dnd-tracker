@@ -7,6 +7,7 @@ import { attackMutation } from '@/lib/server/battles/mutations/attack/attack-mut
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import type { BattleMutationContext } from '@/lib/utils/battle/pipeline/run-battle-mutation';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { d20State } from '@/systems/d20/rules/state';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
 
 const base = createMockParticipant();
@@ -111,7 +112,7 @@ describe('attack with inspiration', () => {
         ) as BattleParticipant;
 
         expect(advantageNotes(out.events)).toBeGreaterThan(0);
-        expect(self.battleData.inspiration).toBe(false);
+        expect(d20State(self)).toEqual({ inspirationSpent: true });
     });
 
     it('without useInspiration the flag stays and no advantage', async () => {
@@ -119,11 +120,11 @@ describe('attack with inspiration', () => {
 
         expect(advantageNotes(out.events)).toBe(0);
         expect(
-            (
+            d20State(
                 out.participants.find(
                     (p) => p.basicInfo.id === 'hero'
                 ) as BattleParticipant
-            ).battleData.inspiration
+            ).inspiration
         ).toBe(true);
     });
 

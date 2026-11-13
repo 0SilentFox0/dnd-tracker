@@ -178,7 +178,11 @@ export function createAttackMutation(
                     API_ERRORS.NO_INSPIRATION
                 );
 
-            participants = spendInspiration(participants, data.attackerId);
+            participants = spendInspiration(
+                participants,
+                data.attackerId,
+                ctx.meta.rules
+            );
         }
 
         const hitSpells = await loadHitSpells(ctx, data.attackerId, deps);

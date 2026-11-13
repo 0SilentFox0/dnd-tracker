@@ -10,6 +10,7 @@ import {
 import { isCastPool, isConsumablePool } from '@/lib/utils/items/pools';
 import type { Ruleset } from '@/lib/utils/rules';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
+import type { PersistOutcome } from '@/lib/utils/rules/systems/types';
 import type { BattleParticipant } from '@/types/battle';
 import type {
     CharacterResources,
@@ -159,24 +160,13 @@ export function applyCharacterResources(
     state: StoredCharacterState,
     rules: Ruleset
 ): BattleParticipant {
-    const inspired =
-        state.inspiration === null
-            ? p
-            : {
-                  ...p,
-                  battleData: {
-                      ...p.battleData,
-                      inspiration: state.inspiration,
-                  },
-              };
-
     const r = state.resources;
 
     const out = r
         ? withHpState(
               withCharges(
                   withSpentSlots(
-                      withExhaustion(inspired, r.exhaustion ?? 0, rules),
+                      withExhaustion(p, r.exhaustion ?? 0, rules),
                       r.slotsSpent
                   ),
                   r.charges
@@ -184,7 +174,7 @@ export function applyCharacterResources(
               r,
               rules
           )
-        : inspired;
+        : p;
 
     const parts = ruleSystemOf(rules).participant?.fromStored ?? [];
 
@@ -242,11 +232,11 @@ function battleCharges(
     return Object.fromEntries([...kept, ...used]);
 }
 
-export function applyBattleResult(
+export function battleResultOutcome(
     r: CharacterResources,
     p: BattleParticipant,
     rules: Ruleset
-): CharacterResources {
+): PersistOutcome {
     const { maxHp, currentHp: hp, tempHp, status } = p.combatStats;
 
     const dead = status === CombatStatus.DEAD;
@@ -267,12 +257,19 @@ export function applyBattleResult(
 
     const parts = ruleSystemOf(rules).participant?.persist ?? [];
 
-    return compactResources(
-        parts.reduce((acc, part) => part({ participant: p, rules }, acc), {
-            resources: written,
-        }).resources
+    const outcome = parts.reduce(
+        (acc, part) => part({ participant: p, rules }, acc),
+        { resources: written } as PersistOutcome
     );
+
+    return { ...outcome, resources: compactResources(outcome.resources) };
 }
+
+export const applyBattleResult = (
+    r: CharacterResources,
+    p: BattleParticipant,
+    rules: Ruleset
+): CharacterResources => battleResultOutcome(r, p, rules).resources;
 
 export function battleResultLogData(
     before: CharacterResources,

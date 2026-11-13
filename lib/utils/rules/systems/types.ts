@@ -691,12 +691,19 @@ export interface RuleSystemActionDetails {
     failed(details: SystemSlot): boolean;
 }
 
+export interface InspirationRules {
+    available(p: BattleParticipant): boolean;
+    spend(p: BattleParticipant): BattleParticipant;
+}
+
 export interface RuleSystemCombat {
     details?: RuleSystemActionDetails;
     /** Validates the system's input of an attack or a cast before it runs */
     input?: { assert(system: SystemSlot, ctx: SystemInputCtx): void };
     /** Whether the attacker may make an off-hand attack; absent means never */
     offHand?(attacker: BattleParticipant): boolean;
+    /** A spendable boost to one attack roll; absent means none */
+    inspiration?: InspirationRules;
     /** Who judges an attack: the client rolls and the server checks vs AC, or the server resolves the whole test */
     judge: 'client' | 'server';
     dice: number;
@@ -790,6 +797,8 @@ export type StoredPart = (
 
 export interface PersistOutcome {
     resources: CharacterResources;
+    /** The sheet's inspiration was spent in this battle */
+    clearInspiration?: true;
 }
 
 /** What a participant writes back to the sheet when the battle ends */

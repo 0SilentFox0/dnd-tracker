@@ -7,6 +7,7 @@ import type { BattleDb } from '@/lib/utils/battle/store/load-battle';
 import { saveBattle } from '@/lib/utils/battle/store/save-battle';
 import type { LoadedBattle } from '@/lib/utils/battle/store/types';
 import { DEFAULT_RULES, type Ruleset } from '@/lib/utils/rules';
+import { withD20State } from '@/systems/d20/rules/state';
 import type { BattleParticipant } from '@/types/battle';
 
 const hero = (
@@ -215,6 +216,32 @@ describe('saveBattle: resources write-back', () => {
             where: { id: 'ch-a' },
             data: { resources: { hp: 0, dead: true } },
         });
+        expect(tx.character.updateMany).toHaveBeenCalledWith({
+            where: { id: 'ch-a', inspiration: true },
+            data: { inspiration: false },
+        });
+    });
+
+    it('clears the inspiration spent in the d20 slot even when resources are not persisted', async () => {
+        const a = withD20State(hero('pa', 'ch-a', { currentHp: 5 }), {
+            inspirationSpent: true,
+        });
+
+        const rules: Ruleset = {
+            ...RULES,
+            outOfCombat: { ...RULES.outOfCombat, persistResources: false },
+        };
+
+        const { db, tx } = fakeDb([{ id: 'ch-a', resources: {} }]);
+
+        await saveBattle(db, loaded(rules, [a]), {
+            participants: [a],
+            pending: [],
+            events: [],
+            scene: COMPLETE,
+        });
+
+        expect(tx.character.update).not.toHaveBeenCalled();
         expect(tx.character.updateMany).toHaveBeenCalledWith({
             where: { id: 'ch-a', inspiration: true },
             data: { inspiration: false },

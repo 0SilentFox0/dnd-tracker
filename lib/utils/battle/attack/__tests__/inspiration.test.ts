@@ -9,6 +9,7 @@ import {
     spendInspiration,
 } from '@/lib/utils/battle/attack/inspiration';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { d20State, withD20State } from '@/systems/d20/rules/state';
 import type { BattleAttack } from '@/types/battle';
 
 const sword: BattleAttack = {
@@ -62,8 +63,39 @@ describe('inspiration in attacks', () => {
             },
         };
 
-        const [after] = spendInspiration([a], a.basicInfo.id);
+        const other = createMockParticipant();
 
-        expect(after.battleData.inspiration).toBe(false);
+        const [after, untouched] = spendInspiration(
+            [a, { ...other, basicInfo: { ...other.basicInfo, id: 'other' } }],
+            a.basicInfo.id,
+            on
+        );
+
+        expect(d20State(after)).toEqual({ inspirationSpent: true });
+        expect(after.battleData.inspiration).toBeUndefined();
+        expect(untouched.battleData.system).toBeUndefined();
+    });
+
+    it('the inspiration of the d20 slot is available, and spending it leaves the slot spent', () => {
+        const p = withD20State(createMockParticipant(), { inspiration: true });
+
+        expect(canUseInspiration(p, on)).toBe(true);
+
+        const [after] = spendInspiration([p], p.basicInfo.id, on);
+
+        expect(canUseInspiration(after, on)).toBe(false);
+        expect(d20State(after).inspirationSpent).toBe(true);
+    });
+
+    it('a system without the inspiration hook cannot use or spend it', () => {
+        const p = withD20State(createMockParticipant(), { inspiration: true });
+
+        const wfrp = {
+            ...on,
+            system: { key: 'wfrp' as const },
+        };
+
+        expect(canUseInspiration(p, wfrp)).toBe(false);
+        expect(spendInspiration([p], p.basicInfo.id, wfrp)).toEqual([p]);
     });
 });

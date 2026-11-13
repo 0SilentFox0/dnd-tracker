@@ -4,6 +4,7 @@ import { ParticipantSide } from '@/lib/constants/battle';
 import { exhaustionLevel } from '@/lib/utils/battle/conditions';
 import { createBattleParticipantFromCharacter } from '@/lib/utils/battle/participant/from-character';
 import { parseRules } from '@/lib/utils/rules/schema';
+import { d20State } from '@/systems/d20/rules/state';
 import type { GameClassData } from '@/types/classes';
 
 const base = {
@@ -128,7 +129,7 @@ describe('battle start from stored resources', () => {
         expect(p.combatStats.status).toBe('active');
         expect(exhaustionLevel(p)).toBe(0);
         expect(p.battleData.abilityUsage).toEqual({});
-        expect(p.battleData.inspiration).toBeUndefined();
+        expect(d20State(p).inspiration).toBeUndefined();
     });
 
     it('HP and temp HP from resources; stored HP above max is clamped', async () => {
@@ -152,7 +153,7 @@ describe('battle start from stored resources', () => {
             currentHp: 0,
             status: 'unconscious',
         });
-        expect(down.battleData.deathSaves).toBeUndefined();
+        expect(d20State(down).deathSaves).toBeUndefined();
 
         const dying = await build(
             PERSIST,
@@ -161,7 +162,7 @@ describe('battle start from stored resources', () => {
         );
 
         expect(dying.combatStats.status).toBe('unconscious');
-        expect(dying.battleData.deathSaves).toEqual({
+        expect(d20State(dying).deathSaves).toEqual({
             successes: 0,
             failures: 0,
             stable: false,
@@ -225,12 +226,17 @@ describe('battle start from stored resources', () => {
 
     it('inspiration comes from the column when the rule is on', async () => {
         expect(
-            (await build({ inspiration: true }, { inspiration: true }))
-                .battleData.inspiration
+            d20State(await build({ inspiration: true }, { inspiration: true }))
+                .inspiration
         ).toBe(true);
         expect(
-            (await build({ inspiration: true }, { inspiration: false }))
-                .battleData.inspiration
-        ).toBe(false);
+            d20State(
+                await build({ inspiration: true }, { inspiration: false })
+            ).inspiration
+        ).toBeUndefined();
+        expect(
+            d20State(await build({ inspiration: false }, { inspiration: true }))
+                .inspiration
+        ).toBeUndefined();
     });
 });

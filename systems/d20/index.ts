@@ -7,6 +7,7 @@ import { d20Damage } from './rules/damage';
 import { d20OnZeroHp } from './rules/death-saves/on-zero-hp';
 import { reviveFromDying } from './rules/death-saves/state';
 import { d20Initiative, d20TieBreak } from './rules/initiative';
+import { D20_INSPIRATION } from './rules/inspiration';
 import { D20_MAGIC } from './rules/magic';
 import { d20UnitSpellDc } from './rules/participant/unit-spell-dc';
 import { proficiencyForLevel } from './rules/proficiency/level';
@@ -15,6 +16,7 @@ import { D20_REACTIONS, d20ProvokedOpportunity } from './rules/reactions';
 import { D20_PROFICIENCY, D20_SAVES } from './rules/saves';
 import { d20SheetBlock } from './rules/sheet/block';
 import { rollFromSheet } from './rules/sheet-roll';
+import { d20FromStored, d20Persist } from './rules/state-parts';
 import { D20_STAT_COLUMNS } from './rules/stats';
 import { D20_TURN } from './rules/turn';
 
@@ -49,6 +51,7 @@ export const D20_MODULE: RuleSystemDefinition = {
     combat: {
         judge: 'client',
         offHand: isFiveE,
+        inspiration: D20_INSPIRATION,
         dice: 20,
         actionEconomy: { bonusAction: true, reaction: true },
         resolveAttack: resolveD20Attack,
@@ -67,7 +70,11 @@ export const D20_MODULE: RuleSystemDefinition = {
         tieBreak: d20TieBreak,
         hitModel: d20HitModel,
     },
-    participant: { fromUnit: [d20UnitSpellDc] },
+    participant: {
+        fromUnit: [d20UnitSpellDc],
+        fromStored: [d20FromStored],
+        persist: [d20Persist],
+    },
     conditionSet: D20_CONDITION_SET,
     magic: D20_MAGIC,
     identity: { alignments: true },
