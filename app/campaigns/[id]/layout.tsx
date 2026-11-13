@@ -1,13 +1,17 @@
 import type { ReactNode } from 'react';
 
+import { ErrorState } from '@/components/common/states';
 import { NotificationsHost } from '@/components/notifications/NotificationsHost';
 import { DemoTourCoordinator } from '@/components/onboarding/DemoTourCoordinator';
 import { getSessionUserId } from '@/lib/auth';
 import { CampaignRole, isDemoKind } from '@/lib/constants/campaigns';
 import { ExtendLocaleScope } from '@/lib/i18n/extend-locale-scope';
+import { getRequestLocale } from '@/lib/i18n/request-locale';
 import { systemScope } from '@/lib/i18n/system-scope';
+import { getTranslator } from '@/lib/i18n/translator';
 import { getCampaignForLayout } from '@/lib/server/campaigns/access';
 import { systemKeyOfCampaign } from '@/lib/server/campaigns/system-key';
+import { isRuleSystemKey } from '@/lib/utils/rules/systems/meta';
 
 export default async function CampaignLayout({
     children,
@@ -24,6 +28,12 @@ export default async function CampaignLayout({
               systemKeyOfCampaign(id),
           ])
         : [null, null];
+
+    if (campaign && !isRuleSystemKey(systemKey)) {
+        const t = await getTranslator(await getRequestLocale(), 'rules');
+
+        return <ErrorState error={new Error(t('validation.unknownSystem'))} />;
+    }
 
     const isDemo = isDemoKind(campaign?.kind);
 

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
+import { SystemPicker } from '@/components/campaigns/templates/SystemPicker';
 import { TemplatePicker } from '@/components/campaigns/templates/TemplatePicker';
 import { HudForm, HudFormPage, HudSection } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
@@ -46,6 +47,10 @@ export function NewCampaignForm() {
         isLoading: templatesLoading,
     } = useTemplateSelection();
 
+    const [systemKey, setSystemKey] = useState<string | undefined>();
+
+    const needsSystem = !selection.file && !selection.templateId;
+
     const create = useCreateCampaign();
 
     const importCampaign = useImportCampaign();
@@ -83,6 +88,7 @@ export function NewCampaignForm() {
                 ...settings,
                 templateId: selection.templateId ?? undefined,
                 contentLocale: selection.contentLocale,
+                ...(needsSystem && systemKey && { system: { key: systemKey } }),
             },
             options
         );
@@ -112,6 +118,9 @@ export function NewCampaignForm() {
                 }
             >
                 <TemplatePicker value={selection} onChange={setSelection} />
+                {needsSystem && (
+                    <SystemPicker value={systemKey} onChange={setSystemKey} />
+                )}
                 <HudSection title={t('form.campaign')}>
                     <div className="space-y-4">
                         <LabeledInput

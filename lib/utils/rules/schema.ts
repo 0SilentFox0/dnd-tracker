@@ -7,6 +7,7 @@ import {
     INITIATIVE_ORDER_MESSAGE,
     type Ruleset,
     sectionSchemas,
+    UNKNOWN_SYSTEM_MESSAGE,
 } from './section-shapes';
 import {
     defaultsOf,
@@ -105,7 +106,6 @@ const sections = {
         defaultsOf(ALL_SECTIONS.advancement) as Ruleset['advancement']
     ),
     tables: withDefaults(sectionSchemas.tables, DEFAULT_RULES.tables),
-    system: withDefaults(sectionSchemas.system, DEFAULT_RULES.system),
 };
 
 const criticalsOrdered = (v: { critOn: number; fumbleOn: number }) =>
@@ -136,7 +136,7 @@ export const RulesetSchema = z
         spellIngredients: sections.spellIngredients.prefault({}),
         advancement: sections.advancement.prefault({}),
         tables: sections.tables.prefault({}),
-        system: sections.system.prefault({}),
+        system: sectionSchemas.system,
     })
     .refine((r) => initiativeOrdered(r.initiative), {
         message: INITIATIVE_ORDER_MESSAGE,
@@ -174,8 +174,21 @@ function warnDroppedModules(system: {
     console.warn(`rules.system.modules ignored: ${id}`);
 }
 
+export class RulesSystemError extends Error {
+    readonly messageKey = UNKNOWN_SYSTEM_MESSAGE;
+
+    constructor() {
+        super(UNKNOWN_SYSTEM_MESSAGE);
+        this.name = 'RulesSystemError';
+    }
+}
+
 export function parseRules(raw: unknown): Ruleset {
     const obj = isRecord(raw) ? raw : {};
+
+    const system = sectionSchemas.system.safeParse(obj.system);
+
+    if (!system.success) throw new RulesSystemError();
 
     const rules = Object.fromEntries(
         Object.entries(ALL_SECTIONS)
@@ -183,20 +196,27 @@ export function parseRules(raw: unknown): Ruleset {
             .map(([name, section]) => [name, parseSection(section, obj[name])])
     ) as Omit<Ruleset, 'system'>;
 
-    const system = sectionSchemas.system.safeParse(obj.system);
-
-    if (!system.success)
-        return {
-            ...rules,
-            system: { key: rules.classes.enabled ? 'dnd5e' : 'homm' },
-        };
-
     if (validateComposition(system.data).length === 0)
         return { ...rules, system: system.data };
 
     warnDroppedModules(system.data);
 
     return { ...rules, system: { key: system.data.key } };
+}
+
+export type SafeParsedRules =
+    | { ok: true; rules: Ruleset }
+    | { ok: false; error: typeof UNKNOWN_SYSTEM_MESSAGE };
+
+export function safeParseRules(raw: unknown): SafeParsedRules {
+    try {
+        return { ok: true, rules: parseRulesCached(raw) };
+    } catch (error) {
+        if (error instanceof RulesSystemError)
+            return { ok: false, error: UNKNOWN_SYSTEM_MESSAGE };
+
+        throw error;
+    }
 }
 
 const RULES_CACHE_LIMIT = 50;

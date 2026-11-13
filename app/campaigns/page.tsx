@@ -24,7 +24,7 @@ import { prisma } from '@/lib/db';
 import { getRequestLocale } from '@/lib/i18n/request-locale';
 import { getTranslator } from '@/lib/i18n/translator';
 import { visibleTemplates } from '@/lib/server/templates/list-templates';
-import { parseRules } from '@/lib/utils/rules/schema';
+import { safeParseRules } from '@/lib/utils/rules/schema';
 import { systemKeyOf } from '@/lib/utils/rules/systems';
 
 export default async function CampaignsPage() {
@@ -113,11 +113,14 @@ export default async function CampaignsPage() {
             demoQuery,
         ]);
 
-        templates = visibleTemplates(templateRows).map(
-            ({ rules, ...tile }) => ({
-                ...tile,
-                system: systemKeyOf(parseRules(rules)),
-            })
+        templates = visibleTemplates(templateRows).flatMap(
+            ({ rules, ...tile }) => {
+                const parsed = safeParseRules(rules);
+
+                return parsed.ok
+                    ? [{ ...tile, system: systemKeyOf(parsed.rules) }]
+                    : [];
+            }
         );
         campaigns = campaignRows;
         demoCampaign = demoRow;

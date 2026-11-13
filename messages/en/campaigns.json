@@ -54,6 +54,8 @@
     "description": "Description",
     "descriptionPlaceholder": "A short campaign description (optional)",
     "rules": "Rules",
+    "system": "Rule system",
+    "systemHint": "A campaign without a template needs a rule system",
     "maxLevel": "Maximum level",
     "allowPlayerEdit": "Let players edit their own characters",
     "createFailed": "Failed to create the campaign",

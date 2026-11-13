@@ -6,6 +6,7 @@ import { API_ERRORS } from '@/lib/constants/api-errors';
 import { ContentError } from '@/lib/server/content/errors';
 import { errorResponse } from '@/lib/utils/api/api-response';
 import { logger } from '@/lib/utils/common/logger';
+import { RulesSystemError } from '@/lib/utils/rules/schema';
 
 export interface ApiErrorContext {
     action: string;
@@ -24,6 +25,9 @@ export function handleApiError(
             error.issues,
             error.params
         );
+
+    if (error instanceof RulesSystemError)
+        return errorResponse(error.messageKey, 422);
 
     logger.error(`[api] ${context.action} failed`, context, error);
 

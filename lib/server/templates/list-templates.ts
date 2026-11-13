@@ -8,7 +8,7 @@ import {
 } from '@/lib/constants/campaigns';
 import { prisma } from '@/lib/db';
 import { ContentError } from '@/lib/server/content/errors';
-import { parseRules } from '@/lib/utils/rules/schema';
+import { type Ruleset, safeParseRules } from '@/lib/utils/rules/schema';
 import { systemKeyOf } from '@/lib/utils/rules/systems';
 import {
     isCanonicalTemplate,
@@ -34,29 +34,43 @@ const select = {
     },
 } as const;
 
-const toCard = ({
-    _count,
-    rules,
-    ...t
-}: {
-    id: string;
-    name: string;
-    description: string | null;
-    kind: string;
-    visibility: string;
-    credits: string | null;
-    locale: string | null;
-    templateKey: string | null;
-    rules: unknown;
-    _count: Record<string, number>;
-}): TemplateCard => ({
+const toCard = (
+    {
+        _count,
+        rules: _rules,
+        ...t
+    }: {
+        id: string;
+        name: string;
+        description: string | null;
+        kind: string;
+        visibility: string;
+        credits: string | null;
+        locale: string | null;
+        templateKey: string | null;
+        rules: unknown;
+        _count: Record<string, number>;
+    },
+    parsed: Ruleset
+): TemplateCard => ({
     ...t,
-    system: systemKeyOf(parseRules(rules)),
+    system: systemKeyOf(parsed),
     counts: _count,
     ...(isCanonicalTemplate(t) && {
         availableLocales: localizationOf(t)?.locales,
     }),
 });
+
+/** A template whose rules carry no valid system is hidden from the picker */
+const toCards = <T extends { rules: unknown }>(
+    rows: T[],
+    build: (row: T, parsed: Ruleset) => TemplateCard
+): TemplateCard[] =>
+    rows.flatMap((row) => {
+        const parsed = safeParseRules(row.rules);
+
+        return parsed.ok ? [build(row, parsed.rules)] : [];
+    });
 
 /** Shared by the picker API and the owner's direct tile query. */
 export function visibleTemplates<T extends TemplateIdentity>(
@@ -94,7 +108,7 @@ export async function listTemplates(userId: string): Promise<TemplateList> {
     ]);
 
     return {
-        official: visibleTemplates(official).map(toCard),
-        mine: mine.map(toCard),
+        official: toCards(visibleTemplates(official), toCard),
+        mine: toCards(mine, toCard),
     };
 }

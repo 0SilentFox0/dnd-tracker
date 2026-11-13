@@ -5,7 +5,6 @@
   "lib/onboarding/whats-new.ts": 6,
   "lib/utils/battle/log/codec.ts": 1,
   "lib/utils/rules/defaults.ts": 1,
-  "lib/utils/rules/schema.ts": 2,
   "lib/utils/rules/section-shapes.ts": 2,
   "scripts/assets/tokens-5e/upload-identity-icons.ts": 4,
   "scripts/assets/tokens-5e/upload-tokens-5e.ts": 4,

@@ -28,12 +28,13 @@ import {
     INVITE_CODE_ATTEMPTS,
     isInviteCodeClash,
 } from '@/lib/utils/campaigns/invite-code';
-import {
-    DEFAULT_RULES,
-    localizedDefaultAttacks,
-} from '@/lib/utils/rules/defaults';
+import { localizedDefaultAttacks } from '@/lib/utils/rules/defaults';
 import { initialRules } from '@/lib/utils/rules/initial-rules';
-import { parseRules, type Ruleset } from '@/lib/utils/rules/schema';
+import {
+    parseRules,
+    type Ruleset,
+    RulesSystemError,
+} from '@/lib/utils/rules/schema';
 import type { SystemSelection } from '@/lib/utils/rules/systems/catalog';
 import type { TemplateContentLocale } from '@/lib/utils/templates/manifest';
 
@@ -65,6 +66,24 @@ interface CreateFromBundleInput {
 const defined = <T extends object>(obj: T) =>
     Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== undefined));
 
+function rulesOf(input: CreateFromBundleInput): Prisma.InputJsonObject {
+    const defaultAttacks = input.defaultAttacks && {
+        defaultAttacks: input.defaultAttacks,
+    };
+
+    if (input.bundle)
+        return parseRules({
+            ...defaultAttacks,
+            ...(input.bundle.rules as object | undefined),
+        }) as Prisma.InputJsonObject;
+
+    if (!input.system) throw new RulesSystemError();
+
+    return initialRules(input.system, {
+        ...defaultAttacks,
+    }) as Prisma.InputJsonObject;
+}
+
 function campaignData(
     input: CreateFromBundleInput
 ): Prisma.CampaignCreateInput | Prisma.CampaignUncheckedCreateInput {
@@ -92,31 +111,7 @@ function campaignData(
         ...(input.critChoiceByDm !== undefined && {
             critChoiceByDm: input.critChoiceByDm,
         }),
-        ...(input.bundle
-            ? {
-                  rules: parseRules({
-                      ...(input.defaultAttacks && {
-                          defaultAttacks: input.defaultAttacks,
-                      }),
-                      ...(input.bundle.rules as object | undefined),
-                  }) as Prisma.InputJsonObject,
-              }
-            : input.system
-              ? {
-                    rules: initialRules(input.system, {
-                        ...(input.defaultAttacks && {
-                            defaultAttacks: input.defaultAttacks,
-                        }),
-                    }) as Prisma.InputJsonObject,
-                }
-              : {
-                    rules: {
-                        ...(input.defaultAttacks && {
-                            defaultAttacks: input.defaultAttacks,
-                        }),
-                        system: { key: DEFAULT_RULES.system.key },
-                    },
-                }),
+        rules: rulesOf(input),
         ...(input.bundle?.credits !== undefined && {
             credits: input.bundle.credits,
         }),

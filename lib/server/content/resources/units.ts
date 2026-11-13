@@ -14,7 +14,7 @@ import {
 import { parseSystemData } from '@/lib/server/characters/core/system-fields';
 import { defineResource } from '@/lib/server/content/define-resource';
 import { detachRefs } from '@/lib/server/content/detach-refs';
-import { toJsonInput } from '@/lib/server/content/errors';
+import { ContentError, toJsonInput } from '@/lib/server/content/errors';
 import {
     assertEffectsInComposition,
     storedEffectOwners,
@@ -33,13 +33,13 @@ import { unitCreateData } from '@/lib/utils/units/unit-create-data';
 
 async function loadCampaignSystem(
     campaignId: string
-): Promise<{ system: RuleSystemDefinition; rules: Ruleset } | null> {
+): Promise<{ system: RuleSystemDefinition; rules: Ruleset }> {
     const campaign = await prisma.campaign.findUnique({
         where: { id: campaignId },
         select: { rules: true },
     });
 
-    if (!campaign) return null;
+    if (!campaign) throw new ContentError(API_ERRORS.CAMPAIGN_NOT_FOUND, 404);
 
     const rules = parseRules(campaign.rules);
 
@@ -50,7 +50,7 @@ const unitCharacteristics = (
     loaded: Awaited<ReturnType<typeof loadCampaignSystem>>,
     value: SystemData | undefined
 ) =>
-    loaded?.system.characteristics.persisted && value
+    loaded.system.characteristics.persisted && value
         ? parseSystemData(loaded.rules, value, 'unitCharacteristics')
         : undefined;
 
@@ -86,10 +86,7 @@ export const unitsResource = defineResource<
 
         const loaded = await loadCampaignSystem(actor.campaignId);
 
-        assertEffectsInComposition(
-            (loaded?.rules ?? parseRules(null)).system,
-            data.abilities
-        );
+        assertEffectsInComposition(loaded.rules.system, data.abilities);
 
         const unit = await prisma.unit.create({
             data: unitCreateData(actor.campaignId, {
@@ -116,7 +113,7 @@ export const unitsResource = defineResource<
         const loaded = await loadCampaignSystem(actor.campaignId);
 
         assertEffectsInComposition(
-            (loaded?.rules ?? parseRules(null)).system,
+            loaded.rules.system,
             data.abilities,
             storedEffectOwners(existing.abilities)
         );

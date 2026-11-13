@@ -1,7 +1,7 @@
 import { isDeepStrictEqual } from 'node:util';
 
 import { expectedDifferenceFor } from '@/lib/utils/rules/parse-parity-expected';
-import { parseRules } from '@/lib/utils/rules/schema';
+import { safeParseRules } from '@/lib/utils/rules/schema';
 import { legacyParseRules } from '@/scripts/db/lib/legacy-rules-parse';
 
 export type RulesDifference = {
@@ -27,7 +27,21 @@ export function diffRules(raw: unknown): {
 } {
     const legacy: Record<string, unknown> = { ...legacyParseRules(raw) };
 
-    const next = parseRules(raw);
+    const parsed = safeParseRules(raw);
+
+    if (!parsed.ok)
+        return {
+            system: (legacy.system as { key: string }).key,
+            differences: [
+                {
+                    path: 'system',
+                    legacy: legacy.system,
+                    next: parsed.error,
+                },
+            ],
+        };
+
+    const next = parsed.rules;
 
     const nextRecord = next as unknown as Record<string, unknown>;
 

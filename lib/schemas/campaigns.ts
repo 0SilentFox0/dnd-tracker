@@ -30,6 +30,13 @@ export const createCampaignSchema = z
                 path: ['system'],
                 message: 'validation.systemWithTemplate',
             });
+
+        if (!data.system && !data.templateId)
+            ctx.addIssue({
+                code: 'custom',
+                path: ['system'],
+                message: 'validation.systemRequired',
+            });
     });
 
 export const updateCampaignSchema = z.object({
