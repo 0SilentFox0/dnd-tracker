@@ -515,7 +515,6 @@
   "systemActionUnknown": "This action is not available in the campaign rule system",
   "systemModulesInvalid": "Invalid set of rule modules",
   "systemModulesInBattle": "Rule modules cannot be changed during an active battle",
-  "systemModuleConfirm": "This module changes how existing heroes are calculated: confirm the change",
   "rollKindMismatch": "This roll type does not fit the campaign rule system",
   "rollOutOfRange": "Roll is outside the system die range",
   "skillUntrained": "The skill is untrained, so the test is not possible",

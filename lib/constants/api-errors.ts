@@ -95,7 +95,7 @@ export const API_ERRORS = {
     SYSTEM_ACTION_UNKNOWN: 'errors.systemActionUnknown',
     SYSTEM_MODULES_INVALID: 'errors.systemModulesInvalid',
     SYSTEM_MODULES_IN_BATTLE: 'errors.systemModulesInBattle',
-    SYSTEM_MODULE_CONFIRM: 'errors.systemModuleConfirm',
+    SYSTEM_MODULE_CONFIRM: 'validation.systemModuleConfirm',
     ROLL_KIND_MISMATCH: 'errors.rollKindMismatch',
     ROLL_OUT_OF_RANGE: 'errors.rollOutOfRange',
     SKILL_UNTRAINED: 'errors.skillUntrained',

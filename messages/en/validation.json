@@ -23,5 +23,6 @@
   "spellDelayPair": "Fill in both fields or neither",
   "rulesCustomConflict": "The same condition cannot be added and removed at once",
   "systemWithTemplate": "A rule system cannot be set together with a template",
-  "tooManySpellZones": "Too many spell zones"
+  "tooManySpellZones": "Too many spell zones",
+  "systemModuleConfirm": "This module changes how existing heroes are calculated: confirm the change"
 }
