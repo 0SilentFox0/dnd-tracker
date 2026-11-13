@@ -7,15 +7,18 @@ import { attackMutation } from '@/lib/server/battles/mutations/attack/attack-mut
 import { makeParticipant } from '@/lib/utils/abilities/__tests__/fixtures';
 import type { BattleMutationContext } from '@/lib/utils/battle/pipeline/run-battle-mutation';
 import { diffParticipants } from '@/lib/utils/battle/store/diff-participants';
+import { restoreParticipantsAt } from '@/lib/utils/battle/store/history';
 import {
     buildParticipantPatch,
     FULL_PARTICIPANT,
 } from '@/lib/utils/battle/store/participant-patch';
+import { buildSnapshotState } from '@/lib/utils/battle/store/snapshot-state';
 import {
     joinParticipant,
     splitParticipant,
 } from '@/lib/utils/battle/store/split-participant';
 import { hashJson } from '@/lib/utils/battle/store/stable-json';
+import type { LoadedBattle } from '@/lib/utils/battle/store/types';
 import { resetTurnState } from '@/lib/utils/battle/turn/turn-state';
 import { mulberry32 } from '@/lib/utils/common/rng';
 import type { DamagedHook } from '@/lib/utils/rules/systems/types';
@@ -179,6 +182,91 @@ describe('migration of an old-form battle participant', () => {
 
         expect(back.battleData.system).toBeUndefined();
         expect(wfrpState(back)).toEqual(OLD_FORM);
+    });
+});
+
+describe('undo history across the migration', () => {
+    const scene = {
+        id: 'b1',
+        campaignId: 'c1',
+        status: 'active' as const,
+        round: 1,
+        turnIndex: 0,
+        version: 1,
+        eventSeq: 0,
+        pendingMoraleCheck: null,
+        pendingChoice: null,
+        startedAt: null,
+        completedAt: null,
+    };
+
+    const meta = {
+        name: 'B',
+        description: null,
+        setup: [],
+        friendlyFire: false,
+        rules: WFRP_RULES,
+        critChoiceByDm: false,
+        map: null,
+        createdAt: new Date(),
+    };
+
+    const current = (p: BattleParticipant): LoadedBattle => ({
+        scene: { ...scene, eventSeq: 2 },
+        meta,
+        participants: [p],
+        pending: [],
+        isDM: true,
+    });
+
+    it('restores the old form before the migration and the slot after it', async () => {
+        const old = fighter('a', ParticipantSide.ALLY, OLD_FORM);
+
+        const migrated = attackerOf(
+            (await attackMutation(wfrpCtx(old), reroll())).participants
+        );
+
+        const spent = withWfrpState(migrated, { fortune: 0 });
+
+        const s0 = [splitParticipant(old, place)];
+
+        const s1 = [splitParticipant(migrated, place)];
+
+        const s2 = [splitParticipant(spent, place)];
+
+        const snapshots = [
+            {
+                seq: 1,
+                state: buildSnapshotState(scene, s0, diffParticipants(s0, s1)),
+            },
+            {
+                seq: 2,
+                state: buildSnapshotState(
+                    { ...scene, eventSeq: 1 },
+                    s1,
+                    diffParticipants(s1, s2)
+                ),
+            },
+        ];
+
+        const [beforeMigration] = restoreParticipantsAt(
+            snapshots,
+            current(spent)
+        ).participants;
+
+        expect(beforeMigration.battleData.system).toBeUndefined();
+        expect(wfrpState(beforeMigration)).toEqual(OLD_FORM);
+
+        const [afterMigration] = restoreParticipantsAt(
+            snapshots.slice(1),
+            current(spent)
+        ).participants;
+
+        expect(afterMigration.battleData.system).toEqual({
+            key: 'wfrp',
+            data: { ...OLD_FORM, fortune: 1 },
+        });
+        expect(wfrpState(afterMigration).fortune).toBe(1);
     });
 });
 
