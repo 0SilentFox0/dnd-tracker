@@ -7,11 +7,11 @@ import { AbilityCopySourcePicker } from './AbilityCopySourcePicker';
 import { AbilityFlow } from './AbilityFlow';
 import { useAbilityEditor } from './editor-context';
 import { RecipeForm } from './RecipeForm';
-import { useAbilityText } from '@/lib/hooks/abilities';
 
 import { HudChipTabs } from '@/components/hud/page';
 import { Button } from '@/components/ui/button';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
+import { useAbilityText } from '@/lib/hooks/abilities';
 import { useAbilityComposition } from '@/lib/hooks/abilities/useAbilityComposition';
 import { useRecipeText } from '@/lib/hooks/abilities/useRecipeText';
 import { useRecipeValues } from '@/lib/hooks/abilities/useRecipeValues';

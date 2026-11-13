@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { useAbilityText } from '@/lib/hooks/abilities';
 import { HUD_SURFACE } from '@/components/hud';
 import { Button } from '@/components/ui/button';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
+import { useAbilityText } from '@/lib/hooks/abilities';
 import type { AbilityFlowSummary } from '@/lib/utils/abilities/segments';
 import { matchesQuery } from '@/lib/utils/common/text-search';
 import type { CellRef } from '@/lib/utils/skills/progression';

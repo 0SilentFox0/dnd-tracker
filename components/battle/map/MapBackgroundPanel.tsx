@@ -2,8 +2,8 @@
 
 import { useTranslations } from 'next-intl';
 
-import { Button } from '@/components/ui/button';
 import { ImageUpload } from '@/components/common/ImageUpload';
+import { Button } from '@/components/ui/button';
 import type { MapBackgroundTool } from '@/lib/hooks/battle';
 
 export function MapBackgroundPanel({ tool }: { tool: MapBackgroundTool }) {

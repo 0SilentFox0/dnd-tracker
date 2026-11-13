@@ -4,7 +4,6 @@ import { cleanup, fireEvent, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ShowWorldControls } from '@/components/show/world/ShowWorldControls';
-
 import { render } from '@/components/ui/__tests__/uk-intl';
 import { getWorldMap, getWorldMaps } from '@/lib/api/world';
 import type { ShowControl } from '@/lib/hooks/show';

@@ -3,9 +3,9 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 
+import { TargetRadioList } from '@/components/battle/hud/TargetRadioList';
 import { SpellBook } from '@/components/battle/wizards/SpellBook';
 import { OptionButton } from '@/components/hud/OptionButton';
-import { TargetRadioList } from '@/components/battle/hud/TargetRadioList';
 import { Button } from '@/components/ui/button';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { useLegendaryAction } from '@/lib/hooks/battle';

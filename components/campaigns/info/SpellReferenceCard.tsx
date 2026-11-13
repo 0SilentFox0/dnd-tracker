@@ -3,7 +3,6 @@
 import { useTranslations } from 'next-intl';
 import { Loader2, Sparkles } from 'lucide-react';
 
-import { useAbilityText } from '@/lib/hooks/abilities';
 import { EntityIcon } from '@/components/common/EntityIcon';
 import { SpellBattlePreview } from '@/components/spells/preview/SpellBattlePreview';
 import {
@@ -14,6 +13,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { useAbilityText } from '@/lib/hooks/abilities';
 import { useUpdateSpellAppearance } from '@/lib/hooks/spells';
 import { useText } from '@/lib/i18n/use-text';
 import { useTranslator } from '@/lib/i18n/use-translator';

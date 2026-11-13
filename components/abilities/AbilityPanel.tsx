@@ -15,8 +15,8 @@ import { useErrorsUnder } from './editor-context';
 import { FieldErrors } from './FieldErrors';
 import type { FlowPart } from './flow-part';
 
-import { Button } from '@/components/ui/button';
 import { ImageUpload } from '@/components/common/ImageUpload';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';

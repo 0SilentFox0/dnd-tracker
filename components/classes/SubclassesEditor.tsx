@@ -6,9 +6,9 @@ import { Plus, Trash2 } from 'lucide-react';
 import { ClassFeaturesEditor } from './ClassFeaturesEditor';
 
 import { EntityIcon } from '@/components/common/EntityIcon';
+import { ImageUpload } from '@/components/common/ImageUpload';
 import { HudSection } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
-import { ImageUpload } from '@/components/common/ImageUpload';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {

@@ -4,8 +4,8 @@ import { useTranslations } from 'next-intl';
 
 import { AudioDock } from '@/components/audio/AudioDock';
 import { AudioPlayerProvider } from '@/components/audio/AudioPlayerProvider';
-import { DiceRoller } from '@/components/dice/DiceRoller';
 import { PlayerViewToggle } from '@/components/common/PlayerViewToggle';
+import { DiceRoller } from '@/components/dice/DiceRoller';
 import { FullscreenButton } from '@/components/show/stage/FullscreenButton';
 import { ShowBattleCall } from '@/components/show/stage/ShowBattleCall';
 import { ShowControlPanel } from '@/components/show/stage/ShowControlPanel';

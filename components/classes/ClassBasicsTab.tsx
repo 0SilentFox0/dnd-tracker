@@ -5,9 +5,9 @@ import { useTranslations } from 'next-intl';
 import { SpellListHint } from './SpellListHint';
 
 import { ColorField } from '@/components/common/ColorField';
+import { ImageUpload } from '@/components/common/ImageUpload';
 import { Checkbox } from '@/components/ui/checkbox';
 import { CommaListInput } from '@/components/ui/comma-list-input';
-import { ImageUpload } from '@/components/common/ImageUpload';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { SelectField } from '@/components/ui/select-field';

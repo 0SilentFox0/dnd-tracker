@@ -8,11 +8,11 @@ import { SaveRolls } from './SaveRolls';
 import { SlotSelect } from './SlotSelect';
 import { SpellSummary } from './SpellSummary';
 
-import { useAbilityText } from '@/lib/hooks/abilities';
 import { AiRollButton, DamageDice } from '@/components/battle/hud/DiceInput';
 import { useSystemBattleUi } from '@/components/battle/use-system-battle-ui';
 import { HUD_SURFACE } from '@/components/hud';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
+import { useAbilityText } from '@/lib/hooks/abilities';
 import type { useSpellBook } from '@/lib/hooks/battle';
 import { cn } from '@/lib/utils';
 import {

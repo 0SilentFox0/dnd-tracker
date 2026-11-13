@@ -2,6 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 
+import { useTheme } from '@/components/layout/ThemeProvider';
 import {
     Select,
     SelectContent,
@@ -9,7 +10,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { useTheme } from '@/components/layout/ThemeProvider';
 import { PALETTE_IDS, PALETTE_SWATCHES } from '@/lib/theme/palettes';
 import type { PaletteId } from '@/types/theme';
 
