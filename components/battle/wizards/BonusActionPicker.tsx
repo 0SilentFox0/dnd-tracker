@@ -11,7 +11,7 @@ import { OptimizedImage } from '@/components/common/OptimizedImage';
 import { HUD_SURFACE } from '@/components/hud';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { ParticipantSide } from '@/lib/constants/battle';
-import { useAbilityPicker, useBattleScene } from '@/lib/hooks/battle';
+import { useAbilityPicker, useBattleSceneData } from '@/lib/hooks/battle';
 import { useText } from '@/lib/i18n/use-text';
 import { cn } from '@/lib/utils';
 import { abilityLabel } from '@/lib/utils/abilities/build/resolve';
@@ -35,7 +35,7 @@ export function BonusActionPicker({
 }) {
     const t = useTranslations('battleWizards');
 
-    const { battle } = useBattleScene();
+    const { battle } = useBattleSceneData();
 
     const text = useText();
 
