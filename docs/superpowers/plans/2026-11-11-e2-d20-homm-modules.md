@@ -103,6 +103,8 @@
 
 ## Ч13. Дані I: `system.key` і явні `modules` (D1, D2, D3)
 
+**Статус: ВИКОНАНО 2026-11-13 (prod застосовано: 14 рядків, лише `key`; гілка `feat/e2-part13-backfill`, не змерджена).** Відхилення: бекфіл охоплює і `battle_scenes.rules`; для retaliation у Grim d100 відкинуто за `wrongBase`; `modules` за розібраними значеннями, явні `modules` пропускаються; `DEFAULT_RULES` лишається фікстурою до Ч17; створення без шаблону — `SystemPicker`. Деталі: `docs/STATUS.md` («E2 Ч13»), `docs/architecture/rule-systems.md`.
+
 **Мета.** Кожен рядок правил має `system.key`; кампанії `dnd5e` з увімкненими механіками Heroes мають явний `modules`; вгадування й типовий ключ видалено. Виконується після деплою Ч1 і до деплою Ч3.
 
 **Обсяг.** `scripts/db/backfill-rule-system.ts`, `lib/utils/rules/{schema,defaults}.ts`, створення кампанії (`lib/server/campaigns/**`).

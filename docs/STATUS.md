@@ -131,6 +131,25 @@ _Оновлено: 2026-11-11._
 
 Гілка `feat/e2-part1-composition` (worktree `../dnd-tracker-e2-part1`), 11 комітів, **не змерджена й не запушена**; prod-кроків немає. Гейти: `tsc` чистий, повний `test:run` 15340 зелених, ESLint 0 помилок, `pnpm systems:index` ідемпотентний, ratchet-файли не зросли. Opus-огляд: blockers немає. Відкладено: baseline sweep і golden-журнали (Ч1 задача 0) — перед Ч5. Лишилось у Ч3: (1) `mergeRules` при зміні `key` має скидати `modules`, а невалідні `modules` не стирати мовчки при збереженні правил (`schema.ts` parseRules/mergeRules); (2) прокинути `prev` у всі `slot.write(...)` у `systems/wfrp/rules/**` до першого запису в `ext`; (3) `duplicateClaim` вважати префікс (`magic` і `magic.slots`) конфліктом; (4) `FieldKinds` розширити словниками нових секцій; (5) нова база без `tokens` мовчки випадає з substring-ratchet: додати перевірку в `system-contract`. Тимчасове: `fallbackBase` UI/server повертає d20 для будь-якого ключа (зникне в Ч2).
 
+### E2 Ч13: дані I, `system.key` і явні `modules` (2026-11-13)
+
+Гілка `feat/e2-part13-backfill` (від local main 866fbce23, worktree `../dnd-tracker-e2-ch13`), **не змерджена й не запушена**; **бекфіл на prod ВИКОНАНО 2026-11-13**. Зроблено: `scripts/db/backfill-rule-system.ts` (dry-run / `--apply` / `--allow-remote` / `--revert <знімок>`, одна транзакція, знімок у `.migration-backup/rule-system/`; критерії модулів за розібраними значеннями; рядки з явним `system.modules` пропускає; охоплює `campaigns.rules` і `battle_scenes.rules`); classless-звіт читає класи через шар контенту; здогадку ключа видалено з живого коду: `parseRules` без `system` кидає `RulesSystemError` (`rules.validation.unknownSystem`, 422 на межі API, `ErrorState` у layout кампанії), `safeParseRules`; створення кампанії вимагає шаблон або систему (`SystemPicker`); `DEFAULT_RULES` лишається тестовою фікстурою (homm) до Ч17. Коміти: 9bf3c057f, 0b16405c8, 2e4d2ad99, 67387bbb9, 72f18a0e0, c5fd47c70, 2ad288dcf, 95d0908cb, bdd3a40d8, 93238e1f7. Деталі — `rule-systems.md`, розділ «Ч13».
+
+**Рішення** (прийняті за рекомендацією): мораль/відсіч лише з дефолту → модулі; безкласові персонажі → `heroscaling`; бекфіл до деплою; `DEFAULT_RULES` — фікстура; `SystemPicker` при створенні без шаблону; знімок у `.migration-backup`. **Відхилення:** `battle_scenes` у бекфілі (знімки боїв); `wrongBase` (а не `missingRequires`) для retaliation у Grim d100.
+
+**Хвости:** клієнтські фолбеки `DEFAULT_RULES.system` лишились в `initiative.ts`, `useBattleSetup.ts`, `PlayerDraftForm.tsx`, `balance-post.ts` (лише поки правила не завантажені); `presets[0]` у `SystemPicker` залежить від порядку згенерованих meta; `traits-guard` дає 422 для неіснуючої кампанії (раніше дефолт); Vecna клієнта має активний бій: перед деплоєм повторити dry-run бекфілу на prod = 0 записів.
+
+**Гейти (репетиція `prodcopy_ch13`):** dry-run 14 записів (лише `key`) / 5 без змін / 0 пропущено; apply, повторний dry-run 0, `--revert` 14/14 побайтово; ownership-звіт 0 порушень; classless 0 (Denis зник після виправлення); `tsc` 0; `test:run` 2237 файлів зелено; sweep 4 профілі exit 0, 0 помилок, `srd-5.2` 1 попередження. **PROD 2026-11-13:** бекап `.migration-backup/prod-backup_20261113_124118_pre-ch13.sql`; dry-run = репетиції; apply записано 14 (`key`); повторний dry-run 0; без `system`: `campaigns` 0/13, `battle_scenes` 0/8 (не-null); знімок для відкату `.migration-backup/rule-system/aws-1-eu-central-1.pooler.supabase.com-postgres-2026-11-13T11-44-58.162Z.json`.
+
+**RUNBOOK деплою Ч3–Ч16** (код Ч3–Ч16 не деплоїти поза цим порядком):
+1. Бекап prod-БД.
+2. Бекфіл `modules`/`key` — **ВИКОНАНО на prod 2026-11-13**.
+3. Повторний `backfill-rule-system` dry-run на prod = 0 записів (Vecna має активний бій, дані могли змінитись).
+4. Деплой коду main — окреме «так» власника. Дата whats-new `2026-11-13`: змінити id і ключі в обох `whatsNew.json`, якщо деплой пізніше.
+5. Перед деплоєм перевірити активні бої (пауза з вибором крита).
+6. Відкат коду не нижче Ч1 після першого запису `system.modules` користувачем; дані повертає `--revert <знімок>`.
+7. Ч14/Ч15 — окремі деплої, лише без активного бою. Ч17 — після тижня спостереження за Ч15.
+
 ### E2 Ч16: шов створення режиму (2026-11-13)
 
 Гілка `feat/e2-part16-mode-seam` (від local main 85cb90883), **не змерджена й не запушена**; prod-кроків немає. Зроблено: `moduleToggles`/`withModule`/`moduleChange` і `systemIssues` у `catalog.ts`; патч правил приймає `system.modules` (422 `SYSTEM_MODULES_INVALID` / 409 `SYSTEM_MODULES_IN_BATTLE` / 409 `SYSTEM_MODULE_CONFIRM`, гейти й для зміни лише `key`); `composition` у `rules.get`; створення без шаблону (`system: { key, modules? }`, `RULES_PRESETS` + `initialRules`); перемикачі модулів у «Система» (`useCampaignModules`); `modules` у маніфесті пакета, `template validate` звіряє склад і `kinds`; whats-new + help (`dm-rule-systems`, s9). Деталі — `rule-systems.md`, розділ «Ч16».
