@@ -7,7 +7,7 @@ import { useCampaignRules } from '@/lib/hooks/campaigns';
 import { translateIssue } from '@/lib/i18n/translate-issue';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import type { CharacterFormBindings } from '@/lib/utils/characters/form/bindings';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { heroInitiativeRange } from '@/lib/utils/characters/initiative-range';
 import type { SheetTotal } from '@/types/characters';
 
 const intOr = (v: string, fallback: number) => {
@@ -35,7 +35,12 @@ export function CharacterCombatParams({
 
     const { data: rules } = useCampaignRules(campaignId);
 
-    const initiativeRange = rules?.initiative ?? DEFAULT_RULES.initiative;
+    const range = rules && heroInitiativeRange(rules);
+
+    const initiativeRange = range && {
+        heroMin: range.min,
+        heroMax: range.max,
+    };
 
     const { armorClass, initiative, speed, minTargets, maxTargets } = data;
 
@@ -83,13 +88,14 @@ export function CharacterCombatParams({
                 label={tc('initiative')}
                 labelClassName="text-xs leading-tight"
                 type="number"
-                min={initiativeRange.heroMin}
-                max={initiativeRange.heroMax}
+                min={initiativeRange?.heroMin}
+                max={initiativeRange?.heroMax}
                 value={initiative}
                 onChange={(e) =>
                     set('initiative', parseInt(e.target.value) || 0)
                 }
                 onBlur={() =>
+                    initiativeRange &&
                     set(
                         'initiative',
                         clampHeroInitiative(initiative, initiativeRange)

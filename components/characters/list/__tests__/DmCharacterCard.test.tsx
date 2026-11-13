@@ -3,6 +3,7 @@ import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { DmCharacterCard } from '@/components/characters/list/DmCharacterCard';
+import { defaultRulesFor } from '@/lib/utils/rules/section-registry';
 import { RULE_SYSTEM_REGISTRY } from '@/lib/utils/rules/systems';
 import type { CharacterListItem } from '@/types/characters';
 import type { GameClassData } from '@/types/classes';
@@ -65,7 +66,9 @@ const renderCard = (c: CharacterListItem) =>
 
 describe('DmCharacterCard HP', () => {
     beforeEach(() => {
-        mocks.rules.mockReturnValue({ data: undefined });
+        mocks.rules.mockReturnValue({
+            data: defaultRulesFor({ key: 'dnd5e' }),
+        });
         mocks.system.mockReturnValue({
             key: 'dnd5e',
             system: RULE_SYSTEM_REGISTRY.dnd5e,

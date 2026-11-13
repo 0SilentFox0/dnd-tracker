@@ -13,7 +13,7 @@ import { resolveAvatarForPersistence } from '@/lib/supabase/avatar-storage';
 import { type CampaignAccessResult } from '@/lib/utils/api/api-auth';
 import { errorResponse } from '@/lib/utils/api/api-response';
 import { parseBody } from '@/lib/utils/api/parse-body';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { heroInitiativeRange } from '@/lib/utils/characters/initiative-range';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import { isUsableProfile, planDraft } from '@/systems/wfrp/rules/creation';
 import { parseProfile } from '@/systems/wfrp/server/schemas';
@@ -118,7 +118,7 @@ export async function createWfrpDraft(
                 level: 1,
                 characteristics: plan.characteristics as never,
                 experience: plan.experience,
-                initiative: DEFAULT_RULES.initiative.heroMin,
+                initiative: heroInitiativeRange(campaign.rules).min,
                 avatar: avatar.avatar ?? undefined,
                 skillTreeProgress: {},
             },

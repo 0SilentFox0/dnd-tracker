@@ -30,9 +30,8 @@ import {
     usePlayerDraftForm,
 } from '@/lib/hooks/characters';
 import { useRaces } from '@/lib/hooks/races';
-import { useCampaignSystem } from '@/lib/hooks/systems';
+import { useRuleSystem } from '@/lib/hooks/systems';
 import { useTranslator } from '@/lib/i18n/use-translator';
-import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
 import { statColumnsOf } from '@/lib/utils/rules/systems/stats';
 import type { DraftInput } from '@/types/characters';
 
@@ -55,9 +54,9 @@ export function PlayerDraftForm({
 
     const { options: archetypes } = useArchetypeOptions();
 
-    const { def } = useCampaignSystem(campaignId, DEFAULT_RULES.system.key);
+    const { system: def } = useRuleSystem({ campaignId });
 
-    const hasArchetype = statColumnsOf(def).has('archetype');
+    const hasArchetype = !!def && statColumnsOf(def).has('archetype');
 
     const { data: races = [] } = useRaces(campaignId);
 

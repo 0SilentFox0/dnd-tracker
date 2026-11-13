@@ -1,5 +1,5 @@
 import { CORE_SECTIONS } from './core-sections';
-import { DEFAULT_RULES } from './defaults';
+import { SECTION_DEFAULTS } from './defaults';
 import type { Ruleset } from './section-shapes';
 import {
     defaultsOf,
@@ -67,8 +67,12 @@ export function systemIssues(system: SystemSelection): CompositionIssue[] {
 /** Full defaults: core defaults plus the default of every section from the registry (system-owned sections such as advancement) */
 export const defaultRulesFor = (system: SystemSelection): Ruleset => {
     const rules: Record<string, unknown> = {
-        ...DEFAULT_RULES,
-        advancement: defaultsOf(ALL_SECTIONS.advancement),
+        ...SECTION_DEFAULTS,
+        ...Object.fromEntries(
+            Object.entries(ALL_SECTIONS)
+                .filter(([name]) => !(name in SECTION_DEFAULTS))
+                .map(([name, section]) => [name, defaultsOf(section)])
+        ),
     };
 
     for (const [name, section] of Object.entries(sectionsOfSystem(system)))

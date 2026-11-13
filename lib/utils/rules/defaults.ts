@@ -1,8 +1,8 @@
-import type { Ruleset } from './section-shapes';
+import type { CoreRuleset, Ruleset } from './section-shapes';
 
-type CoreRuleset = Omit<Ruleset, 'advancement'>;
+export type SectionDefaults = Omit<CoreRuleset, 'system'>;
 
-const CORE_DEFAULTS: CoreRuleset = {
+export const SECTION_DEFAULTS: SectionDefaults = {
     morale: { enabled: true, cap: 3 },
     criticals: {
         critOn: 20,
@@ -45,16 +45,18 @@ const CORE_DEFAULTS: CoreRuleset = {
     encounters: { balance: 'fair', edition: '2014', autoXp: false },
     items: { enabled: false, attunementLimit: 3 },
     spellIngredients: { enabled: false, autoPay: true },
-    tables: {},
-    system: { key: 'homm' },
 };
 
-/** `advancement` is owned by a system section and absent here (typed as Ruleset for the many readers): full defaults come from `defaultRulesFor` */
-export const DEFAULT_RULES = CORE_DEFAULTS as Ruleset;
+/** Test fixture only (production imports are banned by ESLint): `advancement` is owned by a system section and absent here, full defaults come from `defaultRulesFor` */
+export const DEFAULT_RULES = {
+    ...SECTION_DEFAULTS,
+    tables: {},
+    system: { key: 'homm' },
+} as Ruleset;
 
 export function localizedDefaultAttacks(
     t: (key: string) => string
-): CoreRuleset['defaultAttacks'] {
+): SectionDefaults['defaultAttacks'] {
     return {
         meleeName: t('defaultNames.meleeAttack'),
         rangedName: t('defaultNames.rangedAttack'),

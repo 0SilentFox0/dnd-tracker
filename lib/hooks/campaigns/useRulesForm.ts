@@ -9,11 +9,7 @@ import { AttackType } from '@/lib/constants/battle';
 import { MAX_CLASS_LEVEL } from '@/lib/constants/classes';
 import { getHeroDamageDiceForLevel } from '@/lib/constants/hero-scaling';
 import { useNotify } from '@/lib/hooks/common';
-import {
-    DEFAULT_RULES,
-    type Ruleset,
-    type RulesetPatch,
-} from '@/lib/utils/rules';
+import { type Ruleset, type RulesetPatch } from '@/lib/utils/rules';
 
 export const HERO_LEVELS = Array.from(
     { length: MAX_CLASS_LEVEL },
@@ -65,36 +61,45 @@ export function useRulesForm(campaignId: string) {
 
     const [changes, setChanges] = useState<Partial<Ruleset>>({});
 
-    const server = query.data ?? DEFAULT_RULES;
+    const server = query.data;
 
-    const merged: Ruleset = { ...server, ...changes };
+    const merged = server && { ...server, ...changes };
 
-    const data: Ruleset = {
+    const data: Ruleset | undefined = merged && {
         ...merged,
-        conditions: { ...merged.conditions, custom: server.conditions.custom },
+        conditions: {
+            ...merged.conditions,
+            custom: server.conditions.custom,
+        },
     };
 
-    const dirtyKeys = (Object.keys(changes) as (keyof Ruleset)[]).filter(
-        (key) => !same(changes[key], server[key])
-    );
+    const dirtyKeys = server
+        ? (Object.keys(changes) as (keyof Ruleset)[]).filter(
+              (key) => !same(changes[key], server[key])
+          )
+        : [];
 
-    const form: RulesFormState = {
-        campaignId,
-        data,
-        set: (key, value) =>
-            setChanges((prev) => ({
-                ...prev,
-                [key]:
-                    key === 'system' &&
-                    (value as Ruleset['system']).key === server.system.key &&
-                    !(value as Ruleset['system']).modules
-                        ? server.system
-                        : value,
-            })),
-    };
+    const form: RulesFormState | null =
+        server && data
+            ? {
+                  campaignId,
+                  data,
+                  set: (key, value) =>
+                      setChanges((prev) => ({
+                          ...prev,
+                          [key]:
+                              key === 'system' &&
+                              (value as Ruleset['system']).key ===
+                                  server.system.key &&
+                              !(value as Ruleset['system']).modules
+                                  ? server.system
+                                  : value,
+                      })),
+              }
+            : null;
 
     const save = async () => {
-        if (dirtyKeys.length === 0) return true;
+        if (!data || dirtyKeys.length === 0) return true;
 
         const patchValue = (key: keyof Ruleset) => {
             if (key === 'heroScaling') return withFilledDice(data.heroScaling);

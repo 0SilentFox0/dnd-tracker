@@ -10,7 +10,7 @@ import { ruleSystemOf } from '@/lib/utils/rules/systems';
 const system = vi.hoisted(() => ({ def: undefined as unknown }));
 
 vi.mock('@/lib/hooks/systems', () => ({
-    useCampaignSystem: () => ({ def: system.def }),
+    useRuleSystem: () => ({ system: system.def }),
 }));
 vi.mock('@/lib/hooks/races', () => ({ useRaces: () => ({ data: [] }) }));
 vi.mock('@/lib/hooks/characters', () => ({

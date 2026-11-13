@@ -1,17 +1,14 @@
 import { z } from 'zod';
 
-import { DEFAULT_RULES } from './defaults';
 import { ALL_SECTIONS, systemIssues } from './section-registry';
 import {
-    CRITICALS_ORDER_MESSAGE,
-    INITIATIVE_ORDER_MESSAGE,
     type Ruleset,
     sectionSchemas,
     UNKNOWN_SYSTEM_MESSAGE,
 } from './section-shapes';
 import {
-    defaultsOf,
     parseSection,
+    RulesMergeError,
     type RulesSection,
     type SectionMap,
 } from './sections';
@@ -27,127 +24,48 @@ const UNKNOWN_MODULE_MESSAGE = 'rules.validation.unknownModule';
 
 const INVALID_COMPOSITION_MESSAGE = 'rules.validation.invalidComposition';
 
-type Optional<F extends z.ZodType> = undefined extends z.output<F> ? F : never;
+const objectOfSection = (section: RulesSection) =>
+    z
+        .strictObject(
+            Object.fromEntries(
+                Object.entries(section.items).map(([key, item]) => [
+                    key,
+                    item.default === undefined
+                        ? item.schema
+                        : item.schema.default(item.default as never),
+                ])
+            )
+        )
+        .prefault({});
 
-type WithDefaults<S extends Record<string, z.ZodType>> = {
-    [K in keyof S]: S[K] extends Optional<S[K]> ? S[K] : z.ZodDefault<S[K]>;
-};
+const sectionEntries = Object.entries(ALL_SECTIONS).filter(
+    ([name]) => name !== 'system'
+);
 
-function withDefaults<S extends Record<string, z.ZodType>>(
-    section: z.ZodObject<S>,
-    defaults: {
-        [K in keyof S as S[K] extends Optional<S[K]>
-            ? never
-            : K]: z.core.util.NoUndefined<z.output<S[K]>>;
-    }
-) {
-    const fields = Object.entries(section.shape) as [keyof S, S[keyof S]][];
-
-    const shape = Object.fromEntries(
-        fields.map(([key, field]) => [
-            key,
-            key in defaults
-                ? field.default(
-                      (defaults as unknown as Record<keyof S, never>)[key]
-                  )
-                : field,
-        ])
-    ) as WithDefaults<S>;
-
-    return z.strictObject(shape);
-}
-
-const sections = {
-    morale: withDefaults(sectionSchemas.morale, DEFAULT_RULES.morale),
-    criticals: withDefaults(sectionSchemas.criticals, DEFAULT_RULES.criticals),
-    formulas: withDefaults(sectionSchemas.formulas, DEFAULT_RULES.formulas),
-    heroScaling: withDefaults(
-        sectionSchemas.heroScaling,
-        DEFAULT_RULES.heroScaling
-    ),
-    initiative: withDefaults(
-        sectionSchemas.initiative,
-        DEFAULT_RULES.initiative
-    ),
-    defaultAttacks: withDefaults(
-        sectionSchemas.defaultAttacks,
-        DEFAULT_RULES.defaultAttacks
-    ),
-    saves: withDefaults(sectionSchemas.saves, DEFAULT_RULES.saves),
-    deathSaves: withDefaults(
-        sectionSchemas.deathSaves,
-        DEFAULT_RULES.deathSaves
-    ),
-    concentration: withDefaults(
-        sectionSchemas.concentration,
-        DEFAULT_RULES.concentration
-    ),
-    conditions: withDefaults(
-        sectionSchemas.conditions,
-        DEFAULT_RULES.conditions
-    ),
-    actions: withDefaults(sectionSchemas.actions, DEFAULT_RULES.actions),
-    classes: withDefaults(sectionSchemas.classes, DEFAULT_RULES.classes),
-    outOfCombat: withDefaults(
-        sectionSchemas.outOfCombat,
-        DEFAULT_RULES.outOfCombat
-    ),
-    encounters: withDefaults(
-        sectionSchemas.encounters,
-        DEFAULT_RULES.encounters
-    ),
-    items: withDefaults(sectionSchemas.items, DEFAULT_RULES.items),
-    spellIngredients: withDefaults(
-        sectionSchemas.spellIngredients,
-        DEFAULT_RULES.spellIngredients
-    ),
-    advancement: withDefaults(
-        sectionSchemas.advancement,
-        defaultsOf(ALL_SECTIONS.advancement) as Ruleset['advancement']
-    ),
-    tables: withDefaults(sectionSchemas.tables, DEFAULT_RULES.tables),
-};
-
-const criticalsOrdered = (v: { critOn: number; fumbleOn: number }) =>
-    v.fumbleOn < v.critOn;
-
-const initiativeOrdered = (v: { heroMin?: number; heroMax?: number }) =>
-    v.heroMin === undefined ||
-    v.heroMax === undefined ||
-    v.heroMin <= v.heroMax;
-
-export const RulesetSchema = z
+const rulesetSchema = z
     .object({
-        morale: sections.morale.prefault({}),
-        criticals: sections.criticals.prefault({}),
-        formulas: sections.formulas.prefault({}),
-        heroScaling: sections.heroScaling.prefault({}),
-        initiative: sections.initiative.prefault({}),
-        defaultAttacks: sections.defaultAttacks.prefault({}),
-        saves: sections.saves.prefault({}),
-        deathSaves: sections.deathSaves.prefault({}),
-        concentration: sections.concentration.prefault({}),
-        conditions: sections.conditions.prefault({}),
-        actions: sections.actions.prefault({}),
-        classes: sections.classes.prefault({}),
-        outOfCombat: sections.outOfCombat.prefault({}),
-        encounters: sections.encounters.prefault({}),
-        items: sections.items.prefault({}),
-        spellIngredients: sections.spellIngredients.prefault({}),
-        advancement: sections.advancement.prefault({}),
-        tables: sections.tables.prefault({}),
+        ...Object.fromEntries(
+            sectionEntries.map(([name, section]) => [
+                name,
+                objectOfSection(section),
+            ])
+        ),
         system: sectionSchemas.system,
     })
-    .refine((r) => initiativeOrdered(r.initiative), {
-        message: INITIATIVE_ORDER_MESSAGE,
-        path: ['initiative'],
-    })
-    .refine((r) => criticalsOrdered(r.criticals), {
-        message: CRITICALS_ORDER_MESSAGE,
-        path: ['criticals'],
-    })
-    .superRefine((r, ctx) => {
-        for (const issue of systemIssues(r.system)) {
+    .superRefine((value, ctx) => {
+        const r = value as Record<string, Record<string, unknown>>;
+
+        for (const [name, section] of sectionEntries) {
+            if (section.refine && !section.refine(r[name]))
+                ctx.addIssue({
+                    code: 'custom',
+                    message:
+                        section.refineMessage ?? 'rules.validation.invalidSection',
+                    path: [name],
+                });
+        }
+
+        for (const issue of systemIssues(value.system)) {
             if (issue.code !== 'unknownKey')
                 ctx.addIssue({
                     code: 'custom',
@@ -159,6 +77,9 @@ export const RulesetSchema = z
                 });
         }
     });
+
+/** Built from the section registry, so the static type comes from `Ruleset` */
+export const RulesetSchema = rulesetSchema as unknown as z.ZodType<Ruleset>;
 
 const warnedModules = new Set<string>();
 
@@ -332,34 +253,39 @@ function writeOverRaw(
     next: Record<string, Record<string, unknown>>,
     patch: Record<string, unknown>,
     opts: {
-        removedCustom: boolean;
+        touched: Record<string, readonly string[]>;
         keyChanged: boolean;
         patchHasModules: boolean;
     }
 ): Record<string, unknown> {
     const stored: Record<string, unknown> = isRecord(raw) ? { ...raw } : {};
 
-    for (const [name, body] of Object.entries(patch)) {
-        if (!isRecord(body)) continue;
+    const names = new Set([
+        ...Object.entries(patch)
+            .filter(([, body]) => isRecord(body))
+            .map(([name]) => name),
+        ...Object.keys(opts.touched),
+    ]);
+
+    for (const name of names) {
+        const body = patch[name];
 
         const section = isRecord(stored[name]) ? { ...stored[name] } : {};
 
-        for (const key of Object.keys(body)) {
+        const keys = new Set([
+            ...(isRecord(body) ? Object.keys(body) : []),
+            ...(opts.touched[name] ?? []),
+        ]);
+
+        for (const key of keys) {
             const value = next[name]?.[key];
 
-            if (value === undefined || (name === 'tables' && value === null))
-                delete section[key];
+            if (value === undefined) delete section[key];
             else section[key] = value;
         }
 
         stored[name] = section;
     }
-
-    if (opts.removedCustom)
-        stored.conditions = {
-            ...(isRecord(stored.conditions) ? stored.conditions : {}),
-            custom: next.conditions?.custom,
-        };
 
     const system: Record<string, unknown> = {
         ...(isRecord(stored.system) ? stored.system : {}),
@@ -379,38 +305,39 @@ export function mergeRules(
     patch: MergePatch,
     raw?: unknown
 ): MergeRulesResult {
-    const removed = new Set(patch.removeCustomConditions ?? []);
-
     const sections = patch as Record<
         string,
         Record<string, unknown> | undefined
     >;
 
-    const conflict = (
-        Array.isArray(sections.conditions?.custom)
-            ? (sections.conditions.custom as unknown[])
-            : []
-    ).find((c) => isRecord(c) && removed.has(String(c.key)));
+    const touched: Record<string, readonly string[]> = {};
 
-    if (conflict)
-        return {
-            ok: false,
-            issues: [
-                {
-                    code: 'custom',
-                    message: 'validation.rulesCustomConflict',
-                    path: ['removeCustomConditions'],
-                    input: patch.removeCustomConditions,
-                },
-            ],
-        };
+    let next: Record<string, Record<string, unknown>>;
 
-    const next = Object.fromEntries(
-        (Object.keys(current) as (keyof Ruleset)[]).map((k) => [
-            k,
-            { ...current[k], ...(sections[k] ?? {}) },
-        ])
-    );
+    try {
+        next = Object.fromEntries(
+            (Object.keys(current) as (keyof Ruleset)[]).map((k) => {
+                const merge = ALL_SECTIONS[k]?.merge;
+
+                if (!merge) return [k, { ...current[k], ...(sections[k] ?? {}) }];
+
+                const merged = merge(
+                    current[k] as Record<string, unknown>,
+                    sections[k] ?? {},
+                    patch
+                );
+
+                if (merged.touched?.length) touched[k] = merged.touched;
+
+                return [k, merged.next];
+            })
+        );
+    } catch (e) {
+        if (e instanceof RulesMergeError)
+            return { ok: false, issues: [e.issue] };
+
+        throw e;
+    }
 
     const newKey = sections.system?.key;
 
@@ -427,50 +354,6 @@ export function mergeRules(
             ...(patchModules && { modules: patchModules }),
         };
 
-    if (isRecord(sections.tables))
-        next.tables = Object.fromEntries(
-            Object.entries(next.tables).filter(([, rows]) => rows !== null)
-        );
-
-    const groupPatch = sections.encounters?.unitGroups;
-
-    if (isRecord(groupPatch)) {
-        const unitGroups = { ...current.encounters.unitGroups };
-
-        for (const [key, appearance] of Object.entries(groupPatch)) {
-            if (isRecord(appearance))
-                unitGroups[key] = { ...unitGroups[key], ...appearance };
-        }
-
-        next.encounters = { ...next.encounters, unitGroups };
-    }
-
-    const patchedCustom = sections.conditions?.custom;
-
-    if (Array.isArray(patchedCustom)) {
-        const keyOf = (c: unknown) => (isRecord(c) ? c.key : undefined);
-
-        const incoming = new Set(patchedCustom.map(keyOf));
-
-        next.conditions = {
-            ...next.conditions,
-            custom: [
-                ...(current.conditions.custom ?? []).filter(
-                    (c) => !incoming.has(c.key)
-                ),
-                ...patchedCustom,
-            ],
-        };
-    }
-
-    if (removed.size)
-        next.conditions = {
-            ...next.conditions,
-            custom: (
-                (next.conditions as Ruleset['conditions']).custom ?? []
-            ).filter((c) => !removed.has(c.key)),
-        };
-
     const parsed = RulesetSchema.safeParse(next);
 
     if (!parsed.success) return { ok: false, issues: parsed.error.issues };
@@ -482,10 +365,10 @@ export function mergeRules(
         rules: parsed.data,
         stored: writeOverRaw(
             raw,
-            next as Record<string, Record<string, unknown>>,
+            next,
             patch as Record<string, unknown>,
             {
-                removedCustom: removed.size > 0,
+                touched,
                 keyChanged,
                 patchHasModules: !!patchModules,
             }

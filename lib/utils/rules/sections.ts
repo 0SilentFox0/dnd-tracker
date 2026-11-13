@@ -24,6 +24,20 @@ export interface RulesSection {
     refineMessage?: string;
     mechanic: boolean;
     playerHidden?: true;
+    /** Replaces the shallow `{ ...current, ...patch }` of a patch; `touched` lists keys changed beyond those in the patch body; `whole` is the full patch */
+    merge?(
+        current: Record<string, unknown>,
+        patch: Record<string, unknown>,
+        whole: Record<string, unknown>
+    ): { next: Record<string, unknown>; touched?: readonly string[] };
+}
+
+/** Thrown by a `merge` hook for a patch that contradicts itself */
+export class RulesMergeError extends Error {
+    constructor(readonly issue: z.core.$ZodIssue) {
+        super(issue.message);
+        this.name = 'RulesMergeError';
+    }
 }
 
 export type SectionMap = Record<string, RulesSection>;
@@ -170,7 +184,7 @@ export function setRule<T extends Record<string, unknown>>(
     return walk(patch, splitPath(path)) as T;
 }
 
-/** Items of a legacy strict-object section, with defaults taken from DEFAULT_RULES */
+/** Items of a legacy strict-object section, with defaults taken from SECTION_DEFAULTS */
 export function itemsFromShape(
     shape: Record<string, z.ZodType>,
     defaults: Record<string, unknown>,

@@ -154,13 +154,13 @@ describe('rules: сумісність збережених даних і patch',
             expect(merged.issues).toEqual([
                 {
                     code: 'custom',
-                    message: 'rules.validation.initiativeOrder',
-                    path: ['initiative'],
+                    message: 'rules.validation.criticalsOrder',
+                    path: ['criticals'],
                 },
                 {
                     code: 'custom',
-                    message: 'rules.validation.criticalsOrder',
-                    path: ['criticals'],
+                    message: 'rules.validation.initiativeOrder',
+                    path: ['initiative'],
                 },
             ]);
 

@@ -1,9 +1,61 @@
+import { isRecord } from '@/lib/utils/common/is-record';
 import { sectionItems } from '@/lib/utils/rules/section-items';
 import {
     CRITICALS_ORDER_MESSAGE,
     INITIATIVE_ORDER_MESSAGE,
 } from '@/lib/utils/rules/section-shapes';
-import type { SectionsContribution } from '@/lib/utils/rules/sections';
+import {
+    RulesMergeError,
+    type RulesSection,
+    type SectionsContribution,
+} from '@/lib/utils/rules/sections';
+
+const customKey = (c: unknown) => (isRecord(c) ? String(c.key) : undefined);
+
+const mergeConditions: NonNullable<RulesSection['merge']> = (
+    current,
+    patch,
+    whole
+) => {
+    const removed = new Set(
+        Array.isArray(whole.removeCustomConditions)
+            ? whole.removeCustomConditions.map(String)
+            : []
+    );
+
+    const added = Array.isArray(patch.custom) ? patch.custom : undefined;
+
+    const keptOf = (list: unknown) =>
+        Array.isArray(list) ? (list as unknown[]) : [];
+
+    if (added?.some((c) => removed.has(customKey(c) ?? '')))
+        throw new RulesMergeError({
+            code: 'custom',
+            message: 'validation.rulesCustomConflict',
+            path: ['removeCustomConditions'],
+            input: whole.removeCustomConditions,
+        });
+
+    const next = { ...current, ...patch };
+
+    if (added) {
+        const incoming = new Set(added.map(customKey));
+
+        next.custom = [
+            ...keptOf(current.custom).filter(
+                (c) => !incoming.has(customKey(c))
+            ),
+            ...added,
+        ];
+    }
+
+    if (removed.size)
+        next.custom = keptOf(next.custom).filter(
+            (c) => !removed.has(customKey(c) ?? '')
+        );
+
+    return { next, touched: removed.size ? ['custom'] : undefined };
+};
 
 export const D20_SECTIONS: SectionsContribution = {
     sections: {
@@ -47,6 +99,7 @@ export const D20_SECTIONS: SectionsContribution = {
             owner: 'd20',
             mechanic: true,
             items: sectionItems('conditions'),
+            merge: mergeConditions,
         },
         actions: {
             owner: 'd20',

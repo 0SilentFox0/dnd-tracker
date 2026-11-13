@@ -32,6 +32,11 @@ export const D20_MODULE: RuleSystemDefinition = {
         maxHp: d20MaxHp,
         proficiency: (level, rules) =>
             proficiencyForLevel(level, rules.formulas),
+        classes: (rules) => rules.classes.enabled,
+        initiativeRange: (rules) => ({
+            min: rules.initiative.heroMin,
+            max: rules.initiative.heroMax,
+        }),
     },
     stats: { columns: [{ owns: D20_STAT_COLUMNS }] },
     sheet: { blocks: [d20SheetBlock] },

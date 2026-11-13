@@ -6,7 +6,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ConfirmProvider } from '@/components/ui/confirm-dialog';
 import { getCampaignRules, updateCampaignRules } from '@/lib/api/rules';
-import { useRulesForm } from '@/lib/hooks/campaigns';
+import { type RulesFormState, useRulesForm } from '@/lib/hooks/campaigns';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 
 vi.mock('@/lib/api/rules', () => ({
@@ -39,7 +39,15 @@ describe('useRulesForm', () => {
 
         await waitFor(() => expect(view.result.current.isLoading).toBe(false));
 
-        return view;
+        const result = {
+            get current() {
+                const { current } = view.result;
+
+                return { ...current, form: current.form as RulesFormState };
+            },
+        };
+
+        return { ...view, result };
     };
 
     it('starts from the server rules and is clean', async () => {

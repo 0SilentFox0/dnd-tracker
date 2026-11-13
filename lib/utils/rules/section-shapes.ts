@@ -8,8 +8,6 @@ import {
     CUSTOM_CONDITION_KEY_RE,
 } from '@/lib/utils/abilities/schema/kinds';
 import { RULE_SYSTEM_KEYS } from '@/lib/utils/rules/systems/meta';
-import { AdvancementRulesSchema } from '@/systems/wfrp/rules/advancement/schema';
-import { TablesRulesSchema } from '@/systems/wfrp/rules/tables/schema';
 
 const level = z.string().regex(/^([1-9]|1\d|20)$/);
 
@@ -104,8 +102,6 @@ export const sectionSchemas = {
         enabled: z.boolean(),
         autoPay: z.boolean(),
     }),
-    advancement: AdvancementRulesSchema,
-    tables: TablesRulesSchema,
     system: z.strictObject({
         key: z.enum(RULE_SYSTEM_KEYS as [string, ...string[]], {
             message: UNKNOWN_SYSTEM_MESSAGE,
@@ -117,6 +113,12 @@ export const sectionSchemas = {
     }),
 };
 
-export type Ruleset = {
+export type CoreRuleset = {
     [K in keyof typeof sectionSchemas]: z.output<(typeof sectionSchemas)[K]>;
 };
+
+/** Sections owned by a system add themselves here through module augmentation */
+ 
+export interface RulesetExtensions {}
+
+export type Ruleset = CoreRuleset & RulesetExtensions;

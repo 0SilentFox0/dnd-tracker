@@ -14,7 +14,6 @@ import { useClassMode } from '@/lib/hooks/classes';
 import { useRuleSystem } from '@/lib/hooks/systems';
 import { characterBaseHp } from '@/lib/utils/characters/hero-hp';
 import { currentHp } from '@/lib/utils/characters/resources/hp';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
 import { statColumnsOf } from '@/lib/utils/rules/systems/stats';
 import { resolveClassEntries } from '@/lib/utils/spells/class-slots';
 import type { CharacterListItem } from '@/types/characters';
@@ -64,11 +63,13 @@ export function DmCharacterCard({
 
     const ooc = rules?.outOfCombat;
 
-    const maxHp = characterBaseHp(character, {
-        entries,
-        rules: rules ?? DEFAULT_RULES,
-        characteristics: character.characteristics,
-    }).total;
+    const maxHp = rules
+        ? characterBaseHp(character, {
+              entries,
+              rules,
+              characteristics: character.characteristics,
+          }).total
+        : 0;
 
     const hp =
         ooc?.persistResources && character.resources

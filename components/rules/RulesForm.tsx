@@ -55,7 +55,7 @@ export function RulesForm({ campaignId }: { campaignId: string }) {
 
     if (loadError) return <ErrorState error={loadError} onRetry={reload} />;
 
-    if (isLoading) return <LoadingState />;
+    if (isLoading || !form) return <LoadingState />;
 
     const ui = systemUiOf(form.data.system.key, form.data.system.modules);
 

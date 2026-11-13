@@ -840,6 +840,10 @@ export interface RuleSystemDefinition {
         proficiency?(level: number, rules: Ruleset): number;
         /** Columns a level change resets; parts of the composition are merged */
         levelResets?: readonly LevelResetPart[];
+        /** Whether the rules switch classes on; absent means the system has none */
+        classes?(rules: Ruleset): boolean;
+        /** Hero initiative range of the sheet; absent means no sheet field */
+        initiativeRange?(rules: Ruleset): { min: number; max: number };
     };
     stats?: { columns: readonly StatColumnsPart[] };
     sheet?: { blocks: readonly SheetBlock[] };

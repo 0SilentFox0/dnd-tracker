@@ -17,7 +17,7 @@ import { lockPlayerDrafts } from '@/lib/server/characters/draft-lock';
 import { systemServerOf } from '@/lib/server/systems/registry';
 import { requireCampaignAccess } from '@/lib/utils/api/api-auth';
 import { errorResponse } from '@/lib/utils/api/api-response';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { heroInitiativeRange } from '@/lib/utils/characters/initiative-range';
 import { ruleSystemOf } from '@/lib/utils/rules/systems/registry';
 import { statColumnsOf } from '@/lib/utils/rules/systems/stats';
 import type { CharacterClassEntry } from '@/types/classes';
@@ -110,7 +110,7 @@ export async function createDraft(
                 level: 1,
                 ...asClass?.fields,
                 ...(choices?.ok && choices.fields),
-                initiative: DEFAULT_RULES.initiative.heroMin,
+                initiative: heroInitiativeRange(campaign.rules).min,
                 avatar: avatar.avatar ?? undefined,
                 spellSlots,
                 skillTreeProgress: {},

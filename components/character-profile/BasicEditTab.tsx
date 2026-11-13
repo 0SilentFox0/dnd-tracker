@@ -14,7 +14,6 @@ import type { DmCharacterEditor } from '@/lib/hooks/characters';
 import { useClassMode } from '@/lib/hooks/classes';
 import { useCampaignSystem } from '@/lib/hooks/systems';
 import { characterBaseHp } from '@/lib/utils/characters/hero-hp';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
 import { statColumnsOf } from '@/lib/utils/rules/systems/stats';
 import { resolveClassEntries } from '@/lib/utils/spells/class-slots';
 
@@ -51,13 +50,13 @@ export function BasicEditTab({
     const ui = systemUiOf(system.key, system.modules);
 
     const classHp =
-        classUi && classEntries.some((e) => e.class)
+        rules && classUi && classEntries.some((e) => e.class)
             ? characterBaseHp(
                   {
                       level: form.basicInfo.data.level,
                       constitution: form.abilityScores.data.constitution,
                   },
-                  { entries: classEntries, rules: rules ?? DEFAULT_RULES }
+                  { entries: classEntries, rules }
               )
             : null;
 
