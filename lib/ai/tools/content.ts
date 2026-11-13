@@ -103,7 +103,7 @@ export const getRulesTool = defineTool({
     name: 'get_rules',
     title: 'Campaign rules',
     description:
-        'Full set of campaign rules (ruleset) with default values. Schema: content_schema(kind: "rules").',
+        'Full set of campaign rules (ruleset) with default values, plus composition (active base and rule modules). Schema: content_schema(kind: "rules").',
     scopes: ['content:read'],
     input: z.object({}),
     handler: aliasHandler('get_rules'),
@@ -113,7 +113,7 @@ export const updateRulesTool = defineTool({
     name: 'update_rules',
     title: 'Update campaign rules',
     description:
-        'Partial rules patch: fields not given stay as they were. Patch schema: content_schema(kind: "rules"). Returns the rules after the change.',
+        'Partial rules patch: fields not given stay as they were. Patch schema: content_schema(kind: "rules"). Rule modules: system.modules is the complete list of module ids; a module with toggle "setup" in a campaign with characters needs confirm: true; 409 during an active battle. Returns the rules after the change.',
     scopes: ['content:write'],
     input: z.object({ patch: z.record(z.string(), z.unknown()) }),
     handler: aliasHandler('update_rules'),

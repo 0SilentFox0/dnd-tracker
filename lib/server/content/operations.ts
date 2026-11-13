@@ -57,11 +57,11 @@ const OPERATION_ROWS = {
         path: '/rules',
         summary: 'Update rules',
         description:
-            'Partial rules patch; fields not given stay as they were. removeCustomConditions — keys of custom conditions to delete (custom:<slug>); 409 if a condition is still used in battles, spells or units.',
+            'Partial rules patch; fields not given stay as they were. removeCustomConditions — keys of custom conditions to delete (custom:<slug>); 409 if a condition is still used in battles, spells or units. system.modules — the complete list of enabled add-on modules (422 for an invalid set; 409 during an active battle; 409 when a module that changes hero calculation is switched in a campaign with characters, unless confirm: true).',
         need: NEED.write,
         body: RulesetPatchSchema,
         response: 'object',
-        errors: [409],
+        errors: [409, 422],
         invalidBody: API_ERRORS.INVALID_RULES,
         tag: 'Campaign',
     },

@@ -4,6 +4,7 @@ import { jsonContent } from './content-snapshot';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import type { Translator } from '@/lib/i18n/translator';
+import { assertValidSystem } from '@/lib/server/campaigns/modules';
 import { ContentError } from '@/lib/server/content/errors';
 import type { ContentOperationId } from '@/lib/server/content/operation-service';
 import { asRecord } from '@/lib/utils/common/json';
@@ -117,7 +118,16 @@ export function operationPreview(
         case 'rules.update': {
             const before = parseRules(asRecord(root.campaign).rules);
 
-            const merged = mergeRules(before, RulesetPatchSchema.parse(body));
+            const { confirm: _confirm, ...patch } =
+                RulesetPatchSchema.parse(body);
+
+            if (patch.system?.modules)
+                assertValidSystem({
+                    key: patch.system.key ?? before.system.key,
+                    modules: patch.system.modules,
+                });
+
+            const merged = mergeRules(before, patch);
 
             if (!merged.ok)
                 throw new ContentError(
@@ -128,7 +138,7 @@ export function operationPreview(
 
             const row = { ...before, id: 'rules', name: t('results.rules') };
 
-            for (const key of Object.keys(body)) {
+            for (const key of Object.keys(patch)) {
                 const section =
                     key === 'removeCustomConditions'
                         ? 'conditions'
