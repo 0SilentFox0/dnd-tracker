@@ -307,7 +307,7 @@ export interface RuleSystemDefinition {
 ### Після merge
 
 **E2 (L, по підсистемах):** `systems/d20/` стає повним модулем (база d20, `dnd5e` без HOMM-механік); HOMM-специфіка (мораль, відсіч, лідерство) — окремий модуль `systems/homm` поверх бази (U9): спершу `lib/constants` (~25 файлів: `abilities.ts` 107 імпортерів, `classes`, `skills`, `spells`, `damage`, `weapon-traits`, hero-файли), далі персонажі (`lib/utils/characters`, `lib/server/characters`), далі бій (`lib/utils/battle` d20-частини, `d20Roll`). Кожен під-крок зменшує ratchet-список; ціль нуль. Паралельно борги БД: DROP `race_profiles`, `status_effects`, мертвих колонок — після деплою й перевірки prod-рядків; нові міграції лише expand-only. Узагальнення клієнтських flow (`flow.mode`) і маршрутів системних дій (`/system/[action]` замість `channel`, `condition-test`, `corruption`, `downtime`) — теж тут: у E1 системні route-файли в `app/api` лишаються у ratchet-списку винятків (вибір spec).
-**E3 (доменні модулі епіку «Модулі»):** `modules/<domain>/…`, ESLint boundaries, Vitest projects; потребує переписування layering в `CLAUDE.md`. Окремий spec після merge і E2.
+**E3 (доменні модулі епіку «Модулі»):** `modules/<domain>/…`, ESLint boundaries, Vitest projects; потребує переписування layering в `CLAUDE.md`. Окремий spec після merge і E2. Рішення власника 2026-11-13: repo-wide `eslint` на ~6200 файлах вісить > 10 хв (імовірно `import/no-cycle` з `maxDepth: 6`), тому в E2 (з Ч11) повний lint пропускається; в E3 lint запускається окремо по теках/модулях (`eslint <тека>` у CI й локально, цикли — швидким інструментом на кшталт `madge`/`dpdm`).
 E2 після merge, бо масове перенесення на гілці з ~1420 змінених файлів дає найважчі конфлікти.
 
 ## 8. Що блокує заливку іконок і prod-контенту
