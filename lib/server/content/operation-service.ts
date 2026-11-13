@@ -30,6 +30,7 @@ import {
 import { importContent } from '@/lib/server/content/import/import-content';
 import { loadNames } from '@/lib/server/content/import/names';
 import { translateImportReport } from '@/lib/server/content/import/translate-report';
+import { assertKindActive } from '@/lib/server/content/kind-active';
 import { CONTENT_OPERATIONS } from '@/lib/server/content/operations';
 import { assertEffectsInComposition } from '@/lib/server/content/traits-guard';
 import { withCampaignContentWrite } from '@/lib/server/content/write';
@@ -197,8 +198,12 @@ export async function runContentOperation(
             case 'template.publish':
                 return publishTemplate(actor);
             case 'skill-trees.list':
+                await assertKindActive('skills', actor);
+
                 return listSkillTrees(actor);
             case 'skill-trees.save':
+                await assertKindActive('skills', actor);
+
                 return saveSkillTree(actor, {
                     ...bodyOf('skill-trees.save', body),
                     ...(input.treeId ? { treeId: String(input.treeId) } : {}),
@@ -218,11 +223,15 @@ export async function runContentOperation(
                 );
             }
             case 'content.import-example':
+                await assertKindActive(kindOf(input.kind), actor);
+
                 return exampleCsv(actor, kindOf(input.kind), {
                     loadNames,
                     locale: locale ?? undefined,
                 });
             case 'content.export':
+                await assertKindActive(kindOf(input.kind), actor);
+
                 return exportCsv(actor, kindOf(input.kind), {
                     ...EXPORT_DEFAULT_DEPS,
                     locale: locale ?? undefined,

@@ -5,6 +5,7 @@ import { jsonContent } from './content-snapshot';
 
 import 'server-only';
 import { getTranslator } from '@/lib/i18n/translator';
+import { isKindActive } from '@/lib/server/content/kind-active';
 import { CONTENT_RESOURCES } from '@/lib/server/content/resources';
 import {
     EXTRA,
@@ -25,26 +26,36 @@ export function createContentReadActions(): AssistantActionDef[] {
             need: NEED.read('dm'),
             input: z.object({}),
             effect: 'read',
-            execute: async () => ({
+            execute: async (caller) => ({
                 data: jsonContent({
-                    kinds: KINDS.map((kind) => {
-                        const r = CONTENT_RESOURCES[kind];
+                    kinds: (
+                        await Promise.all(
+                            KINDS.map(async (kind) =>
+                                (await isKindActive(kind, caller.actor))
+                                    ? kind
+                                    : null
+                            )
+                        )
+                    )
+                        .filter((kind) => kind !== null)
+                        .map((kind) => {
+                            const r = CONTENT_RESOURCES[kind];
 
-                        return {
-                            kind,
-                            label: r.label,
-                            description: r.description,
-                            listFields: r.listFields,
-                            ops: [
-                                'list',
-                                'get',
-                                'create',
-                                'update',
-                                'delete',
-                                ...(r.removeAll ? ['delete-all'] : []),
-                            ],
-                        };
-                    }),
+                            return {
+                                kind,
+                                label: r.label,
+                                description: r.description,
+                                listFields: r.listFields,
+                                ops: [
+                                    'list',
+                                    'get',
+                                    'create',
+                                    'update',
+                                    'delete',
+                                    ...(r.removeAll ? ['delete-all'] : []),
+                                ],
+                            };
+                        }),
                     extra: EXTRA,
                 }),
                 affected: [],

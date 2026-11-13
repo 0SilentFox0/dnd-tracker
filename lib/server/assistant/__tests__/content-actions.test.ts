@@ -1,6 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
 
+vi.mock('@/lib/server/content/kind-active', () => ({
+    isKindActive: async () => true,
+    assertKindActive: async () => undefined,
+}));
+
 import { executorDatabase } from './fixtures/executor-db';
 
 import { createContentActions } from '@/lib/server/assistant/actions/content';
