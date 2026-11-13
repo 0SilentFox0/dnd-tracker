@@ -33,7 +33,7 @@ vi.mock('@/lib/hooks/characters', async (orig) => ({
     ...(await orig<object>()),
     useSheetRoll: () => h.roll,
 }));
-vi.mock('@/components/battle/fx/dice/DiceStage', () => ({
+vi.mock('@/components/dice/DiceStage', () => ({
     DiceStage: () => null,
 }));
 

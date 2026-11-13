@@ -34,7 +34,7 @@ const DIALOG_RESTRICTED_PATHS = [
 
 const THREE_RESTRICTED_PATH = {
     name: 'three',
-    message: 'three лише в components/battle/fx/dice/scene.ts (лінивий чанк)',
+    message: 'three лише в components/dice/scene.ts (лінивий чанк)',
 };
 
 const THREE_IMPORT_PATTERN = {
@@ -89,7 +89,7 @@ const AI_IN_ASSISTANT_PATTERN = {
         'lib/ai — адаптер над lib/server/assistant, не навпаки: спільний код винесіть у lib/utils або lib/server/assistant.',
 };
 
-const DICE_SCENE_FILE = 'components/battle/fx/dice/scene.ts';
+const DICE_SCENE_FILE = 'components/dice/scene.ts';
 
 const MODE_IMPORT_PATTERN = {
     group: [

@@ -7,7 +7,7 @@ import { preloadAnimation } from '@/components/battle/fx/animations';
 import {
     DiceStage,
     type DiceStageHandle,
-} from '@/components/battle/fx/dice/DiceStage';
+} from '@/components/dice/DiceStage';
 import {
     FX_LOAD_TIMEOUT_MS,
     playFx,

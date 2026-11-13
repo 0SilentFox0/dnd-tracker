@@ -3,7 +3,7 @@ export function preloadFx() {
     return Promise.all([
         import('@/components/battle/fx/auras/AuraCanvas'),
         import('./frames/ImpactFrame'),
-        import('@/components/battle/fx/dice/scene'),
+        import('@/components/dice/scene'),
     ]).then(
         () => undefined,
         () => undefined

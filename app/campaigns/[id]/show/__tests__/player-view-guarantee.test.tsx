@@ -24,7 +24,7 @@ vi.mock('@/lib/hooks/show', async (orig) => ({
 }));
 
 vi.mock('@/components/audio/AudioDock', () => ({ AudioDock: () => <div /> }));
-vi.mock('@/components/common/DiceRoller', () => ({
+vi.mock('@/components/dice/DiceRoller', () => ({
     DiceRoller: () => <div />,
 }));
 vi.mock('@/components/show/stage/ShowBattleCall', () => ({

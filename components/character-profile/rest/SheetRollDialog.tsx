@@ -9,7 +9,7 @@ import '@/components/battle/fx/fx.css';
 import {
     DiceStage,
     type DiceStageHandle,
-} from '@/components/battle/fx/dice/DiceStage';
+} from '@/components/dice/DiceStage';
 import { FormAlert } from '@/components/common/states';
 import { type SheetRollRequest, systemUiOf } from '@/components/systems';
 import { Button } from '@/components/ui/button';
