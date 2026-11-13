@@ -7,6 +7,7 @@ import { sheetFixture } from './sheet-fixture';
 import { SkillsTab } from '@/components/character-profile/SkillsTab';
 import { buildClassProgression } from '@/lib/utils/characters/classes';
 import { makeClass } from '@/lib/utils/characters/classes/__tests__/class-fixtures';
+import { parseRules } from '@/lib/utils/rules/schema';
 import type { CharacterSheet } from '@/types/characters';
 
 const current = vi.hoisted(() => ({
@@ -47,7 +48,9 @@ vi.mock('@/components/skill-tree/progression', () => ({
 }));
 vi.mock('@/lib/hooks/campaigns', async (orig) => ({
     ...(await orig<object>()),
-    useCampaignRules: () => ({ data: undefined }),
+    useCampaignRules: () => ({
+        data: parseRules({ system: { key: 'homm' } }),
+    }),
 }));
 
 const cls = makeClass({
