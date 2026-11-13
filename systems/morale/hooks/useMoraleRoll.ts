@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 
 import type { TurnGateControls } from '@/components/systems/types';
@@ -29,16 +28,6 @@ export function useMoraleRoll(
 
     const fxActive = fx.enabled && !hidden;
 
-    const lifetime = useRef<AbortController | null>(null);
-
-    useEffect(() => {
-        const controller = new AbortController();
-
-        lifetime.current = controller;
-
-        return () => controller.abort();
-    }, []);
-
     const roll = async (d10: number) => {
         let res;
 
@@ -65,7 +54,7 @@ export function useMoraleRoll(
         };
 
         if (fxActive && result !== 'none') {
-            const signal = lifetime.current?.signal;
+            const { signal } = gate;
 
             await afterMoraleDice(signal);
 

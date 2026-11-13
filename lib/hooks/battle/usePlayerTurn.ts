@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useReducer, useRef } from 'react';
+import { useEffect, useMemo, useReducer, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { turnStartDue, turnStartOutcome } from './turn-start-check';
 import { useBattleScene } from './useBattleScene';
 
+import type { TurnGateControls } from '@/components/systems/types';
 import { BattleStatus } from '@/lib/constants/battle';
 import { useConfirm } from '@/lib/hooks/common';
 import { coreActionsOn } from '@/lib/utils/battle/actions/access';
@@ -141,23 +142,35 @@ export function usePlayerTurn(
 
     const strikeAndReturn = { available: canReturn, run: returnToStart };
 
-    const gate = {
-        resolve: (result: TurnGateOutcome) =>
-            dispatch({ type: 'GATE_RESULT', result }),
-        skipTurn: () => {
-            // версія фіксується одразу: якщо DM встигне передати хід сам, таймер отримає 409, а не пропустить наступного
-            const expectedVersion = scene.readBattle()?.version;
+    const sceneRef = useRef(scene);
 
-            skipTimer.current = setTimeout(
-                () =>
-                    scene.actions.nextTurn.mutate(
-                        { expectedVersion },
-                        { onError: () => dispatch({ type: 'RECOVER' }) }
-                    ),
-                TURN_SKIP_MS
-            );
-        },
-    };
+    sceneRef.current = scene;
+
+    const gate = useMemo<TurnGateControls>(
+        () => ({
+            get signal() {
+                return lifetime.current?.signal;
+            },
+            resolve: (result: TurnGateOutcome) =>
+                dispatch({ type: 'GATE_RESULT', result }),
+            skipTurn: () => {
+                const live = sceneRef.current;
+
+                // версія фіксується одразу: якщо DM встигне передати хід сам, таймер отримає 409, а не пропустить наступного
+                const expectedVersion = live.readBattle()?.version;
+
+                skipTimer.current = setTimeout(
+                    () =>
+                        live.actions.nextTurn.mutate(
+                            { expectedVersion },
+                            { onError: () => dispatch({ type: 'RECOVER' }) }
+                        ),
+                    TURN_SKIP_MS
+                );
+            },
+        }),
+        []
+    );
 
     return {
         phase: state.phase,

@@ -185,6 +185,8 @@ export interface BattleBadgeProps {
 }
 
 export interface TurnGateControls {
+    /** Aborts when the whole player turn unmounts, not just the gate panel */
+    readonly signal?: AbortSignal;
     resolve(outcome: TurnGateOutcome): void;
     skipTurn(): void;
 }
