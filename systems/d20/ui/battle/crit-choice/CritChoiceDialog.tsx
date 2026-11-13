@@ -5,16 +5,18 @@ import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
-import type { useCritChoiceDialog } from '@/lib/hooks/battle';
 import { dynamicTextRef } from '@/lib/i18n/text-ref';
 import { useText } from '@/lib/i18n/use-text';
 import type { CritTrigger } from '@/lib/utils/battle/crit-choice/types';
+import { useCritChoiceDialog } from '@/systems/d20/hooks/battle/useCritChoiceDialog';
 
 type Dialog = ReturnType<typeof useCritChoiceDialog>;
 
 type Choice = number | 'random';
 
-export function CritChoiceDialog({ dialog }: { dialog: Dialog }) {
+export function CritChoiceDialog() {
+    const dialog = useCritChoiceDialog();
+
     return dialog.open ? <CritChoiceForm dialog={dialog} /> : null;
 }
 

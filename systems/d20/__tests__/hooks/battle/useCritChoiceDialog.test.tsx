@@ -2,11 +2,10 @@
 import { act, renderHook } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { useCritChoiceDialog } from '../useCritChoiceDialog';
-import { fakeScene } from './fake-scene';
-
+import { fakeScene } from '@/lib/hooks/battle/__tests__/fake-scene';
 import { critEffectsFor } from '@/lib/utils/battle/crit-choice/catalog';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { useCritChoiceDialog } from '@/systems/d20/hooks/battle/useCritChoiceDialog';
 
 const pending = {
     action: 'attack' as const,

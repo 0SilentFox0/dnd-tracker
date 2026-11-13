@@ -38,7 +38,6 @@ export {
     useCoreActions,
     useReadiedAttack,
 } from './useCoreActions';
-export { type CritChoiceRow, useCritChoiceDialog } from './useCritChoiceDialog';
 export { useDmCaster } from './useDmCaster';
 export {
     type DmParticipantActions,

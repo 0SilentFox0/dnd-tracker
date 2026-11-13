@@ -1,3 +1,5 @@
+import { CritChoiceDialog } from './battle/crit-choice/CritChoiceDialog';
+import { CritChoiceWaitingBanner } from './battle/crit-choice/CritChoiceWaitingBanner';
 import { DeathSaveBadge } from './battle/DeathSaveBadge';
 import { d20Defense } from './battle/defense';
 import { HeroStats as BattleHeroStats } from './battle/HeroStats';
@@ -29,6 +31,8 @@ export const D20_MODULE_UI: SystemUi = {
         ParticipantStats,
         heroPanels: [SpellSlotsPanel],
         badges: [DeathSaveBadge],
+        dialogs: [CritChoiceDialog],
+        notices: [CritChoiceWaitingBanner],
     },
     rulesSections: {
         criticals: CriticalsSection,
