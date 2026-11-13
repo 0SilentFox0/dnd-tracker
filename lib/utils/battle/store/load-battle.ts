@@ -203,9 +203,9 @@ export async function loadBattle(
     const membership = row.campaign.members[0];
 
     const rules = parseRulesCached(
-        row.status === BattleStatus.PREPARED
-            ? await loadCampaignRules(db, args)
-            : (row.rules ?? {})
+        row.status !== BattleStatus.PREPARED && row.rules
+            ? row.rules
+            : await loadCampaignRules(db, args)
     );
 
     const all = (await withSnapshots(db, row.battleParticipants)).map((p) => ({

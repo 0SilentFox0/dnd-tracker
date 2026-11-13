@@ -1,5 +1,5 @@
 import { CharacterClassesSchema } from '@/lib/schemas/classes';
-import { parseRules } from '@/lib/utils/rules/schema';
+import { safeParseRules } from '@/lib/utils/rules/schema';
 import { ruleSystemOf } from '@/lib/utils/rules/systems/registry';
 import { statColumnsOf } from '@/lib/utils/rules/systems/stats';
 
@@ -49,7 +49,11 @@ export const exposedCampaignIds = (
     new Set(
         campaigns
             .filter(({ rules }) => {
-                const columns = statColumnsOf(ruleSystemOf(parseRules(rules)));
+                const parsed = safeParseRules(rules);
+
+                if (!parsed.ok) return false;
+
+                const columns = statColumnsOf(ruleSystemOf(parsed.rules));
 
                 return columns.has('classes') && !columns.has('archetype');
             })
@@ -64,10 +68,15 @@ export function classlessD20Characters(
     const exposed = exposedCampaignIds(campaigns);
 
     const enabled = new Map(
-        campaigns.map(({ id, rules }) => [
-            id,
-            parseRules(rules).classes.enabled,
-        ])
+        campaigns.map(({ id, rules }) => {
+            const parsed = safeParseRules(rules);
+
+            if (!parsed.ok) return [id, false] as const;
+
+            const { classes: classRules } = parsed.rules;
+
+            return [id, classRules.enabled] as const;
+        })
     );
 
     const idsByCampaign = new Map<string, Set<string>>();
