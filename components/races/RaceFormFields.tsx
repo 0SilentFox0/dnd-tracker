@@ -12,7 +12,7 @@ import { ChoiceListEditor } from '@/components/choices/ChoiceListEditor';
 import { ColorField } from '@/components/common/ColorField';
 import { HudSection, type HudTab, HudTabs } from '@/components/hud/form';
 import { useRevealInvalidTab } from '@/components/hud/form/reveal-invalid-tab';
-import { ImageUpload } from '@/components/ui/image-upload';
+import { ImageUpload } from '@/components/common/ImageUpload';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';

@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { CharacterBasicInfo } from '@/components/characters/basic/CharacterBasicInfo';
 import { defaultCharacterFormData } from '@/lib/utils/characters/form/defaults';
 
-vi.mock('@/components/ui/image-upload', () => ({
+vi.mock('@/components/common/ImageUpload', () => ({
     ImageUpload: () => <span />,
 }));
 

@@ -21,7 +21,7 @@ vi.mock('@/systems/wfrp/api/characters', () => ({
     updateWfrpDraftIdentity: vi.fn(),
 }));
 
-vi.mock('@/components/ui/image-upload', () => ({ ImageUpload: () => null }));
+vi.mock('@/components/common/ImageUpload', () => ({ ImageUpload: () => null }));
 
 vi.mock('@/components/ui/select-field', () => ({
     SelectField: ({

@@ -10,7 +10,7 @@ import { MAP_MODE_UI, type MapModeUi } from '@/components/battle/modes';
 import { HudSection } from '@/components/hud/form';
 import { BoundedNumberInput } from '@/components/ui/bounded-number-input';
 import { Button } from '@/components/ui/button';
-import { ImageUpload } from '@/components/ui/image-upload';
+import { ImageUpload } from '@/components/common/ImageUpload';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { SelectField } from '@/components/ui/select-field';

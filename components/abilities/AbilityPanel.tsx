@@ -17,7 +17,7 @@ import type { FlowPart } from './flow-part';
 import { useAbilityText } from './use-ability-text';
 
 import { Button } from '@/components/ui/button';
-import { ImageUpload } from '@/components/ui/image-upload';
+import { ImageUpload } from '@/components/common/ImageUpload';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
