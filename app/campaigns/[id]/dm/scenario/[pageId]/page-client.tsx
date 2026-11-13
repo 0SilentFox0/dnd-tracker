@@ -5,10 +5,6 @@ import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
 import { BookOpen, ChevronsUpDown, History, Moon, Sun } from 'lucide-react';
 
-import { ScenarioAiPanel } from './scenario-ai-panel';
-import { ScenarioPageActions } from './scenario-page-actions';
-import { ScenarioPageContent } from './scenario-page-content';
-
 import type { ActionsMenuItem } from '@/components/common/ActionsMenu';
 import { LoadingState, QueryState } from '@/components/common/states';
 import {
@@ -17,6 +13,9 @@ import {
     type TocControl,
 } from '@/components/scenario';
 import { VersionsDialog } from '@/components/scenario/editor/VersionsDialog';
+import { ScenarioAiPanel } from '@/components/scenario/page/ScenarioAiPanel';
+import { ScenarioPageActions } from '@/components/scenario/page/ScenarioPageActions';
+import { ScenarioPageContent } from '@/components/scenario/page/ScenarioPageContent';
 import { ScenarioShowDock } from '@/components/scenario/play/ScenarioShowDock';
 import { useMediaQuery } from '@/lib/hooks/common';
 import {
