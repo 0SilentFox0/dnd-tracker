@@ -69,6 +69,7 @@
   "choiceUnknown": "Вибір не знайдено{detail}",
   "choiceCount": "Забагато виборів{detail}",
   "choiceDuplicate": "Вибір повторюється{detail}",
+  "choiceIncomplete": "Не всі вибори зроблено{detail}",
   "choiceLocked": "Цей вибір відкривається на вищому рівні — його не можна змінити{detail}",
   "choiceMinLevel": "Опція доступна з вищого рівня{detail}",
   "choiceRequires": "Опція потребує іншої опції{detail}",

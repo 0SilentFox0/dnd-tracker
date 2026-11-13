@@ -404,6 +404,7 @@ export function PlayerDraftForm({
                                 <ChoicesEditor
                                     state={choices}
                                     refs={refs}
+                                    issues={submit.choiceIssues}
                                     hero={{
                                         level: 1,
                                         scores: {

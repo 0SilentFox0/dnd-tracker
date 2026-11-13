@@ -66,6 +66,7 @@ export const API_ERRORS = {
     CHOICE_COUNT: 'errors.choiceCount',
     CHOICE_DUPLICATE: 'errors.choiceDuplicate',
     CHOICE_LOCKED: 'errors.choiceLocked',
+    CHOICE_INCOMPLETE: 'errors.choiceIncomplete',
     CHOICE_MIN_LEVEL: 'errors.choiceMinLevel',
     CHOICE_REQUIRES: 'errors.choiceRequires',
     FEAT_TYPE: 'errors.featType',

@@ -186,6 +186,7 @@
     "removeGoal": "Видалити ціль",
     "defaultHeroName": "Герой",
     "raceRequired": "Оберіть расу",
+    "choicesIncomplete": "Зробіть усі обов'язкові вибори",
     "backstoryFailed": "Не вдалося згенерувати передісторію",
     "avatarFailed": "Не вдалося згенерувати аватар",
     "scores": {

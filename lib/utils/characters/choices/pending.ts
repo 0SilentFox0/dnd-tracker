@@ -1,8 +1,14 @@
+import { choiceIssue } from '@/lib/utils/characters/choices/validate';
 import type {
     ChoiceRefs,
     PickVisit,
 } from '@/lib/utils/characters/choices/walk';
-import type { Choice, ChoicePick, FeatData } from '@/types/choices';
+import type {
+    Choice,
+    ChoiceIssue,
+    ChoicePick,
+    FeatData,
+} from '@/types/choices';
 
 export function resolvedPickCount(
     choice: Choice,
@@ -36,13 +42,21 @@ const unreachable = (v: PickVisit): boolean => {
     );
 };
 
+const missing = (v: PickVisit, refs: Pick<ChoiceRefs, 'featsById'>): number =>
+    v.open && !unreachable(v) ? Math.max(0, v.target - resolved(v, refs)) : 0;
+
 export const pendingCount = (
     visits: readonly PickVisit[],
     refs: Pick<ChoiceRefs, 'featsById'>
-): number =>
+): number => visits.reduce((sum, v) => sum + missing(v, refs), 0);
+
+export const pendingIssues = (
+    visits: readonly PickVisit[],
+    refs: Pick<ChoiceRefs, 'featsById'>
+): ChoiceIssue[] =>
     visits
-        .filter((v) => v.open && !unreachable(v))
-        .reduce((sum, v) => sum + Math.max(0, v.target - resolved(v, refs)), 0);
+        .filter((v) => missing(v, refs) > 0)
+        .map((v) => choiceIssue(v.path, 'CHOICE_INCOMPLETE', v.choice.label));
 
 const isBackgroundVisit = (v: PickVisit): boolean =>
     v.path.startsWith('backgroundChoices.') ||

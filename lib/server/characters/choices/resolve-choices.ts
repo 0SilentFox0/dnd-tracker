@@ -36,6 +36,7 @@ export async function resolveCharacterChoices(input: {
     campaignId: string;
     rules: Ruleset;
     isDM: boolean;
+    requireComplete?: boolean;
     character: { race: string; level: number; skills: unknown } & Record<
         AbilityKey,
         number
@@ -74,6 +75,7 @@ export async function resolveCharacterChoices(input: {
         level: input.character.level,
         scores,
         skills: input.character.skills,
+        requireComplete: input.requireComplete,
     });
 
     if (!plan.ok)

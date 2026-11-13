@@ -15,7 +15,7 @@ vi.mock('@/lib/supabase/avatar-storage', () => ({
     })),
 }));
 vi.mock('../../../draft/draft-choices', () => ({
-    draftChoiceFields: vi.fn(async () => null),
+    draftChoiceFields: vi.fn(async () => ({ ok: true, fields: {} })),
 }));
 vi.mock('@/lib/server/characters/core/derive-character-defaults', () => ({
     deriveCharacterDefaults: vi.fn(async () => ({ spellSlots: {} })),
@@ -94,6 +94,18 @@ describe('updateDraft keeps stored picks when the form sends none', () => {
         expect(
             vi.mocked(draftChoiceFields).mock.calls[0][0].data.choices
         ).toEqual({ raceChoices: { l: [{ id: 'drow' }] }, feats: [] });
+    });
+
+    it('incomplete choices: the rejection response is returned and nothing is saved', async () => {
+        vi.mocked(draftChoiceFields).mockResolvedValueOnce({
+            ok: false,
+            response: Response.json({ error: 'x' }, { status: 422 }) as never,
+        });
+
+        const res = await put(body);
+
+        expect(res.status).toBe(422);
+        expect(prisma.character.update).not.toHaveBeenCalled();
     });
 
     it('changed race: old race picks are dropped', async () => {

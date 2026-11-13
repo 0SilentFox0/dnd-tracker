@@ -80,7 +80,7 @@ export async function createDraft(
         classesById: parsed.asClass?.classesById,
     });
 
-    if (choices && !choices.ok) return choices.response;
+    if (!choices.ok) return choices.response;
 
     const spellSlots =
         asClass?.spellSlots ??
@@ -109,7 +109,7 @@ export async function createDraft(
                 controlledBy: access.userId,
                 level: 1,
                 ...asClass?.fields,
-                ...(choices?.ok && choices.fields),
+                ...choices.fields,
                 initiative: heroInitiativeRange(campaign.rules).min,
                 avatar: avatar.avatar ?? undefined,
                 spellSlots,

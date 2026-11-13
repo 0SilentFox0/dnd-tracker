@@ -22,13 +22,12 @@ export async function draftChoiceFields(input: {
 }): Promise<
     | { ok: true; fields: ChoiceFields }
     | { ok: false; response: NextResponse }
-    | null
 > {
     const { data } = input;
 
-    if (!data.choices) return null;
+    const choices = data.choices ?? {};
 
-    const classChoices = data.choices.classChoices;
+    const classChoices = choices.classChoices;
 
     const pool = new Set<string>([
         ...skillFlags(input.storedSkills),
@@ -51,6 +50,7 @@ export async function draftChoiceFields(input: {
         campaignId: input.campaignId,
         rules: input.rules,
         isDM: false,
+        requireComplete: true,
         character: {
             race: data.race,
             level: 1,
@@ -64,9 +64,9 @@ export async function draftChoiceFields(input: {
         },
         before: { raceChoices: {}, feats: [], classes: [] },
         after: {
-            ...backgroundFields(data.choices),
-            raceChoices: data.choices.raceChoices ?? {},
-            feats: (data.choices.feats ?? []).filter(
+            ...backgroundFields(choices),
+            raceChoices: choices.raceChoices ?? {},
+            feats: (choices.feats ?? []).filter(
                 (f) => f.source === 'origin'
             ),
             classes,

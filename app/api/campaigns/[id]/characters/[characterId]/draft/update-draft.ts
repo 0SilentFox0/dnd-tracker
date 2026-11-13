@@ -94,7 +94,7 @@ export async function updateDraft(
         storedSkills: character.skills,
     });
 
-    if (choices && !choices.ok) return choices.response;
+    if (!choices.ok) return choices.response;
 
     const raceChanged = data.race !== character.race;
 
@@ -114,7 +114,7 @@ export async function updateDraft(
         data: {
             ...draftFields(data, campaign.rules, character.goals),
             ...asClass?.fields,
-            ...(choices?.ok && choices.fields),
+            ...choices.fields,
             avatar: avatar.avatar,
             ...(slots && { spellSlots: slots }),
         },

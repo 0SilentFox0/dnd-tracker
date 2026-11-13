@@ -199,6 +199,7 @@ describe('usePlayerDraftForm', () => {
                 raceChoices: {
                     'old-race-choice': [{ id: 'x' }],
                     'elven-lineage': [{ id: 'drow' }],
+                    'keen-senses': [{ id: 'insight' }],
                 },
                 feats: [],
                 classes: [],
@@ -209,7 +210,29 @@ describe('usePlayerDraftForm', () => {
         await waitFor(() => expect(createDraft).toHaveBeenCalled());
         expect(
             vi.mocked(createDraft).mock.calls[0][1].choices?.raceChoices
-        ).toEqual({ 'elven-lineage': [{ id: 'drow' }] });
+        ).toEqual({
+            'elven-lineage': [{ id: 'drow' }],
+            'keen-senses': [{ id: 'insight' }],
+        });
+    });
+
+    it('submit with an open choice returns choiceIssues and does not call the API', () => {
+        classMode.value = { enabled: false, classes: [], pending: false };
+        vi.mocked(createDraft).mockClear();
+
+        const { result } = setup();
+
+        act(() => result.current.form.set('race', 'Люди'));
+        act(() => result.current.submit.run(refs));
+
+        expect(result.current.submit.choiceIssues.map((i) => i.path)).toEqual([
+            'raceChoices.elven-lineage',
+            'raceChoices.keen-senses',
+        ]);
+        expect(result.current.submit.error).toBe(
+            'characters.draft.choicesIncomplete'
+        );
+        expect(createDraft).not.toHaveBeenCalled();
     });
 
     it('submit без раси дає ключ помилки й не викликає API', () => {

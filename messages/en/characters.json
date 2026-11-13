@@ -186,6 +186,7 @@
     "removeGoal": "Delete goal",
     "defaultHeroName": "Hero",
     "raceRequired": "Choose a race",
+    "choicesIncomplete": "Make all the required choices",
     "backstoryFailed": "Could not generate the backstory",
     "avatarFailed": "Could not generate the avatar",
     "scores": {

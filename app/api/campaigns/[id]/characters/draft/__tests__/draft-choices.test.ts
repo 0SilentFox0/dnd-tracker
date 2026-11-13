@@ -14,6 +14,7 @@ vi.mock('@/lib/server/characters/choices/load-refs', () => ({
 
 import { draftChoiceFields } from '../draft-choices';
 
+import { loadChoiceRefs } from '@/lib/server/characters/choices/load-refs';
 import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
 
 const data = {
@@ -31,15 +32,49 @@ const data = {
 const rules = { ...DEFAULT_RULES, classes: { enabled: true } };
 
 describe('draftChoiceFields', () => {
-    it('null without choices; class picks go to the starting class; dm feats are dropped', async () => {
-        expect(
-            await draftChoiceFields({
-                campaignId: 'c1',
-                rules,
-                data,
-                classes: [],
-            })
-        ).toBeNull();
+    it('without choices a race with required picks is rejected with 422', async () => {
+        const result = await draftChoiceFields({
+            campaignId: 'c1',
+            rules,
+            data,
+            classes: [],
+        });
+
+        expect(!result.ok && result.response.status).toBe(422);
+    });
+
+    it('no choices needed: race and class without choice defs pass', async () => {
+        vi.mocked(loadChoiceRefs).mockResolvedValueOnce({
+            ...refs,
+            race: null,
+        });
+
+        const result = await draftChoiceFields({
+            campaignId: 'c1',
+            rules,
+            data: { ...data, race: 'Orc' },
+            classes: [],
+        });
+
+        expect(result).toMatchObject({ ok: true });
+    });
+
+    it('class picks go to the starting class; dm feats are dropped', async () => {
+        const lite = {
+            ...sorcerer,
+            columns: [],
+            features: [
+                {
+                    ...sorcerer.features[0],
+                    choices: [{ ...sorcerer.features[0].choices[0], count: 1 }],
+                },
+            ],
+        };
+
+        vi.mocked(loadChoiceRefs).mockResolvedValueOnce({
+            ...refs,
+            classesById: { [sorcerer.id]: lite },
+        });
 
         const result = await draftChoiceFields({
             campaignId: 'c1',
@@ -47,7 +82,10 @@ describe('draftChoiceFields', () => {
             data: {
                 ...data,
                 choices: {
-                    raceChoices: { 'elven-lineage': [{ id: 'drow' }] },
+                    raceChoices: {
+                        'elven-lineage': [{ id: 'drow' }],
+                        'keen-senses': [{ id: 'insight' }],
+                    },
                     feats: [
                         { id: 'f-alert', source: 'origin' },
                         { id: 'f-archery', source: 'dm' },
@@ -85,7 +123,7 @@ describe('draftChoiceFields', () => {
             classes: [],
         });
 
-        expect(result && !result.ok && result.response.status).toBe(422);
+        expect(!result.ok && result.response.status).toBe(422);
     });
 
     it('expertise passes for a skill from the class pool, fails outside it', async () => {
@@ -96,6 +134,11 @@ describe('draftChoiceFields', () => {
             },
         };
 
+        const elfPicks = {
+            'elven-lineage': [{ id: 'drow' }],
+            'keen-senses': [{ id: 'insight' }],
+        };
+
         const run = (skill: string) =>
             draftChoiceFields({
                 campaignId: 'c1',
@@ -103,15 +146,17 @@ describe('draftChoiceFields', () => {
                 data: {
                     ...data,
                     choices: {
-                        raceChoices: {},
-                        classChoices: { 'expertise-1': [{ id: skill }] },
+                        raceChoices: elfPicks,
+                        classChoices: {
+                            'expertise-1': [{ id: skill }, { id: 'acrobatics' }],
+                        },
                     },
                 },
                 classes: [{ classId: rogue.id, level: 1 }],
                 classesById,
             });
 
-        expect((await run('stealth'))?.ok).toBe(true);
+        expect((await run('stealth')).ok).toBe(true);
         expect(((await run('arcana')) as { ok: boolean }).ok).toBe(false);
     });
 });

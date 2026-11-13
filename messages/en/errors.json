@@ -69,6 +69,7 @@
   "choiceUnknown": "Choice not found{detail}",
   "choiceCount": "Too many choices{detail}",
   "choiceDuplicate": "Duplicate choice{detail}",
+  "choiceIncomplete": "Not all choices are made{detail}",
   "choiceLocked": "This choice opens at a higher level — it cannot be changed{detail}",
   "choiceMinLevel": "Option available from a higher level{detail}",
   "choiceRequires": "Option requires another option{detail}",

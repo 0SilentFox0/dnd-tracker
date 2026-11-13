@@ -128,6 +128,7 @@ export type ChoiceErrorCode =
     | 'CHOICE_COUNT'
     | 'CHOICE_DUPLICATE'
     | 'CHOICE_LOCKED'
+    | 'CHOICE_INCOMPLETE'
     | 'CHOICE_MIN_LEVEL'
     | 'CHOICE_REQUIRES'
     | 'FEAT_TYPE'

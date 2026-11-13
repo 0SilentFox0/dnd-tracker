@@ -350,3 +350,52 @@ describe('planChoices', () => {
         ).toBe('CHOICE_UNKNOWN');
     });
 });
+
+describe('planChoices requireComplete', () => {
+    const complete = {
+        raceChoices: {
+            'elven-lineage': [{ id: 'drow' }],
+            'keen-senses': [{ id: 'insight' }],
+        },
+    };
+
+    it('shortfall is rejected with 422 CHOICE_INCOMPLETE', () => {
+        const res = planChoices(
+            input(
+                {},
+                { raceChoices: { 'elven-lineage': [{ id: 'drow' }] } },
+                { classMode: false, level: 1, requireComplete: true }
+            )
+        );
+
+        expect(res).toMatchObject({
+            ok: false,
+            status: 422,
+            code: 'CHOICE_INCOMPLETE',
+        });
+    });
+
+    it('without the flag the same shortfall passes (DM and level-up)', () => {
+        expect(
+            planChoices(
+                input(
+                    {},
+                    { raceChoices: { 'elven-lineage': [{ id: 'drow' }] } },
+                    { classMode: false, level: 1 }
+                )
+            ).ok
+        ).toBe(true);
+    });
+
+    it('a complete set passes with the flag', () => {
+        expect(
+            planChoices(
+                input({}, complete, {
+                    classMode: false,
+                    level: 1,
+                    requireComplete: true,
+                })
+            ).ok
+        ).toBe(true);
+    });
+});

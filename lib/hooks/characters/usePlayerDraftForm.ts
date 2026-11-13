@@ -23,12 +23,16 @@ import { HERO_ARCHETYPE_KEYS } from '@/lib/constants/hero-archetypes';
 import { useClassMode } from '@/lib/hooks/classes';
 import { useRaces } from '@/lib/hooks/races';
 import type { Locale } from '@/lib/i18n/config';
+import { pendingIssues } from '@/lib/utils/characters/choices/pending';
 import {
     draftChoicesState,
     stateDraftChoices,
 } from '@/lib/utils/characters/choices/picks';
 import { prunePicks } from '@/lib/utils/characters/choices/prune';
-import type { ChoiceRefs } from '@/lib/utils/characters/choices/walk';
+import {
+    type ChoiceRefs,
+    visitPicks,
+} from '@/lib/utils/characters/choices/walk';
 import { classModeOf } from '@/lib/utils/characters/classes';
 import {
     type AbilityMethod,
@@ -49,7 +53,7 @@ import {
     validateAbilityScores,
 } from '@/lib/utils/characters/generate';
 import type { DraftInput } from '@/types/characters';
-import type { ChoicesState } from '@/types/choices';
+import type { ChoiceIssue, ChoicesState } from '@/types/choices';
 
 export type { RollKey };
 
@@ -430,9 +434,33 @@ export function usePlayerDraftForm({
 
     const [validationError, setValidationError] = useState<string | null>(null);
 
+    const [choiceIssues, setChoiceIssues] = useState<ChoiceIssue[]>([]);
+
     const run = (refs?: ChoiceRefs) => {
         if (!values.race) {
             setValidationError(t('raceRequired'));
+
+            return;
+        }
+
+        const issues = refs
+            ? pendingIssues(
+                  visitPicks(
+                      draftChoicesState(
+                          values.choices,
+                          classBased ? values.classId : undefined
+                      ),
+                      refs,
+                      { level: 1, classMode: classBased && !!values.classId }
+                  ),
+                  refs
+              )
+            : [];
+
+        setChoiceIssues(issues);
+
+        if (issues.length > 0) {
+            setValidationError(t('choicesIncomplete'));
 
             return;
         }
@@ -505,6 +533,7 @@ export function usePlayerDraftForm({
         ai,
         submit: {
             run,
+            choiceIssues,
             isPending: submitMutation.isPending,
             error:
                 validationError ??

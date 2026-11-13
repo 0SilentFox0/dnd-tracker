@@ -6,6 +6,7 @@ import {
     applyDelta,
     capIssues,
 } from '@/lib/utils/characters/choices/ability';
+import { pendingIssues } from '@/lib/utils/characters/choices/pending';
 import { lineageName } from '@/lib/utils/characters/choices/picks';
 import { hasPicks } from '@/lib/utils/characters/choices/read';
 import {
@@ -39,6 +40,7 @@ export interface PlanInput {
     level: number;
     scores: Record<AbilityKey, number>;
     skills: unknown;
+    requireComplete?: boolean;
 }
 
 export type PlanResult =
@@ -276,6 +278,9 @@ export function planChoices(input: PlanInput): PlanResult {
     const delta = abilityScoreDelta(beforePicks, afterPicks);
 
     issues.push(...capIssues(input.scores, delta, afterPicks, beforePicks));
+
+    if (issues.length === 0 && input.requireComplete)
+        issues.push(...pendingIssues(visits, refs));
 
     if (issues.length > 0) return failWith(422, issues);
 

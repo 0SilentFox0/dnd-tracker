@@ -5,6 +5,7 @@ import { empty, refs, sorcerer } from './fixtures';
 import {
     backgroundOpenCount,
     pendingCount,
+    pendingIssues,
 } from '@/lib/utils/characters/choices/pending';
 import { visitPicks } from '@/lib/utils/characters/choices/walk';
 import type { ChoicesState } from '@/types/choices';
@@ -212,5 +213,87 @@ describe('backgroundOpenCount', () => {
                 ...sorc(1),
             })
         ).toEqual({ count: 1, key: 'backgroundChoices.bg-skill' });
+    });
+});
+
+describe('pendingIssues', () => {
+    const issues = (state: Partial<ChoicesState>, level: number, mode = true) =>
+        pendingIssues(
+            visitPicks({ ...empty, ...state }, refs, {
+                level,
+                classMode: mode,
+            }),
+            refs
+        );
+
+    it('race and class shortfalls give their paths', () => {
+        const paths = issues(
+            { raceChoices: { 'elven-lineage': [{ id: 'drow' }] }, ...sorc(1) },
+            1
+        ).map((i) => i.path);
+
+        expect(paths).toContain('raceChoices.keen-senses');
+        expect(paths).toContain(`classes.${sorcerer.id}.cantrips`);
+        expect(paths).not.toContain('raceChoices.elven-lineage');
+    });
+
+    it('a nested feat choice is reported', () => {
+        const nested = issues(
+            {
+                feats: [{ id: 'f-asi', source: 'dm' }],
+                raceChoices: {
+                    'elven-lineage': [{ id: 'drow' }],
+                    'keen-senses': [{ id: 'insight' }],
+                },
+            },
+            1
+        );
+
+        expect(nested.some((i) => /^feats\.0\./.test(i.path))).toBe(true);
+    });
+
+    it('an unreachable spell choice is skipped; a full set is empty', () => {
+        const high = {
+            ...sorcerer,
+            features: [
+                {
+                    ...sorcerer.features[0],
+                    choices: [
+                        {
+                            ...sorcerer.features[0].choices[1],
+                            id: 'high',
+                            spells: {
+                                lists: ['Sorcerer'],
+                                minLevel: 9,
+                                maxLevel: 'slots' as const,
+                            },
+                        },
+                    ],
+                },
+            ],
+        };
+
+        const paths = pendingIssues(
+            visitPicks(
+                { ...empty, ...sorc(1) },
+                { ...refs, race: null, classesById: { [sorcerer.id]: high } },
+                { level: 1, classMode: true }
+            ),
+            refs
+        ).map((i) => i.path);
+
+        expect(paths.some((p) => p.endsWith('.high'))).toBe(false);
+        expect(
+            issues(
+                {
+                    raceChoices: {
+                        'elven-lineage': [{ id: 'drow' }],
+                        'keen-senses': [{ id: 'insight' }],
+                    },
+                },
+                1,
+                false
+            )
+        ).toEqual([]);
     });
 });
