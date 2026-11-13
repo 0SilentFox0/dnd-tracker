@@ -19,7 +19,7 @@ import { CharacterArtifactsSection } from '@/components/characters/artifacts/Cha
 import { CharacterSkillsSection } from '@/components/characters/skills/CharacterSkillsSection';
 import { SystemFormFields } from '@/components/characters/stats/SystemFormFields';
 import { CharacterChoicesPanel } from '@/components/choices/CharacterChoicesPanel';
-import { ActionBar } from '@/components/common/ActionBar';
+import { ActionBar } from '@/components/ui/action-bar';
 import { FormAlert } from '@/components/common/states';
 import { LoadingState } from '@/components/common/states';
 import { systemUiOf } from '@/components/systems';

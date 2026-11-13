@@ -12,7 +12,7 @@ import { CompendiumRunsList } from './CompendiumRunsList';
 import { CompendiumSteps } from './CompendiumSteps';
 import { RulesPatchOffer } from './RulesPatchOffer';
 
-import { ActionBar } from '@/components/common/ActionBar';
+import { ActionBar } from '@/components/ui/action-bar';
 import { HudPage, HudPageHeader, HudPanel } from '@/components/hud/page';
 import { OnboardingHint } from '@/components/onboarding/OnboardingHint';
 import { Button } from '@/components/ui/button';

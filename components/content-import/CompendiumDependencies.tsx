@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 
-import { ActionBar } from '@/components/common/ActionBar';
+import { ActionBar } from '@/components/ui/action-bar';
 import { PagerNav } from '@/components/common/PagerNav';
 import { HudPill } from '@/components/hud/page';
 import { Button } from '@/components/ui/button';

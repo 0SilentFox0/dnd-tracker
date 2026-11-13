@@ -2,7 +2,7 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { ActionBar } from '@/components/common/ActionBar';
+import { ActionBar } from '@/components/ui/action-bar';
 
 describe('ActionBar', () => {
     afterEach(cleanup);
