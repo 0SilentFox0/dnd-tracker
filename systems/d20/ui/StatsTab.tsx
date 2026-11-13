@@ -38,7 +38,7 @@ export function StatsTab({ section, onRoll, canRoll }: StatsTabProps) {
     if (section === 'top') {
         return (
             <HudSection title={t('abilities')}>
-                <div className="grid grid-cols-6 gap-1">
+                <div className="grid grid-cols-3 gap-1 sm:grid-cols-6">
                     {sheet.abilities.map((a) => (
                         <div
                             key={a.key}
