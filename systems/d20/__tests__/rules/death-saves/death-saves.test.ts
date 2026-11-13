@@ -24,7 +24,10 @@ import {
     rollDeathSave,
 } from '@/systems/d20/rules/death-saves/roll';
 import { startDying } from '@/systems/d20/rules/death-saves/start';
-import { clearDeathSaves } from '@/systems/d20/rules/death-saves/state';
+import {
+    clearDeathSaves,
+    deathSavesOf,
+} from '@/systems/d20/rules/death-saves/state';
 import type { BattleParticipant } from '@/types/battle';
 
 const on: Ruleset = {
@@ -64,17 +67,41 @@ const hit = (
 
 const dying = (id = 'hero') => startDying(hero({ currentHp: 0 }, id), on);
 
+/** The pre-slot flat form of the counters (dual-read) */
+const withSaves = (
+    p: BattleParticipant,
+    deathSaves: NonNullable<BattleParticipant['battleData']['deathSaves']>
+): BattleParticipant => ({
+    ...p,
+    battleData: {
+        ...p.battleData,
+        system: undefined,
+        deathSaves,
+    },
+});
+
 describe('startDying', () => {
     it('sets unconscious state and zeroed counters', () => {
         const p = dying();
 
         expect(p.combatStats.status).toBe(CombatStatus.UNCONSCIOUS);
         expect(hasCondition(p, 'unconscious')).toBe(true);
-        expect(p.battleData.deathSaves).toEqual({
+        expect(deathSavesOf(p)).toEqual({
             successes: 0,
             failures: 0,
             stable: false,
         });
+    });
+
+    it('keeps the counters in the d20 slot and raises the neutral dying flag', () => {
+        const p = dying();
+
+        expect(p.battleData.system).toEqual({
+            key: 'd20',
+            data: { deathSaves: { successes: 0, failures: 0, stable: false } },
+        });
+        expect(p.battleData.dying).toBe(true);
+        expect(p.battleData).not.toHaveProperty('deathSaves');
     });
 });
 
@@ -83,7 +110,7 @@ describe('damage consequences', () => {
         const r = hit(hero({ currentHp: 5 }), 7);
 
         expect(r.participant.combatStats.status).toBe(CombatStatus.UNCONSCIOUS);
-        expect(r.participant.battleData.deathSaves).toEqual({
+        expect(deathSavesOf(r.participant)).toEqual({
             successes: 0,
             failures: 0,
             stable: false,
@@ -103,23 +130,19 @@ describe('damage consequences', () => {
     it('damage at 0 HP adds a failure, crit adds two, three kill, and it breaks stability', () => {
         const one = hit(dying(), 3);
 
-        expect(one.participant.battleData.deathSaves?.failures).toBe(1);
+        expect(deathSavesOf(one.participant)?.failures).toBe(1);
 
         const crit = hit(dying(), 3, true);
 
-        expect(crit.participant.battleData.deathSaves?.failures).toBe(2);
+        expect(deathSavesOf(crit.participant)?.failures).toBe(2);
 
-        const stable = {
-            ...dying(),
-            battleData: {
-                ...dying().battleData,
-                deathSaves: { successes: 3, failures: 0, stable: true },
-            },
-        };
+        const stable = withSaves(dying(), {
+            successes: 3,
+            failures: 0,
+            stable: true,
+        });
 
-        expect(hit(stable, 1).participant.battleData.deathSaves?.stable).toBe(
-            false
-        );
+        expect(deathSavesOf(hit(stable, 1).participant)?.stable).toBe(false);
 
         const twice = hit(hit(dying(), 3).participant, 3, true);
 
@@ -129,7 +152,7 @@ describe('damage consequences', () => {
     it('does nothing special when the rule is off', () => {
         const r = hit(hero({ currentHp: 5 }), 7, false, DEFAULT_RULES);
 
-        expect(r.participant.battleData.deathSaves).toBeUndefined();
+        expect(deathSavesOf(r.participant)).toBeUndefined();
         expect(hasCondition(r.participant, 'unconscious')).toBe(false);
     });
 });
@@ -137,13 +160,13 @@ describe('damage consequences', () => {
 describe('rollDeathSave', () => {
     it('10 succeeds, 9 fails, 1 fails twice', () => {
         expect(
-            rollDeathSave(dying(), rollOf(10)).participant.battleData.deathSaves
+            deathSavesOf(rollDeathSave(dying(), rollOf(10)).participant)
         ).toMatchObject({ successes: 1, failures: 0 });
         expect(
-            rollDeathSave(dying(), rollOf(9)).participant.battleData.deathSaves
+            deathSavesOf(rollDeathSave(dying(), rollOf(9)).participant)
         ).toMatchObject({ successes: 0, failures: 1 });
         expect(
-            rollDeathSave(dying(), rollOf(1)).participant.battleData.deathSaves
+            deathSavesOf(rollDeathSave(dying(), rollOf(1)).participant)
         ).toMatchObject({ failures: 2 });
     });
 
@@ -154,7 +177,8 @@ describe('rollDeathSave', () => {
             currentHp: 1,
             status: CombatStatus.ACTIVE,
         });
-        expect(participant.battleData.deathSaves).toBeUndefined();
+        expect(deathSavesOf(participant)).toBeUndefined();
+        expect(participant.battleData.dying).toBeUndefined();
         expect(hasCondition(participant, 'unconscious')).toBe(false);
     });
 
@@ -164,7 +188,7 @@ describe('rollDeathSave', () => {
         for (let i = 0; i < 3; i++)
             p = rollDeathSave(p, rollOf(12)).participant;
 
-        expect(p.battleData.deathSaves).toMatchObject({
+        expect(deathSavesOf(p)).toMatchObject({
             successes: 0,
             failures: 0,
             stable: true,
@@ -198,20 +222,19 @@ describe('healing', () => {
             currentHp: 4,
             status: CombatStatus.ACTIVE,
         });
-        expect(participant.battleData.deathSaves).toBeUndefined();
+        expect(deathSavesOf(participant)).toBeUndefined();
         expect(hasCondition(participant, 'unconscious')).toBe(false);
     });
 
     it('raw heal without a revive hook (non-d20 systems) leaves the dying state alone', () => {
-        expect(
-            applyRawHeal(dying(), 4).participant.battleData.deathSaves
-        ).toBeDefined();
+        expect(deathSavesOf(applyRawHeal(dying(), 4).participant)).toBeDefined();
     });
 
     it('clearDeathSaves removes state and counters', () => {
         const p = clearDeathSaves(dying());
 
-        expect(p.battleData.deathSaves).toBeUndefined();
+        expect(deathSavesOf(p)).toBeUndefined();
+        expect(p.battleData.dying).toBeUndefined();
         expect(p.battleData.activeEffects).toHaveLength(0);
     });
 });
@@ -256,22 +279,18 @@ describe('advanceTurn with death saves', () => {
         });
 
         expect(out.scene.turnIndex).toBe(2);
-        expect(out.participants[1].battleData.deathSaves?.successes).toBe(1);
+        expect(deathSavesOf(out.participants[1])?.successes).toBe(1);
         expect(
             out.actions.some((a) => eventTextOf(a).includes('кидок смерті'))
         ).toBe(true);
     });
 
     it('stable hero does not roll', () => {
-        const b = dying('b');
-
-        const stable = {
-            ...b,
-            battleData: {
-                ...b.battleData,
-                deathSaves: { successes: 3, failures: 0, stable: true },
-            },
-        };
+        const stable = withSaves(dying('b'), {
+            successes: 3,
+            failures: 0,
+            stable: true,
+        });
 
         const rng = vi.fn(() => 0.5);
 
@@ -297,7 +316,7 @@ describe('advanceTurn with death saves', () => {
             rng,
         });
 
-        expect(out.participants[1].battleData.deathSaves).toEqual({
+        expect(deathSavesOf(out.participants[1])).toEqual({
             successes: 0,
             failures: 0,
             stable: false,
@@ -347,14 +366,6 @@ describe('victory', () => {
 });
 
 describe('review fixes', () => {
-    const withSaves = (
-        p: BattleParticipant,
-        deathSaves: NonNullable<BattleParticipant['battleData']['deathSaves']>
-    ): BattleParticipant => ({
-        ...p,
-        battleData: { ...p.battleData, deathSaves },
-    });
-
     it('stabilising resets both counters, so later damage starts from one failure', () => {
         let p = withSaves(dying(), {
             successes: 2,
@@ -364,7 +375,7 @@ describe('review fixes', () => {
 
         p = rollDeathSave(p, rollOf(12)).participant;
 
-        expect(p.battleData.deathSaves).toEqual({
+        expect(deathSavesOf(p)).toEqual({
             successes: 0,
             failures: 0,
             stable: true,
@@ -373,7 +384,7 @@ describe('review fixes', () => {
         const hurt = hit(p, 1).participant;
 
         expect(hurt.combatStats.status).toBe(CombatStatus.UNCONSCIOUS);
-        expect(hurt.battleData.deathSaves).toEqual({
+        expect(deathSavesOf(hurt)).toEqual({
             successes: 0,
             failures: 1,
             stable: false,
@@ -409,7 +420,7 @@ describe('review fixes', () => {
 
         const r = settle(before, after).participant;
 
-        expect(r.battleData.deathSaves).toBeUndefined();
+        expect(deathSavesOf(r)).toBeUndefined();
         expect(hasCondition(r, 'unconscious')).toBe(false);
     });
 
@@ -427,15 +438,14 @@ describe('review fixes', () => {
 
         const r = settle(before, after).participant;
 
-        expect(r.battleData.deathSaves).toEqual({
+        expect(deathSavesOf(r)).toEqual({
             successes: 0,
             failures: 0,
             stable: false,
         });
         expect(hasCondition(r, 'unconscious')).toBe(true);
         expect(
-            settle(before, after, DEFAULT_RULES).participant.battleData
-                .deathSaves
+            deathSavesOf(settle(before, after, DEFAULT_RULES).participant)
         ).toBeUndefined();
     });
 

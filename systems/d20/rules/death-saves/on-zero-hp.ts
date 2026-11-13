@@ -1,7 +1,7 @@
 import { dropBrokenConcentration } from '../concentration/damaged';
 import { deathSaveDamage } from './roll';
 import { startDying } from './start';
-import { clearDeathSaves } from './state';
+import { clearDeathSaves, deathSavesOf } from './state';
 
 import { CombatStatus, ParticipantSourceType } from '@/lib/constants/battle';
 import { textRef } from '@/lib/i18n/text-ref';
@@ -101,7 +101,7 @@ function heroGoesDown(ctx: ZeroHpCtx): {
 
     if (
         before.combatStats.currentHp <= 0 &&
-        before.battleData.deathSaves &&
+        deathSavesOf(before) &&
         after.combatStats.status === CombatStatus.UNCONSCIOUS
     ) {
         const killed = instantDeath(amount, after.combatStats.currentHp);
@@ -133,7 +133,7 @@ function settleManual(ctx: ZeroHpCtx): DamageConsequencesResult {
 
     let next = after;
 
-    if (after.combatStats.currentHp > 0 && next.battleData.deathSaves)
+    if (after.combatStats.currentHp > 0 && deathSavesOf(next))
         next = clearDeathSaves(next);
 
     const isHero =
@@ -148,7 +148,7 @@ function settleManual(ctx: ZeroHpCtx): DamageConsequencesResult {
         rules.deathSaves.enabled &&
         isHero &&
         wentDown &&
-        !next.battleData.deathSaves
+        !deathSavesOf(next)
     )
         next = startDying(next, rules);
 

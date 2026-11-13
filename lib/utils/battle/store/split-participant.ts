@@ -43,6 +43,7 @@ export function splitParticipant(
         zoneHits,
         pendingHits,
         retaliationsUsed,
+        dying,
         dormant,
         facing,
         escaped,
@@ -98,6 +99,7 @@ export function splitParticipant(
         ...(zoneHits !== undefined && { zoneHits }),
         ...(pendingHits !== undefined && { pendingHits }),
         ...(retaliationsUsed !== undefined && { retaliationsUsed }),
+        ...(dying !== undefined && { dying }),
         ...(dormant !== undefined && { dormant }),
         ...(facing !== undefined && { facing }),
         ...(escaped !== undefined && { escaped }),
@@ -219,6 +221,7 @@ export function joinParticipant(
             ...(state.retaliationsUsed !== undefined && {
                 retaliationsUsed: state.retaliationsUsed,
             }),
+            ...(state.dying !== undefined && { dying: state.dying }),
             ...(state.dormant !== undefined && { dormant: state.dormant }),
             ...(state.facing !== undefined && { facing: state.facing }),
             ...(state.escaped !== undefined && { escaped: state.escaped }),

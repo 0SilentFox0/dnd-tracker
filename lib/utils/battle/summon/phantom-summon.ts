@@ -37,6 +37,10 @@ export function buildPhantom({
 
     const {
         deathSaves: _deathSaves,
+        dying: _dying,
+        system: _system,
+        inspiration: _inspiration,
+        inspirationSpent: _inspirationSpent,
         transform: _transform,
         pendingCast: _pendingCast,
         object: _object,
@@ -49,6 +53,10 @@ export function buildPhantom({
 
     void [
         _deathSaves,
+        _dying,
+        _system,
+        _inspiration,
+        _inspirationSpent,
         _transform,
         _pendingCast,
         _object,

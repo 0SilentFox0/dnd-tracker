@@ -1,5 +1,9 @@
 import { D20_CONDITION_SET } from '../conditions';
-import { DEATH_SAVES_TIMED_KEY, FRESH_DEATH_SAVES } from './state';
+import {
+    DEATH_SAVES_TIMED_KEY,
+    FRESH_DEATH_SAVES,
+    withDeathSaves,
+} from './state';
 
 import { CombatStatus } from '@/lib/constants/battle';
 import { upsertLabeled } from '@/lib/utils/battle/actions/effects';
@@ -20,16 +24,15 @@ export function startDying(
 
     const down = unconscious ? upsertLabeled(p, unconscious, 0) : p;
 
-    return {
-        ...down,
-        combatStats: {
-            ...down.combatStats,
-            currentHp: 0,
-            status: CombatStatus.UNCONSCIOUS,
+    return withDeathSaves(
+        {
+            ...down,
+            combatStats: {
+                ...down.combatStats,
+                currentHp: 0,
+                status: CombatStatus.UNCONSCIOUS,
+            },
         },
-        battleData: {
-            ...down.battleData,
-            deathSaves: { ...FRESH_DEATH_SAVES },
-        },
-    };
+        { ...FRESH_DEATH_SAVES }
+    );
 }

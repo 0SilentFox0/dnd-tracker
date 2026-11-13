@@ -8,6 +8,7 @@ import { hasCondition } from '@/lib/utils/battle/conditions';
 import { DEFAULT_RULES, type Ruleset } from '@/lib/utils/rules';
 import { beginConcentration } from '@/systems/d20/rules/concentration/sustain';
 import { startDying } from '@/systems/d20/rules/death-saves/start';
+import { d20State } from '@/systems/d20/rules/state';
 import type { BattleParticipant } from '@/types/battle';
 
 const rules: Ruleset = {
@@ -36,7 +37,7 @@ describe('DM-правки HP з правилами 5e', () => {
         });
 
         expect(heroOf(out).combatStats.status).toBe(CombatStatus.ACTIVE);
-        expect(heroOf(out).battleData.deathSaves).toBeUndefined();
+        expect(d20State(heroOf(out)).deathSaves).toBeUndefined();
         expect(hasCondition(heroOf(out), 'unconscious')).toBe(false);
     });
 
@@ -57,14 +58,14 @@ describe('DM-правки HP з правилами 5e', () => {
             revive: true,
         });
 
-        expect(heroOf(out).battleData.deathSaves).toBeUndefined();
+        expect(d20State(heroOf(out)).deathSaves).toBeUndefined();
         expect(hasCondition(heroOf(out), 'unconscious')).toBe(false);
     });
 
     it('HP героя до 0 запускає кидки смерті', () => {
         const out = patchParticipantMutation(ctx(), 'hero', { currentHp: 0 });
 
-        expect(heroOf(out).battleData.deathSaves).toEqual({
+        expect(d20State(heroOf(out)).deathSaves).toEqual({
             successes: 0,
             failures: 0,
             stable: false,

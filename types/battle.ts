@@ -639,7 +639,10 @@ export interface BattleParticipantBattleData {
     pendingExtraActions?: number;
     /** Атаки дії «Атака», що лишилися цього ходу */
     attacksLeft?: number;
+    /** @deprecated dual-read until E2 part 17 */
     inspiration?: boolean;
+    /** The participant lies at 0 HP rolling death saves; set by the system together with its slot */
+    dying?: true;
     /** @deprecated dual-read until E2 part 17 */
     fortune?: number;
     /** @deprecated dual-read until E2 part 17 */
@@ -648,9 +651,9 @@ export interface BattleParticipantBattleData {
     sin?: number;
     /** @deprecated dual-read until E2 part 17 */
     conditionTests?: string[];
-    /** Натхнення витрачено в цьому бою: після бою знімається з листа (ніколи не виставляється з бою) */
+    /** @deprecated dual-read until E2 part 17 */
     inspirationSpent?: boolean;
-    /** Цього ходу була атака дією легкою ближньою зброєю основної руки */
+    /** @deprecated dual-read until E2 part 17 */
     attackedWithLight?: boolean;
     /** Хто прикликав або підняв учасника здібністю */
     summonedBy?: string;
@@ -672,7 +675,7 @@ export interface BattleParticipantBattleData {
     reserved?: boolean;
     /** Щойно введений з резерву: ходить після поточного, у порядку введення */
     revealPending?: boolean;
-    /** 5e: герой на 0 HP кидає смерті; лічильники живуть, поки він непритомний */
+    /** @deprecated dual-read until E2 part 17 */
     deathSaves?: { successes: number; failures: number; stable: boolean };
     resolvedAbilities: ResolvedAbility[];
     abilityUsage?: Record<string, AbilityUsageCounter>;
@@ -703,7 +706,7 @@ export interface BattleParticipantBattleData {
     returnedThisTurn?: boolean;
     /** Злетів «Пікіруванням»: поза картою й поза досяжністю до початку свого наступного ходу */
     airborne?: AirborneState;
-    /** Відсічей, уже даних з початку власного ходу; немає = за hasUsedReaction */
+    /** @deprecated dual-read until E2 part 17 */
     retaliationsUsed?: number;
     /** Раунд, у якому учасник востаннє отримав шкоду від небезпечної клітинки */
     hazardHitRound?: number;

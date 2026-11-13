@@ -9,6 +9,7 @@ import { applyRawDamage } from '@/lib/utils/abilities/engine/effects/hp';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import { DEFAULT_RULES, type Ruleset } from '@/lib/utils/rules';
 import { d20OnZeroHp } from '@/systems/d20/rules/death-saves/on-zero-hp';
+import { deathSavesOf } from '@/systems/d20/rules/death-saves/state';
 import type { BattleParticipant } from '@/types/battle';
 
 const rules: Ruleset = {
@@ -48,7 +49,7 @@ describe('d20OnZeroHp', () => {
         const r = hit(mock(ParticipantSourceType.CHARACTER, 5), 6);
 
         expect(r.participant.combatStats.status).toBe(CombatStatus.UNCONSCIOUS);
-        expect(r.participant.battleData.deathSaves).toEqual({
+        expect(deathSavesOf(r.participant)).toEqual({
             successes: 0,
             failures: 0,
             stable: false,

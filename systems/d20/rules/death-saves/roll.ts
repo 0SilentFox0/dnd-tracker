@@ -1,4 +1,9 @@
-import { clearDeathSaves, FRESH_DEATH_SAVES } from './state';
+import {
+    clearDeathSaves,
+    deathSavesOf,
+    FRESH_DEATH_SAVES,
+    withDeathSaves,
+} from './state';
 
 import { CombatStatus } from '@/lib/constants/battle';
 import { textRef } from '@/lib/i18n/text-ref';
@@ -13,25 +18,23 @@ const FAILURES_TO_DIE = 3;
 const SUCCESSES_TO_STABILIZE = 3;
 
 const needsDeathSave = (p: BattleParticipant): boolean =>
-    isDying(p) && !p.battleData.deathSaves?.stable;
+    isDying(p) && !deathSavesOf(p)?.stable;
 
 function withFailures(p: BattleParticipant, add: number): BattleParticipant {
-    const current = p.battleData.deathSaves ?? FRESH_DEATH_SAVES;
+    const current = deathSavesOf(p) ?? FRESH_DEATH_SAVES;
 
     const saves = current.stable ? FRESH_DEATH_SAVES : current;
 
     const failures = Math.min(FAILURES_TO_DIE, saves.failures + add);
 
+    const counted = withDeathSaves(p, { ...saves, failures, stable: false });
+
     return {
-        ...p,
+        ...counted,
         combatStats:
             failures >= FAILURES_TO_DIE
                 ? { ...p.combatStats, status: CombatStatus.DEAD }
                 : p.combatStats,
-        battleData: {
-            ...p.battleData,
-            deathSaves: { ...saves, failures, stable: false },
-        },
     };
 }
 
@@ -46,7 +49,7 @@ export function rollDeathSave(
     p: BattleParticipant,
     rng: () => number
 ): { participant: BattleParticipant; message: LogLine } {
-    const saves = p.battleData.deathSaves;
+    const saves = deathSavesOf(p);
 
     if (!saves || saves.stable) return { participant: p, message: '' };
 
@@ -76,15 +79,12 @@ export function rollDeathSave(
         const stable = successes >= SUCCESSES_TO_STABILIZE;
 
         return {
-            participant: {
-                ...p,
-                battleData: {
-                    ...p.battleData,
-                    deathSaves: stable
-                        ? { ...FRESH_DEATH_SAVES, stable: true }
-                        : { ...saves, successes },
-                },
-            },
+            participant: withDeathSaves(
+                p,
+                stable
+                    ? { ...FRESH_DEATH_SAVES, stable: true }
+                    : { ...saves, successes }
+            ),
             message: stable
                 ? textRef('battleLog.death.stable', { name, roll })
                 : textRef('battleLog.death.success', {
@@ -107,7 +107,7 @@ export function rollDeathSave(
             : textRef('battleLog.death.fail', {
                   name,
                   roll,
-                  count: failed.battleData.deathSaves?.failures ?? 0,
+                  count: deathSavesOf(failed)?.failures ?? 0,
                   max: FAILURES_TO_DIE,
               }),
     };

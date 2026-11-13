@@ -27,6 +27,7 @@ const CORE_PATCHABLE_FIELDS = {
         'zoneHits',
         'pendingHits',
         'retaliationsUsed',
+        'dying',
         'dormant',
         'escaped',
         'mazeWakeRound',

@@ -71,7 +71,9 @@ export interface ParticipantState {
     hazardHitRound?: number;
     zoneHits?: Record<string, number>;
     pendingHits?: PendingHit[];
+    /** @deprecated dual-read until E2 part 17 */
     retaliationsUsed?: number;
+    dying?: true;
     dormant?: boolean;
     facing?: Direction8;
     escaped?: boolean;

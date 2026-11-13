@@ -92,7 +92,7 @@ export function isTargetable(p: BattleParticipant): boolean {
 
 export const isDying = (p: BattleParticipant): boolean =>
     p.combatStats.status === CombatStatus.UNCONSCIOUS &&
-    !!p.battleData.deathSaves;
+    (p.battleData.dying === true || !!p.battleData.deathSaves);
 
 /** Ціль атаки: як isTargetable, але героя, що вмирає за 5e, теж можна бити (кожне влучання — провал кидка смерті). */
 export const isAttackable = (p: BattleParticipant): boolean =>

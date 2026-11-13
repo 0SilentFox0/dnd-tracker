@@ -8,6 +8,7 @@ import {
 import { makeParticipant, seq } from '@/lib/utils/abilities/__tests__/fixtures';
 import { processAttack } from '@/lib/utils/battle/attack/process';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { d20State } from '@/systems/d20/rules/state';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
 
 const sword: BattleAttack = {
@@ -69,7 +70,7 @@ describe('атака по герою, що вмирає', () => {
         const r = strike(downed({ successes: 0, failures: 0, stable: false }));
 
         expect(r.success).toBe(true);
-        expect(r.targetUpdated.battleData.deathSaves?.failures).toBe(1);
+        expect(d20State(r.targetUpdated).deathSaves?.failures).toBe(1);
     });
 
     it('без кидків смерті (HOMM) атака скасовується', () => {
