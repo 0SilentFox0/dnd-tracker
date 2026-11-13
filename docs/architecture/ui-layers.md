@@ -27,7 +27,7 @@
 
 ## Кіт core-UI для систем
 
-Явний список `SYSTEM_UI_KIT` у `scripts/shared/ui-layers.mjs` (без barrel-файлів: barrel у клієнтському чанку тягне всі модулі). Імпорт дозволений лише дослівно за цим шляхом:
+Явний список `SYSTEM_UI_KIT` у `scripts/shared/ui-layers.mjs` (нових barrel-файлів немає, виняток — наявний `skill-tree/progression`: barrel у клієнтському чанку тягне всі модулі). Імпорт дозволений лише дослівно за цим шляхом:
 
 - `character-profile/ProfileContext` (дані листа), `character-profile/CombatRow`
 - `rules/RulesSection`, `rules/NumberField`, `rules/RulesPaths`

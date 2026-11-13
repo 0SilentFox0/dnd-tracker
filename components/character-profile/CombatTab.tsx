@@ -34,7 +34,7 @@ export function CombatTab() {
 
     const Ui = systemUiOf(ref.key, ref.modules);
 
-    const armorStats =statColumnsOf(system).has('armorClass');
+    const armorStats = statColumnsOf(system).has('armorClass');
 
     const [openAttack, setOpenAttack] = useState<string | null>(null);
 
