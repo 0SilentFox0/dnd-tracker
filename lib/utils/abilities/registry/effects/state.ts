@@ -33,6 +33,7 @@ import { removeEffects } from '@/lib/utils/battle/conditions/query';
 import type { ConditionKey } from '@/lib/utils/battle/conditions/set';
 import { grantExtraActions } from '@/lib/utils/battle/participant/helpers';
 import { spellSaveDc } from '@/lib/utils/battle/spell/save-dc';
+import { resetSystemState } from '@/lib/utils/battle/turn/turn-state';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import { slotLevel, slotRestoreOrder } from '@/lib/utils/spells/slot-keys';
 import type { BattleParticipant } from '@/types/battle';
@@ -167,18 +168,19 @@ export function applyCondition(
 export function applyGrantAction(
     input: EffectApplyInput<Of<'grantAction'>>
 ): EffectApplyResult {
-    const { ability, effect } = input;
+    const { ability, effect, ctx } = input;
 
     return each(
         input,
         (p) => {
-            const granted = grantExtraActions(p, effect.extraActions ?? 0);
+            const extra = grantExtraActions(p, effect.extraActions ?? 0);
+
+            const granted = effect.refreshReaction
+                ? resetSystemState(extra, 'reaction', ctx.rules)
+                : extra;
 
             return {
                 ...granted,
-                ...(effect.refreshReaction && {
-                    battleData: { ...granted.battleData, retaliationsUsed: 0 },
-                }),
                 actionFlags: {
                     ...granted.actionFlags,
                     ...(effect.refreshAction && { hasUsedAction: false }),

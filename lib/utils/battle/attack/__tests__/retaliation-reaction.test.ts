@@ -22,6 +22,7 @@ import { applyCriticalEffect } from '@/lib/utils/battle/attack';
 import { processStartOfTurn } from '@/lib/utils/battle/turn/start-end';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 import { parseRules } from '@/lib/utils/rules/schema';
+import { retaliationsUsedOf } from '@/systems/retaliation/rules/state';
 import type { ResolvedAbility } from '@/types/abilities';
 import type { BattleParticipant } from '@/types/battle';
 
@@ -101,7 +102,7 @@ describe('відсіч і втрачена реакція', () => {
 
         const after = startTurn(stunned);
 
-        expect(after.battleData.retaliationsUsed).toBe(0);
+        expect(retaliationsUsedOf(after) ?? 0).toBe(0);
         expect(retaliate([attacker(), after])).toBeNull();
     });
 
@@ -152,10 +153,9 @@ describe('відсіч і втрачена реакція', () => {
             { rules: DEFAULT_RULES, round: 2, rng: seq(0.5) }
         ).participants;
 
-        expect(
-            restored.find((p) => p.basicInfo.id === 'd')?.battleData
-                .retaliationsUsed
-        ).toBe(0);
+        const back = restored.find((p) => p.basicInfo.id === 'd');
+
+        expect(back && retaliationsUsedOf(back)).toBe(0);
         expect(retaliate(restored)).not.toBeNull();
     });
 

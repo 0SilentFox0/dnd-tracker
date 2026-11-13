@@ -5,6 +5,7 @@ import { retaliate, retaliateTimes, swordUnit } from './helpers';
 import { extraRetaliations } from '@/data/library/unit-abilities';
 import { ParticipantSide } from '@/lib/constants/battle';
 import { resolved } from '@/lib/utils/abilities/__tests__/fixtures';
+import { retaliationsUsedOf } from '@/systems/retaliation/rules/state';
 import type { BattleParticipant } from '@/types/battle';
 
 const defender = (count?: number) =>
@@ -34,7 +35,7 @@ describe('лічильник відсічей', () => {
 
         const after = r?.participants.find((p) => p.basicInfo.id === 'd');
 
-        expect(after?.battleData.retaliationsUsed).toBe(1);
+        expect(after && retaliationsUsedOf(after)).toBe(1);
         expect(after?.actionFlags.hasUsedReaction).toBe(false);
     });
 });

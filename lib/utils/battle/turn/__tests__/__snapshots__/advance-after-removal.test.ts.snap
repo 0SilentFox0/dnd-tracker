@@ -135,7 +135,6 @@ exports[`removal зберігає death-save event, participants, turn/round і 
           "extraMovement": undefined,
           "readied": undefined,
           "resolvedAbilities": [],
-          "retaliationsUsed": 0,
           "returnedThisTurn": undefined,
           "turnStartPosition": undefined,
         },

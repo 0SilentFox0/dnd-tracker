@@ -28,7 +28,6 @@ describe('resetTurnState', () => {
             ...p,
             battleData: {
                 ...p.battleData,
-                retaliationsUsed: 2,
                 movementUsed: 15,
                 returnedThisTurn: true,
             },
@@ -36,7 +35,6 @@ describe('resetTurnState', () => {
 
         const next = resetTurnState(dirty, { rules });
 
-        expect(next.retaliationsUsed).toBe(0);
         expect(next.movementUsed).toBe(0);
         expect(next.turnStartPosition).toEqual({ x: 2, y: 3 });
         expect(next.returnedThisTurn).toBeUndefined();
@@ -117,7 +115,6 @@ describe('resetTurnState system hooks', () => {
 
         expect(next).toEqual({
             ...p.battleData,
-            retaliationsUsed: 0,
             turnStartPosition: p.battleData.position,
             returnedThisTurn: undefined,
             extraMovement: undefined,

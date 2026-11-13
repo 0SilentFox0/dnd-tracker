@@ -359,7 +359,6 @@ exports[`детермінований контракт turn loop > зберіг�
               },
             },
           ],
-          "retaliationsUsed": 0,
           "returnedThisTurn": undefined,
           "turnStartPosition": {
             "x": 1,

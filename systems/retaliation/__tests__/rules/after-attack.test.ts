@@ -15,6 +15,10 @@ import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { AfterAttackCtx } from '@/lib/utils/rules/systems/types';
 import { d20ProvokedOpportunity } from '@/systems/d20/rules/reactions/provoked';
 import { retaliationAfterAttack } from '@/systems/retaliation/rules/after-attack';
+import {
+    retaliationStateData,
+    retaliationsUsedOf,
+} from '@/systems/retaliation/rules/state';
 import type { BattleParticipant } from '@/types/battle';
 
 const rulesOf = (system: Ruleset['system']): Ruleset => ({
@@ -112,7 +116,8 @@ describe('retaliation module on d20', () => {
 
         const d = from.participants.find((p) => p.basicInfo.id === 'd');
 
-        expect(d?.battleData.retaliationsUsed).toBe(1);
+        expect(d && retaliationsUsedOf(d)).toBe(1);
+        expect(d?.battleData.retaliationsUsed).toBeUndefined();
         expect(d?.actionFlags.hasUsedReaction).toBe(true);
     });
 });
@@ -168,7 +173,7 @@ describe('retaliationAfterAttack', () => {
 
         const after = from.participants.find((p) => p.basicInfo.id === 'd');
 
-        expect(after?.battleData.retaliationsUsed).toBe(1);
+        expect(after && retaliationsUsedOf(after)).toBe(1);
         expect(after?.actionFlags.hasUsedReaction).toBe(false);
 
         const second = ctxOf(after as BattleParticipant);
@@ -180,7 +185,7 @@ describe('retaliationAfterAttack', () => {
                     ...(after as BattleParticipant),
                     battleData: {
                         ...(after as BattleParticipant).battleData,
-                        retaliationsUsed: 2,
+                        ...retaliationStateData(after as BattleParticipant, 2),
                     },
                 })
             )

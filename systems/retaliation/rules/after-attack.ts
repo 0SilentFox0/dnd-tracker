@@ -1,4 +1,5 @@
 import { retaliationRules } from './access';
+import { retaliationStateData, retaliationUsed } from './state';
 
 import { findFlagsMany } from '@/lib/utils/abilities/engine/core/collect-modifiers';
 import {
@@ -33,9 +34,7 @@ export const retaliationAfterAttack: AfterAttackHook = (ctx) => {
     const allowed =
         1 + flags.extraRetaliations.reduce((n, f) => n + f.count, 0);
 
-    const used =
-        defender.battleData.retaliationsUsed ??
-        (defender.actionFlags.hasUsedReaction ? 1 : 0);
+    const used = retaliationUsed(defender);
 
     if (!unlimited && (defender.actionFlags.hasUsedReaction || used >= allowed))
         return null;
@@ -46,7 +45,7 @@ export const retaliationAfterAttack: AfterAttackHook = (ctx) => {
               ...defender,
               battleData: {
                   ...defender.battleData,
-                  retaliationsUsed: used + 1,
+                  ...retaliationStateData(defender, used + 1),
               },
               actionFlags: {
                   ...defender.actionFlags,

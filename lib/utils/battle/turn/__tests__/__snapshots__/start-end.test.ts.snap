@@ -240,7 +240,6 @@ exports[`детермінований контракт початку ходу >
             },
           },
         ],
-        "retaliationsUsed": 0,
         "returnedThisTurn": undefined,
         "turnStartPosition": {
           "x": 1,
@@ -421,7 +420,6 @@ exports[`детермінований контракт початку ходу >
               },
             },
           ],
-          "retaliationsUsed": 0,
           "returnedThisTurn": undefined,
           "turnStartPosition": {
             "x": 1,
