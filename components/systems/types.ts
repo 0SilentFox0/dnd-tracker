@@ -57,7 +57,7 @@ export interface AdvancementEditorProps {
 export interface UnitStatsFieldsProps {
     formData: Partial<Unit>;
     onChange: (patch: Partial<Unit>) => void;
-    fiveE?: boolean;
+    monsterStats?: boolean;
 }
 
 export interface SystemConditionsDialogProps {

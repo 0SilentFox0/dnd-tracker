@@ -10,13 +10,13 @@ import { UnitFiveEFields } from '@/systems/d20/ui/units/UnitFiveEFields';
 export function UnitStatsFields({
     formData,
     onChange,
-    fiveE,
+    monsterStats,
 }: UnitStatsFieldsProps) {
     const t = useTranslations('units.basic');
 
     return (
         <>
-            {(fiveE || formData.cr != null) && (
+            {(monsterStats || formData.cr != null) && (
                 <HudSection title="5e">
                     <UnitFiveEFields formData={formData} onChange={onChange} />
                 </HudSection>

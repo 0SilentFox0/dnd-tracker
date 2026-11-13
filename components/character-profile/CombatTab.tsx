@@ -34,7 +34,7 @@ export function CombatTab() {
 
     const Ui = systemUiOf(ref.key, ref.modules);
 
-    const d20Stats = statColumnsOf(system).has('armorClass');
+    const armorStats =statColumnsOf(system).has('armorClass');
 
     const [openAttack, setOpenAttack] = useState<string | null>(null);
 
@@ -111,7 +111,7 @@ export function CombatTab() {
                 </HudSection>
             )}
             <HudSection title={t('defense')}>
-                {d20Stats && (
+                {armorStats && (
                     <>
                         <CombatRow
                             label="AC"

@@ -25,7 +25,7 @@ const editor = (cr: number | null, change = vi.fn()): UnitFormFieldsState =>
         options: {
             races: [],
             spells: [{ id: 'breath', name: 'Подих' }],
-            fiveE: true,
+            monsterStats: true,
             system: 'homm',
         },
         abilities: { errors: 0 },

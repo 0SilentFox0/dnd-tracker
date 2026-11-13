@@ -23,7 +23,7 @@ export function useUnitFormFields(
 
     const { key: system } = useRuleSystem({ campaignId });
 
-    const fiveE =
+    const monsterStats =
         !!rules && (classesEnabled(rules) || rules.encounters.balance === 'xp');
 
     const [formData, setFormData] = useState<Partial<Unit>>(initial);
@@ -43,7 +43,7 @@ export function useUnitFormFields(
 
     return {
         form: { data: formData, set: setFormData, change, dirty },
-        options: { races, race, spells, fiveE, system },
+        options: { races, race, spells, monsterStats, system },
         abilities,
     };
 }

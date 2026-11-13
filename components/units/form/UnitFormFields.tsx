@@ -31,7 +31,7 @@ export function unitFormTabs({
 }: UnitFormFieldsProps): HudTab<UnitFormTabId>[] {
     const { data: formData, change } = editor.form;
 
-    const { races, spells, fiveE, system } = editor.options;
+    const { races, spells, monsterStats, system } = editor.options;
 
     const Ui = system && systemUiOf(system);
 
@@ -59,7 +59,7 @@ export function unitFormTabs({
                         <Ui.UnitStatsFields
                             formData={formData}
                             onChange={change}
-                            fiveE={fiveE}
+                            monsterStats={monsterStats}
                         />
                     )}
                 </div>

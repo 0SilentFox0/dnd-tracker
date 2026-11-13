@@ -47,7 +47,7 @@ export function DmCharacterCard({
 
     const columns = system ? statColumnsOf(system) : undefined;
 
-    const d20Stats = !!columns?.has('armorClass');
+    const armorStats =!!columns?.has('armorClass');
 
     const hideProgression =
         !ready || systemUiOf(systemKey, rules?.system.modules).hideProgression;
@@ -185,10 +185,10 @@ export function DmCharacterCard({
                         }
                     />
                 )}
-                {d20Stats && (
+                {armorStats && (
                     <HudStatChip short="AC" value={character.armorClass} />
                 )}
-                {d20Stats && (
+                {armorStats && (
                     <HudStatChip
                         short={t('statInitiative')}
                         value={character.initiative}
