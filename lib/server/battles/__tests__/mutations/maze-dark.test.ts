@@ -206,23 +206,35 @@ function routes(dir: string): string[] {
 
 describe('blockedByMode', () => {
     it('стоїть на всіх діях учасника, але не на русі (ДМ розставляє) і не на next-turn', async () => {
+        const named = routes(ROOT).flatMap((file) => {
+            const operation = /operation: ['"]([^'"]+)['"]/.exec(
+                readFileSync(file, 'utf8')
+            )?.[1];
+
+            return operation
+                ? [{ operation, name: relative(ROOT, join(file, '..')) }]
+                : [];
+        });
+
+        // module actions are served by the single system/[action] route
+        const systemActions = [
+            'channel',
+            'condition-test',
+            'core-action',
+            'crit-choice',
+            'morale-check',
+            'system-condition',
+        ].map((action) => ({ operation: action, name: action }));
+
         const definitions = await Promise.all(
-            routes(ROOT).map(async (file) => {
-                const operation = /operation: ['"]([^'"]+)['"]/.exec(
-                    readFileSync(file, 'utf8')
-                )?.[1];
-
-                if (!operation) return null;
-
+            [...named, ...systemActions].map(async ({ operation, name }) => {
                 const definition = await getBattleOperation(operation, {
                     id: 'campaign',
                     battleId: 'battle',
                     participantId: 'participant',
                 });
 
-                return definition.blockedByMode
-                    ? relative(ROOT, join(file, '..'))
-                    : null;
+                return definition.blockedByMode ? name : null;
             })
         );
 

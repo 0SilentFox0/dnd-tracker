@@ -6,7 +6,10 @@ import { prisma } from '@/lib/db';
 
 vi.mock('@/lib/utils/api/api-auth', () => ({ requireDM: vi.fn() }));
 vi.mock('server-only', () => ({}));
-vi.mock('@/lib/cache/tags', () => ({ invalidateReference: vi.fn() }));
+vi.mock('@/lib/cache/tags', async (importOriginal) => ({
+    ...(await importOriginal<typeof import('@/lib/cache/tags')>()),
+    invalidateReference: vi.fn(),
+}));
 
 const things = vi.hoisted(() => new Map<string, Record<string, unknown>>());
 
@@ -487,17 +490,15 @@ describe('API tokens + MCP', () => {
 
     describe('content tools over MCP', () => {
         const asToken = (scopes: string[]) =>
-            vi
-                .mocked(prisma.apiToken.findUnique)
-                .mockResolvedValue({
-                    id: 'k1',
-                    campaignId: 'camp1',
-                    userId: 'dm',
-                    revokedAt: null,
-                    lastUsedAt: new Date(),
-                    executionMode: 'review',
-                    scopes,
-                } as never);
+            vi.mocked(prisma.apiToken.findUnique).mockResolvedValue({
+                id: 'k1',
+                campaignId: 'camp1',
+                userId: 'dm',
+                revokedAt: null,
+                lastUsedAt: new Date(),
+                executionMode: 'review',
+                scopes,
+            } as never);
 
         const toolNames = async (scopes: string[]) => {
             asToken(scopes);

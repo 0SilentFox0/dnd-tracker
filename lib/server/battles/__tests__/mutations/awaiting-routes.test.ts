@@ -6,6 +6,16 @@ import { getBattleOperation } from '@/lib/server/battles/operations';
 
 const ROOT = join(process.cwd(), 'app/api/campaigns/[id]/battles/[battleId]');
 
+// module actions are served by the single system/[action] route
+const SYSTEM_ACTIONS = [
+    'channel',
+    'condition-test',
+    'core-action',
+    'crit-choice',
+    'morale-check',
+    'system-condition',
+];
+
 function routes(dir: string): string[] {
     return readdirSync(dir).flatMap((name) => {
         const path = join(dir, name);
@@ -19,21 +29,33 @@ function routes(dir: string): string[] {
 async function allowing(
     flag: 'allowWhileAwaitingDm' | 'allowWhileCritPending'
 ): Promise<string[]> {
+    const named = routes(ROOT).flatMap((file) => {
+        const operation = /operation: ['"]([^'"]+)['"]/.exec(
+            readFileSync(file, 'utf8')
+        )?.[1];
+
+        return operation
+            ? [{ operation, name: relative(ROOT, join(file, '..')) }]
+            : [];
+    });
+
+    const all = [
+        ...named,
+        ...SYSTEM_ACTIONS.map((action) => ({
+            operation: action,
+            name: action,
+        })),
+    ];
+
     const found = await Promise.all(
-        routes(ROOT).map(async (file) => {
-            const operation = /operation: ['"]([^'"]+)['"]/.exec(
-                readFileSync(file, 'utf8')
-            )?.[1];
-
-            if (!operation) return null;
-
+        all.map(async ({ operation, name }) => {
             const definition = await getBattleOperation(operation, {
                 id: 'campaign',
                 battleId: 'battle',
                 participantId: 'participant',
             });
 
-            return definition[flag] ? relative(ROOT, join(file, '..')) : null;
+            return definition[flag] ? name : null;
         })
     );
 

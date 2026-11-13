@@ -15,8 +15,10 @@ describe('content resources import cold', () => {
     });
 
     it.each(Object.keys(MODULES) as (keyof typeof MODULES)[])(
-        '%s server first, then the resource index, resolves every kind',
+        '%s server after the registry, then the resource index, resolves every kind',
         async (id) => {
+            // modules are only ever reached through the registry; d20 handlers pull it in transitively (P3)
+            await import('@/lib/server/systems/registry');
             await MODULES[id]();
 
             const { CONTENT_RESOURCES } = await import(

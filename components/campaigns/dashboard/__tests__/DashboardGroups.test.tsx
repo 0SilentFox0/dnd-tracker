@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DashboardGroups } from '@/components/campaigns/dashboard/DashboardGroups';
 import { useNotifications } from '@/lib/hooks/notifications';
 import { renderWithIntl } from '@/lib/i18n/test/render-with-intl';
+import { parseRules } from '@/lib/utils/rules/schema';
 
 // real uk messages: search matches the translated titles and keywords
 vi.unmock('next-intl');
@@ -38,10 +39,21 @@ const type = (value: string) => {
 
 const tileLinks = () => screen.getAllByRole('link');
 
+const FULL_CONTEXT = {
+    isTemplate: false,
+    classesEnabled: false,
+    system: parseRules({}).system,
+};
+
 describe('DashboardGroups', () => {
     it('DM without query shows group headings and 16 links', async () => {
         const { container } = await render(
-            <DashboardGroups campaignId="c1" isDM pendingDrafts={0} />
+            <DashboardGroups
+                campaignId="c1"
+                isDM
+                pendingDrafts={0}
+                context={FULL_CONTEXT}
+            />
         );
 
         for (const t of ['Гра', 'Герої', 'Бібліотеки'])
@@ -120,7 +132,12 @@ describe('DashboardGroups', () => {
 
     it('empty result can be cleared', async () => {
         await render(
-            <DashboardGroups campaignId="c1" isDM pendingDrafts={0} />
+            <DashboardGroups
+                campaignId="c1"
+                isDM
+                pendingDrafts={0}
+                context={FULL_CONTEXT}
+            />
         );
 
         type('zzz');

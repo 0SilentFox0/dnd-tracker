@@ -18,14 +18,18 @@ describe('dashboard sections', () => {
         (_key, href) => {
             const rel = href.replace(/^\/campaigns\/x/, '');
 
-            const file = path.join(
-                process.cwd(),
-                'app/campaigns/[id]',
-                rel,
-                'page.tsx'
+            const pageOf = (r: string) =>
+                path.join(process.cwd(), 'app/campaigns/[id]', r, 'page.tsx');
+
+            const moduleSection = rel.replace(
+                /^\/dm\/system\/[^/]+$/,
+                '/dm/system/[section]'
             );
 
-            expect(fs.existsSync(file)).toBe(true);
+            expect(
+                fs.existsSync(pageOf(rel)) ||
+                    fs.existsSync(pageOf(moduleSection))
+            ).toBe(true);
         }
     );
 
