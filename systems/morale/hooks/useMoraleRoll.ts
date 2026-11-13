@@ -10,6 +10,10 @@ import {
 } from '@/lib/hooks/battle';
 import { usePageHidden } from '@/lib/hooks/common';
 import { effectiveMorale } from '@/lib/utils/battle/morale/effective-morale';
+import {
+    moraleCheckOp,
+    type MoraleCheckResponse,
+} from '@/systems/morale/api/battle';
 import { moraleResultFx } from '@/systems/morale/rules/result-fx';
 import { moraleOutcome } from '@/systems/morale/rules/turn/outcome';
 import type { BattleParticipant } from '@/types/battle';
@@ -32,10 +36,12 @@ export function useMoraleRoll(
         let res;
 
         try {
-            res = await scene.actions.moraleCheck.mutateAsync({
-                participantId: participant.basicInfo.id,
-                d10Roll: d10,
-            });
+            res = (await scene.actions.system.mutateAsync(
+                moraleCheckOp({
+                    participantId: participant.basicInfo.id,
+                    d10Roll: d10,
+                })
+            )) as Partial<MoraleCheckResponse> | undefined;
         } catch {
             return;
         }

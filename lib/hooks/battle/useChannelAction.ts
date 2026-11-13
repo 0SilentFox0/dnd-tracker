@@ -10,7 +10,7 @@ import type { BattleParticipant } from '@/types/battle';
 export function useChannelAction(hero: BattleParticipant, onDone?: () => void) {
     const {
         battle,
-        actions: { channel },
+        actions: { system: channel },
     } = useBattleScene();
 
     const [open, setOpen] = useState(false);
@@ -24,10 +24,13 @@ export function useChannelAction(hero: BattleParticipant, onDone?: () => void) {
 
         try {
             await channel.mutateAsync({
-                participantId: hero.basicInfo.id,
-                ...(roll === undefined
-                    ? { serverRoll: true as const }
-                    : { roll }),
+                action: 'channel',
+                body: {
+                    participantId: hero.basicInfo.id,
+                    ...(roll === undefined
+                        ? { serverRoll: true as const }
+                        : { roll }),
+                },
             });
             setOpen(false);
             onDone?.();

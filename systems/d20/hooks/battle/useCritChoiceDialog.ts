@@ -6,6 +6,7 @@ import { critRulesOf } from '@/lib/utils/battle/attack/crit-rules';
 import { enabledCritEffects } from '@/lib/utils/battle/crit-choice/catalog';
 import { asShownCrit } from '@/lib/utils/battle/crit-choice/pending';
 import type { CritTrigger } from '@/lib/utils/battle/crit-choice/types';
+import { critChoiceOp } from '@/systems/d20/api/battle';
 
 export interface CritChoiceRow {
     trigger: CritTrigger;
@@ -39,8 +40,8 @@ export function useCritChoiceDialog() {
         open: viewer.isDM && pending !== null,
         rows,
         submit: (choices: Record<string, number | 'random'>) =>
-            actions.critChoice.mutate({ choices }),
-        cancel: () => actions.critChoice.mutate({ cancel: true }),
-        isSubmitting: actions.critChoice.isPending,
+            actions.system.mutate(critChoiceOp({ choices })),
+        cancel: () => actions.system.mutate(critChoiceOp({ cancel: true })),
+        isSubmitting: actions.system.isPending,
     };
 }

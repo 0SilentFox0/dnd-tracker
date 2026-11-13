@@ -13,7 +13,10 @@ import {
 } from '../battle-ops';
 import { campaignPatch, campaignPost } from '../client';
 
-const EXPECTED_PATHS: Record<keyof typeof battleOps, string> = {
+const EXPECTED_PATHS: Record<
+    Exclude<keyof typeof battleOps, 'system'>,
+    string
+> = {
     nextTurn: 'next-turn',
     attack: 'attack',
     abilityAction: 'ability-action',
@@ -26,10 +29,7 @@ const EXPECTED_PATHS: Record<keyof typeof battleOps, string> = {
     mapMotion: 'map-motion',
     mapWeather: 'map-weather',
     bonusAction: 'bonus-action',
-    moraleCheck: 'system/morale-check',
-    critChoice: 'system/crit-choice',
     castSpell: 'spell',
-    channel: 'system/channel',
     start: 'start',
     reset: 'reset',
     complete: 'complete',
@@ -38,7 +38,6 @@ const EXPECTED_PATHS: Record<keyof typeof battleOps, string> = {
     reveal: 'reveal-participant',
     conditions: 'conditions',
     systemCondition: 'system/system-condition',
-    conditionTest: 'system/condition-test',
     initiativeReorder: 'initiative-reorder',
     initiativeRoll: 'initiative-roll',
     coreAction: 'system/core-action',
@@ -61,6 +60,25 @@ describe('battleOps', () => {
             );
         }
     );
+
+    it('system posts the inner body to /system/<action>', async () => {
+        const send = { action: 'morale-check', body: { participantId: 'p1' } };
+
+        expect(battleOpPath(battleOps.system, 'b1', send)).toBe(
+            '/battles/b1/system/morale-check'
+        );
+
+        await callBattleOp(battleOps.system, 'c1', 'b1', {
+            ...send,
+            expectedVersion: 2,
+        });
+
+        expect(campaignPost).toHaveBeenCalledWith(
+            'c1',
+            '/battles/b1/system/morale-check',
+            { participantId: 'p1', expectedVersion: 2 }
+        );
+    });
 
     it('only the participant patch uses PATCH', () => {
         const patching = Object.entries(battleOps).filter(

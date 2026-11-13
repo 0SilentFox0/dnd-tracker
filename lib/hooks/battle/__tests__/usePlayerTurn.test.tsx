@@ -36,8 +36,8 @@ describe('usePlayerTurn', () => {
         await act(async () => result.current.actions.rollMorale(9));
 
         expect(moraleCheck).toHaveBeenCalledWith({
-            participantId: me.basicInfo.id,
-            d10Roll: 9,
+            action: 'morale-check',
+            body: { participantId: me.basicInfo.id, d10Roll: 9 },
         });
         expect(showResult).toHaveBeenCalledWith(
             expect.objectContaining({

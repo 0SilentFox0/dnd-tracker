@@ -186,12 +186,10 @@ export function fakeScene(opts: FakeSceneOptions = {}) {
     const actions = {
         attack: mutation(),
         castSpell: mutation(),
-        channel: mutation(),
         bonusAction: mutation(),
         abilityAction: mutation(),
         nextTurn: mutation(),
-        critChoice: mutation(),
-        moraleCheck: mutation(async () => ({
+        system: mutation(async () => ({
             moraleResult: {
                 hasExtraTurn: true,
                 shouldSkipTurn: false,
@@ -216,7 +214,6 @@ export function fakeScene(opts: FakeSceneOptions = {}) {
         unitControl: mutation(),
         conditions: mutation(),
         systemCondition: mutation(),
-        conditionTest: mutation(),
         initiativeRoll: mutation(),
         initiativeReorder: mutation(),
         coreAction: mutation(),
@@ -345,7 +342,7 @@ export function fakeScene(opts: FakeSceneOptions = {}) {
         abilityAction: actions.abilityAction.mutateAsync,
         nextTurn: actions.nextTurn.mutateAsync,
         move: actions.move.mutate,
-        moraleCheck: actions.moraleCheck.mutateAsync,
+        moraleCheck: actions.system.mutateAsync,
         coreAction: actions.coreAction.mutateAsync,
     };
 }

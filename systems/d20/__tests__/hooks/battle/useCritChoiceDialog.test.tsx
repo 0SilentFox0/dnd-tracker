@@ -123,8 +123,9 @@ describe('useCritChoiceDialog', () => {
 
         act(() => result.current.cancel());
 
-        expect(scene.value.actions.critChoice.mutate).toHaveBeenCalledWith({
-            cancel: true,
+        expect(scene.value.actions.system.mutate).toHaveBeenCalledWith({
+            action: 'crit-choice',
+            body: { cancel: true },
         });
     });
 
@@ -139,8 +140,9 @@ describe('useCritChoiceDialog', () => {
 
         act(() => result.current.submit({ t0: 3, t1: 'random' }));
 
-        expect(scene.value.actions.critChoice.mutate).toHaveBeenCalledWith({
-            choices: { t0: 3, t1: 'random' },
+        expect(scene.value.actions.system.mutate).toHaveBeenCalledWith({
+            action: 'crit-choice',
+            body: { choices: { t0: 3, t1: 'random' } },
         });
         expect(result.current.isSubmitting).toBe(false);
     });

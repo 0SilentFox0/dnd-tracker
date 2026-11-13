@@ -40,8 +40,8 @@ describe('useMoraleRoll', () => {
         await act(async () => result.current.roll(2));
 
         expect(scene.moraleCheck).toHaveBeenCalledWith({
-            participantId: scene.me.basicInfo.id,
-            d10Roll: 2,
+            action: 'morale-check',
+            body: { participantId: scene.me.basicInfo.id, d10Roll: 2 },
         });
         expect(gate.resolve).toHaveBeenCalledWith('skip');
         expect(calls).toEqual(['resolve', 'show', 'skipTurn']);

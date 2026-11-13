@@ -125,8 +125,7 @@ export function useDeleteAllBattles(campaignId: string) {
 
 export const useNextTurn = makeBattleHook(battleOps.nextTurn);
 export const useAttack = makeBattleHook(battleOps.attack);
-export const useMoraleCheck = makeBattleHook(battleOps.moraleCheck);
-export const useCritChoice = makeBattleHook(battleOps.critChoice);
+export const useSystemBattleAction = makeBattleHook(battleOps.system);
 export const useAbilityAction = makeBattleHook(battleOps.abilityAction);
 export const useAuraZone = makeBattleHook(battleOps.auraZone);
 export const useMoveParticipant = makeBattleHook(battleOps.move);
@@ -137,7 +136,6 @@ export const useMapMotion = makeBattleHook(battleOps.mapMotion);
 export const useMapBackground = makeBattleHook(battleOps.mapBackground);
 export const useMapWeather = makeBattleHook(battleOps.mapWeather);
 export const useBonusAction = makeBattleHook(battleOps.bonusAction);
-export const useChannel = makeBattleHook(battleOps.channel);
 export const useCastSpell = makeBattleHook(battleOps.castSpell);
 export const useStartBattle = makeBattleHook(battleOps.start);
 export const useResetBattle = makeBattleHook(battleOps.reset);
@@ -146,7 +144,6 @@ export const useRollbackBattleAction = makeBattleHook(battleOps.rollback);
 export const useRevealBattleParticipants = makeBattleHook(battleOps.reveal);
 export const useBattleConditions = makeBattleHook(battleOps.conditions);
 export const useSystemCondition = makeBattleHook(battleOps.systemCondition);
-export const useConditionTest = makeBattleHook(battleOps.conditionTest);
 export const useInitiativeReorder = makeBattleHook(battleOps.initiativeReorder);
 export const useInitiativeRoll = makeBattleHook(battleOps.initiativeRoll);
 export const useBattleCoreAction = makeBattleHook(battleOps.coreAction);

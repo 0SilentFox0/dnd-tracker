@@ -6,15 +6,12 @@ import type {
     Condition5eKey,
     CustomConditionKey,
 } from '@/lib/utils/abilities/schema/kinds';
-import type { MoraleCheckResult } from '@/lib/utils/battle/morale/threshold';
 import type {
     AbilityActionData,
     AttackData,
     AuraZoneData,
     BattleMutationResponse,
     BonusActionData,
-    ChannelData,
-    CritChoiceData,
     MapBackgroundData,
     MapMotionData,
     MapTerrainData,
@@ -22,7 +19,6 @@ import type {
     MapWeatherData,
     MazeActionData,
     MazeMarkData,
-    MoraleCheckData,
     MoveParticipantData,
     PatchParticipantData,
     SpellCastData,
@@ -62,12 +58,10 @@ export type SystemConditionBody =
           all?: boolean;
       };
 
-export type ConditionTestBody = {
-    participantId: string;
-    condition: string;
-    roll?: number;
-    serverRoll?: boolean;
-};
+export interface SystemOpBody {
+    action: string;
+    body: object;
+}
 
 export type InitiativeRollBody = Record<string, never>;
 
@@ -157,10 +151,10 @@ export const battleOps = {
         invalidate: BATTLES,
         mapResponse: withHpChanges,
     }),
-    moraleCheck: op<MoraleCheckData, { moraleResult: MoraleCheckResult }>({
-        path: systemPath.battle('morale-check'),
+    system: op<SystemOpBody>({
+        path: ({ action }) => systemPath.battle(action),
+        payload: ({ body, expectedVersion }) => ({ ...body, expectedVersion }),
     }),
-    critChoice: op<CritChoiceData>({ path: systemPath.battle('crit-choice') }),
     abilityAction: op<AbilityActionData>({ path: '/ability-action' }),
     auraZone: op<AuraZoneData>({ path: '/aura-zone' }),
     move: op<MoveParticipantData>({ path: '/move' }),
@@ -184,7 +178,6 @@ export const battleOps = {
         path: '/spell',
         mapResponse: withHpChanges,
     }),
-    channel: op<ChannelData>({ path: systemPath.battle('channel') }),
     start: op<object>({ path: '/start', invalidate: BATTLES_AND_ACTIVE }),
     reset: op<object>({ path: '/reset', invalidate: BATTLES }),
     complete: op<{ result?: 'victory' | 'defeat' }>({
@@ -200,9 +193,6 @@ export const battleOps = {
     conditions: op<BattleConditionsBody>({ path: '/conditions' }),
     systemCondition: op<SystemConditionBody>({
         path: systemPath.battle('system-condition'),
-    }),
-    conditionTest: op<ConditionTestBody>({
-        path: systemPath.battle('condition-test'),
     }),
     initiativeReorder: op<InitiativeReorderBody>({
         path: '/initiative-reorder',

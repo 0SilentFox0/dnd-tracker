@@ -173,10 +173,13 @@ describe('прапорці системи правил у HUD бою', () => {
             await screen.findByRole('button', { name: /Спробувати зняти/ })
         );
         fireEvent.click(screen.getByRole('button', { name: /Авто-кидок/ }));
-        expect(wfrp.value.actions.conditionTest.mutate).toHaveBeenCalledWith({
-            participantId: 'me',
-            condition: 'bleeding',
-            serverRoll: true,
+        expect(wfrp.value.actions.system.mutate).toHaveBeenCalledWith({
+            action: 'condition-test',
+            body: {
+                participantId: 'me',
+                condition: 'bleeding',
+                serverRoll: true,
+            },
         });
         cleanup();
 

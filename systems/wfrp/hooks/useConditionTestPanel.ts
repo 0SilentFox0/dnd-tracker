@@ -3,6 +3,7 @@
 import { useBattleScene } from '@/lib/hooks/battle';
 import { dynamicTextRef } from '@/lib/i18n/text-ref';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
+import { conditionTestOp } from '@/systems/wfrp/api/battle';
 import { wfrpState } from '@/systems/wfrp/rules/state';
 import type { BattleParticipant } from '@/types/battle';
 import type { LogLine } from '@/types/text';
@@ -53,11 +54,13 @@ export function useConditionTestPanel(
     return {
         items,
         attempt: (key, roll) =>
-            actions.conditionTest.mutate({
-                participantId: hero.basicInfo.id,
-                condition: key,
-                ...(roll === undefined ? { serverRoll: true } : { roll }),
-            }),
-        isPending: actions.conditionTest.isPending,
+            actions.system.mutate(
+                conditionTestOp({
+                    participantId: hero.basicInfo.id,
+                    condition: key,
+                    ...(roll === undefined ? { serverRoll: true } : { roll }),
+                })
+            ),
+        isPending: actions.system.isPending,
     };
 }
