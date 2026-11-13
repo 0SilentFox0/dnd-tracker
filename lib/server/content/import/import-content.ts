@@ -17,6 +17,7 @@ import {
 import { assertKindActive } from '@/lib/server/content/kind-active';
 import { CONTENT_RESOURCES } from '@/lib/server/content/resources';
 import {
+    withBatchedContentBump,
     withCampaignContentWrite,
     withCampaignRuntimeWrite,
 } from '@/lib/server/content/write';
@@ -686,94 +687,96 @@ export async function importContent(
         return report(true, checked);
     }
 
-    const results: ImportRowResult[] = [];
+    return withBatchedContentBump(actor.campaignId, async () => {
+        const results: ImportRowResult[] = [];
 
-    let wrote = false;
+        let wrote = false;
 
-    for (const plan of plans) {
-        if (plan.status !== 'pending') {
-            results.push(toResult(plan));
-            continue;
-        }
-
-        try {
-            await prepareBody(resource, actor, plan, plan.op === 'create');
-
-            if (plan.op === 'update' && deps.skipUnchanged) {
-                if (
-                    await applyIfChanged(
-                        resource,
-                        actor,
-                        plan,
-                        kind,
-                        deps,
-                        true
-                    )
-                ) {
-                    wrote = true;
-                    results.push(toResult(plan));
-                } else {
-                    plan.status = 'skipped';
-                    results.push(toResult(plan));
-                }
-
+        for (const plan of plans) {
+            if (plan.status !== 'pending') {
+                results.push(toResult(plan));
                 continue;
             }
 
-            if (deps.transactional) {
-                const current = currentContentWrite();
+            try {
+                await prepareBody(resource, actor, plan, plan.op === 'create');
 
-                if (current) {
-                    const tx = current.db as Prisma.TransactionClient;
-
-                    await tx.$executeRaw`SAVEPOINT assistant_import_row`;
-                    try {
-                        await writePlan(resource, actor, plan, kind, deps);
-                        markContentDirty();
-                        await tx.$executeRaw`RELEASE SAVEPOINT assistant_import_row`;
-                    } catch (error) {
-                        await tx.$executeRaw`ROLLBACK TO SAVEPOINT assistant_import_row`;
-                        await tx.$executeRaw`RELEASE SAVEPOINT assistant_import_row`;
-                        throw error;
+                if (plan.op === 'update' && deps.skipUnchanged) {
+                    if (
+                        await applyIfChanged(
+                            resource,
+                            actor,
+                            plan,
+                            kind,
+                            deps,
+                            true
+                        )
+                    ) {
+                        wrote = true;
+                        results.push(toResult(plan));
+                    } else {
+                        plan.status = 'skipped';
+                        results.push(toResult(plan));
                     }
-                } else
-                    await withCampaignContentWrite(actor.campaignId, () =>
-                        writePlan(resource, actor, plan, kind, deps)
+
+                    continue;
+                }
+
+                if (deps.transactional) {
+                    const current = currentContentWrite();
+
+                    if (current) {
+                        const tx = current.db as Prisma.TransactionClient;
+
+                        await tx.$executeRaw`SAVEPOINT assistant_import_row`;
+                        try {
+                            await writePlan(resource, actor, plan, kind, deps);
+                            markContentDirty();
+                            await tx.$executeRaw`RELEASE SAVEPOINT assistant_import_row`;
+                        } catch (error) {
+                            await tx.$executeRaw`ROLLBACK TO SAVEPOINT assistant_import_row`;
+                            await tx.$executeRaw`RELEASE SAVEPOINT assistant_import_row`;
+                            throw error;
+                        }
+                    } else
+                        await withCampaignContentWrite(actor.campaignId, () =>
+                            writePlan(resource, actor, plan, kind, deps)
+                        );
+                } else await writePlan(resource, actor, plan, kind, deps);
+
+                wrote = true;
+                results.push(toResult(plan));
+            } catch (error) {
+                if (!(error instanceof ContentError))
+                    console.error(
+                        '[content import]',
+                        kind,
+                        error instanceof Error ? error.name : 'unknown'
                     );
-            } else await writePlan(resource, actor, plan, kind, deps);
 
-            wrote = true;
-            results.push(toResult(plan));
-        } catch (error) {
-            if (!(error instanceof ContentError))
-                console.error(
-                    '[content import]',
-                    kind,
-                    error instanceof Error ? error.name : 'unknown'
-                );
-
-            results.push({
-                ...toResult(plan),
-                status: 'error',
-                issues: [
-                    ...plan.issues,
-                    ...(error instanceof ContentError
-                        ? contentErrorIssues(error)
-                        : [err(API_ERRORS.IMPORT_ROW_FAILED)]),
-                ],
-            });
+                results.push({
+                    ...toResult(plan),
+                    status: 'error',
+                    issues: [
+                        ...plan.issues,
+                        ...(error instanceof ContentError
+                            ? contentErrorIssues(error)
+                            : [err(API_ERRORS.IMPORT_ROW_FAILED)]),
+                    ],
+                });
+            }
         }
-    }
 
-    if (wrote && resource.invalidates.length > 0)
-        afterContentCommit(() =>
-            (deps.invalidate ?? invalidateReference)(
-                resource.invalidates,
-                actor.campaignId
-            )
-        );
+        if (wrote && resource.invalidates.length > 0)
+            afterContentCommit(() =>
+                (deps.invalidate ?? invalidateReference)(
+                    resource.invalidates,
+                    actor.campaignId
+                )
+            );
 
-    return report(false, results);
+        return report(false, results);
+    });
 }
 
 export function compactImportReport(r: ImportReport, limit = 50) {

@@ -2,6 +2,7 @@ import type { Prisma } from '@prisma/client';
 
 import { ContentError } from './errors';
 import {
+    bumpBatch,
     type ContentEffect,
     currentContentWrite,
     markContentDirty,
@@ -79,3 +80,24 @@ export const withCampaignRuntimeWrite = <T>(
     options: Omit<ContentWriteOptions, 'bump'> = {}
 ) =>
     withCampaignContentWrite(campaignId, callback, { ...options, bump: false });
+
+/** One content-version bump for all writes of the batch; a killed process skips it. */
+export async function withBatchedContentBump<T>(
+    campaignId: string,
+    fn: () => Promise<T>
+): Promise<T> {
+    if (
+        currentContentWrite() ||
+        bumpBatch.getStore()?.campaignId === campaignId
+    )
+        return fn();
+
+    const batch = { campaignId, dirty: false };
+
+    try {
+        return await bumpBatch.run(batch, fn);
+    } finally {
+        if (batch.dirty)
+            await withCampaignContentWrite(campaignId, async () => undefined);
+    }
+}

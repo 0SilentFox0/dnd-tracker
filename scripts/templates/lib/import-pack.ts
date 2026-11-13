@@ -29,7 +29,10 @@ import {
     OFFLINE_IMPORT_DEPS,
 } from '@/lib/server/content/import/import-content';
 import { loadKeys } from '@/lib/server/content/import/slug';
-import { withCampaignContentWrite } from '@/lib/server/content/write';
+import {
+    withBatchedContentBump,
+    withCampaignContentWrite,
+} from '@/lib/server/content/write';
 import { markContentDirty } from '@/lib/server/content/write-context';
 import { type PublishResult } from '@/lib/server/templates/publish';
 import { publishTemplate } from '@/lib/server/templates/publish-service';
@@ -475,90 +478,110 @@ export async function importPack(
         return (await hooks?.prepareRows?.(kind, iconed, prepareCtx)) ?? iconed;
     };
 
-    const perKind: Record<string, KindCounts> = {};
+    const { perKind, outside, failed } = await withBatchedContentBump(
+        template.id,
+        async () => {
+            const perKind: Record<string, KindCounts> = {};
 
-    for (const kind of importOrder(manifest.kinds)) {
-        const rows = pack.rows[kind] ?? [];
+            for (const kind of importOrder(manifest.kinds)) {
+                const rows = pack.rows[kind] ?? [];
 
-        if (!isImportKind(kind)) {
-            perKind[kind] = await upsertBySlug(template.id, kind, rows, {
-                hooks,
-                idBySlug: await idsBySlug(template.id, manifest.kinds),
-                dryRun,
-            });
-            continue;
+                if (!isImportKind(kind)) {
+                    perKind[kind] = await upsertBySlug(
+                        template.id,
+                        kind,
+                        rows,
+                        {
+                            hooks,
+                            idBySlug: await idsBySlug(
+                                template.id,
+                                manifest.kinds
+                            ),
+                            dryRun,
+                        }
+                    );
+                    continue;
+                }
+
+                const prepared = await prepare(kind, rows);
+
+                const first =
+                    hasSets && kind === 'artifacts'
+                        ? prepared.map(({ setId: _setId, ...rest }) => rest)
+                        : prepared;
+
+                const report = await run(kind, first);
+
+                for (const line of describeReport(kind, report, t))
+                    console.info(line);
+
+                perKind[kind] = fromReport(report);
+
+                if (!dryRun && report.counts.error === 0)
+                    await writeExtras(template.id, kind, rows);
+
+                if (hasSets && kind === 'artifact-sets') {
+                    const linked = (
+                        await prepare('artifacts', pack.rows.artifacts ?? [])
+                    ).filter((row) => row.setId);
+
+                    const second = await run('artifacts', linked);
+
+                    for (const line of describeReport(
+                        'artifacts (setId)',
+                        second,
+                        t
+                    ))
+                        console.info(line);
+
+                    perKind.artifacts = {
+                        ...perKind.artifacts,
+                        errors: perKind.artifacts.errors + second.counts.error,
+                    };
+                }
+
+                const clearable = clearableColumnsOf(kind);
+
+                if (!dryRun && clearable.length > 0)
+                    await clearStaleColumns(template.id, kind, rows, clearable);
+            }
+
+            const failed = Object.values(perKind).some((c) => c.errors > 0);
+
+            const outside = failed
+                ? []
+                : await rowsOutsidePack(template.id, manifest.kinds, pack.rows);
+
+            for (const kind of new Set(outside.map((row) => row.kind)))
+                perKind[kind] = {
+                    ...perKind[kind],
+                    deleted: opts.prune
+                        ? outside.filter((row) => row.kind === kind).length
+                        : 0,
+                };
+
+            if (outside.length > 0 && opts.prune) {
+                for (const row of outside)
+                    console.info(
+                        `${dryRun ? 'would delete' : 'delete'} ${row.kind} ${row.slug} "${row.label}"`
+                    );
+
+                if (!dryRun) await pruneRows(template.id, outside);
+            } else if (outside.length > 0)
+                console.warn(
+                    `${outside.length} row(s) outside the pack (pass --prune to delete): ${outside.map((row) => `${row.kind}/${row.slug}`).join(', ')}`
+                );
+
+            if (!dryRun && !failed)
+                await hooks?.afterImport?.({
+                    pack,
+                    templateId: template.id,
+                    idBySlug: await idsBySlug(template.id, manifest.kinds),
+                });
+
+            return { perKind, outside, failed };
         }
-
-        const prepared = await prepare(kind, rows);
-
-        const first =
-            hasSets && kind === 'artifacts'
-                ? prepared.map(({ setId: _setId, ...rest }) => rest)
-                : prepared;
-
-        const report = await run(kind, first);
-
-        for (const line of describeReport(kind, report, t)) console.info(line);
-
-        perKind[kind] = fromReport(report);
-
-        if (!dryRun && report.counts.error === 0)
-            await writeExtras(template.id, kind, rows);
-
-        if (hasSets && kind === 'artifact-sets') {
-            const linked = (
-                await prepare('artifacts', pack.rows.artifacts ?? [])
-            ).filter((row) => row.setId);
-
-            const second = await run('artifacts', linked);
-
-            for (const line of describeReport('artifacts (setId)', second, t))
-                console.info(line);
-
-            perKind.artifacts = {
-                ...perKind.artifacts,
-                errors: perKind.artifacts.errors + second.counts.error,
-            };
-        }
-
-        const clearable = clearableColumnsOf(kind);
-
-        if (!dryRun && clearable.length > 0)
-            await clearStaleColumns(template.id, kind, rows, clearable);
-    }
-
-    const failed = Object.values(perKind).some((c) => c.errors > 0);
-
-    const outside = failed
-        ? []
-        : await rowsOutsidePack(template.id, manifest.kinds, pack.rows);
-
-    for (const kind of new Set(outside.map((row) => row.kind)))
-        perKind[kind] = {
-            ...perKind[kind],
-            deleted: opts.prune
-                ? outside.filter((row) => row.kind === kind).length
-                : 0,
-        };
-
-    if (outside.length > 0 && opts.prune) {
-        for (const row of outside)
-            console.info(
-                `${dryRun ? 'would delete' : 'delete'} ${row.kind} ${row.slug} "${row.label}"`
-            );
-
-        if (!dryRun) await pruneRows(template.id, outside);
-    } else if (outside.length > 0)
-        console.warn(
-            `${outside.length} row(s) outside the pack (pass --prune to delete): ${outside.map((row) => `${row.kind}/${row.slug}`).join(', ')}`
-        );
-
-    if (!dryRun && !failed)
-        await hooks?.afterImport?.({
-            pack,
-            templateId: template.id,
-            idBySlug: await idsBySlug(template.id, manifest.kinds),
-        });
+    );
 
     if (dryRun || failed || !opts.publish)
         return {

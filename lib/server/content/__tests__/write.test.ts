@@ -13,7 +13,7 @@ const h = vi.hoisted(() => {
 
 vi.mock('@/lib/db', () => ({ prisma: { $transaction: h.transaction } }));
 
-import { withCampaignContentWrite } from '../write';
+import { withBatchedContentBump, withCampaignContentWrite } from '../write';
 
 describe('withCampaignContentWrite version bump', () => {
     beforeEach(() => {
@@ -79,6 +79,58 @@ describe('withCampaignContentWrite version bump', () => {
             },
             { bump: false }
         );
+
+        expect(h.tx.campaign.update).toHaveBeenCalledOnce();
+    });
+});
+
+describe('withBatchedContentBump', () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+        h.tx.$queryRaw.mockResolvedValue([{ id: 'c1' }]);
+        h.tx.campaign.update.mockResolvedValue({ contentVersion: 1 });
+    });
+
+    it('bumps once for several writes', async () => {
+        await withBatchedContentBump('c1', async () => {
+            for (let i = 0; i < 3; i++)
+                await withCampaignContentWrite('c1', async () => i);
+
+            expect(h.tx.campaign.update).not.toHaveBeenCalled();
+        });
+
+        expect(h.tx.campaign.update).toHaveBeenCalledOnce();
+    });
+
+    it('does not bump when nothing changed', async () => {
+        await withBatchedContentBump('c1', async () => {
+            await withCampaignContentWrite('c1', async () => 1, {
+                bump: false,
+            });
+        });
+
+        expect(h.tx.campaign.update).not.toHaveBeenCalled();
+    });
+
+    it('bumps in finally when a later step throws', async () => {
+        await expect(
+            withBatchedContentBump('c1', async () => {
+                await withCampaignContentWrite('c1', async () => 1);
+
+                throw new Error('boom');
+            })
+        ).rejects.toThrow('boom');
+
+        expect(h.tx.campaign.update).toHaveBeenCalledOnce();
+    });
+
+    it('joins a nested batch of the same campaign', async () => {
+        await withBatchedContentBump('c1', async () => {
+            await withBatchedContentBump('c1', async () => {
+                await withCampaignContentWrite('c1', async () => 1);
+            });
+            await withCampaignContentWrite('c1', async () => 2);
+        });
 
         expect(h.tx.campaign.update).toHaveBeenCalledOnce();
     });

@@ -29,6 +29,13 @@ export const currentTransaction = (): object | undefined => {
     return store?.open ? store.tx : undefined;
 };
 
+interface ContentBumpBatch {
+    campaignId: string;
+    dirty: boolean;
+}
+
+export const bumpBatch = new AsyncLocalStorage<ContentBumpBatch>();
+
 export const currentContentWrite = () => context.getStore();
 
 export function runContentWriteContext<T>(
@@ -42,7 +49,10 @@ export function runContentWriteContext<T>(
     return context.run(store, async () => {
         const value = await callback();
 
-        if (store.dirty)
+        const batch = bumpBatch.getStore();
+
+        if (store.dirty && batch?.campaignId === campaignId) batch.dirty = true;
+        else if (store.dirty)
             await bumpContentVersion(
                 db as Prisma.TransactionClient,
                 campaignId
