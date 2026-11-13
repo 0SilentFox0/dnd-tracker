@@ -22,7 +22,6 @@ import { d20FromStored, d20Persist } from './rules/state-parts';
 import { D20_STAT_COLUMNS } from './rules/stats';
 import { D20_TURN } from './rules/turn';
 
-import { heroLevelDamage } from '@/lib/utils/battle/damage/hero-level-part';
 import type { RuleSystemDefinition } from '@/lib/utils/rules/systems/types';
 import type { SheetRollSubject } from '@/types/characters';
 
@@ -61,9 +60,7 @@ export const D20_MODULE: RuleSystemDefinition = {
         autoXp: (rules) => rules.encounters.autoXp,
         offHand: D20_OFF_HAND,
         attackAbility: d20AttackAbility,
-        reach: D20_REACH,
-        damageParts: [heroLevelDamage],
-        inspiration: D20_INSPIRATION,
+        reach: D20_REACH,        inspiration: D20_INSPIRATION,
         dice: 20,
         actionEconomy: { bonusAction: true, reaction: true },
         resolveAttack: resolveD20Attack,
