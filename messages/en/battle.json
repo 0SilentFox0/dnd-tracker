@@ -272,7 +272,7 @@
   "turnControls": {
     "strip": {
       "waiting": "Your turn",
-      "morale": "Morale check",
+      "gate": "Morale check",
       "acting": "Your turn · Actions",
       "ended": "Your turn"
     },

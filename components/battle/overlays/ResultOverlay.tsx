@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 
 import { useBattleScene } from '@/lib/hooks/battle';
 import { cn } from '@/lib/utils';
-import { MORALE_SKIP_MS } from '@/lib/utils/battle/flows';
+import { TURN_SKIP_MS } from '@/lib/utils/battle/flows';
 import { signed } from '@/lib/utils/common/format';
 
 const die =
@@ -25,7 +25,7 @@ export function ResultOverlay() {
     useEffect(() => {
         if (fx?.kind !== 'morale-skip') return;
 
-        const id = setTimeout(() => show(null), MORALE_SKIP_MS);
+        const id = setTimeout(() => show(null), TURN_SKIP_MS);
 
         return () => clearTimeout(id);
     }, [fx, show]);
@@ -118,7 +118,7 @@ export function ResultOverlay() {
                     <i
                         className="block h-full bg-[var(--enemy)]"
                         style={{
-                            animation: `hud-countdown ${MORALE_SKIP_MS}ms 0s linear forwards`,
+                            animation: `hud-countdown ${TURN_SKIP_MS}ms 0s linear forwards`,
                         }}
                     />
                 </div>

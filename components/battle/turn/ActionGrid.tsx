@@ -169,10 +169,10 @@ export function ActionGrid({
                         onClick={turn.strikeAndReturn.run}
                     />
                 )}
-                {turn.moraleResult && (
+                {turn.gateResult && (
                     <Tile
                         icon={Hourglass}
-                        label={tm(`outcome.${turn.moraleResult}`)}
+                        label={tm(`outcome.${turn.gateResult}`)}
                         used
                     />
                 )}

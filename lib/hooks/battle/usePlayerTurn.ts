@@ -13,8 +13,8 @@ import { coreActionsOn } from '@/lib/utils/battle/actions/access';
 import { canAttackFromPool } from '@/lib/utils/battle/attack/attacks-left';
 import {
     initialTurnFlow,
-    MORALE_SKIP_MS,
     moraleOutcome,
+    TURN_SKIP_MS,
     turnFlow,
 } from '@/lib/utils/battle/flows';
 import { checkReturnToStart } from '@/lib/utils/battle/grid';
@@ -48,7 +48,7 @@ export function usePlayerTurn(
     const [state, dispatch] = useReducer(turnFlow, initialTurnFlow, (s) =>
         turnFlow(s, {
             type: 'BEGIN',
-            needsMorale: needsMoraleCheck(
+            gated: needsMoraleCheck(
                 participant,
                 scene.battle.initiativeOrder,
                 scene.battle.pendingMoraleCheck
@@ -61,8 +61,8 @@ export function usePlayerTurn(
     const pending = scene.battle
         .pendingMoraleCheck as PendingMoraleCheckPayload | null;
 
-    const moraleResult =
-        state.moraleResult ??
+    const gateResult =
+        state.gateResult ??
         (pending?.participantId === id
             ? moraleOutcome(pending.moraleResult)
             : undefined);
@@ -117,7 +117,7 @@ export function usePlayerTurn(
     };
 
     const endTurn = async () => {
-        if (!participant.actionFlags.hasUsedAction && moraleResult !== 'skip') {
+        if (!participant.actionFlags.hasUsedAction && gateResult !== 'skip') {
             const ok = await confirm({
                 title: t('endTurnTitle'),
                 description: t('endTurnDescription'),
@@ -163,7 +163,7 @@ export function usePlayerTurn(
 
             const result = moraleOutcome(res?.moraleResult);
 
-            dispatch({ type: 'MORALE_RESULT', result });
+            dispatch({ type: 'GATE_RESULT', result });
 
             const base = {
                 name: participant.basicInfo.name,
@@ -196,7 +196,7 @@ export function usePlayerTurn(
                             { expectedVersion },
                             { onError: () => dispatch({ type: 'RECOVER' }) }
                         ),
-                    MORALE_SKIP_MS
+                    TURN_SKIP_MS
                 );
             } else
                 scene.toast.show(
@@ -224,13 +224,13 @@ export function usePlayerTurn(
 
     return {
         phase: state.phase,
-        moraleResult,
+        gateResult,
         status: {
             actionUsed: participant.actionFlags.hasUsedAction,
             attackLeft: canAttackFromPool(participant),
             bonusAvailable: !participant.actionFlags.hasUsedBonusAction,
             bonusSpellReady: canCastBonusSpell(participant, bonusSpells),
-            skipped: moraleResult === 'skip',
+            skipped: gateResult === 'skip',
         },
         actions,
         strikeAndReturn,

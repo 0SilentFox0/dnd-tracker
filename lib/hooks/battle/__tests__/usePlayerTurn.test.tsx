@@ -20,7 +20,7 @@ describe('usePlayerTurn', () => {
 
         const { result } = renderHook(() => usePlayerTurn(me), { wrapper });
 
-        expect(result.current.phase).toBe('morale');
+        expect(result.current.phase).toBe('gate');
 
         await act(async () => result.current.actions.rollMorale(9));
 
@@ -263,7 +263,7 @@ describe('usePlayerTurn', () => {
         expect(
             renderHook(() => usePlayerTurn(plain.me), {
                 wrapper: plain.wrapper,
-            }).result.current.moraleResult
+            }).result.current.gateResult
         ).toBeUndefined();
 
         const checked = fakeScene({ morale: 2 });
@@ -284,6 +284,6 @@ describe('usePlayerTurn', () => {
         });
 
         expect(result.current.phase).toBe('acting');
-        expect(result.current.moraleResult).toBe('extra');
+        expect(result.current.gateResult).toBe('extra');
     });
 });

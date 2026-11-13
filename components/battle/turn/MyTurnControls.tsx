@@ -188,7 +188,7 @@ export function MyTurnControls({
 
     const full = (
         <>
-            {turn.phase === 'morale' && (
+            {turn.phase === 'gate' && (
                 <div className="pt-3">
                     <div className="hud-sc text-lg font-bold">
                         {tm('checkD10')}

@@ -35,7 +35,7 @@ describe('намір атаки з карти', () => {
     });
 
     it('не у фазі дії, дія використана або хід пропущено — не споживається', () => {
-        expect(canConsumeIntent(intent, { ...turn, phase: 'morale' })).toBe(
+        expect(canConsumeIntent(intent, { ...turn, phase: 'gate' })).toBe(
             false
         );
         expect(canConsumeIntent(intent, { ...turn, actionUsed: true })).toBe(

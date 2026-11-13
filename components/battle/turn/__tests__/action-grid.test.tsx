@@ -7,10 +7,10 @@ import { render } from '@/lib/i18n/test/render-uk';
 
 vi.unmock('next-intl');
 
-const turn = (skipped: boolean, moraleResult?: 'extra' | 'skip' | 'none') =>
+const turn = (skipped: boolean, gateResult?: 'extra' | 'skip' | 'none') =>
     ({
         phase: 'acting',
-        moraleResult,
+        gateResult,
         status: { actionUsed: false, bonusAvailable: true, skipped },
         strikeAndReturn: { available: false, run: vi.fn() },
         actions: {

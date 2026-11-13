@@ -1,25 +1,25 @@
 import type { MoraleCheckResult } from '@/lib/utils/battle/morale/threshold';
 
-export type MoraleOutcome = 'extra' | 'skip' | 'none';
+export type TurnGateOutcome = 'extra' | 'skip' | 'none';
 
 export function moraleOutcome(
     r:
         | Pick<MoraleCheckResult, 'hasExtraTurn' | 'shouldSkipTurn'>
         | null
         | undefined
-): MoraleOutcome {
+): TurnGateOutcome {
     return r?.hasExtraTurn ? 'extra' : r?.shouldSkipTurn ? 'skip' : 'none';
 }
 
 export interface TurnFlowState {
-    phase: 'waiting' | 'morale' | 'acting' | 'countdown' | 'ended';
+    phase: 'waiting' | 'gate' | 'acting' | 'countdown' | 'ended';
     stayed: boolean;
-    moraleResult?: MoraleOutcome;
+    gateResult?: TurnGateOutcome;
 }
 
 export type TurnFlowAction =
-    | { type: 'BEGIN'; needsMorale: boolean }
-    | { type: 'MORALE_RESULT'; result: MoraleOutcome }
+    | { type: 'BEGIN'; gated: boolean }
+    | { type: 'GATE_RESULT'; result: TurnGateOutcome }
     | { type: 'EXHAUSTED' }
     | { type: 'STAY' }
     | { type: 'END' }
@@ -32,21 +32,21 @@ export const initialTurnFlow: TurnFlowState = {
 
 export const COUNTDOWN_SECONDS = 5;
 
-export const MORALE_SKIP_MS = 4_000;
+export const TURN_SKIP_MS = 4_000;
 
 export function turnFlow(s: TurnFlowState, a: TurnFlowAction): TurnFlowState {
     switch (a.type) {
         case 'BEGIN':
             return {
-                phase: a.needsMorale ? 'morale' : 'acting',
+                phase: a.gated ? 'gate' : 'acting',
                 stayed: false,
             };
-        case 'MORALE_RESULT':
-            return s.phase === 'morale'
+        case 'GATE_RESULT':
+            return s.phase === 'gate'
                 ? {
                       ...s,
                       phase: a.result === 'skip' ? 'ended' : 'acting',
-                      moraleResult: a.result,
+                      gateResult: a.result,
                   }
                 : s;
         case 'EXHAUSTED':
