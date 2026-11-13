@@ -19,9 +19,9 @@ Skills, races, artifacts, sets and units share one model in `lib/utils/abilities
 
 ## Refactor constants та read projection
 
-Rule default values належать `DEFAULT_RULES`; rules schema зберігає validation/fallback/patch semantics, `MECHANIC_REGISTRY` — перелік механік і labels. Domain constants не об'єднано за самим числом; gameplay defaults/formulas не змінено.
+Rule default values: пункти секцій правил мають дефолти в `SECTION_DEFAULTS` (`lib/utils/rules/defaults.ts`, без `system`); `DEFAULT_RULES` — лише тестова фікстура (нетестовий код її не імпортує, ESLint), а продакшн бере правила кампанії/бою. Секції й ефекти мають власників (core, база, модуль): d20 — `classes/criticals/saves/deathSaves/concentration/conditions/actions/formulas/initiative`, `morale`/`heroscaling`/`retaliation` — свої секції й ефекти (`module-effects`), wfrp — `advancement/tables`; читати `rules.<секція>` у core не можна (лічильник `RULES_SECTION_READERS` = 0), лише через хуки композиції. Rules schema зберігає validation/fallback/patch semantics, `MECHANIC_REGISTRY` — перелік механік і labels. Domain constants не об'єднано за самим числом; gameplay defaults/formulas не змінено.
 
-`abilities.sources/get` у content operation service підтримує campaign-scoped class/feat owners. Клас віддає прямі abilities base/subclass features через canonical class reader; опційні choices і level eligibility далі належать character derivation. Ця read projection не є другим ability registry чи writer.
+`abilities.sources` (`lib/server/content/operation-service.ts`) — таблиця `{ source, contentKind, load }` із фільтром `isKindActive(contentKind, actor)` (D15): джерело, чий вид належить модулю поза композицією кампанії, не завантажується. `abilities.sources/get` у content operation service підтримує campaign-scoped class/feat owners. Клас віддає прямі abilities base/subclass features через canonical class reader; опційні choices і level eligibility далі належать character derivation. Ця read projection не є другим ability registry чи writer.
 
 Class/feat джерела копіювання підтримуються наскрізно: `AbilitySourceRef`, labels у `AbilityCopySourcePicker`, discovery/owner service та OpenAPI descriptions. Client callback передає abilities; class/feat picker regressions і guarded content-storage SQL перевіряють ці межі окремо.
 

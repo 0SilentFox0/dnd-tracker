@@ -114,7 +114,7 @@
 
 - Вид `careers` (`/careers`, `careerId`): `name`, `icon?`, `class?`, `tiers` (рівно 4: `name`, `status?`, `characteristics[]`, `skills[]`, `talents[]` — id рис кампанії, `trappings[]`); список — для учасників, елемент і зміни — лише ДМ (`defineResource`, REST/MCP `content_*`). Відмови: `CAREER_NAME_TAKEN` (409), `CAREER_IN_USE` (409, герой тримає кар'єру), `FOREIGN_FEAT` (400). Кеш — `ReferenceKind.CAREERS`.
 - Імпорт/експорт CSV — лише плоскі колонки `tier{1..4}_*`; без шарів/source-sync/compendium-import. Маршрути кар'єр поза OpenAPI-документом.
-- Операції героя `career-set`, `career-advance` — [rule-systems.md](rule-systems.md#межі-5e-2). Міграція `20261125000000_careers`.
+- Операції героя `career-set`, `career-advance` — [архів, «Межі 5e-2»](../archive/architecture/rule-systems-history-2026-11.md). Міграція `20261125000000_careers`.
 
 ## Імпорт і експорт (етап 4f-0)
 
@@ -159,7 +159,7 @@
 
 ### Мова контенту офіційних шаблонів
 
-Локалізовані офіційні шаблони визначає `localizationOf` над `TEMPLATE_REGISTRY` (`lib/utils/templates/registry.ts`; манифест із двома й більше `locales`): SRD 5.2, Grim d100 і Heroes (усі `en/uk`). Для кожного `templateKey` канонічний — один офіційний англійський шаблон; словники лежать у `data/templates/<template>/i18n/uk.json`, CLI — `pnpm template i18n <cmd> <key> <locale>` (`srd-5.2` / `grim-d100`; скрипт `srd:i18n` видалено в E1); `apply` відмовляє при колізіях імен і нерезолвлених списках заклинань. Нижче описано SRD; Grim працює так само, додатково локалізуючи кар'єри, `rules.tables[*].text` і списки заклинань (псевдовид `lists`, `PACK_LIST_KIND`; ключі словника `lists/<slug>/name`; межі — «Межі 5g-4» у [rule-systems.md](rule-systems.md)).
+Локалізовані офіційні шаблони визначає `localizationOf` над `TEMPLATE_REGISTRY` (`lib/utils/templates/registry.ts`; манифест із двома й більше `locales`): SRD 5.2, Grim d100 і Heroes (усі `en/uk`). Для кожного `templateKey` канонічний — один офіційний англійський шаблон; словники лежать у `data/templates/<template>/i18n/uk.json`, CLI — `pnpm template i18n <cmd> <key> <locale>` (`srd-5.2` / `grim-d100`; скрипт `srd:i18n` видалено в E1); `apply` відмовляє при колізіях імен і нерезолвлених списках заклинань. Нижче описано SRD; Grim працює так само, додатково локалізуючи кар'єри, `rules.tables[*].text` і списки заклинань (псевдовид `lists`, `PACK_LIST_KIND`; ключі словника `lists/<slug>/name`; межі — «Межі 5g-4» в [архіві](../archive/architecture/rule-systems-history-2026-11.md)).
 
 Англійський офіційний `5e SRD 5.2` — єдине джерело; `uk` накладається під час створення клону та source-sync. Спек: `docs/superpowers/specs/2026-10-31-srd-template-overlay-design.md`.
 
@@ -231,7 +231,7 @@
 
 ## JSON-компендіуми: backend Task19 (4f-6)
 
-`lib/server/compendium-import/` доповнює CSV bounded 5etools adapter, source+edition identity, generic entry fallback і звіт manual/partial/native. `previewImport` підписує actor/campaign/plan digest з TTL15min, `confirmImport` повторно авторизує й перебудовує план під Campaign lock; idempotency report зберігається разом із native content/provenance/rules. HTTP upload і UI Task20 реалізовано нижче. Не викликати confirm без актуального preview й session DM.
+`lib/server/compendium-import/` доповнює CSV bounded 5etools adapter, source+edition identity, generic entry fallback і звіт manual/partial/native. `previewImport` підписує actor/campaign/plan digest з TTL15min, `confirmImport` повторно авторизує й перебудовує план під Campaign lock; idempotency report зберігається разом із native content/provenance/rules. HTTP upload і UI Task20 реалізовано нижче. Не викликати confirm без актуального preview й session DM. **D15:** план пропускає рядки виду, чий власник — модуль поза композицією кампанії, з попередженням `KIND_INACTIVE` (ключ у `messages/*/compendium{,Report}.json`); `loadContext` приймає `activeKinds`.
 
 `withCampaignContentWrite` та AsyncLocal transaction context зберігають існуючі resource guards всередині tx; CRUD/CSV/rules/scenario/sync ділять Campaign lock, cache invalidation після commit. Зовнішня підготовка artifact media — до tx. `CompendiumEntry` містить source attribution, baseline власних полів, bindings і notes окремо від template sourceId/sourceHash. Nested provenance не захоплює сусідні підраси. Повторний імпорт зберігає IDs і локальні зміни; немає автоматичного видалення відсутніх записів.
 
@@ -299,7 +299,7 @@ Legacy content tool names збережено, але записи проходя
 
 Class/feat writers перевіряють нові nested choice spell refs через `assertCampaignRefs` у scoped transaction; update використовує `addedIds`, тому старі stale refs не блокують metadata-only save. Class column guard окремо перевіряє stored features при зміні columns. DELETE usage409 класів/рис/передісторій задокументовано в OpenAPI.
 
-`abilities.sources/get` обслуговує всі OwnerKind, включно з class/feat, у межах кампанії. Class projection збирає прямі abilities base/subclass features через `toGameClassData`, не вибирає option grants і не застосовує їх персонажу; feat використовує чинний `readAbilities`.
+`abilities.sources` фільтрується за активністю виду (D15, `isKindActive`, `lib/server/content/kind-active.ts`); системні маршрути `/system/<action>` працюють без `rewrites` (старі URL і `next.config.ts` `rewrites()` прибрано в Ч17; редирект `/dm/careers` теж). `abilities.sources/get` обслуговує всі OwnerKind, включно з class/feat, у межах кампанії. Class projection збирає прямі abilities base/subclass features через `toGameClassData`, не вибирає option grants і не застосовує їх персонажу; feat використовує чинний `readAbilities`.
 
 Compendium orchestration — `adapt.ts`, nested class/optional feature resolution — `feature-resolution.ts`, без іншого adapter registry. SQL export→import→source-update roundtrip і5warm/30sample measurements — [S9 checkpoint](../archive/superpowers/plans/2026-10-26-constructor-refactor-s9-progress.md). Реальна source contention підтверджує NOWAIT refusal до intent; tool transport повертає sanitized500. API/MCP ids/payloads і persisted JSON сумісні; writer validation defects виправлено окремо від extraction.
 
