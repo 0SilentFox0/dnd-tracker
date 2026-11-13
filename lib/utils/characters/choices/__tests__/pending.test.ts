@@ -252,6 +252,46 @@ describe('pendingIssues', () => {
         expect(nested.some((i) => /^feats\.0\./.test(i.path))).toBe(true);
     });
 
+    it('a spell choice with fewer listed spells than count is capped to the available ones', () => {
+        const state = { ...empty, ...sorc(1) };
+
+        const visits = visitPicks(state, { ...refs, race: null }, {
+            level: 1,
+            classMode: true,
+        });
+
+        const none = pendingIssues(visits, { ...refs, spellsById: {} });
+
+        expect(none.some((i) => i.path.endsWith('.cantrips'))).toBe(false);
+
+        const cantrip = Object.values(refs.spellsById).find(
+            (s) => s.level === 0 && s.lists.includes('Sorcerer')
+        )!;
+
+        const one = pendingIssues(visits, {
+            ...refs,
+            spellsById: { [cantrip.id]: cantrip },
+        });
+
+        expect(one.some((i) => i.path.endsWith('.cantrips'))).toBe(true);
+
+        const full = visitPicks(
+            {
+                ...empty,
+                ...sorc(1, { cantrips: [{ id: cantrip.id }] }),
+            },
+            { ...refs, race: null },
+            { level: 1, classMode: true }
+        );
+
+        expect(
+            pendingIssues(full, {
+                ...refs,
+                spellsById: { [cantrip.id]: cantrip },
+            }).some((i) => i.path.endsWith('.cantrips'))
+        ).toBe(false);
+    });
+
     it('an unreachable spell choice is skipped; a full set is empty', () => {
         const high = {
             ...sorcerer,

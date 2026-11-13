@@ -112,6 +112,17 @@ describe('withBatchedContentBump', () => {
         expect(h.tx.campaign.update).not.toHaveBeenCalled();
     });
 
+    it('a failing final bump does not mask the primary error', async () => {
+        await expect(
+            withBatchedContentBump('c1', async () => {
+                await withCampaignContentWrite('c1', async () => 1);
+                h.tx.campaign.update.mockRejectedValueOnce(new Error('bump'));
+
+                throw new Error('primary');
+            })
+        ).rejects.toThrow('primary');
+    });
+
     it('bumps in finally when a later step throws', async () => {
         await expect(
             withBatchedContentBump('c1', async () => {

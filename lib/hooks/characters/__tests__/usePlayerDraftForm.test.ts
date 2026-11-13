@@ -229,9 +229,23 @@ describe('usePlayerDraftForm', () => {
             'raceChoices.elven-lineage',
             'raceChoices.keen-senses',
         ]);
+        result.current.submit.choiceIssues.forEach((i) => {
+            expect(i.message).toContain('errors.choiceIncomplete');
+            expect(i.message).not.toBe('errors.choiceIncomplete');
+        });
         expect(result.current.submit.error).toBe(
             'characters.draft.choicesIncomplete'
         );
+
+        act(() =>
+            result.current.choices.set({
+                ...result.current.choices.data,
+                raceChoices: { 'elven-lineage': [{ id: 'drow' }] },
+            })
+        );
+
+        expect(result.current.submit.choiceIssues).toEqual([]);
+        expect(result.current.submit.error).toBeNull();
         expect(createDraft).not.toHaveBeenCalled();
     });
 

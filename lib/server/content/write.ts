@@ -94,10 +94,23 @@ export async function withBatchedContentBump<T>(
 
     const batch = { campaignId, dirty: false };
 
+    let failed = false;
+
     try {
         return await bumpBatch.run(batch, fn);
+    } catch (error) {
+        failed = true;
+        throw error;
     } finally {
-        if (batch.dirty)
-            await withCampaignContentWrite(campaignId, async () => undefined);
+        if (batch.dirty) {
+            const bump = withCampaignContentWrite(
+                campaignId,
+                async () => undefined
+            );
+
+            // a bump error must not mask the primary error of fn
+            if (failed) await bump.catch(() => undefined);
+            else await bump;
+        }
     }
 }

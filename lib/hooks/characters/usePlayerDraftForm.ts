@@ -17,12 +17,15 @@ import { draftPortraitsQuery, useDraftPortraits } from './useDraftPortraits';
 import { type RollStep, useRollReveal } from './useRollReveal';
 
 import { createDraft, updateDraft } from '@/lib/api/characters';
+import { ApiError } from '@/lib/api/client';
 import { ABILITY_KEYS, type AbilityKey } from '@/lib/constants/abilities';
 import { ALIGNMENTS } from '@/lib/constants/alignment';
 import { HERO_ARCHETYPE_KEYS } from '@/lib/constants/hero-archetypes';
 import { useClassMode } from '@/lib/hooks/classes';
 import { useRaces } from '@/lib/hooks/races';
 import type { Locale } from '@/lib/i18n/config';
+import { translateIssue } from '@/lib/i18n/translate-issue';
+import { useTranslator } from '@/lib/i18n/use-translator';
 import { pendingIssues } from '@/lib/utils/characters/choices/pending';
 import {
     draftChoicesState,
@@ -73,6 +76,8 @@ export function usePlayerDraftForm({
     const locale = useLocale() as Locale;
 
     const t = useTranslations('characters.draft');
+
+    const tRoot = useTranslator();
 
     const tArchetype = useTranslations('characters.archetypes');
 
@@ -424,6 +429,14 @@ export function usePlayerDraftForm({
                 ? updateDraft(campaignId, characterId, body)
                 : createDraft(campaignId, body);
         },
+        onError: (e) => {
+            const issues = (e instanceof ApiError ? e.body : undefined) as
+                | { issues?: unknown }
+                | undefined;
+
+            if (Array.isArray(issues?.issues))
+                setChoiceIssues(issues.issues as ChoiceIssue[]);
+        },
         onSuccess: async () => {
             await queryClient.invalidateQueries({
                 queryKey: characterKeys.sheet(campaignId),
@@ -457,7 +470,12 @@ export function usePlayerDraftForm({
               )
             : [];
 
-        setChoiceIssues(issues);
+        setChoiceIssues(
+            issues.map((issue) => ({
+                ...issue,
+                message: translateIssue(tRoot, issue),
+            }))
+        );
 
         if (issues.length > 0) {
             setValidationError(t('choicesIncomplete'));
@@ -515,11 +533,14 @@ export function usePlayerDraftForm({
                 values.choices,
                 classBased ? values.classId : undefined
             ),
-            set: (next: ChoicesState) =>
+            set: (next: ChoicesState) => {
+                setChoiceIssues([]);
+                setValidationError(null);
                 setValues((prev) => ({
                     ...prev,
                     choices: stateDraftChoices(next),
-                })),
+                }));
+            },
             enabled: classBased,
         },
         generate: {

@@ -42,20 +42,65 @@ const unreachable = (v: PickVisit): boolean => {
     );
 };
 
-const missing = (v: PickVisit, refs: Pick<ChoiceRefs, 'featsById'>): number =>
-    v.open && !unreachable(v) ? Math.max(0, v.target - resolved(v, refs)) : 0;
+type PendingRefs = Pick<ChoiceRefs, 'featsById'> &
+    Partial<Pick<ChoiceRefs, 'spellsById'>>;
+
+/** how many picks the campaign can actually offer; Infinity when it is not bounded by a list */
+function availableCount(v: PickVisit, refs: PendingRefs): number {
+    const { choice } = v;
+
+    if (choice.kind === 'spell' && choice.spells && refs.spellsById) {
+        const { lists, minLevel, maxLevel } = choice.spells;
+
+        const max = maxLevel === 'slots' ? (v.maxSlotLevel ?? 0) : maxLevel;
+
+        return Object.values(refs.spellsById).filter(
+            (s) =>
+                s.level >= minLevel &&
+                s.level <= max &&
+                (lists.length === 0 || s.lists.some((l) => lists.includes(l)))
+        ).length;
+    }
+
+    if (choice.kind === 'feat') {
+        const types = choice.featTypes ?? [];
+
+        return (
+            (choice.options?.length ?? 0) +
+            Object.values(refs.featsById).filter((f) => types.includes(f.type))
+                .length
+        );
+    }
+
+    return Infinity;
+}
+
+const missing = (
+    v: PickVisit,
+    refs: PendingRefs,
+    capToAvailable = false
+): number => {
+    if (!v.open || unreachable(v)) return 0;
+
+    const target = capToAvailable
+        ? Math.min(v.target, availableCount(v, refs))
+        : v.target;
+
+    return Math.max(0, target - resolved(v, refs));
+};
 
 export const pendingCount = (
     visits: readonly PickVisit[],
     refs: Pick<ChoiceRefs, 'featsById'>
 ): number => visits.reduce((sum, v) => sum + missing(v, refs), 0);
 
+/** for requireComplete: a choice the campaign cannot fill (fewer options than count) never blocks */
 export const pendingIssues = (
     visits: readonly PickVisit[],
-    refs: Pick<ChoiceRefs, 'featsById'>
+    refs: PendingRefs
 ): ChoiceIssue[] =>
     visits
-        .filter((v) => missing(v, refs) > 0)
+        .filter((v) => missing(v, refs, true) > 0)
         .map((v) => choiceIssue(v.path, 'CHOICE_INCOMPLETE', v.choice.label));
 
 const isBackgroundVisit = (v: PickVisit): boolean =>
