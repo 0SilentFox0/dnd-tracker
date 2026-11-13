@@ -2,7 +2,6 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { AbbreviationsInfoDialog } from '@/components/common/AbbreviationsInfoDialog';
 import { ColorField } from '@/components/common/ColorField';
 import { ColorSwatch } from '@/components/common/ColorSwatch';
 import { ImportDialog } from '@/components/common/ImportDialog';
@@ -72,12 +71,6 @@ describe('common components use translation keys', () => {
         expect(
             screen.getByPlaceholderText('common.renameGroup.placeholder')
         ).toBeTruthy();
-    });
-
-    it('AbbreviationsInfoDialog', () => {
-        render(<AbbreviationsInfoDialog />);
-
-        expect(screen.getByText('gameTerms.abbreviations.srOnly')).toBeTruthy();
     });
 
     it('WeaponTraitsField', () => {
