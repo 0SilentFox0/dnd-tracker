@@ -28,7 +28,10 @@ import {
     INVITE_CODE_ATTEMPTS,
     isInviteCodeClash,
 } from '@/lib/utils/campaigns/invite-code';
-import { localizedDefaultAttacks } from '@/lib/utils/rules/defaults';
+import {
+    DEFAULT_RULES,
+    localizedDefaultAttacks,
+} from '@/lib/utils/rules/defaults';
 import { initialRules } from '@/lib/utils/rules/initial-rules';
 import { parseRules, type Ruleset } from '@/lib/utils/rules/schema';
 import type { SystemSelection } from '@/lib/utils/rules/systems/catalog';
@@ -106,8 +109,13 @@ function campaignData(
                         }),
                     }) as Prisma.InputJsonObject,
                 }
-              : input.defaultAttacks && {
-                    rules: { defaultAttacks: input.defaultAttacks },
+              : {
+                    rules: {
+                        ...(input.defaultAttacks && {
+                            defaultAttacks: input.defaultAttacks,
+                        }),
+                        system: { key: DEFAULT_RULES.system.key },
+                    },
                 }),
         ...(input.bundle?.credits !== undefined && {
             credits: input.bundle.credits,

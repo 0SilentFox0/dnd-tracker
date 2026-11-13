@@ -28,6 +28,7 @@ import {
     loadTemplateForUser,
 } from '@/lib/server/campaigns/create-campaign';
 import { type Bundle, TemplateLeakError } from '@/lib/server/templates/bundle';
+import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
 
 const bundle = {
     formatVersion: 1,
@@ -94,7 +95,7 @@ describe('createCampaignFromBundle', () => {
         expect(m.importBundle).not.toHaveBeenCalled();
     });
 
-    it('без бандла у rules зберігається лише defaultAttacks', async () => {
+    it('без бандла у rules зберігаються defaultAttacks і типовий ключ системи', async () => {
         m.db.campaign.create.mockResolvedValue({ id: 'c1' });
 
         const defaultAttacks = {
@@ -112,6 +113,7 @@ describe('createCampaignFromBundle', () => {
 
         expect(m.db.campaign.create.mock.calls[0][0].data.rules).toEqual({
             defaultAttacks,
+            system: { key: DEFAULT_RULES.system.key },
         });
     });
 

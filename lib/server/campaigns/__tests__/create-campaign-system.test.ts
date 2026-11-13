@@ -17,7 +17,11 @@ vi.mock('@/lib/i18n/translator', () => ({
 }));
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
-import { createCampaignForUser } from '@/lib/server/campaigns/create-campaign';
+import {
+    createCampaignForUser,
+    createCampaignFromBundle,
+} from '@/lib/server/campaigns/create-campaign';
+import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
 
 const rulesOf = () => m.db.campaign.create.mock.calls[0][0].data.rules;
 
@@ -59,9 +63,28 @@ describe('createCampaignForUser with a system selection', () => {
         expect(m.db.campaign.create).not.toHaveBeenCalled();
     });
 
-    it('without a system keeps the defaultAttacks-only rules', async () => {
+    it('without a template or system stores the default key beside defaultAttacks', async () => {
         await createCampaignForUser('u1', { name: 'N' });
 
-        expect(Object.keys(rulesOf())).toEqual(['defaultAttacks']);
+        expect(rulesOf()).toEqual({
+            defaultAttacks: {
+                meleeName: 'defaultNames.meleeAttack',
+                rangedName: 'defaultNames.rangedAttack',
+                weaponName: 'defaultNames.weapon',
+            },
+            system: { key: DEFAULT_RULES.system.key },
+        });
+    });
+
+    it('without defaultAttacks the rules still carry the system', async () => {
+        await createCampaignFromBundle({
+            userId: 'u1',
+            name: 'N',
+            bundle: null,
+        });
+
+        expect(rulesOf()).toEqual({
+            system: { key: DEFAULT_RULES.system.key },
+        });
     });
 });
