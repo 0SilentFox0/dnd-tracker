@@ -95,7 +95,7 @@ Core бачить `systems/*` лише через корені (`SYSTEM_ROOTS`, 
 - `system-imports-exempt.json` = `[]` (було 18 в E1, 1 до Ч17).
 - `system-literals-exempt.json`: 15 файлів / 56 влучань, лише сховища даних і тексти (`log/codec.ts`, `site.ts`, `whats-new.ts`, `scripts/assets/*`, `scripts/srd/lib/*`, сиди, фікстура `defaults.ts`, назва кубика `'d20'` у `types/characters.ts` і `SheetRollDialog.tsx`). Зростання 29 → 56 влучань у Ч17 — не регрес: пресет `homm` отримав `tokens: ["homm"]`, і скан вперше рахує дані/активи (`build-icon-prompts` 24, `seed-homm5-characters` 7 та ін.); файли core пішли вниз.
 - `RULES_SECTION_READERS` (читання `rules.<секція>` у core) = 0 за всіма секціями (пункти, які тримає core, як `encounters.balance/unitGroups`, не рахуються: `OWNED_ITEMS`).
-- `LEAK_NAMES`: `isFiveE` 0; поля колишнього dual-read (`channelledSl`, `conditionTests`, `psychologyTested`, `attackedWithLight`, `inspirationSpent`, `retaliationsUsed`) = 1 кожне, лише `scripts/db/lib/battle-state-shapes.ts` (піде з forward-скриптом у Ч18); `HOMM_[A-Z]+` 2 (профілі sweep, виключення зі скану — E3); **`CONDITION_5E_` 11** (словник станів у схемі ефектів core) → E3.
+- `LEAK_NAMES`: `isFiveE` 0; поля колишнього dual-read (`channelledSl`, `conditionTests`, `psychologyTested`, `attackedWithLight`, `inspirationSpent`, `retaliationsUsed`) = 0 (forward-скрипт і `battle-state-shapes` очищено в Ч18); `useChannelAction` 0; `HOMM_[A-Z]+` 0 (профілі sweep поза скан, Ч18); **`CONDITION_5E_` 11** (словник станів у схемі ефектів core) → E3.
 - Гард колонок статблока: 7 файлів (`effects/morale` 1, `attack/bonus` 1, `cunning-strike` 2, `hit-model` 1, `balance/stats` 1, `spell/ability-modifier` 2, `spell/power` 2), ціль 0 → E3.
 
 ## Як додати модуль

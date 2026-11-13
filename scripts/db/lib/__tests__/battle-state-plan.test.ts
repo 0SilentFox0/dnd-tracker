@@ -4,9 +4,9 @@ import { hashJson } from '@/lib/utils/battle/store/stable-json';
 import {
     buildReport,
     formatReport,
+    isIdle,
     parseReportArgs,
     type SceneRow,
-    snapshotFileName,
     type StoredRow,
     summarizeReports,
     systemLabel,
@@ -44,8 +44,7 @@ const stored = (
     isPending,
 });
 
-const legacy = () =>
-    stored('p1', { battleData: { fortune: 2 } }, { activeEffects: [] });
+const plain = () => stored('p1', { battleData: {} }, { activeEffects: [] });
 
 const slot = () =>
     stored(
@@ -61,20 +60,31 @@ describe('parse args', () => {
             campaignIds: [],
             json: false,
             allowRemote: false,
-            expectClean: false,
+            expectIdle: false,
         }));
 
     it('report reads values and flags', () =>
         expect(
-            parseReportArgs(['--status', 'all', '--campaign', 'a, b', '--json'])
+            parseReportArgs([
+                '--status',
+                'all',
+                '--campaign',
+                'a, b',
+                '--json',
+                '--expect-idle',
+            ])
         ).toMatchObject({
             status: 'all',
             campaignIds: ['a', 'b'],
             json: true,
+            expectIdle: true,
         }));
 
     it('rejects unknown options, bad status and missing values', () => {
         expect(() => parseReportArgs(['--nope'])).toThrow('Невідома опція');
+        expect(() => parseReportArgs(['--expect-clean'])).toThrow(
+            'Невідома опція'
+        );
         expect(() => parseReportArgs(['--status', 'x'])).toThrow('--status');
         expect(() => parseReportArgs(['--campaign'])).toThrow('потребує');
     });
@@ -98,7 +108,7 @@ describe('buildReport', () => {
     const reports = () =>
         buildReport(
             [scene()],
-            [legacy(), slot(), stored('p3', { battleData: {} }, {}, true)],
+            [plain(), slot(), stored('p3', { battleData: {} }, {}, true)],
             [
                 {
                     battleId: 'b1',
@@ -119,14 +129,14 @@ describe('buildReport', () => {
 
         expect(r.participants).toBe(2);
         expect(r.pending).toBe(1);
-        expect(r.shapes).toEqual({ none: 1, legacy: 1, slot: 1, mixed: 0 });
-        expect(r.fields).toEqual({ fortune: { slot: 1, legacy: 1 } });
-        expect(r.history).toEqual({ rows: 2, withSlot: 1, withLegacy: 0 });
+        expect(r.shapes).toEqual({ none: 2, slot: 1 });
+        expect(r.fields).toEqual({ fortune: 1 });
+        expect(r.history).toEqual({ rows: 2, withSlot: 1 });
         expect(r.hashMismatch).toBe(0);
     });
 
     it('counts hash mismatches', () => {
-        const row = { ...legacy(), snapshotHash: 'bad' };
+        const row = { ...plain(), snapshotHash: 'bad' };
 
         const [r] = buildReport([scene()], [row], []);
 
@@ -147,7 +157,7 @@ describe('buildReport', () => {
     it('formats lines with pauses and summarizes', () => {
         const [r] = buildReport(
             [scene({ pendingChoice: true })],
-            [legacy()],
+            [slot()],
             []
         );
 
@@ -155,24 +165,27 @@ describe('buildReport', () => {
 
         expect(text).toContain('pendingChoice');
         expect(text).toContain('version 7');
-        expect(text).toContain('fortune 0/1');
+        expect(text).toContain('fortune 1');
 
         expect(summarizeReports(reports())).toMatchObject({
             scenes: 1,
             activeScenes: 1,
             campaigns: 1,
-            shapes: { none: 1, legacy: 1, slot: 1, mixed: 0 },
+            shapes: { none: 2, slot: 1 },
         });
     });
 });
 
-describe('snapshotFileName', () => {
-    it('has no colons', () =>
-        expect(
-            snapshotFileName(
-                'localhost',
-                'db',
-                new Date('2026-11-13T10:20:30Z')
-            )
-        ).toBe('localhost-db-2026-11-13T10-20-30.000Z.json'));
+describe('isIdle', () => {
+    const idle = (over: Partial<SceneRow>) =>
+        isIdle(summarizeReports(buildReport([scene(over)], [], [])));
+
+    it('is false for an active or paused scene', () => {
+        expect(idle({})).toBe(false);
+        expect(idle({ status: 'ended', pendingMorale: true })).toBe(false);
+        expect(idle({ status: 'ended', pendingChoice: true })).toBe(false);
+    });
+
+    it('is true for finished scenes without a pause', () =>
+        expect(idle({ status: 'ended' })).toBe(true));
 });
