@@ -18,7 +18,7 @@ export function SystemSection({
     const tTerms = useTranslations('gameTerms');
 
     return (
-        <HudSection title={t('system.label')}>
+        <HudSection title={t('system.label')} className="px-4 py-3">
             <p className="mb-3 text-sm text-hud-muted">
                 {t('system.description')}
             </p>
