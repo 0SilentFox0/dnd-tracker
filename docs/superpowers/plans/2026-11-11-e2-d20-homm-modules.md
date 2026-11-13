@@ -348,6 +348,8 @@
 
 ## Ч16. Шов створення режиму
 
+> **Виконано з відхиленнями (2026-11-13, `feat/e2-part16-mode-seam`).** `moduleCatalog()` уже був (Ч1): додано хелпери й тест «каталог = теки»; каталог не входить у `rules.get` (є `composition`); пресети правил і для баз d20/wfrp; перемикачі — негайна дія, не поле форми; UI створення кампанії без змін; підготовлений бій не блокує. Деталі — `docs/STATUS.md` («E2 Ч16») і `docs/architecture/rule-systems.md`.
+
 **Мета.** Набір модулів можна змінити в кампанії й задати при створенні без шаблону; повний екран-майстер — поза E2.
 
 **Обсяг.** `lib/utils/rules/systems/catalog.ts`, `lib/server/campaigns/**` (створення, патч правил), `lib/schemas/campaigns.ts`, `lib/api/campaigns.ts`, `lib/hooks/campaigns/**`, `components/rules/sections/SystemSection.tsx`, `lib/constants/api-errors.ts`, `messages/*/gameTerms.json`, `lib/onboarding/whats-new.ts`, `messages/*/whatsNew.json`, OpenAPI, AI-інструмент правил.
