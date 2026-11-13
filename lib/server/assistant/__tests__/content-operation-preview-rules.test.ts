@@ -31,6 +31,15 @@ describe('rules.update preview with modules', () => {
         );
     });
 
+    it('warns when a setup module changes heroes, not for a free one', () => {
+        expect(
+            preview({ system: { modules: ['heroscaling'] } })?.warnings
+        ).toEqual(['warnings.moduleSetup']);
+        expect(preview({ system: { modules: ['morale'] } })?.warnings).toEqual(
+            []
+        );
+    });
+
     it('drops confirm from the previewed changes', () => {
         const result = preview({
             system: { modules: ['morale'] },

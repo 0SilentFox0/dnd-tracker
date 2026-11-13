@@ -217,6 +217,8 @@ export function createContentOperationActions(
                         if (projected?.targets.length)
                             targets = projected.targets;
 
+                        if (projected) warnings.push(...projected.warnings);
+
                         let changes = projected?.changes ?? [
                             {
                                 target,

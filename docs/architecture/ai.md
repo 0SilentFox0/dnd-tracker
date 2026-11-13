@@ -84,6 +84,7 @@
 Міграція legacy contracts:
 
 - `content_*`, `get_rules/update_rules`, `get_skill_tree/save_skill_tree`, `source_diff/source_apply` зберігають імена/входи, але йдуть через canonical dispatcher; записи замість негайного CRUD повертають review/auto результат. Клієнти мають читати v2 envelope та явний внутрішній `kind`. Для великого legacy read перейти на еквівалентний `assistant_read` з projection pagination.
+- `rules.update` зі зміною модуля `toggle: 'setup'` (змінює розрахунок героїв) додає в прев'ю попередження `warnings.moduleSetup`; `confirm` відкидається прев'ю й діє лише у виконанні після схвалення пропозиції ДМ.
 - `propose_scenario_edit` вимагає `scenario:write` та готує `scenario.propose-edit`. До підтвердження немає окремого застосовного legacy proposal. Підтвердження створює й застосовує один proposal через єдиний T6 writer у scoped transaction; save, snapshot та receipt атомарні. Старі pending proposals підхоплюються session queue через `scenario.legacy-proposal`, без другого writer.
 - `propose_scene_slide` вимагає `show:write`, але старий payload не доводить явний запит/consent і не має trusted run claim: alias fail closed з поясненням переходу до редактора. Canonical `show.generate` потребує `explicitRequest`, human confirmation та trusted `caller.runId`; поточні T14 transports не створюють runId, тому paid action відмовляє до intent/provider. Run identity/retry/recovery належать T15. Поле `runId` від моделі цього не змінює. Чинна генерація людиною у native UI збережена.
 

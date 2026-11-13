@@ -28,6 +28,7 @@
     "sourceApply": "Dependencies are added automatically; attribution is updated for ignore too. The DM's ScenarioPage materials are not synced.",
     "importPartial": "The import may complete partially: errors and skips are returned for each row.",
     "manualSetup": "additionalSpells, equipment and gold are set up manually.",
+    "moduleSetup": "Changing this module changes the campaign's heroes (stats, levels or skills); applying it needs the DM's confirmation.",
     "importPartialDone": "The import completed partially; check the row errors in the report.",
     "battleDice": "Dice and random effects are computed only at execution time; the result is not known yet.",
     "battleClearHistory": "All battles of the campaign will be deleted together with their events and snapshots.",

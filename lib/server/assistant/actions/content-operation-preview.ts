@@ -13,6 +13,7 @@ import {
     parseRules,
     RulesetPatchSchema,
 } from '@/lib/utils/rules/schema';
+import { moduleChange } from '@/lib/utils/rules/systems/catalog';
 
 type Row = Record<string, unknown>;
 
@@ -22,7 +23,11 @@ export function operationPreview(
     input: Row,
     t: Translator,
     state: unknown
-): { changes: FieldChange[]; targets: TargetRef[] } | null {
+): {
+    changes: FieldChange[];
+    targets: TargetRef[];
+    warnings: string[];
+} | null {
     const root = asRecord(state),
         tables = asRecord(root.tables),
         body = asRecord(input.body);
@@ -37,6 +42,8 @@ export function operationPreview(
     });
 
     const changes: FieldChange[] = [];
+
+    const warnings: string[] = [];
 
     const field = (domain: string, row: Row, path: string, after: unknown) =>
         changes.push({
@@ -141,6 +148,9 @@ export function operationPreview(
                     merged.issues
                 );
 
+            if (moduleChange(before.system, merged.rules.system).setup.length)
+                warnings.push(t('warnings.moduleSetup'));
+
             const row = { ...before, id: 'rules', name: t('results.rules') };
 
             for (const key of Object.keys(patch)) {
@@ -172,6 +182,7 @@ export function operationPreview(
 
     return {
         changes,
+        warnings,
         targets: [
             ...new Map(
                 changes.map((change) => [
