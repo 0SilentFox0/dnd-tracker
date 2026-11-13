@@ -51,10 +51,7 @@ vi.mock('@/systems/wfrp/hooks', async (orig) => ({
         isPending: false,
     }),
 }));
-vi.mock('@/lib/hooks/common', async (orig) => ({
-    ...(await orig<object>()),
-    useConfirm: () => mocks.confirm,
-}));
+vi.mock('@/lib/hooks/common', () => ({ useConfirm: () => mocks.confirm }));
 vi.mock('@/components/ui/select-field', () => ({
     SelectField: ({
         value,

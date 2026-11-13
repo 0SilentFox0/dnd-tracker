@@ -9,7 +9,7 @@ import { AiRollButton } from '@/components/battle/hud/DiceInput';
 import type { ConditionTestPanelProps } from '@/components/systems/types';
 import { useText } from '@/lib/i18n/use-text';
 import { cn } from '@/lib/utils';
-import { useConditionTestPanel } from '@/systems/wfrp/hooks';
+import { useConditionTestPanel } from '@/systems/wfrp/hooks/useConditionTestPanel';
 
 const SOURCES = ['server', 'manual'] as const;
 
