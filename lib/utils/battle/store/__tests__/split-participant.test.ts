@@ -329,7 +329,7 @@ describe('moraleCap upgrade on read', () => {
             ...stored,
             snapshot: {
                 ...stored.snapshot,
-                abilities: { ...stored.snapshot.abilities, moraleCap: 0 },
+                abilities: { ...(stored.snapshot.abilities as object), moraleCap: 0 },
             },
         };
 

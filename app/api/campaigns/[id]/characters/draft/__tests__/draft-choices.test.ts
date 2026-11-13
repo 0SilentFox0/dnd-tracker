@@ -66,7 +66,7 @@ describe('draftChoiceFields', () => {
             features: [
                 {
                     ...sorcerer.features[0],
-                    choices: [{ ...sorcerer.features[0].choices[0], count: 1 }],
+                    choices: [{ ...sorcerer.features[0]!.choices![0]!, count: 1 }],
                 },
             ],
         };

@@ -260,7 +260,7 @@ describe('pendingIssues', () => {
                     ...sorcerer.features[0],
                     choices: [
                         {
-                            ...sorcerer.features[0].choices[1],
+                            ...sorcerer.features[0]!.choices![1]!,
                             id: 'high',
                             spells: {
                                 lists: ['Sorcerer'],
