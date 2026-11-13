@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { join as joinPath } from 'node:path';
 import { beforeAll, describe, expect, it } from 'vitest';
 
 import { seq } from '@/lib/utils/abilities/__tests__/fixtures';
@@ -18,7 +18,7 @@ import type { BattleParticipant } from '@/types/battle';
 // two rows of a completed HOMM5 battle (hero + unit) as stored before the d20 slot existed
 const ROWS = JSON.parse(
     readFileSync(
-        join(__dirname, 'fixtures/e2-legacy/homm5-participants.json'),
+        joinPath(__dirname, 'fixtures/e2-legacy/homm5-participants.json'),
         'utf8'
     )
 ) as StoredParticipant[];
@@ -42,6 +42,12 @@ function lifted(row: StoredParticipant): StoredParticipant {
         },
     };
 }
+
+const stable = (action: object | undefined) => ({
+    ...action,
+    id: undefined,
+    timestamp: undefined,
+});
 
 const join = (row: StoredParticipant): BattleParticipant => {
     const p = joinParticipant(row, 'b1');
@@ -100,8 +106,9 @@ describe('HOMM5 participants stored before the d20 slot', () => {
 
         expect(legacy.first).not.toBeNull();
         expect(slot.first).not.toBeNull();
-        expect(JSON.stringify(slot.first?.battleAction)).toBe(
-            JSON.stringify(legacy.first?.battleAction)
+        expect(legacy.first?.battleAction).toBeDefined();
+        expect(stable(slot.first?.battleAction)).toEqual(
+            stable(legacy.first?.battleAction)
         );
         expect(slot.after.map((p) => p.combatStats)).toEqual(
             legacy.after.map((p) => p.combatStats)

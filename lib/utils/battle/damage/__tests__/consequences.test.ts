@@ -5,6 +5,7 @@ import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/moc
 import { applyDamageConsequences } from '@/lib/utils/battle/damage/consequences';
 import { dealResistedDamage } from '@/lib/utils/battle/damage/resisted-ability-damage';
 import { DEFAULT_RULES, type Ruleset } from '@/lib/utils/rules';
+import { deathSavesOf } from '@/systems/d20/rules/death-saves/state';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
 import { wfrpState } from '@/systems/wfrp/rules/state';
 import type { BattleParticipant } from '@/types/battle';
@@ -102,11 +103,12 @@ describe('applyDamageConsequences', () => {
         });
 
         expect(r.participant.combatStats.status).toBe(CombatStatus.UNCONSCIOUS);
-        expect(r.participant.battleData.deathSaves).toEqual({
+        expect(deathSavesOf(r.participant)).toEqual({
             successes: 0,
             failures: 0,
             stable: false,
         });
+        expect(r.participant.battleData.dying).toBe(true);
     });
 });
 

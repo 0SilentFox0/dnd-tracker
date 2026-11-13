@@ -131,6 +131,7 @@ exports[`removal зберігає death-save event, participants, turn/round і 
           "activeEffects": [],
           "attacks": [],
           "attacksLeft": undefined,
+          "deathSaves": undefined,
           "equippedArtifacts": [],
           "extraMovement": undefined,
           "readied": undefined,
