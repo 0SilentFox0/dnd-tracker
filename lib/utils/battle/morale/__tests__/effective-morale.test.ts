@@ -53,6 +53,18 @@ describe('effectiveMorale', () => {
         expect(effectiveMorale(timed(withMorale(-1), 1), []).value).toBe(0);
     });
 
+    it('moraleCap 0 pins morale to 0; cap 2 clamps to ±2; unset falls back to 3', () => {
+        const capped = (p: BattleParticipant, moraleCap?: number) => ({
+            ...p,
+            combatStats: { ...p.combatStats, moraleCap },
+        });
+
+        expect(effectiveMorale(capped(timed(withMorale(3), 1), 0), []).value).toBe(0);
+        expect(effectiveMorale(capped(timed(withMorale(3), 1), 2), []).value).toBe(2);
+        expect(effectiveMorale(capped(timed(withMorale(-3), -1), 2), []).value).toBe(-2);
+        expect(effectiveMorale(capped(withMorale(5), undefined), []).value).toBe(3);
+    });
+
     it('noNegativeMorale діє після суми', () => {
         expect(
             effectiveMorale(

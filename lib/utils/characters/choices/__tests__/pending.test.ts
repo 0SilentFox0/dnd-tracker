@@ -217,6 +217,26 @@ describe('backgroundOpenCount', () => {
 });
 
 describe('pendingIssues', () => {
+    it('a feat choice with no feats of its featTypes available never blocks', () => {
+        const visit = {
+            choice: {
+                id: 'asi',
+                label: 'Feat',
+                level: 1,
+                count: 1,
+                kind: 'feat' as const,
+                featTypes: ['epicBoon' as const],
+            },
+            picks: [],
+            open: true,
+            target: 1,
+            path: 'classes.x.asi',
+        };
+
+        expect(pendingCount([visit], refs)).toBe(1);
+        expect(pendingIssues([visit], refs)).toEqual([]);
+    });
+
     const issues = (state: Partial<ChoicesState>, level: number, mode = true) =>
         pendingIssues(
             visitPicks({ ...empty, ...state }, refs, {

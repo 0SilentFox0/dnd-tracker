@@ -92,6 +92,18 @@ describe('morale module on d20', () => {
         ).toBe(0);
     });
 
+    it('cap 0 and cap 2 are written as given', () => {
+        const capOf = (cap: number) =>
+            moraleCapPart(hero, {
+                row: { level: 1 },
+                rules: { ...withMorale, morale: { enabled: true, cap } },
+                refs: {},
+            }).combatStats.moraleCap;
+
+        expect(capOf(0)).toBe(0);
+        expect(capOf(2)).toBe(2);
+    });
+
     it('homm runs the pending-morale hook first; a payload stored before Ch8 applies the same', () => {
         expect(beforeAdvanceHooks(DEFAULT_RULES)[0]).toBe(applyPendingMorale);
 

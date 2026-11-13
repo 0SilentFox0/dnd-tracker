@@ -57,7 +57,7 @@ describe('bundle: species profile', () => {
     it('the legacy race_profiles table is not bundled; the profile is a nullable race column', () => {
         const races = BUNDLE_TABLES.find((t) => t.key === 'races')!;
 
-        expect(BUNDLE_TABLES.map((t) => t.model)).not.toContain('RaceProfile');
+        expect(BUNDLE_TABLES.map((t) => t.key)).not.toContain('raceProfiles');
         expect(races.columns).toContain('profile');
         expect(races.nullableJson).toContain('profile');
     });
