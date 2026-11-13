@@ -21,6 +21,7 @@ import { isConditionUsed } from '@/lib/utils/rules/condition-usage';
 import { stripPlayerHiddenRules } from '@/lib/utils/rules/player-hidden';
 import type { Ruleset, RulesetPatch } from '@/lib/utils/rules/schema';
 import { mergeRules, parseRules } from '@/lib/utils/rules/schema';
+import { getRule } from '@/lib/utils/rules/sections';
 import { composition } from '@/lib/utils/rules/systems/catalog';
 import type { CampaignRulesView, ConditionUsage } from '@/types/campaigns';
 
@@ -180,7 +181,11 @@ export async function readCustomConditionUsage(
 
     const rules = await loadRules(actor.campaignId);
 
-    if (!rules.conditions.custom?.some((c) => c.key === key))
+    const custom = getRule(rules, 'conditions.custom') as
+        | Ruleset['conditions']['custom']
+        | undefined;
+
+    if (!custom?.some((c) => c.key === key))
         throw new ContentError(
             API_ERRORS.RULES_CUSTOM_CONDITION_NOT_FOUND,
             404

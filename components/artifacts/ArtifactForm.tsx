@@ -35,6 +35,7 @@ import type { ArmorStats } from '@/lib/utils/artifacts/armor-stats';
 import type { ArtifactFormSubmitPayload } from '@/lib/utils/artifacts/artifact-form';
 import { isWeaponSlot } from '@/lib/utils/artifacts/weapon-slot';
 import type { WeaponStats } from '@/lib/utils/artifacts/weapon-stats';
+import { classesEnabled } from '@/lib/utils/characters/classes/classes-enabled';
 import type { ItemStats } from '@/lib/utils/items/item-stats';
 import type { ArtifactSetOption } from '@/types/artifacts';
 
@@ -105,12 +106,12 @@ export function ArtifactForm({
 
     const [statsValid, setStatsValid] = useState(true);
 
-    const classesEnabled = !!rules?.classes.enabled;
+    const hasClasses = classesEnabled(rules);
 
     const itemsEnabled = !!rules?.items?.enabled;
 
     const hasArmor =
-        classesEnabled &&
+        hasClasses &&
         data.slot === ArtifactSlot.ARMOR &&
         !data.item?.property;
 

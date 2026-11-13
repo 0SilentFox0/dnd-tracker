@@ -35,6 +35,7 @@ import { useSessionUser, useSwitchGoogleAccount } from '@/lib/hooks/auth';
 import { useCampaignRules, useIsTemplateCampaign } from '@/lib/hooks/campaigns';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import { cn } from '@/lib/utils';
+import { classesEnabled } from '@/lib/utils/characters/classes/classes-enabled';
 
 function UserAvatar({
     url,
@@ -102,7 +103,7 @@ export function Header() {
 
     const dmSections = dmSectionsFor({
         isTemplate,
-        classesEnabled: !!rules?.classes.enabled,
+        classesEnabled: classesEnabled(rules),
         system: rules?.system,
     });
 

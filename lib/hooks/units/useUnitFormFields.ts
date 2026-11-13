@@ -7,6 +7,7 @@ import { useCampaignRules } from '@/lib/hooks/campaigns';
 import { useRaces } from '@/lib/hooks/races';
 import { useSpells } from '@/lib/hooks/spells';
 import { useRuleSystem } from '@/lib/hooks/systems';
+import { classesEnabled } from '@/lib/utils/characters/classes/classes-enabled';
 import { byName } from '@/lib/utils/common/text';
 import type { Unit } from '@/types/units';
 
@@ -23,7 +24,7 @@ export function useUnitFormFields(
     const { key: system } = useRuleSystem({ campaignId });
 
     const fiveE =
-        !!rules && (rules.classes.enabled || rules.encounters.balance === 'xp');
+        !!rules && (classesEnabled(rules) || rules.encounters.balance === 'xp');
 
     const [formData, setFormData] = useState<Partial<Unit>>(initial);
 

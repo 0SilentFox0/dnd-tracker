@@ -11,6 +11,7 @@ import { writeCharacterLog } from '@/lib/server/characters/log';
 import { ContentError } from '@/lib/server/content/errors';
 import type { CampaignAccessResult } from '@/lib/utils/api/api-auth';
 import { loadClassesById } from '@/lib/utils/battle/participant/load-classes';
+import { classesEnabled } from '@/lib/utils/characters/classes/classes-enabled';
 import { hitDicePoolFor } from '@/lib/utils/characters/resources/hit-dice';
 import {
     applyRest,
@@ -64,7 +65,7 @@ export async function restParty(access: CampaignAccessResult, body: RestInput) {
     await assertNotInActiveBattle(campaign.id, ids);
 
     const classesById =
-        body.kind === 'long' && campaign.rules.classes.enabled
+        body.kind === 'long' && classesEnabled(campaign.rules)
             ? await loadClassesById(campaign.id)
             : {};
 

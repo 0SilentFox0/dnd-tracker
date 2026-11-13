@@ -38,6 +38,7 @@ import { errorResponse } from '@/lib/utils/api/api-response';
 import { mergeBackground } from '@/lib/utils/backgrounds/selection';
 import { choicesStateOf } from '@/lib/utils/characters/choices/picks';
 import { keepStoredPicks } from '@/lib/utils/characters/choices/picks';
+import { heroInitiativeRange } from '@/lib/utils/characters/initiative-range';
 import { seenLevelOnLevelChange } from '@/lib/utils/characters/seen-level';
 import {
     levelNotificationEvents,
@@ -71,7 +72,9 @@ async function editableData({ access, character }: Gate, input: Parsed) {
     );
 
     if (parsed.initiative !== undefined) {
-        const { heroMin, heroMax } = campaign.rules.initiative;
+        const { min: heroMin, max: heroMax } = heroInitiativeRange(
+            campaign.rules
+        );
 
         if (parsed.initiative < heroMin || parsed.initiative > heroMax)
             throw new ContentError(

@@ -218,24 +218,31 @@ describe('d20 / HOMM names and rule-section readers leaving core', () => {
         criticals: 4,
         deathSaves: 0,
         concentration: 0,
-        conditions: 3,
+        conditions: 2,
         actions: 0,
-        classes: 16,
-        encounters: 8,
+        classes: 3,
+        encounters: 2,
         formulas: 2,
-        initiative: 4,
+        initiative: 2,
         saves: 0,
     };
 
     it('leaked names stay under their maximum', () =>
         check(LEAK_NAMES, (p) => new RegExp(p)));
 
+    // Items a section keeps in core (encounters.balance/unitGroups) are not leaks: only the module-owned ones count
+    const OWNED_ITEMS: Record<string, string> = {
+        encounters: 'edition|autoXp',
+    };
+
     it('reads of rules.<section> stay under their maximum', () =>
         check(
             RULES_SECTION_READERS,
             (s) =>
                 new RegExp(
-                    `\\b(?:rules|ruleset|ruleSet|sections)\\??\\.${s}\\b`
+                    `\\b(?:rules|ruleset|ruleSet|sections)\\??\\.${s}\\b${
+                        OWNED_ITEMS[s] ? `\\??\\.(?:${OWNED_ITEMS[s]})\\b` : ''
+                    }`
                 )
         ));
 });

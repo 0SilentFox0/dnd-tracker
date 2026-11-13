@@ -1,6 +1,6 @@
 import { SECTION_DEFAULTS } from '@/lib/utils/rules/defaults';
 import type { Ruleset } from '@/lib/utils/rules/schema';
-import { ruleSystemOf } from '@/lib/utils/rules/systems/registry';
+import { ruleSystemOf } from '@/lib/utils/rules/systems';
 
 /** Sheet initiative range of the campaign system; a system without the hook gets the section defaults */
 export const heroInitiativeRange = (rules: Ruleset) =>

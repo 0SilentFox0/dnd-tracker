@@ -31,6 +31,7 @@ import {
     skillIdsInPicks,
 } from '@/lib/utils/characters/choices/class-skills';
 import { hasPicks } from '@/lib/utils/characters/choices/read';
+import { heroInitiativeRange } from '@/lib/utils/characters/initiative-range';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { CharacterClassEntry, GameClassData } from '@/types/classes';
 
@@ -82,7 +83,7 @@ async function createCharacterCore(
         'create'
     );
 
-    const { heroMin, heroMax } = campaign.rules.initiative;
+    const { min: heroMin, max: heroMax } = heroInitiativeRange(campaign.rules);
 
     const initiative = data.initiative ?? heroMin;
 

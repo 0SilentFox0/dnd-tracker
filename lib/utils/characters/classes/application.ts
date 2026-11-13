@@ -69,13 +69,10 @@ export interface ClassApplicationInput {
 }
 
 export function deriveClassApplication(
-    { rules, maxLevel, entries, spellcastingAbility }: ClassApplicationInput,
+    { maxLevel, entries, spellcastingAbility }: ClassApplicationInput,
     byId: Record<string, GameClassData>
 ): ClassesApplyResult {
     if (entries.length === 0) return { ok: true, data: null };
-
-    if (!rules.classes.enabled)
-        return { ok: false, status: 422, error: API_ERRORS.CLASSES_DISABLED };
 
     const invalid = validateClassEntries(entries, byId, maxLevel);
 

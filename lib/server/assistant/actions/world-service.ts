@@ -50,6 +50,7 @@ import {
 import { ownedWorldMapPath } from '@/lib/supabase/world-map-storage';
 import type { CampaignAccessResult } from '@/lib/utils/api/api-auth';
 import { requestDigest } from '@/lib/utils/battle/store/stable-json';
+import { classesEnabled } from '@/lib/utils/characters/classes/classes-enabled';
 import { jsonContent } from '@/lib/utils/common/json';
 import { parseRules } from '@/lib/utils/rules/schema';
 import { polygonCentroid } from '@/lib/utils/world/geometry';
@@ -135,7 +136,7 @@ async function worldState(
 
         restRules = {
             outOfCombat: rules.outOfCombat,
-            classesEnabled: rules.classes.enabled,
+            classesEnabled: classesEnabled(rules),
         };
     }
 

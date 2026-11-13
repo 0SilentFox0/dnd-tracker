@@ -11,6 +11,7 @@ import { ContentError } from '@/lib/server/content/errors';
 import { errorResponse } from '@/lib/utils/api/api-response';
 import { planChoices } from '@/lib/utils/characters/choices/plan';
 import type { ChoiceRefs } from '@/lib/utils/characters/choices/walk';
+import { classesEnabled } from '@/lib/utils/characters/classes/classes-enabled';
 import { toInputJson } from '@/lib/utils/common/json';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import type { ChoicesState } from '@/types/choices';
@@ -29,7 +30,7 @@ export type ChoiceFields = {
 export const characterClassMode = (
     rules: Ruleset,
     classes: readonly CharacterClassEntry[]
-): boolean => rules.classes.enabled && classes.length > 0;
+): boolean => classesEnabled(rules) && classes.length > 0;
 
 export async function resolveCharacterChoices(input: {
     campaignId: string;

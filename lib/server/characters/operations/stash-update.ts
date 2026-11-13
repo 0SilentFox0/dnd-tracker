@@ -29,6 +29,7 @@ import { writeInventoryLog } from '@/lib/server/inventory/log';
 import type { Actor } from '@/lib/utils/api/actor';
 import { loadOwned } from '@/lib/utils/api/load-owned';
 import { findHolder } from '@/lib/utils/artifacts/ownership';
+import { classesEnabled as hasClasses } from '@/lib/utils/characters/classes/classes-enabled';
 import { normalizeStash } from '@/lib/utils/inventory/items';
 import { canStashAction } from '@/lib/utils/inventory/permissions';
 import {
@@ -247,7 +248,7 @@ async function buildActionContext(
         artifactSlotType = found.slot;
 
         if (data.action === 'equip' && data.slot)
-            classesEnabled = rules.classes.enabled;
+            classesEnabled = hasClasses(rules);
 
         if (data.action === 'grant')
             grant = await planStashGrant(tx, campaignId, data, found);

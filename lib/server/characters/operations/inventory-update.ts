@@ -20,6 +20,7 @@ import type { Actor } from '@/lib/utils/api/actor';
 import { buildEquipped } from '@/lib/utils/artifacts/equipment';
 import { canEquipOffHand } from '@/lib/utils/artifacts/off-hand';
 import { findHolder, uniqueConflict } from '@/lib/utils/artifacts/ownership';
+import { classesEnabled } from '@/lib/utils/characters/classes/classes-enabled';
 import { normalizeStash } from '@/lib/utils/inventory/items';
 import { itemStatsFromRow } from '@/lib/utils/items/item-row';
 import {
@@ -107,7 +108,7 @@ async function checkOffHand(
     });
 
     if (shieldArtifact && shieldArtifact.slot !== ArtifactSlot.SHIELD) {
-        if (!canEquipOffHand(shieldArtifact, rules.classes.enabled))
+        if (!canEquipOffHand(shieldArtifact, classesEnabled(rules)))
             throw new ContentError(API_ERRORS.OFF_HAND_EQUIP, 422);
     }
 }

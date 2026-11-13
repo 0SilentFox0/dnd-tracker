@@ -42,6 +42,10 @@ import type { Actor } from '@/lib/utils/api/actor';
 import { isRecord } from '@/lib/utils/common/is-record';
 import { RulesetPatchSchema } from '@/lib/utils/rules/schema';
 
+const CLASSES_SECTION = 'classes';
+
+const CLASSES_RULE_PATH = `rules.${CLASSES_SECTION}`;
+
 export interface DependencyChoice {
     refKey: string;
     templateId: string;
@@ -332,7 +336,7 @@ function reportOf(
 
     if (classesMissing)
         allIssues.push(
-            issue('CLASSES_MODE_REQUIRED', 'rules.classes', 'warning')
+            issue('CLASSES_MODE_REQUIRED', CLASSES_RULE_PATH, 'warning')
         );
 
     const issueCounts: Record<string, number> = Object.create(null);

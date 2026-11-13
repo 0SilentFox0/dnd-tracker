@@ -24,6 +24,7 @@ import {
     readPlayerDashboard,
 } from '@/lib/server/campaigns/dashboard';
 import { readCampaignOnboarding } from '@/lib/server/onboarding/campaign';
+import { classesEnabled } from '@/lib/utils/characters/classes/classes-enabled';
 import { parseRules } from '@/lib/utils/rules/schema';
 
 const LABEL = 'text-sm text-hud-muted';
@@ -52,7 +53,7 @@ export default async function CampaignDetailPage({
 
     const rules = parseRules(campaign.rules);
 
-    const classesEnabled = rules.classes.enabled;
+    const hasClasses = classesEnabled(rules);
 
     const [dm, player, onboarding] = await Promise.all([
         isDM && !isTemplate ? readDmDashboard(id).catch(() => null) : null,
@@ -149,7 +150,7 @@ export default async function CampaignDetailPage({
                         pendingDrafts={dm?.pendingDrafts ?? 0}
                         context={{
                             isTemplate,
-                            classesEnabled,
+                            classesEnabled: hasClasses,
                             system: rules.system,
                         }}
                         hiddenKeys={hiddenKeys}

@@ -13,6 +13,7 @@ import {
 } from '@/lib/server/characters/apply-classes';
 import { parseBody } from '@/lib/utils/api/parse-body';
 import { classesById, classModeOf } from '@/lib/utils/characters/classes';
+import { classesEnabled } from '@/lib/utils/characters/classes/classes-enabled';
 import { toGameClassData } from '@/lib/utils/characters/classes/row';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import type { GameClassData } from '@/types/classes';
@@ -40,7 +41,7 @@ async function loadClassMode(
     campaignId: string,
     rules?: Ruleset
 ): Promise<ClassesById | null> {
-    if (!rules?.classes.enabled) return null;
+    if (!classesEnabled(rules)) return null;
 
     const byId = classesById(
         (await getCachedClasses(campaignId)).map(toGameClassData)

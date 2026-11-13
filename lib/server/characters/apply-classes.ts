@@ -7,6 +7,7 @@ import {
     type ClassesApplyResult,
     deriveClassApplication,
 } from '@/lib/utils/characters/classes/application';
+import { classesEnabled } from '@/lib/utils/characters/classes/classes-enabled';
 import { toGameClassData } from '@/lib/utils/characters/classes/row';
 import type { GameClassData } from '@/types/classes';
 
@@ -28,7 +29,7 @@ export async function applyClasses({
 }: ApplyClassesInput): Promise<ClassesApplyResult> {
     if (input.entries.length === 0) return { ok: true, data: null };
 
-    if (!input.rules.classes.enabled)
+    if (!classesEnabled(input.rules))
         return { ok: false, status: 422, error: API_ERRORS.CLASSES_DISABLED };
 
     const byId =

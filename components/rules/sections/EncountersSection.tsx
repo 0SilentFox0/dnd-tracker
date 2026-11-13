@@ -7,8 +7,12 @@ import { SwitchField } from '@/components/ui/switch-field';
 import type { RulesFormState } from '@/lib/hooks/campaigns';
 import type { Ruleset } from '@/lib/utils/rules';
 
+const SECTION = 'encounters';
+
 export function EncountersSection({ form }: { form: RulesFormState }) {
     const t = useTranslations('rules');
+
+    const label = (key: string) => t(`sections.${SECTION}.${key}`);
 
     const has = useHasRule();
 
@@ -21,21 +25,21 @@ export function EncountersSection({ form }: { form: RulesFormState }) {
         {
             path: 'balance',
             id: 'rules-enc-balance',
-            label: t('sections.encounters.balance'),
+            label: label('balance'),
             checked: section.balance === 'xp',
             patch: (v: boolean) => ({ balance: v ? 'xp' : 'fair' }) as const,
         },
         {
             path: 'edition',
             id: 'rules-enc-edition',
-            label: t('sections.encounters.edition'),
+            label: label('edition'),
             checked: section.edition === '2024',
             patch: (v: boolean) => ({ edition: v ? '2024' : '2014' }) as const,
         },
         {
             path: 'autoXp',
             id: 'rules-enc-autoxp',
-            label: t('sections.encounters.autoXp'),
+            label: label('autoXp'),
             checked: section.autoXp,
             patch: (v: boolean) => ({ autoXp: v }),
         },
@@ -57,7 +61,7 @@ export function EncountersSection({ form }: { form: RulesFormState }) {
                     section.autoXp &&
                     !form.data.outOfCombat.xp && (
                         <p className="text-xs text-hud-muted">
-                            {t('sections.encounters.autoXpHint')}
+                            {label('autoXpHint')}
                         </p>
                     )}
             </div>
