@@ -86,6 +86,11 @@
       "subtitle": "Slide sets with music for players",
       "keywords": "slides"
     },
+    "maps": {
+      "title": "Maps",
+      "subtitle": "Reusable battle maps with walls and bars",
+      "keywords": "map, walls, bars, grid, battle"
+    },
     "spell-groups": {
       "title": "Schools of magic",
       "subtitle": "Spell groups and schools",

@@ -14,6 +14,7 @@ export interface Campaign {
     allowPlayerEdit: boolean;
     critChoiceByDm: boolean;
     acquaintancesEnabled: boolean;
+    mapLibraryEnabled: boolean;
     status: string;
     kind?: 'campaign' | 'template';
     members?: CampaignMembership[];
@@ -82,6 +83,7 @@ export interface CampaignSettings {
     allowPlayerEdit: boolean;
     critChoiceByDm: boolean;
     acquaintancesEnabled: boolean;
+    mapLibraryEnabled: boolean;
     status: string;
 }
 

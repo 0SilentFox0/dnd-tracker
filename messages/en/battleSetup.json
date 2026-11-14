@@ -143,6 +143,7 @@
     },
     "edgeDrawing": "Draw walls and bars",
     "edgesDisabledMode": "Walls and bars are disabled in maze mode",
+    "edgesLinked": "Walls of a library map are edited on the Maps page — then press «Update map»",
     "edgesDesktopOnly": "Drawing walls and bars is desktop-only — open this on a computer"
   },
   "characters": {
@@ -247,5 +248,15 @@
     "badEdges": "Invalid walls or bars: out of bounds, duplicated or overlapping",
     "mapAndMapId": "Pass either an inline map or a library map, not both",
     "photoMapTooLarge": "Photo maps are limited to 60×60 cells"
+  },
+  "library": {
+    "title": "Map from library",
+    "label": "Map from library",
+    "none": "None (custom map below)",
+    "size": "{cols}×{rows}",
+    "linked": "This battle is linked to a library map. Update it from the battle screen.",
+    "chosen": "The battle uses this library map ({cols}×{rows}). The custom map editor is hidden.",
+    "tooLarge": "Maps with a side over {max} cells cannot be used in battle yet.",
+    "manage": "Manage maps"
   }
 }

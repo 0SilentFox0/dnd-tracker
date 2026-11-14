@@ -48,23 +48,38 @@ const db = vi.hoisted(() => {
                     maps.get(where.id) ?? null
             ),
             findMany: vi.fn(async () => [...maps.values()]),
-            update: vi.fn(
+            findUniqueOrThrow: vi.fn(
+                async ({ where }: { where: { id: string } }) => {
+                    const row = maps.get(where.id);
+
+                    if (!row) throw new Error('not found');
+
+                    return row;
+                }
+            ),
+            updateMany: vi.fn(
                 async ({
                     where,
                     data,
                 }: {
-                    where: { id: string };
+                    where: { id: string; mapVersion: number };
                     data: Record<string, any>;
                 }) => {
-                    const row = maps.get(where.id) as Record<string, any>;
+                    const row = maps.get(where.id) as
+                        | Record<string, any>
+                        | undefined;
+
+                    if (!row || row.mapVersion !== where.mapVersion)
+                        return { count: 0 };
 
                     const { mapVersion, ...rest } = data;
 
                     Object.assign(row, rest, {
-                        mapVersion: row.mapVersion + mapVersion.increment,
+                        mapVersion:
+                            row.mapVersion + (mapVersion?.increment ?? 0),
                     });
 
-                    return row;
+                    return { count: 1 };
                 }
             ),
             delete: vi.fn(async ({ where }: { where: { id: string } }) => {
@@ -213,6 +228,47 @@ describe('battle map library service', () => {
         expect(await getMap(id, 1)).toBeNull();
     });
 
+    it('save with a stale expectedVersion is a 409 conflict and writes nothing', async () => {
+        const { id } = await createMap('c1', input());
+
+        await saveMap(id, input({ walls: ['2:2:e'], expectedVersion: 1 }));
+
+        await expect(
+            saveMap(id, input({ walls: ['3:3:e'], expectedVersion: 1 }))
+        ).rejects.toMatchObject({
+            status: 409,
+            message: 'errors.battleMapConflict',
+        });
+        expect((await getMap(id))?.walls).toEqual(['2:2:e']);
+
+        const ok = await saveMap(
+            id,
+            input({ walls: ['3:3:e'], expectedVersion: 2 })
+        );
+
+        expect(ok.version).toBe(3);
+    });
+
+    it('a concurrent save between read and write (count 0) is a conflict', async () => {
+        const { id } = await createMap('c1', input());
+
+        db.api.battleMap.updateMany.mockResolvedValueOnce({ count: 0 });
+
+        await expect(
+            saveMap(id, input({ walls: ['2:2:e'] }))
+        ).rejects.toMatchObject({ status: 409 });
+    });
+
+    it('a rename-only save keeps the version and the snapshot', async () => {
+        const { id } = await createMap('c1', input());
+
+        const saved = await saveMap(id, input({ name: 'Renamed' }));
+
+        expect(saved.version).toBe(1);
+        expect(saved.name).toBe('Renamed');
+        expect(db.versions).toHaveLength(1);
+    });
+
     it('a stale current read never memoizes newer geometry under the old version', async () => {
         const { id } = await createMap('c1', input());
 
@@ -282,7 +338,7 @@ describe('battle map library service', () => {
     it('getMapMeta reads ownership and version without geometry', async () => {
         const { id } = await createMap('c1', input());
 
-        await saveMap(id, input());
+        await saveMap(id, input({ walls: ['2:2:e'] }));
 
         db.api.battleMapChunk.findMany.mockClear();
 

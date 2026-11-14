@@ -454,7 +454,7 @@ export const mapEdgeRemoveSchema = z.object({
     restore: z.boolean().optional(),
 });
 
-export const mapUpdateSchema = z.object({}).strict();
+export const mapUpdateSchema = z.object({});
 
 export const mapWeatherSchema = z.object({
     weather: weatherKindSchema.nullable(),

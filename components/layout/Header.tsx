@@ -36,6 +36,7 @@ import {
     useCampaignRules,
     useCampaignSystemSelection,
     useIsTemplateCampaign,
+    useMapLibraryEnabled,
 } from '@/lib/hooks/campaigns';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import { cn } from '@/lib/utils';
@@ -109,9 +110,12 @@ export function Header() {
 
     const system = useCampaignSystemSelection(dmCampaignId);
 
+    const mapLibraryEnabled = useMapLibraryEnabled(dmCampaignId);
+
     const dmSections = dmSectionsFor({
         isTemplate,
         classesEnabled: classesEnabled(rules),
+        mapLibraryEnabled,
         system,
     });
 

@@ -107,6 +107,16 @@ export async function requireCampaignDM(campaignId: string): Promise<{
     };
 }
 
+/** DM-only pages of the map library: flag off → redirect to the campaign. */
+export async function requireMapLibrary(campaignId: string) {
+    const result = await requireCampaignDM(campaignId);
+
+    if (!result.campaign.mapLibraryEnabled)
+        redirect(`/campaigns/${campaignId}`);
+
+    return result;
+}
+
 /** Read-only content pages available to campaign DMs and authenticated Demo visitors. */
 export async function requireCampaignDMOrDemo(campaignId: string): Promise<{
     campaign: PublicCampaign;
