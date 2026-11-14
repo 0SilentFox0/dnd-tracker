@@ -29,8 +29,6 @@ export function SummaryStep({ preview }: { preview: CompositionPreview }) {
 
     const tCommon = useTranslator('common');
 
-    const tAssistant = useTranslator('assistant');
-
     const tBattle = useTranslator('battleCommon');
 
     const none = t('system.wizard.none');
@@ -70,7 +68,7 @@ export function SummaryStep({ preview }: { preview: CompositionPreview }) {
             <Group
                 title={t('system.wizard.contentKinds')}
                 items={preview.contentKinds.map((kind) =>
-                    tAssistant(`contentKinds.${kind}`)
+                    t(`system.wizard.kinds.${kind}`)
                 )}
                 emptyLabel={none}
             />

@@ -1,14 +1,31 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import {
     composition,
+    moduleChange,
     moduleToggles,
     type SystemSelection,
     withModule,
 } from '@/lib/utils/rules/systems/catalog';
-import { previewComposition } from '@/lib/utils/rules/systems/preview';
+import { isInstalled } from '@/lib/utils/rules/systems/lookup';
+import { preloadSystem } from '@/lib/utils/rules/systems/preload';
+import {
+    type CompositionPreview,
+    previewComposition,
+} from '@/lib/utils/rules/systems/preview';
+
+function safePreview(
+    current: SystemSelection,
+    draft: SystemSelection
+): CompositionPreview | null {
+    try {
+        return previewComposition(current, draft);
+    } catch {
+        return null;
+    }
+}
 
 export function useModuleDraft(current: SystemSelection) {
     const [draft, setDraft] = useState<SystemSelection>(() => ({
@@ -16,18 +33,37 @@ export function useModuleDraft(current: SystemSelection) {
         modules: composition(current).modules,
     }));
 
+    const [loadedDraft, setLoadedDraft] = useState<SystemSelection | null>(
+        null
+    );
+
+    useEffect(() => {
+        let isCancelled = false;
+
+        void preloadSystem(draft).then(() => {
+            if (!isCancelled) setLoadedDraft(draft);
+        });
+
+        return () => {
+            isCancelled = true;
+        };
+    }, [draft]);
+
     const toggles = useMemo(() => moduleToggles(draft), [draft]);
 
+    const isReady = loadedDraft === draft || isInstalled(draft);
+
     const preview = useMemo(
-        () => previewComposition(current, draft),
-        [current, draft]
+        () => (isReady ? safePreview(current, draft) : null),
+        [current, draft, isReady]
     );
 
     return {
         draft,
         toggles,
         preview,
-        isChanged: preview.added.length + preview.removed.length > 0,
+        isLoading: preview === null,
+        isChanged: moduleChange(current, draft).changed,
         set: (id: string, on: boolean) =>
             setDraft((prev) => withModule(prev, id, on)),
     };

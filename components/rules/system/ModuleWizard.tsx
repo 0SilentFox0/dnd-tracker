@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 import { ModuleStep } from './ModuleStep';
 import { SummaryStep } from './SummaryStep';
 
+import { LoadingState } from '@/components/common/states';
 import { Button } from '@/components/ui/button';
 import type { useCampaignModules } from '@/lib/hooks/campaigns';
 import { useModuleDraft } from '@/lib/hooks/campaigns/useModuleDraft';
@@ -46,8 +47,10 @@ export function ModuleWizard({
             )}
             {step === 'modules' ? (
                 <ModuleStep toggles={toggles} set={set} isDisabled={isBusy} />
-            ) : (
+            ) : preview ? (
                 <SummaryStep preview={preview} />
+            ) : (
+                <LoadingState />
             )}
             <div className="flex flex-wrap gap-2">
                 {step === 'modules' ? (
@@ -71,7 +74,7 @@ export function ModuleWizard({
                         </Button>
                         <Button
                             type="button"
-                            disabled={isBusy}
+                            disabled={isBusy || !preview}
                             onClick={() => void modules.apply(draft)}
                         >
                             {t('system.wizard.apply')}
