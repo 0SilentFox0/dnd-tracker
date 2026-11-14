@@ -23,6 +23,7 @@ interface EffectNode {
     kind: string;
     flag?: unknown;
     condition?: unknown;
+    conditions?: unknown;
     options?: readonly EffectNode[];
 }
 
@@ -45,10 +46,21 @@ export const storedEffectOwners = (json: unknown): EffectOwner[] =>
           )
         : [];
 
-const conditionKeyOf = (e: EffectNode): string | undefined =>
-    e.kind === 'applyCondition' && typeof e.condition === 'string'
-        ? e.condition
-        : undefined;
+const IMMUNITY_TRAIT_KEYS = ['fear', 'berserk', 'charm'];
+
+const conditionKeysOf = (e: EffectNode): string[] => {
+    if (e.kind === 'applyCondition')
+        return typeof e.condition === 'string' ? [e.condition] : [];
+
+    return e.kind === 'flag' &&
+        e.flag === 'conditionImmunity' &&
+        Array.isArray(e.conditions)
+        ? e.conditions.filter(
+              (c): c is string =>
+                  typeof c === 'string' && !IMMUNITY_TRAIT_KEYS.includes(c)
+          )
+        : [];
+};
 
 const isForeignCondition = (key: string, standard: readonly string[]) =>
     !isCustomConditionKey(key) &&
@@ -82,20 +94,18 @@ export function assertEffectsInComposition(
     const standard = ruleSystemOf({ system }).conditionSet.keys;
 
     const keptConditions = new Set(
-        existing.flatMap((a) => flatten(a.effects).map(conditionKeyOf))
+        existing.flatMap((a) => flatten(a.effects).flatMap(conditionKeysOf))
     );
 
     if (
         abilities.some((a) =>
-            flatten(a.effects).some((e) => {
-                const key = conditionKeyOf(e);
-
-                return (
-                    key !== undefined &&
-                    isForeignCondition(key, standard) &&
-                    !keptConditions.has(key)
-                );
-            })
+            flatten(a.effects).some((e) =>
+                conditionKeysOf(e).some(
+                    (key) =>
+                        isForeignCondition(key, standard) &&
+                        !keptConditions.has(key)
+                )
+            )
         )
     )
         throw new ContentError(API_ERRORS.CONDITION_UNKNOWN, 422);

@@ -267,9 +267,12 @@ export function useSpellBook(
                 bypassCost,
                 scene.battle.rules
             ),
-        attackTargets: state.pick?.needsAttackRolls
-            ? targets.filter((t) => state.targetIds.includes(t.basicInfo.id))
-            : [],
+        attackTargets:
+            state.pick?.needsAttackRolls && attackDice
+                ? targets.filter((t) =>
+                      state.targetIds.includes(t.basicInfo.id)
+                  )
+                : [],
         costUsed: (s: BookSpell) =>
             costBlocked({
                 caster,

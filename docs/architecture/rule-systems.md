@@ -147,7 +147,7 @@ Core бачить `systems/*` лише через корені (`SYSTEM_ROOTS`, 
 7. Хуки Ч22 і семантика «хука немає» (нейтральна поведінка core без правок):
    - `conditionSet.keys`/`labelKey` — стандартний словник станів (Zod-схеми вмінь лишаються статичними: `z.string().regex(CONDITION_KEY_RE)`; семантика «ключ є в композиції» — `assertEffectsInComposition` і `conditions-mutation`, 422 `CONDITION_UNKNOWN`). `keys: []` = у бази немає стандартних станів; збережені ключі легасі-контенту читаються як «немає такого стану».
    - `combat.actions.catalog` (+ `enabled`/`available`/`run`) — каталог дій; порожній `{}` = жодної дії, `dash` не в каталозі (`noActions`); схема тіла — з `SystemServer.schemas`.
-   - `combat.attack.riderOptions?`/`hitRiders?` — ризи атаки (cunning strike); немає = ризи запиту ігноруються, оферу немає.
+   - `combat.attack.riderOptions?`/`hitRiders?` — ризи атаки (cunning strike); немає `hitRiders` = запит із ризами відхиляється (`cunningUnavailable`, `request.ts`), оферу немає.
    - `magic.attackRoll?` — кидок атаки закляттям; немає = закляття з атакою влучає без кидка. `magic.saveCrit?` — нат. результат, що вирішує порятунок; немає = `null`. `magic.attackDice?` — кубик клієнта для атаки закляттям; немає = клієнт не кидає. `combat.zoneAttack?` — кидок зони проти цілі; немає = зона влучає без кидка.
    - Обов'язкові, але no-op за замовчуванням (`noActions`, `noMagic`): `combat.actions.releaseInvalidGrapples`, `magic.sustain.dropOrphaned` — пайплайн викликає їх безумовно.
 ## Wfrp: що де лежить

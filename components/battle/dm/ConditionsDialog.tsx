@@ -74,7 +74,9 @@ function ConditionsDialogBody({
 
     const text = useText();
 
-    const [selected, setSelected] = useState<ConditionKey>(standard.keys[0]);
+    const [selected, setSelected] = useState<ConditionKey | ''>(
+        standard.keys[0] ?? ''
+    );
 
     const [rounds, setRounds] = useState('');
 
@@ -102,6 +104,7 @@ function ConditionsDialogBody({
     const levelsCount = toInt(levels);
 
     const valid =
+        selected !== '' &&
         (rounds === '' || inRange(roundsCount, CONDITION_LIMITS.rounds)) &&
         (selected !== 'exhaustion' || inRange(levelsCount, MAX_EXHAUSTION)) &&
         (!saveOn || inRange(dc, CONDITION_LIMITS.dc));
@@ -201,7 +204,9 @@ function ConditionsDialogBody({
                             checked={selected === key}
                             onClick={() => setSelected(key)}
                             title={text(
-                                dynamicTextRef(`${standard.labelKey(key)}.label`)
+                                dynamicTextRef(
+                                    `${standard.labelKey(key)}.label`
+                                )
                             )}
                             note={text(
                                 dynamicTextRef(

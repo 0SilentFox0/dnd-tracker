@@ -67,6 +67,33 @@ describe('assertEffectsInComposition', () => {
         ).not.toThrow();
     });
 
+    it('checks conditionImmunity keys like applyCondition', () => {
+        const immune = (conditions: unknown) =>
+            ability({ kind: 'flag', flag: 'conditionImmunity', conditions });
+
+        expect(() =>
+            assertEffectsInComposition({ key: 'wfrp' }, immune(['blinded']))
+        ).toThrowError(
+            expect.objectContaining({ message: API_ERRORS.CONDITION_UNKNOWN })
+        );
+        expect(() =>
+            assertEffectsInComposition(
+                { key: 'wfrp' },
+                immune(['custom:x', 'fear'])
+            )
+        ).not.toThrow();
+        expect(() =>
+            assertEffectsInComposition({ key: 'wfrp' }, immune('all'))
+        ).not.toThrow();
+        expect(() =>
+            assertEffectsInComposition(
+                { key: 'wfrp' },
+                immune(['blinded']),
+                immune(['blinded'])
+            )
+        ).not.toThrow();
+    });
+
     it('accepts a wfrp effect in wfrp and a core effect anywhere', () => {
         expect(() =>
             assertEffectsInComposition(

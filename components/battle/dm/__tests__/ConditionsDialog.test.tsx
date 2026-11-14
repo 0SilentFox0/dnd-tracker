@@ -65,6 +65,23 @@ describe('ConditionsDialog', () => {
         });
     });
 
+    it('порожній словник станів блокує «Накласти» без condition: undefined', () => {
+        const onSubmit = vi.fn();
+
+        render(
+            <ConditionsDialog
+                standard={{ ...standard, keys: [] }}
+                participant={hero}
+                onClose={vi.fn()}
+                onSubmit={onSubmit}
+            />
+        );
+
+        fireEvent.click(screen.getByRole('button', { name: 'Накласти' }));
+
+        expect(onSubmit).not.toHaveBeenCalled();
+    });
+
     it('100 раундів блокують «Накласти» (межа з CONDITION_LIMITS)', () => {
         const onSubmit = vi.fn();
 
