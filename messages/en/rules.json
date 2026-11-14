@@ -235,6 +235,7 @@
       "step": "Step {current} of {total}:",
       "modulesTitle": "Choose modules",
       "summaryTitle": "Review and apply",
+      "loadFailed": "Could not load the selected modules. Check your connection and try again.",
       "hint": "Pick the modules, review what changes, then apply once. Turning a module off deletes nothing.",
       "next": "Review",
       "back": "Back",

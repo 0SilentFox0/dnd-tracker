@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl';
 import { ModuleStep } from './ModuleStep';
 import { SummaryStep } from './SummaryStep';
 
-import { LoadingState } from '@/components/common/states';
+import { ErrorState, LoadingState } from '@/components/common/states';
 import { Button } from '@/components/ui/button';
 import type { useCampaignModules } from '@/lib/hooks/campaigns';
 import { useModuleDraft } from '@/lib/hooks/campaigns/useModuleDraft';
@@ -25,7 +25,8 @@ export function ModuleWizard({
 
     const [step, setStep] = useState<Step>('modules');
 
-    const { draft, toggles, preview, isChanged, set } = useModuleDraft(system);
+    const { draft, toggles, preview, error, retry, isChanged, set } =
+        useModuleDraft(system);
 
     const isBusy = isDirty || modules.isPending;
 
@@ -49,6 +50,11 @@ export function ModuleWizard({
                 <ModuleStep toggles={toggles} set={set} isDisabled={isBusy} />
             ) : preview ? (
                 <SummaryStep preview={preview} />
+            ) : error ? (
+                <ErrorState
+                    error={new Error(t('system.wizard.loadFailed'))}
+                    onRetry={retry}
+                />
             ) : (
                 <LoadingState />
             )}

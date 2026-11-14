@@ -37,17 +37,40 @@ export function useModuleDraft(current: SystemSelection) {
         null
     );
 
+    const [failure, setFailure] = useState<{
+        draft: SystemSelection;
+        attempt: number;
+        error: unknown;
+    } | null>(null);
+
+    const [attempt, setAttempt] = useState(0);
+
     useEffect(() => {
         let isCancelled = false;
 
-        void preloadSystem(draft).then(() => {
-            if (!isCancelled) setLoadedDraft(draft);
-        });
+        preloadSystem(draft).then(
+            () => {
+                if (!isCancelled) setLoadedDraft(draft);
+            },
+            (e: unknown) => {
+                if (!isCancelled)
+                    setFailure({
+                        draft,
+                        attempt,
+                        error: e ?? new Error('load failed'),
+                    });
+            }
+        );
 
         return () => {
             isCancelled = true;
         };
-    }, [draft]);
+    }, [draft, attempt]);
+
+    const loadError =
+        failure?.draft === draft && failure.attempt === attempt
+            ? failure.error
+            : null;
 
     const toggles = useMemo(() => moduleToggles(draft), [draft]);
 
@@ -62,7 +85,9 @@ export function useModuleDraft(current: SystemSelection) {
         draft,
         toggles,
         preview,
-        isLoading: preview === null,
+        isLoading: preview === null && !loadError,
+        error: loadError,
+        retry: () => setAttempt((n) => n + 1),
         isChanged: moduleChange(current, draft).changed,
         set: (id: string, on: boolean) =>
             setDraft((prev) => withModule(prev, id, on)),

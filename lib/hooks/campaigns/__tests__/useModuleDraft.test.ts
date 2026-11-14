@@ -56,4 +56,42 @@ describe('useModuleDraft', () => {
 
         expect(result.current.preview?.added).toEqual(['morale']);
     });
+
+    it('a rejected load exposes error, retry reloads', async () => {
+        vi.resetModules();
+
+        const preload = vi
+            .fn()
+            .mockRejectedValueOnce(new Error('chunk'))
+            .mockResolvedValue(undefined);
+
+        vi.doMock('@/lib/utils/rules/systems/preload', () => ({
+            preloadSystem: preload,
+        }));
+        vi.doMock('@/lib/utils/rules/systems/lookup', async (orig) => ({
+            ...(await orig<object>()),
+            isInstalled: () => false,
+        }));
+
+        const { useModuleDraft: fresh } = await import('../useModuleDraft');
+
+        const { result } = renderHook(() =>
+            fresh({ key: 'dnd5e', modules: [] })
+        );
+
+        await waitFor(() => expect(result.current.error).not.toBeNull());
+
+        expect(result.current.isLoading).toBe(false);
+
+        act(() => result.current.retry());
+
+        await waitFor(() => expect(result.current.error).toBeNull());
+        await waitFor(() => expect(preload).toHaveBeenCalledTimes(2));
+
+        expect(result.current.error).toBeNull();
+        expect(preload).toHaveBeenCalledTimes(2);
+
+        vi.doUnmock('@/lib/utils/rules/systems/preload');
+        vi.doUnmock('@/lib/utils/rules/systems/lookup');
+    });
 });
