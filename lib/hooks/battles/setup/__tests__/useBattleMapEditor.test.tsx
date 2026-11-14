@@ -212,7 +212,12 @@ describe('useBattleMapEditor', () => {
 
         const photo = renderHook(() =>
             useBattleMapEditor(
-                { cols: 40, rows: 40, background: 'https://x/a.png' },
+                {
+                    cols: 40,
+                    rows: 40,
+                    opacity: 0.3,
+                    background: 'https://x/a.png',
+                },
                 { maxSide }
             )
         );
@@ -226,7 +231,7 @@ describe('useBattleMapEditor', () => {
 
         const tile = renderHook(() =>
             useBattleMapEditor(
-                { cols: 150, rows: 150, background: null },
+                { cols: 150, rows: 150, opacity: 0.3, background: null },
                 { maxSide }
             )
         );
