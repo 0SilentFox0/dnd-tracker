@@ -242,6 +242,7 @@ function MapStageImpl({
                 <GridLayer
                     map={map}
                     marks={view?.marks}
+                    range={view?.range}
                     cellActions={cellActions}
                     onStrokeStart={painting ? onStrokeStart : undefined}
                     scene={gridScene}

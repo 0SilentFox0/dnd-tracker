@@ -1,5 +1,6 @@
 import { pickAttack } from './attack-reach';
 import { cellKey } from './geometry';
+import type { GridWindow } from './layout';
 import { lineOfFire } from './line-of-fire';
 import {
     type CellMark,
@@ -11,8 +12,8 @@ import {
 import { cellsOf, isOnMap, sizeOf } from './occupancy';
 import { wallsAllowAim } from './sight';
 import {
-    aimInRange,
     apexOf,
+    feetToCells,
     isCenteredTemplate,
     templateAimAllowed,
     templateArea,
@@ -248,21 +249,33 @@ export function aimView(
     };
 }
 
-function outOfRangeMarks(
+// footprintDistance — відстань Чебишова, тож область дальності — прямокутник
+function rangeWindow(
     map: BattleMapConfig,
     origin: GridPoint[],
     rangeFeet: number,
     rules: Ruleset
-): Map<string, CellMark> {
-    const out = new Map<string, CellMark>();
+): GridWindow {
+    const r = feetToCells(rangeFeet, rules);
 
-    for (let y = 0; y < map.rows; y++) {
-        for (let x = 0; x < map.cols; x++)
-            if (!aimInRange(origin, { x, y }, rangeFeet, rules))
-                out.set(cellKey({ x, y }), 'out-of-range');
-    }
+    const xs = origin.map((c) => c.x);
 
-    return out;
+    const ys = origin.map((c) => c.y);
+
+    const x0 = Math.max(0, Math.min(...xs) - r);
+
+    const y0 = Math.max(0, Math.min(...ys) - r);
+
+    const x1 = Math.min(map.cols - 1, Math.max(...xs) + r);
+
+    const y1 = Math.min(map.rows - 1, Math.max(...ys) + r);
+
+    return {
+        x: x0,
+        y: y0,
+        cols: Math.max(0, x1 - x0 + 1),
+        rows: Math.max(0, y1 - y0 + 1),
+    };
 }
 
 interface MoveZoneInput {
@@ -334,19 +347,15 @@ export function deriveMapScene({
 
     const canAttack = attackReady && canStartAttack(current);
 
+    let range: GridWindow | null = null;
+
     if (
         aim &&
         aimCaster &&
         aim.range !== undefined &&
         isCenteredTemplate(aim.template)
     ) {
-        for (const [key, mark] of outOfRangeMarks(
-            map,
-            cellsOf(aimCaster),
-            aim.range,
-            input.rules
-        ))
-            marks.set(key, mark);
+        range = rangeWindow(map, cellsOf(aimCaster), aim.range, input.rules);
     }
 
     const aimed = aim?.aim
@@ -430,6 +439,7 @@ export function deriveMapScene({
         selectedId: placing ? placingId : selectedId,
         currentId: current?.basicInfo.id ?? null,
         marks,
+        range,
         trajectory: null,
         hud,
         ...(aimed && { aim: aimed.aim, pulseFrom: aimed.pulseFrom }),

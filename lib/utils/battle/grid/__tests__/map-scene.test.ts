@@ -10,6 +10,7 @@ import {
     type MapSceneInput,
     type MapSceneMode,
 } from '../map-scene';
+import { aimInRange } from '../template';
 
 import { AttackType, ParticipantSide } from '@/lib/constants/battle';
 import { textRef } from '@/lib/i18n/text-ref';
@@ -481,9 +482,8 @@ describe('deriveMapScene: наведення шаблону', () => {
     it('без зони ходу й цілей; клітинка в дальності — aim, поза — reject «Поза дальністю»', () => {
         const s = deriveMapScene(input({ mode: { aim: aim() } }));
 
-        expect(new Set(s.view.marks?.values())).toEqual(
-            new Set(['out-of-range'])
-        );
+        expect(s.view.marks?.size).toBe(0);
+        expect(s.view.range).toEqual({ x: 0, y: 0, cols: 4, rows: 4 });
         expect(s.aiming).toBe(true);
         expect(s.cellClick({ x: 3, y: 0 })).toEqual({
             kind: 'aim',
@@ -530,15 +530,13 @@ describe('deriveMapScene: наведення шаблону', () => {
         expect(s.view.aim).toEqual({ x: 2, y: 2 });
         expect(s.view.marks?.get('2:2')).toBe('template');
         expect(s.view.marks?.get('3:2')).toBe('template');
-        expect(s.view.marks?.get('4:2')).toBe('out-of-range');
     });
 
     it('клітинки поза дальністю затемнені; конус і лінія без затемнення', () => {
         const s = deriveMapScene(input({ mode: { aim: aim() } }));
 
         expect(s.view.marks?.has('3:3')).toBe(false);
-        expect(s.view.marks?.get('4:0')).toBe('out-of-range');
-        expect(s.view.marks?.get('9:4')).toBe('out-of-range');
+        expect(s.view.range).toEqual({ x: 0, y: 0, cols: 4, rows: 4 });
 
         const cone = deriveMapScene(
             input({
@@ -547,6 +545,38 @@ describe('deriveMapScene: наведення шаблону', () => {
         );
 
         expect(cone.view.marks?.size).toBe(0);
+        expect(cone.view.range).toBeNull();
+    });
+
+    it('рамка дальності: обрізана краєм карти й збігається з aimInRange', () => {
+        const edge = at('c', { x: 8, y: 4 }, ParticipantSide.ALLY);
+
+        const s = deriveMapScene(
+            input({
+                participants: [edge],
+                mode: { aim: aim({ casterId: 'c' }) },
+            })
+        );
+
+        const r = s.view.range;
+
+        expect(r).toEqual({ x: 5, y: 1, cols: 5, rows: 4 });
+
+        const caster = [{ x: 8, y: 4 }];
+
+        for (let y = 0; y < map.rows; y++)
+            for (let x = 0; x < map.cols; x++) {
+                const inside =
+                    !!r &&
+                    x >= r.x &&
+                    x < r.x + r.cols &&
+                    y >= r.y &&
+                    y < r.y + r.rows;
+
+                expect(inside).toBe(
+                    aimInRange(caster, { x, y }, 15, DEFAULT_RULES)
+                );
+            }
     });
 
     it('aimView: поза дальністю — null; конус без дальності — від заклинателя', () => {

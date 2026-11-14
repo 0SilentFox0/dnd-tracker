@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import type { GridWindow } from '../layout';
 import { composeMapView } from '../map-compose';
 import type { MapScene } from '../map-scene';
 
@@ -47,12 +48,20 @@ const hero = armed(at('h', { x: 0, y: 0 }, ParticipantSide.ALLY));
 
 const foe = at('e', { x: 1, y: 0 }, ParticipantSide.ENEMY);
 
-const scene = (marks?: Map<string, BattleMapMark | number>): MapScene => ({
+const scene = (
+    marks?: Map<string, BattleMapMark | number>,
+    range?: GridWindow
+): MapScene => ({
     participants: [hero, foe],
     aiming: false,
     cellClick: () => ({ kind: 'none' }) as never,
     tokenClick: () => ({ kind: 'none' }) as never,
-    view: { selectedId: 'h', currentId: 'h', ...(marks && { marks }) },
+    view: {
+        selectedId: 'h',
+        currentId: 'h',
+        ...(marks && { marks }),
+        ...(range && { range }),
+    },
 });
 
 const overlay = (
@@ -102,9 +111,8 @@ describe('composeMapView', () => {
         expect(full.pendingStroke).toEqual(new Set(['2,2']));
     });
 
-    it('a hover preview replaces scene marks but keeps out-of-range shading', () => {
+    it('a hover preview replaces scene marks', () => {
         const marks = new Map<string, BattleMapMark | number>([
-            ['4,4', 'out-of-range'],
             ['1,1', 'template'],
             ['2,2', 'move' as never],
         ]);
@@ -117,12 +125,26 @@ describe('composeMapView', () => {
 
         const view = compose(scene(marks), { cell: { x: 5, y: 0 }, preview });
 
-        expect([...(view.marks ?? [])]).toEqual([
-            ['4,4', 'out-of-range'],
-            ['5,0', 'template'],
-        ]);
+        expect([...(view.marks ?? [])]).toEqual([['5,0', 'template']]);
         expect(view.aim).toEqual({ x: 5, y: 0 });
         expect(view.pulseFrom).toEqual({ x: 0, y: 0 });
+    });
+
+    it('hover keeps the range window by identity', () => {
+        const range = { x: 0, y: 0, cols: 4, rows: 4 };
+
+        const preview = {
+            marks: new Map<string, BattleMapMark>([['5,0', 'template']]),
+            aim: { x: 5, y: 0 },
+            pulseFrom: { x: 0, y: 0 },
+        };
+
+        const view = compose(scene(undefined, range), {
+            cell: { x: 5, y: 0 },
+            preview,
+        });
+
+        expect(view.range).toBe(range);
     });
 
     it('derives a trajectory when hovering a marked target', () => {

@@ -33,15 +33,7 @@ export function composeMapView({
 
     const { returnId, pendingStroke, ...rest } = overlay;
 
-    // прев'ю під курсором замінює клікнутий шаблон, але не затемнення поза дальністю
-    const marks = preview
-        ? new Map([
-              ...[...(scene.view.marks ?? [])].filter(
-                  ([, m]) => m === 'out-of-range'
-              ),
-              ...preview.marks,
-          ])
-        : scene.view.marks;
+    const marks = preview ? preview.marks : scene.view.marks;
 
     return {
         ...scene.view,

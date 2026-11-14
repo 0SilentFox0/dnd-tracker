@@ -21,6 +21,7 @@ import type { DndSkill } from '@/lib/constants/skills';
 import type { WeaponTrait } from '@/lib/constants/weapon-traits';
 import type { NonRandomEffect } from '@/lib/utils/abilities/schema';
 import type { FxAuraKind, FxImpact, SpellFx } from '@/lib/utils/battle/fx';
+import type { GridWindow } from '@/lib/utils/battle/grid/layout';
 import type { ModeView } from '@/lib/utils/battle/modes/types';
 import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
 import type {
@@ -500,14 +501,15 @@ export type BattleMapMark =
     | 'invalid-target'
     | 'template'
     | 'pick'
-    | 'picked'
-    | 'out-of-range';
+    | 'picked';
 
 export interface BattleMapView {
     selectedId?: string | null;
     currentId?: string | null;
     /** cellKey → позначка; число — досяжна клітинка (вартість руху, не показується) */
     marks?: Map<string, BattleMapMark | number>;
+    /** клітинки в межах дальності прицілу; поза ним затемнено */
+    range?: GridWindow | null;
     /** Підказка атаки при наведенні: дальня — лінія до клітинки, ближня — меч на цілі; cover — клітинки перешкоди (порожньо — заважає стіна лабіринту), відсутній — лінія вільна */
     trajectory?: {
         fromId: string;

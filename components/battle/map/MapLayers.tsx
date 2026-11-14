@@ -13,6 +13,7 @@ import {
     cellKey,
     type CellMark,
     cellPolygon,
+    type GridWindow,
     isDamagingCell,
     isMoveMark,
     parseCellKey,
@@ -65,10 +66,13 @@ function markFill(mark: MarkValue): string {
 
     if (mark === 'picked') return 'rgba(240,200,70,.5)';
 
-    if (mark === 'out-of-range') return 'rgba(0,0,0,.45)';
-
     return mark === 'invalid-target' ? 'rgba(120,120,120,.25)' : 'transparent';
 }
+
+const OUT_OF_RANGE_FILL = 'rgba(0,0,0,.45)';
+
+const inWindow = (w: GridWindow, p: GridPoint) =>
+    p.x >= w.x && p.x < w.x + w.cols && p.y >= w.y && p.y < w.y + w.rows;
 
 type MapT = ReturnType<typeof useTranslations<'battle.map'>>;
 
@@ -186,6 +190,7 @@ interface GridScene {
 interface GridLayerProps {
     map: BattleMapConfig;
     marks: BattleMapView['marks'];
+    range?: BattleMapView['range'];
     cellActions: GridCellActions;
     onStrokeStart?: (p: GridPoint, e: PointerEvent) => void;
     scene: GridScene;
@@ -194,6 +199,7 @@ interface GridLayerProps {
 export const GridLayer = memo(function GridLayer({
     map,
     marks,
+    range,
     cellActions,
     onStrokeStart,
     scene,
@@ -390,7 +396,11 @@ export const GridLayer = memo(function GridLayer({
                         key={key}
                         data-fx-cell={key}
                         points={cellPolygon(p)}
-                        fill={markFill(mark)}
+                        fill={
+                            mark === undefined && range && !inWindow(range, p)
+                                ? OUT_OF_RANGE_FILL
+                                : markFill(mark)
+                        }
                         stroke={gridless ? 'none' : 'rgba(255,255,255,1)'}
                         strokeOpacity={map.opacity}
                         strokeWidth={1.5}
