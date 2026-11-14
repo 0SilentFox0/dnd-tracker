@@ -34,7 +34,12 @@ const fixture = (ids: string[]) => {
             spec.blocks.map(() => `${OPEN}\n${CLOSE}\n`).join('\n')
         );
 
-    for (const id of ids) write(root, `systems/${id}/meta.ts`, 'export {};\n');
+    for (const id of ids)
+        write(
+            root,
+            `systems/${id}/meta.ts`,
+            `export const ${id.toUpperCase()}_META = {};\n`
+        );
 
     return root;
 };
@@ -109,6 +114,13 @@ describe('systems index', () => {
                 );
         }
 
+        for (const id of ['wfrp', 'd6pool'])
+            write(
+                root,
+                `systems/${id}/meta.ts`,
+                `export const ${id.toUpperCase()}_META = {};\n`
+            );
+
         await syncSystemsIndex(root);
 
         for (const spec of ROOT_SPECS.filter((s) => s.file !== 'global.d.ts')) {
@@ -167,12 +179,12 @@ describe('systems index', () => {
         write(
             root,
             'systems/alpha/meta.ts',
-            `export const A = { i18n: { battle: ['zebra', 'apple'], pages: { draft: ['mango'] }, budgetKb: { battle: 5, pages: { draft: 3 } } } };\n`
+            `export const ALPHA_META = { i18n: { battle: ['zebra', 'apple'], pages: { draft: ['mango'] }, budgetKb: { battle: 5, pages: { draft: 3 } } } };\n`
         );
         write(
             root,
             'systems/beta/meta.ts',
-            `export const B = { i18n: { dm: ['apple', 'kiwi'] } };\n`
+            `export const BETA_META = { i18n: { dm: ['apple', 'kiwi'] } };\n`
         );
 
         await syncSystemsIndex(root);
@@ -229,6 +241,44 @@ describe('systems index', () => {
 
         await expect(syncSystemsIndex(root)).rejects.toThrow(
             'lib/utils/rules/systems/meta.ts'
+        );
+    });
+
+    it('rejects a meta namespace that duplicates a core one', async () => {
+        const root = fixture(['alpha']);
+
+        write(
+            root,
+            'systems/alpha/meta.ts',
+            `export const ALPHA_META = { i18n: { battle: ['spells'] } };\n`
+        );
+
+        await expect(syncSystemsIndex(root)).rejects.toThrow(
+            'systems/alpha/meta.ts: i18n namespace "spells" duplicates a core namespace'
+        );
+    });
+
+    it('rejects a value import in meta.ts', async () => {
+        const root = fixture(['alpha']);
+
+        write(
+            root,
+            'systems/alpha/meta.ts',
+            `import { x } from './x';\nexport const ALPHA_META = { i18n: {} };\n`
+        );
+
+        await expect(syncSystemsIndex(root)).rejects.toThrow(
+            'systems/alpha/meta.ts: only `import type` is allowed'
+        );
+    });
+
+    it('rejects a meta.ts without the <ID>_META export', async () => {
+        const root = fixture(['alpha']);
+
+        write(root, 'systems/alpha/meta.ts', 'export {};\n');
+
+        await expect(syncSystemsIndex(root)).rejects.toThrow(
+            'systems/alpha/meta.ts: missing export ALPHA_META'
         );
     });
 });

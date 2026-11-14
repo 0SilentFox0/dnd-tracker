@@ -1,4 +1,5 @@
 import type { WhatsNewEntry } from '@/lib/onboarding/types';
+import { i18nNamespaces } from '@/lib/utils/rules/systems/i18n-namespaces';
 // <systems:generated>
 import { ARTIFACTSETS_META } from '@/systems/artifactsets/meta';
 import { D20_META } from '@/systems/d20/meta';
@@ -94,14 +95,8 @@ export const metaOf = (key: string): SystemMeta | undefined =>
 
 export const systemNamespaces = (): readonly string[] => [
     ...new Set(
-        (SYSTEM_META as readonly SystemMeta[]).flatMap(
-            ({ i18n: { battle, campaign, member, dm, pages } }) => [
-                ...(battle ?? []),
-                ...(campaign ?? []),
-                ...(member ?? []),
-                ...(dm ?? []),
-                ...Object.values(pages ?? {}).flat(),
-            ]
+        (SYSTEM_META as readonly SystemMeta[]).flatMap(({ i18n }) =>
+            i18nNamespaces(i18n)
         )
     ),
 ];

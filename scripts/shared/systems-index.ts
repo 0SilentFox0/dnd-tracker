@@ -1,6 +1,11 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 import * as prettier from 'prettier';
+
+import { CORE_NAMESPACES } from '@/lib/i18n/core-namespaces';
+import { i18nNamespaces } from '@/lib/utils/rules/systems/i18n-namespaces';
+import type { SystemI18n } from '@/lib/utils/rules/systems/meta';
 
 const OPEN = '// <systems:generated>';
 
@@ -11,7 +16,10 @@ const upper = (id: string) => id.toUpperCase().replace(/[^A-Z0-9]/g, '_');
 interface BlockSpec {
     packs?: boolean;
     /** Emits whole-block lines from the ids (instead of per-id `line`) */
-    lines?: (ids: string[], root: string) => string[];
+    lines?: (
+        ids: string[],
+        ctx: { root: string; namespaces: string[] }
+    ) => string[];
     /** The layer file must export this name for the id to get a line */
     name?: (id: string) => string;
     layer: (id: string) => string;
@@ -48,45 +56,47 @@ const scriptsLayer = (id: string) => `scripts/templates/systems/${id}/index.ts`;
 const packLayer = (id: string) => `scripts/templates/${id}/index.ts`;
 
 const i18nBlock = (
-    ids: string[],
-    root: string,
+    namespaces: string[],
     entry: (ns: string) => string
-): string[] =>
-    namespacesIn(root, ids)
-        .map(entry);
+): string[] => namespaces.map(entry);
 
-export const namespacesIn = (root: string, ids: string[]): string[] => {
+export async function namespacesIn(
+    root: string,
+    ids: string[]
+): Promise<string[]> {
     const found = new Set<string>();
 
     for (const id of ids) {
-        const text = fs.readFileSync(path.join(root, metaLayer(id)), 'utf8');
+        const file = path.join(root, metaLayer(id));
 
-        const start = text.search(/\bi18n\s*:\s*\{/);
+        if (/^\s*import\s+(?!type\b)/m.test(fs.readFileSync(file, 'utf8')))
+            throw new Error(
+                `systems/${id}/meta.ts: only \`import type\` is allowed`
+            );
 
-        if (start < 0) continue;
+        const mod = (await import(
+            `${pathToFileURL(file).href}?stamp=${Math.trunc(fs.statSync(file).mtimeMs)}`
+        )) as Record<string, { i18n?: SystemI18n } | undefined>;
 
-        let depth = 0;
+        const meta = mod[`${upper(id)}_META`];
 
-        let end = start;
+        if (!meta)
+            throw new Error(
+                `systems/${id}/meta.ts: missing export ${upper(id)}_META`
+            );
 
-        for (let i = text.indexOf('{', start); i < text.length; i++) {
-            if (text[i] === '{') depth++;
-            else if (text[i] === '}' && --depth === 0) {
-                end = i;
-                break;
-            }
+        for (const ns of i18nNamespaces(meta.i18n ?? {})) {
+            if ((CORE_NAMESPACES as readonly string[]).includes(ns))
+                throw new Error(
+                    `systems/${id}/meta.ts: i18n namespace "${ns}" duplicates a core namespace`
+                );
+
+            found.add(ns);
         }
-
-        const body = text
-            .slice(start, end)
-            .replace(/budgetKb\s*:\s*\{[^{}]*(\{[^{}]*\}[^{}]*)*\}/, '');
-
-        for (const m of body.matchAll(/['"]([A-Za-z][A-Za-z0-9]*)['"]/g))
-            found.add(m[1]);
     }
 
     return [...found].sort();
-};
+}
 
 export const ROOT_SPECS: readonly RootSpec[] = [
     {
@@ -94,10 +104,9 @@ export const ROOT_SPECS: readonly RootSpec[] = [
         blocks: [
             {
                 layer: metaLayer,
-                lines: (ids, root) =>
+                lines: (_ids, { namespaces }) =>
                     i18nBlock(
-                        ids,
-                        root,
+                        namespaces,
                         (ns) =>
                             `${ns}: typeof import("./messages/uk/${ns}.json");`
                     ),
@@ -433,8 +442,10 @@ const render = (
     text: string,
     ids: string[],
     packs: string[],
-    root: string
+    ctx: { root: string; namespaces: string[] }
 ): string => {
+    const { root } = ctx;
+
     const found = [...text.matchAll(BLOCK_RE)].length;
 
     if (found !== spec.blocks.length)
@@ -449,7 +460,7 @@ const render = (
 
         if (block.lines)
             return `${indent}${OPEN}\n${block
-                .lines(ids, root)
+                .lines(ids, ctx)
                 .map((l) => `${indent}${l}\n`)
                 .join('')}${indent}${CLOSE}`;
 
@@ -507,6 +518,8 @@ export const syncSystemsIndex = async (
 
     const packs = packKeysIn(root);
 
+    const namespaces = await namespacesIn(root, ids);
+
     const result: IndexResult = { stale: [], written: [] };
 
     for (const spec of ROOT_SPECS) {
@@ -518,7 +531,7 @@ export const syncSystemsIndex = async (
 
         const after = await formatted(
             file,
-            render(spec, before, ids, packs, root)
+            render(spec, before, ids, packs, { root, namespaces })
         );
 
         if (before === after) continue;
