@@ -143,7 +143,15 @@
       "noDamage": "no damage",
       "type": "Type"
     },
-    "difficultDefault": "Difficult terrain"
+    "difficultDefault": "Difficult terrain",
+    "update": {
+      "button": "Update map",
+      "upToDate": "The map is up to date",
+      "confirmTitle": "Update the battle map?",
+      "confirmDescription": "The battle switches to the latest version of the library map. Tokens standing on cells that become impassable block the update; move them first.",
+      "confirm": "Update",
+      "done": "Map updated"
+    }
   },
   "result": {
     "title": {

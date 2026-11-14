@@ -17,6 +17,7 @@ import { useMapCellActions } from './useMapCellActions';
 import { type MapMotionTool, useMapMotionTool } from './useMapMotionTool';
 import { useMapPlacing } from './useMapPlacing';
 import { type MapTerrainTool, useMapTerrainTool } from './useMapTerrainTool';
+import { type MapUpdateTool, useMapUpdateTool } from './useMapUpdateTool';
 import { type MapWeatherTool, useMapWeatherTool } from './useMapWeatherTool';
 
 import { useText } from '@/lib/i18n/use-text';
@@ -52,6 +53,7 @@ export interface BattleMapScene {
     weatherTool: MapWeatherTool | null;
     motionTool: MapMotionTool | null;
     backgroundTool: MapBackgroundTool | null;
+    mapUpdate: MapUpdateTool | null;
 }
 
 export function useBattleMapScene(fx?: SystemFx): BattleMapScene | null {
@@ -65,6 +67,7 @@ export function useBattleMapScene(fx?: SystemFx): BattleMapScene | null {
         viewer,
         selectedId,
         select,
+        campaignId,
         actions,
         anyPending,
         toast,
@@ -313,6 +316,14 @@ export function useBattleMapScene(fx?: SystemFx): BattleMapScene | null {
         mutation: actions.mapBackground,
     });
 
+    const mapUpdate = useMapUpdateTool({
+        isDM,
+        campaignId,
+        mapRef: battle.mapRef,
+        mutation: actions.mapUpdate,
+        notify: show,
+    });
+
     useExclusivePalettes({
         mode: { active: !!modeTools?.paletteOpen, close: closeModeTool },
         terrain: { active: terrainTool.active, close: closeTerrain },
@@ -342,5 +353,6 @@ export function useBattleMapScene(fx?: SystemFx): BattleMapScene | null {
         weatherTool,
         motionTool,
         backgroundTool,
+        mapUpdate,
     };
 }

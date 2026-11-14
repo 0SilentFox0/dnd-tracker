@@ -14,6 +14,7 @@ import { MapWeatherPicker } from './MapWeatherPicker';
 import { modeUiOf } from '@/components/battle/modes';
 import { useSystemFx } from '@/components/battle/use-system-battle-ui';
 import { useBattleMapScene } from '@/lib/hooks/battle';
+import type { MapUpdateTool } from '@/lib/hooks/battle/useMapUpdateTool';
 import { cn } from '@/lib/utils';
 import { activeModeWithConfig } from '@/lib/utils/battle/modes';
 
@@ -45,6 +46,32 @@ function ModeButton({
             )}
         >
             {children}
+        </button>
+    );
+}
+
+function UpdateMapButton({
+    tool,
+    tall,
+}: {
+    tool: MapUpdateTool;
+    tall: boolean;
+}) {
+    const t = useTranslations('battle.map.update');
+
+    return (
+        <button
+            type="button"
+            disabled={!tool.available || tool.pending}
+            title={tool.available ? undefined : t('upToDate')}
+            onClick={() => void tool.run()}
+            className={cn(
+                tall ? 'h-8' : 'h-7',
+                'rounded-md border border-hud-rule bg-black/60 px-2 text-xs text-hud-muted hover:bg-black/80 disabled:opacity-50',
+                tool.available && 'border-[var(--gold)] text-hud-gold-bright'
+            )}
+        >
+            {t('button')}
         </button>
     );
 }
@@ -126,6 +153,9 @@ export function BattleMapPanel({ phone = false }: { phone?: boolean }) {
                         {t(key)}
                     </ModeButton>
                 ))}
+                {scene.mapUpdate && (
+                    <UpdateMapButton tool={scene.mapUpdate} tall={inRow} />
+                )}
             </div>
             {(terrainTool.active || palettes.some((p) => p.tool.active)) && (
                 // у рядку над картою палітра звисає вниз на карту, не зсуваючи й не перекриваючи перемикач вигляду

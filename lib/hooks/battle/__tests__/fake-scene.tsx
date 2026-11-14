@@ -40,6 +40,7 @@ export interface FakeSceneOptions {
     status?: BattleScene['status'];
     afterLog?: BattleAction[];
     map?: BattleScene['map'];
+    mapRef?: BattleScene['mapRef'];
     mapAim?: MapAim | null;
     mapPick?: MapPick | null;
     attackReady?: boolean;
@@ -157,6 +158,7 @@ export function fakeScene(opts: FakeSceneOptions = {}) {
               }
             : null,
         map: opts.map ?? null,
+        ...(opts.mapRef && { mapRef: opts.mapRef }),
         audio: opts.audio ?? null,
     } as BattleScene;
 
@@ -207,6 +209,7 @@ export function fakeScene(opts: FakeSceneOptions = {}) {
         move: mutation(),
         mapTerrain: mutation(),
         mapWalls: mutation(),
+        mapUpdate: mutation(),
         mapBackground: mutation(),
         mapWeather: mutation(),
         mapMotion: mutation(),
