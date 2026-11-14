@@ -28,12 +28,15 @@ function runMoveHooks(input: MovementInput): MoveHookResult | null {
     let out: MoveHookResult | null = null;
 
     for (const hook of ruleSystemOf(rules).combat.actions.onMove ?? []) {
+        const participants = out?.participants ?? input.participants;
+
         const next = hook({
             ...input,
             path,
             start,
-            participants: out?.participants ?? input.participants,
-            sceneState: out ? out.sceneState : input.sceneState,
+            participants,
+            mover: findParticipant(participants, mover.basicInfo.id) ?? mover,
+            sceneState: out?.sceneState ?? input.sceneState,
         });
 
         if (!next) continue;
@@ -41,6 +44,7 @@ function runMoveHooks(input: MovementInput): MoveHookResult | null {
         out = out
             ? {
                   ...next,
+                  sceneState: next.sceneState ?? out.sceneState,
                   actions: [...out.actions, ...next.actions],
                   messages: [...out.messages, ...next.messages],
               }

@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
+import { PRESETS } from '@/lib/utils/rules/systems/catalog';
 import {
+    isD20Preset,
     NEW_MODULES,
     planAll,
     planRow,
@@ -8,6 +10,7 @@ import {
     summarizePlans,
 } from '@/scripts/db/lib/backfill-rule-modules-plan';
 import {
+    assertNoActiveBattles,
     parseArgs,
     parseSnapshot,
 } from '@/scripts/db/lib/backfill-rule-modules-snapshot';
@@ -118,7 +121,46 @@ describe('cli args and snapshot', () => {
         expect(() => parseArgs(['--apply', '--revert', 'f'])).toThrow();
     });
 
+    it('refuses --apply over active battles without the explicit flag', () => {
+        const args = parseArgs(['--apply']);
+
+        expect(() => assertNoActiveBattles(1, args)).toThrow(
+            '--allow-active-battles'
+        );
+        expect(() => assertNoActiveBattles(0, args)).not.toThrow();
+        expect(() =>
+            assertNoActiveBattles(
+                1,
+                parseArgs(['--apply', '--allow-active-battles'])
+            )
+        ).not.toThrow();
+        expect(() => parseArgs(['--allow-active-battles'])).toThrow();
+    });
+
     it('rejects an invalid snapshot', () => {
         expect(() => parseSnapshot('{"version":2}')).toThrow();
+    });
+});
+
+describe('NEW_MODULES', () => {
+    it('is the frozen list, contained in every d20 preset', () => {
+        expect(NEW_MODULES).toEqual([
+            'deathsaves',
+            'inspiration',
+            'lair',
+            'offhand',
+            'opportunity',
+        ]);
+
+        const presets = Object.entries(PRESETS).filter(([key]) =>
+            isD20Preset(key)
+        );
+
+        expect(presets.length).toBeGreaterThan(0);
+
+        for (const [, preset] of presets)
+            expect(preset.modules).toEqual(
+                expect.arrayContaining([...NEW_MODULES])
+            );
     });
 });

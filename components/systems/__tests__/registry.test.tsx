@@ -64,8 +64,13 @@ describe('system ui registry', () => {
         expect(Object.keys(hommSections ?? {})).toEqual(
             expect.arrayContaining(['morale', 'heroScaling'])
         );
-        expect(dndItems ?? {}).toEqual({});
-        expect(Object.keys(hommItems ?? {})).toEqual(['actions.retaliation']);
+        expect(Object.keys(dndItems ?? {})).toEqual([
+            'actions.opportunityAttacks',
+        ]);
+        expect(Object.keys(hommItems ?? {})).toEqual([
+            'actions.opportunityAttacks',
+            'actions.retaliation',
+        ]);
         expect(systemUiOf('wfrp')).not.toBe(systemUiOf('homm'));
     });
 

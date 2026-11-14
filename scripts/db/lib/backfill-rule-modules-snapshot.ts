@@ -83,6 +83,17 @@ export interface CliArgs {
     snapshotDir: string;
     revertFile?: string;
     force: boolean;
+    allowActiveBattles: boolean;
+}
+
+export function assertNoActiveBattles(
+    activeBattle: number,
+    args: Pick<CliArgs, 'allowActiveBattles'>
+) {
+    if (activeBattle > 0 && !args.allowActiveBattles)
+        throw new Error(
+            `Є записи в активних боях (${activeBattle}): завершіть бої або додайте --allow-active-battles`
+        );
 }
 
 export const DEFAULT_SNAPSHOT_DIR = '.migration-backup/rule-modules';
@@ -94,6 +105,7 @@ export function parseArgs(argv: readonly string[]): CliArgs {
         json: false,
         snapshotDir: DEFAULT_SNAPSHOT_DIR,
         force: false,
+        allowActiveBattles: false,
     };
 
     let apply = false;
@@ -123,6 +135,9 @@ export function parseArgs(argv: readonly string[]): CliArgs {
             case '--force':
                 args.force = true;
                 break;
+            case '--allow-active-battles':
+                args.allowActiveBattles = true;
+                break;
             case '--revert':
                 args.revertFile = value(i++, flag);
                 break;
@@ -139,6 +154,9 @@ export function parseArgs(argv: readonly string[]): CliArgs {
 
     if (args.force && args.revertFile === undefined)
         throw new Error('--force дозволено лише з --revert');
+
+    if (args.allowActiveBattles && !apply)
+        throw new Error('--allow-active-battles дозволено лише з --apply');
 
     if (apply) args.mode = 'apply';
     else if (args.revertFile !== undefined) args.mode = 'revert';

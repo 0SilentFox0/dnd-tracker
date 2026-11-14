@@ -29,9 +29,14 @@ export interface RowPlan {
     afterJson?: Record<string, unknown>;
 }
 
-/** Modules split out of the d20 base, from the single source: the fallback preset. */
-export const NEW_MODULES: readonly string[] =
-    PRESETS[FALLBACK_SYSTEM_KEY].modules;
+/** Frozen list: later modules added to presets must not be backfilled by this one-off script */
+export const NEW_MODULES: readonly string[] = [
+    'deathsaves',
+    'inspiration',
+    'lair',
+    'offhand',
+    'opportunity',
+];
 
 export const FALLBACK_BASE = PRESETS[FALLBACK_SYSTEM_KEY].base;
 

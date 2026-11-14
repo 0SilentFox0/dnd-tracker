@@ -358,7 +358,7 @@ export interface RuleSystemActions {
     legendaryAttack(input: LegendaryAttackInput): LegendaryAttackResult;
     /** A move with whatever it provokes (dragging a grappled foe, `onMove` hooks) */
     move(input: MovementInput): MovementResult;
-    /** Hooks run on every move with a path, base first, then modules; the first that stops the mover ends the chain */
+    /** Hooks run on every move with a path, base first, then modules; the first that stops the mover ends the chain. The base's own `move` must run them (only d20 does) */
     onMove?: readonly MoveHook[];
     /** Drops holds whose grappler fell or is no longer adjacent; same array when there are none */
     releaseInvalidGrapples(

@@ -3,7 +3,8 @@
  * Доповнює явні `system.modules` пресетів бази d20 новими модулями (NEW) у campaigns.rules та battle_scenes.rules.
  * Без --apply — лише звіт (dry-run). Apply — одна транзакція з оптимістичним замком і файлом-знімком для --revert.
  *
- *   pnpm exec tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/db/backfill-rule-modules.ts [--apply | --revert <file>] [--allow-remote] [--json] [--snapshot-dir <dir>] [--force]
+ *   pnpm exec tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/db/backfill-rule-modules.ts [--apply | --revert <file>] [--allow-remote] [--json] [--snapshot-dir <dir>] [--force] [--allow-active-battles]
+ * --apply відмовляє, якщо серед записів є активні бої, доки не задано --allow-active-battles.
  */
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -14,6 +15,7 @@ import {
     summarizePlans,
 } from '@/scripts/db/lib/backfill-rule-modules-plan';
 import {
+    assertNoActiveBattles,
     type CliArgs,
     parseArgs,
     parseSnapshot,
@@ -145,6 +147,9 @@ async function main() {
             result.rows.filter((r) => r.table === table).length;
 
         const header = `БД: ${where} · ${args.mode === 'apply' ? 'APPLY' : 'DRY RUN'} · campaigns ${counts('campaigns')} · battle_scenes ${counts('battle_scenes')}`;
+
+        if (args.mode === 'apply')
+            assertNoActiveBattles(result.summary.activeBattle, args);
 
         const applied =
             args.mode === 'apply'
