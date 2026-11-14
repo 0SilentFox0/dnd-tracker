@@ -1,7 +1,8 @@
 #!/usr/bin/env tsx
 /**
- * Moves the d20 statblock (9 columns) into `characteristics` for characters/units of d20 campaigns and units_base rows of d20 layers.
- * Default is a dry run; --apply writes in batches of 500 (one transaction each) with a byte-exact snapshot for --revert. Columns are never touched.
+ * Fills MISSING d20 statblock keys (9 columns) in `characteristics` for characters/units of d20 campaigns and units_base rows (all except those of known non-d20 campaigns; orphans included).
+ * Stored values are never overwritten (divergent rows are listed). Default is a dry run; --apply writes in batches of 500 (one transaction each) with a byte-exact snapshot for --revert. Columns are never touched.
+ * --revert is safe only while the dual-write (S-A/S-B) code is live; --force overwrites rows changed after apply (owner decision only).
  * HASH GUARD (on by default): contentRowHash before == after for every row, otherwise nothing is written.
  *
  *   pnpm exec tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/db/backfill-d20-characteristics.ts [--apply | --revert <file> | --report [--expect-zero]] [--allow-remote] [--json] [--snapshot-dir <dir>] [--expect-same-hashes | --no-expect-same-hashes] [--force] [--allow-active-battles]
@@ -38,6 +39,14 @@ async function load(db: RawDb) {
     return loadStatRows(db, await loadCampaignFacts(db));
 }
 
+async function loadNonD20(db: RawDb) {
+    const { countNonD20, loadCampaignFacts } = await import(
+        '@/scripts/db/lib/backfill-d20-characteristics-db'
+    );
+
+    return countNonD20(db, await loadCampaignFacts(db));
+}
+
 async function revert(db: RawDb, args: CliArgs, header: string) {
     const { currentTexts, revertSnapshot } = await import(
         '@/scripts/db/lib/backfill-d20-characteristics-db'
@@ -72,7 +81,7 @@ async function revert(db: RawDb, args: CliArgs, header: string) {
 }
 
 async function report(db: RawDb, args: CliArgs, header: string) {
-    const result = reportRows(await load(db));
+    const result = reportRows(await load(db), await loadNonD20(db));
 
     if (args.json) console.log(JSON.stringify(result, null, 2));
     else {
@@ -82,6 +91,12 @@ async function report(db: RawDb, args: CliArgs, header: string) {
             console.log(
                 `${table}: rows ${c.rows} · columns != characteristics ${c.mismatched}`
             );
+
+        const { nonD20, orphan } = result.excluded;
+
+        console.log(
+            `excluded as non-d20: characters ${nonD20.characters}, units ${nonD20.units}, units_base ${nonD20.units_base} · orphan units_base (no campaign) ${orphan}`
+        );
 
         console.log(`rows ${result.rows} · mismatched ${result.mismatched}`);
     }
@@ -170,7 +185,7 @@ async function main() {
         const { byTable, skipped } = summary;
 
         console.log(
-            `summary: write ${summary.write} (characters ${byTable.characters}, units ${byTable.units}, units_base ${byTable.units_base}; active-battle campaigns ${summary.activeBattle}) · unchanged ${summary.unchanged} · skipped ${skipped.notObject} · hash mismatches ${summary.hashMismatches}`
+            `summary: write ${summary.write} (characters ${byTable.characters}, units ${byTable.units}, units_base ${byTable.units_base}; active-battle campaigns ${summary.activeBattle}) · unchanged ${summary.unchanged} · skipped ${skipped.notObject} · divergent ${summary.divergent} · hash mismatches ${summary.hashMismatches}`
         );
 
         if (args.mode === 'apply')

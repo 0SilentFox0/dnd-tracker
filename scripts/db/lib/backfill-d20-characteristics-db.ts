@@ -4,8 +4,10 @@ import { jsonEqual } from '@/lib/utils/battle/store/stable-json';
 import {
     type CampaignFact,
     d20CampaignIds,
+    nonD20CampaignIds,
     rowKey,
     type RowPlan,
+    STAT_TABLES,
     statColumns,
     type StatRow,
     statRowHash,
@@ -47,6 +49,7 @@ type RawRow = {
     owner: string;
     label: string;
     text: string;
+    orphan: boolean;
 } & Record<string, unknown>;
 
 export async function loadCampaignFacts(db: RawDb): Promise<CampaignFact[]> {
@@ -69,13 +72,40 @@ export async function loadCampaignFacts(db: RawDb): Promise<CampaignFact[]> {
     }));
 }
 
+const emptyCounts = (): Record<StatTable, number> => ({
+    characters: 0,
+    units: 0,
+    units_base: 0,
+});
+
+export async function countNonD20(
+    db: RawDb,
+    facts: readonly CampaignFact[]
+): Promise<Record<StatTable, number>> {
+    const ids = nonD20CampaignIds(facts);
+
+    const counts = emptyCounts();
+
+    if (ids.length === 0) return counts;
+
+    for (const table of STAT_TABLES) {
+        const [row] = await db.$queryRaw<{ n: bigint | number }[]>(
+            Prisma.sql`SELECT count(*) AS n FROM ${TABLE_SQL[table]} WHERE ${OWNER_SQL[table]} = ANY(${ids}::text[])`
+        );
+
+        counts[table] = Number(row?.n ?? 0);
+    }
+
+    return counts;
+}
+
 export async function loadStatRows(
     db: RawDb,
     facts: readonly CampaignFact[]
 ): Promise<StatRow[]> {
-    const ids = d20CampaignIds(facts);
+    const d20Ids = d20CampaignIds(facts);
 
-    if (ids.length === 0) return [];
+    const nonD20Ids = nonD20CampaignIds(facts);
 
     const activeIds = new Set(
         facts.filter((f) => f.activeBattle).map((f) => f.id)
@@ -83,14 +113,25 @@ export async function loadStatRows(
 
     const rows: StatRow[] = [];
 
-    for (const table of ['characters', 'units', 'units_base'] as const) {
-        const validFrom =
-            table === 'units_base'
-                ? Prisma.raw('"validFrom"')
-                : Prisma.raw('NULL::int');
+    for (const table of STAT_TABLES) {
+        const isBase = table === 'units_base';
+
+        if (!isBase && d20Ids.length === 0) continue;
+
+        const validFrom = isBase
+            ? Prisma.raw('"validFrom"')
+            : Prisma.raw('NULL::int');
+
+        const orphan = isBase
+            ? Prisma.sql`NOT EXISTS (SELECT 1 FROM campaigns c WHERE c.id = "sourceCampaignId")`
+            : Prisma.sql`false`;
+
+        const scope = isBase
+            ? Prisma.sql`NOT ("sourceCampaignId" = ANY(${nonD20Ids}::text[]))`
+            : Prisma.sql`${OWNER_SQL[table]} = ANY(${d20Ids}::text[])`;
 
         const found = await db.$queryRaw<RawRow[]>(
-            Prisma.sql`SELECT id, ${validFrom} AS "validFrom", ${OWNER_SQL[table]} AS owner, name AS label, characteristics::text AS text, ${columnSql()} FROM ${TABLE_SQL[table]} WHERE ${OWNER_SQL[table]} = ANY(${ids}::text[]) ORDER BY id`
+            Prisma.sql`SELECT id, ${validFrom} AS "validFrom", ${OWNER_SQL[table]} AS owner, name AS label, characteristics::text AS text, ${orphan} AS orphan, ${columnSql()} FROM ${TABLE_SQL[table]} WHERE ${scope} ORDER BY id`
         );
 
         for (const r of found)
@@ -105,6 +146,7 @@ export async function loadStatRows(
                     statColumns().map((c) => [c, Number(r[c])])
                 ),
                 activeBattle: activeIds.has(r.owner),
+                ...(r.orphan && { orphan: true }),
             });
     }
 

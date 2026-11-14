@@ -9,7 +9,9 @@ import {
 import {
     assertSameHashes,
     d20CampaignIds,
+    formatPlan,
     isD20Campaign,
+    nonD20CampaignIds,
     planAll,
     planRow,
     reportRows,
@@ -60,10 +62,13 @@ describe('campaign selection', () => {
             { id: 'c', text: '{"system":{"key":"wfrp"}}', activeBattle: false },
             { id: 'd', text: 'oops', activeBattle: false },
             { id: 'e', text: '{"system":{"key":"nope"}}', activeBattle: false },
+            { id: 'f', text: 'null', activeBattle: false },
         ];
 
-        expect(d20CampaignIds(facts)).toEqual(['a', 'b']);
+        expect(d20CampaignIds(facts)).toEqual(['a', 'b', 'f']);
+        expect(nonD20CampaignIds(facts)).toEqual(['c', 'd', 'e']);
         expect(isD20Campaign('{"system":{"key":"wfrp"}}')).toBe(false);
+        expect(isD20Campaign('[1]')).toBe(true);
     });
 });
 
@@ -115,13 +120,35 @@ describe('planRow', () => {
         );
     });
 
-    it('hash guard catches a column / characteristics disagreement', () => {
+    it('fills only missing keys and never overwrites a stored value', () => {
+        const plan = planRow(
+            row({ characteristicsText: '{"armorClass":18,"speed":"x"}' })
+        );
+
+        expect(plan.afterJson).toEqual({ ...COLS, armorClass: 18 });
+        expect(plan.added).not.toContain('armorClass');
+        expect(plan.added).toContain('speed');
+        expect(plan.divergent).toEqual(['armorClass']);
+    });
+
+    it('lists divergent rows even when nothing is missing', () => {
+        const plan = planRow(
+            row({ characteristicsText: JSON.stringify({ ...COLS, speed: 25 }) })
+        );
+
+        expect(plan.action).toBe('unchanged');
+        expect(plan.divergent).toEqual(['speed']);
+        expect(summarizePlans([plan]).divergent).toBe(1);
+        expect(formatPlan(plan)[0]).toMatch(/^divergent .*speed/);
+    });
+
+    it('hash guard passes when the fill keeps the folded value', () => {
         const plans = planAll([
             row({ characteristicsText: '{"armorClass":18}' }),
         ]);
 
-        expect(summarizePlans(plans).hashMismatches).toBe(1);
-        expect(() => assertSameHashes(plans)).toThrow(/Hash guard/);
+        expect(summarizePlans(plans).hashMismatches).toBe(0);
+        expect(() => assertSameHashes(plans)).not.toThrow();
     });
 
     it('summarizes per table and active battles', () => {
@@ -156,6 +183,19 @@ describe('reportRows', () => {
         expect(report.mismatched).toBe(2);
         expect(report.tables.characters.mismatched).toBe(1);
         expect(report.tables.units.mismatched).toBe(1);
+        expect(report.excluded.orphan).toBe(0);
+    });
+
+    it('counts orphan rows separately and carries the non-d20 counts', () => {
+        const report = reportRows(
+            [row({ table: 'units_base', validFrom: 1, orphan: true })],
+            { characters: 2, units: 3, units_base: 4 }
+        );
+
+        expect(report.excluded).toEqual({
+            orphan: 1,
+            nonD20: { characters: 2, units: 3, units_base: 4 },
+        });
     });
 });
 

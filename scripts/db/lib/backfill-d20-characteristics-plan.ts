@@ -8,7 +8,6 @@ import {
     FALLBACK_SYSTEM_KEY,
     PRESETS,
 } from '@/lib/utils/rules/systems/catalog';
-import { splitColumnView } from '@/lib/utils/rules/systems/column-view';
 import { ruleSystemOf } from '@/lib/utils/rules/systems/lookup';
 
 export type StatTable = 'characters' | 'units' | 'units_base';
@@ -40,6 +39,7 @@ export interface StatRow {
     characteristicsText: string;
     columns: Record<string, number>;
     activeBattle: boolean;
+    orphan?: boolean;
 }
 
 export type SkipReason = 'notObject';
@@ -51,6 +51,7 @@ export interface RowPlan {
     beforeText: string;
     columns: Record<string, number>;
     added: string[];
+    divergent: string[];
     afterJson?: Record<string, unknown>;
     beforeHash?: string;
     afterHash?: string;
@@ -81,9 +82,7 @@ export function isD20Campaign(rulesText: string): boolean {
         return false;
     }
 
-    if (!isRecord(raw)) return false;
-
-    if (raw.system === undefined) return true;
+    if (!isRecord(raw) || raw.system === undefined) return true;
 
     const system = sectionSchemas.system.safeParse(raw.system);
 
@@ -92,6 +91,9 @@ export function isD20Campaign(rulesText: string): boolean {
 
 export const d20CampaignIds = (facts: readonly CampaignFact[]): string[] =>
     facts.filter((f) => isD20Campaign(f.text)).map((f) => f.id);
+
+export const nonD20CampaignIds = (facts: readonly CampaignFact[]): string[] =>
+    facts.filter((f) => !isD20Campaign(f.text)).map((f) => f.id);
 
 export function statRowHash(
     table: StatTable,
@@ -117,6 +119,17 @@ export const missingKeys = (
 ): string[] =>
     statColumns().filter((c) => typeof characteristics[c] !== 'number');
 
+export const divergentKeys = (
+    characteristics: Record<string, unknown>,
+    columns: Record<string, number>
+): string[] =>
+    statColumns().filter(
+        (c) =>
+            c in columns &&
+            typeof characteristics[c] === 'number' &&
+            characteristics[c] !== columns[c]
+    );
+
 const head = (row: StatRow) => {
     const { characteristicsText: _t, columns: _c, ...rest } = row;
 
@@ -129,6 +142,7 @@ export function planRow(row: StatRow): RowPlan {
         beforeText: row.characteristicsText,
         columns: row.columns,
         added: [] as string[],
+        divergent: [] as string[],
     };
 
     const parsed = parseCharacteristics(row.characteristicsText);
@@ -136,20 +150,24 @@ export function planRow(row: StatRow): RowPlan {
     if (!isRecord(parsed) || Array.isArray(parsed))
         return { ...base, action: 'skip', skip: 'notObject' };
 
+    const divergent = divergentKeys(parsed, row.columns);
+
     const added = missingKeys(parsed).filter((c) => c in row.columns);
 
-    if (added.length === 0) return { ...base, action: 'unchanged' };
+    if (added.length === 0) return { ...base, divergent, action: 'unchanged' };
 
-    const { characteristics } = splitColumnView(
-        row.columns,
-        ruleSystemOf(DEFAULT_RULES),
-        parsed
-    );
+    const characteristics = {
+        ...Object.fromEntries(added.map((c) => [c, row.columns[c]])),
+        ...Object.fromEntries(
+            Object.entries(parsed).filter(([key]) => !added.includes(key))
+        ),
+    };
 
     return {
         ...base,
         action: 'write',
         added,
+        divergent,
         afterJson: characteristics as Record<string, unknown>,
         beforeHash: statRowHash(row.table, row.columns, parsed),
         afterHash: statRowHash(row.table, row.columns, characteristics),
@@ -180,6 +198,7 @@ export interface PlanSummary {
     skipped: Record<SkipReason, number>;
     activeBattle: number;
     hashMismatches: number;
+    divergent: number;
     byTable: Record<StatTable, number>;
 }
 
@@ -190,6 +209,7 @@ export function summarizePlans(plans: readonly RowPlan[]): PlanSummary {
         skipped: { notObject: 0 },
         activeBattle: 0,
         hashMismatches: hashMismatches(plans).length,
+        divergent: plans.filter((p) => p.divergent.length > 0).length,
         byTable: { characters: 0, units: 0, units_base: 0 },
     };
 
@@ -207,13 +227,21 @@ export function summarizePlans(plans: readonly RowPlan[]): PlanSummary {
 }
 
 export function formatPlan(p: RowPlan): string[] {
-    if (p.action === 'unchanged') return [];
-
     const where = `${rowKey(p.row)} (${p.row.label})`;
 
-    return p.action === 'skip'
-        ? [`skip ${where}: ${p.skip}`]
-        : [`${where}: +${p.added.join(',')}`];
+    const divergent =
+        p.divergent.length > 0
+            ? [`divergent ${where}: ${p.divergent.join(',')}`]
+            : [];
+
+    if (p.action === 'unchanged') return divergent;
+
+    return [
+        ...(p.action === 'skip'
+            ? [`skip ${where}: ${p.skip}`]
+            : [`${where}: +${p.added.join(',')}`]),
+        ...divergent,
+    ];
 }
 
 export interface ReportCounts {
@@ -221,13 +249,26 @@ export interface ReportCounts {
     mismatched: number;
 }
 
+export interface ExcludedCounts {
+    nonD20: Record<StatTable, number>;
+    orphan: number;
+}
+
 export interface Report {
     tables: Record<StatTable, ReportCounts>;
     rows: number;
     mismatched: number;
+    excluded: ExcludedCounts;
 }
 
-export function reportRows(rows: readonly StatRow[]): Report {
+export function reportRows(
+    rows: readonly StatRow[],
+    nonD20: Record<StatTable, number> = {
+        characters: 0,
+        units: 0,
+        units_base: 0,
+    }
+): Report {
     const report: Report = {
         tables: {
             characters: { rows: 0, mismatched: 0 },
@@ -236,6 +277,7 @@ export function reportRows(rows: readonly StatRow[]): Report {
         },
         rows: 0,
         mismatched: 0,
+        excluded: { nonD20, orphan: rows.filter((r) => r.orphan).length },
     };
 
     for (const row of rows) {
