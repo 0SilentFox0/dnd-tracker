@@ -1,3 +1,5 @@
+// screens under test call systemUiOf without a SystemGate
+import '@/components/systems/registry';
 import type { CharacterSheet } from '@/types/characters';
 
 const line = (label: string, value: string) => ({ label, value });

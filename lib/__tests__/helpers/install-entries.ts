@@ -110,11 +110,29 @@ export function closureOf(entry: string, deps: Deps, stopAtClient = false) {
     return { files, dynamic, boundaries };
 }
 
-/** Server closure stops at `'use client'` files; the browser instance is the union of the closures of every boundary reached */
+/** App `layout.tsx` files above an entry: they wrap the page, so their gates and roots count for it */
+export function layoutsOf(entry: string): string[] {
+    if (!entry.startsWith('app/') || !entry.endsWith('/page.tsx')) return [];
+
+    const parts = path.dirname(entry).split('/');
+
+    return parts.flatMap((_, i) => {
+        const layout = `${parts.slice(0, i + 1).join('/')}/layout.tsx`;
+
+        return fs.existsSync(path.join(ROOT, layout)) ? [layout] : [];
+    });
+}
+
+/** Server closure stops at `'use client'` files; the browser instance is the union of the closures of every boundary reached. `wrap` is what the page's layouts bring (roots, gates) without their own lookups, which a barrel import makes look wider than they are */
 export function sideClosures(entry: string, deps: Deps) {
     const server = closureOf(entry, deps, true);
 
     const client = { files: new Set<string>(), dynamic: new Set<string>() };
+
+    const wrap = {
+        server: { files: new Set<string>(), dynamic: new Set<string>() },
+        client: { files: new Set<string>(), dynamic: new Set<string>() },
+    };
 
     for (const boundary of server.boundaries) {
         const c = closureOf(boundary, deps);
@@ -123,7 +141,21 @@ export function sideClosures(entry: string, deps: Deps) {
         c.dynamic.forEach((f) => client.dynamic.add(f));
     }
 
-    return { server, client };
+    for (const layout of layoutsOf(entry)) {
+        const l = closureOf(layout, deps, true);
+
+        l.files.forEach((f) => wrap.server.files.add(f));
+        l.dynamic.forEach((f) => wrap.server.dynamic.add(f));
+
+        for (const boundary of l.boundaries) {
+            const c = closureOf(boundary, deps);
+
+            c.files.forEach((f) => wrap.client.files.add(f));
+            c.dynamic.forEach((f) => wrap.client.dynamic.add(f));
+        }
+    }
+
+    return { server, client, wrap };
 }
 
 /** An entry that reaches a lookup must reach its install root on the same side (server or browser), statically or through an `import()` of that root; a server root never serves a client component */
@@ -133,7 +165,7 @@ export function unrooted(
     deps: Deps
 ): string[] {
     return entries.flatMap((entry) => {
-        const { server, client } = sideClosures(entry, deps);
+        const { server, client, wrap } = sideClosures(entry, deps);
 
         return pairs.flatMap(({ lookup, root, lazy, side = 'both' }) => {
             const out: string[] = [];
@@ -142,7 +174,8 @@ export function unrooted(
                 side !== 'client' &&
                 server.files.has(lookup) &&
                 !server.files.has(root) &&
-                !server.dynamic.has(root)
+                !server.dynamic.has(root) &&
+                !wrap.server.files.has(root)
             )
                 out.push(`${entry} -> ${lookup} [server]`);
 
@@ -151,7 +184,9 @@ export function unrooted(
                 client.files.has(lookup) &&
                 !client.files.has(root) &&
                 !client.dynamic.has(root) &&
-                !(lazy && client.files.has(lazy))
+                !(lazy && client.files.has(lazy)) &&
+                !wrap.client.files.has(root) &&
+                !(lazy && wrap.client.files.has(lazy))
             )
                 out.push(`${entry} -> ${lookup} [client]`);
 
