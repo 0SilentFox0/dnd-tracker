@@ -155,7 +155,9 @@ const mkActor = (campaignId = 'c1'): Actor => ({
 const rulesOf = (key: string) => ({ system: { key } });
 
 describe('assertCampaignEffects', () => {
-    beforeEach(() => loadRules.mockReset());
+    beforeEach(() => {
+        loadRules.mockReset();
+    });
 
     it('uses the system of the campaign the row is written to', async () => {
         loadRules.mockResolvedValue(rulesOf('dnd5e'));

@@ -25,6 +25,8 @@ vi.mock('@/lib/db', () => ({
         $transaction: async (callback: (tx: unknown) => unknown) =>
             callback({ $queryRaw: async () => [{ id: 'c1' }] }),
         campaignMember: { findUnique: async () => ({ role: 'dm' }) },
+        character: { findMany: async () => [{ id: 'char-1' }] },
+        unit: { findMany: async () => [] },
 
         battleScene: {
             findMany: vi.fn(),

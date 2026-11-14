@@ -4,7 +4,7 @@ const mocks = vi.hoisted(() => ({
     assert: vi.fn(),
     create: vi.fn(async () => ({ id: 'b1' })),
     update: vi.fn(async () => ({})),
-    findFirst: vi.fn(),
+    findUnique: vi.fn(),
 }));
 
 vi.mock('server-only', () => ({}));
@@ -13,7 +13,7 @@ vi.mock('@/lib/db', () => ({
         battleScene: {
             create: mocks.create,
             update: mocks.update,
-            findFirst: mocks.findFirst,
+            findUnique: mocks.findUnique,
         },
     },
 }));
@@ -34,7 +34,7 @@ describe('writeBattleRecord: джерела учасників', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         mocks.assert.mockResolvedValue(undefined);
-        mocks.findFirst.mockResolvedValue({
+        mocks.findUnique.mockResolvedValue({
             id: 'b1',
             version: 1,
             campaignId: 'c1',

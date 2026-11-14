@@ -227,7 +227,7 @@ export function redactParticipantsForPlayers(
 
 export const redactPendingForPlayers = (
     pending: BattleParticipant[]
-): BattleParticipant[] => redactParticipantsForPlayers(stubReserve(pending));
+): BattleParticipant[] => stubReserve(redactParticipantsForPlayers(pending));
 
 export function redactPatchesForPlayers(
     patches: BattleParticipantPatch[],
