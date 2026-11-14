@@ -16,7 +16,7 @@
 
 ## Маніфест (`systems/<id>/meta.ts`)
 
-Дані без логіки, `import type` (`SystemMeta`, `lib/utils/rules/systems/meta.ts`): `module`, `kind`, `keys`, `preset`, `requires`, `conflicts`, `claims`, `after`, `toggle` (`free | setup`; `setup` = зміна в кампанії з персонажами вимагає `confirm`), `distance`, `tokens` (підрядки для ratchet), `i18n` (`battle | campaign | member | dm | pages` + `budgetKb`), `dmSections`, `contentKinds`. Із нього виводяться `systemScope`, бюджети `scope-size`, каталог модулів (`moduleCatalog()`, `moduleToggles`, `withModule`, `moduleChange`). Для кожного addon обов'язкові `gameTerms.module.<id>.{name,summary}`, для кожного ключа `gameTerms.ruleSystem.<key>`.
+Дані без логіки, `import type` (`SystemMeta`, `lib/utils/rules/systems/meta.ts`): `module`, `kind`, `keys`, `preset`, `requires`, `conflicts`, `claims`, `after`, `toggle` (`free | setup`; `setup` = зміна в кампанії з персонажами вимагає `confirm`), `distance`, `tokens` (підрядки для ratchet), `i18n` (слоти `battle | campaign | member | dm | pages`; див. нижче), `dmSections`, `contentKinds`. Із нього виводяться `systemScope`, бюджети `scope-size`, каталог модулів (`moduleCatalog()`, `moduleToggles`, `withModule`, `moduleChange`). **`meta.i18n`:** список namespace-ів на слот, який вантажиться разом з композицією через `systemScope(system, slot)` (`lib/i18n/system-scope.ts`: база + модулі за порядком): `battle` — екран бою (модульний UI бою: `battle: ['battleMorale']`), `campaign` — сторінки кампанії, `member` — гравець/учасник, `dm` — DM-сторінки, `pages.<scope>` — окремі сторінки (`character | dmCharacters | dmCharacter | dmRules | draft`). Модуль без власних текстів поза `gameTerms` — `i18n: {}`. `budgetKb` (gzip КБ на слот `battle|member|dm|pages.<scope>`) читає `lib/i18n/__tests__/scope-size.test.ts` лише в **бази** (типово ліміт 105 КБ на «кампанія+бій»); у addon воно ігнорується, а його namespace входить у тест «`<key>` battle + modules». Для кожного addon обов'язкові `gameTerms.module.<id>.{name,summary}`, для кожного ключа `gameTerms.ruleSystem.<key>`.
 
 ## Порядок композиції
 
@@ -58,6 +58,8 @@ Core бачить `systems/*` лише через корені (`SYSTEM_ROOTS`, 
 ## Слоти
 
 **`SystemSlot = { key, data }`** (`lib/utils/rules/systems/slot.ts`), `defineSlot(key, parse)` → `{ read, write }`; чужий ключ → `read()` = `undefined`. `SlotCodec.extend(module, parse)`: дані модуля в `data.ext[module]`, `write(data, prev?)` переносить `prev.ext`. Слоти в core-типах: `abilities.system`, `attack.system`, `sheet.systemSlot`, `actionDetails.system`/`AttackRollResult.system`, `scene.system` (`battle_scenes.system_state`), `characteristics` (непрозорий `SystemData`).
+
+Кодеки бази: d20 — `D20_STATE` (`systems/d20/rules/state.ts`, поряд `d20State`/`withD20State`/`d20StateData`), wfrp — `PARTICIPANT_STATE` (`systems/wfrp/rules/slots.ts`, `wfrpState`/`withWfrpState` у `state.ts`); модуль розширює кодек своєї бази: `D20_STATE.extend(...)` / `PARTICIPANT_STATE.extend(...)`.
 
 **Слот стану учасника бою** — `battleData.system = { key: <база>, data: { …поля бази…, ext: { <модуль>: … } } }` у колонці `battle_participants.state` (і `battle_snapshots.state`), не в знімку; `snapshotHash` стабільний. База пише свої поля в `data`, модуль — лише свій ключ `ext` (напр. `ext.retaliation.used`). d20: `systems/d20/rules/state.ts` (`d20State`/`withD20State`/`d20StateData`; `deathSaves`, `inspiration`, `inspirationSpent`, `attackedWithLight`), wfrp: `systems/wfrp/rules/state.ts` (`fortune`, `channelledSl`, `sin`, `conditionTests`, `psychologyTested`). Нейтральний прапорець `battleData.dying` (`isDying(p)` = `dying === true`) каже core «лежить на 0 HP» без знання лічильників. Плоских полів і dual-read більше немає (прибрано в Ч17). **Видимість:** слот і інші поля стану (`battleData.system`, `battleData.dying`, `combatStats.moraleCap`, `scene.system`, стати ворогів) видимі гравцеві в мережі, приховування лише в UI ([participant-privacy-scope.md](participant-privacy-scope.md)); система не кладе секретів у слоти стану.
 
@@ -134,8 +136,58 @@ Core бачить `systems/*` лише через корені (`SYSTEM_ROOTS`, 
 1. `systems/<id>/meta.ts`: `kind: "addon"`, `requires: ["<база>"]`, за потреби `claims` (скаляр, який модуль замінює), `after`, `toggle`, `tokens`, `i18n`. `index.ts`: `<ID>_MODULE` через `defineAddon`; необов'язкові `ui/index.ts` (`<ID>_MODULE_UI`), `server/index.ts` (`<ID>_MODULE_SERVER`), `scripts/templates/systems/<id>/index.ts` (`<ID>_MODULE_HOOKS`). Шар без UI/server дає порожній внесок.
 2. Секції правил: `rules/sections.ts` через `sectionItems`/`extendSection` (шляхи `секція.пункт`, колізія з іншим власником = помилка); колонки — `stats.columns` з `owns`; хуки бою/персонажа — списки (`participant.*`, `turn.*`, `afterAttack`, `damageParts`); стан — лише `ext[<id>]` слота бази (`SlotCodec.extend`).
 3. Види контенту — `SystemServer.contentKinds` (підпадають під D15); маршрути — `SystemServer.routes`; бойові дії — `SystemServer.battle` + обгортка `systems/<id>/api/battle.ts` над `actions.system(action, body)`.
-4. Тексти `gameTerms.module.<id>.{name,summary}` і namespace-и з meta в `messages/{uk,en}`; рядок у `whats-new`, коли є користувацька зміна.
+4. Тексти `gameTerms.module.<id>.{name,summary}` і namespace-и з meta в `messages/{uk,en}`; рядок у `whats-new`, коли є користувацька зміна (**зараз це правка core**: `lib/onboarding/whats-new.ts` + `messages/*/whatsNew.json`, файл у `system-literals-exempt.json`; експеримент 2026-11-14 пропустив цей крок. Це єдиний відомий конфлікт з метою «модуль = 0 файлів core»; рекомендовано окремою задачею зробити whats-new власністю модуля або виключити модулі). Новий namespace з `meta.i18n` потребує рядка `import type … from './messages/uk/<ns>.json'` і запису `<ns>: typeof <ns>` в `global.d.ts` (типізований `IntlMessages`; без нього `tsc` падає з `RangeError: Map maximum size exceeded` замість зрозумілої помилки). Тест `lib/i18n/__tests__/label-keys-<ns>.test.ts` не обов'язковий: ніщо його не вимагає, `tsc` вже ловить статичні ключі; `expectLabelKeys` потрібен лише для ключів, що збираються динамічно.
 5. `pnpm systems:index`; звірити `system-contract`, `systems-index`, `system-composition-matrix`, `module-toggle-d16`, `content-kinds-contract`, `stat-columns-contract`, `system-literals`.
+
+## Рецепти модуля
+
+Експеримент-контроль (flanking на d20, fatigue на wfrp): [research/2026-11-14-module-experiment.md](../superpowers/research/2026-11-14-module-experiment.md).
+
+**Скаляр чи список.** Згортка (`compose.ts`): масиви конкатенуються; прості об'єкти зливаються вглиб; усе інше (функція, число, рядок, група з `SYSTEM_FIELD_KINDS.groups` = `magic`, `conditions`) замінюється лише якщо шлях є в `meta.claims`, інакше `CompositionError "replaces … without a claim"`.
+
+| Хук | Вид | Як модулю втрутитись |
+|---|---|---|
+| `combat.resolveAttack`, `abortedRoll`, `initiative`, `tieBreak`, `hitModel.*`, `damage`, `onZeroHp`, `progression.maxHp` та інші функції | скаляр | `claims: ['combat.resolveAttack']` + обгортка `prev` |
+| `combat.turn.*`, `afterAttack`, `onDamaged`, `damageParts`, `participant.*`, `stats.columns`, `sheet.blocks` | список | просто додати елемент |
+| `magic`, `conditions` | група | лише claim усієї групи |
+
+**Обгортка скаляра** (так роблять `heroscaling`, `unitstacks`, flanking). Заявлений шлях — крапкова адреса поля; `prev` — уже зібрана база (і попередні модулі):
+
+```ts
+// meta.ts: claims: ['combat.resolveAttack']
+export const X_MODULE = defineAddon<RuleSystemDefinition>((prev) => ({
+    combat: { resolveAttack: (ctx) => prev.combat.resolveAttack(adapt(ctx)) },
+}));
+```
+
+**Плоский бонус до атаки.** Через `ResolveAttackCtx.modifiers: Record<participantId, StaticEffect[]>` — додати `StaticEffect` (`{ kind: 'modifyStat', stat: 'attackBonus', flat, attackKind? }`) для нападника в `adapt(ctx)`; d20 `resolveAttack` читає його як `extra`/`targetExtra`. Обмеження: позачергові удари (`ctx.offTurn`: відсіч, нагода, readied, legendary) ідуть через `resolveOffTurn`, який `modifiers` ігнорує, тож бонус на них не діє; модуль мусить явно перевіряти `ctx.offTurn` і не обіцяти бонус там.
+
+**Модуль зі станом** (приклад fatigue на wfrp; для d20 — `D20_STATE`, див. `systems/retaliation/rules/state.ts`):
+
+```ts
+export const FATIGUE_STATE = PARTICIPANT_STATE.extend<{ level: number }>(
+    'fatigue', (raw) => isRecord(raw) && Number.isFinite(raw.level) ? { level: raw.level as number } : undefined);
+const withFatigue = (p, level) => ({ ...p, battleData: { ...p.battleData,
+    system: FATIGUE_STATE.write({ level }, p.battleData.system) } });
+```
+
+`write(data, prev)` обов'язково отримує поточний слот (`p.battleData.system`): з нього переносяться поля бази й чужі `ext`; зворотне теж — запис бази зберігає `ext` (`defineSlot.write`). Якщо слота (або слота іншого `key`) немає, створюється `{ key, data: { ext: { <модуль>: … } } }` без полів бази — база мусить читати такий слот толерантно. Читання чужого ключа слота = `undefined`.
+
+**Який хук для лічильника.** `turn.resetState(p, 'turn' | 'reaction')` — обнулити per-turn значення, коли хід починається (або повернулась реакція; приклад retaliation); `onTurnEnd` — змінити стан суб'єкта після ходу (`ctx.id` = чий хід; фільтрувати за ним); `onRoundStart` — раз на раунд для всіх; `onTurnStart` — коли хід настав (можна `skipTurn`/`pending`); `onJoin` — вхід у бій. Хук повертає `{ participants, messages: LogLine[] }` (порожній масив допустимий).
+
+**Корені й імена експортів.** `pnpm systems:index` (`scripts/shared/systems-index.ts`) додає рядок кореня лише коли файл шару експортує точне ім'я `export const|function <ID>_…`: `<ID>_META` (`meta.ts`), `<ID>_MODULE` (`index.ts`), `<ID>_MODULE_UI` (`ui/index.ts`), `<ID>_ABILITY_MODULE` (`rules/ability-install.ts`), `_SERVER`, `_HOOKS`; `<ID>` = id у верхньому регістрі, не-латинські/цифри → `_`. Інше ім'я чи `export { X }` — рядка тихо немає й жодного повідомлення; після запуску звіряти `git diff` коренів.
+
+**Тест модуля в композиції.**
+
+```ts
+import '@/lib/utils/rules/systems/registry';          // ставить корінь rules
+const rules = RulesetSchema.parse({ ...WFRP_RULES, system: { key: 'wfrp', modules: ['fatigue'] } });
+expect(validateComposition(rules.system)).toEqual([]);
+const hooks = ruleSystemOf(rules).combat.turn?.onTurnEnd ?? [];   // `?? []`: бази без хука дають undefined
+runTurnHooks(hooks, { participants, id, round: 1, rng, rules });
+```
+
+Для d20: `{ ...DEFAULT_RULES, system: { key: 'dnd5e', modules: ['flanking'] } }` (фікстура лише для тестів).
 
 ## Як додати базу
 
