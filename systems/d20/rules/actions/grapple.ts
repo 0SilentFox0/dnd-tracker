@@ -21,7 +21,8 @@ import {
     grappleKey,
     releaseGrapples,
 } from '@/lib/utils/battle/conditions/grapple-links';
-import { canStand, isAdjacent } from '@/lib/utils/battle/grid/occupancy';
+import { isAdjacentOnMap } from '@/lib/utils/battle/grid/adjacency';
+import { canStand } from '@/lib/utils/battle/grid/occupancy';
 import { awayStep } from '@/lib/utils/battle/grid/push';
 import { getSpellSaveDC } from '@/lib/utils/common/calculations';
 import type { Ruleset } from '@/lib/utils/rules';
@@ -482,7 +483,7 @@ export function releaseInvalidGrapples(
                 !!grappler &&
                 !!grappler.battleData.position &&
                 !!current.battleData.position &&
-                !isAdjacent(grappler, current);
+                !isAdjacentOnMap(map, grappler, current);
 
             if (!gone && !apart) continue;
 
@@ -550,7 +551,7 @@ export function planDrag(input: {
 
         const free = canStand(map, taken, t, cell);
 
-        const adjacent = free && isAdjacent(movedMover, placed);
+        const adjacent = free && isAdjacentOnMap(map, movedMover, placed);
 
         if (adjacent) {
             plan.targets.push({ id: t.basicInfo.id, cell });

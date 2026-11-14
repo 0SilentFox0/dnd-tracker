@@ -63,3 +63,10 @@ export function rejectAction(
         ? new BattleRuleError('action_rejected', message, params)
         : ruleErrorOf('action_rejected', message);
 }
+
+export class BattleMapVersionMissingError extends Error {
+    constructor(mapId: string, version: number) {
+        super(`battle map ${mapId}@${version} is gone`);
+        this.name = 'BattleMapVersionMissingError';
+    }
+}

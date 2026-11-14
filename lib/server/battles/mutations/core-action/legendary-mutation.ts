@@ -31,6 +31,7 @@ import {
 } from '@/lib/utils/battle/actions/legendary-options';
 import type { LegendaryActionBody } from '@/lib/utils/battle/actions/schema';
 import { currentOf } from '@/lib/utils/battle/common/control';
+import { adjacencyOf } from '@/lib/utils/battle/grid/adjacency';
 import { logFields } from '@/lib/utils/battle/log/lines';
 import { abilityRunContext } from '@/lib/utils/battle/pipeline/ability-use';
 import type {
@@ -238,6 +239,7 @@ async function runAbilityOption(
             },
             participants: ctx.participants,
             sourceId: ability.source.id,
+            adjacent: adjacencyOf(ctx.meta.map),
         })
     )
         throw new BattleRuleError(

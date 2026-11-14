@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
     backgroundBox,
     backgroundColsOf,
+    backgroundRowsOf,
     gridForCellSize,
     impliedCellPx,
     MAX_SIDE,
@@ -69,5 +70,30 @@ describe('розмір клітинки фону', () => {
                 0.6
             )
         ).toEqual({ left: 0, top: 0, width: 156.25, height: 93.75 });
+    });
+
+    it('окрема кількість рядків фону дає неквадратні клітинки; без неї стара поведінка', () => {
+        expect(
+            backgroundBox(
+                { cols: 16, rows: 9, backgroundCols: 10, backgroundRows: 8 },
+                10,
+                0.6
+            )
+        ).toMatchObject({ width: 100, height: 80 });
+        expect(
+            backgroundBox({ cols: 16, rows: 9, backgroundCols: 10 }, 10, 0.6)
+        ).toMatchObject({ width: 100, height: 60 });
+    });
+
+    it('backgroundRowsOf: збережене або з пропорцій', () => {
+        expect(
+            backgroundRowsOf(
+                { cols: 20, rows: 12, backgroundCols: 10, backgroundRows: 7 },
+                tomb
+            )
+        ).toBe(7);
+        expect(
+            backgroundRowsOf({ cols: 20, rows: 12, backgroundCols: 19.8 }, tomb)
+        ).toBeCloseTo(12);
     });
 });

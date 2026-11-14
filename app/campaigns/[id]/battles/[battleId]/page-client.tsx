@@ -39,7 +39,7 @@ function StandardBattlePageClient({
 }) {
     const t = useTranslations('battle.page');
 
-    const { value, loading } = useBattleSceneValue(
+    const { value, loading, error, retry } = useBattleSceneValue(
         campaignId,
         battleId,
         userId
@@ -61,7 +61,8 @@ function StandardBattlePageClient({
                     />
                 ) : (
                     <ErrorState
-                        error={t('notFound')}
+                        error={error ?? t('notFound')}
+                        onRetry={error ? retry : undefined}
                         className="w-full max-w-md"
                     />
                 )}

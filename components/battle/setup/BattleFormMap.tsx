@@ -2,6 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 
+import { GridCalibration } from './GridCalibration';
 import { ToggleRow } from './ToggleRow';
 
 import { BattleMap } from '@/components/battle/map';
@@ -9,6 +10,7 @@ import { MapMotionPanel } from '@/components/battle/map/MapMotionPanel';
 import { MAP_MODE_UI, type MapModeUi } from '@/components/battle/modes';
 import { ImageUpload } from '@/components/common/ImageUpload';
 import { HudSection } from '@/components/hud/form';
+import { OnboardingHint } from '@/components/onboarding/OnboardingHint';
 import { BoundedNumberInput } from '@/components/ui/bounded-number-input';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,9 +19,11 @@ import { SelectField } from '@/components/ui/select-field';
 import { HAZARD_DICE_PATTERN } from '@/lib/constants/battle';
 import { DAMAGE_ELEMENT_OPTIONS } from '@/lib/constants/damage';
 import type { BattleMapEditor } from '@/lib/hooks/battles';
+import { useCoarsePointer } from '@/lib/hooks/common';
 import { useText } from '@/lib/i18n/use-text';
 import { cn } from '@/lib/utils';
 import {
+    isEdgeTool,
     isPreviewSafeBackground,
     marginLimit,
     type Margins,
@@ -38,6 +42,8 @@ import { clamp } from '@/lib/utils/common/clamp';
 const MARGIN_KEYS: (keyof Margins)[] = ['top', 'right', 'bottom', 'left'];
 
 const TOOLS: SetupTool[] = ['blocked', 'wall', 'hazard', 'erase'];
+
+const EDGE_TOOLS: SetupTool[] = ['edge-wall', 'edge-bars', 'edge-erase'];
 
 const SLIDER = 'w-full accent-[var(--hud-gold,#f2c14e)] disabled:opacity-40';
 
@@ -69,12 +75,47 @@ function RangeRow({
     );
 }
 
+function ToolButtons({
+    tools,
+    tool,
+    onPick,
+}: {
+    tools: SetupTool[];
+    tool: SetupTool | null;
+    onPick: (tool: SetupTool | null) => void;
+}) {
+    const t = useTranslations('battleSetup.map');
+
+    return (
+        <div className="flex flex-wrap gap-1.5">
+            {tools.map((value) => (
+                <button
+                    key={value}
+                    type="button"
+                    aria-pressed={tool === value}
+                    onClick={() => onPick(tool === value ? null : value)}
+                    className={cn(
+                        'h-8 rounded-md border bg-black/30 px-3 text-sm hover:bg-black/50',
+                        tool === value
+                            ? 'border-[var(--gold)] text-hud-gold-bright'
+                            : 'border-hud-rule text-hud-muted'
+                    )}
+                >
+                    {t(`tools.${value}`)}
+                </button>
+            ))}
+        </div>
+    );
+}
+
 export function BattleFormMap({ editor }: { editor: BattleMapEditor }) {
     const t = useTranslations('battleSetup.map');
 
     const tDamage = useTranslations('gameTerms.damageTypes');
 
     const text = useText();
+
+    const touch = useCoarsePointer();
 
     const { enabled, map, mode, margins, tool, notice, cellPx } = editor.state;
 
@@ -88,6 +129,8 @@ export function BattleFormMap({ editor }: { editor: BattleMapEditor }) {
     const percent = (v: number) => `${Math.round(v * 100)}%`;
 
     const { brush, actions } = editor;
+
+    const cellTool = tool !== null && !isEdgeTool(tool);
 
     const previewMap =
         isPreviewSafeBackground(map.background) || map.background === null
@@ -205,6 +248,7 @@ export function BattleFormMap({ editor }: { editor: BattleMapEditor }) {
                                 }
                             />
                         </div>
+                        <GridCalibration editor={editor} />
                         <RangeRow
                             id="map-opacity"
                             label={t('opacity', {
@@ -256,28 +300,11 @@ export function BattleFormMap({ editor }: { editor: BattleMapEditor }) {
                             hidden={!!mode && !!MAP_MODE_UI[mode].hidesTerrain}
                         >
                             <Label>{t('drawing')}</Label>
-                            <div className="flex flex-wrap gap-1.5">
-                                {TOOLS.map((value) => (
-                                    <button
-                                        key={value}
-                                        type="button"
-                                        aria-pressed={tool === value}
-                                        onClick={() =>
-                                            actions.setTool(
-                                                tool === value ? null : value
-                                            )
-                                        }
-                                        className={cn(
-                                            'h-8 rounded-md border bg-black/30 px-3 text-sm hover:bg-black/50',
-                                            tool === value
-                                                ? 'border-[var(--gold)] text-hud-gold-bright'
-                                                : 'border-hud-rule text-hud-muted'
-                                        )}
-                                    >
-                                        {t(`tools.${value}`)}
-                                    </button>
-                                ))}
-                            </div>
+                            <ToolButtons
+                                tools={TOOLS}
+                                tool={tool}
+                                onPick={actions.setTool}
+                            />
                             {tool === 'hazard' && (
                                 <div className="grid gap-2 sm:grid-cols-[1fr_8rem_10rem]">
                                     <Input
@@ -338,6 +365,27 @@ export function BattleFormMap({ editor }: { editor: BattleMapEditor }) {
                                 </div>
                             )}
                         </div>
+                        {mode && MAP_MODE_UI[mode].hidesTerrain && (
+                            <p className="text-sm text-hud-muted">
+                                {t('edgesDisabledMode')}
+                            </p>
+                        )}
+                        {!(mode && MAP_MODE_UI[mode].hidesTerrain) &&
+                            (touch ? (
+                                <p className="text-sm text-hud-muted">
+                                    {t('edgesDesktopOnly')}
+                                </p>
+                            ) : (
+                                <div className="space-y-2">
+                                    <OnboardingHint id="dm.map-walls" />
+                                    <Label>{t('edgeDrawing')}</Label>
+                                    <ToolButtons
+                                        tools={EDGE_TOOLS}
+                                        tool={tool}
+                                        onPick={actions.setTool}
+                                    />
+                                </div>
+                            ))}
                         {editor.motionTool && (
                             <div className="space-y-2">
                                 <Label>{t('motion')}</Label>
@@ -380,9 +428,10 @@ export function BattleFormMap({ editor }: { editor: BattleMapEditor }) {
                                 actions={{ onStroke: actions.onStroke }}
                                 className="h-full"
                                 editing={{
-                                    clickableBlocked: tool !== null,
-                                    strokeTool: tool !== null,
+                                    clickableBlocked: cellTool,
+                                    strokeTool: cellTool,
                                     showBlocked: true,
+                                    edges: editor.edgeEditing,
                                 }}
                             />
                         </div>

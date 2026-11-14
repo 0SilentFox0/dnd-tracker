@@ -8,10 +8,13 @@ import {
     isPreviewSafeBackground,
     marginsBlocked,
     paintCells,
+    paintEdges,
     resizeMap,
 } from '../map-editor';
 import { hazardDamage } from '../terrain';
+import { allInteriorEdges } from '../walls';
 
+import { MAP_LIMITS } from '@/lib/constants/map-limits';
 import type { BattleMapConfig } from '@/types/battle';
 
 const base: BattleMapConfig = {
@@ -182,5 +185,81 @@ describe('map-editor', () => {
             null,
         ])
             expect(isPreviewSafeBackground(bad)).toBe(false);
+    });
+});
+
+describe('paintEdges', () => {
+    const paint = (...args: Parameters<typeof paintEdges>) =>
+        paintEdges(...args).map;
+
+    it('додає стіни й ґрати', () => {
+        const a = paint(base, ['1:1:e', '2:2:s'], 'add-walls');
+
+        expect(a.walls).toEqual(['1:1:e', '2:2:s']);
+        expect(paint(a, ['3:3:e'], 'add-bars').bars).toEqual(['3:3:e']);
+    });
+
+    it('конфлікт: остання дія перемагає', () => {
+        const walls = paint(base, ['1:1:e'], 'add-walls');
+
+        const bars = paint(walls, ['1:1:e'], 'add-bars');
+
+        expect(bars.walls).toBeUndefined();
+        expect(bars.bars).toEqual(['1:1:e']);
+        expect(paint(bars, ['1:1:e'], 'add-walls').bars).toBeUndefined();
+    });
+
+    it('remove чіпає лише свій вид, erase — обидва', () => {
+        const both = paint(
+            paint(base, ['1:1:e'], 'add-walls'),
+            ['2:2:e'],
+            'add-bars'
+        );
+
+        expect(paint(both, ['2:2:e'], 'remove-walls').bars).toEqual(['2:2:e']);
+
+        const erased = paint(both, ['1:1:e', '2:2:e'], 'erase');
+
+        expect(erased.walls).toBeUndefined();
+        expect(erased.bars).toBeUndefined();
+    });
+
+    it('ребра поза картою ігноруються', () => {
+        expect(paintEdges(base, ['19:0:e', '0:11:s'], 'add-walls')).toEqual({
+            map: base,
+            overflow: false,
+        });
+    });
+
+    it('понад ліміт — overflow, карта без змін', () => {
+        const big = { ...base, cols: 100, rows: 100 };
+
+        const edges = allInteriorEdges(big).filter((e) => e.endsWith(':e'));
+
+        const full = paintEdges(
+            big,
+            edges.slice(0, MAP_LIMITS.inlineMaxEdges),
+            'add-walls'
+        );
+
+        expect(full.overflow).toBe(false);
+
+        const over = paintEdges(
+            full.map,
+            edges.slice(
+                MAP_LIMITS.inlineMaxEdges,
+                MAP_LIMITS.inlineMaxEdges + 1
+            ),
+            'add-walls'
+        );
+
+        expect(over.overflow).toBe(true);
+        expect(over.map).toBe(full.map);
+    });
+
+    it('resizeMap відкидає ребра поза новим розміром', () => {
+        const map = paintEdges(base, ['2:2:e', '15:2:e'], 'add-walls').map;
+
+        expect(resizeMap(map, 10, 12).walls).toEqual(['2:2:e']);
     });
 });

@@ -9,6 +9,7 @@ import { describeEffect } from '@/lib/utils/abilities/registry/effects';
 import { isDying } from '@/lib/utils/battle/death-saves';
 import { footprintDistance } from '@/lib/utils/battle/grid/geometry';
 import { cellsOf, isOnMap } from '@/lib/utils/battle/grid/occupancy';
+import { wallsAllowSight } from '@/lib/utils/battle/grid/sight';
 import {
     areaRadiusCells,
     feetToCells,
@@ -277,7 +278,7 @@ export function spellTargetCandidates(
     });
 }
 
-/** Дзеркалить серверну перевірку: поза картою чи без дальності обмеження немає. */
+/** Дзеркалить серверну перевірку: поза картою чи без дальності обмеження немає; ціль за стіною недосяжна. */
 export function spellTargetInRange(
     map: BattleMapConfig | null,
     caster: BattleParticipant | null,
@@ -298,7 +299,11 @@ export function spellTargetInRange(
         footprintDistance(cellsOf(caster), cellsOf(target)) <=
             feetToCells(range, rules);
 
-    return inRange && !modeTargetHiddenText(map, caster, [target]);
+    return (
+        inRange &&
+        !modeTargetHiddenText(map, caster, [target]) &&
+        wallsAllowSight(map, caster, target)
+    );
 }
 
 export function spellSaveTargets(

@@ -12,6 +12,7 @@ import {
     MAX_BARRIER_ROUNDS,
     type TerrainBrush,
 } from '@/lib/hooks/battle';
+import { useCoarsePointer } from '@/lib/hooks/common';
 import { cn } from '@/lib/utils';
 
 const BRUSHES: TerrainBrush[] = [
@@ -21,14 +22,39 @@ const BRUSHES: TerrainBrush[] = [
     'difficult',
     'erase',
     'erase-zone',
+    'edge-wall',
+    'edge-bars',
+    'edge-erase',
 ];
 
-export function MapTerrainToolbar({ tool }: { tool: MapTerrainTool }) {
+const EDGE_BRUSHES: TerrainBrush[] = ['edge-wall', 'edge-bars', 'edge-erase'];
+
+export function MapTerrainToolbar({
+    tool,
+    edgesInMode = false,
+}: {
+    tool: MapTerrainTool;
+    edgesInMode?: boolean;
+}) {
     const t = useTranslations('battle.map.terrain');
+
+    const tSetup = useTranslations('battleSetup.map');
 
     const tTypes = useTranslations('gameTerms.damageTypes');
 
     const { brush, setBrush } = tool;
+
+    const touch = useCoarsePointer();
+
+    const brushes = touch
+        ? BRUSHES.filter((b) => !EDGE_BRUSHES.includes(b))
+        : BRUSHES;
+
+    const edgeNotice = touch
+        ? tSetup('edgesDesktopOnly')
+        : edgesInMode
+          ? tSetup('edgesDisabledMode')
+          : null;
 
     const damageOptions = DAMAGE_ELEMENT_OPTIONS.map(({ value }) => ({
         value,
@@ -37,14 +63,15 @@ export function MapTerrainToolbar({ tool }: { tool: MapTerrainTool }) {
 
     return (
         <div className="flex max-w-[calc(100%-1rem)] flex-wrap items-center gap-1.5 rounded-md border border-hud-rule bg-black/70 p-1.5 text-xs">
-            {BRUSHES.map((value) => (
+            {brushes.map((value) => (
                 <button
                     key={value}
                     type="button"
                     aria-pressed={brush.kind === value}
+                    disabled={edgesInMode && EDGE_BRUSHES.includes(value)}
                     onClick={() => setBrush({ kind: value })}
                     className={cn(
-                        'h-7 rounded-md border bg-black/60 px-2 hover:bg-black/80',
+                        'h-7 rounded-md border bg-black/60 px-2 hover:bg-black/80 disabled:cursor-not-allowed disabled:opacity-50',
                         brush.kind === value
                             ? 'border-[var(--gold)] text-hud-gold-bright'
                             : 'border-hud-rule text-hud-muted'
@@ -53,6 +80,11 @@ export function MapTerrainToolbar({ tool }: { tool: MapTerrainTool }) {
                     {t(`brushes.${value}`)}
                 </button>
             ))}
+            {edgeNotice && (
+                <p role="status" className="w-full text-hud-muted">
+                    {edgeNotice}
+                </p>
+            )}
             {brush.kind === 'barrier' && (
                 <label className="flex items-center gap-1 text-hud-muted">
                     {t('rounds')}

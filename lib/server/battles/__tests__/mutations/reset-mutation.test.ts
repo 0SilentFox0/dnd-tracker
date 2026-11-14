@@ -74,4 +74,29 @@ describe('reset mutation', () => {
             }).scene?.map
         ).toEqual(map);
     });
+
+    it('скидає стан карти (видалені ребра, двері), якщо він непорожній', () => {
+        const ctx = context();
+
+        const state = { removedEdges: ['1:1:e'], doors: {} };
+
+        expect(
+            resetMutation({ ...ctx, meta: { ...ctx.meta, mapState: state } })
+                .scene
+        ).toHaveProperty('mapState', null);
+        expect(
+            resetMutation({
+                ...ctx,
+                meta: {
+                    ...ctx.meta,
+                    mapRef: { mapId: 'm1', version: 1 },
+                    mapState: {
+                        removedEdges: [],
+                        doors: { '0:0:e': { open: true, locked: false } },
+                    },
+                },
+            }).scene
+        ).toHaveProperty('mapState', null);
+        expect(resetMutation(ctx).scene).not.toHaveProperty('mapState');
+    });
 });

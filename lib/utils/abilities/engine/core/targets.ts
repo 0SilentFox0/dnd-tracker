@@ -3,6 +3,7 @@ import { findParticipant, isDormant, isTargetable } from './participants';
 
 import type { AbilityTarget } from '@/lib/utils/abilities/schema';
 import { nearestTo } from '@/lib/utils/battle/grid/nearest';
+import { wallsAllowSight } from '@/lib/utils/battle/grid/sight';
 import { modeSees } from '@/lib/utils/battle/modes/engine';
 import type { AbilityEvent } from '@/types/abilities';
 import type { BattleMapConfig, BattleParticipant } from '@/types/battle';
@@ -26,7 +27,8 @@ export function resolveTargetIds(
     // у лабіринті масові вміння по ворогах — лише ті, кого власник бачить (як і заклинання)
     const reachable = (p: BattleParticipant) =>
         targetableInPlay(p) &&
-        (p.basicInfo.side === side || modeSees(map, owner, p));
+        (p.basicInfo.side === side ||
+            (modeSees(map, owner, p) && wallsAllowSight(map, owner, p)));
 
     switch (target ?? 'self') {
         case 'self':

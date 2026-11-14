@@ -1,4 +1,5 @@
 import { cellFeetOf } from './cell-feet';
+import { edgeBlocks, passesWalls, wallsOf } from './edges';
 import {
     cellKey,
     difficultSet,
@@ -131,6 +132,19 @@ export function searchPaths(
         !!avoid?.size &&
         footprint(anchor, size).some((c) => avoid.has(cellKey(c)));
 
+    const hasEdges =
+        (wallsOf(map).size > 0 || !!map.bars?.length) && !passesWalls(mover);
+
+    const stepBlocked = (cur: GridPoint, next: GridPoint) => {
+        if (!hasEdges) return false;
+
+        const to = footprint(next, size);
+
+        return footprint(cur, size).some((c, i) =>
+            edgeBlocks(map, c, to[i], 'move')
+        );
+    };
+
     const difficult = difficultSet(map);
 
     const stepCost = (anchor: GridPoint) =>
@@ -156,6 +170,7 @@ export function searchPaths(
                 if (
                     nextCost > budget ||
                     (seen.get(key) ?? Infinity) <= nextCost ||
+                    stepBlocked(cur, next) ||
                     !fits(map, next, size, walls) ||
                     touchesAvoid(next)
                 )

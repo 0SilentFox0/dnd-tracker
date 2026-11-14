@@ -333,6 +333,7 @@ const BASE_FLAG_REGISTRY: {
     autoCritAdjacent: plain('autoCritAdjacent'),
     twoWeaponFighting: plain('twoWeaponFighting'),
     critImmunity: plain('critImmunity'),
+    passesWalls: plain('passesWalls'),
     cunningAction: plain('cunningAction'),
     evasion: plain('evasion'),
     proneDefense: plain('proneDefense'),

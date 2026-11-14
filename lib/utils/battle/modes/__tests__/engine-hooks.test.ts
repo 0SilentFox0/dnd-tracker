@@ -9,6 +9,7 @@ import { registerTestMode } from '@/lib/utils/battle/modes';
 import {
     modeEngages,
     modeSightedTargets,
+    modeWalls,
 } from '@/lib/utils/battle/modes/engine';
 import { assertAbilityAim } from '@/lib/utils/battle/validation/ability-aim';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
@@ -38,6 +39,7 @@ const fake: MapModeDefinition<FakeConfig> = {
                 : null,
         meleeBlockedText: () => 'блок',
         engages: () => false,
+        walls: () => ['7:7:e'],
     },
     client: {},
 };
@@ -162,5 +164,13 @@ describe('хуки рушія в ядрі', () => {
             'ghost',
         ]);
         expect(modeSightedTargets(plain, ps, hero, ids)).toEqual(ids);
+    });
+
+    it('modeWalls: ребра режиму; без режиму порожньо', () => {
+        off = registerTestMode(fake as MapModeDefinition<unknown>);
+
+        expect(modeWalls(withMode)).toEqual(['7:7:e']);
+        expect(modeWalls(plain)).toEqual([]);
+        expect(modeWalls(null)).toEqual([]);
     });
 });

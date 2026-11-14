@@ -2,9 +2,16 @@
 import { act, renderHook } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { NO_PLAYABLE_NOTICE, useBattleMapEditor } from '../useBattleMapEditor';
+import {
+    EDGE_LIMIT_NOTICE,
+    EDGES_STRIPPED_NOTICE,
+    NO_PLAYABLE_NOTICE,
+    useBattleMapEditor,
+} from '../useBattleMapEditor';
 
 import { DEFAULT_BATTLE_MAP } from '@/lib/constants/battle';
+import { MAP_LIMITS } from '@/lib/constants/map-limits';
+import { allInteriorEdges } from '@/lib/utils/battle/grid';
 
 describe('useBattleMapEditor', () => {
     it('вимкнено → value null; увімкнено → дефолт', () => {
@@ -29,6 +36,34 @@ describe('useBattleMapEditor', () => {
             ])
         );
         expect(result.current.state.map.blocked).toEqual(['1:1', '2:1']);
+    });
+
+    it('ребра понад ліміт — сповіщення, карта без змін', () => {
+        const big = { cols: 100, rows: 100, background: null, opacity: 1 };
+
+        const edges = allInteriorEdges(big).filter((e) => e.endsWith(':e'));
+
+        const { result } = renderHook(() =>
+            useBattleMapEditor({
+                ...big,
+                walls: edges.slice(0, MAP_LIMITS.inlineMaxEdges),
+            })
+        );
+
+        act(() => result.current.actions.setTool('edge-wall'));
+        act(() =>
+            result.current.edgeEditing?.onCommit(
+                edges.slice(
+                    MAP_LIMITS.inlineMaxEdges,
+                    MAP_LIMITS.inlineMaxEdges + 1
+                ),
+                []
+            )
+        );
+        expect(result.current.state.notice).toBe(EDGE_LIMIT_NOTICE);
+        expect(result.current.state.map.walls).toHaveLength(
+            MAP_LIMITS.inlineMaxEdges
+        );
     });
 
     it('небезпека без підпису не пише label', () => {
@@ -330,5 +365,32 @@ describe('useBattleMapEditor', () => {
             axis: 'x',
             speed: 1,
         });
+    });
+
+    it('ввімкнення лабіринту прибирає core-стіни й ґрати', () => {
+        const { result } = renderHook(() =>
+            useBattleMapEditor({
+                ...DEFAULT_BATTLE_MAP,
+                walls: ['1:1:e'],
+                bars: ['2:2:s'],
+            })
+        );
+
+        act(() => result.current.actions.setMode('maze', true));
+
+        expect(result.current.state.map.maze).toBeDefined();
+        expect(result.current.state.map.walls).toBeUndefined();
+        expect(result.current.state.map.bars).toBeUndefined();
+        expect(result.current.state.notice).toBe(EDGES_STRIPPED_NOTICE);
+    });
+
+    it('ввімкнення лабіринту без core-ребер не показує сповіщення', () => {
+        const { result } = renderHook(() =>
+            useBattleMapEditor(DEFAULT_BATTLE_MAP)
+        );
+
+        act(() => result.current.actions.setMode('maze', true));
+
+        expect(result.current.state.notice).toBeNull();
     });
 });

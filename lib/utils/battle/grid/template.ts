@@ -1,4 +1,5 @@
 import { cellFeetOf } from './cell-feet';
+import { cellsConnected, edgeBlocks, wallsOf } from './edges';
 import {
     cellKey,
     cellLine,
@@ -137,8 +138,12 @@ export function rayCells(
 
     const out: GridPoint[] = [];
 
+    let prev = from;
+
     for (const c of cellLine(from, end).slice(1, opts.maxCells + 1)) {
-        if (!isPlayable(map, c)) break;
+        if (!isPlayable(map, c) || edgeBlocks(map, prev, c, 'fire')) break;
+
+        prev = c;
 
         out.push(c);
     }
@@ -186,7 +191,32 @@ export function templateCells(
         raw = raw.filter((c) => !own.has(cellKey(c)));
     }
 
-    return [...new Set(raw.filter((c) => isPlayable(map, c)).map(cellKey))];
+    const playable = raw.filter((c) => isPlayable(map, c));
+
+    const sources =
+        template.shape === 'emanation'
+            ? origin
+            : [aimSource(template, origin, aim)];
+
+    const visible = wallsOf(map).size
+        ? playable.filter(
+              (c) =>
+                  template.shape === 'line' ||
+                  cellsConnected(map, 'fire', sources, [c])
+          )
+        : playable;
+
+    return [...new Set(visible.map(cellKey))];
+}
+
+function aimSource(
+    template: SpellTemplate,
+    origin: GridPoint[],
+    aim: GridPoint
+): GridPoint {
+    if (template.shape === 'cone' && origin.length) return apexOf(origin, aim);
+
+    return aim;
 }
 
 export function participantsInCells(

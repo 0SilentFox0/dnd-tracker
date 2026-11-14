@@ -23,10 +23,12 @@ import type {
     BattleSceneData,
     BattleSceneValue,
 } from '@/lib/hooks/battle/types';
+import { useBattleMapEdges } from '@/lib/hooks/battle-maps';
 import { battleQueryKey, useBattle } from '@/lib/hooks/battles';
 import { usePlayerView } from '@/lib/hooks/common';
 import { type AttackIntent, isIntentStale } from '@/lib/utils/battle/flows';
 import type { MapAim, MapPick } from '@/lib/utils/battle/grid';
+import { composeEffectiveMap } from '@/lib/utils/battle/map-storage/effective-map';
 import { deriveScene, NO_ORDER } from '@/lib/utils/battle/view';
 import type { BattleScene } from '@/types/api';
 import type { BattleLogState, DmControl, ResultFx } from '@/types/battle-scene';
@@ -169,9 +171,35 @@ export function useBattleSceneValue(
         isDM
     );
 
-    const { data: battle, isLoading } = useBattle(campaignId, battleId, {
-        pausePolling: connectionState === 'connected',
-    });
+    const { data: rawBattle, isLoading: isBattleLoading } = useBattle(
+        campaignId,
+        battleId,
+        { pausePolling: connectionState === 'connected' }
+    );
+
+    const mapEdges = useBattleMapEdges(campaignId, rawBattle?.mapRef);
+
+    const isMapPending = !!rawBattle?.mapRef && !mapEdges.data;
+
+    const isLoading = isBattleLoading || (isMapPending && !mapEdges.isError);
+
+    const mapError = isMapPending ? mapEdges.error : null;
+
+    const { refetch: refetchEdges } = mapEdges;
+
+    const retry = useCallback(() => void refetchEdges(), [refetchEdges]);
+
+    const battle = useMemo(() => {
+        if (!rawBattle?.map || isMapPending) return rawBattle;
+
+        const map = composeEffectiveMap(
+            rawBattle.map,
+            rawBattle.mapState,
+            mapEdges.data
+        );
+
+        return map === rawBattle.map ? rawBattle : { ...rawBattle, map };
+    }, [rawBattle, mapEdges.data, isMapPending]);
 
     const actions = useBattleActions(campaignId, battleId, show);
 
@@ -273,7 +301,8 @@ export function useBattleSceneValue(
     )
         setAttackIntent(null);
 
-    if (!battle || !derived) return { value: null, loading: isLoading };
+    if (!battle || !derived || isMapPending)
+        return { value: null, loading: isLoading, error: mapError, retry };
 
     const value: BattleSceneValue = {
         campaignId,
@@ -308,5 +337,5 @@ export function useBattleSceneValue(
         anyPending,
     };
 
-    return { value, loading: isLoading };
+    return { value, loading: isLoading, error: null, retry };
 }

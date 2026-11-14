@@ -10,14 +10,40 @@ import type {
 import type { MapModeKey } from '@/lib/utils/battle/modes';
 import { modeSnapshotSlice } from '@/lib/utils/battle/modes/server';
 import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
-import type { BattleMapConfig, TerrainCell } from '@/types/battle';
+import type {
+    BattleMapConfig,
+    BattleMapRef,
+    BattleMapState,
+    TerrainCell,
+} from '@/types/battle';
+
+export const isEmptyMapState = (state: BattleMapState | null | undefined) =>
+    !state ||
+    (state.removedEdges.length === 0 &&
+        Object.keys(state.doors).length === 0 &&
+        !state.fog);
+
+export const rowToMapState = (
+    row: { removedEdges: unknown; doors: unknown; fog: unknown } | null
+): BattleMapState | null =>
+    row
+        ? {
+              removedEdges: row.removedEdges as string[],
+              doors: row.doors as BattleMapState['doors'],
+              ...(row.fog ? { fog: row.fog as Record<string, unknown> } : {}),
+          }
+        : null;
 
 export interface SnapshotState {
     /** terrain і конфіги режимів лише для боїв із картою; старі знімки без поля — цю частину карти при відкаті не чіпаємо */
     scene: Pick<
         BattleSceneState,
         'round' | 'turnIndex' | 'status' | 'pendingMoraleCheck'
-    > & { sceneState?: SystemSlot } & {
+    > & {
+        sceneState?: SystemSlot;
+        mapState?: BattleMapState;
+        mapVersion?: number;
+    } & {
         terrain?: Record<string, TerrainCell> | null;
     } & Partial<Record<MapModeKey, unknown>>;
     participants: Array<{
@@ -32,7 +58,11 @@ export function buildSnapshotState(
     scene: BattleSceneState,
     before: StoredParticipant[],
     diff: ParticipantsDiff,
-    map: BattleMapConfig | null = null
+    map: BattleMapConfig | null = null,
+    mapLayer: {
+        mapState?: BattleMapState | null;
+        mapRef?: BattleMapRef | null;
+    } = {}
 ): SnapshotState {
     const prev = new Map(before.map((p) => [p.columns.id, p]));
 
@@ -45,6 +75,10 @@ export function buildSnapshotState(
             status: scene.status,
             pendingMoraleCheck: scene.pendingMoraleCheck,
             ...(scene.sceneState && { sceneState: scene.sceneState }),
+            ...(!isEmptyMapState(mapLayer.mapState) && {
+                mapState: mapLayer.mapState as BattleMapState,
+            }),
+            ...(mapLayer.mapRef && { mapVersion: mapLayer.mapRef.version }),
             ...(map && {
                 terrain: map.terrain ?? null,
                 ...modeSnapshotSlice(map),

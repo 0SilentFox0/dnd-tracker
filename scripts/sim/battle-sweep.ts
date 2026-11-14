@@ -58,6 +58,7 @@ import {
     bonusActionSchema,
     castSpellSchema,
     mapTerrainSchema,
+    mapWallsSchema,
     mazeActionSchema,
     mazeMarkSchema,
     moveSchema,
@@ -72,6 +73,7 @@ import {
     battleConditionsSchema,
 } from '@/lib/server/battles/mutations/conditions/conditions-mutation';
 import { mapTerrainMutation } from '@/lib/server/battles/mutations/map-terrain/map-terrain-mutation';
+import { mapWallsMutation } from '@/lib/server/battles/mutations/map-walls/map-walls-mutation';
 import { mazeMutation } from '@/lib/server/battles/mutations/maze/maze-mutation';
 import { mazeMarkMutation } from '@/lib/server/battles/mutations/maze-mark/maze-mark-mutation';
 import { moveMutation } from '@/lib/server/battles/mutations/move/move-mutation';
@@ -90,6 +92,7 @@ import {
 import { mutateSystemOperation } from '@/lib/server/battles/operations';
 import { runBattleMutation } from '@/lib/server/battles/run-mutation';
 import { loadSpellsFromDb } from '@/lib/server/battles/spell/load-spells-db';
+import { loadBattle } from '@/lib/server/battles/store/load-battle';
 import { saveBattle } from '@/lib/server/battles/store/save-battle';
 import { abilityLabel } from '@/lib/utils/abilities/build/resolve';
 import {
@@ -106,6 +109,7 @@ import { isAreaTarget } from '@/lib/utils/abilities/schema/kinds';
 import { applyBattleDelta } from '@/lib/utils/battle/client/apply-delta';
 import { attackKindOf } from '@/lib/utils/battle/common/attack-kind';
 import { attackDamageParts } from '@/lib/utils/battle/damage/attack-parts';
+import { edgeBlocks } from '@/lib/utils/battle/grid/edges';
 import {
     cellDistance,
     cellKey,
@@ -115,9 +119,14 @@ import {
     parseCellKey,
 } from '@/lib/utils/battle/grid/geometry';
 import { cellsOf } from '@/lib/utils/battle/grid/occupancy';
+import { canStep } from '@/lib/utils/battle/grid/walls';
+import {
+    decodeEdges,
+    encodeEdges,
+} from '@/lib/utils/battle/map-storage/edge-chunks';
+import { composeEffectiveMap } from '@/lib/utils/battle/map-storage/effective-map';
 import {
     allReachExit,
-    canStep,
     featureKeys,
     isMazeHero,
     mazeBudgetLeft,
@@ -140,7 +149,7 @@ import { MAZE_TEXTS } from '@/lib/utils/battle/modes/maze/texts';
 import { awaitsMoraleCheck } from '@/lib/utils/battle/morale/awaits-check';
 import { casterSpellDice } from '@/lib/utils/battle/spell/caster-dice';
 import { spellTargetingFor } from '@/lib/utils/battle/spell/spell-targeting';
-import { loadBattle, loadRecentEvents } from '@/lib/utils/battle/store';
+import { loadRecentEvents } from '@/lib/utils/battle/store';
 import { REJECT } from '@/lib/utils/battle/store/reject';
 import { checkVictoryConditions } from '@/lib/utils/battle/turn/victory';
 import { rollDiceList } from '@/lib/utils/common/dice';
@@ -742,6 +751,13 @@ const MAP_TERRAIN = {
     requireStatus: 'active',
     schema: mapTerrainSchema,
     mutate: mapTerrainMutation,
+};
+
+const MAP_WALLS = {
+    access: 'dm',
+    requireStatus: 'active',
+    schema: mapWallsSchema,
+    mutate: mapWallsMutation,
 };
 
 const MAZE = {
@@ -4542,7 +4558,155 @@ async function mapCheck(spells: Map<string, any>) {
         `${victim?.basicInfo.name} HP ${hpBefore} → ${after?.combatStats.currentHp}; terrain=${tr?.status}; ${entry ? `${resultTextOf(entry)}; hpChanges ${JSON.stringify(change)}` : 'запису hazard немає'}`
     );
 
+    await mapWallsCheck();
+
+    mapStateCheck();
+
     await mapSkillAllCheck(spells);
+}
+
+async function mapWallsCheck() {
+    const name =
+        'Карта: стіни навколо бійця — рух заборонено, після зняття дозволено';
+
+    if (state.status !== 'active')
+        return tskip(name, `бій не активний (${state.status})`);
+
+    await untilTurnOf(
+        (p) => p.basicInfo.side === 'ally' && alive(p) && p.battleData.position
+    );
+
+    const mover = current();
+
+    const at = mover.battleData.position as { x: number; y: number };
+
+    const cols = state.map?.cols ?? 12;
+
+    const rows = state.map?.rows ?? 8;
+
+    const edges = [
+        at.x < cols - 1 && `${at.x}:${at.y}:e`,
+        at.x > 0 && `${at.x - 1}:${at.y}:e`,
+        at.y < rows - 1 && `${at.x}:${at.y}:s`,
+        at.y > 0 && `${at.x}:${at.y - 1}:s`,
+    ].filter(Boolean) as string[];
+
+    const taken = new Set(
+        P()
+            .filter(alive)
+            .map(
+                (p) => `${p.battleData.position?.x}:${p.battleData.position?.y}`
+            )
+    );
+
+    const target = [
+        { x: at.x + 1, y: at.y },
+        { x: at.x - 1, y: at.y },
+        { x: at.x, y: at.y + 1 },
+        { x: at.x, y: at.y - 1 },
+    ].find(
+        (c) =>
+            c.x >= 0 &&
+            c.y >= 0 &&
+            c.x < cols &&
+            c.y < rows &&
+            !taken.has(`${c.x}:${c.y}`)
+    );
+
+    if (!target) return tskip(name, 'немає вільної сусідньої клітинки');
+
+    const built = await call('map-walls', MAP_WALLS, {
+        kind: 'walls',
+        add: edges,
+        remove: [],
+    });
+
+    const blocked = await call('move', MOVE, {
+        participantId: mover.basicInfo.id,
+        to: target,
+    });
+
+    const cleared = await call('map-walls', MAP_WALLS, {
+        kind: 'walls',
+        add: [],
+        remove: edges,
+    });
+
+    const free = await call('move', MOVE, {
+        participantId: mover.basicInfo.id,
+        to: target,
+    });
+
+    tcheck(
+        name,
+        built.status === 200 &&
+            blocked.status !== 200 &&
+            cleared.status === 200 &&
+            free.status === 200,
+        `стіни ${built.status}, рух крізь стіни ${blocked.status}, зняття ${cleared.status}, рух після ${free.status}`
+    );
+}
+
+/** Шар стану карти: ефективна карта пропускає видалене ребро й тримає сусіднє, ребра бібліотеки проходять кодек, відкат стану дає базу. */
+function mapStateCheck() {
+    const name =
+        'Карта (стан): removed-ребро відкриває прохід, сусіднє тримає, відкат стану — база';
+
+    const header = {
+        cols: 12,
+        rows: 8,
+        background: null,
+        opacity: 0.4,
+    } as unknown as NonNullable<typeof state.map>;
+
+    const libEdges = {
+        walls: ['3:2:e', '3:3:e', '7:5:s'],
+        bars: ['5:1:s'],
+    };
+
+    const decoded = decodeEdges(
+        encodeEdges(libEdges, header.cols, header.rows),
+        header.cols,
+        header.rows
+    );
+
+    const sorted = (a: string[]) => [...a].sort();
+
+    const roundtrip =
+        sorted(decoded.walls).join() === sorted(libEdges.walls).join() &&
+        sorted(decoded.bars).join() === sorted(libEdges.bars).join();
+
+    const base = composeEffectiveMap(header, null, decoded);
+
+    const removed = composeEffectiveMap(
+        header,
+        { removedEdges: ['3:2:e'], doors: {} },
+        decoded
+    );
+
+    const restored = composeEffectiveMap(
+        header,
+        { removedEdges: [], doors: {} },
+        decoded
+    );
+
+    const at = (x: number, y: number) => ({ x, y });
+
+    const blockedBefore = edgeBlocks(base, at(3, 2), at(4, 2), 'move');
+
+    const openAfter = !edgeBlocks(removed, at(3, 2), at(4, 2), 'move');
+
+    const neighbourHeld = edgeBlocks(removed, at(3, 3), at(4, 3), 'move');
+
+    const rolledBack =
+        edgeBlocks(restored, at(3, 2), at(4, 2), 'move') &&
+        sorted(restored.walls ?? []).join() === sorted(base.walls ?? []).join();
+
+    tcheck(
+        name,
+        roundtrip && blockedBefore && openAfter && neighbourHeld && rolledBack,
+        `кодек ${roundtrip}, стіна ${blockedBefore}, прохід після removed ${openAfter}, сусіднє ребро тримає ${neighbourHeld}, відкат ${rolledBack}`
+    );
 }
 
 /** Вміння «all» на карті: одиночне вороже заклинання б'є всю ворожу сторону без точки й дальності. */

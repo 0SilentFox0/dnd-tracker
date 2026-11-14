@@ -159,6 +159,24 @@ describe('battleMapSchema.gridOffset і backgroundCols', () => {
     });
 });
 
+describe('battleMapSchema.backgroundRows', () => {
+    it('додатне число до 200, необовʼязкове', () => {
+        const parsed = battleMapSchema.safeParse({
+            ...map,
+            backgroundRows: 9.5,
+        });
+
+        expect(parsed.success && parsed.data.backgroundRows).toBe(9.5);
+        expect(battleMapSchema.safeParse(map).success).toBe(true);
+        expect(
+            battleMapSchema.safeParse({ ...map, backgroundRows: 0 }).success
+        ).toBe(false);
+        expect(
+            battleMapSchema.safeParse({ ...map, backgroundRows: 201 }).success
+        ).toBe(false);
+    });
+});
+
 describe('battleMapSchema.weather', () => {
     it('приймає 7 видів погоди, null і відсутність; відхиляє невідоме', () => {
         expect(battleMapSchema.safeParse(map).success).toBe(true);
@@ -281,5 +299,26 @@ describe('battleMapSchema.motion', () => {
                 motion: { axis: 'x', speed: 13 },
             }).success
         ).toBe(false);
+    });
+});
+
+describe('battleMapSchema.walls / bars', () => {
+    const ok = (extra: object) =>
+        battleMapSchema.safeParse({ ...map, ...extra }).success;
+
+    it('приймає коректні ребра', () => {
+        expect(ok({ walls: ['0:0:e', '3:3:s'], bars: ['1:1:e'] })).toBe(true);
+    });
+
+    it('відхиляє сміття, вихід за межі, дублікати і перетин bars з walls', () => {
+        expect(ok({ walls: ['a:b:e'] })).toBe(false);
+        expect(ok({ walls: ['9:0:e'] })).toBe(false);
+        expect(ok({ bars: ['0:9:s'] })).toBe(false);
+        expect(ok({ walls: ['0:0:e', '0:0:e'] })).toBe(false);
+        expect(ok({ walls: ['0:0:e'], bars: ['0:0:e'] })).toBe(false);
+    });
+
+    it('обмежує довжину списку', () => {
+        expect(ok({ walls: Array(7201).fill('0:0:e') })).toBe(false);
     });
 });

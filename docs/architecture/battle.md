@@ -34,7 +34,7 @@ Page `app/campaigns/[id]/battles/[battleId]/page.tsx` (server: `userId` from `ge
 Every battle route is a Zod schema + `runBattleMutation` (`lib/server/battles/run-mutation.ts`, pure engine in `lib/utils/battle/pipeline/`) with a `<action>-mutation.ts` in `lib/server/battles/mutations/<action>/`. The pipeline:
 
 - does auth (`getClaims`);
-- loads the battle in one query (`lib/utils/battle/store/loadBattle`). Participant snapshots — ~75 % of the bytes — come from a per-instance content-addressed cache keyed by `snapshotHash`, and only misses are read, so **anything writing `battle_participants.snapshot` must write its `snapshotHash` too**, as `saveBattle` does;
+- loads the battle in one query (`lib/server/battles/store/loadBattle`). Participant snapshots — ~75 % of the bytes — come from a per-instance content-addressed cache keyed by `snapshotHash`, and only misses are read, so **anything writing `battle_participants.snapshot` must write its `snapshotHash` too**, as `saveBattle` does;
 - checks access (`dm` / `turnController` / `currentController` / `member`) and status;
 - runs `mutate` (pure engine code from `lib/utils/battle/*`, `lib/utils/abilities/*`), checks victory once;
 - saves with an optimistic `version` lock (`saveBattle`: changed `battle_participants` rows in one `UPDATE … FROM (VALUES …)` without reading rows back, append-only `battle_events`, `battle_snapshots` for rollback — pruned to the last 20 when the battle completes; the cleanup cron deletes all snapshots of battles completed more than 90 days ago, events and participants are kept);
@@ -91,7 +91,7 @@ Wizards (attack, spellbook, player turn) are reducers in `lib/utils/battle/flows
 
 ## Attack: cover, chain shot, cleave
 
-- **Cover** is computed by the server (`grid/line-of-fire.ts`) per target of a ranged attack: a living, non-airborne participant, `wall`/`barrier`, `blocked` cells, or a mode wall (`lineBlocked`) on the line. Not applied to melee, chain jumps or secondary targets of piercing shots. The wizard and the map show the same result.
+- **Cover** is computed by the server (`grid/line-of-fire.ts`) per target of a ranged attack: a living, non-airborne participant, `wall`/`barrier`, `blocked` cells, or a mode `lineBlocked` on the line. Not applied to melee, chain jumps or secondary targets of piercing shots. A wall edge on the line (core walls and mode walls, bars excluded) is not cover but a ban: `lineOfFire().wallBlocked` makes `attackReachError` return `REJECT.targetBehindWall`, so the server rejects the shot and the wizard/map mark the target unreachable; chain jumps and piercing rays stop at walls too. The wizard and the map show the same result.
 - **Target limit**: `attack/max-targets.ts`, shared by client and server; auto-targets (chain, cleave, piercing, hits-all) are outside it.
 - **Chain shot**: ability flag `chainShot` (`attack/process/chain.ts`) — the player picks one target, the server jumps to the nearest enemy in range (`grid/nearest.ts`) from the previous target's cell.
 - **Cleave**: a melee attack with `maxTargets > 1` (`attack/process/cleave.ts`) also hits other enemies in the 3 cells of one facing (side = row of 3, diagonal = corner of 3) containing the target; the facing with the most enemies wins (1-cell attackers; larger ones hit any adjacent); the server rolls d20/damage for them (`attack-phase/targets.ts`).
@@ -309,6 +309,20 @@ Spell reducer/payload facade — `flows/spell-flow.ts`; types/costs/selection �
 - `lib/server/battles/guards.ts` (`runGuardedBattleOperationCore`, used by the assistant): actor/tx mismatch is a `ContentError` 409 (was 403); on `dryRun` it returns `delta: null` plus a preview.
 - `createBattleParticipantFromCharacter` without `context` takes artifacts only from `preloaded.artifactRows` (no DB fallback); all production callers pass a context.
 
+## Стіни й ґрати
+
+Операція `map-walls` (`mutations/map-walls`, лише ДМ, активний бій, не в maze): `{ kind: 'walls'|'bars', add, remove }` до `MAP_EDGES_PER_OP`=400 ребер за виклик, перевищення ліміту 7200 відхиляється (`REJECT.mapEdgeLimit`). Пише лише `scene.map`; відповідь — дельта `scene.walls`/`scene.bars` (`{ add, remove }`, `diffEdges`/`applyEdgeDiff`), повна карта лише коли зміна перевищує `EDGE_DIFF_LIMIT`=400 або разом із іншими полями карти. Клієнт зливає дельту в `applyBattleDelta` → `mergeMapDelta`. Правила ребер — [map-modes.md](map-modes.md#стіни-й-ґрати-core-етап-b).
+
 ## Map motion
 
 Поле `map.motion` і операція `map-motion` — див. [map-modes.md](map-modes.md#map-motion-рух). Мутація — копія шаблону `map-weather`: пише лише `scene.map`, відповідь — дельта.
+
+## Карта бою: ефективна карта, стан, rollback (етап 0)
+
+Деталі шарів, бібліотеки й API — [map-modes.md](map-modes.md#зберігання-карти-етап-0). Для бою важливо:
+
+- `meta.map` у мутації — вже **ефективна** карта (`composeEffectiveMap`); `meta.mapBase`/`meta.mapRef`/`meta.mapState` — шари. Мутація, що пише карту, віддає в `scene.map` ефективну форму, а `save-battle` зберігає через `persistedMap` (linked — лише заголовок, inline — база без запікання станових видалень). Знімок (`snapshot-state`) тримає `mapState` і `mapVersion`.
+- `map-edge-remove` пише лише `scene.mapState` (рядок `battle_map_state`), `map-update` — `scene.map` + `scene.mapRef` (+ `mapState`, якщо прибрано застарілі ребра). Обидві — дельта `scene.mapState` / нова карта; `map-walls` на linked-бою → `REJECT.mapEdgesLinked`.
+- **Rollback:** відкат відновлює `mapState` зі знімка; якщо `scene.mapVersion` знімка відрізняється від поточної `mapRef.version` (між ними був `map-update`), відкат відхиляється — `REJECT.rollbackAcrossMapUpdate`.
+- Ліміт розстановки в бою — `MAP_LIMITS.battleMaxSide` (60).
+- **БД:** міграція `20261202000000_battle_map_storage` (expand-only, RLS на всіх нових таблицях) додає `battle_maps`, `battle_map_chunks`, `battle_map_versions`, `battle_map_state` і `battle_scenes.map_id`/`map_version`. **На prod не застосована — їде з main** при деплої (біля міграцій ставити лише через `vercel-build` з `main`).

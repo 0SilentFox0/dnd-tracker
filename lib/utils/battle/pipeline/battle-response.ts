@@ -9,6 +9,7 @@ import {
     battleDmChannelName,
     userChannelName,
 } from '@/lib/pusher/channels';
+import { clientMapOf } from '@/lib/utils/battle/map-storage/persisted-map';
 import { publicSetup, reserveOf } from '@/lib/utils/battle/participant/reserve';
 import type { BattleSceneState, LoadedBattle } from '@/lib/utils/battle/store';
 import { checkVictoryConditions } from '@/lib/utils/battle/turn/victory';
@@ -35,6 +36,16 @@ export interface PusherMessage {
     channel: string;
     event: string;
     payload: unknown;
+}
+
+function mapFields(meta: LoadedBattle['meta']) {
+    const { mapRef, mapState } = meta;
+
+    return {
+        map: clientMapOf(meta),
+        ...(mapRef && { mapRef }),
+        ...(mapState && { mapState }),
+    };
 }
 
 export function toBattleResponse(
@@ -74,7 +85,7 @@ export function toBattleResponse(
         pendingMoraleCheck: scene.pendingMoraleCheck,
         pendingChoice: publicPending(scene.pendingChoice),
         ...(scene.sceneState && { system: scene.sceneState }),
-        map: meta.map,
+        ...mapFields(meta),
         audio: meta.audio ?? null,
         rules: hide ? stripPlayerHiddenRules(meta.rules) : meta.rules,
         turnTimerSeconds: meta.turnTimerSeconds ?? null,

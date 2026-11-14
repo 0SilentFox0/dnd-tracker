@@ -75,6 +75,32 @@ const resolve = (
 ) => resolveSpellTargets(list, who, spell, targeting, chosen, ctx);
 
 describe('resolveSpellTargets на карті', () => {
+    it('точка прицілу за суцільною стіною відхиляється', () => {
+        const walled: BattleMapConfig = {
+            ...map,
+            walls: ['3:0:e', '3:1:e', '3:2:e', '3:3:e', '3:4:e'],
+        };
+
+        expect(
+            resolve(fireball, [], {
+                rules: DEFAULT_RULES,
+                map: walled,
+                targetCell: { x: 6, y: 3 },
+            })
+        ).toEqual({
+            ok: false,
+            error: textRef('battleLog.reject.targetUnreachable'),
+        });
+
+        expect(
+            resolve(fireball, [], {
+                rules: DEFAULT_RULES,
+                map: walled,
+                targetCell: { x: 3, y: 3 },
+            }).ok
+        ).toBe(true);
+    });
+
     it('emanation resolves from every cell of a 2x2 caster without a targetCell', () => {
         const large = {
             ...caster,

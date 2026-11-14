@@ -18,6 +18,17 @@ The first mode: pure geometry/vision/generator, server wake-up in `afterMutation
 
 Difficult terrain, `obscured` cells, spell walls and `spellZones` are core: they live in `map.terrain` / `map.spellZones` and are read by `grid/*` and `spell/zone-*`. Map modes neither import nor change them; the maze never fires zone triggers.
 
+## Стіни й ґрати (core, етап B)
+
+`map.walls` / `map.bars` — ребра `"x:y:e"` / `"x:y:s"` (ліміт 7200 разом із `maze.walls`); ядро, не режим. Примітиви ребер — `grid/walls.ts` (`edgeKey`, `canStep`, `cornerOpen`; `modes/maze/walls.ts` лишився обгорткою над `maze.walls`). Читання лише через `grid/edges.ts`:
+
+- `wallsOf(map)` = `map.walls ∪ modeWalls(map)`; хук режиму `walls?` у `ModeEngineHooks` (диспетчер у `modes/engine.ts`) віддає стіни режиму (maze віддає `maze.walls`; хук мусить повертати стабільний за посиланням масив — memo `wallsOf` ключується ідентичністю), тож рух/постріл/зір по лабіринту ідуть тим самим шляхом. `barsOf(map)` — ґрати.
+- `edgeBlocks(map, a, b, kind, mover?)`, `kind`: `move` (стіни + ґрати), `sight` і `fire` (лише стіни). Діагональ блокується, якщо закритий хоч один кутовий шлях. `cellsConnected` — пряма лінія між наборами клітинок.
+- Споживачі: `searchPaths` (рух; ранній вихід без ребер), `lineOfFire` (`wallBlocked`: постріл крізь стіну, зокрема лабіринту, заборонений через `attackReachError`, а не укриття) і `rayCells`/`templateCells` (`fire`), `grid/sight.ts` (`sightedTargets`, ланцюгові цілі, вибір цілей заклинань/здібностей), `grid/adjacency.ts` (`isAdjacentOnMap`/`cellsAdjacentOnMap` — ближній бій, cleave, fire-burst, move-self, оборонні реакції, opportunity-атаки; `sight`-блок скасовує сусідство). Геометричні `footprintDistance` (аури, ауди, розстановка) не чіпали.
+- Модифікатор `passesWalls` (flag): `edgeBlocks(..., 'move', mover)` ігнорує стіни й ґрати для власника; зір і постріл не змінюються. Враховує лише власні здібності мувера (`collectModifiers([mover])`), без аур інших. Контент (Etherealness, привиди) не прив'язано — у «хвостах» STATUS.
+- Редактор ребер вимкнено, поки активний maze (`REJECT.mapEdgesInMode`) і на touch-пристроях.
+- Руйнування ребер у бою — `map-edge-remove` поверх `battle_map_state` (див. «Зберігання карти» нижче); двері (`doors`, `map-door-toggle`) — етап B6, стан для них уже є (`doors` у `battle_map_state`), бракує мутації й `edgeBlocks`-джерела.
+
 ## Map motion («Рух»)
 
 `BattleMapConfig.motion?: { axis: "x" | "y"; speed } | null` — окреме поле конфігу карти за зразком `weather`, **не** запис у `MAP_MODE_REGISTRY` (реєстр — для режимів, що змінюють правила; рух суто візуальний і сумісний із лабіринтом). `speed` — клітинки/с зі знаком, `|speed| ≤ 6`, `0` = зупинено, відсутнє = вимкнено.
@@ -30,7 +41,22 @@ Difficult terrain, `obscured` cells, spell walls and `spellZones` are core: they
 
 ## Зміна фону в бою
 
-- Операція `map-background` (`mutations/map-background`, лише ДМ, активний бій): пише `map.background` і скидає `backgroundCols`/`gridOffset` (як `setBackground` у налаштуванні). Файл/data-URL вантажиться в bucket `battle-maps` через `resolveMapBackgroundForPersistence` у самій мутації (`campaignId` береться з `params.id`), у сцені лежить лише URL.
+- Операція `map-background` (`mutations/map-background`, лише ДМ, активний бій): пише `map.background` і скидає `backgroundCols`/`backgroundRows`/`gridOffset` (як `setBackground` у налаштуванні). Файл/data-URL вантажиться в bucket `battle-maps` через `resolveMapBackgroundForPersistence` у самій мутації (`campaignId` береться з `params.id`), у сцені лежить лише URL.
 - Для гравців перехід робить `MapBackground`: старий шар лишається, новий монтується з `opacity: 0` і з'являється після `onLoad` (800 мс, `BACKGROUND_FADE_MS`), старий одночасно зникає й знімається. `prefers-reduced-motion` — миттєва заміна. Те саме працює з `map.motion` (`MotionBackground.onReady`).
 - Панель ДМ — `MapBackgroundPanel`, хук `useMapBackgroundTool` (палітра `background` у `palettes.ts` взаємовиключна з рештою). У реєстрі асистента — `handoff` (потрібне завантаження файлу).
 
+## Калібрування сітки (setup)
+
+`BattleMapConfig.backgroundRows?` — окрема висота фону в клітинках (неквадратні клітинки зображення; без неї береться з пропорцій). `backgroundBox` враховує її. Чисті `fromCellRect`/`nudge` у `lib/utils/battle/grid/calibration.ts`; стан у `useGridCalibration`, застосування через `applyCalibration` у `useBattleMapEditor`; UI — `components/battle/setup/GridCalibration.tsx`. При заміні фону калібрування пропонується зберегти лише за того самого розміру зображення. Автодетект сітки відкладено: [спайк](../superpowers/research/2026-11-14-grid-autodetect-spike.md).
+
+## Зберігання карти (етап 0)
+
+Карта бою складається з шарів; ядро й клієнт читають лише **ефективну** карту.
+
+- **Базова карта** — що лежить у `battle_scenes.map` (inline-бій: заголовок + власні `walls`/`bars`) або заголовок бібліотечної карти (linked-бій). **Ефективна** = `composeEffectiveMap(base, state, libEdges?)` (`lib/utils/battle/map-storage/effective-map.ts`): база + ребра бібліотеки − `state.removedEdges`; модові стіни (`modeWalls`) не чіпає; результат стабільний за ідентичністю входів (кеш `WeakMap`, потрібно `wallsOf`). `loadBattle` складає її в `meta.map`.
+- **Запис назад** — `persistedMap(meta, patched, state)` (`map-storage/persisted-map.ts`): linked-карта пишеться лише заголовком (`withoutEdges`), для inline ребра, яких мутація не торкалась, лишають збережену форму (`meta.mapBase` = власні `walls`/`bars` із БД), тож видалені станом ребра не «запікаються» у базу. `clientMapOf` — карта, як її тримає клієнт (заголовок + власні ребра, ще без шару стану).
+- **Бібліотека** — `battle_maps` (заголовок JSON, `cols/rows`, `map_version`) + `battle_map_chunks` (ребра чанками 16×16, 2 біти на ребро: стіна/ґрати; `encodeEdges`/`decodeEdges` у `edge-chunks.ts`) + `battle_map_versions` (знімок payload кожної версії). Сервіс `lib/server/battle-maps/library-service.ts`, схеми `lib/schemas/battle-maps.ts`. API: `GET/POST /api/campaigns/[id]/maps`, `GET/PUT/DELETE …/maps/[mapId]`, `POST …/maps/[mapId]/clone`. `GET` карти віддає слабкий ETag `weakEtag(id, version)` + `ifNoneMatch` → 304 (`lib/utils/api/etag.ts`; egress); видалення використаної карти — 409 `BATTLE_MAP_IN_USE`. Читає будь-хто з доступом до кампанії, пише лише ДМ. Клієнт: `lib/api/battle-maps.ts`, `lib/hooks/battle-maps` (`useBattleMaps`, `useBattleMapEdges`).
+- **Linked-бій:** `battle_scenes.map_id` + `map_version` = `mapRef { mapId, version }`; `scene.map` — лише заголовок (рантайм-поля `terrain`/`spellZones`/`weather`/`motion` і поля режимів лишаються в бою). Ребра клієнт бере з бібліотеки за `mapRef` (`useBattleScene` → `useBattleMapEdges`, ETag), сервер — з `effectiveMapOf` у `loadBattle`. Редагувати ребра linked-карти в бою не можна: `REJECT.mapEdgesLinked` (`map-walls`) — лише `map-edge-remove` (стан).
+- **Стан бою** — `battle_map_state` (1:1 з боєм): `removed_edges`, `doors`, `fog` (резерв під B6/D), `version`. У сцені — `scene.mapState`; у дельті — `ClientBattleDelta.scene.mapState` (`MapStateDelta`: `removed {add,remove}` через `diffEdges`, `doors`; `diffMapState`/`applyMapStateDelta`). Клієнт зливає в `applyBattleDelta`; ефективну карту перераховує `useBattleScene`.
+- **Мутації:** `map-edge-remove` (ДМ, активний бій; `{ edges, restore? }` — прибрати/повернути ребра; валідує наявність ребра в ефективній карті або в `removedEdges`: `REJECT.mapEdgeNotFound`/`mapEdgeNotRemoved`) і `map-update` (ДМ; linked-бій підтягує нову версію бібліотечної карти: відхиляє, якщо учасник опиняється на непрохідній клітинці — `REJECT.mapUpdateCollision`; або версія понад `battleMaxSide` — `BATTLE_MAP_TOO_LARGE`; прибирає з `removedEdges` ребра, яких у новій версії нема; відповідь — нова `map` + `mapRef`).
+- **Ліміти** — `lib/constants/map-limits.ts` (`MAP_LIMITS`): `inlineMaxEdges` 7200 (inline), `libraryMaxEdges` 80000, `chunk` 16, `photoMaxSide` 60 / `tileMaxSide` 200 (бібліотека), `doorsMax` 500. **Тимчасово `battleMaxSide = 60`**: у бій потрапляє карта до 60 клітинок за стороною, доки етапи C/D не дозволять більші.

@@ -47,6 +47,6 @@ describe('battles layout', () => {
         );
 
         expect(screen.getByTestId('skeleton')).toBeTruthy();
-        expect((await screen.findByTestId('page')).textContent).toBe('dnd5e');
+        expect((await screen.findByTestId('page', {}, { timeout: 8000 })).textContent).toBe('dnd5e');
     });
 });

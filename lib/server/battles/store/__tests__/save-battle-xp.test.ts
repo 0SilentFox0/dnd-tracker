@@ -9,7 +9,7 @@ import {
 } from '@/lib/constants/battle';
 import { saveBattle } from '@/lib/server/battles/store/save-battle';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
-import type { BattleDb } from '@/lib/utils/battle/store/load-battle';
+import type { BattleDb } from '@/lib/utils/battle/store/types';
 import type {
     LoadedBattle,
     NewBattleEvent,

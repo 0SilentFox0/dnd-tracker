@@ -140,7 +140,7 @@ export function resolveD20Attack(ctx: ResolveAttackCtx): ResolvedAttack {
             { flag: 'autoCritAdjacent' },
             modifiers[targetId]
         ).entries.length > 0 &&
-        isAdjacentAttack(attacker, target, attack);
+        isAdjacentAttack(attacker, target, attack, ctx.map);
 
     const critRoll = adjacentCrit ? { ...rolled, isCritical: true } : rolled;
 

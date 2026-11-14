@@ -4,10 +4,12 @@ import {
     cellAtScreenPoint,
     cellCenter,
     cellPolygon,
+    edgeAtScreenPoint,
     fitMapBox,
     fitMapView,
     mapSize,
     playableBounds,
+    screenToUnit,
     tokenBox,
     UNIT,
 } from '../layout';
@@ -247,5 +249,48 @@ describe('playableBounds', () => {
         expect(
             playableBounds({ cols: 2, rows: 1, blocked: ['0:0', '1:0'] })
         ).toEqual({ x: 0, y: 0, cols: 2, rows: 1 });
+    });
+});
+
+describe('edgeAtScreenPoint', () => {
+    const map = { cols: 4, rows: 3 };
+
+    it('вертикальне ребро між сусідніми клітинками в рядку', () => {
+        expect(edgeAtScreenPoint(map, 2 * UNIT + 5, 1.5 * UNIT)).toBe('1:1:e');
+    });
+
+    it('горизонтальне ребро між рядками', () => {
+        expect(edgeAtScreenPoint(map, 1.5 * UNIT, 2 * UNIT - 8)).toBe('1:1:s');
+    });
+
+    it('біля кута перемагає ближча вісь', () => {
+        expect(edgeAtScreenPoint(map, 2 * UNIT + 4, 1 * UNIT + 12)).toBe(
+            '1:1:e'
+        );
+        expect(edgeAtScreenPoint(map, 2 * UNIT + 12, 1 * UNIT + 4)).toBe(
+            '2:0:s'
+        );
+    });
+
+    it('центр клітинки, зовнішній край і позамежжя дають null', () => {
+        expect(edgeAtScreenPoint(map, 1.5 * UNIT, 1.5 * UNIT)).toBeNull();
+        expect(edgeAtScreenPoint(map, 2, 1.5 * UNIT)).toBeNull();
+        expect(edgeAtScreenPoint(map, 4 * UNIT, 1.5 * UNIT)).toBeNull();
+        expect(edgeAtScreenPoint(map, -5, 50)).toBeNull();
+        expect(edgeAtScreenPoint(map, 5 * UNIT, 50)).toBeNull();
+    });
+});
+
+describe('screenToUnit', () => {
+    it('знімає зсув і масштаб матриці', () => {
+        const ctm = { a: 2, b: 0, c: 0, d: 2, e: 10, f: 20 };
+
+        expect(screenToUnit(ctm, 210, 120)).toEqual({ x: 100, y: 50 });
+    });
+
+    it('вироджена матриця — null', () => {
+        expect(
+            screenToUnit({ a: 0, b: 0, c: 0, d: 0, e: 0, f: 0 }, 1, 1)
+        ).toBeNull();
     });
 });

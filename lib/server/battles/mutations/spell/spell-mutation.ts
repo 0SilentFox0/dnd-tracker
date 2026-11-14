@@ -26,6 +26,7 @@ import type {
     CritResume,
 } from '@/lib/utils/battle/crit-choice/types';
 import { spellDiceRolls } from '@/lib/utils/battle/dice-record';
+import { adjacencyOf } from '@/lib/utils/battle/grid/adjacency';
 import { withLines, withPrefix } from '@/lib/utils/battle/log/lines';
 import { hasEffectMarker } from '@/lib/utils/battle/participant/state';
 import type {
@@ -412,6 +413,7 @@ export function createSpellMutation(
                 },
                 participants: order,
                 sourceId: legendaryAbility.source.id,
+                adjacent: adjacencyOf(ctx.meta.map),
             })
         )
             throw new BattleRuleError(

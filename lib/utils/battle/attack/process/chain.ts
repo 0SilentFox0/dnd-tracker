@@ -4,10 +4,12 @@ import {
 } from '@/lib/utils/abilities/engine/core/participants';
 import {
     attackRangeCells,
+    cellsConnected,
     cellsOf,
     footprintDistance,
     isOnMap,
     nearestTo,
+    wallsAllowSight,
 } from '@/lib/utils/battle/grid';
 import { isHostile, modeSees } from '@/lib/utils/battle/modes/engine';
 import type { Ruleset } from '@/lib/utils/rules/schema';
@@ -55,6 +57,11 @@ export function nextChainTarget({
             isTargetable(p) &&
             !isDormant(p) &&
             modeSees(map, attacker, p) &&
+            wallsAllowSight(map, attacker, p) &&
+            (!map ||
+                !isOnMap(p) ||
+                origin.length === 0 ||
+                cellsConnected(map, 'fire', origin, cellsOf(p))) &&
             inRange(p)
     );
 

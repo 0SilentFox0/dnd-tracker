@@ -131,7 +131,10 @@
         "hazard": "Hazard",
         "erase": "Erase",
         "difficult": "Difficult",
-        "erase-zone": "Erase zone"
+        "erase-zone": "Erase zone",
+        "edge-wall": "Wall (edge)",
+        "edge-bars": "Bars",
+        "edge-erase": "Erase edge"
       },
       "rounds": "Rounds",
       "hazardLabel": "Hazard label",

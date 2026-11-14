@@ -30,13 +30,17 @@ import {
     withSelf,
 } from '@/lib/utils/abilities/engine/core/participants';
 import { attackKindOf } from '@/lib/utils/battle/common/attack-kind';
-import { isAdjacent } from '@/lib/utils/battle/grid/occupancy';
+import { isAdjacentOnMap } from '@/lib/utils/battle/grid/adjacency';
 import type { AttackRollResult } from '@/lib/utils/battle/types/attack';
 import type {
     ResolveAttackCtx,
     ResolvedAttack,
 } from '@/lib/utils/rules/systems/types';
-import type { BattleAttack, BattleParticipant } from '@/types/battle';
+import type {
+    BattleAttack,
+    BattleMapConfig,
+    BattleParticipant,
+} from '@/types/battle';
 
 const attackCharacteristicOf = (attack: BattleAttack) =>
     (attackKindOf(attack.type) === AttackType.RANGED ? 'bs' : 'ws') as
@@ -68,7 +72,8 @@ export const wfrpAttackTarget = (
 function isOutnumbering(
     attacker: BattleParticipant,
     target: BattleParticipant,
-    participants: BattleParticipant[]
+    participants: BattleParticipant[],
+    map: BattleMapConfig | null | undefined
 ): boolean {
     const near = (
         of: BattleParticipant,
@@ -78,10 +83,11 @@ function isOutnumbering(
             (p) =>
                 p.basicInfo.side === side &&
                 isActive(p) &&
-                (p.basicInfo.id === of.basicInfo.id || isAdjacent(p, of))
+                (p.basicInfo.id === of.basicInfo.id ||
+                    isAdjacentOnMap(map, p, of))
         ).length;
 
-    if (!isAdjacent(attacker, target)) return false;
+    if (!isAdjacentOnMap(map, attacker, target)) return false;
 
     return (
         near(target, attacker.basicInfo.side) >=
@@ -276,7 +282,7 @@ export function resolveWfrpAttack(ctx: ResolveAttackCtx): ResolvedAttack {
                 toHit +
                 againstMod(target, 'melee') +
                 sizeHitMod(attacker, target) +
-                (isOutnumbering(attacker, target, participants)
+                (isOutnumbering(attacker, target, participants, ctx.map)
                     ? OUTNUMBERING_BONUS
                     : 0),
             defenderTargets: [

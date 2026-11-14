@@ -33,6 +33,8 @@ export interface ConditionContext {
     event: AbilityEvent | null;
     participants: BattleParticipant[];
     sourceId?: string;
+    /** Inject `adjacencyOf(map)`: grid/edges imports the ability engine, so conditions cannot import it back. */
+    adjacent?: (a: BattleParticipant, b: BattleParticipant) => boolean;
 }
 
 const WHO: FieldMeta = {
@@ -254,6 +256,7 @@ function allyNextToTarget({
     owner,
     event,
     participants,
+    adjacent = isAdjacent,
 }: ConditionContext): boolean {
     const target = event
         ? eventTargetIds(event)
@@ -268,7 +271,7 @@ function allyNextToTarget({
             p.basicInfo.id !== owner.basicInfo.id &&
             p.basicInfo.side === owner.basicInfo.side &&
             isActive(p) &&
-            isAdjacent(p, target)
+            adjacent(p, target)
     );
 }
 

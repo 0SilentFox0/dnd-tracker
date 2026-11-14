@@ -371,12 +371,48 @@ export interface BattleMapConfig {
     spellZones?: Record<string, SpellZoneRuntime>;
     /** Ширина фону в клітинках (з повзунка «Розмір клітинки»); без неї фон вписується в cols×rows */
     backgroundCols?: number;
+    /** Висота фону в клітинках; без неї береться з пропорцій зображення (клітинки фону квадратні) */
+    backgroundRows?: number;
     /** Зсув сітки відносно фону, частки клітинки 0 ≤ v < 1 */
     gridOffset?: { x: number; y: number };
     maze?: MazeConfig | null;
+    /** Стіни на ребрах ("x:y:e" / "x:y:s"): блокують рух, погляд і вогонь */
+    walls?: string[];
+    /** Ґрати на ребрах: блокують лише рух */
+    bars?: string[];
     /** Атмосфера без механіки; відсутня або null — ясно */
     weather?: WeatherKind | null;
     motion?: MapMotion | null;
+}
+
+export interface DoorState {
+    open: boolean;
+    locked?: boolean;
+}
+
+/** Мінливий шар карти бою поверх незмінної карти: видалені ребра, двері, туман */
+export interface BattleMapState {
+    removedEdges: string[];
+    doors: Record<string, DoorState>;
+    fog?: Record<string, unknown>;
+}
+
+/** Патч стану за ключем; null у doors = прибрати двері */
+export interface MapStateDelta {
+    removed?: { add: string[]; remove: string[] };
+    doors?: Record<string, DoorState | null>;
+}
+
+/** Власні ребра inline-карти, як вони лежать у battle_scenes.map */
+export interface MapBase {
+    walls?: string[];
+    bars?: string[];
+}
+
+/** Бій посилається на pinned-версію бібліотечної карти */
+export interface BattleMapRef {
+    mapId: string;
+    version: number;
 }
 
 /** difficult — лише пензель ДМ (прохідна складна місцевість); зони заклинань ставлять прапорці на hazard */

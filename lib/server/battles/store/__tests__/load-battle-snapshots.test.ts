@@ -1,15 +1,16 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { type BattleDb, loadBattle } from '../load-battle';
+import { loadBattle } from '../load-battle';
+
+import { ParticipantSide } from '@/lib/constants/battle';
+import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import {
     clearSnapshotCache,
     createSnapshotCache,
     SNAPSHOT_CACHE_MAX,
-} from '../snapshot-cache';
-import { splitParticipant } from '../split-participant';
-
-import { ParticipantSide } from '@/lib/constants/battle';
-import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
+} from '@/lib/utils/battle/store/snapshot-cache';
+import { splitParticipant } from '@/lib/utils/battle/store/split-participant';
+import type { BattleDb } from '@/lib/utils/battle/store/types';
 
 const base = createMockParticipant();
 

@@ -1,37 +1,31 @@
-import type { PrismaClient } from '@prisma/client';
-
-import { snapshotCache } from './snapshot-cache';
-import { joinParticipant } from './split-participant';
+import { BattleStatus } from '@/lib/constants/battle';
+import { CampaignRole, isDemoKind } from '@/lib/constants/campaigns';
+import { getPinnedGeometry } from '@/lib/server/battle-maps/library-service';
+import { pendingFromStored } from '@/lib/utils/battle/crit-choice/pending';
+import { composeEffectiveMap } from '@/lib/utils/battle/map-storage/effective-map';
+import { BattleMapVersionMissingError } from '@/lib/utils/battle/store/errors';
+import { snapshotCache } from '@/lib/utils/battle/store/snapshot-cache';
+import { rowToMapState } from '@/lib/utils/battle/store/snapshot-state';
+import { joinParticipant } from '@/lib/utils/battle/store/split-participant';
 import type {
+    BattleDb,
     BattleSceneState,
     LoadedBattle,
     ParticipantColumns,
     ParticipantSnapshot,
     ParticipantState,
-} from './types';
-
-import { BattleStatus } from '@/lib/constants/battle';
-import { CampaignRole, isDemoKind } from '@/lib/constants/campaigns';
-import { pendingFromStored } from '@/lib/utils/battle/crit-choice/pending';
+} from '@/lib/utils/battle/store/types';
 import { parseRulesCached } from '@/lib/utils/rules/schema';
 import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
 import type { BattleAudioState } from '@/types/audio';
 import type {
     BattleMapConfig,
+    BattleMapRef,
+    BattleMapState,
     BattleParticipant,
     BattlePreparationParticipant,
+    MapBase,
 } from '@/types/battle';
-
-export type BattleDb = Pick<
-    PrismaClient,
-    | 'battleScene'
-    | 'battleParticipant'
-    | 'battleEvent'
-    | 'battleSnapshot'
-    | '$transaction'
-    | '$queryRaw'
-    | '$executeRaw'
->;
 
 type ParticipantRow = ParticipantColumns & {
     battleId: string;
@@ -134,6 +128,23 @@ async function loadCampaignRules(
     return row?.campaign.rules;
 }
 
+async function effectiveMapOf(
+    base: BattleMapConfig | null,
+    ref: BattleMapRef | null,
+    state: BattleMapState | null
+): Promise<BattleMapConfig | null> {
+    if (!base) return null;
+
+    if (!ref) return composeEffectiveMap(base, state);
+
+    const library = await getPinnedGeometry(ref.mapId, ref.version);
+
+    if (!library)
+        throw new BattleMapVersionMissingError(ref.mapId, ref.version);
+
+    return composeEffectiveMap(base, state, library);
+}
+
 export async function loadBattle(
     db: BattleDb,
     args: { battleId: string; campaignId: string; userId: string }
@@ -154,6 +165,11 @@ export async function loadBattle(
             pendingCritChoice: true,
             systemState: true,
             map: true,
+            mapId: true,
+            mapVersion: true,
+            mapState: {
+                select: { removedEdges: true, doors: true, fog: true },
+            },
             audio: true,
             rules: true,
             startedAt: true,
@@ -202,16 +218,37 @@ export async function loadBattle(
 
     const membership = row.campaign.members[0];
 
-    const rules = parseRulesCached(
+    const mapRef =
+        row.mapId && row.mapVersion !== null
+            ? { mapId: row.mapId, version: row.mapVersion }
+            : null;
+
+    const mapState = rowToMapState(row.mapState);
+
+    const stored = (row.map ?? null) as BattleMapConfig | null;
+
+    const [rawRules, withSnap, map] = await Promise.all([
         row.status !== BattleStatus.PREPARED && row.rules
             ? row.rules
-            : await loadCampaignRules(db, args)
-    );
+            : loadCampaignRules(db, args),
+        withSnapshots(db, row.battleParticipants),
+        effectiveMapOf(stored, mapRef, mapState),
+    ]);
 
-    const all = (await withSnapshots(db, row.battleParticipants)).map((p) => ({
+    const rules = parseRulesCached(rawRules);
+
+    const all = withSnap.map((p) => ({
         isPending: p.isPending,
         participant: rowToParticipant(p),
     }));
+
+    const mapBase: MapBase | null =
+        stored && !mapRef
+            ? {
+                  ...(stored.walls && { walls: stored.walls }),
+                  ...(stored.bars && { bars: stored.bars }),
+              }
+            : null;
 
     return {
         scene,
@@ -223,7 +260,10 @@ export async function loadBattle(
             friendlyFire: row.campaign.friendlyFire ?? false,
             rules,
             critChoiceByDm: row.campaign.critChoiceByDm,
-            map: (row.map ?? null) as BattleMapConfig | null,
+            map,
+            mapRef,
+            mapState,
+            mapBase,
             audio: (row.audio ?? null) as BattleAudioState | null,
             turnTimerSeconds: row.turnTimerSeconds,
             createdAt: row.createdAt,

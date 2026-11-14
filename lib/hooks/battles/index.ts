@@ -12,6 +12,10 @@ export {
     useBattleSetup,
     useBattleSetupInitial,
 } from './setup/useBattleSetup';
+export {
+    type GridCalibrationController,
+    useGridCalibration,
+} from './setup/useGridCalibration';
 export { useSetupUnitsFilter } from './setup/useSetupUnitsFilter';
 export { type BattleActionOptions, useBattleAction } from './useBattleAction';
 export { useBattleBriefs } from './useBattleBriefs';
@@ -31,8 +35,11 @@ export {
     useInitiativeReorder,
     useInitiativeRoll,
     useMapBackground,
+    useMapEdgeRemove,
     useMapMotion,
     useMapTerrain,
+    useMapUpdate,
+    useMapWalls,
     useMapWeather,
     useMazeAction,
     useMazeMark,

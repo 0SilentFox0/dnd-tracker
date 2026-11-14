@@ -10,6 +10,7 @@ import {
     useRef,
 } from 'react';
 
+import { EdgeEditor } from './EdgeEditor';
 import { MapBackground } from './MapBackground';
 import { MapHitFloat } from './MapHitFloat';
 import {
@@ -22,9 +23,10 @@ import { MapToken } from './MapToken';
 import { MapTokenHud } from './MapTokenHud';
 import { RangedHint } from './RangedHint';
 import { type MapPlacement } from './token-box';
+import { WallsLayer } from './WallsLayer';
 
 import { modeUiOf } from '@/components/battle/modes';
-import { type ModeTools } from '@/lib/hooks/battle';
+import { type EdgeEditing, type ModeTools } from '@/lib/hooks/battle';
 import { cn } from '@/lib/utils';
 import {
     isDormant,
@@ -64,6 +66,7 @@ export interface MapStageEditing {
     clickableBlocked?: boolean;
     showBlocked?: boolean;
     mode: ModeTools | null;
+    edges?: EdgeEditing | null;
 }
 
 interface MapStageProps {
@@ -91,7 +94,7 @@ function MapStageImpl({
     const { painting, preview, svgRef, onStrokeStart, wasDragged } =
         interaction;
 
-    const { clickableBlocked, showBlocked, mode: modeTools } = editing;
+    const { clickableBlocked, showBlocked, mode: modeTools, edges } = editing;
 
     const ui = modeUiOf(map);
 
@@ -217,6 +220,7 @@ function MapStageImpl({
                     onStrokeStart={painting ? onStrokeStart : undefined}
                     scene={gridScene}
                 />
+                <WallsLayer map={map} />
                 {ui?.MapLayers && (
                     <ui.MapLayers
                         map={map}
@@ -236,6 +240,7 @@ function MapStageImpl({
                         pending={view?.pendingStroke}
                     />
                 )}
+                {edges && <EdgeEditor map={map} editing={edges} />}
                 {from && trajectory && (
                     <RangedHint from={from.box} trajectory={trajectory} />
                 )}
@@ -259,6 +264,7 @@ function MapStageImpl({
                         }
                         passThrough={
                             painting ||
+                            !!edges ||
                             !!modeTools?.toolActive ||
                             movingId === p.basicInfo.id
                         }

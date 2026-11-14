@@ -20,6 +20,7 @@ const map: BattleMapConfig = {
     background: '/battle-maps/a.webp',
     opacity: 0.3,
     backgroundCols: 12,
+    backgroundRows: 7,
     gridOffset: { x: 0.2, y: 0.1 },
     weather: 'fog',
 };

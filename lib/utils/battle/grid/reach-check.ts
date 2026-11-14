@@ -1,6 +1,9 @@
+import { isAdjacentOnMap } from './adjacency';
 import { cellFeetOf } from './cell-feet';
 import { footprintDistance } from './geometry';
+import { lineOfFire } from './line-of-fire';
 import { cellsOf, isOnMap } from './occupancy';
+import { wallsAllowSight } from './sight';
 
 import { AttackType } from '@/lib/constants/battle';
 import { textRef } from '@/lib/i18n/text-ref';
@@ -101,7 +104,7 @@ export function rangeDisadvantageReasons(
         (p) =>
             isHostile(map, attacker, p) &&
             isOnMap(p) &&
-            footprintDistance(mine, cellsOf(p)) <= 1 &&
+            isAdjacentOnMap(map, attacker, p) &&
             modeEngages(map, attacker, p)
     );
 
@@ -110,6 +113,14 @@ export function rangeDisadvantageReasons(
 
     return reasons;
 }
+
+const behindWall = (
+    map: BattleMapConfig,
+    participants: BattleParticipant[],
+    attacker: BattleParticipant,
+    targets: BattleParticipant[]
+) =>
+    targets.some((t) => lineOfFire(map, participants, attacker, t).wallBlocked);
 
 export function attackReachError(
     map: BattleMapConfig | null,
@@ -147,14 +158,23 @@ export function attackReachError(
             if (placed.some((t) => distanceTo(t) > bands.long))
                 return textRef(REJECT.targetOutOfAttackRange);
 
-            return modeTargetHiddenText(map, attacker, placed);
+            return (
+                modeTargetHiddenText(map, attacker, placed) ??
+                (behindWall(map, participants, attacker, placed)
+                    ? textRef(REJECT.targetBehindWall)
+                    : null)
+            );
         }
 
-        return (
-            placed
-                .map((t) => modeMeleeBlockedText(map, attacker, t))
-                .find(Boolean) ?? null
-        );
+        const modeBlocked = placed
+            .map((t) => modeMeleeBlockedText(map, attacker, t))
+            .find(Boolean);
+
+        if (modeBlocked) return modeBlocked;
+
+        return placed.some((t) => !wallsAllowSight(map, attacker, t))
+            ? textRef(REJECT.targetNotNear)
+            : null;
     }
 
     const engaged =
@@ -164,7 +184,7 @@ export function attackReachError(
             (p) =>
                 isHostile(map, attacker, p) &&
                 isOnMap(p) &&
-                distanceTo(p) <= 1 &&
+                isAdjacentOnMap(map, attacker, p) &&
                 modeEngages(map, attacker, p)
         );
 
@@ -175,5 +195,11 @@ export function attackReachError(
     if (range !== null && placed.some((t) => distanceTo(t) > range))
         return textRef(REJECT.targetOutOfAttackRange);
 
-    return modeTargetHiddenText(map, attacker, placed);
+    const hidden = modeTargetHiddenText(map, attacker, placed);
+
+    if (hidden) return hidden;
+
+    return behindWall(map, participants, attacker, placed)
+        ? textRef(REJECT.targetBehindWall)
+        : null;
 }

@@ -1,5 +1,11 @@
 import { BattleStatus } from '@/lib/constants/battle';
+import {
+    applyEdgeDiff,
+    diffSize,
+    EDGE_DIFF_LIMIT,
+} from '@/lib/utils/battle/grid/edge-diff';
 import { applyTerrainDiff } from '@/lib/utils/battle/grid/terrain';
+import { applyMapStateDelta } from '@/lib/utils/battle/map-storage/effective-map';
 import {
     mergeModeDeltas,
     MODE_MAP_KEYS,
@@ -9,7 +15,11 @@ import type {
     BattleScene,
     ClientBattleDelta,
 } from '@/types/api';
-import type { BattleAction, BattleParticipant } from '@/types/battle';
+import type {
+    BattleAction,
+    BattleParticipant,
+    MapStateDelta,
+} from '@/types/battle';
 
 function mergeLog(
     previous: BattleAction[],
@@ -56,10 +66,24 @@ function mergeMapDelta(
 
     if (!map) return modePatched ? 'refetch' : map;
 
-    return mergeModeDeltas(
-        scene.terrain ? applyTerrainDiff(map, scene.terrain) : map,
-        scene
-    );
+    let merged = scene.terrain ? applyTerrainDiff(map, scene.terrain) : map;
+
+    if (scene.walls) merged = applyEdgeDiff(merged, 'walls', scene.walls);
+
+    if (scene.bars) merged = applyEdgeDiff(merged, 'bars', scene.bars);
+
+    return mergeModeDeltas(merged, scene);
+}
+
+function mergeMapState(
+    state: BattleScene['mapState'],
+    delta: MapStateDelta | undefined
+): BattleScene['mapState'] | 'refetch' {
+    if (!delta) return state;
+
+    return diffSize(delta.removed) > EDGE_DIFF_LIMIT
+        ? 'refetch'
+        : applyMapStateDelta(state, delta);
 }
 
 export function applyBattleDelta(
@@ -100,12 +124,17 @@ export function applyBattleDelta(
 
     const { scene } = delta;
 
-    if (scene.terrain && !cached.map) return 'refetch';
+    if ((scene.terrain || scene.walls || scene.bars) && !cached.map)
+        return 'refetch';
 
     const map =
         scene.map !== undefined ? scene.map : mergeMapDelta(cached.map, scene);
 
     if (map === 'refetch') return 'refetch';
+
+    const mapState = mergeMapState(cached.mapState, scene.mapState);
+
+    if (mapState === 'refetch') return 'refetch';
 
     // знання з GET могло спиратися на скасовані події: відкат приносить перераховане
     const { knowledge: _knowledge, ...withoutKnowledge } = cached;
@@ -122,6 +151,8 @@ export function applyBattleDelta(
         system:
             scene.system === null ? undefined : (scene.system ?? cached.system),
         ...(map !== cached.map && { map }),
+        ...(mapState !== cached.mapState && { mapState }),
+        ...(scene.mapRef && { mapRef: scene.mapRef }),
         startedAt:
             scene.startedAt === null
                 ? undefined

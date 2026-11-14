@@ -580,6 +580,8 @@ export async function runGuardedBattleOperationCore<TBody>(
         cancelledFrom,
         knowledge,
         map: result.scene?.map,
+        mapState: result.scene?.mapState,
+        mapRef: result.scene?.mapRef,
     });
 
     if (

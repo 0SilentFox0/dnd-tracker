@@ -5,6 +5,7 @@ import type {
     BattleMutationContext,
     MutationResult,
 } from '@/lib/utils/battle/pipeline/run-battle-mutation';
+import { isEmptyMapState } from '@/lib/utils/battle/store/snapshot-state';
 
 export function resetMutation(ctx: BattleMutationContext): MutationResult {
     const pruned = ctx.meta.map
@@ -26,6 +27,7 @@ export function resetMutation(ctx: BattleMutationContext): MutationResult {
             startedAt: null,
             completedAt: null,
             ...(map && { map }),
+            ...(!isEmptyMapState(ctx.meta.mapState) && { mapState: null }),
         },
         events: [],
         history: { clear: true },

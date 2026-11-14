@@ -206,6 +206,7 @@ export function fakeScene(opts: FakeSceneOptions = {}) {
         scaleUnits: mutation(),
         move: mutation(),
         mapTerrain: mutation(),
+        mapWalls: mutation(),
         mapBackground: mutation(),
         mapWeather: mutation(),
         mapMotion: mutation(),

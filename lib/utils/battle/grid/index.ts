@@ -1,5 +1,8 @@
+export * from './adjacency';
 export * from './attack-reach';
 export * from './background';
+export * from './calibration';
+export * from './edges';
 export * from './geometry';
 export * from './hazard';
 export * from './layout';
@@ -15,5 +18,7 @@ export * from './path';
 export * from './placement';
 export * from './push';
 export * from './return-to-start';
+export * from './sight';
 export * from './template';
 export * from './terrain';
+export * from './walls';

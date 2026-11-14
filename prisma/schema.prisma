@@ -58,6 +58,7 @@ model Campaign {
   artifactSets         ArtifactSet[]
   artifacts            Artifact[]
   battles              BattleScene[]
+  battleMaps           BattleMap[]
   members              CampaignMember[]
   dm                   User                  @relation("DMCampaigns", fields: [dmUserId], references: [id])
   characters           Character[]
@@ -480,6 +481,8 @@ model BattleScene {
   map                Json?
   audio              Json?
   rules              Json?
+  mapId              String?             @map("map_id")
+  mapVersion         Int?                @map("map_version")
   createdAt          DateTime            @default(now())
   startedAt          DateTime?
   turnStartedAt      DateTime?           @map("turn_started_at")
@@ -490,9 +493,11 @@ model BattleScene {
   battleParticipants BattleParticipant[]
   battleEvents       BattleEvent[]
   battleSnapshots    BattleSnapshot[]
+  mapState           BattleMapState?
   campaign           Campaign            @relation(fields: [campaignId], references: [id], onDelete: Cascade)
 
   @@index([campaignId])
+  @@index([mapId])
   @@map("battle_scenes")
 }
 
@@ -608,6 +613,57 @@ model BattleSnapshot {
 
   @@id([battleId, seq])
   @@map("battle_snapshots")
+}
+
+model BattleMap {
+  id         String             @id @default(cuid())
+  campaignId String
+  name       String
+  cols       Int
+  rows       Int
+  header     Json
+  mapVersion Int                @default(1) @map("map_version")
+  createdAt  DateTime           @default(now())
+  updatedAt  DateTime           @updatedAt
+  campaign   Campaign           @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  chunks     BattleMapChunk[]
+  versions   BattleMapVersion[]
+
+  @@index([campaignId])
+  @@map("battle_maps")
+}
+
+model BattleMapChunk {
+  mapId String
+  cx    Int
+  cy    Int
+  data  String
+  map   BattleMap @relation(fields: [mapId], references: [id], onDelete: Cascade)
+
+  @@id([mapId, cx, cy])
+  @@map("battle_map_chunks")
+}
+
+model BattleMapVersion {
+  mapId   String
+  version Int
+  payload Json
+  map     BattleMap @relation(fields: [mapId], references: [id], onDelete: Cascade)
+
+  @@id([mapId, version])
+  @@map("battle_map_versions")
+}
+
+model BattleMapState {
+  battleId     String      @id
+  removedEdges Json        @default("[]") @map("removed_edges")
+  doors        Json        @default("{}")
+  fog          Json?
+  version      Int         @default(0)
+  updatedAt    DateTime    @default(now()) @updatedAt @map("updated_at")
+  battle       BattleScene @relation(fields: [battleId], references: [id], onDelete: Cascade)
+
+  @@map("battle_map_state")
 }
 
 model StatusEffect {

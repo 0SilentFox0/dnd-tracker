@@ -5,7 +5,7 @@ import {
     loadKnowledgeEvents,
     loadRecentEvents,
 } from '@/lib/utils/battle/store/history';
-import type { BattleDb } from '@/lib/utils/battle/store/load-battle';
+import type { BattleDb } from '@/lib/utils/battle/store/types';
 import {
     KNOWLEDGE_EVENT_TYPES,
     summarizeKnowledge,

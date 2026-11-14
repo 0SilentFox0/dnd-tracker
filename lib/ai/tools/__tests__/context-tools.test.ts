@@ -19,7 +19,7 @@ vi.mock('@/lib/db', () => ({
 }));
 vi.mock('@/lib/server/campaigns/rules', () => ({ loadRules: vi.fn() }));
 vi.mock('@/lib/server/show/show-store', () => ({ readShowState: vi.fn() }));
-vi.mock('@/lib/utils/battle/store', () => ({ loadBattle: vi.fn() }));
+vi.mock('@/lib/server/battles/store/load-battle', () => ({ loadBattle: vi.fn() }));
 vi.mock('@/lib/cache/reference-data', () => ({
     getCachedUnits: vi.fn(async () => [
         {
@@ -110,7 +110,7 @@ describe('context tools', () => {
     });
 
     it('get_battle_state: учасники з hp у форматі cur/max', async () => {
-        const { loadBattle } = await import('@/lib/utils/battle/store');
+        const { loadBattle } = await import('@/lib/server/battles/store/load-battle');
 
         const part = (
             name: string,
@@ -157,7 +157,7 @@ describe('context tools', () => {
     });
 
     it('get_battle_state wfrp: wounds and characteristics, no hp/ac', async () => {
-        const { loadBattle } = await import('@/lib/utils/battle/store');
+        const { loadBattle } = await import('@/lib/server/battles/store/load-battle');
 
         vi.mocked(loadBattle).mockResolvedValue({
             isDM: true,
@@ -203,7 +203,7 @@ describe('context tools', () => {
     });
 
     it('get_battle_state rejects lost DM membership without exposing participants', async () => {
-        const { loadBattle } = await import('@/lib/utils/battle/store');
+        const { loadBattle } = await import('@/lib/server/battles/store/load-battle');
 
         vi.mocked(loadBattle).mockResolvedValue({
             isDM: false,

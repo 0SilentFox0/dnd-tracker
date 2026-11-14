@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { BattleStatus } from '@/lib/constants/battle';
 import { saveBattle } from '@/lib/server/battles/store/save-battle';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
-import type { BattleDb } from '@/lib/utils/battle/store/load-battle';
+import type { BattleDb } from '@/lib/utils/battle/store/types';
 import type { LoadedBattle } from '@/lib/utils/battle/store/types';
 import { DEFAULT_RULES, type Ruleset } from '@/lib/utils/rules';
 import { withD20State } from '@/systems/d20/rules/state';

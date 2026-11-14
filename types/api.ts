@@ -12,8 +12,11 @@ import type {
     castSpellInputSchema,
     critChoiceSchema,
     mapBackgroundBodySchema,
+    mapEdgeRemoveSchema,
     mapMotionSchema,
     mapTerrainSchema,
+    mapUpdateSchema,
+    mapWallsSchema,
     mapWeatherSchema,
     mazeActionSchema,
     mazeMarkSchema,
@@ -24,7 +27,14 @@ import type {
 import type { Ruleset } from '@/lib/utils/rules';
 import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
 import type { BattleAudioState } from '@/types/audio';
-import type { BattleMapConfig, MazeConfig, TerrainDiff } from '@/types/battle';
+import type {
+    BattleMapConfig,
+    BattleMapRef,
+    BattleMapState,
+    MapStateDelta,
+    MazeConfig,
+    TerrainDiff,
+} from '@/types/battle';
 
 // Skills API
 export type SkillPayload = GroupedSkillPayload;
@@ -94,6 +104,9 @@ export interface BattleScene {
     /** Стан сцени, яким керує система; відсутнє = немає */
     system?: SystemSlot;
     map?: BattleMapConfig | null;
+    /** Бій linked: map без walls/bars, ребра клієнт бере з бібліотеки за mapRef */
+    mapRef?: BattleMapRef;
+    mapState?: BattleMapState;
     /** Стан музики бою; оновлюється окремо від версії (Pusher battle-audio) */
     audio?: BattleAudioState | null;
     /** Підсумок знань про ціль з усіх атак бою (не лише з останніх записів журналу); лише для гравців */
@@ -103,6 +116,11 @@ export interface BattleScene {
 export type BattleParticipantPatch = { id: string } & {
     [K in keyof BattleParticipant]?: Partial<BattleParticipant[K]>;
 };
+
+export interface EdgeDiff {
+    add: string[];
+    remove: string[];
+}
 
 export interface ClientBattleDelta {
     battleId: string;
@@ -124,6 +142,13 @@ export interface ClientBattleDelta {
         map?: BattleMapConfig | null;
         /** зміни місцевості, коли решта карти та сама */
         terrain?: TerrainDiff;
+        /** зміни стін і ґрат, коли решта карти та сама */
+        walls?: EdgeDiff;
+        bars?: EdgeDiff;
+        /** зміни стану карти (видалені ребра, двері); карта в такій дельті не їде */
+        mapState?: MapStateDelta;
+        /** map-update: нова pinned-версія бібліотечної карти */
+        mapRef?: BattleMapRef;
         /** змінені поля лабіринту без стін, коли стіни й решта карти ті самі */
         maze?: Partial<Omit<MazeConfig, 'walls'>>;
     } & Partial<Record<Exclude<MapModeKey, 'maze'>, unknown>>;
@@ -207,6 +232,12 @@ export type MazeActionData = z.infer<typeof mazeActionSchema>;
 export type MazeMarkData = z.infer<typeof mazeMarkSchema>;
 
 export type MapBackgroundData = z.infer<typeof mapBackgroundBodySchema>;
+
+export type MapWallsData = z.infer<typeof mapWallsSchema>;
+
+export type MapEdgeRemoveData = z.infer<typeof mapEdgeRemoveSchema>;
+
+export type MapUpdateData = z.infer<typeof mapUpdateSchema>;
 
 export type MapWeatherData = z.infer<typeof mapWeatherSchema>;
 

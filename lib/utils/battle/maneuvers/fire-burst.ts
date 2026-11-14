@@ -12,7 +12,7 @@ import {
     findParticipant,
     replaceParticipant,
 } from '@/lib/utils/abilities/engine/core/participants';
-import { cellsOf, footprintDistance, isOnMap } from '@/lib/utils/battle/grid';
+import { isAdjacentOnMap, isOnMap } from '@/lib/utils/battle/grid';
 import { savesOf } from '@/lib/utils/battle/saves/access';
 import { spellSaveDc } from '@/lib/utils/battle/spell/save-dc';
 import type { BattleParticipant } from '@/types/battle';
@@ -32,7 +32,7 @@ export function fireBurst(
                   (p) =>
                       isEnemyOf(actor, input.map)(p) &&
                       isOnMap(p) &&
-                      footprintDistance(cellsOf(actor), cellsOf(p)) <= 1
+                      isAdjacentOnMap(input.map, actor, p)
               )
             : pickedEnemies(
                   ps,

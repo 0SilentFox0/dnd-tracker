@@ -6,7 +6,9 @@ import {
     type Margins,
 } from './geometry';
 import { applyTerrain, replaceTerrain } from './terrain';
+import { parseEdgeKey } from './walls';
 
+import { MAP_LIMITS } from '@/lib/constants/map-limits';
 import { clamp } from '@/lib/utils/common/clamp';
 import type { BattleMapConfig, GridPoint, TerrainCell } from '@/types/battle';
 
@@ -78,12 +80,20 @@ export function inferMargins(map: BattleMapConfig): Margins {
     };
 }
 
-export type SetupTool = 'blocked' | 'wall' | 'hazard' | 'erase';
+export type CellTool = 'blocked' | 'wall' | 'hazard' | 'erase';
+
+export type EdgeTool = 'edge-wall' | 'edge-bars' | 'edge-erase';
+
+export type SetupTool = CellTool | EdgeTool;
+
+export function isEdgeTool(tool: SetupTool | null): tool is EdgeTool {
+    return tool !== null && tool.startsWith('edge-');
+}
 
 export function paintCells(
     map: BattleMapConfig,
     cells: GridPoint[],
-    tool: SetupTool,
+    tool: CellTool,
     hazard: Pick<TerrainCell, 'label' | 'damage'> = {}
 ): BattleMapConfig {
     const keys = cells.filter((p) => inBounds(map, p)).map(cellKey);
@@ -122,10 +132,89 @@ export function resizeMap(
         return inBounds(next, { x, y });
     };
 
-    return keepTerrain(
-        withBlocked(next, (map.blocked ?? []).filter(inside)),
-        inside
+    const edgeInside = (edge: string) => {
+        const { a, b } = parseEdgeKey(edge);
+
+        return inBounds(next, a) && inBounds(next, b);
+    };
+
+    return withEdges(
+        keepTerrain(
+            withBlocked(next, (map.blocked ?? []).filter(inside)),
+            inside
+        ),
+        {
+            walls: (map.walls ?? []).filter(edgeInside),
+            bars: (map.bars ?? []).filter(edgeInside),
+        }
     );
+}
+
+export type EdgeOp =
+    | 'add-walls'
+    | 'add-bars'
+    | 'remove-walls'
+    | 'remove-bars'
+    | 'erase';
+
+function withEdges(
+    map: BattleMapConfig,
+    edges: { walls: Iterable<string>; bars: Iterable<string> }
+): BattleMapConfig {
+    const { walls: _walls, bars: _bars, ...rest } = map;
+
+    const walls = [...new Set(edges.walls)];
+
+    const bars = [...new Set(edges.bars)];
+
+    return {
+        ...rest,
+        ...(walls.length ? { walls } : {}),
+        ...(bars.length ? { bars } : {}),
+    };
+}
+
+export type EdgePaint = { map: BattleMapConfig; overflow: boolean };
+
+/** Додає/прибирає ребра; стіна й ґрати не живуть на одному ребрі — остання дія перемагає, понад ліміт — відкидається (`overflow`). */
+export function paintEdges(
+    map: BattleMapConfig,
+    edges: string[],
+    op: EdgeOp
+): EdgePaint {
+    const valid = edges.filter((edge) => {
+        const { a, b } = parseEdgeKey(edge);
+
+        return inBounds(map, a) && inBounds(map, b);
+    });
+
+    if (!valid.length) return { map, overflow: false };
+
+    const walls = new Set(map.walls ?? []);
+
+    const bars = new Set(map.bars ?? []);
+
+    for (const edge of valid) {
+        if (op === 'add-walls') {
+            walls.add(edge);
+            bars.delete(edge);
+        } else if (op === 'add-bars') {
+            bars.add(edge);
+            walls.delete(edge);
+        } else {
+            if (op !== 'remove-bars') walls.delete(edge);
+
+            if (op !== 'remove-walls') bars.delete(edge);
+        }
+    }
+
+    if (
+        walls.size > MAP_LIMITS.inlineMaxEdges ||
+        bars.size > MAP_LIMITS.inlineMaxEdges
+    )
+        return { map, overflow: true };
+
+    return { map: withEdges(map, { walls, bars }), overflow: false };
 }
 
 export function applyMargins(
@@ -145,9 +234,9 @@ export function applyMargins(
     );
 }
 
-export const MIN_SIDE = 4;
+export const MIN_SIDE = MAP_LIMITS.minSide;
 
-export const MAX_SIDE = 60;
+export const MAX_SIDE = MAP_LIMITS.photoMaxSide;
 
 export const MAX_MARGIN = 10;
 

@@ -1,7 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { type BattleDb, loadBattle } from '../load-battle';
+import { loadBattle } from '../load-battle';
 
+import type { BattleDb } from '@/lib/utils/battle/store/types';
 import { defaultRulesFor } from '@/lib/utils/rules/section-registry';
 
 const DEFAULT_RULES = defaultRulesFor({ key: 'homm' });

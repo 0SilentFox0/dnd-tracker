@@ -12,15 +12,17 @@ import {
 } from '@/lib/constants/battle';
 import { DEFAULT_LOCALE } from '@/lib/i18n/config';
 import { getTranslator } from '@/lib/i18n/translator';
+import { lockMapRow } from '@/lib/server/battle-maps/library-service';
 import { encodeLog } from '@/lib/utils/battle/log/codec';
 import { formatBattleLog } from '@/lib/utils/battle/log/lines';
+import { persistedMap } from '@/lib/utils/battle/map-storage/persisted-map';
 import { applyScenePatch } from '@/lib/utils/battle/scene-state';
 import type { ParticipantsDiff, ParticipantUpdate } from '@/lib/utils/battle/store/diff-participants';
 import { diffParticipants } from '@/lib/utils/battle/store/diff-participants';
 import { BattleConflictError } from '@/lib/utils/battle/store/errors';
-import type { BattleDb } from '@/lib/utils/battle/store/load-battle';
-import { buildSnapshotState } from '@/lib/utils/battle/store/snapshot-state';
+import { buildSnapshotState, isEmptyMapState } from '@/lib/utils/battle/store/snapshot-state';
 import { joinParticipant, splitParticipant } from '@/lib/utils/battle/store/split-participant';
+import type { BattleDb } from '@/lib/utils/battle/store/types';
 import type {
     BattleDelta,
     BattleMutationOutcome,
@@ -31,7 +33,7 @@ import type {
     StoredBattleEvent,
     StoredParticipant,
 } from '@/lib/utils/battle/store/types';
-import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapState, BattleParticipant } from '@/types/battle';
 import type { LogLine } from '@/types/text';
 
 type UpdatableColumn = Exclude<keyof ParticipantColumns, 'id'>;
@@ -119,6 +121,30 @@ function jsonOrNull(
     value: unknown
 ): Prisma.InputJsonValue | typeof Prisma.DbNull {
     return value === null ? Prisma.DbNull : (value as Prisma.InputJsonValue);
+}
+
+async function writeMapState(
+    tx: Pick<Prisma.TransactionClient, 'battleMapState'>,
+    battleId: string,
+    state: BattleMapState | null
+) {
+    if (!state || isEmptyMapState(state)) {
+        await tx.battleMapState.deleteMany({ where: { battleId } });
+
+        return;
+    }
+
+    const data = {
+        removedEdges: state.removedEdges as Prisma.InputJsonValue,
+        doors: state.doors as unknown as Prisma.InputJsonValue,
+        fog: state.fog ? (state.fog as Prisma.InputJsonValue) : Prisma.DbNull,
+    };
+
+    await tx.battleMapState.upsert({
+        where: { battleId },
+        create: { battleId, ...data, version: 1 },
+        update: { ...data, version: { increment: 1 } },
+    });
 }
 
 export interface PreparedSave {
@@ -244,6 +270,19 @@ export async function saveBattle(
         scene.status !== BattleStatus.COMPLETED;
 
     await db.$transaction(async (tx) => {
+        if (patch.mapRef) {
+            const { mapId, version } = patch.mapRef;
+
+            await lockMapRow(tx, mapId, 'share');
+
+            const pinned = await tx.battleMapVersion.findUnique({
+                where: { mapId_version: { mapId, version } },
+                select: { version: true },
+            });
+
+            if (!pinned) throw new BattleConflictError();
+        }
+
         const { count } = await tx.battleScene.updateMany({
             where: { id: scene.id, version: scene.version },
             data: {
@@ -276,7 +315,19 @@ export async function saveBattle(
                 ...(patch.completedAt !== undefined && {
                     completedAt: patch.completedAt,
                 }),
-                ...(patch.map !== undefined && { map: jsonOrNull(patch.map) }),
+                ...(patch.map !== undefined && {
+                    map: jsonOrNull(
+                        patch.map &&
+                            persistedMap(
+                                before.meta,
+                                patch.map,
+                                patch.mapState === undefined
+                                    ? before.meta.mapState
+                                    : patch.mapState
+                            )
+                    ),
+                }),
+                ...(patch.mapRef && { mapVersion: patch.mapRef.version }),
                 ...(patch.rules !== undefined && {
                     rules: patch.rules as Prisma.InputJsonValue,
                 }),
@@ -284,6 +335,15 @@ export async function saveBattle(
         });
 
         if (count === 0) throw new BattleConflictError();
+
+        if (
+            patch.mapState !== undefined &&
+            !(
+                isEmptyMapState(before.meta.mapState) &&
+                isEmptyMapState(patch.mapState)
+            )
+        )
+            await writeMapState(tx, scene.id, patch.mapState);
 
         if (diff.created.length > 0) {
             await tx.battleParticipant.createMany({
@@ -343,7 +403,8 @@ export async function saveBattle(
                             scene,
                             beforeStored,
                             diff,
-                            before.meta.map
+                            before.meta.map,
+                            before.meta
                         ) as unknown as Prisma.InputJsonValue,
                     },
                 ],

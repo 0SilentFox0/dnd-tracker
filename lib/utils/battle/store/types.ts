@@ -1,3 +1,5 @@
+import type { PrismaClient } from '@prisma/client';
+
 import type { BattleStatus } from '@/lib/constants/battle';
 import type { Locale } from '@/lib/i18n/config';
 import type { Ruleset } from '@/lib/utils/rules';
@@ -7,11 +9,14 @@ import type { BattleAudioState } from '@/types/audio';
 import type {
     AirborneState,
     BattleMapConfig,
+    BattleMapRef,
+    BattleMapState,
     BattleParticipant,
     BattlePreparationParticipant,
     Direction8,
     GridPoint,
     IngredientStock,
+    MapBase,
     PendingHit,
 } from '@/types/battle';
 
@@ -114,7 +119,12 @@ export interface BattleMeta {
     friendlyFire: boolean;
     rules: Ruleset;
     critChoiceByDm: boolean;
+    /** effective map: library edges of the pinned version minus removed edges */
     map: BattleMapConfig | null;
+    mapRef?: BattleMapRef | null;
+    mapState?: BattleMapState | null;
+    /** stored own walls/bars of an inline map: `map` has the removed edges already subtracted */
+    mapBase?: MapBase | null;
     audio?: BattleAudioState | null;
     turnTimerSeconds?: number | null;
     createdAt: Date;
@@ -144,6 +154,9 @@ export type ScenePatch = Partial<
     >
 > & {
     map?: BattleMapConfig | null;
+    mapState?: BattleMapState | null;
+    /** map-update: re-pin the battle to another library version */
+    mapRef?: BattleMapRef;
     rules?: Ruleset;
     sceneState?: SystemSlot | null;
 };
@@ -178,3 +191,14 @@ export interface BattleDelta {
 }
 
 export type BattleWrite = { logLocale: Locale };
+
+export type BattleDb = Pick<
+    PrismaClient,
+    | 'battleScene'
+    | 'battleParticipant'
+    | 'battleEvent'
+    | 'battleSnapshot'
+    | '$transaction'
+    | '$queryRaw'
+    | '$executeRaw'
+>;

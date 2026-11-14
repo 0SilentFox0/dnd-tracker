@@ -159,7 +159,7 @@ export function rollModeReasonsOf(
     const adjacent =
         !!target &&
         proneDefense.length > 0 &&
-        isAdjacentAttack(attacker, target, attack);
+        isAdjacentAttack(attacker, target, attack, opts.map);
 
     const frightenedLabels = attacker.battleData.activeEffects
         .filter(

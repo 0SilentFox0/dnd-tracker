@@ -44,6 +44,7 @@ export {
     type DownedHeroPrompt,
     useDownedHeroPrompt,
 } from './useDownedHeroPrompt';
+export { type EdgeEditing, useEdgeStroke } from './useEdgeStroke';
 export { useFxEnabled } from './useFxEnabled';
 export { useFxImpacts } from './useFxImpacts';
 export { useHitChange, useHitFx } from './useHitFx';

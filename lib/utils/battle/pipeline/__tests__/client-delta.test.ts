@@ -436,4 +436,125 @@ describe('buildClientDelta', () => {
 
         expect(d.scene).toMatchObject({ status: 'active', completedAt: null });
     });
+
+    describe('стіни й ґрати', () => {
+        const base = { cols: 40, rows: 40, background: null, opacity: 0.3 };
+
+        const mk = (before: object, after: object) => {
+            const a = p('a');
+
+            return buildClientDelta({
+                before: {
+                    scene,
+                    meta: { ...meta, map: { ...base, ...before } },
+                    participants: [a],
+                    pending: [],
+                },
+                after: { ...scene, version: 8 },
+                participants: [a],
+                pending: [],
+                stored: [],
+                fullIds: [],
+                log: [],
+                map: { ...base, ...after },
+            }).scene;
+        };
+
+        it('додані й прибрані ребра йдуть diff без повної карти', () => {
+            const s = mk(
+                { walls: ['1:1:e', '2:2:s'], bars: ['3:3:e'] },
+                { walls: ['1:1:e', '4:4:s'], bars: ['3:3:e', '5:5:e'] }
+            );
+
+            expect(s).not.toHaveProperty('map');
+            expect(s.walls).toEqual({ add: ['4:4:s'], remove: ['2:2:s'] });
+            expect(s.bars).toEqual({ add: ['5:5:e'], remove: [] });
+        });
+
+        it('без змін ребер diff немає; undefined проти [] не змінює', () => {
+            const s = mk({ walls: ['1:1:e'] }, { walls: ['1:1:e'], bars: [] });
+
+            expect(s).not.toHaveProperty('map');
+            expect(s).not.toHaveProperty('walls');
+            expect(s).not.toHaveProperty('bars');
+        });
+
+        it('понад ліміт ребер — повна карта', () => {
+            const walls = Array.from({ length: 401 }, (_, i) => `${i}:0:e`);
+
+            const s = mk({}, { walls });
+
+            expect(s.map).toMatchObject({ walls });
+            expect(s).not.toHaveProperty('walls');
+        });
+    });
+});
+
+describe('buildClientDelta: шар стану карти', () => {
+    const header = { cols: 8, rows: 8, background: null, opacity: 0.3 };
+
+    const removed = { removedEdges: ['1:1:e'], doors: {} };
+
+    const run = (over: {
+        meta: Record<string, unknown>;
+        map?: unknown;
+        mapState?: unknown;
+    }) =>
+        buildClientDelta({
+            before: {
+                scene,
+                meta: { ...meta, ...over.meta } as never,
+                participants: [],
+                pending: [],
+            },
+            after: { ...scene, version: 8 },
+            participants: [],
+            pending: [],
+            stored: [],
+            fullIds: [],
+            log: [],
+            map: over.map as never,
+            mapState: over.mapState as never,
+        }).scene;
+
+    it('зміна стану їде як scene.mapState, без карти й walls', () => {
+        const s = run({
+            meta: { map: { ...header, walls: ['1:1:e'] } },
+            mapState: removed,
+        });
+
+        expect(s.mapState).toEqual({
+            removed: { add: ['1:1:e'], remove: [] },
+        });
+        expect(s).not.toHaveProperty('map');
+        expect(s).not.toHaveProperty('walls');
+    });
+
+    it('linked: ребра ефективної карти не дають walls-діфу', () => {
+        const s = run({
+            meta: {
+                map: { ...header, walls: ['2:2:s'] },
+                mapRef: { mapId: 'm', version: 1 },
+            },
+            map: { ...header, walls: [] },
+        });
+
+        expect(s).not.toHaveProperty('walls');
+        expect(s).not.toHaveProperty('map');
+    });
+
+    it('inline зі станом: дифу ребер немає, коли мутація їх не чіпала', () => {
+        const effective = { ...header, walls: ['2:2:s'] };
+
+        const s = run({
+            meta: {
+                map: effective,
+                mapState: removed,
+                mapBase: { walls: ['1:1:e', '2:2:s'] },
+            },
+            map: { ...effective, terrain: {} },
+        });
+
+        expect(s).not.toHaveProperty('walls');
+    });
 });
