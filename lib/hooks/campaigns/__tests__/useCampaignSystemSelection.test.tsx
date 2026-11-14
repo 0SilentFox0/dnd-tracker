@@ -62,4 +62,19 @@ describe('useCampaignSystemSelection', () => {
         expect(result.current).toBeUndefined();
         expect(getRules).not.toHaveBeenCalled();
     });
+
+    it('takes over rules already in the cache and never requests them', () => {
+        const { client, wrapper } = setup({ key: 'dnd5e' });
+
+        client.setQueryData(campaignKeys.rules('c1'), {
+            system: { key: 'dnd5e', modules: ['morale'] },
+        });
+
+        const { result } = renderHook(() => useCampaignSystemSelection('c1'), {
+            wrapper,
+        });
+
+        expect(result.current).toEqual({ key: 'dnd5e', modules: ['morale'] });
+        expect(getRules).not.toHaveBeenCalled();
+    });
 });

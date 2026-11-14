@@ -30,6 +30,9 @@ const STATIC_SAFE = [
 // reaches a lookup only through the hooks barrel (JoinCampaignDialog) and never calls `*Of`: no campaign, so no composition to gate on
 const CLIENT_LAZY = ['app/campaigns/page.tsx'];
 
+// layouts above every gate: they reach lookups only through guarded reads (`classesEnabled` checks `isInstalled`, `ruleSystemByKey` returns undefined before install)
+const LAYOUT_SAFE = ['app/layout.tsx', 'app/campaigns/[id]/layout.tsx'];
+
 const PAIR = {
     lookup: 'lib/utils/rules/systems/lookup.ts',
     root: 'lib/utils/rules/systems/registry.ts',
@@ -161,7 +164,7 @@ describe('system install entries', () => {
     });
 
     it('every route and page that reaches a lookup reaches its root', () => {
-        const exempt = new Set([...STATIC_SAFE, ...CLIENT_LAZY]);
+        const exempt = new Set([...STATIC_SAFE, ...CLIENT_LAZY, ...LAYOUT_SAFE]);
 
         expect(
             unrooted(
@@ -174,7 +177,7 @@ describe('system install entries', () => {
     });
 
     it('the exemptions list only entries that still reach a lookup unrooted', () => {
-        const stale = [...STATIC_SAFE, ...CLIENT_LAZY].filter(
+        const stale = [...STATIC_SAFE, ...CLIENT_LAZY, ...LAYOUT_SAFE].filter(
             (e) => unrooted([e], INSTALL_PAIRS, fsDeps()).length === 0
         );
 

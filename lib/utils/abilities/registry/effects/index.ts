@@ -489,9 +489,12 @@ export function applyEffect(input: EffectApplyInput): EffectApplyResult {
         | EffectDefinition<EffectKind>
         | undefined;
 
-    return def
-        ? def.apply(input as never)
-        : { participants: input.participants, messages: [] };
+    if (!def)
+        throw new Error(
+            `No effect definition installed for kind: ${String(input.effect.kind)}`
+        );
+
+    return def.apply(input as never);
 }
 
 export function describeEffect(effect: Effect | SpellEffect): Segment[] {

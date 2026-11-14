@@ -58,6 +58,25 @@ describe('SystemGate', () => {
         expect(screen.queryByTestId('skeleton')).toBeNull();
     });
 
+    it('forgets the stale-chunk reload flag after a successful load', async () => {
+        const { SystemGate, release } = await setup();
+
+        sessionStorage.setItem('system-gate-reloaded', '1');
+
+        render(
+            <SystemGate system={{ key: 'wfrp' }}>
+                <span data-testid="child" />
+            </SystemGate>
+        );
+
+        await act(async () => {
+            release();
+        });
+
+        await screen.findByTestId('child');
+        expect(sessionStorage.getItem('system-gate-reloaded')).toBeNull();
+    });
+
     it('uses the custom fallback', async () => {
         const { SystemGate } = await setup();
 

@@ -216,7 +216,7 @@ const walkEntries = (dir: string, match: RegExp): string[] =>
         .sort();
 
 export const appEntries = (): string[] =>
-    walkEntries('app', /^(route\.ts|page\.tsx)$/);
+    walkEntries('app', /^(route\.ts|page\.tsx|layout\.tsx)$/);
 
 export const scriptEntries = (): string[] =>
     walkEntries('scripts', /\.(ts|tsx|mts)$/).filter(

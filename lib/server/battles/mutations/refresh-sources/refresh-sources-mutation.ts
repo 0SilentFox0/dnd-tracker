@@ -89,6 +89,22 @@ export function createRefreshSourcesMutation(
             return loading;
         };
 
+        const races = new Map<string, ReturnType<typeof loadUnitRace>>();
+
+        const raceOf = (raceId: string | null) => {
+            const key = raceId ?? '';
+
+            const cached = races.get(key);
+
+            if (cached) return cached;
+
+            const loading = deps.loadRace(raceId, campaignId);
+
+            races.set(key, loading);
+
+            return loading;
+        };
+
         const characterIds = new Set(
             [...ctx.participants, ...ctx.pending]
                 .filter(
@@ -151,11 +167,9 @@ export function createRefreshSourcesMutation(
                           side,
                           instanceNumber ?? 1,
                           {
-                              [(row as UnitRow).raceId ?? '']:
-                                  await deps.loadRace(
-                                      (row as UnitRow).raceId,
-                                      campaignId
-                                  ),
+                              [(row as UnitRow).raceId ?? '']: await raceOf(
+                                  (row as UnitRow).raceId
+                              ),
                           },
                           ctx.meta.rules
                       );

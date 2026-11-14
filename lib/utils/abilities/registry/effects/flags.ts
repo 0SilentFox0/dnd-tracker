@@ -404,7 +404,9 @@ onAbilityInstall(() => {
 });
 
 export function describeFlag(e: FlagEffect): Segment[] {
-    return (FLAG_REGISTRY[e.flag] as FlagDefinition<FlagKey>).describe(
-        e as never
-    );
+    const def = FLAG_REGISTRY[e.flag] as FlagDefinition<FlagKey> | undefined;
+
+    return def
+        ? def.describe(e as never)
+        : [seg('summary.unknownEffect', { kind: e.flag })];
 }

@@ -11,6 +11,7 @@ import {
     type SystemSelection,
 } from '@/lib/utils/rules/systems/catalog';
 import { installModules, isInstalled } from '@/lib/utils/rules/systems/lookup';
+import { setSystemPreloader } from '@/lib/utils/rules/systems/preload';
 import type { ModuleEntry } from '@/lib/utils/rules/systems/resolve';
 import type { RuleSystemDefinition } from '@/lib/utils/rules/systems/types';
 
@@ -173,3 +174,5 @@ export function loadSystems(system: SystemSelection): Promise<void> {
 
     return started;
 }
+
+setSystemPreloader(loadSystems);

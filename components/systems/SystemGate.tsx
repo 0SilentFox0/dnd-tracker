@@ -16,6 +16,12 @@ const STALE_CHUNK = /ChunkLoadError|Loading chunk|dynamically imported module/i;
 
 const RELOAD_FLAG = 'system-gate-reloaded';
 
+function clearReloadFlag() {
+    try {
+        sessionStorage.removeItem(RELOAD_FLAG);
+    } catch {}
+}
+
 /** A deploy replaces chunk files under an open tab: reload once, then surface the error */
 function reloadOnStaleChunk(error: unknown): boolean {
     const text = error instanceof Error ? `${error.name} ${error.message}` : '';
@@ -59,7 +65,8 @@ export function SystemGate({
     useEffect(() => {
         let current = true;
 
-        loadSystems({ key: system.key, modules: system.modules }).catch(
+        loadSystems({ key: system.key, modules: system.modules }).then(
+            () => clearReloadFlag(),
             (error) => {
                 if (current && !reloadOnStaleChunk(error))
                     setFailure({ selection, error });

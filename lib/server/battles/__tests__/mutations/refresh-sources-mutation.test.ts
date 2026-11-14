@@ -112,6 +112,32 @@ describe('refresh-sources mutation', () => {
         ).toEqual({ r1: race });
     });
 
+    it('loads a shared race once for many units', async () => {
+        const d = deps({
+            loadUnit: vi.fn(
+                async (id: string) =>
+                    ({ id, campaignId: 'c1', raceId: 'r1' }) as never
+            ),
+        });
+
+        await createRefreshSourcesMutation(d)(
+            context({
+                participants: [
+                    gob,
+                    gob2,
+                    participant('gob3', {
+                        sourceType: 'unit',
+                        sourceId: 'u2',
+                        side: ParticipantSide.ENEMY,
+                        instanceNumber: 1,
+                    }),
+                ],
+            })
+        );
+
+        expect(d.loadRace).toHaveBeenCalledTimes(1);
+    });
+
     it('skips missing sources, extra-turn slots, summons and other campaigns', async () => {
         const d = deps({
             loadUnit: vi.fn(async (id: string) =>
