@@ -109,6 +109,47 @@ describe('buildSnapshotState', () => {
         ).not.toContain('base64');
     });
 
+    it('mapState у знімку лише коли мутація його змінила; порожній «до» — явно; mapVersion завжди для linked', () => {
+        const before = [
+            splitParticipant(createMockParticipant(), {
+                orderIndex: 0,
+                isPending: false,
+            }),
+        ];
+
+        const diff = diffParticipants(before, before);
+
+        const state = { removedEdges: ['1:1:e'], doors: {} };
+
+        const mapRef = { mapId: 'm', version: 3 };
+
+        const unchanged = buildSnapshotState(scene, before, diff, null, {
+            mapState: state,
+            mapRef,
+        }).scene;
+
+        expect(unchanged).not.toHaveProperty('mapState');
+        expect(unchanged).not.toHaveProperty('mapStateChanged');
+        expect(unchanged.mapVersion).toBe(3);
+
+        const changed = buildSnapshotState(scene, before, diff, null, {
+            mapState: state,
+            mapRef,
+            mapStateChanged: true,
+        }).scene;
+
+        expect(changed.mapState).toEqual(state);
+        expect(changed.mapStateChanged).toBe(true);
+
+        const fromEmpty = buildSnapshotState(scene, before, diff, null, {
+            mapState: null,
+            mapStateChanged: true,
+        }).scene;
+
+        expect(fromEmpty.mapState).toEqual({ removedEdges: [], doors: {} });
+        expect(fromEmpty.mapStateChanged).toBe(true);
+    });
+
     it('якщо дія змінила snapshot — кладе СТАРИЙ snapshot; видалених — повністю', () => {
         const p = createMockParticipant();
 

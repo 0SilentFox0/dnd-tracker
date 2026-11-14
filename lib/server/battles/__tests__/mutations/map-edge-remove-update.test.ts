@@ -47,6 +47,27 @@ describe('map-edge-remove', () => {
         expect(out.scene).not.toHaveProperty('map');
     });
 
+    it('remove/restore: одна dm-подія з лог-ключем і count', () => {
+        const removed = mapEdgeRemoveMutation(ctxWith(null), {
+            edges: ['1:1:e', '3:3:e'],
+        });
+
+        expect(removed.events).toHaveLength(1);
+        expect(JSON.stringify(removed.events[0])).toContain(
+            'battleLog.dm.edgesRemoved'
+        );
+        expect(JSON.stringify(removed.events[0])).toContain('"count":2');
+
+        const restored = mapEdgeRemoveMutation(
+            ctxWith({ removedEdges: ['1:1:e'], doors: {} }),
+            { edges: ['1:1:e'], restore: true }
+        );
+
+        expect(JSON.stringify(restored.events[0])).toContain(
+            'battleLog.dm.edgesRestored'
+        );
+    });
+
     it('remove: нема такого ребра — mapEdgeNotFound', () => {
         expect(() =>
             mapEdgeRemoveMutation(ctxWith(null), { edges: ['7:7:e'] })
@@ -128,7 +149,10 @@ describe('map-update', () => {
     it('та сама версія — без патчу', async () => {
         mocks.getMap.mockResolvedValue(library({ version: 3 }));
 
-        expect((await mapUpdateMutation(linked(), {})).scene).toBeUndefined();
+        const out = await mapUpdateMutation(linked(), {});
+
+        expect(out.scene).toBeUndefined();
+        expect(out.events).toEqual([]);
     });
 
     it('нова версія: шапка, runtime-поля збережені, mapRef, prune стану', async () => {
@@ -139,6 +163,10 @@ describe('map-update', () => {
             {}
         );
 
+        expect(out.events).toHaveLength(1);
+        expect(JSON.stringify(out.events[0])).toContain(
+            'battleLog.dm.mapUpdated'
+        );
         expect(out.scene?.mapRef).toEqual({ mapId: 'm1', version: 4 });
         expect(out.scene?.map).toMatchObject({
             opacity: 0.5,

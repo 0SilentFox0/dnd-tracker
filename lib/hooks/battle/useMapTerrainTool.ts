@@ -15,6 +15,7 @@ import {
     wallSet,
 } from '@/lib/utils/battle/grid';
 import type {
+    MapEdgeRemoveData,
     MapTerrainData,
     MapTerrainResponse,
     MapWallsData,
@@ -23,10 +24,18 @@ import type { GridPoint, TerrainKind } from '@/types/battle';
 
 export type EdgeBrush = EdgeTool;
 
-export type TerrainBrush = TerrainKind | 'erase' | 'erase-zone' | EdgeBrush;
+export type StateBrush = 'edge-break' | 'edge-restore';
 
-export const isEdgeBrush = (kind: TerrainBrush): kind is EdgeBrush =>
-    kind.startsWith('edge-');
+export type TerrainBrush =
+    | TerrainKind
+    | 'erase'
+    | 'erase-zone'
+    | EdgeBrush
+    | StateBrush;
+
+export const isEdgeBrush = (
+    kind: TerrainBrush
+): kind is EdgeBrush | StateBrush => kind.startsWith('edge-');
 
 const MAX_STROKE_CELLS = 400;
 
@@ -54,6 +63,13 @@ export interface MapTerrainTool {
     edges: EdgeEditing | null;
 }
 
+export interface StateEdgeSource {
+    /** стіни й ґрати ефективної карти */
+    present: ReadonlySet<string>;
+    removed: ReadonlySet<string>;
+    mutate: (data: MapEdgeRemoveData) => Promise<unknown>;
+}
+
 export interface EdgeSource {
     walls?: string[];
     bars?: string[];
@@ -66,6 +82,7 @@ interface Options {
     onSkipped?: (count: number) => void;
     onActivate?: () => void;
     edgeSource?: EdgeSource;
+    stateEdgeSource?: StateEdgeSource;
 }
 
 const EMPTY: ReadonlySet<string> = new Set();
@@ -108,6 +125,7 @@ export function useMapTerrainTool({
     onSkipped,
     onActivate,
     edgeSource,
+    stateEdgeSource,
 }: Options): MapTerrainTool {
     const [on, setOn] = useState(false);
 
@@ -128,10 +146,17 @@ export function useMapTerrainTool({
         mutate,
         onSkipped,
         edgeSource,
+        stateEdgeSource,
     });
 
     useEffect(() => {
-        latest.current = { brush, mutate, onSkipped, edgeSource };
+        latest.current = {
+            brush,
+            mutate,
+            onSkipped,
+            edgeSource,
+            stateEdgeSource,
+        };
     });
 
     const queue = useRef<MapTerrainData[]>([]);
@@ -241,7 +266,9 @@ export function useMapTerrainTool({
 
     const edgeChain = useRef<Promise<unknown>>(Promise.resolve());
 
-    const [inFlightEdges, setInFlightEdges] = useState<MapWallsData[]>([]);
+    const [inFlightEdges, setInFlightEdges] = useState<
+        Array<{ add: string[]; remove: string[] }>
+    >([]);
 
     const committed = useMemo<EdgeEditing['committed']>(
         () => ({
@@ -252,20 +279,44 @@ export function useMapTerrainTool({
     );
 
     const commitEdges = useCallback((add: string[], remove: string[]) => {
-        const { brush: b, edgeSource: src } = latest.current;
+        const {
+            brush: b,
+            edgeSource: src,
+            stateEdgeSource: state,
+        } = latest.current;
 
-        if (!src) return;
-
-        const send = (data: MapWallsData) => {
+        const send = (
+            shown: { add: string[]; remove: string[] },
+            run: () => Promise<unknown>
+        ) => {
             // версія бою одна: паралельні штрихи ловили б 409
-            setInFlightEdges((list) => [...list, data]);
+            setInFlightEdges((list) => [...list, shown]);
             edgeChain.current = edgeChain.current
-                .then(() => src.mutate(data))
+                .then(run)
                 .catch(() => undefined)
                 .finally(() =>
-                    setInFlightEdges((list) => list.filter((d) => d !== data))
+                    setInFlightEdges((list) => list.filter((d) => d !== shown))
                 );
         };
+
+        if (b.kind === 'edge-break' || b.kind === 'edge-restore') {
+            if (!state) return;
+
+            for (let i = 0; i < remove.length; i += MAP_EDGES_PER_OP) {
+                const edges = remove.slice(i, i + MAP_EDGES_PER_OP);
+
+                send({ add: [], remove: edges }, () =>
+                    state.mutate({
+                        edges,
+                        ...(b.kind === 'edge-restore' && { restore: true }),
+                    })
+                );
+            }
+
+            return;
+        }
+
+        if (!src) return;
 
         const batches = (
             kind: MapWallsData['kind'],
@@ -274,12 +325,15 @@ export function useMapTerrainTool({
         ) => {
             const n = Math.max(a.length, r.length);
 
-            for (let i = 0; i < n; i += MAP_EDGES_PER_OP)
-                send({
+            for (let i = 0; i < n; i += MAP_EDGES_PER_OP) {
+                const data: MapWallsData = {
                     kind,
                     add: a.slice(i, i + MAP_EDGES_PER_OP),
                     remove: r.slice(i, i + MAP_EDGES_PER_OP),
-                });
+                };
+
+                send(data, () => src.mutate(data));
+            }
         };
 
         if (b.kind === 'edge-erase') {
@@ -292,7 +346,25 @@ export function useMapTerrainTool({
     }, []);
 
     const edges = useMemo<EdgeEditing | null>(() => {
-        if (!active || !isEdgeBrush(brush.kind) || !edgeSource) return null;
+        if (!active || !isEdgeBrush(brush.kind)) return null;
+
+        if (brush.kind === 'edge-break' || brush.kind === 'edge-restore') {
+            if (!stateEdgeSource) return null;
+
+            const restore = brush.kind === 'edge-restore';
+
+            return {
+                existing: restore
+                    ? stateEdgeSource.removed
+                    : stateEdgeSource.present,
+                erase: true,
+                committed,
+                onCommit: commitEdges,
+                ...(restore && { ghost: stateEdgeSource.removed }),
+            };
+        }
+
+        if (!edgeSource) return null;
 
         const walls = wallSet(edgeSource.walls);
 
@@ -309,7 +381,14 @@ export function useMapTerrainTool({
             committed,
             onCommit: commitEdges,
         };
-    }, [active, brush.kind, edgeSource, commitEdges, committed]);
+    }, [
+        active,
+        brush.kind,
+        edgeSource,
+        stateEdgeSource,
+        commitEdges,
+        committed,
+    ]);
 
     return { active, toggle, close, brush, setBrush, commit, pending, edges };
 }

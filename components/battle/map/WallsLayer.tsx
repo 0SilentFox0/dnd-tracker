@@ -73,12 +73,14 @@ function wallSide(edge: string) {
 
 export const WallsLayer = memo(function WallsLayer({
     map,
+    ghost,
 }: {
     map: Pick<BattleMapConfig, 'walls' | 'bars'>;
+    ghost?: ReadonlySet<string>;
 }) {
     const { walls, bars } = map;
 
-    if (!walls?.length && !bars?.length) return null;
+    if (!walls?.length && !bars?.length && !ghost?.size) return null;
 
     return (
         <g pointerEvents="none" data-map-edges="">
@@ -113,6 +115,17 @@ export const WallsLayer = memo(function WallsLayer({
                     })}
                 </g>
             )}
+            {ghost &&
+                [...ghost].map((edge) => (
+                    <rect
+                        key={`g${edge}`}
+                        data-map-ghost={edge}
+                        className="map-edge-ghost"
+                        {...edgeRect(edge)}
+                        rx={2}
+                        ry={2}
+                    />
+                ))}
             {bars?.map((edge) => (
                 <line
                     key={edge}

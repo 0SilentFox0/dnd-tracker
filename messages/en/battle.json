@@ -134,7 +134,9 @@
         "erase-zone": "Erase zone",
         "edge-wall": "Wall (edge)",
         "edge-bars": "Bars",
-        "edge-erase": "Erase edge"
+        "edge-erase": "Erase edge",
+        "edge-break": "Break",
+        "edge-restore": "Restore"
       },
       "rounds": "Rounds",
       "hazardLabel": "Hazard label",

@@ -231,4 +231,87 @@ describe('rollback mutation', () => {
         });
         expect(load).not.toHaveBeenCalled();
     });
+
+    describe('стан карти (mapState) за mapStateChanged', () => {
+        const stateOf = (edges: string[]) => ({
+            removedEdges: edges,
+            doors: {},
+        });
+
+        const snap = (
+            seq: number,
+            before: { removedEdges: string[] } | null,
+            changed: boolean
+        ) => ({
+            seq,
+            state: buildSnapshotState(
+                { ...ctx.scene, status: 'active' },
+                s,
+                diffParticipants(s, s),
+                null,
+                {
+                    mapState: before ? { ...before, doors: {} } : null,
+                    mapStateChanged: changed,
+                }
+            ),
+        });
+
+        const run = (
+            snapshots: ReturnType<typeof snap>[],
+            current: ReturnType<typeof stateOf> | null,
+            actionIndex: number
+        ) =>
+            createRollbackMutation(
+                vi.fn(async () => snapshots),
+                vi.fn(async () => true)
+            )(
+                { ...ctx, meta: { ...ctx.meta, mapState: current } },
+                { actionIndex }
+            );
+
+        it('(a) remove, потім attack: відкат attack лишає ребро видаленим', async () => {
+            const out = await run(
+                [snap(5, { removedEdges: ['1:1:e'] }, false)],
+                stateOf(['1:1:e']),
+                5
+            );
+
+            expect(out.scene).not.toHaveProperty('mapState');
+        });
+
+        it('(b) відкат самої події remove повертає ребро', async () => {
+            const out = await run([snap(4, null, true)], stateOf(['1:1:e']), 4);
+
+            expect(out.scene?.mapState).toEqual({
+                removedEdges: [],
+                doors: {},
+            });
+        });
+
+        it('(c) remove, remove, відкат першої: бере перший знімок зі зміною', async () => {
+            const out = await run(
+                [
+                    snap(4, null, true),
+                    snap(5, { removedEdges: ['1:1:e'] }, true),
+                ],
+                stateOf(['1:1:e', '2:2:s']),
+                4
+            );
+
+            expect(out.scene?.mapState).toEqual({
+                removedEdges: [],
+                doors: {},
+            });
+        });
+
+        it('(d) жодної зміни після seq: mapState не в результаті', async () => {
+            const out = await run(
+                [snap(4, null, false), snap(5, null, false)],
+                stateOf(['1:1:e']),
+                4
+            );
+
+            expect(out.scene).not.toHaveProperty('mapState');
+        });
+    });
 });

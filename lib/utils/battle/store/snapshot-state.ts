@@ -42,6 +42,7 @@ export interface SnapshotState {
     > & {
         sceneState?: SystemSlot;
         mapState?: BattleMapState;
+        mapStateChanged?: true;
         mapVersion?: number;
     } & {
         terrain?: Record<string, TerrainCell> | null;
@@ -62,6 +63,7 @@ export function buildSnapshotState(
     mapLayer: {
         mapState?: BattleMapState | null;
         mapRef?: BattleMapRef | null;
+        mapStateChanged?: boolean;
     } = {}
 ): SnapshotState {
     const prev = new Map(before.map((p) => [p.columns.id, p]));
@@ -75,8 +77,11 @@ export function buildSnapshotState(
             status: scene.status,
             pendingMoraleCheck: scene.pendingMoraleCheck,
             ...(scene.sceneState && { sceneState: scene.sceneState }),
-            ...(!isEmptyMapState(mapLayer.mapState) && {
-                mapState: mapLayer.mapState as BattleMapState,
+            ...(mapLayer.mapStateChanged && {
+                mapState: isEmptyMapState(mapLayer.mapState)
+                    ? { removedEdges: [], doors: {} }
+                    : (mapLayer.mapState as BattleMapState),
+                mapStateChanged: true as const,
             }),
             ...(mapLayer.mapRef && { mapVersion: mapLayer.mapRef.version }),
             ...(map && {

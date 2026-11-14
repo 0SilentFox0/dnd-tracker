@@ -17,11 +17,20 @@ import { encodeLog } from '@/lib/utils/battle/log/codec';
 import { formatBattleLog } from '@/lib/utils/battle/log/lines';
 import { persistedMap } from '@/lib/utils/battle/map-storage/persisted-map';
 import { applyScenePatch } from '@/lib/utils/battle/scene-state';
-import type { ParticipantsDiff, ParticipantUpdate } from '@/lib/utils/battle/store/diff-participants';
+import type {
+    ParticipantsDiff,
+    ParticipantUpdate,
+} from '@/lib/utils/battle/store/diff-participants';
 import { diffParticipants } from '@/lib/utils/battle/store/diff-participants';
 import { BattleConflictError } from '@/lib/utils/battle/store/errors';
-import { buildSnapshotState, isEmptyMapState } from '@/lib/utils/battle/store/snapshot-state';
-import { joinParticipant, splitParticipant } from '@/lib/utils/battle/store/split-participant';
+import {
+    buildSnapshotState,
+    isEmptyMapState,
+} from '@/lib/utils/battle/store/snapshot-state';
+import {
+    joinParticipant,
+    splitParticipant,
+} from '@/lib/utils/battle/store/split-participant';
 import type { BattleDb } from '@/lib/utils/battle/store/types';
 import type {
     BattleDelta,
@@ -404,7 +413,11 @@ export async function saveBattle(
                             beforeStored,
                             diff,
                             before.meta.map,
-                            before.meta
+                            {
+                                mapState: before.meta.mapState,
+                                mapRef: before.meta.mapRef,
+                                mapStateChanged: patch.mapState !== undefined,
+                            }
                         ) as unknown as Prisma.InputJsonValue,
                     },
                 ],

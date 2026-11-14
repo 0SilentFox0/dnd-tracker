@@ -275,7 +275,10 @@
     "revealed": "The DM brought into the battle: {names}",
     "revealedWith": "The DM brought into the battle: {names}. {rest}",
     "unitAssigned": "🎮 The DM hands {unit} over to {who}",
-    "unitsRandomized": "🎲 The DM hands out free units: {list}"
+    "unitsRandomized": "🎲 The DM hands out free units: {list}",
+    "edgesRemoved": "The DM broke {count} wall segments",
+    "edgesRestored": "The DM restored {count} wall segments",
+    "mapUpdated": "The DM updated the map to version {version}"
   },
   "aura": {
     "inZone": "{ability}: in the zone — {who}",

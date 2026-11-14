@@ -19,6 +19,8 @@ export interface EdgeEditing {
     erase?: boolean;
     /** ребра зафіксованих штрихів, що чекають на відповідь сервера */
     committed?: { add: ReadonlySet<string>; remove: ReadonlySet<string> };
+    /** видалені ребра, що малюються привидом (пензель «Відновити») */
+    ghost?: ReadonlySet<string>;
     onCommit(add: string[], remove: string[]): void;
 }
 

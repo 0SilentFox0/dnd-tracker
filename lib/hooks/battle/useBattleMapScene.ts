@@ -111,12 +111,26 @@ export function useBattleMapScene(fx?: SystemFx): BattleMapScene | null {
         [wallsList, barsList, mapWalls]
     );
 
+    const { mutateAsync: mapEdgeRemove } = actions.mapEdgeRemove;
+
+    const removedList = battle.mapState?.removedEdges;
+
+    const stateEdgeSource = useMemo(
+        () => ({
+            present: new Set([...(wallsList ?? []), ...(barsList ?? [])]),
+            removed: new Set(removedList),
+            mutate: mapEdgeRemove,
+        }),
+        [wallsList, barsList, removedList, mapEdgeRemove]
+    );
+
     const terrainTool = useMapTerrainTool({
         isDM,
         mutate: mapTerrain,
         onSkipped,
         onActivate: stopPlacing,
         edgeSource: battle.mapRef ? undefined : edgeSource,
+        stateEdgeSource,
     });
 
     const toolActive = terrainTool.active || modeToolActive;

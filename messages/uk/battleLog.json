@@ -275,7 +275,10 @@
     "revealed": "ДМ ввів у бій: {names}",
     "revealedWith": "ДМ ввів у бій: {names}. {rest}",
     "unitAssigned": "🎮 ДМ передає {unit} під керування {who}",
-    "unitsRandomized": "🎲 ДМ роздає вільних юнітів: {list}"
+    "unitsRandomized": "🎲 ДМ роздає вільних юнітів: {list}",
+    "edgesRemoved": "ДМ зруйнував перешкод: {count}",
+    "edgesRestored": "ДМ відновив перешкод: {count}",
+    "mapUpdated": "ДМ оновив карту до версії {version}"
   },
   "aura": {
     "inZone": "{ability}: у зоні — {who}",

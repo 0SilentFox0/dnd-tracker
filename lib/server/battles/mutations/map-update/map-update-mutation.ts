@@ -1,5 +1,6 @@
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { MAP_LIMITS } from '@/lib/constants/map-limits';
+import { textRef } from '@/lib/i18n/text-ref';
 import { getMap } from '@/lib/server/battle-maps/library-service';
 import {
     cellsOf,
@@ -18,6 +19,7 @@ import type {
     MutationResult,
 } from '@/lib/utils/battle/pipeline/run-battle-mutation';
 import { BattleRuleError } from '@/lib/utils/battle/store';
+import { dmEvent } from '@/lib/utils/battle/store/event-mapping';
 import { REJECT } from '@/lib/utils/battle/store/reject';
 import type { MapUpdateData } from '@/types/api';
 import type { BattleMapConfig, BattleMapState } from '@/types/battle';
@@ -146,6 +148,12 @@ export async function mapUpdateMutation(
 
     return {
         ...unchanged,
+        events: [
+            dmEvent(
+                ctx.scene.round,
+                textRef('battleLog.dm.mapUpdated', { version: library.version })
+            ),
+        ],
         scene: {
             map: composeEffectiveMap(header, pruned, library),
             mapRef: { mapId: mapRef.mapId, version: library.version },

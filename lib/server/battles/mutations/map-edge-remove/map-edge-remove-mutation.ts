@@ -1,9 +1,11 @@
 import { API_ERRORS } from '@/lib/constants/api-errors';
+import { textRef } from '@/lib/i18n/text-ref';
 import type {
     BattleMutationContext,
     MutationResult,
 } from '@/lib/utils/battle/pipeline/run-battle-mutation';
 import { BattleRuleError } from '@/lib/utils/battle/store';
+import { dmEvent } from '@/lib/utils/battle/store/event-mapping';
 import { REJECT } from '@/lib/utils/battle/store/reject';
 import type { MapEdgeRemoveData } from '@/types/api';
 
@@ -45,7 +47,17 @@ export function mapEdgeRemoveMutation(
     return {
         participants: ctx.participants,
         pending: ctx.pending,
-        events: [],
+        events: [
+            dmEvent(
+                ctx.scene.round,
+                textRef(
+                    body.restore
+                        ? 'battleLog.dm.edgesRestored'
+                        : 'battleLog.dm.edgesRemoved',
+                    { count: edges.size }
+                )
+            ),
+        ],
         scene: { mapState: { ...state, removedEdges } },
     };
 }

@@ -25,9 +25,18 @@ const BRUSHES: TerrainBrush[] = [
     'edge-wall',
     'edge-bars',
     'edge-erase',
+    'edge-break',
+    'edge-restore',
 ];
 
-const EDGE_BRUSHES: TerrainBrush[] = ['edge-wall', 'edge-bars', 'edge-erase'];
+const STATE_BRUSHES: TerrainBrush[] = ['edge-break', 'edge-restore'];
+
+const EDGE_BRUSHES: TerrainBrush[] = [
+    'edge-wall',
+    'edge-bars',
+    'edge-erase',
+    ...STATE_BRUSHES,
+];
 
 export function MapTerrainToolbar({
     tool,
@@ -48,10 +57,11 @@ export function MapTerrainToolbar({
 
     const touch = useCoarsePointer();
 
-    const brushes =
-        touch || edgesLinked
-            ? BRUSHES.filter((b) => !EDGE_BRUSHES.includes(b))
-            : BRUSHES;
+    const brushes = BRUSHES.filter(
+        (b) =>
+            !EDGE_BRUSHES.includes(b) ||
+            (!touch && (!edgesLinked || STATE_BRUSHES.includes(b)))
+    );
 
     const edgeNotice = edgesLinked
         ? tSetup('edgesLinked')

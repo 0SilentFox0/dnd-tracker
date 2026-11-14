@@ -97,12 +97,16 @@ export function createRollbackMutation(
 
         const { participants, pending } = restoreParticipantsAt(snapshots, ctx);
 
-        const mapState = scene.mapState ?? null;
+        const changed = snapshots.find((s) => s.state.scene.mapStateChanged);
 
-        const stateChanged = !jsonEqual(
-            isEmptyMapState(mapState) ? null : mapState,
-            isEmptyMapState(ctx.meta.mapState) ? null : ctx.meta.mapState
-        );
+        const mapState = changed?.state.scene.mapState ?? null;
+
+        const stateChanged =
+            !!changed &&
+            !jsonEqual(
+                isEmptyMapState(mapState) ? null : mapState,
+                isEmptyMapState(ctx.meta.mapState) ? null : ctx.meta.mapState
+            );
 
         const map = ctx.meta.map ? restoreMap(ctx.meta.map, scene) : undefined;
 

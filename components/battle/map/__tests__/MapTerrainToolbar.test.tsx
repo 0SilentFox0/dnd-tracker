@@ -70,4 +70,36 @@ describe('MapTerrainToolbar: інструменти ребер', () => {
             screen.getByText('battleSetup.map.edgesDesktopOnly')
         ).toBeTruthy();
     });
+
+    const brush = (name: string) =>
+        screen.queryByRole('button', {
+            name: `battle.map.terrain.brushes.${name}`,
+        });
+
+    it('linked: лише станові пензлі ребер + пояснення', () => {
+        touch.value = false;
+        render(<MapTerrainToolbar tool={tool} edgesLinked />);
+
+        expect(brush('edge-wall')).toBeNull();
+        expect(brush('edge-erase')).toBeNull();
+        expect(brush('edge-break')).toBeTruthy();
+        expect(brush('edge-restore')).toBeTruthy();
+        expect(screen.getByText('battleSetup.map.edgesLinked')).toBeTruthy();
+    });
+
+    it('inline: станові пензлі поруч зі старими', () => {
+        touch.value = false;
+        render(<MapTerrainToolbar tool={tool} />);
+
+        expect(brush('edge-erase')).toBeTruthy();
+        expect(brush('edge-break')).toBeTruthy();
+    });
+
+    it('дотик (навіть linked): жодних ребрових пензлів', () => {
+        touch.value = true;
+        render(<MapTerrainToolbar tool={tool} edgesLinked />);
+
+        expect(brush('edge-break')).toBeNull();
+        expect(brush('edge-restore')).toBeNull();
+    });
 });

@@ -227,7 +227,7 @@ function MapStageImpl({
                     onStrokeStart={painting ? onStrokeStart : undefined}
                     scene={gridScene}
                 />
-                <WallsLayer map={map} />
+                <WallsLayer map={map} ghost={edges?.ghost} />
                 {ui?.MapLayers && (
                     <ui.MapLayers
                         map={map}

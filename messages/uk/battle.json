@@ -134,7 +134,9 @@
         "erase-zone": "Стерти зону",
         "edge-wall": "Стіна (ребро)",
         "edge-bars": "Ґрати",
-        "edge-erase": "Стерти ребро"
+        "edge-erase": "Стерти ребро",
+        "edge-break": "Зруйнувати",
+        "edge-restore": "Відновити"
       },
       "rounds": "Раундів",
       "hazardLabel": "Підпис небезпеки",

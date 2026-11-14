@@ -79,7 +79,11 @@ describe('rollback зі станом карти', () => {
 
         const out = await run(
             ctx,
-            snapshotOf(ctx, { mapState: removed, mapRef: ctx.meta.mapRef })
+            snapshotOf(ctx, {
+                mapState: removed,
+                mapRef: ctx.meta.mapRef,
+                mapStateChanged: true,
+            })
         );
 
         expect(out.scene?.mapState).toEqual(removed);
@@ -90,10 +94,10 @@ describe('rollback зі станом карти', () => {
 
         const out = await run(
             ctx,
-            snapshotOf(ctx, { mapRef: ctx.meta.mapRef })
+            snapshotOf(ctx, { mapRef: ctx.meta.mapRef, mapStateChanged: true })
         );
 
-        expect(out.scene?.mapState).toBeNull();
+        expect(out.scene?.mapState).toEqual({ removedEdges: [], doors: {} });
     });
 
     it('стан не змінився — патч mapState відсутній', async () => {

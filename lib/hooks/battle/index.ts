@@ -61,6 +61,7 @@ export { type MapMotionTool, useMapMotionTool } from './useMapMotionTool';
 export {
     type MapTerrainTool,
     MAX_BARRIER_ROUNDS,
+    type StateEdgeSource,
     type TerrainBrush,
     useMapTerrainTool,
 } from './useMapTerrainTool';
