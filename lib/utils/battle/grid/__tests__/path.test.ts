@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
 import { canStand } from '../occupancy';
-import { movementBudget, reachable, remainingMovement } from '../path';
+import { moveBudget, movementBudget, reachable, remainingMovement } from '../path';
 
 import { CombatStatus, ParticipantSide } from '@/lib/constants/battle';
+import { MAP_LIMITS } from '@/lib/constants/map-limits';
 import { makeEffect } from '@/lib/utils/abilities/__tests__/fixtures';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
@@ -132,5 +133,34 @@ describe('рух по сітці', () => {
         expect(marks.get('1:1')).toBe(1);
         expect(marks.get('0:0')).toBe(1);
         expect(marks.has('1:0')).toBe(false);
+    });
+});
+
+describe('moveBudget', () => {
+    const unit = at('g', { x: 0, y: 0 });
+
+    const dm = (cols: number, rows: number) =>
+        moveBudget(
+            {
+                map: { ...map, cols, rows },
+                dmUserId: 'dm-user',
+                rules: DEFAULT_RULES,
+            },
+            { ...unit, basicInfo: { ...unit.basicInfo, controlledBy: 'dm' } }
+        );
+
+    it('ДМ: min(cols*rows, dmMoveCap)', () => {
+        expect(dm(100, 100)).toBe(MAP_LIMITS.dmMoveCap);
+        expect(MAP_LIMITS.dmMoveCap).toBe(60);
+        expect(dm(5, 5)).toBe(25);
+    });
+
+    it('гравець — залишок швидкості', () => {
+        expect(
+            moveBudget(
+                { map, dmUserId: null, rules: DEFAULT_RULES },
+                at('h', { x: 0, y: 0 })
+            )
+        ).toBe(6);
     });
 });

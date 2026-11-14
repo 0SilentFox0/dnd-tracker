@@ -6,6 +6,7 @@ export const MAP_LIMITS = {
     libraryMaxEdges: 80000,
     chunk: 16,
     maxTerrainCells: 3600,
+    dmMoveCap: 60,
     doorsMax: 500,
     // temporary until battle stages C/D allow larger maps on the board
     battleMaxSide: 60,

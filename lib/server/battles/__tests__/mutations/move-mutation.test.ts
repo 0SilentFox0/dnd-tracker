@@ -147,6 +147,29 @@ describe('move mutation', () => {
         ).toThrow(expect.objectContaining({ code: 'action_rejected' }));
     });
 
+    it('ДМ не рухає юніта далі за dmMoveCap клітинок вартості', () => {
+        const wide = { ...map, cols: 100, rows: 1 };
+
+        const base = ctx({
+            participants: [at(goblin, { x: 99, y: 0 }), at(hero, { x: 0, y: 0 })],
+        });
+
+        const dm = {
+            ...base,
+            meta: { ...base.meta, map: wide },
+            userId: 'dm-user',
+            isDM: true,
+        };
+
+        expect(
+            moveMutation(dm, { participantId: 'gob', to: { x: 39, y: 0 } })
+                .participants[0].battleData.position
+        ).toEqual({ x: 39, y: 0 });
+        expect(() =>
+            moveMutation(dm, { participantId: 'gob', to: { x: 38, y: 0 } })
+        ).toThrow(expect.objectContaining({ code: 'action_rejected' }));
+    });
+
     it('NPC-герой, привʼязаний до акаунта ДМ, ходить у свій хід без ліміту, як юніт ДМ', () => {
         const npc = {
             ...hero,

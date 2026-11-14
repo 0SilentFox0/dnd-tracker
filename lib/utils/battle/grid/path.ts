@@ -10,6 +10,7 @@ import {
 import { cellsOf, fits, isOnMap, occupiedBy, sizeOf } from './occupancy';
 
 import { EffectMarker } from '@/lib/constants/battle';
+import { MAP_LIMITS } from '@/lib/constants/map-limits';
 import { statWithModifiers } from '@/lib/utils/abilities/engine/core/collect-modifiers';
 import { isActive } from '@/lib/utils/abilities/engine/core/participants';
 import { conditionSourceIds } from '@/lib/utils/battle/conditions/query';
@@ -189,7 +190,7 @@ export function searchPaths(
     return { cost: result, parent };
 }
 
-/** Учасник ДМ (не персонаж гравця) у його хід ходить без ліміту швидкості (як фігура на столі); решта — залишок руху. dmUserId — id ДМ, якщо ходить ДМ, інакше null. */
+/** Учасник ДМ (не персонаж гравця) у його хід ходить без ліміту швидкості (як фігура на столі), але не далі за MAP_LIMITS.dmMoveCap клітинок вартості; решта — залишок руху. dmUserId — id ДМ, якщо ходить ДМ, інакше null. */
 export function moveBudget(
     {
         map,
@@ -205,7 +206,7 @@ export function moveBudget(
     )
         return remainingMovement(p, rules);
 
-    return map.cols * map.rows;
+    return Math.min(map.cols * map.rows, MAP_LIMITS.dmMoveCap);
 }
 
 /** Наляканий не може наблизитись до живого джерела страху. */
