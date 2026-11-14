@@ -52,6 +52,7 @@ export const REJECT = {
     barrierDuration: 'battleLog.reject.barrierDuration',
     mapOccupied: 'battleLog.reject.mapOccupied',
     mapEdgeLimit: 'battleLog.reject.mapEdgeLimit',
+    mapEdgeOutside: 'battleLog.reject.mapEdgeOutside',
     mapEdgesInMode: 'battleLog.reject.mapEdgesInMode',
     rollbackLimit: 'battleLog.reject.rollbackLimit',
     casterMissing: 'battleLog.reject.casterMissing',

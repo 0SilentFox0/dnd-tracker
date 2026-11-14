@@ -4574,9 +4574,9 @@ async function mapWallsCheck() {
 
     const at = mover.battleData.position as { x: number; y: number };
 
-    const cols = 12;
+    const cols = state.map?.cols ?? 12;
 
-    const rows = 8;
+    const rows = state.map?.rows ?? 8;
 
     const edges = [
         at.x < cols - 1 && `${at.x}:${at.y}:e`,

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { edgeBlocks } from '../edges';
+import { cellKey } from '../geometry';
 import { reachable } from '../path';
 
 import { ParticipantSide } from '@/lib/constants/battle';
@@ -27,7 +28,7 @@ function hero(position: GridPoint, gridSize = 1): BattleParticipant {
 const cost = (map: BattleMapConfig, p: BattleParticipant, budget = 10) =>
     reachable(map, [p], p, budget);
 
-const key = (x: number, y: number) => `${x},${y}`;
+const key = (x: number, y: number) => cellKey({ x, y });
 
 describe('стіни й ґрати в русі', () => {
     it('стіна блокує прямий крок, шлях в обхід довший', () => {

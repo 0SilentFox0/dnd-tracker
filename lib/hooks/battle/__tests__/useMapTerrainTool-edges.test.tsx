@@ -67,15 +67,17 @@ describe('useMapTerrainTool: інструмент ребер', () => {
         await act(async () =>
             view.result.current.edges?.onCommit([], ['1:1:e', '3:3:e'])
         );
-        expect(mutate).toHaveBeenCalledWith({
-            kind: 'walls',
-            add: [],
-            remove: ['1:1:e'],
-        });
-        expect(mutate).toHaveBeenCalledWith({
-            kind: 'bars',
-            add: [],
-            remove: ['3:3:e'],
+        await vi.waitFor(() => {
+            expect(mutate).toHaveBeenCalledWith({
+                kind: 'walls',
+                add: [],
+                remove: ['1:1:e'],
+            });
+            expect(mutate).toHaveBeenCalledWith({
+                kind: 'bars',
+                add: [],
+                remove: ['3:3:e'],
+            });
         });
     });
 });

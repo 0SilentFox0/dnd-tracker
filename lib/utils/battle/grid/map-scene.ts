@@ -9,6 +9,7 @@ import {
     targetMarks,
 } from './map-view';
 import { cellsOf, isOnMap, sizeOf } from './occupancy';
+import { wallsAllowAim } from './sight';
 import {
     aimInRange,
     apexOf,
@@ -219,7 +220,8 @@ export function aimView(
             aim.range,
             rules
         ) ||
-        modeAimHiddenText(map, caster, at)
+        modeAimHiddenText(map, caster, at) ||
+        !wallsAllowAim(map, caster, at)
     )
         return null;
 
@@ -450,6 +452,12 @@ export function deriveMapScene({
         const hidden = modeAimHiddenText(map, aimCaster, p);
 
         if (hidden) return { kind: 'reject', reason: hidden };
+
+        if (!wallsAllowAim(map, aimCaster, p))
+            return {
+                kind: 'reject',
+                reason: textRef(REJECT.targetUnreachable),
+            };
 
         return aimView({ map, participants, rules: input.rules }, aim, p)
             ? { kind: 'aim', cell: p }

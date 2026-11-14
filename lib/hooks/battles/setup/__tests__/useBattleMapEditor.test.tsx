@@ -331,4 +331,20 @@ describe('useBattleMapEditor', () => {
             speed: 1,
         });
     });
+
+    it('ввімкнення лабіринту прибирає core-стіни й ґрати', () => {
+        const { result } = renderHook(() =>
+            useBattleMapEditor({
+                ...DEFAULT_BATTLE_MAP,
+                walls: ['1:1:e'],
+                bars: ['2:2:s'],
+            })
+        );
+
+        act(() => result.current.actions.setMode('maze', true));
+
+        expect(result.current.state.map.maze).toBeDefined();
+        expect(result.current.state.map.walls).toBeUndefined();
+        expect(result.current.state.map.bars).toBeUndefined();
+    });
 });

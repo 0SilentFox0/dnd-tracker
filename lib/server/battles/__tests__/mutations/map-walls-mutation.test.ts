@@ -97,7 +97,7 @@ describe('map-walls mutation', () => {
                 add: ['9:0:e'],
                 remove: [],
             })
-        ).toThrow(REJECT.mapOccupied);
+        ).toThrow(REJECT.mapEdgeOutside);
     });
 
     it('бій без карти — відмова', () => {

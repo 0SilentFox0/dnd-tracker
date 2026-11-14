@@ -246,19 +246,21 @@ export function useBattleMapEditor(
     const setMode = useCallback((key: MapModeKey, on: boolean) => {
         const mode = modeOf(key);
 
-        // один режим на бій
-        setMap((m) =>
-            mode.withConfig(
+        // один режим на бій; у режимі core-стіни/ґрати недоступні для редагування, тож зникають разом із ввімкненням
+        setMap((m) => {
+            const { walls, bars, ...base } = m;
+
+            return mode.withConfig(
                 MODE_KEYS.reduce(
                     (acc, other) =>
                         other === key
                             ? acc
                             : modeOf(other).withConfig(acc, null),
-                    m
+                    on ? base : m
                 ),
                 on ? (mode.emptyConfig?.() ?? null) : null
-            )
-        );
+            );
+        });
 
         if (on) setToolState(null);
     }, []);

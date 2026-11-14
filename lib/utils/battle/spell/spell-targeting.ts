@@ -14,7 +14,11 @@ import { conditionSourceIds } from '@/lib/utils/battle/conditions/query';
 import { isDying } from '@/lib/utils/battle/death-saves';
 import { footprintDistance, inBounds } from '@/lib/utils/battle/grid/geometry';
 import { cellsOf, isOnMap } from '@/lib/utils/battle/grid/occupancy';
-import { sightedTargets, wallsAllowSight } from '@/lib/utils/battle/grid/sight';
+import {
+    sightedTargets,
+    wallsAllowAim,
+    wallsAllowSight,
+} from '@/lib/utils/battle/grid/sight';
 import {
     aimInRange,
     feetToCells,
@@ -287,6 +291,9 @@ function resolveTemplate(
 
     if (hidden) return fail(hidden);
 
+    if (!wallsAllowAim(map, caster, aim))
+        return fail(textRef(REJECT.targetUnreachable));
+
     const { cells, targets } = templateArea(
         map,
         ps,
@@ -327,6 +334,9 @@ function resolveSkillRadius(
     const hidden = modeAimHiddenText(scene.map, scene.caster, aim.cell);
 
     if (hidden) return fail(hidden);
+
+    if (!wallsAllowAim(scene.map, scene.caster, aim.cell))
+        return fail(textRef(REJECT.targetUnreachable));
 
     const { cells, targets } = skillRadiusArea(scene, radius, aim.cell);
 

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { edgeBlocks, wallsOf } from '../edges';
+import { cellKey } from '../geometry';
 import { searchPaths } from '../path';
 
 import { ParticipantSide } from '@/lib/constants/battle';
@@ -61,8 +62,8 @@ describe('maze walls vs generic grid', () => {
 
         const { cost } = searchPaths(map, [hero], hero, 30);
 
-        expect(cost.has('2,0')).toBe(true);
-        expect(cost.has('3,0')).toBe(false);
-        expect(cost.has('3,2')).toBe(false);
+        expect(cost.has(cellKey({ x: 2, y: 0 }))).toBe(true);
+        expect(cost.has(cellKey({ x: 3, y: 0 }))).toBe(false);
+        expect(cost.has(cellKey({ x: 3, y: 2 }))).toBe(false);
     });
 });

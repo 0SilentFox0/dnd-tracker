@@ -141,7 +141,7 @@ export function searchPaths(
         const to = footprint(next, size);
 
         return footprint(cur, size).some((c, i) =>
-            edgeBlocks(map, c, to[i], 'move', mover)
+            edgeBlocks(map, c, to[i], 'move')
         );
     };
 

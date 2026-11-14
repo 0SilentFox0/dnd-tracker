@@ -28,7 +28,7 @@ export function mapWallsMutation(
     });
 
     if (outside)
-        throw new BattleRuleError('action_rejected', REJECT.mapOccupied);
+        throw new BattleRuleError('action_rejected', REJECT.mapEdgeOutside);
 
     const walls = body.kind === 'walls';
 
