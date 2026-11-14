@@ -4,6 +4,7 @@ import type { WhatsNewEntry } from '@/lib/onboarding/types';
 export const WHATS_NEW_BUNDLED = 15;
 
 export const WHATS_NEW: WhatsNewEntry[] = [
+    { id: '2026-11-map-library', date: '2026-11-14', audience: 'dm' },
     { id: '2026-11-map-walls', date: '2026-11-14', audience: 'dm' },
     { id: '2026-11-grid-calibration', date: '2026-11-14', audience: 'dm' },
     {

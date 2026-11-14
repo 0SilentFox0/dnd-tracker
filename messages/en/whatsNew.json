@@ -1,4 +1,8 @@
 {
+  "2026-11-map-library": {
+    "title": "Battle map library",
+    "body": "Each campaign can keep a library of battle maps: turn on \"Map library\" in the campaign settings. There is a fullscreen wall and bars editor on desktop, you pick a library map when creating a battle, and battles get an \"Update map\" button."
+  },
   "2026-11-map-walls": {
     "title": "Walls and bars on the map",
     "body": "In map setup and during a battle (map toolbar) you can draw walls and bars along cell edges. A wall blocks movement, shots, sight, templates and melee; bars block movement only. Not available in the maze or on phones."

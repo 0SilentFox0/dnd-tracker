@@ -109,6 +109,10 @@
         "title": "Walls and bars on the map",
         "body": "Draw walls and bars along cell edges: a wall stops movement, shots and sight, bars stop movement only. Works in setup and during a battle; disabled in the maze."
       },
+      "maps": {
+        "title": "Map library",
+        "body": "Keep battle maps in the campaign and reuse them in battles. The wall and bars editor is desktop-only; pull a changed map into a battle with \"Update map\"."
+      },
       "battle-scene": {
         "title": "Running a battle",
         "body": "You see the whole map and all sides. You take the units' turns yourself, players act from their phones; the server calculates rolls and damage."

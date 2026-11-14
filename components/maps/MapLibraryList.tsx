@@ -9,6 +9,7 @@ import { ActionsMenu } from '@/components/common/ActionsMenu';
 import { DmCardGrid, DmListBody } from '@/components/common/DmListBody';
 import { EmptyState, ErrorState } from '@/components/common/states';
 import { HudCard, HudPage, HudPageHeader } from '@/components/hud/page';
+import { OnboardingHint } from '@/components/onboarding/OnboardingHint';
 import { Button } from '@/components/ui/button';
 import { useMapLibrary } from '@/lib/hooks/battle-maps';
 
@@ -42,6 +43,7 @@ export function MapLibraryList({ campaignId }: { campaignId: string }) {
                     </Button>
                 }
             />
+            <OnboardingHint id="dm.maps" className="mb-3" />
             {library.query.isError ? (
                 <ErrorState
                     error={library.query.error}
