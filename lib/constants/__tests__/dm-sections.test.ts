@@ -9,6 +9,24 @@ import {
 const paths = (s: { path: string }[]) => s.map((x) => x.path);
 
 describe('dmSectionsFor', () => {
+    it('shows the maps section only with the map library flag', () => {
+        const ctx = { isTemplate: false, classesEnabled: false };
+
+        expect(paths(dmSectionsFor(ctx))).not.toContain('maps');
+        expect(
+            paths(dmSectionsFor({ ...ctx, mapLibraryEnabled: true }))
+        ).toContain('maps');
+        expect(
+            paths(
+                dmSectionsFor({
+                    isTemplate: true,
+                    classesEnabled: false,
+                    mapLibraryEnabled: true,
+                })
+            )
+        ).not.toContain('maps');
+    });
+
     it('template without classes hides classes, feats, backgrounds and campaign-only sections', () => {
         const p = paths(
             dmSectionsFor({ isTemplate: true, classesEnabled: false })

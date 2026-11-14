@@ -9,6 +9,7 @@ export function useMapLibraryEnabled(campaignId: string) {
         queryKey: campaignKeys.detail(campaignId),
         queryFn: () => getCampaign(campaignId),
         staleTime: ENTITY_STALE_MS,
+        enabled: !!campaignId,
         select: (campaign) => campaign.mapLibraryEnabled,
     });
 

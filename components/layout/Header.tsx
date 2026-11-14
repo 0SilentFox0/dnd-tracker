@@ -32,6 +32,7 @@ import {
 import { HudPortalClassProvider } from '@/components/ui/portal-class';
 import { dmSectionHref, dmSectionsFor } from '@/lib/constants/campaigns';
 import { useSessionUser, useSwitchGoogleAccount } from '@/lib/hooks/auth';
+import { useMapLibraryEnabled } from '@/lib/hooks/battle-maps';
 import {
     useCampaignRules,
     useCampaignSystemSelection,
@@ -109,9 +110,12 @@ export function Header() {
 
     const system = useCampaignSystemSelection(dmCampaignId);
 
+    const mapLibraryEnabled = useMapLibraryEnabled(dmCampaignId);
+
     const dmSections = dmSectionsFor({
         isTemplate,
         classesEnabled: classesEnabled(rules),
+        mapLibraryEnabled,
         system,
     });
 

@@ -54,6 +54,7 @@ export const CORE_NAMESPACES = [
     'show',
     'acquaintances',
     'world',
+    'maps',
     'ai',
     'compendium',
     'contentImport',

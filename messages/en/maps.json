@@ -1,0 +1,39 @@
+{
+  "list": {
+    "title": "Maps",
+    "subtitle": "Reusable battle maps with walls and bars",
+    "create": "New map",
+    "loading": "Loading maps...",
+    "emptyTitle": "No maps yet",
+    "emptyDescription": "Create a map, draw walls and bars, then reuse it in battles.",
+    "size": "{cols}×{rows}",
+    "updated": "Updated {date}",
+    "open": "Open editor",
+    "clone": "Duplicate",
+    "cloneName": "{name} (copy)",
+    "confirmDelete": "Delete this map?",
+    "deleteError": "Failed to delete the map",
+    "createError": "Failed to create the map",
+    "cloneError": "Failed to duplicate the map"
+  },
+  "create": {
+    "title": "New map",
+    "description": "Name and grid size. You can change them in the editor.",
+    "name": "Name",
+    "namePlaceholder": "Goblin cave",
+    "cols": "Columns",
+    "rows": "Rows",
+    "submit": "Create"
+  },
+  "editor": {
+    "back": "Back to maps",
+    "name": "Map name",
+    "save": "Save",
+    "saving": "Saving...",
+    "saved": "Map saved",
+    "saveFailed": "Failed to save the map",
+    "loadFailed": "Failed to load the map",
+    "desktopOnly": "The map editor is desktop-only — open this page on a computer",
+    "edges": "Walls and bars"
+  }
+}

@@ -9,6 +9,7 @@ import {
     GraduationCap,
     Images,
     type LucideIcon,
+    Map as MapIcon,
     Music,
     Network,
     Scale,
@@ -72,6 +73,8 @@ export interface DmSection {
     hiddenWithClasses?: boolean;
     /** campaign page tile: in every kind, only on templates, or none (menu only) */
     tile: 'all' | 'template' | 'none';
+    /** shown only for campaigns with the map library flag on */
+    requiresMapLibrary?: true;
 }
 
 export const DM_SECTIONS: readonly DmSection[] = [
@@ -128,6 +131,13 @@ export const DM_SECTIONS: readonly DmSection[] = [
     { path: 'music', icon: Music, templateVisible: true, tile: 'all' },
     { path: 'show', icon: Images, templateVisible: false, tile: 'all' },
     {
+        path: 'maps',
+        icon: MapIcon,
+        templateVisible: false,
+        requiresMapLibrary: true,
+        tile: 'all',
+    },
+    {
         path: 'spell-groups',
         icon: Wand2,
         templateVisible: true,
@@ -142,6 +152,7 @@ export const DM_SECTIONS: readonly DmSection[] = [
 export interface DmSectionContext {
     isTemplate: boolean;
     classesEnabled: boolean;
+    mapLibraryEnabled?: boolean;
     system?: SystemSelection;
 }
 
@@ -155,6 +166,7 @@ export const dmSectionHref = (campaignId: string, s: DmSection) =>
 export const dmSectionsFor = ({
     isTemplate,
     classesEnabled,
+    mapLibraryEnabled = false,
     system,
 }: DmSectionContext): DmSection[] => {
     const active = system ? dmSectionsOf(system) : new Set<string>();
@@ -164,6 +176,7 @@ export const dmSectionsFor = ({
             (!isTemplate || s.templateVisible) &&
             (!OWNED_SECTIONS.has(s.path) || active.has(s.path)) &&
             (!s.requiresClasses || classesEnabled) &&
+            (!s.requiresMapLibrary || mapLibraryEnabled) &&
             !(s.hiddenWithClasses && classesEnabled)
     );
 };

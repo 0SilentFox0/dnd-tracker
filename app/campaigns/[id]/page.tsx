@@ -157,6 +157,7 @@ export default async function CampaignDetailPage({
                         context={{
                             isTemplate,
                             classesEnabled: hasClasses,
+                            mapLibraryEnabled: campaign.mapLibraryEnabled,
                             system: rules.system,
                         }}
                         hiddenKeys={hiddenKeys}
