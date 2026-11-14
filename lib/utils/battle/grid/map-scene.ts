@@ -256,6 +256,8 @@ function rangeWindow(
     rangeFeet: number,
     rules: Ruleset
 ): GridWindow {
+    if (!origin.length) return { x: 0, y: 0, cols: 0, rows: 0 };
+
     const r = feetToCells(rangeFeet, rules);
 
     const xs = origin.map((c) => c.x);

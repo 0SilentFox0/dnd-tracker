@@ -93,16 +93,22 @@ export function placeParticipants(
 
         const near = p.battleData.position ?? summoner;
 
-        const candidates: Iterable<GridPoint> = near
-            ? cellsByRing(map, near)
-            : anchorsOf(p.basicInfo.side).map(shift);
-
         let anchor: GridPoint | undefined;
 
-        for (const a of candidates) {
-            if (fits(map, a, size, blocked)) {
-                anchor = a;
-                break;
+        if (near) {
+            for (const a of cellsByRing(map, near))
+                if (fits(map, a, size, blocked)) {
+                    anchor = a;
+                    break;
+                }
+        } else {
+            for (const raw of anchorsOf(p.basicInfo.side)) {
+                const a = shift(raw);
+
+                if (fits(map, a, size, blocked)) {
+                    anchor = a;
+                    break;
+                }
             }
         }
 

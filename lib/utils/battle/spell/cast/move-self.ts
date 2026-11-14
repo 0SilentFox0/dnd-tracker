@@ -43,7 +43,17 @@ export function adjacentFreeCell(
 
     const near: GridPoint[] = [];
 
+    const reach = size + sizeOf(target);
+
     for (const a of cellsByRing(map, targetAnchor)) {
+        if (
+            Math.max(
+                Math.abs(a.x - targetAnchor.x),
+                Math.abs(a.y - targetAnchor.y)
+            ) > reach
+        )
+            break;
+
         if (
             fits(map, a, size, blocked) &&
             cellsAdjacentOnMap(map, footprint(a, size), targetCells)

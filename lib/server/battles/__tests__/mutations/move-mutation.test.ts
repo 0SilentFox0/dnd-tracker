@@ -151,7 +151,10 @@ describe('move mutation', () => {
         const wide = { ...map, cols: 100, rows: 1 };
 
         const base = ctx({
-            participants: [at(goblin, { x: 99, y: 0 }), at(hero, { x: 0, y: 0 })],
+            participants: [
+                at(goblin, { x: 99, y: 0 }),
+                at(hero, { x: 0, y: 0 }),
+            ],
         });
 
         const dm = {
@@ -170,7 +173,7 @@ describe('move mutation', () => {
         ).toThrow(expect.objectContaining({ code: 'action_rejected' }));
     });
 
-    it('NPC-герой, привʼязаний до акаунта ДМ, ходить у свій хід без ліміту, як юніт ДМ', () => {
+    it('NPC-герой, привʼязаний до акаунта ДМ, ходить у свій хід за тим самим dmMoveCap, що й юніт ДМ', () => {
         const npc = {
             ...hero,
             basicInfo: { ...hero.basicInfo, controlledBy: 'dm-user' },
