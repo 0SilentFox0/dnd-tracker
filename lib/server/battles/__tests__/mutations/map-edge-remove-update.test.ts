@@ -2,6 +2,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({ getMap: vi.fn() }));
 
+vi.mock('@/lib/server/battle-maps/campaign-limits', () => ({
+    campaignMapMaxSide: async () => 64,
+}));
+
 vi.mock('@/lib/server/battle-maps/library-service', () => ({
     getMap: mocks.getMap,
 }));
