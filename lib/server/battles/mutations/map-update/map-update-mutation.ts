@@ -13,7 +13,8 @@ import {
     composeEffectiveMap,
     pruneRemoved,
 } from '@/lib/utils/battle/map-storage/effective-map';
-import { MODE_MAP_KEYS } from '@/lib/utils/battle/modes/client';
+import { mergeLibraryHeader } from '@/lib/utils/battle/map-storage/merge-header';
+import { withoutEdges } from '@/lib/utils/battle/map-storage/persisted-map';
 import type {
     BattleMutationContext,
     MutationResult,
@@ -23,26 +24,6 @@ import { dmEvent } from '@/lib/utils/battle/store/event-mapping';
 import { REJECT } from '@/lib/utils/battle/store/reject';
 import type { MapUpdateData } from '@/types/api';
 import type { BattleMapConfig, BattleMapState } from '@/types/battle';
-
-const RUNTIME_KEYS: readonly (keyof BattleMapConfig)[] = [
-    'terrain',
-    'spellZones',
-    'weather',
-    'motion',
-];
-
-function runtimeFields(map: BattleMapConfig): Partial<BattleMapConfig> {
-    const keys: readonly (keyof BattleMapConfig)[] = [
-        ...RUNTIME_KEYS,
-        ...MODE_MAP_KEYS,
-    ];
-
-    return Object.fromEntries(
-        keys
-            .filter((key) => map[key] !== undefined)
-            .map((key) => [key, map[key]])
-    );
-}
 
 /** Terrain cells outside the new bounds go, and zones that lose their last cell with them. */
 function pruneOutOfBounds(map: BattleMapConfig): BattleMapConfig {
@@ -124,10 +105,17 @@ export async function mapUpdateMutation(
             API_ERRORS.BATTLE_MAP_TOO_LARGE
         );
 
-    const header = pruneOutOfBounds({
-        ...library.map,
-        ...runtimeFields(map),
-    });
+    const pinned = await getMap(mapRef.mapId, mapRef.version);
+
+    const battleHeader = withoutEdges(map);
+
+    const header = pruneOutOfBounds(
+        mergeLibraryHeader(
+            (pinned?.map ?? battleHeader) as BattleMapConfig,
+            library.map as BattleMapConfig,
+            battleHeader
+        )
+    );
 
     const stuck = ctx.participants.filter(
         (p) => isOnMap(p) && cellsOf(p).some((c) => !isPlayable(header, c))

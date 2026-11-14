@@ -73,4 +73,16 @@ describe('useBattleForm library map payload', () => {
         expect('map' in body).toBe(false);
         expect('mapId' in body).toBe(false);
     });
+
+    it('sends mapId null when a linked battle switches to its own map', () => {
+        submit({
+            battleId: 'b1',
+            library: { mapId: null, isLinked: false, unlink: true },
+        });
+
+        const body = h.update.mock.calls[0][0];
+
+        expect(body.mapId).toBeNull();
+        expect('map' in body).toBe(false);
+    });
 });

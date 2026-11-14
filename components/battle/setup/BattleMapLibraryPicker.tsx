@@ -34,23 +34,27 @@ export function BattleMapLibraryPicker({
             <SelectField
                 id="library-map"
                 value={library.selectedId ?? ''}
-                onValueChange={(id) => library.select(id || null)}
+                onValueChange={(id) => void library.select(id || null)}
                 options={options}
                 allowNone
                 noneLabel={t('none')}
-                disabled={library.isLinked}
+                disabled={library.isLocked}
             />
             <p className="text-sm text-hud-muted">
-                {library.isLinked
-                    ? t('linked')
-                    : chosen
-                      ? t('chosen', {
-                            cols: chosen.cols,
-                            rows: chosen.rows,
-                        })
-                      : anyTooLarge
-                        ? t('tooLarge', { max: MAP_LIMITS.battleMaxSide })
-                        : null}
+                {library.isLocked
+                    ? t('locked')
+                    : library.wasLinked && library.isChanged && !chosen
+                      ? t('ownFromLinked')
+                      : library.isLinked
+                        ? t('linked')
+                        : chosen
+                          ? t('chosen', {
+                                cols: chosen.cols,
+                                rows: chosen.rows,
+                            })
+                          : anyTooLarge
+                            ? t('tooLarge', { max: MAP_LIMITS.battleMaxSide })
+                            : null}
             </p>
             <Link
                 href={`/campaigns/${campaignId}/dm/maps`}

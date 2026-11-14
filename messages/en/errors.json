@@ -556,5 +556,7 @@
   "battleMapConflict": "The map was changed elsewhere: reload the page to see the latest version",
   "battleMapInUse": "The map is used by a battle and cannot be deleted",
   "battleMapNotFound": "The map was not found in the campaign library",
-  "battleMapTooLarge": "This map is too large for a battle"
+  "battleMapTooLarge": "This map is too large for a battle",
+  "battleMapTooManyEdges": "This map has too many walls and bars to keep as the battle's own map",
+  "battleMapRelinkStarted": "The map of a started battle cannot be swapped: reset the battle or press \"Update map\""
 }

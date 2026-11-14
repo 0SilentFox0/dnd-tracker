@@ -15,6 +15,7 @@ import type {
     BattleMapConfig,
     BattlePreparationParticipant,
 } from '@/types/battle';
+import type { CreateBattleData } from '@/types/battle-setup';
 
 interface UseBattleFormParams {
     campaignId: string;
@@ -26,7 +27,7 @@ interface UseBattleFormParams {
     };
     participants: BattlePreparationParticipant[];
     map?: BattleMapConfig | null;
-    library?: { mapId: string | null; isLinked: boolean };
+    library?: { mapId: string | null; isLinked: boolean; unlink?: boolean };
 }
 
 export function useBattleForm({
@@ -40,6 +41,8 @@ export function useBattleForm({
     const libraryMapId = library?.mapId;
 
     const isLinked = library?.isLinked;
+
+    const unlink = library?.unlink;
 
     const t = useTranslations('battleSetup.form');
 
@@ -78,9 +81,11 @@ export function useBattleForm({
                 turnTimerSeconds: formData.turnTimerSeconds,
                 ...(isLinked
                     ? {}
-                    : libraryMapId
-                      ? { mapId: libraryMapId }
-                      : { map: map ?? null }),
+                    : unlink
+                      ? { mapId: null }
+                      : libraryMapId
+                        ? { mapId: libraryMapId }
+                        : { map: map ?? null }),
             };
 
             if (battleId) {
@@ -97,7 +102,7 @@ export function useBattleForm({
                 return;
             }
 
-            create.mutate(body, {
+            create.mutate(body as CreateBattleData, {
                 onSuccess: (battle) => router.push(`${listHref}/${battle.id}`),
                 onError: (error) =>
                     void notify(
@@ -116,6 +121,7 @@ export function useBattleForm({
             map,
             libraryMapId,
             isLinked,
+            unlink,
             router,
             navigateFresh,
             notify,

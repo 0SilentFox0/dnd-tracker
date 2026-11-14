@@ -53,9 +53,7 @@ describe('persistedMap: inline з removedEdges', () => {
             { removedEdges: [], doors: {} }
         );
 
-        expect(new Set(out.walls)).toEqual(
-            new Set(['1:1:e', '2:2:s'])
-        );
+        expect(new Set(out.walls)).toEqual(new Set(['1:1:e', '2:2:s']));
     });
 
     it('linked: ребра не пишуться', () => {

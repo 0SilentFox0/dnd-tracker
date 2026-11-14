@@ -96,7 +96,7 @@ function BattleSetupLayout({
                             library={setup.libraryMap}
                         />
                     )}
-                    {!setup.libraryMap.selectedId && (
+                    {!setup.libraryMap.selectedId && !setup.libraryMap.wasLinked && (
                         <BattleFormMap editor={setup.mapEditor} />
                     )}
                 </div>

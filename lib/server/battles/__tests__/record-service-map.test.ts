@@ -6,6 +6,8 @@ const mocks = vi.hoisted(() => ({
     update: vi.fn(async () => ({})),
     findUnique: vi.fn(),
     getMapMeta: vi.fn(),
+    getMap: vi.fn(),
+    deleteState: vi.fn(async () => ({})),
     lock: vi.fn(async () => undefined),
 }));
 
@@ -18,11 +20,15 @@ vi.mock('@/lib/db', () => ({
             findUnique: mocks.findUnique,
         },
         $transaction: async (fn: (tx: unknown) => unknown) =>
-            fn({ battleScene: { create: mocks.create } }),
+            fn({
+                battleScene: { create: mocks.create, update: mocks.update },
+                battleMapState: { deleteMany: mocks.deleteState },
+            }),
     },
 }));
 vi.mock('@/lib/server/battle-maps/library-service', () => ({
     getMapMeta: mocks.getMapMeta,
+    getMap: mocks.getMap,
     lockMapRow: mocks.lock,
 }));
 vi.mock('@/lib/server/battles/participant-sources', async (orig) => ({
@@ -189,6 +195,148 @@ describe('writeBattleRecord: patch linked-бою', () => {
                     mapVersion: null,
                 }),
             })
+        );
+    });
+});
+
+describe('writeBattleRecord: patch mapId (перепривʼязка)', () => {
+    const patch = (body: unknown) =>
+        writeBattleRecord('c1', 'u1', 'patch', 'b1', body, undefined, true);
+
+    const row = (over: Record<string, unknown> = {}) => ({
+        id: 'b1',
+        campaignId: 'c1',
+        version: 2,
+        status: 'prepared',
+        participants: [],
+        mapId: 'm1',
+        mapVersion: 4,
+        map: {
+            ...header,
+            weather: 'rain',
+            terrain: { '0:0': { kind: 'hazard' } },
+        },
+        ...over,
+    });
+
+    beforeEach(() => {
+        vi.clearAllMocks();
+        mocks.findUnique.mockResolvedValue(row());
+    });
+
+    it('активний бій -> 409', async () => {
+        mocks.findUnique.mockResolvedValue(row({ status: 'active' }));
+
+        await expect(patch({ mapId: 'm2' })).rejects.toMatchObject({
+            status: 409,
+            message: API_ERRORS.BATTLE_MAP_RELINK_STARTED,
+        });
+        expect(mocks.update).not.toHaveBeenCalled();
+    });
+
+    it('інша карта: нова шапка й версія, стан видалено, terrain скинуто, weather лишився', async () => {
+        mocks.getMapMeta.mockResolvedValue({
+            campaignId: 'c1',
+            version: 7,
+            ...size,
+            header: { ...header, opacity: 0.8 },
+        });
+
+        await patch({ mapId: 'm2' });
+
+        expect(mocks.update).toHaveBeenCalledWith(
+            expect.objectContaining({
+                data: expect.objectContaining({
+                    map: { ...header, opacity: 0.8, weather: 'rain' },
+                    mapId: 'm2',
+                    mapVersion: 7,
+                }),
+            })
+        );
+        expect(mocks.deleteState).toHaveBeenCalledWith({
+            where: { battleId: 'b1' },
+        });
+    });
+
+    it('чужа кампанія -> 404', async () => {
+        mocks.getMapMeta.mockResolvedValue({
+            campaignId: 'other',
+            version: 1,
+            ...size,
+            header,
+        });
+
+        await expect(patch({ mapId: 'm2' })).rejects.toMatchObject({
+            status: 404,
+        });
+    });
+
+    it('та сама карта: тристороннє злиття зберігає місцевість з бою', async () => {
+        mocks.getMapMeta.mockResolvedValue({
+            campaignId: 'c1',
+            version: 5,
+            ...size,
+            header: { ...header, opacity: 0.9 },
+        });
+        mocks.getMap.mockResolvedValue({ map: header });
+
+        await patch({ mapId: 'm1' });
+
+        expect(mocks.update).toHaveBeenCalledWith(
+            expect.objectContaining({
+                data: expect.objectContaining({
+                    map: expect.objectContaining({
+                        opacity: 0.9,
+                        weather: 'rain',
+                        terrain: { '0:0': { kind: 'hazard' } },
+                    }),
+                    mapVersion: 5,
+                }),
+            })
+        );
+        expect(mocks.deleteState).not.toHaveBeenCalled();
+    });
+
+    it('null: ребра pinned-версії стають inline, привʼязка знята', async () => {
+        mocks.getMap.mockResolvedValue({
+            map: header,
+            walls: ['1:1:e'],
+            bars: ['2:2:s'],
+        });
+
+        await patch({ mapId: null });
+
+        expect(mocks.getMap).toHaveBeenCalledWith('m1', 4);
+        expect(mocks.update).toHaveBeenCalledWith(
+            expect.objectContaining({
+                data: expect.objectContaining({
+                    map: expect.objectContaining({
+                        walls: ['1:1:e'],
+                        bars: ['2:2:s'],
+                    }),
+                    mapId: null,
+                    mapVersion: null,
+                }),
+            })
+        );
+    });
+
+    it('null: забагато ребер -> 422', async () => {
+        mocks.getMap.mockResolvedValue({
+            map: header,
+            walls: Array.from({ length: 7201 }, (_, i) => `${i}:0:e`),
+            bars: [],
+        });
+
+        await expect(patch({ mapId: null })).rejects.toMatchObject({
+            status: 422,
+            message: API_ERRORS.BATTLE_MAP_TOO_MANY_EDGES,
+        });
+    });
+
+    it('map разом із mapId -> 400', async () => {
+        await expect(patch({ mapId: 'm2', map: header })).rejects.toMatchObject(
+            { status: 400 }
         );
     });
 });

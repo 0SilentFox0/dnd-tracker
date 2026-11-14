@@ -547,6 +547,8 @@ export const API_ERRORS = {
     BATTLE_MAP_IN_USE: 'errors.battleMapInUse',
     BATTLE_MAP_NOT_FOUND: 'errors.battleMapNotFound',
     BATTLE_MAP_TOO_LARGE: 'errors.battleMapTooLarge',
+    BATTLE_MAP_TOO_MANY_EDGES: 'errors.battleMapTooManyEdges',
+    BATTLE_MAP_RELINK_STARTED: 'errors.battleMapRelinkStarted',
     BATTLE_TERRAIN_REJECTED: 'errors.battleTerrainRejected',
     BATTLE_BARRIER_ROUNDS: 'errors.battleBarrierRounds',
     BATTLE_ATTACK_ROLL_REQUIRED: 'errors.battleAttackRollRequired',

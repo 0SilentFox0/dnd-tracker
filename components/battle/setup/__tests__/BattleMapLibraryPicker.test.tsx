@@ -23,6 +23,9 @@ function renderPicker(over: Partial<BattleLibraryMap>) {
         visible: true,
         maps: [brief('a', 20), brief('b', 80)],
         isLinked: false,
+        wasLinked: false,
+        isLocked: false,
+        isChanged: false,
         selectedId: null,
         select: vi.fn(),
         ...over,
@@ -41,20 +44,44 @@ describe('BattleMapLibraryPicker', () => {
         await renderPicker({});
 
         expect(
-            screen.getByRole('link', { name: 'Manage maps' }).getAttribute('href')
+            screen
+                .getByRole('link', { name: 'Manage maps' })
+                .getAttribute('href')
         ).toBe('/campaigns/c1/dm/maps');
     });
 
     it('shows the size of the chosen map', async () => {
         await renderPicker({ selectedId: 'a' });
 
-        expect(screen.getByText(/uses this library map \(20×10\)/)).toBeTruthy();
+        expect(
+            screen.getByText(/uses this library map \(20×10\)/)
+        ).toBeTruthy();
     });
 
-    it('explains the linked state and disables the select', async () => {
-        await renderPicker({ isLinked: true, selectedId: 'a' });
+    it('explains the linked state while the select stays usable before start', async () => {
+        await renderPicker({
+            isLinked: true,
+            wasLinked: true,
+            selectedId: 'a',
+        });
 
         expect(screen.getByText(/linked to a library map/)).toBeTruthy();
-        expect(screen.getByRole('combobox').hasAttribute('disabled')).toBe(true);
+        expect(screen.getByRole('combobox').hasAttribute('disabled')).toBe(
+            false
+        );
+    });
+
+    it('locks the select with an explanation for a started battle', async () => {
+        await renderPicker({
+            isLinked: true,
+            wasLinked: true,
+            isLocked: true,
+            selectedId: 'a',
+        });
+
+        expect(screen.getByText(/already started/)).toBeTruthy();
+        expect(screen.getByRole('combobox').hasAttribute('disabled')).toBe(
+            true
+        );
     });
 });

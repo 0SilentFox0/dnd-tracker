@@ -30,6 +30,7 @@ export interface BattleSetupInitial {
     participants: BattlePreparationParticipant[];
     map?: BattleMapConfig | null;
     mapRef?: BattleMapRef | null;
+    status?: string;
     turnTimerSeconds?: number | null;
 }
 
@@ -62,11 +63,12 @@ export function useBattleSetup(
 
     const mapEditor = useBattleMapEditor(initial?.map);
 
-    const libraryMap = useBattleLibraryMap(
-        campaignId,
-        initial?.mapRef,
-        !!battleId
-    );
+    const libraryMap = useBattleLibraryMap(campaignId, {
+        linked: initial?.mapRef,
+        isEdit: !!battleId,
+        status: initial?.status,
+        hadMap: !!initial?.map,
+    });
 
     const form = useBattleForm({
         campaignId,
@@ -77,6 +79,7 @@ export function useBattleSetup(
         library: {
             mapId: libraryMap.selectedId,
             isLinked: libraryMap.isLinked,
+            unlink: libraryMap.isChanged && libraryMap.selectedId === null,
         },
     });
 
@@ -152,6 +155,7 @@ export function useBattleSetupInitial(campaignId: string, battleId: string) {
                           []) as unknown as BattlePreparationParticipant[],
                       map: battle.map ?? null,
                       mapRef: battle.mapRef ?? null,
+                      status: battle.status,
                       turnTimerSeconds: battle.turnTimerSeconds ?? null,
                   }
                 : undefined,

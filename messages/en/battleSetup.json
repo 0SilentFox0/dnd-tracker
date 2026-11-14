@@ -258,6 +258,13 @@
     "linked": "This battle is linked to a library map. Update it from the battle screen.",
     "chosen": "The battle uses this library map ({cols}×{rows}). The custom map editor is hidden.",
     "tooLarge": "Maps with a side over {max} cells cannot be used in battle yet.",
-    "manage": "Manage maps"
+    "manage": "Manage maps",
+    "locked": "The battle has already started: the map cannot be swapped. Reset the battle or press \"Update map\" on the battle screen.",
+    "ownFromLinked": "The battle will switch to its own map: walls and bars are kept, the link to the library is removed.",
+    "relink": {
+      "title": "Change the battle map?",
+      "description": "Terrain and zones of the current map will be reset (weather and motion are kept).",
+      "confirm": "Change"
+    }
   }
 }

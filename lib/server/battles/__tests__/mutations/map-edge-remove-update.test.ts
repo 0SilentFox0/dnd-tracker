@@ -138,6 +138,18 @@ describe('map-update', () => {
             mapRef: { mapId: 'm1', version: 3 },
         });
 
+    const serve = (
+        current: ReturnType<typeof library>,
+        pinned = library({
+            version: 3,
+            map: { cols: 8, rows: 8, background: null, opacity: 0.3 },
+        })
+    ) =>
+        mocks.getMap.mockImplementation(
+            async (_id: string, version?: number) =>
+                version === 3 ? pinned : current
+        );
+
     beforeEach(() => mocks.getMap.mockReset());
 
     it('не linked — mapNotLinked', async () => {
@@ -147,7 +159,7 @@ describe('map-update', () => {
     });
 
     it('та сама версія — без патчу', async () => {
-        mocks.getMap.mockResolvedValue(library({ version: 3 }));
+        serve(library({ version: 3 }));
 
         const out = await mapUpdateMutation(linked(), {});
 
@@ -156,7 +168,7 @@ describe('map-update', () => {
     });
 
     it('нова версія: шапка, runtime-поля збережені, mapRef, prune стану', async () => {
-        mocks.getMap.mockResolvedValue(library());
+        serve(library());
 
         const out = await mapUpdateMutation(
             linked({ removedEdges: ['1:1:e', '2:2:s'], doors: {} }),
@@ -178,7 +190,7 @@ describe('map-update', () => {
     });
 
     it('учасник на клітинці, що стала недоступною — mapUpdateCollision з іменами', async () => {
-        mocks.getMap.mockResolvedValue(
+        serve(
             library({
                 map: {
                     cols: 8,
@@ -204,7 +216,7 @@ describe('map-update', () => {
     });
 
     it('зменшена карта: прибирає місцевість і зони поза межами, двері зниклих ребер', async () => {
-        mocks.getMap.mockResolvedValue(
+        serve(
             library({
                 cols: 4,
                 rows: 4,
@@ -246,5 +258,43 @@ describe('map-update', () => {
         expect(Object.keys(out.scene!.map!.terrain!)).toEqual(['1:1']);
         expect(Object.keys(out.scene!.map!.spellZones!)).toEqual(['in']);
         expect(Object.keys(out.scene!.mapState!.doors)).toEqual(['1:1:e']);
+    });
+
+    it('terrain змінено в бібліотеці — доходить у бій; правка DM лишається', async () => {
+        const base = { cols: 8, rows: 8, background: null, opacity: 0.3 };
+
+        serve(
+            library({
+                map: {
+                    ...base,
+                    terrain: {
+                        '2:2': { kind: 'difficult' },
+                        '3:3': { kind: 'hazard' },
+                    },
+                },
+            }),
+            library({
+                version: 3,
+                map: { ...base, terrain: { '3:3': { kind: 'hazard' } } },
+            })
+        );
+
+        const ctx = linked();
+
+        ctx.meta.map = {
+            ...ctx.meta.map!,
+            terrain: {
+                '0:0': { kind: 'hazard' },
+                '3:3': { kind: 'barrier' },
+            },
+        };
+
+        const out = await mapUpdateMutation(ctx, {});
+
+        expect(out.scene?.map?.terrain).toEqual({
+            '0:0': { kind: 'hazard' },
+            '2:2': { kind: 'difficult' },
+            '3:3': { kind: 'barrier' },
+        });
     });
 });

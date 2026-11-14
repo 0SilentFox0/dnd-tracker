@@ -17,6 +17,7 @@ import { battleAudioCommandSchema } from '@/lib/schemas/music';
 import type { ActionExecutionContext } from '@/lib/server/assistant/types';
 import { loadAudioLibrary } from '@/lib/server/audio/track-store';
 import {
+    getMap,
     getMapMeta,
     lockMapRow,
 } from '@/lib/server/battle-maps/library-service';
@@ -37,7 +38,12 @@ import {
     applyAudioCommand,
     commandNeedsLibrary,
 } from '@/lib/utils/audio/audio-command';
+import { mergeLibraryHeader } from '@/lib/utils/battle/map-storage/merge-header';
 import { withoutEdges } from '@/lib/utils/battle/map-storage/persisted-map';
+import {
+    headerForOtherMap,
+    materializeEdges,
+} from '@/lib/utils/battle/map-storage/relink-scene';
 import type { BattleAudioState } from '@/types/audio';
 import type { BattleMapConfig } from '@/types/battle';
 
@@ -53,9 +59,14 @@ export const patchBattleSchema = z
         description: z.string().nullable().optional(),
         participants: createBattleSchema.shape.participants.optional(),
         map: battleMapSchema.nullable().optional(),
+        mapId: z.string().min(1).nullable().optional(),
         turnTimerSeconds: turnTimerSecondsSchema.nullable().optional(),
     })
-    .strict();
+    .strict()
+    .refine((d) => !(d.map && d.mapId), {
+        message: 'battleSetup.validation.mapAndMapId',
+        path: ['mapId'],
+    });
 export const recordSchemas = {
     create: createBattleSchema,
     patch: patchBattleSchema,
@@ -138,6 +149,66 @@ async function linkedMapFor(
         mapId,
         version: meta.version,
         header: meta.header as unknown as Prisma.InputJsonObject,
+    };
+}
+
+type PinnedMap = BattleMapConfig | null;
+
+/** The new map columns for a PATCH that rebinds, re-pins or unlinks the library map of a prepared battle. */
+async function relinkData(
+    db: Parameters<typeof getMapMeta>[1],
+    campaignId: string,
+    row: BattleScene,
+    pinned: PinnedMap,
+    mapId: string | null
+) {
+    if (mapId === null) {
+        if (!row.mapId) return null;
+
+        const lib = await getMap(row.mapId, row.mapVersion ?? undefined);
+
+        if (!lib) throw new ContentError(API_ERRORS.BATTLE_MAP_NOT_FOUND, 404);
+
+        const inline = materializeEdges(
+            pinned ?? (lib.map as BattleMapConfig),
+            lib
+        );
+
+        if (!inline)
+            throw new ContentError(API_ERRORS.BATTLE_MAP_TOO_MANY_EDGES, 422);
+
+        return {
+            map: inline as unknown as Prisma.InputJsonObject,
+            mapId: null,
+            mapVersion: null,
+        };
+    }
+
+    const linked = await linkedMapFor(db, campaignId, mapId);
+
+    const library = linked.header as unknown as BattleMapConfig;
+
+    let header = headerForOtherMap(pinned, library);
+
+    if (row.mapId === mapId && pinned) {
+        const old =
+            row.mapVersion === linked.version
+                ? library
+                : ((await getMap(mapId, row.mapVersion ?? undefined))?.map as
+                      | BattleMapConfig
+                      | undefined);
+
+        header = mergeLibraryHeader(
+            old ?? withoutEdges(pinned),
+            library,
+            pinned
+        );
+    }
+
+    return {
+        map: header as unknown as Prisma.InputJsonObject,
+        mapId,
+        mapVersion: linked.version,
     };
 }
 
@@ -280,9 +351,14 @@ export async function writeBattleRecord(
     if (!row) throw new ContentError(API_ERRORS.NOT_FOUND, 404);
 
     if (operation === 'patch') {
-        const { map: rawMap, ...rest } = input as z.infer<
-            typeof patchBattleSchema
-        >;
+        const {
+            map: rawMap,
+            mapId: relinkId,
+            ...rest
+        } = input as z.infer<typeof patchBattleSchema>;
+
+        if (relinkId !== undefined && row.status !== 'prepared')
+            throw new ContentError(API_ERRORS.BATTLE_MAP_RELINK_STARTED, 409);
 
         if (rest.participants)
             await assertParticipantSources(
@@ -314,19 +390,53 @@ export async function writeBattleRecord(
 
         const unlink = row.mapId && map === null;
 
-        await prisma.battleScene.update({
-            where: { id: row.id, version: row.version },
-            data: {
-                ...rest,
-                ...(rest.participants && {
-                    participants:
-                        rest.participants as unknown as Prisma.InputJsonValue,
-                }),
-                ...(map !== undefined && { map: map ?? Prisma.DbNull }),
-                ...(unlink && { mapId: null, mapVersion: null }),
-                version: { increment: 1 },
-            },
-        });
+        const save = (
+            db: Pick<
+                Prisma.TransactionClient,
+                'battleScene' | 'battleMapState'
+            >,
+            relink?: Awaited<ReturnType<typeof relinkData>>
+        ) =>
+            db.battleScene.update({
+                where: { id: row.id, version: row.version },
+                data: {
+                    ...rest,
+                    ...(rest.participants && {
+                        participants:
+                            rest.participants as unknown as Prisma.InputJsonValue,
+                    }),
+                    ...(relink
+                        ? relink
+                        : {
+                              ...(map !== undefined && {
+                                  map: map ?? Prisma.DbNull,
+                              }),
+                              ...(unlink && { mapId: null, mapVersion: null }),
+                          }),
+                    version: { increment: 1 },
+                },
+            });
+
+        if (relinkId === undefined) await save(prisma);
+        else
+            await prisma.$transaction(async (tx) => {
+                if (relinkId) await lockMapRow(tx, relinkId, 'share');
+
+                const relink = await relinkData(
+                    tx,
+                    campaignId,
+                    row,
+                    pinned,
+                    relinkId
+                );
+
+                await save(tx, relink ?? undefined);
+
+                if (relink && row.mapId !== relinkId)
+                    await tx.battleMapState.deleteMany({
+                        where: { battleId: row.id },
+                    });
+            });
 
         return { id: row.id, version: row.version + 1 };
     }
