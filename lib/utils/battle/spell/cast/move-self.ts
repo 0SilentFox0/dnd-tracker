@@ -1,4 +1,5 @@
 import { textRef } from '@/lib/i18n/text-ref';
+import { cellsAdjacentOnMap } from '@/lib/utils/battle/grid/adjacency';
 import {
     cellsByDistance,
     footprint,
@@ -43,7 +44,7 @@ export function adjacentFreeCell(
     const near = cellsByDistance(map, targetAnchor).filter(
         (a) =>
             fits(map, a, size, blocked) &&
-            footprintDistance(footprint(a, size), targetCells) <= 1
+            cellsAdjacentOnMap(map, footprint(a, size), targetCells)
     );
 
     const away = (a: GridPoint) =>

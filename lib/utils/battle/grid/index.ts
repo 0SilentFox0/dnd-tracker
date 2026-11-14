@@ -1,3 +1,4 @@
+export * from './adjacency';
 export * from './attack-reach';
 export * from './background';
 export * from './calibration';

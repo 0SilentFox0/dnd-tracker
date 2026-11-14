@@ -29,7 +29,8 @@ import {
     type CritKind,
     randomCritEffect,
 } from '@/lib/utils/battle/crit-choice/catalog';
-import { isAdjacent, isOnMap } from '@/lib/utils/battle/grid/occupancy';
+import { isAdjacentOnMap } from '@/lib/utils/battle/grid/adjacency';
+import { isOnMap } from '@/lib/utils/battle/grid/occupancy';
 import { isHostile } from '@/lib/utils/battle/modes/engine';
 import { getEffectiveArmorClass } from '@/lib/utils/battle/participant/helpers';
 import { savesOf } from '@/lib/utils/battle/saves/access';
@@ -81,7 +82,9 @@ function resolveSpellAttack(
     const id = target.basicInfo.id;
 
     const adjacent =
-        isOnMap(caster) && isOnMap(target) && isAdjacent(caster, target);
+        isOnMap(caster) &&
+        isOnMap(target) &&
+        isAdjacentOnMap(flow.ctx.map, caster, target);
 
     const targeting = spell.definition.targeting;
 

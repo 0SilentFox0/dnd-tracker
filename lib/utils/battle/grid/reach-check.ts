@@ -1,6 +1,8 @@
+import { isAdjacentOnMap } from './adjacency';
 import { cellFeetOf } from './cell-feet';
 import { footprintDistance } from './geometry';
 import { cellsOf, isOnMap } from './occupancy';
+import { wallsAllowSight } from './sight';
 
 import { AttackType } from '@/lib/constants/battle';
 import { textRef } from '@/lib/i18n/text-ref';
@@ -101,7 +103,7 @@ export function rangeDisadvantageReasons(
         (p) =>
             isHostile(map, attacker, p) &&
             isOnMap(p) &&
-            footprintDistance(mine, cellsOf(p)) <= 1 &&
+            isAdjacentOnMap(map, attacker, p) &&
             modeEngages(map, attacker, p)
     );
 
@@ -150,11 +152,15 @@ export function attackReachError(
             return modeTargetHiddenText(map, attacker, placed);
         }
 
-        return (
-            placed
-                .map((t) => modeMeleeBlockedText(map, attacker, t))
-                .find(Boolean) ?? null
-        );
+        const modeBlocked = placed
+            .map((t) => modeMeleeBlockedText(map, attacker, t))
+            .find(Boolean);
+
+        if (modeBlocked) return modeBlocked;
+
+        return placed.some((t) => !wallsAllowSight(map, attacker, t))
+            ? textRef(REJECT.targetNotNear)
+            : null;
     }
 
     const engaged =
@@ -164,7 +170,7 @@ export function attackReachError(
             (p) =>
                 isHostile(map, attacker, p) &&
                 isOnMap(p) &&
-                distanceTo(p) <= 1 &&
+                isAdjacentOnMap(map, attacker, p) &&
                 modeEngages(map, attacker, p)
         );
 

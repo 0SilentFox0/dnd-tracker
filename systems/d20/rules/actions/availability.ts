@@ -14,7 +14,8 @@ import { actionReason } from '@/lib/utils/battle/actions/reasons';
 import type { CoreActionAvailability } from '@/lib/utils/battle/actions/types';
 import { canAttackFromPool } from '@/lib/utils/battle/attack/attacks-left';
 import { hasCondition } from '@/lib/utils/battle/conditions/query';
-import { bothOnMap, isAdjacent } from '@/lib/utils/battle/grid/occupancy';
+import { isAdjacentOnMap } from '@/lib/utils/battle/grid/adjacency';
+import { bothOnMap } from '@/lib/utils/battle/grid/occupancy';
 import { baseMovement, remainingMovement } from '@/lib/utils/battle/grid/path';
 import { isHostile } from '@/lib/utils/battle/modes/engine';
 import type { Ruleset } from '@/lib/utils/rules/schema';
@@ -77,7 +78,7 @@ export function coreActionTargets(
             p.basicInfo.id !== actor.basicInfo.id &&
             !p.battleData.reserved &&
             sideOk(p) &&
-            (!bothOnMap(map, actor, p) || isAdjacent(actor, p))
+            (!bothOnMap(map, actor, p) || isAdjacentOnMap(map, actor, p))
     );
 }
 

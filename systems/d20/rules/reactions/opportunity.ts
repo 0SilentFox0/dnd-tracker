@@ -11,6 +11,7 @@ import type { ServerStrike } from '@/lib/utils/battle/actions/types';
 import { type ActionFlow, put } from '@/lib/utils/battle/common/action-flow';
 import { conditionSourceIds } from '@/lib/utils/battle/conditions';
 import {
+    cellsConnected,
     cellsOf,
     footprint,
     footprintDistance,
@@ -135,7 +136,8 @@ export function resolveOpportunityAttacks(
 
             if (
                 footprintDistance(fromCells, reach) > range ||
-                footprintDistance(toCells, reach) <= range
+                footprintDistance(toCells, reach) <= range ||
+                !cellsConnected(input.map, 'sight', fromCells, reach)
             )
                 continue;
 

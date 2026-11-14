@@ -6,7 +6,7 @@ import {
 import {
     bothOnMap,
     cellsOf,
-    footprintDistance,
+    isAdjacentOnMap,
     isOnMap,
 } from '@/lib/utils/battle/grid';
 import {
@@ -67,7 +67,7 @@ export function cleaveTargets(
             isTargetable(p) &&
             !isDormant(p) &&
             isOnMap(p) &&
-            footprintDistance(mine, cellsOf(p)) <= 1 &&
+            isAdjacentOnMap(map, attacker, p) &&
             modeMeleeBlockedText(map, attacker, p) === null
     );
 

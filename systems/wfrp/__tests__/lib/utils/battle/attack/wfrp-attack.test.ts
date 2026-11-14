@@ -6,6 +6,7 @@ import {
     ParticipantSide,
 } from '@/lib/constants/battle';
 import { makeParticipant, seq } from '@/lib/utils/abilities/__tests__/fixtures';
+import { testMap } from '@/lib/utils/battle/__tests__/fixtures/placed';
 import { processAttack } from '@/lib/utils/battle/attack/process';
 import { resolveServerAttack } from '@/lib/utils/battle/attack/server-attack';
 import type { ActionFlow } from '@/lib/utils/battle/common/action-flow';
@@ -19,7 +20,11 @@ import { attackOf } from '@/systems/wfrp/rules/__tests__/slot-fixtures';
 import { DEFAULT_CHARACTERISTICS } from '@/systems/wfrp/rules/characteristics/keys';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
 import type { SceneMomentum } from '@/systems/wfrp/rules/slots';
-import type { BattleAttack, BattleParticipant } from '@/types/battle';
+import type {
+    BattleAttack,
+    BattleMapConfig,
+    BattleParticipant,
+} from '@/types/battle';
 
 const sword: BattleAttack = {
     id: 'sw',
@@ -78,6 +83,7 @@ function strike(
         others?: BattleParticipant[];
         rules?: typeof WFRP_RULES;
         momentum?: SceneMomentum;
+        map?: BattleMapConfig;
     } = {}
 ) {
     const attacker = opts.attacker ?? fighter('a', ParticipantSide.ALLY);
@@ -98,6 +104,7 @@ function strike(
         rng,
         rules: opts.rules ?? WFRP_RULES,
         sceneState: opts.momentum && sceneOf(opts.momentum),
+        map: opts.map,
     });
 }
 
@@ -272,6 +279,31 @@ describe('WFRP percentile attack', () => {
                     .attackRoll
             )?.target
         ).toBe(50);
+    });
+
+    it('a wall between attacker and target removes the outnumbering bonus', () => {
+        const cell = (x: number, y: number) => ({ x, y });
+
+        const attacker = fighter('a', ParticipantSide.ALLY, {
+            position: cell(0, 0),
+        });
+
+        const target = fighter('t', ParticipantSide.ENEMY, {
+            position: cell(1, 0),
+        });
+
+        const friend = fighter('f', ParticipantSide.ALLY, {
+            position: cell(1, 1),
+        });
+
+        const target40 = (map: BattleMapConfig) =>
+            attackOf(
+                strike(30, 80, { attacker, target, others: [friend], map })
+                    .attackRoll
+            )?.target;
+
+        expect(target40(testMap(4, 4))).toBe(50);
+        expect(target40(testMap(4, 4, { walls: ['0:0:e'] }))).toBe(40);
     });
 
     it('an unconscious target aborts without crashing', () => {
