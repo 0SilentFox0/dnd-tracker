@@ -277,7 +277,7 @@
     "badges": {
       "thorns": "-{value} attack",
       "rust": "-{value} AC",
-      "raincloud": "-{value} morale",
+      "raincloud": "-{value}",
       "might": "+attack",
       "siphon": "-{value}% damage",
       "stoneskin": "+AC"

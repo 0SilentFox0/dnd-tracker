@@ -114,7 +114,7 @@ Core бачить `systems/*` лише через корені (`SYSTEM_ROOTS`, 
 - Блокування: зміна `system.key` у кампанії з `characters`/`units` → 409 `SYSTEM_LOCKED`; зміна `modules` — 422 `SYSTEM_MODULES_INVALID`, 409 `SYSTEM_MODULES_IN_BATTLE` (лише активний бій), 409 `SYSTEM_MODULE_CONFIRM` (`toggle: "setup"`).
 - `system` не механіка: вкладки правил = секції композиції.
 
-**UI-слоти Ч23.** `SystemUi.dmPages: Record<section, ComponentType<DmPageProps>>` (`view`: list/new/edit, `data`) — сторінки видів контенту модулів (`classes`, `backgrounds` — d20; `skills`, `skill-trees`, `main-skills` — skilltrees; `artifact-sets` — artifactsets; `careers` — wfrp); `app/**` рендерить `SystemDmPage`, 404 — `dmSectionLayout`/`notFound`. `SystemUi.fx.dice: SystemDiceSource[]` (`(event) => SystemDice | null`, конкатенація модулів; `morale` дає кубик перевірки моралі), core-хуки `useBattleFxQueue`/`useFxImpacts`/`useBattleMapScene` беруть слот параметром.
+**UI-слоти Ч23.** `SystemUi.dmPages: Record<section, ComponentType<DmPageProps>>` (`view`: list/new/edit, `data`) — сторінки видів контенту модулів (`classes`, `backgrounds` — d20; `skills`, `skill-trees`, `main-skills` — skilltrees; `artifact-sets` — artifactsets; `careers` — wfrp); `app/**` рендерить `SystemDmPage`, 404 — `dmSectionLayout`/`notFound`. `SystemUi.fx.dice: SystemDiceSource[]` (`(event) => SystemDice | null`, конкатенація модулів; `morale` дає кубик перевірки моралі); `SystemUi.fx.badges: Partial<Record<FxBadgeKey, TextRef>>` — текст бейджа замість нейтрального core-підпису (`morale` → `raincloud` «−N мораль»; дубль ключа між модулями = `CompositionError`), core-хуки `useBattleFxQueue`/`useFxImpacts`/`useBattleMapScene` беруть слот параметром.
 
 ## Ratchet (після Ч18b)
 

@@ -120,4 +120,15 @@ describe('composeUi', () => {
 
         expect(out.HeroStats).toBe(Wrapped);
     });
+
+    it('two addons with the same fx.badges key collide', () => {
+        const badge = (message: string) => ({
+            id: message,
+            build: () => ({ fx: { badges: { raincloud: { message } } } }),
+        });
+
+        expect(() => composeUi(base, [badge('a.b'), badge('c.d')])).toThrow(
+            /duplicate key "raincloud" in fx\.badges/
+        );
+    });
 });

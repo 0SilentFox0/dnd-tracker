@@ -1,4 +1,5 @@
 {
+  "fxBadge": "-{value} morale",
   "extraTitle": "Fighting spirit",
   "extraText": "{name} gets an extra turn at the end of the round",
   "detail": "d10 = {d10} · morale {morale}",

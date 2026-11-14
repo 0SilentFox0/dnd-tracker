@@ -277,7 +277,7 @@
     "badges": {
       "thorns": "−{value} атака",
       "rust": "−{value} КБ",
-      "raincloud": "−{value} мораль",
+      "raincloud": "−{value}",
       "might": "+атака",
       "siphon": "−{value}% шкоди",
       "stoneskin": "+КБ"

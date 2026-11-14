@@ -1,4 +1,5 @@
 {
+  "fxBadge": "−{value} мораль",
   "extraTitle": "Бойовий дух",
   "extraText": "{name} отримує додатковий хід наприкінці раунду",
   "detail": "d10 = {d10} · мораль {morale}",
