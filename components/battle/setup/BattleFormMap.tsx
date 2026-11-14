@@ -2,6 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 
+import { GridCalibration } from './GridCalibration';
 import { ToggleRow } from './ToggleRow';
 
 import { BattleMap } from '@/components/battle/map';
@@ -205,6 +206,7 @@ export function BattleFormMap({ editor }: { editor: BattleMapEditor }) {
                                 }
                             />
                         </div>
+                        <GridCalibration editor={editor} />
                         <RangeRow
                             id="map-opacity"
                             label={t('opacity', {

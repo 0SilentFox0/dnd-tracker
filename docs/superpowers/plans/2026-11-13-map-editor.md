@@ -10,7 +10,7 @@
 - Розгортання: feature flag (на рівні кампанії) на етапи 0, D, E, F, G; A, B, C без прапора. Деплой — після Ч13 backfill (правило E2).
 
 ## Спайки (до відповідних етапів, 1–2 дні кожен, результат — запис у `docs/superpowers/research/`)
-1. **Автодетект сітки** — до етапу A: 5 реальних карт користувача; метрика: частка карт, де знайдено сітку з похибкою < 5% клітинки. Якщо < 3/5 — A робить лише ручне калібрування, автодетект переноситься.
+1. **Автодетект сітки** — до етапу A: 5 реальних карт користувача; метрика: частка карт, де знайдено сітку з похибкою < 5% клітинки. Якщо < 3/5 — A робить лише ручне калібрування, автодетект переноситься. **Результат 2026-11-14: метрика не виконана (0/5 підтверджено) — A лише ручне; `docs/superpowers/research/2026-11-14-grid-autodetect-spike.md`, детальний план `2026-11-14-map-editor-stage-a.md`.**
 2. **Canvas 2D на чанках 16×16, 200×200, середній телефон** — до етапу D: прототип із pan/zoom; FPS ≥ 30 і відсутність OOM на iOS Safari; інакше переглянути підхід (OffscreenCanvas, менший чанк, WebGL).
 3. **Пілот AI-текстур** — до етапу E: 6 зображень (`tiles_stone-floor_1`, `tiles_grass_1`, `tiles_wood-planks_1`, `tiles_wall-stone`, `tiles_barrel`, `tiles_door-wood-closed`), перевірка за `docs/assets/tile-prompts/README.md`.
 4. **Аудит міграції сховища** — до етапу 0: scene templates, content/constructor layers, import/export (`content-snapshot.ts`), AI-проєкція карти (`lib/ai/tools/projection.ts`), `grep -rn "BattleMapConfig\|battleMapSchema" lib/server lib/ai`.
@@ -27,8 +27,7 @@
 
 ## Етап A — Калібрування сітки
 - [ ] Модель: `backgroundRows?` у `BattleMapConfig` + Zod (`lib/schemas/battles.ts`); `backgroundBox` враховує окремі осі (`grid/background.ts`).
-- [ ] Чисті модулі `grid/calibration/`: `fromCellRect`, `detectGrid`, `nudge` + тести (синтетичні сітки, шум, зсув, неквадратні, «немає сітки»).
-- [ ] `lib/utils/common/image-pixels.ts` (`grayPixels` через `drawResized` + `getImageData`).
+- [ ] Чисті модулі `grid/calibration/`: `fromCellRect`, `nudge` (`detectGrid` відкладено після спайку) + тести (синтетичні сітки, шум, зсув, неквадратні, «немає сітки»).
 - [ ] UI: `GridCalibration` у `BattleFormMap`, хук `useGridCalibration`, `actions.applyCalibration` у `useBattleMapEditor`.
 - [ ] Поведінка при заміні фону (зберегти калібрування лише за того самого розміру).
 - [ ] i18n (`battleSetup.map.calibration.*`, uk+en), whats-new, hint.

@@ -37,6 +37,20 @@ export function backgroundColsOf(
     );
 }
 
+/** Висота фону в клітинках: збережена або з пропорцій зображення при квадратних клітинках. */
+export function backgroundRowsOf(
+    map: Pick<
+        BattleMapConfig,
+        'cols' | 'rows' | 'backgroundCols' | 'backgroundRows'
+    >,
+    img: ImageSize
+): number {
+    return (
+        map.backgroundRows ??
+        (backgroundColsOf(map, img) * img.height) / img.width
+    );
+}
+
 export function impliedCellPx(
     map: Pick<BattleMapConfig, 'cols' | 'rows' | 'backgroundCols'>,
     img: ImageSize
@@ -55,7 +69,7 @@ export interface BackgroundBox {
 export function backgroundBox(
     map: Pick<
         BattleMapConfig,
-        'cols' | 'rows' | 'backgroundCols' | 'gridOffset'
+        'cols' | 'rows' | 'backgroundCols' | 'backgroundRows' | 'gridOffset'
     >,
     cellPx: number,
     aspect: number | null
@@ -67,7 +81,11 @@ export function backgroundBox(
     if (map.backgroundCols && aspect) {
         const width = map.backgroundCols * cellPx;
 
-        return { left, top, width, height: width * aspect };
+        const height = map.backgroundRows
+            ? map.backgroundRows * cellPx
+            : width * aspect;
+
+        return { left, top, width, height };
     }
 
     return { left, top, width: map.cols * cellPx, height: map.rows * cellPx };

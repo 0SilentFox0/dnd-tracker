@@ -371,6 +371,8 @@ export interface BattleMapConfig {
     spellZones?: Record<string, SpellZoneRuntime>;
     /** Ширина фону в клітинках (з повзунка «Розмір клітинки»); без неї фон вписується в cols×rows */
     backgroundCols?: number;
+    /** Висота фону в клітинках; без неї береться з пропорцій зображення (клітинки фону квадратні) */
+    backgroundRows?: number;
     /** Зсув сітки відносно фону, частки клітинки 0 ≤ v < 1 */
     gridOffset?: { x: number; y: number };
     maze?: MazeConfig | null;

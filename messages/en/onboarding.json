@@ -101,6 +101,10 @@
         "title": "Balance and reserve",
         "body": "Balance fits the enemies' strength to the player party; there is no separate difficulty level. Participants can be kept in reserve and brought into the battle later."
       },
+      "grid-calibration": {
+        "title": "Grid calibration",
+        "body": "If the grid does not match the map image, outline one cell on the image: the cell size and offset are set automatically. Fine-tune with the arrows."
+      },
       "battle-scene": {
         "title": "Running a battle",
         "body": "You see the whole map and all sides. You take the units' turns yourself, players act from their phones; the server calculates rolls and damage."

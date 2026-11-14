@@ -22,6 +22,9 @@ vi.mock('@/lib/hooks/common', async (orig) => ({
     useImageSize: (src: string | null) =>
         src ? { width: 1980, height: 1200 } : null,
 }));
+vi.mock('@/components/onboarding/OnboardingHint', () => ({
+    OnboardingHint: () => null,
+}));
 vi.stubGlobal(
     'ResizeObserver',
     class {
@@ -393,5 +396,55 @@ describe('BattleFormMap', () => {
             screen.getByRole('button', { name: 'battle.map.motion.off' })
         );
         expect(seen.editor.state.value?.motion).toBeNull();
+    });
+
+    it('калібрування: обведення клітинки на зображенні задає сітку, нуджинг зсуває зсув', () => {
+        render(<Harness />);
+        enable();
+
+        fireEvent.click(
+            screen.getByRole('button', {
+                name: 'battleSetup.map.calibration.start',
+            })
+        );
+
+        const surface = screen.getByTestId('calibration-surface');
+
+        surface.getBoundingClientRect = () =>
+            ({ left: 0, top: 0, width: 990, height: 600 }) as DOMRect;
+
+        fireEvent.pointerDown(surface, {
+            pointerId: 1,
+            clientX: 100,
+            clientY: 50,
+        });
+        fireEvent.pointerMove(surface, {
+            pointerId: 1,
+            buttons: 1,
+            clientX: 200,
+            clientY: 150,
+        });
+        expect(screen.getByTestId('calibration-draft')).toBeTruthy();
+
+        fireEvent.click(
+            screen.getByRole('button', {
+                name: 'battleSetup.map.calibration.apply',
+            })
+        );
+
+        expect(screen.queryByTestId('calibration-surface')).toBeNull();
+        expect(seen.editor.state.map).toMatchObject({
+            cols: 10,
+            rows: 6,
+            backgroundCols: 9.9,
+            backgroundRows: 6,
+        });
+
+        fireEvent.click(
+            screen.getByRole('button', {
+                name: 'battleSetup.map.calibration.nudgeCell: battleSetup.map.calibration.right',
+            })
+        );
+        expect(seen.editor.state.map.gridOffset?.x).toBeCloseTo(0.01 + 0);
     });
 });

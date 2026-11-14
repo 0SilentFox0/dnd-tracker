@@ -10,6 +10,7 @@ const list: OnboardingHintDef[] = [
     { id: 'dm.artifacts', audience: 'dm', helpSlug: 'dm-world' },
     { id: 'dm.battles', audience: 'dm', helpSlug: 'dm-battle' },
     { id: 'dm.battle-setup', audience: 'dm', helpSlug: 'dm-units-balance' },
+    { id: 'dm.grid-calibration', audience: 'dm', helpSlug: 'dm-units-balance' },
     { id: 'dm.battle-scene', audience: 'dm', helpSlug: 'dm-battle' },
     { id: 'dm.scenario', audience: 'dm', helpSlug: 'dm-scenario-show' },
     { id: 'dm.graph', audience: 'dm', helpSlug: 'dm-scenario-show' },

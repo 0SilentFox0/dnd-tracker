@@ -116,7 +116,26 @@
     "hazardType": "Type",
     "background": "Map background",
     "defaultBackground": "Default background",
-    "noPlayable": "At least one free 2×2 area must remain"
+    "noPlayable": "At least one free 2×2 area must remain",
+    "calibration": {
+      "title": "Grid calibration",
+      "start": "Outline a cell",
+      "squareN": "Square N×N cells",
+      "apply": "Apply",
+      "cancel": "Cancel",
+      "instructions": "Drag on the image to outline one cell (or an N×N square of cells); the grid follows your outline.",
+      "previewOpacity": "Grid preview opacity",
+      "nudgePx": "Nudge, 1 px",
+      "nudgeCell": "Nudge, 0.01 cell",
+      "left": "left",
+      "right": "right",
+      "up": "up",
+      "down": "down",
+      "keepTitle": "Keep the grid calibration?",
+      "keepDescription": "The new image has the same size as the previous one. Keep the cell size and grid offset?",
+      "keep": "Keep",
+      "reset": "Reset"
+    }
   },
   "characters": {
     "title": "Characters",

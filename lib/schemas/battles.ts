@@ -245,6 +245,7 @@ export const battleMapSchema = z
             )
             .optional(),
         backgroundCols: z.number().positive().max(200).optional(),
+        backgroundRows: z.number().positive().max(200).optional(),
         gridOffset: z
             .object({ x: z.number().min(0).lt(1), y: z.number().min(0).lt(1) })
             .optional(),

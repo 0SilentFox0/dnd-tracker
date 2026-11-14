@@ -14,13 +14,17 @@ import { textRef } from '@/lib/i18n/text-ref';
 import {
     applyMargins,
     clampMargins,
+    type GridCalibration,
     gridForCellSize,
     hasPlayableArea,
     hazardDamage,
+    type ImageSize,
     impliedCellPx,
     inferMargins,
     isPreviewSafeBackground,
     type Margins,
+    MAX_SIDE,
+    MIN_SIDE,
     paintCells,
     resizeMap,
     type SetupTool,
@@ -30,6 +34,7 @@ import {
     type MapModeDefinition,
     type MapModeKey,
 } from '@/lib/utils/battle/modes';
+import { clamp } from '@/lib/utils/common/clamp';
 import type { BattleMapConfig, GridPoint, MapMotion } from '@/types/battle';
 import type { LogLine } from '@/types/text';
 
@@ -37,6 +42,11 @@ const MODE_KEYS = Object.keys(MAP_MODE_REGISTRY) as MapModeKey[];
 
 const modeOf = (key: MapModeKey) =>
     MAP_MODE_REGISTRY[key] as MapModeDefinition<unknown>;
+
+interface KeptCalibration {
+    size: ImageSize;
+    calibration: Partial<GridCalibration>;
+}
 
 const NO_MARGINS: Margins = { top: 0, right: 0, bottom: 0, left: 0 };
 
@@ -91,28 +101,31 @@ export function useBattleMapEditor(
         setNotice(null);
     }, []);
 
-    const image = useImageSize(
-        enabled
-            ? isPreviewSafeBackground(map.background)
-                ? map.background
-                : DEFAULT_MAP_BACKGROUND
-            : null
-    );
+    const imageSrc = isPreviewSafeBackground(map.background)
+        ? map.background
+        : DEFAULT_MAP_BACKGROUND;
+
+    const image = useImageSize(enabled ? imageSrc : null);
 
     const resize = useCallback(
-        (cols: number, rows: number, backgroundCols: number | undefined) => {
+        (
+            cols: number,
+            rows: number,
+            calibration?: Partial<GridCalibration>
+        ) => {
             const nextMargins = clampMargins({ cols, rows }, margins);
 
-            const { backgroundCols: _old, ...sized } = applyMargins(
+            const {
+                backgroundCols: _cols,
+                backgroundRows: _rows,
+                ...sized
+            } = applyMargins(
                 resizeMap(applyMargins(map, NO_MARGINS, margins), cols, rows),
                 nextMargins,
                 NO_MARGINS
             );
 
-            const next =
-                backgroundCols === undefined
-                    ? sized
-                    : { ...sized, backgroundCols };
+            const next = { ...sized, ...calibration };
 
             if (!hasPlayableArea(next)) return setNotice(NO_PLAYABLE_NOTICE);
 
@@ -125,7 +138,7 @@ export function useBattleMapEditor(
 
     // ручний розмір скидає масштаб фону: він знову вписується в сітку, а повзунок показує нову клітинку
     const setSize = useCallback(
-        (cols: number, rows: number) => resize(cols, rows, undefined),
+        (cols: number, rows: number) => resize(cols, rows),
         [resize]
     );
 
@@ -135,9 +148,29 @@ export function useBattleMapEditor(
 
             const grid = gridForCellSize(image, cellPx);
 
-            resize(grid.cols, grid.rows, grid.backgroundCols);
+            resize(grid.cols, grid.rows, {
+                backgroundCols: grid.backgroundCols,
+            });
         },
         [image, resize]
+    );
+
+    const applyCalibration = useCallback(
+        (calibration: GridCalibration) =>
+            resize(
+                clamp(
+                    Math.round(calibration.backgroundCols),
+                    MIN_SIDE,
+                    MAX_SIDE
+                ),
+                clamp(
+                    Math.round(calibration.backgroundRows),
+                    MIN_SIDE,
+                    MAX_SIDE
+                ),
+                calibration
+            ),
+        [resize]
     );
 
     const setGridOffset = useCallback(
@@ -164,15 +197,47 @@ export function useBattleMapEditor(
         []
     );
 
-    // масштаб і зсув належать старому фону
+    const [kept, setKept] = useState<KeptCalibration | null>(null);
+
+    // масштаб і зсув належать старому фону; той самий розмір нового зображення дає вибір їх зберегти
     const setBackground = useCallback(
-        (background: string | null) =>
-            setMap(({ backgroundCols: _cols, gridOffset: _offset, ...m }) => ({
-                ...m,
-                background,
-            })),
-        []
+        (background: string | null) => {
+            const { backgroundCols, backgroundRows, gridOffset } = map;
+
+            const calibration = { backgroundCols, backgroundRows, gridOffset };
+
+            setKept(
+                image && Object.values(calibration).some(Boolean)
+                    ? { size: image, calibration }
+                    : null
+            );
+            setMap(
+                ({
+                    backgroundCols: _cols,
+                    backgroundRows: _rows,
+                    gridOffset: _offset,
+                    ...m
+                }) => ({ ...m, background })
+            );
+        },
+        [map, image]
     );
+
+    const pendingKeep =
+        kept &&
+        image &&
+        image.width === kept.size.width &&
+        image.height === kept.size.height
+            ? kept.calibration
+            : null;
+
+    const keepCalibration = useCallback(() => {
+        if (pendingKeep) setMap((m) => ({ ...m, ...pendingKeep }));
+
+        setKept(null);
+    }, [pendingKeep]);
+
+    const dropCalibration = useCallback(() => setKept(null), []);
 
     const setMode = useCallback((key: MapModeKey, on: boolean) => {
         const mode = modeOf(key);
@@ -248,6 +313,9 @@ export function useBattleMapEditor(
             notice,
             value: enabled ? map : null,
             cellPx: image ? impliedCellPx(map, image) : null,
+            image,
+            imageSrc,
+            pendingKeep,
         },
         brush,
         motionTool,
@@ -256,6 +324,9 @@ export function useBattleMapEditor(
             setSize,
             setCellSize,
             setGridOffset,
+            applyCalibration,
+            keepCalibration,
+            dropCalibration,
             setOpacity,
             setMargins,
             setTool,

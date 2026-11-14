@@ -1,4 +1,8 @@
 {
+  "2026-11-grid-calibration": {
+    "title": "Grid calibration",
+    "body": "On the battle map setup you can outline one cell on the background image (or an N×N square) and the grid fits it, including non-square cells. Arrows nudge the grid by 1 px or 0.01 cell; when you replace the background with an image of the same size you can keep the calibration."
+  },
   "2026-11-13-rule-modules": {
     "title": "Rule modules",
     "body": "In the campaign rules, the System section, you can now turn modules on and off: morale, retaliation, hero scaling, skill trees, artifact sets and unit stacks. Turning a module off deletes nothing."

@@ -159,6 +159,24 @@ describe('battleMapSchema.gridOffset і backgroundCols', () => {
     });
 });
 
+describe('battleMapSchema.backgroundRows', () => {
+    it('додатне число до 200, необовʼязкове', () => {
+        const parsed = battleMapSchema.safeParse({
+            ...map,
+            backgroundRows: 9.5,
+        });
+
+        expect(parsed.success && parsed.data.backgroundRows).toBe(9.5);
+        expect(battleMapSchema.safeParse(map).success).toBe(true);
+        expect(
+            battleMapSchema.safeParse({ ...map, backgroundRows: 0 }).success
+        ).toBe(false);
+        expect(
+            battleMapSchema.safeParse({ ...map, backgroundRows: 201 }).success
+        ).toBe(false);
+    });
+});
+
 describe('battleMapSchema.weather', () => {
     it('приймає 7 видів погоди, null і відсутність; відхиляє невідоме', () => {
         expect(battleMapSchema.safeParse(map).success).toBe(true);

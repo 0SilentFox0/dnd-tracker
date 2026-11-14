@@ -30,7 +30,10 @@ Difficult terrain, `obscured` cells, spell walls and `spellZones` are core: they
 
 ## Зміна фону в бою
 
-- Операція `map-background` (`mutations/map-background`, лише ДМ, активний бій): пише `map.background` і скидає `backgroundCols`/`gridOffset` (як `setBackground` у налаштуванні). Файл/data-URL вантажиться в bucket `battle-maps` через `resolveMapBackgroundForPersistence` у самій мутації (`campaignId` береться з `params.id`), у сцені лежить лише URL.
+- Операція `map-background` (`mutations/map-background`, лише ДМ, активний бій): пише `map.background` і скидає `backgroundCols`/`backgroundRows`/`gridOffset` (як `setBackground` у налаштуванні). Файл/data-URL вантажиться в bucket `battle-maps` через `resolveMapBackgroundForPersistence` у самій мутації (`campaignId` береться з `params.id`), у сцені лежить лише URL.
 - Для гравців перехід робить `MapBackground`: старий шар лишається, новий монтується з `opacity: 0` і з'являється після `onLoad` (800 мс, `BACKGROUND_FADE_MS`), старий одночасно зникає й знімається. `prefers-reduced-motion` — миттєва заміна. Те саме працює з `map.motion` (`MotionBackground.onReady`).
 - Панель ДМ — `MapBackgroundPanel`, хук `useMapBackgroundTool` (палітра `background` у `palettes.ts` взаємовиключна з рештою). У реєстрі асистента — `handoff` (потрібне завантаження файлу).
 
+## Калібрування сітки (setup)
+
+`BattleMapConfig.backgroundRows?` — окрема висота фону в клітинках (неквадратні клітинки зображення; без неї береться з пропорцій). `backgroundBox` враховує її. Чисті `fromCellRect`/`nudge` у `lib/utils/battle/grid/calibration.ts`; стан у `useGridCalibration`, застосування через `applyCalibration` у `useBattleMapEditor`; UI — `components/battle/setup/GridCalibration.tsx`. При заміні фону калібрування пропонується зберегти лише за того самого розміру зображення. Автодетект сітки відкладено: [спайк](../superpowers/research/2026-11-14-grid-autodetect-spike.md).
