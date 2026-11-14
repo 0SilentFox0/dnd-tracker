@@ -152,121 +152,102 @@ const motionConfigSchema = z.object({
     speed: z.number().min(-MAP_MOTION_MAX_SPEED).max(MAP_MOTION_MAX_SPEED),
 });
 
-export const battleMapSchema = z
-    .object({
-        cols: z
-            .number()
-            .int()
-            .min(MAP_LIMITS.minSide)
-            .max(MAP_LIMITS.photoMaxSide),
-        rows: z
-            .number()
-            .int()
-            .min(MAP_LIMITS.minSide)
-            .max(MAP_LIMITS.photoMaxSide),
-        background: mapBackgroundSchema,
-        opacity: z.number().min(0).max(1),
-        blocked: z
-            .array(z.string().regex(/^\d+:\d+$/))
-            .max(MAP_LIMITS.maxTerrainCells)
-            .optional(),
-        terrain: z
-            .record(
-                z.string().regex(/^\d+:\d+$/),
-                z
-                    .object({
-                        kind: z.enum([
-                            'wall',
-                            'barrier',
-                            'hazard',
-                            'difficult',
-                        ]),
-                        label: z.string().max(60).optional(),
-                        difficult: z.literal(true).optional(),
-                        obscured: z.literal(true).optional(),
-                        zoneId: z.string().max(SPELL_ID_MAX).optional(),
-                        untilRound: z.number().int().min(1).optional(),
-                        damage: z
-                            .object({
-                                dice: z
-                                    .string()
-                                    .regex(HAZARD_DICE_PATTERN)
-                                    .optional(),
-                                amount: z
-                                    .number()
-                                    .int()
-                                    .min(0)
-                                    .max(1000)
-                                    .optional(),
-                                type: z.string().min(1).max(30),
-                                spellId: z
-                                    .string()
-                                    .max(SPELL_ID_MAX)
-                                    .optional(),
-                                casterId: z
-                                    .string()
-                                    .max(SPELL_ID_MAX)
-                                    .optional(),
-                                concentrationOf: z
-                                    .object({
-                                        casterId: z.string().max(SPELL_ID_MAX),
-                                        castId: z.string().max(SPELL_ID_MAX),
-                                    })
-                                    .optional(),
-                            })
-                            .optional(),
-                    })
-                    .refine(
-                        (c) =>
-                            c.kind !== 'barrier' || c.untilRound !== undefined,
-                        'battleSetup.validation.barrierNeedsDuration'
-                    )
-            )
-            .refine(
-                (t) => Object.keys(t).length <= MAP_LIMITS.maxTerrainCells,
-                'battleSetup.validation.tooManyTerrainCells'
-            )
-            .optional(),
-        spellZones: z
-            .record(
-                z.string().max(SPELL_ID_MAX),
-                z.object({
-                    casterId: z.string().max(SPELL_ID_MAX),
-                    spellId: z.string().max(SPELL_ID_MAX),
-                    spellName: z.string().max(120),
-                    dc: z.number().int().min(1).max(40),
-                    side: z.enum(['enemies', 'all']),
-                    centre: mapCellSchema.optional(),
-                    triggers: z.object({
-                        onEnter: ZoneTriggerSchema.optional(),
-                        onTurnStart: ZoneTriggerSchema.optional(),
-                        onExit: ZoneTriggerSchema.optional(),
-                    }),
-                    untilRound: z.number().int().min(1),
-                    concentrationOf: z
+export const battleMapObject = z.object({
+    cols: z.number().int().min(MAP_LIMITS.minSide).max(MAP_LIMITS.photoMaxSide),
+    rows: z.number().int().min(MAP_LIMITS.minSide).max(MAP_LIMITS.photoMaxSide),
+    background: mapBackgroundSchema,
+    opacity: z.number().min(0).max(1),
+    blocked: z
+        .array(z.string().regex(/^\d+:\d+$/))
+        .max(MAP_LIMITS.maxTerrainCells)
+        .optional(),
+    terrain: z
+        .record(
+            z.string().regex(/^\d+:\d+$/),
+            z
+                .object({
+                    kind: z.enum(['wall', 'barrier', 'hazard', 'difficult']),
+                    label: z.string().max(60).optional(),
+                    difficult: z.literal(true).optional(),
+                    obscured: z.literal(true).optional(),
+                    zoneId: z.string().max(SPELL_ID_MAX).optional(),
+                    untilRound: z.number().int().min(1).optional(),
+                    damage: z
                         .object({
-                            casterId: z.string().max(SPELL_ID_MAX),
-                            castId: z.string().max(SPELL_ID_MAX),
+                            dice: z
+                                .string()
+                                .regex(HAZARD_DICE_PATTERN)
+                                .optional(),
+                            amount: z
+                                .number()
+                                .int()
+                                .min(0)
+                                .max(1000)
+                                .optional(),
+                            type: z.string().min(1).max(30),
+                            spellId: z.string().max(SPELL_ID_MAX).optional(),
+                            casterId: z.string().max(SPELL_ID_MAX).optional(),
+                            concentrationOf: z
+                                .object({
+                                    casterId: z.string().max(SPELL_ID_MAX),
+                                    castId: z.string().max(SPELL_ID_MAX),
+                                })
+                                .optional(),
                         })
                         .optional(),
                 })
-            )
-            .refine(
-                (z) => Object.keys(z).length <= 200,
-                'validation.tooManySpellZones'
-            )
-            .optional(),
-        backgroundCols: z.number().positive().max(200).optional(),
-        backgroundRows: z.number().positive().max(200).optional(),
-        gridOffset: z
-            .object({ x: z.number().min(0).lt(1), y: z.number().min(0).lt(1) })
-            .optional(),
-        maze: mazeSchema.nullable().optional(),
-        weather: weatherKindSchema.nullable().optional(),
-        motion: motionConfigSchema.nullable().optional(),
-        walls: z.array(edgeKeySchema).max(MAP_LIMITS.inlineMaxEdges).optional(),
-        bars: z.array(edgeKeySchema).max(MAP_LIMITS.inlineMaxEdges).optional(),
-    })
+                .refine(
+                    (c) => c.kind !== 'barrier' || c.untilRound !== undefined,
+                    'battleSetup.validation.barrierNeedsDuration'
+                )
+        )
+        .refine(
+            (t) => Object.keys(t).length <= MAP_LIMITS.maxTerrainCells,
+            'battleSetup.validation.tooManyTerrainCells'
+        )
+        .optional(),
+    spellZones: z
+        .record(
+            z.string().max(SPELL_ID_MAX),
+            z.object({
+                casterId: z.string().max(SPELL_ID_MAX),
+                spellId: z.string().max(SPELL_ID_MAX),
+                spellName: z.string().max(120),
+                dc: z.number().int().min(1).max(40),
+                side: z.enum(['enemies', 'all']),
+                centre: mapCellSchema.optional(),
+                triggers: z.object({
+                    onEnter: ZoneTriggerSchema.optional(),
+                    onTurnStart: ZoneTriggerSchema.optional(),
+                    onExit: ZoneTriggerSchema.optional(),
+                }),
+                untilRound: z.number().int().min(1),
+                concentrationOf: z
+                    .object({
+                        casterId: z.string().max(SPELL_ID_MAX),
+                        castId: z.string().max(SPELL_ID_MAX),
+                    })
+                    .optional(),
+            })
+        )
+        .refine(
+            (z) => Object.keys(z).length <= 200,
+            'validation.tooManySpellZones'
+        )
+        .optional(),
+    backgroundCols: z.number().positive().max(200).optional(),
+    backgroundRows: z.number().positive().max(200).optional(),
+    gridOffset: z
+        .object({ x: z.number().min(0).lt(1), y: z.number().min(0).lt(1) })
+        .optional(),
+    maze: mazeSchema.nullable().optional(),
+    weather: weatherKindSchema.nullable().optional(),
+    motion: motionConfigSchema.nullable().optional(),
+    walls: z.array(edgeKeySchema).max(MAP_LIMITS.inlineMaxEdges).optional(),
+    bars: z.array(edgeKeySchema).max(MAP_LIMITS.inlineMaxEdges).optional(),
+});
+
+export const battleMapSchema = battleMapObject
     .superRefine((m, ctx) => {
         const walls = new Set<string>();
 

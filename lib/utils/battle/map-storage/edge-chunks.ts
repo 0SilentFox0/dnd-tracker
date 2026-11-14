@@ -1,6 +1,7 @@
+import { MAP_LIMITS } from '@/lib/constants/map-limits';
 import { parseEdgeKey } from '@/lib/utils/battle/grid/walls';
 
-export const CHUNK_SIZE = 16;
+export const CHUNK_SIZE = MAP_LIMITS.chunk;
 
 const CHUNK_BYTES = (CHUNK_SIZE * CHUNK_SIZE * 2 * 2) / 8;
 
