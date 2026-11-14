@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { readSource,sources } from './source-files';
+import { readSource, sources } from './source-files';
 
 export const PROPS_LIMIT = 7;
 
@@ -38,8 +38,7 @@ export function countComponentProps(
     const locals = new Map<string, ts.SignatureDeclarationBase>();
 
     sf.forEachChild((n) => {
-        if (ts.isFunctionDeclaration(n) && n.name)
-            locals.set(n.name.text, n);
+        if (ts.isFunctionDeclaration(n) && n.name) locals.set(n.name.text, n);
 
         if (ts.isVariableStatement(n))
             n.declarationList.declarations.forEach((d) => {
@@ -90,8 +89,7 @@ export function countComponentProps(
             if (/^(Readonly|Partial|Required)$/.test(id) && args)
                 return names(args[0], seen);
 
-            if (/^(Omit|Pick)$/.test(id) && args)
-                return names(args[0], seen);
+            if (/^(Omit|Pick)$/.test(id) && args) return names(args[0], seen);
 
             const decl = types.get(id);
 
@@ -99,8 +97,7 @@ export function countComponentProps(
 
             seen.add(id);
 
-            if (ts.isTypeAliasDeclaration(decl))
-                return names(decl.type, seen);
+            if (ts.isTypeAliasDeclaration(decl)) return names(decl.type, seen);
 
             if (ts.isInterfaceDeclaration(decl)) {
                 decl.members.forEach((m) => {
@@ -143,7 +140,9 @@ export function countComponentProps(
     ) => {
         if (!isComponentName(name)) return;
 
-        const count = typeArg ? names(typeArg).size : fromParam(fn.parameters[0]);
+        const count = typeArg
+            ? names(typeArg).size
+            : fromParam(fn.parameters[0]);
 
         if (count) result[name] = count;
     };

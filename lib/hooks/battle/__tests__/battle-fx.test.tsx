@@ -344,4 +344,26 @@ describe('useBattleFxQueue', () => {
 
         expect(result.current.current).toBeNull();
     });
+
+    it('done keeps its identity across renders so the playing effect does not restart', () => {
+        const { BattleSceneDataContext, useBattleFxQueue } = modules;
+
+        const wrapper = ({ children }: { children: ReactNode }) => (
+            <BattleSceneDataContext.Provider
+                value={{ battle: { battleLog: range(1) } } as never}
+            >
+                {children}
+            </BattleSceneDataContext.Provider>
+        );
+
+        const { result, rerender } = renderHook(() => useBattleFxQueue(true), {
+            wrapper,
+        });
+
+        const first = result.current.done;
+
+        rerender();
+
+        expect(result.current.done).toBe(first);
+    });
 });

@@ -1,6 +1,7 @@
 'use client';
 
 import {
+    useCallback,
     useEffect,
     useLayoutEffect,
     useRef,
@@ -31,8 +32,7 @@ export function useBattleFxQueue(enabled: boolean, fx?: SystemFx) {
     const onDone = useRef(new Map<string, () => void>());
 
     useEffect(() => {
-        for (const d of dice)
-            if (d.onDone) onDone.current.set(d.key, d.onDone);
+        for (const d of dice) if (d.onDone) onDone.current.set(d.key, d.onDone);
     }, [dice]);
 
     const hidden = usePageHidden();
@@ -65,12 +65,12 @@ export function useBattleFxQueue(enabled: boolean, fx?: SystemFx) {
 
     useEffect(() => () => setFxBusy(false), []);
 
-    const done = (key: string) => {
+    const done = useCallback((key: string) => {
         onDone.current.get(key)?.();
         onDone.current.delete(key);
 
         setState((s) => shiftFxQueue(s, key));
-    };
+    }, [setState]);
 
     return {
         current: active ? (state.queue[0] ?? null) : null,
