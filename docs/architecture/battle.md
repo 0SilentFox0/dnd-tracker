@@ -316,3 +316,13 @@ Spell reducer/payload facade — `flows/spell-flow.ts`; types/costs/selection �
 ## Map motion
 
 Поле `map.motion` і операція `map-motion` — див. [map-modes.md](map-modes.md#map-motion-рух). Мутація — копія шаблону `map-weather`: пише лише `scene.map`, відповідь — дельта.
+
+## Карта бою: ефективна карта, стан, rollback (етап 0)
+
+Деталі шарів, бібліотеки й API — [map-modes.md](map-modes.md#зберігання-карти-етап-0). Для бою важливо:
+
+- `meta.map` у мутації — вже **ефективна** карта (`composeEffectiveMap`); `meta.mapBase`/`meta.mapRef`/`meta.mapState` — шари. Мутація, що пише карту, віддає в `scene.map` ефективну форму, а `save-battle` зберігає через `persistedMap` (linked — лише заголовок, inline — база без запікання станових видалень). Знімок (`snapshot-state`) тримає `mapState` і `mapVersion`.
+- `map-edge-remove` пише лише `scene.mapState` (рядок `battle_map_state`), `map-update` — `scene.map` + `scene.mapRef` (+ `mapState`, якщо прибрано застарілі ребра). Обидві — дельта `scene.mapState` / нова карта; `map-walls` на linked-бою → `REJECT.mapEdgesLinked`.
+- **Rollback:** відкат відновлює `mapState` зі знімка; якщо `scene.mapVersion` знімка відрізняється від поточної `mapRef.version` (між ними був `map-update`), відкат відхиляється — `REJECT.rollbackAcrossMapUpdate`.
+- Ліміт розстановки в бою — `MAP_LIMITS.battleMaxSide` (60).
+- **БД:** міграція `20261202000000_battle_map_storage` (expand-only, RLS на всіх нових таблицях) додає `battle_maps`, `battle_map_chunks`, `battle_map_versions`, `battle_map_state` і `battle_scenes.map_id`/`map_version`. **На prod не застосована — їде з main** при деплої (біля міграцій ставити лише через `vercel-build` з `main`).

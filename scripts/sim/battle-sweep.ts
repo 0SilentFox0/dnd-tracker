@@ -107,6 +107,7 @@ import { isAreaTarget } from '@/lib/utils/abilities/schema/kinds';
 import { applyBattleDelta } from '@/lib/utils/battle/client/apply-delta';
 import { attackKindOf } from '@/lib/utils/battle/common/attack-kind';
 import { attackDamageParts } from '@/lib/utils/battle/damage/attack-parts';
+import { edgeBlocks } from '@/lib/utils/battle/grid/edges';
 import {
     cellDistance,
     cellKey,
@@ -117,6 +118,11 @@ import {
 } from '@/lib/utils/battle/grid/geometry';
 import { cellsOf } from '@/lib/utils/battle/grid/occupancy';
 import { canStep } from '@/lib/utils/battle/grid/walls';
+import {
+    decodeEdges,
+    encodeEdges,
+} from '@/lib/utils/battle/map-storage/edge-chunks';
+import { composeEffectiveMap } from '@/lib/utils/battle/map-storage/effective-map';
 import {
     allReachExit,
     featureKeys,
@@ -4556,6 +4562,8 @@ async function mapCheck(spells: Map<string, any>) {
 
     await mapWallsCheck();
 
+    mapStateCheck();
+
     await mapSkillAllCheck(spells);
 }
 
@@ -4638,6 +4646,68 @@ async function mapWallsCheck() {
             cleared.status === 200 &&
             free.status === 200,
         `стіни ${built.status}, рух крізь стіни ${blocked.status}, зняття ${cleared.status}, рух після ${free.status}`
+    );
+}
+
+/** Шар стану карти: ефективна карта пропускає видалене ребро й тримає сусіднє, ребра бібліотеки проходять кодек, відкат стану дає базу. */
+function mapStateCheck() {
+    const name =
+        'Карта (стан): removed-ребро відкриває прохід, сусіднє тримає, відкат стану — база';
+
+    const header = {
+        cols: 12,
+        rows: 8,
+        background: null,
+        opacity: 0.4,
+    } as unknown as NonNullable<typeof state.map>;
+
+    const libEdges = {
+        walls: ['3:2:e', '3:3:e', '7:5:s'],
+        bars: ['5:1:s'],
+    };
+
+    const decoded = decodeEdges(
+        encodeEdges(libEdges, header.cols, header.rows),
+        header.cols,
+        header.rows
+    );
+
+    const sorted = (a: string[]) => [...a].sort();
+
+    const roundtrip =
+        sorted(decoded.walls).join() === sorted(libEdges.walls).join() &&
+        sorted(decoded.bars).join() === sorted(libEdges.bars).join();
+
+    const base = composeEffectiveMap(header, null, decoded);
+
+    const removed = composeEffectiveMap(
+        header,
+        { removedEdges: ['3:2:e'], doors: {} },
+        decoded
+    );
+
+    const restored = composeEffectiveMap(
+        header,
+        { removedEdges: [], doors: {} },
+        decoded
+    );
+
+    const at = (x: number, y: number) => ({ x, y });
+
+    const blockedBefore = edgeBlocks(base, at(3, 2), at(4, 2), 'move');
+
+    const openAfter = !edgeBlocks(removed, at(3, 2), at(4, 2), 'move');
+
+    const neighbourHeld = edgeBlocks(removed, at(3, 3), at(4, 3), 'move');
+
+    const rolledBack =
+        edgeBlocks(restored, at(3, 2), at(4, 2), 'move') &&
+        sorted(restored.walls ?? []).join() === sorted(base.walls ?? []).join();
+
+    tcheck(
+        name,
+        roundtrip && blockedBefore && openAfter && neighbourHeld && rolledBack,
+        `кодек ${roundtrip}, стіна ${blockedBefore}, прохід після removed ${openAfter}, сусіднє ребро тримає ${neighbourHeld}, відкат ${rolledBack}`
     );
 }
 
