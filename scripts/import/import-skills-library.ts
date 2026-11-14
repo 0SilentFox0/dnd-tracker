@@ -20,6 +20,7 @@ import type {
     LibrarySkill,
 } from './import-skills-library-types';
 
+import '@/lib/utils/rules/systems/registry';
 import { DEFAULT_CAMPAIGN_ID } from '@/scripts/shared/default-campaign';
 
 export {

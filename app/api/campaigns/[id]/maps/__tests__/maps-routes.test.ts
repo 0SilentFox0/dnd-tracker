@@ -142,6 +142,26 @@ describe('maps routes', () => {
         expect((await DELETE(send('DELETE'), ctx)).status).toBe(404);
     });
 
+    it('PUT passes expectedVersion through and maps a conflict to 409', async () => {
+        const { ContentError } = await import('@/lib/server/content/errors');
+
+        svc.saveMap.mockRejectedValueOnce(
+            new ContentError('errors.battleMapConflict', 409)
+        );
+
+        const res = await PUT(
+            send('PUT', { ...valid, expectedVersion: 2 }),
+            ctx
+        );
+
+        expect(res.status).toBe(409);
+        expect((await res.json()).error).toBe('errors.battleMapConflict');
+        expect(svc.saveMap).toHaveBeenCalledWith(
+            'm1',
+            expect.objectContaining({ expectedVersion: 2 })
+        );
+    });
+
     it('GET rejects a bad version', async () => {
         expect(
             (await GET(send('GET', undefined, undefined, '?version=abc'), ctx))

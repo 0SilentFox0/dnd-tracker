@@ -40,15 +40,19 @@ export function SubclassCard({
                 return (
                     <ChoiceCard
                         key={s.id}
-                        role="radio"
-                        checked={value === s.id}
-                        disabled={locked && value !== s.id}
-                        onClick={() => onChange(s.id)}
-                        title={s.name}
-                        name={s.name}
-                        icon={s.icon}
-                        summary={summarize(first)}
-                        description={() => levels(s)}
+                        control={{
+                            role: 'radio',
+                            checked: value === s.id,
+                            disabled: locked && value !== s.id,
+                            onClick: () => onChange(s.id),
+                        }}
+                        content={{
+                            title: s.name,
+                            name: s.name,
+                            icon: s.icon,
+                            summary: summarize(first),
+                            description: () => levels(s),
+                        }}
                     />
                 );
             })}

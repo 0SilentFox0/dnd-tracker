@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
+import '@/lib/server/systems/registry';
 import { ParticipantSide } from '@/lib/constants/battle';
+import { createBattleParticipantFromCharacter } from '@/lib/server/battles/participant/from-character';
 import {
     makeParticipant,
     resolved,
@@ -11,7 +13,6 @@ import {
     poolAffordable,
     poolLeft,
 } from '@/lib/utils/abilities/engine/core/usage';
-import { createBattleParticipantFromCharacter } from '@/lib/utils/battle/participant/from-character';
 import { type ItemStats, itemStatsColumns } from '@/lib/utils/items/item-stats';
 import { itemPools, withItemPool } from '@/lib/utils/items/pools';
 import { DEFAULT_RULES } from '@/lib/utils/rules';

@@ -41,6 +41,7 @@ export const EffectMarker = {
     NO_REACTION: 'no_reaction',
     NO_BONUS_ACTION: 'no_bonus_action',
     DISENGAGED: 'disengaged',
+    HIDDEN: 'hidden',
 } as const;
 
 export type EffectMarker = (typeof EffectMarker)[keyof typeof EffectMarker];

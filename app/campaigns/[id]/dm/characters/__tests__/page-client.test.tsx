@@ -72,6 +72,7 @@ vi.mock('@/lib/hooks/systems', () => ({
     }),
 }));
 
+import '@/components/systems/registry';
 import { DMCharactersClient } from '@/app/campaigns/[id]/dm/characters/page-client';
 
 const renderIt = (type?: 'player' | 'npc_hero') =>

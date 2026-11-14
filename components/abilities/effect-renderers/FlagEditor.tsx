@@ -58,7 +58,7 @@ export function FlagEditor({
         } as Effect);
     };
 
-    const fields = [...FLAG_FIELDS[effect.flag], TARGET_FIELD, DURATION_FIELD];
+    const fields = [...(FLAG_FIELDS[effect.flag] ?? []), TARGET_FIELD, DURATION_FIELD];
 
     return (
         <>

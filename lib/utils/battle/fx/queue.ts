@@ -1,6 +1,6 @@
-import type { MoraleThrow } from './dice/from-morale';
 import { mapAction } from './map-action';
 import { takeNewActions } from './new-events';
+import type { SystemDice } from './system-dice';
 import type { FxSpec } from './types';
 
 import type { BattleAction } from '@/types/battle';
@@ -10,27 +10,28 @@ export interface FxQueueState {
     seen: number | null;
     queue: FxSpec[];
     /** undefined = ще не бачили (перший рендер не програє кубик) */
-    morale?: string | null;
+    dice?: string[];
 }
 
 export interface FxQueueInput {
     log: BattleAction[];
-    morale: MoraleThrow | null;
+    dice: SystemDice[];
 }
 
-export const isMoraleFx = (key: string) => key.startsWith('morale:');
-
-const moraleFx = ({ key, spec }: MoraleThrow): FxSpec => ({
-    key: `morale:${key}`,
+const diceFx = ({ key, spec, actorId }: SystemDice): FxSpec => ({
+    key,
     archetype: 'dice',
     element: 'arcane',
-    actorId: key.split(':')[2],
+    actorId,
     actorSide: 'ally',
     targetIds: [],
     hit: true,
     critical: false,
     dice: spec,
 });
+
+export const sameKeys = (a: string[] | undefined, b: string[]) =>
+    !!a && a.length === b.length && a.every((k, i) => k === b[i]);
 
 export const INITIAL_FX_QUEUE: FxQueueState = {
     log: null,
@@ -69,30 +70,29 @@ export function trimFxQueue(queue: FxSpec[], max: number): FxSpec[] {
 /** `active` = FX увімкнено і вкладка видима; неактивна черга лише просуває `seen`, тож після повернення нічого не програється пачкою. */
 export function advanceFxQueue(
     state: FxQueueState,
-    { log, morale }: FxQueueInput,
+    { log, dice }: FxQueueInput,
     active: boolean
 ): FxQueueState {
-    const moraleKey = morale?.key ?? null;
+    const diceKeys = dice.map((d) => d.key);
 
     if (
         state.log === log &&
-        state.morale === moraleKey &&
+        sameKeys(state.dice, diceKeys) &&
         (active || !state.queue.length)
     )
         return state;
 
     const { actions, seen } = takeNewActions(log, state.seen);
 
-    if (!active) return { log, seen, queue: [], morale: moraleKey };
+    if (!active) return { log, seen, queue: [], dice: diceKeys };
 
-    const moraleSpec: FxSpec[] =
-        morale && state.morale !== undefined && moraleKey !== state.morale
-            ? [moraleFx(morale)]
-            : [];
+    const diceSpecs = state.dice
+        ? dice.filter((d) => !state.dice?.includes(d.key)).map(diceFx)
+        : [];
 
     const queue = [
         ...state.queue,
-        ...moraleSpec,
+        ...diceSpecs,
         ...actions.flatMap(mapAction),
     ];
 
@@ -100,7 +100,7 @@ export function advanceFxQueue(
         log,
         seen,
         queue: trimFxQueue(queue, MAX_FX_QUEUE),
-        morale: moraleKey,
+        dice: diceKeys,
     };
 }
 

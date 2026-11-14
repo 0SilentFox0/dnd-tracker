@@ -105,6 +105,10 @@
       "s3": {
         "heading": "Battle music",
         "b0": "The track library is in \"Battle music\"; in battle there is a player with a playlist that all participants hear."
+      },
+      "s4": {
+        "heading": "Map library",
+        "b0": "Turn on \"Map library\" in the campaign settings: the \"Maps\" section stores maps with walls and bars. Pick a map when creating a battle; after editing it in the library press \"Update map\" in the battle (rejected if the new version blocks cells occupied by units)."
       }
     }
   },
@@ -425,8 +429,13 @@
       },
       "s9": {
         "heading": "Rule modules",
-        "b0": "A system is a base plus modules: morale, retaliation, hero scaling, skill trees, artifact sets and unit stacks. HoMM is the d20 base with every module; D&D 5e is the same base with none. You switch modules in the campaign rules, the System section: a switch applies at once, separately from the Save button, and stays disabled while the form has unsaved changes.",
+        "b0": "A system is a base plus modules: morale, retaliation, hero scaling, skill trees, artifact sets and unit stacks. HoMM is the d20 base with every module; D&D 5e is the same base with none. You pick modules in the campaign rules, the System section: switches only edit a draft, and nothing is saved until you review the summary and press Apply. The switches stay disabled while the form has unsaved changes.",
         "b1": "Modules cannot be changed during an active battle. If the campaign already has heroes, Hero scaling and Skill trees ask for confirmation first because they change how heroes are calculated. Nothing is deleted: settings and learned skills stay, and everything returns when you turn the module back on."
+      },
+      "s10": {
+        "heading": "Choose modules step by step",
+        "b0": "In the campaign rules, System section, first pick the base system in the select (it is locked once the campaign has heroes). Then the modules step lets you tick the modules you want, and the summary step previews the sheet sections, content and combat actions you will get, so you see the result before pressing Apply.",
+        "b1": "Switching a module off keeps its data: settings and learned skills come back when you turn it on again. Setup modules (the ones that change how heroes are calculated) ask for confirmation first. Nothing is saved until you press Apply in the summary."
       }
     }
   }

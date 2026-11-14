@@ -1356,7 +1356,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 - Modify: `lib/utils/battle/fx/timing.ts` (`MAX_FX_BATCH = 16`), `lib/utils/battle/fx/queue.ts` (`MAX_FX_QUEUE = 32`, обрізка цілими діями)
 - Modify: `lib/hooks/battle/useFxImpacts.ts` (`RECENT_ACTIONS` → `MAX_FX_BATCH`, вторинні цілі)
 - Modify: `lib/hooks/battle/useBattleFxQueue.ts` (`RECENT_LOG` → `MAX_FX_QUEUE`)
-- Modify: `components/battle/fx/runtime/anchors.ts:78` (`originId ?? actorId`)
+- Modify: `components/fx/runtime/anchors.ts:78` (`originId ?? actorId`)
 - Test: `lib/utils/battle/fx/__tests__/map-action.test.ts`, `lib/utils/battle/fx/__tests__/queue.test.ts`, `lib/hooks/battle/__tests__/useFxImpacts.test.tsx`
 
 **Interfaces:**
@@ -1454,7 +1454,7 @@ export function splashTargetIds(action: BattleAction, main: FxSpec | undefined):
 
 (import `splashTargetIds` from `./impact`; check `impact.ts` doesn't import `map-action.ts` — it imports `./archetypes` only.)
 
-`components/battle/fx/runtime/anchors.ts:78`: `const actorEl = findAnchor(spec.originId ?? spec.actorId, root);`.
+`components/fx/runtime/anchors.ts:78`: `const actorEl = findAnchor(spec.originId ?? spec.actorId, root);`.
 
 `fx/timing.ts`: `export const MAX_FX_BATCH = 16;`.
 
@@ -1507,8 +1507,8 @@ Expected: PASS. Existing queue tests that asserted trimming to 12 specs must be 
 - [ ] **Step 5: Commit**
 
 ```bash
-pnpm lint --fix lib/utils/battle/fx lib/hooks/battle components/battle/fx
-git add -A lib/utils/battle/fx lib/hooks/battle components/battle/fx
+pnpm lint --fix lib/utils/battle/fx lib/hooks/battle components/fx
+git add -A lib/utils/battle/fx lib/hooks/battle components/fx
 git commit -m "feat(battle-fx): chain hops fly from the previous target, splash victims animate, volleys are not trimmed
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"

@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { DmCharacterCard } from '../DmCharacterCard';
 
+import '@/components/systems/registry';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 import type { CharacterListItem } from '@/types/characters';
 

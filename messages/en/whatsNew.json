@@ -1,4 +1,8 @@
 {
+  "2026-11-map-library": {
+    "title": "Battle map library",
+    "body": "Each campaign can keep a library of battle maps: turn on \"Map library\" in the campaign settings. There is a fullscreen wall and bars editor on desktop, you pick a library map when creating a battle, and battles get an \"Update map\" button."
+  },
   "2026-11-map-walls": {
     "title": "Walls and bars on the map",
     "body": "In map setup and during a battle (map toolbar) you can draw walls and bars along cell edges. A wall blocks movement, shots, sight, templates and melee; bars block movement only. Not available in the maze or on phones."
@@ -6,6 +10,10 @@
   "2026-11-grid-calibration": {
     "title": "Grid calibration",
     "body": "On the battle map setup you can outline one cell on the background image (or an N×N square) and the grid fits it, including non-square cells. Arrows nudge the grid by 1 px or 0.01 cell; when you replace the background with an image of the same size you can keep the calibration."
+  },
+  "2026-11-14-mode-wizard": {
+    "title": "Module wizard",
+    "body": "The System section of the campaign rules now has a module wizard: pick the base in the select, choose modules, then review a preview of sheet sections, content and combat actions before you press Apply."
   },
   "2026-11-13-rule-modules": {
     "title": "Rule modules",

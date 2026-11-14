@@ -77,11 +77,13 @@ export function BasicEditTab({
                 basicInfo={form.basicInfo}
                 campaignMembers={options.members}
                 races={options.races}
-                hideProgression={ui.hideProgression}
-                hideLineage={!def.lineage}
-                hideClass={!statColumnsOf(def).has('classes')}
-                hideAlignment={!def.identity.alignments}
-                hideArchetype={!statColumnsOf(def).has('archetype')}
+                hide={{
+                    progression: ui.hideProgression,
+                    lineage: !def.lineage,
+                    class: !statColumnsOf(def).has('classes'),
+                    alignment: !def.identity.alignments,
+                    archetype: !statColumnsOf(def).has('archetype'),
+                }}
                 classMode={classUi ? classMode : undefined}
             />
             {classMode.enabled && !classUi && !ui.hideProgression && (

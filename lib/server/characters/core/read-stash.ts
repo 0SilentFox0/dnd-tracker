@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { Prisma } from '@prisma/client';
 
+import '@/lib/server/systems/registry';
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { CARRIED_SLOTS } from '@/lib/constants/artifacts';
 import { prisma } from '@/lib/db';

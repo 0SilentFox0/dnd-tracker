@@ -1,11 +1,10 @@
-import { ABILITY_VARIABLES } from './variables';
+import { ABILITY_VARIABLES, FORMULA_VARIABLE_NAMES } from './variables';
 
 import type { Flat } from '@/lib/utils/abilities/schema';
 import { evaluateFormula } from '@/lib/utils/battle/common/formula-evaluator';
 import type { BattleParticipant } from '@/types/battle';
 
-export const FORMULA_VARIABLES: readonly string[] =
-    Object.keys(ABILITY_VARIABLES);
+export const FORMULA_VARIABLES: readonly string[] = FORMULA_VARIABLE_NAMES;
 
 export const formulaContext = (p: BattleParticipant): Record<string, number> =>
     Object.fromEntries(

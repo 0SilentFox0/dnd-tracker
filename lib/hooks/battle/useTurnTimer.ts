@@ -4,12 +4,16 @@ import { useEffect, useState } from 'react';
 
 import { useBattleScene } from './useBattleScene';
 
+import { ApiError } from '@/lib/api/client';
 import { BattleStatus } from '@/lib/constants/battle';
 import { useNextTurn } from '@/lib/hooks/battles';
 
 const TICK_MS = 500;
 
 const silent = { onConflict: () => undefined };
+
+// module-level: a layout remount (desktop/mobile switch, gate) must not resend the same turn
+const sentTurns = new Map<string, string>();
 
 /** Залишок часу ходу (лише відображення, без побічних ефектів). */
 export function useTurnCountdown(): {
@@ -67,9 +71,23 @@ export function useTurnTimer(): { secondsLeft: number | null } {
 
     const expired = secondsLeft === 0 && mine && !paused;
 
+    const turnKey = `${battle.currentTurnIndex}|${battle.turnStartedAt ?? ''}`;
+
     useEffect(() => {
-        if (expired) mutate({ auto: true });
-    }, [expired, battle.version, mutate]);
+        if (!expired || sentTurns.get(battleId) === turnKey) return;
+
+        sentTurns.set(battleId, turnKey);
+
+        mutate(
+            { auto: true },
+            {
+                onError: (error) => {
+                    if (!(error instanceof ApiError && error.status === 409))
+                        sentTurns.delete(battleId);
+                },
+            }
+        );
+    }, [expired, battleId, turnKey, mutate]);
 
     return { secondsLeft };
 }

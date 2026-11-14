@@ -9,8 +9,6 @@ import {
     seq,
 } from '@/lib/utils/abilities/__tests__/fixtures';
 import type { Effect } from '@/lib/utils/abilities/schema';
-import { castSpell } from '@/lib/utils/battle/spell';
-import { finishTurnEffects } from '@/lib/utils/battle/turn/end-turn-cleanup';
 import type { CastableSpell } from '@/lib/utils/battle/types/spell-process';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 
@@ -37,6 +35,14 @@ vi.mock('@/lib/utils/rules/systems', async (importOriginal) => {
         ruleSystemByKey: () => system,
     };
 });
+
+vi.resetModules();
+
+const { castSpell } = await import('@/lib/utils/battle/spell');
+
+const { finishTurnEffects } = await import(
+    '@/lib/utils/battle/turn/end-turn-cleanup'
+);
 
 const fire: Effect = {
     kind: 'dealDamage',

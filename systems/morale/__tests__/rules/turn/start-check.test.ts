@@ -11,8 +11,6 @@ import type { BattleParticipant } from '@/types/battle';
 let ruleSystemOf: typeof import('@/lib/utils/rules/systems').ruleSystemOf;
 
 beforeAll(async () => {
-    await import('@/lib/server/systems/registry');
-
     ({ ruleSystemOf } = await import('@/lib/utils/rules/systems'));
 }, 30_000);
 

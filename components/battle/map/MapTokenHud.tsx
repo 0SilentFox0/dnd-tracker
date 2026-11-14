@@ -3,9 +3,14 @@
 import { memo } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { type MapPlacement, tokenBoxStyle } from './token-box';
+import { type MapPlacement, routeFrames, tokenBoxStyle } from './token-box';
 
-import { useDamageShake, useFxEnabled, useHitChange } from '@/lib/hooks/battle';
+import {
+    useDamageShake,
+    useFxEnabled,
+    useHitChange,
+    useTokenGlide,
+} from '@/lib/hooks/battle';
 import { useText } from '@/lib/i18n/use-text';
 import { cn } from '@/lib/utils';
 import { type FxImpact, hudMotifsOf } from '@/lib/utils/battle/fx';
@@ -67,6 +72,10 @@ function MapTokenHudImpl({
 }: MapTokenHudProps) {
     const { box, mapSize, pxPerUnit } = placement;
 
+    const glideRef = useTokenGlide<HTMLDivElement>(
+        routeFrames(placement.route, placement)
+    );
+
     const t = useTranslations('battle.map');
 
     const fmt = useText();
@@ -113,8 +122,9 @@ function MapTokenHudImpl({
 
     return (
         <div
+            ref={glideRef}
             data-map-hud={participant.basicInfo.id}
-            className="pointer-events-none absolute transition-[left,top] duration-[250ms] ease-out motion-reduce:transition-none"
+            className="pointer-events-none absolute"
             style={{ ...tokenBoxStyle(box, mapSize), zIndex: raised ? 20 : 10 }}
         >
             {onReturn && (

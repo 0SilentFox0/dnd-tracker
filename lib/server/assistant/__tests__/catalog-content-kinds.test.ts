@@ -17,8 +17,6 @@ const dm: Actor = {
 let idsFor: (system?: object) => string[];
 
 beforeAll(async () => {
-    await import('@/lib/server/systems/registry');
-
     const { createActionCatalog } = await import(
         '@/lib/server/assistant/catalog'
     );

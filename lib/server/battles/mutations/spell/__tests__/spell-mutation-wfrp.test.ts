@@ -1,6 +1,7 @@
 import type { Prisma, Spell } from '@prisma/client';
 import { describe, expect, it, vi } from 'vitest';
 
+import '@/lib/server/systems/registry';
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { castSpellSchema } from '@/lib/schemas/battles';
 import {

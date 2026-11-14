@@ -22,8 +22,13 @@ const PAIRS = [
     },
 ];
 
-// E3: invert fromCharacter / make the registry lazy
-const KNOWN_CYCLES = ['rules:d20', 'server:d20'];
+const KNOWN_CYCLES: string[] = [];
+
+const LOOKUPS = [
+    'lib/utils/rules/systems/lookup.ts',
+    'lib/server/systems/lookup.ts',
+    'components/systems/lookup.ts',
+].filter((f) => fs.existsSync(path.join(ROOT, f)));
 
 const ids = fs
     .readdirSync(path.join(ROOT, 'systems'), { withFileTypes: true })
@@ -47,5 +52,21 @@ describe('registry <-> system import cycles', () => {
             found,
             'a new cycle, or one is gone: shrink KNOWN_CYCLES'
         ).toEqual(KNOWN_CYCLES);
+    });
+
+    it.each(LOOKUPS)('%s does not reach a system implementation', (lookup) => {
+        const reached = [...staticGraph([lookup]).files].filter(
+            (f) => /^systems\//.test(f) && !/^systems\/[^/]+\/meta\.ts$/.test(f)
+        );
+
+        expect(reached).toEqual([]);
+    });
+
+    it('a lookup never reaches its own install root', () => {
+        for (const lookup of LOOKUPS) {
+            const root = lookup.replace(/lookup\.ts$/, 'registry.ts');
+
+            expect(staticGraph([lookup]).files.has(root)).toBe(false);
+        }
     });
 });

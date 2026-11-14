@@ -3,12 +3,12 @@
 import { type ReactNode, useMemo } from 'react';
 import { Play } from 'lucide-react';
 
-import '@/components/battle/fx/fx.css';
-import { PreviewUnitRow } from '@/components/battle/fx/preview/PreviewUnitRow';
-import { PALETTE } from '@/components/battle/fx/runtime/palette';
-import { playFx } from '@/components/battle/fx/runtime/play';
-import { cancelLayer } from '@/components/battle/fx/runtime/stage';
-import { useFxBadgeLabels } from '@/components/battle/fx/use-badge-labels';
+import '@/components/fx/fx.css';
+import { PreviewUnitRow } from '@/components/fx/preview/PreviewUnitRow';
+import { PALETTE } from '@/components/fx/runtime/palette';
+import { playFx } from '@/components/fx/runtime/play';
+import { cancelLayer } from '@/components/fx/runtime/stage';
+import { useFxBadgeLabels } from '@/components/fx/use-badge-labels';
 import {
     type FxRunner,
     useFxEnabled,

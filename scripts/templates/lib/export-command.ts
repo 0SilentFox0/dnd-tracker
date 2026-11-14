@@ -12,6 +12,7 @@ import {
 import { writeIcons } from './icons-file';
 import { listPackKeys, packPath, readManifest, TEMPLATES_DIR } from './pack';
 
+import '@/lib/utils/rules/systems/registry';
 import { prisma } from '@/lib/db';
 import { tableKey } from '@/lib/server/templates/bundle';
 import { exportCampaign } from '@/lib/server/templates/export-campaign';

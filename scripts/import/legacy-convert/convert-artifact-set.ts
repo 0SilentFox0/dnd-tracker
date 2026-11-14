@@ -12,6 +12,7 @@ import type {
     ConvertOptions,
 } from './types';
 
+import '@/lib/utils/rules/systems/registry';
 import type { Effect } from '@/lib/utils/abilities/schema';
 import { isRecord } from '@/lib/utils/common/is-record';
 

@@ -5,6 +5,7 @@ import {
     gateOptions,
 } from '../operation-runner';
 
+import '@/lib/server/systems/registry';
 import { ChoicesBodySchema } from '@/lib/schemas/choices';
 import { saveCharacterChoices } from '@/lib/server/characters/core/choices-handler';
 

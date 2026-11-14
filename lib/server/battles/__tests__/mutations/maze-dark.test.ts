@@ -255,6 +255,7 @@ describe('blockedByMode', () => {
             'maze-mark',
             'morale-check',
             'spell',
+            'swap-gear',
         ]);
     });
 });

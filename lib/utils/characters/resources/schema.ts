@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { MAX_EXHAUSTION } from '@/lib/utils/battle/conditions/query';
+import { MAX_EXHAUSTION } from '@/lib/constants/exhaustion';
 import type { CharacterResources } from '@/types/characters';
 
 const count = z.number().int().min(0).max(999);

@@ -1,5 +1,5 @@
 /// <reference lib="webworker" />
-import { parseCompendium } from '@/lib/server/compendium-import/parse';
+import { parseCompendium } from '@/lib/utils/compendium-import/parse';
 self.onmessage = async (event: MessageEvent<File>) => {
     try {
         const text = new TextDecoder('utf-8', { fatal: true }).decode(

@@ -6,6 +6,7 @@
  *   pnpm exec tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/db/backfill-default-attacks.ts [--apply] [--allow-remote]
  *   Без --apply — лише підрахунок (dry-run).
  */
+import '@/lib/utils/rules/systems/registry';
 import { prisma } from '@/lib/db';
 import { assertSeedTarget } from '@/scripts/seed/seed-library-lib';
 

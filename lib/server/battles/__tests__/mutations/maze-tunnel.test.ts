@@ -6,6 +6,7 @@ import { CombatStatus, ParticipantSide } from '@/lib/constants/battle';
 import { textOf } from '@/lib/i18n/test/text';
 import { mazeMutation } from '@/lib/server/battles/mutations/maze/maze-mutation';
 import { createRollbackMutation } from '@/lib/server/battles/mutations/rollback/rollback-mutation';
+import { prepareSave } from '@/lib/server/battles/store/save-battle';
 import { cellKey } from '@/lib/utils/battle/grid/geometry';
 import { eventTextOf } from '@/lib/utils/battle/log/__tests__/event-text';
 import { heroTunnel, mazeDistances } from '@/lib/utils/battle/modes/maze';
@@ -17,7 +18,7 @@ import {
 import { MAZE_TEXTS } from '@/lib/utils/battle/modes/maze/texts';
 import { isReserved } from '@/lib/utils/battle/participant/reserve';
 import type { BattleMutationContext } from '@/lib/utils/battle/pipeline/run-battle-mutation';
-import { buildSnapshotState, prepareSave } from '@/lib/utils/battle/store';
+import { buildSnapshotState } from '@/lib/utils/battle/store';
 import { checkVictoryConditions as checkVictory } from '@/lib/utils/battle/turn/victory';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 import type {

@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "sideEffects": [
-    "*.css"
+    "*.css",
+    "**/systems/registry.ts"
   ],
   "scripts": {
     "dev": "pnpm db:local && next dev",
@@ -11,6 +12,8 @@
     "build:local": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
+    "lint:dirs": "bash scripts/lint-dirs.sh",
+    "cycles": "tsx scripts/shared/cycles.ts",
     "knip": "knip",
     "postinstall": "node scripts/postinstall.mjs",
     "deploy": "vercel --prod",

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 
 import { buildSheetFor, loadSheetCharacter } from './sheet-handler';
 
+import '@/lib/server/systems/registry';
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { operationAccess } from '@/lib/server/characters/operation-context';
 import type { Actor } from '@/lib/utils/api/actor';

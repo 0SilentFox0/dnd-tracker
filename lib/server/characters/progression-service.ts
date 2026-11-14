@@ -12,6 +12,7 @@ import {
 import { characterReferenceHash } from './reference-state';
 
 import 'server-only';
+import '@/lib/server/systems/registry';
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { prisma } from '@/lib/db';
 import { DEFAULT_LOCALE, type Locale } from '@/lib/i18n/config';
@@ -29,7 +30,7 @@ import type { ActionResult } from '@/lib/server/assistant/types';
 import { stashActionSchema } from '@/lib/server/characters/core/stash-schema';
 import { assertCan } from '@/lib/server/content/access';
 import { ContentError, parseInput } from '@/lib/server/content/errors';
-import { mergeSystemOperations } from '@/lib/server/systems/registry';
+import { mergeSystemOperations } from '@/lib/server/systems/lookup';
 import type { SystemOperation } from '@/lib/server/systems/types';
 import type { Actor } from '@/lib/utils/api/actor';
 import { requestDigest } from '@/lib/utils/battle/store/stable-json';

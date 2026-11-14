@@ -7,7 +7,6 @@ import {
     sameSource,
     stableJson,
 } from './identity';
-import type { JsonRecord } from './parse';
 import {
     type AdaptedCompendium,
     type AdaptedEntry,
@@ -18,6 +17,7 @@ import {
 } from './types';
 
 import { isRecord } from '@/lib/utils/common/is-record';
+import type { JsonRecord } from '@/lib/utils/compendium-import/parse';
 
 export const ADAPTER_VERSION = '5etools-2';
 export interface ExistingEntry {

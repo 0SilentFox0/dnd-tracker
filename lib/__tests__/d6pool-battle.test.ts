@@ -1,27 +1,57 @@
-import { describe, expect, it, vi } from 'vitest';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 
 import { staticGraph } from './helpers/static-graph';
 
 import { D6POOL_SYSTEM } from '@/lib/__tests__/fixtures/d6pool/definition';
 import { D6POOL_SERVER } from '@/lib/__tests__/fixtures/d6pool/server';
 import { AttackType, ParticipantSide } from '@/lib/constants/battle';
-import { attackBodySchema } from '@/lib/schemas/battles';
-import { context } from '@/lib/server/battles/__tests__/mutations/fixtures';
-import { attackMutation } from '@/lib/server/battles/mutations/attack/attack-mutation';
-import { nextTurnMutation } from '@/lib/server/battles/mutations/next-turn/next-turn-mutation';
-import { createStartMutation } from '@/lib/server/battles/mutations/start/start-mutation';
-import { placed } from '@/lib/utils/battle/__tests__/fixtures/placed';
 import type { BattleMutationContext } from '@/lib/utils/battle/pipeline/run-battle-mutation';
+import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
 import { SYSTEM_ROOTS } from '@/scripts/shared/system-ratchet';
 import type { BattleAttack } from '@/types/battle';
 
-vi.mock('@/lib/utils/rules/systems', async (importOriginal) => ({
+let attackBodySchema: typeof import('@/lib/schemas/battles').attackBodySchema;
+
+let context: typeof import('@/lib/server/battles/__tests__/mutations/fixtures').context;
+
+let attackMutation: typeof import('@/lib/server/battles/mutations/attack/attack-mutation').attackMutation;
+
+let nextTurnMutation: typeof import('@/lib/server/battles/mutations/next-turn/next-turn-mutation').nextTurnMutation;
+
+let createStartMutation: typeof import('@/lib/server/battles/mutations/start/start-mutation').createStartMutation;
+
+let castSpell: typeof import('@/lib/utils/battle/spell').castSpell;
+
+let placed: typeof import('@/lib/utils/battle/__tests__/fixtures/placed').placed;
+
+// the global setup already loaded the lookup modules; the mocks below only reach a fresh graph
+beforeAll(async () => {
+    vi.resetModules();
+
+    ({ attackBodySchema } = await import('@/lib/schemas/battles'));
+    ({ context } = await import(
+        '@/lib/server/battles/__tests__/mutations/fixtures'
+    ));
+    ({ attackMutation } = await import(
+        '@/lib/server/battles/mutations/attack/attack-mutation'
+    ));
+    ({ nextTurnMutation } = await import(
+        '@/lib/server/battles/mutations/next-turn/next-turn-mutation'
+    ));
+    ({ createStartMutation } = await import(
+        '@/lib/server/battles/mutations/start/start-mutation'
+    ));
+    ({ castSpell } = await import('@/lib/utils/battle/spell'));
+    ({ placed } = await import('@/lib/utils/battle/__tests__/fixtures/placed'));
+});
+
+vi.mock('@/lib/utils/rules/systems/lookup', async (importOriginal) => ({
     ...(await importOriginal<object>()),
     ruleSystemOf: () => D6POOL_SYSTEM,
     ruleSystemByKey: () => D6POOL_SYSTEM,
 }));
 
-vi.mock('@/lib/server/systems/registry', async (importOriginal) => ({
+vi.mock('@/lib/server/systems/lookup', async (importOriginal) => ({
     ...(await importOriginal<object>()),
     systemServerOf: () => D6POOL_SERVER,
 }));
@@ -146,6 +176,24 @@ describe('start, attack and next-turn on a d6pool base', () => {
     });
 });
 
+describe('core actions of a base without them', () => {
+    it('has no catalog, so dash is neither listed nor runnable', () => {
+        const { actions } = D6POOL_SYSTEM.combat;
+
+        expect(actions.enabled({} as never)).toBe(false);
+        expect(actions.catalog).toEqual({});
+        expect('dash' in actions.catalog).toBe(false);
+        expect(
+            actions.available('dash', {} as never, [], null, {} as never).ok
+        ).toBe(false);
+        expect(() =>
+            actions.run({
+                body: { action: 'dash', participantId: 'a' },
+            } as never)
+        ).toThrow();
+    });
+});
+
 describe('import graph of the d6pool battle test', () => {
     it('stops at the generated system roots and reaches no systems/*', () => {
         const graph = staticGraph(
@@ -156,5 +204,55 @@ describe('import graph of the d6pool battle test', () => {
         expect(
             [...graph.files].filter((f) => f.startsWith('systems/'))
         ).toEqual([]);
+    });
+});
+
+describe('spell attack of a base without a spell attack roll', () => {
+    it('hits without rolling and the damage lands', () => {
+        const caster = placed('c', {
+            side: ParticipantSide.ALLY,
+            hp: 20,
+            at: { x: 1, y: 1 },
+        });
+
+        const target = placed('t', {
+            side: ParticipantSide.ENEMY,
+            hp: 20,
+            at: { x: 2, y: 1 },
+        });
+
+        const out = castSpell({
+            caster,
+            spell: {
+                id: 'sp',
+                name: 'Bolt',
+                level: 0,
+                groupId: 'g',
+                definition: {
+                    dice: 1,
+                    cost: 'action',
+                    targeting: { kind: 'enemy', range: 60 },
+                    resolution: { kind: 'attack' },
+                    effects: [
+                        {
+                            kind: 'dealDamage',
+                            amount: { spellRoll: 100 },
+                            damageType: 'fire',
+                        },
+                    ],
+                    raceModifiers: [],
+                },
+            },
+            targetIds: ['t'],
+            allParticipants: [caster, target],
+            currentRound: 1,
+            battleId: 'b',
+            diceRolls: [4],
+            dice: { count: 1, sides: 6 },
+            rng: () => 0.5,
+            rules: DEFAULT_RULES,
+        });
+
+        expect(hpOf(out.allParticipantsUpdated, 't')).toBeLessThan(20);
     });
 });

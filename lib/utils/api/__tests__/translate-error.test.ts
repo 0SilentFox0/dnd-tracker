@@ -1,13 +1,15 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { translateErrorBody } from '../translate-error';
-
 vi.mock('server-only', () => ({}));
 vi.mock('@/lib/i18n/request-locale', () => ({ getRequestLocale: vi.fn() }));
 vi.mock('@/lib/constants/api-errors', async (importOriginal) => ({
     ...(await importOriginal<typeof import('@/lib/constants/api-errors')>()),
     API_ERROR_PARAMS: { 'errors.limited': { max: 5, who: 'default' } },
 }));
+
+vi.resetModules();
+
+const { translateErrorBody } = await import('../translate-error');
 
 const known = new Set([
     'errors.forbidden',

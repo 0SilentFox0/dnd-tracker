@@ -1,10 +1,10 @@
 import type { MediaRef } from './media/types';
-import type { Compendium, JsonRecord } from './parse';
 
 import type { ErrorParams } from '@/lib/constants/api-errors';
 import type { Locale } from '@/lib/i18n/config';
 import type { Translator } from '@/lib/i18n/translator';
 import type { ContentKind } from '@/lib/server/content/define-resource';
+import type { Compendium, JsonRecord } from '@/lib/utils/compendium-import/parse';
 
 export type Edition = 'classic' | 'one' | 'unknown';
 export type TargetKind = ContentKind | 'scenarioPages';

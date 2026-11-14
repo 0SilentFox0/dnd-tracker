@@ -1,7 +1,14 @@
 export { battleKeys, battleQueryKey } from './keys';
 export type { BattleOpMutation } from './makeBattleHook';
 export { type BalanceSuggestions } from './setup/useBalanceSuggestions';
-export { type BattleMapEditor } from './setup/useBattleMapEditor';
+export {
+    type BattleLibraryMap,
+    useBattleLibraryMap,
+} from './setup/useBattleLibraryMap';
+export {
+    type BattleMapEditor,
+    useBattleMapEditor,
+} from './setup/useBattleMapEditor';
 export {
     type ParticipantActions,
     type ParticipantSelection,
@@ -51,6 +58,7 @@ export {
     useRollbackBattleAction,
     useScaleBattleUnits,
     useStartBattle,
+    useSwapGear,
     useSystemBattleAction,
     useSystemCondition,
     useUnitControl,

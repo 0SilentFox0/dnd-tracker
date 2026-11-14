@@ -284,6 +284,7 @@ export function planChoices(input: PlanInput): PlanResult {
             ...pendingIssues(visits, {
                 ...refs,
                 hero: { totalLevel: level, scores: input.scores },
+                takenFeatIds: new Set(featCounts.keys()),
             })
         );
 

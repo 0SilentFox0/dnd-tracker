@@ -14,7 +14,7 @@ import { dynamicTextRef, textRef } from '@/lib/i18n/text-ref';
 import { makeParticipant } from '@/lib/utils/abilities/__tests__/fixtures';
 import {
     conditionEffects,
-    hasAnyCondition5e,
+    hasAnyStandardCondition,
     hasCondition,
 } from '@/lib/utils/battle/conditions/query';
 import type { BattleParticipant } from '@/types/battle';
@@ -230,7 +230,7 @@ describe('isolation from 5e and display', () => {
 
         expect(hasCondition(p, 'prone')).toBe(false);
         expect(conditionEffects(p)).toHaveLength(0);
-        expect(hasAnyCondition5e(p)).toBe(false);
+        expect(hasAnyStandardCondition(p)).toBe(false);
     });
 
     it('effect carries label, description and skip_action 100', () => {

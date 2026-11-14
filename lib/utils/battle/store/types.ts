@@ -1,4 +1,7 @@
+import type { PrismaClient } from '@prisma/client';
+
 import type { BattleStatus } from '@/lib/constants/battle';
+import type { Locale } from '@/lib/i18n/config';
 import type { Ruleset } from '@/lib/utils/rules';
 import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
 import type { AbilityUsageCounter } from '@/types/abilities';
@@ -186,3 +189,16 @@ export interface BattleDelta {
     removed: string[];
     events: StoredBattleEvent[];
 }
+
+export type BattleWrite = { logLocale: Locale };
+
+export type BattleDb = Pick<
+    PrismaClient,
+    | 'battleScene'
+    | 'battleParticipant'
+    | 'battleEvent'
+    | 'battleSnapshot'
+    | '$transaction'
+    | '$queryRaw'
+    | '$executeRaw'
+>;

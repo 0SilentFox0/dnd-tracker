@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 
 import { context, goblin, participant } from './fixtures';
 
+import '@/lib/server/systems/registry';
 import { castSpellSchema } from '@/lib/schemas/battles';
 import { createLegendaryMutation } from '@/lib/server/battles/mutations/core-action/legendary-mutation';
 import { createSpellMutation } from '@/lib/server/battles/mutations/spell/spell-mutation';

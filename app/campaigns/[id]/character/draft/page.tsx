@@ -1,7 +1,10 @@
 import { redirect } from 'next/navigation';
 
+import '@/components/systems/registry';
+import '@/lib/server/systems/registry';
 import { PlayerDraftForm } from '@/components/characters/player-draft/PlayerDraftForm';
 import { systemUiOf } from '@/components/systems';
+import { SystemGate } from '@/components/systems/SystemGate';
 import {
     CharacterStatus,
     CharacterType,
@@ -80,11 +83,13 @@ export default async function PlayerDraftPage({
 
         return (
             <ExtendLocaleScope namespaces={systemScope(rules.system, 'draft')}>
-                <DraftForm
-                    campaignId={id}
-                    characterId={c.id}
-                    initialIdentity={initialIdentity}
-                />
+                <SystemGate system={rules.system}>
+                    <DraftForm
+                        campaignId={id}
+                        characterId={c.id}
+                        initialIdentity={initialIdentity}
+                    />
+                </SystemGate>
             </ExtendLocaleScope>
         );
     }
@@ -122,6 +127,12 @@ export default async function PlayerDraftPage({
     };
 
     return (
-        <PlayerDraftForm campaignId={id} characterId={c.id} initial={initial} />
+        <SystemGate system={rules.system}>
+            <PlayerDraftForm
+                campaignId={id}
+                characterId={c.id}
+                initial={initial}
+            />
+        </SystemGate>
     );
 }

@@ -8,17 +8,10 @@ import {
     ParticipantSide,
 } from '@/lib/constants/battle';
 import { prisma } from '@/lib/db';
+import { loadBattle, loadBattleAccess } from '@/lib/server/battles/store/load-battle';
+import { saveBattle } from '@/lib/server/battles/store/save-battle';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
-import {
-    BattleConflictError,
-    loadBattle,
-    loadBattleAccess,
-    loadEventsBefore,
-    loadRecentEvents,
-    loadSnapshotsFrom,
-    restoreParticipantsAt,
-    saveBattle,
-} from '@/lib/utils/battle/store';
+import { BattleConflictError, loadEventsBefore, loadRecentEvents, loadSnapshotsFrom, restoreParticipantsAt } from '@/lib/utils/battle/store';
 import type { BattleParticipant } from '@/types/battle';
 
 const url = process.env.DATABASE_URL ?? '';

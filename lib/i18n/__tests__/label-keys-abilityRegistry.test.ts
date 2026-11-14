@@ -66,7 +66,7 @@ describe('ability registry labels have translations', () => {
         ...DAMAGE_FILTER_KINDS,
     ]);
     expectLabelKeys('abilityRegistry', 'optionGroups', [
-        'conditions5e',
+        'conditionsStandard',
         'mechanicalConditions',
     ]);
 

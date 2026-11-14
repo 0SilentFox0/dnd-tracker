@@ -46,6 +46,20 @@ describe('translateErrorBody with the real catalogs', () => {
         ).toBe('The class "Fighter" already exists in the campaign');
     });
 
+    it('interpolates names into the map update rejection', () => {
+        const body = {
+            error: 'battleLog.reject.mapUpdateCollision',
+            params: { names: 'Orc, Elf' },
+        };
+
+        expect(translateErrorBody(en, body).error).toBe(
+            'The new map version blocks cells occupied by: Orc, Elf'
+        );
+        expect(translateErrorBody(uk, body).error).toBe(
+            'Нова версія карти перекриває клітинки учасників: Orc, Elf'
+        );
+    });
+
     it('uk cooldown follows plural categories', () => {
         const text = (rounds: number) =>
             translateErrorBody(uk, {

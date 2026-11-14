@@ -2,9 +2,9 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { BackgroundCard } from '@/components/backgrounds/BackgroundCard';
 import { FeatCard } from '@/components/feats/FeatCard';
 import { RaceCard } from '@/components/races/RaceCard';
+import { BackgroundCard } from '@/systems/d20/ui/content/backgrounds/BackgroundCard';
 import type { BackgroundData } from '@/types/backgrounds';
 import type { FeatData } from '@/types/choices';
 import type { Race } from '@/types/races';

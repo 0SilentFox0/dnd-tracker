@@ -27,12 +27,13 @@ import { tokensCreateOperation } from './tokens-create';
 import { tokensDeleteOperation } from './tokens-delete';
 import { transferOperation } from './transfer';
 
+import '@/lib/server/systems/registry';
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { loadRules } from '@/lib/server/campaigns/rules';
 import {
     mergeSystemOperations,
     operationInComposition,
-} from '@/lib/server/systems/registry';
+} from '@/lib/server/systems/lookup';
 import type { CampaignAccessResult } from '@/lib/utils/api/api-auth';
 import { errorResponse } from '@/lib/utils/api/api-response';
 import type { Ruleset } from '@/lib/utils/rules/schema';

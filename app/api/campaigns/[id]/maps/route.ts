@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 
+import '@/lib/server/systems/registry';
 import { battleMapInputSchema } from '@/lib/schemas/battle-maps';
 import {
     createMap,

@@ -143,7 +143,6 @@ const base = {
 
 describe('POST level-up (classes)', () => {
     beforeAll(async () => {
-        await import('@/lib/server/systems/registry');
         await import('../route');
     }, 30_000);
 

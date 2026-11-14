@@ -20,6 +20,7 @@ vi.mock('@/components/onboarding/OnboardingHint', () => ({
     ),
 }));
 
+import '@/components/systems/registry';
 import { BattleScreen } from '@/components/battle/scene/BattleScreen';
 import { fakeScene } from '@/lib/hooks/battle/__tests__/fake-scene';
 

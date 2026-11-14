@@ -11,7 +11,7 @@ import {
 
 import { BattleStatus } from '@/lib/constants/battle';
 import { useConfirm } from '@/lib/hooks/common';
-import { hasAnyCondition5e } from '@/lib/utils/battle/conditions';
+import { hasAnyStandardCondition } from '@/lib/utils/battle/conditions';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { BattleParticipant } from '@/types/battle';
 
@@ -112,7 +112,7 @@ export function useDmParticipantActions({ onChangeHp, onDone }: Options) {
                   ) ?? false)
                 : false) ||
             !!(battle.rules && ruleSystemOf(battle.rules).conditions) ||
-            (battle.initiativeOrder ?? []).some(hasAnyCondition5e),
+            (battle.initiativeOrder ?? []).some(hasAnyStandardCondition),
         onKill: isActive ? (p) => update(p, { kill: true }) : undefined,
         onDone,
         unitControl: unitControl.row,
@@ -138,6 +138,9 @@ export function useDmParticipantActions({ onChangeHp, onDone }: Options) {
         row,
         conditions: {
             target: conditionsTarget,
+            standard: battle.rules
+                ? ruleSystemOf(battle.rules).conditionSet
+                : { keys: [], labelKey: (key: string) => key },
             custom:
                 battle.rules &&
                 ruleSystemOf(battle.rules).conditionSet.custom?.(battle.rules),

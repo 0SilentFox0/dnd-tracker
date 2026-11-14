@@ -8,7 +8,6 @@ import {
 } from './adapters/shared';
 import { renderEntries } from './entries';
 import { canonicalKey, nestedId } from './identity';
-import { type Compendium, type JsonRecord, normalized } from './parse';
 import {
     type AdapterContext,
     type Edition,
@@ -18,6 +17,7 @@ import {
 
 import { CHOICE_LIMITS } from '@/lib/constants/choices';
 import type { Translator } from '@/lib/i18n/translator';
+import { type Compendium, type JsonRecord, normalized } from '@/lib/utils/compendium-import/parse';
 
 export interface FeatureResolutionContext {
     root: Compendium;

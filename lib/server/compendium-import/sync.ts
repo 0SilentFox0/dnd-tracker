@@ -1,8 +1,8 @@
 import type { CompendiumBundle, CompendiumBundleDb } from './bundle';
 import { remapCompendiumSection } from './bundle';
-import { CompendiumError } from './parse';
 
 import { jsonContentInput } from '@/lib/utils/common/json';
+import { CompendiumError } from '@/lib/utils/compendium-import/parse';
 
 /** Selected native rows only; campaign source lineage and compendium identity remain independent. */
 export async function syncCompendiumProvenance(

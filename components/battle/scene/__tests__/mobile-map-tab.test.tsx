@@ -32,6 +32,7 @@ vi.mock('@/components/audio/AudioDock', () => ({
     },
 }));
 
+import '@/components/systems/registry';
 import { MapStripSlotContext } from '@/components/battle/scene/MapStrip';
 import { MobileBattleLayout } from '@/components/battle/scene/MobileBattleLayout';
 import { SpellAimPanel } from '@/components/battle/wizards/spellbook/SpellAimPanel';

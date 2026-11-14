@@ -1,22 +1,39 @@
-import { describe, expect, it, vi } from 'vitest';
-
-import { context } from './fixtures';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 
 import { D6POOL_SYSTEM } from '@/lib/__tests__/fixtures/d6pool/definition';
 import { D6POOL_SERVER } from '@/lib/__tests__/fixtures/d6pool/server';
 import { AttackType, ParticipantSide } from '@/lib/constants/battle';
-import { attackBodySchema } from '@/lib/schemas/battles';
-import { attackMutation } from '@/lib/server/battles/mutations/attack/attack-mutation';
-import { placed } from '@/lib/utils/battle/__tests__/fixtures/placed';
 import type { BattleAttack } from '@/types/battle';
 
-vi.mock('@/lib/utils/rules/systems', async (importOriginal) => ({
+let attackMutation: typeof import('@/lib/server/battles/mutations/attack/attack-mutation').attackMutation;
+
+let attackBodySchema: typeof import('@/lib/schemas/battles').attackBodySchema;
+
+let context: typeof import('./fixtures').context;
+
+let placed: typeof import('@/lib/utils/battle/__tests__/fixtures/placed').placed;
+
+// the global setup already loaded the lookup modules; the mocks below only reach a fresh graph
+beforeAll(async () => {
+    vi.resetModules();
+
+    ({ attackMutation } = await import(
+        '@/lib/server/battles/mutations/attack/attack-mutation'
+    ));
+    ({ attackBodySchema } = await import('@/lib/schemas/battles'));
+    ({ context } = await import('./fixtures'));
+    ({ placed } = await import(
+        '@/lib/utils/battle/__tests__/fixtures/placed'
+    ));
+});
+
+vi.mock('@/lib/utils/rules/systems/lookup', async (importOriginal) => ({
     ...(await importOriginal<object>()),
     ruleSystemOf: () => D6POOL_SYSTEM,
     ruleSystemByKey: () => D6POOL_SYSTEM,
 }));
 
-vi.mock('@/lib/server/systems/registry', async (importOriginal) => ({
+vi.mock('@/lib/server/systems/lookup', async (importOriginal) => ({
     ...(await importOriginal<object>()),
     systemServerOf: () => D6POOL_SERVER,
 }));

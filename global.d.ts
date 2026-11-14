@@ -12,10 +12,8 @@ import type battleActions from './messages/uk/battleActions.json';
 import type battleCommon from './messages/uk/battleCommon.json';
 import type battleDm from './messages/uk/battleDm.json';
 import type battleLog from './messages/uk/battleLog.json';
-import type battleMorale from './messages/uk/battleMorale.json';
 import type battleSetup from './messages/uk/battleSetup.json';
 import type battleTerms from './messages/uk/battleTerms.json';
-import type battleWfrp from './messages/uk/battleWfrp.json';
 import type battleWizards from './messages/uk/battleWizards.json';
 import type campaigns from './messages/uk/campaigns.json';
 import type characterProfile from './messages/uk/characterProfile.json';
@@ -35,6 +33,7 @@ import type gameTerms from './messages/uk/gameTerms.json';
 import type help from './messages/uk/help.json';
 import type inventory from './messages/uk/inventory.json';
 import type landing from './messages/uk/landing.json';
+import type maps from './messages/uk/maps.json';
 import type music from './messages/uk/music.json';
 import type onboarding from './messages/uk/onboarding.json';
 import type races from './messages/uk/races.json';
@@ -49,16 +48,6 @@ import type spellEditor from './messages/uk/spellEditor.json';
 import type spells from './messages/uk/spells.json';
 import type units from './messages/uk/units.json';
 import type validation from './messages/uk/validation.json';
-import type wfrpAdvancement from './messages/uk/wfrpAdvancement.json';
-import type wfrpCareers from './messages/uk/wfrpCareers.json';
-import type wfrpCorruption from './messages/uk/wfrpCorruption.json';
-import type wfrpCreation from './messages/uk/wfrpCreation.json';
-import type wfrpDowntime from './messages/uk/wfrpDowntime.json';
-import type wfrpEquipment from './messages/uk/wfrpEquipment.json';
-import type wfrpEquipmentEditor from './messages/uk/wfrpEquipmentEditor.json';
-import type wfrpMagic from './messages/uk/wfrpMagic.json';
-import type wfrpTables from './messages/uk/wfrpTables.json';
-import type wfrpTraits from './messages/uk/wfrpTraits.json';
 import type whatsNew from './messages/uk/whatsNew.json';
 import type world from './messages/uk/world.json';
 
@@ -102,6 +91,21 @@ declare module 'next-intl' {
             show: typeof show;
             acquaintances: typeof acquaintances;
             world: typeof world;
+            maps: typeof maps;
+            // <systems:generated>
+            battleMorale: typeof import('./messages/uk/battleMorale.json');
+            battleWfrp: typeof import('./messages/uk/battleWfrp.json');
+            wfrpAdvancement: typeof import('./messages/uk/wfrpAdvancement.json');
+            wfrpCareers: typeof import('./messages/uk/wfrpCareers.json');
+            wfrpCorruption: typeof import('./messages/uk/wfrpCorruption.json');
+            wfrpCreation: typeof import('./messages/uk/wfrpCreation.json');
+            wfrpDowntime: typeof import('./messages/uk/wfrpDowntime.json');
+            wfrpEquipment: typeof import('./messages/uk/wfrpEquipment.json');
+            wfrpEquipmentEditor: typeof import('./messages/uk/wfrpEquipmentEditor.json');
+            wfrpMagic: typeof import('./messages/uk/wfrpMagic.json');
+            wfrpTables: typeof import('./messages/uk/wfrpTables.json');
+            wfrpTraits: typeof import('./messages/uk/wfrpTraits.json');
+            // </systems:generated>
             ai: typeof ai;
             compendium: typeof compendium;
             contentImport: typeof contentImport;
@@ -117,18 +121,6 @@ declare module 'next-intl' {
             battleSetup: typeof battleSetup;
             battleLog: typeof battleLog;
             battleActions: typeof battleActions;
-            battleMorale: typeof battleMorale;
-            battleWfrp: typeof battleWfrp;
-            wfrpAdvancement: typeof wfrpAdvancement;
-            wfrpCareers: typeof wfrpCareers;
-            wfrpCreation: typeof wfrpCreation;
-            wfrpEquipment: typeof wfrpEquipment;
-            wfrpEquipmentEditor: typeof wfrpEquipmentEditor;
-            wfrpTraits: typeof wfrpTraits;
-            wfrpTables: typeof wfrpTables;
-            wfrpDowntime: typeof wfrpDowntime;
-            wfrpCorruption: typeof wfrpCorruption;
-            wfrpMagic: typeof wfrpMagic;
         };
     }
 }

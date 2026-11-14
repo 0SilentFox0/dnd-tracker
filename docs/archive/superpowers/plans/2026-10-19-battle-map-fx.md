@@ -4,7 +4,7 @@
 
 **Goal:** Анімації бою грають на карті: правильний якір (токен карти, з урахуванням видимої області), AoE — у центр шаблону, плитка обраного учасника реагує на удар, шкода небезпечної місцевості має власний запис журналу, battle-sweep перевіряє бій із картою.
 
-**Architecture:** FX-шар знаходить точки через DOM (`components/battle/fx/runtime/anchors.ts`). Ранжування якорів робимо явним (`map` > `main` > `detail` > `track`) і відсікаємо якорі поза `[data-fx-clip]`. Точку наведення заклинання сервер пише в `actionDetails.aimCell`; `mapAction` переносить її у `FxSpec.at`, а `resolvePoints` перетворює на екранну точку через `polygon[data-fx-cell]`. Шкода небезпеки (рух і початок ходу) пишеться окремим записом журналу з `actionDetails.hazard`.
+**Architecture:** FX-шар знаходить точки через DOM (`components/fx/runtime/anchors.ts`). Ранжування якорів робимо явним (`map` > `main` > `detail` > `track`) і відсікаємо якорі поза `[data-fx-clip]`. Точку наведення заклинання сервер пише в `actionDetails.aimCell`; `mapAction` переносить її у `FxSpec.at`, а `resolvePoints` перетворює на екранну точку через `polygon[data-fx-cell]`. Шкода небезпеки (рух і початок ходу) пишеться окремим записом журналу з `actionDetails.hazard`.
 
 **Tech Stack:** Next.js 16, React 19, TypeScript strict, Vitest (`environment: node`; DOM-тести — `// @vitest-environment happy-dom`), Prisma 6, tsx-скрипти.
 
@@ -34,9 +34,9 @@
 ### Task 1: Ранжування FX-якорів і відсікання за `[data-fx-clip]`
 
 **Files:**
-- Modify: `components/battle/fx/runtime/anchors.ts`
+- Modify: `components/fx/runtime/anchors.ts`
 - Modify: `components/battle/hud/Portrait.tsx` (проп `fx` отримує значення `"detail"`; `data-fx-anchor` для `track` і `detail`)
-- Test: `components/battle/fx/__tests__/anchors.test.ts`
+- Test: `components/fx/__tests__/anchors.test.ts`
 
 **Interfaces:**
 - Consumes: розмітку з блоку 2: токен `[data-fx-participant][data-fx-anchor="map"]` (`components/battle/map/MapToken.tsx`), контейнер карти `[data-fx-clip]`, портрети `Portrait fx="main" | "track"`.
@@ -128,7 +128,7 @@ describe("відсікання за [data-fx-clip]", () => {
 
 - [ ] **Step 2: Run tests to verify they fail**
 
-Run: `pnpm test:run components/battle/fx/__tests__/anchors.test.ts`
+Run: `pnpm test:run components/fx/__tests__/anchors.test.ts`
 Expected: FAIL — нові кейси ранжування й відсікання (поточний `findAnchor` бере перший не-трек якір у порядку DOM і не дивиться на `[data-fx-clip]`).
 
 - [ ] **Step 3: Implement** — у `anchors.ts`:
@@ -169,12 +169,12 @@ function findAnchor(id: string, root: ParentNode = document): HTMLElement | null
 
 У `Portrait.tsx`: `fx?: "main" | "track" | "detail"` і `data-fx-anchor={fx && fx !== "main" ? fx : undefined}`.
 
-- [ ] **Step 4: Run tests** — `pnpm test:run components/battle/fx components/battle/hud` → PASS (наявні тести треку й телефонної прокрутки теж зелені).
+- [ ] **Step 4: Run tests** — `pnpm test:run components/fx components/battle/hud` → PASS (наявні тести треку й телефонної прокрутки теж зелені).
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add components/battle/fx/runtime/anchors.ts components/battle/hud/Portrait.tsx components/battle/fx/__tests__/anchors.test.ts
+git add components/fx/runtime/anchors.ts components/battle/hud/Portrait.tsx components/fx/__tests__/anchors.test.ts
 git commit -m "feat(battle-fx): rank map anchors first and skip tokens outside the visible map
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
@@ -188,8 +188,8 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 - Modify: `types/battle.ts` (у `BattleAction.actionDetails` додати `aimCell?: GridPoint`)
 - Modify: `app/api/campaigns/[id]/battles/[battleId]/spell/spell-mutation.ts` (записати `aimCell`, коли каст пройшов з `targetCell` і на карті)
 - Modify: `lib/utils/battle/fx/types.ts` (`FxSpec.at?: { x: number; y: number }` — клітинка), `lib/utils/battle/fx/map-action.ts`
-- Modify: `components/battle/fx/runtime/anchors.ts` (`resolvePoints` повертає `at?: FxPoint`), `components/battle/fx/runtime/play.ts` (передати `at` в анімацію, локалізоване), `components/battle/fx/animations/types.ts` (поле `at?: FxPoint` у параметрах анімації), `components/battle/fx/animations/area.ts`
-- Test: `lib/utils/battle/fx/__tests__/map-action.test.ts` (створити, якщо немає — перевір `ls lib/utils/battle/fx/__tests__`), `components/battle/fx/__tests__/anchors.test.ts`, тест мутації заклинання поруч із наявними (`grep -rln "createSpellMutation" app/api/__tests__ lib`) — знайди файл, де тестується каст із `targetCell` (блок 3), і додай кейс туди.
+- Modify: `components/fx/runtime/anchors.ts` (`resolvePoints` повертає `at?: FxPoint`), `components/fx/runtime/play.ts` (передати `at` в анімацію, локалізоване), `components/fx/animations/types.ts` (поле `at?: FxPoint` у параметрах анімації), `components/fx/animations/area.ts`
+- Test: `lib/utils/battle/fx/__tests__/map-action.test.ts` (створити, якщо немає — перевір `ls lib/utils/battle/fx/__tests__`), `components/fx/__tests__/anchors.test.ts`, тест мутації заклинання поруч із наявними (`grep -rln "createSpellMutation" app/api/__tests__ lib`) — знайди файл, де тестується каст із `targetCell` (блок 3), і додай кейс туди.
 
 **Interfaces:**
 - Consumes: `spellSchema.targetCell` (`cast-spell-schema.ts`), `resolveTemplate`/`resolveSkillRadius` (`lib/utils/battle/spell/spell-targeting.ts`) — каст із точкою. Якір клітинки `polygon[data-fx-cell="x:y"]` (BattleMap). Видимість — `visible()` з Task 1.
@@ -265,7 +265,7 @@ describe("точка шаблону", () => {
 
 Тест мутації: каст шаблонного заклинання з `targetCell: { x, y }` на бою з картою → у створеній події `details.actionDetails.aimCell` дорівнює `targetCell`; каст одиночного заклинання без карти → `aimCell` відсутній. Використай фікстури й хелпери того файлу, де вже тестується `targetCell` (блок 3).
 
-- [ ] **Step 2: Run** — `pnpm test:run lib/utils/battle/fx components/battle/fx/__tests__/anchors.test.ts` + файл тесту мутації → FAIL.
+- [ ] **Step 2: Run** — `pnpm test:run lib/utils/battle/fx components/fx/__tests__/anchors.test.ts` + файл тесту мутації → FAIL.
 
 - [ ] **Step 3: Implement**
 
@@ -297,12 +297,12 @@ export const area: FxAnimation = async ({ stage, from, to, at, palette, spec }) 
 
 `spell-mutation.ts`: після успішного розвʼязання цілей, якщо `resolution.cells` є і `data.targetCell` задано — `actionDetails.aimCell = data.targetCell` (там, де мутація доповнює `battleAction.actionDetails`; поле має потрапити і в превʼю, і у збережену подію).
 
-- [ ] **Step 4: Run** — ті самі тести → PASS; `pnpm test:run components/battle/fx lib/utils/battle/fx app/api` → PASS.
+- [ ] **Step 4: Run** — ті самі тести → PASS; `pnpm test:run components/fx lib/utils/battle/fx app/api` → PASS.
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add types/battle.ts app/api/campaigns/[id]/battles/[battleId]/spell/spell-mutation.ts lib/utils/battle/fx/types.ts lib/utils/battle/fx/map-action.ts lib/utils/battle/fx/__tests__/map-action.test.ts components/battle/fx/runtime/anchors.ts components/battle/fx/runtime/play.ts components/battle/fx/animations/types.ts components/battle/fx/animations/area.ts components/battle/fx/__tests__/anchors.test.ts <файл тесту мутації>
+git add types/battle.ts app/api/campaigns/[id]/battles/[battleId]/spell/spell-mutation.ts lib/utils/battle/fx/types.ts lib/utils/battle/fx/map-action.ts lib/utils/battle/fx/__tests__/map-action.test.ts components/fx/runtime/anchors.ts components/fx/runtime/play.ts components/fx/animations/types.ts components/fx/animations/area.ts components/fx/__tests__/anchors.test.ts <файл тесту мутації>
 git commit -m "feat(battle-fx): area spells burst at the template centre on the map
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
@@ -317,7 +317,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 - Test: `components/battle/participants/__tests__/participant-details-fx.test.tsx` (створити; подивись, як `field.test.tsx` і тести `ParticipantRow` мокають `useBattleSceneData`/`useFxImpacts`)
 
 **Interfaces:**
-- Consumes: `useHitFx<T>(hp, impact)` (`lib/hooks/battle/useHitFx.ts`) → `{ change, shakeRef, delayStyle }`; `useFxImpacts()` (`lib/hooks/battle/useFxImpact.ts`) → `(id) => FxImpact | null`; `HitFrame` (`components/battle/fx/PortraitFx.tsx`); `Portrait fx="detail"` (Task 1). Еталон розмітки — `ParticipantRow.tsx` (плаваюче число `hud-float`, спалах `hud-flash-red/green`, `HitFrame`).
+- Consumes: `useHitFx<T>(hp, impact)` (`lib/hooks/battle/useHitFx.ts`) → `{ change, shakeRef, delayStyle }`; `useFxImpacts()` (`lib/hooks/battle/useFxImpact.ts`) → `(id) => FxImpact | null`; `HitFrame` (`components/fx/PortraitFx.tsx`); `Portrait fx="detail"` (Task 1). Еталон розмітки — `ParticipantRow.tsx` (плаваюче число `hud-float`, спалах `hud-flash-red/green`, `HitFrame`).
 - Produces: портрет плитки — додатковий якір `data-fx-participant` з `data-fx-anchor="detail"` (нижчий ранг за токен і рядок, тож основна анімація грає на токені); зміна HP на плитці — плаваюче число + спалах/рамка удару, як у рядку.
 
 - [ ] **Step 1: Failing test** (happy-dom): рендер `ParticipantDetails` для `participant` із HP 50; перерендер із HP 40 і `impactFor(id)` → `{ kind: "damage", delayMs: 0 }` (реальну форму `FxImpact` візьми з `lib/utils/battle/fx/impact.ts`):

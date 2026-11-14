@@ -222,7 +222,6 @@
     "lockedHint": "The system cannot be changed while the campaign has characters or units.",
     "modules": {
       "title": "Rule modules",
-      "hint": "Each module adds its own part of the rules. A change applies at once; turning a module off deletes nothing.",
       "setupBadge": "changes heroes",
       "requires": "Requires the \"{module}\" module.",
       "conflicts": "Conflicts with the \"{module}\" module.",
@@ -231,6 +230,42 @@
       "confirmTitle": "Change a rule module?",
       "confirmBody": "The \"{module}\" module changes how existing heroes are calculated. Nothing is deleted: turn the module back on and everything returns.",
       "confirmAction": "Change"
+    },
+    "wizard": {
+      "step": "Step {current} of {total}:",
+      "modulesTitle": "Choose modules",
+      "summaryTitle": "Review and apply",
+      "loadFailed": "Could not load the selected modules. Check your connection and try again.",
+      "hint": "Pick the modules, review what changes, then apply once. Turning a module off deletes nothing.",
+      "next": "Review",
+      "back": "Back",
+      "apply": "Apply",
+      "none": "none",
+      "added": "Turned on",
+      "removed": "Turned off",
+      "sheet": "Character sheet",
+      "sheetBlocks": "{count, plural, one {# sheet block} other {# sheet blocks}}",
+      "rulesSections": "Rule sections",
+      "contentKinds": "Content kinds",
+      "kinds": {
+        "spells": "Spells",
+        "skills": "Skills",
+        "backgrounds": "Backgrounds",
+        "careers": "Careers",
+        "artifacts": "Artifacts",
+        "classes": "Classes",
+        "artifact-sets": "Artifact sets",
+        "main-skills": "Main skills",
+        "feats": "Feats",
+        "spell-groups": "Schools of magic",
+        "tracks": "Battle music",
+        "races": "Races",
+        "units": "Units"
+      },
+      "dmSections": "DM pages",
+      "actions": "Combat actions",
+      "keepsData": "Nothing is saved until you apply; switching a module off keeps its data.",
+      "setupNotice": "Some of these changes affect how heroes are calculated; if the campaign has heroes, you will be asked to confirm when you apply."
     }
   }
 }

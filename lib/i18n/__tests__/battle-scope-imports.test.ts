@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest';
 
 import { reachableSources, walkSources } from '../test/import-graph';
 
-const BATTLE_SEGMENTS = /^app\/campaigns\/[^/]+\/(dm\/)?battles\//;
+// the map editor route extends the scope with the battle namespaces in its own layout
+const BATTLE_SEGMENTS =
+    /^app\/campaigns\/[^/]+\/(dm\/)?(battles\/|maps\/\[mapId\]\/)/;
 
 const SERVER_ONLY = /^(lib\/server|app\/api)\//;
 
@@ -18,9 +20,9 @@ const TOUR_ANCHORS = 'lib/onboarding/demo-tours.ts';
 // reviewed: pages outside the battle segments reach only these battle files (dice roller, FX runtime and preview, query keys); the battle namespaces are not loaded there
 const ALLOWED_BATTLE_CODE = [
     'components/dice/',
-    'components/battle/fx/runtime/',
-    'components/battle/fx/preview/',
-    'components/battle/fx/animations/',
+    'components/fx/runtime/',
+    'components/fx/preview/',
+    'components/fx/animations/',
     'lib/hooks/battles/keys.ts',
 ];
 

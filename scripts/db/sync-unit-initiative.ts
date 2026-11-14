@@ -5,6 +5,7 @@
  *
  *   pnpm exec tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/db/sync-unit-initiative.ts <campaignId> [--dry-run] [--allow-remote]
  */
+import '@/lib/utils/rules/systems/registry';
 import { buildLibrary } from '@/data/library/build';
 import { prisma } from '@/lib/db';
 import { assertSeedTarget, parseArgs } from '@/scripts/seed/seed-library-lib';

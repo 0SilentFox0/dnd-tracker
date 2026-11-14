@@ -13,6 +13,7 @@ import {
 } from '@/lib/server/battles/mutations/rollback/rollback-mutation';
 import { createSpellMutation } from '@/lib/server/battles/mutations/spell/spell-mutation';
 import { runBattleMutation } from '@/lib/server/battles/run-mutation';
+import { prepareSave } from '@/lib/server/battles/store/save-battle';
 import { applyBattleDelta } from '@/lib/utils/battle/client/apply-delta';
 import type {
     MutationResult,
@@ -28,13 +29,7 @@ import type {
     StoredBattleEvent,
     StoredParticipant,
 } from '@/lib/utils/battle/store';
-import {
-    buildSnapshotState,
-    eventToBattleAction,
-    joinParticipant,
-    prepareSave,
-    splitParticipant,
-} from '@/lib/utils/battle/store';
+import { buildSnapshotState, eventToBattleAction, joinParticipant, splitParticipant } from '@/lib/utils/battle/store';
 import {
     KNOWLEDGE_EVENT_TYPES,
     summarizeKnowledge,

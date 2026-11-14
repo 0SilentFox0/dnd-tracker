@@ -2,7 +2,7 @@ import { each, immuneTo } from './each';
 import type { EffectApplyInput, EffectApplyResult } from './types';
 
 import { EffectMarker } from '@/lib/constants/battle';
-import { textRef } from '@/lib/i18n/text-ref';
+import { dynamicTextRef, textRef } from '@/lib/i18n/text-ref';
 import {
     findParticipant,
     updateParticipant,
@@ -20,8 +20,8 @@ import {
 } from '@/lib/utils/abilities/engine/effects/timed-effects';
 import type { Effect } from '@/lib/utils/abilities/schema';
 import {
-    isCondition5eKey,
     isCustomConditionKey,
+    isMechanicalConditionKey,
 } from '@/lib/utils/abilities/schema/kinds';
 import {
     seg,
@@ -106,8 +106,8 @@ export function applyCondition(
     const { ability, effect, ctx } = input;
 
     if (
-        isCondition5eKey(effect.condition) ||
-        isCustomConditionKey(effect.condition)
+        isCustomConditionKey(effect.condition) ||
+        !isMechanicalConditionKey(effect.condition)
     )
         return applyConditionToTargets(input, effect.condition);
 
@@ -156,7 +156,7 @@ export function applyCondition(
             textRef('abilityText.log.condition', {
                 ability: ability.name,
                 target: names,
-                condition: textRef(
+                condition: dynamicTextRef(
                     `abilityRegistry.options.condition.${condition}`
                 ),
                 rounds: effect.duration.rounds,

@@ -1,10 +1,9 @@
+import { type Condition5eKey, isCondition5eKey } from './keys';
+
 import { EffectMarker } from '@/lib/constants/battle';
 import { dynamicTextRef } from '@/lib/i18n/text-ref';
 import type { StaticEffect } from '@/lib/utils/abilities/schema';
-import {
-    type Condition5eKey,
-    type CustomConditionKey,
-} from '@/lib/utils/abilities/schema/kinds';
+import type { CustomConditionKey } from '@/lib/utils/abilities/schema/kinds';
 import type { LabeledEffectInput } from '@/lib/utils/battle/actions/effects';
 import { exhaustionEffects } from '@/lib/utils/battle/conditions/exhaustion';
 import type {
@@ -171,9 +170,11 @@ export function expandCondition5e(
 }
 
 export function conditionEffectInput(
-    key: Condition5eKey,
+    key: string,
     opts: ConditionEffectOptions
-): LabeledEffectInput {
+): LabeledEffectInput | null {
+    if (!isCondition5eKey(key)) return null;
+
     const isExhaustion = key === 'exhaustion';
 
     const { markers, flags } = expandCondition5e(key, {

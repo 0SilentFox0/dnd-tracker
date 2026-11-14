@@ -45,6 +45,7 @@ export const DM_DASHBOARD_SECTIONS: DashboardSection[] = [
     { key: 'graph', href: dm('graph'), icon: Network, group: 'game' },
     { key: 'battles', href: dm('battles'), icon: Swords, group: 'game' },
     { key: 'show', href: dm('show'), icon: Images, group: 'game' },
+    { key: 'maps', href: dm('maps'), icon: MapIcon, group: 'libraries' },
     { key: 'music', href: dm('music'), icon: Music, group: 'game' },
     { key: 'acquaintances', href: acquaintances, icon: Contact, group: 'game' },
     { key: 'ai', href: dm('ai'), icon: Cpu, group: 'game' },
@@ -158,7 +159,7 @@ const pick = (list: DashboardSection[], keys: string[]) =>
     list.filter((s) => keys.includes(s.key));
 
 export const DEMO_DASHBOARD_SECTIONS: DashboardSection[] = [
-    ...DM_DASHBOARD_SECTIONS.filter((section) => section.key !== 'rules'),
+    ...DM_DASHBOARD_SECTIONS.filter((section) => section.key !== 'rules' && section.key !== 'maps'),
     ...pick(PLAYER_DASHBOARD_SECTIONS, ['player-world']).map((section) => ({
         ...section,
         group: 'game' as const,

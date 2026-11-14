@@ -1,20 +1,24 @@
-import { moduleCatalog, PRESETS } from './catalog';
-import { composeSystem } from './compose';
-import { RULE_SYSTEM_KEYS } from './meta';
-import { type ModuleEntry, resolveSystem } from './resolve';
-import type { LevelResetPart, RuleSystemDefinition } from './types';
+import { installModules } from './lookup';
+import type { ModuleEntry } from './resolve';
+import type { RuleSystemDefinition } from './types';
 
-import { type Coin, COIN_VALUE } from '@/lib/constants/inventory';
-import type { Ruleset } from '@/lib/utils/rules/schema';
+import {
+    type AbilityModule,
+    installAbilityModules,
+} from '@/lib/utils/abilities/registry/install';
 // <systems:generated>
 import { ARTIFACTSETS_MODULE } from '@/systems/artifactsets';
 import { D20_MODULE } from '@/systems/d20';
+import { D20_ABILITY_MODULE } from '@/systems/d20/rules/ability-install';
 import { HEROSCALING_MODULE } from '@/systems/heroscaling';
 import { MORALE_MODULE } from '@/systems/morale';
+import { MORALE_ABILITY_MODULE } from '@/systems/morale/rules/ability-install';
 import { RETALIATION_MODULE } from '@/systems/retaliation';
+import { RETALIATION_ABILITY_MODULE } from '@/systems/retaliation/rules/ability-install';
 import { SKILLTREES_MODULE } from '@/systems/skilltrees';
 import { UNITSTACKS_MODULE } from '@/systems/unitstacks';
 import { WFRP_MODULE } from '@/systems/wfrp';
+import { WFRP_ABILITY_MODULE } from '@/systems/wfrp/rules/ability-install';
 // </systems:generated>
 
 export const MODULES: Record<string, ModuleEntry<RuleSystemDefinition>> = {
@@ -30,71 +34,14 @@ export const MODULES: Record<string, ModuleEntry<RuleSystemDefinition>> = {
     // </systems:generated>
 };
 
-const withKey = (
-    definition: RuleSystemDefinition,
-    key: string
-): RuleSystemDefinition =>
-    definition.key === key ? definition : { ...definition, key };
-
-const systemCache = new Map<string, RuleSystemDefinition>();
-
-const resolve = (
-    system: Pick<Ruleset, 'system'>['system']
-): RuleSystemDefinition =>
-    resolveSystem(system, systemCache, {
-        entries: MODULES,
-        compose: (base, addons) =>
-            withKey(composeSystem(base, addons), system.key),
-    });
-
-export const RULE_SYSTEM_REGISTRY: Record<string, RuleSystemDefinition> =
-    Object.fromEntries(RULE_SYSTEM_KEYS.map((key) => [key, resolve({ key })]));
-
-let levelResets: readonly LevelResetPart[] | undefined;
-
-/** Resets of every module regardless of the campaign composition: column integrity is not a game rule, a level-down must not leave stale data behind a switched-off module */
-export function allLevelResets(): readonly LevelResetPart[] {
-    levelResets ??= [
-        ...new Set(
-            Object.entries(PRESETS)
-                .filter(([, { modules }]) => modules.length === 0)
-                .flatMap(([key, { base }]) => {
-                    const addons = moduleCatalog()
-                        .addons.filter((a) => a.requires.includes(base))
-                        .map((a) => a.id);
-
-                    return (
-                        resolve({ key, modules: addons }).progression
-                            .levelResets ?? []
-                    );
-                })
-        ),
-    ];
-
-    return levelResets;
-}
-
-export const ruleSystemOf = (
-    rules: Pick<Ruleset, 'system'>
-): RuleSystemDefinition => {
-    const { key, modules } = rules.system;
-
-    if (!modules && Object.hasOwn(RULE_SYSTEM_REGISTRY, key))
-        return RULE_SYSTEM_REGISTRY[key];
-
-    return resolve(rules.system);
+export const ABILITY_MODULES: Record<string, AbilityModule> = {
+    // <systems:generated>
+    d20: D20_ABILITY_MODULE,
+    morale: MORALE_ABILITY_MODULE,
+    retaliation: RETALIATION_ABILITY_MODULE,
+    wfrp: WFRP_ABILITY_MODULE,
+    // </systems:generated>
 };
 
-export const systemKeyOf = (rules: Pick<Ruleset, 'system'>): string =>
-    rules.system.key;
-
-export const currencyValueOf = (
-    rules: Pick<Ruleset, 'system'>
-): Record<Coin, number> => ruleSystemOf(rules).currency?.value ?? COIN_VALUE;
-
-export const ruleSystemByKey = (
-    key: string
-): RuleSystemDefinition | undefined =>
-    Object.hasOwn(RULE_SYSTEM_REGISTRY, key)
-        ? RULE_SYSTEM_REGISTRY[key]
-        : undefined;
+installModules(MODULES);
+installAbilityModules(ABILITY_MODULES);

@@ -12,13 +12,11 @@ import {
 import { UNIT_SPELL_SLOTS } from '@/lib/constants/battle-balance';
 import { CONTROLLED_BY_DM } from '@/lib/constants/characters';
 import type { WeaponTrait } from '@/lib/constants/weapon-traits';
-import { loadUnitRace } from '@/lib/server/battles/participant/load-race';
 import { bakePassives } from '@/lib/utils/abilities/build/bake';
 import { collectUnitAbilities } from '@/lib/utils/abilities/build/collect';
 import { immunityAbilities } from '@/lib/utils/abilities/build/immunities';
 import { resolveLimitFormulas } from '@/lib/utils/abilities/build/limit-formulas';
 import { getAbilityModifier } from '@/lib/utils/common/calculations';
-import { logger } from '@/lib/utils/common/logger';
 import { spellGrantFields, spellPoolKey } from '@/lib/utils/items/pools';
 import { getUnitImmunities } from '@/lib/utils/races/race-effects';
 import { type Ruleset } from '@/lib/utils/rules';
@@ -126,7 +124,7 @@ function monsterSpellcasting(unit: UnitFromPrisma): {
     };
 }
 
-type UnitRace = Awaited<ReturnType<typeof loadUnitRace>>;
+type UnitRace = Prisma.RaceGetPayload<object> | null;
 
 type UnitStatblock = NonNullable<Unit['statblock']>;
 
@@ -198,31 +196,6 @@ function unitBattleAttacks(unit: UnitFromPrisma): BattleAttack[] {
             }),
         };
     });
-}
-
-async function loadRaceSafe(
-    unit: UnitFromPrisma,
-    racesById?: Record<string, Prisma.RaceGetPayload<object> | null>
-): Promise<UnitRace> {
-    try {
-        return await loadUnitRace(
-            unit.raceId,
-            unit.campaignId,
-            racesById ? (racesById[unit.raceId ?? ''] ?? null) : undefined
-        );
-    } catch (error) {
-        logger.error(
-            '[battle/from-unit] load race failed',
-            {
-                unitId: unit.id,
-                raceId: unit.raceId,
-                campaignId: unit.campaignId,
-            },
-            error
-        );
-
-        return null;
-    }
 }
 
 function unitLegendary(
@@ -351,7 +324,7 @@ export async function createBattleParticipantFromUnit(
     racesById: Record<string, Prisma.RaceGetPayload<object> | null> | undefined,
     rules: Ruleset
 ): Promise<BattleParticipant> {
-    const race = await loadRaceSafe(unit, racesById);
+    const race: UnitRace = racesById?.[unit.raceId ?? ''] ?? null;
 
     const monster = isMonster5e(unit);
 

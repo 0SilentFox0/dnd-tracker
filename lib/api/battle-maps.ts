@@ -18,7 +18,8 @@ export const getBattleMap = (
 ) =>
     campaignGet<BattleMapFull>(
         campaignId,
-        `/maps/${mapId}${version === undefined ? '' : `?version=${version}`}`
+        `/maps/${mapId}${version === undefined ? '' : `?version=${version}`}`,
+        version === undefined ? { cache: 'no-store' } : {}
     );
 
 export const createBattleMap = (campaignId: string, data: BattleMapInput) =>
@@ -33,5 +34,8 @@ export const updateBattleMap = (
 export const deleteBattleMap = (campaignId: string, mapId: string) =>
     campaignDelete<{ success: true }>(campaignId, `/maps/${mapId}`);
 
-export const cloneBattleMap = (campaignId: string, mapId: string) =>
-    campaignPost<BattleMapBrief>(campaignId, `/maps/${mapId}/clone`, {});
+export const cloneBattleMap = (
+    campaignId: string,
+    mapId: string,
+    name?: string
+) => campaignPost<BattleMapBrief>(campaignId, `/maps/${mapId}/clone`, { name });

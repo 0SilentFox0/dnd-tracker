@@ -157,4 +157,5 @@ export const useUpdateBattleParticipant = makeBattleHook(
 );
 export const useScaleBattleUnits = makeBattleHook(battleOps.scaleUnits);
 export const useUnitControl = makeBattleHook(battleOps.unitControl);
+export const useSwapGear = makeBattleHook(battleOps.swapGear);
 export const useRefreshBattleSources = makeBattleHook(battleOps.refreshSources);

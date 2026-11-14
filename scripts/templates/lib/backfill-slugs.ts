@@ -6,6 +6,7 @@ import { delegateFor, labelSelect, rowLabel } from './kind-delegate';
 import { readManifest, TEMPLATES_DIR } from './pack';
 import { makeTemplateStore } from './store';
 
+import '@/lib/utils/rules/systems/registry';
 import { prisma } from '@/lib/db';
 import { writeSlug } from '@/lib/server/content/import/slug';
 import { withCampaignRuntimeWrite } from '@/lib/server/content/write';

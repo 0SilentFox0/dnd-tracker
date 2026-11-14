@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { SPELL_FX_BY_NAME } from '@/data/library/spell-fx-by-name';
 import { SPELLS } from '@/data/library/spells';
@@ -9,6 +9,29 @@ import {
 import { previewSpellFx } from '@/lib/utils/battle/fx/spell-preview';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import { metaOf } from '@/lib/utils/rules/systems/meta';
+
+describe('PREVIEW_SYSTEM_KEY', () => {
+    it('is the previewSandbox base regardless of key order', async () => {
+        vi.resetModules();
+
+        vi.doMock('@/lib/utils/rules/systems/meta', async (orig) => {
+            const real =
+                await orig<typeof import('@/lib/utils/rules/systems/meta')>();
+
+            return {
+                ...real,
+                SYSTEM_META: [...real.SYSTEM_META].reverse(),
+                RULE_SYSTEM_KEYS: [...real.RULE_SYSTEM_KEYS].reverse(),
+            };
+        });
+
+        const mod = await import('@/lib/utils/battle/fx/preview-rules');
+
+        vi.doUnmock('@/lib/utils/rules/systems/meta');
+
+        expect(mod.PREVIEW_SYSTEM_KEY).toBe('dnd5e');
+    });
+});
 
 describe('PREVIEW_RULES', () => {
     it('is a d20 base sandbox keyed by PREVIEW_SYSTEM_KEY', () => {

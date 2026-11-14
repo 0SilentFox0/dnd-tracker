@@ -1,4 +1,3 @@
-import { CompendiumError } from '../parse';
 import type { FetchedImage, fetchImportImage } from './fetch-image';
 import { type MediaProgress, mediaProgress } from './queue';
 import {
@@ -10,6 +9,7 @@ import {
 
 import type { storeCompendiumImage } from '@/lib/supabase/compendium-media-storage';
 import type { Actor } from '@/lib/utils/api/actor';
+import { CompendiumError } from '@/lib/utils/compendium-import/parse';
 
 export type MediaResult =
     | { id: string; ok: true; storedUrl: string }

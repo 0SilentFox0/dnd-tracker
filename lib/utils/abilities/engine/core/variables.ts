@@ -1,4 +1,5 @@
-import { type Owned, ownedIn } from '@/lib/utils/abilities/registry/owned';
+import { onAbilityInstall } from '@/lib/utils/abilities/registry/install';
+import { ownedIn } from '@/lib/utils/abilities/registry/owned';
 import { SYSTEM_ABILITY_VARIABLES } from '@/lib/utils/abilities/registry/system-variables';
 import type { Composition } from '@/lib/utils/rules/systems/catalog';
 import type { BattleParticipant } from '@/types/battle';
@@ -16,11 +17,6 @@ const CORE_VARIABLES: AbilityVariables = {
     cells_moved: (p) => p.battleData.movementUsed ?? 0,
 };
 
-const OWNERS: readonly Owned<AbilityVariables>[] = [
-    { system: '', items: CORE_VARIABLES },
-    ...SYSTEM_ABILITY_VARIABLES,
-];
-
 function merge(lists: readonly AbilityVariables[]): AbilityVariables {
     const out: Record<string, (p: BattleParticipant) => number> = {};
 
@@ -37,9 +33,22 @@ function merge(lists: readonly AbilityVariables[]): AbilityVariables {
 }
 
 /** Every variable any module provides; stored formulas of an inactive module still evaluate. */
-export const ABILITY_VARIABLES: AbilityVariables = merge(
-    OWNERS.map((o) => o.items)
-);
+export const ABILITY_VARIABLES: Record<
+    string,
+    (p: BattleParticipant) => number
+> = {};
+
+export const FORMULA_VARIABLE_NAMES: string[] = [];
+
+onAbilityInstall(() => {
+    Object.assign(
+        ABILITY_VARIABLES,
+        merge([CORE_VARIABLES, ...SYSTEM_ABILITY_VARIABLES.map((o) => o.items)])
+    );
+
+    FORMULA_VARIABLE_NAMES.length = 0;
+    FORMULA_VARIABLE_NAMES.push(...Object.keys(ABILITY_VARIABLES));
+});
 
 /** Variable names offered to the editor for a composition. */
 export const variableNamesOf = (c: Composition): string[] =>

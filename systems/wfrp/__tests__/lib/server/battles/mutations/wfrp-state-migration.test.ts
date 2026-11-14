@@ -1,5 +1,6 @@
-import { beforeAll, describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
+import '@/lib/server/systems/registry';
 import { AttackType, ParticipantSide } from '@/lib/constants/battle';
 import { makeParticipant } from '@/lib/utils/abilities/__tests__/fixtures';
 import { resetTurnState } from '@/lib/utils/battle/turn/turn-state';
@@ -16,10 +17,6 @@ import { wfrpState, withWfrpState } from '@/systems/wfrp/rules/state';
 import { trait } from '@/systems/wfrp/rules/traits/__tests__/fixtures';
 import { wfrpPsychology } from '@/systems/wfrp/rules/traits/psychology';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
-
-beforeAll(async () => {
-    await import('@/lib/server/systems/registry');
-}, 30_000);
 
 const sword: BattleAttack = {
     id: 'sw',

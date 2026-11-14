@@ -45,6 +45,7 @@ export const DM_ARTICLES: HelpArticleDef[] = [
                 ],
             },
             { blocks: [{ kind: 'p' }] },
+            { blocks: [{ kind: 'p' }] },
         ],
     },
     {
@@ -114,6 +115,7 @@ export const DM_ARTICLES: HelpArticleDef[] = [
         sections: [
             { blocks: [{ kind: 'p' }] },
             { blocks: [{ kind: 'p' }] },
+            { blocks: [{ kind: 'p' }, { kind: 'p' }] },
             { blocks: [{ kind: 'p' }, { kind: 'p' }] },
             { blocks: [{ kind: 'p' }, { kind: 'p' }] },
             { blocks: [{ kind: 'p' }, { kind: 'p' }] },

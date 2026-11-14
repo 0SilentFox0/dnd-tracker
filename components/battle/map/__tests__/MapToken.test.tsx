@@ -10,7 +10,7 @@ vi.mock('@/lib/hooks/battle/useFxEnabled', () => ({
         setEnabled: vi.fn(),
     }),
 }));
-vi.mock('@/components/battle/fx/auras/AuraCanvas', () => ({
+vi.mock('@/components/fx/auras/AuraCanvas', () => ({
     AuraCanvas: ({ kinds, size }: { kinds: string[]; size: number }) => (
         <span
             data-testid="aura"
@@ -19,7 +19,7 @@ vi.mock('@/components/battle/fx/auras/AuraCanvas', () => ({
         />
     ),
 }));
-vi.mock('@/components/battle/fx/frames/ImpactFrame', () => ({
+vi.mock('@/components/fx/frames/ImpactFrame', () => ({
     ImpactFrame: ({ impact }: { impact: FxImpact }) => (
         <i data-testid="impact-frame" data-element={impact.element} />
     ),

@@ -1,6 +1,7 @@
-import { COMPENDIUM_LIMITS } from '../parse';
 import type { AdaptedCompendium } from '../types';
 import type { AdaptState } from './state';
+
+import { COMPENDIUM_LIMITS } from '@/lib/utils/compendium-import/parse';
 
 export function finalizeAdapted(state: AdaptState): AdaptedCompendium {
     const { entries, issues, sources, embedded, blocked } = state;

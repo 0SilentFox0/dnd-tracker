@@ -1,5 +1,4 @@
 import { canonicalKey } from './identity';
-import { CompendiumError, type JsonRecord } from './parse';
 import type { DependencyChoice } from './service';
 import {
     type AdaptedEntry,
@@ -10,6 +9,7 @@ import {
 } from './types';
 
 import { isRecord } from '@/lib/utils/common/is-record';
+import { CompendiumError, type JsonRecord } from '@/lib/utils/compendium-import/parse';
 
 export interface TemplateSnapshot {
     id: string;

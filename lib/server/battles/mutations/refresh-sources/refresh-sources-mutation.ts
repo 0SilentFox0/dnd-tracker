@@ -4,10 +4,9 @@ import { ParticipantSourceType } from '@/lib/constants/battle';
 import { prisma } from '@/lib/db';
 import { textRef } from '@/lib/i18n/text-ref';
 import { buildCampaignContextForStart } from '@/lib/server/battles/mutations/start/start-build-context';
-import {
-    createBattleParticipantFromCharacter,
-    createBattleParticipantFromUnit,
-} from '@/lib/utils/battle/participant';
+import { createBattleParticipantFromCharacter } from '@/lib/server/battles/participant/from-character';
+import { loadUnitRace } from '@/lib/server/battles/participant/load-race';
+import { createBattleParticipantFromUnit } from '@/lib/utils/battle/participant';
 import { refreshFromSource } from '@/lib/utils/battle/participant/refresh-from-source';
 import type {
     BattleMutationContext,
@@ -19,7 +18,7 @@ import type { BattleParticipant } from '@/types/battle';
 
 export const refreshSourcesSchema = z.object({});
 
-type CharacterRow = Parameters<
+export type CharacterRow = Parameters<
     typeof createBattleParticipantFromCharacter
 >[0] & { campaignId: string };
 
@@ -30,6 +29,7 @@ type UnitRow = Parameters<typeof createBattleParticipantFromUnit>[0] & {
 export interface RefreshSourcesDeps {
     loadCharacter(id: string): Promise<CharacterRow | null>;
     loadUnit(id: string, campaignId: string): Promise<UnitRow | null>;
+    loadRace: typeof loadUnitRace;
     fromCharacter: typeof createBattleParticipantFromCharacter;
     fromUnit: typeof createBattleParticipantFromUnit;
     buildContext(
@@ -38,7 +38,7 @@ export interface RefreshSourcesDeps {
     ): Promise<CampaignSpellContext | undefined>;
 }
 
-const defaultDeps: RefreshSourcesDeps = {
+export const defaultRefreshDeps: RefreshSourcesDeps = {
     loadCharacter: (id) =>
         prisma.character.findUnique({
             where: { id },
@@ -48,6 +48,7 @@ const defaultDeps: RefreshSourcesDeps = {
         prisma.unit.findFirst({
             where: { id, campaignId },
         }) as Promise<UnitRow | null>,
+    loadRace: loadUnitRace,
     fromCharacter: createBattleParticipantFromCharacter,
     fromUnit: createBattleParticipantFromUnit,
     buildContext: async (campaignId, characters) =>
@@ -64,7 +65,7 @@ const isRealParticipant = (p: BattleParticipant) =>
     !p.basicInfo.isExtraTurnSlot && !p.battleData.summonedBy;
 
 export function createRefreshSourcesMutation(
-    deps: RefreshSourcesDeps = defaultDeps
+    deps: RefreshSourcesDeps = defaultRefreshDeps
 ) {
     return async (ctx: BattleMutationContext): Promise<MutationResult> => {
         const { campaignId, id: battleId } = ctx.scene;
@@ -84,6 +85,22 @@ export function createRefreshSourcesMutation(
                     : deps.loadUnit(id, campaignId);
 
             rows.set(key, loading);
+
+            return loading;
+        };
+
+        const races = new Map<string, ReturnType<typeof loadUnitRace>>();
+
+        const raceOf = (raceId: string | null) => {
+            const key = raceId ?? '';
+
+            const cached = races.get(key);
+
+            if (cached) return cached;
+
+            const loading = deps.loadRace(raceId, campaignId);
+
+            races.set(key, loading);
 
             return loading;
         };
@@ -149,7 +166,11 @@ export function createRefreshSourcesMutation(
                           battleId,
                           side,
                           instanceNumber ?? 1,
-                          undefined,
+                          {
+                              [(row as UnitRow).raceId ?? '']: await raceOf(
+                                  (row as UnitRow).raceId
+                              ),
+                          },
                           ctx.meta.rules
                       );
 

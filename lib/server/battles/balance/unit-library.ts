@@ -1,6 +1,6 @@
 import { ParticipantSide } from '@/lib/constants/battle';
 import { prisma } from '@/lib/db';
-import { systemServerOf } from '@/lib/server/systems/registry';
+import { systemServerOf } from '@/lib/server/systems/lookup';
 import { unitResistances } from '@/lib/utils/battle/balance/resist';
 import type { UnitStats } from '@/lib/utils/battle/balance/stats';
 import {

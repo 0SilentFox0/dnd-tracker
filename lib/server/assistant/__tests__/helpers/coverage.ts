@@ -478,6 +478,13 @@ export const ASSISTANT_ROUTE_COVERAGE: readonly RouteCoverage[] = [
         state: 'active',
     },
     {
+        route: 'campaigns/[id]/battles/[battleId]/swap-gear',
+        methods: ['POST'],
+        task: 10,
+        adapter: 'battles',
+        state: 'active',
+    },
+    {
         route: 'campaigns/[id]/battles/[battleId]/refresh-sources',
         methods: ['POST'],
         task: 10,
@@ -551,21 +558,21 @@ export const ASSISTANT_ROUTE_COVERAGE: readonly RouteCoverage[] = [
         route: 'campaigns/[id]/maps',
         methods: ['GET', 'POST'],
         task: 0,
-        adapter: 'battle-map library, not assistant-exposed until map editor stage 0b',
+        adapter: 'battle-map library, DM UI only, not assistant-exposed',
         state: 'planned',
     },
     {
         route: 'campaigns/[id]/maps/[mapId]',
         methods: ['DELETE', 'GET', 'PUT'],
         task: 0,
-        adapter: 'battle-map library, not assistant-exposed until map editor stage 0b',
+        adapter: 'battle-map library, DM UI only, not assistant-exposed',
         state: 'planned',
     },
     {
         route: 'campaigns/[id]/maps/[mapId]/clone',
         methods: ['POST'],
         task: 0,
-        adapter: 'battle-map library, not assistant-exposed until map editor stage 0b',
+        adapter: 'battle-map library, DM UI only, not assistant-exposed',
         state: 'planned',
     },
     {

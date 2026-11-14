@@ -10,6 +10,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { PartyRestActions } from '../PartyRestActions';
 
+import '@/components/systems/registry';
 import { RULE_SYSTEM_REGISTRY } from '@/lib/utils/rules/systems';
 import type { CharacterListItem } from '@/types/characters';
 

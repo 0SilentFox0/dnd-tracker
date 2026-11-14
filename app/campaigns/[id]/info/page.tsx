@@ -1,7 +1,9 @@
 import Link from 'next/link';
 
+import '@/lib/server/systems/registry';
 import { InfoReferenceClient } from '@/components/campaigns/info/InfoReferenceClient';
 import { HudPage, HudPageHeader } from '@/components/hud/page';
+import { SystemGate } from '@/components/systems/SystemGate';
 import { Button } from '@/components/ui/button';
 import { loadArtifactReference } from '@/lib/cache/artifact-reference';
 import { getCachedInfoReference } from '@/lib/cache/info-reference';
@@ -24,7 +26,9 @@ export default async function CampaignInfoPage({
 
     const { isDM, campaign } = await requireCampaignMember(campaignId);
 
-    const classesEnabled = parseRules(campaign.rules).classes.enabled;
+    const { system, classes: classesRules } = parseRules(campaign.rules);
+
+    const classesEnabled = classesRules.enabled;
 
     const [{ skills, spells }, { artifacts, sets }, classRows] =
         await Promise.all([
@@ -57,15 +61,17 @@ export default async function CampaignInfoPage({
                 }
             />
 
-            <InfoReferenceClient
-                campaignId={campaignId}
-                skills={classes ? [] : skills}
-                classes={classes}
-                spells={spells}
-                artifacts={artifacts}
-                artifactSets={sets}
-                isDM={isDM}
-            />
+            <SystemGate system={system}>
+                <InfoReferenceClient
+                    campaignId={campaignId}
+                    skills={classes ? [] : skills}
+                    classes={classes}
+                    spells={spells}
+                    artifacts={artifacts}
+                    artifactSets={sets}
+                    isDM={isDM}
+                />
+            </SystemGate>
         </HudPage>
     );
 }

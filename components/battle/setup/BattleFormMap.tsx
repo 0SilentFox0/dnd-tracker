@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 
 import { GridCalibration } from './GridCalibration';
+import { EDGE_TOOLS, ToolButtons } from './MapToolButtons';
 import { ToggleRow } from './ToggleRow';
 
 import { BattleMap } from '@/components/battle/map';
@@ -21,7 +22,6 @@ import { DAMAGE_ELEMENT_OPTIONS } from '@/lib/constants/damage';
 import type { BattleMapEditor } from '@/lib/hooks/battles';
 import { useCoarsePointer } from '@/lib/hooks/common';
 import { useText } from '@/lib/i18n/use-text';
-import { cn } from '@/lib/utils';
 import {
     isEdgeTool,
     isPreviewSafeBackground,
@@ -42,8 +42,6 @@ import { clamp } from '@/lib/utils/common/clamp';
 const MARGIN_KEYS: (keyof Margins)[] = ['top', 'right', 'bottom', 'left'];
 
 const TOOLS: SetupTool[] = ['blocked', 'wall', 'hazard', 'erase'];
-
-const EDGE_TOOLS: SetupTool[] = ['edge-wall', 'edge-bars', 'edge-erase'];
 
 const SLIDER = 'w-full accent-[var(--hud-gold,#f2c14e)] disabled:opacity-40';
 
@@ -71,39 +69,6 @@ function RangeRow({
                 onChange={(e) => onChange(Number(e.target.value))}
                 className={SLIDER}
             />
-        </div>
-    );
-}
-
-function ToolButtons({
-    tools,
-    tool,
-    onPick,
-}: {
-    tools: SetupTool[];
-    tool: SetupTool | null;
-    onPick: (tool: SetupTool | null) => void;
-}) {
-    const t = useTranslations('battleSetup.map');
-
-    return (
-        <div className="flex flex-wrap gap-1.5">
-            {tools.map((value) => (
-                <button
-                    key={value}
-                    type="button"
-                    aria-pressed={tool === value}
-                    onClick={() => onPick(tool === value ? null : value)}
-                    className={cn(
-                        'h-8 rounded-md border bg-black/30 px-3 text-sm hover:bg-black/50',
-                        tool === value
-                            ? 'border-[var(--gold)] text-hud-gold-bright'
-                            : 'border-hud-rule text-hud-muted'
-                    )}
-                >
-                    {t(`tools.${value}`)}
-                </button>
-            ))}
         </div>
     );
 }

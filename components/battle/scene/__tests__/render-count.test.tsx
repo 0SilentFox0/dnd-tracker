@@ -87,6 +87,7 @@ vi.mock('@/components/battle/participants/ParticipantRow', async (orig) => {
     };
 });
 
+import '@/components/systems/registry';
 import { BattleSceneProvider } from '@/components/battle/scene/BattleSceneProvider';
 import { BattleScreen } from '@/components/battle/scene/BattleScreen';
 import { campaignPost } from '@/lib/api/client';

@@ -34,6 +34,7 @@ import {
 import { prunePicks } from '@/lib/utils/characters/choices/prune';
 import {
     type ChoiceRefs,
+    countFeats,
     visitPicks,
 } from '@/lib/utils/characters/choices/walk';
 import { classModeOf } from '@/lib/utils/characters/classes';
@@ -464,18 +465,25 @@ export function usePlayerDraftForm({
             return;
         }
 
+        const classMode = classBased && !!values.classId;
+
+        const state = draftChoicesState(
+            values.choices,
+            classBased ? values.classId : undefined
+        );
+
+        const visits = refs
+            ? visitPicks(state, refs, { level: 1, classMode })
+            : [];
+
         const issues = refs
-            ? pendingIssues(
-                  visitPicks(
-                      draftChoicesState(
-                          values.choices,
-                          classBased ? values.classId : undefined
-                      ),
-                      refs,
-                      { level: 1, classMode: classBased && !!values.classId }
+            ? pendingIssues(visits, {
+                  ...refs,
+                  hero: { totalLevel: 1, scores: scoresOf(values) },
+                  takenFeatIds: new Set(
+                      countFeats(visits, state, classMode).keys()
                   ),
-                  { ...refs, hero: { totalLevel: 1, scores: scoresOf(values) } }
-              )
+              })
             : [];
 
         setChoiceIssues(

@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { RulesForm } from '../RulesForm';
 
 import '@/components/ui/__tests__/match-media';
+import '@/components/systems/registry';
 import { renderWithConfirm } from '@/components/ui/__tests__/render-with-confirm';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 

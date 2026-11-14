@@ -1,8 +1,9 @@
 import { array, object, str } from '../adapters/shared';
-import type { Compendium, JsonRecord } from '../parse';
 import type { TargetKind } from '../types';
 import { MEDIA_LIMITS, type MediaRef } from './types';
 import { normalizeMediaUrl } from './url';
+
+import type { Compendium, JsonRecord } from '@/lib/utils/compendium-import/parse';
 
 const FIELD_OF: Partial<Record<TargetKind, 'avatar' | 'icon'>> = {
     units: 'avatar',

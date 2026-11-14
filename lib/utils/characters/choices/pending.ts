@@ -48,6 +48,7 @@ const unreachable = (v: PickVisit): boolean => {
 type PendingRefs = Pick<ChoiceRefs, 'featsById'> &
     Partial<Pick<ChoiceRefs, 'spellsById'>> & {
         hero?: Parameters<typeof featPrerequisiteMet>[1];
+        takenFeatIds?: ReadonlySet<string>;
     };
 
 /** how many picks the campaign can actually offer; Infinity when it is not bounded by a list */
@@ -75,6 +76,7 @@ function availableCount(v: PickVisit, refs: PendingRefs): number {
             Object.values(refs.featsById).filter(
                 (f) =>
                     types.includes(f.type) &&
+                    (f.repeatable || !refs.takenFeatIds?.has(f.id)) &&
                     (!refs.hero || featPrerequisiteMet(f, refs.hero))
             ).length
         );

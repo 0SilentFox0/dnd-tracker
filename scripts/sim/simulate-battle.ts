@@ -61,8 +61,11 @@ import {
 import { createSpellMutation } from '@/lib/server/battles/mutations/spell/spell-mutation';
 import { createStartMutation } from '@/lib/server/battles/mutations/start/start-mutation';
 import { mutateSystemOperation } from '@/lib/server/battles/operations';
+import { createBattleParticipantFromCharacter } from '@/lib/server/battles/participant/from-character';
 import { runBattleMutation } from '@/lib/server/battles/run-mutation';
 import { loadSpellsFromDb } from '@/lib/server/battles/spell/load-spells-db';
+import { loadBattle } from '@/lib/server/battles/store/load-battle';
+import { saveBattle } from '@/lib/server/battles/store/save-battle';
 import {
     collectModifiers,
     statWithModifiers,
@@ -73,7 +76,6 @@ import { applyBattleDelta } from '@/lib/utils/battle/client/apply-delta';
 import { attackDamageParts } from '@/lib/utils/battle/damage/attack-parts';
 import { awaitsMoraleCheck } from '@/lib/utils/battle/morale/awaits-check';
 import { effectiveMorale } from '@/lib/utils/battle/morale/effective-morale';
-import { createBattleParticipantFromCharacter } from '@/lib/utils/battle/participant/from-character';
 import { PUSHER_DELTA_LIMIT_BYTES } from '@/lib/utils/battle/pipeline/limits';
 import type {
     PipelineDeps,
@@ -81,11 +83,7 @@ import type {
 } from '@/lib/utils/battle/pipeline/run-battle-mutation';
 import { applyResistance, hasImmunity } from '@/lib/utils/battle/resistance';
 import { casterSpellDice } from '@/lib/utils/battle/spell/caster-dice';
-import {
-    loadBattle,
-    loadRecentEvents,
-    saveBattle,
-} from '@/lib/utils/battle/store';
+import { loadRecentEvents } from '@/lib/utils/battle/store';
 import { PATCHABLE_PARTICIPANT_FIELDS } from '@/lib/utils/battle/store/participant-patch';
 import { stableStringify } from '@/lib/utils/battle/store/stable-json';
 import { rollDiceList } from '@/lib/utils/common/dice';

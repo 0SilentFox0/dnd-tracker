@@ -1,13 +1,14 @@
 import { describe, expect, it, vi } from 'vitest';
 
+import { confirmImport, type ImportRepository } from '../service';
+
 import {
     byteLength,
     COMPENDIUM_LIMITS,
     CompendiumError,
     detectImportFormat,
     parseCompendium,
-} from '../parse';
-import { confirmImport, type ImportRepository } from '../service';
+} from '@/lib/utils/compendium-import/parse';
 
 function rejectsWith(text: string | Uint8Array, code: string) {
     expect(() => parseCompendium(text)).toThrow(CompendiumError);

@@ -1,4 +1,4 @@
-export * from './registry';
+export * from './lookup';
 export type {
     ArmourGear,
     CharacterHpInput,

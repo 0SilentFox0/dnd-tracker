@@ -8,15 +8,22 @@ import {
     isEffectInComposition,
 } from '@/lib/utils/abilities/registry/effects/ownership';
 import { SYSTEM_EFFECT_OWNERSHIP } from '@/lib/utils/abilities/registry/effects/system-rows';
+import {
+    isCustomConditionKey,
+    isMechanicalConditionKey,
+} from '@/lib/utils/abilities/schema/kinds';
 import type { Actor } from '@/lib/utils/api/actor';
 import {
     composition,
     type SystemSelection,
 } from '@/lib/utils/rules/systems/catalog';
+import { ruleSystemOf } from '@/lib/utils/rules/systems/lookup';
 
 interface EffectNode {
     kind: string;
     flag?: unknown;
+    condition?: unknown;
+    conditions?: unknown;
     options?: readonly EffectNode[];
 }
 
@@ -38,6 +45,89 @@ export const storedEffectOwners = (json: unknown): EffectOwner[] =>
                   Array.isArray((a as EffectOwner).effects)
           )
         : [];
+
+const IMMUNITY_TRAIT_KEYS = ['fear', 'berserk', 'charm'];
+
+const conditionKeysOf = (e: EffectNode): string[] => {
+    if (e.kind === 'applyCondition')
+        return typeof e.condition === 'string' ? [e.condition] : [];
+
+    return e.kind === 'flag' &&
+        e.flag === 'conditionImmunity' &&
+        Array.isArray(e.conditions)
+        ? e.conditions.filter(
+              (c): c is string =>
+                  typeof c === 'string' && !IMMUNITY_TRAIT_KEYS.includes(c)
+          )
+        : [];
+};
+
+const isForeignCondition = (key: string, standard: readonly string[]) =>
+    !isCustomConditionKey(key) &&
+    !isMechanicalConditionKey(key) &&
+    !standard.includes(key);
+
+/** 5etools sources are inherently 5e: conditions foreign to the campaign system are dropped (not failed) and counted */
+export function dropForeignConditions<T extends EffectOwner>(
+    system: SystemSelection,
+    abilities: readonly T[] | undefined
+): { abilities: T[] | undefined; dropped: number } {
+    if (!abilities?.length) return { abilities: abilities as T[] | undefined, dropped: 0 };
+
+    const standard = ruleSystemOf({ system }).conditionSet.keys;
+
+    let dropped = 0;
+
+    const clean = (effects: readonly EffectNode[]): EffectNode[] =>
+        effects.flatMap((e) => {
+            const options = Array.isArray(e.options)
+                ? clean(e.options)
+                : undefined;
+
+            const node = options ? { ...e, options } : e;
+
+            if (e.kind === 'applyCondition') {
+                const keys = conditionKeysOf(e);
+
+                if (keys.some((k) => isForeignCondition(k, standard))) {
+                    dropped += 1;
+
+                    return [];
+                }
+
+                return [node];
+            }
+
+            if (
+                e.kind === 'flag' &&
+                e.flag === 'conditionImmunity' &&
+                Array.isArray(e.conditions)
+            ) {
+                const all = e.conditions as unknown[];
+
+                const kept = all.filter(
+                    (c) =>
+                        typeof c !== 'string' ||
+                        IMMUNITY_TRAIT_KEYS.includes(c) ||
+                        !isForeignCondition(c, standard)
+                );
+
+                dropped += all.length - kept.length;
+
+                return kept.length ? [{ ...node, conditions: kept }] : [];
+            }
+
+            return [node];
+        });
+
+    return {
+        abilities: abilities.map((a) => ({
+            ...a,
+            effects: clean(a.effects),
+        })),
+        dropped,
+    };
+}
 
 export function assertEffectsInComposition(
     system: SystemSelection,
@@ -62,6 +152,25 @@ export function assertEffectsInComposition(
         )
     )
         throw new ContentError(API_ERRORS.EFFECT_OUTSIDE_COMPOSITION, 422);
+
+    const standard = ruleSystemOf({ system }).conditionSet.keys;
+
+    const keptConditions = new Set(
+        existing.flatMap((a) => flatten(a.effects).flatMap(conditionKeysOf))
+    );
+
+    if (
+        abilities.some((a) =>
+            flatten(a.effects).some((e) =>
+                conditionKeysOf(e).some(
+                    (key) =>
+                        isForeignCondition(key, standard) &&
+                        !keptConditions.has(key)
+                )
+            )
+        )
+    )
+        throw new ContentError(API_ERRORS.CONDITION_UNKNOWN, 422);
 }
 
 /** Resource writes outside units: the rule system comes from the campaign the row is written to, loaded once per actor. */

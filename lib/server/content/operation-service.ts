@@ -35,7 +35,10 @@ import {
     isKindActive,
 } from '@/lib/server/content/kind-active';
 import { CONTENT_OPERATIONS } from '@/lib/server/content/operations';
-import { assertEffectsInComposition } from '@/lib/server/content/traits-guard';
+import {
+    assertEffectsInComposition,
+    dropForeignConditions,
+} from '@/lib/server/content/traits-guard';
 import { withCampaignContentWrite } from '@/lib/server/content/write';
 import { afterContentCommit } from '@/lib/server/content/write-context';
 import {
@@ -61,7 +64,7 @@ import { localeOrRequest } from '@/lib/utils/api/translate-error';
 import { toGameClassData } from '@/lib/utils/characters/classes/row';
 import { byName } from '@/lib/utils/common/text';
 import { IMPORT_KINDS } from '@/lib/utils/content/import/kinds';
-import { ruleSystemOf } from '@/lib/utils/rules/systems/registry';
+import { ruleSystemOf } from '@/lib/utils/rules/systems/lookup';
 import { importUnitsIntoCampaign } from '@/lib/utils/units/import-units';
 
 export type ContentOperationId = keyof typeof CONTENT_OPERATIONS;
@@ -456,9 +459,24 @@ export async function runContentOperation(
                 return { ok: true, deleted: result.count };
             }
             case 'units.import': {
-                const { units } = bodyOf('units.import', body);
+                const { units: incoming } = bodyOf('units.import', body);
 
                 const rules = await loadRules(actor.campaignId);
+
+                let droppedConditions = 0;
+
+                const units = incoming.map((unit) => {
+                    const cleaned = dropForeignConditions(
+                        rules.system,
+                        unit.abilities
+                    );
+
+                    droppedConditions += cleaned.dropped;
+
+                    return cleaned.dropped
+                        ? { ...unit, abilities: cleaned.abilities }
+                        : unit;
+                });
 
                 assertEffectsInComposition(
                     rules.system,
@@ -500,7 +518,9 @@ export async function runContentOperation(
 
                 invalidate(actor, ReferenceKind.UNITS);
 
-                return result;
+                return droppedConditions
+                    ? { ...result, droppedConditions }
+                    : result;
             }
             case 'tracks.reorder': {
                 const { ids } = bodyOf('tracks.reorder', body);

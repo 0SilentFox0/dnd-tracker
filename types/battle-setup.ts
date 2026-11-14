@@ -99,6 +99,8 @@ export interface CreateBattleData {
         quantity?: number;
     }>;
     map?: BattleMapConfig | null;
+    mapId?: string;
+    turnTimerSeconds?: number | null;
 }
 
 export interface BattleBalanceBody {

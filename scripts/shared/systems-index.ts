@@ -10,10 +10,16 @@ const upper = (id: string) => id.toUpperCase().replace(/[^A-Z0-9]/g, '_');
 
 interface BlockSpec {
     packs?: boolean;
+    /** Emits whole-block lines from the ids (instead of per-id `line`) */
+    lines?: (ids: string[], root: string) => string[];
     /** The layer file must export this name for the id to get a line */
     name?: (id: string) => string;
     layer: (id: string) => string;
-    line: (id: string) => string;
+    line?: (
+        id: string,
+        exists: (file: string) => boolean,
+        exported: (file: string, name: string) => boolean
+    ) => string;
 }
 
 export interface RootSpec {
@@ -21,7 +27,11 @@ export interface RootSpec {
     blocks: BlockSpec[];
 }
 
+const at = (id: string, rest = '') => `@/systems/${id}${rest}`;
+
 const metaLayer = (id: string) => `systems/${id}/meta.ts`;
+
+const abilityLayer = (id: string) => `systems/${id}/rules/ability-install.ts`;
 
 const imp =
     (name: (id: string) => string, from: (id: string) => string) =>
@@ -37,7 +47,63 @@ const scriptsLayer = (id: string) => `scripts/templates/systems/${id}/index.ts`;
 
 const packLayer = (id: string) => `scripts/templates/${id}/index.ts`;
 
+const i18nBlock = (
+    ids: string[],
+    root: string,
+    entry: (ns: string) => string
+): string[] =>
+    namespacesIn(root, ids)
+        .map(entry);
+
+export const namespacesIn = (root: string, ids: string[]): string[] => {
+    const found = new Set<string>();
+
+    for (const id of ids) {
+        const text = fs.readFileSync(path.join(root, metaLayer(id)), 'utf8');
+
+        const start = text.search(/\bi18n\s*:\s*\{/);
+
+        if (start < 0) continue;
+
+        let depth = 0;
+
+        let end = start;
+
+        for (let i = text.indexOf('{', start); i < text.length; i++) {
+            if (text[i] === '{') depth++;
+            else if (text[i] === '}' && --depth === 0) {
+                end = i;
+                break;
+            }
+        }
+
+        const body = text
+            .slice(start, end)
+            .replace(/budgetKb\s*:\s*\{[^{}]*(\{[^{}]*\}[^{}]*)*\}/, '');
+
+        for (const m of body.matchAll(/['"]([A-Za-z][A-Za-z0-9]*)['"]/g))
+            found.add(m[1]);
+    }
+
+    return [...found].sort();
+};
+
 export const ROOT_SPECS: readonly RootSpec[] = [
+    {
+        file: 'global.d.ts',
+        blocks: [
+            {
+                layer: metaLayer,
+                lines: (ids, root) =>
+                    i18nBlock(
+                        ids,
+                        root,
+                        (ns) =>
+                            `${ns}: typeof import("./messages/uk/${ns}.json");`
+                    ),
+            },
+        ],
+    },
     {
         file: 'lib/utils/rules/systems/meta.ts',
         blocks: [
@@ -57,15 +123,32 @@ export const ROOT_SPECS: readonly RootSpec[] = [
             {
                 layer: (id) => `systems/${id}/index.ts`,
                 name: (id) => `${upper(id)}_MODULE`,
-                line: imp(
-                    (id) => `${upper(id)}_MODULE`,
-                    (id) => `@/systems/${id}`
-                ),
+                line: (id, exists, exported) => {
+                    const rules = imp(
+                        (i) => `${upper(i)}_MODULE`,
+                        (i) => at(i)
+                    )(id);
+
+                    const ability = abilityLayer(id);
+
+                    return exists(ability) &&
+                        exported(ability, `${upper(id)}_ABILITY_MODULE`)
+                        ? `${rules}\n${imp(
+                              (i) => `${upper(i)}_ABILITY_MODULE`,
+                              (i) => at(i, '/rules/ability-install')
+                          )(id)}`
+                        : rules;
+                },
             },
             {
                 layer: (id) => `systems/${id}/index.ts`,
                 name: (id) => `${upper(id)}_MODULE`,
                 line: (id) => `${id}: ${upper(id)}_MODULE,`,
+            },
+            {
+                layer: abilityLayer,
+                name: (id) => `${upper(id)}_ABILITY_MODULE`,
+                line: (id) => `${id}: ${upper(id)}_ABILITY_MODULE,`,
             },
         ],
     },
@@ -82,6 +165,36 @@ export const ROOT_SPECS: readonly RootSpec[] = [
             {
                 layer: (id) => `systems/${id}/ui/index.ts`,
                 line: (id) => `${id}: ${upper(id)}_MODULE_UI,`,
+            },
+        ],
+    },
+    {
+        file: 'components/systems/install.ts',
+        blocks: [
+            {
+                layer: (id) => `systems/${id}/index.ts`,
+                name: (id) => `${upper(id)}_MODULE`,
+                line: (id, exists, exported) => {
+                    const ui =
+                        exists(`systems/${id}/ui/index.ts`) &&
+                        exported(
+                            `systems/${id}/ui/index.ts`,
+                            `${upper(id)}_MODULE_UI`
+                        )
+                            ? `, ui: () => import("${at(id, `/ui`)}").then((m) => m.${upper(id)}_MODULE_UI)`
+                            : '';
+
+                    const ability =
+                        exists(abilityLayer(id)) &&
+                        exported(
+                            abilityLayer(id),
+                            `${upper(id)}_ABILITY_MODULE`
+                        )
+                            ? `, ability: () => import("${at(id, `/rules/ability-install`)}").then((m) => m.${upper(id)}_ABILITY_MODULE)`
+                            : '';
+
+                    return `${id}: { rules: () => import("${at(id)}").then((m) => m.${upper(id)}_MODULE)${ui}${ability} },`;
+                },
             },
         ],
     },
@@ -118,22 +231,6 @@ export const ROOT_SPECS: readonly RootSpec[] = [
         ],
     },
     {
-        file: 'lib/utils/abilities/registry/effects/system-rows.ts',
-        blocks: [
-            {
-                layer: (id) => `systems/${id}/rules/ability-effect-rows.ts`,
-                line: imp(
-                    (id) => `${upper(id)}_EFFECT_ROWS`,
-                    (id) => `@/systems/${id}/rules/ability-effect-rows`
-                ),
-            },
-            {
-                layer: (id) => `systems/${id}/rules/ability-effect-rows.ts`,
-                line: (id) => `ownedBy("${id}", ${upper(id)}_EFFECT_ROWS),`,
-            },
-        ],
-    },
-    {
         file: 'lib/utils/abilities/schema/system-flags.ts',
         blocks: [
             {
@@ -150,22 +247,6 @@ export const ROOT_SPECS: readonly RootSpec[] = [
         ],
     },
     {
-        file: 'lib/utils/abilities/registry/effects/system-flag-rows.ts',
-        blocks: [
-            {
-                layer: (id) => `systems/${id}/rules/ability-flag-rows.ts`,
-                line: imp(
-                    (id) => `${upper(id)}_FLAG_ROWS`,
-                    (id) => `@/systems/${id}/rules/ability-flag-rows`
-                ),
-            },
-            {
-                layer: (id) => `systems/${id}/rules/ability-flag-rows.ts`,
-                line: (id) => `ownedFlags("${id}", ${upper(id)}_FLAG_ROWS),`,
-            },
-        ],
-    },
-    {
         file: 'lib/utils/abilities/schema/module-effects.ts',
         blocks: [
             {
@@ -178,44 +259,6 @@ export const ROOT_SPECS: readonly RootSpec[] = [
             {
                 layer: (id) => `systems/${id}/rules/ability-module-effects.ts`,
                 line: (id) => `${upper(id)}_MODULE_EFFECT_SCHEMAS,`,
-            },
-        ],
-    },
-    {
-        file: 'lib/utils/abilities/registry/effects/module-effect-rows.ts',
-        blocks: [
-            {
-                layer: (id) =>
-                    `systems/${id}/rules/ability-module-effect-rows.ts`,
-                line: imp(
-                    (id) => `${upper(id)}_MODULE_EFFECT_ROWS`,
-                    (id) => `@/systems/${id}/rules/ability-module-effect-rows`
-                ),
-            },
-            {
-                layer: (id) =>
-                    `systems/${id}/rules/ability-module-effect-rows.ts`,
-                line: (id) =>
-                    `ownedBy("${id}", ${upper(id)}_MODULE_EFFECT_ROWS),`,
-            },
-        ],
-    },
-    {
-        file: 'lib/utils/abilities/registry/system-variables.ts',
-        blocks: [
-            {
-                layer: (id) => `systems/${id}/rules/ability-variables.ts`,
-                name: (id) => `${upper(id)}_ABILITY_VARIABLES`,
-                line: imp(
-                    (id) => `${upper(id)}_ABILITY_VARIABLES`,
-                    (id) => `@/systems/${id}/rules/ability-variables`
-                ),
-            },
-            {
-                layer: (id) => `systems/${id}/rules/ability-variables.ts`,
-                name: (id) => `${upper(id)}_ABILITY_VARIABLES`,
-                line: (id) =>
-                    `{ system: "${id}", items: ${upper(id)}_ABILITY_VARIABLES },`,
             },
         ],
     },
@@ -404,6 +447,16 @@ const render = (
     return text.replace(BLOCK_RE, (_all, indent: string) => {
         const block = spec.blocks[i++];
 
+        if (block.lines)
+            return `${indent}${OPEN}\n${block
+                .lines(ids, root)
+                .map((l) => `${indent}${l}\n`)
+                .join('')}${indent}${CLOSE}`;
+
+        const { line } = block;
+
+        if (!line) return `${indent}${OPEN}\n${indent}${CLOSE}`;
+
         const lines = (block.packs ? packs : ids)
             .filter(
                 (id) =>
@@ -411,7 +464,16 @@ const render = (
                     (!block.name ||
                         exportsName(root, block.layer(id), block.name(id)))
             )
-            .map((id) => `${indent}${block.line(id)}\n`);
+            .map(
+                (id) =>
+                    `${indent}${line(
+                        id,
+                        (f) => fs.existsSync(path.join(root, f)),
+                        (f, name) =>
+                            fs.existsSync(path.join(root, f)) &&
+                            exportsName(root, f, name)
+                    )}\n`
+            );
 
         return `${indent}${OPEN}\n${lines.join('')}${indent}${CLOSE}`;
     });

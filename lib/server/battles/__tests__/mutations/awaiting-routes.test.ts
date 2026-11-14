@@ -2,6 +2,7 @@ import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
+import '@/lib/server/systems/registry';
 import { getBattleOperation } from '@/lib/server/battles/operations';
 
 const ROOT = join(process.cwd(), 'app/api/campaigns/[id]/battles/[battleId]');

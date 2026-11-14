@@ -15,11 +15,8 @@ export async function loadRace(
 
 export async function loadUnitRace(
     raceId: string | null | undefined,
-    campaignId: string,
-    preloaded?: RaceRow | null
+    campaignId: string
 ): Promise<RaceRow | null> {
-    if (preloaded !== undefined) return preloaded;
-
     if (!raceId) return null;
 
     return prisma.race.findFirst({ where: { id: raceId, campaignId } });

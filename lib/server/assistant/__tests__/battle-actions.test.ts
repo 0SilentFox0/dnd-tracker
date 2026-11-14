@@ -6,7 +6,7 @@ import {
     ASSISTANT_ROUTE_COVERAGE,
     exportedHttpMethods,
 } from '@/lib/server/assistant/__tests__/helpers/coverage';
-import { BATTLE_ACTION_COVERAGE } from '@/lib/server/assistant/actions/battle-coverage';
+import { battleActionCoverage } from '@/lib/server/assistant/actions/battle-coverage';
 import { BATTLE_ACTIONS } from '@/lib/server/assistant/actions/battles';
 import { confirmationFor } from '@/lib/server/assistant/policy';
 import type {
@@ -186,13 +186,13 @@ describe('T11 battle adapters', () => {
         expect(
             [
                 ...new Set(
-                    BATTLE_ACTION_COVERAGE.map(
+                    battleActionCoverage().map(
                         (row) => `${row.method} ${row.route}`
                     )
                 ),
             ].sort()
         ).toEqual(expected);
-        for (const row of BATTLE_ACTION_COVERAGE) {
+        for (const row of battleActionCoverage()) {
             expect(
                 exportedHttpMethods(
                     readFileSync(`app/api/${row.route}/route.ts`, 'utf8')

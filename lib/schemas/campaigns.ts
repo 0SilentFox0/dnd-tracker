@@ -46,6 +46,7 @@ export const updateCampaignSchema = z.object({
     allowPlayerEdit: z.boolean().optional(),
     critChoiceByDm: z.boolean().optional(),
     acquaintancesEnabled: z.boolean().optional(),
+    mapLibraryEnabled: z.boolean().optional(),
     status: z.enum([CampaignStatus.ACTIVE, CampaignStatus.ARCHIVED]).optional(),
     visibility: z
         .enum([CampaignVisibility.PRIVATE, CampaignVisibility.OFFICIAL])

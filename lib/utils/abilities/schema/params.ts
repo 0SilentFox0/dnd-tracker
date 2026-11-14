@@ -1,8 +1,8 @@
 import { z } from 'zod';
 
-export const CUNNING_STRIKE_EFFECTS = ['poison', 'trip', 'withdraw'] as const;
+export const STRIKE_RIDER_EFFECTS = ['poison', 'trip', 'withdraw'] as const;
 
-export type CunningStrikeEffect = (typeof CUNNING_STRIKE_EFFECTS)[number];
+export type StrikeRiderEffect = (typeof STRIKE_RIDER_EFFECTS)[number];
 
 export const CunningStrikeParamsSchema = z
     .object({
@@ -10,7 +10,7 @@ export const CunningStrikeParamsSchema = z
             .array(
                 z
                     .object({
-                        effect: z.enum(CUNNING_STRIKE_EFFECTS),
+                        effect: z.enum(STRIKE_RIDER_EFFECTS),
                         dice: z.number().int().min(1).max(5),
                     })
                     .strict()

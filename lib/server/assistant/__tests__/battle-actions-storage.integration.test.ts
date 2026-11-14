@@ -8,12 +8,13 @@ import { createActionCatalog } from '@/lib/server/assistant/catalog';
 import { createAssistantExecutor } from '@/lib/server/assistant/execute';
 import type { AssistantCaller } from '@/lib/server/assistant/types';
 import { executeBattleOperation } from '@/lib/server/battles/execute-battle-operation';
+import { loadBattle } from '@/lib/server/battles/store/load-battle';
+import { saveBattle } from '@/lib/server/battles/store/save-battle';
 import {
     isLocalDevDatabaseEnv,
     singleConnectionDatabaseUrl,
 } from '@/lib/server/test-support/local-db';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
-import { loadBattle, saveBattle } from '@/lib/utils/battle/store';
 
 const session = vi.hoisted(() => ({ userId: '' }));
 

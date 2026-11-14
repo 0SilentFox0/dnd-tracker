@@ -1,4 +1,5 @@
 import 'server-only';
+import '@/lib/server/systems/registry';
 import type {
     AnyContentResource,
     ContentKind,
@@ -10,7 +11,7 @@ import { spellGroupsResource } from '@/lib/server/content/resources/spell-groups
 import { spellsResource } from '@/lib/server/content/resources/spells';
 import { tracksResource } from '@/lib/server/content/resources/tracks';
 import { unitsResource } from '@/lib/server/content/resources/units';
-import { systemContentKinds } from '@/lib/server/systems/registry';
+import { systemContentKinds } from '@/lib/server/systems/lookup';
 
 export const CORE_CONTENT_RESOURCES = {
     units: unitsResource,

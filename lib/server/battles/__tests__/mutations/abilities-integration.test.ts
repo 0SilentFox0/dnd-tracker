@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { context, participant } from './fixtures';
 
+import '@/lib/server/systems/registry';
 import { AttackType, ParticipantSide } from '@/lib/constants/battle';
 import { attackBodySchema } from '@/lib/schemas/battles';
 import { attackMutation } from '@/lib/server/battles/mutations/attack/attack-mutation';

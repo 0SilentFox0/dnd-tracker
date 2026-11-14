@@ -100,9 +100,7 @@ describe('createBattleParticipantFromUnit + raceId', () => {
         expect(findFirst).not.toHaveBeenCalled();
     });
 
-    it('без мапи (призов, додавання учасника) — раса з БД за id у межах кампанії', async () => {
-        findFirst.mockResolvedValue(orc);
-
+    it('без мапи раса не завантажується: порожня назва й без вмінь раси', async () => {
         const p = await createBattleParticipantFromUnit(
             unit(),
             'b1',
@@ -112,10 +110,8 @@ describe('createBattleParticipantFromUnit + raceId', () => {
             DEFAULT_RULES
         );
 
-        expect(findFirst).toHaveBeenCalledWith({
-            where: { id: 'r1', campaignId: 'c1' },
-        });
-        expect(p.abilities.race).toBe('Орк');
+        expect(findFirst).not.toHaveBeenCalled();
+        expect(raceAbilities(p)).toEqual([]);
     });
 
     it('raceId = null — порожня назва, без вмінь раси, без запиту', async () => {

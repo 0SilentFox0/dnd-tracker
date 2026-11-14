@@ -29,9 +29,8 @@ export function ConditionSection({
             path={path}
             part="if"
             title={t('title')}
-            {...state}
-            onAdd={condition ? undefined : add}
-            addLabel={t('add')}
+            state={state}
+            add={{ onClick: condition ? undefined : add, label: t('add') }}
         >
             {condition ? (
                 <ConditionEditor

@@ -1,10 +1,12 @@
-export { SYSTEM_UI, systemUiByKey, systemUiOf } from './registry';
+export { SYSTEM_UI, systemUiByKey, systemUiOf } from './lookup';
 export type {
     ActionResultProps,
     CastTestProps,
     ChannelDialogProps,
     CombatRowProps,
     ConditionTestPanelProps,
+    DmPageProps,
+    DmPageView,
     FormFieldProps,
     ResourceFieldsProps,
     RestBadgesProps,

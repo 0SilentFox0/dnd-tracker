@@ -1,10 +1,10 @@
 import { Prisma } from '@prisma/client';
 
 import { eventToBattleAction } from './event-mapping';
-import type { BattleDb } from './load-battle';
 import type { SnapshotState } from './snapshot-state';
 import { joinParticipant, splitParticipant } from './split-participant';
 import type {
+    BattleDb,
     LoadedBattle,
     ParticipantSnapshot,
     StoredBattleEvent,

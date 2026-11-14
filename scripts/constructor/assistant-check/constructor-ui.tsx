@@ -1,9 +1,10 @@
 import { useReducer, useState } from 'react';
 
-import { BackgroundForm } from '@/components/backgrounds/BackgroundForm';
+import '@/components/systems/registry';
+import '@/lib/utils/rules/systems/registry';
 import { AttackWizard } from '@/components/battle/wizards/AttackWizard';
-import { ClassForm } from '@/components/classes/ClassForm';
 import { RulesForm } from '@/components/rules/RulesForm';
+import { SystemDmPage } from '@/components/systems/SystemDmPage';
 import { ConfirmProvider } from '@/components/ui/confirm-dialog';
 import { battleOps, callBattleOp } from '@/lib/api/battle-ops';
 import type { BattleSceneValue } from '@/lib/hooks/battle/types';
@@ -216,14 +217,22 @@ export function ConstructorUiCheck({ flow }: { flow: string }) {
                 {flow === 'rules' ? (
                     <RulesForm campaignId="synthetic" />
                 ) : flow === 'background' ? (
-                    <BackgroundForm
+                    <SystemDmPage
                         campaignId="synthetic"
-                        background={browserBackground}
+                        section="backgrounds"
+                        system={DEFAULT_RULES.system}
+                        canEdit
+                        view={{ type: 'edit', id: browserBackground.id }}
+                        data={browserBackground}
                     />
                 ) : flow === 'class' ? (
-                    <ClassForm
+                    <SystemDmPage
                         campaignId="synthetic"
-                        gameClass={browserClass}
+                        section="classes"
+                        system={DEFAULT_RULES.system}
+                        canEdit
+                        view={{ type: 'edit', id: browserClass.id }}
+                        data={browserClass}
                     />
                 ) : flow === 'attack' ? (
                     <AttackCheck />

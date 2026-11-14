@@ -13,8 +13,8 @@ import {
     ACTION_REASONS,
     actionReason,
 } from '@/lib/utils/battle/actions/reasons';
-import { CONDITION_5E_KEYS } from '@/lib/utils/battle/conditions/set';
 import { MAZE_TEXTS } from '@/lib/utils/battle/modes/maze/texts';
+import { CONDITION_5E_KEYS } from '@/systems/d20/rules/conditions/keys';
 
 const lookup = (tree: Record<string, unknown>, path: string) =>
     path

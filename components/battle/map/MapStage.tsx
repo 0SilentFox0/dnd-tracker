@@ -26,7 +26,11 @@ import { type MapPlacement } from './token-box';
 import { WallsLayer } from './WallsLayer';
 
 import { modeUiOf } from '@/components/battle/modes';
-import { type EdgeEditing, type ModeTools } from '@/lib/hooks/battle';
+import {
+    type EdgeEditing,
+    type ModeTools,
+    useMoveRoutes,
+} from '@/lib/hooks/battle';
 import { cn } from '@/lib/utils';
 import {
     isDormant,
@@ -118,6 +122,8 @@ function MapStageImpl({
         [onCellClick, onCellHover, wasDragged]
     );
 
+    const routes = useMoveRoutes(map, participants);
+
     // полеглі лишаються тут: жетон зникає лише в момент удару анімації, а число смертельного удару — після
     const placed = useMemo(
         () =>
@@ -141,12 +147,13 @@ function MapStageImpl({
                                       box,
                                       mapSize: size,
                                       pxPerUnit,
+                                      route: routes.get(p.basicInfo.id),
                                   } satisfies MapPlacement,
                               },
                           ]
                         : [];
                 }),
-        [participants, modeView, size, pxPerUnit]
+        [participants, modeView, size, pxPerUnit, routes]
     );
 
     const tokens = useMemo(

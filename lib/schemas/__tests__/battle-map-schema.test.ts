@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { battleMapSchema } from '../battles';
+import { battleMapSchema, mapUpdateSchema } from '../battles';
 
 const map = { cols: 10, rows: 10, background: null, opacity: 0.3 };
 
@@ -320,5 +320,12 @@ describe('battleMapSchema.walls / bars', () => {
 
     it('обмежує довжину списку', () => {
         expect(ok({ walls: Array(7201).fill('0:0:e') })).toBe(false);
+    });
+});
+
+describe('mapUpdateSchema', () => {
+    it('пропускає expectedVersion, який клієнт шле з кожною операцією', () => {
+        expect(mapUpdateSchema.safeParse({ expectedVersion: 3 }).success).toBe(true);
+        expect(mapUpdateSchema.safeParse({}).success).toBe(true);
     });
 });

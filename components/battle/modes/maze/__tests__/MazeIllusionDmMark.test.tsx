@@ -10,6 +10,7 @@ vi.mock('@/components/hud/fonts', () => ({
 
 import { MazeViewProvider } from '../MazeViewProvider';
 
+import '@/components/systems/registry';
 import { DmQuickActionsPanel } from '@/components/battle/dm/DmQuickActionsPanel';
 import { ParticipantList } from '@/components/battle/participants/ParticipantList';
 import { ParticipantSide } from '@/lib/constants/battle';

@@ -6,6 +6,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { MazeViewerSwitch } from '../MazeViewerSwitch';
 import { MazeViewProvider } from '../MazeViewProvider';
 
+import '@/components/systems/registry';
 import { ParticipantList } from '@/components/battle/participants/ParticipantList';
 import { ParticipantSide } from '@/lib/constants/battle';
 import {

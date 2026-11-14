@@ -14,14 +14,16 @@ import { API_ERRORS } from '@/lib/constants/api-errors';
 import { useConfirm, useNotify } from '@/lib/hooks/common';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import {
+    composition,
+    moduleChange,
     type ModuleToggle,
     moduleToggles,
-    withModule,
+    type SystemSelection,
 } from '@/lib/utils/rules/systems/catalog';
 
 export function useCampaignModules(campaignId: string): {
     toggles: ModuleToggle[];
-    toggle: (id: string, on: boolean) => Promise<void>;
+    apply: (draft: SystemSelection) => Promise<void>;
     isPending: boolean;
 } {
     const { data } = useCampaignRules(campaignId);
@@ -48,11 +50,11 @@ export function useCampaignModules(campaignId: string): {
         },
     });
 
-    const askConfirm = (id: string) =>
+    const askConfirm = (ids: readonly string[]) =>
         confirm({
             title: t('system.modules.confirmTitle'),
             description: t('system.modules.confirmBody', {
-                module: tTerms(`module.${id}.name`),
+                module: ids.map((id) => tTerms(`module.${id}.name`)).join(', '),
             }),
             confirmLabel: t('system.modules.confirmAction'),
             destructive: true,
@@ -60,22 +62,19 @@ export function useCampaignModules(campaignId: string): {
 
     const toggles = data ? moduleToggles(data.system) : [];
 
-    const toggle = async (id: string, on: boolean) => {
-        if (!data) return;
-
-        const modules = withModule(data.system, id, on).modules;
-
-        const setup = toggles.find((m) => m.id === id)?.toggle === 'setup';
-
+    const save = async (
+        modules: readonly string[],
+        setupIds: readonly string[]
+    ) => {
         const send = (confirmed: boolean) =>
             mutation.mutateAsync({
-                system: { modules: [...(modules ?? [])] },
+                system: { modules: [...modules] },
                 ...(confirmed && { confirm: true as const }),
             });
 
         try {
-            if (setup && data.hasCharacters) {
-                if (!(await askConfirm(id))) return;
+            if (setupIds.length > 0 && data?.hasCharacters) {
+                if (!(await askConfirm(setupIds))) return;
 
                 await send(true);
 
@@ -89,7 +88,7 @@ export function useCampaignModules(campaignId: string): {
                 error.errorKey === API_ERRORS.SYSTEM_MODULE_CONFIRM
             ) {
                 try {
-                    if (await askConfirm(id)) await send(true);
+                    if (await askConfirm(setupIds)) await send(true);
                 } catch (retryError) {
                     await notify(
                         retryError instanceof Error
@@ -107,9 +106,17 @@ export function useCampaignModules(campaignId: string): {
         }
     };
 
+    const apply = async (draft: SystemSelection) => {
+        if (!data) return;
+
+        const { setup } = moduleChange(data.system, draft);
+
+        await save(composition(draft).modules, setup);
+    };
+
     return {
         toggles,
-        toggle,
+        apply,
         isPending: mutation.isPending,
     };
 }

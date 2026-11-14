@@ -38,6 +38,8 @@ import { createStartMutation } from '@/lib/server/battles/mutations/start/start-
 import { mutateSystemOperation } from '@/lib/server/battles/operations';
 import { runBattleMutation } from '@/lib/server/battles/run-mutation';
 import { loadSpellsFromDb } from '@/lib/server/battles/spell/load-spells-db';
+import { loadBattle } from '@/lib/server/battles/store/load-battle';
+import { saveBattle } from '@/lib/server/battles/store/save-battle';
 import { createCampaignFromBundle } from '@/lib/server/campaigns/create-campaign';
 import { cellDistance, parseCellKey } from '@/lib/utils/battle/grid/geometry';
 import {
@@ -46,11 +48,7 @@ import {
     remainingMovement,
 } from '@/lib/utils/battle/grid/path';
 import { awaitsMoraleCheck } from '@/lib/utils/battle/morale/awaits-check';
-import {
-    loadBattle,
-    loadRecentEvents,
-    saveBattle,
-} from '@/lib/utils/battle/store';
+import { loadRecentEvents } from '@/lib/utils/battle/store';
 import { rollDiceList } from '@/lib/utils/common/dice';
 import {
     categoryInventory,

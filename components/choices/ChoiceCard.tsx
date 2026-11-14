@@ -52,34 +52,31 @@ export function DetailsButton({ title, text, className }: DetailsButtonProps) {
 }
 
 interface ChoiceCardProps {
-    role: 'checkbox' | 'radio';
-    checked: boolean;
-    disabled?: boolean;
-    title: string;
-    name: string;
-    icon?: string | null;
-    summary: ReactNode;
-    description?: string | (() => string);
-    requirements?: Requirement[];
-    requirementNames?: Record<string, string>;
-    note?: string;
-    onClick: () => void;
+    control: {
+        role: 'checkbox' | 'radio';
+        checked: boolean;
+        disabled?: boolean;
+        onClick: () => void;
+    };
+    content: {
+        title: string;
+        name: string;
+        icon?: string | null;
+        summary: ReactNode;
+        description?: string | (() => string);
+        note?: string;
+    };
+    requirements?: {
+        items?: Requirement[];
+        names?: Record<string, string>;
+    };
 }
 
-export function ChoiceCard({
-    role,
-    checked,
-    disabled,
-    title,
-    name,
-    icon,
-    summary,
-    description,
-    requirements,
-    requirementNames,
-    note,
-    onClick,
-}: ChoiceCardProps) {
+export function ChoiceCard({ control, content, requirements }: ChoiceCardProps) {
+    const { role, checked, disabled, onClick } = control;
+
+    const { title, name, icon, summary, description, note } = content;
+
     return (
         <div className="relative">
             <OptionButton
@@ -119,7 +116,7 @@ export function ChoiceCard({
                     className="absolute top-1 right-1"
                 />
             )}
-            <RequirementList items={requirements} names={requirementNames} />
+            <RequirementList items={requirements?.items} names={requirements?.names} />
         </div>
     );
 }

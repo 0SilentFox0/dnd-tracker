@@ -1,5 +1,4 @@
-import { DMBackgroundsPageClient } from './page-client';
-
+import { SystemDmPage } from '@/components/systems/SystemDmPage';
 import { getRequestLocale } from '@/lib/i18n/request-locale';
 import { getTranslator } from '@/lib/i18n/translator';
 import { requireCampaignDMOrDemo } from '@/lib/server/campaigns/access';
@@ -23,5 +22,12 @@ export default async function DMBackgroundsPage({
             </p>
         );
 
-    return <DMBackgroundsPageClient campaignId={id} canEdit={!isDemo} />;
+    return (
+        <SystemDmPage
+            campaignId={id}
+            section="backgrounds"
+            system={parseRules(campaign.rules).system}
+            canEdit={!isDemo}
+        />
+    );
 }

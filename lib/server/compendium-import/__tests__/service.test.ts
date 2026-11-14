@@ -1,13 +1,14 @@
 import { createHmac } from 'node:crypto';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { COMPENDIUM_LIMITS, CompendiumError } from '../parse';
 import type { PlanContext } from '../plan';
 import {
     confirmImport,
     type ImportRepository,
     previewImport,
 } from '../service';
+
+import { COMPENDIUM_LIMITS, CompendiumError } from '@/lib/utils/compendium-import/parse';
 
 const actor = {
     campaignId: 'c',

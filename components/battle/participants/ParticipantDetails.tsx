@@ -4,7 +4,6 @@ import { useTranslations } from 'next-intl';
 
 import { Section } from './Section';
 
-import { HitFrame } from '@/components/battle/fx/PortraitFx';
 import {
     EffectIcon,
     HealthBar,
@@ -14,7 +13,11 @@ import {
     HpFigure,
     ZoomablePortrait,
 } from '@/components/battle/hud';
-import { useSystemBattleUi } from '@/components/battle/use-system-battle-ui';
+import {
+    useSystemBattleUi,
+    useSystemFx,
+} from '@/components/battle/use-system-battle-ui';
+import { HitFrame } from '@/components/fx/PortraitFx';
 import { MonsterStatblock } from '@/components/units/MonsterStatblock';
 import {
     useBattleRules,
@@ -113,7 +116,7 @@ function ParticipantDetailsBody({
 
     const { ParticipantStats } = useSystemBattleUi();
 
-    const impactFor = useFxImpacts();
+    const impactFor = useFxImpacts(useSystemFx());
 
     const {
         change,

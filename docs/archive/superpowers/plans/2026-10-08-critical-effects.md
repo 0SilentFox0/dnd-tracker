@@ -366,8 +366,8 @@ if (weakened) {
 - Create: `lib/utils/battle/view/crit-outcome.ts` (+ експорт з `lib/utils/battle/view/index.ts`)
 - Modify: `lib/hooks/battle/useBattleScene.ts` (`ResultFx`, L32–35)
 - Modify: `lib/hooks/battle/useAttackWizard.ts` (~L100–145)
-- Modify: `components/battle/fx/ResultOverlay.tsx`
-- Test: `lib/utils/battle/view/__tests__/crit-outcome.test.ts`, `components/battle/fx/__tests__/result-overlay.test.tsx`, `lib/hooks/battle/__tests__/useAttackWizard.test.tsx`
+- Modify: `components/fx/ResultOverlay.tsx`
+- Test: `lib/utils/battle/view/__tests__/crit-outcome.test.ts`, `components/fx/__tests__/result-overlay.test.tsx`, `lib/hooks/battle/__tests__/useAttackWizard.test.tsx`
 
 **Interfaces:**
 - Produces:
@@ -389,7 +389,7 @@ if (weakened) {
     - `{ kind: "miss", …, critFail: { name: "Падіння", flavor: "…" } }` → «Критична невдача», «Падіння», фраза; немає «Промах»;
     - `{ kind: "crit", … }` без `critEffect` → лише «Критичне влучання» (старі записи без `flavor`).
   - `useAttackWizard.test.tsx` (шаблон — кейс відсічі біля L106): після атаки, у лозі якої запис з `criticalEffect.type === "fail"`, `showResult` отримує `{ kind: "miss", critFail: { name, flavor } }` — навіть якщо клієнтський прогноз не бачив нат.1.
-- [ ] **Step 2: Run** `pnpm test:run lib/utils/battle/view components/battle/fx lib/hooks/battle` — FAIL.
+- [ ] **Step 2: Run** `pnpm test:run lib/utils/battle/view components/fx lib/hooks/battle` — FAIL.
 - [ ] **Step 3: Implement.** `critOutcome`. У `useAttackWizard` поруч з `retaliationOutcome(...)` (той самий `seen`) викликати `critOutcome(log, seen, attackerId, first.targetId)`: `type === "success"` → `critEffect` у `crit`-результаті; `type === "fail"` → `critFail` у `miss`-результаті (рішення з серверного логу, а не з клієнтського `strike.outcome`). `ResultOverlay`: у гілці `miss` за наявності `result.critFail` — заголовок «Критична невдача», нижче назва ефекту й фраза курсивом; у гілці `crit` — назва ефекту й фраза під шкодою. Кольори — ті самі захардкоджені, що вже в оверлеї (`#a89c88`, `ResultOverlay.tsx:78,95`).
 - [ ] **Step 4: Run** ті самі тести — PASS.
 - [ ] **Step 5: Commit** `feat(crits): show the effect and phrase on the result overlay`.

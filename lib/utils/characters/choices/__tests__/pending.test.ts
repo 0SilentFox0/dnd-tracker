@@ -433,4 +433,23 @@ describe('pendingIssues: feat prerequisites', () => {
             })
         ).toHaveLength(1);
     });
+
+    it('a taken non-repeatable feat is not offered again; a repeatable one is', () => {
+        const feats = {
+            a: { ...mk('a', {}), repeatable: false },
+            b: { ...mk('b', {}), repeatable: false },
+        };
+
+        const taken = { takenFeatIds: new Set(['a']) };
+
+        expect(
+            pendingIssues([visit(1)], { featsById: feats, ...taken })
+        ).toEqual([]);
+        expect(
+            pendingIssues([visit(1)], {
+                featsById: { ...feats, a: { ...feats.a, repeatable: true } },
+                ...taken,
+            })
+        ).toHaveLength(1);
+    });
 });

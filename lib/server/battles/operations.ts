@@ -23,7 +23,7 @@ import { ContentError } from '@/lib/server/content/errors';
 import {
     systemBattleOperation,
     systemBattleOperationOf,
-} from '@/lib/server/systems/registry';
+} from '@/lib/server/systems/lookup';
 import type { BattleOperationDeps } from '@/lib/server/systems/types';
 import {
     BattleAccess,
@@ -371,6 +371,18 @@ const OPERATIONS: Record<string, Loader> = {
             );
 
             return { schema: nextTurnSchema, mutate: nextTurnMutation };
+        },
+    }),
+    'swap-gear': operation({
+        access: MEMBER,
+        blockedByMode: true,
+        respond: 'wrapped',
+        load: async () => {
+            const { swapGearMutation, swapGearSchema } = await import(
+                '@/lib/server/battles/mutations/swap-gear/swap-gear-mutation'
+            );
+
+            return { schema: swapGearSchema, mutate: swapGearMutation };
         },
     }),
     'refresh-sources': operation({

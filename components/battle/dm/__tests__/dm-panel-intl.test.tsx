@@ -15,7 +15,9 @@ import type { MazeTools } from '@/lib/hooks/battle/modes/maze';
 import { CAMPAIGN_NAMESPACES } from '@/lib/i18n/scopes';
 import { renderWithIntl } from '@/lib/i18n/test/render-with-intl';
 import { hero } from '@/lib/server/battles/__tests__/mutations/fixtures';
-import { CONDITION_5E_KEYS } from '@/lib/utils/battle/conditions';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { ruleSystemOf } from '@/lib/utils/rules/systems';
+import { CONDITION_5E_KEYS } from '@/systems/d20/rules/conditions/keys';
 
 vi.unmock('next-intl');
 
@@ -36,6 +38,7 @@ describe('DM panel texts in both locales', () => {
     ] as const)('ConditionsDialog %s', async (locale, title, apply, prone) => {
         await renderWithIntl(
             <ConditionsDialog
+                standard={ruleSystemOf(DEFAULT_RULES).conditionSet}
                 participant={hero}
                 onClose={vi.fn()}
                 onSubmit={vi.fn()}

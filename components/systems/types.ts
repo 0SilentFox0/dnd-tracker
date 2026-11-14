@@ -6,6 +6,7 @@ import type { TurnGateControls } from '@/lib/hooks/battle/types';
 import type { SystemConditionBody } from '@/lib/hooks/battles';
 import type { RulesFormState } from '@/lib/hooks/campaigns';
 import type { TurnGateOutcome } from '@/lib/utils/battle/flows';
+import type { SystemFx } from '@/lib/utils/battle/fx';
 import type { BattleKnowledge } from '@/lib/utils/battle/view/knowledge';
 import type { CharacterFormBindings } from '@/lib/utils/characters/form/bindings';
 import type { MechanicKey } from '@/lib/utils/rules/registry';
@@ -71,6 +72,19 @@ export interface DraftFormProps {
     campaignId: string;
     characterId?: string;
     initialIdentity?: unknown;
+}
+
+export type DmPageView =
+    | { type: 'list' }
+    | { type: 'new' }
+    | { type: 'edit'; id: string };
+
+export interface DmPageProps {
+    campaignId: string;
+    canEdit: boolean;
+    view?: DmPageView;
+    /** Server-read payload of the view (the page narrows it itself) */
+    data?: unknown;
 }
 
 export interface RestBadgesProps {
@@ -217,6 +231,7 @@ export interface SystemBattleUi {
 
 export interface SystemUi {
     battle: SystemBattleUi;
+    fx?: SystemFx;
     SpellMagicFields?: ComponentType<SpellMagicFieldsProps>;
     HeroStats: ComponentType;
     StatsTab: ComponentType<StatsTabProps>;
@@ -227,10 +242,7 @@ export interface SystemUi {
     MagicTab?: ComponentType;
     AdvancementTab?: ComponentType;
     AdvancementEditor?: ComponentType<AdvancementEditorProps>;
-    dmPages?: Record<
-        string,
-        ComponentType<{ campaignId: string; canEdit: boolean }>
-    >;
+    dmPages?: Record<string, ComponentType<DmPageProps>>;
     DraftForm?: ComponentType<DraftFormProps>;
     RaceProfileEditor?: ComponentType<RaceProfileEditorProps>;
     ArtifactStatsEditor?: ComponentType<ArtifactStatsEditorProps>;

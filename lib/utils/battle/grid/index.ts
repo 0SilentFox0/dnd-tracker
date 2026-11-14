@@ -12,6 +12,7 @@ export * from './map-compose';
 export * from './map-editor';
 export * from './map-scene';
 export * from './map-view';
+export * from './move-route';
 export * from './nearest';
 export * from './occupancy';
 export * from './path';

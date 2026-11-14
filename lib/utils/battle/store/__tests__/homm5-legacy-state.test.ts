@@ -1,7 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { join as joinPath } from 'node:path';
-import { beforeAll, describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
+import '@/lib/utils/rules/systems/registry';
 import { seq } from '@/lib/utils/abilities/__tests__/fixtures';
 import { resolveRetaliation } from '@/lib/utils/battle/attack/__tests__/helpers';
 import {
@@ -88,10 +89,6 @@ function play(hero: BattleParticipant, unit: BattleParticipant) {
 
     return { first, second, after, turned };
 }
-
-beforeAll(async () => {
-    await import('@/lib/utils/rules/systems/registry');
-}, 30_000);
 
 describe('HOMM5 participants in the d20 slot form', () => {
     it('the fixture rows have consistent hashes and the counter in the slot', () => {

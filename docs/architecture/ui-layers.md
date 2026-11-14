@@ -9,6 +9,7 @@
 | L0 `ui` | `components/ui` | `Button`, `ResponsiveDialog`, `action-bar`, `portal-class` |
 | L1 `hud` | `components/hud` | `HudPage`, `HudForm`, `fonts`, `metal` |
 | L2 `common` | `components/common` | `ImageUpload`, `states/*`, `SearchInput`, `IconUrlField` |
+| L2.5 `fx` | `components/fx` | `BattleFxLayer`, `animations/*`, `auras/*` (без імпорту `battle`/`spells`; слот модуля приходить пропсом `fx`) |
 | L3 домени | `components/<домен>`, `components/systems` (шов: `registry`, `types`, `compose`) | `battle`, `characters`, `units`, `dice`, `show/world`, `scenario/page`, `ai/settings` |
 | L4 системні | `systems/<id>/ui`, `systems/<id>/hooks` | `systems/d20/ui/stats`, `systems/wfrp/ui/creation` |
 | L5 сторінки | `app/**` | `page.tsx` (сервер, `PrefetchedQuery`), `*-client.tsx` (композиція) |
@@ -22,6 +23,7 @@
 | `ui` | `ui`, `@/components/hud/fonts`, `@/components/hud/surface`, `hud/hud.css`, `@/lib/utils` (корінь, `cn`), `lib/utils/common`, `lib/hooks/common` | інші `hud`/`common`/домени, `@/types/*`, `lib/api`, `lib/server`, `systems` |
 | `hud` | `ui`, `hud`, ті самі `lib` | `common`, домени, `@/types/*`, `lib/api`, `lib/server`, `systems` |
 | `common` | `ui`, `hud`, `common`, `@/types/theme`, `lib/utils/{common,text}`, `lib/hooks/common`, `lib/constants` | доменні компоненти й типи, `lib/api`, `lib/server`, `systems` |
+| `fx` | `ui`, `hud`, `common`, `dice`, `fx`, `components/systems/types` | `battle`, `spells` та інші домени, `lib/api`, `lib/server` |
 | системний UI | `ui`, `hud`, `common`, `components/systems/types` і кіт (нижче) | будь-який інший core-компонент |
 | `lib` | усе, крім `components` | `@/components/*` |
 
@@ -32,7 +34,7 @@
 - `character-profile/ProfileContext` (дані листа), `character-profile/CombatRow`
 - `rules/RulesSection`, `rules/NumberField`, `rules/RulesPaths`
 - `battle/hud/DiceInput`, `battle/wizards/attack/shared`, `battle/participants/Section`
-- `skill-tree/progression/ProgressionPanel`, `spells/book/SpellBookPages`, `characters/rest/CharacterPickList`
+- `skill-tree/progression/ProgressionPanel`, `abilities`, `artifact-sets/ArtifactSetCard`, `skills/list/SkillCard`, `ContentTransferButtons`, `ChoiceListEditor`, `OnboardingHint`, `spells/book/SpellBookPages`, `characters/rest/CharacterPickList`
 
 Новий пункт кіта = правка списку (видно в ревʼю) + рядок тут.
 
@@ -46,9 +48,6 @@
 
 ## Допущене й відкладене
 
-- Цикли на рівні тек: `characters` ↔ `character-profile` (один домен «персонаж»), `spells` → `battle/fx`. Файлових циклів немає (`import/no-cycle`).
-- Відкладено в E3/Ч19: FX → `components/fx`, UI видів контенту модулів (`classes`, `backgrounds`, `skills`, `main-skills`, `skill-tree`, `artifact-sets`), мораль-FX, компоненти з пропсами > 7.
-
-## Ratchet
-
-`ui-layers-exempt.json` (`{ file, reason }`) = `[]`. Тест падає, якщо порушник не в списку, або запис уже чистий. Новий запис — лише з рішенням власника.
+- Цикли на рівні тек: `characters` ↔ `character-profile` (один домен «персонаж»), (цикл `spells` ↔ `battle/fx` зник: FX у `components/fx`). Файлові цикли — лише з `import-cycles-baseline.json` (`pnpm cycles`).
+- Ч23: сторінки видів контенту модулів (`classes`, `backgrounds`, `skills`, `skill-trees`, `main-skills`, `artifact-sets`) живуть у `systems/<id>/ui/content` і підключені слотом `SystemUi.dmPages` (`view`: list/new/edit, `data` з серверного prefetch); `app/**/page.tsx` рендерять `SystemDmPage`, 404 дає `dmSectionLayout`. Мораль-FX — `SystemUi.fx.dice` (джерела кубиків, конкатенація модулів), типи в `lib/utils/battle/fx/system-dice.ts`, `systems/morale/ui/fx`. `lib/__tests__/props-budget.test.ts` + `props-budget-exempt.json`: > 7 пропсів лише спадає (регенерація `pnpm exec tsx scripts/shared/props-budget.ts --write`).
+- Відкладено: бейдж «raincloud −N мораль» лишився в `badge-labels.ts` (спільний набір `FxBadgeKey`); `main-skills` не в `SystemMeta.dmSections` (гейт через layout `skill-trees`).

@@ -56,6 +56,36 @@ describe('battleConditionsMutation', () => {
         ).toBe(true);
     });
 
+    it('blinded у кампанії wfrp: CONDITION_UNKNOWN', () => {
+        const ctx = dmCtx();
+
+        expect(() =>
+            battleConditionsMutation(
+                {
+                    ...ctx,
+                    meta: {
+                        ...ctx.meta,
+                        rules: { ...DEFAULT_RULES, system: { key: 'wfrp' } },
+                    },
+                },
+                { action: 'apply', participantId: 'gob', condition: 'blinded' }
+            )
+        ).toThrow(API_ERRORS.CONDITION_UNKNOWN);
+    });
+
+    it('схема приймає довільний ключ за регексом, відкидає сміття', () => {
+        const parse = (condition: string) =>
+            battleConditionsSchema.safeParse({
+                action: 'apply',
+                participantId: 'gob',
+                condition,
+            }).success;
+
+        expect(parse('prone')).toBe(true);
+        expect(parse('custom:x')).toBe(true);
+        expect(parse('Bad Key!')).toBe(false);
+    });
+
     it('імунітет блокує', () => {
         const withFlag = applyCondition5e([hero, goblin], 'gob', {
             key: 'petrified',
@@ -195,14 +225,21 @@ describe('battleConditionsMutation', () => {
 });
 
 describe('battleConditionsSchema', () => {
-    it('невідомий стан відхиляється', () => {
+    it('сміттєвий ключ відхиляється схемою, невідомий — мутацією', () => {
         expect(
             battleConditionsSchema.safeParse({
                 action: 'apply',
                 participantId: 'x',
-                condition: 'sleepy',
+                condition: 'Not A Key',
             }).success
         ).toBe(false);
+        expect(() =>
+            battleConditionsMutation(dmCtx(), {
+                action: 'apply',
+                participantId: 'gob',
+                condition: 'sleepy',
+            })
+        ).toThrow(API_ERRORS.CONDITION_UNKNOWN);
         expect(
             battleConditionsSchema.safeParse({
                 action: 'remove',

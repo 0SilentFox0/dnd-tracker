@@ -4,6 +4,7 @@ import { d20CasterDice } from './caster-dice';
 import { D20_SPELL_RESOURCE } from './resource';
 import { d20SpellSaveDc } from './save-dc';
 import { d20SpellAttackBonus } from './spell-attack';
+import { d20SaveCrit, d20SpellAttackRoll } from './spell-roll';
 import { d20Spellcasting } from './spellcasting';
 
 import { upcastSteps } from '@/lib/utils/battle/spell/upcast';
@@ -12,6 +13,9 @@ import { D20_SUSTAIN } from '@/systems/d20/rules/concentration/sustain';
 
 export const D20_MAGIC: RuleSystemMagic = {
     resource: D20_SPELL_RESOURCE,
+    attackRoll: d20SpellAttackRoll,
+    saveCrit: d20SaveCrit,
+    attackDice: 20,
     sustain: D20_SUSTAIN,
     saveDcBase: (rules) => rules.formulas.saveDcBase,
     saveDc: d20SpellSaveDc,

@@ -46,7 +46,7 @@ export function TriggerSection({
     const errors = useFieldErrors(`${path}.trigger`);
 
     return (
-        <SectionShell path={path} part="when" title={t('title')} {...state}>
+        <SectionShell path={path} part="when" title={t('title')} state={state}>
             <div className="space-y-1">
                 <Label
                     htmlFor={`${path}.trigger.event`}

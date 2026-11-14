@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 
+import '@/lib/server/systems/registry';
 import { resetOnboardingSchema } from '@/lib/schemas';
 import { resetOnboardingFlags } from '@/lib/server/onboarding/flags';
 import { requireAuth } from '@/lib/utils/api/api-auth';

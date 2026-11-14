@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 
+import '@/lib/server/systems/registry';
 import { campaignListKey } from '@/lib/cache/campaign-list';
 import { kvGet, kvSet } from '@/lib/cache/kv';
 import { API_ERRORS } from '@/lib/constants/api-errors';
@@ -11,10 +12,10 @@ import {
     CAMPAIGN_OMIT,
     createCampaignForUser,
 } from '@/lib/server/campaigns/create-campaign';
+import { bundleErrorResponse } from '@/lib/server/templates/bundle-error';
 import { ensureDbUser, PUBLIC_USER_SELECT } from '@/lib/server/users/db-user';
 import { requireAuth, requireAuthUser } from '@/lib/utils/api/api-auth';
 import { errorResponse } from '@/lib/utils/api/api-response';
-import { bundleErrorResponse } from '@/lib/utils/api/bundle-error';
 import { PRIVATE_NO_STORE_HEADERS } from '@/lib/utils/api/cache-headers';
 import { handleApiError } from '@/lib/utils/api/error-handler';
 import { parseBody } from '@/lib/utils/api/parse-body';

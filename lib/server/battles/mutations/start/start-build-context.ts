@@ -1,7 +1,7 @@
 import { Prisma } from '@prisma/client';
 
 import { prisma } from '@/lib/db';
-import { systemServerOf } from '@/lib/server/systems/registry';
+import { systemServerOf } from '@/lib/server/systems/lookup';
 import { referencedSkillIds } from '@/lib/utils/battle/participant/extract-skills';
 import { loadClassesById } from '@/lib/utils/battle/participant/load-classes';
 import type { CampaignSpellContext } from '@/lib/utils/battle/types/participant';

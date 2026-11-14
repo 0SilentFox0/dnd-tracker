@@ -118,11 +118,13 @@ export function NewCharacterForm({
                     basicInfo={basicInfo}
                     campaignMembers={members}
                     races={races}
-                    hideProgression={!!Ui?.hideProgression}
-                    hideLineage={!system.lineage}
-                    hideClass={!hasClasses}
-                    hideAlignment={!system.identity.alignments}
-                    hideArchetype={!statColumnsOf(system).has('archetype')}
+                    hide={{
+                        progression: !!Ui?.hideProgression,
+                        lineage: !system.lineage,
+                        class: !hasClasses,
+                        alignment: !system.identity.alignments,
+                        archetype: !statColumnsOf(system).has('archetype'),
+                    }}
                     classMode={
                         classMode.enabled && Ui && !Ui.hideProgression
                             ? classMode

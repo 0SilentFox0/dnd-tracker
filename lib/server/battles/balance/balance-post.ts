@@ -3,9 +3,10 @@ import type { z } from 'zod';
 import type { balanceSchema } from './balance-schema';
 import { loadCharacterBalanceStats } from './character-stats';
 
+import '@/lib/server/systems/registry';
 import { DEFAULT_RULES_EDITION } from '@/lib/constants/rules';
 import { loadUnitLibraryStats } from '@/lib/server/battles/balance/unit-library';
-import { systemServerOf } from '@/lib/server/systems/registry';
+import { systemServerOf } from '@/lib/server/systems/lookup';
 import type { UnitStats } from '@/lib/utils/battle/balance';
 import {
     buildPartyPower,

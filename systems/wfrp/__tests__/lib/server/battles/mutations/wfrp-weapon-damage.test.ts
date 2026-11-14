@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import '@/lib/server/systems/registry';
 import { ParticipantSide, ParticipantSourceType } from '@/lib/constants/battle';
 import { attackBodySchema } from '@/lib/schemas/battles';
 import { context } from '@/lib/server/battles/__tests__/mutations/fixtures';

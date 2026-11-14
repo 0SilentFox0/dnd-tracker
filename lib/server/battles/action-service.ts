@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import '@/lib/server/systems/registry';
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { prisma } from '@/lib/db';
 import { DEFAULT_LOCALE, type Locale } from '@/lib/i18n/config';

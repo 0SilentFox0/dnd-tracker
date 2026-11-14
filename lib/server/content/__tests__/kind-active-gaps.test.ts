@@ -36,7 +36,6 @@ let ops: Ops;
 let reads: Reads;
 
 beforeAll(async () => {
-    await import('@/lib/server/systems/registry');
     ops = await import('@/lib/server/content/operation-service');
     reads = await import('@/lib/server/assistant/actions/content-reads');
 }, 30_000);

@@ -1,9 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
 
+import '@/lib/server/systems/registry';
 import { ParticipantSide } from '@/lib/constants/battle';
+import { createBattleParticipantFromCharacter } from '@/lib/server/battles/participant/from-character';
 import { weaponStatsColumns } from '@/lib/utils/artifacts/weapon-stats';
 import { loadEquippedArtifactRows } from '@/lib/utils/battle/participant/extract-artifacts';
-import { createBattleParticipantFromCharacter } from '@/lib/utils/battle/participant/from-character';
 import { type ItemStats, itemStatsColumns } from '@/lib/utils/items/item-stats';
 import { DEFAULT_RULES, type Ruleset } from '@/lib/utils/rules';
 import { parseRules } from '@/lib/utils/rules/schema';

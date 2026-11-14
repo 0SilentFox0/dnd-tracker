@@ -1,6 +1,7 @@
 import { z, type ZodType } from 'zod';
 
 import 'server-only';
+import '@/lib/server/systems/registry';
 import {
     ChoiceSchema,
     FeatPrerequisiteSchema,
@@ -12,7 +13,7 @@ import {
     UnitSpellGrantSchema,
     UnitStatblockSchema,
 } from '@/lib/schemas/units';
-import { systemContentKinds } from '@/lib/server/systems/registry';
+import { systemContentKinds } from '@/lib/server/systems/lookup';
 import {
     AbilitySchema,
     LimitsSchema,
@@ -37,6 +38,7 @@ import { SpellFxSchema } from '@/lib/utils/battle/fx/spell-fx-schema';
 import { capitalize } from '@/lib/utils/common/text';
 import { ItemStatsSchema } from '@/lib/utils/items/item-stats';
 import { RulesetPatchSchema } from '@/lib/utils/rules/schema';
+import { allConditionKeys } from '@/lib/utils/rules/systems/lookup';
 import {
     SpellCastingTimeSchema,
     SpellCostSchema,
@@ -131,6 +133,14 @@ export function toJsonSchemas(
     });
 
     return Object.fromEntries(
-        Object.entries(schemas).map(([id, s]) => [id, stripMeta(s)])
+        Object.entries(schemas).map(([id, s]) => [
+            id,
+            id === 'AnyCondition'
+                ? {
+                      ...stripMeta(s),
+                      description: `Standard keys: ${allConditionKeys().join(', ')}; or custom:<slug>`,
+                  }
+                : stripMeta(s),
+        ])
     );
 }

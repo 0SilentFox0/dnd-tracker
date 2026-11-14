@@ -1,7 +1,6 @@
 export { useFxBusy } from './fx-busy';
 export { fireFxImpact, onFxImpact } from './fx-impact';
 export * from './modes';
-export { afterMoraleDice } from './morale-dice';
 export { isSystemActionPending } from './system-action';
 export type { TurnGateControls } from './types';
 export { useAbilityMapAim } from './useAbilityMapAim';
@@ -47,6 +46,7 @@ export {
 export { type EdgeEditing, useEdgeStroke } from './useEdgeStroke';
 export { useFxEnabled } from './useFxEnabled';
 export { useFxImpacts } from './useFxImpacts';
+export { useGearSwap } from './useGearSwap';
 export { useHitChange, useHitFx } from './useHitFx';
 export { type HpChange, useDamageShake, useHpChange } from './useHpChange';
 export { useInitiativeDrag } from './useInitiativeDrag';
@@ -64,12 +64,14 @@ export {
     type TerrainBrush,
     useMapTerrainTool,
 } from './useMapTerrainTool';
+export { type MapUpdateTool, useMapUpdateTool } from './useMapUpdateTool';
 export { type MapWeatherTool, useMapWeatherTool } from './useMapWeatherTool';
 export {
     MAP_TAB,
     type MobileBattleTab,
     useMobileBattleTabs,
 } from './useMobileBattleTabs';
+export { useMoveRoutes } from './useMoveRoutes';
 export {
     type ParticipantClickInput,
     useParticipantClick,
@@ -90,6 +92,7 @@ export {
 } from './useSpellBook';
 export { type FxRunner, useSpellFxPlayback } from './useSpellFxPlayback';
 export { useStrokePaint } from './useStrokePaint';
+export { type GlideFrame, useTokenGlide } from './useTokenGlide';
 export { useTurnCountdown, useTurnTimer } from './useTurnTimer';
 export {
     type UnitControlRow,

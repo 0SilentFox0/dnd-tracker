@@ -1,6 +1,7 @@
 import type { Prisma, Spell } from '@prisma/client';
 import { describe, expect, it, vi } from 'vitest';
 
+import '@/lib/server/systems/registry';
 import { ParticipantSide } from '@/lib/constants/battle';
 import {
     context,

@@ -19,6 +19,8 @@ describe('system ui registry', () => {
             forms: hommForms,
             sheet: hommSheet,
             battle: hommBattle,
+            dmPages: hommPages,
+            fx: hommFx,
             ...hommRest
         } = systemUiOf('homm');
 
@@ -28,10 +30,18 @@ describe('system ui registry', () => {
             forms: dndForms,
             sheet: dndSheet,
             battle: dndBattle,
+            dmPages: dndPages,
+            fx: dndFx,
             ...dndRest
         } = systemUiOf('dnd5e');
 
         expect(hommRest).toEqual(dndRest);
+        expect(hommFx?.dice).toHaveLength(1);
+        expect(dndFx).toBeUndefined();
+        expect(Object.keys(dndPages ?? {})).toEqual(['classes', 'backgrounds']);
+        expect(Object.keys(hommPages ?? {})).toEqual(
+            expect.arrayContaining(['classes', 'skills', 'artifact-sets'])
+        );
         expect(hommBattle.turnStart).toBeDefined();
         expect(dndBattle.turnStart).toBeUndefined();
         expect(hommBattle.badges?.map((b) => b.name)).toEqual([

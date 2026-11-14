@@ -15,7 +15,10 @@ import { CHARACTER_ACTIONS } from '@/lib/server/assistant/actions/characters';
 import { createActionCatalog } from '@/lib/server/assistant/catalog';
 import { createAssistantExecutor } from '@/lib/server/assistant/execute';
 import type { AssistantCaller } from '@/lib/server/assistant/types';
+import { createBattleParticipantFromCharacter } from '@/lib/server/battles/participant/from-character';
 import { loadCharacterContext } from '@/lib/server/battles/participant/load-character-context';
+import { loadBattle } from '@/lib/server/battles/store/load-battle';
+import { saveBattle } from '@/lib/server/battles/store/save-battle';
 import { runCharacterOperation } from '@/lib/server/characters/action-service';
 import { runCharacterProgression } from '@/lib/server/characters/progression-service';
 import { runContentWriteContext } from '@/lib/server/content/write-context';
@@ -23,8 +26,6 @@ import {
     isLocalDevDatabaseEnv,
     singleConnectionDatabaseUrl,
 } from '@/lib/server/test-support/local-db';
-import { createBattleParticipantFromCharacter } from '@/lib/utils/battle/participant/from-character';
-import { loadBattle, saveBattle } from '@/lib/utils/battle/store';
 import { parseRules } from '@/lib/utils/rules/schema';
 vi.mock('@/lib/cache/campaign-list', () => ({
     invalidateCampaignLists: vi.fn(),

@@ -5,6 +5,7 @@ import type { Prisma } from '@prisma/client';
 
 import { assertSeedTarget } from '../seed/seed-library-lib';
 
+import '@/lib/utils/rules/systems/registry';
 import { prisma } from '@/lib/db';
 import { createCampaignFromBundle } from '@/lib/server/campaigns/create-campaign';
 import { BUNDLE_TABLES } from '@/lib/server/templates/bundle';

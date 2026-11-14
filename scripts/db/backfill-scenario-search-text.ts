@@ -6,6 +6,7 @@
  *
  *   pnpm exec tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/db/backfill-scenario-search-text.ts [--dry-run] [--allow-remote]
  */
+import '@/lib/utils/rules/systems/registry';
 import { prisma } from '@/lib/db';
 import { scenarioContentSchema } from '@/lib/schemas/scenario';
 import { buildSearchText } from '@/lib/utils/scenario/search-text';

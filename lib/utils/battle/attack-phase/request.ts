@@ -1,16 +1,13 @@
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { AttackType } from '@/lib/constants/battle';
+import { textRef } from '@/lib/i18n/text-ref';
 import {
     findParticipant,
     isAirborne,
 } from '@/lib/utils/abilities/engine/core/participants';
-import type { CunningStrikeEffect } from '@/lib/utils/abilities/schema';
+import type { StrikeRiderEffect } from '@/lib/utils/abilities/schema';
 import { assertAttackAllowed } from '@/lib/utils/battle/attack/assert-allowed';
 import { canAttackFromPool } from '@/lib/utils/battle/attack/attacks-left';
-import {
-    cunningStrikeCost,
-    cunningStrikeOffer,
-} from '@/lib/utils/battle/attack/cunning-strike';
 import { attackKindOf } from '@/lib/utils/battle/common/attack-kind';
 import {
     type ActorScope,
@@ -46,7 +43,7 @@ export interface AttackRequest {
     damageRolls: number[];
     offHand?: boolean;
     useInspiration?: boolean;
-    cunningStrike?: CunningStrikeEffect[];
+    cunningStrike?: StrikeRiderEffect[];
     /** Already parsed by the system's `schemas.attackInput` */
     system?: SystemSlot;
 }
@@ -216,13 +213,13 @@ export function validateAttackRequest(
     assertAttackAllowed(attacker, attack, chosenTargets);
 
     if (data.cunningStrike?.length) {
-        const cost = cunningStrikeCost(
-            cunningStrikeOffer(attacker, 0),
-            data.cunningStrike
-        );
+        const { rejected } = ruleSystemOf(rules).combat.attack?.hitRiders?.({
+            attacker,
+            round: 0,
+            effects: data.cunningStrike,
+        }) ?? { rejected: textRef(REJECT.cunningUnavailable) };
 
-        if (typeof cost !== 'number')
-            throw ruleErrorOf('action_rejected', cost);
+        if (rejected) throw ruleErrorOf('action_rejected', rejected);
     }
 
     return {

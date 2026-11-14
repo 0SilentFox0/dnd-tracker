@@ -40,10 +40,12 @@ export interface GraphNodeShapeProps {
     matched: boolean;
     hovered: boolean;
     labelled: boolean;
-    onHover: (id: string | null) => void;
-    onSelect: (id: string) => void;
-    onClear: () => void;
-    onOpen: (node: PositionedNode) => void;
+    actions: {
+        onHover: (id: string | null) => void;
+        onSelect: (id: string) => void;
+        onClear: () => void;
+        onOpen: (node: PositionedNode) => void;
+    };
 }
 
 function GraphNodeShapeImpl({
@@ -53,11 +55,10 @@ function GraphNodeShapeImpl({
     matched,
     hovered,
     labelled,
-    onHover,
-    onSelect,
-    onClear,
-    onOpen,
+    actions,
 }: GraphNodeShapeProps) {
+    const { onHover, onSelect, onClear, onOpen } = actions;
+
     const t = useTranslations('scenarioGraph.graph');
 
     const isScene = node.kind === 'scene';

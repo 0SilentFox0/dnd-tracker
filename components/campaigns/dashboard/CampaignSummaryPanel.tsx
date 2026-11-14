@@ -42,6 +42,7 @@ export function CampaignSummaryPanel({
                                 critChoiceByDm: campaign.critChoiceByDm,
                                 acquaintancesEnabled:
                                     campaign.acquaintancesEnabled,
+                                mapLibraryEnabled: campaign.mapLibraryEnabled,
                                 status: campaign.status,
                             }}
                             meta={meta}

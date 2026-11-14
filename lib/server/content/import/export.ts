@@ -1,11 +1,12 @@
 import 'server-only';
+import '@/lib/server/systems/registry';
 import { ArtifactSlot } from '@/lib/constants/artifacts';
 import { prisma } from '@/lib/db';
 import type { Locale } from '@/lib/i18n/config';
 import { getTranslator } from '@/lib/i18n/translator';
 import { assertCan } from '@/lib/server/content/access';
 import { loadNames } from '@/lib/server/content/import/names';
-import { systemContentKinds } from '@/lib/server/systems/registry';
+import { systemContentKinds } from '@/lib/server/systems/lookup';
 import {
     artifactAbilities,
     artifactSetAbilities,

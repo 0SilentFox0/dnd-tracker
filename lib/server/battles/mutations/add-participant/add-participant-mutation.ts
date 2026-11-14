@@ -7,13 +7,12 @@ import { prisma } from '@/lib/db';
 import { textRef } from '@/lib/i18n/text-ref';
 import { mapCellSchema } from '@/lib/schemas/battles';
 import { buildCampaignContextForStart } from '@/lib/server/battles/mutations/start/start-build-context';
+import { createBattleParticipantFromCharacter } from '@/lib/server/battles/participant/from-character';
+import { loadUnitRace } from '@/lib/server/battles/participant/load-race';
 import { applyBakedAuras } from '@/lib/utils/abilities/build/bake';
 import { canStand } from '@/lib/utils/battle/grid/occupancy';
 import { modeEnter, modePlaceOne } from '@/lib/utils/battle/modes/server';
-import {
-    createBattleParticipantFromCharacter,
-    createBattleParticipantFromUnit,
-} from '@/lib/utils/battle/participant';
+import { createBattleParticipantFromUnit } from '@/lib/utils/battle/participant';
 import { reserveOf, toReserve } from '@/lib/utils/battle/participant/reserve';
 import type {
     BattleMutationContext,
@@ -62,6 +61,7 @@ type UnitRow = Parameters<typeof createBattleParticipantFromUnit>[0] & {
 export interface AddParticipantDeps {
     loadCharacter(id: string): Promise<CharacterRow | null>;
     loadUnit(id: string, campaignId: string): Promise<UnitRow | null>;
+    loadRace: typeof loadUnitRace;
     fromCharacter: typeof createBattleParticipantFromCharacter;
     fromUnit: typeof createBattleParticipantFromUnit;
     buildContext(
@@ -80,6 +80,7 @@ const defaultDeps: AddParticipantDeps = {
         prisma.unit.findFirst({
             where: { id, campaignId },
         }) as Promise<UnitRow | null>,
+    loadRace: loadUnitRace,
     fromCharacter: createBattleParticipantFromCharacter,
     fromUnit: createBattleParticipantFromUnit,
     buildContext: async (campaignId, character) =>
@@ -213,13 +214,20 @@ export function createAddParticipantMutation(
                       )
                     : undefined;
 
+            const racesById = {
+                [unit.raceId ?? '']: await deps.loadRace(
+                    unit.raceId,
+                    ctx.scene.campaignId
+                ),
+            };
+
             for (let i = 0; i < (data.quantity ?? 1); i++) {
                 const fresh = await deps.fromUnit(
                     unit,
                     battleId,
                     side,
                     i + 1,
-                    undefined,
+                    racesById,
                     ctx.meta.rules
                 );
 

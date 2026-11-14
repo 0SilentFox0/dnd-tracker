@@ -17,9 +17,11 @@ import { useMapCellActions } from './useMapCellActions';
 import { type MapMotionTool, useMapMotionTool } from './useMapMotionTool';
 import { useMapPlacing } from './useMapPlacing';
 import { type MapTerrainTool, useMapTerrainTool } from './useMapTerrainTool';
+import { type MapUpdateTool, useMapUpdateTool } from './useMapUpdateTool';
 import { type MapWeatherTool, useMapWeatherTool } from './useMapWeatherTool';
 
 import { useText } from '@/lib/i18n/use-text';
+import type { SystemFx } from '@/lib/utils/battle/fx';
 import {
     aimView,
     checkReturnToStart,
@@ -51,9 +53,11 @@ export interface BattleMapScene {
     weatherTool: MapWeatherTool | null;
     motionTool: MapMotionTool | null;
     backgroundTool: MapBackgroundTool | null;
+    mapUpdate: MapUpdateTool | null;
+    edgesLinked: boolean;
 }
 
-export function useBattleMapScene(): BattleMapScene | null {
+export function useBattleMapScene(fx?: SystemFx): BattleMapScene | null {
     const t = useTranslations('battle.notify');
 
     const text = useText();
@@ -64,6 +68,7 @@ export function useBattleMapScene(): BattleMapScene | null {
         viewer,
         selectedId,
         select,
+        campaignId,
         actions,
         anyPending,
         toast,
@@ -111,7 +116,7 @@ export function useBattleMapScene(): BattleMapScene | null {
         mutate: mapTerrain,
         onSkipped,
         onActivate: stopPlacing,
-        edgeSource,
+        edgeSource: battle.mapRef ? undefined : edgeSource,
     });
 
     const toolActive = terrainTool.active || modeToolActive;
@@ -157,7 +162,7 @@ export function useBattleMapScene(): BattleMapScene | null {
 
     const { pending: pendingStroke } = terrainTool;
 
-    const impactFor = useFxImpacts();
+    const impactFor = useFxImpacts(fx);
 
     const { currentRound, currentTurnIndex } = battle;
 
@@ -312,6 +317,14 @@ export function useBattleMapScene(): BattleMapScene | null {
         mutation: actions.mapBackground,
     });
 
+    const mapUpdate = useMapUpdateTool({
+        isDM,
+        campaignId,
+        mapRef: battle.mapRef,
+        mutation: actions.mapUpdate,
+        notify: show,
+    });
+
     useExclusivePalettes({
         mode: { active: !!modeTools?.paletteOpen, close: closeModeTool },
         terrain: { active: terrainTool.active, close: closeTerrain },
@@ -341,5 +354,7 @@ export function useBattleMapScene(): BattleMapScene | null {
         weatherTool,
         motionTool,
         backgroundTool,
+        mapUpdate,
+        edgesLinked: !!battle.mapRef,
     };
 }

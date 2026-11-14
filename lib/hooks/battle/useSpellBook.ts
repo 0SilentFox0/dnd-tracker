@@ -63,7 +63,7 @@ export function useSpellBook(
 ) {
     const scene = useBattleScene();
 
-    const { tested: magic } = useBattleRules();
+    const { tested: magic, attackDice } = useBattleRules();
 
     const text = useText();
 
@@ -267,9 +267,12 @@ export function useSpellBook(
                 bypassCost,
                 scene.battle.rules
             ),
-        attackTargets: state.pick?.needsAttackRolls
-            ? targets.filter((t) => state.targetIds.includes(t.basicInfo.id))
-            : [],
+        attackTargets:
+            state.pick?.needsAttackRolls && attackDice
+                ? targets.filter((t) =>
+                      state.targetIds.includes(t.basicInfo.id)
+                  )
+                : [],
         costUsed: (s: BookSpell) =>
             costBlocked({
                 caster,
@@ -446,14 +449,14 @@ export function useSpellBook(
                 })
             );
 
-            if (state.pick?.needsAttackRolls)
+            if (state.pick?.needsAttackRolls && attackDice)
                 state.targetIds.forEach(
                     (id) =>
                         state.attacks[id] === undefined &&
                         dispatch({
                             type: 'SET_ATTACK',
                             id,
-                            value: rollDie(20, cryptoRandom),
+                            value: rollDie(attackDice, cryptoRandom),
                         })
                 );
         },

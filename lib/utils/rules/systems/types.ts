@@ -8,15 +8,11 @@ import type { Coin } from '@/lib/constants/inventory';
 import type { CharacterSystemColumn } from '@/lib/constants/stat-columns';
 import type { Translator } from '@/lib/i18n/translator';
 import type { StaticEffect } from '@/lib/utils/abilities/schema';
-import type { Condition5eKey } from '@/lib/utils/abilities/schema/kinds';
 import type { Recipe } from '@/lib/utils/abilities/templates/types';
 import type { LabeledEffectInput } from '@/lib/utils/battle/actions/effects';
 import type {
-    CoreActionDef,
-    CoreActionKey,
-} from '@/lib/utils/battle/actions/keys';
-import type {
     CoreActionAvailability,
+    CoreActionDef,
     LegendaryAttackInput,
     LegendaryAttackResult,
     MovementInput,
@@ -25,6 +21,7 @@ import type {
     RunCoreActionResult,
 } from '@/lib/utils/battle/actions/types';
 import type { RollMode } from '@/lib/utils/battle/attack/bonus-math';
+import type { ActionFlow } from '@/lib/utils/battle/common/action-flow';
 import type {
     ApplyConditionOptions,
     ApplyConditionResult,
@@ -39,6 +36,7 @@ import type { TurnGateOutcome } from '@/lib/utils/battle/flows/turn-flow';
 import type { DieFx } from '@/lib/utils/battle/fx/dice/types';
 import type { EquippedArtifactRow } from '@/lib/utils/battle/participant/extract-artifacts';
 import type {
+    D20Mode,
     RuleSystemProficiency,
     RuleSystemSaves,
 } from '@/lib/utils/battle/saves/types';
@@ -314,20 +312,20 @@ export interface RuleSystemTurn {
 export interface RuleSystemActions {
     /** The rules' `actions` section is switched on */
     enabled(rules: Ruleset): boolean;
-    catalog: Partial<Record<CoreActionKey, CoreActionDef>>;
+    catalog: Readonly<Record<string, CoreActionDef>>;
     cost(
-        key: CoreActionKey,
+        key: string,
         actor: BattleParticipant,
         participants: BattleParticipant[]
     ): CoreActionDef['cost'];
     targets(
-        key: CoreActionKey,
+        key: string,
         actor: BattleParticipant,
         participants: BattleParticipant[],
         map: BattleMapConfig | null | undefined
     ): BattleParticipant[];
     available(
-        key: CoreActionKey,
+        key: string,
         actor: BattleParticipant,
         participants: BattleParticipant[],
         map: BattleMapConfig | null | undefined,
@@ -451,6 +449,10 @@ export interface RuleSystemConditions {
 
 /** Standard conditions (blinded, prone, exhaustion…) that core rules apply; unlike `conditions`, every base provides it */
 export interface RuleSystemConditionSet {
+    /** The base's standard condition vocabulary; stored keys never change */
+    keys: readonly string[];
+    /** i18n namespace path of a standard condition (`<path>.label`, `<path>.description`) */
+    labelKey(key: string): string;
     /** Whether the campaign rules switch standard conditions on; absent means never */
     enabled?(rules: Ruleset): boolean;
     /** Campaign-defined conditions; absent means none */
@@ -463,7 +465,7 @@ export interface RuleSystemConditionSet {
     ): ApplyConditionResult;
     /** null: the system has no such condition */
     effectInput(
-        key: Condition5eKey,
+        key: string,
         opts: ConditionEffectOptions
     ): LabeledEffectInput | null;
 }
@@ -612,8 +614,35 @@ export interface RuleSystemSustain {
     ): SustainResult;
 }
 
+export interface SpellAttackRollCtx {
+    mode: D20Mode;
+    rng: () => number;
+    /** A roll the player already made */
+    presetRoll?: number;
+    /** Roll bonus and target armor class */
+    bonus: number;
+    ac: number;
+    /** Roll at or above which the hit is critical, and at or below which it always misses */
+    critOn: number;
+    fumbleOn: number;
+}
+
+export interface SpellAttackRoll {
+    roll: number;
+    rolls: number[];
+    crit: boolean;
+    fumble: boolean;
+    hit: boolean;
+}
+
 export interface RuleSystemMagic {
     resource?: RuleSystemMagicResource;
+    /** Attack roll of a spell against a target; absent means the base has none and a spell with an attack hits without a roll */
+    attackRoll?(ctx: SpellAttackRollCtx): SpellAttackRoll;
+    /** Natural result of a save roll that decides it outright; null for any other roll */
+    saveCrit?(roll: number): 'success' | 'fail' | null;
+    /** Die size the client rolls for a spell attack; absent means the client rolls none */
+    attackDice?: number;
     sustain: RuleSystemSustain;
     /** Base of a spell save DC from the campaign rules; absent means the section default */
     saveDcBase?(rules: Ruleset): number;
@@ -656,10 +685,7 @@ export interface SpellcastingInput {
     rules: Ruleset;
 }
 
-export type LevelResetColumns = Pick<
-    Prisma.CharacterUncheckedUpdateInput,
-    'skillTreeProgress'
->;
+export type LevelResetColumns = Prisma.CharacterUncheckedUpdateInput;
 
 export type LevelResetPart = (change: {
     from: number;
@@ -763,6 +789,44 @@ export type CritRules = Pick<
     'critOn' | 'fumbleOn' | 'effects' | 'disabledSuccess' | 'disabledFail'
 >;
 
+export interface AttackRiderOffer {
+    options: { effect: string; dice: number; label: TextRef }[];
+    maxEffects: number;
+    sneakKey: string;
+    sneakDice: number;
+    /** The next selection after the player taps `effect`; unchanged when it does not fit */
+    toggle(selected: string[], effect: string): string[];
+}
+
+export interface HitRidersCtx {
+    attacker: BattleParticipant;
+    round: number;
+    effects: string[];
+}
+
+export interface HitRidersPlan {
+    /** Set when the chosen riders cannot be bought */
+    rejected?: TextRef;
+    /** Damage dice forgone to pay for the riders */
+    dice: number;
+    /** Resolves the riders after the hit event fired; returns true when something was applied */
+    apply(
+        flow: ActionFlow,
+        targetId: string,
+        fired: readonly string[]
+    ): boolean;
+}
+
+export interface RuleSystemAttackHooks {
+    /** Optional riders bought at the hit (offer for the wizard); absent means none */
+    riderOptions?(
+        attacker: BattleParticipant,
+        round: number
+    ): AttackRiderOffer | null;
+    /** Cost and resolution of the riders a request chose; absent means the request's riders are ignored */
+    hitRiders?(ctx: HitRidersCtx): HitRidersPlan;
+}
+
 export interface RuleSystemCombat {
     /** Critical-hit thresholds and effects of the campaign rules; absent means the neutral defaults */
     crit?(rules: Ruleset): CritRules;
@@ -787,6 +851,13 @@ export interface RuleSystemCombat {
     inspiration?: InspirationRules;
     /** Who judges an attack: the client rolls and the server checks vs AC, or the server resolves the whole test */
     judge: 'client' | 'server';
+    attack?: RuleSystemAttackHooks;
+    /** Attack roll of a zone trigger against one target; absent means a zone attack hits without a roll */
+    zoneAttack?(ctx: {
+        rng: () => number;
+        bonus: number;
+        ac: number;
+    }): { roll: number; hit: boolean };
     dice: number;
     attacksOf?(input: { rows: EquippedArtifactRow[] }): ExtractedAttack[];
     participantFields?(

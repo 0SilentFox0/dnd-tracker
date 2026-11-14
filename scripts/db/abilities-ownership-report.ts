@@ -5,6 +5,7 @@
  *
  *   pnpm exec tsx scripts/db/abilities-ownership-report.ts [--json] [--allow-remote]
  */
+import '@/lib/utils/rules/systems/registry';
 import {
     OWNERSHIP_TABLES,
     rowViolations,

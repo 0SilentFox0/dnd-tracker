@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('@/components/hud/fonts', () => ({ hudFontClassName: '' }));
 
+import '@/components/systems/registry';
 import { ParticipantList } from '@/components/battle/participants/ParticipantList';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { ParticipantSide } from '@/lib/constants/battle';

@@ -1,7 +1,8 @@
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { defineAddon } from '../compose';
-import { MODULES, ruleSystemOf } from '../registry';
+import { ruleSystemOf } from '../lookup';
+import { MODULES } from '../registry';
 import type { RuleSystemDefinition } from '../types';
 
 const sel = (modules?: string[]) => ({ system: { key: 'dnd5e', modules } });

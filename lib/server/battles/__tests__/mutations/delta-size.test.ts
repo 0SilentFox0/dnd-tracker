@@ -7,11 +7,11 @@ import { attackBodySchema } from '@/lib/schemas/battles';
 import { attackMutation } from '@/lib/server/battles/mutations/attack/attack-mutation';
 import { nextTurnMutation } from '@/lib/server/battles/mutations/next-turn/next-turn-mutation';
 import { runBattleMutation } from '@/lib/server/battles/run-mutation';
+import { prepareSave } from '@/lib/server/battles/store/save-battle';
 import type {
     PipelineDeps,
     RunBattleMutationOptions,
 } from '@/lib/utils/battle/pipeline/run-battle-mutation';
-import { prepareSave } from '@/lib/utils/battle/store';
 import type { BattleMutationResponse } from '@/types/api';
 
 const DELTA_BUDGET_BYTES = 2_048;

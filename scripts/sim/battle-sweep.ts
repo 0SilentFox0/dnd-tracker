@@ -92,6 +92,8 @@ import {
 import { mutateSystemOperation } from '@/lib/server/battles/operations';
 import { runBattleMutation } from '@/lib/server/battles/run-mutation';
 import { loadSpellsFromDb } from '@/lib/server/battles/spell/load-spells-db';
+import { loadBattle } from '@/lib/server/battles/store/load-battle';
+import { saveBattle } from '@/lib/server/battles/store/save-battle';
 import { abilityLabel } from '@/lib/utils/abilities/build/resolve';
 import {
     auraKey,
@@ -147,11 +149,7 @@ import { MAZE_TEXTS } from '@/lib/utils/battle/modes/maze/texts';
 import { awaitsMoraleCheck } from '@/lib/utils/battle/morale/awaits-check';
 import { casterSpellDice } from '@/lib/utils/battle/spell/caster-dice';
 import { spellTargetingFor } from '@/lib/utils/battle/spell/spell-targeting';
-import {
-    loadBattle,
-    loadRecentEvents,
-    saveBattle,
-} from '@/lib/utils/battle/store';
+import { loadRecentEvents } from '@/lib/utils/battle/store';
 import { REJECT } from '@/lib/utils/battle/store/reject';
 import { checkVictoryConditions } from '@/lib/utils/battle/turn/victory';
 import { rollDiceList } from '@/lib/utils/common/dice';

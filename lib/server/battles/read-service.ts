@@ -1,14 +1,15 @@
 import 'server-only';
+import '@/lib/server/systems/registry';
 import { AI_LIMITS } from '@/lib/constants/ai';
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { BattleStatus } from '@/lib/constants/battle';
 import { prisma } from '@/lib/db';
 import { getTranslator } from '@/lib/i18n/translator';
+import { loadBattle } from '@/lib/server/battles/store/load-battle';
 import { ContentError } from '@/lib/server/content/errors';
-import { systemServerOf } from '@/lib/server/systems/registry';
+import { systemServerOf } from '@/lib/server/systems/lookup';
 import { decodeStoredLog } from '@/lib/utils/battle/log/codec';
 import { formatBattleLog } from '@/lib/utils/battle/log/lines';
-import { loadBattle } from '@/lib/utils/battle/store';
 
 /** Legacy read remains available on ai; no new write transport is activated here. */
 export async function readLegacyBattleState(

@@ -35,6 +35,24 @@ describe('entry-чанки гравця', () => {
         expect(importers(battle, 'zod')).toEqual([]);
     });
 
+    it('бій не тягне жодного файлу systems/* окрім meta (rules, ui, ability)', () => {
+        expect(
+            [...battle.files].filter(
+                (f) => f.startsWith('systems/') && !f.endsWith('/meta.ts')
+            )
+        ).toEqual([]);
+    });
+
+    it('SystemGate і install.ts не тягнуть systems/* статично', () => {
+        const gate = staticGraph(['components/systems/SystemGate.tsx']);
+
+        expect(
+            [...gate.files].filter(
+                (f) => f.startsWith('systems/') && !f.endsWith('/meta.ts')
+            )
+        ).toEqual([]);
+    });
+
     it('профіль не тягне zod', () => {
         expect(importers(profile, 'zod')).toEqual([]);
     });

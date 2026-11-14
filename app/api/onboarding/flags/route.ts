@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 
+import '@/lib/server/systems/registry';
 import { campaignIdFromChecklistKey } from '@/lib/onboarding/flag-keys';
 import { setOnboardingFlagSchema } from '@/lib/schemas';
 import { setOnboardingFlag } from '@/lib/server/onboarding/flags';

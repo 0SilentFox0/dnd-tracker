@@ -3,18 +3,16 @@
 import { notFound } from 'next/navigation';
 
 import { systemUiOf } from '@/components/systems';
+import type { DmPageProps } from '@/components/systems/types';
 import type { SystemSelection } from '@/lib/utils/rules/systems/catalog';
 
 export function SystemDmPage({
-    campaignId,
     section,
     system,
-    canEdit,
-}: {
-    campaignId: string;
+    ...page
+}: DmPageProps & {
     section: string;
     system: SystemSelection;
-    canEdit: boolean;
 }) {
     const dmPages = systemUiOf(system.key, system.modules).dmPages;
 
@@ -25,5 +23,5 @@ export function SystemDmPage({
 
     if (!Page) notFound();
 
-    return <Page campaignId={campaignId} canEdit={canEdit} />;
+    return <Page {...page} />;
 }

@@ -1,14 +1,15 @@
 import { describe, expect, it } from 'vitest';
 
+import '@/lib/server/systems/registry';
 import {
     AttackType,
     ParticipantSide,
     ParticipantSourceType,
 } from '@/lib/constants/battle';
+import { createBattleParticipantFromCharacter } from '@/lib/server/battles/participant/from-character';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import { applyHeroDmDamageMultiplier } from '@/lib/utils/battle/damage/hero-dm-multiplier';
 import { rowLines } from '@/lib/utils/battle/log/__tests__/event-text';
-import { createBattleParticipantFromCharacter } from '@/lib/utils/battle/participant/from-character';
 import { computeSpellPower } from '@/lib/utils/battle/spell/power';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 import type { BattleParticipant } from '@/types/battle';
@@ -164,7 +165,7 @@ describe('hero archetype damage', () => {
         );
 
         expect(p.abilities.meleeMultiplier).toBe(0.7);
-        expect(p.abilities.rangedMultiplier).toBe(1.5);
+        expect(p.abilities.rangedMultiplier).toBe(1.3);
         expect(p.abilities.magicMultiplier).toBe(0.7);
         expect(p.abilities.archetypeKey).toBe('ranger');
     });

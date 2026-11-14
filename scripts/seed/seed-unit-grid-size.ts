@@ -6,6 +6,7 @@
  */
 import { assertSeedTarget, findByName, parseArgs } from './seed-library-lib';
 
+import '@/lib/utils/rules/systems/registry';
 import { LIBRARY_SOURCE } from '@/data/library/build';
 import { prisma } from '@/lib/db';
 

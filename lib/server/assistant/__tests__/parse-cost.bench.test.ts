@@ -24,11 +24,11 @@ vi.mock('@/lib/server/content/write', () => ({
 }));
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
+import { operationRoute } from '@/lib/server/content/content-routes';
 import { ContentError } from '@/lib/server/content/errors';
 import { runContentOperation } from '@/lib/server/content/operation-service';
 import { CONTENT_OPERATIONS } from '@/lib/server/content/operations';
 import type { Actor } from '@/lib/utils/api/actor';
-import { operationRoute } from '@/lib/utils/api/content-routes';
 
 const actor: Actor = {
     campaignId: 'c',

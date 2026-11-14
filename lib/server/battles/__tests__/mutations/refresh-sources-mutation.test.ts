@@ -33,6 +33,7 @@ function deps(over = {}) {
         loadUnit: vi.fn(async (id: string) =>
             id === 'gone' ? null : ({ id, campaignId: 'c1' } as never)
         ),
+        loadRace: vi.fn(async () => null),
         fromCharacter: vi.fn(async () => fresh('x')),
         fromUnit: vi.fn(async () => fresh('x')),
         buildContext: vi.fn(async () => undefined),
@@ -88,6 +89,53 @@ describe('refresh-sources mutation', () => {
         expect(eventTextOf(out.events[0])).toBe(
             'Оновлено з бібліотеки: 4 учасників'
         );
+    });
+
+    it('builds a unit with its race loaded by raceId', async () => {
+        const race = { id: 'r1', name: 'Elf' } as never;
+
+        const d = deps({
+            loadUnit: vi.fn(
+                async (id: string) =>
+                    ({ id, campaignId: 'c1', raceId: 'r1' }) as never
+            ),
+            loadRace: vi.fn(async () => race),
+        });
+
+        await createRefreshSourcesMutation(d)(
+            context({ participants: [gob] })
+        );
+
+        expect(d.loadRace).toHaveBeenCalledWith('r1', 'c1');
+        expect(
+            (d.fromUnit.mock.calls[0] as unknown[])[4]
+        ).toEqual({ r1: race });
+    });
+
+    it('loads a shared race once for many units', async () => {
+        const d = deps({
+            loadUnit: vi.fn(
+                async (id: string) =>
+                    ({ id, campaignId: 'c1', raceId: 'r1' }) as never
+            ),
+        });
+
+        await createRefreshSourcesMutation(d)(
+            context({
+                participants: [
+                    gob,
+                    gob2,
+                    participant('gob3', {
+                        sourceType: 'unit',
+                        sourceId: 'u2',
+                        side: ParticipantSide.ENEMY,
+                        instanceNumber: 1,
+                    }),
+                ],
+            })
+        );
+
+        expect(d.loadRace).toHaveBeenCalledTimes(1);
     });
 
     it('skips missing sources, extra-turn slots, summons and other campaigns', async () => {

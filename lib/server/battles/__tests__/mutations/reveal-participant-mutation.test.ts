@@ -8,6 +8,7 @@ import {
     revealParticipantSchema,
 } from '@/lib/server/battles/mutations/reveal-participant/reveal-participant-mutation';
 import { runBattleMutation } from '@/lib/server/battles/run-mutation';
+import { prepareSave } from '@/lib/server/battles/store/save-battle';
 import { cellsOf } from '@/lib/utils/battle/grid/occupancy';
 import { eventTextOf } from '@/lib/utils/battle/log/__tests__/event-text';
 import {
@@ -16,10 +17,7 @@ import {
     withMap,
 } from '@/lib/utils/battle/modes/maze/__tests__/fixtures';
 import { BattleAccess } from '@/lib/utils/battle/pipeline/run-battle-mutation';
-import {
-    type BattleMutationOutcome,
-    prepareSave,
-} from '@/lib/utils/battle/store';
+import { type BattleMutationOutcome } from '@/lib/utils/battle/store';
 import { DEFAULT_CHARACTERISTICS } from '@/systems/wfrp/rules/characteristics/keys';
 import { wfrpAbilitiesOf } from '@/systems/wfrp/rules/combat/participant';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';

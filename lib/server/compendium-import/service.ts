@@ -13,13 +13,6 @@ import {
 import { adaptCompendium } from './adapt';
 import { digest } from './identity';
 import {
-    byteLength,
-    COMPENDIUM_LIMITS,
-    CompendiumError,
-    type JsonRecord,
-    parseCompendium,
-} from './parse';
-import {
     ADAPTER_VERSION,
     buildImportPlan,
     type ImportPlan,
@@ -40,6 +33,13 @@ import type { Locale } from '@/lib/i18n/config';
 import { remapIds } from '@/lib/server/templates/remap-ids';
 import type { Actor } from '@/lib/utils/api/actor';
 import { isRecord } from '@/lib/utils/common/is-record';
+import {
+    byteLength,
+    COMPENDIUM_LIMITS,
+    CompendiumError,
+    type JsonRecord,
+    parseCompendium,
+} from '@/lib/utils/compendium-import/parse';
 import { RulesetPatchSchema } from '@/lib/utils/rules/schema';
 
 const CLASSES_SECTION = 'classes';

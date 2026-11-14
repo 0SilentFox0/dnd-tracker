@@ -47,8 +47,9 @@ New endpoint = route → `lib/api/<domain>.ts` → hook → `types/<domain>.ts`.
 
 - **`lib/db.ts`** — singleton `PrismaClient` (`withSafePoolLimits` adds `connection_limit`). Always import `prisma` from here, never `new PrismaClient()`.
 - **Auth/platform** ([platform.md](docs/architecture/platform.md)): server session = `getClaims` (`lib/auth.ts`, `requireAuth`), `getUser` only where fresh email/metadata are written; Supabase `client.ts` from client code, `server.ts` from server; fonts are self-hosted (`next/font/google` is banned); Pusher via `lib/pusher/{server,client,channels}.ts`; first-HTML data via `PrefetchedQuery`.
+- **Systems registry:** lookup (`lookup.ts`, no entries) ≠ install (eager root `registry.ts`); a module that first enters a route graph and calls `*Of` must have a root in that graph (`system-install-entries` test), else `SystemNotInstalledError`. `lib/utils` never imports `lib/server` (ratchet `utils-no-server-imports`).
 - **Egress is a hard constraint** (Supabase free tier): prefer deltas over refetches, keep polling slow, images through `next/image`.
-- **Alias:** `@/*` → repo root; always `@/lib/...`, never `../../`. `import/no-cycle` is on — fix cycles, don't work around them.
+- **Alias:** `@/*` → repo root; always `@/lib/...`, never `../../`. Cycles are checked by `pnpm cycles` (ratchet `import-cycles-baseline.json`, enforced in `test:run`; ESLint `import/no-cycle` is off) — fix cycles, don't work around them.
 
 ### Subsystems — rules that must not be broken
 
@@ -75,6 +76,6 @@ Full gotchas are in `.claude/rules/db-deploy.md` (loads when touching `prisma/`,
 ## Testing
 
 - **Don't run the full suite after every step** (~5k tests, ~50 s, heavy CPU). While working — `pnpm test:changed` / `pnpm test:related <files>`; the full `pnpm test:run` once before merge/push (and in a subagent-driven run — once at the end, not per task). Fall back to the full suite when changing `vitest.config.mts`, `vitest-setup.ts`, shared test helpers, or `package.json` deps — the module graph can't see those.
-- **No repo-wide `pnpm lint` / `--fix` while working** — it pegs a core for minutes (once nearly overheated the machine). While working: `pnpm exec eslint --fix <touched files>`; the repo-wide run happens once before merge/push, never per task or per subagent. Before a repo-wide lint or the full suite check `ps -Ao pid,pcpu,command -r | grep -E "eslint|vitest|next"`: if another heavy run is active (other worktree/session), wait or pause it — never two in parallel. A lint/test process running > ~5 min is hung: kill it and rerun narrower.
+- **Lint per folder.** While working: `pnpm exec eslint --fix <touched files>`, or `pnpm lint:dirs [--changed [base]] [dir...]` (sequential per top-level folder, cached in `.eslintcache`). `import/no-cycle` is replaced by `pnpm cycles` (~1 s; baseline ratchet also runs in `test:run`). A plain repo-wide `pnpm lint` stays available but is heavy: check `ps -Ao pid,pcpu,command -r | grep -E "eslint|vitest|next"` first and never run two heavy jobs in parallel; a lint/test process running > ~5 min is hung — kill it and rerun narrower.
 - **Vitest** runs `environment: "node"`; UI tests needing a DOM put `// @vitest-environment happy-dom` at the top. Tests live in sibling `__tests__/` folders (no top-level `tests/`).
 - Coverage target is `lib/**/*.ts`: `pnpm test:run --coverage`.

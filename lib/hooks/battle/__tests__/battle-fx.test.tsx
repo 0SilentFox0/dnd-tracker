@@ -215,6 +215,69 @@ describe('useBattleFxQueue', () => {
         expect(seen).toEqual(['b-1', 'b-2', 'b-3']);
     });
 
+    it('кубик системи: слот додає спек перед дією; без слота черги кубиків немає', async () => {
+        const { BattleSceneDataContext, useBattleFxQueue } = modules;
+
+        const log: BattleAction[] = range(1);
+
+        let pending: unknown = null;
+
+        const wrapper = ({ children }: { children: ReactNode }) => (
+            <BattleSceneDataContext.Provider
+                value={
+                    {
+                        battle: {
+                            battleLog: log,
+                            pendingMoraleCheck: pending,
+                            initiativeOrder: [],
+                        },
+                    } as never
+                }
+            >
+                {children}
+            </BattleSceneDataContext.Provider>
+        );
+
+        const onDone = vi.fn();
+
+        const fx = {
+            dice: [
+                (e: { scene: { pendingCheck: unknown } }) =>
+                    e.scene.pendingCheck
+                        ? {
+                              key: 'sys:1',
+                              actorId: 'p',
+                              spec: { seed: 1, groups: [] },
+                              onDone,
+                          }
+                        : null,
+            ],
+        };
+
+        const withFx = renderHook(() => useBattleFxQueue(true, fx), {
+            wrapper,
+        });
+
+        const without = renderHook(() => useBattleFxQueue(true), { wrapper });
+
+        pending = { participantId: 'p' };
+        rerenderAll();
+
+        function rerenderAll() {
+            withFx.rerender();
+            without.rerender();
+        }
+
+        expect(withFx.result.current.queue.map((s) => s.key)).toEqual([
+            'sys:1',
+        ]);
+        expect(without.result.current.queue).toEqual([]);
+
+        act(() => withFx.result.current.done('sys:1'));
+
+        expect(onDone).toHaveBeenCalledTimes(1);
+    });
+
     it('useFxBusy: зайнято, поки черга не порожня; FX вимкнено — вільно', async () => {
         const { BattleSceneDataContext, useBattleFxQueue, useFxBusy } = modules;
 
@@ -280,5 +343,27 @@ describe('useBattleFxQueue', () => {
         rerender({ on: true });
 
         expect(result.current.current).toBeNull();
+    });
+
+    it('done keeps its identity across renders so the playing effect does not restart', () => {
+        const { BattleSceneDataContext, useBattleFxQueue } = modules;
+
+        const wrapper = ({ children }: { children: ReactNode }) => (
+            <BattleSceneDataContext.Provider
+                value={{ battle: { battleLog: range(1) } } as never}
+            >
+                {children}
+            </BattleSceneDataContext.Provider>
+        );
+
+        const { result, rerender } = renderHook(() => useBattleFxQueue(true), {
+            wrapper,
+        });
+
+        const first = result.current.done;
+
+        rerender();
+
+        expect(result.current.done).toBe(first);
     });
 });

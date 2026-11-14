@@ -114,14 +114,13 @@ describe('system literals ratchet', () => {
 describe('wfrp leaks outside the allowed files', () => {
     const ALLOWED = new Set([
         ...readImportsExempt().map((e) => e.file),
-        'lib/onboarding/whats-new.ts',
         'lib/constants/api-errors.ts',
         'lib/server/assistant/actions/character-coverage.ts',
     ]);
 
     const literals = readLiteralsExempt();
 
-    it('only route / content-kind / ruleset-section files, whats-new, api-errors and character-coverage mention wfrp', () => {
+    it('only route / content-kind / ruleset-section files, api-errors and character-coverage mention wfrp', () => {
         const leaks = Object.keys(literals).filter(
             (file) =>
                 /wfrp/i.test(fs.readFileSync(path.join(ROOT, file), 'utf8')) &&
@@ -190,7 +189,7 @@ describe('d20 / HOMM names and rule-section readers leaving core', () => {
     const LEAK_NAMES: Record<string, number> = {
         'D20_[A-Z]+': 0,
         judgeD20: 0,
-        CONDITION_5E_: 11,
+        CONDITION_5E_: 0,
         applyCondition5e: 0,
         isHomm: 0,
         'HOMM_[A-Z]+': 0,
@@ -205,6 +204,11 @@ describe('d20 / HOMM names and rule-section readers leaving core', () => {
         conditionTestMutation: 0,
         systemConditionMutation: 0,
         coreActionMutation: 0,
+        CORE_ACTION_KEYS: 0,
+        coreActionSchema: 0,
+        'cunningStrike(Offer|Cost|Dc)|applyCunningStrikeEffects|toggleCunningStrike|CUNNING_STRIKE_LABELS': 0,
+        'removeCondition5e|hasAnyCondition5e|isCondition5eEffect|conditions5e|\\bCunningStrikeEffect\\b|CUNNING_STRIKE_EFFECTS': 0,
+        'rollDie\\(20\\b|rollD20WithMode': 0,
         careersResource: 0,
         createWfrpDraft: 0,
         patchWfrpDraft: 0,

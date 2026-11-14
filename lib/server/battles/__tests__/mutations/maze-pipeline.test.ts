@@ -11,6 +11,7 @@ import {
     rollbackSchema,
 } from '@/lib/server/battles/mutations/rollback/rollback-mutation';
 import { runBattleMutation } from '@/lib/server/battles/run-mutation';
+import { prepareSave } from '@/lib/server/battles/store/save-battle';
 import { applyBattleDelta } from '@/lib/utils/battle/client/apply-delta';
 import { eventTextOf } from '@/lib/utils/battle/log/__tests__/event-text';
 import { allInteriorEdges } from '@/lib/utils/battle/modes/maze';
@@ -30,13 +31,7 @@ import type {
     StoredBattleEvent,
     StoredParticipant,
 } from '@/lib/utils/battle/store';
-import {
-    buildSnapshotState,
-    eventToBattleAction,
-    joinParticipant,
-    prepareSave,
-    splitParticipant,
-} from '@/lib/utils/battle/store';
+import { buildSnapshotState, eventToBattleAction, joinParticipant, splitParticipant } from '@/lib/utils/battle/store';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 import type { BattleMutationResponse, BattleScene } from '@/types/api';
 import type {

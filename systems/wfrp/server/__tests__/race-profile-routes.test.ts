@@ -23,7 +23,6 @@ type Routes = typeof import('@/lib/server/systems/routes');
 let routes: Routes;
 
 beforeAll(async () => {
-    await import('@/lib/server/systems/registry');
     routes = await import('@/lib/server/systems/routes');
 }, 30_000);
 

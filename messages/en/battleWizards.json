@@ -152,6 +152,12 @@
       "use": "Use ingredient (cancels a miscast)"
     }
   },
+  "gear": {
+    "title": "Inventory",
+    "hint": "Changing gear costs a bonus action. Equip, then apply to the battle.",
+    "apply": "Apply to battle (bonus action)",
+    "used": "Bonus action used"
+  },
   "bonus": {
     "title": "Bonus action",
     "ability": "Ability",

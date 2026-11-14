@@ -24,8 +24,9 @@ vi.mock('@/lib/hooks/battle/useFxEnabled', () => ({
         setEnabled: vi.fn(),
     }),
 }));
-vi.mock('@/components/battle/fx/preload', () => ({ preloadFx: fx.preloadFx }));
+vi.mock('@/components/fx/preload', () => ({ preloadFx: fx.preloadFx }));
 
+import '@/components/systems/registry';
 import { BattleScreen } from '@/components/battle/scene/BattleScreen';
 import { ParticipantSide } from '@/lib/constants/battle';
 import { fakeScene } from '@/lib/hooks/battle/__tests__/fake-scene';

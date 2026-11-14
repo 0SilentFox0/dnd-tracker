@@ -39,6 +39,61 @@ describe('assertEffectsInComposition', () => {
         );
     });
 
+    it('rejects an unknown standard condition for the system with CONDITION_UNKNOWN', () => {
+        const blind = ability({
+            kind: 'applyCondition',
+            condition: 'blinded',
+        });
+
+        expect(() =>
+            assertEffectsInComposition({ key: 'wfrp' }, blind)
+        ).toThrowError(
+            expect.objectContaining({
+                message: API_ERRORS.CONDITION_UNKNOWN,
+                status: 422,
+            })
+        );
+        expect(() =>
+            assertEffectsInComposition({ key: 'dnd5e' }, blind)
+        ).not.toThrow();
+        expect(() =>
+            assertEffectsInComposition({ key: 'wfrp' }, blind, blind)
+        ).not.toThrow();
+        expect(() =>
+            assertEffectsInComposition(
+                { key: 'wfrp' },
+                ability({ kind: 'applyCondition', condition: 'custom:x' })
+            )
+        ).not.toThrow();
+    });
+
+    it('checks conditionImmunity keys like applyCondition', () => {
+        const immune = (conditions: unknown) =>
+            ability({ kind: 'flag', flag: 'conditionImmunity', conditions });
+
+        expect(() =>
+            assertEffectsInComposition({ key: 'wfrp' }, immune(['blinded']))
+        ).toThrowError(
+            expect.objectContaining({ message: API_ERRORS.CONDITION_UNKNOWN })
+        );
+        expect(() =>
+            assertEffectsInComposition(
+                { key: 'wfrp' },
+                immune(['custom:x', 'fear'])
+            )
+        ).not.toThrow();
+        expect(() =>
+            assertEffectsInComposition({ key: 'wfrp' }, immune('all'))
+        ).not.toThrow();
+        expect(() =>
+            assertEffectsInComposition(
+                { key: 'wfrp' },
+                immune(['blinded']),
+                immune(['blinded'])
+            )
+        ).not.toThrow();
+    });
+
     it('accepts a wfrp effect in wfrp and a core effect anywhere', () => {
         expect(() =>
             assertEffectsInComposition(
@@ -203,5 +258,49 @@ describe('assertCampaignEffects', () => {
         await assertCampaignEffects(mkActor(), morale);
         await assertCampaignEffects(mkActor(), morale);
         expect(loadRules).toHaveBeenCalledTimes(2);
+    });
+});
+
+describe('dropForeignConditions', () => {
+    const mixed = [
+        {
+            effects: [
+                { kind: 'applyCondition', condition: 'blinded' },
+                { kind: 'applyCondition', condition: 'custom:x' },
+                {
+                    kind: 'flag',
+                    flag: 'conditionImmunity',
+                    conditions: ['blinded', 'fear'],
+                },
+            ],
+        },
+    ];
+
+    it('drops 5e conditions in wfrp without failing the import', async () => {
+        const { dropForeignConditions } = await import(
+            '@/lib/server/content/traits-guard'
+        );
+
+        const out = dropForeignConditions({ key: 'wfrp' }, mixed);
+
+        expect(out.dropped).toBe(2);
+        expect(out.abilities?.[0].effects).toEqual([
+            { kind: 'applyCondition', condition: 'custom:x' },
+            { kind: 'flag', flag: 'conditionImmunity', conditions: ['fear'] },
+        ]);
+        expect(() =>
+            assertEffectsInComposition({ key: 'wfrp' }, out.abilities)
+        ).not.toThrow();
+    });
+
+    it('leaves dnd5e unchanged', async () => {
+        const { dropForeignConditions } = await import(
+            '@/lib/server/content/traits-guard'
+        );
+
+        expect(dropForeignConditions({ key: 'dnd5e' }, mixed)).toEqual({
+            abilities: mixed,
+            dropped: 0,
+        });
     });
 });

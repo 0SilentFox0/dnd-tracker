@@ -17,7 +17,6 @@ let route: Route;
 let getBattleOperation: Operations['getBattleOperation'];
 
 beforeAll(async () => {
-    await import('@/lib/server/systems/registry');
     route = await import(
         '@/app/api/campaigns/[id]/battles/[battleId]/system/[action]/route'
     );

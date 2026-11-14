@@ -1,6 +1,6 @@
-import { DMClassesPageClient } from './page-client';
-
+import { SystemDmPage } from '@/components/systems/SystemDmPage';
 import { requireCampaignDMOrDemo } from '@/lib/server/campaigns/access';
+import { parseRules } from '@/lib/utils/rules/schema';
 
 export default async function DMClassesPage({
     params,
@@ -9,7 +9,14 @@ export default async function DMClassesPage({
 }) {
     const { id } = await params;
 
-    const { isDemo } = await requireCampaignDMOrDemo(id);
+    const { campaign, isDemo } = await requireCampaignDMOrDemo(id);
 
-    return <DMClassesPageClient campaignId={id} canEdit={!isDemo} />;
+    return (
+        <SystemDmPage
+            campaignId={id}
+            section="classes"
+            system={parseRules(campaign.rules).system}
+            canEdit={!isDemo}
+        />
+    );
 }

@@ -3,6 +3,7 @@
 import type { ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import {
+    Backpack,
     BookOpen,
     Hourglass,
     ListChecks,
@@ -73,6 +74,7 @@ export function ActionGrid({
         bonusTile?: boolean;
         ability?: boolean;
         core?: boolean;
+        gear?: boolean;
     };
     actions: {
         channel?(): void;
@@ -81,6 +83,7 @@ export function ActionGrid({
         bonus(): void;
         ability?(): void;
         core?(): void;
+        gear?(): void;
     };
 }) {
     const t = useTranslations('battle.actions');
@@ -159,6 +162,18 @@ export function ActionGrid({
                         label={t('core')}
                         used={turn.status.skipped || pending}
                         onClick={actions.core}
+                    />
+                )}
+                {available.gear && (
+                    <Tile
+                        icon={Backpack}
+                        label={t('gear')}
+                        used={
+                            !turn.status.bonusAvailable ||
+                            turn.status.skipped ||
+                            pending
+                        }
+                        onClick={actions.gear}
                     />
                 )}
                 {turn.strikeAndReturn.available && (

@@ -1,5 +1,6 @@
 import { BUNDLE_TABLES } from './bundle';
 
+import '@/lib/server/systems/registry';
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import {
     CampaignKind,

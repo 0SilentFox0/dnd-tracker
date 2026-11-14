@@ -1,3 +1,8 @@
 export { battleMapKeys } from './keys';
 export { useBattleMapEdges } from './useBattleMapEdges';
-export { useBattleMapMutations, useBattleMaps } from './useBattleMaps';
+export {
+    useBattleMap,
+    useBattleMapMutations,
+    useBattleMaps,
+} from './useBattleMaps';
+export { type NewMapForm, useMapLibrary } from './useMapLibrary';

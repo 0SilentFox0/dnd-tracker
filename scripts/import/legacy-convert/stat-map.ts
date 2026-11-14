@@ -1,5 +1,6 @@
 import type { ConversionIssue, LegacyEffect } from './types';
 
+import '@/lib/utils/rules/systems/registry';
 import {
     type Ability,
     type AbilityTarget,

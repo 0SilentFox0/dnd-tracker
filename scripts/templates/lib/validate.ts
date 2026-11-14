@@ -23,7 +23,7 @@ import {
 import { RulesetSchema } from '@/lib/utils/rules/schema';
 import { systemIssues } from '@/lib/utils/rules/section-registry';
 import { contentKindsOf } from '@/lib/utils/rules/systems/catalog';
-import { RULE_SYSTEM_REGISTRY } from '@/lib/utils/rules/systems/registry';
+import { RULE_SYSTEM_REGISTRY } from '@/lib/utils/rules/systems/lookup';
 import { statusOf, type TranslationsV2 } from '@/lib/utils/templates/i18n/keys';
 import {
     attackNames,

@@ -4,7 +4,6 @@ import { memo } from 'react';
 import { useTranslations } from 'next-intl';
 import { Shield, VenetianMask } from 'lucide-react';
 
-import { HitFrame, PortraitFx } from '@/components/battle/fx/PortraitFx';
 import {
     EffectLine,
     HealthBar,
@@ -14,6 +13,7 @@ import {
     HpFigure,
     Portrait,
 } from '@/components/battle/hud';
+import { HitFrame, PortraitFx } from '@/components/fx/PortraitFx';
 import type { SystemBattleUi } from '@/components/systems/types';
 import { useHitFx } from '@/lib/hooks/battle';
 import { useCreatureTypeLabel } from '@/lib/i18n/use-creature-type';

@@ -7,11 +7,12 @@
  */
 import { writeFileSync } from 'node:fs';
 
+import '@/lib/server/systems/registry';
 import { ParticipantSide } from '@/lib/constants/battle';
 import { HERO_ARCHETYPE_KEYS } from '@/lib/constants/hero-archetypes';
 import { prisma } from '@/lib/db';
+import { createBattleParticipantFromCharacter } from '@/lib/server/battles/participant/from-character';
 import { averageAttackDamage } from '@/lib/utils/battle/damage/average';
-import { createBattleParticipantFromCharacter } from '@/lib/utils/battle/participant/from-character';
 import { casterSpellDice } from '@/lib/utils/battle/spell/caster-dice';
 import { computeSpellPower } from '@/lib/utils/battle/spell/power';
 import type { CharacterFromPrisma } from '@/lib/utils/battle/types/participant';

@@ -5,9 +5,9 @@ import { resolved } from '@/lib/utils/abilities/__tests__/fixtures';
 import { EffectSchema } from '@/lib/utils/abilities/schema';
 import { CLAWS, placed } from '@/lib/utils/battle/__tests__/fixtures/placed';
 import { rollModeReasons } from '@/lib/utils/battle/attack/bonus';
-import { type Condition5eKey } from '@/lib/utils/battle/conditions';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 import { applyCondition5e } from '@/systems/d20/rules/conditions/apply';
+import type { Condition5eKey } from '@/systems/d20/rules/conditions/keys';
 import type { BattleParticipant } from '@/types/battle';
 
 const sensed = (sense: string, range = 30) =>

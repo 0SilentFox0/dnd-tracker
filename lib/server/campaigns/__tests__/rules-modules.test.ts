@@ -32,7 +32,6 @@ let updateCampaignRules: typeof import('@/lib/server/campaigns/rules').updateCam
 let systemServerOf: typeof import('@/lib/server/systems/registry').systemServerOf;
 
 beforeAll(async () => {
-    await import('@/lib/server/systems/registry');
     ({ systemServerOf } = await import('@/lib/server/systems/registry'));
     ({ updateCampaignRules } = await import('@/lib/server/campaigns/rules'));
 }, 30_000);

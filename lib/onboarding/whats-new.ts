@@ -1,28 +1,28 @@
 import type { WhatsNewEntry } from '@/lib/onboarding/types';
+import { SYSTEM_META, type SystemMeta } from '@/lib/utils/rules/systems/meta';
 
 /** Newest entries shown in the UI and bundled into the root chunk; older ones stay in the catalog as history. */
 export const WHATS_NEW_BUNDLED = 15;
 
-export const WHATS_NEW: WhatsNewEntry[] = [
+const CORE_WHATS_NEW: WhatsNewEntry[] = [
+    { id: '2026-11-map-library', date: '2026-11-14', audience: 'dm' },
     { id: '2026-11-map-walls', date: '2026-11-14', audience: 'dm' },
     { id: '2026-11-grid-calibration', date: '2026-11-14', audience: 'dm' },
+    {
+        id: '2026-11-14-mode-wizard',
+        date: '2026-11-14',
+        audience: 'dm',
+        href: '/help/dm-rule-systems',
+    },
     {
         id: '2026-11-13-rule-modules',
         date: '2026-11-13',
         audience: 'dm',
         href: '/help/dm-rule-systems',
     },
-    { id: '2026-11-09-wfrp-corruption', date: '2026-11-09', audience: 'all' },
     { id: '2026-11-08-maze-illusion', date: '2026-11-08', audience: 'dm' },
     { id: '2026-11-08-turn-timer', date: '2026-11-08', audience: 'dm' },
     { id: '2026-11-08-phantom', date: '2026-11-08', audience: 'all' },
-    { id: '2026-11-08-wfrp-downtime', date: '2026-11-08', audience: 'all' },
-    {
-        id: '2026-11-06-wfrp-careers',
-        date: '2026-11-06',
-        audience: 'dm',
-        href: '/help/dm-rule-systems',
-    },
     {
         id: '2026-11-05-slide-audience',
         date: '2026-11-05',
@@ -37,13 +37,6 @@ export const WHATS_NEW: WhatsNewEntry[] = [
     },
     { id: '2026-11-05-map-background', date: '2026-11-05', audience: 'all' },
     { id: '2026-11-05-map-motion-setup', date: '2026-11-05', audience: 'dm' },
-    { id: '2026-11-05-wfrp-advancement', date: '2026-11-05', audience: 'all' },
-    {
-        id: '2026-11-05-wfrp-magic',
-        date: '2026-11-05',
-        audience: 'dm',
-        href: '/help/dm-rule-systems',
-    },
     { id: '2026-11-04-map-motion', date: '2026-11-04', audience: 'dm' },
     { id: '2026-11-04-player-view', date: '2026-11-04', audience: 'dm' },
     { id: '2026-11-04-template-publish', date: '2026-11-04', audience: 'dm' },
@@ -53,12 +46,6 @@ export const WHATS_NEW: WhatsNewEntry[] = [
         date: '2026-11-04',
         audience: 'dm',
         href: '/help/dm-battle',
-    },
-    {
-        id: '2026-11-04-rule-system-wfrp',
-        date: '2026-11-04',
-        audience: 'dm',
-        href: '/help/dm-rule-systems',
     },
     { id: '2026-10-31-user-palettes', date: '2026-10-31', audience: 'all' },
     { id: '2026-10-31-identity-icons', date: '2026-10-31', audience: 'all' },
@@ -179,6 +166,17 @@ export const WHATS_NEW: WhatsNewEntry[] = [
         href: '/settings/ai',
     },
 ];
+
+export const mergeWhatsNew = (
+    core: readonly WhatsNewEntry[],
+    modules: readonly WhatsNewEntry[]
+): WhatsNewEntry[] =>
+    [...core, ...modules].sort((a, b) => b.date.localeCompare(a.date));
+
+export const WHATS_NEW: WhatsNewEntry[] = mergeWhatsNew(
+    CORE_WHATS_NEW,
+    (SYSTEM_META as readonly SystemMeta[]).flatMap((m) => m.whatsNew ?? [])
+);
 
 export const WHATS_NEW_SHOWN: WhatsNewEntry[] = WHATS_NEW.slice(
     0,

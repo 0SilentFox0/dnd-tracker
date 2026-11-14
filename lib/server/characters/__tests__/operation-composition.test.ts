@@ -29,7 +29,6 @@ let operations: Registry['CHARACTER_OPERATIONS'];
 let runCharacterProgression: Progression['runCharacterProgression'];
 
 beforeAll(async () => {
-    await import('@/lib/server/systems/registry');
     operations = (await import('@/lib/server/characters/operations/registry'))
         .CHARACTER_OPERATIONS;
     runCharacterProgression = (

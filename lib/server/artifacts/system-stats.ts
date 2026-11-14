@@ -1,6 +1,7 @@
+import '@/lib/server/systems/registry';
 import { API_ERRORS, type ApiErrorKey } from '@/lib/constants/api-errors';
 import { ContentError } from '@/lib/server/content/errors';
-import { systemServerOf } from '@/lib/server/systems/registry';
+import { systemServerOf } from '@/lib/server/systems/lookup';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 
 type SystemStatsResult =

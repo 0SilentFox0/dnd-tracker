@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
-import { createBattleParticipantFromCharacter } from '../from-character';
-
+import '@/lib/server/systems/registry';
 import { RACES } from '@/data/library/races';
 import { ParticipantSide } from '@/lib/constants/battle';
+import { createBattleParticipantFromCharacter } from '@/lib/server/battles/participant/from-character';
 import { seq } from '@/lib/utils/abilities/__tests__/fixtures';
 import {
     collectModifiers,

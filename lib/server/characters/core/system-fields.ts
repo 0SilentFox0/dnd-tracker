@@ -1,9 +1,10 @@
 import type { CreateCharacterInput } from './create-character-schema';
 import type { UpdateCharacterInput } from './update-character-schema';
 
+import '@/lib/server/systems/registry';
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { ContentError, parseInput } from '@/lib/server/content/errors';
-import { systemServerOf } from '@/lib/server/systems/registry';
+import { systemServerOf } from '@/lib/server/systems/lookup';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import type { RuleSystemDefinition } from '@/lib/utils/rules/systems';
 import type { SystemData } from '@/lib/utils/rules/systems/slot';

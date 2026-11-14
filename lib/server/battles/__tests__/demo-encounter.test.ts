@@ -8,7 +8,12 @@ const findMany = vi.hoisted(() => vi.fn());
 
 const fromUnit = vi.hoisted(() => vi.fn());
 
-vi.mock('@/lib/db', () => ({ prisma: { unit: { findMany } } }));
+vi.mock('@/lib/db', () => ({
+    prisma: {
+        unit: { findMany },
+        race: { findMany: vi.fn().mockResolvedValue([]) },
+    },
+}));
 vi.mock('@/lib/utils/battle/participant/from-unit', () => ({
     createBattleParticipantFromUnit: fromUnit,
 }));
@@ -64,7 +69,7 @@ describe('buildDemoEncounter', () => {
             'b1',
             'enemy',
             2,
-            undefined,
+            {},
             DEFAULT_RULES
         );
         expect(built.every((p) => p.battleData.position)).toBe(true);

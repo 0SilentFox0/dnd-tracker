@@ -10,6 +10,12 @@ export const SYSTEM_UI_KIT = [
     '@/components/skill-tree/progression/ProgressionPanel',
     '@/components/spells/book/SpellBookPages',
     '@/components/characters/rest/CharacterPickList',
+    '@/components/abilities',
+    '@/components/artifact-sets/ArtifactSetCard',
+    '@/components/choices/ChoiceListEditor',
+    '@/components/content-import/ContentTransferButtons',
+    '@/components/onboarding/OnboardingHint',
+    '@/components/skills/list/SkillCard',
 ];
 
 const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&');
@@ -55,6 +61,16 @@ export const UI_LAYER_ZONES = [
         ],
         message:
             'components/common holds domain-free widgets: no domain components or types (docs/architecture/ui-layers.md)',
+    },
+    {
+        name: 'fx',
+        files: ['components/fx/**/*.{ts,tsx}'],
+        forbidden: [
+            '^@/components/(?!ui/|hud(/|$)|common/|dice/|fx/|systems/types$)',
+            '^@/lib/(api|server)(/|$)',
+        ],
+        message:
+            'components/fx sits between common and the domains: it may not import battle, spells or other domain components (docs/architecture/ui-layers.md)',
     },
     {
         name: 'system-ui',

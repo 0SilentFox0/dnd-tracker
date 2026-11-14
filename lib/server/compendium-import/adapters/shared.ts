@@ -1,6 +1,5 @@
 import { renderEntries } from '../entries';
 import { stableJson } from '../identity';
-import type { JsonRecord } from '../parse';
 import {
     type AdapterContext,
     type CompendiumRef,
@@ -10,6 +9,7 @@ import {
 
 import { DND_SKILLS } from '@/lib/constants/skills';
 import { asRecord } from '@/lib/utils/common/json';
+import type { JsonRecord } from '@/lib/utils/compendium-import/parse';
 
 export const effectiveEdition = (value: unknown, fallback: unknown): Edition =>
     value === 'classic' || value === 'one'

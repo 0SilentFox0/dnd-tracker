@@ -29,6 +29,7 @@ import {
     unitRow,
 } from './seed-library-lib';
 
+import '@/lib/utils/rules/systems/registry';
 import {
     branchSkills,
     buildLibrary,

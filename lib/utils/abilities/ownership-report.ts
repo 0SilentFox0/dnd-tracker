@@ -80,11 +80,12 @@ export function partsOf(
     return [{ path: 'abilities', abilities: row.abilities }];
 }
 
-const variableOwners = new Map(
-    SYSTEM_ABILITY_VARIABLES.flatMap((o) =>
-        Object.keys(o.items).map((name) => [name, o.system] as const)
-    )
-);
+const variableOwners = () =>
+    new Map(
+        SYSTEM_ABILITY_VARIABLES.flatMap((o) =>
+            Object.keys(o.items).map((name) => [name, o.system] as const)
+        )
+    );
 
 const sourceOwners = new Map<string, string>(
     SYSTEM_ABILITY_SOURCES.flatMap((o) =>
@@ -127,8 +128,10 @@ function effectViolations(
 
     const active = activeIds(c);
 
+    const owners = variableOwners();
+
     for (const formula of formulasIn(effect)) {
-        for (const [name, owner] of variableOwners)
+        for (const [name, owner] of owners)
             if (!active.has(owner) && new RegExp(`\\b${name}\\b`).test(formula))
                 out.push({ ...base, path, kind: name, reason: 'variable' });
     }

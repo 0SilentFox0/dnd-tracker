@@ -55,7 +55,6 @@ let routes: Routes;
 let operations: Operations;
 
 beforeAll(async () => {
-    await import('@/lib/server/systems/registry');
     routes = await import('@/lib/server/systems/routes');
     operations = await import('@/lib/server/characters/operations/registry');
 }, 30_000);

@@ -1,18 +1,21 @@
 import { ownedBy, type SystemEffectRow } from './system-row';
 
-// <systems:generated>
-import { MORALE_MODULE_EFFECT_ROWS } from '@/systems/morale/rules/ability-module-effect-rows';
-// </systems:generated>
+import { installedAbilityModules, onAbilityInstall } from '@/lib/utils/abilities/registry/install';
 
-const MODULE_EFFECT_ROW_LISTS = [
-    // <systems:generated>
-    ownedBy('morale', MORALE_MODULE_EFFECT_ROWS),
-    // </systems:generated>
-] as const satisfies readonly (readonly SystemEffectRow[])[];
+const rows: SystemEffectRow[] = [];
 
-export const MODULE_EFFECT_ROWS: readonly SystemEffectRow[] =
-    MODULE_EFFECT_ROW_LISTS.flat();
+export const MODULE_EFFECT_ROWS: readonly SystemEffectRow[] = rows;
 
-export const MODULE_EFFECT_DEFAULTS: Readonly<
-    Record<string, Record<string, unknown>>
-> = Object.fromEntries(MODULE_EFFECT_ROWS.map((r) => [r.kind, r.defaults]));
+export const MODULE_EFFECT_DEFAULTS: Record<string, Record<string, unknown>> =
+    {};
+
+onAbilityInstall(() => {
+    rows.length = 0;
+    rows.push(
+        ...installedAbilityModules().flatMap(([id, m]) =>
+            ownedBy(id, m.moduleEffectRows ?? [])
+        )
+    );
+
+    for (const r of rows) MODULE_EFFECT_DEFAULTS[r.kind] = r.defaults;
+});

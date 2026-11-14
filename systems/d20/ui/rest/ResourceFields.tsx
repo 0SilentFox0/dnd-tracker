@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import type { ResourceFieldsProps } from '@/components/systems/types';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { MAX_EXHAUSTION } from '@/lib/utils/battle/conditions';
+import { MAX_EXHAUSTION } from '@/lib/constants/exhaustion';
 
 export function ResourceFields({ values, onChange }: ResourceFieldsProps) {
     const t = useTranslations('rest.resources');

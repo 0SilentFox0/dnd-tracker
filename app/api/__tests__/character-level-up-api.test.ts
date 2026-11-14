@@ -79,7 +79,6 @@ const random = vi.spyOn(Math, 'random');
 
 describe('POST level-up', () => {
     beforeAll(async () => {
-        await import('@/lib/server/systems/registry');
         await import(
             '@/app/api/campaigns/[id]/characters/[characterId]/system/[action]/route'
         );

@@ -4,6 +4,7 @@
  */
 import type { Prisma } from '@prisma/client';
 
+import '@/lib/utils/rules/systems/registry';
 import { LIBRARY_SOURCE } from '@/data/library/build';
 import type { Ability } from '@/lib/utils/abilities/schema';
 import { weaponStatsColumns } from '@/lib/utils/artifacts/weapon-stats';

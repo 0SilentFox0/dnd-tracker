@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { context, goblin, hero, participant } from './fixtures';
 
+import '@/lib/server/systems/registry';
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import {
     AttackType,

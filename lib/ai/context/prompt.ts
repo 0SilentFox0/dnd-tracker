@@ -2,6 +2,7 @@ import { type ContextBlock, fitContext } from './budget';
 import { loadFocus } from './focus';
 
 import 'server-only';
+import '@/lib/server/systems/registry';
 import { type PartyMember, partySummary } from '@/lib/ai/tools/party';
 import {
     contentToMarkdown,
@@ -19,7 +20,7 @@ import { assistantCatalog } from '@/lib/server/assistant/catalog';
 import type { AssistantCaller } from '@/lib/server/assistant/types';
 import { ContentError } from '@/lib/server/content/errors';
 import { loadDigestItems } from '@/lib/server/scenario/summary-store';
-import { systemServerOf } from '@/lib/server/systems/registry';
+import { systemServerOf } from '@/lib/server/systems/lookup';
 import { parseRules } from '@/lib/utils/rules/schema';
 import { scenarioDigest } from '@/lib/utils/scenario/digest/scenario-digest';
 import { pickLiveSection } from '@/lib/utils/scenario/structure';

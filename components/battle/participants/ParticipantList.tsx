@@ -5,7 +5,10 @@ import { memo, useMemo } from 'react';
 import { ParticipantRow } from './ParticipantRow';
 import { ReserveParticipantRow } from './ReserveParticipantRow';
 
-import { useSystemBattleUi } from '@/components/battle/use-system-battle-ui';
+import {
+    useSystemBattleUi,
+    useSystemFx,
+} from '@/components/battle/use-system-battle-ui';
 import { ParticipantSide } from '@/lib/constants/battle';
 import {
     useBattleRules,
@@ -36,7 +39,7 @@ export const ParticipantList = memo(function ParticipantList({
 
     const { defense, badges } = useSystemBattleUi();
 
-    const impactFor = useFxImpacts();
+    const impactFor = useFxImpacts(useSystemFx());
 
     const maskedIds = useModeView().view?.maskedIds;
 

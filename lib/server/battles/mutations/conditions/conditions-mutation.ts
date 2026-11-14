@@ -3,14 +3,17 @@ import { z } from 'zod';
 import { ABILITY_KEYS } from '@/lib/constants/abilities';
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { CONDITION_LIMITS } from '@/lib/constants/battle';
+import { MAX_EXHAUSTION } from '@/lib/constants/exhaustion';
 import { textRef } from '@/lib/i18n/text-ref';
 import { findParticipant } from '@/lib/utils/abilities/engine/core/participants';
 import { CustomConditionKeySchema } from '@/lib/utils/abilities/schema';
 import {
-    CONDITION_5E_KEYS,
-    MAX_EXHAUSTION,
+    CONDITION_KEY_RE,
+    isCustomConditionKey,
+} from '@/lib/utils/abilities/schema/kinds';
+import {
     PERMANENT_ROUNDS,
-    removeCondition5e,
+    removeStandardCondition,
 } from '@/lib/utils/battle/conditions';
 import { lineText } from '@/lib/utils/battle/log/lines';
 import type {
@@ -21,7 +24,7 @@ import { BattleRuleError, dmEvent } from '@/lib/utils/battle/store';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 
 const ConditionKeySchema = z.union([
-    z.enum(CONDITION_5E_KEYS),
+    z.string().regex(CONDITION_KEY_RE),
     CustomConditionKeySchema,
 ]);
 
@@ -62,6 +65,18 @@ export function battleConditionsMutation(
 
     const round = ctx.scene.round;
 
+    const { conditionSet } = ruleSystemOf(ctx.meta.rules);
+
+    if (
+        body.action === 'apply' &&
+        !isCustomConditionKey(body.condition) &&
+        !conditionSet.keys.includes(body.condition)
+    )
+        throw new BattleRuleError(
+            'invalid_target',
+            API_ERRORS.CONDITION_UNKNOWN
+        );
+
     const targets = [
         {
             participantId: target.basicInfo.id,
@@ -70,7 +85,7 @@ export function battleConditionsMutation(
     ];
 
     if (body.action === 'apply') {
-        const result = ruleSystemOf(ctx.meta.rules).conditionSet.apply(
+        const result = conditionSet.apply(
             ctx.participants,
             body.participantId,
             {
@@ -101,7 +116,7 @@ export function battleConditionsMutation(
         };
     }
 
-    const { participants, removed } = removeCondition5e(
+    const { participants, removed } = removeStandardCondition(
         ctx.participants,
         body.participantId,
         body.condition

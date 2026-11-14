@@ -15,7 +15,7 @@ import { WEATHER_KINDS } from '@/lib/constants/battle-weather';
 import { DAMAGE_ELEMENT_OPTIONS } from '@/lib/constants/damage';
 import { MAP_LIMITS } from '@/lib/constants/map-limits';
 import { hexColorSchema } from '@/lib/schemas/common';
-import { CUNNING_STRIKE_EFFECTS } from '@/lib/utils/abilities/schema';
+import { STRIKE_RIDER_EFFECTS } from '@/lib/utils/abilities/schema';
 import { inBounds } from '@/lib/utils/battle/grid/geometry';
 import { hasPlayableArea } from '@/lib/utils/battle/grid/map-editor';
 import { parseEdgeKey } from '@/lib/utils/battle/grid/walls';
@@ -365,7 +365,7 @@ const attackBodyShape = {
     secondRoll: z.number().int().min(1).max(100).optional(),
     /** Підступний удар (Rogue): ефекти замість кубиків Прихованої атаки */
     cunningStrike: z
-        .array(z.enum(CUNNING_STRIKE_EFFECTS))
+        .array(z.enum(STRIKE_RIDER_EFFECTS))
         .min(1)
         .max(3)
         .optional(),
@@ -454,7 +454,7 @@ export const mapEdgeRemoveSchema = z.object({
     restore: z.boolean().optional(),
 });
 
-export const mapUpdateSchema = z.object({}).strict();
+export const mapUpdateSchema = z.object({});
 
 export const mapWeatherSchema = z.object({
     weather: weatherKindSchema.nullable(),

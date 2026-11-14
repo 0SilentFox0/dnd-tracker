@@ -1,3 +1,4 @@
+import { DODGE_KEY_PREFIX } from '../actions/effects';
 import {
     conditionEffectInput,
     customConditionDef,
@@ -5,6 +6,7 @@ import {
 } from './registry';
 
 import { CombatStatus, EffectMarker } from '@/lib/constants/battle';
+import { MAX_EXHAUSTION } from '@/lib/constants/exhaustion';
 import { dynamicTextRef, textRef } from '@/lib/i18n/text-ref';
 import { findFlags } from '@/lib/utils/abilities/engine/core/collect-modifiers';
 import {
@@ -12,19 +14,12 @@ import {
     updateParticipant,
     withActiveEffects,
 } from '@/lib/utils/abilities/engine/core/participants';
-import {
-    type Condition5eKey,
-    isCustomConditionKey,
-} from '@/lib/utils/abilities/schema/kinds';
-import {
-    DODGE_KEY_PREFIX,
-    upsertLabeled,
-} from '@/lib/utils/battle/actions/effects';
+import { isCustomConditionKey } from '@/lib/utils/abilities/schema/kinds';
+import { upsertLabeled } from '@/lib/utils/battle/actions/effects';
 import { releaseGrapples } from '@/lib/utils/battle/conditions/grapple-links';
 import {
     exhaustionLevel,
     hasCondition,
-    MAX_EXHAUSTION,
     removeEffects,
     syncExhaustion,
 } from '@/lib/utils/battle/conditions/query';
@@ -159,10 +154,12 @@ export function applyCondition5e(
 
     const input = custom
         ? customConditionInput(custom, { ...opts, exhaustion: variant })
-        : conditionEffectInput(opts.key as Condition5eKey, {
+        : conditionEffectInput(opts.key, {
               ...opts,
               exhaustion: variant,
           });
+
+    if (!input) return { participants: ps, messages: [], blocked: true };
 
     let next = upsertLabeled(target, input, opts.round);
 

@@ -1,3 +1,6 @@
+import { z } from 'zod';
+
+import type { CoreActionBody } from '../rules/actions/schema';
 import { backgroundsResource } from './content/backgrounds';
 import { classesResource } from './content/classes';
 import { D20_BALANCE } from './balance';
@@ -5,10 +8,7 @@ import { D20_OPERATIONS } from './operations';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import type { SystemServer } from '@/lib/server/systems/types';
-import type {
-    CoreActionBody,
-    LegendaryActionBody,
-} from '@/lib/utils/battle/actions/schema';
+import type { LegendaryActionBody } from '@/lib/utils/battle/actions/schema';
 
 type CoreActionRouteBody = CoreActionBody | LegendaryActionBody;
 
@@ -35,7 +35,11 @@ export const D20_MODULE_SERVER: SystemServer = {
                 missing: API_ERRORS.BATTLE_CORE_ACTIONS_DISABLED,
             },
             load: async (deps) => {
-                const { coreActionRouteSchema } = await import(
+                const { coreActionSchema } = await import(
+                    '../rules/actions/schema'
+                );
+
+                const { legendaryActionSchema } = await import(
                     '@/lib/utils/battle/actions/schema'
                 );
 
@@ -44,7 +48,7 @@ export const D20_MODULE_SERVER: SystemServer = {
                 );
 
                 return {
-                    schema: coreActionRouteSchema,
+                    schema: z.union([coreActionSchema, legendaryActionSchema]),
                     mutate: (ctx, body: CoreActionRouteBody) =>
                         body.action === 'legendary'
                             ? deps.legendary(ctx, body)

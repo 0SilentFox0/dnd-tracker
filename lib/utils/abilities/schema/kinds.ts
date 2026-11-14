@@ -105,28 +105,12 @@ export const CONDITION_KEYS = [
     EffectMarker.IMMOBILIZED,
 ] as const;
 
-export const CONDITION_5E_KEYS = [
-    'blinded',
-    'charmed',
-    'deafened',
-    'frightened',
-    'grappled',
-    'incapacitated',
-    'invisible',
-    'paralyzed',
-    'petrified',
-    'poisoned',
-    'prone',
-    'restrained',
-    'stunned',
-    'unconscious',
-    'exhaustion',
-] as const;
+export const CONDITION_KEY_RE = /^[a-z][a-z0-9_]{0,39}$/;
 
-export type Condition5eKey = (typeof CONDITION_5E_KEYS)[number];
+export type StandardConditionKey = string;
 
-export const isCondition5eKey = (key: unknown): key is Condition5eKey =>
-    (CONDITION_5E_KEYS as readonly unknown[]).includes(key);
+export const isMechanicalConditionKey = (key: unknown): boolean =>
+    (CONDITION_KEYS as readonly unknown[]).includes(key);
 
 export const CUSTOM_CONDITION_KEY_RE = /^custom:[a-z0-9-]{1,40}$/;
 
@@ -135,7 +119,7 @@ export type CustomConditionKey = `custom:${string}`;
 export const isCustomConditionKey = (key: unknown): key is CustomConditionKey =>
     typeof key === 'string' && CUSTOM_CONDITION_KEY_RE.test(key);
 
-export type AnyConditionKey = (typeof CONDITION_KEYS)[number] | Condition5eKey;
+export type AnyConditionKey = string;
 
 export type AbilityTarget = (typeof ABILITY_TARGETS)[number];
 
