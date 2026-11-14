@@ -8,6 +8,7 @@ import {
     DEFAULT_HAZARD_DICE,
     DEFAULT_MAP_BACKGROUND,
 } from '@/lib/constants/battle';
+import type { EdgeEditing } from '@/lib/hooks/battle/useEdgeStroke';
 import { useMapMotionTool } from '@/lib/hooks/battle/useMapMotionTool';
 import { useImageSize } from '@/lib/hooks/common';
 import { textRef } from '@/lib/i18n/text-ref';
@@ -21,13 +22,16 @@ import {
     type ImageSize,
     impliedCellPx,
     inferMargins,
+    isEdgeTool,
     isPreviewSafeBackground,
     type Margins,
     MAX_SIDE,
     MIN_SIDE,
     paintCells,
+    paintEdges,
     resizeMap,
     type SetupTool,
+    wallSet,
 } from '@/lib/utils/battle/grid';
 import {
     MAP_MODE_REGISTRY,
@@ -281,7 +285,7 @@ export function useBattleMapEditor(
 
     const onStroke = useCallback(
         (cells: GridPoint[]) => {
-            if (!tool || cells.length === 0) return;
+            if (!tool || isEdgeTool(tool) || cells.length === 0) return;
 
             const hazard =
                 tool === 'hazard'
@@ -301,13 +305,59 @@ export function useBattleMapEditor(
         [tool, map, brush]
     );
 
+    const activeMode =
+        MODE_KEYS.find((key) => modeOf(key).configOf(map) !== null) ?? null;
+
+    const edgeTool = isEdgeTool(tool) && !activeMode ? tool : null;
+
+    const edgeEditing = useMemo<EdgeEditing | null>(() => {
+        if (!edgeTool) return null;
+
+        const walls = wallSet(map.walls);
+
+        const bars = wallSet(map.bars);
+
+        const onCommit = (add: string[], remove: string[]) => {
+            if (edgeTool === 'edge-erase') {
+                setMap((m) => paintEdges(m, remove, 'erase'));
+
+                return;
+            }
+
+            const kind = edgeTool === 'edge-wall' ? 'walls' : 'bars';
+
+            setMap((m) =>
+                paintEdges(
+                    paintEdges(
+                        m,
+                        add,
+                        kind === 'walls' ? 'add-walls' : 'add-bars'
+                    ),
+                    remove,
+                    kind === 'walls' ? 'remove-walls' : 'remove-bars'
+                )
+            );
+        };
+
+        if (edgeTool === 'edge-erase')
+            return {
+                existing: new Set([...walls, ...bars]),
+                erase: true,
+                onCommit,
+            };
+
+        return {
+            existing: edgeTool === 'edge-wall' ? walls : bars,
+            onCommit,
+        };
+    }, [edgeTool, map.walls, map.bars]);
+
     return {
+        edgeEditing,
         state: {
             enabled,
             map,
-            mode:
-                MODE_KEYS.find((key) => modeOf(key).configOf(map) !== null) ??
-                null,
+            mode: activeMode,
             margins,
             tool,
             notice,

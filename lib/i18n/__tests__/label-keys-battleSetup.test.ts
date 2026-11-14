@@ -9,6 +9,9 @@ const TOOLS: Record<SetupTool, true> = {
     wall: true,
     hazard: true,
     erase: true,
+    'edge-wall': true,
+    'edge-bars': true,
+    'edge-erase': true,
 };
 
 const MARGINS: Record<keyof Margins, true> = {

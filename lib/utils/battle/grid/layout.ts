@@ -49,6 +49,63 @@ export function cellAtScreenPoint(
     return x >= 0 && y >= 0 && x < map.cols && y < map.rows ? { x, y } : null;
 }
 
+export function screenToUnit(
+    ctm: ScreenMatrix,
+    clientX: number,
+    clientY: number
+): { x: number; y: number } | null {
+    const det = ctm.a * ctm.d - ctm.b * ctm.c;
+
+    if (!det) return null;
+
+    const dx = clientX - ctm.e;
+
+    const dy = clientY - ctm.f;
+
+    return {
+        x: (ctm.d * dx - ctm.c * dy) / det,
+        y: (ctm.a * dy - ctm.b * dx) / det,
+    };
+}
+
+const EDGE_TOLERANCE = 0.35;
+
+/** Ребро, найближче до точки в одиницях карти (UNIT на клітинку); `null` — поза межами, на зовнішньому краї або далі за `tolerance` клітинки. */
+export function edgeAtScreenPoint(
+    map: Pick<BattleMapConfig, 'cols' | 'rows'>,
+    x: number,
+    y: number,
+    tolerance = EDGE_TOLERANCE
+): string | null {
+    const fx = x / UNIT;
+
+    const fy = y / UNIT;
+
+    if (fx < 0 || fy < 0 || fx > map.cols || fy > map.rows) return null;
+
+    const vx = Math.round(fx);
+
+    const hy = Math.round(fy);
+
+    const dVertical = Math.abs(fx - vx);
+
+    const dHorizontal = Math.abs(fy - hy);
+
+    const vertical = dVertical <= dHorizontal;
+
+    if (Math.min(dVertical, dHorizontal) > tolerance) return null;
+
+    if (vertical) {
+        const row = Math.min(Math.floor(fy), map.rows - 1);
+
+        return vx > 0 && vx < map.cols ? `${vx - 1}:${row}:e` : null;
+    }
+
+    const col = Math.min(Math.floor(fx), map.cols - 1);
+
+    return hy > 0 && hy < map.rows ? `${col}:${hy - 1}:s` : null;
+}
+
 export function cellCenter(p: GridPoint): { x: number; y: number } {
     return { x: (p.x + 0.5) * UNIT, y: (p.y + 0.5) * UNIT };
 }

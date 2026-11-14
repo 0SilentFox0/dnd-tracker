@@ -208,6 +208,63 @@ describe('BattleFormMap', () => {
         ).not.toBeNull();
     });
 
+    it('edge tools: wall, bars and erase paint map edges', () => {
+        const { container } = render(<Harness />);
+
+        enable();
+
+        const edge = (key: string) => {
+            const surface = container.querySelector(
+                '[data-edge-surface]'
+            ) as SVGRectElement;
+
+            (surface.ownerSVGElement as SVGSVGElement).getScreenCTM = () =>
+                ({
+                    a: CELL_PX / UNIT,
+                    b: 0,
+                    c: 0,
+                    d: CELL_PX / UNIT,
+                    e: 0,
+                    f: 0,
+                }) as DOMMatrix;
+
+            const [x, y] = key.split(':').map(Number);
+
+            const init = {
+                pointerId: 1,
+                isPrimary: true,
+                button: 0,
+                clientX: (x + 1) * CELL_PX,
+                clientY: y * CELL_PX + CELL_PX / 2,
+            };
+
+            fireEvent.pointerDown(surface, init);
+            fireEvent.pointerUp(surface, init);
+        };
+
+        const pick = (name: string) =>
+            fireEvent.click(
+                screen.getByRole('button', {
+                    name: `battleSetup.map.tools.${name}`,
+                })
+            );
+
+        expect(container.querySelector('[data-edge-surface]')).toBeNull();
+
+        pick('edge-wall');
+        edge('1:2');
+        expect(seen.editor.state.map.walls).toEqual(['1:2:e']);
+
+        pick('edge-bars');
+        edge('1:2');
+        expect(seen.editor.state.map.walls).toBeUndefined();
+        expect(seen.editor.state.map.bars).toEqual(['1:2:e']);
+
+        pick('edge-erase');
+        edge('1:2');
+        expect(seen.editor.state.map.bars).toBeUndefined();
+    });
+
     it('margins keep a 2x2 playable area; equal copies the first within limits', () => {
         render(<Harness />);
         enable();

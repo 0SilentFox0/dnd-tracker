@@ -10,6 +10,7 @@ import {
     useRef,
 } from 'react';
 
+import { EdgeEditor } from './EdgeEditor';
 import { MapBackground } from './MapBackground';
 import { MapHitFloat } from './MapHitFloat';
 import {
@@ -24,7 +25,7 @@ import { RangedHint } from './RangedHint';
 import { type MapPlacement } from './token-box';
 
 import { modeUiOf } from '@/components/battle/modes';
-import { type ModeTools } from '@/lib/hooks/battle';
+import { type EdgeEditing, type ModeTools } from '@/lib/hooks/battle';
 import { cn } from '@/lib/utils';
 import {
     isDormant,
@@ -64,6 +65,7 @@ export interface MapStageEditing {
     clickableBlocked?: boolean;
     showBlocked?: boolean;
     mode: ModeTools | null;
+    edges?: EdgeEditing | null;
 }
 
 interface MapStageProps {
@@ -91,7 +93,7 @@ function MapStageImpl({
     const { painting, preview, svgRef, onStrokeStart, wasDragged } =
         interaction;
 
-    const { clickableBlocked, showBlocked, mode: modeTools } = editing;
+    const { clickableBlocked, showBlocked, mode: modeTools, edges } = editing;
 
     const ui = modeUiOf(map);
 
@@ -236,6 +238,7 @@ function MapStageImpl({
                         pending={view?.pendingStroke}
                     />
                 )}
+                {edges && <EdgeEditor map={map} editing={edges} />}
                 {from && trajectory && (
                     <RangedHint from={from.box} trajectory={trajectory} />
                 )}
@@ -259,6 +262,7 @@ function MapStageImpl({
                         }
                         passThrough={
                             painting ||
+                            !!edges ||
                             !!modeTools?.toolActive ||
                             movingId === p.basicInfo.id
                         }

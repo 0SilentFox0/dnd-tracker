@@ -9,6 +9,7 @@ import { MapStage } from './MapStage';
 import './battle-map.css';
 import { modeUiOf } from '@/components/battle/modes';
 import {
+    type EdgeEditing,
     type ModeTools,
     useScrollToCurrent,
     useStrokePaint,
@@ -46,6 +47,8 @@ export interface BattleMapEditing {
     clickableBlocked?: boolean;
     showBlocked?: boolean;
     strokeTool?: boolean;
+    /** інструмент ребер: стіни й ґрати малюються штрихом по краях клітинок; null — вимкнений */
+    edges?: EdgeEditing | null;
     /** інструменти ДМ активного режиму; null — жоден не активний */
     mode?: ModeTools | null;
 }
@@ -66,7 +69,11 @@ export function BattleMap({
 }: BattleMapProps) {
     const { clickableBlocked, showBlocked, strokeTool } = editing;
 
+    const edges = editing.edges ?? null;
+
     const painting = Boolean(strokeTool && actions?.onStroke);
+
+    const drawing = painting || edges !== null;
 
     const modeTools = editing.mode ?? null;
 
@@ -127,7 +134,7 @@ export function BattleMap({
     const scrolls = scrollsX || scrollsY;
 
     const { zoom, offset, bind, containerRef, wasDragged } = useViewport({
-        panLocked: painting || !!modeTools?.panLocked,
+        panLocked: drawing || !!modeTools?.panLocked,
         wheelScrolls: scrolls,
     });
 
@@ -156,13 +163,13 @@ export function BattleMap({
     );
 
     const stageEditing = useMemo(
-        () => ({ clickableBlocked, showBlocked, mode: modeTools }),
-        [clickableBlocked, showBlocked, modeTools]
+        () => ({ clickableBlocked, showBlocked, mode: modeTools, edges }),
+        [clickableBlocked, showBlocked, modeTools, edges]
     );
 
     // свайп віддаємо браузеру лише для прокрутки; зум, щипок і штрих місцевості — наші
     const touch =
-        scrolls && zoom === 1 && !painting
+        scrolls && zoom === 1 && !drawing
             ? cn(scrollsX && 'touch-pan-x', scrollsY && 'touch-pan-y')
             : 'touch-none';
 

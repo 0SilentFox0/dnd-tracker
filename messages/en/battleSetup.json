@@ -108,7 +108,10 @@
       "blocked": "Unplayable",
       "wall": "Impassable",
       "hazard": "Hazard",
-      "erase": "Erase"
+      "erase": "Erase",
+      "edge-wall": "Wall",
+      "edge-bars": "Bars",
+      "edge-erase": "Erase edge"
     },
     "hazardLabel": "Hazard label",
     "hazardDice": "Damage (dice)",
@@ -135,7 +138,9 @@
       "keepDescription": "The new image has the same size as the previous one. Keep the cell size and grid offset?",
       "keep": "Keep",
       "reset": "Reset"
-    }
+    },
+    "edgeDrawing": "Draw walls and bars",
+    "edgesDisabledMode": "Walls and bars are disabled in maze mode"
   },
   "characters": {
     "title": "Characters",
