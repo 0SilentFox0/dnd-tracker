@@ -274,6 +274,7 @@ describe('module queries', () => {
         ["rules.system.modules?.some('x')", 0],
         ['ext.retaliation.used', 1],
         ["ext['morale']", 1],
+        ["ext?.['morale']", 1],
         ["e.stat === 'morale'", 0],
         ["actionType === 'retaliation'", 0],
         ["m.module === 'skilltrees'", 1],

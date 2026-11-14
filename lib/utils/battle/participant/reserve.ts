@@ -48,7 +48,9 @@ export const reserveStub = (p: BattleParticipant): BattleParticipant =>
         battleData: { reserved: true },
     }) as unknown as BattleParticipant;
 
-export const stubReserve = (pending: BattleParticipant[]): BattleParticipant[] =>
+export const stubReserve = (
+    pending: BattleParticipant[]
+): BattleParticipant[] =>
     pending.some(isReserved)
         ? pending.map((p) => (isReserved(p) ? reserveStub(p) : p))
         : pending;

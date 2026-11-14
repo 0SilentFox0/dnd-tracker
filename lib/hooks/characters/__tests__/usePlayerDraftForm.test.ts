@@ -277,7 +277,9 @@ describe('usePlayerDraftForm', () => {
             act(() => result.current.submit.run());
 
             await waitFor(() => expect(createDraft).toHaveBeenCalled());
-            await waitFor(() => expect(result.current.submit.error).toBeTruthy());
+            await waitFor(() =>
+                expect(result.current.submit.error).toBeTruthy()
+            );
 
             return result;
         };
@@ -294,11 +296,19 @@ describe('usePlayerDraftForm', () => {
         it('keeps only choice issues in a mixed list', async () => {
             const result = await fail([
                 { path: ['name'], code: 'too_small', message: 'short' },
-                { path: 'raceChoices.x', code: 'CHOICE_INCOMPLETE', message: 'm' },
+                {
+                    path: 'raceChoices.x',
+                    code: 'CHOICE_INCOMPLETE',
+                    message: 'm',
+                },
             ]);
 
             expect(result.current.submit.choiceIssues).toEqual([
-                { path: 'raceChoices.x', code: 'CHOICE_INCOMPLETE', message: 'm' },
+                {
+                    path: 'raceChoices.x',
+                    code: 'CHOICE_INCOMPLETE',
+                    message: 'm',
+                },
             ]);
         });
     });

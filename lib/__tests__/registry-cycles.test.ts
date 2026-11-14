@@ -38,9 +38,7 @@ describe('registry <-> system import cycles', () => {
                     fs.existsSync(path.join(ROOT, 'systems', id, layer))
                 )
                 .filter((id) =>
-                    staticGraph([`systems/${id}/${layer}`]).files.has(
-                        registry
-                    )
+                    staticGraph([`systems/${id}/${layer}`]).files.has(registry)
                 )
                 .map((id) => `${name}:${id}`)
         ).sort();

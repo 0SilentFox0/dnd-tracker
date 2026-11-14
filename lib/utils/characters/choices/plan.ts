@@ -280,10 +280,12 @@ export function planChoices(input: PlanInput): PlanResult {
     issues.push(...capIssues(input.scores, delta, afterPicks, beforePicks));
 
     if (issues.length === 0 && input.requireComplete)
-        issues.push(...pendingIssues(visits, {
+        issues.push(
+            ...pendingIssues(visits, {
                 ...refs,
                 hero: { totalLevel: level, scores: input.scores },
-            }));
+            })
+        );
 
     if (issues.length > 0) return failWith(422, issues);
 

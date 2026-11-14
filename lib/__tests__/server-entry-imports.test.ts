@@ -20,12 +20,17 @@ describe('server entry imports', () => {
         );
     });
 
-    it.each(ENTRIES)('%s does not pull a system registry or a system', (entry) => {
-        const files = [...staticGraph([entry]).files];
+    it.each(ENTRIES)(
+        '%s does not pull a system registry or a system',
+        (entry) => {
+            const files = [...staticGraph([entry]).files];
 
-        expect(files.filter((f) => FORBIDDEN.includes(f))).toEqual([]);
-        expect(files.filter((f) => /^systems\/[^/]+\/index\.ts$/.test(f))).toEqual(
-            []
-        );
-    });
+            expect(files.filter((f) => FORBIDDEN.includes(f))).toEqual([]);
+            expect(
+                files.filter((f) =>
+                    /^systems\/[^/]+\/(?:server\/|ui\/)?index\.ts$/.test(f)
+                )
+            ).toEqual([]);
+        }
+    );
 });

@@ -8,7 +8,10 @@ import { downtimePeriodOperation } from './downtime-period';
 import { downtimePeriodUndoOperation } from './downtime-period-undo';
 
 import { characterIdSchema } from '@/lib/server/characters/character-id-schema';
-import { asSystemOperation, withCharacterId } from '@/lib/server/systems/operation-helpers';
+import {
+    asSystemOperation,
+    withCharacterId,
+} from '@/lib/server/systems/operation-helpers';
 import type { SystemOperation } from '@/lib/server/systems/types';
 import {
     corruptionGrantSchema,

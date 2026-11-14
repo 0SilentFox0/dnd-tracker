@@ -121,6 +121,44 @@ describe('GET /api/campaigns/[id]/battles', () => {
         expect(select).not.toHaveProperty('initiativeOrder');
         expect(select).not.toHaveProperty('pendingSummons');
     });
+
+    it.each([
+        [false, [{ id: 'u', quantity: 2 }]],
+        [true, [{ id: 'u', quantity: 3, reserved: 1 }]],
+    ])('hides reserve from setup list (isDM=%s)', async (isDM, expected) => {
+        vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue({
+            userId: 'user-1',
+            isDM,
+            campaign: {
+                kind: 'campaign',
+                rules: DEFAULT_RULES,
+                id: 'c1',
+                maxLevel: 20,
+                allowPlayerEdit: true,
+                members: [],
+            },
+        });
+        vi.mocked(prisma.battleScene.findMany).mockResolvedValue([
+            {
+                id: 'b1',
+                status: 'prepared',
+                participants: [{ id: 'u', quantity: 3, reserved: 1 }],
+            },
+        ] as never);
+
+        const { GET } = await import('@/app/api/campaigns/[id]/battles/route');
+
+        const response = await GET(
+            createRequest('http://localhost/api/campaigns/c1/battles'),
+            { params: Promise.resolve({ id: 'c1' }) }
+        );
+
+        const data = (await getResponseJson(response)) as {
+            participants: unknown[];
+        }[];
+
+        expect(data[0].participants).toEqual(expected);
+    });
 });
 
 describe('POST /api/campaigns/[id]/battles', () => {

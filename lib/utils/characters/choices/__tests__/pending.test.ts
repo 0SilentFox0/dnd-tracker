@@ -275,10 +275,14 @@ describe('pendingIssues', () => {
     it('a spell choice with fewer listed spells than count is capped to the available ones', () => {
         const state = { ...empty, ...sorc(1) };
 
-        const visits = visitPicks(state, { ...refs, race: null }, {
-            level: 1,
-            classMode: true,
-        });
+        const visits = visitPicks(
+            state,
+            { ...refs, race: null },
+            {
+                level: 1,
+                classMode: true,
+            }
+        );
 
         const none = pendingIssues(visits, { ...refs, spellsById: {} });
 
@@ -411,7 +415,9 @@ describe('pendingIssues: feat prerequisites', () => {
                 hero: { totalLevel: 1, scores },
             })
         ).toEqual([]);
-        expect(pendingIssues([visit(0)], { ...r, hero: { totalLevel: 1, scores } })).toHaveLength(1);
+        expect(
+            pendingIssues([visit(0)], { ...r, hero: { totalLevel: 1, scores } })
+        ).toHaveLength(1);
     });
 
     it('score prerequisite is checked against hero scores', () => {

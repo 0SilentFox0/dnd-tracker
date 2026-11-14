@@ -1,18 +1,15 @@
 import { hashJson } from '@/lib/utils/battle/store/stable-json';
-import { isRecord } from '@/lib/utils/common/is-record';
-import { SYSTEM_META } from '@/lib/utils/rules/systems/meta';
+import { SYSTEM_META, type SystemMeta } from '@/lib/utils/rules/systems/meta';
 
 const EMPTY_HASHES = new Set<string>(
-    SYSTEM_META.flatMap(
-        (m) =>
-            (m as { emptyCharacteristicsHashes?: readonly string[] })
-                .emptyCharacteristicsHashes ?? []
+    (SYSTEM_META as readonly SystemMeta[]).flatMap(
+        (m) => m.emptyCharacteristicsHashes ?? []
     )
 );
 
 const isEmptyCharacteristics = (v: unknown) =>
     v == null ||
-    (isRecord(v) && Object.keys(v).length === 0) ||
+    (typeof v === 'object' && Object.keys(v).length === 0) ||
     EMPTY_HASHES.has(hashJson(v));
 
 /** Content hash of a row's hashed columns; columns added after stored baselines hash as absent while empty (null / default); `slug` is identity metadata and never hashed. Shared by template sync and layer materialization so both sides agree. */

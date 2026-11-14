@@ -141,7 +141,9 @@ function extractWeaponAttacks(
     }
 
     const shieldRef =
-        classMode && typeof equipped.shield === 'string' ? equipped.shield : null;
+        classMode && typeof equipped.shield === 'string'
+            ? equipped.shield
+            : null;
 
     if (shieldRef) entries.push({ ref: shieldRef, offHand: true });
 

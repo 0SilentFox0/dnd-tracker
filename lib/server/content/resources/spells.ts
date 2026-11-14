@@ -68,10 +68,7 @@ export const spellsResource = defineResource<
             ...(purpose === 'read' && { include: withGroup }),
         }),
     create: async (actor, data) => {
-        await assertCampaignEffects(
-            actor,
-            effectOwners(data.spellEffects)
-        );
+        await assertCampaignEffects(actor, effectOwners(data.spellEffects));
         await assertCampaignRefs(actor.campaignId, {
             spellGroup: data.groupId,
         });

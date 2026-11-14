@@ -61,4 +61,3 @@ export const REJECT = {
     playerNotInBattle: 'battleLog.reject.playerNotInBattle',
     // END
 } as const satisfies Record<string, AppMessageKey>;
-

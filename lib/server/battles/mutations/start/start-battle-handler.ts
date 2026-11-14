@@ -77,7 +77,11 @@ export async function buildStartOrder(
     const [characters, units] = await Promise.all([
         charIds.length > 0
             ? prisma.character.findMany({
-                  where: { id: { in: charIds }, campaignId, ...ACTIVE_CHARACTER },
+                  where: {
+                      id: { in: charIds },
+                      campaignId,
+                      ...ACTIVE_CHARACTER,
+                  },
                   include: {
                       inventory: true,
                   },

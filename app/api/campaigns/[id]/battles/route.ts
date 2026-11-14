@@ -4,7 +4,9 @@ import { prisma } from '@/lib/db';
 import { battleRecordHttp } from '@/lib/server/battles/http';
 import { requireCampaignAccess } from '@/lib/utils/api/api-auth';
 import { handleApiError } from '@/lib/utils/api/error-handler';
+import { publicSetup } from '@/lib/utils/battle/participant/reserve';
 import { battleSceneListSelect } from '@/lib/utils/battle/store/scene-list-select';
+import type { BattlePreparationParticipant } from '@/types/battle';
 
 type Params = { params: Promise<{ id: string }> };
 export async function POST(req: Request, { params }: Params) {
@@ -52,6 +54,11 @@ export async function GET(
         return NextResponse.json(
             battles.map((b) => ({
                 ...b,
+                participants: accessResult.isDM
+                    ? b.participants
+                    : publicSetup(
+                          b.participants as unknown as BattlePreparationParticipant[]
+                      ),
                 initiativeOrder: [] as unknown[],
                 battleLog: [] as unknown[],
             }))

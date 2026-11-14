@@ -91,6 +91,7 @@ export async function runSystemRoute(
                 ? await requireCharacterRow(campaignId, characterId as string, {
                       access,
                       dmOnly: target.access === 'dm',
+                      foreign404: true,
                   })
                 : undefined;
 

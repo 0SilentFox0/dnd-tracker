@@ -175,7 +175,7 @@ export const moduleQueryPatterns = (ids: readonly string[]): RegExp[] => {
             'g'
         ),
         new RegExp(`\\bext\\??\\.(?:${alt})\\b`, 'g'),
-        new RegExp(`\\bext\\??\\[\\s*${Q}(?:${alt})${Q}\\s*\\]`, 'g'),
+        new RegExp(`\\bext(?:\\?\\.)?\\[\\s*${Q}(?:${alt})${Q}\\s*\\]`, 'g'),
         new RegExp(
             `\\.(?:module|moduleId|addon)\\s*[!=]==\\s*${Q}(?:${alt})${Q}`,
             'g'

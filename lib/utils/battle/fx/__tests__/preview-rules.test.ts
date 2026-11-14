@@ -8,10 +8,12 @@ import {
 } from '@/lib/utils/battle/fx/preview-rules';
 import { previewSpellFx } from '@/lib/utils/battle/fx/spell-preview';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
+import { metaOf } from '@/lib/utils/rules/systems/meta';
 
 describe('PREVIEW_RULES', () => {
-    it('is a d20 sandbox keyed by an explicit constant', () => {
+    it('is a d20 base sandbox keyed by PREVIEW_SYSTEM_KEY', () => {
         expect(PREVIEW_RULES.system.key).toBe(PREVIEW_SYSTEM_KEY);
+        expect(metaOf(PREVIEW_SYSTEM_KEY)?.kind ?? 'base').toBe('base');
         expect(ruleSystemOf(PREVIEW_RULES).combat.dice).toBe(20);
     });
 

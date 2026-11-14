@@ -10,7 +10,11 @@ describe('issueFor', () => {
 
     it('matches the path and its children', () => {
         const issues: ChoiceIssue[] = [
-            { path: 'raceChoices.x.0', code: 'CHOICE_INCOMPLETE', message: 'm' },
+            {
+                path: 'raceChoices.x.0',
+                code: 'CHOICE_INCOMPLETE',
+                message: 'm',
+            },
         ];
 
         expect(issueFor(issues, 'raceChoices.x')).toBe('m');

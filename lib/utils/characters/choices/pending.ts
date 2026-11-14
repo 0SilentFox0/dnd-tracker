@@ -1,4 +1,7 @@
-import { choiceIssue, featPrerequisiteMet } from '@/lib/utils/characters/choices/validate';
+import {
+    choiceIssue,
+    featPrerequisiteMet,
+} from '@/lib/utils/characters/choices/validate';
 import type {
     ChoiceRefs,
     PickVisit,

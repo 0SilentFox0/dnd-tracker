@@ -11,13 +11,16 @@ import {
 import { z } from 'zod';
 
 import { getResponseJson } from '@/app/api/__tests__/helpers';
+import { prisma } from '@/lib/db';
 import * as characterAccess from '@/lib/server/characters/access';
 import type { SystemServer } from '@/lib/server/systems/types';
 import * as apiAuth from '@/lib/utils/api/api-auth';
 import { parseRules } from '@/lib/utils/rules/schema';
 
 vi.mock('server-only', () => ({}));
-vi.mock('@/lib/db', () => ({ prisma: {} }));
+vi.mock('@/lib/db', () => ({
+    prisma: { character: { findUnique: vi.fn() } },
+}));
 vi.mock('@/lib/server/characters/access', async (importOriginal) => ({
     ...(await importOriginal<
         typeof import('@/lib/server/characters/access')
@@ -267,12 +270,19 @@ describe('runSystemRoute', () => {
             vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(
                 access({ key: 'homm' }, 'player')
             );
-            vi.mocked(characterAccess.requireCharacterRow).mockResolvedValue(
-                NextResponse.json(
-                    { error: 'errors.characterNotFound' },
-                    { status: 404 }
-                )
+
+            const real = await vi.importActual<
+                typeof import('@/lib/server/characters/access')
+            >('@/lib/server/characters/access');
+
+            vi.mocked(characterAccess.requireCharacterRow).mockImplementation(
+                real.requireCharacterRow
             );
+            vi.mocked(prisma.character.findUnique).mockResolvedValue({
+                id: 'who',
+                campaignId: 'other-campaign',
+                controlledBy: null,
+            } as never);
 
             const response = await call('character', 'who', 'GET');
 

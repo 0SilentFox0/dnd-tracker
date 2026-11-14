@@ -540,9 +540,16 @@ describe('резерв для гравця', () => {
     const log = { mode: 'append' as const, entries: [] };
 
     it('гравець: резервний ворог — заглушка, приклик повний', () => {
-        const b = toBattleResponse({ meta }, scene, [hero], [reserved, summon], log, {
-            isDM: false,
-        });
+        const b = toBattleResponse(
+            { meta },
+            scene,
+            [hero],
+            [reserved, summon],
+            log,
+            {
+                isDM: false,
+            }
+        );
 
         expect(b.pendingSummons?.[0]).toEqual({
             basicInfo: { id: 'gob', side: ParticipantSide.ENEMY },
@@ -592,12 +599,24 @@ describe('резерв для гравця', () => {
         );
 
         expect(player.participants).toEqual([
-            { id: 'u1', type: 'unit', side: ParticipantSide.ENEMY, quantity: 2 },
+            {
+                id: 'u1',
+                type: 'unit',
+                side: ParticipantSide.ENEMY,
+                quantity: 2,
+            },
         ]);
 
-        const dm = toBattleResponse({ meta: setupMeta }, prepared, [], [], log, {
-            isDM: true,
-        });
+        const dm = toBattleResponse(
+            { meta: setupMeta },
+            prepared,
+            [],
+            [],
+            log,
+            {
+                isDM: true,
+            }
+        );
 
         expect(dm.participants).toEqual(setupMeta.setup);
     });
@@ -630,5 +649,58 @@ describe('резерв для гравця', () => {
 
         expect(out.changed).toBe(false);
         expect(out.delta).toBe(delta);
+    });
+
+    it('redactDeltaForPlayers: delta.setup без резерву, changed', () => {
+        const out = redactDeltaForPlayers(
+            {
+                ...baseDelta,
+                setup: [
+                    {
+                        id: 'u',
+                        type: 'unit',
+                        side: ParticipantSide.ENEMY,
+                        quantity: 3,
+                        reserved: 1,
+                    },
+                ],
+            } as ClientBattleDelta,
+            [hero],
+            DEFAULT_RULES
+        );
+
+        expect(out.changed).toBe(true);
+        expect(out.delta.setup).toEqual([
+            { id: 'u', type: 'unit', side: ParticipantSide.ENEMY, quantity: 2 },
+        ]);
+    });
+
+    it('buildPusherMessages: публічний канал із заглушкою, dm-канал із повним учасником', () => {
+        const delta = {
+            ...baseDelta,
+            pending: [reserved],
+        } as ClientBattleDelta;
+
+        const messages = buildPusherMessages({
+            before: scene,
+            after: scene,
+            rules: DEFAULT_RULES,
+            participants: [hero],
+            delta,
+        });
+
+        const pub = messages[0].payload as ClientBattleDelta;
+
+        const dm = messages[1].payload as ClientBattleDelta;
+
+        expect(messages.map((m) => m.channel)).toEqual([
+            'private-battle-b1',
+            'private-battle-dm-b1',
+        ]);
+        expect(pub.pending?.[0]).toEqual({
+            basicInfo: { id: 'gob', side: ParticipantSide.ENEMY },
+            battleData: { reserved: true },
+        });
+        expect(dm.pending?.[0]).toBe(reserved);
     });
 });
