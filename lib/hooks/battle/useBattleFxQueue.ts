@@ -63,7 +63,14 @@ export function useBattleFxQueue(enabled: boolean, fx?: SystemFx) {
     // до відмальовування: екран підсумку в тому ж кадрі ще не встигає показатися поверх кидка
     useLayoutEffect(() => setFxBusy(busy), [busy]);
 
-    useEffect(() => () => setFxBusy(false), []);
+    useEffect(() => {
+        const callbacks = onDone.current;
+
+        return () => {
+            setFxBusy(false);
+            callbacks.clear();
+        };
+    }, []);
 
     const done = useCallback((key: string) => {
         onDone.current.get(key)?.();

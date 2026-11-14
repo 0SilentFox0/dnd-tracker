@@ -15,7 +15,7 @@ export interface SystemDiceEvent {
     round: number;
     turnIndex: number;
     participants: BattleParticipant[];
-    scene: { pendingMoraleCheck: unknown };
+    scene: { pendingCheck: unknown };
     visible(participant: BattleParticipant): boolean;
 }
 

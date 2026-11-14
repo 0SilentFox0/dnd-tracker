@@ -25,7 +25,7 @@ export function useSystemDice(fx?: SystemFx): SystemDice[] {
             round: currentRound,
             turnIndex: currentTurnIndex,
             participants: initiativeOrder,
-            scene: { pendingMoraleCheck },
+            scene: { pendingCheck: pendingMoraleCheck },
             visible,
         };
 

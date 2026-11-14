@@ -45,4 +45,30 @@ describe('props-budget', () => {
         expect(overBudget(counts)).toEqual({ Big: 8 });
         expect(counts.Ok).toBe(2);
     });
+
+    it('counts Pick keys and Omit remainders', () => {
+        const code = `
+            interface P { a: 1; b: 2; c: 3; d: 4 }
+            export const A = (p: Pick<P, 'a' | 'b'>) => null;
+            export const B = (p: Omit<P, 'a'>) => null;
+        `;
+
+        expect(countComponentProps(code)).toEqual({ A: 2, B: 3 });
+    });
+
+    it('resolves prop types imported from another file', () => {
+        const files: Record<string, string> = {
+            'components/x/types': 'export interface P { a: 1; b: 2; c: 3 }',
+        };
+
+        const code = `
+            import type { P as Props } from './types';
+            export const A = (p: Props) => null;
+            export const B = (p: Omit<Props, 'a'>) => null;
+        `;
+
+        expect(
+            countComponentProps(code, 'components/x/A.tsx', (r) => files[r])
+        ).toEqual({ A: 3, B: 2 });
+    });
 });

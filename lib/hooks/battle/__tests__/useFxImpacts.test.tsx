@@ -73,8 +73,8 @@ describe('useFxImpacts', () => {
     it('кубик системи в черзі збільшує запобіжник; без слота — ні', () => {
         const fx = {
             dice: [
-                (e: { scene: { pendingMoraleCheck: unknown } }) =>
-                    e.scene.pendingMoraleCheck
+                (e: { scene: { pendingCheck: unknown } }) =>
+                    e.scene.pendingCheck
                         ? { key: 'k', actorId: 'a', spec: { seed: 1, groups: [] } }
                         : null,
             ],

@@ -10,10 +10,12 @@ const upper = (id: string) => id.toUpperCase().replace(/[^A-Z0-9]/g, '_');
 
 interface BlockSpec {
     packs?: boolean;
+    /** Emits whole-block lines from the ids (instead of per-id `line`) */
+    lines?: (ids: string[], root: string) => string[];
     /** The layer file must export this name for the id to get a line */
     name?: (id: string) => string;
     layer: (id: string) => string;
-    line: (
+    line?: (
         id: string,
         exists: (file: string) => boolean,
         exported: (file: string, name: string) => boolean
@@ -45,7 +47,63 @@ const scriptsLayer = (id: string) => `scripts/templates/systems/${id}/index.ts`;
 
 const packLayer = (id: string) => `scripts/templates/${id}/index.ts`;
 
+const i18nBlock = (
+    ids: string[],
+    root: string,
+    entry: (ns: string) => string
+): string[] =>
+    namespacesIn(root, ids)
+        .map(entry);
+
+export const namespacesIn = (root: string, ids: string[]): string[] => {
+    const found = new Set<string>();
+
+    for (const id of ids) {
+        const text = fs.readFileSync(path.join(root, metaLayer(id)), 'utf8');
+
+        const start = text.search(/\bi18n\s*:\s*\{/);
+
+        if (start < 0) continue;
+
+        let depth = 0;
+
+        let end = start;
+
+        for (let i = text.indexOf('{', start); i < text.length; i++) {
+            if (text[i] === '{') depth++;
+            else if (text[i] === '}' && --depth === 0) {
+                end = i;
+                break;
+            }
+        }
+
+        const body = text
+            .slice(start, end)
+            .replace(/budgetKb\s*:\s*\{[^{}]*(\{[^{}]*\}[^{}]*)*\}/, '');
+
+        for (const m of body.matchAll(/['"]([A-Za-z][A-Za-z0-9]*)['"]/g))
+            found.add(m[1]);
+    }
+
+    return [...found].sort();
+};
+
 export const ROOT_SPECS: readonly RootSpec[] = [
+    {
+        file: 'global.d.ts',
+        blocks: [
+            {
+                layer: metaLayer,
+                lines: (ids, root) =>
+                    i18nBlock(
+                        ids,
+                        root,
+                        (ns) =>
+                            `${ns}: typeof import("./messages/uk/${ns}.json");`
+                    ),
+            },
+        ],
+    },
     {
         file: 'lib/utils/rules/systems/meta.ts',
         blocks: [
@@ -389,6 +447,16 @@ const render = (
     return text.replace(BLOCK_RE, (_all, indent: string) => {
         const block = spec.blocks[i++];
 
+        if (block.lines)
+            return `${indent}${OPEN}\n${block
+                .lines(ids, root)
+                .map((l) => `${indent}${l}\n`)
+                .join('')}${indent}${CLOSE}`;
+
+        const { line } = block;
+
+        if (!line) return `${indent}${OPEN}\n${indent}${CLOSE}`;
+
         const lines = (block.packs ? packs : ids)
             .filter(
                 (id) =>
@@ -398,7 +466,7 @@ const render = (
             )
             .map(
                 (id) =>
-                    `${indent}${block.line(
+                    `${indent}${line(
                         id,
                         (f) => fs.existsSync(path.join(root, f)),
                         (f, name) =>

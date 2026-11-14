@@ -242,8 +242,8 @@ describe('useBattleFxQueue', () => {
 
         const fx = {
             dice: [
-                (e: { scene: { pendingMoraleCheck: unknown } }) =>
-                    e.scene.pendingMoraleCheck
+                (e: { scene: { pendingCheck: unknown } }) =>
+                    e.scene.pendingCheck
                         ? {
                               key: 'sys:1',
                               actorId: 'p',

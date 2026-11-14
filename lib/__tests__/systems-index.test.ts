@@ -111,7 +111,7 @@ describe('systems index', () => {
 
         await syncSystemsIndex(root);
 
-        for (const spec of ROOT_SPECS) {
+        for (const spec of ROOT_SPECS.filter((s) => s.file !== 'global.d.ts')) {
             const text = fs.readFileSync(path.join(root, spec.file), 'utf8');
 
             expect(text.indexOf('D6POOL'), spec.file).toBeGreaterThan(-1);
@@ -159,6 +159,32 @@ describe('systems index', () => {
 
         expect(install).toContain('@/systems/alpha');
         expect(install).not.toContain('alpha/ui');
+    });
+
+    it('global.d.ts gets the deduped, sorted i18n namespaces of every meta (budgetKb ignored)', async () => {
+        const root = fixture(['alpha', 'beta']);
+
+        write(
+            root,
+            'systems/alpha/meta.ts',
+            `export const A = { i18n: { battle: ['zebra', 'apple'], pages: { draft: ['mango'] }, budgetKb: { battle: 5, pages: { draft: 3 } } } };\n`
+        );
+        write(
+            root,
+            'systems/beta/meta.ts',
+            `export const B = { i18n: { dm: ['apple', 'kiwi'] } };\n`
+        );
+
+        await syncSystemsIndex(root);
+
+        const text = fs.readFileSync(path.join(root, 'global.d.ts'), 'utf8');
+
+        const names = [...text.matchAll(/^\s*(\w+): typeof import/gm)].map(
+            (m) => m[1]
+        );
+
+        expect(names).toEqual(['apple', 'kiwi', 'mango', 'zebra']);
+        expect((await syncSystemsIndex(root, 'check')).stale).toEqual([]);
     });
 
     it('is idempotent', async () => {

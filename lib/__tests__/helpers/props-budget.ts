@@ -1,6 +1,28 @@
+import path from 'node:path';
+
 import ts from 'typescript';
 
 import { readSource, sources } from './source-files';
+
+const MODULE_EXT = ['.ts', '.tsx', '/index.ts', '/index.tsx'];
+
+function tryRead(rel: string): string | undefined {
+    for (const ext of MODULE_EXT)
+        try {
+            return readSource(rel + ext);
+        } catch {
+            continue;
+        }
+}
+
+function moduleRel(from: string, spec: string): string | undefined {
+    if (spec.startsWith('@/')) return spec.slice(2);
+
+    if (spec.startsWith('.'))
+        return path.posix.normalize(
+            path.posix.join(path.posix.dirname(from), spec)
+        );
+}
 
 export const PROPS_LIMIT = 7;
 
@@ -21,11 +43,8 @@ const isExported = (node: ts.Node) =>
 
 const isComponentName = (name: string) => /^[A-Z]/.test(name);
 
-export function countComponentProps(
-    code: string,
-    fileName = 'x.tsx'
-): Record<string, number> {
-    const sf = ts.createSourceFile(
+const parse = (code: string, fileName: string) =>
+    ts.createSourceFile(
         fileName,
         code,
         ts.ScriptTarget.Latest,
@@ -33,7 +52,75 @@ export function countComponentProps(
         ts.ScriptKind.TSX
     );
 
-    const types = new Map<string, ts.Node>();
+const typeDecls = (sf: ts.SourceFile) => {
+    const out = new Map<string, ts.Node>();
+
+    sf.forEachChild((n) => {
+        if (ts.isInterfaceDeclaration(n) || ts.isTypeAliasDeclaration(n))
+            out.set(n.name.text, n);
+    });
+
+    return out;
+};
+
+const literalKeys = (node: ts.TypeNode | undefined) => {
+    const out = new Set<string>();
+
+    const visit = (n: ts.TypeNode) => {
+        if (ts.isUnionTypeNode(n)) n.types.forEach(visit);
+        else if (ts.isLiteralTypeNode(n) && ts.isStringLiteral(n.literal))
+            out.add(n.literal.text);
+    };
+
+    if (node) visit(node);
+
+    return out;
+};
+
+export function countComponentProps(
+    code: string,
+    fileName = 'x.tsx',
+    read: (rel: string) => string | undefined = tryRead
+): Record<string, number> {
+    const sf = parse(code, fileName);
+
+    const types = typeDecls(sf);
+
+    const imports = new Map<string, { spec: string; name: string }>();
+
+    sf.statements.forEach((st) => {
+        const b = ts.isImportDeclaration(st) && st.importClause?.namedBindings;
+
+        if (b && ts.isNamedImports(b) && ts.isStringLiteral(st.moduleSpecifier))
+            b.elements.forEach((e) =>
+                imports.set(e.name.text, {
+                    spec: (st.moduleSpecifier as ts.StringLiteral).text,
+                    name: (e.propertyName ?? e.name).text,
+                })
+            );
+    });
+
+    const external = new Map<string, ts.Node | undefined>();
+
+    const resolveImported = (id: string) => {
+        if (external.has(id)) return external.get(id);
+
+        const imp = imports.get(id);
+
+        const rel = imp && moduleRel(fileName, imp.spec);
+
+        const src = rel ? read(rel) : undefined;
+
+        const decl = src
+            ? typeDecls(parse(src, `${rel}.ts`)).get(imp!.name)
+            : undefined;
+
+        external.set(id, decl);
+
+        return decl;
+    };
+
+    const declOf = (id: string) => types.get(id) ?? resolveImported(id);
 
     const locals = new Map<string, ts.SignatureDeclarationBase>();
 
@@ -50,9 +137,6 @@ export function countComponentProps(
                 )
                     locals.set(d.name.text, d.initializer);
             });
-
-        if (ts.isInterfaceDeclaration(n) || ts.isTypeAliasDeclaration(n))
-            types.set(n.name.text, n);
     });
 
     const names = (
@@ -67,7 +151,7 @@ export function countComponentProps(
 
         if (ts.isTypeLiteralNode(node)) {
             node.members.forEach((m) => {
-                if (m.name) out.add(m.name.getText(sf));
+                if (m.name) out.add(m.name.getText());
             });
 
             return out;
@@ -82,16 +166,28 @@ export function countComponentProps(
         }
 
         if (ts.isTypeReferenceNode(node)) {
-            const id = node.typeName.getText(sf);
+            const id = node.typeName.getText();
 
             const args = node.typeArguments;
 
             if (/^(Readonly|Partial|Required)$/.test(id) && args)
                 return names(args[0], seen);
 
-            if (/^(Omit|Pick)$/.test(id) && args) return names(args[0], seen);
+            if (id === 'Pick' && args) {
+                const keys = literalKeys(args[1]);
 
-            const decl = types.get(id);
+                return keys.size ? keys : names(args[0], seen);
+            }
+
+            if (id === 'Omit' && args) {
+                const drop = literalKeys(args[1]);
+
+                return new Set(
+                    [...names(args[0], seen)].filter((k) => !drop.has(k))
+                );
+            }
+
+            const decl = declOf(id);
 
             if (!decl || seen.has(id)) return out;
 
@@ -101,13 +197,13 @@ export function countComponentProps(
 
             if (ts.isInterfaceDeclaration(decl)) {
                 decl.members.forEach((m) => {
-                    if (m.name) out.add(m.name.getText(sf));
+                    if (m.name) out.add(m.name.getText());
                 });
                 decl.heritageClauses?.forEach((h) =>
                     h.types.forEach((t) =>
                         names(
                             ts.factory.createTypeReferenceNode(
-                                t.expression.getText(sf)
+                                t.expression.getText()
                             ),
                             seen
                         ).forEach((x) => out.add(x))
@@ -156,7 +252,7 @@ export function countComponentProps(
         if (ts.isIdentifier(init)) return { fn: locals.get(init.text) };
 
         if (ts.isCallExpression(init)) {
-            const callee = init.expression.getText(sf);
+            const callee = init.expression.getText();
 
             if (/(^|\.)(memo|forwardRef)$/.test(callee)) {
                 const inner = init.arguments[0] && unwrap(init.arguments[0]);

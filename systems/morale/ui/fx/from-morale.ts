@@ -32,7 +32,7 @@ export function moraleThrowOf(input: {
 
 export const moraleDiceSource: SystemDiceSource = (event) => {
     const pending = event.scene
-        .pendingMoraleCheck as PendingMoraleCheckPayload | null;
+        .pendingCheck as PendingMoraleCheckPayload | null;
 
     const who = pending
         ? event.participants.find((p) => p.basicInfo.id === pending.participantId)
