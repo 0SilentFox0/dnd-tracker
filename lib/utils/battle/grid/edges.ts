@@ -17,6 +17,11 @@ const wallsCache = new WeakMap<
     WeakMap<readonly string[], ReadonlySet<string>>
 >();
 
+const moveCache = new WeakMap<
+    readonly string[],
+    WeakMap<ReadonlySet<string>, ReadonlySet<string>>
+>();
+
 const EMPTY: readonly string[] = [];
 
 export function wallsOf(map: EdgeMap): ReadonlySet<string> {
@@ -58,9 +63,25 @@ function blockingSet(map: EdgeMap, kind: EdgeKind): ReadonlySet<string> {
 
     if (kind !== 'move') return walls;
 
-    const bars = barsOf(map);
+    const barsList = map.bars;
 
-    return bars.size ? new Set([...walls, ...bars]) : walls;
+    if (!barsList?.length) return walls;
+
+    let byWalls = moveCache.get(barsList);
+
+    if (!byWalls) {
+        byWalls = new WeakMap();
+        moveCache.set(barsList, byWalls);
+    }
+
+    let union = byWalls.get(walls);
+
+    if (!union) {
+        union = new Set([...walls, ...barsList]);
+        byWalls.set(walls, union);
+    }
+
+    return union;
 }
 
 /** Блокує перехід між сусідніми клітинками (діагональ — якщо закритий хоч один кутовий шлях). */
