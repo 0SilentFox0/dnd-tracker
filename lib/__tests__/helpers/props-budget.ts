@@ -1,5 +1,4 @@
 import path from 'node:path';
-
 import ts from 'typescript';
 
 import { readSource, sources } from './source-files';
@@ -111,9 +110,10 @@ export function countComponentProps(
 
         const src = rel ? read(rel) : undefined;
 
-        const decl = src
-            ? typeDecls(parse(src, `${rel}.ts`)).get(imp!.name)
-            : undefined;
+        const decl =
+            src && imp
+                ? typeDecls(parse(src, `${rel}.ts`)).get(imp.name)
+                : undefined;
 
         external.set(id, decl);
 
@@ -165,51 +165,57 @@ export function countComponentProps(
             return out;
         }
 
-        if (ts.isTypeReferenceNode(node)) {
-            const id = node.typeName.getText();
+        if (ts.isTypeReferenceNode(node))
+            return named(node.typeName.getText(), node.typeArguments, seen);
 
-            const args = node.typeArguments;
+        return out;
+    };
 
-            if (/^(Readonly|Partial|Required)$/.test(id) && args)
-                return names(args[0], seen);
+    const named = (
+        id: string,
+        args: readonly ts.TypeNode[] | undefined,
+        seen: Set<string>
+    ): Set<string> => {
+        const out = new Set<string>();
 
-            if (id === 'Pick' && args) {
-                const keys = literalKeys(args[1]);
+        if (/^(Readonly|Partial|Required)$/.test(id) && args)
+            return names(args[0], seen);
 
-                return keys.size ? keys : names(args[0], seen);
-            }
+        if (id === 'Pick' && args) {
+            const keys = literalKeys(args[1]);
 
-            if (id === 'Omit' && args) {
-                const drop = literalKeys(args[1]);
+            return keys.size ? keys : names(args[0], seen);
+        }
 
-                return new Set(
-                    [...names(args[0], seen)].filter((k) => !drop.has(k))
-                );
-            }
+        if (id === 'Omit' && args) {
+            const drop = literalKeys(args[1]);
 
-            const decl = declOf(id);
+            return new Set(
+                [...names(args[0], seen)].filter((k) => !drop.has(k))
+            );
+        }
 
-            if (!decl || seen.has(id)) return out;
+        const decl = declOf(id);
 
-            seen.add(id);
+        if (!decl || seen.has(id)) return out;
 
-            if (ts.isTypeAliasDeclaration(decl)) return names(decl.type, seen);
+        seen.add(id);
 
-            if (ts.isInterfaceDeclaration(decl)) {
-                decl.members.forEach((m) => {
-                    if (m.name) out.add(m.name.getText());
-                });
-                decl.heritageClauses?.forEach((h) =>
-                    h.types.forEach((t) =>
-                        names(
-                            ts.factory.createTypeReferenceNode(
-                                t.expression.getText()
-                            ),
-                            seen
-                        ).forEach((x) => out.add(x))
-                    )
-                );
-            }
+        if (ts.isTypeAliasDeclaration(decl)) return names(decl.type, seen);
+
+        if (ts.isInterfaceDeclaration(decl)) {
+            decl.members.forEach((m) => {
+                if (m.name) out.add(m.name.getText());
+            });
+            decl.heritageClauses?.forEach((h) =>
+                h.types.forEach((t) =>
+                    named(
+                        t.expression.getText(),
+                        t.typeArguments,
+                        seen
+                    ).forEach((x) => out.add(x))
+                )
+            );
         }
 
         return out;
