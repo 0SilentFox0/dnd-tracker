@@ -254,6 +254,64 @@ describe('playableBounds', () => {
     });
 });
 
+describe('playableBounds oracle', () => {
+    function oracle(cols: number, rows: number, blocked: string[]) {
+        const set = new Set(blocked);
+
+        let x0 = cols,
+            y0 = rows,
+            x1 = -1,
+            y1 = -1;
+
+        for (let y = 0; y < rows; y++)
+            for (let x = 0; x < cols; x++) {
+                if (set.has(`${x}:${y}`)) continue;
+
+                x0 = Math.min(x0, x);
+                y0 = Math.min(y0, y);
+                x1 = Math.max(x1, x);
+                y1 = Math.max(y1, y);
+            }
+
+        return x1 < 0
+            ? { x: 0, y: 0, cols, rows }
+            : { x: x0, y: y0, cols: x1 - x0 + 1, rows: y1 - y0 + 1 };
+    }
+
+    it('збігається зі скануванням усієї карти на випадкових масках', () => {
+        let seed = 7;
+
+        const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+
+        for (let i = 0; i < 50; i++) {
+            const cols = 1 + Math.floor(rnd() * 12);
+
+            const rows = 1 + Math.floor(rnd() * 12);
+
+            const density = rnd();
+
+            const blocked: string[] = [];
+
+            for (let y = 0; y < rows; y++)
+                for (let x = 0; x < cols; x++)
+                    if (rnd() < density) blocked.push(`${x}:${y}`);
+
+            expect(playableBounds({ cols, rows, blocked })).toEqual(
+                oracle(cols, rows, blocked)
+            );
+        }
+    });
+
+    it('повністю заблокована карта — уся карта, результат кешується', () => {
+        const blocked = ['0:0', '1:0', '0:1', '1:1'];
+
+        const first = playableBounds({ cols: 2, rows: 2, blocked });
+
+        expect(first).toEqual({ x: 0, y: 0, cols: 2, rows: 2 });
+        expect(playableBounds({ cols: 2, rows: 2, blocked })).toBe(first);
+    });
+});
+
 describe('edgeAtScreenPoint', () => {
     const map = { cols: 4, rows: 3 };
 

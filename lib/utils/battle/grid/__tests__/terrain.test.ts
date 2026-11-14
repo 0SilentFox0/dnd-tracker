@@ -87,6 +87,13 @@ describe('hazardCells', () => {
         expect([...hazardCells(map)].sort()).toEqual(['1:1', '3:3']);
         expect(hazardCells(base).size).toBe(0);
     });
+
+    it('кешується за ідентичністю terrain', () => {
+        expect(hazardCells(map)).toBe(hazardCells({ ...map }));
+        expect(hazardCells({ ...map, terrain: { ...map.terrain } })).not.toBe(
+            hazardCells(map)
+        );
+    });
 });
 
 describe('isPlayable з місцевістю', () => {

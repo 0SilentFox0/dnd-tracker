@@ -234,31 +234,69 @@ export function fitMapView(
 
 export type GridWindow = { x: number; y: number; cols: number; rows: number };
 
+const boundsCache = new WeakMap<string[], Map<string, GridWindow>>();
+
 /** найменший прямокутник з усіма ігровими клітинками; стіни ігрові, неігрові лише blocked */
 export function playableBounds(
     map: Pick<BattleMapConfig, 'cols' | 'rows' | 'blocked'>
 ): GridWindow {
+    const { cols, rows, blocked: list } = map;
+
+    const whole = { x: 0, y: 0, cols, rows };
+
+    if (!list?.length) return whole;
+
+    const size = `${cols}:${rows}`;
+
+    const cached = boundsCache.get(list)?.get(size);
+
+    if (cached) return cached;
+
     const blocked = blockedSet(map);
 
-    let x0 = map.cols,
-        y0 = map.rows,
-        x1 = -1,
-        y1 = -1;
+    const rowOpen = (y: number) => {
+        for (let x = 0; x < cols; x++)
+            if (!blocked.has(cellKey({ x, y }))) return true;
 
-    for (let y = 0; y < map.rows; y++) {
-        for (let x = 0; x < map.cols; x++) {
-            if (blocked.has(cellKey({ x, y }))) continue;
+        return false;
+    };
 
-            x0 = Math.min(x0, x);
-            y0 = Math.min(y0, y);
-            x1 = Math.max(x1, x);
-            y1 = Math.max(y1, y);
-        }
+    let y0 = 0;
+
+    while (y0 < rows && !rowOpen(y0)) y0++;
+
+    let result = whole;
+
+    if (y0 < rows) {
+        let y1 = rows - 1;
+
+        while (!rowOpen(y1)) y1--;
+
+        const colOpen = (x: number) => {
+            for (let y = y0; y <= y1; y++)
+                if (!blocked.has(cellKey({ x, y }))) return true;
+
+            return false;
+        };
+
+        let x0 = 0;
+
+        while (!colOpen(x0)) x0++;
+
+        let x1 = cols - 1;
+
+        while (!colOpen(x1)) x1--;
+
+        result = { x: x0, y: y0, cols: x1 - x0 + 1, rows: y1 - y0 + 1 };
     }
 
-    return x1 < 0
-        ? { x: 0, y: 0, cols: map.cols, rows: map.rows }
-        : { x: x0, y: y0, cols: x1 - x0 + 1, rows: y1 - y0 + 1 };
+    let bySize = boundsCache.get(list);
+
+    if (!bySize) boundsCache.set(list, (bySize = new Map()));
+
+    bySize.set(size, result);
+
+    return result;
 }
 
 export interface RectLike {

@@ -42,14 +42,27 @@ export function isObscured(
 export const isDamagingCell = (c: TerrainCell) =>
     c.kind === 'hazard' && (!!c.damage || !c.zoneId);
 
+const EMPTY_HAZARDS: ReadonlySet<string> = new Set();
+
+const hazardCache = new WeakMap<Record<string, TerrainCell>, Set<string>>();
+
 export function hazardCells(
     map: Pick<BattleMapConfig, 'terrain'>
-): Set<string> {
-    const terrain = map.terrain ?? {};
+): ReadonlySet<string> {
+    const terrain = map.terrain;
 
-    return new Set(
-        Object.keys(terrain).filter((k) => isDamagingCell(terrain[k]))
-    );
+    if (!terrain) return EMPTY_HAZARDS;
+
+    let set = hazardCache.get(terrain);
+
+    if (!set) {
+        set = new Set(
+            Object.keys(terrain).filter((k) => isDamagingCell(terrain[k]))
+        );
+        hazardCache.set(terrain, set);
+    }
+
+    return set;
 }
 
 function threatens(p: BattleParticipant, mover: BattleParticipant): boolean {
