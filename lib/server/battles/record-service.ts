@@ -135,9 +135,11 @@ async function mapForWrite(
     return { ...map, background: bg.background ?? null };
 }
 
+type LinkedMapDb = Parameters<typeof getMapMeta>[1] &
+    Parameters<typeof campaignMapMaxSide>[1];
+
 async function linkedMapFor(
-    db: Parameters<typeof getMapMeta>[1] &
-        Parameters<typeof campaignMapMaxSide>[1],
+    db: LinkedMapDb,
     campaignId: string,
     mapId: string
 ) {
@@ -160,7 +162,7 @@ type PinnedMap = BattleMapConfig | null;
 
 /** The new map columns for a PATCH that rebinds, re-pins or unlinks the library map of a prepared battle. */
 async function relinkData(
-    db: Parameters<typeof getMapMeta>[1],
+    db: LinkedMapDb,
     campaignId: string,
     row: BattleScene,
     pinned: PinnedMap,

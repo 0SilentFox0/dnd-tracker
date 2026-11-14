@@ -34,7 +34,6 @@ function Probe({ zoom = 1 }: { zoom?: number }) {
         <div
             ref={scrollRef}
             data-scroll=""
-            // @ts-expect-error stub rect
             style={{}}
         >
             <svg
