@@ -250,6 +250,7 @@ describe('blockedByMode', () => {
             'channel',
             'condition-test',
             'core-action',
+            'map-walls',
             'maze-mark',
             'morale-check',
             'spell',

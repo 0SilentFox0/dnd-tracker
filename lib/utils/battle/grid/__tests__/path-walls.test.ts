@@ -109,7 +109,7 @@ describe('стіни й ґрати в русі', () => {
 
             expect(cost(map, ghost({ x: 1, y: 0 })).get(key(2, 0))).toBe(1);
             expect(cost(map, ghost({ x: 1, y: 2 })).get(key(2, 2))).toBe(1);
-            expect(cost(map, hero({ x: 1, y: 0 })).get(key(2, 0))).toBe(5);
+            expect(cost(map, hero({ x: 1, y: 0 })).has(key(2, 0))).toBe(false);
         });
 
         it('зір і постріл не змінюються', () => {

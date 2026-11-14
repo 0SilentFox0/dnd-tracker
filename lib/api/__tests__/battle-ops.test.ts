@@ -112,7 +112,7 @@ describe('battleOps', () => {
             .filter(([, o]) => 'retryOnConflict' in o)
             .map(([k]) => k);
 
-        expect(retrying).toEqual(['mapTerrain', 'mapMotion', 'mapWeather']);
+        expect(retrying).toEqual(['mapTerrain', 'mapWalls', 'mapMotion', 'mapWeather']);
     });
 
     it('only attack and castSpell map the response to hpChanges', () => {

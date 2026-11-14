@@ -101,6 +101,7 @@ describe('useMapTerrainTool: інструмент ребер', () => {
             true
         );
 
+        await vi.waitFor(() => expect(mutate).toHaveBeenCalled());
         await act(async () => done());
         expect(view.result.current.edges?.committed?.add.size).toBe(0);
     });

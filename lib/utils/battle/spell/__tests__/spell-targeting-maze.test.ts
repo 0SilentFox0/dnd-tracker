@@ -124,7 +124,7 @@ describe('заклинання в лабіринті', () => {
         ).toEqual({ ok: true, targetIds: ['e2'] });
     });
 
-    it('шаблон: приціл поза полем зору — відмова; у полі зору — зона не зупиняється тонкими стінами', () => {
+    it('шаблон: приціл поза полем зору — відмова; у полі зору — зона зупиняється стінами', () => {
         expect(
             resolve(fireball, [], {
                 rules: DEFAULT_RULES,
@@ -143,7 +143,8 @@ describe('заклинання в лабіринті', () => {
         });
 
         expect(r.ok).toBe(true);
-        expect(r.ok && r.cells).toContain('9:5');
+        expect(r.ok && r.cells).toContain('8:5');
+        expect(r.ok && r.cells).not.toContain('9:5');
     });
 
     it('розширення вмінням (радіус): приціл поза полем зору — відмова', () => {

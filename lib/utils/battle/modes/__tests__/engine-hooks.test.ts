@@ -39,7 +39,7 @@ const fake: MapModeDefinition<FakeConfig> = {
                 : null,
         meleeBlockedText: () => 'блок',
         engages: () => false,
-        walls: () => ['1:1:e'],
+        walls: () => ['7:7:e'],
     },
     client: {},
 };
@@ -169,7 +169,7 @@ describe('хуки рушія в ядрі', () => {
     it('modeWalls: ребра режиму; без режиму порожньо', () => {
         off = registerTestMode(fake as MapModeDefinition<unknown>);
 
-        expect(modeWalls(withMode)).toEqual(['1:1:e']);
+        expect(modeWalls(withMode)).toEqual(['7:7:e']);
         expect(modeWalls(plain)).toEqual([]);
         expect(modeWalls(null)).toEqual([]);
     });
