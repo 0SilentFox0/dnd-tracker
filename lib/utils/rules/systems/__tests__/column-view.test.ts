@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
-import { splitColumnView, withColumnView } from '../column-view';
+import {
+    flattenStoredColumns,
+    omitColumnView,
+    splitColumnView,
+    withColumnView,
+    withStoredColumns,
+} from '../column-view';
 
 import '@/lib/server/systems/registry';
 import { parseRules } from '@/lib/utils/rules/schema';
@@ -11,10 +17,24 @@ const d20 = ruleSystemOf(parseRules({ system: { key: 'dnd5e' } }));
 const wfrp = ruleSystemOf(parseRules({ system: { key: 'wfrp' } }));
 
 describe('withColumnView', () => {
-    it('falls back to legacy columns when characteristics is empty', () => {
-        const row = { characteristics: {}, strength: 14, armorClass: 15 };
+    it('takes column defaults for missing keys, ignoring stale columns', () => {
+        const view = withColumnView(
+            { characteristics: {}, strength: 14, armorClass: 15 },
+            d20
+        );
 
-        expect(withColumnView(row, d20)).toEqual(row);
+        expect(view).toMatchObject({
+            strength: 10,
+            armorClass: 10,
+            initiative: 0,
+            speed: 30,
+        });
+    });
+
+    it('leaves a row without a characteristics key alone', () => {
+        const row = { strength: 14 };
+
+        expect(withColumnView(row, d20)).toBe(row);
     });
 
     it('prefers stored characteristics over columns', () => {
@@ -53,5 +73,49 @@ describe('splitColumnView', () => {
             characteristics: undefined,
             columns: {},
         });
+    });
+});
+
+describe('omitColumnView', () => {
+    it('drops the nine columns for d20 and nothing for wfrp', () => {
+        const data = { name: 'x', strength: 12, speed: 30, level: 1 };
+
+        expect(omitColumnView(data, d20)).toEqual({ name: 'x', level: 1 });
+        expect(omitColumnView(data, wfrp)).toBe(data);
+    });
+});
+
+describe('withStoredColumns', () => {
+    it('stored numbers win and absent keys keep the column', () => {
+        expect(
+            withStoredColumns({
+                characteristics: { strength: 18 },
+                strength: 10,
+                speed: 25,
+            })
+        ).toMatchObject({ strength: 18, speed: 25 });
+    });
+
+    it('leaves wfrp-like characteristics alone', () => {
+        const row = { characteristics: { ws: 30 }, strength: 10 };
+
+        expect(withStoredColumns(row)).toBe(row);
+    });
+});
+
+describe('flattenStoredColumns', () => {
+    it('moves stored values out; null when only the statblock was inside', () => {
+        expect(
+            flattenStoredColumns({
+                characteristics: { strength: 18 },
+                strength: 10,
+            })
+        ).toEqual({ strength: 18, characteristics: null });
+        expect(
+            flattenStoredColumns({
+                characteristics: { strength: 18, ws: 3 },
+                strength: 10,
+            })
+        ).toEqual({ strength: 18, characteristics: { ws: 3 } });
     });
 });

@@ -40,18 +40,21 @@ describe('d20 characteristics column view', () => {
             expect(D20_CHARACTERISTICS_COLUMNS).not.toContain(k);
     });
 
-    it('reads legacy columns and migrated characteristics alike', () => {
-        const legacy = readD20Columns({ ...stats, characteristics: {} });
-
-        const migrated = readD20Columns({
+    it('reads only characteristics, a missing key takes the column default', () => {
+        expect(readD20Columns({ characteristics: stats })).toEqual(stats);
+        expect(readD20Columns({ characteristics: null })).toEqual({
             strength: 10,
-            characteristics: stats,
+            dexterity: 10,
+            constitution: 10,
+            intelligence: 10,
+            wisdom: 10,
+            charisma: 10,
+            armorClass: 10,
+            initiative: 0,
+            speed: 30,
         });
-
-        expect(legacy).toEqual(stats);
-        expect(migrated).toEqual(stats);
-        expect(readD20Columns({ ...stats, characteristics: null })).toEqual(
-            stats
+        expect(readD20Columns({ characteristics: { speed: 25 } })).toMatchObject(
+            { speed: 25, strength: 10 }
         );
     });
 

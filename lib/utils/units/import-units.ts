@@ -6,7 +6,10 @@ import type { Ability } from '@/lib/utils/abilities/schema';
 import { nameKey } from '@/lib/utils/content/import/mapping';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
-import { splitColumnView } from '@/lib/utils/rules/systems/column-view';
+import {
+    omitColumnView,
+    splitColumnView,
+} from '@/lib/utils/rules/systems/column-view';
 import type { RuleSystemDefinition } from '@/lib/utils/rules/systems/types';
 import { resolveUnitProficiency } from '@/lib/utils/units/monster';
 import { specialAbilitiesToAbilities } from '@/lib/utils/units/special-abilities';
@@ -68,11 +71,7 @@ export function toUnitCreateData(
 ): Prisma.UnitCreateManyInput {
     const view = system && splitColumnView(unit, system).characteristics;
 
-    return {
-        campaignId,
-        name: unit.name,
-        raceId,
-        level: unit.level,
+    const columns = {
         strength: unit.strength,
         dexterity: unit.dexterity,
         constitution: unit.constitution,
@@ -82,6 +81,14 @@ export function toUnitCreateData(
         armorClass: unit.armorClass,
         initiative: unit.initiative,
         speed: unit.speed,
+    };
+
+    return {
+        campaignId,
+        name: unit.name,
+        raceId,
+        level: unit.level,
+        ...(system ? omitColumnView(columns, system) : columns),
         gridSize: unit.gridSize,
         maxHp: unit.maxHp,
         proficiencyBonus: resolveUnitProficiency(unit),

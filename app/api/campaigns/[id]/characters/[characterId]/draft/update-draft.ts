@@ -16,6 +16,8 @@ import { errorResponse } from '@/lib/utils/api/api-response';
 import { loadOwned } from '@/lib/utils/api/load-owned';
 import { storedDraftChoices } from '@/lib/utils/characters/choices/picks';
 import { validateAbilityScores } from '@/lib/utils/characters/generate';
+import { withColumnView } from '@/lib/utils/rules/systems/column-view';
+import { ruleSystemOf } from '@/lib/utils/rules/systems/lookup';
 import type { CharacterClassEntry } from '@/types/classes';
 
 export async function updateDraft(
@@ -116,13 +118,14 @@ export async function updateDraft(
         data: {
             ...draftFields(data, campaign.rules, character.goals, {
                 characteristics: character.characteristics,
+                fields: { ...asClass?.fields, ...choices.fields },
             }),
-            ...asClass?.fields,
-            ...choices.fields,
             avatar: avatar.avatar,
             ...(slots && { spellSlots: slots }),
         },
     });
 
-    return NextResponse.json(updated);
+    return NextResponse.json(
+        withColumnView(updated, ruleSystemOf(campaign.rules))
+    );
 }

@@ -33,7 +33,11 @@ import {
 import { hasPicks } from '@/lib/utils/characters/choices/read';
 import { heroInitiativeRange } from '@/lib/utils/characters/initiative-range';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
-import { splitColumnView } from '@/lib/utils/rules/systems/column-view';
+import {
+    omitColumnView,
+    splitColumnView,
+    withColumnView,
+} from '@/lib/utils/rules/systems/column-view';
 import type { CharacterClassEntry, GameClassData } from '@/types/classes';
 
 async function assertClassSkills({
@@ -172,7 +176,10 @@ async function createCharacterCore(
         fromClasses?.spellSlots ??
         (await deriveCharacterDefaults(campaignId, data)).spellSlots;
 
-    const split = splitColumnView({ ...data, initiative }, system);
+    const split = splitColumnView(
+        { ...data, initiative, ...(choices?.ok && choices.fields) },
+        system
+    );
 
     try {
         const character = await prisma.character.create({
@@ -193,16 +200,20 @@ async function createCharacterCore(
                 background: data.background,
                 avatar: avatar.avatar ?? undefined,
 
-                strength: data.strength,
-                dexterity: data.dexterity,
-                constitution: data.constitution,
-                intelligence: data.intelligence,
-                wisdom: data.wisdom,
-                charisma: data.charisma,
-
-                armorClass: data.armorClass,
-                initiative,
-                speed: data.speed,
+                ...omitColumnView(
+                    {
+                        strength: data.strength,
+                        dexterity: data.dexterity,
+                        constitution: data.constitution,
+                        intelligence: data.intelligence,
+                        wisdom: data.wisdom,
+                        charisma: data.charisma,
+                        armorClass: data.armorClass,
+                        initiative,
+                        speed: data.speed,
+                    },
+                    system
+                ),
 
                 savingThrows: data.savingThrows as Record<string, boolean>,
                 skills: data.skills as Record<string, boolean>,
@@ -232,7 +243,7 @@ async function createCharacterCore(
                             data.characteristics
                         ) as Prisma.InputJsonObject,
                     }),
-                ...(choices?.ok && choices.fields),
+                ...(choices?.ok && omitColumnView(choices.fields, system)),
             },
             include: { user: { select: PUBLIC_USER_SELECT } },
         });
@@ -249,7 +260,7 @@ async function createCharacterCore(
             },
         });
 
-        return character;
+        return withColumnView(character, system);
     } catch (error) {
         if (
             error instanceof Prisma.PrismaClientKnownRequestError &&

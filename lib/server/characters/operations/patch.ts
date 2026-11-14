@@ -45,7 +45,11 @@ import {
     spellNotificationEvents,
 } from '@/lib/utils/notifications/events';
 import { allLevelResets, ruleSystemOf } from '@/lib/utils/rules/systems';
-import { splitColumnView } from '@/lib/utils/rules/systems/column-view';
+import {
+    omitColumnView,
+    splitColumnView,
+    withColumnView,
+} from '@/lib/utils/rules/systems/column-view';
 import type { RuleSystemDefinition } from '@/lib/utils/rules/systems/types';
 import type { SpellSlots } from '@/lib/utils/spells/spell-slots';
 import type { SpellSlotProgression } from '@/types/races';
@@ -250,12 +254,6 @@ function updateWriter({
 
     const { systemBaseline: _baseline, ...columns } = data;
 
-    const view = splitColumnView(
-        { ...columns, ...computedState.computed.abilityScores },
-        system,
-        character.characteristics
-    );
-
     const classesData = fromClasses && {
         class: fromClasses.class,
         subclass: fromClasses.subclass,
@@ -270,16 +268,20 @@ function updateWriter({
         classes: ClassesResult['classesInput'],
         choiceFields?: ChoiceFields,
         characteristics?: unknown
-    ) =>
-        db.character.update({
+    ) => {
+        const view = splitColumnView(
+            { ...columns, ...computed.abilityScores, ...choiceFields },
+            system,
+            character.characteristics
+        );
+
+        return db.character.update({
             where: { id: character.id },
             data: {
-                ...columns,
+                ...omitColumnView(columns, system),
                 characteristics: (characteristics ??
                     view.characteristics ??
-                    data.characteristics) as
-                    | Prisma.InputJsonValue
-                    | undefined,
+                    data.characteristics) as Prisma.InputJsonValue | undefined,
                 backgroundChoices: undefined,
                 backgroundFeatPicks: undefined,
                 classes: classes as unknown as
@@ -287,7 +289,7 @@ function updateWriter({
                     | undefined,
                 avatar,
                 level: computed.finalLevel,
-                ...computed.abilityScores,
+                ...omitColumnView(computed.abilityScores ?? {}, system),
                 ...(computed.spellSlots && {
                     spellSlots: computed.spellSlots as Prisma.InputJsonValue,
                 }),
@@ -306,7 +308,7 @@ function updateWriter({
                     seenLevel: computed.seenLevel,
                 }),
                 ...(fromClasses && { level: finalLevel }),
-                ...choiceFields,
+                ...omitColumnView(choiceFields ?? {}, system),
                 ...(classSeenLevel !== undefined && {
                     seenLevel: classSeenLevel,
                 }),
@@ -314,6 +316,7 @@ function updateWriter({
             include: { user: { select: PUBLIC_USER_SELECT }, inventory: true },
             omit: { notes: true },
         });
+    };
 }
 
 async function patchCore(gate: Gate, parsed: Parsed) {
@@ -324,6 +327,8 @@ async function patchCore(gate: Gate, parsed: Parsed) {
     const campaignId = character.campaignId;
 
     const characterId = character.id;
+
+    const system = ruleSystemOf(campaign.rules);
 
     const editable = await editableData(gate, parsed);
 
@@ -360,7 +365,7 @@ async function patchCore(gate: Gate, parsed: Parsed) {
         avatar: avatar.avatar,
         resolved,
         computedState,
-        system: ruleSystemOf(campaign.rules),
+        system,
     });
 
     const guardsLedger = Boolean(
@@ -395,7 +400,7 @@ async function patchCore(gate: Gate, parsed: Parsed) {
                             rules: campaign.rules,
                             isDM,
                             character: {
-                                ...fresh,
+                                ...withColumnView(fresh, system),
                                 ...computed.abilityScores,
                                 level: resolved.finalLevel,
                             },
@@ -447,7 +452,7 @@ async function patchCore(gate: Gate, parsed: Parsed) {
         ],
     });
 
-    return updatedCharacter;
+    return withColumnView(updatedCharacter, system);
 }
 
 export const patchOperation = defineCharacterOperation({

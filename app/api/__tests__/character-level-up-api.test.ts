@@ -111,8 +111,10 @@ describe('POST level-up', () => {
 
         expect(data).toMatchObject({
             level: 4,
-            strength: 30,
-            dexterity: 11,
+            characteristics: expect.objectContaining({
+                strength: 30,
+                dexterity: 11,
+            }),
             spellSlots: {
                 '1': { max: 3, current: 1 },
                 '2': { max: 1, current: 1 },

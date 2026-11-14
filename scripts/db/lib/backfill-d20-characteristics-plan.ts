@@ -1,3 +1,4 @@
+import '@/lib/utils/rules/systems/registry';
 import { isRecord } from '@/lib/utils/common/is-record';
 import { contentRowHash } from '@/lib/utils/content/row-hash';
 import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
@@ -69,7 +70,7 @@ export const rowKey = (
     r: Pick<StatRow, 'table' | 'id'> & { validFrom?: number }
 ) => `${r.table}:${r.id}${r.validFrom === undefined ? '' : `@${r.validFrom}`}`;
 
-export const D20_BASE = PRESETS[FALLBACK_SYSTEM_KEY].base;
+export const FALLBACK_BASE = PRESETS[FALLBACK_SYSTEM_KEY].base;
 
 export function isD20Campaign(rulesText: string): boolean {
     let raw: unknown;
@@ -86,7 +87,7 @@ export function isD20Campaign(rulesText: string): boolean {
 
     const system = sectionSchemas.system.safeParse(raw.system);
 
-    return system.success && composition(system.data).base === D20_BASE;
+    return system.success && composition(system.data).base === FALLBACK_BASE;
 }
 
 export const d20CampaignIds = (facts: readonly CampaignFact[]): string[] =>

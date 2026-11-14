@@ -1019,12 +1019,10 @@ export interface RuleSystemDefinition {
     characteristics: {
         /** The `characteristics` column carries system data (otherwise it is dropped on write) */
         persisted: boolean;
-        /** Statblock columns that move into `characteristics`; reads fall back to the legacy columns until the backfill is done */
+        /** Statblock columns that move into `characteristics`; reads come only from `characteristics` (a missing key takes the column default), writes leave the columns to DB defaults */
         columnView?: {
             columns: readonly string[];
-            read(
-                row: { characteristics: unknown } & Record<string, unknown>
-            ): Record<string, number>;
+            read(row: { characteristics?: unknown }): Record<string, number>;
             write(
                 cols: Partial<Record<string, number>>,
                 prev: unknown

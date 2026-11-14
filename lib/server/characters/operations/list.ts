@@ -22,7 +22,7 @@ import {
     type RuleSystemDefinition,
     ruleSystemOf,
 } from '@/lib/utils/rules/systems';
-import { withColumnView } from '@/lib/utils/rules/systems/column-view';
+import { withStoredColumns } from '@/lib/utils/rules/systems/column-view';
 
 const COMPACT_SELECT = {
     id: true,
@@ -122,8 +122,6 @@ export const listOperation = defineCharacterOperation({
                 orderBy,
             });
 
-        const system = ruleSystemOf(access.campaign.rules);
-
         return redactListedLedgers(
             await prisma.character.findMany({
                 where,
@@ -133,8 +131,8 @@ export const listOperation = defineCharacterOperation({
                 orderBy,
             }),
             access,
-            system
-        ).map((row) => withColumnView(row, system));
+            ruleSystemOf(access.campaign.rules)
+        ).map(withStoredColumns);
     },
 });
 

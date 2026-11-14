@@ -18,6 +18,7 @@ import { requireCampaignMember } from '@/lib/server/campaigns/access';
 import { draftEditInitial } from '@/lib/server/characters/choices/draft-initial';
 import { validateAbilityScores } from '@/lib/utils/characters/generate';
 import { parseRules } from '@/lib/utils/rules/schema';
+import { withStoredColumns } from '@/lib/utils/rules/systems/column-view';
 import type { DraftInput } from '@/types/characters';
 
 export default async function PlayerDraftPage({
@@ -29,7 +30,7 @@ export default async function PlayerDraftPage({
 
     const { userId, campaign } = await requireCampaignMember(id);
 
-    const c = await prisma.character.findFirst({
+    const stored = await prisma.character.findFirst({
         where: {
             campaignId: id,
             controlledBy: userId,
@@ -52,6 +53,7 @@ export default async function PlayerDraftPage({
             intelligence: true,
             wisdom: true,
             charisma: true,
+            characteristics: true,
             primaryAbility: true,
             goals: true,
             campaignId: true,
@@ -63,7 +65,9 @@ export default async function PlayerDraftPage({
         },
     });
 
-    if (!c) redirect(`/campaigns/${id}/character`);
+    if (!stored) redirect(`/campaigns/${id}/character`);
+
+    const c = withStoredColumns(stored);
 
     const rules = parseRules(campaign.rules);
 

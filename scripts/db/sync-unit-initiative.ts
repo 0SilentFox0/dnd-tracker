@@ -8,6 +8,7 @@
 import '@/lib/utils/rules/systems/registry';
 import { buildLibrary } from '@/data/library/build';
 import { prisma } from '@/lib/db';
+import { withStoredColumns } from '@/lib/utils/rules/systems/column-view';
 import { assertSeedTarget, parseArgs } from '@/scripts/seed/seed-library-lib';
 import { d20RowData } from '@/scripts/shared/d20-row-data';
 
@@ -22,15 +23,17 @@ async function main() {
         buildLibrary().units.map((u) => [u.name, u.initiative])
     );
 
-    const units = await prisma.unit.findMany({
-        where: { campaignId },
-        select: {
-            id: true,
-            name: true,
-            initiative: true,
-            characteristics: true,
-        },
-    });
+    const units = (
+        await prisma.unit.findMany({
+            where: { campaignId },
+            select: {
+                id: true,
+                name: true,
+                initiative: true,
+                characteristics: true,
+            },
+        })
+    ).map(withStoredColumns);
 
     console.log(
         `БД: ${host} · кампанія ${campaignId} · юнітів ${units.length}${dryRun ? ' · DRY RUN' : ''}`

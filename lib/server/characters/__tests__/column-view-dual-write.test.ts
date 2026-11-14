@@ -88,13 +88,21 @@ const stable = <T extends { basicInfo: { id: string } }>(p: T) => ({
     basicInfo: { ...p.basicInfo, id: 'participant' },
 });
 
-describe('fromCharacter dual-read', () => {
-    it('legacy and migrated rows give identical snapshot and hash', async () => {
+describe('fromCharacter reads characteristics only', () => {
+    it('migrated rows ignore the columns: identical snapshot and hash', async () => {
         vi.spyOn(Date, 'now').mockReturnValue(1);
 
-        const legacy = stable(await build(row({})));
+        const defaulted = stable(
+            await build({
+                ...row({ ...STATS }),
+                strength: 10,
+                armorClass: 10,
+                initiative: 0,
+                speed: 30,
+            })
+        );
 
-        const migrated = stable(
+        const corrupted = stable(
             await build({
                 ...row({ ...STATS }),
                 strength: 1,
@@ -103,8 +111,17 @@ describe('fromCharacter dual-read', () => {
             })
         );
 
-        expect(migrated).toEqual(legacy);
-        expect(hashJson(migrated)).toBe(hashJson(legacy));
+        expect(corrupted).toEqual(defaulted);
+        expect(hashJson(corrupted)).toBe(hashJson(defaulted));
+    });
+
+    it('a missing key takes the column default, not the stale column', async () => {
+        const partial = stable(
+            await build({ ...row({ strength: 14 }), speed: 99 })
+        );
+
+        expect(partial.abilities.strength).toBe(14);
+        expect(partial.combatStats.speed).toBe(30);
     });
 });
 
@@ -142,8 +159,8 @@ beforeEach(() => {
     h.race.findFirst.mockResolvedValue(null);
 });
 
-describe('d20 dual-write', () => {
-    it('create writes columns and characteristics', async () => {
+describe('d20 writes only characteristics', () => {
+    it('create leaves the columns to DB defaults', async () => {
         await run('create', gate, {
             name: 'Hero',
             type: 'npc_hero',
@@ -155,10 +172,13 @@ describe('d20 dual-write', () => {
 
         const { data } = h.character.create.mock.calls[0][0];
 
-        expect(data).toMatchObject({ ...STATS, characteristics: STATS });
+        expect(data.characteristics).toEqual(STATS);
+
+        for (const column of Object.keys(STATS))
+            expect(data).not.toHaveProperty(column);
     });
 
-    it('patch writes changed columns into previous characteristics', async () => {
+    it('patch merges the change into previous characteristics and writes no column', async () => {
         await run(
             'patch',
             {
@@ -178,9 +198,7 @@ describe('d20 dual-write', () => {
 
         const { data } = h.character.update.mock.calls[0][0];
 
-        expect(data).toMatchObject({
-            speed: 40,
-            characteristics: { strength: 14, speed: 40 },
-        });
+        expect(data.characteristics).toEqual({ strength: 14, speed: 40 });
+        expect(data).not.toHaveProperty('speed');
     });
 });

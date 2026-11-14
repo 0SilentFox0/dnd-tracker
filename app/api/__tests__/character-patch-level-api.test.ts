@@ -200,7 +200,7 @@ describe('PATCH персонажа: рівень і слоти', () => {
 
         expect(written()).toMatchObject({
             level: 5,
-            strength: 14,
+            characteristics: expect.objectContaining({ strength: 14 }),
             spellSlots: {
                 '1': { max: 3, current: 1 },
                 '2': { max: 1, current: 1 },

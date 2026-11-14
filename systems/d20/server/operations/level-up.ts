@@ -38,6 +38,10 @@ import { hasPicks } from '@/lib/utils/characters/choices/read';
 import { applyLevelGain } from '@/lib/utils/characters/level-up/apply-level-gain';
 import { seenLevelOnLevelChange } from '@/lib/utils/characters/seen-level';
 import { levelNotificationEvents } from '@/lib/utils/notifications/events';
+import {
+    omitColumnView,
+    withColumnView,
+} from '@/lib/utils/rules/systems/column-view';
 import { ruleSystemOf } from '@/lib/utils/rules/systems/lookup';
 
 type Gate = Exclude<
@@ -77,12 +81,14 @@ async function levelUpCore({ access, character }: Gate, pick: LevelUpPick) {
         return prisma.$transaction(async (tx) => {
             await lockCharacters(tx, [characterId]);
 
-            const row = await tx.character.findUnique({
+            const stored = await tx.character.findUnique({
                 where: { id: characterId },
             });
 
-            if (!row)
+            if (!stored)
                 throw new ContentError(API_ERRORS.CHARACTER_NOT_FOUND, 404);
+
+            const row = withColumnView(stored, ruleSystemOf(campaign.rules));
 
             const fresh = await orThrow(
                 classLevelUp({ campaign, character: row, pick })
@@ -136,7 +142,11 @@ async function levelUpCore({ access, character }: Gate, pick: LevelUpPick) {
                         spellcastingAbility: fresh.spellcastingAbility,
                     }),
                     ...(seenLevel !== undefined && { seenLevel }),
-                    ...(choices?.ok && choices.fields),
+                    ...(choices?.ok &&
+                        omitColumnView(
+                            choices.fields,
+                            ruleSystemOf(campaign.rules)
+                        )),
                     ...(choices?.ok &&
                         characteristicsPatch(
                             choices.fields,
@@ -175,7 +185,7 @@ async function levelUpCore({ access, character }: Gate, pick: LevelUpPick) {
                 ]);
 
             return {
-                ...updated,
+                ...withColumnView(updated, ruleSystemOf(campaign.rules)),
                 levelUpDetails: {
                     abilityIncreased: null,
                     classId: pick.classId,
@@ -215,7 +225,7 @@ async function levelUpCore({ access, character }: Gate, pick: LevelUpPick) {
         data: {
             level: newLevel,
             ...(seenLevel !== undefined && { seenLevel }),
-            ...gain.abilityScores,
+            ...omitColumnView(gain.abilityScores, ruleSystemOf(campaign.rules)),
             ...characteristicsPatch(
                 gain.abilityScores,
                 ruleSystemOf(campaign.rules),
@@ -243,7 +253,7 @@ async function levelUpCore({ access, character }: Gate, pick: LevelUpPick) {
     );
 
     return {
-        ...updatedCharacter,
+        ...withColumnView(updatedCharacter, ruleSystemOf(campaign.rules)),
         levelUpDetails: {
             abilityIncreased: gain.gained[0] ?? null,
             spellSlots: gain.spellSlots,

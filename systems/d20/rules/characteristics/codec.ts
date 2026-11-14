@@ -1,22 +1,23 @@
-import { D20_CHARACTERISTICS_COLUMNS } from './columns';
+import { D20_CHARACTERISTICS_COLUMNS, D20_COLUMN_DEFAULTS } from './columns';
 
 import { isRecord } from '@/lib/utils/common/is-record';
 import type { SystemData } from '@/lib/utils/rules/systems/slot';
 
-export function readD20Columns(
-    row: { characteristics: unknown } & Record<string, unknown>
-): Record<string, number> {
+export function readD20Columns(row: {
+    characteristics?: unknown;
+}): Record<string, number> {
     const stored = isRecord(row.characteristics) ? row.characteristics : {};
 
-    const out: Record<string, number> = {};
+    return Object.fromEntries(
+        D20_CHARACTERISTICS_COLUMNS.map((column) => {
+            const value = stored[column];
 
-    for (const column of D20_CHARACTERISTICS_COLUMNS) {
-        const value = stored[column] ?? row[column];
-
-        if (typeof value === 'number') out[column] = value;
-    }
-
-    return out;
+            return [
+                column,
+                typeof value === 'number' ? value : D20_COLUMN_DEFAULTS[column],
+            ];
+        })
+    );
 }
 
 export function writeD20Columns(

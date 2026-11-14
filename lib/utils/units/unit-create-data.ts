@@ -3,11 +3,30 @@ import type { z } from 'zod';
 
 import type { createUnitSchema } from '@/lib/schemas/units';
 import { abilitiesJson } from '@/lib/utils/abilities/read';
-import { splitColumnView } from '@/lib/utils/rules/systems/column-view';
+import {
+    omitColumnView,
+    splitColumnView,
+} from '@/lib/utils/rules/systems/column-view';
 import type { RuleSystemDefinition } from '@/lib/utils/rules/systems/types';
 import { resolveUnitProficiency } from '@/lib/utils/units/monster';
 
 export type CreateUnitData = z.infer<typeof createUnitSchema>;
+
+const columnsOf = (data: CreateUnitData, system?: RuleSystemDefinition) => {
+    const columns = {
+        strength: data.strength,
+        dexterity: data.dexterity,
+        constitution: data.constitution,
+        intelligence: data.intelligence,
+        wisdom: data.wisdom,
+        charisma: data.charisma,
+        armorClass: data.armorClass,
+        initiative: data.initiative,
+        speed: data.speed,
+    };
+
+    return system ? omitColumnView(columns, system) : columns;
+};
 
 export function unitCreateData(
     campaignId: string,
@@ -23,15 +42,7 @@ export function unitCreateData(
         name: data.name,
         raceId: data.raceId ?? null,
         level: data.level,
-        strength: data.strength,
-        dexterity: data.dexterity,
-        constitution: data.constitution,
-        intelligence: data.intelligence,
-        wisdom: data.wisdom,
-        charisma: data.charisma,
-        armorClass: data.armorClass,
-        initiative: data.initiative,
-        speed: data.speed,
+        ...columnsOf(data, system),
         gridSize: data.gridSize,
         maxHp: data.maxHp,
         proficiencyBonus: resolveUnitProficiency(data),

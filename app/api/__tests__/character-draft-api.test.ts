@@ -127,7 +127,7 @@ describe('player draft API', () => {
                     status: 'pending',
                     controlledBy: 'u1',
                     type: 'player',
-                    initiative: 10,
+                    characteristics: expect.objectContaining({ initiative: 10 }),
                     level: 1,
                 }),
             });

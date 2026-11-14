@@ -96,10 +96,18 @@ describe('units d20 columnView', () => {
         db.unit.update.mockResolvedValue({ id: 'u1' });
     });
 
-    it('fromUnit: legacy and migrated rows give identical participant and hash', async () => {
-        const legacy = stable(await build(unitRow({})));
+    it('fromUnit: migrated rows ignore the columns, identical participant and hash', async () => {
+        const defaulted = stable(
+            await build({
+                ...unitRow({ characteristics: { ...STATS } }),
+                strength: 10,
+                armorClass: 10,
+                initiative: 0,
+                speed: 30,
+            })
+        );
 
-        const migrated = stable(
+        const corrupted = stable(
             await build({
                 ...unitRow({ characteristics: { ...STATS } }),
                 strength: 1,
@@ -108,11 +116,11 @@ describe('units d20 columnView', () => {
             })
         );
 
-        expect(migrated).toEqual(legacy);
-        expect(hashJson(migrated)).toBe(hashJson(legacy));
+        expect(corrupted).toEqual(defaulted);
+        expect(hashJson(corrupted)).toBe(hashJson(defaulted));
     });
 
-    it('create writes characteristics and columns', async () => {
+    it('create writes characteristics and no column', async () => {
         await unitsResource.create(
             actor,
             createUnitSchema.parse({ name: 'Orc', ...STATS }) as never
@@ -120,10 +128,13 @@ describe('units d20 columnView', () => {
 
         const data = db.unit.create.mock.calls[0][0].data;
 
-        expect(data).toMatchObject({ ...STATS, characteristics: STATS });
+        expect(data.characteristics).toEqual(STATS);
+
+        for (const column of Object.keys(STATS))
+            expect(data).not.toHaveProperty(column);
     });
 
-    it('patch writes both and keeps unrelated characteristics keys', async () => {
+    it('patch writes characteristics only and keeps unrelated characteristics keys', async () => {
         await unitsResource.update(
             actor,
             {
@@ -136,7 +147,7 @@ describe('units d20 columnView', () => {
 
         const data = db.unit.update.mock.calls[0][0].data;
 
-        expect(data.armorClass).toBe(18);
+        expect(data).not.toHaveProperty('armorClass');
         expect(data.characteristics).toEqual({ extra: 1, armorClass: 18 });
     });
 
@@ -156,15 +167,17 @@ describe('units d20 columnView', () => {
         );
     });
 
-    it('unitCreateData / toUnitCreateData without a system stay legacy', () => {
+    it('unitCreateData / toUnitCreateData with a system write characteristics and no column', () => {
         const parsed = createUnitSchema.parse({ name: 'Orc', ...STATS });
 
         expect(unitCreateData('c1', parsed)).not.toHaveProperty(
             'characteristics'
         );
-        expect(
-            unitCreateData('c1', parsed, ruleSystemOf(rules)).characteristics
-        ).toEqual(STATS);
+
+        const created = unitCreateData('c1', parsed, ruleSystemOf(rules));
+
+        expect(created.characteristics).toEqual(STATS);
+        expect(created).not.toHaveProperty('strength');
         expect(
             toUnitCreateData(
                 'c1',

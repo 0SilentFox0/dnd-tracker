@@ -24,6 +24,10 @@ import {
 import { validateClassEntries } from '@/lib/utils/characters/classes/application';
 import { subclassesLabel } from '@/lib/utils/characters/classes/derive';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
+import {
+    omitColumnView,
+    withColumnView,
+} from '@/lib/utils/rules/systems/column-view';
 import { resolveClassEntries } from '@/lib/utils/spells/class-slots';
 import type { ChoicesBody } from '@/types/choices';
 
@@ -44,11 +48,14 @@ export async function saveCharacterChoices(
     return prisma.$transaction(async (tx) => {
         await lockCharacters(tx, [character.id]);
 
-        const row = await tx.character.findUnique({
+        const stored = await tx.character.findUnique({
             where: { id: character.id },
         });
 
-        if (!row) throw new ContentError(API_ERRORS.CHARACTER_NOT_FOUND, 404);
+        if (!stored)
+            throw new ContentError(API_ERRORS.CHARACTER_NOT_FOUND, 404);
+
+        const row = withColumnView(stored, ruleSystemOf(rules));
 
         const before = choicesStateOf(row);
 
@@ -121,7 +128,7 @@ export async function saveCharacterChoices(
         const updated = await tx.character.update({
             where: { id: row.id },
             data: {
-                ...resolved.fields,
+                ...omitColumnView(resolved.fields, ruleSystemOf(rules)),
                 ...characteristicsPatch(
                     resolved.fields,
                     ruleSystemOf(rules),
@@ -151,6 +158,6 @@ export async function saveCharacterChoices(
             },
         ]);
 
-        return updated;
+        return withColumnView(updated, ruleSystemOf(rules));
     });
 }
