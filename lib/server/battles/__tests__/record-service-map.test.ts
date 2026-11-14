@@ -388,6 +388,22 @@ describe('writeBattleRecord: patch mapId (перепривʼязка)', () => {
         });
     });
 
+    it('null: бібліотечна карта більша за inline-ліміт -> 422, нічого не пишеться', async () => {
+        mocks.getMap.mockResolvedValue({
+            map: header,
+            cols: 120,
+            rows: 120,
+            walls: [],
+            bars: [],
+        });
+
+        await expect(patch({ mapId: null })).rejects.toMatchObject({
+            status: 422,
+            message: API_ERRORS.BATTLE_MAP_TOO_LARGE,
+        });
+        expect(mocks.update).not.toHaveBeenCalled();
+    });
+
     it('map разом із mapId -> 400', async () => {
         await expect(patch({ mapId: 'm2', map: header })).rejects.toMatchObject(
             { status: 400 }

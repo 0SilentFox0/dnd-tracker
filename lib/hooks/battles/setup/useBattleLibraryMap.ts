@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { useBattleMaps } from '@/lib/hooks/battle-maps';
 import { useMapLibraryEnabled } from '@/lib/hooks/campaigns';
 import { useConfirm } from '@/lib/hooks/common';
+import { MAP_LIMITS } from '@/lib/constants/map-limits';
 import { battleMapMaxSide } from '@/lib/utils/battle/map-storage/limits';
 import type { BattleMapRef } from '@/types/battle';
 
@@ -40,8 +41,16 @@ export function useBattleLibraryMap(
 
     const changed = isEdit && choice !== undefined && choice !== linkedId;
 
+    const linkedMap = maps.find((m) => m.id === linkedId);
+
+    const canUnlink =
+        !linkedMap ||
+        Math.max(linkedMap.cols, linkedMap.rows) <= MAP_LIMITS.photoMaxSide;
+
     const select = useCallback(
         async (id: string | null) => {
+            if (id === null && !canUnlink) return;
+
             if (
                 isEdit &&
                 hadMap &&
@@ -57,7 +66,7 @@ export function useBattleLibraryMap(
 
             setChoice(id);
         },
-        [isEdit, hadMap, selectedId, confirm, t]
+        [isEdit, hadMap, selectedId, canUnlink, confirm, t]
     );
 
     return {
@@ -68,6 +77,7 @@ export function useBattleLibraryMap(
         maxSide: battleMapMaxSide({ mapLibraryEnabled: enabled }),
         isLinked: linkedId !== null && !changed,
         wasLinked: linkedId !== null,
+        canUnlink,
         isLocked: locked,
         isChanged: changed,
         selectedId,

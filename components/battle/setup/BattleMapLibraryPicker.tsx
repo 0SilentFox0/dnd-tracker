@@ -35,7 +35,7 @@ export function BattleMapLibraryPicker({
                 value={library.selectedId ?? ''}
                 onValueChange={(id) => void library.select(id || null)}
                 options={options}
-                allowNone
+                allowNone={library.canUnlink}
                 noneLabel={t('none')}
                 disabled={library.isLocked}
             />

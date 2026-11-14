@@ -3,6 +3,7 @@ import { type BattleScene, Prisma } from '@prisma/client';
 import { z } from 'zod';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
+import { MAP_LIMITS } from '@/lib/constants/map-limits';
 import { prisma } from '@/lib/db';
 import { BATTLE_AUDIO_EVENT, battleChannelName } from '@/lib/pusher/channels';
 import { safePusherTrigger } from '@/lib/pusher/safe-trigger';
@@ -174,6 +175,9 @@ async function relinkData(
         const lib = await getMap(row.mapId, row.mapVersion ?? undefined);
 
         if (!lib) throw new ContentError(API_ERRORS.BATTLE_MAP_NOT_FOUND, 404);
+
+        if (Math.max(lib.cols, lib.rows) > MAP_LIMITS.photoMaxSide)
+            throw new ContentError(API_ERRORS.BATTLE_MAP_TOO_LARGE, 422);
 
         const inline = materializeEdges(
             pinned ?? (lib.map as BattleMapConfig),

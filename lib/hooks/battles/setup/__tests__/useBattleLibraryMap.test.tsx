@@ -4,6 +4,11 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const h = vi.hoisted(() => ({
     enabled: true,
+    maps: [{ id: 'm1' }, { id: 'm2' }] as {
+        id: string;
+        cols?: number;
+        rows?: number;
+    }[],
     confirm: vi.fn(async () => true),
 }));
 
@@ -12,7 +17,7 @@ vi.mock('@/lib/hooks/campaigns', () => ({
     useMapLibraryEnabled: () => h.enabled,
 }));
 vi.mock('@/lib/hooks/battle-maps', () => ({
-    useBattleMaps: () => ({ data: [{ id: 'm1' }, { id: 'm2' }] }),
+    useBattleMaps: () => ({ data: h.maps }),
 }));
 vi.mock('@/lib/hooks/common', () => ({ useConfirm: () => h.confirm }));
 
@@ -27,6 +32,7 @@ describe('useBattleLibraryMap in edit mode', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         h.enabled = true;
+        h.maps = [{ id: 'm1' }, { id: 'm2' }];
     });
 
     it('prepared: picker visible with the flag on or when linked', () => {
@@ -86,6 +92,24 @@ describe('useBattleLibraryMap in edit mode', () => {
 
         expect(result.current.selectedId).toBe('m1');
         expect(result.current.isLinked).toBe(true);
+    });
+
+    it('a linked map above the inline limit cannot be unlinked', async () => {
+        h.maps = [{ id: 'm1', cols: 120, rows: 90 }, { id: 'm2' }];
+
+        const { result } = run({
+            isEdit: true,
+            status: 'prepared',
+            linked,
+            hadMap: true,
+        });
+
+        expect(result.current.canUnlink).toBe(false);
+
+        await act(() => result.current.select(null));
+
+        expect(result.current.selectedId).toBe('m1');
+        expect(h.confirm).not.toHaveBeenCalled();
     });
 
     it('create mode never confirms', async () => {
