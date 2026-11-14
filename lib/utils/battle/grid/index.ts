@@ -18,6 +18,7 @@ export * from './occupancy';
 export * from './path';
 export * from './placement';
 export * from './push';
+export * from './region-path';
 export * from './return-to-start';
 export * from './sight';
 export * from './template';
