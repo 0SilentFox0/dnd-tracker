@@ -17,6 +17,7 @@ export * from './path';
 export * from './placement';
 export * from './push';
 export * from './return-to-start';
+export * from './sight';
 export * from './template';
 export * from './terrain';
 export * from './walls';

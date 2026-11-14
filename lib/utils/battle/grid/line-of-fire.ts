@@ -1,3 +1,4 @@
+import { edgeBlocks } from './edges';
 import {
     blockedSet,
     cellKey,
@@ -66,5 +67,12 @@ export function lineOfFire(
         })
         .map(cellKey);
 
-    return { blocked: cells.length > 0 || modeLineBlocked(map, line), cells };
+    const wallBlocked = line.some(
+        (c, i) => i > 0 && edgeBlocks(map, line[i - 1], c, 'fire')
+    );
+
+    return {
+        blocked: cells.length > 0 || wallBlocked || modeLineBlocked(map, line),
+        cells,
+    };
 }

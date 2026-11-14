@@ -16,8 +16,8 @@ import {
     withChainTargets,
     withLiveAimTargets,
 } from '@/lib/utils/battle/flows';
-import { isOnMap } from '@/lib/utils/battle/grid';
-import { isHostile, modeSightedTargets } from '@/lib/utils/battle/modes/engine';
+import { isOnMap, sightedTargets } from '@/lib/utils/battle/grid';
+import { isHostile } from '@/lib/utils/battle/modes/engine';
 import {
     skillAllTargets,
     spellChain,
@@ -141,7 +141,7 @@ export function useSpellBookTargets(
         flow.pick?.targetMode === 'all' &&
         caster &&
         (flow.pick.targetSide === 'ally' || flow.pick.targetSide === 'enemy')
-            ? modeSightedTargets(
+            ? sightedTargets(
                   map,
                   order,
                   caster,

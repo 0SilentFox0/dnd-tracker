@@ -14,6 +14,7 @@ import { conditionSourceIds } from '@/lib/utils/battle/conditions/query';
 import { isDying } from '@/lib/utils/battle/death-saves';
 import { footprintDistance, inBounds } from '@/lib/utils/battle/grid/geometry';
 import { cellsOf, isOnMap } from '@/lib/utils/battle/grid/occupancy';
+import { sightedTargets, wallsAllowSight } from '@/lib/utils/battle/grid/sight';
 import {
     aimInRange,
     feetToCells,
@@ -24,13 +25,13 @@ import {
 import {
     isHostile,
     modeAimHiddenText,
-    modeSightedTargets,
     modeTargetHiddenText,
 } from '@/lib/utils/battle/modes/engine';
 import { isReserved } from '@/lib/utils/battle/participant/reserve';
 import { findEffectMarker } from '@/lib/utils/battle/participant/state';
 import { casterPicksSlot } from '@/lib/utils/battle/spell/picks-slot';
 import { matchesTargetFilter } from '@/lib/utils/battle/spell/target-filter';
+import { REJECT } from '@/lib/utils/battle/store/reject';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { SpellTargeting as SpellTargetingDef } from '@/lib/utils/spells/model/schema';
@@ -386,7 +387,7 @@ function resolveRaw(
         const skill = spellTargetingFor(ps, caster.basicInfo.id, spell);
 
         if (skill.mode === 'all') {
-            const all = modeSightedTargets(
+            const all = sightedTargets(
                 map,
                 ps,
                 caster,
@@ -434,8 +435,15 @@ function resolveRaw(
 
     if (targetHidden) return fail(targetHidden);
 
+    if (
+        map &&
+        (targeting.kind === 'ally' || targeting.kind === 'enemy') &&
+        picked.some((p) => !wallsAllowSight(map, caster, p))
+    )
+        return fail(textRef(REJECT.targetUnreachable));
+
     const sighted = (filter: (p: BattleParticipant) => boolean) =>
-        modeSightedTargets(map, ps, caster, ids(filter));
+        sightedTargets(map, ps, caster, ids(filter));
 
     switch (targeting.kind) {
         case 'self':
