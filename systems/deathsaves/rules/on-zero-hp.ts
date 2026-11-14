@@ -1,14 +1,10 @@
-import { dropBrokenConcentration } from '../concentration/damaged';
 import { deathSaveDamage } from './roll';
 import { startDying } from './start';
 import { clearDeathSaves, deathSavesOf } from './state';
 
 import { CombatStatus, ParticipantSourceType } from '@/lib/constants/battle';
 import { textRef } from '@/lib/i18n/text-ref';
-import {
-    findParticipant,
-    replaceParticipant,
-} from '@/lib/utils/abilities/engine/core/participants';
+import { replaceParticipant } from '@/lib/utils/abilities/engine/core/participants';
 import type { DamageConsequencesResult } from '@/lib/utils/battle/damage/consequences';
 import type { ZeroHpCtx } from '@/lib/utils/rules/systems/types';
 import type { BattleParticipant } from '@/types/battle';
@@ -147,27 +143,15 @@ function settleManual(ctx: ZeroHpCtx): DamageConsequencesResult {
     if (rules.deathSaves.enabled && isHero && wentDown && !deathSavesOf(next))
         next = startDying(next, rules);
 
-    const ps =
-        next === after ? participants : replaceParticipant(participants, next);
-
-    if (!rules.concentration.enabled)
-        return {
-            participant: findParticipant(ps, next.basicInfo.id) ?? next,
-            participants: ps,
-            messages: [],
-        };
-
-    const dropped = dropBrokenConcentration(next, ps);
-
     return {
-        participant:
-            findParticipant(dropped.participants, next.basicInfo.id) ?? next,
-        participants: dropped.participants,
-        messages: dropped.messages,
+        participant: next,
+        participants:
+            next === after ? participants : replaceParticipant(participants, next),
+        messages: [],
     };
 }
 
-export function d20OnZeroHp(ctx: ZeroHpCtx): DamageConsequencesResult {
+export function deathSavesOnZeroHp(ctx: ZeroHpCtx): DamageConsequencesResult {
     if (ctx.manual) return settleManual(ctx);
 
     const hero = heroGoesDown(ctx);

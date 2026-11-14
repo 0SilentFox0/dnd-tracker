@@ -4,7 +4,6 @@ export const D20_RULES_PRESET = {
     criticals: { effects: false, doubleDice: true },
     initiative: { heroMin: 0, heroMax: 20, mode: 'roll' },
     saves: { proficiency: true },
-    deathSaves: { enabled: true },
     concentration: { enabled: true },
     conditions: { enabled: true, exhaustion: '2024' },
     actions: { enabled: true, variant: '2024' },

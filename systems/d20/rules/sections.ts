@@ -88,11 +88,6 @@ export const D20_SECTIONS: SectionsContribution = {
             refineMessage: INITIATIVE_ORDER_MESSAGE,
         },
         saves: { owner: 'd20', mechanic: true, items: sectionItems('saves') },
-        deathSaves: {
-            owner: 'd20',
-            mechanic: true,
-            items: sectionItems('deathSaves'),
-        },
         concentration: {
             owner: 'd20',
             mechanic: true,

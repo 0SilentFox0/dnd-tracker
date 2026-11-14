@@ -2,7 +2,7 @@ import { rollDyingAt } from './roll';
 
 import type { TurnHook, TurnSubjectCtx } from '@/lib/utils/rules/systems/types';
 
-export const d20DeathSaveOnSkip: TurnHook<TurnSubjectCtx> = ({
+export const deathSaveOnSkip: TurnHook<TurnSubjectCtx> = ({
     participants,
     id,
     rules,

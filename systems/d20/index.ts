@@ -9,9 +9,6 @@ import { d20HitModel } from './rules/balance';
 import { concentrationFallout } from './rules/concentration/damaged';
 import { D20_CONDITION_SET } from './rules/conditions';
 import { d20Damage } from './rules/damage';
-import { d20HoldsOn } from './rules/death-saves/holds';
-import { d20OnZeroHp } from './rules/death-saves/on-zero-hp';
-import { reviveFromDying } from './rules/death-saves/state';
 import { d20Initiative, d20TieBreak } from './rules/initiative';
 import { D20_INSPIRATION } from './rules/inspiration';
 import { D20_MAGIC } from './rules/magic';
@@ -26,6 +23,7 @@ import { rollFromSheet } from './rules/sheet-roll';
 import { d20FromStored, d20Persist } from './rules/state-parts';
 import { D20_STAT_COLUMNS } from './rules/stats';
 import { D20_TURN } from './rules/turn';
+import { d20OnZeroHp } from './rules/zero-hp';
 
 import type { RuleSystemDefinition } from '@/lib/utils/rules/systems/types';
 import { d20ZoneAttack } from '@/systems/d20/rules/magic/spell-roll';
@@ -77,8 +75,6 @@ export const D20_MODULE: RuleSystemDefinition = {
         abortedRoll: d20AbortedRoll,
         onZeroHp: d20OnZeroHp,
         onDamaged: [concentrationFallout],
-        onRevived: reviveFromDying,
-        holdsOn: d20HoldsOn,
         turn: D20_TURN,
         actions: D20_ACTIONS,
         reactions: D20_REACTIONS,

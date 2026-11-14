@@ -5,7 +5,7 @@ import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/moc
 import { applyDamageConsequences } from '@/lib/utils/battle/damage/consequences';
 import { dealResistedDamage } from '@/lib/utils/battle/damage/resisted-ability-damage';
 import { DEFAULT_RULES, type Ruleset } from '@/lib/utils/rules';
-import { deathSavesOf } from '@/systems/d20/rules/death-saves/state';
+import { deathSavesOf } from '@/systems/deathsaves/rules/state';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
 import { wfrpState, withWfrpState } from '@/systems/wfrp/rules/state';
 import type { BattleParticipant } from '@/types/battle';

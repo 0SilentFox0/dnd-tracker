@@ -28,7 +28,7 @@ import {
     isZoneConcentrationLive,
 } from '@/systems/d20/rules/concentration/sustain';
 import { applyCondition5e } from '@/systems/d20/rules/conditions/apply';
-import { DEATH_SAVES_TIMED_KEY } from '@/systems/d20/rules/death-saves/state';
+import { DEATH_SAVES_TIMED_KEY } from '@/systems/deathsaves/rules/state';
 import type { BattleMapConfig, BattleParticipant } from '@/types/battle';
 
 const rulesOn = (dcCap: number | null = null): Ruleset => ({

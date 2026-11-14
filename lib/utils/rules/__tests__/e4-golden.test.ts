@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 import heroesHomm from '@/data/templates/heroes-homm/rules.json';
@@ -7,7 +9,11 @@ import { initialRules } from '@/lib/utils/rules/initial-rules';
 
 const golden = (name: string) => `./__golden__/${name}.json`;
 
-const json = (value: unknown) => `${JSON.stringify(value, null, 2)}\n`;
+const storedGolden = (name: string) =>
+    JSON.parse(
+        readFileSync(join(__dirname, golden(name)), 'utf8')
+    ) as unknown;
+
 
 describe('E4 golden: stable before and after the d20 module split', () => {
     it('initialRules dnd5e without modules: sections stay, modules come from the preset', async () => {
@@ -24,20 +30,16 @@ describe('E4 golden: stable before and after the d20 module split', () => {
             'opportunity',
         ]);
 
-        await expect(json(sections)).toMatchFileSnapshot(
-            golden('initial-rules-dnd5e')
-        );
+        expect(sections).toEqual(storedGolden('initial-rules-dnd5e'));
     });
 
-    it('rulesHashes srd-5.2', async () => {
-        await expect(json(rulesHashes(srd))).toMatchFileSnapshot(
-            golden('rules-hashes-srd-5.2')
-        );
+    it('rulesHashes srd-5.2', () => {
+        expect(rulesHashes(srd)).toEqual(storedGolden('rules-hashes-srd-5.2'));
     });
 
-    it('rulesHashes heroes-homm', async () => {
-        await expect(json(rulesHashes(heroesHomm))).toMatchFileSnapshot(
-            golden('rules-hashes-heroes-homm')
+    it('rulesHashes heroes-homm', () => {
+        expect(rulesHashes(heroesHomm)).toEqual(
+            storedGolden('rules-hashes-heroes-homm')
         );
     });
 });

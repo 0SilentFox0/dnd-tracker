@@ -5,6 +5,7 @@ export const DEATHSAVES_META = {
     kind: 'addon',
     keys: [],
     requires: ['d20'],
+    claims: ['combat.onZeroHp'],
     toggle: 'free',
     i18n: {},
 } as const satisfies SystemMeta;

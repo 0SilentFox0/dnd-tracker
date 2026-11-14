@@ -1,6 +1,4 @@
-import { d20State, d20StateData, type DeathSaves } from '../state';
-
-import { CombatStatus } from '@/lib/constants/battle';
+import { d20State, d20StateData, type DeathSaves } from '@/systems/d20/rules/state';
 import type { BattleParticipant } from '@/types/battle';
 
 export const DEATH_SAVES_TIMED_KEY = 'death-saves:unconscious';
@@ -38,17 +36,5 @@ export function clearDeathSaves(p: BattleParticipant): BattleParticipant {
                 (e) => e.abilityKey !== DEATH_SAVES_TIMED_KEY
             ),
         },
-    };
-}
-
-/** `combat.onRevived`: a hero raised above 0 HP leaves the dying state */
-export function reviveFromDying(p: BattleParticipant): BattleParticipant {
-    if (!deathSavesOf(p)) return p;
-
-    const woke = clearDeathSaves(p);
-
-    return {
-        ...woke,
-        combatStats: { ...woke.combatStats, status: CombatStatus.ACTIVE },
     };
 }

@@ -8,8 +8,8 @@ import {
 import { applyRawDamage } from '@/lib/utils/abilities/engine/effects/hp';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import { DEFAULT_RULES, type Ruleset } from '@/lib/utils/rules';
-import { d20OnZeroHp } from '@/systems/d20/rules/death-saves/on-zero-hp';
-import { deathSavesOf } from '@/systems/d20/rules/death-saves/state';
+import { deathSavesOnZeroHp } from '@/systems/deathsaves/rules/on-zero-hp';
+import { deathSavesOf } from '@/systems/deathsaves/rules/state';
 import type { BattleParticipant } from '@/types/battle';
 
 const rules: Ruleset = {
@@ -35,7 +35,7 @@ const mock = (
 };
 
 const hit = (before: BattleParticipant, amount: number) =>
-    d20OnZeroHp({
+    deathSavesOnZeroHp({
         before,
         after: applyRawDamage(before, amount),
         amount,
@@ -44,7 +44,7 @@ const hit = (before: BattleParticipant, amount: number) =>
         participants: [before],
     });
 
-describe('d20OnZeroHp', () => {
+describe('deathSavesOnZeroHp', () => {
     it('a hero dropped to 0 starts dying', () => {
         const r = hit(mock(ParticipantSourceType.CHARACTER, 5), 6);
 

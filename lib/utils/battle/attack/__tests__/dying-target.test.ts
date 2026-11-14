@@ -8,8 +8,8 @@ import {
 import { makeParticipant, seq } from '@/lib/utils/abilities/__tests__/fixtures';
 import { processAttack } from '@/lib/utils/battle/attack/process';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
-import { withDeathSaves } from '@/systems/d20/rules/death-saves/state';
 import { d20State } from '@/systems/d20/rules/state';
+import { withDeathSaves } from '@/systems/deathsaves/rules/state';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
 
 const sword: BattleAttack = {

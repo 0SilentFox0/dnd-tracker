@@ -1,4 +1,3 @@
-import { D20_CONDITION_SET } from '../conditions';
 import {
     DEATH_SAVES_TIMED_KEY,
     FRESH_DEATH_SAVES,
@@ -9,6 +8,7 @@ import { CombatStatus } from '@/lib/constants/battle';
 import { upsertLabeled } from '@/lib/utils/battle/actions/effects';
 import { PERMANENT_ROUNDS } from '@/lib/utils/battle/conditions/set';
 import type { Ruleset } from '@/lib/utils/rules';
+import { D20_CONDITION_SET } from '@/systems/d20/rules/conditions';
 import type { BattleParticipant } from '@/types/battle';
 
 export function startDying(

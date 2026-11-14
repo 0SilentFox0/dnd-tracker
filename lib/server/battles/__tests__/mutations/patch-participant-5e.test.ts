@@ -7,8 +7,8 @@ import { patchParticipantMutation } from '@/lib/server/battles/mutations/partici
 import { hasCondition } from '@/lib/utils/battle/conditions';
 import { DEFAULT_RULES, type Ruleset } from '@/lib/utils/rules';
 import { beginConcentration } from '@/systems/d20/rules/concentration/sustain';
-import { startDying } from '@/systems/d20/rules/death-saves/start';
 import { d20State } from '@/systems/d20/rules/state';
+import { startDying } from '@/systems/deathsaves/rules/start';
 import type { BattleParticipant } from '@/types/battle';
 
 const rules: Ruleset = {

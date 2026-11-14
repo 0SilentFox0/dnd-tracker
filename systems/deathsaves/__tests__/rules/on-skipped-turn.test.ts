@@ -4,10 +4,10 @@ import { CombatStatus } from '@/lib/constants/battle';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import { runTurnHooks } from '@/lib/utils/battle/turn/hooks';
 import { DEFAULT_RULES, type Ruleset } from '@/lib/utils/rules';
-import { d20DeathSaveOnSkip } from '@/systems/d20/rules/death-saves/on-skipped-turn';
-import { startDying } from '@/systems/d20/rules/death-saves/start';
-import { deathSavesOf } from '@/systems/d20/rules/death-saves/state';
 import { withD20State } from '@/systems/d20/rules/state';
+import { deathSaveOnSkip } from '@/systems/deathsaves/rules/on-skipped-turn';
+import { startDying } from '@/systems/deathsaves/rules/start';
+import { deathSavesOf } from '@/systems/deathsaves/rules/state';
 
 const on: Ruleset = {
     ...DEFAULT_RULES,
@@ -24,7 +24,7 @@ const dying = () => {
 };
 
 const run = (rules: Ruleset, roll: number, p = dying()) =>
-    runTurnHooks([d20DeathSaveOnSkip], {
+    runTurnHooks([deathSaveOnSkip], {
         participants: [p],
         id: p.basicInfo.id,
         round: 2,
@@ -32,7 +32,7 @@ const run = (rules: Ruleset, roll: number, p = dying()) =>
         rules,
     });
 
-describe('d20DeathSaveOnSkip', () => {
+describe('deathSaveOnSkip', () => {
     it('a dying participant rolls a death save and the turn is skipped', () => {
         const r = run(on, 12);
 

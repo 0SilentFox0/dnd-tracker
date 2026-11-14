@@ -22,13 +22,13 @@ import { beginConcentration } from '@/systems/d20/rules/concentration/sustain';
 import {
     deathSaveDamage,
     rollDeathSave,
-} from '@/systems/d20/rules/death-saves/roll';
-import { startDying } from '@/systems/d20/rules/death-saves/start';
+} from '@/systems/deathsaves/rules/roll';
+import { startDying } from '@/systems/deathsaves/rules/start';
 import {
     clearDeathSaves,
     deathSavesOf,
     withDeathSaves,
-} from '@/systems/d20/rules/death-saves/state';
+} from '@/systems/deathsaves/rules/state';
 import type { BattleParticipant } from '@/types/battle';
 
 const checkVictoryConditions = (

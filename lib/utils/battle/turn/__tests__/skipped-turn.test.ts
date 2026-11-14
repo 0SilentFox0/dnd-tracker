@@ -7,8 +7,8 @@ import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/moc
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
-import { rollDyingAt } from '@/systems/d20/rules/death-saves/roll';
-import { withDeathSaves } from '@/systems/d20/rules/death-saves/state';
+import { rollDyingAt } from '@/systems/deathsaves/rules/roll';
+import { withDeathSaves } from '@/systems/deathsaves/rules/state';
 import { DEFAULT_CHARACTERISTICS } from '@/systems/wfrp/rules/characteristics/keys';
 import { wfrpAbilitiesOf } from '@/systems/wfrp/rules/combat/participant';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';

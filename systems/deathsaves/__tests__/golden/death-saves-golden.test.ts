@@ -12,9 +12,9 @@ import { initialRules } from '@/lib/utils/rules/initial-rules';
 import { parseRules, type Ruleset } from '@/lib/utils/rules/schema';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import { beginConcentration } from '@/systems/d20/rules/concentration/sustain';
-import { startDying } from '@/systems/d20/rules/death-saves/start';
-import { deathSavesOf } from '@/systems/d20/rules/death-saves/state';
 import { withD20State } from '@/systems/d20/rules/state';
+import { startDying } from '@/systems/deathsaves/rules/start';
+import { deathSavesOf } from '@/systems/deathsaves/rules/state';
 import type { BattleParticipant } from '@/types/battle';
 
 const rulesOf = (key: string, enabled: boolean): Ruleset => {
