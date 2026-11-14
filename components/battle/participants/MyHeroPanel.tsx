@@ -14,7 +14,7 @@ import {
 } from '@/components/battle/hud';
 import { ReactionSpellButton } from '@/components/battle/turn/ReactionSpellButton';
 import { ReadiedAttackButton } from '@/components/battle/turn/ReadiedAttackButton';
-import { useSystemBattleUi } from '@/components/battle/use-system-battle-ui';
+import { useSystemBattleUi, useSystemFx } from '@/components/battle/use-system-battle-ui';
 import { BattleStatus } from '@/lib/constants/battle';
 import {
     useBattleRules,
@@ -56,7 +56,7 @@ export const MyHeroPanel = memo(function MyHeroPanel({
         change,
         shown: hero,
         shakeRef,
-    } = useHitFx<HTMLDivElement>(live, useFxImpacts()(live.basicInfo.id));
+    } = useHitFx<HTMLDivElement>(live, useFxImpacts(useSystemFx())(live.basicInfo.id));
 
     const until = turnsUntil(queue, [hero.basicInfo.id]);
 

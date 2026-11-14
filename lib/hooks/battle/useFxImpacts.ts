@@ -4,6 +4,7 @@ import { useCallback, useMemo } from 'react';
 
 import { useBattleSceneData } from './useBattleScene';
 import { useFxEnabled } from './useFxEnabled';
+import { useSystemDice } from './useSystemDice';
 
 import { usePageHidden } from '@/lib/hooks/common';
 import {
@@ -13,6 +14,7 @@ import {
     MAX_FX_BATCH,
     MAX_FX_MS,
     splashTargetIds,
+    type SystemFx,
 } from '@/lib/utils/battle/fx';
 import { DICE_TOTAL_MS } from '@/lib/utils/battle/fx/dice';
 import type { BattleAction } from '@/types/battle';
@@ -27,12 +29,14 @@ function recentActions(log: BattleAction[]): BattleAction[] {
 }
 
 /** Рядки отримують вплив пропом, щоб не підписуватись на контекст сцени; об'єкти стабільні між рендерами. */
-export function useFxImpacts(): (participantId: string) => FxImpact | null {
+export function useFxImpacts(
+    fx?: SystemFx
+): (participantId: string) => FxImpact | null {
     const { battle } = useBattleSceneData();
 
     const log = battle.battleLog;
 
-    const moraleQueued = !!battle.pendingMoraleCheck;
+    const systemDice = useSystemDice(fx).length;
 
     const { enabled } = useFxEnabled();
 
@@ -53,7 +57,7 @@ export function useFxImpacts(): (participantId: string) => FxImpact | null {
             };
         });
 
-        // запобіжник покриває все, що стоїть у черзі від цієї дії до кінця вікна (кубики, анімації, можлива мораль)
+        // запобіжник покриває все, що стоїть у черзі від цієї дії до кінця вікна (кубики, анімації, кубики системи)
         const waitFrom = (from: number) => {
             const rest = actions.slice(from);
 
@@ -63,7 +67,7 @@ export function useFxImpacts(): (participantId: string) => FxImpact | null {
                 dice * DICE_TOTAL_MS +
                 rest.length * MAX_FX_MS +
                 FX_IMPACT_SLACK_MS +
-                (moraleQueued ? DICE_TOTAL_MS : 0)
+                systemDice * DICE_TOTAL_MS
             );
         };
 
@@ -93,7 +97,7 @@ export function useFxImpacts(): (participantId: string) => FxImpact | null {
         });
 
         return result;
-    }, [log, enabled, moraleQueued, hidden]);
+    }, [log, enabled, systemDice, hidden]);
 
     return useCallback(
         (participantId: string) => impacts.get(participantId) ?? null,

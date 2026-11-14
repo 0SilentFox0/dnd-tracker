@@ -10,6 +10,7 @@ import {
 } from '@/components/battle/fx/runtime/play';
 import { cancelLayer } from '@/components/battle/fx/runtime/stage';
 import { useFxBadgeLabels } from '@/components/battle/fx/use-badge-labels';
+import { useSystemFx } from '@/components/battle/use-system-battle-ui';
 import { DiceStage, type DiceStageHandle } from '@/components/dice/DiceStage';
 import {
     fireFxImpact,
@@ -61,7 +62,7 @@ export function BattleFxLayer() {
 
     const labels = useFxBadgeLabels();
 
-    const { current, queue, done, active } = useBattleFxQueue(enabled);
+    const { current, queue, done, active } = useBattleFxQueue(enabled, useSystemFx());
 
     // Signatures load the moment they are queued, so they are ready by their turn.
     useEffect(() => {

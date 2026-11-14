@@ -52,6 +52,10 @@ vi.mock('@/lib/hooks/battle', () => ({
     }),
 }));
 
+vi.mock('@/components/battle/use-system-battle-ui', () => ({
+    useSystemFx: () => undefined,
+}));
+
 import { BattleFxLayer } from '@/components/battle/fx/BattleFxLayer';
 import { MAX_FX_MS } from '@/lib/utils/battle/fx';
 import { DICE_TOTAL_MS } from '@/lib/utils/battle/fx/dice';

@@ -3,8 +3,8 @@ import { act, renderHook } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { fakeScene } from '@/lib/hooks/battle/__tests__/fake-scene';
-import { moraleDiceDone } from '@/lib/hooks/battle/morale-dice';
 import { usePlayerTurn as useTurn } from '@/lib/hooks/battle/usePlayerTurn';
+import { moraleDiceDone } from '@/systems/morale/hooks/morale-dice';
 import { useMoraleRoll } from '@/systems/morale/hooks/useMoraleRoll';
 
 const fx = vi.hoisted(() => ({ enabled: false }));

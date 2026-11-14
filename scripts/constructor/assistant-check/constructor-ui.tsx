@@ -220,7 +220,7 @@ export function ConstructorUiCheck({ flow }: { flow: string }) {
                     <SystemDmPage
                         campaignId="synthetic"
                         section="backgrounds"
-                        system={{ key: 'dnd5e' }}
+                        system={DEFAULT_RULES.system}
                         canEdit
                         view={{ type: 'edit', id: browserBackground.id }}
                         data={browserBackground}
@@ -229,7 +229,7 @@ export function ConstructorUiCheck({ flow }: { flow: string }) {
                     <SystemDmPage
                         campaignId="synthetic"
                         section="classes"
-                        system={{ key: 'dnd5e' }}
+                        system={DEFAULT_RULES.system}
                         canEdit
                         view={{ type: 'edit', id: browserClass.id }}
                         data={browserClass}

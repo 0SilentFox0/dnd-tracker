@@ -18,8 +18,8 @@ export {
     advanceFxQueue,
     type FxQueueState,
     INITIAL_FX_QUEUE,
-    isMoraleFx,
     MAX_FX_QUEUE,
+    sameKeys,
     shiftFxQueue,
     trimFxQueue,
 } from './queue';
@@ -29,5 +29,11 @@ export type {
     SpellFxTarget,
 } from './spell-preview';
 export type { SpellFx } from './spells';
+export type {
+    SystemDice,
+    SystemDiceEvent,
+    SystemDiceSource,
+    SystemFx,
+} from './system-dice';
 export { MAX_FX_BATCH, MAX_FX_MS } from './timing';
 export type { FxArchetype, FxAuraKind, FxElement, FxSpec } from './types';

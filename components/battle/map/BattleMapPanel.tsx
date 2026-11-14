@@ -12,6 +12,7 @@ import { useMapToolsSlot } from './MapToolsSlot';
 import { MapWeatherPicker } from './MapWeatherPicker';
 
 import { modeUiOf } from '@/components/battle/modes';
+import { useSystemFx } from '@/components/battle/use-system-battle-ui';
 import { useBattleMapScene } from '@/lib/hooks/battle';
 import { cn } from '@/lib/utils';
 
@@ -50,7 +51,7 @@ function ModeButton({
 export function BattleMapPanel({ phone = false }: { phone?: boolean }) {
     const t = useTranslations('battle.map.tools');
 
-    const scene = useBattleMapScene();
+    const scene = useBattleMapScene(useSystemFx());
 
     const slot = useMapToolsSlot();
 

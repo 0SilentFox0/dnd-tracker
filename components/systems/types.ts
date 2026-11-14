@@ -6,6 +6,7 @@ import type { TurnGateControls } from '@/lib/hooks/battle/types';
 import type { SystemConditionBody } from '@/lib/hooks/battles';
 import type { RulesFormState } from '@/lib/hooks/campaigns';
 import type { TurnGateOutcome } from '@/lib/utils/battle/flows';
+import type { SystemFx } from '@/lib/utils/battle/fx';
 import type { BattleKnowledge } from '@/lib/utils/battle/view/knowledge';
 import type { CharacterFormBindings } from '@/lib/utils/characters/form/bindings';
 import type { MechanicKey } from '@/lib/utils/rules/registry';
@@ -230,6 +231,7 @@ export interface SystemBattleUi {
 
 export interface SystemUi {
     battle: SystemBattleUi;
+    fx?: SystemFx;
     SpellMagicFields?: ComponentType<SpellMagicFieldsProps>;
     HeroStats: ComponentType;
     StatsTab: ComponentType<StatsTabProps>;
