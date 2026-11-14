@@ -58,6 +58,7 @@ import {
     bonusActionSchema,
     castSpellSchema,
     mapTerrainSchema,
+    mapWallsSchema,
     mazeActionSchema,
     mazeMarkSchema,
     moveSchema,
@@ -72,6 +73,7 @@ import {
     battleConditionsSchema,
 } from '@/lib/server/battles/mutations/conditions/conditions-mutation';
 import { mapTerrainMutation } from '@/lib/server/battles/mutations/map-terrain/map-terrain-mutation';
+import { mapWallsMutation } from '@/lib/server/battles/mutations/map-walls/map-walls-mutation';
 import { mazeMutation } from '@/lib/server/battles/mutations/maze/maze-mutation';
 import { mazeMarkMutation } from '@/lib/server/battles/mutations/maze-mark/maze-mark-mutation';
 import { moveMutation } from '@/lib/server/battles/mutations/move/move-mutation';
@@ -114,9 +116,9 @@ import {
     parseCellKey,
 } from '@/lib/utils/battle/grid/geometry';
 import { cellsOf } from '@/lib/utils/battle/grid/occupancy';
+import { canStep } from '@/lib/utils/battle/grid/walls';
 import {
     allReachExit,
-    canStep,
     featureKeys,
     isMazeHero,
     mazeBudgetLeft,
@@ -745,6 +747,13 @@ const MAP_TERRAIN = {
     requireStatus: 'active',
     schema: mapTerrainSchema,
     mutate: mapTerrainMutation,
+};
+
+const MAP_WALLS = {
+    access: 'dm',
+    requireStatus: 'active',
+    schema: mapWallsSchema,
+    mutate: mapWallsMutation,
 };
 
 const MAZE = {
@@ -4545,7 +4554,91 @@ async function mapCheck(spells: Map<string, any>) {
         `${victim?.basicInfo.name} HP ${hpBefore} → ${after?.combatStats.currentHp}; terrain=${tr?.status}; ${entry ? `${resultTextOf(entry)}; hpChanges ${JSON.stringify(change)}` : 'запису hazard немає'}`
     );
 
+    await mapWallsCheck();
+
     await mapSkillAllCheck(spells);
+}
+
+async function mapWallsCheck() {
+    const name =
+        'Карта: стіни навколо бійця — рух заборонено, після зняття дозволено';
+
+    if (state.status !== 'active')
+        return tskip(name, `бій не активний (${state.status})`);
+
+    await untilTurnOf(
+        (p) => p.basicInfo.side === 'ally' && alive(p) && p.battleData.position
+    );
+
+    const mover = current();
+
+    const at = mover.battleData.position as { x: number; y: number };
+
+    const cols = 12;
+
+    const rows = 8;
+
+    const edges = [
+        at.x < cols - 1 && `${at.x}:${at.y}:e`,
+        at.x > 0 && `${at.x - 1}:${at.y}:e`,
+        at.y < rows - 1 && `${at.x}:${at.y}:s`,
+        at.y > 0 && `${at.x}:${at.y - 1}:s`,
+    ].filter(Boolean) as string[];
+
+    const taken = new Set(
+        P()
+            .filter(alive)
+            .map(
+                (p) => `${p.battleData.position?.x}:${p.battleData.position?.y}`
+            )
+    );
+
+    const target = [
+        { x: at.x + 1, y: at.y },
+        { x: at.x - 1, y: at.y },
+        { x: at.x, y: at.y + 1 },
+        { x: at.x, y: at.y - 1 },
+    ].find(
+        (c) =>
+            c.x >= 0 &&
+            c.y >= 0 &&
+            c.x < cols &&
+            c.y < rows &&
+            !taken.has(`${c.x}:${c.y}`)
+    );
+
+    if (!target) return tskip(name, 'немає вільної сусідньої клітинки');
+
+    const built = await call('map-walls', MAP_WALLS, {
+        kind: 'walls',
+        add: edges,
+        remove: [],
+    });
+
+    const blocked = await call('move', MOVE, {
+        participantId: mover.basicInfo.id,
+        to: target,
+    });
+
+    const cleared = await call('map-walls', MAP_WALLS, {
+        kind: 'walls',
+        add: [],
+        remove: edges,
+    });
+
+    const free = await call('move', MOVE, {
+        participantId: mover.basicInfo.id,
+        to: target,
+    });
+
+    tcheck(
+        name,
+        built.status === 200 &&
+            blocked.status !== 200 &&
+            cleared.status === 200 &&
+            free.status === 200,
+        `стіни ${built.status}, рух крізь стіни ${blocked.status}, зняття ${cleared.status}, рух після ${free.status}`
+    );
 }
 
 /** Вміння «all» на карті: одиночне вороже заклинання б'є всю ворожу сторону без точки й дальності. */
