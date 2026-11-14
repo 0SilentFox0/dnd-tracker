@@ -14,7 +14,7 @@ import { D20_MAGIC } from './rules/magic';
 import { d20UnitSpellDc } from './rules/participant/unit-spell-dc';
 import { proficiencyForLevel } from './rules/proficiency/level';
 import { d20MaxHp } from './rules/progression/max-hp';
-import { D20_REACTIONS, d20ProvokedOpportunity } from './rules/reactions';
+import { D20_REACTIONS } from './rules/reactions';
 import { D20_PROFICIENCY, D20_SAVES } from './rules/saves';
 import { d20SheetBlock } from './rules/sheet/block';
 import { rollFromSheet } from './rules/sheet-roll';
@@ -75,7 +75,6 @@ export const D20_MODULE: RuleSystemDefinition = {
         reactions: D20_REACTIONS,
         saves: D20_SAVES,
         proficiency: D20_PROFICIENCY,
-        afterAttack: [d20ProvokedOpportunity],
         initiative: d20Initiative,
         tieBreak: d20TieBreak,
         hitModel: d20HitModel,

@@ -13,7 +13,7 @@ import { runAfterAttack } from '@/lib/utils/battle/attack-phase/after-attack';
 import { DEFAULT_RULES, type Ruleset } from '@/lib/utils/rules';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { AfterAttackCtx } from '@/lib/utils/rules/systems/types';
-import { d20ProvokedOpportunity } from '@/systems/d20/rules/reactions/provoked';
+import { d20ProvokedOpportunity } from '@/systems/opportunity/rules/provoked';
 import { retaliationAfterAttack } from '@/systems/retaliation/rules/after-attack';
 import {
     retaliationStateData,
@@ -28,7 +28,10 @@ const rulesOf = (system: Ruleset['system']): Ruleset => ({
 
 const bare = rulesOf({ key: 'dnd5e' });
 
-const withModule = rulesOf({ key: 'dnd5e', modules: ['retaliation'] });
+const withModule = rulesOf({
+    key: 'dnd5e',
+    modules: ['opportunity', 'retaliation'],
+});
 
 const answer = {
     participants: [createMockParticipant()],

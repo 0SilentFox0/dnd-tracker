@@ -1,6 +1,11 @@
 'use client';
 
-import { type ReactNode, useEffect, useState, useSyncExternalStore } from 'react';
+import {
+    type ReactNode,
+    useEffect,
+    useState,
+    useSyncExternalStore,
+} from 'react';
 
 import { LoadingState } from '@/components/common/states';
 import {
@@ -54,7 +59,10 @@ export function SystemGate({
 
     const selection = `${system.key}|${modulesKey}`;
 
-    const [failure, setFailure] = useState<{ selection: string; error: unknown }>();
+    const [failure, setFailure] = useState<{
+        selection: string;
+        error: unknown;
+    }>();
 
     const ready = useSyncExternalStore(
         subscribeSystems,

@@ -5,7 +5,7 @@ import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/moc
 import { resolveServerAttack } from '@/lib/utils/battle/attack/server-attack';
 import { pathTo } from '@/lib/utils/battle/grid/path';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
-import { resolveOpportunityAttacks } from '@/systems/d20/rules/reactions/opportunity';
+import { resolveOpportunityAttacks } from '@/systems/opportunity/rules/opportunity';
 import type {
     BattleAttack,
     BattleMapConfig,

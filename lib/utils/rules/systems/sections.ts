@@ -5,6 +5,7 @@ import { DEATHSAVES_SECTIONS } from '@/systems/deathsaves/rules/sections';
 import { HEROSCALING_SECTIONS } from '@/systems/heroscaling/rules/sections';
 import { INSPIRATION_SECTIONS } from '@/systems/inspiration/rules/sections';
 import { MORALE_SECTIONS } from '@/systems/morale/rules/sections';
+import { OPPORTUNITY_SECTIONS } from '@/systems/opportunity/rules/sections';
 import { RETALIATION_SECTIONS } from '@/systems/retaliation/rules/sections';
 import { WFRP_SECTIONS } from '@/systems/wfrp/rules/sections';
 // </systems:generated>
@@ -18,6 +19,7 @@ export const SECTION_CONTRIBUTIONS: Readonly<
     heroscaling: HEROSCALING_SECTIONS,
     inspiration: INSPIRATION_SECTIONS,
     morale: MORALE_SECTIONS,
+    opportunity: OPPORTUNITY_SECTIONS,
     retaliation: RETALIATION_SECTIONS,
     wfrp: WFRP_SECTIONS,
     // </systems:generated>

@@ -74,6 +74,10 @@ export const LOADERS: Record<string, Loader> = {
     opportunity: {
         rules: () =>
             import('@/systems/opportunity').then((m) => m.OPPORTUNITY_MODULE),
+        ui: () =>
+            import('@/systems/opportunity/ui').then(
+                (m) => m.OPPORTUNITY_MODULE_UI
+            ),
     },
     retaliation: {
         rules: () =>

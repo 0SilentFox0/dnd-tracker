@@ -1,4 +1,3 @@
-import { resolveOpportunityAttacks } from '../reactions/opportunity';
 import { planDrag } from './grapple';
 
 import { textRef } from '@/lib/i18n/text-ref';
@@ -15,10 +14,46 @@ import { releaseGrapples } from '@/lib/utils/battle/conditions/grapple-links';
 import { ruleErrorOf } from '@/lib/utils/battle/store/errors';
 import { battleActionToEvent } from '@/lib/utils/battle/store/event-mapping';
 import type { NewBattleEvent } from '@/lib/utils/battle/store/types';
+import { ruleSystemOf } from '@/lib/utils/rules/systems';
+import type { MoveHookResult } from '@/lib/utils/rules/systems/types';
 import type { LogLine } from '@/types/text';
 
+function runMoveHooks(input: MovementInput): MoveHookResult | null {
+    const { path, mover, rules } = input;
+
+    const start = mover.battleData.position;
+
+    if (!path || !start) return null;
+
+    let out: MoveHookResult | null = null;
+
+    for (const hook of ruleSystemOf(rules).combat.actions.onMove ?? []) {
+        const next = hook({
+            ...input,
+            path,
+            start,
+            participants: out?.participants ?? input.participants,
+            sceneState: out ? out.sceneState : input.sceneState,
+        });
+
+        if (!next) continue;
+
+        out = out
+            ? {
+                  ...next,
+                  actions: [...out.actions, ...next.actions],
+                  messages: [...out.messages, ...next.messages],
+              }
+            : next;
+
+        if (next.stopAt) break;
+    }
+
+    return out;
+}
+
 export function resolveMovement(input: MovementInput): MovementResult {
-    const { map, participants, mover, to, path, budget, cost, rules } = input;
+    const { map, participants, mover, to, path, budget, cost } = input;
 
     const messages: LogLine[] = [];
 
@@ -32,24 +67,7 @@ export function resolveMovement(input: MovementInput): MovementResult {
 
     let spent = cost;
 
-    const start = mover.battleData.position;
-
-    const opportunity =
-        rules.actions.opportunityAttacks && path && start
-            ? resolveOpportunityAttacks({
-                  strike: input.strike,
-                  participants,
-                  moverId: mover.basicInfo.id,
-                  path,
-                  start,
-                  map,
-                  round: input.round,
-                  battleId: input.battleId,
-                  rules,
-                  rng: input.rng,
-                  sceneState: input.sceneState,
-              })
-            : null;
+    const opportunity = runMoveHooks(input);
 
     if (opportunity) {
         base = opportunity.participants;

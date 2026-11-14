@@ -11,7 +11,8 @@ export function d20OnZeroHp(ctx: ZeroHpCtx): DamageConsequencesResult {
 
     if (!rules.concentration.enabled)
         return {
-            participant: findParticipant(participants, after.basicInfo.id) ?? after,
+            participant:
+                findParticipant(participants, after.basicInfo.id) ?? after,
             participants,
             messages: [],
         };

@@ -62,6 +62,7 @@ import type {
     BattleAttack,
     BattleMapConfig,
     BattleParticipant,
+    GridPoint,
 } from '@/types/battle';
 import type {
     CharacterResources,
@@ -308,6 +309,26 @@ export interface RuleSystemTurn {
     onJoin?: readonly TurnHook<TurnJoinCtx>[];
 }
 
+/** A move that is under way: the path is known and the mover stands at `start` */
+export type MoveHookInput = MovementInput & {
+    path: GridPoint[];
+    start: GridPoint;
+};
+
+export interface MoveHookResult {
+    participants: BattleParticipant[];
+    /** The mover is stopped here (dropped by a strike); null = the move goes on */
+    stopAt: GridPoint | null;
+    /** Movement spent when stopped */
+    cost: number;
+    actions: BattleAction[];
+    messages: LogLine[];
+    sceneState?: SystemSlot;
+}
+
+/** Reacts to a move before it lands (opportunity strikes); null = nothing to add */
+export type MoveHook = (input: MoveHookInput) => MoveHookResult | null;
+
 /** Core actions (dash, grapple, …), movement and legendary strikes; a system without them answers with `noActions` */
 export interface RuleSystemActions {
     /** The rules' `actions` section is switched on */
@@ -335,8 +356,10 @@ export interface RuleSystemActions {
     canStandUp(p: BattleParticipant, rules: Ruleset): boolean;
     run(input: RunCoreActionInput): RunCoreActionResult;
     legendaryAttack(input: LegendaryAttackInput): LegendaryAttackResult;
-    /** A move with whatever it provokes (opportunity strikes, dragging a grappled foe) */
+    /** A move with whatever it provokes (dragging a grappled foe, `onMove` hooks) */
     move(input: MovementInput): MovementResult;
+    /** Hooks run on every move with a path, base first, then modules; the first that stops the mover ends the chain */
+    onMove?: readonly MoveHook[];
     /** Drops holds whose grappler fell or is no longer adjacent; same array when there are none */
     releaseInvalidGrapples(
         ps: BattleParticipant[],
@@ -853,11 +876,10 @@ export interface RuleSystemCombat {
     judge: 'client' | 'server';
     attack?: RuleSystemAttackHooks;
     /** Attack roll of a zone trigger against one target; absent means a zone attack hits without a roll */
-    zoneAttack?(ctx: {
-        rng: () => number;
-        bonus: number;
-        ac: number;
-    }): { roll: number; hit: boolean };
+    zoneAttack?(ctx: { rng: () => number; bonus: number; ac: number }): {
+        roll: number;
+        hit: boolean;
+    };
     dice: number;
     attacksOf?(input: { rows: EquippedArtifactRow[] }): ExtractedAttack[];
     participantFields?(

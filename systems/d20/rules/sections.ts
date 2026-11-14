@@ -109,11 +109,7 @@ export const D20_SECTIONS: SectionsContribution = {
         actions: {
             owner: 'd20',
             mechanic: true,
-            items: sectionItems('actions', [
-                'enabled',
-                'opportunityAttacks',
-                'variant',
-            ]),
+            items: sectionItems('actions', ['enabled', 'variant']),
         },
         classes: {
             owner: 'd20',

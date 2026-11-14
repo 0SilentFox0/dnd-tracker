@@ -10,7 +10,7 @@ import { pathTo, reachable } from '@/lib/utils/battle/grid/path';
 import { eventTextOf } from '@/lib/utils/battle/log/__tests__/event-text';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 import { applyCondition5e } from '@/systems/d20/rules/conditions/apply';
-import { resolveOpportunityAttacks } from '@/systems/d20/rules/reactions/opportunity';
+import { resolveOpportunityAttacks } from '@/systems/opportunity/rules/opportunity';
 import type {
     BattleAttack,
     BattleMapConfig,

@@ -1,6 +1,3 @@
-import { D20_REACH } from '../attack/ability';
-import { canReact, pickMeleeAttack } from './reaction';
-
 import { EffectMarker } from '@/lib/constants/battle';
 import { textRef } from '@/lib/i18n/text-ref';
 import {
@@ -22,6 +19,11 @@ import { isHostile } from '@/lib/utils/battle/modes/engine';
 import { hasEffectMarker } from '@/lib/utils/battle/participant/state';
 import type { Ruleset } from '@/lib/utils/rules';
 import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
+import { D20_REACH } from '@/systems/d20/rules/attack/ability';
+import {
+    canReact,
+    pickMeleeAttack,
+} from '@/systems/d20/rules/reactions/reaction';
 import type {
     BattleAction,
     BattleMapConfig,
