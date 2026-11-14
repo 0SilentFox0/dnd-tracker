@@ -35,6 +35,32 @@ describe('entry-чанки гравця', () => {
         expect(importers(battle, 'zod')).toEqual([]);
     });
 
+    it('бій не тягне systems/*/ui, а rules лише ability-корені (ратчет)', () => {
+        const systemFiles = [...battle.files].filter(
+            (f) => f.startsWith('systems/') && !f.endsWith('/meta.ts')
+        );
+
+        expect(systemFiles.filter((f) => f.includes('/ui/'))).toEqual([]);
+        expect(
+            systemFiles.filter(
+                (f) =>
+                    !/\/rules\/ability-[a-z-]+\.ts$/.test(f) &&
+                    f !== 'systems/wfrp/rules/trait-kinds.ts'
+            )
+        ).toEqual([]);
+        expect(systemFiles.length).toBeLessThanOrEqual(8);
+    });
+
+    it('SystemGate і install.ts не тягнуть systems/* статично', () => {
+        const gate = staticGraph(['components/systems/SystemGate.tsx']);
+
+        expect(
+            [...gate.files].filter(
+                (f) => f.startsWith('systems/') && !f.endsWith('/meta.ts')
+            )
+        ).toEqual([]);
+    });
+
     it('профіль не тягне zod', () => {
         expect(importers(profile, 'zod')).toEqual([]);
     });

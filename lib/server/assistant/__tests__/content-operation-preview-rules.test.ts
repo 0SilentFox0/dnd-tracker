@@ -8,7 +8,6 @@ import type { Translator } from '@/lib/i18n/translator';
 let operationPreview: typeof import('@/lib/server/assistant/actions/content-operation-preview').operationPreview;
 
 beforeAll(async () => {
-    await import('@/lib/server/systems/registry');
     ({ operationPreview } = await import(
         '@/lib/server/assistant/actions/content-operation-preview'
     ));

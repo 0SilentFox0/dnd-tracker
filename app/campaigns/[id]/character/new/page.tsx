@@ -1,7 +1,9 @@
 import { redirect } from 'next/navigation';
 
+import '@/components/systems/registry';
 import { PlayerDraftForm } from '@/components/characters/player-draft/PlayerDraftForm';
 import { systemUiOf } from '@/components/systems';
+import { SystemGate } from '@/components/systems/SystemGate';
 import { CharacterType } from '@/lib/constants/characters';
 import { prisma } from '@/lib/db';
 import { ExtendLocaleScope } from '@/lib/i18n/extend-locale-scope';
@@ -40,15 +42,19 @@ export default async function NewPlayerCharacterPage({
     if (DraftForm) {
         return (
             <ExtendLocaleScope namespaces={systemScope(system, 'draft')}>
-                <DraftForm campaignId={id} />
+                <SystemGate system={system}>
+                    <DraftForm campaignId={id} />
+                </SystemGate>
             </ExtendLocaleScope>
         );
     }
 
     return (
-        <PlayerDraftForm
-            campaignId={id}
-            initial={generate === '1' ? 'generate' : undefined}
-        />
+        <SystemGate system={system}>
+            <PlayerDraftForm
+                campaignId={id}
+                initial={generate === '1' ? 'generate' : undefined}
+            />
+        </SystemGate>
     );
 }

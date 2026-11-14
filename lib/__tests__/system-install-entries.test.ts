@@ -26,11 +26,9 @@ const STATIC_SAFE = [
     'app/uk/page.tsx',
 ];
 
-// client-lazy: root arrives with loadSystems/SystemGate (package C); remove as pages migrate
+// client-lazy: not yet behind SystemGate (the DM pages); remove as they migrate
 const CLIENT_LAZY = [
     'app/campaigns/[id]/acquaintances/page.tsx',
-    'app/campaigns/[id]/character/draft/page.tsx',
-    'app/campaigns/[id]/character/new/page.tsx',
     'app/campaigns/[id]/dm/ai/page.tsx',
     'app/campaigns/[id]/dm/artifact-sets/[setId]/page.tsx',
     'app/campaigns/[id]/dm/artifact-sets/new/page.tsx',
@@ -77,8 +75,6 @@ const CLIENT_LAZY = [
     'app/campaigns/[id]/dm/units/new/page.tsx',
     'app/campaigns/[id]/dm/units/page.tsx',
     'app/campaigns/[id]/dm/world/page.tsx',
-    'app/campaigns/[id]/info/page.tsx',
-    'app/campaigns/[id]/page.tsx',
     'app/campaigns/[id]/show/page.tsx',
     'app/campaigns/[id]/world/page.tsx',
 ];

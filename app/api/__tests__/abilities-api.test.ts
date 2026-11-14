@@ -51,7 +51,6 @@ const req = (url: string, init?: RequestInit) =>
     new Request(`http://localhost${url}`, init);
 
 beforeAll(async () => {
-    await import('@/lib/server/systems/registry');
     await import('@/app/api/campaigns/[id]/skills/[skillId]/route');
 }, 30_000);
 

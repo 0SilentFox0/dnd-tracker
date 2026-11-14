@@ -180,7 +180,7 @@ Wizards (attack, spellbook, player turn) are reducers in `lib/utils/battle/flows
 - Легендарний опір: `resolveSave` (`saves/legendary.ts`) у заклинаннях (лише ціль з іншого боку), концентрації, `saveEnds`, Схопленні/Штовханні 2024, Вогняному вибуху; лист не зачіпає.
 - Дії лігва — вміння `roundStart` + `perRound: 1`.
 - Заговори монстра масштабуються з `unit.level` (`spell/caster-dice.ts`), а не з CR: монстр CR 10 із `level: 1` кидає заговори в один кубик. Заклинання монстра поза межами 4e — ДМ виставляє `level` під потрібний масштаб.
-- Авто-досвід: `completeBattle` додає «⭐ Досвід: N кожному», `saveBattle` (гілка `completing`) → `persistBattleXp` (`store/persist-xp.ts`: `battleXpAward`, `lockCharacters`, журнал `xp` з `battleId`). Лише перемога, `encounters.autoXp && outOfCombat.xp`; відкат завершеного бою повторює нарахування (як запис ресурсів 4d).
+- Авто-досвід: `completeBattle` додає «⭐ Досвід: N кожному», `saveBattle` (гілка `completing`) → `persistBattleXp` (`lib/server/battles/store/persist-xp.ts`: `battleXpAward`, `lockCharacters`, журнал `xp` з `battleId`). Лише перемога, `encounters.autoXp && outOfCombat.xp`; відкат завершеного бою повторює нарахування (як запис ресурсів 4d).
 
 ## 5e: броня, числа класів, пули (етап 4f-2)
 

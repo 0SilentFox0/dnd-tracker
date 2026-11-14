@@ -106,7 +106,6 @@ const post = async (action: string, body?: unknown) => {
 
 describe('progression actions', () => {
     beforeAll(async () => {
-        await import('@/lib/server/systems/registry');
         await import('@/app/api/campaigns/[id]/characters/[characterId]/route');
         await import(
             '@/app/api/campaigns/[id]/characters/[characterId]/system/[action]/route'

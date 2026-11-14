@@ -103,7 +103,6 @@ const post = async (body: object) => {
 
 describe('level-up with choices', () => {
     beforeAll(async () => {
-        await import('@/lib/server/systems/registry');
         await import('../route');
     }, 30_000);
 

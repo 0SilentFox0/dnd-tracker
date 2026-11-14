@@ -47,6 +47,7 @@ New endpoint = route → `lib/api/<domain>.ts` → hook → `types/<domain>.ts`.
 
 - **`lib/db.ts`** — singleton `PrismaClient` (`withSafePoolLimits` adds `connection_limit`). Always import `prisma` from here, never `new PrismaClient()`.
 - **Auth/platform** ([platform.md](docs/architecture/platform.md)): server session = `getClaims` (`lib/auth.ts`, `requireAuth`), `getUser` only where fresh email/metadata are written; Supabase `client.ts` from client code, `server.ts` from server; fonts are self-hosted (`next/font/google` is banned); Pusher via `lib/pusher/{server,client,channels}.ts`; first-HTML data via `PrefetchedQuery`.
+- **Systems registry:** lookup (`lookup.ts`, no entries) ≠ install (eager root `registry.ts`); a module that first enters a route graph and calls `*Of` must have a root in that graph (`system-install-entries` test), else `SystemNotInstalledError`. `lib/utils` never imports `lib/server` (ratchet `utils-no-server-imports`).
 - **Egress is a hard constraint** (Supabase free tier): prefer deltas over refetches, keep polling slow, images through `next/image`.
 - **Alias:** `@/*` → repo root; always `@/lib/...`, never `../../`. Cycles are checked by `pnpm cycles` (ratchet `import-cycles-baseline.json`, enforced in `test:run`; ESLint `import/no-cycle` is off) — fix cycles, don't work around them.
 

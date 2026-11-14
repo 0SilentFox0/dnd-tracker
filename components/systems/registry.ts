@@ -1,11 +1,7 @@
-import { composeUi } from './compose';
+import { installUiModules } from './lookup';
 import type { SystemUi } from './types';
 
-import { RULE_SYSTEM_KEYS } from '@/lib/utils/rules/systems/meta';
-import {
-    type ModuleEntry,
-    resolveSystem,
-} from '@/lib/utils/rules/systems/resolve';
+import type { ModuleEntry } from '@/lib/utils/rules/systems/resolve';
 // <systems:generated>
 import { ARTIFACTSETS_MODULE_UI } from '@/systems/artifactsets/ui';
 import { D20_MODULE_UI } from '@/systems/d20/ui';
@@ -28,27 +24,6 @@ export const MODULE_UI: Record<string, ModuleEntry<SystemUi>> = {
     // </systems:generated>
 };
 
-const uiCache = new Map<string, SystemUi>();
+installUiModules(MODULE_UI);
 
-const resolve = (key: string, modules?: readonly string[]): SystemUi =>
-    resolveSystem({ key, modules }, uiCache, {
-        entries: MODULE_UI,
-        optional: true,
-        compose: composeUi,
-    });
-
-export const SYSTEM_UI: Record<string, SystemUi> = Object.fromEntries(
-    RULE_SYSTEM_KEYS.map((key) => [key, resolve(key)])
-);
-
-export const systemUiOf = (
-    key: string,
-    modules?: readonly string[]
-): SystemUi => {
-    if (!modules && Object.hasOwn(SYSTEM_UI, key)) return SYSTEM_UI[key];
-
-    return resolve(key, modules);
-};
-
-export const systemUiByKey = (key: string): SystemUi | undefined =>
-    Object.hasOwn(SYSTEM_UI, key) ? SYSTEM_UI[key] : undefined;
+export { SYSTEM_UI, systemUiByKey, systemUiOf } from './lookup';

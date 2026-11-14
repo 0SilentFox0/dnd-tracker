@@ -1,0 +1,147 @@
+import { installUiModules, isUiInstalled } from './lookup';
+import type { SystemUi } from './types';
+
+import {
+    composition,
+    moduleMetaOf,
+    type SystemSelection,
+} from '@/lib/utils/rules/systems/catalog';
+import { installModules, isInstalled } from '@/lib/utils/rules/systems/lookup';
+import type { ModuleEntry } from '@/lib/utils/rules/systems/resolve';
+import type { RuleSystemDefinition } from '@/lib/utils/rules/systems/types';
+
+interface Loader {
+    rules: () => Promise<ModuleEntry<RuleSystemDefinition>>;
+    ui?: () => Promise<ModuleEntry<SystemUi>>;
+}
+
+export const LOADERS: Record<string, Loader> = {
+    // <systems:generated>
+    artifactsets: {
+        rules: () =>
+            import('@/systems/artifactsets').then((m) => m.ARTIFACTSETS_MODULE),
+        ui: () =>
+            import('@/systems/artifactsets/ui').then(
+                (m) => m.ARTIFACTSETS_MODULE_UI
+            ),
+    },
+    d20: {
+        rules: () => import('@/systems/d20').then((m) => m.D20_MODULE),
+        ui: () => import('@/systems/d20/ui').then((m) => m.D20_MODULE_UI),
+    },
+    heroscaling: {
+        rules: () =>
+            import('@/systems/heroscaling').then((m) => m.HEROSCALING_MODULE),
+        ui: () =>
+            import('@/systems/heroscaling/ui').then(
+                (m) => m.HEROSCALING_MODULE_UI
+            ),
+    },
+    morale: {
+        rules: () => import('@/systems/morale').then((m) => m.MORALE_MODULE),
+        ui: () => import('@/systems/morale/ui').then((m) => m.MORALE_MODULE_UI),
+    },
+    retaliation: {
+        rules: () =>
+            import('@/systems/retaliation').then((m) => m.RETALIATION_MODULE),
+        ui: () =>
+            import('@/systems/retaliation/ui').then(
+                (m) => m.RETALIATION_MODULE_UI
+            ),
+    },
+    skilltrees: {
+        rules: () =>
+            import('@/systems/skilltrees').then((m) => m.SKILLTREES_MODULE),
+        ui: () =>
+            import('@/systems/skilltrees/ui').then(
+                (m) => m.SKILLTREES_MODULE_UI
+            ),
+    },
+    unitstacks: {
+        rules: () =>
+            import('@/systems/unitstacks').then((m) => m.UNITSTACKS_MODULE),
+    },
+    wfrp: {
+        rules: () => import('@/systems/wfrp').then((m) => m.WFRP_MODULE),
+        ui: () => import('@/systems/wfrp/ui').then((m) => m.WFRP_MODULE_UI),
+    },
+    // </systems:generated>
+};
+
+const rulesLoaded: Record<string, ModuleEntry<RuleSystemDefinition>> = {};
+
+const uiLoaded: Record<string, ModuleEntry<SystemUi>> = {};
+
+const pending = new Map<string, Promise<void>>();
+
+const listeners = new Set<() => void>();
+
+export const isSystemReady = (system: SystemSelection): boolean =>
+    isInstalled(system) && isUiInstalled(system);
+
+export function subscribeSystems(listener: () => void): () => void {
+    listeners.add(listener);
+
+    return () => listeners.delete(listener);
+}
+
+/** The base, its addons and everything they `requires`, in dependency-first order */
+export function moduleIdsOf(system: SystemSelection): string[] {
+    const { base, modules } = composition(system);
+
+    const ids = new Set<string>();
+
+    const visit = (id: string) => {
+        if (ids.has(id)) return;
+
+        ids.add(id);
+        moduleMetaOf(id)?.requires?.forEach(visit);
+    };
+
+    [base, ...modules].forEach(visit);
+
+    return [...ids];
+}
+
+const cacheKey = (system: SystemSelection): string => {
+    const { base, modules } = composition(system);
+
+    return [base, ...modules].join('+');
+};
+
+async function load(system: SystemSelection): Promise<void> {
+    const ids = moduleIdsOf(system).filter((id) => Object.hasOwn(LOADERS, id));
+
+    await Promise.all(
+        ids.map(async (id) => {
+            const { rules, ui } = LOADERS[id];
+
+            const [r, u] = await Promise.all([rules(), ui?.()]);
+
+            rulesLoaded[id] = r;
+
+            if (u) uiLoaded[id] = u;
+        })
+    );
+
+    installModules({ ...rulesLoaded });
+    installUiModules({ ...uiLoaded });
+    listeners.forEach((l) => l());
+}
+
+/** Idempotent; a failed load is forgotten so the next call retries */
+export function loadSystems(system: SystemSelection): Promise<void> {
+    if (isSystemReady(system)) return Promise.resolve();
+
+    const key = cacheKey(system);
+
+    const hit = pending.get(key);
+
+    if (hit) return hit;
+
+    const started = load(system).finally(() => pending.delete(key));
+
+    pending.set(key, started);
+
+    return started;
+}

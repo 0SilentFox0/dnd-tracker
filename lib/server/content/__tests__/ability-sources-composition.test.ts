@@ -34,7 +34,6 @@ type Ops = typeof import('@/lib/server/content/operation-service');
 let ops: Ops;
 
 beforeAll(async () => {
-    await import('@/lib/server/systems/registry');
     ops = await import('@/lib/server/content/operation-service');
 }, 30_000);
 

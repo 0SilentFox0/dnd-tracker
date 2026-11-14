@@ -126,6 +126,24 @@ describe('systems index', () => {
         expect((await syncSystemsIndex(root, 'check')).stale).toEqual([]);
     });
 
+    it('the lazy loader map lists a ui import only for ids with a ui layer', async () => {
+        const root = fixture(['alpha', 'beta']);
+
+        write(root, 'systems/alpha/index.ts', 'export const ALPHA_MODULE = 1;\n');
+        write(root, 'systems/alpha/ui/index.ts', 'export const ALPHA_MODULE_UI = 1;\n');
+        write(root, 'systems/beta/index.ts', 'export const BETA_MODULE = 1;\n');
+
+        await syncSystemsIndex(root);
+
+        const install = fs
+            .readFileSync(path.join(root, 'components/systems/install.ts'), 'utf8')
+            .replace(/\s+/g, ' ');
+
+        expect(install).toContain('import("@/systems/alpha/ui")');
+        expect(install).toContain('import("@/systems/beta")');
+        expect(install).not.toContain('systems/beta/ui');
+    });
+
     it('is idempotent', async () => {
         const root = fixture(['alpha']);
 

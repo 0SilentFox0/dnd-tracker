@@ -31,6 +31,7 @@ import { HUD_SURFACE } from '@/components/hud';
 import { PlayerSheetHint } from '@/components/onboarding/OnboardingHint';
 import { LevelUpOverlay } from '@/components/skill-tree/progression';
 import { systemUiOf } from '@/components/systems';
+import { SystemGate } from '@/components/systems/SystemGate';
 import { Button } from '@/components/ui/button';
 import { useCampaignRules } from '@/lib/hooks/campaigns';
 import { useCharacterSheet } from '@/lib/hooks/characters';
@@ -178,7 +179,7 @@ const asTab = (v: string | undefined): ProfileTabId => {
         : 'combat';
 };
 
-export function CharacterProfile({
+function CharacterProfileView({
     campaignId,
     characterId,
     canEdit,
@@ -349,5 +350,28 @@ export function CharacterProfile({
                 );
             }}
         </QueryState>
+    );
+}
+
+export function CharacterProfile(props: {
+    campaignId: string;
+    characterId: string;
+    canEdit: boolean;
+    initialTab?: string;
+}) {
+    const query = useCharacterSheet(props.campaignId, props.characterId);
+
+    const { data: rules } = useCampaignRules(props.campaignId);
+
+    const system =
+        rules?.system ?? (query.data && { key: query.data.system });
+
+    if (!system)
+        return <QueryState query={query}>{() => null}</QueryState>;
+
+    return (
+        <SystemGate system={system}>
+            <CharacterProfileView {...props} />
+        </SystemGate>
     );
 }

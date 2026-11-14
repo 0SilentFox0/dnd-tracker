@@ -1,5 +1,6 @@
-import { beforeAll, describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
+import '@/lib/utils/rules/systems/registry';
 import { makeParticipant } from '@/lib/utils/abilities/__tests__/fixtures';
 import { resetTurnState } from '@/lib/utils/battle/turn/turn-state';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
@@ -31,10 +32,6 @@ const slotOf = (used: number, rest: Record<string, unknown> = {}) => ({
     key: 'd20',
     data: { ...rest, ext: { retaliation: { used } } },
 });
-
-beforeAll(async () => {
-    await import('@/lib/utils/rules/systems/registry');
-}, 30_000);
 
 describe('retaliation count read', () => {
     it('reads the ext of the d20 slot', () => {

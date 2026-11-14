@@ -99,7 +99,6 @@ const post = async (body: object) => {
 
 describe('POST hit-dice', () => {
     beforeAll(async () => {
-        await import('@/lib/server/systems/registry');
         await import('../route');
     }, 30_000);
 

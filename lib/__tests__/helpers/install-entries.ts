@@ -6,12 +6,22 @@ import { importSpecs, resolveSpec, ROOT } from './static-graph';
 export interface InstallPair {
     lookup: string;
     root: string;
+    /** A client page may instead reach the lazy installer (`SystemGate` -> `loadSystems`) */
+    lazy?: string;
 }
+
+const CLIENT_INSTALL = 'components/systems/install.ts';
 
 export const INSTALL_PAIRS: InstallPair[] = [
     {
         lookup: 'lib/utils/rules/systems/lookup.ts',
         root: 'lib/utils/rules/systems/registry.ts',
+        lazy: CLIENT_INSTALL,
+    },
+    {
+        lookup: 'components/systems/lookup.ts',
+        root: 'components/systems/registry.ts',
+        lazy: CLIENT_INSTALL,
     },
     {
         lookup: 'lib/server/systems/lookup.ts',
@@ -89,8 +99,11 @@ export function unrooted(
 
         return pairs
             .filter(
-                ({ lookup, root }) =>
-                    files.has(lookup) && !files.has(root) && !dynamic.has(root)
+                ({ lookup, root, lazy }) =>
+                    files.has(lookup) &&
+                    !files.has(root) &&
+                    !dynamic.has(root) &&
+                    !(lazy && files.has(lazy))
             )
             .map(({ lookup }) => `${entry} -> ${lookup}`);
     });

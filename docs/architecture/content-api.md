@@ -28,7 +28,7 @@
 - **Актор** — `lib/utils/api/actor.ts`: `{ campaignId, userId, isDM, via: "session" | "token", scopes }`. `scopes` = `null` для сесії, права токена для Bearer.
   - `resolveActor`: за наявності `Authorization: Bearer` діє лише токен, без відкату до cookie. Недійсний токен → 401; інша кампанія, немає права або `sessionOnly` → 403. Через токен актор = ДМ.
   - Потреби — пресети `NEED` у `lib/utils/api/need.ts`: `read(access)`, `write`, `writeAll` (лише сесія).
-- **Роути** — `lib/utils/api/content-routes.ts`:
+- **Роути** — `lib/server/content/content-routes.ts`:
   - `collectionRoutes(r)` → `GET`/`POST`/`DELETE` (масове видалення, лише сесія);
   - `itemRoutes(r)` → `GET`/`PATCH`/`DELETE`;
   - `operationRoute(op, fn)` бере `need` з реєстру, сам парсить `op.body` і передає `{ actor, params, req, body }`.

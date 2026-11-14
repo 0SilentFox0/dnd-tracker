@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 
+import '@/lib/server/systems/registry';
 import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
 
@@ -10,9 +11,9 @@ vi.mock('@/lib/utils/api/api-auth', () => ({ requireCampaignAccess: vi.fn() }));
 vi.mock('@/systems/wfrp/server/draft/create-wfrp-draft', () => ({
     createWfrpDraft: vi.fn(async () => NextResponse.json({ wfrp: true })),
 }));
-vi.mock('@/lib/server/systems/registry', async (importOriginal) => {
+vi.mock('@/lib/server/systems/lookup', async (importOriginal) => {
     const actual =
-        await importOriginal<typeof import('@/lib/server/systems/registry')>();
+        await importOriginal<typeof import('@/lib/server/systems/lookup')>();
 
     return {
         ...actual,
@@ -20,6 +21,20 @@ vi.mock('@/lib/server/systems/registry', async (importOriginal) => {
             rules.system.key === 'stub'
                 ? ({} as ReturnType<typeof actual.systemServerOf>)
                 : actual.systemServerOf(rules),
+    };
+});
+vi.mock('@/lib/utils/rules/systems/lookup', async (importOriginal) => {
+    const actual =
+        await importOriginal<
+            typeof import('@/lib/utils/rules/systems/lookup')
+        >();
+
+    return {
+        ...actual,
+        ruleSystemOf: (rules: Parameters<typeof actual.ruleSystemOf>[0]) =>
+            rules.system.key === 'stub'
+                ? { ...actual.ruleSystemOf(WFRP_RULES), creation: undefined }
+                : actual.ruleSystemOf(rules),
     };
 });
 
@@ -56,18 +71,8 @@ describe('createDraft system dispatch', () => {
             system: { ...DEFAULT_RULES.system, key: 'stub' },
         });
 
-        const { RULE_SYSTEM_REGISTRY } = await import(
-            '@/lib/utils/rules/systems/lookup'
-        );
-
-        (RULE_SYSTEM_REGISTRY as Record<string, unknown>).stub = {
-            ...RULE_SYSTEM_REGISTRY.wfrp,
-            creation: undefined,
-        };
-
         const res = await post();
 
-        delete (RULE_SYSTEM_REGISTRY as Record<string, unknown>).stub;
         expect(res.status).toBe(409);
     });
 });

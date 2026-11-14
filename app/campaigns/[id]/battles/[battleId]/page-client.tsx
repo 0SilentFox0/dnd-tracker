@@ -7,6 +7,7 @@ import '@/components/battle/hud/battle-hud.css';
 import { BattleSceneProvider } from '@/components/battle/scene/BattleSceneProvider';
 import { BattleScreen } from '@/components/battle/scene/BattleScreen';
 import { ErrorState, LoadingState } from '@/components/common/states';
+import { SystemGate } from '@/components/systems/SystemGate';
 import { useBattleSceneValue, useBattleTitle } from '@/lib/hooks/battle';
 
 export function BattlePageClient({
@@ -69,8 +70,10 @@ function StandardBattlePageClient({
     }
 
     return (
-        <BattleSceneProvider value={value}>
-            <BattleScreen />
-        </BattleSceneProvider>
+        <SystemGate system={value.battle.rules.system}>
+            <BattleSceneProvider value={value}>
+                <BattleScreen />
+            </BattleSceneProvider>
+        </SystemGate>
     );
 }

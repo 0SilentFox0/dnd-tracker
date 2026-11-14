@@ -40,6 +40,14 @@ Core бачить `systems/*` лише через корені (`SYSTEM_ROOTS`, 
 
 Серверний вхід: `systemOfCampaign(id)` (`lib/server/systems/campaign-system.ts`, читає лише `rules->'system'`), `systemScope(system, slot)` (`lib/i18n/system-scope.ts`, приймає лише об'єкт).
 
+## Реєстр: пошук ≠ встановлення (Ч21)
+
+- **Lookup** (`lib/utils/rules/systems/lookup.ts`, `lib/server/systems/lookup.ts`): `ruleSystemOf`, `systemServerOf`, `RULE_SYSTEM_REGISTRY`, `SYSTEM_SERVER` читають таблицю встановлених записів, самі систем не імпортують, тож не створюють циклів. Виклик до встановлення кидає `SystemNotInstalledError`.
+- **Корінь** (`registry.ts` поруч) імпортує всі `systems/<id>` і викликає `installModules(entries)` (rules) / `installServerModules(entries)` (server). Серверний корінь імпортує й rules-корінь, тож встановлення сервера ставить обидва.
+- **Де стоять корені.** Правило: будь-який модуль, що першим входить у граф маршруту й викликає `*Of`, має корінь у своєму статичному графі (~13 серверних сервіс-файлів, `lib/server/battles/run-mutation.ts` та ін.). Тест `lib/__tests__/system-install-entries.test.ts` перевіряє точки входу; нова точка входу без кореня = червоний тест. Тестам прогрів (`beforeAll(import registry)`) не потрібен: якщо тест викликає `*Of` без маршруту/сервісу в графі, він має статичний `import '@/lib/server/systems/registry'` (або rules-реєстр).
+- **Ратчети:** `registry-cycles.test.ts` — `KNOWN_CYCLES = []` (раніше `rules:d20`, `server:d20`); `utils-no-server-imports` — `lib/utils` не імпортує `lib/server` (0). Файли, що переїхали: `from-character.ts` → `lib/server/battles/participant/`, `persist-*`/`save-battle` → `lib/server/battles/store/`, `parse.ts` компендіуму → `lib/utils/compendium-import/`, `bundle-error.ts` → `lib/server/templates/`, `content-routes.ts` → `lib/server/content/`.
+- **Клієнт:** див. нижче після пакета C.
+
 ## Слоти
 
 **`SystemSlot = { key, data }`** (`lib/utils/rules/systems/slot.ts`), `defineSlot(key, parse)` → `{ read, write }`; чужий ключ → `read()` = `undefined`. `SlotCodec.extend(module, parse)`: дані модуля в `data.ext[module]`, `write(data, prev?)` переносить `prev.ext`. Слоти в core-типах: `abilities.system`, `attack.system`, `sheet.systemSlot`, `actionDetails.system`/`AttackRollResult.system`, `scene.system` (`battle_scenes.system_state`), `characteristics` (непрозорий `SystemData`).
@@ -105,7 +113,7 @@ Core бачить `systems/*` лише через корені (`SYSTEM_ROOTS`, 
 - Межі UI системних тек (`systems/*/{ui,hooks}` беруть з core лише `ui`/`hud`/`common`, `components/systems/types` і кіт) — ESLint `ui-layers/zone`, `ui-layers-exempt.json` = `[]`; див. [ui-layers.md](ui-layers.md).
 - `system-literals-exempt.json`: 6 файлів / 11 влучань, лише тексти й назва кубика (`log/codec.ts`, `site.ts`, `whats-new.ts`, фікстура `defaults.ts`, `'d20'` у `types/characters.ts` і `SheetRollDialog.tsx`). Дані й активи (`scripts/assets/**`, `scripts/seed/**`, `scripts/srd/**`, профілі sweep) скан літералів не дивиться: виняток у `isLiteralAllowed` (`DATA_DIRS`), а не в `SKIP_DIRS` (той діє й на скан імпортів). Було 15 / 56 після Ч17 (зростання від токена `homm` у даних).
 - Лічильник module-queries (запити до модуля в обхід `ruleSystemOf`) = 0, жорстка заборона.
-- `lib/__tests__/registry-cycles.test.ts`: цикли реєстр↔шар систем зафіксовані в `KNOWN_CYCLES = ['rules:d20', 'server:d20']` (→ E3 «ледачий реєстр»); новий цикл або зникнення наявного = червоний тест (зменшити `KNOWN_CYCLES`).
+- `lib/__tests__/registry-cycles.test.ts`: `KNOWN_CYCLES = []` (Ч21: lookup/install split); будь-який новий цикл реєстр↔шар систем = червоний тест.
 - `lib/__tests__/server-entry-imports.test.ts`: граф імпортів серверних входів (напр. `lib/db.ts`) не тягне реєстрів систем і `systems/*/index.ts`, `systems/*/server/index.ts`, `systems/*/ui/index.ts`.
 - `RULES_SECTION_READERS` (читання `rules.<секція>` у core) = 0 за всіма секціями (пункти, які тримає core, як `encounters.balance/unitGroups`, не рахуються: `OWNED_ITEMS`).
 - `LEAK_NAMES`: `isFiveE` 0; поля колишнього dual-read (`channelledSl`, `conditionTests`, `psychologyTested`, `attackedWithLight`, `inspirationSpent`, `retaliationsUsed`) = 0 (forward-скрипт і `battle-state-shapes` очищено в Ч18); `useChannelAction` 0; `HOMM_[A-Z]+` 0 (профілі sweep поза скан, Ч18); **`CONDITION_5E_` 11** (словник станів у схемі ефектів core) → E3.

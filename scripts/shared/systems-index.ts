@@ -13,7 +13,7 @@ interface BlockSpec {
     /** The layer file must export this name for the id to get a line */
     name?: (id: string) => string;
     layer: (id: string) => string;
-    line: (id: string) => string;
+    line: (id: string, exists: (file: string) => boolean) => string;
 }
 
 export interface RootSpec {
@@ -82,6 +82,22 @@ export const ROOT_SPECS: readonly RootSpec[] = [
             {
                 layer: (id) => `systems/${id}/ui/index.ts`,
                 line: (id) => `${id}: ${upper(id)}_MODULE_UI,`,
+            },
+        ],
+    },
+    {
+        file: 'components/systems/install.ts',
+        blocks: [
+            {
+                layer: (id) => `systems/${id}/index.ts`,
+                name: (id) => `${upper(id)}_MODULE`,
+                line: (id, exists) => {
+                    const ui = exists(`systems/${id}/ui/index.ts`)
+                        ? `, ui: () => import("@/systems/${id}/ui").then((m) => m.${upper(id)}_MODULE_UI)`
+                        : '';
+
+                    return `${id}: { rules: () => import("@/systems/${id}").then((m) => m.${upper(id)}_MODULE)${ui} },`;
+                },
             },
         ],
     },
@@ -411,7 +427,10 @@ const render = (
                     (!block.name ||
                         exportsName(root, block.layer(id), block.name(id)))
             )
-            .map((id) => `${indent}${block.line(id)}\n`);
+            .map(
+                (id) =>
+                    `${indent}${block.line(id, (f) => fs.existsSync(path.join(root, f)))}\n`
+            );
 
         return `${indent}${OPEN}\n${lines.join('')}${indent}${CLOSE}`;
     });

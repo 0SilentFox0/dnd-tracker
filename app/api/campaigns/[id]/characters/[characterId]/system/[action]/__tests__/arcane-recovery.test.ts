@@ -125,7 +125,6 @@ const open = { shortRestOpen: true, slotsSpent: { '1': 2, '2': 1, '6': 1 } };
 
 describe('POST arcane-recovery', () => {
     beforeAll(async () => {
-        await import('@/lib/server/systems/registry');
         await import('../route');
     }, 30_000);
 

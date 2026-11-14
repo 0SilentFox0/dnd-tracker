@@ -1,5 +1,6 @@
 import { Info } from 'lucide-react';
 
+import '@/lib/server/systems/registry';
 import { CampaignSummaryPanel } from '@/components/campaigns/dashboard/CampaignSummaryPanel';
 import { DashboardGroups } from '@/components/campaigns/dashboard/DashboardGroups';
 import { DmNextSteps } from '@/components/campaigns/dashboard/DmNextSteps';
@@ -12,6 +13,7 @@ import { HudSection } from '@/components/hud/form';
 import { HudPage, HudPageHeader, HudPanel } from '@/components/hud/page';
 import { DemoTourMenu } from '@/components/onboarding/DemoTourMenu';
 import { OnboardingChecklist } from '@/components/onboarding/OnboardingChecklist';
+import { SystemGate } from '@/components/systems/SystemGate';
 import { dashboardHiddenKeys } from '@/lib/constants/campaign-dashboard';
 import { CampaignKind } from '@/lib/constants/campaigns';
 import { onboardingKeys } from '@/lib/hooks/onboarding/keys';
@@ -142,7 +144,11 @@ export default async function CampaignDetailPage({
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
                 <div className="min-w-0 space-y-4">
                     {dm && <DmNextSteps campaignId={id} data={dm} />}
-                    {player && <PlayerHeroCard campaignId={id} data={player} />}
+                    {player && (
+                        <SystemGate system={rules.system}>
+                            <PlayerHeroCard campaignId={id} data={player} />
+                        </SystemGate>
+                    )}
                     <DashboardGroups
                         campaignId={id}
                         isDM={isDM}

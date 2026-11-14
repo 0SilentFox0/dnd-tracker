@@ -1,13 +1,10 @@
-import { beforeAll, describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
+import '@/lib/utils/rules/systems/registry';
 import { runParticipantParts } from '@/lib/utils/battle/participant/parts';
 import { parseRules } from '@/lib/utils/rules/schema';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { BattleParticipant } from '@/types/battle';
-
-beforeAll(async () => {
-    await import('@/lib/utils/rules/systems/registry');
-}, 30_000);
 
 const run = (
     system: { key: string; modules?: string[] },
