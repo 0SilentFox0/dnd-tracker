@@ -4,6 +4,7 @@ import {
     applyMapStateDelta,
     composeEffectiveMap,
     diffMapState,
+    pruneRemoved,
 } from '../effective-map';
 
 import { testMap } from '@/lib/utils/battle/__tests__/fixtures/placed';
@@ -139,5 +140,44 @@ describe('diffMapState / applyMapStateDelta', () => {
         );
 
         expect(d?.doors).toEqual({ '1:1': { open: true } });
+    });
+});
+
+describe('pruneRemoved', () => {
+    it('returns the same reference when nothing is dropped', () => {
+        const s = state(['1:1:e']);
+
+        expect(pruneRemoved(s, () => true)).toBe(s);
+        expect(pruneRemoved(null, () => false)).toBeNull();
+        expect(pruneRemoved(undefined, () => false)).toBeUndefined();
+    });
+
+    it('drops removals failing the predicate and keeps the rest of the state', () => {
+        const s = state(['1:1:e', '2:2:e'], { '3:3': { open: true } });
+
+        expect(pruneRemoved(s, (e) => e !== '1:1:e')).toEqual({
+            removedEdges: ['2:2:e'],
+            doors: { '3:3': { open: true } },
+        });
+    });
+});
+
+describe('empty-input fast paths', () => {
+    it('applyMapStateDelta keeps the reference for an empty delta', () => {
+        const s = state(['1:1:e']);
+
+        expect(applyMapStateDelta(s, {})).toBe(s);
+        expect(
+            applyMapStateDelta(s, { removed: { add: [], remove: [] } })
+        ).toBe(s);
+    });
+
+    it('library arrays are reused as-is when nothing is removed or owned', () => {
+        const lib = { walls: ['1:1:e'], bars: ['2:2:s'] };
+
+        const eff = composeEffectiveMap(testMap(6, 6), state([]), lib);
+
+        expect(eff.walls).toBe(lib.walls);
+        expect(eff.bars).toBe(lib.bars);
     });
 });

@@ -10,7 +10,8 @@ import {
 } from '../useBattleMapEditor';
 
 import { DEFAULT_BATTLE_MAP } from '@/lib/constants/battle';
-import { allInteriorEdges,MAX_MAP_EDGES } from '@/lib/utils/battle/grid';
+import { MAP_LIMITS } from '@/lib/constants/map-limits';
+import { allInteriorEdges } from '@/lib/utils/battle/grid';
 
 describe('useBattleMapEditor', () => {
     it('вимкнено → value null; увімкнено → дефолт', () => {
@@ -45,19 +46,24 @@ describe('useBattleMapEditor', () => {
         const { result } = renderHook(() =>
             useBattleMapEditor({
                 ...big,
-                walls: edges.slice(0, MAX_MAP_EDGES),
+                walls: edges.slice(0, MAP_LIMITS.inlineMaxEdges),
             })
         );
 
         act(() => result.current.actions.setTool('edge-wall'));
         act(() =>
             result.current.edgeEditing?.onCommit(
-                edges.slice(MAX_MAP_EDGES, MAX_MAP_EDGES + 1),
+                edges.slice(
+                    MAP_LIMITS.inlineMaxEdges,
+                    MAP_LIMITS.inlineMaxEdges + 1
+                ),
                 []
             )
         );
         expect(result.current.state.notice).toBe(EDGE_LIMIT_NOTICE);
-        expect(result.current.state.map.walls).toHaveLength(MAX_MAP_EDGES);
+        expect(result.current.state.map.walls).toHaveLength(
+            MAP_LIMITS.inlineMaxEdges
+        );
     });
 
     it('небезпека без підпису не пише label', () => {

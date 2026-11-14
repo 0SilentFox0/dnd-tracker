@@ -1,5 +1,6 @@
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { inBounds, paintEdges, parseEdgeKey } from '@/lib/utils/battle/grid';
+import { pruneRemoved } from '@/lib/utils/battle/map-storage/effective-map';
 import { activeModeWithConfig } from '@/lib/utils/battle/modes';
 import type {
     BattleMutationContext,
@@ -59,9 +60,12 @@ export function mapWallsMutation(
 
     const state = ctx.meta.mapState;
 
-    const present = new Set([...(painted.walls ?? []), ...(painted.bars ?? [])]);
+    const present = new Set([
+        ...(painted.walls ?? []),
+        ...(painted.bars ?? []),
+    ]);
 
-    const restored = state?.removedEdges.filter((e) => present.has(e));
+    const pruned = pruneRemoved(state, (e) => !present.has(e));
 
     return {
         participants: ctx.participants,
@@ -69,15 +73,7 @@ export function mapWallsMutation(
         events: [],
         scene: {
             map: painted,
-            ...(state &&
-                restored?.length && {
-                    mapState: {
-                        ...state,
-                        removedEdges: state.removedEdges.filter(
-                            (e) => !present.has(e)
-                        ),
-                    },
-                }),
+            ...(pruned !== state && { mapState: pruned }),
         },
     };
 }

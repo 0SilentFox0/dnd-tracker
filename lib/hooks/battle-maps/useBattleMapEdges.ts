@@ -8,15 +8,15 @@ import { getBattleMap } from '@/lib/api/battle-maps';
 import type { LibraryEdges } from '@/lib/utils/battle/map-storage/effective-map';
 import type { BattleMapRef } from '@/types/battle';
 
+const EDGES_GC_MS = 30 * 60_000;
+
 /** Ребра pinned-версії карти бібліотеки; незмінні, тож без повторних запитів. */
 export function useBattleMapEdges(
     campaignId: string,
     ref: BattleMapRef | undefined
 ) {
     return useQuery<LibraryEdges>({
-        queryKey: ref
-            ? battleMapKeys.edges(campaignId, ref.mapId, ref.version)
-            : battleMapKeys.all(campaignId),
+        queryKey: battleMapKeys.edges(campaignId, ref),
         queryFn: ref
             ? async () => {
                   const { walls, bars } = await getBattleMap(
@@ -29,7 +29,7 @@ export function useBattleMapEdges(
               }
             : skipToken,
         staleTime: Infinity,
-        gcTime: 30 * 60_000,
+        gcTime: EDGES_GC_MS,
         structuralSharing: false,
     });
 }

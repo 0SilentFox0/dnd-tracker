@@ -179,12 +179,12 @@ export function useBattleSceneValue(
 
     const mapEdges = useBattleMapEdges(campaignId, rawBattle?.mapRef);
 
-    const isMapLoading = !!rawBattle?.mapRef && !mapEdges.data;
+    const isMapPending = !!rawBattle?.mapRef && !mapEdges.data;
 
-    const isLoading = isBattleLoading || (isMapLoading && !mapEdges.isError);
+    const isLoading = isBattleLoading || (isMapPending && !mapEdges.isError);
 
     const battle = useMemo(() => {
-        if (!rawBattle?.map || isMapLoading) return rawBattle;
+        if (!rawBattle?.map || isMapPending) return rawBattle;
 
         const map = composeEffectiveMap(
             rawBattle.map,
@@ -193,7 +193,7 @@ export function useBattleSceneValue(
         );
 
         return map === rawBattle.map ? rawBattle : { ...rawBattle, map };
-    }, [rawBattle, mapEdges.data, isMapLoading]);
+    }, [rawBattle, mapEdges.data, isMapPending]);
 
     const actions = useBattleActions(campaignId, battleId, show);
 
@@ -295,7 +295,7 @@ export function useBattleSceneValue(
     )
         setAttackIntent(null);
 
-    if (!battle || !derived || isMapLoading)
+    if (!battle || !derived || isMapPending)
         return { value: null, loading: isLoading };
 
     const value: BattleSceneValue = {

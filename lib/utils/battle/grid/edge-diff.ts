@@ -6,6 +6,9 @@ export const EDGE_DIFF_LIMIT = 400;
 
 export type EdgeField = 'walls' | 'bars';
 
+export const diffSize = (diff: EdgeDiff | null | undefined): number =>
+    diff ? diff.add.length + diff.remove.length : 0;
+
 export function diffEdges(
     before: readonly string[] | undefined,
     after: readonly string[] | undefined
@@ -26,6 +29,8 @@ export function applyEdgeDiff(
     field: EdgeField,
     diff: EdgeDiff
 ): BattleMapConfig {
+    if (diffSize(diff) === 0) return map;
+
     const edges = new Set(map[field]);
 
     for (const e of diff.remove) edges.delete(e);

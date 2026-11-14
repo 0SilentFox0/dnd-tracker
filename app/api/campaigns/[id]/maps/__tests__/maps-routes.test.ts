@@ -14,6 +14,7 @@ const svc = vi.hoisted(() => ({
     listMaps: vi.fn(),
     createMap: vi.fn(),
     getMap: vi.fn(),
+    getMapMeta: vi.fn(),
     saveMap: vi.fn(),
     deleteMap: vi.fn(),
     cloneMap: vi.fn(),
@@ -60,6 +61,7 @@ beforeEach(() => {
     auth.requireDM.mockResolvedValue({ userId: 'dm', isDM: true });
     auth.requireCampaignAccess.mockResolvedValue({ userId: 'p', isDM: false });
     svc.getMap.mockResolvedValue(full);
+    svc.getMapMeta.mockResolvedValue(full);
 });
 
 describe('maps routes', () => {
@@ -82,11 +84,12 @@ describe('maps routes', () => {
         );
 
         expect(cached.status).toBe(304);
+        expect(svc.getMap).toHaveBeenCalledTimes(1);
 
-        svc.getMap.mockResolvedValue(null);
+        svc.getMapMeta.mockResolvedValue(null);
         expect((await GET(send('GET'), ctx)).status).toBe(404);
 
-        svc.getMap.mockResolvedValue({ ...full, campaignId: 'other' });
+        svc.getMapMeta.mockResolvedValue({ ...full, campaignId: 'other' });
         expect((await GET(send('GET'), ctx)).status).toBe(403);
     });
 

@@ -77,6 +77,19 @@ describe('ефективна карта в сцені', () => {
         expect(result.current.loading).toBe(true);
     });
 
+    it('linked: помилка завантаження ребер не лишає вічний лоадер', async () => {
+        vi.mocked(getBattleMap).mockRejectedValue(new Error('boom'));
+
+        const { result } = setup({
+            map: header,
+            mapRef: { mapId: 'm1', version: 1 },
+        });
+
+        await waitFor(() => expect(result.current.loading).toBe(false));
+
+        expect(result.current.value).toBeNull();
+    });
+
     it('linked: після завантаження компонує ребра бібліотеки мінус стан', async () => {
         vi.mocked(getBattleMap).mockResolvedValue({
             walls: ['1:1:e', '3:3:e'],

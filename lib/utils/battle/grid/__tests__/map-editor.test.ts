@@ -7,7 +7,6 @@ import {
     inferMargins,
     isPreviewSafeBackground,
     marginsBlocked,
-    MAX_MAP_EDGES,
     paintCells,
     paintEdges,
     resizeMap,
@@ -15,6 +14,7 @@ import {
 import { hazardDamage } from '../terrain';
 import { allInteriorEdges } from '../walls';
 
+import { MAP_LIMITS } from '@/lib/constants/map-limits';
 import type { BattleMapConfig } from '@/types/battle';
 
 const base: BattleMapConfig = {
@@ -216,9 +216,7 @@ describe('paintEdges', () => {
             'add-bars'
         );
 
-        expect(paint(both, ['2:2:e'], 'remove-walls').bars).toEqual([
-            '2:2:e',
-        ]);
+        expect(paint(both, ['2:2:e'], 'remove-walls').bars).toEqual(['2:2:e']);
 
         const erased = paint(both, ['1:1:e', '2:2:e'], 'erase');
 
@@ -240,7 +238,7 @@ describe('paintEdges', () => {
 
         const full = paintEdges(
             big,
-            edges.slice(0, MAX_MAP_EDGES),
+            edges.slice(0, MAP_LIMITS.inlineMaxEdges),
             'add-walls'
         );
 
@@ -248,7 +246,10 @@ describe('paintEdges', () => {
 
         const over = paintEdges(
             full.map,
-            edges.slice(MAX_MAP_EDGES, MAX_MAP_EDGES + 1),
+            edges.slice(
+                MAP_LIMITS.inlineMaxEdges,
+                MAP_LIMITS.inlineMaxEdges + 1
+            ),
             'add-walls'
         );
 

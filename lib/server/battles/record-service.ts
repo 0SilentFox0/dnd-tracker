@@ -16,7 +16,10 @@ import {
 import { battleAudioCommandSchema } from '@/lib/schemas/music';
 import type { ActionExecutionContext } from '@/lib/server/assistant/types';
 import { loadAudioLibrary } from '@/lib/server/audio/track-store';
-import { getMap } from '@/lib/server/battle-maps/library-service';
+import {
+    getMapMeta,
+    lockMapRow,
+} from '@/lib/server/battle-maps/library-service';
 import {
     assertParticipantSources,
     sourceIdsOf,
@@ -34,6 +37,7 @@ import {
     applyAudioCommand,
     commandNeedsLibrary,
 } from '@/lib/utils/audio/audio-command';
+import { withoutEdges } from '@/lib/utils/battle/map-storage/persisted-map';
 import type { BattleAudioState } from '@/types/audio';
 
 export class BattleAudioRateLimitError extends ContentError {
@@ -116,21 +120,23 @@ async function mapForWrite(
     return { ...map, background: bg.background ?? null };
 }
 
-async function linkedMapFor(campaignId: string, mapId: string) {
-    const library = await getMap(mapId);
+async function linkedMapFor(
+    db: Parameters<typeof getMapMeta>[1],
+    campaignId: string,
+    mapId: string
+) {
+    const meta = await getMapMeta(mapId, db);
 
-    if (!library || library.campaignId !== campaignId)
+    if (!meta || meta.campaignId !== campaignId)
         throw new ContentError(API_ERRORS.BATTLE_MAP_NOT_FOUND, 404);
 
-    const { cols, rows } = library.map;
-
-    if (Math.max(cols, rows) > MAP_LIMITS.battleMaxSide)
+    if (Math.max(meta.cols, meta.rows) > MAP_LIMITS.battleMaxSide)
         throw new ContentError(API_ERRORS.BATTLE_MAP_TOO_LARGE, 422);
 
     return {
         mapId,
-        version: library.version,
-        header: library.map as unknown as Prisma.InputJsonObject,
+        version: meta.version,
+        header: meta.header as unknown as Prisma.InputJsonObject,
     };
 }
 
@@ -179,35 +185,48 @@ export async function writeBattleRecord(
     if (operation === 'create') {
         const data = input as z.infer<typeof createBattleSchema>;
 
-        const linked = data.mapId
-            ? await linkedMapFor(campaignId, data.mapId)
-            : null;
-
-        const map = linked
-            ? linked.header
+        const map = data.mapId
+            ? null
             : preparedMap
               ? data.map
               : await mapForWrite(data.map, campaignId);
 
         await assertParticipantSources(campaignId, data.participants);
 
-        return prisma.battleScene.create({
-            data: {
-                campaignId,
-                name: data.name,
-                description: data.description,
-                status: 'prepared',
-                participants:
-                    data.participants as unknown as Prisma.InputJsonValue,
-                currentRound: 1,
-                currentTurnIndex: 0,
-                turnTimerSeconds: data.turnTimerSeconds ?? null,
-                ...(map && { map }),
-                ...(linked && {
-                    mapId: linked.mapId,
-                    mapVersion: linked.version,
-                }),
-            },
+        const createScene = (
+            db: Pick<Prisma.TransactionClient, 'battleScene'>,
+            linked?: Awaited<ReturnType<typeof linkedMapFor>>
+        ) => {
+            const stored = linked ? linked.header : map;
+
+            return db.battleScene.create({
+                data: {
+                    campaignId,
+                    name: data.name,
+                    description: data.description,
+                    status: 'prepared',
+                    participants:
+                        data.participants as unknown as Prisma.InputJsonValue,
+                    currentRound: 1,
+                    currentTurnIndex: 0,
+                    turnTimerSeconds: data.turnTimerSeconds ?? null,
+                    ...(stored && { map: stored }),
+                    ...(linked && {
+                        mapId: linked.mapId,
+                        mapVersion: linked.version,
+                    }),
+                },
+            });
+        };
+
+        const { mapId } = data;
+
+        if (!mapId) return createScene(prisma);
+
+        return prisma.$transaction(async (tx) => {
+            await lockMapRow(tx, mapId, 'share');
+
+            return createScene(tx, await linkedMapFor(tx, campaignId, mapId));
         });
     }
 
@@ -277,7 +296,7 @@ export async function writeBattleRecord(
 
         const map =
             row.mapId && written
-                ? (({ walls: _w, bars: _b, ...header }) => header)(written)
+                ? (withoutEdges(written) as unknown as Prisma.InputJsonObject)
                 : written;
 
         await prisma.battleScene.update({

@@ -35,8 +35,8 @@ export function assembleGeometry(
 export async function memoGeometry(
     mapId: string,
     version: number,
-    load: () => Promise<MapGeometry>
-): Promise<MapGeometry> {
+    load: () => Promise<MapGeometry | null>
+): Promise<MapGeometry | null> {
     const key = `${mapId}:${version}`;
 
     const hit = cache.get(key);
@@ -49,6 +49,8 @@ export async function memoGeometry(
     }
 
     const value = await load();
+
+    if (!value) return null;
 
     cache.set(key, value);
 

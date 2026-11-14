@@ -323,7 +323,13 @@ export async function saveBattle(
 
         if (count === 0) throw new BattleConflictError();
 
-        if (patch.mapState !== undefined)
+        if (
+            patch.mapState !== undefined &&
+            !(
+                isEmptyMapState(before.meta.mapState) &&
+                isEmptyMapState(patch.mapState)
+            )
+        )
             await writeMapState(tx, scene.id, patch.mapState);
 
         if (diff.created.length > 0) {

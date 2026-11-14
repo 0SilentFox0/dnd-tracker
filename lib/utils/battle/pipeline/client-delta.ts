@@ -115,13 +115,13 @@ export function buildClientDelta(args: {
         map,
     } = args;
 
-    const nextState =
+    const mapState =
         args.mapState === undefined ? before.meta.mapState : args.mapState;
 
     const stateDelta =
         args.mapState === undefined
             ? null
-            : diffMapState(before.meta.mapState, args.mapState);
+            : diffMapState(before.meta.mapState, mapState);
 
     const storedById = new Map(args.stored.map((p) => [p.basicInfo.id, p]));
 
@@ -198,10 +198,11 @@ export function buildClientDelta(args: {
             ...(after.completedAt
                 ? { completedAt: after.completedAt.toISOString() }
                 : before.scene.completedAt && { completedAt: null }),
-            ...mapChange(
-                clientMapOf(before.meta),
-                map && persistedMap(before.meta, map, nextState)
-            ),
+            ...(map !== undefined &&
+                mapChange(
+                    clientMapOf(before.meta),
+                    map && persistedMap(before.meta, map, mapState)
+                )),
             ...(stateDelta && { mapState: stateDelta }),
             ...(args.mapRef && { mapRef: args.mapRef }),
         },

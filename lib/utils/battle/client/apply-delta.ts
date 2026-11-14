@@ -1,5 +1,9 @@
 import { BattleStatus } from '@/lib/constants/battle';
-import { applyEdgeDiff, EDGE_DIFF_LIMIT } from '@/lib/utils/battle/grid/edge-diff';
+import {
+    applyEdgeDiff,
+    diffSize,
+    EDGE_DIFF_LIMIT,
+} from '@/lib/utils/battle/grid/edge-diff';
 import { applyTerrainDiff } from '@/lib/utils/battle/grid/terrain';
 import { applyMapStateDelta } from '@/lib/utils/battle/map-storage/effective-map';
 import {
@@ -77,11 +81,9 @@ function mergeMapState(
 ): BattleScene['mapState'] | 'refetch' {
     if (!delta) return state;
 
-    const edges = delta.removed
-        ? delta.removed.add.length + delta.removed.remove.length
-        : 0;
-
-    return edges > EDGE_DIFF_LIMIT ? 'refetch' : applyMapStateDelta(state, delta);
+    return diffSize(delta.removed) > EDGE_DIFF_LIMIT
+        ? 'refetch'
+        : applyMapStateDelta(state, delta);
 }
 
 export function applyBattleDelta(

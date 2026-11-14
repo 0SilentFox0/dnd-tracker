@@ -152,9 +152,12 @@ const motionConfigSchema = z.object({
     speed: z.number().min(-MAP_MOTION_MAX_SPEED).max(MAP_MOTION_MAX_SPEED),
 });
 
+export const mapSide = (max: number) =>
+    z.number().int().min(MAP_LIMITS.minSide).max(max);
+
 export const battleMapObject = z.object({
-    cols: z.number().int().min(MAP_LIMITS.minSide).max(MAP_LIMITS.photoMaxSide),
-    rows: z.number().int().min(MAP_LIMITS.minSide).max(MAP_LIMITS.photoMaxSide),
+    cols: mapSide(MAP_LIMITS.photoMaxSide),
+    rows: mapSide(MAP_LIMITS.photoMaxSide),
     background: mapBackgroundSchema,
     opacity: z.number().min(0).max(1),
     blocked: z

@@ -15,6 +15,7 @@ import { textRef } from '@/lib/i18n/text-ref';
 import {
     applyMargins,
     clampMargins,
+    type EdgeOp,
     type GridCalibration,
     gridForCellSize,
     hasPlayableArea,
@@ -333,22 +334,19 @@ export function useBattleMapEditor(
 
         const bars = wallSet(map.bars);
 
+        const ops: [EdgeOp, EdgeOp] | null =
+            edgeTool === 'edge-erase'
+                ? null
+                : edgeTool === 'edge-wall'
+                  ? ['add-walls', 'remove-walls']
+                  : ['add-bars', 'remove-bars'];
+
         const paint = (m: BattleMapConfig, add: string[], remove: string[]) => {
-            if (edgeTool === 'edge-erase') return paintEdges(m, remove, 'erase');
+            if (!ops) return paintEdges(m, remove, 'erase');
 
-            const kind = edgeTool === 'edge-wall' ? 'walls' : 'bars';
+            const added = paintEdges(m, add, ops[0]);
 
-            const added = paintEdges(
-                m,
-                add,
-                kind === 'walls' ? 'add-walls' : 'add-bars'
-            );
-
-            const removed = paintEdges(
-                added.map,
-                remove,
-                kind === 'walls' ? 'remove-walls' : 'remove-bars'
-            );
+            const removed = paintEdges(added.map, remove, ops[1]);
 
             return {
                 map: removed.map,
@@ -357,10 +355,11 @@ export function useBattleMapEditor(
         };
 
         const onCommit = (add: string[], remove: string[]) => {
-            if (paint(map, add, remove).overflow)
-                setNotice(EDGE_LIMIT_NOTICE);
+            const result = paint(map, add, remove);
 
-            setMap((m) => paint(m, add, remove).map);
+            if (result.overflow) setNotice(EDGE_LIMIT_NOTICE);
+
+            setMap(result.map);
         };
 
         if (edgeTool === 'edge-erase')

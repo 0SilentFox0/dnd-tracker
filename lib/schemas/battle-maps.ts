@@ -1,18 +1,14 @@
 import { z } from 'zod';
 
 import { MAP_LIMITS } from '@/lib/constants/map-limits';
-import { battleMapObject, edgeKeySchema } from '@/lib/schemas/battles';
+import { battleMapObject, edgeKeySchema, mapSide } from '@/lib/schemas/battles';
 import { inBounds } from '@/lib/utils/battle/grid/geometry';
 import { parseEdgeKey } from '@/lib/utils/battle/grid/walls';
 
 const STORAGE_BACKGROUND =
     /^(https:\/\/\S+|\/battle-maps\/[\w.-]+\.(webp|jpg|png))$/;
 
-const side = z
-    .number()
-    .int()
-    .min(MAP_LIMITS.minSide)
-    .max(MAP_LIMITS.tileMaxSide);
+const side = mapSide(MAP_LIMITS.tileMaxSide);
 
 const headerSchema = battleMapObject.omit({ walls: true, bars: true }).extend({
     cols: side,
@@ -25,6 +21,23 @@ const headerSchema = battleMapObject.omit({ walls: true, bars: true }).extend({
 });
 
 const edges = z.array(edgeKeySchema).max(MAP_LIMITS.libraryMaxEdges);
+
+const edgesValid = (
+    list: readonly string[],
+    map: { cols: number; rows: number }
+) => {
+    const seen = new Set<string>();
+
+    return list.every((edge) => {
+        if (seen.has(edge)) return false;
+
+        seen.add(edge);
+
+        const { a, b } = parseEdgeKey(edge);
+
+        return inBounds(map, a) && inBounds(map, b);
+    });
+};
 
 export const battleMapInputSchema = z
     .object({
@@ -47,35 +60,19 @@ export const battleMapInputSchema = z
             });
         }
 
-        const wallSet = new Set<string>();
+        const badEdges = (path: 'walls' | 'bars') =>
+            ctx.addIssue({
+                code: 'custom',
+                message: 'battleSetup.validation.badEdges',
+                path: [path],
+            });
 
-        for (const key of ['walls', 'bars'] as const) {
-            const seen = new Set<string>();
+        const walls = new Set(m.walls);
 
-            for (const edge of m[key]) {
-                const { a, b } = parseEdgeKey(edge);
+        if (!edgesValid(m.walls, m.map)) badEdges('walls');
 
-                const bad =
-                    seen.has(edge) ||
-                    !inBounds(m.map, a) ||
-                    !inBounds(m.map, b) ||
-                    (key === 'bars' && wallSet.has(edge));
-
-                if (bad) {
-                    ctx.addIssue({
-                        code: 'custom',
-                        message: 'battleSetup.validation.badEdges',
-                        path: [key],
-                    });
-
-                    break;
-                }
-
-                seen.add(edge);
-
-                if (key === 'walls') wallSet.add(edge);
-            }
-        }
+        if (!edgesValid(m.bars, m.map) || m.bars.some((e) => walls.has(e)))
+            badEdges('bars');
     });
 
 export const battleMapCloneSchema = z.object({

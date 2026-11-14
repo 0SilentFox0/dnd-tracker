@@ -23,6 +23,17 @@ export const isEmptyMapState = (state: BattleMapState | null | undefined) =>
         Object.keys(state.doors).length === 0 &&
         !state.fog);
 
+export const rowToMapState = (
+    row: { removedEdges: unknown; doors: unknown; fog: unknown } | null
+): BattleMapState | null =>
+    row
+        ? {
+              removedEdges: row.removedEdges as string[],
+              doors: row.doors as BattleMapState['doors'],
+              ...(row.fog ? { fog: row.fog as Record<string, unknown> } : {}),
+          }
+        : null;
+
 export interface SnapshotState {
     /** terrain і конфіги режимів лише для боїв із картою; старі знімки без поля — цю частину карти при відкаті не чіпаємо */
     scene: Pick<

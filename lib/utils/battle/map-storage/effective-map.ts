@@ -1,4 +1,4 @@
-import { diffEdges } from '@/lib/utils/battle/grid/edge-diff';
+import { diffEdges, diffSize } from '@/lib/utils/battle/grid/edge-diff';
 import type {
     BattleMapConfig,
     BattleMapState,
@@ -26,6 +26,12 @@ function merge(
     removed: ReadonlySet<string>
 ): string[] | undefined {
     if (!own?.length && !lib?.length) return own as string[] | undefined;
+
+    if (removed.size === 0) {
+        if (!own?.length) return lib as string[];
+
+        if (!lib?.length) return own as string[];
+    }
 
     const out = new Set<string>([...(own ?? []), ...(lib ?? [])]);
 
@@ -114,10 +120,31 @@ export function diffMapState(
     return delta.removed || delta.doors ? delta : null;
 }
 
+/** Drops removals whose edge fails `keep`; returns the same reference when nothing is dropped. */
+export function pruneRemoved(
+    state: BattleMapState | null | undefined,
+    keep: (edge: string) => boolean
+): BattleMapState | null | undefined {
+    if (!state) return state;
+
+    const removedEdges = state.removedEdges.filter(keep);
+
+    return removedEdges.length === state.removedEdges.length
+        ? state
+        : { ...state, removedEdges };
+}
+
 export function applyMapStateDelta(
     state: BattleMapState | null | undefined,
     delta: MapStateDelta
 ): BattleMapState {
+    if (
+        state &&
+        diffSize(delta.removed) === 0 &&
+        Object.keys(delta.doors ?? {}).length === 0
+    )
+        return state;
+
     const removed = new Set(state?.removedEdges);
 
     for (const e of delta.removed?.remove ?? []) removed.delete(e);

@@ -5,7 +5,8 @@ const mocks = vi.hoisted(() => ({
     create: vi.fn(async () => ({ id: 'b1' })),
     update: vi.fn(async () => ({})),
     findUnique: vi.fn(),
-    getMap: vi.fn(),
+    getMapMeta: vi.fn(),
+    lock: vi.fn(async () => undefined),
 }));
 
 vi.mock('server-only', () => ({}));
@@ -16,10 +17,13 @@ vi.mock('@/lib/db', () => ({
             update: mocks.update,
             findUnique: mocks.findUnique,
         },
+        $transaction: async (fn: (tx: unknown) => unknown) =>
+            fn({ battleScene: { create: mocks.create } }),
     },
 }));
 vi.mock('@/lib/server/battle-maps/library-service', () => ({
-    getMap: mocks.getMap,
+    getMapMeta: mocks.getMapMeta,
+    lockMapRow: mocks.lock,
 }));
 vi.mock('@/lib/server/battles/participant-sources', async (orig) => ({
     ...(await orig<
@@ -32,6 +36,8 @@ import { API_ERRORS } from '@/lib/constants/api-errors';
 import { writeBattleRecord } from '@/lib/server/battles/record-service';
 
 const header = { cols: 20, rows: 10, background: null, opacity: 0.3 };
+
+const size = { cols: 20, rows: 10 };
 
 const create = (mapId: string) =>
     writeBattleRecord(
@@ -51,14 +57,20 @@ describe('writeBattleRecord: create з mapId', () => {
     });
 
     it('копіює шапку, пише map_id і поточну версію', async () => {
-        mocks.getMap.mockResolvedValue({
+        mocks.getMapMeta.mockResolvedValue({
             campaignId: 'c1',
             version: 4,
-            map: header,
+            ...size,
+            header,
         });
 
         await create('m1');
 
+        expect(mocks.lock).toHaveBeenCalledWith(
+            expect.anything(),
+            'm1',
+            'share'
+        );
         expect(mocks.create).toHaveBeenCalledWith({
             data: expect.objectContaining({
                 map: header,
@@ -69,10 +81,11 @@ describe('writeBattleRecord: create з mapId', () => {
     });
 
     it('чужа кампанія або відсутня карта -> 404', async () => {
-        mocks.getMap.mockResolvedValue({
+        mocks.getMapMeta.mockResolvedValue({
             campaignId: 'other',
             version: 1,
-            map: header,
+            ...size,
+            header,
         });
 
         await expect(create('m1')).rejects.toMatchObject({
@@ -80,17 +93,19 @@ describe('writeBattleRecord: create з mapId', () => {
             message: API_ERRORS.BATTLE_MAP_NOT_FOUND,
         });
 
-        mocks.getMap.mockResolvedValue(null);
+        mocks.getMapMeta.mockResolvedValue(null);
 
         await expect(create('m1')).rejects.toMatchObject({ status: 404 });
         expect(mocks.create).not.toHaveBeenCalled();
     });
 
     it('карта більша за battleMaxSide -> 422', async () => {
-        mocks.getMap.mockResolvedValue({
+        mocks.getMapMeta.mockResolvedValue({
             campaignId: 'c1',
             version: 1,
-            map: { ...header, cols: 61 },
+            cols: 61,
+            rows: 10,
+            header: { ...header, cols: 61 },
         });
 
         await expect(create('m1')).rejects.toMatchObject({

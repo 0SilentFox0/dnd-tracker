@@ -14,12 +14,16 @@ interface MapMeta {
 const EDGE_KEYS = ['walls', 'bars'] as const;
 
 export function withoutEdges(map: BattleMapConfig): BattleMapConfig {
+    if (map.walls === undefined && map.bars === undefined) return map;
+
     const { walls: _walls, bars: _bars, ...header } = map;
 
     return header;
 }
 
 function withEdges(map: BattleMapConfig, base: MapBase): BattleMapConfig {
+    if (EDGE_KEYS.every((key) => map[key] === base[key])) return map;
+
     const out = { ...map };
 
     for (const key of EDGE_KEYS) {
@@ -60,6 +64,8 @@ export function persistedMap(
 
     const out = { ...patched };
 
+    let changed = false;
+
     for (const key of EDGE_KEYS) {
         const own = patched[key];
 
@@ -73,10 +79,14 @@ export function persistedMap(
                       ]),
                   ];
 
-        if (value === undefined || (value.length === 0 && own === undefined))
-            delete out[key];
+        const drop =
+            value === undefined || (value.length === 0 && own === undefined);
+
+        if (drop ? own !== undefined : own !== value) changed = true;
+
+        if (drop) delete out[key];
         else out[key] = value;
     }
 
-    return out;
+    return changed ? out : patched;
 }

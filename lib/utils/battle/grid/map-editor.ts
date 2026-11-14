@@ -150,8 +150,6 @@ export function resizeMap(
     );
 }
 
-export const MAX_MAP_EDGES = MAP_LIMITS.inlineMaxEdges;
-
 export type EdgeOp =
     | 'add-walls'
     | 'add-bars'
@@ -210,7 +208,10 @@ export function paintEdges(
         }
     }
 
-    if (walls.size > MAX_MAP_EDGES || bars.size > MAX_MAP_EDGES)
+    if (
+        walls.size > MAP_LIMITS.inlineMaxEdges ||
+        bars.size > MAP_LIMITS.inlineMaxEdges
+    )
         return { map, overflow: true };
 
     return { map: withEdges(map, { walls, bars }), overflow: false };

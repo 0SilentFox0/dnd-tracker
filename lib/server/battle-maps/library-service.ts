@@ -3,6 +3,7 @@ import type { Prisma } from '@prisma/client';
 import {
     assembleGeometry,
     chunksToRecord,
+    type MapGeometry,
     memoGeometry,
     recordToChunkRows,
 } from './assemble';
@@ -10,6 +11,7 @@ import {
 import { prisma } from '@/lib/db';
 import type { BattleMapInput } from '@/lib/schemas/battle-maps';
 import { encodeEdges } from '@/lib/utils/battle/map-storage/edge-chunks';
+import { withoutEdges } from '@/lib/utils/battle/map-storage/persisted-map';
 import type { BattleMapConfig } from '@/types/battle';
 import type { BattleMapBrief, BattleMapFull } from '@/types/battle-map';
 
@@ -33,14 +35,8 @@ const toBrief = (r: {
     updatedAt: r.updatedAt.toISOString(),
 });
 
-const headerOf = (map: BattleMapInput['map'] | BattleMapConfig): Header => {
-    const { walls: _walls, bars: _bars, ...header } = map as BattleMapConfig;
-
-    return header;
-};
-
 const payloadOf = (input: BattleMapInput) => {
-    const header = headerOf(input.map);
+    const header = withoutEdges(input.map as BattleMapConfig);
 
     const chunks = encodeEdges(input, header.cols, header.rows);
 
@@ -92,6 +88,71 @@ export async function createMap(
     return toBrief(row);
 }
 
+export interface BattleMapMeta {
+    campaignId: string;
+    version: number;
+    cols: number;
+    rows: number;
+    header: Header;
+}
+
+type MapDb = Pick<Prisma.TransactionClient, 'battleMap'>;
+
+/** Ownership and current version without loading any geometry. */
+export async function getMapMeta(
+    mapId: string,
+    db: MapDb = prisma
+): Promise<BattleMapMeta | null> {
+    const row = await db.battleMap.findUnique({
+        where: { id: mapId },
+        select: {
+            campaignId: true,
+            mapVersion: true,
+            cols: true,
+            rows: true,
+            header: true,
+        },
+    });
+
+    return row
+        ? {
+              campaignId: row.campaignId,
+              version: row.mapVersion,
+              cols: row.cols,
+              rows: row.rows,
+              header: row.header as unknown as Header,
+          }
+        : null;
+}
+
+async function loadVersionGeometry(
+    mapId: string,
+    version: number
+): Promise<MapGeometry | null> {
+    const snapshot = await prisma.battleMapVersion.findUnique({
+        where: { mapId_version: { mapId, version } },
+    });
+
+    if (!snapshot) return null;
+
+    const payload = snapshot.payload as unknown as {
+        header: Header;
+        chunks: Record<string, string>;
+    };
+
+    return assembleGeometry(payload.header, payload.chunks);
+}
+
+/** A battle pinned (mapId, version) proves the map exists, so the memo is probed before any row is read. */
+export async function getPinnedGeometry(
+    mapId: string,
+    version: number
+): Promise<MapGeometry | null> {
+    return memoGeometry(mapId, version, () =>
+        loadVersionGeometry(mapId, version)
+    );
+}
+
 /** `version` omitted = current; older versions come from the snapshot rows. */
 export async function getMap(
     mapId: string,
@@ -106,33 +167,17 @@ export async function getMap(
     if (target > row.mapVersion) return null;
 
     const geometry = await memoGeometry(mapId, target, async () => {
-        if (target === row.mapVersion) {
-            const chunks = await prisma.battleMapChunk.findMany({
-                where: { mapId },
-            });
+        if (target !== row.mapVersion)
+            return loadVersionGeometry(mapId, target);
 
-            return assembleGeometry(
-                row.header as unknown as Header,
-                chunksToRecord(chunks)
-            );
-        }
-
-        const snapshot = await prisma.battleMapVersion.findUnique({
-            where: { mapId_version: { mapId, version: target } },
+        const chunks = await prisma.battleMapChunk.findMany({
+            where: { mapId },
         });
 
-        if (!snapshot) throw new MapVersionGone();
-
-        const payload = snapshot.payload as unknown as {
-            header: Header;
-            chunks: Record<string, string>;
-        };
-
-        return assembleGeometry(payload.header, payload.chunks);
-    }).catch((e) => {
-        if (e instanceof MapVersionGone) return null;
-
-        throw e;
+        return assembleGeometry(
+            row.header as unknown as Header,
+            chunksToRecord(chunks)
+        );
     });
 
     if (!geometry) return null;
@@ -147,7 +192,24 @@ export async function getMap(
     };
 }
 
-class MapVersionGone extends Error {}
+async function pruneVersions(
+    tx: Prisma.TransactionClient,
+    mapId: string,
+    current: number
+) {
+    const pinned = await tx.battleScene.findMany({
+        where: { mapId },
+        select: { mapVersion: true },
+    });
+
+    const keep = pinned.flatMap((b) =>
+        b.mapVersion === null ? [] : [b.mapVersion]
+    );
+
+    await tx.battleMapVersion.deleteMany({
+        where: { mapId, version: { lt: current, notIn: keep } },
+    });
+}
 
 export async function saveMap(
     mapId: string,
@@ -181,34 +243,34 @@ export async function saveMap(
             },
         });
 
-        const pinned = await tx.battleScene.findMany({
-            where: { mapId },
-            select: { mapVersion: true },
-        });
-
-        const keep = pinned.flatMap((b) =>
-            b.mapVersion === null ? [] : [b.mapVersion]
-        );
-
-        await tx.battleMapVersion.deleteMany({
-            where: {
-                mapId,
-                version: { lt: row.mapVersion, notIn: keep },
-            },
-        });
+        await pruneVersions(tx, mapId, row.mapVersion);
 
         return toBrief(row);
     });
 }
 
+/** Row lock serializes against battle creation, which share-locks the map before pinning it. */
+export async function lockMapRow(
+    tx: Pick<Prisma.TransactionClient, '$queryRaw'>,
+    mapId: string,
+    mode: 'share' | 'update'
+) {
+    await (mode === 'share'
+        ? tx.$queryRaw`SELECT 1 FROM battle_maps WHERE id = ${mapId} FOR SHARE`
+        : tx.$queryRaw`SELECT 1 FROM battle_maps WHERE id = ${mapId} FOR UPDATE`);
+}
+
 export async function deleteMap(mapId: string): Promise<'ok' | 'in-use'> {
-    const used = await prisma.battleScene.count({ where: { mapId } });
+    return prisma.$transaction(async (tx) => {
+        await lockMapRow(tx, mapId, 'update');
 
-    if (used > 0) return 'in-use';
+        if ((await tx.battleScene.count({ where: { mapId } })) > 0)
+            return 'in-use';
 
-    await prisma.battleMap.delete({ where: { id: mapId } });
+        await tx.battleMap.delete({ where: { id: mapId } });
 
-    return 'ok';
+        return 'ok';
+    });
 }
 
 export async function cloneMap(

@@ -2,7 +2,10 @@ import { API_ERRORS } from '@/lib/constants/api-errors';
 import { MAP_LIMITS } from '@/lib/constants/map-limits';
 import { getMap } from '@/lib/server/battle-maps/library-service';
 import { cellsOf, isOnMap, isPlayable } from '@/lib/utils/battle/grid';
-import { composeEffectiveMap } from '@/lib/utils/battle/map-storage/effective-map';
+import {
+    composeEffectiveMap,
+    pruneRemoved,
+} from '@/lib/utils/battle/map-storage/effective-map';
 import { MODE_MAP_KEYS } from '@/lib/utils/battle/modes/client';
 import type {
     BattleMutationContext,
@@ -13,15 +16,23 @@ import { REJECT } from '@/lib/utils/battle/store/reject';
 import type { MapUpdateData } from '@/types/api';
 import type { BattleMapConfig } from '@/types/battle';
 
-const RUNTIME_KEYS = ['terrain', 'spellZones', 'weather', 'motion'] as const;
+const RUNTIME_KEYS: readonly (keyof BattleMapConfig)[] = [
+    'terrain',
+    'spellZones',
+    'weather',
+    'motion',
+];
 
 function runtimeFields(map: BattleMapConfig): Partial<BattleMapConfig> {
-    const source = map as unknown as Record<string, unknown>;
+    const keys: readonly (keyof BattleMapConfig)[] = [
+        ...RUNTIME_KEYS,
+        ...MODE_MAP_KEYS,
+    ];
 
     return Object.fromEntries(
-        [...RUNTIME_KEYS, ...MODE_MAP_KEYS]
-            .filter((key) => source[key] !== undefined)
-            .map((key) => [key, source[key]])
+        keys
+            .filter((key) => map[key] !== undefined)
+            .map((key) => [key, map[key]])
     );
 }
 
@@ -79,12 +90,7 @@ export async function mapUpdateMutation(
 
     const existing = new Set([...library.walls, ...library.bars]);
 
-    const kept = state?.removedEdges.filter((e) => existing.has(e)) ?? [];
-
-    const pruned =
-        state && kept.length !== state.removedEdges.length
-            ? { ...state, removedEdges: kept }
-            : state;
+    const pruned = pruneRemoved(state, (e) => existing.has(e));
 
     return {
         ...unchanged,

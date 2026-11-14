@@ -18,12 +18,12 @@ export function mapEdgeRemoveMutation(
 
     const state = ctx.meta.mapState ?? { removedEdges: [], doors: {} };
 
-    const edges = [...new Set(body.edges)];
+    const edges = new Set(body.edges);
 
     if (body.restore) {
         const removed = new Set(state.removedEdges);
 
-        if (!edges.every((e) => removed.has(e)))
+        if (![...edges].every((e) => removed.has(e)))
             throw new BattleRuleError(
                 'action_rejected',
                 REJECT.mapEdgeNotRemoved
@@ -31,17 +31,15 @@ export function mapEdgeRemoveMutation(
     } else {
         const present = new Set([...(map.walls ?? []), ...(map.bars ?? [])]);
 
-        if (!edges.every((e) => present.has(e)))
+        if (![...edges].every((e) => present.has(e)))
             throw new BattleRuleError(
                 'action_rejected',
                 REJECT.mapEdgeNotFound
             );
     }
 
-    const touched = new Set(edges);
-
     const removedEdges = body.restore
-        ? state.removedEdges.filter((e) => !touched.has(e))
+        ? state.removedEdges.filter((e) => !edges.has(e))
         : [...new Set([...state.removedEdges, ...edges])];
 
     return {

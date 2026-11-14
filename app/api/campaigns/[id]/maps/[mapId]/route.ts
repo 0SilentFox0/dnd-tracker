@@ -5,6 +5,7 @@ import { battleMapInputSchema } from '@/lib/schemas/battle-maps';
 import {
     deleteMap,
     getMap,
+    getMapMeta,
     saveMap,
 } from '@/lib/server/battle-maps/library-service';
 import { requireCampaignAccess, requireDM } from '@/lib/utils/api/api-auth';
@@ -33,14 +34,12 @@ export async function GET(req: Request, { params }: Ctx) {
     if (version !== undefined && !(Number.isInteger(version) && version >= 1))
         return errorResponse(API_ERRORS.INVALID_BODY, 400);
 
-    const map = await loadOwned(getMap(mapId, version), id);
-
-    if (map instanceof NextResponse) return map;
-
-    const etag = weakEtag(map.id, map.version);
-
     if (version === undefined) {
-        const notModified = ifNoneMatch(req, etag);
+        const meta = await loadOwned(getMapMeta(mapId), id);
+
+        if (meta instanceof NextResponse) return meta;
+
+        const notModified = ifNoneMatch(req, weakEtag(mapId, meta.version));
 
         if (notModified) {
             notModified.headers.set('Cache-Control', REVALIDATE);
@@ -48,6 +47,12 @@ export async function GET(req: Request, { params }: Ctx) {
             return notModified;
         }
     }
+
+    const map = await loadOwned(getMap(mapId, version), id);
+
+    if (map instanceof NextResponse) return map;
+
+    const etag = weakEtag(map.id, map.version);
 
     const { campaignId: _campaignId, ...body } = map;
 
@@ -66,7 +71,7 @@ export async function PUT(req: Request, { params }: Ctx) {
 
     if (access instanceof NextResponse) return access;
 
-    const existing = await loadOwned(getMap(mapId), id);
+    const existing = await loadOwned(getMapMeta(mapId), id);
 
     if (existing instanceof NextResponse) return existing;
 
@@ -84,7 +89,7 @@ export async function DELETE(_req: Request, { params }: Ctx) {
 
     if (access instanceof NextResponse) return access;
 
-    const existing = await loadOwned(getMap(mapId), id);
+    const existing = await loadOwned(getMapMeta(mapId), id);
 
     if (existing instanceof NextResponse) return existing;
 

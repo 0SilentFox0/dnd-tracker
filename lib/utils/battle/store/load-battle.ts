@@ -1,6 +1,8 @@
 import type { PrismaClient } from '@prisma/client';
 
+import { BattleMapVersionMissingError } from './errors';
 import { snapshotCache } from './snapshot-cache';
+import { rowToMapState } from './snapshot-state';
 import { joinParticipant } from './split-participant';
 import type {
     BattleSceneState,
@@ -12,7 +14,7 @@ import type {
 
 import { BattleStatus } from '@/lib/constants/battle';
 import { CampaignRole, isDemoKind } from '@/lib/constants/campaigns';
-import { getMap } from '@/lib/server/battle-maps/library-service';
+import { getPinnedGeometry } from '@/lib/server/battle-maps/library-service';
 import { pendingFromStored } from '@/lib/utils/battle/crit-choice/pending';
 import { composeEffectiveMap } from '@/lib/utils/battle/map-storage/effective-map';
 import { parseRulesCached } from '@/lib/utils/rules/schema';
@@ -148,10 +150,10 @@ async function effectiveMapOf(
 
     if (!ref) return composeEffectiveMap(base, state);
 
-    const library = await getMap(ref.mapId, ref.version);
+    const library = await getPinnedGeometry(ref.mapId, ref.version);
 
     if (!library)
-        throw new Error(`battle map ${ref.mapId}@${ref.version} is gone`);
+        throw new BattleMapVersionMissingError(ref.mapId, ref.version);
 
     return composeEffectiveMap(base, state, library);
 }
@@ -229,35 +231,29 @@ export async function loadBattle(
 
     const membership = row.campaign.members[0];
 
-    const rules = parseRulesCached(
-        row.status !== BattleStatus.PREPARED && row.rules
-            ? row.rules
-            : await loadCampaignRules(db, args)
-    );
-
-    const all = (await withSnapshots(db, row.battleParticipants)).map((p) => ({
-        isPending: p.isPending,
-        participant: rowToParticipant(p),
-    }));
-
     const mapRef =
         row.mapId && row.mapVersion !== null
             ? { mapId: row.mapId, version: row.mapVersion }
             : null;
 
-    const mapState: BattleMapState | null = row.mapState
-        ? {
-              removedEdges: row.mapState.removedEdges as string[],
-              doors: row.mapState.doors as unknown as BattleMapState['doors'],
-              ...(row.mapState.fog && {
-                  fog: row.mapState.fog as Record<string, unknown>,
-              }),
-          }
-        : null;
+    const mapState = rowToMapState(row.mapState);
 
     const stored = (row.map ?? null) as BattleMapConfig | null;
 
-    const map = await effectiveMapOf(stored, mapRef, mapState);
+    const [rawRules, withSnap, map] = await Promise.all([
+        row.status !== BattleStatus.PREPARED && row.rules
+            ? row.rules
+            : loadCampaignRules(db, args),
+        withSnapshots(db, row.battleParticipants),
+        effectiveMapOf(stored, mapRef, mapState),
+    ]);
+
+    const rules = parseRulesCached(rawRules);
+
+    const all = withSnap.map((p) => ({
+        isPending: p.isPending,
+        participant: rowToParticipant(p),
+    }));
 
     const mapBase: MapBase | null =
         stored && !mapRef

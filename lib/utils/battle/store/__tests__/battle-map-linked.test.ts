@@ -1,10 +1,10 @@
 import { Prisma } from '@prisma/client';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const mocks = vi.hoisted(() => ({ getMap: vi.fn() }));
+const mocks = vi.hoisted(() => ({ getPinned: vi.fn() }));
 
 vi.mock('@/lib/server/battle-maps/library-service', () => ({
-    getMap: mocks.getMap,
+    getPinnedGeometry: mocks.getPinned,
 }));
 
 import { type BattleDb, loadBattle } from '../load-battle';
@@ -58,8 +58,8 @@ const loadWith = (extra: Record<string, unknown>) =>
 
 describe('loadBattle: карта бібліотеки', () => {
     beforeEach(() => {
-        mocks.getMap.mockReset();
-        mocks.getMap.mockResolvedValue({
+        mocks.getPinned.mockReset();
+        mocks.getPinned.mockResolvedValue({
             map: header,
             walls: ['1:1:e', '2:2:s'],
             bars: ['3:3:e'],
@@ -73,7 +73,7 @@ describe('loadBattle: карта бібліотеки', () => {
             mapState: { removedEdges: ['1:1:e'], doors: {}, fog: null },
         });
 
-        expect(mocks.getMap).toHaveBeenCalledWith('m1', 3);
+        expect(mocks.getPinned).toHaveBeenCalledWith('m1', 3);
         expect(loaded?.meta.map?.walls).toEqual(['2:2:s']);
         expect(loaded?.meta.map?.bars).toEqual(['3:3:e']);
         expect(loaded?.meta.mapRef).toEqual({ mapId: 'm1', version: 3 });
@@ -81,6 +81,14 @@ describe('loadBattle: карта бібліотеки', () => {
             removedEdges: ['1:1:e'],
             doors: {},
         });
+    });
+
+    it('linked: відсутня pinned-версія дає типізовану помилку з mapId і версією', async () => {
+        mocks.getPinned.mockResolvedValue(null);
+
+        await expect(loadWith({ mapId: 'm1', mapVersion: 3 })).rejects.toThrow(
+            'battle map m1@3 is gone'
+        );
     });
 
     it('inline: бібліотеку не чіпає, стан віднімається від власних ребер', async () => {
@@ -91,7 +99,7 @@ describe('loadBattle: карта бібліотеки', () => {
             mapState: { removedEdges: ['4:4:e'], doors: {}, fog: null },
         });
 
-        expect(mocks.getMap).not.toHaveBeenCalled();
+        expect(mocks.getPinned).not.toHaveBeenCalled();
         expect(loaded?.meta.map?.walls).toEqual(['1:1:e']);
         expect(loaded?.meta.mapRef).toBeNull();
     });
