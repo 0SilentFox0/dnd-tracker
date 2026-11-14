@@ -1,6 +1,6 @@
 import { DURATION_FIELD, type FieldMeta, TARGET_FIELD } from '../fields';
 import {
-    CONDITION_KEYS_ALL,
+    conditionKeysAll,
     conditionKeySegment,
     limitsSegments,
 } from '../labels';
@@ -65,7 +65,7 @@ import type {
     EffectKind,
 } from '@/lib/utils/abilities/schema';
 import {
-    CONDITION_5E_KEYS,
+    isMechanicalConditionKey,
     MANEUVERS,
 } from '@/lib/utils/abilities/schema/kinds';
 import type { ModuleEffectKind } from '@/lib/utils/abilities/schema/module-effects';
@@ -228,7 +228,9 @@ const BASE_EFFECT_REGISTRY: {
             {
                 name: 'condition',
                 input: 'select',
-                options: CONDITION_KEYS_ALL.map((value) => ({ value })),
+                get options() {
+                    return conditionKeysAll().map((value) => ({ value }));
+                },
             },
             {
                 name: 'levels',
@@ -241,9 +243,7 @@ const BASE_EFFECT_REGISTRY: {
                 input: 'saveEnds',
                 optional: true,
                 visibleWhen: (v) =>
-                    (CONDITION_5E_KEYS as readonly string[]).includes(
-                        String(v.condition)
-                    ),
+                    !isMechanicalConditionKey(String(v.condition)),
             },
             {
                 name: 'percent',

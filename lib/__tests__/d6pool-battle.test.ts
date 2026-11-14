@@ -172,6 +172,22 @@ describe('start, attack and next-turn on a d6pool base', () => {
     });
 });
 
+describe('core actions of a base without them', () => {
+    it('has no catalog, so dash is neither listed nor runnable', () => {
+        const { actions } = D6POOL_SYSTEM.combat;
+
+        expect(actions.enabled({} as never)).toBe(false);
+        expect(actions.catalog).toEqual({});
+        expect('dash' in actions.catalog).toBe(false);
+        expect(actions.available('dash', {} as never, [], null, {} as never).ok).toBe(
+            false
+        );
+        expect(() =>
+            actions.run({ body: { action: 'dash', participantId: 'a' } } as never)
+        ).toThrow();
+    });
+});
+
 describe('import graph of the d6pool battle test', () => {
     it('stops at the generated system roots and reaches no systems/*', () => {
         const graph = staticGraph(

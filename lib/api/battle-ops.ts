@@ -3,8 +3,8 @@ import { systemPath } from './system';
 
 import type { AbilityKey } from '@/lib/constants/abilities';
 import type {
-    Condition5eKey,
     CustomConditionKey,
+    StandardConditionKey,
 } from '@/lib/utils/abilities/schema/kinds';
 import type {
     AbilityActionData,
@@ -32,7 +32,7 @@ export type BattleConditionsBody =
     | {
           action: 'apply';
           participantId: string;
-          condition: Condition5eKey | CustomConditionKey;
+          condition: StandardConditionKey | CustomConditionKey;
           rounds?: number;
           levels?: number;
           saveEnds?: { ability: AbilityKey; dc: number };
@@ -40,7 +40,7 @@ export type BattleConditionsBody =
     | {
           action: 'remove';
           participantId: string;
-          condition: Condition5eKey | CustomConditionKey;
+          condition: StandardConditionKey | CustomConditionKey;
       };
 
 export type SystemConditionBody =

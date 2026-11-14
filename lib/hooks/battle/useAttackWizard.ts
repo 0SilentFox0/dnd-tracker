@@ -14,11 +14,6 @@ import type { CunningStrikeEffect } from '@/lib/utils/abilities/schema';
 import { ammoStatus } from '@/lib/utils/battle/ammo';
 import { attackCounter } from '@/lib/utils/battle/attack/attacks-left';
 import { critDoublesDice } from '@/lib/utils/battle/attack/crit-dice';
-import {
-    CUNNING_STRIKE_LABELS,
-    cunningStrikeOffer,
-    toggleCunningStrike,
-} from '@/lib/utils/battle/attack/cunning-strike';
 import { canUseInspiration } from '@/lib/utils/battle/attack/inspiration';
 import { attackMaxTargets } from '@/lib/utils/battle/attack/max-targets';
 import { attackKindOf } from '@/lib/utils/battle/common/attack-kind';
@@ -270,17 +265,28 @@ export function useAttackWizard(
     const cunningOffer = useMemo(
         () =>
             attacker && !state.offHand && isOpen
-                ? cunningStrikeOffer(attacker, scene.battle.currentRound)
+                ? ruleSystemOf(scene.battle.rules).combat.attack?.riderOptions?.(
+                      attacker,
+                      scene.battle.currentRound
+                  )
                 : null,
-        [attacker, state.offHand, isOpen, scene.battle.currentRound]
+        [
+            attacker,
+            state.offHand,
+            isOpen,
+            scene.battle.currentRound,
+            scene.battle.rules,
+        ]
     );
 
     const view = {
         cunning: cunningOffer && {
             options: cunningOffer.options.map((o) => ({
                 ...o,
-                label: CUNNING_STRIKE_LABELS[o.effect],
-                selected: !!state.cunningStrike?.includes(o.effect),
+                effect: o.effect as CunningStrikeEffect,
+                selected: !!state.cunningStrike?.includes(
+                    o.effect as CunningStrikeEffect
+                ),
             })),
             maxEffects: cunningOffer.maxEffects,
             sneakDice: cunningOffer.sneakDice,
@@ -428,11 +434,10 @@ export function useAttackWizard(
             cunningOffer &&
             dispatch({
                 type: 'SET_CUNNING_STRIKE',
-                effects: toggleCunningStrike(
+                effects: cunningOffer.toggle(
                     state.cunningStrike ?? [],
-                    effect,
-                    cunningOffer
-                ),
+                    effect
+                ) as CunningStrikeEffect[],
             }),
         setMode: (mode: AttackMode) => dispatch({ type: 'SET_MODE', mode }),
         setSystemInput: (value: SystemSlot | null) =>

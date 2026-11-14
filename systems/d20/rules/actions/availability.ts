@@ -1,3 +1,4 @@
+import type { CoreActionKey } from './keys';
 import { CORE_ACTION_REGISTRY } from './registry';
 
 import { findFlags } from '@/lib/utils/abilities/engine/core/collect-modifiers';
@@ -6,12 +7,11 @@ import {
     isAttackable,
     withSelf,
 } from '@/lib/utils/abilities/engine/core/participants';
-import type {
-    CoreActionDef,
-    CoreActionKey,
-} from '@/lib/utils/battle/actions/keys';
 import { actionReason } from '@/lib/utils/battle/actions/reasons';
-import type { CoreActionAvailability } from '@/lib/utils/battle/actions/types';
+import type {
+    CoreActionAvailability,
+    CoreActionDef,
+} from '@/lib/utils/battle/actions/types';
 import { canAttackFromPool } from '@/lib/utils/battle/attack/attacks-left';
 import { hasCondition } from '@/lib/utils/battle/conditions/query';
 import { bothOnMap, isAdjacent } from '@/lib/utils/battle/grid/occupancy';

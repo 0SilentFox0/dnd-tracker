@@ -8,15 +8,21 @@ import {
     isEffectInComposition,
 } from '@/lib/utils/abilities/registry/effects/ownership';
 import { SYSTEM_EFFECT_OWNERSHIP } from '@/lib/utils/abilities/registry/effects/system-rows';
+import {
+    isCustomConditionKey,
+    isMechanicalConditionKey,
+} from '@/lib/utils/abilities/schema/kinds';
 import type { Actor } from '@/lib/utils/api/actor';
 import {
     composition,
     type SystemSelection,
 } from '@/lib/utils/rules/systems/catalog';
+import { ruleSystemOf } from '@/lib/utils/rules/systems/lookup';
 
 interface EffectNode {
     kind: string;
     flag?: unknown;
+    condition?: unknown;
     options?: readonly EffectNode[];
 }
 
@@ -38,6 +44,16 @@ export const storedEffectOwners = (json: unknown): EffectOwner[] =>
                   Array.isArray((a as EffectOwner).effects)
           )
         : [];
+
+const conditionKeyOf = (e: EffectNode): string | undefined =>
+    e.kind === 'applyCondition' && typeof e.condition === 'string'
+        ? e.condition
+        : undefined;
+
+const isForeignCondition = (key: string, standard: readonly string[]) =>
+    !isCustomConditionKey(key) &&
+    !isMechanicalConditionKey(key) &&
+    !standard.includes(key);
 
 export function assertEffectsInComposition(
     system: SystemSelection,
@@ -62,6 +78,27 @@ export function assertEffectsInComposition(
         )
     )
         throw new ContentError(API_ERRORS.EFFECT_OUTSIDE_COMPOSITION, 422);
+
+    const standard = ruleSystemOf({ system }).conditionSet.keys;
+
+    const keptConditions = new Set(
+        existing.flatMap((a) => flatten(a.effects).map(conditionKeyOf))
+    );
+
+    if (
+        abilities.some((a) =>
+            flatten(a.effects).some((e) => {
+                const key = conditionKeyOf(e);
+
+                return (
+                    key !== undefined &&
+                    isForeignCondition(key, standard) &&
+                    !keptConditions.has(key)
+                );
+            })
+        )
+    )
+        throw new ContentError(API_ERRORS.CONDITION_UNKNOWN, 422);
 }
 
 /** Resource writes outside units: the rule system comes from the campaign the row is written to, loaded once per actor. */

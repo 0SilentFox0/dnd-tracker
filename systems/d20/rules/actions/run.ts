@@ -6,7 +6,14 @@ import {
     standUpCost,
     validateCoreAction,
 } from './availability';
+import {
+    disengageEffect,
+    dodgeEffect,
+    hiddenEffect,
+} from './effects';
 import { runEscape, runGrapple, runShove } from './grapple';
+import type { CoreActionKey } from './keys';
+import type { CoreActionBody } from './schema';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { dynamicTextRef, textRef } from '@/lib/i18n/text-ref';
@@ -17,14 +24,10 @@ import {
 } from '@/lib/utils/abilities/engine/core/participants';
 import { type TimedEffectInput } from '@/lib/utils/abilities/engine/effects/timed-effects';
 import {
-    disengageEffect,
-    dodgeEffect,
     helpEffect,
-    hiddenEffect,
     upsertLabeled,
 } from '@/lib/utils/battle/actions/effects';
 import { reject } from '@/lib/utils/battle/actions/errors';
-import type { CoreActionKey } from '@/lib/utils/battle/actions/keys';
 import { actionReason } from '@/lib/utils/battle/actions/reasons';
 import type {
     RunCoreActionInput,
@@ -67,7 +70,9 @@ function spendAction(
         : applyMainActionUsed(actor);
 }
 
-export function runCoreAction(input: RunCoreActionInput): RunCoreActionResult {
+export function runCoreAction(
+    input: Omit<RunCoreActionInput, 'body'> & { body: CoreActionBody }
+): RunCoreActionResult {
     const { body, participants, map, round, rules, rng } = input;
 
     const actor = findParticipant(participants, body.participantId);

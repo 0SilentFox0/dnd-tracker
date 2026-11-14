@@ -497,6 +497,7 @@ export const API_ERRORS = {
     CONDITION_IMMUNE: 'errors.conditionImmune',
     CONDITION_ABSENT: 'errors.conditionAbsent',
     CONDITION_UNSUPPORTED: 'errors.conditionUnsupported',
+    CONDITION_UNKNOWN: 'errors.conditionUnknown',
     CONDITION_TEST_UNAVAILABLE: 'errors.conditionTestUnavailable',
     NO_FORTUNE: 'errors.noFortune',
     OUT_OF_AMMO: 'errors.outOfAmmo',

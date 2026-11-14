@@ -138,6 +138,9 @@ export function useDmParticipantActions({ onChangeHp, onDone }: Options) {
         row,
         conditions: {
             target: conditionsTarget,
+            standard: battle.rules
+                ? ruleSystemOf(battle.rules).conditionSet
+                : { keys: [], labelKey: (key: string) => key },
             custom:
                 battle.rules &&
                 ruleSystemOf(battle.rules).conditionSet.custom?.(battle.rules),

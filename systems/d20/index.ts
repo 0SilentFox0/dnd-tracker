@@ -1,5 +1,9 @@
 import { D20_ACTIONS } from './rules/actions';
-import { d20AbortedRoll, resolveD20Attack } from './rules/attack';
+import {
+    D20_ATTACK_HOOKS,
+    d20AbortedRoll,
+    resolveD20Attack,
+} from './rules/attack';
 import { D20_REACH, d20AttackAbility } from './rules/attack/ability';
 import { d20HitModel } from './rules/balance';
 import { concentrationFallout } from './rules/concentration/damaged';
@@ -63,6 +67,7 @@ export const D20_MODULE: RuleSystemDefinition = {
         attackAbility: d20AttackAbility,
         reach: D20_REACH,
         inspiration: D20_INSPIRATION,
+        attack: D20_ATTACK_HOOKS,
         dice: 20,
         actionEconomy: { bonusAction: true, reaction: true },
         resolveAttack: resolveD20Attack,

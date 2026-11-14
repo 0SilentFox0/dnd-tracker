@@ -10,8 +10,7 @@ import {
 import { flagBase } from './flag-base';
 import {
     ATTACK_KINDS,
-    CONDITION_5E_KEYS,
-    CONDITION_KEYS,
+    CONDITION_KEY_RE,
     CUSTOM_CONDITION_KEY_RE,
     type CustomConditionKey,
     DAMAGE_FILTER_KINDS,
@@ -30,9 +29,8 @@ import { DND_SKILLS } from '@/lib/constants/skills';
 export {
     type AnyConditionKey,
     BAKED_STATS,
-    CONDITION_5E_KEYS,
+    CONDITION_KEY_RE,
     CONDITION_KEYS,
-    type Condition5eKey,
     type ConditionImmunityKey,
     type CustomConditionKey,
     DYNAMIC_STATS,
@@ -117,10 +115,7 @@ const DamageBonusSchema = z
 
 export const AbilityKeySchema = z.enum(ABILITY_KEYS);
 
-export const AnyConditionSchema = z.enum([
-    ...CONDITION_KEYS,
-    ...CONDITION_5E_KEYS,
-]);
+export const AnyConditionSchema = z.string().regex(CONDITION_KEY_RE);
 
 export const CustomConditionKeySchema = z
     .string()

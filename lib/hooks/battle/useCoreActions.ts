@@ -10,17 +10,13 @@ import {
     coreActionsOn,
     reactionBlockerOf,
 } from '@/lib/utils/battle/actions/access';
-import {
-    CORE_ACTION_KEYS,
-    type CoreActionKey,
-} from '@/lib/utils/battle/actions/keys';
 import { isHostile } from '@/lib/utils/battle/modes/engine';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { BattleParticipant } from '@/types/battle';
 
 export interface CoreActionChoice {
-    key: CoreActionKey;
+    key: string;
     targetId?: string;
     mode?: 'prone' | 'push';
 }
@@ -38,7 +34,7 @@ function bodyFor(
             return { action: key, participantId, targetId };
 
         default:
-            return { action: key, participantId };
+            return { action: key, participantId } as CoreActionBody;
     }
 }
 
@@ -110,37 +106,25 @@ export function useCoreActions(
 
     const items = useMemo(
         () =>
-            CORE_ACTION_KEYS.flatMap((key) => {
-                const def = actions.catalog[key];
-
-                return def
-                    ? [
-                          {
-                              key,
-                              def,
-                              cost: actions.cost(
-                                  key,
-                                  participant,
-                                  initiativeOrder
-                              ),
-                              ...actions.available(
-                                  key,
-                                  participant,
-                                  initiativeOrder,
-                                  map,
-                                  battle.rules
-                              ),
-                          },
-                      ]
-                    : [];
-            }),
+            Object.entries(actions.catalog).map(([key, def]) => ({
+                key,
+                def,
+                cost: actions.cost(key, participant, initiativeOrder),
+                ...actions.available(
+                    key,
+                    participant,
+                    initiativeOrder,
+                    map,
+                    battle.rules
+                ),
+            })),
         [actions, participant, initiativeOrder, map, battle.rules]
     );
 
     return {
         enabled: coreActionsOn(battle.rules),
         items,
-        targetsFor: (key: CoreActionKey) =>
+        targetsFor: (key: string) =>
             actions.targets(key, participant, initiativeOrder, map),
         run: (choice: CoreActionChoice) =>
             send(bodyFor(participant.basicInfo.id, choice)),

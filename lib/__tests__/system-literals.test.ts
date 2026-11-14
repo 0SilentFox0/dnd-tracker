@@ -190,7 +190,7 @@ describe('d20 / HOMM names and rule-section readers leaving core', () => {
     const LEAK_NAMES: Record<string, number> = {
         'D20_[A-Z]+': 0,
         judgeD20: 0,
-        CONDITION_5E_: 11,
+        CONDITION_5E_: 0,
         applyCondition5e: 0,
         isHomm: 0,
         'HOMM_[A-Z]+': 0,
@@ -205,6 +205,9 @@ describe('d20 / HOMM names and rule-section readers leaving core', () => {
         conditionTestMutation: 0,
         systemConditionMutation: 0,
         coreActionMutation: 0,
+        CORE_ACTION_KEYS: 0,
+        coreActionSchema: 0,
+        'cunningStrike(Offer|Cost|Dc)|applyCunningStrikeEffects|toggleCunningStrike|CUNNING_STRIKE_LABELS': 0,
         careersResource: 0,
         createWfrpDraft: 0,
         patchWfrpDraft: 0,

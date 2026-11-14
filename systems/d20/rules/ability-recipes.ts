@@ -1,7 +1,6 @@
-import {
-    CONDITION_5E_KEYS,
-    CONDITION_KEYS,
-} from '@/lib/utils/abilities/schema/kinds';
+import { CONDITION_5E_KEYS } from './conditions/keys';
+
+import { CONDITION_KEYS } from '@/lib/utils/abilities/schema/kinds';
 import {
     ability,
     both,

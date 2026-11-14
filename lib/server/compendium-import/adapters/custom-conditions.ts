@@ -2,10 +2,10 @@ import { renderEntries } from '../entries';
 import { array, object, str } from './shared';
 
 import {
-    CONDITION_5E_KEYS,
     type CONDITION_KEYS,
     CUSTOM_CONDITION_KEY_RE,
 } from '@/lib/utils/abilities/schema/kinds';
+import { allConditionKeys } from '@/lib/utils/rules/systems/lookup';
 
 type Marker = (typeof CONDITION_KEYS)[number];
 
@@ -92,9 +92,7 @@ export function deriveCustomConditions(
 
         if (
             !name ||
-            (CONDITION_5E_KEYS as readonly string[]).includes(
-                name.toLowerCase()
-            )
+            allConditionKeys().includes(name.toLowerCase())
         )
             return { rule: null, name, index, recognized: true };
 

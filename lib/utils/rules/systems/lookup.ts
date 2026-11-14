@@ -1,4 +1,9 @@
-import { composition, moduleCatalog, PRESETS, type SystemSelection } from './catalog';
+import {
+    composition,
+    moduleCatalog,
+    PRESETS,
+    type SystemSelection,
+} from './catalog';
 import { composeSystem } from './compose';
 import { RULE_SYSTEM_KEYS } from './meta';
 import { type ModuleEntry, resolveSystem } from './resolve';
@@ -24,6 +29,8 @@ let table: Record<string, RuleSystemDefinition> | undefined;
 
 let levelResets: readonly LevelResetPart[] | undefined;
 
+let conditionKeys: readonly string[] | undefined;
+
 export function installModules(entries: Entries): void {
     if (
         installed &&
@@ -35,6 +42,7 @@ export function installModules(entries: Entries): void {
     systemCache = new Map();
     table = undefined;
     levelResets = undefined;
+    conditionKeys = undefined;
 }
 
 export function isInstalled(system: SystemSelection): boolean {
@@ -106,9 +114,20 @@ export function allLevelResets(): readonly LevelResetPart[] {
     return levelResets;
 }
 
-export const ruleSystemOf = (
-    rules: Pick<Ruleset, 'system'>
-): RuleSystemDefinition => {
+/** Standard conditions of every installed base: for places with no campaign (template editor, labels) */
+export function allConditionKeys(): readonly string[] {
+    return (conditionKeys ??= [
+        ...new Set(
+            RULE_SYSTEM_KEYS.flatMap(
+                (key) => ruleSystemByKey(key)?.conditionSet.keys ?? []
+            )
+        ),
+    ]);
+}
+
+export const ruleSystemOf = (rules: {
+    system: SystemSelection;
+}): RuleSystemDefinition => {
     return resolve(rules.system);
 };
 

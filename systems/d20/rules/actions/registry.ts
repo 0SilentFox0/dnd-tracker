@@ -1,7 +1,6 @@
-import type {
-    CoreActionDef,
-    CoreActionKey,
-} from '@/lib/utils/battle/actions/keys';
+import type { CoreActionKey } from './keys';
+
+import type { CoreActionDef } from '@/lib/utils/battle/actions/types';
 
 export const CORE_ACTION_REGISTRY: Record<CoreActionKey, CoreActionDef> = {
     dash: { cost: 'action', target: 'none' },

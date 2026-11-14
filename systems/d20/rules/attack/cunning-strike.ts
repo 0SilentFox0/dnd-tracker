@@ -1,3 +1,5 @@
+import { disengageEffect } from '../actions/effects';
+
 import type { AbilityKey } from '@/lib/constants/abilities';
 import { textRef } from '@/lib/i18n/text-ref';
 import {
@@ -7,10 +9,7 @@ import {
 } from '@/lib/utils/abilities/engine/core/participants';
 import { withinLimits } from '@/lib/utils/abilities/engine/core/usage';
 import type { CunningStrikeEffect } from '@/lib/utils/abilities/schema';
-import {
-    disengageEffect,
-    upsertLabeled,
-} from '@/lib/utils/battle/actions/effects';
+import { upsertLabeled } from '@/lib/utils/battle/actions/effects';
 import {
     type ActionFlow,
     getP,
@@ -21,6 +20,12 @@ import { REJECT } from '@/lib/utils/battle/store/reject';
 import { diceCount } from '@/lib/utils/common/dice';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
+import type {
+    AttackRiderOffer,
+    HitRidersCtx,
+    HitRidersPlan,
+    RuleSystemAttackHooks,
+} from '@/lib/utils/rules/systems/types';
 import type { BattleParticipant } from '@/types/battle';
 import type { TextRef } from '@/types/text';
 
@@ -215,3 +220,58 @@ export function applyCunningStrikeEffects(
         flow.messages.push(...r.messages);
     }
 }
+
+function riderOffer(
+    attacker: BattleParticipant,
+    round: number
+): AttackRiderOffer | null {
+    const offer = cunningStrikeOffer(attacker, round);
+
+    return (
+        offer && {
+            options: offer.options.map((o) => ({
+                ...o,
+                label: CUNNING_STRIKE_LABELS[o.effect],
+            })),
+            maxEffects: offer.maxEffects,
+            sneakKey: offer.sneakKey,
+            sneakDice: offer.sneakDice,
+            toggle: (selected, effect) =>
+                toggleCunningStrike(
+                    selected as CunningStrikeEffect[],
+                    effect as CunningStrikeEffect,
+                    offer
+                ),
+        }
+    );
+}
+
+function hitRiders({ attacker, round, effects }: HitRidersCtx): HitRidersPlan {
+    const offer = cunningStrikeOffer(attacker, round);
+
+    const cost = cunningStrikeCost(offer, effects as CunningStrikeEffect[]);
+
+    return typeof cost === 'number'
+        ? {
+              dice: cost,
+              apply: (flow, targetId, fired) => {
+                  if (!offer || cost === 0 || !fired.includes(offer.sneakKey))
+                      return false;
+
+                  applyCunningStrikeEffects(
+                      flow,
+                      attacker.basicInfo.id,
+                      targetId,
+                      effects as CunningStrikeEffect[]
+                  );
+
+                  return true;
+              },
+          }
+        : { rejected: cost, dice: 0, apply: () => false };
+}
+
+export const D20_ATTACK_HOOKS: RuleSystemAttackHooks = {
+    riderOptions: riderOffer,
+    hitRiders,
+};

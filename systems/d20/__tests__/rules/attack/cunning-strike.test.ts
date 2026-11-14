@@ -11,11 +11,6 @@ import {
     seq,
 } from '@/lib/utils/abilities/__tests__/fixtures';
 import type { CunningStrikeEffect } from '@/lib/utils/abilities/schema';
-import {
-    cunningStrikeCost,
-    cunningStrikeOffer,
-    toggleCunningStrike,
-} from '@/lib/utils/battle/attack/cunning-strike';
 import { resolveHit } from '@/lib/utils/battle/attack/process/hit';
 import { validateAttackRequest } from '@/lib/utils/battle/attack-phase/request';
 import { textsOf } from '@/lib/utils/battle/log/__tests__/event-text';
@@ -23,6 +18,11 @@ import { hasEffectMarker } from '@/lib/utils/battle/participant/state';
 import { REJECT } from '@/lib/utils/battle/store/reject';
 import { forgoDice } from '@/lib/utils/common/dice';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
+import {
+    cunningStrikeCost,
+    cunningStrikeOffer,
+    toggleCunningStrike,
+} from '@/systems/d20/rules/attack/cunning-strike';
 import { calculateAttackRoll } from '@/systems/d20/rules/attack/roll';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
 

@@ -418,7 +418,7 @@ export function convertUnits(data: Open5eData): UnitRow[] {
                         c.condition_immunities.map(titleCase).join(', '),
                         {
                             trigger: { event: 'passive' },
-                            // SRD condition names match CONDITION_5E_KEYS 1:1 (checked by the integrity test)
+                            // SRD condition names match the d20 condition keys 1:1 (checked by the integrity test)
                             effects: [
                                 {
                                     kind: 'flag',

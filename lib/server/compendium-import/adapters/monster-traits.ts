@@ -4,12 +4,10 @@ import { plainName, spellRefs } from './monster-attacks';
 import { ABILITIES, array, num, object, str } from './shared';
 
 import { ABILITY_KEYS, type AbilityKey } from '@/lib/constants/abilities';
-import {
-    type Ability,
-    AnyConditionSchema,
-    type Effect,
-} from '@/lib/utils/abilities/schema';
+import { type Ability, type Effect } from '@/lib/utils/abilities/schema';
+import { isMechanicalConditionKey } from '@/lib/utils/abilities/schema/kinds';
 import { getAbilityModifier } from '@/lib/utils/common/calculations';
+import { allConditionKeys } from '@/lib/utils/rules/systems/lookup';
 import type { UnitSpellcasting } from '@/types/units';
 
 const DAMAGE_TYPES = new Set([
@@ -131,7 +129,8 @@ export function defenseAbilities(row: Record<string, unknown>): Defenses {
         flatten(row.conditionImmune, 'conditionImmune', out);
 
         const valid = [...new Set(out.values)].filter(
-            (v) => AnyConditionSchema.safeParse(v).success
+            (v) =>
+                isMechanicalConditionKey(v) || allConditionKeys().includes(v)
         );
 
         unresolved.push(

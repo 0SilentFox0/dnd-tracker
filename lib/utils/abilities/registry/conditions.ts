@@ -1,5 +1,5 @@
 import type { FieldMeta } from './fields';
-import { CONDITION_KEYS_ALL, conditionKeySegment } from './labels';
+import { conditionKeysAll, conditionKeySegment } from './labels';
 
 import { AttackType } from '@/lib/constants/battle';
 import {
@@ -143,7 +143,7 @@ export function describeCondition(c: Condition): Segment[] {
             return [
                 seg('summary.conditions.targetHasCondition', {
                     condition: (
-                        CONDITION_KEYS_ALL as readonly string[]
+                        conditionKeysAll() as readonly string[]
                     ).includes(c.condition)
                         ? conditionKeySegment(c.condition as AnyConditionKey)
                         : c.condition,

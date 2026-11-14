@@ -39,6 +39,34 @@ describe('assertEffectsInComposition', () => {
         );
     });
 
+    it('rejects an unknown standard condition for the system with CONDITION_UNKNOWN', () => {
+        const blind = ability({
+            kind: 'applyCondition',
+            condition: 'blinded',
+        });
+
+        expect(() =>
+            assertEffectsInComposition({ key: 'wfrp' }, blind)
+        ).toThrowError(
+            expect.objectContaining({
+                message: API_ERRORS.CONDITION_UNKNOWN,
+                status: 422,
+            })
+        );
+        expect(() =>
+            assertEffectsInComposition({ key: 'dnd5e' }, blind)
+        ).not.toThrow();
+        expect(() =>
+            assertEffectsInComposition({ key: 'wfrp' }, blind, blind)
+        ).not.toThrow();
+        expect(() =>
+            assertEffectsInComposition(
+                { key: 'wfrp' },
+                ability({ kind: 'applyCondition', condition: 'custom:x' })
+            )
+        ).not.toThrow();
+    });
+
     it('accepts a wfrp effect in wfrp and a core effect anywhere', () => {
         expect(() =>
             assertEffectsInComposition(

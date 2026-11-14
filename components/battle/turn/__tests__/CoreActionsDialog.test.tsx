@@ -7,8 +7,8 @@ import { ReadiedAttackButton } from '../ReadiedAttackButton';
 
 import { fakeScene } from '@/lib/hooks/battle/__tests__/fake-scene';
 import { render } from '@/lib/i18n/test/render-uk';
-import { CORE_ACTION_KEYS } from '@/lib/utils/battle/actions/keys';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import battle from '@/messages/uk/battle.json';
 import battleCommon from '@/messages/uk/battleCommon.json';
 import { applyCondition5e } from '@/systems/d20/rules/conditions/apply';
@@ -54,7 +54,9 @@ describe('CoreActionsDialog', () => {
     it('показує всі дії з вартістю й описом', () => {
         setup();
 
-        for (const k of CORE_ACTION_KEYS) {
+        for (const k of Object.keys(
+            ruleSystemOf(DEFAULT_RULES).combat.actions.catalog
+        ) as (keyof typeof battleCommon.coreActions)[]) {
             expect(screen.getByText(battleCommon.coreActions[k])).toBeTruthy();
             expect(
                 screen.getByText(battle.coreActions.descriptions[k])

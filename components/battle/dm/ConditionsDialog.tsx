@@ -13,15 +13,16 @@ import { SelectField } from '@/components/ui/select-field';
 import { ABILITY_KEYS, type AbilityKey } from '@/lib/constants/abilities';
 import { CONDITION_LIMITS } from '@/lib/constants/battle';
 import type { BattleConditionsBody } from '@/lib/hooks/battles';
+import { dynamicTextRef } from '@/lib/i18n/text-ref';
 import { useText } from '@/lib/i18n/use-text';
 import { effectName } from '@/lib/utils/battle/common/terms';
 import {
-    CONDITION_5E_KEYS,
     conditionEffects,
     type ConditionKey,
     MAX_EXHAUSTION,
 } from '@/lib/utils/battle/conditions';
 import type { Ruleset } from '@/lib/utils/rules';
+import type { RuleSystemConditionSet } from '@/lib/utils/rules/systems/types';
 import type { BattleParticipant } from '@/types/battle';
 
 const FORM_ID = 'conditions-form';
@@ -40,6 +41,7 @@ interface ConditionsDialogProps {
     onClose: () => void;
     onSubmit: (body: BattleConditionsBody) => void;
     isPending?: boolean;
+    standard: Pick<RuleSystemConditionSet, 'keys' | 'labelKey'>;
     custom?: Ruleset['conditions']['custom'];
 }
 
@@ -63,19 +65,16 @@ function ConditionsDialogBody({
     onClose,
     onSubmit,
     isPending,
+    standard,
     custom = [],
 }: ConditionsDialogProps & { participant: BattleParticipant }) {
     const t = useTranslations('battleDm.conditions');
-
-    const tCondition = useTranslations('battleCommon.conditions');
 
     const tAbility = useTranslations('gameTerms.abilities');
 
     const text = useText();
 
-    const [selected, setSelected] = useState<ConditionKey>(
-        CONDITION_5E_KEYS[0]
-    );
+    const [selected, setSelected] = useState<ConditionKey>(standard.keys[0]);
 
     const [rounds, setRounds] = useState('');
 
@@ -195,14 +194,20 @@ function ConditionsDialogBody({
                     role="radiogroup"
                     aria-label={t('state')}
                 >
-                    {CONDITION_5E_KEYS.map((key) => (
+                    {standard.keys.map((key) => (
                         <OptionButton
                             key={key}
                             role="radio"
                             checked={selected === key}
                             onClick={() => setSelected(key)}
-                            title={tCondition(`${key}.label`)}
-                            note={tCondition(`${key}.description`)}
+                            title={text(
+                                dynamicTextRef(`${standard.labelKey(key)}.label`)
+                            )}
+                            note={text(
+                                dynamicTextRef(
+                                    `${standard.labelKey(key)}.description`
+                                )
+                            )}
                         />
                     ))}
                     {custom.map((c) => (
