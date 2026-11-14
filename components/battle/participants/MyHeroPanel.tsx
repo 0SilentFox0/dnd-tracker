@@ -4,7 +4,6 @@ import { memo } from 'react';
 import { useTranslations } from 'next-intl';
 import { Heart } from 'lucide-react';
 
-import { HitFrame, PortraitFx } from '@/components/battle/fx/PortraitFx';
 import {
     EffectLine,
     HealthBar,
@@ -14,7 +13,11 @@ import {
 } from '@/components/battle/hud';
 import { ReactionSpellButton } from '@/components/battle/turn/ReactionSpellButton';
 import { ReadiedAttackButton } from '@/components/battle/turn/ReadiedAttackButton';
-import { useSystemBattleUi, useSystemFx } from '@/components/battle/use-system-battle-ui';
+import {
+    useSystemBattleUi,
+    useSystemFx,
+} from '@/components/battle/use-system-battle-ui';
+import { HitFrame, PortraitFx } from '@/components/fx/PortraitFx';
 import { BattleStatus } from '@/lib/constants/battle';
 import {
     useBattleRules,
@@ -56,7 +59,10 @@ export const MyHeroPanel = memo(function MyHeroPanel({
         change,
         shown: hero,
         shakeRef,
-    } = useHitFx<HTMLDivElement>(live, useFxImpacts(useSystemFx())(live.basicInfo.id));
+    } = useHitFx<HTMLDivElement>(
+        live,
+        useFxImpacts(useSystemFx())(live.basicInfo.id)
+    );
 
     const until = turnsUntil(queue, [hero.basicInfo.id]);
 

@@ -75,7 +75,7 @@
 | `components/battle/scene/InitiativeTrack.tsx`, `LastActionTicker.tsx`, `ParticipantRow.tsx`, `ParticipantDetails.tsx`, `BattleLog.tsx` | поле бою |
 | `components/battle/scene/MyHeroPanel.tsx`, `ActionGrid.tsx`, `TurnCountdown.tsx`, `ConnectionBanner.tsx`, `BattleToast.tsx`, `BattleTopBar.tsx` | мій герой і шапка |
 | `components/battle/wizards/DiceInput.tsx`, `AttackWizard.tsx`, `SpellBook.tsx`, `BonusActionPicker.tsx` | майстри |
-| `components/battle/fx/ResultOverlay.tsx`, `DamageFx.tsx` | результати й анімації |
+| `components/fx/ResultOverlay.tsx`, `DamageFx.tsx` | результати й анімації |
 | `app/campaigns/[id]/battles/[battleId]/BattlePageClient.tsx` | клієнтська частина сторінки |
 
 **Змінити:** `types/api.ts`, `types/battle.ts`, `lib/utils/battle/pipeline/run-battle-mutation.ts`, `lib/utils/battle/pipeline/legacy-battle.ts`, `lib/api/battles.ts`, `lib/api/battles-types.ts`, `lib/hooks/battles/useBattles.ts`, `lib/hooks/battles/index.ts`, `lib/hooks/battle/usePusherBattleSync.ts`, `lib/hooks/battle/index.ts`, `lib/hooks/common/useIsMobile.ts`, `lib/hooks/common/index.ts`, `lib/utils/abilities/engine/collect-modifiers.ts`, `lib/utils/abilities/engine/timed-effects.ts`, `lib/utils/abilities/registry/effects/{static,state,hp}.ts`, `lib/utils/battle/resistance/index.ts`, `lib/utils/battle/damage/impl.ts`, `lib/utils/battle/damage/breakdown.ts`, `lib/utils/battle/types/damage-*.ts`, `lib/utils/battle/attack/process/{compute,actions}.ts`, `lib/utils/battle/spell/{process,process-effects}.ts`, `scripts/simulate-battle.ts`, `app/campaigns/[id]/battles/[battleId]/page.tsx`, `components/battle/panels/DmQuickActionsPanel.tsx`, `docs/ARCHITECTURE.md`, `CLAUDE.md`.
@@ -5872,8 +5872,8 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 ### Task 20: `ResultOverlay`
 
 **Files:**
-- Create: `components/battle/fx/ResultOverlay.tsx`
-- Test: `components/battle/fx/__tests__/result-overlay.test.tsx`
+- Create: `components/fx/ResultOverlay.tsx`
+- Test: `components/fx/__tests__/result-overlay.test.tsx`
 
 **Interfaces:**
 - Consumes: `scene.result`, `scene.showResult` (Task 12).
@@ -5888,7 +5888,7 @@ import { describe, expect, it, vi } from "vitest";
 
 vi.mock("@/components/battle/hud/fonts", () => ({ hudFontClassName: "" }));
 
-import { ResultOverlay } from "@/components/battle/fx/ResultOverlay";
+import { ResultOverlay } from "@/components/fx/ResultOverlay";
 import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
 
 describe("ResultOverlay", () => {
@@ -5929,7 +5929,7 @@ describe("ResultOverlay", () => {
 
 - [ ] **Step 2: Запустити — падає**
 
-Run: `pnpm test:run components/battle/fx`
+Run: `pnpm test:run components/fx`
 Expected: FAIL.
 
 - [ ] **Step 3: Реалізація** — анімації з макетів K–N + «Влучання» (`hit-overlay.html`), кубик без відскоку (`cubic-bezier(.16,1,.3,1)`):
@@ -6026,14 +6026,14 @@ export function ResultOverlay() {
 
 - [ ] **Step 4: Тести зелені**
 
-Run: `pnpm test:run components/battle/fx`
+Run: `pnpm test:run components/fx`
 Expected: PASS.
 
 - [ ] **Step 5: Commit**
 
 ```bash
-pnpm lint --fix components/battle/fx components/battle/hud
-git add components/battle/fx components/battle/hud lib/hooks/battle
+pnpm lint --fix components/fx components/battle/hud
+git add components/fx components/battle/hud lib/hooks/battle
 git commit -m "feat(battle-ui): result overlays for hit, crit, miss and morale
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
@@ -6385,7 +6385,7 @@ import { CompleteBattleDialog } from "./CompleteBattleDialog";
 import { DesktopBattleLayout } from "./DesktopBattleLayout";
 import { MobileBattleLayout } from "./MobileBattleLayout";
 
-import { ResultOverlay } from "@/components/battle/fx/ResultOverlay";
+import { ResultOverlay } from "@/components/fx/ResultOverlay";
 import { hudFontClassName } from "@/components/battle/hud";
 import { BattlePreparationView } from "@/components/battle/views/BattlePreparationView";
 import { useBattleScene } from "@/lib/hooks/battle";

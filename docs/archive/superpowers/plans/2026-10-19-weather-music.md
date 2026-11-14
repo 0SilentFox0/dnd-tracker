@@ -339,7 +339,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 - Test: `components/battle/map/weather/__tests__/effects.test.ts`, `components/battle/map/__tests__/WeatherLayer.test.tsx`
 
 **Interfaces:**
-- Consumes: `subscribe(fn, { fps })` (`components/battle/fx/runtime/ticker.ts`), `fitCanvas(canvas, w, h, dpr)` (`components/battle/fx/runtime/canvas-size.ts`), `useReducedMotion`, `usePageHidden` (`@/lib/hooks/common`), `WeatherKind` (Task 1), `recordingContext` (`components/battle/fx/__tests__/recording-canvas.ts`).
+- Consumes: `subscribe(fn, { fps })` (`components/fx/runtime/ticker.ts`), `fitCanvas(canvas, w, h, dpr)` (`components/fx/runtime/canvas-size.ts`), `useReducedMotion`, `usePageHidden` (`@/lib/hooks/common`), `WeatherKind` (Task 1), `recordingContext` (`components/fx/__tests__/recording-canvas.ts`).
 - Produces:
   - `WeatherSize`, `Rand`, `WeatherSim { step(dt): void; draw(g): void }`, `WeatherEffect { tint; opacity; density; cap; create(size, count, rand): WeatherSim }`, `particleCount(size, effect, scale?)`, `wrap(v, max)`.
   - `createRain`, `createStorm`, `nextFlashIn(rand)`, `FLASH_SEC`, `createSnow`, `createDrift`, `createEmbers`.
@@ -360,7 +360,7 @@ import { createRain } from "../rain";
 import { createStorm, FLASH_SEC } from "../storm";
 import { particleCount } from "../types";
 
-import { recordingContext } from "@/components/battle/fx/__tests__/recording-canvas";
+import { recordingContext } from "@/components/fx/__tests__/recording-canvas";
 import { WEATHER_KINDS } from "@/lib/constants/battle-weather";
 
 const size = { width: 800, height: 600 };
@@ -450,7 +450,7 @@ describe("ефекти погоди", () => {
 import { act, cleanup, render } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { recordingContext } from "@/components/battle/fx/__tests__/recording-canvas";
+import { recordingContext } from "@/components/fx/__tests__/recording-canvas";
 import { BattleMap } from "@/components/battle/map";
 import { WeatherLayer } from "@/components/battle/map/weather/WeatherLayer";
 import type { BattleMapConfig } from "@/types/battle";
@@ -459,7 +459,7 @@ const unsubscribe = vi.hoisted(() => vi.fn());
 
 const subscribe = vi.hoisted(() => vi.fn(() => unsubscribe));
 
-vi.mock("@/components/battle/fx/runtime/ticker", () => ({ subscribe }));
+vi.mock("@/components/fx/runtime/ticker", () => ({ subscribe }));
 
 class RO {
   constructor(private cb: (entries: { contentRect: { width: number; height: number } }[]) => void) {}
@@ -958,8 +958,8 @@ import { useEffect } from "react";
 import { WEATHER_EFFECTS } from "./index";
 import { particleCount, type WeatherSim, type WeatherSize } from "./types";
 
-import { fitCanvas } from "@/components/battle/fx/runtime/canvas-size";
-import { subscribe } from "@/components/battle/fx/runtime/ticker";
+import { fitCanvas } from "@/components/fx/runtime/canvas-size";
+import { subscribe } from "@/components/fx/runtime/ticker";
 import type { WeatherKind } from "@/types/battle";
 
 // частинки дрібні: понад 1.5× пікселів не видно, а заливка дорожчає квадратично
@@ -1110,7 +1110,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
 import type { BattleMapConfig } from "@/types/battle";
 
-vi.mock("@/components/battle/fx/runtime/ticker", () => ({ subscribe: vi.fn(() => vi.fn()) }));
+vi.mock("@/components/fx/runtime/ticker", () => ({ subscribe: vi.fn(() => vi.fn()) }));
 
 afterEach(cleanup);
 

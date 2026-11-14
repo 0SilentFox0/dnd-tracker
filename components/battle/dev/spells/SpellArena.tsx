@@ -10,10 +10,10 @@ import {
 
 import type { SpellArenaHandle } from './types';
 
-import { ARCHETYPE_LABEL, ELEMENT_LABEL } from '@/components/battle/fx/labels';
-import { PreviewUnitRow } from '@/components/battle/fx/preview/PreviewUnitRow';
-import { playFx } from '@/components/battle/fx/runtime/play';
-import { cancelLayer } from '@/components/battle/fx/runtime/stage';
+import { ARCHETYPE_LABEL, ELEMENT_LABEL } from '@/components/fx/labels';
+import { PreviewUnitRow } from '@/components/fx/preview/PreviewUnitRow';
+import { playFx } from '@/components/fx/runtime/play';
+import { cancelLayer } from '@/components/fx/runtime/stage';
 import { type FxRunner, useSpellFxPlayback } from '@/lib/hooks/battle';
 import {
     PREVIEW_UNITS,

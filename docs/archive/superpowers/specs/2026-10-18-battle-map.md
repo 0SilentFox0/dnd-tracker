@@ -28,7 +28,7 @@
 4. **Візуалізація й перевірка**: траєкторії, превʼю шаблону, FX на токенах, battle-sweep із картою, браузерна перевірка.
 
 ## Контракт з анімаціями (FX, гілка `feat/battle-fx-lab`)
-FX-шар (`components/battle/fx`) знаходить точки через DOM: `findAnchor(id)` бере перший видимий `[data-fx-participant=id]`, `centerOf(el)` дає координати у viewport, `resolvePoints(spec)` будує `from`/`to`; `area` летить у центроїд цілей.
+FX-шар (`components/fx`) знаходить точки через DOM: `findAnchor(id)` бере перший видимий `[data-fx-participant=id]`, `centerOf(el)` дає координати у viewport, `resolvePoints(spec)` будує `from`/`to`; `area` летить у центроїд цілей.
 
 Що дає карта (блок 2):
 - Токен: `data-fx-participant={id}` + `data-fx-anchor="map"` — на сцені з картою токен має пріоритет над рядком списку, героєм і треком ініціативи (ранжування в `findAnchor`: map > row/hero > track).

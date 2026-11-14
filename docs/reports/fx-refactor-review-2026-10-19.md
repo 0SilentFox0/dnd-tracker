@@ -1,6 +1,6 @@
 # Ревʼю battle FX, раунд 2: сигнатурні анімації (2026-10-19)
 
-Гілка `feat/battle-fx-lab`, обсяг — `5f57fa1e..HEAD` (05425d2b manuscript-превʼю, bdb8fc92 прототипи сигнатур, 6e36ee0f Light, 18c90906 Dark, 4a251735 Nature/summons): 91 файл, +9 047 рядків, з них ~7 700 рядків у `components/battle/fx/animations/` (50 файлів), 16 нових аур у `auras/canvas/`, нові помічники `runtime/{badge,beam,figure,geometry,ghosts,motion,shapes,streaks}.ts`, зміни в `lib/utils/battle/fx/{overrides,aura,impact,timing}.ts`.
+Гілка `feat/battle-fx-lab`, обсяг — `5f57fa1e..HEAD` (05425d2b manuscript-превʼю, bdb8fc92 прототипи сигнатур, 6e36ee0f Light, 18c90906 Dark, 4a251735 Nature/summons): 91 файл, +9 047 рядків, з них ~7 700 рядків у `components/fx/animations/` (50 файлів), 16 нових аур у `auras/canvas/`, нові помічники `runtime/{badge,beam,figure,geometry,ghosts,motion,shapes,streaks}.ts`, зміни в `lib/utils/battle/fx/{overrides,aura,impact,timing}.ts`.
 
 Правило «одна анімація = один файл, одна аура = один файл» усі пропозиції зберігають — спільне йде лише в `runtime/` та `auras/canvas/kit.ts`.
 
@@ -50,7 +50,7 @@
 
 ### c1. Guard `MAX_FX_MS` обриває сигнатури (NOW)
 
-- Guard: `components/battle/fx/BattleFxLayer.tsx:42-45` — через 3000 мс wall-clock викликає `cancelLayer(el)`.
+- Guard: `components/fx/BattleFxLayer.tsx:42-45` — через 3000 мс wall-clock викликає `cancelLayer(el)`.
 - Тривалості сигнатур: `TOTAL_MS` — 2300 (2 файли), 2400 (2), 2500 (5), **2600 (13), 2700 (11)**. Запас до guard лише 300–400 мс.
 - **Stagger понад TOTAL:** `animations/rebirth.ts:18` (`TOTAL_MS = 2700`) + `rebirth.ts:76` `perTarget(stage, to, 120, …)`. На 4 цілі виходить 2700 + 3 × 120 = 3060 мс, тож хвіст анімації гарантовано обрізається. Відродження лісу — масове лікування союзників, 4+ цілі для нього типові.
 - **Повільні кадри:** `runtime/stage.ts:139` обмежує `dt` до 0.05 с. Нижче 20 fps (мобільний, багато аур, фонова вкладка, що повертається) час tween іде повільніше за wall-clock. Тоді 2700 мс анімації тривають > 3000 мс реального часу і обриваються, хоча анімація справна.
@@ -74,7 +74,7 @@
 
 Додати сигнатуру нового заклинання означає правити обидва файли. Плюс п'ять мап за архетипом:
 - `timing.ts:3` `IMPACT_MS`, `impact.ts:12` `NO_IMPACT`, `impact.ts:14` `HEALS` — у `lib`;
-- `components/battle/fx/labels.ts` `ARCHETYPE_LABEL`, `animations/index.ts` `ANIMATIONS` — у `components`.
+- `components/fx/labels.ts` `ARCHETYPE_LABEL`, `animations/index.ts` `ANIMATIONS` — у `components`.
 
 `Record<FxArchetype, …>` перевіряється компілятором, а `Set` у `impact.ts` — ні. Тому новий архетип мовчки стає «damage». Зараз так неявно класифіковано 17 архетипів, серед них `teleport` і `death`; teleport нешкідливий лише тому, що рамка зʼявляється тільки при зміні HP.
 
@@ -100,7 +100,7 @@ export const ARCHETYPE_FX: Record<FxArchetype, { impactMs: number; impact: "dama
 
 Обидва чанки ліниві (`BattleScreen.tsx:50`, `StatusAuras.tsx:9`, `preload.ts`), гідратацію вони не блокують. Але на сторінці бою й у превʼю книги заклинань (`SpellBattlePreview.tsx:6`) завантажується весь набір з 50 архетипів, хоча в конкретному бою грають 3–6.
 
-**Пропозиція (LATER, M):** `ARCHETYPE_FX[a].load = () => import("@/components/battle/fx/animations/haste")`. Turbopack створить окремий чанк на кожен файл, і правило «одна анімація = один файл» тут якраз допомагає. Базові архетипи (`melee/ranged/bolt/area/heal/buff/debuff/summon/death`) лишаються в основному чанку FX. Сигнатуру завантажують, щойно spec потрапляє в чергу (`advanceFxQueue`), і так у неї є фора щонайменше в одну анімацію. Для превʼю — при відкритті сторінки заклинання. Ризик середній: перший показ без кешу може запізнитися. Тому при помилці завантаження — фолбек на базовий архетип (`spellRules`).
+**Пропозиція (LATER, M):** `ARCHETYPE_FX[a].load = () => import("@/components/fx/animations/haste")`. Turbopack створить окремий чанк на кожен файл, і правило «одна анімація = один файл» тут якраз допомагає. Базові архетипи (`melee/ranged/bolt/area/heal/buff/debuff/summon/death`) лишаються в основному чанку FX. Сигнатуру завантажують, щойно spec потрапляє в чергу (`advanceFxQueue`), і так у неї є фора щонайменше в одну анімацію. Для превʼю — при відкритті сторінки заклинання. Ризик середній: перший показ без кешу може запізнитися. Тому при помилці завантаження — фолбек на базовий архетип (`spellRules`).
 
 Альтернатива простіша: 4 чанки за школами (light/dark/nature/summons). Виграш менший, а мапа «архетип → школа» додає ще одне джерело правди. Тому радимо per-file.
 
@@ -129,7 +129,7 @@ export const ARCHETYPE_FX: Record<FxArchetype, { impactMs: number; impact: "dama
   
   Прибрати `export` (типи можна лишити, якщо потрібні сигнатурам — зараз не потрібні).
 - `runtime/ghosts.ts` `ghostOf` використовують лише тест і `playGhost`, тож export виправданий для тесту.
-- `components/battle/fx/labels.ts` тепер використовується в продакшн-UI (`SpellBattlePreviewPanel.tsx:7`, чип «Анімація»). Перенесення в `fx-lab/labels.ts` із stage 4 фактично скасоване, і це коректно.
+- `components/fx/labels.ts` тепер використовується в продакшн-UI (`SpellBattlePreviewPanel.tsx:7`, чип «Анімація»). Перенесення в `fx-lab/labels.ts` із stage 4 фактично скасоване, і це коректно.
 
 ### c7. Скасування: рух рядків і привиди (п. 3 завдання) — у порядку
 
@@ -146,7 +146,7 @@ export const ARCHETYPE_FX: Record<FxArchetype, { impactMs: number; impact: "dama
 
 ### c9. Тести, яких бракує (п. 9)
 
-1. **Бюджет кадру аур** (`components/battle/fx/__tests__/aura-budget.test.ts`): для кожного `AURA_ANIMATIONS[k]` — 10 викликів `frame()` з записуючим fake-ctx. Після першого кадру має бути 0 викликів `create*Gradient`, а `shadowBlur > 0` на основному ctx — ніколи. Зараз такий тест упав би на `holyweapon` і `lifedome`, тобто зловив би регресію з c2.
+1. **Бюджет кадру аур** (`components/fx/__tests__/aura-budget.test.ts`): для кожного `AURA_ANIMATIONS[k]` — 10 викликів `frame()` з записуючим fake-ctx. Після першого кадру має бути 0 викликів `create*Gradient`, а `shadowBlur > 0` на основному ctx — ніколи. Зараз такий тест упав би на `holyweapon` і `lifedome`, тобто зловив би регресію з c2.
 2. **Завершення анімацій** (`animations-run.test.ts`): для кожного `ANIMATIONS[a]` — fake stage (як у `stage.test.ts`), 1–4 цілі, ручний tick по 16 мс. Анімація резолвиться до `MAX_FX_MS`, а після завершення `s.draws.size === 0`, `s.animations.size === 0` і немає `.fx-ghost`. Зараз упав би на rebirth × 4 (c1).
 
 ### c10. Що з першого ревʼю (2026-10-18) ще не зроблено

@@ -5,7 +5,10 @@ import { memo, useMemo } from 'react';
 import { ParticipantRow } from './ParticipantRow';
 import { ReserveParticipantRow } from './ReserveParticipantRow';
 
-import { useSystemBattleUi, useSystemFx } from '@/components/battle/use-system-battle-ui';
+import {
+    useSystemBattleUi,
+    useSystemFx,
+} from '@/components/battle/use-system-battle-ui';
 import { ParticipantSide } from '@/lib/constants/battle';
 import {
     useBattleRules,

@@ -63,6 +63,16 @@ export const UI_LAYER_ZONES = [
             'components/common holds domain-free widgets: no domain components or types (docs/architecture/ui-layers.md)',
     },
     {
+        name: 'fx',
+        files: ['components/fx/**/*.{ts,tsx}'],
+        forbidden: [
+            '^@/components/(?!ui/|hud(/|$)|common/|dice/|fx/|systems/types$)',
+            '^@/lib/(api|server)(/|$)',
+        ],
+        message:
+            'components/fx sits between common and the domains: it may not import battle, spells or other domain components (docs/architecture/ui-layers.md)',
+    },
+    {
         name: 'system-ui',
         files: ['systems/*/ui/**/*.{ts,tsx}', 'systems/*/hooks/**/*.{ts,tsx}'],
         forbidden: [

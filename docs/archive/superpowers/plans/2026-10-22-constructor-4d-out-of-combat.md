@@ -3442,7 +3442,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 - Test: `components/character-profile/rest/__tests__/hit-dice-panel.test.tsx`, `components/character-profile/rest/__tests__/sheet-roll-dialog.test.tsx`
 
 **Interfaces:**
-- Consumes: `sheet.rest: SheetRest | null` (задача 11), `useSpendHitDie`, `useSheetRoll`, `useCharacterLog` (задача 11), `describeCharacterLog` (задача 11), `useProfile` (`components/character-profile/ProfileContext.tsx`), `DiceStage`/`DiceStageHandle` (`components/battle/fx/dice/DiceStage.tsx`), `DiceThrowSpec` (`lib/utils/battle/fx/dice`), `cryptoRandom` (`lib/utils/common/dice.ts`).
+- Consumes: `sheet.rest: SheetRest | null` (задача 11), `useSpendHitDie`, `useSheetRoll`, `useCharacterLog` (задача 11), `describeCharacterLog` (задача 11), `useProfile` (`components/character-profile/ProfileContext.tsx`), `DiceStage`/`DiceStageHandle` (`components/fx/dice/DiceStage.tsx`), `DiceThrowSpec` (`lib/utils/battle/fx/dice`), `cryptoRandom` (`lib/utils/common/dice.ts`).
 - Produces: `SheetRollRequest = { label: string; subject: SheetRollSubject }`; `SheetRollDialog({ request, onClose }: { request: SheetRollRequest | null; onClose: () => void })`.
 
 Правило показу: усе нове — лише коли `sheet.rest !== null` (HOMM5 і кампанії з вимкненими перемикачами бачать лист як зараз, тести `profile-view.test.tsx` без змін). Кидки й кістки хітів — власник або ДМ (`sheet.viewer.isOwner || sheet.viewer.isDM`).
@@ -3529,7 +3529,7 @@ import type { SheetRest } from "@/types/characters";
 const h = vi.hoisted(() => ({ roll: { mutateAsync: vi.fn(async () => ({ label: "Скритність", rolls: [11, 20], roll: 20, mod: 4, bonus: 2, total: 26, mode: "advantage", autoFail: false, inspirationUsed: true })), isPending: false } }));
 
 vi.mock("@/lib/hooks/characters", async (orig) => ({ ...(await orig<object>()), useSheetRoll: () => h.roll }));
-vi.mock("@/components/battle/fx/dice/DiceStage", () => ({ DiceStage: () => null }));
+vi.mock("@/components/fx/dice/DiceStage", () => ({ DiceStage: () => null }));
 
 const rest: SheetRest = { persist: false, hp: null, dead: false, exhaustion: 0, shortRestOpen: false, hitDice: [], charges: [], inspiration: true, xp: null };
 
@@ -3647,8 +3647,8 @@ import { useRef, useState } from "react";
 
 import { useProfile } from "../ProfileContext";
 
-import "@/components/battle/fx/fx.css";
-import { DiceStage, type DiceStageHandle } from "@/components/battle/fx/dice/DiceStage";
+import "@/components/fx/fx.css";
+import { DiceStage, type DiceStageHandle } from "@/components/fx/dice/DiceStage";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";

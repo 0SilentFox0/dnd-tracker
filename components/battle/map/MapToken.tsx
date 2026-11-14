@@ -5,9 +5,9 @@ import { memo } from 'react';
 import { PORTRAIT_SHARE } from './constants';
 import { type MapPlacement, tokenBoxStyle } from './token-box';
 
-import { StatusAuras } from '@/components/battle/fx/auras/StatusAuras';
-import { HitFrame } from '@/components/battle/fx/PortraitFx';
 import { hitFlashClass, Portrait } from '@/components/battle/hud';
+import { StatusAuras } from '@/components/fx/auras/StatusAuras';
+import { HitFrame } from '@/components/fx/PortraitFx';
 import { useHitFx } from '@/lib/hooks/battle';
 import { cn } from '@/lib/utils';
 import type { FxImpact } from '@/lib/utils/battle/fx';

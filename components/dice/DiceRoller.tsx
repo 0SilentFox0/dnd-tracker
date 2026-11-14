@@ -4,7 +4,7 @@ import { useCallback, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Dices, Minus, Plus } from 'lucide-react';
 
-import '@/components/battle/fx/fx.css';
+import '@/components/fx/fx.css';
 import { DiceStage, type DiceStageHandle } from '@/components/dice/DiceStage';
 import {
     ROLLER_MAX_COUNT,

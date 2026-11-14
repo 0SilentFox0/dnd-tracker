@@ -25,7 +25,7 @@ export function SpellBattlePreview(props: ComponentProps<typeof Panel>) {
     // the signature chunk loads alongside the panel's, so the first cast plays without a wait
     useEffect(() => {
         if (archetype)
-            void import('@/components/battle/fx/animations').then(
+            void import('@/components/fx/animations').then(
                 (m) => m.preloadAnimation(archetype),
                 () => undefined
             );

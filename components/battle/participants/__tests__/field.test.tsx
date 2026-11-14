@@ -4,7 +4,7 @@ import { cleanup, fireEvent, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('@/components/hud/fonts', () => ({ hudFontClassName: '' }));
-vi.mock('@/components/battle/fx/frames/ImpactFrame', () => ({
+vi.mock('@/components/fx/frames/ImpactFrame', () => ({
     ImpactFrame: ({ impact }: { impact: FxImpact }) => (
         <i data-testid="impact-frame" data-element={impact.element} />
     ),

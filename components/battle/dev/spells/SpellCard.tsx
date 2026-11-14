@@ -3,14 +3,14 @@ import { Play } from 'lucide-react';
 
 import type { SpellCardData } from './types';
 
+import { EntityIcon } from '@/components/common/EntityIcon';
 import {
     ARCHETYPE_LABEL,
     AURA_LABEL,
     ELEMENT_LABEL,
     FRAME_LABEL,
-} from '@/components/battle/fx/labels';
-import { PALETTE } from '@/components/battle/fx/runtime/palette';
-import { EntityIcon } from '@/components/common/EntityIcon';
+} from '@/components/fx/labels';
+import { PALETTE } from '@/components/fx/runtime/palette';
 import { HudCard, HudPill } from '@/components/hud/page';
 import { useAbilityText } from '@/lib/hooks/abilities';
 import { useText } from '@/lib/i18n/use-text';

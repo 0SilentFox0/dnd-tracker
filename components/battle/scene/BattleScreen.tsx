@@ -11,7 +11,10 @@ import { MobileBattleLayout } from './MobileBattleLayout';
 
 import { AudioDock } from '@/components/audio/AudioDock';
 import { BattleAudioProvider } from '@/components/battle/audio/BattleAudioProvider';
-import { useSystemBattleUi } from '@/components/battle/use-system-battle-ui';
+import {
+    useSystemBattleUi,
+    useSystemFx,
+} from '@/components/battle/use-system-battle-ui';
 import { hudFontClassName } from '@/components/hud';
 import { OnboardingHint } from '@/components/onboarding/OnboardingHint';
 import { BattleStatus, ParticipantSide } from '@/lib/constants/battle';
@@ -92,10 +95,7 @@ const DmRevivePrompt = dynamic(
 );
 
 const BattleFxLayer = dynamic(
-    () =>
-        import('@/components/battle/fx/BattleFxLayer').then(
-            (m) => m.BattleFxLayer
-        ),
+    () => import('@/components/fx/BattleFxLayer').then((m) => m.BattleFxLayer),
     { ssr: false }
 );
 
@@ -136,6 +136,8 @@ export function BattleScreen() {
         useSystemBattleUi();
 
     // перший HTML — мобільний макет: телефони не бачать підміни після гідратації
+    const fx = useSystemFx();
+
     const wide = useMediaQuery(DESKTOP_QUERY);
 
     const Desktop = useDesktopLayout(wide);
@@ -161,7 +163,7 @@ export function BattleScreen() {
     useEffect(() => {
         if (!fxOn) return;
 
-        import('@/components/battle/fx/preload')
+        import('@/components/fx/preload')
             .then((m) => m.preloadFx())
             .catch(() => undefined);
     }, [fxOn]);
@@ -246,7 +248,7 @@ export function BattleScreen() {
                             onOpenChange={setCompleteOpen}
                         />
                     )}
-                    <BattleFxLayer />
+                    <BattleFxLayer fx={fx} />
                 </div>
             )}
         </BattleAudioProvider>
