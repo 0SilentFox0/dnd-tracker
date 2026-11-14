@@ -27,6 +27,7 @@ import { isEffectInSystem } from '@/lib/utils/abilities/registry/effects/ownersh
 import { SYSTEM_EFFECT_OWNERSHIP } from '@/lib/utils/abilities/registry/effects/system-rows';
 import { triggerMatches } from '@/lib/utils/abilities/registry/triggers';
 import type { StaticEffect } from '@/lib/utils/abilities/schema';
+import { adjacencyOf } from '@/lib/utils/battle/grid/adjacency';
 import type { AbilityEvent } from '@/types/abilities';
 import type { BattleParticipant } from '@/types/battle';
 import type { LogLine } from '@/types/text';
@@ -98,6 +99,7 @@ export function runAbilities(
                     event,
                     participants: ps,
                     sourceId: ability.source.id,
+                    adjacent: adjacencyOf(ctx.map),
                 })
             )
                 continue;
@@ -129,6 +131,7 @@ export function runAbilities(
                                 event: conditionEventForTarget(event, id),
                                 participants: ps,
                                 sourceId: ability.source.id,
+                                adjacent: adjacencyOf(ctx.map),
                             })
                     ),
                 }));

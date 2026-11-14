@@ -12,6 +12,7 @@ import {
     MAX_BARRIER_ROUNDS,
     type TerrainBrush,
 } from '@/lib/hooks/battle';
+import { useCoarsePointer } from '@/lib/hooks/common';
 import { cn } from '@/lib/utils';
 
 const BRUSHES: TerrainBrush[] = [
@@ -26,12 +27,20 @@ const BRUSHES: TerrainBrush[] = [
     'edge-erase',
 ];
 
+const EDGE_BRUSHES: TerrainBrush[] = ['edge-wall', 'edge-bars', 'edge-erase'];
+
 export function MapTerrainToolbar({ tool }: { tool: MapTerrainTool }) {
     const t = useTranslations('battle.map.terrain');
 
     const tTypes = useTranslations('gameTerms.damageTypes');
 
     const { brush, setBrush } = tool;
+
+    const touch = useCoarsePointer();
+
+    const brushes = touch
+        ? BRUSHES.filter((b) => !EDGE_BRUSHES.includes(b))
+        : BRUSHES;
 
     const damageOptions = DAMAGE_ELEMENT_OPTIONS.map(({ value }) => ({
         value,
@@ -40,7 +49,7 @@ export function MapTerrainToolbar({ tool }: { tool: MapTerrainTool }) {
 
     return (
         <div className="flex max-w-[calc(100%-1rem)] flex-wrap items-center gap-1.5 rounded-md border border-hud-rule bg-black/70 p-1.5 text-xs">
-            {BRUSHES.map((value) => (
+            {brushes.map((value) => (
                 <button
                     key={value}
                     type="button"

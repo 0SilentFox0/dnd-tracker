@@ -17,6 +17,7 @@ import {
     evaluateCondition,
 } from '@/lib/utils/abilities/registry/conditions';
 import { canActNow, currentOf } from '@/lib/utils/battle/common/control';
+import { adjacencyOf } from '@/lib/utils/battle/grid/adjacency';
 import { lineText, logFields } from '@/lib/utils/battle/log/lines';
 import { applyMainActionUsed } from '@/lib/utils/battle/participant';
 import type {
@@ -148,6 +149,7 @@ export async function runAbilityUse(
             owner: participant,
             event: null,
             participants: ctx.participants,
+            adjacent: adjacencyOf(ctx.meta.map),
         })
     )
         throw new BattleRuleError(

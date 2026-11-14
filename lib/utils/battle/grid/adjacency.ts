@@ -33,3 +33,8 @@ export function isAdjacentOnMap(
 ): boolean {
     return isAdjacent(a, b) && cellsAdjacentOnMap(map, cellsOf(a), cellsOf(b));
 }
+
+export const adjacencyOf =
+    (map: BattleMapConfig | null | undefined) =>
+    (a: BattleParticipant, b: BattleParticipant): boolean =>
+        isAdjacentOnMap(map, a, b);

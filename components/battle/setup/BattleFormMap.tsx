@@ -19,7 +19,7 @@ import { SelectField } from '@/components/ui/select-field';
 import { HAZARD_DICE_PATTERN } from '@/lib/constants/battle';
 import { DAMAGE_ELEMENT_OPTIONS } from '@/lib/constants/damage';
 import type { BattleMapEditor } from '@/lib/hooks/battles';
-import { useMediaQuery } from '@/lib/hooks/common';
+import { useCoarsePointer } from '@/lib/hooks/common';
 import { useText } from '@/lib/i18n/use-text';
 import { cn } from '@/lib/utils';
 import {
@@ -44,8 +44,6 @@ const MARGIN_KEYS: (keyof Margins)[] = ['top', 'right', 'bottom', 'left'];
 const TOOLS: SetupTool[] = ['blocked', 'wall', 'hazard', 'erase'];
 
 const EDGE_TOOLS: SetupTool[] = ['edge-wall', 'edge-bars', 'edge-erase'];
-
-const COARSE_POINTER = '(pointer: coarse)';
 
 const SLIDER = 'w-full accent-[var(--hud-gold,#f2c14e)] disabled:opacity-40';
 
@@ -117,7 +115,7 @@ export function BattleFormMap({ editor }: { editor: BattleMapEditor }) {
 
     const text = useText();
 
-    const touch = useMediaQuery(COARSE_POINTER);
+    const touch = useCoarsePointer();
 
     const { enabled, map, mode, margins, tool, notice, cellPx } = editor.state;
 

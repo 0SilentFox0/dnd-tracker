@@ -1,13 +1,12 @@
+import { EDGE_WALL_WIDTH } from '@/lib/constants/battle';
 import { parseEdgeKey, UNIT } from '@/lib/utils/battle/grid';
 
-export const WALL_WIDTH = 10;
-
-const HALF = WALL_WIDTH / 2;
+const HALF = EDGE_WALL_WIDTH / 2;
 
 /** Прямокутник ребра "x:y:e" / "x:y:s" із кінцями, що заходять у кути. */
 export function edgeRect(
     edge: string,
-    width = WALL_WIDTH
+    width = EDGE_WALL_WIDTH
 ): { x: number; y: number; width: number; height: number } {
     const { a, side } = parseEdgeKey(edge);
 
@@ -18,13 +17,13 @@ export function edgeRect(
             x: (a.x + 1) * UNIT - half,
             y: a.y * UNIT - HALF,
             width,
-            height: UNIT + WALL_WIDTH,
+            height: UNIT + EDGE_WALL_WIDTH,
         };
 
     return {
         x: a.x * UNIT - HALF,
         y: (a.y + 1) * UNIT - half,
-        width: UNIT + WALL_WIDTH,
+        width: UNIT + EDGE_WALL_WIDTH,
         height: width,
     };
 }

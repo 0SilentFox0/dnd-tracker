@@ -2,8 +2,9 @@
 
 import { memo } from 'react';
 
-import { edgeRect, WALL_WIDTH } from './edge-geometry';
+import { edgeRect } from './edge-geometry';
 
+import { EDGE_WALL_WIDTH } from '@/lib/constants/battle';
 import { parseEdgeKey, UNIT } from '@/lib/utils/battle/grid';
 import type { BattleMapConfig } from '@/types/battle';
 
@@ -50,8 +51,8 @@ export const WallsLayer = memo(function WallsLayer({
                     className="map-wall"
                     data-map-wall={edge}
                     {...edgeRect(edge)}
-                    rx={WALL_WIDTH / 2}
-                    ry={WALL_WIDTH / 2}
+                    rx={EDGE_WALL_WIDTH / 2}
+                    ry={EDGE_WALL_WIDTH / 2}
                 />
             ))}
         </g>

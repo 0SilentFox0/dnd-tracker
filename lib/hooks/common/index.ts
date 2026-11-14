@@ -10,6 +10,7 @@ export {
     useStorageValue,
 } from './storage-value';
 export { useCheckedIds } from './useCheckedIds';
+export { useCoarsePointer } from './useCoarsePointer';
 export { useConfirm } from './useConfirm';
 export { useCrudMutation } from './useCrudMutation';
 export { useCssVarHeight } from './useCssVarHeight';
