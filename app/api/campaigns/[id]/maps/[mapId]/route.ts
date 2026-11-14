@@ -7,9 +7,11 @@ import {
     getMap,
     getMapMeta,
     saveMap,
+    withStoredBackground,
 } from '@/lib/server/battle-maps/library-service';
 import { requireCampaignAccess, requireDM } from '@/lib/utils/api/api-auth';
 import { errorResponse, privateJson } from '@/lib/utils/api/api-response';
+import { handleApiError } from '@/lib/utils/api/error-handler';
 import { ifNoneMatch, weakEtag } from '@/lib/utils/api/etag';
 import { loadOwned } from '@/lib/utils/api/load-owned';
 import { parseBody } from '@/lib/utils/api/parse-body';
@@ -34,11 +36,11 @@ export async function GET(req: Request, { params }: Ctx) {
     if (version !== undefined && !(Number.isInteger(version) && version >= 1))
         return errorResponse(API_ERRORS.INVALID_BODY, 400);
 
+    const meta = await loadOwned(getMapMeta(mapId), id);
+
+    if (meta instanceof NextResponse) return meta;
+
     if (version === undefined) {
-        const meta = await loadOwned(getMapMeta(mapId), id);
-
-        if (meta instanceof NextResponse) return meta;
-
         const notModified = ifNoneMatch(req, weakEtag(mapId, meta.version));
 
         if (notModified) {
@@ -48,9 +50,9 @@ export async function GET(req: Request, { params }: Ctx) {
         }
     }
 
-    const map = await loadOwned(getMap(mapId, version), id);
+    const map = await getMap(mapId, version);
 
-    if (map instanceof NextResponse) return map;
+    if (!map) return errorResponse(API_ERRORS.NOT_FOUND, 404);
 
     const etag = weakEtag(map.id, map.version);
 
@@ -79,7 +81,17 @@ export async function PUT(req: Request, { params }: Ctx) {
 
     if (body instanceof NextResponse) return body;
 
-    return privateJson(await saveMap(mapId, body));
+    try {
+        const input = await withStoredBackground(
+            body,
+            id,
+            existing.header.background
+        );
+
+        return privateJson(await saveMap(mapId, input));
+    } catch (error) {
+        return handleApiError(error, { action: 'battle map save', mapId });
+    }
 }
 
 export async function DELETE(_req: Request, { params }: Ctx) {
@@ -93,8 +105,12 @@ export async function DELETE(_req: Request, { params }: Ctx) {
 
     if (existing instanceof NextResponse) return existing;
 
-    if ((await deleteMap(mapId)) === 'in-use')
-        return errorResponse(API_ERRORS.BATTLE_MAP_IN_USE, 409);
+    try {
+        if ((await deleteMap(mapId)) === 'in-use')
+            return errorResponse(API_ERRORS.BATTLE_MAP_IN_USE, 409);
 
-    return privateJson({ success: true });
+        return privateJson({ success: true });
+    } catch (error) {
+        return handleApiError(error, { action: 'battle map delete', mapId });
+    }
 }

@@ -203,7 +203,7 @@ describe('battle map library service', () => {
         expect(await listMaps('c1')).toHaveLength(1);
     });
 
-    it('save bumps the version and replaces edges; old version is readable', async () => {
+    it('save bumps the version and replaces edges; an unpinned old version is pruned', async () => {
         const { id } = await createMap('c1', input());
 
         const saved = await saveMap(id, input({ walls: ['2:2:e'], bars: [] }));
@@ -211,6 +211,23 @@ describe('battle map library service', () => {
         expect(saved.version).toBe(2);
         expect((await getMap(id))?.walls).toEqual(['2:2:e']);
         expect(await getMap(id, 1)).toBeNull();
+    });
+
+    it('a stale current read never memoizes newer geometry under the old version', async () => {
+        const { id } = await createMap('c1', input());
+
+        const stale = { ...(db.maps.get(id) as Record<string, unknown>) };
+
+        await saveMap(id, input({ walls: ['2:2:e'], bars: [] }));
+
+        db.api.battleMap.findUnique.mockResolvedValueOnce(stale);
+
+        const read = await getMap(id);
+
+        expect(read?.version).toBe(2);
+        expect(read?.walls).toEqual(['2:2:e']);
+        expect(await getMap(id, 1)).toBeNull();
+        expect((await getMap(id, 2))?.walls).toEqual(['2:2:e']);
     });
 
     it('prune drops unreferenced old versions but keeps a pinned one', async () => {

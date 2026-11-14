@@ -82,10 +82,11 @@ describe('map-walls поверх видаленого ребра', () => {
             bars: [] as string[],
         };
 
-        const out = mapWallsMutation(
-            ctxWith(state, { map: effective }),
-            { kind: 'walls', add: ['1:1:e'], remove: [] }
-        );
+        const out = mapWallsMutation(ctxWith(state, { map: effective }), {
+            kind: 'walls',
+            add: ['1:1:e'],
+            remove: [],
+        });
 
         expect(out.scene?.map?.walls).toContain('1:1:e');
         expect(out.scene?.mapState?.removedEdges).toEqual(['3:3:e']);
@@ -93,7 +94,7 @@ describe('map-walls поверх видаленого ребра', () => {
 });
 
 describe('map-update', () => {
-    const library = (over: Partial<{ version: number; map: object }> = {}) => ({
+    const library = (over: Record<string, unknown> = {}) => ({
         version: 4,
         cols: 8,
         rows: 8,
@@ -172,5 +173,50 @@ describe('map-update', () => {
             message: REJECT.mapUpdateCollision,
             params: { names: 'Гоблін' },
         });
+    });
+
+    it('зменшена карта: прибирає місцевість і зони поза межами, двері зниклих ребер', async () => {
+        mocks.getMap.mockResolvedValue(
+            library({
+                cols: 4,
+                rows: 4,
+                map: { cols: 4, rows: 4, background: null, opacity: 0.5 },
+                walls: ['1:1:e'],
+            })
+        );
+
+        const spellZone = {
+            casterId: 'x',
+            spellId: 's',
+            spellName: 'S',
+            side: 'all' as const,
+            triggers: {},
+            untilRound: 3,
+        };
+
+        const ctx = linked({
+            removedEdges: [],
+            doors: {
+                '1:1:e': { open: true, locked: false },
+                '6:6:e': { open: false, locked: false },
+            },
+        });
+
+        ctx.meta.map = {
+            ...ctx.meta.map!,
+            cols: 8,
+            rows: 8,
+            terrain: {
+                '1:1': { kind: 'hazard', zoneId: 'in' },
+                '6:6': { kind: 'hazard', zoneId: 'out' },
+            },
+            spellZones: { in: spellZone, out: spellZone },
+        };
+
+        const out = await mapUpdateMutation(ctx, {});
+
+        expect(Object.keys(out.scene!.map!.terrain!)).toEqual(['1:1']);
+        expect(Object.keys(out.scene!.map!.spellZones!)).toEqual(['in']);
+        expect(Object.keys(out.scene!.mapState!.doors)).toEqual(['1:1:e']);
     });
 });

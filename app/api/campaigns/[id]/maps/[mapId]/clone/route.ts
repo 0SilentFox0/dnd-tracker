@@ -1,9 +1,14 @@
 import { NextResponse } from 'next/server';
 
+import { API_ERRORS } from '@/lib/constants/api-errors';
 import { battleMapCloneSchema } from '@/lib/schemas/battle-maps';
-import { cloneMap, getMap } from '@/lib/server/battle-maps/library-service';
+import {
+    cloneMap,
+    getMap,
+    getMapMeta,
+} from '@/lib/server/battle-maps/library-service';
 import { requireDM } from '@/lib/utils/api/api-auth';
-import { privateJson } from '@/lib/utils/api/api-response';
+import { errorResponse, privateJson } from '@/lib/utils/api/api-response';
 import { loadOwned } from '@/lib/utils/api/load-owned';
 import { parseBody } from '@/lib/utils/api/parse-body';
 
@@ -16,9 +21,13 @@ export async function POST(req: Request, { params }: Ctx) {
 
     if (access instanceof NextResponse) return access;
 
-    const source = await loadOwned(getMap(mapId), id);
+    const meta = await loadOwned(getMapMeta(mapId), id);
 
-    if (source instanceof NextResponse) return source;
+    if (meta instanceof NextResponse) return meta;
+
+    const source = await getMap(mapId);
+
+    if (!source) return errorResponse(API_ERRORS.NOT_FOUND, 404);
 
     const body = await parseBody(battleMapCloneSchema, req);
 

@@ -2,7 +2,6 @@ import type { Prisma } from '@prisma/client';
 
 import {
     assembleGeometry,
-    chunksToRecord,
     type MapGeometry,
     memoGeometry,
     recordToChunkRows,
@@ -10,6 +9,8 @@ import {
 
 import { prisma } from '@/lib/db';
 import type { BattleMapInput } from '@/lib/schemas/battle-maps';
+import { ContentError } from '@/lib/server/content/errors';
+import { resolveMapBackgroundForPersistence } from '@/lib/supabase/battle-map-storage';
 import { encodeEdges } from '@/lib/utils/battle/map-storage/edge-chunks';
 import { withoutEdges } from '@/lib/utils/battle/map-storage/persisted-map';
 import type { BattleMapConfig } from '@/types/battle';
@@ -47,6 +48,25 @@ const payloadOf = (input: BattleMapInput) => {
         payloadJson: { header, chunks } as unknown as Prisma.InputJsonObject,
     };
 };
+
+/** Mirrors an external background into project storage so linked battles never copy a foreign URL. */
+export async function withStoredBackground(
+    input: BattleMapInput,
+    campaignId: string,
+    current?: string | null
+): Promise<BattleMapInput> {
+    const r = await resolveMapBackgroundForPersistence(input.map.background, {
+        campaignId,
+        current,
+    });
+
+    if (!r.ok) throw new ContentError(r.message, 400, undefined, r.params);
+
+    return {
+        ...input,
+        map: { ...input.map, background: r.background ?? null },
+    };
+}
 
 export async function listMaps(campaignId: string): Promise<BattleMapBrief[]> {
     const rows = await prisma.battleMap.findMany({
@@ -156,7 +176,8 @@ export async function getPinnedGeometry(
 /** `version` omitted = current; older versions come from the snapshot rows. */
 export async function getMap(
     mapId: string,
-    version?: number
+    version?: number,
+    attempt = 0
 ): Promise<OwnedBattleMap | null> {
     const row = await prisma.battleMap.findUnique({ where: { id: mapId } });
 
@@ -166,19 +187,13 @@ export async function getMap(
 
     if (target > row.mapVersion) return null;
 
-    const geometry = await memoGeometry(mapId, target, async () => {
-        if (target !== row.mapVersion)
-            return loadVersionGeometry(mapId, target);
+    const geometry = await memoGeometry(mapId, target, () =>
+        loadVersionGeometry(mapId, target)
+    );
 
-        const chunks = await prisma.battleMapChunk.findMany({
-            where: { mapId },
-        });
-
-        return assembleGeometry(
-            row.header as unknown as Header,
-            chunksToRecord(chunks)
-        );
-    });
+    // A concurrent save pruned the version we read as current: retry against the fresh row.
+    if (!geometry && version === undefined && attempt < 2)
+        return getMap(mapId, undefined, attempt + 1);
 
     if (!geometry) return null;
 

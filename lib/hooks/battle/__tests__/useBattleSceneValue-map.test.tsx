@@ -88,6 +88,18 @@ describe('ефективна карта в сцені', () => {
         await waitFor(() => expect(result.current.loading).toBe(false));
 
         expect(result.current.value).toBeNull();
+        expect(result.current.error).toBeInstanceOf(Error);
+
+        vi.mocked(getBattleMap).mockResolvedValue({
+            walls: ['1:1:e'],
+            bars: [],
+        } as never);
+
+        act(() => result.current.retry());
+
+        await waitFor(() => expect(result.current.value).not.toBeNull());
+
+        expect(result.current.error).toBeNull();
     });
 
     it('linked: після завантаження компонує ребра бібліотеки мінус стан', async () => {

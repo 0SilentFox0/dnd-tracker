@@ -1,12 +1,14 @@
 import { Prisma } from '@prisma/client';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const mocks = vi.hoisted(() => ({ getPinned: vi.fn() }));
+const mocks = vi.hoisted(() => ({ getPinned: vi.fn(), lock: vi.fn() }));
 
 vi.mock('@/lib/server/battle-maps/library-service', () => ({
     getPinnedGeometry: mocks.getPinned,
+    lockMapRow: mocks.lock,
 }));
 
+import { BattleConflictError } from '../errors';
 import { type BattleDb, loadBattle } from '../load-battle';
 import { saveBattle } from '../save-battle';
 import { buildSnapshotState } from '../snapshot-state';
@@ -104,10 +106,10 @@ describe('loadBattle: карта бібліотеки', () => {
         expect(loaded?.meta.mapRef).toBeNull();
     });
 
-    it('inline без стану: карта без змін (та сама посилання-форма)', async () => {
+    it('inline без стану: карта без змін (те саме посилання)', async () => {
         const loaded = await loadWith({});
 
-        expect(loaded?.meta.map).toEqual(header);
+        expect(loaded?.meta.map).toBe(header);
         expect(loaded?.meta.mapState).toBeNull();
     });
 });
@@ -147,8 +149,13 @@ const linkedBefore = (mapState: BattleMapState | null): LoadedBattle => ({
     isDM: true,
 });
 
-function fakeDb() {
+function fakeDb(versionExists = true) {
     const tx = {
+        battleMapVersion: {
+            findUnique: vi.fn(async () =>
+                versionExists ? { version: 3 } : null
+            ),
+        },
         battleScene: { updateMany: vi.fn(async () => ({ count: 1 })) },
         battleParticipant: { createMany: vi.fn(), deleteMany: vi.fn() },
         battleEvent: {
@@ -194,6 +201,28 @@ describe('saveBattle: шар карти', () => {
         )[0];
 
         expect(data.map).toEqual(header);
+    });
+
+    it('patch.mapRef: share-лок карти, перевірка версії; зниклу версію відхиляє', async () => {
+        const ref = { mapId: 'm1', version: 3 };
+
+        const { db, tx } = fakeDb();
+
+        await saveBattle(db, linkedBefore(null), outcome({ mapRef: ref }));
+
+        expect(mocks.lock).toHaveBeenCalledWith(tx, 'm1', 'share');
+        expect(tx.battleMapVersion.findUnique).toHaveBeenCalledWith(
+            expect.objectContaining({
+                where: { mapId_version: ref },
+            })
+        );
+
+        const gone = fakeDb(false);
+
+        await expect(
+            saveBattle(gone.db, linkedBefore(null), outcome({ mapRef: ref }))
+        ).rejects.toBeInstanceOf(BattleConflictError);
+        expect(gone.tx.battleScene.updateMany).not.toHaveBeenCalled();
     });
 
     it('patch.mapState: upsert з bump версії; порожній — delete', async () => {

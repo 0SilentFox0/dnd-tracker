@@ -243,6 +243,8 @@
     "barrierNeedsDuration": "A barrier needs a duration",
     "tooManyTerrainCells": "Too many terrain cells",
     "playableAreaTooSmall": "The playable area is too small: at least a free 2×2 area is required",
-    "badEdges": "Invalid walls or bars: out of bounds, duplicated or overlapping"
+    "badEdges": "Invalid walls or bars: out of bounds, duplicated or overlapping",
+    "mapAndMapId": "Pass either an inline map or a library map, not both",
+    "photoMapTooLarge": "Photo maps are limited to 60×60 cells"
   }
 }

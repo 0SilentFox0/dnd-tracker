@@ -39,6 +39,7 @@ import {
 } from '@/lib/utils/audio/audio-command';
 import { withoutEdges } from '@/lib/utils/battle/map-storage/persisted-map';
 import type { BattleAudioState } from '@/types/audio';
+import type { BattleMapConfig } from '@/types/battle';
 
 export class BattleAudioRateLimitError extends ContentError {
     constructor(readonly rate: RateLimitResult) {
@@ -294,10 +295,24 @@ export async function writeBattleRecord(
             ? rawMap
             : await mapForWrite(rawMap, campaignId, row.map);
 
+        const pinned =
+            row.map && typeof row.map === 'object' && !Array.isArray(row.map)
+                ? (row.map as unknown as BattleMapConfig)
+                : null;
+
         const map =
-            row.mapId && written
-                ? (withoutEdges(written) as unknown as Prisma.InputJsonObject)
-                : written;
+            row.mapId && written && pinned
+                ? ({
+                      ...withoutEdges(written),
+                      cols: pinned.cols,
+                      rows: pinned.rows,
+                      blocked: pinned.blocked,
+                  } as unknown as Prisma.InputJsonObject)
+                : row.mapId && written
+                  ? (withoutEdges(written) as unknown as Prisma.InputJsonObject)
+                  : written;
+
+        const unlink = row.mapId && map === null;
 
         await prisma.battleScene.update({
             where: { id: row.id, version: row.version },
@@ -308,6 +323,7 @@ export async function writeBattleRecord(
                         rest.participants as unknown as Prisma.InputJsonValue,
                 }),
                 ...(map !== undefined && { map: map ?? Prisma.DbNull }),
+                ...(unlink && { mapId: null, mapVersion: null }),
                 version: { increment: 1 },
             },
         });

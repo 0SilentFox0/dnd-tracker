@@ -27,6 +27,7 @@ import {
 } from '@/lib/constants/battle';
 import { DEFAULT_LOCALE, type Locale } from '@/lib/i18n/config';
 import { getTranslator } from '@/lib/i18n/translator';
+import { lockMapRow } from '@/lib/server/battle-maps/library-service';
 import { encodeLog } from '@/lib/utils/battle/log/codec';
 import { formatBattleLog } from '@/lib/utils/battle/log/lines';
 import { persistedMap } from '@/lib/utils/battle/map-storage/persisted-map';
@@ -270,6 +271,19 @@ export async function saveBattle(
         scene.status !== BattleStatus.COMPLETED;
 
     await db.$transaction(async (tx) => {
+        if (patch.mapRef) {
+            const { mapId, version } = patch.mapRef;
+
+            await lockMapRow(tx, mapId, 'share');
+
+            const pinned = await tx.battleMapVersion.findUnique({
+                where: { mapId_version: { mapId, version } },
+                select: { version: true },
+            });
+
+            if (!pinned) throw new BattleConflictError();
+        }
+
         const { count } = await tx.battleScene.updateMany({
             where: { id: scene.id, version: scene.version },
             data: {

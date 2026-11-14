@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { Prisma } from '@prisma/client';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('server-only', () => ({}));
@@ -18,6 +19,7 @@ const svc = vi.hoisted(() => ({
     saveMap: vi.fn(),
     deleteMap: vi.fn(),
     cloneMap: vi.fn(),
+    withStoredBackground: vi.fn(async (input: unknown) => input),
 }));
 
 vi.mock('@/lib/server/battle-maps/library-service', () => svc);
@@ -37,6 +39,7 @@ const full = {
     updatedAt: 'x',
     campaignId: 'c1',
     map: {},
+    header: { background: null },
     walls: [],
     bars: [],
 };
@@ -107,6 +110,36 @@ describe('maps routes', () => {
         expect(res.status).toBe(200);
         expect(res.headers.get('Cache-Control')).toContain('immutable');
         expect(svc.getMap).toHaveBeenCalledWith('m1', 1);
+    });
+
+    it('GET ?version=N of another campaign is 403 before any geometry is loaded', async () => {
+        svc.getMapMeta.mockResolvedValue({ ...full, campaignId: 'other' });
+
+        expect(
+            (await GET(send('GET', undefined, undefined, '?version=1'), ctx))
+                .status
+        ).toBe(403);
+        expect(svc.getMap).not.toHaveBeenCalled();
+    });
+
+    it('clone of another campaign is 403 before any geometry is loaded', async () => {
+        svc.getMapMeta.mockResolvedValue({ ...full, campaignId: 'other' });
+
+        expect((await clone(send('POST', {}), ctx)).status).toBe(403);
+        expect(svc.getMap).not.toHaveBeenCalled();
+    });
+
+    it('PUT/DELETE of a map deleted meanwhile (P2025) is 404', async () => {
+        const gone = new Prisma.PrismaClientKnownRequestError('x', {
+            code: 'P2025',
+            clientVersion: 'test',
+        });
+
+        svc.saveMap.mockRejectedValueOnce(gone);
+        svc.deleteMap.mockRejectedValueOnce(gone);
+
+        expect((await PUT(send('PUT', valid), ctx)).status).toBe(404);
+        expect((await DELETE(send('DELETE'), ctx)).status).toBe(404);
     });
 
     it('GET rejects a bad version', async () => {

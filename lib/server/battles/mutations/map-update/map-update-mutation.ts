@@ -1,7 +1,13 @@
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { MAP_LIMITS } from '@/lib/constants/map-limits';
 import { getMap } from '@/lib/server/battle-maps/library-service';
-import { cellsOf, isOnMap, isPlayable } from '@/lib/utils/battle/grid';
+import {
+    cellsOf,
+    inBounds,
+    isOnMap,
+    isPlayable,
+    parseCellKey,
+} from '@/lib/utils/battle/grid';
 import {
     composeEffectiveMap,
     pruneRemoved,
@@ -14,7 +20,7 @@ import type {
 import { BattleRuleError } from '@/lib/utils/battle/store';
 import { REJECT } from '@/lib/utils/battle/store/reject';
 import type { MapUpdateData } from '@/types/api';
-import type { BattleMapConfig } from '@/types/battle';
+import type { BattleMapConfig, BattleMapState } from '@/types/battle';
 
 const RUNTIME_KEYS: readonly (keyof BattleMapConfig)[] = [
     'terrain',
@@ -34,6 +40,52 @@ function runtimeFields(map: BattleMapConfig): Partial<BattleMapConfig> {
             .filter((key) => map[key] !== undefined)
             .map((key) => [key, map[key]])
     );
+}
+
+/** Terrain cells outside the new bounds go, and zones that lose their last cell with them. */
+function pruneOutOfBounds(map: BattleMapConfig): BattleMapConfig {
+    if (!map.terrain) return map;
+
+    const entries = Object.entries(map.terrain);
+
+    const kept = entries.filter(([key]) => inBounds(map, parseCellKey(key)));
+
+    if (kept.length === entries.length) return map;
+
+    const alive = new Set(kept.flatMap(([, cell]) => cell.zoneId ?? []));
+
+    const lost = new Set(
+        entries.flatMap(([, cell]) =>
+            cell.zoneId && !alive.has(cell.zoneId) ? [cell.zoneId] : []
+        )
+    );
+
+    const { spellZones } = map;
+
+    return {
+        ...map,
+        terrain: Object.fromEntries(kept),
+        ...(spellZones && {
+            spellZones: Object.fromEntries(
+                Object.entries(spellZones).filter(([id]) => !lost.has(id))
+            ),
+        }),
+    };
+}
+
+function pruneState(
+    state: BattleMapState | null | undefined,
+    keep: (edge: string) => boolean
+) {
+    const removed = pruneRemoved(state, keep);
+
+    if (!removed?.doors) return removed;
+
+    const doors = Object.entries(removed.doors).filter(([edge]) => keep(edge));
+
+    return doors.length === Object.keys(removed.doors).length
+        ? removed
+        : { ...removed, doors: Object.fromEntries(doors) };
 }
 
 export async function mapUpdateMutation(
@@ -70,10 +122,10 @@ export async function mapUpdateMutation(
             API_ERRORS.BATTLE_MAP_TOO_LARGE
         );
 
-    const header: BattleMapConfig = {
+    const header = pruneOutOfBounds({
         ...library.map,
         ...runtimeFields(map),
-    };
+    });
 
     const stuck = ctx.participants.filter(
         (p) => isOnMap(p) && cellsOf(p).some((c) => !isPlayable(header, c))
@@ -90,7 +142,7 @@ export async function mapUpdateMutation(
 
     const existing = new Set([...library.walls, ...library.bars]);
 
-    const pruned = pruneRemoved(state, (e) => existing.has(e));
+    const pruned = pruneState(state, (e) => existing.has(e));
 
     return {
         ...unchanged,

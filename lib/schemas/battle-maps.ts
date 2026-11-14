@@ -55,7 +55,7 @@ export const battleMapInputSchema = z
         ) {
             ctx.addIssue({
                 code: 'custom',
-                message: 'battleSetup.validation.badEdges',
+                message: 'battleSetup.validation.photoMapTooLarge',
                 path: ['map', 'cols'],
             });
         }

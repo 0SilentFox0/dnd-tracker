@@ -183,6 +183,12 @@ export function useBattleSceneValue(
 
     const isLoading = isBattleLoading || (isMapPending && !mapEdges.isError);
 
+    const mapError = isMapPending ? mapEdges.error : null;
+
+    const { refetch: refetchEdges } = mapEdges;
+
+    const retry = useCallback(() => void refetchEdges(), [refetchEdges]);
+
     const battle = useMemo(() => {
         if (!rawBattle?.map || isMapPending) return rawBattle;
 
@@ -296,7 +302,7 @@ export function useBattleSceneValue(
         setAttackIntent(null);
 
     if (!battle || !derived || isMapPending)
-        return { value: null, loading: isLoading };
+        return { value: null, loading: isLoading, error: mapError, retry };
 
     const value: BattleSceneValue = {
         campaignId,
@@ -331,5 +337,5 @@ export function useBattleSceneValue(
         anyPending,
     };
 
-    return { value, loading: isLoading };
+    return { value, loading: isLoading, error: null, retry };
 }

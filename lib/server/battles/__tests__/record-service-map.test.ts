@@ -114,3 +114,81 @@ describe('writeBattleRecord: create з mapId', () => {
         });
     });
 });
+
+describe('writeBattleRecord: create з map і mapId разом', () => {
+    it('відхиляється схемою, нічого не створює', async () => {
+        await expect(
+            writeBattleRecord(
+                'c1',
+                'u1',
+                'create',
+                undefined,
+                {
+                    name: 'B',
+                    participants: [],
+                    mapId: 'm1',
+                    map: header,
+                },
+                undefined,
+                true
+            )
+        ).rejects.toMatchObject({ status: 400 });
+        expect(mocks.create).not.toHaveBeenCalled();
+    });
+});
+
+describe('writeBattleRecord: patch linked-бою', () => {
+    const patch = (map: unknown) =>
+        writeBattleRecord('c1', 'u1', 'patch', 'b1', { map }, undefined, true);
+
+    const row = {
+        id: 'b1',
+        campaignId: 'c1',
+        version: 2,
+        participants: [],
+        mapId: 'm1',
+        mapVersion: 4,
+        map: { ...header, blocked: ['0:0'] },
+    };
+
+    beforeEach(() => {
+        vi.clearAllMocks();
+        mocks.findUnique.mockResolvedValue(row);
+    });
+
+    it('клієнтська шапка не змінює розміри й blocked закріпленої', async () => {
+        await patch({
+            cols: 50,
+            rows: 50,
+            background: null,
+            opacity: 0.9,
+            blocked: [],
+        });
+
+        expect(mocks.update).toHaveBeenCalledWith(
+            expect.objectContaining({
+                data: expect.objectContaining({
+                    map: expect.objectContaining({
+                        cols: 20,
+                        rows: 10,
+                        blocked: ['0:0'],
+                        opacity: 0.9,
+                    }),
+                }),
+            })
+        );
+    });
+
+    it('map: null знімає mapId і mapVersion', async () => {
+        await patch(null);
+
+        expect(mocks.update).toHaveBeenCalledWith(
+            expect.objectContaining({
+                data: expect.objectContaining({
+                    mapId: null,
+                    mapVersion: null,
+                }),
+            })
+        );
+    });
+});

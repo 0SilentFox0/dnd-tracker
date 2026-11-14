@@ -1,9 +1,14 @@
 import { NextResponse } from 'next/server';
 
 import { battleMapInputSchema } from '@/lib/schemas/battle-maps';
-import { createMap, listMaps } from '@/lib/server/battle-maps/library-service';
+import {
+    createMap,
+    listMaps,
+    withStoredBackground,
+} from '@/lib/server/battle-maps/library-service';
 import { requireCampaignAccess, requireDM } from '@/lib/utils/api/api-auth';
 import { privateJson } from '@/lib/utils/api/api-response';
+import { handleApiError } from '@/lib/utils/api/error-handler';
 import { parseBody } from '@/lib/utils/api/parse-body';
 
 type Ctx = { params: Promise<{ id: string }> };
@@ -29,5 +34,11 @@ export async function POST(req: Request, { params }: Ctx) {
 
     if (body instanceof NextResponse) return body;
 
-    return privateJson(await createMap(id, body), 201);
+    try {
+        const input = await withStoredBackground(body, id);
+
+        return privateJson(await createMap(id, input), 201);
+    } catch (error) {
+        return handleApiError(error, { action: 'battle map create' });
+    }
 }

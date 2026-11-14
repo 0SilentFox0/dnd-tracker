@@ -293,25 +293,30 @@ export const turnTimerSecondsSchema = z
     .min(TURN_TIMER_RANGE[0])
     .max(TURN_TIMER_RANGE[1]);
 
-export const createBattleSchema = z.object({
-    name: z.string().min(1).max(100),
-    description: z.string().optional(),
-    participants: z.array(
-        z.object({
-            id: z.string(),
-            type: z.enum([
-                ParticipantSourceType.CHARACTER,
-                ParticipantSourceType.UNIT,
-            ]),
-            side: z.enum([ParticipantSide.ALLY, ParticipantSide.ENEMY]),
-            quantity: z.number().min(1).optional(),
-            reserved: z.number().int().min(0).optional(),
-        })
-    ),
-    map: battleMapSchema.nullable().optional(),
-    mapId: z.string().min(1).optional(),
-    turnTimerSeconds: turnTimerSecondsSchema.nullable().optional(),
-});
+export const createBattleSchema = z
+    .object({
+        name: z.string().min(1).max(100),
+        description: z.string().optional(),
+        participants: z.array(
+            z.object({
+                id: z.string(),
+                type: z.enum([
+                    ParticipantSourceType.CHARACTER,
+                    ParticipantSourceType.UNIT,
+                ]),
+                side: z.enum([ParticipantSide.ALLY, ParticipantSide.ENEMY]),
+                quantity: z.number().min(1).optional(),
+                reserved: z.number().int().min(0).optional(),
+            })
+        ),
+        map: battleMapSchema.nullable().optional(),
+        mapId: z.string().min(1).optional(),
+        turnTimerSeconds: turnTimerSecondsSchema.nullable().optional(),
+    })
+    .refine((d) => !(d.map && d.mapId), {
+        message: 'battleSetup.validation.mapAndMapId',
+        path: ['mapId'],
+    });
 
 export const moraleCheckSchema = z.object({
     participantId: z.string(),
