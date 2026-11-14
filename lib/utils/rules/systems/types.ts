@@ -656,10 +656,7 @@ export interface SpellcastingInput {
     rules: Ruleset;
 }
 
-export type LevelResetColumns = Pick<
-    Prisma.CharacterUncheckedUpdateInput,
-    'skillTreeProgress'
->;
+export type LevelResetColumns = Prisma.CharacterUncheckedUpdateInput;
 
 export type LevelResetPart = (change: {
     from: number;

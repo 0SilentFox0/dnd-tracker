@@ -44,6 +44,8 @@ export interface SystemMeta {
     claims?: readonly string[];
     after?: readonly string[];
     toggle?: 'free' | 'setup';
+    /** The base whose d20 rules back the spell-preview sandbox */
+    previewSandbox?: true;
     /** Cell scale of a base; read by `cellFeetOf` without touching the registry */
     distance?: { unit: 'ft' | 'yd'; perCell: number };
     tokens?: readonly string[];

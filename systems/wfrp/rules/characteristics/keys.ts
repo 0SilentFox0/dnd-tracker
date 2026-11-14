@@ -3,6 +3,7 @@ import type { CorruptionState } from '../corruption/types';
 import { readDowntime } from '../downtime/read';
 import type { DowntimeState } from '../downtime/types';
 
+import { isRecord } from '@/lib/utils/common/is-record';
 import { isInt } from '@/systems/wfrp/rules/guards';
 
 export {
@@ -72,9 +73,6 @@ export const DEFAULT_CHARACTERISTICS: Characteristics = {
     ledger: [],
     spentArchived: 0,
 };
-
-const isRecord = (v: unknown): v is Record<string, unknown> =>
-    typeof v === 'object' && v !== null && !Array.isArray(v);
 
 // Hand-written mirror of CharacteristicsSchema (schema.ts) so client bundles avoid zod.
 function readPerKey(

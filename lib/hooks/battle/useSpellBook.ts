@@ -63,7 +63,7 @@ export function useSpellBook(
 ) {
     const scene = useBattleScene();
 
-    const { tested: magic } = useBattleRules();
+    const { tested: magic, dice } = useBattleRules();
 
     const text = useText();
 
@@ -453,7 +453,7 @@ export function useSpellBook(
                         dispatch({
                             type: 'SET_ATTACK',
                             id,
-                            value: rollDie(20, cryptoRandom),
+                            value: rollDie(dice, cryptoRandom),
                         })
                 );
         },
