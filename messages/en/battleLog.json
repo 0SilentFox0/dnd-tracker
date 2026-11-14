@@ -297,6 +297,9 @@
   "ability": {
     "noEffect": "{name}: nothing happened"
   },
+  "gear": {
+    "swapped": "🎒 {name}: changes gear (bonus action)"
+  },
   "reject": {
     "bonusActionUsed": "The bonus action has already been used this turn",
     "cannotAct": "The participant cannot act",

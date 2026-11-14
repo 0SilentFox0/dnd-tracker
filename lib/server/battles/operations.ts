@@ -373,6 +373,18 @@ const OPERATIONS: Record<string, Loader> = {
             return { schema: nextTurnSchema, mutate: nextTurnMutation };
         },
     }),
+    'swap-gear': operation({
+        access: MEMBER,
+        blockedByMode: true,
+        respond: 'wrapped',
+        load: async () => {
+            const { swapGearMutation, swapGearSchema } = await import(
+                '@/lib/server/battles/mutations/swap-gear/swap-gear-mutation'
+            );
+
+            return { schema: swapGearSchema, mutate: swapGearMutation };
+        },
+    }),
     'refresh-sources': operation({
         access: DM,
         allowWhileAwaitingDm: true,

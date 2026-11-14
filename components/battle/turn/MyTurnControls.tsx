@@ -11,6 +11,7 @@ import { modeUiOf } from '@/components/battle/modes';
 import { MapStripRow } from '@/components/battle/scene/MapStrip';
 import { useSystemBattleUi } from '@/components/battle/use-system-battle-ui';
 import { AuraZonePicker } from '@/components/battle/wizards/AuraZonePicker';
+import { ParticipantSourceType } from '@/lib/constants/battle';
 import {
     useAttackWizard,
     useAuraZones,
@@ -51,6 +52,12 @@ const CoreActionsDialog = dynamic(
         import('@/components/battle/turn/CoreActionsDialog').then(
             (m) => m.CoreActionsDialog
         ),
+    { ssr: false }
+);
+
+const GearDialog = dynamic(
+    () =>
+        import('@/components/battle/turn/GearDialog').then((m) => m.GearDialog),
     { ssr: false }
 );
 
@@ -102,6 +109,8 @@ export function MyTurnControls({
 
     const [coreOpen, setCoreOpen] = useState(false);
 
+    const [gearOpen, setGearOpen] = useState(false);
+
     const bonusAbilities = usableAbilities(
         hero,
         'bonusAction',
@@ -113,6 +122,10 @@ export function MyTurnControls({
         'action',
         battle.currentRound
     );
+
+    const hasGear =
+        actionEconomy.bonusAction &&
+        hero.basicInfo.sourceType === ParticipantSourceType.CHARACTER;
 
     const hasMagic =
         (!tested &&
@@ -211,6 +224,7 @@ export function MyTurnControls({
                         bonusTile: actionEconomy.bonusAction,
                         ability: actionAbilities.length > 0,
                         core: coreActionsOn(battle.rules),
+                        gear: hasGear,
                     }}
                     actions={{
                         channel: () => setChannelOpen(true),
@@ -219,6 +233,7 @@ export function MyTurnControls({
                         bonus: () => setBonusOpen(true),
                         ability: () => setAbilityOpen(true),
                         core: () => setCoreOpen(true),
+                        gear: () => setGearOpen(true),
                     }}
                 />
             )}
@@ -265,6 +280,14 @@ export function MyTurnControls({
                     participant={hero}
                     open={coreOpen}
                     onOpenChange={setCoreOpen}
+                    onDone={turn.actions.afterAction}
+                />
+            )}
+            {hasGear && (
+                <GearDialog
+                    participant={hero}
+                    open={gearOpen}
+                    onOpenChange={setGearOpen}
                     onDone={turn.actions.afterAction}
                 />
             )}

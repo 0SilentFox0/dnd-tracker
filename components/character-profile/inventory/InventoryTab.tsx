@@ -31,7 +31,7 @@ import { useSeenOnOpen } from '@/lib/hooks/notifications';
 import { useCampaignSystem, useCurrency } from '@/lib/hooks/systems';
 import type { SpecialItem } from '@/types/inventory';
 
-export function InventoryTab() {
+export function InventoryTab({ inBattle = false }: { inBattle?: boolean }) {
     const { campaignId, characterId, sheet } = useProfile();
 
     const t = useTranslations('inventory.tab');
@@ -118,9 +118,11 @@ export function InventoryTab() {
                                             onAdd={onAdd}
                                             newIds={newIds}
                                         />
-                                        <p className="text-xs text-hud-muted">
-                                            {t('combatNote')}
-                                        </p>
+                                        {!inBattle && (
+                                            <p className="text-xs text-hud-muted">
+                                                {t('combatNote')}
+                                            </p>
+                                        )}
                                     </>
                                 )}
                             </QueryState>

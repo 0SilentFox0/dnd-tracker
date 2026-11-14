@@ -211,6 +211,7 @@ export const battleOps = {
     scaleUnits: op<{ direction: 'buff' | 'debuff' }>({ path: '/scale-units' }),
     unitControl: op<UnitControlData>({ path: '/unit-control' }),
     refreshSources: op<Record<string, never>>({ path: '/refresh-sources' }),
+    swapGear: op<{ participantId: string }>({ path: '/swap-gear' }),
     updateParticipant: op<{
         participantId: string;
         data: PatchParticipantData;

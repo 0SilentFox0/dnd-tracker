@@ -46,6 +46,7 @@ export {
 export { type EdgeEditing, useEdgeStroke } from './useEdgeStroke';
 export { useFxEnabled } from './useFxEnabled';
 export { useFxImpacts } from './useFxImpacts';
+export { useGearSwap } from './useGearSwap';
 export { useHitChange, useHitFx } from './useHitFx';
 export { type HpChange, useDamageShake, useHpChange } from './useHpChange';
 export { useInitiativeDrag } from './useInitiativeDrag';
@@ -69,6 +70,7 @@ export {
     type MobileBattleTab,
     useMobileBattleTabs,
 } from './useMobileBattleTabs';
+export { useMoveRoutes } from './useMoveRoutes';
 export {
     type ParticipantClickInput,
     useParticipantClick,
@@ -89,6 +91,7 @@ export {
 } from './useSpellBook';
 export { type FxRunner, useSpellFxPlayback } from './useSpellFxPlayback';
 export { useStrokePaint } from './useStrokePaint';
+export { type GlideFrame, useTokenGlide } from './useTokenGlide';
 export { useTurnCountdown, useTurnTimer } from './useTurnTimer';
 export {
     type UnitControlRow,
