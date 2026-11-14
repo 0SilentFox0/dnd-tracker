@@ -61,8 +61,12 @@ describe('hasWall / canStep', () => {
     });
 
     it('далекий або нульовий крок неможливий', () => {
-        expect(canStep(grid, walls, { x: 0, y: 0 }, { x: 2, y: 0 })).toBe(false);
-        expect(canStep(grid, walls, { x: 0, y: 0 }, { x: 0, y: 0 })).toBe(false);
+        expect(canStep(grid, walls, { x: 0, y: 0 }, { x: 2, y: 0 })).toBe(
+            false
+        );
+        expect(canStep(grid, walls, { x: 0, y: 0 }, { x: 0, y: 0 })).toBe(
+            false
+        );
     });
 });
 

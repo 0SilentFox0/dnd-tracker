@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { barsOf,cellsConnected, edgeBlocks, wallsOf } from '../edges';
+import { barsOf, cellsConnected, edgeBlocks, wallsOf } from '../edges';
 
 import { testMap } from '@/lib/utils/battle/__tests__/fixtures/placed';
 import type { MapModeDefinition } from '@/lib/utils/battle/modes';
@@ -86,7 +86,9 @@ describe('cellsConnected', () => {
     const map = mapWith({ walls: ['2:0:e', '2:1:e'], bars: ['2:2:e'] });
 
     it('стіна розриває зв’язок, а в обхід — ні', () => {
-        expect(cellsConnected(map, 'sight', [at(2, 0)], [at(3, 0)])).toBe(false);
+        expect(cellsConnected(map, 'sight', [at(2, 0)], [at(3, 0)])).toBe(
+            false
+        );
         expect(cellsConnected(map, 'sight', [at(2, 3)], [at(3, 3)])).toBe(true);
     });
 

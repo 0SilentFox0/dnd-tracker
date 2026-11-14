@@ -47,7 +47,9 @@ export function wallsOf(map: EdgeMap): ReadonlySet<string> {
     return union;
 }
 
-export function barsOf(map: Pick<BattleMapConfig, 'bars'>): ReadonlySet<string> {
+export function barsOf(
+    map: Pick<BattleMapConfig, 'bars'>
+): ReadonlySet<string> {
     return wallSet(map.bars);
 }
 
