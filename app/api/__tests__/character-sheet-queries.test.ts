@@ -42,6 +42,7 @@ vi.mock('@/lib/db', () => {
     };
 });
 
+import '@/lib/server/systems/registry';
 import {
     buildSheetFor,
     loadSheetCharacter,

@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
+import '@/lib/server/systems/registry';
 import { AttackType, ParticipantSide } from '@/lib/constants/battle';
 import { CRITICAL_SUCCESS_EFFECTS } from '@/lib/constants/critical-effects';
 import { attackBodySchema } from '@/lib/schemas/battles';

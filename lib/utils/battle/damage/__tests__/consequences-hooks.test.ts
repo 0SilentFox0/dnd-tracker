@@ -2,10 +2,6 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { D6POOL_SYSTEM } from '@/lib/__tests__/fixtures/d6pool/definition';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
-import {
-    applyDamageConsequences,
-    settleStatusChange,
-} from '@/lib/utils/battle/damage/consequences';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 
 const calls = vi.hoisted(() => [] as string[]);
@@ -49,6 +45,12 @@ vi.mock('@/lib/utils/rules/systems', async (importOriginal) => {
         ruleSystemByKey: () => system,
     };
 });
+
+vi.resetModules();
+
+const { applyDamageConsequences, settleStatusChange } = await import(
+    '@/lib/utils/battle/damage/consequences'
+);
 
 const target = createMockParticipant();
 

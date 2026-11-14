@@ -7,6 +7,7 @@ vi.mock('@/components/hud/fonts', () => ({ hudFontClassName: '' }));
 
 vi.mock('next-intl', async () => (await import('./uk-intl')).catalogIntl());
 
+import '@/components/systems/registry';
 import { AttackWizard } from '@/components/battle/wizards/AttackWizard';
 import { AttackType } from '@/lib/constants/battle';
 import { useAttackWizard } from '@/lib/hooks/battle';

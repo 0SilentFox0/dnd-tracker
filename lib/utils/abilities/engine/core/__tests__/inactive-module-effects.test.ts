@@ -20,8 +20,15 @@ import {
     resolved,
     seq,
 } from '@/lib/utils/abilities/__tests__/fixtures';
-import { runAbilities } from '@/lib/utils/abilities/engine/core/run-abilities';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
+
+vi.resetModules();
+
+await import('@/lib/utils/rules/systems/registry');
+
+const { runAbilities } = await import(
+    '@/lib/utils/abilities/engine/core/run-abilities'
+);
 
 const owner = () =>
     makeParticipant({

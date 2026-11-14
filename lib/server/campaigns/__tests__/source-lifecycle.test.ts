@@ -33,7 +33,10 @@ vi.mock('@/lib/db', async () => {
 vi.mock('@/lib/cache/campaign-list', () => ({
     invalidateCampaignLists: vi.fn(),
 }));
-vi.mock('@/lib/cache/tags', () => ({ invalidateAllReference: vi.fn() }));
+vi.mock('@/lib/cache/tags', async (importOriginal) => ({
+    ...(await importOriginal<typeof import('@/lib/cache/tags')>()),
+    invalidateAllReference: vi.fn(),
+}));
 vi.mock('@/lib/i18n/translator', () => ({
     getTranslator: vi.fn(async () => (key: string) => key),
 }));

@@ -1,7 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { resetTurnState } from '../turn-state';
-
 import { placed } from '@/lib/utils/battle/__tests__/fixtures/placed';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 import type { TurnStateReset } from '@/lib/utils/rules/systems/types';
@@ -13,6 +11,10 @@ vi.mock('@/lib/utils/rules/systems', () => ({
         combat: { turn: { resetState: fake.hooks } },
     }),
 }));
+
+vi.resetModules();
+
+const { resetTurnState } = await import('../turn-state');
 
 const rules = DEFAULT_RULES;
 

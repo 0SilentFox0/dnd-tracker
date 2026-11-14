@@ -69,7 +69,7 @@ describe('buildDemoEncounter', () => {
             'b1',
             'enemy',
             2,
-            undefined,
+            {},
             DEFAULT_RULES
         );
         expect(built.every((p) => p.battleData.position)).toBe(true);

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import '@/lib/server/systems/registry';
 import { RACES } from '@/data/library/races';
 import { ParticipantSide } from '@/lib/constants/battle';
 import { createBattleParticipantFromCharacter } from '@/lib/server/battles/participant/from-character';

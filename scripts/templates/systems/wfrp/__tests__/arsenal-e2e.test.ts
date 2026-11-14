@@ -13,6 +13,7 @@ import {
     strike,
 } from './grim-e2e-helpers';
 
+import '@/lib/server/systems/registry';
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { CombatStatus, ParticipantSide } from '@/lib/constants/battle';
 import { createSpellSchema } from '@/lib/schemas/spells';

@@ -7,6 +7,7 @@ vi.mock('@/lib/cache/reference-data', async (importOriginal) => ({
     getCachedFeats,
 }));
 
+import '@/lib/server/systems/registry';
 import { ParticipantSide } from '@/lib/constants/battle';
 import { createBattleParticipantFromCharacter } from '@/lib/server/battles/participant/from-character';
 import { collectModifiers } from '@/lib/utils/abilities/engine/core/collect-modifiers';

@@ -14,6 +14,7 @@ vi.mock('@/lib/hooks/battle/useFxImpacts', () => ({
             : null,
 }));
 
+import '@/components/systems/registry';
 import { ParticipantDetails } from '@/components/battle/participants/ParticipantDetails';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { ParticipantSide } from '@/lib/constants/battle';

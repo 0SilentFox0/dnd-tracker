@@ -16,7 +16,10 @@ vi.mock('@/lib/ai/api-tokens', async (orig) => ({
     ...(await orig<typeof import('@/lib/ai/api-tokens')>()),
     verifyApiToken: vi.fn(),
 }));
-vi.mock('@/lib/cache/tags', () => ({ invalidateReference: vi.fn() }));
+vi.mock('@/lib/cache/tags', async (importOriginal) => ({
+    ...(await importOriginal<typeof import('@/lib/cache/tags')>()),
+    invalidateReference: vi.fn(),
+}));
 vi.mock('@/lib/utils/api/api-auth', () => ({
     requireDM: vi.fn(async () => ({ userId: 'dm' })),
     requireCampaignAccess: vi.fn(async () => ({ userId: 'p', isDM: false })),

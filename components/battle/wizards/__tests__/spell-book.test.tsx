@@ -139,6 +139,7 @@ vi.mock('@/lib/hooks/spells', async (importOriginal) => ({
     })),
 }));
 
+import '@/components/systems/registry';
 import { SpellBook } from '@/components/battle/wizards/SpellBook';
 import { useSpellBook } from '@/lib/hooks/battle';
 import { fakeScene } from '@/lib/hooks/battle/__tests__/fake-scene';

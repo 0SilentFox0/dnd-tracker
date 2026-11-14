@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 vi.mock('@/lib/db', () => ({ prisma: {} }));
 
+import '@/lib/server/systems/registry';
 import { ParticipantSide } from '@/lib/constants/battle';
 import { createBattleParticipantFromCharacter } from '@/lib/server/battles/participant/from-character';
 import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';

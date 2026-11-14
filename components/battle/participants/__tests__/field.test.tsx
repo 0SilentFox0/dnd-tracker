@@ -10,6 +10,7 @@ vi.mock('@/components/battle/fx/frames/ImpactFrame', () => ({
     ),
 }));
 
+import '@/components/systems/registry';
 import { BattleLog } from '@/components/battle/log/BattleLog';
 import { InitiativeTrack } from '@/components/battle/participants/InitiativeTrack';
 import { ParticipantList } from '@/components/battle/participants/ParticipantList';

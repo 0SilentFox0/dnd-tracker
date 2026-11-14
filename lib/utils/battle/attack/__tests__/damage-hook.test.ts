@@ -1,8 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { critDoublesDice } from '../crit-dice';
-import { processAttack } from '../process/run';
-
 import { D6POOL_SYSTEM } from '@/lib/__tests__/fixtures/d6pool/definition';
 import { AttackType, ParticipantSide } from '@/lib/constants/battle';
 import { textRef } from '@/lib/i18n/text-ref';
@@ -39,6 +36,12 @@ vi.mock('@/lib/utils/rules/systems', async (importOriginal) => {
         ruleSystemByKey: () => system,
     };
 });
+
+vi.resetModules();
+
+const { critDoublesDice } = await import('../crit-dice');
+
+const { processAttack } = await import('../process/run');
 
 const SPEAR: BattleAttack = {
     id: 's',

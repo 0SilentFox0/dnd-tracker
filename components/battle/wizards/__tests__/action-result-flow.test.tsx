@@ -29,6 +29,7 @@ vi.mock('@/lib/hooks/spells', async (importOriginal) => ({
     })),
 }));
 
+import '@/components/systems/registry';
 import { ActionResultCard } from '@/components/battle/overlays/ActionResultCard';
 import { AttackWizard } from '@/components/battle/wizards/AttackWizard';
 import { SpellBook } from '@/components/battle/wizards/SpellBook';

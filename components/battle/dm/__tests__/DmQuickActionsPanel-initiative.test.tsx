@@ -13,6 +13,7 @@ vi.mock('@/components/hud/fonts', () => ({
     HUD_SURFACE: 'hud-surface',
 }));
 
+import '@/components/systems/registry';
 import { DmQuickActionsPanel } from '@/components/battle/dm/DmQuickActionsPanel';
 import { fakeScene } from '@/lib/hooks/battle/__tests__/fake-scene';
 

@@ -16,6 +16,7 @@ import {
     strike,
 } from './grim-e2e-helpers';
 
+import '@/lib/server/systems/registry';
 import { CombatStatus, ParticipantSide } from '@/lib/constants/battle';
 import type { BattleMutationContext } from '@/lib/utils/battle/pipeline/run-battle-mutation';
 import { runJoinTriggers } from '@/lib/utils/battle/turn/join-triggers';

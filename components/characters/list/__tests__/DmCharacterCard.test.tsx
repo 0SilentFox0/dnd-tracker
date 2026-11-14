@@ -2,6 +2,7 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import '@/components/systems/registry';
 import { DmCharacterCard } from '@/components/characters/list/DmCharacterCard';
 import { defaultRulesFor } from '@/lib/utils/rules/section-registry';
 import { RULE_SYSTEM_REGISTRY } from '@/lib/utils/rules/systems';

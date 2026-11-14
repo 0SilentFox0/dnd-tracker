@@ -19,6 +19,7 @@ vi.mock('@/components/battle/use-system-battle-ui', async () => {
 import { RollStep } from '../RollStep';
 import type { AttackWizardModel } from '../shared';
 
+import '@/components/systems/registry';
 import { render } from '@/lib/i18n/test/render-uk';
 import type { BattleParticipant } from '@/types/battle';
 

@@ -12,6 +12,7 @@ vi.mock('@/lib/cache/reference-data', async (importOriginal) => ({
     getCachedBackgrounds,
 }));
 
+import '@/lib/server/systems/registry';
 import { ParticipantSide } from '@/lib/constants/battle';
 import { createBattleParticipantFromCharacter } from '@/lib/server/battles/participant/from-character';
 import * as backgroundRows from '@/lib/utils/backgrounds/row';

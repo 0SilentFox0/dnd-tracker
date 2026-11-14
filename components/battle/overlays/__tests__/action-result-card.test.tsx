@@ -10,6 +10,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('@/components/hud/fonts', () => ({ hudFontClassName: '' }));
 
+import '@/components/systems/registry';
 import { ActionResultCard } from '@/components/battle/overlays/ActionResultCard';
 import { CornerStack } from '@/components/battle/scene/CornerStack';
 import {

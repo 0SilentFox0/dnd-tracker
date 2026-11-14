@@ -2,6 +2,7 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import '@/components/systems/registry';
 import { unitFormTabs } from '@/components/units/form/UnitFormFields';
 import type { UnitFormFieldsState } from '@/lib/hooks/units';
 import { makeT } from '@/lib/i18n/test/mock-t';

@@ -31,6 +31,7 @@ vi.mock('@/components/battle/fx/preload', () => ({
     preloadFx: () => Promise.resolve(),
 }));
 
+import '@/components/systems/registry';
 import { MazeViewProvider } from '@/components/battle/modes/maze/MazeViewProvider';
 import { BattleScreen } from '@/components/battle/scene/BattleScreen';
 import {

@@ -8,6 +8,7 @@ import '@/components/ui/__tests__/match-media';
 
 vi.unmock('next-intl');
 
+import '@/components/systems/registry';
 import { ConfirmProvider } from '@/components/ui/confirm-dialog';
 import { renderWithIntl } from '@/lib/i18n/test/render-with-intl';
 import { DEFAULT_RULES } from '@/lib/utils/rules';

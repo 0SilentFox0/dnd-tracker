@@ -14,6 +14,7 @@ vi.mock('@/lib/db', () => ({
     },
 }));
 
+import '@/lib/server/systems/registry';
 import { loadUnitLibraryStats } from '@/lib/server/battles/balance/unit-library';
 import { withD20Model } from '@/lib/utils/battle/balance/__tests__/d20-model';
 import {

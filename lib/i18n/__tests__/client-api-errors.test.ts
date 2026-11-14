@@ -33,6 +33,8 @@ const SERVER_ONLY_TEXT = new Set([
     'lib/utils/battle/spell/spell-targeting.ts',
     'lib/utils/battle/validation/ability-targets.ts',
     'lib/utils/battle/store/errors.ts',
+    'lib/utils/battle/actions/none.ts',
+    'lib/utils/battle/actions/legendary-attack.ts',
     'lib/utils/campaigns/join-error.ts',
 ]);
 

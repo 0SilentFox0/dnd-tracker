@@ -26,9 +26,9 @@ export default async function CampaignInfoPage({
 
     const { isDM, campaign } = await requireCampaignMember(campaignId);
 
-    const rules = parseRules(campaign.rules);
+    const { system, classes: classesRules } = parseRules(campaign.rules);
 
-    const classesEnabled = rules.classes.enabled;
+    const classesEnabled = classesRules.enabled;
 
     const [{ skills, spells }, { artifacts, sets }, classRows] =
         await Promise.all([
@@ -61,7 +61,7 @@ export default async function CampaignInfoPage({
                 }
             />
 
-            <SystemGate system={rules.system}>
+            <SystemGate system={system}>
                 <InfoReferenceClient
                     campaignId={campaignId}
                     skills={classes ? [] : skills}

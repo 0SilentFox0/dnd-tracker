@@ -30,6 +30,7 @@ vi.mock('@/components/battle/fx/preload', () => ({
     preloadFx: () => Promise.resolve(),
 }));
 
+import '@/components/systems/registry';
 import { BattleScreen } from '@/components/battle/scene/BattleScreen';
 import {
     fakeScene,
