@@ -25,10 +25,7 @@ import {
     withAbilityIssues,
 } from '@/lib/utils/abilities/read';
 import { parseRules, type Ruleset } from '@/lib/utils/rules/schema';
-import {
-    omitColumnView,
-    splitColumnView,
-} from '@/lib/utils/rules/systems/column-view';
+import { splitColumnView } from '@/lib/utils/rules/systems/column-view';
 import { ruleSystemOf } from '@/lib/utils/rules/systems/lookup';
 import type { SystemData } from '@/lib/utils/rules/systems/slot';
 import type { RuleSystemDefinition } from '@/lib/utils/rules/systems/types';
@@ -138,20 +135,17 @@ export const unitsResource = defineResource<
                 name: data.name,
                 raceId: data.raceId,
                 level: data.level,
-                ...omitColumnView(
-                    {
-                        strength: data.strength,
-                        dexterity: data.dexterity,
-                        constitution: data.constitution,
-                        intelligence: data.intelligence,
-                        wisdom: data.wisdom,
-                        charisma: data.charisma,
-                        armorClass: data.armorClass,
-                        initiative: data.initiative,
-                        speed: data.speed,
-                    },
-                    loaded.system
-                ),
+                ...{
+                    strength: data.strength,
+                    dexterity: data.dexterity,
+                    constitution: data.constitution,
+                    intelligence: data.intelligence,
+                    wisdom: data.wisdom,
+                    charisma: data.charisma,
+                    armorClass: data.armorClass,
+                    initiative: data.initiative,
+                    speed: data.speed,
+                },
                 gridSize: data.gridSize,
                 maxHp: data.maxHp,
                 proficiencyBonus: data.proficiencyBonus,

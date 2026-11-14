@@ -46,7 +46,6 @@ import {
 } from '@/lib/utils/notifications/events';
 import { allLevelResets, ruleSystemOf } from '@/lib/utils/rules/systems';
 import {
-    omitColumnView,
     splitColumnView,
     withColumnView,
 } from '@/lib/utils/rules/systems/column-view';
@@ -267,18 +266,19 @@ function updateWriter({
         db: Pick<Prisma.TransactionClient, 'character'>,
         classes: ClassesResult['classesInput'],
         choiceFields?: ChoiceFields,
-        characteristics?: unknown
+        characteristics?: unknown,
+        prev: unknown = character.characteristics
     ) => {
         const view = splitColumnView(
             { ...columns, ...computed.abilityScores, ...choiceFields },
             system,
-            character.characteristics
+            prev
         );
 
         return db.character.update({
             where: { id: character.id },
             data: {
-                ...omitColumnView(columns, system),
+                ...columns,
                 characteristics: (characteristics ??
                     view.characteristics ??
                     data.characteristics) as Prisma.InputJsonValue | undefined,
@@ -289,7 +289,7 @@ function updateWriter({
                     | undefined,
                 avatar,
                 level: computed.finalLevel,
-                ...omitColumnView(computed.abilityScores ?? {}, system),
+                ...(computed.abilityScores ?? {}),
                 ...(computed.spellSlots && {
                     spellSlots: computed.spellSlots as Prisma.InputJsonValue,
                 }),
@@ -308,7 +308,7 @@ function updateWriter({
                     seenLevel: computed.seenLevel,
                 }),
                 ...(fromClasses && { level: finalLevel }),
-                ...omitColumnView(choiceFields ?? {}, system),
+                ...(choiceFields ?? {}),
                 ...(classSeenLevel !== undefined && {
                     seenLevel: classSeenLevel,
                 }),
@@ -430,7 +430,8 @@ async function patchCore(gate: Gate, parsed: Parsed) {
                       tx,
                       classes,
                       choices?.ok ? choices.fields : undefined,
-                      characteristics
+                      characteristics,
+                      fresh.characteristics
                   );
               })
             : await writeUpdate(prisma, resolved.classesInput);

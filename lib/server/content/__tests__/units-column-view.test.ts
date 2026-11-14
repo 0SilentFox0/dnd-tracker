@@ -120,7 +120,7 @@ describe('units d20 columnView', () => {
         expect(hashJson(corrupted)).toBe(hashJson(defaulted));
     });
 
-    it('create writes characteristics and no column', async () => {
+    it('create writes characteristics and the columns', async () => {
         await unitsResource.create(
             actor,
             createUnitSchema.parse({ name: 'Orc', ...STATS }) as never
@@ -129,12 +129,10 @@ describe('units d20 columnView', () => {
         const data = db.unit.create.mock.calls[0][0].data;
 
         expect(data.characteristics).toEqual(STATS);
-
-        for (const column of Object.keys(STATS))
-            expect(data).not.toHaveProperty(column);
+        expect(data).toMatchObject(STATS);
     });
 
-    it('patch writes characteristics only and keeps unrelated characteristics keys', async () => {
+    it('patch writes characteristics and the column and keeps unrelated characteristics keys', async () => {
         await unitsResource.update(
             actor,
             {
@@ -147,7 +145,7 @@ describe('units d20 columnView', () => {
 
         const data = db.unit.update.mock.calls[0][0].data;
 
-        expect(data).not.toHaveProperty('armorClass');
+        expect(data.armorClass).toBe(18);
         expect(data.characteristics).toEqual({ extra: 1, armorClass: 18 });
     });
 
@@ -167,7 +165,7 @@ describe('units d20 columnView', () => {
         );
     });
 
-    it('unitCreateData / toUnitCreateData with a system write characteristics and no column', () => {
+    it('unitCreateData / toUnitCreateData with a system write characteristics and the columns', () => {
         const parsed = createUnitSchema.parse({ name: 'Orc', ...STATS });
 
         expect(unitCreateData('c1', parsed)).not.toHaveProperty(
@@ -177,7 +175,7 @@ describe('units d20 columnView', () => {
         const created = unitCreateData('c1', parsed, ruleSystemOf(rules));
 
         expect(created.characteristics).toEqual(STATS);
-        expect(created).not.toHaveProperty('strength');
+        expect(created.strength).toBe(STATS.strength);
         expect(
             toUnitCreateData(
                 'c1',

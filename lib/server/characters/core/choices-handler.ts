@@ -24,10 +24,7 @@ import {
 import { validateClassEntries } from '@/lib/utils/characters/classes/application';
 import { subclassesLabel } from '@/lib/utils/characters/classes/derive';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
-import {
-    omitColumnView,
-    withColumnView,
-} from '@/lib/utils/rules/systems/column-view';
+import { withColumnView } from '@/lib/utils/rules/systems/column-view';
 import { resolveClassEntries } from '@/lib/utils/spells/class-slots';
 import type { ChoicesBody } from '@/types/choices';
 
@@ -128,7 +125,7 @@ export async function saveCharacterChoices(
         const updated = await tx.character.update({
             where: { id: row.id },
             data: {
-                ...omitColumnView(resolved.fields, ruleSystemOf(rules)),
+                ...resolved.fields,
                 ...characteristicsPatch(
                     resolved.fields,
                     ruleSystemOf(rules),

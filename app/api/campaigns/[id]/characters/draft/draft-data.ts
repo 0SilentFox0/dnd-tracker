@@ -4,10 +4,7 @@ import type { DraftData } from './draft-schema';
 
 import { mergeDraftGoals } from '@/lib/server/characters/draft-goals';
 import type { Ruleset } from '@/lib/utils/rules/schema';
-import {
-    omitColumnView,
-    splitColumnView,
-} from '@/lib/utils/rules/systems/column-view';
+import { splitColumnView } from '@/lib/utils/rules/systems/column-view';
 import { ruleSystemOf } from '@/lib/utils/rules/systems/lookup';
 import { statColumnsOf } from '@/lib/utils/rules/systems/stats';
 
@@ -34,17 +31,14 @@ export const draftFields = (
             : undefined,
         alignment: data.alignment ?? null,
         background: data.background ?? null,
-        ...omitColumnView(
-            {
-                strength: data.strength,
-                dexterity: data.dexterity,
-                constitution: data.constitution,
-                intelligence: data.intelligence,
-                wisdom: data.wisdom,
-                charisma: data.charisma,
-            },
-            system
-        ),
+        ...{
+            strength: data.strength,
+            dexterity: data.dexterity,
+            constitution: data.constitution,
+            intelligence: data.intelligence,
+            wisdom: data.wisdom,
+            charisma: data.charisma,
+        },
         primaryAbility: data.primaryAbility ?? null,
         characteristics: splitColumnView(
             { ...data, ...prior?.fields, initiative: prior?.initiative },
@@ -55,14 +49,11 @@ export const draftFields = (
             storedGoals,
             data.goals
         ) as unknown as Prisma.InputJsonValue,
-        ...omitColumnView(
-            {
-                ...prior?.fields,
-                ...(prior?.initiative !== undefined && {
-                    initiative: prior.initiative,
-                }),
-            },
-            system
-        ),
+        ...{
+            ...prior?.fields,
+            ...(prior?.initiative !== undefined && {
+                initiative: prior.initiative,
+            }),
+        },
     };
 };

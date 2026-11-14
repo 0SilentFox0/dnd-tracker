@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 
 import {
     flattenStoredColumns,
-    omitColumnView,
     splitColumnView,
     withColumnView,
     withStoredColumns,
@@ -17,15 +16,15 @@ const d20 = ruleSystemOf(parseRules({ system: { key: 'dnd5e' } }));
 const wfrp = ruleSystemOf(parseRules({ system: { key: 'wfrp' } }));
 
 describe('withColumnView', () => {
-    it('takes column defaults for missing keys, ignoring stale columns', () => {
+    it('falls back to the column for missing keys, then the default', () => {
         const view = withColumnView(
             { characteristics: {}, strength: 14, armorClass: 15 },
             d20
         );
 
         expect(view).toMatchObject({
-            strength: 10,
-            armorClass: 10,
+            strength: 14,
+            armorClass: 15,
             initiative: 0,
             speed: 30,
         });
@@ -73,15 +72,6 @@ describe('splitColumnView', () => {
             characteristics: undefined,
             columns: {},
         });
-    });
-});
-
-describe('omitColumnView', () => {
-    it('drops the nine columns for d20 and nothing for wfrp', () => {
-        const data = { name: 'x', strength: 12, speed: 30, level: 1 };
-
-        expect(omitColumnView(data, d20)).toEqual({ name: 'x', level: 1 });
-        expect(omitColumnView(data, wfrp)).toBe(data);
     });
 });
 

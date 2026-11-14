@@ -38,10 +38,7 @@ import { hasPicks } from '@/lib/utils/characters/choices/read';
 import { applyLevelGain } from '@/lib/utils/characters/level-up/apply-level-gain';
 import { seenLevelOnLevelChange } from '@/lib/utils/characters/seen-level';
 import { levelNotificationEvents } from '@/lib/utils/notifications/events';
-import {
-    omitColumnView,
-    withColumnView,
-} from '@/lib/utils/rules/systems/column-view';
+import { withColumnView } from '@/lib/utils/rules/systems/column-view';
 import { ruleSystemOf } from '@/lib/utils/rules/systems/lookup';
 
 type Gate = Exclude<
@@ -142,11 +139,7 @@ async function levelUpCore({ access, character }: Gate, pick: LevelUpPick) {
                         spellcastingAbility: fresh.spellcastingAbility,
                     }),
                     ...(seenLevel !== undefined && { seenLevel }),
-                    ...(choices?.ok &&
-                        omitColumnView(
-                            choices.fields,
-                            ruleSystemOf(campaign.rules)
-                        )),
+                    ...(choices?.ok && choices.fields),
                     ...(choices?.ok &&
                         characteristicsPatch(
                             choices.fields,
@@ -225,7 +218,7 @@ async function levelUpCore({ access, character }: Gate, pick: LevelUpPick) {
         data: {
             level: newLevel,
             ...(seenLevel !== undefined && { seenLevel }),
-            ...omitColumnView(gain.abilityScores, ruleSystemOf(campaign.rules)),
+            ...gain.abilityScores,
             ...characteristicsPatch(
                 gain.abilityScores,
                 ruleSystemOf(campaign.rules),

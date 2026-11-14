@@ -6,10 +6,7 @@ import type { Ability } from '@/lib/utils/abilities/schema';
 import { nameKey } from '@/lib/utils/content/import/mapping';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
-import {
-    omitColumnView,
-    splitColumnView,
-} from '@/lib/utils/rules/systems/column-view';
+import { splitColumnView } from '@/lib/utils/rules/systems/column-view';
 import type { RuleSystemDefinition } from '@/lib/utils/rules/systems/types';
 import { resolveUnitProficiency } from '@/lib/utils/units/monster';
 import { specialAbilitiesToAbilities } from '@/lib/utils/units/special-abilities';
@@ -88,7 +85,7 @@ export function toUnitCreateData(
         name: unit.name,
         raceId,
         level: unit.level,
-        ...(system ? omitColumnView(columns, system) : columns),
+        ...(system ? columns : columns),
         gridSize: unit.gridSize,
         maxHp: unit.maxHp,
         proficiencyBonus: resolveUnitProficiency(unit),

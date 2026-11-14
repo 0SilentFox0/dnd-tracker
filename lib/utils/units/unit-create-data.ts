@@ -3,10 +3,7 @@ import type { z } from 'zod';
 
 import type { createUnitSchema } from '@/lib/schemas/units';
 import { abilitiesJson } from '@/lib/utils/abilities/read';
-import {
-    omitColumnView,
-    splitColumnView,
-} from '@/lib/utils/rules/systems/column-view';
+import { splitColumnView } from '@/lib/utils/rules/systems/column-view';
 import type { RuleSystemDefinition } from '@/lib/utils/rules/systems/types';
 import { resolveUnitProficiency } from '@/lib/utils/units/monster';
 
@@ -25,7 +22,7 @@ const columnsOf = (data: CreateUnitData, system?: RuleSystemDefinition) => {
         speed: data.speed,
     };
 
-    return system ? omitColumnView(columns, system) : columns;
+    return system ? columns : columns;
 };
 
 export function unitCreateData(

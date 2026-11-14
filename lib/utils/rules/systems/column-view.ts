@@ -12,7 +12,7 @@ const STORED_COLUMNS = [
     ),
 ];
 
-/** For loaders without a ruleset: a stored numeric value wins, an absent key keeps the column (the DB default for rows written after the switch). */
+/** For loaders without a ruleset; same rule as the d20 codec: stored number, else the column. */
 export function withStoredColumns<T extends object>(row: T): T {
     const stored = (row as { characteristics?: unknown }).characteristics;
 
@@ -84,19 +84,4 @@ export function splitColumnView(
         characteristics: view.write(columns, isRecord(prev) ? prev : {}),
         columns,
     };
-}
-
-export function omitColumnView<T extends object>(
-    data: T,
-    system: RuleSystemDefinition
-): T {
-    const view = system.characteristics.columnView;
-
-    if (!view) return data;
-
-    const drop = new Set<string>(view.columns);
-
-    return Object.fromEntries(
-        Object.entries(data).filter(([key]) => !drop.has(key))
-    ) as T;
 }

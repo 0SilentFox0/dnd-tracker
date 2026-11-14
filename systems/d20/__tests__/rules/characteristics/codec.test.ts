@@ -40,7 +40,7 @@ describe('d20 characteristics column view', () => {
             expect(D20_CHARACTERISTICS_COLUMNS).not.toContain(k);
     });
 
-    it('reads only characteristics, a missing key takes the column default', () => {
+    it('reads characteristics, then the column, then the default', () => {
         expect(readD20Columns({ characteristics: stats })).toEqual(stats);
         expect(readD20Columns({ characteristics: null })).toEqual({
             strength: 10,
@@ -53,9 +53,16 @@ describe('d20 characteristics column view', () => {
             initiative: 0,
             speed: 30,
         });
-        expect(readD20Columns({ characteristics: { speed: 25 } })).toMatchObject(
-            { speed: 25, strength: 10 }
-        );
+        expect(
+            readD20Columns({ characteristics: { speed: 25 } })
+        ).toMatchObject({ speed: 25, strength: 10 });
+        expect(
+            readD20Columns({
+                characteristics: { speed: 25 },
+                speed: 99,
+                strength: 14,
+            })
+        ).toMatchObject({ speed: 25, strength: 14, dexterity: 10 });
     });
 
     it('write merges into the previous value', () => {

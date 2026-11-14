@@ -3,11 +3,13 @@ import { describe, expect, it } from 'vitest';
 import { d20RowData } from '../d20-row-data';
 
 describe('d20RowData', () => {
-    it('moves the statblock into characteristics and drops the columns', () => {
+    it('dual-writes the statblock into characteristics and the columns', () => {
         expect(
             d20RowData({ name: 'x', strength: 14, armorClass: 15 })
         ).toEqual({
             name: 'x',
+            strength: 14,
+            armorClass: 15,
             characteristics: { strength: 14, armorClass: 15 },
         });
     });

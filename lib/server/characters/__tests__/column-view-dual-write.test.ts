@@ -5,6 +5,11 @@ import { createBattleParticipantFromCharacter } from '@/lib/server/battles/parti
 import { CHARACTER_OPERATIONS } from '@/lib/server/characters/operations/registry';
 import { hashJson } from '@/lib/utils/battle/store/stable-json';
 import { parseRules } from '@/lib/utils/rules/schema';
+import { ruleSystemOf } from '@/lib/utils/rules/systems';
+import {
+    withColumnView,
+    withStoredColumns,
+} from '@/lib/utils/rules/systems/column-view';
 
 const h = vi.hoisted(() => ({
     character: { create: vi.fn(), update: vi.fn(), findUnique: vi.fn() },
@@ -88,8 +93,8 @@ const stable = <T extends { basicInfo: { id: string } }>(p: T) => ({
     basicInfo: { ...p.basicInfo, id: 'participant' },
 });
 
-describe('fromCharacter reads characteristics only', () => {
-    it('migrated rows ignore the columns: identical snapshot and hash', async () => {
+describe('fromCharacter reads characteristics, then the column', () => {
+    it('rows with all nine keys ignore the columns: identical snapshot and hash', async () => {
         vi.spyOn(Date, 'now').mockReturnValue(1);
 
         const defaulted = stable(
@@ -115,13 +120,26 @@ describe('fromCharacter reads characteristics only', () => {
         expect(hashJson(corrupted)).toBe(hashJson(defaulted));
     });
 
-    it('a missing key takes the column default, not the stale column', async () => {
+    it('partial characteristics fall back to the column for missing keys', async () => {
         const partial = stable(
-            await build({ ...row({ strength: 14 }), speed: 99 })
+            await build({ ...row({ strength: 18 }), strength: 14, speed: 99 })
         );
 
-        expect(partial.abilities.strength).toBe(14);
-        expect(partial.combatStats.speed).toBe(30);
+        expect(partial.abilities.strength).toBe(18);
+        expect(partial.combatStats.speed).toBe(99);
+    });
+
+    it('a row written by dual-write is read alike by builder, to-unit-style overlay and sheet loader', async () => {
+        const written = row({ ...STATS });
+
+        const viaBuilder = stable(await build(written));
+
+        expect(viaBuilder.abilities.strength).toBe(STATS.strength);
+        expect(viaBuilder.combatStats.speed).toBe(STATS.speed);
+        expect(withStoredColumns(written)).toMatchObject(STATS);
+        expect(withColumnView(written, ruleSystemOf(rules))).toMatchObject(
+            STATS
+        );
     });
 });
 
@@ -152,15 +170,19 @@ beforeEach(() => {
         async ({ data }: { data: object }) => ({ id: 'new', ...data })
     );
     h.character.update.mockImplementation(
-        async ({ data }: { data: object }) => ({ id: 'hero', level: 1, ...data })
+        async ({ data }: { data: object }) => ({
+            id: 'hero',
+            level: 1,
+            ...data,
+        })
     );
     h.$queryRaw.mockResolvedValue([]);
     h.characterInventory.create.mockResolvedValue({});
     h.race.findFirst.mockResolvedValue(null);
 });
 
-describe('d20 writes only characteristics', () => {
-    it('create leaves the columns to DB defaults', async () => {
+describe('d20 dual-writes the columns and characteristics', () => {
+    it('create writes the columns and characteristics', async () => {
         await run('create', gate, {
             name: 'Hero',
             type: 'npc_hero',
@@ -173,12 +195,10 @@ describe('d20 writes only characteristics', () => {
         const { data } = h.character.create.mock.calls[0][0];
 
         expect(data.characteristics).toEqual(STATS);
-
-        for (const column of Object.keys(STATS))
-            expect(data).not.toHaveProperty(column);
+        expect(data).toMatchObject(STATS);
     });
 
-    it('patch merges the change into previous characteristics and writes no column', async () => {
+    it('patch merges the change into previous characteristics and writes the column', async () => {
         await run(
             'patch',
             {
@@ -199,6 +219,6 @@ describe('d20 writes only characteristics', () => {
         const { data } = h.character.update.mock.calls[0][0];
 
         expect(data.characteristics).toEqual({ strength: 14, speed: 40 });
-        expect(data).not.toHaveProperty('speed');
+        expect(data.speed).toBe(40);
     });
 });
