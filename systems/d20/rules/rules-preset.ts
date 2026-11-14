@@ -12,7 +12,6 @@ export const D20_RULES_PRESET = {
         persistResources: true,
         longRestHitDice: 'all',
         xp: true,
-        inspiration: true,
     },
     encounters: { balance: 'xp', edition: '2024', autoXp: true },
     items: { enabled: true },

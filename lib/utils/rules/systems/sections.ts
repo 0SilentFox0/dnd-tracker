@@ -3,6 +3,7 @@ import type { SectionsContribution } from '@/lib/utils/rules/sections';
 import { D20_SECTIONS } from '@/systems/d20/rules/sections';
 import { DEATHSAVES_SECTIONS } from '@/systems/deathsaves/rules/sections';
 import { HEROSCALING_SECTIONS } from '@/systems/heroscaling/rules/sections';
+import { INSPIRATION_SECTIONS } from '@/systems/inspiration/rules/sections';
 import { MORALE_SECTIONS } from '@/systems/morale/rules/sections';
 import { RETALIATION_SECTIONS } from '@/systems/retaliation/rules/sections';
 import { WFRP_SECTIONS } from '@/systems/wfrp/rules/sections';
@@ -15,6 +16,7 @@ export const SECTION_CONTRIBUTIONS: Readonly<
     d20: D20_SECTIONS,
     deathsaves: DEATHSAVES_SECTIONS,
     heroscaling: HEROSCALING_SECTIONS,
+    inspiration: INSPIRATION_SECTIONS,
     morale: MORALE_SECTIONS,
     retaliation: RETALIATION_SECTIONS,
     wfrp: WFRP_SECTIONS,

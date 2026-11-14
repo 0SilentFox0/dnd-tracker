@@ -122,10 +122,7 @@ export const D20_SECTIONS: SectionsContribution = {
         },
     },
     extend: {
-        outOfCombat: sectionItems('outOfCombat', [
-            'longRestHitDice',
-            'inspiration',
-        ]),
+        outOfCombat: sectionItems('outOfCombat', ['longRestHitDice']),
         encounters: sectionItems('encounters', ['edition', 'autoXp']),
         items: sectionItems('items', ['attunementLimit']),
     },

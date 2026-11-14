@@ -4,8 +4,8 @@ import { AttackType } from '@/lib/constants/battle';
 import { makeParticipant } from '@/lib/utils/abilities/__tests__/fixtures';
 import { resetTurnState } from '@/lib/utils/battle/turn/turn-state';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
-import { D20_OFF_HAND } from '@/systems/d20/rules/off-hand';
 import { d20State, withD20State } from '@/systems/d20/rules/state';
+import { OFF_HAND_RULES } from '@/systems/offhand/rules/off-hand';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
 
 const light: BattleAttack = {
@@ -34,19 +34,19 @@ const five = (
 
 describe('d20 off-hand', () => {
     it('is ready after a light main-hand attack, in the slot form', () => {
-        const armed = D20_OFF_HAND.arm(five(), light);
+        const armed = OFF_HAND_RULES.arm(five(), light);
 
         expect(d20State(armed).attackedWithLight).toBe(true);
-        expect(D20_OFF_HAND.ready(armed)).toBe(true);
+        expect(OFF_HAND_RULES.ready(armed)).toBe(true);
     });
 
     it('is not ready without the light attack, without an off-hand weapon, or with the bonus action spent', () => {
-        expect(D20_OFF_HAND.ready(five())).toBe(false);
+        expect(OFF_HAND_RULES.ready(five())).toBe(false);
 
         const armed = withD20State(five(), { attackedWithLight: true });
 
         expect(
-            D20_OFF_HAND.ready({
+            OFF_HAND_RULES.ready({
                 ...armed,
                 battleData: {
                     ...armed.battleData,
@@ -55,7 +55,7 @@ describe('d20 off-hand', () => {
             })
         ).toBe(false);
         expect(
-            D20_OFF_HAND.ready({
+            OFF_HAND_RULES.ready({
                 ...armed,
                 actionFlags: { ...armed.actionFlags, hasUsedBonusAction: true },
             })
@@ -70,18 +70,21 @@ describe('d20 off-hand', () => {
             { attackedWithLight: true }
         );
 
-        expect(D20_OFF_HAND.ready(armed)).toBe(false);
-        expect(D20_OFF_HAND.allowed(armed)).toBe(false);
+        expect(OFF_HAND_RULES.ready(armed)).toBe(false);
+        expect(OFF_HAND_RULES.allowed(armed)).toBe(false);
     });
 
     it('arms only for a main-hand melee light attack', () => {
-        expect(D20_OFF_HAND.arm(five(), off).battleData.system).toBeUndefined();
         expect(
-            D20_OFF_HAND.arm(five(), { ...light, type: AttackType.RANGED })
+            OFF_HAND_RULES.arm(five(), off).battleData.system
+        ).toBeUndefined();
+        expect(
+            OFF_HAND_RULES.arm(five(), { ...light, type: AttackType.RANGED })
                 .battleData.system
         ).toBeUndefined();
         expect(
-            D20_OFF_HAND.arm(five(), { ...light, traits: [] }).battleData.system
+            OFF_HAND_RULES.arm(five(), { ...light, traits: [] }).battleData
+                .system
         ).toBeUndefined();
     });
 

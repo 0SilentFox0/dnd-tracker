@@ -111,14 +111,16 @@ export function DmCharacterCard({
                         <HudPill tone={isNpc ? 'silver' : 'gold'}>
                             {isNpc ? t('npcHero') : t('player')}
                         </HudPill>
-                        {ooc?.inspiration && character.inspiration && (
-                            <span
-                                title={t('inspiration')}
-                                className="text-hud-gold"
-                            >
-                                ✦
-                            </span>
-                        )}
+                        {ooc?.inspiration &&
+                            system?.combat.inspiration &&
+                            character.inspiration && (
+                                <span
+                                    title={t('inspiration')}
+                                    className="text-hud-gold"
+                                >
+                                    ✦
+                                </span>
+                            )}
                         {levelReady && (
                             <HudPill tone="gold">{t('levelReady')}</HudPill>
                         )}

@@ -1,12 +1,14 @@
-import { isFiveE } from './damage-model';
-import { d20State, withD20State } from './state';
-
 import { AttackType } from '@/lib/constants/battle';
 import { attackKindOf } from '@/lib/utils/battle/common/attack-kind';
 import { hasTrait } from '@/lib/utils/battle/common/weapon-trait';
-import type { OffHandRules } from '@/lib/utils/rules/systems/types';
+import type {
+    OffHandRules,
+    TurnStateReset,
+} from '@/lib/utils/rules/systems/types';
+import { isFiveE } from '@/systems/d20/rules/damage-model';
+import { d20State, withD20State } from '@/systems/d20/rules/state';
 
-export const D20_OFF_HAND: OffHandRules = {
+export const OFF_HAND_RULES: OffHandRules = {
     allowed: isFiveE,
     ready: (p) =>
         isFiveE(p) &&
@@ -21,3 +23,8 @@ export const D20_OFF_HAND: OffHandRules = {
             ? withD20State(p, { attackedWithLight: true })
             : p,
 };
+
+export const offHandResetState: TurnStateReset = (p, scope) =>
+    scope === 'turn' && d20State(p).attackedWithLight
+        ? withD20State(p, { attackedWithLight: undefined })
+        : p;

@@ -10,9 +10,7 @@ import { concentrationFallout } from './rules/concentration/damaged';
 import { D20_CONDITION_SET } from './rules/conditions';
 import { d20Damage } from './rules/damage';
 import { d20Initiative, d20TieBreak } from './rules/initiative';
-import { D20_INSPIRATION } from './rules/inspiration';
 import { D20_MAGIC } from './rules/magic';
-import { D20_OFF_HAND } from './rules/off-hand';
 import { d20UnitSpellDc } from './rules/participant/unit-spell-dc';
 import { proficiencyForLevel } from './rules/proficiency/level';
 import { d20MaxHp } from './rules/progression/max-hp';
@@ -20,7 +18,6 @@ import { D20_REACTIONS, d20ProvokedOpportunity } from './rules/reactions';
 import { D20_PROFICIENCY, D20_SAVES } from './rules/saves';
 import { d20SheetBlock } from './rules/sheet/block';
 import { rollFromSheet } from './rules/sheet-roll';
-import { d20FromStored, d20Persist } from './rules/state-parts';
 import { D20_STAT_COLUMNS } from './rules/stats';
 import { D20_TURN } from './rules/turn';
 import { d20OnZeroHp } from './rules/zero-hp';
@@ -62,10 +59,8 @@ export const D20_MODULE: RuleSystemDefinition = {
         judge: 'client',
         crit: (rules) => rules.criticals,
         autoXp: (rules) => rules.encounters.autoXp,
-        offHand: D20_OFF_HAND,
         attackAbility: d20AttackAbility,
         reach: D20_REACH,
-        inspiration: D20_INSPIRATION,
         attack: D20_ATTACK_HOOKS,
         zoneAttack: d20ZoneAttack,
         dice: 20,
@@ -87,8 +82,6 @@ export const D20_MODULE: RuleSystemDefinition = {
     },
     participant: {
         fromUnit: [d20UnitSpellDc],
-        fromStored: [d20FromStored],
-        persist: [d20Persist],
     },
     conditionSet: D20_CONDITION_SET,
     magic: D20_MAGIC,
