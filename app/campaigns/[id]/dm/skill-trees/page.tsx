@@ -1,6 +1,6 @@
-import { SkillTreePageClient } from './page-client';
-
+import { SystemDmPage } from '@/components/systems/SystemDmPage';
 import { requireCampaignDMOrDemo } from '@/lib/server/campaigns/access';
+import { parseRules } from '@/lib/utils/rules/schema';
 
 export default async function SkillTreesPage({
     params,
@@ -9,7 +9,14 @@ export default async function SkillTreesPage({
 }) {
     const { id } = await params;
 
-    const { isDemo } = await requireCampaignDMOrDemo(id);
+    const { campaign, isDemo } = await requireCampaignDMOrDemo(id);
 
-    return <SkillTreePageClient campaignId={id} canEdit={!isDemo} />;
+    return (
+        <SystemDmPage
+            campaignId={id}
+            section="skill-trees"
+            system={parseRules(campaign.rules).system}
+            canEdit={!isDemo}
+        />
+    );
 }

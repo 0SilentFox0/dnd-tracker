@@ -16,7 +16,11 @@ const h = vi.hoisted(() => ({
 
 vi.mock('../useBattleScene', () => ({
     useBattleSceneData: () => ({
-        battle: { battleLog: h.log, pendingMoraleCheck: h.morale },
+        battle: {
+            battleLog: h.log,
+            pendingMoraleCheck: h.morale,
+            initiativeOrder: [],
+        },
     }),
 }));
 vi.mock('../useFxEnabled', () => ({ useFxEnabled: () => ({ enabled: true }) }));
@@ -66,15 +70,26 @@ describe('useFxImpacts', () => {
         expect(first).toBeGreaterThan(last);
     });
 
-    it('мораль у черзі збільшує запобіжник', () => {
-        const base =
-            renderHook(() => useFxImpacts()).result.current('a')?.waitMs ?? 0;
+    it('кубик системи в черзі збільшує запобіжник; без слота — ні', () => {
+        const fx = {
+            dice: [
+                (e: { scene: { pendingMoraleCheck: unknown } }) =>
+                    e.scene.pendingMoraleCheck
+                        ? { key: 'k', actorId: 'a', spec: { seed: 1, groups: [] } }
+                        : null,
+            ],
+        };
+
+        const waitOf = (slot?: typeof fx) =>
+            renderHook(() => useFxImpacts(slot)).result.current('a')?.waitMs ??
+            0;
+
+        const base = waitOf(fx);
 
         h.morale = { participantId: 'a' };
 
-        expect(
-            renderHook(() => useFxImpacts()).result.current('a')?.waitMs
-        ).toBeGreaterThan(base);
+        expect(waitOf(fx)).toBeGreaterThan(base);
+        expect(waitOf()).toBe(base);
     });
 
     it('прихована сторінка — вплив без actionId', () => {

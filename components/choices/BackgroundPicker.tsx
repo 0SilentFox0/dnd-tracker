@@ -56,19 +56,23 @@ export function BackgroundPicker({
             {backgrounds.map((b) => (
                 <ChoiceCard
                     key={b.id}
-                    role="radio"
-                    checked={value === b.id}
-                    onClick={() => onChange(b.id)}
-                    title={b.name}
-                    name={b.name}
-                    icon={b.icon}
-                    summary={
-                        <span className="line-clamp-2 block min-h-[2lh]">
-                            {summarize(b.description ?? undefined) ||
-                                summaryOf(b)}
-                        </span>
-                    }
-                    description={() => details(b)}
+                    control={{
+                        role: 'radio',
+                        checked: value === b.id,
+                        onClick: () => onChange(b.id),
+                    }}
+                    content={{
+                        title: b.name,
+                        name: b.name,
+                        icon: b.icon,
+                        summary: (
+                            <span className="line-clamp-2 block min-h-[2lh]">
+                                {summarize(b.description ?? undefined) ||
+                                    summaryOf(b)}
+                            </span>
+                        ),
+                        description: () => details(b),
+                    }}
                 />
             ))}
         </div>

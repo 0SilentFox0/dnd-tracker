@@ -4,16 +4,16 @@
 
 **Goal:** Every battle action (attack, spell, heal, buff, debuff, death) plays a short animation on the battle scene that shows who acted, on whom and with what element, for every viewer (actor, other players, DM). Every effect that lasts 1+ round keeps a persistent status aura on its holder (e.g. plague → green glow rising from below) for as long as it is active.
 
-**Architecture:** The server enriches spell events with `spellDamageType`, `spellTargeting`, `spellEffectKinds` and `appliedEffects`. The client turns each *new* `BattleAction` from the cached scene log into `FxSpec`s (pure, tested mapper in `lib/utils/battle/fx/`). A single fixed overlay (`BattleFxLayer`) plays them one by one with our own Canvas 2D runtime plus CC0 sprite sheets. Participant DOM nodes carry `data-fx-participant` anchors. There are no animation libraries; one animation = one file in `components/battle/fx/animations/`.
+**Architecture:** The server enriches spell events with `spellDamageType`, `spellTargeting`, `spellEffectKinds` and `appliedEffects`. The client turns each *new* `BattleAction` from the cached scene log into `FxSpec`s (pure, tested mapper in `lib/utils/battle/fx/`). A single fixed overlay (`BattleFxLayer`) plays them one by one with our own Canvas 2D runtime plus CC0 sprite sheets. Participant DOM nodes carry `data-fx-participant` anchors. There are no animation libraries; one animation = one file in `components/fx/animations/`.
 
 **Tech Stack:** Next.js 16, React 19, TypeScript strict, Vitest, Canvas 2D, CSS `steps()` sprite sheets.
 
-**Spec:** The lab decision in memory `project-battle-fx`, plus the estimate plan `/Users/silentfox/.claude/plans/eager-stirring-newt.md`. Lab prototype on branch `feat/battle-fx-lab`: `components/battle/fx-lab/engines/canvas/*` (canvas runtime) and `engines/sprites/*` (sprite player); assets in `public/fx/sprites/` (CC0, `LICENSE.txt`).
+**Spec:** The lab decision in memory `project-battle-fx`, plus the estimate plan `/Users/silentfox/.claude/plans/eager-stirring-newt.md`. Lab prototype on branch `feat/battle-fx-lab`: `components/fx-lab/engines/canvas/*` (canvas runtime) and `engines/sprites/*` (sprite player); assets in `public/fx/sprites/` (CC0, `LICENSE.txt`).
 
 ## Global Constraints
 
 - No animation libraries: remove `motion`, `gsap`, `pixi.js`, `@tsparticles/engine` and `@tsparticles/slim` from `package.json`. Use only Canvas 2D, CSS and WAAPI (`element.animate`).
-- **One animation = one file** in `components/battle/fx/animations/` (user rule). Shared runtime lives in `components/battle/fx/runtime/`.
+- **One animation = one file** in `components/fx/animations/` (user rule). Shared runtime lives in `components/fx/runtime/`.
 - Layering: components never import `@/lib/api/*`. Pure logic goes in `lib/utils/battle/fx/` (tested), React state in `lib/hooks/battle/`, and components only render.
 - No new network requests, DB columns or migrations. New fields are optional keys inside `actionDetails` JSON (old events stay valid).
 - Every `lib/utils/battle/fx/*` module has a sibling test in `lib/utils/battle/fx/__tests__/`.
@@ -23,7 +23,7 @@
 - Idle cost is zero: the canvas `requestAnimationFrame` loop runs only while particles/tweens/draws are alive.
 - Status auras are CSS-only (transform/opacity keyframes, no JS loop, no canvas), at most `MAX_AURAS = 2` per participant, and hidden when FX is off. Under reduced motion the existing `.battle-hud` rule already stops their animation; they stay as a static glow.
 - **Unclear spells/effects are asked, not guessed.** The user offered to clarify any spell whose data is not enough to pick an animation, element or aura. An implementer that meets such a case reports `NEEDS_CONTEXT` with the spell name(s); the controller collects them and asks the user in one batch.
-- One aura = one file pair: `components/battle/fx/auras/<kind>.tsx` + `<kind>.module.css` (the keyframes live in the CSS module).
+- One aura = one file pair: `components/fx/auras/<kind>.tsx` + `<kind>.module.css` (the keyframes live in the CSS module).
 
 ## Review Focus
 
@@ -54,7 +54,7 @@ lib/utils/battle/spell/applied-effects.ts   diffAppliedEffects(before, after, ta
 lib/hooks/battle/useFxEnabled.ts            localStorage toggle + reduced motion
 lib/hooks/battle/useBattleFxQueue.ts        new log entries → FxSpec queue
 lib/hooks/battle/useFxImpactDelay.ts        delay for HP float/flash/shake of a participant
-components/battle/fx/
+components/fx/
   fx.css              sprite sheet + layer styles
   runtime/geometry.ts bezier, arcControl, rand, wait, lungeOffset
   runtime/canvas.ts   Stage, glow, sprite, emit, tween, show, ring, flash, shoot
@@ -67,7 +67,7 @@ components/battle/fx/
   auras/<kind>.tsx + <kind>.module.css   one persistent aura per file pair
   auras/StatusAuras.tsx                  renders aurasOf(effects) around a portrait
   BattleFxLayer.tsx   fixed overlay, plays queue
-app/dev/fx-lab/page.tsx + components/battle/fx-lab/*   playground re-pointed to the real library
+app/dev/fx-lab/page.tsx + components/fx-lab/*   playground re-pointed to the real library
 ```
 
 ---
@@ -76,9 +76,9 @@ app/dev/fx-lab/page.tsx + components/battle/fx-lab/*   playground re-pointed to 
 
 **Files:**
 - Modify: `package.json`, `pnpm-lock.yaml` (via `pnpm remove motion gsap pixi.js @tsparticles/engine @tsparticles/slim`)
-- Delete: `components/battle/fx-lab/engines/{css,motion,gsap,particles,pixi}/`
-- Create: `components/battle/fx/runtime/geometry.ts` (from `fx-lab/engines/dom.ts`: keep `wait`, `rand`, `arcControl`, `bezier`, `sampleArc`, `lungeOffset`, plus the `FxPoint` type), `components/battle/fx/runtime/canvas.ts` (move `fx-lab/engines/canvas/shared.ts` without the colour constants `FIRE/STEEL/HEAL/CURSE`), `components/battle/fx/runtime/sprites.ts`, `components/battle/fx/fx.css`
-- Modify: `components/battle/fx-lab/engines/canvas/*`, `components/battle/fx-lab/engines/sprites/*`, `components/battle/fx-lab/config.ts`, `components/battle/fx-lab/types.ts`, `components/battle/fx-lab/fx-lab.css`
+- Delete: `components/fx-lab/engines/{css,motion,gsap,particles,pixi}/`
+- Create: `components/fx/runtime/geometry.ts` (from `fx-lab/engines/dom.ts`: keep `wait`, `rand`, `arcControl`, `bezier`, `sampleArc`, `lungeOffset`, plus the `FxPoint` type), `components/fx/runtime/canvas.ts` (move `fx-lab/engines/canvas/shared.ts` without the colour constants `FIRE/STEEL/HEAL/CURSE`), `components/fx/runtime/sprites.ts`, `components/fx/fx.css`
+- Modify: `components/fx-lab/engines/canvas/*`, `components/fx-lab/engines/sprites/*`, `components/fx-lab/config.ts`, `components/fx-lab/types.ts`, `components/fx-lab/fx-lab.css`
 
 **Interfaces:**
 - Produces, `runtime/geometry.ts`:
@@ -114,10 +114,10 @@ Expected: `package.json` no longer lists them.
 The lab files are untracked (never committed), so plain `rm`/`mv`:
 
 ```bash
-rm -r components/battle/fx-lab/engines/css components/battle/fx-lab/engines/motion components/battle/fx-lab/engines/gsap components/battle/fx-lab/engines/particles components/battle/fx-lab/engines/pixi
-mkdir -p components/battle/fx/runtime components/battle/fx/animations
-mv components/battle/fx-lab/engines/dom.ts components/battle/fx/runtime/geometry.ts
-mv components/battle/fx-lab/engines/canvas/shared.ts components/battle/fx/runtime/canvas.ts
+rm -r components/fx-lab/engines/css components/fx-lab/engines/motion components/fx-lab/engines/gsap components/fx-lab/engines/particles components/fx-lab/engines/pixi
+mkdir -p components/fx/runtime components/fx/animations
+mv components/fx-lab/engines/dom.ts components/fx/runtime/geometry.ts
+mv components/fx-lab/engines/canvas/shared.ts components/fx/runtime/canvas.ts
 ```
 
 Edit `runtime/geometry.ts`:
@@ -208,7 +208,7 @@ export async function playSheet(layer: HTMLElement, sheet: Sheet, at: FxPoint, o
 }
 ```
 
-- [ ] **Step 4: Create `components/battle/fx/fx.css`**
+- [ ] **Step 4: Create `components/fx/fx.css`**
 
 ```css
 .fx-layer { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 35; }
@@ -221,20 +221,20 @@ Remove the `.fxs-*` and `.fxc-*` rules from `fx-lab.css`; keep `.fx-layer` there
 
 - [ ] **Step 5: Point the lab at the runtime**
 
-- `fx-lab/engines/canvas/*` imports from `@/components/battle/fx/runtime/canvas` and `.../geometry`. Move the colour constants into `fx-lab/engines/canvas/colors.ts`. Update `shoot(s, ctx, …)` calls to `shoot(s, ctx.from, ctx.to, …)`.
+- `fx-lab/engines/canvas/*` imports from `@/components/fx/runtime/canvas` and `.../geometry`. Move the colour constants into `fx-lab/engines/canvas/colors.ts`. Update `shoot(s, ctx, …)` calls to `shoot(s, ctx.from, ctx.to, …)`.
 - `fx-lab/engines/sprites/*` uses `playSheet` and `SHEETS` from the runtime. Delete `fx-lab/engines/sprites/shared.ts`, except `flying` for the fireball flight. Simplify that to `shoot`-like canvas-free WAAPI: `el.animate([{ translate: "0 0" }, { translate: \`${dx}px ${dy}px\` }], { duration: 620, easing: "ease-in" })` on a looping `.fxs-sheet` element with `animation-iteration-count: infinite`.
-- In `config.ts` keep only the `canvas` and `sprites` engines; set `FxEngineId = "canvas" | "sprites"`. In `FxLab.tsx` import `@/components/battle/fx/fx.css`.
+- In `config.ts` keep only the `canvas` and `sprites` engines; set `FxEngineId = "canvas" | "sprites"`. In `FxLab.tsx` import `@/components/fx/fx.css`.
 
 - [ ] **Step 6: Verify**
 
-Run: `pnpm exec tsc --noEmit -p . 2>&1 | grep -E "fx" ; pnpm exec eslint --fix components/battle/fx components/battle/fx-lab app/dev`
+Run: `pnpm exec tsc --noEmit -p . 2>&1 | grep -E "fx" ; pnpm exec eslint --fix components/fx components/fx-lab app/dev`
 Expected: no errors.
 Open `http://localhost:3000/dev/fx-lab` (`pnpm dev`) and play each of the four actions: both panels animate.
 
 - [ ] **Step 7: Commit**
 
 ```bash
-git add -A components/battle/fx components/battle/fx-lab app/dev public/fx package.json pnpm-lock.yaml lib/supabase/middleware.ts
+git add -A components/fx components/fx-lab app/dev public/fx package.json pnpm-lock.yaml lib/supabase/middleware.ts
 git commit -m "feat(fx): lab picks sprites + canvas 2D; shared FX runtime"
 ```
 
@@ -822,11 +822,11 @@ git commit -m "feat(fx): pure mapper from battle events to FX specs"
 
 **Files:**
 - Create:
-  - `components/battle/fx/runtime/palette.ts`
-  - `components/battle/fx/animations/types.ts`
-  - `components/battle/fx/animations/{melee,ranged,bolt,area,heal,buff,debuff,summon,death}.ts`
-  - `components/battle/fx/animations/index.ts`
-- Modify: `components/battle/fx-lab/*` (the playground plays real animations)
+  - `components/fx/runtime/palette.ts`
+  - `components/fx/animations/types.ts`
+  - `components/fx/animations/{melee,ranged,bolt,area,heal,buff,debuff,summon,death}.ts`
+  - `components/fx/animations/index.ts`
+- Modify: `components/fx-lab/*` (the playground plays real animations)
 
 **Interfaces:**
 - Consumes: the runtime from Task 1; `FxSpec`, `FxArchetype`, `FxElement` and `IMPACT_MS` from Task 3.
@@ -940,13 +940,13 @@ Run `pnpm dev`, open `http://localhost:3000/dev/fx-lab` and play each archetype 
 - crit is larger;
 - a miss shows no impact sparks.
 
-Run: `pnpm exec tsc --noEmit -p . 2>&1 | grep fx; pnpm exec eslint --fix components/battle/fx components/battle/fx-lab`
+Run: `pnpm exec tsc --noEmit -p . 2>&1 | grep fx; pnpm exec eslint --fix components/fx components/fx-lab`
 Expected: no errors.
 
 - [ ] **Step 4: Commit**
 
 ```bash
-git add -A components/battle/fx components/battle/fx-lab
+git add -A components/fx components/fx-lab
 git commit -m "feat(fx): archetype animation library (one file per animation) + playground"
 ```
 
@@ -963,12 +963,12 @@ The user answered the flagged-spell questions (2026-10-18):
 **Files:**
 - Modify: `lib/utils/battle/fx/types.ts` (FxArchetype += `"swarm" | "quake" | "teleport"`; FxElement += `"earth" | "fury"`), `lib/utils/battle/fx/timing.ts` (IMPACT_MS: `swarm: 700, quake: 400, teleport: 300`), `lib/utils/battle/fx/map-action.ts`, `lib/utils/battle/fx/index.ts`
 - Create: `lib/utils/battle/fx/overrides.ts` — `SPELL_FX_OVERRIDES: Record<string, { archetype?: FxArchetype; element?: FxElement }>` keyed by exact spell name: `"Рій ос": { archetype: "swarm", element: "nature" }`, `"Землетрус": { archetype: "quake", element: "earth" }`, `"Телепортація": { archetype: "teleport", element: "arcane" }`. Applied in `spellArchetype` AFTER the rules (override fields replace the computed ones). Names are what library spells are called in every campaign (seeded from data/library/spells.ts — verify the exact names there).
-- Modify: `components/battle/fx/runtime/palette.ts` — add `earth` (core `#b08850`, tints `#e8d3a8 #c8a26a #8a6234 #5a3e20`, non-additive feel is fine via colours) and `fury` (core `#ff3030`, tints `#ffd0c0 #ff6a4a #e01818 #7a0808`).
-- Create (one animation = one file): `components/battle/fx/animations/swarm.ts`, `quake.ts`, `teleport.ts`; register them in `animations/index.ts` (the Record<FxArchetype, FxAnimation> must stay exhaustive).
+- Modify: `components/fx/runtime/palette.ts` — add `earth` (core `#b08850`, tints `#e8d3a8 #c8a26a #8a6234 #5a3e20`, non-additive feel is fine via colours) and `fury` (core `#ff3030`, tints `#ffd0c0 #ff6a4a #e01818 #7a0808`).
+- Create (one animation = one file): `components/fx/animations/swarm.ts`, `quake.ts`, `teleport.ts`; register them in `animations/index.ts` (the Record<FxArchetype, FxAnimation> must stay exhaustive).
   - `swarm.ts`: ~40 small dark/yellow dots (non-additive dark `#2a2210` and additive `#ffd23a`) flying from the actor to each target along jittery noisy paths (each dot its own bezier + sine jitter), arriving around 700 ms, then buzzing in a tight cloud around the target for ~500 ms and dispersing.
   - `quake.ts`: no projectile. For every target at once: screen-space shake of the target anchors is NOT allowed (DOM is owned by React) — instead draw on canvas: 3–4 jagged crack lines (brown, `#5a3e20`, width 2–3) growing outward from under the target (y + 20), dust particles (non-additive, earth tints, rising and spreading), and 6–10 debris chunks (small dark squares/circles) thrown up with gravity. Impact (cracks reach full length) at ~400 ms.
   - `teleport.ts`: on each target: a tall thin blue-white vertical flash (stretched glow sprite) that collapses to a line and fades, a burst of 20 small arcane particles, then ~250 ms later a reverse expand (reappear). Total ~800 ms.
-- Modify: `components/battle/fx-lab/*` — the playground must list the new archetypes and elements automatically (it iterates ANIMATIONS / PALETTE keys; verify).
+- Modify: `components/fx-lab/*` — the playground must list the new archetypes and elements automatically (it iterates ANIMATIONS / PALETTE keys; verify).
 - Test: `lib/utils/battle/fx/__tests__/map-action.test.ts` — add:
   - berserk spell → `{ archetype: "debuff", element: "fury" }`
   - `spellName: "Рій ос"` with dealDamage/piercing on area → `{ archetype: "swarm", element: "nature" }`
@@ -983,9 +983,9 @@ Steps: RED tests → implement → GREEN (`pnpm test:run lib/utils/battle/fx`) �
 ### Task 5: Anchors, queue hook and the battle overlay
 
 **Files:**
-- Create: `components/battle/fx/runtime/anchors.ts`, `components/battle/fx/BattleFxLayer.tsx`, `lib/hooks/battle/useFxEnabled.ts`, `lib/hooks/battle/useBattleFxQueue.ts`
+- Create: `components/fx/runtime/anchors.ts`, `components/fx/BattleFxLayer.tsx`, `lib/hooks/battle/useFxEnabled.ts`, `lib/hooks/battle/useBattleFxQueue.ts`
 - Modify: `components/battle/participants/ParticipantRow.tsx` (portrait wrapper), `components/battle/participants/MyHeroPanel.tsx`, `components/battle/participants/InitiativeTrack.tsx`, `components/battle/scene/BattleScreen.tsx`, `lib/hooks/battle/index.ts`
-- Test: `components/battle/fx/__tests__/anchors.test.ts` (`// @vitest-environment happy-dom`). The queue logic itself is tested purely in Task 3 (`queue.test.ts`).
+- Test: `components/fx/__tests__/anchors.test.ts` (`// @vitest-environment happy-dom`). The queue logic itself is tested purely in Task 3 (`queue.test.ts`).
 
 **Interfaces:**
 - Consumes: `takeNewActions`, `mapAction`, `FxSpec` (Task 3); `ANIMATIONS` (Task 4); `PALETTE`, `stageFor` (Tasks 1/4).
@@ -1006,7 +1006,7 @@ Steps: RED tests → implement → GREEN (`pnpm test:run lib/utils/battle/fx`) �
 // @vitest-environment happy-dom
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { resolvePoints } from "@/components/battle/fx/runtime/anchors";
+import { resolvePoints } from "@/components/fx/runtime/anchors";
 import type { FxSpec } from "@/lib/utils/battle/fx";
 
 const spec = (over: Partial<FxSpec> = {}): FxSpec => ({ key: "k", archetype: "bolt", element: "fire", actorId: "a", actorSide: "ally", targetIds: ["t"], hit: true, critical: false, ...over });
@@ -1070,7 +1070,7 @@ describe("resolvePoints", () => {
 
 - [ ] **Step 2: Run tests to verify they fail**
 
-Run: `pnpm test:run components/battle/fx`
+Run: `pnpm test:run components/fx`
 Expected: FAIL.
 
 - [ ] **Step 3: Implement**
@@ -1200,13 +1200,13 @@ export function useBattleFxQueue(enabled: boolean) {
 
 import { useEffect, useRef } from "react";
 
-import { ANIMATIONS } from "@/components/battle/fx/animations";
-import { stageFor } from "@/components/battle/fx/runtime/canvas";
-import { PALETTE } from "@/components/battle/fx/runtime/palette";
-import { resolvePoints } from "@/components/battle/fx/runtime/anchors";
+import { ANIMATIONS } from "@/components/fx/animations";
+import { stageFor } from "@/components/fx/runtime/canvas";
+import { PALETTE } from "@/components/fx/runtime/palette";
+import { resolvePoints } from "@/components/fx/runtime/anchors";
 import { useBattleFxQueue, useFxEnabled } from "@/lib/hooks/battle";
 
-import "@/components/battle/fx/fx.css";
+import "@/components/fx/fx.css";
 
 const MAX_FX_MS = 3000;
 
@@ -1255,7 +1255,7 @@ export function BattleFxLayer() {
 Mount it in `BattleScreen.tsx` as the last child of the non-prepared `battle-hud` div, via `next/dynamic` with `ssr: false` (like `ResultOverlay`) so the FX code stays out of the entry chunk:
 
 ```tsx
-const BattleFxLayer = dynamic(() => import("@/components/battle/fx/BattleFxLayer").then((m) => m.BattleFxLayer), { ssr: false });
+const BattleFxLayer = dynamic(() => import("@/components/fx/BattleFxLayer").then((m) => m.BattleFxLayer), { ssr: false });
 ```
 
 Export `useBattleFxQueue` and `useFxEnabled` from `lib/hooks/battle/index.ts`.
@@ -1264,7 +1264,7 @@ Anchors: `Portrait` (`components/battle/hud/Portrait.tsx`) renders the portrait 
 
 - [ ] **Step 4: Run tests to verify they pass**
 
-Run: `pnpm test:run components/battle/fx lib/hooks/battle lib/utils/battle/fx`
+Run: `pnpm test:run components/fx lib/hooks/battle lib/utils/battle/fx`
 Expected: PASS.
 
 - [ ] **Step 5: Commit**
@@ -1348,9 +1348,9 @@ git commit -m "feat(battle): damage numbers wait for the FX impact; FX toggle in
 
 **Files:**
 - Create: `lib/utils/battle/fx/aura.ts`
-- Create: `components/battle/fx/auras/{plague,burning,frost,decay,bleeding,static,regen,blessing,shield,curse,marked,stun,bind,charm}.tsx`, each with a sibling `.module.css`
-- Create: `components/battle/fx/auras/StatusAuras.tsx`
-- Modify: `components/battle/participants/ParticipantRow.tsx`, `components/battle/participants/MyHeroPanel.tsx`, `lib/utils/battle/fx/index.ts`, `components/battle/fx-lab/*` (aura gallery)
+- Create: `components/fx/auras/{plague,burning,frost,decay,bleeding,static,regen,blessing,shield,curse,marked,stun,bind,charm}.tsx`, each with a sibling `.module.css`
+- Create: `components/fx/auras/StatusAuras.tsx`
+- Modify: `components/battle/participants/ParticipantRow.tsx`, `components/battle/participants/MyHeroPanel.tsx`, `lib/utils/battle/fx/index.ts`, `components/fx-lab/*` (aura gallery)
 - Test: `lib/utils/battle/fx/__tests__/aura.test.ts`
 
 **Interfaces:**
@@ -1541,7 +1541,7 @@ Keep `overflow` visible on those wrappers so glows can extend below and above th
 
 - [ ] **Step 6: Verify**
 
-Run: `pnpm test:run lib/utils/battle/fx && pnpm exec tsc --noEmit -p . && pnpm exec eslint --fix components/battle/fx components/battle/participants lib/utils/battle/fx`
+Run: `pnpm test:run lib/utils/battle/fx && pnpm exec tsc --noEmit -p . && pnpm exec eslint --fix components/fx components/battle/participants lib/utils/battle/fx`
 Expected: green.
 
 Visually in `/dev/fx-lab`: every aura is distinct, stays within ~25 % around the portrait, and has no layout shift.
@@ -1549,7 +1549,7 @@ Visually in `/dev/fx-lab`: every aura is distinct, stays within ~25 % around the
 - [ ] **Step 7: Commit**
 
 ```bash
-git add lib/utils/battle/fx components/battle/fx components/battle/participants components/battle/fx-lab
+git add lib/utils/battle/fx components/fx components/battle/participants components/fx-lab
 git commit -m "feat(battle): persistent status auras for effects lasting 1+ round"
 ```
 
@@ -1563,7 +1563,7 @@ Today a hit only flashes the portrait red (`hud-flash-red`), floats the number a
 **Files:**
 - Create: `lib/utils/battle/fx/impact.ts` — `interface FxImpact { element: FxElement; kind: "damage" | "heal"; delayMs: number }`, `impactFor(action: BattleAction | undefined, participantId: string): FxImpact | null` (uses `mapAction(action)[0]`; null when the participant is not a target or the spec is a miss (`hit === false`); `kind` = `"heal"` for archetype `heal`, else `"damage"`; `delayMs` = `IMPACT_MS[archetype]`). Re-implement `impactDelayFor` as `impactFor(...)?.delayMs ?? 0` (keep its export and tests green). Export from the barrel.
 - Create: `lib/hooks/battle/useFxImpact.ts` — `useFxImpact(participantId): FxImpact | null` (same last-non-cancelled-action logic as `useFxImpactDelay`, returns null when FX disabled). `useFxImpactDelay` may delegate to it.
-- Create (one frame = one file pair, `components/battle/fx/frames/<name>.tsx` + `<name>.module.css`), CSS-only (transform/opacity/filter/background keyframes, no JS timers), each a `pointer-events-none absolute inset-0` overlay that plays once and ends fully transparent:
+- Create (one frame = one file pair, `components/fx/frames/<name>.tsx` + `<name>.module.css`), CSS-only (transform/opacity/filter/background keyframes, no JS timers), each a `pointer-events-none absolute inset-0` overlay that plays once and ends fully transparent:
   - `fire`: flames licking along the tile border — orange/yellow gradient tongues rising from the bottom edge and sides (a few `<span>` flame shapes with flicker keyframes) + orange inner glow; 1.6 s, fades out.
   - `cold`: the tile freezes over a few seconds — frost creeps in from the edges (radial/linear white-blue gradients with a frosty noise-like layered gradient), icy blue border, slight blue `backdrop-filter`/tint; creep 1.2 s, hold 1.5 s, thaw 0.8 s (total ~3.5 s).
   - `lightning`: electric crackle — 2–3 zigzag bolts (inline SVG polylines) blinking along the border, white-blue flicker of the whole tile; 1.2 s.
@@ -1576,7 +1576,7 @@ Today a hit only flashes the portrait red (`hud-flash-red`), floats the number a
   - `fury`: deep red pulsing border (2 pulses); 1.2 s.
   - `nature` (damage, e.g. Рій ос): green-yellow leaf/insect specks swirling around the border; 1.4 s.
   - `heal` (kind heal, any element): soft green glow + small "+" sparkles rising inside the tile; 1.4 s.
-- Create: `components/battle/fx/frames/ImpactFrame.tsx` — `ImpactFrame({ impact }: { impact: FxImpact })` picks the frame component (`impact.kind === "heal"` → heal frame, else by `impact.element`) and wraps it in a span with `style={{ animationDelay: `${impact.delayMs}ms` }}` propagated to children via a CSS custom property `--fx-delay` used in every frame's `animation-delay` (so the frame starts exactly at impact). Respect reduced motion: `.battle-hud` already stops animations — make sure frames then render nothing visible (base opacity 0).
+- Create: `components/fx/frames/ImpactFrame.tsx` — `ImpactFrame({ impact }: { impact: FxImpact })` picks the frame component (`impact.kind === "heal"` → heal frame, else by `impact.element`) and wraps it in a span with `style={{ animationDelay: `${impact.delayMs}ms` }}` propagated to children via a CSS custom property `--fx-delay` used in every frame's `animation-delay` (so the frame starts exactly at impact). Respect reduced motion: `.battle-hud` already stops animations — make sure frames then render nothing visible (base opacity 0).
 - Modify: `components/battle/participants/ParticipantRow.tsx` and `MyHeroPanel.tsx` — render `{change && impact && <ImpactFrame key={change.id} impact={impact} />}` inside the relative tile root (keyed by the HP change id so it replays per hit). When `impact` is non-null, skip the portrait `hud-flash-red`/`hud-flash-green` class (the frame replaces it); keep it when FX is off/impact null. Keep the hero panel's full-screen vignette.
 - Modify: `/dev/fx-lab` — add «Рамки» gallery: a sample tile per element + heal with a ▶ that replays the frame.
 - Test: `lib/utils/battle/fx/__tests__/impact.test.ts` — fire bolt target → `{ element: "fire", kind: "damage", delayMs: IMPACT_MS.bolt }`; heal spell target → kind heal; miss (ranged, isHit false) → null; non-target → null; undefined action → null; existing impact-delay tests still green.
@@ -1587,12 +1587,12 @@ Steps: RED → GREEN (`pnpm test:run lib/utils/battle/fx lib/hooks/battle compon
 
 ### Task 7c: Persistent status auras on Canvas 2D (user request 2026-10-18)
 
-Context: Task 7 shipped 15 persistent status auras as CSS-only file pairs (`components/battle/fx/auras/<kind>.tsx` + `.module.css`), rendered by `AuraLayer`/`StatusAuras` (`components/battle/fx/auras/StatusAuras.tsx`) around the portrait in `ParticipantRow` and `MyHeroPanel`, plus a gallery in `/dev/fx-lab`. The pure logic `aurasOf(effects)` / `auraOf` / `FxAuraKind` / `MAX_AURAS` in `lib/utils/battle/fx/aura.ts` is correct — keep it untouched. The user rejected CSS-only element frames as ugly and approved Canvas 2D particle frames (`components/battle/fx/frames/canvas/*`, e.g. fire.ts, cold.ts). The user now wants the auras on Canvas too.
+Context: Task 7 shipped 15 persistent status auras as CSS-only file pairs (`components/fx/auras/<kind>.tsx` + `.module.css`), rendered by `AuraLayer`/`StatusAuras` (`components/fx/auras/StatusAuras.tsx`) around the portrait in `ParticipantRow` and `MyHeroPanel`, plus a gallery in `/dev/fx-lab`. The pure logic `aurasOf(effects)` / `auraOf` / `FxAuraKind` / `MAX_AURAS` in `lib/utils/battle/fx/aura.ts` is correct — keep it untouched. The user rejected CSS-only element frames as ugly and approved Canvas 2D particle frames (`components/fx/frames/canvas/*`, e.g. fire.ts, cold.ts). The user now wants the auras on Canvas too.
 
 **Goal:** same 15 aura kinds, same placement and rules, rendered with Canvas 2D particles/glows in the style of the approved frames — looping for as long as the effect is active.
 
 **Architecture (binding):**
-- One aura = one file: `components/battle/fx/auras/canvas/<kind>.ts` exporting `AuraAnimation = { start?(ctx): State; frame(g: CanvasRenderingContext2D, ctx: AuraCtx, t: number, dt: number): void }` (or an equivalent small interface you define in `auras/canvas/types.ts`) — an *endless* per-frame painter, not a promise. `AuraCtx` gives the portrait centre/radius inside the aura canvas (canvas is the portrait box + padding, e.g. pad = 0.6 × size so glows/particles can extend below/above) and a tiny per-aura particle list helper (spawn/update/draw with additive glow sprites — reuse `glow()`/`sprite()` from `components/battle/fx/runtime/canvas.ts`; do not create a Stage per aura).
+- One aura = one file: `components/fx/auras/canvas/<kind>.ts` exporting `AuraAnimation = { start?(ctx): State; frame(g: CanvasRenderingContext2D, ctx: AuraCtx, t: number, dt: number): void }` (or an equivalent small interface you define in `auras/canvas/types.ts`) — an *endless* per-frame painter, not a promise. `AuraCtx` gives the portrait centre/radius inside the aura canvas (canvas is the portrait box + padding, e.g. pad = 0.6 × size so glows/particles can extend below/above) and a tiny per-aura particle list helper (spawn/update/draw with additive glow sprites — reuse `glow()`/`sprite()` from `components/fx/runtime/canvas.ts`; do not create a Stage per aura).
 - **One shared animation loop for all auras on the page** (`auras/canvas/loop.ts`): a registry of mounted aura canvases; a single `requestAnimationFrame` loop throttled to ~30 fps paints every *visible* registered canvas (IntersectionObserver marks visibility; offscreen canvases are skipped), stops completely when the registry is empty, and naturally pauses in hidden tabs. Per canvas, clear then paint its kinds (max 2).
 - `AuraCanvas` component (`auras/canvas/AuraCanvas.tsx`): `{ kinds: FxAuraKind[]; size: number }` → a `pointer-events-none absolute` span centred on the portrait with a DPR-scaled canvas; registers in the loop on mount, unregisters on unmount/kinds change. `StatusAuras` keeps its props/behaviour (FX off → null) but renders `AuraCanvas`. Keep `AuraLayer`'s role for the lab gallery or replace it — your call, keep imports consistent.
 - Reduced motion (`matchMedia("(prefers-reduced-motion: reduce)")`): paint a single static frame (t fixed) and do not register in the loop.
@@ -1617,10 +1617,10 @@ Context: Task 7 shipped 15 persistent status auras as CSS-only file pairs (`comp
 - rage: deep red pulsing glow + rising red wisps.
 
 **Files:**
-- Create: `components/battle/fx/auras/canvas/{types.ts,loop.ts,AuraCanvas.tsx,index.ts}` + 15 `<kind>.ts`
-- Modify: `components/battle/fx/auras/StatusAuras.tsx`, `components/battle/fx-lab/FxLab.tsx` (gallery uses the canvas auras)
-- Delete: `components/battle/fx/auras/*.module.css` and the CSS `<kind>.tsx` files
-- Test: `components/battle/fx/auras/canvas/__tests__/loop.test.ts` (happy-dom; fake rAF/IntersectionObserver): registering starts the loop, unregistering the last canvas stops it, offscreen canvases are not painted, reduced motion paints once without registering.
+- Create: `components/fx/auras/canvas/{types.ts,loop.ts,AuraCanvas.tsx,index.ts}` + 15 `<kind>.ts`
+- Modify: `components/fx/auras/StatusAuras.tsx`, `components/fx-lab/FxLab.tsx` (gallery uses the canvas auras)
+- Delete: `components/fx/auras/*.module.css` and the CSS `<kind>.tsx` files
+- Test: `components/fx/auras/canvas/__tests__/loop.test.ts` (happy-dom; fake rAF/IntersectionObserver): registering starts the loop, unregistering the last canvas stops it, offscreen canvases are not painted, reduced motion paints once without registering.
 
 **Verify:** `pnpm test:run lib/utils/battle/fx lib/hooks/battle components/battle` (incl. render-count), tsc, eslint --fix; headless screenshots of the «Аури» gallery (deviceScaleFactor 2) at two moments — every aura distinct and recognisable; also open the gallery in the profiler-free sense: confirm via a quick `performance.now()` sample in the page that the loop runs ≤ ~30 fps and stops when the gallery section is removed/scrolled away (IntersectionObserver).
 **Commit:** `feat(battle): status auras on Canvas 2D with one shared throttled loop` + blank line + `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
@@ -1629,14 +1629,14 @@ Context: Task 7 shipped 15 persistent status auras as CSS-only file pairs (`comp
 
 ### Task 7d: Physical hit frames split into melee and ranged (arrow) (user request 2026-10-18)
 
-User: «до фізичної атаки додай окремо атаку ближню і дальню стрілою». Today every physical hit plays the single `physicalFrame` (components/battle/fx/frames/canvas/physical.ts). Split it:
+User: «до фізичної атаки додай окремо атаку ближню і дальню стрілою». Today every physical hit plays the single `physicalFrame` (components/fx/frames/canvas/physical.ts). Split it:
 
 - `physical-melee.ts` (rename/rework the current physical.ts): a weapon strike — 1–2 bright slash streaks across the tile (diagonal, fast wipe-in then fade), short red flash, steel sparks flying from the cut point, slight dent/shadow line left for ~0.5 s. ~0.9 s.
 - `physical-ranged.ts` (new): an arrow hit — the arrow streaks in from the attacker's side (left for an ally shooter / right for an enemy shooter is not known inside the frame → come in from the side nearest the tile's horizontal edge closest to screen centre is overkill; just come in from the left at a slight downward angle) and **sticks into the tile** near the portrait/left third: draw a shaft (thin brown line) with fletching (two small angled strokes) and a dark head buried in the tile; on impact a small thunk ring + wood splinters/dust particles; the arrow stays stuck ~0.8 s, quivers (small sinusoidal wobble of the tail for 0.3 s), then fades. ~1.4 s.
 
 Plumbing:
 - `lib/utils/battle/fx/impact.ts`: `FxImpact` gains `attack?: "melee" | "ranged"` — set from the primary spec's archetype (`melee` → "melee", `ranged` → "ranged"; otherwise undefined). Tests in `lib/utils/battle/fx/__tests__/impact.test.ts`: melee physical hit → attack "melee"; ranged physical hit → attack "ranged"; spell bolt → attack undefined.
-- `components/battle/fx/frames/canvas/index.ts`: export `frameFor(impact: FxImpact): FrameAnimation` — heal → HEAL_FRAME; `element === "physical"` → `impact.attack === "ranged" ? physicalRangedFrame : physicalMeleeFrame`; else `FRAME_ANIMATIONS[element]` (keep `FRAME_ANIMATIONS` with `physical: physicalMeleeFrame` so the Record stays exhaustive). `ImpactFrame` uses `frameFor`.
+- `components/fx/frames/canvas/index.ts`: export `frameFor(impact: FxImpact): FrameAnimation` — heal → HEAL_FRAME; `element === "physical"` → `impact.attack === "ranged" ? physicalRangedFrame : physicalMeleeFrame`; else `FRAME_ANIMATIONS[element]` (keep `FRAME_ANIMATIONS` with `physical: physicalMeleeFrame` so the Record stays exhaustive). `ImpactFrame` uses `frameFor`.
 - Elemental ranged attacks (e.g. a fire arrow, if `damageRolls[0].damageType` is fire) keep their element frame — only physical splits.
 - `/dev/fx-lab` «Рамки» gallery: replace the single «Фізичний» tile by «Ближня атака» and «Стріла».
 
@@ -1672,10 +1672,10 @@ The controller cast all 54 prod spells through `castSpell` and mapped them (`.su
 - Tests in `map-action.test.ts` for each override group (one per kind is enough: entangle, a summon element, Аватар necrotic, Кам'яні шипи earth, meteor, wind buff).
 
 **Registries (must stay exhaustive, compile now; 7f replaces placeholders with real art):**
-- `components/battle/fx/runtime/palette.ts`: add `wind` (core `#d8f4ff`, tints `#ffffff #e6fbff #b8e8f5 #7cc8dc`).
-- `components/battle/fx/animations/index.ts`: `entangle` and `meteor` → temporarily the existing `debuff` / `area` animations.
-- `components/battle/fx/frames/canvas/index.ts`: `wind` → temporarily `arcaneFrame`.
-- `components/battle/fx/auras/canvas` registry: the 8 new aura kinds → temporarily reuse the closest existing painters (frozen→frost, moonmark→marked, dust→decay, stings→plague, roots→bind, blind→curse, bloodlust→rage, haste→blessing).
+- `components/fx/runtime/palette.ts`: add `wind` (core `#d8f4ff`, tints `#ffffff #e6fbff #b8e8f5 #7cc8dc`).
+- `components/fx/animations/index.ts`: `entangle` and `meteor` → temporarily the existing `debuff` / `area` animations.
+- `components/fx/frames/canvas/index.ts`: `wind` → temporarily `arcaneFrame`.
+- `components/fx/auras/canvas` registry: the 8 new aura kinds → temporarily reuse the closest existing painters (frozen→frost, moonmark→marked, dust→decay, stings→plague, roots→bind, blind→curse, bloodlust→rage, haste→blessing).
 - `/dev/fx-lab` labels for new archetypes/elements/auras (Ukrainian).
 
 **Verify:** `pnpm test:run lib/utils/battle lib/hooks/battle components/battle`, tsc, eslint --fix; re-run the prod check script and save the new table to `.superpowers/sdd/2026-10-18-battle-fx-mvp/fx-prod-check-after.md` — every spell listed in the decisions now maps as specified.
@@ -1687,7 +1687,7 @@ The controller cast all 54 prod spells through `castSpell` and mapped them (`.su
 
 Task 7e added kinds wired to placeholder painters. Replace each placeholder with its own file (one animation = one file), in the approved Canvas style (see frames/canvas/fire.ts, cold.ts; auras/canvas/*):
 
-**Auras** (`components/battle/fx/auras/canvas/<kind>.ts`, endless painters in the shared loop):
+**Auras** (`components/fx/auras/canvas/<kind>.ts`, endless painters in the shared loop):
 - `frozen`: the portrait encased in an ice block — translucent pale-blue faceted shell (a few polygon facets with highlights) + slow frost sparkles + faint cold mist at the bottom.
 - `moonmark`: a silver crescent-moon sigil above the head, soft silver-blue glow pulsing, tiny star motes.
 - `dust`: brown dust swirling low around the portrait + small pebbles bouncing, faint cracks under it.
@@ -1697,11 +1697,11 @@ Task 7e added kinds wired to placeholder painters. Replace each placeholder with
 - `bloodlust`: dark-red pulse with blood droplets drawn inward to the portrait (vampiric drain), red rim.
 - `haste`: pale wind streaks whipping horizontally past the portrait + a light cyan rim, quick tempo.
 
-**Action animations** (`components/battle/fx/animations/<archetype>.ts`):
+**Action animations** (`components/fx/animations/<archetype>.ts`):
 - `entangle`: no projectile (or a small green spark from the caster); at each target, vines/roots erupt from the ground under the tile and curl upward around the portrait (bezier strokes growing, leaves), green dust; impact at ~500 ms (IMPACT_MS.entangle).
 - `meteor`: for each target (staggered 120 ms), a burning meteor falls from the top of the screen at a steep angle onto the target (fire trail particles), explodes with the fire palette + debris + a short ground shockwave ring; first impact at ~700 ms (IMPACT_MS.meteor).
 
-**Frame** (`components/battle/fx/frames/canvas/wind.ts`): gust lines sweeping across the tile + a few leaves/dust specks, ~1.2 s (used only if a wind-element hit ever happens).
+**Frame** (`components/fx/frames/canvas/wind.ts`): gust lines sweeping across the tile + a few leaves/dust specks, ~1.2 s (used only if a wind-element hit ever happens).
 
 Keep particle counts moderate. Remove the placeholder mappings. Update the `/dev/fx-lab` galleries so every new kind can be previewed.
 **Verify:** `pnpm test:run lib/utils/battle/fx lib/hooks/battle components/battle` (render-count included), tsc, eslint --fix; headless screenshots (deviceScaleFactor 2) of every new aura, both new animations and the wind frame — each must read clearly as described; iterate until it does.
@@ -1733,7 +1733,7 @@ Expected: exit 0. The report has no errors; the new `actionDetails` fields appea
 
 - [ ] **Step 4: Bundle check**
 
-Run: `pnpm build`. Confirm that the battle page entry chunk does not contain `components/battle/fx` (it loads via `dynamic`) and that no removed library appears in `.next` (`grep -r "pixi\|gsap\|tsparticles" .next/static | head` → empty).
+Run: `pnpm build`. Confirm that the battle page entry chunk does not contain `components/fx` (it loads via `dynamic`) and that no removed library appears in `.next` (`grep -r "pixi\|gsap\|tsparticles" .next/static | head` → empty).
 
 - [ ] **Step 5: Final review**
 

@@ -10,18 +10,22 @@ vi.mock('@/components/hud/fonts', () => ({
 import { ConditionsDialog } from '@/components/battle/dm/ConditionsDialog';
 import { render } from '@/lib/i18n/test/render-uk';
 import { hero } from '@/lib/server/battles/__tests__/mutations/fixtures';
-import { CONDITION_5E_KEYS } from '@/lib/utils/battle/conditions';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import { applyCondition5e } from '@/systems/d20/rules/conditions/apply';
+import { CONDITION_5E_KEYS } from '@/systems/d20/rules/conditions/keys';
 
 vi.unmock('next-intl');
 
 afterEach(cleanup);
 
+const standard = ruleSystemOf(DEFAULT_RULES).conditionSet;
+
 describe('ConditionsDialog', () => {
     it('рендерить усі стани з описом', () => {
         render(
             <ConditionsDialog
+                standard={standard}
                 participant={hero}
                 onClose={vi.fn()}
                 onSubmit={vi.fn()}
@@ -40,6 +44,7 @@ describe('ConditionsDialog', () => {
 
         render(
             <ConditionsDialog
+                standard={standard}
                 participant={hero}
                 onClose={vi.fn()}
                 onSubmit={onSubmit}
@@ -60,11 +65,29 @@ describe('ConditionsDialog', () => {
         });
     });
 
+    it('порожній словник станів блокує «Накласти» без condition: undefined', () => {
+        const onSubmit = vi.fn();
+
+        render(
+            <ConditionsDialog
+                standard={{ ...standard, keys: [] }}
+                participant={hero}
+                onClose={vi.fn()}
+                onSubmit={onSubmit}
+            />
+        );
+
+        fireEvent.click(screen.getByRole('button', { name: 'Накласти' }));
+
+        expect(onSubmit).not.toHaveBeenCalled();
+    });
+
     it('100 раундів блокують «Накласти» (межа з CONDITION_LIMITS)', () => {
         const onSubmit = vi.fn();
 
         render(
             <ConditionsDialog
+                standard={standard}
                 participant={hero}
                 onClose={vi.fn()}
                 onSubmit={onSubmit}
@@ -111,6 +134,7 @@ describe('ConditionsDialog', () => {
 
         render(
             <ConditionsDialog
+                standard={standard}
                 participant={afflicted}
                 onClose={vi.fn()}
                 onSubmit={onSubmit}
@@ -129,6 +153,7 @@ describe('ConditionsDialog', () => {
     it("новий стан з'являється в «Поточні стани» без перевідкриття", () => {
         const { rerender } = render(
             <ConditionsDialog
+                standard={standard}
                 participant={hero}
                 onClose={vi.fn()}
                 onSubmit={vi.fn()}
@@ -149,6 +174,7 @@ describe('ConditionsDialog', () => {
 
         rerender(
             <ConditionsDialog
+                standard={standard}
                 participant={afflicted}
                 onClose={vi.fn()}
                 onSubmit={vi.fn()}
@@ -172,6 +198,7 @@ describe('ConditionsDialog', () => {
 
         render(
             <ConditionsDialog
+                standard={standard}
                 participant={hero}
                 custom={custom}
                 onClose={vi.fn()}

@@ -8,7 +8,7 @@ import { textOf } from '../test/text';
 import { LOCALES } from '@/lib/i18n/config';
 import { localSource } from '@/lib/i18n/local-source';
 import { textRef } from '@/lib/i18n/text-ref';
-import { CUNNING_STRIKE_EFFECTS } from '@/lib/utils/abilities/schema/params';
+import { STRIKE_RIDER_EFFECTS } from '@/lib/utils/abilities/schema/params';
 import { REJECT } from '@/lib/utils/battle/store/reject';
 
 const lookup = (tree: Record<string, unknown>, path: string) =>
@@ -98,7 +98,7 @@ describe('battleLog has translations', () => {
     });
 
     it('the locked Cunning Strike reason names the effect in both locales', () => {
-        for (const effect of CUNNING_STRIKE_EFFECTS) {
+        for (const effect of STRIKE_RIDER_EFFECTS) {
             for (const locale of LOCALES) {
                 expect(
                     textOf(

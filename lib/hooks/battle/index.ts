@@ -1,7 +1,6 @@
 export { useFxBusy } from './fx-busy';
 export { fireFxImpact, onFxImpact } from './fx-impact';
 export * from './modes';
-export { afterMoraleDice } from './morale-dice';
 export { isSystemActionPending } from './system-action';
 export type { TurnGateControls } from './types';
 export { useAbilityMapAim } from './useAbilityMapAim';

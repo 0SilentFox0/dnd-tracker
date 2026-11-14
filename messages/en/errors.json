@@ -445,6 +445,7 @@
   "conditionImmune": "{name}: immune to this condition",
   "conditionAbsent": "{name}: does not have this condition",
   "conditionUnsupported": "This condition is not available in this system",
+  "conditionUnknown": "Unknown condition for this system",
   "conditionTestUnavailable": "This condition cannot be tested for right now",
   "noFortune": "The hero has no Fortune",
   "abilityCooldown": "Cooldown: {rounds, plural, one {# round} other {# rounds}} left",

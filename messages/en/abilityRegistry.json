@@ -822,7 +822,7 @@
     "nearbyEnemies": "nearby enemies (area)"
   },
   "optionGroups": {
-    "conditions5e": "5e conditions",
+    "conditionsStandard": "5e conditions",
     "mechanicalConditions": "Mechanical conditions"
   },
   "templates": {

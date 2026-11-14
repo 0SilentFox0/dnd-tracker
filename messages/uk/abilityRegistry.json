@@ -822,7 +822,7 @@
     "nearbyEnemies": "вороги поруч (зона)"
   },
   "optionGroups": {
-    "conditions5e": "Стани 5e",
+    "conditionsStandard": "Стани 5e",
     "mechanicalConditions": "Механічні стани"
   },
   "templates": {

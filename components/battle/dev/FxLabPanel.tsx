@@ -2,8 +2,8 @@
 
 import { useEffect, useEffectEvent, useRef, useState } from 'react';
 
-import { playFx } from '@/components/battle/fx/runtime/play';
-import { cancelLayer } from '@/components/battle/fx/runtime/stage';
+import { playFx } from '@/components/fx/runtime/play';
+import { cancelLayer } from '@/components/fx/runtime/stage';
 import { cn } from '@/lib/utils';
 import {
     ARCHETYPE_FX,

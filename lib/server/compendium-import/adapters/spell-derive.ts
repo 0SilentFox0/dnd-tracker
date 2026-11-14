@@ -15,10 +15,8 @@ import { ABILITY_KEYS, type AbilityKey } from '@/lib/constants/abilities';
 import type { ErrorParams } from '@/lib/constants/api-errors';
 import type { Translator } from '@/lib/i18n/translator';
 import type { Effect } from '@/lib/utils/abilities/schema/effects';
-import {
-    CONDITION_5E_KEYS,
-    isCustomConditionKey,
-} from '@/lib/utils/abilities/schema/kinds';
+import { isCustomConditionKey } from '@/lib/utils/abilities/schema/kinds';
+import { allConditionKeys } from '@/lib/utils/rules/systems/lookup';
 import {
     ADDS_MOD,
     durationRounds,
@@ -149,8 +147,7 @@ const tags = (raw: string, name: string): string[] => [
 
 const strings = (v: unknown): string[] => array(v).map(str).filter(Boolean);
 
-const isCondition = (c: string): c is (typeof CONDITION_5E_KEYS)[number] =>
-    (CONDITION_5E_KEYS as readonly string[]).includes(c);
+const isCondition = (c: string): boolean => allConditionKeys().includes(c);
 
 type CustomKeys = ReadonlyMap<string, string>;
 

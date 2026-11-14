@@ -1,7 +1,8 @@
+import type { CoreActionBody } from '../../rules/actions/schema';
+
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { coreActionsOn } from '@/lib/utils/battle/actions/access';
 import { runCoreAction } from '@/lib/utils/battle/actions/dispatch';
-import type { CoreActionBody } from '@/lib/utils/battle/actions/schema';
 import { currentOf, requireActor } from '@/lib/utils/battle/common/control';
 import { lineText } from '@/lib/utils/battle/log/lines';
 import type {

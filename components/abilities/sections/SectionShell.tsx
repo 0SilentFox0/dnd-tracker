@@ -12,11 +12,8 @@ interface SectionShellProps {
     path: string;
     part: FlowPart;
     title: ReactNode;
-    open: boolean;
-    onToggle: () => void;
-    summary: string | null;
-    onAdd?: () => void;
-    addLabel?: string;
+    state: { open: boolean; onToggle: () => void; summary: string | null };
+    add?: { onClick?: () => void; label: string };
     className?: string;
     children: ReactNode;
 }
@@ -25,11 +22,8 @@ export function SectionShell({
     path,
     part,
     title,
-    open,
-    onToggle,
-    summary,
-    onAdd,
-    addLabel,
+    state,
+    add,
     className,
     children,
 }: SectionShellProps) {
@@ -47,14 +41,14 @@ export function SectionShell({
         >
             <CollapsibleHeader
                 title={title}
-                summary={summary}
-                open={open}
-                onToggle={onToggle}
-                onAdd={onAdd}
-                addLabel={addLabel}
+                summary={state.summary}
+                open={state.open}
+                onToggle={state.onToggle}
+                onAdd={add?.onClick}
+                addLabel={add?.label}
                 controlsId={`${id}-body`}
             />
-            {open && (
+            {state.open && (
                 <div id={`${id}-body`} className="space-y-2">
                     {children}
                 </div>

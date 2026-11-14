@@ -1,7 +1,7 @@
-import { DMMainSkillsPageClient } from './page-client';
-
+import { SystemDmPage } from '@/components/systems/SystemDmPage';
 import { prisma } from '@/lib/db';
 import { requireCampaignDM } from '@/lib/server/campaigns/access';
+import { parseRules } from '@/lib/utils/rules/schema';
 
 export default async function DMMainSkillsPage({
     params,
@@ -10,7 +10,7 @@ export default async function DMMainSkillsPage({
 }) {
     const { id } = await params;
 
-    await requireCampaignDM(id);
+    const { campaign } = await requireCampaignDM(id);
 
     const mainSkills = await prisma.mainSkill.findMany({
         where: { campaignId: id },
@@ -18,9 +18,12 @@ export default async function DMMainSkillsPage({
     });
 
     return (
-        <DMMainSkillsPageClient
+        <SystemDmPage
             campaignId={id}
-            initialMainSkills={mainSkills.map((skill) => ({
+            section="main-skills"
+            system={parseRules(campaign.rules).system}
+            canEdit
+            data={mainSkills.map((skill) => ({
                 ...skill,
                 createdAt: skill.createdAt.toISOString(),
                 updatedAt: skill.updatedAt.toISOString(),

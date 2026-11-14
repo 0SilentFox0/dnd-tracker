@@ -2,10 +2,10 @@ import { describe, expect, it } from 'vitest';
 
 import { makeParticipant, seq } from '@/lib/utils/abilities/__tests__/fixtures';
 import { upsertTimedEffect } from '@/lib/utils/abilities/engine/effects/timed-effects';
-import { hiddenEffect } from '@/lib/utils/battle/actions/effects';
 import { castSpell } from '@/lib/utils/battle/spell';
 import type { CastableSpell } from '@/lib/utils/battle/types/spell-process';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { hiddenEffect } from '@/systems/d20/rules/actions/effects';
 import type { BattleParticipant } from '@/types/battle';
 
 const cure: CastableSpell = {

@@ -6,7 +6,6 @@ import {
     grantPassive,
 } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import { runCoreAction } from '@/lib/utils/battle/actions/dispatch';
-import { coreActionSchema } from '@/lib/utils/battle/actions/schema';
 import {
     activeEffectIds,
     consumeAttackEffects,
@@ -22,6 +21,7 @@ import {
     coreActionAvailability,
     coreActionCost,
 } from '@/systems/d20/rules/actions/availability';
+import { coreActionSchema } from '@/systems/d20/rules/actions/schema';
 import { passivePerception } from '@/systems/d20/rules/checks/roll-check';
 import { applyCondition5e } from '@/systems/d20/rules/conditions/apply';
 import type { BattleMapConfig, BattleParticipant } from '@/types/battle';

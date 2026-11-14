@@ -1,5 +1,3 @@
-import type { CoreActionBody } from './schema';
-
 import type { ServerAttackInput } from '@/lib/utils/battle/attack/server-attack';
 import type { NewBattleEvent } from '@/lib/utils/battle/store';
 import type { Ruleset } from '@/lib/utils/rules/schema';
@@ -18,6 +16,19 @@ export type ServerStrike = (input: ServerAttackInput) => {
     battleAction: BattleAction;
 };
 
+export type CoreActionDef = {
+    cost: 'action' | 'bonusAction' | 'movement';
+    target: 'none' | 'allyAdjacent' | 'enemyAdjacent';
+};
+
+/** The wire shape of a core action; the system's own schema narrows `action` to its catalog */
+export interface CoreActionRequest {
+    action: string;
+    participantId: string;
+    targetId?: string;
+    mode?: string;
+}
+
 export interface CoreActionAvailability {
     ok: boolean;
     reason?: LogLine;
@@ -25,7 +36,7 @@ export interface CoreActionAvailability {
 
 export interface RunCoreActionInput {
     participants: BattleParticipant[];
-    body: CoreActionBody;
+    body: CoreActionRequest;
     strike: ServerStrike;
     map: BattleMapConfig | null;
     rules: Ruleset;

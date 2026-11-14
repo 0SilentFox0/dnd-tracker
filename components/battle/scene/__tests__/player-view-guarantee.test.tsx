@@ -26,7 +26,7 @@ vi.mock('@/lib/hooks/battles', async (orig) => ({
         isError: false,
     }),
 }));
-vi.mock('@/components/battle/fx/preload', () => ({
+vi.mock('@/components/fx/preload', () => ({
     preloadFx: () => Promise.resolve(),
 }));
 

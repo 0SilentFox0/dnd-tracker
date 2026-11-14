@@ -1,6 +1,6 @@
 import type { FieldMeta } from '../fields';
 import {
-    CONDITION_KEYS_ALL,
+    conditionKeysAll,
     conditionKeySegment,
     damageTypeSegment,
 } from '../labels';
@@ -342,13 +342,15 @@ const BASE_FLAG_REGISTRY: {
             {
                 name: 'conditions',
                 input: 'multiselect',
-                options: [
-                    { value: 'all' },
-                    { value: 'fear' },
-                    { value: 'berserk' },
-                    { value: 'charm' },
-                    ...CONDITION_KEYS_ALL.map((value) => ({ value })),
-                ],
+                get options() {
+                    return [
+                        { value: 'all' },
+                        { value: 'fear' },
+                        { value: 'berserk' },
+                        { value: 'charm' },
+                        ...conditionKeysAll().map((value) => ({ value })),
+                    ];
+                },
             },
         ],
         defaults: { conditions: 'all' },

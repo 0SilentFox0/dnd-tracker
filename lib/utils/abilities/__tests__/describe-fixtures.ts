@@ -17,10 +17,8 @@ import type { SystemEffect } from '../schema/system-effects';
 
 import type { Locale } from '@/lib/i18n/config';
 import type { Translator } from '@/lib/i18n/translator';
-import {
-    CONDITION_5E_KEYS,
-    CONDITION_KEYS,
-} from '@/lib/utils/abilities/schema/kinds';
+import { CONDITION_KEYS } from '@/lib/utils/abilities/schema/kinds';
+import { CONDITION_5E_KEYS } from '@/systems/d20/rules/conditions/keys';
 
 const duration = { rounds: 2 };
 

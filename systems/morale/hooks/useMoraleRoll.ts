@@ -3,7 +3,6 @@
 import { useTranslations } from 'next-intl';
 
 import {
-    afterMoraleDice,
     type TurnGateControls,
     useBattleScene,
     useFxEnabled,
@@ -14,6 +13,7 @@ import {
     moraleCheckOp,
     type MoraleCheckResponse,
 } from '@/systems/morale/api/battle';
+import { afterMoraleDice } from '@/systems/morale/hooks/morale-dice';
 import { moraleResultFx } from '@/systems/morale/rules/result-fx';
 import { moraleOutcome } from '@/systems/morale/rules/turn/outcome';
 import type { BattleParticipant } from '@/types/battle';

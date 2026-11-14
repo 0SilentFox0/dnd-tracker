@@ -20,6 +20,7 @@ import { type MapTerrainTool, useMapTerrainTool } from './useMapTerrainTool';
 import { type MapWeatherTool, useMapWeatherTool } from './useMapWeatherTool';
 
 import { useText } from '@/lib/i18n/use-text';
+import type { SystemFx } from '@/lib/utils/battle/fx';
 import {
     aimView,
     checkReturnToStart,
@@ -53,7 +54,7 @@ export interface BattleMapScene {
     backgroundTool: MapBackgroundTool | null;
 }
 
-export function useBattleMapScene(): BattleMapScene | null {
+export function useBattleMapScene(fx?: SystemFx): BattleMapScene | null {
     const t = useTranslations('battle.notify');
 
     const text = useText();
@@ -157,7 +158,7 @@ export function useBattleMapScene(): BattleMapScene | null {
 
     const { pending: pendingStroke } = terrainTool;
 
-    const impactFor = useFxImpacts();
+    const impactFor = useFxImpacts(fx);
 
     const { currentRound, currentTurnIndex } = battle;
 

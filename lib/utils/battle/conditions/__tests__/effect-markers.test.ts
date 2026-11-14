@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
 import { EffectMarker } from '@/lib/constants/battle';
-import {
-    CONDITION_5E_KEYS,
-    isCondition5eKey,
-} from '@/lib/utils/abilities/schema/kinds';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import { hasCondition } from '@/lib/utils/battle/conditions';
 import { hasEffectMarker } from '@/lib/utils/battle/participant/state';
+import {
+    CONDITION_5E_KEYS,
+    isCondition5eKey,
+} from '@/systems/d20/rules/conditions/keys';
 import type { ActiveEffect, BattleParticipant } from '@/types/battle';
 
 const withMarkers = (...types: string[]): BattleParticipant => {
@@ -38,6 +38,7 @@ describe('hasCondition == hasEffectMarker', () => {
     it('EffectMarker дає ті самі рядки, що й раніше', () => {
         expect(Object.values(EffectMarker).sort()).toEqual([
             'disengaged',
+            'hidden',
             'immobilized',
             'no_bonus_action',
             'no_reaction',

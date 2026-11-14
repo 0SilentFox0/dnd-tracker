@@ -24,7 +24,6 @@ import {
 } from '@/lib/utils/battle/attack/critical';
 import { getP, put } from '@/lib/utils/battle/common/action-flow';
 import { attackKindOf } from '@/lib/utils/battle/common/attack-kind';
-import { rollD20WithMode } from '@/lib/utils/battle/common/roll-d20';
 import {
     type CritKind,
     randomCritEffect,
@@ -41,6 +40,7 @@ import type {
 import { spellAttackBonus } from '@/lib/utils/battle/spell/power';
 import { participantImmuneToSpell } from '@/lib/utils/battle/spell/spell-immunity';
 import { rollGroups } from '@/lib/utils/common/dice';
+import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { RaceModifier } from '@/lib/utils/spells/model/schema';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
 
@@ -81,6 +81,19 @@ function resolveSpellAttack(
 
     const id = target.basicInfo.id;
 
+    const attackRoll = ruleSystemOf(flow.ctx.rules).magic.attackRoll;
+
+    // system rule: a base without magic.attackRoll auto-hits, and the log says so
+    if (!attackRoll) {
+        flow.messages.push(
+            textRef('battleActions.spell.attackAuto', {
+                name: target.basicInfo.name,
+            })
+        );
+
+        return { skip: false, factor: 1, raceMultiplier };
+    }
+
     const adjacent =
         isOnMap(caster) &&
         isOnMap(target) &&
@@ -107,12 +120,6 @@ function resolveSpellAttack(
         })
     );
 
-    const { roll, rolls } = rollD20WithMode(
-        mode,
-        state.rng,
-        state.attackRolls.find((a) => a.participantId === id)?.roll
-    );
-
     const mods = withSelf(flow.ps, caster);
 
     const bonus =
@@ -127,16 +134,20 @@ function resolveSpellAttack(
             attackKind: attackKindOf(pseudoAttack.type),
         }).flat;
 
-    const total = roll + bonus;
-
     const ac = getEffectiveArmorClass(target, flow.ps);
 
-    const crit =
-        roll >= critThresholdOf(flow.ctx.rules, mods, caster.basicInfo.id);
+    const { roll, rolls, crit, fumble, hit } = attackRoll({
+        mode,
+        rng: state.rng,
+        presetRoll: state.attackRolls.find((a) => a.participantId === id)
+            ?.roll,
+        bonus,
+        ac,
+        critOn: critThresholdOf(flow.ctx.rules, mods, caster.basicInfo.id),
+        fumbleOn: critRulesOf(flow.ctx.rules).fumbleOn,
+    });
 
-    const fumble = roll <= critRulesOf(flow.ctx.rules).fumbleOn;
-
-    const hit = !fumble && (crit || total >= ac);
+    const total = roll + bonus;
 
     state.attacks.push({
         participantId: id,
@@ -404,14 +415,17 @@ export function resolveOutcome(
         // союзник кастера сам хоче провалити корисне заклинання — опір не витрачається
         const { roll, mod, bonus, total } = r;
 
-        const saveCrit =
+        const natural =
             !!flow.ctx.crit &&
             critRulesOf(flow.ctx.rules).effects &&
-            !r.autoFail &&
-            (roll === 20 || roll === 1);
+            !r.autoFail
+                ? (ruleSystemOf(flow.ctx.rules).magic.saveCrit?.(roll) ?? null)
+                : null;
+
+        const saveCrit = natural !== null;
 
         // нат. 20/1 визначають результат лише там, де діють криті; Легендарний опір діє вже на цей результат
-        const base = saveCrit ? { ...r, success: roll === 20 } : r;
+        const base = saveCrit ? { ...r, success: natural === 'success' } : r;
 
         const resisted = isHostile(flow.ctx.map, state.caster, target)
             ? saves.resolve(target, base)
@@ -473,8 +487,8 @@ export function resolveOutcome(
         if (resisted.message) flow.messages.push(resisted.message);
 
         const crit =
-            saveCrit && (roll === 20 || !success)
-                ? applySaveCrit(state, id, roll === 20 ? 'success' : 'fail')
+            natural && (natural === 'success' || !success)
+                ? applySaveCrit(state, id, natural)
                 : undefined;
 
         if (crit?.type === 'negate_damage') factor = 0;

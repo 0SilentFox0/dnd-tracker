@@ -49,7 +49,7 @@ export function LimitsSection({
                 path={path}
                 part="limits"
                 title={t('title')}
-                {...state}
+                state={state}
                 className="space-y-1"
             >
                 <p className="text-xs text-muted-foreground">{t('passive')}</p>
@@ -113,9 +113,12 @@ export function LimitsSection({
             path={path}
             part="limits"
             title={t('title')}
-            {...state}
-            onAdd={!state.open && !state.summary ? state.onToggle : undefined}
-            addLabel={t('add')}
+            state={state}
+            add={{
+                onClick:
+                    !state.open && !state.summary ? state.onToggle : undefined,
+                label: t('add'),
+            }}
         >
             <div className="grid grid-cols-6 items-end gap-2 [&>*]:min-w-0">
                 {limitFields.map((f) => (

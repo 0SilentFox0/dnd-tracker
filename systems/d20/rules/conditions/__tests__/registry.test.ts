@@ -71,11 +71,11 @@ describe('CONDITION_5E_REGISTRY', () => {
             exhaustion: '2014',
         });
 
-        expect(input.name).toBe('deafened');
-        expect(input.label).toEqual({
+        expect(input?.name).toBe('deafened');
+        expect(input?.label).toEqual({
             message: 'battleCommon.conditions.deafened.label',
         });
-        expect(textOf(input.label as TextRef)).toBe('Оглухлий');
+        expect(textOf(input?.label as TextRef)).toBe('Оглухлий');
     });
 
     it('deafened is a bare marker', () => {

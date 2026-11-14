@@ -130,6 +130,8 @@ export const D6POOL_SYSTEM: RuleSystemDefinition = {
         },
     },
     conditionSet: {
+        keys: [],
+        labelKey: (key) => key,
         apply: (ps) => ({ participants: ps, messages: [], blocked: true }),
         effectInput: () => null,
     },

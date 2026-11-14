@@ -3,7 +3,6 @@ import { describe, expect, it } from 'vitest';
 import { action } from './action-fixture';
 
 import type { FxSpec } from '@/lib/utils/battle/fx';
-import type { MoraleThrow } from '@/lib/utils/battle/fx/dice';
 import {
     advanceFxQueue,
     type FxQueueState,
@@ -12,14 +11,15 @@ import {
     shiftFxQueue,
     trimFxQueue,
 } from '@/lib/utils/battle/fx/queue';
+import type { SystemDice } from '@/lib/utils/battle/fx/system-dice';
 import type { BattleAction } from '@/types/battle';
 
 const adv = (
     s: FxQueueState,
     log: BattleAction[],
     active: boolean,
-    morale: MoraleThrow | null = null
-) => advanceFxQueue(s, { log, morale }, active);
+    dice: SystemDice[] = []
+) => advanceFxQueue(s, { log, dice }, active);
 
 describe('advanceFxQueue', () => {
     const melee = (i: number) =>
@@ -182,11 +182,12 @@ describe('advanceFxQueue', () => {
         ]);
     });
 
-    describe('morale dice', () => {
-        const m = (d10: number): MoraleThrow => ({
-            key: `1:0:p:${d10}`,
+    describe('system dice', () => {
+        const m = (d10: number): SystemDice[] => [{
+            key: `morale:1:0:p:${d10}`,
+            actorId: 'p',
             spec: { seed: 1, groups: [[{ sides: 10, value: d10 }]] },
-        });
+        }];
 
         const base = adv(INITIAL_FX_QUEUE, [melee(1)], true);
 
@@ -218,14 +219,14 @@ describe('advanceFxQueue', () => {
             const s = adv(INITIAL_FX_QUEUE, [melee(1)], true, m(5));
 
             expect(s.queue).toEqual([]);
-            expect(s.morale).toBe('1:0:p:5');
+            expect(s.dice).toEqual(['morale:1:0:p:5']);
         });
 
         it('inactive → nothing, key stored', () => {
             const s = adv(base, [melee(1)], false, m(5));
 
             expect(s.queue).toEqual([]);
-            expect(s.morale).toBe('1:0:p:5');
+            expect(s.dice).toEqual(['morale:1:0:p:5']);
             expect(adv(s, [melee(1)], true, m(5)).queue).toEqual([]);
         });
     });

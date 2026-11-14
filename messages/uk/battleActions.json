@@ -125,6 +125,7 @@
     "absorb": "💚 {target}: поглинає {healed} HP ({spell})",
     "rollNote": " ({mode, select, advantage {перевага} other {недолік}}: {rolls})",
     "attack": "🎯 {name}: атака заклинанням {roll}+{bonus}={total} проти КЗ {ac}{note}",
+    "attackAuto": "🎯 {name}: закляття влучає автоматично (у цій системі немає кидка атаки)",
     "attackMiss": "{line} — промах",
     "attackHit": "{line} — влучання",
     "attackCrit": "{line} — крит",

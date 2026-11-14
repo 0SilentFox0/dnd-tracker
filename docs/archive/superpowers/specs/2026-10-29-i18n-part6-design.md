@@ -59,7 +59,7 @@
 
 **Бюджет** (`scope-size`, gzip; зараз uk 60,9 / en 48,5 KB; ≈ 0,88 B/символ за ч.5): campaign += `abilityText` ≈ 5 тис. + `battleTerms` ≈ 5 тис. символів → **uk ≈ 69–70, en ≈ 55–56**; бойові ns ≈ 20 тис. → сторінка бою (campaign + battle) **uk ≈ 87–89, en ≈ 69–71**. Один скоуп дав би > 80 на кожній сторінці кампанії → за порогом ч.5 розщеплюємо: бойові ns вантажаться лише на сторінках бою, решта сторінок кампанії не росте на ≈ 18 KB. На першому завантаженні сторінки бою сумарно ≈ 88 KB — як і з одним скоупом; при переході всередині кампанії доїжджає лише бойова частина. `scope-size` перевіряє обидва скоупи (< 100).
 
-**Межа скоупу.** Компоненти бою, які рендеряться поза бойовими сегментами (`components/battle/fx/{dice,runtime,preview}` у `SheetRollDialog`, `DiceRoller`, `SpellBattlePreviewPanel`; dev-сторінки), не читають бойових ns. Новий тест `battle-scope-imports` (обхід графа, як `client-api-errors`): файли, досяжні з `app/**` поза `app/campaigns/*/{battles,dm/battles}/**`, не містять ключів із префіксами `BATTLE_NAMESPACES`.
+**Межа скоупу.** Компоненти бою, які рендеряться поза бойовими сегментами (`components/fx/{dice,runtime,preview}` у `SheetRollDialog`, `DiceRoller`, `SpellBattlePreviewPanel`; dev-сторінки), не читають бойових ns. Новий тест `battle-scope-imports` (обхід графа, як `client-api-errors`): файли, досяжні з `app/**` поза `app/campaigns/*/{battles,dm/battles}/**`, не містять ключів із префіксами `BATTLE_NAMESPACES`.
 
 ## Рішення
 

@@ -24,15 +24,21 @@ vi.mock('@/lib/hooks/spells', async (importOriginal) => ({
     })),
 }));
 
+const rules = vi.hoisted(() => ({ attackDice: 6 as number | undefined }));
+
 vi.mock('../useBattleRules', () => ({
-    useBattleRules: () => ({ tested: false, dice: 6 }),
+    useBattleRules: () => ({
+        tested: false,
+        dice: 6,
+        attackDice: rules.attackDice,
+    }),
 }));
 
 import { useSpellBook } from '../useSpellBook';
 import { fakeScene } from './fake-scene';
 
-describe('useSpellBook: aiDamage uses the system die', () => {
-    it('rolls attack dice with combat.dice sides', async () => {
+describe('useSpellBook: aiDamage uses the magic attack die', () => {
+    it('rolls attack dice with magic.attackDice sides', async () => {
         const scene = fakeScene({
             isDM: true,
             knownSpells: ['bolt'],
@@ -59,6 +65,39 @@ describe('useSpellBook: aiDamage uses the system die', () => {
             expect(roll).toBeLessThanOrEqual(6);
             act(() => result.current.actions.back());
             act(() => result.current.actions.confirmTargets());
+        }
+    });
+
+    it('exposes no attack targets when magic.attackDice is undefined', async () => {
+        rules.attackDice = undefined;
+
+        try {
+            const scene = fakeScene({
+                isDM: true,
+                knownSpells: ['bolt'],
+                slots: { '1': { max: 2, current: 2 } },
+            });
+
+            const { result } = renderHook(() => useSpellBook(scene.me), {
+                wrapper: scene.wrapper,
+            });
+
+            act(() => result.current.actions.open(1));
+            await waitFor(() =>
+                expect(result.current.view.spells).toHaveLength(1)
+            );
+            act(() =>
+                result.current.actions.pick(result.current.view.spells[0])
+            );
+            act(() => result.current.actions.toTargets());
+            act(() => result.current.actions.toggleTarget('gob'));
+            act(() => result.current.actions.confirmTargets());
+
+            expect(result.current.view.attackTargets).toEqual([]);
+            act(() => result.current.actions.aiDamage());
+            expect(result.current.state.attacks.gob).toBeUndefined();
+        } finally {
+            rules.attackDice = 6;
         }
     });
 });

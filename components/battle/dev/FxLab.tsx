@@ -7,19 +7,19 @@ import { Play } from 'lucide-react';
 import { FxLabPanel } from './FxLabPanel';
 
 import '@/components/battle/hud/battle-hud.css';
-import '@/components/battle/fx/fx.css';
+import '@/components/fx/fx.css';
 import './fx-lab.css';
-import { AuraCanvas } from '@/components/battle/fx/auras/AuraCanvas';
-import { FRAMES } from '@/components/battle/fx/frames';
-import { CanvasFrame } from '@/components/battle/fx/frames/CanvasFrame';
-import type { FrameAnimation } from '@/components/battle/fx/frames/types';
+import { AuraCanvas } from '@/components/fx/auras/AuraCanvas';
+import { FRAMES } from '@/components/fx/frames';
+import { CanvasFrame } from '@/components/fx/frames/CanvasFrame';
+import type { FrameAnimation } from '@/components/fx/frames/types';
 import {
     ARCHETYPE_LABEL,
     AURA_KINDS,
     AURA_LABEL,
     ELEMENT_LABEL,
-} from '@/components/battle/fx/labels';
-import { PALETTE } from '@/components/battle/fx/runtime/palette';
+} from '@/components/fx/labels';
+import { PALETTE } from '@/components/fx/runtime/palette';
 import { HudChipTabs, HudPage, HudPageHeader } from '@/components/hud/page';
 import {
     FX_ARCHETYPES,

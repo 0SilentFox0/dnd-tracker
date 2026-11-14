@@ -9,6 +9,11 @@ import { fakeScene } from '@/lib/hooks/battle/__tests__/fake-scene';
 import { render } from '@/lib/i18n/test/render-uk';
 import type { BattleMapConfig } from '@/types/battle';
 
+vi.mock('@/components/battle/use-system-battle-ui', () => ({
+    useSystemFx: () => undefined,
+}));
+
+
 vi.unmock('next-intl');
 
 vi.mock('@/lib/utils/canvas/ticker', () => ({

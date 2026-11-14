@@ -10,14 +10,9 @@ import { textRef } from '@/lib/i18n/text-ref';
 import { findFlags } from '@/lib/utils/abilities/engine/core/collect-modifiers';
 import { isActive } from '@/lib/utils/abilities/engine/core/participants';
 import type {
-    CunningStrikeEffect,
     StaticEffect,
+    StrikeRiderEffect,
 } from '@/lib/utils/abilities/schema';
-import {
-    applyCunningStrikeEffects,
-    cunningStrikeCost,
-    cunningStrikeOffer,
-} from '@/lib/utils/battle/attack/cunning-strike';
 import { eventRollMode } from '@/lib/utils/battle/attack/event-roll-mode';
 import { attackSourceOf } from '@/lib/utils/battle/attack/source';
 import {
@@ -32,6 +27,7 @@ import { attackKindOf } from '@/lib/utils/battle/common/attack-kind';
 import { dealResistedHits } from '@/lib/utils/battle/damage/resisted-ability-damage';
 import type { AttackRollResult } from '@/lib/utils/battle/types/attack';
 import type { CastableSpell } from '@/lib/utils/battle/types/spell-process';
+import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { BattleAttack, DamageRow } from '@/types/battle';
 import type { LogLine } from '@/types/text';
 
@@ -51,7 +47,7 @@ export interface ResolveHitParams {
     obstacle?: boolean;
     hitSpells?: ReadonlyMap<string, CastableSpell>;
     battleId: string;
-    cunningStrike?: CunningStrikeEffect[];
+    cunningStrike?: StrikeRiderEffect[];
 }
 
 export function resolveHit(p: ResolveHitParams): {
@@ -146,15 +142,15 @@ export function resolveHit(p: ResolveHitParams): {
 
     const messagesBeforeHit = flow.messages.length;
 
-    const offer = p.cunningStrike?.length
-        ? cunningStrikeOffer(getP(flow, attackerId), p.currentRound)
-        : null;
+    const riders = p.cunningStrike?.length
+        ? ruleSystemOf(flow.ctx.rules).combat.attack?.hitRiders?.({
+              attacker: getP(flow, attackerId),
+              round: p.currentRound,
+              effects: p.cunningStrike,
+          })
+        : undefined;
 
-    const cunningCost = p.cunningStrike?.length
-        ? cunningStrikeCost(offer, p.cunningStrike)
-        : 0;
-
-    const forgo = typeof cunningCost === 'number' ? cunningCost : 0;
+    const forgo = riders?.dice ?? 0;
 
     const { fired } = fire(flow, {
         type: 'hit',
@@ -177,15 +173,8 @@ export function resolveHit(p: ResolveHitParams): {
         crit: p.attackRoll.isCritical,
     });
 
-    if (
-        p.cunningStrike?.length &&
-        offer &&
-        forgo > 0 &&
-        fired.includes(offer.sneakKey)
-    ) {
-        applyCunningStrikeEffects(flow, attackerId, targetId, p.cunningStrike);
+    if (riders?.apply(flow, targetId, fired))
         settleDowned(flow, targetId, attackerId);
-    }
 
     const abilityDamage = Math.max(
         0,

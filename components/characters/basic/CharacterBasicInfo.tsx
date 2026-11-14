@@ -26,11 +26,13 @@ interface CharacterBasicInfoProps {
     campaignMembers?: CampaignMember[];
     races?: Race[];
     isPlayerView?: boolean;
-    hideProgression?: boolean;
-    hideLineage?: boolean;
-    hideClass?: boolean;
-    hideAlignment?: boolean;
-    hideArchetype?: boolean;
+    hide?: {
+        progression?: boolean;
+        lineage?: boolean;
+        class?: boolean;
+        alignment?: boolean;
+        archetype?: boolean;
+    };
     classMode?: {
         classes: GameClassData[];
         byId: Record<string, GameClassData>;
@@ -42,13 +44,17 @@ export function CharacterBasicInfo({
     campaignMembers = [],
     races = [],
     isPlayerView = false,
-    hideProgression = false,
-    hideLineage = false,
-    hideClass = false,
-    hideAlignment = false,
-    hideArchetype = false,
+    hide = {},
     classMode,
 }: CharacterBasicInfoProps) {
+    const {
+        progression: hideProgression = false,
+        lineage: hideLineage = false,
+        class: hideClass = false,
+        alignment: hideAlignment = false,
+        archetype: hideArchetype = false,
+    } = hide;
+
     const t = useTranslations('characters.form.basic');
 
     const { options: archetypeOptions, universalLabel } = useArchetypeOptions();

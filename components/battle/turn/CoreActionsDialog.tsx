@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { useCoreActions } from '@/lib/hooks/battle';
 import { useText } from '@/lib/i18n/use-text';
-import type { CoreActionKey } from '@/lib/utils/battle/actions/keys';
+import { useTranslator } from '@/lib/i18n/use-translator';
 import type { BattleParticipant } from '@/types/battle';
 
 const SHOVE_MODES = ['prone', 'push'] as const;
@@ -32,11 +32,13 @@ function CoreActionsBody({
 }: Omit<CoreActionsDialogProps, 'open'>) {
     const t = useTranslations('battle.coreActions');
 
+    const tDescription = useTranslator('battle');
+
     const tCost = useTranslations('spells.costs');
 
     const tCommon = useTranslations('common.ui');
 
-    const tActions = useTranslations('battleCommon.coreActions');
+    const tActions = useTranslator('battleCommon');
 
     const text = useText();
 
@@ -45,7 +47,7 @@ function CoreActionsBody({
         onDone
     );
 
-    const [key, setKey] = useState<CoreActionKey | null>(null);
+    const [key, setKey] = useState<string | null>(null);
 
     const [targetId, setTargetId] = useState<string | null>(null);
 
@@ -60,7 +62,7 @@ function CoreActionsBody({
     const ready =
         !!current && !isPending && (!needsTarget || targetId !== null);
 
-    const choose = (k: CoreActionKey) => {
+    const choose = (k: string) => {
         setKey(k);
         setTargetId(null);
     };
@@ -111,7 +113,7 @@ function CoreActionsBody({
                             role="radio"
                             checked={key === k}
                             disabled={!ok}
-                            title={tActions(k)}
+                            title={tActions(`coreActions.${k}`)}
                             meta={
                                 cost === 'movement'
                                     ? t('movement')
@@ -119,7 +121,7 @@ function CoreActionsBody({
                             }
                             note={
                                 <>
-                                    {t(`descriptions.${k}`)}
+                                    {tDescription(`coreActions.descriptions.${k}`)}
                                     {!ok && (
                                         <span className="block text-hud-danger">
                                             {reason && text(reason)}

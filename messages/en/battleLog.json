@@ -385,6 +385,7 @@
     "pendingHit": "💥 “{spell}” hits: {target} −{damage} HP",
     "zoneSave": "🎲 {target}: “{spell}” — {ability} save {total} vs DC {dc}: {success, select, true {success} other {failure}}",
     "zoneAttack": "🎯 {target}: “{spell}” — attack {roll}+{bonus}={total} vs AC {ac}: {hit, select, true {hit} other {miss}}",
+    "zoneAutoHit": "🎯 {target}: “{spell}” — hits automatically (this system has no attack roll)",
     "zonePull": "🌀 {name}: “{spell}” pulls back to the centre"
   },
   "transform": {

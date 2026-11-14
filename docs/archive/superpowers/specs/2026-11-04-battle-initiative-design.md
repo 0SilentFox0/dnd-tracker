@@ -24,7 +24,7 @@ DM під час бою може (a) одним натисканням кину�
 | Мутаційний конвеєр | `runBattleMutation`, `mutations/<action>/`, реєстр `battleOps` (`lib/api/battle-ops.ts`), `makeBattleHook` | дві нові операції за стандартною схемою |
 | Дельта з порядком | `buildClientDelta` (`order`, `patched`), `applyBattleDelta` | нічого нового: переставлений порядок і нові `initiative` вже передаються |
 | Збереження порядку | колонка `battle_participants.orderIndex` | окремого рангу не додаємо |
-| 3D-кубики для всіх | `components/battle/fx/dice/DiceStage`, архетип `dice`, `DiceThrowSpec`, зразок `lib/utils/battle/fx/dice/from-morale.ts` (детермінований `seed` з ключа), `useBattleFxQueue` | новий `from-initiative.ts` будує `DiceThrowSpec` з події; клієнти програють однаково |
+| 3D-кубики для всіх | `components/fx/dice/DiceStage`, архетип `dice`, `DiceThrowSpec`, зразок `lib/utils/battle/fx/dice/from-morale.ts` (детермінований `seed` з ключа), `useBattleFxQueue` | новий `from-initiative.ts` будує `DiceThrowSpec` з події; клієнти програють однаково |
 | Лог | `dmEvent`, `textRef`, `details.log` | подія `battleLog.dm.initiativeRolled` з результатом кожного |
 | Захист порядку | `guardTurnOrder` (`pipeline/turn-order-guard.ts`) | виняток для двох нових операцій (через `result.history`-подібний прапорець результату) |
 | Доступ DM | `BattleAccess.DM`, приклад `conditions` | обидві операції лише DM, статус `ACTIVE`, заборонені при `awaiting_dm` |

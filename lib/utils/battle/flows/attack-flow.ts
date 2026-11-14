@@ -1,5 +1,5 @@
 import { joinLines, textRef } from '@/lib/i18n/text-ref';
-import type { CunningStrikeEffect } from '@/lib/utils/abilities/schema';
+import type { StrikeRiderEffect } from '@/lib/utils/abilities/schema';
 import type { PredictedAttack } from '@/lib/utils/battle/attack/bonus';
 import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
 import type { AttackData } from '@/types/api';
@@ -61,7 +61,7 @@ export interface AttackFlowState {
     inspiration?: boolean;
     /** server-judged systems decide hit/miss on the server, so there is no damage step */
     judge?: 'server';
-    cunningStrike?: CunningStrikeEffect[];
+    cunningStrike?: StrikeRiderEffect[];
     /** the system's own input of the attack, sent as is */
     system?: SystemSlot;
 }
@@ -93,7 +93,7 @@ export type AttackFlowAction =
     | { type: 'SET_MODE'; mode: AttackMode }
     | { type: 'SET_INSPIRATION'; value: boolean; forced?: ForcedMode }
     | { type: 'SET_SYSTEM_INPUT'; value: SystemSlot | null }
-    | { type: 'SET_CUNNING_STRIKE'; effects: CunningStrikeEffect[] }
+    | { type: 'SET_CUNNING_STRIKE'; effects: StrikeRiderEffect[] }
     | {
           type: 'ROLL';
           d20?: number;

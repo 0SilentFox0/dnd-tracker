@@ -1,3 +1,4 @@
+import { EffectMarker } from '@/lib/constants/battle';
 import { textRef } from '@/lib/i18n/text-ref';
 import {
     findParticipant,
@@ -5,7 +6,6 @@ import {
     withSelf,
 } from '@/lib/utils/abilities/engine/core/participants';
 import { resolveTargetIds } from '@/lib/utils/abilities/engine/core/targets';
-import { HIDDEN_MARKER } from '@/lib/utils/battle/actions/effects';
 import { actionReason } from '@/lib/utils/battle/actions/reasons';
 import {
     type ActionFlow,
@@ -109,7 +109,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
     const casterId = caster.basicInfo.id;
 
     const unhidden = removeEffects(caster, (e) =>
-        e.effects.some((x) => x.type === HIDDEN_MARKER)
+        e.effects.some((x) => x.type === EffectMarker.HIDDEN)
     );
 
     const flow: ActionFlow = {

@@ -11,6 +11,10 @@ import type { BattleMapConfig } from '@/types/battle';
 
 vi.unmock('next-intl');
 
+vi.mock('@/components/battle/use-system-battle-ui', () => ({
+    useSystemFx: () => undefined,
+}));
+
 vi.mock('@/lib/utils/canvas/ticker', () => ({
     subscribe: vi.fn(() => vi.fn()),
 }));

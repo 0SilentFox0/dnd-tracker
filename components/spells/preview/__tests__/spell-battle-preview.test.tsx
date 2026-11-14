@@ -22,11 +22,11 @@ const playFx = vi.hoisted(() => vi.fn(() => Promise.resolve()));
 vi.mock('@/lib/hooks/battle/useFxEnabled', () => ({
     useFxEnabled: () => fx.value,
 }));
-vi.mock('@/components/battle/fx/runtime/play', () => ({ playFx }));
-vi.mock('@/components/battle/fx/runtime/stage', () => ({
+vi.mock('@/components/fx/runtime/play', () => ({ playFx }));
+vi.mock('@/components/fx/runtime/stage', () => ({
     cancelLayer: vi.fn(),
 }));
-vi.mock('@/components/battle/fx/auras/AuraCanvas', () => ({
+vi.mock('@/components/fx/auras/AuraCanvas', () => ({
     AuraCanvas: ({ kinds, still }: { kinds: string[]; still?: boolean }) => (
         <span
             data-testid="aura"
@@ -35,7 +35,7 @@ vi.mock('@/components/battle/fx/auras/AuraCanvas', () => ({
         />
     ),
 }));
-vi.mock('@/components/battle/fx/frames/CanvasFrame', () => ({
+vi.mock('@/components/fx/frames/CanvasFrame', () => ({
     CanvasFrame: () => <span data-testid="hit-frame" />,
 }));
 

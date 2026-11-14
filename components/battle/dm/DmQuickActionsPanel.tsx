@@ -347,6 +347,7 @@ export function DmQuickActionsPanel({
             ) : (
                 <ConditionsDialog
                     participant={conditions.target}
+                    standard={conditions.standard}
                     custom={conditions.custom}
                     onClose={conditions.close}
                     onSubmit={conditions.submit}

@@ -1,5 +1,6 @@
 import { exhaustionEffects } from './exhaustion';
 
+import { MAX_EXHAUSTION } from '@/lib/constants/exhaustion';
 import { DEFAULT_RULES_EDITION } from '@/lib/constants/rules';
 import {
     findParticipant,
@@ -7,29 +8,27 @@ import {
     withActiveEffects,
 } from '@/lib/utils/abilities/engine/core/participants';
 import {
-    type Condition5eKey,
     type CustomConditionKey,
-    isCondition5eKey,
     isCustomConditionKey,
+    type StandardConditionKey,
 } from '@/lib/utils/abilities/schema/kinds';
 import { hasEffectMarker } from '@/lib/utils/battle/participant/state';
+import { allConditionKeys } from '@/lib/utils/rules/systems/lookup';
 import type { ActiveEffect, BattleParticipant } from '@/types/battle';
-
-export const MAX_EXHAUSTION = 6;
 
 const carries = (e: ActiveEffect, key: string) =>
     e.effects.some((m) => m.type === key);
 
 export function hasCondition(
     p: BattleParticipant,
-    key: Condition5eKey
+    key: StandardConditionKey
 ): boolean {
     return hasEffectMarker(p, key);
 }
 
 export function conditionSourceIds(
     p: BattleParticipant,
-    key: Condition5eKey
+    key: StandardConditionKey
 ): string[] {
     return p.battleData.activeEffects.flatMap((e) =>
         e.source && carries(e, key) ? [e.source.participantId] : []
@@ -121,21 +120,21 @@ export function removeEffects(
     };
 }
 
-const isCondition5eEffect = (e: ActiveEffect) =>
+const isStandardConditionEffect = (e: ActiveEffect) =>
     e.type === 'condition' &&
-    (isCondition5eKey(e.effects[0]?.type) ||
-        isCustomConditionKey(e.effects[0]?.type));
+    (isCustomConditionKey(e.effects[0]?.type) ||
+        allConditionKeys().includes(e.effects[0]?.type));
 
 /** Ефекти-стани 5e: перший маркер ефекту — власний ключ стану (решта — наслідки через implies). */
 export function conditionEffects(
     p: BattleParticipant
-): { key: Condition5eKey | CustomConditionKey; effect: ActiveEffect }[] {
+): { key: StandardConditionKey | CustomConditionKey; effect: ActiveEffect }[] {
     return p.battleData.activeEffects.flatMap((effect) =>
-        isCondition5eEffect(effect)
+        isStandardConditionEffect(effect)
             ? [
                   {
                       key: effect.effects[0].type as
-                          | Condition5eKey
+                          | StandardConditionKey
                           | CustomConditionKey,
                       effect,
                   },
@@ -144,14 +143,14 @@ export function conditionEffects(
     );
 }
 
-export function hasAnyCondition5e(p: BattleParticipant): boolean {
-    return p.battleData.activeEffects.some(isCondition5eEffect);
+export function hasAnyStandardCondition(p: BattleParticipant): boolean {
+    return p.battleData.activeEffects.some(isStandardConditionEffect);
 }
 
-export function removeCondition5e(
+export function removeStandardCondition(
     ps: BattleParticipant[],
     id: string,
-    key: Condition5eKey | CustomConditionKey
+    key: StandardConditionKey | CustomConditionKey
 ): { participants: BattleParticipant[]; removed: ActiveEffect[] } {
     const target = findParticipant(ps, id);
 

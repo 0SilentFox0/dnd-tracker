@@ -9,7 +9,7 @@ import { SpellLegend } from './SpellLegend';
 import type { SpellArenaHandle, SpellCardData } from './types';
 
 import '@/components/battle/hud/battle-hud.css';
-import '@/components/battle/fx/fx.css';
+import '@/components/fx/fx.css';
 import '@/components/battle/dev/fx-lab.css';
 import { HudChipTabs, HudPage, HudPageHeader } from '@/components/hud/page';
 import { SpellBattlePreview } from '@/components/spells/preview/SpellBattlePreview';

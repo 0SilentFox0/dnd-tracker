@@ -302,16 +302,19 @@ function OptionCards({
             available,
             card: (
                 <ChoiceCard
-                    role="checkbox"
-                    checked={picked.has(o.id)}
-                    disabled={!available && !picked.has(o.id)}
-                    onClick={() => onToggle(o.id)}
-                    title={o.name}
-                    name={o.name}
-                    summary={summarize(o.description)}
-                    description={o.description}
-                    requirements={requirements}
-                    requirementNames={names}
+                    control={{
+                        role: 'checkbox',
+                        checked: picked.has(o.id),
+                        disabled: !available && !picked.has(o.id),
+                        onClick: () => onToggle(o.id),
+                    }}
+                    content={{
+                        title: o.name,
+                        name: o.name,
+                        summary: summarize(o.description),
+                        description: o.description,
+                    }}
+                    requirements={{ items: requirements, names }}
                 />
             ),
         };
@@ -349,13 +352,17 @@ function FeatList({
             available: true,
             card: (
                 <ChoiceCard
-                    role="radio"
-                    checked={value.some((p) => p.id === o.id)}
-                    onClick={() => actions.onToggle(o.id)}
-                    title={o.name}
-                    name={o.name}
-                    summary={summarize(o.description)}
-                    description={o.description}
+                    control={{
+                        role: 'radio',
+                        checked: value.some((p) => p.id === o.id),
+                        onClick: () => actions.onToggle(o.id),
+                    }}
+                    content={{
+                        title: o.name,
+                        name: o.name,
+                        summary: summarize(o.description),
+                        description: o.description,
+                    }}
                 />
             ),
         })),
@@ -381,17 +388,21 @@ function FeatList({
                 card: (
                     <div className="space-y-2">
                         <ChoiceCard
-                            role="radio"
-                            checked={!!picked}
-                            disabled={!available && !picked}
-                            onClick={() => actions.onToggle(f.id)}
-                            title={f.name}
-                            name={f.name}
-                            icon={f.icon}
-                            summary={summarize(f.description ?? undefined)}
-                            description={f.description ?? undefined}
-                            requirements={requirements}
-                            note={taken ? t('picker.featTaken') : undefined}
+                            control={{
+                                role: 'radio',
+                                checked: !!picked,
+                                disabled: !available && !picked,
+                                onClick: () => actions.onToggle(f.id),
+                            }}
+                            content={{
+                                title: f.name,
+                                name: f.name,
+                                icon: f.icon,
+                                summary: summarize(f.description ?? undefined),
+                                description: f.description ?? undefined,
+                                note: taken ? t('picker.featTaken') : undefined,
+                            }}
+                            requirements={{ items: requirements }}
                         />
                         {picked && f.choices.length > 0 && (
                             <div className="ml-4 space-y-3 border-l border-hud-line/40 pl-3">

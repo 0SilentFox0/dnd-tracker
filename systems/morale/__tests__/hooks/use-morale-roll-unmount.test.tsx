@@ -4,9 +4,9 @@ import { act, render } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { fakeScene } from '@/lib/hooks/battle/__tests__/fake-scene';
-import { moraleDiceDone } from '@/lib/hooks/battle/morale-dice';
 import { usePlayerTurn } from '@/lib/hooks/battle/usePlayerTurn';
 import { TURN_SKIP_MS } from '@/lib/utils/battle/flows';
+import { moraleDiceDone } from '@/systems/morale/hooks/morale-dice';
 import { useMoraleRoll } from '@/systems/morale/hooks/useMoraleRoll';
 import type { BattleParticipant } from '@/types/battle';
 

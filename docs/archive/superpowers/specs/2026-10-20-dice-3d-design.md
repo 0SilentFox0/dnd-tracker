@@ -63,12 +63,12 @@ interface DiceRollGroup {
 - `layout.ts` — розкладка рядами під розмір екрана, ліміт 12, «+N».
 - `from-action.ts` — `diceRolls` + видимість → специфікація кидка з підписом.
 
-Клієнт (`components/battle/fx/dice/`):
+Клієнт (`components/fx/dice/`):
 - `DiceStage.tsx` — лінивий WebGL-шар у `BattleFxLayer`.
 - `scene.ts` — three.js-сцена (єдине місце з імпортом `three`, через `import()`); підсвітка в тон кубика (на d6 вона не має сіріти), тінь на столі.
 - `badges.tsx` — бейджі й підпис.
 
-ESLint: заборонено статичний імпорт `three` поза `components/battle/fx/dice/scene.ts`.
+ESLint: заборонено статичний імпорт `three` поза `components/fx/dice/scene.ts`.
 
 Спайк-сторінка `/dev/dice` у фічу не переноситься; гілка `spike/dice` видаляється після злиття.
 

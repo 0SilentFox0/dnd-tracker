@@ -11,16 +11,16 @@ import type {
 } from '@/lib/utils/abilities/schema';
 import {
     ABILITY_TARGETS,
-    CONDITION_5E_KEYS,
     CONDITION_KEYS,
     isCustomConditionKey,
 } from '@/lib/utils/abilities/schema/kinds';
 import { seg, type Segment } from '@/lib/utils/abilities/segments';
 import { signed } from '@/lib/utils/common/format';
+import { allConditionKeys } from '@/lib/utils/rules/systems/lookup';
 
-export const CONDITION_KEYS_ALL: readonly AnyConditionKey[] = [
+export const conditionKeysAll = (): readonly AnyConditionKey[] => [
     ...CONDITION_KEYS,
-    ...CONDITION_5E_KEYS,
+    ...allConditionKeys(),
 ];
 
 export const TARGET_KEYS: readonly AbilityTarget[] = ABILITY_TARGETS;

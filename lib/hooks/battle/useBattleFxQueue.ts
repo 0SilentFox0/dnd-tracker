@@ -4,65 +4,51 @@ import {
     useCallback,
     useEffect,
     useLayoutEffect,
-    useMemo,
+    useRef,
     useState,
 } from 'react';
 
 import { useModeView } from './modes/useModeView';
 import { setFxBusy } from './fx-busy';
 import { fireFxImpact } from './fx-impact';
-import { moraleDiceDone } from './morale-dice';
-import { useBattleSceneData } from './useBattleScene';
+import { useSystemDice } from './useSystemDice';
 
 import { usePageHidden } from '@/lib/hooks/common';
 import {
     advanceFxQueue,
     INITIAL_FX_QUEUE,
-    isMoraleFx,
     MAX_FX_QUEUE,
+    sameKeys,
     shiftFxQueue,
+    type SystemFx,
 } from '@/lib/utils/battle/fx';
-import { moraleThrowOf } from '@/lib/utils/battle/fx/dice';
-import type { PendingMoraleCheckPayload } from '@/lib/utils/battle/turn';
 
 /** Прихована вкладка = вимкнені FX: rAF там стоїть, і все накопичене програлося б разом після повернення. */
-export function useBattleFxQueue(enabled: boolean) {
-    const { fxLog: log, visible } = useModeView();
+export function useBattleFxQueue(enabled: boolean, fx?: SystemFx) {
+    const { fxLog: log } = useModeView();
 
-    const { battle } = useBattleSceneData();
+    const dice = useSystemDice(fx);
 
-    const { currentRound, currentTurnIndex, initiativeOrder } = battle;
+    const onDone = useRef(new Map<string, () => void>());
 
-    const pending =
-        battle.pendingMoraleCheck as PendingMoraleCheckPayload | null;
-
-    const morale = useMemo(() => {
-        const who = pending
-            ? initiativeOrder.find(
-                  (p) => p.basicInfo.id === pending.participantId
-              )
-            : undefined;
-
-        return moraleThrowOf({
-            round: currentRound,
-            turnIndex: currentTurnIndex,
-            pending,
-            visible: !!who && visible(who),
-        });
-    }, [pending, currentRound, currentTurnIndex, initiativeOrder, visible]);
+    useEffect(() => {
+        for (const d of dice) if (d.onDone) onDone.current.set(d.key, d.onDone);
+    }, [dice]);
 
     const hidden = usePageHidden();
 
     const active = enabled && !hidden;
 
+    const diceKeys = dice.map((d) => d.key);
+
     const [state, setState] = useState(INITIAL_FX_QUEUE);
 
     if (
         state.log !== log ||
-        state.morale !== (morale?.key ?? null) ||
+        !sameKeys(state.dice, diceKeys) ||
         (!active && state.queue.length)
     )
-        setState(advanceFxQueue(state, { log, morale }, active));
+        setState(advanceFxQueue(state, { log, dice }, active));
 
     // дія, якої в черзі немає (вже зіграна, пропущена, обрізана, до відкриття сторінки, FX вимкнено), не тримає кадр влучання
     useEffect(() => {
@@ -80,10 +66,11 @@ export function useBattleFxQueue(enabled: boolean) {
     useEffect(() => () => setFxBusy(false), []);
 
     const done = useCallback((key: string) => {
-        if (isMoraleFx(key)) moraleDiceDone();
+        onDone.current.get(key)?.();
+        onDone.current.delete(key);
 
         setState((s) => shiftFxQueue(s, key));
-    }, []);
+    }, [setState]);
 
     return {
         current: active ? (state.queue[0] ?? null) : null,

@@ -3,7 +3,7 @@ import type {
     FieldMeta,
     LocalizedFieldMeta,
 } from '@/lib/utils/abilities/registry/fields';
-import { CONDITION_5E_KEYS } from '@/lib/utils/abilities/schema/kinds';
+import { allConditionKeys } from '@/lib/utils/rules/systems/lookup';
 
 const SET_PREFIX: Record<string, string> = {
     stat: 'stats',
@@ -46,7 +46,7 @@ export function localizeField(
             label: optionLabel(tr, owner, meta.name, o.value),
             ...(meta.name === 'condition' && {
                 group: tr(
-                    `optionGroups.${(CONDITION_5E_KEYS as readonly string[]).includes(o.value) ? 'conditions5e' : 'mechanicalConditions'}`
+                    `optionGroups.${allConditionKeys().includes(o.value) ? 'conditionsStandard' : 'mechanicalConditions'}`
                 ),
             }),
         })),

@@ -54,7 +54,7 @@ export function EffectsSection({
     };
 
     return (
-        <SectionShell path={path} part="then" title={t('title')} {...state}>
+        <SectionShell path={path} part="then" title={t('title')} state={state}>
             <FieldErrors errors={errorsByPath[`${path}.effects`] ?? []} />
             <NestedEffectsEditor
                 effects={ability.effects}

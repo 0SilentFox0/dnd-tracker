@@ -5,7 +5,6 @@ import {
     type ModifierResult,
 } from '@/lib/utils/abilities/engine/core/collect-modifiers';
 import { withSelf } from '@/lib/utils/abilities/engine/core/participants';
-import { rollD20WithMode } from '@/lib/utils/battle/common/roll-d20';
 import { exhaustionLevel } from '@/lib/utils/battle/conditions/query';
 import {
     armorPenalty,
@@ -18,6 +17,7 @@ import type {
     D20Mode,
 } from '@/lib/utils/battle/saves/types';
 import type { Ruleset } from '@/lib/utils/rules/schema';
+import { rollD20WithMode } from '@/systems/d20/rules/dice/roll-d20';
 import type { BattleParticipant } from '@/types/battle';
 
 const covers = (

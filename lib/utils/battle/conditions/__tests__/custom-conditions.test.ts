@@ -7,7 +7,7 @@ import { attackBodySchema } from '@/lib/schemas/battles';
 import { attackMutation } from '@/lib/server/battles/mutations/attack/attack-mutation';
 import { makeParticipant } from '@/lib/utils/abilities/__tests__/fixtures';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
-import { removeCondition5e } from '@/lib/utils/battle/conditions';
+import { removeStandardCondition } from '@/lib/utils/battle/conditions';
 import { hazardHit } from '@/lib/utils/battle/grid';
 import type { BattleMutationContext } from '@/lib/utils/battle/pipeline/run-battle-mutation';
 import { castSpell } from '@/lib/utils/battle/spell';
@@ -176,7 +176,7 @@ describe('накладання custom-стану', () => {
     it('знімається за ключем', () => {
         const [p] = apply(target, 'custom:pacified').participants;
 
-        const { participants, removed } = removeCondition5e(
+        const { participants, removed } = removeStandardCondition(
             [p],
             't',
             'custom:pacified'
