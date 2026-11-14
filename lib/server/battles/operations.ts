@@ -7,8 +7,10 @@ import {
     bonusActionSchema,
     castSpellSchema,
     mapBackgroundBodySchema,
+    mapEdgeRemoveSchema,
     mapMotionSchema,
     mapTerrainSchema,
+    mapUpdateSchema,
     mapWallsSchema,
     mapWeatherSchema,
     mazeActionSchema,
@@ -261,6 +263,32 @@ const OPERATIONS: Record<string, Loader> = {
             );
 
             return { schema: mapWallsSchema, mutate: mapWallsMutation };
+        },
+    }),
+    'map-edge-remove': operation({
+        access: DM,
+        blockedByMode: true,
+        rateLimitScope: 'mapEdgeRemove',
+        load: async () => {
+            const { mapEdgeRemoveMutation } = await import(
+                '@/lib/server/battles/mutations/map-edge-remove/map-edge-remove-mutation'
+            );
+
+            return {
+                schema: mapEdgeRemoveSchema,
+                mutate: mapEdgeRemoveMutation,
+            };
+        },
+    }),
+    'map-update': operation({
+        access: DM,
+        rateLimitScope: 'mapUpdate',
+        load: async () => {
+            const { mapUpdateMutation } = await import(
+                '@/lib/server/battles/mutations/map-update/map-update-mutation'
+            );
+
+            return { schema: mapUpdateSchema, mutate: mapUpdateMutation };
         },
     }),
     'map-background': operation({

@@ -205,6 +205,10 @@ export const BATTLE_RATE_LIMITS = {
     mapTerrain: { limit: 60, windowSeconds: 10 },
     /** Стіни й ґрати на карті (ДМ) — штрих за штрихом. */
     mapWalls: { limit: 60, windowSeconds: 10 },
+    /** Видалення ребер карти в бою (ДМ). */
+    mapEdgeRemove: { limit: 60, windowSeconds: 10 },
+    /** Оновлення бібліотечної карти бою (ДМ) — рідко. */
+    mapUpdate: { limit: 5, windowSeconds: 10 },
     /** Правка лабіринту (ДМ). */
     maze: { limit: 60, windowSeconds: 10 },
     /** Мітка гравця в лабіринті. */

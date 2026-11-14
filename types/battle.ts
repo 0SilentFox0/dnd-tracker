@@ -403,6 +403,12 @@ export interface MapStateDelta {
     doors?: Record<string, DoorState | null>;
 }
 
+/** Власні ребра inline-карти, як вони лежать у battle_scenes.map */
+export interface MapBase {
+    walls?: string[];
+    bars?: string[];
+}
+
 /** Бій посилається на pinned-версію бібліотечної карти */
 export interface BattleMapRef {
     mapId: string;

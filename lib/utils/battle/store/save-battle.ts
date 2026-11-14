@@ -29,12 +29,9 @@ import { DEFAULT_LOCALE, type Locale } from '@/lib/i18n/config';
 import { getTranslator } from '@/lib/i18n/translator';
 import { encodeLog } from '@/lib/utils/battle/log/codec';
 import { formatBattleLog } from '@/lib/utils/battle/log/lines';
+import { persistedMap } from '@/lib/utils/battle/map-storage/persisted-map';
 import { applyScenePatch } from '@/lib/utils/battle/scene-state';
-import type {
-    BattleMapConfig,
-    BattleMapState,
-    BattleParticipant,
-} from '@/types/battle';
+import type { BattleMapState, BattleParticipant } from '@/types/battle';
 import type { LogLine } from '@/types/text';
 
 type UpdatableColumn = Exclude<keyof ParticipantColumns, 'id'>;
@@ -122,14 +119,6 @@ function jsonOrNull(
     value: unknown
 ): Prisma.InputJsonValue | typeof Prisma.DbNull {
     return value === null ? Prisma.DbNull : (value as Prisma.InputJsonValue);
-}
-
-function withoutEdges(map: BattleMapConfig | null) {
-    if (!map) return map;
-
-    const { walls: _walls, bars: _bars, ...header } = map;
-
-    return header;
 }
 
 async function writeMapState(
@@ -315,9 +304,17 @@ export async function saveBattle(
                 }),
                 ...(patch.map !== undefined && {
                     map: jsonOrNull(
-                        before.meta.mapRef ? withoutEdges(patch.map) : patch.map
+                        patch.map &&
+                            persistedMap(
+                                before.meta,
+                                patch.map,
+                                patch.mapState === undefined
+                                    ? before.meta.mapState
+                                    : patch.mapState
+                            )
                     ),
                 }),
+                ...(patch.mapRef && { mapVersion: patch.mapRef.version }),
                 ...(patch.rules !== undefined && {
                     rules: patch.rules as Prisma.InputJsonValue,
                 }),

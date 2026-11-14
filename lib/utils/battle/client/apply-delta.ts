@@ -1,6 +1,7 @@
 import { BattleStatus } from '@/lib/constants/battle';
-import { applyEdgeDiff } from '@/lib/utils/battle/grid/edge-diff';
+import { applyEdgeDiff, EDGE_DIFF_LIMIT } from '@/lib/utils/battle/grid/edge-diff';
 import { applyTerrainDiff } from '@/lib/utils/battle/grid/terrain';
+import { applyMapStateDelta } from '@/lib/utils/battle/map-storage/effective-map';
 import {
     mergeModeDeltas,
     MODE_MAP_KEYS,
@@ -10,7 +11,11 @@ import type {
     BattleScene,
     ClientBattleDelta,
 } from '@/types/api';
-import type { BattleAction, BattleParticipant } from '@/types/battle';
+import type {
+    BattleAction,
+    BattleParticipant,
+    MapStateDelta,
+} from '@/types/battle';
 
 function mergeLog(
     previous: BattleAction[],
@@ -66,6 +71,19 @@ function mergeMapDelta(
     return mergeModeDeltas(merged, scene);
 }
 
+function mergeMapState(
+    state: BattleScene['mapState'],
+    delta: MapStateDelta | undefined
+): BattleScene['mapState'] | 'refetch' {
+    if (!delta) return state;
+
+    const edges = delta.removed
+        ? delta.removed.add.length + delta.removed.remove.length
+        : 0;
+
+    return edges > EDGE_DIFF_LIMIT ? 'refetch' : applyMapStateDelta(state, delta);
+}
+
 export function applyBattleDelta(
     cached: BattleScene,
     delta: ClientBattleDelta
@@ -112,6 +130,10 @@ export function applyBattleDelta(
 
     if (map === 'refetch') return 'refetch';
 
+    const mapState = mergeMapState(cached.mapState, scene.mapState);
+
+    if (mapState === 'refetch') return 'refetch';
+
     // знання з GET могло спиратися на скасовані події: відкат приносить перераховане
     const { knowledge: _knowledge, ...withoutKnowledge } = cached;
 
@@ -127,6 +149,8 @@ export function applyBattleDelta(
         system:
             scene.system === null ? undefined : (scene.system ?? cached.system),
         ...(map !== cached.map && { map }),
+        ...(mapState !== cached.mapState && { mapState }),
+        ...(scene.mapRef && { mapRef: scene.mapRef }),
         startedAt:
             scene.startedAt === null
                 ? undefined

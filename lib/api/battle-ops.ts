@@ -13,9 +13,11 @@ import type {
     BattleMutationResponse,
     BonusActionData,
     MapBackgroundData,
+    MapEdgeRemoveData,
     MapMotionData,
     MapTerrainData,
     MapTerrainResponse,
+    MapUpdateData,
     MapWallsData,
     MapWeatherData,
     MazeActionData,
@@ -164,6 +166,11 @@ export const battleOps = {
         retryOnConflict: true,
     }),
     mapWalls: op<MapWallsData>({ path: '/map-walls', retryOnConflict: true }),
+    mapEdgeRemove: op<MapEdgeRemoveData>({
+        path: '/map-edge-remove',
+        retryOnConflict: true,
+    }),
+    mapUpdate: op<MapUpdateData>({ path: '/map-update' }),
     maze: op<MazeActionData>({ path: '/maze' }),
     mazeMark: op<MazeMarkData>({ path: '/maze-mark' }),
     mapMotion: op<MapMotionData>({

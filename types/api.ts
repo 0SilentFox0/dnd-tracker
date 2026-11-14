@@ -12,8 +12,10 @@ import type {
     castSpellInputSchema,
     critChoiceSchema,
     mapBackgroundBodySchema,
+    mapEdgeRemoveSchema,
     mapMotionSchema,
     mapTerrainSchema,
+    mapUpdateSchema,
     mapWallsSchema,
     mapWeatherSchema,
     mazeActionSchema,
@@ -29,6 +31,7 @@ import type {
     BattleMapConfig,
     BattleMapRef,
     BattleMapState,
+    MapStateDelta,
     MazeConfig,
     TerrainDiff,
 } from '@/types/battle';
@@ -142,6 +145,10 @@ export interface ClientBattleDelta {
         /** зміни стін і ґрат, коли решта карти та сама */
         walls?: EdgeDiff;
         bars?: EdgeDiff;
+        /** зміни стану карти (видалені ребра, двері); карта в такій дельті не їде */
+        mapState?: MapStateDelta;
+        /** map-update: нова pinned-версія бібліотечної карти */
+        mapRef?: BattleMapRef;
         /** змінені поля лабіринту без стін, коли стіни й решта карти ті самі */
         maze?: Partial<Omit<MazeConfig, 'walls'>>;
     } & Partial<Record<Exclude<MapModeKey, 'maze'>, unknown>>;
@@ -227,6 +234,10 @@ export type MazeMarkData = z.infer<typeof mazeMarkSchema>;
 export type MapBackgroundData = z.infer<typeof mapBackgroundBodySchema>;
 
 export type MapWallsData = z.infer<typeof mapWallsSchema>;
+
+export type MapEdgeRemoveData = z.infer<typeof mapEdgeRemoveSchema>;
+
+export type MapUpdateData = z.infer<typeof mapUpdateSchema>;
 
 export type MapWeatherData = z.infer<typeof mapWeatherSchema>;
 

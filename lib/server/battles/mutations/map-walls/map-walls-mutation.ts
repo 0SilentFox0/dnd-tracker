@@ -57,10 +57,27 @@ export function mapWallsMutation(
         ).map;
     }
 
+    const state = ctx.meta.mapState;
+
+    const present = new Set([...(painted.walls ?? []), ...(painted.bars ?? [])]);
+
+    const restored = state?.removedEdges.filter((e) => present.has(e));
+
     return {
         participants: ctx.participants,
         pending: ctx.pending,
         events: [],
-        scene: { map: painted },
+        scene: {
+            map: painted,
+            ...(state &&
+                restored?.length && {
+                    mapState: {
+                        ...state,
+                        removedEdges: state.removedEdges.filter(
+                            (e) => !present.has(e)
+                        ),
+                    },
+                }),
+        },
     };
 }

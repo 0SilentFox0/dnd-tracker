@@ -243,6 +243,8 @@ describe('T11 battle adapters', () => {
             'move',
             'map-terrain',
             'map-walls',
+            'map-edge-remove',
+            'map-update',
             'map-motion',
             'map-weather',
             'maze',

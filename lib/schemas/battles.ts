@@ -441,6 +441,13 @@ export const mapWallsSchema = z
     .refine((b) => b.add.length + b.remove.length > 0)
     .refine((b) => b.kind !== 'both' || b.add.length === 0);
 
+export const mapEdgeRemoveSchema = z.object({
+    edges: z.array(edgeKeySchema).min(1).max(MAP_EDGES_PER_OP),
+    restore: z.boolean().optional(),
+});
+
+export const mapUpdateSchema = z.object({}).strict();
+
 export const mapWeatherSchema = z.object({
     weather: weatherKindSchema.nullable(),
 });

@@ -536,3 +536,63 @@ describe('prependBattleLog', () => {
         expect(next.version).toBe(withLog.version);
     });
 });
+
+describe('applyBattleDelta: mapState', () => {
+    const withState: BattleScene = {
+        ...cached,
+        mapState: { removedEdges: ['1:1:e'], doors: {} },
+    };
+
+    it('застосовує дельту стану, карту не чіпає', () => {
+        const withMap = {
+            ...withState,
+            map: { cols: 4, rows: 4, background: null, opacity: 0.3 },
+        };
+
+        const next = applyBattleDelta(
+            withMap,
+            delta({
+                scene: {
+                    ...delta().scene,
+                    mapState: {
+                        removed: { add: ['2:2:s'], remove: ['1:1:e'] },
+                    },
+                },
+            })
+        );
+
+        expect(next).not.toBe('refetch');
+        expect((next as BattleScene).mapState?.removedEdges).toEqual(['2:2:s']);
+        expect((next as BattleScene).map).toBe(withMap.map);
+    });
+
+    it('дифф понад ліміт — refetch', () => {
+        const add = Array.from({ length: 401 }, (_, i) => `${i}:0:e`);
+
+        expect(
+            applyBattleDelta(
+                withState,
+                delta({
+                    scene: {
+                        ...delta().scene,
+                        mapState: { removed: { add, remove: [] } },
+                    },
+                })
+            )
+        ).toBe('refetch');
+    });
+
+    it('scene.mapRef оновлює pinned-версію', () => {
+        const next = applyBattleDelta(
+            { ...cached, mapRef: { mapId: 'm', version: 1 } },
+            delta({
+                scene: {
+                    ...delta().scene,
+                    mapRef: { mapId: 'm', version: 2 },
+                },
+            })
+        ) as BattleScene;
+
+        expect(next.mapRef).toEqual({ mapId: 'm', version: 2 });
+    });
+});

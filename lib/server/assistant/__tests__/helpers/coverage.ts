@@ -408,6 +408,20 @@ export const ASSISTANT_ROUTE_COVERAGE: readonly RouteCoverage[] = [
         state: 'active',
     },
     {
+        route: 'campaigns/[id]/battles/[battleId]/map-edge-remove',
+        methods: ['POST'],
+        task: 10,
+        adapter: 'battles',
+        state: 'active',
+    },
+    {
+        route: 'campaigns/[id]/battles/[battleId]/map-update',
+        methods: ['POST'],
+        task: 10,
+        adapter: 'battles',
+        state: 'active',
+    },
+    {
         route: 'campaigns/[id]/battles/[battleId]/map-background',
         methods: ['POST'],
         task: 10,

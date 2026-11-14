@@ -1,8 +1,13 @@
 import { publicPending } from './public-pending';
 
 import { BattleStatus } from '@/lib/constants/battle';
-import { diffEdges } from '@/lib/utils/battle/grid/edge-diff';
+import { diffEdges, EDGE_DIFF_LIMIT } from '@/lib/utils/battle/grid/edge-diff';
 import { diffTerrain } from '@/lib/utils/battle/grid/terrain';
+import { diffMapState } from '@/lib/utils/battle/map-storage/effective-map';
+import {
+    clientMapOf,
+    persistedMap,
+} from '@/lib/utils/battle/map-storage/persisted-map';
 import type { MapModeKey } from '@/lib/utils/battle/modes';
 import { isModeMapKey, modeDeltas } from '@/lib/utils/battle/modes/client';
 import type { BattleMeta, BattleSceneState } from '@/lib/utils/battle/store';
@@ -16,6 +21,8 @@ import type { BattleParticipantPatch, ClientBattleDelta } from '@/types/api';
 import type {
     BattleAction,
     BattleMapConfig,
+    BattleMapRef,
+    BattleMapState,
     BattleParticipant,
 } from '@/types/battle';
 
@@ -23,9 +30,6 @@ const ids = (list: BattleParticipant[]) => list.map((p) => p.basicInfo.id);
 
 const sameIds = (a: string[], b: string[]) =>
     a.length === b.length && a.every((id, i) => id === b[i]);
-
-/** більше ребер за раз — повна карта, щоб не переповнити Pusher */
-const EDGE_DIFF_LIMIT = 400;
 
 const baseOf = (map: BattleMapConfig) =>
     JSON.stringify(
@@ -97,6 +101,8 @@ export function buildClientDelta(args: {
     knowledge?: BattleKnowledge;
     /** карта після мутації, якщо мутація її повернула */
     map?: BattleMapConfig | null;
+    mapState?: BattleMapState | null;
+    mapRef?: BattleMapRef;
 }): ClientBattleDelta {
     const {
         before,
@@ -108,6 +114,14 @@ export function buildClientDelta(args: {
         knowledge,
         map,
     } = args;
+
+    const nextState =
+        args.mapState === undefined ? before.meta.mapState : args.mapState;
+
+    const stateDelta =
+        args.mapState === undefined
+            ? null
+            : diffMapState(before.meta.mapState, args.mapState);
 
     const storedById = new Map(args.stored.map((p) => [p.basicInfo.id, p]));
 
@@ -184,7 +198,12 @@ export function buildClientDelta(args: {
             ...(after.completedAt
                 ? { completedAt: after.completedAt.toISOString() }
                 : before.scene.completedAt && { completedAt: null }),
-            ...mapChange(before.meta.map, map),
+            ...mapChange(
+                clientMapOf(before.meta),
+                map && persistedMap(before.meta, map, nextState)
+            ),
+            ...(stateDelta && { mapState: stateDelta }),
+            ...(args.mapRef && { mapRef: args.mapRef }),
         },
         upserted,
         ...(patched.length > 0 && { patched }),

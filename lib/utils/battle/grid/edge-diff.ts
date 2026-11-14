@@ -1,6 +1,9 @@
 import type { EdgeDiff } from '@/types/api';
 import type { BattleMapConfig } from '@/types/battle';
 
+/** більше ребер за раз — повна карта, щоб не переповнити Pusher */
+export const EDGE_DIFF_LIMIT = 400;
+
 export type EdgeField = 'walls' | 'bars';
 
 export function diffEdges(

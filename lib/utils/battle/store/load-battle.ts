@@ -24,6 +24,7 @@ import type {
     BattleMapState,
     BattleParticipant,
     BattlePreparationParticipant,
+    MapBase,
 } from '@/types/battle';
 
 export type BattleDb = Pick<
@@ -254,11 +255,17 @@ export async function loadBattle(
           }
         : null;
 
-    const map = await effectiveMapOf(
-        (row.map ?? null) as BattleMapConfig | null,
-        mapRef,
-        mapState
-    );
+    const stored = (row.map ?? null) as BattleMapConfig | null;
+
+    const map = await effectiveMapOf(stored, mapRef, mapState);
+
+    const mapBase: MapBase | null =
+        stored && !mapRef
+            ? {
+                  ...(stored.walls && { walls: stored.walls }),
+                  ...(stored.bars && { bars: stored.bars }),
+              }
+            : null;
 
     return {
         scene,
@@ -273,6 +280,7 @@ export async function loadBattle(
             map,
             mapRef,
             mapState,
+            mapBase,
             audio: (row.audio ?? null) as BattleAudioState | null,
             turnTimerSeconds: row.turnTimerSeconds,
             createdAt: row.createdAt,

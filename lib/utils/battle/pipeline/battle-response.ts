@@ -9,6 +9,7 @@ import {
     battleDmChannelName,
     userChannelName,
 } from '@/lib/pusher/channels';
+import { clientMapOf } from '@/lib/utils/battle/map-storage/persisted-map';
 import { publicSetup, reserveOf } from '@/lib/utils/battle/participant/reserve';
 import type { BattleSceneState, LoadedBattle } from '@/lib/utils/battle/store';
 import { checkVictoryConditions } from '@/lib/utils/battle/turn/victory';
@@ -40,16 +41,8 @@ export interface PusherMessage {
 function mapFields(meta: LoadedBattle['meta']) {
     const { mapRef, mapState } = meta;
 
-    const map = (() => {
-        if (!mapRef || !meta.map) return meta.map;
-
-        const { walls: _walls, bars: _bars, ...header } = meta.map;
-
-        return header;
-    })();
-
     return {
-        map,
+        map: clientMapOf(meta),
         ...(mapRef && { mapRef }),
         ...(mapState && { mapState }),
     };

@@ -13,6 +13,7 @@ import type {
     Direction8,
     GridPoint,
     IngredientStock,
+    MapBase,
     PendingHit,
 } from '@/types/battle';
 
@@ -119,6 +120,8 @@ export interface BattleMeta {
     map: BattleMapConfig | null;
     mapRef?: BattleMapRef | null;
     mapState?: BattleMapState | null;
+    /** stored own walls/bars of an inline map: `map` has the removed edges already subtracted */
+    mapBase?: MapBase | null;
     audio?: BattleAudioState | null;
     turnTimerSeconds?: number | null;
     createdAt: Date;
@@ -149,6 +152,8 @@ export type ScenePatch = Partial<
 > & {
     map?: BattleMapConfig | null;
     mapState?: BattleMapState | null;
+    /** map-update: re-pin the battle to another library version */
+    mapRef?: BattleMapRef;
     rules?: Ruleset;
     sceneState?: SystemSlot | null;
 };
