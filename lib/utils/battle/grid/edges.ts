@@ -13,10 +13,17 @@ export type EdgeKind = 'move' | 'sight' | 'fire';
 
 type EdgeMap = BattleMapConfig;
 
-const wallsCache = new WeakMap<
-    object,
-    WeakMap<readonly string[], ReadonlySet<string>>
+interface Joined {
+    list: readonly string[];
+    set: ReadonlySet<string>;
+}
+
+const joinCache = new WeakMap<
+    readonly string[],
+    WeakMap<readonly string[], Joined>
 >();
+
+const closedCache = new WeakMap<object, readonly string[]>();
 
 const moveCache = new WeakMap<
     readonly string[],
@@ -25,32 +32,61 @@ const moveCache = new WeakMap<
 
 const EMPTY: readonly string[] = [];
 
+/** Зачинені (не `open`) двері: блокують як стіни; стабільне посилання за ідентичністю `map.doors`. */
+export function closedDoorsOf(
+    map: Pick<BattleMapConfig, 'doors'>
+): readonly string[] {
+    const { doors } = map;
+
+    if (!doors) return EMPTY;
+
+    let list = closedCache.get(doors);
+
+    if (!list) {
+        list = Object.keys(doors).filter((edge) => doors[edge].open !== true);
+
+        closedCache.set(doors, list);
+    }
+
+    return list;
+}
+
+function join(base: Joined, extra: readonly string[]): Joined {
+    if (!extra.length) return base;
+
+    if (!base.set.size) return { list: extra, set: wallSet(extra as string[]) };
+
+    let byExtra = joinCache.get(base.list);
+
+    if (!byExtra) {
+        byExtra = new WeakMap();
+        joinCache.set(base.list, byExtra);
+    }
+
+    let joined = byExtra.get(extra);
+
+    if (!joined) {
+        const set = new Set([...base.set, ...extra]);
+
+        joined = { list: [...set], set };
+        byExtra.set(extra, joined);
+    }
+
+    return joined;
+}
+
 export function wallsOf(map: EdgeMap): ReadonlySet<string> {
     const own = wallSet(map.walls);
 
     const mode = modeWalls(map);
 
-    if (!mode.length) return own;
+    const closed = closedDoorsOf(map);
 
-    if (!own.size) return wallSet(mode as string[]);
+    if (!mode.length && !closed.length) return own;
 
-    const ownList = map.walls ?? EMPTY;
+    const base: Joined = { list: map.walls ?? EMPTY, set: own };
 
-    let byMode = wallsCache.get(ownList);
-
-    if (!byMode) {
-        byMode = new WeakMap();
-        wallsCache.set(ownList, byMode);
-    }
-
-    let union = byMode.get(mode);
-
-    if (!union) {
-        union = new Set([...own, ...mode]);
-        byMode.set(mode, union);
-    }
-
-    return union;
+    return join(join(base, mode), closed).set;
 }
 
 export function barsOf(

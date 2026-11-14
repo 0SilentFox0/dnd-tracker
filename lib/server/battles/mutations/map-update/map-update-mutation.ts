@@ -9,7 +9,9 @@ import {
     isPlayable,
     parseCellKey,
 } from '@/lib/utils/battle/grid';
+import { parseEdgeKey } from '@/lib/utils/battle/grid/walls';
 import {
+    baseDoorsOf,
     composeEffectiveMap,
     pruneRemoved,
 } from '@/lib/utils/battle/map-storage/effective-map';
@@ -25,8 +27,24 @@ import { REJECT } from '@/lib/utils/battle/store/reject';
 import type { MapUpdateData } from '@/types/api';
 import type { BattleMapConfig, BattleMapState } from '@/types/battle';
 
-/** Terrain cells outside the new bounds go, and zones that lose their last cell with them. */
-function pruneOutOfBounds(map: BattleMapConfig): BattleMapConfig {
+function pruneDoors(map: BattleMapConfig): BattleMapConfig {
+    if (!map.doors) return map;
+
+    const entries = Object.entries(map.doors).filter(([edge]) => {
+        const { a, b } = parseEdgeKey(edge);
+
+        return inBounds(map, a) && inBounds(map, b);
+    });
+
+    return entries.length === Object.keys(map.doors).length
+        ? map
+        : { ...map, doors: Object.fromEntries(entries) };
+}
+
+/** Terrain cells and doors outside the new bounds go, and zones that lose their last cell with them. */
+function pruneOutOfBounds(source: BattleMapConfig): BattleMapConfig {
+    const map = pruneDoors(source);
+
     if (!map.terrain) return map;
 
     const entries = Object.entries(map.terrain);
@@ -58,13 +76,16 @@ function pruneOutOfBounds(map: BattleMapConfig): BattleMapConfig {
 
 function pruneState(
     state: BattleMapState | null | undefined,
-    keep: (edge: string) => boolean
+    keepEdge: (edge: string) => boolean,
+    keepDoor: (edge: string) => boolean
 ) {
-    const removed = pruneRemoved(state, keep);
+    const removed = pruneRemoved(state, keepEdge);
 
     if (!removed?.doors) return removed;
 
-    const doors = Object.entries(removed.doors).filter(([edge]) => keep(edge));
+    const doors = Object.entries(removed.doors).filter(([edge]) =>
+        keepDoor(edge)
+    );
 
     return doors.length === Object.keys(removed.doors).length
         ? removed
@@ -107,7 +128,14 @@ export async function mapUpdateMutation(
 
     const pinned = await getMap(mapRef.mapId, mapRef.version);
 
-    const battleHeader = withoutEdges(map);
+    const { doors: _effective, ...headerOnly } = withoutEdges(map);
+
+    const baseDoors = baseDoorsOf(map.doors);
+
+    const battleHeader: BattleMapConfig = {
+        ...headerOnly,
+        ...(baseDoors && { doors: baseDoors }),
+    };
 
     const header = pruneOutOfBounds(
         mergeLibraryHeader(
@@ -130,9 +158,19 @@ export async function mapUpdateMutation(
 
     const state = ctx.meta.mapState;
 
-    const existing = new Set([...library.walls, ...library.bars]);
+    const newDoors = header.doors ?? {};
 
-    const pruned = pruneState(state, (e) => existing.has(e));
+    const existing = new Set([
+        ...library.walls,
+        ...library.bars,
+        ...Object.keys(newDoors),
+    ]);
+
+    const pruned = pruneState(
+        state,
+        (e) => existing.has(e),
+        (e) => e in newDoors
+    );
 
     return {
         ...unchanged,

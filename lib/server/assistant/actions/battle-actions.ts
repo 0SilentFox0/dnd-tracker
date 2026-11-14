@@ -12,6 +12,7 @@ export const BATTLE_COMMANDS = [
     'core-action',
     'initiative-reorder',
     'initiative-roll',
+    'map-door-toggle',
     'map-edge-remove',
     'map-motion',
     'map-terrain',

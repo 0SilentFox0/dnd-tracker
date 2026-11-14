@@ -11,6 +11,7 @@ import { context, goblin, hero } from './fixtures';
 import { mapEdgeRemoveMutation } from '@/lib/server/battles/mutations/map-edge-remove/map-edge-remove-mutation';
 import { mapUpdateMutation } from '@/lib/server/battles/mutations/map-update/map-update-mutation';
 import { mapWallsMutation } from '@/lib/server/battles/mutations/map-walls/map-walls-mutation';
+import { composeEffectiveMap } from '@/lib/utils/battle/map-storage/effective-map';
 import { REJECT } from '@/lib/utils/battle/store/reject';
 import type { BattleMapConfig, BattleMapState } from '@/types/battle';
 
@@ -215,13 +216,18 @@ describe('map-update', () => {
         });
     });
 
-    it('зменшена карта: прибирає місцевість і зони поза межами, двері зниклих ребер', async () => {
+    it('зменшена карта: прибирає місцевість і зони поза межами, стан дверей, яких нема в новій версії', async () => {
         serve(
             library({
                 cols: 4,
                 rows: 4,
-                map: { cols: 4, rows: 4, background: null, opacity: 0.5 },
-                walls: ['1:1:e'],
+                map: {
+                    cols: 4,
+                    rows: 4,
+                    background: null,
+                    opacity: 0.5,
+                    doors: { '1:1:e': { open: false } },
+                },
             })
         );
 
@@ -296,5 +302,75 @@ describe('map-update', () => {
             '2:2': { kind: 'difficult' },
             '3:3': { kind: 'barrier' },
         });
+    });
+});
+
+describe('двері та map-edge-remove / map-update', () => {
+    const withDoor = { ...map, doors: { '4:4:e': { open: false } } };
+
+    it('двері можна виламати й відновити', () => {
+        const base = context({ isDM: true });
+
+        const ctx = {
+            ...base,
+            meta: { ...base.meta, map: withDoor, mapState: null },
+        };
+
+        const out = mapEdgeRemoveMutation(ctx, { edges: ['4:4:e'] });
+
+        expect(out.scene?.mapState?.removedEdges).toEqual(['4:4:e']);
+    });
+
+    it('map-update прибирає state.doors для дверей, яких нема в новій версії', async () => {
+        const pinned = {
+            ...withDoor,
+            doors: { '4:4:e': { open: false }, '5:5:e': { open: false } },
+        };
+
+        mocks.getMap.mockImplementation(
+            async (_id: string, version?: number) =>
+                version === 1
+                    ? {
+                          version: 1,
+                          cols: 8,
+                          rows: 8,
+                          map: pinned,
+                          walls: [],
+                          bars: [],
+                      }
+                    : {
+                          version: 2,
+                          cols: 8,
+                          rows: 8,
+                          map: {
+                              ...pinned,
+                              doors: { '4:4:e': { open: false } },
+                          },
+                          walls: [],
+                          bars: [],
+                      }
+        );
+
+        const state: BattleMapState = {
+            removedEdges: [],
+            doors: { '4:4:e': { open: true }, '5:5:e': { open: true } },
+        };
+
+        const base = context({ isDM: true });
+
+        const ctx = {
+            ...base,
+            meta: {
+                ...base.meta,
+                map: composeEffectiveMap(pinned, state),
+                mapState: state,
+                mapRef: { mapId: 'm', version: 1 },
+            },
+        };
+
+        const out = await mapUpdateMutation(ctx, {});
+
+        expect(out.scene?.mapState?.doors).toEqual({ '4:4:e': { open: true } });
+        expect(Object.keys(out.scene?.map?.doors ?? {})).toEqual(['4:4:e']);
     });
 });

@@ -42,6 +42,7 @@ export {
     useInitiativeReorder,
     useInitiativeRoll,
     useMapBackground,
+    useMapDoorToggle,
     useMapEdgeRemove,
     useMapMotion,
     useMapTerrain,

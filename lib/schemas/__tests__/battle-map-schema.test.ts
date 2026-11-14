@@ -325,7 +325,36 @@ describe('battleMapSchema.walls / bars', () => {
 
 describe('mapUpdateSchema', () => {
     it('пропускає expectedVersion, який клієнт шле з кожною операцією', () => {
-        expect(mapUpdateSchema.safeParse({ expectedVersion: 3 }).success).toBe(true);
+        expect(mapUpdateSchema.safeParse({ expectedVersion: 3 }).success).toBe(
+            true
+        );
         expect(mapUpdateSchema.safeParse({}).success).toBe(true);
+    });
+});
+
+describe('battleMapSchema.doors', () => {
+    const doorsMax = 500;
+
+    it('приймає двері, відхиляє двері на стіні та понад ліміт', () => {
+        const door = { '1:1:e': { open: false } };
+
+        expect(battleMapSchema.safeParse({ ...map, doors: door }).success).toBe(
+            true
+        );
+        expect(
+            battleMapSchema.safeParse({ ...map, doors: door, walls: ['1:1:e'] })
+                .success
+        ).toBe(false);
+
+        const many = Object.fromEntries(
+            Array.from({ length: doorsMax + 1 }, (_, i) => [
+                `${i % 9}:${Math.floor(i / 9)}:e`,
+                { open: false },
+            ])
+        );
+
+        expect(battleMapSchema.safeParse({ ...map, doors: many }).success).toBe(
+            false
+        );
     });
 });

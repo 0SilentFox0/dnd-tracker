@@ -1,3 +1,5 @@
+import { baseDoorsOf } from './effective-map';
+
 import type {
     BattleMapConfig,
     BattleMapRef,
@@ -50,6 +52,24 @@ export function clientMapOf(meta: MapMeta): BattleMapConfig | null {
  * edges left untouched keep their stored form, and edges removed through state stay subtractable.
  */
 export function persistedMap(
+    meta: MapMeta,
+    patched: BattleMapConfig,
+    state: BattleMapState | null | undefined
+): BattleMapConfig {
+    return withBaseDoors(persistedEdges(meta, patched, state));
+}
+
+function withBaseDoors(map: BattleMapConfig): BattleMapConfig {
+    const base = baseDoorsOf(map.doors);
+
+    if (base === map.doors) return map;
+
+    const { doors: _doors, ...rest } = map;
+
+    return base ? { ...rest, doors: base } : rest;
+}
+
+function persistedEdges(
     meta: MapMeta,
     patched: BattleMapConfig,
     state: BattleMapState | null | undefined

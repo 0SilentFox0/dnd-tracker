@@ -85,3 +85,32 @@ describe('mergeLibraryHeader', () => {
         expect(out).not.toHaveProperty('walls');
     });
 });
+
+describe('mergeLibraryHeader doors', () => {
+    const door = (open: boolean) => ({ open });
+
+    it('двері покомпонентно: бойове лишається, змінене бібліотекою береться', () => {
+        const oldLib = {
+            ...base,
+            doors: { '1:1:e': door(false), '2:2:e': door(false) },
+        };
+
+        const newLib = {
+            ...oldLib,
+            doors: {
+                '1:1:e': door(false),
+                '2:2:e': { open: false, locked: true },
+            },
+        };
+
+        const battle = {
+            ...oldLib,
+            doors: { '1:1:e': door(true), '2:2:e': door(false) },
+        };
+
+        expect(mergeLibraryHeader(oldLib, newLib, battle).doors).toEqual({
+            '1:1:e': door(true),
+            '2:2:e': { open: false, locked: true },
+        });
+    });
+});

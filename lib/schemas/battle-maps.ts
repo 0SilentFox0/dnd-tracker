@@ -92,6 +92,17 @@ export const battleMapInputSchema = z
 
         if (!edgesValid(m.bars, m.map) || m.bars.some((e) => walls.has(e)))
             badEdges('bars');
+
+        const solid = new Set([...m.walls, ...m.bars]);
+
+        const doors = Object.keys(m.map.doors ?? {});
+
+        if (!edgesValid(doors, m.map) || doors.some((e) => solid.has(e)))
+            ctx.addIssue({
+                code: 'custom',
+                message: 'battleSetup.validation.doorOnWall',
+                path: ['map', 'doors'],
+            });
     });
 
 export const battleMapCloneSchema = z.object({

@@ -278,7 +278,11 @@
     "unitsRandomized": "🎲 The DM hands out free units: {list}",
     "edgesRemoved": "The DM broke {count} wall segments",
     "edgesRestored": "The DM restored {count} wall segments",
-    "mapUpdated": "The DM updated the map to version {version}"
+    "mapUpdated": "The DM updated the map to version {version}",
+    "doorOpened": "DM opened a door",
+    "doorClosed": "DM closed a door",
+    "doorLocked": "DM locked a door",
+    "doorUnlocked": "DM unlocked a door"
   },
   "aura": {
     "inZone": "{ability}: in the zone — {who}",
@@ -370,7 +374,12 @@
     "actForbiddenOwner": "Only the DM or the participant's owner can act",
     "participantInactive": "The participant cannot act (unconscious or dead)",
     "unitNotAssignable": "A player cannot control this unit",
-    "playerNotInBattle": "The player is not in the battle"
+    "playerNotInBattle": "The player is not in the battle",
+    "doorNotFound": "There is no such door on the map",
+    "doorLocked": "The door is locked",
+    "doorDmOnly": "Only the DM can lock doors",
+    "doorOpenLock": "Only a closed door can be locked",
+    "doorNotAdjacent": "The door is too far: move next to it"
   },
   "spellFx": {
     "riderSave": "🎲 {target}: {rider} — {ability} save {total} vs DC {dc}: {success, select, true {success} other {failure}}",
@@ -412,5 +421,9 @@
       "dodge": "dodge",
       "shield": "shield"
     }
+  },
+  "door": {
+    "opened": "🚪 {name} opens the door",
+    "closed": "🚪 {name} closes the door"
   }
 }

@@ -25,6 +25,7 @@ const EXPECTED_PATHS: Record<
     mapTerrain: 'map-terrain',
     mapWalls: 'map-walls',
     mapEdgeRemove: 'map-edge-remove',
+    mapDoorToggle: 'map-door-toggle',
     mapUpdate: 'map-update',
     maze: 'maze',
     mazeMark: 'maze-mark',

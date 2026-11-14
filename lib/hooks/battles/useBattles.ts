@@ -133,6 +133,8 @@ export const useMoveParticipant = makeBattleHook(battleOps.move);
 export const useMapTerrain = makeBattleHook(battleOps.mapTerrain);
 export const useMapWalls = makeBattleHook(battleOps.mapWalls);
 export const useMapEdgeRemove = makeBattleHook(battleOps.mapEdgeRemove);
+
+export const useMapDoorToggle = makeBattleHook(battleOps.mapDoorToggle);
 export const useMapUpdate = makeBattleHook(battleOps.mapUpdate);
 export const useMazeAction = makeBattleHook(battleOps.maze);
 export const useMazeMark = makeBattleHook(battleOps.mazeMark);

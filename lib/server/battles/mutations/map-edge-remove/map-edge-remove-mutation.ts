@@ -31,7 +31,11 @@ export function mapEdgeRemoveMutation(
                 REJECT.mapEdgeNotRemoved
             );
     } else {
-        const present = new Set([...(map.walls ?? []), ...(map.bars ?? [])]);
+        const present = new Set([
+            ...(map.walls ?? []),
+            ...(map.bars ?? []),
+            ...Object.keys(map.doors ?? {}),
+        ]);
 
         if (![...edges].every((e) => present.has(e)))
             throw new BattleRuleError(

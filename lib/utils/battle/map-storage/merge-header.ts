@@ -10,34 +10,37 @@ const BATTLE_KEYS: ReadonlySet<string> = new Set([
 
 const EDGE_KEYS: ReadonlySet<string> = new Set(['walls', 'bars']);
 
+const KEYED_KEYS: ReadonlySet<string> = new Set(['terrain', 'doors']);
+
 const same = (a: unknown, b: unknown) =>
     a === b || JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
 
 const isRuntimeCell = (cell: TerrainCell | undefined) =>
     !!cell && (cell.zoneId !== undefined || cell.untilRound !== undefined);
 
-function mergeTerrain(
-    oldLib: BattleMapConfig['terrain'],
-    newLib: BattleMapConfig['terrain'],
-    battle: BattleMapConfig['terrain']
-): BattleMapConfig['terrain'] {
+function mergeKeyed<T>(
+    oldLib: Record<string, T> | undefined,
+    newLib: Record<string, T> | undefined,
+    battle: Record<string, T> | undefined,
+    keepBattle: (own: T | undefined) => boolean = () => false
+): Record<string, T> | undefined {
     const keys = new Set([
         ...Object.keys(oldLib ?? {}),
         ...Object.keys(newLib ?? {}),
         ...Object.keys(battle ?? {}),
     ]);
 
-    const out: Record<string, TerrainCell> = {};
+    const out: Record<string, T> = {};
 
     for (const key of keys) {
         const own = battle?.[key];
 
-        const cell =
-            isRuntimeCell(own) || same(newLib?.[key], oldLib?.[key])
+        const value =
+            keepBattle(own) || same(newLib?.[key], oldLib?.[key])
                 ? own
                 : newLib?.[key];
 
-        if (cell) out[key] = cell;
+        if (value) out[key] = value;
     }
 
     return Object.keys(out).length > 0 ? out : undefined;
@@ -61,7 +64,7 @@ export function mergeLibraryHeader(
     const out: Record<string, unknown> = {};
 
     for (const key of keys) {
-        if (EDGE_KEYS.has(key) || key === 'terrain') continue;
+        if (EDGE_KEYS.has(key) || KEYED_KEYS.has(key)) continue;
 
         const k = key as keyof BattleMapConfig;
 
@@ -74,13 +77,18 @@ export function mergeLibraryHeader(
         if (value !== undefined) out[key] = value;
     }
 
-    const terrain = mergeTerrain(
+    const terrain = mergeKeyed(
         oldLib.terrain,
         newLib.terrain,
-        battle.terrain
+        battle.terrain,
+        isRuntimeCell
     );
 
     if (terrain) out.terrain = terrain;
+
+    const doors = mergeKeyed(oldLib.doors, newLib.doors, battle.doors);
+
+    if (doors) out.doors = doors;
 
     return out as unknown as BattleMapConfig;
 }

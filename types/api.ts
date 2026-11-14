@@ -12,6 +12,7 @@ import type {
     castSpellInputSchema,
     critChoiceSchema,
     mapBackgroundBodySchema,
+    mapDoorToggleSchema,
     mapEdgeRemoveSchema,
     mapMotionSchema,
     mapTerrainSchema,
@@ -236,6 +237,8 @@ export type MapBackgroundData = z.infer<typeof mapBackgroundBodySchema>;
 export type MapWallsData = z.infer<typeof mapWallsSchema>;
 
 export type MapEdgeRemoveData = z.infer<typeof mapEdgeRemoveSchema>;
+
+export type MapDoorToggleData = z.infer<typeof mapDoorToggleSchema>;
 
 export type MapUpdateData = z.infer<typeof mapUpdateSchema>;
 

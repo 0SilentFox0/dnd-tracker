@@ -380,6 +380,8 @@ export interface BattleMapConfig {
     walls?: string[];
     /** Ґрати на ребрах: блокують лише рух */
     bars?: string[];
+    /** Початковий стан дверей на ребрах; зачинені блокують як стіни, бойовий стан — у `BattleMapState.doors` */
+    doors?: Record<string, DoorState>;
     /** Атмосфера без механіки; відсутня або null — ясно */
     weather?: WeatherKind | null;
     motion?: MapMotion | null;

@@ -76,3 +76,36 @@ describe('clientMapOf', () => {
         ).not.toHaveProperty('walls');
     });
 });
+
+describe('persistedMap: двері', () => {
+    const withDoors: BattleMapConfig = {
+        ...stored,
+        doors: { '4:4:e': { open: false } },
+    };
+
+    const doorState: BattleMapState = {
+        removedEdges: [],
+        doors: { '4:4:e': { open: true } },
+    };
+
+    it('пише базові двері, не ефективні', () => {
+        const m = {
+            map: composeEffectiveMap(withDoors, doorState),
+            mapRef: null,
+            mapBase: { walls: stored.walls, bars: stored.bars },
+        };
+
+        const out = persistedMap(m, { ...m.map, terrain: {} }, doorState);
+
+        expect(out.doors).toBe(withDoors.doors);
+    });
+
+    it('linked: заголовок із базовими дверима', () => {
+        const m = {
+            map: composeEffectiveMap(withDoors, doorState),
+            mapRef: { mapId: 'm', version: 1 },
+        };
+
+        expect(persistedMap(m, m.map, doorState).doors).toBe(withDoors.doors);
+    });
+});

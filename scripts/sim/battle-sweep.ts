@@ -109,7 +109,7 @@ import { isAreaTarget } from '@/lib/utils/abilities/schema/kinds';
 import { applyBattleDelta } from '@/lib/utils/battle/client/apply-delta';
 import { attackKindOf } from '@/lib/utils/battle/common/attack-kind';
 import { attackDamageParts } from '@/lib/utils/battle/damage/attack-parts';
-import { edgeBlocks } from '@/lib/utils/battle/grid/edges';
+import { edgeBlocks, wallsOf } from '@/lib/utils/battle/grid/edges';
 import {
     cellDistance,
     cellKey,
@@ -124,7 +124,11 @@ import {
     decodeEdges,
     encodeEdges,
 } from '@/lib/utils/battle/map-storage/edge-chunks';
-import { composeEffectiveMap } from '@/lib/utils/battle/map-storage/effective-map';
+import {
+    applyMapStateDelta,
+    composeEffectiveMap,
+    diffMapState,
+} from '@/lib/utils/battle/map-storage/effective-map';
 import {
     allReachExit,
     featureKeys,
@@ -4562,6 +4566,8 @@ async function mapCheck(spells: Map<string, any>) {
 
     mapStateCheck();
 
+    mapDoorsCheck();
+
     await mapSkillAllCheck(spells);
 }
 
@@ -4706,6 +4712,73 @@ function mapStateCheck() {
         name,
         roundtrip && blockedBefore && openAfter && neighbourHeld && rolledBack,
         `кодек ${roundtrip}, стіна ${blockedBefore}, прохід після removed ${openAfter}, сусіднє ребро тримає ${neighbourHeld}, відкат ${rolledBack}`
+    );
+}
+
+/** Двері: зачинені блокують рух/зір/вогонь, відчинені (стан) — ні, ДМ-замок і відкат стану, двері в шапці linked-карти, виламані зникають. */
+function mapDoorsCheck() {
+    const name =
+        'Карта (двері): зачинені блокують, відчинення відкриває прохід, відкат — зачинені, виламані зникають';
+
+    const header = {
+        cols: 12,
+        rows: 8,
+        background: null,
+        opacity: 0.4,
+        doors: { '3:2:e': { open: false }, '6:4:e': { open: false } },
+    } as unknown as NonNullable<typeof state.map>;
+
+    const at = (x: number, y: number) => ({ x, y });
+
+    const blocksAll = (map: typeof header, a: any, b: any) =>
+        (['move', 'sight', 'fire'] as const).every((k) =>
+            edgeBlocks(map, a, b, k)
+        );
+
+    const closed = composeEffectiveMap(header, null);
+
+    const opened = composeEffectiveMap(header, {
+        removedEdges: [],
+        doors: { '3:2:e': { open: true } },
+    });
+
+    const delta = diffMapState(null, {
+        removedEdges: [],
+        doors: { '3:2:e': { open: true } },
+    });
+
+    const rolled = composeEffectiveMap(
+        header,
+        applyMapStateDelta(
+            { removedEdges: [], doors: { '3:2:e': { open: true } } },
+            { doors: { '3:2:e': null } }
+        )
+    );
+
+    const broken = composeEffectiveMap(header, {
+        removedEdges: ['6:4:e'],
+        doors: {},
+    });
+
+    const linked = composeEffectiveMap(header, null, { walls: [], bars: [] });
+
+    const ok = {
+        closedBlocks: blocksAll(closed, at(3, 2), at(4, 2)),
+        openPasses: !edgeBlocks(opened, at(3, 2), at(4, 2), 'move'),
+        neighbourHeld: blocksAll(opened, at(6, 4), at(7, 4)),
+        delta: !!delta?.doors?.['3:2:e'],
+        rolledBack: blocksAll(rolled, at(3, 2), at(4, 2)),
+        broken: !edgeBlocks(broken, at(6, 4), at(7, 4), 'move'),
+        linkedHeader: wallsOf(linked).has('3:2:e'),
+        stable: wallsOf(closed) === wallsOf(closed),
+    };
+
+    tcheck(
+        name,
+        Object.values(ok).every(Boolean),
+        Object.entries(ok)
+            .map(([k, v]) => `${k} ${v}`)
+            .join(', ')
     );
 }
 

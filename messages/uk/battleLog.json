@@ -278,7 +278,11 @@
     "unitsRandomized": "🎲 ДМ роздає вільних юнітів: {list}",
     "edgesRemoved": "ДМ зруйнував перешкод: {count}",
     "edgesRestored": "ДМ відновив перешкод: {count}",
-    "mapUpdated": "ДМ оновив карту до версії {version}"
+    "mapUpdated": "ДМ оновив карту до версії {version}",
+    "doorOpened": "ДМ відчинив двері",
+    "doorClosed": "ДМ зачинив двері",
+    "doorLocked": "ДМ замкнув двері",
+    "doorUnlocked": "ДМ відімкнув двері"
   },
   "aura": {
     "inZone": "{ability}: у зоні — {who}",
@@ -370,7 +374,12 @@
     "actForbiddenOwner": "Діяти може лише DM або власник учасника",
     "participantInactive": "Учасник не може діяти (непритомний або мертвий)",
     "unitNotAssignable": "Цим юнітом не можна керувати гравцю",
-    "playerNotInBattle": "Гравець не бере участі в бою"
+    "playerNotInBattle": "Гравець не бере участі в бою",
+    "doorNotFound": "На карті немає таких дверей",
+    "doorLocked": "Двері замкнені",
+    "doorDmOnly": "Замикати двері може лише ДМ",
+    "doorOpenLock": "Замкнути можна лише зачинені двері",
+    "doorNotAdjacent": "Двері надто далеко: підійдіть до них упритул"
   },
   "spellFx": {
     "riderSave": "🎲 {target}: {rider} — рятівний {ability} {total} проти СК {dc}: {success, select, true {успіх} other {провал}}",
@@ -412,5 +421,9 @@
       "dodge": "ухилення",
       "shield": "щит"
     }
+  },
+  "door": {
+    "opened": "🚪 {name} відчиняє двері",
+    "closed": "🚪 {name} зачиняє двері"
   }
 }

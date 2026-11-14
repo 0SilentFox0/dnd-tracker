@@ -92,3 +92,19 @@ describe('battleMapInputSchema', () => {
         expect(r.success).toBe(false);
     });
 });
+
+describe('battleMapInputSchema.doors', () => {
+    it('двері на стіні бібліотеки — помилка', () => {
+        const r = battleMapInputSchema.safeParse({
+            ...input({ doors: { '1:1:e': { open: false } } }),
+            walls: ['1:1:e'],
+        });
+
+        expect(messages(r)).toContain('battleSetup.validation.doorOnWall');
+        expect(
+            battleMapInputSchema.safeParse(
+                input({ doors: { '1:1:e': { open: false } } })
+            ).success
+        ).toBe(true);
+    });
+});

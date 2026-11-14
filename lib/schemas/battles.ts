@@ -37,6 +37,11 @@ export const mapCellSchema = z.object({
 
 export const edgeKeySchema = z.string().regex(/^\d+:\d+:[es]$/);
 
+export const doorStateSchema = z.object({
+    open: z.boolean(),
+    locked: z.boolean().optional(),
+});
+
 const cellKeySchema = z.string().regex(/^\d+:\d+$/);
 
 const mazeDifficultySchema = z.enum(MAZE_DIFFICULTIES);
@@ -248,6 +253,13 @@ export const battleMapObject = z.object({
     motion: motionConfigSchema.nullable().optional(),
     walls: z.array(edgeKeySchema).max(MAP_LIMITS.inlineMaxEdges).optional(),
     bars: z.array(edgeKeySchema).max(MAP_LIMITS.inlineMaxEdges).optional(),
+    doors: z
+        .record(edgeKeySchema, doorStateSchema)
+        .refine(
+            (d) => Object.keys(d).length <= MAP_LIMITS.doorsMax,
+            'battleSetup.validation.tooManyDoors'
+        )
+        .optional(),
 });
 
 export const battleMapSchema = battleMapObject
@@ -279,6 +291,22 @@ export const battleMapSchema = battleMapObject
                 seen.add(edge);
 
                 if (key === 'walls') walls.add(edge);
+            }
+        }
+
+        const solid = new Set([...(m.walls ?? []), ...(m.bars ?? [])]);
+
+        for (const edge of Object.keys(m.doors ?? {})) {
+            const { a, b } = parseEdgeKey(edge);
+
+            if (solid.has(edge) || !inBounds(m, a) || !inBounds(m, b)) {
+                ctx.addIssue({
+                    code: 'custom',
+                    message: 'battleSetup.validation.doorOnWall',
+                    path: ['doors'],
+                });
+
+                break;
             }
         }
     })
@@ -453,6 +481,15 @@ export const mapEdgeRemoveSchema = z.object({
     edges: z.array(edgeKeySchema).min(1).max(MAP_EDGES_PER_OP),
     restore: z.boolean().optional(),
 });
+
+export const mapDoorToggleSchema = z
+    .object({
+        edge: edgeKeySchema,
+        open: z.boolean().optional(),
+        locked: z.boolean().optional(),
+        actorId: z.string().min(1).optional(),
+    })
+    .refine((b) => b.open !== undefined || b.locked !== undefined);
 
 export const mapUpdateSchema = z.object({});
 

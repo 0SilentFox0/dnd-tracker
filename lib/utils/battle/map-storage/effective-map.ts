@@ -15,6 +15,18 @@ const NO_STATE = {};
 
 const NO_EDGES = {};
 
+/** Effective `doors` object → the base `doors` it was composed from, so persistence can store the base back. */
+const doorsOrigin = new WeakMap<
+    object,
+    Record<string, DoorState> | undefined
+>();
+
+export function baseDoorsOf(
+    doors: BattleMapConfig['doors']
+): BattleMapConfig['doors'] {
+    return doors && doorsOrigin.has(doors) ? doorsOrigin.get(doors) : doors;
+}
+
 const cache = new WeakMap<
     BattleMapConfig,
     WeakMap<object, WeakMap<object, BattleMapConfig>>
@@ -40,7 +52,32 @@ function merge(
     return [...out];
 }
 
-/** Базова карта + ребра бібліотеки − видалені ребра стану; модові стіни не чіпає. Результат стабільний за ідентичністю входів. */
+function composeDoors(
+    base: Record<string, DoorState> | undefined,
+    state: BattleMapState | null | undefined,
+    removed: ReadonlySet<string>
+): Record<string, DoorState> | undefined {
+    if (!base) return base;
+
+    const overlay = state?.doors;
+
+    if (!removed.size && !overlay) return base;
+
+    const out: Record<string, DoorState> = {};
+
+    for (const [edge, door] of Object.entries(base)) {
+        if (!removed.has(edge)) out[edge] = overlay?.[edge] ?? door;
+    }
+
+    doorsOrigin.set(out, base);
+
+    return out;
+}
+
+const hasDoorState = (state: BattleMapState | null | undefined) =>
+    !!state && Object.keys(state.doors ?? {}).length > 0;
+
+/** Базова карта + ребра бібліотеки − видалені ребра стану; двері бази поверх яких лежить стан (виламані зникають); модові стіни не чіпає. Результат стабільний за ідентичністю входів. */
 export function composeEffectiveMap(
     base: BattleMapConfig,
     state: BattleMapState | null | undefined,
@@ -48,7 +85,7 @@ export function composeEffectiveMap(
 ): BattleMapConfig {
     const removed = state?.removedEdges;
 
-    if (!removed?.length && !libEdges) return base;
+    if (!removed?.length && !libEdges && !hasDoorState(state)) return base;
 
     let byState = cache.get(base);
 
@@ -82,6 +119,10 @@ export function composeEffectiveMap(
         if (walls) result.walls = walls;
 
         if (bars) result.bars = bars;
+
+        const doors = composeDoors(base.doors, state, gone);
+
+        if (doors) result.doors = doors;
 
         byLib.set(libKey, result);
     }

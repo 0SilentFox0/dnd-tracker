@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
     applyMapStateDelta,
+    baseDoorsOf,
     composeEffectiveMap,
     diffMapState,
     pruneRemoved,
@@ -16,6 +17,41 @@ const at = (x: number, y: number) => ({ x, y });
 const state = (removedEdges: string[], doors = {}): BattleMapState => ({
     removedEdges,
     doors,
+});
+
+describe('composeEffectiveMap doors', () => {
+    const base = testMap(6, 6, {
+        walls: ['0:0:e'],
+        doors: { '2:2:e': { open: false }, '3:3:e': { open: false } },
+    });
+
+    it('state.doors перекриває базу, ідентичність стабільна', () => {
+        const s = state([], { '2:2:e': { open: true } });
+
+        const eff = composeEffectiveMap(base, s);
+
+        expect(eff.doors).toEqual({
+            '2:2:e': { open: true },
+            '3:3:e': { open: false },
+        });
+        expect(composeEffectiveMap(base, s).doors).toBe(eff.doors);
+        expect(baseDoorsOf(eff.doors)).toBe(base.doors);
+        expect(edgeBlocks(eff, at(2, 2), at(3, 2), 'move')).toBe(false);
+    });
+
+    it('виламані двері зникають, стан для неіснуючих дверей ігнорується', () => {
+        const eff = composeEffectiveMap(
+            base,
+            state(['3:3:e'], { '5:5:e': { open: true } })
+        );
+
+        expect(Object.keys(eff.doors ?? {})).toEqual(['2:2:e']);
+        expect(baseDoorsOf(eff.doors)).toBe(base.doors);
+    });
+
+    it('без стану двері бази — та сама посилання', () => {
+        expect(composeEffectiveMap(base, state([])).doors).toBe(base.doors);
+    });
 });
 
 describe('composeEffectiveMap', () => {

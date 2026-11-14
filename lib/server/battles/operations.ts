@@ -7,6 +7,7 @@ import {
     bonusActionSchema,
     castSpellSchema,
     mapBackgroundBodySchema,
+    mapDoorToggleSchema,
     mapEdgeRemoveSchema,
     mapMotionSchema,
     mapTerrainSchema,
@@ -277,6 +278,21 @@ const OPERATIONS: Record<string, Loader> = {
             return {
                 schema: mapEdgeRemoveSchema,
                 mutate: mapEdgeRemoveMutation,
+            };
+        },
+    }),
+    'map-door-toggle': operation({
+        access: MEMBER,
+        blockedByMode: true,
+        rateLimitScope: 'mapDoor',
+        load: async () => {
+            const { mapDoorToggleMutation } = await import(
+                '@/lib/server/battles/mutations/map-door-toggle/map-door-toggle-mutation'
+            );
+
+            return {
+                schema: mapDoorToggleSchema,
+                mutate: mapDoorToggleMutation,
             };
         },
     }),
