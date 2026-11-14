@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "sideEffects": [
-    "*.css"
+    "*.css",
+    "**/systems/registry.ts"
   ],
   "scripts": {
     "dev": "pnpm db:local && next dev",

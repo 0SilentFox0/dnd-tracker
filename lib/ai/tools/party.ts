@@ -55,10 +55,12 @@ export const getPartyTool = defineTool({
     name: 'get_party',
     scopes: ['ai'],
     title: 'Party',
-    description: withSystemNotes(
-        'Player heroes of the campaign: id, name, level, class, race, AC, DM notes.',
-        'get_party'
-    ),
+    get description() {
+        return withSystemNotes(
+            'Player heroes of the campaign: id, name, level, class, race, AC, DM notes.',
+            'get_party'
+        );
+    },
     input: z.object({}),
     handler: async (ctx) => partySummary(ctx.campaignId),
 });
@@ -67,10 +69,12 @@ export const readCharacterTool = defineTool({
     name: 'read_character',
     scopes: ['ai'],
     title: 'Character sheet',
-    description: withSystemNotes(
-        'Full character sheet (player hero or NPC hero): ability scores, AC, HP-related stats, goals, DM notes and the hero biography from the scenario.',
-        'read_character'
-    ),
+    get description() {
+        return withSystemNotes(
+            'Full character sheet (player hero or NPC hero): ability scores, AC, HP-related stats, goals, DM notes and the hero biography from the scenario.',
+            'read_character'
+        );
+    },
     input: z.object({ id: z.string().min(1) }),
     handler: async (ctx, { id }) => {
         const ai = systemServerOf(await loadRules(ctx.campaignId)).ai;

@@ -27,6 +27,7 @@ import { tokensCreateOperation } from './tokens-create';
 import { tokensDeleteOperation } from './tokens-delete';
 import { transferOperation } from './transfer';
 
+import '@/lib/server/systems/registry';
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { loadRules } from '@/lib/server/campaigns/rules';
 import {
