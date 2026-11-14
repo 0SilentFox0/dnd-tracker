@@ -234,67 +234,105 @@ describe('точка шаблону', () => {
         document.body.innerHTML = '';
     });
 
-    function cell(
-        key: string,
-        rect: Rect,
-        parent: HTMLElement = document.body
+    const ID = { a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 };
+
+    function grid(
+        ctm: Partial<typeof ID> | null,
+        parent: HTMLElement = document.body,
+        size = { cols: 10, rows: 8 }
     ) {
-        const el = document.createElementNS(
+        const svg = document.createElementNS(
             'http://www.w3.org/2000/svg',
-            'polygon'
-        );
+            'svg'
+        ) as SVGSVGElement;
 
-        el.setAttribute('data-fx-cell', key);
-        (el as unknown as HTMLElement).getBoundingClientRect = domRect(rect);
-        parent.appendChild(el);
+        svg.setAttribute('data-fx-grid', '');
+        svg.setAttribute('data-cols', String(size.cols));
+        svg.setAttribute('data-rows', String(size.rows));
+        svg.getScreenCTM = () => (ctm ? ({ ...ID, ...ctm } as DOMMatrix) : null);
+        parent.appendChild(svg);
 
-        return el;
+        return svg;
     }
 
-    it('at — центр видимої клітинки центру шаблону', () => {
-        anchor('t', { x: 10, y: 10, w: 20, h: 20 });
-        cell('4:2', { x: 100, y: 100, w: 30, h: 30 });
+    const area = (at: { x: number; y: number }, over: Partial<FxSpec> = {}) =>
+        spec({ archetype: 'area', at, ...over });
 
-        expect(
-            resolvePoints(spec({ archetype: 'area', at: { x: 4, y: 2 } }))?.at
-        ).toEqual({ x: 115, y: 115 });
+    it('без повороту: центр клітинки з CTM', () => {
+        anchor('t', { x: 10, y: 10, w: 20, h: 20 });
+        grid({ a: 0.5, d: 0.5, e: 100, f: 50 });
+
+        expect(resolvePoints(area({ x: 4, y: 2 }))?.at).toEqual({
+            x: 100 + 0.5 * 450,
+            y: 50 + 0.5 * 250,
+        });
     });
 
-    it('перша копія клітинки прихована — at береться з видимої', () => {
+    it('поворот на 90 градусів', () => {
         anchor('t', { x: 10, y: 10, w: 20, h: 20 });
-        cell('4:2', { x: 0, y: 0, w: 0, h: 0 });
-        cell('4:2', { x: 100, y: 100, w: 30, h: 30 });
+        grid({ a: 0, b: 1, c: -1, d: 0, e: 900, f: 0 });
 
-        expect(
-            resolvePoints(spec({ archetype: 'area', at: { x: 4, y: 2 } }))?.at
-        ).toEqual({ x: 115, y: 115 });
+        expect(resolvePoints(area({ x: 4, y: 2 }))?.at).toEqual({
+            x: 900 - 250,
+            y: 450,
+        });
     });
 
-    it('клітинка прокручена за край телефонної карти — at відсутнє (відкат до центроїда)', () => {
+    it('зум і панорама: точка зсувається разом із CTM', () => {
+        anchor('t', { x: 10, y: 10, w: 20, h: 20 });
+        grid({ a: 1, d: 1, e: -200, f: 30 });
+
+        expect(resolvePoints(area({ x: 4, y: 2 }))?.at).toEqual({
+            x: 250,
+            y: 280,
+        });
+    });
+
+    it('клітинка поза cols/rows: at відсутнє', () => {
+        anchor('t', { x: 10, y: 10, w: 20, h: 20 });
+        grid({});
+
+        expect(resolvePoints(area({ x: 10, y: 0 }))?.at).toBeUndefined();
+        expect(resolvePoints(area({ x: 0, y: -1 }))?.at).toBeUndefined();
+    });
+
+    it('дві копії карти: береться видима', () => {
+        anchor('t', { x: 10, y: 10, w: 20, h: 20 });
+        grid({ e: 5000 });
+        grid({ e: 100 });
+
+        expect(resolvePoints(area({ x: 0, y: 0 }))?.at).toEqual({
+            x: 150,
+            y: 50,
+        });
+    });
+
+    it('клітинка за межами видимої частини карти: at відсутнє', () => {
         const clip = mapClip({ x: 0, y: 0, w: 300, h: 200 }, true);
 
         anchor('t', { x: 10, y: 10, w: 20, h: 20 }, false, clip);
-        cell('4:2', { x: 100, y: 500, w: 30, h: 30 }, clip);
+        grid({ f: 500 }, clip);
 
-        expect(
-            resolvePoints(spec({ archetype: 'area', at: { x: 4, y: 2 } }))?.at
-        ).toBeUndefined();
+        expect(resolvePoints(area({ x: 4, y: 2 }))?.at).toBeUndefined();
     });
 
-    it('каст у порожню зону: ціль — точка прицілу; точку не видно — FX немає', () => {
-        anchor('a', { x: 10, y: 10, w: 20, h: 20 });
-        cell('4:2', { x: 100, y: 100, w: 30, h: 30 });
+    it('точка поза вікном: at відсутнє', () => {
+        anchor('t', { x: 10, y: 10, w: 20, h: 20 });
+        grid({ e: 2000 });
 
-        const empty = spec({
-            archetype: 'area',
-            targetIds: [],
-            at: { x: 4, y: 2 },
-        });
+        expect(resolvePoints(area({ x: 0, y: 0 }))?.at).toBeUndefined();
+    });
+
+    it('каст у порожню зону: ціль — точка клітинки; точку не видно — FX немає', () => {
+        anchor('a', { x: 10, y: 10, w: 20, h: 20 });
+        grid({ e: 100, f: 100 });
+
+        const empty = area({ x: 4, y: 2 }, { targetIds: [] });
 
         expect(resolvePoints(empty)).toMatchObject({
             from: { x: 20, y: 20 },
-            targets: [{ at: { x: 115, y: 115 }, el: null }],
-            at: { x: 115, y: 115 },
+            targets: [{ at: { x: 550, y: 350 }, el: null }],
+            at: { x: 550, y: 350 },
         });
         expect(resolvePoints({ ...empty, at: { x: 9, y: 9 } })).toBeNull();
     });

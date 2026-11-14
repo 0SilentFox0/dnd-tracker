@@ -1,6 +1,7 @@
 import type { FxPoint, FxTarget } from './geometry';
 
 import type { FxSpec } from '@/lib/utils/battle/fx';
+import { cellScreenPoint } from '@/lib/utils/battle/grid';
 
 interface Box {
     top: number;
@@ -16,7 +17,7 @@ const overlaps = (r: Box, v: Box) =>
     r.left < v.right;
 
 /** The map's scrolling wrapper (phones): a token scrolled past its edge is hidden even while inside the window. */
-function scrollViewport(el: HTMLElement): Box | null {
+function scrollViewport(el: Element): Box | null {
     const scroller = el.closest<HTMLElement>('[data-fx-clip]')?.parentElement;
 
     return scroller && scroller.scrollHeight > scroller.clientHeight
@@ -31,16 +32,19 @@ export function anchorRank(el: HTMLElement): number {
     return RANK[el.dataset.fxAnchor ?? ''] ?? 1;
 }
 
-const clipBox = (el: HTMLElement): Box | null =>
+const clipBox = (el: Element): Box | null =>
     el.closest<HTMLElement>('[data-fx-clip]')?.getBoundingClientRect() ?? null;
 
-export function visible(el: HTMLElement) {
-    const r = el.getBoundingClientRect();
+export function visiblePoint(pt: FxPoint, el: Element) {
+    const box = {
+        top: pt.y,
+        bottom: pt.y + 1,
+        left: pt.x,
+        right: pt.x + 1,
+    };
 
     if (
-        r.width <= 0 ||
-        r.height <= 0 ||
-        !overlaps(r, {
+        !overlaps(box, {
             top: 0,
             left: 0,
             bottom: window.innerHeight,
@@ -52,11 +56,32 @@ export function visible(el: HTMLElement) {
     // zoom and pan move a token off the map while it is still inside the window
     const clip = clipBox(el);
 
-    if (clip && !overlaps(r, clip)) return false;
+    if (clip && !overlaps(box, clip)) return false;
 
     const viewport = scrollViewport(el);
 
-    return !viewport || overlaps(r, viewport);
+    return !viewport || overlaps(box, viewport);
+}
+
+export function visible(el: HTMLElement) {
+    const r = el.getBoundingClientRect();
+
+    if (r.width <= 0 || r.height <= 0) return false;
+
+    const clip = clipBox(el);
+
+    const viewport = scrollViewport(el);
+
+    return (
+        overlaps(r, {
+            top: 0,
+            left: 0,
+            bottom: window.innerHeight,
+            right: window.innerWidth,
+        }) &&
+        (!clip || overlaps(r, clip)) &&
+        (!viewport || overlaps(r, viewport))
+    );
 }
 
 const escape = (id: string) =>
@@ -88,13 +113,25 @@ function cellPoint(
     root: ParentNode
 ): FxPoint | undefined {
     // the map may be mounted twice (phone/desktop): take the visible copy
-    const el = [
-        ...root.querySelectorAll<HTMLElement>(
-            `[data-fx-cell="${at.x}:${at.y}"]`
-        ),
-    ].find(visible);
+    for (const svg of root.querySelectorAll<SVGSVGElement>(
+        'svg[data-fx-grid]'
+    )) {
+        const cols = Number(svg.dataset.cols);
 
-    return el && centerOf(el);
+        const rows = Number(svg.dataset.rows);
+
+        if (at.x < 0 || at.y < 0 || at.x >= cols || at.y >= rows) continue;
+
+        const ctm = svg.getScreenCTM();
+
+        if (!ctm) continue;
+
+        const pt = cellScreenPoint(ctm, at);
+
+        if (visiblePoint(pt, svg)) return pt;
+    }
+
+    return undefined;
 }
 
 export function resolvePoints(
