@@ -42,6 +42,10 @@ export const LOADERS: Record<string, Loader> = {
     deathsaves: {
         rules: () =>
             import('@/systems/deathsaves').then((m) => m.DEATHSAVES_MODULE),
+        ui: () =>
+            import('@/systems/deathsaves/ui').then(
+                (m) => m.DEATHSAVES_MODULE_UI
+            ),
     },
     heroscaling: {
         rules: () =>
