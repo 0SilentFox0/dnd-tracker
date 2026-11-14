@@ -12,7 +12,14 @@ export const SRD_MORALE_PROFILE: SweepProfile = {
     heroCount: 4,
     heroLevel: 5,
     rules: {
-        modules: ['morale'],
+        modules: [
+            'morale',
+            'deathsaves',
+            'inspiration',
+            'offhand',
+            'lair',
+            'opportunity',
+        ],
         patch: { morale: { enabled: true, cap: 3 } },
     },
     heroMorale: 2,

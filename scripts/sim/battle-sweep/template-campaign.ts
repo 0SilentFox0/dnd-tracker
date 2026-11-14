@@ -166,6 +166,7 @@ async function patchRules(
         ...stored,
         system: {
             ...(stored.system as object),
+            ...(profile.rules.systemKey && { key: profile.rules.systemKey }),
             modules: [...profile.rules.modules],
         },
     };

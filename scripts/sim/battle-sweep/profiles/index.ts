@@ -1,3 +1,4 @@
+import { D20_BARE_PROFILE } from './d20-bare';
 import { GRIM_PROFILE } from './grim-d100';
 import { HEROES_HOMM_PROFILE } from './heroes-homm';
 import { SRD_PROFILE } from './srd-5.2';
@@ -9,6 +10,7 @@ export type { SweepMode, SweepProfile } from './types';
 export const SWEEP_PROFILES: readonly SweepProfile[] = [
     SRD_PROFILE,
     SRD_MORALE_PROFILE,
+    D20_BARE_PROFILE,
     HEROES_HOMM_PROFILE,
     GRIM_PROFILE,
 ];
