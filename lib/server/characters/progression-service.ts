@@ -177,7 +177,9 @@ export async function runCharacterProgression(
     expected?: string,
     locale: Locale = DEFAULT_LOCALE
 ): Promise<ActionResult> {
-    const schema = PROGRESSION_INPUTS[operation];
+    const schema = Object.hasOwn(PROGRESSION_INPUTS, operation)
+        ? PROGRESSION_INPUTS[operation]
+        : undefined;
 
     if (!schema)
         throw new ContentError(API_ERRORS.ASSISTANT_UNKNOWN_OPERATION, 400);
@@ -227,7 +229,9 @@ export async function runCharacterProgression(
 
             delete body.mode;
 
-            const core = CHARACTER_OPERATIONS[operation];
+            const core = Object.hasOwn(CHARACTER_OPERATIONS, operation)
+                ? CHARACTER_OPERATIONS[operation]
+                : undefined;
 
             if (!core)
                 throw new ContentError(

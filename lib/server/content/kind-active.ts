@@ -12,7 +12,7 @@ const isCore = (kind: string) =>
 
 const systemByActor = new WeakMap<Actor, Promise<Ruleset['system']>>();
 
-function systemOf(actor: Actor) {
+export function actorSystem(actor: Actor): Promise<Ruleset['system']> {
     let system = systemByActor.get(actor);
 
     if (!system) {
@@ -28,7 +28,7 @@ function systemOf(actor: Actor) {
 export async function isKindActive(kind: string, actor: Actor) {
     if (isCore(kind)) return true;
 
-    return contentKindsOf(await systemOf(actor)).has(kind);
+    return contentKindsOf(await actorSystem(actor)).has(kind);
 }
 
 export async function assertKindActive(kind: string, actor: Actor) {

@@ -161,7 +161,7 @@ export const artifactsResource = defineResource<
               };
     },
     async create(actor, data) {
-        await assertCampaignEffects(actor.campaignId, data.abilities);
+        await assertCampaignEffects(actor, data.abilities);
         await assertCampaignRefs(actor.campaignId, {
             artifactSet: data.setId,
             spell: data.item?.spells?.map(({ spellId }) => spellId),
@@ -209,7 +209,7 @@ export const artifactsResource = defineResource<
             throw new ContentError(API_ERRORS.ARMOR_SLOT_ONLY, 400);
 
         await assertCampaignEffects(
-            actor.campaignId,
+            actor,
             data.abilities,
             storedEffectOwners(existing.abilities)
         );

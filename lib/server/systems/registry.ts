@@ -9,6 +9,7 @@ import type {
 } from './types';
 
 import 'server-only';
+import { stableStringify } from '@/lib/utils/battle/store/stable-json';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import { kindOf } from '@/lib/utils/rules/systems/catalog';
 import {
@@ -102,11 +103,35 @@ export const withSystemNotes = (base: string, tool: SystemToolNote): string => {
     return notes.length > 0 ? `${base} ${notes.join(' ')}` : base;
 };
 
+export function indexBattleOperations(
+    servers: readonly SystemServer[]
+): ReadonlyMap<string, SystemBattleOperation> {
+    const index = new Map<string, SystemBattleOperation>();
+
+    for (const [name, op] of servers.flatMap((s) =>
+        Object.entries(s.battle ?? {})
+    )) {
+        const known = index.get(name);
+
+        if (!known) index.set(name, op);
+        else if (
+            known !== op &&
+            stableStringify(known.settings) !== stableStringify(op.settings)
+        )
+            throw new Error(`Duplicate battle operation: ${name}`);
+    }
+
+    return index;
+}
+
+let battleOperations: ReadonlyMap<string, SystemBattleOperation> | undefined;
+
 export function systemBattleOperation(
     name: string
 ): SystemBattleOperation | undefined {
-    return unionServers().find((s) => s.battle && Object.hasOwn(s.battle, name))
-        ?.battle?.[name];
+    battleOperations ??= indexBattleOperations(unionServers());
+
+    return battleOperations.get(name);
 }
 
 export const systemBattleOperationOf = (

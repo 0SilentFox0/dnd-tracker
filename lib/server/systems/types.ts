@@ -4,6 +4,7 @@ import type { ZodType } from 'zod';
 import type { RulesEdition } from '@/lib/constants/rules';
 import type { SpellRequestData } from '@/lib/schemas/battles';
 import type { AttackBody } from '@/lib/server/battles/mutations/attack/attack-mutation';
+import type { CharacterRow } from '@/lib/server/characters/access';
 import type { CharacterOperation } from '@/lib/server/characters/operation-runner';
 import type { AnyContentResource } from '@/lib/server/content/define-resource';
 import type { SyncDb } from '@/lib/server/templates/sync/context';
@@ -50,8 +51,8 @@ export type SystemHttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
 export interface SystemHandlerCtx {
     campaignId: string;
-    /** Set for the `character` route scope */
-    characterId?: string;
+    /** Set for the `character` route scope; already gated to this campaign and the actor */
+    character?: CharacterRow;
     access: CampaignAccessResult;
     input: unknown;
     searchParams: URLSearchParams;

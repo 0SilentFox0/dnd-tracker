@@ -9,6 +9,7 @@ import { SYSTEM_EFFECT_OWNERSHIP } from './registry/effects/system-rows';
 import { SYSTEM_ABILITY_VARIABLES } from './registry/system-variables';
 import { AbilitySchema } from './schema/ability';
 
+import { isRecord } from '@/lib/utils/common/is-record';
 import type { Composition } from '@/lib/utils/rules/systems/catalog';
 
 export type ViolationReason = 'effect' | 'variable' | 'source' | 'schema';
@@ -42,9 +43,6 @@ export interface AbilityPart {
     path: string;
     abilities: unknown;
 }
-
-const isRecord = (v: unknown): v is Record<string, unknown> =>
-    !!v && typeof v === 'object' && !Array.isArray(v);
 
 const arr = (v: unknown): unknown[] => (Array.isArray(v) ? v : []);
 

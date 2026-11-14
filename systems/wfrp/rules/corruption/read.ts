@@ -12,13 +12,8 @@ import {
     MUTATION_EFFECT_LIMITS,
     MUTATION_EFFECTS_MAX,
 } from '@/systems/wfrp/constants/mutations';
+import { isInt, isStr } from '@/systems/wfrp/rules/guards';
 import type { LogLine } from '@/types/text';
-
-const isInt = (v: unknown, min: number, max: number): v is number =>
-    typeof v === 'number' && Number.isInteger(v) && v >= min && v <= max;
-
-const isStr = (v: unknown, min: number, max: number): v is string =>
-    typeof v === 'string' && v.length >= min && v.length <= max;
 
 const hasOnly = (v: Record<string, unknown>, allowed: string[]) =>
     Object.keys(v).every((k) => allowed.includes(k));

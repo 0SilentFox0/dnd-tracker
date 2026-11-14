@@ -185,3 +185,25 @@ describe('isIdle', () => {
     it('is true for finished scenes without a pause', () =>
         expect(idle({ status: 'ended' })).toBe(true));
 });
+
+describe('legacy moraleCap', () => {
+    it('counts rows whose snapshot still carries abilities.moraleCap', () => {
+        const legacy = stored(
+            'p3',
+            { abilities: { moraleCap: 2 } },
+            { activeEffects: [] }
+        );
+
+        const [report] = buildReport([scene()], [legacy, plain()], []);
+
+        expect(report.legacyMoraleCap).toBe(1);
+        expect(formatReport(report).join('\n')).toContain('легасі moraleCap 1');
+        expect(summarizeReports([report]).legacyMoraleCap).toBe(1);
+    });
+
+    it('is 0 without the field', () => {
+        const [report] = buildReport([scene()], [plain()], []);
+
+        expect(report.legacyMoraleCap).toBe(0);
+    });
+});

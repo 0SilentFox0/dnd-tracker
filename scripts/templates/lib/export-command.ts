@@ -3,7 +3,12 @@ import * as path from 'path';
 
 import { assertSeedTarget } from '../../seed/seed-library-lib';
 import { parseCommandArgs } from './cli-args';
-import { bundleToPack, leakedIds, type SlugMap } from './export';
+import {
+    bundleToPack,
+    leakedIds,
+    modulesMismatch,
+    type SlugMap,
+} from './export';
 import { writeIcons } from './icons-file';
 import { listPackKeys, packPath, readManifest, TEMPLATES_DIR } from './pack';
 
@@ -60,23 +65,31 @@ export async function exportCommand(args: string[]): Promise<void> {
             bundle.rules as { system?: { modules?: string[] } } | undefined
         )?.system?.modules;
 
-        const base: TemplateManifest = listPackKeys().includes(key)
+        const existing = listPackKeys().includes(key)
             ? readManifest(key)
-            : {
-                  key,
-                  system: options['--system'] ?? '',
-                  ...(campaignModules && { modules: campaignModules }),
-                  names: {
-                      en: options['--name'] ?? key,
-                      uk: options['--name'] ?? key,
-                  },
-                  locales: ['en'],
-                  rules: { file: 'rules.json' },
-                  kinds: [],
-                  icons: {},
-                  ...(bundle.credits ? { credits: bundle.credits } : {}),
-                  counts: {},
-              };
+            : undefined;
+
+        if (existing) {
+            const mismatch = modulesMismatch(existing, campaignModules);
+
+            if (mismatch) console.warn(`${key}: ${mismatch}`);
+        }
+
+        const base: TemplateManifest = existing ?? {
+            key,
+            system: options['--system'] ?? '',
+            ...(campaignModules && { modules: campaignModules }),
+            names: {
+                en: options['--name'] ?? key,
+                uk: options['--name'] ?? key,
+            },
+            locales: ['en'],
+            rules: { file: 'rules.json' },
+            kinds: [],
+            icons: {},
+            ...(bundle.credits ? { credits: bundle.credits } : {}),
+            counts: {},
+        };
 
         if (!base.system)
             throw new Error('--system is required for a new pack');

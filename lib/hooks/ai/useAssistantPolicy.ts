@@ -13,7 +13,7 @@ export function useAssistantPolicy(campaignId: string) {
         onSuccess: async () => {
             await Promise.all([
                 client.invalidateQueries({
-                    queryKey: ['ai-threads', campaignId],
+                    queryKey: aiKeys.threadsRoot(campaignId),
                 }),
                 client.invalidateQueries({
                     queryKey: aiKeys.apiTokens(campaignId),

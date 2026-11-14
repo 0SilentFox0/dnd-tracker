@@ -24,14 +24,14 @@ import { SECTION_DEFAULTS } from '@/lib/utils/rules/defaults';
 // Без зброї свого виду герой б'є лише кубиками рівня — так само рахує баланс (bestAttack у balance/stats.ts)
 const defaultAttacks = (
     names: Ruleset['defaultAttacks'],
-    fiveE: boolean
+    classMode: boolean
 ): ExtractedAttack[] => [
     {
         id: 'default-melee',
         name: names.meleeName,
         type: AttackType.MELEE as ExtractedAttack['type'],
         attackBonus: 0,
-        damageDice: fiveE ? '1' : '',
+        damageDice: classMode ? '1' : '',
         damageType: 'physical',
     },
     {
@@ -69,7 +69,7 @@ export function extractAttacksFromCharacter(
     artifactsById: Record<string, Prisma.ArtifactGetPayload<object>>,
     names: Ruleset['defaultAttacks'] = SECTION_DEFAULTS.defaultAttacks,
     opts: {
-        fiveE?: boolean;
+        classMode?: boolean;
         items?: { enabled: boolean; attuned: readonly string[] };
         attacksOf?: () => ExtractedAttack[];
     } = {}
@@ -79,14 +79,14 @@ export function extractAttacksFromCharacter(
         : extractWeaponAttacks(
               character,
               artifactsById,
-              !!opts.fiveE,
+              !!opts.classMode,
               names,
               opts.items
           );
 
     return [
         ...weapons,
-        ...defaultAttacks(names, !!opts.fiveE).filter(
+        ...defaultAttacks(names, !!opts.classMode).filter(
             (d) => !weapons.some((w) => w.type === d.type)
         ),
     ];
@@ -112,7 +112,7 @@ const WEAPON_SLOTS = ['weapon', 'mainHand', 'offHand', 'range_weapon'];
 function extractWeaponAttacks(
     character: CharacterFromPrisma,
     rowsById: Record<string, Prisma.ArtifactGetPayload<object>>,
-    fiveE: boolean,
+    classMode: boolean,
     names: Ruleset['defaultAttacks'],
     items?: ItemsOpt
 ): ExtractedAttack[] {
@@ -141,7 +141,7 @@ function extractWeaponAttacks(
     }
 
     const shieldRef =
-        fiveE && typeof equipped.shield === 'string' ? equipped.shield : null;
+        classMode && typeof equipped.shield === 'string' ? equipped.shield : null;
 
     if (shieldRef) entries.push({ ref: shieldRef, offHand: true });
 
@@ -163,7 +163,7 @@ function extractWeaponAttacks(
             continue;
 
         attacks.push(
-            attackFromItem(weapon, { ref, offHand, fiveE, shieldCellEmpty })
+            attackFromItem(weapon, { ref, offHand, classMode, shieldCellEmpty })
         );
     }
 
@@ -210,11 +210,11 @@ function attackFromItem(
     ctx: {
         ref: string;
         offHand: boolean;
-        fiveE: boolean;
+        classMode: boolean;
         shieldCellEmpty: boolean;
     }
 ): ExtractedAttack {
-    const { ref, offHand, fiveE } = ctx;
+    const { ref, offHand, classMode } = ctx;
 
     const modifiers = (weapon.modifiers as ArtifactModifier[]) || [];
 
@@ -252,13 +252,13 @@ function attackFromItem(
         attackType = AttackType.RANGED;
     }
 
-    const traits = fiveE
+    const traits = classMode
         ? parseWeaponTraits(
               getOptionalModifierValue(modifiers, ArtifactModifierType.TRAITS)
           )
         : [];
 
-    const versatileDice = fiveE
+    const versatileDice = classMode
         ? getOptionalModifierValue(
               modifiers,
               ArtifactModifierType.VERSATILE_DICE
@@ -268,7 +268,7 @@ function attackFromItem(
     const thrownMelee = traits.includes('thrown');
 
     const useVersatile =
-        fiveE &&
+        classMode &&
         !offHand &&
         traits.includes('versatile') &&
         !!versatileDice &&
@@ -318,6 +318,6 @@ function attackFromItem(
         ...(versatileDice && { versatileDice }),
         ...(offHand && { hand: 'off' as const }),
         ...(damageBonus !== 0 && { damageBonus }),
-        ...(fiveE && category && { weaponCategory: category }),
+        ...(classMode && category && { weaponCategory: category }),
     };
 }

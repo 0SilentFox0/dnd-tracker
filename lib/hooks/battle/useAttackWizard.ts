@@ -459,7 +459,7 @@ export function useAttackWizard(
             const second =
                 currentMode === 'normal'
                     ? undefined
-                    : rollDie(20, cryptoRandom);
+                    : rollDie(dice, cryptoRandom);
 
             dispatch(rollAction(d20, second));
         },

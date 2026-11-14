@@ -65,7 +65,7 @@ export const featsResource = defineResource<FeatRow, CreateInput, UpdateInput>({
     find: (actor, id) =>
         prisma.feat.findFirst({ where: { id, campaignId: actor.campaignId } }),
     async create(actor, data) {
-        await assertCampaignEffects(actor.campaignId, data.abilities);
+        await assertCampaignEffects(actor, data.abilities);
         await assertNameFree(actor.campaignId, data.name);
         await assertCampaignRefs(actor.campaignId, {
             spell: choiceSpellIds(data.choices),
@@ -89,7 +89,7 @@ export const featsResource = defineResource<FeatRow, CreateInput, UpdateInput>({
     },
     async update(actor, existing, data) {
         await assertCampaignEffects(
-            actor.campaignId,
+            actor,
             data.abilities,
             storedEffectOwners(existing.abilities)
         );

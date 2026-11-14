@@ -1,5 +1,3 @@
-import { z } from 'zod';
-
 import { advanceOperation } from './advance';
 import { advanceUndoOperation } from './advance-undo';
 import { careerAdvanceOperation, careerSetOperation } from './career';
@@ -10,6 +8,7 @@ import { downtimePeriodOperation } from './downtime-period';
 import { downtimePeriodUndoOperation } from './downtime-period-undo';
 
 import { characterIdSchema } from '@/lib/server/characters/character-id-schema';
+import { asSystemOperation, withCharacterId } from '@/lib/server/systems/operation-helpers';
 import type { SystemOperation } from '@/lib/server/systems/types';
 import {
     corruptionGrantSchema,
@@ -26,47 +25,41 @@ import {
     careerSetSchema,
 } from '@/systems/wfrp/server/progression-schemas';
 
-const withId = <T extends z.ZodRawShape>(schema: z.ZodObject<T>) =>
-    schema.extend(characterIdSchema.shape).strict();
-
-const erased = (operation: unknown) =>
-    operation as SystemOperation['operation'];
-
 export const WFRP_OPERATIONS: Record<string, SystemOperation> = {
     advance: {
-        operation: erased(advanceOperation),
-        input: withId(advanceSchema),
+        operation: asSystemOperation(advanceOperation),
+        input: withCharacterId(advanceSchema),
     },
     'advance.undo': {
-        operation: erased(advanceUndoOperation),
+        operation: asSystemOperation(advanceUndoOperation),
         input: characterIdSchema,
     },
     'career.set': {
-        operation: erased(careerSetOperation),
-        input: withId(careerSetSchema),
+        operation: asSystemOperation(careerSetOperation),
+        input: withCharacterId(careerSetSchema),
     },
     'career.advance': {
-        operation: erased(careerAdvanceOperation),
-        input: withId(careerAdvanceSchema),
+        operation: asSystemOperation(careerAdvanceOperation),
+        input: withCharacterId(careerAdvanceSchema),
     },
     'corruption.grant': {
-        operation: erased(corruptionGrantOperation),
-        input: withId(corruptionGrantSchema),
+        operation: asSystemOperation(corruptionGrantOperation),
+        input: withCharacterId(corruptionGrantSchema),
     },
     'corruption.undo': {
-        operation: erased(corruptionUndoOperation),
-        input: withId(corruptionUndoSchema),
+        operation: asSystemOperation(corruptionUndoOperation),
+        input: withCharacterId(corruptionUndoSchema),
     },
     'downtime.set': {
-        operation: erased(downtimeSetOperation),
-        input: withId(downtimeSetSchema),
+        operation: asSystemOperation(downtimeSetOperation),
+        input: withCharacterId(downtimeSetSchema),
     },
     'downtime.period': {
-        operation: erased(downtimePeriodOperation),
+        operation: asSystemOperation(downtimePeriodOperation),
         input: downtimePeriodSchema.strict(),
     },
     'downtime.period.undo': {
-        operation: erased(downtimePeriodUndoOperation),
+        operation: asSystemOperation(downtimePeriodUndoOperation),
         input: downtimePeriodUndoSchema.strict(),
     },
 };

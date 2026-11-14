@@ -130,9 +130,13 @@ export async function runCharacterOperation(
         resultLabel(locale, 'characters')
     );
 
-    const schema = CHARACTER_INPUTS[operation as keyof typeof CHARACTER_INPUTS];
+    const schema = Object.hasOwn(CHARACTER_INPUTS, operation)
+        ? CHARACTER_INPUTS[operation as keyof typeof CHARACTER_INPUTS]
+        : undefined;
 
-    const core = CHARACTER_OPERATIONS[operation];
+    const core = Object.hasOwn(CHARACTER_OPERATIONS, operation)
+        ? CHARACTER_OPERATIONS[operation]
+        : undefined;
 
     if (!schema || !core)
         throw new ContentError(API_ERRORS.ASSISTANT_UNKNOWN_OPERATION, 400);

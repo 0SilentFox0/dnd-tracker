@@ -1,4 +1,4 @@
-import { choiceIssue } from '@/lib/utils/characters/choices/validate';
+import { choiceIssue, featPrerequisiteMet } from '@/lib/utils/characters/choices/validate';
 import type {
     ChoiceRefs,
     PickVisit,
@@ -43,7 +43,9 @@ const unreachable = (v: PickVisit): boolean => {
 };
 
 type PendingRefs = Pick<ChoiceRefs, 'featsById'> &
-    Partial<Pick<ChoiceRefs, 'spellsById'>>;
+    Partial<Pick<ChoiceRefs, 'spellsById'>> & {
+        hero?: Parameters<typeof featPrerequisiteMet>[1];
+    };
 
 /** how many picks the campaign can actually offer; Infinity when it is not bounded by a list */
 function availableCount(v: PickVisit, refs: PendingRefs): number {
@@ -67,8 +69,11 @@ function availableCount(v: PickVisit, refs: PendingRefs): number {
 
         return (
             (choice.options?.length ?? 0) +
-            Object.values(refs.featsById).filter((f) => types.includes(f.type))
-                .length
+            Object.values(refs.featsById).filter(
+                (f) =>
+                    types.includes(f.type) &&
+                    (!refs.hero || featPrerequisiteMet(f, refs.hero))
+            ).length
         );
     }
 

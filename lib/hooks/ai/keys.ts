@@ -1,3 +1,5 @@
+const threadsRoot = (campaignId: string) => ['ai-threads', campaignId] as const;
+
 export const aiKeys = {
     intentsRoot: (campaignId: string) =>
         ['assistant-intents', campaignId] as const,
@@ -16,8 +18,9 @@ export const aiKeys = {
     receipt: (campaignId: string, id: string) =>
         ['assistant-receipt', campaignId, id] as const,
     credentials: () => ['ai-credentials'] as const,
+    threadsRoot,
     threads: (campaignId: string, pageId?: string) =>
-        ['ai-threads', campaignId, pageId ?? null] as const,
+        [...threadsRoot(campaignId), pageId ?? null] as const,
     messages: (campaignId: string, threadId: string) =>
         ['ai-messages', campaignId, threadId] as const,
     proposals: (campaignId: string, pageId: string) =>

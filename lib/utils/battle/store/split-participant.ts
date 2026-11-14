@@ -167,6 +167,7 @@ export function joinParticipant(
         };
     }
 
+    // drop once active-battles-report shows legacyMoraleCap 0 on prod (save never rewrites an unchanged snapshot)
     const { moraleCap: legacyCap, ...abilitiesRest } = s.abilities;
 
     const combatSnap =

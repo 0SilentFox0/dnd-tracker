@@ -4,12 +4,14 @@ import { describe, expect, it } from 'vitest';
 
 import {
     countLiterals,
+    countModuleQueries,
     isLiteralAllowed,
     literalTokens,
     readImportsExempt,
     readLiteralsExempt,
     ROOT,
     scanLiterals,
+    scanModuleQueries,
     sourceFiles,
     SYSTEM_ROOTS,
 } from '@/scripts/shared/system-ratchet';
@@ -258,4 +260,25 @@ describe('d20 / HOMM names and rule-section readers leaving core', () => {
                     }`
                 )
         ));
+});
+
+describe('module queries', () => {
+    const ids = ['morale', 'retaliation', 'skilltrees'];
+
+    it('finds none in core', () => {
+        expect(scanModuleQueries()).toEqual({});
+    });
+
+    it.each([
+        ["modules.includes('morale')", 1],
+        ["rules.system.modules?.some('x')", 0],
+        ['ext.retaliation.used', 1],
+        ["ext['morale']", 1],
+        ["e.stat === 'morale'", 0],
+        ["actionType === 'retaliation'", 0],
+        ["m.module === 'skilltrees'", 1],
+        ["'skilltrees' === m.module", 1],
+    ])('counts %s as %i', (text, n) => {
+        expect(countModuleQueries(text, ids)).toBe(n);
+    });
 });

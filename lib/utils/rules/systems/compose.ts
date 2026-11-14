@@ -260,11 +260,6 @@ export const composeSystem = (
     addons: readonly Addon<RuleSystemDefinition>[]
 ): RuleSystemDefinition => composeParts(base, addons, SYSTEM_FIELD_KINDS);
 
-export const extendSystem = (
-    base: RuleSystemDefinition,
-    build: AddonBuilder<RuleSystemDefinition>
-): RuleSystemDefinition => composeSystem(base, [{ id: 'extension', build }]);
-
 export const compositionKey = (system: SystemSelection): string => {
     const { base, modules } = composition(system);
 

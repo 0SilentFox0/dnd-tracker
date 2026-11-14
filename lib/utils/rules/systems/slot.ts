@@ -1,3 +1,4 @@
+import { isRecord } from '@/lib/utils/common/is-record';
 export type SystemData = Record<string, unknown>;
 
 export interface SystemSlot {
@@ -14,9 +15,6 @@ export interface SlotCodec<T> {
         parse: (raw: unknown) => E | undefined
     ): SlotCodec<E>;
 }
-
-const isRecord = (v: unknown): v is Record<string, unknown> =>
-    typeof v === 'object' && v !== null && !Array.isArray(v);
 
 const prevData = (
     key: string,

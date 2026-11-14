@@ -69,7 +69,7 @@ export const spellsResource = defineResource<
         }),
     create: async (actor, data) => {
         await assertCampaignEffects(
-            actor.campaignId,
+            actor,
             effectOwners(data.spellEffects)
         );
         await assertCampaignRefs(actor.campaignId, {
@@ -128,7 +128,7 @@ export const spellsResource = defineResource<
             );
         }
         await assertCampaignEffects(
-            actor.campaignId,
+            actor,
             effectOwners(data.spellEffects),
             storedEffectOwners([{ effects: existing.spellEffects }])
         );

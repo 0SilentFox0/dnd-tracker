@@ -1,3 +1,4 @@
+import { isRecord } from '@/lib/utils/common/is-record';
 import { defineSlot } from '@/lib/utils/rules/systems/slot';
 import type { BattleParticipant } from '@/types/battle';
 
@@ -16,19 +17,16 @@ export interface D20ParticipantState {
     attackedWithLight?: true;
 }
 
-const isRec = (v: unknown): v is Record<string, unknown> =>
-    typeof v === 'object' && v !== null && !Array.isArray(v);
-
 const finite = (v: unknown): v is number =>
     typeof v === 'number' && Number.isFinite(v);
 
 export const D20_STATE = defineSlot<D20ParticipantState>('d20', (raw) => {
-    if (!isRec(raw)) return undefined;
+    if (!isRecord(raw)) return undefined;
 
     const saves = raw.deathSaves;
 
     return {
-        ...(isRec(saves) &&
+        ...(isRecord(saves) &&
             finite(saves.successes) &&
             finite(saves.failures) && {
                 deathSaves: {

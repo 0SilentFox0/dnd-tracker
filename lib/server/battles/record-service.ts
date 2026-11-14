@@ -15,6 +15,10 @@ import {
 import { battleAudioCommandSchema } from '@/lib/schemas/music';
 import type { ActionExecutionContext } from '@/lib/server/assistant/types';
 import { loadAudioLibrary } from '@/lib/server/audio/track-store';
+import {
+    assertParticipantSources,
+    sourceIdsOf,
+} from '@/lib/server/battles/participant-sources';
 import { ContentError, parseInput } from '@/lib/server/content/errors';
 import { afterContentCommit } from '@/lib/server/content/write-context';
 import { clearShowBattle } from '@/lib/server/show/show-store';
@@ -159,6 +163,8 @@ export async function writeBattleRecord(
             ? data.map
             : await mapForWrite(data.map, campaignId);
 
+        await assertParticipantSources(campaignId, data.participants);
+
         return prisma.battleScene.create({
             data: {
                 campaignId,
@@ -227,6 +233,13 @@ export async function writeBattleRecord(
         const { map: rawMap, ...rest } = input as z.infer<
             typeof patchBattleSchema
         >;
+
+        if (rest.participants)
+            await assertParticipantSources(
+                campaignId,
+                rest.participants,
+                sourceIdsOf(row.participants)
+            );
 
         const map = preparedMap
             ? rawMap

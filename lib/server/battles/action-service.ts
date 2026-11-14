@@ -29,6 +29,11 @@ import {
 import { executeBattleOperation } from '@/lib/server/battles/execute-battle-operation';
 import { assertWriteScope, requireDmMember } from '@/lib/server/battles/guards';
 import { getBattleOperation } from '@/lib/server/battles/operations';
+import {
+    assertParticipantSources,
+    type ParticipantSourceRef,
+    sourceIdsOf,
+} from '@/lib/server/battles/participant-sources';
 import { defaultPipelineDeps } from '@/lib/server/battles/pipeline-deps';
 import {
     battleRecord,
@@ -269,58 +274,6 @@ async function checkCommand(
     await ownHandler(COMMAND_CHECKS, operation)?.(caller, ctx, parsed);
 }
 
-async function checkParticipantSources(
-    campaignId: string,
-    operation: string,
-    body: Body
-) {
-    const refs =
-        operation === 'add-participant'
-            ? [{ id: body.sourceId, type: body.type }]
-            : ((body.participants ?? []) as Array<{
-                  id: string;
-                  type: string;
-              }>);
-
-    const byType = { character: new Set<string>(), unit: new Set<string>() };
-
-    for (const ref of refs)
-        (ref.type === 'character' ? byType.character : byType.unit).add(
-            String(ref.id)
-        );
-
-    const [characters, units] = await Promise.all([
-        byType.character.size
-            ? prisma.character.findMany({
-                  where: { id: { in: [...byType.character] }, campaignId },
-                  select: { id: true },
-              })
-            : [],
-        byType.unit.size
-            ? prisma.unit.findMany({
-                  where: { id: { in: [...byType.unit] }, campaignId },
-                  select: { id: true },
-              })
-            : [],
-    ]);
-
-    const found = {
-        character: new Set(characters.map((row) => row.id)),
-        unit: new Set(units.map((row) => row.id)),
-    };
-
-    for (const ref of refs)
-        if (
-            !(ref.type === 'character' ? found.character : found.unit).has(
-                ref.id as string
-            )
-        )
-            throw new ContentError(
-                API_ERRORS.BATTLE_PARTICIPANT_SOURCE_MISSING,
-                404
-            );
-}
-
 function checkBackground(
     body: Body,
     row: Awaited<ReturnType<typeof state>>['row']
@@ -417,10 +370,19 @@ async function prepared(
         );
 
     if (['create', 'patch', 'add-participant'].includes(operation))
-        await checkParticipantSources(
+        await assertParticipantSources(
             caller.actor.campaignId,
-            operation,
-            value.body
+            operation === 'add-participant'
+                ? [
+                      {
+                          id: String(value.body.sourceId),
+                          type: String(value.body.type),
+                      },
+                  ]
+                : ((value.body.participants ?? []) as ParticipantSourceRef[]),
+            operation === 'patch'
+                ? sourceIdsOf(current.row?.participants)
+                : undefined
         );
 
     checkBackground(value.body, current.row);

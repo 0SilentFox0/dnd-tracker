@@ -55,6 +55,7 @@ import {
     rerecommendScores,
     validateAbilityScores,
 } from '@/lib/utils/characters/generate';
+import { isRecord } from '@/lib/utils/common/is-record';
 import type { DraftInput } from '@/types/characters';
 import type { ChoiceIssue, ChoicesState } from '@/types/choices';
 
@@ -67,6 +68,10 @@ export interface PlayerDraftFormOptions {
     characterId?: string;
     initial?: 'generate' | DraftInput;
 }
+
+// the 400 body may carry plain Zod issues (path is an array), not only ChoiceIssue
+const isChoiceIssue = (i: unknown): i is ChoiceIssue =>
+    isRecord(i) && typeof i.path === 'string' && typeof i.message === 'string';
 
 export function usePlayerDraftForm({
     campaignId,
@@ -434,8 +439,11 @@ export function usePlayerDraftForm({
                 | { issues?: unknown }
                 | undefined;
 
-            if (Array.isArray(issues?.issues))
-                setChoiceIssues(issues.issues as ChoiceIssue[]);
+            setChoiceIssues(
+                Array.isArray(issues?.issues)
+                    ? issues.issues.filter(isChoiceIssue)
+                    : []
+            );
         },
         onSuccess: async () => {
             await queryClient.invalidateQueries({
@@ -466,7 +474,7 @@ export function usePlayerDraftForm({
                       refs,
                       { level: 1, classMode: classBased && !!values.classId }
                   ),
-                  refs
+                  { ...refs, hero: { totalLevel: 1, scores: scoresOf(values) } }
               )
             : [];
 

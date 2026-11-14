@@ -229,3 +229,5 @@ export const BATTLE_RATE_LIMITS = {
 export const AI_PLAYER_RATE_LIMIT = { limit: 10, windowSeconds: 600 } as const;
 
 export const DEMO_READ_RATE_LIMIT = { limit: 120, windowSeconds: 60 } as const;
+
+export const JOIN_RATE_LIMIT = { limit: 10, windowSeconds: 600 } as const;

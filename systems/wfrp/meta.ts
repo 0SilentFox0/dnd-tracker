@@ -33,4 +33,5 @@ export const WFRP_META = {
     },
     dmSections: ['careers'],
     contentKinds: ['careers'],
+    emptyCharacteristicsHashes: ['b4fa5afbf9ba101ee9ddc0c6cee20709f1e8785a'],
 } as const satisfies SystemMeta;

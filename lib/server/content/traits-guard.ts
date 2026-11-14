@@ -1,14 +1,14 @@
 import 'server-only';
 import { API_ERRORS } from '@/lib/constants/api-errors';
-import { prisma } from '@/lib/db';
 import { ContentError } from '@/lib/server/content/errors';
+import { actorSystem } from '@/lib/server/content/kind-active';
 import {
     effectKey,
     type EffectOwnership,
     isEffectInComposition,
 } from '@/lib/utils/abilities/registry/effects/ownership';
 import { SYSTEM_EFFECT_OWNERSHIP } from '@/lib/utils/abilities/registry/effects/system-rows';
-import { parseRules } from '@/lib/utils/rules/schema';
+import type { Actor } from '@/lib/utils/api/actor';
 import {
     composition,
     type SystemSelection,
@@ -64,24 +64,13 @@ export function assertEffectsInComposition(
         throw new ContentError(API_ERRORS.EFFECT_OUTSIDE_COMPOSITION, 422);
 }
 
-/** Resource writes outside units: the rule system comes from the campaign the row is written to. */
+/** Resource writes outside units: the rule system comes from the campaign the row is written to, loaded once per actor. */
 export async function assertCampaignEffects(
-    campaignId: string,
+    actor: Actor,
     abilities: readonly EffectOwner[] | undefined,
     existing: readonly EffectOwner[] = []
 ): Promise<void> {
     if (!abilities?.length) return;
 
-    const campaign = await prisma.campaign.findUnique({
-        where: { id: campaignId },
-        select: { rules: true },
-    });
-
-    if (!campaign) throw new ContentError(API_ERRORS.NOT_FOUND, 404);
-
-    assertEffectsInComposition(
-        parseRules(campaign.rules).system,
-        abilities,
-        existing
-    );
+    assertEffectsInComposition(await actorSystem(actor), abilities, existing);
 }

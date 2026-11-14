@@ -77,7 +77,7 @@ describe('extractAttacksFromCharacter: item refs', () => {
             character({ weapon: 'ls+w2' }),
             ROWS,
             undefined,
-            { fiveE: true }
+            { classMode: true }
         );
 
         expect(attacks.find((a) => a.id === 'ls+w2')).toMatchObject({
@@ -93,7 +93,7 @@ describe('extractAttacksFromCharacter: item refs', () => {
             character({ weapon: 'dg', shield: 'dg' }),
             ROWS,
             undefined,
-            { fiveE: true }
+            { classMode: true }
         );
 
         expect(
@@ -106,7 +106,7 @@ describe('extractAttacksFromCharacter: item refs', () => {
             character({ weapon: 'ls+gone' }),
             ROWS,
             undefined,
-            { fiveE: true }
+            { classMode: true }
         );
 
         expect(attacks.some((a) => a.id === 'ls+gone')).toBe(false);
@@ -125,7 +125,7 @@ describe('extractAttacksFromCharacter: item refs', () => {
             character({ weapon: 'ls+ft' }),
             ROWS,
             undefined,
-            { fiveE: true, items: { enabled: true, attuned: [] } }
+            { classMode: true, items: { enabled: true, attuned: [] } }
         );
 
         expect(off.find((a) => a.id === 'ls+ft')).toMatchObject({

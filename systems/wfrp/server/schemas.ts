@@ -11,7 +11,5 @@ import {
     AilmentInputSchema,
     EndeavourSchema,
 } from '@/systems/wfrp/rules/downtime/schema';
-import { WfrpItemStatsSchema } from '@/systems/wfrp/rules/equipment/stats';
 
 export { AilmentInputSchema, EndeavourSchema };
-export { WfrpItemStatsSchema as WfrpArtifactStatsSchema };

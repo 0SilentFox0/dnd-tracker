@@ -1,5 +1,6 @@
 import { beforeEach, expect, it, vi } from 'vitest';
 
+import { API_ERRORS } from '@/lib/constants/api-errors';
 import { CHARACTER_ACTIONS } from '@/lib/server/assistant/actions/characters';
 import { confirmationFor } from '@/lib/server/assistant/policy';
 import { runCharacterOperation } from '@/lib/server/characters/action-service';
@@ -385,4 +386,12 @@ it('deleteAllPreviewNamesOnlyPlayerCharacters', async () => {
         { domain: 'characters', id: 'player', name: 'Гравець' },
     ]);
     expect(JSON.stringify(preview.changes)).not.toContain('NPC');
+});
+it('inheritedObjectKeyIsAnUnknownOperation', async () => {
+    await expect(
+        runCharacterOperation(actor, 'constructor', {})
+    ).rejects.toMatchObject({
+        status: 400,
+        message: API_ERRORS.ASSISTANT_UNKNOWN_OPERATION,
+    });
 });

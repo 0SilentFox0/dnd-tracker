@@ -1,18 +1,20 @@
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('server-only', () => ({}));
 
-const findUnique = vi.hoisted(() => vi.fn());
+const loadRules = vi.hoisted(() => vi.fn());
 
-vi.mock('@/lib/db', () => ({ prisma: { campaign: { findUnique } } }));
+vi.mock('@/lib/server/campaigns/rules', () => ({ loadRules }));
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
+import { ContentError } from '@/lib/server/content/errors';
 import {
     assertCampaignEffects,
     assertEffectsInComposition,
     storedEffectOwners,
 } from '@/lib/server/content/traits-guard';
 import { ownershipOf } from '@/lib/utils/abilities/registry/effects/ownership';
+import type { Actor } from '@/lib/utils/api/actor';
 
 const own = ownershipOf([], { moraleChance: 'morale' });
 
@@ -142,29 +144,62 @@ describe('update keeps legacy effects', () => {
     });
 });
 
-describe('assertCampaignEffects', () => {
-    it('uses the system of the campaign the row is written to', async () => {
-        findUnique.mockResolvedValue({ rules: { system: { key: 'dnd5e' } } });
-        await expect(assertCampaignEffects('c1', morale)).rejects.toMatchObject(
-            { status: 422 }
-        );
+const mkActor = (campaignId = 'c1'): Actor => ({
+    campaignId,
+    userId: 'u1',
+    isDM: true,
+    via: 'session',
+    scopes: null,
+});
 
-        findUnique.mockResolvedValue({ rules: { system: { key: 'homm' } } });
+const rulesOf = (key: string) => ({ system: { key } });
+
+describe('assertCampaignEffects', () => {
+    beforeEach(() => loadRules.mockReset());
+
+    it('uses the system of the campaign the row is written to', async () => {
+        loadRules.mockResolvedValue(rulesOf('dnd5e'));
         await expect(
-            assertCampaignEffects('c1', morale)
+            assertCampaignEffects(mkActor(), morale)
+        ).rejects.toMatchObject({ status: 422 });
+
+        loadRules.mockResolvedValue(rulesOf('homm'));
+        await expect(
+            assertCampaignEffects(mkActor(), morale)
         ).resolves.toBeUndefined();
     });
 
-    it('an unknown campaign is 404, not a rules parse error', async () => {
-        findUnique.mockResolvedValue(null);
+    it('an unknown campaign rejects with the loader error', async () => {
+        loadRules.mockRejectedValue(
+            new ContentError(API_ERRORS.CAMPAIGN_NOT_FOUND, 404)
+        );
         await expect(
-            assertCampaignEffects('gone', morale)
-        ).rejects.toMatchObject({ message: API_ERRORS.NOT_FOUND, status: 404 });
+            assertCampaignEffects(mkActor('gone'), morale)
+        ).rejects.toMatchObject({
+            message: API_ERRORS.CAMPAIGN_NOT_FOUND,
+            status: 404,
+        });
     });
 
-    it('skips the campaign lookup when there are no abilities', async () => {
-        findUnique.mockClear();
-        await assertCampaignEffects('c1', undefined);
-        expect(findUnique).not.toHaveBeenCalled();
+    it('skips the rules load when there are no abilities', async () => {
+        await assertCampaignEffects(mkActor(), undefined);
+        expect(loadRules).not.toHaveBeenCalled();
+    });
+
+    it('loads rules once for repeated calls with the same actor', async () => {
+        loadRules.mockResolvedValue(rulesOf('homm'));
+
+        const actor = mkActor();
+
+        await assertCampaignEffects(actor, morale);
+        await assertCampaignEffects(actor, morale);
+        expect(loadRules).toHaveBeenCalledTimes(1);
+    });
+
+    it('loads rules per actor for different actors', async () => {
+        loadRules.mockResolvedValue(rulesOf('homm'));
+        await assertCampaignEffects(mkActor(), morale);
+        await assertCampaignEffects(mkActor(), morale);
+        expect(loadRules).toHaveBeenCalledTimes(2);
     });
 });

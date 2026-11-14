@@ -155,6 +155,7 @@ export interface SceneReport {
     shapes: Record<ParticipantShape, number>;
     fields: Record<string, number>;
     hashMismatch: number;
+    legacyMoraleCap: number;
     history: { rows: number; withSlot: number };
     values: {
         id: string;
@@ -176,6 +177,20 @@ const historyHasSlot = (state: unknown): boolean =>
         (p: unknown) => isRecord(p) && readSlot(p.state) !== undefined
     );
 
+const hasLegacyMoraleCap = (snapshotText: string): boolean => {
+    try {
+        const snap: unknown = JSON.parse(snapshotText);
+
+        return (
+            isRecord(snap) &&
+            isRecord(snap.abilities) &&
+            snap.abilities.moraleCap !== undefined
+        );
+    } catch {
+        return false;
+    }
+};
+
 export function buildReport(
     scenes: readonly SceneRow[],
     participants: readonly StoredRow[],
@@ -194,6 +209,7 @@ export function buildReport(
             shapes: emptyShapes(),
             fields: {},
             hashMismatch: 0,
+            legacyMoraleCap: 0,
             history: {
                 rows: hist.length,
                 withSlot: hist.filter((h) => historyHasSlot(h.state)).length,
@@ -209,6 +225,8 @@ export function buildReport(
             report.shapes[shape]++;
 
             if (hashMismatch(row)) report.hashMismatch++;
+
+            if (hasLegacyMoraleCap(row.snapshotText)) report.legacyMoraleCap++;
 
             for (const [name, value] of Object.entries(slot))
                 if (isMeaningful(value))
@@ -242,7 +260,7 @@ export function formatReport(r: SceneReport): string[] {
         `${scene.id} «${scene.name}» · ${scene.status} · кампанія «${scene.campaignName}» (${scene.campaignId})`,
         `  система ${r.system} · раунд ${scene.round}, хід ${scene.turnIndex} · version ${scene.version}`,
         `  учасники ${r.participants}${r.pending > 0 ? ` (+резерв ${r.pending})` : ''} · slot ${shapes.slot} · none ${shapes.none}`,
-        `  поля слота: ${fields || '—'} · hashMismatch ${r.hashMismatch}`,
+        `  поля слота: ${fields || '—'} · hashMismatch ${r.hashMismatch} · легасі moraleCap ${r.legacyMoraleCap}`,
         `  battle_snapshots ${r.history.rows} (зі слотом ${r.history.withSlot})${pauses.length > 0 ? ` · паузи: ${pauses.join(', ')}` : ''}`,
     ];
 }
@@ -263,6 +281,7 @@ export function summarizeReports(reports: readonly SceneReport[]) {
         campaigns: new Set(reports.map((r) => r.scene.campaignId)).size,
         shapes,
         hashMismatch: reports.reduce((a, r) => a + r.hashMismatch, 0),
+        legacyMoraleCap: reports.reduce((a, r) => a + r.legacyMoraleCap, 0),
     };
 }
 

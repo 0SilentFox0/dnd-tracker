@@ -3,6 +3,8 @@ import type { CorruptionState } from '../corruption/types';
 import { readDowntime } from '../downtime/read';
 import type { DowntimeState } from '../downtime/types';
 
+import { isInt } from '@/systems/wfrp/rules/guards';
+
 export {
     CHARACTERISTIC_KEYS,
     type CharacteristicKey,
@@ -70,9 +72,6 @@ export const DEFAULT_CHARACTERISTICS: Characteristics = {
     ledger: [],
     spentArchived: 0,
 };
-
-const isInt = (v: unknown, min: number, max: number): v is number =>
-    typeof v === 'number' && Number.isInteger(v) && v >= min && v <= max;
 
 const isRecord = (v: unknown): v is Record<string, unknown> =>
     typeof v === 'object' && v !== null && !Array.isArray(v);

@@ -10,6 +10,7 @@ import {
     defineCharacterOperation,
     memberScope,
 } from '@/lib/server/characters/operation-runner';
+import { asSystemOperation } from '@/lib/server/systems/operation-helpers';
 import type { SystemOperation } from '@/lib/server/systems/types';
 
 const nodeId = z.string().min(1);
@@ -72,26 +73,23 @@ const resetOperation = defineCharacterOperation({
         }),
 });
 
-const erased = (operation: unknown) =>
-    operation as SystemOperation['operation'];
-
 export const SKILLTREES_OPERATIONS: Record<string, SystemOperation> = {
     progression: {
-        operation: erased(progressionOperation),
+        operation: asSystemOperation(progressionOperation),
         input: characterIdSchema,
         read: true,
     },
     'progression.learn': {
-        operation: erased(learnOperation),
+        operation: asSystemOperation(learnOperation),
         input: characterIdSchema.extend({ nodeId }).strict(),
     },
     'progression.unlearn': {
-        operation: erased(unlearnOperation),
+        operation: asSystemOperation(unlearnOperation),
         input: characterIdSchema.extend({ nodeIds }).strict(),
         confirm: 'always',
     },
     'progression.reset': {
-        operation: erased(resetOperation),
+        operation: asSystemOperation(resetOperation),
         input: characterIdSchema,
         confirm: 'always',
     },

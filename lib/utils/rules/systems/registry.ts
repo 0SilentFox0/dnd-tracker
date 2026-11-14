@@ -74,11 +74,6 @@ export function allLevelResets(): readonly LevelResetPart[] {
     return levelResets;
 }
 
-export const isEmptySystemData = (value: unknown): boolean =>
-    Object.values(RULE_SYSTEM_REGISTRY).some((system) =>
-        system.characteristics.isEmpty(value)
-    );
-
 export const ruleSystemOf = (
     rules: Pick<Ruleset, 'system'>
 ): RuleSystemDefinition => {

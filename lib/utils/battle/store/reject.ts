@@ -62,4 +62,3 @@ export const REJECT = {
     // END
 } as const satisfies Record<string, AppMessageKey>;
 
-export type RejectKey = (typeof REJECT)[keyof typeof REJECT];

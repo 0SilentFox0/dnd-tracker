@@ -60,7 +60,7 @@ export const racesResource = defineResource<
         prisma.race.findFirst({ where: { id, campaignId: actor.campaignId } }),
     toItem: (row) => withAbilityIssues('race', row),
     async create(actor, data) {
-        await assertCampaignEffects(actor.campaignId, data.abilities);
+        await assertCampaignEffects(actor, data.abilities);
         await assertNameFree(actor.campaignId, data.name);
         await assertCampaignRefs(actor.campaignId, {
             mainSkill: data.availableSkills,
@@ -101,7 +101,7 @@ export const racesResource = defineResource<
     },
     async update(actor, existing, data) {
         await assertCampaignEffects(
-            actor.campaignId,
+            actor,
             data.abilities,
             storedEffectOwners(existing.abilities)
         );

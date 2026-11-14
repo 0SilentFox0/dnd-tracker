@@ -88,7 +88,7 @@ export const skillsResource = defineResource<
     toItem: (row) => formatSkillResponse(row),
     async create(actor, data) {
         await assertRefs(actor.campaignId, data);
-        await assertCampaignEffects(actor.campaignId, data.abilities);
+        await assertCampaignEffects(actor, data.abilities);
 
         const { basicInfo, spellData, mainSkillData } = data;
 
@@ -115,7 +115,7 @@ export const skillsResource = defineResource<
     async update(actor, existing, data) {
         await assertRefs(actor.campaignId, data);
         await assertCampaignEffects(
-            actor.campaignId,
+            actor,
             data.abilities,
             storedEffectOwners(existing.abilities)
         );

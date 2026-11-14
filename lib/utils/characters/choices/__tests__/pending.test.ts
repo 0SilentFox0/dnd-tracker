@@ -357,3 +357,74 @@ describe('pendingIssues', () => {
         ).toEqual([]);
     });
 });
+
+describe('pendingIssues: feat prerequisites', () => {
+    const base = { ...refs.featsById['f-alert'] };
+
+    const mk = (id: string, prerequisite: object) => ({
+        ...base,
+        id,
+        type: 'general' as const,
+        prerequisite,
+    });
+
+    const featsById = {
+        a: mk('a', {}),
+        b: mk('b', { level: 4 }),
+        c: mk('c', { scores: { abilities: ['strength'], min: 13 } }),
+    };
+
+    const visit = (picked: number) => ({
+        choice: {
+            id: 'f',
+            label: 'Feat',
+            level: 1,
+            count: 2,
+            kind: 'feat' as const,
+            featTypes: ['general' as const],
+        },
+        picks: Array.from({ length: picked }, () => ({ id: 'a' })),
+        open: true,
+        target: 2,
+        path: 'classes.x.f',
+    });
+
+    const scores = {
+        strength: 10,
+        dexterity: 10,
+        constitution: 10,
+        intelligence: 10,
+        wisdom: 10,
+        charisma: 10,
+    };
+
+    const only = (keys: string[]) =>
+        Object.fromEntries(keys.map((k) => [k, featsById[k as 'a']]));
+
+    it('level prerequisite caps the target to the available feats', () => {
+        const r = { featsById: only(['a', 'b']) };
+
+        expect(pendingIssues([visit(1)], r)).toHaveLength(1);
+        expect(
+            pendingIssues([visit(1)], {
+                ...r,
+                hero: { totalLevel: 1, scores },
+            })
+        ).toEqual([]);
+        expect(pendingIssues([visit(0)], { ...r, hero: { totalLevel: 1, scores } })).toHaveLength(1);
+    });
+
+    it('score prerequisite is checked against hero scores', () => {
+        const r = { featsById: only(['a', 'c']) };
+
+        expect(
+            pendingIssues([visit(1)], { ...r, hero: { totalLevel: 1, scores } })
+        ).toEqual([]);
+        expect(
+            pendingIssues([visit(1)], {
+                ...r,
+                hero: { totalLevel: 1, scores: { ...scores, strength: 14 } },
+            })
+        ).toHaveLength(1);
+    });
+});

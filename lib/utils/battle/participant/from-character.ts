@@ -161,7 +161,7 @@ async function loadCharacterBuildRefs(
         artifactsById,
         rules.defaultAttacks,
         {
-            fiveE: !!resolvedClasses,
+            classMode: !!resolvedClasses,
             items: {
                 enabled: rules.items.enabled,
                 attuned: attunedRefs(character.inventory),

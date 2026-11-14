@@ -4,6 +4,7 @@ import { ParticipantSide } from '@/lib/constants/battle';
 import { lineKey } from '@/lib/i18n/text-ref';
 import { findFlags } from '@/lib/utils/abilities/engine/core/collect-modifiers';
 import { withSelf } from '@/lib/utils/abilities/engine/core/participants';
+import { stubReserve } from '@/lib/utils/battle/participant/reserve';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import { ruleSystemOf, systemKeyOf } from '@/lib/utils/rules/systems';
 import type { BattleParticipantPatch } from '@/types/api';
@@ -223,6 +224,10 @@ export function redactParticipantsForPlayers(
         ? redacted
         : participants;
 }
+
+export const redactPendingForPlayers = (
+    pending: BattleParticipant[]
+): BattleParticipant[] => redactParticipantsForPlayers(stubReserve(pending));
 
 export function redactPatchesForPlayers(
     patches: BattleParticipantPatch[],

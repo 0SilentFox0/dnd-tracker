@@ -16,12 +16,7 @@ import {
 
 import { COINS } from '@/lib/constants/inventory';
 import { isRecord } from '@/lib/utils/common/is-record';
-
-const isInt = (v: unknown, min: number, max: number): v is number =>
-    typeof v === 'number' && Number.isInteger(v) && v >= min && v <= max;
-
-const isStr = (v: unknown, min: number, max: number): v is string =>
-    typeof v === 'string' && v.length >= min && v.length <= max;
+import { isInt, isStr } from '@/systems/wfrp/rules/guards';
 
 const AILMENT_KINDS: readonly unknown[] = ['festering', 'disease', 'injury'];
 

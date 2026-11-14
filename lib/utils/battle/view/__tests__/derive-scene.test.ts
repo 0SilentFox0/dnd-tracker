@@ -143,6 +143,17 @@ describe('резерв і очікування рішення ДМ', () => {
         expect(out.awaiting).toBe('victory');
     });
 
+    it('гравець із заглушкою резерву: awaiting як на сервері', () => {
+        const stub = {
+            basicInfo: { id: 'imp', side: ParticipantSide.ENEMY },
+            battleData: { reserved: true },
+        } as unknown as typeof imp;
+
+        const out = deriveScene(scene(false, [stub]), 'u1', null);
+
+        expect(out.awaiting).toBe('victory');
+    });
+
     it('без резерву ворогів awaiting немає; завершений бій теж не awaiting', () => {
         expect(
             deriveScene(scene(true, []), 'dm-user', null).awaiting

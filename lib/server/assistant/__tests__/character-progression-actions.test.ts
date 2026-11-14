@@ -1,5 +1,6 @@
 import { beforeEach, expect, it, vi } from 'vitest';
 
+import { API_ERRORS } from '@/lib/constants/api-errors';
 import { CHARACTER_PROGRESSION_ACTIONS } from '@/lib/server/assistant/actions/character-progression';
 import { confirmationFor } from '@/lib/server/assistant/policy';
 import {
@@ -287,4 +288,12 @@ it('progressionStateReadsOnlyRequestedHeroes', async () => {
     );
     expect(h.characterInventory.findMany).not.toHaveBeenCalled();
     expect(h.campaign.findUnique).toHaveBeenCalledTimes(2);
+});
+it('inheritedObjectKeyIsAnUnknownOperation', async () => {
+    await expect(
+        runCharacterProgression(actor, 'constructor', {})
+    ).rejects.toMatchObject({
+        status: 400,
+        message: API_ERRORS.ASSISTANT_UNKNOWN_OPERATION,
+    });
 });

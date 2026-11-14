@@ -51,7 +51,7 @@ describe('extractAttacksFromCharacter 5e', () => {
             c,
             byId(rapier, dagger),
             undefined,
-            { fiveE: true }
+            { classMode: true }
         );
 
         expect(fiveE.find((a) => a.hand === 'off')).toMatchObject({
@@ -72,7 +72,7 @@ describe('extractAttacksFromCharacter 5e', () => {
             character({ weapon: 'l' }),
             byId(longsword),
             undefined,
-            { fiveE: true }
+            { classMode: true }
         );
 
         expect(two.find((a) => a.id === 'l')?.damageDice).toBe('1d10');
@@ -81,7 +81,7 @@ describe('extractAttacksFromCharacter 5e', () => {
             character({ weapon: 'l', shield: 'd' }),
             byId(longsword, dagger),
             undefined,
-            { fiveE: true }
+            { classMode: true }
         );
 
         expect(one.find((a) => a.id === 'l')?.damageDice).toBe('1d8');
@@ -116,7 +116,7 @@ describe('extractAttacksFromCharacter 5e', () => {
             c,
             byId(dagger, dagger2),
             undefined,
-            { fiveE: true }
+            { classMode: true }
         );
 
         expect(fiveE.find((a) => a.id === 'd')).toMatchObject({
@@ -140,7 +140,7 @@ describe('extractAttacksFromCharacter 5e', () => {
         const c = character({});
 
         const fiveE = await extractAttacksFromCharacter(c, byId(), undefined, {
-            fiveE: true,
+            classMode: true,
         });
 
         expect(fiveE.find((a) => a.id === 'default-melee')?.damageDice).toBe(

@@ -65,7 +65,7 @@ async function main() {
         const { shapes } = summary;
 
         console.log(
-            `підсумок: активних сцен ${summary.activeScenes} · на паузі ${summary.pausedScenes} · кампаній ${summary.campaigns} · учасників slot ${shapes.slot} · none ${shapes.none} · hashMismatch ${summary.hashMismatch}`
+            `підсумок: активних сцен ${summary.activeScenes} · на паузі ${summary.pausedScenes} · кампаній ${summary.campaigns} · учасників slot ${shapes.slot} · none ${shapes.none} · hashMismatch ${summary.hashMismatch} · легасі moraleCap ${summary.legacyMoraleCap}`
         );
     } finally {
         await prisma.$disconnect();

@@ -8,11 +8,9 @@ import type {
     PercentileCastDetails,
 } from './percentile/details';
 
+import { isRecord } from '@/lib/utils/common/is-record';
 import { defineSlot } from '@/lib/utils/rules/systems/slot';
 import type { ParticipantSide } from '@/types/battle';
-
-const isRec = (v: unknown): v is Record<string, unknown> =>
-    typeof v === 'object' && v !== null && !Array.isArray(v);
 
 export interface WfrpAttackSlot {
     qualities: QualityRef[];
@@ -22,7 +20,7 @@ export interface WfrpAttackSlot {
 }
 
 export const ATTACK_SLOT = defineSlot<WfrpAttackSlot>('wfrp', (raw) => {
-    if (!isRec(raw)) return undefined;
+    if (!isRecord(raw)) return undefined;
 
     const qualities = qualityList(raw.qualities);
 
@@ -46,13 +44,13 @@ export interface WfrpParticipantSlot {
 export const PARTICIPANT_SLOT = defineSlot<WfrpParticipantSlot>(
     'wfrp',
     (raw) =>
-        isRec(raw) && isRec(raw.characteristics) && isRec(raw.stats)
+        isRecord(raw) && isRecord(raw.characteristics) && isRecord(raw.stats)
             ? (raw as unknown as WfrpParticipantSlot)
             : undefined
 );
 
 export const SHEET_SLOT = defineSlot<SheetWfrpBlock>('wfrp', (raw) =>
-    isRec(raw) ? (raw as unknown as SheetWfrpBlock) : undefined
+    isRecord(raw) ? (raw as unknown as SheetWfrpBlock) : undefined
 );
 
 export interface WfrpActionSlot {
@@ -61,13 +59,13 @@ export interface WfrpActionSlot {
 }
 
 export const ACTION_SLOT = defineSlot<WfrpActionSlot>('wfrp', (raw) => {
-    if (!isRec(raw)) return undefined;
+    if (!isRecord(raw)) return undefined;
 
-    const attack = isRec(raw.attack)
+    const attack = isRecord(raw.attack)
         ? (raw.attack as unknown as PercentileAttackDetails)
         : undefined;
 
-    const cast = isRec(raw.cast)
+    const cast = isRecord(raw.cast)
         ? (raw.cast as unknown as PercentileCastDetails)
         : undefined;
 
@@ -79,7 +77,7 @@ export const ACTION_SLOT = defineSlot<WfrpActionSlot>('wfrp', (raw) => {
 export type SceneMomentum = Partial<Record<ParticipantSide, true>>;
 
 export const SCENE_SLOT = defineSlot<SceneMomentum>('wfrp', (raw) => {
-    if (!isRec(raw)) return undefined;
+    if (!isRecord(raw)) return undefined;
 
     return Object.fromEntries(
         Object.entries(raw).filter(([, v]) => v === true)
@@ -100,9 +98,9 @@ const finite = (v: unknown): v is number =>
 export const PARTICIPANT_STATE = defineSlot<WfrpParticipantState>(
     'wfrp',
     (raw) => {
-        if (!isRec(raw)) return undefined;
+        if (!isRecord(raw)) return undefined;
 
-        const tested = isRec(raw.psychologyTested)
+        const tested = isRecord(raw.psychologyTested)
             ? Object.fromEntries(
                   Object.entries(raw.psychologyTested).filter(([, v]) =>
                       finite(v)

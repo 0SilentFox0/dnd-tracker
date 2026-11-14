@@ -157,6 +157,66 @@ export const scanLiterals = (): Record<string, number> => {
     return out;
 };
 
+export const moduleIds = (): string[] =>
+    (SYSTEM_META as readonly SystemMeta[])
+        .filter((m) => m.kind === 'addon')
+        .map((m) => m.module);
+
+const Q = '["\'`]';
+
+export const moduleQueryPatterns = (ids: readonly string[]): RegExp[] => {
+    if (ids.length === 0) return [];
+
+    const alt = ids.map(escapeRe).join('|');
+
+    return [
+        new RegExp(
+            `\\bmodules\\??\\.(?:includes|has|some|indexOf|find|filter)\\(\\s*${Q}(?:${alt})${Q}`,
+            'g'
+        ),
+        new RegExp(`\\bext\\??\\.(?:${alt})\\b`, 'g'),
+        new RegExp(`\\bext\\??\\[\\s*${Q}(?:${alt})${Q}\\s*\\]`, 'g'),
+        new RegExp(
+            `\\.(?:module|moduleId|addon)\\s*[!=]==\\s*${Q}(?:${alt})${Q}`,
+            'g'
+        ),
+        new RegExp(
+            `${Q}(?:${alt})${Q}\\s*[!=]==\\s*[\\w.]*\\.(?:module|moduleId|addon)\\b`,
+            'g'
+        ),
+    ];
+};
+
+export const countModuleQueries = (
+    text: string,
+    ids: readonly string[]
+): number =>
+    moduleQueryPatterns(ids).reduce(
+        (sum, re) => sum + (text.match(re) ?? []).length,
+        0
+    );
+
+export const scanModuleQueries = (): Record<string, number> => {
+    const tokens = literalTokens();
+
+    const ids = moduleIds();
+
+    const out: Record<string, number> = {};
+
+    for (const file of sourceFiles()) {
+        if (isLiteralAllowed(file, tokens)) continue;
+
+        const count = countModuleQueries(
+            fs.readFileSync(path.join(ROOT, file), 'utf8'),
+            ids
+        );
+
+        if (count > 0) out[file] = count;
+    }
+
+    return out;
+};
+
 export interface ImportEntry {
     file: string;
     reason: string;

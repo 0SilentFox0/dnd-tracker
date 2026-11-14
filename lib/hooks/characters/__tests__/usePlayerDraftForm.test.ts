@@ -5,6 +5,7 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createDraft, getDraftPortraitPools } from '@/lib/api/characters';
+import { ApiError } from '@/lib/api/client';
 import { usePlayerDraftForm } from '@/lib/hooks/characters/usePlayerDraftForm';
 import { refs } from '@/lib/utils/characters/choices/__tests__/fixtures';
 
@@ -262,5 +263,43 @@ describe('usePlayerDraftForm', () => {
             'characters.draft.raceRequired'
         );
         expect(createDraft).not.toHaveBeenCalled();
+    });
+    describe('400 with Zod issues', () => {
+        const fail = async (issues: unknown[]) => {
+            classMode.value = { enabled: false, classes: [], pending: false };
+            vi.mocked(createDraft).mockRejectedValue(
+                new ApiError('name: bad', 400, '/x', { error: 'bad', issues })
+            );
+
+            const { result } = setup();
+
+            act(() => result.current.form.set('race', 'Люди'));
+            act(() => result.current.submit.run());
+
+            await waitFor(() => expect(createDraft).toHaveBeenCalled());
+            await waitFor(() => expect(result.current.submit.error).toBeTruthy());
+
+            return result;
+        };
+
+        it('plain Zod issues leave no choice highlights', async () => {
+            const result = await fail([
+                { path: ['name'], code: 'too_small', message: 'short' },
+            ]);
+
+            expect(result.current.submit.choiceIssues).toEqual([]);
+            expect(result.current.submit.error).toContain('name');
+        });
+
+        it('keeps only choice issues in a mixed list', async () => {
+            const result = await fail([
+                { path: ['name'], code: 'too_small', message: 'short' },
+                { path: 'raceChoices.x', code: 'CHOICE_INCOMPLETE', message: 'm' },
+            ]);
+
+            expect(result.current.submit.choiceIssues).toEqual([
+                { path: 'raceChoices.x', code: 'CHOICE_INCOMPLETE', message: 'm' },
+            ]);
+        });
     });
 });

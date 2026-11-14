@@ -5,6 +5,7 @@ import type { SystemHttpMethod, SystemRoute } from './types';
 
 import 'server-only';
 import { API_ERRORS } from '@/lib/constants/api-errors';
+import { requireCharacterRow } from '@/lib/server/characters/access';
 import { operationAccess } from '@/lib/server/characters/operation-context';
 import {
     type CharacterOperation,
@@ -85,6 +86,16 @@ export async function runSystemRoute(
         if (target.access === 'dm' && !access.isDM)
             return errorResponse(API_ERRORS.DM_ONLY, 403);
 
+        const gate =
+            scope === 'character'
+                ? await requireCharacterRow(campaignId, characterId as string, {
+                      access,
+                      dmOnly: target.access === 'dm',
+                  })
+                : undefined;
+
+        if (gate instanceof NextResponse) return gate;
+
         const query = target.query?.(searchParams);
 
         const body = target.schema
@@ -98,7 +109,7 @@ export async function runSystemRoute(
 
         return await target.handle({
             campaignId,
-            characterId,
+            character: gate?.character,
             access,
             input,
             searchParams,

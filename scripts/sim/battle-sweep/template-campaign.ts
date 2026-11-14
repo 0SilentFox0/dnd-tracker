@@ -87,7 +87,7 @@ export async function openTemplateRun(
     campaignId: string | undefined,
     keep = false
 ): Promise<TemplateRun> {
-    await recoverLeftoverRules();
+    if (!keep) await recoverLeftoverRules();
 
     if (profile.source.kind !== 'template')
         throw new Error(`${profile.key} runs on an existing campaign`);

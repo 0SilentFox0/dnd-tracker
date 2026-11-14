@@ -4,10 +4,12 @@ import { ParticipantSide } from '@/lib/constants/battle';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import {
     buildPusherMessages,
+    redactDeltaForPlayers,
     toBattleResponse,
 } from '@/lib/utils/battle/pipeline/battle-response';
 import type { BattleSceneState } from '@/lib/utils/battle/store';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
+import type { ClientBattleDelta } from '@/types/api';
 
 const scene: BattleSceneState = {
     id: 'b1',
@@ -522,5 +524,111 @@ describe('P7: деталі дії у Pusher-каналах', () => {
         expect(publicJson).not.toContain('minor');
         expect(JSON.stringify(dm.payload)).toContain('defender');
         expect(JSON.stringify(dm.payload)).toContain('minor');
+    });
+});
+
+describe('резерв для гравця', () => {
+    const reserved = {
+        ...goblin,
+        battleData: { ...goblin.battleData, reserved: true },
+    };
+
+    const summon = createMockParticipant({
+        basicInfo: { ...goblin.basicInfo, id: 'summon' },
+    });
+
+    const log = { mode: 'append' as const, entries: [] };
+
+    it('гравець: резервний ворог — заглушка, приклик повний', () => {
+        const b = toBattleResponse({ meta }, scene, [hero], [reserved, summon], log, {
+            isDM: false,
+        });
+
+        expect(b.pendingSummons?.[0]).toEqual({
+            basicInfo: { id: 'gob', side: ParticipantSide.ENEMY },
+            battleData: { reserved: true },
+        });
+        expect(b.pendingSummons?.[1]).toEqual(summon);
+    });
+
+    it('DM отримує повний резерв', () => {
+        const b = toBattleResponse({ meta }, scene, [hero], [reserved], log, {
+            isDM: true,
+        });
+
+        expect(b.pendingSummons).toEqual([reserved]);
+    });
+
+    it('PREPARED: сетап для гравця без резерву', () => {
+        const prepared = { ...scene, status: 'prepared' as const };
+
+        const setupMeta = {
+            ...meta,
+            setup: [
+                {
+                    id: 'u1',
+                    type: 'unit' as const,
+                    side: ParticipantSide.ENEMY,
+                    quantity: 3,
+                    reserved: 1,
+                },
+                {
+                    id: 'u2',
+                    type: 'unit' as const,
+                    side: ParticipantSide.ENEMY,
+                    quantity: 1,
+                    reserved: 1,
+                },
+            ],
+        };
+
+        const player = toBattleResponse(
+            { meta: setupMeta },
+            prepared,
+            [],
+            [],
+            log,
+            { isDM: false }
+        );
+
+        expect(player.participants).toEqual([
+            { id: 'u1', type: 'unit', side: ParticipantSide.ENEMY, quantity: 2 },
+        ]);
+
+        const dm = toBattleResponse({ meta: setupMeta }, prepared, [], [], log, {
+            isDM: true,
+        });
+
+        expect(dm.participants).toEqual(setupMeta.setup);
+    });
+
+    const baseDelta = {
+        battleId: 'b1',
+        version: 4,
+        upserted: [],
+        log: [],
+    } as unknown as ClientBattleDelta;
+
+    it('redactDeltaForPlayers: pending із резервом -> заглушки, changed', () => {
+        const out = redactDeltaForPlayers(
+            { ...baseDelta, pending: [reserved] },
+            [hero],
+            DEFAULT_RULES
+        );
+
+        expect(out.changed).toBe(true);
+        expect(out.delta.pending?.[0]).toEqual({
+            basicInfo: { id: 'gob', side: ParticipantSide.ENEMY },
+            battleData: { reserved: true },
+        });
+    });
+
+    it('redactDeltaForPlayers: без резерву той самий об єкт', () => {
+        const delta = { ...baseDelta, pending: [summon] };
+
+        const out = redactDeltaForPlayers(delta, [hero], DEFAULT_RULES);
+
+        expect(out.changed).toBe(false);
+        expect(out.delta).toBe(delta);
     });
 });

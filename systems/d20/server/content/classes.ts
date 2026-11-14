@@ -100,7 +100,7 @@ export const classesResource = defineResource<
         }),
     async create(actor, data) {
         await assertCampaignEffects(
-            actor.campaignId,
+            actor,
             featureAbilities(data.features, data.subclasses)
         );
         await assertNameFree(actor.campaignId, data.name);
@@ -134,7 +134,7 @@ export const classesResource = defineResource<
         const stored = toGameClassData(existing);
 
         await assertCampaignEffects(
-            actor.campaignId,
+            actor,
             featureAbilities(data.features, data.subclasses),
             featureAbilities(stored.features, stored.subclasses)
         );

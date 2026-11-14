@@ -8,26 +8,39 @@ export const RESTORE_DIR = path.resolve(
 
 export interface RestoreEntry {
     campaignId: string;
+    db: string;
     raw: unknown;
 }
 
-const fileOf = (dir: string, campaignId: string) =>
-    path.join(dir, `${campaignId}.json`);
+export const dbIdentity = (url = process.env.DATABASE_URL): string => {
+    try {
+        const { host, pathname } = new URL(url ?? '');
+
+        return `${host}${pathname}`;
+    } catch {
+        return 'unknown';
+    }
+};
+
+const fileOf = (dir: string, db: string, campaignId: string) =>
+    path.join(dir, `${encodeURIComponent(db)}__${campaignId}.json`);
 
 export function saveRestoreFile(
     campaignId: string,
     raw: unknown,
+    db = dbIdentity(),
     dir = RESTORE_DIR
 ): string {
     fs.mkdirSync(dir, { recursive: true });
 
-    const file = fileOf(dir, campaignId);
+    const file = fileOf(dir, db, campaignId);
 
     if (!fs.existsSync(file))
         fs.writeFileSync(
             file,
             JSON.stringify({
                 campaignId,
+                db,
                 raw: raw ?? null,
             } satisfies RestoreEntry)
         );
@@ -35,13 +48,18 @@ export function saveRestoreFile(
     return file;
 }
 
-export function dropRestoreFile(campaignId: string, dir = RESTORE_DIR): void {
-    fs.rmSync(fileOf(dir, campaignId), { force: true });
+export function dropRestoreFile(
+    campaignId: string,
+    db = dbIdentity(),
+    dir = RESTORE_DIR
+): void {
+    fs.rmSync(fileOf(dir, db, campaignId), { force: true });
 }
 
-/** applies and deletes every leftover file; a file whose apply throws stays for the next start */
+/** applies and deletes the leftover files of this DB; a file whose apply throws stays for the next start */
 export async function recoverRules(
     apply: (entry: RestoreEntry) => Promise<void>,
+    db = dbIdentity(),
     dir = RESTORE_DIR
 ): Promise<string[]> {
     if (!fs.existsSync(dir)) return [];
@@ -51,11 +69,22 @@ export async function recoverRules(
     for (const name of fs.readdirSync(dir).filter((n) => n.endsWith('.json'))) {
         const file = path.join(dir, name);
 
-        const entry = JSON.parse(fs.readFileSync(file, 'utf8')) as RestoreEntry;
+        const entry = JSON.parse(
+            fs.readFileSync(file, 'utf8')
+        ) as Partial<RestoreEntry>;
 
-        await apply(entry);
+        if (entry.db === undefined) {
+            console.warn(
+                `sweep restore: skipping legacy file without db: ${name}`
+            );
+            continue;
+        }
+
+        if (entry.db !== db) continue;
+
+        await apply(entry as RestoreEntry);
         fs.rmSync(file, { force: true });
-        restored.push(entry.campaignId);
+        restored.push(entry.campaignId as string);
     }
 
     return restored;

@@ -13,11 +13,10 @@ import {
 } from './qualities';
 import type { WfrpItemStats } from './stats';
 
+import { isRecord } from '@/lib/utils/common/is-record';
+
 // Zod-free read-path twin of WfrpItemStatsSchema (the registry graph must stay Zod-free); guard.test keeps them in agreement.
 type Rec = Record<string, unknown>;
-
-const isRec = (v: unknown): v is Rec =>
-    typeof v === 'object' && v !== null && !Array.isArray(v);
 
 const onlyKeys = (r: Rec, keys: string[]) =>
     Object.keys(r).every((k) => keys.includes(k));
@@ -39,7 +38,7 @@ export function qualityList(v: unknown): QualityRef[] | null {
 
     for (const r of v) {
         if (
-            !isRec(r) ||
+            !isRecord(r) ||
             !onlyKeys(r, ['key', 'value']) ||
             typeof r.key !== 'string' ||
             !Object.hasOwn(QUALITY_REGISTRY, r.key)
@@ -65,7 +64,7 @@ export function qualityList(v: unknown): QualityRef[] | null {
 const common = (r: Rec) => num(r.weight, 0, 1000) && num(r.price, 0, 1_000_000);
 
 export function readStats(raw: unknown): WfrpItemStats | null {
-    if (!isRec(raw)) return null;
+    if (!isRecord(raw)) return null;
 
     const qualities = qualityList(raw.qualities);
 
@@ -94,7 +93,7 @@ export function readStats(raw: unknown): WfrpItemStats | null {
                 'price',
             ]) ||
             !oneOf(raw.kind, ARMOUR_KINDS) ||
-            !isRec(loc) ||
+            !isRecord(loc) ||
             !onlyKeys(loc, [...LOCATIONS]) ||
             !LOCATIONS.every((l) => num(loc[l], 0, AP_MAX_PER_LAYER, true))
         )
@@ -139,7 +138,7 @@ export function readStats(raw: unknown): WfrpItemStats | null {
             return null;
 
         if (
-            !isRec(dmg) ||
+            !isRecord(dmg) ||
             !onlyKeys(dmg, ['addSb', 'flat']) ||
             typeof dmg.addSb !== 'boolean' ||
             !num(dmg.flat, -100, 100, true) ||

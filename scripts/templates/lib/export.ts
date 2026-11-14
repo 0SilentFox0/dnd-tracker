@@ -293,3 +293,19 @@ export function leakedIds(pack: Pack): Record<string, number> {
 
     return found;
 }
+
+const sortedList = (list: readonly string[] | undefined) =>
+    [...(list ?? [])].sort();
+
+export function modulesMismatch(
+    manifest: TemplateManifest,
+    campaign: readonly string[] | undefined
+): string | null {
+    const pack = sortedList(manifest.modules);
+
+    const live = sortedList(campaign);
+
+    if (pack.join(',') === live.join(',')) return null;
+
+    return `pack modules [${pack.join(', ')}] differ from campaign modules [${live.join(', ')}]`;
+}

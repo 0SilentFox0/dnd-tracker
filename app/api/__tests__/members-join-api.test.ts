@@ -28,8 +28,14 @@ const auth = vi.hoisted(() => ({
 
 const kvDel = vi.hoisted(() => vi.fn());
 
+const rate = vi.hoisted(() => ({ checkRateLimit: vi.fn() }));
+
 vi.mock('@/lib/db', () => ({ prisma: db }));
 vi.mock('@/lib/cache/kv', () => ({ kvDel }));
+vi.mock('@/lib/utils/api/rate-limit', async (orig) => ({
+    ...(await orig<object>()),
+    checkRateLimit: rate.checkRateLimit,
+}));
 vi.mock('@/lib/utils/api/api-auth', async (orig) => ({
     ...(await orig<object>()),
     requireAuthUser: auth.requireAuthUser,
@@ -215,6 +221,35 @@ describe('POST /campaigns/join', () => {
             members: [{ userId: 'dm' }],
         });
         db.campaignMember.create.mockResolvedValue({ id: 'm9' });
+        rate.checkRateLimit.mockResolvedValue({
+            allowed: true,
+            count: 1,
+            limit: 10,
+            retryAfterSeconds: 0,
+        });
+    });
+
+    it('перевищений ліміт — 429 без запиту в БД', async () => {
+        rate.checkRateLimit.mockResolvedValue({
+            allowed: false,
+            count: 11,
+            limit: 10,
+            retryAfterSeconds: 60,
+        });
+
+        expect((await joinWith('code')).status).toBe(429);
+        expect(db.campaign.findFirst).not.toHaveBeenCalled();
+    });
+
+    it('ліміт рахується з memoryFallback', async () => {
+        await joinWith('code');
+        expect(rate.checkRateLimit).toHaveBeenCalledWith(
+            expect.objectContaining({
+                userId: 'u1',
+                scope: 'campaign-join',
+                memoryFallback: true,
+            })
+        );
     });
 
     it('без сесії — 401', async () => {

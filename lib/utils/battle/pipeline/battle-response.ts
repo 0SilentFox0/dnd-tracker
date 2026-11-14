@@ -9,13 +9,14 @@ import {
     battleDmChannelName,
     userChannelName,
 } from '@/lib/pusher/channels';
-import { reserveOf } from '@/lib/utils/battle/participant/reserve';
+import { publicSetup, reserveOf } from '@/lib/utils/battle/participant/reserve';
 import type { BattleSceneState, LoadedBattle } from '@/lib/utils/battle/store';
 import { checkVictoryConditions } from '@/lib/utils/battle/turn/victory';
 import {
     redactLogForPlayers,
     redactParticipantsForPlayers,
     redactPatchesForPlayers,
+    redactPendingForPlayers,
 } from '@/lib/utils/battle/view/visibility';
 import { stripPlayerHiddenRules } from '@/lib/utils/rules/player-hidden';
 import type { Ruleset } from '@/lib/utils/rules/schema';
@@ -58,13 +59,18 @@ export function toBattleResponse(
         name: meta.name,
         description: meta.description ?? undefined,
         status: scene.status,
-        participants: scene.status === BattleStatus.PREPARED ? meta.setup : [],
+        participants:
+            scene.status === BattleStatus.PREPARED
+                ? hide
+                    ? publicSetup(meta.setup)
+                    : meta.setup
+                : [],
         currentRound: scene.round,
         currentTurnIndex: scene.turnIndex,
         initiativeOrder: hide
             ? redactParticipantsForPlayers(participants)
             : participants,
-        pendingSummons: hide ? redactParticipantsForPlayers(pending) : pending,
+        pendingSummons: hide ? redactPendingForPlayers(pending) : pending,
         pendingMoraleCheck: scene.pendingMoraleCheck,
         pendingChoice: publicPending(scene.pendingChoice),
         ...(scene.sceneState && { system: scene.sceneState }),
@@ -105,14 +111,16 @@ export function redactDeltaForPlayers(
     const patched =
         delta.patched && redactPatchesForPlayers(delta.patched, participants);
 
-    const pending =
-        delta.pending && redactParticipantsForPlayers(delta.pending);
+    const pending = delta.pending && redactPendingForPlayers(delta.pending);
+
+    const setup = delta.setup && publicSetup(delta.setup);
 
     const changed =
         logChanged ||
         upserted !== delta.upserted ||
         patched !== delta.patched ||
-        pending !== delta.pending;
+        pending !== delta.pending ||
+        setup !== delta.setup;
 
     return {
         delta: changed
@@ -122,6 +130,7 @@ export function redactDeltaForPlayers(
                   upserted,
                   ...(patched && { patched }),
                   ...(pending && { pending }),
+                  ...(setup && { setup }),
               }
             : delta,
         changed,

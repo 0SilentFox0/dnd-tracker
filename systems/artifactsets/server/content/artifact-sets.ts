@@ -92,7 +92,7 @@ export const artifactSetsResource = defineResource<
                   ),
               },
     async create(actor, data) {
-        await assertCampaignEffects(actor.campaignId, data.abilities);
+        await assertCampaignEffects(actor, data.abilities);
 
         const icon =
             data.icon !== undefined
@@ -114,7 +114,7 @@ export const artifactSetsResource = defineResource<
     },
     async update(actor, existing, data) {
         await assertCampaignEffects(
-            actor.campaignId,
+            actor,
             data.abilities,
             storedEffectOwners(existing.abilities)
         );

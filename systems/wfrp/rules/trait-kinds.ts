@@ -22,8 +22,6 @@ export const TRAIT_ATTACKS = [
     'ranged',
 ] as const;
 
-export type TraitAttack = (typeof TRAIT_ATTACKS)[number];
-
 export const WFRP_EFFECT_KINDS: readonly string[] = [
     'wfrpArmour',
     'wfrpWard',

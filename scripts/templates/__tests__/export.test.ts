@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { bundleToPack, leakedIds } from '../lib/export';
+import { bundleToPack, leakedIds, modulesMismatch } from '../lib/export';
 import type { PackRow } from '../lib/pack';
 import { treeFromPack } from '../systems/homm/skill-trees';
 
@@ -350,4 +350,26 @@ describe('JSON row references', () => {
             effects: [{ kind: 'summon', unitId: 'u1', spellIds: ['s1', 's2'] }],
         });
     });
+});
+
+describe('modulesMismatch', () => {
+    const withModules = (modules?: string[]): TemplateManifest => ({
+        ...manifest,
+        ...(modules && { modules }),
+    });
+
+    it('ignores order', () =>
+        expect(
+            modulesMismatch(withModules(['a', 'b']), ['b', 'a'])
+        ).toBeNull());
+
+    it('reports both lists when they differ', () => {
+        const text = modulesMismatch(withModules(['a']), ['b']);
+
+        expect(text).toContain('[a]');
+        expect(text).toContain('[b]');
+    });
+
+    it('treats undefined as empty', () =>
+        expect(modulesMismatch(withModules(), [])).toBeNull());
 });

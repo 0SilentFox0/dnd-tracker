@@ -78,7 +78,10 @@ describe('buildStartOrder: резерв', () => {
 
         expect(prisma.character.findMany).toHaveBeenCalledWith(
             expect.objectContaining({
-                where: expect.objectContaining({ status: 'active' }),
+                where: expect.objectContaining({
+                    campaignId: 'c1',
+                    status: 'active',
+                }),
             })
         );
         expect(order.map((p) => p.basicInfo.id).sort()).toEqual(['h1', 'w1']);
@@ -91,5 +94,22 @@ describe('buildStartOrder: резерв', () => {
             order.find((p) => p.basicInfo.id === 'w1')?.abilities.initiative
         ).toBe(15);
         expect(reserve[0].abilities.initiative).toBe(10);
+    });
+
+    it('персонаж іншої кампанії не стає учасником', async () => {
+        mocks.fromCharacter.mockClear();
+        vi.mocked(prisma.character.findMany).mockResolvedValueOnce([]);
+        mocks.fromUnit.mockResolvedValue(makeParticipant({ id: 'w1' }));
+
+        const { order } = await buildStartOrder(
+            'b1',
+            'c1',
+            [{ id: 'foreign', type: 'character', side: 'ally' }],
+            null,
+            DEFAULT_RULES
+        );
+
+        expect(order.map((p) => p.basicInfo.id)).not.toContain('foreign');
+        expect(mocks.fromCharacter).not.toHaveBeenCalled();
     });
 });

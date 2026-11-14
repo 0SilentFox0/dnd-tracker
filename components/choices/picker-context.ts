@@ -18,8 +18,11 @@ import type { ChoiceHero, ChoiceIssue, ChoicesState } from '@/types/choices';
 import type { CharacterClassEntry, GameClassData } from '@/types/classes';
 
 export const issueFor = (issues: ChoiceIssue[] | undefined, path: string) =>
-    issues?.find((i) => i.path === path || i.path.startsWith(`${path}.`))
-        ?.message;
+    issues?.find(
+        (i) =>
+            typeof i.path === 'string' &&
+            (i.path === path || i.path.startsWith(`${path}.`))
+    )?.message;
 
 export type PickerBase = Omit<
     PickerContext,

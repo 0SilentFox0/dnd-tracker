@@ -1,4 +1,7 @@
-import type { BattleParticipant } from '@/types/battle';
+import type {
+    BattleParticipant,
+    BattlePreparationParticipant,
+} from '@/types/battle';
 
 export const isReserved = (p: BattleParticipant): boolean =>
     p.battleData.reserved === true;
@@ -37,4 +40,28 @@ export function dropBattleFlag(
     delete battleData[key];
 
     return { ...p, battleData };
+}
+
+export const reserveStub = (p: BattleParticipant): BattleParticipant =>
+    ({
+        basicInfo: { id: p.basicInfo.id, side: p.basicInfo.side },
+        battleData: { reserved: true },
+    }) as unknown as BattleParticipant;
+
+export const stubReserve = (pending: BattleParticipant[]): BattleParticipant[] =>
+    pending.some(isReserved)
+        ? pending.map((p) => (isReserved(p) ? reserveStub(p) : p))
+        : pending;
+
+/** Players must not learn how many units the DM holds in reserve. */
+export function publicSetup(
+    setup: BattlePreparationParticipant[]
+): BattlePreparationParticipant[] {
+    if (!setup.some((s) => s.reserved)) return setup;
+
+    return setup.flatMap(({ reserved, ...rest }) => {
+        const quantity = (rest.quantity ?? 1) - (reserved ?? 0);
+
+        return quantity > 0 ? [{ ...rest, quantity }] : [];
+    });
 }

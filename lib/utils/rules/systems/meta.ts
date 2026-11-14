@@ -50,6 +50,8 @@ export interface SystemMeta {
     i18n: SystemI18n;
     dmSections?: readonly string[];
     contentKinds?: readonly string[];
+    /** `hashJson` of `characteristics` values the system treats as empty besides null / {} */
+    emptyCharacteristicsHashes?: readonly string[];
 }
 
 export const SYSTEM_META = [

@@ -27,7 +27,7 @@ const attacksOf = (artifact: never) =>
         } as never,
         { w: artifact } as never,
         undefined,
-        { fiveE: true }
+        { classMode: true }
     );
 
 describe('weaponCategoryOf', () => {
