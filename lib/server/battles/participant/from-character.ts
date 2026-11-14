@@ -59,6 +59,7 @@ import { attunedRefs } from '@/lib/utils/items/resolve';
 import { type Ruleset } from '@/lib/utils/rules';
 import { currencyValueOf, ruleSystemOf } from '@/lib/utils/rules/systems';
 import { composition } from '@/lib/utils/rules/systems/catalog';
+import { withColumnView } from '@/lib/utils/rules/systems/column-view';
 import { systemSlotOf } from '@/lib/utils/rules/systems/slot';
 import type { BranchLevel } from '@/lib/utils/skills/progression';
 import { resolveClassEntries } from '@/lib/utils/spells/class-slots';
@@ -377,7 +378,7 @@ function finalizeCharacter(
 }
 
 export async function createBattleParticipantFromCharacter(
-    character: CharacterFromPrisma,
+    row: CharacterFromPrisma,
     battleId: string,
     side: ParticipantSide,
     instanceNumber?: number,
@@ -387,6 +388,8 @@ export async function createBattleParticipantFromCharacter(
     const rules = context?.rules ?? preloaded?.rules;
 
     if (!rules) throw new Error('Character participant needs campaign rules');
+
+    const character = withColumnView(row, ruleSystemOf(rules));
 
     const modifiers = {
         strength: getAbilityModifier(character.strength),

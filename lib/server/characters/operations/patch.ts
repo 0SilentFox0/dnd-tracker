@@ -45,6 +45,8 @@ import {
     spellNotificationEvents,
 } from '@/lib/utils/notifications/events';
 import { allLevelResets, ruleSystemOf } from '@/lib/utils/rules/systems';
+import { splitColumnView } from '@/lib/utils/rules/systems/column-view';
+import type { RuleSystemDefinition } from '@/lib/utils/rules/systems/types';
 import type { SpellSlots } from '@/lib/utils/spells/spell-slots';
 import type { SpellSlotProgression } from '@/types/races';
 
@@ -231,6 +233,7 @@ interface UpdateWriterInput {
     avatar: string | null | undefined;
     resolved: ClassesResult;
     computedState: Awaited<ReturnType<typeof computeUpdate>>;
+    system: RuleSystemDefinition;
 }
 
 function updateWriter({
@@ -239,12 +242,19 @@ function updateWriter({
     avatar,
     resolved,
     computedState,
+    system,
 }: UpdateWriterInput) {
     const { fromClasses, finalLevel } = resolved;
 
     const { computed, classSeenLevel, restoredSlots } = computedState;
 
     const { systemBaseline: _baseline, ...columns } = data;
+
+    const view = splitColumnView(
+        { ...columns, ...computedState.computed.abilityScores },
+        system,
+        character.characteristics
+    );
 
     const classesData = fromClasses && {
         class: fromClasses.class,
@@ -265,7 +275,9 @@ function updateWriter({
             where: { id: character.id },
             data: {
                 ...columns,
-                characteristics: (characteristics ?? data.characteristics) as
+                characteristics: (characteristics ??
+                    view.characteristics ??
+                    data.characteristics) as
                     | Prisma.InputJsonValue
                     | undefined,
                 backgroundChoices: undefined,
@@ -348,6 +360,7 @@ async function patchCore(gate: Gate, parsed: Parsed) {
         avatar: avatar.avatar,
         resolved,
         computedState,
+        system: ruleSystemOf(campaign.rules),
     });
 
     const guardsLedger = Boolean(

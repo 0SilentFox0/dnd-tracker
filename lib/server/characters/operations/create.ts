@@ -33,6 +33,7 @@ import {
 import { hasPicks } from '@/lib/utils/characters/choices/read';
 import { heroInitiativeRange } from '@/lib/utils/characters/initiative-range';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
+import { splitColumnView } from '@/lib/utils/rules/systems/column-view';
 import type { CharacterClassEntry, GameClassData } from '@/types/classes';
 
 async function assertClassSkills({
@@ -171,6 +172,8 @@ async function createCharacterCore(
         fromClasses?.spellSlots ??
         (await deriveCharacterDefaults(campaignId, data)).spellSlots;
 
+    const split = splitColumnView({ ...data, initiative }, system);
+
     try {
         const character = await prisma.character.create({
             data: {
@@ -218,7 +221,8 @@ async function createCharacterCore(
                 primaryAbility: data.primaryAbility ?? null,
 
                 skillTreeProgress: {},
-                characteristics: (data.characteristics ??
+                characteristics: (split.characteristics ??
+                    data.characteristics ??
                     system.characteristics.defaults()) as
                     | Prisma.InputJsonObject
                     | undefined,
