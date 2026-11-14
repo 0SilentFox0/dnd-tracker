@@ -231,6 +231,19 @@ export function CampaignSettingsDialog({
                         </div>
                         <div className="flex items-center space-x-2">
                             <Checkbox
+                                id="map-library-enabled"
+                                checked={fields.mapLibraryEnabled}
+                                onCheckedChange={(v) =>
+                                    set('mapLibraryEnabled', v === true)
+                                }
+                                disabled={isSaving}
+                            />
+                            <Label htmlFor="map-library-enabled">
+                                {t('settings.mapLibrary')}
+                            </Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <Checkbox
                                 id="campaign-status"
                                 checked={
                                     fields.status === CampaignStatus.ACTIVE

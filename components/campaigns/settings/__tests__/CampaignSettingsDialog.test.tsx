@@ -30,6 +30,7 @@ const campaign: CampaignSettings = {
     allowPlayerEdit: true,
     critChoiceByDm: false,
     acquaintancesEnabled: false,
+    mapLibraryEnabled: false,
     status: 'active',
 };
 
@@ -206,6 +207,22 @@ describe('CampaignSettingsDialog: знайомства', () => {
             expect(updateCampaign).toHaveBeenCalledWith(
                 'c1',
                 expect.objectContaining({ acquaintancesEnabled: true })
+            )
+        );
+    });
+
+    it('перемикач бібліотеки карт іде в payload збереження', async () => {
+        renderDialog();
+
+        fireEvent.click(screen.getByLabelText('campaigns.settings.mapLibrary'));
+        fireEvent.click(
+            screen.getByRole('button', { name: 'common.actions.save' })
+        );
+
+        await waitFor(() =>
+            expect(updateCampaign).toHaveBeenCalledWith(
+                'c1',
+                expect.objectContaining({ mapLibraryEnabled: true })
             )
         );
     });

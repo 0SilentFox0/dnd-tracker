@@ -174,6 +174,7 @@ export default async function CampaignDetailPage({
                             allowPlayerEdit: campaign.allowPlayerEdit,
                             critChoiceByDm: campaign.critChoiceByDm,
                             acquaintancesEnabled: campaign.acquaintancesEnabled,
+                            mapLibraryEnabled: campaign.mapLibraryEnabled,
                             status: campaign.status,
                             inviteCode: campaign.inviteCode,
                         }}

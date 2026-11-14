@@ -75,6 +75,7 @@
     "critChoiceByDm": "DM picks crit/fumble effects",
     "critChoiceHint": "Off — the effect is random",
     "acquaintances": "Acquaintances available to players",
+    "mapLibrary": "Map library",
     "active": "Campaign is active",
     "templates": "Templates",
     "saveAsTemplate": "Save as template",

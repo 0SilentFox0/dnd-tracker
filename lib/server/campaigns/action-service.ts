@@ -90,6 +90,7 @@ export const CAMPAIGN_SETTINGS_SELECT = {
     allowPlayerEdit: true,
     critChoiceByDm: true,
     acquaintancesEnabled: true,
+    mapLibraryEnabled: true,
     status: true,
     friendlyFire: true,
     xpMultiplier: true,
