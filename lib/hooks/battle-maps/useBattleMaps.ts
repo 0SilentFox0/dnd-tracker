@@ -8,6 +8,7 @@ import {
     cloneBattleMap,
     createBattleMap,
     deleteBattleMap,
+    getBattleMap,
     getBattleMaps,
     updateBattleMap,
 } from '@/lib/api/battle-maps';
@@ -19,6 +20,14 @@ export function useBattleMaps(campaignId: string, enabled = true) {
         queryFn: () => getBattleMaps(campaignId),
         enabled,
         staleTime: 60_000,
+    });
+}
+
+export function useBattleMap(campaignId: string, mapId: string) {
+    return useQuery({
+        queryKey: battleMapKeys.detail(campaignId, mapId),
+        queryFn: () => getBattleMap(campaignId, mapId),
+        staleTime: 0,
     });
 }
 
@@ -39,14 +48,27 @@ export function useBattleMapMutations(campaignId: string) {
         update: useMutation({
             mutationFn: (v: { mapId: string; data: BattleMapInput }) =>
                 updateBattleMap(campaignId, v.mapId, v.data),
-            onSuccess,
+            onSuccess: (_data, v) => {
+                void queryClient.invalidateQueries({
+                    queryKey: battleMapKeys.detail(campaignId, v.mapId),
+                });
+
+                return onSuccess();
+            },
         }),
         remove: useMutation({
             mutationFn: (mapId: string) => deleteBattleMap(campaignId, mapId),
-            onSuccess,
+            onSuccess: (_data, mapId) => {
+                queryClient.removeQueries({
+                    queryKey: battleMapKeys.detail(campaignId, mapId),
+                });
+
+                return onSuccess();
+            },
         }),
         clone: useMutation({
-            mutationFn: (mapId: string) => cloneBattleMap(campaignId, mapId),
+            mutationFn: (v: { mapId: string; name?: string }) =>
+                cloneBattleMap(campaignId, v.mapId, v.name),
             onSuccess,
         }),
     };
