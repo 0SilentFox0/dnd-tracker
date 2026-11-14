@@ -25,14 +25,14 @@ vi.mock('@/lib/hooks/spells', async (importOriginal) => ({
 }));
 
 vi.mock('../useBattleRules', () => ({
-    useBattleRules: () => ({ tested: false, dice: 6 }),
+    useBattleRules: () => ({ tested: false, dice: 6, attackDice: 6 }),
 }));
 
 import { useSpellBook } from '../useSpellBook';
 import { fakeScene } from './fake-scene';
 
-describe('useSpellBook: aiDamage uses the system die', () => {
-    it('rolls attack dice with combat.dice sides', async () => {
+describe('useSpellBook: aiDamage uses the magic attack die', () => {
+    it('rolls attack dice with magic.attackDice sides', async () => {
         const scene = fakeScene({
             isDM: true,
             knownSpells: ['bolt'],

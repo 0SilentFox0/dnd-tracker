@@ -63,7 +63,7 @@ export function useSpellBook(
 ) {
     const scene = useBattleScene();
 
-    const { tested: magic, dice } = useBattleRules();
+    const { tested: magic, attackDice } = useBattleRules();
 
     const text = useText();
 
@@ -446,14 +446,14 @@ export function useSpellBook(
                 })
             );
 
-            if (state.pick?.needsAttackRolls)
+            if (state.pick?.needsAttackRolls && attackDice)
                 state.targetIds.forEach(
                     (id) =>
                         state.attacks[id] === undefined &&
                         dispatch({
                             type: 'SET_ATTACK',
                             id,
-                            value: rollDie(dice, cryptoRandom),
+                            value: rollDie(attackDice, cryptoRandom),
                         })
                 );
         },

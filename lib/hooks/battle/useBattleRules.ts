@@ -18,6 +18,7 @@ export function useBattleRules() {
 
         return {
             dice: combat.dice,
+            attackDice: magic.attackDice,
             serverJudged: combat.judge === 'server',
             actionEconomy: combat.actionEconomy,
             spells,

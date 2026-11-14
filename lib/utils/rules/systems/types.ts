@@ -36,6 +36,7 @@ import type { TurnGateOutcome } from '@/lib/utils/battle/flows/turn-flow';
 import type { DieFx } from '@/lib/utils/battle/fx/dice/types';
 import type { EquippedArtifactRow } from '@/lib/utils/battle/participant/extract-artifacts';
 import type {
+    D20Mode,
     RuleSystemProficiency,
     RuleSystemSaves,
 } from '@/lib/utils/battle/saves/types';
@@ -613,8 +614,35 @@ export interface RuleSystemSustain {
     ): SustainResult;
 }
 
+export interface SpellAttackRollCtx {
+    mode: D20Mode;
+    rng: () => number;
+    /** A roll the player already made */
+    presetRoll?: number;
+    /** Roll bonus and target armor class */
+    bonus: number;
+    ac: number;
+    /** Roll at or above which the hit is critical, and at or below which it always misses */
+    critOn: number;
+    fumbleOn: number;
+}
+
+export interface SpellAttackRoll {
+    roll: number;
+    rolls: number[];
+    crit: boolean;
+    fumble: boolean;
+    hit: boolean;
+}
+
 export interface RuleSystemMagic {
     resource?: RuleSystemMagicResource;
+    /** Attack roll of a spell against a target; absent means the base has none and a spell with an attack hits without a roll */
+    attackRoll?(ctx: SpellAttackRollCtx): SpellAttackRoll;
+    /** Natural result of a save roll that decides it outright; null for any other roll */
+    saveCrit?(roll: number): 'success' | 'fail' | null;
+    /** Die size the client rolls for a spell attack; absent means the client rolls none */
+    attackDice?: number;
     sustain: RuleSystemSustain;
     /** Base of a spell save DC from the campaign rules; absent means the section default */
     saveDcBase?(rules: Ruleset): number;
@@ -824,6 +852,12 @@ export interface RuleSystemCombat {
     /** Who judges an attack: the client rolls and the server checks vs AC, or the server resolves the whole test */
     judge: 'client' | 'server';
     attack?: RuleSystemAttackHooks;
+    /** Attack roll of a zone trigger against one target; absent means a zone attack hits without a roll */
+    zoneAttack?(ctx: {
+        rng: () => number;
+        bonus: number;
+        ac: number;
+    }): { roll: number; hit: boolean };
     dice: number;
     attacksOf?(input: { rows: EquippedArtifactRow[] }): ExtractedAttack[];
     participantFields?(

@@ -28,6 +28,7 @@ import { D20_STAT_COLUMNS } from './rules/stats';
 import { D20_TURN } from './rules/turn';
 
 import type { RuleSystemDefinition } from '@/lib/utils/rules/systems/types';
+import { d20ZoneAttack } from '@/systems/d20/rules/magic/spell-roll';
 import type { SheetRollSubject } from '@/types/characters';
 
 export const D20_MODULE: RuleSystemDefinition = {
@@ -68,6 +69,7 @@ export const D20_MODULE: RuleSystemDefinition = {
         reach: D20_REACH,
         inspiration: D20_INSPIRATION,
         attack: D20_ATTACK_HOOKS,
+        zoneAttack: d20ZoneAttack,
         dice: 20,
         actionEconomy: { bonusAction: true, reaction: true },
         resolveAttack: resolveD20Attack,

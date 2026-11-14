@@ -10,7 +10,6 @@ import { applyEffect } from '@/lib/utils/abilities/registry/effects';
 import type { ConcentrationTag } from '@/lib/utils/battle/concentration';
 import { getEffectiveArmorClass } from '@/lib/utils/battle/participant/helpers';
 import { savesOf } from '@/lib/utils/battle/saves/access';
-import { rollDie } from '@/lib/utils/common/dice';
 import type { Ruleset } from '@/lib/utils/rules';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { ZoneTrigger } from '@/lib/utils/spells/model/schema';
@@ -145,25 +144,26 @@ export function fireTrigger(
         if (res.success) return { participants: next, messages, failed: false };
     }
 
-    if (trigger.attack) {
-        const roll = rollDie(20, ctx.rng);
+    const zoneAttack = ruleSystemOf(ctx.rules).combat.zoneAttack;
 
-        const total = roll + (src.attackBonus ?? 0);
+    // a base without a zone attack roll lets the trigger hit unrolled
+    if (trigger.attack && zoneAttack) {
+        const bonus = src.attackBonus ?? 0;
 
         const ac = getEffectiveArmorClass(
             findParticipant(next, targetId) ?? target,
             next
         );
 
-        const hit = roll === 20 || (roll !== 1 && total >= ac);
+        const { roll, hit } = zoneAttack({ rng: ctx.rng, bonus, ac });
 
         messages.push(
             textRef('battleLog.spellFx.zoneAttack', {
                 target: target.basicInfo.name,
                 spell: src.spellName,
                 roll,
-                bonus: src.attackBonus ?? 0,
-                total,
+                bonus,
+                total: roll + bonus,
                 ac,
                 hit: String(hit),
             })
