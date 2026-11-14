@@ -114,14 +114,13 @@ describe('system literals ratchet', () => {
 describe('wfrp leaks outside the allowed files', () => {
     const ALLOWED = new Set([
         ...readImportsExempt().map((e) => e.file),
-        'lib/onboarding/whats-new.ts',
         'lib/constants/api-errors.ts',
         'lib/server/assistant/actions/character-coverage.ts',
     ]);
 
     const literals = readLiteralsExempt();
 
-    it('only route / content-kind / ruleset-section files, whats-new, api-errors and character-coverage mention wfrp', () => {
+    it('only route / content-kind / ruleset-section files, api-errors and character-coverage mention wfrp', () => {
         const leaks = Object.keys(literals).filter(
             (file) =>
                 /wfrp/i.test(fs.readFileSync(path.join(ROOT, file), 'utf8')) &&

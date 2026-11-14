@@ -1,3 +1,4 @@
+import type { WhatsNewEntry } from '@/lib/onboarding/types';
 // <systems:generated>
 import { ARTIFACTSETS_META } from '@/systems/artifactsets/meta';
 import { D20_META } from '@/systems/d20/meta';
@@ -50,6 +51,7 @@ export interface SystemMeta {
     distance?: { unit: 'ft' | 'yd'; perCell: number };
     tokens?: readonly string[];
     i18n: SystemI18n;
+    whatsNew?: readonly WhatsNewEntry[];
     dmSections?: readonly string[];
     contentKinds?: readonly string[];
     /** `hashJson` of `characteristics` values the system treats as empty besides null / {} */
