@@ -352,4 +352,42 @@ describe('точка шаблону', () => {
         });
         expect(resolvePoints({ ...empty, at: { x: 9, y: 9 } })).toBeNull();
     });
+
+    describe('камера: CTM із зумом і зсувом', () => {
+        const CAM = { a: 2, d: 2, e: -300, f: -120 };
+
+        it('центр клітинки через CTM камери', () => {
+            anchor('t', { x: 10, y: 10, w: 20, h: 20 });
+            grid(CAM, document.body, { cols: 20, rows: 20 });
+
+            expect(resolvePoints(area({ x: 4, y: 3 }))?.at).toEqual({
+                x: 4.5 * 100 * 2 - 300,
+                y: 3.5 * 100 * 2 - 120,
+            });
+        });
+
+        it('та сама точка поза [data-fx-clip] — at відсутнє', () => {
+            const clip = document.createElement('div');
+
+            clip.dataset.fxClip = '';
+            clip.getBoundingClientRect = domRect({ x: 0, y: 0, w: 300, h: 200 });
+            document.body.appendChild(clip);
+            anchor('t', { x: 10, y: 10, w: 20, h: 20 }, false, clip);
+            grid(CAM, clip, { cols: 20, rows: 20 });
+
+            expect(resolvePoints(area({ x: 4, y: 3 }))?.at).toBeUndefined();
+        });
+
+        it('батько кліпу без прокрутки не обрізає', () => {
+            const scroller = mapClip({ x: 0, y: 0, w: 300, h: 200 }, false);
+
+            anchor('t', { x: 10, y: 10, w: 20, h: 20 }, false, scroller);
+            grid({ a: 1, d: 1, e: 0, f: 0 }, scroller, { cols: 20, rows: 20 });
+
+            expect(resolvePoints(area({ x: 1, y: 1 }))?.at).toEqual({
+                x: 150,
+                y: 150,
+            });
+        });
+    });
 });
