@@ -4,7 +4,7 @@ import { edgeKey } from './walls';
 
 import {
     cellKey,
-    cellsByDistance,
+    cellsByRing,
     inBounds,
     mapCentre,
 } from '@/lib/utils/battle/grid/geometry';
@@ -130,8 +130,9 @@ export function nearestFree(
     from: GridPoint,
     blocked: ReadonlySet<string>
 ): GridPoint | null {
-    return (
-        cellsByDistance(grid, from).find((p) => !blocked.has(cellKey(p))) ??
-        null
-    );
+    for (const p of cellsByRing(grid, from)) {
+        if (!blocked.has(cellKey(p))) return p;
+    }
+
+    return null;
 }

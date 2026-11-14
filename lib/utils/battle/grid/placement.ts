@@ -1,4 +1,4 @@
-import { cellKey, cellsByDistance, footprint } from './geometry';
+import { cellKey, cellsByRing, footprint } from './geometry';
 import { fits, occupiesCells, sizeOf } from './occupancy';
 
 import { ParticipantSide } from '@/lib/constants/battle';
@@ -63,6 +63,19 @@ export function placeParticipants(
         positions.set(p.basicInfo.id, position);
     }
 
+    const anchorsBySide = new Map<string, GridPoint[]>();
+
+    const anchorsOf = (side: string): GridPoint[] => {
+        let list = anchorsBySide.get(side);
+
+        if (!list) {
+            list = sideAnchors(map, side);
+            anchorsBySide.set(side, list);
+        }
+
+        return list;
+    };
+
     return participants.map((p) => {
         if (!occupiesCells(p) || positions.has(p.basicInfo.id)) return p;
 
@@ -80,11 +93,18 @@ export function placeParticipants(
 
         const near = p.battleData.position ?? summoner;
 
-        const candidates = near
-            ? cellsByDistance(map, near)
-            : sideAnchors(map, p.basicInfo.side).map(shift);
+        const candidates: Iterable<GridPoint> = near
+            ? cellsByRing(map, near)
+            : anchorsOf(p.basicInfo.side).map(shift);
 
-        const anchor = candidates.find((a) => fits(map, a, size, blocked));
+        let anchor: GridPoint | undefined;
+
+        for (const a of candidates) {
+            if (fits(map, a, size, blocked)) {
+                anchor = a;
+                break;
+            }
+        }
 
         if (!anchor) return p;
 

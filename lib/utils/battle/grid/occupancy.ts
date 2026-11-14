@@ -1,6 +1,6 @@
 import {
     cellKey,
-    cellsByDistance,
+    cellsByRing,
     footprint,
     footprintDistance,
     isPlayable,
@@ -113,9 +113,9 @@ export function nearestStandable(
 
     const size = sizeOf(mover);
 
-    return (
-        cellsByDistance(map, from).find((cell) =>
-            fits(map, cell, size, others)
-        ) ?? null
-    );
+    for (const cell of cellsByRing(map, from)) {
+        if (fits(map, cell, size, others)) return cell;
+    }
+
+    return null;
 }

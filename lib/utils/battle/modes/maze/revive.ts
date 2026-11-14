@@ -2,7 +2,7 @@ import { featureKeys } from './features';
 import type { MazeGrid } from './grid';
 import { mazeReachable } from './movement';
 
-import { cellKey, cellsByDistance } from '@/lib/utils/battle/grid/geometry';
+import { cellKey, cellsByRing } from '@/lib/utils/battle/grid/geometry';
 import { occupiedBy } from '@/lib/utils/battle/grid/occupancy';
 import type { BattleParticipant, GridPoint } from '@/types/battle';
 
@@ -38,9 +38,9 @@ export function nearestMazeCell(
     if (byCost.length > 0)
         return byCost[0][1].path[byCost[0][1].path.length - 1];
 
-    return (
-        cellsByDistance(grid, from).find(
-            (c) => !taken.has(cellKey(c)) && !features.has(cellKey(c))
-        ) ?? null
-    );
+    for (const c of cellsByRing(grid, from)) {
+        if (!taken.has(cellKey(c)) && !features.has(cellKey(c))) return c;
+    }
+
+    return null;
 }

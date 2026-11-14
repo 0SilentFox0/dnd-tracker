@@ -250,12 +250,52 @@ export const mapCentre = (
     map: Pick<BattleMapConfig, 'cols' | 'rows'>
 ): GridPoint => ({ x: Math.floor(map.cols / 2), y: Math.floor(map.rows / 2) });
 
+/** Клітинки карти кільцями Чебишева від `from`; усередині кільця — рядками зверху вниз. */
+export function* cellsByRing(
+    map: Pick<BattleMapConfig, 'cols' | 'rows'>,
+    from: GridPoint
+): Generator<GridPoint> {
+    if (map.cols <= 0 || map.rows <= 0) return;
+
+    const last = Math.max(
+        Math.abs(from.x),
+        Math.abs(from.x - (map.cols - 1)),
+        Math.abs(from.y),
+        Math.abs(from.y - (map.rows - 1))
+    );
+
+    for (let d = 0; d <= last; d++) {
+        const y0 = Math.max(0, from.y - d);
+
+        const y1 = Math.min(map.rows - 1, from.y + d);
+
+        for (let y = y0; y <= y1; y++) {
+            if (Math.abs(y - from.y) === d) {
+                const x0 = Math.max(0, from.x - d);
+
+                const x1 = Math.min(map.cols - 1, from.x + d);
+
+                for (let x = x0; x <= x1; x++) yield { x, y };
+
+                continue;
+            }
+
+            const left = from.x - d;
+
+            const right = from.x + d;
+
+            if (left >= 0 && left < map.cols) yield { x: left, y };
+
+            if (right !== left && right >= 0 && right < map.cols)
+                yield { x: right, y };
+        }
+    }
+}
+
 /** Усі клітинки карти за зростанням відстані від `from`; при рівності — рядками зверху вниз. */
 export function cellsByDistance(
     map: Pick<BattleMapConfig, 'cols' | 'rows'>,
     from: GridPoint
 ): GridPoint[] {
-    return allCells(map).sort(
-        (a, b) => cellDistance(a, from) - cellDistance(b, from)
-    );
+    return [...cellsByRing(map, from)];
 }

@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+    allCells,
     cellDistance,
     cellKey,
     cellLine,
     cellsByDistance,
+    cellsByRing,
     closestCell,
     footprint,
     footprintDistance,
@@ -114,5 +116,43 @@ describe('cellsByDistance', () => {
         expect(
             cellsByDistance({ cols: 4, rows: 2 }, { x: 10, y: 10 })
         ).toHaveLength(8);
+    });
+});
+
+describe('cellsByRing', () => {
+    const map = { cols: 7, rows: 5 };
+
+    const oracle = (from: { x: number; y: number }) =>
+        allCells(map).sort(
+            (a, b) => cellDistance(a, from) - cellDistance(b, from)
+        );
+
+    const points = {
+        кутова: { x: 0, y: 0 },
+        крайова: { x: 6, y: 2 },
+        центральна: { x: 3, y: 2 },
+        'поза картою': { x: 9, y: -2 },
+    };
+
+    for (const [name, from] of Object.entries(points)) {
+        it(`збігається зі стабільним sort: ${name}`, () => {
+            expect([...cellsByRing(map, from)]).toEqual(oracle(from));
+            expect(cellsByDistance(map, from)).toEqual(oracle(from));
+        });
+    }
+
+    it('ледачий: зупиняється після першого find', () => {
+        let produced = 0;
+
+        function* counted() {
+            for (const c of cellsByRing({ cols: 200, rows: 200 }, { x: 100, y: 100 })) {
+                produced++;
+                yield c;
+            }
+        }
+
+        for (const c of counted()) if (c.x === 101 && c.y === 100) break;
+
+        expect(produced).toBeLessThan(20);
     });
 });

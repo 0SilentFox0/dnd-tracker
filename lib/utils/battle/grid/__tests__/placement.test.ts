@@ -196,3 +196,85 @@ describe('авторозстановка', () => {
         expect(new Set(cells.map((c) => `${c.x}:${c.y}`)).size).toBe(8);
     });
 });
+
+describe('золотий порядок розстановки', () => {
+    const cfg = (cols: number, rows: number): BattleMapConfig => ({
+        cols,
+        rows,
+        background: null,
+        opacity: 0.3,
+    });
+
+    const A = ParticipantSide.ALLY;
+
+    const E = ParticipantSide.ENEMY;
+
+    const positions = (m: BattleMapConfig, list: BattleParticipant[]) =>
+        placeParticipants(m, list).map((x) => x.battleData.position);
+
+    it('змішані сторони й великі істоти', () => {
+        expect(
+            positions(cfg(10, 5), [
+                p('a1', A),
+                p('a2', A),
+                p('e1', E, {}, 2),
+                p('e2', E),
+                p('a3', A, {}, 2),
+            ])
+        ).toEqual([
+            { x: 0, y: 2 },
+            { x: 0, y: 0 },
+            { x: 8, y: 2 },
+            { x: 9, y: 0 },
+            { x: 1, y: 1 },
+        ]);
+    });
+
+    it('призвані, перекриття й позиція поза картою', () => {
+        expect(
+            positions(cfg(10, 5), [
+                p('s', A, { position: { x: 5, y: 2 } }),
+                p('w1', A, { summonedBy: 's' }),
+                p('w2', A, { summonedBy: 's' }),
+                p('o1', E, { position: { x: 9, y: 4 } }),
+                p('o2', E, { position: { x: 9, y: 4 } }),
+                p('out', A, { position: { x: 14, y: 2 } }),
+            ])
+        ).toEqual([
+            { x: 5, y: 2 },
+            { x: 4, y: 1 },
+            { x: 5, y: 1 },
+            { x: 9, y: 4 },
+            { x: 8, y: 3 },
+            { x: 9, y: 0 },
+        ]);
+    });
+
+    it('20×12: 8 союзників і 8 ворогів, один великий', () => {
+        expect(
+            positions(cfg(20, 12), [
+                ...Array.from({ length: 8 }, (_, i) => p(`a${i}`, A)),
+                ...Array.from({ length: 8 }, (_, i) =>
+                    p(`e${i}`, E, {}, i === 0 ? 3 : 1)
+                ),
+            ])
+        ).toEqual([
+            { x: 0, y: 5 },
+            { x: 0, y: 7 },
+            { x: 0, y: 3 },
+            { x: 0, y: 9 },
+            { x: 0, y: 1 },
+            { x: 0, y: 11 },
+            { x: 1, y: 6 },
+            { x: 1, y: 4 },
+            { x: 17, y: 5 },
+            { x: 19, y: 3 },
+            { x: 19, y: 9 },
+            { x: 19, y: 1 },
+            { x: 19, y: 11 },
+            { x: 18, y: 4 },
+            { x: 18, y: 8 },
+            { x: 18, y: 2 },
+        ]);
+    });
+});
