@@ -94,7 +94,6 @@ model Campaign {
 
   baseSourceId String?
   baseVersion  Int?
-  battleMaps   BattleMap[]
 
   @@index([dmUserId])
   @@index([kind, visibility])
