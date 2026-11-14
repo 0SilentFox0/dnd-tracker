@@ -175,19 +175,21 @@ function withEdges(
     };
 }
 
-/** Додає/прибирає ребра; стіна й ґрати не живуть на одному ребрі — остання дія перемагає, понад ліміт — відкидається. */
+export type EdgePaint = { map: BattleMapConfig; overflow: boolean };
+
+/** Додає/прибирає ребра; стіна й ґрати не живуть на одному ребрі — остання дія перемагає, понад ліміт — відкидається (`overflow`). */
 export function paintEdges(
     map: BattleMapConfig,
     edges: string[],
     op: EdgeOp
-): BattleMapConfig {
+): EdgePaint {
     const valid = edges.filter((edge) => {
         const { a, b } = parseEdgeKey(edge);
 
         return inBounds(map, a) && inBounds(map, b);
     });
 
-    if (!valid.length) return map;
+    if (!valid.length) return { map, overflow: false };
 
     const walls = new Set(map.walls ?? []);
 
@@ -207,9 +209,10 @@ export function paintEdges(
         }
     }
 
-    if (walls.size > MAX_MAP_EDGES || bars.size > MAX_MAP_EDGES) return map;
+    if (walls.size > MAX_MAP_EDGES || bars.size > MAX_MAP_EDGES)
+        return { map, overflow: true };
 
-    return withEdges(map, { walls, bars });
+    return { map: withEdges(map, { walls, bars }), overflow: false };
 }
 
 export function applyMargins(

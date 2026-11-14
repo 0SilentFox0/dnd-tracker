@@ -66,7 +66,6 @@ interface Options {
     onSkipped?: (count: number) => void;
     onActivate?: () => void;
     edgeSource?: EdgeSource;
-    onEdgeError?: () => void;
 }
 
 const EMPTY: ReadonlySet<string> = new Set();
@@ -109,7 +108,6 @@ export function useMapTerrainTool({
     onSkipped,
     onActivate,
     edgeSource,
-    onEdgeError,
 }: Options): MapTerrainTool {
     const [on, setOn] = useState(false);
 
@@ -130,11 +128,10 @@ export function useMapTerrainTool({
         mutate,
         onSkipped,
         edgeSource,
-        onEdgeError,
     });
 
     useEffect(() => {
-        latest.current = { brush, mutate, onSkipped, edgeSource, onEdgeError };
+        latest.current = { brush, mutate, onSkipped, edgeSource };
     });
 
     const queue = useRef<MapTerrainData[]>([]);
@@ -259,14 +256,12 @@ export function useMapTerrainTool({
 
         if (!src) return;
 
-        const wallsList = wallSet(src.walls);
-
         const send = (data: MapWallsData) => {
             // версія бою одна: паралельні штрихи ловили б 409
             setInFlightEdges((list) => [...list, data]);
             edgeChain.current = edgeChain.current
                 .then(() => src.mutate(data))
-                .catch(() => latest.current.onEdgeError?.())
+                .catch(() => undefined)
                 .finally(() =>
                     setInFlightEdges((list) => list.filter((d) => d !== data))
                 );
@@ -288,16 +283,7 @@ export function useMapTerrainTool({
         };
 
         if (b.kind === 'edge-erase') {
-            batches(
-                'walls',
-                [],
-                remove.filter((e) => wallsList.has(e))
-            );
-            batches(
-                'bars',
-                [],
-                remove.filter((e) => !wallsList.has(e))
-            );
+            batches('both', [], remove);
 
             return;
         }

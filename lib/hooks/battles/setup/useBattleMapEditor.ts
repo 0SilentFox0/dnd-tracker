@@ -69,6 +69,8 @@ const DEFAULT_BRUSH: HazardBrush = {
 
 export const NO_PLAYABLE_NOTICE = textRef('battleSetup.map.noPlayable');
 
+export const EDGE_LIMIT_NOTICE = textRef('battleSetup.map.edgeLimit');
+
 export const EDGES_STRIPPED_NOTICE = textRef('battleSetup.map.edgesStripped');
 
 export function useBattleMapEditor(
@@ -331,26 +333,34 @@ export function useBattleMapEditor(
 
         const bars = wallSet(map.bars);
 
-        const onCommit = (add: string[], remove: string[]) => {
-            if (edgeTool === 'edge-erase') {
-                setMap((m) => paintEdges(m, remove, 'erase'));
-
-                return;
-            }
+        const paint = (m: BattleMapConfig, add: string[], remove: string[]) => {
+            if (edgeTool === 'edge-erase') return paintEdges(m, remove, 'erase');
 
             const kind = edgeTool === 'edge-wall' ? 'walls' : 'bars';
 
-            setMap((m) =>
-                paintEdges(
-                    paintEdges(
-                        m,
-                        add,
-                        kind === 'walls' ? 'add-walls' : 'add-bars'
-                    ),
-                    remove,
-                    kind === 'walls' ? 'remove-walls' : 'remove-bars'
-                )
+            const added = paintEdges(
+                m,
+                add,
+                kind === 'walls' ? 'add-walls' : 'add-bars'
             );
+
+            const removed = paintEdges(
+                added.map,
+                remove,
+                kind === 'walls' ? 'remove-walls' : 'remove-bars'
+            );
+
+            return {
+                map: removed.map,
+                overflow: added.overflow || removed.overflow,
+            };
+        };
+
+        const onCommit = (add: string[], remove: string[]) => {
+            if (paint(map, add, remove).overflow)
+                setNotice(EDGE_LIMIT_NOTICE);
+
+            setMap((m) => paint(m, add, remove).map);
         };
 
         if (edgeTool === 'edge-erase')
@@ -364,7 +374,7 @@ export function useBattleMapEditor(
             existing: edgeTool === 'edge-wall' ? walls : bars,
             onCommit,
         };
-    }, [edgeTool, map.walls, map.bars]);
+    }, [edgeTool, map]);
 
     return {
         edgeEditing,

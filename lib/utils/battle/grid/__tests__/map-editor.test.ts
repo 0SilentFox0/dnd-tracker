@@ -7,11 +7,13 @@ import {
     inferMargins,
     isPreviewSafeBackground,
     marginsBlocked,
+    MAX_MAP_EDGES,
     paintCells,
     paintEdges,
     resizeMap,
 } from '../map-editor';
 import { hazardDamage } from '../terrain';
+import { allInteriorEdges } from '../walls';
 
 import type { BattleMapConfig } from '@/types/battle';
 
@@ -187,46 +189,75 @@ describe('map-editor', () => {
 });
 
 describe('paintEdges', () => {
+    const paint = (...args: Parameters<typeof paintEdges>) =>
+        paintEdges(...args).map;
+
     it('додає стіни й ґрати', () => {
-        const a = paintEdges(base, ['1:1:e', '2:2:s'], 'add-walls');
+        const a = paint(base, ['1:1:e', '2:2:s'], 'add-walls');
 
         expect(a.walls).toEqual(['1:1:e', '2:2:s']);
-        expect(paintEdges(a, ['3:3:e'], 'add-bars').bars).toEqual(['3:3:e']);
+        expect(paint(a, ['3:3:e'], 'add-bars').bars).toEqual(['3:3:e']);
     });
 
     it('конфлікт: остання дія перемагає', () => {
-        const walls = paintEdges(base, ['1:1:e'], 'add-walls');
+        const walls = paint(base, ['1:1:e'], 'add-walls');
 
-        const bars = paintEdges(walls, ['1:1:e'], 'add-bars');
+        const bars = paint(walls, ['1:1:e'], 'add-bars');
 
         expect(bars.walls).toBeUndefined();
         expect(bars.bars).toEqual(['1:1:e']);
-        expect(paintEdges(bars, ['1:1:e'], 'add-walls').bars).toBeUndefined();
+        expect(paint(bars, ['1:1:e'], 'add-walls').bars).toBeUndefined();
     });
 
     it('remove чіпає лише свій вид, erase — обидва', () => {
-        const both = paintEdges(
-            paintEdges(base, ['1:1:e'], 'add-walls'),
+        const both = paint(
+            paint(base, ['1:1:e'], 'add-walls'),
             ['2:2:e'],
             'add-bars'
         );
 
-        expect(paintEdges(both, ['2:2:e'], 'remove-walls').bars).toEqual([
+        expect(paint(both, ['2:2:e'], 'remove-walls').bars).toEqual([
             '2:2:e',
         ]);
 
-        const erased = paintEdges(both, ['1:1:e', '2:2:e'], 'erase');
+        const erased = paint(both, ['1:1:e', '2:2:e'], 'erase');
 
         expect(erased.walls).toBeUndefined();
         expect(erased.bars).toBeUndefined();
     });
 
     it('ребра поза картою ігноруються', () => {
-        expect(paintEdges(base, ['19:0:e', '0:11:s'], 'add-walls')).toBe(base);
+        expect(paintEdges(base, ['19:0:e', '0:11:s'], 'add-walls')).toEqual({
+            map: base,
+            overflow: false,
+        });
+    });
+
+    it('понад ліміт — overflow, карта без змін', () => {
+        const big = { ...base, cols: 100, rows: 100 };
+
+        const edges = allInteriorEdges(big).filter((e) => e.endsWith(':e'));
+
+        const full = paintEdges(
+            big,
+            edges.slice(0, MAX_MAP_EDGES),
+            'add-walls'
+        );
+
+        expect(full.overflow).toBe(false);
+
+        const over = paintEdges(
+            full.map,
+            edges.slice(MAX_MAP_EDGES, MAX_MAP_EDGES + 1),
+            'add-walls'
+        );
+
+        expect(over.overflow).toBe(true);
+        expect(over.map).toBe(full.map);
     });
 
     it('resizeMap відкидає ребра поза новим розміром', () => {
-        const map = paintEdges(base, ['2:2:e', '15:2:e'], 'add-walls');
+        const map = paintEdges(base, ['2:2:e', '15:2:e'], 'add-walls').map;
 
         expect(resizeMap(map, 10, 12).walls).toEqual(['2:2:e']);
     });

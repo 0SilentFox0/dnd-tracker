@@ -443,11 +443,12 @@ export const mapTerrainSchema = z.object({
 
 export const mapWallsSchema = z
     .object({
-        kind: z.enum(['walls', 'bars']),
+        kind: z.enum(['walls', 'bars', 'both']),
         add: z.array(edgeKeySchema).max(MAP_EDGES_PER_OP),
         remove: z.array(edgeKeySchema).max(MAP_EDGES_PER_OP),
     })
-    .refine((b) => b.add.length + b.remove.length > 0);
+    .refine((b) => b.add.length + b.remove.length > 0)
+    .refine((b) => b.kind !== 'both' || b.add.length === 0);
 
 export const mapWeatherSchema = z.object({
     weather: weatherKindSchema.nullable(),

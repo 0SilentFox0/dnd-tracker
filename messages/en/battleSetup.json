@@ -120,6 +120,7 @@
     "background": "Map background",
     "defaultBackground": "Default background",
     "noPlayable": "At least one free 2×2 area must remain",
+    "edgeLimit": "Wall or bars limit reached, the extra edges were not added",
     "edgesStripped": "Maze mode removed the walls and bars drawn on the map",
     "calibration": {
       "title": "Grid calibration",

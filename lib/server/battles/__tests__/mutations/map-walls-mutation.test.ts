@@ -61,6 +61,20 @@ describe('map-walls schema', () => {
                 remove: [],
             }).success
         ).toBe(false);
+        expect(
+            mapWallsSchema.safeParse({
+                kind: 'both',
+                add: ['1:1:e'],
+                remove: ['2:2:e'],
+            }).success
+        ).toBe(false);
+        expect(
+            mapWallsSchema.safeParse({
+                kind: 'both',
+                add: [],
+                remove: ['2:2:e'],
+            }).success
+        ).toBe(true);
     });
 });
 
@@ -88,6 +102,19 @@ describe('map-walls mutation', () => {
 
         expect(out.scene?.map?.bars).toEqual(['1:1:e']);
         expect(out.scene?.map).not.toHaveProperty('walls');
+    });
+
+    it('kind both прибирає ребро і зі стін, і з ґрат', () => {
+        const c = ctx({ ...map, walls: ['1:1:e', '2:2:e'], bars: ['3:3:e'] });
+
+        const out = mapWallsMutation(c, {
+            kind: 'both',
+            add: [],
+            remove: ['1:1:e', '3:3:e'],
+        });
+
+        expect(out.scene?.map?.walls).toEqual(['2:2:e']);
+        expect(out.scene?.map).not.toHaveProperty('bars');
     });
 
     it('ребро поза картою — відмова', () => {

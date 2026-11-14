@@ -8,6 +8,7 @@ import type {
 import { BattleRuleError } from '@/lib/utils/battle/store';
 import { REJECT } from '@/lib/utils/battle/store/reject';
 import type { MapWallsData } from '@/types/api';
+import type { BattleMapConfig } from '@/types/battle';
 
 export function mapWallsMutation(
     ctx: BattleMutationContext,
@@ -30,21 +31,28 @@ export function mapWallsMutation(
     if (outside)
         throw new BattleRuleError('action_rejected', REJECT.mapEdgeOutside);
 
-    const walls = body.kind === 'walls';
+    let painted: BattleMapConfig;
 
-    const added = paintEdges(map, body.add, walls ? 'add-walls' : 'add-bars');
+    if (body.kind === 'both') {
+        painted = paintEdges(map, body.remove, 'erase').map;
+    } else {
+        const walls = body.kind === 'walls';
 
-    const existing = new Set((walls ? map.walls : map.bars) ?? []);
+        const added = paintEdges(
+            map,
+            body.add,
+            walls ? 'add-walls' : 'add-bars'
+        );
 
-    // paintEdges відкидає додавання понад ліміт, не змінюючи карту
-    if (added === map && body.add.some((edge) => !existing.has(edge)))
-        throw new BattleRuleError('action_rejected', REJECT.mapEdgeLimit);
+        if (added.overflow)
+            throw new BattleRuleError('action_rejected', REJECT.mapEdgeLimit);
 
-    const painted = paintEdges(
-        added,
-        body.remove,
-        walls ? 'remove-walls' : 'remove-bars'
-    );
+        painted = paintEdges(
+            added.map,
+            body.remove,
+            walls ? 'remove-walls' : 'remove-bars'
+        ).map;
+    }
 
     return {
         participants: ctx.participants,

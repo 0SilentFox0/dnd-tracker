@@ -7,15 +7,13 @@ import { useMapTerrainTool } from '../useMapTerrainTool';
 function setup(
     walls?: string[],
     bars?: string[],
-    mutate = vi.fn().mockResolvedValue(undefined),
-    onEdgeError?: () => void
+    mutate = vi.fn().mockResolvedValue(undefined)
 ) {
     const view = renderHook(() =>
         useMapTerrainTool({
             isDM: true,
             mutate: vi.fn(),
             edgeSource: { walls, bars, mutate },
-            onEdgeError,
         })
     );
 
@@ -62,7 +60,7 @@ describe('useMapTerrainTool: інструмент ребер', () => {
         });
     });
 
-    it('edge-erase розкладає ребра за видом: дві операції', async () => {
+    it('edge-erase шле одну операцію kind both', async () => {
         const { view, mutate } = setup(['1:1:e'], ['3:3:e']);
 
         act(() => view.result.current.setBrush({ kind: 'edge-erase' }));
@@ -71,18 +69,14 @@ describe('useMapTerrainTool: інструмент ребер', () => {
         await act(async () =>
             view.result.current.edges?.onCommit([], ['1:1:e', '3:3:e'])
         );
-        await vi.waitFor(() => {
+        await vi.waitFor(() =>
             expect(mutate).toHaveBeenCalledWith({
-                kind: 'walls',
+                kind: 'both',
                 add: [],
-                remove: ['1:1:e'],
-            });
-            expect(mutate).toHaveBeenCalledWith({
-                kind: 'bars',
-                add: [],
-                remove: ['3:3:e'],
-            });
-        });
+                remove: ['1:1:e', '3:3:e'],
+            })
+        );
+        expect(mutate).toHaveBeenCalledTimes(1);
     });
 
     it('штрих одразу видно як committed, поки сервер не відповів', async () => {
@@ -106,19 +100,18 @@ describe('useMapTerrainTool: інструмент ребер', () => {
         expect(view.result.current.edges?.committed?.add.size).toBe(0);
     });
 
-    it('помилка знімає committed і показує сповіщення', async () => {
+    it('помилка знімає committed без нерозв’язаного відхилення', async () => {
         const mutate = vi.fn().mockRejectedValue(new Error('x'));
 
-        const onEdgeError = vi.fn();
-
-        const { view } = setup(undefined, undefined, mutate, onEdgeError);
+        const { view } = setup(undefined, undefined, mutate);
 
         act(() => view.result.current.setBrush({ kind: 'edge-wall' }));
 
         await act(async () =>
             view.result.current.edges?.onCommit(['2:2:s'], [])
         );
-        await vi.waitFor(() => expect(onEdgeError).toHaveBeenCalledTimes(1));
-        expect(view.result.current.edges?.committed?.add.size).toBe(0);
+        await vi.waitFor(() =>
+            expect(view.result.current.edges?.committed?.add.size).toBe(0)
+        );
     });
 });
