@@ -10,6 +10,12 @@ export const SYSTEM_UI_KIT = [
     '@/components/skill-tree/progression/ProgressionPanel',
     '@/components/spells/book/SpellBookPages',
     '@/components/characters/rest/CharacterPickList',
+    '@/components/abilities',
+    '@/components/artifact-sets/ArtifactSetCard',
+    '@/components/choices/ChoiceListEditor',
+    '@/components/content-import/ContentTransferButtons',
+    '@/components/onboarding/OnboardingHint',
+    '@/components/skills/list/SkillCard',
 ];
 
 const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&');

@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 
-import { BackgroundForm } from '@/components/backgrounds/BackgroundForm';
 import { SourceNotes } from '@/components/content-import/SourceNotes';
+import { SystemDmPage } from '@/components/systems/SystemDmPage';
 import { prisma } from '@/lib/db';
 import { getRequestLocale } from '@/lib/i18n/request-locale';
 import { getTranslator } from '@/lib/i18n/translator';
@@ -40,9 +40,13 @@ export default async function EditBackgroundPage({
                 kind="backgrounds"
                 targetId={backgroundId}
             />
-            <BackgroundForm
+            <SystemDmPage
                 campaignId={id}
-                background={toBackgroundData(row)}
+                section="backgrounds"
+                system={parseRules(campaign.rules).system}
+                canEdit
+                view={{ type: 'edit', id: backgroundId }}
+                data={toBackgroundData(row)}
             />
         </>
     );

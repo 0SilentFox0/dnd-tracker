@@ -5,6 +5,8 @@ export type {
     ChannelDialogProps,
     CombatRowProps,
     ConditionTestPanelProps,
+    DmPageProps,
+    DmPageView,
     FormFieldProps,
     ResourceFieldsProps,
     RestBadgesProps,

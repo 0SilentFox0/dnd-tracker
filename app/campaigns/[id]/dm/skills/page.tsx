@@ -1,10 +1,10 @@
-import { DMSkillsPageClient } from './page-client';
-
+import { SystemDmPage } from '@/components/systems/SystemDmPage';
 import { skillKeys } from '@/lib/hooks/skills/keys';
 import { PrefetchedQuery } from '@/lib/providers/prefetched-query';
 import { requireCampaignDMOrDemo } from '@/lib/server/campaigns/access';
 import { readSkills } from '@/lib/server/skills/read-skills';
 import { readOkJson } from '@/lib/utils/api/read-json';
+import { parseRules } from '@/lib/utils/rules/schema';
 import type { Skill } from '@/types/skills';
 
 export default async function DMSkillsPage({
@@ -14,7 +14,7 @@ export default async function DMSkillsPage({
 }) {
     const { id } = await params;
 
-    const { isDemo } = await requireCampaignDMOrDemo(id);
+    const { campaign, isDemo } = await requireCampaignDMOrDemo(id);
 
     const skills = await readOkJson<Skill[]>(
         await readSkills({ id, accessChecked: true })
@@ -22,7 +22,12 @@ export default async function DMSkillsPage({
 
     return (
         <PrefetchedQuery queryKey={skillKeys.list(id)} data={skills}>
-            <DMSkillsPageClient campaignId={id} canEdit={!isDemo} />
+            <SystemDmPage
+                campaignId={id}
+                section="skills"
+                system={parseRules(campaign.rules).system}
+                canEdit={!isDemo}
+            />
         </PrefetchedQuery>
     );
 }

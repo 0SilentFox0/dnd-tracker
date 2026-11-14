@@ -145,6 +145,11 @@ export function ScenarioGraphView({
 
     const [hoverId, setHoverId] = useState<string | null>(null);
 
+    const nodeActions = useMemo(
+        () => ({ onHover: setHoverId, onSelect, onClear, onOpen }),
+        [onSelect, onClear, onOpen]
+    );
+
     const byId = useMemo(
         () => new Map(graph.nodes.map((n) => [n.id, n])),
         [graph.nodes]
@@ -469,10 +474,7 @@ export function ScenarioGraphView({
                             matched={matched.has(node.id)}
                             hovered={node.id === hoverId}
                             labelled={labelled.has(node.id)}
-                            onHover={setHoverId}
-                            onSelect={onSelect}
-                            onClear={onClear}
-                            onOpen={onOpen}
+                            actions={nodeActions}
                         />
                     ))}
                 </g>

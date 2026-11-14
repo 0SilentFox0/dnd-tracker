@@ -1,8 +1,9 @@
 import { notFound } from 'next/navigation';
 
-import { MainSkillEditForm } from '@/components/main-skills/MainSkillEditForm';
+import { SystemDmPage } from '@/components/systems/SystemDmPage';
 import { prisma } from '@/lib/db';
 import { requireCampaignDM } from '@/lib/server/campaigns/access';
+import { parseRules } from '@/lib/utils/rules/schema';
 
 export default async function EditMainSkillPage({
     params,
@@ -11,7 +12,7 @@ export default async function EditMainSkillPage({
 }) {
     const { id, mainSkillId } = await params;
 
-    await requireCampaignDM(id);
+    const { campaign } = await requireCampaignDM(id);
 
     const mainSkill = await prisma.mainSkill.findFirst({
         where: { id: mainSkillId, campaignId: id },
@@ -22,9 +23,13 @@ export default async function EditMainSkillPage({
     }
 
     return (
-        <MainSkillEditForm
+        <SystemDmPage
             campaignId={id}
-            mainSkill={{
+            section="main-skills"
+            system={parseRules(campaign.rules).system}
+            canEdit
+            view={{ type: 'edit', id: mainSkillId }}
+            data={{
                 ...mainSkill,
                 createdAt: mainSkill.createdAt.toISOString(),
                 updatedAt: mainSkill.updatedAt.toISOString(),

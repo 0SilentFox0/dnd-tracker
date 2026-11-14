@@ -44,7 +44,7 @@ describe('characters in en', () => {
             <CharacterBasicInfo
                 basicInfo={basicInfo as never}
                 races={[]}
-                hideLineage
+                hide={{ lineage: true }}
             />,
             { locale: 'en', namespaces: ['common', 'characters'] }
         );
@@ -74,7 +74,7 @@ describe('characters in en', () => {
             <CharacterBasicInfo
                 basicInfo={basicInfo as never}
                 races={[]}
-                hideClass
+                hide={{ class: true }}
             />,
             { locale: 'en', namespaces: ['common', 'characters'] }
         );
@@ -99,7 +99,7 @@ describe('characters in en', () => {
             <CharacterBasicInfo
                 basicInfo={basicInfo as never}
                 races={[]}
-                hideAlignment
+                hide={{ alignment: true }}
             />,
             { locale: 'en', namespaces: ['common', 'characters'] }
         );

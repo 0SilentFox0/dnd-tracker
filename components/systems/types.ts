@@ -73,6 +73,19 @@ export interface DraftFormProps {
     initialIdentity?: unknown;
 }
 
+export type DmPageView =
+    | { type: 'list' }
+    | { type: 'new' }
+    | { type: 'edit'; id: string };
+
+export interface DmPageProps {
+    campaignId: string;
+    canEdit: boolean;
+    view?: DmPageView;
+    /** Server-read payload of the view (the page narrows it itself) */
+    data?: unknown;
+}
+
 export interface RestBadgesProps {
     sheet: CharacterSheet;
 }
@@ -227,10 +240,7 @@ export interface SystemUi {
     MagicTab?: ComponentType;
     AdvancementTab?: ComponentType;
     AdvancementEditor?: ComponentType<AdvancementEditorProps>;
-    dmPages?: Record<
-        string,
-        ComponentType<{ campaignId: string; canEdit: boolean }>
-    >;
+    dmPages?: Record<string, ComponentType<DmPageProps>>;
     DraftForm?: ComponentType<DraftFormProps>;
     RaceProfileEditor?: ComponentType<RaceProfileEditorProps>;
     ArtifactStatsEditor?: ComponentType<ArtifactStatsEditorProps>;

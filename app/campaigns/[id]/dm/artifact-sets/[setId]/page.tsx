@@ -1,12 +1,10 @@
 import { notFound } from 'next/navigation';
 
-import { ArtifactSetForm } from '@/components/artifact-sets/ArtifactSetForm';
-import { HudFormPage } from '@/components/hud/form';
+import { SystemDmPage } from '@/components/systems/SystemDmPage';
 import { prisma } from '@/lib/db';
-import { getRequestLocale } from '@/lib/i18n/request-locale';
-import { getTranslator } from '@/lib/i18n/translator';
 import { requireCampaignDM } from '@/lib/server/campaigns/access';
 import { readAbilities } from '@/lib/utils/abilities/read';
+import { parseRules } from '@/lib/utils/rules/schema';
 
 export default async function EditArtifactSetPage({
     params,
@@ -15,9 +13,7 @@ export default async function EditArtifactSetPage({
 }) {
     const { id, setId } = await params;
 
-    await requireCampaignDM(id);
-
-    const t = await getTranslator(await getRequestLocale(), 'artifacts');
+    const { campaign } = await requireCampaignDM(id);
 
     const setRow = await prisma.artifactSet.findFirst({
         where: { id: setId, campaignId: id },
@@ -40,11 +36,16 @@ export default async function EditArtifactSetPage({
     };
 
     return (
-        <HudFormPage title={t('sets.edit.title')} aside={setRow.name}>
-            <ArtifactSetForm
-                campaignId={id}
-                setId={setRow.id}
-                initial={{
+        <SystemDmPage
+            campaignId={id}
+            section="artifact-sets"
+            system={parseRules(campaign.rules).system}
+            canEdit
+            view={{ type: 'edit', id: setId }}
+            data={{
+                name: setRow.name,
+                setId: setRow.id,
+                initial: {
                     name: setRow.name,
                     description: setRow.description,
                     icon: setRow.icon,
@@ -61,8 +62,8 @@ export default async function EditArtifactSetPage({
                     abilities,
                     abilityIssues: issues,
                     artifactIds: initialArtifactIds,
-                }}
-            />
-        </HudFormPage>
+                },
+            }}
+        />
     );
 }

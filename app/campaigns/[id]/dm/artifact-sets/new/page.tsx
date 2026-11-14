@@ -1,8 +1,6 @@
-import { ArtifactSetForm } from '@/components/artifact-sets/ArtifactSetForm';
-import { HudFormPage } from '@/components/hud/form';
-import { getRequestLocale } from '@/lib/i18n/request-locale';
-import { getTranslator } from '@/lib/i18n/translator';
+import { SystemDmPage } from '@/components/systems/SystemDmPage';
 import { requireCampaignDM } from '@/lib/server/campaigns/access';
+import { parseRules } from '@/lib/utils/rules/schema';
 
 export default async function NewArtifactSetPage({
     params,
@@ -11,13 +9,15 @@ export default async function NewArtifactSetPage({
 }) {
     const { id } = await params;
 
-    await requireCampaignDM(id);
-
-    const t = await getTranslator(await getRequestLocale(), 'artifacts');
+    const { campaign } = await requireCampaignDM(id);
 
     return (
-        <HudFormPage title={t('sets.new.title')} aside={t('sets.new.aside')}>
-            <ArtifactSetForm campaignId={id} />
-        </HudFormPage>
+        <SystemDmPage
+            campaignId={id}
+            section="artifact-sets"
+            system={parseRules(campaign.rules).system}
+            canEdit
+            view={{ type: 'new' }}
+        />
     );
 }

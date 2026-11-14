@@ -19,7 +19,7 @@ const show = (hideArchetype?: boolean) =>
         <CharacterBasicInfo
             basicInfo={basicInfo as never}
             races={[]}
-            hideArchetype={hideArchetype}
+            hide={{ archetype: hideArchetype }}
         />
     );
 

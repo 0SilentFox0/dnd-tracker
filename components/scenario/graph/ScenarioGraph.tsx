@@ -193,25 +193,29 @@ export function ScenarioGraph({ campaignId }: { campaignId: string }) {
     return (
         <div className="flex h-[calc(100dvh-13rem)] min-h-[480px] flex-col gap-3">
             <GraphToolbar
-                filters={state.filters}
-                showSequence={state.showSequence}
-                timeline={state.layoutMode === 'timeline'}
-                listOpen={listOpen}
-                counts={counts?.byType ?? {}}
-                query={state.query}
-                matches={{
-                    current:
-                        state.matches.length === 0
-                            ? 0
-                            : (state.matchIndex % state.matches.length) + 1,
-                    total: state.matches.length,
+                data={{
+                    filters: state.filters,
+                    showSequence: state.showSequence,
+                    timeline: state.layoutMode === 'timeline',
+                    listOpen,
+                    counts: counts?.byType ?? {},
+                    query: state.query,
+                    matches: {
+                        current:
+                            state.matches.length === 0
+                                ? 0
+                                : (state.matchIndex % state.matches.length) + 1,
+                        total: state.matches.length,
+                    },
                 }}
-                onFilters={set.filters}
-                onShowSequence={set.sequence}
-                onTimeline={(on) => set.layout(on ? 'timeline' : 'free')}
-                onToggleList={() => setListOpen(!listOpen)}
-                onQuery={set.query}
-                onNextMatch={set.nextMatch}
+                actions={{
+                    onFilters: set.filters,
+                    onShowSequence: set.sequence,
+                    onTimeline: (on) => set.layout(on ? 'timeline' : 'free'),
+                    onToggleList: () => setListOpen(!listOpen),
+                    onQuery: set.query,
+                    onNextMatch: set.nextMatch,
+                }}
             />
             {state.truncated > 0 ? (
                 <div

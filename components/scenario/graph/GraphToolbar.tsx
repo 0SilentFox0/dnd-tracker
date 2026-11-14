@@ -11,38 +11,40 @@ import type { GraphFilters } from '@/lib/utils/scenario/graph/types';
 import type { MentionType } from '@/types/scenario';
 
 export interface GraphToolbarProps {
-    filters: GraphFilters;
-    counts: Partial<Record<MentionType, number>>;
-    showSequence: boolean;
-    timeline: boolean;
-    listOpen: boolean;
-    query: string;
-    matches: { current: number; total: number };
-    onFilters: (patch: Partial<GraphFilters>) => void;
-    onShowSequence: (show: boolean) => void;
-    onTimeline: (on: boolean) => void;
-    onToggleList: () => void;
-    onQuery: (q: string) => void;
-    onNextMatch: () => void;
+    data: {
+        filters: GraphFilters;
+        counts: Partial<Record<MentionType, number>>;
+        showSequence: boolean;
+        timeline: boolean;
+        listOpen: boolean;
+        query: string;
+        matches: { current: number; total: number };
+    };
+    actions: {
+        onFilters: (patch: Partial<GraphFilters>) => void;
+        onShowSequence: (show: boolean) => void;
+        onTimeline: (on: boolean) => void;
+        onToggleList: () => void;
+        onQuery: (q: string) => void;
+        onNextMatch: () => void;
+    };
 }
 
 const checkClass = 'flex items-center gap-1.5 text-sm';
 
-export function GraphToolbar({
-    filters,
-    counts,
-    showSequence,
-    timeline,
-    listOpen,
-    query,
-    matches,
-    onFilters,
-    onShowSequence,
-    onTimeline,
-    onToggleList,
-    onQuery,
-    onNextMatch,
-}: GraphToolbarProps) {
+export function GraphToolbar({ data, actions }: GraphToolbarProps) {
+    const { filters, counts, showSequence, timeline, listOpen, query, matches } =
+        data;
+
+    const {
+        onFilters,
+        onShowSequence,
+        onTimeline,
+        onToggleList,
+        onQuery,
+        onNextMatch,
+    } = actions;
+
     const t = useTranslations('scenarioGraph.toolbar');
 
     const tType = useTranslations('scenario.mentionTypes');

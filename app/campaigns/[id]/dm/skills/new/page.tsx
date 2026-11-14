@@ -1,6 +1,7 @@
-import { SkillCreateForm } from '@/components/skills/form/SkillCreateForm';
+import { SystemDmPage } from '@/components/systems/SystemDmPage';
 import { prisma } from '@/lib/db';
 import { requireCampaignDM } from '@/lib/server/campaigns/access';
+import { parseRules } from '@/lib/utils/rules/schema';
 
 export default async function NewSkillPage({
     params,
@@ -9,7 +10,7 @@ export default async function NewSkillPage({
 }) {
     const { id } = await params;
 
-    await requireCampaignDM(id);
+    const { campaign } = await requireCampaignDM(id);
 
     const spells = await prisma.spell.findMany({
         where: { campaignId: id },
@@ -17,5 +18,14 @@ export default async function NewSkillPage({
         orderBy: { createdAt: 'desc' },
     });
 
-    return <SkillCreateForm campaignId={id} spells={spells} />;
+    return (
+        <SystemDmPage
+            campaignId={id}
+            section="skills"
+            system={parseRules(campaign.rules).system}
+            canEdit
+            view={{ type: 'new' }}
+            data={{ spells, mainSkills: [] }}
+        />
+    );
 }

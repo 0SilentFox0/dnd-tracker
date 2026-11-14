@@ -1,12 +1,12 @@
 import { notFound } from 'next/navigation';
 
-import { EditSkillClient } from './edit-skill-client';
-
 import { HudPage, HudPageHeader } from '@/components/hud/page';
 import { SkillCard } from '@/components/skills/list/SkillCard';
+import { SystemDmPage } from '@/components/systems/SystemDmPage';
 import { prisma } from '@/lib/db';
 import { requireCampaignDMOrDemo } from '@/lib/server/campaigns/access';
 import { readSkill } from '@/lib/server/skills/read-skills-list';
+import { parseRules } from '@/lib/utils/rules/schema';
 import type { MainSkill } from '@/types/main-skills';
 
 export default async function EditSkillPage({
@@ -16,7 +16,7 @@ export default async function EditSkillPage({
 }) {
     const { id: campaignId, skillId } = await params;
 
-    const { isDemo } = await requireCampaignDMOrDemo(campaignId);
+    const { campaign, isDemo } = await requireCampaignDMOrDemo(campaignId);
 
     if (isDemo) {
         const skill = await readSkill(campaignId, skillId);
@@ -63,11 +63,13 @@ export default async function EditSkillPage({
     }));
 
     return (
-        <EditSkillClient
+        <SystemDmPage
             campaignId={campaignId}
-            skillId={skillId}
-            spells={spells}
-            initialMainSkills={initialMainSkills}
+            section="skills"
+            system={parseRules(campaign.rules).system}
+            canEdit
+            view={{ type: 'edit', id: skillId }}
+            data={{ spells, mainSkills: initialMainSkills }}
         />
     );
 }

@@ -1,11 +1,12 @@
 import { redirect } from 'next/navigation';
 
-import { ClassForm } from '@/components/classes/ClassForm';
 import { SourceNotes } from '@/components/content-import/SourceNotes';
 import { OnboardingHint } from '@/components/onboarding/OnboardingHint';
+import { SystemDmPage } from '@/components/systems/SystemDmPage';
 import { prisma } from '@/lib/db';
 import { requireCampaignDM } from '@/lib/server/campaigns/access';
 import { toGameClassData } from '@/lib/utils/characters/classes/row';
+import { parseRules } from '@/lib/utils/rules/schema';
 
 export default async function EditClassPage({
     params,
@@ -14,7 +15,7 @@ export default async function EditClassPage({
 }) {
     const { id, classId } = await params;
 
-    await requireCampaignDM(id);
+    const { campaign } = await requireCampaignDM(id);
 
     const row = await prisma.gameClass.findFirst({
         where: { id: classId, campaignId: id },
@@ -29,7 +30,14 @@ export default async function EditClassPage({
                 className="mx-auto mb-3 max-w-5xl"
             />
             <SourceNotes campaignId={id} kind="classes" targetId={classId} />
-            <ClassForm campaignId={id} gameClass={toGameClassData(row)} />
+            <SystemDmPage
+                campaignId={id}
+                section="classes"
+                system={parseRules(campaign.rules).system}
+                canEdit
+                view={{ type: 'edit', id: classId }}
+                data={toGameClassData(row)}
+            />
         </>
     );
 }

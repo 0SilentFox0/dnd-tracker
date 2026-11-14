@@ -5,6 +5,8 @@ import { d20Defense } from './battle/defense';
 import { HeroStats as BattleHeroStats } from './battle/HeroStats';
 import { ParticipantStats } from './battle/ParticipantStats';
 import { SpellSlotsPanel } from './battle/SpellSlotsPanel';
+import { BackgroundsPage } from './content/BackgroundsPage';
+import { ClassesPage } from './content/ClassesPage';
 import { ResourceFields } from './rest/ResourceFields';
 import { RestBadges } from './rest/RestBadges';
 import { ActionsSection } from './rules/ActionsSection';
@@ -45,6 +47,7 @@ export const D20_MODULE_UI: SystemUi = {
         actions: ActionsSection,
         classes: ClassesSection,
     },
+    dmPages: { classes: ClassesPage, backgrounds: BackgroundsPage },
     HeroStats,
     StatsTab,
     RollDialogBody,
