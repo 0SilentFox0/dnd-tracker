@@ -28,7 +28,10 @@ import { battleQueryKey, useBattle } from '@/lib/hooks/battles';
 import { usePlayerView } from '@/lib/hooks/common';
 import { type AttackIntent, isIntentStale } from '@/lib/utils/battle/flows';
 import type { MapAim, MapPick } from '@/lib/utils/battle/grid';
-import { composeEffectiveMap } from '@/lib/utils/battle/map-storage/effective-map';
+import {
+    composeEffectiveMap,
+    type LibraryEdges,
+} from '@/lib/utils/battle/map-storage/effective-map';
 import { deriveScene, NO_ORDER } from '@/lib/utils/battle/view';
 import type { BattleScene } from '@/types/api';
 import type { BattleLogState, DmControl, ResultFx } from '@/types/battle-scene';
@@ -179,7 +182,14 @@ export function useBattleSceneValue(
 
     const mapEdges = useBattleMapEdges(campaignId, rawBattle?.mapRef);
 
-    const isMapPending = !!rawBattle?.mapRef && !mapEdges.data;
+    const [heldEdges, setHeldEdges] = useState<LibraryEdges | undefined>();
+
+    if (mapEdges.data && mapEdges.data !== heldEdges)
+        setHeldEdges(mapEdges.data);
+
+    const edges = mapEdges.data ?? (rawBattle?.mapRef ? heldEdges : undefined);
+
+    const isMapPending = !!rawBattle?.mapRef && !edges;
 
     const isLoading = isBattleLoading || (isMapPending && !mapEdges.isError);
 
@@ -195,11 +205,11 @@ export function useBattleSceneValue(
         const map = composeEffectiveMap(
             rawBattle.map,
             rawBattle.mapState,
-            mapEdges.data
+            edges
         );
 
         return map === rawBattle.map ? rawBattle : { ...rawBattle, map };
-    }, [rawBattle, mapEdges.data, isMapPending]);
+    }, [rawBattle, edges, isMapPending]);
 
     const actions = useBattleActions(campaignId, battleId, show);
 

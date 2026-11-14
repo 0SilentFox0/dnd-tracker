@@ -152,4 +152,43 @@ describe('ефективна карта в сцені', () => {
             expect(result.current.value?.battle.map?.walls).toEqual(['5:5:e'])
         );
     });
+    it('нова версія вантажиться: сцена не блимає лоадером, тримає попередні ребра', async () => {
+        let release: (v: unknown) => void = () => {};
+
+        vi.mocked(getBattleMap).mockImplementation(((
+            _c: string,
+            _m: string,
+            v: number
+        ) =>
+            v === 1
+                ? Promise.resolve({ walls: ['1:1:e'], bars: [] })
+                : new Promise((r) => {
+                      release = r;
+                  })) as never);
+
+        const { result, client, scene } = setup({
+            map: header,
+            mapRef: { mapId: 'm1', version: 1 },
+        });
+
+        await waitFor(() => expect(result.current.value).not.toBeNull());
+
+        act(() =>
+            client.setQueryData(battleQueryKey('c1', 'b1'), {
+                ...scene,
+                mapRef: { mapId: 'm1', version: 2 },
+            })
+        );
+
+        await waitFor(() => expect(getBattleMap).toHaveBeenCalledTimes(2));
+
+        expect(result.current.value?.battle.map?.walls).toEqual(['1:1:e']);
+        expect(result.current.loading).toBe(false);
+
+        await act(async () => release({ walls: ['5:5:e'], bars: [] }));
+
+        await waitFor(() =>
+            expect(result.current.value?.battle.map?.walls).toEqual(['5:5:e'])
+        );
+    });
 });
