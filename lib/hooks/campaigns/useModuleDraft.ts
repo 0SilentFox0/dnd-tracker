@@ -48,19 +48,18 @@ export function useModuleDraft(current: SystemSelection) {
     useEffect(() => {
         let isCancelled = false;
 
-        preloadSystem(draft).then(
-            () => {
-                if (!isCancelled) setLoadedDraft(draft);
-            },
-            (e: unknown) => {
-                if (!isCancelled)
-                    setFailure({
-                        draft,
-                        attempt,
-                        error: e ?? new Error('load failed'),
-                    });
-            }
-        );
+        // preloadSystem swallows load failures, so an uninstalled draft after it settles means the chunk failed
+        void preloadSystem(draft).then(() => {
+            if (isCancelled) return;
+
+            if (isInstalled(draft)) setLoadedDraft(draft);
+            else
+                setFailure({
+                    draft,
+                    attempt,
+                    error: new Error('composition failed to load'),
+                });
+        });
 
         return () => {
             isCancelled = true;
