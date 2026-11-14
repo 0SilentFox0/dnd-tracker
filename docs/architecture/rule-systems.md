@@ -112,10 +112,13 @@ Core бачить `systems/*` лише через корені (`SYSTEM_ROOTS`, 
 - Блокування: зміна `system.key` у кампанії з `characters`/`units` → 409 `SYSTEM_LOCKED`; зміна `modules` — 422 `SYSTEM_MODULES_INVALID`, 409 `SYSTEM_MODULES_IN_BATTLE` (лише активний бій), 409 `SYSTEM_MODULE_CONFIRM` (`toggle: "setup"`).
 - `system` не механіка: вкладки правил = секції композиції.
 
+**UI-слоти Ч23.** `SystemUi.dmPages: Record<section, ComponentType<DmPageProps>>` (`view`: list/new/edit, `data`) — сторінки видів контенту модулів (`classes`, `backgrounds` — d20; `skills`, `skill-trees`, `main-skills` — skilltrees; `artifact-sets` — artifactsets; `careers` — wfrp); `app/**` рендерить `SystemDmPage`, 404 — `dmSectionLayout`/`notFound`. `SystemUi.fx.dice: SystemDiceSource[]` (`(event) => SystemDice | null`, конкатенація модулів; `morale` дає кубик перевірки моралі), core-хуки `useBattleFxQueue`/`useFxImpacts`/`useBattleMapScene` беруть слот параметром.
+
 ## Ratchet (після Ч18b)
 
 Перегенерація: `pnpm exec tsx scripts/shared/system-ratchet.ts --write`; числа лише падають.
 
+- `props-budget-exempt.json` (Ч23): компоненти з > 7 пропсів, числа лише падають; `pnpm exec tsx scripts/shared/props-budget.ts --write`.
 - `system-imports-exempt.json` = `[]` (було 18 в E1, 1 до Ч17).
 - Межі UI системних тек (`systems/*/{ui,hooks}` беруть з core лише `ui`/`hud`/`common`, `components/systems/types` і кіт) — ESLint `ui-layers/zone`, `ui-layers-exempt.json` = `[]`; див. [ui-layers.md](ui-layers.md).
 - `system-literals-exempt.json`: 6 файлів / 11 влучань, лише тексти й назва кубика (`log/codec.ts`, `site.ts`, `whats-new.ts`, фікстура `defaults.ts`, `'d20'` у `types/characters.ts` і `SheetRollDialog.tsx`). Дані й активи (`scripts/assets/**`, `scripts/seed/**`, `scripts/srd/**`, профілі sweep) скан літералів не дивиться: виняток у `isLiteralAllowed` (`DATA_DIRS`), а не в `SKIP_DIRS` (той діє й на скан імпортів). Було 15 / 56 після Ч17 (зростання від токена `homm` у даних).
