@@ -10,6 +10,7 @@ import { MapMotionPanel } from '@/components/battle/map/MapMotionPanel';
 import { MAP_MODE_UI, type MapModeUi } from '@/components/battle/modes';
 import { ImageUpload } from '@/components/common/ImageUpload';
 import { HudSection } from '@/components/hud/form';
+import { OnboardingHint } from '@/components/onboarding/OnboardingHint';
 import { BoundedNumberInput } from '@/components/ui/bounded-number-input';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -374,6 +375,7 @@ export function BattleFormMap({ editor }: { editor: BattleMapEditor }) {
                         {!touch &&
                             !(mode && MAP_MODE_UI[mode].hidesTerrain) && (
                                 <div className="space-y-2">
+                                    <OnboardingHint id="dm.map-walls" />
                                     <Label>{t('edgeDrawing')}</Label>
                                     <ToolButtons
                                         tools={EDGE_TOOLS}

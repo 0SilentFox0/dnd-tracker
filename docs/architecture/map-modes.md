@@ -18,6 +18,17 @@ The first mode: pure geometry/vision/generator, server wake-up in `afterMutation
 
 Difficult terrain, `obscured` cells, spell walls and `spellZones` are core: they live in `map.terrain` / `map.spellZones` and are read by `grid/*` and `spell/zone-*`. Map modes neither import nor change them; the maze never fires zone triggers.
 
+## Стіни й ґрати (core, етап B)
+
+`map.walls` / `map.bars` — ребра `"x:y:e"` / `"x:y:s"` (ліміт 7200 разом із `maze.walls`); ядро, не режим. Примітиви ребер — `grid/walls.ts` (`edgeKey`, `canStep`, `cornerOpen`; `modes/maze/walls.ts` лишився обгорткою над `maze.walls`). Читання лише через `grid/edges.ts`:
+
+- `wallsOf(map)` = `map.walls ∪ modeWalls(map)`; хук режиму `walls?` у `ModeEngineHooks` (диспетчер у `modes/engine.ts`) віддає стіни режиму (maze віддає `maze.walls`), тож рух/постріл/зір по лабіринту ідуть тим самим шляхом. `barsOf(map)` — ґрати.
+- `edgeBlocks(map, a, b, kind, mover?)`, `kind`: `move` (стіни + ґрати), `sight` і `fire` (лише стіни). Діагональ блокується, якщо закритий хоч один кутовий шлях. `cellsConnected` — пряма лінія між наборами клітинок.
+- Споживачі: `searchPaths` (рух; ранній вихід без ребер), `lineOfFire` і `rayCells`/`templateCells` (`fire`), `grid/sight.ts` (`sightedTargets`, ланцюгові цілі, вибір цілей заклинань/здібностей), `grid/adjacency.ts` (`isAdjacentOnMap`/`cellsAdjacentOnMap` — ближній бій, cleave, fire-burst, move-self, оборонні реакції, opportunity-атаки; `sight`-блок скасовує сусідство). Геометричні `footprintDistance` (аури, ауди, розстановка) не чіпали.
+- Модифікатор `passesWalls` (flag): `edgeBlocks(..., 'move', mover)` ігнорує стіни й ґрати для власника; зір і постріл не змінюються. Враховує лише власні здібності мувера (`collectModifiers([mover])`), без аур інших. Контент (Etherealness, привиди) не прив'язано — у «хвостах» STATUS.
+- Редактор ребер вимкнено, поки активний maze (`REJECT.mapEdgesInMode`) і на touch-пристроях.
+- Двері й руйнування ребер (`doors`, `map-door-toggle`, `map-edge-remove`) — етап B6, потребують `battle_map_state`; `edgeBlocks` розширюється лише джерелом стану.
+
 ## Map motion («Рух»)
 
 `BattleMapConfig.motion?: { axis: "x" | "y"; speed } | null` — окреме поле конфігу карти за зразком `weather`, **не** запис у `MAP_MODE_REGISTRY` (реєстр — для режимів, що змінюють правила; рух суто візуальний і сумісний із лабіринтом). `speed` — клітинки/с зі знаком, `|speed| ≤ 6`, `0` = зупинено, відсутнє = вимкнено.

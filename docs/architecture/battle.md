@@ -309,6 +309,10 @@ Spell reducer/payload facade — `flows/spell-flow.ts`; types/costs/selection �
 - `lib/server/battles/guards.ts` (`runGuardedBattleOperationCore`, used by the assistant): actor/tx mismatch is a `ContentError` 409 (was 403); on `dryRun` it returns `delta: null` plus a preview.
 - `createBattleParticipantFromCharacter` without `context` takes artifacts only from `preloaded.artifactRows` (no DB fallback); all production callers pass a context.
 
+## Стіни й ґрати
+
+Операція `map-walls` (`mutations/map-walls`, лише ДМ, активний бій, не в maze): `{ kind: 'walls'|'bars', add, remove }` до `MAP_EDGES_PER_OP`=400 ребер за виклик, перевищення ліміту 7200 відхиляється (`REJECT.mapEdgeLimit`). Пише лише `scene.map`; відповідь — дельта `scene.walls`/`scene.bars` (`{ add, remove }`, `diffEdges`/`applyEdgeDiff`), повна карта лише коли зміна перевищує `EDGE_DIFF_LIMIT`=400 або разом із іншими полями карти. Клієнт зливає дельту в `applyBattleDelta` → `mergeMapDelta`. Правила ребер — [map-modes.md](map-modes.md#стіни-й-ґрати-core-етап-b).
+
 ## Map motion
 
 Поле `map.motion` і операція `map-motion` — див. [map-modes.md](map-modes.md#map-motion-рух). Мутація — копія шаблону `map-weather`: пише лише `scene.map`, відповідь — дельта.

@@ -102,4 +102,9 @@
 - B6 (двері/руйнування) не входить: `edgeBlocks` пізніше отримає додаткове джерело стану.
 
 ## Знахідки (заповнює виконавець)
-_порожньо_
+- T2-T4: `conditions.ts:271` лишив `isAdjacent` (немає `map` у `ConditionContext`). `grid/adjacency.ts` винесено окремо, щоб уникнути циклу occupancy→edges→engine. Класифікацію `footprintDistance` див. у task-234-report. Тести wfrp/template написані за припущеннями (не запускались).
+- T6-T7: `WALL_WIDTH` дубльовано з maze (modes не імпортують `components/battle/map`); редактор ребер прихований на touch; без optimistic-прев'ю у бою; maze відхиляє `map-walls` (`REJECT.mapEdgesInMode`).
+- T8: дельта `scene.walls/bars` (`EdgeDiff`), fallback у повну карту при > 400 ребер.
+- T9: `passesWalls` — flag-ефект (`collectModifiers([mover])`, без аур); `searchPaths` пропускає перевірку ребер, якщо є флаг; контент не прив'язано.
+- T5: sweep імпортує `canStep` з `grid/walls`; сценарій `mapWallsCheck` (оточення бійця стінами → рух відхилено, після зняття дозволено). Удар/постріл через стіну в sweep не перевіряються (покрито unit-тестами).
+- Жоден тест, tsc чи sweep у B2–B5 не запускались.
