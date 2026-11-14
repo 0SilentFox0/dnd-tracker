@@ -4,7 +4,7 @@ export const D20_META = {
     module: 'd20',
     kind: 'base',
     previewSandbox: true,
-    keys: ['dnd5e'],
+    keys: ['d20'],
     tokens: ['dnd5e'],
     distance: { unit: 'ft', perCell: 5 },
     i18n: {},

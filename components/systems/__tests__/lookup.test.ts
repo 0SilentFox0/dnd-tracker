@@ -36,6 +36,7 @@ describe('ui lookup with a partial install', () => {
         lookup.installUiModules({ d20: D20_MODULE_UI });
 
         expect(Object.keys(lookup.SYSTEM_UI).sort()).toEqual([
+            'd20',
             'dnd5e',
             'homm',
             'wfrp',

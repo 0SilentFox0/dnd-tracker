@@ -10,9 +10,14 @@ import {
 import { ARTIFACTSETS_MODULE } from '@/systems/artifactsets';
 import { D20_MODULE } from '@/systems/d20';
 import { D20_ABILITY_MODULE } from '@/systems/d20/rules/ability-install';
+import { DEATHSAVES_MODULE } from '@/systems/deathsaves';
 import { HEROSCALING_MODULE } from '@/systems/heroscaling';
+import { INSPIRATION_MODULE } from '@/systems/inspiration';
+import { LAIR_MODULE } from '@/systems/lair';
 import { MORALE_MODULE } from '@/systems/morale';
 import { MORALE_ABILITY_MODULE } from '@/systems/morale/rules/ability-install';
+import { OFFHAND_MODULE } from '@/systems/offhand';
+import { OPPORTUNITY_MODULE } from '@/systems/opportunity';
 import { RETALIATION_MODULE } from '@/systems/retaliation';
 import { RETALIATION_ABILITY_MODULE } from '@/systems/retaliation/rules/ability-install';
 import { SKILLTREES_MODULE } from '@/systems/skilltrees';
@@ -25,8 +30,13 @@ export const MODULES: Record<string, ModuleEntry<RuleSystemDefinition>> = {
     // <systems:generated>
     artifactsets: ARTIFACTSETS_MODULE,
     d20: D20_MODULE,
+    deathsaves: DEATHSAVES_MODULE,
     heroscaling: HEROSCALING_MODULE,
+    inspiration: INSPIRATION_MODULE,
+    lair: LAIR_MODULE,
     morale: MORALE_MODULE,
+    offhand: OFFHAND_MODULE,
+    opportunity: OPPORTUNITY_MODULE,
     retaliation: RETALIATION_MODULE,
     skilltrees: SKILLTREES_MODULE,
     unitstacks: UNITSTACKS_MODULE,

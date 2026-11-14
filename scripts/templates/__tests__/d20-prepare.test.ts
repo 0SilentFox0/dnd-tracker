@@ -241,6 +241,7 @@ describe('pack hooks composition', () => {
 
     it('SYSTEM_MODULE follows the system meta', () => {
         expect(SYSTEM_MODULE).toEqual({
+            d20: 'd20',
             homm: 'd20',
             dnd5e: 'd20',
             wfrp: 'wfrp',

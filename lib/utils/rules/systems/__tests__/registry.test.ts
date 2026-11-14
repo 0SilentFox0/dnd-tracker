@@ -20,8 +20,9 @@ describe('rule system registry', () => {
         );
     });
 
-    it('has the three systems', () => {
+    it('has the four keys', () => {
         expect(Object.keys(RULE_SYSTEM_REGISTRY).sort()).toEqual([
+            'd20',
             'dnd5e',
             'homm',
             'wfrp',

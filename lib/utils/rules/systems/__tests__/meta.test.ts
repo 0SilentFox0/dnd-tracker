@@ -17,12 +17,13 @@ const META_FILES = ['systems/d20/meta.ts', 'systems/wfrp/meta.ts'];
 
 describe('system meta', () => {
     it('lists keys by systems/* folder alphabetically', () =>
-        expect(RULE_SYSTEM_KEYS).toEqual(['dnd5e', 'homm', 'wfrp']));
+        expect(RULE_SYSTEM_KEYS).toEqual(['d20', 'dnd5e', 'homm', 'wfrp']));
 
     it('resolves keys', () => {
         expect(isRuleSystemKey('wfrp')).toBe(true);
         expect(isRuleSystemKey('nope')).toBe(false);
-        expect(metaOf('dnd5e')?.module).toBe('d20');
+        expect(metaOf('d20')?.module).toBe('d20');
+        expect(metaOf('dnd5e')?.module).toBe('dnd5e');
         expect(metaOf('homm')?.module).toBe('homm');
         expect(metaOf('wfrp')?.module).toBe('wfrp');
         expect(metaOf('nope')).toBeUndefined();

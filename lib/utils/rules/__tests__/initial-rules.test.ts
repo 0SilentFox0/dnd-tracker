@@ -41,16 +41,31 @@ describe('initialRules parity with the empty packs', () => {
 
 describe('initialRules', () => {
     it('writes the module set explicitly, [] for a bare base', () => {
+        expect(initialRules({ key: 'd20' }).system).toEqual({
+            key: 'd20',
+            modules: [],
+        });
         expect(initialRules({ key: 'dnd5e' }).system).toEqual({
             key: 'dnd5e',
-            modules: [],
+            modules: [
+                'deathsaves',
+                'inspiration',
+                'lair',
+                'offhand',
+                'opportunity',
+            ],
         });
         expect(initialRules({ key: 'homm' }).system).toEqual({
             key: 'homm',
             modules: [
                 'artifactsets',
+                'deathsaves',
                 'heroscaling',
+                'inspiration',
+                'lair',
                 'morale',
+                'offhand',
+                'opportunity',
                 'retaliation',
                 'skilltrees',
                 'unitstacks',

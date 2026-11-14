@@ -1,14 +1,11 @@
-import {
-    RULE_SYSTEM_KEYS,
-    SYSTEM_META,
-    type SystemKind,
-    type SystemMeta,
-} from './meta';
+import { SYSTEM_META, type SystemKind, type SystemMeta } from './meta';
 
 import { CORE_CONTENT_KINDS } from '@/lib/constants/content-kinds';
 
-/** Registry order; only for previews and fallbacks where no rules exist. */
-export const FALLBACK_SYSTEM_KEY: string = RULE_SYSTEM_KEYS[0];
+/** The preset flagged `fallback` in meta; only for previews and fallbacks where no rules exist. */
+export const FALLBACK_SYSTEM_KEY: string = SYSTEM_META.find(
+    (m) => 'fallback' in m
+)!.keys[0];
 
 export const MODULE_ID_RE = /^[a-z0-9]+$/;
 

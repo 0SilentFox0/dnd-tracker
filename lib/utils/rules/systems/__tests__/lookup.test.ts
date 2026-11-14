@@ -22,9 +22,9 @@ describe('lookup before an install', () => {
         try {
             ruleSystemOf(wfrp);
         } catch (e) {
-            expect((e as InstanceType<typeof SystemNotInstalledError>).key).toBe(
-                'wfrp'
-            );
+            expect(
+                (e as InstanceType<typeof SystemNotInstalledError>).key
+            ).toBe('wfrp');
         }
     });
 
@@ -64,7 +64,8 @@ describe('lookup after an install root', () => {
 
         lookup.installModules({ d20: D20_MODULE });
         expect(lookup.isInstalled({ key: 'wfrp' })).toBe(false);
-        expect(lookup.isInstalled({ key: 'dnd5e' })).toBe(true);
+        expect(lookup.isInstalled({ key: 'd20' })).toBe(true);
+        expect(lookup.isInstalled({ key: 'dnd5e' })).toBe(false);
     });
 });
 
@@ -101,6 +102,6 @@ describe('partial install (client loads one composition)', () => {
 
         expect(lookup.isInstalled({ key: 'wfrp' })).toBe(true);
         expect(lookup.ruleSystemOf(wfrp).key).toBe(before.key);
-        expect(lookup.ruleSystemByKey('dnd5e')?.key).toBe('dnd5e');
+        expect(lookup.ruleSystemByKey('d20')?.key).toBe('d20');
     });
 });
