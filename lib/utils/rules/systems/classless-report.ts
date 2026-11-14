@@ -1,6 +1,6 @@
 import { CharacterClassesSchema } from '@/lib/schemas/classes';
 import { safeParseRules } from '@/lib/utils/rules/schema';
-import { ruleSystemOf } from '@/lib/utils/rules/systems/registry';
+import { ruleSystemOf } from '@/lib/utils/rules/systems/lookup';
 import { statColumnsOf } from '@/lib/utils/rules/systems/stats';
 
 export interface ReportCampaign {

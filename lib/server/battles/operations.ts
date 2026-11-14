@@ -20,7 +20,7 @@ import { ContentError } from '@/lib/server/content/errors';
 import {
     systemBattleOperation,
     systemBattleOperationOf,
-} from '@/lib/server/systems/registry';
+} from '@/lib/server/systems/lookup';
 import type { BattleOperationDeps } from '@/lib/server/systems/types';
 import {
     BattleAccess,

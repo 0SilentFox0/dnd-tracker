@@ -45,7 +45,8 @@ vi.mock('@/lib/utils/api/rate-limit', () => ({
     rateLimitResponse: () => NextResponse.json({}, { status: 429 }),
 }));
 import { compendiumRoute } from '../http';
-import { COMPENDIUM_LIMITS } from '../parse';
+
+import { COMPENDIUM_LIMITS } from '@/lib/utils/compendium-import/parse';
 
 const ctx = { params: Promise.resolve({ id: 'c' }) };
 
@@ -127,7 +128,7 @@ describe('compendium HTTP boundary', () => {
         expect(mocks.preview).not.toHaveBeenCalled();
     });
     it('returns sanitized stale errors without payload', async () => {
-        const { CompendiumError } = await import('../parse');
+        const { CompendiumError } = await import('@/lib/utils/compendium-import/parse');
 
         mocks.confirm.mockRejectedValue(
             new CompendiumError('PREVIEW_STALE', 'private payload')
@@ -342,7 +343,7 @@ describe('media route', () => {
         expect(mocks.media).not.toHaveBeenCalled();
     });
     it('maps a foreign runId to 404', async () => {
-        const { CompendiumError } = await import('../parse');
+        const { CompendiumError } = await import('@/lib/utils/compendium-import/parse');
 
         mocks.media.mockRejectedValue(new CompendiumError('FORBIDDEN'));
 

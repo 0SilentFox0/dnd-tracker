@@ -14,7 +14,7 @@ import { prisma } from '@/lib/db';
 import type { Locale } from '@/lib/i18n/config';
 import { getTranslator } from '@/lib/i18n/translator';
 import { loadRules } from '@/lib/server/campaigns/rules';
-import { systemServerOf } from '@/lib/server/systems/registry';
+import { systemServerOf } from '@/lib/server/systems/lookup';
 import {
     abilityRegistryOf,
     flowSegments,

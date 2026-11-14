@@ -1,4 +1,4 @@
-import { SYSTEM_SERVER_UNION } from '@/lib/server/systems/registry';
+import { systemServerUnion } from '@/lib/server/systems/lookup';
 
 /** Implemented shared character adapters. Activation of model transports remains T14. */
 const base = 'campaigns/[id]/characters';
@@ -7,7 +7,7 @@ const hero = `${base}/[characterId]`;
 
 /** One row per method and operation of the composed system routes; bare handlers have no assistant action */
 const systemRows = (scope: 'character' | 'campaign', route: string) =>
-    Object.values(SYSTEM_SERVER_UNION).flatMap((server) =>
+    Object.values(systemServerUnion()).flatMap((server) =>
         Object.values(server.routes?.[scope] ?? {}).flatMap((systemRoute) =>
             Object.entries(systemRoute).flatMap(([method, target]) =>
                 target && 'operation' in target
@@ -17,7 +17,8 @@ const systemRows = (scope: 'character' | 'campaign', route: string) =>
         )
     );
 
-export const CHARACTER_ACTION_COVERAGE = [
+export const characterActionCoverage = () =>
+    [
     ['GET', base, 'list', 'character-actions'],
     ['POST', base, 'create', 'character-actions'],
     ['DELETE', base, 'delete-all', 'character-actions'],

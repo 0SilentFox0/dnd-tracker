@@ -57,7 +57,7 @@ describe('createDraft system dispatch', () => {
         });
 
         const { RULE_SYSTEM_REGISTRY } = await import(
-            '@/lib/utils/rules/systems/registry'
+            '@/lib/utils/rules/systems/lookup'
         );
 
         (RULE_SYSTEM_REGISTRY as Record<string, unknown>).stub = {

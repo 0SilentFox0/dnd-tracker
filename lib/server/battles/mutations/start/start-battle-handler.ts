@@ -15,14 +15,12 @@ import {
 import { ACTIVE_CHARACTER } from '@/lib/constants/characters';
 import { prisma } from '@/lib/db';
 import { textRef } from '@/lib/i18n/text-ref';
+import { createBattleParticipantFromCharacter } from '@/lib/server/battles/participant/from-character';
 import { applyBakedAuras } from '@/lib/utils/abilities/build/bake';
 import { runAbilities } from '@/lib/utils/abilities/engine/core/run-abilities';
 import { logFields } from '@/lib/utils/battle/log/lines';
 import { modeEnter } from '@/lib/utils/battle/modes/server';
-import {
-    createBattleParticipantFromCharacter,
-    createBattleParticipantFromUnit,
-} from '@/lib/utils/battle/participant';
+import { createBattleParticipantFromUnit } from '@/lib/utils/battle/participant';
 import {
     calculateInitiative,
     sortByInitiative,

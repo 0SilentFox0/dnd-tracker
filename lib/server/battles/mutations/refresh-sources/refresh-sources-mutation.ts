@@ -4,10 +4,8 @@ import { ParticipantSourceType } from '@/lib/constants/battle';
 import { prisma } from '@/lib/db';
 import { textRef } from '@/lib/i18n/text-ref';
 import { buildCampaignContextForStart } from '@/lib/server/battles/mutations/start/start-build-context';
-import {
-    createBattleParticipantFromCharacter,
-    createBattleParticipantFromUnit,
-} from '@/lib/utils/battle/participant';
+import { createBattleParticipantFromCharacter } from '@/lib/server/battles/participant/from-character';
+import { createBattleParticipantFromUnit } from '@/lib/utils/battle/participant';
 import { refreshFromSource } from '@/lib/utils/battle/participant/refresh-from-source';
 import type {
     BattleMutationContext,

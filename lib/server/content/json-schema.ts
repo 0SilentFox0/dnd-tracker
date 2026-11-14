@@ -1,6 +1,7 @@
 import { z, type ZodType } from 'zod';
 
 import 'server-only';
+import '@/lib/server/systems/registry';
 import {
     ChoiceSchema,
     FeatPrerequisiteSchema,
@@ -12,7 +13,7 @@ import {
     UnitSpellGrantSchema,
     UnitStatblockSchema,
 } from '@/lib/schemas/units';
-import { systemContentKinds } from '@/lib/server/systems/registry';
+import { systemContentKinds } from '@/lib/server/systems/lookup';
 import {
     AbilitySchema,
     LimitsSchema,

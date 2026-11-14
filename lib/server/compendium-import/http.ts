@@ -4,7 +4,6 @@ import { z } from 'zod';
 import { fetchImportImage } from './media/fetch-image';
 import { prismaMediaRepository } from './media/repository';
 import { processMediaBatch } from './media/service';
-import { COMPENDIUM_LIMITS, CompendiumError } from './parse';
 import {
     importTargetOptions,
     mediaPresentation,
@@ -27,6 +26,7 @@ import { privateJson } from '@/lib/utils/api/api-response';
 import { checkRateLimit, rateLimitResponse } from '@/lib/utils/api/rate-limit';
 import { isSameOriginRequest } from '@/lib/utils/api/same-origin';
 import { isRecord } from '@/lib/utils/common/is-record';
+import { COMPENDIUM_LIMITS, CompendiumError } from '@/lib/utils/compendium-import/parse';
 
 const envelope = z.strictObject({
     input: z.unknown(),

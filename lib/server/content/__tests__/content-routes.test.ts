@@ -24,10 +24,10 @@ vi.mock('@/lib/utils/api/api-auth', () => ({
 }));
 
 import { verifyApiToken } from '@/lib/ai/api-tokens';
+import { collectionRoutes, itemRoutes } from '@/lib/server/content/content-routes';
 import { defineResource } from '@/lib/server/content/define-resource';
 import { ContentError } from '@/lib/server/content/errors';
 import * as apiAuth from '@/lib/utils/api/api-auth';
-import { collectionRoutes, itemRoutes } from '@/lib/utils/api/content-routes';
 
 const created = vi.fn(async (_a: unknown, input: { name: string }) => ({
     id: 'n1',

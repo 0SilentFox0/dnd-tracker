@@ -17,6 +17,16 @@ export async function buildDemoEncounter(
         },
     });
 
+    const raceIds = [...new Set(units.flatMap((u) => u.raceId ?? []))];
+
+    const racesById = Object.fromEntries(
+        (
+            await prisma.race.findMany({
+                where: { campaignId: scene.campaignId, id: { in: raceIds } },
+            })
+        ).map((race) => [race.id, race])
+    );
+
     const unitsById = new Map(units.map((unit) => [unit.id, unit]));
 
     const built = await Promise.all(
@@ -35,7 +45,7 @@ export async function buildDemoEncounter(
                           scene.id,
                           entry.side,
                           index + 1,
-                          undefined,
+                          racesById,
                           rules
                       )
                   )

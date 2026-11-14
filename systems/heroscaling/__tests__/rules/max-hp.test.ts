@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 import { parseRules } from '@/lib/utils/rules/schema';
-import { ruleSystemOf } from '@/lib/utils/rules/systems/registry';
+import { ruleSystemOf } from '@/lib/utils/rules/systems/lookup';
 import { heroHpFallback } from '@/systems/heroscaling/rules/hero-hp';
 import { heroMaxHp } from '@/systems/heroscaling/rules/max-hp';
 import type { ResolvedClassEntry } from '@/types/classes';

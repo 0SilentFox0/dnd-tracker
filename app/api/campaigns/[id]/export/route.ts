@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
 
 import { prisma } from '@/lib/db';
+import { operationRoute } from '@/lib/server/content/content-routes';
 import { CONTENT_OPERATIONS } from '@/lib/server/content/operations';
+import { bundleErrorResponse } from '@/lib/server/templates/bundle-error';
 import { exportCampaign } from '@/lib/server/templates/export-campaign';
 import { attachmentHeaders } from '@/lib/utils/api/api-response';
-import { bundleErrorResponse } from '@/lib/utils/api/bundle-error';
-import { operationRoute } from '@/lib/utils/api/content-routes';
 
 export const GET = operationRoute(
     CONTENT_OPERATIONS['campaign.export'],

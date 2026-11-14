@@ -3,8 +3,8 @@ import { Prisma } from '@prisma/client';
 import { z } from 'zod';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
-import { ContentError } from '@/lib/server/content/errors';
 import { errorResponse } from '@/lib/utils/api/api-response';
+import { ContentError } from '@/lib/utils/api/content-error';
 import { logger } from '@/lib/utils/common/logger';
 import { RulesSystemError } from '@/lib/utils/rules/schema';
 

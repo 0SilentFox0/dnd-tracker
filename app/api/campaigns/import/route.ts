@@ -7,10 +7,10 @@ import {
     MAX_BUNDLE_BYTES,
 } from '@/lib/schemas/templates';
 import { createCampaignFromBundle } from '@/lib/server/campaigns/create-campaign';
+import { bundleErrorResponse } from '@/lib/server/templates/bundle-error';
 import { ensureDbUser } from '@/lib/server/users/db-user';
 import { requireAuthUser } from '@/lib/utils/api/api-auth';
 import { errorResponse } from '@/lib/utils/api/api-response';
-import { bundleErrorResponse } from '@/lib/utils/api/bundle-error';
 import { handleApiError } from '@/lib/utils/api/error-handler';
 import { parseBody } from '@/lib/utils/api/parse-body';
 

@@ -13,8 +13,8 @@ vi.mock('@/lib/cache/reference-data', async (importOriginal) => ({
 }));
 
 import { ParticipantSide } from '@/lib/constants/battle';
+import { createBattleParticipantFromCharacter } from '@/lib/server/battles/participant/from-character';
 import * as backgroundRows from '@/lib/utils/backgrounds/row';
-import { createBattleParticipantFromCharacter } from '@/lib/utils/battle/participant/from-character';
 import type { CampaignSpellContext } from '@/lib/utils/battle/types/participant';
 import {
     alert,

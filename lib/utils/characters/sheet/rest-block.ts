@@ -5,7 +5,7 @@ import { hitDicePool } from '@/lib/utils/characters/resources/hit-dice';
 import { readResources } from '@/lib/utils/characters/resources/schema';
 import { isConsumablePool } from '@/lib/utils/items/pools';
 import type { Ruleset } from '@/lib/utils/rules';
-import { ruleSystemOf } from '@/lib/utils/rules/systems/registry';
+import { ruleSystemOf } from '@/lib/utils/rules/systems/lookup';
 import type { BattleParticipant } from '@/types/battle';
 import type { SheetRest } from '@/types/characters';
 import type { ResolvedClassEntry } from '@/types/classes';

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { ParticipantSide } from '@/lib/constants/battle';
-import { createBattleParticipantFromCharacter } from '@/lib/utils/battle/participant/from-character';
+import { createBattleParticipantFromCharacter } from '@/lib/server/battles/participant/from-character';
 import { refreshFromSource } from '@/lib/utils/battle/participant/refresh-from-source';
 import { parseRules } from '@/lib/utils/rules/schema';
 import type { IngredientStock } from '@/types/battle';

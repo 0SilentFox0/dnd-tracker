@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest';
 
 import { adaptCompendium } from '../adapt';
 import { canonicalKey, nestedId } from '../identity';
-import type { Compendium } from '../parse';
+
+import type { Compendium } from '@/lib/utils/compendium-import/parse';
 
 const feature = {
     name: 'Gift',

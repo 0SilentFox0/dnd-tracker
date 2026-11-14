@@ -1,35 +1,36 @@
 import { Prisma } from '@prisma/client';
 
-import type { ParticipantsDiff, ParticipantUpdate } from './diff-participants';
-import { diffParticipants } from './diff-participants';
-import { BattleConflictError } from './errors';
-import type { BattleDb } from './load-battle';
 import { persistConsumables } from './persist-consumables';
 import { persistIngredients } from './persist-ingredients';
 import { persistCharacterResources } from './persist-resources';
 import { persistBattleXp } from './persist-xp';
-import { buildSnapshotState } from './snapshot-state';
-import { joinParticipant, splitParticipant } from './split-participant';
-import type {
-    BattleDelta,
-    BattleMutationOutcome,
-    BattleSceneState,
-    LoadedBattle,
-    ParticipantColumns,
-    StoredBattleEvent,
-    StoredParticipant,
-} from './types';
 
 import {
     BATTLE_LOG_TEXT_FALLBACK,
     BATTLE_SNAPSHOTS_KEPT_AFTER_COMPLETE,
     BattleStatus,
 } from '@/lib/constants/battle';
-import { DEFAULT_LOCALE, type Locale } from '@/lib/i18n/config';
+import { DEFAULT_LOCALE } from '@/lib/i18n/config';
 import { getTranslator } from '@/lib/i18n/translator';
 import { encodeLog } from '@/lib/utils/battle/log/codec';
 import { formatBattleLog } from '@/lib/utils/battle/log/lines';
 import { applyScenePatch } from '@/lib/utils/battle/scene-state';
+import type { ParticipantsDiff, ParticipantUpdate } from '@/lib/utils/battle/store/diff-participants';
+import { diffParticipants } from '@/lib/utils/battle/store/diff-participants';
+import { BattleConflictError } from '@/lib/utils/battle/store/errors';
+import type { BattleDb } from '@/lib/utils/battle/store/load-battle';
+import { buildSnapshotState } from '@/lib/utils/battle/store/snapshot-state';
+import { joinParticipant, splitParticipant } from '@/lib/utils/battle/store/split-participant';
+import type {
+    BattleDelta,
+    BattleMutationOutcome,
+    BattleSceneState,
+    BattleWrite,
+    LoadedBattle,
+    ParticipantColumns,
+    StoredBattleEvent,
+    StoredParticipant,
+} from '@/lib/utils/battle/store/types';
 import type { BattleParticipant } from '@/types/battle';
 import type { LogLine } from '@/types/text';
 
@@ -128,8 +129,6 @@ export interface PreparedSave {
     delta: BattleDelta;
     turnStartedAt: Date | null;
 }
-
-export type BattleWrite = { logLocale: Locale };
 
 export function prepareSave(
     before: LoadedBattle,

@@ -3,12 +3,13 @@ import { z } from 'zod';
 import { AiToolError, defineTool } from './define';
 
 import 'server-only';
+import '@/lib/server/systems/registry';
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { ACTIVE_CHARACTER, CharacterType } from '@/lib/constants/characters';
 import { prisma } from '@/lib/db';
 import { loadRules } from '@/lib/server/campaigns/rules';
 import { readContent } from '@/lib/server/scenario/page-store';
-import { systemServerOf, withSystemNotes } from '@/lib/server/systems/registry';
+import { systemServerOf, withSystemNotes } from '@/lib/server/systems/lookup';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import { docText } from '@/lib/utils/scenario/doc';
 

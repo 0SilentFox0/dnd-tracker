@@ -4,7 +4,7 @@ import type { AssistantActionDef } from './types';
 import 'server-only';
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { ContentError } from '@/lib/server/content/errors';
-import { operationInComposition } from '@/lib/server/systems/registry';
+import { operationInComposition } from '@/lib/server/systems/lookup';
 import type { Actor } from '@/lib/utils/api/actor';
 import { needFailure } from '@/lib/utils/api/need';
 import type { Ruleset } from '@/lib/utils/rules/schema';

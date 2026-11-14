@@ -5,13 +5,6 @@ import type { FeatureResolutionContext } from '../feature-resolution';
 import { canonicalKey } from '../identity';
 import { collectEntryMedia } from '../media/collect';
 import {
-    byteLength,
-    type Compendium,
-    COMPENDIUM_LIMITS,
-    type JsonRecord,
-    normalized,
-} from '../parse';
-import {
     type AdaptedCompendium,
     type AdaptedEntry,
     type Adapter,
@@ -19,6 +12,14 @@ import {
     type AdaptOptions,
     issue,
 } from '../types';
+
+import {
+    byteLength,
+    type Compendium,
+    COMPENDIUM_LIMITS,
+    type JsonRecord,
+    normalized,
+} from '@/lib/utils/compendium-import/parse';
 
 export interface AdaptState {
     root: Compendium;

@@ -1,6 +1,6 @@
 import { ParticipantSide, ParticipantSourceType } from '@/lib/constants/battle';
 import { loadUnitLibraryStats } from '@/lib/server/battles/balance/unit-library';
-import { systemServerOf } from '@/lib/server/systems/registry';
+import { systemServerOf } from '@/lib/server/systems/lookup';
 import {
     buildPartyPower,
     computeFairScaling,

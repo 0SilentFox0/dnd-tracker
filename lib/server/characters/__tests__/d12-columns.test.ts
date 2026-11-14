@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ParticipantSide } from '@/lib/constants/battle';
+import { createBattleParticipantFromCharacter } from '@/lib/server/battles/participant/from-character';
 import { CHARACTER_OPERATIONS } from '@/lib/server/characters/operations/registry';
-import { createBattleParticipantFromCharacter } from '@/lib/utils/battle/participant/from-character';
 import { buildCharacterSheet } from '@/lib/utils/characters/sheet';
 import { parseRules } from '@/lib/utils/rules/schema';
 import { resolveClassEntries } from '@/lib/utils/spells/class-slots';

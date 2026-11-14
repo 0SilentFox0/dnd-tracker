@@ -7,6 +7,7 @@ import { getSessionUserId } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { safePusherTrigger } from '@/lib/pusher/safe-trigger';
 import { pusherServer } from '@/lib/pusher/server';
+import { saveBattle } from '@/lib/server/battles/store/save-battle';
 import { withCampaignRuntimeWrite } from '@/lib/server/content/write';
 import {
     afterContentCommit,
@@ -15,15 +16,7 @@ import {
 import { clearShowBattle } from '@/lib/server/show/show-store';
 import { BATTLE_RATE_LIMITS, checkRateLimit } from '@/lib/utils/api/rate-limit';
 import type { PipelineDeps } from '@/lib/utils/battle/pipeline/run-battle-mutation';
-import {
-    loadAllEvents,
-    loadBattle,
-    loadBattleAccess,
-    loadEventsBefore,
-    loadKnowledgeEvents,
-    loadRecentEvents,
-    saveBattle,
-} from '@/lib/utils/battle/store';
+import { loadAllEvents, loadBattle, loadBattleAccess, loadEventsBefore, loadKnowledgeEvents, loadRecentEvents } from '@/lib/utils/battle/store';
 import { summarizeKnowledge } from '@/lib/utils/battle/view/knowledge';
 
 function recheckAccessWith(

@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
 
 import { aiMapRequestSchema } from '@/lib/schemas/content-import';
+import { type RouteCtx, runContent } from '@/lib/server/content/content-routes';
 import {
     aiMapAvailable,
     aiMapResponse,
 } from '@/lib/server/content/import/ai-map';
 import { importKindOf } from '@/lib/server/content/import/kind';
-import { type RouteCtx, runContent } from '@/lib/utils/api/content-routes';
 import { NEED } from '@/lib/utils/api/need';
 import { parseBody } from '@/lib/utils/api/parse-body';
 

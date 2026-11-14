@@ -40,8 +40,8 @@ import {
     SYSTEM_FIELD_KINDS,
     validateComposition,
 } from '@/lib/utils/rules/systems/compose';
+import { ruleSystemOf } from '@/lib/utils/rules/systems/lookup';
 import { SYSTEM_META, type SystemMeta } from '@/lib/utils/rules/systems/meta';
-import { ruleSystemOf } from '@/lib/utils/rules/systems/registry';
 
 const REAL: readonly SystemMeta[] = SYSTEM_META;
 

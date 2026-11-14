@@ -1,6 +1,8 @@
 import type { Ruleset } from '@/lib/utils/rules/schema';
-import { ruleSystemOf } from '@/lib/utils/rules/systems';
+import { isInstalled, ruleSystemOf } from '@/lib/utils/rules/systems';
 
-/** Whether the campaign rules play with classes; a system without the hook has none */
+/** Whether the campaign rules play with classes; a system without the hook has none, and neither does one not installed yet (root layout, landing) */
 export const classesEnabled = (rules: Ruleset | null | undefined): boolean =>
-    !!rules && (ruleSystemOf(rules).progression.classes?.(rules) ?? false);
+    !!rules &&
+    isInstalled(rules.system) &&
+    (ruleSystemOf(rules).progression.classes?.(rules) ?? false);

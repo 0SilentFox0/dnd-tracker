@@ -13,14 +13,10 @@ import {
     rollbackSchema,
 } from '@/lib/server/battles/mutations/rollback/rollback-mutation';
 import { runBattleMutation } from '@/lib/server/battles/run-mutation';
+import { saveBattle } from '@/lib/server/battles/store/save-battle';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import type { PipelineDeps } from '@/lib/utils/battle/pipeline/run-battle-mutation';
-import {
-    loadBattle,
-    loadRecentEvents,
-    loadSnapshotsFrom,
-    saveBattle,
-} from '@/lib/utils/battle/store';
+import { loadBattle, loadRecentEvents, loadSnapshotsFrom } from '@/lib/utils/battle/store';
 import type { ClientBattleDelta } from '@/types/api';
 
 const url = process.env.DATABASE_URL ?? '';

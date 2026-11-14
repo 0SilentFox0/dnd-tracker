@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { sourceSyncQuerySchema } from '@/lib/schemas';
+import { operationRoute } from '@/lib/server/content/content-routes';
 import { parseInput } from '@/lib/server/content/errors';
 import { CONTENT_OPERATIONS } from '@/lib/server/content/operations';
 import {
@@ -9,7 +10,6 @@ import {
     getSourceDiff,
 } from '@/lib/server/templates/sync/service';
 import { PRIVATE_NO_STORE_HEADERS } from '@/lib/utils/api/cache-headers';
-import { operationRoute } from '@/lib/utils/api/content-routes';
 
 export const GET = operationRoute(
     CONTENT_OPERATIONS['source.diff'],

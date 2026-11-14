@@ -37,7 +37,8 @@ import { createStartMutation } from '@/lib/server/battles/mutations/start/start-
 import { mutateSystemOperation } from '@/lib/server/battles/operations';
 import { runBattleMutation } from '@/lib/server/battles/run-mutation';
 import { loadSpellsFromDb } from '@/lib/server/battles/spell/load-spells-db';
-import { systemServerOf } from '@/lib/server/systems/registry';
+import { saveBattle } from '@/lib/server/battles/store/save-battle';
+import { systemServerOf } from '@/lib/server/systems/lookup';
 import {
     buildPartyPower,
     computeFairScaling,
@@ -57,11 +58,7 @@ import type {
 } from '@/lib/utils/battle/pipeline/run-battle-mutation';
 import { casterSpellDice } from '@/lib/utils/battle/spell/caster-dice';
 import { spellTargetingFor } from '@/lib/utils/battle/spell/spell-targeting';
-import {
-    loadBattle,
-    loadRecentEvents,
-    saveBattle,
-} from '@/lib/utils/battle/store';
+import { loadBattle, loadRecentEvents } from '@/lib/utils/battle/store';
 import {
     bonusTargetCandidates,
     needsBonusTarget,

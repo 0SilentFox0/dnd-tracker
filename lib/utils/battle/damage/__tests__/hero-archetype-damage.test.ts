@@ -5,10 +5,10 @@ import {
     ParticipantSide,
     ParticipantSourceType,
 } from '@/lib/constants/battle';
+import { createBattleParticipantFromCharacter } from '@/lib/server/battles/participant/from-character';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import { applyHeroDmDamageMultiplier } from '@/lib/utils/battle/damage/hero-dm-multiplier';
 import { rowLines } from '@/lib/utils/battle/log/__tests__/event-text';
-import { createBattleParticipantFromCharacter } from '@/lib/utils/battle/participant/from-character';
 import { computeSpellPower } from '@/lib/utils/battle/spell/power';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 import type { BattleParticipant } from '@/types/battle';

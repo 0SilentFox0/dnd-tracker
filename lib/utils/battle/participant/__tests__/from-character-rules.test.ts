@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
 import { ParticipantSide } from '@/lib/constants/battle';
+import { createBattleParticipantFromCharacter } from '@/lib/server/battles/participant/from-character';
 import { awaitsMoraleCheck } from '@/lib/utils/battle/morale/awaits-check';
-import { createBattleParticipantFromCharacter } from '@/lib/utils/battle/participant/from-character';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 import { parseRules } from '@/lib/utils/rules/schema';
 

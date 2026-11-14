@@ -1,7 +1,6 @@
 import { mediaProgress } from './media/queue';
 import { adaptCompendium } from './adapt';
 import { canonicalKey } from './identity';
-import { parseCompendium } from './parse';
 import { kindTable, prismaImportRepository } from './repository';
 import type { CompendiumReport, ImportInput } from './service';
 
@@ -10,6 +9,7 @@ import { prisma } from '@/lib/db';
 import { BUNDLE_TABLES, delegateOf } from '@/lib/server/templates/bundle';
 import { templateLocaleWhere } from '@/lib/server/templates/locale-filter';
 import type { Actor } from '@/lib/utils/api/actor';
+import { parseCompendium } from '@/lib/utils/compendium-import/parse';
 import {
     compendiumTemplateKeys,
     templateKeyWhere,

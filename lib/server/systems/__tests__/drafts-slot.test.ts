@@ -1,8 +1,8 @@
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 
 import { parseRules } from '@/lib/utils/rules/schema';
+import { ruleSystemOf } from '@/lib/utils/rules/systems/lookup';
 import { RULE_SYSTEM_KEYS } from '@/lib/utils/rules/systems/meta';
-import { ruleSystemOf } from '@/lib/utils/rules/systems/registry';
 
 vi.mock('server-only', () => ({}));
 vi.mock('@/lib/db', () => ({ prisma: {} }));

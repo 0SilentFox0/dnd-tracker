@@ -4,6 +4,9 @@ import { vi } from 'vitest';
 if (typeof document !== 'undefined')
     await import('@testing-library/jest-dom/vitest');
 
+// lookup-only code (the barrel) needs an install root; without it every ruleSystemOf in a test would throw SystemNotInstalledError
+await import('@/lib/utils/rules/systems/registry');
+
 // next/font only works inside the Next compiler; components that import components/hud/fonts need a stub
 vi.mock('next/font/google', () => ({
     Alegreya: () => ({ variable: '' }),

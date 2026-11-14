@@ -1,7 +1,8 @@
 import { createHash } from 'node:crypto';
 
-import { byteLength, CompendiumError, normalized } from './parse';
 import type { Edition } from './types';
+
+import { byteLength, CompendiumError, normalized } from '@/lib/utils/compendium-import/parse';
 
 export function canonicalKey(
     kind: string,

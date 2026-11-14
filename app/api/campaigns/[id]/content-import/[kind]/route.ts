@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
 
+import { operationRoute } from '@/lib/server/content/content-routes';
 import { importContent } from '@/lib/server/content/import/import-content';
 import { importKindOf } from '@/lib/server/content/import/kind';
 import { translatedImport } from '@/lib/server/content/import/translate-report';
 import { CONTENT_OPERATIONS } from '@/lib/server/content/operations';
-import { operationRoute } from '@/lib/utils/api/content-routes';
 
 export const maxDuration = 120;
 

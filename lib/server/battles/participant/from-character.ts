@@ -1,19 +1,3 @@
-import type {
-    CampaignSpellContext,
-    CharacterFromPrisma,
-} from '../types/participant';
-import { buildCharacterSpellGrants } from './character-spell-grants';
-import {
-    type EquippedArtifactRow,
-    loadConsumableEntries,
-    loadEquippedArtifactRows,
-    toEquippedArtifacts,
-} from './extract-artifacts';
-import { extractAttacksFromCharacter } from './extract-attacks';
-import { loadClassesById } from './load-classes';
-import { loadFeatsById } from './load-feats';
-import { runParticipantParts } from './parts';
-
 import { ABILITY_KEYS, type AbilityKey } from '@/lib/constants/abilities';
 import {
     CombatStatus,
@@ -27,7 +11,7 @@ import { loadBackground } from '@/lib/server/backgrounds/load';
 import { resolveCharacterSkillEntries } from '@/lib/server/battles/participant/character-skill-entries';
 import { resolveSpellSlotsFromCharacter } from '@/lib/server/battles/participant/from-character-spell-slots';
 import { loadRace } from '@/lib/server/battles/participant/load-race';
-import { systemServerOf } from '@/lib/server/systems/registry';
+import { systemServerOf } from '@/lib/server/systems/lookup';
 import { bakePassives } from '@/lib/utils/abilities/build/bake';
 import type { ArtifactSetRowLike } from '@/lib/utils/abilities/build/collect';
 import { collectCharacterAbilities } from '@/lib/utils/abilities/build/collect';
@@ -36,7 +20,22 @@ import { resolveLimitFormulas } from '@/lib/utils/abilities/build/limit-formulas
 import { classPools } from '@/lib/utils/abilities/class-columns';
 import { readChoiceList } from '@/lib/utils/abilities/read';
 import { initAmmo } from '@/lib/utils/battle/ammo';
+import { buildCharacterSpellGrants } from '@/lib/utils/battle/participant/character-spell-grants';
+import {
+    type EquippedArtifactRow,
+    loadConsumableEntries,
+    loadEquippedArtifactRows,
+    toEquippedArtifacts,
+} from '@/lib/utils/battle/participant/extract-artifacts';
+import { extractAttacksFromCharacter } from '@/lib/utils/battle/participant/extract-attacks';
+import { loadClassesById } from '@/lib/utils/battle/participant/load-classes';
+import { loadFeatsById } from '@/lib/utils/battle/participant/load-feats';
+import { runParticipantParts } from '@/lib/utils/battle/participant/parts';
 import { proficiencyOf } from '@/lib/utils/battle/saves/access';
+import type {
+    CampaignSpellContext,
+    CharacterFromPrisma,
+} from '@/lib/utils/battle/types/participant';
 import { getCharacterImmunities } from '@/lib/utils/characters/character-race-effects';
 import { choicesStateOf } from '@/lib/utils/characters/choices/picks';
 import {

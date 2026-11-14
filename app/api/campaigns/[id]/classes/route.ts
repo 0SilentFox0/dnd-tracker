@@ -1,3 +1,3 @@
-import { kindCollectionRoutes } from '@/lib/utils/api/content-routes';
+import { kindCollectionRoutes } from '@/lib/server/content/content-routes';
 
 export const { GET, POST } = kindCollectionRoutes('classes');

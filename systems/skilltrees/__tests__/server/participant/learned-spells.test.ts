@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 vi.mock('@/lib/db', () => ({ prisma: {} }));
 
 import { ParticipantSide } from '@/lib/constants/battle';
-import { createBattleParticipantFromCharacter } from '@/lib/utils/battle/participant/from-character';
+import { createBattleParticipantFromCharacter } from '@/lib/server/battles/participant/from-character';
 import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
 import { parseRules } from '@/lib/utils/rules/schema';
 import { buildTreeJson } from '@/lib/utils/skills/progression';

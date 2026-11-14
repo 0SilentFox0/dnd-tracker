@@ -5,8 +5,9 @@ import { createAdaptState } from './adapt/state';
 import { attachSubclasses } from './adapt/subclasses';
 import { attachSubraces } from './adapt/subraces';
 import { adaptTopLevel } from './adapt/top-level';
-import type { Compendium } from './parse';
 import type { AdaptedCompendium, AdaptOptions } from './types';
+
+import type { Compendium } from '@/lib/utils/compendium-import/parse';
 
 export { effectiveEdition } from './adapters/shared';
 

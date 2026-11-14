@@ -1,7 +1,8 @@
 import { nameKey, sameEdition } from './identity';
-import { normalized } from './parse';
 import { expectedKind, refKey } from './plan';
 import type { AdaptedEntry, CompendiumRef, TargetKind } from './types';
+
+import { normalized } from '@/lib/utils/compendium-import/parse';
 
 export interface NamedRow {
     id: string;

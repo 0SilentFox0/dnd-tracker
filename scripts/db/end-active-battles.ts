@@ -13,17 +13,13 @@ import { join } from 'node:path';
 import { prisma } from '@/lib/db';
 import { DEFAULT_LOCALE } from '@/lib/i18n/config';
 import { getBattleOperation } from '@/lib/server/battles/operations';
+import { saveBattle } from '@/lib/server/battles/store/save-battle';
 import { withCampaignRuntimeWrite } from '@/lib/server/content/write';
 import { createScopedDatabase } from '@/lib/server/content/write-context';
 import { clearShowBattle } from '@/lib/server/show/show-store';
 import type { PipelineDeps } from '@/lib/utils/battle/pipeline/run-battle-mutation';
 import { runGuardedBattleOperationCore } from '@/lib/utils/battle/pipeline/run-battle-mutation';
-import {
-    loadBattle,
-    loadBattleAccess,
-    loadRecentEvents,
-    saveBattle,
-} from '@/lib/utils/battle/store';
+import { loadBattle, loadBattleAccess, loadRecentEvents } from '@/lib/utils/battle/store';
 import {
     type ActiveSceneRow,
     endScenes,

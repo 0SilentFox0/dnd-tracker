@@ -10,13 +10,13 @@ vi.mock('server-only', () => ({}));
 vi.mock('@/lib/db', () => ({ prisma: h }));
 
 import { ParticipantSide } from '@/lib/constants/battle';
+import { createBattleParticipantFromCharacter } from '@/lib/server/battles/participant/from-character';
 import { buildCharacterUpdateData } from '@/lib/server/characters/core/build-character-update-data';
 import { normalizeCharacterInput } from '@/lib/server/characters/core/system-fields';
-import { createBattleParticipantFromCharacter } from '@/lib/utils/battle/participant/from-character';
 import { buildCharacterSheet } from '@/lib/utils/characters/sheet';
 import { mergeRules, parseRules, type Ruleset } from '@/lib/utils/rules/schema';
 import { PRESETS } from '@/lib/utils/rules/systems/catalog';
-import { ruleSystemOf } from '@/lib/utils/rules/systems/registry';
+import { ruleSystemOf } from '@/lib/utils/rules/systems/lookup';
 import { buildTreeJson } from '@/lib/utils/skills/progression';
 
 const FULL = PRESETS.homm.modules;

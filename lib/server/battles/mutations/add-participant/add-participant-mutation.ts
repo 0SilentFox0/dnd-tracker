@@ -7,13 +7,11 @@ import { prisma } from '@/lib/db';
 import { textRef } from '@/lib/i18n/text-ref';
 import { mapCellSchema } from '@/lib/schemas/battles';
 import { buildCampaignContextForStart } from '@/lib/server/battles/mutations/start/start-build-context';
+import { createBattleParticipantFromCharacter } from '@/lib/server/battles/participant/from-character';
 import { applyBakedAuras } from '@/lib/utils/abilities/build/bake';
 import { canStand } from '@/lib/utils/battle/grid/occupancy';
 import { modeEnter, modePlaceOne } from '@/lib/utils/battle/modes/server';
-import {
-    createBattleParticipantFromCharacter,
-    createBattleParticipantFromUnit,
-} from '@/lib/utils/battle/participant';
+import { createBattleParticipantFromUnit } from '@/lib/utils/battle/participant';
 import { reserveOf, toReserve } from '@/lib/utils/battle/participant/reserve';
 import type {
     BattleMutationContext,

@@ -4,7 +4,7 @@ import { defineTool } from './define';
 
 import 'server-only';
 import { readLegacyBattleState } from '@/lib/server/battles/read-service';
-import { withSystemNotes } from '@/lib/server/systems/registry';
+import { withSystemNotes } from '@/lib/server/systems/lookup';
 
 export const getBattleStateTool = defineTool({
     name: 'get_battle_state',

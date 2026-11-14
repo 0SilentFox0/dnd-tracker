@@ -1,9 +1,9 @@
 import type { MediaReason } from './media/types';
 import { normalizeMediaUrl } from './media/url';
-import { byteLength, CompendiumError } from './parse';
 import { type ImportIssue, issue } from './types';
 
 import { isRecord } from '@/lib/utils/common/is-record';
+import { byteLength, CompendiumError } from '@/lib/utils/compendium-import/parse';
 
 const refs = new Set([
     'spell',

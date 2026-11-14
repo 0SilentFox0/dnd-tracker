@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
 import { ParticipantSide } from '@/lib/constants/battle';
+import { createBattleParticipantFromCharacter } from '@/lib/server/battles/participant/from-character';
 import { armorStatsColumns } from '@/lib/utils/artifacts/armor-stats';
-import { createBattleParticipantFromCharacter } from '@/lib/utils/battle/participant/from-character';
 import { DEFAULT_RULES, type Ruleset } from '@/lib/utils/rules';
 import { parseRules } from '@/lib/utils/rules/schema';
 import type { GameClassData } from '@/types/classes';

@@ -8,8 +8,8 @@ import {
     compositionOrder,
     validateComposition,
 } from '@/lib/utils/rules/systems/compose';
+import { ruleSystemByKey } from '@/lib/utils/rules/systems/lookup';
 import type { SystemMeta } from '@/lib/utils/rules/systems/meta';
-import { ruleSystemByKey } from '@/lib/utils/rules/systems/registry';
 import type {
     ActGate,
     ParticipantPart,

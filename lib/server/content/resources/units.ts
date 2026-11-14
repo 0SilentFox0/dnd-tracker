@@ -25,7 +25,7 @@ import {
     withAbilityIssues,
 } from '@/lib/utils/abilities/read';
 import { parseRules, type Ruleset } from '@/lib/utils/rules/schema';
-import { ruleSystemOf } from '@/lib/utils/rules/systems/registry';
+import { ruleSystemOf } from '@/lib/utils/rules/systems/lookup';
 import type { SystemData } from '@/lib/utils/rules/systems/slot';
 import type { RuleSystemDefinition } from '@/lib/utils/rules/systems/types';
 import { toUnit } from '@/lib/utils/units/to-unit';

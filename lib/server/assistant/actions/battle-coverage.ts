@@ -1,19 +1,23 @@
 import { BATTLE_COMMANDS } from './battle-actions';
 
-import { SYSTEM_SERVER_UNION } from '@/lib/server/systems/registry';
+import { systemServerUnion } from '@/lib/server/systems/lookup';
 
-const systemOperations = new Set(
-    Object.values(SYSTEM_SERVER_UNION).flatMap((server) =>
-        Object.keys(server.battle ?? {})
-    )
-);
+const systemOperations = () =>
+    new Set(
+        Object.values(systemServerUnion()).flatMap((server) =>
+            Object.keys(server.battle ?? {})
+        )
+    );
 
 const base = 'campaigns/[id]/battles';
 
 const battle = `${base}/[battleId]`;
 
 /** Coverage metadata only; T14 activates the executable catalog and transports together. */
-export const BATTLE_ACTION_COVERAGE = [
+export const battleActionCoverage = () => {
+    const system = systemOperations();
+
+    return [
     ['GET', base, 'list'],
     ['POST', base, 'create'],
     ['DELETE', base, 'clear-history'],
@@ -30,7 +34,7 @@ export const BATTLE_ACTION_COVERAGE = [
     ...BATTLE_COMMANDS.map((operation) =>
         operation === 'participants.patch'
             ? ['PATCH', `${battle}/participants/[participantId]`, operation]
-            : systemOperations.has(operation)
+            : system.has(operation)
               ? ['POST', `${battle}/system/[action]`, operation]
               : ['POST', `${battle}/${operation}`, operation]
     ),
@@ -40,3 +44,4 @@ export const BATTLE_ACTION_COVERAGE = [
     actionId: `battles.${operation}`,
     testId: 'battle-actions',
 }));
+};

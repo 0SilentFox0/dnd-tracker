@@ -1,7 +1,6 @@
 import { Prisma } from '@prisma/client';
 import { z } from 'zod';
 
-import { CompendiumError } from './parse';
 import { TARGET_KINDS } from './types';
 
 import { scenarioContentSchema } from '@/lib/schemas/scenario';
@@ -9,6 +8,7 @@ import { contentWrite } from '@/lib/server/scenario/content-write';
 import { newContentId } from '@/lib/server/templates/ids';
 import { remapIds } from '@/lib/server/templates/remap-ids';
 import { jsonContentInput } from '@/lib/utils/common/json';
+import { CompendiumError } from '@/lib/utils/compendium-import/parse';
 import type { ScenarioContent } from '@/types/scenario';
 
 const object = z.record(z.string(), z.unknown());

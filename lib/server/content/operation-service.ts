@@ -61,7 +61,7 @@ import { localeOrRequest } from '@/lib/utils/api/translate-error';
 import { toGameClassData } from '@/lib/utils/characters/classes/row';
 import { byName } from '@/lib/utils/common/text';
 import { IMPORT_KINDS } from '@/lib/utils/content/import/kinds';
-import { ruleSystemOf } from '@/lib/utils/rules/systems/registry';
+import { ruleSystemOf } from '@/lib/utils/rules/systems/lookup';
 import { importUnitsIntoCampaign } from '@/lib/utils/units/import-units';
 
 export type ContentOperationId = keyof typeof CONTENT_OPERATIONS;

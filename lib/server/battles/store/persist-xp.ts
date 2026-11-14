@@ -1,7 +1,5 @@
 import type { Prisma } from '@prisma/client';
 
-import type { NewBattleEvent } from './types';
-
 import { CharacterLogKind } from '@/lib/constants/character-log';
 import { CharacterStatus } from '@/lib/constants/characters';
 import { addExperience } from '@/lib/constants/experience';
@@ -12,6 +10,7 @@ import {
     type CharacterLogInput,
     writeCharacterLog,
 } from '@/lib/server/characters/log';
+import type { NewBattleEvent } from '@/lib/utils/battle/store/types';
 import {
     autoXpEnabled,
     battleXpAward,

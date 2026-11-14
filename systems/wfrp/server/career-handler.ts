@@ -7,7 +7,7 @@ import { characteristicsJson } from '@/lib/server/characters/core/characteristic
 import { lockCharacters } from '@/lib/server/characters/lock';
 import { writeCharacterLog } from '@/lib/server/characters/log';
 import { ContentError } from '@/lib/server/content/errors';
-import { ruleSystemOf } from '@/lib/utils/rules/systems/registry';
+import { ruleSystemOf } from '@/lib/utils/rules/systems/lookup';
 import {
     planCareerAdvance,
     planCareerSet,

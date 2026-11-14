@@ -2,9 +2,9 @@ import { NextResponse } from 'next/server';
 
 import { saveAsTemplateSchema } from '@/lib/schemas/templates';
 import { saveCampaignAsTemplate } from '@/lib/server/campaigns/action-service';
+import { bundleErrorResponse } from '@/lib/server/templates/bundle-error';
 import { sessionDmActor } from '@/lib/utils/api/actor';
 import { requireDM } from '@/lib/utils/api/api-auth';
-import { bundleErrorResponse } from '@/lib/utils/api/bundle-error';
 import { handleApiError } from '@/lib/utils/api/error-handler';
 import { parseBody } from '@/lib/utils/api/parse-body';
 

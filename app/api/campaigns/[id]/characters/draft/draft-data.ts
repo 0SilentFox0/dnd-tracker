@@ -4,7 +4,7 @@ import type { DraftData } from './draft-schema';
 
 import { mergeDraftGoals } from '@/lib/server/characters/draft-goals';
 import type { Ruleset } from '@/lib/utils/rules/schema';
-import { ruleSystemOf } from '@/lib/utils/rules/systems/registry';
+import { ruleSystemOf } from '@/lib/utils/rules/systems/lookup';
 import { statColumnsOf } from '@/lib/utils/rules/systems/stats';
 
 export const draftFields = (

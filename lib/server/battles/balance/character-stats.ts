@@ -2,8 +2,8 @@ import { ParticipantSide } from '@/lib/constants/battle';
 import { ACTIVE_CHARACTER } from '@/lib/constants/characters';
 import { prisma } from '@/lib/db';
 import { buildCampaignContextForStart } from '@/lib/server/battles/mutations/start/start-build-context';
-import { systemServerOf } from '@/lib/server/systems/registry';
-import { createBattleParticipantFromCharacter } from '@/lib/utils/battle/participant';
+import { createBattleParticipantFromCharacter } from '@/lib/server/battles/participant/from-character';
+import { systemServerOf } from '@/lib/server/systems/lookup';
 import { type Ruleset } from '@/lib/utils/rules';
 
 /** Same participants as at battle start, from one context load (no per-character queries). */

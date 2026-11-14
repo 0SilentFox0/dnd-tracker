@@ -2,8 +2,8 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 
+import { RULE_SYSTEM_REGISTRY, ruleSystemOf, systemKeyOf } from '../lookup';
 import { RULE_SYSTEM_KEYS } from '../meta';
-import { RULE_SYSTEM_REGISTRY, ruleSystemOf, systemKeyOf } from '../registry';
 
 import { SYSTEM_UI } from '@/components/systems/registry';
 import { SYSTEM_SERVER } from '@/lib/server/systems/registry';

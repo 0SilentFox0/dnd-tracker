@@ -7,9 +7,9 @@ import {
     CombatStatus,
     ParticipantSide,
 } from '@/lib/constants/battle';
+import { saveBattle } from '@/lib/server/battles/store/save-battle';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import type { BattleDb } from '@/lib/utils/battle/store/load-battle';
-import { saveBattle } from '@/lib/utils/battle/store/save-battle';
 import type {
     LoadedBattle,
     NewBattleEvent,
