@@ -43,6 +43,11 @@ export {
     usePager,
 } from './usePager';
 export {
+    type PinchStep,
+    type PointerBind,
+    usePanPinch,
+} from './usePanPinch';
+export {
     type PlayerViewScope,
     resetPlayerViews,
     usePlayerView,
