@@ -14,7 +14,6 @@ import {
 
 const set = vi.fn();
 
-const toggle = vi.fn();
 
 const apply = vi.fn();
 
@@ -30,7 +29,6 @@ const modulesOf = (
     isPending = false
 ): ReturnType<typeof useCampaignModules> => ({
     toggles,
-    toggle,
     apply,
     isPending,
 });
@@ -162,7 +160,6 @@ describe('SystemSection module switches', () => {
             key: 'dnd5e',
             modules: ['morale'],
         });
-        expect(toggle).not.toHaveBeenCalled();
     });
 
     it('review stays disabled until something changes', () => {

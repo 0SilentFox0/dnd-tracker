@@ -80,7 +80,7 @@ describe('useCampaignModules', () => {
 
         const invalidate = vi.spyOn(client, 'invalidateQueries');
 
-        await act(() => result.current.toggle('morale', true));
+        await act(() => result.current.apply({ key: 'dnd5e', modules: ['morale'] }));
 
         expect(updateCampaignRules).toHaveBeenCalledWith('c1', {
             system: { modules: ['morale'] },
@@ -104,7 +104,7 @@ describe('useCampaignModules', () => {
 
         const { result } = setup(view({ key: 'homm' }, true));
 
-        await act(() => result.current.toggle('heroscaling', false));
+        await act(() => result.current.apply({ key: 'homm', modules: [] }));
 
         expect(confirm).toHaveBeenCalledTimes(1);
         expect(vi.mocked(updateCampaignRules).mock.calls[0][1]).toMatchObject({
@@ -119,7 +119,7 @@ describe('useCampaignModules', () => {
 
         const { result } = setup(view({ key: 'homm' }, true, false));
 
-        await act(() => result.current.toggle('heroscaling', false));
+        await act(() => result.current.apply({ key: 'homm', modules: [] }));
 
         expect(confirm).not.toHaveBeenCalled();
         expect(updateCampaignRules).toHaveBeenCalledTimes(1);
@@ -133,7 +133,7 @@ describe('useCampaignModules', () => {
 
         const { result } = setup(view({ key: 'homm' }, true));
 
-        await act(() => result.current.toggle('heroscaling', false));
+        await act(() => result.current.apply({ key: 'homm', modules: [] }));
 
         expect(updateCampaignRules).not.toHaveBeenCalled();
     });
@@ -153,7 +153,7 @@ describe('useCampaignModules', () => {
 
         const { result } = setup(view({ key: 'homm' }, false));
 
-        await act(() => result.current.toggle('skilltrees', false));
+        await act(() => result.current.apply({ key: 'homm', modules: [] }));
         await waitFor(() =>
             expect(updateCampaignRules).toHaveBeenCalledTimes(2)
         );
@@ -169,7 +169,7 @@ describe('useCampaignModules', () => {
 
         const { result } = setup(view({ key: 'dnd5e' }));
 
-        await act(() => result.current.toggle('morale', true));
+        await act(() => result.current.apply({ key: 'dnd5e', modules: ['morale'] }));
 
         expect(notify).toHaveBeenCalledWith('boom');
         expect(refresh).not.toHaveBeenCalled();

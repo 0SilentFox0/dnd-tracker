@@ -222,7 +222,6 @@
     "lockedHint": "The system cannot be changed while the campaign has characters or units.",
     "modules": {
       "title": "Rule modules",
-      "hint": "Each module adds its own part of the rules. A change applies at once; turning a module off deletes nothing.",
       "setupBadge": "changes heroes",
       "requires": "Requires the \"{module}\" module.",
       "conflicts": "Conflicts with the \"{module}\" module.",
@@ -249,7 +248,8 @@
       "contentKinds": "Content kinds",
       "dmSections": "DM pages",
       "actions": "Combat actions",
-      "keepsData": "Nothing is saved until you apply; switching a module off keeps its data."
+      "keepsData": "Nothing is saved until you apply; switching a module off keeps its data.",
+      "setupNotice": "Some of these changes affect how heroes are calculated; if the campaign has heroes, you will be asked to confirm when you apply."
     }
   }
 }

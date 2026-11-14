@@ -12,6 +12,7 @@ import { previewComposition } from '../preview';
 import { MODULES } from '../registry';
 import type { RuleSystemDefinition } from '../types';
 
+import { sectionsOfComposition } from '@/lib/utils/rules/section-registry';
 import type { SystemSelection } from '@/lib/utils/rules/systems/catalog';
 
 const composed = (system: SystemSelection): RuleSystemDefinition => {
@@ -33,9 +34,13 @@ describe('previewComposition', () => {
         ['bare d20', { key: 'dnd5e', modules: [] }],
         ['wfrp', { key: 'wfrp' }],
     ])('equals composeSystem(base, modules) for %s', (_, system) => {
-        const preview = previewComposition(system, system);
+        const current: SystemSelection = { key: 'dnd5e', modules: ['morale'] };
+
+        const preview = previewComposition(current, system);
 
         const expected = composed(system);
+
+        const sections = sectionsOfComposition(composition(system));
 
         expect(preview.sheetBlocks).toBe(expected.sheet?.blocks.length ?? 0);
         expect(preview.actions).toEqual(
@@ -45,8 +50,9 @@ describe('previewComposition', () => {
             [...contentKindsOf(system)].sort()
         );
         expect(preview.dmSections).toEqual([...dmSectionsOf(system)].sort());
-        expect(preview.added).toEqual([]);
-        expect(preview.removed).toEqual([]);
+        expect(preview.rulesSections).toEqual(
+            Object.keys(sections).filter((key) => sections[key].mechanic)
+        );
         expect(ruleSystemOf({ system }).sheet?.blocks.length ?? 0).toBe(
             preview.sheetBlocks
         );

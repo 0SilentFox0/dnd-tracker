@@ -10,8 +10,6 @@ import { ruleSystemOf } from './lookup';
 import { sectionsOfComposition } from '@/lib/utils/rules/section-registry';
 
 export interface CompositionPreview {
-    base: string;
-    modules: string[];
     sheetBlocks: number;
     rulesSections: string[];
     contentKinds: string[];
@@ -22,7 +20,6 @@ export interface CompositionPreview {
     setup: string[];
 }
 
-/** Read-only: what the draft composition would give the campaign, nothing is persisted */
 export function previewComposition(
     current: SystemSelection,
     draft: SystemSelection
@@ -36,8 +33,6 @@ export function previewComposition(
     const { added, removed, setup } = moduleChange(current, draft);
 
     return {
-        base,
-        modules: [...modules],
         sheetBlocks: definition.sheet?.blocks.length ?? 0,
         rulesSections: Object.keys(sections).filter(
             (key) => sections[key].mechanic

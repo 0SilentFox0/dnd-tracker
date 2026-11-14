@@ -84,10 +84,17 @@ export function SummaryStep({ preview }: { preview: CompositionPreview }) {
             <Group
                 title={t('system.wizard.actions')}
                 items={preview.actions.map((key) =>
-                    tBattle(`coreActions.${key}`)
+                    tBattle.has(`coreActions.${key}`)
+                        ? tBattle(`coreActions.${key}`)
+                        : key
                 )}
                 emptyLabel={none}
             />
+            {preview.setup.length > 0 && (
+                <p className="text-xs text-hud-muted">
+                    {t('system.wizard.setupNotice')}
+                </p>
+            )}
             <p className="text-xs text-hud-muted">
                 {t('system.wizard.keepsData')}
             </p>

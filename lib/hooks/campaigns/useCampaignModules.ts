@@ -19,12 +19,10 @@ import {
     type ModuleToggle,
     moduleToggles,
     type SystemSelection,
-    withModule,
 } from '@/lib/utils/rules/systems/catalog';
 
 export function useCampaignModules(campaignId: string): {
     toggles: ModuleToggle[];
-    toggle: (id: string, on: boolean) => Promise<void>;
     apply: (draft: SystemSelection) => Promise<void>;
     isPending: boolean;
 } {
@@ -108,17 +106,6 @@ export function useCampaignModules(campaignId: string): {
         }
     };
 
-    const toggle = async (id: string, on: boolean) => {
-        if (!data) return;
-
-        const setup = toggles.find((m) => m.id === id)?.toggle === 'setup';
-
-        await save(
-            withModule(data.system, id, on).modules ?? [],
-            setup ? [id] : []
-        );
-    };
-
     const apply = async (draft: SystemSelection) => {
         if (!data) return;
 
@@ -129,7 +116,6 @@ export function useCampaignModules(campaignId: string): {
 
     return {
         toggles,
-        toggle,
         apply,
         isPending: mutation.isPending,
     };
