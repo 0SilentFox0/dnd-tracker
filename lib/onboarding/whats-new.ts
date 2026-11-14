@@ -5,6 +5,12 @@ export const WHATS_NEW_BUNDLED = 15;
 
 export const WHATS_NEW: WhatsNewEntry[] = [
     {
+        id: '2026-11-14-mode-wizard',
+        date: '2026-11-14',
+        audience: 'dm',
+        href: '/help/dm-rule-systems',
+    },
+    {
         id: '2026-11-13-rule-modules',
         date: '2026-11-13',
         audience: 'dm',

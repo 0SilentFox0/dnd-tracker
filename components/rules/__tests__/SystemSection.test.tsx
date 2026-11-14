@@ -16,30 +16,40 @@ const set = vi.fn();
 
 const toggle = vi.fn();
 
-const form = {
-    campaignId: 'c1',
-    data: DEFAULT_RULES,
-    set,
-} as unknown as RulesFormState;
+const apply = vi.fn();
+
+const formOf = (system: { key: string; modules?: string[] }) =>
+    ({
+        campaignId: 'c1',
+        data: { ...DEFAULT_RULES, system },
+        set,
+    }) as unknown as RulesFormState;
 
 const modulesOf = (
     toggles: ModuleToggle[],
     isPending = false
-): ReturnType<typeof useCampaignModules> => ({ toggles, toggle, isPending });
+): ReturnType<typeof useCampaignModules> => ({
+    toggles,
+    toggle,
+    apply,
+    isPending,
+});
 
-const forSystem = (system: { key: string; modules?: string[] }) =>
-    modulesOf(moduleToggles(system));
+const forSystem = (system: { key: string; modules?: string[] }) => ({
+    system,
+    modules: modulesOf(moduleToggles(system)),
+});
 
 const switchOf = (id: string) =>
     document.getElementById(`rules-module-${id}`) as HTMLElement;
 
 const renderWith = (
-    modules: ReturnType<typeof useCampaignModules>,
+    { system, modules }: ReturnType<typeof forSystem>,
     options: { locked?: boolean; dirty?: boolean } = {}
 ) =>
     render(
         <SystemSection
-            form={form}
+            form={formOf(system)}
             locked={options.locked ?? false}
             modules={modules}
             dirty={options.dirty ?? false}
@@ -133,31 +143,34 @@ describe('SystemSection module switches', () => {
         ).toBe(true);
     });
 
-    it('a click reports the module and the new state', () => {
+    it('toggles edit a local draft and apply sends it once', () => {
         renderWith(forSystem({ key: 'dnd5e' }));
 
         fireEvent.click(switchOf('morale'));
 
-        expect(toggle).toHaveBeenCalledWith('morale', true);
-    });
+        expect(apply).not.toHaveBeenCalled();
 
-    it('an unavailable module is disabled and says why', () => {
-        renderWith(
-            modulesOf([
-                {
-                    id: 'morale',
-                    active: true,
-                    available: false,
-                    reason: { code: 'requiredBy', module: 'retaliation' },
-                    toggle: 'free',
-                },
-            ])
+        fireEvent.click(screen.getByText('rules.system.wizard.next'));
+
+        expect(screen.getByTestId('module-summary').textContent).toContain(
+            'gameTerms.module.morale.name'
         );
 
-        expect(switchOf('morale').hasAttribute('disabled')).toBe(true);
+        fireEvent.click(screen.getByText('rules.system.wizard.apply'));
+
+        expect(apply).toHaveBeenCalledWith({
+            key: 'dnd5e',
+            modules: ['morale'],
+        });
+        expect(toggle).not.toHaveBeenCalled();
+    });
+
+    it('review stays disabled until something changes', () => {
+        renderWith(forSystem({ key: 'dnd5e' }));
+
         expect(
-            screen.getByText(/rules\.system\.modules\.requiredBy/)
-        ).toBeTruthy();
+            screen.getByText('rules.system.wizard.next').closest('button')
+        ).toBeDisabled();
     });
 
     it('marks modules that change heroes', () => {

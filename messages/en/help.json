@@ -427,6 +427,11 @@
         "heading": "Rule modules",
         "b0": "A system is a base plus modules: morale, retaliation, hero scaling, skill trees, artifact sets and unit stacks. HoMM is the d20 base with every module; D&D 5e is the same base with none. You switch modules in the campaign rules, the System section: a switch applies at once, separately from the Save button, and stays disabled while the form has unsaved changes.",
         "b1": "Modules cannot be changed during an active battle. If the campaign already has heroes, Hero scaling and Skill trees ask for confirmation first because they change how heroes are calculated. Nothing is deleted: settings and learned skills stay, and everything returns when you turn the module back on."
+      },
+      "s10": {
+        "heading": "Assemble a mode step by step",
+        "b0": "The \"Assemble a mode\" wizard in the campaign rules, System section, walks you through three steps: base, modules and summary. First pick the base system, then tick the modules you want; the summary previews the sheet sections, content and combat actions you will get, so you see the result before applying anything.",
+        "b1": "Switching a module off keeps its data: settings and learned skills come back when you turn it on again. Setup modules (the ones that change how heroes are calculated) ask for confirmation first. Nothing changes until you confirm in the summary."
       }
     }
   }

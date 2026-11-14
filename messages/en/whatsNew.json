@@ -1,4 +1,8 @@
 {
+  "2026-11-14-mode-wizard": {
+    "title": "Assemble a mode",
+    "body": "The System section of the campaign rules now has a step-by-step wizard: pick a base, add modules and see a preview of sheet sections, content and combat actions before you apply."
+  },
   "2026-11-13-rule-modules": {
     "title": "Rule modules",
     "body": "In the campaign rules, the System section, you can now turn modules on and off: morale, retaliation, hero scaling, skill trees, artifact sets and unit stacks. Turning a module off deletes nothing."

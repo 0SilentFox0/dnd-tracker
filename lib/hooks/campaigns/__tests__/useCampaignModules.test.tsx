@@ -174,4 +174,41 @@ describe('useCampaignModules', () => {
         expect(notify).toHaveBeenCalledWith('boom');
         expect(refresh).not.toHaveBeenCalled();
     });
+
+    it('apply sends the draft as one PATCH with the full explicit set', async () => {
+        vi.mocked(updateCampaignRules).mockResolvedValue(
+            view({ key: 'dnd5e', modules: ['morale', 'retaliation'] })
+        );
+
+        const { result } = setup(view({ key: 'dnd5e' }));
+
+        await act(() =>
+            result.current.apply({
+                key: 'dnd5e',
+                modules: ['retaliation', 'morale'],
+            })
+        );
+
+        expect(updateCampaignRules).toHaveBeenCalledTimes(1);
+        expect(updateCampaignRules).toHaveBeenCalledWith('c1', {
+            system: { modules: ['morale', 'retaliation'] },
+        });
+        expect(confirm).not.toHaveBeenCalled();
+    });
+
+    it('apply asks once for setup modules in a campaign with heroes and may switch off to []', async () => {
+        vi.mocked(updateCampaignRules).mockResolvedValue(
+            view({ key: 'homm', modules: [] }, true)
+        );
+
+        const { result } = setup(view({ key: 'homm' }, true));
+
+        await act(() => result.current.apply({ key: 'homm', modules: [] }));
+
+        expect(confirm).toHaveBeenCalledTimes(1);
+        expect(updateCampaignRules).toHaveBeenCalledWith('c1', {
+            system: { modules: [] },
+            confirm: true,
+        });
+    });
 });

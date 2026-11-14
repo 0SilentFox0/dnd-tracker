@@ -231,6 +231,25 @@
       "confirmTitle": "Change a rule module?",
       "confirmBody": "The \"{module}\" module changes how existing heroes are calculated. Nothing is deleted: turn the module back on and everything returns.",
       "confirmAction": "Change"
+    },
+    "wizard": {
+      "step": "Step {current} of {total}:",
+      "modulesTitle": "Choose modules",
+      "summaryTitle": "Review and apply",
+      "hint": "Pick the modules, review what changes, then apply once. Turning a module off deletes nothing.",
+      "next": "Review",
+      "back": "Back",
+      "apply": "Apply",
+      "none": "none",
+      "added": "Turned on",
+      "removed": "Turned off",
+      "sheet": "Character sheet",
+      "sheetBlocks": "{count, plural, one {# sheet block} other {# sheet blocks}}",
+      "rulesSections": "Rule sections",
+      "contentKinds": "Content kinds",
+      "dmSections": "DM pages",
+      "actions": "Combat actions",
+      "keepsData": "Nothing is saved until you apply; switching a module off keeps its data."
     }
   }
 }
