@@ -4,6 +4,7 @@ import {
     cellAtScreenPoint,
     cellCenter,
     cellPolygon,
+    cellScreenPoint,
     edgeAtScreenPoint,
     fitMapBox,
     fitMapView,
@@ -12,6 +13,7 @@ import {
     screenToUnit,
     tokenBox,
     UNIT,
+    visibleGridWindow,
 } from '../layout';
 
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
@@ -292,5 +294,78 @@ describe('screenToUnit', () => {
         expect(
             screenToUnit({ a: 0, b: 0, c: 0, d: 0, e: 0, f: 0 }, 1, 1)
         ).toBeNull();
+    });
+});
+
+describe('cellScreenPoint', () => {
+    const map = { cols: 20, rows: 12 };
+
+    const cases = {
+        одинична: { a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 },
+        'зум 2 і зсув': { a: 2, b: 0, c: 0, d: 2, e: 40, f: -15 },
+        'поворот 90°': { a: 0, b: 1, c: -1, d: 0, e: 1200, f: 0 },
+    };
+
+    for (const [name, ctm] of Object.entries(cases)) {
+        it(`обернена до cellAtScreenPoint: ${name}`, () => {
+            for (const p of [
+                { x: 0, y: 0 },
+                { x: 7, y: 3 },
+                { x: 19, y: 11 },
+            ]) {
+                const s = cellScreenPoint(ctm, p);
+
+                expect(cellAtScreenPoint(map, ctm, s.x, s.y)).toEqual(p);
+            }
+        });
+    }
+});
+
+describe('visibleGridWindow', () => {
+    const id = { a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 };
+
+    it('viewport усередині карти: кратне 16 і містить viewport', () => {
+        const win = visibleGridWindow({
+            viewport: { left: 20 * UNIT, top: 20 * UNIT, right: 25 * UNIT, bottom: 24 * UNIT },
+            ctm: id,
+            cols: 200,
+            rows: 200,
+        });
+
+        expect(win.x % 16).toBe(0);
+        expect(win.y % 16).toBe(0);
+        expect((win.x + win.cols) % 16).toBe(0);
+        expect(win.x).toBeLessThanOrEqual(20);
+        expect(win.x + win.cols).toBeGreaterThanOrEqual(25);
+        expect(win.y).toBeLessThanOrEqual(20);
+        expect(win.y + win.rows).toBeGreaterThanOrEqual(24);
+    });
+
+    it('viewport поза картою обрізано', () => {
+        const win = visibleGridWindow({
+            viewport: { left: -5000, top: -5000, right: 99999, bottom: 99999 },
+            ctm: id,
+            cols: 40,
+            rows: 30,
+        });
+
+        expect(win).toEqual({ x: 0, y: 0, cols: 40, rows: 30 });
+    });
+
+    it('працює з поворотом', () => {
+        const ctm = { a: 0, b: 1, c: -1, d: 0, e: 100 * UNIT, f: 0 };
+
+        const win = visibleGridWindow({
+            viewport: { left: 90 * UNIT, top: 10 * UNIT, right: 95 * UNIT, bottom: 14 * UNIT },
+            ctm,
+            cols: 200,
+            rows: 200,
+        });
+
+        // unit x = (y - f)/UNIT = 10..14, unit y = (e - x)/UNIT = 5..10
+        expect(win.x).toBeLessThanOrEqual(10);
+        expect(win.x + win.cols).toBeGreaterThanOrEqual(14);
+        expect(win.y).toBeLessThanOrEqual(5);
+        expect(win.y + win.rows).toBeGreaterThanOrEqual(10);
     });
 });

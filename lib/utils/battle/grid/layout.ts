@@ -1,6 +1,7 @@
 import { blockedSet, cellKey, footprint } from './geometry';
 import { sizeOf } from './occupancy';
 
+import { MAP_LIMITS } from '@/lib/constants/map-limits';
 import type {
     BattleMapConfig,
     BattleParticipant,
@@ -65,6 +66,20 @@ export function screenToUnit(
     return {
         x: (ctm.d * dx - ctm.c * dy) / det,
         y: (ctm.a * dy - ctm.b * dx) / det,
+    };
+}
+
+export function cellScreenPoint(
+    ctm: ScreenMatrix,
+    p: GridPoint
+): { x: number; y: number } {
+    const ux = (p.x + 0.5) * UNIT;
+
+    const uy = (p.y + 0.5) * UNIT;
+
+    return {
+        x: ctm.a * ux + ctm.c * uy + ctm.e,
+        y: ctm.b * ux + ctm.d * uy + ctm.f,
     };
 }
 
@@ -244,4 +259,60 @@ export function playableBounds(
     return x1 < 0
         ? { x: 0, y: 0, cols: map.cols, rows: map.rows }
         : { x: x0, y: y0, cols: x1 - x0 + 1, rows: y1 - y0 + 1 };
+}
+
+export interface RectLike {
+    left: number;
+    top: number;
+    right: number;
+    bottom: number;
+}
+
+export function visibleGridWindow(
+    input: { viewport: RectLike; ctm: ScreenMatrix; cols: number; rows: number },
+    margin: number = MAP_LIMITS.chunk
+): GridWindow {
+    const { viewport, ctm, cols, rows } = input;
+
+    const corners = [
+        [viewport.left, viewport.top],
+        [viewport.right, viewport.top],
+        [viewport.left, viewport.bottom],
+        [viewport.right, viewport.bottom],
+    ].map(([x, y]) => screenToUnit(ctm, x, y));
+
+    if (corners.some((c) => !c)) return { x: 0, y: 0, cols, rows };
+
+    const xs = corners.map((c) => (c ? c.x / UNIT : 0));
+
+    const ys = corners.map((c) => (c ? c.y / UNIT : 0));
+
+    const chunk = MAP_LIMITS.chunk;
+
+    const x0 = Math.max(
+        0,
+        Math.floor((Math.min(...xs) - margin) / chunk) * chunk
+    );
+
+    const y0 = Math.max(
+        0,
+        Math.floor((Math.min(...ys) - margin) / chunk) * chunk
+    );
+
+    const x1 = Math.min(
+        cols,
+        Math.ceil((Math.max(...xs) + margin) / chunk) * chunk
+    );
+
+    const y1 = Math.min(
+        rows,
+        Math.ceil((Math.max(...ys) + margin) / chunk) * chunk
+    );
+
+    return {
+        x: Math.min(x0, cols),
+        y: Math.min(y0, rows),
+        cols: Math.max(0, x1 - Math.min(x0, cols)),
+        rows: Math.max(0, y1 - Math.min(y0, rows)),
+    };
 }
