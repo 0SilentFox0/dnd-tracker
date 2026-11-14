@@ -20,6 +20,7 @@ import {
 } from './catalog';
 import { toWebp } from './convert';
 
+import '@/lib/utils/rules/systems/registry';
 import { CampaignKind } from '@/lib/constants/campaigns';
 import { prisma } from '@/lib/db';
 import { createAdminClient } from '@/lib/supabase/admin';

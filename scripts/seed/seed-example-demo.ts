@@ -4,6 +4,7 @@ import type { Prisma } from '@prisma/client';
 import { SRD_RULES } from '../srd/lib/rules-preset';
 import { assertSeedTarget } from './seed-library-lib';
 
+import '@/lib/utils/rules/systems/registry';
 import {
     DEMO_CAMPAIGN,
     DEMO_GM_NOTES,

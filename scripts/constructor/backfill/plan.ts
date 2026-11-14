@@ -5,6 +5,7 @@ import { mainSkillRoleByName } from './main-skill-role-by-name';
 import { raceImmunityAbility } from './race-immunities-from-text';
 import { SPELL_GROUP_LOOK_BY_NAME } from './spell-group-look-by-name';
 
+import '@/lib/utils/rules/systems/registry';
 import { SPELL_FX_BY_NAME } from '@/data/library/spell-fx-by-name';
 import type { MainSkillRole } from '@/lib/constants/main-skills';
 import type { SpellFx } from '@/lib/utils/battle/fx/spells';

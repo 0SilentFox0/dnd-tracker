@@ -2,6 +2,7 @@ import { importOrder } from './import-order';
 import { delegateFor, labelSelect, rowLabel } from './kind-delegate';
 import type { PackRow } from './pack';
 
+import '@/lib/utils/rules/systems/registry';
 import { prisma } from '@/lib/db';
 import {
     DETACH_KIND_BY_TABLE,

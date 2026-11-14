@@ -6,6 +6,7 @@ import type {
     LegacyEffect,
 } from './types';
 
+import '@/lib/utils/rules/systems/registry';
 import { parseEffectScopeObject } from '@/lib/constants/artifact-effect-scope';
 import { AttackType } from '@/lib/constants/battle';
 import type {

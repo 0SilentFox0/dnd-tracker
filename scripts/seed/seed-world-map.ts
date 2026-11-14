@@ -21,6 +21,7 @@ import {
     rootsToReplace,
 } from './world-map-roots';
 
+import '@/lib/utils/rules/systems/registry';
 import { YEAR_CACHE_SECONDS } from '@/lib/constants/storage';
 import { WORLD_MAPS_BUCKET } from '@/lib/constants/world';
 import { prisma } from '@/lib/db';

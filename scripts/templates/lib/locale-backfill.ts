@@ -2,6 +2,7 @@ import { assertSeedTarget } from '../../seed/seed-library-lib';
 import { readManifest, TEMPLATES_DIR } from './pack';
 import { makeTemplateStore } from './store';
 
+import '@/lib/utils/rules/systems/registry';
 import { prisma } from '@/lib/db';
 
 export interface LocaleRow {

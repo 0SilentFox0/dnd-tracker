@@ -18,6 +18,7 @@ import { join } from 'node:path';
 
 import { assertSeedTarget } from './seed-library-lib';
 
+import '@/lib/utils/rules/systems/registry';
 import {
     CharacterType,
     clampHeroInitiative,

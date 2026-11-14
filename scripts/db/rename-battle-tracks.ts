@@ -7,6 +7,7 @@
  */
 import { assertSeedTarget } from '../seed/seed-library-lib';
 
+import '@/lib/utils/rules/systems/registry';
 import { prisma } from '@/lib/db';
 import { planBattleTitles } from '@/lib/utils/audio/battle-titles';
 

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 
+import '@/lib/server/systems/registry';
 import { campaignListKey } from '@/lib/cache/campaign-list';
 import { kvGet, kvSet } from '@/lib/cache/kv';
 import { API_ERRORS } from '@/lib/constants/api-errors';

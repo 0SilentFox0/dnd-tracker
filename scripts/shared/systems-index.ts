@@ -25,7 +25,11 @@ export interface RootSpec {
     blocks: BlockSpec[];
 }
 
+const at = (id: string, rest = '') => `@/systems/${id}${rest}`;
+
 const metaLayer = (id: string) => `systems/${id}/meta.ts`;
+
+const abilityLayer = (id: string) => `systems/${id}/rules/ability-install.ts`;
 
 const imp =
     (name: (id: string) => string, from: (id: string) => string) =>
@@ -61,15 +65,32 @@ export const ROOT_SPECS: readonly RootSpec[] = [
             {
                 layer: (id) => `systems/${id}/index.ts`,
                 name: (id) => `${upper(id)}_MODULE`,
-                line: imp(
-                    (id) => `${upper(id)}_MODULE`,
-                    (id) => `@/systems/${id}`
-                ),
+                line: (id, exists, exported) => {
+                    const rules = imp(
+                        (i) => `${upper(i)}_MODULE`,
+                        (i) => at(i)
+                    )(id);
+
+                    const ability = abilityLayer(id);
+
+                    return exists(ability) &&
+                        exported(ability, `${upper(id)}_ABILITY_MODULE`)
+                        ? `${rules}\n${imp(
+                              (i) => `${upper(i)}_ABILITY_MODULE`,
+                              (i) => at(i, '/rules/ability-install')
+                          )(id)}`
+                        : rules;
+                },
             },
             {
                 layer: (id) => `systems/${id}/index.ts`,
                 name: (id) => `${upper(id)}_MODULE`,
                 line: (id) => `${id}: ${upper(id)}_MODULE,`,
+            },
+            {
+                layer: abilityLayer,
+                name: (id) => `${upper(id)}_ABILITY_MODULE`,
+                line: (id) => `${id}: ${upper(id)}_ABILITY_MODULE,`,
             },
         ],
     },
@@ -98,11 +119,23 @@ export const ROOT_SPECS: readonly RootSpec[] = [
                 line: (id, exists, exported) => {
                     const ui =
                         exists(`systems/${id}/ui/index.ts`) &&
-                        exported(`systems/${id}/ui/index.ts`, `${upper(id)}_MODULE_UI`)
-                        ? `, ui: () => import("@/systems/${id}/ui").then((m) => m.${upper(id)}_MODULE_UI)`
-                        : '';
+                        exported(
+                            `systems/${id}/ui/index.ts`,
+                            `${upper(id)}_MODULE_UI`
+                        )
+                            ? `, ui: () => import("${at(id, `/ui`)}").then((m) => m.${upper(id)}_MODULE_UI)`
+                            : '';
 
-                    return `${id}: { rules: () => import("@/systems/${id}").then((m) => m.${upper(id)}_MODULE)${ui} },`;
+                    const ability =
+                        exists(abilityLayer(id)) &&
+                        exported(
+                            abilityLayer(id),
+                            `${upper(id)}_ABILITY_MODULE`
+                        )
+                            ? `, ability: () => import("${at(id, `/rules/ability-install`)}").then((m) => m.${upper(id)}_ABILITY_MODULE)`
+                            : '';
+
+                    return `${id}: { rules: () => import("${at(id)}").then((m) => m.${upper(id)}_MODULE)${ui}${ability} },`;
                 },
             },
         ],
@@ -140,22 +173,6 @@ export const ROOT_SPECS: readonly RootSpec[] = [
         ],
     },
     {
-        file: 'lib/utils/abilities/registry/effects/system-rows.ts',
-        blocks: [
-            {
-                layer: (id) => `systems/${id}/rules/ability-effect-rows.ts`,
-                line: imp(
-                    (id) => `${upper(id)}_EFFECT_ROWS`,
-                    (id) => `@/systems/${id}/rules/ability-effect-rows`
-                ),
-            },
-            {
-                layer: (id) => `systems/${id}/rules/ability-effect-rows.ts`,
-                line: (id) => `ownedBy("${id}", ${upper(id)}_EFFECT_ROWS),`,
-            },
-        ],
-    },
-    {
         file: 'lib/utils/abilities/schema/system-flags.ts',
         blocks: [
             {
@@ -172,22 +189,6 @@ export const ROOT_SPECS: readonly RootSpec[] = [
         ],
     },
     {
-        file: 'lib/utils/abilities/registry/effects/system-flag-rows.ts',
-        blocks: [
-            {
-                layer: (id) => `systems/${id}/rules/ability-flag-rows.ts`,
-                line: imp(
-                    (id) => `${upper(id)}_FLAG_ROWS`,
-                    (id) => `@/systems/${id}/rules/ability-flag-rows`
-                ),
-            },
-            {
-                layer: (id) => `systems/${id}/rules/ability-flag-rows.ts`,
-                line: (id) => `ownedFlags("${id}", ${upper(id)}_FLAG_ROWS),`,
-            },
-        ],
-    },
-    {
         file: 'lib/utils/abilities/schema/module-effects.ts',
         blocks: [
             {
@@ -200,44 +201,6 @@ export const ROOT_SPECS: readonly RootSpec[] = [
             {
                 layer: (id) => `systems/${id}/rules/ability-module-effects.ts`,
                 line: (id) => `${upper(id)}_MODULE_EFFECT_SCHEMAS,`,
-            },
-        ],
-    },
-    {
-        file: 'lib/utils/abilities/registry/effects/module-effect-rows.ts',
-        blocks: [
-            {
-                layer: (id) =>
-                    `systems/${id}/rules/ability-module-effect-rows.ts`,
-                line: imp(
-                    (id) => `${upper(id)}_MODULE_EFFECT_ROWS`,
-                    (id) => `@/systems/${id}/rules/ability-module-effect-rows`
-                ),
-            },
-            {
-                layer: (id) =>
-                    `systems/${id}/rules/ability-module-effect-rows.ts`,
-                line: (id) =>
-                    `ownedBy("${id}", ${upper(id)}_MODULE_EFFECT_ROWS),`,
-            },
-        ],
-    },
-    {
-        file: 'lib/utils/abilities/registry/system-variables.ts',
-        blocks: [
-            {
-                layer: (id) => `systems/${id}/rules/ability-variables.ts`,
-                name: (id) => `${upper(id)}_ABILITY_VARIABLES`,
-                line: imp(
-                    (id) => `${upper(id)}_ABILITY_VARIABLES`,
-                    (id) => `@/systems/${id}/rules/ability-variables`
-                ),
-            },
-            {
-                layer: (id) => `systems/${id}/rules/ability-variables.ts`,
-                name: (id) => `${upper(id)}_ABILITY_VARIABLES`,
-                line: (id) =>
-                    `{ system: "${id}", items: ${upper(id)}_ABILITY_VARIABLES },`,
             },
         ],
     },

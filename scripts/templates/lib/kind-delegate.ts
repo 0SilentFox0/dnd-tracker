@@ -1,5 +1,6 @@
 import { MATCH_COLUMN } from './row-columns';
 
+import '@/lib/utils/rules/systems/registry';
 import {
     type BundleTableDef,
     tableOfKind,

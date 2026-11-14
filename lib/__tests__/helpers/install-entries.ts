@@ -21,6 +21,11 @@ const PAIRS: InstallPair[] = [
         lazy: CLIENT_INSTALL,
     },
     {
+        lookup: 'lib/utils/abilities/registry/install.ts',
+        root: 'lib/utils/rules/systems/registry.ts',
+        lazy: CLIENT_INSTALL,
+    },
+    {
         lookup: 'components/systems/lookup.ts',
         root: 'components/systems/registry.ts',
         lazy: CLIENT_INSTALL,

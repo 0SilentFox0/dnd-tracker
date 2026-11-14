@@ -21,6 +21,7 @@ import {
 } from './identity-catalog';
 import { planUploads } from './identity-plan';
 
+import '@/lib/utils/rules/systems/registry';
 import { CampaignKind } from '@/lib/constants/campaigns';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { ensureBucket } from '@/lib/supabase/buckets';

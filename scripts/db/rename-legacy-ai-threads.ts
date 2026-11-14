@@ -6,6 +6,7 @@
  *   pnpm exec tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/db/rename-legacy-ai-threads.ts [--apply] [--allow-remote]
  *   Без --apply — лише підрахунок (dry-run).
  */
+import '@/lib/utils/rules/systems/registry';
 import { LEGACY_THREAD_TITLE } from '@/lib/constants/ai';
 import { prisma } from '@/lib/db';
 import { assertSeedTarget } from '@/scripts/seed/seed-library-lib';

@@ -17,6 +17,7 @@ import { SYSTEM_FLAG_ROWS } from './system-flag-rows';
 import { DEFAULT_AREA_TARGETS } from '@/lib/constants/abilities';
 import { AttackType } from '@/lib/constants/battle';
 import { MONSTER_SENSE_KEYS } from '@/lib/constants/monster';
+import { onAbilityInstall } from '@/lib/utils/abilities/registry/install';
 import type { FlagEffect, FlagKey } from '@/lib/utils/abilities/schema';
 import type { SystemFlagKey } from '@/lib/utils/abilities/schema/system-flags';
 import { seg, type Segment } from '@/lib/utils/abilities/segments';
@@ -371,24 +372,36 @@ const BASE_FLAG_REGISTRY: {
     },
 };
 
-export const FLAG_REGISTRY = { ...BASE_FLAG_REGISTRY, ...SYSTEM_FLAG_ROWS } as {
+export const FLAG_REGISTRY = { ...BASE_FLAG_REGISTRY } as {
     [K in FlagKey]: FlagDefinition<K>;
 };
 
-const entries = Object.entries(FLAG_REGISTRY) as [
-    FlagKey,
-    FlagDefinition<FlagKey>,
-][];
+export const FLAG_KEYS: FlagKey[] = [];
 
-export const FLAG_KEYS = entries.map(([k]) => k);
+export const FLAG_OPTIONS: { value: FlagKey }[] = [];
 
-export const FLAG_FIELDS = Object.fromEntries(
-    entries.map(([k, d]) => [k, d.fields])
-) as Record<FlagKey, readonly FieldMeta[]>;
+export const FLAG_FIELDS = {} as Record<FlagKey, readonly FieldMeta[]>;
 
-export const FLAG_DEFAULTS = Object.fromEntries(
-    entries.map(([k, d]) => [k, d.defaults])
-) as Record<FlagKey, Record<string, unknown>>;
+export const FLAG_DEFAULTS = {} as Record<FlagKey, Record<string, unknown>>;
+
+onAbilityInstall(() => {
+    Object.assign(FLAG_REGISTRY, SYSTEM_FLAG_ROWS);
+
+    const entries = Object.entries(FLAG_REGISTRY) as [
+        FlagKey,
+        FlagDefinition<FlagKey>,
+    ][];
+
+    FLAG_KEYS.length = 0;
+    FLAG_KEYS.push(...entries.map(([k]) => k));
+    FLAG_OPTIONS.length = 0;
+    FLAG_OPTIONS.push(...FLAG_KEYS.map((value) => ({ value })));
+
+    for (const [k, d] of entries) {
+        FLAG_FIELDS[k] = d.fields;
+        FLAG_DEFAULTS[k] = d.defaults;
+    }
+});
 
 export function describeFlag(e: FlagEffect): Segment[] {
     return (FLAG_REGISTRY[e.flag] as FlagDefinition<FlagKey>).describe(

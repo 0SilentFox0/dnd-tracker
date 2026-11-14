@@ -1,5 +1,6 @@
 import { Prisma } from '@prisma/client';
 
+import '@/lib/utils/rules/systems/registry';
 import {
     racePassiveAbilities,
     racePassiveStatModifiers,

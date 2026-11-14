@@ -1,11 +1,23 @@
 import { vi } from 'vitest';
 
 // ~500 of the 700 files run in node and never touch DOM matchers; loading jest-dom there costs ~60 s of setup per run
-if (typeof document !== 'undefined')
+if (typeof document !== 'undefined') {
     await import('@testing-library/jest-dom/vitest');
+
+    // UI lookups (systemUiOf) throw until the UI table is installed; only DOM tests render it
+    await import('@/components/systems/registry');
+}
 
 // lookup-only code (the barrel) needs an install root; without it every ruleSystemOf in a test would throw SystemNotInstalledError
 await import('@/lib/utils/rules/systems/registry');
+
+// same for the server-side table (systemServerOf); DOM tests never reach server code
+if (typeof document === 'undefined') {
+    process.env.DATABASE_URL ??=
+        'postgresql://placeholder:placeholder@localhost:5432/placeholder';
+
+    await import('@/lib/server/systems/registry');
+}
 
 // next/font only works inside the Next compiler; components that import components/hud/fonts need a stub
 vi.mock('next/font/google', () => ({

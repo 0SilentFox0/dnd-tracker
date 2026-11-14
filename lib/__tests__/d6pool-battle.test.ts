@@ -1,19 +1,45 @@
-import { describe, expect, it, vi } from 'vitest';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 
 import { staticGraph } from './helpers/static-graph';
 
 import { D6POOL_SYSTEM } from '@/lib/__tests__/fixtures/d6pool/definition';
 import { D6POOL_SERVER } from '@/lib/__tests__/fixtures/d6pool/server';
 import { AttackType, ParticipantSide } from '@/lib/constants/battle';
-import { attackBodySchema } from '@/lib/schemas/battles';
-import { context } from '@/lib/server/battles/__tests__/mutations/fixtures';
-import { attackMutation } from '@/lib/server/battles/mutations/attack/attack-mutation';
-import { nextTurnMutation } from '@/lib/server/battles/mutations/next-turn/next-turn-mutation';
-import { createStartMutation } from '@/lib/server/battles/mutations/start/start-mutation';
-import { placed } from '@/lib/utils/battle/__tests__/fixtures/placed';
 import type { BattleMutationContext } from '@/lib/utils/battle/pipeline/run-battle-mutation';
 import { SYSTEM_ROOTS } from '@/scripts/shared/system-ratchet';
 import type { BattleAttack } from '@/types/battle';
+
+let attackBodySchema: typeof import('@/lib/schemas/battles').attackBodySchema;
+
+let context: typeof import('@/lib/server/battles/__tests__/mutations/fixtures').context;
+
+let attackMutation: typeof import('@/lib/server/battles/mutations/attack/attack-mutation').attackMutation;
+
+let nextTurnMutation: typeof import('@/lib/server/battles/mutations/next-turn/next-turn-mutation').nextTurnMutation;
+
+let createStartMutation: typeof import('@/lib/server/battles/mutations/start/start-mutation').createStartMutation;
+
+let placed: typeof import('@/lib/utils/battle/__tests__/fixtures/placed').placed;
+
+// the global setup already loaded the lookup modules; the mocks below only reach a fresh graph
+beforeAll(async () => {
+    vi.resetModules();
+
+    ({ attackBodySchema } = await import('@/lib/schemas/battles'));
+    ({ context } = await import(
+        '@/lib/server/battles/__tests__/mutations/fixtures'
+    ));
+    ({ attackMutation } = await import(
+        '@/lib/server/battles/mutations/attack/attack-mutation'
+    ));
+    ({ nextTurnMutation } = await import(
+        '@/lib/server/battles/mutations/next-turn/next-turn-mutation'
+    ));
+    ({ createStartMutation } = await import(
+        '@/lib/server/battles/mutations/start/start-mutation'
+    ));
+    ({ placed } = await import('@/lib/utils/battle/__tests__/fixtures/placed'));
+});
 
 vi.mock('@/lib/utils/rules/systems/lookup', async (importOriginal) => ({
     ...(await importOriginal<object>()),

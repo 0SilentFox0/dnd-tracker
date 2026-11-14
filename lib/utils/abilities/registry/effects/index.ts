@@ -13,7 +13,7 @@ import {
 } from './control';
 import { applyCopySpellBuffs } from './copy-buffs';
 import { describeSpellOnly, isSpellOnlyEffect } from './describe-spell-only';
-import { describeFlag, FLAG_FIELDS, FLAG_KEYS } from './flags';
+import { describeFlag, FLAG_FIELDS, FLAG_KEYS, FLAG_OPTIONS } from './flags';
 import {
     applyDealDamage,
     applyDot,
@@ -57,6 +57,7 @@ import type { EffectApplyInput, EffectApplyResult } from './types';
 
 import type { Translator } from '@/lib/i18n/translator';
 import { resolveTargetIds } from '@/lib/utils/abilities/engine/core/targets';
+import { onAbilityInstall } from '@/lib/utils/abilities/registry/install';
 import type {
     Ability,
     AnyEffect,
@@ -122,7 +123,7 @@ const BASE_EFFECT_REGISTRY: {
             {
                 name: 'flag',
                 input: 'select',
-                options: FLAG_KEYS.map((value) => ({ value })),
+                options: FLAG_OPTIONS,
             },
             TARGET_FIELD,
             DURATION_FIELD,
@@ -458,14 +459,21 @@ const BASE_EFFECT_REGISTRY: {
     },
 };
 
-const SYSTEM_EFFECT_REGISTRY = Object.fromEntries(
-    [...SYSTEM_EFFECT_ROWS, ...MODULE_EFFECT_ROWS].map((r) => [r.kind, r.row])
-);
+export const EFFECT_REGISTRY = { ...BASE_EFFECT_REGISTRY } as {
+    [K in EffectKind]: EffectDefinition<K>;
+};
 
-export const EFFECT_REGISTRY = {
-    ...BASE_EFFECT_REGISTRY,
-    ...SYSTEM_EFFECT_REGISTRY,
-} as { [K in EffectKind]: EffectDefinition<K> };
+onAbilityInstall(() => {
+    Object.assign(
+        EFFECT_REGISTRY,
+        Object.fromEntries(
+            [...SYSTEM_EFFECT_ROWS, ...MODULE_EFFECT_ROWS].map((r) => [
+                r.kind,
+                r.row,
+            ])
+        )
+    );
+});
 
 export function applyEffect(input: EffectApplyInput): EffectApplyResult {
     if (
@@ -477,11 +485,13 @@ export function applyEffect(input: EffectApplyInput): EffectApplyResult {
     )
         return { participants: input.participants, messages: [] };
 
-    const def = EFFECT_REGISTRY[
-        input.effect.kind
-    ] as EffectDefinition<EffectKind>;
+    const def = EFFECT_REGISTRY[input.effect.kind] as
+        | EffectDefinition<EffectKind>
+        | undefined;
 
-    return def.apply(input as never);
+    return def
+        ? def.apply(input as never)
+        : { participants: input.participants, messages: [] };
 }
 
 export function describeEffect(effect: Effect | SpellEffect): Segment[] {

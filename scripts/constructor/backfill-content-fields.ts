@@ -5,6 +5,7 @@ import type { Prisma } from '@prisma/client';
 import { assertSeedTarget } from '../seed/seed-library-lib';
 import { type CampaignRows, type Change, planBackfill } from './backfill/plan';
 
+import '@/lib/utils/rules/systems/registry';
 import { prisma } from '@/lib/db';
 
 async function loadRows(campaignId: string): Promise<CampaignRows> {

@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 import type { PackRow } from './pack';
 
+import '@/lib/utils/rules/systems/registry';
 import { saveSkillTreeSchema } from '@/lib/schemas/skills';
 import type { PackKind } from '@/lib/utils/templates/manifest';
 

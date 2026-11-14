@@ -12,6 +12,7 @@ import { readIcons, writeIcons } from './icons-file';
 import { type Pack, readPack, TEMPLATES_DIR } from './pack';
 import { makeTemplateStore } from './store';
 
+import '@/lib/utils/rules/systems/registry';
 import type { ICON_BUCKETS } from '@/lib/constants/storage';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { ensureBucket } from '@/lib/supabase/buckets';

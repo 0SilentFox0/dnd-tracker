@@ -7,6 +7,7 @@ import type {
     ConvertOptions,
 } from './types';
 
+import '@/lib/utils/rules/systems/registry';
 import type {
     Ability,
     AttackKind,

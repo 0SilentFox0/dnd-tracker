@@ -9,6 +9,7 @@ import type {
 
 import { assertSeedTarget } from '../seed/seed-library-lib';
 
+import '@/lib/utils/rules/systems/registry';
 import { CharacterType } from '@/lib/constants/characters';
 import { prisma } from '@/lib/db';
 import { remapIds } from '@/lib/server/templates/remap-ids';

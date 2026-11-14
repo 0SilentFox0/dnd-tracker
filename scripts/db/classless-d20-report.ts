@@ -4,6 +4,7 @@
  *
  *   pnpm exec tsx scripts/db/classless-d20-report.ts [--json] [--allow-remote]
  */
+import '@/lib/utils/rules/systems/registry';
 import { assertSeedTarget } from '@/scripts/seed/seed-library-lib';
 
 const flags = new Set(process.argv.slice(2));

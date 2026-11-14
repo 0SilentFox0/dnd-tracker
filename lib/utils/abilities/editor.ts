@@ -4,6 +4,7 @@ import { columnRefIssues } from '@/lib/utils/abilities/class-columns';
 import { EFFECT_REGISTRY } from '@/lib/utils/abilities/registry/effects';
 import { MODULE_EFFECT_DEFAULTS } from '@/lib/utils/abilities/registry/effects/module-effect-rows';
 import { SYSTEM_EFFECT_DEFAULTS } from '@/lib/utils/abilities/registry/effects/system-rows';
+import { onAbilityInstall } from '@/lib/utils/abilities/registry/install';
 import {
     AbilitiesSchema,
     type Ability,
@@ -31,9 +32,17 @@ const STATIC_KINDS: EffectKind[] = [
     'note',
 ];
 
-const ALL_KINDS = (Object.keys(EFFECT_REGISTRY) as EffectKind[]).filter(
-    (k) => (EFFECT_REGISTRY[k] as { pickable?: false }).pickable !== false
-);
+const ALL_KINDS: EffectKind[] = [];
+
+onAbilityInstall(() => {
+    ALL_KINDS.length = 0;
+    ALL_KINDS.push(
+        ...(Object.keys(EFFECT_REGISTRY) as EffectKind[]).filter(
+            (k) =>
+                (EFFECT_REGISTRY[k] as { pickable?: false }).pickable !== false
+        )
+    );
+});
 
 export function allowedEffectKinds(trigger: Trigger): EffectKind[] {
     if (trigger.event === 'passive') return STATIC_KINDS;
@@ -103,11 +112,17 @@ const BASE_DEFAULTS: {
     },
 };
 
-const EFFECT_DEFAULTS = {
-    ...BASE_DEFAULTS,
-    ...SYSTEM_EFFECT_DEFAULTS,
-    ...MODULE_EFFECT_DEFAULTS,
-} as { [K in EffectKind]: WithoutKind<Extract<AnyEffect, { kind: K }>> };
+const EFFECT_DEFAULTS = { ...BASE_DEFAULTS } as {
+    [K in EffectKind]: WithoutKind<Extract<AnyEffect, { kind: K }>>;
+};
+
+onAbilityInstall(() => {
+    Object.assign(
+        EFFECT_DEFAULTS,
+        SYSTEM_EFFECT_DEFAULTS,
+        MODULE_EFFECT_DEFAULTS
+    );
+});
 
 const baseEffect = (kind: EffectKind, noteText: string): Effect =>
     ({

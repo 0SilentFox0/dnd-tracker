@@ -4,6 +4,7 @@ import { mapJsonRefs } from './json-refs';
 import type { IconsFile, Pack, PackRow } from './pack';
 import { EXTRA_COLUMNS } from './row-columns';
 
+import '@/lib/utils/rules/systems/registry';
 import { ArtifactSlot } from '@/lib/constants/artifacts';
 import { type Bundle, tableOfKind } from '@/lib/server/templates/bundle';
 import { CONTENT_ID_RE } from '@/lib/server/templates/ids';

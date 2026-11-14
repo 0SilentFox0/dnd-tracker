@@ -2,6 +2,10 @@ import { installUiModules, isUiInstalled } from './lookup';
 import type { SystemUi } from './types';
 
 import {
+    type AbilityModule,
+    installAbilityModules,
+} from '@/lib/utils/abilities/registry/install';
+import {
     composition,
     moduleMetaOf,
     type SystemSelection,
@@ -13,6 +17,7 @@ import type { RuleSystemDefinition } from '@/lib/utils/rules/systems/types';
 interface Loader {
     rules: () => Promise<ModuleEntry<RuleSystemDefinition>>;
     ui?: () => Promise<ModuleEntry<SystemUi>>;
+    ability?: () => Promise<AbilityModule>;
 }
 
 export const LOADERS: Record<string, Loader> = {
@@ -28,6 +33,10 @@ export const LOADERS: Record<string, Loader> = {
     d20: {
         rules: () => import('@/systems/d20').then((m) => m.D20_MODULE),
         ui: () => import('@/systems/d20/ui').then((m) => m.D20_MODULE_UI),
+        ability: () =>
+            import('@/systems/d20/rules/ability-install').then(
+                (m) => m.D20_ABILITY_MODULE
+            ),
     },
     heroscaling: {
         rules: () =>
@@ -40,6 +49,10 @@ export const LOADERS: Record<string, Loader> = {
     morale: {
         rules: () => import('@/systems/morale').then((m) => m.MORALE_MODULE),
         ui: () => import('@/systems/morale/ui').then((m) => m.MORALE_MODULE_UI),
+        ability: () =>
+            import('@/systems/morale/rules/ability-install').then(
+                (m) => m.MORALE_ABILITY_MODULE
+            ),
     },
     retaliation: {
         rules: () =>
@@ -47,6 +60,10 @@ export const LOADERS: Record<string, Loader> = {
         ui: () =>
             import('@/systems/retaliation/ui').then(
                 (m) => m.RETALIATION_MODULE_UI
+            ),
+        ability: () =>
+            import('@/systems/retaliation/rules/ability-install').then(
+                (m) => m.RETALIATION_ABILITY_MODULE
             ),
     },
     skilltrees: {
@@ -64,6 +81,10 @@ export const LOADERS: Record<string, Loader> = {
     wfrp: {
         rules: () => import('@/systems/wfrp').then((m) => m.WFRP_MODULE),
         ui: () => import('@/systems/wfrp/ui').then((m) => m.WFRP_MODULE_UI),
+        ability: () =>
+            import('@/systems/wfrp/rules/ability-install').then(
+                (m) => m.WFRP_ABILITY_MODULE
+            ),
     },
     // </systems:generated>
 };
@@ -71,6 +92,8 @@ export const LOADERS: Record<string, Loader> = {
 const rulesLoaded: Record<string, ModuleEntry<RuleSystemDefinition>> = {};
 
 const uiLoaded: Record<string, ModuleEntry<SystemUi>> = {};
+
+const abilityLoaded: Record<string, AbilityModule> = {};
 
 const pending = new Map<string, Promise<void>>();
 
@@ -114,16 +137,19 @@ async function load(system: SystemSelection): Promise<void> {
 
     await Promise.all(
         ids.map(async (id) => {
-            const { rules, ui } = LOADERS[id];
+            const { rules, ui, ability } = LOADERS[id];
 
-            const [r, u] = await Promise.all([rules(), ui?.()]);
+            const [r, u, a] = await Promise.all([rules(), ui?.(), ability?.()]);
 
             rulesLoaded[id] = r;
 
             if (u) uiLoaded[id] = u;
+
+            if (a) abilityLoaded[id] = a;
         })
     );
 
+    installAbilityModules({ ...abilityLoaded });
     installModules({ ...rulesLoaded });
     installUiModules({ ...uiLoaded });
     listeners.forEach((l) => l());

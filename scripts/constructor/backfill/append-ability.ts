@@ -1,3 +1,4 @@
+import '@/lib/utils/rules/systems/registry';
 import { type Ability, AbilitySchema } from '@/lib/utils/abilities/schema';
 
 export type AppendResult = {

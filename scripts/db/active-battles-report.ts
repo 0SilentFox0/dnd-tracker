@@ -6,6 +6,7 @@
  *
  *   pnpm exec tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/db/active-battles-report.ts [--status all|active] [--campaign <id,…>] [--json] [--allow-remote] [--expect-idle]
  */
+import '@/lib/utils/rules/systems/registry';
 import type { RawDb } from '@/scripts/db/lib/battle-state-db';
 import {
     buildReport,

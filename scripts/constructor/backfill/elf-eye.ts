@@ -1,5 +1,6 @@
 import { appendAbility } from './append-ability';
 
+import '@/lib/utils/rules/systems/registry';
 import type { Ability } from '@/lib/utils/abilities/schema';
 
 export const ELF_EYE_ABILITY = {
