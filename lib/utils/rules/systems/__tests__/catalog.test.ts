@@ -2,11 +2,13 @@ import { describe, expect, it } from 'vitest';
 
 import {
     composition,
+    FALLBACK_SYSTEM_KEY,
     moduleCatalog,
     moduleChange,
     moduleToggles,
     PRESETS,
     presetsOf,
+    selectableKeysOf,
     unknownIds,
     withModule,
 } from '@/lib/utils/rules/systems/catalog';
@@ -231,5 +233,36 @@ describe('composition issues on fixtures', () => {
         ).map((i) => i.code);
 
         expect(codes).toEqual(['conflict', 'duplicateClaim']);
+    });
+});
+
+describe('selectableKeysOf', () => {
+    const both: SystemMeta[] = [
+        { module: 'core', kind: 'base', keys: ['core'], i18n: {} },
+        { module: 'solo', kind: 'base', keys: ['solo'], i18n: {} },
+        {
+            module: 'pre',
+            kind: 'preset',
+            keys: ['pre'],
+            preset: { base: 'core', modules: [] },
+            i18n: {},
+        },
+    ];
+
+    it('hides a bare base that a preset builds on, keeps standalone bases', () => {
+        expect(selectableKeysOf(['core', 'solo', 'pre'], both)).toEqual([
+            'solo',
+            'pre',
+        ]);
+    });
+
+    it('on the real catalog hides only the bare d20 key', () => {
+        expect(selectableKeysOf(RULE_SYSTEM_KEYS)).toEqual(
+            RULE_SYSTEM_KEYS.filter(
+                (key) =>
+                    PRESETS[key].modules.length > 0 ||
+                    PRESETS[key].base !== PRESETS[FALLBACK_SYSTEM_KEY].base
+            )
+        );
     });
 });

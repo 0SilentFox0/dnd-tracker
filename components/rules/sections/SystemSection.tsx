@@ -7,7 +7,10 @@ import { SelectField } from '@/components/ui/select-field';
 import type { RulesFormState, useCampaignModules } from '@/lib/hooks/campaigns';
 import { ruleSystemLabelKey } from '@/lib/i18n/system-scope';
 import { useTranslator } from '@/lib/i18n/use-translator';
+import { selectableKeysOf } from '@/lib/utils/rules/systems/catalog';
 import { RULE_SYSTEM_KEYS } from '@/lib/utils/rules/systems/meta';
+
+const SELECTABLE_KEYS = selectableKeysOf(RULE_SYSTEM_KEYS);
 
 export function SystemSection({
     form,
@@ -36,7 +39,9 @@ export function SystemSection({
                 aria-label={t('system.label')}
                 value={form.data.system.key}
                 onValueChange={(key) => form.set('system', { key })}
-                options={RULE_SYSTEM_KEYS.map((key) => ({
+                options={RULE_SYSTEM_KEYS.filter(
+                    (key) => key === system.key || SELECTABLE_KEYS.includes(key)
+                ).map((key) => ({
                     value: key,
                     label: tTerms(ruleSystemLabelKey(key)),
                 }))}

@@ -59,7 +59,7 @@ afterEach(() => {
 });
 
 describe('SystemSection', () => {
-    it('offers the four keys and reports a change', () => {
+    it('offers the three selectable keys (no bare d20) and reports a change', () => {
         renderWith(forSystem({ key: 'homm' }));
 
         const trigger = screen.getByRole('combobox', {
@@ -72,7 +72,6 @@ describe('SystemSection', () => {
 
         expect(screen.getAllByRole('option').map((o) => o.textContent)).toEqual(
             [
-                'gameTerms.ruleSystem.d20',
                 'gameTerms.ruleSystem.dnd5e',
                 'gameTerms.ruleSystem.homm',
                 'gameTerms.ruleSystem.wfrp',
@@ -84,6 +83,18 @@ describe('SystemSection', () => {
         );
 
         expect(set).toHaveBeenCalledWith('system', { key: 'wfrp' });
+    });
+
+    it('keeps the current bare d20 key in the list so the select shows it', () => {
+        renderWith(forSystem({ key: 'd20' }));
+
+        fireEvent.click(
+            screen.getByRole('combobox', { name: 'rules.system.label' })
+        );
+
+        expect(
+            screen.getAllByRole('option').map((o) => o.textContent)
+        ).toContain('gameTerms.ruleSystem.d20');
     });
 
     it('locked disables the select and shows the hint', () => {

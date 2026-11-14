@@ -63,6 +63,26 @@ export const presetsOf = (
 
 export const PRESETS: Readonly<Record<string, Composition>> = presetsOf();
 
+/** A bare base that presets are built on is configured only in the module wizard, not picked as a system. */
+export const selectableKeysOf = (
+    keys: readonly string[],
+    metas: Metas = ALL_META
+): string[] => {
+    const presetBases = new Set(
+        metas.flatMap((m) =>
+            kindOf(m) === 'preset' && m.preset ? [m.preset.base] : []
+        )
+    );
+
+    const hidden = new Set(
+        metas
+            .filter((m) => kindOf(m) === 'base' && presetBases.has(m.module))
+            .flatMap((m) => m.keys)
+    );
+
+    return keys.filter((key) => !hidden.has(key));
+};
+
 export const moduleMetaOf = (
     id: string,
     metas: Metas = ALL_META
