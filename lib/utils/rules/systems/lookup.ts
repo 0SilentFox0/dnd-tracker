@@ -114,9 +114,13 @@ export function allLevelResets(): readonly LevelResetPart[] {
     return levelResets;
 }
 
-/** Standard conditions of every installed base: for places with no campaign (template editor, labels) */
+/** Standard conditions of every installed base: for places with no campaign (template editor, labels). Throws before any install; a partial install yields only the installed bases' keys */
 export function allConditionKeys(): readonly string[] {
-    return (conditionKeys ??= [
+    if (conditionKeys) return conditionKeys;
+
+    if (!installed) throw new SystemNotInstalledError('*');
+
+    return (conditionKeys = [
         ...new Set(
             RULE_SYSTEM_KEYS.flatMap(
                 (key) => ruleSystemByKey(key)?.conditionSet.keys ?? []

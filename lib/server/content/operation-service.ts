@@ -35,7 +35,10 @@ import {
     isKindActive,
 } from '@/lib/server/content/kind-active';
 import { CONTENT_OPERATIONS } from '@/lib/server/content/operations';
-import { assertEffectsInComposition } from '@/lib/server/content/traits-guard';
+import {
+    assertEffectsInComposition,
+    dropForeignConditions,
+} from '@/lib/server/content/traits-guard';
 import { withCampaignContentWrite } from '@/lib/server/content/write';
 import { afterContentCommit } from '@/lib/server/content/write-context';
 import {
@@ -456,9 +459,24 @@ export async function runContentOperation(
                 return { ok: true, deleted: result.count };
             }
             case 'units.import': {
-                const { units } = bodyOf('units.import', body);
+                const { units: incoming } = bodyOf('units.import', body);
 
                 const rules = await loadRules(actor.campaignId);
+
+                let droppedConditions = 0;
+
+                const units = incoming.map((unit) => {
+                    const cleaned = dropForeignConditions(
+                        rules.system,
+                        unit.abilities
+                    );
+
+                    droppedConditions += cleaned.dropped;
+
+                    return cleaned.dropped
+                        ? { ...unit, abilities: cleaned.abilities }
+                        : unit;
+                });
 
                 assertEffectsInComposition(
                     rules.system,
@@ -500,7 +518,9 @@ export async function runContentOperation(
 
                 invalidate(actor, ReferenceKind.UNITS);
 
-                return result;
+                return droppedConditions
+                    ? { ...result, droppedConditions }
+                    : result;
             }
             case 'tracks.reorder': {
                 const { ids } = bodyOf('tracks.reorder', body);

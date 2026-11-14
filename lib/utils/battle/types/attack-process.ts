@@ -3,7 +3,7 @@ import type { CastableSpell } from './spell-process';
 
 import type { CriticalEffect } from '@/lib/constants/critical-effects';
 import type { SummonRequest } from '@/lib/utils/abilities/engine/core/types';
-import type { CunningStrikeEffect } from '@/lib/utils/abilities/schema';
+import type { StrikeRiderEffect } from '@/lib/utils/abilities/schema';
 import type { CritPicker } from '@/lib/utils/battle/crit-choice/types';
 import type { Ruleset } from '@/lib/utils/rules';
 import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
@@ -39,7 +39,7 @@ export interface ProcessAttackParams {
     /** Атака другою рукою: витрачає бонусну дію, а не дію/лічильник атак */
     offHand?: boolean;
     /** Підступний удар (Rogue): ефекти замість кубиків Прихованої атаки */
-    cunningStrike?: CunningStrikeEffect[];
+    cunningStrike?: StrikeRiderEffect[];
     system?: SystemSlot;
     /** «Перешкода»: шкода влучання ×0.5 після всіх модифікаторів і опорів */
     obstacle?: boolean;

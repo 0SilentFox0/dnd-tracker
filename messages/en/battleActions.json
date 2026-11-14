@@ -125,6 +125,7 @@
     "absorb": "💚 {target}: absorbs {healed} HP ({spell})",
     "rollNote": " ({mode, select, advantage {advantage} other {disadvantage}}: {rolls})",
     "attack": "🎯 {name}: spell attack {roll}+{bonus}={total} vs AC {ac}{note}",
+    "attackAuto": "🎯 {name}: spell hits automatically (this system has no attack roll)",
     "attackMiss": "{line} — miss",
     "attackHit": "{line} — hit",
     "attackCrit": "{line} — critical",

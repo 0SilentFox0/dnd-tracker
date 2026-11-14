@@ -67,6 +67,68 @@ const isForeignCondition = (key: string, standard: readonly string[]) =>
     !isMechanicalConditionKey(key) &&
     !standard.includes(key);
 
+/** 5etools sources are inherently 5e: conditions foreign to the campaign system are dropped (not failed) and counted */
+export function dropForeignConditions<T extends EffectOwner>(
+    system: SystemSelection,
+    abilities: readonly T[] | undefined
+): { abilities: T[] | undefined; dropped: number } {
+    if (!abilities?.length) return { abilities: abilities as T[] | undefined, dropped: 0 };
+
+    const standard = ruleSystemOf({ system }).conditionSet.keys;
+
+    let dropped = 0;
+
+    const clean = (effects: readonly EffectNode[]): EffectNode[] =>
+        effects.flatMap((e) => {
+            const options = Array.isArray(e.options)
+                ? clean(e.options)
+                : undefined;
+
+            const node = options ? { ...e, options } : e;
+
+            if (e.kind === 'applyCondition') {
+                const keys = conditionKeysOf(e);
+
+                if (keys.some((k) => isForeignCondition(k, standard))) {
+                    dropped += 1;
+
+                    return [];
+                }
+
+                return [node];
+            }
+
+            if (
+                e.kind === 'flag' &&
+                e.flag === 'conditionImmunity' &&
+                Array.isArray(e.conditions)
+            ) {
+                const all = e.conditions as unknown[];
+
+                const kept = all.filter(
+                    (c) =>
+                        typeof c !== 'string' ||
+                        IMMUNITY_TRAIT_KEYS.includes(c) ||
+                        !isForeignCondition(c, standard)
+                );
+
+                dropped += all.length - kept.length;
+
+                return kept.length ? [{ ...node, conditions: kept }] : [];
+            }
+
+            return [node];
+        });
+
+    return {
+        abilities: abilities.map((a) => ({
+            ...a,
+            effects: clean(a.effects),
+        })),
+        dropped,
+    };
+}
+
 export function assertEffectsInComposition(
     system: SystemSelection,
     abilities: readonly EffectOwner[] | undefined,

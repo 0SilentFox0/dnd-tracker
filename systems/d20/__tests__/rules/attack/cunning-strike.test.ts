@@ -10,7 +10,7 @@ import {
     resolved,
     seq,
 } from '@/lib/utils/abilities/__tests__/fixtures';
-import type { CunningStrikeEffect } from '@/lib/utils/abilities/schema';
+import type { StrikeRiderEffect } from '@/lib/utils/abilities/schema';
 import { resolveHit } from '@/lib/utils/battle/attack/process/hit';
 import { validateAttackRequest } from '@/lib/utils/battle/attack-phase/request';
 import { textsOf } from '@/lib/utils/battle/log/__tests__/event-text';
@@ -105,7 +105,7 @@ function foe(conMod: number, dexMod = conMod): BattleParticipant {
 
 function strike(
     ps: BattleParticipant[],
-    cunningStrike?: CunningStrikeEffect[]
+    cunningStrike?: StrikeRiderEffect[]
 ) {
     const flow = {
         ps,

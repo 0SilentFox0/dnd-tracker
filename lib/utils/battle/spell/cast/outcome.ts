@@ -82,9 +82,16 @@ function resolveSpellAttack(
 
     const attackRoll = ruleSystemOf(flow.ctx.rules).magic.attackRoll;
 
-    // a base without a spell attack roll: a spell with an attack hits without a roll
-    if (!attackRoll)
+    // system rule: a base without magic.attackRoll auto-hits, and the log says so
+    if (!attackRoll) {
+        flow.messages.push(
+            textRef('battleActions.spell.attackAuto', {
+                name: target.basicInfo.name,
+            })
+        );
+
         return { skip: false, factor: 1, raceMultiplier };
+    }
 
     const adjacent =
         isOnMap(caster) && isOnMap(target) && isAdjacent(caster, target);

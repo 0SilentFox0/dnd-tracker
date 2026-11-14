@@ -375,6 +375,7 @@
     "pendingHit": "💥 «{spell}» влучає: {target} −{damage} HP",
     "zoneSave": "🎲 {target}: «{spell}» — рятівний {ability} {total} проти СК {dc}: {success, select, true {успіх} other {провал}}",
     "zoneAttack": "🎯 {target}: «{spell}» — атака {roll}+{bonus}={total} проти КЗ {ac}: {hit, select, true {влучання} other {промах}}",
+    "zoneAutoHit": "🎯 {target}: «{spell}» — влучає автоматично (у цій системі немає кидка атаки)",
     "zonePull": "🌀 {name}: «{spell}» тягне назад до центру"
   },
   "transform": {

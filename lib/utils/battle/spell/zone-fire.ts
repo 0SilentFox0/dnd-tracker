@@ -146,7 +146,15 @@ export function fireTrigger(
 
     const zoneAttack = ruleSystemOf(ctx.rules).combat.zoneAttack;
 
-    // a base without a zone attack roll lets the trigger hit unrolled
+    // system rule: a base without combat.zoneAttack auto-hits, and the log says so
+    if (trigger.attack && !zoneAttack)
+        messages.push(
+            textRef('battleLog.spellFx.zoneAutoHit', {
+                target: target.basicInfo.name,
+                spell: src.spellName,
+            })
+        );
+
     if (trigger.attack && zoneAttack) {
         const bonus = src.attackBonus ?? 0;
 

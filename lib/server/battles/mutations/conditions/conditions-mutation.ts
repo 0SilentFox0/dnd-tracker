@@ -13,7 +13,7 @@ import {
 import {
     MAX_EXHAUSTION,
     PERMANENT_ROUNDS,
-    removeCondition5e,
+    removeStandardCondition,
 } from '@/lib/utils/battle/conditions';
 import { lineText } from '@/lib/utils/battle/log/lines';
 import type {
@@ -116,7 +116,7 @@ export function battleConditionsMutation(
         };
     }
 
-    const { participants, removed } = removeCondition5e(
+    const { participants, removed } = removeStandardCondition(
         ctx.participants,
         body.participantId,
         body.condition

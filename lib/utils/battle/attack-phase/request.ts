@@ -5,7 +5,7 @@ import {
     findParticipant,
     isAirborne,
 } from '@/lib/utils/abilities/engine/core/participants';
-import type { CunningStrikeEffect } from '@/lib/utils/abilities/schema';
+import type { StrikeRiderEffect } from '@/lib/utils/abilities/schema';
 import { assertAttackAllowed } from '@/lib/utils/battle/attack/assert-allowed';
 import { canAttackFromPool } from '@/lib/utils/battle/attack/attacks-left';
 import { attackKindOf } from '@/lib/utils/battle/common/attack-kind';
@@ -43,7 +43,7 @@ export interface AttackRequest {
     damageRolls: number[];
     offHand?: boolean;
     useInspiration?: boolean;
-    cunningStrike?: CunningStrikeEffect[];
+    cunningStrike?: StrikeRiderEffect[];
     /** Already parsed by the system's `schemas.attackInput` */
     system?: SystemSlot;
 }

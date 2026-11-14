@@ -10,8 +10,8 @@ import { textRef } from '@/lib/i18n/text-ref';
 import { findFlags } from '@/lib/utils/abilities/engine/core/collect-modifiers';
 import { isActive } from '@/lib/utils/abilities/engine/core/participants';
 import type {
-    CunningStrikeEffect,
     StaticEffect,
+    StrikeRiderEffect,
 } from '@/lib/utils/abilities/schema';
 import { eventRollMode } from '@/lib/utils/battle/attack/event-roll-mode';
 import { attackSourceOf } from '@/lib/utils/battle/attack/source';
@@ -47,7 +47,7 @@ export interface ResolveHitParams {
     obstacle?: boolean;
     hitSpells?: ReadonlyMap<string, CastableSpell>;
     battleId: string;
-    cunningStrike?: CunningStrikeEffect[];
+    cunningStrike?: StrikeRiderEffect[];
 }
 
 export function resolveHit(p: ResolveHitParams): {

@@ -13,7 +13,7 @@ import { MAP_MOTION_MAX_SPEED } from '@/lib/constants/battle-motion';
 import { WEATHER_KINDS } from '@/lib/constants/battle-weather';
 import { DAMAGE_ELEMENT_OPTIONS } from '@/lib/constants/damage';
 import { hexColorSchema } from '@/lib/schemas/common';
-import { CUNNING_STRIKE_EFFECTS } from '@/lib/utils/abilities/schema';
+import { STRIKE_RIDER_EFFECTS } from '@/lib/utils/abilities/schema';
 import { hasPlayableArea } from '@/lib/utils/battle/grid/map-editor';
 import { REJECT } from '@/lib/utils/battle/store/reject';
 import { ZoneTriggerSchema } from '@/lib/utils/spells/model/schema';
@@ -329,7 +329,7 @@ const attackBodyShape = {
     secondRoll: z.number().int().min(1).max(100).optional(),
     /** Підступний удар (Rogue): ефекти замість кубиків Прихованої атаки */
     cunningStrike: z
-        .array(z.enum(CUNNING_STRIKE_EFFECTS))
+        .array(z.enum(STRIKE_RIDER_EFFECTS))
         .min(1)
         .max(3)
         .optional(),

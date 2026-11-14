@@ -28,6 +28,12 @@ describe('lookup before an install', () => {
         }
     });
 
+    it('allConditionKeys throws before any install', async () => {
+        const { allConditionKeys, SystemNotInstalledError } = await fresh();
+
+        expect(() => allConditionKeys()).toThrow(SystemNotInstalledError);
+    });
+
     it('ruleSystemByKey is undefined and isInstalled false, nothing throws', async () => {
         const { ruleSystemByKey, isInstalled } = await fresh();
 

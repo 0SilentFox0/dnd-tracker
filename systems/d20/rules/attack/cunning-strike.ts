@@ -8,7 +8,7 @@ import {
     resolvedAbilitiesOf,
 } from '@/lib/utils/abilities/engine/core/participants';
 import { withinLimits } from '@/lib/utils/abilities/engine/core/usage';
-import type { CunningStrikeEffect } from '@/lib/utils/abilities/schema';
+import type { StrikeRiderEffect } from '@/lib/utils/abilities/schema';
 import { upsertLabeled } from '@/lib/utils/battle/actions/effects';
 import {
     type ActionFlow,
@@ -29,7 +29,7 @@ import type {
 import type { BattleParticipant } from '@/types/battle';
 import type { TextRef } from '@/types/text';
 
-export const CUNNING_STRIKE_LABELS: Record<CunningStrikeEffect, TextRef> = {
+export const CUNNING_STRIKE_LABELS: Record<StrikeRiderEffect, TextRef> = {
     poison: textRef('battleCommon.cunningStrike.poison'),
     trip: textRef('battleCommon.cunningStrike.trip'),
     withdraw: textRef('battleCommon.cunningStrike.withdraw'),
@@ -38,7 +38,7 @@ export const CUNNING_STRIKE_LABELS: Record<CunningStrikeEffect, TextRef> = {
 const CONDITION_ROUNDS = 10;
 
 export interface CunningStrikeOffer {
-    options: { effect: CunningStrikeEffect; dice: number }[];
+    options: { effect: StrikeRiderEffect; dice: number }[];
     maxEffects: number;
     sneakKey: string;
     sneakDice: number;
@@ -77,7 +77,7 @@ export function cunningStrikeOffer(
 /** Повертає вартість у кубиках, або текст відмови. */
 export function cunningStrikeCost(
     offer: CunningStrikeOffer | null,
-    effects: CunningStrikeEffect[]
+    effects: StrikeRiderEffect[]
 ): number | TextRef {
     if (!offer) return textRef(REJECT.cunningUnavailable);
 
@@ -101,10 +101,10 @@ export function cunningStrikeCost(
 }
 
 export function toggleCunningStrike(
-    selected: CunningStrikeEffect[],
-    effect: CunningStrikeEffect,
+    selected: StrikeRiderEffect[],
+    effect: StrikeRiderEffect,
     offer: CunningStrikeOffer
-): CunningStrikeEffect[] {
+): StrikeRiderEffect[] {
     if (selected.includes(effect)) return selected.filter((e) => e !== effect);
 
     const next = offer.maxEffects === 1 ? [effect] : [...selected, effect];
@@ -132,7 +132,7 @@ export function applyCunningStrikeEffects(
     flow: ActionFlow,
     attackerId: string,
     targetId: string,
-    effects: CunningStrikeEffect[]
+    effects: StrikeRiderEffect[]
 ): void {
     for (const effect of effects) {
         const attacker = getP(flow, attackerId);
@@ -238,8 +238,8 @@ function riderOffer(
             sneakDice: offer.sneakDice,
             toggle: (selected, effect) =>
                 toggleCunningStrike(
-                    selected as CunningStrikeEffect[],
-                    effect as CunningStrikeEffect,
+                    selected as StrikeRiderEffect[],
+                    effect as StrikeRiderEffect,
                     offer
                 ),
         }
@@ -249,7 +249,7 @@ function riderOffer(
 function hitRiders({ attacker, round, effects }: HitRidersCtx): HitRidersPlan {
     const offer = cunningStrikeOffer(attacker, round);
 
-    const cost = cunningStrikeCost(offer, effects as CunningStrikeEffect[]);
+    const cost = cunningStrikeCost(offer, effects as StrikeRiderEffect[]);
 
     return typeof cost === 'number'
         ? {
@@ -262,7 +262,7 @@ function hitRiders({ attacker, round, effects }: HitRidersCtx): HitRidersPlan {
                       flow,
                       attacker.basicInfo.id,
                       targetId,
-                      effects as CunningStrikeEffect[]
+                      effects as StrikeRiderEffect[]
                   );
 
                   return true;

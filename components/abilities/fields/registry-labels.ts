@@ -46,7 +46,7 @@ export function localizeField(
             label: optionLabel(tr, owner, meta.name, o.value),
             ...(meta.name === 'condition' && {
                 group: tr(
-                    `optionGroups.${allConditionKeys().includes(o.value) ? 'conditions5e' : 'mechanicalConditions'}`
+                    `optionGroups.${allConditionKeys().includes(o.value) ? 'conditionsStandard' : 'mechanicalConditions'}`
                 ),
             }),
         })),

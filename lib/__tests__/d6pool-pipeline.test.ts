@@ -30,6 +30,18 @@ let placed: typeof import('@/lib/utils/battle/__tests__/fixtures/placed').placed
 beforeAll(async () => {
     vi.resetModules();
 
+    const { installModules, allConditionKeys } = await import(
+        '@/lib/utils/rules/systems/lookup'
+    );
+
+    const { installServerModules } = await import(
+        '@/lib/server/systems/lookup'
+    );
+
+    installModules({ d6pool: D6POOL_SYSTEM });
+    installServerModules({ d6pool: D6POOL_SERVER });
+    allConditionKeys();
+
     ({ runGuardedBattleOperationCore } = await import(
         '@/lib/utils/battle/pipeline/run-battle-mutation'
     ));
@@ -49,16 +61,24 @@ beforeAll(async () => {
     ({ placed } = await import('@/lib/utils/battle/__tests__/fixtures/placed'));
 });
 
-vi.mock('@/lib/utils/rules/systems/lookup', async (importOriginal) => ({
-    ...(await importOriginal<object>()),
-    ruleSystemOf: () => D6POOL_SYSTEM,
-    ruleSystemByKey: () => D6POOL_SYSTEM,
-}));
+vi.mock('@/lib/utils/rules/systems/meta', async (importOriginal) => {
+    const orig =
+        await importOriginal<typeof import('@/lib/utils/rules/systems/meta')>();
 
-vi.mock('@/lib/server/systems/lookup', async (importOriginal) => ({
-    ...(await importOriginal<object>()),
-    systemServerOf: () => D6POOL_SERVER,
-}));
+    const { D6POOL_META } = await import(
+        '@/lib/__tests__/fixtures/d6pool/meta'
+    );
+
+    const SYSTEM_META = [...orig.SYSTEM_META, D6POOL_META];
+
+    return {
+        ...orig,
+        SYSTEM_META,
+        RULE_SYSTEM_KEYS: SYSTEM_META.flatMap((m) => m.keys),
+    };
+});
+
+const RULES = { ...DEFAULT_RULES, system: { key: 'd6pool' } } as never;
 
 const SPEAR: BattleAttack = {
     id: 's',
@@ -141,7 +161,7 @@ const META = {
     description: null,
     setup: [{ id: 'u1', type: 'unit', side: 'enemy' }] as never,
     friendlyFire: false,
-    rules: DEFAULT_RULES,
+    rules: RULES,
     critChoiceByDm: false,
     map: null,
     createdAt: new Date(),
@@ -160,8 +180,8 @@ async function startedStore(enemyHp = 2) {
         'b1',
         ParticipantSide.ALLY,
         undefined,
-        { ...(CONTEXT as object), rules: DEFAULT_RULES } as never,
-        { artifactRows: [], rules: DEFAULT_RULES }
+        { ...(CONTEXT as object), rules: RULES } as never,
+        { artifactRows: [], rules: RULES }
     );
 
     const withSpear = {

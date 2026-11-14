@@ -260,3 +260,47 @@ describe('assertCampaignEffects', () => {
         expect(loadRules).toHaveBeenCalledTimes(2);
     });
 });
+
+describe('dropForeignConditions', () => {
+    const mixed = [
+        {
+            effects: [
+                { kind: 'applyCondition', condition: 'blinded' },
+                { kind: 'applyCondition', condition: 'custom:x' },
+                {
+                    kind: 'flag',
+                    flag: 'conditionImmunity',
+                    conditions: ['blinded', 'fear'],
+                },
+            ],
+        },
+    ];
+
+    it('drops 5e conditions in wfrp without failing the import', async () => {
+        const { dropForeignConditions } = await import(
+            '@/lib/server/content/traits-guard'
+        );
+
+        const out = dropForeignConditions({ key: 'wfrp' }, mixed);
+
+        expect(out.dropped).toBe(2);
+        expect(out.abilities?.[0].effects).toEqual([
+            { kind: 'applyCondition', condition: 'custom:x' },
+            { kind: 'flag', flag: 'conditionImmunity', conditions: ['fear'] },
+        ]);
+        expect(() =>
+            assertEffectsInComposition({ key: 'wfrp' }, out.abilities)
+        ).not.toThrow();
+    });
+
+    it('leaves dnd5e unchanged', async () => {
+        const { dropForeignConditions } = await import(
+            '@/lib/server/content/traits-guard'
+        );
+
+        expect(dropForeignConditions({ key: 'dnd5e' }, mixed)).toEqual({
+            abilities: mixed,
+            dropped: 0,
+        });
+    });
+});

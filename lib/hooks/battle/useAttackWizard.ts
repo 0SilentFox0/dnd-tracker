@@ -10,7 +10,7 @@ import { useBattleScene } from './useBattleScene';
 import { AttackType } from '@/lib/constants/battle';
 import { findFlags } from '@/lib/utils/abilities/engine/core/collect-modifiers';
 import { withSelf } from '@/lib/utils/abilities/engine/core/participants';
-import type { CunningStrikeEffect } from '@/lib/utils/abilities/schema';
+import type { StrikeRiderEffect } from '@/lib/utils/abilities/schema';
 import { ammoStatus } from '@/lib/utils/battle/ammo';
 import { attackCounter } from '@/lib/utils/battle/attack/attacks-left';
 import { critDoublesDice } from '@/lib/utils/battle/attack/crit-dice';
@@ -283,9 +283,9 @@ export function useAttackWizard(
         cunning: cunningOffer && {
             options: cunningOffer.options.map((o) => ({
                 ...o,
-                effect: o.effect as CunningStrikeEffect,
+                effect: o.effect as StrikeRiderEffect,
                 selected: !!state.cunningStrike?.includes(
-                    o.effect as CunningStrikeEffect
+                    o.effect as StrikeRiderEffect
                 ),
             })),
             maxEffects: cunningOffer.maxEffects,
@@ -430,14 +430,14 @@ export function useAttackWizard(
                     .filter((p) => !unreachable.has(p.basicInfo.id))
                     .map((p) => p.basicInfo.id),
             }),
-        toggleCunning: (effect: CunningStrikeEffect) =>
+        toggleCunning: (effect: StrikeRiderEffect) =>
             cunningOffer &&
             dispatch({
                 type: 'SET_CUNNING_STRIKE',
                 effects: cunningOffer.toggle(
                     state.cunningStrike ?? [],
                     effect
-                ) as CunningStrikeEffect[],
+                ) as StrikeRiderEffect[],
             }),
         setMode: (mode: AttackMode) => dispatch({ type: 'SET_MODE', mode }),
         setSystemInput: (value: SystemSlot | null) =>

@@ -208,6 +208,7 @@ describe('d20 / HOMM names and rule-section readers leaving core', () => {
         CORE_ACTION_KEYS: 0,
         coreActionSchema: 0,
         'cunningStrike(Offer|Cost|Dc)|applyCunningStrikeEffects|toggleCunningStrike|CUNNING_STRIKE_LABELS': 0,
+        'removeCondition5e|hasAnyCondition5e|isCondition5eEffect|conditions5e|\\bCunningStrikeEffect\\b|CUNNING_STRIKE_EFFECTS': 0,
         'rollDie\\(20\\b|rollD20WithMode': 0,
         careersResource: 0,
         createWfrpDraft: 0,
