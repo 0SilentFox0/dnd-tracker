@@ -2,37 +2,13 @@
 
 import { memo } from 'react';
 
+import { edgeRect } from '@/components/battle/map/edge-geometry';
 import { EDGE_WALL_WIDTH } from '@/lib/constants/battle';
 import { UNIT } from '@/lib/utils/battle/grid';
-import { MazeView, parseEdgeKey } from '@/lib/utils/battle/modes/maze';
+import type { MazeView } from '@/lib/utils/battle/modes/maze';
 import type { BattleMapConfig } from '@/types/battle';
 
 const HALF = EDGE_WALL_WIDTH / 2;
-
-/** Прямокутник ребра "x:y:e" / "x:y:s" із заокругленими кінцями, що заходять у кути. */
-export function wallRect(edge: string): {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-} {
-    const { a, side } = parseEdgeKey(edge);
-
-    if (side === 'e')
-        return {
-            x: (a.x + 1) * UNIT - HALF,
-            y: a.y * UNIT - HALF,
-            width: EDGE_WALL_WIDTH,
-            height: UNIT + EDGE_WALL_WIDTH,
-        };
-
-    return {
-        x: a.x * UNIT - HALF,
-        y: (a.y + 1) * UNIT - HALF,
-        width: UNIT + EDGE_WALL_WIDTH,
-        height: EDGE_WALL_WIDTH,
-    };
-}
 
 interface Props {
     map: BattleMapConfig;
@@ -65,7 +41,7 @@ export const MazeWallsLayer = memo(function MazeWallsLayer({
                     key={edge}
                     className="maze-wall"
                     data-maze-wall={edge}
-                    {...wallRect(edge)}
+                    {...edgeRect(edge)}
                     rx={HALF}
                     ry={HALF}
                 />

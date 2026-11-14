@@ -8,7 +8,12 @@ import {
     MAP_EDGES_PER_OP,
 } from '@/lib/constants/battle';
 import type { EdgeEditing } from '@/lib/hooks/battle/useEdgeStroke';
-import { cellKey, hazardDamage, wallSet } from '@/lib/utils/battle/grid';
+import {
+    cellKey,
+    type EdgeTool,
+    hazardDamage,
+    wallSet,
+} from '@/lib/utils/battle/grid';
 import type {
     MapTerrainData,
     MapTerrainResponse,
@@ -16,7 +21,7 @@ import type {
 } from '@/types/api';
 import type { GridPoint, TerrainKind } from '@/types/battle';
 
-export type EdgeBrush = 'edge-wall' | 'edge-bars' | 'edge-erase';
+export type EdgeBrush = EdgeTool;
 
 export type TerrainBrush = TerrainKind | 'erase' | 'erase-zone' | EdgeBrush;
 

@@ -105,10 +105,9 @@ export function edgeBlocks(
 
     if (!set.size) return false;
 
-    if (kind === 'move' && mover && edgeBlocksPlain(map, set, a, b))
-        return !passesWalls(mover);
+    const blocked = edgeBlocksPlain(map, set, a, b);
 
-    return edgeBlocksPlain(map, set, a, b);
+    return blocked && kind === 'move' && mover ? !passesWalls(mover) : blocked;
 }
 
 function edgeBlocksPlain(
