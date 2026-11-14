@@ -35,6 +35,14 @@ const typeOnly = (clause: string | undefined) => {
     );
 };
 
+export function importSpecs(source: string) {
+    return [...source.matchAll(IMPORT_RE)]
+        .filter(([, isType, clause]) => !isType && !typeOnly(clause))
+        .map((m) => m[3]);
+}
+
+export const resolveSpec = resolveLocal;
+
 /** Static imports land in the entry chunk; `import()` / next/dynamic do not. Files in `stop` are listed but not traversed. */
 export function staticGraph(
     entries: string[],

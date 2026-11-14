@@ -11,6 +11,8 @@
     "build:local": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
+    "lint:dirs": "bash scripts/lint-dirs.sh",
+    "cycles": "tsx scripts/shared/cycles.ts",
     "knip": "knip",
     "postinstall": "node scripts/postinstall.mjs",
     "deploy": "vercel --prod",

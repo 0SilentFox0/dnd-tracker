@@ -46,7 +46,7 @@
 
 ## Допущене й відкладене
 
-- Цикли на рівні тек: `characters` ↔ `character-profile` (один домен «персонаж»), `spells` → `battle/fx`. Файлових циклів немає (`import/no-cycle`).
+- Цикли на рівні тек: `characters` ↔ `character-profile` (один домен «персонаж»), `spells` → `battle/fx`. Файлові цикли — лише з `import-cycles-baseline.json` (`pnpm cycles`).
 - Відкладено в E3/Ч19: FX → `components/fx`, UI видів контенту модулів (`classes`, `backgrounds`, `skills`, `main-skills`, `skill-tree`, `artifact-sets`), мораль-FX, компоненти з пропсами > 7.
 
 ## Ratchet
