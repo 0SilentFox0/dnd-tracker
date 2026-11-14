@@ -69,15 +69,37 @@ describe('useMapEditorDraft', () => {
                 map: { cols: 10, rows: 8, background: null, opacity: 0.35 },
                 walls: ['0,0|1,0'],
                 bars: [],
+                expectedVersion: 3,
             })
         );
         await waitFor(() => expect(result.current.isDirty).toBe(false));
         expect(result.current.justSaved).toBe(true);
     });
 
-    it('notifies with the server message when saving fails (conflict)', async () => {
+    it('sends expectedVersion and follows the returned version', async () => {
+        vi.mocked(updateBattleMap).mockResolvedValue({ version: 4 } as never);
+
+        const { result } = setup();
+
+        act(() => result.current.name.set('A'));
+        act(() => result.current.save());
+        await waitFor(() => expect(result.current.isDirty).toBe(false));
+
+        act(() => result.current.name.set('B'));
+        act(() => result.current.save());
+
+        await waitFor(() => expect(updateBattleMap).toHaveBeenCalledTimes(2));
+
+        const versions = vi
+            .mocked(updateBattleMap)
+            .mock.calls.map((c) => c[2].expectedVersion);
+
+        expect(versions).toEqual([3, 4]);
+    });
+
+    it('a 409 shows the changed-elsewhere notice and keeps the draft dirty', async () => {
         vi.mocked(updateBattleMap).mockRejectedValue(
-            new ApiError('Map changed elsewhere', 409, '/maps/m1')
+            new ApiError('errors.battleMapConflict', 409, '/maps/m1')
         );
 
         const { result } = setup();
@@ -87,11 +109,26 @@ describe('useMapEditorDraft', () => {
 
         await waitFor(() =>
             expect(confirm).toHaveBeenCalledWith(
-                expect.objectContaining({
-                    description: 'Map changed elsewhere',
-                })
+                expect.objectContaining({ description: 'maps.editor.conflict' })
             )
         );
         expect(result.current.isDirty).toBe(true);
+    });
+
+    it('other failures show the server message', async () => {
+        vi.mocked(updateBattleMap).mockRejectedValue(
+            new ApiError('Boom', 500, '/maps/m1')
+        );
+
+        const { result } = setup();
+
+        act(() => result.current.name.set('X'));
+        act(() => result.current.save());
+
+        await waitFor(() =>
+            expect(confirm).toHaveBeenCalledWith(
+                expect.objectContaining({ description: 'Boom' })
+            )
+        );
     });
 });

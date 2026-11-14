@@ -45,6 +45,7 @@ export const battleMapInputSchema = z
         map: headerSchema,
         walls: edges.default([]),
         bars: edges.default([]),
+        expectedVersion: z.number().int().min(1).optional(),
     })
     .superRefine((m, ctx) => {
         const { cols, rows, background } = m.map;

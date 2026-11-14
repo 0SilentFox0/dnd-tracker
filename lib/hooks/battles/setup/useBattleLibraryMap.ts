@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 
-import { useBattleMaps, useMapLibraryEnabled } from '@/lib/hooks/battle-maps';
+import { useBattleMaps } from '@/lib/hooks/battle-maps';
+import { useMapLibraryEnabled } from '@/lib/hooks/campaigns';
 import type { BattleMapRef } from '@/types/battle';
 
 export function useBattleLibraryMap(
@@ -21,7 +22,7 @@ export function useBattleLibraryMap(
     const linkedId = isEdit ? (linked?.mapId ?? null) : null;
 
     return {
-        visible: enabled && (isEdit ? !!linkedId : true) && maps.length > 0,
+        visible: linkedId !== null || (enabled && !isEdit && maps.length > 0),
         maps,
         isLinked: linkedId !== null,
         selectedId: linkedId ?? selectedId,

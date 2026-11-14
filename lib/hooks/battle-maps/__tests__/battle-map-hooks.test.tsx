@@ -4,12 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import {
-    battleMapKeys,
-    useBattleMap,
-    useBattleMapMutations,
-    useMapLibraryEnabled,
-} from '..';
+import { battleMapKeys, useBattleMap, useBattleMapMutations } from '..';
 
 import {
     cloneBattleMap,
@@ -18,6 +13,7 @@ import {
     updateBattleMap,
 } from '@/lib/api/battle-maps';
 import { getCampaign } from '@/lib/api/campaigns';
+import { useMapLibraryEnabled } from '@/lib/hooks/campaigns';
 
 vi.mock('@/lib/api/battle-maps', () => ({
     getBattleMaps: vi.fn(),
@@ -82,6 +78,10 @@ describe('battle-map hooks', () => {
 
         expect(keys).toContainEqual(battleMapKeys.detail('c1', 'm1'));
         expect(keys).toContainEqual(battleMapKeys.list('c1'));
+        expect(spy).toHaveBeenCalledWith({
+            queryKey: battleMapKeys.detail('c1', 'm1'),
+            refetchType: 'none',
+        });
     });
 
     it('remove drops the detail cache', async () => {

@@ -37,11 +37,15 @@ export function useMapUpdateTool(args: {
 
     const linked = isDM && !!mapRef;
 
-    const { data: maps } = useBattleMaps(campaignId, linked);
+    const { data: maps } = useBattleMaps(campaignId, linked, {
+        staleTime: 0,
+        refetchOnWindowFocus: 'always',
+    });
 
     const latest = maps?.find((m) => m.id === mapRef?.mapId)?.version;
 
-    const available = !!mapRef && latest !== undefined && latest > mapRef.version;
+    const available =
+        !!mapRef && latest !== undefined && latest > mapRef.version;
 
     const run = useCallback(async () => {
         const ok = await confirm({

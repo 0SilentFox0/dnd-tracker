@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useBattleMap } from '@/lib/hooks/battle-maps';
+// deep import: the battle-maps barrel would close a cycle through battles
 import { useMapEditorDraft } from '@/lib/hooks/battle-maps/useMapEditorDraft';
 import { useCoarsePointer, useUnsavedChangesGuard } from '@/lib/hooks/common';
 import { useText } from '@/lib/i18n/use-text';

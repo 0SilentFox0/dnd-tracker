@@ -14,12 +14,20 @@ import {
 } from '@/lib/api/battle-maps';
 import type { BattleMapInput } from '@/lib/schemas/battle-maps';
 
-export function useBattleMaps(campaignId: string, enabled = true) {
+export function useBattleMaps(
+    campaignId: string,
+    enabled = true,
+    options: {
+        staleTime?: number;
+        refetchOnWindowFocus?: boolean | 'always';
+    } = {}
+) {
     return useQuery({
         queryKey: battleMapKeys.list(campaignId),
         queryFn: () => getBattleMaps(campaignId),
         enabled,
         staleTime: 60_000,
+        ...options,
     });
 }
 
@@ -51,6 +59,7 @@ export function useBattleMapMutations(campaignId: string) {
             onSuccess: (_data, v) => {
                 void queryClient.invalidateQueries({
                     queryKey: battleMapKeys.detail(campaignId, v.mapId),
+                    refetchType: 'none',
                 });
 
                 return onSuccess();

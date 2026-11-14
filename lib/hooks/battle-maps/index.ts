@@ -6,4 +6,3 @@ export {
     useBattleMaps,
 } from './useBattleMaps';
 export { type NewMapForm, useMapLibrary } from './useMapLibrary';
-export { useMapLibraryEnabled } from './useMapLibraryEnabled';

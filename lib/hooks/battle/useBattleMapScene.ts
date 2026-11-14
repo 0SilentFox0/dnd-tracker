@@ -54,6 +54,7 @@ export interface BattleMapScene {
     motionTool: MapMotionTool | null;
     backgroundTool: MapBackgroundTool | null;
     mapUpdate: MapUpdateTool | null;
+    edgesLinked: boolean;
 }
 
 export function useBattleMapScene(fx?: SystemFx): BattleMapScene | null {
@@ -115,7 +116,7 @@ export function useBattleMapScene(fx?: SystemFx): BattleMapScene | null {
         mutate: mapTerrain,
         onSkipped,
         onActivate: stopPlacing,
-        edgeSource,
+        edgeSource: battle.mapRef ? undefined : edgeSource,
     });
 
     const toolActive = terrainTool.active || modeToolActive;
@@ -354,5 +355,6 @@ export function useBattleMapScene(fx?: SystemFx): BattleMapScene | null {
         motionTool,
         backgroundTool,
         mapUpdate,
+        edgesLinked: !!battle.mapRef,
     };
 }

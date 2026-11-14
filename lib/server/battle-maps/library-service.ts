@@ -1,4 +1,5 @@
 import type { Prisma } from '@prisma/client';
+import { isDeepStrictEqual } from 'node:util';
 
 import {
     assembleGeometry,
@@ -7,6 +8,7 @@ import {
     recordToChunkRows,
 } from './assemble';
 
+import { API_ERRORS } from '@/lib/constants/api-errors';
 import { prisma } from '@/lib/db';
 import type { BattleMapInput } from '@/lib/schemas/battle-maps';
 import { ContentError } from '@/lib/server/content/errors';
@@ -226,6 +228,11 @@ async function pruneVersions(
     });
 }
 
+const conflict = () => new ContentError(API_ERRORS.BATTLE_MAP_CONFLICT, 409);
+
+const plain = (v: unknown) => JSON.parse(JSON.stringify(v)) as unknown;
+
+/** `input.expectedVersion` guards against overwriting a newer save; an identical payload only renames. */
 export async function saveMap(
     mapId: string,
     input: BattleMapInput
@@ -233,16 +240,47 @@ export async function saveMap(
     const { header, chunks, headerJson, payloadJson } = payloadOf(input);
 
     return prisma.$transaction(async (tx) => {
-        const row = await tx.battleMap.update({
+        const current = await tx.battleMap.findUniqueOrThrow({
             where: { id: mapId },
-            data: {
-                name: input.name,
-                cols: header.cols,
-                rows: header.rows,
-                header: headerJson,
-                mapVersion: { increment: 1 },
-            },
+            select: { mapVersion: true },
         });
+
+        const base = current.mapVersion;
+
+        if (
+            input.expectedVersion !== undefined &&
+            input.expectedVersion !== base
+        )
+            throw conflict();
+
+        const snapshot = await tx.battleMapVersion.findUnique({
+            where: { mapId_version: { mapId, version: base } },
+        });
+
+        const unchanged =
+            !!snapshot &&
+            isDeepStrictEqual(plain(snapshot.payload), plain(payloadJson));
+
+        const { count } = await tx.battleMap.updateMany({
+            where: { id: mapId, mapVersion: base },
+            data: unchanged
+                ? { name: input.name }
+                : {
+                      name: input.name,
+                      cols: header.cols,
+                      rows: header.rows,
+                      header: headerJson,
+                      mapVersion: { increment: 1 },
+                  },
+        });
+
+        if (count === 0) throw conflict();
+
+        const row = await tx.battleMap.findUniqueOrThrow({
+            where: { id: mapId },
+        });
+
+        if (unchanged) return toBrief(row);
 
         await tx.battleMapChunk.deleteMany({ where: { mapId } });
 

@@ -32,11 +32,11 @@ import {
 import { HudPortalClassProvider } from '@/components/ui/portal-class';
 import { dmSectionHref, dmSectionsFor } from '@/lib/constants/campaigns';
 import { useSessionUser, useSwitchGoogleAccount } from '@/lib/hooks/auth';
-import { useMapLibraryEnabled } from '@/lib/hooks/battle-maps';
 import {
     useCampaignRules,
     useCampaignSystemSelection,
     useIsTemplateCampaign,
+    useMapLibraryEnabled,
 } from '@/lib/hooks/campaigns';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import { cn } from '@/lib/utils';

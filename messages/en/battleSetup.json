@@ -143,6 +143,7 @@
     },
     "edgeDrawing": "Draw walls and bars",
     "edgesDisabledMode": "Walls and bars are disabled in maze mode",
+    "edgesLinked": "Walls of a library map are edited on the Maps page — then press «Update map»",
     "edgesDesktopOnly": "Drawing walls and bars is desktop-only — open this on a computer"
   },
   "characters": {

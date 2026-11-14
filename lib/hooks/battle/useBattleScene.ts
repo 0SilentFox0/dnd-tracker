@@ -187,7 +187,9 @@ export function useBattleSceneValue(
     if (mapEdges.data && mapEdges.data !== heldEdges)
         setHeldEdges(mapEdges.data);
 
-    const edges = mapEdges.data ?? (rawBattle?.mapRef ? heldEdges : undefined);
+    const edges =
+        mapEdges.data ??
+        (rawBattle?.mapRef && mapEdges.isPending ? heldEdges : undefined);
 
     const isMapPending = !!rawBattle?.mapRef && !edges;
 

@@ -28,7 +28,9 @@ export default async function BattlePage({
 
     const ref = battle?.mapRef;
 
-    const pinned = ref ? await getMap(ref.mapId, ref.version) : null;
+    const pinned = ref
+        ? await getMap(ref.mapId, ref.version).catch(() => null)
+        : null;
 
     const edges =
         ref && pinned?.campaignId === id

@@ -1,7 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 
+import { campaignKeys } from './keys';
+
 import { getCampaign } from '@/lib/api/campaigns';
-import { campaignKeys } from '@/lib/hooks/campaigns/keys';
 import { ENTITY_STALE_MS } from '@/lib/providers/query-provider';
 
 export function useMapLibraryEnabled(campaignId: string) {

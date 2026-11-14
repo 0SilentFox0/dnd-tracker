@@ -32,9 +32,11 @@ const EDGE_BRUSHES: TerrainBrush[] = ['edge-wall', 'edge-bars', 'edge-erase'];
 export function MapTerrainToolbar({
     tool,
     edgesInMode = false,
+    edgesLinked = false,
 }: {
     tool: MapTerrainTool;
     edgesInMode?: boolean;
+    edgesLinked?: boolean;
 }) {
     const t = useTranslations('battle.map.terrain');
 
@@ -46,15 +48,18 @@ export function MapTerrainToolbar({
 
     const touch = useCoarsePointer();
 
-    const brushes = touch
-        ? BRUSHES.filter((b) => !EDGE_BRUSHES.includes(b))
-        : BRUSHES;
+    const brushes =
+        touch || edgesLinked
+            ? BRUSHES.filter((b) => !EDGE_BRUSHES.includes(b))
+            : BRUSHES;
 
-    const edgeNotice = touch
-        ? tSetup('edgesDesktopOnly')
-        : edgesInMode
-          ? tSetup('edgesDisabledMode')
-          : null;
+    const edgeNotice = edgesLinked
+        ? tSetup('edgesLinked')
+        : touch
+          ? tSetup('edgesDesktopOnly')
+          : edgesInMode
+            ? tSetup('edgesDisabledMode')
+            : null;
 
     const damageOptions = DAMAGE_ELEMENT_OPTIONS.map(({ value }) => ({
         value,

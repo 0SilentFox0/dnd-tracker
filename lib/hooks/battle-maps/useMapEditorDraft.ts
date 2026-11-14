@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 
 import { useBattleMapMutations } from './useBattleMaps';
 
+import { ApiError } from '@/lib/api/client';
 import { useBattleMapEditor } from '@/lib/hooks/battles';
 import { useNotify } from '@/lib/hooks/common';
 import type { BattleMapInput } from '@/lib/schemas/battle-maps';
@@ -32,6 +33,8 @@ export function useMapEditorDraft(campaignId: string, source: BattleMapFull) {
 
     const [justSaved, setJustSaved] = useState(false);
 
+    const [version, setVersion] = useState(source.version);
+
     const isDirty = snapshot !== saved;
 
     const save = () => {
@@ -47,14 +50,26 @@ export function useMapEditorDraft(campaignId: string, source: BattleMapFull) {
         update.mutate(
             {
                 mapId: source.id,
-                data: { name: name.trim(), map: header, walls, bars },
+                data: {
+                    name: name.trim(),
+                    map: header,
+                    walls,
+                    bars,
+                    expectedVersion: version,
+                },
             },
             {
-                onSuccess: () => {
+                onSuccess: (brief) => {
+                    setVersion(brief.version);
                     setSaved(snapshot);
                     setJustSaved(true);
                 },
-                onError: (e) => void notify(errorMessage(e, t('saveFailed'))),
+                onError: (e) =>
+                    void notify(
+                        e instanceof ApiError && e.status === 409
+                            ? t('conflict')
+                            : errorMessage(e, t('saveFailed'))
+                    ),
             }
         );
     };

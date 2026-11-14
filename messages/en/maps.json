@@ -31,6 +31,7 @@
     "save": "Save",
     "saving": "Saving...",
     "saved": "Map saved",
+    "conflict": "The map was changed elsewhere — reload the page to get the latest version, then redo your edits",
     "saveFailed": "Failed to save the map",
     "loadFailed": "Failed to load the map",
     "desktopOnly": "The map editor is desktop-only — open this page on a computer",

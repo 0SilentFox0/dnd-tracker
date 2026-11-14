@@ -168,6 +168,7 @@ export function BattleMapPanel({ phone = false }: { phone?: boolean }) {
                         <MapTerrainToolbar
                             tool={terrainTool}
                             edgesInMode={!!activeModeWithConfig(scene.map)}
+                            edgesLinked={scene.edgesLinked}
                         />
                     )}
                     {palettes.map(

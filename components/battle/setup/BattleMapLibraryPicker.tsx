@@ -24,6 +24,8 @@ export function BattleMapLibraryPicker({
         disabled: Math.max(m.cols, m.rows) > MAP_LIMITS.battleMaxSide,
     }));
 
+    const anyTooLarge = options.some((o) => o.disabled);
+
     const chosen = library.maps.find((m) => m.id === library.selectedId);
 
     return (
@@ -46,7 +48,9 @@ export function BattleMapLibraryPicker({
                             cols: chosen.cols,
                             rows: chosen.rows,
                         })
-                      : t('tooLarge', { max: MAP_LIMITS.battleMaxSide })}
+                      : anyTooLarge
+                        ? t('tooLarge', { max: MAP_LIMITS.battleMaxSide })
+                        : null}
             </p>
             <Link
                 href={`/campaigns/${campaignId}/dm/maps`}
