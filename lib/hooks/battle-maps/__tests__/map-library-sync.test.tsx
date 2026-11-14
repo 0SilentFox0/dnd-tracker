@@ -10,7 +10,9 @@ import { announceMapLibraryChange, useMapLibrarySync } from '../mapLibrarySync';
 describe('map library sync', () => {
     it('invalidates the list when another tab announces a change', async () => {
         const client = new QueryClient();
+
         const spy = vi.spyOn(client, 'invalidateQueries');
+
         const wrapper = ({ children }: { children: ReactNode }) => (
             <QueryClientProvider client={client}>
                 {children}
