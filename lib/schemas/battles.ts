@@ -306,6 +306,7 @@ export const createBattleSchema = z.object({
         })
     ),
     map: battleMapSchema.nullable().optional(),
+    mapId: z.string().min(1).optional(),
     turnTimerSeconds: turnTimerSecondsSchema.nullable().optional(),
 });
 

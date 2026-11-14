@@ -12,12 +12,16 @@ import type {
 
 import { BattleStatus } from '@/lib/constants/battle';
 import { CampaignRole, isDemoKind } from '@/lib/constants/campaigns';
+import { getMap } from '@/lib/server/battle-maps/library-service';
 import { pendingFromStored } from '@/lib/utils/battle/crit-choice/pending';
+import { composeEffectiveMap } from '@/lib/utils/battle/map-storage/effective-map';
 import { parseRulesCached } from '@/lib/utils/rules/schema';
 import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
 import type { BattleAudioState } from '@/types/audio';
 import type {
     BattleMapConfig,
+    BattleMapRef,
+    BattleMapState,
     BattleParticipant,
     BattlePreparationParticipant,
 } from '@/types/battle';
@@ -134,6 +138,23 @@ async function loadCampaignRules(
     return row?.campaign.rules;
 }
 
+async function effectiveMapOf(
+    base: BattleMapConfig | null,
+    ref: BattleMapRef | null,
+    state: BattleMapState | null
+): Promise<BattleMapConfig | null> {
+    if (!base) return null;
+
+    if (!ref) return composeEffectiveMap(base, state);
+
+    const library = await getMap(ref.mapId, ref.version);
+
+    if (!library)
+        throw new Error(`battle map ${ref.mapId}@${ref.version} is gone`);
+
+    return composeEffectiveMap(base, state, library);
+}
+
 export async function loadBattle(
     db: BattleDb,
     args: { battleId: string; campaignId: string; userId: string }
@@ -154,6 +175,11 @@ export async function loadBattle(
             pendingCritChoice: true,
             systemState: true,
             map: true,
+            mapId: true,
+            mapVersion: true,
+            mapState: {
+                select: { removedEdges: true, doors: true, fog: true },
+            },
             audio: true,
             rules: true,
             startedAt: true,
@@ -213,6 +239,27 @@ export async function loadBattle(
         participant: rowToParticipant(p),
     }));
 
+    const mapRef =
+        row.mapId && row.mapVersion !== null
+            ? { mapId: row.mapId, version: row.mapVersion }
+            : null;
+
+    const mapState: BattleMapState | null = row.mapState
+        ? {
+              removedEdges: row.mapState.removedEdges as string[],
+              doors: row.mapState.doors as unknown as BattleMapState['doors'],
+              ...(row.mapState.fog && {
+                  fog: row.mapState.fog as Record<string, unknown>,
+              }),
+          }
+        : null;
+
+    const map = await effectiveMapOf(
+        (row.map ?? null) as BattleMapConfig | null,
+        mapRef,
+        mapState
+    );
+
     return {
         scene,
         meta: {
@@ -223,7 +270,9 @@ export async function loadBattle(
             friendlyFire: row.campaign.friendlyFire ?? false,
             rules,
             critChoiceByDm: row.campaign.critChoiceByDm,
-            map: (row.map ?? null) as BattleMapConfig | null,
+            map,
+            mapRef,
+            mapState,
             audio: (row.audio ?? null) as BattleAudioState | null,
             turnTimerSeconds: row.turnTimerSeconds,
             createdAt: row.createdAt,

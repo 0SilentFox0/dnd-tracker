@@ -6,6 +6,8 @@ import type { BattleAudioState } from '@/types/audio';
 import type {
     AirborneState,
     BattleMapConfig,
+    BattleMapRef,
+    BattleMapState,
     BattleParticipant,
     BattlePreparationParticipant,
     Direction8,
@@ -113,7 +115,10 @@ export interface BattleMeta {
     friendlyFire: boolean;
     rules: Ruleset;
     critChoiceByDm: boolean;
+    /** effective map: library edges of the pinned version minus removed edges */
     map: BattleMapConfig | null;
+    mapRef?: BattleMapRef | null;
+    mapState?: BattleMapState | null;
     audio?: BattleAudioState | null;
     turnTimerSeconds?: number | null;
     createdAt: Date;
@@ -143,6 +148,7 @@ export type ScenePatch = Partial<
     >
 > & {
     map?: BattleMapConfig | null;
+    mapState?: BattleMapState | null;
     rules?: Ruleset;
     sceneState?: SystemSlot | null;
 };

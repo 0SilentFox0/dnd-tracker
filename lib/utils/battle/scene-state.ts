@@ -17,7 +17,7 @@ export function applyScenePatch(
     scene: BattleSceneState,
     patch: ScenePatch
 ): BattleSceneState {
-    const { map: _map, sceneState, ...rest } = patch;
+    const { map: _map, mapState: _mapState, sceneState, ...rest } = patch;
 
     return {
         ...scene,

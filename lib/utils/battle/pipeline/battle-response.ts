@@ -37,6 +37,24 @@ export interface PusherMessage {
     payload: unknown;
 }
 
+function mapFields(meta: LoadedBattle['meta']) {
+    const { mapRef, mapState } = meta;
+
+    const map = (() => {
+        if (!mapRef || !meta.map) return meta.map;
+
+        const { walls: _walls, bars: _bars, ...header } = meta.map;
+
+        return header;
+    })();
+
+    return {
+        map,
+        ...(mapRef && { mapRef }),
+        ...(mapState && { mapState }),
+    };
+}
+
 export function toBattleResponse(
     loaded: Pick<LoadedBattle, 'meta'>,
     scene: BattleSceneState,
@@ -74,7 +92,7 @@ export function toBattleResponse(
         pendingMoraleCheck: scene.pendingMoraleCheck,
         pendingChoice: publicPending(scene.pendingChoice),
         ...(scene.sceneState && { system: scene.sceneState }),
-        map: meta.map,
+        ...mapFields(meta),
         audio: meta.audio ?? null,
         rules: hide ? stripPlayerHiddenRules(meta.rules) : meta.rules,
         turnTimerSeconds: meta.turnTimerSeconds ?? null,

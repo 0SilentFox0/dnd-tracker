@@ -8,7 +8,7 @@ import { persistConsumables } from './persist-consumables';
 import { persistIngredients } from './persist-ingredients';
 import { persistCharacterResources } from './persist-resources';
 import { persistBattleXp } from './persist-xp';
-import { buildSnapshotState } from './snapshot-state';
+import { buildSnapshotState, isEmptyMapState } from './snapshot-state';
 import { joinParticipant, splitParticipant } from './split-participant';
 import type {
     BattleDelta,
@@ -30,7 +30,11 @@ import { getTranslator } from '@/lib/i18n/translator';
 import { encodeLog } from '@/lib/utils/battle/log/codec';
 import { formatBattleLog } from '@/lib/utils/battle/log/lines';
 import { applyScenePatch } from '@/lib/utils/battle/scene-state';
-import type { BattleParticipant } from '@/types/battle';
+import type {
+    BattleMapConfig,
+    BattleMapState,
+    BattleParticipant,
+} from '@/types/battle';
 import type { LogLine } from '@/types/text';
 
 type UpdatableColumn = Exclude<keyof ParticipantColumns, 'id'>;
@@ -118,6 +122,38 @@ function jsonOrNull(
     value: unknown
 ): Prisma.InputJsonValue | typeof Prisma.DbNull {
     return value === null ? Prisma.DbNull : (value as Prisma.InputJsonValue);
+}
+
+function withoutEdges(map: BattleMapConfig | null) {
+    if (!map) return map;
+
+    const { walls: _walls, bars: _bars, ...header } = map;
+
+    return header;
+}
+
+async function writeMapState(
+    tx: Pick<Prisma.TransactionClient, 'battleMapState'>,
+    battleId: string,
+    state: BattleMapState | null
+) {
+    if (!state || isEmptyMapState(state)) {
+        await tx.battleMapState.deleteMany({ where: { battleId } });
+
+        return;
+    }
+
+    const data = {
+        removedEdges: state.removedEdges as Prisma.InputJsonValue,
+        doors: state.doors as unknown as Prisma.InputJsonValue,
+        fog: state.fog ? (state.fog as Prisma.InputJsonValue) : Prisma.DbNull,
+    };
+
+    await tx.battleMapState.upsert({
+        where: { battleId },
+        create: { battleId, ...data, version: 1 },
+        update: { ...data, version: { increment: 1 } },
+    });
 }
 
 export interface PreparedSave {
@@ -277,7 +313,11 @@ export async function saveBattle(
                 ...(patch.completedAt !== undefined && {
                     completedAt: patch.completedAt,
                 }),
-                ...(patch.map !== undefined && { map: jsonOrNull(patch.map) }),
+                ...(patch.map !== undefined && {
+                    map: jsonOrNull(
+                        before.meta.mapRef ? withoutEdges(patch.map) : patch.map
+                    ),
+                }),
                 ...(patch.rules !== undefined && {
                     rules: patch.rules as Prisma.InputJsonValue,
                 }),
@@ -285,6 +325,9 @@ export async function saveBattle(
         });
 
         if (count === 0) throw new BattleConflictError();
+
+        if (patch.mapState !== undefined)
+            await writeMapState(tx, scene.id, patch.mapState);
 
         if (diff.created.length > 0) {
             await tx.battleParticipant.createMany({
@@ -344,7 +387,8 @@ export async function saveBattle(
                             scene,
                             beforeStored,
                             diff,
-                            before.meta.map
+                            before.meta.map,
+                            before.meta
                         ) as unknown as Prisma.InputJsonValue,
                     },
                 ],

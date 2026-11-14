@@ -552,5 +552,7 @@
   "outOfAmmo": "Out of ammunition",
   "weaponReloading": "The weapon is reloading",
   "effectOutsideComposition": "The effect belongs to a module outside this campaign's rule system",
-  "battleMapInUse": "The map is used by a battle and cannot be deleted"
+  "battleMapInUse": "The map is used by a battle and cannot be deleted",
+  "battleMapNotFound": "The map was not found in the campaign library",
+  "battleMapTooLarge": "This map is too large for a battle"
 }

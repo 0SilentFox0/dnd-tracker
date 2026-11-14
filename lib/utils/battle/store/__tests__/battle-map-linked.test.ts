@@ -1,0 +1,296 @@
+import { Prisma } from '@prisma/client';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+const mocks = vi.hoisted(() => ({ getMap: vi.fn() }));
+
+vi.mock('@/lib/server/battle-maps/library-service', () => ({
+    getMap: mocks.getMap,
+}));
+
+import { type BattleDb, loadBattle } from '../load-battle';
+import { saveBattle } from '../save-battle';
+import { buildSnapshotState } from '../snapshot-state';
+import type { LoadedBattle } from '../types';
+
+import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
+import { toBattleResponse } from '@/lib/utils/battle/pipeline/battle-response';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
+import type { BattleMapConfig, BattleMapState } from '@/types/battle';
+
+const header: BattleMapConfig = {
+    cols: 8,
+    rows: 8,
+    background: null,
+    opacity: 0.3,
+};
+
+const sceneRow = (extra: Record<string, unknown>) => ({
+    id: 'b1',
+    campaignId: 'c1',
+    name: 'Бій',
+    description: null,
+    status: 'active',
+    currentRound: 1,
+    currentTurnIndex: 0,
+    version: 1,
+    eventSeq: 0,
+    pendingMoraleCheck: null,
+    map: header,
+    audio: null,
+    rules: { system: { key: 'homm' } },
+    startedAt: null,
+    completedAt: null,
+    createdAt: new Date(0),
+    participants: [],
+    battleParticipants: [],
+    campaign: { friendlyFire: false, members: [{ role: 'dm' }] },
+    ...extra,
+});
+
+const loadWith = (extra: Record<string, unknown>) =>
+    loadBattle(
+        {
+            battleScene: { findFirst: vi.fn(async () => sceneRow(extra)) },
+            battleParticipant: { findMany: vi.fn(async () => []) },
+        } as unknown as BattleDb,
+        { battleId: 'b1', campaignId: 'c1', userId: 'dm' }
+    );
+
+describe('loadBattle: карта бібліотеки', () => {
+    beforeEach(() => {
+        mocks.getMap.mockReset();
+        mocks.getMap.mockResolvedValue({
+            map: header,
+            walls: ['1:1:e', '2:2:s'],
+            bars: ['3:3:e'],
+        });
+    });
+
+    it('linked: ребра pinned-версії мінус видалені, mapRef і mapState окремо', async () => {
+        const loaded = await loadWith({
+            mapId: 'm1',
+            mapVersion: 3,
+            mapState: { removedEdges: ['1:1:e'], doors: {}, fog: null },
+        });
+
+        expect(mocks.getMap).toHaveBeenCalledWith('m1', 3);
+        expect(loaded?.meta.map?.walls).toEqual(['2:2:s']);
+        expect(loaded?.meta.map?.bars).toEqual(['3:3:e']);
+        expect(loaded?.meta.mapRef).toEqual({ mapId: 'm1', version: 3 });
+        expect(loaded?.meta.mapState).toEqual({
+            removedEdges: ['1:1:e'],
+            doors: {},
+        });
+    });
+
+    it('inline: бібліотеку не чіпає, стан віднімається від власних ребер', async () => {
+        const loaded = await loadWith({
+            map: { ...header, walls: ['1:1:e', '4:4:e'] },
+            mapId: null,
+            mapVersion: null,
+            mapState: { removedEdges: ['4:4:e'], doors: {}, fog: null },
+        });
+
+        expect(mocks.getMap).not.toHaveBeenCalled();
+        expect(loaded?.meta.map?.walls).toEqual(['1:1:e']);
+        expect(loaded?.meta.mapRef).toBeNull();
+    });
+
+    it('inline без стану: карта без змін (та сама посилання-форма)', async () => {
+        const loaded = await loadWith({});
+
+        expect(loaded?.meta.map).toEqual(header);
+        expect(loaded?.meta.mapState).toBeNull();
+    });
+});
+
+const hero = createMockParticipant();
+
+const state: BattleMapState = { removedEdges: ['1:1:e'], doors: {} };
+
+const linkedBefore = (mapState: BattleMapState | null): LoadedBattle => ({
+    scene: {
+        id: 'b1',
+        campaignId: 'c1',
+        status: 'active',
+        round: 1,
+        turnIndex: 0,
+        version: 1,
+        eventSeq: 0,
+        pendingMoraleCheck: null,
+        pendingChoice: null,
+        startedAt: null,
+        completedAt: null,
+    },
+    meta: {
+        name: 'Бій',
+        description: null,
+        setup: [],
+        friendlyFire: false,
+        rules: DEFAULT_RULES,
+        critChoiceByDm: false,
+        map: { ...header, walls: ['2:2:s'] },
+        mapRef: { mapId: 'm1', version: 3 },
+        mapState,
+        createdAt: new Date(),
+    },
+    participants: [hero],
+    pending: [],
+    isDM: true,
+});
+
+function fakeDb() {
+    const tx = {
+        battleScene: { updateMany: vi.fn(async () => ({ count: 1 })) },
+        battleParticipant: { createMany: vi.fn(), deleteMany: vi.fn() },
+        battleEvent: {
+            createMany: vi.fn(),
+            updateMany: vi.fn(),
+            deleteMany: vi.fn(),
+        },
+        battleSnapshot: { createMany: vi.fn(), deleteMany: vi.fn() },
+        battleMapState: { upsert: vi.fn(), deleteMany: vi.fn() },
+        $executeRaw: vi.fn(),
+    };
+
+    const db = {
+        $transaction: vi.fn(async (fn: (t: typeof tx) => Promise<void>) =>
+            fn(tx)
+        ),
+    } as unknown as BattleDb;
+
+    return { db, tx };
+}
+
+const outcome = (scene: object, events: object[] = []) => ({
+    participants: [hero],
+    pending: [],
+    events: events as never,
+    scene,
+});
+
+describe('saveBattle: шар карти', () => {
+    it('linked: walls/bars не потрапляють у battle_scenes.map', async () => {
+        const { db, tx } = fakeDb();
+
+        await saveBattle(
+            db,
+            linkedBefore(null),
+            outcome({ map: { ...header, walls: ['2:2:s'], bars: ['3:3:e'] } })
+        );
+
+        const { data } = (
+            tx.battleScene.updateMany.mock.calls[0] as unknown as [
+                { data: { map: object } },
+            ]
+        )[0];
+
+        expect(data.map).toEqual(header);
+    });
+
+    it('patch.mapState: upsert з bump версії; порожній — delete', async () => {
+        const { db, tx } = fakeDb();
+
+        await saveBattle(db, linkedBefore(null), outcome({ mapState: state }));
+
+        expect(tx.battleMapState.upsert).toHaveBeenCalledWith(
+            expect.objectContaining({
+                where: { battleId: 'b1' },
+                create: expect.objectContaining({
+                    removedEdges: ['1:1:e'],
+                    version: 1,
+                }),
+                update: expect.objectContaining({
+                    version: { increment: 1 },
+                    fog: Prisma.DbNull,
+                }),
+            })
+        );
+
+        await saveBattle(
+            db,
+            linkedBefore(state),
+            outcome({ mapState: { removedEdges: [], doors: {} } })
+        );
+
+        expect(tx.battleMapState.deleteMany).toHaveBeenCalledWith({
+            where: { battleId: 'b1' },
+        });
+    });
+
+    it('без mapState у патчі таблицю стану не чіпає', async () => {
+        const { db, tx } = fakeDb();
+
+        await saveBattle(db, linkedBefore(state), outcome({ turnIndex: 0 }));
+
+        expect(tx.battleMapState.upsert).not.toHaveBeenCalled();
+        expect(tx.battleMapState.deleteMany).not.toHaveBeenCalled();
+    });
+
+    it('знімок тримає стан і mapVersion ДО дії', async () => {
+        const { db, tx } = fakeDb();
+
+        await saveBattle(
+            db,
+            linkedBefore(state),
+            outcome({ mapState: { removedEdges: [], doors: {} } }, [
+                { type: 'turn', round: 1, resultText: 'x' },
+            ])
+        );
+
+        const snap = (
+            tx.battleSnapshot.createMany.mock.calls[0] as unknown as [
+                { data: { state: { scene: object } }[] },
+            ]
+        )[0].data[0].state.scene;
+
+        expect(snap).toMatchObject({ mapState: state, mapVersion: 3 });
+    });
+});
+
+describe('buildSnapshotState: шар карти', () => {
+    const base = linkedBefore(null);
+
+    it('порожній стан і inline не додають полів', () => {
+        const { scene } = buildSnapshotState(
+            base.scene,
+            [],
+            { created: [], updated: [], removed: [] },
+            null,
+            {
+                mapState: { removedEdges: [], doors: {} },
+            }
+        );
+
+        expect(scene).not.toHaveProperty('mapState');
+        expect(scene).not.toHaveProperty('mapVersion');
+    });
+});
+
+describe('toBattleResponse: linked', () => {
+    const respond = (loaded: LoadedBattle) =>
+        toBattleResponse(loaded, loaded.scene, [], [], {
+            mode: 'full',
+            entries: [],
+        });
+
+    it('віддає map без walls/bars, mapRef і mapState', () => {
+        const res = respond(linkedBefore(state));
+
+        expect(res.map).toEqual(header);
+        expect(res.mapRef).toEqual({ mapId: 'm1', version: 3 });
+        expect(res.mapState).toEqual(state);
+    });
+
+    it('inline: map як є, без mapRef/mapState', () => {
+        const loaded = linkedBefore(null);
+
+        loaded.meta.mapRef = null;
+
+        const res = respond(loaded);
+
+        expect(res.map).toEqual({ ...header, walls: ['2:2:s'] });
+        expect(res).not.toHaveProperty('mapRef');
+        expect(res).not.toHaveProperty('mapState');
+    });
+});

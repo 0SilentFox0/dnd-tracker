@@ -19,6 +19,8 @@ import {
     restoreParticipantsAt,
 } from '@/lib/utils/battle/store';
 import { REJECT } from '@/lib/utils/battle/store/reject';
+import { isEmptyMapState } from '@/lib/utils/battle/store/snapshot-state';
+import { jsonEqual } from '@/lib/utils/battle/store/stable-json';
 import type { BattleMapConfig } from '@/types/battle';
 
 export const rollbackSchema = z.object({
@@ -78,9 +80,29 @@ export function createRollbackMutation(
             });
         }
 
+        const { scene } = first.state;
+
+        const { mapRef } = ctx.meta;
+
+        if (
+            mapRef &&
+            scene.mapVersion !== undefined &&
+            scene.mapVersion !== mapRef.version
+        ) {
+            throw new BattleRuleError(
+                'action_rejected',
+                REJECT.rollbackAcrossMapUpdate
+            );
+        }
+
         const { participants, pending } = restoreParticipantsAt(snapshots, ctx);
 
-        const { scene } = first.state;
+        const mapState = scene.mapState ?? null;
+
+        const stateChanged = !jsonEqual(
+            isEmptyMapState(mapState) ? null : mapState,
+            isEmptyMapState(ctx.meta.mapState) ? null : ctx.meta.mapState
+        );
 
         const map = ctx.meta.map ? restoreMap(ctx.meta.map, scene) : undefined;
 
@@ -98,6 +120,7 @@ export function createRollbackMutation(
                     completedAt: null,
                 }),
                 ...(map && { map }),
+                ...(stateChanged && { mapState }),
             },
             events: [],
             history: { cancelFromSeq: first.seq },

@@ -54,6 +54,8 @@ export const REJECT = {
     mapEdgeLimit: 'battleLog.reject.mapEdgeLimit',
     mapEdgeOutside: 'battleLog.reject.mapEdgeOutside',
     mapEdgesInMode: 'battleLog.reject.mapEdgesInMode',
+    mapEdgesLinked: 'battleLog.reject.mapEdgesLinked',
+    rollbackAcrossMapUpdate: 'battleLog.reject.rollbackAcrossMapUpdate',
     rollbackLimit: 'battleLog.reject.rollbackLimit',
     casterMissing: 'battleLog.reject.casterMissing',
     spellForbidden: 'battleLog.reject.spellForbidden',

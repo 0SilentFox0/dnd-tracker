@@ -350,6 +350,8 @@
     "mapEdgeOutside": "The wall or bars are outside the map",
     "mapEdgeLimit": "Too many walls or bars on the map",
     "mapEdgesInMode": "Walls and bars are unavailable in this map mode",
+    "mapEdgesLinked": "Library map edges cannot be edited in battle: remove an edge via battle state or update the map",
+    "rollbackAcrossMapUpdate": "This action cannot be rolled back: the battle map was updated after it",
     "rollbackLimit": "This action can no longer be rolled back: only the last {count} states are kept after the battle ends",
     "casterMissing": "The caster is not in the battle",
     "spellForbidden": "Only the DM or the controller of the current turn can cast spells",

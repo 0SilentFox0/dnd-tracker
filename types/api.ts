@@ -25,7 +25,13 @@ import type {
 import type { Ruleset } from '@/lib/utils/rules';
 import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
 import type { BattleAudioState } from '@/types/audio';
-import type { BattleMapConfig, MazeConfig, TerrainDiff } from '@/types/battle';
+import type {
+    BattleMapConfig,
+    BattleMapRef,
+    BattleMapState,
+    MazeConfig,
+    TerrainDiff,
+} from '@/types/battle';
 
 // Skills API
 export type SkillPayload = GroupedSkillPayload;
@@ -95,6 +101,9 @@ export interface BattleScene {
     /** Стан сцени, яким керує система; відсутнє = немає */
     system?: SystemSlot;
     map?: BattleMapConfig | null;
+    /** Бій linked: map без walls/bars, ребра клієнт бере з бібліотеки за mapRef */
+    mapRef?: BattleMapRef;
+    mapState?: BattleMapState;
     /** Стан музики бою; оновлюється окремо від версії (Pusher battle-audio) */
     audio?: BattleAudioState | null;
     /** Підсумок знань про ціль з усіх атак бою (не лише з останніх записів журналу); лише для гравців */

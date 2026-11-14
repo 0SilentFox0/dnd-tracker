@@ -19,6 +19,9 @@ export function mapWallsMutation(
     if (!map)
         throw new BattleRuleError('action_rejected', API_ERRORS.BATTLE_NO_MAP);
 
+    if (ctx.meta.mapRef)
+        throw new BattleRuleError('action_rejected', REJECT.mapEdgesLinked);
+
     if (activeModeWithConfig(map))
         throw new BattleRuleError('action_rejected', REJECT.mapEdgesInMode);
 
