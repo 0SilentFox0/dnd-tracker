@@ -172,6 +172,7 @@ export interface MapView {
     width: number;
     height: number;
     rotated: boolean;
+    grow: number;
 }
 
 // карта лягає вертикально, лише коли вона помітно ширша, ніж висока
@@ -229,7 +230,12 @@ export function fitMapView(
     const grow =
         box.width > 0 ? Math.max(1, (minCell * shown.cols) / box.width) : 1;
 
-    return { width: box.width * grow, height: box.height * grow, rotated };
+    return {
+        width: box.width * grow,
+        height: box.height * grow,
+        rotated,
+        grow,
+    };
 }
 
 export type GridWindow = { x: number; y: number; cols: number; rows: number };
