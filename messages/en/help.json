@@ -90,7 +90,8 @@
       },
       "s1": {
         "heading": "Map and modes",
-        "b0": "The map is a grid with obstacles, walls and weather. Besides the regular mode there is a maze with fog. Obstacles on the line of fire grant cover automatically."
+        "b0": "The map is a grid with obstacles, walls and weather. Besides the regular mode there is a maze with fog. Obstacles on the line of fire grant cover automatically.",
+        "b1": "Doors sit on a cell edge, placed with the Door brush, and are closed or locked. A closed door blocks movement, shots and sight; a player opens it with a hero standing next to it on their turn, the DM can lock, unlock or break a door."
       },
       "s2": {
         "heading": "Turns, morale, finishing",

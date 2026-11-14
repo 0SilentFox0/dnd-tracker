@@ -10,6 +10,7 @@ import './battle-map.css';
 import { modeUiOf } from '@/components/battle/modes';
 import {
     type EdgeEditing,
+    type MapDoorsTool,
     type ModeTools,
     useScrollToCurrent,
     useStrokePaint,
@@ -49,6 +50,10 @@ export interface BattleMapEditing {
     strokeTool?: boolean;
     /** інструмент ребер: стіни й ґрати малюються штрихом по краях клітинок; null — вимкнений */
     edges?: EdgeEditing | null;
+    /** двері: клік гравця відчиняє, меню ДМ; null/відсутній — лише гліфи */
+    doors?: MapDoorsTool | null;
+    /** показувати замки дверей (редактор, ДМ) */
+    doorLocks?: boolean;
     /** інструменти ДМ активного режиму; null — жоден не активний */
     mode?: ModeTools | null;
 }
@@ -70,6 +75,10 @@ export function BattleMap({
     const { clickableBlocked, showBlocked, strokeTool } = editing;
 
     const edges = editing.edges ?? null;
+
+    const doors = editing.doors ?? null;
+
+    const { doorLocks } = editing;
 
     const painting = Boolean(strokeTool && actions?.onStroke);
 
@@ -163,8 +172,15 @@ export function BattleMap({
     );
 
     const stageEditing = useMemo(
-        () => ({ clickableBlocked, showBlocked, mode: modeTools, edges }),
-        [clickableBlocked, showBlocked, modeTools, edges]
+        () => ({
+            clickableBlocked,
+            showBlocked,
+            mode: modeTools,
+            edges,
+            doors,
+            doorLocks,
+        }),
+        [clickableBlocked, showBlocked, modeTools, edges, doors, doorLocks]
     );
 
     // свайп віддаємо браузеру лише для прокрутки; зум, щипок і штрих місцевості — наші

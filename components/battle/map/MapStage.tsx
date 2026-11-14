@@ -10,6 +10,8 @@ import {
     useRef,
 } from 'react';
 
+import { DoorMenu } from './DoorMenu';
+import { DoorsLayer } from './DoorsLayer';
 import { EdgeEditor } from './EdgeEditor';
 import { MapBackground } from './MapBackground';
 import { MapHitFloat } from './MapHitFloat';
@@ -28,6 +30,7 @@ import { WallsLayer } from './WallsLayer';
 import { modeUiOf } from '@/components/battle/modes';
 import {
     type EdgeEditing,
+    type MapDoorsTool,
     type ModeTools,
     useMoveRoutes,
 } from '@/lib/hooks/battle';
@@ -71,6 +74,8 @@ export interface MapStageEditing {
     showBlocked?: boolean;
     mode: ModeTools | null;
     edges?: EdgeEditing | null;
+    doors?: MapDoorsTool | null;
+    doorLocks?: boolean;
 }
 
 interface MapStageProps {
@@ -98,7 +103,21 @@ function MapStageImpl({
     const { painting, preview, svgRef, onStrokeStart, wasDragged } =
         interaction;
 
-    const { clickableBlocked, showBlocked, mode: modeTools, edges } = editing;
+    const {
+        clickableBlocked,
+        showBlocked,
+        mode: modeTools,
+        edges,
+        doors: doorsTool,
+        doorLocks,
+    } = editing;
+
+    const doorPress =
+        doorsTool && !painting && !edges && !modeTools?.toolActive
+            ? doorsTool.press
+            : undefined;
+
+    const menuDoor = doorsTool?.menu ? map.doors?.[doorsTool.menu] : undefined;
 
     const ui = modeUiOf(map);
 
@@ -228,6 +247,15 @@ function MapStageImpl({
                     scene={gridScene}
                 />
                 <WallsLayer map={map} ghost={edges?.ghost} />
+                {map.doors && Object.keys(map.doors).length > 0 && (
+                    <DoorsLayer
+                        doors={map.doors}
+                        pxPerUnit={pxPerUnit}
+                        rotated={rotated}
+                        showLock={doorsTool?.showLock ?? doorLocks ?? false}
+                        onPress={doorPress}
+                    />
+                )}
                 {ui?.MapLayers && (
                     <ui.MapLayers
                         map={map}
@@ -252,6 +280,15 @@ function MapStageImpl({
                     <RangedHint from={from.box} trajectory={trajectory} />
                 )}
             </svg>
+            {doorsTool?.menu && menuDoor && (
+                <DoorMenu
+                    edge={doorsTool.menu}
+                    door={menuDoor}
+                    pxPerUnit={pxPerUnit}
+                    rotated={rotated}
+                    tool={doorsTool}
+                />
+            )}
             {/* у режимі місцевості токени притушені, щоб під ними було видно штрих і заливку */}
             <div
                 data-map-tokens

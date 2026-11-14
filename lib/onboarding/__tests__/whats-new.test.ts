@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import type { WhatsNewEntry } from '@/lib/onboarding/types';
-import { mergeWhatsNew,WHATS_NEW } from '@/lib/onboarding/whats-new';
+import { mergeWhatsNew, WHATS_NEW } from '@/lib/onboarding/whats-new';
 import { SYSTEM_META } from '@/lib/utils/rules/systems/meta';
 
 const e = (id: string, date: string): WhatsNewEntry => ({

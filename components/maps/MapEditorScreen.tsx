@@ -9,6 +9,7 @@ import { BattleMap } from '@/components/battle/map';
 import { MapBackgroundSection } from '@/components/battle/setup/MapBackgroundSection';
 import { MapCellToolsSection } from '@/components/battle/setup/MapCellToolsSection';
 import {
+    DoorToolOptions,
     EDGE_TOOLS,
     ToolButtons,
 } from '@/components/battle/setup/MapToolButtons';
@@ -149,6 +150,7 @@ function EditorBody({
                             strokeTool: cellTool,
                             showBlocked: true,
                             edges: editor.edgeEditing,
+                            doorLocks: true,
                         }}
                     />
                 </div>
@@ -182,6 +184,7 @@ function EditorBody({
                                 tool={tool}
                                 onPick={editor.actions.setTool}
                             />
+                            <DoorToolOptions editor={editor} />
                         </div>
                     )}
                 </aside>

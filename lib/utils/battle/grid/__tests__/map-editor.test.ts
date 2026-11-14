@@ -8,6 +8,7 @@ import {
     isPreviewSafeBackground,
     marginsBlocked,
     paintCells,
+    paintDoors,
     paintEdges,
     resizeMap,
 } from '../map-editor';
@@ -261,5 +262,58 @@ describe('paintEdges', () => {
         const map = paintEdges(base, ['2:2:e', '15:2:e'], 'add-walls').map;
 
         expect(resizeMap(map, 10, 12).walls).toEqual(['2:2:e']);
+    });
+});
+
+describe('paintDoors', () => {
+    it('ставить зачинені/замкнені двері, прибирає, витісняє стіну', () => {
+        const walled = paintEdges(base, ['1:1:e'], 'add-walls').map;
+
+        const placed = paintDoors(
+            walled,
+            { add: ['1:1:e', '2:2:s'], remove: [] },
+            true
+        ).map;
+
+        expect(placed.doors).toEqual({
+            '1:1:e': { open: false, locked: true },
+            '2:2:s': { open: false, locked: true },
+        });
+        expect(placed.walls).toBeUndefined();
+
+        const removed = paintDoors(placed, { add: [], remove: ['1:1:e'] }).map;
+
+        expect(Object.keys(removed.doors ?? {})).toEqual(['2:2:s']);
+        expect(
+            paintDoors(removed, { add: [], remove: ['2:2:s'] }).map.doors
+        ).toBeUndefined();
+    });
+
+    it('стіна заміщає двері, erase прибирає їх, resize відсікає за межами', () => {
+        const door = paintDoors(base, {
+            add: ['1:1:e', '18:5:e'],
+            remove: [],
+        }).map;
+
+        expect(paintEdges(door, ['1:1:e'], 'add-walls').map.doors).toEqual({
+            '18:5:e': { open: false },
+        });
+        expect(
+            paintEdges(door, ['1:1:e'], 'erase').map.doors?.['1:1:e']
+        ).toBeUndefined();
+        expect(Object.keys(resizeMap(door, 10, 10).doors ?? {})).toEqual([
+            '1:1:e',
+        ]);
+    });
+
+    it('понад doorsMax — overflow', () => {
+        const big = { ...base, cols: 60, rows: 60 };
+
+        const all = Array.from(
+            { length: MAP_LIMITS.doorsMax + 1 },
+            (_, i) => `${i % 59}:${Math.floor(i / 59)}:e`
+        );
+
+        expect(paintDoors(big, { add: all, remove: [] }).overflow).toBe(true);
     });
 });

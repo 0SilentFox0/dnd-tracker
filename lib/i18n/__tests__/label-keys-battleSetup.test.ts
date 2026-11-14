@@ -11,6 +11,7 @@ const TOOLS: Record<SetupTool, true> = {
     erase: true,
     'edge-wall': true,
     'edge-bars': true,
+    'edge-door': true,
     'edge-erase': true,
 };
 

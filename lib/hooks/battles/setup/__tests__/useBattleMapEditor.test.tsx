@@ -393,4 +393,21 @@ describe('useBattleMapEditor', () => {
 
         expect(result.current.state.notice).toBeNull();
     });
+
+    it('edge-door: ставить замкнені двері за перемикачем і прибирає повторним кліком', () => {
+        const { result } = renderHook(() => useBattleMapEditor(null));
+
+        act(() => result.current.actions.setEnabled(true));
+        act(() => result.current.actions.setTool('edge-door'));
+        act(() => result.current.actions.setDoorLocked(true));
+        act(() => result.current.edgeEditing?.onCommit(['2:2:e'], []));
+        expect(result.current.state.map.doors).toEqual({
+            '2:2:e': { open: false, locked: true },
+        });
+        expect([...(result.current.edgeEditing?.existing ?? [])]).toEqual([
+            '2:2:e',
+        ]);
+        act(() => result.current.edgeEditing?.onCommit([], ['2:2:e']));
+        expect(result.current.state.map.doors).toBeUndefined();
+    });
 });

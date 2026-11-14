@@ -32,6 +32,7 @@ const list: OnboardingHintDef[] = [
     },
     { id: 'player.draft', audience: 'player', helpSlug: 'player-quickstart' },
     { id: 'player.battle', audience: 'player', helpSlug: 'player-battle' },
+    { id: 'battle.map-doors', audience: 'all', helpSlug: 'dm-battle' },
 ];
 
 export const HINTS: Record<string, OnboardingHintDef> = Object.fromEntries(

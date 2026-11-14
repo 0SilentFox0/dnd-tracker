@@ -43,7 +43,7 @@ export interface OnboardingStep<F> {
 
 export interface OnboardingHintDef {
     id: string;
-    audience: OnboardingRole;
+    audience: OnboardingAudience;
     helpSlug?: string;
 }
 

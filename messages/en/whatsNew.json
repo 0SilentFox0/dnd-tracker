@@ -1,4 +1,8 @@
 {
+  "2026-11-map-doors": {
+    "title": "Doors on the map",
+    "body": "Battle maps now have doors. Closed doors block movement, shots, sight, templates and melee; a player opens them with a hero standing next to the door on their turn, the DM can lock, close or break them. Place doors with the Door brush in battle setup and the library editor (desktop)."
+  },
   "2026-11-map-library": {
     "title": "Battle map library",
     "body": "Each campaign can keep a library of battle maps: turn on \"Map library\" in the campaign settings. There is a fullscreen wall and bars editor on desktop, you pick a library map when creating a battle, and battles get an \"Update map\" button."

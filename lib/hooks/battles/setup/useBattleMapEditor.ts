@@ -29,6 +29,7 @@ import {
     MAX_SIDE,
     MIN_SIDE,
     paintCells,
+    paintDoors,
     paintEdges,
     resizeMap,
     type SetupTool,
@@ -72,6 +73,8 @@ export const NO_PLAYABLE_NOTICE = textRef('battleSetup.map.noPlayable');
 
 export const EDGE_LIMIT_NOTICE = textRef('battleSetup.map.edgeLimit');
 
+export const DOOR_LIMIT_NOTICE = textRef('battleSetup.map.doorLimit');
+
 export const EDGES_STRIPPED_NOTICE = textRef('battleSetup.map.edgesStripped');
 
 export function useBattleMapEditor(
@@ -96,6 +99,8 @@ export function useBattleMapEditor(
             setBrushState((b) => ({ ...b, ...patch })),
         []
     );
+
+    const [doorLocked, setDoorLocked] = useState(false);
 
     const [notice, setNotice] = useState<LogLine | null>(null);
 
@@ -259,7 +264,7 @@ export function useBattleMapEditor(
 
             // один режим на бій; у режимі core-стіни/ґрати недоступні для редагування, тож зникають разом із ввімкненням
             setMap((m) => {
-                const { walls, bars, ...base } = m;
+                const { walls, bars, doors, ...base } = m;
 
                 return mode.withConfig(
                     MODE_KEYS.reduce(
@@ -276,13 +281,13 @@ export function useBattleMapEditor(
             if (on) {
                 setToolState(null);
                 setNotice(
-                    map.walls?.length || map.bars?.length
+                    map.walls?.length || map.bars?.length || map.doors
                         ? EDGES_STRIPPED_NOTICE
                         : null
                 );
             }
         },
-        [map.walls, map.bars]
+        [map.walls, map.bars, map.doors]
     );
 
     const setMotion = useCallback(
@@ -339,6 +344,19 @@ export function useBattleMapEditor(
 
         const bars = wallSet(map.bars);
 
+        if (edgeTool === 'edge-door') {
+            return {
+                existing: new Set(Object.keys(map.doors ?? {})),
+                onCommit: (add: string[], remove: string[]) => {
+                    const result = paintDoors(map, { add, remove }, doorLocked);
+
+                    if (result.overflow) setNotice(DOOR_LIMIT_NOTICE);
+
+                    setMap(result.map);
+                },
+            };
+        }
+
         const ops: [EdgeOp, EdgeOp] | null =
             edgeTool === 'edge-erase'
                 ? null
@@ -369,7 +387,11 @@ export function useBattleMapEditor(
 
         if (edgeTool === 'edge-erase')
             return {
-                existing: new Set([...walls, ...bars]),
+                existing: new Set([
+                    ...walls,
+                    ...bars,
+                    ...Object.keys(map.doors ?? {}),
+                ]),
                 erase: true,
                 onCommit,
             };
@@ -378,7 +400,7 @@ export function useBattleMapEditor(
             existing: edgeTool === 'edge-wall' ? walls : bars,
             onCommit,
         };
-    }, [edgeTool, map]);
+    }, [edgeTool, map, doorLocked]);
 
     return {
         edgeEditing,
@@ -388,6 +410,7 @@ export function useBattleMapEditor(
             mode: activeMode,
             margins,
             tool,
+            doorLocked,
             notice,
             value: enabled ? map : null,
             cellPx: image ? impliedCellPx(map, image) : null,
@@ -408,6 +431,7 @@ export function useBattleMapEditor(
             setOpacity,
             setMargins,
             setTool,
+            setDoorLocked,
             setBackground,
             replaceBackground,
             setBrush,

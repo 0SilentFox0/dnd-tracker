@@ -65,6 +65,7 @@ export {
     type TerrainBrush,
     useMapTerrainTool,
 } from './useMapTerrainTool';
+export { type MapDoorsTool, useMapDoors } from './useMapDoors';
 export { type MapUpdateTool, useMapUpdateTool } from './useMapUpdateTool';
 export { type MapWeatherTool, useMapWeatherTool } from './useMapWeatherTool';
 export {

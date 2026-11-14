@@ -13,6 +13,7 @@ import {
     type MapBackgroundTool,
     useMapBackgroundTool,
 } from './useMapBackgroundTool';
+import { type MapDoorsTool, useMapDoors } from './useMapDoors';
 import { useMapCellActions } from './useMapCellActions';
 import { type MapMotionTool, useMapMotionTool } from './useMapMotionTool';
 import { useMapPlacing } from './useMapPlacing';
@@ -54,6 +55,7 @@ export interface BattleMapScene {
     motionTool: MapMotionTool | null;
     backgroundTool: MapBackgroundTool | null;
     mapUpdate: MapUpdateTool | null;
+    doors: MapDoorsTool;
     edgesLinked: boolean;
 }
 
@@ -106,6 +108,8 @@ export function useBattleMapScene(fx?: SystemFx): BattleMapScene | null {
 
     const barsList = map?.bars;
 
+    const doorsList = map?.doors;
+
     const edgeSource = useMemo(
         () => ({ walls: wallsList, bars: barsList, mutate: mapWalls }),
         [wallsList, barsList, mapWalls]
@@ -117,11 +121,15 @@ export function useBattleMapScene(fx?: SystemFx): BattleMapScene | null {
 
     const stateEdgeSource = useMemo(
         () => ({
-            present: new Set([...(wallsList ?? []), ...(barsList ?? [])]),
+            present: new Set([
+                ...(wallsList ?? []),
+                ...(barsList ?? []),
+                ...Object.keys(doorsList ?? {}),
+            ]),
             removed: new Set(removedList),
             mutate: mapEdgeRemove,
         }),
-        [wallsList, barsList, removedList, mapEdgeRemove]
+        [wallsList, barsList, doorsList, removedList, mapEdgeRemove]
     );
 
     const terrainTool = useMapTerrainTool({
@@ -331,6 +339,14 @@ export function useBattleMapScene(fx?: SystemFx): BattleMapScene | null {
         mutation: actions.mapBackground,
     });
 
+    const doors = useMapDoors({
+        isDM,
+        current: current ?? undefined,
+        isMyTurn,
+        mutation: actions.mapDoorToggle,
+        notify: show,
+    });
+
     const mapUpdate = useMapUpdateTool({
         isDM,
         campaignId,
@@ -369,6 +385,7 @@ export function useBattleMapScene(fx?: SystemFx): BattleMapScene | null {
         motionTool,
         backgroundTool,
         mapUpdate,
+        doors,
         edgesLinked: !!battle.mapRef,
     };
 }

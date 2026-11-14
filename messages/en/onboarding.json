@@ -159,6 +159,12 @@
         "title": "Battle from your phone",
         "body": "When your turn comes, choose an action: move, attack, spell. The server calculates rolls and damage; you end your turn with the end turn button."
       }
+    },
+    "battle": {
+      "map-doors": {
+        "title": "Doors on the map",
+        "body": "Doors sit on a cell edge: a closed door blocks movement, shots and sight like a wall. Walk your hero right next to it on your turn and tap the door to open it. The DM can lock doors; they can also be broken down."
+      }
     }
   },
   "demoTours": {

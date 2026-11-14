@@ -36,7 +36,7 @@ export const DM_ARTICLES: HelpArticleDef[] = [
         audience: 'dm',
         sections: [
             { blocks: [{ kind: 'p' }] },
-            { blocks: [{ kind: 'p' }] },
+            { blocks: [{ kind: 'p' }, { kind: 'p' }] },
             {
                 blocks: [
                     { kind: 'list', count: 3 },

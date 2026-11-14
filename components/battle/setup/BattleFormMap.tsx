@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl';
 
 import { MapBackgroundSection } from './MapBackgroundSection';
 import { MapCellToolsSection } from './MapCellToolsSection';
-import { EDGE_TOOLS, ToolButtons } from './MapToolButtons';
+import { DoorToolOptions, EDGE_TOOLS, ToolButtons } from './MapToolButtons';
 import { ToggleRow } from './ToggleRow';
 
 import { BattleMap } from '@/components/battle/map';
@@ -172,6 +172,7 @@ export function BattleFormMap({ editor }: { editor: BattleMapEditor }) {
                                         tool={tool}
                                         onPick={actions.setTool}
                                     />
+                                    <DoorToolOptions editor={editor} />
                                 </div>
                             ))}
                         {editor.motionTool && (
@@ -200,6 +201,7 @@ export function BattleFormMap({ editor }: { editor: BattleMapEditor }) {
                                     strokeTool: cellTool,
                                     showBlocked: true,
                                     edges: editor.edgeEditing,
+                                    doorLocks: true,
                                 }}
                             />
                         </div>

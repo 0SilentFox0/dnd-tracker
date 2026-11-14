@@ -111,7 +111,8 @@
       "erase": "Erase",
       "edge-wall": "Wall",
       "edge-bars": "Bars",
-      "edge-erase": "Erase edge"
+      "edge-erase": "Erase edge",
+      "edge-door": "Door"
     },
     "hazardLabel": "Hazard label",
     "hazardDice": "Damage (dice)",
@@ -145,7 +146,9 @@
     "edgeDrawing": "Draw walls and bars",
     "edgesDisabledMode": "Walls and bars are disabled in maze mode",
     "edgesLinked": "Walls of a library map are edited on the Maps page — then press «Update map»",
-    "edgesDesktopOnly": "Drawing walls and bars is desktop-only — open this on a computer"
+    "edgesDesktopOnly": "Drawing walls and bars is desktop-only — open this on a computer",
+    "doorLocked": "Locked",
+    "doorLimit": "Door limit reached, the extra doors were not added"
   },
   "characters": {
     "title": "Characters",
@@ -249,7 +252,9 @@
     "badEdges": "Invalid walls or bars: out of bounds, duplicated or overlapping",
     "mapAndMapId": "Pass either an inline map or a library map, not both",
     "photoMapTooLarge": "Photo maps are limited to 60×60 cells",
-    "libraryTerrainRuntime": "A library map can only have static terrain (no spell zones)"
+    "libraryTerrainRuntime": "A library map can only have static terrain (no spell zones)",
+    "doorOnWall": "Doors cannot sit on a wall or bars, or outside the map",
+    "tooManyDoors": "Too many doors on the map"
   },
   "library": {
     "title": "Map from library",

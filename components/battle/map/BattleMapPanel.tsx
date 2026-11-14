@@ -12,6 +12,7 @@ import { useMapToolsSlot } from './MapToolsSlot';
 import { MapWeatherPicker } from './MapWeatherPicker';
 
 import { modeUiOf } from '@/components/battle/modes';
+import { OnboardingHint } from '@/components/onboarding/OnboardingHint';
 import { useSystemFx } from '@/components/battle/use-system-battle-ui';
 import { type MapUpdateTool, useBattleMapScene } from '@/lib/hooks/battle';
 import { cn } from '@/lib/utils';
@@ -90,6 +91,8 @@ export function BattleMapPanel({ phone = false }: { phone?: boolean }) {
     const modeTools = phone ? null : scene.modeTools;
 
     const ui = modeUiOf(scene.map);
+
+    const hasDoors = Object.keys(scene.map.doors ?? {}).length > 0;
 
     const inRow = !phone && !!slot;
 
@@ -197,6 +200,15 @@ export function BattleMapPanel({ phone = false }: { phone?: boolean }) {
             className={cn('relative h-full', phone && 'flex flex-col')}
         >
             {phone && tools}
+            {hasDoors && (
+                <OnboardingHint
+                    id="battle.map-doors"
+                    className={cn(
+                        'z-20 max-w-sm',
+                        phone ? 'mx-1 mb-1' : 'absolute bottom-2 left-2'
+                    )}
+                />
+            )}
             <BattleMap
                 map={scene.map}
                 participants={scene.participants}
@@ -205,6 +217,7 @@ export function BattleMapPanel({ phone = false }: { phone?: boolean }) {
                 editing={{
                     strokeTool: terrainTool?.active && !terrainTool.edges,
                     edges: terrainTool?.edges,
+                    doors: scene.doors,
                     mode: modeTools,
                 }}
                 phone={phone}

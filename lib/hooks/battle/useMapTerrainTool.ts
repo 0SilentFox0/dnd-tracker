@@ -22,7 +22,7 @@ import type {
 } from '@/types/api';
 import type { GridPoint, TerrainKind } from '@/types/battle';
 
-export type EdgeBrush = EdgeTool;
+export type EdgeBrush = Exclude<EdgeTool, 'edge-door'>;
 
 export type StateBrush = 'edge-break' | 'edge-restore';
 

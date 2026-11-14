@@ -10,7 +10,12 @@ import { parseEdgeKey } from './walls';
 
 import { MAP_LIMITS } from '@/lib/constants/map-limits';
 import { clamp } from '@/lib/utils/common/clamp';
-import type { BattleMapConfig, GridPoint, TerrainCell } from '@/types/battle';
+import type {
+    BattleMapConfig,
+    DoorState,
+    GridPoint,
+    TerrainCell,
+} from '@/types/battle';
 
 const NO_MARGINS: Margins = { top: 0, right: 0, bottom: 0, left: 0 };
 
@@ -82,7 +87,7 @@ export function inferMargins(map: BattleMapConfig): Margins {
 
 export type CellTool = 'blocked' | 'wall' | 'hazard' | 'erase';
 
-export type EdgeTool = 'edge-wall' | 'edge-bars' | 'edge-erase';
+export type EdgeTool = 'edge-wall' | 'edge-bars' | 'edge-door' | 'edge-erase';
 
 export type SetupTool = CellTool | EdgeTool;
 
@@ -138,7 +143,7 @@ export function resizeMap(
         return inBounds(next, a) && inBounds(next, b);
     };
 
-    return withEdges(
+    const resized = withEdges(
         keepTerrain(
             withBlocked(next, (map.blocked ?? []).filter(inside)),
             inside
@@ -148,6 +153,22 @@ export function resizeMap(
             bars: (map.bars ?? []).filter(edgeInside),
         }
     );
+
+    return withDoors(
+        resized,
+        Object.fromEntries(
+            Object.entries(map.doors ?? {}).filter(([edge]) => edgeInside(edge))
+        )
+    );
+}
+
+function withDoors(
+    map: BattleMapConfig,
+    doors: Record<string, DoorState>
+): BattleMapConfig {
+    const { doors: _doors, ...rest } = map;
+
+    return Object.keys(doors).length ? { ...rest, doors } : rest;
 }
 
 export type EdgeOp =
@@ -214,7 +235,51 @@ export function paintEdges(
     )
         return { map, overflow: true };
 
-    return { map: withEdges(map, { walls, bars }), overflow: false };
+    const doors = { ...map.doors };
+
+    for (const edge of valid) {
+        if (op === 'erase' || walls.has(edge) || bars.has(edge))
+            delete doors[edge];
+    }
+
+    return {
+        map: withDoors(withEdges(map, { walls, bars }), doors),
+        overflow: false,
+    };
+}
+
+/** Ставить зачинені (за потреби замкнені) двері або прибирає їх; двері витісняють стіну й ґрати на ребрі, понад ліміт — відкидається (`overflow`). */
+export function paintDoors(
+    map: BattleMapConfig,
+    edges: { add: string[]; remove: string[] },
+    locked = false
+): EdgePaint {
+    const inside = (edge: string) => {
+        const { a, b } = parseEdgeKey(edge);
+
+        return inBounds(map, a) && inBounds(map, b);
+    };
+
+    const doors = { ...map.doors };
+
+    for (const edge of edges.remove) delete doors[edge];
+
+    for (const edge of edges.add.filter(inside))
+        doors[edge] = { open: false, ...(locked && { locked }) };
+
+    if (Object.keys(doors).length > MAP_LIMITS.doorsMax)
+        return { map, overflow: true };
+
+    const gone = new Set(edges.add.filter(inside));
+
+    const walls = (map.walls ?? []).filter((e) => !gone.has(e));
+
+    const bars = (map.bars ?? []).filter((e) => !gone.has(e));
+
+    return {
+        map: withDoors(withEdges(map, { walls, bars }), doors),
+        overflow: false,
+    };
 }
 
 export function applyMargins(

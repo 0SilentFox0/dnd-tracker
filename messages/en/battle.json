@@ -153,6 +153,17 @@
       "confirmDescription": "The battle switches to the latest version of the library map. Tokens standing on cells that become impassable block the update; move them first.",
       "confirm": "Update",
       "done": "Map updated"
+    },
+    "doors": {
+      "open": "Open",
+      "close": "Close",
+      "lock": "Lock",
+      "unlock": "Unlock",
+      "stateOpen": "Door is open",
+      "stateClosed": "Door is closed",
+      "stateLocked": "Door is locked",
+      "notYourTurn": "A hero opens a door on their own turn",
+      "menu": "Door"
     }
   },
   "result": {

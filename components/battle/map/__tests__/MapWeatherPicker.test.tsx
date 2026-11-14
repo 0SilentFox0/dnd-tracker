@@ -13,7 +13,6 @@ vi.mock('@/components/battle/use-system-battle-ui', () => ({
     useSystemFx: () => undefined,
 }));
 
-
 vi.unmock('next-intl');
 
 vi.mock('@/lib/utils/canvas/ticker', () => ({
