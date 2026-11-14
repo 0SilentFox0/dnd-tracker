@@ -385,6 +385,30 @@ export interface BattleMapConfig {
     motion?: MapMotion | null;
 }
 
+export interface DoorState {
+    open: boolean;
+    locked?: boolean;
+}
+
+/** Мінливий шар карти бою поверх незмінної карти: видалені ребра, двері, туман */
+export interface BattleMapState {
+    removedEdges: string[];
+    doors: Record<string, DoorState>;
+    fog?: Record<string, unknown>;
+}
+
+/** Патч стану за ключем; null у doors = прибрати двері */
+export interface MapStateDelta {
+    removed?: { add: string[]; remove: string[] };
+    doors?: Record<string, DoorState | null>;
+}
+
+/** Бій посилається на pinned-версію бібліотечної карти */
+export interface BattleMapRef {
+    mapId: string;
+    version: number;
+}
+
 /** difficult — лише пензель ДМ (прохідна складна місцевість); зони заклинань ставлять прапорці на hazard */
 export type TerrainKind = 'wall' | 'barrier' | 'hazard' | 'difficult';
 
