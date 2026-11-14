@@ -6,6 +6,8 @@ import type { Ability } from '@/lib/utils/abilities/schema';
 import { nameKey } from '@/lib/utils/content/import/mapping';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
+import { splitColumnView } from '@/lib/utils/rules/systems/column-view';
+import type { RuleSystemDefinition } from '@/lib/utils/rules/systems/types';
 import { resolveUnitProficiency } from '@/lib/utils/units/monster';
 import { specialAbilitiesToAbilities } from '@/lib/utils/units/special-abilities';
 import type { UnitImportResult } from '@/types/import';
@@ -61,8 +63,11 @@ export function toUnitCreateData(
     campaignId: string,
     unit: ImportUnitRow,
     raceId: string | null,
-    keepCharacteristics = false
+    keepCharacteristics = false,
+    system?: RuleSystemDefinition
 ): Prisma.UnitCreateManyInput {
+    const view = system && splitColumnView(unit, system).characteristics;
+
     return {
         campaignId,
         name: unit.name,
@@ -90,10 +95,13 @@ export function toUnitCreateData(
         legendaryActions: unit.legendaryActions,
         legendaryResistances: unit.legendaryResistances,
         saveProficiencies: unit.saveProficiencies as Prisma.InputJsonValue,
-        ...(keepCharacteristics &&
-            unit.characteristics && {
-                characteristics: unit.characteristics as Prisma.InputJsonObject,
-            }),
+        ...(view
+            ? { characteristics: view as Prisma.InputJsonObject }
+            : keepCharacteristics &&
+              unit.characteristics && {
+                  characteristics:
+                      unit.characteristics as Prisma.InputJsonObject,
+              }),
     };
 }
 
@@ -121,6 +129,8 @@ export async function importUnitsIntoCampaign(
 
     const taken = new Set(existing.map((u) => u.name));
 
+    const system = rules && ruleSystemOf(rules);
+
     const data = rows
         .filter((r) => !taken.has(r.name))
         .map((r) =>
@@ -128,7 +138,8 @@ export async function importUnitsIntoCampaign(
                 campaignId,
                 r,
                 raceIdOf(r.raceName),
-                !!rules && ruleSystemOf(rules).characteristics.persisted
+                !!system?.characteristics.persisted,
+                system
             )
         );
 

@@ -42,7 +42,7 @@ describe('unitsResource', () => {
         db.unit.deleteMany.mockResolvedValue({ count: 2 });
     });
 
-    it('drops characteristics for d20 campaigns, keeps them for wfrp', async () => {
+    it('drops wfrp characteristics for d20 campaigns, keeps them for wfrp', async () => {
         db.unit.create.mockResolvedValue({ id: 'u1' });
         db.unit.update.mockResolvedValue({ id: 'u1' });
 
@@ -57,12 +57,12 @@ describe('unitsResource', () => {
             { id: 'u1', knownSpells: [] } as never,
             input
         );
-        expect(db.unit.create.mock.calls[0][0].data).not.toHaveProperty(
-            'characteristics'
-        );
+        expect(
+            db.unit.create.mock.calls[0][0].data.characteristics
+        ).not.toHaveProperty('base');
         expect(
             db.unit.update.mock.calls[0][0].data.characteristics
-        ).toBeUndefined();
+        ).not.toHaveProperty('base');
 
         db.campaign.findUnique.mockResolvedValue({ rules: WFRP_RULES });
         await unitsResource.create(actor, input);

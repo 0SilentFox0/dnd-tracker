@@ -25,6 +25,7 @@ import {
     withAbilityIssues,
 } from '@/lib/utils/abilities/read';
 import { parseRules, type Ruleset } from '@/lib/utils/rules/schema';
+import { splitColumnView } from '@/lib/utils/rules/systems/column-view';
 import { ruleSystemOf } from '@/lib/utils/rules/systems/lookup';
 import type { SystemData } from '@/lib/utils/rules/systems/slot';
 import type { RuleSystemDefinition } from '@/lib/utils/rules/systems/types';
@@ -89,13 +90,17 @@ export const unitsResource = defineResource<
         assertEffectsInComposition(loaded.rules.system, data.abilities);
 
         const unit = await prisma.unit.create({
-            data: unitCreateData(actor.campaignId, {
-                ...data,
-                characteristics: unitCharacteristics(
-                    loaded,
-                    data.characteristics
-                ),
-            }),
+            data: unitCreateData(
+                actor.campaignId,
+                {
+                    ...data,
+                    characteristics: unitCharacteristics(
+                        loaded,
+                        data.characteristics
+                    ),
+                },
+                loaded.system
+            ),
         });
 
         return unit;
@@ -117,6 +122,12 @@ export const unitsResource = defineResource<
             data.abilities,
             storedEffectOwners(existing.abilities)
         );
+
+        const view = splitColumnView(
+            data,
+            loaded.system,
+            existing.characteristics
+        ).characteristics;
 
         const unit = await prisma.unit.update({
             where: { id: existing.id },
@@ -156,7 +167,7 @@ export const unitsResource = defineResource<
                 statblock: toJsonInput(data.statblock),
                 spellcasting: toJsonInput(data.spellcasting),
                 characteristics: toJsonInput(
-                    unitCharacteristics(loaded, data.characteristics)
+                    view ?? unitCharacteristics(loaded, data.characteristics)
                 ),
             },
         });
