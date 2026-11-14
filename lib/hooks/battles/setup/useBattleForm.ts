@@ -35,11 +35,11 @@ export function useBattleForm({
     formData,
     participants,
     map,
-    library: libraryMap,
+    library,
 }: UseBattleFormParams) {
-    const libraryMapId = libraryMap?.mapId;
+    const libraryMapId = library?.mapId;
 
-    const isLinked = libraryMap?.isLinked;
+    const isLinked = library?.isLinked;
 
     const t = useTranslations('battleSetup.form');
 

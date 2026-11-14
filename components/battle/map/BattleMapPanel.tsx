@@ -13,8 +13,7 @@ import { MapWeatherPicker } from './MapWeatherPicker';
 
 import { modeUiOf } from '@/components/battle/modes';
 import { useSystemFx } from '@/components/battle/use-system-battle-ui';
-import { useBattleMapScene } from '@/lib/hooks/battle';
-import type { MapUpdateTool } from '@/lib/hooks/battle/useMapUpdateTool';
+import { type MapUpdateTool, useBattleMapScene } from '@/lib/hooks/battle';
 import { cn } from '@/lib/utils';
 import { activeModeWithConfig } from '@/lib/utils/battle/modes';
 

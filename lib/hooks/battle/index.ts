@@ -63,6 +63,7 @@ export {
     type TerrainBrush,
     useMapTerrainTool,
 } from './useMapTerrainTool';
+export { type MapUpdateTool, useMapUpdateTool } from './useMapUpdateTool';
 export { type MapWeatherTool, useMapWeatherTool } from './useMapWeatherTool';
 export {
     MAP_TAB,
