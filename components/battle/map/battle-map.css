@@ -252,5 +252,6 @@
 /* Стіни й ґрати редактора ребер */
 .map-edge-pending { fill: rgba(242, 193, 78, 0.55); }
 .map-edge-pending-remove { fill: rgba(225, 70, 55, 0.55); }
-.map-wall { fill: var(--map-wall, #151210); stroke: var(--map-wall-edge, #000); stroke-width: 1.5px; vector-effect: non-scaling-stroke; }
+.map-wall { stroke: var(--map-wall-edge, #1a1511); stroke-width: 1.5px; vector-effect: non-scaling-stroke; }
+.map-wall-light { fill: rgba(255, 255, 255, 0.22); }
 .map-bars { fill: none; stroke: var(--map-bars, #9aa3ad); stroke-width: 3px; stroke-dasharray: 10 8; stroke-linecap: round; vector-effect: non-scaling-stroke; }

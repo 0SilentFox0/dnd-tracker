@@ -1,6 +1,6 @@
 'use client';
 
-import type { PointerEvent } from 'react';
+import { type PointerEvent, useState } from 'react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp } from 'lucide-react';
@@ -9,6 +9,7 @@ import { OnboardingHint } from '@/components/onboarding/OnboardingHint';
 import { BoundedNumberInput } from '@/components/ui/bounded-number-input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { type BattleMapEditor, useGridCalibration } from '@/lib/hooks/battles';
 import {
     backgroundColsOf,
@@ -36,6 +37,8 @@ export function GridCalibration({ editor }: { editor: BattleMapEditor }) {
     const { map, imageSrc } = editor.state;
 
     const { state, actions } = useGridCalibration(editor);
+
+    const [zoom, setZoom] = useState(1);
 
     const { image, mode, draft, preview } = state;
 
@@ -65,144 +68,181 @@ export function GridCalibration({ editor }: { editor: BattleMapEditor }) {
         if (e.buttons) actions.drag(toImagePoint(e));
     };
 
+    const dialogOpen = mode === 'rect' && !!image && !!grid;
+
     return (
         <div className="space-y-2">
             <OnboardingHint id="dm.grid-calibration" />
             <div className="flex flex-wrap items-center justify-between gap-2">
                 <Label>{t('title')}</Label>
-                {mode === 'off' ? (
-                    <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        disabled={!image}
-                        onClick={actions.start}
-                    >
-                        {t('start')}
-                    </Button>
-                ) : (
-                    <div className="flex flex-wrap items-center gap-2">
-                        <Label htmlFor="map-calibration-n" className="text-xs">
-                            {t('squareN')}
-                        </Label>
-                        <BoundedNumberInput
-                            id="map-calibration-n"
-                            className="w-16"
-                            value={state.n}
-                            min={1}
-                            max={MAX_N}
-                            onCommit={actions.setN}
-                        />
-                        <Button
-                            type="button"
-                            size="sm"
-                            disabled={!preview}
-                            onClick={actions.commit}
-                        >
-                            {t('apply')}
-                        </Button>
-                        <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={actions.cancel}
-                        >
-                            {t('cancel')}
-                        </Button>
-                    </div>
-                )}
+                <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={!image || mode !== 'off'}
+                    onClick={actions.start}
+                >
+                    {t('start')}
+                </Button>
             </div>
-            {mode === 'rect' && image && grid && (
-                <>
-                    <p className="text-xs text-hud-muted">
-                        {t('instructions')}
-                    </p>
-                    <div
-                        data-testid="calibration-surface"
-                        className="relative w-full touch-none overflow-hidden rounded-md border border-hud-rule select-none"
-                        style={{
-                            aspectRatio: `${image.width} / ${image.height}`,
-                        }}
-                        onPointerDown={onDown}
-                        onPointerMove={onMove}
-                    >
-                        <Image
-                            src={imageSrc}
-                            alt=""
-                            fill
-                            sizes="(min-width: 1024px) 20rem, 100vw"
-                            className="pointer-events-none object-fill"
-                        />
-                        <svg
-                            viewBox={`0 0 ${image.width} ${image.height}`}
-                            preserveAspectRatio="none"
-                            className="pointer-events-none absolute inset-0 h-full w-full"
-                            style={{ opacity: state.previewOpacity }}
-                            aria-hidden
-                        >
-                            <defs>
-                                <pattern
-                                    id="calibration-grid"
-                                    patternUnits="userSpaceOnUse"
-                                    width={image.width / grid.backgroundCols}
-                                    height={image.height / grid.backgroundRows}
-                                    x={
-                                        (grid.gridOffset.x * image.width) /
-                                        grid.backgroundCols
-                                    }
-                                    y={
-                                        (grid.gridOffset.y * image.height) /
-                                        grid.backgroundRows
-                                    }
-                                >
-                                    <path
-                                        d={`M ${image.width / grid.backgroundCols} 0 V ${image.height / grid.backgroundRows} H 0`}
-                                        fill="none"
-                                        stroke="var(--hud-gold, #f2c14e)"
-                                        strokeWidth={1}
-                                        vectorEffect="non-scaling-stroke"
-                                    />
-                                </pattern>
-                            </defs>
-                            <rect
-                                width={image.width}
-                                height={image.height}
-                                fill="url(#calibration-grid)"
+            {dialogOpen && (
+                <ResponsiveDialog
+                    open
+                    onOpenChange={(open) => !open && actions.cancel()}
+                    title={t('title')}
+                    description={t('instructions')}
+                    className="max-w-5xl"
+                    footer={
+                        <>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={actions.cancel}
+                            >
+                                {t('cancel')}
+                            </Button>
+                            <Button
+                                type="button"
+                                disabled={!preview}
+                                onClick={actions.commit}
+                            >
+                                {t('apply')}
+                            </Button>
+                        </>
+                    }
+                >
+                    <div className="space-y-3 overflow-y-auto px-4 pb-2 sm:px-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                            <Label
+                                htmlFor="map-calibration-n"
+                                className="text-xs"
+                            >
+                                {t('squareN')}
+                            </Label>
+                            <BoundedNumberInput
+                                id="map-calibration-n"
+                                className="w-16"
+                                value={state.n}
+                                min={1}
+                                max={MAX_N}
+                                onCommit={actions.setN}
                             />
-                        </svg>
-                        {draft && (
+                        </div>
+                        <div className="max-h-[68dvh] overflow-auto rounded-md p-2">
                             <div
-                                data-testid="calibration-draft"
-                                className="pointer-events-none absolute border-2 border-hud-gold-bright bg-hud-gold-bright/20"
+                                data-testid="calibration-surface"
+                                className="relative mx-auto shrink-0 touch-none overflow-hidden rounded-md border border-hud-rule select-none"
                                 style={{
-                                    left: `${(draft.x / image.width) * 100}%`,
-                                    top: `${(draft.y / image.height) * 100}%`,
-                                    width: `${(draft.w / image.width) * 100}%`,
-                                    height: `${(draft.h / image.height) * 100}%`,
+                                    aspectRatio: `${image.width} / ${image.height}`,
+                                    width: `calc(min(100%, 62dvh * ${image.width / image.height}) * ${zoom})`,
                                 }}
+                                onPointerDown={onDown}
+                                onPointerMove={onMove}
+                            >
+                                <Image
+                                    src={imageSrc}
+                                    alt=""
+                                    fill
+                                    sizes="(min-width: 1024px) 64rem, 100vw"
+                                    className="pointer-events-none object-fill"
+                                />
+                                <svg
+                                    viewBox={`0 0 ${image.width} ${image.height}`}
+                                    preserveAspectRatio="none"
+                                    className="pointer-events-none absolute inset-0 h-full w-full"
+                                    style={{ opacity: state.previewOpacity }}
+                                    aria-hidden
+                                >
+                                    <defs>
+                                        <pattern
+                                            id="calibration-grid"
+                                            patternUnits="userSpaceOnUse"
+                                            width={
+                                                image.width /
+                                                grid.backgroundCols
+                                            }
+                                            height={
+                                                image.height /
+                                                grid.backgroundRows
+                                            }
+                                            x={
+                                                (grid.gridOffset.x *
+                                                    image.width) /
+                                                grid.backgroundCols
+                                            }
+                                            y={
+                                                (grid.gridOffset.y *
+                                                    image.height) /
+                                                grid.backgroundRows
+                                            }
+                                        >
+                                            <path
+                                                d={`M ${image.width / grid.backgroundCols} 0 V ${image.height / grid.backgroundRows} H 0`}
+                                                fill="none"
+                                                stroke="var(--hud-gold, #f2c14e)"
+                                                strokeWidth={1}
+                                                vectorEffect="non-scaling-stroke"
+                                            />
+                                        </pattern>
+                                    </defs>
+                                    <rect
+                                        width={image.width}
+                                        height={image.height}
+                                        fill="url(#calibration-grid)"
+                                    />
+                                </svg>
+                                {draft && (
+                                    <div
+                                        data-testid="calibration-draft"
+                                        className="pointer-events-none absolute border-2 border-hud-gold-bright bg-hud-gold-bright/20"
+                                        style={{
+                                            left: `${(draft.x / image.width) * 100}%`,
+                                            top: `${(draft.y / image.height) * 100}%`,
+                                            width: `${(draft.w / image.width) * 100}%`,
+                                            height: `${(draft.h / image.height) * 100}%`,
+                                        }}
+                                    />
+                                )}
+                            </div>
+                        </div>
+                        <div>
+                            <Label htmlFor="map-calibration-zoom">
+                                {t('zoom', { value: zoom })}
+                            </Label>
+                            <input
+                                id="map-calibration-zoom"
+                                type="range"
+                                min={1}
+                                max={4}
+                                step={0.25}
+                                value={zoom}
+                                onChange={(e) =>
+                                    setZoom(Number(e.target.value))
+                                }
+                                className="w-full accent-[var(--hud-gold,#f2c14e)]"
                             />
-                        )}
+                        </div>
+                        <div>
+                            <Label htmlFor="map-calibration-opacity">
+                                {t('previewOpacity')}
+                            </Label>
+                            <input
+                                id="map-calibration-opacity"
+                                type="range"
+                                min={0.1}
+                                max={1}
+                                step={0.05}
+                                value={state.previewOpacity}
+                                onChange={(e) =>
+                                    actions.setPreviewOpacity(
+                                        Number(e.target.value)
+                                    )
+                                }
+                                className="w-full accent-[var(--hud-gold,#f2c14e)]"
+                            />
+                        </div>
                     </div>
-                    <div>
-                        <Label htmlFor="map-calibration-opacity">
-                            {t('previewOpacity')}
-                        </Label>
-                        <input
-                            id="map-calibration-opacity"
-                            type="range"
-                            min={0.1}
-                            max={1}
-                            step={0.05}
-                            value={state.previewOpacity}
-                            onChange={(e) =>
-                                actions.setPreviewOpacity(
-                                    Number(e.target.value)
-                                )
-                            }
-                            className="w-full accent-[var(--hud-gold,#f2c14e)]"
-                        />
-                    </div>
-                </>
+                </ResponsiveDialog>
             )}
             <div className="flex flex-wrap gap-x-4 gap-y-2">
                 {STEPS.map(({ unit, step }) => (

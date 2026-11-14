@@ -129,6 +129,7 @@
       "apply": "Apply",
       "cancel": "Cancel",
       "instructions": "Drag on the image to outline one cell (or an N×N square of cells); the grid follows your outline.",
+      "zoom": "Zoom ×{value}",
       "previewOpacity": "Grid preview opacity",
       "nudgePx": "Nudge, 1 px",
       "nudgeCell": "Nudge, 0.01 cell",
