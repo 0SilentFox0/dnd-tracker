@@ -252,6 +252,7 @@ describe('spell attack of a base without a spell attack roll', () => {
             rng: () => 0.5,
             rules: DEFAULT_RULES,
         });
+
         expect(hpOf(out.allParticipantsUpdated, 't')).toBeLessThan(20);
     });
 });
