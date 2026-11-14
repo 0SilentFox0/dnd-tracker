@@ -47,6 +47,7 @@ export { type EdgeEditing, useEdgeStroke } from './useEdgeStroke';
 export { useFxEnabled } from './useFxEnabled';
 export { useFxImpacts } from './useFxImpacts';
 export { useGearSwap } from './useGearSwap';
+export { useGridWindow } from './useGridWindow';
 export { useHitChange, useHitFx } from './useHitFx';
 export { type HpChange, useDamageShake, useHpChange } from './useHpChange';
 export { useInitiativeDrag } from './useInitiativeDrag';
@@ -57,6 +58,7 @@ export {
     type MapBackgroundTool,
     useMapBackgroundTool,
 } from './useMapBackgroundTool';
+export { type MapDoorsTool, useMapDoors } from './useMapDoors';
 export { type MapMotionTool, useMapMotionTool } from './useMapMotionTool';
 export {
     type MapTerrainTool,
@@ -65,7 +67,6 @@ export {
     type TerrainBrush,
     useMapTerrainTool,
 } from './useMapTerrainTool';
-export { type MapDoorsTool, useMapDoors } from './useMapDoors';
 export { type MapUpdateTool, useMapUpdateTool } from './useMapUpdateTool';
 export { type MapWeatherTool, useMapWeatherTool } from './useMapWeatherTool';
 export {

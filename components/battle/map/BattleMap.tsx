@@ -12,6 +12,7 @@ import {
     type EdgeEditing,
     type MapDoorsTool,
     type ModeTools,
+    useGridWindow,
     useScrollToCurrent,
     useStrokePaint,
 } from '@/lib/hooks/battle';
@@ -161,6 +162,12 @@ export function BattleMap({
         scrolls
     );
 
+    const gridWindow = useGridWindow({
+        svgRef,
+        scrollRef: outerRef,
+        deps: { zoom, offset, size, pxPerUnit },
+    });
+
     const layout = useMemo(
         () => ({
             win,
@@ -168,9 +175,9 @@ export function BattleMap({
             pxPerUnit,
             rotated: fit.rotated,
             phone,
-            window: null,
+            window: gridWindow,
         }),
-        [win, size, pxPerUnit, fit.rotated, phone]
+        [win, size, pxPerUnit, fit.rotated, phone, gridWindow]
     );
 
     const interaction = useMemo(
