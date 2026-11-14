@@ -35,6 +35,11 @@
     "saveFailed": "Failed to save the map",
     "loadFailed": "Failed to load the map",
     "desktopOnly": "The map editor is desktop-only — open this page on a computer",
-    "edges": "Walls and bars"
+    "edges": "Walls and bars",
+    "panels": {
+      "background": "Background",
+      "cells": "Cells",
+      "edges": "Edges"
+    }
   }
 }

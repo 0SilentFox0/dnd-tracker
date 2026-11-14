@@ -6,12 +6,15 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useMapEditorDraft } from '../useMapEditorDraft';
 
-import { updateBattleMap } from '@/lib/api/battle-maps';
+import { getBattleMap, updateBattleMap } from '@/lib/api/battle-maps';
 import { ApiError } from '@/lib/api/client';
 import { ConfirmContext } from '@/lib/hooks/common/confirm-context';
 import type { BattleMapFull } from '@/types/battle-map';
 
-vi.mock('@/lib/api/battle-maps', () => ({ updateBattleMap: vi.fn() }));
+vi.mock('@/lib/api/battle-maps', () => ({
+    updateBattleMap: vi.fn(),
+    getBattleMap: vi.fn(),
+}));
 vi.mock('@/lib/hooks/common', async (orig) => ({
     ...(await orig<object>()),
     useImageSize: () => null,
@@ -130,5 +133,44 @@ describe('useMapEditorDraft', () => {
                 expect.objectContaining({ description: 'Boom' })
             )
         );
+    });
+
+    it('a background or terrain change makes the draft dirty', () => {
+        const { result } = setup();
+
+        act(() =>
+            result.current.editor.actions.setBackground('https://x/a.png')
+        );
+        expect(result.current.isDirty).toBe(true);
+
+        act(() => result.current.editor.actions.setBackground(null));
+        expect(result.current.isDirty).toBe(false);
+
+        act(() => result.current.editor.actions.setOpacity(0.9));
+        expect(result.current.isDirty).toBe(true);
+    });
+
+    it('swaps a saved data-URL background for the stored URL and stays clean', async () => {
+        vi.mocked(updateBattleMap).mockResolvedValue({ version: 4 } as never);
+        vi.mocked(getBattleMap).mockResolvedValue({
+            ...source,
+            map: { ...source.map, background: 'https://cdn.test/bg.webp' },
+        });
+
+        const { result } = setup();
+
+        act(() =>
+            result.current.editor.actions.setBackground(
+                'data:image/png;base64,AAAA'
+            )
+        );
+        act(() => result.current.save());
+
+        await waitFor(() =>
+            expect(result.current.editor.state.map.background).toBe(
+                'https://cdn.test/bg.webp'
+            )
+        );
+        await waitFor(() => expect(result.current.isDirty).toBe(false));
     });
 });

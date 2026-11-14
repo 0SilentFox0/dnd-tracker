@@ -175,6 +175,22 @@ const db = vi.hoisted(() => {
 
 vi.mock('@/lib/db', () => ({ prisma: db.api }));
 
+const storage = vi.hoisted(() => ({
+    resolve: vi.fn(
+        async (bg: string | null) =>
+            ({
+                ok: true,
+                background: bg?.startsWith('data:')
+                    ? 'https://cdn.test/bg.webp'
+                    : bg,
+            }) as const
+    ),
+}));
+
+vi.mock('@/lib/supabase/battle-map-storage', () => ({
+    resolveMapBackgroundForPersistence: storage.resolve,
+}));
+
 import { clearGeometryCache } from '../assemble';
 import {
     cloneMap,
@@ -185,6 +201,7 @@ import {
     getPinnedGeometry,
     listMaps,
     saveMap,
+    withStoredBackground,
 } from '../library-service';
 
 import type { BattleMapInput } from '@/lib/schemas/battle-maps';
@@ -385,5 +402,32 @@ describe('battle map library service', () => {
             '0:0:e',
             '17:3:s',
         ]);
+    });
+
+    it('a data-URL background is stored as a bucket URL, and re-saving that URL keeps the version', async () => {
+        const stored = await withStoredBackground(
+            input({
+                map: {
+                    cols: 20,
+                    rows: 20,
+                    background: 'data:image/png;base64,AAAA',
+                    opacity: 0.5,
+                },
+            }),
+            'c1'
+        );
+
+        expect(storage.resolve).toHaveBeenCalledTimes(1);
+        expect(stored.map.background).toBe('https://cdn.test/bg.webp');
+
+        const brief = await createMap('c1', stored);
+
+        const again = await withStoredBackground(
+            stored,
+            'c1',
+            stored.map.background
+        );
+
+        expect((await saveMap(brief.id, again)).version).toBe(1);
     });
 });

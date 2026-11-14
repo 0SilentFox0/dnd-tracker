@@ -1,10 +1,13 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { ArrowLeft } from 'lucide-react';
 
 import { BattleMap } from '@/components/battle/map';
+import { MapBackgroundSection } from '@/components/battle/setup/MapBackgroundSection';
+import { MapCellToolsSection } from '@/components/battle/setup/MapCellToolsSection';
 import {
     EDGE_TOOLS,
     ToolButtons,
@@ -19,7 +22,12 @@ import { useBattleMap } from '@/lib/hooks/battle-maps';
 import { useMapEditorDraft } from '@/lib/hooks/battle-maps/useMapEditorDraft';
 import { useCoarsePointer, useUnsavedChangesGuard } from '@/lib/hooks/common';
 import { useText } from '@/lib/i18n/use-text';
-import { MAX_SIDE, MIN_SIDE } from '@/lib/utils/battle/grid';
+import {
+    isEdgeTool,
+    isPreviewSafeBackground,
+    MAX_SIDE,
+    MIN_SIDE,
+} from '@/lib/utils/battle/grid';
 import type { BattleMapFull } from '@/types/battle-map';
 
 function BackLink({ campaignId }: { campaignId: string }) {
@@ -34,6 +42,10 @@ function BackLink({ campaignId }: { campaignId: string }) {
         </Button>
     );
 }
+
+type Panel = 'background' | 'cells' | 'edges';
+
+const PANELS: Panel[] = ['background', 'cells', 'edges'];
 
 function EditorBody({
     campaignId,
@@ -55,6 +67,15 @@ function EditorBody({
     const { editor } = draft;
 
     const { map, tool, notice } = editor.state;
+
+    const [panel, setPanel] = useState<Panel>('background');
+
+    const cellTool = tool !== null && !isEdgeTool(tool);
+
+    const previewMap =
+        isPreviewSafeBackground(map.background) || map.background === null
+            ? map
+            : { ...map, background: null };
 
     return (
         <div className="flex h-[calc(100dvh-3.5rem)] flex-col gap-2 p-2">
@@ -101,14 +122,6 @@ function EditorBody({
                         }
                     />
                 </div>
-                <div className="space-y-1">
-                    <Label className="text-xs">{t('edges')}</Label>
-                    <ToolButtons
-                        tools={EDGE_TOOLS}
-                        tool={tool}
-                        onPick={editor.actions.setTool}
-                    />
-                </div>
                 <Button
                     onClick={draft.save}
                     disabled={!draft.canSave}
@@ -124,18 +137,54 @@ function EditorBody({
             >
                 {notice ? text(notice) : draft.justSaved ? t('saved') : ''}
             </p>
-            <div className="min-h-0 flex-1">
-                <BattleMap
-                    map={map}
-                    participants={[]}
-                    className="h-full"
-                    editing={{
-                        clickableBlocked: false,
-                        strokeTool: false,
-                        showBlocked: true,
-                        edges: editor.edgeEditing,
-                    }}
-                />
+            <div className="grid min-h-0 flex-1 gap-3 lg:grid-cols-[minmax(0,1fr)_20rem]">
+                <div className="min-h-0 min-w-0">
+                    <BattleMap
+                        map={previewMap}
+                        participants={[]}
+                        actions={{ onStroke: editor.actions.onStroke }}
+                        className="h-full"
+                        editing={{
+                            clickableBlocked: cellTool,
+                            strokeTool: cellTool,
+                            showBlocked: true,
+                            edges: editor.edgeEditing,
+                        }}
+                    />
+                </div>
+                <aside className="min-h-0 space-y-3 overflow-y-auto pr-1">
+                    <div className="flex gap-1" role="tablist">
+                        {PANELS.map((p) => (
+                            <Button
+                                key={p}
+                                type="button"
+                                role="tab"
+                                aria-selected={panel === p}
+                                size="sm"
+                                variant={panel === p ? 'default' : 'outline'}
+                                onClick={() => setPanel(p)}
+                            >
+                                {t(`panels.${p}`)}
+                            </Button>
+                        ))}
+                    </div>
+                    {panel === 'background' && (
+                        <MapBackgroundSection editor={editor} />
+                    )}
+                    {panel === 'cells' && (
+                        <MapCellToolsSection editor={editor} />
+                    )}
+                    {panel === 'edges' && (
+                        <div className="space-y-2">
+                            <Label className="text-xs">{t('edges')}</Label>
+                            <ToolButtons
+                                tools={EDGE_TOOLS}
+                                tool={tool}
+                                onPick={editor.actions.setTool}
+                            />
+                        </div>
+                    )}
+                </aside>
             </div>
         </div>
     );

@@ -1,24 +1,35 @@
 import { z } from 'zod';
 
 import { MAP_LIMITS } from '@/lib/constants/map-limits';
-import { battleMapObject, edgeKeySchema, mapSide } from '@/lib/schemas/battles';
+import {
+    battleMapObject,
+    edgeKeySchema,
+    mapBackgroundSchema,
+    mapSide,
+} from '@/lib/schemas/battles';
 import { inBounds } from '@/lib/utils/battle/grid/geometry';
 import { parseEdgeKey } from '@/lib/utils/battle/grid/walls';
-
-const STORAGE_BACKGROUND =
-    /^(https:\/\/\S+|\/battle-maps\/[\w.-]+\.(webp|jpg|png))$/;
 
 const side = mapSide(MAP_LIMITS.tileMaxSide);
 
 const headerSchema = battleMapObject.omit({ walls: true, bars: true }).extend({
     cols: side,
     rows: side,
-    background: z
-        .string()
-        .max(2000)
-        .regex(STORAGE_BACKGROUND, 'battleSetup.validation.background')
-        .nullable(),
+    background: mapBackgroundSchema,
+    spellZones: z.never().optional(),
 });
+
+type Terrain = NonNullable<z.infer<typeof headerSchema>['terrain']>;
+
+const staticTerrainOnly = (terrain: Terrain | undefined) =>
+    Object.values(terrain ?? {}).every(
+        ({ zoneId, untilRound, damage }) =>
+            zoneId === undefined &&
+            untilRound === undefined &&
+            damage?.spellId === undefined &&
+            damage?.casterId === undefined &&
+            damage?.concentrationOf === undefined
+    );
 
 const edges = z.array(edgeKeySchema).max(MAP_LIMITS.libraryMaxEdges);
 
@@ -60,6 +71,13 @@ export const battleMapInputSchema = z
                 path: ['map', 'cols'],
             });
         }
+
+        if (!staticTerrainOnly(m.map.terrain))
+            ctx.addIssue({
+                code: 'custom',
+                message: 'battleSetup.validation.libraryTerrainRuntime',
+                path: ['map', 'terrain'],
+            });
 
         const badEdges = (path: 'walls' | 'bars') =>
             ctx.addIssue({

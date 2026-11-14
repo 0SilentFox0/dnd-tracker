@@ -191,7 +191,14 @@ describe('maps routes', () => {
             map: { ...valid.map, background: 'data:image/png;base64,AAAA' },
         };
 
-        expect((await POST(send('POST', dataUrl), ctx)).status).toBe(400);
+        expect((await POST(send('POST', dataUrl), ctx)).status).toBe(201);
+
+        const badBackground = {
+            ...valid,
+            map: { ...valid.map, background: 'javascript:alert(1)' },
+        };
+
+        expect((await POST(send('POST', badBackground), ctx)).status).toBe(400);
 
         const tooBig = {
             ...valid,

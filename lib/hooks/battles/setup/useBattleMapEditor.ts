@@ -232,6 +232,11 @@ export function useBattleMapEditor(
         [map, image]
     );
 
+    const replaceBackground = useCallback(
+        (background: string | null) => setMap((m) => ({ ...m, background })),
+        []
+    );
+
     const pendingKeep =
         kept &&
         image &&
@@ -404,6 +409,7 @@ export function useBattleMapEditor(
             setMargins,
             setTool,
             setBackground,
+            replaceBackground,
             setBrush,
             setMode,
             onStroke,

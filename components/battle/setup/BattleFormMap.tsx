@@ -2,23 +2,19 @@
 
 import { useTranslations } from 'next-intl';
 
-import { GridCalibration } from './GridCalibration';
+import { MapBackgroundSection } from './MapBackgroundSection';
+import { MapCellToolsSection } from './MapCellToolsSection';
 import { EDGE_TOOLS, ToolButtons } from './MapToolButtons';
 import { ToggleRow } from './ToggleRow';
 
 import { BattleMap } from '@/components/battle/map';
 import { MapMotionPanel } from '@/components/battle/map/MapMotionPanel';
 import { MAP_MODE_UI, type MapModeUi } from '@/components/battle/modes';
-import { ImageUpload } from '@/components/common/ImageUpload';
 import { HudSection } from '@/components/hud/form';
 import { OnboardingHint } from '@/components/onboarding/OnboardingHint';
 import { BoundedNumberInput } from '@/components/ui/bounded-number-input';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { SelectField } from '@/components/ui/select-field';
-import { HAZARD_DICE_PATTERN } from '@/lib/constants/battle';
-import { DAMAGE_ELEMENT_OPTIONS } from '@/lib/constants/damage';
 import type { BattleMapEditor } from '@/lib/hooks/battles';
 import { useCoarsePointer } from '@/lib/hooks/common';
 import { useText } from '@/lib/i18n/use-text';
@@ -27,73 +23,26 @@ import {
     isPreviewSafeBackground,
     marginLimit,
     type Margins,
-    MAX_CELL_PX,
-    MAX_GRID_OFFSET,
     MAX_MARGIN,
     MAX_SIDE,
-    MIN_CELL_PX,
     MIN_PLAYABLE,
     MIN_SIDE,
-    type SetupTool,
 } from '@/lib/utils/battle/grid';
 import type { MapModeKey } from '@/lib/utils/battle/modes';
 import { clamp } from '@/lib/utils/common/clamp';
 
 const MARGIN_KEYS: (keyof Margins)[] = ['top', 'right', 'bottom', 'left'];
 
-const TOOLS: SetupTool[] = ['blocked', 'wall', 'hazard', 'erase'];
-
-const SLIDER = 'w-full accent-[var(--hud-gold,#f2c14e)] disabled:opacity-40';
-
-function RangeRow({
-    id,
-    label,
-    value,
-    range,
-    onChange,
-}: {
-    id: string;
-    label: string;
-    value: number;
-    range: { min: number; max: number; step: number; disabled?: boolean };
-    onChange: (v: number) => void;
-}) {
-    return (
-        <div>
-            <Label htmlFor={id}>{label}</Label>
-            <input
-                id={id}
-                type="range"
-                {...range}
-                value={value}
-                onChange={(e) => onChange(Number(e.target.value))}
-                className={SLIDER}
-            />
-        </div>
-    );
-}
-
 export function BattleFormMap({ editor }: { editor: BattleMapEditor }) {
     const t = useTranslations('battleSetup.map');
-
-    const tDamage = useTranslations('gameTerms.damageTypes');
 
     const text = useText();
 
     const touch = useCoarsePointer();
 
-    const { enabled, map, mode, margins, tool, notice, cellPx } = editor.state;
+    const { enabled, map, mode, margins, tool, notice } = editor.state;
 
-    const damageOptions = DAMAGE_ELEMENT_OPTIONS.map(({ value }) => ({
-        value,
-        label: tDamage(value),
-    }));
-
-    const offset = map.gridOffset ?? { x: 0, y: 0 };
-
-    const percent = (v: number) => `${Math.round(v * 100)}%`;
-
-    const { brush, actions } = editor;
+    const { actions } = editor;
 
     const cellTool = tool !== null && !isEdgeTool(tool);
 
@@ -165,64 +114,7 @@ export function BattleFormMap({ editor }: { editor: BattleMapEditor }) {
                                 />
                             </div>
                         </div>
-                        <RangeRow
-                            id="map-cell-size"
-                            label={t('cellSize', {
-                                size: cellPx === null ? '…' : `${cellPx} px`,
-                                cols: map.cols,
-                                rows: map.rows,
-                            })}
-                            value={cellPx ?? MIN_CELL_PX}
-                            range={{
-                                min: MIN_CELL_PX,
-                                max: MAX_CELL_PX,
-                                step: 1,
-                                disabled: cellPx === null,
-                            }}
-                            onChange={actions.setCellSize}
-                        />
-                        <div className="grid grid-cols-2 gap-3">
-                            <RangeRow
-                                id="map-offset-x"
-                                label={t('offsetX', {
-                                    value: percent(offset.x),
-                                })}
-                                value={offset.x}
-                                range={{
-                                    min: 0,
-                                    max: MAX_GRID_OFFSET,
-                                    step: 0.01,
-                                }}
-                                onChange={(x) =>
-                                    actions.setGridOffset({ ...offset, x })
-                                }
-                            />
-                            <RangeRow
-                                id="map-offset-y"
-                                label={t('offsetY', {
-                                    value: percent(offset.y),
-                                })}
-                                value={offset.y}
-                                range={{
-                                    min: 0,
-                                    max: MAX_GRID_OFFSET,
-                                    step: 0.01,
-                                }}
-                                onChange={(y) =>
-                                    actions.setGridOffset({ ...offset, y })
-                                }
-                            />
-                        </div>
-                        <GridCalibration editor={editor} />
-                        <RangeRow
-                            id="map-opacity"
-                            label={t('opacity', {
-                                value: percent(map.opacity),
-                            })}
-                            value={map.opacity}
-                            range={{ min: 0, max: 1, step: 0.05 }}
-                            onChange={actions.setOpacity}
-                        />
+                        <MapBackgroundSection editor={editor} />
                         <div className="space-y-2">
                             <div className="flex items-center justify-between gap-2">
                                 <Label>{t('margins.title')}</Label>
@@ -260,76 +152,7 @@ export function BattleFormMap({ editor }: { editor: BattleMapEditor }) {
                                 ))}
                             </div>
                         </div>
-                        <div
-                            className="space-y-2"
-                            hidden={!!mode && !!MAP_MODE_UI[mode].hidesTerrain}
-                        >
-                            <Label>{t('drawing')}</Label>
-                            <ToolButtons
-                                tools={TOOLS}
-                                tool={tool}
-                                onPick={actions.setTool}
-                            />
-                            {tool === 'hazard' && (
-                                <div className="grid gap-2 sm:grid-cols-[1fr_8rem_10rem]">
-                                    <Input
-                                        aria-label={t('hazardLabel')}
-                                        className="self-end"
-                                        maxLength={60}
-                                        value={brush.label}
-                                        onChange={(e) =>
-                                            actions.setBrush({
-                                                label: e.target.value,
-                                            })
-                                        }
-                                    />
-                                    <div className="space-y-1">
-                                        <Label
-                                            htmlFor="map-hazard-dice"
-                                            className="text-xs"
-                                        >
-                                            {t('hazardDice')}
-                                        </Label>
-                                        <Input
-                                            id="map-hazard-dice"
-                                            aria-invalid={
-                                                brush.dice.trim() !== '' &&
-                                                !HAZARD_DICE_PATTERN.test(
-                                                    brush.dice.trim()
-                                                )
-                                            }
-                                            maxLength={12}
-                                            placeholder={t(
-                                                'hazardDicePlaceholder'
-                                            )}
-                                            value={brush.dice}
-                                            onChange={(e) =>
-                                                actions.setBrush({
-                                                    dice: e.target.value,
-                                                })
-                                            }
-                                        />
-                                    </div>
-                                    <div className="space-y-1">
-                                        <Label
-                                            htmlFor="map-hazard-type"
-                                            className="text-xs"
-                                        >
-                                            {t('hazardType')}
-                                        </Label>
-                                        <SelectField
-                                            id="map-hazard-type"
-                                            value={brush.damageType}
-                                            onValueChange={(damageType) =>
-                                                actions.setBrush({ damageType })
-                                            }
-                                            placeholder={t('hazardType')}
-                                            options={damageOptions}
-                                        />
-                                    </div>
-                                </div>
-                            )}
-                        </div>
+                        <MapCellToolsSection editor={editor} />
                         {mode && MAP_MODE_UI[mode].hidesTerrain && (
                             <p className="text-sm text-hud-muted">
                                 {t('edgesDisabledMode')}
@@ -357,26 +180,6 @@ export function BattleFormMap({ editor }: { editor: BattleMapEditor }) {
                                 <MapMotionPanel tool={editor.motionTool} />
                             </div>
                         )}
-                        <div className="space-y-2">
-                            <ImageUpload
-                                value={map.background ?? ''}
-                                onChange={(v) =>
-                                    actions.setBackground(v || null)
-                                }
-                                label={t('background')}
-                                maxSide={2400}
-                                allowFile
-                            />
-                            <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                onClick={() => actions.setBackground(null)}
-                                disabled={map.background === null}
-                            >
-                                {t('defaultBackground')}
-                            </Button>
-                        </div>
                     </div>
                     <div className="min-w-0 space-y-2">
                         <p

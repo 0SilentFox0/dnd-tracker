@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 
 import { useBattleMapMutations } from './useBattleMaps';
 
+import { getBattleMap } from '@/lib/api/battle-maps';
 import { ApiError } from '@/lib/api/client';
 import { useBattleMapEditor } from '@/lib/hooks/battles';
 import { useNotify } from '@/lib/hooks/common';
@@ -37,6 +38,25 @@ export function useMapEditorDraft(campaignId: string, source: BattleMapFull) {
 
     const isDirty = snapshot !== saved;
 
+    // swap the uploaded data-URL for the bucket URL so the next save does not re-upload it
+    const adoptStoredBackground = async (sent: typeof editor.state.map) => {
+        try {
+            const { map } = await getBattleMap(campaignId, source.id);
+
+            if (!map.background) return;
+
+            editor.actions.replaceBackground(map.background);
+            setSaved(
+                JSON.stringify([
+                    name.trim(),
+                    { ...sent, background: map.background },
+                ])
+            );
+        } catch {
+            // the data-URL stays; the next save uploads it again
+        }
+    };
+
     const save = () => {
         const { value } = editor.state;
 
@@ -63,6 +83,9 @@ export function useMapEditorDraft(campaignId: string, source: BattleMapFull) {
                     setVersion(brief.version);
                     setSaved(snapshot);
                     setJustSaved(true);
+
+                    if (header.background?.startsWith('data:'))
+                        void adoptStoredBackground(value);
                 },
                 onError: (e) =>
                     void notify(
