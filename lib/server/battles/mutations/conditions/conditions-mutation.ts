@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { ABILITY_KEYS } from '@/lib/constants/abilities';
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { CONDITION_LIMITS } from '@/lib/constants/battle';
+import { MAX_EXHAUSTION } from '@/lib/constants/exhaustion';
 import { textRef } from '@/lib/i18n/text-ref';
 import { findParticipant } from '@/lib/utils/abilities/engine/core/participants';
 import { CustomConditionKeySchema } from '@/lib/utils/abilities/schema';
@@ -11,7 +12,6 @@ import {
     isCustomConditionKey,
 } from '@/lib/utils/abilities/schema/kinds';
 import {
-    MAX_EXHAUSTION,
     PERMANENT_ROUNDS,
     removeStandardCondition,
 } from '@/lib/utils/battle/conditions';

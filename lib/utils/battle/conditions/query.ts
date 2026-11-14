@@ -1,5 +1,6 @@
 import { exhaustionEffects } from './exhaustion';
 
+import { MAX_EXHAUSTION } from '@/lib/constants/exhaustion';
 import { DEFAULT_RULES_EDITION } from '@/lib/constants/rules';
 import {
     findParticipant,
@@ -14,8 +15,6 @@ import {
 import { hasEffectMarker } from '@/lib/utils/battle/participant/state';
 import { allConditionKeys } from '@/lib/utils/rules/systems/lookup';
 import type { ActiveEffect, BattleParticipant } from '@/types/battle';
-
-export const MAX_EXHAUSTION = 6;
 
 const carries = (e: ActiveEffect, key: string) =>
     e.effects.some((m) => m.type === key);

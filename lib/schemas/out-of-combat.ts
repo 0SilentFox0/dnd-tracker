@@ -1,8 +1,8 @@
 import { z } from 'zod';
 
 import { ABILITY_KEYS } from '@/lib/constants/abilities';
+import { MAX_EXHAUSTION } from '@/lib/constants/exhaustion';
 import { DND_SKILLS } from '@/lib/constants/skills';
-import { MAX_EXHAUSTION } from '@/lib/utils/battle/conditions/query';
 
 const characterIds = z.array(z.string().min(1).max(100)).min(1).max(50);
 

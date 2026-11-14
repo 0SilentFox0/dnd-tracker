@@ -6,6 +6,7 @@ import {
 } from './registry';
 
 import { CombatStatus, EffectMarker } from '@/lib/constants/battle';
+import { MAX_EXHAUSTION } from '@/lib/constants/exhaustion';
 import { dynamicTextRef, textRef } from '@/lib/i18n/text-ref';
 import { findFlags } from '@/lib/utils/abilities/engine/core/collect-modifiers';
 import {
@@ -19,7 +20,6 @@ import { releaseGrapples } from '@/lib/utils/battle/conditions/grapple-links';
 import {
     exhaustionLevel,
     hasCondition,
-    MAX_EXHAUSTION,
     removeEffects,
     syncExhaustion,
 } from '@/lib/utils/battle/conditions/query';

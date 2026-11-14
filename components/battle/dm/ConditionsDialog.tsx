@@ -12,6 +12,7 @@ import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { SelectField } from '@/components/ui/select-field';
 import { ABILITY_KEYS, type AbilityKey } from '@/lib/constants/abilities';
 import { CONDITION_LIMITS } from '@/lib/constants/battle';
+import { MAX_EXHAUSTION } from '@/lib/constants/exhaustion';
 import type { BattleConditionsBody } from '@/lib/hooks/battles';
 import { dynamicTextRef } from '@/lib/i18n/text-ref';
 import { useText } from '@/lib/i18n/use-text';
@@ -19,7 +20,6 @@ import { effectName } from '@/lib/utils/battle/common/terms';
 import {
     conditionEffects,
     type ConditionKey,
-    MAX_EXHAUSTION,
 } from '@/lib/utils/battle/conditions';
 import type { Ruleset } from '@/lib/utils/rules';
 import type { RuleSystemConditionSet } from '@/lib/utils/rules/systems/types';
