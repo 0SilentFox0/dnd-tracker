@@ -68,12 +68,7 @@ export const SYSTEM_UI: Record<string, SystemUi> = new Proxy(
     }
 );
 
-export const systemUiOf = (
-    key: string,
-    modules?: readonly string[]
-): SystemUi => {
-    return resolve(key, modules);
-};
+export const systemUiOf = resolve;
 
 /** Undefined for an unknown key or before an install */
 export const systemUiByKey = (key: string): SystemUi | undefined =>
