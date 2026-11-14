@@ -1,4 +1,8 @@
 {
+  "2026-11-map-large": {
+    "title": "Large battle maps",
+    "body": "With the map library turned on, battles can use maps up to 200×200 cells. Photo maps stay up to 60×60."
+  },
   "2026-11-map-doors": {
     "title": "Doors on the map",
     "body": "Battle maps now have doors. Closed doors block movement, shots, sight, templates and melee; a player opens them with a hero standing next to the door on their turn, the DM can lock, close or break them. Place doors with the Door brush in battle setup and the library editor (desktop)."

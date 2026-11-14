@@ -6,7 +6,6 @@ import { useTranslations } from 'next-intl';
 import { HudSection } from '@/components/hud/form';
 import { Label } from '@/components/ui/label';
 import { SelectField } from '@/components/ui/select-field';
-import { MAP_LIMITS } from '@/lib/constants/map-limits';
 import type { BattleLibraryMap } from '@/lib/hooks/battles';
 
 export function BattleMapLibraryPicker({
@@ -21,7 +20,7 @@ export function BattleMapLibraryPicker({
     const options = library.maps.map((m) => ({
         value: m.id,
         label: `${m.name} · ${t('size', { cols: m.cols, rows: m.rows })}`,
-        disabled: Math.max(m.cols, m.rows) > MAP_LIMITS.battleMaxSide,
+        disabled: Math.max(m.cols, m.rows) > library.maxSide,
     }));
 
     const anyTooLarge = options.some((o) => o.disabled);
@@ -53,7 +52,7 @@ export function BattleMapLibraryPicker({
                                 rows: chosen.rows,
                             })
                           : anyTooLarge
-                            ? t('tooLarge', { max: MAP_LIMITS.battleMaxSide })
+                            ? t('tooLarge', { max: library.maxSide })
                             : null}
             </p>
             <Link

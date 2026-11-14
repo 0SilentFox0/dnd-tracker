@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { useBattleMaps } from '@/lib/hooks/battle-maps';
 import { useMapLibraryEnabled } from '@/lib/hooks/campaigns';
 import { useConfirm } from '@/lib/hooks/common';
+import { battleMapMaxSide } from '@/lib/utils/battle/map-storage/limits';
 import type { BattleMapRef } from '@/types/battle';
 
 interface LibraryMapOptions {
@@ -64,6 +65,7 @@ export function useBattleLibraryMap(
             ? linkedId !== null || (!locked && enabled && maps.length > 0)
             : enabled && maps.length > 0,
         maps,
+        maxSide: battleMapMaxSide({ mapLibraryEnabled: enabled }),
         isLinked: linkedId !== null && !changed,
         wasLinked: linkedId !== null,
         isLocked: locked,

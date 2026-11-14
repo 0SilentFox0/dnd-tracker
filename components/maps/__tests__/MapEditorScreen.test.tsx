@@ -92,4 +92,36 @@ describe('MapEditorScreen', () => {
         );
         expect(screen.getByText('maps.editor.edges')).toBeTruthy();
     });
+
+    it('allows 120 columns on a map without a background', () => {
+        touch.value = false;
+        query.value = {
+            isPending: false,
+            isError: false,
+            data: {
+                id: 'm1',
+                name: 'Cave',
+                cols: 10,
+                rows: 8,
+                version: 1,
+                updatedAt: '',
+                map: { cols: 10, rows: 8, background: null, opacity: 0.35 },
+                walls: [],
+                bars: [],
+            },
+        };
+        render(
+            <QueryClientProvider client={new QueryClient()}>
+                <ConfirmContext.Provider value={vi.fn() as never}>
+                    <MapEditorScreen campaignId="c1" mapId="m1" />
+                </ConfirmContext.Provider>
+            </QueryClientProvider>
+        );
+
+        const cols = document.getElementById('map-cols') as HTMLInputElement;
+
+        fireEvent.change(cols, { target: { value: '120' } });
+        fireEvent.blur(cols);
+        expect(cols.value).toBe('120');
+    });
 });

@@ -9,8 +9,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { DEFAULT_BATTLE_MAP } from '@/lib/constants/battle';
+import { MAP_LIMITS } from '@/lib/constants/map-limits';
 import type { NewMapForm } from '@/lib/hooks/battle-maps';
-import { MAX_SIDE, MIN_SIDE } from '@/lib/utils/battle/grid';
+import { MIN_SIDE } from '@/lib/utils/battle/grid';
 
 const FORM_ID = 'create-map-form';
 
@@ -87,7 +88,7 @@ export function CreateMapDialog({
                             id="create-map-cols"
                             value={size.cols}
                             min={MIN_SIDE}
-                            max={MAX_SIDE}
+                            max={MAP_LIMITS.tileMaxSide}
                             onCommit={(cols) =>
                                 setSize((s) => ({ ...s, cols }))
                             }
@@ -99,7 +100,7 @@ export function CreateMapDialog({
                             id="create-map-rows"
                             value={size.rows}
                             min={MIN_SIDE}
-                            max={MAX_SIDE}
+                            max={MAP_LIMITS.tileMaxSide}
                             onCommit={(rows) =>
                                 setSize((s) => ({ ...s, rows }))
                             }

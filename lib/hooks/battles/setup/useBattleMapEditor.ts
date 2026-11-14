@@ -78,7 +78,8 @@ export const DOOR_LIMIT_NOTICE = textRef('battleSetup.map.doorLimit');
 export const EDGES_STRIPPED_NOTICE = textRef('battleSetup.map.edgesStripped');
 
 export function useBattleMapEditor(
-    initial: BattleMapConfig | null | undefined
+    initial: BattleMapConfig | null | undefined,
+    { maxSide = MAX_SIDE }: { maxSide?: number } = {}
 ) {
     const [enabled, setEnabledState] = useState(Boolean(initial));
 
@@ -127,6 +128,9 @@ export function useBattleMapEditor(
             rows: number,
             calibration?: Partial<GridCalibration>
         ) => {
+            cols = Math.min(cols, maxSide);
+            rows = Math.min(rows, maxSide);
+
             const nextMargins = clampMargins({ cols, rows }, margins);
 
             const {
@@ -147,7 +151,7 @@ export function useBattleMapEditor(
             setMap(next);
             setMarginsState(nextMargins);
         },
-        [map, margins]
+        [map, margins, maxSide]
     );
 
     // ручний розмір скидає масштаб фону: він знову вписується в сітку, а повзунок показує нову клітинку

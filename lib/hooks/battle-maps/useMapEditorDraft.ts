@@ -7,6 +7,7 @@ import { useBattleMapMutations } from './useBattleMaps';
 
 import { getBattleMap } from '@/lib/api/battle-maps';
 import { ApiError } from '@/lib/api/client';
+import { MAP_LIMITS } from '@/lib/constants/map-limits';
 import { useBattleMapEditor } from '@/lib/hooks/battles';
 import { useNotify } from '@/lib/hooks/common';
 import type { BattleMapInput } from '@/lib/schemas/battle-maps';
@@ -20,11 +21,18 @@ export function useMapEditorDraft(campaignId: string, source: BattleMapFull) {
 
     const { update } = useBattleMapMutations(campaignId);
 
-    const editor = useBattleMapEditor({
-        ...source.map,
-        walls: source.walls,
-        bars: source.bars,
-    });
+    const editor = useBattleMapEditor(
+        {
+            ...source.map,
+            walls: source.walls,
+            bars: source.bars,
+        },
+        {
+            maxSide: source.map.background
+                ? MAP_LIMITS.photoMaxSide
+                : MAP_LIMITS.tileMaxSide,
+        }
+    );
 
     const backgroundRef = useRef(editor.state.map.background);
 

@@ -97,3 +97,13 @@ describe('useBattleLibraryMap in edit mode', () => {
         expect(result.current.selectedId).toBe('m2');
     });
 });
+
+describe('useBattleLibraryMap maxSide', () => {
+    it('follows the library flag', () => {
+        h.enabled = true;
+        expect(run({}).result.current.maxSide).toBe(200);
+
+        h.enabled = false;
+        expect(run({}).result.current.maxSide).toBe(60);
+    });
+});

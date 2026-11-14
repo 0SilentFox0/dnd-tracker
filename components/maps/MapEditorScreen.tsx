@@ -18,6 +18,7 @@ import { BoundedNumberInput } from '@/components/ui/bounded-number-input';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { MAP_LIMITS } from '@/lib/constants/map-limits';
 import { useBattleMap } from '@/lib/hooks/battle-maps';
 // deep import: the battle-maps barrel would close a cycle through battles
 import { useMapEditorDraft } from '@/lib/hooks/battle-maps/useMapEditorDraft';
@@ -26,7 +27,6 @@ import { useText } from '@/lib/i18n/use-text';
 import {
     isEdgeTool,
     isPreviewSafeBackground,
-    MAX_SIDE,
     MIN_SIDE,
 } from '@/lib/utils/battle/grid';
 import type { BattleMapFull } from '@/types/battle-map';
@@ -71,6 +71,10 @@ function EditorBody({
 
     const [panel, setPanel] = useState<Panel>('background');
 
+    const maxSide = map.background
+        ? MAP_LIMITS.photoMaxSide
+        : MAP_LIMITS.tileMaxSide;
+
     const cellTool = tool !== null && !isEdgeTool(tool);
 
     const previewMap =
@@ -101,7 +105,7 @@ function EditorBody({
                         id="map-cols"
                         value={map.cols}
                         min={MIN_SIDE}
-                        max={MAX_SIDE}
+                        max={maxSide}
                         onCommit={(v) => editor.actions.setSize(v, map.rows)}
                         onValueChange={(v) =>
                             editor.actions.setSize(v, map.rows)
@@ -116,7 +120,7 @@ function EditorBody({
                         id="map-rows"
                         value={map.rows}
                         min={MIN_SIDE}
-                        max={MAX_SIDE}
+                        max={maxSide}
                         onCommit={(v) => editor.actions.setSize(map.cols, v)}
                         onValueChange={(v) =>
                             editor.actions.setSize(map.cols, v)

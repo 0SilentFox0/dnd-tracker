@@ -187,6 +187,26 @@ describe('useBattleMapEditor', () => {
         expect(result.current.state.map.blocked).toHaveLength(100 - 64);
     });
 
+    it('maxSide: 200 приймає 150, без опції — кламп до 60', () => {
+        const big = renderHook(() =>
+            useBattleMapEditor(null, { maxSide: 200 })
+        );
+
+        act(() => big.result.current.actions.setSize(150, 150));
+        expect(big.result.current.state.map).toMatchObject({
+            cols: 150,
+            rows: 150,
+        });
+
+        const small = renderHook(() => useBattleMapEditor(null));
+
+        act(() => small.result.current.actions.setSize(150, 150));
+        expect(small.result.current.state.map).toMatchObject({
+            cols: 60,
+            rows: 60,
+        });
+    });
+
     it('зменшення розміру перетискає поля', () => {
         const { result } = renderHook(() =>
             useBattleMapEditor({

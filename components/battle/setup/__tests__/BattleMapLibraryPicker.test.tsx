@@ -22,6 +22,7 @@ function renderPicker(over: Partial<BattleLibraryMap>) {
     const library = {
         visible: true,
         maps: [brief('a', 20), brief('b', 80)],
+        maxSide: 60,
         isLinked: false,
         wasLinked: false,
         isLocked: false,
