@@ -9,6 +9,7 @@ import '@/lib/utils/rules/systems/registry';
 import { buildLibrary } from '@/data/library/build';
 import { prisma } from '@/lib/db';
 import { assertSeedTarget, parseArgs } from '@/scripts/seed/seed-library-lib';
+import { d20RowData } from '@/scripts/shared/d20-row-data';
 
 async function main() {
     const { campaignId, dryRun, allowRemote } = parseArgs(
@@ -23,7 +24,12 @@ async function main() {
 
     const units = await prisma.unit.findMany({
         where: { campaignId },
-        select: { id: true, name: true, initiative: true },
+        select: {
+            id: true,
+            name: true,
+            initiative: true,
+            characteristics: true,
+        },
     });
 
     console.log(
@@ -43,7 +49,7 @@ async function main() {
         if (!dryRun)
             await prisma.unit.update({
                 where: { id: u.id },
-                data: { initiative: next },
+                data: d20RowData({ initiative: next }, u.characteristics),
             });
     }
 

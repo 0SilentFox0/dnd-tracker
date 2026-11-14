@@ -16,6 +16,7 @@ import { abilityScores, proficiencyForTier } from '@/data/library/unit-stats';
 import { ARTIFACT_GRID_9 } from '@/lib/constants/artifacts';
 import type { Ability } from '@/lib/utils/abilities/schema';
 import { type BuildTreeInput } from '@/lib/utils/skills/progression/tree-json';
+import { d20RowData } from '@/scripts/shared/d20-row-data';
 
 export interface SeedOptions {
     campaignId: string;
@@ -210,7 +211,7 @@ export function unitRow(
             ((type === 'melee' ? scores.strength : scores.dexterity) - 10) / 2
         );
 
-    return {
+    return d20RowData({
         name: unit.name,
         gridSize: unit.gridSize ?? 1,
         raceId:
@@ -242,7 +243,7 @@ export function unitRow(
         levelScaling: unit.levelScaling
             ? { ...unit.levelScaling }
             : Prisma.DbNull,
-    };
+    });
 }
 
 /** Library icon on create; on update only fills an empty avatar so a DM-set one survives. */

@@ -36,6 +36,7 @@ import {
 } from '@/lib/supabase/image-storage';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 import { fullSpellSlots } from '@/lib/utils/spells/spell-slots';
+import { d20RowData } from '@/scripts/shared/d20-row-data';
 import type { CharacterGoal } from '@/types/characters';
 import type { SpellSlotProgression } from '@/types/races';
 
@@ -494,7 +495,7 @@ function stats(b: Build) {
         b.order.map((a, i) => [a, STANDARD[i]])
     ) as Record<Ability, number>;
 
-    return {
+    return d20RowData({
         ...scores,
         armorClass: b.ac,
         initiative: heroInitiative(scores.dexterity, b.archetype),
@@ -503,7 +504,7 @@ function stats(b: Build) {
         spellcastingAbility: b.casting,
         primaryAbility: b.primary,
         archetype: b.archetype,
-    };
+    });
 }
 
 function photoDataUrl(dir: string, name: string): string | null {
@@ -675,7 +676,7 @@ async function main() {
 
         const existing = await prisma.character.findFirst({
             where: { campaignId: campaign.id, name: e.name },
-            select: { id: true, avatar: true },
+            select: { id: true, avatar: true, characteristics: true },
         });
 
         const needsAvatar =
@@ -722,7 +723,10 @@ async function main() {
                 await prisma.character.update({
                     where: { id: existing.id },
                     data: {
-                        initiative: data.initiative,
+                        ...d20RowData(
+                            { initiative: data.initiative },
+                            existing.characteristics
+                        ),
                         ...(personalSkillId && { personalSkillId }),
                     },
                 });
@@ -743,7 +747,10 @@ async function main() {
         if (existing) {
             await prisma.character.update({
                 where: { id: existing.id },
-                data: { ...data, ...(avatar && { avatar }) },
+                data: {
+                    ...d20RowData(data, existing.characteristics),
+                    ...(avatar && { avatar }),
+                },
             });
             console.log(`оновлено: ${summary}`);
             continue;

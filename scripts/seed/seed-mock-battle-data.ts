@@ -29,6 +29,7 @@ import { AttackType } from '@/lib/constants/battle';
 import { CampaignRole } from '@/lib/constants/campaigns';
 import { CharacterType } from '@/lib/constants/characters';
 import { buildTreeJson } from '@/lib/utils/skills/progression';
+import { d20RowData } from '@/scripts/shared/d20-row-data';
 import { DEFAULT_CAMPAIGN_ID } from '@/scripts/shared/default-campaign';
 
 const prisma = new PrismaClient();
@@ -559,14 +560,14 @@ async function seedMockData() {
             }
 
             const character = await prisma.character.create({
-                data: {
+                data: d20RowData({
                     campaignId: CAMPAIGN_ID,
                     ...charData,
                     spellSlots: charData.spellSlots as Prisma.InputJsonValue,
                     knownSpells: charData.knownSpells as Prisma.InputJsonValue,
                     skillTreeProgress:
                         charData.skillTreeProgress as Prisma.InputJsonValue,
-                },
+                }),
             });
 
             // Створюємо CharacterSkills для дерева скілів

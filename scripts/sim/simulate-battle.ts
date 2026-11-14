@@ -94,6 +94,7 @@ import {
     racialNodeId,
 } from '@/lib/utils/skills/progression';
 import { racePassiveData } from '@/scripts/seed/seed-library-lib';
+import { d20RowData } from '@/scripts/shared/d20-row-data';
 import type { BattleMutationResponse, BattleScene } from '@/types/api';
 import type { BattleAction, BattleParticipant } from '@/types/battle';
 
@@ -300,7 +301,7 @@ async function seed() {
 
     const chars = {
         thorin: await prisma.character.create({
-            data: {
+            data: d20RowData({
                 ...base,
                 name: 'Торін',
                 race: 'Дварф',
@@ -315,10 +316,10 @@ async function seed() {
                     skills.undying,
                     skills.ironSkin,
                 ]),
-            },
+            }),
         }),
         lyra: await prisma.character.create({
-            data: {
+            data: d20RowData({
                 ...base,
                 class: 'Ranger',
                 name: 'Ліра',
@@ -333,10 +334,10 @@ async function seed() {
                     skills.secondWind,
                     racialNodeId('basic'),
                 ]),
-            },
+            }),
         }),
         myron: await prisma.character.create({
-            data: {
+            data: d20RowData({
                 ...base,
                 class: 'Wizard',
                 name: 'Мирон',
@@ -349,7 +350,7 @@ async function seed() {
                 immunities: ['контроль'],
                 knownSpells: [spell.id],
                 spellSlots: { '1': { max: 2, current: 2 } },
-            },
+            }),
         }),
     };
 
@@ -381,11 +382,11 @@ async function seed() {
     for (const [key, { raceKey, ...u }] of Object.entries(UNITS)) {
         units[key] = (
             await prisma.unit.create({
-                data: {
+                data: d20RowData({
                     campaignId,
                     ...u,
                     raceId: raceKey ? raceIds[raceKey] : null,
-                } as Prisma.UnitUncheckedCreateInput,
+                }) as Prisma.UnitUncheckedCreateInput,
             })
         ).id;
     }
@@ -687,7 +688,7 @@ async function racePassivesCheck() {
         });
 
         const hero = await prisma.character.create({
-            data: {
+            data: d20RowData({
                 campaignId,
                 type: 'player',
                 controlledBy: SIM_PLAYER.id,
@@ -703,7 +704,7 @@ async function racePassivesCheck() {
                 charisma: 10,
                 armorClass: 12,
                 initiative: 0,
-            },
+            }),
         });
 
         return createBattleParticipantFromCharacter(
@@ -1470,7 +1471,7 @@ async function seedFair() {
 
     for (const { weapon, ...h } of FAIR_HEROES) {
         const row = await prisma.character.create({
-            data: {
+            data: d20RowData({
                 campaignId,
                 type: 'player',
                 controlledBy: SIM_PLAYER.id,
@@ -1478,7 +1479,7 @@ async function seedFair() {
                 level: 4,
                 initiative: 1,
                 ...h,
-            },
+            }),
         });
 
         await prisma.characterInventory.create({
@@ -1492,7 +1493,10 @@ async function seedFair() {
 
     for (const u of FAIR_UNITS)
         await prisma.unit.create({
-            data: { campaignId, ...u } as Prisma.UnitUncheckedCreateInput,
+            data: d20RowData({
+                campaignId,
+                ...u,
+            }) as Prisma.UnitUncheckedCreateInput,
         });
 
     return { campaignId, heroIds };
@@ -1721,11 +1725,11 @@ async function newMechanics() {
 
     for (const { side, ...u } of MECHANICS_UNITS(group.id)) {
         const row = await prisma.unit.create({
-            data: {
+            data: d20RowData({
                 campaignId,
                 ...u,
                 knownSpells: [light.id],
-            } as Prisma.UnitUncheckedCreateInput,
+            }) as Prisma.UnitUncheckedCreateInput,
         });
 
         setup.push({ id: row.id, type: ParticipantSourceType.UNIT, side });
@@ -1957,18 +1961,21 @@ async function racialMechanics() {
     });
 
     await prisma.unit.create({
-        data: {
+        data: d20RowData({
             campaignId,
             ...DEMON_UNIT,
             raceId: demons.id,
-        } as Prisma.UnitUncheckedCreateInput,
+        }) as Prisma.UnitUncheckedCreateInput,
     });
 
     const setup: Array<Record<string, unknown>> = [];
 
     for (const { side, ...u } of RACIAL_UNITS) {
         const row = await prisma.unit.create({
-            data: { campaignId, ...u } as Prisma.UnitUncheckedCreateInput,
+            data: d20RowData({
+                campaignId,
+                ...u,
+            }) as Prisma.UnitUncheckedCreateInput,
         });
 
         setup.push({
@@ -2337,11 +2344,11 @@ async function spellModel() {
 
     for (const { side, ...u } of SPELL_MODEL_UNITS(human.id)) {
         const row = await prisma.unit.create({
-            data: {
+            data: d20RowData({
                 campaignId,
                 ...u,
                 knownSpells,
-            } as Prisma.UnitUncheckedCreateInput,
+            }) as Prisma.UnitUncheckedCreateInput,
         });
 
         setup.push({ id: row.id, type: ParticipantSourceType.UNIT, side });
