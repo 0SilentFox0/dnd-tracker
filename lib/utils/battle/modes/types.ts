@@ -135,7 +135,7 @@ export interface ModeEngineHooks<C> {
         attacker: BattleParticipant;
         neighbour: BattleParticipant;
     }): boolean;
-    /** Ребра-стіни режиму, що додаються до core `map.walls`. */
+    /** Ребра-стіни режиму, що додаються до core `map.walls`; масив має бути стабільним за посиланням (memo `wallsOf` за ідентичністю). */
     walls?(args: { config: C; map: BattleMapConfig }): readonly string[];
     /** Лінія вогню (сусідні клітинки по черзі) перетинає стіну режиму. Відсутній — ні. */
     lineBlocked?(args: {
