@@ -162,7 +162,14 @@ export function BattleMap({
     );
 
     const layout = useMemo(
-        () => ({ win, size, pxPerUnit, rotated: fit.rotated, phone }),
+        () => ({
+            win,
+            size,
+            pxPerUnit,
+            rotated: fit.rotated,
+            phone,
+            window: null,
+        }),
         [win, size, pxPerUnit, fit.rotated, phone]
     );
 

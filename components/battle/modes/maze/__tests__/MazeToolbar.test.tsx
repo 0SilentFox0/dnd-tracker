@@ -6,6 +6,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { MazeToolbar } from '../MazeToolbar';
 import { mazeMap, RO } from './maze-fixtures';
 
+import { clickCell } from '@/components/battle/map/__tests__/grid-pointer';
 import { BattleMapPanel } from '@/components/battle/map/BattleMapPanel';
 import { MazeViewProvider } from '@/components/battle/modes/maze/MazeViewProvider';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -196,7 +197,7 @@ describe('MazeToolbar', () => {
 
         expect(container.querySelector('[data-maze-edge]')).toBeNull();
 
-        fireEvent.click(container.querySelector('[data-fx-cell="3:3"]')!);
+        clickCell(container, { x: 3, y: 3 });
 
         expect(mutate).toHaveBeenCalledWith(
             { op: 'fog', cells: ['3:3'], on: true },

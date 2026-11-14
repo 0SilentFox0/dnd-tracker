@@ -61,15 +61,14 @@ function Harness() {
     );
 }
 
-const cell = (c: HTMLElement, key: string) =>
-    c.querySelector(`polygon[data-fx-cell="${key}"]`) as Element;
+const hit = (c: HTMLElement) =>
+    c.querySelector('[data-grid-hit]') as SVGRectElement;
 
 const CELL_PX = 10;
 
 // сітка в тестах 10 px на клітинку: штрих рахує клітинки з координат вказівника
 function press(c: HTMLElement, key: string) {
-    const svg = (cell(c, key) as SVGPolygonElement)
-        .ownerSVGElement as SVGSVGElement;
+    const svg = hit(c).ownerSVGElement as SVGSVGElement;
 
     svg.getScreenCTM = () =>
         ({
@@ -83,7 +82,7 @@ function press(c: HTMLElement, key: string) {
 
     const [x, y] = key.split(':').map(Number);
 
-    fireEvent.pointerDown(cell(c, key), {
+    fireEvent.pointerDown(hit(c), {
         pointerId: 1,
         isPrimary: true,
         button: 0,
@@ -104,7 +103,12 @@ function dragTo(key: string) {
 
 const release = () => fireEvent.pointerUp(window, { pointerId: 1 });
 
-const blocked = (c: HTMLElement) => c.querySelectorAll('polygon[data-blocked]');
+const blockedCount = (c: HTMLElement) =>
+    [
+        ...(
+            c.querySelector('path[data-blocked]')?.getAttribute('d') ?? ''
+        ).matchAll(/h(\d+)v/g),
+    ].reduce((n, m) => n + Number(m[1]) / UNIT, 0);
 
 const enable = () =>
     fireEvent.click(
@@ -124,19 +128,24 @@ describe('BattleFormMap', () => {
     it('off: no preview and value is null', () => {
         const { container } = render(<Harness />);
 
-        expect(container.querySelectorAll('polygon')).toHaveLength(0);
+        expect(container.querySelector('svg[data-fx-grid]')).toBeNull();
         expect(seen.editor.state.value).toBeNull();
     });
 
-    it('on: preview with 240 cells; top margin 2 blocks 40 without stroke', () => {
+    it('on: preview with 240 cells; top margin 2 blocks 40', () => {
         const { container } = render(<Harness />);
 
         enable();
-        expect(container.querySelectorAll('polygon')).toHaveLength(240);
+
+        const grid = container.querySelector('svg[data-fx-grid]') as Element;
+
+        expect(
+            Number(grid.getAttribute('data-cols')) *
+                Number(grid.getAttribute('data-rows'))
+        ).toBe(240);
 
         typeIn('battleSetup.map.margins.top', '2');
-        expect(blocked(container)).toHaveLength(40);
-        expect(blocked(container)[0].getAttribute('stroke')).toBe('none');
+        expect(blockedCount(container)).toBe(40);
     });
 
     it('palette: drag-paints blocked cells, erase clears them', () => {
@@ -146,7 +155,7 @@ describe('BattleFormMap', () => {
         press(container, '3:3');
         dragTo('4:3');
         release();
-        expect(blocked(container)).toHaveLength(0);
+        expect(blockedCount(container)).toBe(0);
 
         fireEvent.click(
             screen.getByRole('button', {
@@ -156,14 +165,14 @@ describe('BattleFormMap', () => {
         press(container, '3:3');
         dragTo('4:3');
         release();
-        expect(blocked(container)).toHaveLength(2);
+        expect(blockedCount(container)).toBe(2);
 
         fireEvent.click(
             screen.getByRole('button', { name: 'battleSetup.map.tools.erase' })
         );
         press(container, '3:3');
         release();
-        expect(blocked(container)).toHaveLength(1);
+        expect(blockedCount(container)).toBe(1);
     });
 
     it('palette: wall and hazard with label and damage; no barrier option', () => {
@@ -421,9 +430,9 @@ describe('BattleFormMap', () => {
 
         enable();
         typeIn('battleSetup.map.margins.top', '1');
-        expect(blocked(container)[0].getAttribute('fill')).not.toBe(
-            'transparent'
-        );
+        expect(
+            container.querySelector('path[data-blocked]')?.getAttribute('fill')
+        ).not.toBe('transparent');
     });
 
     it('motion panel sets and clears map.motion', () => {

@@ -173,8 +173,8 @@ describe('шари лабіринту', () => {
         ) as SVGRectElement;
 
         const cell = layer.querySelector(
-            'svg [data-fx-cell="2:3"]'
-        ) as SVGPolygonElement;
+            'svg [data-grid-hit]'
+        ) as SVGRectElement;
 
         expect(wall.closest('svg')).toBe(cell.closest('svg'));
 

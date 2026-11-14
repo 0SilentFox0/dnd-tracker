@@ -2,6 +2,8 @@
 import { cleanup, fireEvent } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { clickCell, hoverCell, stubGridCtm } from './grid-pointer';
+
 import { BattleMap } from '@/components/battle/map';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { CombatStatus } from '@/lib/constants/battle';
@@ -58,12 +60,16 @@ const square: BattleMapConfig = {
 const people = [at('h', 0, 0), at('e', 3, 2)];
 
 describe('BattleMap', () => {
-    it('renders cells and tokens', () => {
+    it('renders the grid and tokens', () => {
         const { container } = render(
             <BattleMap map={square} participants={people} />
         );
 
-        expect(container.querySelectorAll('polygon')).toHaveLength(12);
+        expect(
+            container.querySelector('svg[data-fx-grid]')?.getAttribute('data-cols')
+        ).toBe('4');
+        expect(container.querySelector('[data-grid-lines]')).not.toBeNull();
+        expect(container.querySelectorAll('polygon')).toHaveLength(0);
         expect(
             container.querySelector('[data-fx-participant="h"]')
         ).not.toBeNull();
@@ -83,26 +89,114 @@ describe('BattleMap', () => {
             />
         );
 
-        const blocked = container.querySelector(
-            'polygon[data-fx-cell="1:1"]'
-        ) as SVGPolygonElement;
+        expect(container.querySelector('[data-blocked]')).toBeNull();
+        expect(
+            container.querySelector('mask path')?.getAttribute('d')
+        ).toBe('M100 100h100v100h-100z');
 
-        expect(blocked.getAttribute('stroke')).toBe('none');
-        expect(blocked.getAttribute('fill')).toBe('transparent');
-        expect(blocked.getAttribute('pointer-events')).toBe('none');
-
-        fireEvent.click(blocked);
+        clickCell(container, { x: 1, y: 1 });
         expect(onCellClick).not.toHaveBeenCalled();
 
-        fireEvent.click(
-            container.querySelector(
-                'polygon[data-fx-cell="2:1"]'
-            ) as SVGPolygonElement
-        );
+        clickCell(container, { x: 2, y: 1 });
         expect(onCellClick).toHaveBeenCalledTimes(1);
     });
 
-    it('exposes FX hooks: anchor, cell, clip', () => {
+    it('hovering a blocked cell reports null, an open cell reports the cell', () => {
+        const onCellHover = vi.fn();
+
+        const { container } = render(
+            <BattleMap
+                map={{ ...square, blocked: ['1:1'] }}
+                participants={people}
+                actions={{ onCellHover }}
+            />
+        );
+
+        hoverCell(container, { x: 2, y: 1 });
+        expect(onCellHover).toHaveBeenLastCalledWith({ x: 2, y: 1 });
+
+        hoverCell(container, { x: 1, y: 1 });
+        expect(onCellHover).toHaveBeenLastCalledWith(null);
+    });
+
+    it('clickableBlocked lets a blocked cell be clicked', () => {
+        const onCellClick = vi.fn();
+
+        const { container } = render(
+            <BattleMap
+                map={{ ...square, blocked: ['1:1'] }}
+                participants={people}
+                actions={{ onCellClick }}
+                editing={{ clickableBlocked: true }}
+            />
+        );
+
+        clickCell(container, { x: 1, y: 1 });
+        expect(onCellClick).toHaveBeenCalledWith({ x: 1, y: 1 });
+    });
+
+    it('view.range darkens everything outside the rectangle with one evenodd path', () => {
+        const { container } = render(
+            <BattleMap
+                map={square}
+                participants={people}
+                view={{ range: { x: 1, y: 0, cols: 2, rows: 2 } }}
+            />
+        );
+
+        const out = container.querySelectorAll('[data-out-of-range]');
+
+        expect(out).toHaveLength(1);
+        expect(out[0].getAttribute('fill-rule')).toBe('evenodd');
+        expect(out[0].getAttribute('d')).toBe(
+            'M0 0h400v300h-400zM100 0h200v200h-200z'
+        );
+    });
+
+    it('a 100-cell move zone is one outline and one fill', () => {
+        const marks = new Map<string, number>();
+
+        for (let x = 0; x < 10; x++)
+            for (let y = 0; y < 10; y++) marks.set(`${x}:${y}`, 1);
+
+        const { container } = render(
+            <BattleMap
+                map={{ ...square, cols: 10, rows: 10 }}
+                participants={[]}
+                view={{ marks }}
+            />
+        );
+
+        expect(container.querySelectorAll('[data-fx-zone="move"]')).toHaveLength(
+            1
+        );
+        expect(
+            container.querySelectorAll('[data-zone-fill="move"]')
+        ).toHaveLength(1);
+    });
+
+    it('grid element count does not depend on the map area', () => {
+        const count = (cols: number, rows: number) => {
+            const { container, unmount } = render(
+                <BattleMap
+                    map={{ ...square, cols, rows }}
+                    participants={[]}
+                />
+            );
+
+            const n = container.querySelectorAll(
+                'svg[data-fx-grid] path, svg[data-fx-grid] polygon'
+            ).length;
+
+            unmount();
+
+            return n;
+        };
+
+        expect(count(60, 60)).toBe(count(8, 8));
+    });
+
+    it('exposes FX hooks: anchor, grid, clip', () => {
         const { container } = render(
             <BattleMap map={square} participants={people} />
         );
@@ -112,9 +206,7 @@ describe('BattleMap', () => {
                 .querySelector('[data-fx-participant="h"]')
                 ?.getAttribute('data-fx-anchor')
         ).toBe('map');
-        expect(
-            container.querySelector('polygon[data-fx-cell="3:2"]')
-        ).not.toBeNull();
+        expect(container.querySelector('svg[data-fx-grid]')).not.toBeNull();
         expect(container.querySelectorAll('[data-fx-clip]')).toHaveLength(1);
     });
 
@@ -401,7 +493,7 @@ describe('BattleMap', () => {
             />
         );
 
-        fireEvent.click(container.querySelectorAll('polygon')[5]);
+        clickCell(container, { x: 1, y: 1 });
         expect(onCellClick).toHaveBeenCalledWith({ x: 1, y: 1 });
     });
 
@@ -513,7 +605,9 @@ describe('BattleMap', () => {
         );
 
         expect(
-            container.querySelectorAll('polygon')[0].getAttribute('fill')
+            container
+                .querySelector('polygon[data-mark-cell="0:0"]')
+                ?.getAttribute('fill')
         ).toBe('rgba(230,80,60,.35)');
     });
 
@@ -548,15 +642,17 @@ describe('BattleMap', () => {
         );
         expect(bad.getAttribute('stroke')).toBe('rgba(255,100,85,.65)');
         // приглушена заливка: фон карти лишається видимим
+        expect(container.querySelectorAll('[data-fx-zone="move"]')).toHaveLength(
+            1
+        );
         expect(
-            container
-                .querySelector('polygon[data-fx-cell="1:0"]')
-                ?.getAttribute('fill')
+            container.querySelectorAll('[data-zone-fill="move"]')
+        ).toHaveLength(1);
+        expect(
+            container.querySelector('[data-zone-fill="move"]')?.getAttribute('fill')
         ).toBe('rgba(90,210,80,.07)');
         expect(
-            container
-                .querySelector('polygon[data-fx-cell="2:0"]')
-                ?.getAttribute('fill')
+            container.querySelector('[data-zone-fill="danger"]')?.getAttribute('fill')
         ).toBe('rgba(225,70,55,.09)');
     });
 
@@ -575,7 +671,7 @@ describe('BattleMap', () => {
         );
 
         const wall = container.querySelector(
-            '[data-terrain="wall"] polygon'
+            '[data-terrain="wall"] path'
         ) as Element;
 
         const barrier = container.querySelector(
@@ -583,38 +679,39 @@ describe('BattleMap', () => {
         ) as Element;
 
         const hazard = container.querySelector(
-            '[data-terrain="hazard"] polygon'
+            '[data-terrain="hazard"] path'
         ) as Element;
+
+        const hazardStroke = container.querySelector(
+            '[data-terrain="hazard"] path[stroke]'
+        ) as Element;
+
+        const titleAt = (x: number, y: number) => {
+            hoverCell(container, { x, y });
+
+            return container.querySelector('[data-grid-hover] title')
+                ?.textContent;
+        };
 
         expect(wall.getAttribute('fill')).toBe('rgba(0,0,0,.6)');
         expect(
-            barrier.querySelectorAll('polygon')[0].getAttribute('fill')
+            barrier.querySelectorAll('path')[0].getAttribute('fill')
         ).toBe('rgba(0,0,0,.75)');
         expect(
-            barrier.querySelectorAll('polygon')[1].getAttribute('fill')
+            barrier.querySelectorAll('path')[1].getAttribute('fill')
         ).toContain('url(#');
         expect(hazard.getAttribute('fill')).toBe(
             'url(#battle-map-hazard-fire)'
         );
-        expect(hazard.getAttribute('stroke')).toBe('#ff9a2a');
+        expect(hazardStroke.getAttribute('stroke')).toBe('#ff9a2a');
+        expect(titleAt(2, 1)).toBe('Барʼєр до кінця раунду 3');
+        expect(titleAt(3, 1)).toBe('Вогняна стіна');
+        expect(titleAt(0, 1)).toBeUndefined();
         expect(
             container
-                .querySelector('polygon[data-fx-cell="1:1"]')
-                ?.getAttribute('stroke')
-        ).toBe('none');
-        expect(
-            container.querySelector('polygon[data-fx-cell="2:1"] title')
-                ?.textContent
-        ).toBe('Барʼєр до кінця раунду 3');
-        expect(
-            container.querySelector('polygon[data-fx-cell="3:1"] title')
-                ?.textContent
-        ).toBe('Вогняна стіна');
-        expect(
-            container
-                .querySelector('polygon[data-fx-cell="0:1"]')
-                ?.getAttribute('stroke')
-        ).toBe('rgba(255,255,255,1)');
+                .querySelector('mask path')
+                ?.getAttribute('d')
+        ).toContain('M100 100');
     });
 
     it("тимчасова небезпека: вогняна заливка, жар, полум'я й «ще N р.»; червона зона руху — ні", () => {
@@ -640,7 +737,7 @@ describe('BattleMap', () => {
         const timed = container.querySelectorAll('[data-hazard-timed]');
 
         expect(timed).toHaveLength(1);
-        expect(timed[0].querySelector('polygon')?.getAttribute('fill')).toBe(
+        expect(timed[0].getAttribute('fill')).toBe(
             'url(#battle-map-hazard-fire)'
         );
         expect(
@@ -649,21 +746,20 @@ describe('BattleMap', () => {
         expect(
             container.querySelector('.battle-map-ember')?.children
         ).toHaveLength(2);
-        expect(
-            container.querySelector('polygon[data-fx-cell="1:1"] title')
-                ?.textContent
-        ).toBe('Вогняна стіна · ще 2 р.');
-        expect(
-            container.querySelector('polygon[data-fx-cell="3:2"] title')
-                ?.textContent
-        ).toBe('Лава');
 
-        const danger = container.querySelector(
-            'polygon[data-fx-cell="2:0"]'
-        ) as Element;
+        const titleAt = (x: number, y: number) => {
+            hoverCell(container, { x, y });
 
-        expect(danger.getAttribute('fill')).toBe('rgba(225,70,55,.09)');
-        expect(danger.querySelector('title')).toBeNull();
+            return container.querySelector('[data-grid-hover] title')
+                ?.textContent;
+        };
+
+        expect(titleAt(1, 1)).toBe('Вогняна стіна · ще 2 р.');
+        expect(titleAt(3, 2)).toBe('Лава');
+        expect(
+            container.querySelector('[data-zone-fill="danger"]')?.getAttribute('fill')
+        ).toBe('rgba(225,70,55,.09)');
+        expect(titleAt(2, 0)).toBeUndefined();
         expect(container.querySelector('[data-hazard-flame="2:0"]')).toBeNull();
     });
 
@@ -682,17 +778,15 @@ describe('BattleMap', () => {
 
         const root = container.querySelector('[data-fx-clip]') as Element;
 
-        const cell = container.querySelectorAll('polygon')[5];
-
         fireEvent.pointerDown(root, { pointerId: 1, clientX: 10, clientY: 10 });
         fireEvent.pointerMove(root, { pointerId: 1, clientX: 30, clientY: 10 });
         fireEvent.pointerUp(root, { pointerId: 1, clientX: 30, clientY: 10 });
-        fireEvent.click(cell);
+        clickCell(container, { x: 1, y: 1 });
         expect(onCellClick).not.toHaveBeenCalled();
 
         fireEvent.pointerDown(root, { pointerId: 1, clientX: 10, clientY: 10 });
         fireEvent.pointerUp(root, { pointerId: 1, clientX: 10, clientY: 10 });
-        fireEvent.click(cell);
+        clickCell(container, { x: 1, y: 1 });
         expect(onCellClick).toHaveBeenCalledTimes(1);
     });
 
@@ -720,21 +814,15 @@ describe('BattleMap', () => {
             />
         );
 
-        const cellEl = shown.container.querySelector(
-            'polygon[data-fx-cell="1:1"]'
-        ) as SVGPolygonElement;
+        const cellEl = shown.container.querySelector('[data-blocked]') as Element;
 
+        expect(cellEl.getAttribute('d')).toBe('M100 100h100v100h-100z');
         expect(cellEl.getAttribute('fill')).not.toBe('transparent');
-        expect(cellEl.getAttribute('stroke')).toBe('none');
         cleanup();
 
         const hidden = render(<BattleMap map={m} participants={[]} />);
 
-        expect(
-            hidden.container
-                .querySelector('polygon[data-fx-cell="1:1"]')
-                ?.getAttribute('fill')
-        ).toBe('transparent');
+        expect(hidden.container.querySelector('[data-blocked]')).toBeNull();
     });
 
     it("the mover's own token lets clicks through to its footprint cells while move marks show", () => {
@@ -812,8 +900,9 @@ describe('BattleMap — поворот у портреті', () => {
             <BattleMap map={map} participants={[]} view={{ round: 2 }} phone />
         );
 
+        hoverCell(phone.container, { x: 1, y: 1 });
         expect(
-            phone.container.querySelector('polygon[data-fx-cell="1:1"] title')
+            phone.container.querySelector('[data-grid-hover] title')
                 ?.textContent
         ).toBe('Небезпечна зона · ще 1 р.');
         expect(
@@ -830,8 +919,9 @@ describe('BattleMap — поворот у портреті', () => {
                 .querySelector('[data-hazard-flame="1:1"]')
                 ?.getAttribute('transform')
         ).toBeNull();
+        hoverCell(desktop.container, { x: 1, y: 1 });
         expect(
-            desktop.container.querySelector('polygon[data-fx-cell="1:1"] title')
+            desktop.container.querySelector('[data-grid-hover] title')
                 ?.textContent
         ).toBe('Небезпечна зона · до кінця раунду 2');
     });
@@ -1087,26 +1177,19 @@ describe('BattleMap — terrain stroke', () => {
             />
         );
 
-        const svg = (
-            utils.container.querySelector('polygon') as SVGPolygonElement
-        ).ownerSVGElement as SVGSVGElement;
-
         // 100 px на клітинку: одиниця SVG = 1 px екрана
-        svg.getScreenCTM = () =>
-            ({ a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 }) as DOMMatrix;
+        stubGridCtm(utils.container);
 
-        const cell = (key: string) =>
-            utils.container.querySelector(
-                `polygon[data-fx-cell="${key}"]`
-            ) as Element;
+        const cell = () =>
+            utils.container.querySelector('[data-grid-hit]') as Element;
 
         const down = (
-            key: string,
+            _key: string,
             x: number,
             y: number,
             init: Record<string, unknown> = {}
         ) =>
-            fireEvent.pointerDown(cell(key), {
+            fireEvent.pointerDown(cell(), {
                 pointerId: 1,
                 isPrimary: true,
                 button: 0,

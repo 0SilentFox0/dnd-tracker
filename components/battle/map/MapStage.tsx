@@ -10,17 +10,13 @@ import {
     useRef,
 } from 'react';
 
+import { type GridCellActions, GridLayer } from './grid/GridLayer';
 import { DoorMenu } from './DoorMenu';
 import { DoorsLayer } from './DoorsLayer';
 import { EdgeEditor } from './EdgeEditor';
 import { MapBackground } from './MapBackground';
 import { MapHitFloat } from './MapHitFloat';
-import {
-    type GridCellActions,
-    GridLayer,
-    StrokeLayer,
-    TemplateLayer,
-} from './MapLayers';
+import { StrokeLayer, TemplateLayer } from './MapLayers';
 import { MapToken } from './MapToken';
 import { MapTokenHud } from './MapTokenHud';
 import { RangedHint } from './RangedHint';
@@ -41,6 +37,7 @@ import {
 } from '@/lib/utils/abilities/engine/core/participants';
 import {
     centreCell,
+    type GridWindow,
     isFallen,
     isMoveMark,
     tokenBox,
@@ -59,6 +56,7 @@ export interface MapStageLayout {
     pxPerUnit: number;
     rotated: boolean;
     phone: boolean;
+    window: GridWindow | null;
 }
 
 export interface MapStageInteraction {
@@ -100,6 +98,8 @@ function MapStageImpl({
 }: MapStageProps) {
     const { win, size, pxPerUnit, rotated, phone } = layout;
 
+    const gridWindow = layout.window;
+
     const { painting, preview, svgRef, onStrokeStart, wasDragged } =
         interaction;
 
@@ -132,13 +132,19 @@ function MapStageImpl({
     const onCellHover = actions?.onCellHover;
 
     const gridScene = useMemo(
-        () => ({ round, rotated, clickableBlocked, showBlocked }),
-        [round, rotated, clickableBlocked, showBlocked]
+        () => ({
+            round,
+            rotated,
+            clickableBlocked,
+            showBlocked,
+            window: gridWindow,
+        }),
+        [round, rotated, clickableBlocked, showBlocked, gridWindow]
     );
 
     const cellActions = useMemo<GridCellActions>(
-        () => ({ onCellClick, onCellHover, wasDragged }),
-        [onCellClick, onCellHover, wasDragged]
+        () => ({ onCellClick, onCellHover, wasDragged, svgRef }),
+        [onCellClick, onCellHover, wasDragged, svgRef]
     );
 
     const routes = useMoveRoutes(map, participants);
@@ -238,6 +244,9 @@ function MapStageImpl({
                 className="absolute inset-0 h-full w-full"
                 viewBox={`0 0 ${size.width} ${size.height}`}
                 preserveAspectRatio="none"
+                data-fx-grid=""
+                data-cols={map.cols}
+                data-rows={map.rows}
             >
                 <GridLayer
                     map={map}

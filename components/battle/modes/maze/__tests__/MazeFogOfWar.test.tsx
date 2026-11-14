@@ -44,7 +44,7 @@ describe('туман війни гравця', () => {
         expect(new Set(holes)).toEqual(new Set(view.cells));
         expect(holes).toContain('1:2');
         expect(holes).not.toContain('4:2');
-        expect(container.querySelector('[data-fx-cell="4:2"]')).not.toBeNull();
+        expect(container.querySelector('[data-grid-hit]')).not.toBeNull();
     });
 
     it('покрив лежить над клітинками й під стінами, не перехоплює кліки', () => {
@@ -60,7 +60,7 @@ describe('туман війни гравця', () => {
 
         const order = [
             ...svg.querySelectorAll(
-                '[data-fx-cell], [data-maze-fow-layer], [data-maze-walls]'
+                '[data-grid-hit], [data-maze-fow-layer], [data-maze-walls]'
             ),
         ];
 
@@ -69,7 +69,7 @@ describe('туман війни гравця', () => {
         );
 
         expect(
-            order.findIndex((el) => el.hasAttribute('data-fx-cell'))
+            order.findIndex((el) => el.hasAttribute('data-grid-hit'))
         ).toBeLessThan(fow);
         expect(
             order.findIndex((el) => el.hasAttribute('data-maze-walls'))
