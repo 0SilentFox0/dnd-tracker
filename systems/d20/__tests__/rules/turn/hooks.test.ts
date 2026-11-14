@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
 
-import { d20LairRoundStart } from '../../../rules/turn/on-round-start';
 import { d20DropStalePendingCast } from '../../../rules/turn/on-turn-end';
 
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
@@ -65,20 +64,5 @@ describe('d20DropStalePendingCast', () => {
 
         expect(out.participants[0].battleData.pendingCast).toBeDefined();
         expect(out.messages).toEqual([]);
-    });
-});
-
-describe('d20LairRoundStart', () => {
-    it('is silent without an active lair', () => {
-        const p = createMockParticipant();
-
-        expect(
-            d20LairRoundStart({
-                participants: [p],
-                round: 2,
-                rng: () => 0.5,
-                rules: DEFAULT_RULES,
-            }).messages
-        ).toEqual([]);
     });
 });

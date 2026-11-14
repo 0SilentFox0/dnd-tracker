@@ -17,4 +17,7 @@ export const DND5E_META = {
         ],
     },
     i18n: {},
+    whatsNew: [
+        { id: '2026-11-14-d20-modules', date: '2026-11-14', audience: 'dm' },
+    ],
 } as const satisfies SystemMeta;
