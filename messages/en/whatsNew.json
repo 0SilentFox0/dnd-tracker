@@ -5,7 +5,10 @@
   },
   "2026-11-grid-calibration": {
     "title": "Grid calibration",
-    "body": "On the battle map setup you can outline one cell on the background image (or an N×N square) and the grid fits it, including non-square cells. Arrows nudge the grid by 1 px or 0.01 cell; when you replace the background with an image of the same size you can keep the calibration."
+    "body": "On the battle map setup you can outline one cell on the background image (or an N×N square) and the grid fits it, including non-square cells. Arrows nudge the grid by 1 px or 0.01 cell; when you replace the background with an image of the same size you can keep the calibration.",
+  "2026-11-14-mode-wizard": {
+    "title": "Module wizard",
+    "body": "The System section of the campaign rules now has a module wizard: pick the base in the select, choose modules, then review a preview of sheet sections, content and combat actions before you press Apply."
   },
   "2026-11-13-rule-modules": {
     "title": "Rule modules",

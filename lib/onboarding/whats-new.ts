@@ -7,6 +7,12 @@ export const WHATS_NEW: WhatsNewEntry[] = [
     { id: '2026-11-map-walls', date: '2026-11-14', audience: 'dm' },
     { id: '2026-11-grid-calibration', date: '2026-11-14', audience: 'dm' },
     {
+        id: '2026-11-14-mode-wizard',
+        date: '2026-11-14',
+        audience: 'dm',
+        href: '/help/dm-rule-systems',
+    },
+    {
         id: '2026-11-13-rule-modules',
         date: '2026-11-13',
         audience: 'dm',
