@@ -18,19 +18,23 @@ const fire = (extra: Parameters<typeof testMap>[2]) =>
     lineOfFire(testMap(10, 10, extra), [shooter, target], shooter, target);
 
 describe('lineOfFire: стіни й ґрати', () => {
-    it('стіна на лінії блокує вогонь без клітинок-перешкод', () => {
+    it('стіна на лінії — wallBlocked, а не укриття', () => {
         expect(fire({ walls: ['3:5:e'] })).toEqual({
-            blocked: true,
+            blocked: false,
+            wallBlocked: true,
             cells: [],
         });
     });
 
     it('стіна поза лінією не заважає', () => {
-        expect(fire({ walls: ['3:2:e'] }).blocked).toBe(false);
+        expect(fire({ walls: ['3:2:e'] }).wallBlocked).toBe(false);
     });
 
     it('ґрати не блокують вогонь', () => {
-        expect(fire({ bars: ['3:5:e'] }).blocked).toBe(false);
+        expect(fire({ bars: ['3:5:e'] })).toMatchObject({
+            blocked: false,
+            wallBlocked: false,
+        });
     });
 });
 

@@ -126,3 +126,18 @@ describe('nextChainTarget', () => {
         ).toBe('near');
     });
 });
+
+describe('nextChainTarget: стіни', () => {
+    it('стіна між попередньою ціллю й наступною не пускає стрибок', () => {
+        const behind = at('w', { x: 8, y: 5 });
+
+        const map = testMap(20, 20, { walls: ['6:5:e'] });
+
+        expect(next([demoness, first, behind], new Set(['t']), map)).toBe(
+            undefined
+        );
+        expect(
+            next([demoness, first, behind], new Set(['t']), testMap(20))
+        ).toBe('w');
+    });
+});

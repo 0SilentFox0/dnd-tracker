@@ -14,6 +14,7 @@ import { MapWeatherPicker } from './MapWeatherPicker';
 import { modeUiOf } from '@/components/battle/modes';
 import { useBattleMapScene } from '@/lib/hooks/battle';
 import { cn } from '@/lib/utils';
+import { activeModeWithConfig } from '@/lib/utils/battle/modes';
 
 function ModeButton({
     active,
@@ -134,7 +135,10 @@ export function BattleMapPanel({ phone = false }: { phone?: boolean }) {
                     )}
                 >
                     {terrainTool.active && (
-                        <MapTerrainToolbar tool={terrainTool} />
+                        <MapTerrainToolbar
+                            tool={terrainTool}
+                            edgesInMode={!!activeModeWithConfig(scene.map)}
+                        />
                     )}
                     {palettes.map(
                         ({ key, tool, panel }) =>

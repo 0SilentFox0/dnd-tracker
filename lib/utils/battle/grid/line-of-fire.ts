@@ -15,12 +15,15 @@ import { isUp } from '@/lib/utils/battle/participant/state';
 import type { BattleMapConfig, BattleParticipant } from '@/types/battle';
 
 export interface LineOfFire {
+    /** Укриття (×0.5): істоти, бар'єри, закриті клітинки, ворота режиму; стіна — окремо у `wallBlocked`. */
     blocked: boolean;
+    /** Стіна ребром на лінії: постріл неможливий. */
+    wallBlocked: boolean;
     /** Клітинки, що заважають (для підсвітки); стіна лабіринту клітинки не має. */
     cells: string[];
 }
 
-const CLEAR: LineOfFire = { blocked: false, cells: [] };
+const CLEAR: LineOfFire = { blocked: false, wallBlocked: false, cells: [] };
 
 export function lineOfFire(
     map: BattleMapConfig | null | undefined,
@@ -72,7 +75,8 @@ export function lineOfFire(
     );
 
     return {
-        blocked: cells.length > 0 || wallBlocked || modeLineBlocked(map, line),
+        blocked: cells.length > 0 || modeLineBlocked(map, line),
+        wallBlocked,
         cells,
     };
 }

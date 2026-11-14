@@ -142,7 +142,8 @@
       "reset": "Reset"
     },
     "edgeDrawing": "Draw walls and bars",
-    "edgesDisabledMode": "Walls and bars are disabled in maze mode"
+    "edgesDisabledMode": "Walls and bars are disabled in maze mode",
+    "edgesDesktopOnly": "Drawing walls and bars is desktop-only — open this on a computer"
   },
   "characters": {
     "title": "Characters",

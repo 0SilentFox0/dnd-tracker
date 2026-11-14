@@ -23,6 +23,7 @@ export const REJECT = {
     badSpellTarget: 'battleLog.reject.badSpellTarget',
     targetUnreachable: 'battleLog.reject.targetUnreachable',
     targetNotNear: 'battleLog.reject.targetNotNear',
+    targetBehindWall: 'battleLog.reject.targetBehindWall',
     targetOutOfAttackRange: 'battleLog.reject.targetOutOfAttackRange',
     enemyNearNoShoot: 'battleLog.reject.enemyNearNoShoot',
     returnImpossible: 'battleLog.reject.returnImpossible',

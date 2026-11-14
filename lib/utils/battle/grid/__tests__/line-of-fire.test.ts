@@ -29,6 +29,7 @@ describe('lineOfFire', () => {
     it('вільна лінія — без перешкоди', () => {
         expect(lineOfFire(MAP, [shooter, target], shooter, target)).toEqual({
             blocked: false,
+            wallBlocked: false,
             cells: [],
         });
     });
@@ -45,7 +46,7 @@ describe('lineOfFire', () => {
                 shooter,
                 target
             )
-        ).toEqual({ blocked: true, cells: ['2:5'] });
+        ).toEqual({ blocked: true, wallBlocked: false, cells: ['2:5'] });
         expect(
             lineOfFire(
                 MAP,
@@ -110,6 +111,7 @@ describe('lineOfFire', () => {
 
         expect(lineOfFire(MAP, [shooter, big], shooter, big)).toEqual({
             blocked: false,
+            wallBlocked: false,
             cells: [],
         });
     });
@@ -137,6 +139,7 @@ describe('lineOfFire', () => {
 
         expect(lineOfFire(map, [shooter, target], shooter, target)).toEqual({
             blocked: true,
+            wallBlocked: true,
             cells: [],
         });
     });

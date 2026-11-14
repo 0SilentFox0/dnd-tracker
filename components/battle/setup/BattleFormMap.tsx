@@ -370,8 +370,12 @@ export function BattleFormMap({ editor }: { editor: BattleMapEditor }) {
                                 {t('edgesDisabledMode')}
                             </p>
                         )}
-                        {!touch &&
-                            !(mode && MAP_MODE_UI[mode].hidesTerrain) && (
+                        {!(mode && MAP_MODE_UI[mode].hidesTerrain) &&
+                            (touch ? (
+                                <p className="text-sm text-hud-muted">
+                                    {t('edgesDesktopOnly')}
+                                </p>
+                            ) : (
                                 <div className="space-y-2">
                                     <OnboardingHint id="dm.map-walls" />
                                     <Label>{t('edgeDrawing')}</Label>
@@ -381,7 +385,7 @@ export function BattleFormMap({ editor }: { editor: BattleMapEditor }) {
                                         onPick={actions.setTool}
                                     />
                                 </div>
-                            )}
+                            ))}
                         {editor.motionTool && (
                             <div className="space-y-2">
                                 <Label>{t('motion')}</Label>

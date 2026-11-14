@@ -1,6 +1,7 @@
 import { isAdjacentOnMap } from './adjacency';
 import { cellFeetOf } from './cell-feet';
 import { footprintDistance } from './geometry';
+import { lineOfFire } from './line-of-fire';
 import { cellsOf, isOnMap } from './occupancy';
 import { wallsAllowSight } from './sight';
 
@@ -113,6 +114,14 @@ export function rangeDisadvantageReasons(
     return reasons;
 }
 
+const behindWall = (
+    map: BattleMapConfig,
+    participants: BattleParticipant[],
+    attacker: BattleParticipant,
+    targets: BattleParticipant[]
+) =>
+    targets.some((t) => lineOfFire(map, participants, attacker, t).wallBlocked);
+
 export function attackReachError(
     map: BattleMapConfig | null,
     participants: BattleParticipant[],
@@ -149,7 +158,12 @@ export function attackReachError(
             if (placed.some((t) => distanceTo(t) > bands.long))
                 return textRef(REJECT.targetOutOfAttackRange);
 
-            return modeTargetHiddenText(map, attacker, placed);
+            return (
+                modeTargetHiddenText(map, attacker, placed) ??
+                (behindWall(map, participants, attacker, placed)
+                    ? textRef(REJECT.targetBehindWall)
+                    : null)
+            );
         }
 
         const modeBlocked = placed
@@ -181,5 +195,11 @@ export function attackReachError(
     if (range !== null && placed.some((t) => distanceTo(t) > range))
         return textRef(REJECT.targetOutOfAttackRange);
 
-    return modeTargetHiddenText(map, attacker, placed);
+    const hidden = modeTargetHiddenText(map, attacker, placed);
+
+    if (hidden) return hidden;
+
+    return behindWall(map, participants, attacker, placed)
+        ? textRef(REJECT.targetBehindWall)
+        : null;
 }

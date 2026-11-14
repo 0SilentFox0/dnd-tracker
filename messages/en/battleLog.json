@@ -319,6 +319,7 @@
     "badSpellTarget": "This target does not fit the spell",
     "targetUnreachable": "The target is unreachable",
     "targetNotNear": "The target is not nearby — move closer first",
+    "targetBehindWall": "The target is behind a wall — no shot",
     "targetOutOfAttackRange": "The target is out of attack range",
     "enemyNearNoShoot": "An enemy is adjacent — you cannot shoot",
     "returnImpossible": "Cannot return",

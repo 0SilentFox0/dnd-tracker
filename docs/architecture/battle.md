@@ -91,7 +91,7 @@ Wizards (attack, spellbook, player turn) are reducers in `lib/utils/battle/flows
 
 ## Attack: cover, chain shot, cleave
 
-- **Cover** is computed by the server (`grid/line-of-fire.ts`) per target of a ranged attack: a living, non-airborne participant, `wall`/`barrier`, `blocked` cells, or a mode wall (`lineBlocked`) on the line. Not applied to melee, chain jumps or secondary targets of piercing shots. The wizard and the map show the same result.
+- **Cover** is computed by the server (`grid/line-of-fire.ts`) per target of a ranged attack: a living, non-airborne participant, `wall`/`barrier`, `blocked` cells, or a mode `lineBlocked` on the line. Not applied to melee, chain jumps or secondary targets of piercing shots. A wall edge on the line (core walls and mode walls, bars excluded) is not cover but a ban: `lineOfFire().wallBlocked` makes `attackReachError` return `REJECT.targetBehindWall`, so the server rejects the shot and the wizard/map mark the target unreachable; chain jumps and piercing rays stop at walls too. The wizard and the map show the same result.
 - **Target limit**: `attack/max-targets.ts`, shared by client and server; auto-targets (chain, cleave, piercing, hits-all) are outside it.
 - **Chain shot**: ability flag `chainShot` (`attack/process/chain.ts`) — the player picks one target, the server jumps to the nearest enemy in range (`grid/nearest.ts`) from the previous target's cell.
 - **Cleave**: a melee attack with `maxTargets > 1` (`attack/process/cleave.ts`) also hits other enemies in the 3 cells of one facing (side = row of 3, diagonal = corner of 3) containing the target; the facing with the most enemies wins (1-cell attackers; larger ones hit any adjacent); the server rolls d20/damage for them (`attack-phase/targets.ts`).

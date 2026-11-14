@@ -319,6 +319,7 @@
     "badSpellTarget": "Ця ціль не підходить для заклинання",
     "targetUnreachable": "Ціль недосяжна",
     "targetNotNear": "Ціль не поруч — спершу підійдіть",
+    "targetBehindWall": "Ціль за стіною — стріляти не можна",
     "targetOutOfAttackRange": "Ціль поза дальністю атаки",
     "enemyNearNoShoot": "Поруч ворог — стріляти не можна",
     "returnImpossible": "Повернутися неможливо",

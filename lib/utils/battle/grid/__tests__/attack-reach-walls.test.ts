@@ -72,3 +72,34 @@ describe('сусідство й досяг зі стінами', () => {
         expect(isAdjacentAttack(hero, foe, sword, testMap(6, 6))).toBe(true);
     });
 });
+
+describe('дальня атака зі стінами', () => {
+    const bow = {
+        id: 'b',
+        name: 'Bow',
+        type: AttackType.RANGED,
+        range: '80/320',
+    } as BattleAttack;
+
+    const archer = unit('a', { x: 0, y: 5 }, ParticipantSide.ALLY);
+
+    const far = unit('t', { x: 6, y: 5 }, ParticipantSide.ENEMY);
+
+    const shoot = (map: ReturnType<typeof testMap>) =>
+        attackReachError(map, [archer, far], archer, bow, [far], DEFAULT_RULES);
+
+    it('стіна на лінії забороняє постріл', () => {
+        expect(shoot(testMap(10, 10, { walls: ['3:5:e'] }))).toEqual(
+            textRef(REJECT.targetBehindWall)
+        );
+    });
+
+    it('ґрати й вільна лінія не заважають', () => {
+        expect(shoot(testMap(10, 10, { bars: ['3:5:e'] }))).toBeNull();
+        expect(shoot(testMap(10, 10))).toBeNull();
+    });
+
+    it('стіна поза лінією не заважає', () => {
+        expect(shoot(testMap(10, 10, { walls: ['3:2:e'] }))).toBeNull();
+    });
+});

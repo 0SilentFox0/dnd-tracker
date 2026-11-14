@@ -4,6 +4,7 @@ import {
 } from '@/lib/utils/abilities/engine/core/participants';
 import {
     attackRangeCells,
+    cellsConnected,
     cellsOf,
     footprintDistance,
     isOnMap,
@@ -57,6 +58,10 @@ export function nextChainTarget({
             !isDormant(p) &&
             modeSees(map, attacker, p) &&
             wallsAllowSight(map, attacker, p) &&
+            (!map ||
+                !isOnMap(p) ||
+                origin.length === 0 ||
+                cellsConnected(map, 'fire', origin, cellsOf(p))) &&
             inRange(p)
     );
 
