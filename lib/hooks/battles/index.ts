@@ -1,7 +1,10 @@
 export { battleKeys, battleQueryKey } from './keys';
 export type { BattleOpMutation } from './makeBattleHook';
 export { type BalanceSuggestions } from './setup/useBalanceSuggestions';
-export { type BattleMapEditor } from './setup/useBattleMapEditor';
+export {
+    type BattleMapEditor,
+    useBattleMapEditor,
+} from './setup/useBattleMapEditor';
 export {
     type ParticipantActions,
     type ParticipantSelection,
