@@ -8,6 +8,7 @@ import {
 import { applyTerrain, replaceTerrain } from './terrain';
 import { parseEdgeKey } from './walls';
 
+import { MAP_LIMITS } from '@/lib/constants/map-limits';
 import { clamp } from '@/lib/utils/common/clamp';
 import type { BattleMapConfig, GridPoint, TerrainCell } from '@/types/battle';
 
@@ -149,7 +150,7 @@ export function resizeMap(
     );
 }
 
-export const MAX_MAP_EDGES = 7200;
+export const MAX_MAP_EDGES = MAP_LIMITS.inlineMaxEdges;
 
 export type EdgeOp =
     | 'add-walls'
@@ -232,9 +233,9 @@ export function applyMargins(
     );
 }
 
-export const MIN_SIDE = 4;
+export const MIN_SIDE = MAP_LIMITS.minSide;
 
-export const MAX_SIDE = 60;
+export const MAX_SIDE = MAP_LIMITS.photoMaxSide;
 
 export const MAX_MARGIN = 10;
 

@@ -13,6 +13,7 @@ import {
 import { MAP_MOTION_MAX_SPEED } from '@/lib/constants/battle-motion';
 import { WEATHER_KINDS } from '@/lib/constants/battle-weather';
 import { DAMAGE_ELEMENT_OPTIONS } from '@/lib/constants/damage';
+import { MAP_LIMITS } from '@/lib/constants/map-limits';
 import { hexColorSchema } from '@/lib/schemas/common';
 import { CUNNING_STRIKE_EFFECTS } from '@/lib/utils/abilities/schema';
 import { inBounds } from '@/lib/utils/battle/grid/geometry';
@@ -73,11 +74,11 @@ const illusionPairsSchema = z
     });
 
 export const mazeSchema = z.object({
-    walls: z.array(edgeKeySchema).max(7200),
+    walls: z.array(edgeKeySchema).max(MAP_LIMITS.inlineMaxEdges),
     exit: mapCellSchema.nullable(),
     difficulty: mazeDifficultySchema,
     teleports: z.array(z.tuple([mapCellSchema, mapCellSchema])).max(20),
-    fog: z.array(cellKeySchema).max(3600),
+    fog: z.array(cellKeySchema).max(MAP_LIMITS.maxTerrainCells),
     marks: z
         .record(
             cellKeySchema,
@@ -88,7 +89,7 @@ export const mazeSchema = z.object({
             })
         )
         .refine(
-            (m) => Object.keys(m).length <= 3600,
+            (m) => Object.keys(m).length <= MAP_LIMITS.maxTerrainCells,
             'battleSetup.validation.tooManyMarks'
         ),
     dark: z.boolean(),
@@ -153,13 +154,21 @@ const motionConfigSchema = z.object({
 
 export const battleMapSchema = z
     .object({
-        cols: z.number().int().min(4).max(60),
-        rows: z.number().int().min(4).max(60),
+        cols: z
+            .number()
+            .int()
+            .min(MAP_LIMITS.minSide)
+            .max(MAP_LIMITS.photoMaxSide),
+        rows: z
+            .number()
+            .int()
+            .min(MAP_LIMITS.minSide)
+            .max(MAP_LIMITS.photoMaxSide),
         background: mapBackgroundSchema,
         opacity: z.number().min(0).max(1),
         blocked: z
             .array(z.string().regex(/^\d+:\d+$/))
-            .max(3600)
+            .max(MAP_LIMITS.maxTerrainCells)
             .optional(),
         terrain: z
             .record(
@@ -214,7 +223,7 @@ export const battleMapSchema = z
                     )
             )
             .refine(
-                (t) => Object.keys(t).length <= 3600,
+                (t) => Object.keys(t).length <= MAP_LIMITS.maxTerrainCells,
                 'battleSetup.validation.tooManyTerrainCells'
             )
             .optional(),
@@ -255,8 +264,8 @@ export const battleMapSchema = z
         maze: mazeSchema.nullable().optional(),
         weather: weatherKindSchema.nullable().optional(),
         motion: motionConfigSchema.nullable().optional(),
-        walls: z.array(edgeKeySchema).max(7200).optional(),
-        bars: z.array(edgeKeySchema).max(7200).optional(),
+        walls: z.array(edgeKeySchema).max(MAP_LIMITS.inlineMaxEdges).optional(),
+        bars: z.array(edgeKeySchema).max(MAP_LIMITS.inlineMaxEdges).optional(),
     })
     .superRefine((m, ctx) => {
         const walls = new Set<string>();
