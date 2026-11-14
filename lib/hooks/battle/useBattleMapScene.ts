@@ -95,6 +95,8 @@ export function useBattleMapScene(): BattleMapScene | null {
         [show, t]
     );
 
+    const onEdgeError = useCallback(() => show(t('edgesFailed')), [show, t]);
+
     const { mutateAsync: mapWalls } = actions.mapWalls;
 
     const wallsList = map?.walls;
@@ -112,6 +114,7 @@ export function useBattleMapScene(): BattleMapScene | null {
         onSkipped,
         onActivate: stopPlacing,
         edgeSource,
+        onEdgeError,
     });
 
     const toolActive = terrainTool.active || modeToolActive;

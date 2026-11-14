@@ -4,14 +4,18 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { useMapTerrainTool } from '../useMapTerrainTool';
 
-function setup(walls?: string[], bars?: string[]) {
-    const mutate = vi.fn().mockResolvedValue(undefined);
-
+function setup(
+    walls?: string[],
+    bars?: string[],
+    mutate = vi.fn().mockResolvedValue(undefined),
+    onEdgeError?: () => void
+) {
     const view = renderHook(() =>
         useMapTerrainTool({
             isDM: true,
             mutate: vi.fn(),
             edgeSource: { walls, bars, mutate },
+            onEdgeError,
         })
     );
 
@@ -79,5 +83,41 @@ describe('useMapTerrainTool: інструмент ребер', () => {
                 remove: ['3:3:e'],
             });
         });
+    });
+
+    it('штрих одразу видно як committed, поки сервер не відповів', async () => {
+        let done!: () => void;
+
+        const mutate = vi.fn(
+            () => new Promise<void>((resolve) => (done = resolve))
+        );
+
+        const { view } = setup(undefined, undefined, mutate);
+
+        act(() => view.result.current.setBrush({ kind: 'edge-wall' }));
+        act(() => view.result.current.edges?.onCommit(['2:2:s'], []));
+
+        expect(view.result.current.edges?.committed?.add.has('2:2:s')).toBe(
+            true
+        );
+
+        await act(async () => done());
+        expect(view.result.current.edges?.committed?.add.size).toBe(0);
+    });
+
+    it('помилка знімає committed і показує сповіщення', async () => {
+        const mutate = vi.fn().mockRejectedValue(new Error('x'));
+
+        const onEdgeError = vi.fn();
+
+        const { view } = setup(undefined, undefined, mutate, onEdgeError);
+
+        act(() => view.result.current.setBrush({ kind: 'edge-wall' }));
+
+        await act(async () =>
+            view.result.current.edges?.onCommit(['2:2:s'], [])
+        );
+        await vi.waitFor(() => expect(onEdgeError).toHaveBeenCalledTimes(1));
+        expect(view.result.current.edges?.committed?.add.size).toBe(0);
     });
 });

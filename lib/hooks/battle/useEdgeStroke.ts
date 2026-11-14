@@ -17,6 +17,8 @@ export interface EdgeEditing {
     existing: ReadonlySet<string>;
     /** «стерти» лише знімає, не додає */
     erase?: boolean;
+    /** ребра зафіксованих штрихів, що чекають на відповідь сервера */
+    committed?: { add: ReadonlySet<string>; remove: ReadonlySet<string> };
     onCommit(add: string[], remove: string[]): void;
 }
 

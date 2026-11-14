@@ -282,7 +282,8 @@
     "endTurnTitle": "End the turn?",
     "endTurnDescription": "The action has not been used yet.",
     "endTurnConfirm": "End turn",
-    "skippedCells": "{count, plural, one {Skipped # cell} other {Skipped # cells}} (occupied or off the map)"
+    "skippedCells": "{count, plural, one {Skipped # cell} other {Skipped # cells}} (occupied or off the map)",
+    "edgesFailed": "Failed to save walls, the change was rolled back"
   },
   "unitControl": {
     "dm": "DM"

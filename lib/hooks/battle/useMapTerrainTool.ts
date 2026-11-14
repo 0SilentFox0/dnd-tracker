@@ -66,6 +66,7 @@ interface Options {
     onSkipped?: (count: number) => void;
     onActivate?: () => void;
     edgeSource?: EdgeSource;
+    onEdgeError?: () => void;
 }
 
 const EMPTY: ReadonlySet<string> = new Set();
@@ -108,6 +109,7 @@ export function useMapTerrainTool({
     onSkipped,
     onActivate,
     edgeSource,
+    onEdgeError,
 }: Options): MapTerrainTool {
     const [on, setOn] = useState(false);
 
@@ -123,10 +125,16 @@ export function useMapTerrainTool({
 
     const active = on && isDM;
 
-    const latest = useRef({ brush, mutate, onSkipped, edgeSource });
+    const latest = useRef({
+        brush,
+        mutate,
+        onSkipped,
+        edgeSource,
+        onEdgeError,
+    });
 
     useEffect(() => {
-        latest.current = { brush, mutate, onSkipped, edgeSource };
+        latest.current = { brush, mutate, onSkipped, edgeSource, onEdgeError };
     });
 
     const queue = useRef<MapTerrainData[]>([]);
@@ -236,6 +244,16 @@ export function useMapTerrainTool({
 
     const edgeChain = useRef<Promise<unknown>>(Promise.resolve());
 
+    const [inFlightEdges, setInFlightEdges] = useState<MapWallsData[]>([]);
+
+    const committed = useMemo<EdgeEditing['committed']>(
+        () => ({
+            add: new Set(inFlightEdges.flatMap((d) => d.add)),
+            remove: new Set(inFlightEdges.flatMap((d) => d.remove)),
+        }),
+        [inFlightEdges]
+    );
+
     const commitEdges = useCallback((add: string[], remove: string[]) => {
         const { brush: b, edgeSource: src } = latest.current;
 
@@ -245,9 +263,13 @@ export function useMapTerrainTool({
 
         const send = (data: MapWallsData) => {
             // версія бою одна: паралельні штрихи ловили б 409
+            setInFlightEdges((list) => [...list, data]);
             edgeChain.current = edgeChain.current
                 .then(() => src.mutate(data))
-                .catch(() => undefined);
+                .catch(() => latest.current.onEdgeError?.())
+                .finally(() =>
+                    setInFlightEdges((list) => list.filter((d) => d !== data))
+                );
         };
 
         const batches = (
@@ -298,9 +320,10 @@ export function useMapTerrainTool({
                       ? bars
                       : new Set([...walls, ...bars]),
             ...(brush.kind === 'edge-erase' && { erase: true }),
+            committed,
             onCommit: commitEdges,
         };
-    }, [active, brush.kind, edgeSource, commitEdges]);
+    }, [active, brush.kind, edgeSource, commitEdges, committed]);
 
     return { active, toggle, close, brush, setBrush, commit, pending, edges };
 }
