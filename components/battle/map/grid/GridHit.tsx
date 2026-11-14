@@ -1,6 +1,12 @@
 'use client';
 
-import { memo, type PointerEvent, type RefObject, useRef, useState } from 'react';
+import {
+    memo,
+    type PointerEvent,
+    type RefObject,
+    useRef,
+    useState,
+} from 'react';
 import { useTranslations } from 'next-intl';
 
 import { terrainTitle } from './grid-style';
@@ -93,6 +99,8 @@ export const GridHit = memo(function GridHit({
             onPointerMove={(e) => moveTo(cellAt(e))}
             onPointerLeave={() => moveTo(null)}
             onPointerDown={(e) => {
+                if (e.pointerType !== 'mouse') moveTo(cellAt(e));
+
                 const p = onStrokeStart && cellAt(e);
 
                 if (p) onStrokeStart?.(p, e);

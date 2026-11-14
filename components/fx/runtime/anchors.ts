@@ -124,7 +124,7 @@ function cellPoint(
 
         const ctm = svg.getScreenCTM();
 
-        if (!ctm) continue;
+        if (!ctm || svg.getBoundingClientRect().width <= 0) continue;
 
         const pt = cellScreenPoint(ctm, at);
 

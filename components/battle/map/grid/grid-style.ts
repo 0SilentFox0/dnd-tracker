@@ -1,11 +1,6 @@
 import type { useTranslations } from 'next-intl';
 
-import {
-    type CellMark,
-    type GridWindow,
-    isMoveMark,
-    UNIT,
-} from '@/lib/utils/battle/grid';
+import { type CellMark, type GridWindow, UNIT } from '@/lib/utils/battle/grid';
 import type { GridPoint, TerrainCell } from '@/types/battle';
 
 export const HATCH_ID = 'battle-map-barrier-hatch';
@@ -33,12 +28,6 @@ export const ZONE = {
 } as const;
 
 export type MarkValue = CellMark | number | undefined;
-
-export function zoneOf(mark: MarkValue) {
-    if (mark === 'move-danger') return ZONE.danger;
-
-    return isMoveMark(mark) ? ZONE.move : null;
-}
 
 export function markFill(mark: MarkValue): string {
     if (mark === 'target') return 'rgba(230,80,60,.35)';

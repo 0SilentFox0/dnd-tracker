@@ -239,7 +239,8 @@ describe('точка шаблону', () => {
     function grid(
         ctm: Partial<typeof ID> | null,
         parent: HTMLElement = document.body,
-        size = { cols: 10, rows: 8 }
+        size = { cols: 10, rows: 8 },
+        shown = true
     ) {
         const svg = document.createElementNS(
             'http://www.w3.org/2000/svg',
@@ -249,7 +250,14 @@ describe('точка шаблону', () => {
         svg.setAttribute('data-fx-grid', '');
         svg.setAttribute('data-cols', String(size.cols));
         svg.setAttribute('data-rows', String(size.rows));
-        svg.getScreenCTM = () => (ctm ? ({ ...ID, ...ctm } as DOMMatrix) : null);
+        svg.getScreenCTM = () =>
+            ctm ? ({ ...ID, ...ctm } as DOMMatrix) : null;
+        svg.getBoundingClientRect = domRect({
+            x: 0,
+            y: 0,
+            w: shown ? 100 : 0,
+            h: shown ? 100 : 0,
+        });
         parent.appendChild(svg);
 
         return svg;
@@ -294,6 +302,14 @@ describe('точка шаблону', () => {
 
         expect(resolvePoints(area({ x: 10, y: 0 }))?.at).toBeUndefined();
         expect(resolvePoints(area({ x: 0, y: -1 }))?.at).toBeUndefined();
+    });
+
+    it('без CTM або зі схованою копією: at відсутнє', () => {
+        anchor('t', { x: 10, y: 10, w: 20, h: 20 });
+        grid(null);
+        grid({}, document.body, { cols: 10, rows: 8 }, false);
+
+        expect(resolvePoints(area({ x: 0, y: 0 }))?.at).toBeUndefined();
     });
 
     it('дві копії карти: береться видима', () => {

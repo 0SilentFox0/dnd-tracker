@@ -3,10 +3,12 @@ import { fireEvent } from '@testing-library/react';
 import { UNIT } from '@/lib/utils/battle/grid';
 
 export function stubGridCtm(container: HTMLElement) {
-    container.querySelectorAll<SVGSVGElement>('svg[data-fx-grid]').forEach((svg) => {
-        svg.getScreenCTM = () =>
-            ({ a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 }) as DOMMatrix;
-    });
+    container
+        .querySelectorAll<SVGSVGElement>('svg[data-fx-grid]')
+        .forEach((svg) => {
+            svg.getScreenCTM = () =>
+                ({ a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 }) as DOMMatrix;
+        });
 }
 
 function target(container: HTMLElement) {
@@ -26,8 +28,13 @@ export const clickCell = (c: HTMLElement, p: { x: number; y: number }) =>
 export const hoverCell = (c: HTMLElement, p: { x: number; y: number }) =>
     fireEvent.pointerMove(target(c), coords(p));
 
-export const pressCell = (c: HTMLElement, p: { x: number; y: number }) =>
+export const pressCell = (
+    c: HTMLElement,
+    p: { x: number; y: number },
+    pointerType = 'mouse'
+) =>
     fireEvent.pointerDown(target(c), {
+        pointerType,
         ...coords(p),
         isPrimary: true,
         button: 0,

@@ -2,7 +2,7 @@
 import { cleanup, fireEvent } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { clickCell, hoverCell, stubGridCtm } from './grid-pointer';
+import { clickCell, hoverCell, pressCell, stubGridCtm } from './grid-pointer';
 
 import { BattleMap } from '@/components/battle/map';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -66,7 +66,9 @@ describe('BattleMap', () => {
         );
 
         expect(
-            container.querySelector('svg[data-fx-grid]')?.getAttribute('data-cols')
+            container
+                .querySelector('svg[data-fx-grid]')
+                ?.getAttribute('data-cols')
         ).toBe('4');
         expect(container.querySelector('[data-grid-lines]')).not.toBeNull();
         expect(container.querySelectorAll('polygon')).toHaveLength(0);
@@ -90,9 +92,9 @@ describe('BattleMap', () => {
         );
 
         expect(container.querySelector('[data-blocked]')).toBeNull();
-        expect(
-            container.querySelector('mask path')?.getAttribute('d')
-        ).toBe('M100 100h100v100h-100z');
+        expect(container.querySelector('mask path')?.getAttribute('d')).toBe(
+            'M100 100h100v100h-100z'
+        );
 
         clickCell(container, { x: 1, y: 1 });
         expect(onCellClick).not.toHaveBeenCalled();
@@ -117,6 +119,21 @@ describe('BattleMap', () => {
 
         hoverCell(container, { x: 1, y: 1 });
         expect(onCellHover).toHaveBeenLastCalledWith(null);
+    });
+
+    it('a touch pointerdown reports the hovered cell', () => {
+        const onCellHover = vi.fn();
+
+        const { container } = render(
+            <BattleMap
+                map={square}
+                participants={people}
+                actions={{ onCellHover }}
+            />
+        );
+
+        pressCell(container, { x: 2, y: 1 }, 'touch');
+        expect(onCellHover).toHaveBeenLastCalledWith({ x: 2, y: 1 });
     });
 
     it('clickableBlocked lets a blocked cell be clicked', () => {
@@ -167,9 +184,9 @@ describe('BattleMap', () => {
             />
         );
 
-        expect(container.querySelectorAll('[data-fx-zone="move"]')).toHaveLength(
-            1
-        );
+        expect(
+            container.querySelectorAll('[data-fx-zone="move"]')
+        ).toHaveLength(1);
         expect(
             container.querySelectorAll('[data-zone-fill="move"]')
         ).toHaveLength(1);
@@ -178,10 +195,7 @@ describe('BattleMap', () => {
     it('grid element count does not depend on the map area', () => {
         const count = (cols: number, rows: number) => {
             const { container, unmount } = render(
-                <BattleMap
-                    map={{ ...square, cols, rows }}
-                    participants={[]}
-                />
+                <BattleMap map={{ ...square, cols, rows }} participants={[]} />
             );
 
             const n = container.querySelectorAll(
@@ -642,17 +656,21 @@ describe('BattleMap', () => {
         );
         expect(bad.getAttribute('stroke')).toBe('rgba(255,100,85,.65)');
         // приглушена заливка: фон карти лишається видимим
-        expect(container.querySelectorAll('[data-fx-zone="move"]')).toHaveLength(
-            1
-        );
+        expect(
+            container.querySelectorAll('[data-fx-zone="move"]')
+        ).toHaveLength(1);
         expect(
             container.querySelectorAll('[data-zone-fill="move"]')
         ).toHaveLength(1);
         expect(
-            container.querySelector('[data-zone-fill="move"]')?.getAttribute('fill')
+            container
+                .querySelector('[data-zone-fill="move"]')
+                ?.getAttribute('fill')
         ).toBe('rgba(90,210,80,.07)');
         expect(
-            container.querySelector('[data-zone-fill="danger"]')?.getAttribute('fill')
+            container
+                .querySelector('[data-zone-fill="danger"]')
+                ?.getAttribute('fill')
         ).toBe('rgba(225,70,55,.09)');
     });
 
@@ -694,9 +712,9 @@ describe('BattleMap', () => {
         };
 
         expect(wall.getAttribute('fill')).toBe('rgba(0,0,0,.6)');
-        expect(
-            barrier.querySelectorAll('path')[0].getAttribute('fill')
-        ).toBe('rgba(0,0,0,.75)');
+        expect(barrier.querySelectorAll('path')[0].getAttribute('fill')).toBe(
+            'rgba(0,0,0,.75)'
+        );
         expect(
             barrier.querySelectorAll('path')[1].getAttribute('fill')
         ).toContain('url(#');
@@ -708,9 +726,7 @@ describe('BattleMap', () => {
         expect(titleAt(3, 1)).toBe('Вогняна стіна');
         expect(titleAt(0, 1)).toBeUndefined();
         expect(
-            container
-                .querySelector('mask path')
-                ?.getAttribute('d')
+            container.querySelector('mask path')?.getAttribute('d')
         ).toContain('M100 100');
     });
 
@@ -757,7 +773,9 @@ describe('BattleMap', () => {
         expect(titleAt(1, 1)).toBe('Вогняна стіна · ще 2 р.');
         expect(titleAt(3, 2)).toBe('Лава');
         expect(
-            container.querySelector('[data-zone-fill="danger"]')?.getAttribute('fill')
+            container
+                .querySelector('[data-zone-fill="danger"]')
+                ?.getAttribute('fill')
         ).toBe('rgba(225,70,55,.09)');
         expect(titleAt(2, 0)).toBeUndefined();
         expect(container.querySelector('[data-hazard-flame="2:0"]')).toBeNull();
@@ -814,7 +832,9 @@ describe('BattleMap', () => {
             />
         );
 
-        const cellEl = shown.container.querySelector('[data-blocked]') as Element;
+        const cellEl = shown.container.querySelector(
+            '[data-blocked]'
+        ) as Element;
 
         expect(cellEl.getAttribute('d')).toBe('M100 100h100v100h-100z');
         expect(cellEl.getAttribute('fill')).not.toBe('transparent');
