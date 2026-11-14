@@ -10,6 +10,7 @@ import {
     characterClassMode,
     resolveCharacterChoices,
 } from '@/lib/server/characters/choices/resolve-choices';
+import { characteristicsPatch } from '@/lib/server/characters/core/characteristics-patch';
 import { lockCharacters } from '@/lib/server/characters/lock';
 import { writeCharacterLog } from '@/lib/server/characters/log';
 import { ContentError } from '@/lib/server/content/errors';
@@ -22,6 +23,7 @@ import {
 } from '@/lib/utils/characters/choices/picks';
 import { validateClassEntries } from '@/lib/utils/characters/classes/application';
 import { subclassesLabel } from '@/lib/utils/characters/classes/derive';
+import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import { resolveClassEntries } from '@/lib/utils/spells/class-slots';
 import type { ChoicesBody } from '@/types/choices';
 
@@ -120,6 +122,11 @@ export async function saveCharacterChoices(
             where: { id: row.id },
             data: {
                 ...resolved.fields,
+                ...characteristicsPatch(
+                    resolved.fields,
+                    ruleSystemOf(rules),
+                    row.characteristics
+                ),
                 ...(subclassLabel !== undefined && { subclass: subclassLabel }),
             },
             include: { user: { select: PUBLIC_USER_SELECT }, inventory: true },

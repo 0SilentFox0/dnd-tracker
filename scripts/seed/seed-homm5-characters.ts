@@ -763,7 +763,7 @@ async function main() {
         await prisma.$transaction(async (tx) => {
             const created = await tx.character.create({
                 data: {
-                    ...data,
+                    ...d20RowData(data),
                     campaignId: campaign.id,
                     controlledBy: campaign.dmUserId,
                     level: 1,

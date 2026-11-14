@@ -18,6 +18,7 @@ import {
     characterClassMode,
     resolveCharacterChoices,
 } from '@/lib/server/characters/choices/resolve-choices';
+import { characteristicsPatch } from '@/lib/server/characters/core/characteristics-patch';
 import { loadRaceProgression } from '@/lib/server/characters/core/load-race-progression';
 import { lockCharacters } from '@/lib/server/characters/lock';
 import { writeCharacterLog } from '@/lib/server/characters/log';
@@ -136,6 +137,12 @@ async function levelUpCore({ access, character }: Gate, pick: LevelUpPick) {
                     }),
                     ...(seenLevel !== undefined && { seenLevel }),
                     ...(choices?.ok && choices.fields),
+                    ...(choices?.ok &&
+                        characteristicsPatch(
+                            choices.fields,
+                            ruleSystemOf(campaign.rules),
+                            row.characteristics
+                        )),
                 },
                 include: {
                     user: { select: PUBLIC_USER_SELECT },
@@ -209,6 +216,11 @@ async function levelUpCore({ access, character }: Gate, pick: LevelUpPick) {
             level: newLevel,
             ...(seenLevel !== undefined && { seenLevel }),
             ...gain.abilityScores,
+            ...characteristicsPatch(
+                gain.abilityScores,
+                ruleSystemOf(campaign.rules),
+                character.characteristics
+            ),
             spellSlots: gain.spellSlots as Prisma.InputJsonValue,
         },
         include: {
