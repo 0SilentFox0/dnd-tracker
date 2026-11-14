@@ -5,7 +5,8 @@ import { ModuleStep } from './ModuleStep';
 import { SummaryStep } from './SummaryStep';
 
 import { Button } from '@/components/ui/button';
-import { type useCampaignModules, useModuleDraft } from '@/lib/hooks/campaigns';
+import type { useCampaignModules } from '@/lib/hooks/campaigns';
+import { useModuleDraft } from '@/lib/hooks/campaigns/useModuleDraft';
 import type { SystemSelection } from '@/lib/utils/rules/systems/catalog';
 
 type Step = 'modules' | 'summary';
