@@ -1019,6 +1019,17 @@ export interface RuleSystemDefinition {
     characteristics: {
         /** The `characteristics` column carries system data (otherwise it is dropped on write) */
         persisted: boolean;
+        /** Statblock columns that move into `characteristics`; reads fall back to the legacy columns until the backfill is done */
+        columnView?: {
+            columns: readonly string[];
+            read(
+                row: { characteristics: unknown } & Record<string, unknown>
+            ): Record<string, number>;
+            write(
+                cols: Partial<Record<string, number>>,
+                prev: unknown
+            ): SystemData;
+        };
         defaults(): SystemData | undefined;
         isEmpty(value: unknown): boolean;
         sheetBlock(input: SheetBlockInput): SystemSlot | undefined;

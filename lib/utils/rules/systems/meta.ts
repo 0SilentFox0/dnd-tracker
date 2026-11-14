@@ -65,6 +65,8 @@ export interface SystemMeta {
     contentKinds?: readonly string[];
     /** `hashJson` of `characteristics` values the system treats as empty besides null / {} */
     emptyCharacteristicsHashes?: readonly string[];
+    /** Row columns the system stores inside `characteristics`; the content hash folds them back so legacy and migrated rows hash alike */
+    characteristicsColumns?: readonly string[];
 }
 
 export const SYSTEM_META = [

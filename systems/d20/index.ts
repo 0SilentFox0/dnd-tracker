@@ -6,6 +6,8 @@ import {
 } from './rules/attack';
 import { D20_REACH, d20AttackAbility } from './rules/attack/ability';
 import { d20HitModel } from './rules/balance';
+import { readD20Columns, writeD20Columns } from './rules/characteristics/codec';
+import { D20_CHARACTERISTICS_COLUMNS } from './rules/characteristics/columns';
 import { concentrationFallout } from './rules/concentration/damaged';
 import { D20_CONDITION_SET } from './rules/conditions';
 import { d20Damage } from './rules/damage';
@@ -44,6 +46,11 @@ export const D20_MODULE: RuleSystemDefinition = {
     sheet: { blocks: [d20SheetBlock] },
     characteristics: {
         persisted: false,
+        columnView: {
+            columns: D20_CHARACTERISTICS_COLUMNS,
+            read: readD20Columns,
+            write: writeD20Columns,
+        },
         defaults: () => undefined,
         isEmpty: (v) =>
             v == null || (typeof v === 'object' && Object.keys(v).length === 0),

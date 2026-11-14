@@ -10,4 +10,15 @@ export const D20_META = {
     i18n: {},
     dmSections: ['classes', 'backgrounds'],
     contentKinds: ['classes', 'backgrounds'],
+    characteristicsColumns: [
+        'strength',
+        'dexterity',
+        'constitution',
+        'intelligence',
+        'wisdom',
+        'charisma',
+        'armorClass',
+        'initiative',
+        'speed',
+    ],
 } as const satisfies SystemMeta;
