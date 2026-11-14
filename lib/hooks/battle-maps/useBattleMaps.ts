@@ -3,6 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { battleMapKeys } from './keys';
+import { announceMapLibraryChange } from './mapLibrarySync';
 
 import {
     cloneBattleMap,
@@ -42,10 +43,13 @@ export function useBattleMap(campaignId: string, mapId: string) {
 export function useBattleMapMutations(campaignId: string) {
     const queryClient = useQueryClient();
 
-    const onSuccess = () =>
-        queryClient.invalidateQueries({
+    const onSuccess = () => {
+        announceMapLibraryChange(campaignId);
+
+        return queryClient.invalidateQueries({
             queryKey: battleMapKeys.list(campaignId),
         });
+    };
 
     return {
         create: useMutation({

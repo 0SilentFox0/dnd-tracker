@@ -81,6 +81,9 @@ function EditorBody({
                         min={MIN_SIDE}
                         max={MAX_SIDE}
                         onCommit={(v) => editor.actions.setSize(v, map.rows)}
+                        onValueChange={(v) =>
+                            editor.actions.setSize(v, map.rows)
+                        }
                     />
                 </div>
                 <div className="w-20 space-y-1">
@@ -93,6 +96,9 @@ function EditorBody({
                         min={MIN_SIDE}
                         max={MAX_SIDE}
                         onCommit={(v) => editor.actions.setSize(map.cols, v)}
+                        onValueChange={(v) =>
+                            editor.actions.setSize(map.cols, v)
+                        }
                     />
                 </div>
                 <div className="space-y-1">

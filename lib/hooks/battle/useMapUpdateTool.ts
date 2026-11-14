@@ -3,7 +3,7 @@
 import { useCallback, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { useBattleMaps } from '@/lib/hooks/battle-maps';
+import { useBattleMaps, useMapLibrarySync } from '@/lib/hooks/battle-maps';
 import { useConfirm } from '@/lib/hooks/common';
 import type { BattleMapRef } from '@/types/battle';
 
@@ -36,6 +36,8 @@ export function useMapUpdateTool(args: {
     const confirm = useConfirm();
 
     const linked = isDM && !!mapRef;
+
+    useMapLibrarySync(campaignId, linked);
 
     const { data: maps } = useBattleMaps(campaignId, linked, {
         staleTime: 0,
