@@ -2,10 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import '@/lib/server/systems/registry';
 import { ParticipantSide } from '@/lib/constants/battle';
-import {
-    makeParticipant,
-    seq,
-} from '@/lib/utils/abilities/__tests__/fixtures';
+import { makeParticipant, seq } from '@/lib/utils/abilities/__tests__/fixtures';
 import { critRulesOf } from '@/lib/utils/battle/attack/crit-rules';
 import { castSpell } from '@/lib/utils/battle/spell';
 import type { CastableSpell } from '@/lib/utils/battle/types/spell-process';
@@ -74,7 +71,14 @@ describe('wfrp spell attack outcome around the crit fallback', () => {
         expect(cast(roll)).toMatchSnapshot();
     });
 
-    it('wfrp has no crit hook, fallback applies', () => {
-        expect(critRulesOf(wfrp)).toMatchSnapshot();
+    it('wfrp has no crit hook: fallback effects true before E4, false after (owner-approved fix)', () => {
+        expect(critRulesOf(wfrp)).toEqual({
+            critOn: 20,
+            disabledFail: [],
+            disabledSuccess: [],
+            doubleDice: false,
+            effects: false,
+            fumbleOn: 1,
+        });
     });
 });

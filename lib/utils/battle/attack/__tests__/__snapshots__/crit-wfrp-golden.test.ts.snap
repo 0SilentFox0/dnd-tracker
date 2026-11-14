@@ -29,14 +29,3 @@ exports[`wfrp spell attack outcome around the crit fallback > roll 20 1`] = `
   "success": false,
 }
 `;
-
-exports[`wfrp spell attack outcome around the crit fallback > wfrp has no crit hook, fallback applies 1`] = `
-{
-  "critOn": 20,
-  "disabledFail": [],
-  "disabledSuccess": [],
-  "doubleDice": false,
-  "effects": true,
-  "fumbleOn": 1,
-}
-`;
