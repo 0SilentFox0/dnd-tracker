@@ -26,6 +26,7 @@ interface UseBattleFormParams {
     };
     participants: BattlePreparationParticipant[];
     map?: BattleMapConfig | null;
+    library?: { mapId: string | null; isLinked: boolean };
 }
 
 export function useBattleForm({
@@ -34,7 +35,12 @@ export function useBattleForm({
     formData,
     participants,
     map,
+    library: libraryMap,
 }: UseBattleFormParams) {
+    const libraryMapId = libraryMap?.mapId;
+
+    const isLinked = libraryMap?.isLinked;
+
     const t = useTranslations('battleSetup.form');
 
     const tActions = useTranslations('common.actions');
@@ -69,8 +75,12 @@ export function useBattleForm({
                 name: formData.name,
                 description: formData.description,
                 participants,
-                map: map ?? null,
                 turnTimerSeconds: formData.turnTimerSeconds,
+                ...(isLinked
+                    ? {}
+                    : libraryMapId
+                      ? { mapId: libraryMapId }
+                      : { map: map ?? null }),
             };
 
             if (battleId) {
@@ -104,6 +114,8 @@ export function useBattleForm({
             formData.turnTimerSeconds,
             participants,
             map,
+            libraryMapId,
+            isLinked,
             router,
             navigateFresh,
             notify,

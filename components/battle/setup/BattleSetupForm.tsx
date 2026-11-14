@@ -7,6 +7,7 @@ import { AutopickCard } from './AutopickCard';
 import { BalanceSummary } from './BalanceSummary';
 import { BattleFormBasicInfo } from './BattleFormBasicInfo';
 import { BattleFormMap } from './BattleFormMap';
+import { BattleMapLibraryPicker } from './BattleMapLibraryPicker';
 import { CharactersListCard } from './CharactersListCard';
 import { SidePanelCard } from './SidePanelCard';
 import { UnitsListCard } from './UnitsListCard';
@@ -87,7 +88,19 @@ function BattleSetupLayout({
         {
             id: BATTLE_FORM_TAB.map,
             label: t('tabs.map'),
-            content: <BattleFormMap editor={setup.mapEditor} />,
+            content: (
+                <div className="space-y-4">
+                    {setup.libraryMap.visible && (
+                        <BattleMapLibraryPicker
+                            campaignId={campaignId}
+                            library={setup.libraryMap}
+                        />
+                    )}
+                    {!setup.libraryMap.selectedId && (
+                        <BattleFormMap editor={setup.mapEditor} />
+                    )}
+                </div>
+            ),
         },
         {
             id: BATTLE_FORM_TAB.heroes,
