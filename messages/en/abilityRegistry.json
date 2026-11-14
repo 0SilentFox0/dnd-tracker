@@ -349,6 +349,9 @@
     "critImmunity": {
       "label": "Crit immunity"
     },
+    "passesWalls": {
+      "label": "Passes through walls"
+    },
     "cunningAction": {
       "label": "Cunning Action"
     },
@@ -1110,6 +1113,7 @@
       "autoCritAdjacent": "melee attacks from 5 ft against the target are critical",
       "twoWeaponFighting": "off-hand damage modifier",
       "critImmunity": "a critical hit against the owner becomes a normal hit",
+      "passesWalls": "passes through map walls and bars",
       "cunningAction": "Dash, Disengage and Hide as a bonus action",
       "evasion": "Dexterity saving throw with half damage: success — 0, failure — half",
       "proneDefense": "melee attacks against the target have advantage, ranged — disadvantage",

@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
+import { edgeBlocks } from '../edges';
 import { reachable } from '../path';
 
 import { ParticipantSide } from '@/lib/constants/battle';
+import { resolved } from '@/lib/utils/abilities/__tests__/fixtures';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import { testMap } from '@/lib/utils/battle/__tests__/fixtures/placed';
 import type {
@@ -78,5 +80,47 @@ describe('стіни й ґрати в русі', () => {
         const b = cost(withEmpty, hero({ x: 1, y: 1 }));
 
         expect([...b]).toEqual([...a]);
+    });
+
+    describe('passesWalls', () => {
+        const ghost = (position: GridPoint): BattleParticipant => {
+            const p = hero(position);
+
+            return {
+                ...p,
+                battleData: {
+                    ...p.battleData,
+                    resolvedAbilities: [
+                        resolved({
+                            trigger: { event: 'passive' },
+                            effects: [{ kind: 'flag', flag: 'passesWalls' }],
+                        }),
+                    ],
+                },
+            };
+        };
+
+        it('ефірний проходить стіни й ґрати, звичайний — ні', () => {
+            const map = testMap(5, 3, {
+                walls: ['1:0:e', '1:1:e'],
+                bars: ['1:2:e'],
+            });
+
+            expect(cost(map, ghost({ x: 1, y: 0 })).get(key(2, 0))).toBe(1);
+            expect(cost(map, ghost({ x: 1, y: 2 })).get(key(2, 2))).toBe(1);
+            expect(cost(map, hero({ x: 1, y: 0 })).get(key(2, 0))).toBe(5);
+        });
+
+        it('зір і постріл не змінюються', () => {
+            const map = testMap(5, 3, { walls: ['1:0:e'] });
+
+            const a = { x: 1, y: 0 };
+
+            const b = { x: 2, y: 0 };
+
+            expect(edgeBlocks(map, a, b, 'move', ghost(a))).toBe(false);
+            expect(edgeBlocks(map, a, b, 'sight', ghost(a))).toBe(true);
+            expect(edgeBlocks(map, a, b, 'fire', ghost(a))).toBe(true);
+        });
     });
 });

@@ -1,6 +1,7 @@
 import { cellLine } from './geometry';
 import { cornerOpen, edgeKey, wallSet } from './walls';
 
+import { collectModifiers } from '@/lib/utils/abilities/engine/core/collect-modifiers';
 import { modeWalls } from '@/lib/utils/battle/modes/engine';
 import type {
     BattleMapConfig,
@@ -84,18 +85,38 @@ function blockingSet(map: EdgeMap, kind: EdgeKind): ReadonlySet<string> {
     return union;
 }
 
+export function passesWalls(mover?: BattleParticipant): boolean {
+    return (
+        !!mover &&
+        collectModifiers([mover], mover.basicInfo.id, { flag: 'passesWalls' })
+            .entries.length > 0
+    );
+}
+
 /** Блокує перехід між сусідніми клітинками (діагональ — якщо закритий хоч один кутовий шлях). */
 export function edgeBlocks(
     map: EdgeMap,
     a: GridPoint,
     b: GridPoint,
     kind: EdgeKind,
-    _mover?: BattleParticipant
+    mover?: BattleParticipant
 ): boolean {
     const set = blockingSet(map, kind);
 
     if (!set.size) return false;
 
+    if (kind === 'move' && mover && edgeBlocksPlain(map, set, a, b))
+        return !passesWalls(mover);
+
+    return edgeBlocksPlain(map, set, a, b);
+}
+
+function edgeBlocksPlain(
+    map: EdgeMap,
+    set: ReadonlySet<string>,
+    a: GridPoint,
+    b: GridPoint
+): boolean {
     const dx = Math.abs(b.x - a.x);
 
     const dy = Math.abs(b.y - a.y);

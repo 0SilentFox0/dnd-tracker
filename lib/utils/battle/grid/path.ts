@@ -1,5 +1,5 @@
 import { cellFeetOf } from './cell-feet';
-import { edgeBlocks, wallsOf } from './edges';
+import { edgeBlocks, passesWalls, wallsOf } from './edges';
 import {
     cellKey,
     difficultSet,
@@ -132,7 +132,8 @@ export function searchPaths(
         !!avoid?.size &&
         footprint(anchor, size).some((c) => avoid.has(cellKey(c)));
 
-    const hasEdges = wallsOf(map).size > 0 || !!map.bars?.length;
+    const hasEdges =
+        (wallsOf(map).size > 0 || !!map.bars?.length) && !passesWalls(mover);
 
     const stepBlocked = (cur: GridPoint, next: GridPoint) => {
         if (!hasEdges) return false;
