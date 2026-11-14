@@ -252,7 +252,7 @@
     "ability": "Ability",
     "bonus": "Bonus",
     "core": "Actions",
-    "gear": "Gear",
+    "gear": "Inventory",
     "strikeAndReturn": "Return",
     "endTurn": "End turn"
   },

@@ -153,7 +153,7 @@
     }
   },
   "gear": {
-    "title": "Gear",
+    "title": "Inventory",
     "hint": "Changing gear costs a bonus action. Equip, then apply to the battle.",
     "apply": "Apply to battle (bonus action)",
     "used": "Bonus action used"
