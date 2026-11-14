@@ -29,7 +29,7 @@ describe('heroscaling archetype part', () => {
 
         expect(a).toMatchObject({
             meleeMultiplier: 0.7,
-            rangedMultiplier: 1.5,
+            rangedMultiplier: 1.3,
             magicMultiplier: 0.7,
             archetypeKey: 'ranger',
         });

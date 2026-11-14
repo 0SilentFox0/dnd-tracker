@@ -18,7 +18,7 @@ describe('heroArchetype', () => {
         expect(heroArchetype('ranger')).toMatchObject({
             hpPerLevel: 9,
             melee: 0.7,
-            ranged: 1.5,
+            ranged: 1.3,
             magic: 0.7,
         });
     });

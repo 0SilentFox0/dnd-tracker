@@ -164,7 +164,7 @@ describe('hero archetype damage', () => {
         );
 
         expect(p.abilities.meleeMultiplier).toBe(0.7);
-        expect(p.abilities.rangedMultiplier).toBe(1.5);
+        expect(p.abilities.rangedMultiplier).toBe(1.3);
         expect(p.abilities.magicMultiplier).toBe(0.7);
         expect(p.abilities.archetypeKey).toBe('ranger');
     });

@@ -35,7 +35,7 @@ const ARCHETYPES: Record<HeroArchetypeKey, HeroArchetype> = {
     paladin: {
         key: 'paladin',
         hpPerLevel: 13,
-        melee: 1,
+        melee: 1.3,
         ranged: 0.5,
         magic: 0.7,
     },
@@ -43,7 +43,7 @@ const ARCHETYPES: Record<HeroArchetypeKey, HeroArchetype> = {
         key: 'ranger',
         hpPerLevel: 9,
         melee: 0.7,
-        ranged: 1.5,
+        ranged: 1.3,
         magic: 0.7,
     },
     rogue: { key: 'rogue', hpPerLevel: 9, melee: 1.4, ranged: 1, magic: 0.6 },
