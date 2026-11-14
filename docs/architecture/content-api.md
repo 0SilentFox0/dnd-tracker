@@ -74,6 +74,8 @@
 - Права перевіряються в сервісі (`assertCan`), а не лише в HTTP-шарі. Новий шлях до контенту (інструмент, скрипт) ходить через сервіс.
 - Окремих «API-схем» немає: UI, REST, OpenAPI і MCP використовують одні схеми з `lib/schemas`.
 - Кожен запис через сервіс скидає кеш-теги свого виду. `revalidateTag` діє лише в межах життя обробника роуту: `/api/mcp` для POST дочитує SSE-відповідь `mcp-handler` до кінця перед поверненням, інакше інструмент виконується вже після повернення `Response` і скидання кешу губиться.
+- **Статблоки юнітів кампанії читають усі учасники** (`lib/server/content/resources/units.ts`: `access: { list: 'member', item: 'member' }`). Свідоме рішення (Ч19 F-13): потрібно для прикликів гравця й довідника, статблок не секрет; секретні поля в юніти не кладуться.
+- **Рульова система актора в гейтах виду** (`actorSystem`, `lib/server/content/kind-active.ts`) вантажиться один раз на `Actor` (WeakMap-кеш) і спільна для `isKindActive`/`assertKindActive` та `traits-guard` (`races`, `feats`, `spells`, `artifacts`); відсутня кампанія → `CAMPAIGN_NOT_FOUND`.
 - **Стилі помилок** — у коді їх три: `throw new ContentError(...)`, `{ ok: false, status }` і `return NextResponse`. Нові домени використовують лише `throw ContentError` (`handleApiError` переводить його у відповідь); наявні не мігруються, а `orThrow` (`lib/server/characters/operation-runner.ts`) пов'язує старі `NextResponse`-хелпери з throw-потоком.
 
 ## Класи (етап 4c-1)

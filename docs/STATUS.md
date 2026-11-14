@@ -2,7 +2,7 @@
 
 Одне місце для відповіді на питання «що зараз у роботі». Оновлюється в кінці кожної гілки, в тому ж коміті, що й злиття.
 
-_Оновлено: 2026-11-13._
+_Оновлено: 2026-11-14._
 
 **Вигляд гравця (гілка `feat/player-view`, ../dnd-tracker-playerview, до мерджу):** DM перемикає бій і `/show` на вигляд гравця (кнопка, клавіша `P`): режим пер-вікнівий (`sessionStorage`), чиста візуалізація без керування, FX кубиків лишається (віджет `DiceRoller` прихований), лабіринт із туманом (ДМ перемикає, чий вигляд: вибір героя в оверлеї карти), світова мапа через party views. Приховування лише в UI: клієнт тримає DM-payload (не межа безпеки). Вікно DM у режимі не хостить музику бою. DM-вікно рендерить сцену з prefetch без скелета; щоб F5 не показав DM-сцену на проєкторі, `PlayerViewGuard` (сторінки бою й `/show`) ставить inline-скриптом `data-pv-pending` на `<html>` з sessionStorage і ховає `[data-pv-stage]` CSS, `usePlayerView` знімає атрибут після гідрації. Кнопка «в бій» у показі в режимі гравця вмикає прапорець бою; герой туману лабіринту закріплюється, скидається при виході з режиму. Відкрито: мобільне розташування перемикача 360px, браузерна перевірка. Архітектура — [battle.md](architecture/battle.md#player-view-dm-window), [show.md](architecture/show.md). Підказки для перемикача немає (лише запис «Що нового»).
 
@@ -161,6 +161,18 @@ _Оновлено: 2026-11-13._
 - **P-G (документи):** `rule-systems.md` (хуки, винятки контракту, коди відмов, ratchet), `useChannelAction` у wfrp, `git mv` спеки й плану E2 в архів.
 
 **Ratchet після Ч18b:** `system-imports-exempt.json` `[]`; `system-literals-exempt.json` 6 файлів / 11 влучань; `RULES_SECTION_READERS` 0; `isFiveE` 0; `CONDITION_5E_` 11 (E3-a); гард колонок статблока 1 файл (було 7).
+
+### E2 Ч19: аудит і виправлення (2026-11-14, `feat/e2-ch19`, не змерджена й не запушена)
+
+**Закрито (хвиля 1, `d047f937d`).**
+- Бій: `assertParticipantSources` (IDOR джерел учасників у `action-service`/`record-service`), резерв для гравця — заглушки `reserveStub` у GET/SSR/мутації/публічній дельті, `publicSetup` без резерву.
+- Реєстр: `actorSystem` (одне завантаження правил на actor), `PREVIEW_RULES` через `PREVIEW_SYSTEM_KEY` (d20 за `combat.dice === 20`, без літерала), ratchet-и `registry-cycles` (`KNOWN_CYCLES = rules:d20, server:d20`), `server-entry-imports`, `system-literals`, лічильник module-queries = 0.
+- Клієнт: чернетка гравця (`usePlayerDraftForm`, `picker-context`), `pendingIssues` з передумовами рис (`hero`), `useAttackWizard` кидає `rollDie(combat.dice)` (F-05), ключ `aiKeys.threadsRoot`.
+- Сервер: відсутня кампанія → `CAMPAIGN_NOT_FOUND` (F-10), ліміт `/api/campaigns/join` 10 за 10 хв із `memoryFallback` (F-14), `Object.hasOwn` для операцій персонажа (`constructor` → 400), `fiveE` → `classMode`.
+- Скрипти: `legacyMoraleCap` у `active-battles-report` (F-19), `modulesMismatch` у `scripts/templates/lib/export.ts`, `tests/integration` → `lib/__tests__/integration`.
+- Документи: рішення власника F-13 (гравці читають статблоки юнітів, не секрет), видимість стану бою гравцю, contract-крок міграцій (`.claude/rules/db-deploy.md`).
+
+**Хвости E3.** `useSpellBook` (`aiDamage`) досі hard-coded `rollDie(20)` (F-05 лише `useAttackWizard`); `systems/wfrp/rules/characteristics/keys.ts` має локальний `isRecord`; F-11, F-12, F-15; ледачий реєстр (зняти `KNOWN_CYCLES`); інверсія `fromCharacter`; неповторювані вже взяті риси в `availableCount`.
 
 ### E2 Ч18c: два баги live-run, moraleCap, Minor 13, DROP race_profiles (2026-11-13/14, змерджено й запушено, main 385a9f763 + тести)
 

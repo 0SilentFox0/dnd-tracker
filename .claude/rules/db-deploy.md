@@ -15,6 +15,7 @@ These trip people up repeatedly — read before touching the DB or `vercel.json`
 - **`DIRECT_URL` (port 5432) is required in Vercel Production** — without it the build fails with an explanatory error.
 - **Production builds from a branch other than `main`** fail on purpose, so an unmerged migration never reaches the prod DB. Override with `ALLOW_PROD_MIGRATE=1` only deliberately.
 - **Migrations must be expand-only** (add columns/tables, backfill, drop later): `migrate deploy` runs before `next build`, and a Vercel rollback does not revert the schema.
+- **Contract step (DROP column/table) — a separate migration in a separate deploy**, once at least one earlier deploy has no readers left (grep the code + `scripts/`) and the table/column is verified empty or its data moved; the commit message links the commit that removed the readers. Precedent: `20261201000000_drop_race_profiles`.
 - **Every `CREATE TABLE` migration must also `ALTER TABLE … ENABLE ROW LEVEL SECURITY`** — Supabase exposes `public` tables to the anon key otherwise. `prisma/__tests__/migrations-rls.test.ts` enforces it.
 - **Regions:** Supabase `eu-central-1`, Vercel functions `fra1`, Pusher cluster `eu`. Don't move one without the others — every DB round trip across continents adds ~100 ms.
 - **`DATABASE_URL` for Vercel = Transaction pooler (port 6543) with `?pgbouncer=true&sslmode=require`.** The Direct connection (port 5432) is only for one-off DDL/backups (`scripts/db/backup-database.sh`, manual migrations).

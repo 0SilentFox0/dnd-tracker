@@ -30,6 +30,10 @@
 
 `canSeeExactStats(p, viewer)` (`lib/utils/battle/view/visibility.ts`): точні стати бачить ДМ, глядач з прапорцем `seeEnemyHp` (`canSeeEnemyHp`/`alwaysSeesEnemyStats`) або союзник. Для решти UI ховає HP/AC/опори (`ParticipantList`, `ParticipantDetails`, `map-scene` HUD, `strike-steps`, майстер атаки, `useAttackSubmit`); `resolveObservedTraits` і `knowledge` дають лише спостережене. Це суто презентаційний гейт: дані в кеші клієнта повні.
 
+## Що вже закрито на сервері (Ч19)
+
+Єдиний виняток із «приховування лише в UI» — резерв: для гравця сервер віддає заглушки `{ id, side, reserved }` (`reserveStub`/`stubReserve`) у GET/SSR, відповіді мутації й публічній Pusher-дельті, а сетап `PREPARED` — без резервної частини (`publicSetup`). Решта лишається видимою гравцеві в мережі: стати ворогів, `battleData.system`, `battleData.dying`, `combatStats.moraleCap`, `scene.system`; приховування лише в UI. Тому система не кладе секретів у слоти стану (`battleData.system`). Джерела учасників (`character`/`unit`) перевіряються на належність кампанії (`assertParticipantSources`).
+
 ## Поля за глядачем (цільова модель)
 
 | Поле ворога | ДМ | Гравець без `seeEnemyHp` | Гравець з `seeEnemyHp` |
