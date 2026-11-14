@@ -1,6 +1,7 @@
 import { publicPending } from './public-pending';
 
 import { BattleStatus } from '@/lib/constants/battle';
+import { diffEdges } from '@/lib/utils/battle/grid/edge-diff';
 import { diffTerrain } from '@/lib/utils/battle/grid/terrain';
 import type { MapModeKey } from '@/lib/utils/battle/modes';
 import { isModeMapKey, modeDeltas } from '@/lib/utils/battle/modes/client';
@@ -23,12 +24,19 @@ const ids = (list: BattleParticipant[]) => list.map((p) => p.basicInfo.id);
 const sameIds = (a: string[], b: string[]) =>
     a.length === b.length && a.every((id, i) => id === b[i]);
 
+/** більше ребер за раз — повна карта, щоб не переповнити Pusher */
+const EDGE_DIFF_LIMIT = 400;
+
 const baseOf = (map: BattleMapConfig) =>
     JSON.stringify(
         Object.fromEntries(
             Object.entries(map).filter(
                 ([k]) =>
-                    k !== 'terrain' && k !== 'spellZones' && !isModeMapKey(k)
+                    k !== 'terrain' &&
+                    k !== 'spellZones' &&
+                    k !== 'walls' &&
+                    k !== 'bars' &&
+                    !isModeMapKey(k)
             )
         )
     );
@@ -37,7 +45,10 @@ const baseOf = (map: BattleMapConfig) =>
 function mapChange(
     before: BattleMapConfig | null,
     after: BattleMapConfig | null | undefined
-): Pick<ClientBattleDelta['scene'], 'map' | 'terrain' | MapModeKey> {
+): Pick<
+    ClientBattleDelta['scene'],
+    'map' | 'terrain' | 'walls' | 'bars' | MapModeKey
+> {
     if (after === undefined || before === after) return {};
 
     if (!before || !after || baseOf(before) !== baseOf(after))
@@ -47,9 +58,24 @@ function mapChange(
 
     if (modes === null) return { map: after };
 
+    const walls = diffEdges(before.walls, after.walls);
+
+    const bars = diffEdges(before.bars, after.bars);
+
+    const edgeCount =
+        (walls ? walls.add.length + walls.remove.length : 0) +
+        (bars ? bars.add.length + bars.remove.length : 0);
+
+    if (edgeCount > EDGE_DIFF_LIMIT) return { map: after };
+
     const terrain = diffTerrain(before.terrain, after.terrain);
 
-    return { ...(terrain && { terrain }), ...modes };
+    return {
+        ...(terrain && { terrain }),
+        ...(walls && { walls }),
+        ...(bars && { bars }),
+        ...modes,
+    };
 }
 
 export function buildClientDelta(args: {

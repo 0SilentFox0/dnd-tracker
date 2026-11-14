@@ -104,6 +104,11 @@ export type BattleParticipantPatch = { id: string } & {
     [K in keyof BattleParticipant]?: Partial<BattleParticipant[K]>;
 };
 
+export interface EdgeDiff {
+    add: string[];
+    remove: string[];
+}
+
 export interface ClientBattleDelta {
     battleId: string;
     version: number;
@@ -124,6 +129,9 @@ export interface ClientBattleDelta {
         map?: BattleMapConfig | null;
         /** зміни місцевості, коли решта карти та сама */
         terrain?: TerrainDiff;
+        /** зміни стін і ґрат, коли решта карти та сама */
+        walls?: EdgeDiff;
+        bars?: EdgeDiff;
         /** змінені поля лабіринту без стін, коли стіни й решта карти ті самі */
         maze?: Partial<Omit<MazeConfig, 'walls'>>;
     } & Partial<Record<Exclude<MapModeKey, 'maze'>, unknown>>;

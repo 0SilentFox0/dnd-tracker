@@ -436,4 +436,56 @@ describe('buildClientDelta', () => {
 
         expect(d.scene).toMatchObject({ status: 'active', completedAt: null });
     });
+
+    describe('стіни й ґрати', () => {
+        const base = { cols: 40, rows: 40, background: null, opacity: 0.3 };
+
+        const mk = (before: object, after: object) => {
+            const a = p('a');
+
+            return buildClientDelta({
+                before: {
+                    scene,
+                    meta: { ...meta, map: { ...base, ...before } },
+                    participants: [a],
+                    pending: [],
+                },
+                after: { ...scene, version: 8 },
+                participants: [a],
+                pending: [],
+                stored: [],
+                fullIds: [],
+                log: [],
+                map: { ...base, ...after },
+            }).scene;
+        };
+
+        it('додані й прибрані ребра йдуть diff без повної карти', () => {
+            const s = mk(
+                { walls: ['1:1:e', '2:2:s'], bars: ['3:3:e'] },
+                { walls: ['1:1:e', '4:4:s'], bars: ['3:3:e', '5:5:e'] }
+            );
+
+            expect(s).not.toHaveProperty('map');
+            expect(s.walls).toEqual({ add: ['4:4:s'], remove: ['2:2:s'] });
+            expect(s.bars).toEqual({ add: ['5:5:e'], remove: [] });
+        });
+
+        it('без змін ребер diff немає; undefined проти [] не змінює', () => {
+            const s = mk({ walls: ['1:1:e'] }, { walls: ['1:1:e'], bars: [] });
+
+            expect(s).not.toHaveProperty('map');
+            expect(s).not.toHaveProperty('walls');
+            expect(s).not.toHaveProperty('bars');
+        });
+
+        it('понад ліміт ребер — повна карта', () => {
+            const walls = Array.from({ length: 401 }, (_, i) => `${i}:0:e`);
+
+            const s = mk({}, { walls });
+
+            expect(s.map).toMatchObject({ walls });
+            expect(s).not.toHaveProperty('walls');
+        });
+    });
 });

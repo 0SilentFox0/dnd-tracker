@@ -1,4 +1,5 @@
 import { BattleStatus } from '@/lib/constants/battle';
+import { applyEdgeDiff } from '@/lib/utils/battle/grid/edge-diff';
 import { applyTerrainDiff } from '@/lib/utils/battle/grid/terrain';
 import {
     mergeModeDeltas,
@@ -56,10 +57,13 @@ function mergeMapDelta(
 
     if (!map) return modePatched ? 'refetch' : map;
 
-    return mergeModeDeltas(
-        scene.terrain ? applyTerrainDiff(map, scene.terrain) : map,
-        scene
-    );
+    let merged = scene.terrain ? applyTerrainDiff(map, scene.terrain) : map;
+
+    if (scene.walls) merged = applyEdgeDiff(merged, 'walls', scene.walls);
+
+    if (scene.bars) merged = applyEdgeDiff(merged, 'bars', scene.bars);
+
+    return mergeModeDeltas(merged, scene);
 }
 
 export function applyBattleDelta(
@@ -100,7 +104,8 @@ export function applyBattleDelta(
 
     const { scene } = delta;
 
-    if (scene.terrain && !cached.map) return 'refetch';
+    if ((scene.terrain || scene.walls || scene.bars) && !cached.map)
+        return 'refetch';
 
     const map =
         scene.map !== undefined ? scene.map : mergeMapDelta(cached.map, scene);

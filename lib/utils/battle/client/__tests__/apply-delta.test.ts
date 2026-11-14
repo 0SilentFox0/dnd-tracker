@@ -127,6 +127,39 @@ describe('applyBattleDelta', () => {
         ).toEqual(terrain);
     });
 
+    it('scene.walls/bars домерджуються в кешовану карту; без карти — refetch', () => {
+        const map = {
+            cols: 8,
+            rows: 8,
+            background: null,
+            opacity: 0.3,
+            walls: ['1:1:e', '2:2:s'],
+        };
+
+        const scene = {
+            status: 'active' as const,
+            round: 1,
+            turnIndex: 1,
+            pendingMoraleCheck: null,
+            pendingChoice: null,
+            walls: { add: ['3:3:e'], remove: ['1:1:e'] },
+            bars: { add: ['4:4:s'], remove: [] },
+        };
+
+        const merged = applyBattleDelta(
+            { ...cached, map },
+            delta({ scene })
+        ) as BattleScene;
+
+        expect([...(merged.map?.walls ?? [])].sort()).toEqual([
+            '2:2:s',
+            '3:3:e',
+        ]);
+        expect(merged.map?.bars).toEqual(['4:4:s']);
+        expect(map.walls).toEqual(['1:1:e', '2:2:s']);
+        expect(applyBattleDelta(cached, delta({ scene }))).toBe('refetch');
+    });
+
     it('scene.terrain домерджується в кешовану карту новим записом; без карти в кеші — refetch', () => {
         const map = {
             cols: 8,
