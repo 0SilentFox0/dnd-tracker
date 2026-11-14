@@ -28,9 +28,10 @@ export function useMapEditorDraft(campaignId: string, source: BattleMapFull) {
             bars: source.bars,
         },
         {
-            maxSide: source.map.background
-                ? MAP_LIMITS.photoMaxSide
-                : MAP_LIMITS.tileMaxSide,
+            maxSide: {
+                photo: MAP_LIMITS.photoMaxSide,
+                tile: MAP_LIMITS.tileMaxSide,
+            },
         }
     );
 

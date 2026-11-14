@@ -79,7 +79,9 @@ export const EDGES_STRIPPED_NOTICE = textRef('battleSetup.map.edgesStripped');
 
 export function useBattleMapEditor(
     initial: BattleMapConfig | null | undefined,
-    { maxSide = MAX_SIDE }: { maxSide?: number } = {}
+    {
+        maxSide = { photo: MAX_SIDE, tile: MAX_SIDE },
+    }: { maxSide?: { photo: number; tile: number } } = {}
 ) {
     const [enabled, setEnabledState] = useState(Boolean(initial));
 
@@ -128,8 +130,10 @@ export function useBattleMapEditor(
             rows: number,
             calibration?: Partial<GridCalibration>
         ) => {
-            cols = Math.min(cols, maxSide);
-            rows = Math.min(rows, maxSide);
+            const limit = map.background ? maxSide.photo : maxSide.tile;
+
+            cols = Math.min(cols, limit);
+            rows = Math.min(rows, limit);
 
             const nextMargins = clampMargins({ cols, rows }, margins);
 

@@ -189,7 +189,7 @@ describe('useBattleMapEditor', () => {
 
     it('maxSide: 200 приймає 150, без опції — кламп до 60', () => {
         const big = renderHook(() =>
-            useBattleMapEditor(null, { maxSide: 200 })
+            useBattleMapEditor(null, { maxSide: { photo: 200, tile: 200 } })
         );
 
         act(() => big.result.current.actions.setSize(150, 150));
@@ -202,6 +202,38 @@ describe('useBattleMapEditor', () => {
 
         act(() => small.result.current.actions.setSize(150, 150));
         expect(small.result.current.state.map).toMatchObject({
+            cols: 60,
+            rows: 60,
+        });
+    });
+
+    it('maxSide follows the current background, not the initial one', () => {
+        const maxSide = { photo: 60, tile: 200 };
+
+        const photo = renderHook(() =>
+            useBattleMapEditor(
+                { cols: 40, rows: 40, background: 'https://x/a.png' },
+                { maxSide }
+            )
+        );
+
+        act(() => photo.result.current.actions.setBackground(null));
+        act(() => photo.result.current.actions.setSize(120, 120));
+        expect(photo.result.current.state.map).toMatchObject({
+            cols: 120,
+            rows: 120,
+        });
+
+        const tile = renderHook(() =>
+            useBattleMapEditor(
+                { cols: 150, rows: 150, background: null },
+                { maxSide }
+            )
+        );
+
+        act(() => tile.result.current.actions.setBackground('https://x/a.png'));
+        act(() => tile.result.current.actions.setSize(150, 150));
+        expect(tile.result.current.state.map).toMatchObject({
             cols: 60,
             rows: 60,
         });
