@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { useBattleMapMutations } from './useBattleMaps';
@@ -26,6 +26,10 @@ export function useMapEditorDraft(campaignId: string, source: BattleMapFull) {
         bars: source.bars,
     });
 
+    const backgroundRef = useRef(editor.state.map.background);
+
+    backgroundRef.current = editor.state.map.background;
+
     const [name, setName] = useState(source.name);
 
     const snapshot = JSON.stringify([name.trim(), editor.state.map]);
@@ -43,7 +47,8 @@ export function useMapEditorDraft(campaignId: string, source: BattleMapFull) {
         try {
             const { map } = await getBattleMap(campaignId, source.id);
 
-            if (!map.background) return;
+            if (!map.background || backgroundRef.current !== sent.background)
+                return;
 
             editor.actions.replaceBackground(map.background);
             setSaved(

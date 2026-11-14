@@ -12,6 +12,7 @@ import { mapEdgeRemoveMutation } from '@/lib/server/battles/mutations/map-edge-r
 import { mapUpdateMutation } from '@/lib/server/battles/mutations/map-update/map-update-mutation';
 import { mapWallsMutation } from '@/lib/server/battles/mutations/map-walls/map-walls-mutation';
 import { composeEffectiveMap } from '@/lib/utils/battle/map-storage/effective-map';
+import { persistedMap } from '@/lib/utils/battle/map-storage/persisted-map';
 import { REJECT } from '@/lib/utils/battle/store/reject';
 import type { BattleMapConfig, BattleMapState } from '@/types/battle';
 
@@ -319,6 +320,40 @@ describe('двері та map-edge-remove / map-update', () => {
         const out = mapEdgeRemoveMutation(ctx, { edges: ['4:4:e'] });
 
         expect(out.scene?.mapState?.removedEdges).toEqual(['4:4:e']);
+    });
+
+    it('map-walls не запікає стан дверей у базову карту', () => {
+        const doors = {
+            '4:4:e': { open: false },
+            '5:5:e': { open: false, locked: true },
+        };
+
+        const inline = { ...map, doors };
+
+        const state: BattleMapState = {
+            removedEdges: ['5:5:e'],
+            doors: { '4:4:e': { open: true } },
+        };
+
+        const effective = composeEffectiveMap(inline, state);
+
+        const base = context({ isDM: true });
+
+        const meta = { ...base.meta, map: effective, mapState: state };
+
+        const out = mapWallsMutation(
+            { ...base, meta },
+            { kind: 'walls', add: ['1:3:e'], remove: [] }
+        );
+
+        const stored = persistedMap(
+            meta,
+            out.scene!.map!,
+            out.scene?.mapState ?? state
+        );
+
+        expect(stored.doors).toEqual(doors);
+        expect(stored.walls).toContain('1:3:e');
     });
 
     it('map-update прибирає state.doors для дверей, яких нема в новій версії', async () => {

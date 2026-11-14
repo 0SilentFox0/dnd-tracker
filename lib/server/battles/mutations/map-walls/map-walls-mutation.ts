@@ -1,6 +1,9 @@
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { inBounds, paintEdges, parseEdgeKey } from '@/lib/utils/battle/grid';
-import { pruneRemoved } from '@/lib/utils/battle/map-storage/effective-map';
+import {
+    baseDoorsOf,
+    pruneRemoved,
+} from '@/lib/utils/battle/map-storage/effective-map';
 import { activeModeWithConfig } from '@/lib/utils/battle/modes';
 import type {
     BattleMutationContext,
@@ -15,16 +18,18 @@ export function mapWallsMutation(
     ctx: BattleMutationContext,
     body: MapWallsData
 ): MutationResult {
-    const map = ctx.meta.map;
+    const effective = ctx.meta.map;
 
-    if (!map)
+    if (!effective)
         throw new BattleRuleError('action_rejected', API_ERRORS.BATTLE_NO_MAP);
 
     if (ctx.meta.mapRef)
         throw new BattleRuleError('action_rejected', REJECT.mapEdgesLinked);
 
-    if (activeModeWithConfig(map))
+    if (activeModeWithConfig(effective))
         throw new BattleRuleError('action_rejected', REJECT.mapEdgesInMode);
+
+    const map = withBaseDoors(effective);
 
     const outside = [...body.add, ...body.remove].some((edge) => {
         const { a, b } = parseEdgeKey(edge);
@@ -76,4 +81,15 @@ export function mapWallsMutation(
             ...(pruned !== state && { mapState: pruned }),
         },
     };
+}
+
+/** Painting must not copy state-composed doors (open/locked/broken) into the stored base map. */
+function withBaseDoors(map: BattleMapConfig): BattleMapConfig {
+    const doors = baseDoorsOf(map.doors);
+
+    if (doors === map.doors) return map;
+
+    const { doors: _doors, ...rest } = map;
+
+    return doors ? { ...rest, doors } : rest;
 }

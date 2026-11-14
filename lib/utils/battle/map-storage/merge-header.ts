@@ -1,3 +1,5 @@
+import { inBounds, parseCellKey } from '@/lib/utils/battle/grid';
+import { parseEdgeKey } from '@/lib/utils/battle/grid/walls';
 import { MODE_MAP_KEYS } from '@/lib/utils/battle/modes/client';
 import type { BattleMapConfig, TerrainCell } from '@/types/battle';
 
@@ -91,4 +93,51 @@ export function mergeLibraryHeader(
     if (doors) out.doors = doors;
 
     return out as unknown as BattleMapConfig;
+}
+
+function pruneDoors(map: BattleMapConfig): BattleMapConfig {
+    if (!map.doors) return map;
+
+    const entries = Object.entries(map.doors).filter(([edge]) => {
+        const { a, b } = parseEdgeKey(edge);
+
+        return inBounds(map, a) && inBounds(map, b);
+    });
+
+    return entries.length === Object.keys(map.doors).length
+        ? map
+        : { ...map, doors: Object.fromEntries(entries) };
+}
+
+/** Terrain cells and doors outside the new bounds go, and zones that lose their last cell with them. */
+export function pruneOutOfBounds(source: BattleMapConfig): BattleMapConfig {
+    const map = pruneDoors(source);
+
+    if (!map.terrain) return map;
+
+    const entries = Object.entries(map.terrain);
+
+    const kept = entries.filter(([key]) => inBounds(map, parseCellKey(key)));
+
+    if (kept.length === entries.length) return map;
+
+    const alive = new Set(kept.flatMap(([, cell]) => cell.zoneId ?? []));
+
+    const lost = new Set(
+        entries.flatMap(([, cell]) =>
+            cell.zoneId && !alive.has(cell.zoneId) ? [cell.zoneId] : []
+        )
+    );
+
+    const { spellZones } = map;
+
+    return {
+        ...map,
+        terrain: Object.fromEntries(kept),
+        ...(spellZones && {
+            spellZones: Object.fromEntries(
+                Object.entries(spellZones).filter(([id]) => !lost.has(id))
+            ),
+        }),
+    };
 }

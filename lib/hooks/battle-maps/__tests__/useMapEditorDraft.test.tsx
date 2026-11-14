@@ -173,4 +173,39 @@ describe('useMapEditorDraft', () => {
         );
         await waitFor(() => expect(result.current.isDirty).toBe(false));
     });
+
+    it('keeps a background changed while the stored URL was loading', async () => {
+        vi.mocked(updateBattleMap).mockResolvedValue({ version: 4 } as never);
+
+        let resolve!: (v: BattleMapFull) => void;
+
+        vi.mocked(getBattleMap).mockReturnValue(
+            new Promise((r) => (resolve = r))
+        );
+
+        const { result } = setup();
+
+        act(() =>
+            result.current.editor.actions.setBackground(
+                'data:image/png;base64,AAAA'
+            )
+        );
+        act(() => result.current.save());
+        await waitFor(() => expect(getBattleMap).toHaveBeenCalled());
+
+        act(() =>
+            result.current.editor.actions.setBackground('https://x/other.png')
+        );
+
+        await act(async () =>
+            resolve({
+                ...source,
+                map: { ...source.map, background: 'https://cdn.test/bg.webp' },
+            })
+        );
+
+        expect(result.current.editor.state.map.background).toBe(
+            'https://x/other.png'
+        );
+    });
 });

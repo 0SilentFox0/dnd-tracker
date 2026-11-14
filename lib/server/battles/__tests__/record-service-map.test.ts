@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import type { BattleMapConfig } from '@/types/battle';
+
 const mocks = vi.hoisted(() => ({
     assert: vi.fn(),
     create: vi.fn(async () => ({ id: 'b1' })),
@@ -295,6 +297,39 @@ describe('writeBattleRecord: patch mapId (перепривʼязка)', () => {
             })
         );
         expect(mocks.deleteState).not.toHaveBeenCalled();
+    });
+
+    it('та сама карта, менші межі: terrain поза ними обрізається', async () => {
+        mocks.findUnique.mockResolvedValue(
+            row({
+                map: {
+                    ...header,
+                    terrain: {
+                        '0:0': { kind: 'hazard' },
+                        '15:5': { kind: 'hazard' },
+                    },
+                },
+            })
+        );
+        mocks.getMapMeta.mockResolvedValue({
+            campaignId: 'c1',
+            version: 5,
+            cols: 10,
+            rows: 10,
+            header: { ...header, cols: 10 },
+        });
+        mocks.getMap.mockResolvedValue({ map: header });
+
+        await patch({ mapId: 'm1' });
+
+        const [[{ data }]] = mocks.update.mock.calls as unknown as [
+            [{ data: { map: BattleMapConfig } }],
+        ];
+
+        const { map } = data;
+
+        expect(map.cols).toBe(10);
+        expect(map.terrain).toEqual({ '0:0': { kind: 'hazard' } });
     });
 
     it('null: ребра pinned-версії стають inline, привʼязка знята', async () => {

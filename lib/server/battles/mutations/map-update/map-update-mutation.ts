@@ -4,18 +4,18 @@ import { textRef } from '@/lib/i18n/text-ref';
 import { getMap } from '@/lib/server/battle-maps/library-service';
 import {
     cellsOf,
-    inBounds,
     isOnMap,
     isPlayable,
-    parseCellKey,
 } from '@/lib/utils/battle/grid';
-import { parseEdgeKey } from '@/lib/utils/battle/grid/walls';
 import {
     baseDoorsOf,
     composeEffectiveMap,
     pruneRemoved,
 } from '@/lib/utils/battle/map-storage/effective-map';
-import { mergeLibraryHeader } from '@/lib/utils/battle/map-storage/merge-header';
+import {
+    mergeLibraryHeader,
+    pruneOutOfBounds,
+} from '@/lib/utils/battle/map-storage/merge-header';
 import { withoutEdges } from '@/lib/utils/battle/map-storage/persisted-map';
 import type {
     BattleMutationContext,
@@ -26,53 +26,6 @@ import { dmEvent } from '@/lib/utils/battle/store/event-mapping';
 import { REJECT } from '@/lib/utils/battle/store/reject';
 import type { MapUpdateData } from '@/types/api';
 import type { BattleMapConfig, BattleMapState } from '@/types/battle';
-
-function pruneDoors(map: BattleMapConfig): BattleMapConfig {
-    if (!map.doors) return map;
-
-    const entries = Object.entries(map.doors).filter(([edge]) => {
-        const { a, b } = parseEdgeKey(edge);
-
-        return inBounds(map, a) && inBounds(map, b);
-    });
-
-    return entries.length === Object.keys(map.doors).length
-        ? map
-        : { ...map, doors: Object.fromEntries(entries) };
-}
-
-/** Terrain cells and doors outside the new bounds go, and zones that lose their last cell with them. */
-function pruneOutOfBounds(source: BattleMapConfig): BattleMapConfig {
-    const map = pruneDoors(source);
-
-    if (!map.terrain) return map;
-
-    const entries = Object.entries(map.terrain);
-
-    const kept = entries.filter(([key]) => inBounds(map, parseCellKey(key)));
-
-    if (kept.length === entries.length) return map;
-
-    const alive = new Set(kept.flatMap(([, cell]) => cell.zoneId ?? []));
-
-    const lost = new Set(
-        entries.flatMap(([, cell]) =>
-            cell.zoneId && !alive.has(cell.zoneId) ? [cell.zoneId] : []
-        )
-    );
-
-    const { spellZones } = map;
-
-    return {
-        ...map,
-        terrain: Object.fromEntries(kept),
-        ...(spellZones && {
-            spellZones: Object.fromEntries(
-                Object.entries(spellZones).filter(([id]) => !lost.has(id))
-            ),
-        }),
-    };
-}
 
 function pruneState(
     state: BattleMapState | null | undefined,

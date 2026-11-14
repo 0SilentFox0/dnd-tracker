@@ -38,7 +38,10 @@ import {
     applyAudioCommand,
     commandNeedsLibrary,
 } from '@/lib/utils/audio/audio-command';
-import { mergeLibraryHeader } from '@/lib/utils/battle/map-storage/merge-header';
+import {
+    mergeLibraryHeader,
+    pruneOutOfBounds,
+} from '@/lib/utils/battle/map-storage/merge-header';
 import { withoutEdges } from '@/lib/utils/battle/map-storage/persisted-map';
 import {
     headerForOtherMap,
@@ -198,10 +201,8 @@ async function relinkData(
                       | BattleMapConfig
                       | undefined);
 
-        header = mergeLibraryHeader(
-            old ?? withoutEdges(pinned),
-            library,
-            pinned
+        header = pruneOutOfBounds(
+            mergeLibraryHeader(old ?? withoutEdges(pinned), library, pinned)
         );
     }
 
