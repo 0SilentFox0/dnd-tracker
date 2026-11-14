@@ -69,6 +69,7 @@ export {
     type MobileBattleTab,
     useMobileBattleTabs,
 } from './useMobileBattleTabs';
+export { useMoveRoutes } from './useMoveRoutes';
 export {
     type ParticipantClickInput,
     useParticipantClick,
@@ -89,6 +90,7 @@ export {
 } from './useSpellBook';
 export { type FxRunner, useSpellFxPlayback } from './useSpellFxPlayback';
 export { useStrokePaint } from './useStrokePaint';
+export { type GlideFrame, useTokenGlide } from './useTokenGlide';
 export { useTurnCountdown, useTurnTimer } from './useTurnTimer';
 export {
     type UnitControlRow,

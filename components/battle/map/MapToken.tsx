@@ -3,12 +3,12 @@
 import { memo } from 'react';
 
 import { PORTRAIT_SHARE } from './constants';
-import { type MapPlacement, tokenBoxStyle } from './token-box';
+import { type MapPlacement, routeFrames, tokenBoxStyle } from './token-box';
 
 import { hitFlashClass, Portrait } from '@/components/battle/hud';
 import { StatusAuras } from '@/components/fx/auras/StatusAuras';
 import { HitFrame } from '@/components/fx/PortraitFx';
-import { useHitFx } from '@/lib/hooks/battle';
+import { useHitFx, useTokenGlide } from '@/lib/hooks/battle';
 import { cn } from '@/lib/utils';
 import type { FxImpact } from '@/lib/utils/battle/fx';
 import { isFallen } from '@/lib/utils/battle/grid';
@@ -51,6 +51,10 @@ function MapTokenImpl({
 
     const { box, mapSize, pxPerUnit } = placement;
 
+    const glideRef = useTokenGlide<HTMLDivElement>(
+        routeFrames(placement.route, placement)
+    );
+
     const { id, name } = participant.basicInfo;
 
     if (isFallen(participant)) return null;
@@ -62,8 +66,9 @@ function MapTokenImpl({
 
     return (
         <div
+            ref={glideRef}
             data-dormant={dormant || undefined}
-            className="pointer-events-none absolute transition-[left,top] duration-[250ms] ease-out motion-reduce:transition-none"
+            className="pointer-events-none absolute"
             style={{
                 ...tokenBoxStyle(box, mapSize),
                 zIndex: isDown(participant) ? 1 : 2,

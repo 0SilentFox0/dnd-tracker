@@ -9,7 +9,21 @@ export const tokenBoxStyle = (
     height: `${(box.size / mapSize.height) * 100}%`,
 });
 
+/** кадри ходу жетона: left/top на кожній клітинці шляху */
+export const routeFrames = (
+    route: readonly { cx: number; cy: number }[] | undefined,
+    { box, mapSize }: MapPlacement
+) =>
+    route && route.length > 1
+        ? route.map((c) => {
+              const { left, top } = tokenBoxStyle({ ...box, ...c }, mapSize);
+
+              return { left, top };
+          })
+        : null;
+
 export interface MapPlacement {
+    route?: { cx: number; cy: number }[];
     box: { cx: number; cy: number; size: number };
     mapSize: { width: number; height: number };
     pxPerUnit: number;
