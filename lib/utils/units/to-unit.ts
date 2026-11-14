@@ -1,7 +1,7 @@
 import type { Prisma } from '@prisma/client';
 
 import { abilitySummary } from '@/lib/utils/abilities/summary';
-import { withStoredColumns } from '@/lib/utils/rules/systems/column-view';
+import { flattenStoredColumns } from '@/lib/utils/rules/systems/column-view';
 import { readSaveProficiencies } from '@/lib/utils/units/monster';
 import type { Unit, UnitAttack } from '@/types/units';
 
@@ -9,7 +9,7 @@ const list = <T>(value: unknown): T[] =>
     Array.isArray(value) ? (value as T[]) : [];
 
 export function toUnit(stored: Prisma.UnitGetPayload<object>): Unit {
-    const row = withStoredColumns(stored);
+    const row = flattenStoredColumns(stored);
 
     return {
         id: row.id,

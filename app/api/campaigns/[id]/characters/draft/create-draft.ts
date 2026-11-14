@@ -19,7 +19,7 @@ import { systemServerOf } from '@/lib/server/systems/lookup';
 import { requireCampaignAccess } from '@/lib/utils/api/api-auth';
 import { errorResponse } from '@/lib/utils/api/api-response';
 import { heroInitiativeRange } from '@/lib/utils/characters/initiative-range';
-import { withColumnView } from '@/lib/utils/rules/systems/column-view';
+import { columnViewDto } from '@/lib/utils/rules/systems/column-view';
 import { ruleSystemOf } from '@/lib/utils/rules/systems/lookup';
 import { statColumnsOf } from '@/lib/utils/rules/systems/stats';
 import type { CharacterClassEntry } from '@/types/classes';
@@ -123,7 +123,7 @@ export async function createDraft(
             data: { characterId: created.id, ...EMPTY_INVENTORY },
         });
 
-        return withColumnView(created, ruleSystemOf(campaign.rules));
+        return columnViewDto(created, ruleSystemOf(campaign.rules));
     });
 
     return result instanceof NextResponse ? result : NextResponse.json(result);

@@ -34,8 +34,8 @@ import { hasPicks } from '@/lib/utils/characters/choices/read';
 import { heroInitiativeRange } from '@/lib/utils/characters/initiative-range';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import {
+    columnViewDto,
     splitColumnView,
-    withColumnView,
 } from '@/lib/utils/rules/systems/column-view';
 import type { CharacterClassEntry, GameClassData } from '@/types/classes';
 
@@ -256,7 +256,7 @@ async function createCharacterCore(
             },
         });
 
-        return withColumnView(character, system);
+        return columnViewDto(character, system);
     } catch (error) {
         if (
             error instanceof Prisma.PrismaClientKnownRequestError &&

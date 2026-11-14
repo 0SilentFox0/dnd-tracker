@@ -22,7 +22,7 @@ import {
     type RuleSystemDefinition,
     ruleSystemOf,
 } from '@/lib/utils/rules/systems';
-import { withStoredColumns } from '@/lib/utils/rules/systems/column-view';
+import { flattenStoredColumns } from '@/lib/utils/rules/systems/column-view';
 
 const COMPACT_SELECT = {
     id: true,
@@ -132,7 +132,7 @@ export const listOperation = defineCharacterOperation({
             }),
             access,
             ruleSystemOf(access.campaign.rules)
-        ).map(withStoredColumns);
+        ).map(flattenStoredColumns);
     },
 });
 

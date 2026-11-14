@@ -46,6 +46,7 @@ import {
 } from '@/lib/utils/notifications/events';
 import { allLevelResets, ruleSystemOf } from '@/lib/utils/rules/systems';
 import {
+    columnViewDto,
     splitColumnView,
     withColumnView,
 } from '@/lib/utils/rules/systems/column-view';
@@ -453,7 +454,7 @@ async function patchCore(gate: Gate, parsed: Parsed) {
         ],
     });
 
-    return withColumnView(updatedCharacter, system);
+    return columnViewDto(updatedCharacter, system);
 }
 
 export const patchOperation = defineCharacterOperation({

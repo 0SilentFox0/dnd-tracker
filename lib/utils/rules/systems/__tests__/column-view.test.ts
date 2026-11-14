@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+    columnViewDto,
     flattenStoredColumns,
     splitColumnView,
     withColumnView,
@@ -107,5 +108,36 @@ describe('flattenStoredColumns', () => {
                 strength: 10,
             })
         ).toEqual({ strength: 18, characteristics: { ws: 3 } });
+    });
+});
+
+describe('columnViewDto', () => {
+    it('keeps the statblock flat and drops the view keys for d20', () => {
+        const dto = columnViewDto(
+            { characteristics: { strength: 18 }, strength: 10, speed: 30 },
+            d20
+        ) as Record<string, unknown>;
+
+        expect(dto).toMatchObject({ strength: 18, speed: 30 });
+        expect(dto.characteristics).toBeNull();
+    });
+
+    it('keeps foreign keys in characteristics', () => {
+        const dto = columnViewDto(
+            { characteristics: { strength: 18, extra: 1 }, strength: 10 },
+            d20
+        ) as Record<string, unknown>;
+
+        expect(dto.characteristics).toEqual({ extra: 1 });
+    });
+
+    it('leaves wfrp characteristics and rows without the key alone', () => {
+        const row = { characteristics: { ws: 30 }, strength: 10 };
+
+        expect(columnViewDto(row, wfrp)).toBe(row);
+
+        const plain = { strength: 14 };
+
+        expect(columnViewDto(plain, d20)).toBe(plain);
     });
 });

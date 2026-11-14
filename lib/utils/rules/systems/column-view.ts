@@ -59,6 +59,31 @@ export function withColumnView<T extends object>(
     return { ...row, ...view.read(row as { characteristics?: unknown }) };
 }
 
+/** Response shape: the statblock stays flat, the view keys leave `characteristics` (only for systems with a columnView). */
+export function columnViewDto<T extends object>(
+    row: T,
+    system: RuleSystemDefinition
+): T {
+    const view = system.characteristics.columnView;
+
+    const flat = withColumnView(row, system) as T & {
+        characteristics?: unknown;
+    };
+
+    if (!view || !isRecord(flat.characteristics)) return flat;
+
+    const rest = Object.fromEntries(
+        Object.entries(flat.characteristics).filter(
+            ([key]) => !view.columns.includes(key)
+        )
+    );
+
+    return {
+        ...flat,
+        characteristics: Object.keys(rest).length > 0 ? rest : null,
+    };
+}
+
 export function splitColumnView(
     data: Record<string, unknown>,
     system: RuleSystemDefinition,
