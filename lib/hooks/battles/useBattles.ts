@@ -46,6 +46,7 @@ export function useBattle(
                 await getBattle(campaignId, battleId)
             ),
         staleTime: 15_000,
+        structuralSharing: false,
         refetchInterval: (query) => {
             if (options?.pausePolling) return false;
 
@@ -131,6 +132,8 @@ export const useAuraZone = makeBattleHook(battleOps.auraZone);
 export const useMoveParticipant = makeBattleHook(battleOps.move);
 export const useMapTerrain = makeBattleHook(battleOps.mapTerrain);
 export const useMapWalls = makeBattleHook(battleOps.mapWalls);
+export const useMapEdgeRemove = makeBattleHook(battleOps.mapEdgeRemove);
+export const useMapUpdate = makeBattleHook(battleOps.mapUpdate);
 export const useMazeAction = makeBattleHook(battleOps.maze);
 export const useMazeMark = makeBattleHook(battleOps.mazeMark);
 export const useMapMotion = makeBattleHook(battleOps.mapMotion);
