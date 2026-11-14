@@ -11,13 +11,12 @@ import {
 } from './scenario';
 
 import {
-    aimInRange,
-    allCells,
     applyTerrainDiff,
     blockedSet,
     cellKey,
     cellsByDistance,
     cellsOf,
+    feetToCells,
     hazardCells,
     isMoveMark,
     moveBudget,
@@ -25,34 +24,47 @@ import {
     nearestStandable,
     placeParticipants,
     playableBounds,
+    regionFillPath,
+    regionOutlinePath,
     searchPaths,
+    windowPath,
 } from '@/lib/utils/battle/grid';
 import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
 import type { BattleMapConfig, GridPoint } from '@/types/battle';
 
 const RUNS = Number(process.env.SPIKE_RUNS ?? 7);
 
-// copy of the private outOfRangeMarks (map-scene.ts) — the "before" shape
-function outOfRangeMarks(map: BattleMapConfig, origin: GridPoint[], feet: number) {
-    const out = new Map<string, string>();
+// copy of the private rangeWindow (map-scene.ts) + the windowPath the layer draws
+function rangeWindow(map: BattleMapConfig, origin: GridPoint[], feet: number) {
+    const r = feetToCells(feet, DEFAULT_RULES);
 
-    for (let y = 0; y < map.rows; y++)
-        for (let x = 0; x < map.cols; x++)
-            if (!aimInRange(origin, { x, y }, feet, DEFAULT_RULES))
-                out.set(cellKey({ x, y }), 'out-of-range');
+    const xs = origin.map((c) => c.x);
 
-    return out;
+    const ys = origin.map((c) => c.y);
+
+    const x0 = Math.max(0, Math.min(...xs) - r);
+
+    const y0 = Math.max(0, Math.min(...ys) - r);
+
+    const x1 = Math.min(map.cols - 1, Math.max(...xs) + r);
+
+    const y1 = Math.min(map.rows - 1, Math.max(...ys) + r);
+
+    const win = { x: x0, y: y0, cols: x1 - x0 + 1, rows: y1 - y0 + 1 };
+
+    return windowPath(map, win);
 }
 
-// copy of the inline zoneCells in GridLayer (MapLayers.tsx), recomputed on every render
-function zoneCells(map: BattleMapConfig, marks: Map<string, unknown>) {
+function dmZone(map: BattleMapConfig, marks: Map<string, unknown>) {
     const blocked = blockedSet(map);
 
-    return allCells(map).flatMap((p) => {
-        const m = marks.get(cellKey(p)) as Parameters<typeof isMoveMark>[0];
+    const keys: string[] = [];
 
-        return !blocked.has(cellKey(p)) && isMoveMark(m) ? [p] : [];
-    });
+    for (const [key, m] of marks)
+        if (!blocked.has(key) && isMoveMark(m as Parameters<typeof isMoveMark>[0]))
+            keys.push(key);
+
+    return [regionFillPath(keys), regionOutlinePath(keys)];
 }
 
 it('grid algorithms on synthetic maps', () => {
@@ -115,10 +127,10 @@ it('grid algorithms on synthetic maps', () => {
                 time(() => placeParticipants(map, unplaced), RUNS).median
             ),
             'hazardCells (ms)': ms(time(() => hazardCells(map), RUNS).median),
-            'outOfRangeMarks 60ft (ms)': ms(
-                time(() => outOfRangeMarks(map, cellsOf(hero), 60), RUNS).median
+            'rangeWindow 60ft (ms)': ms(
+                time(() => rangeWindow(map, cellsOf(hero), 60), RUNS).median
             ),
-            'zoneCells DM marks (ms)': ms(time(() => zoneCells(map, dmMarks), RUNS).median),
+            'DM zone fill+outline (ms)': ms(time(() => dmZone(map, dmMarks), RUNS).median),
             'playableBounds (ms)': ms(time(() => playableBounds(map), RUNS).median),
             'applyTerrainDiff 1 cell (ms)': ms(time(() => applyTerrainDiff(oneCell, diff), RUNS).median),
         });

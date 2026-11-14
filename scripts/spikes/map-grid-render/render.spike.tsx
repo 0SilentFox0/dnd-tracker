@@ -80,7 +80,7 @@ it('BattleMap render cost on synthetic maps', () => {
             dom = {
                 elements: c.querySelectorAll('*').length,
                 polygons: c.querySelectorAll('polygon').length,
-                cellPolygons: c.querySelectorAll('[data-fx-cell]').length,
+                cellPolygons: c.querySelectorAll('[data-mark-cell]').length,
                 htmlKb: Math.round(c.innerHTML.length / 1024),
             };
 
