@@ -10,6 +10,7 @@ import {
     time,
 } from './scenario';
 
+import '@/lib/utils/rules/systems/registry';
 import {
     applyTerrainDiff,
     blockedSet,

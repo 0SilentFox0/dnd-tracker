@@ -13,6 +13,7 @@ import {
     syntheticParticipants,
 } from './scenario';
 
+import '@/lib/utils/rules/systems/registry';
 import { BattleMap } from '@/components/battle/map';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { moveZoneMarks } from '@/lib/utils/battle/grid';
