@@ -1,6 +1,6 @@
 import { API_ERRORS } from '@/lib/constants/api-errors';
-import { MAP_LIMITS } from '@/lib/constants/map-limits';
 import { textRef } from '@/lib/i18n/text-ref';
+import { campaignMapMaxSide } from '@/lib/server/battle-maps/campaign-limits';
 import { getMap } from '@/lib/server/battle-maps/library-service';
 import {
     cellsOf,
@@ -73,7 +73,10 @@ export async function mapUpdateMutation(
 
     if (library.version === mapRef.version) return unchanged;
 
-    if (Math.max(library.cols, library.rows) > MAP_LIMITS.battleMaxSide)
+    if (
+        Math.max(library.cols, library.rows) >
+        (await campaignMapMaxSide(library.campaignId))
+    )
         throw new BattleRuleError(
             'action_rejected',
             API_ERRORS.BATTLE_MAP_TOO_LARGE

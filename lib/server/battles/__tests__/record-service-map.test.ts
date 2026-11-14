@@ -7,6 +7,7 @@ const mocks = vi.hoisted(() => ({
     create: vi.fn(async () => ({ id: 'b1' })),
     update: vi.fn(async () => ({})),
     findUnique: vi.fn(),
+    campaignFind: vi.fn(async () => ({ mapLibraryEnabled: false })),
     getMapMeta: vi.fn(),
     getMap: vi.fn(),
     deleteState: vi.fn(async () => ({})),
@@ -16,6 +17,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock('server-only', () => ({}));
 vi.mock('@/lib/db', () => ({
     prisma: {
+        campaign: { findUnique: mocks.campaignFind },
         battleScene: {
             create: mocks.create,
             update: mocks.update,
@@ -23,6 +25,7 @@ vi.mock('@/lib/db', () => ({
         },
         $transaction: async (fn: (tx: unknown) => unknown) =>
             fn({
+                campaign: { findUnique: mocks.campaignFind },
                 battleScene: { create: mocks.create, update: mocks.update },
                 battleMapState: { deleteMany: mocks.deleteState },
             }),
@@ -107,7 +110,7 @@ describe('writeBattleRecord: create з mapId', () => {
         expect(mocks.create).not.toHaveBeenCalled();
     });
 
-    it('карта більша за battleMaxSide -> 422', async () => {
+    it('карта більша за ліміт без прапорця -> 422', async () => {
         mocks.getMapMeta.mockResolvedValue({
             campaignId: 'c1',
             version: 1,
@@ -120,6 +123,22 @@ describe('writeBattleRecord: create з mapId', () => {
             status: 422,
             message: API_ERRORS.BATTLE_MAP_TOO_LARGE,
         });
+    });
+
+    it('100x100 з прапорцем mapLibraryEnabled приймається', async () => {
+        mocks.campaignFind.mockResolvedValueOnce({ mapLibraryEnabled: true });
+        mocks.getMapMeta.mockResolvedValue({
+            campaignId: 'c1',
+            version: 1,
+            cols: 100,
+            rows: 100,
+            header: { ...header, cols: 100, rows: 100 },
+        });
+
+        await create('m1');
+
+        expect(mocks.create).toHaveBeenCalled();
+        mocks.create.mockClear();
     });
 });
 

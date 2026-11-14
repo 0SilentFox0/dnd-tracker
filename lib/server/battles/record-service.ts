@@ -3,7 +3,6 @@ import { type BattleScene, Prisma } from '@prisma/client';
 import { z } from 'zod';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
-import { MAP_LIMITS } from '@/lib/constants/map-limits';
 import { prisma } from '@/lib/db';
 import { BATTLE_AUDIO_EVENT, battleChannelName } from '@/lib/pusher/channels';
 import { safePusherTrigger } from '@/lib/pusher/safe-trigger';
@@ -16,6 +15,7 @@ import {
 import { battleAudioCommandSchema } from '@/lib/schemas/music';
 import type { ActionExecutionContext } from '@/lib/server/assistant/types';
 import { loadAudioLibrary } from '@/lib/server/audio/track-store';
+import { campaignMapMaxSide } from '@/lib/server/battle-maps/campaign-limits';
 import {
     getMap,
     getMapMeta,
@@ -136,7 +136,8 @@ async function mapForWrite(
 }
 
 async function linkedMapFor(
-    db: Parameters<typeof getMapMeta>[1],
+    db: Parameters<typeof getMapMeta>[1] &
+        Parameters<typeof campaignMapMaxSide>[1],
     campaignId: string,
     mapId: string
 ) {
@@ -145,7 +146,7 @@ async function linkedMapFor(
     if (!meta || meta.campaignId !== campaignId)
         throw new ContentError(API_ERRORS.BATTLE_MAP_NOT_FOUND, 404);
 
-    if (Math.max(meta.cols, meta.rows) > MAP_LIMITS.battleMaxSide)
+    if (Math.max(meta.cols, meta.rows) > (await campaignMapMaxSide(campaignId, db)))
         throw new ContentError(API_ERRORS.BATTLE_MAP_TOO_LARGE, 422);
 
     return {
