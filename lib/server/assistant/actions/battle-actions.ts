@@ -14,6 +14,7 @@ export const BATTLE_COMMANDS = [
     'initiative-roll',
     'map-motion',
     'map-terrain',
+    'map-walls',
     'map-weather',
     'maze',
     'maze-mark',

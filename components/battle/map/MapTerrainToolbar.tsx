@@ -21,6 +21,9 @@ const BRUSHES: TerrainBrush[] = [
     'difficult',
     'erase',
     'erase-zone',
+    'edge-wall',
+    'edge-bars',
+    'edge-erase',
 ];
 
 export function MapTerrainToolbar({ tool }: { tool: MapTerrainTool }) {

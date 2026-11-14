@@ -203,6 +203,8 @@ export const BATTLE_RATE_LIMITS = {
     move: { limit: 60, windowSeconds: 10 },
     /** Місцевість на карті (ДМ) — штрих за штрихом. */
     mapTerrain: { limit: 60, windowSeconds: 10 },
+    /** Стіни й ґрати на карті (ДМ) — штрих за штрихом. */
+    mapWalls: { limit: 60, windowSeconds: 10 },
     /** Правка лабіринту (ДМ). */
     maze: { limit: 60, windowSeconds: 10 },
     /** Мітка гравця в лабіринті. */

@@ -23,6 +23,7 @@ import { MapToken } from './MapToken';
 import { MapTokenHud } from './MapTokenHud';
 import { RangedHint } from './RangedHint';
 import { type MapPlacement } from './token-box';
+import { WallsLayer } from './WallsLayer';
 
 import { modeUiOf } from '@/components/battle/modes';
 import { type EdgeEditing, type ModeTools } from '@/lib/hooks/battle';
@@ -219,6 +220,7 @@ function MapStageImpl({
                     onStrokeStart={painting ? onStrokeStart : undefined}
                     scene={gridScene}
                 />
+                <WallsLayer map={map} />
                 {ui?.MapLayers && (
                     <ui.MapLayers
                         map={map}

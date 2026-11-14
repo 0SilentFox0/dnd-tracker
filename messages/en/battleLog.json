@@ -347,6 +347,8 @@
     "fortuneNotFree": "Fortune does not apply to a free cast",
     "barrierDuration": "A barrier needs a duration in rounds",
     "mapOccupied": "The cell is occupied or outside the field",
+    "mapEdgeLimit": "Too many walls or bars on the map",
+    "mapEdgesInMode": "Walls and bars are unavailable in this map mode",
     "rollbackLimit": "This action can no longer be rolled back: only the last {count} states are kept after the battle ends",
     "casterMissing": "The caster is not in the battle",
     "spellForbidden": "Only the DM or the controller of the current turn can cast spells",

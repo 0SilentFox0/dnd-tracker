@@ -14,6 +14,7 @@ import type {
     mapBackgroundBodySchema,
     mapMotionSchema,
     mapTerrainSchema,
+    mapWallsSchema,
     mapWeatherSchema,
     mazeActionSchema,
     mazeMarkSchema,
@@ -215,6 +216,8 @@ export type MazeActionData = z.infer<typeof mazeActionSchema>;
 export type MazeMarkData = z.infer<typeof mazeMarkSchema>;
 
 export type MapBackgroundData = z.infer<typeof mapBackgroundBodySchema>;
+
+export type MapWallsData = z.infer<typeof mapWallsSchema>;
 
 export type MapWeatherData = z.infer<typeof mapWeatherSchema>;
 

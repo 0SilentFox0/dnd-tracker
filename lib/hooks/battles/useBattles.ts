@@ -130,6 +130,7 @@ export const useAbilityAction = makeBattleHook(battleOps.abilityAction);
 export const useAuraZone = makeBattleHook(battleOps.auraZone);
 export const useMoveParticipant = makeBattleHook(battleOps.move);
 export const useMapTerrain = makeBattleHook(battleOps.mapTerrain);
+export const useMapWalls = makeBattleHook(battleOps.mapWalls);
 export const useMazeAction = makeBattleHook(battleOps.maze);
 export const useMazeMark = makeBattleHook(battleOps.mazeMark);
 export const useMapMotion = makeBattleHook(battleOps.mapMotion);

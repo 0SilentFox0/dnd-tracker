@@ -37,6 +37,7 @@ export {
     useMapBackground,
     useMapMotion,
     useMapTerrain,
+    useMapWalls,
     useMapWeather,
     useMazeAction,
     useMazeMark,

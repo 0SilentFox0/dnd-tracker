@@ -242,6 +242,7 @@ describe('T11 battle adapters', () => {
             'morale-check',
             'move',
             'map-terrain',
+            'map-walls',
             'map-motion',
             'map-weather',
             'maze',

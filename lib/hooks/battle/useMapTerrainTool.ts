@@ -1,16 +1,27 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
     DEFAULT_HAZARD_DAMAGE_TYPE,
     DEFAULT_HAZARD_DICE,
+    MAP_EDGES_PER_OP,
 } from '@/lib/constants/battle';
-import { cellKey, hazardDamage } from '@/lib/utils/battle/grid';
-import type { MapTerrainData, MapTerrainResponse } from '@/types/api';
+import type { EdgeEditing } from '@/lib/hooks/battle/useEdgeStroke';
+import { cellKey, hazardDamage, wallSet } from '@/lib/utils/battle/grid';
+import type {
+    MapTerrainData,
+    MapTerrainResponse,
+    MapWallsData,
+} from '@/types/api';
 import type { GridPoint, TerrainKind } from '@/types/battle';
 
-export type TerrainBrush = TerrainKind | 'erase' | 'erase-zone';
+export type EdgeBrush = 'edge-wall' | 'edge-bars' | 'edge-erase';
+
+export type TerrainBrush = TerrainKind | 'erase' | 'erase-zone' | EdgeBrush;
+
+export const isEdgeBrush = (kind: TerrainBrush): kind is EdgeBrush =>
+    kind.startsWith('edge-');
 
 const MAX_STROKE_CELLS = 400;
 
@@ -34,6 +45,14 @@ export interface MapTerrainTool {
     commit(cells: GridPoint[]): void;
     /** клітинки штрихів, що чекають на відповідь сервера */
     pending: ReadonlySet<string>;
+    /** штрих по ребрах (стіни й ґрати); null, коли активний пензель клітинок */
+    edges: EdgeEditing | null;
+}
+
+export interface EdgeSource {
+    walls?: string[];
+    bars?: string[];
+    mutate: (data: MapWallsData) => Promise<unknown>;
 }
 
 interface Options {
@@ -41,6 +60,7 @@ interface Options {
     mutate: (data: MapTerrainData) => Promise<MapTerrainResponse | undefined>;
     onSkipped?: (count: number) => void;
     onActivate?: () => void;
+    edgeSource?: EdgeSource;
 }
 
 const EMPTY: ReadonlySet<string> = new Set();
@@ -82,6 +102,7 @@ export function useMapTerrainTool({
     mutate,
     onSkipped,
     onActivate,
+    edgeSource,
 }: Options): MapTerrainTool {
     const [on, setOn] = useState(false);
 
@@ -97,10 +118,10 @@ export function useMapTerrainTool({
 
     const active = on && isDM;
 
-    const latest = useRef({ brush, mutate, onSkipped });
+    const latest = useRef({ brush, mutate, onSkipped, edgeSource });
 
     useEffect(() => {
-        latest.current = { brush, mutate, onSkipped };
+        latest.current = { brush, mutate, onSkipped, edgeSource };
     });
 
     const queue = useRef<MapTerrainData[]>([]);
@@ -162,6 +183,8 @@ export function useMapTerrainTool({
                 damageType: t,
             } = latest.current.brush;
 
+            if (isEdgeBrush(b)) return;
+
             const damage = hazardDamage(d, t);
 
             const terrain: MapTerrainData['terrain'] =
@@ -206,5 +229,73 @@ export function useMapTerrainTool({
         return () => window.removeEventListener('keydown', onKey);
     }, [active]);
 
-    return { active, toggle, close, brush, setBrush, commit, pending };
+    const edgeChain = useRef<Promise<unknown>>(Promise.resolve());
+
+    const commitEdges = useCallback((add: string[], remove: string[]) => {
+        const { brush: b, edgeSource: src } = latest.current;
+
+        if (!src) return;
+
+        const wallsList = wallSet(src.walls);
+
+        const send = (data: MapWallsData) => {
+            // версія бою одна: паралельні штрихи ловили б 409
+            edgeChain.current = edgeChain.current
+                .then(() => src.mutate(data))
+                .catch(() => undefined);
+        };
+
+        const batches = (
+            kind: MapWallsData['kind'],
+            a: string[],
+            r: string[]
+        ) => {
+            const n = Math.max(a.length, r.length);
+
+            for (let i = 0; i < n; i += MAP_EDGES_PER_OP)
+                send({
+                    kind,
+                    add: a.slice(i, i + MAP_EDGES_PER_OP),
+                    remove: r.slice(i, i + MAP_EDGES_PER_OP),
+                });
+        };
+
+        if (b.kind === 'edge-erase') {
+            batches(
+                'walls',
+                [],
+                remove.filter((e) => wallsList.has(e))
+            );
+            batches(
+                'bars',
+                [],
+                remove.filter((e) => !wallsList.has(e))
+            );
+
+            return;
+        }
+
+        batches(b.kind === 'edge-wall' ? 'walls' : 'bars', add, remove);
+    }, []);
+
+    const edges = useMemo<EdgeEditing | null>(() => {
+        if (!active || !isEdgeBrush(brush.kind) || !edgeSource) return null;
+
+        const walls = wallSet(edgeSource.walls);
+
+        const bars = wallSet(edgeSource.bars);
+
+        return {
+            existing:
+                brush.kind === 'edge-wall'
+                    ? walls
+                    : brush.kind === 'edge-bars'
+                      ? bars
+                      : new Set([...walls, ...bars]),
+            ...(brush.kind === 'edge-erase' && { erase: true }),
+            onCommit: commitEdges,
+        };
+    }, [active, brush.kind, edgeSource, commitEdges]);
+
+    return { active, toggle, close, brush, setBrush, commit, pending, edges };
 }

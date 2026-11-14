@@ -9,6 +9,7 @@ import {
     mapBackgroundBodySchema,
     mapMotionSchema,
     mapTerrainSchema,
+    mapWallsSchema,
     mapWeatherSchema,
     mazeActionSchema,
     mazeMarkSchema,
@@ -248,6 +249,18 @@ const OPERATIONS: Record<string, Loader> = {
             );
 
             return { schema: mapTerrainSchema, mutate: mapTerrainMutation };
+        },
+    }),
+    'map-walls': operation({
+        access: DM,
+        blockedByMode: true,
+        rateLimitScope: 'mapWalls',
+        load: async () => {
+            const { mapWallsMutation } = await import(
+                '@/lib/server/battles/mutations/map-walls/map-walls-mutation'
+            );
+
+            return { schema: mapWallsSchema, mutate: mapWallsMutation };
         },
     }),
     'map-background': operation({

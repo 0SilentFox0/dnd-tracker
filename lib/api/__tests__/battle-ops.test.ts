@@ -23,6 +23,7 @@ const EXPECTED_PATHS: Record<
     auraZone: 'aura-zone',
     move: 'move',
     mapTerrain: 'map-terrain',
+    mapWalls: 'map-walls',
     maze: 'maze',
     mazeMark: 'maze-mark',
     mapBackground: 'map-background',

@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 import {
     HAZARD_DICE_PATTERN,
+    MAP_EDGES_PER_OP,
     MAZE_DIFFICULTIES,
     MAZE_LIMITS,
     MAZE_MARK_SYMBOLS,
@@ -439,6 +440,14 @@ export const mapTerrainSchema = z.object({
         })
         .nullable(),
 });
+
+export const mapWallsSchema = z
+    .object({
+        kind: z.enum(['walls', 'bars']),
+        add: z.array(edgeKeySchema).max(MAP_EDGES_PER_OP),
+        remove: z.array(edgeKeySchema).max(MAP_EDGES_PER_OP),
+    })
+    .refine((b) => b.add.length + b.remove.length > 0);
 
 export const mapWeatherSchema = z.object({
     weather: weatherKindSchema.nullable(),

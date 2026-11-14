@@ -16,6 +16,7 @@ import type {
     MapMotionData,
     MapTerrainData,
     MapTerrainResponse,
+    MapWallsData,
     MapWeatherData,
     MazeActionData,
     MazeMarkData,
@@ -162,6 +163,7 @@ export const battleOps = {
         path: '/map-terrain',
         retryOnConflict: true,
     }),
+    mapWalls: op<MapWallsData>({ path: '/map-walls', retryOnConflict: true }),
     maze: op<MazeActionData>({ path: '/maze' }),
     mazeMark: op<MazeMarkData>({ path: '/maze-mark' }),
     mapMotion: op<MapMotionData>({

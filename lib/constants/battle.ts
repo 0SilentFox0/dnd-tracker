@@ -170,6 +170,8 @@ export const MAZE_MARK_SYMBOLS = [
     'star',
 ] as const;
 
+export const MAP_EDGES_PER_OP = 400;
+
 export const MAZE_LIMITS = {
     wallEdgesPerOp: 400,
     fogCellsPerOp: 400,

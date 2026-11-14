@@ -51,6 +51,8 @@ export const REJECT = {
     fortuneNotFree: 'battleLog.reject.fortuneNotFree',
     barrierDuration: 'battleLog.reject.barrierDuration',
     mapOccupied: 'battleLog.reject.mapOccupied',
+    mapEdgeLimit: 'battleLog.reject.mapEdgeLimit',
+    mapEdgesInMode: 'battleLog.reject.mapEdgesInMode',
     rollbackLimit: 'battleLog.reject.rollbackLimit',
     casterMissing: 'battleLog.reject.casterMissing',
     spellForbidden: 'battleLog.reject.spellForbidden',

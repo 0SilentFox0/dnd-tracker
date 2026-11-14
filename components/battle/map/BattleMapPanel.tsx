@@ -167,7 +167,11 @@ export function BattleMapPanel({ phone = false }: { phone?: boolean }) {
                 participants={scene.participants}
                 view={scene.view}
                 actions={scene.actions}
-                editing={{ strokeTool: terrainTool?.active, mode: modeTools }}
+                editing={{
+                    strokeTool: terrainTool?.active && !terrainTool.edges,
+                    edges: terrainTool?.edges,
+                    mode: modeTools,
+                }}
                 phone={phone}
                 className={phone ? 'min-h-0 flex-1' : 'h-full'}
             />

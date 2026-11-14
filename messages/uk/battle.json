@@ -131,7 +131,10 @@
         "hazard": "Небезпека",
         "erase": "Стерти",
         "difficult": "Складна",
-        "erase-zone": "Стерти зону"
+        "erase-zone": "Стерти зону",
+        "edge-wall": "Стіна (ребро)",
+        "edge-bars": "Ґрати",
+        "edge-erase": "Стерти ребро"
       },
       "rounds": "Раундів",
       "hazardLabel": "Підпис небезпеки",

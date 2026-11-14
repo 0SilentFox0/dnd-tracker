@@ -95,11 +95,23 @@ export function useBattleMapScene(): BattleMapScene | null {
         [show, t]
     );
 
+    const { mutateAsync: mapWalls } = actions.mapWalls;
+
+    const wallsList = map?.walls;
+
+    const barsList = map?.bars;
+
+    const edgeSource = useMemo(
+        () => ({ walls: wallsList, bars: barsList, mutate: mapWalls }),
+        [wallsList, barsList, mapWalls]
+    );
+
     const terrainTool = useMapTerrainTool({
         isDM,
         mutate: mapTerrain,
         onSkipped,
         onActivate: stopPlacing,
+        edgeSource,
     });
 
     const toolActive = terrainTool.active || modeToolActive;
