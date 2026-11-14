@@ -25,13 +25,16 @@ export function useTokenGlide<T extends HTMLElement>(
         if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches)
             return;
 
-        el.animate([...frames], {
-            duration: Math.min(
-                MAX_MS,
-                Math.max(MIN_MS, (frames.length - 1) * STEP_MS)
-            ),
-            easing: 'linear',
-        });
+        el.animate(
+            frames.map((f) => ({ ...f })),
+            {
+                duration: Math.min(
+                    MAX_MS,
+                    Math.max(MIN_MS, (frames.length - 1) * STEP_MS)
+                ),
+                easing: 'linear',
+            }
+        );
     }, [frames]);
 
     return ref;

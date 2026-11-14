@@ -51,6 +51,7 @@ export {
     useRollbackBattleAction,
     useScaleBattleUnits,
     useStartBattle,
+    useSwapGear,
     useSystemBattleAction,
     useSystemCondition,
     useUnitControl,

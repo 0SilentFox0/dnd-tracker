@@ -31,6 +31,7 @@ export const BATTLE_COMMANDS = [
     'scale-units',
     'spell',
     'start',
+    'swap-gear',
     'unit-control',
 ] as const;
 export const BATTLE_RECORD_WRITES = [

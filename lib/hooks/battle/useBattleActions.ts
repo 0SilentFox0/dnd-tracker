@@ -33,6 +33,7 @@ import {
     useRollbackBattleAction,
     useScaleBattleUnits,
     useStartBattle,
+    useSwapGear,
     useSystemBattleAction,
     useSystemCondition,
     useUnitControl,
@@ -87,5 +88,6 @@ export function useBattleActions(
         scaleUnits: useScaleBattleUnits(campaignId, battleId, o),
         unitControl: useUnitControl(campaignId, battleId, o),
         refreshSources: useRefreshBattleSources(campaignId, battleId, o),
+        swapGear: useSwapGear(campaignId, battleId, o),
     };
 }

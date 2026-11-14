@@ -46,6 +46,7 @@ export {
 export { type EdgeEditing, useEdgeStroke } from './useEdgeStroke';
 export { useFxEnabled } from './useFxEnabled';
 export { useFxImpacts } from './useFxImpacts';
+export { useGearSwap } from './useGearSwap';
 export { useHitChange, useHitFx } from './useHitFx';
 export { type HpChange, useDamageShake, useHpChange } from './useHpChange';
 export { useInitiativeDrag } from './useInitiativeDrag';

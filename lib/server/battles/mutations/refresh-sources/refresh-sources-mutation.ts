@@ -18,7 +18,7 @@ import type { BattleParticipant } from '@/types/battle';
 
 export const refreshSourcesSchema = z.object({});
 
-type CharacterRow = Parameters<
+export type CharacterRow = Parameters<
     typeof createBattleParticipantFromCharacter
 >[0] & { campaignId: string };
 
@@ -38,7 +38,7 @@ export interface RefreshSourcesDeps {
     ): Promise<CampaignSpellContext | undefined>;
 }
 
-const defaultDeps: RefreshSourcesDeps = {
+export const defaultRefreshDeps: RefreshSourcesDeps = {
     loadCharacter: (id) =>
         prisma.character.findUnique({
             where: { id },
@@ -65,7 +65,7 @@ const isRealParticipant = (p: BattleParticipant) =>
     !p.basicInfo.isExtraTurnSlot && !p.battleData.summonedBy;
 
 export function createRefreshSourcesMutation(
-    deps: RefreshSourcesDeps = defaultDeps
+    deps: RefreshSourcesDeps = defaultRefreshDeps
 ) {
     return async (ctx: BattleMutationContext): Promise<MutationResult> => {
         const { campaignId, id: battleId } = ctx.scene;

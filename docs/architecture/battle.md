@@ -326,3 +326,8 @@ Spell reducer/payload facade — `flows/spell-flow.ts`; types/costs/selection �
 - **Rollback:** відкат відновлює `mapState` зі знімка; якщо `scene.mapVersion` знімка відрізняється від поточної `mapRef.version` (між ними був `map-update`), відкат відхиляється — `REJECT.rollbackAcrossMapUpdate`.
 - Ліміт розстановки в бою — `MAP_LIMITS.battleMaxSide` (60).
 - **БД:** міграція `20261202000000_battle_map_storage` (expand-only, RLS на всіх нових таблицях) додає `battle_maps`, `battle_map_chunks`, `battle_map_versions`, `battle_map_state` і `battle_scenes.map_id`/`map_version`. **На prod не застосована — їде з main** при деплої (біля міграцій ставити лише через `vercel-build` з `main`).
+
+## Рух жетона й екіпіювання в бою
+
+- **Анімація ходу.** `useMoveRoutes` порівнює знімки учасників і через `moveRoutes` (`lib/utils/battle/grid/move-route.ts`, шлях `pathTo` з урахуванням стін) дає маршрут; `useTokenGlide` проводить жетон і його HUD по клітинках (Web Animations, 120 мс/клітинку, ≤1.5 с; `prefers-reduced-motion` вимикає).
+- **Екіпіювання в бою.** Плитка «Екіпіювання» (`GearDialog`) відкриває `InventoryTab` героя; зміни пишуться в персонажа звичайними stash-діями, а «Застосувати» викликає `swap-gear` (`mutations/swap-gear/`): у свій хід за бонусну дію учасник перебудовується з листа (`refreshFromSource` + `armorClass`). Без застосування зміни діють з наступного бою.

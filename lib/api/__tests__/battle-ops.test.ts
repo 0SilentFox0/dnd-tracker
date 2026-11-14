@@ -32,6 +32,7 @@ const EXPECTED_PATHS: Record<
     mapMotion: 'map-motion',
     mapWeather: 'map-weather',
     bonusAction: 'bonus-action',
+    swapGear: 'swap-gear',
     castSpell: 'spell',
     start: 'start',
     reset: 'reset',
