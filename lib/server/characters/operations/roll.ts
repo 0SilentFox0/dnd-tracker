@@ -5,6 +5,7 @@ import {
     gateOptions,
 } from '../operation-runner';
 
+import '@/lib/server/systems/registry';
 import { sheetRollSchema } from '@/lib/schemas/out-of-combat';
 import { rollForSheet } from '@/lib/server/characters/core/roll-handler';
 

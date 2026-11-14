@@ -4,6 +4,7 @@ import {
     defineCharacterOperation,
 } from '../operation-runner';
 
+import '@/lib/server/systems/registry';
 import { restSchema } from '@/lib/schemas/out-of-combat';
 import { restParty } from '@/lib/server/characters/core/rest-handler';
 

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 
+import '@/lib/server/systems/registry';
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { prisma } from '@/lib/db';
 import type { Actor } from '@/lib/utils/api/actor';

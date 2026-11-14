@@ -7,6 +7,7 @@ import {
     createCampaignFromBundle,
 } from './create-campaign';
 
+import '@/lib/server/systems/registry';
 import 'server-only';
 import { saveAiSettings } from '@/lib/ai/settings';
 import { invalidateCampaignLists } from '@/lib/cache/campaign-list';

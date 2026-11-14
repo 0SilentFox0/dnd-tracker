@@ -6,6 +6,7 @@ import {
 import type { SystemServer } from './types';
 
 import 'server-only';
+import '@/lib/utils/rules/systems/registry';
 import type { ModuleEntry } from '@/lib/utils/rules/systems/resolve';
 // <systems:generated>
 import { ARTIFACTSETS_MODULE_SERVER } from '@/systems/artifactsets/server';

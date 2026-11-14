@@ -5,6 +5,7 @@ import {
     gateOptions,
 } from '../operation-runner';
 
+import '@/lib/server/systems/registry';
 import { resourcesEditSchema } from '@/lib/schemas/out-of-combat';
 import { editResourcesFor } from '@/lib/server/characters/core/resources-handler';
 

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 
+import '@/lib/server/systems/registry';
 import { getCachedSpells } from '@/lib/cache/reference-data';
 import { requireCampaignAccess } from '@/lib/utils/api/api-auth';
 import { PRIVATE_NO_STORE_HEADERS } from '@/lib/utils/api/cache-headers';

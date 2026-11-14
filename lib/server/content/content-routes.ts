@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { z, ZodType } from 'zod';
 
+import '@/lib/server/systems/registry';
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import type { ContentKind } from '@/lib/constants/content-kinds';
 import type { AnyContentResource } from '@/lib/server/content/define-resource';
