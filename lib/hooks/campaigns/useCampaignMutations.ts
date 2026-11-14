@@ -29,10 +29,17 @@ export function useJoinCampaign() {
 export function useUpdateCampaign(campaignId: string) {
     const router = useRouter();
 
+    const queryClient = useQueryClient();
+
     return useMutation({
         mutationFn: (data: Parameters<typeof updateCampaign>[1]) =>
             updateCampaign(campaignId, data),
-        onSuccess: () => router.refresh(),
+        onSuccess: () => {
+            void queryClient.invalidateQueries({
+                queryKey: campaignKeys.detail(campaignId),
+            });
+            router.refresh();
+        },
     });
 }
 

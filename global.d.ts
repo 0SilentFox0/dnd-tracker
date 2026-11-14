@@ -33,6 +33,7 @@ import type gameTerms from './messages/uk/gameTerms.json';
 import type help from './messages/uk/help.json';
 import type inventory from './messages/uk/inventory.json';
 import type landing from './messages/uk/landing.json';
+import type maps from './messages/uk/maps.json';
 import type music from './messages/uk/music.json';
 import type onboarding from './messages/uk/onboarding.json';
 import type races from './messages/uk/races.json';
@@ -90,6 +91,7 @@ declare module 'next-intl' {
             show: typeof show;
             acquaintances: typeof acquaintances;
             world: typeof world;
+            maps: typeof maps;
             // <systems:generated>
             battleMorale: typeof import('./messages/uk/battleMorale.json');
             battleWfrp: typeof import('./messages/uk/battleWfrp.json');

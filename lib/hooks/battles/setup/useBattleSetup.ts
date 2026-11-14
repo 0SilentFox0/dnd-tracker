@@ -5,6 +5,7 @@ import { useMemo, useState } from 'react';
 import { useBattle } from '../useBattles';
 import { useBalanceSuggestions } from './useBalanceSuggestions';
 import { useBattleForm } from './useBattleForm';
+import { useBattleLibraryMap } from './useBattleLibraryMap';
 import { useBattleMapEditor } from './useBattleMapEditor';
 import { useBattleParticipants } from './useBattleParticipants';
 import { useFairBalance } from './useFairBalance';
@@ -19,6 +20,7 @@ import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import { FALLBACK_SYSTEM_KEY } from '@/lib/utils/rules/systems/catalog';
 import type {
     BattleMapConfig,
+    BattleMapRef,
     BattlePreparationParticipant,
 } from '@/types/battle';
 
@@ -27,6 +29,7 @@ export interface BattleSetupInitial {
     description: string;
     participants: BattlePreparationParticipant[];
     map?: BattleMapConfig | null;
+    mapRef?: BattleMapRef | null;
     turnTimerSeconds?: number | null;
 }
 
@@ -59,12 +62,22 @@ export function useBattleSetup(
 
     const mapEditor = useBattleMapEditor(initial?.map);
 
+    const libraryMap = useBattleLibraryMap(
+        campaignId,
+        initial?.mapRef,
+        !!battleId
+    );
+
     const form = useBattleForm({
         campaignId,
         battleId,
         formData,
         participants: participants.list,
         map: mapEditor.state.value,
+        library: {
+            mapId: libraryMap.selectedId,
+            isLinked: libraryMap.isLinked,
+        },
     });
 
     const balance = useBalanceSuggestions({
@@ -114,6 +127,7 @@ export function useBattleSetup(
         balance,
         form,
         mapEditor,
+        libraryMap,
         fair,
         encounters,
         balanceKind,
@@ -137,6 +151,7 @@ export function useBattleSetupInitial(campaignId: string, battleId: string) {
                       participants: (battle.participants ??
                           []) as unknown as BattlePreparationParticipant[],
                       map: battle.map ?? null,
+                      mapRef: battle.mapRef ?? null,
                       turnTimerSeconds: battle.turnTimerSeconds ?? null,
                   }
                 : undefined,

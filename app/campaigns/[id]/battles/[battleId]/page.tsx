@@ -2,8 +2,10 @@ import { BattlePageClient } from './page-client';
 
 import { PlayerViewGuard } from '@/components/common/PlayerViewGuard';
 import { getSessionUserId } from '@/lib/auth';
+import { battleMapKeys } from '@/lib/hooks/battle-maps/keys';
 import { battleQueryKey } from '@/lib/hooks/battles/keys';
 import { PrefetchedQuery } from '@/lib/providers/prefetched-query';
+import { getMap } from '@/lib/server/battle-maps/library-service';
 import { readBattleScene } from '@/lib/server/battles/read-battle';
 import { requireCampaignMember } from '@/lib/server/campaigns/access';
 import { readOkJson } from '@/lib/utils/api/read-json';
@@ -24,15 +26,39 @@ export default async function BattlePage({
         ),
     ]);
 
+    const ref = battle?.mapRef;
+
+    const pinned = ref
+        ? await getMap(ref.mapId, ref.version).catch(() => null)
+        : null;
+
+    const edges =
+        ref && pinned?.campaignId === id
+            ? { walls: pinned.walls, bars: pinned.bars }
+            : null;
+
+    const client = (
+        <PlayerViewGuard scope={{ kind: 'battle', id: battleId }}>
+            <BattlePageClient
+                campaignId={id}
+                battleId={battleId}
+                userId={userId}
+            />
+        </PlayerViewGuard>
+    );
+
     return (
         <PrefetchedQuery queryKey={battleQueryKey(id, battleId)} data={battle}>
-            <PlayerViewGuard scope={{ kind: 'battle', id: battleId }}>
-                <BattlePageClient
-                    campaignId={id}
-                    battleId={battleId}
-                    userId={userId}
-                />
-            </PlayerViewGuard>
+            {ref && edges ? (
+                <PrefetchedQuery
+                    queryKey={battleMapKeys.edges(id, ref)}
+                    data={edges}
+                >
+                    {client}
+                </PrefetchedQuery>
+            ) : (
+                client
+            )}
         </PrefetchedQuery>
     );
 }

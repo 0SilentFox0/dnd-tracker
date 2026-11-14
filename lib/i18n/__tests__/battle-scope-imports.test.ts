@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest';
 
 import { reachableSources, walkSources } from '../test/import-graph';
 
-const BATTLE_SEGMENTS = /^app\/campaigns\/[^/]+\/(dm\/)?battles\//;
+// the map editor route extends the scope with the battle namespaces in its own layout
+const BATTLE_SEGMENTS =
+    /^app\/campaigns\/[^/]+\/(dm\/)?(battles\/|maps\/\[mapId\]\/)/;
 
 const SERVER_ONLY = /^(lib\/server|app\/api)\//;
 

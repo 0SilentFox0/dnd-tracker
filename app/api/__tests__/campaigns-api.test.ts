@@ -335,4 +335,41 @@ describe('PATCH /api/campaigns/[id]', () => {
             })
         );
     });
+    it('PATCH зберігає mapLibraryEnabled', async () => {
+        vi.mocked(apiAuth.requireDM).mockResolvedValue({
+            userId: 'dm-1',
+            isDM: false,
+            campaign: {
+                kind: 'campaign',
+                rules: DEFAULT_RULES,
+                id: 'c1',
+                maxLevel: 20,
+                allowPlayerEdit: true,
+                members: [{ userId: 'dm-1', role: 'dm' }],
+            },
+        });
+        vi.mocked(prisma.campaign.update).mockResolvedValue({
+            id: 'c1',
+            mapLibraryEnabled: true,
+            members: [],
+        } as never);
+
+        const { PATCH } = await import('@/app/api/campaigns/[id]/route');
+
+        const response = await PATCH(
+            createRequest('http://localhost/api/campaigns/c1', {
+                method: 'PATCH',
+                body: JSON.stringify({ mapLibraryEnabled: true }),
+                headers: { 'Content-Type': 'application/json' },
+            }),
+            { params: Promise.resolve({ id: 'c1' }) }
+        );
+
+        expect(await getResponseStatus(response)).toBe(200);
+        expect(prisma.campaign.update).toHaveBeenCalledWith(
+            expect.objectContaining({
+                data: expect.objectContaining({ mapLibraryEnabled: true }),
+            })
+        );
+    });
 });
