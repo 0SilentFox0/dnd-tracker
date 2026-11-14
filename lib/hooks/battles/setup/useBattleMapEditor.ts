@@ -69,6 +69,8 @@ const DEFAULT_BRUSH: HazardBrush = {
 
 export const NO_PLAYABLE_NOTICE = textRef('battleSetup.map.noPlayable');
 
+export const EDGES_STRIPPED_NOTICE = textRef('battleSetup.map.edgesStripped');
+
 export function useBattleMapEditor(
     initial: BattleMapConfig | null | undefined
 ) {
@@ -243,27 +245,37 @@ export function useBattleMapEditor(
 
     const dropCalibration = useCallback(() => setKept(null), []);
 
-    const setMode = useCallback((key: MapModeKey, on: boolean) => {
-        const mode = modeOf(key);
+    const setMode = useCallback(
+        (key: MapModeKey, on: boolean) => {
+            const mode = modeOf(key);
 
-        // один режим на бій; у режимі core-стіни/ґрати недоступні для редагування, тож зникають разом із ввімкненням
-        setMap((m) => {
-            const { walls, bars, ...base } = m;
+            // один режим на бій; у режимі core-стіни/ґрати недоступні для редагування, тож зникають разом із ввімкненням
+            setMap((m) => {
+                const { walls, bars, ...base } = m;
 
-            return mode.withConfig(
-                MODE_KEYS.reduce(
-                    (acc, other) =>
-                        other === key
-                            ? acc
-                            : modeOf(other).withConfig(acc, null),
-                    on ? base : m
-                ),
-                on ? (mode.emptyConfig?.() ?? null) : null
-            );
-        });
+                return mode.withConfig(
+                    MODE_KEYS.reduce(
+                        (acc, other) =>
+                            other === key
+                                ? acc
+                                : modeOf(other).withConfig(acc, null),
+                        on ? base : m
+                    ),
+                    on ? (mode.emptyConfig?.() ?? null) : null
+                );
+            });
 
-        if (on) setToolState(null);
-    }, []);
+            if (on) {
+                setToolState(null);
+                setNotice(
+                    map.walls?.length || map.bars?.length
+                        ? EDGES_STRIPPED_NOTICE
+                        : null
+                );
+            }
+        },
+        [map.walls, map.bars]
+    );
 
     const setMotion = useCallback(
         (motion: MapMotion | null) => setMap((m) => ({ ...m, motion })),

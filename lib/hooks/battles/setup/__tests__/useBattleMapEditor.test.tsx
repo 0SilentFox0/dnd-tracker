@@ -2,7 +2,11 @@
 import { act, renderHook } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { NO_PLAYABLE_NOTICE, useBattleMapEditor } from '../useBattleMapEditor';
+import {
+    EDGES_STRIPPED_NOTICE,
+    NO_PLAYABLE_NOTICE,
+    useBattleMapEditor,
+} from '../useBattleMapEditor';
 
 import { DEFAULT_BATTLE_MAP } from '@/lib/constants/battle';
 
@@ -346,5 +350,16 @@ describe('useBattleMapEditor', () => {
         expect(result.current.state.map.maze).toBeDefined();
         expect(result.current.state.map.walls).toBeUndefined();
         expect(result.current.state.map.bars).toBeUndefined();
+        expect(result.current.state.notice).toBe(EDGES_STRIPPED_NOTICE);
+    });
+
+    it('ввімкнення лабіринту без core-ребер не показує сповіщення', () => {
+        const { result } = renderHook(() =>
+            useBattleMapEditor(DEFAULT_BATTLE_MAP)
+        );
+
+        act(() => result.current.actions.setMode('maze', true));
+
+        expect(result.current.state.notice).toBeNull();
     });
 });
