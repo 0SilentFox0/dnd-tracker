@@ -3,10 +3,10 @@
 import { useCallback, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
+import { MAP_LIMITS } from '@/lib/constants/map-limits';
 import { useBattleMaps } from '@/lib/hooks/battle-maps';
 import { useMapLibraryEnabled } from '@/lib/hooks/campaigns';
 import { useConfirm } from '@/lib/hooks/common';
-import { MAP_LIMITS } from '@/lib/constants/map-limits';
 import { battleMapMaxSide } from '@/lib/utils/battle/map-storage/limits';
 import type { BattleMapRef } from '@/types/battle';
 

@@ -307,7 +307,12 @@ export interface RectLike {
 }
 
 export function visibleGridWindow(
-    input: { viewport: RectLike; ctm: ScreenMatrix; cols: number; rows: number },
+    input: {
+        viewport: RectLike;
+        ctm: ScreenMatrix;
+        cols: number;
+        rows: number;
+    },
     margin: number = MAP_LIMITS.chunk
 ): GridWindow {
     const { viewport, ctm, cols, rows } = input;

@@ -36,9 +36,7 @@ describe('regionFillPath', () => {
     });
 
     it('одна клітинка — квадрат', () => {
-        expect(regionFillPath(['2:1'])).toBe(
-            `M${2 * U} ${U}h${U}v${U}h-${U}z`
-        );
+        expect(regionFillPath(['2:1'])).toBe(`M${2 * U} ${U}h${U}v${U}h-${U}z`);
     });
 
     it('рядок 0..3 — один відрізок', () => {

@@ -2,19 +2,12 @@
 
 import { memo, type PointerEvent, useId, useMemo } from 'react';
 
-import { type GridCellActions,GridHit } from './GridHit';
+import { type GridCellActions, GridHit } from './GridHit';
 import { GridMarks } from './GridMarks';
 import { GridDefs, GridStatic } from './GridStatic';
 
-import {
-    blockedSet,
-    type GridWindow,
-} from '@/lib/utils/battle/grid';
-import type {
-    BattleMapConfig,
-    BattleMapView,
-    GridPoint,
-} from '@/types/battle';
+import { blockedSet, type GridWindow } from '@/lib/utils/battle/grid';
+import type { BattleMapConfig, BattleMapView, GridPoint } from '@/types/battle';
 
 export type { GridCellActions } from './GridHit';
 

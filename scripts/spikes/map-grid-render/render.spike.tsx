@@ -28,7 +28,11 @@ const SIDES_RUN = process.env.SPIKE_SIDES
     : SIDES;
 
 class RO {
-    constructor(private cb: (e: { contentRect: { width: number; height: number } }[]) => void) {}
+    constructor(
+        private cb: (
+            e: { contentRect: { width: number; height: number } }[]
+        ) => void
+    ) {}
     observe() {
         this.cb([{ contentRect: { width: 1280, height: 800 } }]);
     }
@@ -55,7 +59,12 @@ it('BattleMap render cost on synthetic maps', () => {
 
         const ui = (view?: BattleMapView) => (
             <TooltipProvider>
-                <BattleMap map={map} participants={participants} view={view} actions={actions} />
+                <BattleMap
+                    map={map}
+                    participants={participants}
+                    view={view}
+                    actions={actions}
+                />
             </TooltipProvider>
         );
 
@@ -96,7 +105,9 @@ it('BattleMap render cost on synthetic maps', () => {
 
             // hover: the scene derives a fresh Map with the same content
             t0 = performance.now();
-            act(() => r.rerender(ui({ currentId: 'p8', marks: new Map(marks) })));
+            act(() =>
+                r.rerender(ui({ currentId: 'p8', marks: new Map(marks) }))
+            );
             hover.push(performance.now() - t0);
 
             cleanup();
@@ -137,5 +148,8 @@ it('BattleMap render cost on synthetic maps', () => {
     console.table(rows);
 
     if (process.env.SPIKE_OUT)
-        writeFileSync(`${process.env.SPIKE_OUT}/render-${SIDES_RUN.join('-')}.json`, JSON.stringify(rows, null, 2));
+        writeFileSync(
+            `${process.env.SPIKE_OUT}/render-${SIDES_RUN.join('-')}.json`,
+            JSON.stringify(rows, null, 2)
+        );
 }, 900_000);

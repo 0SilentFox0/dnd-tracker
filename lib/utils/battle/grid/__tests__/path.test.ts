@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
 import { canStand } from '../occupancy';
-import { moveBudget, movementBudget, reachable, remainingMovement } from '../path';
+import {
+    moveBudget,
+    movementBudget,
+    reachable,
+    remainingMovement,
+} from '../path';
 
 import { CombatStatus, ParticipantSide } from '@/lib/constants/battle';
 import { MAP_LIMITS } from '@/lib/constants/map-limits';

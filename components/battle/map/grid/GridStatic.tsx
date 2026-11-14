@@ -237,10 +237,7 @@ export const GridStatic = memo(function GridStatic({
             {hazardKeys.length > 0 && (
                 <g data-hazard-layer="">
                     <g className="battle-map-ember">
-                        <path
-                            d={paths.hazardFill}
-                            fill="rgba(255,190,70,.3)"
-                        />
+                        <path d={paths.hazardFill} fill="rgba(255,190,70,.3)" />
                         <path
                             d={paths.hazardOutline}
                             fill="none"

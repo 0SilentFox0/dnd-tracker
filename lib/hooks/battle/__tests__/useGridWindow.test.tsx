@@ -12,7 +12,14 @@ const flush = () => act(() => new Promise((r) => setTimeout(r, 5)));
 
 const SIZE = { width: 100 * UNIT, height: 100 * UNIT };
 
-let ctm: { a: number; b: number; c: number; d: number; e: number; f: number } | null;
+let ctm: {
+    a: number;
+    b: number;
+    c: number;
+    d: number;
+    e: number;
+    f: number;
+} | null;
 
 let renders = 0;
 
@@ -31,16 +38,13 @@ function Probe({ zoom = 1 }: { zoom?: number }) {
     });
 
     return (
-        <div
-            ref={scrollRef}
-            data-scroll=""
-            style={{}}
-        >
+        <div ref={scrollRef} data-scroll="" style={{}}>
             <svg
                 ref={(el) => {
                     if (el) {
                         el.getScreenCTM = () => ctm as unknown as DOMMatrix;
-                        (svgRef as { current: SVGSVGElement | null }).current = el;
+                        (svgRef as { current: SVGSVGElement | null }).current =
+                            el;
                     }
                 }}
             />

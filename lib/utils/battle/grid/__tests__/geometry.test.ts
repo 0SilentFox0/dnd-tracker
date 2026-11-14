@@ -145,7 +145,10 @@ describe('cellsByRing', () => {
         let produced = 0;
 
         function* counted() {
-            for (const c of cellsByRing({ cols: 200, rows: 200 }, { x: 100, y: 100 })) {
+            for (const c of cellsByRing(
+                { cols: 200, rows: 200 },
+                { x: 100, y: 100 }
+            )) {
                 produced++;
                 yield c;
             }

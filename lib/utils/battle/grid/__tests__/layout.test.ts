@@ -384,7 +384,12 @@ describe('visibleGridWindow', () => {
 
     it('viewport усередині карти: кратне 16 і містить viewport', () => {
         const win = visibleGridWindow({
-            viewport: { left: 20 * UNIT, top: 20 * UNIT, right: 25 * UNIT, bottom: 24 * UNIT },
+            viewport: {
+                left: 20 * UNIT,
+                top: 20 * UNIT,
+                right: 25 * UNIT,
+                bottom: 24 * UNIT,
+            },
             ctm: id,
             cols: 200,
             rows: 200,
@@ -414,7 +419,12 @@ describe('visibleGridWindow', () => {
         const ctm = { a: 0, b: 1, c: -1, d: 0, e: 100 * UNIT, f: 0 };
 
         const win = visibleGridWindow({
-            viewport: { left: 90 * UNIT, top: 10 * UNIT, right: 95 * UNIT, bottom: 14 * UNIT },
+            viewport: {
+                left: 90 * UNIT,
+                top: 10 * UNIT,
+                right: 95 * UNIT,
+                bottom: 14 * UNIT,
+            },
             ctm,
             cols: 200,
             rows: 200,

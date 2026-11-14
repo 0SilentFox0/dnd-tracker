@@ -62,7 +62,10 @@ function dmZone(map: BattleMapConfig, marks: Map<string, unknown>) {
     const keys: string[] = [];
 
     for (const [key, m] of marks)
-        if (!blocked.has(key) && isMoveMark(m as Parameters<typeof isMoveMark>[0]))
+        if (
+            !blocked.has(key) &&
+            isMoveMark(m as Parameters<typeof isMoveMark>[0])
+        )
             keys.push(key);
 
     return [regionFillPath(keys), regionOutlinePath(keys)];
@@ -80,7 +83,10 @@ it('grid algorithms on synthetic maps', () => {
 
         const hero = participants[0];
 
-        const budget = moveBudget({ map, dmUserId: DM_ID, rules: DEFAULT_RULES }, dmMover);
+        const budget = moveBudget(
+            { map, dmUserId: DM_ID, rules: DEFAULT_RULES },
+            dmMover
+        );
 
         const dmMarks = moveZoneMarks(map, participants, dmMover, {
             rules: DEFAULT_RULES,
@@ -96,7 +102,14 @@ it('grid algorithms on synthetic maps', () => {
 
         const oneCell = { ...map, terrain: { ...map.terrain } };
 
-        const diff = { set: [{ cell: { kind: 'difficult' as const }, keys: [cellKey(centre)] }] };
+        const diff = {
+            set: [
+                {
+                    cell: { kind: 'difficult' as const },
+                    keys: [cellKey(centre)],
+                },
+            ],
+        };
 
         rows.push({
             side: n,
@@ -104,7 +117,10 @@ it('grid algorithms on synthetic maps', () => {
             dmBudget: budget,
             dmReachable: dmMarks.size,
             'searchPaths DM (ms)': ms(
-                time(() => searchPaths(map, participants, dmMover, budget), RUNS).median
+                time(
+                    () => searchPaths(map, participants, dmMover, budget),
+                    RUNS
+                ).median
             ),
             'searchPaths hero 6 (ms)': ms(
                 time(() => searchPaths(map, participants, hero, 6), RUNS).median
@@ -119,10 +135,20 @@ it('grid algorithms on synthetic maps', () => {
                     RUNS
                 ).median
             ),
-            'cellsByDistance (ms)': ms(time(() => cellsByDistance(map, centre), RUNS).median),
+            'cellsByDistance (ms)': ms(
+                time(() => cellsByDistance(map, centre), RUNS).median
+            ),
             'nearestStandable (ms)': ms(
-                time(() => nearestStandable(map, participants, hero, cellsOf(dmMover)[0]), RUNS)
-                    .median
+                time(
+                    () =>
+                        nearestStandable(
+                            map,
+                            participants,
+                            hero,
+                            cellsOf(dmMover)[0]
+                        ),
+                    RUNS
+                ).median
             ),
             'placeParticipants 16 (ms)': ms(
                 time(() => placeParticipants(map, unplaced), RUNS).median
@@ -131,14 +157,23 @@ it('grid algorithms on synthetic maps', () => {
             'rangeWindow 60ft (ms)': ms(
                 time(() => rangeWindow(map, cellsOf(hero), 60), RUNS).median
             ),
-            'DM zone fill+outline (ms)': ms(time(() => dmZone(map, dmMarks), RUNS).median),
-            'playableBounds (ms)': ms(time(() => playableBounds(map), RUNS).median),
-            'applyTerrainDiff 1 cell (ms)': ms(time(() => applyTerrainDiff(oneCell, diff), RUNS).median),
+            'DM zone fill+outline (ms)': ms(
+                time(() => dmZone(map, dmMarks), RUNS).median
+            ),
+            'playableBounds (ms)': ms(
+                time(() => playableBounds(map), RUNS).median
+            ),
+            'applyTerrainDiff 1 cell (ms)': ms(
+                time(() => applyTerrainDiff(oneCell, diff), RUNS).median
+            ),
         });
     }
 
     console.table(rows);
 
     if (process.env.SPIKE_OUT)
-        writeFileSync(`${process.env.SPIKE_OUT}/algorithms.json`, JSON.stringify(rows, null, 2));
+        writeFileSync(
+            `${process.env.SPIKE_OUT}/algorithms.json`,
+            JSON.stringify(rows, null, 2)
+        );
 }, 600_000);

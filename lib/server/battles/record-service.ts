@@ -149,7 +149,10 @@ async function linkedMapFor(
     if (!meta || meta.campaignId !== campaignId)
         throw new ContentError(API_ERRORS.BATTLE_MAP_NOT_FOUND, 404);
 
-    if (Math.max(meta.cols, meta.rows) > (await campaignMapMaxSide(campaignId, db)))
+    if (
+        Math.max(meta.cols, meta.rows) >
+        (await campaignMapMaxSide(campaignId, db))
+    )
         throw new ContentError(API_ERRORS.BATTLE_MAP_TOO_LARGE, 422);
 
     return {

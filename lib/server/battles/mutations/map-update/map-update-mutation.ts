@@ -2,11 +2,7 @@ import { API_ERRORS } from '@/lib/constants/api-errors';
 import { textRef } from '@/lib/i18n/text-ref';
 import { campaignMapMaxSide } from '@/lib/server/battle-maps/campaign-limits';
 import { getMap } from '@/lib/server/battle-maps/library-service';
-import {
-    cellsOf,
-    isOnMap,
-    isPlayable,
-} from '@/lib/utils/battle/grid';
+import { cellsOf, isOnMap, isPlayable } from '@/lib/utils/battle/grid';
 import {
     baseDoorsOf,
     composeEffectiveMap,

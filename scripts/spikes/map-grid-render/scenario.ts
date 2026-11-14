@@ -42,7 +42,10 @@ export function syntheticMap(n: number): BattleMapConfig {
 
     const terrain: Record<string, TerrainCell> = {};
 
-    const target = Math.min(MAP_LIMITS.maxTerrainCells, Math.round(n * n * 0.05));
+    const target = Math.min(
+        MAP_LIMITS.maxTerrainCells,
+        Math.round(n * n * 0.05)
+    );
 
     while (Object.keys(terrain).length < target) {
         const x = 2 + Math.floor(rand() * (n - 4));
@@ -74,7 +77,9 @@ export function syntheticMap(n: number): BattleMapConfig {
 }
 
 /** 8 heroes + 8 DM enemies around the map centre on cells free of terrain. */
-export function syntheticParticipants(map: BattleMapConfig): BattleParticipant[] {
+export function syntheticParticipants(
+    map: BattleMapConfig
+): BattleParticipant[] {
     const c = Math.floor(map.cols / 2);
 
     const list: BattleParticipant[] = [];

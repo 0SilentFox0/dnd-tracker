@@ -18,7 +18,6 @@ vi.mock('@/components/battle/use-system-battle-ui', () => ({
     useSystemFx: () => undefined,
 }));
 
-
 vi.unmock('next-intl');
 
 afterEach(cleanup);
