@@ -19,10 +19,7 @@ import {
     UNIT,
     windowPath,
 } from '@/lib/utils/battle/grid';
-import type {
-    BattleMapConfig,
-    BattleMapView,
-} from '@/types/battle';
+import type { BattleMapConfig, BattleMapView } from '@/types/battle';
 
 interface GridMarksProps {
     map: BattleMapConfig;
@@ -89,8 +86,8 @@ export const GridMarks = memo(function GridMarks({
 
     const lines = useMemo(() => gridLinesPath(cols, rows), [cols, rows]);
 
-    const gridless = useMemo(() => {
-        const keys = [...blocked, ...split.move, ...split.danger];
+    const staticMask = useMemo(() => {
+        const keys = [...blocked];
 
         if (terrain)
             for (const [key, cell] of Object.entries(terrain))
@@ -98,7 +95,11 @@ export const GridMarks = memo(function GridMarks({
                     keys.push(key);
 
         return keys.length ? regionFillPath(keys) : '';
-    }, [blocked, terrain, split]);
+    }, [blocked, terrain]);
+
+    const gridless = [staticMask, zones.move?.fill, zones.danger?.fill]
+        .filter(Boolean)
+        .join('');
 
     const outOfRange = useMemo(
         () => (range ? windowPath({ cols, rows }, range) : ''),
