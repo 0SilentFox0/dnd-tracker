@@ -102,6 +102,7 @@ export const mazeMode: MapModeDefinition<MazeConfig> = {
         engages: ({ map, attacker, neighbour }) =>
             inPlay(neighbour) &&
             !meleeWallBetween(gridOf(map), attacker, neighbour),
+        walls: ({ config }) => config.walls ?? [],
         lineBlocked: ({ map, line }) => mazeLineBlocked(gridOf(map), line),
         moveZone: mazeMoveZone,
     },

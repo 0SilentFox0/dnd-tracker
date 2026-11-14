@@ -125,6 +125,17 @@ export function modeLineBlocked(map: MapArg, line: GridPoint[]): boolean {
     );
 }
 
+export function modeWalls(map: MapArg): readonly string[] {
+    const active = activeModeWithConfig(map);
+
+    return (
+        active?.mode.engine.walls?.({
+            config: active.config,
+            map: active.map,
+        }) ?? []
+    );
+}
+
 /** Масові цілі: ворогів, яких каст не бачить, відсіює режим; союзники й невідомі id лишаються. */
 export function modeSightedTargets(
     map: MapArg,

@@ -1,6 +1,7 @@
 export * from './attack-reach';
 export * from './background';
 export * from './calibration';
+export * from './edges';
 export * from './geometry';
 export * from './hazard';
 export * from './layout';
@@ -18,3 +19,4 @@ export * from './push';
 export * from './return-to-start';
 export * from './template';
 export * from './terrain';
+export * from './walls';

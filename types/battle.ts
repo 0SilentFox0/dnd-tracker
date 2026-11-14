@@ -376,6 +376,10 @@ export interface BattleMapConfig {
     /** Зсув сітки відносно фону, частки клітинки 0 ≤ v < 1 */
     gridOffset?: { x: number; y: number };
     maze?: MazeConfig | null;
+    /** Стіни на ребрах ("x:y:e" / "x:y:s"): блокують рух, погляд і вогонь */
+    walls?: string[];
+    /** Ґрати на ребрах: блокують лише рух */
+    bars?: string[];
     /** Атмосфера без механіки; відсутня або null — ясно */
     weather?: WeatherKind | null;
     motion?: MapMotion | null;

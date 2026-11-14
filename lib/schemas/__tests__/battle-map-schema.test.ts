@@ -301,3 +301,24 @@ describe('battleMapSchema.motion', () => {
         ).toBe(false);
     });
 });
+
+describe('battleMapSchema.walls / bars', () => {
+    const ok = (extra: object) =>
+        battleMapSchema.safeParse({ ...map, ...extra }).success;
+
+    it('приймає коректні ребра', () => {
+        expect(ok({ walls: ['0:0:e', '3:3:s'], bars: ['1:1:e'] })).toBe(true);
+    });
+
+    it('відхиляє сміття, вихід за межі, дублікати і перетин bars з walls', () => {
+        expect(ok({ walls: ['a:b:e'] })).toBe(false);
+        expect(ok({ walls: ['9:0:e'] })).toBe(false);
+        expect(ok({ bars: ['0:9:s'] })).toBe(false);
+        expect(ok({ walls: ['0:0:e', '0:0:e'] })).toBe(false);
+        expect(ok({ walls: ['0:0:e'], bars: ['0:0:e'] })).toBe(false);
+    });
+
+    it('обмежує довжину списку', () => {
+        expect(ok({ walls: Array(7201).fill('0:0:e') })).toBe(false);
+    });
+});

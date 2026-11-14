@@ -14,7 +14,9 @@ import { WEATHER_KINDS } from '@/lib/constants/battle-weather';
 import { DAMAGE_ELEMENT_OPTIONS } from '@/lib/constants/damage';
 import { hexColorSchema } from '@/lib/schemas/common';
 import { CUNNING_STRIKE_EFFECTS } from '@/lib/utils/abilities/schema';
+import { inBounds } from '@/lib/utils/battle/grid/geometry';
 import { hasPlayableArea } from '@/lib/utils/battle/grid/map-editor';
+import { parseEdgeKey } from '@/lib/utils/battle/grid/walls';
 import { REJECT } from '@/lib/utils/battle/store/reject';
 import { ZoneTriggerSchema } from '@/lib/utils/spells/model/schema';
 
@@ -31,7 +33,7 @@ export const mapCellSchema = z.object({
     y: z.number().int().min(0).max(59),
 });
 
-const edgeKeySchema = z.string().regex(/^\d+:\d+:[es]$/);
+export const edgeKeySchema = z.string().regex(/^\d+:\d+:[es]$/);
 
 const cellKeySchema = z.string().regex(/^\d+:\d+$/);
 
@@ -252,6 +254,39 @@ export const battleMapSchema = z
         maze: mazeSchema.nullable().optional(),
         weather: weatherKindSchema.nullable().optional(),
         motion: motionConfigSchema.nullable().optional(),
+        walls: z.array(edgeKeySchema).max(7200).optional(),
+        bars: z.array(edgeKeySchema).max(7200).optional(),
+    })
+    .superRefine((m, ctx) => {
+        const walls = new Set<string>();
+
+        for (const key of ['walls', 'bars'] as const) {
+            const seen = new Set<string>();
+
+            for (const edge of m[key] ?? []) {
+                const { a, b } = parseEdgeKey(edge);
+
+                const bad =
+                    seen.has(edge) ||
+                    !inBounds(m, a) ||
+                    !inBounds(m, b) ||
+                    (key === 'bars' && walls.has(edge));
+
+                if (bad) {
+                    ctx.addIssue({
+                        code: 'custom',
+                        message: 'battleSetup.validation.badEdges',
+                        path: [key],
+                    });
+
+                    break;
+                }
+
+                seen.add(edge);
+
+                if (key === 'walls') walls.add(edge);
+            }
+        }
     })
     .refine((m) => hasPlayableArea(m), {
         message: 'battleSetup.validation.playableAreaTooSmall',
