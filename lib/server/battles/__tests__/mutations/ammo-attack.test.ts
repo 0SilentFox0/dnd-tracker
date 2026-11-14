@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { context } from './fixtures';
 
+import '@/lib/server/systems/registry';
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { AttackType, ParticipantSide } from '@/lib/constants/battle';
 import { attackBodySchema } from '@/lib/schemas/battles';

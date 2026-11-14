@@ -4,6 +4,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { ConstructorUiCheck } from './constructor-ui';
 
+import '@/components/systems/registry';
+import '@/lib/utils/rules/systems/registry';
 import { AssistantHandoff } from '@/components/ai/AssistantHandoff';
 import { AssistantWorkspace } from '@/components/ai/AssistantWorkspace';
 import { DEFAULT_RULES } from '@/lib/utils/rules';

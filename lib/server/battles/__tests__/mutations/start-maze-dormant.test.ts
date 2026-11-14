@@ -23,8 +23,10 @@ vi.mock('@/lib/server/battles/mutations/start/start-fair-scaling', () => ({
             }))
     ),
 }));
-vi.mock('@/lib/utils/battle/participant', () => ({
+vi.mock('@/lib/server/battles/participant/from-character', () => ({
     createBattleParticipantFromCharacter: mocks.fromCharacter,
+}));
+vi.mock('@/lib/utils/battle/participant', () => ({
     createBattleParticipantFromUnit: mocks.fromUnit,
 }));
 

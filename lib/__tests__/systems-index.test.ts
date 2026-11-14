@@ -144,6 +144,23 @@ describe('systems index', () => {
         expect(install).not.toContain('systems/beta/ui');
     });
 
+    it('a ui layer without the _MODULE_UI export gets no ui loader', async () => {
+        const root = fixture(['alpha']);
+
+        write(root, 'systems/alpha/index.ts', 'export const ALPHA_MODULE = 1;\n');
+        write(root, 'systems/alpha/ui/index.ts', 'export const OTHER = 1;\n');
+
+        await syncSystemsIndex(root);
+
+        const install = fs.readFileSync(
+            path.join(root, 'components/systems/install.ts'),
+            'utf8'
+        );
+
+        expect(install).toContain('@/systems/alpha');
+        expect(install).not.toContain('alpha/ui');
+    });
+
     it('is idempotent', async () => {
         const root = fixture(['alpha']);
 

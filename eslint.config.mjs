@@ -117,6 +117,7 @@ const SYSTEM_ROOTS = [
     'lib/utils/rules/systems/sections.ts',
     'lib/utils/rules/systems/rules-presets.ts',
     'components/systems/registry.ts',
+    'components/systems/install.ts',
     'lib/server/systems/registry.ts',
     'lib/utils/abilities/schema/system-effects.ts',
     'lib/utils/abilities/registry/effects/system-rows.ts',

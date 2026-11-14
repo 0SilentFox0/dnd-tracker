@@ -1,5 +1,7 @@
 import { useReducer, useState } from 'react';
 
+import '@/components/systems/registry';
+import '@/lib/utils/rules/systems/registry';
 import { BackgroundForm } from '@/components/backgrounds/BackgroundForm';
 import { AttackWizard } from '@/components/battle/wizards/AttackWizard';
 import { ClassForm } from '@/components/classes/ClassForm';

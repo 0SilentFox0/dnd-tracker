@@ -361,13 +361,16 @@ export function CharacterProfile(props: {
 }) {
     const query = useCharacterSheet(props.campaignId, props.characterId);
 
-    const { data: rules } = useCampaignRules(props.campaignId);
+    const rulesQuery = useCampaignRules(props.campaignId);
 
     const system =
-        rules?.system ?? (query.data && { key: query.data.system });
+        rulesQuery.data?.system ??
+        (!rulesQuery.isPending && query.data
+            ? { key: query.data.system }
+            : undefined);
 
     if (!system)
-        return <QueryState query={query}>{() => null}</QueryState>;
+        return <QueryState query={query}>{() => <LoadingState />}</QueryState>;
 
     return (
         <SystemGate system={system}>

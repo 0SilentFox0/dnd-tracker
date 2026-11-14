@@ -5,6 +5,7 @@ import {
     type Deps,
     fsDeps,
     INSTALL_PAIRS,
+    scriptEntries,
     unrooted,
 } from './helpers/install-entries';
 
@@ -29,6 +30,7 @@ const STATIC_SAFE = [
 // client-lazy: not yet behind SystemGate (the DM pages); remove as they migrate
 const CLIENT_LAZY = [
     'app/campaigns/[id]/acquaintances/page.tsx',
+    'app/campaigns/page.tsx',
     'app/campaigns/[id]/dm/ai/page.tsx',
     'app/campaigns/[id]/dm/artifact-sets/[setId]/page.tsx',
     'app/campaigns/[id]/dm/artifact-sets/new/page.tsx',
@@ -69,6 +71,7 @@ const CLIENT_LAZY = [
     'app/campaigns/[id]/dm/skills/page.tsx',
     'app/campaigns/[id]/dm/spell-groups/page.tsx',
     'app/campaigns/[id]/dm/spells/[spellId]/page.tsx',
+    'app/campaigns/[id]/dm/spells/page.tsx',
     'app/campaigns/[id]/dm/spells/new/page.tsx',
     'app/campaigns/[id]/dm/system/[section]/page.tsx',
     'app/campaigns/[id]/dm/units/[unitId]/page.tsx',
@@ -84,14 +87,21 @@ const PAIR = {
     root: 'lib/utils/rules/systems/registry.ts',
 };
 
-const fake = (graph: Record<string, string[]>, dyn = {}): Deps => {
-    const dynamic: Record<string, string[]> = dyn;
+const fake = (
+    graph: Record<string, string[]>,
+    dyn: Record<string, string[]> = {},
+    client: string[] = []
+): Deps => {
+    const clientFiles = new Set(client);
 
     return (file) => ({
         files: graph[file] ?? [],
-        dynamic: dynamic[file] ?? [],
+        dynamic: dyn[file] ?? [],
+        client: clientFiles.has(file),
     });
 };
+
+const SERVER_ROOT = 'lib/server/systems/registry.ts';
 
 describe('system install entries (fixtures)', () => {
     it('a route reaching a lookup without the root is red', () => {
@@ -101,7 +111,7 @@ describe('system install entries (fixtures)', () => {
         });
 
         expect(unrooted(['app/api/x/route.ts'], [PAIR], deps)).toEqual([
-            `app/api/x/route.ts -> ${PAIR.lookup}`,
+            `app/api/x/route.ts -> ${PAIR.lookup} [server]`,
         ]);
     });
 
@@ -130,9 +140,78 @@ describe('system install entries (fixtures)', () => {
 
         expect(unrooted(['app/api/x/route.ts'], [PAIR], deps)).toEqual([]);
     });
+
+    it('a server root imported by the page does not rescue a client component', () => {
+        const deps = fake(
+            {
+                'app/p/page.tsx': ['components/Client.tsx', SERVER_ROOT],
+                'components/Client.tsx': ['lib/a.ts'],
+                'lib/a.ts': [PAIR.lookup],
+                [SERVER_ROOT]: [PAIR.root],
+            },
+            {},
+            ['components/Client.tsx']
+        );
+
+        expect(unrooted(['app/p/page.tsx'], [PAIR], deps)).toEqual([
+            `app/p/page.tsx -> ${PAIR.lookup} [client]`,
+        ]);
+    });
+
+    it('the lookup read on the server needs the server root even when the client side is rooted', () => {
+        const deps = fake(
+            {
+                'app/p/page.tsx': ['components/Client.tsx', 'lib/a.ts'],
+                'components/Client.tsx': [PAIR.root],
+                'lib/a.ts': [PAIR.lookup],
+            },
+            {},
+            ['components/Client.tsx']
+        );
+
+        expect(unrooted(['app/p/page.tsx'], [PAIR], deps)).toEqual([
+            `app/p/page.tsx -> ${PAIR.lookup} [server]`,
+        ]);
+    });
+
+    it('a gate or root reached through the client boundary turns the client side green', () => {
+        const withGate = fake(
+            {
+                'app/p/page.tsx': ['components/Client.tsx', 'components/Gate.tsx'],
+                'components/Client.tsx': ['lib/a.ts'],
+                'components/Gate.tsx': ['components/systems/install.ts'],
+                'lib/a.ts': [PAIR.lookup],
+            },
+            {},
+            ['components/Client.tsx', 'components/Gate.tsx']
+        );
+
+        expect(
+            unrooted(
+                ['app/p/page.tsx'],
+                [{ ...PAIR, lazy: 'components/systems/install.ts' }],
+                withGate
+            )
+        ).toEqual([]);
+    });
 });
 
 describe('system install entries', () => {
+    it('every script that reaches a lookup reaches its root', () => {
+        const deps = fsDeps();
+
+        const flat: Deps = (file) => ({ ...deps(file), client: false });
+
+        expect(
+            unrooted(
+                scriptEntries(),
+                INSTALL_PAIRS.map((p) => ({ ...p, side: 'server' as const })),
+                flat
+            ),
+            'import the install root in the script'
+        ).toEqual([]);
+    });
+
     it('every route and page that reaches a lookup reaches its root', () => {
         const exempt = new Set([...STATIC_SAFE, ...CLIENT_LAZY]);
 

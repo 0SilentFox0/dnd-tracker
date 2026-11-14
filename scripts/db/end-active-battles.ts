@@ -10,6 +10,7 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
+import '@/lib/server/systems/registry';
 import { prisma } from '@/lib/db';
 import { DEFAULT_LOCALE } from '@/lib/i18n/config';
 import { getBattleOperation } from '@/lib/server/battles/operations';

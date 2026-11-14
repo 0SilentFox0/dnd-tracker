@@ -1,5 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 
+import '@/lib/server/systems/registry';
+
 const DATA = vi.hoisted(() => {
     const hero = (id: string, maxHp: number) => ({
         id,

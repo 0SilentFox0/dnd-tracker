@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import '@/lib/server/systems/registry';
+
 const db = vi.hoisted(() => ({
     race: { findMany: vi.fn() },
     campaign: {

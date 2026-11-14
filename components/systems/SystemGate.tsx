@@ -12,6 +12,28 @@ import type { SystemSelection } from '@/lib/utils/rules/systems/catalog';
 
 const NEVER = () => false;
 
+const STALE_CHUNK = /ChunkLoadError|Loading chunk|dynamically imported module/i;
+
+const RELOAD_FLAG = 'system-gate-reloaded';
+
+/** A deploy replaces chunk files under an open tab: reload once, then surface the error */
+function reloadOnStaleChunk(error: unknown): boolean {
+    const text = error instanceof Error ? `${error.name} ${error.message}` : '';
+
+    if (!STALE_CHUNK.test(text)) return false;
+
+    try {
+        if (sessionStorage.getItem(RELOAD_FLAG)) return false;
+
+        sessionStorage.setItem(RELOAD_FLAG, '1');
+        window.location.reload();
+
+        return true;
+    } catch {
+        return false;
+    }
+}
+
 /** Server and first hydration render the fallback, so a warm server process cannot cause a mismatch */
 export function SystemGate({
     system,
@@ -22,9 +44,11 @@ export function SystemGate({
     children: ReactNode;
     fallback?: ReactNode;
 }) {
-    const [failure, setFailure] = useState<unknown>();
+    const modulesKey = system.modules?.join(',') ?? '';
 
-    const modulesKey = system.modules?.join(',');
+    const selection = `${system.key}|${modulesKey}`;
+
+    const [failure, setFailure] = useState<{ selection: string; error: unknown }>();
 
     const ready = useSyncExternalStore(
         subscribeSystems,
@@ -32,17 +56,23 @@ export function SystemGate({
         NEVER
     );
 
-    if (!ready && typeof window !== 'undefined')
-        loadSystems(system).catch(() => undefined);
-
     useEffect(() => {
-        loadSystems({ key: system.key, modules: system.modules }).catch(
-            setFailure
-        );
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [system.key, modulesKey]);
+        let current = true;
 
-    if (failure) throw failure;
+        loadSystems({ key: system.key, modules: system.modules }).catch(
+            (error) => {
+                if (current && !reloadOnStaleChunk(error))
+                    setFailure({ selection, error });
+            }
+        );
+
+        return () => {
+            current = false;
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selection]);
+
+    if (failure?.selection === selection) throw failure.error;
 
     return ready ? children : (fallback ?? <LoadingState />);
 }

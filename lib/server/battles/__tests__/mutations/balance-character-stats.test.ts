@@ -1,5 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 
+import '@/lib/server/systems/registry';
+
 const calls = vi.hoisted(() => ({
     byKey: {} as Record<string, number>,
     args: {} as Record<string, unknown>,

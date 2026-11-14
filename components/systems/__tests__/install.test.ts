@@ -108,13 +108,30 @@ describe('loadSystems', () => {
 
         vi.mocked(install.LOADERS.wfrp.rules)
             .mockRejectedValueOnce(new Error('chunk'))
-            ;
+            .mockRejectedValueOnce(new Error('chunk'));
 
         await expect(install.loadSystems({ key: 'wfrp' })).rejects.toThrow(
             'chunk'
         );
         await install.loadSystems({ key: 'wfrp' });
         expect(install.isSystemReady({ key: 'wfrp' })).toBe(true);
+    });
+
+    it('retries a transient failure once within the same call', async () => {
+        const { install } = await fresh();
+
+        const { loader } = stub();
+
+        for (const id of Object.keys(install.LOADERS))
+            install.LOADERS[id] = loader(id);
+
+        vi.mocked(install.LOADERS.wfrp.rules).mockRejectedValueOnce(
+            new Error('chunk')
+        );
+
+        await install.loadSystems({ key: 'wfrp' });
+        expect(install.isSystemReady({ key: 'wfrp' })).toBe(true);
+        expect(install.LOADERS.wfrp.rules).toHaveBeenCalledTimes(2);
     });
 
     it('moduleIdsOf lists the base, addons and their requires', async () => {

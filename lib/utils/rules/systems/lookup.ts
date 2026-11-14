@@ -25,9 +25,13 @@ let table: Record<string, RuleSystemDefinition> | undefined;
 let levelResets: readonly LevelResetPart[] | undefined;
 
 export function installModules(entries: Entries): void {
-    if (installed === entries) return;
+    if (
+        installed &&
+        Object.entries(entries).every(([id, e]) => installed?.[id] === e)
+    )
+        return;
 
-    installed = entries;
+    installed = installed ? { ...installed, ...entries } : entries;
     systemCache = new Map();
     table = undefined;
     levelResets = undefined;
@@ -61,7 +65,10 @@ const resolve = (system: SystemSelection): RuleSystemDefinition => {
 
 const registryTable = (): Record<string, RuleSystemDefinition> =>
     (table ??= Object.fromEntries(
-        RULE_SYSTEM_KEYS.map((key) => [key, resolve({ key })])
+        RULE_SYSTEM_KEYS.filter((key) => isInstalled({ key })).map((key) => [
+            key,
+            resolve({ key }),
+        ])
     ));
 
 /** Reads the installed table on every access, so importing it before an install root has run is safe */
@@ -102,11 +109,6 @@ export function allLevelResets(): readonly LevelResetPart[] {
 export const ruleSystemOf = (
     rules: Pick<Ruleset, 'system'>
 ): RuleSystemDefinition => {
-    const { key, modules } = rules.system;
-
-    if (!modules && RULE_SYSTEM_KEYS.includes(key))
-        return registryTable()[key];
-
     return resolve(rules.system);
 };
 
@@ -121,6 +123,6 @@ export const currencyValueOf = (
 export const ruleSystemByKey = (
     key: string
 ): RuleSystemDefinition | undefined =>
-    installed && RULE_SYSTEM_KEYS.includes(key)
-        ? registryTable()[key]
+    installed && RULE_SYSTEM_KEYS.includes(key) && isInstalled({ key })
+        ? resolve({ key })
         : undefined;

@@ -15,13 +15,13 @@ import type { BattleMutationContext } from '@/lib/utils/battle/pipeline/run-batt
 import { SYSTEM_ROOTS } from '@/scripts/shared/system-ratchet';
 import type { BattleAttack } from '@/types/battle';
 
-vi.mock('@/lib/utils/rules/systems', async (importOriginal) => ({
+vi.mock('@/lib/utils/rules/systems/lookup', async (importOriginal) => ({
     ...(await importOriginal<object>()),
     ruleSystemOf: () => D6POOL_SYSTEM,
     ruleSystemByKey: () => D6POOL_SYSTEM,
 }));
 
-vi.mock('@/lib/server/systems/registry', async (importOriginal) => ({
+vi.mock('@/lib/server/systems/lookup', async (importOriginal) => ({
     ...(await importOriginal<object>()),
     systemServerOf: () => D6POOL_SERVER,
 }));

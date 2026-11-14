@@ -1,5 +1,6 @@
 import Link from 'next/link';
 
+import '@/lib/server/systems/registry';
 import { InfoReferenceClient } from '@/components/campaigns/info/InfoReferenceClient';
 import { HudPage, HudPageHeader } from '@/components/hud/page';
 import { SystemGate } from '@/components/systems/SystemGate';

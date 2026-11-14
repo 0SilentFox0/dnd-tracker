@@ -26,6 +26,7 @@ function deps(over = {}) {
             async () => ({ id: 'ch1', campaignId: 'c1' }) as never
         ),
         loadUnit: vi.fn(async () => ({ id: 'u1', campaignId: 'c1' }) as never),
+        loadRace: vi.fn(async () => null),
         fromCharacter: vi.fn(async () => participant('new-ch')),
         fromUnit: vi.fn(
             async (_u: unknown, _b: string, _s: unknown, n: number) =>
@@ -94,6 +95,29 @@ describe('add-participant mutation', () => {
             'gob',
         ]);
         expect(out.scene?.turnIndex).toBe(2);
+    });
+
+    it('юніта будують із расою, завантаженою за raceId', async () => {
+        const race = { id: 'r1', name: 'Elf' } as never;
+
+        const d = deps({
+            loadUnit: vi.fn(
+                async () => ({ id: 'u1', campaignId: 'c1', raceId: 'r1' }) as never
+            ),
+            loadRace: vi.fn(async () => race),
+        });
+
+        await createAddParticipantMutation(d)(context(), {
+            sourceId: 'u1',
+            type: 'unit',
+            side: 'enemy',
+            quantity: 1,
+        });
+
+        expect(d.loadRace).toHaveBeenCalledWith('r1', 'c1');
+        expect(
+            (d.fromUnit.mock.calls[0] as unknown[])[4]
+        ).toEqual({ r1: race });
     });
 
     it('героя будують із зафіксованими правилами бою', async () => {

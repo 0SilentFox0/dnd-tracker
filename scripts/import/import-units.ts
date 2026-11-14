@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import * as fs from 'fs';
 import * as path from 'path';
 
+import '@/lib/utils/rules/systems/registry';
 import { importUnitsSchema } from '@/lib/schemas/units';
 import { loadRules } from '@/lib/server/campaigns/rules';
 import { parseTable } from '@/lib/utils/content/import/table';

@@ -7,6 +7,7 @@
  */
 import { writeFileSync } from 'node:fs';
 
+import '@/lib/server/systems/registry';
 import { ParticipantSide } from '@/lib/constants/battle';
 import { HERO_ARCHETYPE_KEYS } from '@/lib/constants/hero-archetypes';
 import { prisma } from '@/lib/db';

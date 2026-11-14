@@ -12,3 +12,12 @@ export async function loadRace(
 
     return prisma.race.findFirst({ where: { campaignId, name: raceName } });
 }
+
+export async function loadUnitRace(
+    raceId: string | null | undefined,
+    campaignId: string
+): Promise<RaceRow | null> {
+    if (!raceId) return null;
+
+    return prisma.race.findFirst({ where: { id: raceId, campaignId } });
+}

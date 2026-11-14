@@ -1,4 +1,5 @@
 // @vitest-environment happy-dom
+import { Component, type ReactNode } from 'react';
 import { act, cleanup, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -86,5 +87,89 @@ describe('SystemGate', () => {
 
         await screen.findByTestId('child');
         expect(d20).not.toHaveBeenCalled();
+    });
+
+    it('a failed load throws once and does not restart the load on every render', async () => {
+        const { SystemGate, install } = await setup();
+
+        const rules = vi.fn(async () => {
+            throw new Error('boom');
+        });
+
+        install.LOADERS.wfrp = { rules };
+
+        class Boundary extends Component<
+            { children: ReactNode },
+            { error?: Error }
+        > {
+            state: { error?: Error } = {};
+
+            static getDerivedStateFromError(error: Error) {
+                return { error };
+            }
+
+            render() {
+                return this.state.error ? (
+                    <b data-testid="err">{this.state.error.message}</b>
+                ) : (
+                    this.props.children
+                );
+            }
+        }
+
+        const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+        const { rerender } = render(
+            <Boundary>
+                <SystemGate system={{ key: 'wfrp' }}>
+                    <span />
+                </SystemGate>
+            </Boundary>
+        );
+
+        expect(await screen.findByTestId('err')).toBeTruthy();
+
+        const calls = rules.mock.calls.length;
+
+        rerender(
+            <Boundary>
+                <SystemGate system={{ key: 'wfrp' }}>
+                    <span />
+                </SystemGate>
+            </Boundary>
+        );
+
+        expect(rules.mock.calls.length).toBe(calls);
+        spy.mockRestore();
+    });
+
+    it('a failure of a previous composition is not blamed on the current one', async () => {
+        const { SystemGate, install, release } = await setup();
+
+        let fail!: (e: Error) => void;
+
+        install.LOADERS.homm = undefined as never;
+        install.LOADERS.d20 = {
+            rules: () => new Promise((_, reject) => (fail = reject)),
+        };
+
+        const view = render(
+            <SystemGate system={{ key: 'dnd5e' }}>
+                <span data-testid="child" />
+            </SystemGate>
+        );
+
+        view.rerender(
+            <SystemGate system={{ key: 'wfrp' }}>
+                <span data-testid="child" />
+            </SystemGate>
+        );
+
+        await act(async () => {
+            fail(new Error('old'));
+            release();
+        });
+
+        expect(await screen.findByTestId('child')).toBeTruthy();
     });
 });

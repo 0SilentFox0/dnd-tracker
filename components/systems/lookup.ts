@@ -21,9 +21,13 @@ let uiCache = new Map<string, SystemUi>();
 let table: Record<string, SystemUi> | undefined;
 
 export function installUiModules(entries: Entries): void {
-    if (installed === entries) return;
+    if (
+        installed &&
+        Object.entries(entries).every(([id, e]) => installed?.[id] === e)
+    )
+        return;
 
-    installed = entries;
+    installed = installed ? { ...installed, ...entries } : entries;
     uiCache = new Map();
     table = undefined;
 }
@@ -47,7 +51,9 @@ const resolve = (key: string, modules?: readonly string[]): SystemUi => {
 
 const uiTable = (): Record<string, SystemUi> =>
     (table ??= Object.fromEntries(
-        RULE_SYSTEM_KEYS.map((key) => [key, resolve(key)])
+        RULE_SYSTEM_KEYS.filter((key) => isUiInstalled({ key })).map(
+            (key) => [key, resolve(key)]
+        )
     ));
 
 /** Reads the installed table on every access, so importing it before an install is safe */
@@ -66,11 +72,11 @@ export const systemUiOf = (
     key: string,
     modules?: readonly string[]
 ): SystemUi => {
-    if (!modules && RULE_SYSTEM_KEYS.includes(key)) return uiTable()[key];
-
     return resolve(key, modules);
 };
 
 /** Undefined for an unknown key or before an install */
 export const systemUiByKey = (key: string): SystemUi | undefined =>
-    installed && RULE_SYSTEM_KEYS.includes(key) ? uiTable()[key] : undefined;
+    installed && RULE_SYSTEM_KEYS.includes(key) && isUiInstalled({ key })
+        ? resolve(key)
+        : undefined;

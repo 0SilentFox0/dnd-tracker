@@ -54,12 +54,47 @@ describe('lookup after an install root', () => {
     it('isInstalled is false while a module of the composition is missing', async () => {
         const lookup = await fresh();
 
-        const { MODULES } = await import('../registry');
+        const { D20_MODULE } = await import('@/systems/d20');
 
-        const { wfrp: base, ...rest } = MODULES;
-
-        lookup.installModules(rest);
+        lookup.installModules({ d20: D20_MODULE });
         expect(lookup.isInstalled({ key: 'wfrp' })).toBe(false);
-        expect(base).toBeDefined();
+        expect(lookup.isInstalled({ key: 'dnd5e' })).toBe(true);
+    });
+});
+
+describe('partial install (client loads one composition)', () => {
+    it('a bare key resolves from its own base only; other keys are absent, not throwing', async () => {
+        const lookup = await fresh();
+
+        const { WFRP_MODULE } = await import('@/systems/wfrp');
+
+        lookup.installModules({ wfrp: WFRP_MODULE });
+
+        expect(lookup.ruleSystemOf(wfrp).key).toBe('wfrp');
+        expect(lookup.ruleSystemByKey('wfrp')).toBe(lookup.ruleSystemOf(wfrp));
+        expect(lookup.ruleSystemByKey('dnd5e')).toBeUndefined();
+        expect(Object.keys(lookup.RULE_SYSTEM_REGISTRY)).toEqual(['wfrp']);
+        expect(lookup.RULE_SYSTEM_REGISTRY.dnd5e).toBeUndefined();
+        expect(() => lookup.ruleSystemOf({ system: { key: 'dnd5e' } })).toThrow(
+            /No definition/
+        );
+    });
+
+    it('a later install merges with the earlier one', async () => {
+        const lookup = await fresh();
+
+        const { WFRP_MODULE } = await import('@/systems/wfrp');
+
+        const { D20_MODULE } = await import('@/systems/d20');
+
+        lookup.installModules({ wfrp: WFRP_MODULE });
+
+        const before = lookup.ruleSystemOf(wfrp);
+
+        lookup.installModules({ d20: D20_MODULE });
+
+        expect(lookup.isInstalled({ key: 'wfrp' })).toBe(true);
+        expect(lookup.ruleSystemOf(wfrp).key).toBe(before.key);
+        expect(lookup.ruleSystemByKey('dnd5e')?.key).toBe('dnd5e');
     });
 });

@@ -19,8 +19,10 @@ vi.mock('@/lib/server/battles/mutations/start/start-fair-scaling', () => ({
         async (_c: string, _s: unknown, built: unknown[]) => built
     ),
 }));
-vi.mock('@/lib/utils/battle/participant', () => ({
+vi.mock('@/lib/server/battles/participant/from-character', () => ({
     createBattleParticipantFromCharacter: mocks.fromCharacter,
+}));
+vi.mock('@/lib/utils/battle/participant', () => ({
     createBattleParticipantFromUnit: mocks.fromUnit,
 }));
 

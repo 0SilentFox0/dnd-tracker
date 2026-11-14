@@ -129,7 +129,7 @@ async function load(system: SystemSelection): Promise<void> {
     listeners.forEach((l) => l());
 }
 
-/** Idempotent; a failed load is forgotten so the next call retries */
+/** Idempotent; retries once (a chunk fetch can fail transiently), and a failed load is forgotten so the next call retries */
 export function loadSystems(system: SystemSelection): Promise<void> {
     if (isSystemReady(system)) return Promise.resolve();
 
@@ -139,7 +139,9 @@ export function loadSystems(system: SystemSelection): Promise<void> {
 
     if (hit) return hit;
 
-    const started = load(system).finally(() => pending.delete(key));
+    const started = load(system)
+        .catch(() => load(system))
+        .finally(() => pending.delete(key));
 
     pending.set(key, started);
 

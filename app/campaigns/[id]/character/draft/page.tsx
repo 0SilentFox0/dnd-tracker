@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 
 import '@/components/systems/registry';
+import '@/lib/server/systems/registry';
 import { PlayerDraftForm } from '@/components/characters/player-draft/PlayerDraftForm';
 import { systemUiOf } from '@/components/systems';
 import { SystemGate } from '@/components/systems/SystemGate';

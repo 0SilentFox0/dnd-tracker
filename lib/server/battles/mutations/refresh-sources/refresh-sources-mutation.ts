@@ -5,6 +5,7 @@ import { prisma } from '@/lib/db';
 import { textRef } from '@/lib/i18n/text-ref';
 import { buildCampaignContextForStart } from '@/lib/server/battles/mutations/start/start-build-context';
 import { createBattleParticipantFromCharacter } from '@/lib/server/battles/participant/from-character';
+import { loadUnitRace } from '@/lib/server/battles/participant/load-race';
 import { createBattleParticipantFromUnit } from '@/lib/utils/battle/participant';
 import { refreshFromSource } from '@/lib/utils/battle/participant/refresh-from-source';
 import type {
@@ -28,6 +29,7 @@ type UnitRow = Parameters<typeof createBattleParticipantFromUnit>[0] & {
 export interface RefreshSourcesDeps {
     loadCharacter(id: string): Promise<CharacterRow | null>;
     loadUnit(id: string, campaignId: string): Promise<UnitRow | null>;
+    loadRace: typeof loadUnitRace;
     fromCharacter: typeof createBattleParticipantFromCharacter;
     fromUnit: typeof createBattleParticipantFromUnit;
     buildContext(
@@ -46,6 +48,7 @@ const defaultDeps: RefreshSourcesDeps = {
         prisma.unit.findFirst({
             where: { id, campaignId },
         }) as Promise<UnitRow | null>,
+    loadRace: loadUnitRace,
     fromCharacter: createBattleParticipantFromCharacter,
     fromUnit: createBattleParticipantFromUnit,
     buildContext: async (campaignId, characters) =>
@@ -147,7 +150,13 @@ export function createRefreshSourcesMutation(
                           battleId,
                           side,
                           instanceNumber ?? 1,
-                          undefined,
+                          {
+                              [(row as UnitRow).raceId ?? '']:
+                                  await deps.loadRace(
+                                      (row as UnitRow).raceId,
+                                      campaignId
+                                  ),
+                          },
                           ctx.meta.rules
                       );
 
