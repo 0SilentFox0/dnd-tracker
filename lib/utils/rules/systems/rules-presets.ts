@@ -1,5 +1,6 @@
 // <systems:generated>
 import { D20_RULES_PRESET } from '@/systems/d20/rules/rules-preset';
+import { DND5E_RULES_PRESET } from '@/systems/dnd5e/rules/rules-preset';
 import { HOMM_RULES_PRESET } from '@/systems/homm/rules/rules-preset';
 import { WFRP_RULES_PRESET } from '@/systems/wfrp/rules/rules-preset';
 // </systems:generated>
@@ -12,6 +13,7 @@ export type RulesPreset = Readonly<
 export const RULES_PRESETS: Readonly<Record<string, RulesPreset>> = {
     // <systems:generated>
     d20: D20_RULES_PRESET,
+    dnd5e: DND5E_RULES_PRESET,
     homm: HOMM_RULES_PRESET,
     wfrp: WFRP_RULES_PRESET,
     // </systems:generated>

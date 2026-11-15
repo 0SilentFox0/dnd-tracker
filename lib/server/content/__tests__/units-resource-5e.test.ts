@@ -11,6 +11,7 @@ const db = vi.hoisted(() => ({
         update: vi.fn(),
         deleteMany: vi.fn(),
         findFirst: vi.fn(),
+        findUnique: vi.fn(async () => null),
     },
 }));
 

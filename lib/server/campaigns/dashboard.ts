@@ -3,6 +3,7 @@ import { BattleStatus, ParticipantSourceType } from '@/lib/constants/battle';
 import { CharacterStatus, CharacterType } from '@/lib/constants/characters';
 import { prisma } from '@/lib/db';
 import { latestPublishedVersion } from '@/lib/server/templates/publish';
+import { withStoredColumns } from '@/lib/utils/rules/systems/column-view';
 import type { DmDashboardData, PlayerDashboardData } from '@/types/campaigns';
 
 export async function sourceUpdateState(
@@ -98,7 +99,7 @@ export async function readPlayerDashboard(
     campaignId: string,
     userId: string
 ): Promise<PlayerDashboardData> {
-    const [hasWorld, hero] = await Promise.all([
+    const [hasWorld, stored] = await Promise.all([
         prisma.worldMap
             .count({ where: { campaignId, parentMarkerId: null } })
             .then((n) => n > 0),
@@ -118,6 +119,7 @@ export async function readPlayerDashboard(
                 avatar: true,
                 armorClass: true,
                 speed: true,
+                characteristics: true,
                 status: true,
                 reviewNote: true,
                 seenLevel: true,
@@ -125,7 +127,10 @@ export async function readPlayerDashboard(
         }),
     ]);
 
-    if (!hero) return { hero: null, activeBattle: null, hasWorld };
+    if (!stored) return { hero: null, activeBattle: null, hasWorld };
+
+    const { characteristics: _characteristics, ...hero } =
+        withStoredColumns(stored);
 
     const participant = await prisma.battleParticipant.findFirst({
         where: {

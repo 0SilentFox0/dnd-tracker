@@ -81,7 +81,10 @@ describe('SystemGate', () => {
         const { SystemGate } = await setup();
 
         render(
-            <SystemGate system={{ key: 'wfrp' }} fallback={<i data-testid="fb" />}>
+            <SystemGate
+                system={{ key: 'wfrp' }}
+                fallback={<i data-testid="fb" />}
+            >
                 <span />
             </SystemGate>
         );

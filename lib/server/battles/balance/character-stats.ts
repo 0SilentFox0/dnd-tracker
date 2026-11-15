@@ -5,6 +5,8 @@ import { buildCampaignContextForStart } from '@/lib/server/battles/mutations/sta
 import { createBattleParticipantFromCharacter } from '@/lib/server/battles/participant/from-character';
 import { systemServerOf } from '@/lib/server/systems/lookup';
 import { type Ruleset } from '@/lib/utils/rules';
+import { ruleSystemOf } from '@/lib/utils/rules/systems';
+import { withColumnView } from '@/lib/utils/rules/systems/column-view';
 
 /** Same participants as at battle start, from one context load (no per-character queries). */
 export async function loadCharacterBalanceStats(
@@ -12,14 +14,18 @@ export async function loadCharacterBalanceStats(
     characterIds: string[] | undefined,
     rules: Ruleset
 ) {
-    const characters = await prisma.character.findMany({
-        where: {
-            campaignId,
-            ...ACTIVE_CHARACTER,
-            ...(characterIds && { id: { in: characterIds } }),
-        },
-        include: { inventory: true },
-    });
+    const system = ruleSystemOf(rules);
+
+    const characters = (
+        await prisma.character.findMany({
+            where: {
+                campaignId,
+                ...ACTIVE_CHARACTER,
+                ...(characterIds && { id: { in: characterIds } }),
+            },
+            include: { inventory: true },
+        })
+    ).map((row) => withColumnView(row, system));
 
     if (characters.length === 0) return [];
 

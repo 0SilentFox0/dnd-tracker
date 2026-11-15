@@ -65,6 +65,10 @@ async function main() {
 
     const { DEFAULT_RULES } = await import('@/lib/utils/rules/defaults');
 
+    const { withStoredColumns } = await import(
+        '@/lib/utils/rules/systems/column-view'
+    );
+
     const { categoryInventory, projectInput } = await import(
         '@/lib/utils/compendium-import/flow'
     );
@@ -299,9 +303,11 @@ async function main() {
             `попередження рас/бекґраундів/рис: ${codes(['races', 'backgrounds', 'feats'])}`,
         ]);
 
-        const units = await prisma.unit.findMany({
-            where: { campaignId, name: names('monster') },
-        });
+        const units = (
+            await prisma.unit.findMany({
+                where: { campaignId, name: names('monster') },
+            })
+        ).map(withStoredColumns);
 
         const monsters = array(root.monster);
 

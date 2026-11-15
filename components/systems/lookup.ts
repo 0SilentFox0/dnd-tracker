@@ -51,9 +51,10 @@ const resolve = (key: string, modules?: readonly string[]): SystemUi => {
 
 const uiTable = (): Record<string, SystemUi> =>
     (table ??= Object.fromEntries(
-        RULE_SYSTEM_KEYS.filter((key) => isUiInstalled({ key })).map(
-            (key) => [key, resolve(key)]
-        )
+        RULE_SYSTEM_KEYS.filter((key) => isUiInstalled({ key })).map((key) => [
+            key,
+            resolve(key),
+        ])
     ));
 
 /** Reads the installed table on every access, so importing it before an install is safe */

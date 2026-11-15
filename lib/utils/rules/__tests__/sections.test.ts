@@ -214,7 +214,7 @@ describe('parseSection (per item)', () => {
         expect(parseSection(upgradable, {})).toEqual({ size: { w: 1 } });
     });
 
-    it('legacy retaliation key with the module off does not break actions', () => {
+    it('legacy retaliation and opportunity keys with the modules off do not break actions', () => {
         const actions = sectionsOfSystem({ key: 'dnd5e', modules: [] }).actions;
 
         expect(
@@ -224,11 +224,7 @@ describe('parseSection (per item)', () => {
                 retaliation: false,
                 variant: '2024',
             })
-        ).toEqual({
-            enabled: true,
-            opportunityAttacks: false,
-            variant: '2024',
-        });
+        ).toEqual({ enabled: true, variant: '2024' });
     });
 
     it('a failing refine falls back to the section defaults', () => {

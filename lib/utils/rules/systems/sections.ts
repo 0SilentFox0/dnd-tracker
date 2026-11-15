@@ -1,8 +1,11 @@
 import type { SectionsContribution } from '@/lib/utils/rules/sections';
 // <systems:generated>
 import { D20_SECTIONS } from '@/systems/d20/rules/sections';
+import { DEATHSAVES_SECTIONS } from '@/systems/deathsaves/rules/sections';
 import { HEROSCALING_SECTIONS } from '@/systems/heroscaling/rules/sections';
+import { INSPIRATION_SECTIONS } from '@/systems/inspiration/rules/sections';
 import { MORALE_SECTIONS } from '@/systems/morale/rules/sections';
+import { OPPORTUNITY_SECTIONS } from '@/systems/opportunity/rules/sections';
 import { RETALIATION_SECTIONS } from '@/systems/retaliation/rules/sections';
 import { WFRP_SECTIONS } from '@/systems/wfrp/rules/sections';
 // </systems:generated>
@@ -12,8 +15,11 @@ export const SECTION_CONTRIBUTIONS: Readonly<
 > = {
     // <systems:generated>
     d20: D20_SECTIONS,
+    deathsaves: DEATHSAVES_SECTIONS,
     heroscaling: HEROSCALING_SECTIONS,
+    inspiration: INSPIRATION_SECTIONS,
     morale: MORALE_SECTIONS,
+    opportunity: OPPORTUNITY_SECTIONS,
     retaliation: RETALIATION_SECTIONS,
     wfrp: WFRP_SECTIONS,
     // </systems:generated>

@@ -1,14 +1,11 @@
-import {
-    RULE_SYSTEM_KEYS,
-    SYSTEM_META,
-    type SystemKind,
-    type SystemMeta,
-} from './meta';
+import { SYSTEM_META, type SystemKind, type SystemMeta } from './meta';
 
 import { CORE_CONTENT_KINDS } from '@/lib/constants/content-kinds';
 
-/** Registry order; only for previews and fallbacks where no rules exist. */
-export const FALLBACK_SYSTEM_KEY: string = RULE_SYSTEM_KEYS[0];
+/** The preset flagged `fallback` in meta; only for previews and fallbacks where no rules exist. */
+export const FALLBACK_SYSTEM_KEY: string = SYSTEM_META.find(
+    (m) => 'fallback' in m
+)!.keys[0];
 
 export const MODULE_ID_RE = /^[a-z0-9]+$/;
 
@@ -65,6 +62,26 @@ export const presetsOf = (
 };
 
 export const PRESETS: Readonly<Record<string, Composition>> = presetsOf();
+
+/** A bare base that presets are built on is configured only in the module wizard, not picked as a system. */
+export const selectableKeysOf = (
+    keys: readonly string[],
+    metas: Metas = ALL_META
+): string[] => {
+    const presetBases = new Set(
+        metas.flatMap((m) =>
+            kindOf(m) === 'preset' && m.preset ? [m.preset.base] : []
+        )
+    );
+
+    const hidden = new Set(
+        metas
+            .filter((m) => kindOf(m) === 'base' && presetBases.has(m.module))
+            .flatMap((m) => m.keys)
+    );
+
+    return keys.filter((key) => !hidden.has(key));
+};
 
 export const moduleMetaOf = (
     id: string,

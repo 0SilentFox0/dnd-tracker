@@ -7,6 +7,10 @@
     "title": "Doors on the map",
     "body": "Battle maps now have doors. Closed doors block movement, shots, sight, templates and melee; a player opens them with a hero standing next to the door on their turn, the DM can lock, close or break them. Place doors with the Door brush in battle setup and the library editor (desktop)."
   },
+  "2026-11-14-d20-modules": {
+    "title": "d20 modules in the rules wizard",
+    "body": "Death saves, inspiration, off-hand attack, lair actions and opportunity attacks are now separate modules of the D&D 5e rules. The campaign rules wizard shows them as switches, and a bare \"d20\" system without any of them is available for custom rule sets. Existing D&D 5e and HoMM campaigns keep all of them on."
+  },
   "2026-11-map-library": {
     "title": "Battle map library",
     "body": "Each campaign can keep a library of battle maps: turn on \"Map library\" in the campaign settings. There is a fullscreen wall and bars editor on desktop, you pick a library map when creating a battle, and battles get an \"Update map\" button."

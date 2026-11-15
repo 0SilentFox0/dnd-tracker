@@ -98,7 +98,7 @@ describe('units API', () => {
             campaignId: 'c1',
             name: 'Шаман',
             raceId: 'r1',
-            armorClass: 0,
+            characteristics: expect.objectContaining({ armorClass: 0 }),
         });
         expect(revalidateTag).toHaveBeenCalledWith('units-c1', { expire: 0 });
     });

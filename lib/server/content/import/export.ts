@@ -28,6 +28,7 @@ import { refKindsOf } from '@/lib/utils/content/import/kinds';
 import { recordToCells } from '@/lib/utils/content/import/mapping';
 import { toCsv } from '@/lib/utils/content/import/table';
 import { itemStatsFromRow } from '@/lib/utils/items/item-row';
+import { flattenStoredColumns } from '@/lib/utils/rules/systems/column-view';
 import type { IdName } from '@/types/common';
 import type { ImportKind, ImportRecord } from '@/types/content-import';
 
@@ -55,7 +56,7 @@ export const EXPORT_LOADERS: Record<
     units: async (c) =>
         asRecords(
             (await prisma.unit.findMany(query(c))).map((r) => ({
-                ...r,
+                ...flattenStoredColumns(r),
                 abilities: unitAbilities(r),
             }))
         ),

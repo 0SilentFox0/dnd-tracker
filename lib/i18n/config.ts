@@ -1,3 +1,4 @@
+import { CORE_NAMESPACES } from '@/lib/i18n/core-namespaces';
 import {
     type SystemNamespace,
     systemNamespaces,
@@ -17,60 +18,7 @@ export const LOCALE_CHANGE_EVENT = 'locale-change';
 
 export const APP_TIME_ZONE = 'UTC';
 
-export const CORE_NAMESPACES = [
-    'common',
-    'validation',
-    'errors',
-    'auth',
-    'landing',
-    'onboarding',
-    'demoTours',
-    'whatsNew',
-    'help',
-    'races',
-    'skills',
-    'classes',
-    'feats',
-    'backgrounds',
-    'artifacts',
-    'music',
-    'choices',
-    'campaigns',
-    'dashboard',
-    'characters',
-    'characterProfile',
-    'inventory',
-    'rest',
-    'spells',
-    'spellEditor',
-    'editors',
-    'units',
-    'abilities',
-    'abilityRegistry',
-    'rules',
-    'skillTree',
-    'scenario',
-    'scenarioGraph',
-    'show',
-    'acquaintances',
-    'world',
-    'maps',
-    'ai',
-    'compendium',
-    'contentImport',
-    'gameTerms',
-    'assistant',
-    'compendiumReport',
-    'abilityText',
-    'battleTerms',
-    'battleCommon',
-    'battle',
-    'battleWizards',
-    'battleDm',
-    'battleSetup',
-    'battleLog',
-    'battleActions',
-] as const;
+export { CORE_NAMESPACES };
 
 export type Namespace = (typeof CORE_NAMESPACES)[number] | SystemNamespace;
 

@@ -7,5 +7,5 @@ export const composeUi = (
     addons: readonly Addon<SystemUi>[]
 ): SystemUi =>
     composeParts(base, addons, {
-        dictionaries: ['rulesSections', 'rulesItems', 'dmPages'],
+        dictionaries: ['rulesSections', 'rulesItems', 'dmPages', 'fx.badges'],
     });

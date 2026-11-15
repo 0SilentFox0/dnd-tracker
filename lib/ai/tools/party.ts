@@ -11,6 +11,7 @@ import { loadRules } from '@/lib/server/campaigns/rules';
 import { readContent } from '@/lib/server/scenario/page-store';
 import { systemServerOf, withSystemNotes } from '@/lib/server/systems/lookup';
 import type { Ruleset } from '@/lib/utils/rules/schema';
+import { withStoredColumns } from '@/lib/utils/rules/systems/column-view';
 import { docText } from '@/lib/utils/scenario/doc';
 
 const PARTY_SELECT = {
@@ -20,8 +21,19 @@ const PARTY_SELECT = {
     class: true,
     race: true,
     armorClass: true,
+    characteristics: true,
     notes: true,
 } as const;
+
+const flatRow = <T extends object>(row: T) => {
+    const { characteristics: _stored, ...rest } = withStoredColumns(
+        row
+    ) as T & {
+        characteristics?: unknown;
+    };
+
+    return rest;
+};
 
 export type PartyMember = {
     id: string;
@@ -48,7 +60,9 @@ export async function partySummary(
 
     if (ai?.party) return (await ai.party(campaignId, query)) as PartyMember[];
 
-    return prisma.character.findMany({ ...query, select: PARTY_SELECT });
+    return (
+        await prisma.character.findMany({ ...query, select: PARTY_SELECT })
+    ).map(flatRow);
 }
 
 export const getPartyTool = defineTool({
@@ -129,6 +143,6 @@ export const readCharacterTool = defineTool({
         if (ai?.hero && ai.heroSelect)
             return { ...(await ai.hero(ctx.campaignId, c)), biography };
 
-        return { ...c, biography };
+        return { ...flatRow(c), biography };
     },
 });

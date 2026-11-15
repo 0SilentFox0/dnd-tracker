@@ -38,7 +38,7 @@ describe('partySummary', () => {
         );
     });
 
-    it('d20: classic member shape, no characteristics, no career query', async () => {
+    it('d20: classic member shape, statblock from characteristics, no career query', async () => {
         vi.mocked(prisma.character.findMany).mockResolvedValue([
             {
                 id: 'h1',
@@ -46,7 +46,8 @@ describe('partySummary', () => {
                 level: 5,
                 class: 'Knight',
                 race: 'Human',
-                armorClass: 16,
+                armorClass: 10,
+                characteristics: { armorClass: 16 },
                 notes: null,
             },
         ] as never);
@@ -64,7 +65,7 @@ describe('partySummary', () => {
         });
         expect(prisma.character.findMany).toHaveBeenCalledWith(
             expect.objectContaining({
-                select: expect.not.objectContaining({ characteristics: true }),
+                select: expect.objectContaining({ characteristics: true }),
             })
         );
         expect(prisma.career.findMany).not.toHaveBeenCalled();

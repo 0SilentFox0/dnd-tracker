@@ -39,6 +39,14 @@ export const LOADERS: Record<string, Loader> = {
                 (m) => m.D20_ABILITY_MODULE
             ),
     },
+    deathsaves: {
+        rules: () =>
+            import('@/systems/deathsaves').then((m) => m.DEATHSAVES_MODULE),
+        ui: () =>
+            import('@/systems/deathsaves/ui').then(
+                (m) => m.DEATHSAVES_MODULE_UI
+            ),
+    },
     heroscaling: {
         rules: () =>
             import('@/systems/heroscaling').then((m) => m.HEROSCALING_MODULE),
@@ -47,12 +55,28 @@ export const LOADERS: Record<string, Loader> = {
                 (m) => m.HEROSCALING_MODULE_UI
             ),
     },
+    inspiration: {
+        rules: () =>
+            import('@/systems/inspiration').then((m) => m.INSPIRATION_MODULE),
+    },
+    lair: { rules: () => import('@/systems/lair').then((m) => m.LAIR_MODULE) },
     morale: {
         rules: () => import('@/systems/morale').then((m) => m.MORALE_MODULE),
         ui: () => import('@/systems/morale/ui').then((m) => m.MORALE_MODULE_UI),
         ability: () =>
             import('@/systems/morale/rules/ability-install').then(
                 (m) => m.MORALE_ABILITY_MODULE
+            ),
+    },
+    offhand: {
+        rules: () => import('@/systems/offhand').then((m) => m.OFFHAND_MODULE),
+    },
+    opportunity: {
+        rules: () =>
+            import('@/systems/opportunity').then((m) => m.OPPORTUNITY_MODULE),
+        ui: () =>
+            import('@/systems/opportunity/ui').then(
+                (m) => m.OPPORTUNITY_MODULE_UI
             ),
     },
     retaliation: {

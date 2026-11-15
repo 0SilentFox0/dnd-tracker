@@ -17,6 +17,17 @@
     "initiative": 12,
     "speed": 35,
     "archetype": "ranger",
+    "characteristics": {
+      "strength": 14,
+      "dexterity": 12,
+      "constitution": 13,
+      "intelligence": 11,
+      "wisdom": 10,
+      "charisma": 16,
+      "armorClass": 15,
+      "initiative": 12,
+      "speed": 35
+    },
     "spellSlots": {
       "1": {
         "max": 1,

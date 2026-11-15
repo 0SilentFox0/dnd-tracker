@@ -29,6 +29,7 @@ import {
 import type { HeroArchetypeKey } from '@/lib/constants/hero-archetypes';
 import { prisma } from '@/lib/db';
 import { characterGoalsSchema } from '@/lib/schemas/character-goals';
+import { lockCharacters } from '@/lib/server/characters/lock';
 import { AVATARS_BUCKET } from '@/lib/supabase/avatar-storage';
 import {
     uploadImageDataUrl,
@@ -36,6 +37,7 @@ import {
 } from '@/lib/supabase/image-storage';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 import { fullSpellSlots } from '@/lib/utils/spells/spell-slots';
+import { d20RowData } from '@/scripts/shared/d20-row-data';
 import type { CharacterGoal } from '@/types/characters';
 import type { SpellSlotProgression } from '@/types/races';
 
@@ -494,7 +496,7 @@ function stats(b: Build) {
         b.order.map((a, i) => [a, STANDARD[i]])
     ) as Record<Ability, number>;
 
-    return {
+    return d20RowData({
         ...scores,
         armorClass: b.ac,
         initiative: heroInitiative(scores.dexterity, b.archetype),
@@ -503,7 +505,7 @@ function stats(b: Build) {
         spellcastingAbility: b.casting,
         primaryAbility: b.primary,
         archetype: b.archetype,
-    };
+    });
 }
 
 function photoDataUrl(dir: string, name: string): string | null {
@@ -675,7 +677,7 @@ async function main() {
 
         const existing = await prisma.character.findFirst({
             where: { campaignId: campaign.id, name: e.name },
-            select: { id: true, avatar: true },
+            select: { id: true, avatar: true, characteristics: true },
         });
 
         const needsAvatar =
@@ -719,12 +721,24 @@ async function main() {
             }
 
             if (!dryRun)
-                await prisma.character.update({
-                    where: { id: existing.id },
-                    data: {
-                        initiative: data.initiative,
-                        ...(personalSkillId && { personalSkillId }),
-                    },
+                await prisma.$transaction(async (tx) => {
+                    await lockCharacters(tx, [existing.id]);
+
+                    const current = await tx.character.findUnique({
+                        where: { id: existing.id },
+                        select: { characteristics: true },
+                    });
+
+                    await tx.character.update({
+                        where: { id: existing.id },
+                        data: {
+                            ...d20RowData(
+                                { initiative: data.initiative },
+                                current?.characteristics
+                            ),
+                            ...(personalSkillId && { personalSkillId }),
+                        },
+                    });
                 });
 
             console.log(
@@ -741,9 +755,21 @@ async function main() {
         }
 
         if (existing) {
-            await prisma.character.update({
-                where: { id: existing.id },
-                data: { ...data, ...(avatar && { avatar }) },
+            await prisma.$transaction(async (tx) => {
+                await lockCharacters(tx, [existing.id]);
+
+                const current = await tx.character.findUnique({
+                    where: { id: existing.id },
+                    select: { characteristics: true },
+                });
+
+                await tx.character.update({
+                    where: { id: existing.id },
+                    data: {
+                        ...d20RowData(data, current?.characteristics),
+                        ...(avatar && { avatar }),
+                    },
+                });
             });
             console.log(`оновлено: ${summary}`);
             continue;
@@ -756,7 +782,7 @@ async function main() {
         await prisma.$transaction(async (tx) => {
             const created = await tx.character.create({
                 data: {
-                    ...data,
+                    ...d20RowData(data),
                     campaignId: campaign.id,
                     controlledBy: campaign.dmUserId,
                     level: 1,

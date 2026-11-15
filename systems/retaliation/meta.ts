@@ -5,5 +5,6 @@ export const RETALIATION_META = {
     kind: 'addon',
     keys: [],
     requires: ['d20'],
+    after: ['opportunity'],
     i18n: {},
 } as const satisfies SystemMeta;

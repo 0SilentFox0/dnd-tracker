@@ -5,6 +5,7 @@ export {
     type FxImpactKind,
 } from './archetypes';
 export { aurasOf } from './aura';
+export { FX_BADGE_VALUES, type FxBadgeKey } from './badges';
 export { frameKindOf, type FxFrameKind } from './frame-kind';
 export { type HudMotif, hudMotifsOf } from './hud-motif';
 export { type FxImpact, impactFor, splashTargetIds } from './impact';

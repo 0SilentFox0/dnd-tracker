@@ -10,7 +10,7 @@ import {
 } from '@/lib/utils/battle/__tests__/fixtures/placed';
 import { REJECT } from '@/lib/utils/battle/store/reject';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
-import { withDeathSaves } from '@/systems/d20/rules/death-saves/state';
+import { withDeathSaves } from '@/systems/deathsaves/rules/state';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
 
 const none = {

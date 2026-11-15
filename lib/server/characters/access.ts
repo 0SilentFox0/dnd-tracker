@@ -10,6 +10,7 @@ import type { Actor } from '@/lib/utils/api/actor';
 import { type CampaignAccessResult } from '@/lib/utils/api/api-auth';
 import { errorResponse } from '@/lib/utils/api/api-response';
 import { loadOwned } from '@/lib/utils/api/load-owned';
+import { withStoredColumns } from '@/lib/utils/rules/systems/column-view';
 
 export type CharacterWithInventory = Prisma.CharacterGetPayload<{
     include: { inventory: true };
@@ -78,7 +79,10 @@ export async function gateCharacter<
     if (!access.isDM && character.controlledBy !== access.userId)
         return errorResponse(API_ERRORS.FORBIDDEN, 403);
 
-    return { access, character };
+    return {
+        access,
+        character: withStoredColumns(character),
+    };
 }
 
 export function requireCharacterAccess(

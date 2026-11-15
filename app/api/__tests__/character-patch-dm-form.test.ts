@@ -18,11 +18,15 @@ vi.mock('@/lib/server/characters/core/resolve-character-owner', () => ({
         async (_c: string, _u: string, o: object) => o
     ),
 }));
+vi.mock('@/lib/server/characters/lock', () => ({
+    lockCharacters: vi.fn().mockResolvedValue(new Map()),
+}));
 vi.mock('@/lib/db', () => ({
     prisma: {
         character: { findUnique: vi.fn(), update: vi.fn() },
         campaign: { findUnique: vi.fn() },
         race: { findFirst: vi.fn() },
+        $transaction: vi.fn(),
     },
 }));
 vi.mock('@/lib/server/content/write', () => ({
@@ -67,6 +71,9 @@ const patch = async (body: unknown) => {
 describe('PATCH of the whole DM edit form', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        vi.mocked(prisma.$transaction).mockImplementation(
+            ((fn: (tx: unknown) => unknown) => fn(prisma)) as never
+        );
         vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue({
             userId: 'dm',
             isDM: true,

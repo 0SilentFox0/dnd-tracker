@@ -9,6 +9,7 @@ import {
     type UnitStatsRow,
 } from '@/lib/utils/battle/balance/unit-library';
 import { getAttackAbilityModifier } from '@/lib/utils/common/calculations';
+import { withStoredColumns } from '@/lib/utils/rules/systems/column-view';
 import {
     artifactRows,
     assertSeedTarget,
@@ -345,7 +346,7 @@ describe('seed-library-lib', () => {
         };
 
         it('maps stats, attacks, spells and race', () => {
-            const row = unitRow(base, maps, races);
+            const row = withStoredColumns(unitRow(base, maps, races));
 
             expect(row).toMatchObject({
                 name: 'Стрілець',
@@ -392,7 +393,7 @@ describe('seed-library-lib', () => {
         });
 
         it('total to-hit of every attack equals the unit attack bonus', () => {
-            const row = unitRow(base, maps, races);
+            const row = withStoredColumns(unitRow(base, maps, races));
 
             const scores = {
                 strength: row.strength as number,
@@ -412,7 +413,9 @@ describe('seed-library-lib', () => {
         });
 
         it("fair balance reads the unit's AC and full to-hit from the seeded row", () => {
-            const row = unitRow({ ...base, spellKeys: undefined }, maps, races);
+            const row = withStoredColumns(
+                unitRow({ ...base, spellKeys: undefined }, maps, races)
+            );
 
             const stats = unitRowStats({
                 ...row,

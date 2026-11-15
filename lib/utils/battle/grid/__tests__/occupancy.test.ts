@@ -4,7 +4,7 @@ import { bothOnMap, isAdjacent, isFallen, isOnMap } from '../occupancy';
 
 import { CombatStatus } from '@/lib/constants/battle';
 import { placed, testMap } from '@/lib/utils/battle/__tests__/fixtures/placed';
-import { withDeathSaves } from '@/systems/d20/rules/death-saves/state';
+import { withDeathSaves } from '@/systems/deathsaves/rules/state';
 
 describe('bothOnMap', () => {
     const a = placed('a', { at: { x: 1, y: 1 } });

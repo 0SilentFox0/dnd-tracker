@@ -13,8 +13,8 @@ import type {
 import type { BattleDelta, LoadedBattle } from '@/lib/utils/battle/store';
 import { applyCharacterResources } from '@/lib/utils/characters/resources/battle';
 import { DEFAULT_RULES, type Ruleset } from '@/lib/utils/rules';
-import { startDying } from '@/systems/d20/rules/death-saves/start';
-import { withDeathSaves } from '@/systems/d20/rules/death-saves/state';
+import { startDying } from '@/systems/deathsaves/rules/start';
+import { withDeathSaves } from '@/systems/deathsaves/rules/state';
 import type { BattleParticipant } from '@/types/battle';
 
 vi.mock('@/lib/i18n/request-locale', () => ({

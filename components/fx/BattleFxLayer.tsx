@@ -61,7 +61,7 @@ export function BattleFxLayer({ fx }: { fx?: SystemFx }) {
 
     const { enabled } = useFxEnabled();
 
-    const labels = useFxBadgeLabels();
+    const labels = useFxBadgeLabels(fx);
 
     const { current, queue, done, active } = useBattleFxQueue(enabled, fx);
 

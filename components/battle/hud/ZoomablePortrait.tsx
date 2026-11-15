@@ -7,7 +7,8 @@ import { Portrait, type PortraitProps } from './Portrait';
 
 import { ImageZoomDialog } from '@/components/common/ImageZoomDialog';
 
-interface ZoomablePortraitProps extends PortraitProps {
+interface ZoomablePortraitProps
+    extends Omit<PortraitProps, 'current' | 'extra'> {
     /** restarts only the portrait animation, the zoom dialog stays open */
     flashKey?: string;
 }

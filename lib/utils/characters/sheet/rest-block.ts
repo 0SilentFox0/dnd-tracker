@@ -5,6 +5,7 @@ import { hitDicePool } from '@/lib/utils/characters/resources/hit-dice';
 import { readResources } from '@/lib/utils/characters/resources/schema';
 import { isConsumablePool } from '@/lib/utils/items/pools';
 import type { Ruleset } from '@/lib/utils/rules';
+import { inspirationOn } from '@/lib/utils/rules/inspiration-on';
 import { ruleSystemOf } from '@/lib/utils/rules/systems/lookup';
 import type { BattleParticipant } from '@/types/battle';
 import type { SheetRest } from '@/types/characters';
@@ -24,8 +25,9 @@ export function buildRestBlock(input: {
 }): SheetRest | null {
     const ooc = input.rules?.outOfCombat;
 
-    if (!ooc || (!ooc.persistResources && !ooc.xp && !ooc.inspiration))
-        return null;
+    const inspiration = !!input.rules && inspirationOn(input.rules);
+
+    if (!ooc || (!ooc.persistResources && !ooc.xp && !inspiration)) return null;
 
     const { participant: p, character: c } = input;
 
@@ -96,7 +98,7 @@ export function buildRestBlock(input: {
             used: offer.used,
             slots: offer.slots,
         },
-        inspiration: ooc.inspiration ? !!c.inspiration : null,
+        inspiration: inspiration ? !!c.inspiration : null,
         xp: ooc.xp
             ? {
                   value: experience,

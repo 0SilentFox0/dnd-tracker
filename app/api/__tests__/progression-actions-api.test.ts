@@ -17,6 +17,9 @@ vi.mock('@/lib/utils/api/api-auth', () => ({
     requireAuth: vi.fn(),
     requireDM: vi.fn(),
 }));
+vi.mock('@/lib/server/characters/lock', () => ({
+    lockCharacters: vi.fn().mockResolvedValue(new Map()),
+}));
 
 vi.mock('@/lib/db', () => ({
     prisma: {
@@ -31,6 +34,7 @@ vi.mock('@/lib/db', () => ({
         skillTree: { findFirst: vi.fn() },
         skill: { findMany: vi.fn() },
         mainSkill: { findMany: vi.fn() },
+        $transaction: vi.fn(),
     },
 }));
 
@@ -114,6 +118,9 @@ describe('progression actions', () => {
 
     beforeEach(() => {
         vi.clearAllMocks();
+        vi.mocked(prisma.$transaction).mockImplementation(
+            ((fn: (tx: unknown) => unknown) => fn(prisma)) as never
+        );
         vi.mocked(prisma.character.findFirst).mockResolvedValue({
             ...CHAR,
             level: 3,

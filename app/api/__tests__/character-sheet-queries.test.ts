@@ -279,6 +279,31 @@ describe('лист персонажа: запити до БД', () => {
         expect(db.calls['artifact.findMany']).toBe(1);
     });
 
+    it('HP листа читає статблок з characteristics, а не застарілу колонку', async () => {
+        const sheetOf = async (row: object) => {
+            db.results['character.findUnique'] = row;
+
+            return buildSheetFor(
+                (await loadSheetCharacter('ch')) as never,
+                { isDM: false, isOwner: true },
+                { maxLevel: 20, rules: DEFAULT_RULES }
+            );
+        };
+
+        const legacy = await sheetOf({ ...character, constitution: 20 });
+
+        const migrated = await sheetOf({
+            ...character,
+            constitution: 10,
+            characteristics: { constitution: 20 },
+        });
+
+        expect(migrated.hp).toEqual(legacy.hp);
+        expect(migrated.hp.lines.map((l) => l.label)).not.toContain(
+            'sheet.line.bonuses'
+        );
+    });
+
     it('прогресія в листі: вільні очки = рівень − вивчені вузли дерева', async () => {
         const sheet = await buildSheetFor(
             character as never,

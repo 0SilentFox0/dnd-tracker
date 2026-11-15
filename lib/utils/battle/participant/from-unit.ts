@@ -21,6 +21,7 @@ import { spellGrantFields, spellPoolKey } from '@/lib/utils/items/pools';
 import { getUnitImmunities } from '@/lib/utils/races/race-effects';
 import { type Ruleset } from '@/lib/utils/rules';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
+import { withColumnView } from '@/lib/utils/rules/systems/column-view';
 import { systemSlotOf } from '@/lib/utils/rules/systems/slot';
 import {
     bestMentalAbility,
@@ -317,13 +318,15 @@ function unitBattleData(
 }
 
 export async function createBattleParticipantFromUnit(
-    unit: UnitFromPrisma,
+    row: UnitFromPrisma,
     battleId: string,
     side: ParticipantSide,
     instanceNumber: number,
     racesById: Record<string, Prisma.RaceGetPayload<object> | null> | undefined,
     rules: Ruleset
 ): Promise<BattleParticipant> {
+    const unit = withColumnView(row, ruleSystemOf(rules));
+
     const race: UnitRace = racesById?.[unit.raceId ?? ''] ?? null;
 
     const monster = isMonster5e(unit);

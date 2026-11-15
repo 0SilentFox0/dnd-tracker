@@ -10,6 +10,9 @@ import { DEFAULT_RULES } from '@/lib/utils/rules';
 vi.mock('@/lib/server/notifications/notify', () => ({
     notifyCharacterOwners: vi.fn().mockResolvedValue(0),
 }));
+vi.mock('@/lib/server/characters/lock', () => ({
+    lockCharacters: vi.fn().mockResolvedValue(new Map()),
+}));
 vi.mock('@/lib/utils/api/api-auth', () => ({
     requireAuth: vi.fn(),
     requireCampaignAccess: vi.fn(),
@@ -20,6 +23,7 @@ vi.mock('@/lib/db', () => ({
         character: { findUnique: vi.fn(), update: vi.fn() },
         campaign: { findUnique: vi.fn() },
         race: { findFirst: vi.fn() },
+        $transaction: vi.fn(async (fn: (tx: unknown) => unknown) => fn(prisma)),
     },
 }));
 
@@ -145,6 +149,36 @@ describe('PATCH персонажа: рівень і слоти', () => {
         });
     });
 
+    it('зливає статблок зі свіжим characteristics під row-lock', async () => {
+        vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(
+            access('dm')
+        );
+        vi.mocked(prisma.character.findUnique)
+            .mockResolvedValueOnce(CHARACTER as never)
+            .mockResolvedValueOnce({
+                ...CHARACTER,
+                characteristics: { strength: 10 },
+            } as never)
+            .mockResolvedValue({
+                ...CHARACTER,
+                characteristics: {
+                    strength: 10,
+                    intelligence: 22,
+                    houseRule: 'keep',
+                },
+            } as never);
+
+        const res = await patch({ dexterity: 12 });
+
+        expect(res.status).toBe(200);
+        expect(written().characteristics).toMatchObject({
+            strength: 10,
+            dexterity: 12,
+            intelligence: 22,
+            houseRule: 'keep',
+        });
+    });
+
     it('гравець правит свого героя — виклик без подій і з його userId', async () => {
         vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(
             access('player')
@@ -200,7 +234,7 @@ describe('PATCH персонажа: рівень і слоти', () => {
 
         expect(written()).toMatchObject({
             level: 5,
-            strength: 14,
+            characteristics: expect.objectContaining({ strength: 14 }),
             spellSlots: {
                 '1': { max: 3, current: 1 },
                 '2': { max: 1, current: 1 },

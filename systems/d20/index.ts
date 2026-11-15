@@ -6,26 +6,23 @@ import {
 } from './rules/attack';
 import { D20_REACH, d20AttackAbility } from './rules/attack/ability';
 import { d20HitModel } from './rules/balance';
+import { readD20Columns, writeD20Columns } from './rules/characteristics/codec';
+import { D20_CHARACTERISTICS_COLUMNS } from './rules/characteristics/columns';
 import { concentrationFallout } from './rules/concentration/damaged';
 import { D20_CONDITION_SET } from './rules/conditions';
 import { d20Damage } from './rules/damage';
-import { d20HoldsOn } from './rules/death-saves/holds';
-import { d20OnZeroHp } from './rules/death-saves/on-zero-hp';
-import { reviveFromDying } from './rules/death-saves/state';
 import { d20Initiative, d20TieBreak } from './rules/initiative';
-import { D20_INSPIRATION } from './rules/inspiration';
 import { D20_MAGIC } from './rules/magic';
-import { D20_OFF_HAND } from './rules/off-hand';
 import { d20UnitSpellDc } from './rules/participant/unit-spell-dc';
 import { proficiencyForLevel } from './rules/proficiency/level';
 import { d20MaxHp } from './rules/progression/max-hp';
-import { D20_REACTIONS, d20ProvokedOpportunity } from './rules/reactions';
+import { D20_REACTIONS } from './rules/reactions';
 import { D20_PROFICIENCY, D20_SAVES } from './rules/saves';
 import { d20SheetBlock } from './rules/sheet/block';
 import { rollFromSheet } from './rules/sheet-roll';
-import { d20FromStored, d20Persist } from './rules/state-parts';
 import { D20_STAT_COLUMNS } from './rules/stats';
 import { D20_TURN } from './rules/turn';
+import { d20OnZeroHp } from './rules/zero-hp';
 
 import type { RuleSystemDefinition } from '@/lib/utils/rules/systems/types';
 import { d20ZoneAttack } from '@/systems/d20/rules/magic/spell-roll';
@@ -49,6 +46,11 @@ export const D20_MODULE: RuleSystemDefinition = {
     sheet: { blocks: [d20SheetBlock] },
     characteristics: {
         persisted: false,
+        columnView: {
+            columns: D20_CHARACTERISTICS_COLUMNS,
+            read: readD20Columns,
+            write: writeD20Columns,
+        },
         defaults: () => undefined,
         isEmpty: (v) =>
             v == null || (typeof v === 'object' && Object.keys(v).length === 0),
@@ -64,10 +66,8 @@ export const D20_MODULE: RuleSystemDefinition = {
         judge: 'client',
         crit: (rules) => rules.criticals,
         autoXp: (rules) => rules.encounters.autoXp,
-        offHand: D20_OFF_HAND,
         attackAbility: d20AttackAbility,
         reach: D20_REACH,
-        inspiration: D20_INSPIRATION,
         attack: D20_ATTACK_HOOKS,
         zoneAttack: d20ZoneAttack,
         dice: 20,
@@ -77,22 +77,17 @@ export const D20_MODULE: RuleSystemDefinition = {
         abortedRoll: d20AbortedRoll,
         onZeroHp: d20OnZeroHp,
         onDamaged: [concentrationFallout],
-        onRevived: reviveFromDying,
-        holdsOn: d20HoldsOn,
         turn: D20_TURN,
         actions: D20_ACTIONS,
         reactions: D20_REACTIONS,
         saves: D20_SAVES,
         proficiency: D20_PROFICIENCY,
-        afterAttack: [d20ProvokedOpportunity],
         initiative: d20Initiative,
         tieBreak: d20TieBreak,
         hitModel: d20HitModel,
     },
     participant: {
         fromUnit: [d20UnitSpellDc],
-        fromStored: [d20FromStored],
-        persist: [d20Persist],
     },
     conditionSet: D20_CONDITION_SET,
     magic: D20_MAGIC,

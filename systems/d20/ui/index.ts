@@ -1,6 +1,5 @@
 import { CritChoiceDialog } from './battle/crit-choice/CritChoiceDialog';
 import { CritChoiceWaitingBanner } from './battle/crit-choice/CritChoiceWaitingBanner';
-import { DeathSaveBadge } from './battle/DeathSaveBadge';
 import { d20Defense } from './battle/defense';
 import { HeroStats as BattleHeroStats } from './battle/HeroStats';
 import { ParticipantStats } from './battle/ParticipantStats';
@@ -14,7 +13,6 @@ import { ClassesSection } from './rules/ClassesSection';
 import { ConcentrationSection } from './rules/ConcentrationSection';
 import { ConditionsSection } from './rules/ConditionsSection';
 import { CriticalsSection } from './rules/CriticalsSection';
-import { DeathSavesSection } from './rules/DeathSavesSection';
 import { FormulasSection } from './rules/FormulasSection';
 import { InitiativeSection } from './rules/InitiativeSection';
 import { SavesSection } from './rules/SavesSection';
@@ -32,7 +30,6 @@ export const D20_MODULE_UI: SystemUi = {
         defense: d20Defense,
         ParticipantStats,
         heroPanels: [SpellSlotsPanel],
-        badges: [DeathSaveBadge],
         dialogs: [CritChoiceDialog],
         notices: [CritChoiceWaitingBanner],
     },
@@ -41,7 +38,6 @@ export const D20_MODULE_UI: SystemUi = {
         formulas: FormulasSection,
         initiative: InitiativeSection,
         saves: SavesSection,
-        deathSaves: DeathSavesSection,
         concentration: ConcentrationSection,
         conditions: ConditionsSection,
         actions: ActionsSection,

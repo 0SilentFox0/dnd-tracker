@@ -159,8 +159,10 @@ describe('PUT choices', () => {
         expect(
             vi.mocked(prisma.character.update).mock.calls[0][0].data
         ).toMatchObject({
-            charisma: 18,
-            wisdom: 13,
+            characteristics: expect.objectContaining({
+                charisma: 18,
+                wisdom: 13,
+            }),
             classes: [
                 {
                     classId: sorcerer.id,

@@ -7,11 +7,7 @@ import type {
 import { rollD20WithMode } from '@/systems/d20/rules/dice/roll-d20';
 
 export function d20SpellAttackRoll(ctx: SpellAttackRollCtx): SpellAttackRoll {
-    const { roll, rolls } = rollD20WithMode(
-        ctx.mode,
-        ctx.rng,
-        ctx.presetRoll
-    );
+    const { roll, rolls } = rollD20WithMode(ctx.mode, ctx.rng, ctx.presetRoll);
 
     const crit = roll >= ctx.critOn;
 

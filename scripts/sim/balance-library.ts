@@ -75,6 +75,7 @@ import {
     racialNodeId,
     type TreeNodes,
 } from '@/lib/utils/skills/progression';
+import { d20RowData } from '@/scripts/shared/d20-row-data';
 import type { ResolvedAbility } from '@/types/abilities';
 import type { BattleMutationResponse, BattleScene } from '@/types/api';
 import type { BattleParticipant } from '@/types/battle';
@@ -928,7 +929,7 @@ async function createParty(
         void _unused;
 
         const row = await prisma.character.create({
-            data: {
+            data: d20RowData({
                 campaignId,
                 type: 'player',
                 controlledBy: SIM_PLAYER.id,
@@ -944,7 +945,7 @@ async function createParty(
                     [tree.treeId]: { unlockedSkills: unlocked },
                 },
                 ...stats,
-            },
+            }),
         });
 
         let equipped: Record<string, string> = { mainHand: weapons[b.weapon] };

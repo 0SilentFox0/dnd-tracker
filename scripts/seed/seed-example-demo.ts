@@ -26,6 +26,7 @@ import { emptyMaze } from '@/lib/utils/battle/modes/maze/constants';
 import { deriveClassApplication } from '@/lib/utils/characters/classes/application';
 import { toGameClassData } from '@/lib/utils/characters/classes/row';
 import { templateKeyWhere } from '@/lib/utils/templates/registry';
+import { d20RowData } from '@/scripts/shared/d20-row-data';
 
 const MAPS = {
     world: '/example-demo/maps/world.jpg',
@@ -362,7 +363,7 @@ async function copySrdLibraries(campaignId: string, userId: string) {
 
             await tx.character.upsert({
                 where: { id: DEMO_IDS.characters.scout },
-                create: {
+                create: d20RowData({
                     id: DEMO_IDS.characters.scout,
                     campaignId,
                     controlledBy: userId,
@@ -415,8 +416,8 @@ async function copySrdLibraries(campaignId: string, userId: string) {
                         versatile: [{ id: alert }],
                     }),
                     status: 'active',
-                },
-                update: {
+                }),
+                update: d20RowData({
                     campaignId,
                     controlledBy: userId,
                     type: 'player',
@@ -468,7 +469,7 @@ async function copySrdLibraries(campaignId: string, userId: string) {
                         versatile: [{ id: alert }],
                     }),
                     status: 'active',
-                },
+                }),
             });
 
             return {

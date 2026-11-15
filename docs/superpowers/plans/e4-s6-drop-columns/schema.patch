@@ -1,0 +1,50 @@
+--- a/prisma/schema.prisma	2026-11-15 00:35:56
++++ b/prisma/schema.prisma	2026-11-15 00:35:56
+@@ -132,15 +132,6 @@
+   notes               String?
+   experience          Int                 @default(0)
+   avatar              String?
+-  strength            Int                 @default(10)
+-  dexterity           Int                 @default(10)
+-  constitution        Int                 @default(10)
+-  intelligence        Int                 @default(10)
+-  wisdom              Int                 @default(10)
+-  charisma            Int                 @default(10)
+-  armorClass          Int                 @default(10)
+-  initiative          Int                 @default(0)
+-  speed               Int                 @default(30)
+   savingThrows        Json                @default("{}")
+   skills              Json                @default("{}")
+   spellcastingAbility String?
+@@ -200,15 +191,6 @@
+   name                 String
+   raceId               String?
+   level                Int      @default(1)
+-  strength             Int      @default(10)
+-  dexterity            Int      @default(10)
+-  constitution         Int      @default(10)
+-  intelligence         Int      @default(10)
+-  wisdom               Int      @default(10)
+-  charisma             Int      @default(10)
+-  armorClass           Int      @default(10)
+-  initiative           Int      @default(0)
+-  speed                Int      @default(30)
+   gridSize             Int      @default(1)
+   maxHp                Int      @default(10)
+   proficiencyBonus     Int      @default(2)
+@@ -1404,15 +1386,6 @@
+   name                 String
+   raceId               String?
+   level                Int      @default(1)
+-  strength             Int      @default(10)
+-  dexterity            Int      @default(10)
+-  constitution         Int      @default(10)
+-  intelligence         Int      @default(10)
+-  wisdom               Int      @default(10)
+-  charisma             Int      @default(10)
+-  armorClass           Int      @default(10)
+-  initiative           Int      @default(0)
+-  speed                Int      @default(30)
+   gridSize             Int      @default(1)
+   maxHp                Int      @default(10)
+   proficiencyBonus     Int      @default(2)

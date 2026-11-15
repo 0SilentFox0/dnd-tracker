@@ -9,7 +9,7 @@ import { hpOf } from '@/lib/utils/battle/__tests__/fixtures/placed';
 import type { BattleSceneState } from '@/lib/utils/battle/store';
 import { advanceAfterRemoval, advanceTurn } from '@/lib/utils/battle/turn';
 import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
-import { withDeathSaves } from '@/systems/d20/rules/death-saves/state';
+import { withDeathSaves } from '@/systems/deathsaves/rules/state';
 
 const scene: BattleSceneState = {
     id: 'b1',

@@ -10,6 +10,7 @@ import {
     characterClassMode,
     resolveCharacterChoices,
 } from '@/lib/server/characters/choices/resolve-choices';
+import { characteristicsPatch } from '@/lib/server/characters/core/characteristics-patch';
 import { lockCharacters } from '@/lib/server/characters/lock';
 import { writeCharacterLog } from '@/lib/server/characters/log';
 import { ContentError } from '@/lib/server/content/errors';
@@ -22,6 +23,11 @@ import {
 } from '@/lib/utils/characters/choices/picks';
 import { validateClassEntries } from '@/lib/utils/characters/classes/application';
 import { subclassesLabel } from '@/lib/utils/characters/classes/derive';
+import { ruleSystemOf } from '@/lib/utils/rules/systems';
+import {
+    columnViewDto,
+    withColumnView,
+} from '@/lib/utils/rules/systems/column-view';
 import { resolveClassEntries } from '@/lib/utils/spells/class-slots';
 import type { ChoicesBody } from '@/types/choices';
 
@@ -42,11 +48,14 @@ export async function saveCharacterChoices(
     return prisma.$transaction(async (tx) => {
         await lockCharacters(tx, [character.id]);
 
-        const row = await tx.character.findUnique({
+        const stored = await tx.character.findUnique({
             where: { id: character.id },
         });
 
-        if (!row) throw new ContentError(API_ERRORS.CHARACTER_NOT_FOUND, 404);
+        if (!stored)
+            throw new ContentError(API_ERRORS.CHARACTER_NOT_FOUND, 404);
+
+        const row = withColumnView(stored, ruleSystemOf(rules));
 
         const before = choicesStateOf(row);
 
@@ -120,6 +129,11 @@ export async function saveCharacterChoices(
             where: { id: row.id },
             data: {
                 ...resolved.fields,
+                ...characteristicsPatch(
+                    resolved.fields,
+                    ruleSystemOf(rules),
+                    row.characteristics
+                ),
                 ...(subclassLabel !== undefined && { subclass: subclassLabel }),
             },
             include: { user: { select: PUBLIC_USER_SELECT }, inventory: true },
@@ -144,6 +158,6 @@ export async function saveCharacterChoices(
             },
         ]);
 
-        return updated;
+        return columnViewDto(updated, ruleSystemOf(rules));
     });
 }

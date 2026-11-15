@@ -2,6 +2,7 @@ import { MoraleBadge } from './battle/MoraleBadge';
 import { MoraleLabel } from './battle/MoraleLabel';
 import { MoralePanel } from './battle/MoralePanel';
 import { MoraleResultOverlayLazy } from './battle/MoraleResultOverlayLazy';
+import { moraleFxBadges } from './fx/badges';
 import { moraleDiceSource } from './fx/from-morale';
 import { MoraleField } from './MoraleField';
 import { MoraleRow } from './MoraleRow';
@@ -12,7 +13,7 @@ import { defineAddon } from '@/lib/utils/rules/systems/compose';
 
 export const MORALE_MODULE_UI = defineAddon<SystemUi>(() => ({
     rulesSections: { morale: MoraleSection },
-    fx: { dice: [moraleDiceSource] },
+    fx: { dice: [moraleDiceSource], badges: moraleFxBadges },
     forms: { fields: [MoraleField] },
     sheet: { combatRows: [MoraleRow] },
     battle: {
