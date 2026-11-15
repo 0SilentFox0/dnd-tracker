@@ -6,8 +6,8 @@ import { castSpell } from '@/lib/utils/battle/spell';
 import { resolveSpellTargets } from '@/lib/utils/battle/spell/spell-targeting';
 import type { CastableSpell } from '@/lib/utils/battle/types/spell-process';
 import { DEFAULT_RULES, type Ruleset } from '@/lib/utils/rules';
-import { startDying } from '@/systems/d20/rules/death-saves/start';
 import { d20State } from '@/systems/d20/rules/state';
+import { startDying } from '@/systems/deathsaves/rules/start';
 
 const rules: Ruleset = {
     ...DEFAULT_RULES,

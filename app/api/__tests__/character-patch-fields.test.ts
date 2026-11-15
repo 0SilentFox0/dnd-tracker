@@ -16,12 +16,16 @@ vi.mock('@/lib/utils/api/api-auth', () => ({
     requireAuth: vi.fn(),
     requireDM: vi.fn(),
 }));
+vi.mock('@/lib/server/characters/lock', () => ({
+    lockCharacters: vi.fn().mockResolvedValue(new Map()),
+}));
 
 vi.mock('@/lib/db', () => ({
     prisma: {
         character: { findUnique: vi.fn(), update: vi.fn() },
         campaign: { findUnique: vi.fn() },
         race: { findFirst: vi.fn() },
+        $transaction: vi.fn(),
     },
 }));
 
@@ -149,6 +153,9 @@ describe('PATCH archetype', () => {
 
     beforeEach(() => {
         vi.clearAllMocks();
+        vi.mocked(prisma.$transaction).mockImplementation(
+            ((fn: (tx: unknown) => unknown) => fn(prisma)) as never
+        );
         vi.mocked(prisma.character.findUnique).mockResolvedValue({
             id: 'ch',
             campaignId: 'camp',

@@ -10,12 +10,15 @@ import { API_ERRORS } from '@/lib/constants/api-errors';
 import { CharacterStatus } from '@/lib/constants/characters';
 import { prisma } from '@/lib/db';
 import { deriveCharacterDefaults } from '@/lib/server/characters/core/derive-character-defaults';
+import { lockCharacters } from '@/lib/server/characters/lock';
 import { systemServerOf } from '@/lib/server/systems/lookup';
 import { requireCampaignAccess } from '@/lib/utils/api/api-auth';
 import { errorResponse } from '@/lib/utils/api/api-response';
 import { loadOwned } from '@/lib/utils/api/load-owned';
 import { storedDraftChoices } from '@/lib/utils/characters/choices/picks';
 import { validateAbilityScores } from '@/lib/utils/characters/generate';
+import { columnViewDto } from '@/lib/utils/rules/systems/column-view';
+import { ruleSystemOf } from '@/lib/utils/rules/systems/lookup';
 import type { CharacterClassEntry } from '@/types/classes';
 
 export async function updateDraft(
@@ -47,6 +50,7 @@ export async function updateDraft(
                 raceChoices: true,
                 feats: true,
                 classes: true,
+                characteristics: true,
             },
         }),
         campaignId,
@@ -110,16 +114,34 @@ export async function updateDraft(
               ).spellSlots
             : undefined);
 
-    const updated = await prisma.character.update({
-        where: { id: characterId },
-        data: {
-            ...draftFields(data, campaign.rules, character.goals),
-            ...asClass?.fields,
-            ...choices.fields,
-            avatar: avatar.avatar,
-            ...(slots && { spellSlots: slots }),
-        },
-    });
+    return prisma.$transaction(async (tx) => {
+        await lockCharacters(tx, [characterId]);
 
-    return NextResponse.json(updated);
+        const current = await tx.character.findUnique({
+            where: { id: characterId },
+            select: { status: true, characteristics: true },
+        });
+
+        if (!current)
+            return errorResponse(API_ERRORS.CHARACTER_NOT_FOUND, 404);
+
+        if (current.status !== CharacterStatus.PENDING)
+            return errorResponse(API_ERRORS.DRAFT_NOT_PENDING, 400);
+
+        const updated = await tx.character.update({
+            where: { id: characterId },
+            data: {
+                ...draftFields(data, campaign.rules, character.goals, {
+                    characteristics: current.characteristics,
+                    fields: { ...asClass?.fields, ...choices.fields },
+                }),
+                avatar: avatar.avatar,
+                ...(slots && { spellSlots: slots }),
+            },
+        });
+
+        return NextResponse.json(
+            columnViewDto(updated, ruleSystemOf(campaign.rules))
+        );
+    });
 }

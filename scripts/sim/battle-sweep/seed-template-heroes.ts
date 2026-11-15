@@ -1,5 +1,7 @@
 import type { SweepProfile } from './profiles';
 
+import { d20RowData } from '@/scripts/shared/d20-row-data';
+
 export interface HeroSpec {
     name: string;
     race: string;
@@ -52,7 +54,7 @@ export function heroRowData(
     profile: SweepProfile,
     ctx: { campaignId: string; controlledBy: string; spellIds: string[] }
 ) {
-    return {
+    const row = {
         campaignId: ctx.campaignId,
         type: 'npc_hero',
         controlledBy: ctx.controlledBy,
@@ -77,4 +79,6 @@ export function heroRowData(
                 ? { base: BASE_CHARACTERISTICS, move: 4 }
                 : {},
     };
+
+    return profile.judge === 'server' ? row : d20RowData(row);
 }

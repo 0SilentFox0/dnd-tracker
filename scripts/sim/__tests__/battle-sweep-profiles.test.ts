@@ -10,6 +10,8 @@ import {
 import { diffRowCounts, overallExit } from '../battle-sweep/row-counts';
 import { heroSpecsFor } from '../battle-sweep/seed-template-heroes';
 
+import { NEW_MODULES } from '@/scripts/db/lib/backfill-rule-modules-plan';
+
 describe('battle-sweep template selection', () => {
     it('runs every template without --template', () =>
         expect(parseTemplateKeys(['--mode', 'sweep'])).toEqual([
@@ -23,7 +25,7 @@ describe('battle-sweep template selection', () => {
 
     it('rejects an unknown template listing the valid ones', () => {
         expect(() => parseTemplateKeys(['--template', 'nope'])).toThrow(
-            /srd-5\.2, srd-5\.2\+morale, heroes-homm, grim-d100/
+            /srd-5\.2, srd-5\.2\+morale, d20-bare, heroes-homm, grim-d100/
         );
         expect(() => parseTemplateKeys(['--template'])).toThrow(
             /Unknown template/
@@ -34,6 +36,7 @@ describe('battle-sweep template selection', () => {
         expect(SWEEP_PROFILES.map((p) => p.key)).toEqual([
             'srd-5.2',
             'srd-5.2+morale',
+            'd20-bare',
             'heroes-homm',
             'grim-d100',
         ]);
@@ -62,13 +65,43 @@ describe('battle-sweep template selection', () => {
     });
 });
 
+describe('d20-bare profile', () => {
+    it('runs the srd-5.2 template on the bare d20 base with no modules', () => {
+        const profile = profileOf('d20-bare')!;
+
+        expect(profile.template).toBe('srd-5.2');
+        expect(profile.rules).toEqual({
+            systemKey: 'd20',
+            modules: [],
+            patch: {},
+        });
+        expect(moraleExpectation(profile)).toBe('absent');
+    });
+});
+
 describe('srd-5.2+morale profile', () => {
+    it('adds exactly the modules split out of d20 to morale', () => {
+        expect(profileOf('srd-5.2+morale')!.rules!.modules).toEqual(
+            expect.arrayContaining(['morale', ...NEW_MODULES])
+        );
+        expect(profileOf('srd-5.2+morale')!.rules!.modules).toHaveLength(
+            NEW_MODULES.length + 1
+        );
+    });
+
     it('opens the srd-5.2 template with the morale module and mixed-sign hero morale', () => {
         const profile = profileOf('srd-5.2+morale')!;
 
         expect(profile.template).toBe('srd-5.2');
         expect(profile.rules).toEqual({
-            modules: ['morale'],
+            modules: [
+                'morale',
+                'deathsaves',
+                'inspiration',
+                'offhand',
+                'lair',
+                'opportunity',
+            ],
             patch: { morale: { enabled: true, cap: 3 } },
         });
         expect(parseTemplateKeys(['--template', 'srd-5.2+morale'])).toEqual([

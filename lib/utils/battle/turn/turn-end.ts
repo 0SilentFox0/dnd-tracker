@@ -21,7 +21,7 @@ export function processEndOfTurn(
     currentTurnIndex: number,
     initiativeOrder: BattleParticipant[],
     currentRound: number,
-    deathSaves: { rules: Ruleset; rng?: () => number }
+    skipped: { rules: Ruleset; rng?: () => number }
 ): {
     nextTurnIndex: number;
     nextRound: number;
@@ -53,8 +53,8 @@ export function processEndOfTurn(
         const rolled =
             nextRound === currentRound
                 ? skippedTurnAt(order, nextTurnIndex, {
-                      rules: deathSaves.rules,
-                      rng: rngOf(deathSaves),
+                      rules: skipped.rules,
+                      rng: rngOf(skipped),
                       round: nextRound,
                   })
                 : null;

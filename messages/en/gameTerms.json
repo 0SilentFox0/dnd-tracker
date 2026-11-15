@@ -170,7 +170,8 @@
   "ruleSystem": {
     "homm": "HoMM (simplified d20)",
     "dnd5e": "D&D 5e",
-    "wfrp": "Grim d100"
+    "wfrp": "Grim d100",
+    "d20": "D20 (base)"
   },
   "difficulty": {
     "veryEasy": "Very easy",
@@ -321,6 +322,26 @@
     "unitstacks": {
       "name": "Unit stacks",
       "summary": "Creature count in a stack, target range, level scaling and stack damage in balance."
+    },
+    "deathsaves": {
+      "name": "Death saves",
+      "summary": "Dying heroes roll death saves at 0 HP; stabilize or die after three outcomes."
+    },
+    "inspiration": {
+      "name": "Inspiration",
+      "summary": "A character may hold inspiration and spend it for advantage on a roll."
+    },
+    "offhand": {
+      "name": "Off-hand attack",
+      "summary": "A bonus-action attack with a second light weapon."
+    },
+    "lair": {
+      "name": "Lair actions",
+      "summary": "Lair actions at the start of a round (initiative 20)."
+    },
+    "opportunity": {
+      "name": "Opportunity attacks",
+      "summary": "Leaving a melee reach provokes an attack of opportunity."
     }
   }
 }

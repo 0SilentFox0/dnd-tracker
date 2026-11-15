@@ -8,7 +8,9 @@
 import '@/lib/utils/rules/systems/registry';
 import { buildLibrary } from '@/data/library/build';
 import { prisma } from '@/lib/db';
+import { withStoredColumns } from '@/lib/utils/rules/systems/column-view';
 import { assertSeedTarget, parseArgs } from '@/scripts/seed/seed-library-lib';
+import { d20RowData } from '@/scripts/shared/d20-row-data';
 
 async function main() {
     const { campaignId, dryRun, allowRemote } = parseArgs(
@@ -21,10 +23,17 @@ async function main() {
         buildLibrary().units.map((u) => [u.name, u.initiative])
     );
 
-    const units = await prisma.unit.findMany({
-        where: { campaignId },
-        select: { id: true, name: true, initiative: true },
-    });
+    const units = (
+        await prisma.unit.findMany({
+            where: { campaignId },
+            select: {
+                id: true,
+                name: true,
+                initiative: true,
+                characteristics: true,
+            },
+        })
+    ).map(withStoredColumns);
 
     console.log(
         `БД: ${host} · кампанія ${campaignId} · юнітів ${units.length}${dryRun ? ' · DRY RUN' : ''}`
@@ -41,9 +50,18 @@ async function main() {
         console.log(`${u.name}: ${u.initiative} → ${next}`);
 
         if (!dryRun)
-            await prisma.unit.update({
-                where: { id: u.id },
-                data: { initiative: next },
+            await prisma.$transaction(async (tx) => {
+                await tx.$queryRaw`SELECT id FROM units WHERE id = ${u.id} FOR UPDATE`;
+
+                const current = await tx.unit.findUnique({
+                    where: { id: u.id },
+                    select: { characteristics: true },
+                });
+
+                await tx.unit.update({
+                    where: { id: u.id },
+                    data: d20RowData({ initiative: next }, current?.characteristics),
+                });
             });
     }
 

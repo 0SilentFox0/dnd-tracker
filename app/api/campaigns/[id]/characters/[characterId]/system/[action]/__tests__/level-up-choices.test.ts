@@ -146,7 +146,7 @@ describe('level-up with choices', () => {
             vi.mocked(prisma.character.update).mock.calls[0][0].data
         ).toMatchObject({
             level: 4,
-            charisma: 19,
+            characteristics: expect.objectContaining({ charisma: 19 }),
             classes: [
                 {
                     classId: sorcerer.id,

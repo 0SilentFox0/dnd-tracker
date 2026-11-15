@@ -28,6 +28,7 @@ import {
     resolveItemRow,
 } from '@/lib/utils/items/resolve';
 import type { Ruleset } from '@/lib/utils/rules';
+import { withStoredColumns } from '@/lib/utils/rules/systems/column-view';
 import {
     normalizeTree,
     readUnlocked,
@@ -36,14 +37,17 @@ import {
 import { resolveClassEntries } from '@/lib/utils/spells/class-slots';
 import type { CharacterSheet, SheetArtifact } from '@/types/characters';
 
-export const loadSheetCharacter = (characterId: string) =>
-    prisma.character.findUnique({
+export const loadSheetCharacter = async (characterId: string) => {
+    const row = await prisma.character.findUnique({
         where: { id: characterId },
         include: {
             inventory: true,
             tokens: { orderBy: { createdAt: 'desc' } },
         },
     });
+
+    return row && withStoredColumns(row);
+};
 
 export type SheetCharacter = NonNullable<
     Awaited<ReturnType<typeof loadSheetCharacter>>

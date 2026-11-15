@@ -3,19 +3,14 @@ import type { z } from 'zod';
 
 import type { createUnitSchema } from '@/lib/schemas/units';
 import { abilitiesJson } from '@/lib/utils/abilities/read';
+import { splitColumnView } from '@/lib/utils/rules/systems/column-view';
+import type { RuleSystemDefinition } from '@/lib/utils/rules/systems/types';
 import { resolveUnitProficiency } from '@/lib/utils/units/monster';
 
 export type CreateUnitData = z.infer<typeof createUnitSchema>;
 
-export function unitCreateData(
-    campaignId: string,
-    data: CreateUnitData
-): Prisma.UnitUncheckedCreateInput {
-    return {
-        campaignId,
-        name: data.name,
-        raceId: data.raceId ?? null,
-        level: data.level,
+const columnsOf = (data: CreateUnitData, system?: RuleSystemDefinition) => {
+    const columns = {
         strength: data.strength,
         dexterity: data.dexterity,
         constitution: data.constitution,
@@ -25,6 +20,26 @@ export function unitCreateData(
         armorClass: data.armorClass,
         initiative: data.initiative,
         speed: data.speed,
+    };
+
+    return system ? columns : columns;
+};
+
+export function unitCreateData(
+    campaignId: string,
+    data: CreateUnitData,
+    system?: RuleSystemDefinition
+): Prisma.UnitUncheckedCreateInput {
+    const characteristics =
+        (system && splitColumnView(data, system).characteristics) ??
+        data.characteristics;
+
+    return {
+        campaignId,
+        name: data.name,
+        raceId: data.raceId ?? null,
+        level: data.level,
+        ...columnsOf(data, system),
         gridSize: data.gridSize,
         maxHp: data.maxHp,
         proficiencyBonus: resolveUnitProficiency(data),
@@ -42,8 +57,8 @@ export function unitCreateData(
         legendaryActions: data.legendaryActions,
         legendaryResistances: data.legendaryResistances,
         saveProficiencies: data.saveProficiencies as Prisma.InputJsonValue,
-        ...(data.characteristics && {
-            characteristics: data.characteristics as Prisma.InputJsonObject,
+        ...(characteristics && {
+            characteristics: characteristics as Prisma.InputJsonObject,
         }),
         ...(Object.keys(data.statblock).length > 0 && {
             statblock: data.statblock as Prisma.InputJsonValue,

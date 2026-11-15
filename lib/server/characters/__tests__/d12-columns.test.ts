@@ -196,6 +196,8 @@ describe('D12 patch', () => {
             spellSlots: {},
         };
 
+        h.character.findUnique.mockResolvedValue(character);
+
         await run(
             'patch',
             { access: access(COMPOSITIONS[name]), character },

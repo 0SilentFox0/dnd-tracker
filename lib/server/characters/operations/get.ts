@@ -14,6 +14,7 @@ import { PUBLIC_USER_SELECT } from '@/lib/server/users/db-user';
 import type { Actor } from '@/lib/utils/api/actor';
 import { requireAuth } from '@/lib/utils/api/api-auth';
 import { isDmMember } from '@/lib/utils/api/is-dm';
+import { flattenStoredColumns } from '@/lib/utils/rules/systems/column-view';
 
 const userGate = async (
     ctx: CharacterOpCtx
@@ -62,7 +63,7 @@ export const getOperation = defineCharacterOperation({
 
         // нотатки — особисті: майстер їх не бачить
         return {
-            ...rest,
+            ...flattenStoredColumns(rest),
             ...(character.controlledBy === userId && { notes }),
             knownSpells,
         };

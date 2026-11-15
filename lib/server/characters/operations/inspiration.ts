@@ -5,6 +5,7 @@ import {
     gateOptions,
 } from '../operation-runner';
 
+import '@/lib/server/systems/registry';
 import { inspirationSchema } from '@/lib/schemas/out-of-combat';
 import { setInspiration } from '@/lib/server/characters/core/set-inspiration';
 

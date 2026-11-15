@@ -21,6 +21,7 @@ import { weaponStatsFromRow } from '@/lib/utils/artifacts/weapon-stats';
 import { IMPORT_SPECS, isImportKind } from '@/lib/utils/content/import';
 import { itemStatsFromRow } from '@/lib/utils/items/item-row';
 import { RulesetSchema } from '@/lib/utils/rules/schema';
+import { flattenStoredColumns } from '@/lib/utils/rules/systems/column-view';
 import type {
     PackKind,
     TemplateManifest,
@@ -194,7 +195,10 @@ export function bundleToPack(
                     } as PackRow;
                 }
 
-                const full = { ...row, ...derived(kind, row, setArtifacts) };
+                const full = {
+                    ...flattenStoredColumns(row),
+                    ...derived(kind, row, setArtifacts),
+                };
 
                 const record: Record<string, unknown> = {};
 

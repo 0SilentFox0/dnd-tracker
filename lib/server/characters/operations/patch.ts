@@ -45,6 +45,12 @@ import {
     spellNotificationEvents,
 } from '@/lib/utils/notifications/events';
 import { allLevelResets, ruleSystemOf } from '@/lib/utils/rules/systems';
+import {
+    columnViewDto,
+    splitColumnView,
+    withColumnView,
+} from '@/lib/utils/rules/systems/column-view';
+import type { RuleSystemDefinition } from '@/lib/utils/rules/systems/types';
 import type { SpellSlots } from '@/lib/utils/spells/spell-slots';
 import type { SpellSlotProgression } from '@/types/races';
 
@@ -231,6 +237,7 @@ interface UpdateWriterInput {
     avatar: string | null | undefined;
     resolved: ClassesResult;
     computedState: Awaited<ReturnType<typeof computeUpdate>>;
+    system: RuleSystemDefinition;
 }
 
 function updateWriter({
@@ -239,6 +246,7 @@ function updateWriter({
     avatar,
     resolved,
     computedState,
+    system,
 }: UpdateWriterInput) {
     const { fromClasses, finalLevel } = resolved;
 
@@ -259,15 +267,22 @@ function updateWriter({
         db: Pick<Prisma.TransactionClient, 'character'>,
         classes: ClassesResult['classesInput'],
         choiceFields?: ChoiceFields,
-        characteristics?: unknown
-    ) =>
-        db.character.update({
+        characteristics?: unknown,
+        prev: unknown = character.characteristics
+    ) => {
+        const view = splitColumnView(
+            { ...columns, ...computed.abilityScores, ...choiceFields },
+            system,
+            prev
+        );
+
+        return db.character.update({
             where: { id: character.id },
             data: {
                 ...columns,
-                characteristics: (characteristics ?? data.characteristics) as
-                    | Prisma.InputJsonValue
-                    | undefined,
+                characteristics: (characteristics ??
+                    view.characteristics ??
+                    data.characteristics) as Prisma.InputJsonValue | undefined,
                 backgroundChoices: undefined,
                 backgroundFeatPicks: undefined,
                 classes: classes as unknown as
@@ -275,7 +290,7 @@ function updateWriter({
                     | undefined,
                 avatar,
                 level: computed.finalLevel,
-                ...computed.abilityScores,
+                ...(computed.abilityScores ?? {}),
                 ...(computed.spellSlots && {
                     spellSlots: computed.spellSlots as Prisma.InputJsonValue,
                 }),
@@ -294,7 +309,7 @@ function updateWriter({
                     seenLevel: computed.seenLevel,
                 }),
                 ...(fromClasses && { level: finalLevel }),
-                ...choiceFields,
+                ...(choiceFields ?? {}),
                 ...(classSeenLevel !== undefined && {
                     seenLevel: classSeenLevel,
                 }),
@@ -302,9 +317,21 @@ function updateWriter({
             include: { user: { select: PUBLIC_USER_SELECT }, inventory: true },
             omit: { notes: true },
         });
+    };
 }
 
 async function patchCore(gate: Gate, parsed: Parsed) {
+    const system = ruleSystemOf(gate.access.campaign.rules);
+
+    const stored = await prisma.character.findUnique({
+        where: { id: gate.character.id },
+    });
+
+    if (!stored)
+        throw new ContentError(API_ERRORS.CHARACTER_NOT_FOUND, 404);
+
+    gate = { ...gate, character: withColumnView(stored, system) };
+
     const { access, character } = gate;
 
     const { userId, campaign, isDM } = access;
@@ -348,6 +375,7 @@ async function patchCore(gate: Gate, parsed: Parsed) {
         avatar: avatar.avatar,
         resolved,
         computedState,
+        system,
     });
 
     const guardsLedger = Boolean(
@@ -382,7 +410,7 @@ async function patchCore(gate: Gate, parsed: Parsed) {
                             rules: campaign.rules,
                             isDM,
                             character: {
-                                ...fresh,
+                                ...withColumnView(fresh, system),
                                 ...computed.abilityScores,
                                 level: resolved.finalLevel,
                             },
@@ -412,10 +440,32 @@ async function patchCore(gate: Gate, parsed: Parsed) {
                       tx,
                       classes,
                       choices?.ok ? choices.fields : undefined,
-                      characteristics
+                      characteristics,
+                      fresh.characteristics
                   );
               })
-            : await writeUpdate(prisma, resolved.classesInput);
+            : await prisma.$transaction(async (tx) => {
+                  await lockCharacters(tx, [characterId]);
+
+                  const fresh = await tx.character.findUnique({
+                      where: { id: characterId },
+                      select: { characteristics: true },
+                  });
+
+                  if (!fresh)
+                      throw new ContentError(
+                          API_ERRORS.CHARACTER_NOT_FOUND,
+                          404
+                      );
+
+                  return writeUpdate(
+                      tx,
+                      resolved.classesInput,
+                      undefined,
+                      undefined,
+                      fresh.characteristics
+                  );
+              });
 
     await notifyCharacterOwners({
         campaignId,
@@ -434,7 +484,7 @@ async function patchCore(gate: Gate, parsed: Parsed) {
         ],
     });
 
-    return updatedCharacter;
+    return columnViewDto(updatedCharacter, system);
 }
 
 export const patchOperation = defineCharacterOperation({

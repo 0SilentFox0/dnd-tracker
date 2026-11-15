@@ -13,6 +13,8 @@ import { createBattleParticipantFromUnit } from '@/lib/utils/battle/participant/
 import { saveDcBaseOf } from '@/lib/utils/battle/spell/save-dc';
 import type { UnitFromPrisma } from '@/lib/utils/battle/types/participant';
 import { type Ruleset } from '@/lib/utils/rules';
+import { ruleSystemOf } from '@/lib/utils/rules/systems';
+import { withColumnView } from '@/lib/utils/rules/systems/column-view';
 import type { BattleParticipant } from '@/types/battle';
 import type { RaceRow } from '@/types/races';
 
@@ -78,11 +80,15 @@ export async function loadUnitLibraryStats(
     campaignId: string,
     rules: Ruleset
 ): Promise<UnitStats[]> {
-    const [rows, races, summonSources] = await Promise.all([
+    const system = ruleSystemOf(rules);
+
+    const [stored, races, summonSources] = await Promise.all([
         prisma.unit.findMany({ where: { campaignId } }),
         prisma.race.findMany({ where: { campaignId } }),
         loadSummonSources(campaignId),
     ]);
+
+    const rows = stored.map((row) => withColumnView(row, system));
 
     const { balance } = systemServerOf(rules);
 

@@ -1,0 +1,6024 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`death saves golden (behaviour before the module split) > dnd5e composition, enabled false 1`] = `
+{
+  "holds": {
+    "holdsAlive": false,
+    "holdsDying": true,
+    "holdsStable": false,
+    "revivedAlive": {
+      "concentrating": false,
+      "dying": null,
+      "effects": [],
+      "hp": 5,
+      "saves": null,
+      "status": "active",
+    },
+    "revivedDying": {
+      "concentrating": false,
+      "dying": null,
+      "effects": [],
+      "hp": 0,
+      "saves": null,
+      "status": "active",
+    },
+  },
+  "skip": {
+    "alive/d1": {
+      "messages": [],
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+      "skip": false,
+    },
+    "alive/d10": {
+      "messages": [],
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+      "skip": false,
+    },
+    "alive/d20": {
+      "messages": [],
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+      "skip": false,
+    },
+    "alive/d9": {
+      "messages": [],
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+      "skip": false,
+    },
+    "dying/d1": {
+      "messages": [],
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "unconscious",
+        },
+      ],
+      "skip": false,
+    },
+    "dying/d10": {
+      "messages": [],
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "unconscious",
+        },
+      ],
+      "skip": false,
+    },
+    "dying/d20": {
+      "messages": [],
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "unconscious",
+        },
+      ],
+      "skip": false,
+    },
+    "dying/d9": {
+      "messages": [],
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "unconscious",
+        },
+      ],
+      "skip": false,
+    },
+    "stable/d1": {
+      "messages": [],
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": true,
+            "successes": 3,
+          },
+          "status": "unconscious",
+        },
+      ],
+      "skip": false,
+    },
+    "stable/d10": {
+      "messages": [],
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": true,
+            "successes": 3,
+          },
+          "status": "unconscious",
+        },
+      ],
+      "skip": false,
+    },
+    "stable/d20": {
+      "messages": [],
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": true,
+            "successes": 3,
+          },
+          "status": "unconscious",
+        },
+      ],
+      "skip": false,
+    },
+    "stable/d9": {
+      "messages": [],
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": true,
+            "successes": 3,
+          },
+          "status": "unconscious",
+        },
+      ],
+      "skip": false,
+    },
+    "unit/d1": {
+      "messages": [],
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+      "skip": false,
+    },
+    "unit/d10": {
+      "messages": [],
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+      "skip": false,
+    },
+    "unit/d20": {
+      "messages": [],
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+      "skip": false,
+    },
+    "unit/d9": {
+      "messages": [],
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+      "skip": false,
+    },
+  },
+  "zero": {
+    "hero/conc/auto/already-dead": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": null,
+        "effects": [
+          "concentration",
+        ],
+        "hp": 0,
+        "saves": null,
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": null,
+          "effects": [
+            "concentration",
+          ],
+          "hp": 0,
+          "saves": null,
+          "status": "dead",
+        },
+      ],
+    },
+    "hero/conc/auto/at0-crit": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+          "concentration",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": false,
+          "successes": 0,
+        },
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+            "concentration",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "unconscious",
+        },
+      ],
+    },
+    "hero/conc/auto/at0-hit": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+          "concentration",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": false,
+          "successes": 0,
+        },
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+            "concentration",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "unconscious",
+        },
+      ],
+    },
+    "hero/conc/auto/at0-massive": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+          "concentration",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": false,
+          "successes": 0,
+        },
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+            "concentration",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "unconscious",
+        },
+      ],
+    },
+    "hero/conc/auto/at0-stable-hit": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+          "concentration",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": true,
+          "successes": 3,
+        },
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+            "concentration",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": true,
+            "successes": 3,
+          },
+          "status": "unconscious",
+        },
+      ],
+    },
+    "hero/conc/auto/drop": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": null,
+        "effects": [
+          "concentration",
+        ],
+        "hp": 0,
+        "saves": null,
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": null,
+          "effects": [
+            "concentration",
+          ],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "hero/conc/auto/drop-crit": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": null,
+        "effects": [
+          "concentration",
+        ],
+        "hp": 0,
+        "saves": null,
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": null,
+          "effects": [
+            "concentration",
+          ],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "hero/conc/auto/exact": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": null,
+        "effects": [
+          "concentration",
+        ],
+        "hp": 0,
+        "saves": null,
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": null,
+          "effects": [
+            "concentration",
+          ],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "hero/conc/auto/massive": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": null,
+        "effects": [
+          "concentration",
+        ],
+        "hp": 0,
+        "saves": null,
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": null,
+          "effects": [
+            "concentration",
+          ],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "hero/conc/auto/no-drop": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": null,
+        "effects": [
+          "concentration",
+        ],
+        "hp": 12,
+        "saves": null,
+        "status": "active",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": null,
+          "effects": [
+            "concentration",
+          ],
+          "hp": 15,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "hero/conc/manual/dead": {
+      "messages": [
+        {
+          "message": "battleLog.concentration.lost",
+          "params": {
+            "name": "Тест",
+            "spell": "Sp",
+          },
+        },
+      ],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 5,
+        "saves": null,
+        "status": "active",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "hero/conc/manual/down": {
+      "messages": [
+        {
+          "message": "battleLog.concentration.lost",
+          "params": {
+            "name": "Тест",
+            "spell": "Sp",
+          },
+        },
+      ],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 5,
+        "saves": null,
+        "status": "active",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "hero/conc/manual/healed": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": null,
+        "effects": [
+          "concentration",
+        ],
+        "hp": 5,
+        "saves": null,
+        "status": "active",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": null,
+          "effects": [
+            "concentration",
+          ],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "hero/conc/manual/still-down": {
+      "messages": [
+        {
+          "message": "battleLog.concentration.lost",
+          "params": {
+            "name": "Тест",
+            "spell": "Sp",
+          },
+        },
+      ],
+      "participant": {
+        "concentrating": false,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": false,
+          "successes": 0,
+        },
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "unconscious",
+        },
+      ],
+    },
+    "hero/conc/manual/unchanged": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": null,
+        "effects": [
+          "concentration",
+        ],
+        "hp": 5,
+        "saves": null,
+        "status": "active",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": null,
+          "effects": [
+            "concentration",
+          ],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "hero/plain/auto/already-dead": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 0,
+        "saves": null,
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 0,
+          "saves": null,
+          "status": "dead",
+        },
+      ],
+    },
+    "hero/plain/auto/at0-crit": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": false,
+          "successes": 0,
+        },
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "unconscious",
+        },
+      ],
+    },
+    "hero/plain/auto/at0-hit": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": false,
+          "successes": 0,
+        },
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "unconscious",
+        },
+      ],
+    },
+    "hero/plain/auto/at0-massive": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": false,
+          "successes": 0,
+        },
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "unconscious",
+        },
+      ],
+    },
+    "hero/plain/auto/at0-stable-hit": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": true,
+          "successes": 3,
+        },
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": true,
+            "successes": 3,
+          },
+          "status": "unconscious",
+        },
+      ],
+    },
+    "hero/plain/auto/drop": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 0,
+        "saves": null,
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "hero/plain/auto/drop-crit": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 0,
+        "saves": null,
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "hero/plain/auto/exact": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 0,
+        "saves": null,
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "hero/plain/auto/massive": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 0,
+        "saves": null,
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "hero/plain/auto/no-drop": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 12,
+        "saves": null,
+        "status": "active",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 15,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "hero/plain/manual/dead": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 5,
+        "saves": null,
+        "status": "active",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "hero/plain/manual/down": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 5,
+        "saves": null,
+        "status": "active",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "hero/plain/manual/healed": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 5,
+        "saves": null,
+        "status": "active",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "hero/plain/manual/still-down": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": false,
+          "successes": 0,
+        },
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "unconscious",
+        },
+      ],
+    },
+    "hero/plain/manual/unchanged": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 5,
+        "saves": null,
+        "status": "active",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "unit/conc/auto/already-dead": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": null,
+        "effects": [
+          "concentration",
+        ],
+        "hp": 0,
+        "saves": null,
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": null,
+          "effects": [
+            "concentration",
+          ],
+          "hp": 0,
+          "saves": null,
+          "status": "dead",
+        },
+      ],
+    },
+    "unit/conc/auto/at0-crit": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+          "concentration",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": false,
+          "successes": 0,
+        },
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+            "concentration",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "unconscious",
+        },
+      ],
+    },
+    "unit/conc/auto/at0-hit": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+          "concentration",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": false,
+          "successes": 0,
+        },
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+            "concentration",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "unconscious",
+        },
+      ],
+    },
+    "unit/conc/auto/at0-massive": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+          "concentration",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": false,
+          "successes": 0,
+        },
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+            "concentration",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "unconscious",
+        },
+      ],
+    },
+    "unit/conc/auto/at0-stable-hit": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+          "concentration",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": true,
+          "successes": 3,
+        },
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+            "concentration",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": true,
+            "successes": 3,
+          },
+          "status": "unconscious",
+        },
+      ],
+    },
+    "unit/conc/auto/drop": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": null,
+        "effects": [
+          "concentration",
+        ],
+        "hp": 0,
+        "saves": null,
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": null,
+          "effects": [
+            "concentration",
+          ],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "unit/conc/auto/drop-crit": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": null,
+        "effects": [
+          "concentration",
+        ],
+        "hp": 0,
+        "saves": null,
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": null,
+          "effects": [
+            "concentration",
+          ],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "unit/conc/auto/exact": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": null,
+        "effects": [
+          "concentration",
+        ],
+        "hp": 0,
+        "saves": null,
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": null,
+          "effects": [
+            "concentration",
+          ],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "unit/conc/auto/massive": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": null,
+        "effects": [
+          "concentration",
+        ],
+        "hp": 0,
+        "saves": null,
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": null,
+          "effects": [
+            "concentration",
+          ],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "unit/conc/auto/no-drop": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": null,
+        "effects": [
+          "concentration",
+        ],
+        "hp": 12,
+        "saves": null,
+        "status": "active",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": null,
+          "effects": [
+            "concentration",
+          ],
+          "hp": 15,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "unit/conc/manual/dead": {
+      "messages": [
+        {
+          "message": "battleLog.concentration.lost",
+          "params": {
+            "name": "Тест",
+            "spell": "Sp",
+          },
+        },
+      ],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 5,
+        "saves": null,
+        "status": "active",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "unit/conc/manual/down": {
+      "messages": [
+        {
+          "message": "battleLog.concentration.lost",
+          "params": {
+            "name": "Тест",
+            "spell": "Sp",
+          },
+        },
+      ],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 5,
+        "saves": null,
+        "status": "active",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "unit/conc/manual/healed": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": null,
+        "effects": [
+          "concentration",
+        ],
+        "hp": 5,
+        "saves": null,
+        "status": "active",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": null,
+          "effects": [
+            "concentration",
+          ],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "unit/conc/manual/still-down": {
+      "messages": [
+        {
+          "message": "battleLog.concentration.lost",
+          "params": {
+            "name": "Тест",
+            "spell": "Sp",
+          },
+        },
+      ],
+      "participant": {
+        "concentrating": false,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": false,
+          "successes": 0,
+        },
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "unconscious",
+        },
+      ],
+    },
+    "unit/conc/manual/unchanged": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": null,
+        "effects": [
+          "concentration",
+        ],
+        "hp": 5,
+        "saves": null,
+        "status": "active",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": null,
+          "effects": [
+            "concentration",
+          ],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "unit/plain/auto/already-dead": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 0,
+        "saves": null,
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 0,
+          "saves": null,
+          "status": "dead",
+        },
+      ],
+    },
+    "unit/plain/auto/at0-crit": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": false,
+          "successes": 0,
+        },
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "unconscious",
+        },
+      ],
+    },
+    "unit/plain/auto/at0-hit": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": false,
+          "successes": 0,
+        },
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "unconscious",
+        },
+      ],
+    },
+    "unit/plain/auto/at0-massive": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": false,
+          "successes": 0,
+        },
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "unconscious",
+        },
+      ],
+    },
+    "unit/plain/auto/at0-stable-hit": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": true,
+          "successes": 3,
+        },
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": true,
+            "successes": 3,
+          },
+          "status": "unconscious",
+        },
+      ],
+    },
+    "unit/plain/auto/drop": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 0,
+        "saves": null,
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "unit/plain/auto/drop-crit": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 0,
+        "saves": null,
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "unit/plain/auto/exact": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 0,
+        "saves": null,
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "unit/plain/auto/massive": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 0,
+        "saves": null,
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "unit/plain/auto/no-drop": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 12,
+        "saves": null,
+        "status": "active",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 15,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "unit/plain/manual/dead": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 5,
+        "saves": null,
+        "status": "active",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "unit/plain/manual/down": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 5,
+        "saves": null,
+        "status": "active",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "unit/plain/manual/healed": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 5,
+        "saves": null,
+        "status": "active",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "unit/plain/manual/still-down": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": false,
+          "successes": 0,
+        },
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "unconscious",
+        },
+      ],
+    },
+    "unit/plain/manual/unchanged": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 5,
+        "saves": null,
+        "status": "active",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+  },
+}
+`;
+
+exports[`death saves golden (behaviour before the module split) > dnd5e composition, enabled true 1`] = `
+{
+  "holds": {
+    "holdsAlive": false,
+    "holdsDying": true,
+    "holdsStable": false,
+    "revivedAlive": {
+      "concentrating": false,
+      "dying": null,
+      "effects": [],
+      "hp": 5,
+      "saves": null,
+      "status": "active",
+    },
+    "revivedDying": {
+      "concentrating": false,
+      "dying": null,
+      "effects": [],
+      "hp": 0,
+      "saves": null,
+      "status": "active",
+    },
+  },
+  "skip": {
+    "alive/d1": {
+      "messages": [],
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+      "skip": false,
+    },
+    "alive/d10": {
+      "messages": [],
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+      "skip": false,
+    },
+    "alive/d20": {
+      "messages": [],
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+      "skip": false,
+    },
+    "alive/d9": {
+      "messages": [],
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+      "skip": false,
+    },
+    "dying/d1": {
+      "messages": [
+        {
+          "message": "battleLog.death.fail",
+          "params": {
+            "count": 2,
+            "max": 3,
+            "name": "Тест",
+            "roll": 1,
+          },
+        },
+      ],
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 2,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "unconscious",
+        },
+      ],
+      "skip": true,
+    },
+    "dying/d10": {
+      "messages": [
+        {
+          "message": "battleLog.death.success",
+          "params": {
+            "count": 1,
+            "max": 3,
+            "name": "Тест",
+            "roll": 10,
+          },
+        },
+      ],
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 1,
+          },
+          "status": "unconscious",
+        },
+      ],
+      "skip": true,
+    },
+    "dying/d20": {
+      "messages": [
+        {
+          "message": "battleLog.death.wake",
+          "params": {
+            "name": "Тест",
+          },
+        },
+      ],
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 1,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+      "skip": true,
+    },
+    "dying/d9": {
+      "messages": [
+        {
+          "message": "battleLog.death.fail",
+          "params": {
+            "count": 1,
+            "max": 3,
+            "name": "Тест",
+            "roll": 9,
+          },
+        },
+      ],
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 1,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "unconscious",
+        },
+      ],
+      "skip": true,
+    },
+    "stable/d1": {
+      "messages": [],
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": true,
+            "successes": 3,
+          },
+          "status": "unconscious",
+        },
+      ],
+      "skip": false,
+    },
+    "stable/d10": {
+      "messages": [],
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": true,
+            "successes": 3,
+          },
+          "status": "unconscious",
+        },
+      ],
+      "skip": false,
+    },
+    "stable/d20": {
+      "messages": [],
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": true,
+            "successes": 3,
+          },
+          "status": "unconscious",
+        },
+      ],
+      "skip": false,
+    },
+    "stable/d9": {
+      "messages": [],
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": true,
+            "successes": 3,
+          },
+          "status": "unconscious",
+        },
+      ],
+      "skip": false,
+    },
+    "unit/d1": {
+      "messages": [],
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+      "skip": false,
+    },
+    "unit/d10": {
+      "messages": [],
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+      "skip": false,
+    },
+    "unit/d20": {
+      "messages": [],
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+      "skip": false,
+    },
+    "unit/d9": {
+      "messages": [],
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+      "skip": false,
+    },
+  },
+  "zero": {
+    "hero/conc/auto/already-dead": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": null,
+        "effects": [
+          "concentration",
+        ],
+        "hp": 0,
+        "saves": null,
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": null,
+          "effects": [
+            "concentration",
+          ],
+          "hp": 0,
+          "saves": null,
+          "status": "dead",
+        },
+      ],
+    },
+    "hero/conc/auto/at0-crit": {
+      "messages": [
+        {
+          "message": "battleLog.death.damageFail",
+          "params": {
+            "name": "Тест",
+          },
+        },
+      ],
+      "participant": {
+        "concentrating": true,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+          "concentration",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 2,
+          "stable": false,
+          "successes": 0,
+        },
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+            "concentration",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 2,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "unconscious",
+        },
+      ],
+    },
+    "hero/conc/auto/at0-hit": {
+      "messages": [
+        {
+          "message": "battleLog.death.damageFail",
+          "params": {
+            "name": "Тест",
+          },
+        },
+      ],
+      "participant": {
+        "concentrating": true,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+          "concentration",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 1,
+          "stable": false,
+          "successes": 0,
+        },
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+            "concentration",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 1,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "unconscious",
+        },
+      ],
+    },
+    "hero/conc/auto/at0-massive": {
+      "messages": [
+        {
+          "message": "battleLog.death.massive",
+          "params": {
+            "name": "Тест",
+          },
+        },
+      ],
+      "participant": {
+        "concentrating": true,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+          "concentration",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": false,
+          "successes": 0,
+        },
+        "status": "dead",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+            "concentration",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "dead",
+        },
+      ],
+    },
+    "hero/conc/auto/at0-stable-hit": {
+      "messages": [
+        {
+          "message": "battleLog.death.damageFail",
+          "params": {
+            "name": "Тест",
+          },
+        },
+      ],
+      "participant": {
+        "concentrating": true,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+          "concentration",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 1,
+          "stable": false,
+          "successes": 0,
+        },
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+            "concentration",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 1,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "unconscious",
+        },
+      ],
+    },
+    "hero/conc/auto/drop": {
+      "messages": [
+        {
+          "message": "battleLog.death.unconscious",
+          "params": {
+            "name": "Тест",
+          },
+        },
+      ],
+      "participant": {
+        "concentrating": true,
+        "dying": true,
+        "effects": [
+          "concentration",
+          "death-saves:unconscious",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": false,
+          "successes": 0,
+        },
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": true,
+          "effects": [
+            "concentration",
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "unconscious",
+        },
+      ],
+    },
+    "hero/conc/auto/drop-crit": {
+      "messages": [
+        {
+          "message": "battleLog.death.unconscious",
+          "params": {
+            "name": "Тест",
+          },
+        },
+      ],
+      "participant": {
+        "concentrating": true,
+        "dying": true,
+        "effects": [
+          "concentration",
+          "death-saves:unconscious",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": false,
+          "successes": 0,
+        },
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": true,
+          "effects": [
+            "concentration",
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "unconscious",
+        },
+      ],
+    },
+    "hero/conc/auto/exact": {
+      "messages": [
+        {
+          "message": "battleLog.death.unconscious",
+          "params": {
+            "name": "Тест",
+          },
+        },
+      ],
+      "participant": {
+        "concentrating": true,
+        "dying": true,
+        "effects": [
+          "concentration",
+          "death-saves:unconscious",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": false,
+          "successes": 0,
+        },
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": true,
+          "effects": [
+            "concentration",
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "unconscious",
+        },
+      ],
+    },
+    "hero/conc/auto/massive": {
+      "messages": [
+        {
+          "message": "battleLog.death.massive",
+          "params": {
+            "name": "Тест",
+          },
+        },
+      ],
+      "participant": {
+        "concentrating": true,
+        "dying": null,
+        "effects": [
+          "concentration",
+        ],
+        "hp": 0,
+        "saves": null,
+        "status": "dead",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": null,
+          "effects": [
+            "concentration",
+          ],
+          "hp": 0,
+          "saves": null,
+          "status": "dead",
+        },
+      ],
+    },
+    "hero/conc/auto/no-drop": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": null,
+        "effects": [
+          "concentration",
+        ],
+        "hp": 12,
+        "saves": null,
+        "status": "active",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": null,
+          "effects": [
+            "concentration",
+          ],
+          "hp": 15,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "hero/conc/manual/dead": {
+      "messages": [
+        {
+          "message": "battleLog.concentration.lost",
+          "params": {
+            "name": "Тест",
+            "spell": "Sp",
+          },
+        },
+      ],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 5,
+        "saves": null,
+        "status": "active",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "hero/conc/manual/down": {
+      "messages": [
+        {
+          "message": "battleLog.concentration.lost",
+          "params": {
+            "name": "Тест",
+            "spell": "Sp",
+          },
+        },
+      ],
+      "participant": {
+        "concentrating": false,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": false,
+          "successes": 0,
+        },
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "unconscious",
+        },
+      ],
+    },
+    "hero/conc/manual/healed": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": null,
+        "effects": [
+          "concentration",
+        ],
+        "hp": 5,
+        "saves": null,
+        "status": "active",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": null,
+          "effects": [
+            "concentration",
+          ],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "hero/conc/manual/still-down": {
+      "messages": [
+        {
+          "message": "battleLog.concentration.lost",
+          "params": {
+            "name": "Тест",
+            "spell": "Sp",
+          },
+        },
+      ],
+      "participant": {
+        "concentrating": false,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": false,
+          "successes": 0,
+        },
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "unconscious",
+        },
+      ],
+    },
+    "hero/conc/manual/unchanged": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": null,
+        "effects": [
+          "concentration",
+        ],
+        "hp": 5,
+        "saves": null,
+        "status": "active",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": null,
+          "effects": [
+            "concentration",
+          ],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "hero/plain/auto/already-dead": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 0,
+        "saves": null,
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 0,
+          "saves": null,
+          "status": "dead",
+        },
+      ],
+    },
+    "hero/plain/auto/at0-crit": {
+      "messages": [
+        {
+          "message": "battleLog.death.damageFail",
+          "params": {
+            "name": "Тест",
+          },
+        },
+      ],
+      "participant": {
+        "concentrating": false,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 2,
+          "stable": false,
+          "successes": 0,
+        },
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 2,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "unconscious",
+        },
+      ],
+    },
+    "hero/plain/auto/at0-hit": {
+      "messages": [
+        {
+          "message": "battleLog.death.damageFail",
+          "params": {
+            "name": "Тест",
+          },
+        },
+      ],
+      "participant": {
+        "concentrating": false,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 1,
+          "stable": false,
+          "successes": 0,
+        },
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 1,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "unconscious",
+        },
+      ],
+    },
+    "hero/plain/auto/at0-massive": {
+      "messages": [
+        {
+          "message": "battleLog.death.massive",
+          "params": {
+            "name": "Тест",
+          },
+        },
+      ],
+      "participant": {
+        "concentrating": false,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": false,
+          "successes": 0,
+        },
+        "status": "dead",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "dead",
+        },
+      ],
+    },
+    "hero/plain/auto/at0-stable-hit": {
+      "messages": [
+        {
+          "message": "battleLog.death.damageFail",
+          "params": {
+            "name": "Тест",
+          },
+        },
+      ],
+      "participant": {
+        "concentrating": false,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 1,
+          "stable": false,
+          "successes": 0,
+        },
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 1,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "unconscious",
+        },
+      ],
+    },
+    "hero/plain/auto/drop": {
+      "messages": [
+        {
+          "message": "battleLog.death.unconscious",
+          "params": {
+            "name": "Тест",
+          },
+        },
+      ],
+      "participant": {
+        "concentrating": false,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": false,
+          "successes": 0,
+        },
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "unconscious",
+        },
+      ],
+    },
+    "hero/plain/auto/drop-crit": {
+      "messages": [
+        {
+          "message": "battleLog.death.unconscious",
+          "params": {
+            "name": "Тест",
+          },
+        },
+      ],
+      "participant": {
+        "concentrating": false,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": false,
+          "successes": 0,
+        },
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "unconscious",
+        },
+      ],
+    },
+    "hero/plain/auto/exact": {
+      "messages": [
+        {
+          "message": "battleLog.death.unconscious",
+          "params": {
+            "name": "Тест",
+          },
+        },
+      ],
+      "participant": {
+        "concentrating": false,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": false,
+          "successes": 0,
+        },
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "unconscious",
+        },
+      ],
+    },
+    "hero/plain/auto/massive": {
+      "messages": [
+        {
+          "message": "battleLog.death.massive",
+          "params": {
+            "name": "Тест",
+          },
+        },
+      ],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 0,
+        "saves": null,
+        "status": "dead",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 0,
+          "saves": null,
+          "status": "dead",
+        },
+      ],
+    },
+    "hero/plain/auto/no-drop": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 12,
+        "saves": null,
+        "status": "active",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 15,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "hero/plain/manual/dead": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 5,
+        "saves": null,
+        "status": "active",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "hero/plain/manual/down": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": false,
+          "successes": 0,
+        },
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "unconscious",
+        },
+      ],
+    },
+    "hero/plain/manual/healed": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 5,
+        "saves": null,
+        "status": "active",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "hero/plain/manual/still-down": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": false,
+          "successes": 0,
+        },
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "unconscious",
+        },
+      ],
+    },
+    "hero/plain/manual/unchanged": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 5,
+        "saves": null,
+        "status": "active",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "unit/conc/auto/already-dead": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": null,
+        "effects": [
+          "concentration",
+        ],
+        "hp": 0,
+        "saves": null,
+        "status": "dead",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": null,
+          "effects": [
+            "concentration",
+          ],
+          "hp": 0,
+          "saves": null,
+          "status": "dead",
+        },
+      ],
+    },
+    "unit/conc/auto/at0-crit": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+          "concentration",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": false,
+          "successes": 0,
+        },
+        "status": "dead",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+            "concentration",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "dead",
+        },
+      ],
+    },
+    "unit/conc/auto/at0-hit": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+          "concentration",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": false,
+          "successes": 0,
+        },
+        "status": "dead",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+            "concentration",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "dead",
+        },
+      ],
+    },
+    "unit/conc/auto/at0-massive": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+          "concentration",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": false,
+          "successes": 0,
+        },
+        "status": "dead",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+            "concentration",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "dead",
+        },
+      ],
+    },
+    "unit/conc/auto/at0-stable-hit": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+          "concentration",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": true,
+          "successes": 3,
+        },
+        "status": "dead",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+            "concentration",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": true,
+            "successes": 3,
+          },
+          "status": "dead",
+        },
+      ],
+    },
+    "unit/conc/auto/drop": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": null,
+        "effects": [
+          "concentration",
+        ],
+        "hp": 0,
+        "saves": null,
+        "status": "dead",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": null,
+          "effects": [
+            "concentration",
+          ],
+          "hp": 0,
+          "saves": null,
+          "status": "dead",
+        },
+      ],
+    },
+    "unit/conc/auto/drop-crit": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": null,
+        "effects": [
+          "concentration",
+        ],
+        "hp": 0,
+        "saves": null,
+        "status": "dead",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": null,
+          "effects": [
+            "concentration",
+          ],
+          "hp": 0,
+          "saves": null,
+          "status": "dead",
+        },
+      ],
+    },
+    "unit/conc/auto/exact": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": null,
+        "effects": [
+          "concentration",
+        ],
+        "hp": 0,
+        "saves": null,
+        "status": "dead",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": null,
+          "effects": [
+            "concentration",
+          ],
+          "hp": 0,
+          "saves": null,
+          "status": "dead",
+        },
+      ],
+    },
+    "unit/conc/auto/massive": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": null,
+        "effects": [
+          "concentration",
+        ],
+        "hp": 0,
+        "saves": null,
+        "status": "dead",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": null,
+          "effects": [
+            "concentration",
+          ],
+          "hp": 0,
+          "saves": null,
+          "status": "dead",
+        },
+      ],
+    },
+    "unit/conc/auto/no-drop": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": null,
+        "effects": [
+          "concentration",
+        ],
+        "hp": 12,
+        "saves": null,
+        "status": "active",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": null,
+          "effects": [
+            "concentration",
+          ],
+          "hp": 15,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "unit/conc/manual/dead": {
+      "messages": [
+        {
+          "message": "battleLog.concentration.lost",
+          "params": {
+            "name": "Тест",
+            "spell": "Sp",
+          },
+        },
+      ],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 5,
+        "saves": null,
+        "status": "active",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "unit/conc/manual/down": {
+      "messages": [
+        {
+          "message": "battleLog.concentration.lost",
+          "params": {
+            "name": "Тест",
+            "spell": "Sp",
+          },
+        },
+      ],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 5,
+        "saves": null,
+        "status": "active",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "unit/conc/manual/healed": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": null,
+        "effects": [
+          "concentration",
+        ],
+        "hp": 5,
+        "saves": null,
+        "status": "active",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": null,
+          "effects": [
+            "concentration",
+          ],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "unit/conc/manual/still-down": {
+      "messages": [
+        {
+          "message": "battleLog.concentration.lost",
+          "params": {
+            "name": "Тест",
+            "spell": "Sp",
+          },
+        },
+      ],
+      "participant": {
+        "concentrating": false,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": false,
+          "successes": 0,
+        },
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "unconscious",
+        },
+      ],
+    },
+    "unit/conc/manual/unchanged": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": null,
+        "effects": [
+          "concentration",
+        ],
+        "hp": 5,
+        "saves": null,
+        "status": "active",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": null,
+          "effects": [
+            "concentration",
+          ],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "unit/plain/auto/already-dead": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 0,
+        "saves": null,
+        "status": "dead",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 0,
+          "saves": null,
+          "status": "dead",
+        },
+      ],
+    },
+    "unit/plain/auto/at0-crit": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": false,
+          "successes": 0,
+        },
+        "status": "dead",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "dead",
+        },
+      ],
+    },
+    "unit/plain/auto/at0-hit": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": false,
+          "successes": 0,
+        },
+        "status": "dead",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "dead",
+        },
+      ],
+    },
+    "unit/plain/auto/at0-massive": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": false,
+          "successes": 0,
+        },
+        "status": "dead",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "dead",
+        },
+      ],
+    },
+    "unit/plain/auto/at0-stable-hit": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": true,
+          "successes": 3,
+        },
+        "status": "dead",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": true,
+            "successes": 3,
+          },
+          "status": "dead",
+        },
+      ],
+    },
+    "unit/plain/auto/drop": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 0,
+        "saves": null,
+        "status": "dead",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 0,
+          "saves": null,
+          "status": "dead",
+        },
+      ],
+    },
+    "unit/plain/auto/drop-crit": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 0,
+        "saves": null,
+        "status": "dead",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 0,
+          "saves": null,
+          "status": "dead",
+        },
+      ],
+    },
+    "unit/plain/auto/exact": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 0,
+        "saves": null,
+        "status": "dead",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 0,
+          "saves": null,
+          "status": "dead",
+        },
+      ],
+    },
+    "unit/plain/auto/massive": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 0,
+        "saves": null,
+        "status": "dead",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 0,
+          "saves": null,
+          "status": "dead",
+        },
+      ],
+    },
+    "unit/plain/auto/no-drop": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 12,
+        "saves": null,
+        "status": "active",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 15,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "unit/plain/manual/dead": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 5,
+        "saves": null,
+        "status": "active",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "unit/plain/manual/down": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 5,
+        "saves": null,
+        "status": "active",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "unit/plain/manual/healed": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 5,
+        "saves": null,
+        "status": "active",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "unit/plain/manual/still-down": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": false,
+          "successes": 0,
+        },
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "unconscious",
+        },
+      ],
+    },
+    "unit/plain/manual/unchanged": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 5,
+        "saves": null,
+        "status": "active",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+  },
+}
+`;
+
+exports[`death saves golden (behaviour before the module split) > homm composition (death saves off) 1`] = `
+{
+  "holds": {
+    "holdsAlive": false,
+    "holdsDying": true,
+    "holdsStable": false,
+    "revivedAlive": {
+      "concentrating": false,
+      "dying": null,
+      "effects": [],
+      "hp": 5,
+      "saves": null,
+      "status": "active",
+    },
+    "revivedDying": {
+      "concentrating": false,
+      "dying": null,
+      "effects": [],
+      "hp": 0,
+      "saves": null,
+      "status": "active",
+    },
+  },
+  "skip": {
+    "alive/d1": {
+      "messages": [],
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+      "skip": false,
+    },
+    "alive/d10": {
+      "messages": [],
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+      "skip": false,
+    },
+    "alive/d20": {
+      "messages": [],
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+      "skip": false,
+    },
+    "alive/d9": {
+      "messages": [],
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+      "skip": false,
+    },
+    "dying/d1": {
+      "messages": [],
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "unconscious",
+        },
+      ],
+      "skip": false,
+    },
+    "dying/d10": {
+      "messages": [],
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "unconscious",
+        },
+      ],
+      "skip": false,
+    },
+    "dying/d20": {
+      "messages": [],
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "unconscious",
+        },
+      ],
+      "skip": false,
+    },
+    "dying/d9": {
+      "messages": [],
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "unconscious",
+        },
+      ],
+      "skip": false,
+    },
+    "stable/d1": {
+      "messages": [],
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": true,
+            "successes": 3,
+          },
+          "status": "unconscious",
+        },
+      ],
+      "skip": false,
+    },
+    "stable/d10": {
+      "messages": [],
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": true,
+            "successes": 3,
+          },
+          "status": "unconscious",
+        },
+      ],
+      "skip": false,
+    },
+    "stable/d20": {
+      "messages": [],
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": true,
+            "successes": 3,
+          },
+          "status": "unconscious",
+        },
+      ],
+      "skip": false,
+    },
+    "stable/d9": {
+      "messages": [],
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": true,
+            "successes": 3,
+          },
+          "status": "unconscious",
+        },
+      ],
+      "skip": false,
+    },
+    "unit/d1": {
+      "messages": [],
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+      "skip": false,
+    },
+    "unit/d10": {
+      "messages": [],
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+      "skip": false,
+    },
+    "unit/d20": {
+      "messages": [],
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+      "skip": false,
+    },
+    "unit/d9": {
+      "messages": [],
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+      "skip": false,
+    },
+  },
+  "zero": {
+    "hero/conc/auto/already-dead": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": null,
+        "effects": [
+          "concentration",
+        ],
+        "hp": 0,
+        "saves": null,
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": null,
+          "effects": [
+            "concentration",
+          ],
+          "hp": 0,
+          "saves": null,
+          "status": "dead",
+        },
+      ],
+    },
+    "hero/conc/auto/at0-crit": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+          "concentration",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": false,
+          "successes": 0,
+        },
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+            "concentration",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "unconscious",
+        },
+      ],
+    },
+    "hero/conc/auto/at0-hit": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+          "concentration",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": false,
+          "successes": 0,
+        },
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+            "concentration",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "unconscious",
+        },
+      ],
+    },
+    "hero/conc/auto/at0-massive": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+          "concentration",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": false,
+          "successes": 0,
+        },
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+            "concentration",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "unconscious",
+        },
+      ],
+    },
+    "hero/conc/auto/at0-stable-hit": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+          "concentration",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": true,
+          "successes": 3,
+        },
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+            "concentration",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": true,
+            "successes": 3,
+          },
+          "status": "unconscious",
+        },
+      ],
+    },
+    "hero/conc/auto/drop": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": null,
+        "effects": [
+          "concentration",
+        ],
+        "hp": 0,
+        "saves": null,
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": null,
+          "effects": [
+            "concentration",
+          ],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "hero/conc/auto/drop-crit": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": null,
+        "effects": [
+          "concentration",
+        ],
+        "hp": 0,
+        "saves": null,
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": null,
+          "effects": [
+            "concentration",
+          ],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "hero/conc/auto/exact": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": null,
+        "effects": [
+          "concentration",
+        ],
+        "hp": 0,
+        "saves": null,
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": null,
+          "effects": [
+            "concentration",
+          ],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "hero/conc/auto/massive": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": null,
+        "effects": [
+          "concentration",
+        ],
+        "hp": 0,
+        "saves": null,
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": null,
+          "effects": [
+            "concentration",
+          ],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "hero/conc/auto/no-drop": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": null,
+        "effects": [
+          "concentration",
+        ],
+        "hp": 12,
+        "saves": null,
+        "status": "active",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": null,
+          "effects": [
+            "concentration",
+          ],
+          "hp": 15,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "hero/conc/manual/dead": {
+      "messages": [
+        {
+          "message": "battleLog.concentration.lost",
+          "params": {
+            "name": "Тест",
+            "spell": "Sp",
+          },
+        },
+      ],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 5,
+        "saves": null,
+        "status": "active",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "hero/conc/manual/down": {
+      "messages": [
+        {
+          "message": "battleLog.concentration.lost",
+          "params": {
+            "name": "Тест",
+            "spell": "Sp",
+          },
+        },
+      ],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 5,
+        "saves": null,
+        "status": "active",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "hero/conc/manual/healed": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": null,
+        "effects": [
+          "concentration",
+        ],
+        "hp": 5,
+        "saves": null,
+        "status": "active",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": null,
+          "effects": [
+            "concentration",
+          ],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "hero/conc/manual/still-down": {
+      "messages": [
+        {
+          "message": "battleLog.concentration.lost",
+          "params": {
+            "name": "Тест",
+            "spell": "Sp",
+          },
+        },
+      ],
+      "participant": {
+        "concentrating": false,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": false,
+          "successes": 0,
+        },
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "unconscious",
+        },
+      ],
+    },
+    "hero/conc/manual/unchanged": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": null,
+        "effects": [
+          "concentration",
+        ],
+        "hp": 5,
+        "saves": null,
+        "status": "active",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": null,
+          "effects": [
+            "concentration",
+          ],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "hero/plain/auto/already-dead": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 0,
+        "saves": null,
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 0,
+          "saves": null,
+          "status": "dead",
+        },
+      ],
+    },
+    "hero/plain/auto/at0-crit": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": false,
+          "successes": 0,
+        },
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "unconscious",
+        },
+      ],
+    },
+    "hero/plain/auto/at0-hit": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": false,
+          "successes": 0,
+        },
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "unconscious",
+        },
+      ],
+    },
+    "hero/plain/auto/at0-massive": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": false,
+          "successes": 0,
+        },
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "unconscious",
+        },
+      ],
+    },
+    "hero/plain/auto/at0-stable-hit": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": true,
+          "successes": 3,
+        },
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": true,
+            "successes": 3,
+          },
+          "status": "unconscious",
+        },
+      ],
+    },
+    "hero/plain/auto/drop": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 0,
+        "saves": null,
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "hero/plain/auto/drop-crit": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 0,
+        "saves": null,
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "hero/plain/auto/exact": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 0,
+        "saves": null,
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "hero/plain/auto/massive": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 0,
+        "saves": null,
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "hero/plain/auto/no-drop": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 12,
+        "saves": null,
+        "status": "active",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 15,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "hero/plain/manual/dead": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 5,
+        "saves": null,
+        "status": "active",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "hero/plain/manual/down": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 5,
+        "saves": null,
+        "status": "active",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "hero/plain/manual/healed": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 5,
+        "saves": null,
+        "status": "active",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "hero/plain/manual/still-down": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": false,
+          "successes": 0,
+        },
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "unconscious",
+        },
+      ],
+    },
+    "hero/plain/manual/unchanged": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 5,
+        "saves": null,
+        "status": "active",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "unit/conc/auto/already-dead": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": null,
+        "effects": [
+          "concentration",
+        ],
+        "hp": 0,
+        "saves": null,
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": null,
+          "effects": [
+            "concentration",
+          ],
+          "hp": 0,
+          "saves": null,
+          "status": "dead",
+        },
+      ],
+    },
+    "unit/conc/auto/at0-crit": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+          "concentration",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": false,
+          "successes": 0,
+        },
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+            "concentration",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "unconscious",
+        },
+      ],
+    },
+    "unit/conc/auto/at0-hit": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+          "concentration",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": false,
+          "successes": 0,
+        },
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+            "concentration",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "unconscious",
+        },
+      ],
+    },
+    "unit/conc/auto/at0-massive": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+          "concentration",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": false,
+          "successes": 0,
+        },
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+            "concentration",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "unconscious",
+        },
+      ],
+    },
+    "unit/conc/auto/at0-stable-hit": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+          "concentration",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": true,
+          "successes": 3,
+        },
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+            "concentration",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": true,
+            "successes": 3,
+          },
+          "status": "unconscious",
+        },
+      ],
+    },
+    "unit/conc/auto/drop": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": null,
+        "effects": [
+          "concentration",
+        ],
+        "hp": 0,
+        "saves": null,
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": null,
+          "effects": [
+            "concentration",
+          ],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "unit/conc/auto/drop-crit": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": null,
+        "effects": [
+          "concentration",
+        ],
+        "hp": 0,
+        "saves": null,
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": null,
+          "effects": [
+            "concentration",
+          ],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "unit/conc/auto/exact": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": null,
+        "effects": [
+          "concentration",
+        ],
+        "hp": 0,
+        "saves": null,
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": null,
+          "effects": [
+            "concentration",
+          ],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "unit/conc/auto/massive": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": null,
+        "effects": [
+          "concentration",
+        ],
+        "hp": 0,
+        "saves": null,
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": null,
+          "effects": [
+            "concentration",
+          ],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "unit/conc/auto/no-drop": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": null,
+        "effects": [
+          "concentration",
+        ],
+        "hp": 12,
+        "saves": null,
+        "status": "active",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": null,
+          "effects": [
+            "concentration",
+          ],
+          "hp": 15,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "unit/conc/manual/dead": {
+      "messages": [
+        {
+          "message": "battleLog.concentration.lost",
+          "params": {
+            "name": "Тест",
+            "spell": "Sp",
+          },
+        },
+      ],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 5,
+        "saves": null,
+        "status": "active",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "unit/conc/manual/down": {
+      "messages": [
+        {
+          "message": "battleLog.concentration.lost",
+          "params": {
+            "name": "Тест",
+            "spell": "Sp",
+          },
+        },
+      ],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 5,
+        "saves": null,
+        "status": "active",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "unit/conc/manual/healed": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": null,
+        "effects": [
+          "concentration",
+        ],
+        "hp": 5,
+        "saves": null,
+        "status": "active",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": null,
+          "effects": [
+            "concentration",
+          ],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "unit/conc/manual/still-down": {
+      "messages": [
+        {
+          "message": "battleLog.concentration.lost",
+          "params": {
+            "name": "Тест",
+            "spell": "Sp",
+          },
+        },
+      ],
+      "participant": {
+        "concentrating": false,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": false,
+          "successes": 0,
+        },
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "unconscious",
+        },
+      ],
+    },
+    "unit/conc/manual/unchanged": {
+      "messages": [],
+      "participant": {
+        "concentrating": true,
+        "dying": null,
+        "effects": [
+          "concentration",
+        ],
+        "hp": 5,
+        "saves": null,
+        "status": "active",
+      },
+      "participants": [
+        {
+          "concentrating": true,
+          "dying": null,
+          "effects": [
+            "concentration",
+          ],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "unit/plain/auto/already-dead": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 0,
+        "saves": null,
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 0,
+          "saves": null,
+          "status": "dead",
+        },
+      ],
+    },
+    "unit/plain/auto/at0-crit": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": false,
+          "successes": 0,
+        },
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "unconscious",
+        },
+      ],
+    },
+    "unit/plain/auto/at0-hit": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": false,
+          "successes": 0,
+        },
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "unconscious",
+        },
+      ],
+    },
+    "unit/plain/auto/at0-massive": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": false,
+          "successes": 0,
+        },
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "unconscious",
+        },
+      ],
+    },
+    "unit/plain/auto/at0-stable-hit": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": true,
+          "successes": 3,
+        },
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": true,
+            "successes": 3,
+          },
+          "status": "unconscious",
+        },
+      ],
+    },
+    "unit/plain/auto/drop": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 0,
+        "saves": null,
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "unit/plain/auto/drop-crit": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 0,
+        "saves": null,
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "unit/plain/auto/exact": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 0,
+        "saves": null,
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "unit/plain/auto/massive": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 0,
+        "saves": null,
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "unit/plain/auto/no-drop": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 12,
+        "saves": null,
+        "status": "active",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 15,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "unit/plain/manual/dead": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 5,
+        "saves": null,
+        "status": "active",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "unit/plain/manual/down": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 5,
+        "saves": null,
+        "status": "active",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "unit/plain/manual/healed": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 5,
+        "saves": null,
+        "status": "active",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+    "unit/plain/manual/still-down": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": true,
+        "effects": [
+          "death-saves:unconscious",
+        ],
+        "hp": 0,
+        "saves": {
+          "failures": 0,
+          "stable": false,
+          "successes": 0,
+        },
+        "status": "unconscious",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": true,
+          "effects": [
+            "death-saves:unconscious",
+          ],
+          "hp": 0,
+          "saves": {
+            "failures": 0,
+            "stable": false,
+            "successes": 0,
+          },
+          "status": "unconscious",
+        },
+      ],
+    },
+    "unit/plain/manual/unchanged": {
+      "messages": [],
+      "participant": {
+        "concentrating": false,
+        "dying": null,
+        "effects": [],
+        "hp": 5,
+        "saves": null,
+        "status": "active",
+      },
+      "participants": [
+        {
+          "concentrating": false,
+          "dying": null,
+          "effects": [],
+          "hp": 5,
+          "saves": null,
+          "status": "active",
+        },
+      ],
+    },
+  },
+}
+`;

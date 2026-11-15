@@ -3,6 +3,7 @@ import { AiToolError } from '@/lib/ai/tools/define';
 import { loadPageForAi } from '@/lib/ai/tools/scenario-read';
 import { ACTIVE_CHARACTER } from '@/lib/constants/characters';
 import { prisma } from '@/lib/db';
+import { withStoredColumns } from '@/lib/utils/rules/systems/column-view';
 import type { AiFocus } from '@/types/ai';
 
 /** Queries always bind nested ids to the authorized campaign. No unscoped existence lookup. */
@@ -19,11 +20,15 @@ export async function loadFocus(campaignId: string, focus: AiFocus) {
                 class: true,
                 race: true,
                 armorClass: true,
+                characteristics: true,
             },
         });
 
         return character
-            ? { kind: 'character' as const, character }
+            ? {
+                  kind: 'character' as const,
+                  character: withStoredColumns(character),
+              }
             : { kind: 'unavailable' as const };
     }
 

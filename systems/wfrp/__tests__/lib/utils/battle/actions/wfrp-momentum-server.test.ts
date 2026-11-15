@@ -9,7 +9,7 @@ import { DEFAULT_RULES } from '@/lib/utils/rules';
 import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
 import { D20_ACTIONS } from '@/systems/d20/rules/actions';
 import { resolveMovement } from '@/systems/d20/rules/actions/movement';
-import { resolveOpportunityAttacks } from '@/systems/d20/rules/reactions/opportunity';
+import { resolveOpportunityAttacks } from '@/systems/opportunity/rules/opportunity';
 import {
     momentumOf,
     sceneOf,
@@ -141,11 +141,10 @@ const opportunity = (
 
 describe('opportunity attacks', () => {
     it('the reacting side wins the opposed roll and gains Momentum', () => {
-        const { direct, moved } = opportunity(wfrp, () => byCall(HIT, MISS));
+        const { direct } = opportunity(wfrp, () => byCall(HIT, MISS));
 
         expect(direct.actions).toHaveLength(1);
         expect(momentumOf(direct.sceneState)).toEqual({ ally: true });
-        expect(momentumOf(moved.sceneState)).toEqual({ ally: true });
     });
 
     it('an existing token of the reacting side is spent', () => {

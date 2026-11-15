@@ -88,11 +88,6 @@ export const D20_SECTIONS: SectionsContribution = {
             refineMessage: INITIATIVE_ORDER_MESSAGE,
         },
         saves: { owner: 'd20', mechanic: true, items: sectionItems('saves') },
-        deathSaves: {
-            owner: 'd20',
-            mechanic: true,
-            items: sectionItems('deathSaves'),
-        },
         concentration: {
             owner: 'd20',
             mechanic: true,
@@ -114,11 +109,7 @@ export const D20_SECTIONS: SectionsContribution = {
         actions: {
             owner: 'd20',
             mechanic: true,
-            items: sectionItems('actions', [
-                'enabled',
-                'opportunityAttacks',
-                'variant',
-            ]),
+            items: sectionItems('actions', ['enabled', 'variant']),
         },
         classes: {
             owner: 'd20',
@@ -127,10 +118,7 @@ export const D20_SECTIONS: SectionsContribution = {
         },
     },
     extend: {
-        outOfCombat: sectionItems('outOfCombat', [
-            'longRestHitDice',
-            'inspiration',
-        ]),
+        outOfCombat: sectionItems('outOfCombat', ['longRestHitDice']),
         encounters: sectionItems('encounters', ['edition', 'autoXp']),
         items: sectionItems('items', ['attunementLimit']),
     },

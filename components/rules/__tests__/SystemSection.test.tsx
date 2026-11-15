@@ -14,7 +14,6 @@ import {
 
 const set = vi.fn();
 
-
 const apply = vi.fn();
 
 const formOf = (system: { key: string; modules?: string[] }) =>
@@ -60,7 +59,7 @@ afterEach(() => {
 });
 
 describe('SystemSection', () => {
-    it('offers the three systems and reports a change', () => {
+    it('offers the three selectable keys (no bare d20) and reports a change', () => {
         renderWith(forSystem({ key: 'homm' }));
 
         const trigger = screen.getByRole('combobox', {
@@ -86,6 +85,18 @@ describe('SystemSection', () => {
         expect(set).toHaveBeenCalledWith('system', { key: 'wfrp' });
     });
 
+    it('keeps the current bare d20 key in the list so the select shows it', () => {
+        renderWith(forSystem({ key: 'd20' }));
+
+        fireEvent.click(
+            screen.getByRole('combobox', { name: 'rules.system.label' })
+        );
+
+        expect(
+            screen.getAllByRole('option').map((o) => o.textContent)
+        ).toContain('gameTerms.ruleSystem.d20');
+    });
+
     it('locked disables the select and shows the hint', () => {
         renderWith(forSystem({ key: 'homm' }), { locked: true });
 
@@ -97,23 +108,23 @@ describe('SystemSection', () => {
 });
 
 describe('SystemSection module switches', () => {
-    it('homm: six switches, all on', () => {
+    it('homm: eleven switches, all on', () => {
         renderWith(forSystem({ key: 'homm' }));
 
         const switches = screen.getAllByRole('switch');
 
-        expect(switches).toHaveLength(6);
+        expect(switches).toHaveLength(11);
         expect(
             switches.every((s) => s.getAttribute('aria-checked') === 'true')
         ).toBe(true);
     });
 
-    it('dnd5e: six switches, all off and enabled', () => {
-        renderWith(forSystem({ key: 'dnd5e' }));
+    it('d20: eleven switches, all off and enabled', () => {
+        renderWith(forSystem({ key: 'd20' }));
 
         const switches = screen.getAllByRole('switch');
 
-        expect(switches).toHaveLength(6);
+        expect(switches).toHaveLength(11);
         expect(
             switches.every(
                 (s) =>
@@ -121,6 +132,16 @@ describe('SystemSection module switches', () => {
                     !s.hasAttribute('disabled')
             )
         ).toBe(true);
+    });
+
+    it('dnd5e: the five d20 modules are on, the rest off', () => {
+        renderWith(forSystem({ key: 'dnd5e' }));
+
+        const on = screen
+            .getAllByRole('switch')
+            .filter((s) => s.getAttribute('aria-checked') === 'true');
+
+        expect(on).toHaveLength(5);
     });
 
     it('wfrp: no module block', () => {
@@ -142,7 +163,7 @@ describe('SystemSection module switches', () => {
     });
 
     it('toggles edit a local draft and apply sends it once', () => {
-        renderWith(forSystem({ key: 'dnd5e' }));
+        renderWith(forSystem({ key: 'd20' }));
 
         fireEvent.click(switchOf('morale'));
 
@@ -157,13 +178,13 @@ describe('SystemSection module switches', () => {
         fireEvent.click(screen.getByText('rules.system.wizard.apply'));
 
         expect(apply).toHaveBeenCalledWith({
-            key: 'dnd5e',
+            key: 'd20',
             modules: ['morale'],
         });
     });
 
     it('review stays disabled until something changes', () => {
-        renderWith(forSystem({ key: 'dnd5e' }));
+        renderWith(forSystem({ key: 'd20' }));
 
         expect(
             screen.getByText('rules.system.wizard.next').closest('button')
@@ -171,7 +192,7 @@ describe('SystemSection module switches', () => {
     });
 
     it('marks modules that change heroes', () => {
-        renderWith(forSystem({ key: 'dnd5e' }));
+        renderWith(forSystem({ key: 'd20' }));
 
         expect(
             screen.getAllByText('rules.system.modules.setupBadge')

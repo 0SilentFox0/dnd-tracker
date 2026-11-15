@@ -300,5 +300,9 @@
   "2026-10-31-identity-icons": {
     "title": "Icons in libraries",
     "body": "Races, classes, subclasses, backgrounds and class features now have icons in the libraries."
+  },
+  "2026-11-14-d20-modules": {
+    "title": "d20 modules in the rules wizard",
+    "body": "Death saves, inspiration, off-hand attack, lair actions and opportunity attacks are now separate modules of the D&D 5e rules. The campaign rules wizard shows them as switches, and a bare \"d20\" system without any of them is available for custom rule sets. Existing D&D 5e and HoMM campaigns keep all of them on."
   }
 }

@@ -19,6 +19,7 @@ import { systemServerOf } from '@/lib/server/systems/lookup';
 import { requireCampaignAccess } from '@/lib/utils/api/api-auth';
 import { errorResponse } from '@/lib/utils/api/api-response';
 import { heroInitiativeRange } from '@/lib/utils/characters/initiative-range';
+import { columnViewDto } from '@/lib/utils/rules/systems/column-view';
 import { ruleSystemOf } from '@/lib/utils/rules/systems/lookup';
 import { statColumnsOf } from '@/lib/utils/rules/systems/stats';
 import type { CharacterClassEntry } from '@/types/classes';
@@ -103,15 +104,15 @@ export async function createDraft(
 
         const created = await tx.character.create({
             data: {
-                ...draftFields(data, campaign.rules),
+                ...draftFields(data, campaign.rules, undefined, {
+                    initiative: heroInitiativeRange(campaign.rules).min,
+                    fields: { ...asClass?.fields, ...choices.fields },
+                }),
                 campaignId,
                 type: CharacterType.PLAYER,
                 status: CharacterStatus.PENDING,
                 controlledBy: access.userId,
                 level: 1,
-                ...asClass?.fields,
-                ...choices.fields,
-                initiative: heroInitiativeRange(campaign.rules).min,
                 avatar: avatar.avatar ?? undefined,
                 spellSlots,
                 skillTreeProgress: {},
@@ -122,7 +123,7 @@ export async function createDraft(
             data: { characterId: created.id, ...EMPTY_INVENTORY },
         });
 
-        return created;
+        return columnViewDto(created, ruleSystemOf(campaign.rules));
     });
 
     return result instanceof NextResponse ? result : NextResponse.json(result);

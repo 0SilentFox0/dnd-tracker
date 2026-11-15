@@ -23,17 +23,6 @@ export function ActionsSection({ form }: { form: RulesFormState }) {
                 />
                 {actions.enabled && (
                     <>
-                        <SwitchField
-                            id="rules-actions-oa"
-                            label={t('sections.actions.opportunityAttacks')}
-                            checked={actions.opportunityAttacks}
-                            onCheckedChange={(v) =>
-                                form.set('actions', {
-                                    ...actions,
-                                    opportunityAttacks: v,
-                                })
-                            }
-                        />
                         <RulesItems section="actions" form={form} />
                         <SwitchField
                             id="rules-actions-variant"

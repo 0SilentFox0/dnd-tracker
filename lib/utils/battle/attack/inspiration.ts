@@ -1,5 +1,6 @@
 import { textRef } from '@/lib/i18n/text-ref';
 import type { Ruleset } from '@/lib/utils/rules';
+import { inspirationOn } from '@/lib/utils/rules/inspiration-on';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { BattleParticipant } from '@/types/battle';
 
@@ -11,7 +12,8 @@ export function canUseInspiration(
 ): boolean {
     return (
         !!p &&
-        !!rules?.outOfCombat?.inspiration &&
+        !!rules &&
+        inspirationOn(rules) &&
         !!ruleSystemOf(rules).combat.inspiration?.available(p)
     );
 }

@@ -11,7 +11,7 @@ import { systemUiOf } from '@/components/systems';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { fakeScene } from '@/lib/hooks/battle/__tests__/fake-scene';
 import { render } from '@/lib/i18n/test/render-uk';
-import { withDeathSaves } from '@/systems/d20/rules/death-saves/state';
+import { withDeathSaves } from '@/systems/deathsaves/rules/state';
 
 vi.unmock('next-intl');
 

@@ -14,6 +14,7 @@ import { useClassMode } from '@/lib/hooks/classes';
 import { useRuleSystem } from '@/lib/hooks/systems';
 import { characterBaseHp } from '@/lib/utils/characters/hero-hp';
 import { currentHp } from '@/lib/utils/characters/resources/hp';
+import { inspirationOn } from '@/lib/utils/rules/inspiration-on';
 import { statColumnsOf } from '@/lib/utils/rules/systems/stats';
 import { resolveClassEntries } from '@/lib/utils/spells/class-slots';
 import type { CharacterListItem } from '@/types/characters';
@@ -111,14 +112,16 @@ export function DmCharacterCard({
                         <HudPill tone={isNpc ? 'silver' : 'gold'}>
                             {isNpc ? t('npcHero') : t('player')}
                         </HudPill>
-                        {ooc?.inspiration && character.inspiration && (
-                            <span
-                                title={t('inspiration')}
-                                className="text-hud-gold"
-                            >
-                                ✦
-                            </span>
-                        )}
+                        {rules &&
+                            inspirationOn(rules) &&
+                            character.inspiration && (
+                                <span
+                                    title={t('inspiration')}
+                                    className="text-hud-gold"
+                                >
+                                    ✦
+                                </span>
+                            )}
                         {levelReady && (
                             <HudPill tone="gold">{t('levelReady')}</HudPill>
                         )}

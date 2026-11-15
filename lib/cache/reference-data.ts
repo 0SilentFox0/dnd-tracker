@@ -4,6 +4,7 @@ import type { Prisma } from '@prisma/client';
 import { cacheTags } from '@/lib/cache/tags';
 import { prisma } from '@/lib/db';
 import { currentContentWrite } from '@/lib/server/content/write-context';
+import { withStoredColumns } from '@/lib/utils/rules/systems/column-view';
 import { toUnit } from '@/lib/utils/units/to-unit';
 
 // A guarded write must use the transaction snapshot, never a previously cached reference.
@@ -131,7 +132,7 @@ export async function getCachedSummonPool(campaignId: string) {
                 }),
             ]);
 
-            return { units, races };
+            return { units: units.map(withStoredColumns), races };
         },
         [cacheTags.units(campaignId), 'summon-pool'],
         {

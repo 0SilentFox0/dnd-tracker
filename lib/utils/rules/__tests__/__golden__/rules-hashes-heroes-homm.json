@@ -1,0 +1,18 @@
+{
+  "defaultAttacks": "cccd1cca30003941b2f36f3a3b89808ddf4dc4eb",
+  "spellIngredients": "a56544f0e9ebe9864168195067a1a80ee12e7396",
+  "outOfCombat": "a6c9a9652f1a024aced856e46e845015fa814724",
+  "encounters": "3569652f3ab8bbe593b2a84db46129f112ed0aba",
+  "items": "c2753c4cd37c703091c6c4cb902db974fd68d0a2",
+  "criticals": "8c2bc1cfef5c7d1771011515374bd16ef0150154",
+  "formulas": "588fbc78d3f55fb98965647186eb6be0235bbda3",
+  "initiative": "d27dd44a9228364d77769184d47f67a3b7e1b3ce",
+  "saves": "fd9dfc50fc0191263d9fcdd93c876c6e51658216",
+  "deathSaves": "d33085f716ee0b46daf1f4c0411d56daa0628ba4",
+  "concentration": "fd9ba79e5b0b5b6b8d7c2a290070e214b456c61d",
+  "conditions": "39f999e16d1a3b0fe4d7c0ff0674fcacb570863c",
+  "actions": "4c18bb2872bb4928f1beb0ca3b34e0d07426ea83",
+  "classes": "9f7257363d8123a5dcadacc8e1248ca053663854",
+  "heroScaling": "8652607d808c5b91d31c684c24654b333da7aeff",
+  "morale": "11c65d4fc0934b7ebcc50c5409b027e01828d78c"
+}

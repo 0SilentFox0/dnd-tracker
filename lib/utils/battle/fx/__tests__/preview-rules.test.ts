@@ -29,7 +29,7 @@ describe('PREVIEW_SYSTEM_KEY', () => {
 
         vi.doUnmock('@/lib/utils/rules/systems/meta');
 
-        expect(mod.PREVIEW_SYSTEM_KEY).toBe('dnd5e');
+        expect(mod.PREVIEW_SYSTEM_KEY).toBe('d20');
     });
 });
 

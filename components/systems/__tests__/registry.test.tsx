@@ -6,8 +6,9 @@ import { RULE_SYSTEM_REGISTRY } from '@/lib/utils/rules/systems';
 import { statColumnsOf } from '@/lib/utils/rules/systems/stats';
 
 describe('system ui registry', () => {
-    it('has the three systems, homm and dnd5e share the d20 ui', () => {
+    it('has the four keys, d20 presets share the d20 ui', () => {
         expect(Object.keys(SYSTEM_UI).sort()).toEqual([
+            'd20',
             'dnd5e',
             'homm',
             'wfrp',
@@ -63,8 +64,13 @@ describe('system ui registry', () => {
         expect(Object.keys(hommSections ?? {})).toEqual(
             expect.arrayContaining(['morale', 'heroScaling'])
         );
-        expect(dndItems ?? {}).toEqual({});
-        expect(Object.keys(hommItems ?? {})).toEqual(['actions.retaliation']);
+        expect(Object.keys(dndItems ?? {})).toEqual([
+            'actions.opportunityAttacks',
+        ]);
+        expect(Object.keys(hommItems ?? {})).toEqual([
+            'actions.opportunityAttacks',
+            'actions.retaliation',
+        ]);
         expect(systemUiOf('wfrp')).not.toBe(systemUiOf('homm'));
     });
 
