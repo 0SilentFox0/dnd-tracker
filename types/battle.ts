@@ -393,17 +393,32 @@ export interface DoorState {
     locked?: boolean;
 }
 
+export type FogMode = 'off' | 'reveal' | 'vision';
+
+export type RevealedRun = readonly [y: number, startX: number, endX: number];
+
+export interface FogState {
+    mode: FogMode;
+    revealed: RevealedRun[];
+    visionRadius: number;
+}
+
 /** Мінливий шар карти бою поверх незмінної карти: видалені ребра, двері, туман */
 export interface BattleMapState {
     removedEdges: string[];
     doors: Record<string, DoorState>;
-    fog?: Record<string, unknown>;
+    fog?: FogState;
 }
 
 /** Патч стану за ключем; null у doors = прибрати двері */
 export interface MapStateDelta {
     removed?: { add: string[]; remove: string[] };
     doors?: Record<string, DoorState | null>;
+    fog?: {
+        mode?: FogMode;
+        visionRadius?: number;
+        revealed?: { add: RevealedRun[]; remove: RevealedRun[] };
+    };
 }
 
 /** Власні ребра inline-карти, як вони лежать у battle_scenes.map */

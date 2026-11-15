@@ -25,6 +25,7 @@ const EXPECTED_PATHS: Record<
     mapTerrain: 'map-terrain',
     mapWalls: 'map-walls',
     mapEdgeRemove: 'map-edge-remove',
+    mapFog: 'map-fog',
     mapDoorToggle: 'map-door-toggle',
     mapUpdate: 'map-update',
     maze: 'maze',
@@ -116,7 +117,7 @@ describe('battleOps', () => {
             .filter(([, o]) => 'retryOnConflict' in o)
             .map(([k]) => k);
 
-        expect(retrying).toEqual(['mapTerrain', 'mapWalls', 'mapEdgeRemove', 'mapMotion', 'mapWeather']);
+        expect(retrying).toEqual(['mapTerrain', 'mapWalls', 'mapEdgeRemove', 'mapFog', 'mapMotion', 'mapWeather']);
     });
 
     it('only attack and castSpell map the response to hpChanges', () => {

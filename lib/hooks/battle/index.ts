@@ -65,6 +65,7 @@ export {
     useMapCamera,
 } from './useMapCamera';
 export { type MapDoorsTool, useMapDoors } from './useMapDoors';
+export { type FogBrush, type MapFogTool, useMapFogTool } from './useMapFogTool';
 export { type MapMotionTool, useMapMotionTool } from './useMapMotionTool';
 export {
     type MapTerrainTool,

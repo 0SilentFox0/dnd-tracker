@@ -108,6 +108,18 @@
       "motion": "Motion",
       "background": "Background"
     },
+    "fog": {
+      "label": "Fog of war",
+      "mode": "Visibility mode",
+      "radius": "Vision radius",
+      "brush": "Fog tool",
+      "remember": "Remember explored",
+      "preview": "View as player",
+      "dmView": "DM view",
+      "shareAllies": "Share vision among allies",
+      "modes": { "off": "Off", "reveal": "Reveal", "vision": "Hero vision" },
+      "brushes": { "brush": "Brush", "rectangle": "Rectangle", "room": "Room", "erase": "Erase" }
+    },
     "camera": {
       "zoomIn": "Zoom in",
       "zoomOut": "Zoom out",

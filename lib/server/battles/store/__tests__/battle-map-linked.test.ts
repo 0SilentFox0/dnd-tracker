@@ -281,6 +281,29 @@ describe('saveBattle: шар карти', () => {
         });
     });
 
+    it('persists the fog JSON in the existing map-state row', async () => {
+        const { db, tx } = fakeDb();
+
+        const fog = {
+            mode: 'reveal' as const,
+            visionRadius: 8,
+            revealed: [[1, 2, 5] as const],
+        };
+
+        await saveBattle(
+            db,
+            linkedBefore(null),
+            outcome({ mapState: { removedEdges: [], doors: {}, fog } })
+        );
+
+        expect(tx.battleMapState.upsert).toHaveBeenCalledWith(
+            expect.objectContaining({
+                create: expect.objectContaining({ fog }),
+                update: expect.objectContaining({ fog }),
+            })
+        );
+    });
+
     it('без mapState у патчі таблицю стану не чіпає', async () => {
         const { db, tx } = fakeDb();
 

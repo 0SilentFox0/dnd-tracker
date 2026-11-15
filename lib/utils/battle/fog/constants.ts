@@ -1,0 +1,3 @@
+export const FOG_DEFAULT_VISION_RADIUS = 8;
+export const FOG_MAX_VISION_RADIUS = 40;
+export const FOG_MAX_REVEALED_RUNS = 40_000;

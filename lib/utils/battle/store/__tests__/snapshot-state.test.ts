@@ -119,7 +119,15 @@ describe('buildSnapshotState', () => {
 
         const diff = diffParticipants(before, before);
 
-        const state = { removedEdges: ['1:1:e'], doors: {} };
+        const state = {
+            removedEdges: ['1:1:e'],
+            doors: {},
+            fog: {
+                mode: 'vision' as const,
+                visionRadius: 8,
+                revealed: [[0, 0, 3] as const],
+            },
+        };
 
         const mapRef = { mapId: 'm', version: 3 };
 

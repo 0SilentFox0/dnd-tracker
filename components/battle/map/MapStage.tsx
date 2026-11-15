@@ -10,6 +10,7 @@ import {
     useRef,
 } from 'react';
 
+import { MapFogLayer } from './fog/MapFogLayer';
 import { type GridCellActions, GridLayer } from './grid/GridLayer';
 import { TileCanvas, type TileRenderState } from './tiles/TileCanvas';
 import { DoorMenu } from './DoorMenu';
@@ -75,6 +76,14 @@ export interface MapStageEditing {
     edges?: EdgeEditing | null;
     doors?: MapDoorsTool | null;
     doorLocks?: boolean;
+    fogActive?: boolean;
+    fog?: {
+        mode: 'off' | 'reveal' | 'vision';
+        revealed: import('@/types/battle').RevealedRun[];
+        visible: ReadonlySet<string>;
+        explored: ReadonlySet<string>;
+        dmEditing: boolean;
+    };
 }
 
 interface MapStageProps {
@@ -113,6 +122,8 @@ function MapStageImpl({
         edges,
         doors: doorsTool,
         doorLocks,
+        fog,
+        fogActive,
     } = editing;
 
     const doorPress =
@@ -146,8 +157,13 @@ function MapStageImpl({
     );
 
     const cellActions = useMemo<GridCellActions>(
-        () => ({ onCellClick, onCellHover, wasDragged, svgRef }),
-        [onCellClick, onCellHover, wasDragged, svgRef]
+        () => ({
+            onCellClick,
+            onCellHover: fogActive ? undefined : onCellHover,
+            wasDragged,
+            svgRef,
+        }),
+        [fogActive, onCellClick, onCellHover, wasDragged, svgRef]
     );
 
     const routes = useMoveRoutes(map, participants);
@@ -300,6 +316,13 @@ function MapStageImpl({
                     <RangedHint from={from.box} trajectory={trajectory} />
                 )}
             </svg>
+            {fog && (
+                <MapFogLayer
+                    map={map}
+                    cellPx={UNIT * pxPerUnit}
+                    {...fog}
+                />
+            )}
             {doorsTool?.menu && menuDoor && (
                 <DoorMenu
                     edge={doorsTool.menu}
@@ -330,6 +353,7 @@ function MapStageImpl({
                             painting ||
                             !!edges ||
                             !!modeTools?.toolActive ||
+                            !!fogActive ||
                             movingId === p.basicInfo.id
                         }
                         impact={view?.impactFor?.(p.basicInfo.id)}

@@ -44,6 +44,7 @@ export {
     useMapBackground,
     useMapDoorToggle,
     useMapEdgeRemove,
+    useMapFog,
     useMapMotion,
     useMapTerrain,
     useMapUpdate,

@@ -88,6 +88,20 @@ Door source має розмір 256×64; Canvas тепер показує edge-a
 
 ## Виконано й відкладено
 
-**Виконано у продовженні:** браузерне вимірювання Canvas/assets/cache; повний локальний каталог із перевіркою всіх 138 файлів; оптимізація чотирьох 2×2 object assets; підтвердження й виправлення двох seam-дефектів; адаптація палітри та інструментів редактора, скидання stale edge mode, tile-only сітка без фото.
+**Виконано:** браузерне вимірювання Canvas/assets/cache; повний локальний каталог із перевіркою всіх 138 файлів; оптимізація чотирьох 2×2 object assets; підтвердження й виправлення двох seam-дефектів; адаптація палітри та інструментів редактора, скидання stale edge mode, tile-only сітка без фото. Під час продовження цільову UI-test coverage розширено для пошуку, шарів, keyboard undo/redo і збереження тайлів.
 
-**Відкладено:** вручну перевірити повний editor route на touch-device; окремий battle-sweep. Віддалене завантаження assets, застосування міграцій, зміни production і push не виконувалися.
+## Повторна перевірка editor route — 2026-11-15
+
+**Перевірено:** локальний застосунок відкривався у Google Chrome headless із CDP, viewport було примусово виставлено 375×812 CSS px. Сторінка `/sign-in` мала `scrollWidth = 375`, тож горизонтального overflow на цій сторінці немає. Цільова група редактора/TileCanvas/assets/cache/useTileEditor: 6 файлів/20 тестів. У `MapEditorScreen.test.tsx` перевіряються панелі background/cells/edges/tiles, шари й інструменти, підписана картка з image preview, пошук локалізованим підписом, доступний вибір шару, клавіатурні undo/redo з виключенням поля пошуку, tile-save callback, приховування фото й скидання edge tool, карта без фону. Повторний повний `pnpm test:run`: 2 409 файлів і 17 104 тести пройшли, 1 файл/6 тестів skipped. `pnpm exec tsc --noEmit` і цільовий ESLint для редактора/тайлів пройшли. `NODE_OPTIONS=--max-old-space-size=8192 pnpm build` пройшов; початковий запуск зі стандартним heap уперся в ліміт пам'яті Node близько 4 GiB. У `GridHit` лишився `getScreenCTM()` → `cellAtScreenPoint`; `MapStage` має `data-fx-grid`. Stage E не змінював ці файли.
+
+**Фінальна браузерна перевірка відкладена до самого кінця кодової роботи:** маршрут `/campaigns/.../dm/maps/...` перенаправив на `/sign-in`, оскільки локальної авторизованої сесії не було. Тому повний візуальний прохід редактора на 375 px, live keyboard/focus, малювання/стирання, зміна масштабу дверей і save/reload ще не виконувалися. Пошук, вибір шару й undo/redo вже мають вузькі UI-тести. Chrome viewport є емуляцією розміру, а не фізичним touch-device; фізичного пристрою в середовищі немає. Компонент для coarse pointer відображає повідомлення `desktopOnly`, тому touch-редагування не доступне в поточній реалізації.
+
+**Battle-sweep:** `DATABASE_URL=postgresql://postgres:postgres@localhost:54322/prodcopy pnpm battle-sweep --template heroes-homm --mode all` був запущений лише на локальній БД. Він зупинився на підготовці кампанії з Prisma P2022: відсутня колонка `campaigns.mapLibraryEnabled`; звіт sweep вказав, що row counts не змінилися. Виправлення схеми потребувало б міграції, яку не запускали. Production не торкалися.
+
+**Repo-wide lint:** `pnpm lint` завершився з 57 errors і 575 warnings у багатьох файлах; серед помилок є import-sort у `components/battle/map/DoorMenu.tsx`, що не змінювався в Stage E. Цільовий lint змінених редакторних файлів пройшов.
+
+## Фінальний browser smoke після F/G — 2026-11-15
+
+**Перевірено в локальному Chrome headless:** CDP примусово встановив viewport 375×812 CSS px; тестовий `/campaigns/.../dm/maps/...` маршрут перенаправив на `/sign-in`, бо немає локальної авторизованої сесії. На сторінці входу `documentElement.scrollWidth = 375`, без горизонтального overflow. Це не є перевіркою editor layout чи його інтеракцій. Фізичного touch-пристрою немає.
+
+**Відкладено:** повний авторизований editor route на вузькому viewport; live keyboard/focus, вибір текстури, пошук, малювання/стирання, перемикання шарів/режимів, масштаб дверей та save/reload; браузерні F/G сценарії; фізичний touch. Автоматизовані цільові й повні тести, typecheck, ESLint змінених файлів і build пройшли (результати етапів — у `docs/STATUS.md`). Battle-sweep зупинився до сценаріїв через несумісну локальну `prodcopy` (`campaigns.mapLibraryEnabled`, Prisma P2022). Схему не мігрували; production, віддалене Storage та непов’язані assets/prompts не змінювали.

@@ -36,6 +36,13 @@
     "loadFailed": "Failed to load the map",
     "desktopOnly": "The map editor is desktop-only — open this page on a computer",
     "edges": "Walls and bars",
+    "import": {
+      "button": "Import UVTT",
+      "chooseFile": "Choose a .dd2vtt or .uvtt file",
+      "help": "Imports the map image, grid scale, walls and doors into this draft. Save the map to persist it.",
+      "invalidExtension": "Choose a .dd2vtt or .uvtt file.",
+      "failed": "Could not read this map file."
+    },
     "panels": {
       "background": "Background",
       "cells": "Cells",

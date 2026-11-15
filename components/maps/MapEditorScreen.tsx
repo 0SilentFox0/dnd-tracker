@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
@@ -46,6 +46,7 @@ import {
     isPreviewSafeBackground,
     MIN_SIDE,
 } from '@/lib/utils/battle/grid';
+import { parseUvtt, UvttImportError } from '@/lib/utils/battle/uvtt/parse';
 import enTileLabels from '@/messages/en/tile-labels.json';
 import ukTileLabels from '@/messages/uk/tile-labels.json';
 import type { BattleMapFull, BattleMapTileChunks } from '@/types/battle-map';
@@ -160,6 +161,10 @@ function EditorContent({
 
     const [tileSearch, setTileSearch] = useState('');
 
+    const [importError, setImportError] = useState('');
+
+    const importInput = useRef<HTMLInputElement>(null);
+
     const { undo, redo } = tileEditor;
 
     useEffect(() => {
@@ -242,6 +247,34 @@ function EditorContent({
         if (panel !== nextPanel) editor.actions.setTool(null);
 
         setPanel(nextPanel);
+    };
+
+    const importUvtt = async (file: File | undefined) => {
+        if (!file) return;
+
+        setImportError('');
+        try {
+            if (!/\.(dd2vtt|uvtt)$/i.test(file.name))
+                throw new UvttImportError(t('import.invalidExtension'));
+
+            const result = parseUvtt(await file.text());
+
+            editor.actions.replaceMapFromImport({
+                cols: result.cols,
+                rows: result.rows,
+                background: result.image,
+                backgroundCols: result.backgroundCols,
+                walls: result.walls,
+                doors: result.doors,
+            });
+            selectPanel('background');
+        } catch (error) {
+            setImportError(
+                error instanceof UvttImportError ? error.message : t('import.failed')
+            );
+        } finally {
+            if (importInput.current) importInput.current.value = '';
+        }
     };
 
     return (
@@ -355,6 +388,28 @@ function EditorContent({
                             ))}
                         </TabsList>
                         <TabsContent value="background">
+                            <div className="mb-3 space-y-2">
+                                <input
+                                    ref={importInput}
+                                    type="file"
+                                    accept=".dd2vtt,.uvtt,application/json"
+                                    className="sr-only"
+                                    aria-label={t('import.chooseFile')}
+                                    onChange={(event) => void importUvtt(event.currentTarget.files?.[0])}
+                                />
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => importInput.current?.click()}
+                                >
+                                    {t('import.button')}
+                                </Button>
+                                <p className="text-xs text-hud-muted">{t('import.help')}</p>
+                                {importError ? (
+                                    <p role="alert" className="text-sm text-destructive">{importError}</p>
+                                ) : null}
+                            </div>
                             <MapBackgroundSection editor={editor} />
                         </TabsContent>
                         <TabsContent value="cells">

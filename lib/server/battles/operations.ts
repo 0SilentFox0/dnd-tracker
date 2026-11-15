@@ -9,6 +9,7 @@ import {
     mapBackgroundBodySchema,
     mapDoorToggleSchema,
     mapEdgeRemoveSchema,
+    mapFogSchema,
     mapMotionSchema,
     mapTerrainSchema,
     mapUpdateSchema,
@@ -279,6 +280,18 @@ const OPERATIONS: Record<string, Loader> = {
                 schema: mapEdgeRemoveSchema,
                 mutate: mapEdgeRemoveMutation,
             };
+        },
+    }),
+    'map-fog': operation({
+        access: DM,
+        blockedByMode: true,
+        rateLimitScope: 'mapWalls',
+        load: async () => {
+            const { mapFogMutation } = await import(
+                '@/lib/server/battles/mutations/map-fog/map-fog-mutation'
+            );
+
+            return { schema: mapFogSchema, mutate: mapFogMutation };
         },
     }),
     'map-door-toggle': operation({

@@ -8,6 +8,7 @@ const state = (open: Partial<PaletteState> = {}): PaletteState => ({
     weather: false,
     motion: false,
     background: false,
+    fog: false,
     ...open,
 });
 

@@ -250,6 +250,27 @@ export function useBattleMapEditor(
         []
     );
 
+    const replaceMapFromImport = useCallback(
+        (imported: Pick<BattleMapConfig, 'cols' | 'rows' | 'background' | 'backgroundCols' | 'walls' | 'doors'>) => {
+            setMap((m) => ({
+                ...m,
+                ...imported,
+                bars: [],
+                backgroundRows: undefined,
+                blocked: undefined,
+                terrain: undefined,
+                gridOffset: undefined,
+                maze: null,
+                weather: null,
+                motion: null,
+            }));
+            setToolState(null);
+            setMarginsState(NO_MARGINS);
+            setNotice(null);
+        },
+        []
+    );
+
     const pendingKeep =
         kept &&
         image &&
@@ -442,6 +463,7 @@ export function useBattleMapEditor(
             setDoorLocked,
             setBackground,
             replaceBackground,
+            replaceMapFromImport,
             setBrush,
             setMode,
             onStroke,

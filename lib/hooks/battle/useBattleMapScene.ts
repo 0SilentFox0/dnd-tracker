@@ -16,6 +16,7 @@ import {
 } from './useMapBackgroundTool';
 import { useMapCellActions } from './useMapCellActions';
 import { type MapDoorsTool, useMapDoors } from './useMapDoors';
+import { useMapFogTool } from './useMapFogTool';
 import { type MapMotionTool, useMapMotionTool } from './useMapMotionTool';
 import { useMapPlacing } from './useMapPlacing';
 import { type MapTerrainTool, useMapTerrainTool } from './useMapTerrainTool';
@@ -37,6 +38,7 @@ import {
 } from '@/lib/utils/battle/grid';
 import type { TileLayerChunks } from '@/lib/utils/battle/tiles/derive';
 import { NO_ORDER } from '@/lib/utils/battle/view';
+import type { Viewer } from '@/lib/utils/battle/view/visibility';
 import type { BattleScene } from '@/types/api';
 import type {
     BattleMapActions,
@@ -48,6 +50,7 @@ import type {
 
 export interface BattleMapScene {
     battle: BattleScene;
+    viewer: Viewer;
     tileChunks?: TileLayerChunks;
     tileVersion?: number;
     map: BattleMapConfig;
@@ -57,6 +60,7 @@ export interface BattleMapScene {
     actions: BattleMapActions;
     placement: { active: boolean; toggle(): void } | null;
     terrainTool: MapTerrainTool | null;
+    fogTool: ReturnType<typeof useMapFogTool>;
     modeTools: ModeTools | null;
     weatherTool: MapWeatherTool | null;
     motionTool: MapMotionTool | null;
@@ -73,11 +77,11 @@ export function useBattleMapScene(fx?: SystemFx): BattleMapScene | null {
 
     const {
         battle,
+        viewer,
         tileChunks,
         tileVersion,
         turn: { current, isMyTurn },
         roster: { hero },
-        viewer,
         selectedId,
         select,
         campaignId,
@@ -164,6 +168,18 @@ export function useBattleMapScene(fx?: SystemFx): BattleMapScene | null {
         onActivate: stopPlacing,
         edgeSource: battle.mapRef ? undefined : edgeSource,
         stateEdgeSource,
+    });
+
+    const fogState = battle.mapState?.fog;
+
+    const { mutateAsync: mapFog } = actions.mapFog;
+
+    const fogTool = useMapFogTool({
+        isDM,
+        map,
+        mode: fogState?.mode ?? 'off',
+        radius: fogState?.visionRadius ?? 8,
+        mutate: mapFog,
     });
 
     const toolActive = terrainTool.active || modeToolActive;
@@ -403,6 +419,7 @@ export function useBattleMapScene(fx?: SystemFx): BattleMapScene | null {
             active: !!backgroundTool?.active,
             close: backgroundTool?.close,
         },
+        fog: { active: !!fogTool?.active, close: fogTool?.close },
     });
 
     const placement = useMemo(
@@ -414,6 +431,7 @@ export function useBattleMapScene(fx?: SystemFx): BattleMapScene | null {
 
     return {
         battle,
+        viewer,
         ...(tileChunks && { tileChunks }),
         ...(tileVersion !== undefined && { tileVersion }),
         map,
@@ -423,6 +441,7 @@ export function useBattleMapScene(fx?: SystemFx): BattleMapScene | null {
         actions: mapActions,
         placement,
         terrainTool: isDM ? terrainTool : null,
+        fogTool,
         modeTools,
         weatherTool,
         motionTool,

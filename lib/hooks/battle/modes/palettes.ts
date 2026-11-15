@@ -3,7 +3,8 @@ export type PaletteKey =
     | 'terrain'
     | 'weather'
     | 'motion'
-    | 'background';
+    | 'background'
+    | 'fog';
 
 export type PaletteState = Record<PaletteKey, boolean>;
 
@@ -13,6 +14,7 @@ export const PALETTE_KEYS: readonly PaletteKey[] = [
     'weather',
     'motion',
     'background',
+    'fog',
 ];
 
 /** Щойно відкрита палітра витісняє решту відкритих. */

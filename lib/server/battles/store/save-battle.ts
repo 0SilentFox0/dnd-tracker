@@ -146,7 +146,9 @@ async function writeMapState(
     const data = {
         removedEdges: state.removedEdges as Prisma.InputJsonValue,
         doors: state.doors as unknown as Prisma.InputJsonValue,
-        fog: state.fog ? (state.fog as Prisma.InputJsonValue) : Prisma.DbNull,
+        fog: state.fog
+            ? (state.fog as unknown as Prisma.InputJsonValue)
+            : Prisma.DbNull,
     };
 
     await tx.battleMapState.upsert({

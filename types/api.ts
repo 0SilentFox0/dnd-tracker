@@ -14,6 +14,7 @@ import type {
     mapBackgroundBodySchema,
     mapDoorToggleSchema,
     mapEdgeRemoveSchema,
+    mapFogSchema,
     mapMotionSchema,
     mapTerrainSchema,
     mapUpdateSchema,
@@ -237,6 +238,8 @@ export type MapBackgroundData = z.infer<typeof mapBackgroundBodySchema>;
 export type MapWallsData = z.infer<typeof mapWallsSchema>;
 
 export type MapEdgeRemoveData = z.infer<typeof mapEdgeRemoveSchema>;
+
+export type MapFogData = z.infer<typeof mapFogSchema>;
 
 export type MapDoorToggleData = z.infer<typeof mapDoorToggleSchema>;
 

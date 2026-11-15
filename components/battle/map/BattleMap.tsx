@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { MapCameraControls } from './camera/MapCameraControls';
 import { MapMinimap } from './camera/MapMinimap';
@@ -70,6 +70,16 @@ export interface BattleMapEditing {
     doorLocks?: boolean;
     /** інструменти ДМ активного режиму; null — жоден не активний */
     mode?: ModeTools | null;
+    fog?: {
+        mode: 'off' | 'reveal' | 'vision';
+        revealed: import('@/types/battle').RevealedRun[];
+        visible: ReadonlySet<string>;
+        explored: ReadonlySet<string>;
+        dmEditing: boolean;
+        active: boolean;
+        brush: import('@/lib/hooks/battle/useMapFogTool').FogBrush;
+        onStroke(cells: import('@/types/battle').GridPoint[]): void;
+    };
 }
 
 const NO_EDITING: BattleMapEditing = {};
@@ -95,9 +105,16 @@ export function BattleMap({
 
     const { doorLocks } = editing;
 
-    const painting = Boolean(strokeTool && actions?.onStroke);
+    const terrainPainting = Boolean(strokeTool && actions?.onStroke);
 
-    const drawing = painting || edges !== null;
+    const fogPainting = Boolean(
+        editing.fog?.active &&
+            (editing.fog.brush === 'brush' || editing.fog.brush === 'erase')
+    );
+
+    const painting = terrainPainting || fogPainting;
+
+    const drawing = painting || edges !== null || !!editing.fog?.active;
 
     const modeTools = editing.mode ?? null;
 
@@ -132,10 +149,18 @@ export function BattleMap({
         return () => observer.disconnect();
     }, []);
 
+    const onPaintStroke = useCallback(
+        (cells: import('@/types/battle').GridPoint[]) => {
+            if (fogPainting) editing.fog?.onStroke(cells);
+            else actions?.onStroke?.(cells);
+        },
+        [fogPainting, editing.fog, actions]
+    );
+
     const { svgRef, preview, onStrokeStart } = useStrokePaint({
         painting,
         dims: { cols, rows },
-        onStroke: actions?.onStroke,
+        onStroke: onPaintStroke,
     });
 
     const win = useMemo(
@@ -272,8 +297,9 @@ export function BattleMap({
             edges,
             doors,
             doorLocks,
+            fogActive: !!editing.fog?.active,
         }),
-        [clickableBlocked, showBlocked, modeTools, edges, doors, doorLocks]
+        [clickableBlocked, showBlocked, modeTools, edges, doors, doorLocks, editing.fog?.active]
     );
 
     // свайп віддаємо браузеру лише для прокрутки; зум, щипок і штрих місцевості — наші
@@ -361,7 +387,7 @@ export function BattleMap({
                             view={view}
                             actions={actions}
                             tiles={tiles}
-                            editing={stageEditing}
+                            editing={{ ...stageEditing, fog: editing.fog }}
                             layout={layout}
                             interaction={interaction}
                         />

@@ -177,6 +177,55 @@ describe('diffMapState / applyMapStateDelta', () => {
 
         expect(d?.doors).toEqual({ '1:1': { open: true } });
     });
+
+    it('diffs fog mode, radius, and revealed runs without replacing other state', () => {
+        const before: BattleMapState = {
+            ...state(['1:1:e'], { '2:2:e': { open: true } }),
+            fog: {
+                mode: 'reveal',
+                revealed: [
+                    [0, 0, 5],
+                    [1, 1, 4],
+                ],
+                visionRadius: 8,
+            },
+        };
+
+        const after: BattleMapState = {
+            ...state(['1:1:e'], { '2:2:e': { open: true } }),
+            fog: {
+                mode: 'vision',
+                revealed: [
+                    [0, 0, 3],
+                    [2, 4, 7],
+                ],
+                visionRadius: 11,
+            },
+        };
+
+        const delta = diffMapState(before, after);
+
+        expect(delta?.fog).toEqual({
+            mode: 'vision',
+            visionRadius: 11,
+            revealed: {
+                add: [
+                    [2, 4, 7],
+                ],
+                remove: [
+                    [0, 3, 5],
+                    [1, 1, 4],
+                ],
+            },
+        });
+
+        if (!delta) throw new Error('expected fog delta');
+
+        const applied = applyMapStateDelta(before, delta);
+
+        expect(applied).toEqual(after);
+        expect(diffMapState(applied, after)).toBeNull();
+    });
 });
 
 describe('pruneRemoved', () => {

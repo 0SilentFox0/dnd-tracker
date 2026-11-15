@@ -14,6 +14,7 @@ import type {
     BattleMapConfig,
     BattleMapRef,
     BattleMapState,
+    FogState,
     TerrainCell,
 } from '@/types/battle';
 
@@ -30,7 +31,7 @@ export const rowToMapState = (
         ? {
               removedEdges: row.removedEdges as string[],
               doors: row.doors as BattleMapState['doors'],
-              ...(row.fog ? { fog: row.fog as Record<string, unknown> } : {}),
+              ...(row.fog ? { fog: row.fog as FogState } : {}),
           }
         : null;
 

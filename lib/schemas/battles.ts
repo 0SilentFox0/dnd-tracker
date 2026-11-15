@@ -16,6 +16,7 @@ import { DAMAGE_ELEMENT_OPTIONS } from '@/lib/constants/damage';
 import { MAP_LIMITS } from '@/lib/constants/map-limits';
 import { hexColorSchema } from '@/lib/schemas/common';
 import { STRIKE_RIDER_EFFECTS } from '@/lib/utils/abilities/schema';
+import { FOG_MAX_VISION_RADIUS } from '@/lib/utils/battle/fog/constants';
 import { inBounds } from '@/lib/utils/battle/grid/geometry';
 import { hasPlayableArea } from '@/lib/utils/battle/grid/map-editor';
 import { parseEdgeKey } from '@/lib/utils/battle/grid/walls';
@@ -481,6 +482,27 @@ export const mapEdgeRemoveSchema = z.object({
     edges: z.array(edgeKeySchema).min(1).max(MAP_EDGES_PER_OP),
     restore: z.boolean().optional(),
 });
+
+const fogRunSchema = z.tuple([
+    z.number().int().min(0).max(199),
+    z.number().int().min(0).max(199),
+    z.number().int().min(1).max(200),
+]);
+
+export const mapFogSchema = z
+    .object({
+        mode: z.enum(['off', 'reveal', 'vision']).optional(),
+        visionRadius: z.number().int().min(1).max(FOG_MAX_VISION_RADIUS).optional(),
+        add: z.array(fogRunSchema).max(2000).optional(),
+        remove: z.array(fogRunSchema).max(2000).optional(),
+    })
+    .refine(
+        (body) =>
+            body.mode !== undefined ||
+            body.visionRadius !== undefined ||
+            !!body.add?.length ||
+            !!body.remove?.length
+    );
 
 export const mapDoorToggleSchema = z
     .object({

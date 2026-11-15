@@ -1,8 +1,15 @@
+import { FOG_DEFAULT_VISION_RADIUS } from '@/lib/utils/battle/fog/constants';
+import {
+    addRevealedRuns,
+    diffRevealedRuns,
+    removeRevealedRuns,
+} from '@/lib/utils/battle/fog/revealed-runs';
 import { diffEdges, diffSize } from '@/lib/utils/battle/grid/edge-diff';
 import type {
     BattleMapConfig,
     BattleMapState,
     DoorState,
+    FogState,
     MapStateDelta,
 } from '@/types/battle';
 
@@ -14,6 +21,12 @@ export interface LibraryEdges {
 const NO_STATE = {};
 
 const NO_EDGES = {};
+
+const DEFAULT_FOG: FogState = {
+    mode: 'off',
+    revealed: [],
+    visionRadius: FOG_DEFAULT_VISION_RADIUS,
+};
 
 /** Effective `doors` object → the base `doors` it was composed from, so persistence can store the base back. */
 const doorsOrigin = new WeakMap<
@@ -158,7 +171,25 @@ export function diffMapState(
 
     if (Object.keys(doors).length) delta.doors = doors;
 
-    return delta.removed || delta.doors ? delta : null;
+    const prevFog = before?.fog ?? DEFAULT_FOG;
+
+    const nextFog = after?.fog ?? DEFAULT_FOG;
+
+    const revealed = diffRevealedRuns(prevFog.revealed, nextFog.revealed);
+
+    const fog: NonNullable<MapStateDelta['fog']> = {};
+
+    if (prevFog.mode !== nextFog.mode) fog.mode = nextFog.mode;
+
+    if (prevFog.visionRadius !== nextFog.visionRadius)
+        fog.visionRadius = nextFog.visionRadius;
+
+    if (revealed.add.length || revealed.remove.length)
+        fog.revealed = revealed;
+
+    if (Object.keys(fog).length) delta.fog = fog;
+
+    return delta.removed || delta.doors || delta.fog ? delta : null;
 }
 
 /** Drops removals whose edge fails `keep`; returns the same reference when nothing is dropped. */
@@ -179,11 +210,19 @@ export function applyMapStateDelta(
     state: BattleMapState | null | undefined,
     delta: MapStateDelta
 ): BattleMapState {
-    if (
-        state &&
-        diffSize(delta.removed) === 0 &&
-        Object.keys(delta.doors ?? {}).length === 0
-    )
+    const prevFog = state?.fog ?? DEFAULT_FOG;
+
+    const fogDelta = delta.fog;
+
+    const fogIsEmpty =
+        !fogDelta ||
+        ((fogDelta.mode === undefined || fogDelta.mode === prevFog.mode) &&
+            (fogDelta.visionRadius === undefined ||
+                fogDelta.visionRadius === prevFog.visionRadius) &&
+            (fogDelta.revealed?.add.length ?? 0) === 0 &&
+            (fogDelta.revealed?.remove.length ?? 0) === 0);
+
+    if (state && diffSize(delta.removed) === 0 && !Object.keys(delta.doors ?? {}).length && fogIsEmpty)
         return state;
 
     const removed = new Set(state?.removedEdges);
@@ -199,9 +238,24 @@ export function applyMapStateDelta(
         else doors[key] = door;
     }
 
+    const fog = fogDelta
+        ? {
+              mode: fogDelta.mode ?? prevFog.mode,
+              visionRadius: fogDelta.visionRadius ?? prevFog.visionRadius,
+              revealed: addRevealedRuns(
+                  removeRevealedRuns(
+                      prevFog.revealed,
+                      fogDelta.revealed?.remove ?? []
+                  ),
+                  fogDelta.revealed?.add ?? []
+              ),
+          }
+        : state?.fog;
+
     return {
         ...state,
         removedEdges: [...removed],
         doors,
+        ...(fog && { fog }),
     };
 }

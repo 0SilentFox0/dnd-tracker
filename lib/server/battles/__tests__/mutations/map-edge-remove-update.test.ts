@@ -13,6 +13,7 @@ vi.mock('@/lib/server/battle-maps/library-service', () => ({
 import { context, goblin, hero } from './fixtures';
 
 import { mapEdgeRemoveMutation } from '@/lib/server/battles/mutations/map-edge-remove/map-edge-remove-mutation';
+import { mapFogMutation } from '@/lib/server/battles/mutations/map-fog/map-fog-mutation';
 import { mapUpdateMutation } from '@/lib/server/battles/mutations/map-update/map-update-mutation';
 import { mapWallsMutation } from '@/lib/server/battles/mutations/map-walls/map-walls-mutation';
 import { composeEffectiveMap } from '@/lib/utils/battle/map-storage/effective-map';
@@ -96,6 +97,43 @@ describe('map-edge-remove', () => {
                 restore: true,
             })
         ).toThrow(rejected(REJECT.mapEdgeNotRemoved));
+    });
+});
+
+describe('map-fog', () => {
+    it('stores mode and reveal deltas without replacing doors or removed edges', () => {
+        const state = {
+            removedEdges: ['1:1:e'],
+            doors: { '2:2:e': { open: true } },
+        };
+
+        const out = mapFogMutation(ctxWith(state), {
+            mode: 'reveal',
+            add: [[1, 2, 5]],
+        });
+
+        expect(out.scene?.mapState).toEqual({
+            ...state,
+            fog: { mode: 'reveal', visionRadius: 8, revealed: [[1, 2, 5]] },
+        });
+    });
+
+    it('rejects out-of-bounds runs and skips maze maps', () => {
+        expect(() =>
+            mapFogMutation(ctxWith(null), { add: [[1, 6, 9]] })
+        ).toThrow(rejected(REJECT.mapEdgeOutside));
+        expect(() =>
+            mapFogMutation(
+                ctxWith(null, { map: { ...map, maze: {} as never } }),
+                { mode: 'reveal' }
+            )
+        ).toThrow(rejected(REJECT.mapEdgesInMode));
+    });
+
+    it('returns no scene patch for a no-op', () => {
+        expect(
+            mapFogMutation(ctxWith(null), { mode: 'off' }).scene
+        ).toBeUndefined();
     });
 });
 
