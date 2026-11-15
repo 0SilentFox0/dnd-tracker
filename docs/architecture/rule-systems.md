@@ -98,6 +98,8 @@ Core бачить `systems/*` лише через корені (`SYSTEM_ROOTS`, 
 
 **Читання характеристик статблока в core — лише через хуки:** модифікатори рятунків — `combat.saves.modifiers(p)` (баланс: `hitModel.saves(p)`), бонус майстерності — `combat.proficiency.bonus(p)`, бонус атаки закляття — `magic.spellAttackBonus`; система без цього віддає нулі. Необовʼязковий `combat.holdsOn?(p)` (Ч18c; d20 — `systems/d20/rules/death-saves/holds.ts`, поруч з `onRevived`): полеглий учасник, що ще в бою (d20: вмирає й не стабільний); core не читає `stable` слота, а `checkVictoryConditions` бере хук, щоб не віддавати поразку, поки герой робить кидки смерті.
 
+**E4 / трек S (S.4):** для дев’яти d20 характеристик єдине правило читання: числове `characteristics[key]`, інакше legacy-колонка, інакше дефолт кодека (`readD20Columns`, `withStoredColumns`, `withColumnView`). S-B продовжує dual-write у колонки та JSON, тож відкат S-B → S-A безпечний; зупинка запису в колонки має бути окремим деплоєм перед S.6. S.6 має два зафіксовані ризики: після DROP зміняться хеші шаблонів, якщо `characteristics` не містить усіх дев’яти ключів; до DROP результати `withColumnView` і `withStoredColumns` треба типізувати як `T & D20Columns`, бо споживачі читають плоскі поля з Prisma-рядків. Див. [план контрактного кроку](../superpowers/plans/e4-s6-drop-columns/README.md).
+
 **Винятки й домовленості контракту.**
 - d6pool (і будь-яка база без `magic.resource`) кастує вільно: слотів/ресурсу немає, `picksSlot` відсутній (Ч7-M2).
 - Бойова операція, якої немає в базі кампанії, дає 422 `action_rejected` (з `missing`); 404 `systemActionUnknown` лише коли такої дії немає в жодній системі чи модулі композиції (Ч7-M7).

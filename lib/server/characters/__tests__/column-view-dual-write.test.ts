@@ -129,6 +129,61 @@ describe('fromCharacter reads characteristics, then the column', () => {
         expect(partial.combatStats.speed).toBe(99);
     });
 
+    it.each([null, {}])(
+        'S-A legacy characteristics %s reads like S-B characteristics through all views',
+        async (characteristics) => {
+            const legacy = {
+                ...row(characteristics ?? {}),
+                characteristics,
+            };
+
+            const migrated = {
+                ...row({ ...STATS }),
+                strength: 1,
+                armorClass: 1,
+                initiative: -5,
+                speed: 1,
+            };
+
+            const legacyParticipant = stable(await build(legacy));
+
+            const migratedParticipant = stable(await build(migrated));
+
+            expect(legacyParticipant).toEqual(migratedParticipant);
+            expect(withStoredColumns(legacy)).toMatchObject(STATS);
+            expect(withStoredColumns(migrated)).toMatchObject(STATS);
+            expect(
+                withColumnView(legacy, ruleSystemOf(rules))
+            ).toMatchObject(STATS);
+            expect(
+                withColumnView(migrated, ruleSystemOf(rules))
+            ).toMatchObject(STATS);
+        }
+    );
+
+    it('partial characteristics resolve the same values through all views', async () => {
+        const partial = {
+            ...row({ strength: 18 }),
+            strength: 14,
+            speed: 99,
+        };
+
+        const participant = stable(await build(partial));
+
+        const expected = {
+            ...STATS,
+            strength: 18,
+            speed: 99,
+        };
+
+        expect(participant.abilities.strength).toBe(expected.strength);
+        expect(participant.combatStats.speed).toBe(expected.speed);
+        expect(withStoredColumns(partial)).toMatchObject(expected);
+        expect(withColumnView(partial, ruleSystemOf(rules))).toMatchObject(
+            expected
+        );
+    });
+
     it('a row written by dual-write is read alike by builder, to-unit-style overlay and sheet loader', async () => {
         const written = row({ ...STATS });
 

@@ -6,6 +6,9 @@ import { ROOT, sourceFiles } from '@/scripts/shared/system-ratchet';
 
 const SCANNED = ['lib', 'app', 'scripts', 'systems'];
 
+const COLUMNS =
+    'strength|dexterity|constitution|intelligence|wisdom|charisma|armorClass|initiative|speed';
+
 const COLUMN =
     /\b(?:strength|dexterity|constitution|intelligence|wisdom|charisma|armorClass|initiative|speed)\s*:/;
 
@@ -25,7 +28,16 @@ export const writesWithoutCharacteristics = (text: string) =>
 const CALL =
     /\b(?:character|unit|unitBase)\.(?:create|createMany|update|updateMany|upsert)\s*\(/g;
 
-const SCORE_SPREAD = /\.\.\.[^,]*\b(?:abilityScores|fields)\b/;
+const SCORE_SPREAD = /\.\.\.[^,]*\babilityScores\b/;
+
+const SPREAD_IDENTIFIER = /\.\.\.\s*([A-Za-z_$][\w$]*)/g;
+
+const spreadsStatObject = (body: string, source: string) =>
+    [...body.matchAll(SPREAD_IDENTIFIER)].some(([, name]) =>
+        new RegExp(
+            `\\b(?:const|let|var)\\s+${name}\\s*=\\s*\\{[^}]*\\b(?:${COLUMNS})\\s*:`
+        ).test(source)
+    );
 
 function callBodies(text: string): string[] {
     const bodies: string[] = [];
@@ -53,7 +65,9 @@ function callBodies(text: string): string[] {
 export const callsWithoutCharacteristics = (text: string) =>
     callBodies(text).filter(
         (body) =>
-            (COLUMN.test(body) || SCORE_SPREAD.test(body)) &&
+            (COLUMN.test(body) ||
+                SCORE_SPREAD.test(body) ||
+                spreadsStatObject(body, text)) &&
             !DUAL_WRITE.test(body)
     );
 
@@ -89,6 +103,21 @@ describe('statblock writes carry characteristics', () => {
                 'a.character.update({ data: { ...gain.abilityScores } }); b.character.update({ data: { ...x.fields, ...characteristicsPatch(x.fields) } })'
             )
         ).toHaveLength(1);
+        expect(
+            callsWithoutCharacteristics(
+                'const stats = { strength: 10 }; prisma.unit.create({ data: { ...stats } })'
+            )
+        ).toHaveLength(1);
+        expect(
+            callsWithoutCharacteristics(
+                'const fields = { name: "x" }; prisma.unit.create({ data: { ...fields } })'
+            )
+        ).toHaveLength(0);
+        expect(
+            callsWithoutCharacteristics(
+                'const stats = { strength: 10 }; prisma.unit.create({ data: d20RowData({ ...stats }) })'
+            )
+        ).toHaveLength(0);
     });
 
     it('no write call keeps scores out of characteristics', () => {

@@ -4,7 +4,7 @@ const db = vi.hoisted(() => ({
     campaign: { findUnique: vi.fn() },
     race: { count: vi.fn() },
     spell: { count: vi.fn() },
-    unit: { create: vi.fn(), update: vi.fn() },
+    unit: { create: vi.fn(), update: vi.fn(), findUnique: vi.fn() },
 }));
 
 vi.mock('server-only', () => ({}));
@@ -94,6 +94,9 @@ describe('units d20 columnView', () => {
         db.campaign.findUnique.mockResolvedValue({ rules });
         db.unit.create.mockResolvedValue({ id: 'u1' });
         db.unit.update.mockResolvedValue({ id: 'u1' });
+        db.unit.findUnique.mockResolvedValue({
+            characteristics: { extra: 1 },
+        });
     });
 
     it('fromUnit: migrated rows ignore the columns, identical participant and hash', async () => {
@@ -147,6 +150,27 @@ describe('units d20 columnView', () => {
 
         expect(data.armorClass).toBe(18);
         expect(data.characteristics).toEqual({ extra: 1, armorClass: 18 });
+    });
+
+    it('patch merges into characteristics from the fresh row, not the earlier resource row', async () => {
+        db.unit.findUnique.mockResolvedValue({
+            characteristics: { intelligence: 17 },
+        });
+
+        await unitsResource.update(
+            actor,
+            { id: 'u1', knownSpells: [], characteristics: { extra: 1 } } as never,
+            { armorClass: 18 } as never
+        );
+
+        expect(db.unit.findUnique).toHaveBeenCalledWith({
+            where: { id: 'u1' },
+            select: { characteristics: true },
+        });
+        expect(db.unit.update.mock.calls.at(-1)?.[0].data.characteristics).toEqual({
+            intelligence: 17,
+            armorClass: 18,
+        });
     });
 
     it('wfrp keeps its own characteristics untouched', async () => {

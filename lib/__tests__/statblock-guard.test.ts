@@ -84,7 +84,26 @@ const COLUMNS =
 const SELECTS_COLUMN = new RegExp(`\\b(?:${COLUMNS})\\s*:\\s*true\\b`);
 
 const READS_ROW_COLUMN = new RegExp(
-    `\\b(?:character|unit|unitBase|row|hero|stored|fresh|existing|u|c)\\??\\.(?:${COLUMNS})\\b`
+    `\\b(?:character|unit|unitBase|row|hero|stored|fresh|existing|u|c)\\??(?:\\.(?:${COLUMNS})\\b|\\[['\"](?:${COLUMNS})['\"]\\])`
+);
+
+const DESTRUCTURES_COLUMN = new RegExp(
+    `\\{[^}]*\\b(?:${COLUMNS})\\b[^}]*\\}\\s*=\\s*(?:character|unit|unitBase|row|hero|stored|fresh|existing|u|c)\\b`
+);
+
+const COMPUTED_COLUMN = new RegExp(
+    `\\b(?:character|unit|unitBase|row|hero|stored|fresh|existing|u|c)\\??\\[[A-Za-z_$][\\w$]*\\]`
+);
+
+const COLUMN_VARIABLE = new RegExp(
+    `\\b(?:const|let)\\s+([A-Za-z_$][\\w$]*)\\s*=\\s*['\"](?:${COLUMNS})['\"]`
+);
+
+const SPREAD_ROW =
+    /\.\.\.(?:character|unit|unitBase|row|hero|stored|fresh|existing|u|c)\b/;
+
+const SPREAD_ALIAS_COLUMN = new RegExp(
+    `\\b(?:stats|values|copy|result|data)\\??\\.(?:${COLUMNS})\\b`
 );
 
 const LOADS_ROW =
@@ -115,7 +134,12 @@ export const selectsColumnWithoutCharacteristics = (text: string) =>
     SELECTS_COLUMN.test(text) && !CHARACTERISTICS.test(text);
 
 export const readsColumnWithoutOverlay = (text: string) =>
-    LOADS_ROW.test(text) && READS_ROW_COLUMN.test(text) && !OVERLAY.test(text);
+    LOADS_ROW.test(text) &&
+    (READS_ROW_COLUMN.test(text) ||
+        DESTRUCTURES_COLUMN.test(text) ||
+        (COLUMN_VARIABLE.test(text) && COMPUTED_COLUMN.test(text)) ||
+        (SPREAD_ROW.test(text) && SPREAD_ALIAS_COLUMN.test(text))) &&
+    !OVERLAY.test(text);
 
 const dbFiles = () =>
     sourceFiles(DB_SCANNED).filter(
@@ -153,6 +177,41 @@ describe('statblock columns are read through characteristics', () => {
         expect(
             readsColumnWithoutOverlay(
                 'prisma.unit.findMany().then((r) => r.map(withStoredColumns)); u.speed'
+            )
+        ).toBe(false);
+        expect(
+            readsColumnWithoutOverlay(
+                'const row = await prisma.unit.findUnique(); const { speed } = row'
+            )
+        ).toBe(true);
+        expect(
+            readsColumnWithoutOverlay(
+                "const row = await prisma.unit.findUnique(); row['armorClass']"
+            )
+        ).toBe(true);
+        expect(
+            readsColumnWithoutOverlay(
+                "const row = await prisma.unit.findUnique(); row['description']"
+            )
+        ).toBe(false);
+        expect(
+            readsColumnWithoutOverlay(
+                "const row = await prisma.unit.findUnique(); const key = 'strength'; row[key]"
+            )
+        ).toBe(true);
+        expect(
+            readsColumnWithoutOverlay(
+                "const row = await prisma.unit.findUnique(); const key = 'description'; row[key]"
+            )
+        ).toBe(false);
+        expect(
+            readsColumnWithoutOverlay(
+                'const row = await prisma.unit.findUnique(); const stats = { ...row }; stats.strength'
+            )
+        ).toBe(true);
+        expect(
+            readsColumnWithoutOverlay(
+                'const row = await prisma.unit.findUnique(); const stats = { ...row }; stats.name'
             )
         ).toBe(false);
     });

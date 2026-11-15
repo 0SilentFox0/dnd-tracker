@@ -123,10 +123,15 @@ export const unitsResource = defineResource<
             storedEffectOwners(existing.abilities)
         );
 
+        const current = await prisma.unit.findUnique({
+            where: { id: existing.id },
+            select: { characteristics: true },
+        });
+
         const view = splitColumnView(
             data,
             loaded.system,
-            existing.characteristics
+            current?.characteristics
         ).characteristics;
 
         const unit = await prisma.unit.update({

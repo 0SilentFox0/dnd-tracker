@@ -12,12 +12,28 @@ import {
 import { getResponseJson } from './helpers';
 
 import { prisma } from '@/lib/db';
+import { lockCharacters } from '@/lib/server/characters/lock';
 import { notifyCharacterOwners } from '@/lib/server/notifications/notify';
 import * as apiAuth from '@/lib/utils/api/api-auth';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 
 vi.mock('@/lib/server/notifications/notify', () => ({
     notifyCharacterOwners: vi.fn().mockResolvedValue(0),
+}));
+vi.mock('@/lib/server/characters/lock', () => ({
+    lockCharacters: vi.fn(async (_tx: unknown, ids: string[]) =>
+        new Map([
+            [
+                ids[0],
+                {
+                    id: ids[0],
+                    resources: {},
+                    experience: 0,
+                    characteristics: { intelligence: 27 },
+                },
+            ],
+        ])
+    ),
 }));
 vi.mock('@/lib/utils/api/api-auth', () => ({
     requireCampaignAccess: vi.fn(async () => ({
@@ -31,6 +47,8 @@ vi.mock('@/lib/db', () => ({
     prisma: {
         character: { findUnique: vi.fn(), update: vi.fn() },
         race: { findFirst: vi.fn() },
+        $queryRaw: vi.fn(),
+        $transaction: vi.fn(),
     },
 }));
 
@@ -94,6 +112,17 @@ describe('POST level-up', () => {
         vi.mocked(prisma.race.findFirst).mockResolvedValue({
             spellSlotProgression: [{ level: 2, slots: 3 }],
         } as never);
+        vi.mocked(prisma.$transaction).mockImplementation(
+            ((fn: (tx: unknown) => unknown) => fn(prisma)) as never
+        );
+        vi.mocked(prisma.$queryRaw).mockResolvedValue([
+            {
+                id: 'ch',
+                resources: {},
+                experience: 0,
+                characteristics: { intelligence: 27 },
+            },
+        ] as never);
         vi.mocked(prisma.character.update).mockImplementation(((args: {
             data: object;
         }) => Promise.resolve({ ...CHARACTER, ...args.data })) as never);
@@ -105,6 +134,7 @@ describe('POST level-up', () => {
         const res = await post();
 
         expect(res.status).toBe(200);
+        expect(lockCharacters).toHaveBeenCalled();
 
         const data = vi.mocked(prisma.character.update).mock.calls[0][0]
             .data as Record<string, unknown>;
@@ -124,6 +154,28 @@ describe('POST level-up', () => {
         expect(data).not.toHaveProperty('currentHp');
         expect(await getResponseJson(res)).toMatchObject({
             levelUpDetails: { abilityIncreased: 'dexterity' },
+        });
+    });
+
+    it('merges level gain into the locked, fresh characteristics row', async () => {
+        vi.mocked(prisma.character.findUnique)
+            .mockResolvedValueOnce(CHARACTER as never)
+            .mockResolvedValueOnce({
+                ...CHARACTER,
+                characteristics: { intelligence: 27 },
+            } as never);
+
+        const res = await post();
+
+        expect(res.status).toBe(200);
+
+        const data = vi.mocked(prisma.character.update).mock.calls[0][0]
+            .data as Record<string, unknown>;
+
+        expect(data.characteristics).toMatchObject({
+            strength: 30,
+            dexterity: 11,
+            intelligence: 27,
         });
     });
 
