@@ -28,7 +28,10 @@
       "label": "Berserk"
     },
     "charm": {
-      "label": "Switch to the caster's side"
+      "label": "Switch to the caster's side",
+      "fields": {
+        "affectsHeroes": "Can affect heroes"
+      }
     },
     "applyCondition": {
       "label": "Apply condition",

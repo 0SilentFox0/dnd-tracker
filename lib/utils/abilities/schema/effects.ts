@@ -383,6 +383,7 @@ const BerserkSchema = z.object({
 const CharmSchema = z.object({
     kind: z.literal('charm'),
     duration: DurationSchema,
+    affectsHeroes: z.boolean().optional(),
     ...target,
 });
 

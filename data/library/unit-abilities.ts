@@ -318,7 +318,17 @@ const mindless = (
 });
 
 export const undead = (): Ability =>
-    mindless('unit-undead', 'Нежить', 'Ігнорує мораль, імунітет до страху.');
+    mindless('unit-undead', 'Нежить', 'Ігнорує мораль, імунітет до страху та Сліпоти.', [
+        {
+            kind: 'flag',
+            flag: 'conditionImmunity',
+            conditions: [
+                'disable_melee_attacks',
+                'disable_ranged_attacks',
+                'disable_spell_casting',
+            ],
+        },
+    ]);
 
 export const construct = (): Ability =>
     mindless(

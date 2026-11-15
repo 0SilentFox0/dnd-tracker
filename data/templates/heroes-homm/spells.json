@@ -1264,7 +1264,7 @@
     "name": "Puppet Master",
     "level": 5,
     "groupId": "Darkness",
-    "description": "The enemy makes a Wisdom saving throw; on a failure it switches to the caster's side for 1 round and acts under the control of the caster's player, then returns. Does not affect heroes.",
+    "description": "An enemy, including a hero, makes a Wisdom saving throw; on a failure it switches to the caster's side for 1 round and acts under the control of the caster's player, then returns.",
     "appearanceDescription": "Thin silver threads stretch from the caster's fingers and catch on the enemy's wrists and neck. It jerks like a puppet at a fair and obediently turns its weapon against its own.",
     "cost": "action",
     "dice": 0,
@@ -1283,6 +1283,7 @@
     "spellEffects": [
       {
         "kind": "charm",
+        "affectsHeroes": true,
         "duration": {
           "rounds": 1
         }

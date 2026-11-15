@@ -523,13 +523,14 @@ export const SPELLS: LibrarySpell[] = [
         name: 'Ляльковод',
         school: DARK,
         level: 5,
-        description: `Ворог робить рятівний кидок Мудрості; при провалі на 1 раунд переходить на бік заклинателя і діє під контролем його гравця, потім повертається. ${NOT_HEROES}`,
+        description:
+            'Ворог, зокрема герой, робить рятівний кидок Мудрості; при провалі на 1 раунд переходить на бік заклинателя і діє під контролем його гравця, потім повертається.',
         appearanceDescription:
             "З пальців заклинателя тягнуться тонкі срібні нитки й чіпляються за зап'ястя та шию ворога. Той смикається, як лялька на ярмарку, і слухняно розвертає зброю проти своїх.",
         definition: def(
             0,
             ENEMY_NEAR,
-            [{ kind: 'charm', duration: rounds(1) }],
+            [{ kind: 'charm', duration: rounds(1), affectsHeroes: true }],
             { resolution: save('wisdom', 'none') }
         ),
         raceModifiers: [],

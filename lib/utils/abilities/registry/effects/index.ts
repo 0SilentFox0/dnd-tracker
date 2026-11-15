@@ -217,7 +217,11 @@ const BASE_EFFECT_REGISTRY: {
     charm: {
         kind: 'charm',
         static: false,
-        fields: [TARGET_FIELD, REQUIRED_DURATION],
+        fields: [
+            TARGET_FIELD,
+            REQUIRED_DURATION,
+            { name: 'affectsHeroes', input: 'toggle', optional: true },
+        ],
         describe: describeCharm,
         apply: applyCharm,
     },

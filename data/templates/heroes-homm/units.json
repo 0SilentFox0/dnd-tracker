@@ -8502,7 +8502,7 @@
       {
         "id": "unit-undead",
         "name": "Undead",
-        "description": "Ignores morale; immune to fear.",
+        "description": "Ignores morale; immune to fear and Blindness.",
         "trigger": {
           "event": "passive"
         },
@@ -8516,6 +8516,15 @@
             "flag": "conditionImmunity",
             "conditions": [
               "fear"
+            ]
+          },
+          {
+            "kind": "flag",
+            "flag": "conditionImmunity",
+            "conditions": [
+              "disable_melee_attacks",
+              "disable_ranged_attacks",
+              "disable_spell_casting"
             ]
           }
         ]
@@ -8601,7 +8610,7 @@
       {
         "id": "unit-undead",
         "name": "Undead",
-        "description": "Ignores morale; immune to fear.",
+        "description": "Ignores morale; immune to fear and Blindness.",
         "trigger": {
           "event": "passive"
         },
@@ -8615,6 +8624,15 @@
             "flag": "conditionImmunity",
             "conditions": [
               "fear"
+            ]
+          },
+          {
+            "kind": "flag",
+            "flag": "conditionImmunity",
+            "conditions": [
+              "disable_melee_attacks",
+              "disable_ranged_attacks",
+              "disable_spell_casting"
             ]
           }
         ]
@@ -8676,7 +8694,7 @@
       {
         "id": "unit-undead",
         "name": "Undead",
-        "description": "Ignores morale; immune to fear.",
+        "description": "Ignores morale; immune to fear and Blindness.",
         "trigger": {
           "event": "passive"
         },
@@ -8690,6 +8708,15 @@
             "flag": "conditionImmunity",
             "conditions": [
               "fear"
+            ]
+          },
+          {
+            "kind": "flag",
+            "flag": "conditionImmunity",
+            "conditions": [
+              "disable_melee_attacks",
+              "disable_ranged_attacks",
+              "disable_spell_casting"
             ]
           }
         ]
@@ -8777,7 +8804,7 @@
       {
         "id": "unit-undead",
         "name": "Undead",
-        "description": "Ignores morale; immune to fear.",
+        "description": "Ignores morale; immune to fear and Blindness.",
         "trigger": {
           "event": "passive"
         },
@@ -8791,6 +8818,15 @@
             "flag": "conditionImmunity",
             "conditions": [
               "fear"
+            ]
+          },
+          {
+            "kind": "flag",
+            "flag": "conditionImmunity",
+            "conditions": [
+              "disable_melee_attacks",
+              "disable_ranged_attacks",
+              "disable_spell_casting"
             ]
           }
         ]
@@ -8863,7 +8899,7 @@
       {
         "id": "unit-undead",
         "name": "Undead",
-        "description": "Ignores morale; immune to fear.",
+        "description": "Ignores morale; immune to fear and Blindness.",
         "trigger": {
           "event": "passive"
         },
@@ -8877,6 +8913,15 @@
             "flag": "conditionImmunity",
             "conditions": [
               "fear"
+            ]
+          },
+          {
+            "kind": "flag",
+            "flag": "conditionImmunity",
+            "conditions": [
+              "disable_melee_attacks",
+              "disable_ranged_attacks",
+              "disable_spell_casting"
             ]
           }
         ]
@@ -8963,7 +9008,7 @@
       {
         "id": "unit-undead",
         "name": "Undead",
-        "description": "Ignores morale; immune to fear.",
+        "description": "Ignores morale; immune to fear and Blindness.",
         "trigger": {
           "event": "passive"
         },
@@ -8977,6 +9022,15 @@
             "flag": "conditionImmunity",
             "conditions": [
               "fear"
+            ]
+          },
+          {
+            "kind": "flag",
+            "flag": "conditionImmunity",
+            "conditions": [
+              "disable_melee_attacks",
+              "disable_ranged_attacks",
+              "disable_spell_casting"
             ]
           }
         ]
@@ -9048,7 +9102,7 @@
       {
         "id": "unit-undead",
         "name": "Undead",
-        "description": "Ignores morale; immune to fear.",
+        "description": "Ignores morale; immune to fear and Blindness.",
         "trigger": {
           "event": "passive"
         },
@@ -9062,6 +9116,15 @@
             "flag": "conditionImmunity",
             "conditions": [
               "fear"
+            ]
+          },
+          {
+            "kind": "flag",
+            "flag": "conditionImmunity",
+            "conditions": [
+              "disable_melee_attacks",
+              "disable_ranged_attacks",
+              "disable_spell_casting"
             ]
           }
         ]
@@ -9132,7 +9195,7 @@
       {
         "id": "unit-undead",
         "name": "Undead",
-        "description": "Ignores morale; immune to fear.",
+        "description": "Ignores morale; immune to fear and Blindness.",
         "trigger": {
           "event": "passive"
         },
@@ -9146,6 +9209,15 @@
             "flag": "conditionImmunity",
             "conditions": [
               "fear"
+            ]
+          },
+          {
+            "kind": "flag",
+            "flag": "conditionImmunity",
+            "conditions": [
+              "disable_melee_attacks",
+              "disable_ranged_attacks",
+              "disable_spell_casting"
             ]
           }
         ]
@@ -9233,7 +9305,7 @@
       {
         "id": "unit-undead",
         "name": "Undead",
-        "description": "Ignores morale; immune to fear.",
+        "description": "Ignores morale; immune to fear and Blindness.",
         "trigger": {
           "event": "passive"
         },
@@ -9247,6 +9319,15 @@
             "flag": "conditionImmunity",
             "conditions": [
               "fear"
+            ]
+          },
+          {
+            "kind": "flag",
+            "flag": "conditionImmunity",
+            "conditions": [
+              "disable_melee_attacks",
+              "disable_ranged_attacks",
+              "disable_spell_casting"
             ]
           }
         ]
@@ -9324,7 +9405,7 @@
       {
         "id": "unit-undead",
         "name": "Undead",
-        "description": "Ignores morale; immune to fear.",
+        "description": "Ignores morale; immune to fear and Blindness.",
         "trigger": {
           "event": "passive"
         },
@@ -9338,6 +9419,15 @@
             "flag": "conditionImmunity",
             "conditions": [
               "fear"
+            ]
+          },
+          {
+            "kind": "flag",
+            "flag": "conditionImmunity",
+            "conditions": [
+              "disable_melee_attacks",
+              "disable_ranged_attacks",
+              "disable_spell_casting"
             ]
           }
         ]
@@ -9395,7 +9485,7 @@
       {
         "id": "unit-undead",
         "name": "Undead",
-        "description": "Ignores morale; immune to fear.",
+        "description": "Ignores morale; immune to fear and Blindness.",
         "trigger": {
           "event": "passive"
         },
@@ -9409,6 +9499,15 @@
             "flag": "conditionImmunity",
             "conditions": [
               "fear"
+            ]
+          },
+          {
+            "kind": "flag",
+            "flag": "conditionImmunity",
+            "conditions": [
+              "disable_melee_attacks",
+              "disable_ranged_attacks",
+              "disable_spell_casting"
             ]
           }
         ]
@@ -9493,7 +9592,7 @@
       {
         "id": "unit-undead",
         "name": "Undead",
-        "description": "Ignores morale; immune to fear.",
+        "description": "Ignores morale; immune to fear and Blindness.",
         "trigger": {
           "event": "passive"
         },
@@ -9507,6 +9606,15 @@
             "flag": "conditionImmunity",
             "conditions": [
               "fear"
+            ]
+          },
+          {
+            "kind": "flag",
+            "flag": "conditionImmunity",
+            "conditions": [
+              "disable_melee_attacks",
+              "disable_ranged_attacks",
+              "disable_spell_casting"
             ]
           }
         ]
@@ -9584,7 +9692,7 @@
       {
         "id": "unit-undead",
         "name": "Undead",
-        "description": "Ignores morale; immune to fear.",
+        "description": "Ignores morale; immune to fear and Blindness.",
         "trigger": {
           "event": "passive"
         },
@@ -9598,6 +9706,15 @@
             "flag": "conditionImmunity",
             "conditions": [
               "fear"
+            ]
+          },
+          {
+            "kind": "flag",
+            "flag": "conditionImmunity",
+            "conditions": [
+              "disable_melee_attacks",
+              "disable_ranged_attacks",
+              "disable_spell_casting"
             ]
           }
         ]
@@ -9640,7 +9757,7 @@
       {
         "id": "unit-undead",
         "name": "Undead",
-        "description": "Ignores morale; immune to fear.",
+        "description": "Ignores morale; immune to fear and Blindness.",
         "trigger": {
           "event": "passive"
         },
@@ -9654,6 +9771,15 @@
             "flag": "conditionImmunity",
             "conditions": [
               "fear"
+            ]
+          },
+          {
+            "kind": "flag",
+            "flag": "conditionImmunity",
+            "conditions": [
+              "disable_melee_attacks",
+              "disable_ranged_attacks",
+              "disable_spell_casting"
             ]
           }
         ]
@@ -9696,7 +9822,7 @@
       {
         "id": "unit-undead",
         "name": "Undead",
-        "description": "Ignores morale; immune to fear.",
+        "description": "Ignores morale; immune to fear and Blindness.",
         "trigger": {
           "event": "passive"
         },
@@ -9710,6 +9836,15 @@
             "flag": "conditionImmunity",
             "conditions": [
               "fear"
+            ]
+          },
+          {
+            "kind": "flag",
+            "flag": "conditionImmunity",
+            "conditions": [
+              "disable_melee_attacks",
+              "disable_ranged_attacks",
+              "disable_spell_casting"
             ]
           }
         ]
@@ -9769,7 +9904,7 @@
       {
         "id": "unit-undead",
         "name": "Undead",
-        "description": "Ignores morale; immune to fear.",
+        "description": "Ignores morale; immune to fear and Blindness.",
         "trigger": {
           "event": "passive"
         },
@@ -9783,6 +9918,15 @@
             "flag": "conditionImmunity",
             "conditions": [
               "fear"
+            ]
+          },
+          {
+            "kind": "flag",
+            "flag": "conditionImmunity",
+            "conditions": [
+              "disable_melee_attacks",
+              "disable_ranged_attacks",
+              "disable_spell_casting"
             ]
           }
         ]
@@ -9878,7 +10022,7 @@
       {
         "id": "unit-undead",
         "name": "Undead",
-        "description": "Ignores morale; immune to fear.",
+        "description": "Ignores morale; immune to fear and Blindness.",
         "trigger": {
           "event": "passive"
         },
@@ -9892,6 +10036,15 @@
             "flag": "conditionImmunity",
             "conditions": [
               "fear"
+            ]
+          },
+          {
+            "kind": "flag",
+            "flag": "conditionImmunity",
+            "conditions": [
+              "disable_melee_attacks",
+              "disable_ranged_attacks",
+              "disable_spell_casting"
             ]
           }
         ]
@@ -9982,7 +10135,7 @@
       {
         "id": "unit-undead",
         "name": "Undead",
-        "description": "Ignores morale; immune to fear.",
+        "description": "Ignores morale; immune to fear and Blindness.",
         "trigger": {
           "event": "passive"
         },
@@ -9996,6 +10149,15 @@
             "flag": "conditionImmunity",
             "conditions": [
               "fear"
+            ]
+          },
+          {
+            "kind": "flag",
+            "flag": "conditionImmunity",
+            "conditions": [
+              "disable_melee_attacks",
+              "disable_ranged_attacks",
+              "disable_spell_casting"
             ]
           }
         ]
@@ -10052,7 +10214,7 @@
       {
         "id": "unit-undead",
         "name": "Undead",
-        "description": "Ignores morale; immune to fear.",
+        "description": "Ignores morale; immune to fear and Blindness.",
         "trigger": {
           "event": "passive"
         },
@@ -10066,6 +10228,15 @@
             "flag": "conditionImmunity",
             "conditions": [
               "fear"
+            ]
+          },
+          {
+            "kind": "flag",
+            "flag": "conditionImmunity",
+            "conditions": [
+              "disable_melee_attacks",
+              "disable_ranged_attacks",
+              "disable_spell_casting"
             ]
           }
         ]
@@ -10144,7 +10315,7 @@
       {
         "id": "unit-undead",
         "name": "Undead",
-        "description": "Ignores morale; immune to fear.",
+        "description": "Ignores morale; immune to fear and Blindness.",
         "trigger": {
           "event": "passive"
         },
@@ -10158,6 +10329,15 @@
             "flag": "conditionImmunity",
             "conditions": [
               "fear"
+            ]
+          },
+          {
+            "kind": "flag",
+            "flag": "conditionImmunity",
+            "conditions": [
+              "disable_melee_attacks",
+              "disable_ranged_attacks",
+              "disable_spell_casting"
             ]
           }
         ]
@@ -10222,7 +10402,7 @@
       {
         "id": "unit-undead",
         "name": "Undead",
-        "description": "Ignores morale; immune to fear.",
+        "description": "Ignores morale; immune to fear and Blindness.",
         "trigger": {
           "event": "passive"
         },
@@ -10236,6 +10416,15 @@
             "flag": "conditionImmunity",
             "conditions": [
               "fear"
+            ]
+          },
+          {
+            "kind": "flag",
+            "flag": "conditionImmunity",
+            "conditions": [
+              "disable_melee_attacks",
+              "disable_ranged_attacks",
+              "disable_spell_casting"
             ]
           }
         ]
@@ -10392,7 +10581,7 @@
       {
         "id": "unit-undead",
         "name": "Undead",
-        "description": "Ignores morale; immune to fear.",
+        "description": "Ignores morale; immune to fear and Blindness.",
         "trigger": {
           "event": "passive"
         },
@@ -10406,6 +10595,15 @@
             "flag": "conditionImmunity",
             "conditions": [
               "fear"
+            ]
+          },
+          {
+            "kind": "flag",
+            "flag": "conditionImmunity",
+            "conditions": [
+              "disable_melee_attacks",
+              "disable_ranged_attacks",
+              "disable_spell_casting"
             ]
           }
         ]

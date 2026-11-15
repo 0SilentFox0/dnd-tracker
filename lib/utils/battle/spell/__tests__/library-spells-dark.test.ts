@@ -2,6 +2,8 @@ import type { Spell } from '@prisma/client';
 import { describe, expect, it } from 'vitest';
 
 import { SPELLS } from '@/data/library/spells';
+import hommSpells from '@/data/templates/heroes-homm/spells.json';
+import hommUnits from '@/data/templates/heroes-homm/units.json';
 import { ParticipantSide, ParticipantSourceType } from '@/lib/constants/battle';
 import { createSpellMutation } from '@/lib/server/battles/mutations/spell/spell-mutation';
 import { makeParticipant, seq } from '@/lib/utils/abilities/__tests__/fixtures';
@@ -607,6 +609,108 @@ describe('Темрява — бібліотечні заклинання', () =>
             side: ParticipantSide.ENEMY,
             controlledBy: 'dm',
         });
+    });
+
+    it('Ляльковод може передати гравцеві керування ворожим героєм', () => {
+        const godric = hero('godric');
+
+        godric.basicInfo = {
+            ...godric.basicInfo,
+            side: ParticipantSide.ENEMY,
+            controlledBy: 'enemy-player',
+            sourceType: ParticipantSourceType.CHARACTER,
+        };
+
+        const ps = cast('puppet-master', ['godric'], [hero(), godric]).allParticipantsUpdated;
+
+        const controlledGodric = find(ps, 'godric');
+
+        expect(controlledGodric.basicInfo).toMatchObject({
+            side: ParticipantSide.ALLY,
+            controlledBy: 'user-1',
+        });
+
+        const start = processStartOfTurn(
+            controlledGodric,
+            2,
+            ps,
+            seq(0.5),
+            undefined,
+            DEFAULT_RULES
+        );
+
+        expect(endTurnCleanup(start.participant).basicInfo).toMatchObject({
+            side: ParticipantSide.ENEMY,
+            controlledBy: 'enemy-player',
+        });
+    });
+
+    it('шаблон HOMM5 описує дію Ляльковода на героїв', () => {
+        const puppetMaster = hommSpells.find(
+            (entry) => entry.slug === 'puppet-master'
+        );
+
+        expect(puppetMaster?.description).toContain('including a hero');
+        expect(puppetMaster?.spellEffects).toContainEqual(
+            expect.objectContaining({ kind: 'charm', affectsHeroes: true })
+        );
+    });
+
+    it('нежить імунна до Сліпоти', () => {
+        const base = world();
+
+        const orc = find(base, 'orc');
+
+        const undeadTraits = hommUnits.flatMap((entry) =>
+            (
+                (entry.abilities ?? []) as unknown as {
+                    id?: string;
+                    effects?: {
+                        kind?: string;
+                        flag?: string;
+                        conditions?: string[];
+                    }[];
+                }[]
+            ).filter((ability) => ability.id === 'unit-undead')
+        );
+
+        expect(undeadTraits.length).toBeGreaterThan(0);
+        expect(
+            undeadTraits.every((ability) =>
+                ability.effects?.some(
+                    (effect) =>
+                        effect.kind === 'flag' &&
+                        effect.flag === 'conditionImmunity' &&
+                        ['disable_melee_attacks', 'disable_ranged_attacks', 'disable_spell_casting'].every(
+                            (condition) => effect.conditions?.includes(condition)
+                        )
+                )
+            ) === true
+        ).toBe(true);
+
+        const undeadTrait = hommUnits
+            .find((entry) => entry.slug === 'necromancers-arcane-ghost')
+            ?.abilities?.find((ability) => ability.id === 'unit-undead');
+
+        if (!undeadTrait) throw new Error('unit-undead ability is missing');
+
+        const undead = {
+            ...orc,
+            battleData: {
+                ...orc.battleData,
+                resolvedAbilities: [
+                    {
+                        ...undeadTrait,
+                        key: 'unit:undead:unit-undead',
+                        source: { type: 'unit', id: 'undead', name: 'Нежить' },
+                    },
+                ],
+            },
+        } as unknown as BattleParticipant;
+
+        const ps = cast('blindness', ['orc'], [base[0], undead, base[2]]).allParticipantsUpdated;
+
+        expect(find(ps, 'orc').battleData.activeEffects).toHaveLength(0);
     });
 
     it('Вампіризм: атаки союзника лікують на 50 % завданої шкоди', () => {

@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { act, cleanup, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('@/components/hud/fonts', () => ({ hudFontClassName: '' }));
@@ -37,6 +37,15 @@ describe('MoraleResultOverlay', () => {
 
         expect(screen.getByText(title)).toBeTruthy();
         expect(screen.getByText(new RegExp(detail))).toBeTruthy();
+    });
+
+    it('успішну перевірку моралі можна закрити кнопкою повернення до бою', () => {
+        const { wrapper, showResult } = fakeScene({ result: extra });
+
+        render(<MoraleResultOverlay />, { wrapper });
+        fireEvent.click(screen.getByRole('button'));
+
+        expect(showResult).toHaveBeenCalledWith(null);
     });
 
     it('атаки й заклинання не займають екран — їх показує кутова картка', () => {

@@ -171,6 +171,23 @@ const SAMPLES: Record<string, Ability[]> = {
 };
 
 describe('unit ability catalog', () => {
+    it('undead are immune to Blindness', () => {
+        expect(catalog.undead()).toMatchObject({
+            description: expect.stringContaining('Сліпоти'),
+            effects: expect.arrayContaining([
+                {
+                    kind: 'flag',
+                    flag: 'conditionImmunity',
+                    conditions: [
+                        'disable_melee_attacks',
+                        'disable_ranged_attacks',
+                        'disable_spell_casting',
+                    ],
+                },
+            ]),
+        });
+    });
+
     it('every factory output is a valid ability', () => {
         for (const [factory, abilities] of Object.entries(SAMPLES)) {
             for (const ability of abilities) {
