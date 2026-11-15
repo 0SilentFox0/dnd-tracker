@@ -245,6 +245,27 @@ describe('battle map library service', () => {
         expect(await getMap(id, 1)).toBeNull();
     });
 
+    it('geometry save preserves tile layers on rows and in the new version snapshot', async () => {
+        const { id } = await createMap('c1', input());
+
+        const row = db.chunks.find((chunk) => chunk.mapId === id);
+
+        row!.tileLayers = { ground: 'r1:tiles' };
+
+        const saved = await saveMap(id, input({ walls: ['2:2:e'], bars: [] }));
+
+        const persisted = db.chunks.find((chunk) => chunk.mapId === id);
+
+        const version = db.versions.find(
+            (snapshot) => snapshot.mapId === id && snapshot.version === saved.version
+        );
+
+        expect(persisted?.tileLayers).toEqual({ ground: 'r1:tiles' });
+        expect((version?.payload as { tileLayers: unknown }).tileLayers).toEqual({
+            '0:0': { ground: 'r1:tiles' },
+        });
+    });
+
     it('save with a stale expectedVersion is a 409 conflict and writes nothing', async () => {
         const { id } = await createMap('c1', input());
 
