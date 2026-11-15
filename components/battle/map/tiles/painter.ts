@@ -10,7 +10,9 @@ export interface TileRasterAsset {
     variants?: readonly { image: CanvasImageSource; weight: number }[];
 }
 
-export type TileRasterAssets = Readonly<Record<number, TileRasterAsset | undefined>>;
+export type TileRasterAssets = Readonly<
+    Record<number, TileRasterAsset | undefined>
+>;
 
 const LAYER_ORDER: readonly TileLayer[] = [
     'ground',
@@ -74,17 +76,19 @@ function drawCell(
 ) {
     const footprint = definition.footprint;
 
-    const edgeOffset = definition.layer === 'edge-art' ? (cellPx * 3) / 8 : 0;
+    const isEdgeArt = definition.layer === 'edge-art';
 
-    const edgeHeight = definition.layer === 'edge-art' ? cellPx / 4 : cellPx;
+    const edgeWidth = isEdgeArt ? cellPx * 1.5 : footprint.cols * cellPx;
 
-    ctx.drawImage(
-        image,
-        (x - origin.x) * cellPx,
-        (y - origin.y) * cellPx + edgeOffset,
-        footprint.cols * cellPx,
-        footprint.rows * edgeHeight
-    );
+    const edgeHeight = isEdgeArt ? (cellPx * 3) / 8 : footprint.rows * cellPx;
+
+    const edgeX =
+        (x - origin.x) * cellPx - (isEdgeArt ? (edgeWidth - cellPx) / 2 : 0);
+
+    const edgeY =
+        (y - origin.y) * cellPx + (isEdgeArt ? (cellPx - edgeHeight) / 2 : 0);
+
+    ctx.drawImage(image, edgeX, edgeY, edgeWidth, edgeHeight);
 }
 
 function drawGroundBlend(
@@ -108,17 +112,61 @@ function drawGroundBlend(
     const y0 = (y - origin.y) * cellPx;
 
     const neighbors = [
-        { bit: 1, x, y: y - 1, points: [[0, 0], [cellPx, 0], [cellPx / 2, cellPx / 2]] },
-        { bit: 2, x: x + 1, y, points: [[cellPx, 0], [cellPx, cellPx], [cellPx / 2, cellPx / 2]] },
-        { bit: 4, x, y: y + 1, points: [[cellPx, cellPx], [0, cellPx], [cellPx / 2, cellPx / 2]] },
-        { bit: 8, x: x - 1, y, points: [[0, cellPx], [0, 0], [cellPx / 2, cellPx / 2]] },
+        {
+            bit: 1,
+            x,
+            y: y - 1,
+            points: [
+                [0, 0],
+                [cellPx, 0],
+                [cellPx / 2, cellPx / 2],
+            ],
+        },
+        {
+            bit: 2,
+            x: x + 1,
+            y,
+            points: [
+                [cellPx, 0],
+                [cellPx, cellPx],
+                [cellPx / 2, cellPx / 2],
+            ],
+        },
+        {
+            bit: 4,
+            x,
+            y: y + 1,
+            points: [
+                [cellPx, cellPx],
+                [0, cellPx],
+                [cellPx / 2, cellPx / 2],
+            ],
+        },
+        {
+            bit: 8,
+            x: x - 1,
+            y,
+            points: [
+                [0, cellPx],
+                [0, 0],
+                [cellPx / 2, cellPx / 2],
+            ],
+        },
     ] as const;
 
     const mask = edgeMask({
-        north: tileAt(chunks, 'ground', x, y - 1) !== 0 && tileAt(chunks, 'ground', x, y - 1) !== id,
-        east: tileAt(chunks, 'ground', x + 1, y) !== 0 && tileAt(chunks, 'ground', x + 1, y) !== id,
-        south: tileAt(chunks, 'ground', x, y + 1) !== 0 && tileAt(chunks, 'ground', x, y + 1) !== id,
-        west: tileAt(chunks, 'ground', x - 1, y) !== 0 && tileAt(chunks, 'ground', x - 1, y) !== id,
+        north:
+            tileAt(chunks, 'ground', x, y - 1) !== 0 &&
+            tileAt(chunks, 'ground', x, y - 1) !== id,
+        east:
+            tileAt(chunks, 'ground', x + 1, y) !== 0 &&
+            tileAt(chunks, 'ground', x + 1, y) !== id,
+        south:
+            tileAt(chunks, 'ground', x, y + 1) !== 0 &&
+            tileAt(chunks, 'ground', x, y + 1) !== id,
+        west:
+            tileAt(chunks, 'ground', x - 1, y) !== 0 &&
+            tileAt(chunks, 'ground', x - 1, y) !== id,
     });
 
     for (const neighbor of neighbors) {
@@ -209,8 +257,19 @@ export function drawTileViewport(
 
                         const image = variantImage(seed, x, y, id, asset);
 
-                        if (layer === 'ground' && definition.autotile === 'ground-16') {
-                            drawCell(ctx, image, definition, x, y, window, cellPx);
+                        if (
+                            layer === 'ground' &&
+                            definition.autotile === 'ground-16'
+                        ) {
+                            drawCell(
+                                ctx,
+                                image,
+                                definition,
+                                x,
+                                y,
+                                window,
+                                cellPx
+                            );
                             drawGroundBlend(ctx, {
                                 chunks,
                                 assets,
@@ -223,7 +282,15 @@ export function drawTileViewport(
                                 seed,
                             });
                         } else {
-                            drawCell(ctx, image, definition, x, y, window, cellPx);
+                            drawCell(
+                                ctx,
+                                image,
+                                definition,
+                                x,
+                                y,
+                                window,
+                                cellPx
+                            );
                         }
                     }
                 }

@@ -1,11 +1,21 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
-import { useTranslations } from 'next-intl';
-import { ArrowLeft } from 'lucide-react';
+import { useLocale, useTranslations } from 'next-intl';
+import {
+    ArrowLeft,
+    Brush,
+    Eraser,
+    Minus,
+    PaintBucket,
+    Pipette,
+    Square,
+} from 'lucide-react';
 
 import { BattleMap } from '@/components/battle/map';
+import { tileAssetUrl } from '@/components/battle/map/tiles/assets';
 import { MapBackgroundSection } from '@/components/battle/setup/MapBackgroundSection';
 import { MapCellToolsSection } from '@/components/battle/setup/MapCellToolsSection';
 import {
@@ -18,6 +28,7 @@ import { BoundedNumberInput } from '@/components/ui/bounded-number-input';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MAP_LIMITS } from '@/lib/constants/map-limits';
 import { TILE_CATALOG } from '@/lib/constants/tilesets/catalog';
 import {
@@ -35,6 +46,8 @@ import {
     isPreviewSafeBackground,
     MIN_SIDE,
 } from '@/lib/utils/battle/grid';
+import enTileLabels from '@/messages/en/tile-labels.json';
+import ukTileLabels from '@/messages/uk/tile-labels.json';
 import type { BattleMapFull, BattleMapTileChunks } from '@/types/battle-map';
 
 function BackLink({ campaignId }: { campaignId: string }) {
@@ -51,6 +64,40 @@ function BackLink({ campaignId }: { campaignId: string }) {
 }
 
 type Panel = 'background' | 'cells' | 'edges' | 'tiles';
+
+function TileAssetImage({
+    tile,
+    alt,
+    className,
+}: {
+    tile: (typeof TILE_CATALOG)[number];
+    alt: string;
+    className: string;
+}) {
+    const width = tile.layer === 'edge-art' ? 256 : tile.footprint.cols * 256;
+
+    const height = tile.layer === 'edge-art' ? 64 : tile.footprint.rows * 256;
+
+    return (
+        <Image
+            src={tileAssetUrl(tile)}
+            alt={alt}
+            width={width}
+            height={height}
+            unoptimized
+            className={className}
+        />
+    );
+}
+
+const TILE_TOOLS = [
+    { key: 'brush', icon: Brush },
+    { key: 'line', icon: Minus },
+    { key: 'rectangle', icon: Square },
+    { key: 'fill', icon: PaintBucket },
+    { key: 'eraser', icon: Eraser },
+    { key: 'picker', icon: Pipette },
+] as const;
 
 const PANELS: Panel[] = ['background', 'cells', 'edges', 'tiles'];
 
@@ -99,12 +146,19 @@ function EditorContent({
     const tileEditor = useTileEditor({
         initialChunks: tileData.chunks,
         version: tileData.version,
-        mapSize: { cols: draft.editor.state.map.cols, rows: draft.editor.state.map.rows },
+        mapSize: {
+            cols: draft.editor.state.map.cols,
+            rows: draft.editor.state.map.rows,
+        },
     });
 
     const tileSave = usePatchBattleMapTiles(campaignId, source.id);
 
-    const [panel, setPanel] = useState<Panel>('background');
+    const [panel, setPanel] = useState<Panel>(() =>
+        source.map.background ? 'background' : 'tiles'
+    );
+
+    const [tileSearch, setTileSearch] = useState('');
 
     const { undo, redo } = tileEditor;
 
@@ -157,10 +211,38 @@ function EditorContent({
 
     const tileTranslations = useTranslations('maps.editor.tiles');
 
-    const previewMap =
-        isPreviewSafeBackground(map.background) || map.background === null
-            ? map
-            : { ...map, background: null };
+    const locale = useLocale() === 'uk' ? 'uk' : 'en';
+
+    const tileLabels = locale === 'uk' ? ukTileLabels : enTileLabels;
+
+    const tileLabel = (key: string) =>
+        (tileLabels as Record<string, string>)[key] ?? key;
+
+    const previewMap = paintingTiles
+        ? { ...map, background: null }
+        : isPreviewSafeBackground(map.background) || map.background === null
+          ? map
+          : { ...map, background: null };
+
+    const selectedTile = TILE_CATALOG.find(
+        (tile) => tile.id === tileEditor.selectedTileId
+    );
+
+    const visibleTiles = TILE_CATALOG.filter((tile) => {
+        if (tile.layer !== tileEditor.activeLayer) return false;
+
+        const name = tileLabel(tile.key);
+
+        return name
+            .toLocaleLowerCase()
+            .includes(tileSearch.trim().toLocaleLowerCase());
+    });
+
+    const selectPanel = (nextPanel: Panel) => {
+        if (panel !== nextPanel) editor.actions.setTool(null);
+
+        setPanel(nextPanel);
+    };
 
     return (
         <div className="flex h-[calc(100dvh-3.5rem)] flex-col gap-2 p-2">
@@ -222,7 +304,7 @@ function EditorContent({
             >
                 {notice ? text(notice) : draft.justSaved ? t('saved') : ''}
             </p>
-            <div className="grid min-h-0 flex-1 gap-3 lg:grid-cols-[minmax(0,1fr)_20rem]">
+            <div className="grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_minmax(14rem,42%)] gap-3 overflow-hidden lg:grid-cols-[minmax(0,1fr)_20rem] lg:grid-rows-1">
                 <div className="min-h-0 min-w-0">
                     <BattleMap
                         map={previewMap}
@@ -232,128 +314,298 @@ function EditorContent({
                                 ? tileEditor.onStroke
                                 : editor.actions.onStroke,
                         }}
-                        tiles={
-                            {
-                                      mapId: source.id,
-                                      version: tileEditor.version,
-                                      seed: source.id,
-                                      chunks: tileEditor.chunks,
-                                      assets: {},
-                            }
-                        }
+                        tiles={{
+                            mapId: source.id,
+                            version: tileEditor.version,
+                            seed: source.id,
+                            chunks: tileEditor.chunks,
+                            assets: {},
+                        }}
                         className="h-full"
                         editing={{
-                            clickableBlocked: paintingTiles || cellTool,
-                            strokeTool: paintingTiles || cellTool,
+                            clickableBlocked:
+                                paintingTiles ||
+                                (panel === 'cells' && cellTool),
+                            strokeTool:
+                                paintingTiles ||
+                                (panel === 'cells' && cellTool),
                             showBlocked: true,
-                            edges: editor.edgeEditing,
+                            edges:
+                                panel === 'edges' ? editor.edgeEditing : null,
                             doorLocks: true,
                         }}
                     />
                 </div>
-                <aside className="min-h-0 space-y-3 overflow-y-auto pr-1">
-                    <div className="flex gap-1" role="tablist">
-                        {PANELS.map((p) => (
-                            <Button
-                                key={p}
-                                type="button"
-                                role="tab"
-                                aria-selected={panel === p}
-                                size="sm"
-                                variant={panel === p ? 'default' : 'outline'}
-                                onClick={() => setPanel(p)}
-                            >
-                                {t(`panels.${p}`)}
-                            </Button>
-                        ))}
-                    </div>
-                    {panel === 'background' && (
-                        <MapBackgroundSection editor={editor} />
-                    )}
-                    {panel === 'cells' && (
-                        <MapCellToolsSection editor={editor} />
-                    )}
-                    {panel === 'edges' && (
-                        <div className="space-y-2">
-                            <Label className="text-xs">{t('edges')}</Label>
-                            <ToolButtons
-                                tools={EDGE_TOOLS}
-                                tool={tool}
-                                onPick={editor.actions.setTool}
-                            />
-                            <DoorToolOptions editor={editor} />
-                        </div>
-                    )}
-                    {panel === 'tiles' && (
-                        <div className="space-y-3">
-                            <div className="flex flex-wrap gap-1" role="group" aria-label={tileTranslations('layers')}>
-                                {(['ground', 'wallfill', 'objects', 'edge-art'] as const).map((layer) => (
-                                    <Button
-                                        key={layer}
-                                        type="button"
-                                        size="sm"
-                                        variant={tileEditor.activeLayer === layer ? 'default' : 'outline'}
-                                        onClick={() => tileEditor.setActiveLayer(layer)}
-                                    >
-                                        {tileTranslations(`layer.${layer}`)}
-                                    </Button>
-                                ))}
-                            </div>
-                            <div className="flex flex-wrap gap-1" role="group" aria-label={tileTranslations('tools')}>
-                                {(['brush', 'line', 'rectangle', 'fill', 'eraser', 'picker'] as const).map((nextTool) => (
-                                    <Button
-                                        key={nextTool}
-                                        type="button"
-                                        size="sm"
-                                        variant={tileEditor.tool === nextTool ? 'default' : 'outline'}
-                                        onClick={() => tileEditor.setTool(nextTool)}
-                                    >
-                                        {tileTranslations(`tool.${nextTool}`)}
-                                    </Button>
-                                ))}
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <Label htmlFor="tile-brush-size" className="text-xs">{tileTranslations('brushSize')}</Label>
-                                <select
-                                    id="tile-brush-size"
-                                    className="h-8 rounded border bg-background px-2 text-sm"
-                                    value={tileEditor.brushSize}
-                                    onChange={(event) => tileEditor.setBrushSize(Number(event.target.value))}
-                                >
-                                    {[1, 2, 3].map((size) => <option key={size} value={size}>{size}</option>)}
-                                </select>
-                            </div>
-                            <div className="grid grid-cols-2 gap-1">
-                                {TILE_CATALOG.filter((tile) => tile.layer === tileEditor.activeLayer).map((tile) => (
-                                    <Button
-                                        key={tile.id}
-                                        type="button"
-                                        size="sm"
-                                        variant={tileEditor.selectedTileId === tile.id ? 'default' : 'outline'}
-                                        onClick={() => tileEditor.setSelectedTile(tile.id)}
-                                    >
-                                        {tileTranslations(`name.${tile.key}`)}
-                                    </Button>
-                                ))}
-                            </div>
-                            <div className="flex gap-1">
-                                <Button type="button" size="sm" variant="outline" disabled={!tileEditor.canUndo} onClick={tileEditor.undo}>{tileTranslations('undo')}</Button>
-                                <Button type="button" size="sm" variant="outline" disabled={!tileEditor.canRedo} onClick={tileEditor.redo}>{tileTranslations('redo')}</Button>
-                                <Button
+                <aside className="min-h-0 space-y-3 overflow-x-hidden overflow-y-auto pr-1">
+                    <Tabs
+                        value={panel}
+                        onValueChange={(value) => selectPanel(value as Panel)}
+                        className="min-w-0"
+                    >
+                        <TabsList className="h-auto w-full flex-wrap justify-start gap-1 rounded-md bg-transparent p-0">
+                            {PANELS.map((p) => (
+                                <TabsTrigger
+                                    key={p}
                                     type="button"
-                                    size="sm"
-                                    disabled={!tileEditor.isDirty || tileSave.isPending}
-                                    onClick={() => tileSave.mutate(
-                                        { expectedVersion: tileEditor.version, patches: tileEditor.dirtyPatches },
-                                        { onSuccess: ({ version }) => { tileEditor.acceptSaved(); draft.acceptVersion(version); } }
-                                    )}
+                                    value={p}
+                                    className="min-w-0 flex-1 rounded-md border border-hud-rule bg-black/30 px-2 text-xs text-hud-muted data-[state=active]:border-[var(--gold)] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
                                 >
-                                    {tileSave.isPending ? tileTranslations('saving') : tileTranslations('save')}
-                                </Button>
+                                    {t(`panels.${p}`)}
+                                </TabsTrigger>
+                            ))}
+                        </TabsList>
+                        <TabsContent value="background">
+                            <MapBackgroundSection editor={editor} />
+                        </TabsContent>
+                        <TabsContent value="cells">
+                            <MapCellToolsSection editor={editor} />
+                        </TabsContent>
+                        <TabsContent value="edges">
+                            <div className="space-y-2">
+                                <Label className="text-xs">{t('edges')}</Label>
+                                <ToolButtons
+                                    tools={EDGE_TOOLS}
+                                    tool={tool}
+                                    onPick={editor.actions.setTool}
+                                />
+                                <DoorToolOptions editor={editor} />
                             </div>
-                            {tileSave.isError && <p role="alert" className="text-sm text-destructive">{tileTranslations('saveFailed')}</p>}
-                        </div>
-                    )}
+                        </TabsContent>
+                        <TabsContent value="tiles">
+                            <div className="space-y-3">
+                                <div
+                                    className="grid grid-cols-2 gap-1"
+                                    role="group"
+                                    aria-label={tileTranslations('layers')}
+                                >
+                                    {(
+                                        [
+                                            'ground',
+                                            'wallfill',
+                                            'objects',
+                                            'edge-art',
+                                        ] as const
+                                    ).map((layer) => (
+                                        <Button
+                                            key={layer}
+                                            type="button"
+                                            size="sm"
+                                            className="min-w-0 px-2 text-xs"
+                                            aria-pressed={
+                                                tileEditor.activeLayer === layer
+                                            }
+                                            variant={
+                                                tileEditor.activeLayer === layer
+                                                    ? 'default'
+                                                    : 'outline'
+                                            }
+                                            onClick={() =>
+                                                tileEditor.setActiveLayer(layer)
+                                            }
+                                        >
+                                            {tileTranslations(`layer.${layer}`)}
+                                        </Button>
+                                    ))}
+                                </div>
+                                <p
+                                    className="text-xs text-hud-muted"
+                                    aria-live="polite"
+                                >
+                                    {tileTranslations(
+                                        `tool.${tileEditor.tool}`
+                                    )}
+                                </p>
+                                <div
+                                    className="grid grid-cols-6 gap-1"
+                                    role="group"
+                                    aria-label={tileTranslations('tools')}
+                                >
+                                    {TILE_TOOLS.map(
+                                        ({ key: nextTool, icon: Icon }) => (
+                                            <Button
+                                                key={nextTool}
+                                                type="button"
+                                                size="icon"
+                                                aria-label={tileTranslations(
+                                                    `tool.${nextTool}`
+                                                )}
+                                                aria-pressed={
+                                                    tileEditor.tool === nextTool
+                                                }
+                                                title={tileTranslations(
+                                                    `tool.${nextTool}`
+                                                )}
+                                                className="w-full"
+                                                variant={
+                                                    tileEditor.tool === nextTool
+                                                        ? 'default'
+                                                        : 'outline'
+                                                }
+                                                onClick={() =>
+                                                    tileEditor.setTool(nextTool)
+                                                }
+                                            >
+                                                <Icon
+                                                    aria-hidden="true"
+                                                    className="h-4 w-4"
+                                                />
+                                            </Button>
+                                        )
+                                    )}
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <Label
+                                        htmlFor="tile-brush-size"
+                                        className="text-xs"
+                                    >
+                                        {tileTranslations('brushSize')}
+                                    </Label>
+                                    <select
+                                        id="tile-brush-size"
+                                        className="h-8 rounded border bg-background px-2 text-sm"
+                                        value={tileEditor.brushSize}
+                                        onChange={(event) =>
+                                            tileEditor.setBrushSize(
+                                                Number(event.target.value)
+                                            )
+                                        }
+                                    >
+                                        {[1, 2, 3].map((size) => (
+                                            <option key={size} value={size}>
+                                                {size}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                                {selectedTile && (
+                                    <div className="overflow-hidden rounded-md border border-hud-rule bg-black/20 p-2">
+                                        <p
+                                            className="mb-1 truncate text-xs font-medium"
+                                            aria-live="polite"
+                                        >
+                                            {tileLabel(selectedTile.key)}
+                                        </p>
+                                        <div className="flex h-16 items-center justify-center rounded bg-black/30 p-1">
+                                            <TileAssetImage
+                                                tile={selectedTile}
+                                                alt={tileLabel(
+                                                    selectedTile.key
+                                                )}
+                                                className="max-h-full max-w-full object-contain"
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+                                <Input
+                                    aria-label={tileTranslations('search')}
+                                    placeholder={tileTranslations('search')}
+                                    value={tileSearch}
+                                    onChange={(event) =>
+                                        setTileSearch(event.target.value)
+                                    }
+                                    className="h-8 text-sm"
+                                />
+                                <div className="grid grid-cols-2 gap-1 sm:grid-cols-3">
+                                    {visibleTiles.map((tile) => (
+                                        <Button
+                                            key={tile.id}
+                                            type="button"
+                                            size="sm"
+                                            aria-pressed={
+                                                tileEditor.selectedTileId ===
+                                                tile.id
+                                            }
+                                            aria-label={tileLabel(tile.key)}
+                                            title={tileLabel(tile.key)}
+                                            className="h-auto min-w-0 flex-col gap-1 px-1 py-1.5 text-center whitespace-normal"
+                                            variant={
+                                                tileEditor.selectedTileId ===
+                                                tile.id
+                                                    ? 'default'
+                                                    : 'outline'
+                                            }
+                                            onClick={() =>
+                                                tileEditor.setSelectedTile(
+                                                    tile.id
+                                                )
+                                            }
+                                        >
+                                            <span className="flex h-12 w-full items-center justify-center overflow-hidden rounded bg-black/30 p-1">
+                                                <TileAssetImage
+                                                    tile={tile}
+                                                    alt=""
+                                                    className="max-h-full max-w-full object-contain"
+                                                />
+                                            </span>
+                                            <span className="line-clamp-2 w-full text-[11px] leading-tight">
+                                                {tileLabel(tile.key)}
+                                            </span>
+                                        </Button>
+                                    ))}
+                                </div>
+                                <div className="flex flex-wrap gap-1">
+                                    <Button
+                                        type="button"
+                                        size="sm"
+                                        variant="outline"
+                                        disabled={!tileEditor.canUndo}
+                                        onClick={tileEditor.undo}
+                                    >
+                                        {tileTranslations('undo')}
+                                    </Button>
+                                    <Button
+                                        type="button"
+                                        size="sm"
+                                        variant="outline"
+                                        disabled={!tileEditor.canRedo}
+                                        onClick={tileEditor.redo}
+                                    >
+                                        {tileTranslations('redo')}
+                                    </Button>
+                                    <Button
+                                        type="button"
+                                        size="sm"
+                                        disabled={
+                                            !tileEditor.isDirty ||
+                                            tileSave.isPending
+                                        }
+                                        onClick={() =>
+                                            tileSave.mutate(
+                                                {
+                                                    expectedVersion:
+                                                        tileEditor.version,
+                                                    patches:
+                                                        tileEditor.dirtyPatches,
+                                                },
+                                                {
+                                                    onSuccess: ({
+                                                        version,
+                                                    }) => {
+                                                        tileEditor.acceptSaved();
+                                                        draft.acceptVersion(
+                                                            version
+                                                        );
+                                                    },
+                                                }
+                                            )
+                                        }
+                                    >
+                                        {tileSave.isPending
+                                            ? tileTranslations('saving')
+                                            : tileTranslations('save')}
+                                    </Button>
+                                </div>
+                                {tileSave.isError && (
+                                    <p
+                                        role="alert"
+                                        className="text-sm text-destructive"
+                                    >
+                                        {tileTranslations('saveFailed')}
+                                    </p>
+                                )}
+                            </div>
+                        </TabsContent>
+                    </Tabs>
                 </aside>
             </div>
         </div>

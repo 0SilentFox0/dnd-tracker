@@ -60,6 +60,7 @@
         "picker": "Picker"
       },
       "brushSize": "Brush size",
+      "search": "Search textures",
       "name": {
         "stone-floor": "Stone floor",
         "grass": "Grass",
