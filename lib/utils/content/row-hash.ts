@@ -45,7 +45,10 @@ export function contentRowHash(
         row.characteristics = rest;
     }
 
-    if (model === 'Unit' && isEmptyCharacteristics(row.characteristics))
+    if (
+        (model === 'Unit' || model === 'Character') &&
+        isEmptyCharacteristics(row.characteristics)
+    )
         delete row.characteristics;
 
     if (model === 'Artifact' && row.systemStats == null) delete row.systemStats;

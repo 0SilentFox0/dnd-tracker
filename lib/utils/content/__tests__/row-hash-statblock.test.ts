@@ -71,6 +71,12 @@ describe('contentRowHash statblock fold', () => {
         );
     });
 
+    it('Character null and {} characteristics hash the same', () => {
+        expect(
+            contentRowHash('Character', { ...unit, characteristics: null })
+        ).toBe(contentRowHash('Character', { ...unit, characteristics: {} }));
+    });
+
     it('a flat pack row hashes as before', () => {
         expect(contentRowHash('Unit', unit)).toBe(
             contentRowHash('Unit', legacy(unit))
