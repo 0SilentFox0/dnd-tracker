@@ -444,7 +444,28 @@ async function patchCore(gate: Gate, parsed: Parsed) {
                       fresh.characteristics
                   );
               })
-            : await writeUpdate(prisma, resolved.classesInput);
+            : await prisma.$transaction(async (tx) => {
+                  await lockCharacters(tx, [characterId]);
+
+                  const fresh = await tx.character.findUnique({
+                      where: { id: characterId },
+                      select: { characteristics: true },
+                  });
+
+                  if (!fresh)
+                      throw new ContentError(
+                          API_ERRORS.CHARACTER_NOT_FOUND,
+                          404
+                      );
+
+                  return writeUpdate(
+                      tx,
+                      resolved.classesInput,
+                      undefined,
+                      undefined,
+                      fresh.characteristics
+                  );
+              });
 
     await notifyCharacterOwners({
         campaignId,

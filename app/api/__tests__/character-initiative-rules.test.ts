@@ -16,6 +16,9 @@ vi.mock('@/lib/utils/api/api-auth', () => ({
 vi.mock('@/lib/server/characters/core/resolve-character-owner', () => ({
     resolveCharacterOwner: vi.fn(async () => ({ controlledBy: 'owner' })),
 }));
+vi.mock('@/lib/server/characters/lock', () => ({
+    lockCharacters: vi.fn().mockResolvedValue(new Map()),
+}));
 vi.mock('@/lib/supabase/avatar-storage', () => ({
     resolveAvatarForPersistence: vi.fn(async (a: string | undefined) => ({
         ok: true,
@@ -27,6 +30,7 @@ vi.mock('@/lib/db', () => ({
         character: { create: vi.fn(), findUnique: vi.fn(), update: vi.fn() },
         characterInventory: { create: vi.fn() },
         race: { findFirst: vi.fn() },
+        $transaction: vi.fn(),
     },
 }));
 
@@ -74,6 +78,9 @@ const patch = (body: object) =>
 describe('ініціатива героя за правилами кампанії', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        vi.mocked(prisma.$transaction).mockImplementation(
+            ((fn: (tx: unknown) => unknown) => fn(prisma)) as never
+        );
         vi.mocked(prisma.race.findFirst).mockResolvedValue(null);
         vi.mocked(prisma.character.create).mockImplementation((async (args: {
             data: object;
