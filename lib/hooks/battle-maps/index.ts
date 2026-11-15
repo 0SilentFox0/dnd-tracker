@@ -5,5 +5,7 @@ export {
     useBattleMap,
     useBattleMapMutations,
     useBattleMaps,
+    useBattleMapTiles,
+    usePatchBattleMapTiles,
 } from './useBattleMaps';
 export { type NewMapForm, useMapLibrary } from './useMapLibrary';

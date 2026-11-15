@@ -6,7 +6,12 @@ import {
 } from './client';
 
 import type { BattleMapInput } from '@/lib/schemas/battle-maps';
-import type { BattleMapBrief, BattleMapFull } from '@/types/battle-map';
+import type { BattleMapTilePatchInput } from '@/lib/schemas/battle-maps';
+import type {
+    BattleMapBrief,
+    BattleMapFull,
+    BattleMapTileChunks,
+} from '@/types/battle-map';
 
 export const getBattleMaps = (campaignId: string) =>
     campaignGet<BattleMapBrief[]>(campaignId, '/maps', { cache: 'no-store' });
@@ -33,6 +38,23 @@ export const updateBattleMap = (
 
 export const deleteBattleMap = (campaignId: string, mapId: string) =>
     campaignDelete<{ success: true }>(campaignId, `/maps/${mapId}`);
+
+export const getBattleMapTiles = (
+    campaignId: string,
+    mapId: string,
+    version?: number
+) =>
+    campaignGet<BattleMapTileChunks>(
+        campaignId,
+        `/maps/${mapId}/tiles${version === undefined ? '' : `?version=${version}`}`,
+        { cache: 'no-store' }
+    );
+
+export const patchBattleMapTiles = (
+    campaignId: string,
+    mapId: string,
+    data: BattleMapTilePatchInput
+) => campaignPut<{ version: number }>(campaignId, `/maps/${mapId}/tiles`, data);
 
 export const cloneBattleMap = (
     campaignId: string,

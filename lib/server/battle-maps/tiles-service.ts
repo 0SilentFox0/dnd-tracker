@@ -81,6 +81,8 @@ export async function getTileChunks(mapId: string, version: number) {
     return splitTileSnapshot(payload.tileLayers);
 }
 
+export const getPinnedTileChunks = getTileChunks;
+
 export async function patchTileChunks(
     mapId: string,
     expectedVersion: number,

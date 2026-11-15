@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { MapCameraControls } from './camera/MapCameraControls';
 import { MapMinimap } from './camera/MapMinimap';
+import type { TileRenderState } from './tiles/TileCanvas';
 import { WeatherLayer } from './weather/WeatherLayer';
 import { ATTACK_CURSOR } from './attack-cursors';
 import { MapStage } from './MapStage';
@@ -50,6 +51,7 @@ export interface BattleMapProps {
     participants: BattleParticipant[];
     view?: BattleMapView;
     actions?: BattleMapActions;
+    tiles?: TileRenderState;
     className?: string;
     editing?: BattleMapEditing;
     /** телефон: карта обрізана до ігрових клітинок, на всю ширину й вертикально, якщо вона альбомна */
@@ -80,6 +82,7 @@ export function BattleMap({
     participants,
     view,
     actions,
+    tiles,
     className,
     editing = NO_EDITING,
     phone = false,
@@ -357,6 +360,7 @@ export function BattleMap({
                             participants={participants}
                             view={view}
                             actions={actions}
+                            tiles={tiles}
                             editing={stageEditing}
                             layout={layout}
                             interaction={interaction}

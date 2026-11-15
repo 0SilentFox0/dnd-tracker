@@ -226,6 +226,17 @@ export function BattleMapPanel({ phone = false }: { phone?: boolean }) {
             )}
             <BattleMap
                 map={scene.map}
+                tiles={
+                    scene.tileChunks && scene.battle.mapRef
+                        ? {
+                              mapId: scene.battle.mapRef.mapId,
+                              version: scene.tileVersion ?? scene.battle.mapRef.version,
+                              seed: scene.battle.mapRef.mapId,
+                              chunks: scene.tileChunks,
+                              assets: {},
+                          }
+                        : undefined
+                }
                 participants={scene.participants}
                 view={scene.view}
                 actions={scene.actions}

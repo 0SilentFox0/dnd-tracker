@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { useBattleMapMutations } from './useBattleMaps';
@@ -37,7 +37,9 @@ export function useMapEditorDraft(campaignId: string, source: BattleMapFull) {
 
     const backgroundRef = useRef(editor.state.map.background);
 
-    backgroundRef.current = editor.state.map.background;
+    useEffect(() => {
+        backgroundRef.current = editor.state.map.background;
+    }, [editor.state.map.background]);
 
     const [name, setName] = useState(source.name);
 
@@ -123,6 +125,8 @@ export function useMapEditorDraft(campaignId: string, source: BattleMapFull) {
         isDirty,
         justSaved: justSaved && !isDirty,
         isSaving: update.isPending,
+        version,
+        acceptVersion: setVersion,
         canSave: isDirty && name.trim() !== '' && !update.isPending,
         save,
     };
