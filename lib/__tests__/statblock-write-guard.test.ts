@@ -9,13 +9,9 @@ const SCANNED = ['lib', 'app', 'scripts', 'systems'];
 const COLUMNS =
     'strength|dexterity|constitution|intelligence|wisdom|charisma|armorClass|initiative|speed';
 
-const COLUMN =
-    /\b(?:strength|dexterity|constitution|intelligence|wisdom|charisma|armorClass|initiative|speed)\s*:/;
-
-const WRITE =
-    /\b(?:character|unit|unitBase)\.(?:create|createMany|update|updateMany|upsert)\s*\(|\bPrisma\.(?:Unit|Character|UnitBase)\w*(?:Create|Update)\w*Input\b|\bfunction\s+\w*RowData\b/;
-
-const DUAL_WRITE = /\bcharacteristics(?:Patch)?\b|\bd20RowData\b|\bdraftFields\(/;
+const COLUMN = new RegExp(
+    `(?:\\b(?:${COLUMNS})\\s*:|\\b(?:${COLUMNS})\\b(?=\\s*[,}])|\\[\\s*['\"](?:${COLUMNS})['\"]\\s*\\]\\s*:)`
+);
 
 /** Only goes down; the S.4 switch removes the need for it. */
 const EXEMPT: string[] = [];
@@ -23,7 +19,7 @@ const EXEMPT: string[] = [];
 const CALL_EXEMPT: string[] = [];
 
 export const writesWithoutCharacteristics = (text: string) =>
-    COLUMN.test(text) && WRITE.test(text) && !DUAL_WRITE.test(text);
+    callsWithoutCharacteristics(text).length > 0;
 
 const CALL =
     /\b(?:character|unit|unitBase)\.(?:create|createMany|update|updateMany|upsert)\s*\(/g;
@@ -35,9 +31,59 @@ const SPREAD_IDENTIFIER = /\.\.\.\s*([A-Za-z_$][\w$]*)/g;
 const spreadsStatObject = (body: string, source: string) =>
     [...body.matchAll(SPREAD_IDENTIFIER)].some(([, name]) =>
         new RegExp(
-            `\\b(?:const|let|var)\\s+${name}\\s*=\\s*\\{[^}]*\\b(?:${COLUMNS})\\s*:`
+            `\\b(?:const|let|var)\\s+${name}\\s*=\\s*\\{[^}]*${COLUMN.source}`
         ).test(source)
     );
+
+const objectBodyAfter = (text: string, start: number): string => {
+    const open = text.indexOf('{', start);
+
+    if (open < 0) return text.slice(start);
+
+    let depth = 0;
+
+    for (let i = open; i < text.length; i++) {
+        if (text[i] === '{') depth++;
+
+        if (text[i] === '}' && --depth === 0) return text.slice(open, i + 1);
+    }
+
+    return text.slice(open);
+};
+
+const writeData = (body: string) => {
+    const match = /\bdata\s*:\s*/.exec(body);
+
+    if (!match) return '';
+
+    const start = match.index + match[0].length;
+
+    return body[start] === '{'
+        ? objectBodyAfter(body, start)
+        : body.slice(start);
+};
+
+const hasDualWriteData = (body: string) =>
+    /\b(?:characteristics(?:Patch)?|d20RowData|draftFields|unitCreateData|toUnitCreateData)\b/.test(
+        writeData(body)
+    );
+
+const hasStatSpread = (body: string, source: string) => {
+    const data = writeData(body);
+
+    const keyVariable = new RegExp(
+        `\\b(?:const|let)\\s+([A-Za-z_$][\\w$]*)\\s*=\\s*['\"](?:${COLUMNS})['\"]`
+    );
+
+    const keyMatch = keyVariable.exec(source);
+
+    return (
+        COLUMN.test(data) ||
+        SCORE_SPREAD.test(data) ||
+        spreadsStatObject(data, source) ||
+        Boolean(keyMatch && data.includes(`[${keyMatch[1]}]`))
+    );
+};
 
 function callBodies(text: string): string[] {
     const bodies: string[] = [];
@@ -65,10 +111,7 @@ function callBodies(text: string): string[] {
 export const callsWithoutCharacteristics = (text: string) =>
     callBodies(text).filter(
         (body) =>
-            (COLUMN.test(body) ||
-                SCORE_SPREAD.test(body) ||
-                spreadsStatObject(body, text)) &&
-            !DUAL_WRITE.test(body)
+            hasStatSpread(body, text) && !hasDualWriteData(body)
     );
 
 const offenders = () =>
@@ -90,6 +133,26 @@ describe('statblock writes carry characteristics', () => {
                 'prisma.unit.create({ data: d20RowData({ strength: 10 }) })'
             )
         ).toBe(false);
+        expect(
+            callsWithoutCharacteristics(
+                'const strength = 10; prisma.unit.create({ data: { strength } })'
+            )
+        ).toHaveLength(1);
+        expect(
+            callsWithoutCharacteristics(
+                "const key = 'strength'; prisma.unit.update({ data: { [key]: 16 } })"
+            )
+        ).toHaveLength(1);
+        expect(
+            callsWithoutCharacteristics(
+                'const strength = 10; const stats = { strength }; prisma.unit.create({ data: { ...stats } })'
+            )
+        ).toHaveLength(1);
+        expect(
+            callsWithoutCharacteristics(
+                'prisma.unit.update({ data: { strength: 10 }, select: { characteristics: true } })'
+            )
+        ).toHaveLength(1);
         expect(
             writesWithoutCharacteristics(
                 'prisma.skill.create({ data: { speed: 1 } })'

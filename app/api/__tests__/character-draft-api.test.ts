@@ -15,7 +15,13 @@ vi.mock('@/lib/utils/api/api-auth', () => ({
 
 const tx = vi.hoisted(() => ({
     $executeRaw: vi.fn(),
-    character: { count: vi.fn(), create: vi.fn() },
+    $queryRaw: vi.fn(),
+    character: {
+        count: vi.fn(),
+        create: vi.fn(),
+        findUnique: vi.fn(),
+        update: vi.fn(),
+    },
     characterInventory: { create: vi.fn() },
 }));
 
@@ -102,6 +108,13 @@ describe('player draft API', () => {
         );
         vi.mocked(apiAuth.requireDM).mockResolvedValue(access('dm', 'dm'));
         tx.character.count.mockResolvedValue(0);
+        tx.$queryRaw.mockResolvedValue([]);
+        tx.character.findUnique.mockImplementation((args) =>
+            vi.mocked(prisma.character.findUnique)(args as never)
+        );
+        tx.character.update.mockImplementation((args) =>
+            vi.mocked(prisma.character.update)(args as never)
+        );
         vi.mocked(prisma.character.count).mockResolvedValue(0);
         tx.character.create.mockImplementation(
             async ({ data }: { data: object }) => ({ id: 'new', ...data })

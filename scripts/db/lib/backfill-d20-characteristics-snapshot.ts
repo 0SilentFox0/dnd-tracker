@@ -1,3 +1,6 @@
+import { renameSync, writeFileSync } from 'node:fs';
+
+import { jsonEqual } from '@/lib/utils/battle/store/stable-json';
 import { isRecord } from '@/lib/utils/common/is-record';
 import {
     rowKey,
@@ -29,6 +32,16 @@ export type RevertAction = {
 
 export const snapshotKey = (row: SnapshotRow) => rowKey(row);
 
+export function writeSnapshotAtomically(
+    file: string,
+    snapshot: CharacteristicsSnapshot
+) {
+    const temporary = `${file}.tmp-${process.pid}`;
+
+    writeFileSync(temporary, JSON.stringify(snapshot, null, 2));
+    renameSync(temporary, file);
+}
+
 export function revertPlan(
     s: CharacteristicsSnapshot,
     current: ReadonlyMap<string, string>
@@ -38,7 +51,17 @@ export function revertPlan(
 
         if (text === undefined) return { row, action: 'missing' };
 
-        if (text === row.after)
+        let sameJson = false;
+
+        if (text !== row.after) {
+            try {
+                sameJson = jsonEqual(JSON.parse(text), JSON.parse(row.after));
+            } catch {
+                sameJson = false;
+            }
+        }
+
+        if (text === row.after || sameJson)
             return { row, action: 'restore', current: text };
 
         if (text === row.before)

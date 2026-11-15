@@ -84,15 +84,17 @@ const COLUMNS =
 const SELECTS_COLUMN = new RegExp(`\\b(?:${COLUMNS})\\s*:\\s*true\\b`);
 
 const READS_ROW_COLUMN = new RegExp(
-    `\\b(?:character|unit|unitBase|row|hero|stored|fresh|existing|u|c)\\??(?:\\.(?:${COLUMNS})\\b|\\[['\"](?:${COLUMNS})['\"]\\])`
+    `\\b(character|unit|unitBase|row|hero|stored|fresh|existing|u|c)\\??(?:\\.(?:${COLUMNS})\\b|\\[['\"](?:${COLUMNS})['\"]\\])`,
+    'g'
 );
 
 const DESTRUCTURES_COLUMN = new RegExp(
-    `\\{[^}]*\\b(?:${COLUMNS})\\b[^}]*\\}\\s*=\\s*(?:character|unit|unitBase|row|hero|stored|fresh|existing|u|c)\\b`
+    `\\{[^}]*\\b(?:${COLUMNS})\\b[^}]*\\}\\s*=\\s*(?:(?:await\\s+)?(?:prisma|tx)\\.(?:character|unit|unitBase)\\.(?:findMany|findFirst|findUnique)|(?:character|unit|unitBase|row|hero|stored|fresh|existing|u|c))\\b`
 );
 
 const COMPUTED_COLUMN = new RegExp(
-    `\\b(?:character|unit|unitBase|row|hero|stored|fresh|existing|u|c)\\??\\[[A-Za-z_$][\\w$]*\\]`
+    `\\b(character|unit|unitBase|row|hero|stored|fresh|existing|u|c)\\??\\[[A-Za-z_$][\\w$]*\\]`,
+    'g'
 );
 
 const COLUMN_VARIABLE = new RegExp(
@@ -110,9 +112,7 @@ const LOADS_ROW =
     /\b(?:character|unit|unitBase)\.(?:findMany|findFirst|findUnique|findUniqueOrThrow|findFirstOrThrow)\b/;
 
 const OVERLAY =
-    /\b(?:withColumnView|withStoredColumns|flattenStoredColumns|readD20Columns)\b/;
-
-const CHARACTERISTICS = /\bcharacteristics\b/;
+    /\b(?:withColumnView|withStoredColumns|flattenStoredColumns|readD20Columns)\s*\(/;
 
 const CODEC_LAYER = [
     'lib/utils/rules/systems/column-view.ts',
@@ -121,25 +121,48 @@ const CODEC_LAYER = [
 ];
 
 /** Only goes down; not DB statblock reads (battle participant, rules registry, JSON saving throws). */
-const SELECT_EXEMPT = [
-    'lib/server/battles/store/load-battle.ts',
-    'lib/utils/rules/registry.ts',
-    'scripts/seed/seed-example-demo.ts',
+const SELECT_EXEMPT: string[] = [];
+
+/** Safe non-row inputs or rows already passed through the D20 overlay. */
+const ROW_EXEMPT = [
+    'lib/utils/units/import-units.ts',
+    'scripts/db/sync-unit-initiative.ts',
+    'scripts/import/compendium-coverage-report.ts',
 ];
 
-/** Reads the import input rows; the only DB load is a name select. */
-const ROW_EXEMPT = ['lib/utils/units/import-units.ts'];
-
 export const selectsColumnWithoutCharacteristics = (text: string) =>
-    SELECTS_COLUMN.test(text) && !CHARACTERISTICS.test(text);
+    [...text.matchAll(/\bselect\s*:\s*\{([^{}]*)\}/g)].some(
+        ([, fields]) =>
+            SELECTS_COLUMN.test(fields) &&
+            !/\bcharacteristics\s*:\s*true\b/.test(fields)
+    );
 
-export const readsColumnWithoutOverlay = (text: string) =>
-    LOADS_ROW.test(text) &&
-    (READS_ROW_COLUMN.test(text) ||
-        DESTRUCTURES_COLUMN.test(text) ||
-        (COLUMN_VARIABLE.test(text) && COMPUTED_COLUMN.test(text)) ||
-        (SPREAD_ROW.test(text) && SPREAD_ALIAS_COLUMN.test(text))) &&
-    !OVERLAY.test(text);
+const overlayFor = (text: string, name: string) =>
+    new RegExp(
+        `\\b(?:const|let|var)\\s+${name}\\s*=\\s*(?:await\\s+)?${OVERLAY.source}`
+    ).test(text);
+
+export const readsColumnWithoutOverlay = (text: string) => {
+    if (!LOADS_ROW.test(text)) return false;
+
+    const direct = [...text.matchAll(READS_ROW_COLUMN)].some(
+        ([, name]) => !overlayFor(text, name)
+    );
+
+    const computed =
+        COLUMN_VARIABLE.test(text) &&
+        [...text.matchAll(COMPUTED_COLUMN)].some(
+            ([, name]) => !overlayFor(text, name)
+        );
+
+    const destructured = DESTRUCTURES_COLUMN.test(text);
+
+    const computedKey = COLUMN_VARIABLE.test(text) && computed;
+
+    const spread = SPREAD_ROW.test(text) && SPREAD_ALIAS_COLUMN.test(text);
+
+    return direct || computed || destructured || computedKey || spread;
+};
 
 const dbFiles = () =>
     sourceFiles(DB_SCANNED).filter(
@@ -166,6 +189,11 @@ describe('statblock columns are read through characteristics', () => {
                 'select: { armorClass: true, characteristics: true }'
             )
         ).toBe(false);
+        expect(
+            selectsColumnWithoutCharacteristics(
+                'prisma.unit.findMany({ select: { armorClass: true, characteristics: true } }); prisma.character.findMany({ select: { strength: true } })'
+            )
+        ).toBe(true);
     });
 
     it('flags a row column read without the overlay', () => {
@@ -178,10 +206,15 @@ describe('statblock columns are read through characteristics', () => {
             readsColumnWithoutOverlay(
                 'prisma.unit.findMany().then((r) => r.map(withStoredColumns)); u.speed'
             )
-        ).toBe(false);
+        ).toBe(true);
         expect(
             readsColumnWithoutOverlay(
                 'const row = await prisma.unit.findUnique(); const { speed } = row'
+            )
+        ).toBe(true);
+        expect(
+            readsColumnWithoutOverlay(
+                'const { speed } = await prisma.unit.findUnique()'
             )
         ).toBe(true);
         expect(
@@ -212,6 +245,16 @@ describe('statblock columns are read through characteristics', () => {
         expect(
             readsColumnWithoutOverlay(
                 'const row = await prisma.unit.findUnique(); const stats = { ...row }; stats.name'
+            )
+        ).toBe(false);
+        expect(
+            readsColumnWithoutOverlay(
+                'import { withStoredColumns } from "@/lib/utils/rules/systems/column-view"; const row = await prisma.unit.findUnique(); row.speed'
+            )
+        ).toBe(true);
+        expect(
+            readsColumnWithoutOverlay(
+                'const row = withStoredColumns(await prisma.unit.findUnique()); row.speed'
             )
         ).toBe(false);
     });

@@ -50,9 +50,18 @@ async function main() {
         console.log(`${u.name}: ${u.initiative} → ${next}`);
 
         if (!dryRun)
-            await prisma.unit.update({
-                where: { id: u.id },
-                data: d20RowData({ initiative: next }, u.characteristics),
+            await prisma.$transaction(async (tx) => {
+                await tx.$queryRaw`SELECT id FROM units WHERE id = ${u.id} FOR UPDATE`;
+
+                const current = await tx.unit.findUnique({
+                    where: { id: u.id },
+                    select: { characteristics: true },
+                });
+
+                await tx.unit.update({
+                    where: { id: u.id },
+                    data: d20RowData({ initiative: next }, current?.characteristics),
+                });
             });
     }
 

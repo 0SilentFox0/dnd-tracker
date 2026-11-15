@@ -254,6 +254,10 @@ describe('d20 dual-writes the columns and characteristics', () => {
     });
 
     it('patch merges the change into previous characteristics and writes the column', async () => {
+        h.character.findUnique.mockResolvedValue(
+            row({ strength: 17, speed: 30 }) as never
+        );
+
         await run(
             'patch',
             {
@@ -273,7 +277,7 @@ describe('d20 dual-writes the columns and characteristics', () => {
 
         const { data } = h.character.update.mock.calls[0][0];
 
-        expect(data.characteristics).toEqual({ strength: 14, speed: 40 });
+        expect(data.characteristics).toEqual({ strength: 17, speed: 40 });
         expect(data.speed).toBe(40);
     });
 });

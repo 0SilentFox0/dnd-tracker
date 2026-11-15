@@ -321,6 +321,17 @@ function updateWriter({
 }
 
 async function patchCore(gate: Gate, parsed: Parsed) {
+    const system = ruleSystemOf(gate.access.campaign.rules);
+
+    const stored = await prisma.character.findUnique({
+        where: { id: gate.character.id },
+    });
+
+    if (!stored)
+        throw new ContentError(API_ERRORS.CHARACTER_NOT_FOUND, 404);
+
+    gate = { ...gate, character: withColumnView(stored, system) };
+
     const { access, character } = gate;
 
     const { userId, campaign, isDM } = access;
@@ -328,8 +339,6 @@ async function patchCore(gate: Gate, parsed: Parsed) {
     const campaignId = character.campaignId;
 
     const characterId = character.id;
-
-    const system = ruleSystemOf(campaign.rules);
 
     const editable = await editableData(gate, parsed);
 

@@ -260,6 +260,22 @@ describe('revertPlan', () => {
             'missing',
         ]);
     });
+
+    it('recognizes a planned JSONB value despite PostgreSQL text formatting', () => {
+        const row = {
+            table: 'units' as const,
+            id: 'planned',
+            before: '{}',
+            after: '{"strength":10,"speed":30}',
+        };
+
+        expect(
+            revertPlan(
+                snapshot([row]),
+                new Map([['units:planned', '{"speed": 30, "strength": 10}']])
+            )[0].action
+        ).toBe('restore');
+    });
 });
 
 const fakeDb = (results: unknown[][]) => {
@@ -289,11 +305,31 @@ describe('applyPlans', () => {
 
         const write = vi.fn();
 
+        let writeStarted = false;
+
+        const transaction = db.$transaction;
+
+        db.$transaction = (async (fn: (tx: RawDb) => Promise<unknown>) => {
+            expect(writeStarted).toBe(true);
+
+            return transaction(fn);
+        }) as RawDb['$transaction'];
+        write.mockImplementation(() => {
+            writeStarted = true;
+        });
+
         const rows = await applyPlans(db, [plan], write);
 
         expect(rows).toHaveLength(1);
         expect(rows[0].before).toBe('{}');
-        expect(write).toHaveBeenCalledWith(rows);
+        expect(write).toHaveBeenCalledWith(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    before: '{}',
+                    after: JSON.stringify(plan.afterJson),
+                }),
+            ])
+        );
     });
 
     it('throws when the row changed since it was read', async () => {

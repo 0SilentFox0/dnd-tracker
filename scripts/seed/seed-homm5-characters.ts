@@ -29,6 +29,7 @@ import {
 import type { HeroArchetypeKey } from '@/lib/constants/hero-archetypes';
 import { prisma } from '@/lib/db';
 import { characterGoalsSchema } from '@/lib/schemas/character-goals';
+import { lockCharacters } from '@/lib/server/characters/lock';
 import { AVATARS_BUCKET } from '@/lib/supabase/avatar-storage';
 import {
     uploadImageDataUrl,
@@ -720,15 +721,24 @@ async function main() {
             }
 
             if (!dryRun)
-                await prisma.character.update({
-                    where: { id: existing.id },
-                    data: {
-                        ...d20RowData(
-                            { initiative: data.initiative },
-                            existing.characteristics
-                        ),
-                        ...(personalSkillId && { personalSkillId }),
-                    },
+                await prisma.$transaction(async (tx) => {
+                    await lockCharacters(tx, [existing.id]);
+
+                    const current = await tx.character.findUnique({
+                        where: { id: existing.id },
+                        select: { characteristics: true },
+                    });
+
+                    await tx.character.update({
+                        where: { id: existing.id },
+                        data: {
+                            ...d20RowData(
+                                { initiative: data.initiative },
+                                current?.characteristics
+                            ),
+                            ...(personalSkillId && { personalSkillId }),
+                        },
+                    });
                 });
 
             console.log(
@@ -745,12 +755,21 @@ async function main() {
         }
 
         if (existing) {
-            await prisma.character.update({
-                where: { id: existing.id },
-                data: {
-                    ...d20RowData(data, existing.characteristics),
-                    ...(avatar && { avatar }),
-                },
+            await prisma.$transaction(async (tx) => {
+                await lockCharacters(tx, [existing.id]);
+
+                const current = await tx.character.findUnique({
+                    where: { id: existing.id },
+                    select: { characteristics: true },
+                });
+
+                await tx.character.update({
+                    where: { id: existing.id },
+                    data: {
+                        ...d20RowData(data, current?.characteristics),
+                        ...(avatar && { avatar }),
+                    },
+                });
             });
             console.log(`оновлено: ${summary}`);
             continue;

@@ -144,7 +144,7 @@ describe('PATCH character keeps stored class picks', () => {
 
         vi.mocked(prisma.character.findUnique)
             .mockResolvedValueOnce(stored as never)
-            .mockResolvedValueOnce(fresh as never);
+            .mockResolvedValue(fresh as never);
 
         await patchCharacter(
             new Request('http://x', {
@@ -198,7 +198,7 @@ it('background-only PATCH keeps classes and plans from the row read under lock',
 
     vi.mocked(prisma.character.findUnique)
         .mockResolvedValueOnce(stored as never)
-        .mockResolvedValueOnce(fresh as never);
+        .mockResolvedValue(fresh as never);
 
     const res = await patchCharacter(
         new Request('http://x', {

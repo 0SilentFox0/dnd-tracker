@@ -10,7 +10,7 @@
 
 1. Деплой S-B (читання з `characteristics`, dual-write) стабільний ≥1 деплой.
 2. **Деплой «stop writing columns»** (окремий, до DROP): прибрати запис колонок у місцях зі списку «Запис» нижче; після нього відкат на код, що пише колонки, колонок уже не оновлює (вони застаріють).
-3. `--report --expect-zero` на проді (`scripts/db/lib/backfill-d20-characteristics*`): у кожному рядку `characters`/`units`/`units_base` усі 9 ключів у `characteristics` (див. ризик хешу нижче). Свіжий звіт після деплою кроку 2.
+3. Окремий all-system аудит на проді після кроку 2: **кожен рядок** усіх трьох таблиць має числові 9 ключів у `characteristics`; зафіксувати baseline-хеші шаблонів і порівняти їх після DROP, включно з non-d20 кампаніями та WFRP. Нинішній `--report --expect-zero` не є цим аудитом: він відбирає d20-рядки й порівнює JSON з колонками, що вже не є очікуваною умовою після stop-writing.
 4. Grep читачів колонок у `lib/ systems/ scripts/ app/` = 0 (таблиця нижче; `statblock-guard` + `statblock-write-guard` зелені без винятків).
 5. `active-battles-report --expect-idle`; бекап `scripts/db/backup-database.sh` (DIRECT_URL 5432).
 6. Окреме «так» власника. Коміт міграції посилається на коміт, що прибрав читачів/запис (db-deploy.md).
@@ -26,12 +26,14 @@
 
 ## Де змінюється код
 
-- **Бандл / хеш:** `t.columns` у `lib/server/templates/bundle.ts` бере поля з DMMF (`SCALAR_ENUMS`) — 9 колонок зникнуть самі після `prisma generate`; окремого списку немає. `lib/utils/content/row-hash.ts` (`FOLDED_COLUMNS`) і так докладає ключі з `characteristics` у хеш, лишити. **Ризик:** раніше хеш рядка включав колонки (в т.ч. дефолти); після DROP ключ, відсутній у `characteristics`, випаде з хешу, і хеш змінюється відносно збережених baseline. Передумова 3 (повні 9 ключів) це знімає; після деплою перевірити sync dry-run = 0.
+- **Бандл / хеш:** `t.columns` у `lib/server/templates/bundle.ts` бере поля з DMMF (`SCALAR_ENUMS`) — 9 колонок зникнуть самі після `prisma generate`; окремого списку немає. `lib/utils/content/row-hash.ts` (`FOLDED_COLUMNS`) і так докладає ключі з `characteristics` у хеш, лишити. **Ризик:** раніше хеш рядка включав колонки (в т.ч. дефолти); після DROP ключ, відсутній у `characteristics`, випаде з хешу, і хеш зміниться відносно збережених baseline. Перевірити повноту треба для всіх рядків трьох таблиць, не лише d20. Додатково в WFRP scalar-default поля нині можуть входити у content hash без відповідних вкладених WFRP-ключів; потрібна перевірка збереження їх hash-представлення до/після DROP. Після міграції порівняти зафіксований baseline й template sync dry-run = 0.
 - **Читання / fallback:** `systems/d20/rules/characteristics/codec.ts` (`readD20Columns`: прибрати `row[column]` з `find`, лишити `stored[column]` -> `D20_COLUMN_DEFAULTS`); `lib/utils/rules/systems/column-view.ts` — `withStoredColumns`/`flattenStoredColumns`/`withColumnView` лишаються (читають `characteristics`), але фраза «else the column» у коментарі/доках застаріла; `D20_COLUMN_DEFAULTS` лишається.
 - **Запис (dual-write):** `splitColumnView` (повертає `columns`) і `scripts/shared/d20-row-data.ts` (`d20RowData`) — прибрати колонки з вихідних `data`, лишити лише `characteristics`; `draftFields` (`app/api/campaigns/[id]/characters/draft/draft-data.ts`); решта у таблиці.
 - **Select-и колонок:** прибрати `<col>: true` (лишити `characteristics: true` + overlay) — таблиця.
 - **Гарди:** `lib/__tests__/statblock-guard.test.ts`, `statblock-write-guard.test.ts` — переписати на «жодна з 9 назв як поле Prisma-рядка» або видалити після DROP (типи Prisma самі це гарантують); оновити `lib/utils/content/__tests__/row-hash-statblock.test.ts`, `column-view-dual-write.test.ts`, `units-column-view.test.ts`, `systems/d20/__tests__/rules/characteristics/codec.test.ts`.
 - **Типи:** `withColumnView/withStoredColumns` повертають `T` (Prisma-рядок), і код далі читає `character.strength` (`from-character.ts`, `from-unit.ts`, `balance/*`, `apply-transforms.ts` тощо). Після DROP ці типи зламаються. До DROP (у кроці «stop writing») ввести тип-розширення `T & D20Columns` у поверненні overlay-функцій. Остаточний список місць дає `prisma generate` на копії зі `schema.patch` + `tsc --noEmit`.
+
+Звітність `--report --expect-zero` лишається корисною для dual-write d20 перевірки до stop-writing, але не може закривати передумову 3: після stop-writing legacy-колонки навмисно застарівають, а перевірка не охоплює всі system rows та WFRP hash-поведінку.
 
 ## Класифікація знахідок (grep по `lib/ systems/ scripts/ app/ prisma/`, без `__tests__`)
 

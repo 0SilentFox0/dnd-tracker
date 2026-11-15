@@ -21,12 +21,16 @@ vi.mock('../../../draft/draft-choices', () => ({
 vi.mock('@/lib/server/characters/core/derive-character-defaults', () => ({
     deriveCharacterDefaults: vi.fn(async () => ({ spellSlots: {} })),
 }));
+vi.mock('@/lib/server/characters/lock', () => ({
+    lockCharacters: vi.fn(async () => new Map()),
+}));
 vi.mock('@/lib/db', () => ({
     prisma: {
         character: {
             findUnique: vi.fn(),
             update: vi.fn(async () => ({ id: 'a' })),
         },
+        $transaction: vi.fn(),
     },
 }));
 
@@ -81,6 +85,9 @@ describe('updateDraft keeps stored picks when the form sends none', () => {
         vi.mocked(prisma.character.findUnique).mockResolvedValue(
             stored as never
         );
+        vi.mocked(prisma.$transaction).mockImplementation(
+            ((fn: (tx: unknown) => unknown) => fn(prisma)) as never
+        );
     });
 
     it('same race: stored race picks are passed on', async () => {
@@ -111,5 +118,31 @@ describe('updateDraft keeps stored picks when the form sends none', () => {
         expect(
             vi.mocked(draftChoiceFields).mock.calls[0][0].data.choices
         ).toBeUndefined();
+    });
+
+    it('merges into characteristics re-read under the character lock', async () => {
+        vi.mocked(prisma.character.findUnique)
+            .mockResolvedValueOnce({
+                ...stored,
+                characteristics: { armorClass: 10 },
+            } as never)
+            .mockResolvedValueOnce({
+                status: 'pending',
+                characteristics: { armorClass: 18, speed: 40 },
+            } as never);
+
+        const res = await put(body);
+
+        expect(res.status).toBe(200);
+        expect(prisma.character.update).toHaveBeenCalledWith(
+            expect.objectContaining({
+                data: expect.objectContaining({
+                    characteristics: expect.objectContaining({
+                        armorClass: 18,
+                        speed: 40,
+                    }),
+                }),
+            })
+        );
     });
 });

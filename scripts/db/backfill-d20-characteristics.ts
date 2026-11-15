@@ -8,7 +8,7 @@
  *   pnpm exec tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/db/backfill-d20-characteristics.ts [--apply | --revert <file> | --report [--expect-zero]] [--allow-remote] [--json] [--snapshot-dir <dir>] [--expect-same-hashes | --no-expect-same-hashes] [--force] [--allow-active-battles]
  * --apply refuses when affected rows belong to campaigns with active battles unless --allow-active-battles is given.
  */
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import '@/lib/utils/rules/systems/registry';
@@ -27,6 +27,7 @@ import {
     parseSnapshot,
     snapshotFileName,
     snapshotKey,
+    writeSnapshotAtomically,
 } from '@/scripts/db/lib/backfill-d20-characteristics-snapshot';
 import type { RawDb } from '@/scripts/db/lib/raw-db';
 import { assertSeedTarget } from '@/scripts/seed/seed-library-lib';
@@ -149,6 +150,8 @@ async function main() {
                 snapshotFileName(host, database, now)
             );
 
+            mkdirSync(args.snapshotDir, { recursive: true });
+
             const done = await applyPlans(db, plans, (rowsDone) => {
                 const snapshot: CharacteristicsSnapshot = {
                     version: 1,
@@ -158,8 +161,7 @@ async function main() {
                     rows: rowsDone,
                 };
 
-                mkdirSync(args.snapshotDir, { recursive: true });
-                writeFileSync(target, JSON.stringify(snapshot, null, 2));
+                writeSnapshotAtomically(target, snapshot);
             });
 
             written = done.length;

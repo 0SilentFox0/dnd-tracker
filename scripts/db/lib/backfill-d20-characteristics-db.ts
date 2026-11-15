@@ -196,7 +196,19 @@ export async function applyPlans(
 ): Promise<SnapshotRow[]> {
     const targets = plans.filter((p) => p.action === 'write' && p.afterJson);
 
+    const planned: SnapshotRow[] = targets.map((plan) => ({
+        table: plan.row.table,
+        id: plan.row.id,
+        ...(plan.row.validFrom === undefined
+            ? {}
+            : { validFrom: plan.row.validFrom }),
+        before: plan.beforeText,
+        after: JSON.stringify(plan.afterJson),
+    }));
+
     const done: SnapshotRow[] = [];
+
+    if (planned.length > 0) write(planned);
 
     for (let i = 0; i < targets.length; i += BATCH_SIZE) {
         const batch = targets.slice(i, i + BATCH_SIZE);
@@ -247,7 +259,9 @@ export async function applyPlans(
 
         done.push(...rows);
 
-        write(done);
+        const completed = new Map(done.map((row) => [rowKey(row), row]));
+
+        write(planned.map((row) => completed.get(rowKey(row)) ?? row));
     }
 
     return done;
