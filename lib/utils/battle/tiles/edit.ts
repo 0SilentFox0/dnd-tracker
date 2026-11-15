@@ -226,7 +226,11 @@ export function applyTileChanges(
         let cells = mutable.get(identity);
 
         if (!cells) {
-            cells = new Uint16Array(chunks[change.layer]?.[change.key] ?? CHUNK_CELLS);
+            const existing = chunks[change.layer]?.[change.key];
+
+            cells = existing
+                ? new Uint16Array(existing)
+                : new Uint16Array(CHUNK_CELLS);
             mutable.set(identity, cells);
             (next[change.layer] ??= { ...(chunks[change.layer] ?? {}) })[change.key] = cells;
         }

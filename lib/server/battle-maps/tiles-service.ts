@@ -1,4 +1,4 @@
-import type { Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 
 import { validateTileIdsForLayer } from '@/lib/constants/tilesets/catalog';
 import { prisma } from '@/lib/db';

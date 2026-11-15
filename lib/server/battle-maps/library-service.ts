@@ -328,7 +328,7 @@ export async function saveMap(
 
         await tx.battleMapChunk.deleteMany({ where: { mapId } });
 
-        const chunkRows = new Map(
+        const chunkRows = new Map<string, Prisma.BattleMapChunkCreateManyInput>(
             recordToChunkRows(chunks).map((chunk) => [
                 `${chunk.cx}:${chunk.cy}`,
                 { mapId, ...chunk },

@@ -95,4 +95,23 @@ describe('drawTileViewport', () => {
 
         expect(ctx.drawImage).toHaveBeenCalledWith(image, 0, 0, 48, 48);
     });
+
+    it('keeps edge-art in a centered 4:1 strip inside its map cell', () => {
+        const ctx = context();
+
+        const chunk = new Uint16Array(256);
+
+        chunk[0] = 6;
+
+        drawTileViewport(ctx, {
+            chunks: { 'edge-art': { '0:0': chunk } },
+            assets: { 6: { image } },
+            catalog,
+            window: { x: 0, y: 0, cols: 1, rows: 1 },
+            cellPx: 64,
+            seed: 'm1',
+        });
+
+        expect(ctx.drawImage).toHaveBeenCalledWith(image, 0, 24, 64, 16);
+    });
 });

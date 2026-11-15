@@ -157,7 +157,7 @@ Seamless tileable top-down ground texture, orthographic view straight from above
 25. **Wooden planks (variant 1)** — `tiles_wood-planks_1.png` · P1
 
 ```
-Seamless tileable top-down ground texture, orthographic view straight from above, flat even lighting with no directional shadows, no vignette, no perspective, uniform detail density across the whole image, no large unique landmark in the centre, all four edges must wrap perfectly when the image is repeated. Painterly fantasy game art in the spirit of classic fantasy RPG maps, rich but natural colours, no text, no letters, no watermark, no border, no frame. Square 1:1, 1024x1024. The surface: dark brown wooden floorboards with visible grain, nail heads and narrow gaps, calm and even, the cleanest version.
+Seamless, periodic 2D top-down ground texture, orthographic view straight from above, flat even lighting, no directional shadows, no vignette, no perspective, uniform detail density and colour across the whole image. The texture must wrap perfectly on all four edges: left and right borders must continue the same plank widths, grain, gaps and brightness with pixel-matched joins; top and bottom borders must also match exactly. Plank lines may cross an edge only where the opposite edge continues them without a visible break. No unmatched cut planks, edge darkening, seams, central motif or unique landmark. Painterly fantasy game art in the spirit of classic fantasy RPG maps, rich but natural colours, no text, no letters, no watermark, no border, no frame. Square 1:1, 1024x1024. The surface: dark brown wooden floorboards with visible but subtle grain, nail heads and narrow gaps, calm and even.
 ```
 
 26. **Wooden planks (variant 2)** — `tiles_wood-planks_2.png` · P1
@@ -565,7 +565,7 @@ Seamless tileable top-down ground texture, orthographic view straight from above
 1. **Stone wall** — `tiles_wall-stone.png` · P1
 
 ```
-Seamless tileable top-down wall-material texture, orthographic view straight from above, flat even lighting with no directional shadows, no vignette, no perspective, uniform detail density, all four edges wrap perfectly when repeated; it will be used as a fill for thin wall lines, so it must show only the top surface of the wall material. Painterly fantasy game art in the spirit of classic fantasy RPG maps, rich but natural colours, no text, no letters, no watermark, no border, no frame. Square 1:1, 1024x1024. The material: grey dressed stone blocks with dark mortar.
+Seamless, periodic 2D top-down wall-material texture, orthographic view straight from above, flat even lighting, no directional shadows, no vignette, no perspective, uniform detail density and stone scale. The texture must wrap perfectly on all four edges: left and right borders must continue the same stone blocks and mortar joints with pixel-matched joins; top and bottom borders must also match exactly. Blocks and mortar should continue through the boundaries without unmatched cut stones, visible seams or edge darkening. Show only the top surface of the wall material, suitable for filling thin wall lines. No inset patch, plaque, medallion, miniature mosaic or unique central feature. Painterly fantasy game art in the spirit of classic fantasy RPG maps, rich but natural colours, no text, no letters, no watermark, no border, no frame. Square 1:1, 1024x1024. The material: grey dressed stone blocks with dark mortar.
 ```
 
 2. **Brick wall** — `tiles_wall-brick.png` · P1
@@ -835,7 +835,7 @@ Top-down game map wall segment seen straight from above (orthographic), a long n
 2. **Wooden door closed** — `tiles_door-wood-closed.png` · P1
 
 ```
-Top-down game map wall segment seen straight from above (orthographic), a long narrow horizontal strip with a 4:1 aspect ratio, it must tile seamlessly left-to-right when repeated, vertically centred on a perfectly flat pure magenta #FF00FF background for chroma-key removal (no magenta in the object), flat even lighting. Painterly fantasy game art in the spirit of classic fantasy RPG maps, rich but natural colours, no text, no letters, no watermark, no border, no frame. The segment: a closed wooden door with iron hinges set in a stone wall band, seen from above.
+Top-down game map wall segment seen straight from above (orthographic), a long narrow horizontal strip with a 4:1 aspect ratio, designed to tile seamlessly left-to-right when repeated. Show exactly one complete closed wooden door, as a single centered instance. Do not create multiple doors, repeated doors, side-by-side variations, a sprite sheet, or partial door fragments at either edge. Keep the full door silhouette inside the canvas with clear horizontal margins; do not crop or clip it. Set the door in a stone wall band. Vertically centre the band on a perfectly flat pure magenta #FF00FF background for chroma-key removal; no magenta in the door or wall. Flat even lighting. Painterly fantasy game art in the spirit of classic fantasy RPG maps, rich but natural colours, no text, no letters, no watermark, no border, no frame.
 ```
 
 3. **Wooden door open** — `tiles_door-wood-open.png` · P1

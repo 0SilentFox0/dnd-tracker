@@ -74,12 +74,16 @@ function drawCell(
 ) {
     const footprint = definition.footprint;
 
+    const edgeOffset = definition.layer === 'edge-art' ? (cellPx * 3) / 8 : 0;
+
+    const edgeHeight = definition.layer === 'edge-art' ? cellPx / 4 : cellPx;
+
     ctx.drawImage(
         image,
         (x - origin.x) * cellPx,
-        (y - origin.y) * cellPx,
+        (y - origin.y) * cellPx + edgeOffset,
         footprint.cols * cellPx,
-        footprint.rows * cellPx
+        footprint.rows * edgeHeight
     );
 }
 
@@ -157,6 +161,7 @@ export function drawTileViewport(
         window: GridWindow;
         cellPx: number;
         seed: string;
+        layers?: readonly TileLayer[];
     }
 ): void {
     const { chunks, assets, catalog, window, cellPx, seed } = input;
@@ -167,7 +172,7 @@ export function drawTileViewport(
 
     ctx.clearRect(0, 0, window.cols * cellPx, window.rows * cellPx);
 
-    for (const layer of LAYER_ORDER) {
+    for (const layer of input.layers ?? LAYER_ORDER) {
         const startCx = Math.floor(window.x / CHUNK_SIDE);
 
         const startCy = Math.floor(window.y / CHUNK_SIDE);

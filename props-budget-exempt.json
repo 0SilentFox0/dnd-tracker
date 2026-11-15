@@ -2,6 +2,8 @@
     "components/abilities/AbilityListEditor.tsx#AbilityListEditor": 9,
     "components/abilities/NestedEffectsEditor.tsx#NestedEffectsEditor": 9,
     "components/battle/map/MapToken.tsx#MapToken": 10,
+    "components/battle/map/BattleMap.tsx#BattleMap": 8,
+    "components/battle/map/MapStage.tsx#MapStage": 8,
     "components/battle/setup/SetupEntityCard.tsx#SetupEntityCard": 8,
     "components/choices/ChoiceWizard.tsx#ChoiceWizard": 8,
     "components/common/GroupAccordionItem.tsx#GroupAccordionItem": 9,

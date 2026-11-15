@@ -35,7 +35,9 @@ import {
     type MapSceneActor,
     type MapSceneMode,
 } from '@/lib/utils/battle/grid';
+import type { TileLayerChunks } from '@/lib/utils/battle/tiles/derive';
 import { NO_ORDER } from '@/lib/utils/battle/view';
+import type { BattleScene } from '@/types/api';
 import type {
     BattleMapActions,
     BattleMapConfig,
@@ -45,6 +47,9 @@ import type {
 } from '@/types/battle';
 
 export interface BattleMapScene {
+    battle: BattleScene;
+    tileChunks?: TileLayerChunks;
+    tileVersion?: number;
     map: BattleMapConfig;
     participants: BattleParticipant[];
     view: BattleMapView;
@@ -68,6 +73,8 @@ export function useBattleMapScene(fx?: SystemFx): BattleMapScene | null {
 
     const {
         battle,
+        tileChunks,
+        tileVersion,
         turn: { current, isMyTurn },
         roster: { hero },
         viewer,
@@ -406,6 +413,9 @@ export function useBattleMapScene(fx?: SystemFx): BattleMapScene | null {
     if (!map || !scene || !view) return null;
 
     return {
+        battle,
+        ...(tileChunks && { tileChunks }),
+        ...(tileVersion !== undefined && { tileVersion }),
         map,
         participants: scene.participants,
         view,

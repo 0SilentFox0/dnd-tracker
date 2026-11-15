@@ -82,7 +82,9 @@ export const TILE_CATALOG = [
     },
 ] as const satisfies readonly TileDefinition[];
 
-const byId = new Map(TILE_CATALOG.map((tile) => [tile.id, tile]));
+const byId = new Map<number, TileDefinition>(
+    TILE_CATALOG.map((tile) => [tile.id, tile])
+);
 
 export function tileDefinition(id: number): TileDefinition | undefined {
     return byId.get(id);

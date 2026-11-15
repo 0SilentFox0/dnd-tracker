@@ -5,8 +5,25 @@ vi.mock('server-only', () => ({}));
 const db = vi.hoisted(() => {
     const maps = new Map<string, Record<string, unknown>>();
 
-    const chunks: { mapId: string; cx: number; cy: number; data: string }[] =
-        [];
+    type MapRowData = {
+        campaignId?: string;
+        name?: string;
+        cols?: number;
+        rows?: number;
+        header?: unknown;
+        chunks?: { create: Omit<(typeof chunks)[number], 'mapId'>[] };
+        versions?: { create: Omit<(typeof versions)[number], 'mapId'> };
+        mapVersion?: number | { increment?: number };
+        [key: string]: unknown;
+    };
+
+    const chunks: {
+        mapId: string;
+        cx: number;
+        cy: number;
+        data: string;
+        tileLayers?: unknown;
+    }[] = [];
 
     const versions: {
         mapId: string;
@@ -20,7 +37,7 @@ const db = vi.hoisted(() => {
 
     const api = {
         battleMap: {
-            create: vi.fn(async ({ data }: { data: Record<string, any> }) => {
+            create: vi.fn(async ({ data }: { data: MapRowData }) => {
                 const id = `m${++seq}`;
 
                 const row = {
@@ -36,10 +53,11 @@ const db = vi.hoisted(() => {
 
                 maps.set(id, row);
 
-                for (const c of data.chunks.create)
+                for (const c of data.chunks?.create ?? [])
                     chunks.push({ mapId: id, ...c });
 
-                versions.push({ mapId: id, ...data.versions.create });
+                if (data.versions?.create)
+                    versions.push({ mapId: id, ...data.versions.create });
 
                 return row;
             }),
@@ -63,20 +81,28 @@ const db = vi.hoisted(() => {
                     data,
                 }: {
                     where: { id: string; mapVersion: number };
-                    data: Record<string, any>;
+                    data: MapRowData;
                 }) => {
                     const row = maps.get(where.id) as
-                        | Record<string, any>
+                        | Record<string, unknown>
                         | undefined;
 
-                    if (!row || row.mapVersion !== where.mapVersion)
+                    if (
+                        !row ||
+                        typeof row.mapVersion !== 'number' ||
+                        row.mapVersion !== where.mapVersion
+                    )
                         return { count: 0 };
 
                     const { mapVersion, ...rest } = data;
 
+                    const increment =
+                        typeof mapVersion === 'object'
+                            ? mapVersion.increment ?? 0
+                            : 0;
+
                     Object.assign(row, rest, {
-                        mapVersion:
-                            row.mapVersion + (mapVersion?.increment ?? 0),
+                        mapVersion: row.mapVersion + increment,
                     });
 
                     return { count: 1 };
@@ -250,7 +276,9 @@ describe('battle map library service', () => {
 
         const row = db.chunks.find((chunk) => chunk.mapId === id);
 
-        row!.tileLayers = { ground: 'r1:tiles' };
+        if (!row) throw new Error('expected chunk row');
+
+        row.tileLayers = { ground: 'r1:tiles' };
 
         const saved = await saveMap(id, input({ walls: ['2:2:e'], bars: [] }));
 
@@ -415,7 +443,9 @@ describe('battle map library service', () => {
 
         const source = await getMap(id);
 
-        const copy = await cloneMap(source!, undefined);
+        if (!source) throw new Error('expected source map');
+
+        const copy = await cloneMap(source, undefined);
 
         expect(copy.id).not.toBe(id);
         expect(copy.name).toBe('Crypt (copy)');
