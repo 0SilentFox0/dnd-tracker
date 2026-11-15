@@ -5,7 +5,20 @@ vi.mock('server-only', () => ({}));
 const db = vi.hoisted(() => {
     const map = { mapVersion: 1, cols: 20, rows: 20 };
 
-    const rows: Record<string, any>[] = [
+    type ChunkRow = {
+        mapId: string;
+        cx: number;
+        cy: number;
+        data: string;
+        tileLayers?: unknown;
+    };
+    type SnapshotRow = {
+        mapId: string;
+        version: number;
+        payload: Record<string, unknown>;
+    };
+
+    const rows: ChunkRow[] = [
         {
             mapId: 'm1',
             cx: 0,
@@ -15,64 +28,109 @@ const db = vi.hoisted(() => {
         },
     ];
 
-    const snapshots: Record<string, any>[] = [
+    const snapshots: SnapshotRow[] = [
         {
             mapId: 'm1',
             version: 1,
             payload: {
                 header: { cols: 20, rows: 20 },
                 chunks: { '0:0': 'legacy-edges' },
-                tileLayers: { '0:0': { ground: 'r1:old', objects: 'r1:object' } },
+                tileLayers: {
+                    '0:0': { ground: 'r1:old', objects: 'r1:object' },
+                },
             },
         },
     ];
 
-    const api: Record<string, any> = {
+    const api = {
         battleMap: {
             findUniqueOrThrow: vi.fn(async () => map),
-            updateMany: vi.fn(async ({ where, data }) => {
-                if (map.mapVersion !== where.mapVersion) return { count: 0 };
+            updateMany: vi.fn(
+                async ({
+                    where,
+                    data,
+                }: {
+                    where: { mapVersion: number };
+                    data: { mapVersion: { increment: number } };
+                }) => {
+                    if (map.mapVersion !== where.mapVersion)
+                        return { count: 0 };
 
-                map.mapVersion += data.mapVersion.increment;
+                    map.mapVersion += data.mapVersion.increment;
 
-                return { count: 1 };
-            }),
+                    return { count: 1 };
+                }
+            ),
         },
         battleMapChunk: {
             findMany: vi.fn(async () => rows),
-            upsert: vi.fn(async ({ where, create, update }) => {
-                const row = rows.find(
-                    (item) =>
-                        item.mapId === where.mapId_cx_cy.mapId &&
-                        item.cx === where.mapId_cx_cy.cx &&
-                        item.cy === where.mapId_cx_cy.cy
-                );
+            upsert: vi.fn(
+                async ({
+                    where,
+                    create,
+                    update,
+                }: {
+                    where: {
+                        mapId_cx_cy: { mapId: string; cx: number; cy: number };
+                    };
+                    create: ChunkRow;
+                    update: Partial<ChunkRow>;
+                }) => {
+                    const row = rows.find(
+                        (item) =>
+                            item.mapId === where.mapId_cx_cy.mapId &&
+                            item.cx === where.mapId_cx_cy.cx &&
+                            item.cy === where.mapId_cx_cy.cy
+                    );
 
-                if (row) Object.assign(row, update);
-                else rows.push(create);
-            }),
-            deleteMany: vi.fn(async ({ where }) => {
-                const index = rows.findIndex(
-                    (row) => row.mapId === where.mapId && row.cx === where.cx && row.cy === where.cy
-                );
+                    if (row) Object.assign(row, update);
+                    else rows.push(create);
+                }
+            ),
+            deleteMany: vi.fn(
+                async ({
+                    where,
+                }: {
+                    where: { mapId: string; cx: number; cy: number };
+                }) => {
+                    const index = rows.findIndex(
+                        (row) =>
+                            row.mapId === where.mapId &&
+                            row.cx === where.cx &&
+                            row.cy === where.cy
+                    );
 
-                if (index >= 0) rows.splice(index, 1);
-            }),
+                    if (index >= 0) rows.splice(index, 1);
+                }
+            ),
         },
         battleMapVersion: {
-            findUnique: vi.fn(async ({ where }) =>
-                snapshots.find(
-                    (snapshot) =>
-                        snapshot.mapId === where.mapId_version.mapId &&
-                        snapshot.version === where.mapId_version.version
-                ) ?? null
+            findUnique: vi.fn(
+                async ({
+                    where,
+                }: {
+                    where: {
+                        mapId_version: { mapId: string; version: number };
+                    };
+                }) =>
+                    snapshots.find(
+                        (snapshot) =>
+                            snapshot.mapId === where.mapId_version.mapId &&
+                            snapshot.version === where.mapId_version.version
+                    ) ?? null
             ),
-            create: vi.fn(async ({ data }) => snapshots.push(data)),
+            create: vi.fn(async ({ data }: { data: SnapshotRow }) =>
+                snapshots.push(data)
+            ),
         },
-        $transaction: vi.fn(),
+        $transaction: vi.fn(async (fn: (tx: unknown) => unknown) =>
+            fn(undefined)
+        ),
     };
 
-    api.$transaction.mockImplementation((fn: (tx: unknown) => unknown) => fn(api));
+    api.$transaction.mockImplementation((fn: (tx: unknown) => unknown) =>
+        Promise.resolve(fn(api))
+    );
 
     return { api, map, rows, snapshots };
 });
@@ -104,11 +162,15 @@ describe('battle map tile storage', () => {
             payload: {
                 header: { cols: 20, rows: 20 },
                 chunks: { '0:0': 'legacy-edges' },
-                tileLayers: { '0:0': { ground: 'r1:old', objects: 'r1:object' } },
+                tileLayers: {
+                    '0:0': { ground: 'r1:old', objects: 'r1:object' },
+                },
             },
         });
         vi.clearAllMocks();
-        db.api.$transaction.mockImplementation((fn: (tx: unknown) => unknown) => fn(db.api));
+        db.api.$transaction.mockImplementation((fn: (tx: unknown) => unknown) =>
+            Promise.resolve(fn(db.api))
+        );
         db.api.battleMap.findUniqueOrThrow.mockResolvedValue(db.map);
     });
 
