@@ -108,7 +108,7 @@
 - Modify: `lib/api/battle-maps.ts`, `lib/hooks/battle-maps/*`, `lib/server/battle-maps/__tests__/library-service.test.ts`
 
 **Interfaces:**
-- `TileChunkKey = { layer: TileLayer; cx: number; cy: number }`; `TileChunkPatch = { key: TileChunkKey; data: string | null }` (`null` видаляє порожній шаровий чанк).
+- `TileChunkPatch = { layer: TileLayer; cx: number; cy: number; data: string | null }` (`null` видаляє порожній шаровий чанк).
 - `getTileChunks(mapId, keys?, version?)` повертає тільки запитані чанки/шари; `patchTileChunks(mapId, expectedVersion, patches)` версіює карту атомарно й не змінює інші шари.
 - Endpoint дозволяє читання учаснику кампанії з доступом до карти, а запис — лише DM з увімкненим `mapLibraryEnabled`; застосовує ліміти тіла й координат. URL активів публічно читаються, як у наявному `battle-maps` bucket.
 
@@ -129,14 +129,15 @@
 - Modify: `lib/utils/battle/tiles/index.ts`
 
 **Interfaces:**
-- `edgeMask(neighbors): 0..15`; `variantFor(mapSeed, x, y, tileId, variants): number` є чистою і детермінованою.
-- `diffTileChunks(before, after): TileChunkPatch[]`; `deriveTileCells(chunks, catalog): { blocked: ReadonlySet<string>; blocksSight: ReadonlySet<string> }` із кешем за версією/ідентичністю входу.
+- `edgeMask(neighbors: EdgeNeighbors): 0..15`; `variantFor(mapSeed, x, y, tileId, variants): number` є чистою і детермінованою.
+- `diffTileChunks(layer, before, after): TileChunkPatch[]`, де `before` і `after` — записи `cx:cy` → `Uint16Array`.
+- `deriveTileCells({ chunks, cols, rows, version }, catalog): DerivedTileCells`, де `chunks` — шарові записи `cx:cy` → `Uint16Array`; кеш ключується ідентичністю чанків/каталогу та версією/розміром карти.
 
 - [ ] Тести 16 autotile edge masks, меж карти й однаковості маски для сусідів; наземне згладжування окремо перевіряє стабільність маски/noise seed.
 - [ ] Тести детермінованого варіанта незалежно від порядку викликів; зміна seed міняє вибір у контрольному наборі координат.
 - [ ] Тести diff для unchanged, changed, inserted/deleted chunks і того, що patch включає лише фактичні ключі.
 - [ ] Тести derived blocked/blocksSight, крайових object footprints і cache invalidation при новій версії.
-- [ ] Запустити кожен `lib/utils/battle/tiles/__tests__/*.test.ts` явним шляхом.
+- [x] Запустити явними командами тести `autotile`, `variant`, `diff` і `derive`; усі 25 тестів пройшли.
 - [x] Реалізувати чисті модулі autotile/варіантів/diff/derived cells; v1 використовує 16 станів edge mask, каталог зберігає розширюваний формат для майбутнього blob-47. Згладжування ground меж лишається залежним від Spike 3.
 - [ ] Коміт: `feat(map-editor): add tile autotile and chunk diffs`.
 
