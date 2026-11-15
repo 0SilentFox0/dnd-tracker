@@ -50,6 +50,8 @@
 
 ## Task 1: Spike 3 і пілот активів
 
+**Поточний стан:** валідація й локальний dry-run uploader готові. Пілотні PNG/WebP відсутні, тому перевірки шва/читабельності, upload і вимірювання Spike 3 лишаються відкритими.
+
 **Files:**
 - Create: `docs/superpowers/research/2026-11-15-map-tile-spike3.md`
 - Create: `scripts/assets/tiles/validate.ts`
@@ -75,6 +77,8 @@
 
 ## Task 2: Additive chunk schema та сумісні кодеки
 
+**Поточний стан:** виконано й закомічено (`7c8f36f8d`); міграція expand-only створена, але не застосована.
+
 **Files:**
 - Modify: `prisma/schema.prisma` (`BattleMapChunk.tileLayers Json? @map("tile_layers")`, чинний composite key)
 - Create: `prisma/migrations/20261204000000_battle_map_tile_layers/migration.sql` (лише expand/data-preserving; застосування поза цим кроком за окремим рішенням)
@@ -98,6 +102,8 @@
 - [ ] Коміт: `feat(map-editor): add layered tile chunk format`.
 
 ## Task 3: Каталог і шарове збереження бібліотечної карти
+
+**Поточний стан:** виконано й закомічено (`0116462fa`); версійні patch-и, каталог, route/API та сумісність snapshot/rollback реалізовані. Міграція не застосована.
 
 **Files:**
 - Create: `lib/constants/tilesets/{types,catalog}.ts` і тести
@@ -123,6 +129,8 @@
 
 ## Task 4: Autotile, варіанти та похідні властивості карти
 
+**Поточний стан:** чисті утиліти й тести готові; Spike 3 визначить, чи вмикати згладжування ground-меж.
+
 **Files:**
 - Create: `lib/utils/battle/tiles/{autotile,variant,diff,derive}.ts`
 - Create: `lib/utils/battle/tiles/__tests__/{autotile,variant,diff,derive}.test.ts`
@@ -142,6 +150,8 @@
 - [ ] Коміт: `feat(map-editor): add tile autotile and chunk diffs`.
 
 ## Task 5: Canvas-рендер видимих чанків
+
+**Поточний стан:** незакомічена реалізація малює чанки видимого вікна й підключена до карти; точкові painter/BattleMap тести проходили. Raster chunk cache, справжні asset URLs/текстури та перевірка FX-контракту ще відкриті.
 
 **Files:**
 - Create: `components/battle/map/tiles/{TileCanvas,drawTileChunk,chunk-cache}.tsx` (за потреби рознести pure painter у `.ts`)
@@ -163,6 +173,8 @@
 - [ ] Коміт: `feat(map-editor): render visible map tile chunks`.
 
 ## Task 6: Інструменти редактора, історія та інтеграція чернетки
+
+**Поточний стан:** незакомічені інструменти, dirty patches, undo/redo та інтеграція з versioned save реалізовані; цільові тести хука й екрана проходили. Залишаються повнота тестів і фінальні гейти.
 
 **Files:**
 - Create: `lib/hooks/battle-maps/useTileEditor.ts` і unit/component tests
