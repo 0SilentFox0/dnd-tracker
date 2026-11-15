@@ -51,7 +51,7 @@ export interface CharacterGoal {
  * Згрупована структура даних персонажа (як використовується в формі)
  */
 export interface CharacterFormData {
-    characteristics?: SystemData;
+    characteristics?: SystemData | null;
     systemBaseline?: unknown;
     basicInfo: {
         name: string;
@@ -159,7 +159,7 @@ export interface Character {
     primaryAbility?: AbilityKey | null;
     goals?: CharacterGoal[];
     archetype?: string | null;
-    characteristics?: SystemData;
+    characteristics?: SystemData | null;
     experience?: number;
     /** Прогрес по деревах прокачки: skillTreeId → { unlockedSkills } */
     skillTreeProgress?: Record<

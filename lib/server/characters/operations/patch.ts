@@ -445,12 +445,9 @@ async function patchCore(gate: Gate, parsed: Parsed) {
                   );
               })
             : await prisma.$transaction(async (tx) => {
-                  await lockCharacters(tx, [characterId]);
-
-                  const fresh = await tx.character.findUnique({
-                      where: { id: characterId },
-                      select: { characteristics: true },
-                  });
+                  const fresh = (await lockCharacters(tx, [characterId])).get(
+                      characterId
+                  );
 
                   if (!fresh)
                       throw new ContentError(

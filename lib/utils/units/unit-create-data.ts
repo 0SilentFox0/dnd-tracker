@@ -9,7 +9,7 @@ import { resolveUnitProficiency } from '@/lib/utils/units/monster';
 
 export type CreateUnitData = z.infer<typeof createUnitSchema>;
 
-const columnsOf = (data: CreateUnitData, system?: RuleSystemDefinition) => {
+const columnsOf = (data: CreateUnitData) => {
     const columns = {
         strength: data.strength,
         dexterity: data.dexterity,
@@ -22,7 +22,7 @@ const columnsOf = (data: CreateUnitData, system?: RuleSystemDefinition) => {
         speed: data.speed,
     };
 
-    return system ? columns : columns;
+    return columns;
 };
 
 export function unitCreateData(
@@ -39,7 +39,7 @@ export function unitCreateData(
         name: data.name,
         raceId: data.raceId ?? null,
         level: data.level,
-        ...columnsOf(data, system),
+        ...columnsOf(data),
         gridSize: data.gridSize,
         maxHp: data.maxHp,
         proficiencyBonus: resolveUnitProficiency(data),

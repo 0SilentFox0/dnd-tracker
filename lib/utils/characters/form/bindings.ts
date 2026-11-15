@@ -45,11 +45,11 @@ function characteristicsBinding(
     setFormData: SetFormData
 ): SystemBinding {
     return {
-        data: formData.characteristics,
+        data: formData.characteristics ?? undefined,
         update: (fn) =>
             setFormData((prev) => ({
                 ...prev,
-                characteristics: fn(prev.characteristics),
+                characteristics: fn(prev.characteristics ?? undefined),
             })),
     };
 }

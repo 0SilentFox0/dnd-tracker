@@ -257,6 +257,14 @@ describe('d20 dual-writes the columns and characteristics', () => {
         h.character.findUnique.mockResolvedValue(
             row({ strength: 17, speed: 30 }) as never
         );
+        h.$queryRaw.mockResolvedValue([
+            {
+                id: 'ch1',
+                resources: {},
+                experience: 0,
+                characteristics: { strength: 17, speed: 30 },
+            },
+        ]);
 
         await run(
             'patch',

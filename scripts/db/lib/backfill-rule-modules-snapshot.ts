@@ -84,6 +84,7 @@ export interface CliArgs {
     revertFile?: string;
     force: boolean;
     allowActiveBattles: boolean;
+    acknowledgeModuleReadd: boolean;
 }
 
 export function assertNoActiveBattles(
@@ -106,6 +107,7 @@ export function parseArgs(argv: readonly string[]): CliArgs {
         snapshotDir: DEFAULT_SNAPSHOT_DIR,
         force: false,
         allowActiveBattles: false,
+        acknowledgeModuleReadd: false,
     };
 
     let apply = false;
@@ -138,6 +140,9 @@ export function parseArgs(argv: readonly string[]): CliArgs {
             case '--allow-active-battles':
                 args.allowActiveBattles = true;
                 break;
+            case '--i-know-it-re-adds-modules':
+                args.acknowledgeModuleReadd = true;
+                break;
             case '--revert':
                 args.revertFile = value(i++, flag);
                 break;
@@ -157,6 +162,14 @@ export function parseArgs(argv: readonly string[]): CliArgs {
 
     if (args.allowActiveBattles && !apply)
         throw new Error('--allow-active-battles дозволено лише з --apply');
+
+    if (args.acknowledgeModuleReadd && !apply)
+        throw new Error('--i-know-it-re-adds-modules дозволено лише з --apply');
+
+    if (apply && !args.acknowledgeModuleReadd)
+        throw new Error(
+            'Повторне застосування повертає вимкнені модулі; для підтвердження додайте --i-know-it-re-adds-modules'
+        );
 
     if (apply) args.mode = 'apply';
     else if (args.revertFile !== undefined) args.mode = 'revert';

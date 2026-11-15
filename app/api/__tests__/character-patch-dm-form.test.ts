@@ -19,7 +19,11 @@ vi.mock('@/lib/server/characters/core/resolve-character-owner', () => ({
     ),
 }));
 vi.mock('@/lib/server/characters/lock', () => ({
-    lockCharacters: vi.fn().mockResolvedValue(new Map()),
+    lockCharacters: vi.fn(async (_tx: unknown, ids: string[]) =>
+        new Map(
+            ids.map((id) => [id, { id, resources: {}, experience: 0, characteristics: null }])
+        )
+    ),
 }));
 vi.mock('@/lib/db', () => ({
     prisma: {
