@@ -291,8 +291,12 @@ describe('map-update', () => {
             },
         });
 
+        const currentMap = ctx.meta.map;
+
+        if (!currentMap) throw new Error('expected linked map');
+
         ctx.meta.map = {
-            ...ctx.meta.map!,
+            ...currentMap,
             cols: 8,
             rows: 8,
             terrain: {
@@ -304,9 +308,11 @@ describe('map-update', () => {
 
         const out = await mapUpdateMutation(ctx, {});
 
-        expect(Object.keys(out.scene!.map!.terrain!)).toEqual(['1:1']);
-        expect(Object.keys(out.scene!.map!.spellZones!)).toEqual(['in']);
-        expect(Object.keys(out.scene!.mapState!.doors)).toEqual(['1:1:e']);
+        expect(Object.keys(out.scene?.map?.terrain ?? {})).toEqual(['1:1']);
+        expect(Object.keys(out.scene?.map?.spellZones ?? {})).toEqual(['in']);
+        expect(Object.keys(out.scene?.mapState?.doors ?? {})).toEqual([
+            '1:1:e',
+        ]);
     });
 
     it('terrain змінено в бібліотеці — доходить у бій; правка DM лишається', async () => {
@@ -330,8 +336,12 @@ describe('map-update', () => {
 
         const ctx = linked();
 
+        const currentMap = ctx.meta.map;
+
+        if (!currentMap) throw new Error('expected linked map');
+
         ctx.meta.map = {
-            ...ctx.meta.map!,
+            ...currentMap,
             terrain: {
                 '0:0': { kind: 'hazard' },
                 '3:3': { kind: 'barrier' },
@@ -388,11 +398,11 @@ describe('двері та map-edge-remove / map-update', () => {
             { kind: 'walls', add: ['1:3:e'], remove: [] }
         );
 
-        const stored = persistedMap(
-            meta,
-            out.scene!.map!,
-            out.scene?.mapState ?? state
-        );
+        const outputMap = out.scene?.map;
+
+        if (!outputMap) throw new Error('expected updated map');
+
+        const stored = persistedMap(meta, outputMap, out.scene?.mapState ?? state);
 
         expect(stored.doors).toEqual(doors);
         expect(stored.walls).toContain('1:3:e');

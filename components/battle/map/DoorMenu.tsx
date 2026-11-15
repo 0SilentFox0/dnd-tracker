@@ -4,9 +4,9 @@ import { useTranslations } from 'next-intl';
 
 import { doorCentre } from './DoorsLayer';
 
+import type { MapDoorsTool } from '@/lib/hooks/battle';
 import { cn } from '@/lib/utils';
 import { UNIT } from '@/lib/utils/battle/grid';
-import type { MapDoorsTool } from '@/lib/hooks/battle';
 import type { DoorState } from '@/types/battle';
 
 const BUTTON =

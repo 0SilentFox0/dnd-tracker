@@ -10,13 +10,21 @@ import {
     singleConnectionDatabaseUrl,
 } from '@/lib/server/test-support/local-db';
 
+type DynamicDelegate = {
+    create(args: Record<string, unknown>): Promise<unknown>;
+    deleteMany(args: Record<string, unknown>): Promise<unknown>;
+    findMany(
+        args: Record<string, unknown>
+    ): Promise<Record<string, unknown>[]>;
+};
+
 const raw = new PrismaClient({
     datasources: { db: { url: singleConnectionDatabaseUrl('DATABASE_URL') } },
 });
 
 const db = raw.$extends(contentLayer());
 
-const R = raw as unknown as Record<string, any>;
+const R = raw as unknown as Record<string, DynamicDelegate>;
 
 const marker = `publish-${randomUUID()}`;
 
@@ -144,16 +152,16 @@ describe.skipIf(!isLocalDevDatabaseEnv())('publishTemplateVersion', () => {
             },
         });
 
-        for (const id of [ids.template, ids.other])
-            await raw.campaign.create({
-                data: {
+        await raw.campaign.createMany({
+            data: [ids.template, ids.other].map((id) => ({
                     id,
                     name: id,
                     dmUserId: ids.user,
                     inviteCode: randomUUID(),
                     kind: 'template',
-                },
-            });
+                    rules: { system: { key: 'homm' } },
+                })),
+        });
 
         for (const f of FIXTURES)
             await R[f.delegate].create({
@@ -233,7 +241,7 @@ describe.skipIf(!isLocalDevDatabaseEnv())('publishTemplateVersion', () => {
 
         const rows = await history(spell);
 
-        expect(rows.map((r: any) => [r.name, r.validFrom, r.validTo])).toEqual([
+        expect(rows.map((r) => [r.name, r.validFrom, r.validTo])).toEqual([
             ['spell one', 1, 2],
             ['spell two', 2, null],
         ]);
@@ -290,7 +298,7 @@ describe.skipIf(!isLocalDevDatabaseEnv())('publishTemplateVersion', () => {
             validTo: null,
             slug: `${marker}-spell`,
         });
-        expect(rows.filter((r: any) => r.validTo === null)).toHaveLength(1);
+        expect(rows.filter((r) => r.validTo === null)).toHaveLength(1);
     });
 
     it('base rows belong to the template that published them', async () => {
