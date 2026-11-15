@@ -2,46 +2,54 @@ import { describe, expect, it } from 'vitest';
 
 import { splitMapChunkRows, UnknownTileLayerError } from '../chunks';
 
-import { encodeEdges } from '@/lib/utils/battle/map-storage/edge-chunks';
+import {
+    EMPTY_EDGE_CHUNK,
+    encodeEdges,
+} from '@/lib/utils/battle/map-storage/edge-chunks';
 
 describe('splitMapChunkRows', () => {
-    it('treats rows without a layer and rows on layer 0 as legacy edges', () => {
+    it('reads old rows with null tile_layers as edge chunks', () => {
         const encoded = encodeEdges({ walls: ['0:0:e'] }, 16, 16)['0:0'];
 
         const result = splitMapChunkRows([
-            { cx: 0, cy: 0, data: encoded },
-            { cx: 1, cy: 0, data: encoded, layer: 0 },
+            { cx: 0, cy: 0, data: encoded, tileLayers: null },
         ]);
 
-        expect(result.edges).toEqual({ '0:0': encoded, '1:0': encoded });
+        expect(result.edges).toEqual({ '0:0': encoded });
         expect(result.tiles).toEqual({});
     });
 
-    it('separates tile layers without passing them to the edge decoder', () => {
+    it('separates tile layers stored alongside the legacy edge payload', () => {
         const result = splitMapChunkRows([
-            { cx: 0, cy: 0, data: 'r1:ground', layer: 1 },
-            { cx: 0, cy: 0, data: 'r1:objects', layer: 3 },
+            {
+                cx: 0,
+                cy: 0,
+                data: EMPTY_EDGE_CHUNK,
+                tileLayers: { ground: 'r1:ground', objects: 'r1:objects' },
+            },
         ]);
 
-        expect(result.edges).toEqual({});
+        expect(result.edges).toEqual({ '0:0': EMPTY_EDGE_CHUNK });
         expect(result.tiles).toEqual({
             ground: { '0:0': 'r1:ground' },
             objects: { '0:0': 'r1:objects' },
         });
     });
 
-    it('rejects duplicate rows for the same layer and coordinates', () => {
+    it('rejects duplicate rows for a coordinate', () => {
         expect(() =>
             splitMapChunkRows([
-                { cx: 0, cy: 0, data: 'r1:first', layer: 1 },
-                { cx: 0, cy: 0, data: 'r1:second', layer: 1 },
+                { cx: 0, cy: 0, data: 'edges', tileLayers: null },
+                { cx: 0, cy: 0, data: 'edges', tileLayers: { ground: 'r1:tile' } },
             ])
         ).toThrow(/duplicate/i);
     });
 
-    it('rejects unknown layer ids rather than interpreting data as edges', () => {
+    it('rejects unknown tile layer keys instead of interpreting them as edges', () => {
         expect(() =>
-            splitMapChunkRows([{ cx: 0, cy: 0, data: 'future-format', layer: 99 }])
+            splitMapChunkRows([
+                { cx: 0, cy: 0, data: EMPTY_EDGE_CHUNK, tileLayers: { future: 'r1:data' } },
+            ])
         ).toThrow(UnknownTileLayerError);
     });
 });

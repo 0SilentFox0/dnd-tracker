@@ -4,7 +4,7 @@
 
 **Goal:** Додати редактор тайлів для бібліотечних карт кампанії з Canvas-рендером видимих чанків, шаровим RLE-збереженням і скасуванням/повтором дій.
 
-**Architecture:** Розширити `battle_map_chunks` шаровим ключем, зберігши старі записи як шар ребер; чисті кодеки/autotile винести в `lib/utils/battle/tiles`, сховище та версії лишити в бібліотеці карт, а Canvas-рендер побудувати поверх поточних CTM/GridWindow API. Власні/CC0 текстури проходять окремий шлях завантаження до `battle-tiles`; редактор використовує прапорець `mapLibraryEnabled`, наявні карти, хуки й версійну синхронізацію.
+**Architecture:** Розширити `battle_map_chunks` nullable `tile_layers JSONB`, зберігши `data` для legacy-ребер і чинний PK; чисті кодеки/autotile винести в `lib/utils/battle/tiles`, сховище та версії лишити в бібліотеці карт, а Canvas-рендер побудувати поверх поточних CTM/GridWindow API. Власні/CC0 текстури проходять окремий шлях завантаження до `battle-tiles`; редактор використовує прапорець `mapLibraryEnabled`, наявні карти, хуки й версійну синхронізацію.
 
 **Tech Stack:** Next.js 16, React 19, TypeScript strict, Prisma/PostgreSQL, Supabase Storage, Canvas 2D/OffscreenCanvas з fallback, Vitest.
 
@@ -14,8 +14,8 @@
 
 - Працювати лише в worktree `/Users/silentfox/Work/dnd-tracker-map-editor-c`, гілка `feat/map-editor-c`; не чіпати інші worktree.
 - Мова документації й коментарів — українська; імпорти з `@/`; дотримуватися шарування й перевикористовувати наявний код.
-- Не змінювати production, не застосовувати міграції; для виконання цього плану окремо погодити власне створення/застосування expand-only міграції.
-- Старі `battle_map_chunks` без шару лишаються читабельними як ребра; старий base64 на 256 байтів не декодувати як RLE тайлів.
+- Не змінювати production, не застосовувати міграції; створення expand-only міграції погоджено; не застосовувати її й не змінювати production.
+- Старі `battle_map_chunks` із `tile_layers = NULL` лишаються читабельними як ребра; старий base64 на 256 байтів не декодувати як RLE тайлів.
 - Редагування відбувається в бібліотеці карт (`MapEditorScreen`); форма бою лише вибирає готову карту. `blocks` входить до набору заблокованих клітинок для руху; `blocksSight` лишається метаданими для Fog G.
 - Прапорець кампанії — наявний `mapLibraryEnabled`; нову кампанійну колонку не додавати.
 - Пілот текстур передує масовій генерації: `tiles_stone-floor_1`, `tiles_grass_1`, `tiles_wood-planks_1`, `tiles_wall-stone`, `tiles_barrel`, `tiles_door-wood-closed`.
@@ -45,7 +45,7 @@
 - `lib/supabase/*` та `scripts/assets/*`: перевірка й завантаження ресурсів; не викликати імпорт контенту для тайлів.
 - `components/battle/map/tiles/*`: Canvas-малювач і кеш видимих чанків; не замінює SVG/DOM FX, стіни чи учасників.
 - `components/maps/*`, `lib/hooks/battle-maps/*`, `components/battle/setup/*`: редактор для комп'ютера, інструменти вказівника, історія дій та інтеграція з наявною чернеткою карти.
-- `prisma/schema.prisma`, одна нова міграція лише на розширення, `prisma/__tests__/migrations-rls.test.ts`: явне поле шару й сумісний ключ; дані не переписувати/не видаляти.
+- `prisma/schema.prisma`, одна нова міграція лише на розширення, `prisma/__tests__/migrations-rls.test.ts`: nullable JSONB поля шарів; чинний ключ і дані не переписувати/не видаляти.
 - `docs/architecture/map-modes.md`, `docs/architecture/battle.md`, `docs/STATUS.md`: контракт і відкладені кінцеві перевірки.
 
 ## Task 1: Spike 3 і пілот активів
@@ -73,28 +73,28 @@
 - [ ] Задокументувати формати/ліцензії кожного пілотного ресурсу; не запускати мережеве завантаження в межах цього кроку без тестового target.
 - [ ] Коміт: `feat(map-editor): add tile asset spike and validation`.
 
-## Task 2: Шаровий chunk schema та сумісні кодеки
+## Task 2: Additive chunk schema та сумісні кодеки
 
 **Files:**
-- Modify: `prisma/schema.prisma` (`BattleMapChunk.layer`, composite key)
-- Create: `prisma/migrations/<timestamp>_battle_map_chunk_layers/migration.sql` (лише expand/data-preserving; застосування поза цим кроком за окремим рішенням)
+- Modify: `prisma/schema.prisma` (`BattleMapChunk.tileLayers Json? @map("tile_layers")`, чинний composite key)
+- Create: `prisma/migrations/20261204000000_battle_map_tile_layers/migration.sql` (лише expand/data-preserving; застосування поза цим кроком за окремим рішенням)
 - Modify: `prisma/__tests__/migrations-rls.test.ts`
 - Modify: `lib/utils/battle/map-storage/edge-chunks.ts` і його тести
 - Create: `lib/utils/battle/tiles/{types,chunks,rle}.ts`
 - Create: `lib/utils/battle/tiles/__tests__/{chunks,rle}.test.ts`
 
 **Interfaces:**
-- `TileLayer = 'ground' | 'wallfill' | 'objects' | 'edge-art'`; DB IDs: `0 = edges`, `1 = ground`, `2 = wallfill`, `3 = objects`, `4 = edge-art`.
+- `TileLayer = 'ground' | 'wallfill' | 'objects' | 'edge-art'`; ключі JSONB відповідають цим рядкам.
 - `encodeTileChunk(cells: Uint16Array): string` / `decodeTileChunk(data: string): Uint16Array` — рівно 256 значень; запис version tag `r1:`; run/value кодуються little-endian `Uint16`.
-- `encodeEdges`/`decodeEdges` зберігають поточний публічний контракт; нові DB row adapters вказують layer 0.
+- `encodeEdges`/`decodeEdges` зберігають поточний публічний контракт; старі DB row adapters трактують `tile_layers = NULL` як edge-only; нові tile rows зберігають порожні ребра у `data`.
 
-- [x] Тести сумісності: старий edge chunk із 256 байтів base64 декодується поточним `decodeEdges`, адаптер рядків відносить його до `layer=0` і не передає в RLE-декодер.
+- [x] Тести сумісності: старий edge chunk із 256 байтів base64 декодується поточним `decodeEdges`, row adapter читає `tile_layers = NULL` як edge-only і не передає base64 у RLE-декодер.
 - [x] Тести RLE: кодування/декодування 256 клітинок, порожній чанк, межі довжини серії, ID 0/65535, некоректний тег, нульова серія, переповнення/недостатня довжина виходу, невідома версія.
 - [x] Запустити `pnpm test:run lib/utils/battle/map-storage/__tests__/edge-chunks.test.ts`, `pnpm test:run lib/utils/battle/tiles/__tests__/chunks.test.ts` і `pnpm test:run lib/utils/battle/tiles/__tests__/rle.test.ts`; усі три suite пройшли.
-- [ ] Додати поле шару Prisma й змінити ключ на `(mapId, layer, cx, cy)`; старі записи отримують `layer=0` через default, а старе читання ребер лишається валідним.
-- [ ] Створити expand-only SQL: додати `layer SMALLINT NOT NULL DEFAULT 0`, замінити primary key на складений із шаром, не видаляти/не перекодовувати рядки, зберегти FK/RLS та індекси; не застосовувати міграцію до будь-якої БД у цьому кроці.
-- [ ] Оновити RLS migration guard, щоб вимагав RLS на `battle_map_chunks` після зміни схеми; запустити `pnpm test:run prisma/__tests__/migrations-rls.test.ts`.
-- [ ] Запустити edge і RLE тестові файли повторно після адаптації row adapters.
+- [x] Додати nullable `tile_layers Json?` у Prisma; чинний PK `(mapId,cx,cy)` лишається без змін, старі записи лишаються `NULL` і читаються як ребра.
+- [x] Створити expand-only SQL лише з `ADD COLUMN tile_layers JSONB`; без backfill/PK/FK/RLS changes. Не застосовувати міграцію.
+- [x] Оновити RLS migration guard і перевірити additive-форму; `pnpm test:run prisma/__tests__/migrations-rls.test.ts` пройшов.
+- [x] Повторно запустити edge, chunk adapter і RLE файли окремо; усі пройшли.
 - [ ] Коміт: `feat(map-editor): add layered tile chunk format`.
 
 ## Task 3: Каталог і шарове збереження бібліотечної карти
@@ -116,7 +116,7 @@
 - [ ] Запустити `pnpm test:run lib/server/battle-maps/__tests__/library-service.test.ts`.
 - [ ] Додати typed catalog із provenance/license, tile ID, variant assets/weights, footprint, autotile kind і `blocks`/`blocksSight`; перевірити унікальність ID та asset refs окремим тестом.
 - [ ] Додати Zod схему патчів: лише відомі layers, координати в межах карти, максимум патчів/body bytes, дозволені tile IDs, version tag; typed 400/413/409 errors.
-- [ ] Реалізувати транзакційний сервіс, що оновлює лише передані ключі шарів і збільшує `mapVersion` один раз; знімок/rollback зберігає всі шари, старий `payload.chunks` продовжує декодувати ребра. Спершу розгорнути сумісне читання, а запис тайлів увімкнути лише після оновлення всіх читачів; старий код не має працювати після появи рядків інших шарів.
+- [ ] Реалізувати транзакційний сервіс, що оновлює лише передані ключі шарів і збільшує `mapVersion` один раз; знімок/rollback зберігає всі шари, старий `payload.chunks` продовжує декодувати ребра. Спершу розгорнути сумісне читання, а запис тайлів увімкнути лише після оновлення всіх читачів; сумісний writer має зберігати `tile_layers`; після появи tile data не відкочуватися до старого writer.
 - [ ] Додати маршрут/API/хук і тести доступу: не-ДМ, чужа кампанія, прапорець вимкнено, некоректне тіло, завеликий запит, конфлікт, успіх.
 - [ ] Запустити кожен змінений тестовий файл окремою командою `pnpm test:run <шлях>`.
 - [ ] Коміт: `feat(map-editor): persist tile chunk patches`.

@@ -1,18 +1,7 @@
-export const TILE_LAYER_IDS = {
-    ground: 1,
-    wallfill: 2,
-    objects: 3,
-    'edge-art': 4,
-} as const;
+export const TILE_LAYERS = ['ground', 'wallfill', 'objects', 'edge-art'] as const;
 
-export type TileLayer = keyof typeof TILE_LAYER_IDS;
+export type TileLayer = (typeof TILE_LAYERS)[number];
 
-export const TILE_LAYERS = Object.keys(TILE_LAYER_IDS) as TileLayer[];
-
-export function tileLayerFromId(layerId: number): TileLayer | null {
-    return (
-        (Object.entries(TILE_LAYER_IDS).find(([, id]) => id === layerId)?.[
-            0
-        ] as TileLayer | undefined) ?? null
-    );
+export function isTileLayer(layer: string): layer is TileLayer {
+    return (TILE_LAYERS as readonly string[]).includes(layer);
 }

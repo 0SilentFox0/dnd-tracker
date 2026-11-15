@@ -635,11 +635,12 @@ model BattleMap {
 }
 
 model BattleMapChunk {
-  mapId String
-  cx    Int
-  cy    Int
-  data  String
-  map   BattleMap @relation(fields: [mapId], references: [id], onDelete: Cascade)
+  mapId      String
+  cx         Int
+  cy         Int
+  data       String
+  tileLayers Json?    @map("tile_layers")
+  map        BattleMap @relation(fields: [mapId], references: [id], onDelete: Cascade)
 
   @@id([mapId, cx, cy])
   @@map("battle_map_chunks")

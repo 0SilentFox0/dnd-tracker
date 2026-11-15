@@ -1,10 +1,10 @@
-import { type TileLayer,tileLayerFromId } from '@/lib/utils/battle/tiles/types';
+import { isTileLayer, type TileLayer } from '@/lib/utils/battle/tiles/types';
 
 export interface MapChunkRow {
     cx: number;
     cy: number;
     data: string;
-    layer?: number | null;
+    tileLayers?: unknown;
 }
 
 export interface SplitMapChunkRows {
@@ -13,8 +13,8 @@ export interface SplitMapChunkRows {
 }
 
 export class UnknownTileLayerError extends Error {
-    constructor(readonly layerId: number) {
-        super(`Unknown battle map chunk layer ${layerId}`);
+    constructor(readonly layer: string) {
+        super(`Unknown battle map tile layer ${layer}`);
         this.name = 'UnknownTileLayerError';
     }
 }
@@ -42,28 +42,26 @@ export function splitMapChunkRows(rows: readonly MapChunkRow[]): SplitMapChunkRo
         )
             throw new Error('Battle map chunk coordinates must be non-negative integers');
 
-        const layerId = row.layer ?? 0;
-
         const key = `${row.cx}:${row.cy}`;
 
-        const unique = `${layerId}:${key}`;
+        if (seen.has(key)) throw new DuplicateMapChunkError(key);
 
-        if (seen.has(unique)) throw new DuplicateMapChunkError(unique);
+        seen.add(key);
+        edges[key] = row.data;
 
-        seen.add(unique);
+        if (row.tileLayers == null) continue;
 
-        if (layerId === 0) {
-            edges[key] = row.data;
-            continue;
+        if (typeof row.tileLayers !== 'object' || Array.isArray(row.tileLayers))
+            throw new Error('Battle map tile layers must be an object');
+
+        for (const [layerName, data] of Object.entries(row.tileLayers)) {
+            if (!isTileLayer(layerName)) throw new UnknownTileLayerError(layerName);
+
+            if (typeof data !== 'string')
+                throw new Error(`Tile chunk ${layerName} must be a string`);
+
+            (tiles[layerName] ??= {})[key] = data;
         }
-
-        const layer = tileLayerFromId(layerId);
-
-        if (!layer) throw new UnknownTileLayerError(layerId);
-
-        const byKey = (tiles[layer] ??= {});
-
-        byKey[key] = row.data;
     }
 
     return { edges, tiles };

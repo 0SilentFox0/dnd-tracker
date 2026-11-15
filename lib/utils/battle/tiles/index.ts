@@ -21,10 +21,5 @@ export {
     TileChunkError,
     type TileChunkErrorCode,
 } from '@/lib/utils/battle/tiles/rle';
-export {
-    TILE_LAYER_IDS,
-    TILE_LAYERS,
-    type TileLayer,
-    tileLayerFromId,
-} from '@/lib/utils/battle/tiles/types';
+export { isTileLayer, TILE_LAYERS, type TileLayer } from '@/lib/utils/battle/tiles/types';
 export { type TileVariant,variantFor } from '@/lib/utils/battle/tiles/variant';

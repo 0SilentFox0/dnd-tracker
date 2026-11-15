@@ -37,4 +37,23 @@ describe('migrations RLS', () => {
         expect(created.size).toBeGreaterThan(0);
         expect(missing).toEqual([]);
     });
+
+    it('розширює battle_map_chunks без заміни ключа чи вимкнення RLS', () => {
+        const sql = readAllMigrationsSql();
+
+        const tileLayersMigration = sql.match(
+            /ALTER TABLE "battle_map_chunks" ADD COLUMN "tile_layers" JSONB;/
+        );
+
+        expect(tileLayersMigration).not.toBeNull();
+        expect(sql).not.toMatch(
+            /ALTER TABLE "battle_map_chunks"\s+DROP CONSTRAINT[^;]*PRIMARY KEY/i
+        );
+        expect(sql).not.toMatch(
+            /ALTER TABLE "battle_map_chunks"\s+DISABLE ROW LEVEL SECURITY/i
+        );
+        expect(sql).toMatch(
+            /ALTER TABLE "battle_map_chunks" ENABLE ROW LEVEL SECURITY/i
+        );
+    });
 });
