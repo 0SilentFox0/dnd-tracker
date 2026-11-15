@@ -6,6 +6,7 @@ import type { PusherConnectionState } from '@/lib/hooks/battle/usePusherBattleSy
 import type { BattleOpMutation } from '@/lib/hooks/battles';
 import type { AttackIntent, TurnGateOutcome } from '@/lib/utils/battle/flows';
 import type { MapAim, MapPick } from '@/lib/utils/battle/grid';
+import type { TileLayerChunks } from '@/lib/utils/battle/tiles/derive';
 import type { DisplayEffect } from '@/lib/utils/battle/view';
 import type { Viewer } from '@/lib/utils/battle/view/visibility';
 import type { BattleScene } from '@/types/api';
@@ -68,6 +69,8 @@ export interface BattleSceneDialogs {
 }
 
 export interface BattleSceneValue extends BattleSceneData {
+    tileChunks?: TileLayerChunks;
+    tileVersion?: number;
     dialogs: BattleSceneDialogs;
     connection: PusherConnectionState;
     playerView: { available: boolean; enabled: boolean; toggle(): void };

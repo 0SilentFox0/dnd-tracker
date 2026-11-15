@@ -5,6 +5,8 @@ export const CHUNK_SIZE = MAP_LIMITS.chunk;
 
 const CHUNK_BYTES = (CHUNK_SIZE * CHUNK_SIZE * 2 * 2) / 8;
 
+export const EMPTY_EDGE_CHUNK = btoa(String.fromCharCode(...new Uint8Array(CHUNK_BYTES)));
+
 const KIND_WALL = 1;
 
 const KIND_BAR = 2;

@@ -6,6 +6,7 @@ import { battleMapKeys } from '@/lib/hooks/battle-maps/keys';
 import { battleQueryKey } from '@/lib/hooks/battles/keys';
 import { PrefetchedQuery } from '@/lib/providers/prefetched-query';
 import { getMap } from '@/lib/server/battle-maps/library-service';
+import { getTileChunks } from '@/lib/server/battle-maps/tiles-service';
 import { readBattleScene } from '@/lib/server/battles/read-battle';
 import { requireCampaignMember } from '@/lib/server/campaigns/access';
 import { readOkJson } from '@/lib/utils/api/read-json';
@@ -32,6 +33,10 @@ export default async function BattlePage({
         ? await getMap(ref.mapId, ref.version).catch(() => null)
         : null;
 
+    const tileChunks = ref && pinned?.campaignId === id
+        ? await getTileChunks(ref.mapId, ref.version).catch(() => null)
+        : null;
+
     const edges =
         ref && pinned?.campaignId === id
             ? { walls: pinned.walls, bars: pinned.bars }
@@ -54,7 +59,14 @@ export default async function BattlePage({
                     queryKey={battleMapKeys.edges(id, ref)}
                     data={edges}
                 >
-                    {client}
+                    {tileChunks ? (
+                        <PrefetchedQuery
+                            queryKey={battleMapKeys.tiles(id, ref.mapId, ref.version)}
+                            data={{ version: ref.version, chunks: tileChunks }}
+                        >
+                            {client}
+                        </PrefetchedQuery>
+                    ) : client}
                 </PrefetchedQuery>
             ) : (
                 client

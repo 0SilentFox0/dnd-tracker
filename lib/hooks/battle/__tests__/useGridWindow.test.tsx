@@ -28,17 +28,17 @@ let seen: GridWindow | null = null;
 function Probe({ zoom = 1 }: { zoom?: number }) {
     const svgRef = useRef<SVGSVGElement>(null);
 
-    const scrollRef = useRef<HTMLDivElement>(null);
+    const viewportRef = useRef<HTMLDivElement>(null);
 
     renders++;
     seen = useGridWindow({
         svgRef,
-        scrollRef,
+        viewportRef,
         deps: { zoom, offset: { x: 0, y: 0 }, size: SIZE, pxPerUnit: 1 },
     });
 
     return (
-        <div ref={scrollRef} data-scroll="" style={{}}>
+        <div ref={viewportRef} data-scroll="" style={{}}>
             <svg
                 ref={(el) => {
                     if (el) {

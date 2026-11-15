@@ -20,6 +20,9 @@ vi.mock('@/lib/hooks/common', async (orig) => ({
 }));
 vi.mock('@/lib/hooks/battle-maps', () => ({
     useBattleMap: () => query.value,
+    useBattleMapTiles: () => ({ data: { version: 1, chunks: {} } }),
+    usePatchBattleMapTiles: () => ({ mutate: vi.fn(), isPending: false, isError: false }),
+    useBattleMapMutations: () => ({ update: { mutate: vi.fn(), isPending: false } }),
 }));
 vi.mock('@/lib/hooks/battle-maps/useMapEditorDraft', async (orig) => orig());
 vi.mock('@/components/battle/map', () => ({ BattleMap: () => null }));
@@ -91,6 +94,12 @@ describe('MapEditorScreen', () => {
             screen.getByRole('tab', { name: 'maps.editor.panels.edges' })
         );
         expect(screen.getByText('maps.editor.edges')).toBeTruthy();
+
+        fireEvent.click(
+            screen.getByRole('tab', { name: 'maps.editor.panels.tiles' })
+        );
+        expect(screen.getByRole('group', { name: 'maps.editor.tiles.layers' })).toBeTruthy();
+        expect(screen.getByRole('group', { name: 'maps.editor.tiles.tools' })).toBeTruthy();
     });
 
     it('allows 120 columns on a map without a background', () => {

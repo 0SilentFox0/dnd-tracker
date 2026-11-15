@@ -13,4 +13,6 @@ export const battleMapKeys = {
                   ref.version,
               ] as const)
             : (['battle-maps', campaignId, 'edges'] as const),
+    tiles: (campaignId: string, mapId: string, version?: number) =>
+        ['battle-maps', campaignId, 'tiles', mapId, version ?? 'current'] as const,
 };

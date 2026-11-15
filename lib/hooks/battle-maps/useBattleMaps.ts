@@ -1,6 +1,6 @@
 'use client';
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { skipToken, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { battleMapKeys } from './keys';
 import { announceMapLibraryChange } from './mapLibrarySync';
@@ -11,6 +11,8 @@ import {
     deleteBattleMap,
     getBattleMap,
     getBattleMaps,
+    getBattleMapTiles,
+    patchBattleMapTiles,
     updateBattleMap,
 } from '@/lib/api/battle-maps';
 import type { BattleMapInput } from '@/lib/schemas/battle-maps';
@@ -40,6 +42,35 @@ export function useBattleMap(campaignId: string, mapId: string) {
     });
 }
 
+export function useBattleMapTiles(
+    campaignId: string,
+    mapId: string | undefined,
+    version?: number,
+    enabled = mapId !== undefined
+) {
+    return useQuery({
+        queryKey: battleMapKeys.tiles(campaignId, mapId ?? '', version),
+        queryFn: mapId ? () => getBattleMapTiles(campaignId, mapId, version) : skipToken,
+        enabled,
+        staleTime: 0,
+    });
+}
+
+export function usePatchBattleMapTiles(campaignId: string, mapId: string) {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (data: Parameters<typeof patchBattleMapTiles>[2]) =>
+            patchBattleMapTiles(campaignId, mapId, data),
+        onSuccess: async () => {
+            await queryClient.invalidateQueries({
+                queryKey: battleMapKeys.tiles(campaignId, mapId),
+            });
+            announceMapLibraryChange(campaignId);
+        },
+    });
+}
+
 export function useBattleMapMutations(campaignId: string) {
     const queryClient = useQueryClient();
 
@@ -64,6 +95,9 @@ export function useBattleMapMutations(campaignId: string) {
                 void queryClient.invalidateQueries({
                     queryKey: battleMapKeys.detail(campaignId, v.mapId),
                     refetchType: 'none',
+                });
+                void queryClient.invalidateQueries({
+                    queryKey: battleMapKeys.tiles(campaignId, v.mapId),
                 });
 
                 return onSuccess();

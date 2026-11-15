@@ -2,7 +2,7 @@
 import type { ReactNode } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, cleanup, renderHook, waitFor } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('@/lib/hooks/battle/usePusherBattleSync', () => ({
     usePusherBattleSync: () => ({ connectionState: 'connected' }),
@@ -11,9 +11,12 @@ vi.mock('@/lib/api/battles', async (orig) => ({
     ...(await orig<typeof import('@/lib/api/battles')>()),
     getBattle: vi.fn(),
 }));
-vi.mock('@/lib/api/battle-maps', () => ({ getBattleMap: vi.fn() }));
+vi.mock('@/lib/api/battle-maps', () => ({
+    getBattleMap: vi.fn(),
+    getBattleMapTiles: vi.fn(),
+}));
 
-import { getBattleMap } from '@/lib/api/battle-maps';
+import { getBattleMap, getBattleMapTiles } from '@/lib/api/battle-maps';
 import { useBattleSceneValue } from '@/lib/hooks/battle';
 import { fakeScene } from '@/lib/hooks/battle/__tests__/fake-scene';
 import { battleQueryKey } from '@/lib/hooks/battles';
@@ -26,6 +29,11 @@ vi.unmock('next-intl');
 afterEach(() => {
     cleanup();
     vi.mocked(getBattleMap).mockReset();
+    vi.mocked(getBattleMapTiles).mockReset();
+});
+
+beforeEach(() => {
+    vi.mocked(getBattleMapTiles).mockResolvedValue({ version: 1, chunks: {} });
 });
 
 const header = { cols: 8, rows: 8 } as unknown as BattleMapConfig;
@@ -119,6 +127,30 @@ describe('ефективна карта в сцені', () => {
         expect(result.current.value?.battle.map?.walls).toEqual(['1:1:e']);
         expect(result.current.value?.battle.map?.bars).toEqual(['0:0:s']);
         expect(getBattleMap).toHaveBeenCalledWith('c1', 'm1', 1);
+    });
+
+    it('linked: додає блокувальні тайли пінованої версії до карти бою', async () => {
+        vi.mocked(getBattleMap).mockResolvedValue({ walls: [], bars: [] } as never);
+
+        const cells = new Uint16Array(256);
+
+        cells[3 * 16 + 2] = 5;
+
+        const { encodeTileChunk } = await import('@/lib/utils/battle/tiles/rle');
+
+        vi.mocked(getBattleMapTiles).mockResolvedValue({
+            version: 1,
+            chunks: { objects: { '0:0': encodeTileChunk(cells) } },
+        });
+
+        const { result } = setup({
+            map: header,
+            mapRef: { mapId: 'm1', version: 1 },
+        });
+
+        await waitFor(() => expect(result.current.value?.tileChunks).toBeTruthy());
+        expect(result.current.value?.battle.map?.blocked).toContain('2:3');
+        expect(result.current.value?.tileChunks?.objects?.['0:0']?.[50]).toBe(5);
     });
 
     it('map-update-дельта з новою версією підтягує нові ребра', async () => {

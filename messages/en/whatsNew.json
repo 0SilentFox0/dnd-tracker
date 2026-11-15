@@ -300,5 +300,9 @@
   "2026-10-31-identity-icons": {
     "title": "Icons in libraries",
     "body": "Races, classes, subclasses, backgrounds and class features now have icons in the libraries."
+  },
+  "2026-11-map-camera": {
+    "title": "Camera for large maps",
+    "body": "Pan and zoom around large battle maps. Use the minimap to jump elsewhere on the field; the camera follows your hero automatically."
   }
 }

@@ -19,11 +19,12 @@ import { useParticipantClick } from './useParticipantClick';
 import { usePusherBattleSync } from './usePusherBattleSync';
 
 import { BattleStatus } from '@/lib/constants/battle';
+import { TILE_CATALOG } from '@/lib/constants/tilesets/catalog';
 import type {
     BattleSceneData,
     BattleSceneValue,
 } from '@/lib/hooks/battle/types';
-import { useBattleMapEdges } from '@/lib/hooks/battle-maps';
+import { useBattleMapEdges, useBattleMapTiles } from '@/lib/hooks/battle-maps';
 import { battleQueryKey, useBattle } from '@/lib/hooks/battles';
 import { usePlayerView } from '@/lib/hooks/common';
 import { type AttackIntent, isIntentStale } from '@/lib/utils/battle/flows';
@@ -32,9 +33,39 @@ import {
     composeEffectiveMap,
     type LibraryEdges,
 } from '@/lib/utils/battle/map-storage/effective-map';
+import type { TileLayerChunks } from '@/lib/utils/battle/tiles/derive';
+import { deriveTileCells } from '@/lib/utils/battle/tiles/derive';
+import { decodeTileChunk } from '@/lib/utils/battle/tiles/rle';
+import type { TileLayer } from '@/lib/utils/battle/tiles/types';
 import { deriveScene, NO_ORDER } from '@/lib/utils/battle/view';
 import type { BattleScene } from '@/types/api';
 import type { BattleLogState, DmControl, ResultFx } from '@/types/battle-scene';
+
+const TILE_PROPERTIES = Object.fromEntries(
+    TILE_CATALOG.map((tile) => [tile.id, {
+        blocks: tile.blocks,
+        blocksSight: tile.blocksSight,
+        footprint: tile.footprint,
+    }])
+);
+
+function decodeTileLayers(
+    encoded: Partial<Record<TileLayer, Record<string, string>>> | undefined
+): TileLayerChunks {
+    if (!encoded) return {};
+
+    return Object.fromEntries(
+        Object.entries(encoded).map(([layer, chunks]) => [
+            layer,
+            Object.fromEntries(
+                Object.entries(chunks ?? {}).map(([key, data]) => [
+                    key,
+                    decodeTileChunk(data),
+                ])
+            ),
+        ])
+    ) as TileLayerChunks;
+}
 
 export const BattleSceneContext = createContext<BattleSceneValue | null>(null);
 
@@ -182,6 +213,13 @@ export function useBattleSceneValue(
 
     const mapEdges = useBattleMapEdges(campaignId, rawBattle?.mapRef);
 
+    const mapTiles = useBattleMapTiles(
+        campaignId,
+        rawBattle?.mapRef?.mapId,
+        rawBattle?.mapRef?.version,
+        !!rawBattle?.mapRef
+    );
+
     const [heldEdges, setHeldEdges] = useState<LibraryEdges | undefined>();
 
     if (mapEdges.data && mapEdges.data !== heldEdges)
@@ -191,7 +229,28 @@ export function useBattleSceneValue(
         mapEdges.data ??
         (rawBattle?.mapRef && mapEdges.isPending ? heldEdges : undefined);
 
-    const isMapPending = !!rawBattle?.mapRef && !edges;
+    const tileChunks = useMemo(
+        () => decodeTileLayers(mapTiles.data?.chunks),
+        [mapTiles.data]
+    );
+
+    const decodedTileFields = useMemo(() => {
+        if (!rawBattle?.map || !mapTiles.data) return null;
+
+        return deriveTileCells(
+            {
+                chunks: tileChunks,
+                cols: rawBattle.map.cols,
+                rows: rawBattle.map.rows,
+                version: mapTiles.data.version,
+            },
+            TILE_PROPERTIES
+        );
+    }, [mapTiles.data, rawBattle, tileChunks]);
+
+    const isMapPending =
+        !!rawBattle?.mapRef &&
+        (!edges || (mapTiles.isPending && !mapTiles.isError));
 
     const isLoading = isBattleLoading || (isMapPending && !mapEdges.isError);
 
@@ -204,14 +263,23 @@ export function useBattleSceneValue(
     const battle = useMemo(() => {
         if (!rawBattle?.map || isMapPending) return rawBattle;
 
-        const map = composeEffectiveMap(
+        const effective = composeEffectiveMap(
             rawBattle.map,
             rawBattle.mapState,
             edges
         );
 
+        const blocked = decodedTileFields?.blocked;
+
+        const map = blocked?.size
+            ? {
+                  ...effective,
+                  blocked: [...new Set([...(effective.blocked ?? []), ...blocked])],
+              }
+            : effective;
+
         return map === rawBattle.map ? rawBattle : { ...rawBattle, map };
-    }, [rawBattle, edges, isMapPending]);
+    }, [rawBattle, edges, isMapPending, decodedTileFields]);
 
     const actions = useBattleActions(campaignId, battleId, show);
 
@@ -320,6 +388,10 @@ export function useBattleSceneValue(
         campaignId,
         battleId,
         battle,
+        ...(mapTiles.data && {
+            tileChunks,
+            tileVersion: mapTiles.data.version,
+        }),
         ...derived,
         effects,
         dialogs: { awaitingDm, resultScreen },

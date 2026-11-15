@@ -8,13 +8,14 @@ import { useModeView } from './modes/useModeView';
 import { turnStartDue } from './turn-start-check';
 import { useBattleScene } from './useBattleScene';
 import { useExclusivePalettes } from './useExclusivePalettes';
+import { useFollowTurnSetting } from './useFollowTurnSetting';
 import { useFxImpacts } from './useFxImpacts';
 import {
     type MapBackgroundTool,
     useMapBackgroundTool,
 } from './useMapBackgroundTool';
-import { type MapDoorsTool, useMapDoors } from './useMapDoors';
 import { useMapCellActions } from './useMapCellActions';
+import { type MapDoorsTool, useMapDoors } from './useMapDoors';
 import { type MapMotionTool, useMapMotionTool } from './useMapMotionTool';
 import { useMapPlacing } from './useMapPlacing';
 import { type MapTerrainTool, useMapTerrainTool } from './useMapTerrainTool';
@@ -34,7 +35,9 @@ import {
     type MapSceneActor,
     type MapSceneMode,
 } from '@/lib/utils/battle/grid';
+import type { TileLayerChunks } from '@/lib/utils/battle/tiles/derive';
 import { NO_ORDER } from '@/lib/utils/battle/view';
+import type { BattleScene } from '@/types/api';
 import type {
     BattleMapActions,
     BattleMapConfig,
@@ -44,9 +47,13 @@ import type {
 } from '@/types/battle';
 
 export interface BattleMapScene {
+    battle: BattleScene;
+    tileChunks?: TileLayerChunks;
+    tileVersion?: number;
     map: BattleMapConfig;
     participants: BattleParticipant[];
     view: BattleMapView;
+    followTurn: { on: boolean; toggle(): void } | null;
     actions: BattleMapActions;
     placement: { active: boolean; toggle(): void } | null;
     terrainTool: MapTerrainTool | null;
@@ -66,7 +73,10 @@ export function useBattleMapScene(fx?: SystemFx): BattleMapScene | null {
 
     const {
         battle,
+        tileChunks,
+        tileVersion,
         turn: { current, isMyTurn },
+        roster: { hero },
         viewer,
         selectedId,
         select,
@@ -83,6 +93,21 @@ export function useBattleMapScene(fx?: SystemFx): BattleMapScene | null {
     const [hoverCell, setHoverCell] = useState<GridPoint | null>(null);
 
     const { isDM } = viewer;
+
+    const followSetting = useFollowTurnSetting();
+
+    const { follow: followEnabled, setFollow } = followSetting;
+
+    const followTurn = useMemo(
+        () =>
+            isDM
+                ? {
+                      on: followEnabled,
+                      toggle: () => setFollow(!followEnabled),
+                  }
+                : null,
+        [isDM, followEnabled, setFollow]
+    );
 
     const map = battle.map ?? null;
 
@@ -224,7 +249,7 @@ export function useBattleMapScene(fx?: SystemFx): BattleMapScene | null {
         [canAct, map, order, current]
     );
 
-    const view = useMemo(() => {
+    const composedView = useMemo(() => {
         if (!scene || !map) return null;
 
         return composeMapView({
@@ -256,6 +281,20 @@ export function useBattleMapScene(fx?: SystemFx): BattleMapScene | null {
         currentRound,
         modeView,
     ]);
+
+    const view = useMemo(
+        () =>
+            composedView
+                ? {
+                      ...composedView,
+                      camera: {
+                          follow: isDM ? followEnabled : true,
+                          selfId: hero?.basicInfo.id ?? null,
+                      },
+                  }
+                : null,
+        [composedView, isDM, followEnabled, hero?.basicInfo.id]
+    );
 
     const { mutate: move } = actions.move;
 
@@ -374,9 +413,13 @@ export function useBattleMapScene(fx?: SystemFx): BattleMapScene | null {
     if (!map || !scene || !view) return null;
 
     return {
+        battle,
+        ...(tileChunks && { tileChunks }),
+        ...(tileVersion !== undefined && { tileVersion }),
         map,
         participants: scene.participants,
         view,
+        followTurn,
         actions: mapActions,
         placement,
         terrainTool: isDM ? terrainTool : null,

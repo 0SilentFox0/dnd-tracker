@@ -9,6 +9,7 @@ import {
 } from '@/lib/schemas/battles';
 import { inBounds } from '@/lib/utils/battle/grid/geometry';
 import { parseEdgeKey } from '@/lib/utils/battle/grid/walls';
+import { TILE_LAYERS } from '@/lib/utils/battle/tiles/types';
 
 const side = mapSide(MAP_LIMITS.tileMaxSide);
 
@@ -110,3 +111,36 @@ export const battleMapCloneSchema = z.object({
 });
 
 export type BattleMapInput = z.infer<typeof battleMapInputSchema>;
+
+const tileLayerSchema = z.enum(TILE_LAYERS);
+
+const tilePatchSchema = z.object({
+    layer: tileLayerSchema,
+    cx: z.number().int().nonnegative(),
+    cy: z.number().int().nonnegative(),
+    data: z.string().max(2_000).nullable(),
+});
+
+export const battleMapTilePatchSchema = z
+    .object({
+        expectedVersion: z.number().int().min(1),
+        patches: z.array(tilePatchSchema).min(1).max(512),
+    })
+    .superRefine(({ patches }, ctx) => {
+        const seen = new Set<string>();
+
+        for (const patch of patches) {
+            const key = `${patch.layer}:${patch.cx}:${patch.cy}`;
+
+            if (seen.has(key))
+                ctx.addIssue({
+                    code: 'custom',
+                    message: 'battleMap.validation.duplicateTilePatch',
+                    path: ['patches'],
+                });
+
+            seen.add(key);
+        }
+    });
+
+export type BattleMapTilePatchInput = z.infer<typeof battleMapTilePatchSchema>;

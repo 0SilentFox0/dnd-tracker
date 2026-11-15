@@ -80,19 +80,20 @@ describe('fitMapView', () => {
             width: 300,
             height: 180,
             rotated: false,
+            grow: 1,
         });
     });
 
     it('широка карта в портретному контейнері — повернута, рамка з переставленими сторонами', () => {
         expect(
             fitMapView({ width: 300, height: 600 }, wide, { rotatable: true })
-        ).toEqual({ width: 300, height: 500, rotated: true });
+        ).toEqual({ width: 300, height: 500, rotated: true, grow: 1 });
     });
 
     it('широка карта в широкому контейнері — без повороту', () => {
         expect(
             fitMapView({ width: 600, height: 300 }, wide, { rotatable: true })
-        ).toEqual({ width: 500, height: 300, rotated: false });
+        ).toEqual({ width: 500, height: 300, rotated: false, grow: 1 });
     });
 
     it('bothWays: висока карта в широкому контейнері — повернута; без bothWays — ні', () => {
@@ -102,7 +103,7 @@ describe('fitMapView', () => {
                 { cols: 12, rows: 20 },
                 { bothWays: true }
             )
-        ).toEqual({ width: 500, height: 300, rotated: true });
+        ).toEqual({ width: 500, height: 300, rotated: true, grow: 1 });
         expect(
             fitMapView({ width: 600, height: 300 }, { cols: 12, rows: 20 })
                 .rotated
@@ -112,7 +113,7 @@ describe('fitMapView', () => {
     it('taller: карта розтягується по ширині до заданої надвисоти', () => {
         expect(
             fitMapView({ width: 600, height: 300 }, wide, { taller: 1.4 })
-        ).toEqual({ width: 600, height: 360, rotated: false });
+        ).toEqual({ width: 600, height: 360, rotated: false, grow: 1 });
     });
 
     it('майже квадратна карта — поворот майже нічого не дає, лишається як є', () => {
@@ -151,37 +152,45 @@ describe('fitMapView', () => {
                 rotatable: true,
                 fillWidth: true,
             })
-        ).toEqual({ width: 300, height: 500, rotated: true });
+        ).toEqual({ width: 300, height: 500, rotated: true, grow: 1 });
     });
 
     it('fillWidth без повороту: ширина екрана, висота за пропорцією', () => {
         expect(
             fitMapView({ width: 600, height: 100 }, wide, { fillWidth: true })
-        ).toEqual({ width: 600, height: 360, rotated: false });
+        ).toEqual({ width: 600, height: 360, rotated: false, grow: 1 });
     });
 
     it('порожній контейнер — без повороту', () => {
         expect(
             fitMapView({ width: 0, height: 0 }, wide, { rotatable: true })
-        ).toEqual({ width: 0, height: 0, rotated: false });
+        ).toEqual({ width: 0, height: 0, rotated: false, grow: 1 });
     });
 
     it('minCell: дрібні клітинки — рамка росте до мінімальної клітинки зі збереженням пропорцій', () => {
         expect(
             fitMapView({ width: 300, height: 200 }, wide, { minCell: 32 })
-        ).toEqual({ width: 640, height: 384, rotated: false });
+        ).toEqual({ width: 640, height: 384, rotated: false, grow: 640 / 300 });
     });
 
     it('minCell: клітинки й так достатні — рамка не змінюється', () => {
         expect(
             fitMapView({ width: 1000, height: 600 }, wide, { minCell: 32 })
-        ).toEqual({ width: 1000, height: 600, rotated: false });
+        ).toEqual({ width: 1000, height: 600, rotated: false, grow: 1 });
+    });
+
+    it('grow: 1 без minCell і > 1, коли клітинка менша за minCell', () => {
+        const avail = { width: 300, height: 200 };
+
+        expect(fitMapView(avail, wide).grow).toBe(1);
+        expect(fitMapView(avail, wide, { minCell: 10 }).grow).toBe(1);
+        expect(fitMapView(avail, wide, { minCell: 30 }).grow).toBeCloseTo(2, 9);
     });
 
     it('minCell: порожній контейнер не роздувається', () => {
         expect(
             fitMapView({ width: 0, height: 0 }, wide, { minCell: 32 })
-        ).toEqual({ width: 0, height: 0, rotated: false });
+        ).toEqual({ width: 0, height: 0, rotated: false, grow: 1 });
     });
 });
 

@@ -583,6 +583,13 @@ export const ASSISTANT_ROUTE_COVERAGE: readonly RouteCoverage[] = [
         state: 'planned',
     },
     {
+        route: 'campaigns/[id]/maps/[mapId]/tiles',
+        methods: ['GET', 'PUT'],
+        task: 0,
+        adapter: 'battle-map tile library, DM UI only, not assistant-exposed',
+        state: 'planned',
+    },
+    {
         route: 'campaigns/[id]/world/discard-upload',
         methods: ['POST'],
         task: 0,

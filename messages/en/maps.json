@@ -39,7 +39,40 @@
     "panels": {
       "background": "Background",
       "cells": "Cells",
-      "edges": "Edges"
+      "edges": "Edges",
+      "tiles": "Textures"
+    },
+    "tiles": {
+      "layers": "Tile layers",
+      "tools": "Tile tools",
+      "layer": {
+        "ground": "Ground",
+        "wallfill": "Wall fill",
+        "objects": "Objects",
+        "edge-art": "Doors and details"
+      },
+      "tool": {
+        "brush": "Brush",
+        "line": "Line",
+        "rectangle": "Rectangle",
+        "fill": "Fill",
+        "eraser": "Eraser",
+        "picker": "Picker"
+      },
+      "brushSize": "Brush size",
+      "name": {
+        "stone-floor": "Stone floor",
+        "grass": "Grass",
+        "wood-planks": "Wood planks",
+        "stone-wall-fill": "Stone wall",
+        "barrel": "Barrel",
+        "closed-wood-door": "Closed wooden door"
+      },
+      "undo": "Undo",
+      "redo": "Redo",
+      "save": "Save tiles",
+      "saving": "Saving...",
+      "saveFailed": "Failed to save tiles"
     }
   }
 }

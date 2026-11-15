@@ -13,8 +13,12 @@ import { prisma } from '@/lib/db';
 import type { BattleMapInput } from '@/lib/schemas/battle-maps';
 import { ContentError } from '@/lib/server/content/errors';
 import { resolveMapBackgroundForPersistence } from '@/lib/supabase/battle-map-storage';
-import { encodeEdges } from '@/lib/utils/battle/map-storage/edge-chunks';
+import {
+    EMPTY_EDGE_CHUNK,
+    encodeEdges,
+} from '@/lib/utils/battle/map-storage/edge-chunks';
 import { withoutEdges } from '@/lib/utils/battle/map-storage/persisted-map';
+import { isTileLayer, type TileLayer } from '@/lib/utils/battle/tiles/types';
 import type { BattleMapConfig } from '@/types/battle';
 import type { BattleMapBrief, BattleMapFull } from '@/types/battle-map';
 
@@ -47,7 +51,7 @@ const payloadOf = (input: BattleMapInput) => {
         header,
         chunks,
         headerJson: header as unknown as Prisma.InputJsonObject,
-        payloadJson: { header, chunks } as unknown as Prisma.InputJsonObject,
+        payloadJson: { header, chunks, tileLayers: {} } as unknown as Prisma.InputJsonObject,
     };
 };
 
@@ -209,7 +213,7 @@ export async function getMap(
     };
 }
 
-async function pruneVersions(
+export async function pruneMapVersions(
     tx: Prisma.TransactionClient,
     mapId: string,
     current: number
@@ -232,6 +236,27 @@ const conflict = () => new ContentError(API_ERRORS.BATTLE_MAP_CONFLICT, 409);
 
 const plain = (v: unknown) => JSON.parse(JSON.stringify(v)) as unknown;
 
+function tileLayersFromRows(
+    rows: readonly { cx: number; cy: number; tileLayers: unknown }[]
+) {
+    const snapshot: Record<string, Partial<Record<TileLayer, string>>> = {};
+
+    for (const row of rows) {
+        if (!row.tileLayers || typeof row.tileLayers !== 'object' || Array.isArray(row.tileLayers))
+            continue;
+
+        const layers: Partial<Record<TileLayer, string>> = {};
+
+        for (const [layer, data] of Object.entries(row.tileLayers))
+            if (isTileLayer(layer) && typeof data === 'string') layers[layer] = data;
+
+        if (Object.keys(layers).length)
+            snapshot[`${row.cx}:${row.cy}`] = layers;
+    }
+
+    return snapshot;
+}
+
 /** `input.expectedVersion` guards against overwriting a newer save; an identical payload only renames. */
 export async function saveMap(
     mapId: string,
@@ -253,13 +278,32 @@ export async function saveMap(
         )
             throw conflict();
 
+        const oldRows = await tx.battleMapChunk.findMany({
+            where: { mapId },
+            select: { cx: true, cy: true, data: true, tileLayers: true },
+        });
+
+        const tileLayers = tileLayersFromRows(oldRows);
+
+        const versionPayload = {
+            ...payloadJson,
+            tileLayers,
+        } as Prisma.InputJsonObject;
+
         const snapshot = await tx.battleMapVersion.findUnique({
             where: { mapId_version: { mapId, version: base } },
         });
 
+        const snapshotPayload = snapshot
+            ? (plain(snapshot.payload) as Record<string, unknown>)
+            : null;
+
         const unchanged =
-            !!snapshot &&
-            isDeepStrictEqual(plain(snapshot.payload), plain(payloadJson));
+            !!snapshotPayload &&
+            isDeepStrictEqual(
+                { ...snapshotPayload, tileLayers: snapshotPayload.tileLayers ?? {} },
+                plain(versionPayload)
+            );
 
         const { count } = await tx.battleMap.updateMany({
             where: { id: mapId, mapVersion: base },
@@ -284,19 +328,43 @@ export async function saveMap(
 
         await tx.battleMapChunk.deleteMany({ where: { mapId } });
 
+        const chunkRows = new Map<string, Prisma.BattleMapChunkCreateManyInput>(
+            recordToChunkRows(chunks).map((chunk) => [
+                `${chunk.cx}:${chunk.cy}`,
+                { mapId, ...chunk },
+            ])
+        );
+
+        for (const oldRow of oldRows) {
+            const layers = tileLayers[`${oldRow.cx}:${oldRow.cy}`];
+
+            if (!layers) continue;
+
+            const key = `${oldRow.cx}:${oldRow.cy}`;
+
+            const row = chunkRows.get(key) ?? {
+                mapId,
+                cx: oldRow.cx,
+                cy: oldRow.cy,
+                data: EMPTY_EDGE_CHUNK,
+            };
+
+            chunkRows.set(key, { ...row, tileLayers: layers });
+        }
+
         await tx.battleMapChunk.createMany({
-            data: recordToChunkRows(chunks).map((c) => ({ mapId, ...c })),
+            data: [...chunkRows.values()],
         });
 
         await tx.battleMapVersion.create({
             data: {
                 mapId,
                 version: row.mapVersion,
-                payload: payloadJson,
+                payload: versionPayload,
             },
         });
 
-        await pruneVersions(tx, mapId, row.mapVersion);
+        await pruneMapVersions(tx, mapId, row.mapVersion);
 
         return toBrief(row);
     });

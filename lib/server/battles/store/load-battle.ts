@@ -1,6 +1,8 @@
 import { BattleStatus } from '@/lib/constants/battle';
 import { CampaignRole, isDemoKind } from '@/lib/constants/campaigns';
+import { TILE_CATALOG } from '@/lib/constants/tilesets/catalog';
 import { getPinnedGeometry } from '@/lib/server/battle-maps/library-service';
+import { getPinnedTileChunks } from '@/lib/server/battle-maps/tiles-service';
 import { pendingFromStored } from '@/lib/utils/battle/crit-choice/pending';
 import { composeEffectiveMap } from '@/lib/utils/battle/map-storage/effective-map';
 import { BattleMapVersionMissingError } from '@/lib/utils/battle/store/errors';
@@ -15,6 +17,8 @@ import type {
     ParticipantSnapshot,
     ParticipantState,
 } from '@/lib/utils/battle/store/types';
+import { deriveTileCells, type TileLayerChunks } from '@/lib/utils/battle/tiles/derive';
+import { decodeTileChunk } from '@/lib/utils/battle/tiles/rle';
 import { parseRulesCached } from '@/lib/utils/rules/schema';
 import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
 import type { BattleAudioState } from '@/types/audio';
@@ -33,6 +37,14 @@ type ParticipantRow = ParticipantColumns & {
     state: unknown;
     snapshotHash: string;
 };
+
+const TILE_PROPERTIES = Object.fromEntries(
+    TILE_CATALOG.map((tile) => [tile.id, {
+        blocks: tile.blocks,
+        blocksSight: tile.blocksSight,
+        footprint: tile.footprint,
+    }])
+);
 
 function rowToParticipant(row: ParticipantRow): BattleParticipant {
     const { battleId, snapshot, state, snapshotHash, ...columns } = row;
@@ -137,12 +149,44 @@ async function effectiveMapOf(
 
     if (!ref) return composeEffectiveMap(base, state);
 
-    const library = await getPinnedGeometry(ref.mapId, ref.version);
+    const [library, encodedTiles] = await Promise.all([
+        getPinnedGeometry(ref.mapId, ref.version),
+        getPinnedTileChunks(ref.mapId, ref.version),
+    ]);
 
-    if (!library)
+    if (!library || encodedTiles === null)
         throw new BattleMapVersionMissingError(ref.mapId, ref.version);
 
-    return composeEffectiveMap(base, state, library);
+    const chunks = Object.fromEntries(
+        Object.entries(encodedTiles).map(([layer, records]) => [
+            layer,
+            Object.fromEntries(
+                Object.entries(records ?? {}).map(([key, data]) => [
+                    key,
+                    decodeTileChunk(data),
+                ])
+            ),
+        ])
+    ) as TileLayerChunks;
+
+    const derived = deriveTileCells(
+        {
+            chunks,
+            cols: base.cols,
+            rows: base.rows,
+            version: ref.version,
+        },
+        TILE_PROPERTIES
+    );
+
+    const effective = composeEffectiveMap(base, state, library);
+
+    return derived.blocked.size
+        ? {
+              ...effective,
+              blocked: [...new Set([...(effective.blocked ?? []), ...derived.blocked])],
+          }
+        : effective;
 }
 
 export async function loadBattle(

@@ -14,6 +14,7 @@ Page `app/campaigns/[id]/battles/[battleId]/page.tsx` (server: `userId` from `ge
 
 - `useBattleScene` (`lib/hooks/battle`) складає значення сцени з `derive-scene` (`lib/utils/battle/view`, чиста похідна: черга, склад сторін, глядач) і `useBattleActions` (мутації з реєстру `battleOps`; з барелю не експортується). Типи: чисті (`ResultFx`, `StrikeFx`, `ActionResultFx`, `BattleLogState`, `BattleSceneTurn/Roster/Result`) — у `types/battle-scene.ts` без імпортів хуків; типи, що залежать від хуків (`BattleSceneValue/Data/Actions/Intents/Dialogs`) — у `lib/hooks/battle/types.ts`.
 - `BattleMap` (`components/battle/map`) — оболонка: `MapStage` (жести, масштаб, шари), `MapLayers` (сітка, токени, накладки), `RangedHint` (підказка дальнього пострілу), `useStrokePaint` (малювання місцевості, `lib/hooks/battle`). Вид карти складає `composeMapView` (`lib/utils/battle/grid/map-compose.ts`).
+- `BattleMapView.camera?: { follow, selfId }` — клієнтська ідентичність глядача для camera follow (гравець завжди, ДМ через localStorage-перемикач); у camera mode transform шару лишається в SVG CTM, а FX-якорі `data-fx-*` не змінюються. Деталі й поріг `fit.grow > 1` — [map-modes.md](map-modes.md#камера-етап-c).
 
 ## Дії асистента над боєм
 

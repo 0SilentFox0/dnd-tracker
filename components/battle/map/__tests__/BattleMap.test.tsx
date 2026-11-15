@@ -9,7 +9,6 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { CombatStatus } from '@/lib/constants/battle';
 import { render } from '@/lib/i18n/test/render-uk';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
-import { MIN_TAP_CELL_PX } from '@/lib/utils/battle/grid';
 import type {
     ActiveEffect,
     BattleMapConfig,
@@ -78,6 +77,56 @@ describe('BattleMap', () => {
         expect(
             container.querySelector('[data-fx-participant="e"]')
         ).not.toBeNull();
+    });
+
+    it('uses a fixed camera viewport for maps that grow beyond the tap size', () => {
+        avail = { width: 375, height: 600 };
+
+        const { container } = render(
+            <BattleMap
+                map={{ ...square, cols: 100, rows: 100 }}
+                participants={[]}
+            />
+        );
+
+        const clip = container.querySelector('[data-fx-clip]') as HTMLElement;
+
+        const outer = clip.parentElement as HTMLElement;
+
+        const layer = clip.firstElementChild as HTMLElement;
+
+        expect(outer.className).not.toContain('overflow-auto');
+        expect(clip.style.width).toBe('375px');
+        expect(layer.style.transform).toContain('scale(');
+        expect(container.querySelector('[data-map-rotated]')).toBeNull();
+    });
+
+    it('maps camera screen coordinates back to the correct clicked cell', () => {
+        avail = { width: 375, height: 600 };
+
+        const onCellClick = vi.fn();
+
+        const { container } = render(
+            <BattleMap
+                map={{ ...square, cols: 100, rows: 100 }}
+                participants={[at('p1', 5, 5)]}
+                view={{
+                    currentId: 'p1',
+                    camera: { follow: true, selfId: 'p1' },
+                }}
+                actions={{ onCellClick }}
+            />
+        );
+
+        const svg = container.querySelector('svg[data-fx-grid]') as SVGSVGElement;
+
+        svg.getScreenCTM = () =>
+            ({ a: 0.3, b: 0, c: 0, d: 0.3, e: 22.5, f: 135 }) as DOMMatrix;
+        fireEvent.click(container.querySelector('[data-grid-hit]') as Element, {
+            clientX: 187.5,
+            clientY: 300,
+        });
+        expect(onCellClick).toHaveBeenCalledWith({ x: 5, y: 5 });
     });
 
     it('draws blocked cells dark, without stroke, and ignores clicks on them', () => {
@@ -240,7 +289,7 @@ describe('BattleMap', () => {
         expect(parseFloat(clip.style.width)).toBeCloseTo(1400 * (2 / 3));
     });
 
-    it('дрібні клітинки — карта росте до мінімальної клітинки й прокручується в обидва боки від краю', () => {
+    it('дрібні клітинки — вмикається камера без нативного прокручування', () => {
         avail = { width: 1000, height: 1000 };
 
         const { container } = render(
@@ -254,10 +303,10 @@ describe('BattleMap', () => {
 
         const outer = clip.parentElement as HTMLElement;
 
-        expect(parseFloat(clip.style.width)).toBe(30 * MIN_TAP_CELL_PX);
-        expect(parseFloat(clip.style.height)).toBe(80 * MIN_TAP_CELL_PX);
-        expect(outer.className).toContain('overflow-auto');
-        expect(outer.className).toContain('items-start');
+        expect(parseFloat(clip.style.width)).toBe(1000);
+        expect(parseFloat(clip.style.height)).toBe(1000);
+        expect(outer.className).not.toContain('overflow-auto');
+        expect(outer.className).toContain('items-center');
         expect(outer.className).toContain('justify-center');
     });
 
@@ -386,7 +435,7 @@ describe('BattleMap', () => {
             }
         });
 
-        it('tiny cells show only the bar', () => {
+        it('tiny fit-all cells hide the HUD until the camera zooms in', () => {
             avail = { width: 80, height: 60 };
 
             const { container } = render(
@@ -399,7 +448,7 @@ describe('BattleMap', () => {
 
             expect(
                 container.querySelector('[data-map-hud="h"]')?.textContent
-            ).toBe('');
+            ).toBeUndefined();
         });
     });
 

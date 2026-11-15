@@ -11,6 +11,7 @@ import {
 } from 'react';
 
 import { type GridCellActions, GridLayer } from './grid/GridLayer';
+import { TileCanvas, type TileRenderState } from './tiles/TileCanvas';
 import { DoorMenu } from './DoorMenu';
 import { DoorsLayer } from './DoorsLayer';
 import { EdgeEditor } from './EdgeEditor';
@@ -81,6 +82,7 @@ interface MapStageProps {
     participants: BattleParticipant[];
     view?: BattleMapView;
     actions?: BattleMapActions;
+    tiles?: TileRenderState;
     editing: MapStageEditing;
     layout: MapStageLayout;
     interaction: MapStageInteraction;
@@ -92,6 +94,7 @@ function MapStageImpl({
     participants,
     view,
     actions,
+    tiles,
     editing,
     layout,
     interaction,
@@ -239,6 +242,13 @@ function MapStageImpl({
                 phone={phone}
                 rotated={rotated}
             />
+            {tiles && (
+                <TileCanvas
+                    tiles={tiles}
+                    viewport={gridWindow}
+                    cellPx={UNIT * pxPerUnit}
+                />
+            )}
             <svg
                 ref={svgRef}
                 className="absolute inset-0 h-full w-full"

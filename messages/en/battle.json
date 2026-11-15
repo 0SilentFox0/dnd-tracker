@@ -108,6 +108,16 @@
       "motion": "Motion",
       "background": "Background"
     },
+    "camera": {
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out",
+      "recenter": "Return to token",
+      "minimap": "Minimap",
+      "minimapShow": "Show minimap",
+      "minimapHide": "Collapse minimap",
+      "follow": "Follow the turn",
+      "followHint": "Automatically move the camera to the active participant at the start of their turn"
+    },
     "backgroundLabel": "Map background",
     "defaultBackground": "Default background",
     "motion": {

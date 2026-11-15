@@ -28,7 +28,7 @@ export const PLAYER_ARTICLES: HelpArticleDef[] = [
         audience: 'player',
         sections: [
             { blocks: [{ kind: 'p' }] },
-            { blocks: [{ kind: 'p' }, { kind: 'list', count: 4 }] },
+            { blocks: [{ kind: 'p' }, { kind: 'list', count: 4 }, { kind: 'p' }] },
             { blocks: [{ kind: 'p' }, { kind: 'p' }] },
             { blocks: [{ kind: 'p' }] },
             { blocks: [{ kind: 'p' }] },

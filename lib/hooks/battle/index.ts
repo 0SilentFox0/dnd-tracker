@@ -44,6 +44,7 @@ export {
     useDownedHeroPrompt,
 } from './useDownedHeroPrompt';
 export { type EdgeEditing, useEdgeStroke } from './useEdgeStroke';
+export { useFollowTurnSetting } from './useFollowTurnSetting';
 export { useFxEnabled } from './useFxEnabled';
 export { useFxImpacts } from './useFxImpacts';
 export { useGearSwap } from './useGearSwap';
@@ -58,6 +59,11 @@ export {
     type MapBackgroundTool,
     useMapBackgroundTool,
 } from './useMapBackgroundTool';
+export {
+    type CameraTarget,
+    type MapCameraOptions,
+    useMapCamera,
+} from './useMapCamera';
 export { type MapDoorsTool, useMapDoors } from './useMapDoors';
 export { type MapMotionTool, useMapMotionTool } from './useMapMotionTool';
 export {

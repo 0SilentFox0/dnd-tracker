@@ -1,11 +1,18 @@
 import { Prisma } from '@prisma/client';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const mocks = vi.hoisted(() => ({ getPinned: vi.fn(), lock: vi.fn() }));
+const mocks = vi.hoisted(() => ({
+    getPinned: vi.fn(),
+    getPinnedTiles: vi.fn(),
+    lock: vi.fn(),
+}));
 
 vi.mock('@/lib/server/battle-maps/library-service', () => ({
     getPinnedGeometry: mocks.getPinned,
     lockMapRow: mocks.lock,
+}));
+vi.mock('@/lib/server/battle-maps/tiles-service', () => ({
+    getPinnedTileChunks: mocks.getPinnedTiles,
 }));
 
 import { loadBattle } from '../load-battle';
@@ -62,11 +69,13 @@ const loadWith = (extra: Record<string, unknown>) =>
 describe('loadBattle: карта бібліотеки', () => {
     beforeEach(() => {
         mocks.getPinned.mockReset();
+        mocks.getPinnedTiles.mockReset();
         mocks.getPinned.mockResolvedValue({
             map: header,
             walls: ['1:1:e', '2:2:s'],
             bars: ['3:3:e'],
         });
+        mocks.getPinnedTiles.mockResolvedValue({});
     });
 
     it('linked: ребра pinned-версії мінус видалені, mapRef і mapState окремо', async () => {
@@ -84,6 +93,22 @@ describe('loadBattle: карта бібліотеки', () => {
             removedEdges: ['1:1:e'],
             doors: {},
         });
+    });
+
+    it('linked: блокувальні тайли з pinned-версії входять у карту бою', async () => {
+        const cells = new Uint16Array(256);
+
+        cells[3 * 16 + 2] = 5;
+
+        const { encodeTileChunk } = await import('@/lib/utils/battle/tiles/rle');
+
+        mocks.getPinnedTiles.mockResolvedValue({
+            objects: { '0:0': encodeTileChunk(cells) },
+        });
+
+        const loaded = await loadWith({ mapId: 'm1', mapVersion: 3 });
+
+        expect(loaded?.meta.map?.blocked).toContain('2:3');
     });
 
     it('linked: відсутня pinned-версія дає типізовану помилку з mapId і версією', async () => {
