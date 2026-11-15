@@ -1,4 +1,6 @@
 // @vitest-environment happy-dom
+import type { ReactNode } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
     cleanup,
     fireEvent,
@@ -49,6 +51,13 @@ const hero = (id: string) =>
         race: 'y',
     }) as CharacterListItem;
 
+const renderWithQueryClient = (ui: ReactNode) =>
+    render(
+        <QueryClientProvider client={new QueryClient()}>
+            {ui}
+        </QueryClientProvider>
+    );
+
 describe('PartyRestActions new session', () => {
     afterEach(() => {
         cleanup();
@@ -57,7 +66,7 @@ describe('PartyRestActions new session', () => {
 
     it('wfrp: shows the session button and sends kind session for everyone', async () => {
         h.system = 'wfrp';
-        render(
+        renderWithQueryClient(
             <PartyRestActions
                 campaignId="c"
                 characters={[hero('a'), hero('b')]}
@@ -78,7 +87,7 @@ describe('PartyRestActions new session', () => {
 
     it('wfrp: no short/long rest or close-rest buttons', () => {
         h.system = 'wfrp';
-        render(
+        renderWithQueryClient(
             <PartyRestActions
                 campaignId="c"
                 characters={[
@@ -103,7 +112,7 @@ describe('PartyRestActions new session', () => {
 
     it('d20: close-rest button shows while a short rest is open', () => {
         h.system = 'homm';
-        render(
+        renderWithQueryClient(
             <PartyRestActions
                 campaignId="c"
                 characters={[
@@ -122,7 +131,9 @@ describe('PartyRestActions new session', () => {
 
     it('d20: no session button', () => {
         h.system = 'homm';
-        render(<PartyRestActions campaignId="c" characters={[hero('a')]} />);
+        renderWithQueryClient(
+            <PartyRestActions campaignId="c" characters={[hero('a')]} />
+        );
 
         expect(
             screen.queryByRole('button', { name: 'rest.party.session' })
