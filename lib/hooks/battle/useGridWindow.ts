@@ -10,7 +10,7 @@ import {
 
 interface GridWindowOptions {
     svgRef: RefObject<SVGSVGElement | null>;
-    scrollRef: RefObject<HTMLElement | null>;
+    viewportRef: RefObject<HTMLElement | null>;
     deps: {
         zoom: number;
         offset: { x: number; y: number };
@@ -31,7 +31,7 @@ const same = (a: GridWindow | null, b: GridWindow | null) =>
 /** Видиме вікно клітинок (квантоване до чанка); `null` без CTM — тоді рендериться все. */
 export function useGridWindow({
     svgRef,
-    scrollRef,
+    viewportRef,
     deps,
 }: GridWindowOptions): GridWindow | null {
     const [win, setWin] = useState<GridWindow | null>(null);
@@ -41,7 +41,7 @@ export function useGridWindow({
     const { zoom, offset, size, pxPerUnit } = deps;
 
     useEffect(() => {
-        const scroller = scrollRef.current;
+        const viewport = viewportRef.current;
 
         let frame = 0;
 
@@ -51,9 +51,9 @@ export function useGridWindow({
             const ctm = svgRef.current?.getScreenCTM?.();
 
             const next =
-                scroller && ctm
+                viewport && ctm
                     ? visibleGridWindow({
-                          viewport: scroller.getBoundingClientRect(),
+                          viewport: viewport.getBoundingClientRect(),
                           ctm,
                           cols: size.width / UNIT,
                           rows: size.height / UNIT,
@@ -71,16 +71,16 @@ export function useGridWindow({
         };
 
         schedule();
-        scroller?.addEventListener('scroll', schedule, { passive: true });
+        viewport?.addEventListener('scroll', schedule, { passive: true });
 
         return () => {
-            scroller?.removeEventListener('scroll', schedule);
+            viewport?.removeEventListener('scroll', schedule);
 
             if (frame) cancelAnimationFrame(frame);
         };
     }, [
         svgRef,
-        scrollRef,
+        viewportRef,
         zoom,
         offset.x,
         offset.y,

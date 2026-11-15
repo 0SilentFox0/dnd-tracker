@@ -13,11 +13,19 @@ import {
     type MapDoorsTool,
     type ModeTools,
     useGridWindow,
+    useMapCamera,
     useScrollToCurrent,
     useStrokePaint,
 } from '@/lib/hooks/battle';
 import { useViewport } from '@/lib/hooks/common';
 import { cn } from '@/lib/utils';
+import {
+    cameraBounds,
+    cellPointPx,
+    followTarget,
+    type Frame,
+    needsCamera,
+} from '@/lib/utils/battle/camera';
 import {
     fitMapView,
     mapSize,
@@ -129,13 +137,34 @@ export function BattleMap({
         [phone, map, cols, rows]
     );
 
-    const fit = fitMapView(avail, win, {
-        rotatable: phone,
-        bothWays: !phone,
-        fillWidth: phone,
-        taller: phone ? 1 : DESKTOP_MAX_TALLER,
-        minCell: MIN_TAP_CELL_PX,
-    });
+    const fit = useMemo(
+        () =>
+            fitMapView(avail, win, {
+                rotatable: phone,
+                bothWays: !phone,
+                fillWidth: phone,
+                taller: phone ? 1 : DESKTOP_MAX_TALLER,
+                minCell: MIN_TAP_CELL_PX,
+            }),
+        [avail, win, phone]
+    );
+
+    const cameraMode = needsCamera(fit);
+
+    const fitAll = useMemo(
+        () =>
+            cameraMode
+                ? fitMapView(avail, win, {
+                      rotatable: false,
+                      bothWays: false,
+                      fillWidth: false,
+                      taller: 1,
+                  })
+                : fit,
+        [cameraMode, avail, win, fit]
+    );
+
+    const renderedFit = cameraMode ? fitAll : fit;
 
     const scrollsX = fit.width > avail.width + 0.5;
 
@@ -143,13 +172,57 @@ export function BattleMap({
 
     const scrolls = scrollsX || scrollsY;
 
-    const { zoom, offset, bind, containerRef, wasDragged } = useViewport({
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    const viewport = useViewport({
         panLocked: drawing || !!modeTools?.panLocked,
         wheelScrolls: scrolls,
+        enabled: !cameraMode,
+        containerRef,
     });
 
-    const pxPerUnit =
-        (fit.rotated ? fit.height : fit.width) / (win.cols * UNIT);
+    const pxPerUnit = renderedFit.width / (win.cols * UNIT);
+
+    const frame = useMemo<Frame | null>(() => {
+        if (!cameraMode || avail.width <= 0 || avail.height <= 0) return null;
+
+        return {
+            avail,
+            content: { width: fitAll.width, height: fitAll.height },
+            bounds: cameraBounds(fitAll.width / win.cols),
+        };
+    }, [cameraMode, avail, fitAll.width, fitAll.height, win.cols]);
+
+    const cameraTarget = followTarget(view?.currentId ?? null, participants);
+
+    const selfTarget = followTarget(view?.camera?.selfId ?? null, participants);
+
+    const camera = useMapCamera({
+        enabled: cameraMode,
+        frame,
+        containerRef,
+        panLocked: drawing || !!modeTools?.panLocked,
+        follow: {
+            currentId: view?.currentId ?? null,
+            target: cameraTarget
+                ? { point: cellPointPx(cameraTarget.anchor, cameraTarget.size, win, pxPerUnit) }
+                : null,
+            self: selfTarget
+                ? { point: cellPointPx(selfTarget.anchor, selfTarget.size, win, pxPerUnit) }
+                : null,
+            enabled: view?.camera?.follow ?? false,
+        },
+    });
+
+    const zoom = cameraMode ? camera.camera.zoom : viewport.zoom;
+
+    const offset = cameraMode
+        ? { x: camera.camera.x, y: camera.camera.y }
+        : viewport.offset;
+
+    const bind = cameraMode ? camera.bind : viewport.bind;
+
+    const wasDragged = cameraMode ? camera.wasDragged : viewport.wasDragged;
 
     const modeView = view?.mode;
 
@@ -159,12 +232,12 @@ export function BattleMap({
         outerRef,
         containerRef,
         view?.currentId ?? null,
-        scrolls
+        scrolls && !cameraMode && (view?.camera?.follow ?? true)
     );
 
     const gridWindow = useGridWindow({
         svgRef,
-        scrollRef: outerRef,
+        viewportRef: cameraMode ? containerRef : outerRef,
         deps: { zoom, offset, size, pxPerUnit },
     });
 
@@ -173,11 +246,11 @@ export function BattleMap({
             win,
             size,
             pxPerUnit,
-            rotated: fit.rotated,
+            rotated: cameraMode ? false : fit.rotated,
             phone,
             window: gridWindow,
         }),
-        [win, size, pxPerUnit, fit.rotated, phone, gridWindow]
+        [win, size, pxPerUnit, cameraMode, fit.rotated, phone, gridWindow]
     );
 
     const interaction = useMemo(
@@ -199,7 +272,7 @@ export function BattleMap({
 
     // свайп віддаємо браузеру лише для прокрутки; зум, щипок і штрих місцевості — наші
     const touch =
-        scrolls && zoom === 1 && !drawing
+        !cameraMode && scrolls && zoom === 1 && !drawing
             ? cn(scrollsX && 'touch-pan-x', scrollsY && 'touch-pan-y')
             : 'touch-none';
 
@@ -209,10 +282,18 @@ export function BattleMap({
             ref={outerRef}
             className={cn(
                 'flex h-full w-full',
-                (phone || scrolls) && 'overflow-auto',
-                phone && '[scrollbar-gutter:stable]',
-                scrollsX ? 'justify-start' : 'justify-center',
-                scrollsY ? 'items-start' : 'items-center',
+                !cameraMode && (phone || scrolls) && 'overflow-auto',
+                !cameraMode && phone && '[scrollbar-gutter:stable]',
+                cameraMode
+                    ? 'items-center justify-center'
+                    : scrollsX
+                      ? 'justify-start'
+                      : 'justify-center',
+                cameraMode
+                    ? ''
+                    : scrollsY
+                      ? 'items-start'
+                      : 'items-center',
                 className
             )}
         >
@@ -229,8 +310,8 @@ export function BattleMap({
                         'cursor-(--attack-cursor)! **:cursor-(--attack-cursor)!'
                 )}
                 style={{
-                    width: fit.width,
-                    height: fit.height,
+                    width: cameraMode ? avail.width : fit.width,
+                    height: cameraMode ? avail.height : fit.height,
                     ...(trajectory && {
                         '--attack-cursor': ATTACK_CURSOR[trajectory.kind],
                     }),
@@ -238,24 +319,31 @@ export function BattleMap({
                 {...bind}
             >
                 <div
-                    className="absolute inset-0 origin-top-left"
+                    className={cn(
+                        'origin-top-left',
+                        cameraMode ? 'absolute top-0 left-0' : 'absolute inset-0'
+                    )}
                     style={{
+                        ...(cameraMode && {
+                            width: fitAll.width,
+                            height: fitAll.height,
+                        }),
                         transform: `translate(${offset.x}px, ${offset.y}px) scale(${zoom})`,
                     }}
                 >
                     {/* поворот усередині шару зуму, тож панорама й щипок лишаються в екранних координатах */}
                     <div
-                        data-map-rotated={fit.rotated || undefined}
+                        data-map-rotated={renderedFit.rotated || undefined}
                         className={cn(
                             'absolute top-0 left-0 origin-top-left',
-                            !fit.rotated && 'inset-0'
+                            !renderedFit.rotated && 'inset-0'
                         )}
                         style={
-                            fit.rotated
+                            renderedFit.rotated
                                 ? {
-                                      width: fit.height,
-                                      height: fit.width,
-                                      transform: `translateX(${fit.width}px) rotate(90deg)`,
+                                      width: renderedFit.height,
+                                      height: renderedFit.width,
+                                      transform: `translateX(${renderedFit.width}px) rotate(90deg)`,
                                   }
                                 : undefined
                         }

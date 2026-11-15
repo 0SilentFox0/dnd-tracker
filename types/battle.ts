@@ -504,6 +504,7 @@ export type BattleMapMark =
     | 'picked';
 
 export interface BattleMapView {
+    camera?: { follow: boolean; selfId: string | null };
     selectedId?: string | null;
     currentId?: string | null;
     /** cellKey → позначка; число — досяжна клітинка (вартість руху, не показується) */

@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { type RefObject, useCallback, useEffect, useRef, useState } from 'react';
 
 import { DRAG_THRESHOLD, usePanPinch } from './usePanPinch';
 
@@ -27,6 +27,7 @@ export interface ViewportOptions {
     /** контейнер карти прокручується: без зуму колесо гортає його, а масштабує лише з Ctrl/⌘ */
     wheelScrolls?: boolean;
     enabled?: boolean;
+    containerRef?: RefObject<HTMLDivElement | null>;
     minZoom?: number;
     maxZoom?: number;
 }
@@ -35,6 +36,7 @@ export function useViewport({
     panLocked = false,
     wheelScrolls = false,
     enabled = true,
+    containerRef: suppliedRef,
     minZoom = DEFAULT_MIN_ZOOM,
     maxZoom = DEFAULT_MAX_ZOOM,
 }: ViewportOptions = {}) {
@@ -46,7 +48,9 @@ export function useViewport({
         bounds.current = { min: minZoom, max: maxZoom };
     }, [minZoom, maxZoom]);
 
-    const containerRef = useRef<HTMLDivElement>(null);
+    const ownRef = useRef<HTMLDivElement>(null);
+
+    const containerRef = suppliedRef ?? ownRef;
 
     const gestures = usePanPinch({
         panLocked,
@@ -104,7 +108,7 @@ export function useViewport({
         setView((v) =>
             zoomAt(v, v.zoom * factor, w / 2, h / 2, w, h, bounds.current)
         );
-    }, []);
+    }, [containerRef]);
 
     const focusOn = useCallback((nx: number, ny: number, zoom: number) => {
         const rect = containerRef.current?.getBoundingClientRect();
@@ -114,7 +118,7 @@ export function useViewport({
         const h = rect?.height ?? 0;
 
         setView((v) => focusAt(v, nx, ny, zoom, w, h, bounds.current));
-    }, []);
+    }, [containerRef]);
 
     return {
         zoom: view.zoom,
