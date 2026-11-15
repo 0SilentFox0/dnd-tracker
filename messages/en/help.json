@@ -91,7 +91,8 @@
       "s1": {
         "heading": "Map and modes",
         "b0": "The map is a grid with obstacles, walls and weather. Besides the regular mode there is a maze with fog. Obstacles on the line of fire grant cover automatically.",
-        "b1": "Doors sit on a cell edge, placed with the Door brush, and are closed or locked. A closed door blocks movement, shots and sight; a player opens it with a hero standing next to it on their turn, the DM can lock, unlock or break a door."
+        "b1": "Doors sit on a cell edge, placed with the Door brush, and are closed or locked. A closed door blocks movement, shots and sight; a player opens it with a hero standing next to it on their turn, the DM can lock, unlock or break a door.",
+        "b2": "Pan large maps by dragging and zoom with the wheel or a two-finger gesture. The minimap jumps to another part of the field; the Follow the turn switch moves the camera to the active participant automatically."
       },
       "s2": {
         "heading": "Turns, morale, finishing",
@@ -261,7 +262,8 @@
           "i1": "Attack: pick a target; the server won't accept targets out of reach.",
           "i2": "Spell: from the spellbook or directly from the map.",
           "i3": "End turn: the button at the bottom; without it the turn won't pass on."
-        }
+        },
+        "b2": "On a large map, zoom with the wheel or two fingers and pan by dragging. The camera follows your hero automatically; use the minimap to jump elsewhere on the field."
       },
       "s2": {
         "heading": "Attack and spells",

@@ -12,8 +12,8 @@ import { useMapToolsSlot } from './MapToolsSlot';
 import { MapWeatherPicker } from './MapWeatherPicker';
 
 import { modeUiOf } from '@/components/battle/modes';
-import { OnboardingHint } from '@/components/onboarding/OnboardingHint';
 import { useSystemFx } from '@/components/battle/use-system-battle-ui';
+import { OnboardingHint } from '@/components/onboarding/OnboardingHint';
 import { type MapUpdateTool, useBattleMapScene } from '@/lib/hooks/battle';
 import { cn } from '@/lib/utils';
 import { activeModeWithConfig } from '@/lib/utils/battle/modes';
@@ -23,18 +23,21 @@ function ModeButton({
     onClick,
     tall,
     hidden,
+    title,
     children,
 }: {
     active: boolean;
     onClick: () => void;
     tall: boolean;
     hidden?: boolean;
+    title?: string;
     children: string;
 }) {
     return (
         <button
             type="button"
             hidden={hidden}
+            title={title}
             aria-pressed={active}
             onClick={onClick}
             className={cn(
@@ -78,6 +81,8 @@ function UpdateMapButton({
 
 export function BattleMapPanel({ phone = false }: { phone?: boolean }) {
     const t = useTranslations('battle.map.tools');
+
+    const cameraT = useTranslations('battle.map.camera');
 
     const scene = useBattleMapScene(useSystemFx());
 
@@ -136,6 +141,16 @@ export function BattleMapPanel({ phone = false }: { phone?: boolean }) {
                 </ModeButton>
                 {modeTools && ui?.Toolbar && (
                     <ui.Toolbar tools={modeTools.raw} tall={inRow} />
+                )}
+                {scene.followTurn && (
+                    <ModeButton
+                        active={scene.followTurn.on}
+                        onClick={scene.followTurn.toggle}
+                        title={cameraT('followHint')}
+                        tall={inRow}
+                    >
+                        {cameraT('follow')}
+                    </ModeButton>
                 )}
                 <ModeButton
                     active={terrainTool.active}

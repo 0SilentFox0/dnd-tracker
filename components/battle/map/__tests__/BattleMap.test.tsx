@@ -101,6 +101,34 @@ describe('BattleMap', () => {
         expect(container.querySelector('[data-map-rotated]')).toBeNull();
     });
 
+    it('maps camera screen coordinates back to the correct clicked cell', () => {
+        avail = { width: 375, height: 600 };
+
+        const onCellClick = vi.fn();
+
+        const { container } = render(
+            <BattleMap
+                map={{ ...square, cols: 100, rows: 100 }}
+                participants={[at('p1', 5, 5)]}
+                view={{
+                    currentId: 'p1',
+                    camera: { follow: true, selfId: 'p1' },
+                }}
+                actions={{ onCellClick }}
+            />
+        );
+
+        const svg = container.querySelector('svg[data-fx-grid]') as SVGSVGElement;
+
+        svg.getScreenCTM = () =>
+            ({ a: 0.3, b: 0, c: 0, d: 0.3, e: 22.5, f: 135 }) as DOMMatrix;
+        fireEvent.click(container.querySelector('[data-grid-hit]') as Element, {
+            clientX: 187.5,
+            clientY: 300,
+        });
+        expect(onCellClick).toHaveBeenCalledWith({ x: 5, y: 5 });
+    });
+
     it('draws blocked cells dark, without stroke, and ignores clicks on them', () => {
         const onCellClick = vi.fn();
 

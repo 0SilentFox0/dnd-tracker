@@ -228,6 +228,7 @@ export function useMapCamera({
         if (previousTurn.current === follow.currentId) return;
 
         previousTurn.current = follow.currentId;
+        previousTarget.current = follow.target?.point ?? null;
 
         if (follow.enabled && follow.target && frame) {
             fly(centerOn(follow.target.point, Math.max(cameraRef.current.zoom, frame.bounds.max / 3), frame));

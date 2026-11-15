@@ -44,6 +44,18 @@ function setup(
 }
 
 describe('useBattleMapScene', () => {
+    it('adds viewer camera identity and keeps player follow enabled', () => {
+        const player = setup(false);
+
+        expect(player.current().view.camera).toEqual({ follow: true, selfId: 'me' });
+
+        const dm = setup(true);
+
+        expect(dm.current().view.camera).toEqual({ follow: false, selfId: 'me' });
+        act(() => dm.current().followTurn?.toggle());
+        expect(dm.current().view.camera?.follow).toBe(true);
+    });
+
     it('атака по сусіду записує намір з актором, раундом, ходом і зброєю', () => {
         const { current, value } = setup(false);
 

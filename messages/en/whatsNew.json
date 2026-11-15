@@ -1,4 +1,8 @@
 {
+  "2026-11-map-camera": {
+    "title": "Camera for large maps",
+    "body": "Pan and zoom around large battle maps. Use the minimap to jump elsewhere on the field; the camera follows your hero automatically."
+  },
   "2026-11-map-large": {
     "title": "Large battle maps",
     "body": "With the map library turned on, battles can use maps up to 200×200 cells. Photo maps stay up to 60×60."

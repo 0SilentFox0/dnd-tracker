@@ -108,6 +108,16 @@
       "motion": "Рух",
       "background": "Фон"
     },
+    "camera": {
+      "zoomIn": "Збільшити мапу",
+      "zoomOut": "Зменшити мапу",
+      "recenter": "До себе",
+      "minimap": "Мінімапа",
+      "minimapShow": "Показати мінімапу",
+      "minimapHide": "Згорнути мінімапу",
+      "follow": "Слідкувати за ходом",
+      "followHint": "Автоматично переводити камеру до активного учасника на початку його ходу"
+    },
     "backgroundLabel": "Фон карти",
     "defaultBackground": "Стандартний фон",
     "motion": {

@@ -15,7 +15,10 @@ vi.mock('@/components/battle/use-system-battle-ui', () => ({
 
 vi.unmock('next-intl');
 
-afterEach(cleanup);
+afterEach(() => {
+    cleanup();
+    localStorage.clear();
+});
 
 class RO {
     constructor(
@@ -72,6 +75,22 @@ describe('BattleMapPanel', () => {
         const { queryByRole } = panel(false);
 
         expect(queryByRole('button', { name: 'Розставити' })).toBeNull();
+    });
+
+    it('перемикач слідування є лише для ДМ і зберігає вибір', () => {
+        const dm = panel(true);
+
+        const toggle = dm.getByRole('button', { name: 'Слідкувати за ходом' });
+
+        expect(toggle.getAttribute('aria-pressed')).toBe('false');
+        fireEvent.click(toggle);
+        expect(toggle.getAttribute('aria-pressed')).toBe('true');
+        expect(localStorage.getItem('battle-map-follow-turn')).toBe('on');
+
+        dm.unmount();
+        expect(
+            panel(false).queryByRole('button', { name: 'Слідкувати за ходом' })
+        ).toBeNull();
     });
 
     it('ДМ відкриває палітру «Місцевість», вона вимикає «Розставити»', () => {

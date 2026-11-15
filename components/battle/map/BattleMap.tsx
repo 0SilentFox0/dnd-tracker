@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 
+import { MapCameraControls } from './camera/MapCameraControls';
+import { MapMinimap } from './camera/MapMinimap';
 import { WeatherLayer } from './weather/WeatherLayer';
 import { ATTACK_CURSOR } from './attack-cursors';
 import { MapStage } from './MapStage';
@@ -24,6 +26,7 @@ import {
     cellPointPx,
     followTarget,
     type Frame,
+    minimapViewport,
     needsCamera,
 } from '@/lib/utils/battle/camera';
 import {
@@ -282,6 +285,7 @@ export function BattleMap({
             ref={outerRef}
             className={cn(
                 'flex h-full w-full',
+                cameraMode && 'relative',
                 !cameraMode && (phone || scrolls) && 'overflow-auto',
                 !cameraMode && phone && '[scrollbar-gutter:stable]',
                 cameraMode
@@ -367,6 +371,27 @@ export function BattleMap({
                 )}
                 <WeatherLayer weather={map.weather} phone={phone} />
             </div>
+            {cameraMode && frame && (
+                <>
+                    <MapCameraControls
+                        onZoomIn={() => camera.zoomBy(1.2)}
+                        onZoomOut={() => camera.zoomBy(1 / 1.2)}
+                        onRecenter={camera.recenter}
+                        canRecenter={!!selfTarget || !!cameraTarget}
+                        userMoved={camera.userMoved}
+                        phone={phone}
+                    />
+                    <MapMinimap
+                        map={map}
+                        win={win}
+                        participants={participants}
+                        viewport={minimapViewport(camera.camera, frame)}
+                        onPick={camera.flyToMinimap}
+                        hiddenCells={[]}
+                        phone={phone}
+                    />
+                </>
+            )}
         </div>
     );
 }
