@@ -54,7 +54,9 @@
 - Create: `docs/superpowers/research/2026-11-15-map-tile-spike3.md`
 - Create: `scripts/assets/tiles/validate.ts`
 - Create: `scripts/assets/tiles/upload.ts`
+- Create: `scripts/assets/tiles/upload-lib.ts`
 - Create: `scripts/assets/tiles/__tests__/validate.test.ts`
+- Create: `scripts/assets/tiles/__tests__/upload-lib.test.ts`
 - Modify: `package.json` (команда для tile assets)
 - Assets: шість пілотних файлів за `docs/assets/tile-prompts/README.md`, у локальній теці пілоту; жодного production upload.
 
@@ -64,9 +66,10 @@
 
 - [ ] Перевірити шість пілотних текстур із README: шов після зсуву на 50%, читабельність у 64 px, прозорість/пурпурову кайму, масштаб, розміри й ≤200 KiB; якщо 2 або більше мають дефект, скоригувати промпт або випробувати CC0 Kenney до масової генерації.
 - [ ] Зняти початкові показники Spike 3: розмір файлів і декодовані розміри, повторення без шва, пам'ять Canvas/частоту перемальовування для 100×100 і 200×200, час рендера видимого вікна; зафіксувати середовище, цифри, компроміси й висновок у research-файлі.
-- [ ] Написати тести `validate.test.ts`: дозволені ground/wallfill 256×256, object 2×1 і 2×2, edge 256×64, PNG/WebP, межу 200 KiB, невідповідність MIME, завеликі/невірні розміри й ліміт кампанії 50 MiB.
-- [ ] Запустити `pnpm test:run scripts/assets/tiles/__tests__/validate.test.ts`; очікувано всі позитивні/негативні випадки проходять.
-- [ ] Реалізувати окрему CLI-команду завантаження з префіксом `campaignId/` для кампанійних активів і незмінним глобальним шляхом для CC0/власних текстур; production-ціль відхиляється без окремого прапорця/захисту.
+- [x] Написати тести `validate.test.ts`: дозволені ground/wallfill 256×256, object 2×1 і 2×2, edge 256×64, PNG/WebP, межу 200 KiB, невідповідність MIME, завеликі/невірні розміри й ліміт кампанії 50 MiB.
+- [x] Запустити `pnpm test:run scripts/assets/tiles/__tests__/validate.test.ts`; усі 11 позитивних/негативних випадків пройшли.
+- [x] Реалізувати окрему CLI-команду завантаження з префіксом `campaignId/` для кампанійних активів і незмінним глобальним шляхом для CC0/власних текстур; завантаження дозволене тільки до localhost, за замовчуванням діє dry-run.
+- [x] Перевірити CLI-контракти `pnpm test:run scripts/assets/tiles/__tests__/upload-lib.test.ts`; усі 8 тестів пройшли.
 - [ ] Задокументувати формати/ліцензії кожного пілотного ресурсу; не запускати мережеве завантаження в межах цього кроку без тестового target.
 - [ ] Коміт: `feat(map-editor): add tile asset spike and validation`.
 
@@ -85,9 +88,9 @@
 - `encodeTileChunk(cells: Uint16Array): string` / `decodeTileChunk(data: string): Uint16Array` — рівно 256 значень; запис version tag `r1:`; run/value кодуються little-endian `Uint16`.
 - `encodeEdges`/`decodeEdges` зберігають поточний публічний контракт; нові DB row adapters вказують layer 0.
 
-- [ ] Тести сумісності: старий edge chunk із 256 байтів base64 декодується поточним `decodeEdges`, адаптер БД відносить його до `layer=0` і не передає в RLE-декодер.
-- [ ] Тести RLE: кодування/декодування 256 клітинок, порожній чанк, межі довжини серії, ID 0/65535, некоректний тег, нульова серія, переповнення/недостатня довжина виходу, невідома версія.
-- [ ] Запустити `pnpm test:run lib/utils/battle/map-storage/__tests__/edge-chunks.test.ts` та `pnpm test:run lib/utils/battle/tiles/__tests__/rle.test.ts`.
+- [x] Тести сумісності: старий edge chunk із 256 байтів base64 декодується поточним `decodeEdges`, адаптер рядків відносить його до `layer=0` і не передає в RLE-декодер.
+- [x] Тести RLE: кодування/декодування 256 клітинок, порожній чанк, межі довжини серії, ID 0/65535, некоректний тег, нульова серія, переповнення/недостатня довжина виходу, невідома версія.
+- [x] Запустити `pnpm test:run lib/utils/battle/map-storage/__tests__/edge-chunks.test.ts`, `pnpm test:run lib/utils/battle/tiles/__tests__/chunks.test.ts` і `pnpm test:run lib/utils/battle/tiles/__tests__/rle.test.ts`; усі три suite пройшли.
 - [ ] Додати поле шару Prisma й змінити ключ на `(mapId, layer, cx, cy)`; старі записи отримують `layer=0` через default, а старе читання ребер лишається валідним.
 - [ ] Створити expand-only SQL: додати `layer SMALLINT NOT NULL DEFAULT 0`, замінити primary key на складений із шаром, не видаляти/не перекодовувати рядки, зберегти FK/RLS та індекси; не застосовувати міграцію до будь-якої БД у цьому кроці.
 - [ ] Оновити RLS migration guard, щоб вимагав RLS на `battle_map_chunks` після зміни схеми; запустити `pnpm test:run prisma/__tests__/migrations-rls.test.ts`.
@@ -134,7 +137,7 @@
 - [ ] Тести diff для unchanged, changed, inserted/deleted chunks і того, що patch включає лише фактичні ключі.
 - [ ] Тести derived blocked/blocksSight, крайових object footprints і cache invalidation при новій версії.
 - [ ] Запустити кожен `lib/utils/battle/tiles/__tests__/*.test.ts` явним шляхом.
-- [ ] Реалізувати модулі; v1 використовує 16-state edge autotile, каталог зберігає розширюваний формат для майбутнього blob-47.
+- [x] Реалізувати чисті модулі autotile/варіантів/diff/derived cells; v1 використовує 16 станів edge mask, каталог зберігає розширюваний формат для майбутнього blob-47. Згладжування ground меж лишається залежним від Spike 3.
 - [ ] Коміт: `feat(map-editor): add tile autotile and chunk diffs`.
 
 ## Task 5: Canvas-рендер видимих чанків
