@@ -85,7 +85,7 @@ export function toUnitCreateData(
         name: unit.name,
         raceId,
         level: unit.level,
-        ...(system ? columns : columns),
+        ...columns,
         gridSize: unit.gridSize,
         maxHp: unit.maxHp,
         proficiencyBonus: resolveUnitProficiency(unit),

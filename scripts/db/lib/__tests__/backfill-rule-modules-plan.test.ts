@@ -116,13 +116,19 @@ describe('summarizePlans', () => {
 describe('cli args and snapshot', () => {
     it('is a dry run by default and guards --force', () => {
         expect(parseArgs([]).mode).toBe('dry');
+        expect(() => parseArgs(['--apply'])).toThrow(
+            '--i-know-it-re-adds-modules'
+        );
+        expect(
+            parseArgs(['--apply', '--i-know-it-re-adds-modules']).mode
+        ).toBe('apply');
         expect(() => parseArgs(['--force'])).toThrow();
         expect(parseArgs(['--revert', 'f.json', '--force']).force).toBe(true);
         expect(() => parseArgs(['--apply', '--revert', 'f'])).toThrow();
     });
 
     it('refuses --apply over active battles without the explicit flag', () => {
-        const args = parseArgs(['--apply']);
+        const args = parseArgs(['--apply', '--i-know-it-re-adds-modules']);
 
         expect(() => assertNoActiveBattles(1, args)).toThrow(
             '--allow-active-battles'
@@ -131,7 +137,11 @@ describe('cli args and snapshot', () => {
         expect(() =>
             assertNoActiveBattles(
                 1,
-                parseArgs(['--apply', '--allow-active-battles'])
+                parseArgs([
+                    '--apply',
+                    '--allow-active-battles',
+                    '--i-know-it-re-adds-modules',
+                ])
             )
         ).not.toThrow();
         expect(() => parseArgs(['--allow-active-battles'])).toThrow();

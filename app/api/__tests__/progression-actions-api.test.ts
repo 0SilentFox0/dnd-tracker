@@ -18,7 +18,11 @@ vi.mock('@/lib/utils/api/api-auth', () => ({
     requireDM: vi.fn(),
 }));
 vi.mock('@/lib/server/characters/lock', () => ({
-    lockCharacters: vi.fn().mockResolvedValue(new Map()),
+    lockCharacters: vi.fn(async (_tx: unknown, ids: string[]) =>
+        new Map(
+            ids.map((id) => [id, { id, resources: {}, experience: 0, characteristics: null }])
+        )
+    ),
 }));
 
 vi.mock('@/lib/db', () => ({

@@ -3,7 +3,7 @@
  * Доповнює явні `system.modules` пресетів бази d20 новими модулями (NEW) у campaigns.rules та battle_scenes.rules.
  * Без --apply — лише звіт (dry-run). Apply — одна транзакція з оптимістичним замком і файлом-знімком для --revert.
  *
- *   pnpm exec tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/db/backfill-rule-modules.ts [--apply | --revert <file>] [--allow-remote] [--json] [--snapshot-dir <dir>] [--force] [--allow-active-battles]
+ *   pnpm exec tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/db/backfill-rule-modules.ts [--apply --i-know-it-re-adds-modules | --revert <file>] [--allow-remote] [--json] [--snapshot-dir <dir>] [--force] [--allow-active-battles]
  * --apply відмовляє, якщо серед записів є активні бої, доки не задано --allow-active-battles.
  */
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';

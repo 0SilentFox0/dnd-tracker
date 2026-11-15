@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { RACES } from '@/data/library/races';
 import { prisma } from '@/lib/db';
+import { lockCharacters } from '@/lib/server/characters/lock';
 import { notifyCharacterOwners } from '@/lib/server/notifications/notify';
 import * as apiAuth from '@/lib/utils/api/api-auth';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
@@ -11,7 +12,11 @@ vi.mock('@/lib/server/notifications/notify', () => ({
     notifyCharacterOwners: vi.fn().mockResolvedValue(0),
 }));
 vi.mock('@/lib/server/characters/lock', () => ({
-    lockCharacters: vi.fn().mockResolvedValue(new Map()),
+    lockCharacters: vi.fn(async (_tx: unknown, ids: string[]) =>
+        new Map(
+            ids.map((id) => [id, { id, resources: {}, experience: 0, characteristics: null }])
+        )
+    ),
 }));
 vi.mock('@/lib/utils/api/api-auth', () => ({
     requireAuth: vi.fn(),
@@ -84,6 +89,20 @@ describe('PATCH персонажа: рівень і слоти', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         random.mockReturnValue(0);
+        vi.mocked(lockCharacters).mockImplementation(
+            async (_tx, ids) =>
+                new Map(
+                    ids.map((id) => [
+                        id,
+                        {
+                            id,
+                            resources: {},
+                            experience: 0,
+                            characteristics: null,
+                        },
+                    ])
+                )
+        );
         vi.mocked(prisma.character.findUnique).mockResolvedValue(
             CHARACTER as never
         );
@@ -155,18 +174,24 @@ describe('PATCH персонажа: рівень і слоти', () => {
         );
         vi.mocked(prisma.character.findUnique)
             .mockResolvedValueOnce(CHARACTER as never)
-            .mockResolvedValueOnce({
-                ...CHARACTER,
-                characteristics: { strength: 10 },
-            } as never)
-            .mockResolvedValue({
-                ...CHARACTER,
-                characteristics: {
-                    strength: 10,
-                    intelligence: 22,
-                    houseRule: 'keep',
-                },
-            } as never);
+            .mockResolvedValue(CHARACTER as never);
+        vi.mocked(lockCharacters).mockResolvedValue(
+            new Map([
+                [
+                    'ch',
+                    {
+                        id: 'ch',
+                        resources: {},
+                        experience: 0,
+                        characteristics: {
+                            strength: 10,
+                            intelligence: 22,
+                            houseRule: 'keep',
+                        },
+                    },
+                ],
+            ])
+        );
 
         const res = await patch({ dexterity: 12 });
 
@@ -177,6 +202,25 @@ describe('PATCH персонажа: рівень і слоти', () => {
             intelligence: 22,
             houseRule: 'keep',
         });
+        expect(prisma.character.findUnique).not.toHaveBeenCalledWith({
+            where: { id: 'ch' },
+            select: { characteristics: true },
+        });
+    });
+
+    it('повертає 404, якщо персонаж зник до row-lock', async () => {
+        vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(
+            access('dm')
+        );
+        vi.mocked(prisma.character.findUnique).mockResolvedValue(
+            CHARACTER as never
+        );
+        vi.mocked(lockCharacters).mockResolvedValue(new Map());
+
+        const res = await patch({ dexterity: 12 });
+
+        expect(res.status).toBe(404);
+        expect(prisma.character.update).not.toHaveBeenCalled();
     });
 
     it('гравець правит свого героя — виклик без подій і з його userId', async () => {

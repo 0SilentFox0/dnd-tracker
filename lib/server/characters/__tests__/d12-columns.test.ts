@@ -197,6 +197,14 @@ describe('D12 patch', () => {
         };
 
         h.character.findUnique.mockResolvedValue(character);
+        h.$queryRaw.mockResolvedValue([
+            {
+                id: 'hero',
+                resources: {},
+                experience: 0,
+                characteristics: characteristics(name).characteristics ?? null,
+            },
+        ]);
 
         await run(
             'patch',

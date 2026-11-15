@@ -31,14 +31,12 @@ export const draftFields = (
             : undefined,
         alignment: data.alignment ?? null,
         background: data.background ?? null,
-        ...{
-            strength: data.strength,
-            dexterity: data.dexterity,
-            constitution: data.constitution,
-            intelligence: data.intelligence,
-            wisdom: data.wisdom,
-            charisma: data.charisma,
-        },
+        strength: data.strength,
+        dexterity: data.dexterity,
+        constitution: data.constitution,
+        intelligence: data.intelligence,
+        wisdom: data.wisdom,
+        charisma: data.charisma,
         primaryAbility: data.primaryAbility ?? null,
         characteristics: splitColumnView(
             { ...data, ...prior?.fields, initiative: prior?.initiative },
@@ -49,11 +47,9 @@ export const draftFields = (
             storedGoals,
             data.goals
         ) as unknown as Prisma.InputJsonValue,
-        ...{
-            ...prior?.fields,
-            ...(prior?.initiative !== undefined && {
-                initiative: prior.initiative,
-            }),
-        },
+        ...prior?.fields,
+        ...(prior?.initiative !== undefined && {
+            initiative: prior.initiative,
+        }),
     };
 };
