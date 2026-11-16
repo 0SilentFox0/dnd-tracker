@@ -25,10 +25,10 @@
   .battle-map-ember, .battle-map-flame, .battle-map-pulse { animation: none; }
 }
 
-.map-spell-effect-cell { position: absolute; display: block; border-radius: 50%; }
-.map-spell-effect-cell .map-hud-fx { inset: 5%; border-radius: 50%; }
-.map-spell-effect-cell .map-hud-fx::before { box-shadow: 0 0 14px var(--fx-glow), inset 0 0 12px var(--fx-glow); }
-.map-spell-effect-cell .map-hud-fx::after { filter: drop-shadow(0 0 3px var(--fx-glow)); }
+.map-spell-effect-cell { position: absolute; display: block; overflow: visible; }
+.map-spell-effect-cell .map-hud-fx { inset: 0; border-radius: 0; transform: scale(var(--map-fx-size, 1)); transform-origin: 50% 100%; opacity: var(--map-fx-intensity, 1); }
+.map-spell-effect-cell .map-hud-fx::before { box-shadow: none; }
+.map-spell-effect-cell .map-hud-fx::after { filter: drop-shadow(0 0 5px var(--fx-glow)); }
 .map-spell-effect-cell .map-hud-fx::before, .map-spell-effect-cell .map-hud-fx::after { animation-delay: var(--map-fx-delay, 0s); }
 
 /* Плашка HP токена: лише transform/opacity в анімаціях — токенів багато, фільтри й перемальовування дорогі */
@@ -109,6 +109,36 @@
 .map-hud-fx[data-hud-fx="gold"] { --fx-glow: rgba(240, 200, 100, 0.5); --fx-c: #fff0b8; }
 .map-hud-fx[data-hud-fx="holy"] { --fx-glow: rgba(255, 245, 210, 0.5); --fx-c: #ffffff; }
 .map-hud-fx[data-hud-fx="life"] { --fx-glow: rgba(120, 225, 130, 0.5); --fx-c: #c8ffc8; }
+
+/* Environmental effects billow from the cell instead of outlining it. */
+.map-spell-effect-cell .map-hud-fx:is([data-hud-fx="fire"], [data-hud-fx="plague"], [data-hud-fx="curse"])::before {
+  inset: 18% 12% 0;
+  border-radius: 50% 50% 35% 35%;
+  background: radial-gradient(ellipse at 50% 100%, var(--fx-glow), transparent 68%);
+  animation: map-environment-rise 2.2s ease-in-out infinite;
+}
+.map-spell-effect-cell .map-hud-fx[data-hud-fx="fire"]::before {
+  background: radial-gradient(ellipse at 50% 100%, rgba(255,190,55,.9), rgba(255,70,12,.42) 35%, transparent 72%);
+  clip-path: polygon(0 100%, 10% 62%, 28% 77%, 43% 12%, 58% 57%, 78% 0, 87% 64%, 100% 42%, 100% 100%);
+}
+.map-spell-effect-cell .map-hud-fx[data-hud-fx="plague"]::before {
+  background: radial-gradient(ellipse at 50% 100%, rgba(135,220,65,.62), rgba(75,150,40,.3) 46%, transparent 75%);
+  filter: blur(3px);
+}
+.map-spell-effect-cell .map-hud-fx[data-hud-fx="curse"]::before {
+  background: radial-gradient(ellipse at 50% 100%, rgba(170,110,230,.58), rgba(100,60,150,.25) 48%, transparent 75%);
+  filter: blur(4px);
+}
+.map-spell-effect-cell .map-hud-fx[data-map-effect-id="139"]::before {
+  inset: 12% 5% 0;
+  background:
+    radial-gradient(ellipse at 30% 82%, rgba(205,215,205,.5), transparent 58%),
+    radial-gradient(ellipse at 72% 75%, rgba(175,190,180,.42), transparent 60%),
+    radial-gradient(ellipse at 48% 48%, rgba(225,230,220,.32), transparent 66%);
+  filter: blur(5px);
+}
+@keyframes map-environment-rise { 0%,100% { transform: translateY(3px) scale(.94); opacity: .68; } 50% { transform: translateY(-5px) scale(1.06); opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .map-spell-effect-cell .map-hud-fx::before { animation: none !important; } }
 
 /* частинки над верхнім краєм: іскри, бульбашки, дим, мотеси */
 .map-hud-fx:is([data-hud-fx="fire"], [data-hud-fx="plague"], [data-hud-fx="curse"], [data-hud-fx="holy"], [data-hud-fx="life"])::after {
@@ -259,6 +289,6 @@
 .map-edge-pending { fill: rgba(242, 193, 78, 0.55); }
 .map-edge-pending-remove { fill: rgba(225, 70, 55, 0.55); }
 .map-edge-ghost { fill: none; stroke: rgba(225, 70, 55, 0.8); stroke-width: 2; stroke-dasharray: 5 4; }
-.map-wall { stroke: var(--map-wall-edge, #1a1511); stroke-width: 1.5px; vector-effect: non-scaling-stroke; }
-.map-wall-light { fill: rgba(255, 255, 255, 0.22); }
+.map-wall { stroke: var(--map-wall-edge, #17120f); stroke-width: 2px; vector-effect: non-scaling-stroke; }
+.map-wall-light { fill: rgba(255, 255, 255, 0.34); stroke: rgba(255,255,255,.18); stroke-width: 1px; vector-effect: non-scaling-stroke; }
 .map-bars { fill: none; stroke: var(--map-bars, #9aa3ad); stroke-width: 3px; stroke-dasharray: 10 8; stroke-linecap: round; vector-effect: non-scaling-stroke; }

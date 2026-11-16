@@ -69,11 +69,14 @@ export const MapEffectsLayer = memo(function MapEffectsLayer({
                         top: y * cellPx,
                         width: cellPx,
                         height: cellPx,
-                    }}
+                        '--map-fx-size': 'var(--map-effect-size, 1)',
+                        '--map-fx-intensity': 'var(--map-effect-intensity, 1)',
+                    } as CSSProperties}
                 >
                     <i
                         className="map-hud-fx"
                         data-hud-fx={kind}
+                        data-map-effect-id={id}
                         style={
                             {
                                 '--map-fx-delay': `${((x * 7 + y * 11) % 9) * -0.17}s`,

@@ -90,6 +90,8 @@
         "picker": "Піпетка"
       },
       "brushSize": "Розмір пензля",
+      "effectSize": "Розмір ефекту",
+      "effectIntensity": "Інтенсивність",
       "search": "Знайти текстуру",
       "palette": "Палітра текстур",
       "paletteCount": "Доступно: {count}",

@@ -90,6 +90,8 @@
         "picker": "Picker"
       },
       "brushSize": "Brush size",
+      "effectSize": "Effect size",
+      "effectIntensity": "Intensity",
       "search": "Search textures",
       "palette": "Texture palette",
       "paletteCount": "{count} available",

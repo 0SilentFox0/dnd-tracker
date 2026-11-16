@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
@@ -216,6 +216,8 @@ function EditorContent({
     );
 
     const [tileSearch, setTileSearch] = useState('');
+    const [effectIntensity, setEffectIntensity] = useState(0.8);
+    const [effectSize, setEffectSize] = useState(1);
 
     const [importError, setImportError] = useState('');
 
@@ -456,7 +458,15 @@ function EditorContent({
                 {notice ? text(notice) : draft.justSaved ? t('saved') : ''}
             </p>
             <div className="grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_minmax(14rem,42%)] gap-3 overflow-hidden lg:grid-cols-[minmax(0,1fr)_20rem] lg:grid-rows-1">
-                <div className="relative min-h-0 min-w-0 overflow-hidden">
+                <div
+                    className="relative min-h-0 min-w-0 overflow-hidden"
+                    style={
+                        {
+                            '--map-effect-intensity': effectIntensity,
+                            '--map-effect-size': effectSize,
+                        } as CSSProperties
+                    }
+                >
                     <BattleMap
                         map={previewMap}
                         participants={[]}
@@ -489,7 +499,7 @@ function EditorContent({
                 </div>
                 <aside
                     ref={asideRef}
-                    className="min-h-0 space-y-3 overflow-x-hidden overflow-y-auto overscroll-contain rounded-lg border border-hud-rule bg-background/50 p-2 pb-6 shadow-sm"
+                    className="min-h-0 space-y-3 overflow-x-hidden overflow-y-auto overscroll-contain rounded-lg border border-hud-rule bg-background p-2 pb-6 shadow-sm"
                 >
                     <Tabs
                         value={panel}
@@ -498,15 +508,15 @@ function EditorContent({
                     >
                         <TabsList
                             aria-label={t('sidebar')}
-                            className="sticky top-0 z-20 grid h-auto w-full grid-cols-3 gap-1 rounded-md border border-hud-rule bg-background/95 p-1 shadow-sm backdrop-blur"
+                            className="sticky top-0 z-20 grid h-auto w-full grid-cols-2 gap-1 rounded-md border border-hud-rule bg-background p-1 shadow-sm"
                         >
-                            <span className="col-span-3 px-1 pt-1 text-[10px] font-semibold tracking-wide text-hud-muted uppercase">
+                            <span className="col-span-2 px-1 pt-1 text-[10px] font-semibold tracking-wide text-hud-muted uppercase">
                                 {t('groups.map')}
                             </span>
                             {PANELS.map((p) => (
                                 <div key={p} className="contents">
                                     {p === 'edges' && (
-                                        <span className="col-span-3 px-1 pt-2 text-[10px] font-semibold tracking-wide text-hud-muted uppercase">
+                                        <span className="col-span-2 px-1 pt-2 text-[10px] font-semibold tracking-wide text-hud-muted uppercase">
                                             {t('groups.paint')}
                                         </span>
                                     )}
@@ -514,18 +524,18 @@ function EditorContent({
                                         type="button"
                                         value={p}
                                         title={t(`panels.${p}`)}
-                                        className="flex h-[4.25rem] min-w-0 flex-col items-center justify-center gap-1 rounded-md border border-hud-rule bg-black/20 px-1 text-[10px] leading-tight text-hud-muted data-[state=active]:border-[var(--gold)] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                                        className="flex h-11 min-w-0 flex-row items-center justify-start gap-2 rounded-md border border-hud-rule bg-black/20 px-2 text-left text-xs leading-tight text-hud-muted data-[state=active]:border-[var(--gold)] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
                                     >
                                         {(() => {
                                             const Icon = PANEL_ICONS[p];
                                             return (
                                                 <Icon
                                                     aria-hidden="true"
-                                                    className="h-4 w-4"
+                                                    className="h-4 w-4 shrink-0"
                                                 />
                                             );
                                         })()}
-                                        <span className="text-center">
+                                        <span className="min-w-0 truncate">
                                             {t(`panels.${p}`)}
                                         </span>
                                     </TabsTrigger>
@@ -670,6 +680,42 @@ function EditorContent({
                                             `description.${tileEditor.activeLayer}`
                                         )}
                                     </p>
+                                    {panel === 'effects' && (
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <label className="space-y-1 text-xs text-hud-muted">
+                                                <span className="flex justify-between gap-2">
+                                                    <span>{tileTranslations('effectSize')}</span>
+                                                    <span>{effectSize.toFixed(1)}×</span>
+                                                </span>
+                                                <input
+                                                    aria-label={tileTranslations('effectSize')}
+                                                    type="range"
+                                                    min="0.6"
+                                                    max="1.8"
+                                                    step="0.1"
+                                                    value={effectSize}
+                                                    onChange={(event) => setEffectSize(Number(event.target.value))}
+                                                    className="w-full accent-primary"
+                                                />
+                                            </label>
+                                            <label className="space-y-1 text-xs text-hud-muted">
+                                                <span className="flex justify-between gap-2">
+                                                    <span>{tileTranslations('effectIntensity')}</span>
+                                                    <span>{Math.round(effectIntensity * 100)}%</span>
+                                                </span>
+                                                <input
+                                                    aria-label={tileTranslations('effectIntensity')}
+                                                    type="range"
+                                                    min="0.2"
+                                                    max="1"
+                                                    step="0.05"
+                                                    value={effectIntensity}
+                                                    onChange={(event) => setEffectIntensity(Number(event.target.value))}
+                                                    className="w-full accent-primary"
+                                                />
+                                            </label>
+                                        </div>
+                                    )}
                                 </section>
                                 <section className="space-y-3 rounded-lg border border-hud-rule bg-black/20 p-3">
                                     <h3 className="text-xs font-semibold tracking-wide text-hud-muted uppercase">
