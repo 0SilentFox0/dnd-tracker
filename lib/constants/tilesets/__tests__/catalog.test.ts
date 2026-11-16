@@ -10,7 +10,7 @@ import enTileLabels from '@/messages/en/tile-labels.json';
 import ukTileLabels from '@/messages/uk/tile-labels.json';
 
 describe('tile catalog', () => {
-    it('has unique ids, keys, and pilot asset files', () => {
+    it('has unique ids, keys, and local raster asset files', () => {
         expect(new Set(TILE_CATALOG.map(({ id }) => id)).size).toBe(
             TILE_CATALOG.length
         );
@@ -18,8 +18,10 @@ describe('tile catalog', () => {
             TILE_CATALOG.length
         );
         expect(
-            new Set(TILE_CATALOG.map(({ assetFile }) => assetFile)).size
-        ).toBe(TILE_CATALOG.length);
+            new Set(
+                TILE_CATALOG.map(({ assetFile }) => assetFile).filter(Boolean)
+            ).size
+        ).toBe(TILE_CATALOG.length - 11);
         expect(TILE_CATALOG.map(({ assetFile }) => assetFile)).toEqual(
             expect.arrayContaining([
                 'tiles_stone-floor_1.png',
@@ -42,7 +44,15 @@ describe('tile catalog', () => {
                 .length,
             edgeArt: TILE_CATALOG.filter((tile) => tile.layer === 'edge-art')
                 .length,
-        }).toEqual({ ground: 90, wallfill: 6, objects: 35, edgeArt: 7 });
+            effects: TILE_CATALOG.filter((tile) => tile.layer === 'effects')
+                .length,
+        }).toEqual({
+            ground: 90,
+            wallfill: 6,
+            objects: 35,
+            edgeArt: 7,
+            effects: 11,
+        });
     });
 
     it('has Ukrainian and English labels for every tile', () => {

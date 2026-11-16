@@ -13,6 +13,7 @@ import {
 import { MapFogLayer } from './fog/MapFogLayer';
 import { type GridCellActions, GridLayer } from './grid/GridLayer';
 import { TileCanvas, type TileRenderState } from './tiles/TileCanvas';
+import { MapEffectsLayer } from './tiles/MapEffectsLayer';
 import { DoorMenu } from './DoorMenu';
 import { DoorsLayer } from './DoorsLayer';
 import { EdgeEditor } from './EdgeEditor';
@@ -317,11 +318,7 @@ function MapStageImpl({
                 )}
             </svg>
             {fog && (
-                <MapFogLayer
-                    map={map}
-                    cellPx={UNIT * pxPerUnit}
-                    {...fog}
-                />
+                <MapFogLayer map={map} cellPx={UNIT * pxPerUnit} {...fog} />
             )}
             {doorsTool?.menu && menuDoor && (
                 <DoorMenu
@@ -395,6 +392,14 @@ function MapStageImpl({
                     />
                 ))}
             </div>
+            {tiles && (
+                <MapEffectsLayer
+                    chunks={tiles.chunks}
+                    window={gridWindow}
+                    map={map}
+                    cellPx={UNIT * pxPerUnit}
+                />
+            )}
         </div>
     );
 }

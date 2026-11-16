@@ -39,7 +39,10 @@ export function useTileEditor(input: {
     version: number;
     mapSize: { cols: number; rows: number };
 }) {
-    const base = useMemo(() => decodeChunks(input.initialChunks), [input.initialChunks]);
+    const base = useMemo(
+        () => decodeChunks(input.initialChunks),
+        [input.initialChunks]
+    );
 
     const [chunks, setChunks] = useState<TileLayerChunks>(base);
 
@@ -61,12 +64,13 @@ export function useTileEditor(input: {
 
     const dirtyPatches = useMemo(
         () =>
-            ['ground', 'wallfill', 'objects', 'edge-art'].flatMap((layer) =>
-                diffTileChunks(
-                    layer as TileLayer,
-                    baseChunks[layer as TileLayer] ?? {},
-                    chunks[layer as TileLayer] ?? {}
-                )
+            ['ground', 'wallfill', 'objects', 'edge-art', 'effects'].flatMap(
+                (layer) =>
+                    diffTileChunks(
+                        layer as TileLayer,
+                        baseChunks[layer as TileLayer] ?? {},
+                        chunks[layer as TileLayer] ?? {}
+                    )
             ),
         [baseChunks, chunks]
     );
@@ -98,7 +102,9 @@ export function useTileEditor(input: {
             if (result.changes.length === 0) return;
 
             setChunks(result.chunks);
-            setUndoStack((stack) => [...stack, result.changes].slice(-HISTORY_LIMIT));
+            setUndoStack((stack) =>
+                [...stack, result.changes].slice(-HISTORY_LIMIT)
+            );
             setRedoStack([]);
         },
         [activeLayer, brushSize, chunks, input.mapSize, selectedTileId, tool]
@@ -133,10 +139,10 @@ export function useTileEditor(input: {
     }, []);
 
     const acceptSaved = useCallback(() => {
-            setBaseChunks(chunks);
-            setUndoStack([]);
-            setRedoStack([]);
-        }, [chunks]);
+        setBaseChunks(chunks);
+        setUndoStack([]);
+        setRedoStack([]);
+    }, [chunks]);
 
     return {
         chunks,

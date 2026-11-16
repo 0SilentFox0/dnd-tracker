@@ -25,6 +25,12 @@
   .battle-map-ember, .battle-map-flame, .battle-map-pulse { animation: none; }
 }
 
+.map-spell-effect-cell { position: absolute; display: block; border-radius: 50%; }
+.map-spell-effect-cell .map-hud-fx { inset: 5%; border-radius: 50%; }
+.map-spell-effect-cell .map-hud-fx::before { box-shadow: 0 0 14px var(--fx-glow), inset 0 0 12px var(--fx-glow); }
+.map-spell-effect-cell .map-hud-fx::after { filter: drop-shadow(0 0 3px var(--fx-glow)); }
+.map-spell-effect-cell .map-hud-fx::before, .map-spell-effect-cell .map-hud-fx::after { animation-delay: var(--map-fx-delay, 0s); }
+
 /* Плашка HP токена: лише transform/opacity в анімаціях — токенів багато, фільтри й перемальовування дорогі */
 .map-hud-plaque {
   --hud-rim: rgba(201, 179, 122, 0.55);

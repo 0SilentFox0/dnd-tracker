@@ -7,4 +7,6 @@ export interface MapCatalogEntry {
     downloadUrl: string;
     license: 'CC-BY-SA-4.0';
     attribution: string;
+    previewUrl?: string;
+    importable?: boolean;
 }

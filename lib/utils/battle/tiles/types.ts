@@ -1,4 +1,10 @@
-export const TILE_LAYERS = ['ground', 'wallfill', 'objects', 'edge-art'] as const;
+export const TILE_LAYERS = [
+    'ground',
+    'wallfill',
+    'objects',
+    'edge-art',
+    'effects',
+] as const;
 
 export type TileLayer = (typeof TILE_LAYERS)[number];
 

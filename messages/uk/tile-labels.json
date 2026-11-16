@@ -132,9 +132,20 @@
   "water-shallow-3": "Мілка вода · 3",
   "well": "Криниця",
   "window": "Вікно",
+  "smoke-effect": "Дим",
+  "flame-effect": "Полум'я",
+  "glow-effect": "Магічне сяйво",
   "wood-planks-light-1": "Світлі дерев’яні дошки · 1",
   "wood-planks-light-2": "Світлі дерев’яні дошки · 2",
   "wood-planks-light-3": "Світлі дерев’яні дошки · 3",
   "wood-planks-2": "Дерев’яні дошки · 2",
-  "wood-planks-3": "Дерев’яні дошки · 3"
+  "wood-planks-3": "Дерев’яні дошки · 3",
+  "frost-effect": "Морозне поле",
+  "plague-effect": "Отруйні випари",
+  "blood-effect": "Кривава магія",
+  "stun-effect": "Електричний розряд",
+  "nature-effect": "Сила природи",
+  "storm-effect": "Блискавка",
+  "gold-effect": "Золоті іскри",
+  "life-effect": "Цілюща енергія"
 }

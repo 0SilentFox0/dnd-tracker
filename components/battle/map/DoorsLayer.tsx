@@ -7,9 +7,9 @@ import { Lock } from 'lucide-react';
 import { parseEdgeKey, UNIT } from '@/lib/utils/battle/grid';
 import type { BattleMapConfig, DoorState } from '@/types/battle';
 
-const LEAF = UNIT * 0.72;
+const LEAF = UNIT;
 
-const THICK = UNIT * 0.16;
+const THICK = UNIT * 0.24;
 
 const LOCK = UNIT * 0.3;
 

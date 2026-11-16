@@ -5,17 +5,12 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { MapCatalogDialog } from '../MapCatalogDialog';
 
 import { useMapCatalog } from '@/lib/hooks/battle-maps/useMapCatalog';
-import { useMapCatalogPreview } from '@/lib/hooks/battle-maps/useMapCatalogPreview';
 import { renderWithIntl } from '@/lib/i18n/test/render-with-intl';
 import type { MapCatalogEntry } from '@/types/map-catalog';
 
 vi.mock('@/lib/hooks/battle-maps/useMapCatalog', () => ({
     useMapCatalog: vi.fn(),
 }));
-vi.mock('@/lib/hooks/battle-maps/useMapCatalogPreview', () => ({
-    useMapCatalogPreview: vi.fn(),
-}));
-
 const entry: MapCatalogEntry = {
     id: 'maps/cave/Room.dd2vtt',
     category: 'cave / rooms',
@@ -27,17 +22,8 @@ const entry: MapCatalogEntry = {
         'https://raw.githubusercontent.com/mbround18/vtt-maps/main/maps/cave/Room.dd2vtt',
     license: 'CC-BY-SA-4.0',
     attribution: 'mbround18/vtt-maps',
-};
-
-const preview = {
-    image: 'data:image/png;base64,AAAA',
-    imageWidth: 10,
-    imageHeight: 10,
-    cols: 8,
-    rows: 6,
-    backgroundCols: 1,
-    walls: [],
-    doors: {},
+    previewUrl: '/assets/map-catalog/room.webp',
+    importable: true,
 };
 
 afterEach(() => {
@@ -51,12 +37,6 @@ function renderDialog(onImport = vi.fn().mockResolvedValue({ id: 'map-1' })) {
         isLoading: false,
         isError: false,
     } as never);
-    vi.mocked(useMapCatalogPreview).mockReturnValue({
-        data: preview,
-        isLoading: false,
-        isError: false,
-    } as never);
-
     const onOpenChange = vi.fn();
 
     const view = renderWithIntl(
@@ -94,12 +74,7 @@ describe('MapCatalogDialog', () => {
         fireEvent.click(
             screen.getByRole('button', { name: 'maps.catalog.add' })
         );
-        await waitFor(() =>
-            expect(onImport).toHaveBeenCalledWith(
-                entry,
-                expect.objectContaining({ cols: 8, rows: 6 })
-            )
-        );
+        await waitFor(() => expect(onImport).toHaveBeenCalledWith(entry));
         expect(onOpenChange).toHaveBeenCalledWith(false);
     });
 

@@ -28,6 +28,7 @@
   },
   "editor": {
     "back": "Back to maps",
+    "workspaceTitle": "Map editor",
     "name": "Map name",
     "save": "Save",
     "saving": "Saving...",
@@ -36,6 +37,11 @@
     "saveFailed": "Failed to save the map",
     "loadFailed": "Failed to load the map",
     "desktopOnly": "The map editor is desktop-only — open this page on a computer",
+    "sidebar": "Map editor panels",
+    "groups": {
+      "map": "Map setup",
+      "paint": "Painting and details"
+    },
     "edges": "Walls and bars",
     "import": {
       "button": "Import UVTT",
@@ -48,7 +54,15 @@
       "background": "Background",
       "cells": "Cells",
       "edges": "Edges",
-      "tiles": "Textures"
+      "tiles": "Textures",
+      "effects": "Special effects"
+    },
+    "panelDescription": {
+      "background": "Import a UVTT file or set the background image and grid scale.",
+      "cells": "Mark blocked cells and hazardous areas.",
+      "edges": "Draw walls, bars, and interactive doors along cell edges.",
+      "tiles": "Choose a layer, texture, and tool, then paint on the map.",
+      "effects": "Overlay spell effects: frost, fire, poison, blood, lightning, nature, and healing energy."
     },
     "tiles": {
       "layers": "Tile layers",
@@ -57,7 +71,15 @@
         "ground": "Ground",
         "wallfill": "Wall fill",
         "objects": "Objects",
-        "edge-art": "Doors and details"
+        "edge-art": "Doors and details",
+        "effects": "Special effects"
+      },
+      "description": {
+        "ground": "Floor textures cover the surface of cells.",
+        "wallfill": "Wall material is drawn along wall lines.",
+        "objects": "Objects sit above the floor and can cover a cell.",
+        "edge-art": "Decorative doors and details fill a cell.",
+        "effects": "11 animated spell effects overlay the map."
       },
       "tool": {
         "brush": "Brush",
@@ -69,13 +91,27 @@
       },
       "brushSize": "Brush size",
       "search": "Search textures",
+      "palette": "Texture palette",
+      "paletteCount": "{count} available",
+      "noResults": "No textures match this search.",
       "name": {
         "stone-floor": "Stone floor",
         "grass": "Grass",
         "wood-planks": "Wood planks",
         "stone-wall-fill": "Stone wall",
         "barrel": "Barrel",
-        "closed-wood-door": "Closed wooden door"
+        "closed-wood-door": "Closed wooden door",
+        "smoke-effect": "Smoke",
+        "flame-effect": "Flame",
+        "glow-effect": "Magic glow",
+        "frost-effect": "Frost field",
+        "plague-effect": "Poisonous fumes",
+        "blood-effect": "Blood magic",
+        "stun-effect": "Electric shock",
+        "nature-effect": "Nature energy",
+        "storm-effect": "Lightning",
+        "gold-effect": "Golden sparks",
+        "life-effect": "Healing energy"
       },
       "undo": "Undo",
       "redo": "Redo",
@@ -94,6 +130,7 @@
     "noResults": "No maps match your search.",
     "loadingPreview": "Loading preview…",
     "previewFailed": "Could not load or validate this map preview.",
+    "importUnavailable": "The preview is available, but this map's format or geometry is not supported by the editor yet.",
     "attribution": "{attribution} · {license}",
     "source": "View source and license",
     "add": "Add map to campaign",

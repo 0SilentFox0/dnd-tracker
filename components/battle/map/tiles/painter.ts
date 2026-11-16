@@ -78,15 +78,13 @@ function drawCell(
 
     const isEdgeArt = definition.layer === 'edge-art';
 
-    const edgeWidth = isEdgeArt ? cellPx * 1.5 : footprint.cols * cellPx;
+    const edgeWidth = isEdgeArt ? cellPx : footprint.cols * cellPx;
 
-    const edgeHeight = isEdgeArt ? (cellPx * 3) / 8 : footprint.rows * cellPx;
+    const edgeHeight = isEdgeArt ? cellPx : footprint.rows * cellPx;
 
-    const edgeX =
-        (x - origin.x) * cellPx - (isEdgeArt ? (edgeWidth - cellPx) / 2 : 0);
+    const edgeX = (x - origin.x) * cellPx;
 
-    const edgeY =
-        (y - origin.y) * cellPx + (isEdgeArt ? (cellPx - edgeHeight) / 2 : 0);
+    const edgeY = (y - origin.y) * cellPx;
 
     ctx.drawImage(image, edgeX, edgeY, edgeWidth, edgeHeight);
 }

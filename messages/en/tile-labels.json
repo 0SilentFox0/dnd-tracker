@@ -132,9 +132,20 @@
   "water-shallow-3": "Shallow water (variant 3)",
   "well": "Well",
   "window": "Window",
+  "smoke-effect": "Smoke",
+  "flame-effect": "Flame",
+  "glow-effect": "Magic glow",
   "wood-planks-light-1": "Light wooden planks (variant 1)",
   "wood-planks-light-2": "Light wooden planks (variant 2)",
   "wood-planks-light-3": "Light wooden planks (variant 3)",
   "wood-planks-2": "Wooden planks (variant 2)",
-  "wood-planks-3": "Wooden planks (variant 3)"
+  "wood-planks-3": "Wooden planks (variant 3)",
+  "frost-effect": "Frost field",
+  "plague-effect": "Poisonous fumes",
+  "blood-effect": "Blood magic",
+  "stun-effect": "Electric shock",
+  "nature-effect": "Nature energy",
+  "storm-effect": "Lightning",
+  "gold-effect": "Golden sparks",
+  "life-effect": "Healing energy"
 }

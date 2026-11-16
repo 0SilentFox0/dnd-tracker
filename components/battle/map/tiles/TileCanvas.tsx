@@ -2,14 +2,12 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-import {
-    loadTileImage,
-    visibleTileIds as getVisibleTileIds,
-} from './assets';
+import { loadTileImage, visibleTileIds as getVisibleTileIds } from './assets';
 import { drawCachedTileViewport } from './chunk-cache';
 import type { TileRasterAssets } from './painter';
 
 import { TILE_CATALOG, tileDefinition } from '@/lib/constants/tilesets/catalog';
+import type { TileDefinition } from '@/lib/constants/tilesets/types';
 import type { GridWindow } from '@/lib/utils/battle/grid';
 import type { TileLayerChunks } from '@/lib/utils/battle/tiles/derive';
 
@@ -46,7 +44,10 @@ export function TileCanvas({
 
         const definitions = visibleTileIds
             .map((id) => tileDefinition(id))
-            .filter((definition) => definition !== undefined);
+            .filter(
+                (definition): definition is TileDefinition =>
+                    definition !== undefined && definition.assetFile !== null
+            );
 
         void Promise.all(
             definitions.map(async (definition) => {

@@ -6,7 +6,7 @@ const CHUNK_SIDE = 16;
 
 const imagePromises = new Map<string, Promise<HTMLImageElement>>();
 
-const ASSET_DIRECTORY = {
+const ASSET_DIRECTORY: Partial<Record<TileDefinition['layer'], string>> = {
     ground: 'ground',
     wallfill: 'wallfill',
     objects: 'objects',
@@ -14,7 +14,12 @@ const ASSET_DIRECTORY = {
 } as const;
 
 export function tileAssetUrl(definition: TileDefinition): string {
-    return `/assets/battle-tiles/${ASSET_DIRECTORY[definition.layer]}/${definition.assetFile}`;
+    const directory = ASSET_DIRECTORY[definition.layer];
+
+    if (!directory || !definition.assetFile)
+        throw new Error('Tile has no raster asset');
+
+    return `/assets/battle-tiles/${directory}/${definition.assetFile}`;
 }
 
 export function visibleTileIds(
@@ -57,9 +62,10 @@ export function visibleTileIds(
 
                 for (let y = minY; y < maxY; y++) {
                     for (let x = minX; x < maxX; x++) {
-                        const id = chunk[
-                            (y % CHUNK_SIDE) * CHUNK_SIDE + (x % CHUNK_SIDE)
-                        ];
+                        const id =
+                            chunk[
+                                (y % CHUNK_SIDE) * CHUNK_SIDE + (x % CHUNK_SIDE)
+                            ];
 
                         if (id) ids.add(id);
                     }
@@ -71,7 +77,9 @@ export function visibleTileIds(
     return [...ids].sort((a, b) => a - b);
 }
 
-export function loadTileImage(definition: TileDefinition): Promise<HTMLImageElement> {
+export function loadTileImage(
+    definition: TileDefinition
+): Promise<HTMLImageElement> {
     const url = tileAssetUrl(definition);
 
     const cached = imagePromises.get(url);

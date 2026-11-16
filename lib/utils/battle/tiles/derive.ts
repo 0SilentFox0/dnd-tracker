@@ -33,7 +33,10 @@ const CHUNK_SIDE = 16;
 
 const CHUNK_CELLS = CHUNK_SIDE * CHUNK_SIDE;
 
-const cache = new WeakMap<object, WeakMap<object, Map<string, DerivedTileCells>>>();
+const cache = new WeakMap<
+    object,
+    WeakMap<object, Map<string, DerivedTileCells>>
+>();
 
 function parseChunkKey(key: string): { cx: number; cy: number } {
     const match = /^(\d+):(\d+)$/.exec(key);
@@ -95,7 +98,13 @@ export function deriveTileCells(
 
     const blocksSight = new Set<string>();
 
-    for (const layer of ['ground', 'wallfill', 'objects', 'edge-art'] as const) {
+    for (const layer of [
+        'ground',
+        'wallfill',
+        'objects',
+        'edge-art',
+        'effects',
+    ] as const) {
         const chunks = input.chunks[layer];
 
         if (!chunks) continue;
@@ -125,8 +134,7 @@ export function deriveTileCells(
 
                 const footprint = tile.footprint ?? { cols: 1, rows: 1 };
 
-                if (tile.blocks)
-                    addFootprint(blocked, x, y, footprint, input);
+                if (tile.blocks) addFootprint(blocked, x, y, footprint, input);
 
                 if (tile.blocksSight)
                     addFootprint(blocksSight, x, y, footprint, input);
@@ -137,12 +145,17 @@ export function deriveTileCells(
     const result = { blocked, blocksSight };
 
     const catalogCache =
-        byCatalog?.get(catalog as object) ?? new Map<string, DerivedTileCells>();
+        byCatalog?.get(catalog as object) ??
+        new Map<string, DerivedTileCells>();
 
     catalogCache.set(cacheKey, result);
 
     if (byCatalog) byCatalog.set(catalog as object, catalogCache);
-    else cache.set(input.chunks as object, new WeakMap([[catalog as object, catalogCache]]));
+    else
+        cache.set(
+            input.chunks as object,
+            new WeakMap([[catalog as object, catalogCache]])
+        );
 
     return result;
 }

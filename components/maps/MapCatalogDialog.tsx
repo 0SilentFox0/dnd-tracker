@@ -8,8 +8,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { useMapCatalog } from '@/lib/hooks/battle-maps/useMapCatalog';
-import { useMapCatalogPreview } from '@/lib/hooks/battle-maps/useMapCatalogPreview';
-import type { UvttImport } from '@/lib/utils/battle/uvtt/parse';
 import type { MapCatalogEntry } from '@/types/map-catalog';
 
 const EMPTY_ENTRIES: MapCatalogEntry[] = [];
@@ -22,7 +20,7 @@ export function MapCatalogDialog({
 }: {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    onImport: (entry: MapCatalogEntry, parsed?: UvttImport) => Promise<unknown>;
+    onImport: (entry: MapCatalogEntry) => Promise<unknown>;
     pending?: boolean;
 }) {
     const t = useTranslations('maps.catalog');
@@ -52,16 +50,12 @@ export function MapCatalogDialog({
     const selected =
         filtered.find((entry) => entry.id === selectedId) ?? filtered[0];
 
-    const previewQuery = useMapCatalogPreview(selected, open);
-
-    const preview = previewQuery.data;
-
     const handleImport = async () => {
         if (!selected) return;
 
         setImportError('');
         try {
-            await onImport(selected, preview ?? undefined);
+            await onImport(selected);
             onOpenChange(false);
         } catch (error) {
             setImportError(
@@ -83,10 +77,7 @@ export function MapCatalogDialog({
                 <Button
                     onClick={() => void handleImport()}
                     disabled={
-                        !selected ||
-                        !preview ||
-                        pending ||
-                        previewQuery.isLoading
+                        !selected || selected.importable === false || pending
                     }
                 >
                     {pending ? t('adding') : t('add')}
@@ -125,6 +116,16 @@ export function MapCatalogDialog({
                                     onClick={() => setSelectedId(entry.id)}
                                     className={`block w-full rounded p-2 text-left text-sm ${selected?.id === entry.id ? 'bg-hud-gold/15 text-hud-ink' : 'hover:bg-muted'}`}
                                 >
+                                    {entry.previewUrl ? (
+                                        <Image
+                                            src={entry.previewUrl}
+                                            alt=""
+                                            width={160}
+                                            height={100}
+                                            unoptimized
+                                            className="mb-2 h-20 w-full rounded object-cover"
+                                        />
+                                    ) : null}
                                     <span className="block font-medium">
                                         {entry.name}
                                     </span>
@@ -143,28 +144,23 @@ export function MapCatalogDialog({
                                     <h3 className="font-medium">
                                         {selected.name}
                                     </h3>
-                                    {previewQuery.isLoading ? (
-                                        <p className="text-sm text-muted-foreground">
-                                            {t('loadingPreview')}
-                                        </p>
+                                    {selected.previewUrl ? (
+                                        <Image
+                                            src={selected.previewUrl}
+                                            alt={selected.name}
+                                            width={640}
+                                            height={640}
+                                            unoptimized
+                                            className="max-h-[38vh] w-full rounded border object-contain"
+                                        />
                                     ) : null}
-                                    {previewQuery.isError ? (
+                                    {selected.importable === false ? (
                                         <p
                                             role="alert"
                                             className="text-sm text-destructive"
                                         >
-                                            {t('previewFailed')}
+                                            {t('importUnavailable')}
                                         </p>
-                                    ) : null}
-                                    {preview ? (
-                                        <Image
-                                            src={preview.image}
-                                            alt={selected.name}
-                                            width={preview.imageWidth}
-                                            height={preview.imageHeight}
-                                            unoptimized
-                                            className="max-h-[38vh] w-full rounded border object-contain"
-                                        />
                                     ) : null}
                                     <p className="text-xs text-muted-foreground">
                                         {t('attribution', {

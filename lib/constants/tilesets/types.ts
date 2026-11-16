@@ -1,11 +1,24 @@
 import type { TileLayer } from '@/lib/utils/battle/tiles/types';
 
+export type MapSpellEffect =
+    | 'frost'
+    | 'fire'
+    | 'plague'
+    | 'blood'
+    | 'stun'
+    | 'nature'
+    | 'curse'
+    | 'storm'
+    | 'gold'
+    | 'holy'
+    | 'life';
+
 export interface TileDefinition {
     id: number;
     key: string;
     nameKey: string;
     layer: TileLayer;
-    assetFile: string;
+    assetFile: string | null;
     source: 'cc0' | 'generated' | 'campaign';
     license: string;
     attribution?: string;
@@ -13,4 +26,5 @@ export interface TileDefinition {
     autotile: 'ground-16' | 'none';
     blocks: boolean;
     blocksSight: boolean;
+    effectKind?: MapSpellEffect;
 }

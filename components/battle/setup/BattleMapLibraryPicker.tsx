@@ -14,9 +14,11 @@ import type { BattleLibraryMap } from '@/lib/hooks/battles';
 export function BattleMapLibraryPicker({
     campaignId,
     library,
+    onClear,
 }: {
     campaignId: string;
     library: BattleLibraryMap;
+    onClear?: () => void;
 }) {
     const t = useTranslations('battleSetup.library');
 
@@ -36,7 +38,10 @@ export function BattleMapLibraryPicker({
             <SelectField
                 id="library-map"
                 value={library.selectedId ?? ''}
-                onValueChange={(id) => void library.select(id || null)}
+                onValueChange={(id) => {
+                    if (!id) onClear?.();
+                    void library.select(id || null);
+                }}
                 options={options}
                 allowNone={library.canUnlink}
                 noneLabel={t('none')}

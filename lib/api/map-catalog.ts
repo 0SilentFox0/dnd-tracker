@@ -5,7 +5,7 @@ const MAX_UVTT_BYTES = 96 * 1024 * 1024;
 const RAW_ROOT = 'https://raw.githubusercontent.com/mbround18/vtt-maps/main/';
 
 export async function getMapCatalog(): Promise<MapCatalogEntry[]> {
-    const response = await fetch('/api/map-catalog');
+    const response = await fetch('/assets/map-catalog/index.json');
 
     if (!response.ok) throw new Error('Map catalog is unavailable');
 

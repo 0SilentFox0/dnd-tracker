@@ -167,7 +167,9 @@ function rasterSignature(
             for (let x = cx - 1; x <= cx + 1; x++) {
                 const values = chunks[currentLayer]?.[`${x}:${y}`];
 
-                parts.push(values ? `${x}:${y}:${values.join(',')}` : `${x}:${y}:`);
+                parts.push(
+                    values ? `${x}:${y}:${values.join(',')}` : `${x}:${y}:`
+                );
             }
         }
     }
@@ -249,11 +251,12 @@ export function drawCachedTileViewport(
                         ),
                     },
                     () => {
-                        const buffer = createRasterCanvas(rasterSize, rasterSize);
+                        const buffer = createRasterCanvas(
+                            rasterSize,
+                            rasterSize
+                        );
 
-                        const bufferContext = buffer.getContext(
-                            '2d'
-                        ) as
+                        const bufferContext = buffer.getContext('2d') as
                             | CanvasRenderingContext2D
                             | OffscreenCanvasRenderingContext2D
                             | null;

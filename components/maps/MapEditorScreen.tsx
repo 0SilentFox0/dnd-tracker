@@ -6,12 +6,30 @@ import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
 import {
     ArrowLeft,
+    Biohazard,
+    BrickWall,
     Brush,
+    CloudLightning,
+    DoorOpen,
+    Droplets,
     Eraser,
+    Flame,
+    Grid2X2,
+    Image as ImageIcon,
+    Layers,
+    Leaf,
     Minus,
+    Package,
     PaintBucket,
     Pipette,
     Square,
+    Sparkles,
+    Snowflake,
+    Sun,
+    Zap,
+    Coins,
+    HeartPulse,
+    Wind,
 } from 'lucide-react';
 
 import { BattleMap } from '@/components/battle/map';
@@ -31,6 +49,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MAP_LIMITS } from '@/lib/constants/map-limits';
 import { TILE_CATALOG } from '@/lib/constants/tilesets/catalog';
+import type { MapSpellEffect } from '@/lib/constants/tilesets/types';
 import {
     useBattleMap,
     useBattleMapTiles,
@@ -64,7 +83,7 @@ function BackLink({ campaignId }: { campaignId: string }) {
     );
 }
 
-type Panel = 'background' | 'cells' | 'edges' | 'tiles';
+type Panel = 'background' | 'cells' | 'edges' | 'tiles' | 'effects';
 
 function TileAssetImage({
     tile,
@@ -75,9 +94,16 @@ function TileAssetImage({
     alt: string;
     className: string;
 }) {
-    const width = tile.layer === 'edge-art' ? 256 : tile.footprint.cols * 256;
+    if (tile.layer === 'effects') {
+        const Icon = EFFECT_ICONS[tile.effectKind ?? 'holy'];
+        return <Icon aria-hidden="true" className={className} />;
+    }
 
-    const height = tile.layer === 'edge-art' ? 64 : tile.footprint.rows * 256;
+    if (!tile.assetFile) return null;
+
+    const width = tile.footprint.cols * 256;
+
+    const height = tile.footprint.rows * 256;
 
     return (
         <Image
@@ -100,7 +126,37 @@ const TILE_TOOLS = [
     { key: 'picker', icon: Pipette },
 ] as const;
 
-const PANELS: Panel[] = ['background', 'cells', 'edges', 'tiles'];
+const PANELS: Panel[] = ['background', 'cells', 'edges', 'tiles', 'effects'];
+
+const EFFECT_ICONS = {
+    frost: Snowflake,
+    fire: Flame,
+    plague: Biohazard,
+    blood: Droplets,
+    stun: Zap,
+    nature: Leaf,
+    curse: Wind,
+    storm: CloudLightning,
+    gold: Coins,
+    holy: Sun,
+    life: HeartPulse,
+} satisfies Record<MapSpellEffect, typeof ImageIcon>;
+
+const PANEL_ICONS = {
+    background: ImageIcon,
+    cells: Grid2X2,
+    edges: DoorOpen,
+    tiles: Layers,
+    effects: Sparkles,
+} satisfies Record<Panel, typeof ImageIcon>;
+
+const LAYER_ICONS = {
+    ground: Grid2X2,
+    wallfill: BrickWall,
+    objects: Package,
+    'edge-art': DoorOpen,
+    effects: Sparkles,
+};
 
 function EditorBody({
     campaignId,
@@ -170,7 +226,7 @@ function EditorContent({
     const { undo, redo } = tileEditor;
 
     useEffect(() => {
-        if (panel !== 'tiles') return;
+        if (panel !== 'tiles' && panel !== 'effects') return;
 
         const onKeyDown = (event: KeyboardEvent) => {
             const target = event.target;
@@ -214,7 +270,7 @@ function EditorContent({
 
     const cellTool = tool !== null && !isEdgeTool(tool);
 
-    const paintingTiles = panel === 'tiles';
+    const paintingTiles = panel === 'tiles' || panel === 'effects';
 
     const tileTranslations = useTranslations('maps.editor.tiles');
 
@@ -248,6 +304,10 @@ function EditorContent({
     const selectPanel = (nextPanel: Panel) => {
         if (panel !== nextPanel) editor.actions.setTool(null);
 
+        if (nextPanel === 'effects') tileEditor.setActiveLayer('effects');
+        else if (nextPanel === 'tiles' && tileEditor.activeLayer === 'effects')
+            tileEditor.setActiveLayer('ground');
+
         setPanel(nextPanel);
         asideRef.current?.scrollTo({ top: 0 });
     };
@@ -273,7 +333,9 @@ function EditorContent({
             selectPanel('background');
         } catch (error) {
             setImportError(
-                error instanceof UvttImportError ? error.message : t('import.failed')
+                error instanceof UvttImportError
+                    ? error.message
+                    : t('import.failed')
             );
         } finally {
             if (importInput.current) importInput.current.value = '';
@@ -281,10 +343,13 @@ function EditorContent({
     };
 
     return (
-        <div className="flex h-[calc(100dvh-3.5rem)] min-h-0 flex-col gap-2 overflow-hidden p-2">
-            <div className="flex shrink-0 flex-wrap items-end gap-3">
+        <div className="flex h-[calc(100dvh-var(--app-header-h,89px)-3.5rem)] min-h-0 flex-col gap-3 overflow-hidden p-3">
+            <div className="flex shrink-0 flex-wrap items-end gap-3 rounded-lg border border-hud-rule bg-background/60 p-3 shadow-sm">
                 <BackLink campaignId={campaignId} />
                 <div className="min-w-[12rem] flex-1 space-y-1">
+                    <h1 className="text-xs font-semibold tracking-wide text-hud-muted uppercase">
+                        {t('workspaceTitle')}
+                    </h1>
                     <Label htmlFor="map-name" className="text-xs">
                         {t('name')}
                     </Label>
@@ -424,25 +489,57 @@ function EditorContent({
                 </div>
                 <aside
                     ref={asideRef}
-                    className="min-h-0 space-y-3 overflow-x-hidden overflow-y-auto overscroll-contain pr-1"
+                    className="min-h-0 space-y-3 overflow-x-hidden overflow-y-auto overscroll-contain rounded-lg border border-hud-rule bg-background/50 p-2 pb-6 shadow-sm"
                 >
                     <Tabs
                         value={panel}
                         onValueChange={(value) => selectPanel(value as Panel)}
                         className="min-w-0"
                     >
-                        <TabsList className="sticky top-0 z-20 h-auto w-full flex-wrap justify-start gap-1 rounded-md bg-background p-1">
+                        <TabsList
+                            aria-label={t('sidebar')}
+                            className="sticky top-0 z-20 grid h-auto w-full grid-cols-3 gap-1 rounded-md border border-hud-rule bg-background/95 p-1 shadow-sm backdrop-blur"
+                        >
+                            <span className="col-span-3 px-1 pt-1 text-[10px] font-semibold tracking-wide text-hud-muted uppercase">
+                                {t('groups.map')}
+                            </span>
                             {PANELS.map((p) => (
-                                <TabsTrigger
-                                    key={p}
-                                    type="button"
-                                    value={p}
-                                    className="min-w-0 flex-1 rounded-md border border-hud-rule bg-black/30 px-2 text-xs text-hud-muted data-[state=active]:border-[var(--gold)] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-                                >
-                                    {t(`panels.${p}`)}
-                                </TabsTrigger>
+                                <div key={p} className="contents">
+                                    {p === 'edges' && (
+                                        <span className="col-span-3 px-1 pt-2 text-[10px] font-semibold tracking-wide text-hud-muted uppercase">
+                                            {t('groups.paint')}
+                                        </span>
+                                    )}
+                                    <TabsTrigger
+                                        type="button"
+                                        value={p}
+                                        title={t(`panels.${p}`)}
+                                        className="flex h-[4.25rem] min-w-0 flex-col items-center justify-center gap-1 rounded-md border border-hud-rule bg-black/20 px-1 text-[10px] leading-tight text-hud-muted data-[state=active]:border-[var(--gold)] data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                                    >
+                                        {(() => {
+                                            const Icon = PANEL_ICONS[p];
+                                            return (
+                                                <Icon
+                                                    aria-hidden="true"
+                                                    className="h-4 w-4"
+                                                />
+                                            );
+                                        })()}
+                                        <span className="text-center">
+                                            {t(`panels.${p}`)}
+                                        </span>
+                                    </TabsTrigger>
+                                </div>
                             ))}
                         </TabsList>
+                        <div className="my-3 rounded-md border border-hud-rule bg-black/20 px-3 py-2">
+                            <h2 className="text-sm font-semibold text-hud-gold-bright">
+                                {t(`panels.${panel}`)}
+                            </h2>
+                            <p className="mt-1 text-xs leading-relaxed text-hud-muted">
+                                {t(`panelDescription.${panel}`)}
+                            </p>
+                        </div>
                         <TabsContent value="background">
                             <div className="mb-3 space-y-2">
                                 <input
@@ -451,7 +548,11 @@ function EditorContent({
                                     accept=".dd2vtt,.uvtt,application/json"
                                     className="sr-only"
                                     aria-label={t('import.chooseFile')}
-                                    onChange={(event) => void importUvtt(event.currentTarget.files?.[0])}
+                                    onChange={(event) =>
+                                        void importUvtt(
+                                            event.currentTarget.files?.[0]
+                                        )
+                                    }
                                 />
                                 <Button
                                     type="button"
@@ -461,9 +562,16 @@ function EditorContent({
                                 >
                                     {t('import.button')}
                                 </Button>
-                                <p className="text-xs text-hud-muted">{t('import.help')}</p>
+                                <p className="text-xs text-hud-muted">
+                                    {t('import.help')}
+                                </p>
                                 {importError ? (
-                                    <p role="alert" className="text-sm text-destructive">{importError}</p>
+                                    <p
+                                        role="alert"
+                                        className="text-sm text-destructive"
+                                    >
+                                        {importError}
+                                    </p>
                                 ) : null}
                             </div>
                             <MapBackgroundSection editor={editor} />
@@ -482,178 +590,259 @@ function EditorContent({
                                 <DoorToolOptions editor={editor} />
                             </div>
                         </TabsContent>
-                        <TabsContent value="tiles">
-                            <div className="space-y-3">
-                                <div
-                                    className="grid grid-cols-2 gap-1"
-                                    role="group"
-                                    aria-label={tileTranslations('layers')}
-                                >
-                                    {(
-                                        [
-                                            'ground',
-                                            'wallfill',
-                                            'objects',
-                                            'edge-art',
-                                        ] as const
-                                    ).map((layer) => (
-                                        <Button
-                                            key={layer}
-                                            type="button"
-                                            size="sm"
-                                            className="min-w-0 px-2 text-xs"
-                                            aria-pressed={
-                                                tileEditor.activeLayer === layer
-                                            }
-                                            variant={
-                                                tileEditor.activeLayer === layer
-                                                    ? 'default'
-                                                    : 'outline'
-                                            }
-                                            onClick={() =>
-                                                tileEditor.setActiveLayer(layer)
-                                            }
-                                        >
-                                            {tileTranslations(`layer.${layer}`)}
-                                        </Button>
-                                    ))}
-                                </div>
-                                <p
-                                    className="text-xs text-hud-muted"
-                                    aria-live="polite"
-                                >
-                                    {tileTranslations(
-                                        `tool.${tileEditor.tool}`
-                                    )}
-                                </p>
-                                <div
-                                    className="grid grid-cols-6 gap-1"
-                                    role="group"
-                                    aria-label={tileTranslations('tools')}
-                                >
-                                    {TILE_TOOLS.map(
-                                        ({ key: nextTool, icon: Icon }) => (
+                        <TabsContent
+                            value={panel === 'effects' ? 'effects' : 'tiles'}
+                        >
+                            <div className="space-y-4">
+                                <section className="space-y-3 rounded-lg border border-hud-rule bg-black/20 p-3">
+                                    <h3 className="text-xs font-semibold tracking-wide text-hud-muted uppercase">
+                                        {tileTranslations('layers')}
+                                    </h3>
+                                    <div
+                                        className={
+                                            panel === 'effects'
+                                                ? 'grid grid-cols-1 gap-2'
+                                                : 'grid grid-cols-2 gap-2'
+                                        }
+                                        role="group"
+                                        aria-label={tileTranslations('layers')}
+                                    >
+                                        {(panel === 'effects'
+                                            ? (['effects'] as const)
+                                            : ([
+                                                  'ground',
+                                                  'wallfill',
+                                                  'objects',
+                                                  'edge-art',
+                                              ] as const)
+                                        ).map((layer) => (
                                             <Button
-                                                key={nextTool}
+                                                key={layer}
                                                 type="button"
-                                                size="icon"
-                                                aria-label={tileTranslations(
-                                                    `tool.${nextTool}`
-                                                )}
+                                                size="sm"
+                                                className="h-auto min-h-10 min-w-0 justify-start gap-2 px-2 py-2 text-left text-xs whitespace-normal"
                                                 aria-pressed={
-                                                    tileEditor.tool === nextTool
+                                                    tileEditor.activeLayer ===
+                                                    layer
                                                 }
-                                                title={tileTranslations(
-                                                    `tool.${nextTool}`
-                                                )}
-                                                className="w-full"
                                                 variant={
-                                                    tileEditor.tool === nextTool
+                                                    tileEditor.activeLayer ===
+                                                    layer
                                                         ? 'default'
                                                         : 'outline'
                                                 }
                                                 onClick={() =>
-                                                    tileEditor.setTool(nextTool)
+                                                    tileEditor.setActiveLayer(
+                                                        layer
+                                                    )
                                                 }
                                             >
-                                                <Icon
-                                                    aria-hidden="true"
-                                                    className="h-4 w-4"
-                                                />
-                                            </Button>
-                                        )
-                                    )}
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <Label
-                                        htmlFor="tile-brush-size"
-                                        className="text-xs"
-                                    >
-                                        {tileTranslations('brushSize')}
-                                    </Label>
-                                    <select
-                                        id="tile-brush-size"
-                                        className="h-8 rounded border bg-background px-2 text-sm"
-                                        value={tileEditor.brushSize}
-                                        onChange={(event) =>
-                                            tileEditor.setBrushSize(
-                                                Number(event.target.value)
-                                            )
-                                        }
-                                    >
-                                        {[1, 2, 3].map((size) => (
-                                            <option key={size} value={size}>
-                                                {size}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                                {selectedTile && (
-                                    <div className="overflow-hidden rounded-md border border-hud-rule bg-black/20 p-2">
-                                        <p
-                                            className="mb-1 truncate text-xs font-medium"
-                                            aria-live="polite"
-                                        >
-                                            {tileLabel(selectedTile.key)}
-                                        </p>
-                                        <div className="flex h-16 items-center justify-center rounded bg-black/30 p-1">
-                                            <TileAssetImage
-                                                tile={selectedTile}
-                                                alt={tileLabel(
-                                                    selectedTile.key
+                                                {(() => {
+                                                    const Icon =
+                                                        LAYER_ICONS[layer];
+                                                    return (
+                                                        <Icon
+                                                            aria-hidden="true"
+                                                            className="h-4 w-4 shrink-0"
+                                                        />
+                                                    );
+                                                })()}
+                                                {tileTranslations(
+                                                    `layer.${layer}`
                                                 )}
-                                                className="max-h-full max-w-full object-contain"
-                                            />
-                                        </div>
+                                            </Button>
+                                        ))}
                                     </div>
-                                )}
-                                <Input
-                                    aria-label={tileTranslations('search')}
-                                    placeholder={tileTranslations('search')}
-                                    value={tileSearch}
-                                    onChange={(event) =>
-                                        setTileSearch(event.target.value)
-                                    }
-                                    className="h-8 text-sm"
-                                />
-                                <div className="grid grid-cols-2 gap-1 sm:grid-cols-3">
-                                    {visibleTiles.map((tile) => (
-                                        <Button
-                                            key={tile.id}
-                                            type="button"
-                                            size="sm"
-                                            aria-pressed={
-                                                tileEditor.selectedTileId ===
-                                                tile.id
-                                            }
-                                            aria-label={tileLabel(tile.key)}
-                                            title={tileLabel(tile.key)}
-                                            className="h-auto min-w-0 flex-col gap-1 px-1 py-1.5 text-center whitespace-normal"
-                                            variant={
-                                                tileEditor.selectedTileId ===
-                                                tile.id
-                                                    ? 'default'
-                                                    : 'outline'
-                                            }
-                                            onClick={() =>
-                                                tileEditor.setSelectedTile(
-                                                    tile.id
+                                    {selectedTile && (
+                                        <div className="sticky top-[4.25rem] z-10 flex items-center justify-between gap-2 rounded-md border border-hud-rule bg-background/95 px-3 py-2 text-xs shadow-sm backdrop-blur">
+                                            <span className="truncate text-hud-muted">
+                                                {tileTranslations(
+                                                    `layer.${tileEditor.activeLayer}`
+                                                )}
+                                            </span>
+                                            <span className="truncate font-medium text-hud-gold-bright">
+                                                {tileLabel(selectedTile.key)}
+                                            </span>
+                                        </div>
+                                    )}
+                                    <p className="rounded border border-hud-rule bg-black/20 p-2 text-xs text-hud-muted">
+                                        {tileTranslations(
+                                            `description.${tileEditor.activeLayer}`
+                                        )}
+                                    </p>
+                                </section>
+                                <section className="space-y-3 rounded-lg border border-hud-rule bg-black/20 p-3">
+                                    <h3 className="text-xs font-semibold tracking-wide text-hud-muted uppercase">
+                                        {tileTranslations('tools')}
+                                    </h3>
+                                    <p
+                                        className="text-xs text-hud-muted"
+                                        aria-live="polite"
+                                    >
+                                        {tileTranslations(
+                                            `tool.${tileEditor.tool}`
+                                        )}
+                                    </p>
+                                    <div
+                                        className="grid grid-cols-6 gap-1"
+                                        role="group"
+                                        aria-label={tileTranslations('tools')}
+                                    >
+                                        {TILE_TOOLS.map(
+                                            ({ key: nextTool, icon: Icon }) => (
+                                                <Button
+                                                    key={nextTool}
+                                                    type="button"
+                                                    size="icon"
+                                                    aria-label={tileTranslations(
+                                                        `tool.${nextTool}`
+                                                    )}
+                                                    aria-pressed={
+                                                        tileEditor.tool ===
+                                                        nextTool
+                                                    }
+                                                    title={tileTranslations(
+                                                        `tool.${nextTool}`
+                                                    )}
+                                                    className="w-full"
+                                                    variant={
+                                                        tileEditor.tool ===
+                                                        nextTool
+                                                            ? 'default'
+                                                            : 'outline'
+                                                    }
+                                                    onClick={() =>
+                                                        tileEditor.setTool(
+                                                            nextTool
+                                                        )
+                                                    }
+                                                >
+                                                    <Icon
+                                                        aria-hidden="true"
+                                                        className="h-4 w-4"
+                                                    />
+                                                </Button>
+                                            )
+                                        )}
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Label
+                                            htmlFor="tile-brush-size"
+                                            className="text-xs"
+                                        >
+                                            {tileTranslations('brushSize')}
+                                        </Label>
+                                        <select
+                                            id="tile-brush-size"
+                                            className="h-8 rounded border bg-background px-2 text-sm"
+                                            value={tileEditor.brushSize}
+                                            onChange={(event) =>
+                                                tileEditor.setBrushSize(
+                                                    Number(event.target.value)
                                                 )
                                             }
                                         >
-                                            <span className="flex h-12 w-full items-center justify-center overflow-hidden rounded bg-black/30 p-1">
+                                            {[1, 2, 3].map((size) => (
+                                                <option key={size} value={size}>
+                                                    {size}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </section>
+                                <section className="space-y-3 rounded-lg border border-hud-rule bg-black/20 p-3">
+                                    <div className="flex items-center justify-between gap-2">
+                                        <h3 className="text-xs font-semibold tracking-wide text-hud-muted uppercase">
+                                            {tileTranslations('palette')}
+                                        </h3>
+                                        <span className="text-[11px] text-hud-muted">
+                                            {tileTranslations('paletteCount', {
+                                                count: visibleTiles.length,
+                                            })}
+                                        </span>
+                                    </div>
+                                    {selectedTile && (
+                                        <div className="overflow-hidden rounded-md border border-hud-rule bg-black/20 p-2">
+                                            <p
+                                                className="mb-1 truncate text-xs font-medium"
+                                                aria-live="polite"
+                                            >
+                                                {tileLabel(selectedTile.key)}
+                                            </p>
+                                            <div className="flex h-16 items-center justify-center rounded bg-black/30 p-1">
                                                 <TileAssetImage
-                                                    tile={tile}
-                                                    alt=""
-                                                    className="max-h-full max-w-full object-contain"
+                                                    tile={selectedTile}
+                                                    alt={tileLabel(
+                                                        selectedTile.key
+                                                    )}
+                                                    className={
+                                                        selectedTile.layer ===
+                                                        'edge-art'
+                                                            ? 'h-full w-full object-fill'
+                                                            : 'max-h-full max-w-full object-contain'
+                                                    }
                                                 />
-                                            </span>
-                                            <span className="line-clamp-2 w-full text-[11px] leading-tight">
-                                                {tileLabel(tile.key)}
-                                            </span>
-                                        </Button>
-                                    ))}
-                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                    <Input
+                                        aria-label={tileTranslations('search')}
+                                        placeholder={tileTranslations('search')}
+                                        value={tileSearch}
+                                        onChange={(event) =>
+                                            setTileSearch(event.target.value)
+                                        }
+                                        className="h-8 text-sm"
+                                    />
+                                    <div className="grid grid-cols-2 gap-1 sm:grid-cols-3">
+                                        {visibleTiles.map((tile) => (
+                                            <Button
+                                                key={tile.id}
+                                                type="button"
+                                                size="sm"
+                                                aria-pressed={
+                                                    tileEditor.selectedTileId ===
+                                                    tile.id
+                                                }
+                                                aria-label={tileLabel(tile.key)}
+                                                title={tileLabel(tile.key)}
+                                                className="h-auto min-w-0 flex-col gap-1 px-1 py-1.5 text-center whitespace-normal"
+                                                variant={
+                                                    tileEditor.selectedTileId ===
+                                                    tile.id
+                                                        ? 'default'
+                                                        : 'outline'
+                                                }
+                                                onClick={() =>
+                                                    tileEditor.setSelectedTile(
+                                                        tile.id
+                                                    )
+                                                }
+                                            >
+                                                <span className="flex h-12 w-full items-center justify-center overflow-hidden rounded bg-black/30 p-1">
+                                                    <TileAssetImage
+                                                        tile={tile}
+                                                        alt=""
+                                                        className={
+                                                            tile.layer ===
+                                                            'edge-art'
+                                                                ? 'h-full w-full object-fill'
+                                                                : 'max-h-full max-w-full object-contain'
+                                                        }
+                                                    />
+                                                </span>
+                                                <span className="line-clamp-2 w-full text-[11px] leading-tight">
+                                                    {tileLabel(tile.key)}
+                                                </span>
+                                            </Button>
+                                        ))}
+                                    </div>
+                                    {visibleTiles.length === 0 && (
+                                        <p className="rounded-md border border-dashed border-hud-rule p-4 text-center text-xs text-hud-muted">
+                                            {tileTranslations('noResults')}
+                                        </p>
+                                    )}
+                                </section>
                             </div>
                         </TabsContent>
                     </Tabs>

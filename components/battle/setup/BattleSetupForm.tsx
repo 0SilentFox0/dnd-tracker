@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { AutopickCard } from './AutopickCard';
@@ -21,6 +22,7 @@ import { LoadingState } from '@/components/common/states';
 import { HudForm, HudFormPage, type HudTab } from '@/components/hud/form';
 import { OnboardingHint } from '@/components/onboarding/OnboardingHint';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { ParticipantSide } from '@/lib/constants/battle';
 import {
     type BattleSetupInitial,
@@ -57,7 +59,11 @@ function BattleSetupLayout({
 }: BattleSetupFormProps & { initial?: BattleSetupInitial }) {
     const t = useTranslations('battleSetup.form');
 
+    const tMap = useTranslations('battleSetup.map');
+
     const setup = useBattleSetup(campaignId, battleId, initial);
+
+    const [preparedMapChosen, setPreparedMapChosen] = useState(false);
 
     const tActions = useTranslations('common.actions');
 
@@ -68,6 +74,24 @@ function BattleSetupLayout({
     if (setup.loading) return <SetupLoading isEdit={isEdit} />;
 
     const { participants, details, data, balance, form } = setup;
+
+    const { libraryMap, mapEditor } = setup;
+
+    const mapChoice = libraryMap.selectedId
+        ? 'prepared'
+        : preparedMapChosen
+          ? 'prepared'
+          : mapEditor.state.enabled
+            ? 'create'
+            : 'none';
+
+    const chooseMap = (choice: 'none' | 'create' | 'prepared') => {
+        setPreparedMapChosen(choice === 'prepared');
+        if (choice === 'none' || choice === 'create') {
+            if (libraryMap.selectedId) void libraryMap.select(null);
+        }
+        mapEditor.actions.setEnabled(choice === 'create' ? true : false);
+    };
 
     const sidePanel = (side: ParticipantSide) => (
         <SidePanelCard
@@ -90,15 +114,52 @@ function BattleSetupLayout({
             label: t('tabs.map'),
             content: (
                 <div className="space-y-4">
-                    {setup.libraryMap.visible && (
-                        <BattleMapLibraryPicker
-                            campaignId={campaignId}
-                            library={setup.libraryMap}
-                        />
-                    )}
-                    {!setup.libraryMap.selectedId && !setup.libraryMap.wasLinked && (
-                        <BattleFormMap editor={setup.mapEditor} />
-                    )}
+                    <div
+                        className="grid gap-3 md:grid-cols-3"
+                        role="group"
+                        aria-label={tMap('mapChoice.title')}
+                    >
+                        {(['none', 'create', 'prepared'] as const).map(
+                            (choice) => (
+                                <button
+                                    key={choice}
+                                    type="button"
+                                    aria-pressed={mapChoice === choice}
+                                    onClick={() => chooseMap(choice)}
+                                    className={cn(
+                                        'min-h-28 rounded-lg border p-4 text-left transition-colors',
+                                        mapChoice === choice
+                                            ? 'border-hud-gold bg-hud-gold/10 ring-1 ring-hud-gold'
+                                            : 'border-hud-rule bg-background/40 hover:border-hud-gold/60 hover:bg-background/70'
+                                    )}
+                                >
+                                    <span className="block font-semibold">
+                                        {tMap(`mapChoice.${choice}.title`)}
+                                    </span>
+                                    <span className="mt-1 block text-sm text-hud-muted">
+                                        {tMap(
+                                            `mapChoice.${choice}.description`
+                                        )}
+                                    </span>
+                                </button>
+                            )
+                        )}
+                    </div>
+                    {mapChoice === 'prepared' ? (
+                        libraryMap.visible ? (
+                            <BattleMapLibraryPicker
+                                campaignId={campaignId}
+                                library={libraryMap}
+                                onClear={() => setPreparedMapChosen(false)}
+                            />
+                        ) : (
+                            <p className="rounded-md border border-hud-rule p-4 text-sm text-hud-muted">
+                                {tMap('mapChoice.prepared.unavailable')}
+                            </p>
+                        )
+                    ) : mapChoice === 'create' ? (
+                        <BattleFormMap editor={mapEditor} />
+                    ) : null}
                 </div>
             ),
         },

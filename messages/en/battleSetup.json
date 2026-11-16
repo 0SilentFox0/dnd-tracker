@@ -87,6 +87,22 @@
   },
   "map": {
     "title": "Battle map",
+    "mapChoice": {
+      "title": "How do you want to add a map?",
+      "none": {
+        "title": "No map",
+        "description": "Show the battle as a column based list."
+      },
+      "create": {
+        "title": "Create a map now",
+        "description": "Set up a grid, background, cells, and walls for this battle."
+      },
+      "prepared": {
+        "title": "Load a prepared map",
+        "description": "Choose a campaign map or add one from the catalog.",
+        "unavailable": "The map library is turned off for this campaign. Enable it in campaign settings to use prepared maps."
+      }
+    },
     "enabled": "Battle on a map",
     "cols": "Columns",
     "rows": "Rows",

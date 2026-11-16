@@ -96,7 +96,7 @@ describe('drawTileViewport', () => {
         expect(ctx.drawImage).toHaveBeenCalledWith(image, 0, 0, 48, 48);
     });
 
-    it('renders edge-art as an enlarged centered 4:1 strip for clear door details', () => {
+    it('renders edge-art across one full cell for visible door details', () => {
         const ctx = context();
 
         const chunk = new Uint16Array(256);
@@ -112,6 +112,6 @@ describe('drawTileViewport', () => {
             seed: 'm1',
         });
 
-        expect(ctx.drawImage).toHaveBeenCalledWith(image, -16, 20, 96, 24);
+        expect(ctx.drawImage).toHaveBeenCalledWith(image, 0, 0, 64, 64);
     });
 });
