@@ -16,6 +16,7 @@ const storage = vi.hoisted(() => ({
         error: null,
     })),
     createBucket: vi.fn(async () => ({ data: null, error: null })),
+    updateBucket: vi.fn(async () => ({ data: null, error: null })),
     from: vi.fn(() => ({
         upload,
         getPublicUrl: (p: string) => ({

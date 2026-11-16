@@ -271,6 +271,7 @@
       "title": "Change the battle map?",
       "description": "Terrain and zones of the current map will be reset (weather and motion are kept).",
       "confirm": "Change"
-    }
+    },
+    "catalog": "Browse maps"
   }
 }

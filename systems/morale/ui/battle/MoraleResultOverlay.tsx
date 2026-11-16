@@ -33,7 +33,7 @@ export function MoraleResultOverlay() {
         const id = setTimeout(() => show(null), TURN_SKIP_MS);
 
         return () => clearTimeout(id);
-    }, [fx, skipped, show]);
+    }, [skipped, show]);
 
     if (!data) return null;
 

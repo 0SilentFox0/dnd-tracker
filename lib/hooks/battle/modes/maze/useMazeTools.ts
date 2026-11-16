@@ -17,10 +17,18 @@ import { useBattleScene } from '@/lib/hooks/battle/useBattleScene';
 import { useNotify } from '@/lib/hooks/common';
 import { cellKey, samePoint } from '@/lib/utils/battle/grid';
 import { isEdgeCell } from '@/lib/utils/battle/modes/maze';
-import { illusionPairs } from '@/lib/utils/battle/modes/maze/illusion';
+import {
+    illusionGroups,
+    illusionPairs,
+} from '@/lib/utils/battle/modes/maze/illusion';
 import { MAZE_TEXTS } from '@/lib/utils/battle/modes/maze/texts';
 import type { MazeActionData } from '@/types/api';
-import type { GridPoint, IllusionPair, MazeConfig } from '@/types/battle';
+import type {
+    GridPoint,
+    IllusionGroup,
+    IllusionPair,
+    MazeConfig,
+} from '@/types/battle';
 
 export type { MazeEdgeStroke, MazeGenerateInput, MazeTool };
 
@@ -64,7 +72,8 @@ export interface MazeTools {
 
 export interface MazeIllusion {
     pairs: IllusionPair[];
-    set(pairs: IllusionPair[]): void;
+    groups: IllusionGroup[];
+    set(groups: IllusionGroup[]): void;
     clear(): void;
 }
 
@@ -203,14 +212,16 @@ export function useMazeTools(): MazeTools | null {
     );
 
     const pairs = useMemo(() => illusionPairs(maze), [maze]);
+    const groups = useMemo(() => illusionGroups(maze), [maze]);
 
     const illusion = useMemo<MazeIllusion>(
         () => ({
             pairs,
-            set: (next) => send({ op: 'illusion', pairs: next }),
-            clear: () => send({ op: 'illusion', pairs: [] }),
+            groups,
+            set: (next) => send({ op: 'illusion', groups: next }),
+            clear: () => send({ op: 'illusion', groups: [] }),
         }),
-        [pairs, send]
+        [groups, pairs, send]
     );
 
     const tool = enabled ? state.tool : 'none';

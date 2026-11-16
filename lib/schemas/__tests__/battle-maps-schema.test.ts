@@ -11,6 +11,42 @@ const messages = (r: ReturnType<typeof battleMapInputSchema.safeParse>) =>
     r.success ? [] : r.error.issues.map((i) => i.message);
 
 describe('battleMapInputSchema', () => {
+    it('allows optional validated source attribution', () => {
+        expect(battleMapInputSchema.safeParse(input({})).success).toBe(true);
+        expect(
+            battleMapInputSchema.safeParse(
+                input({
+                    source: {
+                        url: 'https://github.com/mbround18/vtt-maps',
+                        attribution: 'mbround18/vtt-maps',
+                        license: 'CC-BY-SA-4.0',
+                    },
+                })
+            ).success
+        ).toBe(true);
+    });
+
+    it.each([
+        {
+            url: 'http://example.com/map',
+            attribution: 'source',
+            license: 'CC-BY-SA-4.0',
+        },
+        {
+            url: 'https://example.com/map',
+            attribution: 'source',
+            license: 'MIT',
+        },
+        {
+            url: 'https://example.com/map',
+            attribution: 'x'.repeat(121),
+            license: 'CC-BY-SA-4.0',
+        },
+    ])('rejects invalid source metadata', (source) => {
+        expect(battleMapInputSchema.safeParse(input({ source })).success).toBe(
+            false
+        );
+    });
     it('accepts a data-URL background', () => {
         const r = battleMapInputSchema.safeParse(
             input({ background: 'data:image/png;base64,AAAA' })

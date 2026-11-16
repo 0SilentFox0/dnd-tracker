@@ -315,6 +315,11 @@ export interface IllusionPair {
     bSees: IllusionDisguise;
 }
 
+/** Герої однієї ілюзійної групи: disguise — образ, під яким інші бачать героя. */
+export interface IllusionGroup {
+    heroes: Array<{ id: string; disguise: IllusionDisguise }>;
+}
+
 /** walls — ребра "x:y:e" / "x:y:s"; fog і marks — за ключем клітинки "x:y" */
 export interface MazeConfig {
     walls: string[];
@@ -326,7 +331,7 @@ export interface MazeConfig {
     dark: boolean;
     /** перший крок героя зроблено: «Згенерувати»/«Розкидати старти» більше недоступні */
     moved?: boolean;
-    illusionSwap?: { pairs: IllusionPair[] };
+    illusionSwap?: { pairs?: IllusionPair[]; groups?: IllusionGroup[] };
 }
 
 export type TemplateShape =
@@ -362,6 +367,11 @@ export interface BattleMapConfig {
     cols: number;
     rows: number;
     background: string | null;
+    source?: {
+        url: string;
+        attribution: string;
+        license: 'CC-BY-SA-4.0';
+    };
     /** Прозорість ліній сітки, 0..1 */
     opacity: number;
     /** Неігрові клітинки (ключі "x:y") */

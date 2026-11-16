@@ -65,6 +65,20 @@ export function auditRouteCoverage(
 
 export const ASSISTANT_ROUTE_COVERAGE: readonly RouteCoverage[] = [
     {
+        route: 'campaigns/[id]/maps/background-upload',
+        methods: ['POST'],
+        task: 1,
+        adapter: 'battle-map-background-storage',
+        state: 'handoff',
+    },
+    {
+        route: 'campaigns/[id]/maps/background-upload/discard',
+        methods: ['POST'],
+        task: 1,
+        adapter: 'battle-map-background-storage',
+        state: 'handoff',
+    },
+    {
         route: 'campaigns/[id]/ai/threads/[threadId]/context-preview',
         methods: ['POST'],
         task: 18,

@@ -1,14 +1,18 @@
 'use client';
 
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
 import { useBattleMapMutations, useBattleMaps } from './useBattleMaps';
+import { useImportCatalogMap } from './useImportCatalogMap';
 
 import { DEFAULT_BATTLE_MAP } from '@/lib/constants/battle';
 import { useLibraryList, useNotify } from '@/lib/hooks/common';
+import type { UvttImport } from '@/lib/utils/battle/uvtt/parse';
 import { errorMessage } from '@/lib/utils/common/error-message';
 import type { BattleMapBrief } from '@/types/battle-map';
+import type { MapCatalogEntry } from '@/types/map-catalog';
 
 export interface NewMapForm {
     name: string;
@@ -28,6 +32,10 @@ export function useMapLibrary(campaignId: string) {
     const query = useBattleMaps(campaignId);
 
     const mutations = useBattleMapMutations(campaignId);
+
+    const catalogImport = useImportCatalogMap(campaignId);
+
+    const [catalogOpen, setCatalogOpen] = useState(false);
 
     const list = useLibraryList({
         query,
@@ -51,7 +59,20 @@ export function useMapLibrary(campaignId: string) {
             ...list.createDialog,
             isPending: mutations.create.isPending,
         },
+        catalog: {
+            open: catalogOpen,
+            setOpen: setCatalogOpen,
+            isPending: catalogImport.isPending,
+        },
         actions: {
+            importCatalogEntry: async (
+                entry: MapCatalogEntry,
+                parsed?: UvttImport
+            ) => {
+                const created = await catalogImport.importEntry(entry, parsed);
+
+                router.push(`/campaigns/${campaignId}/dm/maps/${created.id}`);
+            },
             create: ({ name, cols, rows }: NewMapForm) =>
                 mutations.create.mutate(
                     {

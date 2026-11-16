@@ -2,9 +2,18 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { ChevronDown, ChevronRight, Pencil, Search, X } from 'lucide-react';
+import {
+    ChevronDown,
+    ChevronRight,
+    Pencil,
+    Plus,
+    Search,
+    X,
+} from 'lucide-react';
 
+import { AddYoutubeTrackDialog } from '@/components/music/AddYoutubeTrackDialog';
 import { TrackTitleInput } from '@/components/music/TrackTitleInput';
+import { UploadTrackButton } from '@/components/music/UploadTrackButton';
 import {
     type PlayerAudioDm,
     type PlaylistView,
@@ -181,6 +190,8 @@ export function DmPlaylist({ dm }: { dm: PlayerAudioDm }) {
 
     const grouped = view.groupNames.length > 1;
 
+    const [youtubeOpen, setYoutubeOpen] = useState(false);
+
     const row = (tr: CampaignTrack) => (
         <TrackRow
             key={tr.id}
@@ -214,6 +225,27 @@ export function DmPlaylist({ dm }: { dm: PlayerAudioDm }) {
             </button>
             {open && (
                 <>
+                    <div className="mt-2 flex items-center gap-1">
+                        <UploadTrackButton
+                            pending={library.isBusy}
+                            onFile={(file) => void library.upload(file)}
+                        />
+                        <button
+                            type="button"
+                            disabled={library.isBusy}
+                            onClick={() => setYoutubeOpen(true)}
+                            className="flex h-7 items-center gap-1 rounded border border-hud-rule px-2 text-xs hover:bg-white/10 disabled:opacity-40"
+                        >
+                            <Plus className="size-3.5" />
+                            {t('music.youtube.add')}
+                        </button>
+                    </div>
+                    <AddYoutubeTrackDialog
+                        open={youtubeOpen}
+                        onOpenChange={setYoutubeOpen}
+                        pending={library.isBusy}
+                        onSubmit={library.addYoutube}
+                    />
                     <PlaylistFilters
                         view={view}
                         total={library.tracks.length}

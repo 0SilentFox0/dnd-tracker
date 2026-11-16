@@ -22,6 +22,12 @@ interface Props {
 
 const FORM_ID = 'maze-generate-form';
 
+const PRESETS = {
+    short: { difficulty: 'easy', teleportPairs: 0, fogPatches: 0 },
+    standard: { difficulty: 'medium', teleportPairs: 1, fogPatches: 2 },
+    perilous: { difficulty: 'hard', teleportPairs: 2, fogPatches: 4 },
+} as const;
+
 export function MazeGenerateDialog({
     open,
     onOpenChange,
@@ -47,6 +53,24 @@ export function MazeGenerateDialog({
     const [counts, setCounts] = useState(DEFAULT_MAZE_COUNTS);
 
     const [exit, setExit] = useState<MazeGenerateInput['exit']>('random');
+
+    const presetOptions = [
+        { value: 'short', label: t('generate.presets.short') },
+        { value: 'standard', label: t('generate.presets.standard') },
+        { value: 'perilous', label: t('generate.presets.perilous') },
+    ];
+
+    const applyPreset = (value: string) => {
+        const preset = PRESETS[value as keyof typeof PRESETS];
+
+        if (!preset) return;
+
+        setDifficulty(preset.difficulty);
+        setCounts({
+            teleportPairs: preset.teleportPairs,
+            fogPatches: preset.fogPatches,
+        });
+    };
 
     const submit = (e: FormEvent) => {
         e.preventDefault();
@@ -77,6 +101,15 @@ export function MazeGenerateDialog({
             }
         >
             <form id={FORM_ID} onSubmit={submit} className="space-y-4 py-2">
+                <div className="space-y-1.5">
+                    <Label>{t('generate.preset')}</Label>
+                    <SelectField
+                        value=""
+                        onValueChange={applyPreset}
+                        placeholder={t('generate.choosePreset')}
+                        options={presetOptions}
+                    />
+                </div>
                 <div className="space-y-1.5">
                     <Label>{t('generate.level')}</Label>
                     <SelectField

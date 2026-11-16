@@ -41,7 +41,6 @@ export const mazeMode: MapModeDefinition<MazeConfig> = {
         afterSettle: ({ map, scene, result }) =>
             pruneIllusion(result.scene?.map ?? map, scene, result),
         blockedText: (maze) => (maze.dark ? API_ERRORS.MAZE_DARK : null),
-        autoSkipText: (maze) => (maze.dark ? MAZE_TEXTS.darkSkip : null),
         placeAll: ({ map, config, participants }) =>
             placeMazeParticipants({ ...map, maze: config }, participants),
         placeOne: ({ map, config, participants, mover, to }) => {

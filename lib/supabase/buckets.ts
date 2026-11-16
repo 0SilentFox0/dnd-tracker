@@ -21,6 +21,10 @@ export async function ensureBucket(
         const created = await supabase.storage.createBucket(bucket, options);
 
         if (created.error) return { ok: false, message: created.error.message };
+    } else {
+        const updated = await supabase.storage.updateBucket(bucket, options);
+
+        if (updated.error) return { ok: false, message: updated.error.message };
     }
 
     ensured.add(bucket);

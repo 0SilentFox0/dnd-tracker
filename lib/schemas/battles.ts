@@ -66,18 +66,27 @@ const illusionPairSchema = z
         message: 'battleSetup.validation.illusionDuplicate',
     });
 
-const illusionPairsSchema = z
-    .array(illusionPairSchema)
-    .max(8)
-    .superRefine((pairs, ctx) => {
-        const ids = pairs.flatMap((p) => [p.a, p.b]);
+const illusionPairsSchema = z.array(illusionPairSchema).max(8);
 
-        if (new Set(ids).size !== ids.length)
-            ctx.addIssue({
-                code: 'custom',
-                message: 'battleSetup.validation.illusionDuplicate',
-            });
-    });
+const illusionGroupSchema = z.object({
+    heroes: z
+        .array(
+            z.object({
+                id: z.string().min(1).max(64),
+                disguise: illusionDisguiseSchema,
+            })
+        )
+        .min(2)
+        .max(20)
+        .superRefine((heroes, ctx) => {
+            if (new Set(heroes.map((h) => h.id)).size !== heroes.length)
+                ctx.addIssue({
+                    code: 'custom',
+                    message: 'battleSetup.validation.illusionDuplicate',
+                });
+        }),
+});
+const illusionGroupsSchema = z.array(illusionGroupSchema).max(8);
 
 export const mazeSchema = z.object({
     walls: z.array(edgeKeySchema).max(MAP_LIMITS.inlineMaxEdges),
@@ -100,7 +109,12 @@ export const mazeSchema = z.object({
         ),
     dark: z.boolean(),
     moved: z.boolean().optional(),
-    illusionSwap: z.object({ pairs: illusionPairsSchema }).optional(),
+    illusionSwap: z
+        .object({
+            pairs: illusionPairsSchema.optional(),
+            groups: illusionGroupsSchema.optional(),
+        })
+        .optional(),
 });
 
 const mazeFeatureCounts = {
@@ -135,7 +149,15 @@ export const mazeActionSchema = z.discriminatedUnion('op', [
         on: z.boolean(),
     }),
     z.object({ op: z.literal('dark'), on: z.boolean() }),
-    z.object({ op: z.literal('illusion'), pairs: illusionPairsSchema }),
+    z
+        .object({
+            op: z.literal('illusion'),
+            pairs: illusionPairsSchema.optional(),
+            groups: illusionGroupsSchema.optional(),
+        })
+        .refine(
+            (body) => body.pairs !== undefined || body.groups !== undefined
+        ),
     z.object({ op: z.literal('scatterStarts') }),
 ]);
 
@@ -165,6 +187,17 @@ export const battleMapObject = z.object({
     cols: mapSide(MAP_LIMITS.photoMaxSide),
     rows: mapSide(MAP_LIMITS.photoMaxSide),
     background: mapBackgroundSchema,
+    source: z
+        .object({
+            url: z
+                .string()
+                .url()
+                .max(2000)
+                .refine((value) => value.startsWith('https://')),
+            attribution: z.string().trim().min(1).max(120),
+            license: z.literal('CC-BY-SA-4.0'),
+        })
+        .optional(),
     opacity: z.number().min(0).max(1),
     blocked: z
         .array(z.string().regex(/^\d+:\d+$/))
@@ -492,7 +525,12 @@ const fogRunSchema = z.tuple([
 export const mapFogSchema = z
     .object({
         mode: z.enum(['off', 'reveal', 'vision']).optional(),
-        visionRadius: z.number().int().min(1).max(FOG_MAX_VISION_RADIUS).optional(),
+        visionRadius: z
+            .number()
+            .int()
+            .min(1)
+            .max(FOG_MAX_VISION_RADIUS)
+            .optional(),
         add: z.array(fogRunSchema).max(2000).optional(),
         remove: z.array(fogRunSchema).max(2000).optional(),
     })

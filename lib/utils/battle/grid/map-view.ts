@@ -4,7 +4,7 @@ import { cellsOf, isOnMap, sizeOf } from './occupancy';
 import { moveBudget, reachable } from './path';
 import { hazardCells, threatCells } from './terrain';
 
-import { isActive } from '@/lib/utils/abilities/engine/core/participants';
+import { isAttackable } from '@/lib/utils/abilities/engine/core/participants';
 import { isHostile } from '@/lib/utils/battle/modes/engine';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import type {
@@ -133,7 +133,7 @@ export function targetMarks(
     const marks = new Map<string, CellMark>();
 
     for (const t of participants) {
-        if (!isHostile(map, attacker, t) || !isOnMap(t) || !isActive(t))
+        if (!isHostile(map, attacker, t) || !isOnMap(t) || !isAttackable(t))
             continue;
 
         const mark: CellMark = pickAttack(

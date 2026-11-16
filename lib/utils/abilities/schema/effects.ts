@@ -377,6 +377,7 @@ const BerserkSchema = z.object({
     kind: z.literal('berserk'),
     damageBonusPercent: z.number().min(0).max(300),
     duration: DurationSchema,
+    affectsHeroes: z.boolean().optional(),
     ...target,
 });
 

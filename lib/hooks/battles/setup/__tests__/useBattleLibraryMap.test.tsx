@@ -10,6 +10,7 @@ const h = vi.hoisted(() => ({
         rows?: number;
     }[],
     confirm: vi.fn(async () => true),
+    importEntry: vi.fn(async () => ({ id: 'imported-map' })),
 }));
 
 vi.mock('next-intl', () => ({ useTranslations: () => (k: string) => k }));
@@ -18,6 +19,12 @@ vi.mock('@/lib/hooks/campaigns', () => ({
 }));
 vi.mock('@/lib/hooks/battle-maps', () => ({
     useBattleMaps: () => ({ data: h.maps }),
+}));
+vi.mock('@/lib/hooks/battle-maps/useImportCatalogMap', () => ({
+    useImportCatalogMap: () => ({
+        importEntry: h.importEntry,
+        isPending: false,
+    }),
 }));
 vi.mock('@/lib/hooks/common', () => ({ useConfirm: () => h.confirm }));
 
@@ -33,6 +40,7 @@ describe('useBattleLibraryMap in edit mode', () => {
         vi.clearAllMocks();
         h.enabled = true;
         h.maps = [{ id: 'm1' }, { id: 'm2' }];
+        h.importEntry.mockClear();
     });
 
     it('prepared: picker visible with the flag on or when linked', () => {
@@ -110,6 +118,16 @@ describe('useBattleLibraryMap in edit mode', () => {
 
         expect(result.current.selectedId).toBe('m1');
         expect(h.confirm).not.toHaveBeenCalled();
+    });
+
+    it('selects a catalog map after importing it in setup', async () => {
+        const { result } = run({});
+
+        const entry = { id: 'maps/cave/Room.dd2vtt' } as never;
+
+        await act(() => result.current.importCatalogEntry(entry));
+        expect(h.importEntry).toHaveBeenCalledWith(entry, undefined);
+        expect(result.current.selectedId).toBe('imported-map');
     });
 
     it('create mode never confirms', async () => {

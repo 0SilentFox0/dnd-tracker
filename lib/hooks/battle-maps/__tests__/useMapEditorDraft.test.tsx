@@ -6,14 +6,23 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useMapEditorDraft } from '../useMapEditorDraft';
 
-import { getBattleMap, updateBattleMap } from '@/lib/api/battle-maps';
+import {
+    discardBattleMapBackground,
+    uploadBattleMapBackground,
+} from '@/lib/api/battle-map-background';
+import { updateBattleMap } from '@/lib/api/battle-maps';
 import { ApiError } from '@/lib/api/client';
 import { ConfirmContext } from '@/lib/hooks/common/confirm-context';
+import { normalizeUvttBackground } from '@/lib/utils/battle/uvtt/normalize-background';
 import type { BattleMapFull } from '@/types/battle-map';
 
-vi.mock('@/lib/api/battle-maps', () => ({
-    updateBattleMap: vi.fn(),
-    getBattleMap: vi.fn(),
+vi.mock('@/lib/api/battle-maps', () => ({ updateBattleMap: vi.fn() }));
+vi.mock('@/lib/api/battle-map-background', () => ({
+    discardBattleMapBackground: vi.fn(async () => undefined),
+    uploadBattleMapBackground: vi.fn(),
+}));
+vi.mock('@/lib/utils/battle/uvtt/normalize-background', () => ({
+    normalizeUvttBackground: vi.fn(),
 }));
 vi.mock('@/lib/hooks/common', async (orig) => ({
     ...(await orig<object>()),
@@ -51,7 +60,15 @@ const setup = () => {
 };
 
 describe('useMapEditorDraft', () => {
-    beforeEach(() => vi.clearAllMocks());
+    beforeEach(() => {
+        vi.clearAllMocks();
+        vi.mocked(normalizeUvttBackground).mockResolvedValue(
+            new Blob(['image'], { type: 'image/webp' })
+        );
+        vi.mocked(uploadBattleMapBackground).mockResolvedValue(
+            'https://cdn.test/bg.webp'
+        );
+    });
 
     it('starts clean and saves name, header and edges', async () => {
         vi.mocked(updateBattleMap).mockResolvedValue({} as never);
@@ -64,7 +81,7 @@ describe('useMapEditorDraft', () => {
         act(() => result.current.name.set(' Renamed '));
         expect(result.current.canSave).toBe(true);
 
-        act(() => result.current.save());
+        await act(async () => result.current.save());
 
         await waitFor(() =>
             expect(updateBattleMap).toHaveBeenCalledWith('c1', 'm1', {
@@ -85,11 +102,11 @@ describe('useMapEditorDraft', () => {
         const { result } = setup();
 
         act(() => result.current.name.set('A'));
-        act(() => result.current.save());
+        await act(async () => result.current.save());
         await waitFor(() => expect(result.current.isDirty).toBe(false));
 
         act(() => result.current.name.set('B'));
-        act(() => result.current.save());
+        await act(async () => result.current.save());
 
         await waitFor(() => expect(updateBattleMap).toHaveBeenCalledTimes(2));
 
@@ -108,7 +125,7 @@ describe('useMapEditorDraft', () => {
         const { result } = setup();
 
         act(() => result.current.name.set('X'));
-        act(() => result.current.save());
+        await act(async () => result.current.save());
 
         await waitFor(() =>
             expect(confirm).toHaveBeenCalledWith(
@@ -116,6 +133,27 @@ describe('useMapEditorDraft', () => {
             )
         );
         expect(result.current.isDirty).toBe(true);
+    });
+
+    it('a failed save keeps the local background usable after upload cleanup', async () => {
+        vi.mocked(updateBattleMap).mockRejectedValue(
+            new ApiError('errors.battleMapConflict', 409, '/maps/m1')
+        );
+
+        const { result } = setup();
+
+        const localBackground = 'data:image/png;base64,AAAA';
+
+        act(() => result.current.editor.actions.setBackground(localBackground));
+        await act(async () => result.current.save());
+
+        expect(result.current.editor.state.map.background).toBe(
+            localBackground
+        );
+        expect(discardBattleMapBackground).toHaveBeenCalledWith(
+            'c1',
+            'https://cdn.test/bg.webp'
+        );
     });
 
     it('other failures show the server message', async () => {
@@ -126,7 +164,7 @@ describe('useMapEditorDraft', () => {
         const { result } = setup();
 
         act(() => result.current.name.set('X'));
-        act(() => result.current.save());
+        await act(async () => result.current.save());
 
         await waitFor(() =>
             expect(confirm).toHaveBeenCalledWith(
@@ -152,10 +190,6 @@ describe('useMapEditorDraft', () => {
 
     it('swaps a saved data-URL background for the stored URL and stays clean', async () => {
         vi.mocked(updateBattleMap).mockResolvedValue({ version: 4 } as never);
-        vi.mocked(getBattleMap).mockResolvedValue({
-            ...source,
-            map: { ...source.map, background: 'https://cdn.test/bg.webp' },
-        });
 
         const { result } = setup();
 
@@ -164,8 +198,14 @@ describe('useMapEditorDraft', () => {
                 'data:image/png;base64,AAAA'
             )
         );
-        act(() => result.current.save());
+        await act(async () => result.current.save());
 
+        await waitFor(() =>
+            expect(uploadBattleMapBackground).toHaveBeenCalledWith(
+                'c1',
+                expect.any(Blob)
+            )
+        );
         await waitFor(() =>
             expect(result.current.editor.state.map.background).toBe(
                 'https://cdn.test/bg.webp'
@@ -174,13 +214,11 @@ describe('useMapEditorDraft', () => {
         await waitFor(() => expect(result.current.isDirty).toBe(false));
     });
 
-    it('keeps a background changed while the stored URL was loading', async () => {
-        vi.mocked(updateBattleMap).mockResolvedValue({ version: 4 } as never);
+    it('does not overwrite a background changed during upload', async () => {
+        let resolveUpload!: (url: string) => void;
 
-        let resolve!: (v: BattleMapFull) => void;
-
-        vi.mocked(getBattleMap).mockReturnValue(
-            new Promise((r) => (resolve = r))
+        vi.mocked(uploadBattleMapBackground).mockReturnValue(
+            new Promise((resolve) => (resolveUpload = resolve))
         );
 
         const { result } = setup();
@@ -190,20 +228,27 @@ describe('useMapEditorDraft', () => {
                 'data:image/png;base64,AAAA'
             )
         );
-        act(() => result.current.save());
-        await waitFor(() => expect(getBattleMap).toHaveBeenCalled());
 
+        let saving!: Promise<void>;
+
+        await act(async () => {
+            saving = result.current.save();
+            await waitFor(() =>
+                expect(uploadBattleMapBackground).toHaveBeenCalled()
+            );
+        });
         act(() =>
             result.current.editor.actions.setBackground('https://x/other.png')
         );
-
-        await act(async () =>
-            resolve({
-                ...source,
-                map: { ...source.map, background: 'https://cdn.test/bg.webp' },
-            })
+        await waitFor(() =>
+            expect(result.current.editor.state.map.background).toBe(
+                'https://x/other.png'
+            )
         );
-
+        await act(async () => {
+            resolveUpload('https://cdn.test/bg.webp');
+            await saving;
+        });
         expect(result.current.editor.state.map.background).toBe(
             'https://x/other.png'
         );

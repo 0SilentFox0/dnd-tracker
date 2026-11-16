@@ -120,32 +120,58 @@ describe('mazeActionSchema illusion', () => {
         expect(parse([])).toBe(true);
     });
 
-    it('rejects blank names, a == b, a repeated id and more than 8 pairs', () => {
+    it('rejects invalid disguises and repeated heroes within one pair', () => {
         expect(parse([pair({ aSees: { name: '' } })])).toBe(false);
         expect(parse([pair({ bSees: { name: '   ' } })])).toBe(false);
         expect(parse([pair({ b: 'p1' })])).toBe(false);
-        expect(parse([pair(), pair({ a: 'p3', b: 'p1' })])).toBe(false);
+        expect(parse([pair(), pair({ a: 'p3', b: 'p1' })])).toBe(true);
         expect(
             parse(
-                Array.from({ length: 9 }, (_, i) =>
-                    pair({ a: `a${i}`, b: `b${i}` })
-                )
-            )
-        ).toBe(false);
-        expect(
-            parse(
-                Array.from({ length: 8 }, (_, i) =>
+                Array.from({ length: 2 }, (_, i) =>
                     pair({ a: `a${i}`, b: `b${i}` })
                 )
             )
         ).toBe(true);
+        expect(parse([pair({ a: 'a', b: 'b' })])).toBe(true);
+    });
+
+    it('accepts overlapping multi-hero groups and rejects duplicate heroes within a group', () => {
+        const group = (ids: string[]) => ({
+            heroes: ids.map((id) => ({ id, disguise })),
+        });
+        expect(
+            mazeActionSchema.safeParse({
+                op: 'illusion',
+                groups: [
+                    group(['A', 'B', 'C']),
+                    group(['A', 'D']),
+                    group(['C', 'D']),
+                ],
+            }).success
+        ).toBe(true);
+        expect(
+            mazeActionSchema.safeParse({
+                op: 'illusion',
+                groups: [group(['A', 'A'])],
+            }).success
+        ).toBe(false);
     });
 
     it('mazeSchema accepts illusionSwap', () => {
         expect(
             mazeSchema.safeParse({
                 ...emptyMaze(),
-                illusionSwap: { pairs: [pair()] },
+                illusionSwap: {
+                    groups: [
+                        {
+                            heroes: [
+                                { id: 'A', disguise },
+                                { id: 'B', disguise },
+                                { id: 'C', disguise },
+                            ],
+                        },
+                    ],
+                },
             }).success
         ).toBe(true);
     });

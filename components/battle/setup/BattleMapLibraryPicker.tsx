@@ -2,8 +2,11 @@
 
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { Download } from 'lucide-react';
 
 import { HudSection } from '@/components/hud/form';
+import { MapCatalogDialog } from '@/components/maps/MapCatalogDialog';
+import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { SelectField } from '@/components/ui/select-field';
 import type { BattleLibraryMap } from '@/lib/hooks/battles';
@@ -55,12 +58,30 @@ export function BattleMapLibraryPicker({
                             ? t('tooLarge', { max: library.maxSide })
                             : null}
             </p>
+            {library.canImportCatalog ? (
+                <Button
+                    variant="outline"
+                    disabled={library.isImportingCatalog}
+                    onClick={() => library.setCatalogOpen(true)}
+                >
+                    <Download className="mr-2 h-4 w-4" />
+                    {t('catalog')}
+                </Button>
+            ) : null}
             <Link
                 href={`/campaigns/${campaignId}/dm/maps`}
                 className="text-sm text-hud-gold-bright underline"
             >
                 {t('manage')}
             </Link>
+            {library.catalogOpen ? (
+                <MapCatalogDialog
+                    open={library.catalogOpen}
+                    onOpenChange={library.setCatalogOpen}
+                    onImport={library.importCatalogEntry}
+                    pending={library.isImportingCatalog}
+                />
+            ) : null}
         </HudSection>
     );
 }

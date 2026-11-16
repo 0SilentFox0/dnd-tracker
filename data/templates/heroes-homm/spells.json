@@ -61,7 +61,7 @@
     "name": "Berserk",
     "level": 4,
     "groupId": "Darkness",
-    "description": "The enemy makes a Wisdom saving throw; on a failure it goes berserk for 1 round: on its turn it automatically attacks a random other creature (its own allies included) with +50% damage. Does not affect heroes.",
+    "description": "The enemy, including a hero, makes a Wisdom saving throw; on a failure it goes berserk for 1 round: on its turn it automatically attacks a random other creature (its own allies included) with +50% damage.",
     "appearanceDescription": "The enemy's eyes fill with blood and a bestial roar tears from its throat. It no longer sees faces, only targets, and lunges at the first one in reach, even if it is its own brother-in-arms.",
     "cost": "action",
     "dice": 0,
@@ -83,7 +83,8 @@
         "duration": {
           "rounds": 1
         },
-        "damageBonusPercent": 50
+        "damageBonusPercent": 50,
+        "affectsHeroes": true
       }
     ]
   },
@@ -1228,7 +1229,7 @@
     "name": "Plague",
     "level": 2,
     "groupId": "Darkness",
-    "description": "Poisons an enemy: a roll of 1 die of poison damage (d6/d8/d10 depending on school mastery; +1 die per 3 hero levels) determines the damage the enemy takes at the start of each of its turns for 2 rounds.",
+    "description": "Poisons one enemy: at the start of its turn for 2 rounds, it takes half the poison spell roll.",
     "appearanceDescription": "A cloud of greenish flies bursts from the caster's palm and fastens onto the enemy's face. The skin is covered with black blisters, and its breath reeks of a rotting crypt.",
     "cost": "action",
     "dice": 1,
@@ -1250,7 +1251,7 @@
         },
         "damageType": "poison",
         "damagePerRound": {
-          "spellRoll": 100
+          "spellRoll": 50
         }
       }
     ],

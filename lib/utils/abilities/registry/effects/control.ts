@@ -34,7 +34,10 @@ export function applyBerserk(
 
         if (!t || !isActive(t)) continue;
 
-        if (t.basicInfo.sourceType === ParticipantSourceType.CHARACTER) {
+        if (
+            t.basicInfo.sourceType === ParticipantSourceType.CHARACTER &&
+            !effect.affectsHeroes
+        ) {
             messages.push(
                 textRef('abilityText.log.notOnHeroes', {
                     ability: ability.name,

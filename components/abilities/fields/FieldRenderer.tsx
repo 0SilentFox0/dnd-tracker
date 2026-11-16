@@ -10,6 +10,7 @@ import { NumberListField } from './NumberListField';
 import { SaveEndsField } from './SaveEndsField';
 import { SelectInput } from './SelectInput';
 import { SpellPickerField } from './SpellPickerField';
+import { SpellSchoolField } from './SpellSchoolField';
 import { TextField } from './TextField';
 import { ToggleField } from './ToggleField';
 import { UnitPickerField } from './UnitPickerField';
@@ -69,6 +70,9 @@ export function FieldRenderer({
                 return <NumberField {...props} />;
             case 'text':
             case 'strings':
+                if (owner === 'spellTargeting' && meta.name === 'school') {
+                    return <SpellSchoolField {...props} />;
+                }
                 return <TextField {...props} />;
             case 'select':
                 return <SelectInput {...props} />;

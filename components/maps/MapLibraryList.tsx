@@ -1,9 +1,17 @@
 'use client';
 
 import { useFormatter, useTranslations } from 'next-intl';
-import { Copy, Edit, Map as MapIcon, Plus, Trash2 } from 'lucide-react';
+import {
+    Copy,
+    Download,
+    Edit,
+    Map as MapIcon,
+    Plus,
+    Trash2,
+} from 'lucide-react';
 
 import { CreateMapDialog } from './CreateMapDialog';
+import { MapCatalogDialog } from './MapCatalogDialog';
 
 import { ActionsMenu } from '@/components/common/ActionsMenu';
 import { DmCardGrid, DmListBody } from '@/components/common/DmListBody';
@@ -24,7 +32,7 @@ export function MapLibraryList({ campaignId }: { campaignId: string }) {
 
     const library = useMapLibrary(campaignId);
 
-    const { maps, actions, createDialog } = library;
+    const { maps, actions, createDialog, catalog } = library;
 
     const editorHref = (id: string) => `/campaigns/${campaignId}/dm/maps/${id}`;
 
@@ -34,13 +42,23 @@ export function MapLibraryList({ campaignId }: { campaignId: string }) {
                 title={t('title')}
                 subtitle={t('subtitle')}
                 actions={
-                    <Button
-                        onClick={() => createDialog.setOpen(true)}
-                        className="flex items-center gap-2"
-                    >
-                        <Plus className="h-4 w-4" />
-                        {t('create')}
-                    </Button>
+                    <div className="flex gap-2">
+                        <Button
+                            variant="outline"
+                            onClick={() => catalog.setOpen(true)}
+                            className="flex items-center gap-2"
+                        >
+                            <Download className="h-4 w-4" />
+                            {t('catalog')}
+                        </Button>
+                        <Button
+                            onClick={() => createDialog.setOpen(true)}
+                            className="flex items-center gap-2"
+                        >
+                            <Plus className="h-4 w-4" />
+                            {t('create')}
+                        </Button>
+                    </div>
                 }
             />
             <OnboardingHint id="dm.maps" className="mb-3" />
@@ -125,6 +143,12 @@ export function MapLibraryList({ campaignId }: { campaignId: string }) {
                 onOpenChange={createDialog.setOpen}
                 pending={createDialog.isPending}
                 onSubmit={actions.create}
+            />
+            <MapCatalogDialog
+                open={catalog.open}
+                onOpenChange={catalog.setOpen}
+                pending={catalog.isPending}
+                onImport={actions.importCatalogEntry}
             />
         </HudPage>
     );

@@ -14,20 +14,13 @@ import { useAudioElementSync } from './useAudioElementSync';
 import { type AudioPrefs, useAudioPrefs } from './useAudioPrefs';
 import { useAudioState } from './useAudioState';
 
-import { useRenameTrack, useTracks } from '@/lib/hooks/music';
-import { translateIssue } from '@/lib/i18n/translate-issue';
-import { useTranslator } from '@/lib/i18n/use-translator';
-import { errorMessage } from '@/lib/utils/common/error-message';
-import type { BattleAudioState, CampaignTrack } from '@/types/audio';
+import { type MusicLibrary, useMusicLibrary } from '@/lib/hooks/music';
+import type { BattleAudioState } from '@/types/audio';
 
 /** Лише для ДМ: керування, бібліотека кампанії й посилання на сторінку музики. */
 export interface PlayerAudioDm {
     control: AudioControl;
-    library: {
-        tracks: CampaignTrack[];
-        isLoading: boolean;
-        rename(id: string, title: string): void;
-    };
+    library: MusicLibrary;
     musicHref: string;
 }
 
@@ -42,16 +35,12 @@ export interface PlayerAudioValue {
 
 export const AudioPlayerContext = createContext<PlayerAudioValue | null>(null);
 
-const NO_TRACKS: CampaignTrack[] = [];
-
 /** audioRef — єдиний <audio> сторінки в AudioPlayerProvider: iOS розблоковує саме елемент, тож він не мусить перемонтовуватися разом із панеллю. */
 export function usePlayerAudioValue(host: AudioHost): {
     value: PlayerAudioValue;
     audioRef: (el: HTMLAudioElement | null) => void;
 } {
-    const { campaignId, isDM, silent = false, onFailure } = host;
-
-    const t = useTranslator();
+    const { campaignId, isDM, silent = false } = host;
 
     // браузери пускають звук лише після жесту: один клік на кожне відкриття сторінки
     const [unlocked, setUnlocked] = useState(false);
@@ -67,17 +56,7 @@ export function usePlayerAudioValue(host: AudioHost): {
 
     const control = useAudioControl(host);
 
-    const { data: tracks = NO_TRACKS, isLoading } = useTracks(campaignId, {
-        enabled: isDM,
-    });
-
-    const rename = useRenameTrack(campaignId, (e) =>
-        onFailure(
-            translateIssue(t, {
-                message: errorMessage(e, 'music.player.renameFailed'),
-            })
-        )
-    );
+    const library = useMusicLibrary(campaignId, undefined, isDM);
 
     const track = audio?.track ?? null;
 
@@ -105,11 +84,11 @@ export function usePlayerAudioValue(host: AudioHost): {
             control
                 ? {
                       control,
-                      library: { tracks, isLoading, rename },
+                      library,
                       musicHref: `/campaigns/${campaignId}/dm/music`,
                   }
                 : null,
-        [control, tracks, isLoading, rename, campaignId]
+        [control, library, campaignId]
     );
 
     const value = useMemo(

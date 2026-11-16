@@ -257,12 +257,20 @@ describe('useMazeTools', () => {
 
         expect(tools().illusion.pairs).toEqual([pair]);
 
-        act(() => tools().illusion.set([pair]));
+        const groups = [
+            {
+                heroes: [
+                    { id: 'h1', disguise: pair.bSees },
+                    { id: 'h2', disguise: pair.aSees },
+                ],
+            },
+        ];
+        act(() => tools().illusion.set(groups));
         act(() => tools().illusion.clear());
 
         expect(mutate.mock.calls.map((c) => c[0])).toEqual([
-            { op: 'illusion', pairs: [pair] },
-            { op: 'illusion', pairs: [] },
+            { op: 'illusion', groups },
+            { op: 'illusion', groups: [] },
         ]);
     });
 

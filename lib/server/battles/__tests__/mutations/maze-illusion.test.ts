@@ -27,6 +27,7 @@ import type {
     ScenePatch,
 } from '@/lib/utils/battle/store/types';
 import type { IllusionPair, MazeConfig } from '@/types/battle';
+import { illusionPairs } from '@/lib/utils/battle/modes/maze/illusion';
 
 const hero2 = participant('hero2', { controlledBy: 'user-2' });
 
@@ -68,6 +69,47 @@ describe('maze illusion op', () => {
         expect(out.events[0].details).toMatchObject({
             actionDetails: { mazeEvent: 'op' },
         });
+    });
+
+    it('stores overlapping multi-hero groups and exposes their pairwise relations', () => {
+        const hero3 = at(participant('hero3', { controlledBy: 'user-3' }), {
+            x: 2,
+            y: 5,
+        });
+        const groups = [
+            {
+                heroes: [
+                    { id: 'hero', disguise: { name: 'Wolf' } },
+                    { id: 'hero2', disguise: { name: 'Elf' } },
+                    { id: 'hero3', disguise: { name: 'Orc' } },
+                ],
+            },
+            {
+                heroes: [
+                    { id: 'hero', disguise: { name: 'Elf' } },
+                    { id: 'hero2', disguise: { name: 'Wolf' } },
+                ],
+            },
+            {
+                heroes: [
+                    { id: 'hero3', disguise: { name: 'Elf' } },
+                    { id: 'hero2', disguise: { name: 'Orc' } },
+                ],
+            },
+        ];
+        const loaded = ctx({
+            participants: [
+                at(hero, { x: 0, y: 2 }),
+                at(hero2, { x: 0, y: 5 }),
+                hero3,
+            ],
+        });
+
+        const out = mazeMutation(loaded, { op: 'illusion', groups });
+        const maze = out.scene?.map?.maze;
+
+        expect(maze?.illusionSwap?.groups).toEqual(groups);
+        expect(illusionPairs(maze)).toHaveLength(5);
     });
 
     it('empty list resets the pairs without touching participants', () => {

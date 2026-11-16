@@ -28,7 +28,10 @@ import {
     scatterFreeStarts,
     seedFrom,
 } from '@/lib/utils/battle/modes/maze';
-import { mazeOpEvent } from '@/lib/utils/battle/modes/maze/illusion';
+import {
+    expandIllusionGroups,
+    mazeOpEvent,
+} from '@/lib/utils/battle/modes/maze/illusion';
 import { MAZE_TEXTS } from '@/lib/utils/battle/modes/maze/texts';
 import type {
     BattleMutationContext,
@@ -376,20 +379,31 @@ const illusion: OpHandler<'illusion'> = (ctx, { map, grid }, body) => {
         );
     };
 
-    if (body.pairs.length && ctx.scene.status !== BattleStatus.ACTIVE)
+    const pairs = body.groups
+        ? expandIllusionGroups(body.groups)
+        : (body.pairs ?? []);
+    const heroIds = body.groups
+        ? body.groups.flatMap((group) => group.heroes.map((hero) => hero.id))
+        : pairs.flatMap((pair) => [pair.a, pair.b]);
+
+    if (heroIds.length && ctx.scene.status !== BattleStatus.ACTIVE)
         rejectAction(MAZE_TEXTS.illusionNotActive);
 
-    if (!body.pairs.every((p) => ok(p.a) && ok(p.b)))
-        rejectAction(MAZE_TEXTS.illusionInvalid);
+    if (!heroIds.every(ok)) rejectAction(MAZE_TEXTS.illusionInvalid);
 
-    const text = body.pairs.length
+    const text = heroIds.length
         ? MAZE_TEXTS.ops.illusionOn
         : MAZE_TEXTS.ops.illusionOff;
 
     return finish({
         ctx,
         map,
-        maze: { ...grid.maze, illusionSwap: { pairs: body.pairs } },
+        maze: {
+            ...grid.maze,
+            illusionSwap: body.groups
+                ? { pairs: [], groups: body.groups }
+                : { pairs, groups: [] },
+        },
         text,
     });
 };

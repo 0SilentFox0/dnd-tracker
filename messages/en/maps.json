@@ -14,7 +14,8 @@
     "confirmDelete": "Delete this map?",
     "deleteError": "Failed to delete the map",
     "createError": "Failed to create the map",
-    "cloneError": "Failed to duplicate the map"
+    "cloneError": "Failed to duplicate the map",
+    "catalog": "Browse map catalog"
   },
   "create": {
     "title": "New map",
@@ -82,5 +83,21 @@
       "saving": "Saving...",
       "saveFailed": "Failed to save tiles"
     }
+  },
+  "catalog": {
+    "title": "Map catalog",
+    "description": "Choose a community map to add a campaign-owned copy.",
+    "search": "Search by map or category",
+    "loading": "Loading maps…",
+    "loadFailed": "Could not load the map catalog.",
+    "retry": "Retry",
+    "noResults": "No maps match your search.",
+    "loadingPreview": "Loading preview…",
+    "previewFailed": "Could not load or validate this map preview.",
+    "attribution": "{attribution} · {license}",
+    "source": "View source and license",
+    "add": "Add map to campaign",
+    "adding": "Adding map…",
+    "importFailed": "Could not import this map."
   }
 }

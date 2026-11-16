@@ -78,7 +78,7 @@ export const SPELL_FX_BY_NAME: Record<string, SpellFx> = {
     'Прокляття Потойбіччя': { archetype: 'netherhands', element: 'necrotic' },
     'Слово лікування': { archetype: 'healword', element: 'nature' },
     'Хвиля зцілення': { archetype: 'healwave', element: 'nature' },
-    'Відродження лісу': { archetype: 'rebirth', element: 'nature' },
+    'Підняття мертвих': { archetype: 'rebirth', element: 'nature' },
     'Дух лісу': { archetype: 'forestspirit', element: 'nature', aura: 'stag' },
     'Колючі лози': {
         archetype: 'thornvines',

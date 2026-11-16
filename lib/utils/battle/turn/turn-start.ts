@@ -509,8 +509,17 @@ export function processStartOfTurn(
         abilityMessages.push(...r.messages);
     }
 
+    const finalParticipant =
+        findParticipant(participants, id) ?? updatedParticipant;
+
+    const unableToUseAnyAttackOrSpell =
+        isActive(finalParticipant) &&
+        hasEffectMarker(finalParticipant, 'disable_melee_attacks') &&
+        hasEffectMarker(finalParticipant, 'disable_ranged_attacks') &&
+        hasEffectMarker(finalParticipant, 'disable_spell_casting');
+
     return {
-        participant: findParticipant(participants, id) ?? updatedParticipant,
+        participant: finalParticipant,
         participants,
         damageMessages,
         expiredEffects,
@@ -518,7 +527,9 @@ export function processStartOfTurn(
         rechargeMessages,
         statusChanged,
         ...(damage.hazard && { hazard: damage.hazard }),
-        ...(damage.systemSkip && { skipTurn: true as const }),
+        ...((damage.systemSkip || unableToUseAnyAttackOrSpell) && {
+            skipTurn: true as const,
+        }),
         ...(damage.systemPending && { pending: true as const }),
     };
 }

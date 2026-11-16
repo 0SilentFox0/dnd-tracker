@@ -5,10 +5,13 @@ import { useTranslations } from 'next-intl';
 
 import { MAP_LIMITS } from '@/lib/constants/map-limits';
 import { useBattleMaps } from '@/lib/hooks/battle-maps';
+import { useImportCatalogMap } from '@/lib/hooks/battle-maps/useImportCatalogMap';
 import { useMapLibraryEnabled } from '@/lib/hooks/campaigns';
 import { useConfirm } from '@/lib/hooks/common';
 import { battleMapMaxSide } from '@/lib/utils/battle/map-storage/limits';
+import type { UvttImport } from '@/lib/utils/battle/uvtt/parse';
 import type { BattleMapRef } from '@/types/battle';
+import type { MapCatalogEntry } from '@/types/map-catalog';
 
 interface LibraryMapOptions {
     linked?: BattleMapRef | null;
@@ -29,7 +32,11 @@ export function useBattleLibraryMap(
 
     const query = useBattleMaps(campaignId, enabled || !!linked);
 
+    const catalogImport = useImportCatalogMap(campaignId);
+
     const [choice, setChoice] = useState<string | null | undefined>(undefined);
+
+    const [catalogOpen, setCatalogOpen] = useState(false);
 
     const maps = query.data ?? [];
 
@@ -69,10 +76,17 @@ export function useBattleLibraryMap(
         [isEdit, hadMap, selectedId, canUnlink, confirm, t]
     );
 
+    const importCatalogEntry = useCallback(
+        async (entry: MapCatalogEntry, parsed?: UvttImport) => {
+            const created = await catalogImport.importEntry(entry, parsed);
+
+            await select(created.id);
+        },
+        [catalogImport, select]
+    );
+
     return {
-        visible: isEdit
-            ? linkedId !== null || (!locked && enabled && maps.length > 0)
-            : enabled && maps.length > 0,
+        visible: isEdit ? linkedId !== null || (!locked && enabled) : enabled,
         maps,
         maxSide: battleMapMaxSide({ mapLibraryEnabled: enabled }),
         isLinked: linkedId !== null && !changed,
@@ -82,6 +96,11 @@ export function useBattleLibraryMap(
         isChanged: changed,
         selectedId,
         select,
+        catalogOpen,
+        setCatalogOpen,
+        importCatalogEntry,
+        isImportingCatalog: catalogImport.isPending,
+        canImportCatalog: enabled && !locked,
     };
 }
 

@@ -25,7 +25,8 @@
       "label": "Healing per round (HOT)"
     },
     "berserk": {
-      "label": "Berserk"
+      "label": "Berserk",
+      "fields": { "affectsHeroes": "Can affect heroes" }
     },
     "charm": {
       "label": "Switch to the caster's side",

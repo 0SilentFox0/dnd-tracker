@@ -157,7 +157,7 @@ export function MazeToolbar({
                     onOpenChange={close}
                     campaignId={battle.campaignId}
                     heroes={heroes}
-                    pairs={illusion.pairs}
+                    groups={illusion.groups}
                     onApply={illusion.set}
                     onClear={illusion.clear}
                 />

@@ -133,7 +133,6 @@ function diceWord(n: number): string {
 const power = (n: number, what: string) =>
     `${n} ${diceWord(n)} ${what} (к6/к8/к10 залежно від майстерності школи; +1 кубик за кожні 3 рівні героя)`;
 
-const NOT_HEROES = 'Не діє на героїв.';
 
 export const SPELLS: LibrarySpell[] = [
     // ── Світло ─────────────────────────────────────────────────────────────
@@ -410,13 +409,13 @@ export const SPELLS: LibrarySpell[] = [
         name: 'Чума',
         school: DARK,
         level: 2,
-        description: `Отруює ворога: кидок — ${power(1, 'отрутою')} — визначає шкоду, яку ворог отримує на початку кожного свого ходу протягом 2 раундів.`,
+        description: `Отруює одного ворога: на початку його ходу протягом 2 раундів він отримує половину результату кидка ${power(1, 'отрутою')}.`,
         appearanceDescription:
             'З долоні заклинателя зривається хмарка зеленкуватих мух і впивається ворогові в обличчя. Шкіра вкривається чорними пухирями, а від подиху тхне гниллю склепу.',
         definition: def(1, ENEMY_NEAR, [
             {
                 kind: 'dot',
-                damagePerRound: { spellRoll: 100 },
+                damagePerRound: { spellRoll: 50 },
                 damageType: 'poison',
                 duration: rounds(2),
             },
@@ -493,13 +492,21 @@ export const SPELLS: LibrarySpell[] = [
         name: 'Шал',
         school: DARK,
         level: 4,
-        description: `Ворог робить рятівний кидок Мудрості; при провалі на 1 раунд впадає в шал: на свій хід автоматично атакує випадкову іншу істоту (зокрема своїх) з +50 % шкоди. ${NOT_HEROES}`,
+        description:
+            'Ворог, зокрема герой, робить рятівний кидок Мудрості; при провалі на 1 раунд впадає в шал: на свій хід автоматично атакує випадкову іншу істоту (зокрема своїх) з +50 % шкоди.',
         appearanceDescription:
             "Очі ворога наливаються кров'ю, а з горла виривається звіриний рев. Він більше не бачить облич — лише цілі, і кидається на першого, хто трапиться, хай то навіть його брат по зброї.",
         definition: def(
             0,
             ENEMY_NEAR,
-            [{ kind: 'berserk', damageBonusPercent: 50, duration: rounds(1) }],
+            [
+                {
+                    kind: 'berserk',
+                    damageBonusPercent: 50,
+                    duration: rounds(1),
+                    affectsHeroes: true,
+                },
+            ],
             { resolution: save('wisdom', 'none') }
         ),
         raceModifiers: [],
@@ -929,7 +936,7 @@ export const SPELLS: LibrarySpell[] = [
     {
         key: 'forest-rebirth',
         iconKey: 'forest-rebirth',
-        name: 'Відродження лісу',
+        name: 'Підняття мертвих',
         school: NATURE,
         level: 5,
         description:

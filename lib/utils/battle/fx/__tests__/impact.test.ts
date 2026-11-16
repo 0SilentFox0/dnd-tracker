@@ -343,7 +343,7 @@ describe('impactFor', () => {
             kind: 'heal',
             delayMs: ARCHETYPE_FX.healwave.impactMs,
         });
-        expect(cast('Відродження лісу', healing)).toMatchObject({
+        expect(cast('Підняття мертвих', healing)).toMatchObject({
             kind: 'heal',
             delayMs: ARCHETYPE_FX.rebirth.impactMs,
         });

@@ -449,7 +449,7 @@ describe('mapAction', () => {
             })
         ).toMatchObject({ archetype: 'healwave', element: 'nature' });
         expect(
-            spell('Відродження лісу', {
+            spell('Підняття мертвих', {
                 spellTargeting: 'allAlliesDead',
                 spellEffectKinds: ['heal'],
                 totalHealing: 9,

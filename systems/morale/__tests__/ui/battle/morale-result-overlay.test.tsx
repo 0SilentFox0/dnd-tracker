@@ -1,5 +1,11 @@
 // @vitest-environment happy-dom
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import {
+    act,
+    cleanup,
+    fireEvent,
+    render,
+    screen,
+} from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('@/components/hud/fonts', () => ({ hudFontClassName: '' }));
@@ -90,6 +96,24 @@ describe('MoraleResultOverlay', () => {
         act(() => vi.advanceTimersByTime(4_100));
         expect(showResult).toHaveBeenCalledWith(null);
 
+        vi.useRealTimers();
+    });
+
+    it('оновлення сцени не перезапускає таймер закриття паніки', () => {
+        vi.useFakeTimers();
+
+        const scene = fakeScene({ result: skip });
+
+        const view = render(<MoraleResultOverlay />, {
+            wrapper: scene.wrapper,
+        });
+
+        act(() => vi.advanceTimersByTime(2_000));
+        scene.value.result.fx = { ...skip };
+        view.rerender(<MoraleResultOverlay />);
+        act(() => vi.advanceTimersByTime(2_100));
+
+        expect(scene.showResult).toHaveBeenCalledWith(null);
         vi.useRealTimers();
     });
 });

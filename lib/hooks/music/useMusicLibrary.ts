@@ -44,9 +44,12 @@ const DELETE_NOTE_KEYS = {
     youtube: 'music.library.deleteNote.youtube',
 } as const;
 
+const NO_TRACKS: CampaignTrack[] = [];
+
 export function useMusicLibrary(
     campaignId: string,
-    initial: CampaignTrack[]
+    initial?: CampaignTrack[],
+    enabled = true
 ): MusicLibrary {
     const queryClient = useQueryClient();
 
@@ -56,9 +59,13 @@ export function useMusicLibrary(
 
     const t = useTranslator();
 
-    const { data: tracks = initial, isLoading } = useTracks(campaignId, {
-        initial,
-    });
+    const { data: tracks = initial ?? NO_TRACKS, isLoading } = useTracks(
+        campaignId,
+        {
+            ...(initial && { initial }),
+            enabled,
+        }
+    );
 
     const onError = useCallback(
         (e: unknown) =>

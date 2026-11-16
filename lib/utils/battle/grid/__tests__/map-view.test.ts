@@ -2,7 +2,11 @@ import { describe, expect, it } from 'vitest';
 
 import { moveMarks, targetMarks } from '../map-view';
 
-import { AttackType, ParticipantSide } from '@/lib/constants/battle';
+import {
+    AttackType,
+    CombatStatus,
+    ParticipantSide,
+} from '@/lib/constants/battle';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 import type {
@@ -94,5 +98,27 @@ describe('підсвітка карти', () => {
                 DEFAULT_RULES
             ).get('5:0')
         ).toBe('target');
+    });
+
+    it('можна позначити ціллю героя, що вмирає і не може дати відсіч', () => {
+        const hero = at('h', { x: 0, y: 0 }, ParticipantSide.ALLY);
+
+        const dying = at('e', { x: 1, y: 0 }, ParticipantSide.ENEMY);
+
+        dying.combatStats = {
+            ...dying.combatStats,
+            status: CombatStatus.UNCONSCIOUS,
+        };
+        dying.battleData = { ...dying.battleData, dying: true };
+
+        const marks = targetMarks(
+            map,
+            [hero, dying],
+            hero,
+            [sword],
+            DEFAULT_RULES
+        );
+
+        expect(marks.get('1:0')).toBe('target');
     });
 });

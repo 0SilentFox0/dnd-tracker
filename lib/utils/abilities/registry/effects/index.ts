@@ -208,6 +208,7 @@ const BASE_EFFECT_REGISTRY: {
         static: false,
         fields: [
             { name: 'damageBonusPercent', input: 'number' },
+            { name: 'affectsHeroes', input: 'toggle', optional: true },
             TARGET_FIELD,
             REQUIRED_DURATION,
         ],

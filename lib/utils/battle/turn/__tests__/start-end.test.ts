@@ -88,6 +88,32 @@ describe('processStartOfTurn', () => {
             hasUsedReaction: false,
         });
     });
+
+    it('Сліпота автоматично пропускає хід, коли заборонені атаки й заклинання', () => {
+        const base = createMockParticipant();
+
+        const p = createMockParticipant({
+            battleData: {
+                ...base.battleData,
+                activeEffects: [
+                    debuff('disable_melee_attacks', 2),
+                    debuff('disable_ranged_attacks', 2),
+                    debuff('disable_spell_casting', 2),
+                ],
+            },
+        });
+
+        const out = processStartOfTurn(
+            p,
+            2,
+            [p],
+            undefined,
+            undefined,
+            DEFAULT_RULES
+        );
+
+        expect(out.skipTurn).toBe(true);
+    });
 });
 
 describe('рух на початку ходу', () => {

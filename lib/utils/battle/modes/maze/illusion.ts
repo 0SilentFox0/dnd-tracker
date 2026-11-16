@@ -11,14 +11,51 @@ import type {
     BattleMapConfig,
     BattleParticipant,
     IllusionDisguise,
+    IllusionGroup,
     IllusionPair,
     MazeConfig,
 } from '@/types/battle';
 import type { LogLine } from '@/types/text';
 
+export const illusionGroups = (
+    maze: MazeConfig | null | undefined
+): IllusionGroup[] => {
+    if (maze?.illusionSwap?.groups) return maze.illusionSwap.groups;
+
+    return (maze?.illusionSwap?.pairs ?? []).map((pair) => ({
+        heroes: [
+            { id: pair.a, disguise: pair.bSees },
+            { id: pair.b, disguise: pair.aSees },
+        ],
+    }));
+};
+
+export const expandIllusionGroups = (groups: IllusionGroup[]): IllusionPair[] =>
+    groups.flatMap(({ heroes }) => {
+        const pairs: IllusionPair[] = [];
+
+        for (let i = 0; i < heroes.length; i++) {
+            for (let j = i + 1; j < heroes.length; j++) {
+                const a = heroes[i];
+                const b = heroes[j];
+                pairs.push({
+                    a: a.id,
+                    b: b.id,
+                    aSees: b.disguise,
+                    bSees: a.disguise,
+                });
+            }
+        }
+
+        return pairs;
+    });
+
 export const illusionPairs = (
     maze: MazeConfig | null | undefined
-): IllusionPair[] => maze?.illusionSwap?.pairs ?? [];
+): IllusionPair[] =>
+    maze?.illusionSwap?.groups
+        ? expandIllusionGroups(maze.illusionSwap.groups)
+        : (maze?.illusionSwap?.pairs ?? []);
 
 export const areIllusionFoes = (
     pairs: IllusionPair[],
@@ -72,6 +109,7 @@ export function pruneIllusion<T extends PruneOutcome>(
     result: T
 ): T {
     const pairs = illusionPairs(map?.maze);
+    const groups = map?.maze?.illusionSwap?.groups;
 
     if (!map?.maze || pairs.length === 0) return result;
 
@@ -82,13 +120,33 @@ export function pruneIllusion<T extends PruneOutcome>(
         result.participants.filter(onMazeField).map((p) => p.basicInfo.id)
     );
 
-    const kept = active
-        ? pairs.filter((p) => live.has(p.a) && live.has(p.b))
-        : [];
+    let illusionSwap: NonNullable<MazeConfig['illusionSwap']>;
+    let changed: boolean;
+    if (groups) {
+        const keptGroups = active
+            ? groups
+                  .map((group) => ({
+                      heroes: group.heroes.filter((hero) => live.has(hero.id)),
+                  }))
+                  .filter((group) => group.heroes.length >= 2)
+            : [];
+        changed =
+            keptGroups.length !== groups.length ||
+            keptGroups.some(
+                (group, i) => group.heroes.length !== groups[i]?.heroes.length
+            );
+        illusionSwap = { groups: keptGroups };
+    } else {
+        const kept = active
+            ? pairs.filter((p) => live.has(p.a) && live.has(p.b))
+            : [];
+        changed = kept.length !== pairs.length;
+        illusionSwap = { pairs: kept };
+    }
 
-    if (kept.length === pairs.length) return result;
+    if (!changed) return result;
 
-    const next: MazeConfig = { ...map.maze, illusionSwap: { pairs: kept } };
+    const next: MazeConfig = { ...map.maze, illusionSwap };
 
     return {
         ...result,

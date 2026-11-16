@@ -178,6 +178,13 @@
       "title": "Generate a maze",
       "description": "New walls, teleports and fog; the heroes will stand at the edge.",
       "submit": "Generate",
+      "preset": "Template",
+      "choosePreset": "Choose a template",
+      "presets": {
+        "short": "Quick and clear",
+        "standard": "Standard",
+        "perilous": "Perilous"
+      },
       "level": "Level",
       "exit": "Exit",
       "exitRandom": "Random",
@@ -208,8 +215,7 @@
       "fogPatches": "Fog patches"
     },
     "illusion": {
-      "aSees": "How A sees B",
-      "bSees": "How B sees A",
+      "heroAppearsAs": "Mask {name} · #{group}",
       "apply": "Apply",
       "restore": "Restore allies"
     }

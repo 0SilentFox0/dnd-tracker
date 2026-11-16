@@ -312,7 +312,7 @@ describe('Темрява — бібліотечні заклинання', () =>
 
         const { seen } = turnsOf(ps, 'orc', 3);
 
-        expect(seen.map((o) => o.combatStats.currentHp)).toEqual([95, 90, 90]);
+        expect(seen.map((o) => o.combatStats.currentHp)).toEqual([98, 96, 96]);
     });
 
     it('Чума: опір отруті 50 % зменшує щораундову шкоду', () => {
@@ -356,7 +356,7 @@ describe('Темрява — бібліотечні заклинання', () =>
 
         const { seen } = turnsOf(ps, 'orc', 1);
 
-        expect(seen[0].combatStats.currentHp).toBe(97);
+        expect(seen[0].combatStats.currentHp).toBe(99);
     });
 
     it('Розсіяність: 2 ходи цілі з шансом 50 % втрачає дію', () => {
@@ -538,7 +538,7 @@ describe('Темрява — бібліотечні заклинання', () =>
         });
     });
 
-    it("Шал: юніт б'є випадкову іншу істоту з +50 %; на героя не діє", () => {
+    it("Шал діє на героїв і юнітів", () => {
         const ps = cast('berserk', ['orc'], world()).allParticipantsUpdated;
 
         expect(find(ps, 'orc').battleData.activeEffects[0].effects[0]).toEqual({
@@ -556,8 +556,8 @@ describe('Темрява — бібліотечні заклинання', () =>
                 cast('berserk', ['h'], [hero(), enemyHero])
                     .allParticipantsUpdated,
                 'h'
-            ).battleData.activeEffects
-        ).toHaveLength(0);
+            ).battleData.activeEffects[0].effects[0]
+        ).toEqual({ type: 'berserk', value: 50 });
 
         const loop = runAdvanceTurnLoop({
             rules: DEFAULT_RULES,

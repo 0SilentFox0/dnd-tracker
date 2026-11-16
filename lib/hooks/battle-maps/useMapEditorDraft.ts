@@ -5,12 +5,16 @@ import { useTranslations } from 'next-intl';
 
 import { useBattleMapMutations } from './useBattleMaps';
 
-import { getBattleMap } from '@/lib/api/battle-maps';
+import {
+    discardBattleMapBackground,
+    uploadBattleMapBackground,
+} from '@/lib/api/battle-map-background';
 import { ApiError } from '@/lib/api/client';
 import { MAP_LIMITS } from '@/lib/constants/map-limits';
 import { useBattleMapEditor } from '@/lib/hooks/battles';
 import { useNotify } from '@/lib/hooks/common';
 import type { BattleMapInput } from '@/lib/schemas/battle-maps';
+import { normalizeUvttBackground } from '@/lib/utils/battle/uvtt/normalize-background';
 import { errorMessage } from '@/lib/utils/common/error-message';
 import type { BattleMapFull } from '@/types/battle-map';
 
@@ -51,40 +55,41 @@ export function useMapEditorDraft(campaignId: string, source: BattleMapFull) {
 
     const [version, setVersion] = useState(source.version);
 
+    const [isUploading, setIsUploading] = useState(false);
+
     const isDirty = snapshot !== saved;
 
-    // swap the uploaded data-URL for the bucket URL so the next save does not re-upload it
-    const adoptStoredBackground = async (sent: typeof editor.state.map) => {
-        try {
-            const { map } = await getBattleMap(campaignId, source.id);
-
-            if (!map.background || backgroundRef.current !== sent.background)
-                return;
-
-            editor.actions.replaceBackground(map.background);
-            setSaved(
-                JSON.stringify([
-                    name.trim(),
-                    { ...sent, background: map.background },
-                ])
-            );
-        } catch {
-            // the data-URL stays; the next save uploads it again
-        }
-    };
-
-    const save = () => {
+    const save = async () => {
         const { value } = editor.state;
 
-        if (!value || !name.trim()) return;
+        if (!value || !name.trim() || update.isPending || isUploading) return;
 
         const { walls = [], bars = [], ...rest } = value;
 
         // runtime-only zones never exist on a library map
-        const header = rest as BattleMapInput['map'];
+        let header = rest as BattleMapInput['map'];
 
-        update.mutate(
-            {
+        let uploadedBackground: string | undefined;
+
+        try {
+            if (header.background?.startsWith('data:')) {
+                setIsUploading(true);
+
+                const normalized = await normalizeUvttBackground(
+                    header.background
+                );
+
+                const storedUrl = await uploadBattleMapBackground(
+                    campaignId,
+                    normalized
+                );
+
+                uploadedBackground = storedUrl;
+
+                header = { ...header, background: storedUrl };
+            }
+
+            const brief = await update.mutateAsync({
                 mapId: source.id,
                 data: {
                     name: name.trim(),
@@ -93,24 +98,38 @@ export function useMapEditorDraft(campaignId: string, source: BattleMapFull) {
                     bars,
                     expectedVersion: version,
                 },
-            },
-            {
-                onSuccess: (brief) => {
-                    setVersion(brief.version);
-                    setSaved(snapshot);
-                    setJustSaved(true);
+            });
 
-                    if (header.background?.startsWith('data:'))
-                        void adoptStoredBackground(value);
-                },
-                onError: (e) =>
-                    void notify(
-                        e instanceof ApiError && e.status === 409
-                            ? t('conflict')
-                            : errorMessage(e, t('saveFailed'))
-                    ),
+            if (
+                uploadedBackground &&
+                backgroundRef.current === value.background
+            )
+                editor.actions.replaceBackground(uploadedBackground);
+
+            setVersion(brief.version);
+            setSaved(
+                JSON.stringify([
+                    name.trim(),
+                    { ...editor.state.map, background: header.background },
+                ])
+            );
+            setJustSaved(true);
+        } catch (e) {
+            if (uploadedBackground) {
+                await discardBattleMapBackground(
+                    campaignId,
+                    uploadedBackground
+                ).catch(() => undefined);
             }
-        );
+
+            void notify(
+                e instanceof ApiError && e.status === 409
+                    ? t('conflict')
+                    : errorMessage(e, t('saveFailed'))
+            );
+        } finally {
+            setIsUploading(false);
+        }
     };
 
     return {
@@ -124,10 +143,11 @@ export function useMapEditorDraft(campaignId: string, source: BattleMapFull) {
         },
         isDirty,
         justSaved: justSaved && !isDirty,
-        isSaving: update.isPending,
+        isSaving: update.isPending || isUploading,
         version,
         acceptVersion: setVersion,
-        canSave: isDirty && name.trim() !== '' && !update.isPending,
+        canSave:
+            isDirty && name.trim() !== '' && !update.isPending && !isUploading,
         save,
     };
 }

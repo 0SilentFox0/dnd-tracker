@@ -16,6 +16,7 @@
     "pending": "Завантаження…"
   },
   "youtube": {
+    "add": "Додати YouTube",
     "title": "Додати з YouTube",
     "description": "Посилання youtu.be, watch?v= або shorts. Назву можна не вводити — візьмемо з YouTube.",
     "urlLabel": "Посилання YouTube",

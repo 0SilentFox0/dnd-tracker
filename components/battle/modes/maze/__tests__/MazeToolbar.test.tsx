@@ -226,7 +226,7 @@ function ToolbarWithAsHero() {
         },
         editing: null,
         asHero,
-        illusion: { pairs: [], set: vi.fn(), clear: vi.fn() },
+        illusion: { pairs: [], groups: [], set: vi.fn(), clear: vi.fn() },
     };
 
     return (

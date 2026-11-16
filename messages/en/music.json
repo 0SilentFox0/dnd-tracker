@@ -16,6 +16,7 @@
     "pending": "Uploading…"
   },
   "youtube": {
+    "add": "Add YouTube",
     "title": "Add from YouTube",
     "description": "A youtu.be, watch?v= or shorts link. The title is optional — we will take it from YouTube.",
     "urlLabel": "YouTube link",
