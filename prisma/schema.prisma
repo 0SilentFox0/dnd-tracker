@@ -43,7 +43,7 @@ model Campaign {
   allowPlayerEdit      Boolean               @default(true)
   critChoiceByDm       Boolean               @default(false)
   acquaintancesEnabled Boolean               @default(false)
-  mapLibraryEnabled    Boolean               @default(false)
+  mapLibraryEnabled    Boolean               @default(true)
   status               String                @default("active")
   createdAt            DateTime              @default(now())
   updatedAt            DateTime              @updatedAt
