@@ -89,6 +89,7 @@ export interface MapStageEditing {
 
 interface MapStageProps {
     map: BattleMapConfig;
+    showDefaultBackground?: boolean;
     participants: BattleParticipant[];
     view?: BattleMapView;
     actions?: BattleMapActions;
@@ -101,6 +102,7 @@ interface MapStageProps {
 /** Шар карти в пікселях: фон, SVG-сітка й шари, жетони з HUD і числами ударів. */
 function MapStageImpl({
     map,
+    showDefaultBackground = true,
     participants,
     view,
     actions,
@@ -253,12 +255,14 @@ function MapStageImpl({
                 height: size.height * pxPerUnit,
             }}
         >
-            <MapBackground
-                map={map}
-                cellPx={UNIT * pxPerUnit}
-                phone={phone}
-                rotated={rotated}
-            />
+            {(map.background || showDefaultBackground) && (
+                <MapBackground
+                    map={map}
+                    cellPx={UNIT * pxPerUnit}
+                    phone={phone}
+                    rotated={rotated}
+                />
+            )}
             {tiles && (
                 <TileCanvas
                     tiles={tiles}

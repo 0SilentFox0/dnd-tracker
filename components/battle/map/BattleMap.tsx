@@ -54,6 +54,8 @@ export interface BattleMapProps {
     tiles?: TileRenderState;
     className?: string;
     editing?: BattleMapEditing;
+    /** Hide the fallback image when a map has no selected background. */
+    showDefaultBackground?: boolean;
     /** телефон: карта обрізана до ігрових клітинок, на всю ширину й вертикально, якщо вона альбомна */
     phone?: boolean;
 }
@@ -95,6 +97,7 @@ export function BattleMap({
     tiles,
     className,
     editing = NO_EDITING,
+    showDefaultBackground = true,
     phone = false,
 }: BattleMapProps) {
     const { clickableBlocked, showBlocked, strokeTool } = editing;
@@ -383,6 +386,7 @@ export function BattleMap({
                     >
                         <MapStage
                             map={map}
+                            showDefaultBackground={showDefaultBackground}
                             participants={participants}
                             view={view}
                             actions={actions}

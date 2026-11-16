@@ -469,6 +469,7 @@ function EditorContent({
                 >
                     <BattleMap
                         map={previewMap}
+                        showDefaultBackground={false}
                         participants={[]}
                         actions={{
                             onStroke: paintingTiles
