@@ -38,6 +38,36 @@ function finite(value: unknown): value is number {
     return typeof value === 'number' && Number.isFinite(value);
 }
 
+function point(value: unknown): [number, number] | null {
+    if (Array.isArray(value) && finite(value[0]) && finite(value[1]))
+        return [value[0], value[1]];
+
+    const coordinates = record(value);
+
+    return coordinates && finite(coordinates.x) && finite(coordinates.y)
+        ? [coordinates.x, coordinates.y]
+        : null;
+}
+
+function points(value: unknown): [number, number][] | null {
+    if (!Array.isArray(value)) return null;
+
+    if (value.length >= 4 && value.length % 2 === 0 && value.every(finite)) {
+        const result: [number, number][] = [];
+
+        for (let i = 0; i < value.length; i += 2)
+            result.push([value[i], value[i + 1]]);
+
+        return result;
+    }
+
+    const result = value.map(point);
+
+    return result.length >= 2 && result.every((p) => p !== null)
+        ? (result as [number, number][])
+        : null;
+}
+
 function base64Image(value: unknown): {
     src: string;
     bytes: number;
@@ -143,7 +173,8 @@ function edgeAt(
     a: [number, number],
     b: [number, number],
     cols: number,
-    rows: number
+    rows: number,
+    snapSingleEdge = false
 ): string[] {
     if (
         [...a, ...b].some(
@@ -178,9 +209,14 @@ function edgeAt(
                 'A wall or portal lies outside the supported grid edges.'
             );
 
-        const start = Math.max(0, Math.floor(Math.min(a[1], b[1])));
+        let start = Math.max(0, Math.floor(Math.min(a[1], b[1])));
 
-        const end = Math.min(rows, Math.ceil(Math.max(a[1], b[1])));
+        let end = Math.min(rows, Math.ceil(Math.max(a[1], b[1])));
+
+        if (snapSingleEdge && end - start > 1 && Math.abs(b[1] - a[1]) <= 1 + GEOMETRY_TOLERANCE) {
+            start = Math.floor((a[1] + b[1]) / 2);
+            end = start + 1;
+        }
 
         for (let y = start; y < end; y++) edges.push(`${xLine - 1}:${y}:e`);
 
@@ -203,9 +239,14 @@ function edgeAt(
                 'A wall or portal lies outside the supported grid edges.'
             );
 
-        const start = Math.max(0, Math.floor(Math.min(a[0], b[0])));
+        let start = Math.max(0, Math.floor(Math.min(a[0], b[0])));
 
-        const end = Math.min(cols, Math.ceil(Math.max(a[0], b[0])));
+        let end = Math.min(cols, Math.ceil(Math.max(a[0], b[0])));
+
+        if (snapSingleEdge && end - start > 1 && Math.abs(b[0] - a[0]) <= 1 + GEOMETRY_TOLERANCE) {
+            start = Math.floor((a[0] + b[0]) / 2);
+            end = start + 1;
+        }
 
         for (let x = start; x < end; x++) edges.push(`${x}:${yLine - 1}:s`);
 
@@ -230,25 +271,28 @@ function segments(
     const result = new Set<string>();
 
     for (const line of value) {
-        if (
-            !Array.isArray(line) ||
-            line.length < 4 ||
-            line.length % 2 !== 0 ||
-            !line.every(finite)
-        )
+        const linePoints = points(line);
+
+        const pixelCoordinates =
+            Array.isArray(line) && line.every(finite);
+
+        if (!linePoints)
             throw new UvttImportError(
-                'A line of sight must contain pairs of finite coordinates.'
+                'A line of sight must contain at least two valid points.'
             );
 
-        const points: [number, number][] = [];
+        const gridPoints = linePoints.map(([x, y]) => [
+            (x - origin[0]) / (pixelCoordinates ? ppi : 1),
+            (y - origin[1]) / (pixelCoordinates ? ppi : 1),
+        ]) as [number, number][];
 
-        for (let i = 0; i < line.length; i += 2)
-            points.push([
-                (line[i] - origin[0]) / ppi,
-                (line[i + 1] - origin[1]) / ppi,
-            ]);
-        for (let i = 1; i < points.length; i++)
-            for (const edge of edgeAt(points[i - 1], points[i], cols, rows))
+        for (let i = 1; i < gridPoints.length; i++)
+            for (const edge of edgeAt(
+                gridPoints[i - 1],
+                gridPoints[i],
+                cols,
+                rows
+            ))
                 result.add(edge);
 
         if (result.size > MAP_LIMITS.libraryMaxEdges)
@@ -280,13 +324,7 @@ export function parseUvtt(text: string): UvttImport {
 
     const originRaw = resolution?.map_origin;
 
-    const origin: [number, number] =
-        Array.isArray(originRaw) &&
-        originRaw.length >= 2 &&
-        finite(originRaw[0]) &&
-        finite(originRaw[1])
-            ? [originRaw[0], originRaw[1]]
-            : [0, 0];
+    const origin = point(originRaw) ?? [0, 0];
 
     const ppi = resolution?.pixels_per_grid;
 
@@ -312,11 +350,11 @@ export function parseUvtt(text: string): UvttImport {
         Math.abs(rows - size.y) > 0.001 ||
         cols < MAP_LIMITS.minSide ||
         rows < MAP_LIMITS.minSide ||
-        cols > MAP_LIMITS.photoMaxSide ||
-        rows > MAP_LIMITS.photoMaxSide
+        cols > MAP_LIMITS.tileMaxSide ||
+        rows > MAP_LIMITS.tileMaxSide
     )
         throw new UvttImportError(
-            `Map dimensions must be between ${MAP_LIMITS.minSide} and ${MAP_LIMITS.photoMaxSide} cells.`
+            `Map dimensions must be between ${MAP_LIMITS.minSide} and ${MAP_LIMITS.tileMaxSide} cells.`
         );
 
     const image = base64Image(root.image);
@@ -352,20 +390,28 @@ export function parseUvtt(text: string): UvttImport {
     for (const portal of (root.portals ?? []) as unknown[]) {
         const data = record(portal);
 
-        const bounds = data?.bounds;
+        const boundsRaw = data?.bounds;
 
-        if (
-            !Array.isArray(bounds) ||
-            bounds.length !== 4 ||
-            !bounds.every(finite)
-        )
+        const bounds = points(boundsRaw);
+
+        const pixelCoordinates =
+            Array.isArray(boundsRaw) && boundsRaw.every(finite);
+
+        if (!bounds || bounds.length !== 2)
             throw new UvttImportError('A portal is missing valid bounds.');
 
         const edges = edgeAt(
-            [(bounds[0] - origin[0]) / ppi, (bounds[1] - origin[1]) / ppi],
-            [(bounds[2] - origin[0]) / ppi, (bounds[3] - origin[1]) / ppi],
+            [
+                (bounds[0][0] - origin[0]) / (pixelCoordinates ? ppi : 1),
+                (bounds[0][1] - origin[1]) / (pixelCoordinates ? ppi : 1),
+            ],
+            [
+                (bounds[1][0] - origin[0]) / (pixelCoordinates ? ppi : 1),
+                (bounds[1][1] - origin[1]) / (pixelCoordinates ? ppi : 1),
+            ],
             cols,
-            rows
+            rows,
+            true
         );
 
         if (edges.length !== 1)

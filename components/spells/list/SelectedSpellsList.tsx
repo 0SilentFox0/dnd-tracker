@@ -37,7 +37,7 @@ export function SelectedSpellsList({
     return (
         <div className="space-y-3">
             <p className="text-sm font-medium">{t('title')}</p>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-3">
                 {selectedSpells.map((spell) => {
                     return (
                         <HudCard key={spell.id} className="relative min-w-0 overflow-hidden">

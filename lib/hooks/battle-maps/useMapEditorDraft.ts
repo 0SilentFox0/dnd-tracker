@@ -33,7 +33,7 @@ export function useMapEditorDraft(campaignId: string, source: BattleMapFull) {
         },
         {
             maxSide: {
-                photo: MAP_LIMITS.photoMaxSide,
+                photo: MAP_LIMITS.tileMaxSide,
                 tile: MAP_LIMITS.tileMaxSide,
             },
         }

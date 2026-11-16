@@ -64,15 +64,24 @@ export function FieldRenderer({
 
     const props = { id: path, value: value as never, onChange, meta };
 
+    if (owner === 'flags.spellTargeting' && meta.name === 'school') {
+        return (
+            <div className="col-span-3 min-w-0 space-y-1">
+                <Label htmlFor={path} className="text-xs text-muted-foreground">
+                    {meta.label}
+                </Label>
+                <SpellSchoolField {...props} />
+                <FieldErrors errors={errors} testId={`field-errors-${path}`} />
+            </div>
+        );
+    }
+
     const input = (() => {
         switch (meta.input) {
             case 'number':
                 return <NumberField {...props} />;
             case 'text':
             case 'strings':
-                if (owner === 'spellTargeting' && meta.name === 'school') {
-                    return <SpellSchoolField {...props} />;
-                }
                 return <TextField {...props} />;
             case 'select':
                 return <SelectInput {...props} />;

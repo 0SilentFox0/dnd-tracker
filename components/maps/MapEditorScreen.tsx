@@ -165,6 +165,8 @@ function EditorContent({
 
     const importInput = useRef<HTMLInputElement>(null);
 
+    const asideRef = useRef<HTMLElement>(null);
+
     const { undo, redo } = tileEditor;
 
     useEffect(() => {
@@ -247,6 +249,7 @@ function EditorContent({
         if (panel !== nextPanel) editor.actions.setTool(null);
 
         setPanel(nextPanel);
+        asideRef.current?.scrollTo({ top: 0 });
     };
 
     const importUvtt = async (file: File | undefined) => {
@@ -278,8 +281,8 @@ function EditorContent({
     };
 
     return (
-        <div className="flex h-[calc(100dvh-3.5rem)] flex-col gap-2 p-2">
-            <div className="flex flex-wrap items-end gap-3">
+        <div className="flex h-[calc(100dvh-3.5rem)] min-h-0 flex-col gap-2 overflow-hidden p-2">
+            <div className="flex shrink-0 flex-wrap items-end gap-3">
                 <BackLink campaignId={campaignId} />
                 <div className="min-w-[12rem] flex-1 space-y-1">
                     <Label htmlFor="map-name" className="text-xs">
@@ -329,16 +332,66 @@ function EditorContent({
                 >
                     {draft.isSaving ? t('saving') : t('save')}
                 </Button>
+                {paintingTiles && (
+                    <>
+                        <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            disabled={!tileEditor.canUndo}
+                            onClick={tileEditor.undo}
+                        >
+                            {tileTranslations('undo')}
+                        </Button>
+                        <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            disabled={!tileEditor.canRedo}
+                            onClick={tileEditor.redo}
+                        >
+                            {tileTranslations('redo')}
+                        </Button>
+                        <Button
+                            type="button"
+                            size="sm"
+                            disabled={!tileEditor.isDirty || tileSave.isPending}
+                            onClick={() =>
+                                tileSave.mutate(
+                                    {
+                                        expectedVersion: tileEditor.version,
+                                        patches: tileEditor.dirtyPatches,
+                                    },
+                                    {
+                                        onSuccess: ({ version }) => {
+                                            tileEditor.acceptSaved();
+                                            draft.acceptVersion(version);
+                                        },
+                                    }
+                                )
+                            }
+                        >
+                            {tileSave.isPending
+                                ? tileTranslations('saving')
+                                : tileTranslations('save')}
+                        </Button>
+                    </>
+                )}
             </div>
+            {tileSave.isError && paintingTiles && (
+                <p role="alert" className="shrink-0 text-sm text-destructive">
+                    {tileTranslations('saveFailed')}
+                </p>
+            )}
             <p
                 aria-live="polite"
                 role="status"
-                className="min-h-5 text-sm text-hud-gold-bright"
+                className="min-h-5 shrink-0 text-sm text-hud-gold-bright"
             >
                 {notice ? text(notice) : draft.justSaved ? t('saved') : ''}
             </p>
             <div className="grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_minmax(14rem,42%)] gap-3 overflow-hidden lg:grid-cols-[minmax(0,1fr)_20rem] lg:grid-rows-1">
-                <div className="min-h-0 min-w-0">
+                <div className="relative min-h-0 min-w-0 overflow-hidden">
                     <BattleMap
                         map={previewMap}
                         participants={[]}
@@ -369,13 +422,16 @@ function EditorContent({
                         }}
                     />
                 </div>
-                <aside className="min-h-0 space-y-3 overflow-x-hidden overflow-y-auto pr-1">
+                <aside
+                    ref={asideRef}
+                    className="min-h-0 space-y-3 overflow-x-hidden overflow-y-auto overscroll-contain pr-1"
+                >
                     <Tabs
                         value={panel}
                         onValueChange={(value) => selectPanel(value as Panel)}
                         className="min-w-0"
                     >
-                        <TabsList className="h-auto w-full flex-wrap justify-start gap-1 rounded-md bg-transparent p-0">
+                        <TabsList className="sticky top-0 z-20 h-auto w-full flex-wrap justify-start gap-1 rounded-md bg-background p-1">
                             {PANELS.map((p) => (
                                 <TabsTrigger
                                     key={p}
@@ -598,66 +654,6 @@ function EditorContent({
                                         </Button>
                                     ))}
                                 </div>
-                                <div className="flex flex-wrap gap-1">
-                                    <Button
-                                        type="button"
-                                        size="sm"
-                                        variant="outline"
-                                        disabled={!tileEditor.canUndo}
-                                        onClick={tileEditor.undo}
-                                    >
-                                        {tileTranslations('undo')}
-                                    </Button>
-                                    <Button
-                                        type="button"
-                                        size="sm"
-                                        variant="outline"
-                                        disabled={!tileEditor.canRedo}
-                                        onClick={tileEditor.redo}
-                                    >
-                                        {tileTranslations('redo')}
-                                    </Button>
-                                    <Button
-                                        type="button"
-                                        size="sm"
-                                        disabled={
-                                            !tileEditor.isDirty ||
-                                            tileSave.isPending
-                                        }
-                                        onClick={() =>
-                                            tileSave.mutate(
-                                                {
-                                                    expectedVersion:
-                                                        tileEditor.version,
-                                                    patches:
-                                                        tileEditor.dirtyPatches,
-                                                },
-                                                {
-                                                    onSuccess: ({
-                                                        version,
-                                                    }) => {
-                                                        tileEditor.acceptSaved();
-                                                        draft.acceptVersion(
-                                                            version
-                                                        );
-                                                    },
-                                                }
-                                            )
-                                        }
-                                    >
-                                        {tileSave.isPending
-                                            ? tileTranslations('saving')
-                                            : tileTranslations('save')}
-                                    </Button>
-                                </div>
-                                {tileSave.isError && (
-                                    <p
-                                        role="alert"
-                                        className="text-sm text-destructive"
-                                    >
-                                        {tileTranslations('saveFailed')}
-                                    </p>
-                                )}
                             </div>
                         </TabsContent>
                     </Tabs>

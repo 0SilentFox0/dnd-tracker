@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { SelectField } from '@/components/ui/select-field';
 import { useAbilityText } from '@/lib/hooks/abilities';
 import { useAbilityComposition } from '@/lib/hooks/abilities/useAbilityComposition';
+import { useSpellGroups } from '@/lib/hooks/spells';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import {
     changeEffectKind,
@@ -61,6 +62,20 @@ export function EffectCard({
     const kindErrors = errorsByPath[`${path}.kind`] ?? [];
 
     const pickable = useAbilityComposition(campaignId).kinds(trigger);
+
+    const { data: spellGroups = [] } = useSpellGroups(campaignId);
+
+    const effectText =
+        effect.kind === 'flag' &&
+        effect.flag === 'spellTargeting' &&
+        effect.school
+            ? text.effect({
+                  ...effect,
+                  school:
+                      spellGroups.find((group) => group.id === effect.school)
+                          ?.name ?? effect.school,
+              })
+            : text.effect(effect);
 
     if (!def) {
         return (
@@ -174,7 +189,7 @@ export function EffectCard({
             </div>
             <p className="text-xs text-primary">
                 <span aria-hidden>= </span>
-                <span>{text.effect(effect)}</span>
+                <span>{effectText}</span>
             </p>
         </div>
     );

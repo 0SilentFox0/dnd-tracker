@@ -60,19 +60,6 @@ export const battleMapInputSchema = z
         expectedVersion: z.number().int().min(1).optional(),
     })
     .superRefine((m, ctx) => {
-        const { cols, rows, background } = m.map;
-
-        if (
-            background !== null &&
-            (cols > MAP_LIMITS.photoMaxSide || rows > MAP_LIMITS.photoMaxSide)
-        ) {
-            ctx.addIssue({
-                code: 'custom',
-                message: 'battleSetup.validation.photoMapTooLarge',
-                path: ['map', 'cols'],
-            });
-        }
-
         if (!staticTerrainOnly(m.map.terrain))
             ctx.addIssue({
                 code: 'custom',

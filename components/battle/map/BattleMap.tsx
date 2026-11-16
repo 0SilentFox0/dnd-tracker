@@ -314,7 +314,7 @@ export function BattleMap({
             ref={outerRef}
             className={cn(
                 'flex h-full w-full',
-                cameraMode && 'relative',
+                'relative',
                 !cameraMode && (phone || scrolls) && 'overflow-auto',
                 !cameraMode && phone && '[scrollbar-gutter:stable]',
                 cameraMode
@@ -421,6 +421,16 @@ export function BattleMap({
                         phone={phone}
                     />
                 </>
+            )}
+            {!cameraMode && (
+                <MapCameraControls
+                    onZoomIn={() => viewport.zoomBy(1.2)}
+                    onZoomOut={() => viewport.zoomBy(1 / 1.2)}
+                    onRecenter={() => viewport.reset()}
+                    canRecenter={viewport.zoom > 1}
+                    userMoved={viewport.zoom > 1}
+                    phone={phone}
+                />
             )}
         </div>
     );
