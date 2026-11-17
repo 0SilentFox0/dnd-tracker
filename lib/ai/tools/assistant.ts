@@ -32,6 +32,7 @@ const request = z.strictObject({ actionId, input: z.unknown() });
 
 export const assistantCapabilitiesTool = defineTool({
     name: 'assistant_capabilities',
+    effect: 'read',
     scopes: assistantScopes,
     title: 'Assistant capabilities',
     description:
@@ -66,6 +67,7 @@ export const assistantCapabilitiesTool = defineTool({
 });
 export const assistantSchemaTool = defineTool({
     name: 'assistant_schema',
+    effect: 'read',
     scopes: assistantScopes,
     title: 'Action schema',
     description:
@@ -83,6 +85,7 @@ export const assistantSchemaTool = defineTool({
 });
 export const assistantReadTool = defineTool({
     name: 'assistant_read',
+    effect: 'read',
     scopes: assistantScopes,
     title: 'Read campaign',
     description:
@@ -119,6 +122,7 @@ export const assistantReadTool = defineTool({
 });
 export const assistantActionTool = defineTool({
     name: 'assistant_action',
+    effect: 'destructive',
     scopes: assistantScopes,
     title: 'Prepare action',
     description:

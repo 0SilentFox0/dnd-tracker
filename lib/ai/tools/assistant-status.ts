@@ -21,6 +21,7 @@ import { ContentError } from '@/lib/server/content/errors';
 
 export const assistantStatusTool = defineTool({
     name: 'assistant_status',
+    effect: 'read',
     scopes: API_TOKEN_SCOPES.filter((scope) => scope !== 'ai'),
     title: 'Proposal status',
     description:
@@ -126,6 +127,8 @@ export const assistantStatusTool = defineTool({
 
 export const assistantRejectTool = defineTool({
     name: 'assistant_reject',
+    effect: 'write',
+    idempotent: true,
     scopes: API_TOKEN_SCOPES.filter((scope) => scope !== 'ai'),
     title: 'Reject proposal',
     description:

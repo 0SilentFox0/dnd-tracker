@@ -89,7 +89,7 @@ export const readCharacterTool = defineTool({
             'read_character'
         );
     },
-    input: z.object({ id: z.string().min(1) }),
+    input: z.object({ id: z.string().min(1).max(200) }),
     handler: async (ctx, { id }) => {
         const ai = systemServerOf(await loadRules(ctx.campaignId)).ai;
 
