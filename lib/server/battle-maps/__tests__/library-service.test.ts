@@ -455,6 +455,49 @@ describe('battle map library service', () => {
         ]);
     });
 
+    it('clone copies tile layers to the new rows and its first version snapshot, including tile-only chunks', async () => {
+        const { id } = await createMap('c1', input());
+
+        const row = db.chunks.find((chunk) => chunk.mapId === id);
+
+        if (!row) throw new Error('expected chunk row');
+
+        row.tileLayers = { ground: 'r1:tiles' };
+
+        db.chunks.push({
+            mapId: id,
+            cx: 1,
+            cy: 1,
+            data: 'e',
+            tileLayers: { objects: 'r1:obj' },
+        });
+
+        const source = await getMap(id);
+
+        if (!source) throw new Error('expected source map');
+
+        const copy = await cloneMap(source, undefined);
+
+        const rows = db.chunks.filter((chunk) => chunk.mapId === copy.id);
+
+        expect(
+            Object.fromEntries(rows.map((c) => [`${c.cx}:${c.cy}`, c.tileLayers]))
+        ).toMatchObject({
+            '0:0': { ground: 'r1:tiles' },
+            '1:1': { objects: 'r1:obj' },
+        });
+
+        const version = db.versions.find((v) => v.mapId === copy.id);
+
+        expect((version?.payload as { tileLayers: unknown }).tileLayers).toEqual({
+            '0:0': { ground: 'r1:tiles' },
+            '1:1': { objects: 'r1:obj' },
+        });
+        expect(
+            db.chunks.find((c) => c.mapId === id && c.cx === 0)?.tileLayers
+        ).toEqual({ ground: 'r1:tiles' });
+    });
+
     it('a data-URL background is stored as a bucket URL, and re-saving that URL keeps the version', async () => {
         const stored = await withStoredBackground(
             input({

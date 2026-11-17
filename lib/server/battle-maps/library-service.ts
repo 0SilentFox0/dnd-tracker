@@ -14,6 +14,7 @@ import type { BattleMapInput } from '@/lib/schemas/battle-maps';
 import { ContentError } from '@/lib/server/content/errors';
 import { resolveMapBackgroundForPersistence } from '@/lib/supabase/battle-map-storage';
 import {
+    type EdgeChunks,
     EMPTY_EDGE_CHUNK,
     encodeEdges,
 } from '@/lib/utils/battle/map-storage/edge-chunks';
@@ -91,9 +92,54 @@ export async function listMaps(campaignId: string): Promise<BattleMapBrief[]> {
     return rows.map(toBrief);
 }
 
+function tileLayersFromRows(
+    rows: readonly { cx: number; cy: number; tileLayers: unknown }[]
+) {
+    const snapshot: Record<string, Partial<Record<TileLayer, string>>> = {};
+
+    for (const row of rows) {
+        if (!row.tileLayers || typeof row.tileLayers !== 'object' || Array.isArray(row.tileLayers))
+            continue;
+
+        const layers: Partial<Record<TileLayer, string>> = {};
+
+        for (const [layer, data] of Object.entries(row.tileLayers))
+            if (isTileLayer(layer) && typeof data === 'string') layers[layer] = data;
+
+        if (Object.keys(layers).length)
+            snapshot[`${row.cx}:${row.cy}`] = layers;
+    }
+
+    return snapshot;
+}
+
+type TileSnapshot = ReturnType<typeof tileLayersFromRows>;
+
+/** Tile layers ride on the edge chunk rows; a chunk with tiles but no edges still needs a row. */
+function chunkRowsWithTiles(chunks: EdgeChunks, tileLayers: TileSnapshot) {
+    const rows = new Map<string, Omit<Prisma.BattleMapChunkCreateManyInput, 'mapId'>>(
+        recordToChunkRows(chunks).map((chunk) => [
+            `${chunk.cx}:${chunk.cy}`,
+            chunk,
+        ])
+    );
+
+    for (const [key, layers] of Object.entries(tileLayers)) {
+        const [cx, cy] = key.split(':').map(Number);
+
+        rows.set(key, {
+            ...(rows.get(key) ?? { cx, cy, data: EMPTY_EDGE_CHUNK }),
+            tileLayers: layers,
+        });
+    }
+
+    return [...rows.values()];
+}
+
 export async function createMap(
     campaignId: string,
-    input: BattleMapInput
+    input: BattleMapInput,
+    tileLayers: TileSnapshot = {}
 ): Promise<BattleMapBrief> {
     const { header, chunks, headerJson, payloadJson } = payloadOf(input);
 
@@ -104,9 +150,15 @@ export async function createMap(
             cols: header.cols,
             rows: header.rows,
             header: headerJson,
-            chunks: { create: recordToChunkRows(chunks) },
+            chunks: { create: chunkRowsWithTiles(chunks, tileLayers) },
             versions: {
-                create: { version: 1, payload: payloadJson },
+                create: {
+                    version: 1,
+                    payload: {
+                        ...payloadJson,
+                        tileLayers,
+                    } as Prisma.InputJsonObject,
+                },
             },
         },
     });
@@ -236,27 +288,6 @@ const conflict = () => new ContentError(API_ERRORS.BATTLE_MAP_CONFLICT, 409);
 
 const plain = (v: unknown) => JSON.parse(JSON.stringify(v)) as unknown;
 
-function tileLayersFromRows(
-    rows: readonly { cx: number; cy: number; tileLayers: unknown }[]
-) {
-    const snapshot: Record<string, Partial<Record<TileLayer, string>>> = {};
-
-    for (const row of rows) {
-        if (!row.tileLayers || typeof row.tileLayers !== 'object' || Array.isArray(row.tileLayers))
-            continue;
-
-        const layers: Partial<Record<TileLayer, string>> = {};
-
-        for (const [layer, data] of Object.entries(row.tileLayers))
-            if (isTileLayer(layer) && typeof data === 'string') layers[layer] = data;
-
-        if (Object.keys(layers).length)
-            snapshot[`${row.cx}:${row.cy}`] = layers;
-    }
-
-    return snapshot;
-}
-
 /** `input.expectedVersion` guards against overwriting a newer save; an identical payload only renames. */
 export async function saveMap(
     mapId: string,
@@ -328,32 +359,11 @@ export async function saveMap(
 
         await tx.battleMapChunk.deleteMany({ where: { mapId } });
 
-        const chunkRows = new Map<string, Prisma.BattleMapChunkCreateManyInput>(
-            recordToChunkRows(chunks).map((chunk) => [
-                `${chunk.cx}:${chunk.cy}`,
-                { mapId, ...chunk },
-            ])
-        );
-
-        for (const oldRow of oldRows) {
-            const layers = tileLayers[`${oldRow.cx}:${oldRow.cy}`];
-
-            if (!layers) continue;
-
-            const key = `${oldRow.cx}:${oldRow.cy}`;
-
-            const row = chunkRows.get(key) ?? {
-                mapId,
-                cx: oldRow.cx,
-                cy: oldRow.cy,
-                data: EMPTY_EDGE_CHUNK,
-            };
-
-            chunkRows.set(key, { ...row, tileLayers: layers });
-        }
-
         await tx.battleMapChunk.createMany({
-            data: [...chunkRows.values()],
+            data: chunkRowsWithTiles(chunks, tileLayers).map((row) => ({
+                mapId,
+                ...row,
+            })),
         });
 
         await tx.battleMapVersion.create({
@@ -398,10 +408,19 @@ export async function cloneMap(
     map: OwnedBattleMap,
     name?: string
 ): Promise<BattleMapBrief> {
-    return createMap(map.campaignId, {
-        name: name ?? `${map.name} (copy)`.slice(0, 80),
-        map: map.map as BattleMapInput['map'],
-        walls: map.walls,
-        bars: map.bars,
+    const rows = await prisma.battleMapChunk.findMany({
+        where: { mapId: map.id },
+        select: { cx: true, cy: true, tileLayers: true },
     });
+
+    return createMap(
+        map.campaignId,
+        {
+            name: name ?? `${map.name} (copy)`.slice(0, 80),
+            map: map.map as BattleMapInput['map'],
+            walls: map.walls,
+            bars: map.bars,
+        },
+        tileLayersFromRows(rows)
+    );
 }
