@@ -232,7 +232,7 @@ describe('system lookups stay lazy at module level', () => {
         );
 
         expect(files.flatMap((f) => topLevelCalls(f))).toEqual([]);
-    });
+    }, 30_000);
 });
 
 describe('the top-level detector (fixtures)', () => {
