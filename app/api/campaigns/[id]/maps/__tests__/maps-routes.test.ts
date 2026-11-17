@@ -202,7 +202,7 @@ describe('maps routes', () => {
 
         const tooBig = {
             ...valid,
-            map: { ...valid.map, cols: 80, background: 'https://x/y.png' },
+            map: { ...valid.map, cols: 201, background: 'https://x/y.png' },
         };
 
         expect((await POST(send('POST', tooBig), ctx)).status).toBe(400);
