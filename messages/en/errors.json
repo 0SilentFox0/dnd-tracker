@@ -554,6 +554,7 @@
   "outOfAmmo": "Out of ammunition",
   "weaponReloading": "The weapon is reloading",
   "effectOutsideComposition": "The effect belongs to a module outside this campaign's rule system",
+  "battleMapBackgroundInvalid": "The map background is not a valid image uploaded to this campaign",
   "battleMapConflict": "The map was changed elsewhere: reload the page to see the latest version",
   "battleMapLimit": "The library already has {max} maps — delete some",
   "battleMapInUse": "The map is used by a battle and cannot be deleted",
