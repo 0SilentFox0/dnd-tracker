@@ -56,11 +56,7 @@ export class TileRasterChunkCache<T = CanvasImageSource> {
 
         const bytes = (image.width ?? 0) * (image.height ?? 0) * 4;
 
-        if (bytes > this.maxBytes) {
-            this.close(raster);
-
-            return raster;
-        }
+        if (bytes > this.maxBytes) return raster;
 
         this.entries.set(cacheKey, {
             version: key.version,
