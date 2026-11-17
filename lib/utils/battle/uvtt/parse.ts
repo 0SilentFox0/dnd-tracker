@@ -10,6 +10,10 @@ const MAX_IMAGE_PIXELS = 120_000_000;
 
 const GEOMETRY_TOLERANCE = 0.16;
 
+const EPSILON = 1e-9;
+
+const HEADER_CHARS = 64;
+
 export type UvttImport = {
     image: string;
     imageWidth: number;
@@ -18,6 +22,7 @@ export type UvttImport = {
     rows: number;
     backgroundCols: number;
     walls: string[];
+    warnings: UvttWarning[];
     doors: Record<string, { open: boolean }>;
 };
 
@@ -68,6 +73,18 @@ function points(value: unknown): [number, number][] | null {
         : null;
 }
 
+function decodeHeader(payload: string): Uint8Array {
+    const head = payload.slice(0, HEADER_CHARS);
+
+    try {
+        return Uint8Array.from(atob(head), (char) => char.charCodeAt(0));
+    } catch {
+        throw new UvttImportError(
+            'The embedded map image is not valid base64.'
+        );
+    }
+}
+
 function base64Image(value: unknown): {
     src: string;
     bytes: number;
@@ -81,31 +98,33 @@ function base64Image(value: unknown): {
         value
     );
 
-    const payload = match?.[2] ?? (value.startsWith('data:') ? null : value);
+    const rawPayload = match?.[2] ?? (value.startsWith('data:') ? null : value);
+
+    const payload =
+        rawPayload && /\s/.test(rawPayload)
+            ? rawPayload.replace(/\s+/g, '')
+            : rawPayload;
 
     if (!payload || payload.length > Math.ceil((MAX_IMAGE_BYTES * 4) / 3))
         throw new UvttImportError(
             'The embedded image is invalid or larger than 72 MiB.'
         );
 
-    let binary: string;
-
-    try {
-        binary = atob(payload);
-    } catch {
+    if (!/^[A-Za-z0-9+/]+={0,2}$/.test(payload) || payload.length % 4 === 1)
         throw new UvttImportError(
             'The embedded map image is not valid base64.'
         );
-    }
 
-    const bytes = binary.length;
+    const padding = payload.endsWith('==') ? 2 : payload.endsWith('=') ? 1 : 0;
+
+    const bytes = Math.floor((payload.length * 3) / 4) - padding;
 
     if (!bytes || bytes > MAX_IMAGE_BYTES)
         throw new UvttImportError(
             'The embedded image is invalid or larger than 72 MiB.'
         );
 
-    const data = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+    const data = decodeHeader(payload);
 
     let width = 0;
 
@@ -169,93 +188,97 @@ function base64Image(value: unknown): {
     return { src: `data:${mime};base64,${payload}`, bytes, width, height };
 }
 
+export type UvttWarningCode =
+    | 'outOfBounds'
+    | 'border'
+    | 'zeroLength'
+    | 'diagonal'
+    | 'portalSpan';
+
+export type UvttWarning = { code: UvttWarningCode; count: number };
+
+type EdgeResult = { edges: string[] } | { skip: UvttWarningCode };
+
+function snap(lo: number, hi: number, max: number): [number, number] {
+    return [
+        Math.max(0, Math.floor(lo + GEOMETRY_TOLERANCE)),
+        Math.min(max, Math.ceil(hi - GEOMETRY_TOLERANCE)),
+    ];
+}
+
 function edgeAt(
     a: [number, number],
     b: [number, number],
     cols: number,
     rows: number,
     snapSingleEdge = false
-): string[] {
+): EdgeResult {
     if (
         [...a, ...b].some(
             (n, i) =>
-                n < -GEOMETRY_TOLERANCE ||
-                n > (i % 2 === 0 ? cols : rows) + GEOMETRY_TOLERANCE
+                n < -GEOMETRY_TOLERANCE - EPSILON ||
+                n > (i % 2 === 0 ? cols : rows) + GEOMETRY_TOLERANCE + EPSILON
         )
     )
-        throw new UvttImportError(
-            'A wall or portal extends outside the map grid.'
-        );
+        return { skip: 'outOfBounds' };
 
     const dx = b[0] - a[0];
 
     const dy = b[1] - a[1];
 
+    const vertical =
+        Math.abs(dx) <= GEOMETRY_TOLERANCE + EPSILON &&
+        Math.abs(a[0] - Math.round(a[0])) <= GEOMETRY_TOLERANCE + EPSILON;
+
+    const horizontal =
+        Math.abs(dy) <= GEOMETRY_TOLERANCE + EPSILON &&
+        Math.abs(a[1] - Math.round(a[1])) <= GEOMETRY_TOLERANCE + EPSILON;
+
+    if (!vertical && !horizontal) return { skip: 'diagonal' };
+
+    const [across, along, acrossMax, alongMax] = vertical
+        ? [0, 1, cols, rows]
+        : [1, 0, rows, cols];
+
+    const line = Math.round((a[across] + b[across]) / 2);
+
+    if (Math.abs(a[along] - b[along]) < 0.001) return { skip: 'zeroLength' };
+
+    if (line <= 0 || line >= acrossMax) return { skip: 'border' };
+
+    let [start, end] = snap(
+        Math.min(a[along], b[along]),
+        Math.max(a[along], b[along]),
+        alongMax
+    );
+
+    if (
+        snapSingleEdge &&
+        end - start !== 1 &&
+        Math.abs(b[along] - a[along]) <= 1 + GEOMETRY_TOLERANCE
+    ) {
+        start = Math.floor((a[along] + b[along]) / 2);
+        end = start + 1;
+    }
+
     const edges: string[] = [];
 
-    if (
-        Math.abs(dx) <= GEOMETRY_TOLERANCE &&
-        Math.abs(a[0] - Math.round(a[0])) <= GEOMETRY_TOLERANCE
-    ) {
-        const xLine = Math.round((a[0] + b[0]) / 2);
+    for (let i = start; i < end; i++)
+        edges.push(vertical ? `${line - 1}:${i}:e` : `${i}:${line - 1}:s`);
 
-        if (
-            xLine <= 0 ||
-            xLine >= cols ||
-            Math.abs(dx) > GEOMETRY_TOLERANCE ||
-            Math.abs(a[1] - b[1]) < 0.001
-        )
-            throw new UvttImportError(
-                'A wall or portal lies outside the supported grid edges.'
-            );
+    return edges.length ? { edges } : { skip: 'zeroLength' };
+}
 
-        let start = Math.max(0, Math.floor(Math.min(a[1], b[1])));
+class Warnings {
+    private counts = new Map<UvttWarningCode, number>();
 
-        let end = Math.min(rows, Math.ceil(Math.max(a[1], b[1])));
-
-        if (snapSingleEdge && end - start > 1 && Math.abs(b[1] - a[1]) <= 1 + GEOMETRY_TOLERANCE) {
-            start = Math.floor((a[1] + b[1]) / 2);
-            end = start + 1;
-        }
-
-        for (let y = start; y < end; y++) edges.push(`${xLine - 1}:${y}:e`);
-
-        return edges;
+    add(code: UvttWarningCode) {
+        this.counts.set(code, (this.counts.get(code) ?? 0) + 1);
     }
 
-    if (
-        Math.abs(dy) <= GEOMETRY_TOLERANCE &&
-        Math.abs(a[1] - Math.round(a[1])) <= GEOMETRY_TOLERANCE
-    ) {
-        const yLine = Math.round((a[1] + b[1]) / 2);
-
-        if (
-            yLine <= 0 ||
-            yLine >= rows ||
-            Math.abs(dy) > GEOMETRY_TOLERANCE ||
-            Math.abs(a[0] - b[0]) < 0.001
-        )
-            throw new UvttImportError(
-                'A wall or portal lies outside the supported grid edges.'
-            );
-
-        let start = Math.max(0, Math.floor(Math.min(a[0], b[0])));
-
-        let end = Math.min(cols, Math.ceil(Math.max(a[0], b[0])));
-
-        if (snapSingleEdge && end - start > 1 && Math.abs(b[0] - a[0]) <= 1 + GEOMETRY_TOLERANCE) {
-            start = Math.floor((a[0] + b[0]) / 2);
-            end = start + 1;
-        }
-
-        for (let x = start; x < end; x++) edges.push(`${x}:${yLine - 1}:s`);
-
-        return edges;
+    list(): UvttWarning[] {
+        return [...this.counts].map(([code, count]) => ({ code, count }));
     }
-
-    throw new UvttImportError(
-        'Diagonal or off-grid walls are not supported by the map editor.'
-    );
 }
 
 function segments(
@@ -263,7 +286,8 @@ function segments(
     cols: number,
     rows: number,
     ppi: number,
-    origin: [number, number]
+    origin: [number, number],
+    warnings: Warnings
 ): string[] {
     if (!Array.isArray(value))
         throw new UvttImportError('Wall geometry is missing or invalid.');
@@ -273,8 +297,7 @@ function segments(
     for (const line of value) {
         const linePoints = points(line);
 
-        const pixelCoordinates =
-            Array.isArray(line) && line.every(finite);
+        const pixelCoordinates = Array.isArray(line) && line.every(finite);
 
         if (!linePoints)
             throw new UvttImportError(
@@ -286,14 +309,12 @@ function segments(
             (y - origin[1]) / (pixelCoordinates ? ppi : 1),
         ]) as [number, number][];
 
-        for (let i = 1; i < gridPoints.length; i++)
-            for (const edge of edgeAt(
-                gridPoints[i - 1],
-                gridPoints[i],
-                cols,
-                rows
-            ))
-                result.add(edge);
+        for (let i = 1; i < gridPoints.length; i++) {
+            const found = edgeAt(gridPoints[i - 1], gridPoints[i], cols, rows);
+
+            if ('skip' in found) warnings.add(found.skip);
+            else for (const edge of found.edges) result.add(edge);
+        }
 
         if (result.size > MAP_LIMITS.libraryMaxEdges)
             throw new UvttImportError(
@@ -370,17 +391,27 @@ export function parseUvtt(text: string): UvttImport {
             'Pixels-per-grid produces an unsupported background scale.'
         );
 
-    const walls = segments(root.line_of_sight ?? [], cols, rows, ppi, origin);
+    const warnings = new Warnings();
+
+    const wallList = segments(
+        root.line_of_sight ?? [],
+        cols,
+        rows,
+        ppi,
+        origin,
+        warnings
+    );
 
     const objects = segments(
         root.objects_line_of_sight ?? [],
         cols,
         rows,
         ppi,
-        origin
+        origin,
+        warnings
     );
 
-    for (const edge of objects) if (!walls.includes(edge)) walls.push(edge);
+    const walls = new Set([...wallList, ...objects]);
 
     const doors: Record<string, { open: boolean }> = {};
 
@@ -400,7 +431,7 @@ export function parseUvtt(text: string): UvttImport {
         if (!bounds || bounds.length !== 2)
             throw new UvttImportError('A portal is missing valid bounds.');
 
-        const edges = edgeAt(
+        const found = edgeAt(
             [
                 (bounds[0][0] - origin[0]) / (pixelCoordinates ? ppi : 1),
                 (bounds[0][1] - origin[1]) / (pixelCoordinates ? ppi : 1),
@@ -414,10 +445,19 @@ export function parseUvtt(text: string): UvttImport {
             true
         );
 
-        if (edges.length !== 1)
-            throw new UvttImportError('A portal must fit on one map edge.');
+        if ('skip' in found) {
+            warnings.add(found.skip);
 
-        doors[edges[0]] = { open: data?.closed === false };
+            continue;
+        }
+
+        if (found.edges.length !== 1) {
+            warnings.add('portalSpan');
+
+            continue;
+        }
+
+        doors[found.edges[0]] = { open: data?.closed === false };
 
         if (Object.keys(doors).length > MAP_LIMITS.doorsMax)
             throw new UvttImportError(
@@ -425,9 +465,7 @@ export function parseUvtt(text: string): UvttImport {
             );
     }
 
-    const wallSet = new Set(walls);
-
-    for (const edge of Object.keys(doors)) wallSet.delete(edge);
+    for (const edge of Object.keys(doors)) walls.delete(edge);
 
     return {
         image: image.src,
@@ -436,7 +474,8 @@ export function parseUvtt(text: string): UvttImport {
         cols,
         rows,
         backgroundCols,
-        walls: [...wallSet],
+        walls: [...walls],
+        warnings: warnings.list(),
         doors,
     };
 }
