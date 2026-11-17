@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 
 import {
     applyMargins,
@@ -16,6 +16,7 @@ import { hazardDamage } from '../terrain';
 import { allInteriorEdges } from '../walls';
 
 import { MAP_LIMITS } from '@/lib/constants/map-limits';
+import { maxEdgesFor } from '@/lib/utils/battle/map-storage/limits';
 import type { BattleMapConfig } from '@/types/battle';
 
 const base: BattleMapConfig = {
@@ -232,30 +233,52 @@ describe('paintEdges', () => {
         });
     });
 
-    it('понад ліміт — overflow, карта без змін', () => {
-        const big = { ...base, cols: 100, rows: 100 };
+    describe('ліміт ребер', () => {
+        const limits = MAP_LIMITS as { inlineMaxEdges: number };
 
-        const edges = allInteriorEdges(big).filter((e) => e.endsWith(':e'));
+        const original = limits.inlineMaxEdges;
 
-        const full = paintEdges(
-            big,
-            edges.slice(0, MAP_LIMITS.inlineMaxEdges),
-            'add-walls'
+        afterEach(() => {
+            limits.inlineMaxEdges = original;
+        });
+
+        const edges = allInteriorEdges(base).filter((e) => e.endsWith(':e'));
+
+        it('понад ліміт — overflow, карта без змін', () => {
+            limits.inlineMaxEdges = 10;
+
+            const full = paintEdges(base, edges.slice(0, 10), 'add-walls');
+
+            expect(full.overflow).toBe(false);
+
+            const over = paintEdges(full.map, edges.slice(10, 11), 'add-walls');
+
+            expect(over.overflow).toBe(true);
+            expect(over.map).toBe(full.map);
+        });
+
+        it('карта вище ліміту: прибирання не блокується, зростання блокується', () => {
+            limits.inlineMaxEdges = 10;
+
+            const over = { ...base, walls: edges.slice(0, 15) };
+
+            const removed = paintEdges(over, [edges[0]], 'erase');
+
+            expect(removed.overflow).toBe(false);
+            expect(removed.map.walls).toHaveLength(14);
+            expect(paintEdges(over, [edges[20]], 'add-walls').overflow).toBe(
+                true
+            );
+        });
+    });
+
+    it('maxEdgesFor: велика карта бібліотеки отримує ліміт імпорту', () => {
+        expect(maxEdgesFor({ cols: 60, rows: 30 })).toBe(
+            MAP_LIMITS.inlineMaxEdges
         );
-
-        expect(full.overflow).toBe(false);
-
-        const over = paintEdges(
-            full.map,
-            edges.slice(
-                MAP_LIMITS.inlineMaxEdges,
-                MAP_LIMITS.inlineMaxEdges + 1
-            ),
-            'add-walls'
+        expect(maxEdgesFor({ cols: 61, rows: 10 })).toBe(
+            MAP_LIMITS.libraryMaxEdges
         );
-
-        expect(over.overflow).toBe(true);
-        expect(over.map).toBe(full.map);
     });
 
     it('resizeMap відкидає ребра поза новим розміром', () => {
