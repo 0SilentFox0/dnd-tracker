@@ -11,7 +11,7 @@ import type { CampaignSettings, CampaignSettingsMeta } from '@/types/campaigns';
 
 const LABEL = 'text-sm text-hud-muted';
 
-type CampaignSummary = CampaignSettings & { inviteCode: string };
+type CampaignSummary = CampaignSettings & { inviteCode: string | null };
 
 export function CampaignSummaryPanel({
     campaignId,
@@ -57,7 +57,7 @@ export function CampaignSummaryPanel({
                             {campaign.maxLevel}
                         </p>
                     </div>
-                    {!meta.isTemplate && (
+                    {isDM && campaign.inviteCode && !meta.isTemplate && (
                         <div id="invite" className="scroll-mt-20">
                             <p className={`${LABEL} mb-2`}>{t('inviteCode')}</p>
                             <InviteCodeDisplay

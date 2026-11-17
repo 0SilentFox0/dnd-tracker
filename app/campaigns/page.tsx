@@ -242,12 +242,14 @@ export default async function CampaignsPage() {
                                             ).length,
                                         })}
                                     </p>
-                                    <p>
-                                        {t('card.inviteCode')}{' '}
-                                        <code className="rounded bg-hud-field px-1.5 font-mono text-hud-bone">
-                                            {campaign.inviteCode}
-                                        </code>
-                                    </p>
+                                    {isDM && (
+                                        <p>
+                                            {t('card.inviteCode')}{' '}
+                                            <code className="rounded bg-hud-field px-1.5 font-mono text-hud-bone">
+                                                {campaign.inviteCode}
+                                            </code>
+                                        </p>
+                                    )}
                                 </div>
                             </Link>
                         </HudCard>

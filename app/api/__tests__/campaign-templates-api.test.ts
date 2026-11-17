@@ -411,6 +411,21 @@ describe('campaign templates API', () => {
         expect((await res.json()).error).toBe(API_ERRORS.TEMPLATE_NOT_JOINABLE);
     });
 
+    it('join за кодом демо-кампанії — 403 DEMO_NOT_JOINABLE, без запису членства', async () => {
+        m.db.campaign.findFirst.mockResolvedValue({
+            id: 'd1',
+            kind: 'demo',
+            status: 'active',
+            members: [],
+        });
+
+        const res = await joinPost(json({ inviteCode: 'ABC123' }));
+
+        expect(res.status).toBe(403);
+        expect((await res.json()).error).toBe(API_ERRORS.DEMO_NOT_JOINABLE);
+        expect(m.db.campaignMember.create).not.toHaveBeenCalled();
+    });
+
     it('GET /api/templates — офіційні й мої, без чужих приватних', async () => {
         m.db.campaign.findMany.mockImplementation(
             async ({ where }: { where: { visibility: unknown } }) =>

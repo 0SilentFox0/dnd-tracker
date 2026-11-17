@@ -201,6 +201,7 @@
   "templateNotFound": "Шаблон не знайдено",
   "templateForbidden": "Немає доступу до шаблону",
   "templateNotJoinable": "До шаблону не можна приєднатися",
+  "demoNotJoinable": "До демо-кампанії не можна приєднатися",
   "bundleInvalid": "Некоректний файл кампанії",
   "bundleTooLarge": "Файл кампанії завеликий (до 4 МБ)",
   "aiNotConfigured": "AI-асистент не налаштований на сервері",
