@@ -1,3 +1,5 @@
+import { EventEmitter } from 'node:events';
+import { Readable } from 'node:stream';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
@@ -9,7 +11,42 @@ import {
 
 const lookupMock = vi.hoisted(() => vi.fn());
 
+const httpsRequestMock = vi.hoisted(() => vi.fn());
+
 vi.mock('node:dns/promises', () => ({ lookup: lookupMock }));
+
+vi.mock('node:https', () => ({ request: httpsRequestMock }));
+
+// Adapts node:https.request onto the stubbed global fetch so the scenarios below stay response-driven.
+function bridgeHttpsToFetch() {
+    httpsRequestMock.mockImplementation(
+        (
+            opts: { host: string; path: string; signal: AbortSignal },
+            cb: (res: unknown) => void
+        ) => {
+            const req = new EventEmitter() as EventEmitter & { end(): void };
+
+            req.end = () => {
+                fetch(`https://${opts.host}${opts.path}`, {
+                    signal: opts.signal,
+                }).then((res) => {
+                    const stream = res.body
+                        ? Readable.fromWeb(res.body as never)
+                        : Readable.from([]);
+
+                    cb(
+                        Object.assign(stream, {
+                            statusCode: res.status,
+                            headers: Object.fromEntries(res.headers),
+                        })
+                    );
+                }, (e) => req.emit('error', e));
+            };
+
+            return req;
+        }
+    );
+}
 
 const PNG = Buffer.from([0x89, 0x50, 0x4e, 0x47, 1, 2, 3, 4]);
 
@@ -25,6 +62,8 @@ function imgResponse(body: Uint8Array, headers: Record<string, string> = {}) {
 describe('safe-fetch', () => {
     beforeEach(() => {
         lookupMock.mockReset();
+        httpsRequestMock.mockReset();
+        bridgeHttpsToFetch();
         lookupMock.mockResolvedValue([{ address: '93.184.216.34', family: 4 }]);
     });
 
@@ -280,6 +319,25 @@ describe('safe-fetch', () => {
 
         await vi.advanceTimersByTimeAsync(10_001);
         await assertion;
+    });
+
+    it('connects to the validated IP and keeps hostname for Host/SNI', async () => {
+        vi.stubGlobal('fetch', vi.fn().mockResolvedValueOnce(imgResponse(PNG)));
+        lookupMock.mockResolvedValue([{ address: '93.184.216.34', family: 4 }]);
+
+        await safeFetchBuffer('https://ok.example/a.png?x=1', OPTS);
+
+        const opts = httpsRequestMock.mock.calls[0][0];
+
+        expect(opts.host).toBe('ok.example');
+        expect(opts.servername).toBe('ok.example');
+        expect(opts.path).toBe('/a.png?x=1');
+
+        const cb = vi.fn();
+
+        opts.lookup('ok.example', {}, cb);
+        expect(cb).toHaveBeenCalledWith(null, '93.184.216.34', 4);
+        expect(lookupMock).toHaveBeenCalledTimes(1);
     });
 
     it('sniffImageMime recognises allowed formats only', () => {

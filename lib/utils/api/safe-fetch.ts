@@ -1,4 +1,6 @@
 import { lookup } from 'node:dns/promises';
+import type { IncomingMessage } from 'node:http';
+import { request as httpsRequest } from 'node:https';
 import { BlockList, isIP } from 'node:net';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
@@ -125,10 +127,12 @@ function withSignal<T>(p: Promise<T>, signal?: AbortSignal): Promise<T> {
     });
 }
 
-export async function assertPublicHttpsUrl(
+type ResolvedTarget = { url: URL; address: string; family: 4 | 6 };
+
+async function resolvePublicTarget(
     rawUrl: string,
     signal?: AbortSignal
-): Promise<URL> {
+): Promise<ResolvedTarget> {
     let url: URL;
 
     try {
@@ -147,11 +151,13 @@ export async function assertPublicHttpsUrl(
         throw new SafeFetchError(API_ERRORS.SAFE_FETCH_INTERNAL_URL);
     }
 
-    if (isIP(host)) {
+    const literal = isIP(host);
+
+    if (literal) {
         if (isPrivateIp(host))
             throw new SafeFetchError(API_ERRORS.SAFE_FETCH_INTERNAL_URL);
 
-        return url;
+        return { url, address: host, family: literal as 4 | 6 };
     }
 
     let addrs: { address: string }[];
@@ -169,7 +175,57 @@ export async function assertPublicHttpsUrl(
         throw new SafeFetchError(API_ERRORS.SAFE_FETCH_INTERNAL_URL);
     }
 
-    return url;
+    const address = addrs[0].address;
+
+    return { url, address, family: isIP(address) as 4 | 6 };
+}
+
+export async function assertPublicHttpsUrl(
+    rawUrl: string,
+    signal?: AbortSignal
+): Promise<URL> {
+    return (await resolvePublicTarget(rawUrl, signal)).url;
+}
+
+type PinnedResponse = {
+    status: number;
+    headers: IncomingMessage['headers'];
+    stream: IncomingMessage;
+};
+
+/** Connects to the already-validated IP; Host and TLS SNI/cert check keep the original hostname, so DNS cannot rebind between check and connect. */
+function pinnedGet(
+    target: ResolvedTarget,
+    headers: Record<string, string> | undefined,
+    signal: AbortSignal
+): Promise<PinnedResponse> {
+    return new Promise((resolve, reject) => {
+        const { url, address, family } = target;
+
+        const host = url.hostname.replace(/^\[|\]$/g, '');
+
+        const req = httpsRequest(
+            {
+                host,
+                port: url.port || 443,
+                path: `${url.pathname}${url.search}`,
+                method: 'GET',
+                headers,
+                servername: isIP(host) ? undefined : host,
+                signal,
+                lookup: (_h, _o, cb) => cb(null, address, family),
+            },
+            (res) =>
+                resolve({
+                    status: res.statusCode ?? 0,
+                    headers: res.headers,
+                    stream: res,
+                })
+        );
+
+        req.on('error', reject);
+        req.end();
+    });
 }
 
 export type SafeFetchResult = {
@@ -191,18 +247,23 @@ export async function safeFetchBuffer(
         let current = rawUrl.trim();
 
         for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
-            const url = await assertPublicHttpsUrl(current, controller.signal);
+            const target = await resolvePublicTarget(
+                current,
+                controller.signal
+            );
 
-            const res = await fetch(url, {
-                headers: opts.headers,
-                redirect: 'manual',
-                signal: controller.signal,
-            });
+            const { url } = target;
+
+            const res = await pinnedGet(
+                target,
+                opts.headers,
+                controller.signal
+            );
 
             if (res.status >= 300 && res.status < 400) {
-                const loc = res.headers.get('location');
+                const loc = res.headers.location;
 
-                await res.body?.cancel().catch(() => {});
+                res.stream.destroy();
 
                 if (!loc)
                     throw new SafeFetchError(API_ERRORS.SAFE_FETCH_FAILED);
@@ -212,8 +273,8 @@ export async function safeFetchBuffer(
                 continue;
             }
 
-            if (!res.ok) {
-                await res.body?.cancel().catch(() => {});
+            if (res.status < 200 || res.status >= 300) {
+                res.stream.destroy();
 
                 return {
                     status: res.status,
@@ -222,10 +283,10 @@ export async function safeFetchBuffer(
                 };
             }
 
-            const len = res.headers.get('content-length');
+            const len = res.headers['content-length'];
 
             if (len && parseInt(len, 10) > opts.maxBytes) {
-                await res.body?.cancel().catch(() => {});
+                res.stream.destroy();
                 throw new SafeFetchError(API_ERRORS.SAFE_FETCH_TOO_LARGE);
             }
 
@@ -233,30 +294,20 @@ export async function safeFetchBuffer(
 
             let total = 0;
 
-            if (res.body) {
-                const reader = res.body.getReader();
+            for await (const chunk of res.stream as AsyncIterable<Buffer>) {
+                total += chunk.length;
 
-                for (;;) {
-                    const { done, value } = await reader.read();
-
-                    if (done) break;
-
-                    total += value.length;
-
-                    if (total > opts.maxBytes) {
-                        await reader.cancel().catch(() => {});
-                        throw new SafeFetchError(
-                            API_ERRORS.SAFE_FETCH_TOO_LARGE
-                        );
-                    }
-
-                    chunks.push(value);
+                if (total > opts.maxBytes) {
+                    res.stream.destroy();
+                    throw new SafeFetchError(API_ERRORS.SAFE_FETCH_TOO_LARGE);
                 }
+
+                chunks.push(chunk);
             }
 
             return {
                 status: res.status,
-                contentType: res.headers.get('content-type'),
+                contentType: res.headers['content-type'] ?? null,
                 body: Buffer.concat(chunks),
             };
         }
