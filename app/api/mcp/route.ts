@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createMcpHandler } from 'mcp-handler';
 
+import { mcpAuditLogger } from '@/lib/ai/mcp-audit';
 import { registerMcpCapabilities } from '@/lib/ai/mcp-capabilities';
 import { buildToolContext } from '@/lib/ai/mcp-context';
 import { boundMcpRequest } from '@/lib/ai/mcp-request';
@@ -18,7 +19,12 @@ export const maxDuration = 300;
 async function handler(req: Request): Promise<Response> {
     const auth = await verifyBearer(bearerToken(req), null);
 
-    if (auth instanceof NextResponse) return auth;
+    if (auth instanceof NextResponse) {
+        if (auth.status === 401)
+            auth.headers.set('WWW-Authenticate', 'Bearer realm="mcp"');
+
+        return auth;
+    }
 
     const tools = toolsFor(auth.scopes);
 
@@ -49,6 +55,7 @@ async function handler(req: Request): Promise<Response> {
         },
         {
             serverInfo: { name: 'dnd-tracker', version: '1.0.0' },
+            onEvent: mcpAuditLogger(auth.tokenId, auth.campaignId),
         }
     );
 
