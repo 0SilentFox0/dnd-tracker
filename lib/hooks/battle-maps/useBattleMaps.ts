@@ -1,6 +1,11 @@
 'use client';
 
-import { skipToken, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+    skipToken,
+    useMutation,
+    useQuery,
+    useQueryClient,
+} from '@tanstack/react-query';
 
 import { battleMapKeys } from './keys';
 import { announceMapLibraryChange } from './mapLibrarySync';
@@ -15,7 +20,10 @@ import {
     patchBattleMapTiles,
     updateBattleMap,
 } from '@/lib/api/battle-maps';
-import type { BattleMapInput } from '@/lib/schemas/battle-maps';
+import type {
+    BattleMapInput,
+    BattleMapSaveInput,
+} from '@/lib/schemas/battle-maps';
 
 export function useBattleMaps(
     campaignId: string,
@@ -50,7 +58,9 @@ export function useBattleMapTiles(
 ) {
     return useQuery({
         queryKey: battleMapKeys.tiles(campaignId, mapId ?? '', version),
-        queryFn: mapId ? () => getBattleMapTiles(campaignId, mapId, version) : skipToken,
+        queryFn: mapId
+            ? () => getBattleMapTiles(campaignId, mapId, version)
+            : skipToken,
         enabled,
         staleTime: 0,
     });
@@ -89,7 +99,7 @@ export function useBattleMapMutations(campaignId: string) {
             onSuccess,
         }),
         update: useMutation({
-            mutationFn: (v: { mapId: string; data: BattleMapInput }) =>
+            mutationFn: (v: { mapId: string; data: BattleMapSaveInput }) =>
                 updateBattleMap(campaignId, v.mapId, v.data),
             onSuccess: (_data, v) => {
                 void queryClient.invalidateQueries({

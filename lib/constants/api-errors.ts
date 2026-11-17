@@ -1,4 +1,5 @@
 import { BATTLE_SNAPSHOTS_KEPT_AFTER_COMPLETE } from './battle';
+import { MAP_LIMITS } from './map-limits';
 import {
     MAX_TRACK_MB,
     MAX_TRACKS_PER_CAMPAIGN,
@@ -546,6 +547,7 @@ export const API_ERRORS = {
     BATTLE_ROLLBACK_EXPIRED: 'errors.battleRollbackExpired',
     BATTLE_MAP_CONFLICT: 'errors.battleMapConflict',
     BATTLE_MAP_IN_USE: 'errors.battleMapInUse',
+    BATTLE_MAP_LIMIT: 'errors.battleMapLimit',
     BATTLE_MAP_NOT_FOUND: 'errors.battleMapNotFound',
     BATTLE_MAP_TOO_LARGE: 'errors.battleMapTooLarge',
     BATTLE_MAP_TOO_MANY_EDGES: 'errors.battleMapTooManyEdges',
@@ -586,6 +588,7 @@ export const API_ERROR_PARAMS: Partial<Record<ApiErrorKey, ErrorParams>> = {
         maxMb: MAX_TRACK_MB,
     },
     [API_ERRORS.DECK_SLIDES_LIMIT]: { max: MAX_SLIDES_PER_DECK },
+    [API_ERRORS.BATTLE_MAP_LIMIT]: { max: MAP_LIMITS.maxPerCampaign },
     [API_ERRORS.DECK_LIMIT]: { max: MAX_DECKS_PER_CAMPAIGN },
     [API_ERRORS.SLIDE_FILE_INVALID]: { maxMb: MAX_SLIDE_MB },
     [API_ERRORS.BATTLE_ROLLBACK_EXPIRED]: {

@@ -9,8 +9,12 @@ import {
 } from './assemble';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
+import { MAP_LIMITS } from '@/lib/constants/map-limits';
 import { prisma } from '@/lib/db';
-import type { BattleMapInput } from '@/lib/schemas/battle-maps';
+import type {
+    BattleMapInput,
+    BattleMapSaveInput,
+} from '@/lib/schemas/battle-maps';
 import { ContentError } from '@/lib/server/content/errors';
 import { resolveMapBackgroundForPersistence } from '@/lib/supabase/battle-map-storage';
 import {
@@ -52,16 +56,20 @@ const payloadOf = (input: BattleMapInput) => {
         header,
         chunks,
         headerJson: header as unknown as Prisma.InputJsonObject,
-        payloadJson: { header, chunks, tileLayers: {} } as unknown as Prisma.InputJsonObject,
+        payloadJson: {
+            header,
+            chunks,
+            tileLayers: {},
+        } as unknown as Prisma.InputJsonObject,
     };
 };
 
 /** Mirrors an external background into project storage so linked battles never copy a foreign URL. */
-export async function withStoredBackground(
-    input: BattleMapInput,
+export async function withStoredBackground<T extends BattleMapInput>(
+    input: T,
     campaignId: string,
     current?: string | null
-): Promise<BattleMapInput> {
+): Promise<T> {
     const r = await resolveMapBackgroundForPersistence(input.map.background, {
         campaignId,
         current,
@@ -72,7 +80,7 @@ export async function withStoredBackground(
     return {
         ...input,
         map: { ...input.map, background: r.background ?? null },
-    };
+    } as T;
 }
 
 export async function listMaps(campaignId: string): Promise<BattleMapBrief[]> {
@@ -98,13 +106,18 @@ function tileLayersFromRows(
     const snapshot: Record<string, Partial<Record<TileLayer, string>>> = {};
 
     for (const row of rows) {
-        if (!row.tileLayers || typeof row.tileLayers !== 'object' || Array.isArray(row.tileLayers))
+        if (
+            !row.tileLayers ||
+            typeof row.tileLayers !== 'object' ||
+            Array.isArray(row.tileLayers)
+        )
             continue;
 
         const layers: Partial<Record<TileLayer, string>> = {};
 
         for (const [layer, data] of Object.entries(row.tileLayers))
-            if (isTileLayer(layer) && typeof data === 'string') layers[layer] = data;
+            if (isTileLayer(layer) && typeof data === 'string')
+                layers[layer] = data;
 
         if (Object.keys(layers).length)
             snapshot[`${row.cx}:${row.cy}`] = layers;
@@ -117,7 +130,10 @@ type TileSnapshot = ReturnType<typeof tileLayersFromRows>;
 
 /** Tile layers ride on the edge chunk rows; a chunk with tiles but no edges still needs a row. */
 function chunkRowsWithTiles(chunks: EdgeChunks, tileLayers: TileSnapshot) {
-    const rows = new Map<string, Omit<Prisma.BattleMapChunkCreateManyInput, 'mapId'>>(
+    const rows = new Map<
+        string,
+        Omit<Prisma.BattleMapChunkCreateManyInput, 'mapId'>
+    >(
         recordToChunkRows(chunks).map((chunk) => [
             `${chunk.cx}:${chunk.cy}`,
             chunk,
@@ -142,6 +158,14 @@ export async function createMap(
     tileLayers: TileSnapshot = {}
 ): Promise<BattleMapBrief> {
     const { header, chunks, headerJson, payloadJson } = payloadOf(input);
+
+    if (
+        (await prisma.battleMap.count({ where: { campaignId } })) >=
+        MAP_LIMITS.maxPerCampaign
+    )
+        throw new ContentError(API_ERRORS.BATTLE_MAP_LIMIT, 409, undefined, {
+            max: MAP_LIMITS.maxPerCampaign,
+        });
 
     const row = await prisma.battleMap.create({
         data: {
@@ -291,7 +315,7 @@ const plain = (v: unknown) => JSON.parse(JSON.stringify(v)) as unknown;
 /** `input.expectedVersion` guards against overwriting a newer save; an identical payload only renames. */
 export async function saveMap(
     mapId: string,
-    input: BattleMapInput
+    input: BattleMapSaveInput
 ): Promise<BattleMapBrief> {
     const { header, chunks, headerJson, payloadJson } = payloadOf(input);
 
@@ -303,11 +327,7 @@ export async function saveMap(
 
         const base = current.mapVersion;
 
-        if (
-            input.expectedVersion !== undefined &&
-            input.expectedVersion !== base
-        )
-            throw conflict();
+        if (input.expectedVersion !== base) throw conflict();
 
         const oldRows = await tx.battleMapChunk.findMany({
             where: { mapId },
@@ -332,7 +352,10 @@ export async function saveMap(
         const unchanged =
             !!snapshotPayload &&
             isDeepStrictEqual(
-                { ...snapshotPayload, tileLayers: snapshotPayload.tileLayers ?? {} },
+                {
+                    ...snapshotPayload,
+                    tileLayers: snapshotPayload.tileLayers ?? {},
+                },
                 plain(versionPayload)
             );
 

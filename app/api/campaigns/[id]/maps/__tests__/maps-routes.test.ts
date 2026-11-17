@@ -24,6 +24,10 @@ const svc = vi.hoisted(() => ({
 
 vi.mock('@/lib/server/battle-maps/library-service', () => svc);
 
+const access = vi.hoisted(() => ({ requireMapReadAccess: vi.fn() }));
+
+vi.mock('@/lib/server/battle-maps/player-access', () => access);
+
 import { POST as clone } from '../[mapId]/clone/route';
 import { DELETE, GET, PUT } from '../[mapId]/route';
 import { GET as list, POST } from '../route';
@@ -50,6 +54,8 @@ const valid = {
     walls: ['0:0:e'],
 };
 
+const validSave = { ...valid, expectedVersion: 1 };
+
 const send = (method: string, body?: unknown, headers?: HeadersInit, q = '') =>
     new Request(`http://x/maps${q}`, {
         method,
@@ -63,15 +69,50 @@ beforeEach(() => {
     vi.clearAllMocks();
     auth.requireDM.mockResolvedValue({ userId: 'dm', isDM: true });
     auth.requireCampaignAccess.mockResolvedValue({ userId: 'p', isDM: false });
+    access.requireMapReadAccess.mockResolvedValue(null);
     svc.getMap.mockResolvedValue(full);
     svc.getMapMeta.mockResolvedValue(full);
 });
 
 describe('maps routes', () => {
-    it('GET list for members', async () => {
+    it('GET list is DM-only', async () => {
         svc.listMaps.mockResolvedValue([]);
 
         expect((await list(send('GET'), ctx)).status).toBe(200);
+
+        auth.requireDM.mockResolvedValue(forbidden());
+
+        expect((await list(send('GET'), ctx)).status).toBe(403);
+        expect(svc.listMaps).toHaveBeenCalledTimes(1);
+    });
+
+    it('GET one by a player without a battle on the map is 403', async () => {
+        access.requireMapReadAccess.mockResolvedValue(forbidden());
+
+        expect((await GET(send('GET'), ctx)).status).toBe(403);
+        expect(access.requireMapReadAccess).toHaveBeenCalledWith(
+            'c1',
+            'm1',
+            false
+        );
+        expect(svc.getMap).not.toHaveBeenCalled();
+    });
+
+    it('PUT without expectedVersion is 400', async () => {
+        expect((await PUT(send('PUT', valid), ctx)).status).toBe(400);
+        expect(svc.saveMap).not.toHaveBeenCalled();
+    });
+
+    it('POST at the library quota is 409 with the limit param', async () => {
+        const { ContentError } = await import('@/lib/server/content/errors');
+
+        svc.createMap.mockRejectedValueOnce(
+            new ContentError('errors.battleMapLimit', 409, undefined, {
+                max: 100,
+            })
+        );
+
+        expect((await POST(send('POST', valid), ctx)).status).toBe(409);
     });
 
     it('GET one: 200 with ETag, 304 on match, 404, 403 for another campaign', async () => {
@@ -138,7 +179,7 @@ describe('maps routes', () => {
         svc.saveMap.mockRejectedValueOnce(gone);
         svc.deleteMap.mockRejectedValueOnce(gone);
 
-        expect((await PUT(send('PUT', valid), ctx)).status).toBe(404);
+        expect((await PUT(send('PUT', validSave), ctx)).status).toBe(404);
         expect((await DELETE(send('DELETE'), ctx)).status).toBe(404);
     });
 
@@ -173,7 +214,7 @@ describe('maps routes', () => {
         auth.requireDM.mockResolvedValue(forbidden());
 
         expect((await POST(send('POST', valid), ctx)).status).toBe(403);
-        expect((await PUT(send('PUT', valid), ctx)).status).toBe(403);
+        expect((await PUT(send('PUT', validSave), ctx)).status).toBe(403);
         expect((await DELETE(send('DELETE'), ctx)).status).toBe(403);
         expect((await clone(send('POST', {}), ctx)).status).toBe(403);
         expect(svc.createMap).not.toHaveBeenCalled();
@@ -184,7 +225,7 @@ describe('maps routes', () => {
         svc.saveMap.mockResolvedValue({ id: 'm1', version: 3 });
 
         expect((await POST(send('POST', valid), ctx)).status).toBe(201);
-        expect((await PUT(send('PUT', valid), ctx)).status).toBe(200);
+        expect((await PUT(send('PUT', validSave), ctx)).status).toBe(200);
 
         const dataUrl = {
             ...valid,
@@ -207,7 +248,7 @@ describe('maps routes', () => {
 
         expect((await POST(send('POST', tooBig), ctx)).status).toBe(400);
 
-        const outside = { ...valid, walls: ['25:0:e'] };
+        const outside = { ...validSave, walls: ['25:0:e'] };
 
         expect((await PUT(send('PUT', outside), ctx)).status).toBe(400);
     });

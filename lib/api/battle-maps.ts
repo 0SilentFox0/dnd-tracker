@@ -5,8 +5,11 @@ import {
     campaignPut,
 } from './client';
 
-import type { BattleMapInput } from '@/lib/schemas/battle-maps';
-import type { BattleMapTilePatchInput } from '@/lib/schemas/battle-maps';
+import type {
+    BattleMapInput,
+    BattleMapSaveInput,
+    BattleMapTilePatchInput,
+} from '@/lib/schemas/battle-maps';
 import type {
     BattleMapBrief,
     BattleMapFull,
@@ -33,7 +36,7 @@ export const createBattleMap = (campaignId: string, data: BattleMapInput) =>
 export const updateBattleMap = (
     campaignId: string,
     mapId: string,
-    data: BattleMapInput
+    data: BattleMapSaveInput
 ) => campaignPut<BattleMapBrief>(campaignId, `/maps/${mapId}`, data);
 
 export const deleteBattleMap = (campaignId: string, mapId: string) =>

@@ -555,6 +555,7 @@
   "weaponReloading": "The weapon is reloading",
   "effectOutsideComposition": "The effect belongs to a module outside this campaign's rule system",
   "battleMapConflict": "The map was changed elsewhere: reload the page to see the latest version",
+  "battleMapLimit": "The library already has {max} maps — delete some",
   "battleMapInUse": "The map is used by a battle and cannot be deleted",
   "battleMapNotFound": "The map was not found in the campaign library",
   "battleMapTooLarge": "This map is too large for a battle",

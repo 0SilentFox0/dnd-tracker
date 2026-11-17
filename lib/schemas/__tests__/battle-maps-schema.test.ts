@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { battleMapInputSchema } from '../battle-maps';
+import { battleMapInputSchema, battleMapSaveSchema } from '../battle-maps';
 
 const input = (map: object) => ({
     name: 'Cave',
@@ -128,5 +128,22 @@ describe('battleMapInputSchema', () => {
 
         expect(photo(200).success).toBe(true);
         expect(photo(201).success).toBe(false);
+    });
+});
+
+describe('battleMapSaveSchema', () => {
+    it('requires expectedVersion and keeps the input refinements', () => {
+        expect(battleMapSaveSchema.safeParse(input({})).success).toBe(false);
+        expect(
+            battleMapSaveSchema.safeParse({ ...input({}), expectedVersion: 1 })
+                .success
+        ).toBe(true);
+        expect(
+            battleMapSaveSchema.safeParse({
+                ...input({}),
+                walls: ['99:0:e'],
+                expectedVersion: 1,
+            }).success
+        ).toBe(false);
     });
 });

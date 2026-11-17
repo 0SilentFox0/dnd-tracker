@@ -1,5 +1,6 @@
 import { Prisma } from '@prisma/client';
 
+import { MAP_LIMITS } from '@/lib/constants/map-limits';
 import { validateTileIdsForLayer } from '@/lib/constants/tilesets/catalog';
 import { prisma } from '@/lib/db';
 import { pruneMapVersions } from '@/lib/server/battle-maps/library-service';
@@ -50,7 +51,9 @@ export function tileLayersToSnapshot(
     const snapshot: TileSnapshot = {};
 
     for (const row of rows) {
-        const layers = parseSnapshot({ [keyOf(row.cx, row.cy)]: row.tileLayers });
+        const layers = parseSnapshot({
+            [keyOf(row.cx, row.cy)]: row.tileLayers,
+        });
 
         Object.assign(snapshot, layers);
     }
@@ -117,7 +120,10 @@ export async function patchTileChunks(
 
         if (patch.data !== null) {
             try {
-                validateTileIdsForLayer(decodeTileChunk(patch.data), patch.layer);
+                validateTileIdsForLayer(
+                    decodeTileChunk(patch.data),
+                    patch.layer
+                );
             } catch {
                 throw new ContentError('errors.invalidBody', 400);
             }
@@ -132,9 +138,9 @@ export async function patchTileChunks(
 
         if (map.mapVersion !== expectedVersion) throw conflict();
 
-        const maxCx = Math.ceil(map.cols / 16);
+        const maxCx = Math.ceil(map.cols / MAP_LIMITS.chunk);
 
-        const maxCy = Math.ceil(map.rows / 16);
+        const maxCy = Math.ceil(map.rows / MAP_LIMITS.chunk);
 
         for (const patch of patches)
             if (patch.cx >= maxCx || patch.cy >= maxCy)
@@ -174,14 +180,19 @@ export async function patchTileChunks(
 
         if (!count) throw conflict();
 
-        for (const coord of new Set(patches.map(({ cx, cy }) => keyOf(cx, cy)))) {
+        for (const coord of new Set(
+            patches.map(({ cx, cy }) => keyOf(cx, cy))
+        )) {
             const [cx, cy] = coord.split(':').map(Number);
 
             const existing = byCoord.get(coord);
 
             const tileLayers = nextTiles[coord];
 
-            if (!tileLayers && (!existing || existing.data === EMPTY_EDGE_CHUNK)) {
+            if (
+                !tileLayers &&
+                (!existing || existing.data === EMPTY_EDGE_CHUNK)
+            ) {
                 await tx.battleMapChunk.deleteMany({
                     where: { mapId, cx, cy },
                 });

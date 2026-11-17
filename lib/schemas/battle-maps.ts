@@ -51,53 +51,64 @@ const edgesValid = (
     });
 };
 
-export const battleMapInputSchema = z
-    .object({
-        name: z.string().trim().min(1).max(80),
-        map: headerSchema,
-        walls: edges.default([]),
-        bars: edges.default([]),
-        expectedVersion: z.number().int().min(1).optional(),
-    })
-    .superRefine((m, ctx) => {
-        if (!staticTerrainOnly(m.map.terrain))
-            ctx.addIssue({
-                code: 'custom',
-                message: 'battleSetup.validation.libraryTerrainRuntime',
-                path: ['map', 'terrain'],
-            });
+const battleMapBase = z.object({
+    name: z.string().trim().min(1).max(80),
+    map: headerSchema,
+    walls: edges.default([]),
+    bars: edges.default([]),
+    expectedVersion: z.number().int().min(1).optional(),
+});
 
-        const badEdges = (path: 'walls' | 'bars') =>
-            ctx.addIssue({
-                code: 'custom',
-                message: 'battleSetup.validation.badEdges',
-                path: [path],
-            });
+const refineBattleMap = (
+    m: z.infer<typeof battleMapBase>,
+    ctx: z.RefinementCtx
+) => {
+    if (!staticTerrainOnly(m.map.terrain))
+        ctx.addIssue({
+            code: 'custom',
+            message: 'battleSetup.validation.libraryTerrainRuntime',
+            path: ['map', 'terrain'],
+        });
 
-        const walls = new Set(m.walls);
+    const badEdges = (path: 'walls' | 'bars') =>
+        ctx.addIssue({
+            code: 'custom',
+            message: 'battleSetup.validation.badEdges',
+            path: [path],
+        });
 
-        if (!edgesValid(m.walls, m.map)) badEdges('walls');
+    const walls = new Set(m.walls);
 
-        if (!edgesValid(m.bars, m.map) || m.bars.some((e) => walls.has(e)))
-            badEdges('bars');
+    if (!edgesValid(m.walls, m.map)) badEdges('walls');
 
-        const solid = new Set([...m.walls, ...m.bars]);
+    if (!edgesValid(m.bars, m.map) || m.bars.some((e) => walls.has(e)))
+        badEdges('bars');
 
-        const doors = Object.keys(m.map.doors ?? {});
+    const solid = new Set([...m.walls, ...m.bars]);
 
-        if (!edgesValid(doors, m.map) || doors.some((e) => solid.has(e)))
-            ctx.addIssue({
-                code: 'custom',
-                message: 'battleSetup.validation.doorOnWall',
-                path: ['map', 'doors'],
-            });
-    });
+    const doors = Object.keys(m.map.doors ?? {});
+
+    if (!edgesValid(doors, m.map) || doors.some((e) => solid.has(e)))
+        ctx.addIssue({
+            code: 'custom',
+            message: 'battleSetup.validation.doorOnWall',
+            path: ['map', 'doors'],
+        });
+};
+
+export const battleMapInputSchema = battleMapBase.superRefine(refineBattleMap);
+
+export const battleMapSaveSchema = battleMapBase
+    .extend({ expectedVersion: z.number().int().min(1) })
+    .superRefine(refineBattleMap);
 
 export const battleMapCloneSchema = z.object({
     name: z.string().trim().min(1).max(80).optional(),
 });
 
 export type BattleMapInput = z.infer<typeof battleMapInputSchema>;
+
+export type BattleMapSaveInput = z.infer<typeof battleMapSaveSchema>;
 
 const tileLayerSchema = z.enum(TILE_LAYERS);
 

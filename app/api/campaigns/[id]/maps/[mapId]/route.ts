@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 import '@/lib/server/systems/registry';
 import { API_ERRORS } from '@/lib/constants/api-errors';
-import { battleMapInputSchema } from '@/lib/schemas/battle-maps';
+import { battleMapSaveSchema } from '@/lib/schemas/battle-maps';
 import {
     deleteMap,
     getMap,
@@ -10,6 +10,7 @@ import {
     saveMap,
     withStoredBackground,
 } from '@/lib/server/battle-maps/library-service';
+import { requireMapReadAccess } from '@/lib/server/battle-maps/player-access';
 import { requireCampaignAccess, requireDM } from '@/lib/utils/api/api-auth';
 import { errorResponse, privateJson } from '@/lib/utils/api/api-response';
 import { handleApiError } from '@/lib/utils/api/error-handler';
@@ -29,6 +30,10 @@ export async function GET(req: Request, { params }: Ctx) {
     const access = await requireCampaignAccess(id);
 
     if (access instanceof NextResponse) return access;
+
+    const denied = await requireMapReadAccess(id, mapId, access.isDM);
+
+    if (denied) return denied;
 
     const raw = new URL(req.url).searchParams.get('version');
 
@@ -78,7 +83,7 @@ export async function PUT(req: Request, { params }: Ctx) {
 
     if (existing instanceof NextResponse) return existing;
 
-    const body = await parseBody(battleMapInputSchema, req);
+    const body = await parseBody(battleMapSaveSchema, req);
 
     if (body instanceof NextResponse) return body;
 
