@@ -18,6 +18,7 @@ import { publicToolData } from '@/lib/utils/common/public-tool-data';
 export type AiToolContext = {
     caller?: AssistantCaller;
     toolCallId?: string;
+    requestKey?: string;
     campaignId: string;
     userId: string;
     scopes: readonly ApiTokenScope[];

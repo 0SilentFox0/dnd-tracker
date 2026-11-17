@@ -8,8 +8,20 @@ import { ContentError } from '@/lib/server/content/errors';
 export const toolRequestKey = (runId: string, toolCallId: string) =>
     `${runId}_${createHash('sha256').update(toolCallId).digest('hex')}`;
 
-export function toolRequestId(ctx: AiToolContext): string {
-    if (!ctx.caller?.runId) return randomUUID();
+/** Stable per retry: the same token, JSON-RPC id, tool and arguments map to one key. */
+export const mcpRequestKey = (
+    tokenId: string,
+    rpcId: string | number,
+    toolName: string,
+    input: unknown
+) =>
+    `mcp_${createHash('sha256')
+        .update(JSON.stringify([tokenId, rpcId, toolName, input ?? null]))
+        .digest('hex')
+        .slice(0, 48)}`;
+
+export function toolRequestId(ctx: AiToolContext, clientKey?: string): string {
+    if (!ctx.caller?.runId) return clientKey ?? ctx.requestKey ?? randomUUID();
 
     if (!ctx.toolCallId)
         throw new ContentError(API_ERRORS.ASSISTANT_TOOL_CALL_ID_MISSING, 409);

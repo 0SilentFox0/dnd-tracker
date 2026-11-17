@@ -8,6 +8,7 @@ import { toolRequestId } from './request-key';
 
 import { API_TOKEN_SCOPES } from '@/lib/constants/ai';
 import { API_ERRORS } from '@/lib/constants/api-errors';
+import { assistantRequestIdSchema } from '@/lib/schemas/ai';
 import { authorizeAssistant } from '@/lib/server/assistant/authorize';
 import { assistantCatalog } from '@/lib/server/assistant/catalog';
 import { dispatchAction } from '@/lib/server/assistant/execute';
@@ -29,6 +30,14 @@ const page = {
 };
 
 const request = z.strictObject({ actionId, input: z.unknown() });
+
+const actionRequest = request.extend({
+    requestId: assistantRequestIdSchema
+        .optional()
+        .describe(
+            'Client idempotency key: retrying with the same key never applies the action twice.'
+        ),
+});
 
 export const assistantCapabilitiesTool = defineTool({
     name: 'assistant_capabilities',
@@ -127,11 +136,11 @@ export const assistantActionTool = defineTool({
     title: 'Prepare action',
     description:
         'Calls the single dispatcher with review/auto policy. Pending and handoff do not mean the change was made; confirmation is by a human in the UI only.',
-    input: request,
-    handler: (ctx, input) =>
+    input: actionRequest,
+    handler: (ctx, { requestId, ...input }) =>
         dispatchAction(
             callerOf(ctx),
-            { ...input, requestId: toolRequestId(ctx) },
+            { ...input, requestId: toolRequestId(ctx, requestId) },
             ctx.abortSignal
         ),
 });
