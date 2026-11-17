@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { noActions, noReactions } from '@/lib/utils/battle/actions/none';
+import { proficiencyOf, savesOf } from '@/lib/utils/battle/saves/access';
 import { noProficiency, noSaves } from '@/lib/utils/battle/saves/none';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
@@ -16,8 +17,8 @@ describe('combat slots through the registry', () => {
 
         expect(combat.actions).toBe(noActions);
         expect(combat.reactions).toBe(noReactions);
-        expect(combat.saves).toBe(noSaves);
-        expect(combat.proficiency).toBe(noProficiency);
+        expect(savesOf(WFRP_RULES)).toBe(noSaves);
+        expect(proficiencyOf(WFRP_RULES)).toBe(noProficiency);
     });
 
     it('d20 answers with its own actions, reactions, saves and proficiency', () => {

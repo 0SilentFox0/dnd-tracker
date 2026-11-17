@@ -41,7 +41,6 @@ import { WFRP_TURN } from './rules/turn';
 
 import { COINS } from '@/lib/constants/inventory';
 import { noActions, noReactions } from '@/lib/utils/battle/actions/none';
-import { noProficiency, noSaves } from '@/lib/utils/battle/saves/none';
 import type { SystemData } from '@/lib/utils/rules/systems/slot';
 import type { RuleSystemDefinition } from '@/lib/utils/rules/systems/types';
 
@@ -139,8 +138,6 @@ export const WFRP_MODULE: RuleSystemDefinition = {
         turn: WFRP_TURN,
         actions: noActions,
         reactions: noReactions,
-        saves: noSaves,
-        proficiency: noProficiency,
         hitModel: wfrpHitModel,
     },
     lineage: false,
