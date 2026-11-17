@@ -2,8 +2,8 @@
 import { cleanup, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { FieldRenderer } from '@/components/abilities/fields/FieldRenderer';
 import { AbilityEditorProvider } from '@/components/abilities/editor-context';
+import { FieldRenderer } from '@/components/abilities/fields/FieldRenderer';
 import { renderWithIntl } from '@/lib/i18n/test/render-with-intl';
 
 vi.mock('@/lib/hooks/spells', () => ({
@@ -25,7 +25,7 @@ describe('FieldRenderer school field', () => {
                     value="school-id-1"
                     onChange={vi.fn()}
                     path="effects.0.school"
-                    owner="spellTargeting"
+                    owner="flags.spellTargeting"
                 />
             </AbilityEditorProvider>,
             { locale: 'uk', namespaces: ['common', 'abilityRegistry'] }
