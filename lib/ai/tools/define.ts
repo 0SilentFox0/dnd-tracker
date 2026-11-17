@@ -91,6 +91,21 @@ export type ToolResult =
           };
       };
 
+/** Object root (MCP requires it); one envelope for result and error. */
+export const toolOutputSchema = z.object({
+    version: z.literal(2),
+    kind: z.enum(['result', 'error']),
+    data: z.unknown().optional(),
+    error: z
+        .object({
+            code: z.string(),
+            status: z.number(),
+            message: z.string(),
+            issues: z.unknown().optional(),
+        })
+        .optional(),
+});
+
 export function clip(value: unknown): string {
     if (typeof value === 'string')
         return value.length > AI_LIMITS.toolResultChars

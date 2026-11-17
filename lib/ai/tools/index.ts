@@ -11,6 +11,7 @@ import {
     type AiToolDef,
     runTool,
     runToolResult,
+    toolOutputSchema,
 } from './define';
 import { getPartyTool, readCharacterTool } from './party';
 import { proposeScenarioEditTool } from './propose';
@@ -85,6 +86,7 @@ export function registerMcpTools(
                 title: def.title,
                 description: def.description,
                 inputSchema: def.input as z.ZodObject,
+                outputSchema: toolOutputSchema,
             },
             async (input: unknown, extra) => {
                 const tokenId = base.caller?.tokenId;
@@ -111,6 +113,7 @@ export function registerMcpTools(
                     content: [
                         { type: 'text' as const, text: JSON.stringify(result) },
                     ],
+                    structuredContent: result,
                     isError: result.kind === 'error',
                 };
             }
