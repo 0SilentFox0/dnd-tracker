@@ -7,7 +7,8 @@ import { textRef } from '@/lib/i18n/text-ref';
 import { checkVictoryConditions } from '@/lib/utils/battle/turn/victory';
 import type { Ruleset } from '@/lib/utils/rules';
 import type { BattleSummary, BattleSummaryHero } from '@/types/api';
-import type { BattleAction, BattleParticipant } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 import type { TextRef } from '@/types/text';
 
 type SummaryEvent = Pick<

@@ -10,14 +10,14 @@ import { cellsOf, isOnMap } from '@/lib/utils/battle/grid/occupancy';
 import { applyTerrain } from '@/lib/utils/battle/grid/terrain';
 import type { CastableSpell } from '@/lib/utils/battle/types/spell-process';
 import type { CreateTerrainEffect } from '@/lib/utils/spells/model/schema';
+import type { BattleParticipant } from '@/types/battle';
 import type {
     BattleMapConfig,
-    BattleParticipant,
     GridPoint,
     SpellZoneRuntime,
     TerrainCell,
     TerrainDamage,
-} from '@/types/battle';
+} from '@/types/battle-grid';
 
 interface ZoneHazardInput {
     map: BattleMapConfig | null | undefined;

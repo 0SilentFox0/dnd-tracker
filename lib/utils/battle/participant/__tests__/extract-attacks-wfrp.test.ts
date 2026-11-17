@@ -16,7 +16,8 @@ import { mitigateWfrpDamage } from '@/systems/wfrp/rules/combat/mitigate';
 import { wfrpAbilitiesOf } from '@/systems/wfrp/rules/combat/participant';
 import { armourAp } from '@/systems/wfrp/rules/equipment/armour';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
-import type { BattleAttack, BattleMapConfig } from '@/types/battle';
+import type { BattleAttack } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 const weaponStats = (over: object) => ({
     type: 'weapon',

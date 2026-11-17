@@ -10,7 +10,7 @@ import {
 import { UNIT_QUANTITY as QUANTITY } from '@/lib/constants/battle-units';
 import { useCharacters } from '@/lib/hooks/characters';
 import { useUnitPicker } from '@/lib/hooks/units';
-import type { AddParticipantData } from '@/types/battle';
+import type { AddParticipantData } from '@/types/battle-actions';
 
 interface Options {
     campaignId: string;

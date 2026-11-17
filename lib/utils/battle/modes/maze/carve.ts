@@ -3,7 +3,7 @@ import { pick, randInt, type Rng, shuffled } from './rng';
 import { allInteriorEdges, edgeKey } from './walls';
 
 import { cellKey, orthoNeighbors } from '@/lib/utils/battle/grid/geometry';
-import type { GridPoint, MazeDifficulty } from '@/types/battle';
+import type { GridPoint, MazeDifficulty } from '@/types/battle-grid';
 
 export type CarveAlgo = 'backtracker' | 'prim';
 

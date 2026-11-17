@@ -17,7 +17,7 @@ vi.mock('@/lib/server/battle-maps/campaign-limits', () => ({
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { mapUpdateMutation } from '@/lib/server/battles/mutations/map-update/map-update-mutation';
-import type { BattleMapConfig } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 const map: BattleMapConfig = {
     cols: 8,

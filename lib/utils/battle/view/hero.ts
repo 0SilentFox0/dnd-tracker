@@ -25,12 +25,9 @@ import { spellNeedsSlot, spellSlotLeft } from '@/lib/utils/battle/spell/slot';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import { PACT_KEY } from '@/lib/utils/spells/slot-keys';
 import type { ResolvedAbility } from '@/types/abilities';
-import type {
-    BattleAction,
-    BattleAttack,
-    BattleMapConfig,
-    BattleParticipant,
-} from '@/types/battle';
+import type { BattleAttack, BattleParticipant } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 export type SpellTier =
     | 'iron'

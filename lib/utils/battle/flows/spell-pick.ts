@@ -35,11 +35,8 @@ import {
 import { matchesTargetFilter } from '@/lib/utils/battle/spell/target-filter';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
-import type {
-    BattleMapConfig,
-    BattleParticipant,
-    GridPoint,
-} from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 import type { BookSpell } from '@/types/spells';
 
 export const spellDefinition = (s: BookSpell) => ({

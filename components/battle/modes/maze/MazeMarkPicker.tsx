@@ -16,7 +16,8 @@ import { MAZE_MARK_SYMBOLS } from '@/lib/constants/battle';
 import { useBattleScene } from '@/lib/hooks/battle';
 import { useMazeView } from '@/lib/hooks/battle/modes/maze';
 import { mazeBudgetLeft } from '@/lib/utils/battle/modes/maze';
-import type { BattleParticipant, MazeMarkSymbol } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { MazeMarkSymbol } from '@/types/battle-grid';
 
 const SYMBOL_ICONS: Record<MazeMarkSymbol, typeof Star> = {
     'arrow-n': ArrowUp,

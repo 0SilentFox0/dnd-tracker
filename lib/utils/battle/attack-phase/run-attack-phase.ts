@@ -45,12 +45,9 @@ import type {
     AfterAttackCtx,
     AfterAttackResult,
 } from '@/lib/utils/rules/systems/types';
-import type {
-    ActiveEffect,
-    BattleAction,
-    BattleMapConfig,
-    BattleParticipant,
-} from '@/types/battle';
+import type { ActiveEffect, BattleParticipant } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 export type AttackPhaseInput = {
     battle: {

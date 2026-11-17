@@ -12,7 +12,7 @@ import {
     trimFxQueue,
 } from '@/lib/utils/battle/fx/queue';
 import type { SystemDice } from '@/lib/utils/battle/fx/system-dice';
-import type { BattleAction } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 
 const adv = (
     s: FxQueueState,
@@ -183,11 +183,13 @@ describe('advanceFxQueue', () => {
     });
 
     describe('system dice', () => {
-        const m = (d10: number): SystemDice[] => [{
-            key: `morale:1:0:p:${d10}`,
-            actorId: 'p',
-            spec: { seed: 1, groups: [[{ sides: 10, value: d10 }]] },
-        }];
+        const m = (d10: number): SystemDice[] => [
+            {
+                key: `morale:1:0:p:${d10}`,
+                actorId: 'p',
+                spec: { seed: 1, groups: [[{ sides: 10, value: d10 }]] },
+            },
+        ];
 
         const base = adv(INITIAL_FX_QUEUE, [melee(1)], true);
 

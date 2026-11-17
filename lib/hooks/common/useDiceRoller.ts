@@ -4,7 +4,7 @@ import { useCallback, useRef, useState } from 'react';
 
 import { type DiceThrowSpec, THROW_MS } from '@/lib/utils/battle/fx/dice';
 import { cryptoRandom, rollDie } from '@/lib/utils/common/dice';
-import type { DieSides } from '@/types/battle';
+import type { DieSides } from '@/types/battle-actions';
 
 export const ROLLER_SIDES: readonly DieSides[] = [4, 6, 8, 10, 12, 20];
 

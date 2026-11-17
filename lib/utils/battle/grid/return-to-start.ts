@@ -3,11 +3,8 @@ import { canStand } from './occupancy';
 import { textRef } from '@/lib/i18n/text-ref';
 import { findFlags } from '@/lib/utils/abilities/engine/core/collect-modifiers';
 import { REJECT } from '@/lib/utils/battle/store/reject';
-import type {
-    BattleMapConfig,
-    BattleParticipant,
-    GridPoint,
-} from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 import type { LogLine } from '@/types/text';
 
 export type ReturnToStart =

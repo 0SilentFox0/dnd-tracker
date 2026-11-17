@@ -17,13 +17,13 @@ import {
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 import type { SpellTargeting } from '@/lib/utils/spells/model/schema';
 import type { AbilityEvent } from '@/types/abilities';
+import type { BattleParticipant } from '@/types/battle';
 import type {
     BattleMapConfig,
-    BattleParticipant,
     Direction8,
     GridPoint,
     MazeConfig,
-} from '@/types/battle';
+} from '@/types/battle-grid';
 
 const mapOf = (over: Partial<MazeConfig> = {}): BattleMapConfig =>
     mazeMap({ exit: { x: 11, y: 11 }, ...over }, 12);

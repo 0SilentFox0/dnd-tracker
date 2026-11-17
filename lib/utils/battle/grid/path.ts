@@ -17,11 +17,8 @@ import { conditionSourceIds } from '@/lib/utils/battle/conditions/query';
 import { hasEffectMarker } from '@/lib/utils/battle/participant/state';
 import { controlledByDm } from '@/lib/utils/battle/participant/unit-control';
 import type { Ruleset } from '@/lib/utils/rules/schema';
-import type {
-    BattleMapConfig,
-    BattleParticipant,
-    GridPoint,
-} from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 
 /** Швидкість у клітинках без Ривка; 0, якщо знерухомлений. */
 export function baseMovement(p: BattleParticipant, rules: Ruleset): number {

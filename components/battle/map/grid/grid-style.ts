@@ -1,7 +1,7 @@
 import type { useTranslations } from 'next-intl';
 
 import { type CellMark, type GridWindow, UNIT } from '@/lib/utils/battle/grid';
-import type { GridPoint, TerrainCell } from '@/types/battle';
+import type { GridPoint, TerrainCell } from '@/types/battle-grid';
 
 export const HATCH_ID = 'battle-map-barrier-hatch';
 

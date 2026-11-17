@@ -2,7 +2,8 @@ import { ruleRow, totalRow } from './rows';
 
 import { textRef } from '@/lib/i18n/text-ref';
 import { parseDice } from '@/lib/utils/common/dice';
-import type { BattleAttack, DamageRow, DamageStep } from '@/types/battle';
+import type { BattleAttack } from '@/types/battle';
+import type { DamageRow, DamageStep } from '@/types/battle-actions';
 
 export const WEAPON_FLAT_LABEL = textRef('battleLog.damage.steps.weaponBonus');
 

@@ -2,7 +2,7 @@ import { MAZE_UI } from './maze';
 import type { MapModeUi } from './types';
 
 import { activeMapMode, type MapModeKey } from '@/lib/utils/battle/modes';
-import type { BattleMapConfig } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 export const MAP_MODE_UI: Record<MapModeKey, MapModeUi> = { maze: MAZE_UI };
 

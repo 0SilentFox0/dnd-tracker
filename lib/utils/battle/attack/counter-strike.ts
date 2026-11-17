@@ -16,12 +16,9 @@ import type { CritPicker } from '@/lib/utils/battle/crit-choice/types';
 import { hasEffectMarker } from '@/lib/utils/battle/participant/state';
 import type { Ruleset } from '@/lib/utils/rules';
 import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
-import type {
-    BattleAction,
-    BattleAttack,
-    BattleMapConfig,
-    BattleParticipant,
-} from '@/types/battle';
+import type { BattleAttack, BattleParticipant } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 type Kind = AttackType;
 

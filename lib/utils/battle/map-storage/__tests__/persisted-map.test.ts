@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { composeEffectiveMap } from '../effective-map';
 import { clientMapOf, persistedMap } from '../persisted-map';
 
-import type { BattleMapConfig, BattleMapState } from '@/types/battle';
+import type { BattleMapConfig, BattleMapState } from '@/types/battle-grid';
 
 const stored: BattleMapConfig = {
     cols: 8,

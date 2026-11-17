@@ -28,7 +28,8 @@ import { dealResistedHits } from '@/lib/utils/battle/damage/resisted-ability-dam
 import type { AttackRollResult } from '@/lib/utils/battle/types/attack';
 import type { CastableSpell } from '@/lib/utils/battle/types/spell-process';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
-import type { BattleAttack, DamageRow } from '@/types/battle';
+import type { BattleAttack } from '@/types/battle';
+import type { DamageRow } from '@/types/battle-actions';
 import type { LogLine } from '@/types/text';
 
 export interface ResolveHitParams {

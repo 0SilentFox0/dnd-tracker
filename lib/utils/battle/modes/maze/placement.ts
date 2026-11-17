@@ -6,7 +6,8 @@ import { ParticipantSide } from '@/lib/constants/battle';
 import { cellKey, inBounds, samePoint } from '@/lib/utils/battle/grid/geometry';
 import { occupiedBy } from '@/lib/utils/battle/grid/occupancy';
 import { MAZE_TEXTS } from '@/lib/utils/battle/modes/maze/texts';
-import type { BattleParticipant, GridPoint } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { GridPoint } from '@/types/battle-grid';
 
 export interface MazePlacementArgs {
     participants: BattleParticipant[];

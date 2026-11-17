@@ -15,7 +15,7 @@ import {
 } from '@/lib/utils/battle/view';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 import type { ResolvedAbility } from '@/types/abilities';
-import type { BattleAction } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 
 const ability = (over: Partial<ResolvedAbility>): ResolvedAbility =>
     ({

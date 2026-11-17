@@ -48,7 +48,8 @@ import type {
 import { rngOf } from '@/lib/utils/common/rng';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { ResolveAttackCtx } from '@/lib/utils/rules/systems/types';
-import type { BattleAction, BattleParticipant } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 
 export type { ProcessAttackParams, ProcessAttackResult };
 

@@ -1,5 +1,5 @@
 import { wallSet as edgeSet } from '@/lib/utils/battle/grid/walls';
-import type { MazeConfig } from '@/types/battle';
+import type { MazeConfig } from '@/types/battle-grid';
 
 export type { ParsedEdge } from '@/lib/utils/battle/grid/walls';
 export {

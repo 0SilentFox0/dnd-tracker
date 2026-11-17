@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { mergeLibraryHeader } from '@/lib/utils/battle/map-storage/merge-header';
-import type { BattleMapConfig } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 const base: BattleMapConfig = {
     cols: 10,

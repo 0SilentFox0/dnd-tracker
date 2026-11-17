@@ -5,7 +5,8 @@ import { lineOfFire } from '../line-of-fire';
 import { ParticipantSide } from '@/lib/constants/battle';
 import { placed, testMap } from '@/lib/utils/battle/__tests__/fixtures/placed';
 import { mazeMap } from '@/lib/utils/battle/modes/maze/__tests__/fixtures';
-import type { BattleParticipant, GridPoint } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { GridPoint } from '@/types/battle-grid';
 
 const MAP = testMap();
 

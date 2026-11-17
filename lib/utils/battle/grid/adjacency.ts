@@ -1,11 +1,8 @@
 import { edgeBlocks, wallsOf } from './edges';
 import { cellsOf, isAdjacent } from './occupancy';
 
-import type {
-    BattleMapConfig,
-    BattleParticipant,
-    GridPoint,
-} from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 
 /** Хоч одна пара сусідніх клітинок без стіни між ними (ґрати удар не зупиняють). */
 export function cellsAdjacentOnMap(

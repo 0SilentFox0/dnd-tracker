@@ -1,4 +1,4 @@
-import type { MazeConfig } from '@/types/battle';
+import type { MazeConfig } from '@/types/battle-grid';
 
 // мітка чи прапорець не тягнуть ~20 КБ стін: шлемо лише змінені поля; null — треба повна карта
 export function mazeChange(

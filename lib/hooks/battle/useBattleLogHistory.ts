@@ -7,7 +7,7 @@ import { getBattleEvents } from '@/lib/api/battles';
 import { battleQueryKey } from '@/lib/hooks/battles';
 import { prependBattleLog } from '@/lib/utils/battle/client/apply-delta';
 import type { BattleScene } from '@/types/api';
-import type { BattleAction } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 
 const FIRST_EVENT_SEQ = 1;
 

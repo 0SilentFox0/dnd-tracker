@@ -15,11 +15,9 @@ import type {
     BattleScene,
     ClientBattleDelta,
 } from '@/types/api';
-import type {
-    BattleAction,
-    BattleParticipant,
-    MapStateDelta,
-} from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
+import type { MapStateDelta } from '@/types/battle-grid';
 
 function mergeLog(
     previous: BattleAction[],

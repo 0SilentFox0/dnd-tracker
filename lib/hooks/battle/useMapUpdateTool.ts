@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 
 import { useBattleMaps, useMapLibrarySync } from '@/lib/hooks/battle-maps';
 import { useConfirm } from '@/lib/hooks/common';
-import type { BattleMapRef } from '@/types/battle';
+import type { BattleMapRef } from '@/types/battle-grid';
 
 export interface MapUpdateTool {
     available: boolean;

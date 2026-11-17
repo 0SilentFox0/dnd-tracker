@@ -28,11 +28,11 @@ import {
 import { runJoinTriggers } from '@/lib/utils/battle/turn/join-triggers';
 import { type Ruleset } from '@/lib/utils/rules';
 import type {
-    BattleAction,
-    BattleMapConfig,
     BattleParticipant,
     BattlePreparationParticipant,
 } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
+import type { BattleMapConfig } from '@/types/battle-grid';
 import type { LogLine } from '@/types/text';
 
 export async function buildStartOrder(

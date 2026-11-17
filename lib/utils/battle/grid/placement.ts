@@ -3,11 +3,8 @@ import { fits, occupiesCells, sizeOf } from './occupancy';
 
 import { ParticipantSide } from '@/lib/constants/battle';
 import { modePlaceAll } from '@/lib/utils/battle/modes/server';
-import type {
-    BattleMapConfig,
-    BattleParticipant,
-    GridPoint,
-} from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 
 function sideAnchors(map: BattleMapConfig, side: string): GridPoint[] {
     const cols = Array.from({ length: map.cols }, (_, i) =>

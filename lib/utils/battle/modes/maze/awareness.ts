@@ -17,11 +17,8 @@ import type {
     NewBattleEvent,
     ScenePatch,
 } from '@/lib/utils/battle/store/types';
-import type {
-    BattleMapConfig,
-    BattleParticipant,
-    GridPoint,
-} from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 
 export interface AwarenessResult {
     participants: BattleParticipant[];

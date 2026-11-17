@@ -13,7 +13,8 @@ import { isHostile } from '@/lib/utils/battle/modes/engine';
 import { BattleRuleError } from '@/lib/utils/battle/store/errors';
 import { bonusTargetSide, needsBonusTarget } from '@/lib/utils/battle/view';
 import type { ResolvedAbility } from '@/types/abilities';
-import type { BattleMapConfig, BattleParticipant } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 export const abilityMaxTargets = (a: ResolvedAbility): number =>
     a.maxTargets ?? 1;

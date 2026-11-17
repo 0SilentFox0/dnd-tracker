@@ -11,7 +11,7 @@ import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { SelectField } from '@/components/ui/select-field';
 import { MAZE_DIFFICULTIES } from '@/lib/constants/battle';
 import type { MazeGenerateInput } from '@/lib/hooks/battle/modes/maze';
-import type { MazeDifficulty } from '@/types/battle';
+import type { MazeDifficulty } from '@/types/battle-grid';
 
 interface Props {
     open: boolean;

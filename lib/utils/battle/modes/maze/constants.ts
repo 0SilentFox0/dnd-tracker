@@ -1,4 +1,4 @@
-import type { MazeConfig, MazeDifficulty } from '@/types/battle';
+import type { MazeConfig, MazeDifficulty } from '@/types/battle-grid';
 
 export const MAZE_STEPS_PER_TURN = 3;
 

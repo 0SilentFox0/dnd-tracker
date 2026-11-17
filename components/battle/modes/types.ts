@@ -1,7 +1,8 @@
 import type { ComponentType, ReactNode } from 'react';
 
 import type { ModeView } from '@/lib/utils/battle/modes';
-import type { BattleMapConfig, BattleParticipant } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 export interface MapModeUi {
     /** Шари всередині трансформованої карти (над місцевістю, під жетонами). */

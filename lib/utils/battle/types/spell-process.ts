@@ -7,13 +7,9 @@ import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
 import type { SpellIngredient } from '@/lib/utils/spells/ingredients/types';
 import type { SpellDice } from '@/lib/utils/spells/model/dice';
 import type { SpellDefinition } from '@/lib/utils/spells/model/schema';
-import type {
-    BattleAction,
-    BattleMapConfig,
-    BattleParticipant,
-    SpellGrant,
-    TerrainDamage,
-} from '@/types/battle';
+import type { BattleParticipant, SpellGrant } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
+import type { BattleMapConfig, TerrainDamage } from '@/types/battle-grid';
 import type { LogLine } from '@/types/text';
 
 export interface CastableSpell {

@@ -20,11 +20,8 @@ import {
     participantsInCells,
 } from '@/lib/utils/battle/grid';
 import type { Ruleset } from '@/lib/utils/rules';
-import type {
-    AirborneState,
-    BattleMapConfig,
-    BattleParticipant,
-} from '@/types/battle';
+import type { AirborneState, BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 export function startDive(
     ps: BattleParticipant[],

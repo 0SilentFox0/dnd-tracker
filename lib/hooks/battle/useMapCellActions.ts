@@ -14,7 +14,7 @@ import {
     type MapScene,
     sameCell,
 } from '@/lib/utils/battle/grid';
-import type { BattleMapActions, GridPoint } from '@/types/battle';
+import type { BattleMapActions, GridPoint } from '@/types/battle-grid';
 
 interface MapCellActionsInput {
     scene: MapScene | null;

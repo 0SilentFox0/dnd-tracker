@@ -1,6 +1,6 @@
 import type { CriticalEffect } from '@/lib/constants/critical-effects';
 import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
-import type { DamageRow } from '@/types/battle';
+import type { DamageRow } from '@/types/battle-actions';
 import type { LogLine } from '@/types/text';
 
 export interface AttackRollResult {

@@ -7,7 +7,7 @@ import { fakeScene } from './fake-scene';
 
 import type { MapAim, MapPick } from '@/lib/utils/battle/grid';
 import type { MapTerrainData } from '@/types/api';
-import type { BattleMapConfig } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 vi.unmock('next-intl');
 
@@ -47,11 +47,17 @@ describe('useBattleMapScene', () => {
     it('adds viewer camera identity and keeps player follow enabled', () => {
         const player = setup(false);
 
-        expect(player.current().view.camera).toEqual({ follow: true, selfId: 'me' });
+        expect(player.current().view.camera).toEqual({
+            follow: true,
+            selfId: 'me',
+        });
 
         const dm = setup(true);
 
-        expect(dm.current().view.camera).toEqual({ follow: false, selfId: 'me' });
+        expect(dm.current().view.camera).toEqual({
+            follow: false,
+            selfId: 'me',
+        });
         act(() => dm.current().followTurn?.toggle());
         expect(dm.current().view.camera?.follow).toBe(true);
     });

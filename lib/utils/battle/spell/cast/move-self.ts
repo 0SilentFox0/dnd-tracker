@@ -12,11 +12,8 @@ import {
     occupiedBy,
     sizeOf,
 } from '@/lib/utils/battle/grid/occupancy';
-import type {
-    BattleMapConfig,
-    BattleParticipant,
-    GridPoint,
-} from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 import type { LogLine } from '@/types/text';
 
 /** Найближча до кастера вільна клітинка впритул до цілі; null — місця немає. */

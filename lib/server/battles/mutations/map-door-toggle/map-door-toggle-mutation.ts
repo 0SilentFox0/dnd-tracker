@@ -17,7 +17,8 @@ import { actorEvent, dmEvent } from '@/lib/utils/battle/store/event-mapping';
 import { REJECT } from '@/lib/utils/battle/store/reject';
 import { assertCanAct } from '@/lib/utils/battle/turn';
 import type { MapDoorToggleData } from '@/types/api';
-import type { BattleParticipant, DoorState } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { DoorState } from '@/types/battle-grid';
 
 const sameDoor = (a: DoorState | undefined, b: DoorState | undefined) =>
     !!a && !!b && a.open === b.open && !!a.locked === !!b.locked;

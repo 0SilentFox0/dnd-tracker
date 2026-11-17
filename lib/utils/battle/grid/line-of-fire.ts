@@ -12,7 +12,8 @@ import { bothOnMap, cellsOf, occupiedBy } from './occupancy';
 import { isAirborne } from '@/lib/utils/abilities/engine/core/participants';
 import { modeLineBlocked } from '@/lib/utils/battle/modes/engine';
 import { isUp } from '@/lib/utils/battle/participant/state';
-import type { BattleMapConfig, BattleParticipant } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 export interface LineOfFire {
     /** Укриття (×0.5): істоти, бар'єри, закриті клітинки, ворота режиму; стіна — окремо у `wallBlocked`. */

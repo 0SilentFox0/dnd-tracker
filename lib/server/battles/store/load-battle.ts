@@ -17,19 +17,24 @@ import type {
     ParticipantSnapshot,
     ParticipantState,
 } from '@/lib/utils/battle/store/types';
-import { deriveTileCells, type TileLayerChunks } from '@/lib/utils/battle/tiles/derive';
+import {
+    deriveTileCells,
+    type TileLayerChunks,
+} from '@/lib/utils/battle/tiles/derive';
 import { decodeTileChunk } from '@/lib/utils/battle/tiles/rle';
 import { parseRulesCached } from '@/lib/utils/rules/schema';
 import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
 import type { BattleAudioState } from '@/types/audio';
 import type {
+    BattleParticipant,
+    BattlePreparationParticipant,
+} from '@/types/battle';
+import type {
     BattleMapConfig,
     BattleMapRef,
     BattleMapState,
-    BattleParticipant,
-    BattlePreparationParticipant,
     MapBase,
-} from '@/types/battle';
+} from '@/types/battle-grid';
 
 type ParticipantRow = ParticipantColumns & {
     battleId: string;
@@ -39,11 +44,14 @@ type ParticipantRow = ParticipantColumns & {
 };
 
 const TILE_PROPERTIES = Object.fromEntries(
-    TILE_CATALOG.map((tile) => [tile.id, {
-        blocks: tile.blocks,
-        blocksSight: tile.blocksSight,
-        footprint: tile.footprint,
-    }])
+    TILE_CATALOG.map((tile) => [
+        tile.id,
+        {
+            blocks: tile.blocks,
+            blocksSight: tile.blocksSight,
+            footprint: tile.footprint,
+        },
+    ])
 );
 
 function rowToParticipant(row: ParticipantRow): BattleParticipant {
@@ -184,7 +192,12 @@ async function effectiveMapOf(
     return derived.blocked.size
         ? {
               ...effective,
-              blocked: [...new Set([...(effective.blocked ?? []), ...derived.blocked])],
+              blocked: [
+                  ...new Set([
+                      ...(effective.blocked ?? []),
+                      ...derived.blocked,
+                  ]),
+              ],
           }
         : effective;
 }

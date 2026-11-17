@@ -13,11 +13,8 @@ import {
     isHostile,
     modeMeleeBlockedText,
 } from '@/lib/utils/battle/modes/engine';
-import type {
-    BattleMapConfig,
-    BattleParticipant,
-    GridPoint,
-} from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 
 const FACINGS: GridPoint[] = [
     { x: 0, y: -1 },

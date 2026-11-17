@@ -16,6 +16,7 @@ import {
     withMap,
 } from '@/lib/utils/battle/modes/maze/__tests__/fixtures';
 import { pruneIllusion } from '@/lib/utils/battle/modes/maze/illusion';
+import { illusionPairs } from '@/lib/utils/battle/modes/maze/illusion';
 import { MAZE_TEXTS } from '@/lib/utils/battle/modes/maze/texts';
 import type {
     BattleMutationContext,
@@ -26,8 +27,7 @@ import type {
     NewBattleEvent,
     ScenePatch,
 } from '@/lib/utils/battle/store/types';
-import type { IllusionPair, MazeConfig } from '@/types/battle';
-import { illusionPairs } from '@/lib/utils/battle/modes/maze/illusion';
+import type { IllusionPair, MazeConfig } from '@/types/battle-grid';
 
 const hero2 = participant('hero2', { controlledBy: 'user-2' });
 
@@ -76,6 +76,7 @@ describe('maze illusion op', () => {
             x: 2,
             y: 5,
         });
+
         const groups = [
             {
                 heroes: [
@@ -97,6 +98,7 @@ describe('maze illusion op', () => {
                 ],
             },
         ];
+
         const loaded = ctx({
             participants: [
                 at(hero, { x: 0, y: 2 }),
@@ -106,6 +108,7 @@ describe('maze illusion op', () => {
         });
 
         const out = mazeMutation(loaded, { op: 'illusion', groups });
+
         const maze = out.scene?.map?.maze;
 
         expect(maze?.illusionSwap?.groups).toEqual(groups);

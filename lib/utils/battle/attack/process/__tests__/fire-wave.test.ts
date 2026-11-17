@@ -10,12 +10,8 @@ import { placed, testMap } from '@/lib/utils/battle/__tests__/fixtures/placed';
 import { textsOf } from '@/lib/utils/battle/log/__tests__/event-text';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 import { calculateAttackRoll } from '@/systems/d20/rules/attack/roll';
-import type {
-    BattleAttack,
-    BattleMapConfig,
-    BattleParticipant,
-    GridPoint,
-} from '@/types/battle';
+import type { BattleAttack, BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 
 const MAP = testMap();
 

@@ -1,7 +1,7 @@
 import { type ImageSize, MAX_CELL_PX, MIN_CELL_PX } from './background';
 
 import { clamp } from '@/lib/utils/common/clamp';
-import type { BattleMapConfig } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 export interface PixelRect {
     x: number;

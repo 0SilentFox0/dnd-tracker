@@ -8,7 +8,7 @@ import { mazeMap } from './maze-fixtures';
 import { MazeViewProvider } from '@/components/battle/modes/maze/MazeViewProvider';
 import { fakeScene } from '@/lib/hooks/battle/__tests__/fake-scene';
 import { render } from '@/lib/i18n/test/render-uk';
-import type { MazeConfig } from '@/types/battle';
+import type { MazeConfig } from '@/types/battle-grid';
 
 vi.unmock('next-intl');
 

@@ -100,7 +100,8 @@ import { render } from '@/lib/i18n/test/render-uk';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 import type { BattleScene, ClientBattleDelta } from '@/types/api';
-import type { BattleAction, BattleParticipant } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 
 vi.unmock('next-intl');
 

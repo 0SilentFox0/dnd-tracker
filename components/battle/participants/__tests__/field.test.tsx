@@ -25,7 +25,8 @@ import type { FxImpact } from '@/lib/utils/battle/fx';
 import { buildDisplayEffects, turnQueue } from '@/lib/utils/battle/view';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 import type { BattleScene } from '@/types/api';
-import type { ActiveEffect, BattleAction } from '@/types/battle';
+import type { ActiveEffect } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 
 vi.unmock('next-intl');
 

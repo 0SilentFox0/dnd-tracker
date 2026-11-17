@@ -8,7 +8,7 @@ import { ParticipantSide } from '@/lib/constants/battle';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import { mazeMap } from '@/lib/utils/battle/modes/maze/__tests__/fixtures';
 import { canStep, wallSet } from '@/lib/utils/battle/modes/maze/walls';
-import type { GridPoint } from '@/types/battle';
+import type { GridPoint } from '@/types/battle-grid';
 
 // Server maze moves go through mazeMove/canStep; the client preview uses the generic grid path, so the two must agree.
 const COLS = 4;

@@ -2,7 +2,7 @@ import { legacyLines } from './legacy';
 
 import { formatText, joinLines, lineKey } from '@/lib/i18n/text-ref';
 import type { Translator } from '@/lib/i18n/translator';
-import type { BattleAction } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 import type { LogLine } from '@/types/text';
 
 export const uniqueLines = (lines: LogLine[]): LogLine[] => [

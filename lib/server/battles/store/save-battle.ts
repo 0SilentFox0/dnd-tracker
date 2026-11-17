@@ -42,7 +42,8 @@ import type {
     StoredBattleEvent,
     StoredParticipant,
 } from '@/lib/utils/battle/store/types';
-import type { BattleMapState, BattleParticipant } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapState } from '@/types/battle-grid';
 import type { LogLine } from '@/types/text';
 
 type UpdatableColumn = Exclude<keyof ParticipantColumns, 'id'>;

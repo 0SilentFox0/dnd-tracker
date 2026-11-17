@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { battleKeys } from './keys';
 
 import { getBattleBriefs } from '@/lib/api/battles';
-import type { BattleBrief } from '@/types/battle';
+import type { BattleBrief } from '@/types/battle-actions';
 
 export function useBattleBriefs(
     campaignId: string,

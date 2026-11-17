@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { makeT } from '@/lib/i18n/test/mock-t';
 import { getLogEntryDetailLines } from '@/lib/utils/battle/view/log-format';
-import type { BattleAction } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 
 describe('лог: фраза криту', () => {
     const entry = (flavor?: string) =>

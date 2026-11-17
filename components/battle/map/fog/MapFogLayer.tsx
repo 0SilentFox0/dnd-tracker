@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react';
 
 import { revealedHas } from '@/lib/utils/battle/fog/revealed-runs';
 import { cellKey } from '@/lib/utils/battle/grid/geometry';
-import type { BattleMapConfig, RevealedRun } from '@/types/battle';
+import type { BattleMapConfig, RevealedRun } from '@/types/battle-grid';
 
 export function MapFogLayer({
     map,

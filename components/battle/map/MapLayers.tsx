@@ -10,7 +10,7 @@ import {
     cellPolygon,
     parseCellKey,
 } from '@/lib/utils/battle/grid';
-import type { BattleMapView, GridPoint } from '@/types/battle';
+import type { BattleMapView, GridPoint } from '@/types/battle-grid';
 
 export const StrokeLayer = memo(function StrokeLayer({
     preview,

@@ -37,11 +37,8 @@ import {
 import { cryptoRandom, rollDie } from '@/lib/utils/common/dice';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
-import type {
-    BattleAttack,
-    BattleParticipant,
-    DamageStep,
-} from '@/types/battle';
+import type { BattleAttack, BattleParticipant } from '@/types/battle';
+import type { DamageStep } from '@/types/battle-actions';
 
 export function useAttackWizard(
     attacker: BattleParticipant | null,
@@ -265,7 +262,9 @@ export function useAttackWizard(
     const cunningOffer = useMemo(
         () =>
             attacker && !state.offHand && isOpen
-                ? ruleSystemOf(scene.battle.rules).combat.attack?.riderOptions?.(
+                ? ruleSystemOf(
+                      scene.battle.rules
+                  ).combat.attack?.riderOptions?.(
                       attacker,
                       scene.battle.currentRound
                   )

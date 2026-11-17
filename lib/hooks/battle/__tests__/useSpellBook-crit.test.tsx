@@ -28,7 +28,7 @@ import { useSpellBook } from '../useSpellBook';
 import { fakeScene } from './fake-scene';
 
 import { textOf } from '@/lib/i18n/test/text';
-import type { BattleAction } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 
 describe('useSpellBook: пауза на вибір крита ДМ', () => {
     it('очікування без результату, після зняття pending — результат з нових записів журналу', async () => {

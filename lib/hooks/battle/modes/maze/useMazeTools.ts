@@ -28,7 +28,7 @@ import type {
     IllusionGroup,
     IllusionPair,
     MazeConfig,
-} from '@/types/battle';
+} from '@/types/battle-grid';
 
 export type { MazeEdgeStroke, MazeGenerateInput, MazeTool };
 
@@ -212,6 +212,7 @@ export function useMazeTools(): MazeTools | null {
     );
 
     const pairs = useMemo(() => illusionPairs(maze), [maze]);
+
     const groups = useMemo(() => illusionGroups(maze), [maze]);
 
     const illusion = useMemo<MazeIllusion>(

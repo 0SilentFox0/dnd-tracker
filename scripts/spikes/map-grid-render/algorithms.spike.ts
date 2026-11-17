@@ -31,7 +31,7 @@ import {
     windowPath,
 } from '@/lib/utils/battle/grid';
 import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
-import type { BattleMapConfig, GridPoint } from '@/types/battle';
+import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 
 const RUNS = Number(process.env.SPIKE_RUNS ?? 7);
 

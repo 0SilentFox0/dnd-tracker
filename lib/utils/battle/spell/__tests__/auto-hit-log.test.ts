@@ -2,16 +2,13 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { D6POOL_SYSTEM } from '@/lib/__tests__/fixtures/d6pool/definition';
 import { ParticipantSide } from '@/lib/constants/battle';
-import {
-    makeParticipant,
-    seq,
-} from '@/lib/utils/abilities/__tests__/fixtures';
+import { makeParticipant, seq } from '@/lib/utils/abilities/__tests__/fixtures';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import { castSpell } from '@/lib/utils/battle/spell';
 import { fireTrigger } from '@/lib/utils/battle/spell/zone-fire';
 import type { CastableSpell } from '@/lib/utils/battle/types/spell-process';
 import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
-import type { BattleMapConfig } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 vi.mock('@/lib/utils/rules/systems', async (importOriginal) => ({
     ...(await importOriginal<object>()),

@@ -16,7 +16,7 @@ import type {
     BattleMapState,
     FogState,
     TerrainCell,
-} from '@/types/battle';
+} from '@/types/battle-grid';
 
 export const isEmptyMapState = (state: BattleMapState | null | undefined) =>
     !state ||

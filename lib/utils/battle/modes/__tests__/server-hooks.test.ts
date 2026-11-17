@@ -16,7 +16,8 @@ import {
     restoreModeSlices,
     withModeAfterMutation,
 } from '@/lib/utils/battle/modes/server';
-import type { BattleMapConfig, BattleParticipant } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 type FakeConfig = { on: true; dark?: boolean };
 

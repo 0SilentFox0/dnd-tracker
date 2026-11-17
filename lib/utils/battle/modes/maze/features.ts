@@ -10,7 +10,7 @@ import {
     samePoint,
 } from '@/lib/utils/battle/grid/geometry';
 import { MAZE_TELEPORT_MIN_DISTANCE } from '@/lib/utils/battle/modes/maze/constants';
-import type { GridPoint, MazeConfig } from '@/types/battle';
+import type { GridPoint, MazeConfig } from '@/types/battle-grid';
 
 const PATCH_ATTEMPTS = 30;
 

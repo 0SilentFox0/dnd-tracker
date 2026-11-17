@@ -23,15 +23,15 @@ import {
     targetMarks,
     templateArea,
 } from '@/lib/utils/battle/grid';
+import type { BattleParticipant } from '@/types/battle';
 import type {
     BattleMapActions,
     BattleMapConfig,
     BattleMapView,
-    BattleParticipant,
     GridPoint,
     MazeMarkSymbol,
     SpellTemplate,
-} from '@/types/battle';
+} from '@/types/battle-grid';
 
 export type BattleMapPlaygroundMode =
     | 'move'

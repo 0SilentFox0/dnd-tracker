@@ -10,7 +10,8 @@ import { moveWithReactions } from '@/lib/utils/battle/actions/dispatch';
 import { pathTo } from '@/lib/utils/battle/grid/path';
 import type { Ruleset } from '@/lib/utils/rules';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
-import type { BattleMapConfig, BattleParticipant } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 const map: BattleMapConfig = {
     cols: 10,

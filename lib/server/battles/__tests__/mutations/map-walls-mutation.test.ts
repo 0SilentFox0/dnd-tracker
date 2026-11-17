@@ -11,7 +11,7 @@ import { mazeMap } from '@/lib/utils/battle/modes/maze/__tests__/fixtures';
 import { BattleAccess } from '@/lib/utils/battle/pipeline/run-battle-mutation';
 import { BattleRuleError } from '@/lib/utils/battle/store';
 import { REJECT } from '@/lib/utils/battle/store/reject';
-import type { BattleMapConfig } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 const runBattleMutation = vi.hoisted(() => vi.fn());
 

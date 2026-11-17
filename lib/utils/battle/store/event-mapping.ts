@@ -3,11 +3,8 @@ import type { NewBattleEvent, StoredBattleEvent } from './types';
 import { DM_ACTOR, SYSTEM_ACTOR } from '@/lib/constants/battle';
 import { decodeLog } from '@/lib/utils/battle/log/codec';
 import { logFields } from '@/lib/utils/battle/log/lines';
-import type {
-    BattleAction,
-    BattleParticipant,
-    DiceRollGroup,
-} from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleAction, DiceRollGroup } from '@/types/battle-actions';
 import type { LogLine } from '@/types/text';
 
 type EventDetails = {

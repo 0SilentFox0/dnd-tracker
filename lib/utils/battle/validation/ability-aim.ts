@@ -5,11 +5,8 @@ import { BattleRuleError, ruleErrorOf } from '@/lib/utils/battle/store/errors';
 import { REJECT } from '@/lib/utils/battle/store/reject';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import type { ResolvedAbility } from '@/types/abilities';
-import type {
-    BattleMapConfig,
-    BattleParticipant,
-    GridPoint,
-} from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 
 export function assertAbilityAim(
     ability: ResolvedAbility,

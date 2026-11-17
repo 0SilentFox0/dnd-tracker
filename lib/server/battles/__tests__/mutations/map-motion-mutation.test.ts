@@ -8,7 +8,7 @@ import { mapMotionSchema } from '@/lib/schemas/battles';
 import { mapMotionMutation } from '@/lib/server/battles/mutations/map-motion/map-motion-mutation';
 import { BattleAccess } from '@/lib/utils/battle/pipeline/run-battle-mutation';
 import { BattleRuleError } from '@/lib/utils/battle/store';
-import type { BattleMapConfig } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 const runBattleMutation = vi.hoisted(() => vi.fn());
 

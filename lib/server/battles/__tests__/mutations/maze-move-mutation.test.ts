@@ -12,7 +12,7 @@ import {
 } from '@/lib/utils/battle/modes/maze/__tests__/fixtures';
 import { MAZE_TEXTS } from '@/lib/utils/battle/modes/maze/texts';
 import { BattleAccessError } from '@/lib/utils/battle/store';
-import type { BattleMapConfig, MazeConfig } from '@/types/battle';
+import type { BattleMapConfig, MazeConfig } from '@/types/battle-grid';
 
 const mapOf = (over: Partial<MazeConfig> = {}): BattleMapConfig =>
     mazeMap({ exit: { x: 5, y: 0 }, ...over }, 6);

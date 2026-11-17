@@ -19,7 +19,7 @@ import {
 import { critDoublesDice } from '@/lib/utils/battle/attack/crit-dice';
 import { attackKindOf } from '@/lib/utils/battle/common/attack-kind';
 import { diceCount } from '@/lib/utils/common/dice';
-import type { DamageStep } from '@/types/battle';
+import type { DamageStep } from '@/types/battle-actions';
 
 export type {
     ComputeDamageBreakdownParams,

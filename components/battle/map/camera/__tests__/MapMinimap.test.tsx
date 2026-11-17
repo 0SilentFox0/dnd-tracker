@@ -7,7 +7,8 @@ import { MapMinimap } from '../MapMinimap';
 import { CombatStatus, ParticipantSide } from '@/lib/constants/battle';
 import { render } from '@/lib/i18n/test/render-uk';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
-import type { BattleMapConfig, BattleParticipant } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 afterEach(() => {
     cleanup();
@@ -24,7 +25,11 @@ const map: BattleMapConfig = {
     blocked: ['2:1'],
 };
 
-const participant = (id: string, side: ParticipantSide, x: number): BattleParticipant => {
+const participant = (
+    id: string,
+    side: ParticipantSide,
+    x: number
+): BattleParticipant => {
     const base = createMockParticipant();
 
     return {
@@ -56,7 +61,9 @@ describe('MapMinimap', () => {
             />
         );
 
-        const svg = container.querySelector('svg[data-map-minimap]') as SVGSVGElement;
+        const svg = container.querySelector(
+            'svg[data-map-minimap]'
+        ) as SVGSVGElement;
 
         vi.spyOn(svg, 'getBoundingClientRect').mockReturnValue({
             left: 20,
@@ -69,11 +76,16 @@ describe('MapMinimap', () => {
             y: 30,
             toJSON: () => ({}),
         });
-        expect(container.querySelectorAll('[data-minimap-participant]')).toHaveLength(2);
+        expect(
+            container.querySelectorAll('[data-minimap-participant]')
+        ).toHaveLength(2);
         expect(container.querySelector('[data-minimap-fog]')).not.toBeNull();
         expect(svg.querySelectorAll('path')).toHaveLength(2);
 
-        const event = new PointerEvent('pointerdown', { bubbles: true, pointerId: 1 });
+        const event = new PointerEvent('pointerdown', {
+            bubbles: true,
+            pointerId: 1,
+        });
 
         Object.defineProperties(event, {
             clientX: { value: 100 },

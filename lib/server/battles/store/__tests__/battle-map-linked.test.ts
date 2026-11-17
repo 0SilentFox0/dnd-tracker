@@ -25,7 +25,7 @@ import { buildSnapshotState } from '@/lib/utils/battle/store/snapshot-state';
 import type { BattleDb } from '@/lib/utils/battle/store/types';
 import type { LoadedBattle } from '@/lib/utils/battle/store/types';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
-import type { BattleMapConfig, BattleMapState } from '@/types/battle';
+import type { BattleMapConfig, BattleMapState } from '@/types/battle-grid';
 
 const header: BattleMapConfig = {
     cols: 8,
@@ -100,7 +100,9 @@ describe('loadBattle: карта бібліотеки', () => {
 
         cells[3 * 16 + 2] = 5;
 
-        const { encodeTileChunk } = await import('@/lib/utils/battle/tiles/rle');
+        const { encodeTileChunk } = await import(
+            '@/lib/utils/battle/tiles/rle'
+        );
 
         mocks.getPinnedTiles.mockResolvedValue({
             objects: { '0:0': encodeTileChunk(cells) },

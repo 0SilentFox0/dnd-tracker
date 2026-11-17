@@ -28,7 +28,8 @@ import type {
     PatchParticipantData,
     SpellCastData,
 } from '@/types/api';
-import type { BattleAction, LegendaryOption } from '@/types/battle';
+import type { LegendaryOption } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 import type { AddParticipantData } from '@/types/battle-setup';
 
 export type WithVersion<T> = T & { expectedVersion?: number };

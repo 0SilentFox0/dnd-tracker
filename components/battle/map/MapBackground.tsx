@@ -9,7 +9,7 @@ import { DEFAULT_MAP_BACKGROUND } from '@/lib/constants/battle';
 import { useLoadedAspect } from '@/lib/hooks/battle';
 import { useReducedMotion } from '@/lib/hooks/common';
 import { backgroundBox } from '@/lib/utils/battle/grid';
-import type { BattleMapConfig } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 export const BACKGROUND_FADE_MS = 800;
 

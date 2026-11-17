@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { WEATHER_KINDS } from '@/lib/constants/battle-weather';
 import type { MapWeatherTool } from '@/lib/hooks/battle';
 import { cn } from '@/lib/utils';
-import type { WeatherKind } from '@/types/battle';
+import type { WeatherKind } from '@/types/battle-grid';
 
 const OPTIONS: readonly (WeatherKind | null)[] = [null, ...WEATHER_KINDS];
 

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { retaliationOutcome } from '@/lib/utils/battle/view';
-import type { BattleAction } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 
 const ret = (actionIndex: number, change: number) =>
     ({

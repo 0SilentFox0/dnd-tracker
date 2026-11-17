@@ -4,7 +4,8 @@ import { useCallback, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 import type { MapDoorToggleData } from '@/types/api';
-import type { BattleParticipant, DoorState } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { DoorState } from '@/types/battle-grid';
 
 export interface MapDoorsTool {
     showLock: boolean;

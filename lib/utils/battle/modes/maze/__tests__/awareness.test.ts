@@ -10,12 +10,8 @@ import {
     testMap,
 } from '@/lib/utils/battle/__tests__/fixtures/placed';
 import { eventTextOf } from '@/lib/utils/battle/log/__tests__/event-text';
-import type {
-    BattleParticipant,
-    Direction8,
-    GridPoint,
-    MazeConfig,
-} from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { Direction8, GridPoint, MazeConfig } from '@/types/battle-grid';
 
 const grid = (over: Partial<MazeConfig> = {}) =>
     mazeGrid({ exit: { x: 9, y: 9 }, ...over }, 10);

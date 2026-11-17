@@ -8,7 +8,7 @@ import { fakeScene } from '@/lib/hooks/battle/__tests__/fake-scene';
 import { BATTLE_NAMESPACES, CAMPAIGN_NAMESPACES } from '@/lib/i18n/scopes';
 import { renderWithIntl } from '@/lib/i18n/test/render-with-intl';
 import { textRef } from '@/lib/i18n/text-ref';
-import type { BattleAction } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 
 vi.unmock('next-intl');
 

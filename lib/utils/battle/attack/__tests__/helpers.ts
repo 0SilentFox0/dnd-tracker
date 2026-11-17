@@ -12,11 +12,8 @@ import {
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 import { retaliationAfterAttack } from '@/systems/retaliation/rules/after-attack';
 import type { ResolvedAbility } from '@/types/abilities';
-import type {
-    BattleAttack,
-    BattleMapConfig,
-    BattleParticipant,
-} from '@/types/battle';
+import type { BattleAttack, BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 export type RetaliationInput = CounterStrikeInput & {
     attackRoll?: { isCriticalFail: boolean };

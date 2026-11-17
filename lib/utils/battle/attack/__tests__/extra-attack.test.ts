@@ -22,11 +22,8 @@ import { DEFAULT_RULES } from '@/lib/utils/rules';
 import { parseRules } from '@/lib/utils/rules/schema';
 import { d20State, withD20State } from '@/systems/d20/rules/state';
 import { resolveOpportunityAttacks } from '@/systems/opportunity/rules/opportunity';
-import type {
-    BattleAttack,
-    BattleMapConfig,
-    BattleParticipant,
-} from '@/types/battle';
+import type { BattleAttack, BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 const spendAttack = (
     p: BattleParticipant,

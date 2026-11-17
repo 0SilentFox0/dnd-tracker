@@ -36,7 +36,7 @@ import type {
     MapStateDelta,
     MazeConfig,
     TerrainDiff,
-} from '@/types/battle';
+} from '@/types/battle-grid';
 
 // Skills API
 export type SkillPayload = GroupedSkillPayload;
@@ -59,14 +59,13 @@ export interface SkillUpdatePayload {
 }
 
 // Battles API
-import type {
-    BattleAction,
-    BattleParticipant,
-    BattlePreparationParticipant,
-} from './battle';
-
 import type { MapModeKey } from '@/lib/utils/battle/modes';
 import type { BattleKnowledge } from '@/lib/utils/battle/view/knowledge';
+import type {
+    BattleParticipant,
+    BattlePreparationParticipant,
+} from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 
 export interface BattleScene {
     id: string;

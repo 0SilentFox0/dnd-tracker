@@ -24,12 +24,9 @@ import {
     canReact,
     pickMeleeAttack,
 } from '@/systems/d20/rules/reactions/reaction';
-import type {
-    BattleAction,
-    BattleMapConfig,
-    BattleParticipant,
-    GridPoint,
-} from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
+import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 import type { LogLine } from '@/types/text';
 
 export interface OpportunityInput {

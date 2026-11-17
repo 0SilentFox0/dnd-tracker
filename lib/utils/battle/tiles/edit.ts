@@ -1,8 +1,14 @@
 import type { TileLayerChunks } from '@/lib/utils/battle/tiles/derive';
 import type { TileLayer } from '@/lib/utils/battle/tiles/types';
-import type { GridPoint } from '@/types/battle';
+import type { GridPoint } from '@/types/battle-grid';
 
-export type TileEditTool = 'brush' | 'line' | 'rectangle' | 'fill' | 'eraser' | 'picker';
+export type TileEditTool =
+    | 'brush'
+    | 'line'
+    | 'rectangle'
+    | 'fill'
+    | 'eraser'
+    | 'picker';
 
 export interface TileCellChange {
     layer: TileLayer;
@@ -28,7 +34,9 @@ export function tileAt(
 
     const cy = Math.floor(y / SIDE);
 
-    return chunks[layer]?.[`${cx}:${cy}`]?.[(y % SIDE) * SIDE + (x % SIDE)] ?? 0;
+    return (
+        chunks[layer]?.[`${cx}:${cy}`]?.[(y % SIDE) * SIDE + (x % SIDE)] ?? 0
+    );
 }
 
 function linePoints(start: GridPoint, end: GridPoint): GridPoint[] {
@@ -110,12 +118,22 @@ function fillPoints(
 
     const result: GridPoint[] = [];
 
-    for (let cursor = 0; cursor < queue.length && result.length < mapSize.cols * mapSize.rows; cursor++) {
+    for (
+        let cursor = 0;
+        cursor < queue.length && result.length < mapSize.cols * mapSize.rows;
+        cursor++
+    ) {
         const point = queue[cursor];
 
         const key = `${point.x}:${point.y}`;
 
-        if (seen.has(key) || point.x < 0 || point.y < 0 || point.x >= mapSize.cols || point.y >= mapSize.rows)
+        if (
+            seen.has(key) ||
+            point.x < 0 ||
+            point.y < 0 ||
+            point.x >= mapSize.cols ||
+            point.y >= mapSize.rows
+        )
             continue;
 
         seen.add(key);
@@ -152,9 +170,10 @@ export function applyTileStroke(input: {
     if (!Number.isInteger(brushSize) || brushSize < 1 || brushSize > 3)
         throw new Error('Brush size must be between 1 and 3');
 
-    const points = tool === 'fill'
-        ? fillPoints(chunks, layer, startPoints[0], mapSize)
-        : operationPoints(tool, startPoints);
+    const points =
+        tool === 'fill'
+            ? fillPoints(chunks, layer, startPoints[0], mapSize)
+            : operationPoints(tool, startPoints);
 
     const targets = new Map<string, GridPoint>();
 
@@ -189,7 +208,9 @@ export function applyTileStroke(input: {
 
         const index = (y % SIDE) * SIDE + (x % SIDE);
 
-        const cells = mutable.get(key) ?? new Uint16Array(layerChunks[key] ?? CHUNK_CELLS);
+        const cells =
+            mutable.get(key) ??
+            new Uint16Array(layerChunks[key] ?? CHUNK_CELLS);
 
         const before = cells[index];
 
@@ -232,16 +253,20 @@ export function applyTileChanges(
                 ? new Uint16Array(existing)
                 : new Uint16Array(CHUNK_CELLS);
             mutable.set(identity, cells);
-            (next[change.layer] ??= { ...(chunks[change.layer] ?? {}) })[change.key] = cells;
+            (next[change.layer] ??= { ...(chunks[change.layer] ?? {}) })[
+                change.key
+            ] = cells;
         }
 
-        cells[change.index] = direction === 'before' ? change.before : change.after;
+        cells[change.index] =
+            direction === 'before' ? change.before : change.after;
     }
 
     for (const change of changes) {
         const cells = mutable.get(`${change.layer}:${change.key}`);
 
-        if (cells?.every((cell) => cell === 0)) delete next[change.layer]?.[change.key];
+        if (cells?.every((cell) => cell === 0))
+            delete next[change.layer]?.[change.key];
     }
 
     return { ...chunks, ...next };

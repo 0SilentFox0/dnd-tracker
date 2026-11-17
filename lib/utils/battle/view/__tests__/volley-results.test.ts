@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { volleyResults } from '../volley-results';
 
 import { placed } from '@/lib/utils/battle/__tests__/fixtures/placed';
-import type { BattleAction } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 
 interface Over {
     target: string;

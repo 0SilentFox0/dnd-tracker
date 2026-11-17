@@ -21,7 +21,8 @@ import {
 import type { CastableSpell } from '@/lib/utils/battle/types/spell-process';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 import type { ResolvedAbility } from '@/types/abilities';
-import type { BattleAction, BattleParticipant } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 
 const passive = (
     key: string,

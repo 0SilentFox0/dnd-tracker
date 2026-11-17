@@ -29,7 +29,8 @@ import {
 } from '@/systems/d20/rules/concentration/sustain';
 import { applyCondition5e } from '@/systems/d20/rules/conditions/apply';
 import { DEATH_SAVES_TIMED_KEY } from '@/systems/deathsaves/rules/state';
-import type { BattleMapConfig, BattleParticipant } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 const rulesOn = (dcCap: number | null = null): Ruleset => ({
     ...DEFAULT_RULES,

@@ -18,12 +18,8 @@ import type {
     SpellEffect,
 } from '@/lib/utils/spells/model/schema';
 import type { ResolvedAbility } from '@/types/abilities';
-import type {
-    BattleAction,
-    BattleParticipant,
-    DamageStep,
-    SpellGrant,
-} from '@/types/battle';
+import type { BattleParticipant, SpellGrant } from '@/types/battle';
+import type { BattleAction, DamageStep } from '@/types/battle-actions';
 import type { LogLine } from '@/types/text';
 
 export type ChosenSpell = Omit<CastableSpell, 'definition'> & {

@@ -8,7 +8,8 @@ import {
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import { summarizeBattle } from '@/lib/utils/battle/view/summary';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
-import type { BattleAction, BattleParticipant } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 
 function member(
     id: string,

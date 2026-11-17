@@ -4,11 +4,8 @@ import { useMazeModeTools } from './maze/useMazeModeTools';
 import { useMazeDarkAutoSkip, useMazePlaceUnit } from './maze';
 
 import { activeMapMode, type MapModeKey } from '@/lib/utils/battle/modes';
-import type {
-    AddParticipantData,
-    BattleMapConfig,
-    GridPoint,
-} from '@/types/battle';
+import type { AddParticipantData } from '@/types/battle-actions';
+import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 
 export interface ModeTools {
     /** панорамування заблоковано (малювання стін) */

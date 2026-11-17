@@ -12,7 +12,7 @@ vi.mock('@/lib/api/client', async (orig) => ({
 import { campaignPost } from '@/lib/api/client';
 import { useAttack } from '@/lib/hooks/battles';
 import type { ClientBattleDelta } from '@/types/api';
-import type { BattleAction } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 
 const change = (participantId: string, value: number) => ({
     participantId,

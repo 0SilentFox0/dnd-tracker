@@ -10,7 +10,8 @@ import { mazeGrid } from './fixtures';
 
 import { ParticipantSide } from '@/lib/constants/battle';
 import { byId, placed } from '@/lib/utils/battle/__tests__/fixtures/placed';
-import type { BattleParticipant, GridPoint, MazeConfig } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { GridPoint, MazeConfig } from '@/types/battle-grid';
 
 const mk = (over: Partial<MazeConfig> = {}, cols = 10, rows = 10) =>
     mazeGrid(over, cols, rows);

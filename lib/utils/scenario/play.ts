@@ -1,5 +1,5 @@
 import { BattleStatus } from '@/lib/constants/battle';
-import type { BattleBrief } from '@/types/battle';
+import type { BattleBrief } from '@/types/battle-actions';
 import type {
     ScenarioContent,
     ScenarioMarkerRef,

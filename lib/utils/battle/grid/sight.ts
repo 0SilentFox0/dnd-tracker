@@ -2,11 +2,8 @@ import { cellsConnected, wallsOf } from './edges';
 import { cellsOf, isOnMap } from './occupancy';
 
 import { modeSightedTargets } from '@/lib/utils/battle/modes/engine';
-import type {
-    BattleMapConfig,
-    BattleParticipant,
-    GridPoint,
-} from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 
 /** Core-видимість: стіни карти не перекривають лінію між жодною парою клітинок обох учасників. */
 export function wallsAllowSight(

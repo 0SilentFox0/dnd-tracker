@@ -1,4 +1,4 @@
-import type { DieSides } from '@/types/battle';
+import type { DieSides } from '@/types/battle-actions';
 
 export const MAX_DICE = 12;
 

@@ -2,7 +2,7 @@ import type { LibrarySpell } from './types';
 
 import type { Effect } from '@/lib/utils/abilities/schema';
 import type { SpellDefinition } from '@/lib/utils/spells/model/schema';
-import type { TemplateShape } from '@/types/battle';
+import type { TemplateShape } from '@/types/battle-grid';
 
 const LIGHT = 'Світло';
 
@@ -132,7 +132,6 @@ function diceWord(n: number): string {
 // spec §1: (N + ⌊hero level / 3⌋)d{school die}, no flat bonus
 const power = (n: number, what: string) =>
     `${n} ${diceWord(n)} ${what} (к6/к8/к10 залежно від майстерності школи; +1 кубик за кожні 3 рівні героя)`;
-
 
 export const SPELLS: LibrarySpell[] = [
     // ── Світло ─────────────────────────────────────────────────────────────

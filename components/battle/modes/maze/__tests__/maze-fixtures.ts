@@ -3,13 +3,15 @@ import { placed } from '@/lib/utils/battle/__tests__/fixtures/placed';
 import { deriveMazeView } from '@/lib/utils/battle/modes/maze';
 import { mazeMap as sharedMazeMap } from '@/lib/utils/battle/modes/maze/__tests__/fixtures';
 import type {
-    BattleMapConfig,
     BattleParticipant,
     BattleParticipantBattleData,
+} from '@/types/battle';
+import type {
+    BattleMapConfig,
     Direction8,
     GridPoint,
     MazeConfig,
-} from '@/types/battle';
+} from '@/types/battle-grid';
 
 export class RO {
     constructor(

@@ -22,7 +22,7 @@ import { fakeScene } from '@/lib/hooks/battle/__tests__/fake-scene';
 import { battleQueryKey } from '@/lib/hooks/battles';
 import { IntlWrapper } from '@/lib/i18n/test/intl-wrapper';
 import type { BattleScene } from '@/types/api';
-import type { BattleMapConfig } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 vi.unmock('next-intl');
 
@@ -130,13 +130,18 @@ describe('ефективна карта в сцені', () => {
     });
 
     it('linked: додає блокувальні тайли пінованої версії до карти бою', async () => {
-        vi.mocked(getBattleMap).mockResolvedValue({ walls: [], bars: [] } as never);
+        vi.mocked(getBattleMap).mockResolvedValue({
+            walls: [],
+            bars: [],
+        } as never);
 
         const cells = new Uint16Array(256);
 
         cells[3 * 16 + 2] = 5;
 
-        const { encodeTileChunk } = await import('@/lib/utils/battle/tiles/rle');
+        const { encodeTileChunk } = await import(
+            '@/lib/utils/battle/tiles/rle'
+        );
 
         vi.mocked(getBattleMapTiles).mockResolvedValue({
             version: 1,
@@ -148,9 +153,13 @@ describe('ефективна карта в сцені', () => {
             mapRef: { mapId: 'm1', version: 1 },
         });
 
-        await waitFor(() => expect(result.current.value?.tileChunks).toBeTruthy());
+        await waitFor(() =>
+            expect(result.current.value?.tileChunks).toBeTruthy()
+        );
         expect(result.current.value?.battle.map?.blocked).toContain('2:3');
-        expect(result.current.value?.tileChunks?.objects?.['0:0']?.[50]).toBe(5);
+        expect(result.current.value?.tileChunks?.objects?.['0:0']?.[50]).toBe(
+            5
+        );
     });
 
     it('map-update-дельта з новою версією підтягує нові ребра', async () => {

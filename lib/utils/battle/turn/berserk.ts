@@ -15,11 +15,9 @@ import { endTurnCleanup } from '@/lib/utils/battle/turn/end-turn-cleanup';
 import { pickOne, rollDiceList, rollDie } from '@/lib/utils/common/dice';
 import type { Ruleset } from '@/lib/utils/rules';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
-import type {
-    BattleAction,
-    BattleMapConfig,
-    BattleParticipant,
-} from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
+import type { BattleMapConfig } from '@/types/battle-grid';
 import type { LogLine } from '@/types/text';
 
 export function berserkBonusOf(p: BattleParticipant): number | undefined {

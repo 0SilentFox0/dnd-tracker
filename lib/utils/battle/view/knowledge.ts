@@ -1,6 +1,6 @@
 import { BattleActionType } from '@/lib/constants/battle';
 import { lineKey } from '@/lib/i18n/text-ref';
-import type { BattleAction, DamageStep } from '@/types/battle';
+import type { BattleAction, DamageStep } from '@/types/battle-actions';
 import type { LogLine } from '@/types/text';
 
 export interface KnownArmorClass {

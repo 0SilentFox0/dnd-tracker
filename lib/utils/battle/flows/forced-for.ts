@@ -2,11 +2,8 @@ import { type ForcedMode, forcedModeOf } from './attack-flow';
 
 import { predictAttack } from '@/lib/utils/battle/attack/bonus';
 import type { Ruleset } from '@/lib/utils/rules/schema';
-import type {
-    BattleAttack,
-    BattleMapConfig,
-    BattleParticipant,
-} from '@/types/battle';
+import type { BattleAttack, BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 export interface AttackContext {
     order: BattleParticipant[];

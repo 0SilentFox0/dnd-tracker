@@ -12,7 +12,7 @@ import {
     stepMotion,
 } from '@/lib/utils/battle/map-motion';
 import { subscribe } from '@/lib/utils/canvas/ticker';
-import type { BattleMapConfig, MapMotion } from '@/types/battle';
+import type { BattleMapConfig, MapMotion } from '@/types/battle-grid';
 
 const REST_PX_PER_S = 0.5;
 

@@ -1,11 +1,8 @@
 import { ParticipantSide } from '@/lib/constants/battle';
 import type { QueueEntry } from '@/lib/utils/battle/view/queue';
-import type {
-    ActiveEffect,
-    BattleAction,
-    BattleParticipant,
-    IllusionDisguise,
-} from '@/types/battle';
+import type { ActiveEffect, BattleParticipant } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
+import type { IllusionDisguise } from '@/types/battle-grid';
 import type { LogLine, TextArg } from '@/types/text';
 
 const NO_NAMES: ReadonlyMap<string, string> = new Map();

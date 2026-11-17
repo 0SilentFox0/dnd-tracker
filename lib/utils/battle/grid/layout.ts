@@ -2,11 +2,8 @@ import { blockedSet, cellKey, footprint } from './geometry';
 import { sizeOf } from './occupancy';
 
 import { MAP_LIMITS } from '@/lib/constants/map-limits';
-import type {
-    BattleMapConfig,
-    BattleParticipant,
-    GridPoint,
-} from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 
 export const UNIT = 100;
 

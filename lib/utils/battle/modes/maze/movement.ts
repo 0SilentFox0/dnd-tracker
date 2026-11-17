@@ -14,7 +14,8 @@ import {
 import { occupiedBy, occupiesCells } from '@/lib/utils/battle/grid/occupancy';
 import { MAZE_STEPS_PER_TURN } from '@/lib/utils/battle/modes/maze/constants';
 import { MAZE_TEXTS } from '@/lib/utils/battle/modes/maze/texts';
-import type { BattleParticipant, GridPoint } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { GridPoint } from '@/types/battle-grid';
 
 export interface MazeMoveResult {
     mover: BattleParticipant;

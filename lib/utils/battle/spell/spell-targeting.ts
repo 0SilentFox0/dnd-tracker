@@ -39,12 +39,12 @@ import { REJECT } from '@/lib/utils/battle/store/reject';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { SpellTargeting as SpellTargetingDef } from '@/lib/utils/spells/model/schema';
+import type { BattleParticipant } from '@/types/battle';
 import type {
     BattleMapConfig,
-    BattleParticipant,
     GridPoint,
     SpellTemplate,
-} from '@/types/battle';
+} from '@/types/battle-grid';
 import type { LogLine } from '@/types/text';
 
 export interface SpellRef {

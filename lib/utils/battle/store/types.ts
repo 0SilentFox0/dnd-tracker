@@ -8,17 +8,19 @@ import type { AbilityUsageCounter } from '@/types/abilities';
 import type { BattleAudioState } from '@/types/audio';
 import type {
     AirborneState,
+    BattleParticipant,
+    BattlePreparationParticipant,
+    IngredientStock,
+} from '@/types/battle';
+import type {
     BattleMapConfig,
     BattleMapRef,
     BattleMapState,
-    BattleParticipant,
-    BattlePreparationParticipant,
     Direction8,
     GridPoint,
-    IngredientStock,
     MapBase,
     PendingHit,
-} from '@/types/battle';
+} from '@/types/battle-grid';
 
 /** A pause the system raised for a decision: `shown` goes to clients, `hidden` stays on the server */
 export interface PendingChoice {

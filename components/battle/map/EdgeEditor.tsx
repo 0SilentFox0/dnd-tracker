@@ -6,7 +6,7 @@ import { edgeRect } from './edge-geometry';
 
 import { type EdgeEditing, useEdgeStroke } from '@/lib/hooks/battle';
 import { mapSize } from '@/lib/utils/battle/grid';
-import type { BattleMapConfig } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 interface Props {
     map: Pick<BattleMapConfig, 'cols' | 'rows'>;

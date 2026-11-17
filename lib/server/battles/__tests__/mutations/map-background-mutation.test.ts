@@ -6,7 +6,7 @@ import { API_ERRORS } from '@/lib/constants/api-errors';
 import { mapBackgroundBodySchema } from '@/lib/schemas/battles';
 import { createMapBackgroundMutation } from '@/lib/server/battles/mutations/map-background/map-background-mutation';
 import { BattleRuleError } from '@/lib/utils/battle/store';
-import type { BattleMapConfig } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 const resolve = vi.hoisted(() => vi.fn());
 

@@ -15,7 +15,8 @@ import { DEFAULT_RULES } from '@/lib/utils/rules';
 import type { SpellEffect } from '@/lib/utils/spells/model/schema';
 import { runEscape } from '@/systems/d20/rules/actions/grapple';
 import { bestSaveAbility } from '@/systems/d20/rules/saves/roll-save';
-import type { BattleMapConfig, BattleParticipant } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 const map: BattleMapConfig = {
     cols: 20,

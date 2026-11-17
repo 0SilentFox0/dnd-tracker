@@ -4,7 +4,8 @@ import { placeParticipants } from '@/lib/utils/battle/grid';
 import { createBattleParticipantFromUnit } from '@/lib/utils/battle/participant/from-unit';
 import type { Ruleset } from '@/lib/utils/rules';
 import type { BattleScene } from '@/types/api';
-import type { BattleMapConfig, BattleParticipant } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 export async function buildDemoEncounter(
     scene: BattleScene,

@@ -12,12 +12,8 @@ import { cellFeetOf } from '@/lib/utils/battle/grid/cell-feet';
 import { footprint, footprintDistance } from '@/lib/utils/battle/grid/geometry';
 import { isOnMap, sizeOf } from '@/lib/utils/battle/grid/occupancy';
 import type { Ruleset } from '@/lib/utils/rules/schema';
-import type {
-    ActiveEffect,
-    AnchoredZoneState,
-    BattleParticipant,
-    GridPoint,
-} from '@/types/battle';
+import type { ActiveEffect, BattleParticipant } from '@/types/battle';
+import type { AnchoredZoneState, GridPoint } from '@/types/battle-grid';
 import type { LogLine } from '@/types/text';
 
 interface Anchor {

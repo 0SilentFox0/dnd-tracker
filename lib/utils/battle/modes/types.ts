@@ -4,12 +4,9 @@ import type {
     NewBattleEvent,
     ScenePatch,
 } from '@/lib/utils/battle/store/types';
-import type {
-    BattleAction,
-    BattleMapConfig,
-    BattleParticipant,
-    GridPoint,
-} from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
+import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 import type { LogLine } from '@/types/text';
 
 /** Що бачить глядач у режимі; null у хуках — бачить усе. */

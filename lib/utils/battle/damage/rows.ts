@@ -1,5 +1,5 @@
 import { capitalizeLine } from '@/lib/i18n/text-ref';
-import type { DamageRow } from '@/types/battle';
+import type { DamageRow } from '@/types/battle-actions';
 import type { LogLine } from '@/types/text';
 
 export const ruleRow = (): DamageRow => ({ label: '', tone: 'rule' });

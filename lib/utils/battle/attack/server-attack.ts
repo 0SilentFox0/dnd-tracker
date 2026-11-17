@@ -17,7 +17,8 @@ import { attackDamageParts } from '@/lib/utils/battle/damage/attack-parts';
 import type { AttackRollResult } from '@/lib/utils/battle/types/attack';
 import { parseDiceLenient, rollGroups } from '@/lib/utils/common/dice';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
-import type { BattleAction, BattleAttack } from '@/types/battle';
+import type { BattleAttack } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 import type { TextRef } from '@/types/text';
 
 export type ServerAttackLabel =

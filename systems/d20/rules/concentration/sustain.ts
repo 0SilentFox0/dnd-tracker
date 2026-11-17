@@ -15,11 +15,8 @@ import type {
     RuleSystemSustain,
     SustainResult,
 } from '@/lib/utils/rules/systems/types';
-import type {
-    ActiveEffect,
-    BattleMapConfig,
-    BattleParticipant,
-} from '@/types/battle';
+import type { ActiveEffect, BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 import type { LogLine } from '@/types/text';
 
 export const concentrationOn = (p: BattleParticipant) =>

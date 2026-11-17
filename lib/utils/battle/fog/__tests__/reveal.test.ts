@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { floodRoom, revealCells, revealRectangle } from '../reveal';
 import { revealedHas } from '../revealed-runs';
 
-import type { BattleMapConfig } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 const map = (overrides: Partial<BattleMapConfig> = {}): BattleMapConfig => ({
     cols: 5,
@@ -30,7 +30,14 @@ describe('fog reveal geometry', () => {
     it('clips brush and rectangle cells to map bounds and respects caller blocks', () => {
         const grid = map();
 
-        const brush = revealCells(grid, [{ x: -1, y: 0 }, { x: 2, y: 2 }], new Set(['2:2']));
+        const brush = revealCells(
+            grid,
+            [
+                { x: -1, y: 0 },
+                { x: 2, y: 2 },
+            ],
+            new Set(['2:2'])
+        );
 
         expect(brush).toEqual([]);
         expect(revealRectangle(grid, { x: -2, y: 1 }, { x: 2, y: 3 })).toEqual([
@@ -67,11 +74,14 @@ describe('fog reveal geometry', () => {
     it('converts fill output to normalized row runs', () => {
         const cells = floodRoom({ map: map(), start: { x: 1, y: 1 } });
 
-        const runs = revealCells(map(), [...cells].map((key) => {
-            const [x, y] = key.split(':').map(Number);
+        const runs = revealCells(
+            map(),
+            [...cells].map((key) => {
+                const [x, y] = key.split(':').map(Number);
 
-            return { x, y };
-        }));
+                return { x, y };
+            })
+        );
 
         expect(runs).toEqual([
             [0, 0, 5],

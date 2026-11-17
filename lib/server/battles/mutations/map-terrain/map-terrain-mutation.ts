@@ -17,7 +17,7 @@ import type {
 import { BattleRuleError } from '@/lib/utils/battle/store';
 import { REJECT } from '@/lib/utils/battle/store/reject';
 import type { MapTerrainResponse } from '@/types/api';
-import type { TerrainCell } from '@/types/battle';
+import type { TerrainCell } from '@/types/battle-grid';
 
 export type MapTerrainBody = z.infer<typeof mapTerrainSchema>;
 

@@ -17,11 +17,8 @@ import type {
     SpellEffect,
 } from '@/lib/utils/spells/model/schema';
 import { dropConcentration } from '@/systems/d20/rules/concentration/sustain';
-import type {
-    BattleMapConfig,
-    BattleParticipant,
-    GridPoint,
-} from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 
 const map: BattleMapConfig = {
     cols: 30,

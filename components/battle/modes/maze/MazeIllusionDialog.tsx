@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { SelectField } from '@/components/ui/select-field';
 import { useUnitPicker } from '@/lib/hooks/units';
-import type { IllusionDisguise, IllusionGroup } from '@/types/battle';
+import type { IllusionDisguise, IllusionGroup } from '@/types/battle-grid';
 
 interface Hero {
     id: string;
@@ -47,8 +47,11 @@ function MaskPicker({
     onChange: (d: IllusionDisguise) => void;
 }) {
     const tPick = useTranslations('battleDm.addParticipant');
+
     const picker = useUnitPicker(campaignId, true);
+
     const units = picker.tiers.flatMap((tier) => tier.units);
+
     const options = units.map((u) => ({ value: u.id, label: u.name }));
 
     if (value?.unitId && !units.some((u) => u.id === value.unitId))
@@ -56,6 +59,7 @@ function MaskPicker({
 
     const pickUnit = (id: string) => {
         const unit = units.find((u) => u.id === id);
+
         if (unit)
             onChange({
                 name: unit.name,
@@ -111,9 +115,13 @@ export function MazeIllusionDialog({
     onClear,
 }: Props) {
     const t = useTranslations('battleDm.maze.illusion');
+
     const tPick = useTranslations('battleDm.addParticipant');
+
     const tMaze = useTranslations('battleDm.maze');
+
     const tActions = useTranslations('common.actions');
+
     const [rows, setRows] = useState<GroupRow[]>(() => toRows(groups));
 
     const patchMember = (
@@ -140,6 +148,7 @@ export function MazeIllusionDialog({
                 i === memberIndex ? [] : [hero.id]
             ) ?? []
         );
+
         return heroes.map((hero) => ({
             value: hero.id,
             label: hero.name,
@@ -148,6 +157,7 @@ export function MazeIllusionDialog({
     };
 
     const ready = rows.length > 0 && rows.every(isComplete);
+
     const submit = (action: () => void) => () => {
         action();
         onOpenChange(false);

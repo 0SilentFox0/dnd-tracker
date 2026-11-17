@@ -13,7 +13,7 @@ import {
     mazeDistances,
     wallSet,
 } from '@/lib/utils/battle/modes/maze';
-import type { GridPoint } from '@/types/battle';
+import type { GridPoint } from '@/types/battle-grid';
 
 const grid = { cols: 11, rows: 9 };
 

@@ -2,7 +2,8 @@ import { cellKey } from './geometry';
 import { tokenBox } from './layout';
 import { pathTo } from './path';
 
-import type { BattleMapConfig, BattleParticipant } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 export interface RoutePoint {
     cx: number;

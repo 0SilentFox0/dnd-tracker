@@ -8,11 +8,8 @@ import { castSpell } from '@/lib/utils/battle/spell';
 import type { CastableSpell } from '@/lib/utils/battle/types/spell-process';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 import type { InlineCast, SpellEffect } from '@/lib/utils/spells/model/schema';
-import type {
-    BattleAttack,
-    BattleMapConfig,
-    BattleParticipant,
-} from '@/types/battle';
+import type { BattleAttack, BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 const map: BattleMapConfig = {
     cols: 60,

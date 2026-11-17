@@ -41,7 +41,11 @@ import {
     type MapModeKey,
 } from '@/lib/utils/battle/modes';
 import { clamp } from '@/lib/utils/common/clamp';
-import type { BattleMapConfig, GridPoint, MapMotion } from '@/types/battle';
+import type {
+    BattleMapConfig,
+    GridPoint,
+    MapMotion,
+} from '@/types/battle-grid';
 import type { LogLine } from '@/types/text';
 
 const MODE_KEYS = Object.keys(MAP_MODE_REGISTRY) as MapModeKey[];
@@ -251,7 +255,17 @@ export function useBattleMapEditor(
     );
 
     const replaceMapFromImport = useCallback(
-        (imported: Pick<BattleMapConfig, 'cols' | 'rows' | 'background' | 'backgroundCols' | 'walls' | 'doors'>) => {
+        (
+            imported: Pick<
+                BattleMapConfig,
+                | 'cols'
+                | 'rows'
+                | 'background'
+                | 'backgroundCols'
+                | 'walls'
+                | 'doors'
+            >
+        ) => {
             setMap((m) => ({
                 ...m,
                 ...imported,

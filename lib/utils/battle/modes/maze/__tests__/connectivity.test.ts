@@ -10,7 +10,7 @@ import { mazeGrid } from './fixtures';
 
 import { allCells, cellKey } from '@/lib/utils/battle/grid/geometry';
 import { emptyMaze } from '@/lib/utils/battle/modes/maze/constants';
-import type { GridPoint, MazeConfig } from '@/types/battle';
+import type { GridPoint, MazeConfig } from '@/types/battle-grid';
 
 const p = (x: number, y: number) => ({ x, y });
 

@@ -5,7 +5,8 @@ import { textRef } from '@/lib/i18n/text-ref';
 import { collectModifiers } from '@/lib/utils/abilities/engine/core/collect-modifiers';
 import { withSelf } from '@/lib/utils/abilities/engine/core/participants';
 import type { AttackKind } from '@/lib/utils/abilities/schema';
-import type { BattleParticipant, DamageStep } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { DamageStep } from '@/types/battle-actions';
 import type { LogLine } from '@/types/text';
 
 function isPhysicalDamageType(dt: string): boolean {

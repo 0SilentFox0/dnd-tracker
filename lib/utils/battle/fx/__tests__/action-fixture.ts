@@ -1,5 +1,5 @@
 import { ParticipantSide } from '@/lib/constants/battle';
-import type { BattleAction } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 
 export const action = (over: Partial<BattleAction> = {}): BattleAction => ({
     id: 'b-1',

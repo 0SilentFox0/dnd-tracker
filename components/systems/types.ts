@@ -13,7 +13,8 @@ import type { MechanicKey } from '@/lib/utils/rules/registry';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import type { SystemConditionInfo } from '@/lib/utils/rules/systems';
 import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
-import type { BattleAction, BattleParticipant } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 import type {
     CharacterListItem,
     CharacterSheet,

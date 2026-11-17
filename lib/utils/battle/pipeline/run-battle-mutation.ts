@@ -63,11 +63,9 @@ import {
 import type { Ruleset } from '@/lib/utils/rules';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { BattleScene, ClientBattleDelta } from '@/types/api';
-import type {
-    BattleAction,
-    BattleMapConfig,
-    BattleParticipant,
-} from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 export { PUSHER_DELTA_LIMIT_BYTES } from './limits';
 

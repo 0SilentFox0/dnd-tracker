@@ -2,11 +2,8 @@
 
 import { createContext, useContext, useMemo, useState } from 'react';
 
-import type {
-    AddParticipantData,
-    GridPoint,
-    MazeDifficulty,
-} from '@/types/battle';
+import type { AddParticipantData } from '@/types/battle-actions';
+import type { GridPoint, MazeDifficulty } from '@/types/battle-grid';
 
 export type MazeTool =
     | 'none'

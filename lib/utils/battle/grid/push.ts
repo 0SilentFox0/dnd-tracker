@@ -1,10 +1,7 @@
 import { canStand } from './occupancy';
 
-import type {
-    BattleMapConfig,
-    BattleParticipant,
-    GridPoint,
-} from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 
 /** Клітинка на крок далі від `from` — та сама геометрія для «Штовхнути» і заклинань. */
 export const awayStep = (from: GridPoint, at: GridPoint): GridPoint => ({

@@ -40,12 +40,12 @@ import type {
 import { rejectAction } from '@/lib/utils/battle/store';
 import { rngOf } from '@/lib/utils/common/rng';
 import type { MazeActionData } from '@/types/api';
+import type { BattleParticipant } from '@/types/battle';
 import type {
     BattleMapConfig,
-    BattleParticipant,
     GridPoint,
     MazeConfig,
-} from '@/types/battle';
+} from '@/types/battle-grid';
 import type { LogLine } from '@/types/text';
 
 export interface MazeEnv {
@@ -382,6 +382,7 @@ const illusion: OpHandler<'illusion'> = (ctx, { map, grid }, body) => {
     const pairs = body.groups
         ? expandIllusionGroups(body.groups)
         : (body.pairs ?? []);
+
     const heroIds = body.groups
         ? body.groups.flatMap((group) => group.heroes.map((hero) => hero.id))
         : pairs.flatMap((pair) => [pair.a, pair.b]);

@@ -8,7 +8,8 @@ import {
 } from './occupancy';
 
 import { modePlaceRevived } from '@/lib/utils/battle/modes/server';
-import type { BattleMapConfig, BattleParticipant } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 /** Воскреслі стають на свою останню клітинку, а якщо вона зайнята — на найближчу вільну; без клітинки лишаються до звичайної розстановки. */
 export function placeRevived(

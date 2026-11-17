@@ -13,7 +13,7 @@ import type {
 } from '@/lib/utils/battle/pipeline/run-battle-mutation';
 import { BattleRuleError } from '@/lib/utils/battle/store';
 import type { MapFogData } from '@/types/api';
-import type { FogState } from '@/types/battle';
+import type { FogState } from '@/types/battle-grid';
 
 export function mapFogMutation(
     ctx: BattleMutationContext,
@@ -22,10 +22,16 @@ export function mapFogMutation(
     const map = ctx.meta.map;
 
     if (!map)
-        throw new BattleRuleError('action_rejected', 'battleLog.reject.mapNotLinked');
+        throw new BattleRuleError(
+            'action_rejected',
+            'battleLog.reject.mapNotLinked'
+        );
 
     if (map.maze)
-        throw new BattleRuleError('action_rejected', 'battleLog.reject.mapEdgesInMode');
+        throw new BattleRuleError(
+            'action_rejected',
+            'battleLog.reject.mapEdgesInMode'
+        );
 
     const size = { cols: map.cols, rows: map.rows };
 
@@ -38,8 +44,16 @@ export function mapFogMutation(
     for (const run of [...(body.add ?? []), ...(body.remove ?? [])]) {
         const [y, start, end] = run;
 
-        if (y >= map.rows || start >= map.cols || end > map.cols || start >= end)
-            throw new BattleRuleError('action_rejected', 'battleLog.reject.mapEdgeOutside');
+        if (
+            y >= map.rows ||
+            start >= map.cols ||
+            end > map.cols ||
+            start >= end
+        )
+            throw new BattleRuleError(
+                'action_rejected',
+                'battleLog.reject.mapEdgeOutside'
+            );
     }
 
     const revealed = removeRevealedRuns(
@@ -49,7 +63,10 @@ export function mapFogMutation(
     );
 
     if (revealed.length > FOG_MAX_REVEALED_RUNS)
-        throw new BattleRuleError('action_rejected', 'battleLog.reject.mapEdgeLimit');
+        throw new BattleRuleError(
+            'action_rejected',
+            'battleLog.reject.mapEdgeLimit'
+        );
 
     const fog: FogState = {
         mode: body.mode ?? previous.mode,
@@ -63,9 +80,15 @@ export function mapFogMutation(
         fog.mode === previous.mode &&
         fog.visionRadius === previous.visionRadius &&
         fog.revealed.length === previous.revealed.length &&
-        fog.revealed.every((run, index) => run.every((v, i) => v === previous.revealed[index]?.[i]))
+        fog.revealed.every((run, index) =>
+            run.every((v, i) => v === previous.revealed[index]?.[i])
+        )
     )
-        return { participants: ctx.participants, pending: ctx.pending, events: [] };
+        return {
+            participants: ctx.participants,
+            pending: ctx.pending,
+            events: [],
+        };
 
     return {
         participants: ctx.participants,

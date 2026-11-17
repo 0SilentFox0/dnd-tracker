@@ -23,7 +23,8 @@ import {
     spellChain,
 } from '@/lib/utils/battle/spell/spell-targeting';
 import { matchesTargetFilter } from '@/lib/utils/battle/spell/target-filter';
-import type { BattleParticipant, GridPoint } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { GridPoint } from '@/types/battle-grid';
 
 /** Цілі заклинання: кандидати, дальність, наведення на карті та цілі, що їх зачепить шаблон чи ланцюг. */
 export function useSpellBookTargets(

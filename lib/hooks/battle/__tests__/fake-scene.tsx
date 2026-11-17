@@ -24,7 +24,8 @@ import { sceneOf } from '@/systems/wfrp/rules/__tests__/slot-fixtures';
 import type { SceneMomentum } from '@/systems/wfrp/rules/slots';
 import type { ResolvedAbility } from '@/types/abilities';
 import type { BattleScene } from '@/types/api';
-import type { BattleAction, BattleParticipant } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 import type { ResultFx } from '@/types/battle-scene';
 
 export interface FakeSceneOptions {

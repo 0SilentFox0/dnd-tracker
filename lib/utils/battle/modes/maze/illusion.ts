@@ -7,14 +7,14 @@ import type {
     NewBattleEvent,
     ScenePatch,
 } from '@/lib/utils/battle/store/types';
+import type { BattleParticipant } from '@/types/battle';
 import type {
     BattleMapConfig,
-    BattleParticipant,
     IllusionDisguise,
     IllusionGroup,
     IllusionPair,
     MazeConfig,
-} from '@/types/battle';
+} from '@/types/battle-grid';
 import type { LogLine } from '@/types/text';
 
 export const illusionGroups = (
@@ -37,7 +37,9 @@ export const expandIllusionGroups = (groups: IllusionGroup[]): IllusionPair[] =>
         for (let i = 0; i < heroes.length; i++) {
             for (let j = i + 1; j < heroes.length; j++) {
                 const a = heroes[i];
+
                 const b = heroes[j];
+
                 pairs.push({
                     a: a.id,
                     b: b.id,
@@ -109,6 +111,7 @@ export function pruneIllusion<T extends PruneOutcome>(
     result: T
 ): T {
     const pairs = illusionPairs(map?.maze);
+
     const groups = map?.maze?.illusionSwap?.groups;
 
     if (!map?.maze || pairs.length === 0) return result;
@@ -121,7 +124,9 @@ export function pruneIllusion<T extends PruneOutcome>(
     );
 
     let illusionSwap: NonNullable<MazeConfig['illusionSwap']>;
+
     let changed: boolean;
+
     if (groups) {
         const keptGroups = active
             ? groups
@@ -130,6 +135,7 @@ export function pruneIllusion<T extends PruneOutcome>(
                   }))
                   .filter((group) => group.heroes.length >= 2)
             : [];
+
         changed =
             keptGroups.length !== groups.length ||
             keptGroups.some(
@@ -140,6 +146,7 @@ export function pruneIllusion<T extends PruneOutcome>(
         const kept = active
             ? pairs.filter((p) => live.has(p.a) && live.has(p.b))
             : [];
+
         changed = kept.length !== pairs.length;
         illusionSwap = { pairs: kept };
     }

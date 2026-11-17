@@ -7,7 +7,7 @@ import { fakeScene } from './fake-scene';
 
 import { resolved } from '@/lib/utils/abilities/__tests__/fixtures';
 import { sceneOf } from '@/systems/wfrp/rules/__tests__/slot-fixtures';
-import type { BattleAction } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 
 const hitLog = (changes: { participantId: string; change: number }[]) =>
     [

@@ -9,7 +9,8 @@ import { textRef } from '@/lib/i18n/text-ref';
 import { placed, testMap } from '@/lib/utils/battle/__tests__/fixtures/placed';
 import { REJECT } from '@/lib/utils/battle/store/reject';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
-import type { BattleAttack, GridPoint } from '@/types/battle';
+import type { BattleAttack } from '@/types/battle';
+import type { GridPoint } from '@/types/battle-grid';
 
 const unit = (id: string, at: GridPoint, side: ParticipantSide, size = 1) =>
     placed(id, { side, at, hp: 20, size });

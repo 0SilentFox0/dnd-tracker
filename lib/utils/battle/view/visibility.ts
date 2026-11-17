@@ -8,12 +8,8 @@ import { stubReserve } from '@/lib/utils/battle/participant/reserve';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import { ruleSystemOf, systemKeyOf } from '@/lib/utils/rules/systems';
 import type { BattleParticipantPatch } from '@/types/api';
-import type {
-    ActiveEffect,
-    BattleAction,
-    BattleParticipant,
-    DamageStep,
-} from '@/types/battle';
+import type { ActiveEffect, BattleParticipant } from '@/types/battle';
+import type { BattleAction, DamageStep } from '@/types/battle-actions';
 import type { LogLine } from '@/types/text';
 
 export interface Viewer {

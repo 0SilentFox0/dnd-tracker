@@ -1,7 +1,7 @@
 import type { Locale } from '@/lib/i18n/config';
 import { textOf } from '@/lib/i18n/test/text';
 import { decodeLog } from '@/lib/utils/battle/log/codec';
-import type { DamageRow } from '@/types/battle';
+import type { DamageRow } from '@/types/battle-actions';
 import type { LogLine } from '@/types/text';
 
 interface TextCarrier {

@@ -15,7 +15,11 @@ import {
     MAZE_TELEPORT_MIN_DISTANCE,
 } from '@/lib/utils/battle/modes/maze/constants';
 import { MAZE_TEXTS } from '@/lib/utils/battle/modes/maze/texts';
-import type { GridPoint, MazeConfig, MazeDifficulty } from '@/types/battle';
+import type {
+    GridPoint,
+    MazeConfig,
+    MazeDifficulty,
+} from '@/types/battle-grid';
 
 const p = (x: number, y: number) => ({ x, y });
 

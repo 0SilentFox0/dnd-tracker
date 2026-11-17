@@ -12,7 +12,7 @@ import { MazeViewProvider } from '@/components/battle/modes/maze/MazeViewProvide
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { fakeScene } from '@/lib/hooks/battle/__tests__/fake-scene';
 import { type MazeTools, useMazeView } from '@/lib/hooks/battle/modes/maze';
-import type { MazeConfig } from '@/types/battle';
+import type { MazeConfig } from '@/types/battle-grid';
 
 vi.mock('@/components/battle/use-system-battle-ui', () => ({
     useSystemFx: () => undefined,

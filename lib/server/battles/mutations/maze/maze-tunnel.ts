@@ -23,11 +23,8 @@ import {
 } from '@/lib/utils/battle/store';
 import { advanceAfterRemoval } from '@/lib/utils/battle/turn';
 import { originalSide } from '@/lib/utils/battle/turn/original-side';
-import type {
-    BattleMapConfig,
-    BattleParticipant,
-    MazeConfig,
-} from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig, MazeConfig } from '@/types/battle-grid';
 
 const isDead = (p: BattleParticipant) =>
     p.combatStats.status === CombatStatus.DEAD;

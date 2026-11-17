@@ -8,7 +8,7 @@ import {
     inBounds,
     mapCentre,
 } from '@/lib/utils/battle/grid/geometry';
-import type { GridPoint } from '@/types/battle';
+import type { GridPoint } from '@/types/battle-grid';
 
 export type TunnelDir = 'n' | 'e' | 's' | 'w';
 

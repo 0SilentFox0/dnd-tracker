@@ -7,7 +7,7 @@ import { particleCount, type WeatherSim, type WeatherSize } from './types';
 
 import { fitCanvas } from '@/lib/utils/canvas/canvas-size';
 import { subscribe } from '@/lib/utils/canvas/ticker';
-import type { WeatherKind } from '@/types/battle';
+import type { WeatherKind } from '@/types/battle-grid';
 
 // частинки дрібні: понад 1.5× пікселів не видно, а заливка дорожчає квадратично
 const MAX_WEATHER_DPR = 1.5;

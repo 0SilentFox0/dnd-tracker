@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { MazeIllusionDialog } from '@/components/battle/modes/maze/MazeIllusionDialog';
 import { render } from '@/lib/i18n/test/render-uk';
-import type { IllusionGroup } from '@/types/battle';
+import type { IllusionGroup } from '@/types/battle-grid';
 
 vi.unmock('next-intl');
 
@@ -55,7 +55,9 @@ async function pick(name: string, option: string) {
 
 function setup(groups: IllusionGroup[] = []) {
     const onApply = vi.fn();
+
     const onClear = vi.fn();
+
     render(
         <MazeIllusionDialog
             open
@@ -67,6 +69,7 @@ function setup(groups: IllusionGroup[] = []) {
             onClear={onClear}
         />
     );
+
     return { onApply, onClear };
 }
 
@@ -81,12 +84,14 @@ async function addDisguise(
     unit: string
 ) {
     const label = `Маска ${hero} · #${group}`;
+
     await pick(label, unit);
 }
 
 describe('MazeIllusionDialog', () => {
     it('creates one group of three heroes with a disguise per hero', async () => {
         const { onApply } = setup();
+
         fireEvent.click(screen.getByRole('button', { name: 'Додати 1' }));
         await addHero(1, 1, 'Аліса');
         fireEvent.click(screen.getByRole('button', { name: 'Додати (1)' }));
@@ -125,6 +130,7 @@ describe('MazeIllusionDialog', () => {
 
     it('allows the same hero in different overlapping groups', async () => {
         const { onApply } = setup();
+
         fireEvent.click(screen.getByRole('button', { name: 'Додати 1' }));
         await addHero(1, 1, 'Аліса');
         fireEvent.click(screen.getByRole('button', { name: 'Додати (1)' }));
@@ -150,7 +156,9 @@ describe('MazeIllusionDialog', () => {
                 { id: 'h3', disguise: { name: 'Орк', unitId: 'u1' } },
             ],
         };
+
         const { onClear } = setup([group]);
+
         expect(
             screen.getByRole('combobox', { name: 'Герой 1.1' })
         ).toHaveTextContent('Аліса');

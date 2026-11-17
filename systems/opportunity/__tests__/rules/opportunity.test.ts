@@ -11,11 +11,8 @@ import { eventTextOf } from '@/lib/utils/battle/log/__tests__/event-text';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 import { applyCondition5e } from '@/systems/d20/rules/conditions/apply';
 import { resolveOpportunityAttacks } from '@/systems/opportunity/rules/opportunity';
-import type {
-    BattleAttack,
-    BattleMapConfig,
-    BattleParticipant,
-} from '@/types/battle';
+import type { BattleAttack, BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 const map: BattleMapConfig = {
     cols: 10,

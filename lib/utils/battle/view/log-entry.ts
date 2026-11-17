@@ -3,7 +3,7 @@ import { dynamicTextRef, textRef } from '@/lib/i18n/text-ref';
 import { splitLegacyTriggers } from '@/lib/utils/battle/log/legacy';
 import { actionLines } from '@/lib/utils/battle/log/lines';
 import { getLogEntryDetailItems } from '@/lib/utils/battle/view/log-format';
-import type { BattleAction } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 import type { LogLine } from '@/types/text';
 
 const KNOWN_KINDS: ReadonlySet<string> = new Set(

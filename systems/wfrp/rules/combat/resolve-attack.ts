@@ -36,11 +36,8 @@ import type {
     ResolveAttackCtx,
     ResolvedAttack,
 } from '@/lib/utils/rules/systems/types';
-import type {
-    BattleAttack,
-    BattleMapConfig,
-    BattleParticipant,
-} from '@/types/battle';
+import type { BattleAttack, BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 const attackCharacteristicOf = (attack: BattleAttack) =>
     (attackKindOf(attack.type) === AttackType.RANGED ? 'bs' : 'ws') as

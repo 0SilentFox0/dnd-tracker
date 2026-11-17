@@ -17,7 +17,7 @@ import {
     type SystemFx,
 } from '@/lib/utils/battle/fx';
 import { DICE_TOTAL_MS } from '@/lib/utils/battle/fx/dice';
-import type { BattleAction } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 
 const FX_IMPACT_SLACK_MS = 1500;
 

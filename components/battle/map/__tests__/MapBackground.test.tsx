@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { BACKGROUND_FADE_MS, MapBackground } from '../MapBackground';
 
-import type { BattleMapConfig } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 const reduced = vi.hoisted(() => ({ value: false }));
 

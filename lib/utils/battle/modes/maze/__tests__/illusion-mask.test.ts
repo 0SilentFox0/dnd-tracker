@@ -17,11 +17,9 @@ import {
     maskParticipant,
 } from '@/lib/utils/battle/modes/maze/illusion-mask';
 import { canSeeExactStats, turnQueue } from '@/lib/utils/battle/view';
-import type {
-    BattleAction,
-    BattleParticipant,
-    IllusionPair,
-} from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
+import type { IllusionPair } from '@/types/battle-grid';
 
 const hero = (
     id: string,

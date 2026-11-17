@@ -14,7 +14,8 @@ import type {
     TurnAdvanceCtx,
     TurnHook,
 } from '@/lib/utils/rules/systems/types';
-import type { BattleAction, BattleParticipant } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 
 export interface ApplyPendingMoraleResult {
     updatedInitiativeOrder: BattleParticipant[];

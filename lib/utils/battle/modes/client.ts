@@ -7,7 +7,8 @@ import {
 import type { ModeView } from './types';
 
 import type { ClientBattleDelta } from '@/types/api';
-import type { BattleAction, BattleMapConfig } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 export type ModeDeltas = Partial<Pick<ClientBattleDelta['scene'], MapModeKey>>;
 

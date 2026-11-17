@@ -19,7 +19,7 @@ import {
     UNIT,
     windowPath,
 } from '@/lib/utils/battle/grid';
-import type { BattleMapConfig, BattleMapView } from '@/types/battle';
+import type { BattleMapConfig, BattleMapView } from '@/types/battle-grid';
 
 interface GridMarksProps {
     map: BattleMapConfig;

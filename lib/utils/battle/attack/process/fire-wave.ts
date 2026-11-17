@@ -13,7 +13,8 @@ import {
 } from '@/lib/utils/battle/grid';
 import { isHostile } from '@/lib/utils/battle/modes/engine';
 import type { Ruleset } from '@/lib/utils/rules/schema';
-import type { BattleMapConfig, BattleParticipant } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 export function fireWaveVictims(
     map: BattleMapConfig | null | undefined,

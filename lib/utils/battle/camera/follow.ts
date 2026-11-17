@@ -1,6 +1,7 @@
 import { UNIT } from '@/lib/utils/battle/grid/layout';
 import { sizeOf } from '@/lib/utils/battle/grid/occupancy';
-import type { BattleParticipant, GridPoint } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { GridPoint } from '@/types/battle-grid';
 
 export function cellPointPx(
     anchor: GridPoint,

@@ -18,7 +18,7 @@ import { SelectField } from '@/components/ui/select-field';
 import { Switch } from '@/components/ui/switch';
 import type { AbilityKey } from '@/lib/constants/abilities';
 import { useTranslator } from '@/lib/i18n/use-translator';
-import type { TemplateShape } from '@/types/battle';
+import type { TemplateShape } from '@/types/battle-grid';
 import type { SpellResolution, SpellTargeting } from '@/types/spells';
 
 const RANGED_KINDS = ['ally', 'enemy', 'allyDead', 'area', 'template'];

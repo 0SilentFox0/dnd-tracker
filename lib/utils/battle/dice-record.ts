@@ -1,4 +1,8 @@
-import type { DiceRollGroup, DieSides, RolledDie } from '@/types/battle';
+import type {
+    DiceRollGroup,
+    DieSides,
+    RolledDie,
+} from '@/types/battle-actions';
 
 const SIDES = new Set<number>([4, 6, 8, 10, 12, 20]);
 

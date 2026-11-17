@@ -21,12 +21,12 @@ import type { BattleMutationContext } from '@/lib/utils/battle/pipeline/run-batt
 import { buildSnapshotState } from '@/lib/utils/battle/store';
 import { checkVictoryConditions as checkVictory } from '@/lib/utils/battle/turn/victory';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
+import type { BattleParticipant } from '@/types/battle';
 import type {
     BattleMapConfig,
-    BattleParticipant,
     GridPoint,
     MazeConfig,
-} from '@/types/battle';
+} from '@/types/battle-grid';
 
 const checkVictoryConditions = (
     order: BattleParticipant[],

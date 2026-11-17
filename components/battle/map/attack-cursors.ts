@@ -1,4 +1,4 @@
-import type { BattleMapView } from '@/types/battle';
+import type { BattleMapView } from '@/types/battle-grid';
 
 type AttackKind = NonNullable<BattleMapView['trajectory']>['kind'];
 

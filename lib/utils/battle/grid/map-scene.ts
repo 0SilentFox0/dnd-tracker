@@ -37,13 +37,13 @@ import {
     type Viewer,
 } from '@/lib/utils/battle/view/visibility';
 import type { Ruleset } from '@/lib/utils/rules/schema';
+import type { BattleParticipant } from '@/types/battle';
 import type {
     BattleMapConfig,
     BattleMapView,
-    BattleParticipant,
     GridPoint,
     SpellTemplate,
-} from '@/types/battle';
+} from '@/types/battle-grid';
 import type { LogLine } from '@/types/text';
 
 export interface MapAim {

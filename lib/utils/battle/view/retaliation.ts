@@ -1,6 +1,6 @@
 import { damageTaken } from './damage-taken';
 
-import type { BattleAction } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 
 export interface RetaliationOutcome {
     name: string;

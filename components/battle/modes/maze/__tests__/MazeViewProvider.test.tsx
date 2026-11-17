@@ -23,7 +23,7 @@ import { render } from '@/lib/i18n/test/render-uk';
 import { testMap } from '@/lib/utils/battle/__tests__/fixtures/placed';
 import { MAZE_UNKNOWN_NAME } from '@/lib/utils/battle/modes/maze';
 import { mazeMap } from '@/lib/utils/battle/modes/maze/__tests__/fixtures';
-import type { BattleAction } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 
 vi.unmock('next-intl');
 

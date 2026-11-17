@@ -24,7 +24,8 @@ import {
 import { coreActionSchema } from '@/systems/d20/rules/actions/schema';
 import { passivePerception } from '@/systems/d20/rules/checks/roll-check';
 import { applyCondition5e } from '@/systems/d20/rules/conditions/apply';
-import type { BattleMapConfig, BattleParticipant } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 const map: BattleMapConfig = {
     cols: 10,

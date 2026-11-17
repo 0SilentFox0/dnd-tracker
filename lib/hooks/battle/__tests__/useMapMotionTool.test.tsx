@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { useMapMotionTool } from '../useMapMotionTool';
 
-import type { MapMotion } from '@/types/battle';
+import type { MapMotion } from '@/types/battle-grid';
 
 function setup(initial: MapMotion | null, isDM = true) {
     const mutate = vi.fn();

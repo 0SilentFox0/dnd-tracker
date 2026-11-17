@@ -4,7 +4,7 @@ import { action } from './action-fixture';
 
 import { takeNewActions } from '@/lib/utils/battle/fx/new-events';
 import { MAX_FX_BATCH } from '@/lib/utils/battle/fx/timing';
-import type { BattleAction } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 
 const at = (i: number, over: Partial<BattleAction> = {}) => ({
     ...action({ actionIndex: i, id: `b-${i}` }),

@@ -6,12 +6,12 @@ import { moveMutation } from '@/lib/server/battles/mutations/move/move-mutation'
 import { eventTextOf } from '@/lib/utils/battle/log/__tests__/event-text';
 import { BattleAccessError } from '@/lib/utils/battle/store';
 import { REJECT } from '@/lib/utils/battle/store/reject';
+import type { BattleParticipant } from '@/types/battle';
 import type {
     BattleMapConfig,
-    BattleParticipant,
     GridPoint,
     TerrainCell,
-} from '@/types/battle';
+} from '@/types/battle-grid';
 
 const map: BattleMapConfig = {
     cols: 10,

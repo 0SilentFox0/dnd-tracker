@@ -11,7 +11,8 @@ import {
     rayCells,
 } from '@/lib/utils/battle/grid';
 import { isHostile } from '@/lib/utils/battle/modes/engine';
-import type { BattleMapConfig, BattleParticipant } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 export function piercingTargets(
     map: BattleMapConfig | null | undefined,

@@ -21,7 +21,7 @@ import type {
     RunBattleMutationOptions,
 } from '@/lib/utils/battle/pipeline/run-battle-mutation';
 import { BattleAccess } from '@/lib/utils/battle/pipeline/run-battle-mutation';
-import type { BattleMapConfig, MazeConfig } from '@/types/battle';
+import type { BattleMapConfig, MazeConfig } from '@/types/battle-grid';
 
 const mapOf = (over: Partial<MazeConfig> = {}): BattleMapConfig =>
     mazeMap({ exit: { x: 5, y: 0 }, dark: true, moved: true, ...over }, 6);

@@ -12,7 +12,7 @@ import {
     withLines,
     withPrefix,
 } from '@/lib/utils/battle/log/lines';
-import type { BattleAction } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 
 const legacy = { resultText: "Гоблін б'є | гарантована шкода: 2" };
 

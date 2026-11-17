@@ -7,7 +7,7 @@ import { mazeGrid } from './fixtures';
 
 import { cellDistance, cellKey } from '@/lib/utils/battle/grid/geometry';
 import { MAZE_SCATTER_MIN_GAP } from '@/lib/utils/battle/modes/maze/constants';
-import type { MazeConfig } from '@/types/battle';
+import type { MazeConfig } from '@/types/battle-grid';
 
 const ids = (n: number) => Array.from({ length: n }, (_, i) => `p${i}`);
 

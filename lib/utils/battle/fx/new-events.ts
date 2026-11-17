@@ -1,6 +1,6 @@
 import { MAX_FX_BATCH } from './timing';
 
-import type { BattleAction } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 
 export function takeNewActions(
     log: BattleAction[],

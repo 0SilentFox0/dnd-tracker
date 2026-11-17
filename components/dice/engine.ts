@@ -19,7 +19,7 @@ import {
     type ThrowPlan,
     type Vec3,
 } from '@/lib/utils/battle/fx/dice';
-import type { DieSides } from '@/types/battle';
+import type { DieSides } from '@/types/battle-actions';
 
 export interface DiceEngine {
     roll(spec: DiceThrowSpec): Promise<void>;

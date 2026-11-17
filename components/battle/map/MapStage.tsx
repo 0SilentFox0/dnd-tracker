@@ -46,12 +46,12 @@ import {
     tokenBox,
     UNIT,
 } from '@/lib/utils/battle/grid';
+import type { BattleParticipant } from '@/types/battle';
 import type {
     BattleMapActions,
     BattleMapConfig,
     BattleMapView,
-    BattleParticipant,
-} from '@/types/battle';
+} from '@/types/battle-grid';
 
 export interface MapStageLayout {
     win: { x: number; y: number };
@@ -81,7 +81,7 @@ export interface MapStageEditing {
     fogActive?: boolean;
     fog?: {
         mode: 'off' | 'reveal' | 'vision';
-        revealed: import('@/types/battle').RevealedRun[];
+        revealed: import('@/types/battle-grid').RevealedRun[];
         visible: ReadonlySet<string>;
         explored: ReadonlySet<string>;
         dmEditing: boolean;

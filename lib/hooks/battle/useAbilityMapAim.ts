@@ -7,7 +7,8 @@ import { useBattleScene } from './useBattleScene';
 import { aimInRange, cellsOf, sizeOf } from '@/lib/utils/battle/grid';
 import { cellFeetOf } from '@/lib/utils/battle/grid/cell-feet';
 import type { ResolvedAbility } from '@/types/abilities';
-import type { BattleParticipant, GridPoint } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { GridPoint } from '@/types/battle-grid';
 
 /** Наведення вміння на клітинку карти: шаблон — слід учасника, Escape або «Скасувати» прибирають наведення. */
 export function useAbilityMapAim(

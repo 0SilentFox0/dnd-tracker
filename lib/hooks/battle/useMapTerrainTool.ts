@@ -20,7 +20,7 @@ import type {
     MapTerrainResponse,
     MapWallsData,
 } from '@/types/api';
-import type { GridPoint, TerrainKind } from '@/types/battle';
+import type { GridPoint, TerrainKind } from '@/types/battle-grid';
 
 export type EdgeBrush = Exclude<EdgeTool, 'edge-door'>;
 

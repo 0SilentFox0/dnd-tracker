@@ -12,11 +12,8 @@ import {
     isDying,
     isEscaped,
 } from '@/lib/utils/abilities/engine/core/participants';
-import type {
-    BattleMapConfig,
-    BattleParticipant,
-    GridPoint,
-} from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 
 export function sizeOf(p: BattleParticipant): number {
     return Math.min(3, Math.max(1, p.combatStats.gridSize ?? 1));

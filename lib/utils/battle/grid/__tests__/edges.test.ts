@@ -5,7 +5,7 @@ import { barsOf, cellsConnected, edgeBlocks, wallsOf } from '../edges';
 import { testMap } from '@/lib/utils/battle/__tests__/fixtures/placed';
 import type { MapModeDefinition } from '@/lib/utils/battle/modes';
 import { registerTestMode } from '@/lib/utils/battle/modes';
-import type { BattleMapConfig } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 const at = (x: number, y: number) => ({ x, y });
 

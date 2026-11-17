@@ -11,7 +11,7 @@ import {
 } from '@/lib/utils/battle/grid/geometry';
 import { MAZE_SCATTER_MIN_GAP } from '@/lib/utils/battle/modes/maze/constants';
 import { MAZE_TEXTS } from '@/lib/utils/battle/modes/maze/texts';
-import type { GridPoint } from '@/types/battle';
+import type { GridPoint } from '@/types/battle-grid';
 
 const SCATTER_ATTEMPTS = 20;
 

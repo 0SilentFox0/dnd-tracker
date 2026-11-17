@@ -10,7 +10,7 @@ import {
 
 import { DRAG_THRESHOLD } from '@/lib/hooks/common';
 import { cellAtScreenPoint, cellKey, cellLine } from '@/lib/utils/battle/grid';
-import type { BattleMapActions, GridPoint } from '@/types/battle';
+import type { BattleMapActions, GridPoint } from '@/types/battle-grid';
 
 interface Stroke {
     pointerId: number;

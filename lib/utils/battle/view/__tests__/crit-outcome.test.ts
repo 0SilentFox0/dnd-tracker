@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { critOutcome } from '@/lib/utils/battle/view';
-import type { BattleAction } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 
 const atk = (
     actionIndex: number,

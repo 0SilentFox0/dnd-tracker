@@ -23,7 +23,8 @@ import { useServiceActorName } from '@/lib/i18n/use-service-actor-name';
 import { useText } from '@/lib/i18n/use-text';
 import { cn } from '@/lib/utils';
 import { logEntryView } from '@/lib/utils/battle/view';
-import type { BattleAction, BattleParticipant } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 
 const ICON: Record<BattleAction['actionType'], LucideIcon> = {
     attack: Swords,

@@ -4,7 +4,7 @@ import {
     type ParticipantSourceTypeValue,
 } from '@/lib/constants/battle';
 import type { XpDifficulty } from '@/lib/utils/battle/balance/xp-budget';
-import type { BattleMapConfig } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 import type { LogLine } from '@/types/text';
 
 export interface SetupCharacter {
@@ -121,4 +121,4 @@ export interface BattleBalanceResponse {
     _debug?: { mainSkills?: unknown; characterSkillProgress?: unknown };
 }
 
-export type { AddParticipantData } from '@/types/battle';
+export type { AddParticipantData } from '@/types/battle-actions';

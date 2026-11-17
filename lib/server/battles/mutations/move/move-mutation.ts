@@ -44,12 +44,12 @@ import { assertCanAct } from '@/lib/utils/battle/turn';
 import { rngOf } from '@/lib/utils/common/rng';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
+import type { BattleParticipant } from '@/types/battle';
 import type {
     BattleMapConfig,
-    BattleParticipant,
     GridPoint,
     TerrainCell,
-} from '@/types/battle';
+} from '@/types/battle-grid';
 import type { LogLine } from '@/types/text';
 
 export type MoveBody = z.infer<typeof moveSchema>;

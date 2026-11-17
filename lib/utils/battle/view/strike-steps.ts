@@ -3,11 +3,8 @@ import { canSeeExactStats, hiddenTargetSteps, type Viewer } from './visibility';
 import { computeDamageBreakdown } from '@/lib/utils/battle/damage';
 import { obstacleStep } from '@/lib/utils/battle/damage/obstacle';
 import type { BattleScene } from '@/types/api';
-import type {
-    BattleAttack,
-    BattleParticipant,
-    DamageStep,
-} from '@/types/battle';
+import type { BattleAttack, BattleParticipant } from '@/types/battle';
+import type { DamageStep } from '@/types/battle-actions';
 
 interface StrikeStepsInput {
     attacker: BattleParticipant;

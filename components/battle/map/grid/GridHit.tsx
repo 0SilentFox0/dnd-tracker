@@ -21,7 +21,7 @@ import type {
     BattleMapActions,
     BattleMapConfig,
     GridPoint,
-} from '@/types/battle';
+} from '@/types/battle-grid';
 
 export interface GridCellActions {
     onCellClick?: BattleMapActions['onCellClick'];

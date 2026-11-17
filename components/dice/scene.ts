@@ -33,7 +33,7 @@ import {
     len,
     sub,
 } from '@/lib/utils/battle/fx/dice';
-import type { DieSides } from '@/types/battle';
+import type { DieSides } from '@/types/battle-actions';
 
 const CELL_PX = 128;
 

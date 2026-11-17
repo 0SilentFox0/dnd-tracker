@@ -18,11 +18,8 @@ import { sharedEnemyRace } from '@/lib/utils/battle/balance/setup';
 import { SECTION_DEFAULTS } from '@/lib/utils/rules/defaults';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import { FALLBACK_SYSTEM_KEY } from '@/lib/utils/rules/systems/catalog';
-import type {
-    BattleMapConfig,
-    BattleMapRef,
-    BattlePreparationParticipant,
-} from '@/types/battle';
+import type { BattlePreparationParticipant } from '@/types/battle';
+import type { BattleMapConfig, BattleMapRef } from '@/types/battle-grid';
 
 export interface BattleSetupInitial {
     name: string;

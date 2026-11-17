@@ -8,7 +8,7 @@ import {
     viewpointOf,
 } from '../vision';
 
-import type { MazeConfig } from '@/types/battle';
+import type { MazeConfig } from '@/types/battle-grid';
 
 const p = (x: number, y: number) => ({ x, y });
 

@@ -12,7 +12,8 @@ import {
 } from '@/lib/utils/battle/view';
 import { getLogEntryDetailItems } from '@/lib/utils/battle/view/log-format';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
-import type { ActiveEffect, BattleAction } from '@/types/battle';
+import type { ActiveEffect } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 
 const entry = (resultText: string) =>
     ({

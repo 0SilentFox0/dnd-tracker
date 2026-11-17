@@ -9,7 +9,7 @@ import type {
     LoadedBattle,
 } from '@/lib/utils/battle/store/types';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
-import type { BattleMapConfig } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 const map: BattleMapConfig = {
     cols: 8,
