@@ -280,7 +280,9 @@ function EditorContent({
     const tileLabelTranslations = useTranslations('maps.tileLabels');
 
     const tileLabel = (key: string) =>
-        tileLabelTranslations.has(key) ? tileLabelTranslations(key) : key;
+        tileLabelTranslations.has(key as never)
+            ? tileLabelTranslations(key as never)
+            : key;
 
     const previewMap = paintingTiles
         ? { ...map, background: null }
