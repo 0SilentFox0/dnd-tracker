@@ -239,6 +239,7 @@ describe('blockedByMode', () => {
             'core-action',
             'map-door-toggle',
             'map-edge-remove',
+            'map-fog',
             'map-walls',
             'maze-mark',
             'morale-check',

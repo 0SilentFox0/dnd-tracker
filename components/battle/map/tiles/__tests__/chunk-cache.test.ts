@@ -59,4 +59,29 @@ describe('TileRasterChunkCache', () => {
 
         expect(render).toHaveBeenCalledTimes(2);
     });
+
+    it('не закриває некешований raster, що перевищує ліміт', () => {
+        const cache = new TileRasterChunkCache<{
+            width: number;
+            height: number;
+            close: () => void;
+        }>(16);
+
+        const close = vi.fn();
+
+        const raster = { width: 100, height: 100, close };
+
+        const key = {
+            mapId: 'map-1',
+            version: 1,
+            layer: 'ground' as const,
+            cx: 0,
+            cy: 0,
+            pixelRatio: 1,
+            signature: 'big',
+        };
+
+        expect(cache.getOrCreate(key, () => raster)).toBe(raster);
+        expect(close).not.toHaveBeenCalled();
+    });
 });
