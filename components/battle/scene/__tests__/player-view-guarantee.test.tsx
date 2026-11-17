@@ -78,6 +78,7 @@ const ALLOWED = [
     /^(Фр|Го)/,
     /^ходить /,
     /^Огляд/,
+    /^(Збільшити|Зменшити) мапу$/,
 ];
 
 function mount(opts: FakeSceneOptions) {
