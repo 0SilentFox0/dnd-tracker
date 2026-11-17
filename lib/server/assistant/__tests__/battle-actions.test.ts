@@ -245,6 +245,7 @@ describe('T11 battle adapters', () => {
             'map-walls',
             'map-door-toggle',
             'map-edge-remove',
+            'map-fog',
             'map-update',
             'map-motion',
             'map-weather',

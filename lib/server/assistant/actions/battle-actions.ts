@@ -14,6 +14,7 @@ export const BATTLE_COMMANDS = [
     'initiative-roll',
     'map-door-toggle',
     'map-edge-remove',
+    'map-fog',
     'map-motion',
     'map-terrain',
     'map-update',

@@ -429,6 +429,13 @@ export const ASSISTANT_ROUTE_COVERAGE: readonly RouteCoverage[] = [
         state: 'active',
     },
     {
+        route: 'campaigns/[id]/battles/[battleId]/map-fog',
+        methods: ['POST'],
+        task: 10,
+        adapter: 'battles',
+        state: 'active',
+    },
+    {
         route: 'campaigns/[id]/battles/[battleId]/map-door-toggle',
         methods: ['POST'],
         task: 10,
