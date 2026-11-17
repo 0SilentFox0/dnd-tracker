@@ -1,0 +1,854 @@
+[
+    {
+        "file": "components/abilities/AbilityChips.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/abilities/AbilityFlow.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/abilities/fields/ScaleColumnSelect.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/abilities/sections/CollapsibleHeader.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/abilities/sections/PerformSection.tsx",
+        "count": 3
+    },
+    {
+        "file": "components/ai/AiComposer.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/ai/AiProposalCard.tsx",
+        "count": 2
+    },
+    {
+        "file": "components/ai/AssistantContextDisclosure.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/ai/AssistantHandoff.tsx",
+        "count": 2
+    },
+    {
+        "file": "components/ai/AssistantWorkspace.tsx",
+        "count": 2
+    },
+    {
+        "file": "components/artifacts/ArtifactArmorFields.tsx",
+        "count": 2
+    },
+    {
+        "file": "components/artifacts/ArtifactItemFields.tsx",
+        "count": 2
+    },
+    {
+        "file": "components/artifacts/ItemCastingFields.tsx",
+        "count": 3
+    },
+    {
+        "file": "components/audio/AudioDock.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/audio/AudioPlayerPanel.tsx",
+        "count": 4
+    },
+    {
+        "file": "components/audio/DmAudioControls.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/audio/DmPlaylist.tsx",
+        "count": 9
+    },
+    {
+        "file": "components/audio/PlayerErrorBoundary.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/audio/SeekBar.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/audio/UnlockSoundButton.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/auth/AuthScreens.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/auth/PasswordInput.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/battle/demo/DemoBattleSandbox.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/battle/dev/BattleMapPlayground.tsx",
+        "count": 8
+    },
+    {
+        "file": "components/battle/dev/FxLab.tsx",
+        "count": 2
+    },
+    {
+        "file": "components/battle/dev/spells/FxSpells.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/battle/dev/spells/SpellCard.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/battle/dm/dialogs/InitiativeOrderDialog.tsx",
+        "count": 2
+    },
+    {
+        "file": "components/battle/dm/DmBattleLog.tsx",
+        "count": 2
+    },
+    {
+        "file": "components/battle/dm/DmParticipantRow.tsx",
+        "count": 8
+    },
+    {
+        "file": "components/battle/dm/DmQuickActionsPanel.tsx",
+        "count": 5
+    },
+    {
+        "file": "components/battle/dm/DmRevivePrompt.tsx",
+        "count": 2
+    },
+    {
+        "file": "components/battle/hud/DiceInput.tsx",
+        "count": 3
+    },
+    {
+        "file": "components/battle/hud/EffectLine.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/battle/hud/ZoomablePortrait.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/battle/log/BattleLogLoadEarlier.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/battle/log/LogEntryCard.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/battle/log/LogTimeline.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/battle/log/RoundHeader.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/battle/map/BattleMapPanel.tsx",
+        "count": 5
+    },
+    {
+        "file": "components/battle/map/DoorMenu.tsx",
+        "count": 2
+    },
+    {
+        "file": "components/battle/map/fog/MapFogToolbar.tsx",
+        "count": 3
+    },
+    {
+        "file": "components/battle/map/MapMotionPanel.tsx",
+        "count": 6
+    },
+    {
+        "file": "components/battle/map/MapTerrainToolbar.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/battle/map/MapToken.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/battle/map/MapTokenHud.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/battle/map/MapWeatherPicker.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/battle/modes/maze/MazeMarkPicker.tsx",
+        "count": 2
+    },
+    {
+        "file": "components/battle/modes/maze/MazeToolbar.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/battle/overlays/ActionResultCard.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/battle/overlays/BattlePreparationView.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/battle/overlays/BattleResultScreen.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/battle/participants/InitiativeTrack.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/battle/participants/ParticipantRow.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/battle/participants/ReservePanel.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/battle/participants/ReserveParticipantRow.tsx",
+        "count": 2
+    },
+    {
+        "file": "components/battle/scene/AwaitingDmBanner.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/battle/scene/BattleOverBanner.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/battle/scene/BattleToast.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/battle/scene/BattleTopBar.tsx",
+        "count": 4
+    },
+    {
+        "file": "components/battle/scene/DesktopBattleLayout.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/battle/scene/LastActionTicker.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/battle/scene/MapStrip.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/battle/scene/MobileBattleLayout.tsx",
+        "count": 2
+    },
+    {
+        "file": "components/battle/setup/BattleSetupForm.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/battle/setup/GridCalibration.tsx",
+        "count": 2
+    },
+    {
+        "file": "components/battle/setup/MapBackgroundSection.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/battle/setup/MapToolButtons.tsx",
+        "count": 2
+    },
+    {
+        "file": "components/battle/setup/SetupEntityCard.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/battle/turn/ActionGrid.tsx",
+        "count": 2
+    },
+    {
+        "file": "components/battle/turn/ReactionSpellButton.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/battle/turn/ReadiedAttackButton.tsx",
+        "count": 2
+    },
+    {
+        "file": "components/battle/turn/TurnCountdown.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/battle/wizards/AbilityAimPanel.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/battle/wizards/attack/DamageStep.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/battle/wizards/attack/RollStep.tsx",
+        "count": 2
+    },
+    {
+        "file": "components/battle/wizards/attack/SummaryStep.tsx",
+        "count": 3
+    },
+    {
+        "file": "components/battle/wizards/attack/TargetStep.tsx",
+        "count": 3
+    },
+    {
+        "file": "components/battle/wizards/attack/WeaponStep.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/battle/wizards/AttackWizard.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/battle/wizards/AuraZonePicker.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/battle/wizards/BonusActionPicker.tsx",
+        "count": 3
+    },
+    {
+        "file": "components/battle/wizards/SpellBook.tsx",
+        "count": 4
+    },
+    {
+        "file": "components/battle/wizards/spellbook/CastSourceSelect.tsx",
+        "count": 2
+    },
+    {
+        "file": "components/battle/wizards/spellbook/IngredientsLine.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/battle/wizards/spellbook/SlotSelect.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/battle/wizards/spellbook/SpellAimPanel.tsx",
+        "count": 3
+    },
+    {
+        "file": "components/battle/wizards/spellbook/SpellCastDialog.tsx",
+        "count": 7
+    },
+    {
+        "file": "components/battle/wizards/TargetButton.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/campaigns/info/ReferenceSearchBar.tsx",
+        "count": 2
+    },
+    {
+        "file": "components/campaigns/templates/TemplatePicker.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/character-profile/AddTokenDialog.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/character-profile/ClassLevelUpDialog.tsx",
+        "count": 2
+    },
+    {
+        "file": "components/character-profile/CombatRow.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/character-profile/CombatTab.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/character-profile/GoalList.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/character-profile/HeroPortrait.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/character-profile/inventory/InventoryCell.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/character-profile/inventory/PurseBar.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/character-profile/LevelUpBadge.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/character-profile/path/PathRowCard.tsx",
+        "count": 2
+    },
+    {
+        "file": "components/character-profile/ProfileHero.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/character-profile/ProfileSpellBook.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/character-profile/stash/GrantArtifactDialog.tsx",
+        "count": 3
+    },
+    {
+        "file": "components/character-profile/stash/ItemDialog.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/character-profile/stash/MoneyDialog.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/character-profile/TransferArtifactDialog.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/characters/artifacts/CharacterArtifactsSection.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/characters/player-draft/AbilityScoresPicker.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/characters/skills/CharacterSkillsSection.tsx",
+        "count": 2
+    },
+    {
+        "file": "components/choices/ChoiceCard.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/choices/ChoiceHeaderRow.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/choices/ChoiceKindFields.tsx",
+        "count": 2
+    },
+    {
+        "file": "components/choices/ChoiceListEditor.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/choices/ChoicePicker.tsx",
+        "count": 2
+    },
+    {
+        "file": "components/choices/ChoicesEditor.tsx",
+        "count": 2
+    },
+    {
+        "file": "components/choices/ChoiceWizard.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/choices/OptionSpellsEditor.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/choices/SpellGrantEditor.tsx",
+        "count": 5
+    },
+    {
+        "file": "components/common/ColorSwatch.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/common/ImageUpload.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/common/PlayerViewToggle.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/common/SearchInput.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/common/ToastHost.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/common/ZoomableEntityIcon.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/content-import/CategoryChip.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/content-import/CompendiumAdvanced.tsx",
+        "count": 2
+    },
+    {
+        "file": "components/content-import/CompendiumDependencies.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/content-import/CompendiumImport.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/content-import/CompendiumMaterials.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/content-import/RulesPatchOffer.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/dice/DiceRoller.tsx",
+        "count": 5
+    },
+    {
+        "file": "components/feats/FeatBasicsTab.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/layout/Header.tsx",
+        "count": 2
+    },
+    {
+        "file": "components/maps/MapCatalogDialog.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/maps/MapEditorScreen.tsx",
+        "count": 4
+    },
+    {
+        "file": "components/music/TrackGroups.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/music/UploadTrackButton.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/onboarding/DemoTourTooltip.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/scenario/editor/MentionList.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/scenario/editor/OrderButtons.tsx",
+        "count": 3
+    },
+    {
+        "file": "components/scenario/editor/RevealSettings.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/scenario/editor/RowBindings.tsx",
+        "count": 5
+    },
+    {
+        "file": "components/scenario/editor/SaveStatus.tsx",
+        "count": 3
+    },
+    {
+        "file": "components/scenario/editor/ScenarioEditor.tsx",
+        "count": 4
+    },
+    {
+        "file": "components/scenario/editor/ScenarioToolbar.tsx",
+        "count": 3
+    },
+    {
+        "file": "components/scenario/editor/SectionHeaderEditor.tsx",
+        "count": 4
+    },
+    {
+        "file": "components/scenario/editor/SlidePickerDialog.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/scenario/graph/GraphInspector.tsx",
+        "count": 2
+    },
+    {
+        "file": "components/scenario/graph/GraphListPanel.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/scenario/graph/GraphToolbar.tsx",
+        "count": 6
+    },
+    {
+        "file": "components/scenario/MarkerChip.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/scenario/page/ScenarioPageActions.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/scenario/play/RowPlayControls.tsx",
+        "count": 4
+    },
+    {
+        "file": "components/scenario/play/ScenarioShowDock.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/scenario/ScenarioBar.tsx",
+        "count": 2
+    },
+    {
+        "file": "components/scenario/ScenarioIndex.tsx",
+        "count": 2
+    },
+    {
+        "file": "components/scenario/ScenarioPageView.tsx",
+        "count": 2
+    },
+    {
+        "file": "components/scenario/ScenarioSearch.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/scenario/SectionTrackChip.tsx",
+        "count": 2
+    },
+    {
+        "file": "components/show/editor/AddSlidesBar.tsx",
+        "count": 2
+    },
+    {
+        "file": "components/show/editor/AudiencePicker.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/show/editor/DeckSceneSelect.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/show/editor/GenerateSlideDialog.tsx",
+        "count": 2
+    },
+    {
+        "file": "components/show/editor/SlideDialog.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/show/editor/SlideGrid.tsx",
+        "count": 2
+    },
+    {
+        "file": "components/show/editor/TrackPicker.tsx",
+        "count": 2
+    },
+    {
+        "file": "components/show/puzzle/PuzzleBoard.tsx",
+        "count": 2
+    },
+    {
+        "file": "components/show/puzzle/PuzzleHand.tsx",
+        "count": 2
+    },
+    {
+        "file": "components/show/stage/FullscreenButton.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/show/stage/show-ui.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/show/stage/ShowDeckStrip.tsx",
+        "count": 3
+    },
+    {
+        "file": "components/show/world/ShowWorldControls.tsx",
+        "count": 2
+    },
+    {
+        "file": "components/spells/book/LevelBookmarks.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/spells/book/SchoolTabs.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/spells/book/SpellRow.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/spells/form/SpellFormBody.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/spells/preview/SpellBattlePreviewPanel.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/systems/SystemGate.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/world/editor/HeroEyesSelect.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/world/editor/InspectorParts.tsx",
+        "count": 2
+    },
+    {
+        "file": "components/world/editor/MapFileDropzone.tsx",
+        "count": 3
+    },
+    {
+        "file": "components/world/editor/MapStrip.tsx",
+        "count": 4
+    },
+    {
+        "file": "components/world/editor/MarkerStrip.tsx",
+        "count": 4
+    },
+    {
+        "file": "components/world/editor/WorldMapSettings.tsx",
+        "count": 3
+    },
+    {
+        "file": "components/world/editor/WorldMarkerPanel.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/world/editor/WorldPanelHeader.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/world/editor/WorldToolbar.tsx",
+        "count": 2
+    },
+    {
+        "file": "components/world/HeroCluster.tsx",
+        "count": 3
+    },
+    {
+        "file": "components/world/notes/WorldNotesPanel.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/world/play/WorldPlayClient.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/world/WorldCrumbs.tsx",
+        "count": 1
+    },
+    {
+        "file": "components/world/WorldPins.tsx",
+        "count": 1
+    },
+    {
+        "file": "systems/d20/ui/battle/crit-choice/CritChoiceDialog.tsx",
+        "count": 1
+    },
+    {
+        "file": "systems/d20/ui/content/backgrounds/BackgroundForm.tsx",
+        "count": 1
+    },
+    {
+        "file": "systems/d20/ui/content/classes/ClassColumnsEditor.tsx",
+        "count": 2
+    },
+    {
+        "file": "systems/d20/ui/content/classes/ClassFeaturesEditor.tsx",
+        "count": 1
+    },
+    {
+        "file": "systems/d20/ui/stats/PrimaryAbilityPicker.tsx",
+        "count": 1
+    },
+    {
+        "file": "systems/d20/ui/StatsTab.tsx",
+        "count": 1
+    },
+    {
+        "file": "systems/morale/ui/battle/MoraleResultOverlay.tsx",
+        "count": 1
+    },
+    {
+        "file": "systems/skilltrees/ui/content/skill-tree/editor/AddBranchSheet.tsx",
+        "count": 1
+    },
+    {
+        "file": "systems/skilltrees/ui/content/skill-tree/editor/SlotPicker.tsx",
+        "count": 2
+    },
+    {
+        "file": "systems/skilltrees/ui/content/skill-tree/SkillTreeTransferButtons.tsx",
+        "count": 1
+    },
+    {
+        "file": "systems/wfrp/ui/battle/ChannelDialog.tsx",
+        "count": 1
+    },
+    {
+        "file": "systems/wfrp/ui/battle/ConditionTestPanel.tsx",
+        "count": 2
+    },
+    {
+        "file": "systems/wfrp/ui/battle/D100Input.tsx",
+        "count": 3
+    },
+    {
+        "file": "systems/wfrp/ui/battle/D100RollBody.tsx",
+        "count": 1
+    },
+    {
+        "file": "systems/wfrp/ui/battle/D100RollPicker.tsx",
+        "count": 2
+    },
+    {
+        "file": "systems/wfrp/ui/CharacteristicsGrid.tsx",
+        "count": 1
+    },
+    {
+        "file": "systems/wfrp/ui/creation/OptionCard.tsx",
+        "count": 1
+    },
+    {
+        "file": "systems/wfrp/ui/creation/WfrpDraftForm.tsx",
+        "count": 1
+    },
+    {
+        "file": "systems/wfrp/ui/SkillsList.tsx",
+        "count": 1
+    },
+    {
+        "file": "systems/wfrp/ui/spells/SpellMagicFields.tsx",
+        "count": 1
+    }
+]

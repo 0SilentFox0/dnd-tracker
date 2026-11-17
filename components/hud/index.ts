@@ -1,4 +1,6 @@
 export { HUD_PRELOAD_FONTS, hudFontClassName } from './fonts';
+export { HudToggleChip } from './HudToggleChip';
+export { HudToolbar } from './HudToolbar';
 export {
     BRANCH_LEVEL_METAL,
     CIRCLE_METAL,
@@ -6,5 +8,3 @@ export {
     spellLevelMetal,
 } from './metal';
 export { HUD_SURFACE } from './surface';
-export { HudToggleChip } from './HudToggleChip';
-export { HudToolbar } from './HudToolbar';
