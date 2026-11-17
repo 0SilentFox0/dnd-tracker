@@ -6,3 +6,5 @@ export {
     spellLevelMetal,
 } from './metal';
 export { HUD_SURFACE } from './surface';
+export { HudToggleChip } from './HudToggleChip';
+export { HudToolbar } from './HudToolbar';
