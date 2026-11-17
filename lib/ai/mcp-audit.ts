@@ -4,6 +4,7 @@ type McpAuditEvent = {
     type: string;
     method?: string;
     parameters?: unknown;
+    result?: unknown;
     status?: string;
     duration?: number;
     severity?: string;
