@@ -35,7 +35,9 @@ export async function GET(
         const campaign = await prisma.campaign.findUnique({
             where: { id },
             include: CAMPAIGN_INCLUDE,
-            omit: CAMPAIGN_OMIT,
+            omit: accessResult.isDM
+                ? CAMPAIGN_OMIT
+                : { ...CAMPAIGN_OMIT, inviteCode: true },
         });
 
         if (!campaign) {

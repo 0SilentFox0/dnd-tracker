@@ -177,7 +177,7 @@ export default async function CampaignDetailPage({
                             acquaintancesEnabled: campaign.acquaintancesEnabled,
                             mapLibraryEnabled: campaign.mapLibraryEnabled,
                             status: campaign.status,
-                            inviteCode: campaign.inviteCode,
+                            inviteCode: isDM ? campaign.inviteCode : null,
                         }}
                         isDM={isDM}
                         meta={{
