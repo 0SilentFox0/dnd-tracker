@@ -16,7 +16,6 @@ vi.mock('@/lib/server/assistant/authorize', () => ({
     authorizeAssistant: vi.fn(),
 }));
 import { ASSISTANT_TOOLS } from '../assistant';
-import { CONTENT_TOOLS } from '../content';
 import type { AiToolContext } from '../define';
 import { runTool } from '../define';
 
@@ -77,7 +76,7 @@ it('chatAndMcpSamePayloadSameDomainResult', async () => {
     expect(dispatch.mock.calls[0][0]).toEqual(session.caller);
     expect(dispatch.mock.calls[1][0]).toEqual(mcp.caller);
 });
-it('legacyContentAliasCannotBypassReview', async () => {
+it('contentWriteGoesThroughAssistantAction', async () => {
     dispatch.mockResolvedValueOnce({
         kind: 'pending',
         intent: { id: 'i', status: 'pending' },
@@ -85,9 +84,9 @@ it('legacyContentAliasCannotBypassReview', async () => {
     } as never);
 
     const result = JSON.parse(
-        await runTool(CONTENT_TOOLS[4], mcp, {
-            kind: 'races',
-            data: { name: 'Elf' },
+        await runTool(tool('assistant_action'), mcp, {
+            actionId: 'content.races.create',
+            input: { data: { name: 'Elf' } },
         })
     );
 

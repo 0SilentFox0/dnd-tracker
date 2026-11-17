@@ -31,7 +31,6 @@ const caller: AssistantCaller = {
 describe('trusted SDK tool request keys', () => {
     it.each([
         ['assistant_action', { actionId: 'campaign.patch', input: {} }],
-        ['content_create', { kind: 'units', data: { name: 'Test' } }],
         [
             'propose_scenario_edit',
             {

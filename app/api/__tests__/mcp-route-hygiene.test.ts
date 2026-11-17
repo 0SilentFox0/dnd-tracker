@@ -5,13 +5,17 @@ import { GET, POST } from '@/app/api/mcp/route';
 const h = vi.hoisted(() => ({
     token: null as null | { scopes: string[] },
     allowed: true,
+    deny: new Set<string>(),
+    order: [] as string[],
     handler: vi.fn(async () => new Response('{}')),
     createdOptions: null as null | { onEvent?: unknown },
 }));
 
 vi.mock('@/lib/ai/api-tokens', () => ({
-    verifyApiToken: vi.fn(async () =>
-        h.token
+    verifyApiToken: vi.fn(async () => {
+        h.order.push('auth');
+
+        return h.token
             ? {
                   id: 't1',
                   campaignId: 'c1',
@@ -19,8 +23,8 @@ vi.mock('@/lib/ai/api-tokens', () => ({
                   locale: 'en',
                   ...h.token,
               }
-            : null
-    ),
+            : null;
+    }),
 }));
 vi.mock('@/lib/ai/mcp-request', () => ({
     boundMcpRequest: async (req: Request) => req,
@@ -36,12 +40,16 @@ vi.mock('mcp-handler', () => ({
     },
 }));
 vi.mock('@/lib/utils/api/rate-limit', () => ({
-    checkRateLimit: async () => ({
-        allowed: h.allowed,
-        retryAfterSeconds: 7,
-        limit: 1,
-        count: 2,
-    }),
+    checkRateLimit: async ({ scope }: { scope: string }) => {
+        h.order.push(scope);
+
+        return {
+            allowed: h.allowed && !h.deny.has(scope),
+            retryAfterSeconds: 7,
+            limit: 1,
+            count: 2,
+        };
+    },
     rateLimitResponse: () =>
         new Response(null, { status: 429, headers: { 'Retry-After': '7' } }),
 }));
@@ -57,6 +65,8 @@ describe('MCP route hygiene', () => {
     beforeEach(() => {
         h.token = { scopes: ['content:read'] };
         h.allowed = true;
+        h.deny.clear();
+        h.order.length = 0;
         h.handler.mockClear();
         h.createdOptions = null;
     });
@@ -89,6 +99,26 @@ describe('MCP route hygiene', () => {
 
         expect(res.status).toBe(429);
         expect(res.headers.get('Retry-After')).toBe('7');
+        expect(h.handler).not.toHaveBeenCalled();
+    });
+
+    it('429 on the IP limit comes before token verification', async () => {
+        h.deny.add('mcp-ip');
+
+        const res = await GET(request('GET', 'Bearer dndt_guess'));
+
+        expect(res.status).toBe(429);
+        expect(h.order).toEqual(['mcp-ip']);
+        expect(h.handler).not.toHaveBeenCalled();
+    });
+
+    it('429 on the campaign aggregate after the per-token limit passes', async () => {
+        h.deny.add('mcp-campaign');
+
+        const res = await POST(request('POST', 'Bearer dndt_ok'));
+
+        expect(res.status).toBe(429);
+        expect(h.order).toEqual(['mcp-ip', 'auth', 'mcp', 'mcp-campaign']);
         expect(h.handler).not.toHaveBeenCalled();
     });
 
