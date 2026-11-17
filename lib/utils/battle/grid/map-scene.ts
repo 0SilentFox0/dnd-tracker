@@ -314,25 +314,40 @@ function openMoveZone({
 const moveZone = (input: MoveZoneInput): MoveZone =>
     modeMoveZone(input.map, input) ?? openMoveZone(input);
 
-export function deriveMapScene({
-    map,
-    selectedId,
-    actor,
-    mode,
-    modeView,
-    ...input
-}: MapSceneInput): MapScene {
-    const { current, viewer, canAct, isDM, attackReady } = actor;
+interface SceneState {
+    map: BattleMapConfig;
+    rules: Ruleset;
+    participants: BattleParticipant[];
+    actor: MapSceneActor;
+    placing: boolean;
+    placingId: string | null;
+    tool: boolean;
+    aim: MapAim | null;
+    aimCaster: BattleParticipant | undefined;
+    pick: MapPick | null;
+    canAttack: boolean;
+    attacks: BattleParticipant['battleData']['attacks'];
+    marks: Map<string, CellMark | number>;
+    steps: MoveZone['steps'] | null;
+}
 
-    const { placingId } = mode;
+const canSee = (p: BattleParticipant, { isDM, viewer }: MapSceneActor) =>
+    !hasCondition(p, 'invisible') ||
+    isDM ||
+    p.basicInfo.controlledBy === viewer.userId;
 
-    const placing = mode.placing && isDM;
+function resolveMode(
+    input: MapSceneInput,
+    participants: BattleParticipant[]
+): Pick<
+    SceneState,
+    'placing' | 'placingId' | 'tool' | 'aim' | 'aimCaster' | 'pick'
+> {
+    const { mode, actor } = input;
 
-    const tool = Boolean(mode.toolActive) && isDM;
+    const placing = mode.placing && actor.isDM;
 
-    const participants = input.participants.filter(
-        (p) => !p.battleData.reserved
-    );
+    const tool = Boolean(mode.toolActive) && actor.isDM;
 
     const aimCaster =
         mode.aim && !placing && !tool
@@ -341,49 +356,87 @@ export function deriveMapScene({
 
     const aim = aimCaster && isOnMap(aimCaster) ? mode.aim : null;
 
-    const pick = mode.pick && !placing && !tool && !aim ? mode.pick : null;
+    return {
+        placing,
+        placingId: mode.placingId,
+        tool,
+        aim: aim ?? null,
+        aimCaster,
+        pick: mode.pick && !placing && !tool && !aim ? mode.pick : null,
+    };
+}
 
-    const marks = new Map<string, CellMark | number>();
+function pickMarks(
+    participants: BattleParticipant[],
+    pick: MapPick
+): Map<string, CellMark> {
+    const marks = new Map<string, CellMark>();
 
-    const attacks = current?.battleData.attacks ?? [];
+    for (const { id, reachable } of pick.targets) {
+        const target = findParticipant(participants, id);
 
-    const canAttack = attackReady && canStartAttack(current);
+        if (!target || !isOnMap(target)) continue;
 
-    let range: GridWindow | null = null;
+        const mark: CellMark = !reachable
+            ? 'invalid-target'
+            : pick.selectedIds.includes(id)
+              ? 'picked'
+              : 'pick';
 
-    if (
-        aim &&
-        aimCaster &&
-        aim.range !== undefined &&
-        isCenteredTemplate(aim.template)
-    ) {
-        range = rangeWindow(map, cellsOf(aimCaster), aim.range, input.rules);
+        for (const c of cellsOf(target)) marks.set(cellKey(c), mark);
     }
 
-    const aimed = aim?.aim
-        ? aimView({ map, participants, rules: input.rules }, aim, aim.aim)
-        : null;
+    return marks;
+}
 
-    if (aimed) for (const [key, mark] of aimed.marks) marks.set(key, mark);
-
-    const seen = (
+function visibleToViewer({
+    participants,
+    actor,
+    modeView,
+}: Pick<MapSceneInput, 'actor' | 'modeView'> & {
+    participants: BattleParticipant[];
+}): BattleParticipant[] {
+    return (
         modeView
             ? participants.filter((p) =>
                   modeView.visibleIds.has(p.basicInfo.id)
               )
             : participants
-    ).filter(
-        (p) =>
-            !hasCondition(p, 'invisible') ||
-            isDM ||
-            p.basicInfo.controlledBy === viewer.userId
-    );
+    ).filter((p) => canSee(p, actor));
+}
+
+function buildMarks(
+    state: Pick<
+        SceneState,
+        | 'map'
+        | 'rules'
+        | 'participants'
+        | 'actor'
+        | 'placing'
+        | 'tool'
+        | 'aim'
+        | 'pick'
+        | 'canAttack'
+        | 'attacks'
+    >,
+    aimed: ReturnType<typeof aimView>,
+    modeView: ModeView | null | undefined
+): { marks: Map<string, CellMark | number>; steps: SceneState['steps'] } {
+    const { map, rules, participants, actor, aim, pick } = state;
+
+    const { current, viewer, canAct, isDM } = actor;
+
+    const seen = visibleToViewer({ participants, actor, modeView });
+
+    const marks = new Map<string, CellMark | number>();
+
+    if (aimed) for (const [key, mark] of aimed.marks) marks.set(key, mark);
 
     const canMove =
         !aim &&
         !pick &&
-        !placing &&
-        !tool &&
+        !state.placing &&
+        !state.tool &&
         canAct &&
         current?.battleData.position;
 
@@ -396,227 +449,253 @@ export function deriveMapScene({
                   mover: current,
                   view: modeView,
                   dmUserId: isDM ? viewer.userId : null,
-                  rules: input.rules,
+                  rules,
               })
             : null;
-
-    const steps = zone?.steps ?? null;
 
     if (zone && current) {
         for (const [key, mark] of zone.marks) marks.set(key, mark);
 
-        if (canAttack)
+        if (state.canAttack)
             for (const [key, mark] of targetMarks(
                 map,
                 seen,
                 current,
-                attacks,
-                input.rules
+                state.attacks ?? [],
+                rules
             ))
                 marks.set(key, mark);
     }
 
-    if (pick) {
-        for (const { id, reachable } of pick.targets) {
-            const target = findParticipant(participants, id);
+    if (pick)
+        for (const [key, mark] of pickMarks(participants, pick))
+            marks.set(key, mark);
 
-            if (!target || !isOnMap(target)) continue;
+    return { marks, steps: zone?.steps ?? null };
+}
 
-            const mark: CellMark = !reachable
-                ? 'invalid-target'
-                : pick.selectedIds.includes(id)
-                  ? 'picked'
-                  : 'pick';
+function aimClick(s: SceneState, p: GridPoint): MapClick {
+    const { aim, aimCaster, map, participants, rules } = s;
 
-            for (const c of cellsOf(target)) marks.set(cellKey(c), mark);
-        }
+    if (
+        !aim ||
+        !aimCaster ||
+        !templateAimAllowed(
+            cellsOf(aimCaster),
+            aim.template,
+            p,
+            aim.range,
+            rules
+        )
+    )
+        return { kind: 'reject', reason: textRef(REJECT.outOfRange) };
+
+    const hidden = modeAimHiddenText(map, aimCaster, p);
+
+    if (hidden) return { kind: 'reject', reason: hidden };
+
+    if (!wallsAllowAim(map, aimCaster, p))
+        return { kind: 'reject', reason: textRef(REJECT.targetUnreachable) };
+
+    return aimView({ map, participants, rules }, aim, p)
+        ? { kind: 'aim', cell: p }
+        : { kind: 'reject', reason: textRef(REJECT.pickDirection) };
+}
+
+function pickClick(pick: MapPick | null, id: string): MapClick {
+    const entry = pick?.targets.find((t) => t.id === id);
+
+    if (!entry || entry.filteredOut)
+        return { kind: 'reject', reason: textRef(REJECT.badSpellTarget) };
+
+    return entry.reachable
+        ? { kind: 'pick', id }
+        : { kind: 'reject', reason: textRef(REJECT.outOfRange) };
+}
+
+function attackClick(
+    s: SceneState,
+    target: BattleParticipant
+): MapClick | null {
+    const { map, participants, rules, marks, attacks, actor } = s;
+
+    const { current } = actor;
+
+    if (
+        !actor.canAct ||
+        !s.canAttack ||
+        !current ||
+        !isHostile(map, current, target) ||
+        !isOnMap(target)
+    )
+        return null;
+
+    const mark = marks.get(cellKey(cellsOf(target)[0]));
+
+    if (mark !== 'target' && mark !== 'invalid-target') return null;
+
+    const { attack, error } = pickAttack(
+        map,
+        participants,
+        current,
+        attacks ?? [],
+        target,
+        rules
+    );
+
+    return mark === 'target'
+        ? {
+              kind: 'attack',
+              targetId: target.basicInfo.id,
+              ...(attack && { attackId: attack.id ?? attack.name }),
+          }
+        : {
+              kind: 'reject',
+              reason: error ?? textRef(REJECT.targetUnreachable),
+          };
+}
+
+function tokenClickOf(s: SceneState, id: string): MapClick {
+    if (s.tool) return { kind: 'none' };
+
+    const target = findParticipant(s.participants, id);
+
+    if (s.placing)
+        return target && isOnMap(target)
+            ? { kind: 'arm', id }
+            : { kind: 'none' };
+
+    if (s.aim)
+        return target && isOnMap(target)
+            ? aimClick(s, centreCell(target))
+            : { kind: 'none' };
+
+    if (s.pick) return pickClick(s.pick, id);
+
+    return (target && attackClick(s, target)) ?? { kind: 'select', id };
+}
+
+function placeClick(s: SceneState, p: GridPoint): MapClick {
+    const placed = s.placingId
+        ? findParticipant(s.participants, s.placingId)
+        : undefined;
+
+    return placed && isOnMap(placed)
+        ? {
+              kind: 'move',
+              participantId: placed.basicInfo.id,
+              to: p,
+              free: true,
+          }
+        : { kind: 'none' };
+}
+
+function cellClickOf(s: SceneState, p: GridPoint): MapClick {
+    if (s.tool) return { kind: 'none' };
+
+    if (s.placing) return placeClick(s, p);
+
+    if (s.aim) return aimClick(s, p);
+
+    const key = cellKey(p);
+
+    const { current, canAct } = s.actor;
+
+    if (s.pick) {
+        const occupant = s.participants.find(
+            (x) => isOnMap(x) && cellsOf(x).some((c) => cellKey(c) === key)
+        );
+
+        return occupant
+            ? tokenClickOf(s, occupant.basicInfo.id)
+            : { kind: 'none' };
     }
 
-    const hud: NonNullable<BattleMapView['hud']> = new Map();
+    const mark = s.marks.get(key);
 
-    for (const p of participants)
-        hud.set(p.basicInfo.id, { exact: canSeeExactStats(p, viewer) });
+    if (
+        current &&
+        isOnMap(current) &&
+        cellsOf(current).some((c) => cellKey(c) === key)
+    )
+        return { kind: 'select', id: current.basicInfo.id };
 
-    const view: BattleMapView = {
-        selectedId: placing ? placingId : selectedId,
-        currentId: current?.basicInfo.id ?? null,
-        marks,
-        range,
-        trajectory: null,
-        hud,
-        ...(aimed && { aim: aimed.aim, pulseFrom: aimed.pulseFrom }),
+    if (canAct && current && isMoveMark(mark))
+        return {
+            kind: 'move',
+            participantId: current.basicInfo.id,
+            to: s.steps?.get(key)?.anchor ?? p,
+            free: false,
+        };
+
+    if (mark === 'target' || mark === 'invalid-target') {
+        const occupant = enemyAt(s.map, s.participants, current, key);
+
+        if (occupant) return tokenClickOf(s, occupant.basicInfo.id);
+    }
+
+    return { kind: 'none' };
+}
+
+export function deriveMapScene(input: MapSceneInput): MapScene {
+    const { map, rules, selectedId, actor, modeView } = input;
+
+    const { current, viewer } = actor;
+
+    const participants = input.participants.filter(
+        (p) => !p.battleData.reserved
+    );
+
+    const modeState = resolveMode(input, participants);
+
+    const { aim, aimCaster, placing } = modeState;
+
+    const range: GridWindow | null =
+        aim &&
+        aimCaster &&
+        aim.range !== undefined &&
+        isCenteredTemplate(aim.template)
+            ? rangeWindow(map, cellsOf(aimCaster), aim.range, rules)
+            : null;
+
+    const aimed = aim?.aim
+        ? aimView({ map, participants, rules }, aim, aim.aim)
+        : null;
+
+    const base = {
+        map,
+        rules,
+        participants,
+        actor,
+        ...modeState,
+        canAttack: actor.attackReady && canStartAttack(current),
+        attacks: current?.battleData.attacks ?? [],
     };
 
-    function aimAt(p: GridPoint): MapClick {
-        if (
-            !aim ||
-            !aimCaster ||
-            !templateAimAllowed(
-                cellsOf(aimCaster),
-                aim.template,
-                p,
-                aim.range,
-                input.rules
-            )
-        )
-            return { kind: 'reject', reason: textRef(REJECT.outOfRange) };
+    const { marks, steps } = buildMarks(base, aimed, modeView);
 
-        const hidden = modeAimHiddenText(map, aimCaster, p);
+    const state: SceneState = { ...base, marks, steps };
 
-        if (hidden) return { kind: 'reject', reason: hidden };
-
-        if (!wallsAllowAim(map, aimCaster, p))
-            return {
-                kind: 'reject',
-                reason: textRef(REJECT.targetUnreachable),
-            };
-
-        return aimView({ map, participants, rules: input.rules }, aim, p)
-            ? { kind: 'aim', cell: p }
-            : { kind: 'reject', reason: textRef(REJECT.pickDirection) };
-    }
-
-    function pickAt(id: string): MapClick {
-        const entry = pick?.targets.find((t) => t.id === id);
-
-        if (!entry || entry.filteredOut)
-            return { kind: 'reject', reason: textRef(REJECT.badSpellTarget) };
-
-        return entry.reachable
-            ? { kind: 'pick', id }
-            : { kind: 'reject', reason: textRef(REJECT.outOfRange) };
-    }
-
-    function tokenClick(id: string): MapClick {
-        if (tool) return { kind: 'none' };
-
-        const target = findParticipant(participants, id);
-
-        if (placing)
-            return target && isOnMap(target)
-                ? { kind: 'arm', id }
-                : { kind: 'none' };
-
-        if (aim)
-            return target && isOnMap(target)
-                ? aimAt(centreCell(target))
-                : { kind: 'none' };
-
-        if (pick) return pickAt(id);
-
-        if (
-            canAct &&
-            canAttack &&
-            current &&
-            target &&
-            isHostile(map, current, target) &&
-            isOnMap(target)
-        ) {
-            const mark = marks.get(cellKey(cellsOf(target)[0]));
-
-            if (mark === 'target') {
-                const { attack } = pickAttack(
-                    map,
-                    participants,
-                    current,
-                    attacks,
-                    target,
-                    input.rules
-                );
-
-                return {
-                    kind: 'attack',
-                    targetId: id,
-                    ...(attack && { attackId: attack.id ?? attack.name }),
-                };
-            }
-
-            if (mark === 'invalid-target')
-                return {
-                    kind: 'reject',
-                    reason:
-                        pickAttack(
-                            map,
-                            participants,
-                            current,
-                            attacks,
-                            target,
-                            input.rules
-                        ).error ?? textRef(REJECT.targetUnreachable),
-                };
-        }
-
-        return { kind: 'select', id };
-    }
-
-    function cellClick(p: GridPoint): MapClick {
-        if (tool) return { kind: 'none' };
-
-        if (placing) {
-            const placed = placingId
-                ? findParticipant(participants, placingId)
-                : undefined;
-
-            return placed && isOnMap(placed)
-                ? {
-                      kind: 'move',
-                      participantId: placed.basicInfo.id,
-                      to: p,
-                      free: true,
-                  }
-                : { kind: 'none' };
-        }
-
-        if (aim) return aimAt(p);
-
-        const key = cellKey(p);
-
-        if (pick) {
-            const occupant = participants.find(
-                (x) => isOnMap(x) && cellsOf(x).some((c) => cellKey(c) === key)
-            );
-
-            return occupant
-                ? tokenClick(occupant.basicInfo.id)
-                : { kind: 'none' };
-        }
-
-        const mark = marks.get(key);
-
-        if (
-            current &&
-            isOnMap(current) &&
-            cellsOf(current).some((c) => cellKey(c) === key)
-        )
-            return { kind: 'select', id: current.basicInfo.id };
-
-        if (canAct && current && isMoveMark(mark))
-            return {
-                kind: 'move',
-                participantId: current.basicInfo.id,
-                to: steps?.get(key)?.anchor ?? p,
-                free: false,
-            };
-
-        if (mark === 'target' || mark === 'invalid-target') {
-            const occupant = enemyAt(map, participants, current, key);
-
-            if (occupant) return tokenClick(occupant.basicInfo.id);
-        }
-
-        return { kind: 'none' };
-    }
+    const hud: NonNullable<BattleMapView['hud']> = new Map(
+        participants.map((p) => [
+            p.basicInfo.id,
+            { exact: canSeeExactStats(p, viewer) },
+        ])
+    );
 
     return {
-        participants: participants.filter(
-            (p) =>
-                !hasCondition(p, 'invisible') ||
-                isDM ||
-                p.basicInfo.controlledBy === viewer.userId
-        ),
-        view,
+        participants: participants.filter((p) => canSee(p, actor)),
+        view: {
+            selectedId: placing ? modeState.placingId : selectedId,
+            currentId: current?.basicInfo.id ?? null,
+            marks,
+            range,
+            trajectory: null,
+            hud,
+            ...(aimed && { aim: aimed.aim, pulseFrom: aimed.pulseFrom }),
+        },
         aiming: !!aim,
-        cellClick,
-        tokenClick,
+        cellClick: (p) => cellClickOf(state, p),
+        tokenClick: (id) => tokenClickOf(state, id),
     };
 }
