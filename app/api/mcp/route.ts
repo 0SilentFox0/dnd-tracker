@@ -16,7 +16,21 @@ import { checkRateLimit, rateLimitResponse } from '@/lib/utils/api/rate-limit';
 export const maxDuration = 300;
 
 // stateless: a handler per request, closed over the token's campaign
+const clientIp = (req: Request) =>
+    req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+    req.headers.get('x-real-ip') ||
+    'unknown';
+
 async function handler(req: Request): Promise<Response> {
+    const ipRate = await checkRateLimit({
+        userId: clientIp(req),
+        scope: 'mcp-ip',
+        ...AI_RATE_LIMITS.mcpIp,
+        memoryFallback: true,
+    });
+
+    if (!ipRate.allowed) return rateLimitResponse(ipRate);
+
     const auth = await verifyBearer(bearerToken(req), null);
 
     if (auth instanceof NextResponse) {
@@ -40,6 +54,15 @@ async function handler(req: Request): Promise<Response> {
         });
 
         if (!rate.allowed) return rateLimitResponse(rate);
+
+        const campaignRate = await checkRateLimit({
+            userId: auth.campaignId,
+            scope: 'mcp-campaign',
+            ...AI_RATE_LIMITS.mcpCampaign,
+            memoryFallback: true,
+        });
+
+        if (!campaignRate.allowed) return rateLimitResponse(campaignRate);
     }
 
     const bounded = await boundMcpRequest(req);
