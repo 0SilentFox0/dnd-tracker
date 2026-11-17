@@ -20,3 +20,22 @@ paths:
 - System UI takes from core only `ui`/`hud`/`common`, `components/systems/types` and the kit (`SYSTEM_UI_KIT` in `scripts/shared/ui-layers.mjs`).
 - `ActionBar` is `components/ui/action-bar`, `ImageUpload` is `components/common`; dice are `components/dice`.
 - Page states: `components/common/states` (`QueryState`, `EmptyState`, `LoadingState`, `ErrorState`); form buttons: `ActionBar`.
+
+## Kit pairs: what to use when
+
+Not duplicates: the first of each pair is the primitive, the second adds label/state wiring on top.
+
+| Need | Use | Not |
+|---|---|---|
+| Integer field, value live on every keystroke | `NumberInput` | raw `type=number` |
+| Number with range, commit on blur/Enter (`onCommit`) | `BoundedNumberInput` | `NumberInput` + manual clamp |
+| Slider | `Slider` (`components/ui/slider`) | raw `type=range` |
+| Custom-composed dropdown (groups, triggers) | `Select*` primitives | — |
+| Plain dropdown from options array | `SelectField` | hand-built `Select` tree |
+| Bare toggle inside custom layout | `Switch` | — |
+| Labelled toggle row (+ description) | `SwitchField` | `Switch` + `Label` by hand |
+| Any modal (desktop modal, phone sheet) | `ResponsiveDialog` | `Dialog` / `vaul` directly |
+| Yes/no confirmation | `useConfirm()` (renders `ConfirmDialog`) | `window.confirm`, `ConfirmDialog` by hand |
+| Map/HUD toggle chip, toolbar | `HudToggleChip`, `HudToolbar` (`components/hud`) | per-file gold-chip classes |
+
+`dialog.tsx` is the Radix wrapper used only inside `components/ui` (`ResponsiveDialog`, `ConfirmDialog` build on it).
