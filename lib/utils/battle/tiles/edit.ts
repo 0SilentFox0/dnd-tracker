@@ -1,4 +1,5 @@
-import { cellLine } from '@/lib/utils/battle/grid/geometry';
+import { cellKey, cellLine } from '@/lib/utils/battle/grid/geometry';
+import { CHUNK_CELLS, CHUNK_SIDE, chunkKey } from '@/lib/utils/battle/map-storage/chunk-key';
 import type { TileLayerChunks } from '@/lib/utils/battle/tiles/derive';
 import type { TileLayer } from '@/lib/utils/battle/tiles/types';
 import type { GridPoint } from '@/types/battle';
@@ -13,10 +14,6 @@ export interface TileCellChange {
     after: number;
 }
 
-const SIDE = 16;
-
-const CHUNK_CELLS = SIDE * SIDE;
-
 export function tileAt(
     chunks: TileLayerChunks,
     layer: TileLayer,
@@ -25,11 +22,11 @@ export function tileAt(
 ): number {
     if (x < 0 || y < 0) return 0;
 
-    const cx = Math.floor(x / SIDE);
+    const cx = Math.floor(x / CHUNK_SIDE);
 
-    const cy = Math.floor(y / SIDE);
+    const cy = Math.floor(y / CHUNK_SIDE);
 
-    return chunks[layer]?.[`${cx}:${cy}`]?.[(y % SIDE) * SIDE + (x % SIDE)] ?? 0;
+    return chunks[layer]?.[chunkKey(cx, cy)]?.[(y % CHUNK_SIDE) * CHUNK_SIDE + (x % CHUNK_SIDE)] ?? 0;
 }
 
 function operationPoints(
@@ -78,7 +75,7 @@ function fillPoints(
     for (let cursor = 0; cursor < queue.length && result.length < mapSize.cols * mapSize.rows; cursor++) {
         const point = queue[cursor];
 
-        const key = `${point.x}:${point.y}`;
+        const key = cellKey(point);
 
         if (seen.has(key) || point.x < 0 || point.y < 0 || point.x >= mapSize.cols || point.y >= mapSize.rows)
             continue;
@@ -133,7 +130,7 @@ export function applyTileStroke(input: {
                 const y = point.y + by - offset;
 
                 if (x >= 0 && y >= 0 && x < mapSize.cols && y < mapSize.rows)
-                    targets.set(`${x}:${y}`, { x, y });
+                    targets.set(cellKey({ x, y }), { x, y });
             }
     }
 
@@ -146,13 +143,13 @@ export function applyTileStroke(input: {
     const value = tool === 'eraser' ? 0 : tileId;
 
     for (const { x, y } of targets.values()) {
-        const cx = Math.floor(x / SIDE);
+        const cx = Math.floor(x / CHUNK_SIDE);
 
-        const cy = Math.floor(y / SIDE);
+        const cy = Math.floor(y / CHUNK_SIDE);
 
-        const key = `${cx}:${cy}`;
+        const key = chunkKey(cx, cy);
 
-        const index = (y % SIDE) * SIDE + (x % SIDE);
+        const index = (y % CHUNK_SIDE) * CHUNK_SIDE + (x % CHUNK_SIDE);
 
         const cells = mutable.get(key) ?? new Uint16Array(layerChunks[key] ?? CHUNK_CELLS);
 

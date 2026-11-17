@@ -46,10 +46,10 @@ export function fogView({
 
     if (bypass) {
         for (let y = 0; y < map.rows; y++)
-            for (let x = 0; x < map.cols; x++) visible.add(`${x}:${y}`);
+            for (let x = 0; x < map.cols; x++) visible.add(cellKey({ x, y }));
     } else if (mode === 'reveal') {
         for (const [y, start, end] of revealed)
-            for (let x = start; x < end; x++) visible.add(`${x}:${y}`);
+            for (let x = start; x < end; x++) visible.add(cellKey({ x, y }));
     } else {
         const viewers = participants.filter(
             (p) =>

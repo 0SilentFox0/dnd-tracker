@@ -1,3 +1,5 @@
+import { CHUNK_CELLS } from '@/lib/utils/battle/map-storage/chunk-key';
+import { toBase64 } from '@/lib/utils/common/base64';
 export type TileChunkErrorCode =
     | 'INVALID_CHUNK_SIZE'
     | 'INVALID_VERSION'
@@ -16,22 +18,12 @@ export class TileChunkError extends Error {
     }
 }
 
-const CHUNK_CELLS = 16 * 16;
-
 const PREFIX = 'r1:';
 
 const BASE64 = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/;
 
 function fail(code: TileChunkErrorCode, message: string): never {
     throw new TileChunkError(code, message);
-}
-
-function toBase64(bytes: Uint8Array): string {
-    let binary = '';
-
-    for (const byte of bytes) binary += String.fromCharCode(byte);
-
-    return btoa(binary);
 }
 
 function fromBase64(value: string): Uint8Array {

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from 
 
 import { decodeFogMemory, encodeFogMemory } from '@/lib/utils/battle/fog/memory';
 import { normalizeRevealedRuns } from '@/lib/utils/battle/fog/revealed-runs';
+import { cellKey } from '@/lib/utils/battle/grid/geometry';
 
 const keyOf = (battleId: string, viewerId: string) =>
     `dnd-tracker:fog:v1:${battleId}:${viewerId}`;
@@ -112,7 +113,7 @@ export function useFogMemory({
         const cells = new Set<string>();
 
         for (const [y, start, end] of exploredRuns)
-            for (let x = start; x < end; x++) cells.add(`${x}:${y}`);
+            for (let x = start; x < end; x++) cells.add(cellKey({ x, y }));
 
         return cells;
     }, [exploredRuns]);

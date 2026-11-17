@@ -1,3 +1,4 @@
+import { chunkKey } from '@/lib/utils/battle/map-storage/chunk-key';
 import {
     decodeEdges,
     type EdgeChunks,
@@ -13,7 +14,7 @@ const cache = new Map<string, MapGeometry>();
 export const chunksToRecord = (
     rows: { cx: number; cy: number; data: string }[]
 ): EdgeChunks =>
-    Object.fromEntries(rows.map((c) => [`${c.cx}:${c.cy}`, c.data]));
+    Object.fromEntries(rows.map((c) => [chunkKey(c.cx, c.cy), c.data]));
 
 export const recordToChunkRows = (chunks: EdgeChunks) =>
     Object.entries(chunks).map(([key, data]) => {

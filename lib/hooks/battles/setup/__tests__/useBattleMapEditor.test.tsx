@@ -39,31 +39,28 @@ describe('useBattleMapEditor', () => {
     });
 
     it('ребра понад ліміт — сповіщення, карта без змін', () => {
-        const big = { cols: 100, rows: 100, background: null, opacity: 1 };
+        const limits = MAP_LIMITS as { inlineMaxEdges: number };
 
-        const edges = allInteriorEdges(big).filter((e) => e.endsWith(':e'));
+        const original = limits.inlineMaxEdges;
 
-        const { result } = renderHook(() =>
-            useBattleMapEditor({
-                ...big,
-                walls: edges.slice(0, MAP_LIMITS.inlineMaxEdges),
-            })
-        );
+        limits.inlineMaxEdges = 20;
 
-        act(() => result.current.actions.setTool('edge-wall'));
-        act(() =>
-            result.current.edgeEditing?.onCommit(
-                edges.slice(
-                    MAP_LIMITS.inlineMaxEdges,
-                    MAP_LIMITS.inlineMaxEdges + 1
-                ),
-                []
-            )
-        );
-        expect(result.current.state.notice).toBe(EDGE_LIMIT_NOTICE);
-        expect(result.current.state.map.walls).toHaveLength(
-            MAP_LIMITS.inlineMaxEdges
-        );
+        try {
+            const small = { cols: 30, rows: 30, background: null, opacity: 1 };
+
+            const edges = allInteriorEdges(small).filter((e) => e.endsWith(':e'));
+
+            const { result } = renderHook(() =>
+                useBattleMapEditor({ ...small, walls: edges.slice(0, 20) })
+            );
+
+            act(() => result.current.actions.setTool('edge-wall'));
+            act(() => result.current.edgeEditing?.onCommit(edges.slice(20, 21), []));
+            expect(result.current.state.notice).toBe(EDGE_LIMIT_NOTICE);
+            expect(result.current.state.map.walls).toHaveLength(20);
+        } finally {
+            limits.inlineMaxEdges = original;
+        }
     });
 
     it('небезпека без підпису не пише label', () => {

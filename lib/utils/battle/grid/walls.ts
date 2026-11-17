@@ -21,6 +21,13 @@ export function wallSet(list?: string[]): ReadonlySet<string> {
     return set;
 }
 
+export function formatEdgeKey(
+    p: GridPoint,
+    side: 'e' | 's'
+): string {
+    return `${cellKey(p)}:${side}`;
+}
+
 export function edgeKey(a: GridPoint, b: GridPoint): string | null {
     const dx = b.x - a.x;
 
@@ -30,7 +37,7 @@ export function edgeKey(a: GridPoint, b: GridPoint): string | null {
 
     const first = dx < 0 || dy < 0 ? b : a;
 
-    return `${cellKey(first)}:${dx !== 0 ? 'e' : 's'}`;
+    return formatEdgeKey(first, dx !== 0 ? 'e' : 's');
 }
 
 export interface ParsedEdge {
@@ -117,9 +124,9 @@ export function allInteriorEdges(grid: GridSize): string[] {
 
     for (let y = 0; y < grid.rows; y++) {
         for (let x = 0; x < grid.cols; x++) {
-            if (x < grid.cols - 1) out.push(`${x}:${y}:e`);
+            if (x < grid.cols - 1) out.push(formatEdgeKey({ x, y }, 'e'));
 
-            if (y < grid.rows - 1) out.push(`${x}:${y}:s`);
+            if (y < grid.rows - 1) out.push(formatEdgeKey({ x, y }, 's'));
         }
     }
 

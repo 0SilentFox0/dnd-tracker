@@ -13,6 +13,7 @@ import { prisma } from '@/lib/db';
 import type { BattleMapInput } from '@/lib/schemas/battle-maps';
 import { ContentError } from '@/lib/server/content/errors';
 import { resolveMapBackgroundForPersistence } from '@/lib/supabase/battle-map-storage';
+import { chunkKey } from '@/lib/utils/battle/map-storage/chunk-key';
 import {
     type EdgeChunks,
     EMPTY_EDGE_CHUNK,
@@ -107,7 +108,7 @@ function tileLayersFromRows(
             if (isTileLayer(layer) && typeof data === 'string') layers[layer] = data;
 
         if (Object.keys(layers).length)
-            snapshot[`${row.cx}:${row.cy}`] = layers;
+            snapshot[chunkKey(row.cx, row.cy)] = layers;
     }
 
     return snapshot;
@@ -119,7 +120,7 @@ type TileSnapshot = ReturnType<typeof tileLayersFromRows>;
 function chunkRowsWithTiles(chunks: EdgeChunks, tileLayers: TileSnapshot) {
     const rows = new Map<string, Omit<Prisma.BattleMapChunkCreateManyInput, 'mapId'>>(
         recordToChunkRows(chunks).map((chunk) => [
-            `${chunk.cx}:${chunk.cy}`,
+            chunkKey(chunk.cx, chunk.cy),
             chunk,
         ])
     );

@@ -1,3 +1,5 @@
+import { cellKey } from '@/lib/utils/battle/grid/geometry';
+import { CHUNK_CELLS, CHUNK_SIDE, parseChunkKey } from '@/lib/utils/battle/map-storage/chunk-key';
 import type { TileLayer } from '@/lib/utils/battle/tiles/types';
 
 export interface TileDefinitionProperties {
@@ -29,22 +31,10 @@ export class UnknownTileIdError extends Error {
     }
 }
 
-const CHUNK_SIDE = 16;
-
-const CHUNK_CELLS = CHUNK_SIDE * CHUNK_SIDE;
-
 const cache = new WeakMap<
     object,
     WeakMap<object, Map<string, DerivedTileCells>>
 >();
-
-function parseChunkKey(key: string): { cx: number; cy: number } {
-    const match = /^(\d+):(\d+)$/.exec(key);
-
-    if (!match) throw new Error(`Invalid chunk key ${key}`);
-
-    return { cx: Number(match[1]), cy: Number(match[2]) };
-}
 
 function addFootprint(
     output: Set<string>,
@@ -70,7 +60,7 @@ function addFootprint(
             const cellY = y + fy;
 
             if (cellX < mapSize.cols && cellY < mapSize.rows)
-                output.add(`${cellX}:${cellY}`);
+                output.add(cellKey({ x: cellX, y: cellY }));
         }
     }
 }
@@ -113,7 +103,11 @@ export function deriveTileCells(
             if (!(cells instanceof Uint16Array) || cells.length !== CHUNK_CELLS)
                 throw new Error('Tile chunks must contain 256 Uint16 values');
 
-            const { cx, cy } = parseChunkKey(key);
+            const chunk = parseChunkKey(key);
+
+            if (!chunk) throw new Error(`Invalid chunk key ${key}`);
+
+            const { cx, cy } = chunk;
 
             for (let index = 0; index < cells.length; index++) {
                 const tileId = cells[index];
