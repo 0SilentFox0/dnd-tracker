@@ -1,3 +1,4 @@
+import { cellLine } from '@/lib/utils/battle/grid/geometry';
 import type { TileLayerChunks } from '@/lib/utils/battle/tiles/derive';
 import type { TileLayer } from '@/lib/utils/battle/tiles/types';
 import type { GridPoint } from '@/types/battle';
@@ -31,42 +32,6 @@ export function tileAt(
     return chunks[layer]?.[`${cx}:${cy}`]?.[(y % SIDE) * SIDE + (x % SIDE)] ?? 0;
 }
 
-function linePoints(start: GridPoint, end: GridPoint): GridPoint[] {
-    const points: GridPoint[] = [];
-
-    let x = start.x;
-
-    let y = start.y;
-
-    const dx = Math.abs(end.x - start.x);
-
-    const sx = start.x < end.x ? 1 : -1;
-
-    const dy = -Math.abs(end.y - start.y);
-
-    const sy = start.y < end.y ? 1 : -1;
-
-    let error = dx + dy;
-
-    for (;;) {
-        points.push({ x, y });
-
-        if (x === end.x && y === end.y) return points;
-
-        const twice = 2 * error;
-
-        if (twice >= dy) {
-            error += dy;
-            x += sx;
-        }
-
-        if (twice <= dx) {
-            error += dx;
-            y += sy;
-        }
-    }
-}
-
 function operationPoints(
     tool: TileEditTool,
     points: readonly GridPoint[]
@@ -78,7 +43,7 @@ function operationPoints(
 
     const end = points[points.length - 1];
 
-    if (tool === 'line') return linePoints(start, end);
+    if (tool === 'line') return cellLine(start, end);
 
     const cells: GridPoint[] = [];
 
