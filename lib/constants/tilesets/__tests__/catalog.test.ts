@@ -29,7 +29,7 @@ describe('tile catalog', () => {
                 'tiles_wood-planks_1.png',
                 'tiles_wall-stone.png',
                 'tiles_barrel.png',
-                'tiles_door-wood-closed.png',
+                'tiles_door-wood-closed-cell.png',
             ])
         );
     });
