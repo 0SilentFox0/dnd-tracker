@@ -218,6 +218,7 @@ export const API_ERRORS = {
     TEMPLATE_NOT_FOUND: 'errors.templateNotFound',
     TEMPLATE_FORBIDDEN: 'errors.templateForbidden',
     TEMPLATE_NOT_JOINABLE: 'errors.templateNotJoinable',
+    DEMO_NOT_JOINABLE: 'errors.demoNotJoinable',
     BUNDLE_INVALID: 'errors.bundleInvalid',
     BUNDLE_TOO_LARGE: 'errors.bundleTooLarge',
     AI_NOT_CONFIGURED: 'errors.aiNotConfigured',

@@ -201,6 +201,7 @@
   "templateNotFound": "Template not found",
   "templateForbidden": "No access to the template",
   "templateNotJoinable": "The template cannot be joined",
+  "demoNotJoinable": "The demo campaign cannot be joined",
   "bundleInvalid": "Invalid campaign file",
   "bundleTooLarge": "The campaign file is too large (up to 4 MB)",
   "aiNotConfigured": "The AI assistant is not configured on the server",

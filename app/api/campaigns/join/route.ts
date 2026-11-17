@@ -7,6 +7,7 @@ import {
     CampaignKind,
     CampaignRole,
     CampaignStatus,
+    isDemoKind,
 } from '@/lib/constants/campaigns';
 import { prisma } from '@/lib/db';
 import { joinCampaignSchema } from '@/lib/schemas';
@@ -59,6 +60,10 @@ export async function POST(request: Request) {
 
         if (campaign.kind === CampaignKind.TEMPLATE) {
             return errorResponse(API_ERRORS.TEMPLATE_NOT_JOINABLE, 403);
+        }
+
+        if (isDemoKind(campaign.kind)) {
+            return errorResponse(API_ERRORS.DEMO_NOT_JOINABLE, 403);
         }
 
         if (campaign.status !== CampaignStatus.ACTIVE) {
