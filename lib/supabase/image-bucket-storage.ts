@@ -43,7 +43,11 @@ export function imageBucketStorage<T extends string>({
 
         const ensured = await ensure(supabase);
 
-        if (!ensured.ok) return ensured;
+        if (!ensured.ok) {
+            console.warn(`[${logTag}] ensure bucket failed`, ensured.message);
+
+            return { ok: false, message: API_ERRORS.INTERNAL };
+        }
 
         const storage = supabase.storage.from(bucket);
 
@@ -51,11 +55,11 @@ export function imageBucketStorage<T extends string>({
 
         const { data, error } = await storage.createSignedUploadUrl(path);
 
-        if (error || !data)
-            return {
-                ok: false,
-                message: error?.message ?? API_ERRORS.INTERNAL,
-            };
+        if (error || !data) {
+            console.warn(`[${logTag}] signed upload failed`, error?.message);
+
+            return { ok: false, message: API_ERRORS.INTERNAL };
+        }
 
         return {
             ok: true,

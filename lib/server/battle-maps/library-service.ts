@@ -19,6 +19,7 @@ import {
     backgroundOf,
     removeUnreferencedBackgrounds,
 } from '@/lib/server/battle-maps/background-cleanup';
+import { verifyBattleMapBackground } from '@/lib/server/battle-maps/background-upload';
 import { ContentError } from '@/lib/server/content/errors';
 import { resolveMapBackgroundForPersistence } from '@/lib/supabase/battle-map-storage';
 import {
@@ -28,6 +29,7 @@ import {
 } from '@/lib/utils/battle/map-storage/edge-chunks';
 import { withoutEdges } from '@/lib/utils/battle/map-storage/persisted-map';
 import { isTileLayer, type TileLayer } from '@/lib/utils/battle/tiles/types';
+import { isHostedOnProjectStorage } from '@/lib/utils/common/image-url';
 import type { BattleMapConfig } from '@/types/battle';
 import type { BattleMapBrief, BattleMapFull } from '@/types/battle-map';
 
@@ -74,6 +76,19 @@ export async function withStoredBackground<T extends BattleMapInput>(
     campaignId: string,
     current?: string | null
 ): Promise<T> {
+    const background = input.map.background;
+
+    if (
+        background &&
+        background !== current &&
+        isHostedOnProjectStorage(background) &&
+        !(await verifyBattleMapBackground(campaignId, background))
+    ) {
+        await removeUnreferencedBackgrounds(campaignId, [background]);
+
+        throw new ContentError(API_ERRORS.BATTLE_MAP_BACKGROUND_INVALID, 400);
+    }
+
     const r = await resolveMapBackgroundForPersistence(input.map.background, {
         campaignId,
         current,
