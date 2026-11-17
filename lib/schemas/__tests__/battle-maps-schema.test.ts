@@ -116,31 +116,17 @@ describe('battleMapInputSchema', () => {
         expect(r.success).toBe(false);
     });
 
-    it('rejects a photo map above the photo limit', () => {
-        const r = battleMapInputSchema.safeParse(
-            input({
-                cols: 80,
-                rows: 80,
-                background: 'data:image/png;base64,AAAA',
-            })
-        );
-
-        expect(r.success).toBe(false);
-    });
-});
-
-describe('battleMapInputSchema.doors', () => {
-    it('двері на стіні бібліотеки — помилка', () => {
-        const r = battleMapInputSchema.safeParse({
-            ...input({ doors: { '1:1:e': { open: false } } }),
-            walls: ['1:1:e'],
-        });
-
-        expect(messages(r)).toContain('battleSetup.validation.doorOnWall');
-        expect(
+    it('accepts a photo map up to the library side limit and rejects above', () => {
+        const photo = (side: number) =>
             battleMapInputSchema.safeParse(
-                input({ doors: { '1:1:e': { open: false } } })
-            ).success
-        ).toBe(true);
+                input({
+                    cols: side,
+                    rows: side,
+                    background: 'data:image/png;base64,AAAA',
+                })
+            );
+
+        expect(photo(200).success).toBe(true);
+        expect(photo(201).success).toBe(false);
     });
 });

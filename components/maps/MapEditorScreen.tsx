@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { type CSSProperties,useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
@@ -10,11 +10,13 @@ import {
     BrickWall,
     Brush,
     CloudLightning,
+    Coins,
     DoorOpen,
     Droplets,
     Eraser,
     Flame,
     Grid2X2,
+    HeartPulse,
     Image as ImageIcon,
     Layers,
     Leaf,
@@ -22,14 +24,12 @@ import {
     Package,
     PaintBucket,
     Pipette,
-    Square,
-    Sparkles,
     Snowflake,
+    Sparkles,
+    Square,
     Sun,
-    Zap,
-    Coins,
-    HeartPulse,
     Wind,
+    Zap,
 } from 'lucide-react';
 
 import { BattleMap } from '@/components/battle/map';
@@ -96,6 +96,7 @@ function TileAssetImage({
 }) {
     if (tile.layer === 'effects') {
         const Icon = EFFECT_ICONS[tile.effectKind ?? 'holy'];
+
         return <Icon aria-hidden="true" className={className} />;
     }
 
@@ -216,7 +217,9 @@ function EditorContent({
     );
 
     const [tileSearch, setTileSearch] = useState('');
+
     const [effectIntensity, setEffectIntensity] = useState(0.8);
+
     const [effectSize, setEffectSize] = useState(1);
 
     const [importError, setImportError] = useState('');
@@ -469,7 +472,6 @@ function EditorContent({
                 >
                     <BattleMap
                         map={previewMap}
-                        showDefaultBackground={false}
                         participants={[]}
                         actions={{
                             onStroke: paintingTiles
@@ -485,6 +487,7 @@ function EditorContent({
                         }}
                         className="h-full"
                         editing={{
+                            showDefaultBackground: false,
                             clickableBlocked:
                                 paintingTiles ||
                                 (panel === 'cells' && cellTool),
@@ -529,6 +532,7 @@ function EditorContent({
                                     >
                                         {(() => {
                                             const Icon = PANEL_ICONS[p];
+
                                             return (
                                                 <Icon
                                                     aria-hidden="true"
@@ -651,6 +655,7 @@ function EditorContent({
                                                 {(() => {
                                                     const Icon =
                                                         LAYER_ICONS[layer];
+
                                                     return (
                                                         <Icon
                                                             aria-hidden="true"

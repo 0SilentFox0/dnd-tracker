@@ -3,6 +3,11 @@ import { useState } from 'react';
 import { cleanup, fireEvent, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+vi.mock('@/lib/hooks/spells', async (importOriginal) => ({
+    ...(await importOriginal<typeof import('@/lib/hooks/spells')>()),
+    useSpellGroups: () => ({ data: [] }),
+}));
+
 vi.mock('@/lib/hooks/campaigns', () => ({
     useCampaignRules: () => ({ data: undefined }),
 }));

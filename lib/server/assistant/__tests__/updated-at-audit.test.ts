@@ -16,6 +16,11 @@ const BIND_ALLOWLIST = new Set(['lib/server/show/deck-operations.ts']);
 
 const FIRST_GUARDED_MIGRATION = '20261108000000_assistant_intents';
 
+// already on main and immutable; touches only the mapLibraryEnabled flag, which no stamp reads
+const MIGRATION_ALLOWLIST = new Set([
+    '20261205000000_map_library_enabled_by_default',
+]);
+
 const tables = Object.values(UPDATED_AT_TABLES);
 
 const delegates = Object.keys(UPDATED_AT_TABLES).map(
@@ -151,6 +156,7 @@ describe('updatedAt audit behind precondition stamps', () => {
         for (const name of readdirSync(dir).filter(
             (entry) =>
                 entry > FIRST_GUARDED_MIGRATION &&
+                !MIGRATION_ALLOWLIST.has(entry) &&
                 statSync(path.join(dir, entry)).isDirectory()
         )) {
             const sql = readFileSync(

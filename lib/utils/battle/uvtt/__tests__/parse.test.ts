@@ -58,12 +58,25 @@ describe('parseUvtt', () => {
             JSON.stringify({ ...base, resolution: undefined }),
             JSON.stringify({
                 ...base,
-                resolution: { ...base.resolution, map_size: { x: 61, y: 6 } },
+                resolution: { ...base.resolution, map_size: { x: 201, y: 6 } },
             }),
             JSON.stringify({ ...base, line_of_sight: [[0, 0, 20, 20]] }),
         ]) {
             expect(() => parseUvtt(input)).toThrow(UvttImportError);
         }
+    });
+
+    it('accepts the 200-cell limit and rejects 201', () => {
+        const withSize = (x: number, y: number) =>
+            JSON.stringify({
+                ...base,
+                line_of_sight: [],
+                resolution: { ...base.resolution, map_size: { x, y } },
+            });
+
+        expect(() => parseUvtt(withSize(200, 200))).not.toThrow();
+        expect(() => parseUvtt(withSize(200, 201))).toThrow(UvttImportError);
+        expect(() => parseUvtt(withSize(201, 200))).toThrow(UvttImportError);
     });
 
     it('rejects malformed embedded images and excessive file sizes', () => {

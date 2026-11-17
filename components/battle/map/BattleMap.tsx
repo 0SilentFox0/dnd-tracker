@@ -54,13 +54,13 @@ export interface BattleMapProps {
     tiles?: TileRenderState;
     className?: string;
     editing?: BattleMapEditing;
-    /** Hide the fallback image when a map has no selected background. */
-    showDefaultBackground?: boolean;
     /** телефон: карта обрізана до ігрових клітинок, на всю ширину й вертикально, якщо вона альбомна */
     phone?: boolean;
 }
 
 export interface BattleMapEditing {
+    /** false: no fallback image when the map has no selected background */
+    showDefaultBackground?: boolean;
     clickableBlocked?: boolean;
     showBlocked?: boolean;
     strokeTool?: boolean;
@@ -97,10 +97,14 @@ export function BattleMap({
     tiles,
     className,
     editing = NO_EDITING,
-    showDefaultBackground = true,
     phone = false,
 }: BattleMapProps) {
-    const { clickableBlocked, showBlocked, strokeTool } = editing;
+    const {
+        clickableBlocked,
+        showBlocked,
+        strokeTool,
+        showDefaultBackground,
+    } = editing;
 
     const edges = editing.edges ?? null;
 
@@ -300,9 +304,19 @@ export function BattleMap({
             edges,
             doors,
             doorLocks,
+            showDefaultBackground,
             fogActive: !!editing.fog?.active,
         }),
-        [clickableBlocked, showBlocked, modeTools, edges, doors, doorLocks, editing.fog?.active]
+        [
+            clickableBlocked,
+            showBlocked,
+            modeTools,
+            edges,
+            doors,
+            doorLocks,
+            showDefaultBackground,
+            editing.fog?.active,
+        ]
     );
 
     // свайп віддаємо браузеру лише для прокрутки; зум, щипок і штрих місцевості — наші
@@ -386,7 +400,6 @@ export function BattleMap({
                     >
                         <MapStage
                             map={map}
-                            showDefaultBackground={showDefaultBackground}
                             participants={participants}
                             view={view}
                             actions={actions}

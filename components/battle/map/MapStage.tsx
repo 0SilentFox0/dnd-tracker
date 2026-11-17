@@ -12,8 +12,8 @@ import {
 
 import { MapFogLayer } from './fog/MapFogLayer';
 import { type GridCellActions, GridLayer } from './grid/GridLayer';
-import { TileCanvas, type TileRenderState } from './tiles/TileCanvas';
 import { MapEffectsLayer } from './tiles/MapEffectsLayer';
+import { TileCanvas, type TileRenderState } from './tiles/TileCanvas';
 import { DoorMenu } from './DoorMenu';
 import { DoorsLayer } from './DoorsLayer';
 import { EdgeEditor } from './EdgeEditor';
@@ -71,6 +71,7 @@ export interface MapStageInteraction {
 }
 
 export interface MapStageEditing {
+    showDefaultBackground?: boolean;
     clickableBlocked?: boolean;
     showBlocked?: boolean;
     mode: ModeTools | null;
@@ -89,7 +90,6 @@ export interface MapStageEditing {
 
 interface MapStageProps {
     map: BattleMapConfig;
-    showDefaultBackground?: boolean;
     participants: BattleParticipant[];
     view?: BattleMapView;
     actions?: BattleMapActions;
@@ -102,7 +102,6 @@ interface MapStageProps {
 /** Шар карти в пікселях: фон, SVG-сітка й шари, жетони з HUD і числами ударів. */
 function MapStageImpl({
     map,
-    showDefaultBackground = true,
     participants,
     view,
     actions,
@@ -127,6 +126,7 @@ function MapStageImpl({
         doorLocks,
         fog,
         fogActive,
+        showDefaultBackground = true,
     } = editing;
 
     const doorPress =

@@ -63,12 +63,14 @@ export function EffectCard({
 
     const pickable = useAbilityComposition(campaignId).kinds(trigger);
 
-    const { data: spellGroups = [] } = useSpellGroups(campaignId);
+    const schoolFlag = effect.kind === 'flag' && effect.flag === 'spellTargeting';
+
+    const { data: spellGroups = [] } = useSpellGroups(campaignId, {
+        enabled: schoolFlag,
+    });
 
     const effectText =
-        effect.kind === 'flag' &&
-        effect.flag === 'spellTargeting' &&
-        effect.school
+        schoolFlag && effect.school
             ? text.effect({
                   ...effect,
                   school:
