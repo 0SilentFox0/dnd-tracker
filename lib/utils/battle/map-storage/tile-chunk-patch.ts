@@ -74,13 +74,13 @@ export function planTileChunkWrites(
 
         if (!next) nextLayers.set(key, null);
 
-        if (sameLayers(before?.layers, next)) continue;
-
         if (!next && (!before || before.data === EMPTY_EDGE_CHUNK)) {
             if (before) writes.push({ kind: 'delete', key, cx, cy });
 
             continue;
         }
+
+        if (sameLayers(before?.layers, next)) continue;
 
         writes.push({
             kind: 'upsert',

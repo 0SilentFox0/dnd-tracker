@@ -110,4 +110,15 @@ describe('planTileChunkWrites', () => {
             },
         ]);
     });
+
+    it('deletes a leftover empty row when a patch clears a missing layer', () => {
+        const plan = planTileChunkWrites(
+            [{ layer: 'objects', cx: 1, cy: 1, data: null }],
+            new Map([['1:1', { data: EMPTY_EDGE_CHUNK, layers: undefined }]])
+        );
+
+        expect(plan.writes).toEqual([
+            { kind: 'delete', key: '1:1', cx: 1, cy: 1 },
+        ]);
+    });
 });

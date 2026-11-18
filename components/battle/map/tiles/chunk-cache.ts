@@ -115,6 +115,8 @@ export function clearTileRasterCache(): void {
     rasterCache.clear();
 }
 
+const SIGNATURE_MEMO_LIMIT = 512;
+
 const signatureMemo = new WeakMap<
     TileLayerChunks,
     WeakMap<TileRasterAssets, Map<string, string>>
@@ -142,6 +144,8 @@ function memoizedSignature(
     let signature = byKey.get(key);
 
     if (signature === undefined) {
+        if (byKey.size >= SIGNATURE_MEMO_LIMIT) byKey.clear();
+
         signature = rasterSignature(
             chunks,
             layer,

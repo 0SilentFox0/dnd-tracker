@@ -11,6 +11,8 @@ import type { TileDefinition } from '@/lib/constants/tilesets/types';
 import type { GridWindow } from '@/lib/utils/battle/grid';
 import type { TileLayerChunks } from '@/lib/utils/battle/tiles/derive';
 
+let mountedCanvases = 0;
+
 const CATALOG_BY_ID = Object.fromEntries(
     TILE_CATALOG.map((definition) => [definition.id, definition])
 );
@@ -87,7 +89,24 @@ export function TileCanvas({
         [loadedAssets, tiles.assets]
     );
 
-    useEffect(() => clearTileRasterCache, [tiles.mapId]);
+    useEffect(() => {
+        mountedCanvases += 1;
+
+        return () => {
+            mountedCanvases -= 1;
+
+            if (mountedCanvases === 0) clearTileRasterCache();
+        };
+    }, []);
+
+    const lastMapId = useRef(tiles.mapId);
+
+    useEffect(() => {
+        if (lastMapId.current === tiles.mapId) return;
+
+        lastMapId.current = tiles.mapId;
+        clearTileRasterCache();
+    }, [tiles.mapId]);
 
     useEffect(() => {
         const canvas = canvasRef.current;
