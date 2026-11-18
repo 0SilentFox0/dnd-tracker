@@ -1,12 +1,5 @@
 export { edgeMask, type EdgeNeighbors } from '@/lib/utils/battle/tiles/autotile';
 export {
-    DuplicateMapChunkError,
-    type MapChunkRow,
-    type SplitMapChunkRows,
-    splitMapChunkRows,
-    UnknownTileLayerError,
-} from '@/lib/utils/battle/tiles/chunks';
-export {
     type DerivedTileCells,
     deriveTileCells,
     type TileCatalogProperties,

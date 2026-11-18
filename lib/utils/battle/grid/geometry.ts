@@ -52,8 +52,14 @@ export function cellDistance(a: GridPoint, b: GridPoint): number {
     return Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y));
 }
 
-/** клітинки на відрізку a→b (Брезенгем), з обома кінцями */
-export function cellLine(a: GridPoint, b: GridPoint): GridPoint[] {
+/** клітинки на відрізку a→b (Брезенгем), з обома кінцями; дробові координати округлюються, нескінченні/NaN дають [] */
+export function cellLine(from: GridPoint, to: GridPoint): GridPoint[] {
+    if (![from.x, from.y, to.x, to.y].every(Number.isFinite)) return [];
+
+    const a = { x: Math.round(from.x), y: Math.round(from.y) };
+
+    const b = { x: Math.round(to.x), y: Math.round(to.y) };
+
     const dx = Math.abs(b.x - a.x);
 
     const dy = -Math.abs(b.y - a.y);

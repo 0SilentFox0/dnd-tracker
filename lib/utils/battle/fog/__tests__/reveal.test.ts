@@ -91,4 +91,36 @@ describe('fog reveal geometry', () => {
         ]);
         expect(revealedHas(runs, 4, 3)).toBe(true);
     });
+
+    it('large map with many blocked cells reveals quickly and correctly', () => {
+        const side = 200;
+
+        const blocked = Array.from(
+            { length: side * side },
+            (_, i) => `${i % side}:${Math.floor(i / side)}`
+        ).filter((_, i) => i % 3 === 0);
+
+        const big = map({ cols: side, rows: side, blocked });
+
+        const started = Date.now();
+
+        const runs = revealRectangle(big, { x: 0, y: 0 }, { x: side - 1, y: side - 1 });
+
+        const cells = revealCells(
+            big,
+            Array.from({ length: side * side }, (_, i) => ({
+                x: i % side,
+                y: Math.floor(i / side),
+            }))
+        );
+
+        expect(Date.now() - started).toBeLessThan(2000);
+        expect(runs).toEqual(cells);
+        expect(revealedHas(runs, 1, 0)).toBe(true);
+        expect(revealedHas(runs, 0, 0)).toBe(false);
+    });
+
+    it('ignores NaN and fractional cells', () => {
+        expect(revealCells(map(), [{ x: NaN, y: 0 }, { x: 1.5, y: 1 }])).toEqual([]);
+    });
 });

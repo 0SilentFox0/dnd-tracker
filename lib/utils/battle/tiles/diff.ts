@@ -1,3 +1,4 @@
+import { CHUNK_CELLS, parseChunkKey } from '@/lib/utils/battle/map-storage/chunk-key';
 import { encodeTileChunk } from '@/lib/utils/battle/tiles/rle';
 import type { TileLayer } from '@/lib/utils/battle/tiles/types';
 
@@ -7,8 +8,6 @@ export interface TileChunkPatch {
     cy: number;
     data: string | null;
 }
-
-const CHUNK_CELLS = 256;
 
 function assertChunk(cells: Uint16Array): void {
     if (!(cells instanceof Uint16Array) || cells.length !== CHUNK_CELLS)
@@ -24,11 +23,11 @@ function same(a: Uint16Array, b: Uint16Array): boolean {
 }
 
 function coordinates(key: string): { cx: number; cy: number } {
-    const match = /^(\d+):(\d+)$/.exec(key);
+    const parsed = parseChunkKey(key);
 
-    if (!match) throw new Error(`Invalid tile chunk key ${key}`);
+    if (!parsed) throw new Error(`Invalid tile chunk key ${key}`);
 
-    return { cx: Number(match[1]), cy: Number(match[2]) };
+    return parsed;
 }
 
 export function diffTileChunks(

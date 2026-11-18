@@ -9,6 +9,7 @@ import { applyTerrain, replaceTerrain } from './terrain';
 import { parseEdgeKey } from './walls';
 
 import { MAP_LIMITS } from '@/lib/constants/map-limits';
+import { maxEdgesFor } from '@/lib/utils/battle/map-storage/limits';
 import { clamp } from '@/lib/utils/common/clamp';
 import type {
     BattleMapConfig,
@@ -229,10 +230,12 @@ export function paintEdges(
         }
     }
 
-    if (
-        walls.size > MAP_LIMITS.inlineMaxEdges ||
-        bars.size > MAP_LIMITS.inlineMaxEdges
-    )
+    const max = maxEdgesFor(map);
+
+    const grows = (next: Set<string>, prev?: string[]) =>
+        next.size > max && next.size > (prev?.length ?? 0);
+
+    if (grows(walls, map.walls) || grows(bars, map.bars))
         return { map, overflow: true };
 
     const doors = { ...map.doors };

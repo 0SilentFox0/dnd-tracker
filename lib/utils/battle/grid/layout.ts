@@ -1,5 +1,6 @@
 import { blockedSet, cellKey, footprint } from './geometry';
 import { sizeOf } from './occupancy';
+import { formatEdgeKey } from './walls';
 
 import { MAP_LIMITS } from '@/lib/constants/map-limits';
 import type { BattleParticipant } from '@/types/battle';
@@ -110,12 +111,12 @@ export function edgeAtScreenPoint(
     if (vertical) {
         const row = Math.min(Math.floor(fy), map.rows - 1);
 
-        return vx > 0 && vx < map.cols ? `${vx - 1}:${row}:e` : null;
+        return vx > 0 && vx < map.cols ? formatEdgeKey({ x: vx - 1, y: row }, 'e') : null;
     }
 
     const col = Math.min(Math.floor(fx), map.cols - 1);
 
-    return hy > 0 && hy < map.rows ? `${col}:${hy - 1}:s` : null;
+    return hy > 0 && hy < map.rows ? formatEdgeKey({ x: col, y: hy - 1 }, 's') : null;
 }
 
 export function cellCenter(p: GridPoint): { x: number; y: number } {

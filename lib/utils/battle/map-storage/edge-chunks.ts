@@ -1,11 +1,12 @@
-import { MAP_LIMITS } from '@/lib/constants/map-limits';
-import { parseEdgeKey } from '@/lib/utils/battle/grid/walls';
+import { formatEdgeKey, parseEdgeKey } from '@/lib/utils/battle/grid/walls';
+import { CHUNK_SIDE, parseChunkKey } from '@/lib/utils/battle/map-storage/chunk-key';
+import { toBase64 } from '@/lib/utils/common/base64';
 
-export const CHUNK_SIZE = MAP_LIMITS.chunk;
+export const CHUNK_SIZE = CHUNK_SIDE;
 
 const CHUNK_BYTES = (CHUNK_SIZE * CHUNK_SIZE * 2 * 2) / 8;
 
-export const EMPTY_EDGE_CHUNK = btoa(String.fromCharCode(...new Uint8Array(CHUNK_BYTES)));
+export const EMPTY_EDGE_CHUNK = toBase64(new Uint8Array(CHUNK_BYTES));
 
 const KIND_WALL = 1;
 
@@ -30,14 +31,6 @@ function slot(x: number, y: number, side: 'e' | 's'): number {
         ((y % CHUNK_SIZE) * CHUNK_SIZE + (x % CHUNK_SIZE)) * 2 +
         (side === 'e' ? 0 : 1)
     );
-}
-
-function toBase64(bytes: Uint8Array): string {
-    let bin = '';
-
-    for (const b of bytes) bin += String.fromCharCode(b);
-
-    return btoa(bin);
 }
 
 function fromBase64(value: string, key: string): Uint8Array {
@@ -142,13 +135,11 @@ export function decodeEdges(
     const bars: { x: number; y: number; side: 'e' | 's' }[] = [];
 
     for (const [key, value] of Object.entries(chunks)) {
-        const m = /^(\d+):(\d+)$/.exec(key);
+        const parsed = parseChunkKey(key);
 
-        if (!m) throw new EdgeChunkError(`invalid chunk key ${key}`);
+        if (!parsed) throw new EdgeChunkError(`invalid chunk key ${key}`);
 
-        const cx = Number(m[1]);
-
-        const cy = Number(m[2]);
+        const { cx, cy } = parsed;
 
         const bytes = fromBase64(value, key);
 
@@ -183,8 +174,8 @@ export function decodeEdges(
     const order = (p: { x: number; y: number; side: string }, q: typeof p) =>
         p.y - q.y || p.x - q.x || p.side.localeCompare(q.side);
 
-    const str = (e: { x: number; y: number; side: string }) =>
-        `${e.x}:${e.y}:${e.side}`;
+    const str = (e: { x: number; y: number; side: 'e' | 's' }) =>
+        formatEdgeKey(e, e.side);
 
     return {
         walls: walls.sort(order).map(str),

@@ -48,6 +48,17 @@ it('межі карти', () => {
 });
 
 describe('cellLine', () => {
+    it('NaN/нескінченні координати → порожньо, не зависає', () => {
+        expect(cellLine({ x: NaN, y: 0 }, { x: 2, y: 2 })).toEqual([]);
+        expect(cellLine({ x: 0, y: 0 }, { x: Infinity, y: 2 })).toEqual([]);
+    });
+
+    it('дробові координати округлюються', () => {
+        expect(cellLine({ x: 0.4, y: 0 }, { x: 2.6, y: 0.2 }).map(cellKey)).toEqual(
+            ['0:0', '1:0', '2:0', '3:0']
+        );
+    });
+
     it('та сама клітинка — одна клітинка', () => {
         expect(cellLine({ x: 2, y: 2 }, { x: 2, y: 2 })).toEqual([
             { x: 2, y: 2 },

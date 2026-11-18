@@ -69,11 +69,13 @@ export function revealCells(
     cells: Iterable<GridPoint>,
     blocked: ReadonlySet<string> = new Set()
 ): RevealedRun[] {
+    const mapBlocked = new Set(map.blocked);
+
     const runs = [...cells]
         .filter(
             (cell) =>
                 inBounds(map, cell) &&
-                !map.blocked?.includes(cellKey(cell)) &&
+                !mapBlocked.has(cellKey(cell)) &&
                 !blocked.has(cellKey(cell))
         )
         .map(({ x, y }) => [y, x, x + 1] as const);
@@ -98,14 +100,16 @@ export function revealRectangle(
 
     const rows: RevealedRun[] = [];
 
+    const mapBlocked = new Set(map.blocked);
+
     for (let y = minY; y <= maxY; y++) {
         let start: number | null = null;
 
         for (let x = minX; x <= maxX + 1; x++) {
-            const key = `${x}:${y}`;
+            const key = cellKey({ x, y });
 
             const allowed =
-                x <= maxX && !map.blocked?.includes(key) && !blocked.has(key);
+                x <= maxX && !mapBlocked.has(key) && !blocked.has(key);
 
             if (allowed && start === null) start = x;
 

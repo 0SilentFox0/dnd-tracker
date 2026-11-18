@@ -1,9 +1,11 @@
 import { Prisma } from '@prisma/client';
 
+import { MAP_LIMITS } from '@/lib/constants/map-limits';
 import { validateTileIdsForLayer } from '@/lib/constants/tilesets/catalog';
 import { prisma } from '@/lib/db';
 import { pruneMapVersions } from '@/lib/server/battle-maps/library-service';
 import { ContentError } from '@/lib/server/content/errors';
+import { chunkKey } from '@/lib/utils/battle/map-storage/chunk-key';
 import { EMPTY_EDGE_CHUNK } from '@/lib/utils/battle/map-storage/edge-chunks';
 import { decodeTileChunk } from '@/lib/utils/battle/tiles/rle';
 import { isTileLayer, type TileLayer } from '@/lib/utils/battle/tiles/types';
@@ -17,8 +19,6 @@ export interface TileChunkPatch {
 
 type LayerRecord = Partial<Record<TileLayer, string>>;
 type TileSnapshot = Record<string, LayerRecord>;
-
-const keyOf = (cx: number, cy: number) => `${cx}:${cy}`;
 
 const conflict = () => new ContentError('errors.battleMapConflict', 409);
 
@@ -50,7 +50,7 @@ export function tileLayersToSnapshot(
     const snapshot: TileSnapshot = {};
 
     for (const row of rows) {
-        const layers = parseSnapshot({ [keyOf(row.cx, row.cy)]: row.tileLayers });
+        const layers = parseSnapshot({ [chunkKey(row.cx, row.cy)]: row.tileLayers });
 
         Object.assign(snapshot, layers);
     }
@@ -132,9 +132,9 @@ export async function patchTileChunks(
 
         if (map.mapVersion !== expectedVersion) throw conflict();
 
-        const maxCx = Math.ceil(map.cols / 16);
+        const maxCx = Math.ceil(map.cols / MAP_LIMITS.chunk);
 
-        const maxCy = Math.ceil(map.rows / 16);
+        const maxCy = Math.ceil(map.rows / MAP_LIMITS.chunk);
 
         for (const patch of patches)
             if (patch.cx >= maxCx || patch.cy >= maxCy)
@@ -153,11 +153,11 @@ export async function patchTileChunks(
         const nextTiles: TileSnapshot = structuredClone(currentTiles);
 
         const byCoord = new Map(
-            rows.map((row) => [keyOf(row.cx, row.cy), row])
+            rows.map((row) => [chunkKey(row.cx, row.cy), row])
         );
 
         for (const patch of patches) {
-            const key = keyOf(patch.cx, patch.cy);
+            const key = chunkKey(patch.cx, patch.cy);
 
             const layers = (nextTiles[key] ??= {});
 
@@ -174,7 +174,7 @@ export async function patchTileChunks(
 
         if (!count) throw conflict();
 
-        for (const coord of new Set(patches.map(({ cx, cy }) => keyOf(cx, cy)))) {
+        for (const coord of new Set(patches.map(({ cx, cy }) => chunkKey(cx, cy)))) {
             const [cx, cy] = coord.split(':').map(Number);
 
             const existing = byCoord.get(coord);
