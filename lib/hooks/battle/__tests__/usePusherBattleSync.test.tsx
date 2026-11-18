@@ -894,6 +894,96 @@ describe('usePusherBattleSync: dm-канал', () => {
         expect(qc.getQueryData<BattleScene>(key)?.version).toBe(4);
     });
 
+    it('серія redacted дельт — один GET сцени (коалесинг)', async () => {
+        const qc = new QueryClient();
+
+        const invalidate = vi.spyOn(qc, 'invalidateQueries');
+
+        qc.setQueryData(key, makeBattlePayload({ version: 4 }));
+        render(
+            <PlayerSync
+                campaignId="camp-1"
+                battleId="battle-1"
+                userId="dm"
+                client={qc}
+                isDM
+            />
+        );
+        await waitFor(() =>
+            expect(
+                channelBindings
+                    .get('private-battle-battle-1')
+                    ?.has('battle-delta')
+            ).toBe(true)
+        );
+        invalidate.mockClear();
+
+        act(() => {
+            for (let i = 0; i < 3; i++)
+                simulateTrigger(
+                    'private-battle-battle-1',
+                    'battle-delta',
+                    delta([entry('прихований')], true)
+                );
+        });
+
+        await waitFor(() => expect(invalidate).toHaveBeenCalledTimes(1));
+        await new Promise((r) => setTimeout(r, 600));
+        expect(invalidate).toHaveBeenCalledTimes(1);
+    });
+
+    it('гравець із власним героєм на ворожому боці (charm) на redacted дельту інвалідує сцену', async () => {
+        const qc = new QueryClient();
+
+        const invalidate = vi.spyOn(qc, 'invalidateQueries');
+
+        const scene = makeBattlePayload({ version: 4 });
+
+        const [first, ...rest] = scene.initiativeOrder;
+
+        qc.setQueryData(key, {
+            ...scene,
+            initiativeOrder: [
+                {
+                    ...first,
+                    basicInfo: {
+                        ...first.basicInfo,
+                        side: 'enemy',
+                        controlledBy: 'user-1',
+                    },
+                },
+                ...rest,
+            ],
+        });
+        render(
+            <PlayerSync
+                campaignId="camp-1"
+                battleId="battle-1"
+                userId="user-1"
+                client={qc}
+            />
+        );
+        await waitFor(() =>
+            expect(
+                channelBindings
+                    .get('private-battle-battle-1')
+                    ?.has('battle-delta')
+            ).toBe(true)
+        );
+        invalidate.mockClear();
+
+        act(() =>
+            simulateTrigger(
+                'private-battle-battle-1',
+                'battle-delta',
+                delta([entry('прихований')], true)
+            )
+        );
+        await waitFor(() =>
+            expect(invalidate).toHaveBeenCalledWith({ queryKey: key })
+        );
+    });
+
     it('redacted дельта не новіша за кеш не викликає інвалідацію', async () => {
         const qc = new QueryClient();
 
