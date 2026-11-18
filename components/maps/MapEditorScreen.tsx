@@ -1,6 +1,6 @@
 'use client';
 
-import { type CSSProperties, useCallback, useRef } from 'react';
+import { type CSSProperties, useCallback, useMemo, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { BackLink, EditorHeader } from './editor/EditorHeader';
@@ -21,6 +21,8 @@ import { useCoarsePointer } from '@/lib/hooks/common';
 import { useText } from '@/lib/i18n/use-text';
 import { isEdgeTool, isPreviewSafeBackground } from '@/lib/utils/battle/grid';
 import type { BattleMapFull, BattleMapTileChunks } from '@/types/battle-map';
+
+const NO_PARTICIPANTS: never[] = [];
 
 function EditorBody({
     campaignId,
@@ -111,11 +113,51 @@ function EditorContent({
     const cellPainting =
         paintingTiles || (panel === 'cells' && tool !== null && !isEdgeTool(tool));
 
-    const previewMap = paintingTiles
-        ? { ...map, background: null }
-        : isPreviewSafeBackground(map.background) || map.background === null
-          ? map
-          : { ...map, background: null };
+    const hideBackground =
+        paintingTiles ||
+        !(isPreviewSafeBackground(map.background) || map.background === null);
+
+    const previewMap = useMemo(
+        () => (hideBackground ? { ...map, background: null } : map),
+        [hideBackground, map]
+    );
+
+    const { onStroke: tileStroke, version, chunks } = tileEditor;
+
+    const { onStroke: mapStroke } = editor.actions;
+
+    const mapActions = useMemo(
+        () => ({ onStroke: paintingTiles ? tileStroke : mapStroke }),
+        [paintingTiles, tileStroke, mapStroke]
+    );
+
+    const look = useMemo(
+        () => ({
+            className: 'h-full',
+            tiles: {
+                mapId: source.id,
+                version,
+                seed: source.id,
+                chunks,
+                assets: {},
+            },
+        }),
+        [source.id, version, chunks]
+    );
+
+    const { edgeEditing } = editor;
+
+    const editing = useMemo(
+        () => ({
+            showDefaultBackground: false,
+            clickableBlocked: cellPainting,
+            strokeTool: cellPainting,
+            showBlocked: true,
+            edges: panel === 'edges' ? edgeEditing : null,
+            doorLocks: true,
+        }),
+        [cellPainting, panel, edgeEditing]
+    );
 
     return (
         <div className="flex h-[calc(100dvh-var(--app-header-h,89px)-3.5rem)] min-h-0 flex-col gap-3 overflow-hidden p-3">
@@ -149,28 +191,10 @@ function EditorContent({
                 >
                     <BattleMap
                         map={previewMap}
-                        participants={[]}
-                        actions={{
-                            onStroke: paintingTiles
-                                ? tileEditor.onStroke
-                                : editor.actions.onStroke,
-                        }}
-                        tiles={{
-                            mapId: source.id,
-                            version: tileEditor.version,
-                            seed: source.id,
-                            chunks: tileEditor.chunks,
-                            assets: {},
-                        }}
-                        className="h-full"
-                        editing={{
-                            showDefaultBackground: false,
-                            clickableBlocked: cellPainting,
-                            strokeTool: cellPainting,
-                            showBlocked: true,
-                            edges: panel === 'edges' ? editor.edgeEditing : null,
-                            doorLocks: true,
-                        }}
+                        participants={NO_PARTICIPANTS}
+                        actions={mapActions}
+                        look={look}
+                        editing={editing}
                     />
                 </div>
                 <aside

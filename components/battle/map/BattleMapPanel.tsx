@@ -212,19 +212,22 @@ function BattleMapPanelContent({
         />
     );
 
-    const tiles = useMemo(
-        () =>
-            scene.tileChunks && scene.battle.mapRef
-                ? {
-                      mapId: scene.battle.mapRef.mapId,
-                      version:
-                          scene.tileVersion ?? scene.battle.mapRef.version,
-                      seed: scene.battle.mapRef.mapId,
-                      chunks: scene.tileChunks,
-                      assets: {},
-                  }
-                : undefined,
-        [scene.tileChunks, scene.battle.mapRef, scene.tileVersion]
+    const look = useMemo(
+        () => ({
+            className: phone ? 'min-h-0 flex-1' : 'h-full',
+            tiles:
+                scene.tileChunks && scene.battle.mapRef
+                    ? {
+                          mapId: scene.battle.mapRef.mapId,
+                          version:
+                              scene.tileVersion ?? scene.battle.mapRef.version,
+                          seed: scene.battle.mapRef.mapId,
+                          chunks: scene.tileChunks,
+                          assets: {},
+                      }
+                    : undefined,
+        }),
+        [phone, scene.tileChunks, scene.battle.mapRef, scene.tileVersion]
     );
 
     const { actions } = scene;
@@ -277,13 +280,12 @@ function BattleMapPanelContent({
             )}
             <BattleMap
                 map={scene.map}
-                tiles={tiles}
                 participants={fog.visibleParticipants}
                 view={scene.view}
                 actions={mapActions}
                 editing={editing}
+                look={look}
                 phone={phone}
-                className={phone ? 'min-h-0 flex-1' : 'h-full'}
             />
             {!phone && (inRow ? tools && createPortal(tools, slot) : tools)}
             {!phone && fogControls}

@@ -51,11 +51,15 @@ export interface BattleMapProps {
     participants: BattleParticipant[];
     view?: BattleMapView;
     actions?: BattleMapActions;
-    tiles?: TileRenderState;
-    className?: string;
+    look?: BattleMapLook;
     editing?: BattleMapEditing;
     /** телефон: карта обрізана до ігрових клітинок, на всю ширину й вертикально, якщо вона альбомна */
     phone?: boolean;
+}
+
+export interface BattleMapLook {
+    tiles?: TileRenderState;
+    className?: string;
 }
 
 export interface BattleMapEditing {
@@ -86,6 +90,8 @@ export interface BattleMapEditing {
 
 const NO_EDITING: BattleMapEditing = {};
 
+const NO_LOOK: BattleMapLook = {};
+
 const FIT_ZOOM_BOUNDS = { min: 1, max: 3 };
 
 const ZOOM_STEP = 1.2;
@@ -98,11 +104,12 @@ export function BattleMap({
     participants,
     view,
     actions,
-    tiles,
-    className,
+    look = NO_LOOK,
     editing = NO_EDITING,
     phone = false,
 }: BattleMapProps) {
+    const { tiles, className } = look;
+
     const { clickableBlocked, showBlocked, strokeTool, showDefaultBackground } =
         editing;
 
@@ -275,8 +282,9 @@ export function BattleMap({
             rotated: cameraMode ? false : fit.rotated,
             phone,
             window: gridWindow,
+            tiles,
         }),
-        [win, size, pxPerUnit, cameraMode, fit.rotated, phone, gridWindow]
+        [win, size, pxPerUnit, cameraMode, fit.rotated, phone, gridWindow, tiles]
     );
 
     const interaction = useMemo(
@@ -294,6 +302,7 @@ export function BattleMap({
             doorLocks,
             showDefaultBackground,
             fogActive: !!editing.fog?.active,
+            fog: editing.fog,
         }),
         [
             clickableBlocked,
@@ -303,7 +312,7 @@ export function BattleMap({
             doors,
             doorLocks,
             showDefaultBackground,
-            editing.fog?.active,
+            editing.fog,
         ]
     );
 
@@ -389,8 +398,7 @@ export function BattleMap({
                             participants={participants}
                             view={view}
                             actions={actions}
-                            tiles={tiles}
-                            editing={{ ...stageEditing, fog: editing.fog }}
+                            editing={stageEditing}
                             layout={layout}
                             interaction={interaction}
                         />

@@ -156,14 +156,6 @@
         "count": 1
     },
     {
-        "file": "components/battle/map/BattleMapPanel.tsx",
-        "count": 5
-    },
-    {
-        "file": "components/battle/map/DoorMenu.tsx",
-        "count": 2
-    },
-    {
         "file": "components/battle/map/fog/MapFogToolbar.tsx",
         "count": 3
     },
