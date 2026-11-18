@@ -9,6 +9,9 @@ import { hpOf } from '@/lib/utils/battle/__tests__/fixtures/placed';
 import type { BattleSceneState } from '@/lib/utils/battle/store';
 import { advanceAfterRemoval, advanceTurn } from '@/lib/utils/battle/turn';
 import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
+import { pendingSlot } from '@/systems/morale/__tests__/pending';
+import { pendingMoraleOf } from '@/systems/morale/rules/state';
+import { applyScenePatch } from '@/lib/utils/battle/scene-state';
 import { withDeathSaves } from '@/systems/deathsaves/rules/state';
 
 const scene: BattleSceneState = {
@@ -135,4 +138,30 @@ it('removal зберігає death-save event, participants, turn/round і єд�
     } finally {
         vi.useRealTimers();
     }
+});
+
+it('removal з відкладеною мораллю скидає слот у патчі сцени', () => {
+    const rules = {
+        ...DEFAULT_RULES,
+        system: { key: 'dnd5e', modules: ['morale'] },
+        morale: { enabled: true, cap: 4 },
+    } as typeof DEFAULT_RULES;
+
+    const sceneState = pendingSlot({
+        participantId: 'ghost',
+        d10Roll: 1,
+        moraleResult: { shouldSkipTurn: false, hasExtraTurn: false, moralePositive: true, message: '' },
+    });
+
+    const scene0 = { ...scene, sceneState };
+
+    const out = advanceAfterRemoval({
+        rules,
+        participants: [makeParticipant({ id: 'a' }), makeParticipant({ id: 'b' })],
+        pending: [],
+        scene: scene0,
+        before: 1,
+    });
+
+    expect(pendingMoraleOf(applyScenePatch(scene0, out.scene).sceneState)).toBeNull();
 });

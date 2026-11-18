@@ -25,6 +25,7 @@ import {
 import { resetSceneState, sceneResetPatch } from '@/lib/utils/battle/scene-state';
 import type { BattleSceneState, ScenePatch } from '@/lib/utils/battle/store';
 import type { Ruleset } from '@/lib/utils/rules';
+import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
 import type { BattleParticipant } from '@/types/battle';
 import type { BattleAction } from '@/types/battle-actions';
 import type { BattleMapConfig } from '@/types/battle-grid';
@@ -70,13 +71,15 @@ export function advanceAfterRemoval({
                 sceneState: resetSceneState(input.rules, scene.sceneState),
             },
         },
-        true
+        true,
+        scene.sceneState
     );
 }
 
 function advanceFrom(
     { participants, pending, scene, rng, map, rules }: AdvanceTurnInput,
-    skipEnding: boolean
+    skipEnding: boolean,
+    persistedSceneState: SystemSlot | undefined = scene.sceneState
 ): AdvanceTurnOutput {
     let order = participants;
 
@@ -109,7 +112,7 @@ function advanceFrom(
                 turnIndex: scene.turnIndex,
                 round: scene.round,
                 status: scene.status,
-                ...sceneResetPatch(rules, scene.sceneState),
+                ...sceneResetPatch(rules, persistedSceneState),
             },
             actions,
         };
@@ -228,7 +231,7 @@ function advanceFrom(
                 turnIndex: extraIndex,
                 round: scene.round,
                 status: scene.status,
-                ...sceneResetPatch(rules, scene.sceneState),
+                ...sceneResetPatch(rules, persistedSceneState),
             },
             actions: [...actions, extraTurnAction(taker, scene)],
         };
@@ -283,7 +286,7 @@ function advanceFrom(
             round: loop.nextRound,
             status: victory.finalStatus as BattleSceneState['status'],
             ...(victory.completedAt && { completedAt: victory.completedAt }),
-            ...sceneResetPatch(rules, scene.sceneState),
+            ...sceneResetPatch(rules, persistedSceneState),
             ...(prunedMap && { map: prunedMap }),
         },
         actions: [...actions, ...newLogEntries],
