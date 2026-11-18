@@ -3,9 +3,9 @@ import { describe, expect, it } from 'vitest';
 import '@/lib/server/systems/registry';
 import { ParticipantSide } from '@/lib/constants/battle';
 import { createBattleParticipantFromCharacter } from '@/lib/server/battles/participant/from-character';
-import { awaitsMoraleCheck } from '@/lib/utils/battle/morale/awaits-check';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 import { parseRules } from '@/lib/utils/rules/schema';
+import { awaitsMoraleCheck } from '@/systems/morale/rules/awaits-check';
 
 const character = {
     id: 'ch1',

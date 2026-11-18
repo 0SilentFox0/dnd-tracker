@@ -5,6 +5,7 @@ import {
     goblin,
     hero,
 } from '@/lib/server/battles/__tests__/mutations/fixtures';
+import { systemServerOf } from '@/lib/server/systems/lookup';
 import { runAbilities } from '@/lib/utils/abilities/engine/core/run-abilities';
 import { assertCanAct, assertCanEndTurn } from '@/lib/utils/battle/turn';
 import { beforeAdvanceHooks } from '@/lib/utils/battle/turn/hooks';
@@ -131,5 +132,26 @@ describe('morale module on d20', () => {
 
         expect(out.participants[0].actionFlags.hasUsedReaction).toBe(true);
         expect(out.actions?.[0].actionType).toBe('morale_skip');
+    });
+
+    it('startCheck.valueOf is the effective morale, absent without the module', () => {
+        expect(
+            ruleSystemOf(withMorale).combat.turn?.startCheck?.valueOf(
+                moraleHero,
+                [moraleHero]
+            )
+        ).toBe(2);
+        expect(ruleSystemOf(bare).combat.turn?.startCheck).toBeUndefined();
+    });
+
+    it('the server battle operation declares its own dice, so core dice.ts names no module', () => {
+        const dice = systemServerOf(withMorale).battle?.['morale-check']?.serverDice;
+
+        expect(dice?.placeholder).toEqual({ d10Roll: 1 });
+
+        const rolled = dice?.roll(context({ participants: [hero] })).d10Roll;
+
+        expect(rolled).toBeGreaterThanOrEqual(1);
+        expect(rolled).toBeLessThanOrEqual(10);
     });
 });

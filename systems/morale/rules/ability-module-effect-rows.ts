@@ -2,7 +2,7 @@ import { textRef } from '@/lib/i18n/text-ref';
 import {
     clampMorale,
     moraleCapOf,
-} from '@/lib/utils/abilities/engine/effects/morale';
+} from '@/lib/utils/abilities/build/morale-stat';
 import { each, immuneTo } from '@/lib/utils/abilities/registry/effects/each';
 import type { SystemEffectRowInput } from '@/lib/utils/abilities/registry/effects/system-row';
 import type { EffectApplyInput } from '@/lib/utils/abilities/registry/effects/types';

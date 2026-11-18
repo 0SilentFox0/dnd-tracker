@@ -1,6 +1,6 @@
 import type { SystemDice, SystemDiceSource } from '@/lib/utils/battle/fx';
-import type { PendingMoraleCheckPayload } from '@/lib/utils/battle/turn';
 import { moraleDiceDone } from '@/systems/morale/hooks/morale-dice';
+import type { PendingMoraleCheckPayload } from '@/systems/morale/rules/threshold';
 
 export function moraleThrowOf(input: {
     round: number;

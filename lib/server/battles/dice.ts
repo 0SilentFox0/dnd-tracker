@@ -5,6 +5,7 @@ import {
 } from '@/lib/server/battles/mutations/attack/attack-mutation';
 import { createSpellMutation } from '@/lib/server/battles/mutations/spell/spell-mutation';
 import { ContentError } from '@/lib/server/content/errors';
+import { systemBattleOperation } from '@/lib/server/systems/lookup';
 import { validateAttackRequest } from '@/lib/utils/battle/attack-phase/request';
 import { attackReachError } from '@/lib/utils/battle/grid';
 import type {
@@ -12,8 +13,6 @@ import type {
     RunBattleMutationOptions,
 } from '@/lib/utils/battle/pipeline/run-battle-mutation';
 import { ruleErrorOf } from '@/lib/utils/battle/store/errors';
-import { rollDie } from '@/lib/utils/common/dice';
-import { rngOf } from '@/lib/utils/common/rng';
 
 const rollKeys = new Set([
     'd10Roll',
@@ -46,7 +45,11 @@ export function schemaDiceInput(
     body: Record<string, unknown>,
     server: boolean
 ) {
-    if (server && operation === 'morale-check') return { ...body, d10Roll: 1 };
+    const placeholder = server
+        ? systemBattleOperation(operation)?.serverDice?.placeholder
+        : undefined;
+
+    if (placeholder) return { ...body, ...placeholder };
 
     return server && operation === 'attack' ? { ...body, d20Roll: 1 } : body;
 }
@@ -95,13 +98,15 @@ export function withServerBattleDice(
             }) as RunBattleMutationOptions<unknown>['mutate'],
         };
 
-    if (operation === 'morale-check')
+    const serverDice = systemBattleOperation(operation)?.serverDice;
+
+    if (serverDice)
         return {
             ...definition,
             mutate: (ctx, raw) =>
                 definition.mutate(ctx, {
                     ...(raw as Record<string, unknown>),
-                    d10Roll: rollDie(10, rngOf(ctx)),
+                    ...serverDice.roll(ctx),
                 }),
         };
 

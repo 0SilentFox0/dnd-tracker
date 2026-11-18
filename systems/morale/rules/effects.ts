@@ -1,13 +1,8 @@
-import { liveActiveEffects } from './zone-effects';
-
+import { clampMorale, moraleCapOf } from '@/lib/utils/abilities/build/morale-stat';
 import { resolvedAbilitiesOf } from '@/lib/utils/abilities/engine/core/participants';
+import { liveActiveEffects } from '@/lib/utils/abilities/engine/effects/zone-effects';
 import type { FlagKey } from '@/lib/utils/abilities/schema';
 import type { BattleParticipant } from '@/types/battle';
-
-export const moraleCapOf = (p: BattleParticipant) => p.combatStats.moraleCap ?? 3;
-
-export const clampMorale = (v: number, cap: number) =>
-    Math.max(-cap, Math.min(cap, v));
 
 export function ownTimedMoraleFlat(
     p: BattleParticipant,

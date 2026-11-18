@@ -8,12 +8,12 @@ import {
     useFxEnabled,
 } from '@/lib/hooks/battle';
 import { usePageHidden } from '@/lib/hooks/common';
-import { effectiveMorale } from '@/lib/utils/battle/morale/effective-morale';
 import {
     moraleCheckOp,
     type MoraleCheckResponse,
 } from '@/systems/morale/api/battle';
 import { afterMoraleDice } from '@/systems/morale/hooks/morale-dice';
+import { effectiveMorale } from '@/systems/morale/rules/effective-morale';
 import { moraleResultFx } from '@/systems/morale/rules/result-fx';
 import { moraleOutcome } from '@/systems/morale/rules/turn/outcome';
 import type { BattleParticipant } from '@/types/battle';

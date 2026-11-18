@@ -1,10 +1,10 @@
+import { moraleCapOf } from '@/lib/utils/abilities/build/morale-stat';
 import { findFlags } from '@/lib/utils/abilities/engine/core/collect-modifiers';
 import { withSelf } from '@/lib/utils/abilities/engine/core/participants';
 import {
     combineMorale,
-    moraleCapOf,
     ownTimedMoraleFlat,
-} from '@/lib/utils/abilities/engine/effects/morale';
+} from '@/systems/morale/rules/effects';
 import type { BattleParticipant } from '@/types/battle';
 
 /** Лідерські бонуси до шансу додаткового ходу (прапорець moraleChance), %. */

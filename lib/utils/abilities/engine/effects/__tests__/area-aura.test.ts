@@ -13,9 +13,9 @@ import {
     pendingAreaAuras,
     zoneMembers,
 } from '@/lib/utils/abilities/engine/effects/area-aura';
-import { ownTimedMoraleFlat } from '@/lib/utils/abilities/engine/effects/morale';
-import { effectiveMorale } from '@/lib/utils/battle/morale/effective-morale';
 import { decreaseEffectDurations } from '@/lib/utils/battle/turn/effects';
+import { effectiveMorale } from '@/systems/morale/rules/effective-morale';
+import { ownTimedMoraleFlat } from '@/systems/morale/rules/effects';
 import type { BattleParticipant } from '@/types/battle';
 
 const fear = (id = 'unit-fear-aura') =>

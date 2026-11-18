@@ -1,12 +1,12 @@
 import { ABILITY_KEYS } from '@/lib/constants/abilities';
+import {
+    clampMorale,
+    moraleCapOf,
+} from '@/lib/utils/abilities/build/morale-stat';
 import { resolveFlat } from '@/lib/utils/abilities/engine/core/amount';
 import { auraKey } from '@/lib/utils/abilities/engine/core/collect-modifiers';
 import { staticEffectStrength } from '@/lib/utils/abilities/engine/core/effect-strength';
 import { resolvedAbilitiesOf } from '@/lib/utils/abilities/engine/core/participants';
-import {
-    clampMorale,
-    moraleCapOf,
-} from '@/lib/utils/abilities/engine/effects/morale';
 import { evaluateCondition } from '@/lib/utils/abilities/registry/conditions';
 import type { Effect } from '@/lib/utils/abilities/schema';
 import { isBakedStat } from '@/lib/utils/abilities/schema/kinds';

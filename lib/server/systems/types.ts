@@ -133,8 +133,15 @@ export type SystemBattleSettings = Omit<
     'params' | 'schema' | 'mutate' | 'operation'
 > & { missing: string };
 
+/** Server-side dice: `placeholder` satisfies the schema, `roll` supplies the real values before the mutation runs */
+export interface SystemBattleServerDice {
+    placeholder: Record<string, unknown>;
+    roll(ctx: BattleMutationContext): Record<string, unknown>;
+}
+
 export interface SystemBattleOperation {
     settings: SystemBattleSettings;
+    serverDice?: SystemBattleServerDice;
     load(deps: BattleOperationDeps): Promise<{
         schema: ZodType;
         mutate(

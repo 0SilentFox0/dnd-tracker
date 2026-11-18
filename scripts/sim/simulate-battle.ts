@@ -9,6 +9,7 @@
 import type { Prisma } from '@prisma/client';
 
 import { resultTextOf } from './log-text';
+import { awaitsMoraleCheck, effectiveMorale } from './morale-gate';
 import {
     artifactRows,
     DEMON_RACE,
@@ -74,8 +75,6 @@ import { runAbilities } from '@/lib/utils/abilities/engine/core/run-abilities';
 import { countMarks } from '@/lib/utils/abilities/engine/effects/marks';
 import { applyBattleDelta } from '@/lib/utils/battle/client/apply-delta';
 import { attackDamageParts } from '@/lib/utils/battle/damage/attack-parts';
-import { awaitsMoraleCheck } from '@/lib/utils/battle/morale/awaits-check';
-import { effectiveMorale } from '@/lib/utils/battle/morale/effective-morale';
 import { PUSHER_DELTA_LIMIT_BYTES } from '@/lib/utils/battle/pipeline/limits';
 import type {
     PipelineDeps,

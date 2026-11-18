@@ -1,9 +1,9 @@
 import type { TurnGateOutcome } from '@/lib/utils/battle/flows/turn-flow';
+import type { TurnStartCheck } from '@/lib/utils/rules/systems/types';
 import type {
     MoraleCheckResult,
     PendingMoraleCheckPayload,
-} from '@/lib/utils/battle/morale/threshold';
-import type { TurnStartCheck } from '@/lib/utils/rules/systems/types';
+} from '@/systems/morale/rules/threshold';
 
 export function moraleOutcome(
     r:

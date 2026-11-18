@@ -47,7 +47,6 @@ import {
     reachable,
     remainingMovement,
 } from '@/lib/utils/battle/grid/path';
-import { awaitsMoraleCheck } from '@/lib/utils/battle/morale/awaits-check';
 import { loadRecentEvents } from '@/lib/utils/battle/store';
 import { rollDiceList } from '@/lib/utils/common/dice';
 import {
@@ -56,6 +55,7 @@ import {
 } from '@/lib/utils/compendium-import/flow';
 import { itemStatsFromRow } from '@/lib/utils/items/item-row';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { awaitsMoraleCheck } from '@/systems/morale/rules/awaits-check';
 
 const FILE = process.env.COMPENDIUM_REAL_FILE;
 

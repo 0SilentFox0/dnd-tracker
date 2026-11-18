@@ -80,6 +80,11 @@ export type ActGate = (
 /** The client-side check a participant must resolve before acting; `outcomeOf` reads a stored pending check */
 export interface TurnStartCheck {
     due(scope: ActGateScope, participantId: string): boolean;
+    /** The value the check rolls against (after flags and timed effects) */
+    valueOf(
+        participant: BattleParticipant,
+        participants: BattleParticipant[]
+    ): number;
     outcomeOf(
         pending: unknown,
         participantId: string

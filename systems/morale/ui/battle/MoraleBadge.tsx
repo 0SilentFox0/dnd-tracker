@@ -5,8 +5,8 @@ import { useTranslations } from 'next-intl';
 import type { BattleBadgeProps } from '@/components/systems/types';
 import { useBattleSceneData } from '@/lib/hooks/battle';
 import { cn } from '@/lib/utils';
-import { effectiveMorale } from '@/lib/utils/battle/morale/effective-morale';
 import { signed } from '@/lib/utils/common/format';
+import { effectiveMorale } from '@/systems/morale/rules/effective-morale';
 import type { BattleParticipant } from '@/types/battle';
 
 export function MoraleBadge({ participant, place }: BattleBadgeProps) {

@@ -10,10 +10,10 @@ import {
     statWithModifiers,
 } from '@/lib/utils/abilities/engine/core/collect-modifiers';
 import { runAbilities } from '@/lib/utils/abilities/engine/core/run-abilities';
-import { effectiveMorale } from '@/lib/utils/battle/morale/effective-morale';
 import { applyResistance, hasImmunity } from '@/lib/utils/battle/resistance';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 import { racePassiveData } from '@/scripts/seed/seed-library-lib';
+import { effectiveMorale } from '@/systems/morale/rules/effective-morale';
 import type { BattleParticipant } from '@/types/battle';
 
 const ABILITY_KEYS = [

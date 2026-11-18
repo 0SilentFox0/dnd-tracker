@@ -1,7 +1,7 @@
 import { effectiveMorale } from './effective-morale';
 
 import { currentOf } from '@/lib/utils/battle/common/control';
-import type { PendingMoraleCheckPayload } from '@/lib/utils/battle/morale/threshold';
+import type { PendingMoraleCheckPayload } from '@/systems/morale/rules/threshold';
 import type { BattleParticipant } from '@/types/battle';
 
 export interface MoraleScope {

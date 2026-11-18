@@ -1,7 +1,7 @@
-import { awaitsMoraleCheck } from '@/lib/utils/battle/morale/awaits-check';
-import type { PendingMoraleCheckPayload } from '@/lib/utils/battle/morale/threshold';
 import { REJECT } from '@/lib/utils/battle/store/reject';
 import type { ActGate } from '@/lib/utils/rules/systems/types';
+import { awaitsMoraleCheck } from '@/systems/morale/rules/awaits-check';
+import type { PendingMoraleCheckPayload } from '@/systems/morale/rules/threshold';
 
 export function isPanicking(
     pendingMoraleCheck: unknown,

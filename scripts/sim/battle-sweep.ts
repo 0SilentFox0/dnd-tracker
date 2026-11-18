@@ -40,6 +40,7 @@ import {
     type TemplateRun,
 } from './battle-sweep/template-campaign';
 import { resultTextOf } from './log-text';
+import { awaitsMoraleCheck } from './morale-gate';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import {
@@ -150,7 +151,6 @@ import {
     MAZE_STEPS_PER_TURN,
 } from '@/lib/utils/battle/modes/maze/constants';
 import { MAZE_TEXTS } from '@/lib/utils/battle/modes/maze/texts';
-import { awaitsMoraleCheck } from '@/lib/utils/battle/morale/awaits-check';
 import { casterSpellDice } from '@/lib/utils/battle/spell/caster-dice';
 import { spellTargetingFor } from '@/lib/utils/battle/spell/spell-targeting';
 import { loadRecentEvents } from '@/lib/utils/battle/store';
