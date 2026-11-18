@@ -21,7 +21,7 @@ import {
 import { REJECT } from '@/lib/utils/battle/store/reject';
 import { isEmptyMapState } from '@/lib/utils/battle/store/snapshot-state';
 import { jsonEqual } from '@/lib/utils/battle/store/stable-json';
-import type { BattleMapConfig } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 export const rollbackSchema = z.object({
     actionIndex: z.number().int().min(1),

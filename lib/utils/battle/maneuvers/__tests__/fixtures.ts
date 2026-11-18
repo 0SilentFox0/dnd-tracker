@@ -12,11 +12,8 @@ import {
     testMap,
 } from '@/lib/utils/battle/__tests__/fixtures/placed';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
-import type {
-    BattleMapConfig,
-    BattleParticipant,
-    GridPoint,
-} from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 
 export const MAP: BattleMapConfig = testMap(20);
 

@@ -6,7 +6,7 @@ import { DmBattleLog } from '@/components/battle/dm/DmBattleLog';
 import { BATTLE_SNAPSHOTS_KEPT_AFTER_COMPLETE } from '@/lib/constants/battle';
 import { renderWithConfirm } from '@/lib/i18n/test/render-uk';
 import type { BattleScene } from '@/types/api';
-import type { BattleAction } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 
 vi.unmock('next-intl');
 

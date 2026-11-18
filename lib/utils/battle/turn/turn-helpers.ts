@@ -4,7 +4,8 @@ import {
     completeBattle,
 } from '@/lib/utils/battle/turn/victory';
 import type { Ruleset } from '@/lib/utils/rules';
-import type { BattleAction, BattleParticipant } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 
 export interface ApplyVictoryParams {
     updatedInitiativeOrder: BattleParticipant[];

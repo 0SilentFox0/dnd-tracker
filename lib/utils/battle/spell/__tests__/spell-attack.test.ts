@@ -12,11 +12,8 @@ import { castSpell } from '@/lib/utils/battle/spell';
 import { spellAttackBonus } from '@/lib/utils/battle/spell/power';
 import type { CastableSpell } from '@/lib/utils/battle/types/spell-process';
 import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
-import type {
-    BattleMapConfig,
-    BattleParticipant,
-    GridPoint,
-} from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 
 const fire: Effect = {
     kind: 'dealDamage',

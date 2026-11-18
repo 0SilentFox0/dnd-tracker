@@ -2,12 +2,12 @@ import type { StaticEffect } from '@/lib/utils/abilities/schema';
 import type { CritPicker } from '@/lib/utils/battle/crit-choice/types';
 import type { Rng } from '@/lib/utils/common/rng';
 import type { Ruleset } from '@/lib/utils/rules';
+import type { BattleParticipant } from '@/types/battle';
 import type {
     AnchoredZoneState,
     BattleMapConfig,
-    BattleParticipant,
     GridPoint,
-} from '@/types/battle';
+} from '@/types/battle-grid';
 import type { LogLine } from '@/types/text';
 
 export type { Rng };

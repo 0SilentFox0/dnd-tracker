@@ -8,11 +8,8 @@ import { ParticipantSide } from '@/lib/constants/battle';
 import { resolved } from '@/lib/utils/abilities/__tests__/fixtures';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import { testMap } from '@/lib/utils/battle/__tests__/fixtures/placed';
-import type {
-    BattleMapConfig,
-    BattleParticipant,
-    GridPoint,
-} from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 
 function hero(position: GridPoint, gridSize = 1): BattleParticipant {
     const p = createMockParticipant();

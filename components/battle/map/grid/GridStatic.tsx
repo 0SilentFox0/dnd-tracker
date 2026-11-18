@@ -23,7 +23,7 @@ import {
     regionOutlinePath,
     UNIT,
 } from '@/lib/utils/battle/grid';
-import type { BattleMapConfig } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 interface TerrainGroups {
     wall: string[];

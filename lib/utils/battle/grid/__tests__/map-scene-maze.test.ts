@@ -6,12 +6,12 @@ import { deriveMapScene, type MapSceneActor } from '@/lib/utils/battle/grid';
 import { deriveMazeView } from '@/lib/utils/battle/modes/maze';
 import { mazeMap } from '@/lib/utils/battle/modes/maze/__tests__/fixtures';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
+import type { BattleParticipant } from '@/types/battle';
 import type {
     BattleMapConfig,
-    BattleParticipant,
     Direction8,
     GridPoint,
-} from '@/types/battle';
+} from '@/types/battle-grid';
 
 const hero = (at: GridPoint, facing: Direction8): BattleParticipant => {
     const p = placed('h', { side: ParticipantSide.ALLY, at });

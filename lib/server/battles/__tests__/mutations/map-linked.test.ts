@@ -7,7 +7,7 @@ import { createRollbackMutation } from '@/lib/server/battles/mutations/rollback/
 import { diffParticipants, splitParticipant } from '@/lib/utils/battle/store';
 import { REJECT } from '@/lib/utils/battle/store/reject';
 import { buildSnapshotState } from '@/lib/utils/battle/store/snapshot-state';
-import type { BattleMapConfig, BattleMapState } from '@/types/battle';
+import type { BattleMapConfig, BattleMapState } from '@/types/battle-grid';
 
 const map: BattleMapConfig = {
     cols: 8,

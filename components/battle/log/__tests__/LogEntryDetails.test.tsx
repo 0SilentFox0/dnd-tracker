@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { LogEntryDetails } from '@/components/battle/log/LogEntryDetails';
 import { render } from '@/lib/i18n/test/render-uk';
-import type { BattleAction } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 
 vi.unmock('next-intl');
 

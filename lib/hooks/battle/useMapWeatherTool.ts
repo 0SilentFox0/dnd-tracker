@@ -5,7 +5,7 @@ import { useCallback, useMemo } from 'react';
 import { usePaletteToggle } from './usePaletteToggle';
 
 import type { MapWeatherData } from '@/types/api';
-import type { WeatherKind } from '@/types/battle';
+import type { WeatherKind } from '@/types/battle-grid';
 
 export interface MapWeatherTool {
     active: boolean;

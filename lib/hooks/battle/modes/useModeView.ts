@@ -4,7 +4,8 @@ import { createContext, useContext, useMemo } from 'react';
 
 import { useBattleSceneData } from '@/lib/hooks/battle/useBattleScene';
 import type { ModeView } from '@/lib/utils/battle/modes';
-import type { BattleAction, BattleParticipant } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 
 export interface ModeViewValue {
     view: ModeView | null;

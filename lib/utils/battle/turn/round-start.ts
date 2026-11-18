@@ -10,11 +10,9 @@ import type { Rng } from '@/lib/utils/abilities/engine/core/types';
 import { summonsOf } from '@/lib/utils/battle/participant/reserve';
 import type { Ruleset } from '@/lib/utils/rules';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
-import type {
-    BattleAction,
-    BattleMapConfig,
-    BattleParticipant,
-} from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
+import type { BattleMapConfig } from '@/types/battle-grid';
 import type { LogLine } from '@/types/text';
 
 /**

@@ -1,4 +1,4 @@
-import type { BattleMapConfig } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 export const CONDITION_LIMITS = { rounds: 99, dc: 40 } as const;
 

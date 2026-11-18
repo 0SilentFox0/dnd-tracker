@@ -8,11 +8,8 @@ import {
 import { mapDoorToggleMutation } from '@/lib/server/battles/mutations/map-door-toggle/map-door-toggle-mutation';
 import { composeEffectiveMap } from '@/lib/utils/battle/map-storage/effective-map';
 import { REJECT } from '@/lib/utils/battle/store/reject';
-import type {
-    BattleMapConfig,
-    BattleMapState,
-    BattleParticipant,
-} from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig, BattleMapState } from '@/types/battle-grid';
 
 const base: BattleMapConfig = {
     cols: 8,

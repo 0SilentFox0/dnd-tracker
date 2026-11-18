@@ -6,7 +6,8 @@ import { nearestTo } from '@/lib/utils/battle/grid/nearest';
 import { wallsAllowSight } from '@/lib/utils/battle/grid/sight';
 import { modeSees } from '@/lib/utils/battle/modes/engine';
 import type { AbilityEvent } from '@/types/abilities';
-import type { BattleMapConfig, BattleParticipant } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 const targetableInPlay = (p: BattleParticipant) =>
     isTargetable(p) && !isDormant(p);

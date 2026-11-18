@@ -1,4 +1,8 @@
-import type { BattleMapConfig, GridPoint, TerrainCell } from '@/types/battle';
+import type {
+    BattleMapConfig,
+    GridPoint,
+    TerrainCell,
+} from '@/types/battle-grid';
 
 const DIRS = [
     [-1, -1],

@@ -8,7 +8,7 @@ import {
 } from '@/lib/utils/battle/modes';
 import { mazeMode } from '@/lib/utils/battle/modes/maze';
 import { emptyMaze } from '@/lib/utils/battle/modes/maze/constants';
-import type { BattleMapConfig } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 const base: BattleMapConfig = { cols: 10, rows: 8 } as BattleMapConfig;
 

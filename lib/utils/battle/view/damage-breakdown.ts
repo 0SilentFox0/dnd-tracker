@@ -1,5 +1,5 @@
 import { textRef } from '@/lib/i18n/text-ref';
-import type { DamageRow } from '@/types/battle';
+import type { DamageRow } from '@/types/battle-actions';
 
 export type DamageBreakdownRow = DamageRow;
 

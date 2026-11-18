@@ -4,11 +4,8 @@ import { AURA_RADIUS_CELLS } from '@/lib/constants/battle';
 import { inPlay } from '@/lib/utils/abilities/engine/core/participants';
 import { footprintDistance } from '@/lib/utils/battle/grid/geometry';
 import { cellsOf, isOnMap } from '@/lib/utils/battle/grid/occupancy';
-import type {
-    ActiveEffect,
-    BattleMapConfig,
-    BattleParticipant,
-} from '@/types/battle';
+import type { ActiveEffect, BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 /** Область-аури на карті: склад зони — живі в радіусі; власник без позиції лишається в ручному режимі. */
 export function syncMapAuras(

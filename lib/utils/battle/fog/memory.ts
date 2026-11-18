@@ -1,6 +1,6 @@
 import { normalizeRevealedRuns } from './revealed-runs';
 
-import type { RevealedRun } from '@/types/battle';
+import type { RevealedRun } from '@/types/battle-grid';
 
 export interface FogMemoryRecord {
     version: 1;

@@ -11,7 +11,7 @@ import {
     momentumOf,
     sceneOf,
 } from '@/systems/wfrp/rules/__tests__/slot-fixtures';
-import type { BattleMapConfig, MazeConfig } from '@/types/battle';
+import type { BattleMapConfig, MazeConfig } from '@/types/battle-grid';
 
 const ctx = context({
     scene: { ...context().scene, eventSeq: 6, status: 'completed' },

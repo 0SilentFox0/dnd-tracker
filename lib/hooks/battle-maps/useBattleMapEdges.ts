@@ -6,7 +6,7 @@ import { battleMapKeys } from './keys';
 
 import { getBattleMap } from '@/lib/api/battle-maps';
 import type { LibraryEdges } from '@/lib/utils/battle/map-storage/effective-map';
-import type { BattleMapRef } from '@/types/battle';
+import type { BattleMapRef } from '@/types/battle-grid';
 
 const EDGES_GC_MS = 30 * 60_000;
 

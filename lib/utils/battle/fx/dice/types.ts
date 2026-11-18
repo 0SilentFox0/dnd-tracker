@@ -1,4 +1,4 @@
-import type { DieSides } from '@/types/battle';
+import type { DieSides } from '@/types/battle-actions';
 
 export interface DieFx {
     sides: DieSides;

@@ -10,7 +10,7 @@ import {
 
 import { testMap } from '@/lib/utils/battle/__tests__/fixtures/placed';
 import { edgeBlocks, wallsOf } from '@/lib/utils/battle/grid/edges';
-import type { BattleMapState } from '@/types/battle';
+import type { BattleMapState } from '@/types/battle-grid';
 
 const at = (x: number, y: number) => ({ x, y });
 
@@ -209,9 +209,7 @@ describe('diffMapState / applyMapStateDelta', () => {
             mode: 'vision',
             visionRadius: 11,
             revealed: {
-                add: [
-                    [2, 4, 7],
-                ],
+                add: [[2, 4, 7]],
                 remove: [
                     [0, 3, 5],
                     [1, 1, 4],

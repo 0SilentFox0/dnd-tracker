@@ -3,7 +3,7 @@ import {
     BattleStatus,
 } from '@/lib/constants/battle';
 import type { BattleScene } from '@/types/api';
-import type { BattleAction } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 
 /**
  * Після завершення бою лишаються останні N знімків; кожна дія з подіями пише хоча б одну подію,

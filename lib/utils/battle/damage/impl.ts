@@ -13,7 +13,8 @@ import type { StaticEffect } from '@/lib/utils/abilities/schema';
 import { attackKindOf } from '@/lib/utils/battle/common/attack-kind';
 import { abilityRef } from '@/lib/utils/battle/common/terms';
 import { signed } from '@/lib/utils/common/format';
-import type { BattleParticipant, DamageRow, DamageStep } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { DamageRow, DamageStep } from '@/types/battle-actions';
 import type { TextRef } from '@/types/text';
 
 const BONUS_PREFIX: Record<ModifierEntry['sourceType'], TextRef> = {

@@ -27,11 +27,8 @@ import {
     beginConcentration,
     dropConcentration,
 } from '@/systems/d20/rules/concentration/sustain';
-import type {
-    BattleMapConfig,
-    BattleParticipant,
-    GridPoint,
-} from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 
 const checkVictoryConditions = (
     order: BattleParticipant[],

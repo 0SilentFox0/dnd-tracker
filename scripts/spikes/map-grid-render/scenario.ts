@@ -2,11 +2,8 @@ import { ParticipantSide } from '@/lib/constants/battle';
 import { CONTROLLED_BY_DM } from '@/lib/constants/characters';
 import { MAP_LIMITS } from '@/lib/constants/map-limits';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
-import type {
-    BattleMapConfig,
-    BattleParticipant,
-    TerrainCell,
-} from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig, TerrainCell } from '@/types/battle-grid';
 
 export const SIDES = [60, 100, 200] as const;
 

@@ -20,11 +20,8 @@ import { attackOf } from '@/systems/wfrp/rules/__tests__/slot-fixtures';
 import { DEFAULT_CHARACTERISTICS } from '@/systems/wfrp/rules/characteristics/keys';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
 import type { SceneMomentum } from '@/systems/wfrp/rules/slots';
-import type {
-    BattleAttack,
-    BattleMapConfig,
-    BattleParticipant,
-} from '@/types/battle';
+import type { BattleAttack, BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 const sword: BattleAttack = {
     id: 'sw',

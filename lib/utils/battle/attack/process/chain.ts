@@ -13,11 +13,8 @@ import {
 } from '@/lib/utils/battle/grid';
 import { isHostile, modeSees } from '@/lib/utils/battle/modes/engine';
 import type { Ruleset } from '@/lib/utils/rules/schema';
-import type {
-    BattleAttack,
-    BattleMapConfig,
-    BattleParticipant,
-} from '@/types/battle';
+import type { BattleAttack, BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 export interface ChainStep {
     map: BattleMapConfig | null | undefined;

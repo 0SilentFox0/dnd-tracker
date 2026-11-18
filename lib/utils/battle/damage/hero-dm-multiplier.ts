@@ -2,7 +2,8 @@ import { multiplierRow } from './rows';
 
 import { AttackType, ParticipantSourceType } from '@/lib/constants/battle';
 import { textRef } from '@/lib/i18n/text-ref';
-import type { BattleParticipant, DamageRow } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { DamageRow } from '@/types/battle-actions';
 import type { LogLine } from '@/types/text';
 
 function clampHeroDamageMultiplier(raw: number | undefined | null): number {

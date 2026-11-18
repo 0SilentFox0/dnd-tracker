@@ -23,7 +23,8 @@ import { wfrpAbilitiesOf } from '@/systems/wfrp/rules/combat/participant';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
 import { wfrpState } from '@/systems/wfrp/rules/state';
 import { trait } from '@/systems/wfrp/rules/traits/__tests__/fixtures';
-import type { BattleMapConfig, BattleParticipant } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 const reserved = (id: string) =>
     participant(

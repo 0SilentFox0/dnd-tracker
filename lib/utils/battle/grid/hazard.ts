@@ -17,12 +17,12 @@ import { participantImmuneToSpell } from '@/lib/utils/battle/spell/spell-immunit
 import { diceAverage, rollDice } from '@/lib/utils/common/dice';
 import type { Ruleset } from '@/lib/utils/rules';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
+import type { BattleParticipant } from '@/types/battle';
 import type {
     BattleMapConfig,
-    BattleParticipant,
     GridPoint,
     TerrainCell,
-} from '@/types/battle';
+} from '@/types/battle-grid';
 import type { LogLine } from '@/types/text';
 
 const strength = (c: TerrainCell) =>

@@ -17,7 +17,8 @@ import {
     needsBonusTarget,
 } from '@/lib/utils/battle/view';
 import type { ResolvedAbility } from '@/types/abilities';
-import type { BattleParticipant, GridPoint } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { GridPoint } from '@/types/battle-grid';
 
 type Trigger = 'bonusAction' | 'action';
 

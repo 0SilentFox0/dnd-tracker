@@ -67,7 +67,7 @@ Core бачить `systems/*` лише через корені (`SYSTEM_ROOTS`, 
 
 Позначки: **обов'язковий** (база мусить дати), **необов'язковий** (немає хука = нейтральна поведінка core), **список** (конкатенується за порядком композиції).
 
-`RuleSystemDefinition` (`lib/utils/rules/systems/types.ts`):
+`RuleSystemDefinition` (`lib/utils/rules/systems/types.ts`; типи слотів у сусідніх `types-{combat,turn,actions,conditions,magic,sheet,participant}.ts`, `types.ts` реекспортує їх, тож імпорт лишається з `types`). `combat.saves`/`combat.proficiency` необов'язкові: читач — `savesOf`/`proficiencyOf` (`lib/utils/battle/saves/access.ts`), відсутній слот = `noSaves`/`noProficiency`:
 
 | Поле | Статус | Що робить |
 |---|---|---|

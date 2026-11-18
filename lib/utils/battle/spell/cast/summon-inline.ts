@@ -5,7 +5,8 @@ import type {
     SpellEffect,
     SummonInlineEffect,
 } from '@/lib/utils/spells/model/schema';
-import type { AnchoredZoneState, BattleParticipant } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { AnchoredZoneState } from '@/types/battle-grid';
 
 interface SummonInlineInput {
     effects: SpellEffect[];

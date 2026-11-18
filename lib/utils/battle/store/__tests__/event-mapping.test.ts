@@ -9,7 +9,7 @@ import {
     eventToBattleAction,
     systemEvent,
 } from '@/lib/utils/battle/store/event-mapping';
-import type { BattleAction } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 
 const action: BattleAction = {
     id: 'x',

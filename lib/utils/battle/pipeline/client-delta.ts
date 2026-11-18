@@ -18,13 +18,13 @@ import {
 import { jsonEqual } from '@/lib/utils/battle/store/stable-json';
 import type { BattleKnowledge } from '@/lib/utils/battle/view/knowledge';
 import type { BattleParticipantPatch, ClientBattleDelta } from '@/types/api';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 import type {
-    BattleAction,
     BattleMapConfig,
     BattleMapRef,
     BattleMapState,
-    BattleParticipant,
-} from '@/types/battle';
+} from '@/types/battle-grid';
 
 const ids = (list: BattleParticipant[]) => list.map((p) => p.basicInfo.id);
 

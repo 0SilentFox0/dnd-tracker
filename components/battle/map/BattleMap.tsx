@@ -37,12 +37,12 @@ import {
     playableBounds,
     UNIT,
 } from '@/lib/utils/battle/grid';
+import type { BattleParticipant } from '@/types/battle';
 import type {
     BattleMapActions,
     BattleMapConfig,
     BattleMapView,
-    BattleParticipant,
-} from '@/types/battle';
+} from '@/types/battle-grid';
 
 export type { BattleMapActions, BattleMapView };
 
@@ -74,13 +74,13 @@ export interface BattleMapEditing {
     mode?: ModeTools | null;
     fog?: {
         mode: 'off' | 'reveal' | 'vision';
-        revealed: import('@/types/battle').RevealedRun[];
+        revealed: import('@/types/battle-grid').RevealedRun[];
         visible: ReadonlySet<string>;
         explored: ReadonlySet<string>;
         dmEditing: boolean;
         active: boolean;
         brush: import('@/lib/hooks/battle/useMapFogTool').FogBrush;
-        onStroke(cells: import('@/types/battle').GridPoint[]): void;
+        onStroke(cells: import('@/types/battle-grid').GridPoint[]): void;
     };
 }
 
@@ -99,12 +99,8 @@ export function BattleMap({
     editing = NO_EDITING,
     phone = false,
 }: BattleMapProps) {
-    const {
-        clickableBlocked,
-        showBlocked,
-        strokeTool,
-        showDefaultBackground,
-    } = editing;
+    const { clickableBlocked, showBlocked, strokeTool, showDefaultBackground } =
+        editing;
 
     const edges = editing.edges ?? null;
 
@@ -157,7 +153,7 @@ export function BattleMap({
     }, []);
 
     const onPaintStroke = useCallback(
-        (cells: import('@/types/battle').GridPoint[]) => {
+        (cells: import('@/types/battle-grid').GridPoint[]) => {
             if (fogPainting) editing.fog?.onStroke(cells);
             else actions?.onStroke?.(cells);
         },
@@ -243,10 +239,24 @@ export function BattleMap({
         follow: {
             currentId: view?.currentId ?? null,
             target: cameraTarget
-                ? { point: cellPointPx(cameraTarget.anchor, cameraTarget.size, win, pxPerUnit) }
+                ? {
+                      point: cellPointPx(
+                          cameraTarget.anchor,
+                          cameraTarget.size,
+                          win,
+                          pxPerUnit
+                      ),
+                  }
                 : null,
             self: selfTarget
-                ? { point: cellPointPx(selfTarget.anchor, selfTarget.size, win, pxPerUnit) }
+                ? {
+                      point: cellPointPx(
+                          selfTarget.anchor,
+                          selfTarget.size,
+                          win,
+                          pxPerUnit
+                      ),
+                  }
                 : null,
             enabled: view?.camera?.follow ?? false,
         },
@@ -339,11 +349,7 @@ export function BattleMap({
                     : scrollsX
                       ? 'justify-start'
                       : 'justify-center',
-                cameraMode
-                    ? ''
-                    : scrollsY
-                      ? 'items-start'
-                      : 'items-center',
+                cameraMode ? '' : scrollsY ? 'items-start' : 'items-center',
                 className
             )}
         >
@@ -371,7 +377,9 @@ export function BattleMap({
                 <div
                     className={cn(
                         'origin-top-left',
-                        cameraMode ? 'absolute top-0 left-0' : 'absolute inset-0'
+                        cameraMode
+                            ? 'absolute top-0 left-0'
+                            : 'absolute inset-0'
                     )}
                     style={{
                         ...(cameraMode && {

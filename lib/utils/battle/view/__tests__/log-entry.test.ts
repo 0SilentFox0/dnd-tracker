@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { textOf } from '@/lib/i18n/test/text';
 import { groupLogByRound, logEntryView } from '@/lib/utils/battle/view';
-import type { BattleAction } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 
 const entry = (resultText: string, hpChanges: BattleAction['hpChanges'] = []) =>
     ({ resultText, hpChanges }) as BattleAction;

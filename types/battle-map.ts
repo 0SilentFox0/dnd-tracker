@@ -1,5 +1,5 @@
 import type { TileLayer } from '@/lib/utils/battle/tiles/types';
-import type { BattleMapConfig } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 export interface BattleMapBrief {
     id: string;

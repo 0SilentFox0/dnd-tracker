@@ -1,5 +1,5 @@
 import { mapCentre } from '@/lib/utils/battle/grid/geometry';
-import type { Direction8, GridPoint } from '@/types/battle';
+import type { Direction8, GridPoint } from '@/types/battle-grid';
 
 export const DIR_VECTORS: Record<Direction8, GridPoint> = {
     n: { x: 0, y: -1 },

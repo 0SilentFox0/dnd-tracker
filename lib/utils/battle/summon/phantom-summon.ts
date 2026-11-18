@@ -4,7 +4,8 @@ import { isActive } from '@/lib/utils/abilities/engine/core/participants';
 import { nearestStandable } from '@/lib/utils/battle/grid/occupancy';
 import { type Ruleset } from '@/lib/utils/rules';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
-import type { BattleMapConfig, BattleParticipant } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 import type { LogLine } from '@/types/text';
 
 interface PhantomInput {

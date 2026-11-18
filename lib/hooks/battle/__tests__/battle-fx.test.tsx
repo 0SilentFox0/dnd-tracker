@@ -4,7 +4,7 @@ import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { action } from '@/lib/utils/battle/fx/__tests__/action-fixture';
-import type { BattleAction } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 
 function stubReducedMotion(initial: boolean) {
     const listeners = new Set<() => void>();

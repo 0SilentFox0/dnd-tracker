@@ -3,11 +3,8 @@ import { mazeVision, seesParticipant, viewpointOf } from './vision';
 import { canStep, wallSet } from './walls';
 
 import { cellKey } from '@/lib/utils/battle/grid/geometry';
-import type {
-    BattleMapConfig,
-    BattleParticipant,
-    GridPoint,
-} from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 
 function seesCell(
     grid: MazeGrid,

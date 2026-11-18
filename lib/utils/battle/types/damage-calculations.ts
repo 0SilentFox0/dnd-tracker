@@ -1,4 +1,4 @@
-import type { DamageRow, DamageStep } from '@/types/battle';
+import type { DamageRow, DamageStep } from '@/types/battle-actions';
 
 /**
  * Типи для розрахунку урону

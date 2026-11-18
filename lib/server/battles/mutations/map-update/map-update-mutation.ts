@@ -21,7 +21,7 @@ import { BattleRuleError } from '@/lib/utils/battle/store';
 import { dmEvent } from '@/lib/utils/battle/store/event-mapping';
 import { REJECT } from '@/lib/utils/battle/store/reject';
 import type { MapUpdateData } from '@/types/api';
-import type { BattleMapConfig, BattleMapState } from '@/types/battle';
+import type { BattleMapConfig, BattleMapState } from '@/types/battle-grid';
 
 function pruneState(
     state: BattleMapState | null | undefined,

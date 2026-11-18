@@ -18,7 +18,8 @@ import {
 } from '@/lib/utils/battle/modes/maze/__tests__/fixtures';
 import { turnQueue } from '@/lib/utils/battle/view';
 import { filterQueueByView } from '@/lib/utils/battle/view/queue';
-import type { BattleParticipant, GridPoint, MazeConfig } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { GridPoint, MazeConfig } from '@/types/battle-grid';
 
 const withControl = (
     p: BattleParticipant,

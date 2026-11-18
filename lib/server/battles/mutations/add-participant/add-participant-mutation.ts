@@ -31,7 +31,8 @@ import {
 import { runPsychology } from '@/lib/utils/battle/turn/join-triggers';
 import type { CampaignSpellContext } from '@/lib/utils/battle/types/participant';
 import { rngOf } from '@/lib/utils/common/rng';
-import type { BattleParticipant, GridPoint } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { GridPoint } from '@/types/battle-grid';
 
 export const addParticipantSchema = z.object({
     sourceId: z.string(),

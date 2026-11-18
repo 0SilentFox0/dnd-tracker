@@ -9,7 +9,8 @@ import {
 } from '@/lib/constants/battle';
 import { placed, testMap } from '@/lib/utils/battle/__tests__/fixtures/placed';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
-import type { BattleAttack, GridPoint } from '@/types/battle';
+import type { BattleAttack } from '@/types/battle';
+import type { GridPoint } from '@/types/battle-grid';
 
 const bow: BattleAttack = {
     id: 'b',

@@ -20,7 +20,7 @@ import type {
     BattleSummary,
     BattleVersion,
 } from '@/types/api';
-import type { BattleAction } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 
 type BattleParams = { id: string; battleId: string };
 

@@ -2,11 +2,8 @@ import { activeModeWithConfig } from './registry';
 import type { ModeMoveZone, ModeView } from './types';
 
 import { isActive } from '@/lib/utils/abilities/engine/core/participants';
-import type {
-    BattleMapConfig,
-    BattleParticipant,
-    GridPoint,
-} from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 import type { LogLine } from '@/types/text';
 
 type MapArg = BattleMapConfig | null | undefined;

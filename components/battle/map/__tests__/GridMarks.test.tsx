@@ -19,7 +19,7 @@ vi.mock('@/lib/utils/battle/grid', async (orig) => {
 
 import { GridMarks } from '../grid/GridMarks';
 
-import type { BattleMapConfig } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 const map = { cols: 6, rows: 6, opacity: 0.3 } as BattleMapConfig;
 

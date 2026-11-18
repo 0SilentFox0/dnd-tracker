@@ -1,12 +1,12 @@
 import { type aimView, deriveTrajectory, type MapScene } from './map-scene';
 
 import type { Ruleset } from '@/lib/utils/rules/schema';
+import type { BattleParticipant } from '@/types/battle';
 import type {
     BattleMapConfig,
     BattleMapView,
-    BattleParticipant,
     GridPoint,
-} from '@/types/battle';
+} from '@/types/battle-grid';
 
 interface ComposeMapViewInput {
     scene: MapScene;

@@ -6,7 +6,8 @@ import { useParticipantClick } from '../useParticipantClick';
 import { fakeScene } from './fake-scene';
 
 import { AttackType } from '@/lib/constants/battle';
-import type { BattleAttack, BattleMapConfig } from '@/types/battle';
+import type { BattleAttack } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 const map: BattleMapConfig = {
     cols: 10,

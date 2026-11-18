@@ -12,12 +12,12 @@ import {
     reachable,
 } from '@/lib/utils/battle/grid';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
+import type { BattleParticipant } from '@/types/battle';
 import type {
     BattleMapConfig,
-    BattleParticipant,
     GridPoint,
     TerrainCell,
-} from '@/types/battle';
+} from '@/types/battle-grid';
 
 const hazardHit = (
     p: Parameters<typeof hit>[0],

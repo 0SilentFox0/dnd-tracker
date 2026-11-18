@@ -49,7 +49,7 @@ import {
     materializeEdges,
 } from '@/lib/utils/battle/map-storage/relink-scene';
 import type { BattleAudioState } from '@/types/audio';
-import type { BattleMapConfig } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 export class BattleAudioRateLimitError extends ContentError {
     constructor(readonly rate: RateLimitResult) {

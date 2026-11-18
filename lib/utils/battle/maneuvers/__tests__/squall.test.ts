@@ -12,7 +12,7 @@ import {
 
 import { ParticipantSide } from '@/lib/constants/battle';
 import { withinLimits } from '@/lib/utils/abilities/engine/core/usage';
-import type { GridPoint } from '@/types/battle';
+import type { GridPoint } from '@/types/battle-grid';
 
 const griffin = (at?: GridPoint) =>
     unit('g', {

@@ -9,7 +9,8 @@ import {
     modeFxVisible,
     modeLogVisible,
 } from '@/lib/utils/battle/modes/client';
-import type { BattleAction, BattleMapConfig } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 type FakeConfig = { a: number; b: number };
 

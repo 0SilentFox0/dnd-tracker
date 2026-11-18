@@ -3,7 +3,7 @@ import { takeNewActions } from './new-events';
 import type { SystemDice } from './system-dice';
 import type { FxSpec } from './types';
 
-import type { BattleAction } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 
 export interface FxQueueState {
     log: BattleAction[] | null;
@@ -90,11 +90,7 @@ export function advanceFxQueue(
         ? dice.filter((d) => !state.dice?.includes(d.key)).map(diceFx)
         : [];
 
-    const queue = [
-        ...state.queue,
-        ...diceSpecs,
-        ...actions.flatMap(mapAction),
-    ];
+    const queue = [...state.queue, ...diceSpecs, ...actions.flatMap(mapAction)];
 
     return {
         log,

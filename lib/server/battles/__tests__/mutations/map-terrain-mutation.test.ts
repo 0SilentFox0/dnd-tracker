@@ -6,11 +6,8 @@ import { CombatStatus } from '@/lib/constants/battle';
 import { mapTerrainSchema } from '@/lib/schemas/battles';
 import { mapTerrainMutation } from '@/lib/server/battles/mutations/map-terrain/map-terrain-mutation';
 import { REJECT } from '@/lib/utils/battle/store/reject';
-import type {
-    BattleMapConfig,
-    BattleParticipant,
-    GridPoint,
-} from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 
 const map: BattleMapConfig = {
     cols: 10,

@@ -11,7 +11,7 @@ import { dmEvent } from '@/lib/utils/battle/store';
 import { enterChangedTurn } from '@/lib/utils/battle/turn/enter-turn';
 import { rollInitiative } from '@/lib/utils/battle/turn/roll-initiative';
 import { rngOf } from '@/lib/utils/common/rng';
-import type { DiceRollGroup, DieSides } from '@/types/battle';
+import type { DiceRollGroup, DieSides } from '@/types/battle-actions';
 
 export const initiativeRollSchema = z.object({});
 

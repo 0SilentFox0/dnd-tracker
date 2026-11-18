@@ -1,7 +1,8 @@
 import type { MapAim, MapClick, MapPick } from './map-scene';
 
 import type { AttackIntent } from '@/lib/utils/battle/flows';
-import type { BattleParticipant, GridPoint } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { GridPoint } from '@/types/battle-grid';
 import type { LogLine } from '@/types/text';
 
 type MapClickHandlers = {

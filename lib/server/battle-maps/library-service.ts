@@ -20,7 +20,7 @@ import {
 } from '@/lib/utils/battle/map-storage/edge-chunks';
 import { withoutEdges } from '@/lib/utils/battle/map-storage/persisted-map';
 import { isTileLayer, type TileLayer } from '@/lib/utils/battle/tiles/types';
-import type { BattleMapConfig } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 import type { BattleMapBrief, BattleMapFull } from '@/types/battle-map';
 
 type Header = BattleMapFull['map'];
@@ -52,7 +52,11 @@ const payloadOf = (input: BattleMapInput) => {
         header,
         chunks,
         headerJson: header as unknown as Prisma.InputJsonObject,
-        payloadJson: { header, chunks, tileLayers: {} } as unknown as Prisma.InputJsonObject,
+        payloadJson: {
+            header,
+            chunks,
+            tileLayers: {},
+        } as unknown as Prisma.InputJsonObject,
     };
 };
 
@@ -98,13 +102,18 @@ function tileLayersFromRows(
     const snapshot: Record<string, Partial<Record<TileLayer, string>>> = {};
 
     for (const row of rows) {
-        if (!row.tileLayers || typeof row.tileLayers !== 'object' || Array.isArray(row.tileLayers))
+        if (
+            !row.tileLayers ||
+            typeof row.tileLayers !== 'object' ||
+            Array.isArray(row.tileLayers)
+        )
             continue;
 
         const layers: Partial<Record<TileLayer, string>> = {};
 
         for (const [layer, data] of Object.entries(row.tileLayers))
-            if (isTileLayer(layer) && typeof data === 'string') layers[layer] = data;
+            if (isTileLayer(layer) && typeof data === 'string')
+                layers[layer] = data;
 
         if (Object.keys(layers).length)
             snapshot[`${row.cx}:${row.cy}`] = layers;
@@ -117,7 +126,10 @@ type TileSnapshot = ReturnType<typeof tileLayersFromRows>;
 
 /** Tile layers ride on the edge chunk rows; a chunk with tiles but no edges still needs a row. */
 function chunkRowsWithTiles(chunks: EdgeChunks, tileLayers: TileSnapshot) {
-    const rows = new Map<string, Omit<Prisma.BattleMapChunkCreateManyInput, 'mapId'>>(
+    const rows = new Map<
+        string,
+        Omit<Prisma.BattleMapChunkCreateManyInput, 'mapId'>
+    >(
         recordToChunkRows(chunks).map((chunk) => [
             `${chunk.cx}:${chunk.cy}`,
             chunk,
@@ -332,7 +344,10 @@ export async function saveMap(
         const unchanged =
             !!snapshotPayload &&
             isDeepStrictEqual(
-                { ...snapshotPayload, tileLayers: snapshotPayload.tileLayers ?? {} },
+                {
+                    ...snapshotPayload,
+                    tileLayers: snapshotPayload.tileLayers ?? {},
+                },
                 plain(versionPayload)
             );
 

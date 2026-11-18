@@ -21,11 +21,9 @@ import {
 } from '@/lib/utils/battle/turn/turn-start';
 import { checkVictoryConditions } from '@/lib/utils/battle/turn/victory';
 import type { Ruleset } from '@/lib/utils/rules';
-import type {
-    BattleAction,
-    BattleMapConfig,
-    BattleParticipant,
-} from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
+import type { BattleMapConfig } from '@/types/battle-grid';
 import type { LogLine } from '@/types/text';
 
 export interface AdvanceTurnLoopParams {

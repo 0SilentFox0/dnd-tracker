@@ -4,7 +4,8 @@ import {
     isActive,
     isEscaped,
 } from '@/lib/utils/abilities/engine/core/participants';
-import type { BattleParticipant, GridPoint } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { GridPoint } from '@/types/battle-grid';
 
 const isHeroSide = (p: BattleParticipant): boolean =>
     p.basicInfo.side === ParticipantSide.ALLY;

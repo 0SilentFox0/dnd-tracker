@@ -1,4 +1,4 @@
-import type { BattleMapConfig, MazeConfig } from '@/types/battle';
+import type { BattleMapConfig, MazeConfig } from '@/types/battle-grid';
 
 export type GridSize = { cols: number; rows: number };
 

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { visibleFrom, visibleFromMany } from '../shadowcast';
 
-import type { BattleMapConfig } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 const map = (overrides: Partial<BattleMapConfig> = {}): BattleMapConfig => ({
     cols: 9,
@@ -50,7 +50,12 @@ describe('grid line of sight', () => {
         expect(obscured.has('4:6')).toBe(true);
         expect(obscured.has('4:7')).toBe(false);
 
-        const tileObscured = visibleFrom(map(), { x: 4, y: 4 }, 4, new Set(['4:6']));
+        const tileObscured = visibleFrom(
+            map(),
+            { x: 4, y: 4 },
+            4,
+            new Set(['4:6'])
+        );
 
         expect(tileObscured.has('4:7')).toBe(false);
     });
@@ -62,7 +67,14 @@ describe('grid line of sight', () => {
             4
         );
 
-        const union = visibleFromMany(map(), [{ x: 1, y: 1 }, { x: 7, y: 7 }], 1);
+        const union = visibleFromMany(
+            map(),
+            [
+                { x: 1, y: 1 },
+                { x: 7, y: 7 },
+            ],
+            1
+        );
 
         expect(corner.has('4:4')).toBe(false);
 

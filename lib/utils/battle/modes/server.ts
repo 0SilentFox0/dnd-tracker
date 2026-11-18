@@ -2,11 +2,8 @@ import { activeModeWithConfig, allMapModes } from './registry';
 import type { ModeAwareOutcome } from './types';
 
 import type { BattleSceneState } from '@/lib/utils/battle/store/types';
-import type {
-    BattleMapConfig,
-    BattleParticipant,
-    GridPoint,
-} from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 import type { LogLine } from '@/types/text';
 
 export function modeStart(

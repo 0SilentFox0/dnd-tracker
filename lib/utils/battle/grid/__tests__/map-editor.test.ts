@@ -16,7 +16,7 @@ import { hazardDamage } from '../terrain';
 import { allInteriorEdges } from '../walls';
 
 import { MAP_LIMITS } from '@/lib/constants/map-limits';
-import type { BattleMapConfig } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 const base: BattleMapConfig = {
     cols: 20,

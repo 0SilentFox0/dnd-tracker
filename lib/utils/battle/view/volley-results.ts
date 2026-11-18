@@ -3,7 +3,8 @@ import { damageTaken } from './damage-taken';
 import type { AttackOutcomeSummary } from '@/lib/utils/battle/flows';
 import { splashVictimIds } from '@/lib/utils/battle/fx/impact';
 import { isUp } from '@/lib/utils/battle/participant/state';
-import type { BattleAction, BattleParticipant } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 
 export function volleyResults(
     log: BattleAction[],

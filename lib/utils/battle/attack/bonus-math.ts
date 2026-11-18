@@ -27,11 +27,8 @@ import type {
     AttackAbilityResult,
     ReachRules,
 } from '@/lib/utils/rules/systems/types';
-import type {
-    BattleAttack,
-    BattleMapConfig,
-    BattleParticipant,
-} from '@/types/battle';
+import type { BattleAttack, BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 import type { LogLine } from '@/types/text';
 
 /** The system-dependent inputs of an attack roll, passed in so this module never reads the registry (a d20 system file imports it). */

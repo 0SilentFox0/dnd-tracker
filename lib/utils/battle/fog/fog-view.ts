@@ -4,12 +4,12 @@ import { cellKey } from '@/lib/utils/battle/grid/geometry';
 import { centreCell } from '@/lib/utils/battle/grid/map-scene';
 import { cellsOf, isFallen } from '@/lib/utils/battle/grid/occupancy';
 import { visibleFromMany } from '@/lib/utils/battle/vision/shadowcast';
+import type { BattleParticipant } from '@/types/battle';
 import type {
     BattleMapConfig,
-    BattleParticipant,
     FogMode,
     RevealedRun,
-} from '@/types/battle';
+} from '@/types/battle-grid';
 
 export interface FogViewResult {
     visible: ReadonlySet<string>;
@@ -58,9 +58,13 @@ export function fogView({
                 !p.battleData.escaped &&
                 !isFallen(p) &&
                 (p.basicInfo.controlledBy === viewerId ||
-                    (shareAllies && p.basicInfo.side === participants.find(
-                        (candidate) => candidate.basicInfo.controlledBy === viewerId
-                    )?.basicInfo.side))
+                    (shareAllies &&
+                        p.basicInfo.side ===
+                            participants.find(
+                                (candidate) =>
+                                    candidate.basicInfo.controlledBy ===
+                                    viewerId
+                            )?.basicInfo.side))
         );
 
         const cells = visibleFromMany(
@@ -83,7 +87,11 @@ export function fogView({
             continue;
         }
 
-        if (battleData.reserved || isEscaped(participant) || isFallen(participant))
+        if (
+            battleData.reserved ||
+            isEscaped(participant) ||
+            isFallen(participant)
+        )
             continue;
 
         const own = basicInfo.controlledBy === viewerId;

@@ -21,11 +21,8 @@ import { diffTerrain } from '@/lib/utils/battle/grid/terrain';
 import { eventTextOf } from '@/lib/utils/battle/log/__tests__/event-text';
 import { BattleAccessError } from '@/lib/utils/battle/store';
 import type { UnitFromPrisma } from '@/lib/utils/battle/types/participant';
-import type {
-    BattleMapConfig,
-    BattleParticipant,
-    GridPoint,
-} from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 
 const spellRow = {
     id: 's1',

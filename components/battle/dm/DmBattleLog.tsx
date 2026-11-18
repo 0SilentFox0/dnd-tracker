@@ -9,7 +9,7 @@ import { LogTimeline } from '@/components/battle/log/LogTimeline';
 import { useBattleRules, useBattleScene } from '@/lib/hooks/battle';
 import { useConfirm } from '@/lib/hooks/common';
 import { canRollbackEntry } from '@/lib/utils/battle/view';
-import type { BattleAction } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 
 export function DmBattleLog({ onClose }: { onClose: () => void }) {
     const t = useTranslations('battleDm.log');

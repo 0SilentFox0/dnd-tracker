@@ -2,7 +2,7 @@ import { MAX_INITIATIVE_DICE, MAX_SAVES_SHOWN } from './layout';
 import type { DieFx } from './types';
 
 import { ruleSystemByKey } from '@/lib/utils/rules/systems';
-import type { BattleAction, DiceRollGroup } from '@/types/battle';
+import type { BattleAction, DiceRollGroup } from '@/types/battle-actions';
 
 export interface DiceThrowSpec {
     seed: number;

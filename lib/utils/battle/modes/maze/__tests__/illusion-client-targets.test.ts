@@ -9,7 +9,8 @@ import { targetMarks } from '@/lib/utils/battle/grid/map-view';
 import { bonusTargetCandidates } from '@/lib/utils/battle/view';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 import type { ResolvedAbility } from '@/types/abilities';
-import type { BattleAttack, IllusionPair } from '@/types/battle';
+import type { BattleAttack } from '@/types/battle';
+import type { IllusionPair } from '@/types/battle-grid';
 
 const a = placed('a', { side: ParticipantSide.ALLY, at: { x: 1, y: 1 } });
 

@@ -2,12 +2,12 @@ import { expect } from 'vitest';
 
 import { testMap } from '@/lib/utils/battle/__tests__/fixtures/placed';
 import { emptyMaze } from '@/lib/utils/battle/modes/maze/constants';
+import type { BattleParticipant } from '@/types/battle';
 import type {
     BattleMapConfig,
-    BattleParticipant,
     GridPoint,
     MazeConfig,
-} from '@/types/battle';
+} from '@/types/battle-grid';
 
 type BattleData = Partial<BattleParticipant['battleData']>;
 

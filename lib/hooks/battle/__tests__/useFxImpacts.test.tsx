@@ -6,7 +6,7 @@ import { useFxImpacts } from '../useFxImpacts';
 
 import { AttackType } from '@/lib/constants/battle';
 import { action } from '@/lib/utils/battle/fx/__tests__/action-fixture';
-import type { BattleAction } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 
 const h = vi.hoisted(() => ({
     log: [] as BattleAction[],
@@ -75,7 +75,11 @@ describe('useFxImpacts', () => {
             dice: [
                 (e: { scene: { pendingCheck: unknown } }) =>
                     e.scene.pendingCheck
-                        ? { key: 'k', actorId: 'a', spec: { seed: 1, groups: [] } }
+                        ? {
+                              key: 'k',
+                              actorId: 'a',
+                              spec: { seed: 1, groups: [] },
+                          }
                         : null,
             ],
         };

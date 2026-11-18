@@ -7,13 +7,12 @@ import { hazardCells, threatCells } from './terrain';
 import { isAttackable } from '@/lib/utils/abilities/engine/core/participants';
 import { isHostile } from '@/lib/utils/battle/modes/engine';
 import type { Ruleset } from '@/lib/utils/rules/schema';
+import type { BattleAttack, BattleParticipant } from '@/types/battle';
 import type {
-    BattleAttack,
     BattleMapConfig,
     BattleMapMark,
-    BattleParticipant,
     GridPoint,
-} from '@/types/battle';
+} from '@/types/battle-grid';
 
 export type CellMark = BattleMapMark;
 

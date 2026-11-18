@@ -14,7 +14,8 @@ import type { Ruleset } from '@/lib/utils/rules';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { ZoneTrigger } from '@/lib/utils/spells/model/schema';
 import type { ResolvedAbility } from '@/types/abilities';
-import type { BattleMapConfig, BattleParticipant } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 import type { LogLine } from '@/types/text';
 
 export type TriggerKind = 'onEnter' | 'onTurnStart' | 'onExit';

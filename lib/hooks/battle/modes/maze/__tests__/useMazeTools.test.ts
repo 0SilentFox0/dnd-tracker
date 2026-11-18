@@ -9,7 +9,7 @@ import { useMazeTools } from '../useMazeTools';
 import { ParticipantSide, ParticipantSourceType } from '@/lib/constants/battle';
 import { mazeMap } from '@/lib/utils/battle/modes/maze/__tests__/fixtures';
 import { MAZE_TEXTS } from '@/lib/utils/battle/modes/maze/texts';
-import type { MazeConfig } from '@/types/battle';
+import type { MazeConfig } from '@/types/battle-grid';
 
 function setup(maze: Partial<MazeConfig> = {}, isDM = true) {
     const scene = fakeScene({ isDM, map: mazeMap(maze, 8, 6) });
@@ -265,6 +265,7 @@ describe('useMazeTools', () => {
                 ],
             },
         ];
+
         act(() => tools().illusion.set(groups));
         act(() => tools().illusion.clear());
 

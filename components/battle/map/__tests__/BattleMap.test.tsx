@@ -9,11 +9,8 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { CombatStatus } from '@/lib/constants/battle';
 import { render } from '@/lib/i18n/test/render-uk';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
-import type {
-    ActiveEffect,
-    BattleMapConfig,
-    BattleParticipant,
-} from '@/types/battle';
+import type { ActiveEffect, BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 vi.unmock('next-intl');
 
@@ -118,7 +115,9 @@ describe('BattleMap', () => {
             />
         );
 
-        const svg = container.querySelector('svg[data-fx-grid]') as SVGSVGElement;
+        const svg = container.querySelector(
+            'svg[data-fx-grid]'
+        ) as SVGSVGElement;
 
         svg.getScreenCTM = () =>
             ({ a: 0.3, b: 0, c: 0, d: 0.3, e: 22.5, f: 135 }) as DOMMatrix;

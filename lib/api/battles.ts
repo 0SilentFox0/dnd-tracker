@@ -16,7 +16,7 @@ import type {
     BattleSummary,
     BattleVersion,
 } from '@/types/api';
-import type { BattleBrief } from '@/types/battle';
+import type { BattleBrief } from '@/types/battle-actions';
 import type {
     BattleBalanceBody,
     BattleBalanceResponse,

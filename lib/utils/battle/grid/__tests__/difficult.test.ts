@@ -5,7 +5,7 @@ import { pathTo, reachable } from '../path';
 import { diffTerrain } from '../terrain';
 
 import { placed, testMap } from '@/lib/utils/battle/__tests__/fixtures/placed';
-import type { TerrainCell } from '@/types/battle';
+import type { TerrainCell } from '@/types/battle-grid';
 
 const mover = placed('m', { at: { x: 0, y: 0 } });
 

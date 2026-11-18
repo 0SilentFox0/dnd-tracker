@@ -12,7 +12,7 @@ import {
 import { MAZE_TEXTS } from '@/lib/utils/battle/modes/maze/texts';
 import type { BattleMutationContext } from '@/lib/utils/battle/pipeline/run-battle-mutation';
 import type { MazeActionData as MazeAction } from '@/types/api';
-import type { MazeConfig } from '@/types/battle';
+import type { MazeConfig } from '@/types/battle-grid';
 import type { LogLine } from '@/types/text';
 
 const ctx = (

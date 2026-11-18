@@ -1,8 +1,5 @@
-import type {
-    ActiveEffect,
-    BattleMapConfig,
-    BattleParticipant,
-} from '@/types/battle';
+import type { ActiveEffect, BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 export type ConcentrationTag = NonNullable<ActiveEffect['concentrationOf']>;
 

@@ -1,5 +1,5 @@
 import { dynamicTextRef } from '@/lib/i18n/text-ref';
-import type { BattleAction } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 import type { LogLine } from '@/types/text';
 
 export interface CritOutcome {

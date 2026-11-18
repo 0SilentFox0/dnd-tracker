@@ -9,12 +9,8 @@ import {
     inBounds,
 } from '@/lib/utils/battle/grid/geometry';
 import { MAZE_VISION_RANGE } from '@/lib/utils/battle/modes/maze/constants';
-import type {
-    BattleParticipant,
-    Direction8,
-    GridPoint,
-    MazeConfig,
-} from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { Direction8, GridPoint, MazeConfig } from '@/types/battle-grid';
 
 export interface Viewpoint {
     position: GridPoint;

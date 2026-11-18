@@ -2,7 +2,8 @@ import { inwardFacing } from './direction';
 
 import { ParticipantSide } from '@/lib/constants/battle';
 import { takesTurn } from '@/lib/utils/abilities/engine/core/participants';
-import type { BattleMapConfig, BattleParticipant } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 // вороги вже сплячі з buildStartOrder; герої дивляться всередину лабіринту
 function faceInward(

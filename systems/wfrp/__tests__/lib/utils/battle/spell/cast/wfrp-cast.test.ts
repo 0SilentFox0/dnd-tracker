@@ -17,7 +17,8 @@ import { caster as wfrpCaster } from '@/systems/wfrp/rules/magic/__tests__/fixtu
 import { FORTUNE_INPUT } from '@/systems/wfrp/rules/percentile/fortune';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
 import { wfrpState, withWfrpState } from '@/systems/wfrp/rules/state';
-import type { BattleMapConfig, BattleParticipant } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 const map: BattleMapConfig = {
     cols: 40,

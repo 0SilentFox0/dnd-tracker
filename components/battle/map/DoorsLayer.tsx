@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { Lock } from 'lucide-react';
 
 import { parseEdgeKey, UNIT } from '@/lib/utils/battle/grid';
-import type { BattleMapConfig, DoorState } from '@/types/battle';
+import type { BattleMapConfig, DoorState } from '@/types/battle-grid';
 
 const LEAF = UNIT;
 

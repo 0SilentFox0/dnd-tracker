@@ -11,10 +11,8 @@ import {
 } from '../useBattles';
 
 import { useConfirm, useNavigateFresh, useNotify } from '@/lib/hooks/common';
-import type {
-    BattleMapConfig,
-    BattlePreparationParticipant,
-} from '@/types/battle';
+import type { BattlePreparationParticipant } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 import type { CreateBattleData } from '@/types/battle-setup';
 
 interface UseBattleFormParams {

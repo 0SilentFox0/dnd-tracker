@@ -23,7 +23,7 @@ import {
 } from '@/lib/utils/battle/modes/maze';
 import { maskBattleBy } from '@/lib/utils/battle/modes/maze/illusion-mask';
 import type { BattleScene } from '@/types/api';
-import type { BattleAction } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 
 export interface MazeAsHero {
     id: string | null;

@@ -1,7 +1,7 @@
 import { ARCHETYPE_FX } from './archetypes';
 import type { FxElement, FxSpec } from './types';
 
-import type { BattleAction } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 
 export interface FxImpact {
     element: FxElement;

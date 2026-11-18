@@ -11,7 +11,7 @@ import {
     textRef,
 } from '@/lib/i18n/text-ref';
 import type { Translator } from '@/lib/i18n/translator';
-import type { BattleAction } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 import type { LogLine } from '@/types/text';
 
 export type LogDetailItem =

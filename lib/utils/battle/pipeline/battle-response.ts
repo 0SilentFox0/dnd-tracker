@@ -26,7 +26,8 @@ import type {
     BattleScene,
     ClientBattleDelta,
 } from '@/types/api';
-import type { BattleAction, BattleParticipant } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 
 export interface BattleResponseView {
     isDM?: boolean;

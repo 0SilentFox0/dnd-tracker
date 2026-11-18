@@ -96,7 +96,8 @@ import {
 import { racePassiveData } from '@/scripts/seed/seed-library-lib';
 import { d20RowData } from '@/scripts/shared/d20-row-data';
 import type { BattleMutationResponse, BattleScene } from '@/types/api';
-import type { BattleAction, BattleParticipant } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 
 const url = process.env.DATABASE_URL ?? '';
 

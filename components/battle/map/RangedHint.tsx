@@ -5,7 +5,7 @@ import {
 } from './constants';
 
 import { cellCenter, parseCellKey, UNIT } from '@/lib/utils/battle/grid';
-import type { BattleMapView } from '@/types/battle';
+import type { BattleMapView } from '@/types/battle-grid';
 
 interface RangedHintProps {
     from: { cx: number; cy: number };

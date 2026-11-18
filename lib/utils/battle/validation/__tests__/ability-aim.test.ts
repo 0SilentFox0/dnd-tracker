@@ -5,7 +5,7 @@ import { REJECT } from '@/lib/utils/battle/store/reject';
 import { assertAbilityAim } from '@/lib/utils/battle/validation/ability-aim';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 import type { ResolvedAbility } from '@/types/abilities';
-import type { BattleMapConfig } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 const map: BattleMapConfig = {
     cols: 20,

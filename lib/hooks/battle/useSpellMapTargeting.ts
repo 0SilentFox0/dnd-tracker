@@ -9,11 +9,8 @@ import {
 } from '@/lib/utils/battle/flows';
 import type { MapAim, MapPick } from '@/lib/utils/battle/grid';
 import type { Ruleset } from '@/lib/utils/rules/schema';
-import type {
-    BattleMapConfig,
-    BattleParticipant,
-    GridPoint,
-} from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 
 export interface MapTargetingContext {
     caster: BattleParticipant | null;

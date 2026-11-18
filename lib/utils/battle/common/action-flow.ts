@@ -15,7 +15,8 @@ import type {
 import { applyDamageConsequences } from '@/lib/utils/battle/damage/consequences';
 import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
 import type { AbilityEvent } from '@/types/abilities';
-import type { BattleAction, BattleParticipant } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 import type { LogLine } from '@/types/text';
 
 /** Стан однієї дії (атака, закляття): свіжий список учасників і накопичений лог умінь. */

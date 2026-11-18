@@ -9,7 +9,8 @@ import { casterSpellDice } from '@/lib/utils/battle/spell/caster-dice';
 import type { CastableSpell } from '@/lib/utils/battle/types/spell-process';
 import { pickOne, rollDiceList } from '@/lib/utils/common/dice';
 import type { Ruleset } from '@/lib/utils/rules';
-import type { BattleMapConfig, BattleParticipant } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 import type { LogLine } from '@/types/text';
 
 export interface HitSpellInput {

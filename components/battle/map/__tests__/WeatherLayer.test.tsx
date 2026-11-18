@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { BattleMap } from '@/components/battle/map';
 import { WeatherLayer } from '@/components/battle/map/weather/WeatherLayer';
 import { recordingContext } from '@/lib/utils/canvas/__tests__/recording-canvas';
-import type { BattleMapConfig } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 const unsubscribe = vi.hoisted(() => vi.fn());
 

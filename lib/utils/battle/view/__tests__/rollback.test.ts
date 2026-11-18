@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { BATTLE_SNAPSHOTS_KEPT_AFTER_COMPLETE } from '@/lib/constants/battle';
 import { canRollbackEntry } from '@/lib/utils/battle/view/rollback';
 import type { BattleScene } from '@/types/api';
-import type { BattleAction } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 
 const entry = (actionIndex: number, isCancelled = false) =>
     ({ actionIndex, isCancelled }) as BattleAction;

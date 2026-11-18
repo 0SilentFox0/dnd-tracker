@@ -13,7 +13,8 @@ import {
     sceneOf,
 } from '@/systems/wfrp/rules/__tests__/slot-fixtures';
 import type { BattleScene, ClientBattleDelta } from '@/types/api';
-import type { BattleAction, BattleParticipant } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 
 const p = (id: string, hp = 10): BattleParticipant => {
     const base = createMockParticipant();

@@ -7,12 +7,8 @@ import { AttackType, ParticipantSide } from '@/lib/constants/battle';
 import { resolved, seq } from '@/lib/utils/abilities/__tests__/fixtures';
 import { placed, testMap } from '@/lib/utils/battle/__tests__/fixtures/placed';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
-import type {
-    BattleAttack,
-    BattleMapConfig,
-    BattleParticipant,
-    GridPoint,
-} from '@/types/battle';
+import type { BattleAttack, BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 
 const MAP = testMap();
 

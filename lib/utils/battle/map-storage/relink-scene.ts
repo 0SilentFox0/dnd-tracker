@@ -1,6 +1,6 @@
 import { MAP_LIMITS } from '@/lib/constants/map-limits';
 import type { LibraryEdges } from '@/lib/utils/battle/map-storage/effective-map';
-import type { BattleMapConfig } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 /** Another library map replaces the geometry; only the battle's own atmosphere carries over. */
 export function headerForOtherMap(

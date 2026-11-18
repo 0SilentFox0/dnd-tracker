@@ -18,11 +18,8 @@ import {
 import { REJECT } from '@/lib/utils/battle/store/reject';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import type { ReachRules } from '@/lib/utils/rules/systems/types';
-import type {
-    BattleAttack,
-    BattleMapConfig,
-    BattleParticipant,
-} from '@/types/battle';
+import type { BattleAttack, BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 import type { LogLine } from '@/types/text';
 
 /** Reach checks that take the system's reach hook explicitly, for code a rule system itself imports */

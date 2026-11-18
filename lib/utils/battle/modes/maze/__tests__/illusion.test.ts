@@ -9,7 +9,7 @@ import {
 } from '../illusion';
 
 import { emptyMaze } from '@/lib/utils/battle/modes/maze/constants';
-import type { IllusionPair } from '@/types/battle';
+import type { IllusionPair } from '@/types/battle-grid';
 
 const pair: IllusionPair = {
     a: 'zehir',
@@ -51,8 +51,11 @@ describe('illusion helpers', () => {
 
     it('expands overlapping multi-hero groups into pairwise hostile relations', () => {
         const wolf = { name: 'Wolf' };
+
         const orc = { name: 'Orc' };
+
         const elf = { name: 'Elf' };
+
         const groups = [
             {
                 heroes: [
@@ -74,6 +77,7 @@ describe('illusion helpers', () => {
                 ],
             },
         ];
+
         const pairs = expandIllusionGroups(groups);
 
         expect(pairs).toHaveLength(5);

@@ -11,7 +11,7 @@ import {
     summarizeKnowledge,
 } from '@/lib/utils/battle/view';
 import { KNOWLEDGE_EVENT_TYPES } from '@/lib/utils/battle/view/knowledge';
-import type { BattleAction } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 
 const atk = (
     actorName: string,

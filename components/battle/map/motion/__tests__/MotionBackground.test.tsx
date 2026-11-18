@@ -10,7 +10,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { MotionBackground } from '../MotionBackground';
 
-import type { BattleMapConfig, MapMotion } from '@/types/battle';
+import type { BattleMapConfig, MapMotion } from '@/types/battle-grid';
 
 const ticker = vi.hoisted(() => ({
     fns: [] as ((now: number, dt: number) => boolean | void)[],

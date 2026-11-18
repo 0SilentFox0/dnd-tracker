@@ -1,7 +1,7 @@
 import { inBounds, parseCellKey } from '@/lib/utils/battle/grid';
 import { parseEdgeKey } from '@/lib/utils/battle/grid/walls';
 import { MODE_MAP_KEYS } from '@/lib/utils/battle/modes/client';
-import type { BattleMapConfig, TerrainCell } from '@/types/battle';
+import type { BattleMapConfig, TerrainCell } from '@/types/battle-grid';
 
 const BATTLE_KEYS: ReadonlySet<string> = new Set([
     'spellZones',

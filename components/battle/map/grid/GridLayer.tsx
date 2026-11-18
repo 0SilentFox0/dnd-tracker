@@ -7,7 +7,11 @@ import { GridMarks } from './GridMarks';
 import { GridDefs, GridStatic } from './GridStatic';
 
 import { blockedSet, type GridWindow } from '@/lib/utils/battle/grid';
-import type { BattleMapConfig, BattleMapView, GridPoint } from '@/types/battle';
+import type {
+    BattleMapConfig,
+    BattleMapView,
+    GridPoint,
+} from '@/types/battle-grid';
 
 export type { GridCellActions } from './GridHit';
 

@@ -9,7 +9,7 @@ import {
     impactFor as impactForSpec,
     mapAction,
 } from '@/lib/utils/battle/fx';
-import type { BattleAction } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 
 const impactFor = (action: BattleAction | undefined, id: string) =>
     impactForSpec(action ? mapAction(action)[0] : undefined, id);

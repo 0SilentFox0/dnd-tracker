@@ -4,7 +4,7 @@ import { memo, useId } from 'react';
 
 import { parseCellKey, UNIT } from '@/lib/utils/battle/grid';
 import { MazeView } from '@/lib/utils/battle/modes/maze';
-import type { BattleMapConfig } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 interface Props {
     map: BattleMapConfig;

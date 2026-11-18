@@ -9,14 +9,13 @@ import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/moc
 import { mazeMap } from '@/lib/utils/battle/modes/maze/__tests__/fixtures';
 import { REJECT } from '@/lib/utils/battle/store/reject';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
+import type { BattleAttack, BattleParticipant } from '@/types/battle';
 import type {
-    BattleAttack,
     BattleMapConfig,
-    BattleParticipant,
     Direction8,
     GridPoint,
     MazeConfig,
-} from '@/types/battle';
+} from '@/types/battle-grid';
 
 const mapOf = (over: Partial<MazeConfig> = {}): BattleMapConfig =>
     mazeMap({ exit: { x: 9, y: 9 }, ...over }, 10);

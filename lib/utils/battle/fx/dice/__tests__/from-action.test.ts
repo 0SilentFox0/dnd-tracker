@@ -5,7 +5,7 @@ import {
     MAX_INITIATIVE_DICE,
     percentileDice,
 } from '@/lib/utils/battle/fx/dice';
-import type { BattleAction } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 
 const action = (
     over: Partial<BattleAction> & {

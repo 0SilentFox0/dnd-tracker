@@ -15,7 +15,8 @@ import { restoreCharm } from '@/lib/utils/abilities/engine/effects/charm';
 import { logFields } from '@/lib/utils/battle/log/lines';
 import type { Ruleset } from '@/lib/utils/rules';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
-import { BattleAction, BattleParticipant } from '@/types/battle';
+import { BattleParticipant } from '@/types/battle';
+import { BattleAction } from '@/types/battle-actions';
 import type { LogLine } from '@/types/text';
 
 export interface VictoryCheckResult {

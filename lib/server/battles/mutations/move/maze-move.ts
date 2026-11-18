@@ -21,7 +21,7 @@ import {
     rejectAction,
 } from '@/lib/utils/battle/store';
 import { advanceTurn, assertCanAct } from '@/lib/utils/battle/turn';
-import type { BattleMapConfig, GridPoint } from '@/types/battle';
+import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 
 export interface MazeMoveBody {
     participantId: string;

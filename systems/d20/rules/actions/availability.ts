@@ -19,7 +19,8 @@ import { bothOnMap } from '@/lib/utils/battle/grid/occupancy';
 import { baseMovement, remainingMovement } from '@/lib/utils/battle/grid/path';
 import { isHostile } from '@/lib/utils/battle/modes/engine';
 import type { Ruleset } from '@/lib/utils/rules/schema';
-import type { BattleMapConfig, BattleParticipant } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 import type { LogLine } from '@/types/text';
 
 const STAND_UP_COST_DIVISOR = 2;

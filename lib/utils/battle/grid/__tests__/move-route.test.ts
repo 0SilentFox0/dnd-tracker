@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { moveRoutes } from '../move-route';
 
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
-import type { BattleMapConfig, GridPoint } from '@/types/battle';
+import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 
 const map: BattleMapConfig = {
     cols: 8,

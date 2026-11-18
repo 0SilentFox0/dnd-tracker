@@ -1,6 +1,6 @@
 import { cross, dot, len, norm, scale, sub, type Vec3 } from './math';
 
-import type { DieSides } from '@/types/battle';
+import type { DieSides } from '@/types/battle-actions';
 
 export interface PolyFace {
     value: number;

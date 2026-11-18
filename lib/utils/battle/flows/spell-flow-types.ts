@@ -5,7 +5,7 @@ import type {
 } from '@/lib/utils/battle/spell/spell-targeting';
 import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
 import type { SpellTargetFilter } from '@/lib/utils/spells/model/schema';
-import type { GridPoint, SpellTemplate } from '@/types/battle';
+import type { GridPoint, SpellTemplate } from '@/types/battle-grid';
 import type { LogLine } from '@/types/text';
 
 export type SpellTargetMode = 'none' | 'single' | 'multi' | 'all' | 'template';

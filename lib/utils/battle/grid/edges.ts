@@ -3,11 +3,8 @@ import { cornerOpen, edgeKey, wallSet } from './walls';
 
 import { collectModifiers } from '@/lib/utils/abilities/engine/core/collect-modifiers';
 import { modeWalls } from '@/lib/utils/battle/modes/engine';
-import type {
-    BattleMapConfig,
-    BattleParticipant,
-    GridPoint,
-} from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 
 export type EdgeKind = 'move' | 'sight' | 'fire';
 

@@ -3,9 +3,18 @@
 import { useCallback, useState } from 'react';
 
 import { FOG_MAX_VISION_RADIUS } from '@/lib/utils/battle/fog/constants';
-import { floodRoom, revealCells, revealRectangle } from '@/lib/utils/battle/fog/reveal';
+import {
+    floodRoom,
+    revealCells,
+    revealRectangle,
+} from '@/lib/utils/battle/fog/reveal';
 import type { MapFogData } from '@/types/api';
-import type { BattleMapConfig, FogMode, GridPoint, RevealedRun } from '@/types/battle';
+import type {
+    BattleMapConfig,
+    FogMode,
+    GridPoint,
+    RevealedRun,
+} from '@/types/battle-grid';
 
 export type FogBrush = 'brush' | 'erase' | 'rectangle' | 'room';
 
@@ -56,32 +65,36 @@ export function useMapFogTool({
         setShapeStart(null);
     }, []);
 
-    const setMode = useCallback((value: FogMode) => void mutate({ mode: value }), [mutate]);
+    const setMode = useCallback(
+        (value: FogMode) => void mutate({ mode: value }),
+        [mutate]
+    );
 
     const setRadius = useCallback((value: number) => setRadiusDraft(value), []);
 
-    const commitRadius = useCallback(
-        () => {
-            const value = radiusDraft ?? radius;
+    const commitRadius = useCallback(() => {
+        const value = radiusDraft ?? radius;
 
-            setRadiusDraft(null);
-            void mutate({
-                visionRadius: Math.max(
-                    1,
-                    Math.min(FOG_MAX_VISION_RADIUS, Math.round(value))
-                ),
-            });
-        },
-        [mutate, radiusDraft, radius]
-    );
+        setRadiusDraft(null);
+        void mutate({
+            visionRadius: Math.max(
+                1,
+                Math.min(FOG_MAX_VISION_RADIUS, Math.round(value))
+            ),
+        });
+    }, [mutate, radiusDraft, radius]);
 
     const sendRuns = useCallback(
         (runs: RevealedRun[]) => {
             if (!runs.length) return;
 
-            const tuples = runs.map(([y, start, end]) => [y, start, end] as [number, number, number]);
+            const tuples = runs.map(
+                ([y, start, end]) => [y, start, end] as [number, number, number]
+            );
 
-            void mutate(brush === 'erase' ? { remove: tuples } : { add: tuples });
+            void mutate(
+                brush === 'erase' ? { remove: tuples } : { add: tuples }
+            );
         },
         [brush, mutate]
     );
@@ -100,12 +113,18 @@ export function useMapFogTool({
             if (!map) return;
 
             if (brush === 'room')
-                sendRuns(revealCells(map, [...floodRoom({ map, start: from })].map((key) => {
-                    const [x, y] = key.split(':').map(Number);
+                sendRuns(
+                    revealCells(
+                        map,
+                        [...floodRoom({ map, start: from })].map((key) => {
+                            const [x, y] = key.split(':').map(Number);
 
-                    return { x, y };
-                })));
-            else if (brush === 'rectangle') sendRuns(revealRectangle(map, from, to));
+                            return { x, y };
+                        })
+                    )
+                );
+            else if (brush === 'rectangle')
+                sendRuns(revealRectangle(map, from, to));
             else applyCells([to]);
         },
         [map, brush, sendRuns, applyCells]

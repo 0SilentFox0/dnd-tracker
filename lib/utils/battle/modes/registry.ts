@@ -2,7 +2,7 @@ import { mazeMode } from './maze/mode';
 import { NORMAL_MODE } from './normal';
 import type { MapModeDefinition } from './types';
 
-import type { BattleMapConfig } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 export const MAP_MODE_REGISTRY = { maze: mazeMode } as const satisfies Record<
     string,

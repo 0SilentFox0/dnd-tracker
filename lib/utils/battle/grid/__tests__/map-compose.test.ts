@@ -8,13 +8,12 @@ import { ParticipantSide } from '@/lib/constants/battle';
 import { AttackType } from '@/lib/constants/battle';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
+import type { BattleAttack, BattleParticipant } from '@/types/battle';
 import type {
-    BattleAttack,
     BattleMapConfig,
     BattleMapMark,
-    BattleParticipant,
     GridPoint,
-} from '@/types/battle';
+} from '@/types/battle-grid';
 
 const map: BattleMapConfig = {
     cols: 10,

@@ -15,7 +15,7 @@ import {
     getP,
     put,
 } from '@/lib/utils/battle/common/action-flow';
-import { savesOf } from '@/lib/utils/battle/saves/access';
+import { proficiencyOf, savesOf } from '@/lib/utils/battle/saves/access';
 import { REJECT } from '@/lib/utils/battle/store/reject';
 import { diceCount } from '@/lib/utils/common/dice';
 import type { Ruleset } from '@/lib/utils/rules/schema';
@@ -121,10 +121,10 @@ export const cunningStrikeDc = (
     attacker: BattleParticipant,
     rules: Ruleset
 ): number => {
-    const { saves, proficiency } = ruleSystemOf(rules).combat;
-
     return (
-        8 + saves.modifiers(attacker).dexterity + proficiency.bonus(attacker)
+        8 +
+        savesOf(rules).modifiers(attacker).dexterity +
+        proficiencyOf(rules).bonus(attacker)
     );
 };
 

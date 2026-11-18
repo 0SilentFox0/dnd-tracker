@@ -41,7 +41,8 @@ import {
 import { fakeScene } from '@/lib/hooks/battle/__tests__/fake-scene';
 import type { BattleSceneValue } from '@/lib/hooks/battle/types';
 import { render } from '@/lib/i18n/test/render-uk';
-import type { BattleAction, BattleParticipant } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 
 vi.unmock('next-intl');
 

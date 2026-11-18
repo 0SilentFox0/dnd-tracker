@@ -5,7 +5,7 @@ import type {
     BattleMapRef,
     BattleMapState,
     MapBase,
-} from '@/types/battle';
+} from '@/types/battle-grid';
 
 interface MapMeta {
     map: BattleMapConfig | null;

@@ -1,6 +1,6 @@
 import { cellKey, inBounds, neighbors } from './geometry';
 
-import type { GridPoint } from '@/types/battle';
+import type { GridPoint } from '@/types/battle-grid';
 
 export type GridSize = { cols: number; rows: number };
 

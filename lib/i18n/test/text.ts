@@ -4,7 +4,7 @@ import { DEFAULT_LOCALE, type Locale, NAMESPACES } from '../config';
 import { formatText } from '../text-ref';
 import type { Translator } from '../translator';
 
-import type { BattleAction } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 import type { LogLine } from '@/types/text';
 
 const files = (

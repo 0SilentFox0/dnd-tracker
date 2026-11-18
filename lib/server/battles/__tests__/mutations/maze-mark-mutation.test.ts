@@ -17,7 +17,7 @@ import type {
     PipelineDeps,
 } from '@/lib/utils/battle/pipeline/run-battle-mutation';
 import { BattleAccess } from '@/lib/utils/battle/pipeline/run-battle-mutation';
-import type { MazeConfig } from '@/types/battle';
+import type { MazeConfig } from '@/types/battle-grid';
 
 const hero2 = participant('hero2', { controlledBy: 'user-2', name: 'Друга' });
 

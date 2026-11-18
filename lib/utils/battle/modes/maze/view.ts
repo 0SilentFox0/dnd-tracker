@@ -33,12 +33,9 @@ import {
     filterQueueByView,
     type QueueEntry,
 } from '@/lib/utils/battle/view/queue';
-import type {
-    ActiveEffect,
-    BattleAction,
-    BattleMapConfig,
-    BattleParticipant,
-} from '@/types/battle';
+import type { ActiveEffect, BattleParticipant } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 export type MazeRole = 'dm' | 'player' | 'spectator';
 

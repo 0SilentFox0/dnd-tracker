@@ -6,7 +6,7 @@ import { blizzard, snow } from './snow';
 import { storm } from './storm';
 import type { WeatherEffect } from './types';
 
-import type { WeatherKind } from '@/types/battle';
+import type { WeatherKind } from '@/types/battle-grid';
 
 export const WEATHER_EFFECTS: Record<WeatherKind, WeatherEffect> = {
     rain,

@@ -13,7 +13,7 @@ import {
     type RecordedCall,
     recordingContext,
 } from '@/lib/utils/canvas/__tests__/recording-canvas';
-import type { WeatherKind } from '@/types/battle';
+import type { WeatherKind } from '@/types/battle-grid';
 
 const size = { width: 800, height: 600 };
 

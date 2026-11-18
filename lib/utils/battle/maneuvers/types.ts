@@ -1,10 +1,7 @@
 import type { Downed, Rng } from '@/lib/utils/abilities/engine/core/types';
 import type { Ruleset } from '@/lib/utils/rules';
-import type {
-    BattleMapConfig,
-    BattleParticipant,
-    GridPoint,
-} from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 import type { LogLine } from '@/types/text';
 
 export interface ManeuverInput {

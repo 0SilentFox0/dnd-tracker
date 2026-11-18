@@ -20,7 +20,8 @@ import type { UnitFromPrisma } from '@/lib/utils/battle/types/participant';
 import { pickOne } from '@/lib/utils/common/dice';
 import type { Ruleset } from '@/lib/utils/rules';
 import { scaleSummon } from '@/lib/utils/units/level-scaling';
-import type { BattleMapConfig, BattleParticipant } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 import type { RaceRow } from '@/types/races';
 import type { LogLine } from '@/types/text';
 

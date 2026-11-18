@@ -4,7 +4,7 @@ import { rayCells, templateCells } from '../template';
 
 import { testMap } from '@/lib/utils/battle/__tests__/fixtures/placed';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
-import type { GridPoint, SpellTemplate } from '@/types/battle';
+import type { GridPoint, SpellTemplate } from '@/types/battle-grid';
 
 const column = (edge: 'walls' | 'bars') => ({
     [edge]: Array.from({ length: 12 }, (_, y) => `5:${y}:e`),

@@ -7,7 +7,8 @@ import { nearestStandable } from '@/lib/utils/battle/grid/occupancy';
 import { createBattleParticipantFromUnit } from '@/lib/utils/battle/participant';
 import type { UnitFromPrisma } from '@/lib/utils/battle/types/participant';
 import type { Ruleset } from '@/lib/utils/rules';
-import type { BattleMapConfig, BattleParticipant } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 const GRID_SIZE: Record<InlineSummon['size'], number> = {
     tiny: 1,

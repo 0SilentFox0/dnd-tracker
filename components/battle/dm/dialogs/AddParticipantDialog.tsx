@@ -26,7 +26,7 @@ import {
     UNIT_QUANTITY as QUANTITY,
 } from '@/lib/constants/battle-units';
 import { useAddParticipantForm } from '@/lib/hooks/battle';
-import type { AddParticipantData } from '@/types/battle';
+import type { AddParticipantData } from '@/types/battle-actions';
 
 const FORM_ID = 'add-participant-form';
 

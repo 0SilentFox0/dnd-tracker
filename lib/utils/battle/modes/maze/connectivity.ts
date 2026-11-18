@@ -3,7 +3,7 @@ import type { MazeGrid } from './grid';
 import { mazeNeighbors, wallSet } from './walls';
 
 import { allCells, cellKey, inBounds } from '@/lib/utils/battle/grid/geometry';
-import type { GridPoint } from '@/types/battle';
+import type { GridPoint } from '@/types/battle-grid';
 
 export function mazeDistances(
     grid: MazeGrid,

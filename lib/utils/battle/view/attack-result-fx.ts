@@ -9,7 +9,8 @@ import { volleyResults } from './volley-results';
 
 import type { AttackOutcomeSummary } from '@/lib/utils/battle/flows';
 import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
-import type { BattleAction, BattleParticipant } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 import type { ResultFx, StrikeFx } from '@/types/battle-scene';
 
 interface StrikeOutcome {

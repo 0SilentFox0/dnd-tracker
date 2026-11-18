@@ -18,7 +18,11 @@ import type {
     PipelineDeps,
 } from '@/lib/utils/battle/pipeline/run-battle-mutation';
 import { BattleAccess } from '@/lib/utils/battle/pipeline/run-battle-mutation';
-import type { BattleMapConfig, GridPoint, MazeConfig } from '@/types/battle';
+import type {
+    BattleMapConfig,
+    GridPoint,
+    MazeConfig,
+} from '@/types/battle-grid';
 
 const mapOf = (over: Partial<MazeConfig> = {}): BattleMapConfig =>
     mazeMap({ exit: { x: 7, y: 0 }, ...over });

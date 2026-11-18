@@ -17,7 +17,8 @@ import {
     releaseInvalidGrapples,
 } from '@/systems/d20/rules/actions/grapple';
 import { applyCondition5e } from '@/systems/d20/rules/conditions/apply';
-import type { BattleMapConfig, BattleParticipant } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 const map: BattleMapConfig = {
     cols: 10,

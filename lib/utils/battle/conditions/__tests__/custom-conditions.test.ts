@@ -16,7 +16,8 @@ import type { CastableSpell } from '@/lib/utils/battle/types/spell-process';
 import { DEFAULT_RULES, type Ruleset } from '@/lib/utils/rules';
 import { mergeRules, parseRules } from '@/lib/utils/rules/schema';
 import { applyCondition5e } from '@/systems/d20/rules/conditions/apply';
-import type { BattleParticipant, TerrainCell } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { TerrainCell } from '@/types/battle-grid';
 
 const PACIFIED = {
     key: 'custom:pacified',

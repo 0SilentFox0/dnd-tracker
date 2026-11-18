@@ -7,7 +7,7 @@ import { usePaletteToggle } from './usePaletteToggle';
 import { MAP_MOTION_DEFAULT_SPEED } from '@/lib/constants/battle-motion';
 import { clampMotionSpeed, resumeSpeed } from '@/lib/utils/battle/map-motion';
 import type { MapMotionData } from '@/types/api';
-import type { MapMotion, MapMotionAxis } from '@/types/battle';
+import type { MapMotion, MapMotionAxis } from '@/types/battle-grid';
 
 export interface MapMotionTool {
     active: boolean;

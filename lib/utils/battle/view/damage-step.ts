@@ -1,6 +1,6 @@
 import { textRef } from '@/lib/i18n/text-ref';
 import { signed } from '@/lib/utils/common/format';
-import type { DamageStep } from '@/types/battle';
+import type { DamageStep } from '@/types/battle-actions';
 import type { LogLine } from '@/types/text';
 
 const VALUE: Record<

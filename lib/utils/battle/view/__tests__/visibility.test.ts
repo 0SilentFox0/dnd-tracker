@@ -16,7 +16,7 @@ import { DEFAULT_RULES } from '@/lib/utils/rules';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import { attackOf, castOf } from '@/systems/wfrp/rules/__tests__/slot-fixtures';
 import type { BattleParticipant } from '@/types/battle';
-import type { BattleAction, DamageStep } from '@/types/battle';
+import type { BattleAction, DamageStep } from '@/types/battle-actions';
 
 const side = (s: ParticipantSide) => {
     const p = createMockParticipant();

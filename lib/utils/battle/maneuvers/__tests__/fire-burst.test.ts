@@ -14,7 +14,7 @@ import { ParticipantSide } from '@/lib/constants/battle';
 import { withinLimits } from '@/lib/utils/abilities/engine/core/usage';
 import { grantPassive } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import { textsOf } from '@/lib/utils/battle/log/__tests__/event-text';
-import type { GridPoint } from '@/types/battle';
+import type { GridPoint } from '@/types/battle-grid';
 
 const demon = (at?: GridPoint) =>
     unit('g', {

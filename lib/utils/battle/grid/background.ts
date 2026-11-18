@@ -1,7 +1,7 @@
 import { MAX_SIDE, MIN_SIDE } from './map-editor';
 
 import { clamp } from '@/lib/utils/common/clamp';
-import type { BattleMapConfig } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 export interface ImageSize {
     width: number;

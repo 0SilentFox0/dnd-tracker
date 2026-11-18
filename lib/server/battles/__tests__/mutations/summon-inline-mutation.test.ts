@@ -8,11 +8,8 @@ import { API_ERRORS } from '@/lib/constants/api-errors';
 import { createSpellMutation } from '@/lib/server/battles/mutations/spell/spell-mutation';
 import { dismissExpiredSummons } from '@/lib/utils/battle/summon/dismiss';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
-import type {
-    BattleMapConfig,
-    BattleParticipant,
-    GridPoint,
-} from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 
 const map: BattleMapConfig = {
     cols: 20,

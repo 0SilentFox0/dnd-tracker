@@ -9,7 +9,8 @@ import { eventTextOf } from '@/lib/utils/battle/log/__tests__/event-text';
 import type { BattleSceneState } from '@/lib/utils/battle/store';
 import { advanceTurn } from '@/lib/utils/battle/turn';
 import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
-import type { BattleAction, BattleMapConfig } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 const scene: BattleSceneState = {
     id: 'b1',

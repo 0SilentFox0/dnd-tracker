@@ -12,12 +12,12 @@ import { cellsOf, isOnMap } from './occupancy';
 
 import { isTargetable } from '@/lib/utils/abilities/engine/core/participants';
 import type { Ruleset } from '@/lib/utils/rules/schema';
+import type { BattleParticipant } from '@/types/battle';
 import type {
     BattleMapConfig,
-    BattleParticipant,
     GridPoint,
     SpellTemplate,
-} from '@/types/battle';
+} from '@/types/battle-grid';
 
 const CONE_TAN = 0.5;
 

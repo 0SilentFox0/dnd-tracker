@@ -19,7 +19,7 @@ import { mapWallsMutation } from '@/lib/server/battles/mutations/map-walls/map-w
 import { composeEffectiveMap } from '@/lib/utils/battle/map-storage/effective-map';
 import { persistedMap } from '@/lib/utils/battle/map-storage/persisted-map';
 import { REJECT } from '@/lib/utils/battle/store/reject';
-import type { BattleMapConfig, BattleMapState } from '@/types/battle';
+import type { BattleMapConfig, BattleMapState } from '@/types/battle-grid';
 
 const map: BattleMapConfig = {
     cols: 8,
@@ -402,7 +402,11 @@ describe('двері та map-edge-remove / map-update', () => {
 
         if (!outputMap) throw new Error('expected updated map');
 
-        const stored = persistedMap(meta, outputMap, out.scene?.mapState ?? state);
+        const stored = persistedMap(
+            meta,
+            outputMap,
+            out.scene?.mapState ?? state
+        );
 
         expect(stored.doors).toEqual(doors);
         expect(stored.walls).toContain('1:3:e');

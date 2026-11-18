@@ -11,11 +11,8 @@ import {
 import { attackKindOf } from '@/lib/utils/battle/common/attack-kind';
 import { diceAverage } from '@/lib/utils/common/dice';
 import type { Ruleset } from '@/lib/utils/rules/schema';
-import type {
-    BattleAttack,
-    BattleParticipant,
-    DamageStep,
-} from '@/types/battle';
+import type { BattleAttack, BattleParticipant } from '@/types/battle';
+import type { DamageStep } from '@/types/battle-actions';
 
 export interface AverageDamage {
     total: number;

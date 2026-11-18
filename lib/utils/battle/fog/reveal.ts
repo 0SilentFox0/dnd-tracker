@@ -1,7 +1,15 @@
 import { normalizeRevealedRuns } from '@/lib/utils/battle/fog/revealed-runs';
 import { edgeBlocks } from '@/lib/utils/battle/grid/edges';
-import { cellKey, inBounds, orthoNeighbors } from '@/lib/utils/battle/grid/geometry';
-import type { BattleMapConfig, GridPoint, RevealedRun } from '@/types/battle';
+import {
+    cellKey,
+    inBounds,
+    orthoNeighbors,
+} from '@/lib/utils/battle/grid/geometry';
+import type {
+    BattleMapConfig,
+    GridPoint,
+    RevealedRun,
+} from '@/types/battle-grid';
 
 /** Four-neighbour flood fill bounded by map cells and movement-blocking edges. */
 export function floodRoom({
@@ -18,7 +26,10 @@ export function floodRoom({
     const blockedCells = new Set([
         ...(map.blocked ?? []),
         ...Object.entries(map.terrain ?? {})
-            .filter(([, terrain]) => terrain.kind === 'wall' || terrain.kind === 'barrier')
+            .filter(
+                ([, terrain]) =>
+                    terrain.kind === 'wall' || terrain.kind === 'barrier'
+            )
             .map(([key]) => key),
         ...blocked,
     ]);
@@ -94,9 +105,7 @@ export function revealRectangle(
             const key = `${x}:${y}`;
 
             const allowed =
-                x <= maxX &&
-                !map.blocked?.includes(key) &&
-                !blocked.has(key);
+                x <= maxX && !map.blocked?.includes(key) && !blocked.has(key);
 
             if (allowed && start === null) start = x;
 

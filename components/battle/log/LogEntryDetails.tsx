@@ -4,7 +4,7 @@ import { useText } from '@/lib/i18n/use-text';
 import { cn } from '@/lib/utils';
 import { type DamageBreakdownRow } from '@/lib/utils/battle/view/damage-breakdown';
 import { getLogEntryDetailItems } from '@/lib/utils/battle/view/log-format';
-import type { BattleAction } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 
 function DamageTable({ rows }: { rows: DamageBreakdownRow[] }) {
     const t = useTranslations('battle.log');

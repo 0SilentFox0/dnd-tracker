@@ -14,7 +14,7 @@ import type {
     GridPoint,
     MazeMark,
     MazeMarkSymbol,
-} from '@/types/battle';
+} from '@/types/battle-grid';
 
 const RUNE = 'M0,-30 L26,15 L-26,15 Z M0,30 L-26,-15 L26,-15 Z';
 

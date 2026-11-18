@@ -11,7 +11,7 @@ import type {
     DoorState,
     FogState,
     MapStateDelta,
-} from '@/types/battle';
+} from '@/types/battle-grid';
 
 export interface LibraryEdges {
     walls: readonly string[];
@@ -184,8 +184,7 @@ export function diffMapState(
     if (prevFog.visionRadius !== nextFog.visionRadius)
         fog.visionRadius = nextFog.visionRadius;
 
-    if (revealed.add.length || revealed.remove.length)
-        fog.revealed = revealed;
+    if (revealed.add.length || revealed.remove.length) fog.revealed = revealed;
 
     if (Object.keys(fog).length) delta.fog = fog;
 
@@ -222,7 +221,12 @@ export function applyMapStateDelta(
             (fogDelta.revealed?.add.length ?? 0) === 0 &&
             (fogDelta.revealed?.remove.length ?? 0) === 0);
 
-    if (state && diffSize(delta.removed) === 0 && !Object.keys(delta.doors ?? {}).length && fogIsEmpty)
+    if (
+        state &&
+        diffSize(delta.removed) === 0 &&
+        !Object.keys(delta.doors ?? {}).length &&
+        fogIsEmpty
+    )
         return state;
 
     const removed = new Set(state?.removedEdges);

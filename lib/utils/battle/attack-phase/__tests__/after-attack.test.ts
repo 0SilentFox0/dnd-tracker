@@ -8,7 +8,7 @@ import type {
     AfterAttackCtx,
     AfterAttackHook,
 } from '@/lib/utils/rules/systems/types';
-import type { BattleAction } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 
 const action = (id: string) => ({ id }) as unknown as BattleAction;
 

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { dot, getPolyhedron, len } from '@/lib/utils/battle/fx/dice';
-import type { DieSides } from '@/types/battle';
+import type { DieSides } from '@/types/battle-actions';
 
 const ALL: DieSides[] = [4, 6, 8, 10, 12, 20];
 

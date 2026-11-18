@@ -9,7 +9,7 @@ import { mapWeatherSchema } from '@/lib/schemas/battles';
 import { mapWeatherMutation } from '@/lib/server/battles/mutations/map-weather/map-weather-mutation';
 import { BattleAccess } from '@/lib/utils/battle/pipeline/run-battle-mutation';
 import { BattleRuleError } from '@/lib/utils/battle/store';
-import type { BattleMapConfig } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 const runBattleMutation = vi.hoisted(() => vi.fn());
 

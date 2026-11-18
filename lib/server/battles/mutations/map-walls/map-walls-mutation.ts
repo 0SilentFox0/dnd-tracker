@@ -12,7 +12,7 @@ import type {
 import { BattleRuleError } from '@/lib/utils/battle/store';
 import { REJECT } from '@/lib/utils/battle/store/reject';
 import type { MapWallsData } from '@/types/api';
-import type { BattleMapConfig } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 export function mapWallsMutation(
     ctx: BattleMutationContext,

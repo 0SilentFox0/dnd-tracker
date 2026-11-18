@@ -10,7 +10,7 @@ import {
 } from 'react';
 
 import { edgeAtScreenPoint, screenToUnit, UNIT } from '@/lib/utils/battle/grid';
-import type { BattleMapConfig } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 export interface EdgeEditing {
     /** ребра активного виду (для «стерти» — стіни й ґрати разом) */

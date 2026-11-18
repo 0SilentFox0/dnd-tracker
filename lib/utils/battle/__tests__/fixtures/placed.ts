@@ -1,12 +1,8 @@
 import { AttackType, ParticipantSide } from '@/lib/constants/battle';
 import { makeParticipant } from '@/lib/utils/abilities/__tests__/fixtures';
 import type { ResolvedAbility } from '@/types/abilities';
-import type {
-    BattleAttack,
-    BattleMapConfig,
-    BattleParticipant,
-    GridPoint,
-} from '@/types/battle';
+import type { BattleAttack, BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 
 export const CLAWS: BattleAttack = {
     id: 'c',

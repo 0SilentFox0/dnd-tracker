@@ -10,11 +10,8 @@ import {
     zoneEffectId,
 } from '@/lib/utils/abilities/engine/effects/area-aura';
 import { syncMapAuras } from '@/lib/utils/abilities/engine/effects/map-auras';
-import type {
-    BattleMapConfig,
-    BattleParticipant,
-    GridPoint,
-} from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 
 const map: BattleMapConfig = {
     cols: 12,

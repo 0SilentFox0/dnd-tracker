@@ -25,11 +25,8 @@ import { wfrpAbilitiesOf } from '@/systems/wfrp/rules/combat/participant';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
 import { wfrpState } from '@/systems/wfrp/rules/state';
 import { trait } from '@/systems/wfrp/rules/traits/__tests__/fixtures';
-import type {
-    ActiveEffect,
-    BattleMapConfig,
-    BattleParticipant,
-} from '@/types/battle';
+import type { ActiveEffect, BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 const debuff = (type: string, duration: number): ActiveEffect =>
     makeEffect(`e-${type}`, {

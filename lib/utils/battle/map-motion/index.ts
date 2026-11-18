@@ -4,7 +4,7 @@ import {
     MAP_MOTION_MAX_SPEED,
 } from '@/lib/constants/battle-motion';
 import { clamp } from '@/lib/utils/common/clamp';
-import type { MapMotion } from '@/types/battle';
+import type { MapMotion } from '@/types/battle-grid';
 
 export function clampMotionSpeed(v: number): number {
     if (Number.isNaN(v)) return 0;

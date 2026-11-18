@@ -14,12 +14,8 @@ import {
 import { assertAbilityAim } from '@/lib/utils/battle/validation/ability-aim';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 import type { ResolvedAbility } from '@/types/abilities';
-import type {
-    BattleAttack,
-    BattleMapConfig,
-    BattleParticipant,
-    GridPoint,
-} from '@/types/battle';
+import type { BattleAttack, BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 
 type FakeConfig = { on: true };
 

@@ -17,11 +17,8 @@ import { isHostile } from '@/lib/utils/battle/modes/engine';
 import { BattleRuleError } from '@/lib/utils/battle/store/errors';
 import { REJECT } from '@/lib/utils/battle/store/reject';
 import type { Ruleset } from '@/lib/utils/rules/schema';
-import type {
-    BattleAttack,
-    BattleMapConfig,
-    BattleParticipant,
-} from '@/types/battle';
+import type { BattleAttack, BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 type AttackFlags = ReturnType<
     typeof findFlagsMany<

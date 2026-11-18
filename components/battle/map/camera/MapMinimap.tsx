@@ -9,17 +9,15 @@ import { Button } from '@/components/ui/button';
 import { DEFAULT_MAP_BACKGROUND } from '@/lib/constants/battle';
 import { ParticipantSide } from '@/lib/constants/battle';
 import { useLoadedAspect } from '@/lib/hooks/battle';
-import {
-    createStorageFlag,
-    useStorageValue,
-} from '@/lib/hooks/common';
+import { createStorageFlag, useStorageValue } from '@/lib/hooks/common';
 import {
     backgroundBox,
     type GridWindow,
     regionFillPath,
     UNIT,
 } from '@/lib/utils/battle/grid';
-import type { BattleMapConfig, BattleParticipant } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 const phoneOpen = createStorageFlag('battle-map-minimap-phone', false);
 
@@ -122,7 +120,7 @@ export function MapMinimap({
                         height={height}
                         preserveAspectRatio="none"
                         onPointerDown={pick}
-                        className="block touch-none cursor-crosshair"
+                        className="block cursor-crosshair touch-none"
                     >
                         <image
                             href={src}
@@ -152,16 +150,29 @@ export function MapMinimap({
 
                             if (!point) return null;
 
-                            const size = Math.min(3, Math.max(1, participant.combatStats.gridSize ?? 1));
+                            const size = Math.min(
+                                3,
+                                Math.max(
+                                    1,
+                                    participant.combatStats.gridSize ?? 1
+                                )
+                            );
 
                             return (
                                 <circle
                                     key={participant.basicInfo.id}
-                                    data-minimap-participant={participant.basicInfo.id}
+                                    data-minimap-participant={
+                                        participant.basicInfo.id
+                                    }
                                     cx={point.x + size / 2 - win.x}
                                     cy={point.y + size / 2 - win.y}
                                     r={Math.max(0.12, size * 0.16)}
-                                    fill={participant.basicInfo.side === ParticipantSide.ALLY ? 'var(--ally)' : 'var(--enemy)'}
+                                    fill={
+                                        participant.basicInfo.side ===
+                                        ParticipantSide.ALLY
+                                            ? 'var(--ally)'
+                                            : 'var(--enemy)'
+                                    }
                                 />
                             );
                         })}

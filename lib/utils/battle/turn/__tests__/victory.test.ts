@@ -14,7 +14,8 @@ import {
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 import { d20StateData } from '@/systems/d20/rules/state';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
-import type { BattleAction, BattleParticipant } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 
 const completeBattle = (
     ps: BattleParticipant[],

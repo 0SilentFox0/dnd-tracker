@@ -14,7 +14,7 @@ import {
 } from '@/lib/utils/battle/tiles/edit';
 import { decodeTileChunk } from '@/lib/utils/battle/tiles/rle';
 import type { TileLayer } from '@/lib/utils/battle/tiles/types';
-import type { GridPoint } from '@/types/battle';
+import type { GridPoint } from '@/types/battle-grid';
 
 const HISTORY_LIMIT = 100;
 

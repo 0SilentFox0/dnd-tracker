@@ -1,7 +1,7 @@
 import { AttackType } from '@/lib/constants/battle';
 import type { OwnerKind } from '@/lib/utils/abilities/read';
 import type { Ability, StaticEffect } from '@/lib/utils/abilities/schema';
-import type { GridPoint } from '@/types/battle';
+import type { GridPoint } from '@/types/battle-grid';
 import type { LogLine } from '@/types/text';
 
 export type {

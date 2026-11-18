@@ -3,7 +3,7 @@ import { elementOf } from './element';
 import { splashTargetIds } from './impact';
 import type { FxArchetype, FxElement, FxSpec } from './types';
 
-import type { BattleAction } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 
 const AREA_TARGETING = new Set([
     'area',

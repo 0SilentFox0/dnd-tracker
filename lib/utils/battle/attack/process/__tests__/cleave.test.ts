@@ -4,7 +4,7 @@ import { cleaveTargets } from '../cleave';
 
 import { CombatStatus, ParticipantSide } from '@/lib/constants/battle';
 import { placed, testMap } from '@/lib/utils/battle/__tests__/fixtures/placed';
-import type { GridPoint } from '@/types/battle';
+import type { GridPoint } from '@/types/battle-grid';
 
 const MAP = testMap();
 

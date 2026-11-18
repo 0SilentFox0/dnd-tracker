@@ -17,11 +17,8 @@ import {
     SpellDefinitionSchema,
     type SpellEffect,
 } from '@/lib/utils/spells/model/schema';
-import type {
-    BattleMapConfig,
-    BattleParticipant,
-    GridPoint,
-} from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 
 const map: BattleMapConfig = {
     cols: 40,

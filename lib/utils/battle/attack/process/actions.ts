@@ -12,11 +12,8 @@ import { lineText, logFields } from '@/lib/utils/battle/log/lines';
 import { immunityNote } from '@/lib/utils/battle/resistance';
 import type { AttackRollResult } from '@/lib/utils/battle/types/attack';
 import type { Ruleset } from '@/lib/utils/rules';
-import type {
-    BattleAction,
-    BattleAttack,
-    BattleParticipant,
-} from '@/types/battle';
+import type { BattleAttack, BattleParticipant } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 import type { LogLine } from '@/types/text';
 
 const critDetails = (effect: CriticalEffect, flavor?: CritFlavor) => ({

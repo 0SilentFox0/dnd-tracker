@@ -22,11 +22,9 @@ import {
     mazeMap,
 } from '@/lib/utils/battle/modes/maze/__tests__/fixtures';
 import { turnQueue } from '@/lib/utils/battle/view';
-import type {
-    BattleAction,
-    BattleParticipant,
-    GridPoint,
-} from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
+import type { GridPoint } from '@/types/battle-grid';
 
 const mine = (id: string, at: GridPoint, user = 'u1'): BattleParticipant => {
     const p = placed(id, { side: ParticipantSide.ALLY, at });

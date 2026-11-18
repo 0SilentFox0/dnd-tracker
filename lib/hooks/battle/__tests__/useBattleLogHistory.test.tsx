@@ -11,7 +11,7 @@ import { useBattleLogHistory } from '../useBattleLogHistory';
 import { getBattleEvents } from '@/lib/api/battles';
 import { battleQueryKey } from '@/lib/hooks/battles';
 import type { BattleScene } from '@/types/api';
-import type { BattleAction } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 
 vi.mock('@/lib/api/battles', () => ({ getBattleEvents: vi.fn() }));
 

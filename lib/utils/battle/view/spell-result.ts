@@ -1,5 +1,5 @@
 import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
-import type { BattleAction } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 import type { ResultFx } from '@/types/battle-scene';
 
 type HpChange = {

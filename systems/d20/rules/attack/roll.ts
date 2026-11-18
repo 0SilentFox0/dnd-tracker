@@ -17,11 +17,8 @@ import type { CritPicker } from '@/lib/utils/battle/crit-choice/types';
 import type { AttackRollResult } from '@/lib/utils/battle/types/attack';
 import { rollDie } from '@/lib/utils/common/dice';
 import { type Ruleset } from '@/lib/utils/rules';
-import type {
-    BattleAttack,
-    BattleMapConfig,
-    BattleParticipant,
-} from '@/types/battle';
+import type { BattleAttack, BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 const D20_MATH: AttackMathSystem = {
     abilityOf: (p, attack, participants = [p]) =>

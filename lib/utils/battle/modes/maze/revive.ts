@@ -4,7 +4,8 @@ import { mazeReachable } from './movement';
 
 import { cellKey, cellsByRing } from '@/lib/utils/battle/grid/geometry';
 import { occupiedBy } from '@/lib/utils/battle/grid/occupancy';
-import type { BattleParticipant, GridPoint } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { GridPoint } from '@/types/battle-grid';
 
 /** Воскреслий стає на свою клітинку або найближчу вільну за кроками лабіринту (стіни, без виходу й телепортів). */
 export function nearestMazeCell(

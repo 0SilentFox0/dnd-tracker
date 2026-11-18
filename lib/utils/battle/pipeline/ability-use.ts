@@ -35,7 +35,8 @@ import { assertAbilityAim } from '@/lib/utils/battle/validation/ability-aim';
 import { assertAbilityTargets } from '@/lib/utils/battle/validation/ability-targets';
 import { abilityOnMap } from '@/lib/utils/battle/view';
 import { rngOf } from '@/lib/utils/common/rng';
-import type { BattleParticipant, GridPoint } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { GridPoint } from '@/types/battle-grid';
 
 export type AbilityUseTrigger = 'action' | 'bonusAction';
 

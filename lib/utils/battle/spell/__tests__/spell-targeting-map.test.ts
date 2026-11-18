@@ -13,11 +13,8 @@ import {
 } from '@/lib/utils/battle/spell/spell-targeting';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 import type { SpellTargeting } from '@/lib/utils/spells/model/schema';
-import type {
-    BattleMapConfig,
-    BattleParticipant,
-    GridPoint,
-} from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 
 const map: BattleMapConfig = {
     cols: 20,

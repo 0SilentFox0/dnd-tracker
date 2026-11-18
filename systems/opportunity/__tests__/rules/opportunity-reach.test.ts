@@ -6,11 +6,8 @@ import { resolveServerAttack } from '@/lib/utils/battle/attack/server-attack';
 import { pathTo } from '@/lib/utils/battle/grid/path';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 import { resolveOpportunityAttacks } from '@/systems/opportunity/rules/opportunity';
-import type {
-    BattleAttack,
-    BattleMapConfig,
-    BattleParticipant,
-} from '@/types/battle';
+import type { BattleAttack, BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 const map: BattleMapConfig = {
     cols: 10,

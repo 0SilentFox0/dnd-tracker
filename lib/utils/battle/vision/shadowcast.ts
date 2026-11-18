@@ -1,6 +1,6 @@
 import { edgeBlocks } from '@/lib/utils/battle/grid/edges';
 import { cellKey, inBounds } from '@/lib/utils/battle/grid/geometry';
-import type { BattleMapConfig, GridPoint } from '@/types/battle';
+import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 
 const MAX_RADIUS = 40;
 

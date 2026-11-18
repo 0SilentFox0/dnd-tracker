@@ -12,7 +12,8 @@ import type {
 
 import { BATTLE_LOG_RECENT_EVENTS } from '@/lib/constants/battle';
 import { KNOWLEDGE_EVENT_TYPES } from '@/lib/utils/battle/view/knowledge';
-import type { BattleAction, BattleParticipant } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 
 const EVENT_SELECT = {
     seq: true,

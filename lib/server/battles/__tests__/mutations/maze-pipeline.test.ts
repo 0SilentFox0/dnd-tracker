@@ -31,15 +31,20 @@ import type {
     StoredBattleEvent,
     StoredParticipant,
 } from '@/lib/utils/battle/store';
-import { buildSnapshotState, eventToBattleAction, joinParticipant, splitParticipant } from '@/lib/utils/battle/store';
+import {
+    buildSnapshotState,
+    eventToBattleAction,
+    joinParticipant,
+    splitParticipant,
+} from '@/lib/utils/battle/store';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 import type { BattleMutationResponse, BattleScene } from '@/types/api';
+import type { BattleParticipant } from '@/types/battle';
 import type {
     BattleMapConfig,
-    BattleParticipant,
     GridPoint,
     MazeConfig,
-} from '@/types/battle';
+} from '@/types/battle-grid';
 
 const DM = 'dm-user';
 

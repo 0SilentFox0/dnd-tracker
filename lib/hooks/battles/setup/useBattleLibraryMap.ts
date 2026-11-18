@@ -10,7 +10,7 @@ import { useMapLibraryEnabled } from '@/lib/hooks/campaigns';
 import { useConfirm } from '@/lib/hooks/common';
 import { battleMapMaxSide } from '@/lib/utils/battle/map-storage/limits';
 import type { UvttImport } from '@/lib/utils/battle/uvtt/parse';
-import type { BattleMapRef } from '@/types/battle';
+import type { BattleMapRef } from '@/types/battle-grid';
 import type { MapCatalogEntry } from '@/types/map-catalog';
 
 interface LibraryMapOptions {

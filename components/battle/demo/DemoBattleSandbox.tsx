@@ -11,7 +11,7 @@ import {
     useBattleMapPlayground,
 } from '@/lib/hooks/battle/useBattleMapPlayground';
 import type { BattleScene } from '@/types/api';
-import type { BattleMapConfig } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 const MODES: BattleMapPlaygroundMode[] = ['move', 'attack', 'template'];
 

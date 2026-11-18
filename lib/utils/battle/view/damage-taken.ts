@@ -1,4 +1,4 @@
-import type { BattleAction } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
 
 export function damageTaken(
     action: BattleAction,

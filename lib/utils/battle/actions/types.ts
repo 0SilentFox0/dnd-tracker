@@ -3,12 +3,9 @@ import type { NewBattleEvent } from '@/lib/utils/battle/store';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
 import type { ReachRules } from '@/lib/utils/rules/systems/types';
-import type {
-    BattleAction,
-    BattleMapConfig,
-    BattleParticipant,
-    GridPoint,
-} from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleAction } from '@/types/battle-actions';
+import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 import type { LogLine } from '@/types/text';
 
 /** Core's server-rolled strike, handed to the system so it does not import core back (`resolveServerAttack`) */

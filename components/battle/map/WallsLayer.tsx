@@ -5,7 +5,7 @@ import { memo } from 'react';
 import { edgeRect } from './edge-geometry';
 
 import { parseEdgeKey, UNIT } from '@/lib/utils/battle/grid';
-import type { BattleMapConfig } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 function barsLine(edge: string) {
     const { a, side } = parseEdgeKey(edge);

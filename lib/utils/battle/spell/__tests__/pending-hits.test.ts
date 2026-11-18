@@ -9,11 +9,8 @@ import { resolvePendingHits } from '@/lib/utils/battle/spell/pending-hits';
 import { processStartOfTurn } from '@/lib/utils/battle/turn/turn-start';
 import type { CastableSpell } from '@/lib/utils/battle/types/spell-process';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
-import type {
-    BattleMapConfig,
-    BattleParticipant,
-    GridPoint,
-} from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 
 const map: BattleMapConfig = {
     cols: 40,

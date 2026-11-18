@@ -8,7 +8,7 @@ import { useBattleMapPlayground } from '../useBattleMapPlayground';
 import { DEFAULT_BATTLE_MAP, MAZE_MARK_SYMBOLS } from '@/lib/constants/battle';
 import { buildMockParticipants } from '@/lib/hooks/battle/mock-participants';
 import { occupiedBy, placeParticipants } from '@/lib/utils/battle/grid';
-import type { BattleMapConfig } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 type Hook = { current: ReturnType<typeof useBattleMapPlayground> };
 

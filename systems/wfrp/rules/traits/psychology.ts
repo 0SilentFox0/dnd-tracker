@@ -17,7 +17,8 @@ import { isHostile } from '@/lib/utils/battle/modes/engine';
 import type { Rng } from '@/lib/utils/common/rng';
 import type { SystemConditionResult } from '@/lib/utils/rules/systems/types';
 import type { PsychologyKind } from '@/systems/wfrp/rules/trait-kinds';
-import type { BattleMapConfig, BattleParticipant } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 import type { LogLine } from '@/types/text';
 
 interface Threat {

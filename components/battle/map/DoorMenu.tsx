@@ -7,7 +7,7 @@ import { doorCentre } from './DoorsLayer';
 import type { MapDoorsTool } from '@/lib/hooks/battle';
 import { cn } from '@/lib/utils';
 import { UNIT } from '@/lib/utils/battle/grid';
-import type { DoorState } from '@/types/battle';
+import type { DoorState } from '@/types/battle-grid';
 
 const BUTTON =
     'h-8 rounded-md border border-hud-rule bg-black/80 px-2 text-xs text-hud-gold-bright hover:bg-black';

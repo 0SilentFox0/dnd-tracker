@@ -15,7 +15,7 @@ import type {
     DoorState,
     GridPoint,
     TerrainCell,
-} from '@/types/battle';
+} from '@/types/battle-grid';
 
 const NO_MARGINS: Margins = { top: 0, right: 0, bottom: 0, left: 0 };
 

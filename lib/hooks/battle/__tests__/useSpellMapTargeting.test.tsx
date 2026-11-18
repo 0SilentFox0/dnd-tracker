@@ -10,7 +10,7 @@ import {
     useSpellBook,
 } from '@/lib/hooks/battle/useSpellBook';
 import type { MapAim, MapPick } from '@/lib/utils/battle/grid';
-import type { GridPoint } from '@/types/battle';
+import type { GridPoint } from '@/types/battle-grid';
 import type { BookSpell } from '@/types/spells';
 
 const spells = [

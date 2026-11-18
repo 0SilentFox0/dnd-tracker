@@ -13,11 +13,8 @@ import { runAttackPhase } from '@/lib/utils/battle/attack-phase/run-attack-phase
 import { applyObstacle } from '@/lib/utils/battle/damage/obstacle';
 import { eventTextOf } from '@/lib/utils/battle/log/__tests__/event-text';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
-import type {
-    BattleAttack,
-    BattleMapConfig,
-    BattleParticipant,
-} from '@/types/battle';
+import type { BattleAttack, BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 const sword: BattleAttack = {
     id: 'sw',

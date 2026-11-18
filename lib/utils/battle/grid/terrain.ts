@@ -5,13 +5,13 @@ import { AttackType, HAZARD_DICE_PATTERN } from '@/lib/constants/battle';
 import { isActive } from '@/lib/utils/abilities/engine/core/participants';
 import { getDisabledAttackKinds } from '@/lib/utils/battle/attack/disabled-attacks';
 import { attackKindOf } from '@/lib/utils/battle/common/attack-kind';
+import type { BattleParticipant } from '@/types/battle';
 import type {
     BattleMapConfig,
-    BattleParticipant,
     TerrainCell,
     TerrainDamage,
     TerrainDiff,
-} from '@/types/battle';
+} from '@/types/battle-grid';
 
 /** Шкода небезпеки ДМ; порожні чи некоректні кубики — без шкоди (лише підсвітка). */
 export function hazardDamage(

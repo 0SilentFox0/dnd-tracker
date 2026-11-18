@@ -18,13 +18,11 @@ import { runAbilities } from '@/lib/utils/abilities/engine/core/run-abilities';
 import type { StaticEffect } from '@/lib/utils/abilities/schema';
 import { attackSourceOf } from '@/lib/utils/battle/attack/source';
 import { attackKindOf } from '@/lib/utils/battle/common/attack-kind';
+import { proficiencyOf } from '@/lib/utils/battle/saves/access';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
-import type {
-    BattleAttack,
-    BattleMapConfig,
-    BattleParticipant,
-} from '@/types/battle';
+import type { BattleAttack, BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 export { forcedRollMode };
 
@@ -33,10 +31,12 @@ export type { RollMode, RollModeReasons };
 const mathSystemOf = (rules: Pick<Ruleset, 'system'>): AttackMathSystem => {
     const { combat } = ruleSystemOf(rules);
 
+    const proficiency = proficiencyOf(rules);
+
     return {
         abilityOf: (p, attack, participants) =>
             attackAbilityOf(rules, p, attack, participants),
-        proficiencyBonus: (p) => combat.proficiency.bonus(p),
+        proficiencyBonus: (p) => proficiency.bonus(p),
         reach: combat.reach,
     };
 };

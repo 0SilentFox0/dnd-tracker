@@ -41,7 +41,8 @@ import { zoneTurnStart } from '@/lib/utils/battle/spell/zone-triggers';
 import { rollDie } from '@/lib/utils/common/dice';
 import type { Ruleset } from '@/lib/utils/rules';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
-import type { BattleMapConfig, BattleParticipant } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 import type { LogLine } from '@/types/text';
 
 /**

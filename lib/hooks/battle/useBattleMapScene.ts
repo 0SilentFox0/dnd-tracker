@@ -40,13 +40,13 @@ import type { TileLayerChunks } from '@/lib/utils/battle/tiles/derive';
 import { NO_ORDER } from '@/lib/utils/battle/view';
 import type { Viewer } from '@/lib/utils/battle/view/visibility';
 import type { BattleScene } from '@/types/api';
+import type { BattleParticipant } from '@/types/battle';
 import type {
     BattleMapActions,
     BattleMapConfig,
     BattleMapView,
-    BattleParticipant,
     GridPoint,
-} from '@/types/battle';
+} from '@/types/battle-grid';
 
 export interface BattleMapScene {
     battle: BattleScene;

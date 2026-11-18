@@ -29,7 +29,7 @@ import {
     rowSlideState,
     sectionTrackToPlay,
 } from '@/lib/utils/scenario/play';
-import type { BattleBrief } from '@/types/battle';
+import type { BattleBrief } from '@/types/battle-actions';
 import type {
     ScenarioContent,
     ScenarioMarkerRef,

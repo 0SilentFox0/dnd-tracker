@@ -10,7 +10,8 @@ import { multiplierRow, stepRow } from '@/lib/utils/battle/damage/rows';
 import { signed } from '@/lib/utils/common/format';
 import { type Ruleset } from '@/lib/utils/rules';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
-import type { BattleParticipant, DamageRow } from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
+import type { DamageRow } from '@/types/battle-actions';
 
 export function spellAttackBonus(
     caster: BattleParticipant,

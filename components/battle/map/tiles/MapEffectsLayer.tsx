@@ -1,12 +1,12 @@
 'use client';
 
-import { type CSSProperties,memo } from 'react';
+import { type CSSProperties, memo } from 'react';
 
 import { tileDefinition } from '@/lib/constants/tilesets/catalog';
 import type { MapSpellEffect } from '@/lib/constants/tilesets/types';
-import { type GridWindow,UNIT } from '@/lib/utils/battle/grid';
+import { type GridWindow, UNIT } from '@/lib/utils/battle/grid';
 import type { TileLayerChunks } from '@/lib/utils/battle/tiles/derive';
-import type { BattleMapConfig } from '@/types/battle';
+import type { BattleMapConfig } from '@/types/battle-grid';
 
 const SIDE = 16;
 
@@ -75,14 +75,17 @@ export const MapEffectsLayer = memo(function MapEffectsLayer({
                 <span
                     key={`${x}:${y}:${id}`}
                     className="map-spell-effect-cell"
-                    style={{
-                        left: x * cellPx,
-                        top: y * cellPx,
-                        width: cellPx,
-                        height: cellPx,
-                        '--map-fx-size': 'var(--map-effect-size, 1)',
-                        '--map-fx-intensity': 'var(--map-effect-intensity, 1)',
-                    } as CSSProperties}
+                    style={
+                        {
+                            left: x * cellPx,
+                            top: y * cellPx,
+                            width: cellPx,
+                            height: cellPx,
+                            '--map-fx-size': 'var(--map-effect-size, 1)',
+                            '--map-fx-intensity':
+                                'var(--map-effect-intensity, 1)',
+                        } as CSSProperties
+                    }
                 >
                     <i
                         className="map-hud-fx"
