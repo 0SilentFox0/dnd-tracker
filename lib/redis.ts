@@ -1,9 +1,3 @@
-/**
- * Upstash Redis singleton через REST, не TCP: serverless cold starts не вичерпують connection pool.
- * Читає першу наявну пару env: `UPSTASH_REDIS_REST_*`, `KV_REST_API_*`, `dnd_KV_REST_API_*`.
- * Без пари повертає `null` — споживачі трактують це як "Redis недоступний" (fail-open).
- */
-
 import { Redis } from '@upstash/redis';
 
 let cachedClient: Redis | null = null;
@@ -35,10 +29,6 @@ function readUpstashCreds(): UpstashCreds | null {
     return null;
 }
 
-/**
- * Повертає Upstash Redis клієнт або `null` якщо env vars не встановлені.
- * Не throw — fail-open для cache/rate-limit hot path.
- */
 export function getRedisClient(): Redis | null {
     if (resolved) return cachedClient;
 
