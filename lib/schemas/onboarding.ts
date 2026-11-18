@@ -5,7 +5,7 @@ import { HINTS } from '@/lib/onboarding/hints';
 
 const HINT_PREFIX = 'hint:';
 
-// лише відомі підказки: довільні hint:* ключі плодили б рядки в таблиці
+// known hints only: arbitrary hint:* keys would spawn table rows
 const isKnownHintKey = (key: string) =>
     !key.startsWith(HINT_PREFIX) ||
     key === HIDE_ALL_HINTS_KEY ||

@@ -78,7 +78,7 @@ export async function loadShowDeck(
         : null;
 }
 
-/** Картинки інших наборів кампанії: спільне посилання не можна стирати разом з одним набором. */
+/** Images of the campaign other decks: a shared link must not be erased along with one deck. */
 export async function urlsUsedElsewhere(
     campaignId: string,
     exceptDeckId: string

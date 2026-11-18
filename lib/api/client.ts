@@ -84,7 +84,6 @@ export function setGlobalApiErrorHandler(handler: GlobalErrorHandler): void {
 
 type RequestOptions = RequestInit & {
     parseResponse?: 'json' | 'text' | 'none';
-    /** сира відповідь до розбору тіла — для заголовків (Date) */
     onResponse?: (response: Response) => void;
 };
 

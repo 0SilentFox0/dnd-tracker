@@ -1,6 +1,4 @@
-/**
- * Пише в БД — лише локальна Docker-БД (pnpm db:local). На будь-якому іншому хості — skip.
- */
+/** Writes to the DB: local Docker DB only (pnpm db:local); skipped on any other host. */
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import {
@@ -8,10 +6,19 @@ import {
     ParticipantSide,
 } from '@/lib/constants/battle';
 import { prisma } from '@/lib/db';
-import { loadBattle, loadBattleAccess } from '@/lib/server/battles/store/load-battle';
+import {
+    loadBattle,
+    loadBattleAccess,
+} from '@/lib/server/battles/store/load-battle';
 import { saveBattle } from '@/lib/server/battles/store/save-battle';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
-import { BattleConflictError, loadEventsBefore, loadRecentEvents, loadSnapshotsFrom, restoreParticipantsAt } from '@/lib/utils/battle/store';
+import {
+    BattleConflictError,
+    loadEventsBefore,
+    loadRecentEvents,
+    loadSnapshotsFrom,
+    restoreParticipantsAt,
+} from '@/lib/utils/battle/store';
 import { pendingSlot } from '@/systems/morale/__tests__/pending';
 import type { BattleParticipant } from '@/types/battle';
 

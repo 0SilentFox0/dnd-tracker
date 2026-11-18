@@ -186,7 +186,7 @@ async function loadTargetRows(
     return out;
 }
 
-// campaigns cloned before stage 3: rows' sourceHash is the baseline, rules/settings count as synced
+// campaigns cloned before sourceHash existed: rows' sourceHash is the baseline, rules/settings count as synced
 function fallbackBaseline(
     sourceBundle: SyncContext['sourceBundle'],
     rows: LocalRow[]

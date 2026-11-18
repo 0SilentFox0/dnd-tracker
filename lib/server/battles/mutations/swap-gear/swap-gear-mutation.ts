@@ -29,7 +29,6 @@ export const swapGearSchema = z.object({ participantId: z.string().min(1) });
 
 export type SwapGearBody = z.infer<typeof swapGearSchema>;
 
-/** Герой у свій хід переносить зміни екіпіювання з листа в бій за бонусну дію. */
 export function createSwapGearMutation(
     deps: Pick<
         RefreshSourcesDeps,

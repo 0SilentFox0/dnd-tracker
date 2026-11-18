@@ -16,7 +16,7 @@ const spells = BUNDLE_TABLES.find((t) => t.key === 'spells')!;
 
 const units = BUNDLE_TABLES.find((t) => t.key === 'units')!;
 
-// джерело: S1 Fireball; клон: L1 (sourceId S1)
+// source: S1 Fireball; clone: L1 (sourceId S1)
 const S1 = id('a'),
     S2 = id('b'),
     L1 = id('x'),

@@ -20,7 +20,7 @@ export const SLIDE_CAPTION_MAX = 200;
 
 export const SLIDE_MAX_EDGE_PX = 2560;
 
-/** Бакет приймає й те, що дзеркалиться за посиланням (resolveImageForPersistence). */
+/** The bucket also accepts what is mirrored by URL (resolveImageForPersistence). */
 export const SLIDE_FORMATS = {
     'image/webp': 'webp',
     'image/jpeg': 'jpg',
@@ -28,7 +28,6 @@ export const SLIDE_FORMATS = {
     'image/gif': 'gif',
 } as const;
 
-/** Що клієнт вантажить напряму (після зменшення). */
 export const SLIDE_UPLOAD_TYPES = [
     'image/webp',
     'image/jpeg',

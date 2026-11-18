@@ -10,7 +10,7 @@ export interface LockedCharacter {
     characteristics: unknown;
 }
 
-/** SELECT … FOR UPDATE у транзакції: read-modify-write ресурсів/досвіду не губить паралельні правки. */
+/** SELECT ... FOR UPDATE in a transaction: read-modify-write of resources/experience keeps concurrent edits. */
 export async function lockCharacters(
     tx: Pick<Prisma.TransactionClient, '$queryRaw'>,
     ids: string[]

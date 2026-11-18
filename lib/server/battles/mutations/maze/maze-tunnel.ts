@@ -29,7 +29,7 @@ import type { BattleMapConfig, MazeConfig } from '@/types/battle-grid';
 const isDead = (p: BattleParticipant) =>
     p.combatStats.status === CombatStatus.DEAD;
 
-// зачарований лишається на своєму початковому боці, як у перевірці перемоги
+// an enchanted unit stays on its starting side, as in the victory check
 const leaves = (p: BattleParticipant) =>
     originalSide(p) === ParticipantSide.ENEMY &&
     (!!p.basicInfo.isExtraTurnSlot || !isDead(p));
@@ -81,7 +81,7 @@ function turnAfter(
     };
 }
 
-/** «1 тунель»: вороги зникають у резерв ДМа, решта карти — відкрита кімната, герої стоять рядом у прямому тунелі від центру до нового виходу на краю; перший за ініціативою — біля виходу. */
+/** "1 tunnel": enemies vanish into the DM reserve, the rest of the map is an open room, heroes stand in a straight tunnel from the center to the new edge exit; the first by initiative is next to the exit. */
 export function tunnelMutation(
     ctx: BattleMutationContext,
     { map: base, grid: current }: MazeEnv,
@@ -122,7 +122,7 @@ export function tunnelMutation(
 
     stays.forEach((p) => taken.add(cellKey(p.battleData.position)));
 
-    // тіла й вибулі, що лежали на лінії тунелю, зсуваються в кімнату поруч
+    // corpses and fallen units lying on the tunnel line shift into the adjacent room
     const shifted = new Map(
         stays.flatMap((p) => {
             const at = p.battleData.position;

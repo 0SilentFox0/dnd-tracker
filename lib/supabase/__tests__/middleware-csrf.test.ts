@@ -1,8 +1,3 @@
-/**
- * Тести для rejectCrossOriginMutation — explicit Origin/CSRF check
- * на POST/PATCH/PUT/DELETE до /api/* (CODE_AUDIT 4.4).
- */
-
 import type { NextRequest } from 'next/server';
 import { describe, expect, it } from 'vitest';
 
@@ -173,7 +168,6 @@ describe('rejectCrossOriginMutation', () => {
 
     it('treats https vs http different origins as cross-origin (different host:port implied)', () => {
         // host stays "example.com" without port, https://example.com:443 also has host "example.com"
-        // Тут перевіряємо, що різні порти ловляться:
         const r = rejectCrossOriginMutation(
             makeRequest({
                 method: 'POST',

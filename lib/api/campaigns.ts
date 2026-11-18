@@ -14,9 +14,6 @@ import type {
     CampaignWithWarnings,
 } from '@/types/campaigns';
 
-/**
- * Отримує активні бої й покази в кампаніях, де користувач є учасником.
- */
 export async function getActiveSessions(): Promise<ActiveSessions> {
     return request<ActiveSessions>('/api/campaigns/active-battles?withShows=1');
 }
@@ -38,9 +35,6 @@ export async function getCampaignMembers(
     return campaignGet<CampaignMember[]>(campaignId, '/members');
 }
 
-/**
- * Створює нову кампанію
- */
 export async function createCampaign(data: {
     name: string;
     description?: string;
@@ -57,9 +51,6 @@ export async function createCampaign(data: {
     });
 }
 
-/**
- * Приєднується до кампанії за кодом запрошення
- */
 export async function joinCampaign(inviteCode: string): Promise<{
     campaign: Campaign;
 }> {
@@ -71,9 +62,6 @@ export async function joinCampaign(inviteCode: string): Promise<{
     return { campaign: data.campaign };
 }
 
-/**
- * Видаляє учасника з кампанії (лише DM)
- */
 export async function removeCampaignMember(
     campaignId: string,
     memberId: string

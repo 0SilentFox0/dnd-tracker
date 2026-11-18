@@ -293,7 +293,8 @@ function chooseSlot(
               })
             : null;
 
-    if (chosen && !chosen.ok) throw ruleErrorOf('action_rejected', chosen.error);
+    if (chosen && !chosen.ok)
+        throw ruleErrorOf('action_rejected', chosen.error);
 
     return chosen;
 }
@@ -467,7 +468,7 @@ function prepareCastDice(
         ? { ...sized, count: Math.min(data.inputCount ?? 1, inputDice.max) }
         : sized;
 
-    // прев'ю без кидків: сервер кидає сам, щоб показати орієнтовний результат
+    // preview without rolls: the server rolls itself to show an estimate
     const diceRolls =
         (data.preview || serverRolls) && data.diceRolls.length === 0
             ? rollDiceList(`${expected.count}d${expected.sides}`, rngOf(ctx))
@@ -640,7 +641,7 @@ function assertActionAvailable(
 
     const isBonus = definition.cost === 'bonusAction';
 
-    // атака й закляття за дію ділять одну дію ходу; вільний каст DM її не витрачає
+    // attack and spell share one turn action; a DM free cast does not spend it
 
     if (
         !free &&

@@ -93,7 +93,7 @@ const sectionSchema = z.object({
     id: idSchema,
     title: z.string().max(200),
     played: z.boolean(),
-    // схема спільна для читання й збереження: ключ із новішого релізу (після відкату) не має ламати сторінку
+    // shared by read and save: a key from a newer release (after a rollback) must not break the page
     icon: z.enum(SECTION_ICON_KEYS).optional().catch(undefined),
     trackId: z.string().min(1).max(64).optional(),
     reveal: revealSchema.optional(),

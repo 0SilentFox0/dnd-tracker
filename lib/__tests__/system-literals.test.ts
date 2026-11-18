@@ -152,7 +152,7 @@ describe('wfrp leaks outside the allowed files', () => {
 
 describe('d20 / HOMM names and rule-section readers leaving core', () => {
     // Counts files (not hits) in lib/ app/ components/ types/ scripts/ except registry roots and scripts/templates/systems/**.
-    // A number may only fall: both growth and a stale (too high) maximum fail. Target is 0 once Part 2+ moves the rules out.
+    // A number may only fall: both growth and a stale (too high) maximum fail.
     const roots = new Set(SYSTEM_ROOTS);
 
     const files = sourceFiles().filter(

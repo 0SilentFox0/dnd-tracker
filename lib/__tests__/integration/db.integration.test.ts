@@ -1,12 +1,3 @@
-/**
- * Інтеграційний тест: підключення до Postgres через Prisma.
- * Ніяких mutations — лише SELECT, безпечно для prod БД.
- *
- * Скіп якщо DATABASE_URL відсутній або підключення не вдається
- * (наприклад, паузнутий Supabase tenant — теж рахуємо як skip,
- * а не fail, щоб локальний run не падав через стейл credentials).
- */
-
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { findMissing } from './_helpers';
@@ -21,8 +12,7 @@ if (!canConnect) {
     console.warn(`[integration:db] skipped — missing: ${missing.join(', ')}`);
 }
 
-// Quick reachability ping. Якщо tenant паузнутий / dead — скіпаємо,
-// замість того щоб падати у кожному тесті.
+// Reachability ping: a paused/dead tenant skips the suite instead of failing every test
 beforeAll(async () => {
     if (!canConnect) return;
 
@@ -38,8 +28,7 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-    // disconnect навіть якщо canConnect=false (Prisma міг встигнути
-    // створити idle pool до failed ping).
+    // disconnect even if canConnect=false: Prisma may have opened an idle pool before the failed ping
     try {
         await prisma.$disconnect();
     } catch {

@@ -2,7 +2,7 @@ import type { Prisma } from '@prisma/client';
 
 import type { CharacterLogKindValue } from '@/lib/constants/character-log';
 
-// без server-only: модуль імпортує battle store, який вантажать симуляції через tsx
+// no server-only: the module imports the battle store, which simulations load through tsx
 export type CharacterLogInput = {
     campaignId: string;
     characterId: string;

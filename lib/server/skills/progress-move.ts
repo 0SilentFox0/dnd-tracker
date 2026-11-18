@@ -7,7 +7,7 @@ const MOVE_ATTEMPTS = 3;
 
 type ProgressDb = Pick<Prisma.TransactionClient, 'character'>;
 
-// старий прогрес ключувався id з JSON дерева; після збереження JSON id = id рядка, тож переносимо ключ
+// old progress was keyed by the id from the tree JSON; after saving, JSON id = row id, so the key is moved
 export async function moveSkillTreeProgress(
     tx: ProgressDb,
     campaignId: string,

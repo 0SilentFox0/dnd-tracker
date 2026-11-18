@@ -347,7 +347,7 @@ function finalizeCharacter(
         resolveLimitFormulas(classMode ? applyClassArmor(baked) : baked)
     );
 
-    // СК і бонус заклять — від характеристики з расовими/артефактними бонусами, тож після запікання
+    // DC and spell bonus come from the ability with racial/artifact bonuses, so after baking
     const spell =
         system.magic.spellcasting?.({
             level: character.level,

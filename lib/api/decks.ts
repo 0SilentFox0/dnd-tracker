@@ -46,7 +46,7 @@ export const setDeckScene = (
 export const deleteDeck = (campaignId: string, deckId: string) =>
     campaignDelete<{ ok: true }>(campaignId, `/decks/${deckId}`);
 
-/** Файл іде з браузера прямо в Storage: тіло запиту до Vercel обмежене 4,5 МБ. */
+/** The file goes from the browser straight to Storage: the request body to Vercel is capped at 4.5 MB. */
 export async function uploadSlideImage(
     campaignId: string,
     blob: Blob,

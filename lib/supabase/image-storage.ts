@@ -26,7 +26,7 @@ export { YEAR_CACHE_SECONDS } from '@/lib/constants/storage';
 
 const MAX_BYTES = 5 * 1024 * 1024;
 
-/** base64 роздуває файл ~на 33%. */
+// base64 inflates the file by ~33%
 const MAX_DATA_URL_CHARS = 7 * 1024 * 1024;
 
 const STORED_URL_MAX_LEN = 2000;
@@ -56,7 +56,6 @@ function isImageDataUrl(value: string): boolean {
     );
 }
 
-/** Шлях: `{campaignId}/{objectBaseName}{ext}`, upsert. */
 async function putImage(
     buffer: Buffer,
     mime: string,
@@ -93,7 +92,6 @@ async function putImage(
     return { ok: true, value: bucket.getPublicUrl(fullPath).data.publicUrl };
 }
 
-/** Клієнтський прев’ю через FileReader (data:image/...;base64,...); після decode — ліміт 5 МБ. */
 export async function uploadImageDataUrl(
     dataUrl: string,
     target: StoredImage
@@ -176,10 +174,6 @@ export async function mirrorImageUrl(
     return putImage(fetched.body, mime, target);
 }
 
-/**
- * Значення зображення для БД: незмінене або вже наше — як є; зовнішній URL дзеркалиться,
- * data URL вантажиться, інакше — короткий рядок як є. `undefined` — поле не змінюється.
- */
 export function resolveImageForPersistence(
     value: string | null,
     options: PersistOptions

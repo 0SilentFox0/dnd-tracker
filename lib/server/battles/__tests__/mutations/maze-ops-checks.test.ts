@@ -24,7 +24,7 @@ const ctx = (
     return withMap(base, mazeMap({ exit: { x: 7, y: 0 }, ...mazeOver }));
 };
 
-// герой у кишені (0,7)–(1,7), єдиний вихід — через (2,7); (3,3) замкнена з усіх боків
+// hero in a pocket (0,7)-(1,7), the only exit via (2,7); (3,3) is closed on all sides
 const trap = {
     walls: ['0:6:s', '1:6:s', '2:6:s', '2:3:e', '3:3:e', '3:2:s', '3:3:s'],
 };

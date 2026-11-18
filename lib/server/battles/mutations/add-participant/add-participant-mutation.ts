@@ -251,11 +251,11 @@ function insertNewcomers(
         let at: number;
 
         if (current && compareInitiative(p, current, ctx.meta.rules) < 0) {
-            // місце в цьому раунді вже минуло: поточний лишається поточним, новачок ходить з наступного раунду
+            // this round slot has passed: the current stays current, the newcomer acts from the next round
             at = initiativeSlot(order, p, ctx.meta.rules);
             turnIndex++;
         } else {
-            // порядок після розкриттів не монотонний: шукаємо лише серед тих, хто ще має ходити (після щойно введених)
+            // order after reveals is not monotonic: search only among those still to act (after the just-entered)
             let afterRun = turnIndex + 1;
 
             while (order[afterRun]?.battleData.revealPending) afterRun++;

@@ -68,7 +68,6 @@ const scene0: BattleSceneState = {
     completedAt: null,
 };
 
-/** Сховище в пам'яті з тими самими split/join, prepareSave і знімками, що й saveBattle, плюс карта бою */
 function memoryBattle(participants: BattleParticipant[], map: BattleMapConfig) {
     let scene = { ...scene0 };
 

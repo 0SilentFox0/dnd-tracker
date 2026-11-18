@@ -80,7 +80,7 @@ type TableInput = {
 };
 
 function refsIssues(c: TableInput): ErrorIssue[] {
-    // оновлення без columns перевіряє ресурс за збереженою таблицею
+    // an update without columns validates the resource against the stored table
     if (c.columns === undefined) return [];
 
     const columns = c.columns;

@@ -30,7 +30,7 @@ export function reorderTracks(
     return campaignPut<CampaignTrack[]>(campaignId, '/tracks/order', { ids });
 }
 
-/** Файл іде з браузера прямо в Storage: тіло запиту до Vercel обмежене 4,5 МБ. */
+/** The file goes from the browser straight to Storage: the request body to Vercel is capped at 4.5 MB. */
 export async function uploadTrackFile(
     campaignId: string,
     file: File,
@@ -52,7 +52,7 @@ export async function uploadTrackFile(
         request
     );
 
-    // Storage бере MIME з частини FormData, а браузер дає для .m4a «audio/x-m4a» або "" — перетипізовуємо за квитком
+    // Storage takes the MIME from the FormData part, and browsers send "audio/x-m4a" or "" for .m4a: retype from the ticket
     const body = new Blob([file], { type: ticket.contentType });
 
     const { error } = await createClient()

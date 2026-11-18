@@ -27,7 +27,7 @@ export function trackPathOwnedBy(path: string, campaignId: string): boolean {
 type Bucket = ReturnType<Admin['storage']['from']>;
 
 async function musicBucket(supabase: Admin): Promise<Result<Bucket>> {
-    // ліміт і типи на рівні бакета: Storage сам відхилить чужий файл за підписаним URL
+    // limit and types at bucket level: Storage rejects a foreign file sent through a signed URL
     const ensured = await ensureBucket(supabase, BATTLE_MUSIC_BUCKET, {
         public: true,
         fileSizeLimit: MAX_TRACK_BYTES,

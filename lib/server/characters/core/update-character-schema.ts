@@ -65,10 +65,8 @@ export const updateCharacterSchema = z.object({
     immunities: z.array(z.string()).optional(),
     morale: z.number().min(-10).max(10).optional(),
 
-    // Прокачка
     controlledBy: z.string().optional(),
 
-    // Уміння (персональний скіл)
     personalSkillId: z.string().optional().nullable(),
 
     primaryAbility: z.enum(ABILITY_KEYS).nullable().optional(),

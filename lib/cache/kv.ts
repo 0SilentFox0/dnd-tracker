@@ -1,7 +1,3 @@
-/**
- * Опціональний кеш на спільному клієнті `lib/redis.ts`; без Redis kv* функції — no-op.
- */
-
 import { getRedisClient } from '@/lib/redis';
 
 const KV_TTL_SECONDS = 60;
@@ -12,7 +8,6 @@ export async function kvGet<T>(key: string): Promise<T | null> {
     if (!redis) return null;
 
     try {
-        // @upstash/redis автоматично JSON-парсить значення.
         const data = await redis.get<T>(key);
 
         return data ?? null;
@@ -31,7 +26,6 @@ export async function kvSet(
     if (!redis) return;
 
     try {
-        // @upstash/redis автоматично JSON-серіалізує об'єкти.
         await redis.set(key, value, { ex: ttlSeconds });
     } catch {
         // ignore

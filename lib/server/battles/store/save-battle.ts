@@ -73,7 +73,7 @@ const UPDATABLE_COLUMNS = Object.keys(COLUMN_SQL_TYPES) as UpdatableColumn[];
 
 const quoted = (name: string) => Prisma.raw(`"${name}"`);
 
-// один UPDATE … FROM (VALUES …) без RETURNING: кількість запитів не росте з кількістю учасників
+// single UPDATE ... FROM (VALUES ...) without RETURNING: query count does not grow with participants
 function updateParticipantsSql(
     battleId: string,
     updates: ParticipantUpdate[]

@@ -128,7 +128,7 @@ async function assembleCampaignContext({
     return campaignContext;
 }
 
-/** Лише скіли, на які посилаються персонажі, і спел-рядки без описів (економія egress). */
+/** Only skills referenced by characters and spell rows without descriptions (egress saving). */
 export async function buildCampaignContextForStart(
     campaignId: string,
     characters: CharacterWithRelations[],

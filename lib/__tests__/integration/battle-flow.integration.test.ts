@@ -1,6 +1,3 @@
-/**
- * Наскрізний флоу бою через runBattleMutation і справжнє сховище. Лише локальна Docker-БД.
- */
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 
 import { AttackType, ParticipantSide } from '@/lib/constants/battle';

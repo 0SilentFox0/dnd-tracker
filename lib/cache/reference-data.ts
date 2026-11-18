@@ -111,7 +111,6 @@ export async function getCachedMainSkills(campaignId: string) {
     )();
 }
 
-/** Лише колонки, потрібні для побудови прикликаного учасника (без createdAt/опису рас); інвалідація тегами units/races. */
 export async function getCachedSummonPool(campaignId: string) {
     return referenceCache(
         async () => {
