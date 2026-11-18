@@ -225,6 +225,7 @@ describe('battle map tile storage', () => {
 
     it('reads only patched chunks and skips unchanged ones', async () => {
         db.rows[0].tileLayers = { ground: encodedNew };
+
         const next = await patchTileChunks('m1', 1, [
             { layer: 'ground', cx: 0, cy: 0, data: encodedNew },
         ]);

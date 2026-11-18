@@ -7,9 +7,9 @@ import { pruneMapVersions } from '@/lib/server/battle-maps/library-service';
 import { ContentError } from '@/lib/server/content/errors';
 import { chunkKey } from '@/lib/utils/battle/map-storage/chunk-key';
 import {
+    type ExistingTileChunk,
     planTileChunkWrites,
     tilePatchKeys,
-    type ExistingTileChunk,
 } from '@/lib/utils/battle/map-storage/tile-chunk-patch';
 import { decodeTileChunk } from '@/lib/utils/battle/tiles/rle';
 import { isTileLayer, type TileLayer } from '@/lib/utils/battle/tiles/types';

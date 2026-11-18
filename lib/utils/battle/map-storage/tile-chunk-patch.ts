@@ -38,6 +38,7 @@ export function tilePatchKeys(patches: readonly TilePatchInput[]): string[] {
 
 function sameLayers(a: TileLayerRecord | undefined, b: TileLayerRecord | null) {
     const left = Object.entries(a ?? {});
+
     const right = Object.entries(b ?? {});
 
     if (left.length !== right.length) return false;
@@ -77,6 +78,7 @@ export function planTileChunkWrites(
 
         if (!next && (!before || before.data === EMPTY_EDGE_CHUNK)) {
             if (before) writes.push({ kind: 'delete', key, cx, cy });
+
             continue;
         }
 
