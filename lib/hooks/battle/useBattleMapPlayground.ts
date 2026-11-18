@@ -2,7 +2,24 @@
 
 import { useCallback, useMemo, useState } from 'react';
 
-import { buildMockParticipants } from './mock-participants';
+import { playgroundCellClick } from './playground-click';
+import {
+    type BattleMapPlaygroundLogEntry,
+    type BattleMapPlaygroundMode,
+    type BattleMapPlaygroundSnapshot,
+    DEMO_RANGE,
+    DEMO_TEMPLATE,
+    DEMO_TERRAIN,
+    initial,
+    LOG_LIMIT,
+} from './playground-demo';
+
+export type {
+    BattleMapPlaygroundLogEntry,
+    BattleMapPlaygroundLogKey,
+    BattleMapPlaygroundMode,
+    BattleMapPlaygroundSnapshot,
+} from './playground-demo';
 
 import {
     CombatStatus,
@@ -10,75 +27,9 @@ import {
     MAZE_MARK_SYMBOLS,
 } from '@/lib/constants/battle';
 import { PREVIEW_RULES } from '@/lib/utils/battle/fx/preview-rules';
-import {
-    aimView,
-    cellKey,
-    cellsOf,
-    deriveTrajectory,
-    type MapAim,
-    marginCells,
-    moveMarks,
-    moveZoneMarks,
-    placeParticipants,
-    targetMarks,
-    templateArea,
-} from '@/lib/utils/battle/grid';
+import {aimView, deriveTrajectory, type MapAim, marginCells, moveMarks, moveZoneMarks, placeParticipants, targetMarks} from '@/lib/utils/battle/grid';
 import type { BattleParticipant } from '@/types/battle';
-import type {
-    BattleMapActions,
-    BattleMapConfig,
-    BattleMapView,
-    GridPoint,
-    MazeMarkSymbol,
-    SpellTemplate,
-} from '@/types/battle-grid';
-
-export type BattleMapPlaygroundMode =
-    | 'move'
-    | 'attack'
-    | 'template'
-    | 'maze-mark';
-
-export type BattleMapPlaygroundLogKey =
-    | 'mazeMark'
-    | 'outOfRange'
-    | 'template'
-    | 'move'
-    | 'hit'
-    | 'turn';
-
-export interface BattleMapPlaygroundLogEntry {
-    key: BattleMapPlaygroundLogKey;
-    params: Record<string, string | number>;
-}
-
-export interface BattleMapPlaygroundSnapshot {
-    map?: BattleMapConfig;
-    participants?: BattleParticipant[];
-}
-
-const DEMO_DAMAGE = 7;
-
-const DEMO_TERRAIN: NonNullable<BattleMapConfig['terrain']> = {
-    '9:3': { kind: 'wall' },
-    '9:4': { kind: 'wall' },
-    '9:5': { kind: 'wall' },
-    '6:7': { kind: 'barrier', untilRound: 3 },
-    '7:7': { kind: 'barrier', untilRound: 3 },
-    '12:8': { kind: 'hazard', label: 'Fire wall' },
-    '13:8': { kind: 'hazard', label: 'Fire wall' },
-    '12:9': { kind: 'hazard', label: 'Fire wall' },
-};
-
-const LOG_LIMIT = 6;
-
-const DEMO_TEMPLATE: SpellTemplate = { shape: 'circle', size: 20 };
-
-const DEMO_RANGE = 60;
-
-function initial(map: BattleMapConfig): BattleParticipant[] {
-    return placeParticipants(map, buildMockParticipants());
-}
+import type {BattleMapActions, BattleMapConfig, BattleMapView, GridPoint, MazeMarkSymbol} from '@/types/battle-grid';
 
 export function useBattleMapPlayground(
     snapshot: BattleMapPlaygroundSnapshot = {}
@@ -239,139 +190,25 @@ export function useBattleMapPlayground(
     );
 
     const onCellClick = useCallback(
-        (p: GridPoint) => {
-            const key = cellKey(p);
-
-            if (mode === 'maze-mark') {
-                if (!map.maze) return;
-
-                setMapState((prev) =>
-                    prev.maze
-                        ? {
-                              ...prev,
-                              maze: {
-                                  ...prev.maze,
-                                  marks: {
-                                      ...prev.maze.marks,
-                                      [key]: {
-                                          symbol: mazeMarkSymbol,
-                                          color: '#f0c75e',
-                                          by: activeId,
-                                      },
-                                  },
-                              },
-                          }
-                        : prev
-                );
-                pushLog({
-                    key: 'mazeMark',
-                    params: { symbol: mazeMarkSymbol, cell: key },
-                });
-
-                return;
-            }
-
-            if (mode === 'template') {
-                if (
-                    !aimView(
-                        { map, participants, rules: PREVIEW_RULES },
-                        mapAim,
-                        p
-                    )
-                )
-                    return pushLog({ key: 'outOfRange', params: {} });
-
-                const hit = templateArea(
-                    map,
-                    participants,
+        (p: GridPoint) =>
+            playgroundCellClick(
+                {
+                    mode,
+                    marks,
+                    costs,
+                    activeId,
                     active,
-                    DEMO_TEMPLATE,
-                    p,
-                    PREVIEW_RULES
-                ).targets;
-
-                setAim(p);
-                pushLog({
-                    key: 'template',
-                    params: {
-                        cell: key,
-                        names: hit.map((q) => q.basicInfo.name).join(', '),
-                    },
-                });
-
-                return;
-            }
-
-            if (mode === 'move') {
-                const cost = marks.has(key) ? costs.get(key) : undefined;
-
-                if (cost === undefined || cost <= 0) return;
-
-                setParticipants((prev) =>
-                    prev.map((q) =>
-                        q.basicInfo.id === activeId
-                            ? {
-                                  ...q,
-                                  battleData: {
-                                      ...q.battleData,
-                                      position: p,
-                                      movementUsed:
-                                          (q.battleData.movementUsed ?? 0) +
-                                          cost,
-                                  },
-                              }
-                            : q
-                    )
-                );
-                pushLog({
-                    key: 'move',
-                    params: { name: active.basicInfo.name, cost },
-                });
-
-                return;
-            }
-
-            if (marks.get(key) !== 'target') return;
-
-            const target = participants.find(
-                (q) =>
-                    q.basicInfo.side !== active.basicInfo.side &&
-                    cellsOf(q).some((c) => cellKey(c) === key)
-            );
-
-            if (!target) return;
-
-            setParticipants((prev) =>
-                prev.map((q) => {
-                    if (q.basicInfo.id !== target.basicInfo.id) return q;
-
-                    const currentHp = Math.max(
-                        0,
-                        q.combatStats.currentHp - DEMO_DAMAGE
-                    );
-
-                    return {
-                        ...q,
-                        combatStats: {
-                            ...q.combatStats,
-                            currentHp,
-                            status:
-                                currentHp <= 0
-                                    ? CombatStatus.DEAD
-                                    : q.combatStats.status,
-                        },
-                    };
-                })
-            );
-            pushLog({
-                key: 'hit',
-                params: {
-                    name: active.basicInfo.name,
-                    target: target.basicInfo.name,
-                    damage: DEMO_DAMAGE,
+                    participants,
+                    map,
+                    mapAim,
+                    mazeMarkSymbol,
+                    setMap: setMapState,
+                    setParticipants,
+                    setAim,
+                    pushLog,
                 },
-            });
-        },
+                p
+            ),
         [
             mode,
             marks,
