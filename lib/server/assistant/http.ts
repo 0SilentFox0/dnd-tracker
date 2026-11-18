@@ -40,6 +40,85 @@ const privateResponse = (response: Response) => {
     return response;
 };
 
+async function deletionReceiptResponse(
+    campaignId: string,
+    intentId: string
+): Promise<Response | null> {
+    const auth = await requireAuth();
+
+    if (auth instanceof NextResponse) return privateResponse(auth);
+
+    const rate = await checkRateLimit({
+        userId: auth.userId,
+        scope: 'assistant-receipt',
+        battleId: campaignId,
+        limit: 120,
+        windowSeconds: 60,
+        memoryFallback: true,
+    });
+
+    if (!rate.allowed) return privateResponse(rateLimitResponse(rate));
+
+    try {
+        return privateJson(
+            await readDeletionReceipt(auth.userId, campaignId, intentId)
+        );
+    } catch (error) {
+        if (!(error instanceof ContentError) || error.status !== 404)
+            throw error;
+    }
+
+    return null;
+}
+
+async function listResponse(
+    caller: ReturnType<typeof chatCaller>,
+    req: Request
+) {
+    const url = new URL(req.url);
+
+    const cursor = url.searchParams.get('cursor') ?? undefined;
+
+    const limit = url.searchParams.has('limit')
+        ? Number(url.searchParams.get('limit'))
+        : undefined;
+
+    return privateJson(
+        await listIntents(caller, {
+            cursor,
+            limit,
+            ...(url.searchParams.has('status') && {
+                status: url.searchParams.get('status') as never,
+            }),
+        })
+    );
+}
+
+async function updatePolicy(req: Request, campaignId: string, userId: string) {
+    const body = await parseBody(assistantPolicySchema, req, undefined, {
+        maxBytes: AI_BODY_LIMITS.small,
+    });
+
+    if (body instanceof NextResponse) return privateResponse(body);
+
+    const where = { id: body.id, campaignId, userId };
+
+    const result =
+        body.target === 'thread'
+            ? await prisma.aiThread.updateMany({
+                  where,
+                  data: { executionMode: body.executionMode },
+              })
+            : await prisma.apiToken.updateMany({
+                  where: { ...where, revokedAt: null },
+                  data: { executionMode: body.executionMode },
+              });
+
+    if (result.count !== 1) return privateJson({ code: 'NOT_FOUND' }, 404);
+
+    return privateJson({ id: body.id, executionMode: body.executionMode });
+}
+
 export function assistantRoute(mode: RouteMode) {
     return async (req: Request, context: Context): Promise<Response> => {
         try {
@@ -62,41 +141,12 @@ export function assistantRoute(mode: RouteMode) {
             if (mutation && !isSameOriginRequest(req))
                 return privateJson({ code: 'FORBIDDEN' }, 403);
 
-            let receiptRateChecked = false;
+            const receiptRateChecked = mode === 'receipt' && !!intentId;
 
             if (mode === 'receipt' && intentId) {
-                const auth = await requireAuth();
+                const early = await deletionReceiptResponse(campaignId, intentId);
 
-                if (auth instanceof NextResponse) return privateResponse(auth);
-
-                const rate = await checkRateLimit({
-                    userId: auth.userId,
-                    scope: 'assistant-receipt',
-                    battleId: campaignId,
-                    limit: 120,
-                    windowSeconds: 60,
-                    memoryFallback: true,
-                });
-
-                if (!rate.allowed)
-                    return privateResponse(rateLimitResponse(rate));
-
-                receiptRateChecked = true;
-                try {
-                    return privateJson(
-                        await readDeletionReceipt(
-                            auth.userId,
-                            campaignId,
-                            intentId
-                        )
-                    );
-                } catch (error) {
-                    if (
-                        !(error instanceof ContentError) ||
-                        error.status !== 404
-                    )
-                        throw error;
-                }
+                if (early) return early;
             }
 
             const access = await requireDM(campaignId);
@@ -124,61 +174,10 @@ export function assistantRoute(mode: RouteMode) {
                     return privateResponse(rateLimitResponse(rate));
             }
 
-            if (mode === 'list') {
-                const url = new URL(req.url);
+            if (mode === 'list') return listResponse(caller, req);
 
-                const cursor = url.searchParams.get('cursor') ?? undefined;
-
-                const limit = url.searchParams.has('limit')
-                    ? Number(url.searchParams.get('limit'))
-                    : undefined;
-
-                return privateJson(
-                    await listIntents(caller, {
-                        cursor,
-                        limit,
-                        ...(url.searchParams.has('status') && {
-                            status: url.searchParams.get('status') as never,
-                        }),
-                    })
-                );
-            }
-
-            if (mode === 'policy') {
-                const body = await parseBody(
-                    assistantPolicySchema,
-                    req,
-                    undefined,
-                    { maxBytes: AI_BODY_LIMITS.small }
-                );
-
-                if (body instanceof NextResponse) return privateResponse(body);
-
-                const where = {
-                    id: body.id,
-                    campaignId,
-                    userId: access.userId,
-                };
-
-                const result =
-                    body.target === 'thread'
-                        ? await prisma.aiThread.updateMany({
-                              where,
-                              data: { executionMode: body.executionMode },
-                          })
-                        : await prisma.apiToken.updateMany({
-                              where: { ...where, revokedAt: null },
-                              data: { executionMode: body.executionMode },
-                          });
-
-                if (result.count !== 1)
-                    return privateJson({ code: 'NOT_FOUND' }, 404);
-
-                return privateJson({
-                    id: body.id,
-                    executionMode: body.executionMode,
-                });
-            }
+            if (mode === 'policy')
+                return updatePolicy(req, campaignId, access.userId);
 
             if (!intentId) return privateJson({ code: 'INVALID_INPUT' }, 400);
 
