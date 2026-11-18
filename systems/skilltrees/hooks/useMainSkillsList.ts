@@ -3,9 +3,8 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { useDeleteMainSkill, useMainSkills } from './useMainSkills';
-
 import { useConfirm, useSearch } from '@/lib/hooks/common';
+import { useDeleteMainSkill, useMainSkills } from '@/lib/hooks/skills/useMainSkills';
 import type { MainSkill } from '@/types/main-skills';
 
 const mainSkillFields = (mainSkill: MainSkill) => [mainSkill.name];

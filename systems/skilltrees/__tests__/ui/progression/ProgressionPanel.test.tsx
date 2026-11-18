@@ -88,7 +88,7 @@ const dto = () => ({
     },
 });
 
-vi.mock('@/lib/hooks/skills', () => ({
+vi.mock('@/systems/skilltrees/hooks', () => ({
     useCharacterProgression: () => {
         const data = dto();
 

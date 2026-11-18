@@ -4,11 +4,10 @@ import { type FormEvent, useCallback, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
-import { useMainSkills } from './useMainSkills';
-import { useCreateSkill, useUpdateSkill } from './useSkills';
-
 import { abilitySaveError, useAbilityValidity } from '@/lib/hooks/abilities';
 import { useNavigateFresh } from '@/lib/hooks/common';
+import { useMainSkills } from '@/lib/hooks/skills/useMainSkills';
+import { useCreateSkill, useUpdateSkill } from '@/lib/hooks/skills/useSkills';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import { initialSkillFormValues } from '@/lib/utils/skills/form/normalize';
 import { buildSkillFormPayload } from '@/lib/utils/skills/form/payload';

@@ -1,8 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { skillKeys } from './keys';
-
 import { getSkillTrees, updateSkillTree } from '@/lib/api/skill-trees';
+import { skillKeys } from '@/lib/hooks/skills/keys';
 import type { RawTree } from '@/lib/utils/skills/progression';
 
 export function useSkillTrees(campaignId: string) {

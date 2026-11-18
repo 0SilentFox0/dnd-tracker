@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { Download, Upload } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { useSkillTreeTransfer } from '@/lib/hooks/skills';
+import { useSkillTreeTransfer } from '@/systems/skilltrees/hooks';
 
 export function SkillTreeTransferButtons({
     campaignId,

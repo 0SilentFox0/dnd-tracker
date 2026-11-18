@@ -38,7 +38,7 @@ let errors: Array<{ code: string; ref: string; label?: string }> = [];
 
 let loading = false;
 
-vi.mock('@/lib/hooks/skills', () => ({
+vi.mock('@/systems/skilltrees/hooks', () => ({
     useSkillTreeEditor: () => ({
         state: {
             isLoading: loading,

@@ -5,7 +5,8 @@ import { cleanup, renderHook } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import * as api from '@/lib/api/character-progression';
-import { skillKeys, useCharacterProgression } from '@/lib/hooks/skills';
+import { skillKeys } from '@/lib/hooks/skills';
+import { useCharacterProgression } from '@/systems/skilltrees/hooks';
 
 vi.mock('@/lib/api/character-progression');
 

@@ -7,7 +7,7 @@ import { useTranslations } from 'next-intl';
 import './level-up.css';
 import { HUD_SURFACE } from '@/components/hud';
 import { Button } from '@/components/ui/button';
-import { useLevelUpCelebration } from '@/lib/hooks/skills';
+import { useLevelUpCelebration } from '@/systems/skilltrees/hooks';
 
 export function LevelUpOverlay({
     campaignId,

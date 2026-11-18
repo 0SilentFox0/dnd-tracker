@@ -9,7 +9,7 @@ import { EmptyState } from '@/components/common/states';
 import { ContentTransferButtons } from '@/components/content-import/ContentTransferButtons';
 import { HudPage, HudPageHeader } from '@/components/hud/page';
 import { Button } from '@/components/ui/button';
-import { useMainSkillsList } from '@/lib/hooks/skills';
+import { useMainSkillsList } from '@/systems/skilltrees/hooks';
 import { CreateMainSkillDialog } from '@/systems/skilltrees/ui/content/main-skills/CreateMainSkillDialog';
 import { MainSkillCard } from '@/systems/skilltrees/ui/content/main-skills/MainSkillCard';
 import type { MainSkill } from '@/types/main-skills';

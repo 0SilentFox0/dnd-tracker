@@ -2,15 +2,14 @@
 
 import { useCallback, useMemo } from 'react';
 
-import { useMainSkills } from './useMainSkills';
+import { useSearch } from '@/lib/hooks/common';
+import { useMainSkills } from '@/lib/hooks/skills/useMainSkills';
 import {
     useDeleteAllSkills,
     useDeleteSkill,
     useDuplicateSkill,
     useSkills,
-} from './useSkills';
-
-import { useSearch } from '@/lib/hooks/common';
+} from '@/lib/hooks/skills/useSkills';
 import {
     convertGroupedSkillsToArray,
     groupSkillsByMainSkill,

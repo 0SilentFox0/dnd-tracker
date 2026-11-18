@@ -6,7 +6,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import * as progressionApi from '@/lib/api/character-progression';
 import { characterKeys } from '@/lib/hooks/characters/keys';
-import { useLevelUpCelebration } from '@/lib/hooks/skills';
+import { useLevelUpCelebration } from '@/systems/skilltrees/hooks';
 import type { CharacterSheet } from '@/types/characters';
 
 vi.mock('@/lib/api/character-progression');

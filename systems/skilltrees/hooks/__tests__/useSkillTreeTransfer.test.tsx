@@ -2,8 +2,8 @@
 import { act, cleanup, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { useSkillTreeTransfer } from '@/lib/hooks/skills/useSkillTreeTransfer';
 import { SKILL_TREE_FILE_FORMAT } from '@/lib/utils/skills/tree-transfer';
+import { useSkillTreeTransfer } from '@/systems/skilltrees/hooks/useSkillTreeTransfer';
 
 const state = vi.hoisted(() => ({
     trees: [] as Array<{ id: string; race: string; skills: unknown }>,
@@ -17,7 +17,7 @@ const confirm = vi.hoisted(() => vi.fn(async () => true));
 
 const downloadText = vi.hoisted(() => vi.fn());
 
-vi.mock('@/lib/hooks/skills/useSkillTrees', () => ({
+vi.mock('@/systems/skilltrees/hooks/useSkillTrees', () => ({
     useSkillTrees: () => ({ data: state.trees }),
     useSaveSkillTree: () => ({ mutateAsync: save, isPending: false }),
 }));

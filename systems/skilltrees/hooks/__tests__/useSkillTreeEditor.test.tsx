@@ -6,8 +6,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createMainSkill } from '@/lib/api/main-skills';
 import * as treesApi from '@/lib/api/skill-trees';
-import { useSkillTreeEditor } from '@/lib/hooks/skills';
 import { buildTreeJson } from '@/lib/utils/skills/progression';
+import { useSkillTreeEditor } from '@/systems/skilltrees/hooks';
 
 vi.mock('@/lib/api/skill-trees');
 

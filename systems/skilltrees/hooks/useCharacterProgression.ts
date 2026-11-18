@@ -3,9 +3,8 @@
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
-import { skillKeys } from './keys';
-
 import { getCharacterProgression } from '@/lib/api/character-progression';
+import { skillKeys } from '@/lib/hooks/skills/keys';
 import { ENTITY_STALE_MS } from '@/lib/providers/query-provider';
 import {
     normalizeTree,

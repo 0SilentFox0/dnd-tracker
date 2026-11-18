@@ -4,9 +4,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
-import { useUpdateMainSkill } from './useMainSkills';
-
 import { useNavigateFresh } from '@/lib/hooks/common';
+import { useUpdateMainSkill } from '@/lib/hooks/skills/useMainSkills';
 import { useSpellGroups } from '@/lib/hooks/spells';
 import { errorMessage } from '@/lib/utils/common/error-message';
 import type { MainSkill, MainSkillFormData } from '@/types/main-skills';

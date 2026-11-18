@@ -3,8 +3,6 @@
 import { useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 
-import { skillKeys } from './keys';
-
 import {
     learnNode,
     resetProgression,
@@ -14,6 +12,7 @@ import { ApiError } from '@/lib/api/client';
 import { battleKeys } from '@/lib/hooks/battles/keys';
 import { characterKeys } from '@/lib/hooks/characters/keys';
 import { useNotify, useSingleFlight } from '@/lib/hooks/common';
+import { skillKeys } from '@/lib/hooks/skills/keys';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import {
     BRANCH_MIN_LEVEL,
