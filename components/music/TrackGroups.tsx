@@ -83,7 +83,8 @@ export function TrackGroups({
                             className="flex flex-col gap-2"
                         >
                             <Button
-                                variant="bare"
+                                variant="plain"
+                                size="auto"
                                 type="button"
                                 aria-expanded={!folded}
                                 onClick={() => view.collapsed.toggle(g.name)}
