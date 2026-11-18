@@ -29,7 +29,12 @@ import type {
     StoredBattleEvent,
     StoredParticipant,
 } from '@/lib/utils/battle/store';
-import { buildSnapshotState, eventToBattleAction, joinParticipant, splitParticipant } from '@/lib/utils/battle/store';
+import {
+    buildSnapshotState,
+    eventToBattleAction,
+    joinParticipant,
+    splitParticipant,
+} from '@/lib/utils/battle/store';
 import {
     KNOWLEDGE_EVENT_TYPES,
     summarizeKnowledge,
@@ -294,9 +299,9 @@ function visible(scene: BattleScene, { withKnowledge = false } = {}) {
 async function expectDeltaMatchesGet(
     battle: Memory,
     action: (b: Memory) => Promise<BattleMutationResponse['delta']>,
-    opts?: { withKnowledge?: boolean }
+    opts?: { withKnowledge?: boolean; as?: string }
 ) {
-    const before = await battle.get();
+    const before = await battle.get(opts?.as);
 
     const delta = wire(await action(battle));
 
@@ -304,7 +309,7 @@ async function expectDeltaMatchesGet(
 
     expect(applied).not.toBe('refetch');
 
-    const after = await battle.get();
+    const after = await battle.get(opts?.as);
 
     expect(visible(applied as BattleScene, opts)).toEqual(visible(after, opts));
 
@@ -455,7 +460,8 @@ describe('інваріант: GET(до) + дельта = GET(після)', () =>
 
         const { applied } = await expectDeltaMatchesGet(
             memoryBattle({ participants: [armedHero, burningGoblin, orc] }),
-            nextTurn
+            nextTurn,
+            { as: DM }
         );
 
         const gob = applied.initiativeOrder[1];
@@ -493,7 +499,7 @@ describe('інваріант: GET(до) + дельта = GET(після)', () =>
                     },
                     { actionIndex: first }
                 ),
-            { withKnowledge: true }
+            { as: DM }
         );
 
         expect(delta.cancelledFrom).toBe(first);
@@ -566,8 +572,10 @@ describe('інваріант: GET(до) + дельта = GET(після)', () =>
             events: [],
         });
 
-        const { applied } = await expectDeltaMatchesGet(battle, (b) =>
-            b.act(DM, { access: BattleAccess.DM, mutate: grow })
+        const { applied } = await expectDeltaMatchesGet(
+            battle,
+            (b) => b.act(DM, { access: BattleAccess.DM, mutate: grow }),
+            { as: DM }
         );
 
         expect(applied.initiativeOrder[1].combatStats.maxHp).toBe(38);

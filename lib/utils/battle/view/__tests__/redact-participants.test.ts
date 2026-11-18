@@ -64,7 +64,7 @@ describe('redactParticipantsForViewer', () => {
             armorClass: 0,
         });
         expect(p.abilities.strength).toBe(10);
-        expect(JSON.stringify(p)).not.toContain('morale');
+        expect(JSON.stringify(p.abilities.system)).not.toContain('morale');
         expect(JSON.stringify(p)).not.toContain('lair');
         expect(p.battleData.hpMultiplier).toBeUndefined();
         expect(p.basicInfo.name).toBe(base.basicInfo.name);

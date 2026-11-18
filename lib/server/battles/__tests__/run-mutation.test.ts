@@ -533,7 +533,7 @@ describe('runBattleMutation', () => {
             event: 'battle-delta',
             channel: 'private-battle-b1',
         });
-        expect(messages[0].payload).toEqual(json.delta);
+        expect(messages[0].payload).toEqual({ ...json.delta, redacted: true });
     });
 
     it('велика дельта — battle-delta з refetch, відповідь усе одно повна', async () => {

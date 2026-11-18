@@ -101,10 +101,15 @@ function redactOne(p: BattleParticipant): BattleParticipant {
     if (slot) battleData.system = slot;
 
     const abilities = Object.fromEntries(
-        PUBLIC_ABILITY_KEYS.flatMap((k) =>
-            p.abilities[k] === undefined ? [] : [[k, p.abilities[k]]]
+        Object.entries(p.abilities).filter(
+            ([k, v]) =>
+                v !== undefined &&
+                (PUBLIC_ABILITY_KEYS as readonly string[]).includes(k)
         )
-    ) as Pick<BattleParticipant['abilities'], (typeof PUBLIC_ABILITY_KEYS)[number]>;
+    ) as Pick<
+        BattleParticipant['abilities'],
+        (typeof PUBLIC_ABILITY_KEYS)[number]
+    >;
 
     const abilitySlot = stripExt(p.abilities.system);
 
@@ -146,7 +151,9 @@ export const redactPendingForViewer = (
     viewer: Viewer,
     pending: BattleParticipant[]
 ): BattleParticipant[] =>
-    stubReserve(redactParticipantsForViewer(viewer, pending));
+    viewer.isDM
+        ? pending
+        : stubReserve(redactParticipantsForViewer(viewer, pending));
 
 function redactPatch(
     patch: BattleParticipantPatch,
