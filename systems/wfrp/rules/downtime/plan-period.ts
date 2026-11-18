@@ -46,7 +46,7 @@ export type PeriodInput = {
 export type PlannedHero = {
     id: string;
     resources: CharacterResources;
-    characteristics: Characteristics;
+    characteristics: Characteristics & { downtime: DowntimeState };
     coins?: CoinAmount;
     summary: PeriodSummary;
 };

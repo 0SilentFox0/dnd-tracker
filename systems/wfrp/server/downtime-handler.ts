@@ -319,7 +319,7 @@ async function persistPeriod(
         await tx.character.update({
             where: { id: p.id },
             data: {
-                resources: p.resources as Prisma.InputJsonValue,
+                resources: characteristicsJson(p.resources),
                 characteristics: characteristicsJson(p.characteristics),
             },
         });
@@ -377,7 +377,7 @@ export async function passPeriod(
             characters: planned.map((p) => ({
                 id: p.id,
                 resources: p.resources,
-                downtime: p.characteristics.downtime as DowntimeState,
+                downtime: p.characteristics.downtime,
                 ...purseOf(incomes, p.id),
             })),
         };
@@ -489,7 +489,7 @@ async function persistUndo(
         await tx.character.update({
             where: { id: r.id },
             data: {
-                resources: r.resources as Prisma.InputJsonValue,
+                resources: characteristicsJson(r.resources),
                 characteristics: characteristicsJson(r.characteristics),
             },
         });
