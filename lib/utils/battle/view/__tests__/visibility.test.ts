@@ -894,3 +894,79 @@ describe('деталі дії через combat.details (D77, P1-P6)', () => {
         expect(entries[0]).toBe(e);
     });
 });
+
+describe('числа HP/AC ворога в журналі (L8b C1)', () => {
+    const mk = (id: string, s: ParticipantSide, hp: number) => {
+        const p = side(s);
+
+        return {
+            ...p,
+            basicInfo: { ...p.basicInfo, id },
+            combatStats: { ...p.combatStats, maxHp: 40, currentHp: hp },
+        } as BattleParticipant;
+    };
+
+    const enemy = mk('e', ParticipantSide.ENEMY, 12);
+
+    const ally = mk('f', ParticipantSide.ALLY, 30);
+
+    const entry = {
+        targets: [
+            { participantId: 'e', participantName: 'x' },
+            { participantId: 'f', participantName: 'y' },
+        ],
+        actionDetails: {
+            spellAttacks: [
+                { participantId: 'e', roll: 10, total: 14, ac: 17, hit: true },
+                { participantId: 'f', roll: 10, total: 14, ac: 12, hit: true },
+            ],
+        },
+        hpChanges: [
+            {
+                participantId: 'e',
+                participantName: 'x',
+                oldHp: 20,
+                newHp: 12,
+                change: 8,
+            },
+            {
+                participantId: 'f',
+                participantName: 'y',
+                oldHp: 30,
+                newHp: 25,
+                change: 5,
+            },
+        ],
+    } as unknown as BattleAction;
+
+    const seen = sanitizeLogEntry(
+        entry,
+        PLAYER_VIEWER,
+        ctxOf([enemy, ally], DEFAULT_RULES)
+    );
+
+    it('ворог: change лишається, oldHp/newHp стають відрами, ac знято', () => {
+        expect(seen.hpChanges[0]).toMatchObject({
+            change: 8,
+            oldHp: 75,
+            newHp: 40,
+        });
+        expect(seen.actionDetails.spellAttacks?.[0]).not.toHaveProperty('ac');
+    });
+
+    it('союзник лишається точним', () => {
+        expect(seen.hpChanges[1]).toEqual(entry.hpChanges[1]);
+        expect(seen.actionDetails.spellAttacks?.[1].ac).toBe(12);
+    });
+
+    it('seeEnemyHp і ДМ бачать точні числа', () => {
+        const ctx = ctxOf([enemy, ally], DEFAULT_RULES);
+
+        expect(
+            sanitizeLogEntry(entry, { ...PLAYER_VIEWER, canSeeEnemyHp: true }, ctx)
+        ).toBe(entry);
+        expect(
+            sanitizeLogEntry(entry, { ...PLAYER_VIEWER, isDM: true }, ctx)
+        ).toBe(entry);
+    });
+});

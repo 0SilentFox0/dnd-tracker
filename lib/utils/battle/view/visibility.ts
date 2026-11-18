@@ -1,3 +1,4 @@
+import { bucketOfHp } from './hp-bucket';
 import { type BattleKnowledge, resolveObservedTraits } from './knowledge';
 
 import { ParticipantSide } from '@/lib/constants/battle';
@@ -81,11 +82,17 @@ export function sanitizeLogEntry(
 
     const isMiscastLine = conditions?.isMiscastLine ?? (() => false);
 
-    const concealed = (e.targets ?? []).some((t) => {
-        const p = participants.find((x) => x.basicInfo.id === t.participantId);
+    const hiddenIds = (ids: string[]) =>
+        new Set(
+            ids.filter((id) => {
+                const p = participants.find((x) => x.basicInfo.id === id);
 
-        return !p || !canSeeExactStats(p, viewer);
-    });
+                return !p || !canSeeExactStats(p, viewer);
+            })
+        );
+
+    const concealed =
+        hiddenIds((e.targets ?? []).map((t) => t.participantId)).size > 0;
 
     const details = e.actionDetails ?? {};
 
@@ -135,8 +142,44 @@ export function sanitizeLogEntry(
         (lines.length !== e.log?.length ||
             lines.some((l, i) => l !== e.log?.[i]));
 
+    const hidden = hiddenIds([
+        ...(e.hpChanges ?? []).map((h) => h.participantId),
+        ...(details.spellAttacks ?? []).map((a) => a.participantId),
+    ]);
+
+    const hpChanges = hidden.size
+        ? (e.hpChanges ?? []).map((h) => {
+              const p = participants.find(
+                  (x) => x.basicInfo.id === h.participantId
+              );
+
+              return p && hidden.has(h.participantId)
+                  ? {
+                        ...h,
+                        oldHp: bucketOfHp(p, h.oldHp),
+                        newHp: bucketOfHp(p, h.newHp),
+                    }
+                  : hidden.has(h.participantId)
+                    ? { ...h, oldHp: 0, newHp: 0 }
+                    : h;
+          })
+        : e.hpChanges;
+
+    const spellAttacks = details.spellAttacks?.map((a) => {
+        if (!hidden.has(a.participantId)) return a;
+
+        const { ac: _hiddenAc, ...open } = a;
+
+        return open;
+    });
+
+    const numbersChanged =
+        hpChanges !== e.hpChanges ||
+        (!!spellAttacks && spellAttacks.some((a, i) => a !== details.spellAttacks?.[i]));
+
     if (
         !stripsNumbers &&
+        !numbersChanged &&
         redacted === sys &&
         !linesChanged &&
         !casterConditions
@@ -145,11 +188,14 @@ export function sanitizeLogEntry(
 
     const { system: _drop, ...full } = details;
 
-    const base = hideNumbers ? rest : full;
+    const base = {
+        ...(hideNumbers ? rest : full),
+        ...(spellAttacks && { spellAttacks }),
+    };
 
     const actionDetails = redacted ? { ...base, system: redacted } : base;
 
-    return { ...e, actionDetails, ...(lines && { log: lines }) };
+    return { ...e, actionDetails, hpChanges, ...(lines && { log: lines }) };
 }
 
 export function redactLogForPlayers(

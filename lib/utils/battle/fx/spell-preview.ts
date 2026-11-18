@@ -207,7 +207,7 @@ export function previewCastFx(castable: CastableSpell): SpellFxResult {
 
         const hpChanged = new Set(
             result.battleAction.hpChanges
-                .filter((h) => h.oldHp !== h.newHp)
+                .filter((h) => h.change !== 0)
                 .map((h) => h.participantId)
         );
 

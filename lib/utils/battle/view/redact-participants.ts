@@ -1,4 +1,5 @@
 import { healthState } from './health';
+import { HP_BUCKET, PROJECTED_MAX_HP } from './hp-bucket';
 import { canSeeExactStats, type Viewer } from './visibility';
 
 import { stubReserve } from '@/lib/utils/battle/participant/reserve';
@@ -9,17 +10,6 @@ import type {
     BattleParticipant,
     BattleParticipantBattleData,
 } from '@/types/battle';
-
-// bucket midpoints against maxHp 100: healthState() reads the same state from the projection
-const HP_BUCKET = {
-    unhurt: 100,
-    wounded: 75,
-    bloodied: 40,
-    dying: 10,
-    down: 0,
-} as const;
-
-const PROJECTED_MAX_HP = 100;
 
 const SECRET_BATTLE_KEYS = [
     'hpMultiplier',
