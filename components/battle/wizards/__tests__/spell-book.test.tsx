@@ -9,7 +9,10 @@ import {
 } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { listOptions } from '@/components/ui/__tests__/radix-select';
+import {
+    listOptions,
+    pickOption,
+} from '@/components/ui/__tests__/radix-select';
 
 vi.mock('@/components/hud/fonts', () => ({ hudFontClassName: '' }));
 
@@ -387,9 +390,7 @@ describe('SpellBook', () => {
 
         render(<Harness caster={hero} />, { wrapper });
         fireEvent.click(await screen.findByText('Палаючий промінь'));
-        fireEvent.change(screen.getByLabelText('Джерело каста'), {
-            target: { value: 'slot:2' },
-        });
+        await pickOption(screen.getByLabelText('Джерело каста'), 'Слот Коло 2');
         fireEvent.click(screen.getByRole('button', { name: /Обрати цілі/ }));
         fireEvent.click(screen.getByRole('button', { name: /Гоблін/ }));
         fireEvent.click(screen.getByRole('button', { name: 'Далі · кидки' }));
@@ -446,9 +447,7 @@ describe('SpellBook', () => {
 
         render(<Harness caster={hero} />, { wrapper });
         fireEvent.click(await screen.findByText('Палаючий промінь'));
-        fireEvent.change(screen.getByLabelText('Рівень каста'), {
-            target: { value: '3' },
-        });
+        await pickOption(screen.getByLabelText('Рівень каста'), /3/);
         fireEvent.click(screen.getByRole('button', { name: /Обрати цілі/ }));
         fireEvent.click(screen.getByRole('button', { name: /Гоблін/ }));
         fireEvent.click(screen.getByRole('button', { name: 'Далі · кидки' }));

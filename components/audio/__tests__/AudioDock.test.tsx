@@ -11,6 +11,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AudioDock } from '../AudioDock';
 
 import { BattleAudioProvider } from '@/components/battle/audio/BattleAudioProvider';
+import { pickOption } from '@/components/ui/__tests__/radix-select';
 import { sendBattleAudio } from '@/lib/api/battle-audio';
 import { getTracks, updateTrack } from '@/lib/api/tracks';
 import { fakeScene } from '@/lib/hooks/battle/__tests__/fake-scene';
@@ -490,13 +491,13 @@ describe('AudioDock — ДМ', () => {
         fireEvent.click(
             getByRole('button', { name: 'music.playlist.resetFilters' })
         );
-        fireEvent.change(
+        await pickOption(
             getByRole('combobox', { name: 'music.playlist.group' }),
-            { target: { value: 'Люди' } }
+            'Люди'
         );
-        fireEvent.change(
+        await pickOption(
             getByRole('combobox', { name: 'music.playlist.kind' }),
-            { target: { value: 'file' } }
+            'music.playlist.kinds.file'
         );
         expect(
             [...getByRole('list', { name: 'Люди' }).querySelectorAll('li')].map(

@@ -64,7 +64,7 @@ const writeData = (body: string) => {
 };
 
 const hasDualWriteData = (body: string) =>
-    /\b(?:characteristics(?:Patch)?|d20RowData|draftFields|unitCreateData|toUnitCreateData)\b/.test(
+    /\b(?:characteristics(?:Patch)?|d20RowData|draftFields|unitCreateData|toUnitCreateData|characterCreateData)\b/.test(
         writeData(body)
     );
 

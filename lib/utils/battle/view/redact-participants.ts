@@ -14,6 +14,7 @@ import type {
     BattleAttack,
     BattleParticipant,
     BattleParticipantBattleData,
+    BattleParticipantCombatStats,
 } from '@/types/battle';
 
 const SECRET_BATTLE_KEYS = [
@@ -87,6 +88,14 @@ function slotRedactor(rules: Ruleset): SlotRedact {
 
 const withoutConcealed = (effects: ActiveEffect[]) =>
     effects.filter((e) => !e.concealed);
+
+const HIDDEN_STATS = [
+    'morale',
+] as const satisfies readonly (keyof BattleParticipantCombatStats)[];
+
+const NEUTRAL_HIDDEN_STATS = Object.fromEntries(
+    HIDDEN_STATS.map((key) => [key, 0])
+) as Pick<BattleParticipantCombatStats, (typeof HIDDEN_STATS)[number]>;
 
 const SECRET_ATTACK_KEYS = [
     'versatileDice',
@@ -179,7 +188,7 @@ function redactOne(
             ...projectHp(p),
             tempHp: 0,
             armorClass: 0,
-            morale: 0,
+            ...NEUTRAL_HIDDEN_STATS,
         },
         spellcasting: { spellSlots: {}, knownSpells: [] },
         battleData,
@@ -235,9 +244,10 @@ function redactPatch(
             maxHp,
             tempHp: _t,
             armorClass: _ac,
-            morale: _morale,
             ...stats
         } = combatStats;
+
+        for (const key of HIDDEN_STATS) delete stats[key];
 
         const projected =
             currentHp !== undefined ||

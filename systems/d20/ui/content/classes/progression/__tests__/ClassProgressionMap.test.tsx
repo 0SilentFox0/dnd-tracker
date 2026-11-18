@@ -72,8 +72,8 @@ describe('ClassProgressionMap', () => {
         expect(onOpenLevel).toHaveBeenCalledTimes(2);
 
         onOpenLevel.mockClear();
-        fireEvent.click(container.querySelector('td summary') as HTMLElement);
-        fireEvent.click(container.querySelector('li summary') as HTMLElement);
+        fireEvent.click(container.querySelector('td [data-slot="disclosure"] button') as HTMLElement);
+        fireEvent.click(container.querySelector('li [data-slot="disclosure"] button') as HTMLElement);
         expect(onOpenLevel).not.toHaveBeenCalled();
     });
 

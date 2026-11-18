@@ -137,9 +137,17 @@ function makeBattlePayload(overrides: Partial<BattleScene> = {}): BattleScene {
         currentRound: 1,
         currentTurnIndex: 1,
         initiativeOrder: [
-            { basicInfo: { id: 'p-1', name: 'Айвен', side: 'ally' } },
-            { basicInfo: { id: 'p-2', name: 'Аграїл', side: 'ally' } },
-        ] as BattleScene['initiativeOrder'],
+            {
+                basicInfo: { id: 'p-1', name: 'Айвен', side: 'ally' },
+                combatStats: { status: 'active' },
+                battleData: { resolvedAbilities: [], activeEffects: [] },
+            },
+            {
+                basicInfo: { id: 'p-2', name: 'Аграїл', side: 'ally' },
+                combatStats: { status: 'active' },
+                battleData: { resolvedAbilities: [], activeEffects: [] },
+            },
+        ] as unknown as BattleScene['initiativeOrder'],
         rules: DEFAULT_RULES,
         battleLog: [],
         createdAt: new Date().toISOString(),

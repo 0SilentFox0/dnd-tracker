@@ -510,7 +510,7 @@ export const prismaImportRepository: ImportRepository = {
             boundEntry,
         });
 
-        const rules = parseRules(settings.rules);
+        const parsed = parseRules(settings.rules);
 
         return {
             campaignId: actor.campaignId,
@@ -521,11 +521,11 @@ export const prismaImportRepository: ImportRepository = {
             settingsHash: digest(settings),
             hasCharacters,
             hasClasses,
-            classesEnabled: rules.classes.enabled,
-            customConditionKeys: (rules.conditions.custom ?? []).map(
+            classesEnabled: parsed.classes.enabled,
+            customConditionKeys: (parsed.conditions.custom ?? []).map(
                 (c) => c.key
             ),
-            activeKinds: contentKindsOf(rules.system),
+            activeKinds: contentKindsOf(parsed.system),
         };
     },
     async findRun(actor, key) {

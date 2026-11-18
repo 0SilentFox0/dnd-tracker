@@ -7,6 +7,10 @@ import type { FeatData } from '@/types/choices';
 
 const mutate = vi.fn();
 
+vi.mock('@/components/ui/select-field', () =>
+    import('@/components/ui/__tests__/select-field-mock')
+);
+
 vi.mock('next/navigation', () => ({ useRouter: () => ({ push: vi.fn() }) }));
 vi.mock('@/lib/hooks/common', async (importOriginal) => ({
     ...(await importOriginal<typeof import('@/lib/hooks/common')>()),

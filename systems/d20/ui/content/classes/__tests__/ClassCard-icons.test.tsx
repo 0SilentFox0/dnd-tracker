@@ -99,7 +99,7 @@ describe('class icons', () => {
             />
         );
 
-        const summaries = container.querySelectorAll('summary');
+        const summaries = container.querySelectorAll('[data-slot="disclosure"] button');
 
         expect(summaries[0].querySelector('img')).not.toBeNull();
         expect(summaries[1].querySelector('img')).toBeNull();

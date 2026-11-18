@@ -67,6 +67,13 @@ const cls = makeClass({
     ],
 });
 
+const openStates = (root: HTMLElement) =>
+    Array.from(root.querySelectorAll('section > [data-slot="disclosure"]')).map(
+        (d) =>
+            d.querySelector('[data-state]')?.getAttribute('data-state') ===
+            'open'
+    );
+
 describe('SkillsTab class map', () => {
     afterEach(cleanup);
 
@@ -134,22 +141,14 @@ describe('SkillsTab class map', () => {
 
             const { container, unmount } = render(<SkillsTab />);
 
-            expect(
-                Array.from(container.querySelectorAll('section > details')).map(
-                    (d) => (d as HTMLDetailsElement).open
-                )
-            ).toEqual([true, true]);
+            expect(openStates(container)).toEqual([true, true]);
             unmount();
 
             current.sheet = sheetWith([quiet('a'), quiet('b'), quiet('c')]);
 
             const three = render(<SkillsTab />);
 
-            expect(
-                Array.from(
-                    three.container.querySelectorAll('section > details')
-                ).map((d) => (d as HTMLDetailsElement).open)
-            ).toEqual([false, false, false]);
+            expect(openStates(three.container)).toEqual([false, false, false]);
             three.unmount();
 
             current.sheet = sheetWith([
@@ -160,11 +159,7 @@ describe('SkillsTab class map', () => {
 
             const waiting = render(<SkillsTab />);
 
-            expect(
-                Array.from(
-                    waiting.container.querySelectorAll('section > details')
-                ).map((d) => (d as HTMLDetailsElement).open)
-            ).toEqual([false, false, true]);
+            expect(openStates(waiting.container)).toEqual([false, false, true]);
         });
 
         it('the add-class button exists only with classLevelUp and opens the dialog on the new-class choice', () => {

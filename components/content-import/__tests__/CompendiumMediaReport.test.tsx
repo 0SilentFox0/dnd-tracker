@@ -55,7 +55,9 @@ describe('CompendiumMediaReport', () => {
         expect(container.textContent).toContain('3Не вдалося');
         expect(container.textContent).toContain('Сервер відповів кодом 404');
         expect(container.textContent).toContain('Сервер відповів кодом 503');
-        expect(container.querySelectorAll('[data-slot="disclosure"]')).toHaveLength(2);
+        expect(
+            container.querySelectorAll('[data-slot="disclosure"]')
+        ).toHaveLength(2);
     });
 
     it('offers resume and retry through the actions when idle', async () => {
@@ -87,7 +89,9 @@ describe('CompendiumMediaReport', () => {
                 actions={actions()}
             />
         );
-        expect(screen.queryByRole('button')).toBeNull();
+        expect(
+            screen.queryByRole('button', { name: /Продовжити|Повторити/ })
+        ).toBeNull();
         cleanup();
         await render(
             <CompendiumMediaReport
@@ -97,7 +101,9 @@ describe('CompendiumMediaReport', () => {
                 actions={actions()}
             />
         );
-        expect(screen.queryByRole('button')).toBeNull();
+        expect(
+            screen.queryByRole('button', { name: /Продовжити|Повторити/ })
+        ).toBeNull();
     });
 
     it('caps a failure group at 20 rows with a show-more button', async () => {
@@ -111,7 +117,9 @@ describe('CompendiumMediaReport', () => {
         );
 
         expect(screen.getAllByText(/cdn\.example/)).toHaveLength(20);
-        fireEvent.click(screen.getByRole('button', { name: /Ще 5|ще 5|5/ }));
+        fireEvent.click(
+            screen.getByRole('button', { name: /Показати ще \(5\)/ })
+        );
         expect(screen.getAllByText(/cdn\.example/)).toHaveLength(25);
     });
 });
@@ -128,7 +136,9 @@ describe('CompendiumMediaSummary', () => {
         );
 
         expect(container.textContent).toContain('Зображень: 12');
-        expect(container.querySelector('[data-slot="disclosure"]')).toBeTruthy();
+        expect(
+            container.querySelector('[data-slot="disclosure"]')
+        ).toBeTruthy();
         expect(container.textContent).toContain(
             'Перевищено ліміт зображень на імпорт: 3'
         );

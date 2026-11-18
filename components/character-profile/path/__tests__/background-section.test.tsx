@@ -78,7 +78,11 @@ describe('BackgroundSection', () => {
 
         expect(screen.getByText(/Magic Initiate/)).toBeTruthy();
         expect(screen.getByText(/Ink/)).toBeTruthy();
-        expect(screen.queryByRole('button')).toBeNull();
+        expect(
+            screen.queryByRole('button', {
+                name: /background\.(change|pick|open)/,
+            })
+        ).toBeNull();
     });
 
     it('chosen + canEdit: Change opens the background step', () => {
