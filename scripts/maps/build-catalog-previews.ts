@@ -8,9 +8,12 @@ import { listVttMapCatalog } from '@/lib/server/map-catalog/vtt-maps';
 import { parseUvtt } from '@/lib/utils/battle/uvtt/parse';
 
 const output = path.join(process.cwd(), 'public/assets/map-catalog');
+
 async function main() {
     const entries = await listVttMapCatalog();
+
     const results = new Array(entries.length);
+
     let cursor = 0;
 
     await mkdir(output, { recursive: true });
@@ -18,19 +21,26 @@ async function main() {
     async function worker() {
         for (;;) {
             const index = cursor++;
+
             const entry = entries[index];
+
             if (!entry) return;
 
             const text = await getMapCatalogAsset(entry);
+
             const raw = JSON.parse(text) as { image?: unknown };
+
             const source = typeof raw.image === 'string' ? raw.image : '';
+
             const payload = source.startsWith('data:')
                 ? source.slice(source.indexOf(',') + 1)
                 : source;
+
             if (!payload)
                 throw new Error(`Map has no image: ${entry.filePath}`);
 
             const file = `${createHash('sha256').update(entry.id).digest('hex').slice(0, 20)}.webp`;
+
             await sharp(Buffer.from(payload, 'base64'))
                 .rotate()
                 .resize({
@@ -43,6 +53,7 @@ async function main() {
                 .toFile(path.join(output, file));
 
             let importable = true;
+
             try {
                 parseUvtt(text);
             } catch {
