@@ -30,7 +30,8 @@ describe('buildSteps', () => {
         });
 
         expect(steps[1].env).toBeUndefined();
-        expect(steps[2].env).toBeUndefined();
+        expect(steps[2].env).not.toHaveProperty('DATABASE_URL');
+        expect(steps[2].env?.NODE_OPTIONS).toContain('max-old-space-size');
     });
 
     it('preview не запускає міграції', () => {
