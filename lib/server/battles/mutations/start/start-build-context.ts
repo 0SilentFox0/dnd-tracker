@@ -19,6 +19,124 @@ export interface BuildContextResult {
     racesById: Record<string, Prisma.RaceGetPayload<object> | null>;
 }
 
+function indexRaces<R extends { id: string; name: string }>(
+    races: R[],
+    uniqueRaceNames: string[],
+    unitRaceIds: string[]
+) {
+    const racesByName: Record<string, R | null> = {};
+
+    const racesById: Record<string, R | null> = {};
+
+    for (const r of races) {
+        if (uniqueRaceNames.includes(r.name)) racesByName[r.name] = r;
+
+        if (unitRaceIds.includes(r.id)) racesById[r.id] = r;
+    }
+    for (const rn of uniqueRaceNames) {
+        if (!(rn in racesByName)) racesByName[rn] = null;
+    }
+    for (const id of unitRaceIds) {
+        if (!(id in racesById)) racesById[id] = null;
+    }
+
+    return { racesByName, racesById };
+}
+
+async function assembleCampaignContext({
+    campaignId,
+    characterContext,
+    uniqueRaceNames,
+    racesByName,
+    campaign,
+    rules,
+}: {
+    campaignId: string;
+    characterContext: unknown[][];
+    uniqueRaceNames: string[];
+    racesByName: CampaignSpellContext['racesByName'];
+    campaign: { maxLevel?: number } | null;
+    rules: CampaignSpellContext['rules'];
+}): Promise<CampaignSpellContext> {
+        const [skillTrees, mainSkills, spells, allSkills, batchArtifacts] =
+            characterContext;
+
+        const skillTreeByRace: Record<
+            string,
+            NonNullable<(typeof skillTrees)[number]> | null
+        > = {};
+
+        const treesArr = (
+            Array.isArray(skillTrees) ? skillTrees : []
+        ) as Array<{
+            race: string;
+        }>;
+
+        for (const st of treesArr) {
+            if (st?.race)
+                skillTreeByRace[st.race] = st as NonNullable<
+                    (typeof skillTrees)[number]
+                >;
+        }
+        for (const rn of uniqueRaceNames) {
+            if (!(rn in skillTreeByRace)) skillTreeByRace[rn] = null;
+        }
+
+        const skillsById: Record<string, Prisma.SkillGetPayload<object>> = {};
+
+        const allSkillsArr = Array.isArray(allSkills) ? allSkills : [];
+
+        for (const s of allSkillsArr) {
+            if (s && typeof s === 'object' && 'id' in s) {
+                skillsById[(s as { id: string }).id] =
+                    s as Prisma.SkillGetPayload<object>;
+            }
+        }
+
+        const artifactsById: Record<
+            string,
+            Prisma.ArtifactGetPayload<object>
+        > = {};
+
+        const artifactsArr = Array.isArray(batchArtifacts)
+            ? batchArtifacts
+            : [];
+
+        for (const a of artifactsArr) {
+            if (a && typeof a === 'object' && 'id' in a) {
+                artifactsById[(a as { id: string }).id] =
+                    a as Prisma.ArtifactGetPayload<object>;
+            }
+        }
+
+        const campaignContext: CampaignSpellContext = {
+            skillTreeByRace:
+                skillTreeByRace as CampaignSpellContext['skillTreeByRace'],
+            mainSkills: mainSkills as CampaignSpellContext['mainSkills'],
+            spells: spells as CampaignSpellContext['spells'],
+            allSkills: allSkills as CampaignSpellContext['allSkills'],
+            racesByName,
+            campaign: {
+                maxLevel: (campaign as { maxLevel?: number })?.maxLevel ?? 20,
+            },
+            rules,
+            skillsById,
+            artifactsById:
+                Object.keys(artifactsById).length > 0
+                    ? artifactsById
+                    : undefined,
+        };
+
+        if (classesEnabled(campaignContext.rules))
+            campaignContext.classesById = await loadClassesById(campaignId);
+
+        for (const prepare of systemServerOf(campaignContext.rules).participant
+            ?.prepareContext ?? [])
+            await prepare(campaignId, campaignContext);
+
+    return campaignContext;
+}
+
 /** Лише скіли, на які посилаються персонажі, і спел-рядки без описів (економія egress). */
 export async function buildCampaignContextForStart(
     campaignId: string,
@@ -109,101 +227,23 @@ export async function buildCampaignContextForStart(
             : []),
     ]);
 
-    const racesByName: Record<string, (typeof races)[0] | null> = {};
+    const { racesByName, racesById } = indexRaces(
+        races,
+        uniqueRaceNames,
+        unitRaceIds
+    );
 
-    const racesById: Record<string, (typeof races)[0] | null> = {};
-
-    for (const r of races) {
-        if (uniqueRaceNames.includes(r.name)) racesByName[r.name] = r;
-
-        if (unitRaceIds.includes(r.id)) racesById[r.id] = r;
-    }
-    for (const rn of uniqueRaceNames) {
-        if (!(rn in racesByName)) racesByName[rn] = null;
-    }
-    for (const id of unitRaceIds) {
-        if (!(id in racesById)) racesById[id] = null;
-    }
-
-    let campaignContext: CampaignSpellContext | undefined;
-
-    if (characters.length > 0 && characterContext.length >= 4) {
-        const [skillTrees, mainSkills, spells, allSkills, batchArtifacts] =
-            characterContext;
-
-        const skillTreeByRace: Record<
-            string,
-            NonNullable<(typeof skillTrees)[number]> | null
-        > = {};
-
-        const treesArr = (
-            Array.isArray(skillTrees) ? skillTrees : []
-        ) as Array<{
-            race: string;
-        }>;
-
-        for (const st of treesArr) {
-            if (st?.race)
-                skillTreeByRace[st.race] = st as NonNullable<
-                    (typeof skillTrees)[number]
-                >;
-        }
-        for (const rn of uniqueRaceNames) {
-            if (!(rn in skillTreeByRace)) skillTreeByRace[rn] = null;
-        }
-
-        const skillsById: Record<string, Prisma.SkillGetPayload<object>> = {};
-
-        const allSkillsArr = Array.isArray(allSkills) ? allSkills : [];
-
-        for (const s of allSkillsArr) {
-            if (s && typeof s === 'object' && 'id' in s) {
-                skillsById[(s as { id: string }).id] =
-                    s as Prisma.SkillGetPayload<object>;
-            }
-        }
-
-        const artifactsById: Record<
-            string,
-            Prisma.ArtifactGetPayload<object>
-        > = {};
-
-        const artifactsArr = Array.isArray(batchArtifacts)
-            ? batchArtifacts
-            : [];
-
-        for (const a of artifactsArr) {
-            if (a && typeof a === 'object' && 'id' in a) {
-                artifactsById[(a as { id: string }).id] =
-                    a as Prisma.ArtifactGetPayload<object>;
-            }
-        }
-
-        campaignContext = {
-            skillTreeByRace:
-                skillTreeByRace as CampaignSpellContext['skillTreeByRace'],
-            mainSkills: mainSkills as CampaignSpellContext['mainSkills'],
-            spells: spells as CampaignSpellContext['spells'],
-            allSkills: allSkills as CampaignSpellContext['allSkills'],
-            racesByName,
-            campaign: {
-                maxLevel: (campaign as { maxLevel?: number })?.maxLevel ?? 20,
-            },
-            rules,
-            skillsById,
-            artifactsById:
-                Object.keys(artifactsById).length > 0
-                    ? artifactsById
-                    : undefined,
-        };
-
-        if (classesEnabled(campaignContext.rules))
-            campaignContext.classesById = await loadClassesById(campaignId);
-
-        for (const prepare of systemServerOf(campaignContext.rules).participant
-            ?.prepareContext ?? [])
-            await prepare(campaignId, campaignContext);
-    }
+    const campaignContext =
+        characters.length > 0 && characterContext.length >= 4
+            ? await assembleCampaignContext({
+                  campaignId,
+                  characterContext,
+                  uniqueRaceNames,
+                  racesByName,
+                  campaign,
+                  rules,
+              })
+            : undefined;
 
     return { campaignContext, racesById };
 }
