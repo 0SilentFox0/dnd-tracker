@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
 import { createBattleParticipantFromUnit } from '@/lib/utils/battle/participant/from-unit';
-import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { type Ruleset } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 const rules = (system: Ruleset['system']): Ruleset => ({
     ...DEFAULT_RULES,

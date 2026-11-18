@@ -4,8 +4,8 @@ import {
     bareD20Rules,
     dnd5eRules,
 } from '@/lib/__tests__/helpers/dnd5e-modules';
-import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { type Ruleset } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 
 const withRetaliation = (): Ruleset => ({

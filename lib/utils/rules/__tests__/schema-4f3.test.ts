@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
 import srdRules from '@/data/templates/srd-5.2/rules.json';
-import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { MECHANIC_REGISTRY } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import {
     mergeRules,
     parseRules,

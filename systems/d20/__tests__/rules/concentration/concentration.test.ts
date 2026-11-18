@@ -19,8 +19,8 @@ import { hazardHit, hazardUnder } from '@/lib/utils/battle/grid';
 import { textsOf } from '@/lib/utils/battle/log/__tests__/event-text';
 import { castSpell } from '@/lib/utils/battle/spell';
 import type { CastableSpell } from '@/lib/utils/battle/types/spell-process';
-import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { type Ruleset } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { concentrationCheck } from '@/systems/d20/rules/concentration/check';
 import {
     beginConcentration,

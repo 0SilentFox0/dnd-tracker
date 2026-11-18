@@ -12,8 +12,8 @@ import type {
 } from '@/lib/utils/battle/pipeline/run-battle-mutation';
 import type { BattleDelta, LoadedBattle } from '@/lib/utils/battle/store';
 import { applyCharacterResources } from '@/lib/utils/characters/resources/battle';
-import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { type Ruleset } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { startDying } from '@/systems/deathsaves/rules/start';
 import { withDeathSaves } from '@/systems/deathsaves/rules/state';
 import type { BattleParticipant } from '@/types/battle';

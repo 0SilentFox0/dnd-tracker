@@ -11,8 +11,8 @@ import { attackMutation } from '@/lib/server/battles/mutations/attack/attack-mut
 import { nextTurnMutation } from '@/lib/server/battles/mutations/next-turn/next-turn-mutation';
 import { seq } from '@/lib/utils/abilities/__tests__/fixtures';
 import type { BattleMutationContext } from '@/lib/utils/battle/pipeline/run-battle-mutation';
-import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { type Ruleset } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import { validateComposition } from '@/lib/utils/rules/systems/compose';
 import type { BattleParticipant } from '@/types/battle';

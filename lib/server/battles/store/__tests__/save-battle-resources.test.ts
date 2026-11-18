@@ -6,8 +6,8 @@ import { saveBattle } from '@/lib/server/battles/store/save-battle';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import type { BattleDb } from '@/lib/utils/battle/store/types';
 import type { LoadedBattle } from '@/lib/utils/battle/store/types';
-import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { type Ruleset } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { withD20State } from '@/systems/d20/rules/state';
 import type { BattleParticipant } from '@/types/battle';
 

@@ -6,8 +6,8 @@ import {
     hero,
 } from '@/lib/server/battles/__tests__/mutations/fixtures';
 import { hasCondition, PERMANENT_ROUNDS } from '@/lib/utils/battle/conditions';
-import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { type Ruleset } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import { startDying } from '@/systems/deathsaves/rules/start';
 import { DEATH_SAVES_TIMED_KEY } from '@/systems/deathsaves/rules/state';

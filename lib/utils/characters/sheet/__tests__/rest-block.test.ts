@@ -3,8 +3,8 @@ import { describe, expect, it } from 'vitest';
 import { resolved } from '@/lib/utils/abilities/__tests__/fixtures';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import { buildRestBlock } from '@/lib/utils/characters/sheet/rest-block';
-import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { type Ruleset } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
 import type { GameClassData } from '@/types/classes';
 

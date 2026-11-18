@@ -13,8 +13,8 @@ import { castSpell } from '@/lib/utils/battle/spell';
 import { applyTransforms } from '@/lib/utils/battle/transform/apply-transforms';
 import { revertExpiredTransforms } from '@/lib/utils/battle/transform/revert';
 import type { CastableSpell } from '@/lib/utils/battle/types/spell-process';
-import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { type Ruleset } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import {
     SpellDefinitionSchema,
     type SpellEffect,
