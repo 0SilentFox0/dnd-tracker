@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 
 import { parseUvtt, UvttImportError } from '../parse';
 
-// Minimal PNG header: parser only needs dimensions and an embedded payload.
 const png = 'iVBORw0KGgoAAAANSUhEUgAAAAoAAAAK';
 
 const pngWithSize = (width: number, height: number) => {
@@ -52,7 +51,7 @@ describe('parseUvtt', () => {
         });
     });
 
-    it('rejects malformed JSON, missing fields, oversized dimensions and unsupported diagonals', () => {
+    it('rejects malformed JSON, missing fields, oversized dimensions and missing geometry', () => {
         for (const input of [
             '{',
             JSON.stringify({ ...base, resolution: undefined }),
@@ -60,7 +59,6 @@ describe('parseUvtt', () => {
                 ...base,
                 resolution: { ...base.resolution, map_size: { x: 201, y: 6 } },
             }),
-            JSON.stringify({ ...base, line_of_sight: [[0, 0, 20, 20]] }),
         ]) {
             expect(() => parseUvtt(input)).toThrow(UvttImportError);
         }
@@ -119,5 +117,140 @@ describe('parseUvtt', () => {
         expect(() => parseUvtt(JSON.stringify(tooWide))).toThrow(
             /12000 px per side/
         );
+    });
+
+    describe('hostile input', () => {
+        const withLos = (line_of_sight: unknown, extra: object = {}) =>
+            JSON.stringify({ ...base, line_of_sight, ...extra });
+
+        it('skips diagonal, zero-length, border and out-of-bounds walls with warnings', () => {
+            const result = parseUvtt(
+                withLos([
+                    [20, 10, 40, 10],
+                    [0, 0, 20, 20],
+                    [30, 30, 30, 30],
+                    [0, 10, 0, 30],
+                    [80, 10, 80, 30],
+                    [500, 10, 900, 10],
+                ])
+            );
+
+            expect(result.walls).toEqual(['2:0:s', '3:0:s']);
+            expect(result.warnings).toEqual(
+                expect.arrayContaining([
+                    { code: 'diagonal', count: 1 },
+                    { code: 'zeroLength', count: 1 },
+                    { code: 'border', count: 2 },
+                    { code: 'outOfBounds', count: 1 },
+                ])
+            );
+        });
+
+        it('reports no warnings for a clean file', () => {
+            expect(parseUvtt(JSON.stringify(base)).warnings).toEqual([]);
+        });
+
+        it('skips a portal that spans several edges or is diagonal', () => {
+            const result = parseUvtt(
+                withLos([], {
+                    portals: [
+                        { bounds: [10, 30, 50, 30], closed: true },
+                        { bounds: [10, 10, 30, 30], closed: true },
+                    ],
+                })
+            );
+
+            expect(result.doors).toEqual({});
+            expect(result.warnings).toEqual(
+                expect.arrayContaining([
+                    { code: 'portalSpan', count: 1 },
+                    { code: 'diagonal', count: 1 },
+                ])
+            );
+        });
+
+        it('does not widen a wall by float noise past a cell boundary', () => {
+            const result = parseUvtt(withLos([[20, 10, 40.0000001, 10]]));
+
+            expect(result.walls).toEqual(['2:0:s', '3:0:s']);
+        });
+
+        it('snaps fractional coordinates within tolerance', () => {
+            const result = parseUvtt(
+                withLos([[2.1, 1.05, 3.95, 0.95]], {
+                    resolution: { ...base.resolution, pixels_per_grid: 1 },
+                })
+            );
+
+            expect(result.walls).toEqual(['2:0:s', '3:0:s']);
+        });
+
+        it('rejects NaN, Infinity-like and non-numeric sizes', () => {
+            for (const size of [
+                { x: null, y: 6 },
+                { x: '8', y: 6 },
+                { x: 8.5, y: 6 },
+                { x: -8, y: 6 },
+                { x: 1e308, y: 1e308 },
+            ])
+                expect(() =>
+                    parseUvtt(
+                        JSON.stringify({
+                            ...base,
+                            resolution: { ...base.resolution, map_size: size },
+                        })
+                    )
+                ).toThrow(UvttImportError);
+
+            for (const ppi of [0, -1, null, 'x'])
+                expect(() =>
+                    parseUvtt(
+                        JSON.stringify({
+                            ...base,
+                            resolution: {
+                                ...base.resolution,
+                                pixels_per_grid: ppi,
+                            },
+                        })
+                    )
+                ).toThrow(UvttImportError);
+        });
+
+        it('ignores wall points that are NaN and rejects non-array geometry', () => {
+            expect(() => parseUvtt(withLos([[20, null, 40, 10]]))).toThrow(
+                UvttImportError
+            );
+            expect(() => parseUvtt(withLos('walls'))).toThrow(UvttImportError);
+            expect(() => parseUvtt(withLos([], { portals: {} }))).toThrow(
+                UvttImportError
+            );
+        });
+
+        it('rejects corrupted base64 without decoding the whole payload', () => {
+            for (const image of [
+                'iVBOR*GgoAAAANSUhEUgAAAAoAAAAK',
+                'iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKA',
+                'data:image/png;base64,@@@@',
+                'data:image/gif;base64,AAAA',
+                '=',
+            ])
+                expect(() =>
+                    parseUvtt(JSON.stringify({ ...base, image }))
+                ).toThrow(UvttImportError);
+        });
+
+        it('rejects a huge pixels-per-grid ratio and tiny background scale', () => {
+            expect(() =>
+                parseUvtt(
+                    JSON.stringify({
+                        ...base,
+                        resolution: {
+                            ...base.resolution,
+                            pixels_per_grid: 1e-9,
+                        },
+                    })
+                )
+            ).toThrow(/background scale/);
+        });
     });
 });
