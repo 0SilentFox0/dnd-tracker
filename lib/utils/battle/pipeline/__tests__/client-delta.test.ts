@@ -15,7 +15,7 @@ import type { BattleParticipant } from '@/types/battle';
 const p = (
     id: string,
     hp = 10,
-    side = ParticipantSide.ALLY
+    side: ParticipantSide = ParticipantSide.ALLY
 ): BattleParticipant => {
     const base = createMockParticipant();
 
