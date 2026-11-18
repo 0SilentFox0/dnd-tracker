@@ -209,6 +209,305 @@ async function owner(kind: OwnerKind, actor: Actor, ownerId: string) {
     }
 }
 
+type OperationContext = {
+    actor: Actor;
+    input: Record<string, unknown>;
+    body: unknown;
+    locale?: Locale | null;
+    param: (key: string) => string;
+};
+
+async function importOperation(ctx: OperationContext) {
+    const { actor, input, body, locale } = ctx;
+
+        const report = await importContent(
+            actor,
+            kindOf(input.kind),
+            bodyOf('content.import', body)
+        );
+
+        if (locale === null) return report;
+
+        return translateImportReport(
+            await getTranslator(await localeOrRequest(locale)),
+            report
+        );
+}
+
+async function abilitySources(ctx: OperationContext) {
+    const { actor } = ctx;
+
+        const where = { campaignId: actor.campaignId };
+
+        const groups = await Promise.all(
+            ABILITY_SOURCES.map(async (s) =>
+                (await isKindActive(s.contentKind, actor))
+                    ? { kind: s.source, rows: await s.load(where) }
+                    : { kind: s.source, rows: [] }
+            )
+        );
+
+        return {
+            sources: groups.flatMap(({ kind, rows }) =>
+                rows
+                    .map((row) => ({
+                        kind,
+                        id: row.id,
+                        name: row.name,
+                    }))
+                    .sort(byName)
+            ),
+        };
+}
+
+async function abilityGet(ctx: OperationContext) {
+    const { actor, input, param } = ctx;
+
+        const kind = input.kind as OwnerKind;
+
+        const row = await owner(kind, actor, param('ownerId'));
+
+        if (!row) throw new ContentError(API_ERRORS.NOT_FOUND, 404);
+
+        if (kind === OwnerKind.CLASS && 'features' in row) {
+            const cls = toGameClassData(row);
+
+            return {
+                abilities: [
+                    ...cls.features,
+                    ...cls.subclasses.flatMap((s) => s.features),
+                ].flatMap((f) => f.abilities),
+            };
+        }
+
+        return { abilities: readAbilities(kind, row).abilities };
+}
+
+async function duplicateSkill(ctx: OperationContext) {
+    const { actor, locale, param } = ctx;
+
+        const source = await owned(
+            await prisma.skill.findFirst({
+                where: {
+                    id: param('skillId'),
+                    campaignId: actor.campaignId,
+                },
+            }),
+            actor,
+            API_ERRORS.SKILL_NOT_FOUND
+        );
+
+        const t = await getTranslator(
+            await localeOrRequest(locale),
+            'assistant'
+        );
+
+        const skill = await prisma.skill.create({
+            data: {
+                campaignId: actor.campaignId,
+                name: source.name.trim()
+                    ? t('defaults.copyOf', { name: source.name })
+                    : t('defaults.skillCopy'),
+                description: source.description,
+                icon: source.icon,
+                image: source.image ?? null,
+                spellId: source.spellId,
+                spellGroupId: source.spellGroupId,
+                grantedSpellId: source.grantedSpellId,
+                mainSkillId: source.mainSkillId,
+                spellNewSpellId: source.grantedSpellId,
+                abilities: abilitiesJson(skillAbilities(source)),
+            },
+            include: {
+                spell: true,
+                spellGroup: true,
+                grantedSpell: true,
+                mainSkill: true,
+            },
+        });
+
+        invalidate(actor, ReferenceKind.SKILLS);
+
+        return skill;
+}
+
+async function removeSpellFromGroup(ctx: OperationContext) {
+    const { actor, param } = ctx;
+
+        await owned(
+            await prisma.spell.findFirst({
+                where: {
+                    id: param('spellId'),
+                    campaignId: actor.campaignId,
+                },
+            }),
+            actor
+        );
+
+        const result = await prisma.spell.update({
+            where: { id: param('spellId') },
+            data: { groupId: null },
+            include: { spellGroup: true },
+        });
+
+        invalidate(actor, ReferenceKind.SPELLS);
+
+        return result;
+}
+
+async function removeAllSpellsFromGroup(ctx: OperationContext) {
+    const { actor, param } = ctx;
+
+        await owned(
+            await prisma.spellGroup.findFirst({
+                where: {
+                    id: param('groupId'),
+                    campaignId: actor.campaignId,
+                },
+            }),
+            actor
+        );
+        await prisma.spell.updateMany({
+            where: {
+                campaignId: actor.campaignId,
+                groupId: param('groupId'),
+            },
+            data: { groupId: null },
+        });
+        invalidate(actor, ReferenceKind.SPELLS);
+
+        return { ok: true };
+}
+
+async function deleteSpellsByLevel(ctx: OperationContext) {
+    const { actor, body } = ctx;
+
+        const { level } = bodyOf('spells.delete-by-level', body);
+
+        const doomed = await prisma.spell.findMany({
+            where: { campaignId: actor.campaignId, level },
+            select: { id: true },
+        });
+
+        await detachRefs(
+            prisma,
+            actor.campaignId,
+            'spell',
+            doomed.map((s) => s.id)
+        );
+
+        const result = await prisma.spell.deleteMany({
+            where: { campaignId: actor.campaignId, level },
+        });
+
+        invalidate(actor, ReferenceKind.SPELLS);
+
+        return { ok: true, deleted: result.count };
+}
+
+async function importUnits(ctx: OperationContext) {
+    const { actor, body } = ctx;
+
+        const { units: incoming } = bodyOf('units.import', body);
+
+        const rules = await loadRules(actor.campaignId);
+
+        let droppedConditions = 0;
+
+        const units = incoming.map((unit) => {
+            const cleaned = dropForeignConditions(
+                rules.system,
+                unit.abilities
+            );
+
+            droppedConditions += cleaned.dropped;
+
+            return cleaned.dropped
+                ? { ...unit, abilities: cleaned.abilities }
+                : unit;
+        });
+
+        assertEffectsInComposition(
+            rules.system,
+            units.flatMap((unit) => unit.abilities ?? [])
+        );
+
+        await assertCampaignRefs(actor.campaignId, {
+            spell: [
+                ...units.flatMap((unit) => unit.knownSpells),
+                ...units.flatMap((unit) =>
+                    abilitySpellIds(unit.abilities)
+                ),
+            ],
+        });
+
+        const persisted = ruleSystemOf(rules).characteristics.persisted;
+
+        const narrowed = persisted
+            ? units.map((unit) =>
+                  unit.characteristics
+                      ? {
+                            ...unit,
+                            characteristics: parseSystemData(
+                                rules,
+                                unit.characteristics,
+                                'unitCharacteristics'
+                            ),
+                        }
+                      : unit
+              )
+            : units;
+
+        const result = await importUnitsIntoCampaign(
+            prisma,
+            actor.campaignId,
+            narrowed,
+            rules
+        );
+
+        invalidate(actor, ReferenceKind.UNITS);
+
+        return droppedConditions
+            ? { ...result, droppedConditions }
+            : result;
+}
+
+async function reorderTracks(ctx: OperationContext) {
+    const { actor, body } = ctx;
+
+        const { ids } = bodyOf('tracks.reorder', body);
+
+        const known = new Set(
+            (
+                await prisma.campaignTrack.findMany({
+                    where: { campaignId: actor.campaignId },
+                    select: { id: true },
+                })
+            ).map((row) => row.id)
+        );
+
+        if (
+            ids.length !== known.size ||
+            new Set(ids).size !== ids.length ||
+            !ids.every((trackId) => known.has(trackId))
+        )
+            throw new ContentError(
+                API_ERRORS.TRACK_ORDER_MISMATCH,
+                400
+            );
+
+        await prisma.$transaction(
+            ids.map((trackId, sortOrder) =>
+                prisma.campaignTrack.update({
+                    where: { id: trackId },
+                    data: { sortOrder },
+                })
+            )
+        );
+
+        return listTracks(actor.campaignId);
+}
+
 /** Shared HTTP/action operation. It owns authorization, parsing and the write lock. */
 export async function runContentOperation(
     operationId: ContentOperationId,
@@ -241,6 +540,8 @@ export async function runContentOperation(
 
     const param = (key: string) =>
         String((input as Record<string, unknown>)[key]);
+
+    const ctx: OperationContext = { actor, input, body, locale, param };
 
     const work = async () => {
         switch (operationId) {
@@ -277,20 +578,8 @@ export async function runContentOperation(
                     ...bodyOf('skill-trees.save', body),
                     ...(input.treeId ? { treeId: String(input.treeId) } : {}),
                 });
-            case 'content.import': {
-                const report = await importContent(
-                    actor,
-                    kindOf(input.kind),
-                    bodyOf('content.import', body)
-                );
-
-                if (locale === null) return report;
-
-                return translateImportReport(
-                    await getTranslator(await localeOrRequest(locale)),
-                    report
-                );
-            }
+            case 'content.import':
+                return importOperation(ctx);
             case 'content.import-example':
                 await assertKindActive(kindOf(input.kind), actor);
 
@@ -305,256 +594,22 @@ export async function runContentOperation(
                     ...EXPORT_DEFAULT_DEPS,
                     locale: locale ?? undefined,
                 });
-            case 'abilities.sources': {
-                const where = { campaignId: actor.campaignId };
-
-                const groups = await Promise.all(
-                    ABILITY_SOURCES.map(async (s) =>
-                        (await isKindActive(s.contentKind, actor))
-                            ? { kind: s.source, rows: await s.load(where) }
-                            : { kind: s.source, rows: [] }
-                    )
-                );
-
-                return {
-                    sources: groups.flatMap(({ kind, rows }) =>
-                        rows
-                            .map((row) => ({
-                                kind,
-                                id: row.id,
-                                name: row.name,
-                            }))
-                            .sort(byName)
-                    ),
-                };
-            }
-            case 'abilities.get': {
-                const kind = input.kind as OwnerKind;
-
-                const row = await owner(kind, actor, param('ownerId'));
-
-                if (!row) throw new ContentError(API_ERRORS.NOT_FOUND, 404);
-
-                if (kind === OwnerKind.CLASS && 'features' in row) {
-                    const cls = toGameClassData(row);
-
-                    return {
-                        abilities: [
-                            ...cls.features,
-                            ...cls.subclasses.flatMap((s) => s.features),
-                        ].flatMap((f) => f.abilities),
-                    };
-                }
-
-                return { abilities: readAbilities(kind, row).abilities };
-            }
-            case 'skills.duplicate': {
-                const source = await owned(
-                    await prisma.skill.findFirst({
-                        where: {
-                            id: param('skillId'),
-                            campaignId: actor.campaignId,
-                        },
-                    }),
-                    actor,
-                    API_ERRORS.SKILL_NOT_FOUND
-                );
-
-                const t = await getTranslator(
-                    await localeOrRequest(locale),
-                    'assistant'
-                );
-
-                const skill = await prisma.skill.create({
-                    data: {
-                        campaignId: actor.campaignId,
-                        name: source.name.trim()
-                            ? t('defaults.copyOf', { name: source.name })
-                            : t('defaults.skillCopy'),
-                        description: source.description,
-                        icon: source.icon,
-                        image: source.image ?? null,
-                        spellId: source.spellId,
-                        spellGroupId: source.spellGroupId,
-                        grantedSpellId: source.grantedSpellId,
-                        mainSkillId: source.mainSkillId,
-                        spellNewSpellId: source.grantedSpellId,
-                        abilities: abilitiesJson(skillAbilities(source)),
-                    },
-                    include: {
-                        spell: true,
-                        spellGroup: true,
-                        grantedSpell: true,
-                        mainSkill: true,
-                    },
-                });
-
-                invalidate(actor, ReferenceKind.SKILLS);
-
-                return skill;
-            }
-            case 'spells.remove-from-group': {
-                await owned(
-                    await prisma.spell.findFirst({
-                        where: {
-                            id: param('spellId'),
-                            campaignId: actor.campaignId,
-                        },
-                    }),
-                    actor
-                );
-
-                const result = await prisma.spell.update({
-                    where: { id: param('spellId') },
-                    data: { groupId: null },
-                    include: { spellGroup: true },
-                });
-
-                invalidate(actor, ReferenceKind.SPELLS);
-
-                return result;
-            }
-            case 'spell-groups.remove-all-spells': {
-                await owned(
-                    await prisma.spellGroup.findFirst({
-                        where: {
-                            id: param('groupId'),
-                            campaignId: actor.campaignId,
-                        },
-                    }),
-                    actor
-                );
-                await prisma.spell.updateMany({
-                    where: {
-                        campaignId: actor.campaignId,
-                        groupId: param('groupId'),
-                    },
-                    data: { groupId: null },
-                });
-                invalidate(actor, ReferenceKind.SPELLS);
-
-                return { ok: true };
-            }
-            case 'spells.delete-by-level': {
-                const { level } = bodyOf('spells.delete-by-level', body);
-
-                const doomed = await prisma.spell.findMany({
-                    where: { campaignId: actor.campaignId, level },
-                    select: { id: true },
-                });
-
-                await detachRefs(
-                    prisma,
-                    actor.campaignId,
-                    'spell',
-                    doomed.map((s) => s.id)
-                );
-
-                const result = await prisma.spell.deleteMany({
-                    where: { campaignId: actor.campaignId, level },
-                });
-
-                invalidate(actor, ReferenceKind.SPELLS);
-
-                return { ok: true, deleted: result.count };
-            }
-            case 'units.import': {
-                const { units: incoming } = bodyOf('units.import', body);
-
-                const rules = await loadRules(actor.campaignId);
-
-                let droppedConditions = 0;
-
-                const units = incoming.map((unit) => {
-                    const cleaned = dropForeignConditions(
-                        rules.system,
-                        unit.abilities
-                    );
-
-                    droppedConditions += cleaned.dropped;
-
-                    return cleaned.dropped
-                        ? { ...unit, abilities: cleaned.abilities }
-                        : unit;
-                });
-
-                assertEffectsInComposition(
-                    rules.system,
-                    units.flatMap((unit) => unit.abilities ?? [])
-                );
-
-                await assertCampaignRefs(actor.campaignId, {
-                    spell: [
-                        ...units.flatMap((unit) => unit.knownSpells),
-                        ...units.flatMap((unit) =>
-                            abilitySpellIds(unit.abilities)
-                        ),
-                    ],
-                });
-
-                const persisted = ruleSystemOf(rules).characteristics.persisted;
-
-                const narrowed = persisted
-                    ? units.map((unit) =>
-                          unit.characteristics
-                              ? {
-                                    ...unit,
-                                    characteristics: parseSystemData(
-                                        rules,
-                                        unit.characteristics,
-                                        'unitCharacteristics'
-                                    ),
-                                }
-                              : unit
-                      )
-                    : units;
-
-                const result = await importUnitsIntoCampaign(
-                    prisma,
-                    actor.campaignId,
-                    narrowed,
-                    rules
-                );
-
-                invalidate(actor, ReferenceKind.UNITS);
-
-                return droppedConditions
-                    ? { ...result, droppedConditions }
-                    : result;
-            }
-            case 'tracks.reorder': {
-                const { ids } = bodyOf('tracks.reorder', body);
-
-                const known = new Set(
-                    (
-                        await prisma.campaignTrack.findMany({
-                            where: { campaignId: actor.campaignId },
-                            select: { id: true },
-                        })
-                    ).map((row) => row.id)
-                );
-
-                if (
-                    ids.length !== known.size ||
-                    new Set(ids).size !== ids.length ||
-                    !ids.every((trackId) => known.has(trackId))
-                )
-                    throw new ContentError(
-                        API_ERRORS.TRACK_ORDER_MISMATCH,
-                        400
-                    );
-
-                await prisma.$transaction(
-                    ids.map((trackId, sortOrder) =>
-                        prisma.campaignTrack.update({
-                            where: { id: trackId },
-                            data: { sortOrder },
-                        })
-                    )
-                );
-
-                return listTracks(actor.campaignId);
-            }
+            case 'abilities.sources':
+                return abilitySources(ctx);
+            case 'abilities.get':
+                return abilityGet(ctx);
+            case 'skills.duplicate':
+                return duplicateSkill(ctx);
+            case 'spells.remove-from-group':
+                return removeSpellFromGroup(ctx);
+            case 'spell-groups.remove-all-spells':
+                return removeAllSpellsFromGroup(ctx);
+            case 'spells.delete-by-level':
+                return deleteSpellsByLevel(ctx);
+            case 'units.import':
+                return importUnits(ctx);
+            case 'tracks.reorder':
+                return reorderTracks(ctx);
         }
     };
 
