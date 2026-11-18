@@ -14,6 +14,7 @@ import {
 import type { Rng } from '@/lib/utils/abilities/engine/core/types';
 import { recordUse } from '@/lib/utils/abilities/engine/core/usage';
 import { evaluateCondition } from '@/lib/utils/abilities/registry/conditions';
+import { reactionsOf } from '@/lib/utils/battle/actions/access';
 import { spendLair } from '@/lib/utils/battle/actions/lair';
 import {
     legendaryCostOf,
@@ -518,9 +519,7 @@ function assertActionAvailable(
     const { definition } = spell;
 
     if (definition.cost === 'reaction' && !free) {
-        const blocker = ruleSystemOf(ctx.meta.rules).combat.reactions.blocker(
-            caster
-        );
+        const blocker = reactionsOf(ctx.meta.rules).blocker(caster);
 
         if (blocker) throw ruleErrorOf('action_rejected', blocker);
     } else assertCanAct(ctx, caster.basicInfo.id, { skipMorale: free });

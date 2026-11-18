@@ -5,12 +5,12 @@ import {
     buildPartyPower,
     computeFairScaling,
     heroMember,
+    hitModelOf,
     type Power,
     unitMember,
 } from '@/lib/utils/battle/balance';
 import type { CampaignSpellContext } from '@/lib/utils/battle/types/participant';
 import type { Ruleset } from '@/lib/utils/rules';
-import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { BattleParticipant } from '@/types/battle';
 
 export type StartSlot =
@@ -39,7 +39,7 @@ export async function scaleEnemiesForFairBattle(
 
     if (!slots.some(isEnemyUnit)) return built;
 
-    const { hitModel: model } = ruleSystemOf(rules).combat;
+    const model = hitModelOf(rules);
 
     const { balance } = systemServerOf(rules);
 

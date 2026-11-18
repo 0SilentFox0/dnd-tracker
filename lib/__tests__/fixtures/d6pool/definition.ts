@@ -1,4 +1,3 @@
-import { noActions, noReactions } from '@/lib/utils/battle/actions/none';
 import { noProficiency, noSaves } from '@/lib/utils/battle/saves/none';
 import { noMagic } from '@/lib/utils/battle/spell/none';
 import { rollDie } from '@/lib/utils/common/dice';
@@ -92,9 +91,6 @@ export const D6POOL_SYSTEM: RuleSystemDefinition = {
     combat: {
         judge: 'client',
         dice: 6,
-        actionEconomy: { bonusAction: false, reaction: false },
-        actions: noActions,
-        reactions: noReactions,
         saves: noSaves,
         proficiency: noProficiency,
         resolveAttack: d6Attack,

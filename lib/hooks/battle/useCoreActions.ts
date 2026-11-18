@@ -7,12 +7,12 @@ import { useBattleScene } from './useBattleScene';
 import type { CoreActionBody } from '@/lib/hooks/battles';
 import { isAttackable } from '@/lib/utils/abilities/engine/core/participants';
 import {
+    actionsOf,
     coreActionsOn,
     reactionBlockerOf,
 } from '@/lib/utils/battle/actions/access';
 import { isHostile } from '@/lib/utils/battle/modes/engine';
 import type { Ruleset } from '@/lib/utils/rules/schema';
-import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { BattleParticipant } from '@/types/battle';
 
 export interface CoreActionChoice {
@@ -102,7 +102,7 @@ export function useCoreActions(
 
     const readied = useReadiedAttack(participant, onDone);
 
-    const { actions } = ruleSystemOf(battle.rules).combat;
+    const actions = actionsOf(battle.rules);
 
     const items = useMemo(
         () =>

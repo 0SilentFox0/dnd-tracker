@@ -12,6 +12,7 @@ import { previewComposition } from '../preview';
 import { MODULES } from '../registry';
 import type { RuleSystemDefinition } from '../types';
 
+import { noActions } from '@/lib/utils/battle/actions/none';
 import { sectionsOfComposition } from '@/lib/utils/rules/section-registry';
 import type { SystemSelection } from '@/lib/utils/rules/systems/catalog';
 
@@ -44,7 +45,7 @@ describe('previewComposition', () => {
 
         expect(preview.sheetBlocks).toBe(expected.sheet?.blocks.length ?? 0);
         expect(preview.actions).toEqual(
-            Object.keys(expected.combat.actions.catalog).sort()
+            Object.keys((expected.combat.actions ?? noActions).catalog).sort()
         );
         expect(preview.contentKinds).toEqual(
             [...contentKindsOf(system)].sort()

@@ -12,6 +12,7 @@ import {
     buildPartyPower,
     computeFairScaling,
     heroMember,
+    hitModelOf,
     pickEnemyRoster,
     unitMember,
 } from '@/lib/utils/battle/balance';
@@ -21,7 +22,6 @@ import {
     type XpEdition,
 } from '@/lib/utils/battle/balance/xp-budget';
 import { type Ruleset } from '@/lib/utils/rules';
-import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { AllyStats, SuggestedEnemy } from '@/types/battle-setup';
 
 type BalancePostData = z.infer<typeof balanceSchema>;
@@ -98,7 +98,7 @@ export async function postBalanceResponse(
         allyCount += quantity;
     }
 
-    const party = buildPartyPower(members, ruleSystemOf(rules).combat.hitModel);
+    const party = buildPartyPower(members, hitModelOf(rules));
 
     const allyStats: AllyStats = {
         dpr: round1(party.dpr),

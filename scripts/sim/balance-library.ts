@@ -46,6 +46,7 @@ import {
     heroMember,
     pickEnemyRoster,
 } from '@/lib/utils/battle/balance';
+import { hitModelOf } from '@/lib/utils/battle/balance/hit-model';
 import { applyBattleDelta } from '@/lib/utils/battle/client/apply-delta';
 import { attackDamageParts } from '@/lib/utils/battle/damage/attack-parts';
 import { awaitsMoraleCheck } from '@/lib/utils/battle/morale/awaits-check';
@@ -67,7 +68,6 @@ import {
 } from '@/lib/utils/battle/view';
 import { rollDiceList } from '@/lib/utils/common/dice';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
-import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import {
     branchLevelNodeId,
     canLearn,
@@ -1124,7 +1124,7 @@ async function main() {
                     stats: heroMember(s),
                     hero: true,
                 })),
-                ruleSystemOf(DEFAULT_RULES).combat.hitModel
+                hitModelOf(DEFAULT_RULES)
             );
 
             console.info(

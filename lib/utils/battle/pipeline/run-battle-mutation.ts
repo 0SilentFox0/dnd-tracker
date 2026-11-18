@@ -18,6 +18,7 @@ import type {
     BATTLE_RATE_LIMITS,
     RateLimitResult,
 } from '@/lib/utils/api/rate-limit';
+import { actionsOf } from '@/lib/utils/battle/actions/access';
 import { controls, currentOf } from '@/lib/utils/battle/common/control';
 import { placeParticipants } from '@/lib/utils/battle/grid/placement';
 import { placeRevived } from '@/lib/utils/battle/grid/revive-placement';
@@ -254,7 +255,7 @@ function withPlacement(
     if (cleared !== result.participants)
         result = { ...result, participants: cleared };
 
-    const released = ruleSystemOf(rules).combat.actions.releaseInvalidGrapples(
+    const released = actionsOf(rules).releaseInvalidGrapples(
         result.participants,
         map
     );

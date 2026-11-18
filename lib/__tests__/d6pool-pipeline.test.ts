@@ -9,6 +9,7 @@ import {
     BattleStatus,
     ParticipantSide,
 } from '@/lib/constants/battle';
+import { noActions } from '@/lib/utils/battle/actions/none';
 import type { RunBattleMutationOptions } from '@/lib/utils/battle/pipeline/run-battle-mutation';
 import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
 import type { BattleAttack } from '@/types/battle';
@@ -260,12 +261,12 @@ describe('d6pool through the real battle pipeline', () => {
     it('next-turn works without releaseInvalidGrapples and sustain.dropOrphaned', async () => {
         const { store } = await startedStore(20);
 
-        const { combat, magic } = D6POOL_SYSTEM;
+        const { magic } = D6POOL_SYSTEM;
 
         const { participants } = store.state;
 
         expect(
-            combat.actions.releaseInvalidGrapples(participants, null)
+            noActions.releaseInvalidGrapples(participants, null)
         ).toEqual({ participants, messages: [] });
         expect(magic.sustain.dropOrphaned(participants, null, 1)).toEqual({
             participants,

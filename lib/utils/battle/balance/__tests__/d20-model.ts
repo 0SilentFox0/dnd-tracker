@@ -1,8 +1,8 @@
 import type { PartyPower } from '@/lib/utils/battle/balance/fair';
+import { hitModelOf } from '@/lib/utils/battle/balance/hit-model';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
-import { ruleSystemOf } from '@/lib/utils/rules/systems';
 
-export const D20_MODEL = ruleSystemOf(DEFAULT_RULES).combat.hitModel;
+export const D20_MODEL = hitModelOf(DEFAULT_RULES);
 
 export type PartialModelParty<T> = Omit<T, 'hit' | 'refHit' | 'refHitUnit'> &
     Partial<Pick<PartyPower, 'hit' | 'refHit' | 'refHitUnit'>>;

@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { coreActionsOn, reactionBlockerOf } from '../access';
 import { moveWithReactions, runCoreAction } from '../dispatch';
+import { noActions } from '../none';
 import { actionReason } from '../reasons';
 
 import { D6POOL_SYSTEM } from '@/lib/__tests__/fixtures/d6pool/definition';
@@ -25,7 +26,7 @@ vi.mock('@/lib/utils/rules/systems', async (importOriginal) => {
 describe('core actions of a system without them (d6pool base)', () => {
     const actor = createMockParticipant();
 
-    const { actions } = D6POOL_SYSTEM.combat;
+    const actions = D6POOL_SYSTEM.combat.actions ?? noActions;
 
     it('lists nothing and is switched off whatever the rules section says', () => {
         expect(actions.catalog).toEqual({});
@@ -85,7 +86,7 @@ describe('core actions of a system without them (d6pool base)', () => {
 
 describe('wfrp noActions', () => {
     it('has an empty catalog, is off and blocks reactions', async () => {
-        const { noActions, noReactions } = await import('../none');
+        const { noReactions } = await import('../none');
 
         const actor = createMockParticipant();
 

@@ -5,6 +5,7 @@ import { staticGraph } from './helpers/static-graph';
 import { D6POOL_SYSTEM } from '@/lib/__tests__/fixtures/d6pool/definition';
 import { D6POOL_SERVER } from '@/lib/__tests__/fixtures/d6pool/server';
 import { AttackType, ParticipantSide } from '@/lib/constants/battle';
+import { noActions } from '@/lib/utils/battle/actions/none';
 import type { BattleMutationContext } from '@/lib/utils/battle/pipeline/run-battle-mutation';
 import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
 import { SYSTEM_ROOTS } from '@/scripts/shared/system-ratchet';
@@ -178,7 +179,7 @@ describe('start, attack and next-turn on a d6pool base', () => {
 
 describe('core actions of a base without them', () => {
     it('has no catalog, so dash is neither listed nor runnable', () => {
-        const { actions } = D6POOL_SYSTEM.combat;
+        const actions = D6POOL_SYSTEM.combat.actions ?? noActions;
 
         expect(actions.enabled({} as never)).toBe(false);
         expect(actions.catalog).toEqual({});

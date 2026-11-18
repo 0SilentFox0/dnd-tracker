@@ -1,10 +1,24 @@
 import type { getCharacterStats, UnitStats } from './index';
 
 import { noSaves } from '@/lib/utils/battle/saves/none';
+import type { Ruleset } from '@/lib/utils/rules/schema';
+import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { RuleSystemCombat } from '@/lib/utils/rules/systems/types';
 import type { BattleParticipant } from '@/types/battle';
 
 export type HitModel = NonNullable<RuleSystemCombat['hitModel']>;
+
+/** A system without its own hit model: an even matchup, one damage per hit */
+export const noHitModel: HitModel = {
+    offense: () => 0,
+    defense: () => 0,
+    winChance: () => 0.5,
+    damage: () => 1,
+    refHit: 0.5,
+};
+
+export const hitModelOf = (rules: Pick<Ruleset, 'system'>): HitModel =>
+    ruleSystemOf(rules).combat.hitModel ?? noHitModel;
 
 const MELEE_KEY = 'melee:physical';
 

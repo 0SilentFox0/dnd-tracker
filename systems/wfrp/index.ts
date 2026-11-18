@@ -40,7 +40,6 @@ import { WFRP_TRAITS } from './rules/traits';
 import { WFRP_TURN } from './rules/turn';
 
 import { COINS } from '@/lib/constants/inventory';
-import { noActions, noReactions } from '@/lib/utils/battle/actions/none';
 import type { SystemData } from '@/lib/utils/rules/systems/slot';
 import type { RuleSystemDefinition } from '@/lib/utils/rules/systems/types';
 
@@ -122,7 +121,6 @@ export const WFRP_MODULE: RuleSystemDefinition = {
         input: { assert: assertWfrpInput },
         judge: 'server',
         dice: 100,
-        actionEconomy: { bonusAction: false, reaction: false },
         attacksOf: extractWfrpAttacks,
         participantFields: wfrpParticipantFields,
         tieBreak: (p) => participantStats(p)?.ag ?? p.abilities.dexterity,
@@ -136,8 +134,6 @@ export const WFRP_MODULE: RuleSystemDefinition = {
         onZeroHp: wfrpOnZeroHp,
         onDamaged: [wfrpLoseChannelled],
         turn: WFRP_TURN,
-        actions: noActions,
-        reactions: noReactions,
         hitModel: wfrpHitModel,
     },
     lineage: false,
