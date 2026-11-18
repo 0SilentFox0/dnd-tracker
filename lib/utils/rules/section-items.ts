@@ -2,6 +2,8 @@ import { SECTION_DEFAULTS } from './defaults';
 import { sectionSchemas } from './section-shapes';
 import { itemsFromShape } from './sections';
 
+import { asRecord } from '@/lib/utils/common/json';
+
 /** Items of a legacy section (all of them, or only `keys`) with schemas and defaults from section-shapes/SECTION_DEFAULTS */
 export const sectionItems = (
     name: keyof typeof sectionSchemas,
@@ -9,11 +11,6 @@ export const sectionItems = (
 ) =>
     itemsFromShape(
         sectionSchemas[name].shape as never,
-        (
-            SECTION_DEFAULTS as unknown as Record<
-                string,
-                Record<string, unknown>
-            >
-        )[name] ?? {},
+        asRecord(asRecord(SECTION_DEFAULTS)[name]),
         keys
     );

@@ -4,6 +4,9 @@ import { isRecord } from './is-record';
 
 export const toInputJson = (v: unknown) => v as Prisma.InputJsonValue;
 
+/** Reads a stored JSON column / untyped value as a trusted shape; validate at the boundary when the data is user-controlled. */
+export const fromJson = <T>(v: unknown): T => v as T;
+
 export const toInputJsonObject = (v: object) => v as Prisma.InputJsonObject;
 
 export const asRecord = (v: unknown): Record<string, unknown> =>

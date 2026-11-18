@@ -1,3 +1,4 @@
+import { fromJson } from '@/lib/utils/common/json';
 import type {
     BattleParticipant,
     BattlePreparationParticipant,
@@ -43,10 +44,10 @@ export function dropBattleFlag(
 }
 
 export const reserveStub = (p: BattleParticipant): BattleParticipant =>
-    ({
+    fromJson<BattleParticipant>({
         basicInfo: { id: p.basicInfo.id, side: p.basicInfo.side },
         battleData: { reserved: true },
-    }) as unknown as BattleParticipant;
+    });
 
 export const stubReserve = (
     pending: BattleParticipant[]

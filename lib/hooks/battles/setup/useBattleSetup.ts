@@ -16,6 +16,7 @@ import { CharacterType } from '@/lib/constants/characters';
 import { useCampaignRules } from '@/lib/hooks/campaigns';
 import { hitModelOf } from '@/lib/utils/battle/balance/hit-model';
 import { sharedEnemyRace } from '@/lib/utils/battle/balance/setup';
+import { fromJson } from '@/lib/utils/common/json';
 import { SECTION_DEFAULTS } from '@/lib/utils/rules/defaults';
 import { FALLBACK_SYSTEM_KEY } from '@/lib/utils/rules/systems/catalog';
 import type { BattlePreparationParticipant } from '@/types/battle';
@@ -148,8 +149,9 @@ export function useBattleSetupInitial(campaignId: string, battleId: string) {
                 ? {
                       name: battle.name || '',
                       description: (battle.description as string) || '',
-                      participants: (battle.participants ??
-                          []) as unknown as BattlePreparationParticipant[],
+                      participants: fromJson<BattlePreparationParticipant[]>(
+                          battle.participants ?? []
+                      ),
                       map: battle.map ?? null,
                       mapRef: battle.mapRef ?? null,
                       status: battle.status,

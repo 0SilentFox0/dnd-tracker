@@ -1,6 +1,7 @@
 import 'server-only';
 import { prisma } from '@/lib/db';
 import { tableOfKind as bundleTable } from '@/lib/server/templates/bundle';
+import { unsafeCast } from '@/lib/utils/common/cast';
 import type { ImportKind } from '@/types/content-import';
 
 export interface KeyRow {
@@ -17,7 +18,7 @@ interface Delegate {
 export const tableOfKind = (kind: ImportKind) => bundleTable(kind)!;
 
 const delegateOf = (kind: ImportKind) =>
-    (prisma as unknown as Record<string, Delegate>)[tableOfKind(kind).delegate];
+    unsafeCast<Record<string, Delegate>>(prisma)[tableOfKind(kind).delegate];
 
 export const loadKeys = (
     campaignId: string,

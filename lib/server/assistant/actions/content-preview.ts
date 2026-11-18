@@ -11,6 +11,7 @@ import {
 } from '@/lib/server/templates/bundle';
 import { collectKeysAndStrings } from '@/lib/server/templates/remap-ids';
 import type { Actor } from '@/lib/utils/api/actor';
+import { unsafeCast } from '@/lib/utils/common/cast';
 
 type Row = Record<string, unknown>;
 type Delegate = { findMany: (args: unknown) => Promise<Row[]> };
@@ -102,7 +103,7 @@ export async function contentPreviewState(
     const ownKey = id ? undefined : tableKey(kind);
 
     for (const table of BUNDLE_TABLES) {
-        const delegate = prisma[table.delegate] as unknown as Delegate;
+        const delegate = unsafeCast<Delegate>(prisma[table.delegate]);
 
         if (table.key === ownKey) {
             tables[table.key] = await delegate.findMany({
@@ -187,8 +188,8 @@ async function referencing(
             (entry) => entry.key === relation.table
         )!;
 
-        const rows = await (
-            prisma[table.delegate] as unknown as Delegate
+        const rows = await unsafeCast<Delegate>(
+            prisma[table.delegate]
         ).findMany({
             where: { campaignId, [relation.column]: { in: [...ids] } },
             orderBy: { id: 'asc' },
@@ -217,7 +218,7 @@ export async function contentOperationState(
 
     const body = (input.body ?? {}) as Row;
 
-    const db = prisma as unknown as Record<string, Delegate>;
+    const db = unsafeCast<Record<string, Delegate>>(prisma);
 
     const find = (delegate: string, where: Row, select?: Row) =>
         db[delegate].findMany({

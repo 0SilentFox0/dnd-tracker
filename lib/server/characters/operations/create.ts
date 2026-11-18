@@ -73,7 +73,7 @@ async function assertClassSkills({
         throw new ContentError(issues[0].message, 422, issues);
 }
 
-type NormalizedInput = ReturnType<typeof normalizeCharacterInput>;
+type NormalizedInput = CreateCharacterInput;
 
 type AppliedClasses = Extract<
     Awaited<ReturnType<typeof applyClasses>>,
@@ -147,7 +147,7 @@ function characterCreateData({
     initiative: number;
     fromClasses: AppliedClasses;
     choices: Awaited<ReturnType<typeof createChoices>>;
-    owner: { controlledBy: string | null };
+    owner: { controlledBy: string };
     avatar: { avatar?: string | null };
     spellSlots: Prisma.InputJsonValue;
     split: ReturnType<typeof splitColumnView>;

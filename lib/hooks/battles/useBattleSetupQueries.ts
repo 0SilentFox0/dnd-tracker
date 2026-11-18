@@ -7,6 +7,7 @@ import { battleKeys } from './keys';
 import { getBattleBalance, getBattleBalanceStats } from '@/lib/api/battles';
 import { useCharacters } from '@/lib/hooks/characters';
 import { useUnits } from '@/lib/hooks/units';
+import { fromJson } from '@/lib/utils/common/json';
 import type { BattleBalanceBody } from '@/types/battle-setup';
 import type {
     EntityStats,
@@ -20,7 +21,7 @@ export function useSetupRoster(campaignId: string) {
     const units = useUnits(campaignId);
 
     return {
-        characters: (characters.data ?? []) as unknown as SetupCharacter[],
+        characters: fromJson<SetupCharacter[]>(characters.data ?? []),
         units: units.data ?? [],
         isPending: characters.isPending || units.isPending,
     };

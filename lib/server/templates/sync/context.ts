@@ -30,7 +30,10 @@ import {
 export type SyncDb = TemplateDb &
     Pick<
         Prisma.TransactionClient,
-        'campaignSourceSync' | 'character' | 'characterInventory'
+        | 'campaignSourceSync'
+        | 'character'
+        | 'characterInventory'
+        | 'characterSkills'
     >;
 
 const asState = (v: unknown): SyncState => {

@@ -28,7 +28,7 @@ import { templateLocaleWhere } from '@/lib/server/templates/locale-filter';
 import type { Actor } from '@/lib/utils/api/actor';
 import { armorStatsFromRow } from '@/lib/utils/artifacts/armor-stats';
 import { weaponStatsFromRow } from '@/lib/utils/artifacts/weapon-stats';
-import { asRecord, jsonContentInput } from '@/lib/utils/common/json';
+import { asRecord, fromJson, jsonContentInput } from '@/lib/utils/common/json';
 import {
     CompendiumError,
     type JsonRecord,
@@ -199,9 +199,9 @@ async function loadRows(
 
         const values =
             kind === 'scenarioPages'
-                ? ((await prisma.scenarioPage.findMany({
-                      where,
-                  })) as unknown as JsonRecord[])
+                ? fromJson<JsonRecord[]>(
+                      await prisma.scenarioPage.findMany({ where })
+                  )
                 : await delegateOf(
                       prisma,
                       tableOf(kindTable[kind as keyof typeof kindTable])
@@ -541,7 +541,7 @@ export const prismaImportRepository: ImportRepository = {
         return run
             ? {
                   requestHash: run.planHash,
-                  report: run.report as unknown as CompendiumReport,
+                  report: fromJson<CompendiumReport>(run.report),
               }
             : undefined;
     },

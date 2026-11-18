@@ -331,7 +331,10 @@ async function checkApplied(
     content: ScenarioContent,
     finalOps: ScenarioAiOp[],
     created: CreatedAcquaintance[]
-) {
+): Promise<
+    | { ok: false; failure: Extract<ApplyResult, { ok: false }> }
+    | { ok: true; sources: Map<string, string | undefined> }
+> {
     const foreign = acquaintanceMentionIds(finalOps).filter(
         (id) => !created.some((c) => c.id === id)
     );
@@ -345,7 +348,7 @@ async function checkApplied(
         return {
             ok: false as const,
             failure: {
-                ok: false,
+                ok: false as const,
                 status: 404,
                 error: API_ERRORS.ACQUAINTANCE_NOT_FOUND,
             },
@@ -355,7 +358,7 @@ async function checkApplied(
         return {
             ok: false as const,
             failure: {
-                ok: false,
+                ok: false as const,
                 status: 400,
                 error: API_ERRORS.AI_PROPOSAL_INVALID,
             },
@@ -365,7 +368,7 @@ async function checkApplied(
         return {
             ok: false as const,
             failure: {
-                ok: false,
+                ok: false as const,
                 status: 413,
                 error: API_ERRORS.SCENARIO_TOO_LARGE,
             },
@@ -382,7 +385,7 @@ async function checkApplied(
         return {
             ok: false as const,
             failure: {
-                ok: false,
+                ok: false as const,
                 status: 400,
                 error: API_ERRORS.AI_PROPOSAL_INVALID,
             },

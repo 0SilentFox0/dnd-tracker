@@ -10,6 +10,7 @@ import type { Actor } from '@/lib/utils/api/actor';
 import { type CampaignAccessResult } from '@/lib/utils/api/api-auth';
 import { errorResponse } from '@/lib/utils/api/api-response';
 import { loadOwned } from '@/lib/utils/api/load-owned';
+import { unsafeCast } from '@/lib/utils/common/cast';
 import { withStoredColumns } from '@/lib/utils/rules/systems/column-view';
 
 export type CharacterWithInventory = Prisma.CharacterGetPayload<{
@@ -139,13 +140,19 @@ export function requireCharacterSelect<S extends Prisma.CharacterSelect>(
     select: S,
     opts: GateOptions = {}
 ) {
-    const query = prisma.character.findUnique({
-        where: { id: characterId },
-        select,
-    }) as unknown as PromiseLike<
-        | (Prisma.CharacterGetPayload<{ select: S }> & { campaignId: string })
-        | null
-    >;
+    const query = unsafeCast<
+        PromiseLike<
+            | (Prisma.CharacterGetPayload<{ select: S }> & {
+                  campaignId: string;
+              })
+            | null
+        >
+    >(
+        prisma.character.findUnique({
+            where: { id: characterId },
+            select,
+        })
+    );
 
     return gateCharacter(
         campaignId,

@@ -40,6 +40,7 @@ import { choicesStateOf } from '@/lib/utils/characters/choices/picks';
 import { keepStoredPicks } from '@/lib/utils/characters/choices/picks';
 import { heroInitiativeRange } from '@/lib/utils/characters/initiative-range';
 import { seenLevelOnLevelChange } from '@/lib/utils/characters/seen-level';
+import { fromJson, toInputJson } from '@/lib/utils/common/json';
 import {
     levelNotificationEvents,
     spellNotificationEvents,
@@ -216,7 +217,7 @@ async function computeUpdate(
         : undefined;
 
     const progression = Array.isArray(race?.spellSlotProgression)
-        ? (race.spellSlotProgression as unknown as SpellSlotProgression[])
+        ? fromJson<SpellSlotProgression[]>(race.spellSlotProgression)
         : null;
 
     const restoredSlots = clearingClasses
@@ -285,9 +286,8 @@ function updateWriter({
                     data.characteristics) as Prisma.InputJsonValue | undefined,
                 backgroundChoices: undefined,
                 backgroundFeatPicks: undefined,
-                classes: classes as unknown as
-                    | Prisma.InputJsonValue
-                    | undefined,
+                classes:
+                    classes === undefined ? undefined : toInputJson(classes),
                 avatar,
                 level: computed.finalLevel,
                 ...(computed.abilityScores ?? {}),

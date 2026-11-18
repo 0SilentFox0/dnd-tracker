@@ -11,6 +11,7 @@ import { exportCampaign } from './export-campaign';
 import { layeredModels } from '@/lib/db/layer/config';
 import { bumpContentVersion } from '@/lib/server/campaigns/version';
 import { rowHash } from '@/lib/server/templates/sync/hash';
+import { unsafeCast } from '@/lib/utils/common/cast';
 
 export interface PublishResult {
     version: number;
@@ -35,9 +36,7 @@ interface BaseDelegate {
 const CHUNK = 200;
 
 const baseDelegate = (db: object, t: BundleTableDef) =>
-    (db as unknown as Record<string, BaseDelegate>)[
-        layeredModels()[t.model].base
-    ];
+    unsafeCast<Record<string, BaseDelegate>>(db)[layeredModels()[t.model].base];
 
 interface VersionWindow {
     _max: { validFrom: number | null; validTo: number | null };
@@ -50,12 +49,12 @@ export async function latestPublishedVersion(
 ): Promise<number | null> {
     const windows = await Promise.all(
         BUNDLE_TABLES.map((t) =>
-            (
-                db as unknown as Record<
+            unsafeCast<
+                Record<
                     string,
                     { aggregate(args: unknown): Promise<VersionWindow> }
                 >
-            )[layeredModels()[t.model].base].aggregate({
+            >(db)[layeredModels()[t.model].base].aggregate({
                 where: { sourceCampaignId: templateId },
                 _max: { validFrom: true, validTo: true },
             })

@@ -2,6 +2,7 @@ import type { Prisma } from '@prisma/client';
 import { AsyncLocalStorage } from 'node:async_hooks';
 
 import { bumpContentVersion } from '@/lib/server/campaigns/version';
+import { unsafeCast } from '@/lib/utils/common/cast';
 
 export type ContentEffect = () => void | Promise<void>;
 
@@ -84,13 +85,9 @@ export function createScopedDatabase<T extends object>(base: T): T {
 
             if (property === '$transaction') {
                 return (callback: unknown, ...rest: unknown[]) => {
-                    const open = (
-                        target as unknown as {
-                            $transaction: (
-                                ...args: unknown[]
-                            ) => Promise<unknown>;
-                        }
-                    ).$transaction;
+                    const open = unsafeCast<{
+                        $transaction: (...args: unknown[]) => Promise<unknown>;
+                    }>(target).$transaction;
 
                     if (typeof callback !== 'function')
                         return open.call(target, callback, ...rest);
