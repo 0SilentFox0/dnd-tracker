@@ -16,7 +16,6 @@ export interface SectionCollapse {
     expand: (id: string) => void;
 }
 
-/** Розгорнуті вручну розділи живуть до перезавантаження; перемикач «зіграні розгорнуті» — у браузері. */
 export function useSectionCollapse(): SectionCollapse {
     const showPlayed = useStorageValue(showPlayedFlag, false);
 

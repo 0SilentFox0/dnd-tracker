@@ -8,7 +8,7 @@ import { useTranslator } from '@/lib/i18n/use-translator';
 import { readSpellDefinition } from '@/lib/utils/spells/model/read';
 import type { Spell } from '@/types/spells';
 
-// поза barrel: тягне zod, а barrel потрапляє в entry-чанки бою й профілю гравця
+// outside the barrel: pulls in zod, and the barrel lands in battle and player-profile entry chunks
 export function useSpellMechanics() {
     const t = useTranslator();
 

@@ -17,7 +17,7 @@ import type { BattleAudioState } from '@/types/audio';
 
 const TAP_HINT_AFTER_MS = 3_000;
 
-// при зміні відео ефекти синхронізації ще бачать старий плеєр, а виклик після destroy() кидає «reading 'src'»
+// when the video changes, sync effects still see the old player and a call after destroy() throws "reading 'src'"
 const destroyedPlayers = new WeakSet<YtPlayer>();
 
 export function useYoutubeSync(input: {
@@ -39,7 +39,7 @@ export function useYoutubeSync(input: {
 
     const [failed, setFailed] = useState(false);
 
-    // PLAYING: тривалість стає відомою лише тепер — не чекаємо перевірки дрейфу
+    // PLAYING: the duration is only known now, do not wait for the drift check
     const [starts, setStarts] = useState(0);
 
     const tapHint = useRef<number | undefined>(undefined);
@@ -119,7 +119,7 @@ export function useYoutubeSync(input: {
                 if (!alive()) return;
 
                 player.playVideo();
-                // iOS може проігнорувати playVideo без дотику до самого плеєра
+                // iOS may ignore playVideo without a touch on the player itself
                 window.clearTimeout(tapHint.current);
                 tapHint.current = window.setTimeout(
                     () =>
@@ -133,7 +133,7 @@ export function useYoutubeSync(input: {
             pause: () => {
                 if (alive()) player.pauseVideo();
             },
-            // до метаданих ціль не загорнута в петлю; наступна перевірка дрейфу перемотає
+            // before metadata the target is not wrapped into the loop; the next drift check will seek
             seek: (sec) => {
                 if (alive() && player.getDuration()) player.seekTo(sec, true);
             },

@@ -193,7 +193,6 @@ export function useAttackWizard(
                 ? ('ranged' as const)
                 : ('melee' as const)
             : null,
-        /** дальність перевірена картою — лише тоді «ціль поруч» правда */
         reachChecked:
             !!scene.battle.map &&
             !!attacker?.battleData.position &&

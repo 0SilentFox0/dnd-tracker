@@ -9,20 +9,19 @@ import type { BattleScene } from '@/types/api';
 
 export const RESYNC_AFTER_HIDDEN_MS = 15_000;
 
-/** Питає лише версію бою; повний GET — коли вона новіша за кеш. Також після довго схованої вкладки. */
 export function useBattleResync(
     campaignId: string,
     battleId: string
 ): () => Promise<void> {
     const queryClient = useQueryClient();
 
-    // ключ — бій: запит старого бою не має блокувати (чи скидати) запит нового
+    // keyed by battle: a stale battle's request must not block (or reset) the new one
     const inFlightRef = useRef<{
         battleId: string;
         promise: Promise<void>;
     } | null>(null);
 
-    // видимість і перепідключення часто приходять разом: один запит версії на обидва
+    // visibility and reconnect often arrive together: one version request for both
     const resync = useCallback(() => {
         if (inFlightRef.current?.battleId === battleId)
             return inFlightRef.current.promise;
@@ -32,7 +31,7 @@ export function useBattleResync(
         const entry = {
             battleId,
             promise: (async () => {
-                // музика не має версії: пропущені battle-audio перечитуються окремо (лише якщо звук увімкнено)
+                // music has no version: missed battle-audio is re-read separately (only if sound is on)
                 void queryClient.invalidateQueries({
                     queryKey: battleKeys.audio(campaignId, battleId),
                 });
@@ -51,7 +50,7 @@ export function useBattleResync(
 
                     if (cached === undefined || version <= cached) return;
                 } catch {
-                    // без версії безпечніше перечитати бій
+                    // without a version it is safer to re-read the battle
                 }
 
                 await queryClient.invalidateQueries({ queryKey: key });

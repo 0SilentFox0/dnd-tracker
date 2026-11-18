@@ -15,7 +15,6 @@ const silent = { onConflict: () => undefined };
 // module-level: a layout remount (desktop/mobile switch, gate) must not resend the same turn
 const sentTurns = new Map<string, string>();
 
-/** Залишок часу ходу (лише відображення, без побічних ефектів). */
 export function useTurnCountdown(): {
     secondsLeft: number | null;
     totalSeconds: number | null;
@@ -53,7 +52,6 @@ export function useTurnCountdown(): {
     return { secondsLeft, totalSeconds: running ? seconds : null };
 }
 
-/** Таймер ходу бою: а коли час вийшов — клієнт ДМа або власника ходу завершує хід. */
 export function useTurnTimer(): { secondsLeft: number | null } {
     const { campaignId, battleId, battle, viewer, turn, anyPending } =
         useBattleScene();

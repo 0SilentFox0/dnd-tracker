@@ -10,7 +10,6 @@ import type { BattleMapRef } from '@/types/battle-grid';
 
 const EDGES_GC_MS = 30 * 60_000;
 
-/** Ребра pinned-версії карти бібліотеки; незмінні, тож без повторних запитів. */
 export function useBattleMapEdges(
     campaignId: string,
     ref: BattleMapRef | undefined

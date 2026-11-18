@@ -2,7 +2,6 @@
 
 import { type SyntheticEvent, useState } from 'react';
 
-/** Пропорції завантаженого фону для `src` + обробники `<Image>`; `onReady` лунає і на успіх, і на помилку. */
 export function useLoadedAspect(src: string, onReady?: () => void) {
     const [loaded, setLoaded] = useState<{
         src: string;

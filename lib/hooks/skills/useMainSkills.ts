@@ -55,7 +55,7 @@ export function useDeleteMainSkill(campaignId: string) {
         mutationFn: (mainSkillId: string) =>
             deleteMainSkill(campaignId, mainSkillId),
         errorText: t('deleteFailed'),
-        // скіли посилаються на видалений mainSkill
+        // skills reference the deleted mainSkill
         invalidateKeys: [
             skillKeys.mainSkills(campaignId),
             skillKeys.list(campaignId),

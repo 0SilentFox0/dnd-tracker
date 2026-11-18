@@ -14,7 +14,6 @@ export function fireFxImpact(actionId: string) {
     for (const cb of [...(listeners.get(actionId) ?? [])]) cb();
 }
 
-/** Кадр влучання чекає удару анімації своєї дії; `waitMs` — запобіжник, якщо анімацію пропущено. */
 export function onFxImpact(
     actionId: string,
     waitMs: number,
@@ -43,7 +42,7 @@ export function onFxImpact(
     }
 
     if (fired.includes(actionId)) {
-        // підписка з ефекту: колбек не має кликати setState синхронно
+        // subscribed from an effect: the callback must not call setState synchronously
         clearTimeout(timer);
         queueMicrotask(finish);
 

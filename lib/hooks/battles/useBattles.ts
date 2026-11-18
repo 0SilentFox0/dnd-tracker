@@ -17,10 +17,9 @@ import { BattleStatus } from '@/lib/constants/battle';
 import { acceptFullBattle } from '@/lib/utils/battle/client/apply-delta';
 import type { BattleScene } from '@/types/api';
 
-/** Fallback-polling без Pusher. 30s — знижує egress; оновлення йдуть через Pusher та мутації. */
 export const BATTLE_ACTIVE_REFETCH_INTERVAL_MS = 30_000;
 
-// prepared теж: інакше гравці без Pusher не побачать старту бою.
+// prepared too: otherwise players without Pusher will not see the battle start.
 const POLLED_BATTLE_STATUSES: ReadonlySet<BattleStatus> = new Set([
     BattleStatus.PREPARED,
     BattleStatus.ACTIVE,
@@ -30,7 +29,6 @@ export function useBattle(
     campaignId: string,
     battleId: string,
     options?: {
-        /** Вимкнути polling (напр. коли Pusher підключено — оновлення йдуть по Realtime). */
         pausePolling?: boolean;
     }
 ) {

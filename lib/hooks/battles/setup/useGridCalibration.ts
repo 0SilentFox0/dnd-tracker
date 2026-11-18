@@ -32,7 +32,6 @@ const rectOf = (a: Point, b: Point): PixelRect => ({
     h: Math.abs(a.y - b.y),
 });
 
-/** Ручне калібрування сітки: обвести клітинку (або N×N) на зображенні, точний нуджинг, вибір «зберегти калібрування» при заміні фону. */
 export function useGridCalibration(editor: BattleMapEditor) {
     const t = useTranslations('battleSetup.map.calibration');
 

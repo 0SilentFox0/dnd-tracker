@@ -9,7 +9,6 @@ import type { AudioHost } from './host';
 import { mergeAudio, mergeAudioSnapshot } from '@/lib/utils/audio/merge';
 import type { BattleAudioSnapshot } from '@/types/audio';
 
-/** unlocked = звук увімкнено: лише тоді GET (свіжий стан і годинник); до того — seed і Pusher. */
 export function useAudioState({
     host,
     unlocked,
@@ -32,7 +31,7 @@ export function useAudioState({
             );
         },
         enabled: unlocked,
-        // seed і Pusher пишуть кеш через setQueryData і роблять його «свіжим», а годинник міряє лише GET після розблокування
+        // seed and Pusher write the cache via setQueryData making it "fresh", while the clock measures only the GET after unlock
         staleTime: 0,
         initialData: { audio: seed ?? null, clockOffsetMs: null },
         initialDataUpdatedAt: 0,
@@ -40,14 +39,14 @@ export function useAudioState({
         refetchOnReconnect: false,
     });
 
-    // seed несе стан на момент читання — лише злиття за seq, ніколи не присвоєння
+    // the seed carries the state at read time: merge by seq only, never assign
     useEffect(() => {
         if (!seed) return;
 
         writeAudioSnapshot(queryClient, queryKey, { audio: seed });
     }, [queryClient, queryKey, seed]);
 
-    // кеш читається синхронно: сповіщення спостерігача приходять пізніше за рендер
+    // the cache is read synchronously: observer notifications arrive after the render
     const snapshot =
         queryClient.getQueryData<BattleAudioSnapshot>(queryKey) ?? data;
 

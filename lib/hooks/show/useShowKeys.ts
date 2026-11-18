@@ -12,12 +12,10 @@ const ARROWS: Partial<Record<string, ShowCommand>> = {
     ArrowLeft: { action: 'prev' },
 };
 
-/** Літери за e.code: на українській розкладці e.key для B — «и». */
 const LETTERS: Partial<Record<string, ShowCommand>> = {
     KeyB: { action: 'curtain' },
 };
 
-/** extraKeys — додаткові дії за e.code (сценарій: KeyN — наступний рядок). */
 export function useShowKeys(
     control: ShowControl | null,
     extraKeys: Record<string, () => void> = {}

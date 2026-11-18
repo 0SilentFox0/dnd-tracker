@@ -13,13 +13,9 @@ import { edgeAtScreenPoint, screenToUnit, UNIT } from '@/lib/utils/battle/grid';
 import type { BattleMapConfig } from '@/types/battle-grid';
 
 export interface EdgeEditing {
-    /** ребра активного виду (для «стерти» — стіни й ґрати разом) */
     existing: ReadonlySet<string>;
-    /** «стерти» лише знімає, не додає */
     erase?: boolean;
-    /** ребра зафіксованих штрихів, що чекають на відповідь сервера */
     committed?: { add: ReadonlySet<string>; remove: ReadonlySet<string> };
-    /** видалені ребра, що малюються привидом (пензель «Відновити») */
     ghost?: ReadonlySet<string>;
     onCommit(add: string[], remove: string[]): void;
 }
@@ -70,7 +66,6 @@ function edgesBetween(
     return out;
 }
 
-/** Штрих по ребрах: перше ребро задає дію (додати чи зняти), решта лише доповнює; на відпусканні йде в `onCommit`. */
 export function useEdgeStroke(map: Dims, editing: EdgeEditing) {
     const { cols, rows } = map;
 

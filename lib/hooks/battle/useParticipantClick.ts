@@ -13,7 +13,6 @@ export interface ParticipantClickInput extends ParticipantClickScene {
     requestAttack(intent: AttackIntent): void;
 }
 
-/** Стабільний обробник (рядки списку memo): ворог у свій хід — атака, інакше — вибір. */
 export function useParticipantClick(
     input: ParticipantClickInput | null
 ): (id: string) => void {

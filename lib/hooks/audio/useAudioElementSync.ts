@@ -13,18 +13,15 @@ export interface MediaSyncInput {
     unlocked: boolean;
     volume: number;
     muted: boolean;
-    /** play() поза жестом відхилено (новий елемент на iOS) — знову потрібна кнопка «Увімкнути звук» */
     onBlocked?(): void;
 }
 
-/** Порожній WAV: play() у жесті розблоковує елемент на iOS, коли треку ще немає. */
 const SILENT_WAV =
     'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=';
 
 const isBlocked = (e: unknown) =>
     e instanceof Error && e.name === 'NotAllowedError';
 
-/** Стабільний адаптер: елемент приходить через ref-колбек, тож рендер не читає ref. */
 function elementMedia() {
     let el: HTMLAudioElement | null = null;
 
@@ -56,10 +53,10 @@ export function useAudioElementSync(input: MediaSyncInput): {
 } {
     const node = useRef<HTMLAudioElement | null>(null);
 
-    // стан лише перезапускає ефекти при зміні елемента; сам елемент змінюється через ref
+    // state only restarts effects when the element changes; the element itself changes via ref
     const [attached, setAttached] = useState<HTMLAudioElement | null>(null);
 
-    // помилка привʼязана до src: інший трек, YouTube чи «Стоп» прибирають її без скидання в ефекті
+    // the error is bound to src: another track, YouTube or Stop clears it without a reset in an effect
     const [failedSrc, setFailedSrc] = useState<string | null>(null);
 
     const [loads, setLoads] = useState(0);
@@ -77,7 +74,7 @@ export function useAudioElementSync(input: MediaSyncInput): {
 
     const { unlocked, src, state, clockOffsetMs, volume, muted } = input;
 
-    // до useDriftSync: ефекти йдуть за порядком, тож план бачить уже виставлений src
+    // before useDriftSync: effects run in order, so the plan sees the src already set
     useEffect(() => {
         const el = node.current;
 

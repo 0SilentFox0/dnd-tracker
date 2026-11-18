@@ -16,7 +16,6 @@ const stateOf = (tools: PaletteTools): PaletteState =>
         PALETTE_KEYS.map((k) => [k, tools[k].active])
     ) as PaletteState;
 
-/** Щойно відкрита палітра (режиму, місцевості, погоди, руху, фону) закриває решту. */
 export function useExclusivePalettes(tools: PaletteTools) {
     const latest = useRef(tools);
 

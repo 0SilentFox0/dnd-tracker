@@ -8,7 +8,6 @@ import { writeShowSnapshot } from './show-snapshot';
 import { getShow } from '@/lib/api/show';
 import type { ShowSnapshot, ShowState } from '@/types/show';
 
-/** Сервер кладе стан у кеш через PrefetchedQuery; далі — Pusher і повторний GET після перепідписки. */
 export function useShowState(
     campaignId: string,
     enabled = true
@@ -32,7 +31,7 @@ export function useShowState(
         },
         enabled,
         staleTime: Infinity,
-        // без Pusher стан не доходить подіями — повільний polling
+        // without Pusher the state does not arrive as events: slow polling
         refetchInterval: process.env.NEXT_PUBLIC_PUSHER_KEY ? false : 30_000,
         refetchOnWindowFocus: false,
     });

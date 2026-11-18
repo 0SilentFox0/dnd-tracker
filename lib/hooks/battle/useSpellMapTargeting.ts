@@ -52,7 +52,6 @@ function createAimHoverStore(): AimHoverStore {
     };
 }
 
-/** Крок цілей на карті: шаблон приймає точку наведення, решта — клік по токену; ховер пишеться у стор, щоб прев'ю перемальовувало лише своїх підписників, Escape скасовує. */
 export function useSpellMapTargeting(
     state: SpellFlowState,
     dispatch: Dispatch<SpellFlowAction>,
@@ -91,7 +90,7 @@ export function useSpellMapTargeting(
             ).map((p) => p.basicInfo.id);
 
             dispatch({ type: 'SET_AIM', aim: cell, targetIds: ids });
-            // клік у межах дальності і є підтвердженням, навіть якщо зона нікого не зачепила
+            // a click within range is the confirmation even if the zone hit nobody
             dispatch({ type: 'CONFIRM_TARGETS' });
         };
         pickAt.current = (id) => {

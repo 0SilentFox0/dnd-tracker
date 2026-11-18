@@ -6,7 +6,6 @@ import { useBattleScene } from './useBattleScene';
 
 import type { BattleParticipant } from '@/types/battle';
 
-/** Заклинатель вільного касту ДМ: тримаємо id, бо рух і дельти міняють учасника, поки ДМ цілиться. */
 export function useDmCaster() {
     const { battle } = useBattleScene();
 

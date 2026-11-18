@@ -17,7 +17,6 @@ export const PALETTE_KEYS: readonly PaletteKey[] = [
     'fog',
 ];
 
-/** Щойно відкрита палітра витісняє решту відкритих. */
 export function palettesToClose(
     prev: PaletteState,
     next: PaletteState

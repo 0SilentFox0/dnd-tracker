@@ -25,20 +25,15 @@ export interface TurnGateControls {
     skipTurn(): void;
 }
 
-/** Наміри гравця, що їх карта передає майстрам (не мутації — ті в `actions`). */
 export interface BattleSceneIntents {
     attack: AttackIntent | null;
     requestAttack(intent: AttackIntent): void;
     clearAttack(): void;
-    /** Наведення шаблону заклинання на карті: клік по клітинці ставить точку замість руху чи атаки */
     mapAim: MapAim | null;
     setMapAim(aim: MapAim | null): void;
-    /** Вибір цілей заклинання на карті: клік по токену обирає ціль замість руху чи атаки */
     mapPick: MapPick | null;
     setMapPick(pick: MapPick | null): void;
-    /** Фаза ходу поточного героя дозволяє атаку — лише тоді клік по ворогу стає наміром, а не вибором */
     attackReady: boolean;
-    /** MyTurnControls повідомляє id героя, чия фаза дозволяє атаку; null — не дозволяє */
     setAttackReady(heroId: string | null): void;
 }
 
@@ -46,7 +41,6 @@ export type BattleSceneActions = {
     [K in keyof typeof battleOps]: BattleOpMutation<K>;
 };
 
-/** Змінюється лише разом з даними бою — список учасників, черга, герой. */
 export interface BattleSceneData {
     campaignId: string;
     battleId: string;
@@ -58,7 +52,6 @@ export interface BattleSceneData {
     effects: Map<string, DisplayEffect[]>;
     dmControl: DmControl;
     select(id: string | null): void;
-    /** Клік по учаснику в списку: ворог у свій хід — атака, інакше — вибір */
     clickParticipant(id: string): void;
     readBattle(): BattleScene | undefined;
 }

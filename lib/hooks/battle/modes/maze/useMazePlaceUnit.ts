@@ -7,7 +7,6 @@ import { IDLE_MAZE_TOOL, useMazeToolState } from './useMazeToolState';
 
 import type { AddParticipantData } from '@/types/battle-actions';
 
-/** Юніт із діалогу «Додати» ставиться кліком по клітинці лабіринту; undefined — не лабіринт або не ДМ. */
 export function useMazePlaceUnit():
     | ((body: AddParticipantData) => void)
     | undefined {

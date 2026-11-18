@@ -9,7 +9,6 @@ export interface StorageValue<T> {
 }
 
 export interface StorageCodec<T> {
-    /** raw === null — ключа немає; сміття теж має повернути значення за замовчуванням */
     parse(raw: string | null): T;
     serialize(value: T): string;
 }
@@ -57,7 +56,7 @@ export function createStorageValue<T>(
     return {
         get: () => (cached ??= read()),
         set(value) {
-            // через parse, щоб кеш і сховище тримали те саме нормалізоване значення (clamp), що прочитає інша вкладка
+            // via parse, so the cache and storage hold the same normalized (clamped) value another tab will read
             cached = codec.parse(codec.serialize(value));
 
             try {

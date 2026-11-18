@@ -58,7 +58,7 @@ export function useDiceRoller(play: (spec: DiceThrowSpec) => Promise<void>) {
 
         const done = play(spec).catch(() => undefined);
 
-        // сума з'являється, коли кубики ляжуть, а не після витримки й згасання
+        // the sum appears when the dice land, not after the hold and fade-out
         await Promise.race([done, new Promise((r) => setTimeout(r, THROW_MS))]);
 
         if (run !== runs.current) return;

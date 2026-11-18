@@ -26,7 +26,6 @@ interface SpellCastSubmitInput {
     onDone?: () => void;
 }
 
-/** Надсилає каст, чекає на вибір крита від ДМ і показує підсумок. */
 export function useSpellCastSubmit({
     caster,
     selected,

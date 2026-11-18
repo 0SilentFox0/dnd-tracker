@@ -36,7 +36,6 @@ export interface ParticipantActions {
     remove: (participantId: string) => void;
     setQuantity: (participantId: string, quantity: number) => void;
     setReserve: (participantId: string, reserved: number) => void;
-    /** Юніт: не вибраний → союзник, союзник → прибрати, ворог → союзник. */
     cycleUnit: (participantId: string) => void;
 }
 

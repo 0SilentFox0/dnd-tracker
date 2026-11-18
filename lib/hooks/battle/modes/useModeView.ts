@@ -10,7 +10,6 @@ import type { BattleAction } from '@/types/battle-actions';
 export interface ModeViewValue {
     view: ModeView | null;
     visible(p: BattleParticipant): boolean;
-    /** Журнал для FX: уже відфільтрований режимом */
     fxLog: BattleAction[];
 }
 
@@ -20,7 +19,6 @@ const seesAll = () => true;
 
 const NO_LOG: BattleAction[] = [];
 
-/** Без провайдера режиму — бачить усіх і весь журнал (звичайний бій). */
 export function useModeView(): ModeViewValue {
     const value = useContext(ModeViewContext);
 

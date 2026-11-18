@@ -22,7 +22,6 @@ export interface AuraZoneStep {
     pending: boolean;
 }
 
-/** На карті склад зони рахується за радіусом, тож вибір не потрібен. Перша аура в області, зону якої власник ще не вказав у цьому раунді; попередній склад — як підказка. */
 export function useAuraZones(owner: BattleParticipant): AuraZoneStep | null {
     const { battle, actions } = useBattleScene();
 

@@ -50,7 +50,7 @@ export function useAttackSteps({
                     viewer: scene.viewer,
                 });
             });
-        // byId читає order, який уже в deps
+        // byId reads order, which is already in deps
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
         attacker,

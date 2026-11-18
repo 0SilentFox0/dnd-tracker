@@ -26,7 +26,6 @@ import { matchesTargetFilter } from '@/lib/utils/battle/spell/target-filter';
 import type { BattleParticipant } from '@/types/battle';
 import type { GridPoint } from '@/types/battle-grid';
 
-/** Цілі заклинання: кандидати, дальність, наведення на карті та цілі, що їх зачепить шаблон чи ланцюг. */
 export function useSpellBookTargets(
     caster: BattleParticipant | null,
     flow: SpellFlowState,
@@ -96,7 +95,7 @@ export function useSpellBookTargets(
 
     const onMap = !!map && !!caster && isOnMap(caster);
 
-    // полеглі зникають з карти — воскресіння обирає ціль зі списку у вікні
+    // fallen units leave the map: resurrection picks its target from the dialog list
     const mapTargeting =
         flow.step === 'targets' && onMap && flow.pick?.targetSide !== 'dead';
 
@@ -150,7 +149,7 @@ export function useSpellBookTargets(
               )
             : [];
 
-    // від точки, а не від id на момент кліку: рух до касту змінює, кого зачепить
+    // measured from the point, not the id at click time: moving before the cast changes who is hit
     const state = withAllTargets(
         withChainTargets(
             withLiveAimTargets(

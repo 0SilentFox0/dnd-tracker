@@ -56,7 +56,7 @@ export function usePusherShowSync(campaignId: string, enabled = true): void {
                     return;
                 }
 
-                // обмежений слайд не розсилається: перечитуємо власний вигляд
+                // a restricted slide is not broadcast: re-read the own view
                 if (typeof event?.seq !== 'number') return;
 
                 const cachedSeq =
@@ -77,7 +77,7 @@ export function usePusherShowSync(campaignId: string, enabled = true): void {
 
                 lastWorldSeq.current = seq;
 
-                // trailing: остання подія серії встигає потрапити в одне перечитування
+                // trailing: the last event of a series gets into one refetch
                 if (timer.current) return;
 
                 timer.current = setTimeout(() => {
@@ -87,7 +87,7 @@ export function usePusherShowSync(campaignId: string, enabled = true): void {
             },
         },
         {
-            // стан із HTML старший за підписку: події між ними загубилися б
+            // the HTML state is older than the subscription: events in between would be lost
             onSubscribed: () => {
                 void queryClient.invalidateQueries({
                     queryKey: showKeys.state(campaignId),

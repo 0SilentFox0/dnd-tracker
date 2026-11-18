@@ -71,7 +71,7 @@ export function useMapGridSizing({
         [map, margins, maxSide, setMap, setMarginsState, setNotice]
     );
 
-    // ручний розмір скидає масштаб фону: він знову вписується в сітку, а повзунок показує нову клітинку
+    // a manual size resets the background scale: it refits the grid, and the slider shows the new cell
     const setSize = useCallback(
         (cols: number, rows: number) => resize(cols, rows),
         [resize]

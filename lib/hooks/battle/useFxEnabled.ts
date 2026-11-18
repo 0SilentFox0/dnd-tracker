@@ -8,7 +8,6 @@ import {
 
 const fxFlag = createStorageFlag('battle-fx', true);
 
-/** `userEnabled` — перемикач гравця (аури); `motionAllowed` — системне «зменшити рух»; `enabled` — анімації дій і рамки. */
 export function useFxEnabled() {
     const userEnabled = useStorageValue(fxFlag, false);
 

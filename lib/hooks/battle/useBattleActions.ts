@@ -42,7 +42,6 @@ import {
     useUpdateBattleParticipant,
 } from '@/lib/hooks/battles';
 
-/** Усі мутації бою; збої й конфлікти йдуть у тост. */
 export function useBattleActions(
     campaignId: string,
     battleId: string,

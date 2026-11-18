@@ -8,7 +8,6 @@ import { audioPosition } from '@/lib/utils/audio/position';
 
 const TICK_MS = 500;
 
-/** Поточна позиція треку в секундах; null — тривалість невідома (YouTube без durationSec) або нічого не грає. */
 export function useAudioPosition(): {
     positionSec: number;
     durationSec: number;

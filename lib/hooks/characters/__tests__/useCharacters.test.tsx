@@ -67,7 +67,7 @@ describe('мутації персонажа інвалідують баланс 
         expect(invalidate).toHaveBeenCalledWith(
             expect.objectContaining({ queryKey: ['battle-balance', 'c'] })
         );
-        // бейдж і оверлей нового рівня читають лист: він не має чекати staleTime
+        // the new-level badge and overlay read the sheet: it must not wait for staleTime
         expect(invalidate).toHaveBeenCalledWith(
             expect.objectContaining({ queryKey: characterKeys.sheet('c') })
         );

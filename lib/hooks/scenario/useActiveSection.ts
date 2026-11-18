@@ -25,7 +25,6 @@ const stickyLine = () => {
     return px('--app-header-h') + px('--sb-bar-h') + px('--sb-toolbar-h') + 24;
 };
 
-/** Поточний розділ — останній, чий верх пройшов лінію під липкою шапкою. */
 export function useActiveSection(ids: string[]): string | null {
     const [active, setActive] = useState<string | null>(null);
 

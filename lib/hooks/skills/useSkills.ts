@@ -61,7 +61,6 @@ export function useDeleteSkill(campaignId: string) {
     });
 }
 
-/** Копія з новим id, назва + " (копія)" */
 export function useDuplicateSkill(campaignId: string) {
     const t = useTranslations('skills.list');
 

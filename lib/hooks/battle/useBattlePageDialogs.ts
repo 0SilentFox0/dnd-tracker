@@ -26,7 +26,6 @@ function useOpenable(): OpenableDialog {
     return { open, setOpen, show: () => setOpen(true) };
 }
 
-/** Стейт діалогів сторінки бою (лог, додати учасника, змінити HP) для DM-дій. */
 export function useBattlePageDialogs(): BattlePageDialogs {
     const log = useOpenable();
 

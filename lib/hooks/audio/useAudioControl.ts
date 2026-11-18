@@ -44,7 +44,7 @@ export function useAudioControl(host: AudioHost): AudioControl | null {
 
     const control = useMemo(
         () => ({
-            // помилку вже обробив onError
+            // onError already handled the error
             send: (cmd: BattleAudioCommand) =>
                 void singleFlight(() =>
                     mutateAsync(cmd).catch(() => undefined)

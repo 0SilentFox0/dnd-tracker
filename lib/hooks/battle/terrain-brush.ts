@@ -29,7 +29,6 @@ export interface TerrainBrushSettings {
     kind: TerrainBrush;
     rounds: number;
     label: string;
-    /** порожньо — небезпека без шкоди */
     dice: string;
     damageType: string;
 }

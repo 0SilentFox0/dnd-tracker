@@ -8,7 +8,6 @@ export const MAP_TAB = 'map';
 
 export type MobileBattleTab = ParticipantSide | typeof MAP_TAB;
 
-/** Вкладки мобільного бою: поки йде наведення на карті, вкладка карти примусова; без карти — остання вкладка списку. */
 export function useMobileBattleTabs({
     hasMap,
     mapAim,

@@ -46,7 +46,7 @@ export function useSetOnboardingFlag() {
                         : prev
             );
         },
-        // оптимістичний запис не дійшов — повертаємо серверний стан, щоб бейдж/чекліст не «ожили» лише в наступній сесії
+        // the optimistic write did not land: restore server state so the badge/checklist do not "come alive" only next session
         onError: () =>
             qc.invalidateQueries({ queryKey: onboardingKeys.flags() }),
     });
@@ -79,7 +79,7 @@ export function useOnboardingFlags() {
 }
 
 export function useOnboardingHint(id: string) {
-    // select: підказка перерендериться лише коли змінюється її власна видимість
+    // select: a hint rerenders only when its own visibility changes
     const { data: hidden } = useQuery({
         ...flagsQuery,
         select: (d: OnboardingFlagsResponse) => isHintHidden(id, d.flags),

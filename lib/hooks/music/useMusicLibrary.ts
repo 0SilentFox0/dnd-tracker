@@ -38,7 +38,7 @@ export interface MusicLibrary {
 const stripExtension = (name: string, fallback: string) =>
     name.replace(/\.[^.]+$/, '').slice(0, TRACK_TITLE_MAX) || fallback;
 
-// у стані бою лише знімок треку: YouTube грає далі, а файл зі сховища зникає одразу
+// battle state keeps only a track snapshot: YouTube keeps playing, a storage file disappears at once
 const DELETE_NOTE_KEYS = {
     file: 'music.library.deleteNote.file',
     youtube: 'music.library.deleteNote.youtube',
@@ -121,7 +121,7 @@ export function useMusicLibrary(
         onError,
     });
 
-    // помилку вже показав onError — сторінці лишається лише дочекатися
+    // onError already showed the error; the page only has to wait
     const upload = useCallback(
         async (file: File) => {
             await uploadAsync(file).catch(() => undefined);

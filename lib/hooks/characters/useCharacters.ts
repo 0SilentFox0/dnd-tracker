@@ -24,7 +24,7 @@ import type {
 
 export type { Character };
 
-// compact — без важких JSON/інвентаря (менший egress)
+// compact: no heavy JSON/inventory (less egress)
 export function useCharacters(
     campaignId: string,
     opts?: {
