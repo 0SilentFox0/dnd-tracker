@@ -10,11 +10,11 @@ vi.mock('server-only', () => ({}));
 vi.mock('@/lib/db', () => ({ prisma: db }));
 
 import { buildTreeJson } from '@/lib/utils/skills/progression';
+import type { ProgressionContext } from '@/systems/skilltrees/server/progression/context';
 import {
     buildProgressionDto,
     PROGRESSION_SKILL_SELECT,
 } from '@/systems/skilltrees/server/progression/dto';
-import type { ProgressionContext } from '@/systems/skilltrees/server/progression/context';
 
 const treeRow = {
     id: 'row',
@@ -39,7 +39,7 @@ const ctx = (over: Partial<ProgressionContext> = {}): ProgressionContext => ({
         controlledBy: 'owner',
     },
     progressRead: {},
-    treeRow: treeRow as ProgressionContext['treeRow'],
+    treeRow: treeRow as unknown as ProgressionContext['treeRow'],
     isDM: false,
     isOwner: true,
     ...over,

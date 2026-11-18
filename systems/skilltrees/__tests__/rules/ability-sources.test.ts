@@ -65,6 +65,7 @@ describe('skilltrees ability source', () => {
         const [withLine] = collect([
             entry({ id: 's1', mainSkillId: 'm', level: 'expert' }),
         ]);
+
         const [noLevel] = collect([entry({ id: 's2', mainSkillId: 'm' })]);
 
         expect(withLine.source.line).toEqual({
@@ -121,6 +122,7 @@ describe('skilltrees ability source', () => {
                 mainSkillSpellGroupId: 'water',
             }),
         ]);
+
         const [fromBranch] = collect([
             entry({ id: 's2', mainSkillSpellGroupId: 'water' }),
         ]);
@@ -141,6 +143,7 @@ describe('skilltrees ability source', () => {
                 mainSkillSpellGroupId: 'water',
             }),
         ]);
+
         const [none] = collect([entry({ id: 's2' })]);
 
         expect(schoolOf(explicit)).toBe('earth');
@@ -149,9 +152,7 @@ describe('skilltrees ability source', () => {
 
     it('a skill without abilities contributes nothing', () => {
         expect(
-            collect([
-                entry({ id: 's1', row: { id: 's1', name: 's1' } }),
-            ])
+            collect([entry({ id: 's1', row: { id: 's1', name: 's1' } })])
         ).toEqual([]);
     });
 });

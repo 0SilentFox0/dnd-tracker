@@ -1,4 +1,5 @@
 // @vitest-environment happy-dom
+import type { ComponentType } from 'react';
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -34,14 +35,9 @@ vi.mock(
         ),
     })
 );
-vi.mock(
-    '@/systems/skilltrees/ui/content/skill-tree/SkillTreesList',
-    () => ({
-        SkillTreesList: (p: { canEdit: boolean }) => (
-            <p>{`trees:${p.canEdit}`}</p>
-        ),
-    })
-);
+vi.mock('@/systems/skilltrees/ui/content/skill-tree/SkillTreesList', () => ({
+    SkillTreesList: (p: { canEdit: boolean }) => <p>{`trees:${p.canEdit}`}</p>,
+}));
 
 import type { DmPageProps } from '@/components/systems/types';
 import { SKILLTREES_META } from '@/systems/skilltrees/meta';
@@ -50,7 +46,11 @@ import { SKILLTREES_MODULE_UI } from '@/systems/skilltrees/ui';
 const pages = SKILLTREES_MODULE_UI({} as never).dmPages ?? {};
 
 const renderPage = (section: string, props: Partial<DmPageProps>) => {
-    const Page = pages[section];
+    const Page: ComponentType<DmPageProps> | undefined = pages[section] as
+        | ComponentType<DmPageProps>
+        | undefined;
+
+    if (!Page) throw new Error(`no page for ${section}`);
 
     return render(
         <Page campaignId="c" canEdit={true} data={undefined} {...props} />
@@ -87,7 +87,9 @@ describe('skilltrees content pages', () => {
     });
 
     it('main skills section lists branches and edits the loaded one', () => {
-        renderPage('main-skills', { data: [{ name: 'Attack' }, { name: 'Magic' }] });
+        renderPage('main-skills', {
+            data: [{ name: 'Attack' }, { name: 'Magic' }],
+        });
         expect(screen.getByText('ms-list:Attack,Magic')).toBeTruthy();
         cleanup();
 

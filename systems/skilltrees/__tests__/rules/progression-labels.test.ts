@@ -28,9 +28,9 @@ describe('nodeLabel', () => {
             tag: 'node.tagBranchUp',
             skillName: null,
         });
-        expect(
-            nodeLabel({ ...node, branchId: 'gone' }, dto, t).title
-        ).toBe('node.branchTier(gone,tiers.advanced)');
+        expect(nodeLabel({ ...node, branchId: 'gone' }, dto, t).title).toBe(
+            'node.branchTier(gone,tiers.advanced)'
+        );
     });
 
     it('racial: the skill name when set, otherwise the racial tag', () => {

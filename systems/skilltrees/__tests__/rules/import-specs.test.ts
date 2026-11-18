@@ -61,7 +61,10 @@ describe('skilltrees import specs', () => {
     });
 
     it('skills toBody on update emits only groups that have values', () => {
-        const body = skills.toBody?.({ spellId: null, name: undefined }, 'update');
+        const body = skills.toBody?.(
+            { spellId: null, name: undefined },
+            'update'
+        );
 
         expect(body).toEqual({ spellData: { spellId: null } });
     });

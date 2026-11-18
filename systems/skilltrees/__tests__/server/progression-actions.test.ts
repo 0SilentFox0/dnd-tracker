@@ -133,10 +133,12 @@ describe('runProgressionAction', () => {
     });
 
     it('unlearn and reset are DM-only', async () => {
-        for (const action of [
+        const actions: Parameters<typeof runProgressionAction>[3][] = [
             { type: 'unlearn', nodeIds: ['x'] },
             { type: 'reset' },
-        ] as const) {
+        ];
+
+        for (const action of actions) {
             const res = await run(asUser('owner'), action);
 
             expect(res.status).toBe(403);
