@@ -1,5 +1,4 @@
 'use client';
-
 import { useMemo } from 'react';
 
 import {
@@ -14,6 +13,7 @@ import {
     createStorageNumber,
     useStorageValue,
 } from '@/lib/hooks/common';
+import { clamp } from '@/lib/utils/common/clamp';
 
 export interface AudioPrefs {
     volume: number;
@@ -27,7 +27,7 @@ export interface AudioPrefs {
 const volumeStore = createStorageNumber(
     AUDIO_VOLUME_KEY,
     DEFAULT_AUDIO_VOLUME,
-    (v) => Math.min(1, Math.max(0, v))
+    (v) => clamp(v, 0, 1)
 );
 
 const mutedFlag = createStorageFlag(AUDIO_MUTED_KEY, false);

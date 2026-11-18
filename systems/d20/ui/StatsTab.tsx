@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { useProfile } from '@/components/character-profile/ProfileContext';
+import { RollableCell } from '@/components/character-profile/RollableCell';
 import { HudSection } from '@/components/hud/form';
 import type {
     SheetRollRequest,
@@ -20,20 +21,17 @@ export function StatsTab({ section, onRoll, canRoll }: StatsTabProps) {
 
     const tg = useTranslations('gameTerms');
 
-    const rollable = (request: SheetRollRequest, children: ReactNode) =>
-        canRoll ? (
-            <button
-                type="button"
-                title={t('roll')}
-                onClick={() => onRoll(request)}
-                className="flex w-full justify-between gap-2 text-left"
-            >
-                <span className="sr-only">{t('roll')}: </span>
-                {children}
-            </button>
-        ) : (
-            <div className="flex w-full justify-between gap-2">{children}</div>
-        );
+    const rollable = (request: SheetRollRequest, children: ReactNode) => (
+        <RollableCell
+            canRoll={canRoll}
+            onRoll={() => onRoll(request)}
+            title={t('roll')}
+            className="flex w-full justify-between gap-2 text-left"
+        >
+            {canRoll && <span className="sr-only">{t('roll')}: </span>}
+            {children}
+        </RollableCell>
+    );
 
     if (section === 'top') {
         return (

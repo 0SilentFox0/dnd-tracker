@@ -1,5 +1,4 @@
 'use client';
-
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Check, Pencil, Plus, Trash2, X } from 'lucide-react';
@@ -19,6 +18,7 @@ import {
 import { useCharacterGoals } from '@/lib/hooks/characters';
 import { useConfirm } from '@/lib/hooks/common';
 import { cn } from '@/lib/utils';
+import { shortId } from '@/lib/utils/common/short-id';
 import type { CharacterGoal } from '@/types/characters';
 
 const ORDER: Record<GoalStatus, number> = {
@@ -34,9 +34,6 @@ const NEXT: Record<GoalStatus, GoalStatus> = {
 };
 
 const goalName = (g: CharacterGoal) => g.title ?? g.text;
-
-const newId = () =>
-    `g${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
 
 export function GoalList() {
     const { campaignId, characterId, sheet } = useProfile();
@@ -84,7 +81,7 @@ export function GoalList() {
             : [
                   ...all,
                   {
-                      id: newId(),
+                      id: shortId(),
                       text,
                       ...(title && { title }),
                       status: GoalStatus.ACTIVE,

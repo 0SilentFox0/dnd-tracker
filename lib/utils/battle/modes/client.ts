@@ -6,6 +6,7 @@ import {
 } from './registry';
 import type { ModeView } from './types';
 
+import { sameJson } from '@/lib/utils/common/json';
 import type { ClientBattleDelta } from '@/types/api';
 import type { BattleAction } from '@/types/battle-actions';
 import type { BattleMapConfig } from '@/types/battle-grid';
@@ -18,9 +19,6 @@ export const MODE_MAP_KEYS = Object.keys(
 
 export const isModeMapKey = (key: string): key is MapModeKey =>
     (MODE_MAP_KEYS as readonly string[]).includes(key);
-
-const sameJson = (a: unknown, b: unknown) =>
-    a === b || JSON.stringify(a) === JSON.stringify(b);
 
 /** Патчі режимів для дельти: { [key]: зміни } або null — потрібна повна карта. */
 export function modeDeltas(

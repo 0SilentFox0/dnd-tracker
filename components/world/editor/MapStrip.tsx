@@ -1,8 +1,8 @@
 'use client';
 
-import { type CSSProperties, useRef } from 'react';
+import { useRef } from 'react';
 import { useTranslations } from 'next-intl';
-import { ChevronRight, Crosshair, ImageUp, Map as MapIcon } from 'lucide-react';
+import { Crosshair, ImageUp, Map as MapIcon } from 'lucide-react';
 
 import {
     CHIP,
@@ -13,8 +13,8 @@ import {
     StripLead,
     SwitchField,
 } from './InspectorParts';
+import { ChildMapList, ImageFileInput, RadiusRange } from './MapFieldParts';
 import { useWorldEditorContext } from './WorldEditorContext';
-import { RADIUS_STEP } from './WorldMapSettings';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -22,7 +22,6 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from '@/components/ui/popover';
-import { REVEAL_RADIUS_RANGE } from '@/lib/constants/world';
 import { useMapFields } from '@/lib/hooks/world';
 import { cn } from '@/lib/utils';
 import type { WorldMapDetail } from '@/types/world';
@@ -73,19 +72,13 @@ export function MapStrip({
             />
             <label className="flex shrink-0 items-center gap-2 text-sm">
                 {t('editor.radius')}
-                <input
-                    type="range"
-                    aria-label={t('editor.radiusView')}
-                    className="hud-range w-32"
-                    style={{ '--fill': `${fill}%` } as CSSProperties}
-                    min={REVEAL_RADIUS_RANGE.min}
-                    max={REVEAL_RADIUS_RANGE.max}
-                    step={RADIUS_STEP}
-                    value={radius}
-                    onChange={(e) => setRadius(Number(e.target.value))}
-                    onPointerUp={commitRadius}
-                    onKeyUp={commitRadius}
-                    onBlur={commitRadius}
+                <RadiusRange
+                    radius={radius}
+                    fill={fill}
+                    setRadius={setRadius}
+                    commit={commitRadius}
+                    label={t('editor.radiusView')}
+                    className="w-32"
                 />
                 <span className="w-10 font-mono text-hud-gold-bright">
                     {Math.round(radius * 100)}%
@@ -110,31 +103,11 @@ export function MapStrip({
                     </button>
                 </PopoverTrigger>
                 <PopoverContent className={cn(POPOVER, 'w-60')}>
-                    {children.length ? (
-                        <ul className="space-y-1">
-                            {children.map((m) => (
-                                <li key={m.id}>
-                                    <button
-                                        type="button"
-                                        onClick={() => openMap(m.id)}
-                                        className="flex min-h-9 w-full items-center justify-between gap-2 rounded-md border border-hud-rule bg-black/30 px-3 text-left text-sm hover:border-[var(--gold)]"
-                                    >
-                                        <span className="truncate">
-                                            {m.name}
-                                        </span>
-                                        <ChevronRight
-                                            className="size-4 shrink-0 text-hud-muted"
-                                            aria-hidden
-                                        />
-                                    </button>
-                                </li>
-                            ))}
-                        </ul>
-                    ) : (
-                        <p className="text-xs text-hud-muted">
-                            {t('editor.childrenEmpty')}
-                        </p>
-                    )}
+                    <ChildMapList
+                        maps={children}
+                        onOpen={openMap}
+                        itemClassName="min-h-9"
+                    />
                 </PopoverContent>
             </Popover>
             <Button
@@ -148,18 +121,9 @@ export function MapStrip({
                 <ImageUp className="size-4" />
                 {t('editor.replaceImage')}
             </Button>
-            <input
-                ref={fileInput}
-                type="file"
-                accept="image/*"
-                hidden
-                onChange={(e) => {
-                    const file = e.target.files?.[0];
-
-                    e.target.value = '';
-
-                    if (file) void replaceImage(file);
-                }}
+            <ImageFileInput
+                inputRef={fileInput}
+                onFile={(file) => void replaceImage(file)}
             />
             <span className="ml-auto flex shrink-0 items-center gap-2">
                 <DeleteButton

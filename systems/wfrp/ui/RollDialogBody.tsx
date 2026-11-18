@@ -2,6 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 
+import { RollResultView } from '@/components/character-profile/RollResultView';
 import type { RollDialogBodyProps } from '@/components/systems/types';
 import { Label } from '@/components/ui/label';
 import { SelectField } from '@/components/ui/select-field';
@@ -35,19 +36,20 @@ export function RollDialogBody({
                 />
             </div>
             {result?.kind === 'percentile' && (
-                <div aria-live="polite" className="text-center">
-                    <div className="text-4xl font-bold text-hud-gold-bright tabular-nums">
-                        {result.roll}
-                    </div>
-                    <div className="text-xs text-hud-muted">
-                        {t('target', { target: result.target })}
-                        {result.reversed && (
-                            <span title={t('reversed')}> ↔</span>
-                        )}
-                        {result.auto && (
-                            <span> · {t(`auto.${result.auto}`)}</span>
-                        )}
-                    </div>
+                <RollResultView
+                    total={result.roll}
+                    detail={
+                        <>
+                            {t('target', { target: result.target })}
+                            {result.reversed && (
+                                <span title={t('reversed')}> ↔</span>
+                            )}
+                            {result.auto && (
+                                <span> · {t(`auto.${result.auto}`)}</span>
+                            )}
+                        </>
+                    }
+                >
                     <div className="mt-1 text-sm">
                         {tg(`testOutcome.${result.outcome}`)} ·{' '}
                         {t('sl', { sl: result.sl })}
@@ -55,7 +57,7 @@ export function RollDialogBody({
                     <div className="text-xs text-hud-muted">
                         {tg(`difficulty.${result.difficulty as DifficultyKey}`)}
                     </div>
-                </div>
+                </RollResultView>
             )}
         </>
     );

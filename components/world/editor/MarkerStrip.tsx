@@ -14,7 +14,8 @@ import {
     StripLead,
     SwitchField,
 } from './InspectorParts';
-import { ICON_OPTIONS, markerIcon } from './marker-icon-options';
+import { MarkerIconGrid } from './MapFieldParts';
+import { markerIcon } from './marker-icon-options';
 import { NewWorldMapDialog } from './NewWorldMapDialog';
 import { useWorldEditorContext } from './WorldEditorContext';
 
@@ -88,33 +89,15 @@ export function MarkerStrip({
                         </button>
                     </PopoverTrigger>
                     <PopoverContent className={POPOVER}>
-                        <div
-                            role="group"
+                        <MarkerIconGrid
                             aria-label={t('editor.icons')}
-                            className="grid grid-cols-4 gap-1.5"
-                        >
-                            {ICON_OPTIONS.map(({ value, Icon: Option }) => (
-                                <button
-                                    key={value}
-                                    type="button"
-                                    title={t(`markerKinds.${value}`)}
-                                    aria-label={t(`markerKinds.${value}`)}
-                                    aria-pressed={marker.icon === value}
-                                    onClick={() => {
-                                        void save({ icon: value });
-                                        setIconOpen(false);
-                                    }}
-                                    className={cn(
-                                        'flex size-10 items-center justify-center rounded-md border bg-black/40 text-hud-muted hover:text-hud-ink',
-                                        marker.icon === value
-                                            ? 'metal-gold metal-fill border-[var(--gold)]'
-                                            : 'border-hud-rule'
-                                    )}
-                                >
-                                    <Option className="size-5" aria-hidden />
-                                </button>
-                            ))}
-                        </div>
+                            value={marker.icon}
+                            cellClassName="size-10"
+                            onPick={(icon) => {
+                                void save({ icon });
+                                setIconOpen(false);
+                            }}
+                        />
                     </PopoverContent>
                 </Popover>
             ) : (

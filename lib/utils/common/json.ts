@@ -14,3 +14,6 @@ export const jsonContent = (value: unknown): Prisma.JsonValue =>
 
 export const jsonContentInput = (value: unknown): Prisma.InputJsonValue =>
     jsonContent(value) as Prisma.InputJsonValue;
+
+export const sameJson = (a: unknown, b: unknown): boolean =>
+    a === b || JSON.stringify(a) === JSON.stringify(b);

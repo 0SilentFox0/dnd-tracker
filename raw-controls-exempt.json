@@ -412,6 +412,10 @@
         "count": 1
     },
     {
+        "file": "components/character-profile/RollableCell.tsx",
+        "count": 1
+    },
+    {
         "file": "components/character-profile/stash/GrantArtifactDialog.tsx",
         "count": 3
     },
@@ -724,24 +728,20 @@
         "count": 2
     },
     {
+        "file": "components/world/editor/MapFieldParts.tsx",
+        "count": 4
+    },
+    {
         "file": "components/world/editor/MapFileDropzone.tsx",
         "count": 3
     },
     {
         "file": "components/world/editor/MapStrip.tsx",
-        "count": 4
+        "count": 1
     },
     {
         "file": "components/world/editor/MarkerStrip.tsx",
-        "count": 4
-    },
-    {
-        "file": "components/world/editor/WorldMapSettings.tsx",
         "count": 3
-    },
-    {
-        "file": "components/world/editor/WorldMarkerPanel.tsx",
-        "count": 1
     },
     {
         "file": "components/world/editor/WorldPanelHeader.tsx",
@@ -792,10 +792,6 @@
         "count": 1
     },
     {
-        "file": "systems/d20/ui/StatsTab.tsx",
-        "count": 1
-    },
-    {
         "file": "systems/morale/ui/battle/MoraleResultOverlay.tsx",
         "count": 1
     },
@@ -830,10 +826,6 @@
     {
         "file": "systems/wfrp/ui/battle/D100RollPicker.tsx",
         "count": 2
-    },
-    {
-        "file": "systems/wfrp/ui/CharacteristicsGrid.tsx",
-        "count": 1
     },
     {
         "file": "systems/wfrp/ui/creation/OptionCard.tsx",

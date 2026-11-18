@@ -102,6 +102,40 @@ const parsedInput = (operation: WorldOperation, input: unknown) =>
 
 const getCampaignId = (caller: AssistantCaller) => caller.actor.campaignId;
 
+async function mapTransitionState(
+    campaignId: string,
+    input: Record<string, unknown>,
+    destMapId: string | undefined
+) {
+    const ids = input.characterIds as string[];
+
+    const heroes = await activePlayerHeroes(campaignId, { id: { in: ids } });
+
+    const positions = await readPositions(ids);
+
+    const [reveals, characters] = destMapId
+        ? await Promise.all([
+              prisma.worldReveal.findMany({
+                  where: { mapId: destMapId, characterId: { in: ids } },
+                  select: { id: true, characterId: true, shape: true },
+              }),
+              input.rest !== 'none'
+                  ? prisma.character.findMany({
+                        where: { id: { in: ids }, campaignId },
+                        select: { id: true, resources: true, classes: true },
+                    })
+                  : [],
+          ])
+        : [[], []];
+
+    return {
+        heroes: heroes.sort((a, b) => a.id.localeCompare(b.id)),
+        positions: [...positions].sort(([a], [b]) => a.localeCompare(b)),
+        reveals: reveals.sort((a, b) => a.id.localeCompare(b.id)),
+        characters: characters.sort((a, b) => a.id.localeCompare(b.id)),
+    };
+}
+
 async function worldState(
     caller: AssistantCaller,
     operation: WorldOperation,
@@ -336,49 +370,15 @@ async function worldState(
             if (!marker)
                 throw new ContentError(API_ERRORS.WORLD_MARKER_NOT_FOUND, 404);
 
-            const heroes = await activePlayerHeroes(campaignId, {
-                id: { in: input.characterIds as string[] },
-            });
-
-            const positions = await readPositions(
-                input.characterIds as string[]
+            const state = await mapTransitionState(
+                campaignId,
+                input,
+                marker.childMap?.id
             );
-
-            const [reveals, characters] = marker.childMap
-                ? await Promise.all([
-                      prisma.worldReveal.findMany({
-                          where: {
-                              mapId: marker.childMap.id,
-                              characterId: {
-                                  in: input.characterIds as string[],
-                              },
-                          },
-                          select: { id: true, characterId: true, shape: true },
-                      }),
-                      input.rest !== 'none'
-                          ? prisma.character.findMany({
-                                where: {
-                                    id: { in: input.characterIds as string[] },
-                                    campaignId,
-                                },
-                                select: {
-                                    id: true,
-                                    resources: true,
-                                    classes: true,
-                                },
-                            })
-                          : [],
-                  ])
-                : [[], []];
 
             return {
                 marker,
-                heroes: heroes.sort((a, b) => a.id.localeCompare(b.id)),
-                positions: [...positions].sort(([a], [b]) =>
-                    a.localeCompare(b)
-                ),
-                reveals: reveals.sort((a, b) => a.id.localeCompare(b.id)),
-                characters: characters.sort((a, b) => a.id.localeCompare(b.id)),
+                ...state,
                 ...(restRules ? { restRules } : {}),
             };
         }
@@ -391,51 +391,15 @@ async function worldState(
             if (!map)
                 throw new ContentError(API_ERRORS.WORLD_MAP_NOT_FOUND, 404);
 
-            const heroes = await activePlayerHeroes(campaignId, {
-                id: { in: input.characterIds as string[] },
-            });
-
-            const positions = await readPositions(
-                input.characterIds as string[]
+            const state = await mapTransitionState(
+                campaignId,
+                input,
+                map.parentMarker?.mapId
             );
-
-            const destMapId = map.parentMarker?.mapId;
-
-            const [reveals, characters] = destMapId
-                ? await Promise.all([
-                      prisma.worldReveal.findMany({
-                          where: {
-                              mapId: destMapId,
-                              characterId: {
-                                  in: input.characterIds as string[],
-                              },
-                          },
-                          select: { id: true, characterId: true, shape: true },
-                      }),
-                      input.rest !== 'none'
-                          ? prisma.character.findMany({
-                                where: {
-                                    id: { in: input.characterIds as string[] },
-                                    campaignId,
-                                },
-                                select: {
-                                    id: true,
-                                    resources: true,
-                                    classes: true,
-                                },
-                            })
-                          : [],
-                  ])
-                : [[], []];
 
             return {
                 map,
-                heroes: heroes.sort((a, b) => a.id.localeCompare(b.id)),
-                positions: [...positions].sort(([a], [b]) =>
-                    a.localeCompare(b)
-                ),
-                reveals: reveals.sort((a, b) => a.id.localeCompare(b.id)),
-                characters: characters.sort((a, b) => a.id.localeCompare(b.id)),
+                ...state,
                 ...(restRules ? { restRules } : {}),
             };
         }

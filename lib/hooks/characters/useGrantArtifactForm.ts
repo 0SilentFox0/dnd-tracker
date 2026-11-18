@@ -1,5 +1,4 @@
 'use client';
-
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 
@@ -7,6 +6,7 @@ import { useFreeArtifacts, useStashAction } from './useStash';
 
 import { ITEM_LIMITS } from '@/lib/constants/artifacts';
 import { useNotify } from '@/lib/hooks/common';
+import { clamp } from '@/lib/utils/common/clamp';
 import type { FreeArtifact } from '@/types/inventory';
 
 const [MIN_QTY, MAX_QTY] = ITEM_LIMITS.grantQuantity;
@@ -22,7 +22,7 @@ interface GrantBody {
 }
 
 export const clampGrantQuantity = (raw: string) =>
-    Math.min(MAX_QTY, Math.max(MIN_QTY, Math.trunc(Number(raw)) || 1));
+    clamp(Math.trunc(Number(raw)) || 1, MIN_QTY, MAX_QTY);
 
 export function useGrantArtifactForm({
     campaignId,

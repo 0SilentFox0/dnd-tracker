@@ -1,57 +1,9 @@
 import type { Namespace } from './config';
+export { BATTLE_NAMESPACES, CAMPAIGN_NAMESPACES } from './core-namespaces';
 
 export const ROOT_NAMESPACES = [
     'common',
     'validation',
     'whatsNew',
     'gameTerms',
-] as const satisfies readonly Namespace[];
-
-export const CAMPAIGN_NAMESPACES = [
-    'common',
-    'validation',
-    'onboarding',
-    'races',
-    'skills',
-    'classes',
-    'feats',
-    'backgrounds',
-    'artifacts',
-    'music',
-    'choices',
-    'campaigns',
-    'dashboard',
-    'characters',
-    'characterProfile',
-    'inventory',
-    'rest',
-    'spells',
-    'spellEditor',
-    'editors',
-    'units',
-    'abilities',
-    'abilityRegistry',
-    'rules',
-    'skillTree',
-    'scenario',
-    'scenarioGraph',
-    'show',
-    'acquaintances',
-    'world',
-    'maps',
-    'compendium',
-    'contentImport',
-    'gameTerms',
-    'abilityText',
-    'battleTerms',
-] as const satisfies readonly Namespace[];
-
-export const BATTLE_NAMESPACES = [
-    'battleCommon',
-    'battle',
-    'battleWizards',
-    'battleDm',
-    'battleSetup',
-    'battleLog',
-    'battleActions',
 ] as const satisfies readonly Namespace[];

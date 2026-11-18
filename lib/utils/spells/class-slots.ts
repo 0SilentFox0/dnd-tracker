@@ -4,6 +4,7 @@ import {
     MULTICLASS_SLOTS,
     PACT_SLOTS,
 } from '@/lib/constants/classes';
+import { clamp } from '@/lib/utils/common/clamp';
 import { PACT_KEY } from '@/lib/utils/spells/slot-keys';
 import type {
     CharacterClassEntry,
@@ -14,7 +15,7 @@ import type {
 export type ClassSlots = Record<string, { max: number; level?: number }>;
 
 const clampLevel = (level: number) =>
-    Math.max(0, Math.min(MAX_CLASS_LEVEL, Math.floor(level)));
+    clamp(Math.floor(level), 0, MAX_CLASS_LEVEL);
 
 export function casterLevel(entries: ResolvedClassEntry[]): number {
     const casters = entries.filter(

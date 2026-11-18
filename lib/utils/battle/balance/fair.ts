@@ -18,6 +18,7 @@ import {
     TARGET_ROUNDS,
     TIER_CEILING_QUANTILE,
 } from '@/lib/constants/battle-balance';
+import { clamp } from '@/lib/utils/common/clamp';
 
 export interface PartyPower {
     dpr: number;
@@ -260,7 +261,7 @@ export interface FairScaling {
 
 export type TierCeilings = Map<number, Power>;
 
-const clampScale = (x: number) => Math.min(SCALE_MAX, Math.max(SCALE_MIN, x));
+const clampScale = (x: number) => clamp(x, SCALE_MIN, SCALE_MAX);
 
 function highLevelSteps(heroLevel: number | undefined): number {
     if (heroLevel === undefined) return 0;

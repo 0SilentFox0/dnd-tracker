@@ -1,4 +1,5 @@
 import { PUZZLE_MAX_PIECES, PUZZLE_MIN_PIECES } from '@/lib/constants/show';
+import { clamp } from '@/lib/utils/common/clamp';
 import type { PuzzleSpec } from '@/types/show';
 
 interface Pt {
@@ -34,7 +35,7 @@ export function mulberry32(seed: number): () => number {
 const fmt = (n: number) => String(Math.round(n * 100) / 100);
 
 const clampCount = (count: number) =>
-    Math.min(PUZZLE_MAX_PIECES, Math.max(PUZZLE_MIN_PIECES, Math.round(count)));
+    clamp(Math.round(count), PUZZLE_MIN_PIECES, PUZZLE_MAX_PIECES);
 
 const lerp = (a: Pt, b: Pt, t: number): Pt => ({
     x: a.x + (b.x - a.x) * t,

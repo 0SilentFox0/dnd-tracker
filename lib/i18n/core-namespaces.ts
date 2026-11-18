@@ -1,13 +1,7 @@
-export const CORE_NAMESPACES = [
+export const CAMPAIGN_NAMESPACES = [
     'common',
     'validation',
-    'errors',
-    'auth',
-    'landing',
     'onboarding',
-    'demoTours',
-    'whatsNew',
-    'help',
     'races',
     'skills',
     'classes',
@@ -36,14 +30,14 @@ export const CORE_NAMESPACES = [
     'acquaintances',
     'world',
     'maps',
-    'ai',
     'compendium',
     'contentImport',
     'gameTerms',
-    'assistant',
-    'compendiumReport',
     'abilityText',
     'battleTerms',
+] as const;
+
+export const BATTLE_NAMESPACES = [
     'battleCommon',
     'battle',
     'battleWizards',
@@ -52,3 +46,28 @@ export const CORE_NAMESPACES = [
     'battleLog',
     'battleActions',
 ] as const;
+
+const SITE_NAMESPACES = [
+    'errors',
+    'auth',
+    'landing',
+    'demoTours',
+    'whatsNew',
+    'help',
+    'ai',
+    'assistant',
+    'compendiumReport',
+] as const;
+
+type CoreNamespace =
+    | (typeof SITE_NAMESPACES)[number]
+    | (typeof CAMPAIGN_NAMESPACES)[number]
+    | (typeof BATTLE_NAMESPACES)[number];
+
+export const CORE_NAMESPACES: readonly CoreNamespace[] = [
+    ...new Set<CoreNamespace>([
+        ...SITE_NAMESPACES,
+        ...CAMPAIGN_NAMESPACES,
+        ...BATTLE_NAMESPACES,
+    ]),
+];

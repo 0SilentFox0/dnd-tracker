@@ -9,6 +9,7 @@ import {
     type XpEdition,
     type XpVerdict,
 } from '@/lib/constants/experience';
+import { clamp } from '@/lib/utils/common/clamp';
 
 export {
     DEFAULT_XP_DIFFICULTY,
@@ -19,7 +20,7 @@ export {
 };
 
 const clampLevel = (level: number) =>
-    Math.min(MAX_CLASS_LEVEL, Math.max(1, Math.round(level)));
+    clamp(Math.round(level), 1, MAX_CLASS_LEVEL);
 
 const orderOf = (edition: XpEdition): readonly XpDifficulty[] =>
     XP_DIFFICULTIES[edition];
