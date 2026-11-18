@@ -51,7 +51,6 @@ const CREATED_AT = new Date('2026-01-01T00:00:00.000Z');
 
 const wire = <T>(value: T): T => JSON.parse(JSON.stringify(value)) as T;
 
-/** Сховище в пам'яті з тими самими split/join і prepareSave, що й saveBattle: дельта йде зі збереженої форми */
 function memoryBattle(init: {
     participants: BattleParticipant[];
     pending?: BattleParticipant[];
@@ -280,7 +279,7 @@ function memoryBattle(init: {
 
 type Memory = ReturnType<typeof memoryBattle>;
 
-// поля, які GET і дельта мають право відрізняти: режим журналу, час події, знання (клієнт зливає його з журналом)
+// fields GET and the delta may legitimately differ on: log mode, event time, knowledge (the client merges it with the log)
 function visible(scene: BattleScene, { withKnowledge = false } = {}) {
     const {
         battleLogMode: _m,

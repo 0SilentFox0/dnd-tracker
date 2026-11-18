@@ -25,7 +25,7 @@ type DraftRow = {
     classes: unknown;
 } & Record<AbilityKey, number>;
 
-/** Форма чернетки показує базові бали: збережені вже містять приріст від піків, сервер додасть його знову при збереженні. */
+/** The draft form shows base scores: stored ones already include peak gains, and the server would add them again on save. */
 export async function draftEditInitial(
     row: DraftRow,
     rules: Ruleset

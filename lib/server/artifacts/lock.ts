@@ -2,7 +2,7 @@ import type { Prisma } from '@prisma/client';
 
 import 'server-only';
 
-// pg_advisory_xact_lock повертає void — $queryRaw не вміє його десеріалізувати, тому $executeRaw
+// pg_advisory_xact_lock returns void, which $queryRaw cannot deserialize, hence $executeRaw
 export const lockCampaignArtifacts = (
     tx: Prisma.TransactionClient,
     campaignId: string

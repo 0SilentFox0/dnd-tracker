@@ -108,7 +108,7 @@ function finish({
     };
 }
 
-// правки пензлем ДМа йдуть часто: без події й знімка (відкат до попередньої дії поверне й ці правки)
+// frequent DM brush edits: no event and no snapshot (a rollback to the previous action reverts them too)
 function edited(
     ctx: BattleMutationContext,
     map: BattleMapConfig,

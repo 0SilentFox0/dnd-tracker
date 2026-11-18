@@ -9,7 +9,6 @@ import type { CharacterFromPrisma } from '@/lib/utils/battle/types/participant';
 import type { Ruleset } from '@/lib/utils/rules';
 import type { BattleParticipant } from '@/types/battle';
 
-/** Учасник з листа: той самий шлях, що й старт бою (ресурси, виснаження, аури). */
 export async function buildCharacterParticipant(
     character: CharacterFromPrisma,
     campaign: { maxLevel: number; rules: Ruleset }

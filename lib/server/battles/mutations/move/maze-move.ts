@@ -97,7 +97,7 @@ export function mazeMove(
         MAZE_TEXTS.escaped(mover.basicInfo.name)
     );
 
-    // вихід завершує хід героя тим самим рушієм, що й attack з endTurn
+    // the exit ends the hero turn with the same engine as attack with endTurn
     const advanced = advanceTurn({
         participants: after,
         pending: ctx.pending,

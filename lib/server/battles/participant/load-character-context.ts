@@ -28,7 +28,6 @@ export interface CharacterContext {
     classEntries: ResolvedClassEntry[];
 }
 
-/** Learned-вузли дерева й особистий скіл персонажа: що саме з бібліотеки кампанії йому потрібне. */
 function learnedNeeds(
     character: CharacterFromPrisma,
     tree: Prisma.SkillTreeGetPayload<object> | null
@@ -143,11 +142,6 @@ function indexArtifacts(
     return { artifactsById, artifactSetsById, artifactSetMemberIds };
 }
 
-/**
- * Контекст персонажа: раса й дерево + артефакти зі сетами → скіли, школи й заклинання.
- * Школи й заклинання — лише коли є вивчені вузли, і лише групи гілок дерева та вивчених скілів.
- * Класи й потрібні choice refs читаються campaign-scoped кешованими loaders.
- */
 export async function loadCharacterContext(
     character: CharacterFromPrisma,
     settings: { maxLevel: number; rules: Ruleset }

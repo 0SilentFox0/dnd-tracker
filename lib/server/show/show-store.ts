@@ -18,12 +18,7 @@ import {
     withoutWorldTargets,
 } from '@/lib/utils/show/show-command';
 import type { BattleAudioState } from '@/types/audio';
-import type {
-    PuzzleState,
-    ShowEvent,
-    ShowState,
-    Slide,
-} from '@/types/show';
+import type { PuzzleState, ShowEvent, ShowState, Slide } from '@/types/show';
 
 const SHOW_SELECT = {
     deckId: true,
@@ -43,7 +38,7 @@ type ShowRow = Prisma.CampaignShowGetPayload<{ select: typeof SHOW_SELECT }>;
 
 type StoredSlide = Slide & { puzzleState?: PuzzleState };
 
-/** Стан пазла лежить усередині JSONB слайда під `puzzleState` (`puzzle` слайда — це параметри нарізки). */
+/** Puzzle state lives inside the slide JSONB under `puzzleState` (the slide `puzzle` holds the slicing params). */
 function splitSlide(raw: unknown): {
     slide: Slide | null;
     puzzle?: PuzzleState;
@@ -113,9 +108,10 @@ const unchangedOr = (
     prev: ShowState | null,
     next: ShowState,
     key: 'battle' | 'cover' | 'world'
-) => (prev && prev[key] === next[key] ? {} : { [key]: json(next[key] ?? null) });
+) =>
+    prev && prev[key] === next[key] ? {} : { [key]: json(next[key] ?? null) };
 
-/** Оптимістичне блокування за seq; рядок створюється лише першим записом і ніколи не видаляється. */
+/** Optimistic locking by seq; the row is created by the first write and never deleted. */
 export async function writeShowState(
     campaignId: string,
     prev: ShowState | null,
@@ -158,7 +154,7 @@ export async function writeShowState(
     return count === 1;
 }
 
-/** Викликати з after(): Pusher не повинен затримувати відповідь. */
+/** Call from after(): Pusher must not delay the response. */
 export function publishShow(
     campaignId: string,
     show: ShowState,
@@ -186,7 +182,6 @@ export function publishShow(
 
 const CLEAR_ATTEMPTS = 3;
 
-/** Бій завершено — виклик «До бою!» для нього знімається; помилки лише логуються. */
 export async function clearShowBattle(
     campaignId: string,
     battleId: string,
@@ -222,7 +217,6 @@ export async function clearShowBattle(
     }
 }
 
-/** Показану карту чи фокус-маркер видалено — показ їх більше не згадує; помилки лише логуються. */
 export async function clearShowWorld(
     campaignId: string,
     gone: { mapIds: string[]; markerIds: string[] }

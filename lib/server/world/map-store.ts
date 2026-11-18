@@ -100,7 +100,6 @@ export async function readWorldMapDetail(
     };
 }
 
-/** imageUrl піддерева `rootMapId`, що не використовуються картами поза ним. */
 export async function orphanedImagesOfSubtree(
     campaignId: string,
     rootMapId: string

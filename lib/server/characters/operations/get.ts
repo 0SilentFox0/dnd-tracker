@@ -61,7 +61,7 @@ export const getOperation = defineCharacterOperation({
             ? rest.knownSpells
             : [];
 
-        // нотатки — особисті: майстер їх не бачить
+        // notes are private: the DM does not see them
         return {
             ...flattenStoredColumns(rest),
             ...(character.controlledBy === userId && { notes }),

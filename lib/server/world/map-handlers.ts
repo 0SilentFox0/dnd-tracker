@@ -50,7 +50,7 @@ export const ownedMarker = (campaignId: string, markerId: string) =>
         API_ERRORS.WORLD_MARKER_NOT_FOUND
     );
 
-/** Файли піддерева прибираються лише після успішного видалення рядків. */
+/** Subtree files are removed only after the rows were deleted successfully. */
 export async function deleteSubtreeWithFiles(
     campaignId: string,
     rootMapId: string,
@@ -63,7 +63,6 @@ export async function deleteSubtreeWithFiles(
     if (urls.length > 0) after(() => removeWorldMapFiles(campaignId, urls));
 }
 
-/** Видалення піддерева: показ більше не може вказувати на його карти й маркери. */
 export function clearShowAfterDelete(
     campaignId: string,
     gone: { mapIds: string[]; markerIds: string[] }

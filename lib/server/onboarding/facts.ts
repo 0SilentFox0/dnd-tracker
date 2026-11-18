@@ -21,7 +21,7 @@ export type OnboardingSnapshot = {
 const checklistFlagSql = (campaignId: string, userId: string) =>
     Prisma.sql`(SELECT value FROM user_onboarding_flags WHERE "userId" = ${userId} AND key = ${checklistKey(campaignId)}) AS "checklistFlag"`;
 
-// один запит (факти + прапорці) замість кількох: на Vercel connection_limit = 1, тож окремі запити йшли б послідовно
+// one query (facts + flags) instead of several: Vercel connection_limit = 1 would run separate ones sequentially
 async function readDmRow(
     campaignId: string,
     userId: string

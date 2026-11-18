@@ -8,7 +8,7 @@ import {
 } from '@/lib/utils/show/player-view';
 import type { ShowState } from '@/types/show';
 
-/** Стан показу очима користувача: ДМ бачить усе, гравець — лише слайди для своїх героїв; `trail` не йде нікому. */
+/** The DM sees everything, a player only slides for their heroes; `trail` goes to nobody. */
 export async function showForViewer(
     campaignId: string,
     access: Pick<CampaignAccessResult, 'userId' | 'isDM'>,

@@ -49,7 +49,7 @@ async function fileSource(
 
     if (!verified.ok) return verified;
 
-    // спільний обʼєкт у двох рядках: видалення одного стерло б файл іншого
+    // shared object across two rows: deleting one would erase the other file
     if (
         await prisma.campaignTrack.findFirst({
             where: { campaignId, url: verified.value },

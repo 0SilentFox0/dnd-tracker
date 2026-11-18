@@ -38,9 +38,9 @@ export async function readOnboardingFlags(
         }),
     ]);
 
-    // перший візит: старі новини не мають горіти бейджем
+    // first visit: old news must not light the badge
     if (!(WHATS_NEW_KEY in flags) && WHATS_NEW[0]) {
-        // best-effort: без рядка users (сесія старша за БД) запис падає, а відповідь має лишитися 200
+        // best-effort: without a users row (session older than the DB) the write fails, but the response must stay 200
         await setOnboardingFlag(userId, WHATS_NEW_KEY, WHATS_NEW[0].id).catch(
             () => undefined
         );

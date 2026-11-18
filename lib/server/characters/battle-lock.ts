@@ -4,7 +4,7 @@ import { BattleStatus, ParticipantSourceType } from '@/lib/constants/battle';
 import { prisma } from '@/lib/db';
 import { ContentError } from '@/lib/server/content/errors';
 
-/** 409, якщо хтось із героїв — учасник (на мапі чи в резерві) активного бою: запис після бою перезаписав би правки. */
+/** 409 when any hero is a participant (on the map or in reserve) of an active battle: a write after the battle would overwrite edits. */
 async function inActiveBattle(campaignId: string, characterIds: string[]) {
     const found = await prisma.battleParticipant.findFirst({
         where: {

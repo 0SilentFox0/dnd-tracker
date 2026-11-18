@@ -63,7 +63,7 @@ export function createRollbackMutation(
         ctx: BattleMutationContext,
         body: z.infer<typeof rollbackSchema>
     ): Promise<MutationResult> => {
-        // повторний клік чи друга вкладка DM: скасовану подію не відкочуємо вдруге
+        // repeated click or a second DM tab: do not roll back a cancelled event twice
         if (!(await isActiveEvent(ctx.scene.id, body.actionIndex))) {
             throw new BattleRuleError(
                 'action_rejected',

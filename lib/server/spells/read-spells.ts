@@ -31,7 +31,6 @@ export async function readSpells({
     }
 }
 
-/** `GET …/spells/refs`: лише {id,name,level,lists} для редакторів вибору — без описів і ефектів. */
 export async function readSpellRefs({
     id,
 }: {

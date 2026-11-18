@@ -38,7 +38,7 @@ const hero = createMockParticipant({
     },
 });
 
-// багато HP і не критичний кидок: ефект криту випадковий і може вбити ціль, тоді хід перескакує
+// lots of HP and a non-crit roll: the crit effect is random and may kill the target, then the turn jumps
 const goblin = createMockParticipant({
     basicInfo: {
         ...base.basicInfo,

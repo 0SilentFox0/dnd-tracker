@@ -72,14 +72,14 @@ function assertAttackInput(
     const attack =
         attacker && findAttack(attacker, data.attackId, data.offHand);
 
-    // без атакуючого чи атаки помилку дасть сама фаза атаки
+    // without attacker or attack the attack phase reports the error itself
     if (!attacker || !attack) return;
 
     assertAmmo(attacker, attack);
 
     const targetIds = requestedTargetIds(data);
 
-    // клієнт героя кидає кубики зброї разом із кубиками рівня (PlayerTurnViewDialogs)
+    // the hero client rolls weapon dice together with level dice (PlayerTurnViewDialogs)
     assertAttackRolls(
         attackDamageParts(attacker, attack, ctx.meta.rules).formula,
         {

@@ -229,7 +229,7 @@ export function moveMutation(
     if (data.returnToStart)
         return returnToStart(ctx, participants, mover, ownTurn);
 
-    // розстановка ДМ (чужий хід або free) — без бюджету й шляху
+    // DM placement (other turn or free): no budget and no path
     if (!ownTurn || (ctx.isDM && data.free === true))
         return placeMove(ctx, data, map, participants, mover);
 
@@ -243,7 +243,7 @@ interface MoveOutcome {
     messages: LogLine[];
     events: NewBattleEvent[];
     sceneState?: SystemSlot;
-    /** шлях пройдено вільно від from; лише тоді спрацьовують зони заклинань */
+    /** Path walked freely from `from`; only then do spell zones trigger. */
     trail?: { from: GridPoint | undefined; path: GridPoint[] };
 }
 

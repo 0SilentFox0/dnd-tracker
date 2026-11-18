@@ -1,8 +1,3 @@
-/**
- * Access-check кампанії для server-pages: не залогінений → /sign-in, немає кампанії чи членства → /campaigns,
- * DM-only для гравця → /campaigns/[id]. Для API-routes — `requireCampaignAccess` / `requireDM` у `lib/utils/api/api-auth.ts`.
- */
-
 import { cache } from 'react';
 import { redirect } from 'next/navigation';
 import type { Campaign, CampaignMember } from '@prisma/client';
@@ -37,13 +32,6 @@ export function getCampaignForLayout(campaignId: string, userId: string) {
     return campaignWithMembership(campaignId, userId);
 }
 
-/**
- * Завантажує campaign + проста перевірка членства.
- * Повертає лише власну membership (для access-check, не для UI).
- *
- * Use case: DM dashboard pages, де показуєш список ресурсів кампанії,
- * не потрібен повний список members.
- */
 export async function requireCampaignMember(campaignId: string): Promise<{
     campaign: PublicCampaign;
     userId: string;
@@ -76,8 +64,7 @@ export async function requireCampaignMember(campaignId: string): Promise<{
     if (!member) redirect('/campaigns');
 
     return {
-        // members не повертаємо — це лише slim access-check map.
-        // Споживачі, яким треба список members, кличуть requireCampaignWithMembers.
+        // members are not returned: slim access-check map; consumers needing them call requireCampaignWithMembers
         campaign,
         userId,
         role: member.role,
@@ -87,10 +74,6 @@ export async function requireCampaignMember(campaignId: string): Promise<{
     };
 }
 
-/**
- * Те саме, що requireCampaignMember, але з додатковою DM-only перевіркою.
- * Не-DM → redirect(`/campaigns/${id}`).
- */
 export async function requireCampaignDM(campaignId: string): Promise<{
     campaign: PublicCampaign;
     userId: string;
@@ -136,12 +119,6 @@ export async function requireCampaignDMOrDemo(campaignId: string): Promise<{
     };
 }
 
-/**
- * Завантажує campaign з усіма members + user-relation для UI рендеру.
- * Повертає role поточного користувача окремо.
- *
- * Use case: campaign detail page, де треба показати members list.
- */
 export async function requireCampaignWithMembers(campaignId: string): Promise<{
     campaign: PublicCampaign & {
         members: FullMembership[];

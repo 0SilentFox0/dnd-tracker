@@ -25,7 +25,7 @@ export async function readCampaignOnboarding(
 
     if (progress.allRequiredDone && flag === undefined) {
         flag = now.toISOString();
-        // skipDuplicates: паралельний запит уже міг поставити дату — тоді лишаємо його
+        // skipDuplicates: a parallel request may already have set the date, then keep it
         await prisma.userOnboardingFlag.createMany({
             data: { userId, key: checklistKey(campaignId), value: flag },
             skipDuplicates: true,

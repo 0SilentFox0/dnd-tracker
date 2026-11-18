@@ -8,7 +8,7 @@ import type { WorldChangedEvent } from '@/types/world';
 
 let lastSeq = 0;
 
-/** Монотонний у межах інстансу; клієнт лише відкидає повтор того ж seq. */
+/** Monotonic per instance; clients only drop a repeat of the same seq. */
 const nextSeq = () => (lastSeq = Math.max(Date.now(), lastSeq + 1));
 
 export async function triggerWorldChanged(

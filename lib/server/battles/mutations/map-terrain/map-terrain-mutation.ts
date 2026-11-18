@@ -41,7 +41,7 @@ export function mapTerrainMutation(
     if (!map)
         throw new BattleRuleError('action_rejected', API_ERRORS.BATTLE_NO_MAP);
 
-    // "05:6" проходить regex, але рушій і рендер шукають лише канонічні ключі
+    // "05:6" passes the regex, but the engine and render look up canonical keys only
     const cells = [...new Set(body.cells.map((k) => cellKey(parseKey(k))))];
 
     const { terrain } = body;

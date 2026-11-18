@@ -1,7 +1,3 @@
-/**
- * Логіка POST /start: учасники, слоти, ефекти/тригери на старті, ініціатива. Запис і Pusher — у runBattleMutation.
- */
-
 import { buildCampaignContextForStart } from './start-build-context';
 import { scaleEnemiesForFairBattle } from './start-fair-scaling';
 import { isReservedSlot, partitionReserve } from './start-reserve';
@@ -241,7 +237,7 @@ function applyStartOfBattleAndSort(
     const ctx = { round: 1, rng: Math.random, map, rules };
 
     const battleStart = runJoinTriggers(
-        // сплячі вороги лабіринту не спрацьовують на старті
+        // sleeping maze enemies do not trigger at start
         initiativeOrder.map((p) => modeEnter(map, p)),
         ctx
     );

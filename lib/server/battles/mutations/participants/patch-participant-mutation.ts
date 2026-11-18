@@ -134,7 +134,7 @@ function takeOutOfOrder(
 
     const current = ctx.scene.turnIndex;
 
-    // хід був на видаленому — наступний отримує повний початок ходу (а з кінця черги — новий раунд)
+    // the turn was on the deleted one: the next gets a full turn start (from the queue end: a new round)
     if (removedIndex === current && participants.length > 0) {
         const advanced = advanceAfterRemoval({
             participants,

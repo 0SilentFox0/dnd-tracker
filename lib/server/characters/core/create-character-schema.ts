@@ -71,7 +71,6 @@ export const createCharacterSchema = z.object({
     immunities: z.array(z.string()).default([]),
     morale: z.number().min(-10).max(10).default(0),
 
-    // Уміння (персональний скіл з групи «Персональні»)
     personalSkillId: z.string().optional().nullable(),
     primaryAbility: z.enum(ABILITY_KEYS).nullable().optional(),
     characteristics: SystemDataSchema.optional(),

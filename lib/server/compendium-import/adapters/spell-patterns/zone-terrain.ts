@@ -144,7 +144,6 @@ const LINE_TERRAIN =
 
 const LINE_TERRAIN_ROUNDS = 10;
 
-/** Складна місцевість по лінії від кастера до цілі: ефект додається до решти механіки заклинання. */
 export const lineTerrainEffect = (
     text: string,
     range: number | 'self'

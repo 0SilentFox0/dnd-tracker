@@ -28,7 +28,7 @@ export function createMapBackgroundMutation(campaignId: string) {
 
         if (!resolved.ok) throw new ContentError(resolved.message, 400);
 
-        // нова картинка має інше вирівнювання — повертаємо типове
+        // a new image has other alignment: reset to the default
         const {
             backgroundCols: _cols,
             backgroundRows: _rows,
