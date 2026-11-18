@@ -17,7 +17,7 @@ const confirm = vi.hoisted(() => vi.fn(async () => true));
 
 const downloadText = vi.hoisted(() => vi.fn());
 
-vi.mock('@/lib/hooks/skills/useSkillTrees', () => ({
+vi.mock('@/systems/skilltrees/hooks/useSkillTrees', () => ({
     useSkillTrees: () => ({ data: state.trees }),
 }));
 vi.mock('@/systems/skilltrees/hooks/useSaveSkillTree', () => ({

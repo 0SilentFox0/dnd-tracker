@@ -29,7 +29,7 @@ describe('довідник артефактів', () => {
                 slot: 'weapon',
                 description: 'd',
                 abilities: [ability],
-                artifactSet: { name: 'Набір' },
+                setId: 's1',
             },
             {
                 id: 'a2',
@@ -39,7 +39,21 @@ describe('довідник артефактів', () => {
                 slot: 'shield',
                 description: null,
                 abilities: [],
-                artifactSet: null,
+                setId: null,
+            },
+            {
+                id: 'a3',
+                name: 'Шолом',
+                slot: 'helm',
+                abilities: [],
+                setId: 's1',
+            },
+            {
+                id: 'a4',
+                name: 'Амулет',
+                slot: 'neck',
+                abilities: [],
+                setId: 's1',
             },
         ] as never);
         vi.mocked(prisma.artifactSet.findMany).mockResolvedValue([
@@ -49,7 +63,6 @@ describe('довідник артефактів', () => {
                 icon: null,
                 description: null,
                 abilities: [ability],
-                artifacts: [{ name: 'Шолом' }, { name: 'Амулет' }],
             },
         ] as never);
         vi.mocked(prisma.characterInventory.findMany).mockResolvedValue([
@@ -87,7 +100,7 @@ describe('довідник артефактів', () => {
     it('сет: бонуси та назви артефактів за алфавітом', async () => {
         const { sets } = await loadArtifactReference('c');
 
-        expect(sets[0].artifactNames).toEqual(['Амулет', 'Шолом']);
+        expect(sets[0].artifactNames).toEqual(['Амулет', 'Меч', 'Шолом']);
         expect(sets[0].bonuses).toEqual([
             expect.objectContaining({
                 then: [

@@ -28,22 +28,9 @@ export interface CharacterContext {
 }
 
 function indexArtifacts(
-    artifacts: Record<string, unknown>[],
-    joined: string[]
+    artifacts: Prisma.ArtifactGetPayload<object>[]
 ): NonNullable<CampaignSpellContext['artifactsById']> {
-    const artifactsById: NonNullable<CampaignSpellContext['artifactsById']> =
-        {};
-
-    for (const raw of artifacts) {
-        const row = { ...raw };
-
-        for (const key of joined) delete row[key];
-
-        artifactsById[row.id as string] =
-            row as unknown as Prisma.ArtifactGetPayload<object>;
-    }
-
-    return artifactsById;
+    return Object.fromEntries(artifacts.map((a) => [a.id, a]));
 }
 
 export async function loadCharacterContext(
@@ -61,28 +48,20 @@ export async function loadCharacterContext(
 
     const loaders = systemServerOf(rules).participant?.characterContext ?? [];
 
-    const artifactInclude = Object.assign(
-        {},
-        ...loaders.map((l) => l.artifactInclude)
-    ) as Prisma.ArtifactInclude;
-
-    const joined = Object.keys(artifactInclude);
-
     const [campaign, artifacts] = await Promise.all([
         prisma.campaign.findUnique({
             where: { id: campaignId },
             select: {
                 races: { where: { name: raceName }, take: 1 },
-                ...Object.assign(
+                ...(Object.assign(
                     {},
                     ...loaders.map((l) => l.select?.(character))
-                ),
+                ) as Record<never, never>),
             },
         }),
         artifactIds.length > 0
             ? prisma.artifact.findMany({
                   where: { id: { in: artifactIds }, campaignId },
-                  ...(joined.length > 0 && { include: artifactInclude }),
               })
             : [],
     ]);
@@ -150,10 +129,7 @@ export async function loadCharacterContext(
         ? await loadBackground(campaignId, state.backgroundId)
         : null;
 
-    const artifactsById = indexArtifacts(
-        artifacts as Record<string, unknown>[],
-        joined
-    );
+    const artifactsById = indexArtifacts(artifacts);
 
     return {
         race,

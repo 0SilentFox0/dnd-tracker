@@ -9,8 +9,8 @@ import { loadNames } from '@/lib/server/content/import/names';
 import { systemContentKinds } from '@/lib/server/systems/lookup';
 import {
     artifactAbilities,
-    artifactSetAbilities,
     featAbilities,
+    ownerAbilities,
     raceAbilities,
     skillAbilities,
     unitAbilities,
@@ -110,24 +110,25 @@ export const EXPORT_LOADERS: Record<
                 item: itemStatsFromRow(r) ?? undefined,
             }))
         ),
-    'artifact-sets': async (c) =>
-        asRecords(
-            (
-                await prisma.artifactSet.findMany({
-                    ...query(c),
-                    include: {
-                        artifacts: {
-                            select: { id: true },
-                            orderBy: { createdAt: 'asc' },
-                        },
-                    },
-                })
-            ).map(({ artifacts, ...r }) => ({
+    'artifact-sets': async (c) => {
+        const sets = await prisma.artifactSet.findMany(query(c));
+
+        const members = await prisma.artifact.findMany({
+            where: { setId: { in: sets.map((r) => r.id) } },
+            select: { id: true, setId: true },
+            orderBy: { createdAt: 'asc' },
+        });
+
+        return asRecords(
+            sets.map((r) => ({
                 ...r,
-                abilities: artifactSetAbilities(r),
-                artifactIds: artifacts.map((a) => a.id),
+                abilities: ownerAbilities(r),
+                artifactIds: members
+                    .filter((a) => a.setId === r.id)
+                    .map((a) => a.id),
             }))
-        ),
+        );
+    },
 };
 
 export const DEFAULT_DEPS: ExportDeps = {

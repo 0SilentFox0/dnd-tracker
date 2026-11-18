@@ -17,6 +17,7 @@ import type {
 import { legacyDamageKindOf } from '@/lib/utils/abilities/schema';
 import { matchesAttackBonusModifier } from '@/lib/utils/battle/common/modifiers';
 import { isRecord } from '@/lib/utils/common/is-record';
+import { moduleVocab } from '@/lib/utils/rules/systems/vocab';
 
 const BONUS_STATS: Record<string, StatKey> = {
     strength: 'strength',
@@ -28,7 +29,11 @@ const BONUS_STATS: Record<string, StatKey> = {
     armorClass: 'armor',
     speed: 'speed',
     initiative: 'initiative',
-    morale: 'morale',
+    ...Object.fromEntries(
+        moduleVocab('abilityStats')
+            .filter((s) => s.sheetKey)
+            .map((s) => [s.id, s.sheetKey as StatKey])
+    ),
     minTargets: 'minTargets',
     maxTargets: 'maxTargets',
 };

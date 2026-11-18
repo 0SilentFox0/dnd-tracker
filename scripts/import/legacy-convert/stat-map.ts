@@ -13,6 +13,10 @@ import {
     type StatKey,
     type Trigger,
 } from '@/lib/utils/abilities/schema';
+import { moduleVocab } from '@/lib/utils/rules/systems/vocab';
+
+const MORALE_STAT = moduleVocab('abilityStats').find((s) => s.capped)
+    ?.id as StatKey;
 
 export interface StatMapContext {
     trigger: Trigger;
@@ -386,7 +390,7 @@ export function mapLegacyEffect(
             } as Effect);
 
             return out;
-        case 'morale':
+        case MORALE_STAT:
             if (passive) {
                 if (e.type === 'min')
                     return (note('мінімальна мораль не автоматизована'), out);
@@ -394,7 +398,7 @@ export function mapLegacyEffect(
                 if (!ctx.skipBakedStats && value)
                     out.effects.push({
                         kind: 'modifyStat',
-                        stat: 'morale',
+                        stat: MORALE_STAT,
                         flat: value,
                     });
 

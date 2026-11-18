@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const db = vi.hoisted(() => ({
     artifact: {
         findFirst: vi.fn(),
+        findMany: vi.fn(async () => []),
         create: vi.fn(),
         update: vi.fn(),
         deleteMany: vi.fn(),

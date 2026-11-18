@@ -13,6 +13,7 @@ import { SpellReferenceCard } from './SpellReferenceCard';
 import { HudPanel } from '@/components/hud/page';
 import { Accordion } from '@/components/ui/accordion';
 import { groupDisplayName, UNGROUPED_KEY } from '@/lib/constants/ungrouped';
+import { ITEM_SET_KEY } from '@/lib/utils/artifacts/item-set-key';
 import { groupBy } from '@/lib/utils/common/collections';
 import type {
     ArtifactForReference,
@@ -274,7 +275,7 @@ export function ReferenceSectionAccordion({
                                         accordionValue: setName,
                                         title: groupDisplayName(
                                             setName,
-                                            tu('artifactSet')
+                                            tu(ITEM_SET_KEY)
                                         ),
                                         count: list.length,
                                     }}

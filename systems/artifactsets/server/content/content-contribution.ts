@@ -4,7 +4,7 @@ import { OwnerKind } from '@/lib/utils/abilities/read';
 
 export const ARTIFACTSETS_CONTENT: SystemContentServer = {
     abilityOwners: {
-        [OwnerKind.ARTIFACT_SET]: {
+        [OwnerKind.artifactSet]: {
             contentKind: 'artifact-sets',
             order: 40,
             load: (where) =>

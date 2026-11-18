@@ -1,35 +1,46 @@
 import { type ArtifactSetBattleMaps, artifactSetContext } from './load-maps';
 
+import { prisma } from '@/lib/db';
 import type { CharacterContextLoader } from '@/lib/server/systems/types';
 
-type SetRow = ArtifactSetBattleMaps['artifactSetsById'][string] & {
-    artifacts: { id: string }[];
-};
-
 export const artifactSetCharacterContext: CharacterContextLoader = {
-    artifactInclude: {
-        artifactSet: { include: { artifacts: { select: { id: true } } } },
-    },
     load: async ({ artifacts }) => {
         const maps: ArtifactSetBattleMaps = {
             artifactSetsById: {},
             artifactSetMemberIds: {},
         };
 
-        for (const { artifactSet } of artifacts as {
-            artifactSet?: SetRow | null;
-        }[]) {
-            if (!artifactSet) continue;
+        const setIds = [
+            ...new Set(
+                (artifacts as { setId?: string | null }[]).flatMap((a) =>
+                    a.setId ? [a.setId] : []
+                )
+            ),
+        ];
 
-            maps.artifactSetsById[artifactSet.id] = {
-                id: artifactSet.id,
-                name: artifactSet.name,
-                setBonus: artifactSet.setBonus,
-                icon: artifactSet.icon,
-                abilities: artifactSet.abilities,
+        const [sets, members] = setIds.length
+            ? await Promise.all([
+                  prisma.artifactSet.findMany({
+                      where: { id: { in: setIds } },
+                  }),
+                  prisma.artifact.findMany({
+                      where: { setId: { in: setIds } },
+                      select: { id: true, setId: true },
+                  }),
+              ])
+            : [[], []];
+
+        for (const set of sets) {
+            maps.artifactSetsById[set.id] = {
+                id: set.id,
+                name: set.name,
+                setBonus: set.setBonus,
+                icon: set.icon,
+                abilities: set.abilities,
             };
-            maps.artifactSetMemberIds[artifactSet.id] =
-                artifactSet.artifacts.map((a) => a.id);
+            maps.artifactSetMemberIds[set.id] = members
+                .filter((m) => m.setId === set.id)
+                .map((m) => m.id);
         }
 
         const holder = { ext: {} };

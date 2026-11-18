@@ -5,7 +5,6 @@ model SkillTree {
   skills          Json              @default("[]")
   createdAt       DateTime          @default(now())
   characterSkills CharacterSkills[]
-  campaign        Campaign          @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   sourceId        String?
   sourceHash      String?
   slug            String?

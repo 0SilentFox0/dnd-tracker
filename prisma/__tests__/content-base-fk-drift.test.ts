@@ -16,7 +16,7 @@ const SCHEMA = prismaSchemaFiles()
     .map((f) => readFileSync(f, 'utf8'))
     .join('\n');
 
-const EXPECTED = [
+const DROPPED_IN_MIGRATION = [
     'artifacts.setId',
     'character_skills.skillTreeId',
     'characters.backgroundId',
@@ -29,6 +29,14 @@ const EXPECTED = [
     'spells.groupId',
     'spells.summonUnitId',
     'units.raceId',
+];
+
+const EXPECTED = DROPPED_IN_MIGRATION.filter((k) => k !== 'artifacts.setId');
+
+// Relations removed from the schema (P10) while the DB keeps the FK: migrate diff proposes DROP for them.
+const INVERSE_DROP = [
+    'artifact_sets_campaignId_fkey',
+    'skill_trees_campaignId_fkey',
 ];
 
 const dropped = [
@@ -50,13 +58,33 @@ function relationColumns(table: string): string[] {
 
 describe('content_base FK drop (documented drift, see .claude/rules/db-deploy.md)', () => {
     it('drops exactly the expected constraints', () => {
-        expect([...dropped].sort()).toEqual(EXPECTED);
+        expect([...dropped].sort()).toEqual(DROPPED_IN_MIGRATION);
     });
 
     it.each(EXPECTED)('%s keeps its @relation in the schema', (key) => {
         const [table, column] = key.split('.');
 
         expect(relationColumns(table)).toContain(column);
+    });
+});
+
+describe('inverse drift (relation removed from the schema, FK kept in the DB)', () => {
+    it.each(['artifact_sets', 'skill_trees'])(
+        '%s has no campaign relation in the schema',
+        (table) => {
+            expect(relationColumns(table)).not.toContain('campaignId');
+        }
+    );
+
+    it('artifacts has no set relation in the schema', () => {
+        expect(relationColumns('artifacts')).not.toContain('setId');
+    });
+
+    it('lists the FKs the schema no longer declares', () => {
+        expect(INVERSE_DROP).toEqual([
+            'artifact_sets_campaignId_fkey',
+            'skill_trees_campaignId_fkey',
+        ]);
     });
 });
 

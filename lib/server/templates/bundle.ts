@@ -131,6 +131,7 @@ function table(
         fks: {
             ...deriveFks(fields),
             ...(model === 'Background' && { originFeatId: 'feats' as const }),
+            ...(model === 'Artifact' && { setId: 'artifactSets' as const }),
         },
     };
 }

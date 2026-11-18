@@ -80,6 +80,7 @@ import { PATCHABLE_PARTICIPANT_FIELDS } from '@/lib/utils/battle/store/participa
 import { stableStringify } from '@/lib/utils/battle/store/stable-json';
 import { rollDiceList } from '@/lib/utils/common/dice';
 import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
+import { moduleVocab } from '@/lib/utils/rules/systems/vocab';
 import {
     branchLevelNodeId,
     buildTreeJson,
@@ -577,6 +578,10 @@ function printState(title: string) {
     }
 }
 
+const RETALIATION_ACTION = moduleVocab('actionTypes').find(
+    (a) => a.blockFlag
+)?.id;
+
 const START = {
     access: 'dm' as const,
     requireStatus: 'prepared' as const,
@@ -640,7 +645,10 @@ const ROLLBACK = {
 const MORALE = {
     access: 'member' as const,
     requireStatus: 'active' as const,
-    schema: z.object({ participantId: z.string(), d10Roll: z.number().min(1).max(10) }),
+    schema: z.object({
+        participantId: z.string(),
+        d10Roll: z.number().min(1).max(10),
+    }),
     respond: 'wrapped' as const,
     mutate: mutateSystemOperation('morale-check', 'morale disabled'),
 };
@@ -1130,7 +1138,7 @@ async function scenario() {
 
     const t1 = await attack('Торін', "Кам'яний голем #1", 18, [8]);
 
-    const golemRet = t1.events.find((e) => e.actionType === 'retaliation');
+    const golemRet = t1.events.find((e) => e.actionType === RETALIATION_ACTION);
 
     check(
         'Відсіч при влучанні: голем відповідає Торіну',
@@ -1170,7 +1178,7 @@ async function scenario() {
     const shamanSwing = await attack('Орк-шаман #1', 'Мирон', 2, [3]);
 
     const myronRet = shamanSwing.events.filter(
-        (e) => e.actionType === 'retaliation'
+        (e) => e.actionType === RETALIATION_ACTION
     );
 
     check(

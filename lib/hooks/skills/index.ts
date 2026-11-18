@@ -5,7 +5,6 @@ export {
     useMainSkills,
     useUpdateMainSkill,
 } from './useMainSkills';
-export { useRacialSkills } from './useRacialSkills';
 export {
     useCreateSkill,
     useDeleteAllSkills,
@@ -16,5 +15,4 @@ export {
     useSkills,
     useUpdateSkill,
 } from './useSkills';
-export { useSkillTrees } from './useSkillTrees';
 export { useUpdateSkillAppearance } from './useUpdateSkillAppearance';

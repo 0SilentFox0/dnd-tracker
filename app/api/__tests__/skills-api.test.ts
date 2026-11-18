@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { dispatchedRoute } from './dispatched-route';
 import { createRequest, getResponseJson, getResponseStatus } from './helpers';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
@@ -51,7 +52,7 @@ describe('GET /api/campaigns/[id]/skills', () => {
             NextResponse.json({ error: 'Forbidden' }, { status: 403 })
         );
 
-        const { GET } = await import('@/app/api/campaigns/[id]/skills/route');
+        const { GET } = dispatchedRoute('skills');
 
         const request = createRequest(
             'http://localhost/api/campaigns/c1/skills'
@@ -113,7 +114,7 @@ describe('GET /api/campaigns/[id]/skills', () => {
 
         vi.mocked(prisma.skill.findMany).mockResolvedValue(mockSkills as never);
 
-        const { GET } = await import('@/app/api/campaigns/[id]/skills/route');
+        const { GET } = dispatchedRoute('skills');
 
         const request = createRequest(
             'http://localhost/api/campaigns/c1/skills'
@@ -146,7 +147,7 @@ describe('GET /api/campaigns/[id]/skills', () => {
         });
         vi.mocked(prisma.skill.findMany).mockResolvedValue([]);
 
-        const { GET } = await import('@/app/api/campaigns/[id]/skills/route');
+        const { GET } = dispatchedRoute('skills');
 
         const request = createRequest(
             'http://localhost/api/campaigns/c1/skills'
@@ -181,7 +182,7 @@ describe('GET /api/campaigns/[id]/skills', () => {
             { id: 's1', name: 'Поклик', icon: null, description: null },
         ] as never);
 
-        const { GET } = await import('@/app/api/campaigns/[id]/skills/route');
+        const { GET } = dispatchedRoute('skills');
 
         const response = await GET(
             createRequest(
@@ -222,7 +223,7 @@ describe('POST /api/campaigns/[id]/skills', () => {
             NextResponse.json({ error: 'Forbidden' }, { status: 403 })
         );
 
-        const { POST } = await import('@/app/api/campaigns/[id]/skills/route');
+        const { POST } = dispatchedRoute('skills');
 
         const request = createRequest(
             'http://localhost/api/campaigns/c1/skills',
@@ -261,7 +262,7 @@ describe('POST /api/campaigns/[id]/skills', () => {
             },
         });
 
-        const { POST } = await import('@/app/api/campaigns/[id]/skills/route');
+        const { POST } = dispatchedRoute('skills');
 
         const request = createRequest(
             'http://localhost/api/campaigns/c1/skills',
@@ -327,7 +328,7 @@ describe('POST /api/campaigns/[id]/skills', () => {
 
         vi.mocked(prisma.skill.create).mockResolvedValue(created as never);
 
-        const { POST } = await import('@/app/api/campaigns/[id]/skills/route');
+        const { POST } = dispatchedRoute('skills');
 
         const request = createRequest(
             'http://localhost/api/campaigns/c1/skills',
@@ -366,7 +367,7 @@ describe('POST /api/campaigns/[id]/skills', () => {
         } as never);
         vi.mocked(prisma.spell.count).mockResolvedValue(0);
 
-        const { POST } = await import('@/app/api/campaigns/[id]/skills/route');
+        const { POST } = dispatchedRoute('skills');
 
         const request = createRequest(
             'http://localhost/api/campaigns/c1/skills',
@@ -403,9 +404,7 @@ describe('DELETE /api/campaigns/[id]/skills (delete all)', () => {
             NextResponse.json({ error: 'Forbidden' }, { status: 403 })
         );
 
-        const { DELETE } = await import(
-            '@/app/api/campaigns/[id]/skills/route'
-        );
+        const { DELETE } = dispatchedRoute('skills');
 
         const request = createRequest(
             'http://localhost/api/campaigns/c1/skills',
@@ -436,9 +435,7 @@ describe('DELETE /api/campaigns/[id]/skills (delete all)', () => {
         });
         vi.mocked(prisma.skill.deleteMany).mockResolvedValue({ count: 5 });
 
-        const { DELETE } = await import(
-            '@/app/api/campaigns/[id]/skills/route'
-        );
+        const { DELETE } = dispatchedRoute('skills');
 
         const request = createRequest(
             'http://localhost/api/campaigns/c1/skills',
@@ -472,9 +469,7 @@ describe('GET /api/campaigns/[id]/skills/[skillId]', () => {
             NextResponse.json({ error: 'Forbidden' }, { status: 403 })
         );
 
-        const { GET } = await import(
-            '@/app/api/campaigns/[id]/skills/[skillId]/route'
-        );
+        const { GET } = dispatchedRoute('skills/:skillId');
 
         const request = createRequest(
             'http://localhost/api/campaigns/c1/skills/skill-1'
@@ -502,9 +497,7 @@ describe('GET /api/campaigns/[id]/skills/[skillId]', () => {
         });
         vi.mocked(prisma.skill.findFirst).mockResolvedValue(null);
 
-        const { GET } = await import(
-            '@/app/api/campaigns/[id]/skills/[skillId]/route'
-        );
+        const { GET } = dispatchedRoute('skills/:skillId');
 
         const request = createRequest(
             'http://localhost/api/campaigns/c1/skills/skill-1'
@@ -536,9 +529,7 @@ describe('GET /api/campaigns/[id]/skills/[skillId]', () => {
         });
         vi.mocked(prisma.skill.findFirst).mockResolvedValue(null);
 
-        const { GET } = await import(
-            '@/app/api/campaigns/[id]/skills/[skillId]/route'
-        );
+        const { GET } = dispatchedRoute('skills/:skillId');
 
         const request = createRequest(
             'http://localhost/api/campaigns/c1/skills/skill-1'
@@ -597,9 +588,7 @@ describe('GET /api/campaigns/[id]/skills/[skillId]', () => {
 
         vi.mocked(prisma.skill.findFirst).mockResolvedValue(mockSkill as never);
 
-        const { GET } = await import(
-            '@/app/api/campaigns/[id]/skills/[skillId]/route'
-        );
+        const { GET } = dispatchedRoute('skills/:skillId');
 
         const request = createRequest(
             'http://localhost/api/campaigns/c1/skills/skill-1'
@@ -631,9 +620,7 @@ describe('PATCH /api/campaigns/[id]/skills/[skillId]', () => {
             NextResponse.json({ error: 'Forbidden' }, { status: 403 })
         );
 
-        const { PATCH } = await import(
-            '@/app/api/campaigns/[id]/skills/[skillId]/route'
-        );
+        const { PATCH } = dispatchedRoute('skills/:skillId');
 
         const request = createRequest(
             'http://localhost/api/campaigns/c1/skills/skill-1',
@@ -666,9 +653,7 @@ describe('PATCH /api/campaigns/[id]/skills/[skillId]', () => {
         });
         vi.mocked(prisma.skill.findFirst).mockResolvedValue(null);
 
-        const { PATCH } = await import(
-            '@/app/api/campaigns/[id]/skills/[skillId]/route'
-        );
+        const { PATCH } = dispatchedRoute('skills/:skillId');
 
         const request = createRequest(
             'http://localhost/api/campaigns/c1/skills/skill-1',
@@ -745,9 +730,7 @@ describe('PATCH /api/campaigns/[id]/skills/[skillId]', () => {
             mainSkill: null,
         } as never);
 
-        const { PATCH } = await import(
-            '@/app/api/campaigns/[id]/skills/[skillId]/route'
-        );
+        const { PATCH } = dispatchedRoute('skills/:skillId');
 
         const request = createRequest(
             'http://localhost/api/campaigns/c1/skills/skill-1',
@@ -784,9 +767,7 @@ describe('DELETE /api/campaigns/[id]/skills/[skillId]', () => {
             NextResponse.json({ error: 'Forbidden' }, { status: 403 })
         );
 
-        const { DELETE } = await import(
-            '@/app/api/campaigns/[id]/skills/[skillId]/route'
-        );
+        const { DELETE } = dispatchedRoute('skills/:skillId');
 
         const request = createRequest(
             'http://localhost/api/campaigns/c1/skills/skill-1',
@@ -817,9 +798,7 @@ describe('DELETE /api/campaigns/[id]/skills/[skillId]', () => {
         });
         vi.mocked(prisma.skill.findFirst).mockResolvedValue(null);
 
-        const { DELETE } = await import(
-            '@/app/api/campaigns/[id]/skills/[skillId]/route'
-        );
+        const { DELETE } = dispatchedRoute('skills/:skillId');
 
         const request = createRequest(
             'http://localhost/api/campaigns/c1/skills/skill-1',
@@ -854,9 +833,7 @@ describe('DELETE /api/campaigns/[id]/skills/[skillId]', () => {
         } as never);
         vi.mocked(prisma.skill.delete).mockResolvedValue({} as never);
 
-        const { DELETE } = await import(
-            '@/app/api/campaigns/[id]/skills/[skillId]/route'
-        );
+        const { DELETE } = dispatchedRoute('skills/:skillId');
 
         const request = createRequest(
             'http://localhost/api/campaigns/c1/skills/skill-1',

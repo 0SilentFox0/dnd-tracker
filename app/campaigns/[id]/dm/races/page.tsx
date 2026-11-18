@@ -5,6 +5,7 @@ import { PrefetchedQuery } from '@/lib/providers/prefetched-query';
 import { requireCampaignDMOrDemo } from '@/lib/server/campaigns/access';
 import { readRaces } from '@/lib/server/races/read-races';
 import { readOkJson } from '@/lib/utils/api/read-json';
+import { parseRules } from '@/lib/utils/rules/schema';
 import type { Race } from '@/types/races';
 
 export default async function DMRacesPage({
@@ -14,7 +15,7 @@ export default async function DMRacesPage({
 }) {
     const { id } = await params;
 
-    const { isDemo } = await requireCampaignDMOrDemo(id);
+    const { campaign, isDemo } = await requireCampaignDMOrDemo(id);
 
     const races = await readOkJson<Race[]>(
         await readRaces({ id, accessChecked: true })
@@ -22,7 +23,11 @@ export default async function DMRacesPage({
 
     return (
         <PrefetchedQuery queryKey={raceKeys.list(id)} data={races}>
-            <DMRacesPageClient campaignId={id} canEdit={!isDemo} />
+            <DMRacesPageClient
+                campaignId={id}
+                system={parseRules(campaign.rules).system}
+                canEdit={!isDemo}
+            />
         </PrefetchedQuery>
     );
 }

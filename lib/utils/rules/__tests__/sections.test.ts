@@ -279,7 +279,11 @@ describe('defaultRulesFor', () => {
 
         expect(rules).toEqual({
             ...DEFAULT_RULES,
-            actions: { ...DEFAULT_RULES.actions, opportunityAttacks: true },
+            actions: {
+                ...DEFAULT_RULES.actions,
+                opportunityAttacks: true,
+                retaliation: true,
+            },
             advancement: DEFAULT_ADVANCEMENT_RULES,
             system: { key: 'dnd5e' },
         });

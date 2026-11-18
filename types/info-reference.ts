@@ -3,6 +3,7 @@ import type {
     AbilityFlowSummary,
     Segment,
 } from '@/lib/utils/abilities/segments';
+import type { ItemSetKey } from '@/lib/utils/artifacts/item-set-key';
 import type { SpellFx } from '@/lib/utils/battle/fx/spells';
 import type {
     SpellCost,
@@ -126,6 +127,5 @@ export interface ReferenceFilters {
     artifact: {
         rarity: FilterField<string>;
         slot: FilterField<string, { value: string; label: string }[]>;
-        artifactSet: FilterField<string>;
-    };
+    } & { [K in ItemSetKey]: FilterField<string> };
 }

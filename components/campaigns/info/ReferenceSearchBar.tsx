@@ -22,6 +22,10 @@ import { Label } from '@/components/ui/label';
 import { SelectField } from '@/components/ui/select-field';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import { cn } from '@/lib/utils';
+import {
+    ITEM_SET_KEY,
+    type ItemSetKey,
+} from '@/lib/utils/artifacts/item-set-key';
 import type { ReferenceFilters, SectionTab } from '@/types/info-reference';
 
 interface ReferenceSearchBarProps {
@@ -36,7 +40,7 @@ interface FilterSelectProps {
         | 'spellType'
         | 'rarity'
         | 'slot'
-        | 'artifactSet';
+        | ItemSetKey;
     value: string | null;
     onChange: (v: string | null) => void;
     options: { value: string; label: string }[];
@@ -112,7 +116,9 @@ function SpellFilters({ filter }: { filter: ReferenceFilters['spell'] }) {
 function ArtifactFilters({ filter }: { filter: ReferenceFilters['artifact'] }) {
     const t = useTranslator('artifacts');
 
-    const { rarity, slot, artifactSet } = filter;
+    const { rarity, slot } = filter;
+
+    const itemSet = filter[ITEM_SET_KEY];
 
     return (
         <>
@@ -132,10 +138,10 @@ function ArtifactFilters({ filter }: { filter: ReferenceFilters['artifact'] }) {
                 options={slot.options}
             />
             <FilterSelect
-                name="artifactSet"
-                value={artifactSet.value}
-                onChange={artifactSet.set}
-                options={asOptions(artifactSet.options)}
+                name={ITEM_SET_KEY}
+                value={itemSet.value}
+                onChange={itemSet.set}
+                options={asOptions(itemSet.options)}
             />
         </>
     );

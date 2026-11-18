@@ -4,6 +4,8 @@ const mocks = vi.hoisted(() => ({
     campaign: vi.fn(),
     artifacts: vi.fn(),
     skill: vi.fn(),
+    skillTree: vi.fn(),
+    artifactSets: vi.fn(),
     classes: vi.fn(),
     feats: vi.fn(),
     backgrounds: vi.fn(),
@@ -14,6 +16,8 @@ vi.mock('@/lib/db', () => ({
         campaign: { findUnique: mocks.campaign },
         artifact: { findMany: mocks.artifacts },
         skill: { findFirst: mocks.skill },
+        skillTree: { findFirst: mocks.skillTree },
+        artifactSet: { findMany: mocks.artifactSets },
     },
 }));
 vi.mock('@/lib/cache/reference-data', () => ({
@@ -75,7 +79,8 @@ const settings = {
 describe('loadCharacterContext choice refs', () => {
     beforeEach(() => {
         vi.resetAllMocks();
-        mocks.campaign.mockResolvedValue({ races: [], skillTrees: [] });
+        mocks.campaign.mockResolvedValue({ races: [] });
+        mocks.skillTree.mockResolvedValue(null);
         mocks.classes.mockResolvedValue([
             { ...sorcerer, campaignId: character.campaignId },
         ]);
@@ -152,7 +157,6 @@ describe('loadCharacterContext choice refs', () => {
                     ],
                 },
             ],
-            skillTrees: [],
         });
 
         const { context } = await loadCharacterContext(
@@ -175,7 +179,8 @@ describe('loadCharacterContext choice refs', () => {
 describe('loadCharacterContext WFRP talents', () => {
     it('loads the campaign feats when the hero owns talents', async () => {
         vi.resetAllMocks();
-        mocks.campaign.mockResolvedValue({ races: [], skillTrees: [] });
+        mocks.campaign.mockResolvedValue({ races: [] });
+        mocks.skillTree.mockResolvedValue(null);
         mocks.feats.mockResolvedValue([feat]);
 
         const hero = {
@@ -208,19 +213,21 @@ describe('loadCharacterContext module slices', () => {
 
     beforeEach(() => {
         vi.resetAllMocks();
-        mocks.campaign.mockResolvedValue({ races: [], skillTrees: [] });
-        mocks.artifacts.mockResolvedValue([
+        mocks.campaign.mockResolvedValue({ races: [] });
+        mocks.skillTree.mockResolvedValue(null);
+        mocks.artifacts
+            .mockResolvedValueOnce([{ id: 'a1', setId: 's1' }])
+            .mockResolvedValue([
+                { id: 'a1', setId: 's1' },
+                { id: 'a2', setId: 's1' },
+            ]);
+        mocks.artifactSets.mockResolvedValue([
             {
-                id: 'a1',
-                setId: 's1',
-                artifactSet: {
-                    id: 's1',
-                    name: 'Set',
-                    setBonus: null,
-                    icon: null,
-                    abilities: [],
-                    artifacts: [{ id: 'a1' }, { id: 'a2' }],
-                },
+                id: 's1',
+                name: 'Set',
+                setBonus: null,
+                icon: null,
+                abilities: [],
             },
         ]);
     });
@@ -261,14 +268,15 @@ describe('loadCharacterContext module slices', () => {
         });
         expect(context.artifactsById?.a1).toEqual({ id: 'a1', setId: 's1' });
         expect(mocks.campaign).toHaveBeenCalledTimes(1);
-        expect(mocks.artifacts).toHaveBeenCalledTimes(1);
+        expect(mocks.artifacts).toHaveBeenCalledTimes(2);
     });
 });
 
 describe('loadCharacterContext personal skill without the skilltrees module', () => {
     beforeEach(() => {
         vi.resetAllMocks();
-        mocks.campaign.mockResolvedValue({ races: [], skillTrees: [] });
+        mocks.campaign.mockResolvedValue({ races: [] });
+        mocks.skillTree.mockResolvedValue(null);
         mocks.artifacts.mockResolvedValue([]);
         mocks.classes.mockResolvedValue([]);
         mocks.feats.mockResolvedValue([]);

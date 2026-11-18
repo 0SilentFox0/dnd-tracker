@@ -103,7 +103,13 @@ async function systemStatsColumn(
     return { systemStats: value as Prisma.InputJsonValue };
 }
 
-const withSet = { artifactSet: true } as const;
+async function attachSet<T extends { setId: string | null }>(row: T) {
+    const artifactSet = row.setId
+        ? await prisma.artifactSet.findUnique({ where: { id: row.setId } })
+        : null;
+
+    return { ...row, artifactSet };
+}
 
 export const artifactsResource = defineResource<
     ArtifactRow,
@@ -124,10 +130,9 @@ export const artifactsResource = defineResource<
     notFound: API_ERRORS.NOT_FOUND,
     list: (actor) => readArtifactsList(actor.campaignId),
     find: (actor, id, purpose) =>
-        prisma.artifact.findFirst({
-            where: { id, campaignId: actor.campaignId },
-            ...(purpose === 'read' && { include: withSet }),
-        }),
+        prisma.artifact
+            .findFirst({ where: { id, campaignId: actor.campaignId } })
+            .then((row) => (row && purpose === 'read' ? attachSet(row) : row)),
     toItem: (row) => withAbilityIssues('artifact', row),
     checkImport: async (actor, data) => {
         await systemStatsColumn(actor.campaignId, data.systemStats);
@@ -177,32 +182,33 @@ export const artifactsResource = defineResource<
             data.systemStats
         );
 
-        return prisma.artifact.create({
-            data: {
-                campaignId: actor.campaignId,
-                name: data.name,
-                description: data.description,
-                rarity: data.rarity,
-                slot: data.slot,
-                ...(data.abilities && {
-                    abilities: abilitiesJson(data.abilities),
-                }),
-                ...(data.weapon && {
-                    bonuses: weaponStatsColumns(data.weapon).bonuses,
-                }),
-                ...((data.weapon || data.armor || data.item) && {
-                    modifiers: nextModifiers(
-                        [],
-                        data,
-                        false
-                    ) as Prisma.InputJsonValue,
-                }),
-                ...stats,
-                setId: data.setId,
-                icon,
-            },
-            include: withSet,
-        });
+        return prisma.artifact
+            .create({
+                data: {
+                    campaignId: actor.campaignId,
+                    name: data.name,
+                    description: data.description,
+                    rarity: data.rarity,
+                    slot: data.slot,
+                    ...(data.abilities && {
+                        abilities: abilitiesJson(data.abilities),
+                    }),
+                    ...(data.weapon && {
+                        bonuses: weaponStatsColumns(data.weapon).bonuses,
+                    }),
+                    ...((data.weapon || data.armor || data.item) && {
+                        modifiers: nextModifiers(
+                            [],
+                            data,
+                            false
+                        ) as Prisma.InputJsonValue,
+                    }),
+                    ...stats,
+                    setId: data.setId,
+                    icon,
+                },
+            })
+            .then(attachSet);
     },
     async update(actor, existing, data) {
         if (data.armor && (data.slot ?? existing.slot) !== ArtifactSlot.ARMOR)
@@ -240,30 +246,33 @@ export const artifactsResource = defineResource<
 
         const modifiers = nextModifiers(existing.modifiers, data, dropArmor);
 
-        return prisma.artifact.update({
-            where: { id: existing.id },
-            data: {
-                name: data.name,
-                description: data.description,
-                rarity: data.rarity,
-                slot: data.slot,
-                abilities:
-                    data.abilities !== undefined
-                        ? abilitiesJson(data.abilities)
-                        : undefined,
-                ...(data.weapon && {
-                    bonuses: weaponStatsColumns(data.weapon).bonuses,
-                }),
-                ...(modifiers && {
-                    modifiers: modifiers as Prisma.InputJsonValue,
-                }),
-                ...stats,
-                setId:
-                    data.setId !== undefined ? data.setId || null : undefined,
-                icon: icon === undefined ? undefined : (icon ?? null),
-            },
-            include: withSet,
-        });
+        return prisma.artifact
+            .update({
+                where: { id: existing.id },
+                data: {
+                    name: data.name,
+                    description: data.description,
+                    rarity: data.rarity,
+                    slot: data.slot,
+                    abilities:
+                        data.abilities !== undefined
+                            ? abilitiesJson(data.abilities)
+                            : undefined,
+                    ...(data.weapon && {
+                        bonuses: weaponStatsColumns(data.weapon).bonuses,
+                    }),
+                    ...(modifiers && {
+                        modifiers: modifiers as Prisma.InputJsonValue,
+                    }),
+                    ...stats,
+                    setId:
+                        data.setId !== undefined
+                            ? data.setId || null
+                            : undefined,
+                    icon: icon === undefined ? undefined : (icon ?? null),
+                },
+            })
+            .then(attachSet);
     },
     async remove(actor, existing) {
         await prisma.artifact.deleteMany({

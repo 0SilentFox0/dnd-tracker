@@ -9,9 +9,10 @@ import { RacePassiveBlock } from './RaceInnateSections';
 import { ActionsMenu } from '@/components/common/ActionsMenu';
 import { ZoomableEntityIcon } from '@/components/common/ZoomableEntityIcon';
 import { HudCard } from '@/components/hud/page';
+import { useNoSkillSummary } from '@/components/systems/compose';
 import { Badge } from '@/components/ui/badge';
 import { abilityScoreTermKey } from '@/lib/constants/abilities';
-import { useMainSkills, useRacialSkills, useSkills } from '@/lib/hooks/skills';
+import { useMainSkills, useSkills } from '@/lib/hooks/skills';
 import {
     countRaceSkills,
     modifiedAbilityScores,
@@ -25,6 +26,10 @@ interface RaceCardProps {
     campaignId: string;
     onDelete?: (raceId: string) => void;
     canEdit?: boolean;
+    useSkillSummary?: (
+        campaignId: string,
+        raceName: string
+    ) => { treeSkillCount: number | null };
 }
 
 export function RaceCard({
@@ -32,6 +37,7 @@ export function RaceCard({
     campaignId,
     onDelete,
     canEdit = true,
+    useSkillSummary = useNoSkillSummary,
 }: RaceCardProps) {
     const t = useTranslations('races');
 
@@ -43,7 +49,7 @@ export function RaceCard({
 
     const { data: mainSkills = [] } = useMainSkills(campaignId);
 
-    const { treeSkillCount } = useRacialSkills(campaignId, race.name);
+    const { treeSkillCount } = useSkillSummary(campaignId, race.name);
 
     const availableSkillsCount = useMemo(
         () => countRaceSkills(race, allSkills, treeSkillCount),

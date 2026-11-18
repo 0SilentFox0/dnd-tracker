@@ -77,11 +77,8 @@ describe('layer config derived from the schema', () => {
             kind: 'many',
             fk: 'raceId',
         });
-        expect(models.Artifact.relations.artifactSet).toMatchObject({
-            target: 'ArtifactSet',
-            kind: 'one',
-            fk: 'setId',
-        });
+        expect(models.Artifact.relations.artifactSet).toBeUndefined();
+        expect(models.ArtifactSet.relations.artifacts).toBeUndefined();
         expect(models.Spell.relations.summonUnit).toMatchObject({
             target: 'Unit',
             kind: 'one',
@@ -92,7 +89,6 @@ describe('layer config derived from the schema', () => {
 
     it('lists the campaign relations that hold layered rows', () => {
         expect(Object.keys(campaignRelations()).sort()).toEqual([
-            'artifactSets',
             'artifacts',
             'backgrounds',
             'careers',
@@ -100,7 +96,6 @@ describe('layer config derived from the schema', () => {
             'feats',
             'mainSkills',
             'races',
-            'skillTrees',
             'skills',
             'spellGroups',
             'spells',

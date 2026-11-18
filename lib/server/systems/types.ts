@@ -185,8 +185,6 @@ export interface CharacterContribution {
 /** Single-character path: `select` joins the one campaign read, `load` may add its own reads */
 export interface CharacterContextLoader {
     select?(character: CharacterFromPrisma): Prisma.CampaignSelect;
-    /** Relations joined into the equipped-artifact read; their keys are stripped from the context rows */
-    artifactInclude?: Prisma.ArtifactInclude;
     load(input: {
         character: CharacterFromPrisma;
         campaignId: string;

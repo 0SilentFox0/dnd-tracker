@@ -183,24 +183,24 @@ describe('buildOpenApi', () => {
     });
 
     it('abilities.get: kind — enum власників; skill-trees під тегом «Skills»; ids має опис', () => {
-        expect(requiredOp('abilities.get').op.parameters).toEqual(
-            expect.arrayContaining([
-                expect.objectContaining({
-                    name: 'kind',
-                    schema: {
-                        type: 'string',
-                        enum: [
-                            'skill',
-                            'race',
-                            'class',
-                            'artifact',
-                            'artifactSet',
-                            'unit',
-                            'feat',
-                        ],
-                    },
-                }),
-            ])
+        const kind = (
+            requiredOp('abilities.get').op.parameters as {
+                name: string;
+                schema: { type: string; enum: string[] };
+            }[]
+        ).find((p) => p.name === 'kind');
+
+        expect(kind?.schema.type).toBe('string');
+        expect([...(kind?.schema.enum ?? [])].sort()).toEqual(
+            [
+                'skill',
+                'race',
+                'class',
+                'artifact',
+                'artifactSet',
+                'unit',
+                'feat',
+            ].sort()
         );
         expect(requiredOp('skill-trees.save').op.tags).toEqual(['Skills']);
         expect(requiredOp('skill-trees.list').op.tags).toEqual(['Skills']);

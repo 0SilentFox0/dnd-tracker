@@ -32,9 +32,13 @@ vi.mock('@/lib/utils/api/api-auth', async (orig) => ({
     requireDM,
 }));
 
-import * as duplicate from '@/app/api/campaigns/[id]/skills/[skillId]/duplicate/route';
-import * as one from '@/app/api/campaigns/[id]/skills/[skillId]/route';
-import * as list from '@/app/api/campaigns/[id]/skills/route';
+import { dispatchedRoute } from './dispatched-route';
+
+const duplicate = dispatchedRoute('skills/:skillId/duplicate');
+
+const one = dispatchedRoute('skills/:skillId');
+
+const list = dispatchedRoute('skills');
 
 const ctx = { params: Promise.resolve({ id: 'c1' }) };
 

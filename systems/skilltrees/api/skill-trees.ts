@@ -1,5 +1,6 @@
-import { campaignPatch } from '@/lib/api/client';
+import { campaignGet, campaignPatch } from '@/lib/api/client';
 import type { RawTree } from '@/lib/utils/skills/progression';
+import type { SkillTreeRow } from '@/types/skills';
 
 export async function updateSkillTree(params: {
     campaignId: string;
@@ -11,4 +12,10 @@ export async function updateSkillTree(params: {
         race: params.race,
         skills: params.skills,
     });
+}
+
+export async function getSkillTrees(
+    campaignId: string
+): Promise<SkillTreeRow[]> {
+    return campaignGet<SkillTreeRow[]>(campaignId, '/skill-trees');
 }

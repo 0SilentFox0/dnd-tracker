@@ -1,3 +1,5 @@
+import type { NextResponse } from 'next/server';
+
 import { moduleContentRoute } from '@/lib/server/content/module-dispatch';
 
 type Ctx = { params: Promise<Record<string, string>> };
@@ -21,4 +23,4 @@ export const dispatchedRoute = (template: string) =>
                 });
             },
         ])
-    ) as Record<(typeof METHODS)[number], (req: Request, ctx: Ctx) => Promise<Response>>;
+    ) as unknown as Record<(typeof METHODS)[number], (req: Request, ctx: Ctx) => Promise<NextResponse>>;

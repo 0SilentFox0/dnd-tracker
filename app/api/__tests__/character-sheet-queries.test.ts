@@ -207,19 +207,19 @@ describe('лист персонажа: запити до БД', () => {
                                   abilities: [],
                               },
                           ],
-                          skillTrees: [tree],
                       }
                     : {
                           skills: [skill('atk-b'), skill('o1'), skill('p1')],
                           mainSkills: [],
                           spells: [{ id: 'sp1', level: 1, groupId: null }],
                       },
+            'skillTree.findFirst': tree,
             'artifact.findMany': [armor],
             'spell.findMany': [bookSpell],
         };
     });
 
-    it('персонаж із деревом, артефактами, особистим скілом і заклинаннями — не більше 5 викликів Prisma', async () => {
+    it('персонаж із деревом, артефактами, особистим скілом і заклинаннями — не більше 6 викликів Prisma', async () => {
         const loaded = await loadSheetCharacter('ch');
 
         const sheet = await buildSheetFor(
@@ -228,9 +228,9 @@ describe('лист персонажа: запити до БД', () => {
             { maxLevel: 20, rules: DEFAULT_RULES }
         );
 
-        expect(total()).toBeLessThanOrEqual(5);
+        expect(total()).toBeLessThanOrEqual(6);
         expect(db.calls['race.findFirst']).toBeUndefined();
-        expect(db.calls['skillTree.findFirst']).toBeUndefined();
+        expect(db.calls['skillTree.findFirst']).toBe(1);
         expect(db.calls['campaign.findUnique']).toBe(2);
         expect(sheet.identity.raceIcon).toBe('elf.png');
         expect(sheet.personalSkill).toEqual({
@@ -243,10 +243,9 @@ describe('лист персонажа: запити до БД', () => {
         expect(sheet.items.artifacts.map((a) => a.name)).toEqual(['Кольчуга']);
     });
 
-    it('сети приходять разом з артефактами, без окремих запитів', async () => {
-        db.results['artifact.findMany'] = [
-            { ...armor, setId: 's1', artifactSet: huntSet },
-        ];
+    it('сети й їх члени читаються двома окремими запитами за setId', async () => {
+        db.results['artifact.findMany'] = [{ ...armor, setId: 's1' }];
+        db.results['artifactSet.findMany'] = [huntSet];
 
         const sheet = await buildSheetFor(
             character as never,
@@ -274,8 +273,8 @@ describe('лист персонажа: запити до БД', () => {
                 ],
             },
         ]);
-        expect(db.calls['artifactSet.findMany']).toBeUndefined();
-        expect(db.calls['artifact.findMany']).toBe(1);
+        expect(db.calls['artifactSet.findMany']).toBe(1);
+        expect(db.calls['artifact.findMany']).toBe(2);
     });
 
     it('HP листа читає статблок з characteristics, а не застарілу колонку', async () => {
@@ -318,9 +317,9 @@ describe('лист персонажа: запити до БД', () => {
     });
 
     it('без дерева раси — 0 вільних очок', async () => {
+        db.results['skillTree.findFirst'] = null;
         db.results['campaign.findUnique'] = {
             races: [],
-            skillTrees: [],
             skills: [],
             mainSkills: [],
             spells: [],

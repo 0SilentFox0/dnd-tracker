@@ -1,8 +1,8 @@
 import { useMemo } from 'react';
 
-import { useSkills } from './useSkills';
 import { useSkillTrees } from './useSkillTrees';
 
+import { useSkills } from '@/lib/hooks/skills';
 import {
     type RaceRacialSkills,
     raceRacialSkills,

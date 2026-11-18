@@ -12,7 +12,6 @@ import type { Race } from '@/types/races';
 vi.mock('@/lib/hooks/skills', () => ({
     useSkills: () => ({ data: [] }),
     useMainSkills: () => ({ data: [] }),
-    useRacialSkills: () => ({ treeSkillCount: 0 }),
 }));
 
 const bg = (icon: string | null) =>

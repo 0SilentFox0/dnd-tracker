@@ -7,8 +7,6 @@ model ArtifactSet {
   icon        String?
   createdAt   DateTime   @default(now())
   abilities   Json       @default("[]")
-  campaign    Campaign   @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  artifacts   Artifact[]
   sourceId    String?
   sourceHash  String?
   slug        String?

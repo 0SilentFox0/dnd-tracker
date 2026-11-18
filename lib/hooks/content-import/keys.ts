@@ -8,6 +8,7 @@ import { raceKeys } from '@/lib/hooks/races/keys';
 import { skillKeys } from '@/lib/hooks/skills/keys';
 import { spellKeys } from '@/lib/hooks/spells/keys';
 import { unitKeys, unitWriteKeys } from '@/lib/hooks/units/keys';
+import { SYSTEM_META, type SystemMeta } from '@/lib/utils/rules/systems/meta';
 import type { ImportKind } from '@/types/content-import';
 
 export const contentImportKeys = {
@@ -30,14 +31,26 @@ const INVALIDATE: Partial<
     classes: (c) => [classKeys.list(c)],
     backgrounds: (c) => [backgroundKeys.list(c)],
     feats: (c) => [featKeys.list(c)],
-    artifacts: (c) => [artifactKeys.list(c), ['artifact-sets', c]],
-    'artifact-sets': (c) => [['artifact-sets', c], artifactKeys.list(c)],
+    artifacts: (c) => [artifactKeys.list(c)],
 };
 
-export const importInvalidateKeys = (
-    campaignId: string,
-    kind: ImportKind
-): QueryKey[] =>
+const ownKeys = (campaignId: string, kind: ImportKind): QueryKey[] =>
     INVALIDATE[kind]?.(campaignId) ?? [
         contentImportKeys.fallbackList(campaignId, kind),
     ];
+
+const linkedKinds = (kind: ImportKind): string[] =>
+    (SYSTEM_META as readonly SystemMeta[]).flatMap(
+        (m) => m.importLinks?.[kind] ?? []
+    );
+
+/** Own keys of the kind plus those of the kinds linked by modules (one level) */
+export const importInvalidateKeys = (
+    campaignId: string,
+    kind: ImportKind
+): QueryKey[] => [
+    ...ownKeys(campaignId, kind),
+    ...linkedKinds(kind).flatMap((link) =>
+        ownKeys(campaignId, link as ImportKind)
+    ),
+];

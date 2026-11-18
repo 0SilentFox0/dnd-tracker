@@ -10,7 +10,7 @@ import { type Bundle, tableOfKind } from '@/lib/server/templates/bundle';
 import { CONTENT_ID_RE } from '@/lib/server/templates/ids';
 import {
     artifactAbilities,
-    artifactSetAbilities,
+    ownerAbilities,
     raceAbilities,
     skillAbilities,
     unitAbilities,
@@ -95,7 +95,7 @@ function derived(
         }
         case 'artifact-sets':
             return {
-                abilities: artifactSetAbilities(row),
+                abilities: ownerAbilities(row),
                 artifactIds: setArtifacts.get(row.id) ?? [],
             };
         default:

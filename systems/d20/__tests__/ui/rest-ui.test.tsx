@@ -8,10 +8,16 @@ import { RestBadges } from '@/systems/d20/ui/rest/RestBadges';
 import type { CharacterSheet } from '@/types/characters';
 
 describe('d20 ResourceFields', () => {
+    const emptySheet = {} as CharacterSheet;
+
     afterEach(cleanup);
 
     it('renders current values, empty when unset', () => {
-        render(<ResourceFields values={{ tempHp: '5' }} onChange={vi.fn()} />);
+        render(<ResourceFields
+                sheet={emptySheet}
+                values={{ tempHp: '5' }}
+                onChange={vi.fn()}
+            />);
 
         expect(document.getElementById('res-temp')).toHaveValue(5);
         expect(document.getElementById('res-exh')).toHaveValue(null);
@@ -24,7 +30,11 @@ describe('d20 ResourceFields', () => {
     it('reports edits by field key with the raw string', () => {
         const onChange = vi.fn();
 
-        render(<ResourceFields values={{}} onChange={onChange} />);
+        render(<ResourceFields
+                sheet={emptySheet}
+                values={{}}
+                onChange={onChange}
+            />);
 
         fireEvent.change(document.getElementById('res-temp') as HTMLElement, {
             target: { value: '7' },

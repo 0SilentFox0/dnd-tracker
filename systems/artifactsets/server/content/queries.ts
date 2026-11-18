@@ -6,17 +6,35 @@ import { abilitiesJson } from '@/lib/utils/abilities/read';
 import type { Ability } from '@/lib/utils/abilities/schema';
 import { withAbilitySummary } from '@/lib/utils/abilities/summary';
 
-const includeList = {
-    artifacts: {
-        select: { id: true, name: true, slot: true },
-    },
+const memberListSelect = { id: true, name: true, slot: true } as const;
+
+const memberDetailSelect = {
+    id: true,
+    name: true,
+    slot: true,
+    icon: true,
 } as const;
 
-const includeDetail = {
-    artifacts: {
-        select: { id: true, name: true, slot: true, icon: true },
-    },
-} as const;
+async function withMembers<
+    T extends { id: string },
+    S extends Prisma.ArtifactSelect,
+>(sets: T[], select: S) {
+    const members = sets.length
+        ? ((await prisma.artifact.findMany({
+              where: { setId: { in: sets.map((s) => s.id) } },
+              select: { ...select, setId: true } as Prisma.ArtifactSelect,
+          })) as unknown as (Prisma.ArtifactGetPayload<{ select: S }> & {
+              setId: string;
+          })[])
+        : [];
+
+    return sets.map((set) => ({
+        ...set,
+        artifacts: members
+            .filter((m) => m.setId === set.id)
+            .map(({ setId: _setId, ...rest }) => rest),
+    }));
+}
 
 function setBonusToPrismaInput(
     value: unknown | undefined | null
@@ -63,21 +81,25 @@ export function buildArtifactSetPatchInput(data: {
 export async function listArtifactSets(campaignId: string) {
     const sets = await prisma.artifactSet.findMany({
         where: { campaignId },
-        include: includeList,
         orderBy: { createdAt: 'desc' },
     });
 
-    return sets.map((s) => withAbilitySummary('artifactSet', s));
+    return (await withMembers(sets, memberListSelect)).map((s) =>
+        withAbilitySummary('artifactSet', s)
+    );
 }
 
 export async function findArtifactSetInCampaign(
     campaignId: string,
     setId: string
 ) {
-    return prisma.artifactSet.findFirst({
+    const row = await prisma.artifactSet.findFirst({
         where: { id: setId, campaignId },
-        include: includeDetail,
     });
+
+    if (!row) return null;
+
+    return (await withMembers([row], memberDetailSelect))[0];
 }
 
 export async function reloadArtifactSetDetail(
@@ -86,14 +108,13 @@ export async function reloadArtifactSetDetail(
 ) {
     const row = await prisma.artifactSet.findFirst({
         where: { id: setId, campaignId },
-        include: includeDetail,
     });
 
     if (!row) {
         throw new Error(`ArtifactSet not found: ${setId}`);
     }
 
-    return row;
+    return (await withMembers([row], memberDetailSelect))[0];
 }
 
 export async function insertArtifactSet(
@@ -117,10 +138,14 @@ export async function insertArtifactSet(
             }),
             icon: input.icon?.trim() ? input.icon.trim() : null,
         },
-        include: includeList,
     });
 
-    return row;
+    return {
+        ...row,
+        artifacts: [] as Prisma.ArtifactGetPayload<{
+            select: typeof memberListSelect;
+        }>[],
+    };
 }
 
 export async function updateArtifactSetRow(

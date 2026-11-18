@@ -49,8 +49,11 @@ vi.mock('@/lib/utils/api/api-auth', async (orig) => ({
     requireCampaignDMOrDemoAccess: auth.requireCampaignDMOrDemoAccess,
 }));
 
-import * as one from '@/app/api/campaigns/[id]/main-skills/[mainSkillId]/route';
-import * as list from '@/app/api/campaigns/[id]/main-skills/route';
+import { dispatchedRoute } from './dispatched-route';
+
+const one = dispatchedRoute('main-skills/:mainSkillId');
+
+const list = dispatchedRoute('main-skills');
 
 const ctx = { params: Promise.resolve({ id: 'c1' }) };
 

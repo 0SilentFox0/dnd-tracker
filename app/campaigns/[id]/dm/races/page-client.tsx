@@ -12,19 +12,26 @@ import { HudPage, HudPageHeader } from '@/components/hud/page';
 import { OnboardingHint } from '@/components/onboarding/OnboardingHint';
 import { CreateRaceDialog } from '@/components/races/CreateRaceDialog';
 import { RaceCard } from '@/components/races/RaceCard';
+import { systemUiOf } from '@/components/systems';
 import { Button } from '@/components/ui/button';
 import { useRacesList } from '@/lib/hooks/races';
+import type { SystemSelection } from '@/lib/utils/rules/systems/catalog';
 
 export function DMRacesPageClient({
     campaignId,
+    system,
     canEdit = true,
 }: {
     campaignId: string;
+    system: SystemSelection;
     canEdit?: boolean;
 }) {
     const t = useTranslations('races');
 
     const list = useRacesList(campaignId);
+
+    const useSkillSummary = systemUiOf(system.key, system.modules).races
+        ?.useSkillSummary;
 
     const { races } = list;
 
@@ -93,6 +100,7 @@ export function DMRacesPageClient({
                                             : undefined
                                     }
                                     canEdit={canEdit}
+                                    useSkillSummary={useSkillSummary}
                                 />
                             ))}
                         </DmCardGrid>

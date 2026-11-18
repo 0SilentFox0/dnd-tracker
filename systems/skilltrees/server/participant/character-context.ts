@@ -76,11 +76,10 @@ async function loadLibrary(campaignId: string, needs: LearnedNeeds) {
 }
 
 export const skillTreeCharacterContext: CharacterContextLoader = {
-    select: (character) => ({
-        skillTrees: { where: { race: character.race }, take: 1 },
-    }),
-    load: async ({ character, campaignId, campaign }) => {
-        const tree = (campaign?.skillTrees as Tree[] | undefined)?.[0] ?? null;
+    load: async ({ character, campaignId }) => {
+        const tree: Tree | null = await prisma.skillTree.findFirst({
+            where: { campaignId, race: character.race },
+        });
 
         const library = await loadLibrary(
             campaignId,

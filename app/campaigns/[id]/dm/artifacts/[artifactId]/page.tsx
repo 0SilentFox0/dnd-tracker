@@ -20,7 +20,6 @@ export default async function EditArtifactPage({
 
     const artifact = await prisma.artifact.findFirst({
         where: { id: artifactId, campaignId: id },
-        include: { artifactSet: true },
     });
 
     if (!artifact) {

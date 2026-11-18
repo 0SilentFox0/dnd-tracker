@@ -1,6 +1,6 @@
 import { resolveAbilities } from '@/lib/utils/abilities/build/resolve';
 import type { AbilitySourceHook } from '@/lib/utils/abilities/build/source-types';
-import { artifactSetAbilities } from '@/lib/utils/abilities/read';
+import { ownerAbilities } from '@/lib/utils/abilities/read';
 
 export const ARTIFACTSETS_ABILITY_SOURCES: readonly AbilitySourceHook[] = [
     {
@@ -15,7 +15,7 @@ export const ARTIFACTSETS_ABILITY_SOURCES: readonly AbilitySourceHook[] = [
                         name: s.name,
                         icon: s.icon ?? null,
                     },
-                    artifactSetAbilities(s)
+                    ownerAbilities(s)
                 )
             ),
     },

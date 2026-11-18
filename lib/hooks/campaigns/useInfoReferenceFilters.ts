@@ -4,6 +4,7 @@ import { useDeferredValue, useMemo, useState } from 'react';
 
 import type { Translator } from '@/lib/i18n/translator';
 import { useTranslator } from '@/lib/i18n/use-translator';
+import { ITEM_SET_KEY } from '@/lib/utils/artifacts/item-set-key';
 import {
     artifactSearchText,
     classSearchText,
@@ -28,7 +29,7 @@ interface FilterValues {
     spellType: string | null;
     artifactRarity: string | null;
     artifactSlot: string | null;
-    artifactSet: string | null;
+    itemSet: string | null;
 }
 
 const NO_FILTERS: FilterValues = {
@@ -38,7 +39,7 @@ const NO_FILTERS: FilterValues = {
     spellType: null,
     artifactRarity: null,
     artifactSlot: null,
-    artifactSet: null,
+    itemSet: null,
 };
 
 function uniqueSorted<T, V extends string | number>(
@@ -109,7 +110,7 @@ export function useInfoReferenceFilters(
                 value,
                 label,
             })).sort((a, b) => a.label.localeCompare(b.label)),
-            artifactSet: uniqueSorted(artifacts, (a) => a.setName),
+            itemSet: uniqueSorted(artifacts, (a) => a.setName),
         };
     }, [skills, spells, artifacts, t]);
 
@@ -175,7 +176,7 @@ export function useInfoReferenceFilters(
                     (!values.artifactRarity ||
                         a.rarity === values.artifactRarity) &&
                     (!values.artifactSlot || a.slot === values.artifactSlot) &&
-                    (!values.artifactSet || a.setName === values.artifactSet)
+                    (!values.itemSet || a.setName === values.itemSet)
             ),
         [
             artifacts,
@@ -183,7 +184,7 @@ export function useInfoReferenceFilters(
             deferredSearch,
             values.artifactRarity,
             values.artifactSlot,
-            values.artifactSet,
+            values.itemSet,
         ]
     );
 
@@ -255,9 +256,9 @@ export function useInfoReferenceFilters(
                 options: options.artifactRarity,
             },
             slot: { ...field('artifactSlot'), options: options.artifactSlot },
-            artifactSet: {
-                ...field('artifactSet'),
-                options: options.artifactSet,
+            [ITEM_SET_KEY]: {
+                ...field('itemSet'),
+                options: options.itemSet,
             },
         },
     };

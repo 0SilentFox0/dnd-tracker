@@ -1,12 +1,4 @@
 {
-  "components/campaigns/info/ReferenceSearchBar.tsx": 2,
-  "components/campaigns/info/ReferenceSectionAccordion.tsx": 1,
-  "lib/hooks/campaigns/useInfoReferenceFilters.ts": 1,
-  "lib/utils/abilities/read.ts": 1,
   "scripts/db/lib/backfill-pending-morale-plan.ts": 1,
-  "scripts/db/lib/backfill-rule-modules-plan.ts": 5,
-  "scripts/import/legacy-convert/convert-artifact.ts": 1,
-  "scripts/import/legacy-convert/stat-map.ts": 2,
-  "scripts/sim/battle-sweep.ts": 5,
-  "scripts/sim/simulate-battle.ts": 2
+  "scripts/db/lib/backfill-rule-modules-plan.ts": 5
 }

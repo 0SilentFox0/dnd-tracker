@@ -23,6 +23,7 @@ describe('system ui registry', () => {
             dmPages: hommPages,
             fx: hommFx,
             itemGroups: hommArtifactSets,
+            races: hommRaces,
             ...hommRest
         } = systemUiOf('homm');
 
@@ -34,10 +35,13 @@ describe('system ui registry', () => {
             battle: dndBattle,
             dmPages: dndPages,
             fx: dndFx,
+            races: dndRaces,
             ...dndRest
         } = systemUiOf('dnd5e');
 
         expect(hommRest).toEqual(dndRest);
+        expect(hommRaces?.useSkillSummary).toBeDefined();
+        expect(dndRaces?.useSkillSummary).toBeDefined();
         expect(hommArtifactSets).toBeDefined();
         expect(hommFx?.dice).toHaveLength(1);
         expect(dndFx).toBeUndefined();

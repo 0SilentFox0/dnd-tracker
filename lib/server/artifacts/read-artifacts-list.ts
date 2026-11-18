@@ -16,12 +16,19 @@ function itemKindBadge(row: { modifiers?: unknown }) {
 export async function readArtifactsList(campaignId: string) {
     const rows = await prisma.artifact.findMany({
         where: { campaignId },
-        include: { artifactSet: { select: { id: true, name: true } } },
         orderBy: { createdAt: 'desc' },
     });
 
+    const sets = await prisma.artifactSet.findMany({
+        where: { campaignId },
+        select: { id: true, name: true },
+    });
+
+    const setById = new Map(sets.map((set) => [set.id, set]));
+
     return rows.map(({ abilities, ...row }) => ({
         ...row,
+        artifactSet: (row.setId && setById.get(row.setId)) || null,
         ...itemKindBadge(row),
         sheetBonuses: sheetStatBonuses(
             artifactAbilities({ ...row, abilities })

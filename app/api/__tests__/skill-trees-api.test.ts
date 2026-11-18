@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { dispatchedRoute } from './dispatched-route';
 import { getResponseJson } from './helpers';
 
 import { prisma } from '@/lib/db';
@@ -39,9 +40,7 @@ const RAW = buildTreeJson({
 });
 
 const patch = async (treeId: string, skills: unknown) => {
-    const { PATCH } = await import(
-        '@/app/api/campaigns/[id]/skill-trees/[treeId]/route'
-    );
+    const { PATCH } = dispatchedRoute('skill-trees/:treeId');
 
     return PATCH(
         new Request('http://x', {
@@ -276,9 +275,7 @@ describe('PATCH skill tree', () => {
 
 describe('GET skill trees', () => {
     const list = async () => {
-        const { GET } = await import(
-            '@/app/api/campaigns/[id]/skill-trees/route'
-        );
+        const { GET } = dispatchedRoute('skill-trees');
 
         return GET(new Request('http://x'), {
             params: Promise.resolve({ id: 'camp' }),

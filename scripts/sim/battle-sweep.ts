@@ -145,6 +145,7 @@ import { checkVictoryConditions } from '@/lib/utils/battle/turn/victory';
 import { rollDiceList } from '@/lib/utils/common/dice';
 import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { ruleSystemByKey } from '@/lib/utils/rules/systems';
+import { moduleVocab } from '@/lib/utils/rules/systems/vocab';
 import {
     branchLevelNodeId,
     canLearn,
@@ -706,7 +707,10 @@ const MORALE = {
     access: 'member',
     requireStatus: 'active',
     blockedByMode: true,
-    schema: z.object({ participantId: z.string(), d10Roll: z.number().min(1).max(10) }),
+    schema: z.object({
+        participantId: z.string(),
+        d10Roll: z.number().min(1).max(10),
+    }),
     respond: 'wrapped',
     mutate: mutateSystemOperation('morale-check', 'morale disabled'),
 };
@@ -1228,7 +1232,23 @@ const BAKED = new Set([
     'speed',
 ]);
 
-const TARGET_STATS = new Set(['morale', 'minTargets', 'maxTargets']);
+const CAPPED_STATS = new Map(
+    moduleVocab('abilityStats')
+        .filter((s) => s.capped)
+        .map((s) => [s.id, s.defaultValue ?? 1])
+);
+
+const AREA_STATS = new Set(
+    moduleVocab('abilityStats')
+        .filter((s) => s.areaOk)
+        .map((s) => s.id)
+);
+
+const TARGET_STATS = new Set([
+    ...CAPPED_STATS.keys(),
+    'minTargets',
+    'maxTargets',
+]);
 
 function expectedBakedFlat(x: any, stat: string): number {
     let sum = 0;
@@ -1306,11 +1326,12 @@ function passiveApplies(p: any, a: any): true | 'baked' | string {
             const cap = subject.combatStats.moraleCap ?? 3;
 
             const raw =
-                (hero[e.stat] ?? (e.stat === 'morale' ? 0 : 1)) +
+                (hero[e.stat] ?? CAPPED_STATS.get(e.stat) ?? 1) +
                 expectedBakedFlat(subject, e.stat);
 
-            const expected =
-                e.stat === 'morale' ? Math.max(-cap, Math.min(cap, raw)) : raw;
+            const expected = CAPPED_STATS.has(e.stat)
+                ? Math.max(-cap, Math.min(cap, raw))
+                : raw;
 
             if (subject.combatStats[e.stat] !== expected)
                 return `${e.stat}: ${subject.combatStats[e.stat]} ≠ очікувано ${expected} (${subject.basicInfo.name}, база ${hero[e.stat] ?? '?'})`;
@@ -2035,7 +2056,13 @@ function coverageReport(): string[] {
         'Не спрацювали тригерні вміння (часто шанс або умова) та пасивки без запису в модифікаторах:',
     ];
 
-    for (const src of ['skill', 'race', 'artifact', 'artifactSet', 'unit']) {
+    for (const src of [
+        'skill',
+        'race',
+        'artifact',
+        ...moduleVocab('abilitySources').map((s) => s.id),
+        'unit',
+    ]) {
         const list = [...coverage.values()].filter((c) => c.source === src);
 
         const counts = list.reduce(
@@ -4108,7 +4135,7 @@ async function auraZoneCheck() {
         (byId(id).battleData.activeEffects ?? []).some(
             (e: any) =>
                 e.zone?.ownerId === nm.basicInfo.id &&
-                e.abilityEffects?.some((x: any) => x.stat === 'morale')
+                e.abilityEffects?.some((x: any) => AREA_STATS.has(x.stat))
         );
 
     const outside = heroes.slice(2).every((h) => !inZone(h.basicInfo.id));

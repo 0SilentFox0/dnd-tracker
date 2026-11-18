@@ -56,7 +56,6 @@ model Campaign {
   credits              String?
   locale               String?
   templateKey          String?
-  artifactSets         ArtifactSet[]
   artifacts            Artifact[]
   battles              BattleScene[]
   battleMaps           BattleMap[]
@@ -70,7 +69,6 @@ model Campaign {
   careers              Career[]
   feats                Feat[]
   scenarioPages        ScenarioPage[]
-  skillTrees           SkillTree[]
   skills               Skill[]
   spellGroups          SpellGroup[]
   spells               Spell[]
@@ -354,7 +352,6 @@ model Artifact {
   createdAt   DateTime     @default(now())
   abilities   Json         @default("[]")
   campaign    Campaign     @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  artifactSet ArtifactSet? @relation(fields: [setId], references: [id])
   sourceId    String?
   sourceHash  String?
   slug        String?

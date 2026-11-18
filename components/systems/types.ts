@@ -292,6 +292,13 @@ export interface SystemUi {
         AttackOption: ComponentType<RerollTokenControlProps>;
         SheetOption: ComponentType<RerollTokenControlProps>;
     };
+    /** Skill-tree contribution to a race card; the core calls it unconditionally (null object when absent) */
+    races?: {
+        useSkillSummary(
+            campaignId: string,
+            raceName: string
+        ): { treeSkillCount: number | null };
+    };
     EquippedSummary?: ComponentType<EquippedSummaryProps>;
     DowntimeTab?: ComponentType;
     DowntimePeriodPanel?: ComponentType<DowntimePeriodPanelProps>;

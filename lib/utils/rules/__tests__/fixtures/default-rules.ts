@@ -8,10 +8,18 @@ const fullDefaults: Record<string, unknown> = {
 
 delete fullDefaults.advancement;
 
-/** `advancement` is owned by a system section and absent here; sections of modules come from the registry */
+const { opportunityAttacks, retaliation, ...actions } = (
+    fullDefaults.actions as Record<string, unknown>
+);
+
+void opportunityAttacks;
+void retaliation;
+
+/** Module toggles stay absent (read as `!== false`): the fixture equals the pre-module defaults, see default-rules.frozen.json */
 export const DEFAULT_RULES = {
     ...SECTION_DEFAULTS,
     ...fullDefaults,
+    actions,
     tables: {},
     system: { key: 'homm' },
 } as Ruleset;

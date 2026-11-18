@@ -9,20 +9,35 @@ import {
 } from '@/lib/utils/abilities/schema';
 import { readChoices } from '@/lib/utils/characters/choices/read';
 import { fromJson, toInputJson } from '@/lib/utils/common/json';
+import {
+    moduleVocab,
+    type ModuleVocabId,
+} from '@/lib/utils/rules/systems/vocab';
 import type { Choice } from '@/types/choices';
 import type { ClassFeature } from '@/types/classes';
 
-export const OwnerKind = {
+const CORE_OWNER_KINDS = {
     SKILL: 'skill',
     RACE: 'race',
     CLASS: 'class',
     ARTIFACT: 'artifact',
-    ARTIFACT_SET: 'artifactSet',
     UNIT: 'unit',
     FEAT: 'feat',
 } as const;
 
-export type OwnerKind = (typeof OwnerKind)[keyof typeof OwnerKind];
+type ModuleOwnerKind = ModuleVocabId<'abilitySources'>;
+
+export type OwnerKind =
+    | (typeof CORE_OWNER_KINDS)[keyof typeof CORE_OWNER_KINDS]
+    | ModuleOwnerKind;
+
+/** Core kinds by name plus every module's ability source by its own id (e.g. `OwnerKind.artifactSet`) */
+export const OwnerKind = {
+    ...CORE_OWNER_KINDS,
+    ...(Object.fromEntries(
+        moduleVocab('abilitySources').map((e) => [e.id, e.id])
+    ) as { readonly [K in ModuleOwnerKind]: K }),
+} as const;
 
 type OwnerRow = { id: string; abilities?: unknown };
 
@@ -57,7 +72,7 @@ export const raceAbilities = (row: OwnerRow) => read(row);
 
 export const artifactAbilities = (row: OwnerRow) => read(row);
 
-export const artifactSetAbilities = (row: OwnerRow) => read(row);
+export const ownerAbilities = (row: OwnerRow) => read(row);
 
 export const unitAbilities = (row: OwnerRow) => read(row);
 

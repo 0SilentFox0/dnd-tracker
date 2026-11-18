@@ -31,7 +31,7 @@ exports[`resolveRetaliation якір (байт-у-байт) > rng 0.05 1`] = `
           "checkRoll": 2,
           "target": "a",
           "title": {
-            "message": "battleLog.offTurn.titles.retaliation",
+            "message": "retaliationLog.title",
           },
         },
       },
@@ -161,7 +161,7 @@ exports[`resolveRetaliation якір (байт-у-байт) > rng 0.85 1`] = `
           "damage": 7,
           "target": "a",
           "title": {
-            "message": "battleLog.offTurn.titles.retaliation",
+            "message": "retaliationLog.title",
           },
         },
       },
@@ -322,7 +322,7 @@ exports[`resolveRetaliation якір (байт-у-байт) > rng 0.99 1`] = `
           "damage": 4,
           "target": "a",
           "title": {
-            "message": "battleLog.offTurn.titles.retaliation",
+            "message": "retaliationLog.title",
           },
         },
       },

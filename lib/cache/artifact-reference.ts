@@ -10,8 +10,9 @@ import type {
     ArtifactSetForReference,
 } from '@/types/info-reference';
 
-const SET_SOURCE = moduleVocab('abilitySources').find((e) => e.itemLike)
-    ?.id as OwnerKind | undefined;
+const SET_SOURCE = moduleVocab('abilitySources').find((e) => e.itemLike)?.id as
+    | OwnerKind
+    | undefined;
 
 export interface ArtifactReference {
     artifacts: ArtifactForReference[];
@@ -33,7 +34,7 @@ export async function loadArtifactReference(
                 description: true,
                 abilities: true,
                 modifiers: true,
-                artifactSet: { select: { name: true } },
+                setId: true,
             },
             orderBy: { name: 'asc' },
         }),
@@ -45,7 +46,6 @@ export async function loadArtifactReference(
                 icon: true,
                 description: true,
                 abilities: true,
-                artifacts: { select: { name: true } },
             },
             orderBy: { name: 'asc' },
         }),
@@ -58,6 +58,18 @@ export async function loadArtifactReference(
             },
         }),
     ]);
+
+    const setNameById = new Map(sets.map((s) => [s.id, s.name]));
+
+    const namesBySet = new Map<string, string[]>();
+
+    for (const a of artifacts) {
+        if (a.setId)
+            namesBySet.set(a.setId, [
+                ...(namesBySet.get(a.setId) ?? []),
+                a.name,
+            ]);
+    }
 
     const holderById = new Map<string, string>();
 
@@ -79,7 +91,7 @@ export async function loadArtifactReference(
                 slot: a.slot,
                 description: a.description,
                 effects: abilitySummary('artifact', a),
-                setName: a.artifactSet?.name ?? null,
+                setName: (a.setId && setNameById.get(a.setId)) || null,
                 holderName: gear ? null : (holderById.get(a.id) ?? null),
                 ...(gear && { gear: true as const }),
             };
@@ -90,9 +102,9 @@ export async function loadArtifactReference(
             icon: s.icon,
             description: s.description,
             bonuses: SET_SOURCE ? abilitySummary(SET_SOURCE, s) : [],
-            artifactNames: s.artifacts
-                .map((x) => x.name)
-                .sort((x, y) => x.localeCompare(y)),
+            artifactNames: (namesBySet.get(s.id) ?? []).sort((x, y) =>
+                x.localeCompare(y)
+            ),
         })),
     };
 }
