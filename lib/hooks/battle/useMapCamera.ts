@@ -31,6 +31,8 @@ export interface MapCameraOptions {
     frame: Frame | null;
     containerRef: RefObject<HTMLDivElement | null>;
     panLocked: boolean;
+    /** wheel scrolls the page container until zoomed; zoom needs Ctrl/Cmd */
+    wheelScrolls?: boolean;
     follow: {
         currentId: string | null;
         target: CameraTarget | null;
@@ -48,6 +50,7 @@ export function useMapCamera({
     frame,
     containerRef,
     panLocked,
+    wheelScrolls = false,
     follow,
 }: MapCameraOptions) {
     const [cameraState, setCameraState] = useState(IDENTITY);
@@ -153,6 +156,9 @@ export function useMapCamera({
 
         if (!enabled || !activeFrame) return;
 
+        if (wheelScrolls && cameraRef.current.zoom === 1 && !e.ctrlKey && !e.metaKey)
+            return;
+
         e.preventDefault();
         cancelAnimation();
         updateCamera(
@@ -164,7 +170,7 @@ export function useMapCamera({
             )
         );
         markMoved();
-    }, [cancelAnimation, enabled, markMoved, updateCamera]);
+    }, [cancelAnimation, enabled, markMoved, updateCamera, wheelScrolls]);
 
     const gestures = usePanPinch({
         enabled,
