@@ -117,7 +117,10 @@ export async function patchTileChunks(
 
         if (patch.data !== null) {
             try {
-                validateTileIdsForLayer(decodeTileChunk(patch.data), patch.layer);
+                validateTileIdsForLayer(
+                    decodeTileChunk(patch.data),
+                    patch.layer
+                );
             } catch {
                 throw new ContentError('errors.invalidBody', 400);
             }
@@ -181,7 +184,10 @@ export async function patchTileChunks(
 
             const tileLayers = nextTiles[coord];
 
-            if (!tileLayers && (!existing || existing.data === EMPTY_EDGE_CHUNK)) {
+            if (
+                !tileLayers &&
+                (!existing || existing.data === EMPTY_EDGE_CHUNK)
+            ) {
                 await tx.battleMapChunk.deleteMany({
                     where: { mapId, cx, cy },
                 });

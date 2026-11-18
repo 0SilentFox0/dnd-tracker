@@ -66,6 +66,7 @@ const db = vi.hoisted(() => {
                     maps.get(where.id) ?? null
             ),
             findMany: vi.fn(async () => [...maps.values()]),
+            count: vi.fn(async () => maps.size),
             findUniqueOrThrow: vi.fn(
                 async ({ where }: { where: { id: string } }) => {
                     const row = maps.get(where.id);
@@ -98,7 +99,7 @@ const db = vi.hoisted(() => {
 
                     const increment =
                         typeof mapVersion === 'object'
-                            ? mapVersion.increment ?? 0
+                            ? (mapVersion.increment ?? 0)
                             : 0;
 
                     Object.assign(row, rest, {
@@ -230,6 +231,7 @@ import {
     withStoredBackground,
 } from '../library-service';
 
+import { MAP_LIMITS } from '@/lib/constants/map-limits';
 import type { BattleMapInput } from '@/lib/schemas/battle-maps';
 
 const input = (over: Partial<BattleMapInput> = {}): BattleMapInput => ({
@@ -239,6 +241,13 @@ const input = (over: Partial<BattleMapInput> = {}): BattleMapInput => ({
     bars: ['1:1:e'],
     ...over,
 });
+
+const save = async (id: string, data: BattleMapInput) =>
+    saveMap(id, {
+        ...data,
+        expectedVersion:
+            data.expectedVersion ?? (await getMapMeta(id))?.version ?? 1,
+    });
 
 beforeEach(() => {
     db.reset();
@@ -264,7 +273,7 @@ describe('battle map library service', () => {
     it('save bumps the version and replaces edges; an unpinned old version is pruned', async () => {
         const { id } = await createMap('c1', input());
 
-        const saved = await saveMap(id, input({ walls: ['2:2:e'], bars: [] }));
+        const saved = await save(id, input({ walls: ['2:2:e'], bars: [] }));
 
         expect(saved.version).toBe(2);
         expect((await getMap(id))?.walls).toEqual(['2:2:e']);
@@ -280,16 +289,19 @@ describe('battle map library service', () => {
 
         row.tileLayers = { ground: 'r1:tiles' };
 
-        const saved = await saveMap(id, input({ walls: ['2:2:e'], bars: [] }));
+        const saved = await save(id, input({ walls: ['2:2:e'], bars: [] }));
 
         const persisted = db.chunks.find((chunk) => chunk.mapId === id);
 
         const version = db.versions.find(
-            (snapshot) => snapshot.mapId === id && snapshot.version === saved.version
+            (snapshot) =>
+                snapshot.mapId === id && snapshot.version === saved.version
         );
 
         expect(persisted?.tileLayers).toEqual({ ground: 'r1:tiles' });
-        expect((version?.payload as { tileLayers: unknown }).tileLayers).toEqual({
+        expect(
+            (version?.payload as { tileLayers: unknown }).tileLayers
+        ).toEqual({
             '0:0': { ground: 'r1:tiles' },
         });
     });
@@ -297,22 +309,41 @@ describe('battle map library service', () => {
     it('save with a stale expectedVersion is a 409 conflict and writes nothing', async () => {
         const { id } = await createMap('c1', input());
 
-        await saveMap(id, input({ walls: ['2:2:e'], expectedVersion: 1 }));
+        await save(id, input({ walls: ['2:2:e'], expectedVersion: 1 }));
 
         await expect(
-            saveMap(id, input({ walls: ['3:3:e'], expectedVersion: 1 }))
+            save(id, input({ walls: ['3:3:e'], expectedVersion: 1 }))
         ).rejects.toMatchObject({
             status: 409,
             message: 'errors.battleMapConflict',
         });
         expect((await getMap(id))?.walls).toEqual(['2:2:e']);
 
-        const ok = await saveMap(
+        const ok = await save(
             id,
             input({ walls: ['3:3:e'], expectedVersion: 2 })
         );
 
         expect(ok.version).toBe(3);
+    });
+
+    it('save without a matching expectedVersion is a conflict', async () => {
+        const { id } = await createMap('c1', input());
+
+        await expect(
+            saveMap(id, { ...input(), expectedVersion: 7 })
+        ).rejects.toMatchObject({ status: 409 });
+    });
+
+    it('create beyond the per-campaign quota is a 409 with the limit', async () => {
+        db.api.battleMap.count.mockResolvedValueOnce(MAP_LIMITS.maxPerCampaign);
+
+        await expect(createMap('c1', input())).rejects.toMatchObject({
+            status: 409,
+            message: 'errors.battleMapLimit',
+            params: { max: MAP_LIMITS.maxPerCampaign },
+        });
+        expect(db.api.battleMap.create).not.toHaveBeenCalled();
     });
 
     it('a concurrent save between read and write (count 0) is a conflict', async () => {
@@ -321,14 +352,14 @@ describe('battle map library service', () => {
         db.api.battleMap.updateMany.mockResolvedValueOnce({ count: 0 });
 
         await expect(
-            saveMap(id, input({ walls: ['2:2:e'] }))
+            save(id, input({ walls: ['2:2:e'] }))
         ).rejects.toMatchObject({ status: 409 });
     });
 
     it('a rename-only save keeps the version and the snapshot', async () => {
         const { id } = await createMap('c1', input());
 
-        const saved = await saveMap(id, input({ name: 'Renamed' }));
+        const saved = await save(id, input({ name: 'Renamed' }));
 
         expect(saved.version).toBe(1);
         expect(saved.name).toBe('Renamed');
@@ -340,7 +371,7 @@ describe('battle map library service', () => {
 
         const stale = { ...(db.maps.get(id) as Record<string, unknown>) };
 
-        await saveMap(id, input({ walls: ['2:2:e'], bars: [] }));
+        await save(id, input({ walls: ['2:2:e'], bars: [] }));
 
         db.api.battleMap.findUnique.mockResolvedValueOnce(stale);
 
@@ -357,8 +388,8 @@ describe('battle map library service', () => {
 
         db.scenes.push({ mapId: id, mapVersion: 1 });
 
-        await saveMap(id, input({ walls: ['2:2:e'] }));
-        await saveMap(id, input({ walls: ['3:3:e'] }));
+        await save(id, input({ walls: ['2:2:e'] }));
+        await save(id, input({ walls: ['3:3:e'] }));
 
         expect(db.versions.map((v) => v.version).sort()).toEqual([1, 3]);
 
@@ -404,7 +435,7 @@ describe('battle map library service', () => {
     it('getMapMeta reads ownership and version without geometry', async () => {
         const { id } = await createMap('c1', input());
 
-        await saveMap(id, input({ walls: ['2:2:e'] }));
+        await save(id, input({ walls: ['2:2:e'] }));
 
         db.api.battleMapChunk.findMany.mockClear();
 
@@ -423,7 +454,7 @@ describe('battle map library service', () => {
 
         db.scenes.push({ mapId: id, mapVersion: 1 });
 
-        await saveMap(id, input({ walls: ['2:2:e'] }));
+        await save(id, input({ walls: ['2:2:e'] }));
 
         db.api.battleMap.findUnique.mockClear();
 
@@ -481,7 +512,9 @@ describe('battle map library service', () => {
         const rows = db.chunks.filter((chunk) => chunk.mapId === copy.id);
 
         expect(
-            Object.fromEntries(rows.map((c) => [`${c.cx}:${c.cy}`, c.tileLayers]))
+            Object.fromEntries(
+                rows.map((c) => [`${c.cx}:${c.cy}`, c.tileLayers])
+            )
         ).toMatchObject({
             '0:0': { ground: 'r1:tiles' },
             '1:1': { objects: 'r1:obj' },
@@ -489,7 +522,9 @@ describe('battle map library service', () => {
 
         const version = db.versions.find((v) => v.mapId === copy.id);
 
-        expect((version?.payload as { tileLayers: unknown }).tileLayers).toEqual({
+        expect(
+            (version?.payload as { tileLayers: unknown }).tileLayers
+        ).toEqual({
             '0:0': { ground: 'r1:tiles' },
             '1:1': { objects: 'r1:obj' },
         });
@@ -522,6 +557,6 @@ describe('battle map library service', () => {
             stored.map.background
         );
 
-        expect((await saveMap(brief.id, again)).version).toBe(1);
+        expect((await save(brief.id, again)).version).toBe(1);
     });
 });

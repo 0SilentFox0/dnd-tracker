@@ -6,6 +6,7 @@ import { MAP_LIMITS } from '@/lib/constants/map-limits';
 import { battleMapTilePatchSchema } from '@/lib/schemas/battle-maps';
 import { campaignMapMaxSide } from '@/lib/server/battle-maps/campaign-limits';
 import { getMapMeta } from '@/lib/server/battle-maps/library-service';
+import { requireMapReadAccess } from '@/lib/server/battle-maps/player-access';
 import {
     getTileChunks,
     patchTileChunks,
@@ -30,6 +31,10 @@ export async function GET(req: Request, { params }: Ctx) {
     const meta = await loadOwned(getMapMeta(mapId), id);
 
     if (meta instanceof NextResponse) return meta;
+
+    const denied = await requireMapReadAccess(id, mapId, access.isDM);
+
+    if (denied) return denied;
 
     const rawVersion = new URL(req.url).searchParams.get('version');
 
@@ -77,6 +82,9 @@ export async function PUT(req: Request, { params }: Ctx) {
 
         return privateJson({ version });
     } catch (error) {
-        return handleApiError(error, { action: 'battle map tile patch', mapId });
+        return handleApiError(error, {
+            action: 'battle map tile patch',
+            mapId,
+        });
     }
 }

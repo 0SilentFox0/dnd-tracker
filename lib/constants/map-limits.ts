@@ -16,6 +16,8 @@ export const MAP_LIMITS = {
     inlineMaxEdges: 7200,
     libraryMaxEdges: 80000,
     chunk: 16,
+    maxPerCampaign: 100,
+    createRate: { limit: 20, windowSeconds: 60 },
     maxTerrainCells: 3600,
     dmMoveCap: 60,
     doorsMax: 500,
