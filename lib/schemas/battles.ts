@@ -26,7 +26,7 @@ import { ZoneTriggerSchema } from '@/lib/utils/spells/model/schema';
 const MAP_BACKGROUND_PATTERN =
     /^(https:\/\/\S+|data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+|\/battle-maps\/[\w.-]+\.(webp|jpg|png))$/;
 
-/** castId = `<caster>:<spell>@<round>#<seq>` з uuid-id, зона додає `@<round>` або `#<i>`; id призваних — `inline:<castId>:<n>` */
+/** castId = `<caster>:<spell>@<round>#<seq>` with uuid ids, a zone appends `@<round>` or `#<i>`; summoned ids are `inline:<castId>:<n>`. */
 const SPELL_ID_MAX = 200;
 
 export const battleVersionBodySchema = z.object({
@@ -417,20 +417,20 @@ const attackBodyShape = {
     d20Roll: z.number().int().min(1).max(100).optional(),
     attackRoll: z.number().int().min(1).max(100).optional(),
     attackRolls: z.array(z.number().int().min(1).max(100)).optional(),
-    /** сервер кидає d20/d100 сам; кидки клієнта не потрібні й ігноруються */
+    // the server rolls d20/d100 itself; client rolls are ignored
     serverRoll: z.boolean().optional(),
-    /** другий d20 на ціль у порядку attackRolls; сервер сам вирішує перевагу/недолік */
+    // second d20 per target in attackRolls order; the server decides advantage/disadvantage
     secondRolls: z.array(z.number().int().min(1).max(20).nullable()).optional(),
     advantageRoll: z.number().int().min(1).max(20).optional(),
     disadvantageRoll: z.number().int().min(1).max(20).optional(),
-    /** вибір гравця; сервер застосовує, лише коли навички не задають режим */
+    // player choice; applied by the server only when skills set no mode
     rollMode: z.enum(['normal', 'advantage', 'disadvantage']).optional(),
     damageRolls: z.array(z.number()).default([]),
     offHand: z.boolean().optional(),
     useInspiration: z.boolean().optional(),
     system: systemInputSchema.optional(),
     secondRoll: z.number().int().min(1).max(100).optional(),
-    /** Підступний удар (Rogue): ефекти замість кубиків Прихованої атаки */
+    // Cunning Strike (Rogue): effects instead of Sneak Attack dice
     cunningStrike: z
         .array(z.enum(STRIKE_RIDER_EFFECTS))
         .min(1)
@@ -486,7 +486,7 @@ export const mapTerrainSchema = z.object({
         .array(z.string().regex(/^\d+:\d+$/))
         .min(1)
         .max(400),
-    /** з terrain: null — стерти цілі зони заклинань, до яких належать клітинки */
+    // terrain: null erases the target spell zones that own the cells
     eraseZone: z.literal(true).optional(),
     terrain: z
         .object({
@@ -577,7 +577,6 @@ const castSpellShape = {
     grantKey: z.string().min(1).max(300).optional(),
     castLevel: z.number().int().min(0).max(9).optional(),
     targetIds: z.array(z.string()).default([]),
-    /** точка шаблону на карті */
     targetCell: mapCellSchema.optional(),
     diceRolls: z.array(z.number()).default([]),
     saveRolls: z
