@@ -177,12 +177,7 @@ function queryParams(schema: ZodType | undefined) {
     }));
 }
 
-export function buildOpenApi(): OpenApiDocument {
-    const specs: OpSpec[] = [
-        ...resources.flatMap(resourceSpecs),
-        ...operations,
-    ];
-
+function schemaEntries() {
     const entries: Array<readonly [ZodType, string]> = [];
 
     for (const r of resources) {
@@ -201,18 +196,15 @@ export function buildOpenApi(): OpenApiDocument {
         if (op.body) entries.push([op.body, `${pascal(op.id)}Body`]);
     }
 
-    const idBySchema = new Map<ZodType, string>();
+    return entries;
+}
 
-    for (const [schema, id] of [...sharedSchemas(), ...entries]) {
-        if (!idBySchema.has(schema)) idBySchema.set(schema, id);
-    }
-
-    const paths: OpenApiDocument['paths'] = {};
-
-    for (const spec of specs) {
-        const scope = spec.need.scope;
-
-        const p = `${BASE}${spec.path}`;
+function operationOf(
+    spec: OpSpec,
+    p: string,
+    idBySchema: Map<ZodType, string>
+): OpenApiOperation {
+    const scope = spec.need.scope;
 
         const codes = [
             ...new Set([
@@ -224,7 +216,7 @@ export function buildOpenApi(): OpenApiDocument {
 
         const bodyId = spec.body && idBySchema.get(spec.body);
 
-        const operation: OpenApiOperation = {
+    const operation: OpenApiOperation = {
             operationId: spec.id,
             summary: spec.summary,
             ...(spec.description || spec.need.access === 'dm'
@@ -266,22 +258,13 @@ export function buildOpenApi(): OpenApiDocument {
             },
         };
 
-        const path = (paths[p] ??= {});
+    return operation;
+}
 
-        path.parameters = pathParams(p, spec.pathEnums).filter(
-            (param) =>
-                !('schema' in param && param.schema && 'enum' in param.schema)
-        ) as unknown as OpenApiOperation;
-        path[spec.method.toLowerCase()] = operation;
-    }
-
+function openApiComponents(
+    entries: Array<readonly [ZodType, string]>
+): OpenApiDocument['components'] {
     return {
-        openapi: '3.1.0',
-        info: { title: 'D&D Tracker — Content API', version: '2c' },
-        servers: [{ url: '/' }],
-        security: [{ bearerAuth: [] }],
-        paths,
-        components: {
             responses: {
                 ...Object.fromEntries(
                     Object.values(ERROR_RESPONSES).map(
@@ -352,7 +335,44 @@ export function buildOpenApi(): OpenApiDocument {
                     },
                 },
             },
-        },
+    };
+}
+
+export function buildOpenApi(): OpenApiDocument {
+    const specs: OpSpec[] = [
+        ...resources.flatMap(resourceSpecs),
+        ...operations,
+    ];
+
+    const entries = schemaEntries();
+
+    const idBySchema = new Map<ZodType, string>();
+
+    for (const [schema, id] of [...sharedSchemas(), ...entries]) {
+        if (!idBySchema.has(schema)) idBySchema.set(schema, id);
+    }
+
+    const paths: OpenApiDocument['paths'] = {};
+
+    for (const spec of specs) {
+        const p = `${BASE}${spec.path}`;
+
+        const path = (paths[p] ??= {});
+
+        path.parameters = pathParams(p, spec.pathEnums).filter(
+            (param) =>
+                !('schema' in param && param.schema && 'enum' in param.schema)
+        ) as unknown as OpenApiOperation;
+        path[spec.method.toLowerCase()] = operationOf(spec, p, idBySchema);
+    }
+
+    return {
+        openapi: '3.1.0',
+        info: { title: 'D&D Tracker — Content API', version: '2c' },
+        servers: [{ url: '/' }],
+        security: [{ bearerAuth: [] }],
+        paths,
+        components: openApiComponents(entries),
     };
 }
 
