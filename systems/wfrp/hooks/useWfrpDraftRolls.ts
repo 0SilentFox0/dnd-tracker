@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 
 import type { CareerMode } from './draft-form-helpers';
 
-import type { useRollReveal } from '@/lib/hooks/characters/useRollReveal';
+import type { useRollReveal } from '@/lib/hooks/characters';
 import type { Rng } from '@/lib/utils/common/rng';
 import {
     type CreationRolls,

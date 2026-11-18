@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { cleanIdentity, serverIssueCodes } from './draft-form-helpers';
 
-import { characterKeys } from '@/lib/hooks/characters/keys';
+import { characterKeys } from '@/lib/hooks/characters';
 import {
     createWfrpDraft,
     updateWfrpDraftIdentity,
