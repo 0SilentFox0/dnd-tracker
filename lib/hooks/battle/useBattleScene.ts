@@ -45,7 +45,6 @@ export function useBattleScene(): BattleSceneValue {
     return value;
 }
 
-/** Без тостів, журналу, вибору й стану мутацій: компонент не перемальовується, поки не змінився бій. */
 export function useBattleSceneData(): BattleSceneData {
     const value = useContext(BattleSceneDataContext);
 

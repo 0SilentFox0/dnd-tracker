@@ -11,7 +11,6 @@ const MIN_MS = 220;
 
 const MAX_MS = 1500;
 
-/** Проводить елемент по кадрах маршруту (Web Animations); без маршруту елемент стоїть у своїй позиції. */
 export function useTokenGlide<T extends HTMLElement>(
     frames: readonly GlideFrame[] | null
 ) {

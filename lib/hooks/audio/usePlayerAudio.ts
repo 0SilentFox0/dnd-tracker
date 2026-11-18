@@ -17,7 +17,6 @@ import { useAudioState } from './useAudioState';
 import { type MusicLibrary, useMusicLibrary } from '@/lib/hooks/music';
 import type { BattleAudioState } from '@/types/audio';
 
-/** Лише для ДМ: керування, бібліотека кампанії й посилання на сторінку музики. */
 export interface PlayerAudioDm {
     control: AudioControl;
     library: MusicLibrary;
@@ -27,7 +26,6 @@ export interface PlayerAudioDm {
 export interface PlayerAudioValue {
     state: BattleAudioState | null;
     clockOffsetMs: number;
-    /** failed — файл треку не завантажився */
     sound: { unlocked: boolean; unlock(): void; failed: boolean };
     prefs: AudioPrefs;
     dm: PlayerAudioDm | null;
@@ -35,14 +33,13 @@ export interface PlayerAudioValue {
 
 export const AudioPlayerContext = createContext<PlayerAudioValue | null>(null);
 
-/** audioRef — єдиний <audio> сторінки в AudioPlayerProvider: iOS розблоковує саме елемент, тож він не мусить перемонтовуватися разом із панеллю. */
 export function usePlayerAudioValue(host: AudioHost): {
     value: PlayerAudioValue;
     audioRef: (el: HTMLAudioElement | null) => void;
 } {
     const { campaignId, isDM, silent = false } = host;
 
-    // браузери пускають звук лише після жесту: один клік на кожне відкриття сторінки
+    // browsers allow sound only after a gesture: one click per page open
     const [unlocked, setUnlocked] = useState(false);
 
     const { audio, clockOffsetMs } = useAudioState({ host, unlocked });

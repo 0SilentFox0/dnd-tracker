@@ -156,7 +156,7 @@ export function usePlayerTurn(
             skipTurn: () => {
                 const live = sceneRef.current;
 
-                // версія фіксується одразу: якщо DM встигне передати хід сам, таймер отримає 409, а не пропустить наступного
+                // the version is pinned now: if the DM passes the turn first, the timer gets 409 instead of skipping the next player
                 const expectedVersion = live.readBattle()?.version;
 
                 skipTimer.current = setTimeout(

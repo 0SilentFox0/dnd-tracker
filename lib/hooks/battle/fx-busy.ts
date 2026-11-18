@@ -19,7 +19,6 @@ const subscribe = (l: () => void) => {
     return () => listeners.delete(l);
 };
 
-/** Черга FX ще грає (кубики чи анімації дій): екрани, що закривають поле, чекають, щоб не сховати останній кидок. */
 export const useFxBusy = () =>
     useSyncExternalStore(
         subscribe,

@@ -29,7 +29,6 @@ interface MapCellActionsInput {
     };
 }
 
-/** Стабільні обробники карти: читають останній стан через ref, тож не ламають memo токенів. */
 export function useMapCellActions({
     scene,
     handle,

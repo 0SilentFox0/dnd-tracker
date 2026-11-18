@@ -168,7 +168,7 @@ export function useDeckEditor(campaignId: string, deck: SlideDeck) {
             return false;
         }
 
-        // база — свіжа версія: якщо повтор впаде не через 409, наступне збереження не впреться в конфлікт знову
+        // base is the fresh version: if the retry fails for a non-409 reason, the next save does not hit a conflict again
         setSaved({ draft: draftOf(fresh), updatedAt: fresh.updatedAt });
         await mutation.mutateAsync({
             sent,

@@ -12,9 +12,6 @@ interface UseSpellSelectionProps {
     onSelectionChange: (spellIds: string[]) => void;
 }
 
-/**
- * Хук для управління вибором заклинань
- */
 export function useSpellSelection({
     spells,
     selectedSpellIds,

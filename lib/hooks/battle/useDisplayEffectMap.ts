@@ -9,7 +9,6 @@ import {
 import type { Ruleset } from '@/lib/utils/rules';
 import type { BattleParticipant } from '@/types/battle';
 
-/** Раз на зміну черги, не на рядок; незмінні списки ефектів лишаються тими самими масивами. */
 export function useDisplayEffectMap(
     order: BattleParticipant[],
     rules?: Ruleset

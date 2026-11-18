@@ -21,7 +21,6 @@ const compositionKey = (order: BattleParticipant[]) =>
         )
         .join('\u0002');
 
-/** Та сама мапа, поки не змінився склад (id/ім'я/аватар) — дельти HP не перемальовують портрети ефектів. */
 export function useParticipantFacesValue(
     order: BattleParticipant[]
 ): Map<string, ParticipantFace> {

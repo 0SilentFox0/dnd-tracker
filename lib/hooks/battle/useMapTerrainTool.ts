@@ -36,14 +36,11 @@ export interface MapTerrainTool {
     brush: TerrainBrushSettings;
     setBrush(patch: Partial<TerrainBrushSettings>): void;
     commit(cells: GridPoint[]): void;
-    /** клітинки штрихів, що чекають на відповідь сервера */
     pending: ReadonlySet<string>;
-    /** штрих по ребрах (стіни й ґрати); null, коли активний пензель клітинок */
     edges: EdgeEditing | null;
 }
 
 export interface StateEdgeSource {
-    /** стіни й ґрати ефективної карти */
     present: ReadonlySet<string>;
     removed: ReadonlySet<string>;
     mutate: (data: MapEdgeRemoveData) => Promise<unknown>;
@@ -118,7 +115,7 @@ export function useMapTerrainTool({
         setPending(all.length > 0 ? new Set(all) : EMPTY);
     }, []);
 
-    // один запит за раз: паралельні штрихи читали б ту саму версію бою й ловили 409
+    // one request at a time: parallel strokes would read the same battle version and hit 409
     const drain = useCallback(async () => {
         if (inFlight.current) return;
 
@@ -136,7 +133,7 @@ export function useMapTerrainTool({
                 if (res?.skipped?.length)
                     latest.current.onSkipped?.(res.skipped.length);
             } catch {
-                // помилку вже показав useBattleAction
+                // useBattleAction already showed the error
             }
         }
 
@@ -216,7 +213,7 @@ export function useMapTerrainTool({
             shown: { add: string[]; remove: string[] },
             run: () => Promise<unknown>
         ) => {
-            // версія бою одна: паралельні штрихи ловили б 409
+            // a single battle version: parallel strokes would hit 409
             setInFlightEdges((list) => [...list, shown]);
             edgeChain.current = edgeChain.current
                 .then(run)

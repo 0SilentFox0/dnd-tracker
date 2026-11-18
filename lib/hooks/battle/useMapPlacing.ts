@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
-/** Розстановка DM: режим «розставляти», обраний для розстановки токен і вихід по Esc. */
 export function useMapPlacing(isDM: boolean, modeToolActive: boolean) {
     const [placingOn, setPlacingOn] = useState(false);
 

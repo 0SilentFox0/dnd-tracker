@@ -29,7 +29,6 @@ function recentActions(log: BattleAction[]): BattleAction[] {
         .slice(-MAX_FX_BATCH);
 }
 
-/** Рядки отримують вплив пропом, щоб не підписуватись на контекст сцени; об'єкти стабільні між рендерами. */
 export function useFxImpacts(
     fx?: SystemFx
 ): (participantId: string) => FxImpact | null {
@@ -60,7 +59,7 @@ export function useFxImpacts(
             };
         });
 
-        // запобіжник покриває все, що стоїть у черзі від цієї дії до кінця вікна (кубики, анімації, кубики системи)
+        // the safety timer covers everything queued from this action to the end of the window (dice, animations, system dice)
         const waitFrom = (from: number) => {
             const rest = actions.slice(from);
 
@@ -99,7 +98,7 @@ export function useFxImpacts(
 
                 const delta = projected.has(id) ? deltaOf(action, id) : 0;
 
-                // прихована вкладка = FX-черга неактивна: показ без очікування сигналу
+                // hidden tab = FX queue inactive: show without waiting for the signal
                 if (impact)
                     result.set(id, {
                         ...impact,

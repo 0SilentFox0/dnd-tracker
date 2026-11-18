@@ -23,7 +23,6 @@ import {
     type SystemFx,
 } from '@/lib/utils/battle/fx';
 
-/** Прихована вкладка = вимкнені FX: rAF там стоїть, і все накопичене програлося б разом після повернення. */
 export function useBattleFxQueue(enabled: boolean, fx?: SystemFx) {
     const { fxLog: log } = useModeView();
 
@@ -50,7 +49,7 @@ export function useBattleFxQueue(enabled: boolean, fx?: SystemFx) {
     )
         setState(advanceFxQueue(state, { log, dice }, active));
 
-    // дія, якої в черзі немає (вже зіграна, пропущена, обрізана, до відкриття сторінки, FX вимкнено), не тримає кадр влучання
+    // an action absent from the queue (already played, skipped, trimmed, before page open, FX off) must not hold the hit frame
     useEffect(() => {
         const queued = new Set(state.queue.map((s) => s.actionId));
 
@@ -60,7 +59,7 @@ export function useBattleFxQueue(enabled: boolean, fx?: SystemFx) {
 
     const busy = active && state.queue.length > 0;
 
-    // до відмальовування: екран підсумку в тому ж кадрі ще не встигає показатися поверх кидка
+    // before paint: the result screen must not appear over the roll in the same frame
     useLayoutEffect(() => setFxBusy(busy), [busy]);
 
     useEffect(() => {

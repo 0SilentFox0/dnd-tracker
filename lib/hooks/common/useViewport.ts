@@ -22,9 +22,7 @@ const WHEEL_STEP = 1.1;
 export { DRAG_THRESHOLD };
 
 export interface ViewportOptions {
-    /** один палець не тягне карту (малювання місцевості), щипок масштабує як завжди */
     panLocked?: boolean;
-    /** контейнер карти прокручується: без зуму колесо гортає його, а масштабує лише з Ctrl/⌘ */
     wheelScrolls?: boolean;
     enabled?: boolean;
     containerRef?: RefObject<HTMLDivElement | null>;

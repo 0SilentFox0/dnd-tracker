@@ -24,7 +24,7 @@ export function useMapBackground({
 }) {
     const [kept, setKept] = useState<KeptCalibration | null>(null);
 
-    // масштаб і зсув належать старому фону; той самий розмір нового зображення дає вибір їх зберегти
+    // scale and offset belong to the old background; the same image size in the new one offers keeping them
     const setBackground = useCallback(
         (background: string | null) => {
             const { backgroundCols, backgroundRows, gridOffset } = map;

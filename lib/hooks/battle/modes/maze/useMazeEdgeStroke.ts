@@ -70,7 +70,7 @@ export function useMazeEdgeStroke(
 
                 const walls = wallSet(latest.current.maze);
 
-                // перше ребро задає дію; решта штриха лише доповнює її
+                // the first edge sets the action; the rest of the stroke only extends it
                 const edges = [...s.edges].filter(
                     (e) => walls.has(e) === s.remove
                 );

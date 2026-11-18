@@ -40,7 +40,7 @@ export function usePlaylistView(tracks: CampaignTrack[]): PlaylistView {
 
     const groupNames = useMemo(() => listTrackGroups(tracks), [tracks]);
 
-    // група могла зникнути після перейменування — тоді фільтр по ній не діє
+    // the group may vanish after a rename: then its filter has no effect
     const effective = useMemo(
         () =>
             filter.group && !groupNames.includes(filter.group)
@@ -80,7 +80,7 @@ export function usePlaylistView(tracks: CampaignTrack[]): PlaylistView {
         groups,
         shownCount: shown.length,
         collapsed: {
-            // під час пошуку все розгорнуто, щоб збіги не ховались у згорнутих групах
+            // while searching everything is expanded so matches are not hidden in collapsed groups
             has: (name) => !searching && collapsed.has(name),
             toggle: (name) =>
                 setCollapsed((s) => {

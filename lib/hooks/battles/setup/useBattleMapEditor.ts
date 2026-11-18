@@ -175,7 +175,7 @@ export function useBattleMapEditor(
         (key: MapModeKey, on: boolean) => {
             const mode = modeOf(key);
 
-            // один режим на бій; у режимі core-стіни/ґрати недоступні для редагування, тож зникають разом із ввімкненням
+            // one mode per battle; in a mode, core walls/grates are not editable and disappear when it is enabled
             setMap((m) => {
                 const { walls, bars, doors, ...base } = m;
 

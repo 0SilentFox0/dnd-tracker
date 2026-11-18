@@ -17,7 +17,6 @@ import { isUp } from '@/lib/utils/battle/participant/state';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
 import type { LogLine } from '@/types/text';
 
-/** Цілі, яких атакувальник бачить, і ті з них, кого закриває укриття. */
 export function useAttackTargets(
     attacker: BattleParticipant | null,
     attack: BattleAttack | null,

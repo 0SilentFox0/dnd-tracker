@@ -11,7 +11,6 @@ interface CritPauseOptions {
     onCancelled(): void;
 }
 
-/** Дія стала на паузу, поки ДМ обирає ефект крита: після зняття pending або завершує її за новими записами журналу, або повідомляє про скасування. */
 export function useCritPause({
     waiting,
     actorId,

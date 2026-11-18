@@ -7,7 +7,6 @@ import type {
     ClientBattleDelta,
 } from '@/types/api';
 
-/** Патчить кешовану сцену дельтою; без кешу, refetch-сигнал чи пропуск версії — одна інвалідація. */
 export function writeBattleDelta(
     queryClient: QueryClient,
     key: QueryKey,

@@ -6,7 +6,6 @@ import { prefersReducedMotion } from './media-query';
 
 const DURATION = 320;
 
-/** FLIP для дітей з `data-flip`: зсунуті плавно переїжджають на нове місце, нові — з'являються. */
 export function useFlip(
     container: RefObject<HTMLElement | null>,
     version: unknown

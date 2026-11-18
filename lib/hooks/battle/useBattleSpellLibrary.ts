@@ -16,7 +16,6 @@ import type { BookSpell } from '@/types/spells';
 
 const NO_SPELLS: string[] = [];
 
-/** Відомі закляття одним набором: DM бачить усіх учасників, гравець лише своїх (без витоку ворожих і без рефетчу при кожному призові). */
 export function useBattleSpellIds(): string[] {
     const { battle, viewer, roster } = useBattleScene();
 
@@ -78,7 +77,6 @@ function useGrantLiveness(): (g: SpellGrant) => boolean {
     );
 }
 
-/** Прогріває закляття бою, поки він простоює. */
 export function useSpellBookPrefetch() {
     const { campaignId } = useBattleScene();
 
@@ -87,7 +85,6 @@ export function useSpellBookPrefetch() {
 
 const BONUS_NONE: BookSpell[] = [];
 
-/** Відомі гравцеві заклинання за бонусну дію (з кешу книги, яку прогріває useSpellBookPrefetch). */
 export function useSpellsWithCost(
     hero: BattleParticipant,
     cost: 'bonusAction' | 'reaction'

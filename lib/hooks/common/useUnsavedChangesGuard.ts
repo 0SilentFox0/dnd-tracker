@@ -9,7 +9,6 @@ import { useConfirm } from './useConfirm';
 const MODIFIED = (e: MouseEvent) =>
     e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey;
 
-/** Поки active: закриття вкладки, і клік по внутрішньому посиланню питають підтвердження. */
 export function useUnsavedChangesGuard(active: boolean): void {
     const t = useTranslations('common');
 

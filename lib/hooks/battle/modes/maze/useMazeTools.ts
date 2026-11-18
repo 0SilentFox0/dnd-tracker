@@ -44,7 +44,6 @@ export interface MazeToolsState {
     tool: MazeTool;
     dark: boolean;
     canGenerate: boolean;
-    /** «Згенерувати» чекає на клітинку виходу */
     awaitingExit: boolean;
     heroes: { id: string; name: string }[];
 }
@@ -64,7 +63,6 @@ export interface MazeToolsActions {
 export interface MazeTools {
     state: MazeToolsState;
     actions: MazeToolsActions;
-    /** для карти: null — інструмент не активний */
     editing: MazeEditing | null;
     asHero: MazeAsHero;
     illusion: MazeIllusion;
@@ -77,7 +75,6 @@ export interface MazeIllusion {
     clear(): void;
 }
 
-/** Інструменти ДМ у лабіринті; null — не ДМ або бій без лабіринту. */
 export function useMazeTools(): MazeTools | null {
     const { battle, viewer, actions } = useBattleScene();
 

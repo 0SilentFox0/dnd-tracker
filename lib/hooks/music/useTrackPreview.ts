@@ -16,7 +16,6 @@ import type { CampaignTrack } from '@/types/audio';
 export interface TrackPreview {
     playingId: string | null;
     failedId: string | null;
-    /** частка 0..1; null — тривалість невідома */
     progress: number | null;
     toggle(track: CampaignTrack): void;
     stop(): void;
@@ -36,7 +35,7 @@ function fileSource(
 ): Source {
     const audio = new Audio(url);
 
-    // після stop старе джерело мовчить: перерваний play() відхиляється, коли вже грає наступний трек
+    // after stop the old source stays silent: an interrupted play() is rejected once the next track already plays
     let alive = true;
 
     const ended = () => alive && onEnd();
@@ -66,7 +65,7 @@ function youtubeSource(
     onEnd: () => void,
     onError: () => void
 ): Source {
-    // iframe мусить бути в документі; поза екраном, щоб не ламати розмітку
+    // the iframe must be in the document; kept off-screen so it does not break the layout
     const host = document.createElement('div');
 
     host.style.cssText =

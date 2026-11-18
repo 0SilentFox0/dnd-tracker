@@ -7,7 +7,6 @@ import type { Slide } from '@/types/show';
 
 interface SlideLayer {
     slide: Slide;
-    /** Змінюється з кожним виходом шару нагору, щоб анімація появи починалась заново. */
     key: string;
     role: 'top' | 'under' | 'ending';
 }

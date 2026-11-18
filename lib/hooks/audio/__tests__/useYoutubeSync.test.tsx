@@ -42,7 +42,7 @@ vi.mock('@/lib/utils/audio/youtube-iframe-api', () => ({
                     destroy: vi.fn(),
                 };
 
-                // як справжній YT: після destroy() iframe вже немає, будь-який виклик падає
+                // like the real YT: after destroy() the iframe is gone and any call throws
                 const live = Object.fromEntries(
                     Object.entries(player).map(([k, fn]) => [
                         k,

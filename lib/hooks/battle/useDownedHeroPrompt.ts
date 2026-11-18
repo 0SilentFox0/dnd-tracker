@@ -32,7 +32,7 @@ export function useDownedHeroPrompt(): DownedHeroPrompt {
         [isDM, battle.status, battle.initiativeOrder]
     );
 
-    // герой, що піднявся, знову має викликати сповіщення, якщо впаде вдруге
+    // a hero who got up must notify again if downed a second time
     const stillDown = dismissed.filter((id) =>
         downed.some((p) => p.basicInfo.id === id)
     );

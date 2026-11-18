@@ -1,7 +1,5 @@
 /**
  * @vitest-environment happy-dom
- *
- * Тест: два гравці, підписані на канал бою, отримують однаковий стан після battle-delta.
  */
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, cleanup, render, screen, waitFor } from '@testing-library/react';
@@ -17,7 +15,6 @@ import type { BattleScene } from '@/types/api';
 
 vi.mock('@/lib/api/battles', () => ({ getBattleVersion: vi.fn() }));
 
-// Стан для симуляції Pusher: зберігає callbacks по channel+event
 const channelBindings = new Map<
     string,
     Map<string, Set<(data: unknown) => void>>

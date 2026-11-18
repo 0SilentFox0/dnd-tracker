@@ -12,7 +12,6 @@ export const MAZE_DARK_SKIP_MS = 1500;
 
 const silent = { onConflict: () => undefined };
 
-/** У темряві хід нічого не дає: клієнт ДМ або власника поточного ходу сам його пропускає. */
 export function useMazeDarkAutoSkip(): void {
     const { campaignId, battleId, battle, viewer, turn, anyPending } =
         useBattleScene();

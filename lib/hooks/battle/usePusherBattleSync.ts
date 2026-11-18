@@ -44,11 +44,6 @@ const CONNECTION_STATES = new Set([
     'unavailable',
 ]);
 
-/**
- * Pusher-канали бою: battle-delta і battle-audio в кеш, turn-started для поточного юзера.
- * Канал battle-* не залежить від currentUserId, щоб не втрачати події під час завантаження userId.
- * Після першої підписки, розриву або довго схованої вкладки — перевірка версії (useBattleResync).
- */
 export function usePusherBattleSync(
     campaignId: string,
     battleId: string,
@@ -120,7 +115,7 @@ export function usePusherBattleSync(
 
         const signal = data as ClientBattleDelta | BattleRefetchSignal;
 
-        // ДМ бере повну дельту з dm-каналу тієї ж версії, але лише поки той канал підписаний
+        // the DM takes the full delta from the dm channel of the same version, only while that channel is subscribed
         if (dmReady && 'redacted' in signal && signal.redacted) return;
 
         const cached = queryClient.getQueryData<BattleScene>(key);
@@ -226,7 +221,7 @@ export function usePusherBattleSync(
         },
     });
 
-    // з'єднання живе, але канал бою не підписаний — дельт не буде, хай працює polling
+    // connected but the battle channel is not subscribed: no deltas will arrive, let polling work
     const connectionState =
         failedChannels.includes(channel) ||
         (isDM && failedChannels.includes(dmChannel))

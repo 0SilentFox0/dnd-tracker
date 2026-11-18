@@ -29,7 +29,6 @@ interface StrokePaintOptions {
     onStroke: BattleMapActions['onStroke'];
 }
 
-/** Штрих місцевості по карті: клітинки під вказівником збираються в `preview`, на відпусканні йдуть в `onStroke`. */
 export function useStrokePaint({
     painting,
     dims,
@@ -72,7 +71,7 @@ export function useStrokePaint({
 
             if (!s || !svg || e.pointerId !== s.pointerId) return;
 
-            // дрібне тремтіння клацання не має зачіпати сусідню клітинку
+            // click jitter must not touch the neighbouring cell
             if (
                 !s.moved &&
                 Math.hypot(e.clientX - s.x, e.clientY - s.y) <= DRAG_THRESHOLD
@@ -95,7 +94,7 @@ export function useStrokePaint({
             setPreview(new Set(s.cells.keys()));
         };
 
-        // другий палець — це щипок, а не штрих
+        // a second finger is a pinch, not a stroke
         const onDown = (e: globalThis.PointerEvent) => {
             if (
                 strokeRef.current &&

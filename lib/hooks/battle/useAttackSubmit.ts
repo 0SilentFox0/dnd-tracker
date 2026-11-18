@@ -29,7 +29,6 @@ interface AttackSubmitInput {
     onDone?: () => void;
 }
 
-/** Надсилає атаку, чекає на вибір крита від ДМ і показує підсумок. */
 export function useAttackSubmit({
     attacker,
     attack,

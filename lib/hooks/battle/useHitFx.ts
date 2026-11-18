@@ -28,7 +28,6 @@ function useImpactReveal(change: HpChange | null): HpChange | null {
     return !actionId || revealed === change.id ? change : null;
 }
 
-/** До удару анімації показує учасника з HP і статусом до зміни, щоб HUD не випереджав анімацію. */
 function useShownParticipant(
     participant: BattleParticipant,
     change: HpChange | null
@@ -58,7 +57,6 @@ function useShownParticipant(
     );
 }
 
-/** Зміна HP і учасник для HUD — обидва оновлюються в момент удару анімації цієї дії. */
 export function useHitChange(
     participant: BattleParticipant,
     impact: FxImpact | null
@@ -70,7 +68,6 @@ export function useHitChange(
     return { change, shown: useShownParticipant(participant, change) };
 }
 
-/** Зміна HP → декорації удару (спалах, число, струс) у момент удару анімації цієї дії. */
 export function useHitFx<T extends HTMLElement>(
     participant: BattleParticipant,
     impact: FxImpact | null

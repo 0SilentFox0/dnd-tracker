@@ -18,7 +18,6 @@ interface ChannelCallbacks {
     onError?: (error: unknown) => void;
 }
 
-/** Лінивий pusher-js: setup отримує клієнт, коли модуль завантажено; повертає cleanup для useEffect. */
 function withPusher(setup: (pusher: PusherClient) => () => void): () => void {
     if (typeof window === 'undefined' || !process.env.NEXT_PUBLIC_PUSHER_KEY)
         return () => {};
@@ -41,7 +40,6 @@ function withPusher(setup: (pusher: PusherClient) => () => void): () => void {
     };
 }
 
-/** Підписка на канал; перепідписується лише при зміні назви каналу чи набору подій. */
 export function usePusherChannel(
     name: string | null,
     handlers: PusherHandlers,
@@ -87,7 +85,6 @@ export function usePusherChannel(
     }, [name, events]);
 }
 
-/** Стан з'єднання Pusher; onReconnect — після будь-якого виходу з connected і повернення. */
 export function usePusherConnection(
     onState: (state: string) => void,
     onReconnect: () => void

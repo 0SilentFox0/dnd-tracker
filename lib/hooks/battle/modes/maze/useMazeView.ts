@@ -126,7 +126,6 @@ export interface MazeMaskValue {
     value: BattleSceneValue;
 }
 
-/** Сцена без прихованих від гравця учасників: списки, черга, «ходить …», журнал. */
 export function useMazeMaskValue(): MazeMaskValue {
     const value = useBattleScene();
 

@@ -2,7 +2,6 @@
 
 import { type RefObject, useEffect } from 'react';
 
-/** Докручує прокручувану карту так, щоб жетон поточного ходу був у видимій зоні. */
 export function useScrollToCurrent(
     outerRef: RefObject<HTMLElement | null>,
     containerRef: RefObject<HTMLElement | null>,
@@ -42,6 +41,5 @@ export function useScrollToCurrent(
 
         if (dy !== 0 || dx !== 0)
             outer.scrollBy({ top: dy, left: dx, behavior: 'smooth' });
-        // scrolls — щоб спрацювати й після першого виміру, коли вкладку відкрили посеред ходу
     }, [currentId, outerRef, containerRef, scrolls]);
 }

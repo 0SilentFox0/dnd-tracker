@@ -57,7 +57,7 @@ export function useAddParticipantForm({
 
     const [wasOpen, setWasOpen] = useState(open);
 
-    // батько закриває діалог в onSuccess — лише тоді скидаємо введене
+    // the parent closes the dialog in onSuccess: only then reset the input
     if (open !== wasOpen) {
         setWasOpen(open);
 
@@ -70,7 +70,7 @@ export function useAddParticipantForm({
         }
     }
 
-    // помилка: діалог лишився відкритим — Скасувати не має стерти введене
+    // on error the dialog stays open: Cancel must not wipe the input
     if (isError && submitted) setSubmitted(false);
 
     const handleSubmit = (e: FormEvent) => {

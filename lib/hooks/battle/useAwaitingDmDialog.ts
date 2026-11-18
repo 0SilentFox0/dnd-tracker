@@ -9,7 +9,6 @@ export interface DialogState {
 
 type Awaiting = 'victory' | 'defeat' | null;
 
-/** ДМ закрив діалог — він лишається закритим до наступного стану очікування; банер відкриває його знову. */
 export function useAwaitingDmDialog(
     isDM: boolean,
     awaiting: Awaiting

@@ -6,7 +6,6 @@ import { writeAudioSnapshot } from '@/lib/hooks/audio';
 import { mergeShow } from '@/lib/utils/show/merge-show';
 import type { ShowSnapshot, ShowState } from '@/types/show';
 
-/** Один вхід для GET, відповіді на команду і Pusher: стан показу за seq, аудіо — у кеш плеєра. */
 export function writeShowSnapshot(
     queryClient: QueryClient,
     campaignId: string,

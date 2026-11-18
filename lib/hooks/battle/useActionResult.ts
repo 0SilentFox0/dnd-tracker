@@ -8,7 +8,6 @@ import { isActionResult } from '@/lib/utils/battle/view';
 
 export const ACTION_RESULT_MS = 4_000;
 
-/** Підсумок атаки чи заклинання для кутової картки: сам зникає, щоб не заступати FX на карті. */
 export function useActionResult() {
     const {
         result: { fx, show },

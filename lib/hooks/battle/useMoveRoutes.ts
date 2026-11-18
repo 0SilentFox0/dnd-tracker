@@ -6,7 +6,6 @@ import type { BattleMapConfig } from '@/types/battle-grid';
 
 const NONE: ReadonlyMap<string, RoutePoint[]> = new Map();
 
-/** Маршрути жетонів, що змінили клітинку з попереднього знімка учасників. */
 export function useMoveRoutes(
     map: BattleMapConfig,
     participants: BattleParticipant[]

@@ -11,7 +11,6 @@ export interface HpChange {
     impact: FxImpact | null;
 }
 
-/** Вплив фіксується в момент зміни HP: пізніші дії не перезапускають спалах/рамку цього удару. Для цілей із відром HP число береться з `impact.delta` сервера, а удар без зміни відра теж дає зміну. */
 export function useHpChange(
     hp: number,
     impact: FxImpact | null = null
@@ -51,7 +50,6 @@ const SHAKE = [
     { transform: 'none' },
 ];
 
-/** Тремтіння без перемонтування піддерева: Web Animations перезапускається на кожну втрату HP. */
 export function useDamageShake<T extends HTMLElement>(change: HpChange | null) {
     const ref = useRef<T>(null);
 

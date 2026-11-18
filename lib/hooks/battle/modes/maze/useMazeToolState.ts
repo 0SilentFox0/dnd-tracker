@@ -22,9 +22,7 @@ export interface MazeGenerateInput {
 
 export interface MazeToolStateValue {
     tool: MazeTool;
-    /** юніт із діалогу «Додати», що чекає на клітинку */
     pendingUnit: AddParticipantData | null;
-    /** «Згенерувати» з виходом «Вибрати на карті» чекає на клітинку */
     pendingGenerate: Omit<MazeGenerateInput, 'exit'> | null;
     teleportFrom: GridPoint | null;
 }
@@ -41,7 +39,6 @@ export const IDLE_MAZE_TOOL: MazeToolStateValue = {
     teleportFrom: null,
 };
 
-/** Спільний стан інструментів: діалог «Додати» в панелі ДМ і карта — різні гілки дерева. */
 export const MazeToolStateContext = createContext<MazeToolState | null>(null);
 
 const NO_TOOL_STATE: MazeToolState = { state: IDLE_MAZE_TOOL, patch: () => {} };

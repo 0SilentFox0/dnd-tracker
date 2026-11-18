@@ -8,20 +8,17 @@ import type { AddParticipantData } from '@/types/battle-actions';
 import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 
 export interface ModeTools {
-    /** панорамування заблоковано (малювання стін) */
     panLocked: boolean;
-    /** клік по клітинці перехоплено інструментом */
     toolActive: boolean;
     clickCell(cell: GridPoint): void;
     closeTool(): void;
-    /** передається в Toolbar/EditPalette/MapLayers режиму як `tools`/`editing` */
     raw: unknown;
     paletteOpen: boolean;
 }
 
 type ByMode<T> = Partial<Record<string, T>>;
 
-// Хуки всіх режимів реєстру викликаються безумовно: режим карти може змінитися між рендерами.
+// hooks of every registry mode are called unconditionally: the map mode can change between renders
 export function useModeTools(
     map: BattleMapConfig | null | undefined
 ): ModeTools | null {

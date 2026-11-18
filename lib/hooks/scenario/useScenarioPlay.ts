@@ -41,17 +41,13 @@ import type { Slide } from '@/types/show';
 export interface ScenarioPlay {
     lookup: PlayLookup;
     showSlide(row: ScenarioRow): void;
-    /** Вмикає трек розділу вручну (без слайда). */
     playSectionTrack(section: ScenarioSection): void;
-    /** Рядок, на чиєму слайді стоїть показ. */
     currentRow: ScenarioRow | null;
-    /** Рядок для «Наступний рядок»; null — далі слайдів немає. */
     nextRow: ScenarioRow | null;
     showMarker(ref: ScenarioMarkerRef): void;
     runBattle(row: ScenarioRow): void;
     pending: boolean;
     control: ShowControl;
-    /** Демо: прив'язки видно, але команди показу не надсилаються. */
     readOnly: boolean;
 }
 
@@ -155,7 +151,7 @@ export function useScenarioPlay(
 
     return {
         lookup,
-        // open на поточному слайді знімає й заглушку
+        // open on the current slide also clears the placeholder
         showSlide: (row) => {
             const state = rowSlideState(row, lookup);
 

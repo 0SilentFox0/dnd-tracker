@@ -28,7 +28,6 @@ const same = (a: GridWindow | null, b: GridWindow | null) =>
         a.cols === b.cols &&
         a.rows === b.rows);
 
-/** Видиме вікно клітинок (квантоване до чанка); `null` без CTM — тоді рендериться все. */
 export function useGridWindow({
     svgRef,
     viewportRef,

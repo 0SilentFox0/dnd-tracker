@@ -10,7 +10,6 @@ import type { ResolvedAbility } from '@/types/abilities';
 import type { BattleParticipant } from '@/types/battle';
 import type { GridPoint } from '@/types/battle-grid';
 
-/** Наведення вміння на клітинку карти: шаблон — слід учасника, Escape або «Скасувати» прибирають наведення. */
 export function useAbilityMapAim(
     participant: BattleParticipant,
     onAim: (ability: ResolvedAbility, cell: GridPoint) => void
