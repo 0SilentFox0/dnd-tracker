@@ -8,7 +8,7 @@ import { MulticlassReasons } from './MulticlassReasons';
 import { SubclassCard } from '@/components/choices/SubclassCard';
 import { FormAlert } from '@/components/common/states';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Radio } from '@/components/ui/radio';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { SelectField } from '@/components/ui/select-field';
 import {
@@ -116,9 +116,7 @@ export function ClassLevelUpDialog({
                             key={entry.classId}
                             className="flex items-center gap-2 text-sm"
                         >
-                            <Input
-                                bare
-                                type="radio"
+                            <Radio
                                 name="class-pick"
                                 checked={choice === entry.classId}
                                 onChange={() =>
@@ -132,9 +130,7 @@ export function ClassLevelUpDialog({
                     ))}
                     {available.length > 0 && (
                         <label className="flex items-center gap-2 text-sm">
-                            <Input
-                                bare
-                                type="radio"
+                            <Radio
                                 name="class-pick"
                                 checked={choice === NEW_CLASS}
                                 onChange={() => actions.pickClass(NEW_CLASS)}

@@ -85,8 +85,8 @@ export function AddBranchSheet({
                     onChange={(e) => setName(e.target.value)}
                 />
                 <Input
-                    bare
                     type="color"
+                    className="h-9 w-16 p-1"
                     aria-label={t('color')}
                     value={color}
                     onChange={(e) => setColor(e.target.value)}
