@@ -1,5 +1,6 @@
 'use client';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Disclosure } from '@/components/ui/disclosure';
 import { Input } from '@/components/ui/input';
 import type { JsonRecord } from '@/lib/constants/compendium-import';
 import type { CompendiumImportController } from '@/lib/hooks/compendium-import';
@@ -58,15 +59,19 @@ export function CompendiumAdvanced({
     };
 
     return (
-        <details className="rounded-lg border border-hud-rule p-2 text-sm">
-            <summary className="cursor-pointer text-hud-gold">
-                {t('advanced.title')}
-                {advancedActive(options) && (
-                    <span className="ml-2 text-hud-good">
-                        {t('advanced.active')}
-                    </span>
-                )}
-            </summary>
+        <Disclosure
+            className="rounded-lg border border-hud-rule p-2 text-sm"
+            summary={
+                <span className="text-hud-gold">
+                    {t('advanced.title')}
+                    {advancedActive(options) && (
+                        <span className="ml-2 text-hud-good">
+                            {t('advanced.active')}
+                        </span>
+                    )}
+                </span>
+            }
+        >
             <div className="mt-2 space-y-3">
                 <label className="flex items-start gap-2">
                     <Checkbox
@@ -104,10 +109,13 @@ export function CompendiumAdvanced({
                         summary: describeRulesPatch(t, options.rulesPatch),
                     })}
                 </p>
-                <details>
-                    <summary className="cursor-pointer text-hud-gold">
-                        {t('categoriesStep.sources')}
-                    </summary>
+                <Disclosure
+                    summary={
+                        <span className="text-hud-gold">
+                            {t('categoriesStep.sources')}
+                        </span>
+                    }
+                >
                     <MetaSummary meta={root._meta} />
                     {categories.flatMap((kind) =>
                         (Array.isArray(root[kind])
@@ -145,8 +153,8 @@ export function CompendiumAdvanced({
                                 )
                         )
                     )}
-                </details>
+                </Disclosure>
             </div>
-        </details>
+        </Disclosure>
     );
 }

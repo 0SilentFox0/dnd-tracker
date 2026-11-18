@@ -6,6 +6,7 @@ import { HudPill } from '@/components/hud/page';
 import { ActionBar } from '@/components/ui/action-bar';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Disclosure } from '@/components/ui/disclosure';
 import { SelectField } from '@/components/ui/select-field';
 import {
     COMPENDIUM_PAGE_SIZES,
@@ -157,15 +158,22 @@ export function CompendiumDependencies({
 
     return (
         <div className="space-y-3">
-            <details open className="text-sm">
-                <summary className="cursor-pointer text-hud-gold">
-                    {hiddenCount > 0 && !showAll
-                        ? t('dependencies.titleCountOf', {
-                              shown: shown.length,
-                              total: all.length,
-                          })
-                        : t('dependencies.titleCount', { shown: shown.length })}
-                </summary>
+            <Disclosure
+                defaultOpen
+                className="text-sm"
+                summary={
+                    <span className="text-hud-gold">
+                        {hiddenCount > 0 && !showAll
+                            ? t('dependencies.titleCountOf', {
+                                  shown: shown.length,
+                                  total: all.length,
+                              })
+                            : t('dependencies.titleCount', {
+                                  shown: shown.length,
+                              })}
+                    </span>
+                }
+            >
                 <div className="my-3 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
                     {pager.pageItems.map((row) => (
                         <div
@@ -196,47 +204,55 @@ export function CompendiumDependencies({
                             {row.refs
                                 .filter((ref) => ref.unresolved)
                                 .map(refBlock)}
-                            <details className="mt-auto">
-                                <summary className="cursor-pointer text-xs text-hud-muted">
-                                    {t('dependencies.more')}
-                                </summary>
-                                <div className="mt-2 space-y-2">
-                                    {summaryLines(t, row.summary).map(
-                                        (line) => (
-                                            <p
-                                                className="text-xs text-hud-muted"
-                                                key={line}
-                                            >
-                                                {line}
-                                            </p>
-                                        )
-                                    )}
-                                    {row.refs
-                                        .filter((ref) => !ref.unresolved)
-                                        .map(refBlock)}
-                                    <label className="flex items-start gap-2">
-                                        <Checkbox
-                                            className="mt-0.5 h-4 w-4 shrink-0 accent-hud-gold"
-                                            checked={
-                                                options.overwriteKeys?.includes(
-                                                    row.key
-                                                ) ?? false
-                                            }
-                                            onCheckedChange={(v) =>
-                                                overwrite(row.key, v === true)
-                                            }
-                                        />{' '}
-                                        {t('dependencies.overwrite')}
-                                    </label>
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => excludeRow(row.key)}
-                                    >
-                                        {t('dependencies.exclude')}
-                                    </Button>
-                                </div>
-                            </details>
+                            <div className="mt-auto">
+                                <Disclosure
+                                    summary={
+                                        <span className="text-xs text-hud-muted">
+                                            {t('dependencies.more')}
+                                        </span>
+                                    }
+                                >
+                                    <div className="mt-2 space-y-2">
+                                        {summaryLines(t, row.summary).map(
+                                            (line) => (
+                                                <p
+                                                    className="text-xs text-hud-muted"
+                                                    key={line}
+                                                >
+                                                    {line}
+                                                </p>
+                                            )
+                                        )}
+                                        {row.refs
+                                            .filter((ref) => !ref.unresolved)
+                                            .map(refBlock)}
+                                        <label className="flex items-start gap-2">
+                                            <Checkbox
+                                                className="mt-0.5 h-4 w-4 shrink-0 accent-hud-gold"
+                                                checked={
+                                                    options.overwriteKeys?.includes(
+                                                        row.key
+                                                    ) ?? false
+                                                }
+                                                onCheckedChange={(v) =>
+                                                    overwrite(
+                                                        row.key,
+                                                        v === true
+                                                    )
+                                                }
+                                            />{' '}
+                                            {t('dependencies.overwrite')}
+                                        </label>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => excludeRow(row.key)}
+                                        >
+                                            {t('dependencies.exclude')}
+                                        </Button>
+                                    </div>
+                                </Disclosure>
+                            </div>
                         </div>
                     ))}
                 </div>
@@ -260,7 +276,7 @@ export function CompendiumDependencies({
                               })}
                     </Button>
                 )}
-            </details>
+            </Disclosure>
             {!preview.report.readyToImport && (
                 <ActionBar>
                     <Button

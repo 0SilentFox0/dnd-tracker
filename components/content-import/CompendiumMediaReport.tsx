@@ -2,6 +2,7 @@
 import { useMemo, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
+import { Disclosure } from '@/components/ui/disclosure';
 import type { CompendiumImportController } from '@/lib/hooks/compendium-import';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import {
@@ -27,11 +28,15 @@ function FailureGroup({
 
     return (
         <li>
-            <details className="rounded-lg border border-hud-rule px-3 py-2">
-                <summary className="cursor-pointer">
-                    <strong>{mediaReasonLabel(t, reason, params)}</strong>{' '}
-                    <span className="text-hud-muted">{items.length}</span>
-                </summary>
+            <Disclosure
+                className="rounded-lg border border-hud-rule px-3 py-2"
+                summary={
+                    <span>
+                        <strong>{mediaReasonLabel(t, reason, params)}</strong>{' '}
+                        <span className="text-hud-muted">{items.length}</span>
+                    </span>
+                }
+            >
                 <ul className="mt-2 space-y-1 text-xs">
                     {items.slice(0, shown).map((item) => (
                         <li className="break-all" key={item.id}>
@@ -49,7 +54,7 @@ function FailureGroup({
                         {t('report.showMore', { count: items.length - shown })}
                     </Button>
                 )}
-            </details>
+            </Disclosure>
         </li>
     );
 }

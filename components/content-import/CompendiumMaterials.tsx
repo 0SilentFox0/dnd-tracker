@@ -1,6 +1,7 @@
 'use client';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Disclosure } from '@/components/ui/disclosure';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import type { ChapterBlock } from '@/lib/utils/compendium-import/categories';
 import { NOTES_LIMIT_BYTES } from '@/lib/utils/compendium-import/categories';
@@ -39,17 +40,19 @@ export function CompendiumMaterials({
                 ).length;
 
                 return (
-                    <details
-                        className="rounded-lg border border-hud-rule p-2 text-sm"
+                    <Disclosure
                         key={`${block.kind}:${block.index}`}
+                        className="rounded-lg border border-hud-rule p-2 text-sm"
+                        summary={
+                            <span className="text-hud-gold">
+                                {t('materials.summary', {
+                                    title: block.title,
+                                    chosen,
+                                    total: paths.length,
+                                })}
+                            </span>
+                        }
                     >
-                        <summary className="cursor-pointer text-hud-gold">
-                            {t('materials.summary', {
-                                title: block.title,
-                                chosen,
-                                total: paths.length,
-                            })}
-                        </summary>
                         <div className="mt-2 flex flex-wrap gap-2">
                             <Button
                                 type="button"
@@ -101,7 +104,7 @@ export function CompendiumMaterials({
                                 </span>
                             </label>
                         ))}
-                    </details>
+                    </Disclosure>
                 );
             })}
         </div>

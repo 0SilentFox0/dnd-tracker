@@ -11,6 +11,7 @@ import {
     type TocControl,
     tocItems,
 } from '@/components/scenario';
+import { Disclosure } from '@/components/ui/disclosure';
 import type {
     ScenarioPlay,
     SectionCollapse,
@@ -43,17 +44,19 @@ function SummarySection({
     return (
         <>
             <OnboardingHint id="dm.summaries" className="mb-3 text-left" />
-            <details className="mb-4 rounded-lg border bg-card/75 p-3">
-                <summary className="cursor-pointer text-sm font-medium">
-                    {t('title')}
-                </summary>
+            <Disclosure
+                className="mb-4 rounded-lg border bg-card/75 p-3"
+                summary={
+                    <span className="text-sm font-medium">{t('title')}</span>
+                }
+            >
                 <div className="mt-3">
                     <ScenarioSummaryPanel
                         campaignId={campaignId}
                         pageId={pageId}
                     />
                 </div>
-            </details>
+            </Disclosure>
         </>
     );
 }

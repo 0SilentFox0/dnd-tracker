@@ -343,6 +343,6 @@ it('collapses technical categories and aligns the main table cells', async () =>
     expect(screen.getByText(/Технічні категорії \(1\)/)).toBeTruthy();
     expect(container.querySelectorAll('[role=row]')).toHaveLength(2);
     expect(
-        screen.getByText(/Технічні категорії/).closest('details')?.textContent
+        screen.getByText(/Технічні категорії/).closest('[data-slot="disclosure"]')?.textContent
     ).toContain('foundryFeat');
 });
