@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { HUD_SELECT_CLASS } from '@/components/hud/form';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
-import { NativeSelect } from '@/components/ui/native-select';
+import { SelectField } from '@/components/ui/select-field';
 import { ABILITY_KEYS, type AbilityKey } from '@/lib/constants/abilities';
 import { CHOICE_LIMITS } from '@/lib/constants/choices';
 import { MAX_SPELL_LEVEL } from '@/lib/constants/spells';
@@ -72,21 +72,18 @@ export function SpellGrantEditor({
                     </label>
                     <label className="text-xs">
                         {t('grant.rest')}
-                        <NativeSelect
+                        <SelectField
                             aria-label={t('grant.restAria')}
-                            className={HUD_SELECT_CLASS}
+                            triggerClassName={`${HUD_SELECT_CLASS} w-auto`}
                             value={value.rest}
-                            onChange={(e) =>
-                                set({
-                                    rest: e.target.value as 'short' | 'long',
-                                })
+                            onValueChange={(rest) =>
+                                set({ rest: rest as 'short' | 'long' })
                             }
-                        >
-                            <option value="long">{t('grant.restLong')}</option>
-                            <option value="short">
-                                {t('grant.restShort')}
-                            </option>
-                        </NativeSelect>
+                            options={[
+                                { value: 'long', label: t('grant.restLong') },
+                                { value: 'short', label: t('grant.restShort') },
+                            ]}
+                        />
                     </label>
                     <label className="text-xs">
                         {t('grant.circle')}
@@ -108,27 +105,24 @@ export function SpellGrantEditor({
                     </label>
                     <label className="text-xs">
                         {t('grant.ability')}
-                        <NativeSelect
+                        <SelectField
                             aria-label={t('grant.abilityAria')}
-                            className={HUD_SELECT_CLASS}
+                            triggerClassName={`${HUD_SELECT_CLASS} w-auto`}
                             value={value.dcAbility ?? ''}
-                            onChange={(e) =>
+                            onValueChange={(ability) =>
                                 set({
-                                    dcAbility: (e.target.value || undefined) as
+                                    dcAbility: (ability || undefined) as
                                         | AbilityKey
                                         | undefined,
                                 })
                             }
-                        >
-                            <option value="">
-                                {t('grant.abilityDefault')}
-                            </option>
-                            {ABILITY_KEYS.map((key) => (
-                                <option key={key} value={key}>
-                                    {tg(`abilities.${key}.label`)}
-                                </option>
-                            ))}
-                        </NativeSelect>
+                            allowNone
+                            noneLabel={t('grant.abilityDefault')}
+                            options={ABILITY_KEYS.map((key) => ({
+                                value: key,
+                                label: tg(`abilities.${key}.label`),
+                            }))}
+                        />
                     </label>
                     <label className="flex items-center gap-2 text-xs">
                         <Checkbox

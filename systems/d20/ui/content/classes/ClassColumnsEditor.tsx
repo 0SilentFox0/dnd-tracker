@@ -7,7 +7,7 @@ import { HUD_SELECT_CLASS, HudSection } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
-import { NativeSelect } from '@/components/ui/native-select';
+import { SelectField } from '@/components/ui/select-field';
 import { MAX_CLASS_COLUMNS, MAX_CLASS_LEVEL } from '@/lib/constants/classes';
 import type { ClassColumn } from '@/types/classes';
 
@@ -165,29 +165,28 @@ export function ClassColumnsEditor({
                             {t('columns.pool')}
                         </label>
                         {c.pool && (
-                            <NativeSelect
+                            <SelectField
                                 aria-label={t('columns.restLabel', {
                                     n: i + 1,
                                 })}
-                                className={HUD_SELECT_CLASS}
+                                triggerClassName={`${HUD_SELECT_CLASS} w-auto`}
                                 value={c.pool.rest}
-                                onChange={(e) =>
+                                onValueChange={(rest) =>
                                     patch(i, {
-                                        pool: {
-                                            rest: e.target.value as
-                                                | 'short'
-                                                | 'long',
-                                        },
+                                        pool: { rest: rest as 'short' | 'long' },
                                     })
                                 }
-                            >
-                                <option value="short">
-                                    {t('columns.restShort')}
-                                </option>
-                                <option value="long">
-                                    {t('columns.restLong')}
-                                </option>
-                            </NativeSelect>
+                                options={[
+                                    {
+                                        value: 'short',
+                                        label: t('columns.restShort'),
+                                    },
+                                    {
+                                        value: 'long',
+                                        label: t('columns.restLong'),
+                                    },
+                                ]}
+                            />
                         )}
                     </div>
                 </HudSection>

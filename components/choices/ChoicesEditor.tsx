@@ -7,7 +7,7 @@ import { classPickerContext, issueFor, pickerBase } from './picker-context';
 
 import { HUD_SELECT_CLASS, HudSection } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
-import { NativeSelect } from '@/components/ui/native-select';
+import { SelectField } from '@/components/ui/select-field';
 import type { ChoiceRefsView } from '@/lib/hooks/characters';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import { mergeBackground } from '@/lib/utils/backgrounds/selection';
@@ -89,28 +89,24 @@ export function ChoicesEditor({
                 <HudSection title={t('editor.background')}>
                     <label className="block space-y-2">
                         {t('editor.background')}
-                        <NativeSelect
+                        <SelectField
                             aria-label={t('editor.background')}
-                            className={`${HUD_SELECT_CLASS} w-full`}
+                            triggerClassName={`${HUD_SELECT_CLASS} w-full`}
                             value={data.backgroundId ?? ''}
-                            onChange={(e) =>
+                            onValueChange={(backgroundId) =>
                                 set({
                                     ...data,
                                     ...mergeBackground(data, {
-                                        backgroundId: e.target.value || null,
+                                        backgroundId: backgroundId || null,
                                     }),
                                 })
                             }
-                        >
-                            <option value="">{t('editor.noBackground')}</option>
-                            {Object.values(refs.backgroundsById ?? {}).map(
-                                (b) => (
-                                    <option key={b.id} value={b.id}>
-                                        {b.name}
-                                    </option>
-                                )
-                            )}
-                        </NativeSelect>
+                            allowNone
+                            noneLabel={t('editor.noBackground')}
+                            options={Object.values(
+                                refs.backgroundsById ?? {}
+                            ).map((b) => ({ value: b.id, label: b.name }))}
+                        />
                     </label>
                     <p className="text-xs text-hud-muted">
                         {t('editor.backgroundHint')}

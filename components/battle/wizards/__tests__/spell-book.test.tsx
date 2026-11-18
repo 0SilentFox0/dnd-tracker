@@ -9,6 +9,8 @@ import {
 } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { listOptions } from '@/components/ui/__tests__/radix-select';
+
 vi.mock('@/components/hud/fonts', () => ({ hudFontClassName: '' }));
 
 vi.mock('next-intl', async () => (await import('./uk-intl')).catalogIntl());
@@ -182,8 +184,13 @@ describe('SpellBook', () => {
         ];
         render(<Harness caster={caster} />, { wrapper });
         fireEvent.click(await screen.findByText('Палаючий промінь'));
-        expect(screen.getByRole('option', { name: /Слот/ })).toBeTruthy();
-        expect(screen.getByRole('option', { name: /Wand/ })).toBeTruthy();
+
+        const names = (
+            await listOptions(screen.getByLabelText('Джерело каста'))
+        ).map((o) => o.textContent);
+
+        expect(names.some((n) => /Слот/.test(n ?? ''))).toBe(true);
+        expect(names.some((n) => /Wand/.test(n ?? ''))).toBe(true);
     });
 
     it('starts long casting without asking for targets or dice', async () => {
@@ -303,19 +310,21 @@ describe('SpellBook', () => {
 
         fireEvent.click(await screen.findByText('Палаючий промінь'));
 
-        const source = screen.getByLabelText(
-            'Джерело каста'
-        ) as HTMLSelectElement;
+        const source = screen.getByLabelText('Джерело каста');
 
         expect(
-            [...source.options].map((o) => [o.textContent, o.disabled])
+            (await listOptions(source)).map((o) => [
+                o.textContent,
+                o.getAttribute('aria-disabled') === 'true',
+            ])
         ).toEqual([
-            ['Оберіть джерело', true],
             ['Слот Коло 2', false],
             ['Elf · 0/1', true],
             ['Magic Initiate · 1/1', false],
         ]);
-        fireEvent.change(source, { target: { value: `grant:feat:mi:ray` } });
+        fireEvent.click(
+            screen.getByRole('option', { name: 'Magic Initiate · 1/1' })
+        );
         fireEvent.click(screen.getByRole('button', { name: /Обрати цілі/ }));
         fireEvent.click(screen.getByRole('button', { name: /Гоблін/ }));
         fireEvent.click(screen.getByRole('button', { name: 'Далі · кидки' }));

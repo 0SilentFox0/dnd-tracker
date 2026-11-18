@@ -4,6 +4,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, expect, it } from 'vitest';
 
 import { ChoicesEditor } from '@/components/choices/ChoicesEditor';
+import { pickOption } from '@/components/ui/__tests__/radix-select';
 import {
     empty,
     refs,
@@ -55,11 +56,12 @@ function Harness() {
 }
 
 afterEach(cleanup);
-it('selects a background, shows its origin feat and limits each ASI to two', () => {
+it('selects a background, shows its origin feat and limits each ASI to two', async () => {
     render(<Harness />);
-    fireEvent.change(screen.getByLabelText('choices.editor.background'), {
-        target: { value: 'sage' },
-    });
+    await pickOption(
+        screen.getByLabelText('choices.editor.background'),
+        'Sage'
+    );
     expect(screen.getByText('Видає ДМ')).toBeTruthy();
 
     const plus = screen.getByRole('button', {

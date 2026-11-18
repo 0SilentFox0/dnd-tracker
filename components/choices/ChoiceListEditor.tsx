@@ -18,7 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { NativeSelect } from '@/components/ui/native-select';
+import { SelectField } from '@/components/ui/select-field';
 import { Textarea } from '@/components/ui/textarea';
 import { ABILITY_SCORE_CAP } from '@/lib/constants/abilities';
 import { CHOICE_KINDS, CHOICE_LIMITS } from '@/lib/constants/choices';
@@ -191,39 +191,29 @@ export function ChoiceListEditor({
                                             >
                                                 {t('list.scale')}
                                             </Label>
-                                            <NativeSelect
+                                            <SelectField
                                                 id={`choice-${i}-scale`}
-                                                className={HUD_SELECT_CLASS}
+                                                triggerClassName={`${HUD_SELECT_CLASS} w-auto`}
                                                 value={
                                                     typeof choice.count ===
                                                     'number'
                                                         ? ''
                                                         : choice.count.scale
                                                 }
-                                                onChange={(e) =>
+                                                onValueChange={(scale) =>
                                                     onPatch({
-                                                        count: e.target.value
-                                                            ? {
-                                                                  scale: e
-                                                                      .target
-                                                                      .value,
-                                                              }
+                                                        count: scale
+                                                            ? { scale }
                                                             : 1,
                                                     })
                                                 }
-                                            >
-                                                <option value="">
-                                                    {t('list.scaleNumber')}
-                                                </option>
-                                                {classColumns.map((c) => (
-                                                    <option
-                                                        key={c.key}
-                                                        value={c.key}
-                                                    >
-                                                        {c.label}
-                                                    </option>
-                                                ))}
-                                            </NativeSelect>
+                                                allowNone
+                                                noneLabel={t('list.scaleNumber')}
+                                                options={classColumns.map((c) => ({
+                                                    value: c.key,
+                                                    label: c.label,
+                                                }))}
+                                            />
                                         </div>
                                     )}
                                 {owner === 'race' &&

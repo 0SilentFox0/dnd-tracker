@@ -10,6 +10,10 @@ import {
 } from '@testing-library/react';
 import { afterEach, expect, it, vi } from 'vitest';
 
+import {
+    listOptions,
+    pickOption,
+} from '@/components/ui/__tests__/radix-select';
 import { ConfirmProvider } from '@/components/ui/confirm-dialog';
 import { updateBackground } from '@/lib/api/backgrounds';
 import { backgroundKeys } from '@/lib/hooks/backgrounds/keys';
@@ -114,10 +118,15 @@ afterEach(() => {
     vi.resetAllMocks();
 });
 
-it('allows only origin feats and explains manual equipment', () => {
+it('allows only origin feats and explains manual equipment', async () => {
     mount();
-    expect(screen.getByRole('option', { name: 'Origin' })).toBeTruthy();
-    expect(screen.queryByRole('option', { name: 'General' })).toBeNull();
+
+    const names = (
+        await listOptions(screen.getByLabelText('backgrounds.form.origin'))
+    ).map((o) => o.textContent);
+
+    expect(names).toContain('Origin');
+    expect(names).not.toContain('General');
     expect(screen.getByText(/backgrounds.form.equipmentNote/)).toBeTruthy();
 });
 
@@ -149,9 +158,10 @@ it('blocks invalid choices, then saves one normalized domain body and navigates 
         target: { value: '  Flute  \n\n Dice ' },
     });
     fireEvent.blur(screen.getByLabelText('backgrounds.form.tools'));
-    fireEvent.change(screen.getByLabelText('backgrounds.form.origin'), {
-        target: { value: 'origin' },
-    });
+    await pickOption(
+        screen.getByLabelText('backgrounds.form.origin'),
+        'Origin'
+    );
     fireEvent.change(screen.getByLabelText('backgrounds.form.equipment'), {
         target: { value: '  Coins  ' },
     });

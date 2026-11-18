@@ -9,7 +9,7 @@ import { HUD_SELECT_CLASS } from '@/components/hud/form';
 import { Checkbox } from '@/components/ui/checkbox';
 import { CommaListInput } from '@/components/ui/comma-list-input';
 import { Input } from '@/components/ui/input';
-import { NativeSelect } from '@/components/ui/native-select';
+import { SelectField } from '@/components/ui/select-field';
 import { ABILITY_KEYS, ABILITY_SCORE_CAP } from '@/lib/constants/abilities';
 import { CHOICE_LIMITS, FEAT_TYPES } from '@/lib/constants/choices';
 import { DND_SKILLS } from '@/lib/constants/skills';
@@ -161,55 +161,51 @@ export function SpellChoiceFields({
                     </label>
                     <label className="flex items-center gap-2">
                         {t('fields.minCircle')}
-                        <NativeSelect
+                        <SelectField
                             aria-label={t('fields.minCircleAria')}
-                            className={HUD_SELECT_CLASS}
-                            value={rule.minLevel}
-                            onChange={(e) =>
+                            triggerClassName={`${HUD_SELECT_CLASS} w-auto`}
+                            value={String(rule.minLevel)}
+                            onValueChange={(v) =>
                                 onPatch({
-                                    spells: {
-                                        ...rule,
-                                        minLevel: Number(e.target.value),
-                                    },
+                                    spells: { ...rule, minLevel: Number(v) },
                                 })
                             }
-                        >
-                            {CIRCLES.map((c) => (
-                                <option key={c} value={c}>
-                                    {c}
-                                </option>
-                            ))}
-                        </NativeSelect>
+                            options={CIRCLES.map((c) => ({
+                                value: String(c),
+                                label: String(c),
+                            }))}
+                        />
                     </label>
                     <label className="flex items-center gap-2">
                         {t('fields.maxCircle')}
-                        <NativeSelect
+                        <SelectField
                             aria-label={t('fields.maxCircleAria')}
-                            className={HUD_SELECT_CLASS}
+                            triggerClassName={`${HUD_SELECT_CLASS} w-auto`}
                             value={String(rule.maxLevel)}
-                            onChange={(e) =>
+                            onValueChange={(v) =>
                                 onPatch({
                                     spells: {
                                         ...rule,
                                         maxLevel:
-                                            e.target.value === 'slots'
-                                                ? 'slots'
-                                                : Number(e.target.value),
+                                            v === 'slots' ? 'slots' : Number(v),
                                     },
                                 })
                             }
-                        >
-                            {CIRCLES.map((c) => (
-                                <option key={c} value={c}>
-                                    {c}
-                                </option>
-                            ))}
-                            {owner === 'class' && (
-                                <option value="slots">
-                                    {t('fields.slotsMax')}
-                                </option>
-                            )}
-                        </NativeSelect>
+                            options={[
+                                ...CIRCLES.map((c) => ({
+                                    value: String(c),
+                                    label: String(c),
+                                })),
+                                ...(owner === 'class'
+                                    ? [
+                                          {
+                                              value: 'slots',
+                                              label: t('fields.slotsMax'),
+                                          },
+                                      ]
+                                    : []),
+                            ]}
+                        />
                     </label>
                 </div>
             )}

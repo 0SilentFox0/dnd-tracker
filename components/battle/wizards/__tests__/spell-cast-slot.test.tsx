@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { cleanup, fireEvent, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { listOptions } from '@/components/ui/__tests__/radix-select';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 
 vi.mock('@/components/hud/fonts', () => ({ hudFontClassName: '' }));
@@ -115,15 +116,15 @@ describe('слот у вікні касту', () => {
         fireEvent.click(await screen.findByText('Крижаний спис'));
         fireEvent.click(screen.getByRole('button', { name: /Обрати цілі/ }));
 
-        const select = screen.getByLabelText('Слот') as HTMLSelectElement;
+        const select = screen.getByLabelText('Слот');
 
-        expect([...select.options].map((o) => o.text)).toEqual([
+        expect((await listOptions(select)).map((o) => o.textContent)).toEqual([
             'Коло 1',
             'Коло 3',
             'Пакт · коло 3',
         ]);
 
-        fireEvent.change(select, { target: { value: '3' } });
+        fireEvent.click(screen.getByRole('option', { name: 'Коло 3' }));
         fireEvent.click(screen.getByRole('button', { name: /Гоблін/ }));
         fireEvent.click(screen.getByRole('button', { name: 'Далі · кидки' }));
 
