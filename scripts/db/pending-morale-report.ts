@@ -5,16 +5,30 @@
  *   pnpm exec tsx scripts/db/pending-morale-report.ts [--json] [--allow-remote]
  */
 import '@/lib/utils/rules/systems/registry';
+import { resetSceneState } from '@/lib/utils/battle/scene-state';
+import { isRecord } from '@/lib/utils/common/is-record';
+import { defaultRulesFor } from '@/lib/utils/rules/section-registry';
+import { FALLBACK_SYSTEM_KEY } from '@/lib/utils/rules/systems/catalog';
+import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
 import { assertSeedTarget } from '@/scripts/seed/seed-library-lib';
 
 const flags = new Set(process.argv.slice(2));
 
-const slotHasPending = (state: unknown): boolean => {
-    const pending = (
-        state as { data?: { ext?: { morale?: { pending?: unknown } } } } | null
-    )?.data?.ext?.morale?.pending;
+const RULES = defaultRulesFor({
+    key: FALLBACK_SYSTEM_KEY,
+    modules: ['morale'],
+});
 
-    return pending !== undefined && pending !== null;
+const slotOf = (raw: unknown): SystemSlot | undefined =>
+    isRecord(raw) && typeof raw.key === 'string'
+        ? { key: raw.key, data: raw.data }
+        : undefined;
+
+// a reset only rewrites a slot that still carries a pending check
+const slotHasPending = (state: unknown): boolean => {
+    const slot = slotOf(state);
+
+    return !!slot && resetSceneState(RULES, slot) !== slot;
 };
 
 const systemOf = (rules: unknown): string | undefined => {
@@ -61,7 +75,10 @@ async function main() {
         let pending = 0;
 
         for (const scene of scenes) {
-            if (scene.pendingMoraleCheck === null && !slotHasPending(scene.systemState))
+            if (
+                scene.pendingMoraleCheck === null &&
+                !slotHasPending(scene.systemState)
+            )
                 continue;
 
             pending++;
