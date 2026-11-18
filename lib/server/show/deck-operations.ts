@@ -76,15 +76,15 @@ export async function bindDeckRecord(
                 throw new ContentError(API_ERRORS.DECK_SCENE_INVALID, 400);
         }
 
-        const current = await prisma.slideDeck.findUnique({
-            where: { id: deckId },
+        const current = await prisma.slideDeck.findFirst({
+            where: { id: deckId, campaignId },
             select: { updatedAt: true },
         });
 
         if (!current) throw new ContentError(API_ERRORS.DECK_NOT_FOUND, 404);
 
         return prisma.slideDeck.update({
-            where: { id: deckId },
+            where: { id: deckId, campaignId },
             data: { scenarioPageId, updatedAt: current.updatedAt },
         });
     });
@@ -92,5 +92,5 @@ export async function bindDeckRecord(
 
 export const deleteDeckRecord = (campaignId: string, deckId: string) =>
     withCampaignRuntimeWrite(campaignId, () =>
-        prisma.slideDeck.delete({ where: { id: deckId } })
+        prisma.slideDeck.delete({ where: { id: deckId, campaignId } })
     );

@@ -40,6 +40,7 @@ export const defaultPipelineDeps: PipelineDeps = {
             userId,
             scope,
             battleId,
+            failClosed: true,
             ...BATTLE_RATE_LIMITS[scope],
         }),
     loadBattle: (args) => loadBattle(prisma, args),

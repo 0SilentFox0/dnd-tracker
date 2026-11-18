@@ -99,6 +99,7 @@
   "skillTreeProgressChanged": "Прогрес персонажів змінився під час збереження, спробуйте ще раз",
   "invalidJson": "Некоректний JSON у тілі запиту",
   "tooManyRequests": "Забагато запитів, спробуйте трохи згодом",
+  "rateLimitUnavailable": "Сервіс тимчасово недоступний, спробуйте трохи згодом",
   "abilityTooManyTargets": "Забагато цілей для цього вміння",
   "abilityTargetRequired": "Оберіть ціль для цього вміння",
   "abilityTargetInvalid": "Недопустима ціль для цього вміння",

@@ -32,7 +32,7 @@ afterEach(() => {
 });
 
 describe('checkRateLimit', () => {
-    it('fail-open якщо Redis недоступний (повертає allowed=true)', async () => {
+    it('without Redis memory limiter allows (count=1)', async () => {
         vi.mocked(getRedisClient).mockReturnValueOnce(null);
 
         const result = await checkRateLimit({
@@ -44,7 +44,7 @@ describe('checkRateLimit', () => {
         });
 
         expect(result.allowed).toBe(true);
-        expect(result.count).toBe(0);
+        expect(result.count).toBe(1);
     });
 
     it('allowed=true коли count <= limit', async () => {
@@ -214,10 +214,50 @@ describe('checkRateLimit memoryFallback', () => {
         expect((await checkRateLimit(input('m3'))).allowed).toBe(true);
     });
 
-    it('без memoryFallback лишається fail-open', async () => {
+    it('memory fallback is the default', async () => {
         const plain = { ...input('m4'), memoryFallback: undefined };
 
-        for (let i = 0; i < 5; i++)
-            expect((await checkRateLimit(plain)).allowed).toBe(true);
+        await checkRateLimit(plain);
+        await checkRateLimit(plain);
+
+        expect((await checkRateLimit(plain)).allowed).toBe(false);
+    });
+
+    it('failClosed without Redis in production returns 503, in dev uses memory', async () => {
+        const sensitive = { ...input('m5'), failClosed: true };
+
+        vi.stubEnv('NODE_ENV', 'production');
+
+        const blocked = await checkRateLimit(sensitive);
+
+        expect(blocked.allowed).toBe(false);
+        expect(blocked.unavailable).toBe(true);
+        expect(rateLimitResponse(blocked).status).toBe(503);
+
+        vi.stubEnv('NODE_ENV', 'test');
+
+        expect((await checkRateLimit(sensitive)).allowed).toBe(true);
+        vi.unstubAllEnvs();
+    });
+
+    it('failClosed on a Redis error in production returns unavailable', async () => {
+        vi.mocked(getRedisClient).mockReturnValue({} as never);
+        limitMock.mockRejectedValue(new Error('down'));
+        vi.stubEnv('NODE_ENV', 'production');
+
+        const res = await checkRateLimit({ ...input('m6'), failClosed: true });
+
+        expect(res.unavailable).toBe(true);
+        vi.unstubAllEnvs();
+    });
+
+    it('production without failClosed still limits by memory', async () => {
+        vi.stubEnv('NODE_ENV', 'production');
+
+        await checkRateLimit(input('m7'));
+        await checkRateLimit(input('m7'));
+
+        expect((await checkRateLimit(input('m7'))).allowed).toBe(false);
+        vi.unstubAllEnvs();
     });
 });

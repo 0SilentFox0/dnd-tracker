@@ -99,6 +99,7 @@
   "skillTreeProgressChanged": "Character progress changed while saving, try again",
   "invalidJson": "Invalid JSON in the request body",
   "tooManyRequests": "Too many requests, try again shortly",
+  "rateLimitUnavailable": "Service temporarily unavailable, try again shortly",
   "abilityTooManyTargets": "Too many targets for this ability",
   "abilityTargetRequired": "Choose a target for this ability",
   "abilityTargetInvalid": "Invalid target for this ability",

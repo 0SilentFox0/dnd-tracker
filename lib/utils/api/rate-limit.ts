@@ -12,6 +12,7 @@ export interface RateLimitInput {
     limit: number;
     windowSeconds: number;
     memoryFallback?: boolean;
+    failClosed?: boolean;
 }
 
 export interface RateLimitResult {
@@ -19,6 +20,7 @@ export interface RateLimitResult {
     count: number;
     limit: number;
     retryAfterSeconds: number;
+    unavailable?: boolean;
 }
 
 const ratelimiterCache = new Map<string, Ratelimit>();
@@ -103,8 +105,15 @@ function warnNoRedisInProduction() {
 export async function checkRateLimit(
     input: RateLimitInput
 ): Promise<RateLimitResult> {
-    const { userId, scope, battleId, limit, windowSeconds, memoryFallback } =
-        input;
+    const {
+        userId,
+        scope,
+        battleId,
+        limit,
+        windowSeconds,
+        memoryFallback = true,
+        failClosed = false,
+    } = input;
 
     const result: RateLimitResult = {
         allowed: true,
@@ -119,12 +128,25 @@ export async function checkRateLimit(
         ? `${userId}:${battleId}:${scope}`
         : `${userId}:${scope}`;
 
-    if (!limiter) {
-        warnNoRedisInProduction();
+    const degraded = (): RateLimitResult => {
+        if (failClosed && process.env.NODE_ENV === 'production')
+            return {
+                allowed: false,
+                count: limit,
+                limit,
+                retryAfterSeconds: 30,
+                unavailable: true,
+            };
 
         return memoryFallback
             ? checkMemoryLimit(identifier, limit, windowSeconds)
             : result;
+    };
+
+    if (!limiter) {
+        warnNoRedisInProduction();
+
+        return degraded();
     }
 
     try {
@@ -154,13 +176,17 @@ export async function checkRateLimit(
             error: String(err),
         });
 
-        return memoryFallback
-            ? checkMemoryLimit(identifier, limit, windowSeconds)
-            : result;
+        return degraded();
     }
 }
 
 export function rateLimitResponse(rl: RateLimitResult): NextResponse {
+    if (rl.unavailable)
+        return apiErrorJson(
+            { error: API_ERRORS.RATE_LIMIT_UNAVAILABLE },
+            { status: 503, headers: { 'Retry-After': '30' } }
+        );
+
     return apiErrorJson(
         {
             error: API_ERRORS.TOO_MANY_REQUESTS,

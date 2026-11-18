@@ -8,7 +8,7 @@ import { errorResponse } from '@/lib/utils/api/api-response';
 type MapUse = { mapId: string | null; mapVersion: number | null };
 
 /**
- * Players may read the library map at the version a non-completed battle of the campaign
+ * Players may read the library map at the version an active battle of the campaign
  * pins (the current one when the pin is null), plus the pinned version of the most
  * recently completed battle so the result screen keeps its walls. Without an explicit
  * version a player gets the pinned one, the DM gets undefined (the caller serves current).
@@ -27,7 +27,7 @@ export async function resolveMapReadVersion(
             where: {
                 campaignId,
                 mapId,
-                status: { not: BattleStatus.COMPLETED },
+                status: BattleStatus.ACTIVE,
             },
             select: { mapId: true, mapVersion: true },
         }),

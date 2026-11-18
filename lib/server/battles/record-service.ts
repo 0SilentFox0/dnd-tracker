@@ -455,6 +455,7 @@ async function audioBattleRecord(
         userId,
         scope: 'audio',
         battleId: row.id,
+        failClosed: true,
         ...BATTLE_RATE_LIMITS.audio,
     });
 

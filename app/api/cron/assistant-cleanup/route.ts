@@ -5,7 +5,9 @@ import { cleanupAssistantData } from '@/lib/server/assistant/cleanup';
 import { cleanupBattleSnapshots } from '@/lib/server/battles/cleanup';
 import { cleanupReadNotifications } from '@/lib/server/notifications/cleanup';
 import { errorResponse } from '@/lib/utils/api/api-response';
+import { bearerToken } from '@/lib/utils/api/bearer';
 import { handleApiError } from '@/lib/utils/api/error-handler';
+import { safeEqual } from '@/lib/utils/api/safe-equal';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,7 +16,7 @@ export async function GET(request: Request) {
 
     if (!secret) return errorResponse(API_ERRORS.CRON_NOT_CONFIGURED, 503);
 
-    if (request.headers.get('authorization') !== `Bearer ${secret}`) {
+    if (!safeEqual(bearerToken(request) ?? '', secret)) {
         return errorResponse(API_ERRORS.UNAUTHORIZED, 401);
     }
 

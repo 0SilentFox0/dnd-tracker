@@ -35,6 +35,16 @@ describe('resolveMapReadVersion', () => {
         expect(prisma.battleScene.findMany).not.toHaveBeenCalled();
     });
 
+    it('queries only ACTIVE battles so a prepared one does not expose its map', async () => {
+        await player();
+
+        expect(prisma.battleScene.findMany).toHaveBeenCalledWith(
+            expect.objectContaining({
+                where: expect.objectContaining({ status: 'active' }),
+            })
+        );
+    });
+
     it('serves a player the pinned version of a live battle by default', async () => {
         prisma.battleScene.findMany.mockResolvedValue([
             { mapId: 'm1', mapVersion: 2 },

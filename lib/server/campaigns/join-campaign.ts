@@ -52,7 +52,7 @@ export async function joinCampaignByCode(
     const member = await prisma.campaignMember.create({
         data: { campaignId: campaign.id, userId, role: CampaignRole.PLAYER },
         include: {
-            campaign: { omit: { aiInstructions: true } },
+            campaign: { select: { id: true, name: true } },
             user: { select: PUBLIC_USER_SELECT },
         },
     });

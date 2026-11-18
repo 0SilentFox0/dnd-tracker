@@ -52,9 +52,9 @@ export async function createCampaign(data: {
 }
 
 export async function joinCampaign(inviteCode: string): Promise<{
-    campaign: Campaign;
+    campaign: Pick<Campaign, 'id' | 'name'>;
 }> {
-    const data = await request<{ campaign: Campaign }>('/api/campaigns/join', {
+    const data = await request<{ campaign: Pick<Campaign, 'id' | 'name'> }>('/api/campaigns/join', {
         method: 'POST',
         body: JSON.stringify({ inviteCode }),
     });

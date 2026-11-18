@@ -1,9 +1,9 @@
 import { Prisma } from '@prisma/client';
-import { timingSafeEqual } from 'node:crypto';
 
 import { prisma } from '@/lib/db';
 import { privateJson } from '@/lib/utils/api/api-response';
 import { bearerToken } from '@/lib/utils/api/bearer';
+import { safeEqual } from '@/lib/utils/api/safe-equal';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,11 +15,7 @@ function hasHealthSecret(request: Request): boolean {
 
     if (!secret || !given) return false;
 
-    const a = Buffer.from(secret);
-
-    const b = Buffer.from(given);
-
-    return a.length === b.length && timingSafeEqual(a, b);
+    return safeEqual(given, secret);
 }
 
 export async function GET(request: Request) {
