@@ -246,6 +246,7 @@ describe('runBattleMutation', () => {
         );
 
         expect(res.status).toBe(401);
+        expect(typeof (await res.json()).error).toBe('string');
         expect(d.loadBattle).not.toHaveBeenCalled();
     });
 
@@ -313,6 +314,7 @@ describe('runBattleMutation', () => {
         );
 
         expect(res.status).toBe(403);
+        expect(typeof (await res.json()).error).toBe('string');
         expect(mutate).not.toHaveBeenCalled();
         expect(saveBattle).not.toHaveBeenCalled();
     });
@@ -373,24 +375,7 @@ describe('runBattleMutation', () => {
         );
 
         expect(res.status).toBe(400);
-        expect(mutate).not.toHaveBeenCalled();
-    });
-
-    it('expectedVersion застаріла — 409 без мутації', async () => {
-        const mutate = vi.fn(noop);
-
-        const res = await runBattleMutation(
-            req({ expectedVersion: 2 }),
-            {
-                params,
-                access: 'member',
-                schema: z.object({ expectedVersion: z.number() }),
-                mutate,
-            },
-            deps()
-        );
-
-        expect(res.status).toBe(409);
+        expect(typeof (await res.json()).error).toBe('string');
         expect(mutate).not.toHaveBeenCalled();
     });
 
@@ -681,6 +666,7 @@ describe('runBattleMutation', () => {
             d
         );
 
+        expect(res.status).toBe(200);
         expect(await res.json()).toEqual({ preview: true });
         expect(d.saveBattle).not.toHaveBeenCalled();
         expect(d.publish).not.toHaveBeenCalled();
@@ -863,37 +849,39 @@ describe('runBattleMutation', () => {
         expect(JSON.stringify(json)).not.toContain('"position"');
     });
 
-    it('expectedVersion перевіряється, навіть якщо схема роуту його не оголошує', async () => {
-        const mutate = vi.fn((ctx: BattleMutationContext) => ({
-            participants: ctx.participants,
-            pending: ctx.pending,
-            events: [],
-        }));
+    it.each([
+        [
+            'declared in the route schema',
+            z.object({ expectedVersion: z.number() }),
+        ],
+        [
+            'not declared by the route schema',
+            z.object({ targetId: z.string() }),
+        ],
+        ['route without a schema', undefined],
+    ])(
+        'stale expectedVersion is a 409 with no mutation or save (%s)',
+        async (_n, schema) => {
+            const mutate = vi.fn((ctx: BattleMutationContext) => ({
+                participants: ctx.participants,
+                pending: ctx.pending,
+                events: [],
+            }));
 
-        const res = await runBattleMutation(
-            req({ targetId: 'gob', expectedVersion: 2 }),
-            {
-                params,
-                access: 'member',
-                schema: z.object({ targetId: z.string() }),
-                mutate,
-            },
-            deps()
-        );
+            const d = deps();
 
-        expect(res.status).toBe(409);
-        expect(mutate).not.toHaveBeenCalled();
-    });
+            const res = await runBattleMutation(
+                req({ targetId: 'gob', expectedVersion: 2 }),
+                { params, access: 'member', schema, mutate },
+                d
+            );
 
-    it('expectedVersion перевіряється і для роуту без схеми', async () => {
-        const res = await runBattleMutation(
-            req({ expectedVersion: 2 }),
-            { params, access: 'member', mutate: noop },
-            deps()
-        );
-
-        expect(res.status).toBe(409);
-    });
+            expect(res.status).toBe(409);
+            expect(typeof (await res.json()).error).toBe('string');
+            expect(mutate).not.toHaveBeenCalled();
+            expect(d.saveBattle).not.toHaveBeenCalled();
+        }
+    );
 
     it('очищення історії (reset/start) скасовує весь журнал у клієнтів', async () => {
         const d = deps();
