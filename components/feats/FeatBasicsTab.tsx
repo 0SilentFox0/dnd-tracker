@@ -3,11 +3,11 @@
 import { useTranslations } from 'next-intl';
 
 import { ImageUpload } from '@/components/common/ImageUpload';
-import { HUD_SELECT_CLASS } from '@/components/hud/form';
+import { HUD_SELECT_TRIGGER_CLASS } from '@/components/hud/form';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { NativeSelect } from '@/components/ui/native-select';
+import { SelectField } from '@/components/ui/select-field';
 import { Textarea } from '@/components/ui/textarea';
 import { ABILITY_KEYS, type AbilityKey } from '@/lib/constants/abilities';
 import { CHOICE_LIMITS, FEAT_TYPES } from '@/lib/constants/choices';
@@ -77,20 +77,16 @@ export function FeatBasicsTab({
             {!advancement && (
                 <div className="space-y-2">
                     <Label htmlFor="feat-type">{t('form.type')}</Label>
-                    <NativeSelect
+                    <SelectField
                         id="feat-type"
-                        className={HUD_SELECT_CLASS}
+                        triggerClassName={HUD_SELECT_TRIGGER_CLASS}
                         value={data.type}
-                        onChange={(e) =>
-                            patch({ type: e.target.value as FeatType })
-                        }
-                    >
-                        {FEAT_TYPES.map((type) => (
-                            <option key={type} value={type}>
-                                {t(`types.${type}`)}
-                            </option>
-                        ))}
-                    </NativeSelect>
+                        onValueChange={(v) => patch({ type: v as FeatType })}
+                        options={FEAT_TYPES.map((type) => ({
+                            value: type,
+                            label: t(`types.${type}`),
+                        }))}
+                    />
                 </div>
             )}
             {advancement && (
