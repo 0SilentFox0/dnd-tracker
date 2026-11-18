@@ -1,5 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { API_ERRORS } from '@/lib/constants/api-errors';
+import { MAP_LIMITS } from '@/lib/constants/map-limits';
+
 const ticket = vi.hoisted(() => vi.fn());
 
 vi.mock('@/lib/server/battle-maps/background-upload', () => ({
@@ -11,53 +14,82 @@ vi.mock('@/lib/utils/api/as-dm', () => ({
 
 import { POST } from '../route';
 
-const request = (body: unknown) =>
+const rawRequest = (body: string) =>
     new Request('https://app.test/api/campaigns/c/maps/background-upload', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify(body),
+        body,
+    });
+
+const call = (body: unknown) =>
+    POST(rawRequest(JSON.stringify(body)), {
+        params: Promise.resolve({ id: 'c' }),
     });
 
 describe('battle map background upload ticket', () => {
-    beforeEach(() => vi.clearAllMocks());
-    it('issues a campaign scoped ticket for supported image types', async () => {
-        ticket.mockResolvedValue({
-            ok: true,
-            value: { bucket: 'battle-maps', path: 'c/image.webp' },
-        });
+    beforeEach(() => vi.resetAllMocks());
 
-        const response = await POST(
-            request({ size: 100, contentType: 'image/webp' }),
-            {
-                params: Promise.resolve({ id: 'c' }),
-            }
-        );
+    it('returns the ticket issued for the campaign and content type', async () => {
+        ticket.mockImplementation(async (campaignId: string, type: string) => ({
+            ok: true,
+            value: { bucket: 'battle-maps', path: `${campaignId}/${type}` },
+        }));
+
+        const response = await call({ size: 100, contentType: 'image/webp' });
 
         expect(response.status).toBe(200);
-        expect(ticket).toHaveBeenCalledWith('c', 'image/webp');
+        expect(await response.json()).toEqual({
+            bucket: 'battle-maps',
+            path: 'c/image/webp',
+        });
     });
 
-    it('rejects unsupported formats and oversized uploads', async () => {
-        expect(
-            (
-                await POST(request({ size: 100, contentType: 'image/gif' }), {
-                    params: Promise.resolve({ id: 'c' }),
-                })
-            ).status
-        ).toBe(400);
-        expect(
-            (
-                await POST(
-                    request({
-                        size: 9 * 1024 * 1024,
-                        contentType: 'image/png',
-                    }),
-                    {
-                        params: Promise.resolve({ id: 'c' }),
-                    }
-                )
-            ).status
-        ).toBe(400);
+    it('accepts an upload exactly at the size limit', async () => {
+        ticket.mockResolvedValue({ ok: true, value: { path: 'p' } });
+
+        const response = await call({
+            size: MAP_LIMITS.backgroundUploadBytes,
+            contentType: 'image/png',
+        });
+
+        expect(response.status).toBe(200);
+    });
+
+    it.each([
+        ['unsupported format', { size: 100, contentType: 'image/gif' }],
+        [
+            'oversized upload',
+            {
+                size: MAP_LIMITS.backgroundUploadBytes + 1,
+                contentType: 'image/png',
+            },
+        ],
+        ['zero size', { size: 0, contentType: 'image/png' }],
+        ['fractional size', { size: 1.5, contentType: 'image/png' }],
+        ['missing type', { size: 100 }],
+    ])('rejects %s with 400 and issues no ticket', async (_name, body) => {
+        const response = await call(body);
+
+        expect(response.status).toBe(400);
+        expect((await response.json()).error).toBe(API_ERRORS.INVALID_BODY);
         expect(ticket).not.toHaveBeenCalled();
+    });
+
+    it('rejects malformed JSON with 400', async () => {
+        const response = await POST(rawRequest('{nope'), {
+            params: Promise.resolve({ id: 'c' }),
+        });
+
+        expect(response.status).toBe(400);
+        expect((await response.json()).error).toBe(API_ERRORS.INVALID_JSON);
+    });
+
+    it('surfaces a storage failure as 500 with its message', async () => {
+        ticket.mockResolvedValue({ ok: false, message: 'storage down' });
+
+        const response = await call({ size: 100, contentType: 'image/png' });
+
+        expect(response.status).toBe(500);
+        expect((await response.json()).error).toBe('storage down');
     });
 });
