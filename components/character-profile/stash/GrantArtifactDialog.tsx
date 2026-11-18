@@ -4,12 +4,13 @@ import { useProfile } from '../ProfileContext';
 
 import { EntityIcon } from '@/components/common/EntityIcon';
 import { EmptyState, LoadingState } from '@/components/common/states';
+import { HudButton } from '@/components/hud';
 import { HUD_SELECT_CLASS } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { NativeSelect } from '@/components/ui/native-select';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
+import { SelectField } from '@/components/ui/select-field';
 import { ITEM_LIMITS } from '@/lib/constants/artifacts';
 import { useGrantArtifactForm } from '@/lib/hooks/characters';
 import { useTranslator } from '@/lib/i18n/use-translator';
@@ -39,8 +40,7 @@ function ArtifactRow({
 }) {
     return (
         <li>
-            <Button
-                variant="bare"
+            <HudButton
                 type="button"
                 disabled={disabled}
                 onClick={onClick}
@@ -62,7 +62,7 @@ function ArtifactRow({
                         {subtitle}
                     </span>
                 </span>
-            </Button>
+            </HudButton>
         </li>
     );
 }
@@ -186,23 +186,20 @@ export function GrantArtifactDialog({
                             <Label htmlFor="grant-parameter">
                                 {t('inventory.grant.parameter')}
                             </Label>
-                            <NativeSelect
+                            <SelectField
                                 id="grant-parameter"
-                                className={`${HUD_SELECT_CLASS} w-full`}
+                                triggerClassName={`${HUD_SELECT_CLASS} w-full`}
                                 value={fields.parameter}
-                                onChange={(e) =>
-                                    actions.setParameter(e.target.value)
-                                }
-                            >
-                                <option value="">
-                                    {t('inventory.grant.chooseParameter')}
-                                </option>
-                                {form.parameterOptions.map((option) => (
-                                    <option key={option.key} value={option.key}>
-                                        {option.label}
-                                    </option>
-                                ))}
-                            </NativeSelect>
+                                onValueChange={actions.setParameter}
+                                allowNone
+                                noneLabel={t('inventory.grant.chooseParameter')}
+                                options={form.parameterOptions.map(
+                                    (option) => ({
+                                        value: option.key,
+                                        label: option.label,
+                                    })
+                                )}
+                            />
                         </>
                     )}
                     {picked.consumable && (
@@ -212,34 +209,32 @@ export function GrantArtifactDialog({
                                     <Label htmlFor="grant-spell">
                                         {t('inventory.grant.spell')}
                                     </Label>
-                                    <NativeSelect
+                                    <SelectField
                                         id="grant-spell"
-                                        className={`${HUD_SELECT_CLASS} w-full`}
+                                        triggerClassName={`${HUD_SELECT_CLASS} w-full`}
                                         value={fields.spellId}
-                                        onChange={(e) =>
-                                            actions.setSpellId(e.target.value)
-                                        }
-                                    >
-                                        <option value="">
-                                            {t('inventory.grant.chooseSpell')}
-                                        </option>
-                                        {form.spellOptions.map((spell) => (
-                                            <option
-                                                key={spell.spellId}
-                                                value={spell.spellId}
-                                            >
-                                                {spell.castLevel !== undefined
-                                                    ? t(
-                                                          'inventory.grant.spellOption',
-                                                          {
-                                                              label: spell.label,
-                                                              level: spell.castLevel,
-                                                          }
-                                                      )
-                                                    : spell.label}
-                                            </option>
-                                        ))}
-                                    </NativeSelect>
+                                        onValueChange={actions.setSpellId}
+                                        allowNone
+                                        noneLabel={t(
+                                            'inventory.grant.chooseSpell'
+                                        )}
+                                        options={form.spellOptions.map(
+                                            (spell) => ({
+                                                value: spell.spellId,
+                                                label:
+                                                    spell.castLevel !==
+                                                    undefined
+                                                        ? t(
+                                                              'inventory.grant.spellOption',
+                                                              {
+                                                                  label: spell.label,
+                                                                  level: spell.castLevel,
+                                                              }
+                                                          )
+                                                        : spell.label,
+                                            })
+                                        )}
+                                    />
                                     <p className="text-xs text-hud-muted">
                                         {t('inventory.grant.spellNote')}
                                     </p>

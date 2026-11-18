@@ -11,6 +11,7 @@ import { StatsStep } from './StatsStep';
 import { TalentsStep } from './TalentsStep';
 
 import { StepIndicator } from '@/components/common/StepIndicator';
+import { HudButton } from '@/components/hud';
 import { HudFormPage } from '@/components/hud/form';
 import { ActionBar } from '@/components/ui/action-bar';
 import { Button } from '@/components/ui/button';
@@ -91,15 +92,14 @@ export function WfrpDraftForm({
                         />
                     )}
                     {rolling && (
-                        <Button
-                            variant="bare"
+                        <HudButton
                             type="button"
                             aria-label={t('skipHint')}
                             className="absolute inset-0 z-20 cursor-pointer bg-transparent"
                             onClick={skip}
                         >
                             <span className="sr-only">{t('skipHint')}</span>
-                        </Button>
+                        </HudButton>
                     )}
                     {step.id !== 'identity' &&
                         form.stepErrors(step.id).length > 0 && (

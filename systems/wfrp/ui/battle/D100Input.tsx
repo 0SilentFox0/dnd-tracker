@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { DieInput } from '@/components/battle/hud/DiceInput';
-import { Button } from '@/components/ui/button';
+import { HudButton } from '@/components/hud';
 import { cn } from '@/lib/utils';
 import {
     composePercentile,
@@ -46,8 +46,7 @@ export function D100Input({ onRoll }: { onRoll: (value: number) => void }) {
                 className="grid grid-cols-5 gap-1.5"
             >
                 {TENS_OPTIONS.map((n) => (
-                    <Button
-                        variant="bare"
+                    <HudButton
                         key={n}
                         type="button"
                         aria-pressed={n === tens}
@@ -55,7 +54,7 @@ export function D100Input({ onRoll }: { onRoll: (value: number) => void }) {
                         className={cell(n === tens)}
                     >
                         {String(n).padStart(2, '0')}
-                    </Button>
+                    </HudButton>
                 ))}
             </div>
             <div
@@ -64,8 +63,7 @@ export function D100Input({ onRoll }: { onRoll: (value: number) => void }) {
                 className="grid grid-cols-5 gap-1.5"
             >
                 {UNITS_OPTIONS.map((n) => (
-                    <Button
-                        variant="bare"
+                    <HudButton
                         key={n}
                         type="button"
                         aria-pressed={n === units}
@@ -73,7 +71,7 @@ export function D100Input({ onRoll }: { onRoll: (value: number) => void }) {
                         className={cell(n === units)}
                     >
                         {n}
-                    </Button>
+                    </HudButton>
                 ))}
             </div>
             <DieInput
@@ -84,15 +82,14 @@ export function D100Input({ onRoll }: { onRoll: (value: number) => void }) {
                 strict
                 className="h-12 border border-white/20 bg-black/30 text-center text-lg text-[var(--ink)]"
             />
-            <Button
-                variant="bare"
+            <HudButton
                 type="button"
                 disabled={value === undefined}
                 onClick={() => value !== undefined && onRoll(value)}
                 className="hud-sc h-[52px] w-full border border-white/25 text-[15px] font-bold tracking-[.04em] text-[var(--bone)] disabled:opacity-40"
             >
                 {t('roll')}
-            </Button>
+            </HudButton>
         </div>
     );
 }

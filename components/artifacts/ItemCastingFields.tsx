@@ -2,11 +2,11 @@
 
 import { useTranslations } from 'next-intl';
 
-import { HUD_SELECT_CLASS } from '@/components/hud/form';
+import { HUD_SELECT_TRIGGER_CLASS } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
-import { NativeSelect } from '@/components/ui/native-select';
+import { SelectField } from '@/components/ui/select-field';
 import { ITEM_LIMITS } from '@/lib/constants/artifacts';
 import { MAX_SPELL_LEVEL } from '@/lib/constants/spells';
 import { useSpells } from '@/lib/hooks/spells';
@@ -76,14 +76,12 @@ export function ItemCastingFields({
         <div className="space-y-3">
             <label className="block text-xs">
                 {t('parameter')}
-                <NativeSelect
+                <SelectField
                     aria-label={t('parameterAria')}
-                    className={HUD_SELECT_CLASS}
+                    triggerClassName={HUD_SELECT_TRIGGER_CLASS}
                     value={value.parameter?.kind ?? ''}
-                    onChange={(e) => {
-                        const kind = e.target.value as
-                            | 'damageType'
-                            | 'creatureType';
+                    onValueChange={(v) => {
+                        const kind = v as 'damageType' | 'creatureType' | '';
 
                         const key = kind === 'damageType' ? 'fire' : 'dragon';
 
@@ -93,11 +91,13 @@ export function ItemCastingFields({
                                 : undefined,
                         });
                     }}
-                >
-                    <option value="">{t('noParameter')}</option>
-                    <option value="damageType">{t('damageType')}</option>
-                    <option value="creatureType">{t('creatureType')}</option>
-                </NativeSelect>
+                    allowNone
+                    noneLabel={t('noParameter')}
+                    options={[
+                        { value: 'damageType', label: t('damageType') },
+                        { value: 'creatureType', label: t('creatureType') },
+                    ]}
+                />
             </label>
             {value.parameter && (
                 <div className="flex flex-wrap gap-1">
@@ -145,25 +145,26 @@ export function ItemCastingFields({
                     key={spell.spellId}
                     className="space-y-2 rounded border border-hud-line p-2"
                 >
-                    <NativeSelect
+                    <SelectField
                         aria-label={t('spellAria')}
-                        className={`${HUD_SELECT_CLASS} w-full`}
+                        triggerClassName={HUD_SELECT_TRIGGER_CLASS}
                         value={spell.spellId}
-                        onChange={(e) =>
-                            setSpell(index, { spellId: e.target.value })
-                        }
-                    >
-                        {!library.some((s) => s.id === spell.spellId) && (
-                            <option value={spell.spellId}>
-                                {t('spellMissing')}
-                            </option>
-                        )}
-                        {library.map((s) => (
-                            <option key={s.id} value={s.id}>
-                                {s.name} ({s.level})
-                            </option>
-                        ))}
-                    </NativeSelect>
+                        onValueChange={(id) => setSpell(index, { spellId: id })}
+                        options={[
+                            ...(library.some((s) => s.id === spell.spellId)
+                                ? []
+                                : [
+                                      {
+                                          value: spell.spellId,
+                                          label: t('spellMissing'),
+                                      },
+                                  ]),
+                            ...library.map((s) => ({
+                                value: s.id,
+                                label: `${s.name} (${s.level})`,
+                            })),
+                        ]}
+                    />
                     <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                         {SPELL_NUMBER_FIELDS.map((key) => {
                             const [min, max] = ITEM_LIMITS[key];

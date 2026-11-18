@@ -6,6 +6,7 @@ import { ChevronDown, ChevronRight, Plus } from 'lucide-react';
 
 import { SectionTitle } from './SectionTitle';
 
+import { HudButton } from '@/components/hud';
 import { Button } from '@/components/ui/button';
 
 interface CollapsibleHeaderProps {
@@ -33,8 +34,7 @@ export function CollapsibleHeader({
 
     return (
         <div className="flex items-center gap-1">
-            <Button
-                variant="bare"
+            <HudButton
                 type="button"
                 aria-expanded={open}
                 aria-controls={controlsId}
@@ -57,7 +57,7 @@ export function CollapsibleHeader({
                             {t('emptySummary')}
                         </span>
                     ))}
-            </Button>
+            </HudButton>
             {onAdd && (
                 <Button
                     type="button"

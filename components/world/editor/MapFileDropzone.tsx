@@ -76,7 +76,6 @@ export function MapFileDropzone({
                 )}
             >
                 <Input
-                    bare
                     type="file"
                     accept={ACCEPT}
                     aria-label={t('ariaLabel')}

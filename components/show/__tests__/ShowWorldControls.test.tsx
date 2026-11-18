@@ -10,6 +10,10 @@ import type { ShowControl } from '@/lib/hooks/show';
 import type { ShowState } from '@/types/show';
 import type { WorldMapSummary } from '@/types/world';
 
+vi.mock('@/components/ui/select-field', () =>
+    import('@/components/ui/__tests__/select-field-mock')
+);
+
 vi.unmock('next-intl');
 
 vi.mock('@/lib/api/world', () => ({

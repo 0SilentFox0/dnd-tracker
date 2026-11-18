@@ -55,7 +55,7 @@ describe('CompendiumMediaReport', () => {
         expect(container.textContent).toContain('3Не вдалося');
         expect(container.textContent).toContain('Сервер відповів кодом 404');
         expect(container.textContent).toContain('Сервер відповів кодом 503');
-        expect(container.querySelectorAll('details')).toHaveLength(2);
+        expect(container.querySelectorAll('[data-slot="disclosure"]')).toHaveLength(2);
     });
 
     it('offers resume and retry through the actions when idle', async () => {
@@ -128,7 +128,7 @@ describe('CompendiumMediaSummary', () => {
         );
 
         expect(container.textContent).toContain('Зображень: 12');
-        expect(container.querySelector('details')).toBeTruthy();
+        expect(container.querySelector('[data-slot="disclosure"]')).toBeTruthy();
         expect(container.textContent).toContain(
             'Перевищено ліміт зображень на імпорт: 3'
         );

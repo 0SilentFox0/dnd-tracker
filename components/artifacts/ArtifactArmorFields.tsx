@@ -2,12 +2,12 @@
 
 import { useTranslations } from 'next-intl';
 
-import { HUD_SELECT_CLASS, HudSection } from '@/components/hud/form';
+import { HUD_SELECT_TRIGGER_CLASS, HudSection } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { NativeSelect } from '@/components/ui/native-select';
+import { SelectField } from '@/components/ui/select-field';
 import {
     ARMOR_CATEGORIES,
     armorDexCap,
@@ -69,23 +69,18 @@ export function ArtifactArmorFields({
                     >
                         {t('category')}
                     </Label>
-                    <NativeSelect
+                    <SelectField
                         id="armor-category"
-                        className={`${HUD_SELECT_CLASS} w-full`}
+                        triggerClassName={HUD_SELECT_TRIGGER_CLASS}
                         value={value.category}
-                        onChange={(e) =>
-                            set(
-                                'category',
-                                e.target.value as ArmorStats['category']
-                            )
+                        onValueChange={(v) =>
+                            set('category', v as ArmorStats['category'])
                         }
-                    >
-                        {ARMOR_CATEGORIES.map((c) => (
-                            <option key={c} value={c}>
-                                {t(`categories.${c}`)}
-                            </option>
-                        ))}
-                    </NativeSelect>
+                        options={ARMOR_CATEGORIES.map((c) => ({
+                            value: c,
+                            label: t(`categories.${c}`),
+                        }))}
+                    />
                 </div>
                 <div className="space-y-1">
                     <Label

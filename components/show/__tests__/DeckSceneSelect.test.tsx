@@ -4,6 +4,10 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { DeckSceneSelect } from '@/components/show/editor/DeckSceneSelect';
 
+vi.mock('@/components/ui/select-field', () =>
+    import('@/components/ui/__tests__/select-field-mock')
+);
+
 const set = vi.fn();
 
 vi.mock('@/lib/hooks/show', () => ({

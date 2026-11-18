@@ -1,4 +1,5 @@
 'use client';
+import { Disclosure } from '@/components/ui/disclosure';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import { categoryLabel } from '@/lib/utils/compendium-import/flow';
 import type { splitCategories } from '@/lib/utils/compendium-import/labels';
@@ -73,12 +74,16 @@ export function CompendiumCoverage({
                 </div>
             )}
             {categories.technical.length > 0 && (
-                <details className="text-xs text-hud-muted">
-                    <summary className="cursor-pointer">
-                        {t('report.technical', {
-                            count: categories.technical.length,
-                        })}
-                    </summary>
+                <Disclosure
+                    className="text-xs text-hud-muted"
+                    summary={
+                        <span>
+                            {t('report.technical', {
+                                count: categories.technical.length,
+                            })}
+                        </span>
+                    }
+                >
                     <ul className="mt-1">
                         {categories.technical.map(([kind, count]) => (
                             <li key={kind}>
@@ -89,7 +94,7 @@ export function CompendiumCoverage({
                             </li>
                         ))}
                     </ul>
-                </details>
+                </Disclosure>
             )}
         </>
     );

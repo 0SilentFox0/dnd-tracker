@@ -7,8 +7,8 @@ import { wfrpState } from '../../rules/state';
 import { D100RollPicker } from './D100RollPicker';
 
 import { btn } from '@/components/battle/wizards/attack/shared';
+import { HudButton } from '@/components/hud';
 import type { RollBodyProps } from '@/components/systems/types';
-import { Button } from '@/components/ui/button';
 import { useText } from '@/lib/i18n/use-text';
 import { cn } from '@/lib/utils';
 import { lockedRollSource } from '@/lib/utils/battle/flows/attack-flow';
@@ -71,14 +71,13 @@ export function D100RollBody({
                 onRoll={actions.roll}
                 onAuto={actions.aiRoll}
             />
-            <Button
-                variant="bare"
+            <HudButton
                 type="button"
                 onClick={actions.back}
                 className={cn(btn, 'mt-3 w-full border-white/25')}
             >
                 {tc('back')}
-            </Button>
+            </HudButton>
         </>
     );
 }

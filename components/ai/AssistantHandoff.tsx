@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
-import { Button } from '@/components/ui/button';
+import { HudButton } from '@/components/hud';
 import { Checkbox } from '@/components/ui/checkbox';
 import { isAssistantHandoffHref } from '@/lib/schemas/assistant-handoff';
 import type { HandoffResult } from '@/types/assistant';
@@ -57,15 +57,14 @@ function SourceNotePicker({
                     {note.title}
                 </label>
             ))}
-            <Button
-                variant="bare"
+            <HudButton
                 type="button"
                 disabled={!current.length}
                 className="underline disabled:opacity-50"
                 onClick={() => onSelect(current)}
             >
                 {t('handoff.useNotes')}
-            </Button>
+            </HudButton>
         </fieldset>
     );
 }

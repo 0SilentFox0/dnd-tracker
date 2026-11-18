@@ -12,7 +12,7 @@ import {
     X,
 } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
+import { HudButton } from '@/components/hud';
 import { MAZE_MARK_SYMBOLS } from '@/lib/constants/battle';
 import { useBattleScene } from '@/lib/hooks/battle';
 import { useMazeView } from '@/lib/hooks/battle/modes/maze';
@@ -54,8 +54,7 @@ export function MazeMarkPicker({ hero }: { hero: BattleParticipant }) {
 
     return (
         <div className="pt-2">
-            <Button
-                variant="bare"
+            <HudButton
                 type="button"
                 disabled={anyPending}
                 aria-expanded={open}
@@ -63,7 +62,7 @@ export function MazeMarkPicker({ hero }: { hero: BattleParticipant }) {
                 className="hud-sc flex h-11 w-full items-center justify-center border border-white/25 bg-black/55 text-[15px] tracking-[.08em] text-[var(--ink)] disabled:opacity-50"
             >
                 {t('picker')}
-            </Button>
+            </HudButton>
             {open && (
                 <div
                     role="group"
@@ -74,8 +73,7 @@ export function MazeMarkPicker({ hero }: { hero: BattleParticipant }) {
                         const Icon = SYMBOL_ICONS[symbol];
 
                         return (
-                            <Button
-                                variant="bare"
+                            <HudButton
                                 key={symbol}
                                 type="button"
                                 aria-label={t(symbol)}
@@ -84,7 +82,7 @@ export function MazeMarkPicker({ hero }: { hero: BattleParticipant }) {
                                 className="flex h-11 items-center justify-center border border-white/25 bg-black/55 text-[var(--gold)] disabled:opacity-50"
                             >
                                 <Icon className="size-5" />
-                            </Button>
+                            </HudButton>
                         );
                     })}
                 </div>

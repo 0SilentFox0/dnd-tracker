@@ -3,6 +3,7 @@
 import type { TooltipRenderProps } from 'react-joyride';
 import { X } from 'lucide-react';
 
+import { HudButton } from '@/components/hud';
 import { Button } from '@/components/ui/button';
 
 export function DemoTourTooltip(props: TooltipRenderProps) {
@@ -35,14 +36,13 @@ export function DemoTourTooltip(props: TooltipRenderProps) {
                         {step.content}
                     </div>
                 </div>
-                <Button
-                    variant="bare"
+                <HudButton
                     type="button"
                     {...closeProps}
                     className="-mt-1 -mr-1 shrink-0 rounded-md p-1 text-hud-muted transition-colors hover:text-hud-ink"
                 >
                     <X className="size-4" aria-hidden />
-                </Button>
+                </HudButton>
             </div>
             <div className="mt-3 flex items-center gap-2">
                 <span className="hud-sc text-xs text-hud-muted">

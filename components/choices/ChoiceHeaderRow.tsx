@@ -6,7 +6,7 @@ import { HUD_SELECT_CLASS } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { NativeSelect } from '@/components/ui/native-select';
+import { SelectField } from '@/components/ui/select-field';
 import { MAX_CLASS_LEVEL } from '@/lib/constants/classes';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import type { Choice, ChoiceKind, ChoiceOwner } from '@/types/choices';
@@ -51,20 +51,18 @@ export function ChoiceHeaderRow({
                     <Label htmlFor={`choice-${index}-kind`}>
                         {t('header.kind')}
                     </Label>
-                    <NativeSelect
+                    <SelectField
                         id={`choice-${index}-kind`}
-                        className={HUD_SELECT_CLASS}
+                        triggerClassName={`${HUD_SELECT_CLASS} w-auto`}
                         value={choice.kind}
-                        onChange={(e) =>
-                            actions.onSwitchKind(e.target.value as ChoiceKind)
+                        onValueChange={(k) =>
+                            actions.onSwitchKind(k as ChoiceKind)
                         }
-                    >
-                        {kinds.map((k) => (
-                            <option key={k} value={k}>
-                                {t(`kinds.${k}`)}
-                            </option>
-                        ))}
-                    </NativeSelect>
+                        options={kinds.map((k) => ({
+                            value: k,
+                            label: t(`kinds.${k}`),
+                        }))}
+                    />
                 </div>
                 {owner !== 'feat' && (
                     <div className="w-24 space-y-1">

@@ -3,6 +3,10 @@ import { useState } from 'react';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import {
+    listOptions,
+    pickOption,
+} from '@/components/ui/__tests__/radix-select';
 import { ClassFeaturesEditor } from '@/systems/d20/ui/content/classes/ClassFeaturesEditor';
 import type { ClassFeature } from '@/types/classes';
 
@@ -50,12 +54,13 @@ describe('ClassFeaturesEditor', () => {
         ).toBe('true');
     });
 
-    it('додає рівень із секцією редактора здібностей', () => {
+    it('додає рівень із секцією редактора здібностей', async () => {
         render(<Harness />);
 
-        fireEvent.change(screen.getByLabelText('classes.features.levelToAdd'), {
-            target: { value: '5' },
-        });
+        await pickOption(
+            screen.getByLabelText('classes.features.levelToAdd'),
+            '5'
+        );
         fireEvent.click(
             screen.getByRole('button', { name: 'classes.features.addLevel' })
         );
@@ -64,18 +69,20 @@ describe('ClassFeaturesEditor', () => {
         expect(screen.getAllByTestId('ability-editor')).toHaveLength(1);
     });
 
-    it('тримає рівні відсортованими', () => {
+    it('тримає рівні відсортованими', async () => {
         render(<Harness initial={[{ level: 9, abilities: [] }]} />);
 
-        fireEvent.change(screen.getByLabelText('classes.features.levelToAdd'), {
-            target: { value: '2' },
-        });
+        await pickOption(
+            screen.getByLabelText('classes.features.levelToAdd'),
+            '2'
+        );
         fireEvent.click(
             screen.getByRole('button', { name: 'classes.features.addLevel' })
         );
-        fireEvent.change(screen.getByLabelText('classes.features.levelToAdd'), {
-            target: { value: '4' },
-        });
+        await pickOption(
+            screen.getByLabelText('classes.features.levelToAdd'),
+            '4'
+        );
         fireEvent.click(
             screen.getByRole('button', { name: 'classes.features.addLevel' })
         );
@@ -109,14 +116,14 @@ describe('ClassFeaturesEditor', () => {
         expect(headings()).toEqual(['classes.features.level {"level":3}']);
     });
 
-    it('не пропонує вже додані рівні', () => {
+    it('не пропонує вже додані рівні', async () => {
         render(<Harness initial={[{ level: 1, abilities: [] }]} />);
 
-        const options = Array.from(
-            screen
-                .getByLabelText('classes.features.levelToAdd')
-                .querySelectorAll('option')
-        ).map((o) => o.value);
+        const options = (
+            await listOptions(
+                screen.getByLabelText('classes.features.levelToAdd')
+            )
+        ).map((o) => o.textContent);
 
         expect(options).not.toContain('1');
         expect(options).toHaveLength(19);

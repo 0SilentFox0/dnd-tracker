@@ -12,9 +12,8 @@ describe('OptionButton', () => {
             <OptionButton
                 role="checkbox"
                 checked
-                title="Ліс"
-                note="опис"
                 onClick={() => {}}
+                text={{ title: 'Ліс', note: 'опис' }}
             />
         );
 
@@ -31,8 +30,8 @@ describe('OptionButton', () => {
             <OptionButton
                 role="radio"
                 checked={false}
-                title="A"
                 onClick={onClick}
+                text={{ title: 'A' }}
             />
         );
 
@@ -43,8 +42,8 @@ describe('OptionButton', () => {
                 role="radio"
                 checked={false}
                 disabled
-                title="A"
                 onClick={onClick}
+                text={{ title: 'A' }}
             />
         );
         fireEvent.click(screen.getByRole('radio'));

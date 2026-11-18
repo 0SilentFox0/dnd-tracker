@@ -7,6 +7,7 @@ import { HudSection } from '@/components/hud/form';
 import { HudPanel } from '@/components/hud/page';
 import { ActionBar } from '@/components/ui/action-bar';
 import { Button } from '@/components/ui/button';
+import { Disclosure } from '@/components/ui/disclosure';
 import type { CompendiumImportController } from '@/lib/hooks/compendium-import';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import {
@@ -105,12 +106,16 @@ export function CompendiumCategories({
                 </fieldset>
             </HudSection>
             {skipped.length > 0 && (
-                <details className="text-sm text-hud-muted">
-                    <summary className="cursor-pointer">
-                        {t('categoriesStep.skippedTechnical', {
-                            count: skipped.length,
-                        })}
-                    </summary>
+                <Disclosure
+                    className="text-sm text-hud-muted"
+                    summary={
+                        <span>
+                            {t('categoriesStep.skippedTechnical', {
+                                count: skipped.length,
+                            })}
+                        </span>
+                    }
+                >
                     <ul className="mt-1 flex flex-wrap gap-x-3 text-xs">
                         {skipped.map((row) => (
                             <li key={row.kind}>
@@ -121,7 +126,7 @@ export function CompendiumCategories({
                             </li>
                         ))}
                     </ul>
-                </details>
+                </Disclosure>
             )}
             <CompendiumMaterials
                 blocks={blocks}

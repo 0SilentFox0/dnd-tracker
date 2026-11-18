@@ -4,7 +4,7 @@ import { Loader2, Swords } from 'lucide-react';
 import { type AttackWizardModel, btn, primaryBtn } from './shared';
 
 import { PendingChoiceNote } from '@/components/battle/wizards/PendingChoiceNote';
-import { Button } from '@/components/ui/button';
+import { HudButton } from '@/components/hud';
 import { useText } from '@/lib/i18n/use-text';
 import { cn } from '@/lib/utils';
 import { formatDamageStep } from '@/lib/utils/battle/view';
@@ -66,8 +66,7 @@ export function SummaryStep({
                     </div>
                     <div className="mt-1.5 flex flex-wrap gap-2">
                         {view.cunning.options.map((o) => (
-                            <Button
-                                variant="bare"
+                            <HudButton
                                 key={o.effect}
                                 type="button"
                                 aria-pressed={o.selected}
@@ -81,24 +80,22 @@ export function SummaryStep({
                                 )}
                             >
                                 {text(o.label)} · −{o.dice}d6
-                            </Button>
+                            </HudButton>
                         ))}
                     </div>
                 </div>
             )}
             {state.waitingCrit && <PendingChoiceNote />}
             <div className="mt-3 grid grid-cols-2 gap-2">
-                <Button
-                    variant="bare"
+                <HudButton
                     type="button"
                     disabled={submitting}
                     onClick={actions.back}
                     className={cn(btn, 'border-white/25')}
                 >
                     ← {tc('back')}
-                </Button>
-                <Button
-                    variant="bare"
+                </HudButton>
+                <HudButton
                     type="button"
                     disabled={submitting}
                     onClick={actions.submit}
@@ -112,7 +109,7 @@ export function SummaryStep({
                             {t('submit')}
                         </>
                     )}
-                </Button>
+                </HudButton>
             </div>
         </>
     );

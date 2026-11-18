@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 
 import { EntityIcon } from '@/components/common/EntityIcon';
+import { Disclosure } from '@/components/ui/disclosure';
 import { cn } from '@/lib/utils';
 import type { ProgressionItem, ProgressionRow } from '@/types/classes';
 
@@ -31,35 +32,39 @@ export function Items({
         <ul className="space-y-1">
             {items.map((it) => (
                 <li key={it.key}>
-                    <details>
-                        <summary
-                            className={cn(
-                                'cursor-pointer text-sm',
-                                it.description ? '' : 'list-none'
-                            )}
-                            style={accent ? { color: accent } : undefined}
-                        >
-                            {it.icon ? (
-                                <EntityIcon
-                                    src={it.icon}
-                                    name={it.name}
-                                    size={20}
-                                    className="mr-1 inline-flex size-5 rounded align-middle"
-                                />
-                            ) : null}
-                            {it.name}
-                            {it.summary ? (
-                                <span className="ml-1 text-xs text-hud-muted">
-                                    {it.summary}
-                                </span>
-                            ) : null}
-                        </summary>
+                    <Disclosure
+                        hideChevron={!it.description}
+                        triggerClassName={cn(
+                            'text-sm',
+                            it.description ? '' : 'pointer-events-none'
+                        )}
+                        summary={
+                            <span
+                                style={accent ? { color: accent } : undefined}
+                            >
+                                {it.icon ? (
+                                    <EntityIcon
+                                        src={it.icon}
+                                        name={it.name}
+                                        size={20}
+                                        className="mr-1 inline-flex size-5 rounded align-middle"
+                                    />
+                                ) : null}
+                                {it.name}
+                                {it.summary ? (
+                                    <span className="ml-1 text-xs text-hud-muted">
+                                        {it.summary}
+                                    </span>
+                                ) : null}
+                            </span>
+                        }
+                    >
                         {it.description ? (
                             <p className="mt-1 text-xs whitespace-pre-line text-hud-muted">
                                 {it.description}
                             </p>
                         ) : null}
-                    </details>
+                    </Disclosure>
                 </li>
             ))}
         </ul>

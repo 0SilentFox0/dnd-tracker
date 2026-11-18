@@ -57,7 +57,7 @@ export function SelectField({
     required = false,
     allowNone = false,
     noneLabel,
-    noneValue = 'none',
+    noneValue = '__none__',
     children,
 }: SelectFieldProps) {
     const t = useTranslations('common');

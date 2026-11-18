@@ -1,7 +1,9 @@
 // @vitest-environment happy-dom
 import { useState } from 'react';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+
+import { pickOption } from '@/components/ui/__tests__/radix-select';
 
 vi.mock('@/lib/hooks/campaigns', () => ({
     useCampaignRules: () => ({ data: undefined }),
@@ -61,16 +63,14 @@ function Harness({
 describe.each(['flat', 'amount'] as const)('%s: class table mode', (kind) => {
     afterEach(cleanup);
 
-    it('shows the column picker for a scale value and switches the column', () => {
+    it('shows the column picker for a scale value and switches the column', async () => {
         render(<Harness kind={kind} initial={{ scale: 'rages' }} />);
 
-        const select = screen.getByLabelText(
-            'abilities.fields.classColumn'
-        ) as HTMLSelectElement;
+        const select = screen.getByLabelText('abilities.fields.classColumn');
 
-        expect(select.value).toBe('rages');
+        expect(select.textContent).toContain('rages');
 
-        fireEvent.change(select, { target: { value: 'rage-damage' } });
+        await pickOption(select, /Rage Damage/);
 
         expect(screen.getByTestId('v').textContent).toBe(
             '{"scale":"rage-damage"}'

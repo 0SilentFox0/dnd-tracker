@@ -12,6 +12,7 @@ import {
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { AbilityListEditor } from '@/components/abilities';
+import { pickOption } from '@/components/ui/__tests__/radix-select';
 import type { Ability } from '@/lib/utils/abilities/schema';
 
 vi.mock('@/lib/api/abilities', () => ({
@@ -321,7 +322,7 @@ describe('AbilityListEditor', () => {
 describe('linked action editor', () => {
     afterEach(cleanup);
 
-    it('chooses an attack reference and lair limit', () => {
+    it('chooses an attack reference and lair limit', async () => {
         render(
             <Harness
                 initial={[
@@ -335,12 +336,13 @@ describe('linked action editor', () => {
                 ]}
             />
         );
-        fireEvent.change(screen.getByLabelText('abilities.perform.kindAria'), {
-            target: { value: 'attack' },
-        });
-        fireEvent.change(
+        await pickOption(
+            screen.getByLabelText('abilities.perform.kindAria'),
+            'abilities.perform.attack'
+        );
+        await pickOption(
             screen.getByLabelText('abilities.perform.attackAria'),
-            { target: { value: 'Rend' } }
+            'Rend'
         );
         expect(json()[0].perform).toEqual({ kind: 'attack', attack: 'Rend' });
         fireEvent.click(screen.getByLabelText('abilities.limits.lair'));

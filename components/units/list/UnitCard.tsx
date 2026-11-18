@@ -75,12 +75,14 @@ export const UnitCard = memo(function UnitCard({
 
     return (
         <HudCard
-            href={
+            link={
                 canEdit
-                    ? `/campaigns/${campaignId}/dm/units/${unit.id}`
+                    ? {
+                          href: `/campaigns/${campaignId}/dm/units/${unit.id}`,
+                          label: unit.name,
+                      }
                     : undefined
             }
-            linkLabel={unit.name}
             className="group/card relative flex flex-col justify-between space-y-3"
         >
             <div

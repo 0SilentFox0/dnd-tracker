@@ -113,23 +113,26 @@ function CoreActionsBody({
                             role="radio"
                             checked={key === k}
                             disabled={!ok}
-                            title={tActions(`coreActions.${k}`)}
-                            meta={
-                                cost === 'movement'
-                                    ? t('movement')
-                                    : tCost(cost)
-                            }
-                            note={
-                                <>
-                                    {tDescription(`coreActions.descriptions.${k}`)}
-                                    {!ok && (
-                                        <span className="block text-hud-danger">
-                                            {reason && text(reason)}
-                                        </span>
-                                    )}
-                                </>
-                            }
                             onClick={() => choose(k)}
+                            text={{
+                                title: tActions(`coreActions.${k}`),
+                                meta:
+                                    cost === 'movement'
+                                        ? t('movement')
+                                        : tCost(cost),
+                                note: (
+                                    <>
+                                        {tDescription(
+                                            `coreActions.descriptions.${k}`
+                                        )}
+                                        {!ok && (
+                                            <span className="block text-hud-danger">
+                                                {reason && text(reason)}
+                                            </span>
+                                        )}
+                                    </>
+                                ),
+                            }}
                         />
                     ))}
                 </div>
@@ -144,8 +147,8 @@ function CoreActionsBody({
                                 key={m}
                                 role="radio"
                                 checked={mode === m}
-                                title={t(`shove.${m}`)}
                                 onClick={() => setMode(m)}
+                                text={{ title: t(`shove.${m}`) }}
                             />
                         ))}
                     </div>

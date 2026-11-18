@@ -23,8 +23,10 @@ export function MainSkillCard({
 
     return (
         <HudCard
-            href={`/campaigns/${campaignId}/dm/main-skills/${mainSkill.id}`}
-            linkLabel={mainSkill.name}
+            link={{
+                href: `/campaigns/${campaignId}/dm/main-skills/${mainSkill.id}`,
+                label: mainSkill.name,
+            }}
             accent={mainSkill.color}
             className="space-y-3"
         >

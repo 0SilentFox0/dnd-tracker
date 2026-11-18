@@ -9,7 +9,7 @@ import { ChoiceListEditor } from '@/components/choices/ChoiceListEditor';
 import { HUD_SELECT_CLASS, HudSection } from '@/components/hud/form';
 import { HudChipTabs } from '@/components/hud/page';
 import { Button } from '@/components/ui/button';
-import { NativeSelect } from '@/components/ui/native-select';
+import { SelectField } from '@/components/ui/select-field';
 import { MAX_CLASS_LEVEL } from '@/lib/constants/classes';
 import { useErrorTotals } from '@/lib/hooks/common';
 import type { Ability } from '@/types/abilities';
@@ -183,18 +183,16 @@ export function ClassFeaturesEditor({
 
             {free.length > 0 && (
                 <div className="flex flex-wrap items-center gap-2">
-                    <NativeSelect
+                    <SelectField
                         aria-label={t('features.levelToAdd')}
-                        className={HUD_SELECT_CLASS}
-                        value={next ?? ''}
-                        onChange={(e) => setPicked(Number(e.target.value))}
-                    >
-                        {free.map((l) => (
-                            <option key={l} value={l}>
-                                {l}
-                            </option>
-                        ))}
-                    </NativeSelect>
+                        triggerClassName={`${HUD_SELECT_CLASS} w-auto`}
+                        value={String(next ?? '')}
+                        onValueChange={(v) => setPicked(Number(v))}
+                        options={free.map((l) => ({
+                            value: String(l),
+                            label: String(l),
+                        }))}
+                    />
                     <Button
                         type="button"
                         variant="outline"

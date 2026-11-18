@@ -4,8 +4,8 @@ import { Fragment, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { ChoiceCard, DetailsButton } from '@/components/choices/ChoiceCard';
+import { HudButton } from '@/components/hud';
 import { OptionButton } from '@/components/hud/OptionButton';
-import { Button } from '@/components/ui/button';
 import {
     ABILITY_KEYS,
     ABILITY_SCORE_CAP,
@@ -59,8 +59,7 @@ export function Card({
             checked={checked}
             disabled={disabled}
             onClick={onClick}
-            title={title}
-            note={note}
+            text={{ title: title, note: note }}
         />
     );
 }
@@ -225,8 +224,7 @@ export function AbilityPoints({
                         <span className="w-28">
                             {tg(`abilities.${a}.label`)}
                         </span>
-                        <Button
-                            variant="bare"
+                        <HudButton
                             type="button"
                             aria-label={`−1 ${tg(`abilities.${a}.label`)}`}
                             disabled={added === 0}
@@ -247,9 +245,8 @@ export function AbilityPoints({
                             className="rounded border border-hud-line/50 px-2 disabled:opacity-40"
                         >
                             −
-                        </Button>
-                        <Button
-                            variant="bare"
+                        </HudButton>
+                        <HudButton
                             type="button"
                             aria-label={`+1 ${tg(`abilities.${a}.label`)}`}
                             disabled={
@@ -262,7 +259,7 @@ export function AbilityPoints({
                             className="rounded border border-hud-line/50 px-2 disabled:opacity-40"
                         >
                             +
-                        </Button>
+                        </HudButton>
                         {after !== scores[a] && (
                             <span className="text-xs text-hud-muted">{`${scores[a]} → ${after}`}</span>
                         )}

@@ -7,7 +7,7 @@ import { AssistantReview } from './AssistantReview';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { NativeSelect } from '@/components/ui/native-select';
+import { SelectField } from '@/components/ui/select-field';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import { focusLabelOf } from '@/lib/utils/ai/focus';
 import type { AiFocus } from '@/types/ai';
@@ -57,24 +57,17 @@ export function AssistantWorkspace({
             >
                 <label>
                     {t('workspace.focusKind')}
-                    <NativeSelect
+                    <SelectField
                         aria-label={t('workspace.focusKind')}
                         value={kind}
-                        onChange={(event) => setKind(event.target.value)}
-                    >
-                        <option value="campaign">
-                            {t('workspace.kinds.campaign')}
-                        </option>
-                        <option value="scenario">
-                            {t('workspace.kinds.scenario')}
-                        </option>
-                        <option value="character">
-                            {t('workspace.kinds.character')}
-                        </option>
-                        <option value="battle">
-                            {t('workspace.kinds.battle')}
-                        </option>
-                    </NativeSelect>
+                        onValueChange={setKind}
+                        options={(
+                            ['campaign', 'scenario', 'character', 'battle'] as const
+                        ).map((k) => ({
+                            value: k,
+                            label: t(`workspace.kinds.${k}`),
+                        }))}
+                    />
                 </label>
                 {kind !== 'campaign' && (
                     <label>

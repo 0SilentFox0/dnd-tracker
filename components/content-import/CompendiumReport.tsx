@@ -17,6 +17,7 @@ import { SourceNotes } from './SourceNotes';
 import { PagerNav } from '@/components/common/PagerNav';
 import { HudChipTabs } from '@/components/hud/page';
 import { Button } from '@/components/ui/button';
+import { Disclosure } from '@/components/ui/disclosure';
 import { COMPENDIUM_PAGE_SIZES } from '@/lib/constants/compendium-import';
 import { usePager } from '@/lib/hooks/common';
 import { useTranslator } from '@/lib/i18n/use-translator';
@@ -177,10 +178,12 @@ export function CompendiumReport({
                     </ul>
                 </div>
             )}
-            <details open>
-                <summary className="cursor-pointer text-hud-gold">
-                    {t('report.sources')}
-                </summary>
+            <Disclosure
+                defaultOpen
+                summary={
+                    <span className="text-hud-gold">{t('report.sources')}</span>
+                }
+            >
                 <ul className="text-hud-muted">
                     {report.sources.map((source, index) => (
                         <li key={index}>{sourceLabel(t, source)}</li>
@@ -196,7 +199,7 @@ export function CompendiumReport({
                         )
                         .join('; ')}
                 </p>
-            </details>
+            </Disclosure>
             <CompendiumCoverage categories={categories} />
             <div className="space-y-2">
                 <h3 className="hud-sc text-base text-hud-ink">

@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { X } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
+import { HudButton } from '@/components/hud';
 import type { Toast } from '@/lib/hooks/common';
 
 export function ToastHost({
@@ -47,15 +47,14 @@ export function ToastHost({
                             {t('notifications.open')}
                         </Link>
                     )}
-                    <Button
-                        variant="bare"
+                    <HudButton
                         type="button"
                         aria-label={t('ui.close')}
                         onClick={() => onDismiss(toast.id)}
                         className="shrink-0 text-hud-muted hover:text-hud-ink"
                     >
                         <X className="size-4" />
-                    </Button>
+                    </HudButton>
                 </div>
             ))}
         </div>

@@ -33,8 +33,8 @@ export function TargetRadioList({
                     key={target.basicInfo.id}
                     role="radio"
                     checked={isOn(target.basicInfo.id)}
-                    title={target.basicInfo.name}
                     onClick={() => onChange(target.basicInfo.id)}
+                    text={{ title: target.basicInfo.name }}
                 />
             ))}
         </div>

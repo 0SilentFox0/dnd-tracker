@@ -22,7 +22,6 @@ export function UploadTrackButton({
     return (
         <>
             <Input
-                bare
                 ref={input}
                 type="file"
                 accept={TRACK_FILE_ACCEPT}

@@ -2,6 +2,8 @@
 import { cleanup, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { listOptions } from '@/components/ui/__tests__/radix-select';
+
 vi.unmock('next-intl');
 vi.mock('@/components/hud/fonts', () => ({ hudFontClassName: '' }));
 vi.mock('@/components/battle/use-system-battle-ui', () => ({
@@ -92,8 +94,10 @@ describe('attack and spell wizards', () => {
             screen.getByRole('button', { name: 'Disadvantage' })
         ).toBeInTheDocument();
         expect(
-            screen.getByRole('option', { name: 'Pact · level 3' })
-        ).toBeInTheDocument();
+            (await listOptions(screen.getByRole('combobox'))).map(
+                (o) => o.textContent
+            )
+        ).toContain('Pact · level 3');
         expect(document.body.textContent).not.toMatch(/battleWizards\./);
     });
 
@@ -115,8 +119,10 @@ describe('attack and spell wizards', () => {
             screen.getByRole('button', { name: 'Недолік' })
         ).toBeInTheDocument();
         expect(
-            screen.getByRole('option', { name: 'Пакт · коло 3' })
-        ).toBeInTheDocument();
+            (await listOptions(screen.getByRole('combobox'))).map(
+                (o) => o.textContent
+            )
+        ).toContain('Пакт · коло 3');
         expect(document.body.textContent).not.toMatch(/battleWizards\./);
     });
 });

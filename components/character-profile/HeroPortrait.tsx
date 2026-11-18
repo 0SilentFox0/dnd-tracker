@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 
 import { ImageZoomDialog } from '@/components/common/ImageZoomDialog';
 import { OptimizedImage } from '@/components/common/OptimizedImage';
-import { Button } from '@/components/ui/button';
+import { HudButton } from '@/components/hud';
 import { cn } from '@/lib/utils';
 
 interface HeroPortraitProps {
@@ -48,8 +48,7 @@ export function HeroPortrait({
 
     return (
         <>
-            <Button
-                variant="bare"
+            <HudButton
                 type="button"
                 aria-label={t('open')}
                 onClick={() => setOpen(true)}
@@ -62,7 +61,7 @@ export function HeroPortrait({
                     height={853}
                     className="size-full object-cover"
                 />
-            </Button>
+            </HudButton>
             <ImageZoomDialog
                 src={src}
                 name={name}

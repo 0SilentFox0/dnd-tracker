@@ -2,7 +2,7 @@
 
 import { MonitorPlay } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
+import { HudIconButton } from '@/components/hud';
 import { cn } from '@/lib/utils';
 
 export function PlayerViewToggle({
@@ -19,20 +19,19 @@ export function PlayerViewToggle({
     const label = enabled ? labels.on : labels.off;
 
     return (
-        <Button
-            variant="bare"
+        <HudIconButton
             type="button"
             onClick={onToggle}
             aria-label={label}
             aria-pressed={enabled}
             title={`${label} (P)`}
             className={cn(
-                'flex size-8 items-center justify-center hover:bg-white/10',
+                'hover:bg-white/10',
                 enabled ? 'text-[var(--gold)]' : 'text-hud-muted',
                 className
             )}
         >
             <MonitorPlay className="size-4" />
-        </Button>
+        </HudIconButton>
     );
 }

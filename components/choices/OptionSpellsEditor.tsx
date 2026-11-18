@@ -8,7 +8,7 @@ import { SpellGrantEditor } from './SpellGrantEditor';
 import { HUD_SELECT_CLASS } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { NativeSelect } from '@/components/ui/native-select';
+import { SelectField } from '@/components/ui/select-field';
 import { MAX_CLASS_LEVEL } from '@/lib/constants/classes';
 import { useSpells } from '@/lib/hooks/spells';
 import type { ChoiceOption } from '@/types/choices';
@@ -47,25 +47,26 @@ export function OptionSpellsEditor({
                                 set(i, { level: Number(e.target.value) || 1 })
                             }
                         />
-                        <NativeSelect
+                        <SelectField
                             aria-label={t('optionSpells.spell')}
-                            className={HUD_SELECT_CLASS}
+                            triggerClassName={`${HUD_SELECT_CLASS} w-auto`}
                             value={row.spellId}
-                            onChange={(e) =>
-                                set(i, { spellId: e.target.value })
-                            }
-                        >
-                            {spells.map((s) => (
-                                <option key={s.id} value={s.id}>
-                                    {s.name} ({s.level})
-                                </option>
-                            ))}
-                            {!spells.some((s) => s.id === row.spellId) && (
-                                <option value={row.spellId}>
-                                    {t('optionSpells.missing')}
-                                </option>
-                            )}
-                        </NativeSelect>
+                            onValueChange={(spellId) => set(i, { spellId })}
+                            options={[
+                                ...spells.map((s) => ({
+                                    value: s.id,
+                                    label: `${s.name} (${s.level})`,
+                                })),
+                                ...(spells.some((s) => s.id === row.spellId)
+                                    ? []
+                                    : [
+                                          {
+                                              value: row.spellId,
+                                              label: t('optionSpells.missing'),
+                                          },
+                                      ]),
+                            ]}
+                        />
                         <Button
                             type="button"
                             variant="ghost"

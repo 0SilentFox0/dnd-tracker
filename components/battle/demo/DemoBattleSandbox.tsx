@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { BattleMap } from '@/components/battle/map/BattleMap';
+import { HudButton } from '@/components/hud';
 import { Button } from '@/components/ui/button';
 import { DEFAULT_BATTLE_MAP, MAZE_MARK_SYMBOLS } from '@/lib/constants/battle';
 import {
@@ -104,8 +105,7 @@ export function DemoBattleSandbox({ scene }: { scene: BattleScene }) {
                 className="grid gap-2 sm:grid-cols-2"
             >
                 {participants.map((participant) => (
-                    <Button
-                        variant="bare"
+                    <HudButton
                         key={participant.basicInfo.id}
                         type="button"
                         onClick={() =>
@@ -121,7 +121,7 @@ export function DemoBattleSandbox({ scene }: { scene: BattleScene }) {
                                 max: participant.combatStats.maxHp,
                             })}
                         </span>
-                    </Button>
+                    </HudButton>
                 ))}
             </section>
             {log.length > 0 && (

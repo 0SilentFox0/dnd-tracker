@@ -14,7 +14,7 @@ import {
     Zap,
 } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
+import { HudButton } from '@/components/hud';
 import type { usePlayerTurn } from '@/lib/hooks/battle';
 import { cn } from '@/lib/utils';
 type Turn = ReturnType<typeof usePlayerTurn>;
@@ -32,8 +32,7 @@ const Tile = ({
     primary?: boolean;
     onClick?: () => void;
 }) => (
-    <Button
-        variant="bare"
+    <HudButton
         type="button"
         disabled={used}
         onClick={onClick}
@@ -53,7 +52,7 @@ const Tile = ({
         <span className="hud-sc min-w-0 text-[17px] leading-5 [overflow-wrap:anywhere]">
             {label}
         </span>
-    </Button>
+    </HudButton>
 );
 
 export function ActionGrid({
@@ -191,15 +190,14 @@ export function ActionGrid({
                 )}
             </div>
             {turn.phase !== 'countdown' && (
-                <Button
-                    variant="bare"
+                <HudButton
                     type="button"
                     disabled={pending}
                     onClick={() => void turn.actions.endTurn()}
                     className="hud-sc mt-2 flex h-11 w-full items-center justify-center border border-white/15 text-[15px] tracking-[.08em] text-hud-soft disabled:opacity-50"
                 >
                     {t('endTurn')}
-                </Button>
+                </HudButton>
             )}
         </>
     );

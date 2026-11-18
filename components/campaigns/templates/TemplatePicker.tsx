@@ -4,9 +4,9 @@ import { useEffect, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 
 import { ImportDialog } from '@/components/common/ImportDialog';
+import { HudButton } from '@/components/hud';
 import { HudSection } from '@/components/hud/form';
 import { HudPill } from '@/components/hud/page';
-import { Button } from '@/components/ui/button';
 import {
     SelectField,
     type SelectOptionGroup,
@@ -215,14 +215,13 @@ export function TemplatePicker({ value, onChange }: TemplatePickerProps) {
                     {value.file && (
                         <p className="text-xs text-hud-muted">
                             {t('entities', { count: value.file.entities })} ·{' '}
-                            <Button
-                                variant="bare"
+                            <HudButton
                                 type="button"
                                 className="underline"
                                 onClick={() => setImportOpen(true)}
                             >
                                 {t('pickAnother')}
-                            </Button>
+                            </HudButton>
                         </p>
                     )}
                 </div>

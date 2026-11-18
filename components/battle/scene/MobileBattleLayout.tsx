@@ -22,8 +22,7 @@ import { ParticipantDetails } from '@/components/battle/participants/Participant
 import { ParticipantList } from '@/components/battle/participants/ParticipantList';
 import { ReserveSheetButton } from '@/components/battle/participants/ReservePanel';
 import { MyTurnControls } from '@/components/battle/turn/MyTurnControls';
-import { HUD_SURFACE } from '@/components/hud';
-import { Button } from '@/components/ui/button';
+import { HUD_SURFACE, HudButton } from '@/components/hud';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { BattleStatus, ParticipantSide } from '@/lib/constants/battle';
 import {
@@ -90,8 +89,7 @@ export function MobileBattleLayout() {
     const selected = useSelectedParticipant();
 
     const tabBtn = (side: MobileBattleTab, label: string, n?: number) => (
-        <Button
-            variant="bare"
+        <HudButton
             role="tab"
             aria-selected={tab === side}
             type="button"
@@ -104,7 +102,7 @@ export function MobileBattleLayout() {
             )}
         >
             {label} {n}
-        </Button>
+        </HudButton>
     );
 
     const completed = battle.status === BattleStatus.COMPLETED;
@@ -166,15 +164,14 @@ export function MobileBattleLayout() {
                     {mapTab && <ReserveSheetButton />}
                     {mapTab && <BattlePlayerViewToggle className="shrink-0" />}
                     {isDM && battle.status !== BattleStatus.PREPARED && (
-                        <Button
-                            variant="bare"
+                        <HudButton
                             type="button"
                             onClick={() => setDmOpen(true)}
                             aria-label={t('openDmActions')}
                             className="flex w-11 items-center justify-center text-[var(--gold)]"
                         >
                             <Settings2 className="size-5" />
-                        </Button>
+                        </HudButton>
                     )}
                 </div>
                 {/* док — шар над картою/списком: панель не може вилізти за верх області, а на будь-якій вкладці лишається змонтованою (звук іде) */}

@@ -4,6 +4,10 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { ChoiceListEditor } from '@/components/choices/ChoiceListEditor';
+import {
+    listOptions,
+    pickOption,
+} from '@/components/ui/__tests__/radix-select';
 import type { Choice, ChoiceOwner } from '@/types/choices';
 
 vi.mock('@/components/abilities', () => ({
@@ -50,7 +54,7 @@ const json = () =>
 describe('ChoiceListEditor', () => {
     afterEach(cleanup);
 
-    it('edits the grant policy of a spell choice', () => {
+    it('edits the grant policy of a spell choice', async () => {
         render(
             <Harness
                 owner="class"
@@ -74,24 +78,26 @@ describe('ChoiceListEditor', () => {
             rest: 'long',
             via: 'grant',
         });
-        fireEvent.change(screen.getByLabelText('choices.grant.restAria'), {
-            target: { value: 'short' },
-        });
+        await pickOption(
+            screen.getByLabelText('choices.grant.restAria'),
+            'choices.grant.restShort'
+        );
         fireEvent.change(screen.getByLabelText('choices.grant.circleAria'), {
             target: { value: '3' },
         });
         expect(json()[0].grant).toMatchObject({ rest: 'short', castLevel: 3 });
     });
 
-    it('adds a choice and switches its kind', () => {
+    it('adds a choice and switches its kind', async () => {
         render(<Harness owner="class" />);
 
         fireEvent.click(
             screen.getByRole('button', { name: 'choices.list.add' })
         );
-        fireEvent.change(screen.getByLabelText('choices.header.kind'), {
-            target: { value: 'abilityScore' },
-        });
+        await pickOption(
+            screen.getByLabelText('choices.header.kind'),
+            'choices.kinds.abilityScore'
+        );
 
         expect(json()[0]).toMatchObject({
             kind: 'abilityScore',
@@ -100,7 +106,7 @@ describe('ChoiceListEditor', () => {
         });
     });
 
-    it('class: count from a table column; race: lineage; feat: no nested feat kind', () => {
+    it('class: count from a table column; race: lineage; feat: no nested feat kind', async () => {
         render(
             <Harness
                 owner="class"
@@ -117,9 +123,10 @@ describe('ChoiceListEditor', () => {
             />
         );
 
-        fireEvent.change(screen.getByLabelText('choices.list.scale'), {
-            target: { value: 'metamagic' },
-        });
+        await pickOption(
+            screen.getByLabelText('choices.list.scale'),
+            'Metamagic'
+        );
 
         expect(json()[0].count).toEqual({ scale: 'metamagic' });
 
@@ -155,12 +162,10 @@ describe('ChoiceListEditor', () => {
         );
 
         expect(
-            Array.from(
-                screen
-                    .getByLabelText('choices.header.kind')
-                    .querySelectorAll('option')
-            ).map((o) => o.getAttribute('value'))
-        ).not.toContain('feat');
+            (
+                await listOptions(screen.getByLabelText('choices.header.kind'))
+            ).map((o) => o.textContent)
+        ).not.toContain('choices.kinds.feat');
         expect(screen.queryByLabelText('choices.header.level')).toBeNull();
     });
 
@@ -242,7 +247,7 @@ describe('ChoiceListEditor', () => {
         expect(
             screen
                 .getByText('choices.header.technical')
-                .closest('details')
+                .closest('[data-slot="disclosure"]')
                 ?.contains(screen.getByLabelText('choices.header.id'))
         ).toBe(true);
     });
@@ -270,6 +275,8 @@ describe('ChoiceListEditor', () => {
             />
         );
 
-        expect(screen.getByText('First').closest('details')?.open).toBe(false);
+        expect(screen.getByText('First').closest('button')?.dataset.state).toBe(
+            'closed'
+        );
     });
 });

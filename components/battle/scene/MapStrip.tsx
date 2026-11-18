@@ -3,7 +3,7 @@
 import { createContext, type ReactNode, useContext } from 'react';
 import { ChevronRight } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
+import { HudButton } from '@/components/hud';
 
 /** Нижня смуга вкладки «Карта» на телефоні: панелі, що інакше лягли б поверх карти, рендеряться сюди в потоці. */
 export const MapStripSlotContext = createContext<HTMLElement | null>(null);
@@ -23,14 +23,13 @@ export function MapStripRow({
     onExpand: () => void;
 }) {
     return (
-        <Button
-            variant="bare"
+        <HudButton
             type="button"
             onClick={onExpand}
             className="flex h-10 w-full items-center gap-2 text-left text-[15px] text-[var(--ink)]"
         >
             <span className="min-w-0 flex-1 truncate">{children}</span>
             <ChevronRight className="size-5 shrink-0 text-[var(--hud-muted)]" />
-        </Button>
+        </HudButton>
     );
 }

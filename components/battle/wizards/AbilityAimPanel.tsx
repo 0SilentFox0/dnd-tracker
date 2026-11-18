@@ -2,7 +2,7 @@ import { useTranslations } from 'next-intl';
 
 import { MapAimPanel } from './MapAimPanel';
 
-import { Button } from '@/components/ui/button';
+import { HudButton } from '@/components/hud';
 
 /** Поки вміння наводиться на карту, вибір закритий. */
 export function AbilityAimPanel({
@@ -22,14 +22,13 @@ export function AbilityAimPanel({
             title={name}
             hint={t('abilityAim.hint')}
             footer={
-                <Button
-                    variant="bare"
+                <HudButton
                     type="button"
                     onClick={onCancel}
                     className="hud-sc h-10 w-full border border-white/20 px-3 text-sm"
                 >
                     {tc('cancel')}
-                </Button>
+                </HudButton>
             }
         />
     );

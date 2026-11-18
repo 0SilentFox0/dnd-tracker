@@ -5,19 +5,8 @@ import { cn } from '@/lib/utils';
 function Input({
     className,
     type,
-    bare = false,
     ...props
-}: React.ComponentProps<'input'> & { bare?: boolean }) {
-    if (bare)
-        return (
-            <input
-                type={type}
-                data-slot="input"
-                className={className}
-                {...props}
-            />
-        );
-
+}: React.ComponentProps<'input'>) {
     return (
         <input
             type={type}

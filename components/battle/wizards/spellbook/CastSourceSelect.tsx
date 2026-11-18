@@ -1,6 +1,6 @@
 import { useTranslations } from 'next-intl';
 
-import { NativeSelect } from '@/components/ui/native-select';
+import { SelectField } from '@/components/ui/select-field';
 import { BATTLE_SELECT_CLASS } from '@/lib/constants/battle';
 import type { useSpellBook } from '@/lib/hooks/battle';
 import { useText } from '@/lib/i18n/use-text';
@@ -23,47 +23,35 @@ export function CastSourceSelect({ book }: { book: Book }) {
         <div className="mb-3 space-y-2 text-sm">
             <label className="flex items-center justify-between gap-3">
                 {tw('label')}
-                <NativeSelect
+                <SelectField
                     aria-label={tw('label')}
                     value={value}
-                    onChange={(e) => book.actions.setSource(e.target.value)}
-                    className={BATTLE_SELECT_CLASS}
-                >
-                    <option value="" disabled>
-                        {tw('pick')}
-                    </option>
-                    {options.map((option) => (
-                        <option
-                            key={option.value}
-                            value={option.value}
-                            disabled={option.disabled}
-                        >
-                            {text(option.label)}
-                        </option>
-                    ))}
-                </NativeSelect>
+                    onValueChange={book.actions.setSource}
+                    placeholder={tw('pick')}
+                    triggerClassName={`${BATTLE_SELECT_CLASS} w-auto`}
+                    options={options.map((option) => ({
+                        value: option.value,
+                        label: text(option.label),
+                        disabled: option.disabled,
+                    }))}
+                />
             </label>
             {book.view.castLevelOptions.length > 0 && (
                 <label className="flex items-center justify-between gap-3">
                     {tw('level')}
-                    <NativeSelect
+                    <SelectField
                         aria-label={tw('level')}
-                        value={book.view.castLevelValue ?? ''}
-                        onChange={(e) =>
-                            book.actions.setCastLevel(Number(e.target.value))
+                        value={String(book.view.castLevelValue ?? '')}
+                        onValueChange={(v) =>
+                            book.actions.setCastLevel(Number(v))
                         }
-                        className={BATTLE_SELECT_CLASS}
-                    >
-                        {book.view.castLevelOptions.map((option) => (
-                            <option
-                                key={option.value}
-                                value={option.value}
-                                disabled={option.disabled}
-                            >
-                                {text(option.label)}
-                            </option>
-                        ))}
-                    </NativeSelect>
+                        triggerClassName={`${BATTLE_SELECT_CLASS} w-auto`}
+                        options={book.view.castLevelOptions.map((option) => ({
+                            value: String(option.value),
+                            label: text(option.label),
+                            disabled: option.disabled,
+                        }))}
+                    />
                 </label>
             )}
         </div>

@@ -6,7 +6,7 @@ import { ChevronRight } from 'lucide-react';
 
 import { FLOW_BORDER, FLOW_TEXT, type FlowPart } from './flow-part';
 
-import { Button } from '@/components/ui/button';
+import { HudButton } from '@/components/hud';
 import { useAbilityText } from '@/lib/hooks/abilities';
 import { cn } from '@/lib/utils';
 import type {
@@ -53,8 +53,7 @@ export function AbilityFlow({
         );
 
         return onChipClick ? (
-            <Button
-                variant="bare"
+            <HudButton
                 key={key}
                 type="button"
                 data-part={part}
@@ -63,7 +62,7 @@ export function AbilityFlow({
                 onClick={() => onChipClick(part)}
             >
                 {content}
-            </Button>
+            </HudButton>
         ) : (
             <span key={key} data-part={part} className={className}>
                 {content}

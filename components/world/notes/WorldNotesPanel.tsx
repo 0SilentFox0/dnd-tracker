@@ -5,7 +5,7 @@ import { Pencil, Trash2 } from 'lucide-react';
 
 import { HudChipTabs, HudPanel } from '@/components/hud/page';
 import { Button } from '@/components/ui/button';
-import { NativeSelect } from '@/components/ui/native-select';
+import { SelectField } from '@/components/ui/select-field';
 import { Textarea } from '@/components/ui/textarea';
 import { WORLD_NOTE_MAX } from '@/lib/constants/world';
 import { type RosterHero, useNotesPanel } from '@/lib/hooks/world';
@@ -166,20 +166,16 @@ export function WorldNotesPanel({
                 />
                 <div className="flex flex-wrap items-center gap-2">
                     {!isDM && heroes.length > 1 ? (
-                        <NativeSelect
+                        <SelectField
                             aria-label={t('asHero')}
                             value={panel.characterId}
-                            onChange={(e) =>
-                                panel.setCharacterId(e.target.value)
-                            }
-                            className="h-9 rounded-md border border-hud-rule bg-black/40 px-2 text-sm text-hud-ink"
-                        >
-                            {heroes.map((h) => (
-                                <option key={h.id} value={h.id}>
-                                    {h.name}
-                                </option>
-                            ))}
-                        </NativeSelect>
+                            onValueChange={panel.setCharacterId}
+                            options={heroes.map((h) => ({
+                                value: h.id,
+                                label: h.name,
+                            }))}
+                            triggerClassName="h-9 w-auto rounded-md border-hud-rule bg-black/40 px-2 text-sm text-hud-ink data-[size=default]:h-9 dark:bg-black/40"
+                        />
                     ) : null}
                     <span
                         className={

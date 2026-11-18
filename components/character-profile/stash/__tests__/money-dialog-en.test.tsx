@@ -37,7 +37,7 @@ describe('MoneyDialog in English', () => {
 
         expect(screen.getByText('Spend')).toBeTruthy();
         expect(screen.getByLabelText('Amount')).toBeTruthy();
-        expect(screen.getByRole('option', { name: 'gp' })).toBeTruthy();
+        expect(screen.getByRole('combobox').textContent).toContain('gp');
         expect(screen.getByRole('button', { name: 'Confirm' })).toBeTruthy();
     });
 });

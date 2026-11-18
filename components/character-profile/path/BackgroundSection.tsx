@@ -6,6 +6,7 @@ import { useBackgroundFacts } from '@/components/choices/useBackgroundFacts';
 import { EntityIcon } from '@/components/common/EntityIcon';
 import { HudPill } from '@/components/hud/page';
 import { Button } from '@/components/ui/button';
+import { Disclosure } from '@/components/ui/disclosure';
 import { translateIssue } from '@/lib/i18n/translate-issue';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import type { SheetBackground } from '@/types/choices';
@@ -89,12 +90,12 @@ export function BackgroundSection({
                 )}
             </div>
             {description && (
-                <details className="text-hud-muted">
-                    <summary className="cursor-pointer">
-                        {t('description')}
-                    </summary>
+                <Disclosure
+                    className="text-hud-muted"
+                    summary={<>{t('description')}</>}
+                >
                     <p className="mt-1 whitespace-pre-line">{description}</p>
-                </details>
+                </Disclosure>
             )}
             {facts({ skills, tools, originFeatName: originFeat?.name }).map(
                 (line) => (

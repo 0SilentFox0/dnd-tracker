@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl';
 
 import { TargetButton } from '@/components/battle/wizards/TargetButton';
-import { Button } from '@/components/ui/button';
+import { HudButton } from '@/components/hud';
 import { useAbilityText } from '@/lib/hooks/abilities';
 import type { AuraZoneStep } from '@/lib/hooks/battle';
 
@@ -42,15 +42,14 @@ export function AuraZonePicker({ step }: { step: AuraZoneStep }) {
                     />
                 ))}
             </div>
-            <Button
-                variant="bare"
+            <HudButton
                 type="button"
                 disabled={pending}
                 onClick={() => void confirm()}
                 className="hud-sc flex h-11 w-full items-center justify-center border border-[var(--gold)] disabled:opacity-40"
             >
                 {t('aura.confirm', { count: selected.length })}
-            </Button>
+            </HudButton>
         </div>
     );
 }

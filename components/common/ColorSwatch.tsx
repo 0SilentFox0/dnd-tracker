@@ -22,7 +22,6 @@ export function ColorSwatch({
             style={{ background: color }}
         >
             <Input
-                bare
                 type="color"
                 aria-label={label}
                 value={color}

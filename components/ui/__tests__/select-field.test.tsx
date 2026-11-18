@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
-import { cleanup, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { SelectField } from '@/components/ui/select-field';
 
@@ -17,5 +17,23 @@ describe('SelectField', () => {
         );
 
         expect(screen.getByText('common.ui.selectPlaceholder')).toBeTruthy();
+    });
+
+    it('maps the none sentinel back to an empty string', () => {
+        const onValueChange = vi.fn();
+
+        render(
+            <SelectField
+                value="a"
+                onValueChange={onValueChange}
+                allowNone
+                noneLabel="None"
+                options={[{ value: 'a', label: 'A' }]}
+            />
+        );
+        fireEvent.keyDown(screen.getByRole('combobox'), { key: 'Enter' });
+        fireEvent.click(screen.getByRole('option', { name: 'None' }));
+
+        expect(onValueChange).toHaveBeenCalledWith('');
     });
 });

@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import { Lock } from 'lucide-react';
 
+import { HudButton } from '@/components/hud';
 import { Button } from '@/components/ui/button';
 import type { GraphDetail } from '@/lib/utils/scenario/graph/types';
 
@@ -83,8 +84,7 @@ export function GraphInspector({
                 <ul className="flex flex-col gap-1">
                     {links.map((l) => (
                         <li key={l.node.id}>
-                            <Button
-                                variant="bare"
+                            <HudButton
                                 type="button"
                                 className="flex w-full items-center gap-2 rounded px-1 py-0.5 text-left text-sm hover:bg-accent"
                                 onClick={() => onSelect(l.node.id)}
@@ -98,7 +98,7 @@ export function GraphInspector({
                                 <span className="text-xs text-muted-foreground">
                                     ×{l.count}
                                 </span>
-                            </Button>
+                            </HudButton>
                         </li>
                     ))}
                 </ul>
@@ -109,8 +109,7 @@ export function GraphInspector({
                     <ul className="flex flex-col gap-1">
                         {relations.map((r) => (
                             <li key={`${r.node.id}|${r.label}`}>
-                                <Button
-                                    variant="bare"
+                                <HudButton
                                     type="button"
                                     className="flex w-full flex-col rounded px-1 py-0.5 text-left text-sm hover:bg-accent"
                                     onClick={() => onSelect(r.node.id)}
@@ -121,7 +120,7 @@ export function GraphInspector({
                                     <span className="text-xs text-muted-foreground">
                                         {r.label}
                                     </span>
-                                </Button>
+                                </HudButton>
                             </li>
                         ))}
                     </ul>

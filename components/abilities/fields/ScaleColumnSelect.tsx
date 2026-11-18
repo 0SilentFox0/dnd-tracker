@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl';
 
 import { useAbilityEditor } from '@/components/abilities/editor-context';
 import { HUD_SELECT_CLASS } from '@/components/hud/form';
-import { NativeSelect } from '@/components/ui/native-select';
+import { SelectField } from '@/components/ui/select-field';
 
 export function ScaleColumnSelect({
     id,
@@ -24,21 +24,17 @@ export function ScaleColumnSelect({
     );
 
     return (
-        <NativeSelect
+        <SelectField
             id={id}
             aria-label={t('classColumn')}
-            className={`${HUD_SELECT_CLASS} w-full`}
+            triggerClassName={`${HUD_SELECT_CLASS} w-full`}
             value={value ?? ''}
-            onChange={(e) => onChange(e.target.value)}
-        >
-            <option value="" disabled>
-                —
-            </option>
-            {columns.map((c) => (
-                <option key={c.key} value={c.key}>
-                    {c.label} ({c.key})
-                </option>
-            ))}
-        </NativeSelect>
+            onValueChange={onChange}
+            placeholder="—"
+            options={columns.map((c) => ({
+                value: c.key,
+                label: `${c.label} (${c.key})`,
+            }))}
+        />
     );
 }

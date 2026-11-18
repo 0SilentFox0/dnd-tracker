@@ -4,7 +4,7 @@ import { memo } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { Portrait } from '@/components/battle/hud';
-import { Button } from '@/components/ui/button';
+import { HudButton } from '@/components/hud';
 import { useBattleSceneData } from '@/lib/hooks/battle';
 import { useServiceActorName } from '@/lib/i18n/use-service-actor-name';
 import { useTranslator } from '@/lib/i18n/use-translator';
@@ -40,8 +40,7 @@ export const LastActionTicker = memo(function LastActionTicker({
     const change = last.hpChanges?.[0]?.change ?? 0;
 
     return (
-        <Button
-            variant="bare"
+        <HudButton
             type="button"
             onClick={onOpenLog}
             className="mx-4 flex h-10 w-[calc(100%-2rem)] items-center gap-2 border-y border-white/10 text-left text-sm text-hud-text"
@@ -74,6 +73,6 @@ export const LastActionTicker = memo(function LastActionTicker({
                     {ts('openLog')}
                 </span>
             )}
-        </Button>
+        </HudButton>
     );
 });

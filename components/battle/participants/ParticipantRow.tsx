@@ -14,8 +14,8 @@ import {
     Portrait,
 } from '@/components/battle/hud';
 import { HitFrame, PortraitFx } from '@/components/fx/PortraitFx';
+import { HudButton } from '@/components/hud';
 import type { SystemBattleUi } from '@/components/systems/types';
-import { Button } from '@/components/ui/button';
 import { useHitFx } from '@/lib/hooks/battle';
 import { useCreatureTypeLabel } from '@/lib/i18n/use-creature-type';
 import { useText } from '@/lib/i18n/use-text';
@@ -91,8 +91,7 @@ export const ParticipantRow = memo(function ParticipantRow({
                 down && 'opacity-40'
             )}
         >
-            <Button
-                variant="bare"
+            <HudButton
                 type="button"
                 aria-label={participant.basicInfo.name}
                 onClick={() => onSelect(participant.basicInfo.id)}

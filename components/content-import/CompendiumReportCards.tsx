@@ -4,6 +4,7 @@ import Link from 'next/link';
 
 import { HudPill } from '@/components/hud/page';
 import { Button } from '@/components/ui/button';
+import { Disclosure } from '@/components/ui/disclosure';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import { destination } from '@/lib/utils/compendium-import/flow';
 import {
@@ -134,11 +135,15 @@ export function IssueGroupCard({
 
     return (
         <li>
-            <details className="rounded-lg border border-hud-rule px-3 py-2">
-                <summary className="cursor-pointer">
-                    <strong>{group.title}</strong>{' '}
-                    <HudPill tone="muted">{group.items.length}</HudPill>
-                </summary>
+            <Disclosure
+                className="rounded-lg border border-hud-rule px-3 py-2"
+                summary={
+                    <span>
+                        <strong>{group.title}</strong>{' '}
+                        <HudPill tone="muted">{group.items.length}</HudPill>
+                    </span>
+                }
+            >
                 <p className="mt-2">{group.action}</p>
                 <ul className="mt-2 space-y-1">
                     {group.items.slice(0, shown).map((item, index) => (
@@ -173,7 +178,7 @@ export function IssueGroupCard({
                         })}
                     </Button>
                 )}
-            </details>
+            </Disclosure>
         </li>
     );
 }
@@ -197,39 +202,45 @@ export function RowCard({
 
     return (
         <li className="min-w-0">
-            <details className="rounded-lg bg-hud-panel p-3 shadow-[inset_0_0_0_1px_var(--color-hud-edge)]">
-                <summary className="cursor-pointer space-y-1">
-                    {kind && (
-                        <span className="block text-[11px] text-hud-muted uppercase">
-                            {kind}
-                        </span>
-                    )}
-                    <span className="hud-sc block text-[15px] break-words text-hud-ink">
-                        {kind ? `«${name}»${owner}` : name}
-                    </span>
-                    {source && (
-                        <span className="block text-xs break-words text-hud-muted">
-                            {source}
-                        </span>
-                    )}
-                    <span className="flex flex-wrap gap-1 pt-1">
-                        <HudPill
-                            tone={
-                                row.status === 'unchanged' ? 'muted' : 'accent'
-                            }
-                        >
-                            {statusLabel(t, row.status)}
-                        </HudPill>
-                        <HudPill>{coverageLabel(t, row.coverage)}</HudPill>
-                        {actions.length > 0 && (
-                            <HudPill tone="bone">
-                                {t('report.manualActionsCount', {
-                                    count: actions.length,
-                                })}
-                            </HudPill>
+            <Disclosure
+                className="rounded-lg bg-hud-panel p-3 shadow-[inset_0_0_0_1px_var(--color-hud-edge)]"
+                summary={
+                    <span className="space-y-1">
+                        {kind && (
+                            <span className="block text-[11px] text-hud-muted uppercase">
+                                {kind}
+                            </span>
                         )}
+                        <span className="hud-sc block text-[15px] break-words text-hud-ink">
+                            {kind ? `«${name}»${owner}` : name}
+                        </span>
+                        {source && (
+                            <span className="block text-xs break-words text-hud-muted">
+                                {source}
+                            </span>
+                        )}
+                        <span className="flex flex-wrap gap-1 pt-1">
+                            <HudPill
+                                tone={
+                                    row.status === 'unchanged'
+                                        ? 'muted'
+                                        : 'accent'
+                                }
+                            >
+                                {statusLabel(t, row.status)}
+                            </HudPill>
+                            <HudPill>{coverageLabel(t, row.coverage)}</HudPill>
+                            {actions.length > 0 && (
+                                <HudPill tone="bone">
+                                    {t('report.manualActionsCount', {
+                                        count: actions.length,
+                                    })}
+                                </HudPill>
+                            )}
+                        </span>
                     </span>
-                </summary>
+                }
+            >
                 <div className="mt-2 space-y-1">
                     {actions.map((issue, i) => (
                         <p key={i} title={issue.code}>
@@ -256,7 +267,7 @@ export function RowCard({
                         </div>
                     )}
                 </div>
-            </details>
+            </Disclosure>
         </li>
     );
 }

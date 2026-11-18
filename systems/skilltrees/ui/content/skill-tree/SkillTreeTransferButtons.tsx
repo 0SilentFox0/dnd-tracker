@@ -1,11 +1,10 @@
 'use client';
 
-import { useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { Download, Upload } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { FileButton } from '@/components/ui/file-button';
 import { useSkillTreeTransfer } from '@/systems/skilltrees/hooks';
 
 export function SkillTreeTransferButtons({
@@ -17,34 +16,19 @@ export function SkillTreeTransferButtons({
 
     const transfer = useSkillTreeTransfer(campaignId);
 
-    const input = useRef<HTMLInputElement>(null);
-
     return (
         <div className="flex flex-wrap justify-end gap-2">
-            <Input
-                bare
-                ref={input}
-                type="file"
+            <FileButton
                 accept=".json"
-                className="hidden"
-                aria-label={t('fileLabel')}
-                onChange={(e) => {
-                    const file = e.target.files?.[0];
-
-                    e.target.value = '';
-
-                    if (file) void transfer.actions.importFile(file);
-                }}
-            />
-            <Button
+                inputLabel={t('fileLabel')}
+                onFile={(file) => void transfer.actions.importFile(file)}
                 variant="outline"
                 size="sm"
                 disabled={!transfer.ready || transfer.busy}
-                onClick={() => input.current?.click()}
             >
                 <Upload className="h-4 w-4" />
                 {t('import')}
-            </Button>
+            </FileButton>
             <Button
                 variant="outline"
                 size="sm"

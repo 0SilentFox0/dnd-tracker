@@ -84,8 +84,10 @@ export function MapLibraryList({ campaignId }: { campaignId: string }) {
                         {maps.map((map) => (
                             <HudCard
                                 key={map.id}
-                                href={editorHref(map.id)}
-                                linkLabel={map.name}
+                                link={{
+                                    href: editorHref(map.id),
+                                    label: map.name,
+                                }}
                                 className="flex h-full flex-col gap-3"
                             >
                                 <div className="flex items-start justify-between gap-2">

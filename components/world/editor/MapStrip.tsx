@@ -16,6 +16,7 @@ import {
 import { ChildMapList, ImageFileInput, RadiusRange } from './MapFieldParts';
 import { useWorldEditorContext } from './WorldEditorContext';
 
+import { HudButton } from '@/components/hud';
 import { Button } from '@/components/ui/button';
 import {
     Popover,
@@ -98,9 +99,9 @@ export function MapStrip({
             </Button>
             <Popover>
                 <PopoverTrigger asChild>
-                    <Button variant="bare" type="button" className={CHIP}>
+                    <HudButton type="button" className={CHIP}>
                         {t('editor.children', { count: children.length })}
-                    </Button>
+                    </HudButton>
                 </PopoverTrigger>
                 <PopoverContent className={cn(POPOVER, 'w-60')}>
                     <ChildMapList

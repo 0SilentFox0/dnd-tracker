@@ -5,8 +5,9 @@ import { useTranslations } from 'next-intl';
 import { Info } from 'lucide-react';
 
 import { EntityIcon } from '@/components/common/EntityIcon';
+import { HudButton } from '@/components/hud';
 import { HudPill } from '@/components/hud/page';
-import { Button } from '@/components/ui/button';
+import { Disclosure } from '@/components/ui/disclosure';
 import { DND_SKILLS, type DndSkill } from '@/lib/constants/skills';
 import { cn } from '@/lib/utils';
 import {
@@ -46,8 +47,10 @@ function SubclassOptions({ progression }: { progression: ClassProgression }) {
     const preview = useMemo(() => subclassPreview(progression), [progression]);
 
     return (
-        <details className="mt-1 text-xs text-hud-muted">
-            <summary className="cursor-pointer">{t('subclassOptions')}</summary>
+        <Disclosure
+            className="mt-1 text-xs text-hud-muted"
+            summary={<>{t('subclassOptions')}</>}
+        >
             <ul className="mt-1 space-y-1">
                 {preview.map((sub) => (
                     <li key={sub.id}>
@@ -73,7 +76,7 @@ function SubclassOptions({ progression }: { progression: ClassProgression }) {
                     </li>
                 ))}
             </ul>
-        </details>
+        </Disclosure>
     );
 }
 
@@ -107,14 +110,13 @@ function PickLine({
     const subclass = progression.subclasses.find((c) => c.id === chosen)?.name;
 
     const pickButton = (label: string) => (
-        <Button
-            variant="bare"
+        <HudButton
             type="button"
             onClick={() => onPick?.(pickStepKey(progression.classId, pick))}
             className="min-h-10 w-full rounded-md border border-hud-gold-strong/60 px-3 py-2 text-left text-sm text-hud-gold-strong"
         >
             {label}
-        </Button>
+        </HudButton>
     );
 
     if (pick.kind === 'subclass') {
@@ -242,15 +244,14 @@ export function PathRowCard({
                             ) : null}
                         </div>
                         {item.description ? (
-                            <Button
-                                variant="bare"
+                            <HudButton
                                 type="button"
                                 aria-label={t('details', { name: item.name })}
                                 onClick={() => onDetail(item)}
                                 className="flex size-9 shrink-0 items-center justify-center rounded-md text-hud-muted hover:text-hud-ink"
                             >
                                 <Info className="size-4" />
-                            </Button>
+                            </HudButton>
                         ) : null}
                     </li>
                 ))}

@@ -11,12 +11,12 @@ import {
     X,
 } from 'lucide-react';
 
+import { HudButton } from '@/components/hud';
 import { AddYoutubeTrackDialog } from '@/components/music/AddYoutubeTrackDialog';
 import { TrackTitleInput } from '@/components/music/TrackTitleInput';
 import { UploadTrackButton } from '@/components/music/UploadTrackButton';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { NativeSelect } from '@/components/ui/native-select';
+import { SelectField } from '@/components/ui/select-field';
 import {
     type PlayerAudioDm,
     type PlaylistView,
@@ -57,8 +57,7 @@ function TrackRow({
                     className="h-auto rounded border-hud-rule bg-black/60 px-1.5 py-1 text-xs text-hud-bone md:text-xs"
                 />
             ) : (
-                <Button
-                    variant="bare"
+                <HudButton
                     type="button"
                     aria-current={current || undefined}
                     disabled={disabled}
@@ -71,11 +70,10 @@ function TrackRow({
                 >
                     {track.kind === 'youtube' ? '▶ ' : '♪ '}
                     {label}
-                </Button>
+                </HudButton>
             )}
             {!editing && (
-                <Button
-                    variant="bare"
+                <HudButton
                     type="button"
                     aria-label={t('playlist.renameLabel', {
                         title: track.title,
@@ -85,7 +83,7 @@ function TrackRow({
                     className="flex size-7 shrink-0 items-center justify-center text-hud-muted hover:text-hud-bone"
                 >
                     <Pencil className="size-3.5" />
-                </Button>
+                </HudButton>
             )}
         </li>
     );
@@ -93,6 +91,9 @@ function TrackRow({
 
 const FIELD =
     'h-7 min-w-0 rounded border border-hud-rule bg-black/60 px-1.5 text-xs text-hud-bone';
+
+const SELECT =
+    'h-7 min-w-0 rounded border-hud-rule bg-black/60 px-1.5 py-0 text-xs text-hud-bone shadow-none data-[size=default]:h-7 dark:bg-black/60 dark:hover:bg-black/60';
 
 const KINDS: TrackKind[] = ['youtube', 'file'];
 
@@ -125,42 +126,37 @@ function PlaylistFilters({
             </div>
             <div className="flex items-center gap-1">
                 {view.groupNames.length > 1 && (
-                    <NativeSelect
+                    <SelectField
                         aria-label={t('music.playlist.group')}
                         value={data.group ?? ''}
-                        onChange={(e) => set({ group: e.target.value || null })}
-                        className={cn(FIELD, 'flex-1')}
-                    >
-                        <option value="">
-                            {t('music.playlist.allGroups')}
-                        </option>
-                        {view.groupNames.map((g) => (
-                            <option key={g} value={g}>
-                                {trackGroupLabel(t, g)}
-                            </option>
-                        ))}
-                    </NativeSelect>
+                        onValueChange={(v) => set({ group: v || null })}
+                        allowNone
+                        noneLabel={t('music.playlist.allGroups')}
+                        options={view.groupNames.map((g) => ({
+                            value: g,
+                            label: trackGroupLabel(t, g),
+                        }))}
+                        className="flex-1"
+                        triggerClassName={SELECT}
+                    />
                 )}
-                <NativeSelect
+                <SelectField
                     aria-label={t('music.playlist.kind')}
                     value={data.kind ?? ''}
-                    onChange={(e) =>
-                        set({
-                            kind: (e.target.value || null) as TrackKind | null,
-                        })
+                    onValueChange={(v) =>
+                        set({ kind: (v || null) as TrackKind | null })
                     }
-                    className={cn(FIELD, 'flex-1')}
-                >
-                    <option value="">{t('music.playlist.allKinds')}</option>
-                    {KINDS.map((k) => (
-                        <option key={k} value={k}>
-                            {t(`music.playlist.kinds.${k}`)}
-                        </option>
-                    ))}
-                </NativeSelect>
+                    allowNone
+                    noneLabel={t('music.playlist.allKinds')}
+                    options={KINDS.map((k) => ({
+                        value: k,
+                        label: t(`music.playlist.kinds.${k}`),
+                    }))}
+                    className="flex-1"
+                    triggerClassName={SELECT}
+                />
                 {active && (
-                    <Button
-                        variant="bare"
+                    <HudButton
                         type="button"
                         aria-label={t('music.playlist.resetFilters')}
                         title={t('music.playlist.resetFilters')}
@@ -168,7 +164,7 @@ function PlaylistFilters({
                         className="flex size-7 shrink-0 items-center justify-center text-hud-muted hover:text-hud-bone"
                     >
                         <X className="size-3.5" />
-                    </Button>
+                    </HudButton>
                 )}
             </div>
             {active && (
@@ -214,8 +210,7 @@ export function DmPlaylist({ dm }: { dm: PlayerAudioDm }) {
 
     return (
         <div className="mt-2" data-tour="music.playlist">
-            <Button
-                variant="bare"
+            <HudButton
                 type="button"
                 aria-expanded={open}
                 onClick={() => set(!open)}
@@ -229,7 +224,7 @@ export function DmPlaylist({ dm }: { dm: PlayerAudioDm }) {
                 <span className="hud-sc tracking-[.08em]">
                     {t('music.playlist.title')}
                 </span>
-            </Button>
+            </HudButton>
             {open && (
                 <>
                     <div className="mt-2 flex items-center gap-1">
@@ -237,8 +232,7 @@ export function DmPlaylist({ dm }: { dm: PlayerAudioDm }) {
                             pending={library.isBusy}
                             onFile={(file) => void library.upload(file)}
                         />
-                        <Button
-                            variant="bare"
+                        <HudButton
                             type="button"
                             disabled={library.isBusy}
                             onClick={() => setYoutubeOpen(true)}
@@ -246,7 +240,7 @@ export function DmPlaylist({ dm }: { dm: PlayerAudioDm }) {
                         >
                             <Plus className="size-3.5" />
                             {t('music.youtube.add')}
-                        </Button>
+                        </HudButton>
                     </div>
                     <AddYoutubeTrackDialog
                         open={youtubeOpen}
@@ -275,8 +269,7 @@ export function DmPlaylist({ dm }: { dm: PlayerAudioDm }) {
 
                                   return (
                                       <li key={g.name}>
-                                          <Button
-                                              variant="bare"
+                                          <HudButton
                                               type="button"
                                               aria-expanded={!folded}
                                               onClick={() =>
@@ -295,7 +288,7 @@ export function DmPlaylist({ dm }: { dm: PlayerAudioDm }) {
                                               <span className="text-hud-muted">
                                                   {g.tracks.length}
                                               </span>
-                                          </Button>
+                                          </HudButton>
                                           {!folded && (
                                               <ul aria-label={groupLabel}>
                                                   {g.tracks.map(row)}

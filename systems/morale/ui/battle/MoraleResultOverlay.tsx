@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { Button } from '@/components/ui/button';
+import { HudButton } from '@/components/hud';
 import { useBattleScene } from '@/lib/hooks/battle';
 import { cn } from '@/lib/utils';
 import { TURN_SKIP_MS } from '@/lib/utils/battle/flows';
@@ -72,8 +72,7 @@ export function MoraleResultOverlay() {
                         morale: signed(data.morale),
                     })}
                 </div>
-                <Button
-                    variant="bare"
+                <HudButton
                     type="button"
                     onClick={close}
                     className={cn(
@@ -82,7 +81,7 @@ export function MoraleResultOverlay() {
                     )}
                 >
                     {t('toBattle')}
-                </Button>
+                </HudButton>
             </div>
         );
     }

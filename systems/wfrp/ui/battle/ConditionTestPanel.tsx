@@ -6,8 +6,8 @@ import { useTranslations } from 'next-intl';
 import { D100Input } from './D100Input';
 
 import { AiRollButton } from '@/components/battle/hud/DiceInput';
+import { HudButton } from '@/components/hud';
 import type { ConditionTestPanelProps } from '@/components/systems/types';
-import { Button } from '@/components/ui/button';
 import { useText } from '@/lib/i18n/use-text';
 import { cn } from '@/lib/utils';
 import { useConditionTestPanel } from '@/systems/wfrp/hooks/useConditionTestPanel';
@@ -39,8 +39,7 @@ export function ConditionTestPanel({ hero }: ConditionTestPanelProps) {
         <div className="mt-2 space-y-1.5">
             {panel.items.map(({ key, label, stand }) => (
                 <div key={key}>
-                    <Button
-                        variant="bare"
+                    <HudButton
                         type="button"
                         disabled={panel.isPending}
                         aria-expanded={open === key}
@@ -54,13 +53,12 @@ export function ConditionTestPanel({ hero }: ConditionTestPanelProps) {
                         {stand
                             ? t('stand')
                             : t('attempt', { condition: text(label) })}
-                    </Button>
+                    </HudButton>
                     {open === key && (
                         <div className="pb-1">
                             <div className="mt-2 grid h-9 grid-cols-2 border border-white/20">
                                 {SOURCES.map((m) => (
-                                    <Button
-                                        variant="bare"
+                                    <HudButton
                                         key={m}
                                         type="button"
                                         aria-pressed={source === m}
@@ -73,7 +71,7 @@ export function ConditionTestPanel({ hero }: ConditionTestPanelProps) {
                                         )}
                                     >
                                         {t(m === 'server' ? 'auto' : 'manual')}
-                                    </Button>
+                                    </HudButton>
                                 ))}
                             </div>
                             {source === 'manual' ? (

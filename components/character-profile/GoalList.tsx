@@ -5,6 +5,7 @@ import { Check, Pencil, Plus, Trash2, X } from 'lucide-react';
 
 import { useProfile } from './ProfileContext';
 
+import { HudButton } from '@/components/hud';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -116,8 +117,7 @@ export function GoalList() {
                         key={g.id}
                         className="flex items-start gap-2 border-b border-hud-raised py-2.5 text-sm last:border-b-0"
                     >
-                        <Button
-                            variant="bare"
+                        <HudButton
                             type="button"
                             disabled={!isDM || isPending}
                             aria-label={t('statusLabel', {
@@ -142,7 +142,7 @@ export function GoalList() {
                             ) : (
                                 '◆'
                             )}
-                        </Button>
+                        </HudButton>
                         <div className="min-w-0 flex-1 pt-1.5">
                             {(g.title ||
                                 g.kind ||

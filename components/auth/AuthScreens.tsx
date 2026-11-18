@@ -16,6 +16,7 @@ import {
 } from '@/components/auth/AuthParts';
 import { NewPasswordForm } from '@/components/auth/NewPasswordForm';
 import { PasswordInput } from '@/components/auth/PasswordInput';
+import { HudButton } from '@/components/hud';
 import { Button } from '@/components/ui/button';
 import { LabeledInput } from '@/components/ui/labeled-input';
 import { AFTER_SIGN_IN_PATH, PASSWORD_MIN_LENGTH } from '@/lib/constants/auth';
@@ -126,14 +127,13 @@ function SignUpCard() {
                     <p className="text-hud-muted">{t('signUp.existingNote')}</p>
                     <ResendConfirmation email={sentTo} />
                     <div className="flex justify-between text-sm">
-                        <Button
-                            variant="bare"
+                        <HudButton
                             type="button"
                             onClick={reset}
                             className="text-hud-gold hover:text-hud-gold-strong"
                         >
                             {t('signUp.changeEmail')}
-                        </Button>
+                        </HudButton>
                         <AuthLink href="/sign-in">
                             {t('common.backToSignIn')}
                         </AuthLink>

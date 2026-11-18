@@ -8,6 +8,7 @@ import { ChoicePicker } from './ChoicePicker';
 import { issueFor, pickerBase, pickerContextFor } from './picker-context';
 import { SubclassCard } from './SubclassCard';
 
+import { HudButton } from '@/components/hud';
 import { Button } from '@/components/ui/button';
 import { type ChoiceRefsView, useChoiceWizard } from '@/lib/hooks/characters';
 import {
@@ -173,8 +174,7 @@ export function ChoiceWizard({
                     {conflict?.kind === 'freeOrigin' && (
                         <p role="alert" className="text-sm text-hud-danger">
                             {t('editor.originFirst')}
-                            <Button
-                                variant="bare"
+                            <HudButton
                                 type="button"
                                 className="ml-2 underline"
                                 onClick={() =>
@@ -187,7 +187,7 @@ export function ChoiceWizard({
                                 }
                             >
                                 {t('editor.replaceOrigin')}
-                            </Button>
+                            </HudButton>
                         </p>
                     )}
                     {conflict?.kind === 'duplicate' && (

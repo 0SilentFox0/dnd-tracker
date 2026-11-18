@@ -39,6 +39,10 @@ vi.mock('@/lib/hooks/artifacts', () => ({
 
 import { ArtifactItemFields } from '../ArtifactItemFields';
 
+vi.mock('@/components/ui/select-field', () =>
+    import('@/components/ui/__tests__/select-field-mock')
+);
+
 afterEach(cleanup);
 
 describe('ArtifactItemFields', () => {

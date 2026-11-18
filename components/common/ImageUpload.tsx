@@ -81,7 +81,6 @@ export function ImageUpload({
                         {t('ui.or')}
                     </span>
                     <Input
-                        bare
                         ref={fileInputRef}
                         type="file"
                         accept={ACCEPT}

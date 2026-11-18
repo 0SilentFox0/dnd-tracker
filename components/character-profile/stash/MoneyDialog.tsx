@@ -7,8 +7,8 @@ import { useProfile } from '../ProfileContext';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { NativeSelect } from '@/components/ui/native-select';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
+import { SelectField } from '@/components/ui/select-field';
 import { type Coin, COINS } from '@/lib/constants/inventory';
 import { useStashAction } from '@/lib/hooks/characters';
 import { useNotify } from '@/lib/hooks/common';
@@ -148,20 +148,16 @@ export function MoneyDialog({
                                 className="h-11 min-w-0 flex-1"
                                 autoFocus
                             />
-                            <NativeSelect
+                            <SelectField
                                 aria-label={t('money.coin')}
                                 value={coin}
-                                onChange={(e) =>
-                                    setCoin(e.target.value as Coin)
-                                }
-                                className="h-11 rounded-md border border-hud-line bg-hud-field px-2 text-hud-ink"
-                            >
-                                {COINS.map((c) => (
-                                    <option key={c} value={c}>
-                                        {label(c)}
-                                    </option>
-                                ))}
-                            </NativeSelect>
+                                onValueChange={(v) => setCoin(v as Coin)}
+                                triggerClassName="h-11 w-auto border-hud-line bg-hud-field text-hud-ink"
+                                options={COINS.map((c) => ({
+                                    value: c,
+                                    label: label(c),
+                                }))}
+                            />
                         </div>
                         <Input
                             aria-label={t('money.noteSpend')}

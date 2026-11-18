@@ -2,7 +2,7 @@ import { useTranslations } from 'next-intl';
 
 import type { MoneyMode } from '../stash/MoneyDialog';
 
-import { Button } from '@/components/ui/button';
+import { HudIconButton } from '@/components/hud';
 import { COINS } from '@/lib/constants/inventory';
 import type { InventoryModel } from '@/lib/hooks/characters';
 import type { CurrencyView } from '@/lib/hooks/systems';
@@ -43,17 +43,16 @@ export function PurseBar({
                 <span className="flex gap-1">
                     {BUTTONS.filter((b) => !b.dmOnly || access.isDM).map(
                         (b) => (
-                            <Button
-                                variant="bare"
+                            <HudIconButton
                                 key={b.mode}
                                 type="button"
                                 aria-label={t(`purse.${b.mode}`)}
                                 title={t(`purse.${b.mode}`)}
                                 onClick={() => onMode(b.mode)}
-                                className="flex size-8 items-center justify-center rounded border border-hud-line text-hud-ink hover:border-hud-gold-strong"
+                                className="rounded border border-hud-line text-hud-ink hover:border-hud-gold-strong"
                             >
                                 {b.sign}
-                            </Button>
+                            </HudIconButton>
                         )
                     )}
                 </span>

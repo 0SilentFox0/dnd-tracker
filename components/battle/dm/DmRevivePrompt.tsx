@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { HeartPulse, Skull, X } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
+import { HudButton } from '@/components/hud';
 import { useBattleRules, useDownedHeroPrompt } from '@/lib/hooks/battle';
 
 export function DmRevivePrompt() {
@@ -37,8 +37,7 @@ export function DmRevivePrompt() {
                             }
                         )}
                     </span>
-                    <Button
-                        variant="bare"
+                    <HudButton
                         type="button"
                         disabled={isPending}
                         onClick={() => revive(p)}
@@ -46,16 +45,15 @@ export function DmRevivePrompt() {
                     >
                         <HeartPulse className="size-3.5" />
                         {t('action')}
-                    </Button>
-                    <Button
-                        variant="bare"
+                    </HudButton>
+                    <HudButton
                         type="button"
                         title={t('hide')}
                         onClick={() => dismiss(p)}
                         className="flex size-8 shrink-0 items-center justify-center text-[var(--hud-muted)] hover:text-[var(--ink)]"
                     >
                         <X className="size-4" />
-                    </Button>
+                    </HudButton>
                 </div>
             ))}
         </div>

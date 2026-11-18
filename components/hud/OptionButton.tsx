@@ -6,9 +6,7 @@ interface OptionButtonProps {
     role: 'radio' | 'checkbox';
     checked: boolean;
     disabled?: boolean;
-    title: ReactNode;
-    meta?: ReactNode;
-    note?: ReactNode;
+    text: { title: ReactNode; meta?: ReactNode; note?: ReactNode };
     onClick: () => void;
     variant?: 'battle' | 'form';
     className?: string;
@@ -26,9 +24,7 @@ export function OptionButton({
     role,
     checked,
     disabled,
-    title,
-    meta,
-    note,
+    text: { title, meta, note },
     onClick,
     variant = 'battle',
     className,
