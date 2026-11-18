@@ -140,10 +140,8 @@ it('schemaAndDataPageValidJsonUnderLimit', async () => {
     expect(schema.kind).toBe('result');
     expect(schema.data).toBeDefined();
 });
-it('legacyProposalsUseDispatcherAndPaidAliasFailsClosed', async () => {
+it('legacyProposalsUseDispatcher', async () => {
     const { proposeScenarioEditTool } = await import('../propose');
-
-    const { proposeSceneSlideTool } = await import('../propose-slide');
 
     const edit = await runTool(proposeScenarioEditTool, session, {
         pageId: 'p',
@@ -156,15 +154,6 @@ it('legacyProposalsUseDispatcherAndPaidAliasFailsClosed', async () => {
         actionId: 'scenario.propose-edit',
     });
     dispatch.mockClear();
-
-    const paid = JSON.parse(
-        await runTool(proposeSceneSlideTool, session, {
-            pageId: 'p',
-            prompt: 'Forest',
-        })
-    );
-
-    expect(paid).toMatchObject({ kind: 'error', error: { status: 409 } });
     expect(dispatch).not.toHaveBeenCalled();
 });
 it('rejectsForgedIdentityAndRunFields', async () => {

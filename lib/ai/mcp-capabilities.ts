@@ -3,10 +3,13 @@ import { z } from 'zod';
 
 import type { AiToolContext } from '@/lib/ai/tools/define';
 import { hasScope } from '@/lib/constants/ai';
+import { API_ERRORS } from '@/lib/constants/api-errors';
 import { prisma } from '@/lib/db';
+import { getTranslator } from '@/lib/i18n/translator';
 import { authorizeAssistant } from '@/lib/server/assistant/authorize';
 import { listPages } from '@/lib/server/scenario/page-store';
 import { listWorldMaps } from '@/lib/server/world/map-store';
+import { publicToolData } from '@/lib/utils/common/public-tool-data';
 
 const RESOURCE_PAGE_SIZE = 100;
 
@@ -43,7 +46,7 @@ function registerResource(
                 {
                     uri: requestedUri.href,
                     mimeType: 'application/json',
-                    text: resourceText(await read(requestedUri)),
+                    text: resourceText(publicToolData(await read(requestedUri))),
                 },
             ],
         })
@@ -94,7 +97,11 @@ export function registerMcpCapabilities(
                           description: text(row.description),
                           instructions: text(row.aiInstructions),
                       }
-                    : { error: 'Campaign not found' };
+                    : {
+                          error: (await getTranslator(context.locale))(
+                              API_ERRORS.CAMPAIGN_NOT_FOUND
+                          ),
+                      };
             }
         );
     }

@@ -91,6 +91,8 @@ export const contentUpdateTool = defineTool({
 
 export const contentDeleteTool = defineTool({
     name: 'content_delete',
+    effect: 'destructive',
+    idempotent: true,
     title: 'Delete content record',
     description:
         'Deletes one record by id. Irreversible; there is no bulk delete. Before deleting make sure it is the right record (content_get).',
@@ -111,6 +113,7 @@ export const getRulesTool = defineTool({
 
 export const updateRulesTool = defineTool({
     name: 'update_rules',
+    effect: 'destructive',
     title: 'Update campaign rules',
     description:
         'Partial rules patch: fields not given stay as they were. Patch schema: content_schema(kind: "rules"). Rule modules: system.modules is the complete list of module ids; a module with toggle "setup" in a campaign with characters needs confirm: true; 409 during an active battle. Returns the rules after the change.',
@@ -131,6 +134,8 @@ export const getSkillTreeTool = defineTool({
 
 export const saveSkillTreeTool = defineTool({
     name: 'save_skill_tree',
+    effect: 'destructive',
+    idempotent: true,
     title: 'Save race skill tree',
     description:
         'Saves a race skill tree as a whole (creates it if missing): { race, skills: { mainSkills, ultimateSkill } }. An existing tree is replaced — call get_skill_tree first. Schema: content_schema(kind: "skill-tree"); ids of main skills and skills come from content_list. Tree errors are returned as a list.',
@@ -155,6 +160,7 @@ export const sourceDiffTool = defineTool({
 
 export const sourceApplyTool = defineTool({
     name: 'source_apply',
+    effect: 'destructive',
     title: 'Apply source changes',
     description:
         'apply — items from source_diff to take from the source (dependencies are added automatically, see autoAdded); ignore — hide items until the source changes again. A conflict in apply means taking the source version instead of your own. On a source-changed error, repeat source_diff.',
@@ -175,6 +181,7 @@ export const sourceApplySafeTool = defineTool({
 
 export const contentImportTool = defineTool({
     name: 'content_import',
+    effect: 'destructive',
     title: 'Import content',
     description:
         'Bulk create/update of records of one kind (up to 500 rows per call) — for moving a campaign from another service. rows are objects with the fields of the create body (content_schema), but references to other records may be given by name, and numbers/lists as text, like in CSV; for skills the fields are flat: name, description, icon, image, mainSkillId, spellId, spellGroupId, grantedSpellId, abilities. mode: create (duplicate name is a row error) | update (by name: update, otherwise create) | skip (skip existing). First call with dryRun: true — validation without writing. Response: counts and up to 50 rows with errors/warnings (omitted — how many more).',

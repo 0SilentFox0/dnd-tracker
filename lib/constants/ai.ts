@@ -118,6 +118,7 @@ export const AI_LIMITS = {
     slimOutputChars: 2000,
     toolResultChars: 25_000,
     toolResultJsonChars: 20_000,
+    toolOutputBoundChars: 22_000,
     keptReadingChars: 60_000,
     contextChars: 40_000,
     digestChars: 4000,

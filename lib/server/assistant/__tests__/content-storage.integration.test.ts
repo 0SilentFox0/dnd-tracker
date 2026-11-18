@@ -578,7 +578,7 @@ describe.skipIf(!isLocalDevDatabaseEnv())(
                         title: 'Synthetic',
                         description: 'Synthetic',
                         scopes: [],
-                        input: z.unknown(),
+                        input: z.object({}),
                         handler: async () => {
                             try {
                                 return await executor.dispatchAction(caller(), {

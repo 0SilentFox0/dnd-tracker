@@ -3,6 +3,7 @@ import * as preloadedModule2 from 'zod';
 
 import * as preloadedModule0 from '@/lib/ai/tools';
 import * as preloadedModule1 from '@/lib/ai/tools/define';
+import { READ_ONLY_API_TOKEN_SCOPES } from '@/lib/constants/ai';
 
 vi.mock('@/lib/db', () => ({ prisma: {} }));
 
@@ -187,5 +188,92 @@ describe('AI tool registry', () => {
         expect(text).not.toContain('secret');
         expect(spy).toHaveBeenCalled();
         spy.mockRestore();
+    });
+
+    it('propose_scene_slide is not registered', () => {
+        expect(
+            preloadedModule0.AI_TOOLS.some(
+                (t) => t.name === 'propose_scene_slide'
+            )
+        ).toBe(false);
+    });
+
+    it('every input is an object schema that serializes to JSON Schema', () => {
+        for (const t of preloadedModule0.AI_TOOLS) {
+            expect(t.input, t.name).toBeInstanceOf(preloadedModule2.z.ZodObject);
+
+            const schema = preloadedModule2.z.toJSONSchema(t.input, {
+                io: 'input',
+            });
+
+            expect(schema.type, t.name).toBe('object');
+            expect(() => JSON.stringify(schema), t.name).not.toThrow();
+        }
+    });
+
+    it('annotations follow effect and scopes', () => {
+        const { AI_TOOLS } = preloadedModule0;
+
+        const { toolAnnotations } = preloadedModule1;
+
+        const byName = (n: string) =>
+            toolAnnotations(
+                AI_TOOLS.find((t) => t.name === n) ?? expect.unreachable(n)
+            );
+
+        expect(byName('get_party')).toMatchObject({
+            readOnlyHint: true,
+            destructiveHint: false,
+            idempotentHint: true,
+        });
+        expect(byName('assistant_read').readOnlyHint).toBe(true);
+        expect(byName('assistant_status').readOnlyHint).toBe(true);
+        expect(byName('content_create')).toMatchObject({
+            readOnlyHint: false,
+            destructiveHint: false,
+        });
+        expect(byName('content_delete')).toMatchObject({
+            readOnlyHint: false,
+            destructiveHint: true,
+            idempotentHint: true,
+        });
+        expect(byName('assistant_action').destructiveHint).toBe(true);
+    });
+
+    it('read-only (demo) scopes do not expose write-only tools', () => {
+        const names = preloadedModule0
+            .toolsFor(READ_ONLY_API_TOKEN_SCOPES)
+            .map((t) => t.name);
+
+        expect(names).toContain('content_list');
+        for (const write of [
+            'content_create',
+            'content_update',
+            'content_delete',
+            'content_import',
+            'update_rules',
+            'save_skill_tree',
+            'source_apply',
+            'world_action',
+            'propose_scenario_edit',
+        ])
+            expect(names).not.toContain(write);
+    });
+
+    it('registerMcpTools passes annotations', () => {
+        const registerTool = vi.fn();
+
+        const [def] = preloadedModule0.toolsFor(['content:read']);
+
+        preloadedModule0.registerMcpTools({ registerTool } as never, [def], {
+            campaignId: 'c',
+            userId: 'u',
+            scopes: ['content:read'] as const,
+            threadId: null,
+            locale: 'uk' as const,
+        });
+        expect(registerTool.mock.calls[0][1].annotations).toMatchObject({
+            readOnlyHint: true,
+        });
     });
 });

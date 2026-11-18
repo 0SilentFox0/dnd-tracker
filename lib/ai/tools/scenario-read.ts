@@ -114,9 +114,9 @@ export const readScenarioPageTool = defineTool({
     description:
         'Read a scenario page as the scenario markdown dialect: sections with [sectionId], rows with ids, story and DM notes. ||text|| is a DM-only secret. Pass sectionId to read one section. Offsets are page-absolute (same as outline @N); with sectionId the read stops at the section end. Long pages come in chunks: the last line [next offset N of TOTAL] gives the offset for the next call; [row split] marks one oversize row cut in the middle.',
     input: z.object({
-        pageId: z.string().min(1),
-        sectionId: z.string().min(1).optional(),
-        offset: z.number().int().min(0).optional(),
+        pageId: z.string().min(1).max(200),
+        sectionId: z.string().min(1).max(200).optional(),
+        offset: z.number().int().min(0).max(10_000_000).optional(),
     }),
     handler: async (ctx, { pageId, sectionId, offset }) => {
         const page = await loadPageForAi(ctx.campaignId, pageId);
@@ -131,7 +131,7 @@ export const outlineScenarioPageTool = defineTool({
     title: 'Scenario page outline',
     description:
         'Compact map of a scenario page: sections [id], row ids with story/notes sizes in characters, a short text start and the offset of each section/row for read_scenario_page. Use it first on a large page, then read only what you need.',
-    input: z.object({ pageId: z.string().min(1) }),
+    input: z.object({ pageId: z.string().min(1).max(200) }),
     handler: async (ctx, { pageId }) => {
         const page = await loadPageForAi(ctx.campaignId, pageId);
 
@@ -147,9 +147,9 @@ export const findScenarioMentionsTool = defineTool({
         "Find every occurrence of a name in scenario story and DM notes, in any grammatical form (matched by word stem). `forms` keep the text's capitalisation. linkMentions matches a capitalised form only at a capital letter: for names that are also common words (Hope, Rose) pass only capitalised forms. Returns hits {pageId, sectionId, rowId, field, snippet, forms, inMention} (inMention = already a mention chip) and the distinct forms found. Paginated: up to 100 hits per call (fewer when they are large); pass the returned nextOffset as offset for the next call until it is null. Searches the whole campaign unless pageId/sectionId is given.",
     input: z.object({
         query: z.string().trim().min(2).max(100),
-        pageId: z.string().min(1).optional(),
-        sectionId: z.string().min(1).optional(),
-        offset: z.number().int().min(0).optional(),
+        pageId: z.string().min(1).max(200).optional(),
+        sectionId: z.string().min(1).max(200).optional(),
+        offset: z.number().int().min(0).max(10_000_000).optional(),
     }),
     handler: async (ctx, { query, pageId, sectionId, offset = 0 }) => {
         const pages = pageId

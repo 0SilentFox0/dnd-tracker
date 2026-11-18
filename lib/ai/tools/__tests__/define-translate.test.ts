@@ -64,4 +64,49 @@ describe('runToolResult translation', () => {
             error: { code: 'INVALID_INPUT', message: 'Invalid input' },
         });
     });
+
+    it('puts the API_ERRORS code (not a generic one) into error.code', async () => {
+        const result = await runToolResult(
+            failing(new ContentError(API_ERRORS.FORBIDDEN, 403)),
+            ctx,
+            { n: 1 }
+        );
+
+        expect(result).toMatchObject({
+            kind: 'error',
+            error: { code: 'FORBIDDEN', status: 403 },
+        });
+    });
+
+    it('rejects a caller bound to another campaign (IDOR) for ai-scoped tools', async () => {
+        const tool = defineTool({
+            name: 'y',
+            scopes: ['ai'],
+            title: 'y',
+            description: 'y',
+            input: z.object({}),
+            handler: async () => 'leak',
+        });
+
+        const caller = (campaignId: string) =>
+            ({
+                actor: { campaignId, userId: 'u', isDM: true, via: 'token' },
+                channel: 'mcp',
+                threadId: null,
+                tokenId: 't',
+                locale: 'uk',
+            }) as never;
+
+        const result = await runToolResult(
+            tool,
+            { ...(ctx as object), caller: caller('other') } as never,
+            {}
+        );
+
+        expect(result).toMatchObject({
+            kind: 'error',
+            error: { code: 'ASSISTANT_ACTION_FORBIDDEN', status: 403 },
+        });
+        expect(JSON.stringify(result)).not.toContain('leak');
+    });
 });

@@ -14,7 +14,6 @@ import {
 } from './define';
 import { getPartyTool, readCharacterTool } from './party';
 import { proposeScenarioEditTool } from './propose';
-import { proposeSceneSlideTool } from './propose-slide';
 import { readReferenceTool, searchReferenceTool } from './reference';
 import {
     findScenarioMentionsTool,
@@ -44,7 +43,6 @@ export const AI_TOOLS: AiToolDef[] = [
     searchReferenceTool,
     readReferenceTool,
     proposeScenarioEditTool,
-    proposeSceneSlideTool,
     ...CONTENT_TOOLS,
     ...ASSISTANT_TOOLS,
 ];

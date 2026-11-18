@@ -36,23 +36,46 @@ export class AiToolError extends Error {
     }
 }
 
-export type AiToolDef = {
+export type ToolEffect = 'read' | 'write' | 'destructive';
+
+export type AiToolDef<S extends z.ZodObject = z.ZodObject> = {
     name: string;
     scopes: readonly ApiTokenScope[];
+    /** Omitted: derived from scopes (only read scopes → read, otherwise write). */
+    effect?: ToolEffect;
+    idempotent?: boolean;
     title: string;
     description: string;
-    input: z.ZodType;
-    handler: (ctx: AiToolContext, input: unknown) => Promise<unknown>;
+    input: S;
+    // method syntax keeps AiToolDef<Specific> assignable to AiToolDef[] (bivariant param)
+    handler(ctx: AiToolContext, input: z.infer<S>): Promise<unknown>;
 };
 
-export function defineTool<S extends z.ZodType>(
-    def: Omit<AiToolDef, 'input' | 'handler'> & {
-        input: S;
-        handler: (ctx: AiToolContext, input: z.infer<S>) => Promise<unknown>;
-    }
-): AiToolDef {
-    return def as AiToolDef;
+export const defineTool = <S extends z.ZodObject>(def: AiToolDef<S>) => def;
+
+const isReadScope = (scope: ApiTokenScope) =>
+    scope === 'ai' || scope.endsWith(':read');
+
+export const toolEffect = (def: AiToolDef): ToolEffect =>
+    def.effect ?? (def.scopes.every(isReadScope) ? 'read' : 'write');
+
+export function toolAnnotations(def: AiToolDef) {
+    const effect = toolEffect(def);
+
+    return {
+        readOnlyHint: effect === 'read',
+        destructiveHint: effect === 'destructive',
+        idempotentHint: effect === 'read' || def.idempotent === true,
+        openWorldHint: false,
+    };
 }
+
+const ERROR_CODE_BY_KEY = new Map<string, string>(
+    Object.entries(API_ERRORS).map(([code, key]) => [key, code])
+);
+
+const toolErrorCode = (message: string) =>
+    ERROR_CODE_BY_KEY.get(message) ?? 'ASSISTANT_UNAVAILABLE';
 
 export type ToolResult =
     | { version: 2; kind: 'result'; data: unknown }
@@ -81,7 +104,7 @@ export function clip(value: unknown): string {
 }
 
 function boundedOutput(value: unknown): unknown {
-    if (JSON.stringify(value ?? null).length < 22000) return value;
+    if (JSON.stringify(value ?? null).length < AI_LIMITS.toolOutputBoundChars) return value;
 
     if (value && typeof value === 'object' && 'kind' in value) {
         if (value.kind === 'pending' && 'intent' in value) {
@@ -200,7 +223,7 @@ export async function runToolResult(
                 version: 2,
                 kind: 'error',
                 error: {
-                    code: 'ASSISTANT_UNAVAILABLE',
+                    code: toolErrorCode(error.message),
                     status: error instanceof ContentError ? error.status : 422,
                     message: translateErrorBody(t, {
                         error: error.message,
