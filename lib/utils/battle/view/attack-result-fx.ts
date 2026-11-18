@@ -4,7 +4,7 @@ import {
     formatKnownArmorClass,
     resolveKnownArmorClass,
 } from './knowledge';
-import { retaliationOutcome } from './retaliation';
+import { counterOutcome } from './counter-outcome';
 import { volleyResults } from './volley-results';
 
 import type { AttackOutcomeSummary } from '@/lib/utils/battle/flows';
@@ -79,7 +79,7 @@ export function buildAttackResultFx({
 }: AttackResultFxInput): ResultFx {
     const first = results[0];
 
-    const retaliation = retaliationOutcome(log, seen);
+    const retaliation = counterOutcome(log, seen);
 
     const crit = critOutcome(log, seen, attackerId, first.targetId);
 

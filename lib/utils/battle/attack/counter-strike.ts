@@ -10,6 +10,10 @@ import {
     withSelf,
 } from '@/lib/utils/abilities/engine/core/participants';
 import type { Rng } from '@/lib/utils/abilities/engine/core/types';
+import {
+    counterActionType,
+    counterBlockFlags,
+} from '@/lib/utils/battle/action-types';
 import type { ActionFlow } from '@/lib/utils/battle/common/action-flow';
 import { attackKindOf } from '@/lib/utils/battle/common/attack-kind';
 import type { CritPicker } from '@/lib/utils/battle/crit-choice/types';
@@ -21,6 +25,8 @@ import type { BattleAction } from '@/types/battle-actions';
 import type { BattleMapConfig } from '@/types/battle-grid';
 
 type Kind = AttackType;
+
+type FlagName = Parameters<typeof findFlags>[2];
 
 const kindOf = (a: Pick<BattleAttack, 'type'>): Kind => attackKindOf(a.type);
 
@@ -92,9 +98,13 @@ export function counterStrike(
     if (!defender || !attacker || !isActive(defender) || !isActive(attacker))
         return null;
 
+    const room = withSelf(participants, attacker);
+
     if (
-        findFlags(withSelf(participants, attacker), attackerId, 'noRetaliation')
-            .length > 0
+        counterBlockFlags().some(
+            (flag) =>
+                findFlags(room, attackerId, flag as FlagName).length > 0
+        )
     )
         return null;
 
@@ -128,7 +138,7 @@ export function counterStrike(
         battleId,
         rng,
         bonusPercent: weapon.bonusPercent,
-        label: 'retaliation',
+        label: counterActionType(),
     });
 
     return { participants: flow.ps, battleAction, sceneState: flow.sceneState };

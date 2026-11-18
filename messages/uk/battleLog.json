@@ -110,13 +110,11 @@
     "miss": "{title}: {attacker} → {target}: d20 {checkRoll}, промах{crit}",
     "second": "🎲 {noun}, {mode}: другий d20 = {value}",
     "titles": {
-      "retaliation": "Відсіч",
       "opportunity": "Атака можливості",
       "readied": "Підготовлена атака",
       "legendary": "Легендарна дія"
     },
     "nouns": {
-      "retaliation": "відсіч",
       "opportunity": "атака можливості",
       "readied": "підготовлена атака",
       "legendary": "легендарна атака"
@@ -136,7 +134,6 @@
     "doubledServer": " (сервер: {rolls})"
   },
   "rollMode": {
-    "inspiration": "Натхнення",
     "armorPenalty": "Броня без володіння",
     "farRange": "Далека дистанція",
     "enemyNear": "Ворог поруч",
@@ -169,8 +166,7 @@
     "extraTurn": "{name} отримує додатковий хід"
   },
   "round": {
-    "start": "🔁 Початок Раунду {round}",
-    "lair": "🏰 Ініціатива 20: дія лігва — {name}"
+    "start": "🔁 Початок Раунду {round}"
   },
   "hazard": {
     "defaultLabel": "Небезпечна зона",
@@ -192,17 +188,6 @@
     "completeWon": "🎉 Бій завершено! Перемога союзників!",
     "completeLost": "💀 Бій завершено! Поразка союзників!",
     "withXp": "{text} · ⭐ Досвід: {share} кожному"
-  },
-  "morale": {
-    "ignored": "{name}: мораль не діє",
-    "neutral": "{name} має нейтральну мораль",
-    "leadership": ", лідерство +{bonus}%",
-    "detail": "Мораль +{morale}{leadership}, кидок: {roll}, потрібно: >={threshold}",
-    "extra": "⭐ {name}: додатковий хід! ({detail})",
-    "noExtra": "{name}: без додаткового ходу ({detail})",
-    "skip": "😔 {name}: пропуск ходу через низьку мораль (Мораль {morale}, кидок: {roll}, пропуск на: <={threshold})",
-    "noSkip": "{name}: хід не пропущено (Мораль {morale}, кидок: {roll}, пропуск на: <={threshold})",
-    "notFound": "Учасник не знайдений в initiativeOrder"
   },
   "death": {
     "wake": "🎲 {name}: кидок смерті 20 — приходить до тями з 1 HP",
@@ -256,8 +241,6 @@
   },
   "dm": {
     "name": "ДМ",
-    "lairIn": "🏰 {name}: у лігві",
-    "lairOut": "🏰 {name}: поза лігвом",
     "removed": "Видалено з бою (DM): {name}",
     "removedReserve": "Видалено з резерву (DM): {name}",
     "returnedReserve": "Повернено в резерв (DM): {name}",
@@ -291,9 +274,7 @@
   "legendary": {
     "action": "👑 {name}: легендарна дія — {attack} ({counter})",
     "use": "👑 {name}: легендарна дія — {ability} → {attack}",
-    "useLair": "🏰 {name}: дія лігва — {ability} → {attack}",
-    "run": "👑 {name}: легендарна дія «{ability}» ({counter}) — {text}",
-    "runLair": "🏰 {name}: дія лігва «{ability}» ({counter}) — {text}"
+    "run": "👑 {name}: легендарна дія «{ability}» ({counter}) — {text}"
   },
   "spell": {
     "castCancelled": "{name}: накладання скасовано",
@@ -311,7 +292,6 @@
     "bonusActionUsed": "Бонусну дію вже використано цього ходу",
     "cannotAct": "Учасник не може діяти",
     "noSuchAbility": "У учасника немає такого вміння",
-    "abilityIsLair": "Це вміння — дія лігва",
     "abilityIsLegendary": "Це вміння — легендарна дія, її використовують поза своїм ходом",
     "abilityLimit": "Ліміт використань вичерпано",
     "abilityCooldown": "Перезарядка: ще {rounds} р.",
@@ -322,7 +302,6 @@
     "spellDiceCount": "Потрібно {expected} кубиків заклинання, отримано {got}",
     "wrongStatus": "Дія недоступна в статусі «{status}»",
     "panicSkip": "Учасник у паніці й пропускає хід",
-    "moraleFirst": "Спершу потрібна перевірка моралі",
     "turnTimerRunning": "Час ходу ще не вичерпано",
     "outOfRange": "Поза дальністю",
     "pickDirection": "Оберіть напрямок",

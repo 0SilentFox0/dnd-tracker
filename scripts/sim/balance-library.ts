@@ -1,6 +1,7 @@
 #!/usr/bin/env tsx
 import type { Prisma } from '@prisma/client';
 import { execFileSync } from 'node:child_process';
+import { z } from 'zod';
 
 import { awaitsMoraleCheck } from './morale-gate';
 import { SIM_PLAYER, SIM_USER } from './simulate-battle-scenario';
@@ -14,7 +15,6 @@ import {
 } from '@/lib/constants/battle';
 import { CampaignRole } from '@/lib/constants/campaigns';
 import { prisma } from '@/lib/db';
-import { moraleCheckSchema } from '@/lib/schemas';
 import {
     abilityActionSchema,
     attackBodySchema,
@@ -300,7 +300,7 @@ const START = {
 const MORALE = {
     access: 'member' as const,
     requireStatus: 'active' as const,
-    schema: moraleCheckSchema,
+    schema: z.object({ participantId: z.string(), d10Roll: z.number().min(1).max(10) }),
     respond: 'wrapped' as const,
     mutate: mutateSystemOperation('morale-check', 'morale disabled'),
 };

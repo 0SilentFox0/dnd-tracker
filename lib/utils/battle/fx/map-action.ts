@@ -3,6 +3,7 @@ import { elementOf } from './element';
 import { splashTargetIds } from './impact';
 import type { FxArchetype, FxElement, FxSpec } from './types';
 
+import { isAttackFxAction } from '@/lib/utils/battle/action-types';
 import type { BattleAction } from '@/types/battle-actions';
 
 const AREA_TARGETING = new Set([
@@ -82,7 +83,7 @@ function primary(action: BattleAction): FxSpec | null {
         critical: d.isCritical === true,
     };
 
-    if (action.actionType === 'attack' || action.actionType === 'retaliation') {
+    if (action.actionType === 'attack' || isAttackFxAction(action.actionType)) {
         return {
             ...base,
             archetype: d.attackKind === 'ranged' ? 'ranged' : 'melee',

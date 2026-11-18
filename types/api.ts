@@ -22,7 +22,6 @@ import type {
     mapWeatherSchema,
     mazeActionSchema,
     mazeMarkSchema,
-    moraleCheckSchema,
     moveSchema,
     patchParticipantSchema,
 } from '@/lib/schemas/battles';
@@ -189,8 +188,6 @@ export type AttackData = Omit<
     z.input<typeof attackBodyInputSchema>,
     'damageRolls'
 > & { damageRolls: number[] };
-
-export type MoraleCheckData = z.infer<typeof moraleCheckSchema>;
 
 export type CritChoiceData = z.infer<typeof critChoiceSchema>;
 

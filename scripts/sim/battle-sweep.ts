@@ -4,6 +4,7 @@ import { spawnSync } from 'node:child_process';
 import { appendFileSync, mkdirSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { z } from 'zod';
 
 import {
     assertLocalProdcopy,
@@ -37,7 +38,6 @@ import {
 } from '@/lib/constants/battle';
 import { CONTROLLED_BY_DM } from '@/lib/constants/characters';
 import { prisma } from '@/lib/db';
-import { moraleCheckSchema } from '@/lib/schemas';
 import {
     abilityActionSchema,
     attackBodySchema,
@@ -706,7 +706,7 @@ const MORALE = {
     access: 'member',
     requireStatus: 'active',
     blockedByMode: true,
-    schema: moraleCheckSchema,
+    schema: z.object({ participantId: z.string(), d10Roll: z.number().min(1).max(10) }),
     respond: 'wrapped',
     mutate: mutateSystemOperation('morale-check', 'morale disabled'),
 };

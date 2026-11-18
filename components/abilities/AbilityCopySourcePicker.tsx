@@ -12,17 +12,18 @@ import {
 } from '@/lib/hooks/abilities';
 import type { Ability } from '@/lib/utils/abilities/schema';
 import { matchesQuery } from '@/lib/utils/common/text-search';
+import { moduleVocab } from '@/lib/utils/rules/systems/vocab';
 import type { AbilitySourceRef } from '@/types/abilities';
 
-const SOURCE_KINDS = [
+const SOURCE_KINDS: readonly AbilitySourceRef['kind'][] = [
     'skill',
     'race',
     'artifact',
-    'artifactSet',
+    ...moduleVocab('abilitySources').map((e) => e.id as AbilitySourceRef['kind']),
     'unit',
     'class',
     'feat',
-] as const satisfies readonly AbilitySourceRef['kind'][];
+];
 
 export function AbilityCopySourcePicker({
     campaignId,

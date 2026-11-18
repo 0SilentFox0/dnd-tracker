@@ -1,3 +1,4 @@
+import { z } from 'zod';
 /* eslint-disable @typescript-eslint/no-explicit-any -- raw JSON battle responses */
 // Local only: COMPENDIUM_REAL_FILE=<5etools json> DATABASE_URL/DIRECT_URL=<local db with the SRD template> pnpm exec vitest run --config vitest.integration.config.mts <this file>
 import type { Prisma } from '@prisma/client';
@@ -30,7 +31,6 @@ import {
     ParticipantSourceType,
 } from '@/lib/constants/battle';
 import { prisma } from '@/lib/db';
-import { moraleCheckSchema } from '@/lib/schemas';
 import { createAttackMutation } from '@/lib/server/battles/mutations/attack/attack-mutation';
 import { moveMutation } from '@/lib/server/battles/mutations/move/move-mutation';
 import { nextTurnMutation } from '@/lib/server/battles/mutations/next-turn/next-turn-mutation';
@@ -429,7 +429,7 @@ describe.skipIf(!FILE)('real file import', () => {
             access: 'member',
             requireStatus: 'active',
             blockedByMode: true,
-            schema: moraleCheckSchema,
+            schema: z.object({ participantId: z.string(), d10Roll: z.number().min(1).max(10) }),
             respond: 'wrapped',
             mutate: mutateSystemOperation('morale-check', 'morale disabled'),
         };

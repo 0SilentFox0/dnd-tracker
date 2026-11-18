@@ -34,6 +34,8 @@ export interface SystemI18n {
     rules?: readonly string[];
     /** Scopes with the module's stored battle-log texts: loaded for every installed module so old logs render with the module off */
     log?: readonly string[];
+    /** Stored log/reject keys from before the texts moved into `log` scopes, old key -> current key (a key ending in `.` is a prefix); the translator resolves them */
+    legacyKeys?: Readonly<Record<string, string>>;
     pages?: Partial<Record<SystemPageScope, readonly string[]>>;
     budgetKb?: {
         battle?: number;
@@ -94,11 +96,14 @@ export interface VocabShapes {
         counter?: true;
         serverLabel?: true;
         fx?: 'attack';
+        logged?: true;
+        blockFlag?: string;
+        label?: { title: string; noun: string };
     };
     legendaryKinds: { id: string; lair?: true };
     rollKinds: { id: string; after: string };
     combatStats: { id: string; hidden?: true; neutral?: number };
-    logFields: { id: string; code: string };
+    logFields: { id: string; code: string; prefix?: string };
     equipSlots: { id: string; weapon?: true; needsLight?: true };
     characterLogTypes: { id: string; toggle?: true };
     unitImportFields: { id: string; type: 'int' };

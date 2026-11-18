@@ -5,8 +5,9 @@ import { activeEffectIds, consumeAttackEffects } from './consume-effects';
 import { critDamageRolls, critDoublesDice } from './crit-dice';
 import { applyCriticalEffect, critFlavorOf } from './critical';
 
-import { textRef } from '@/lib/i18n/text-ref';
+import { dynamicTextRef, textRef } from '@/lib/i18n/text-ref';
 import { isActive } from '@/lib/utils/abilities/engine/core/participants';
+import type { ServerLabelType } from '@/lib/utils/battle/action-types';
 import {
     type ActionFlow,
     appendHpChanges,
@@ -17,25 +18,16 @@ import { attackDamageParts } from '@/lib/utils/battle/damage/attack-parts';
 import type { AttackRollResult } from '@/lib/utils/battle/types/attack';
 import { parseDiceLenient, rollGroups } from '@/lib/utils/common/dice';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
+import { moduleVocab } from '@/lib/utils/rules/systems/vocab';
 import type { BattleAttack } from '@/types/battle';
 import type { BattleAction } from '@/types/battle-actions';
 import type { TextRef } from '@/types/text';
 
-export type ServerAttackLabel =
-    | 'retaliation'
-    | 'opportunity'
-    | 'readied'
-    | 'legendary';
+type CoreLabel = 'readied' | 'legendary';
 
-const LABELS: Record<ServerAttackLabel, { title: TextRef; noun: TextRef }> = {
-    retaliation: {
-        title: textRef('battleLog.offTurn.titles.retaliation'),
-        noun: textRef('battleLog.offTurn.nouns.retaliation'),
-    },
-    opportunity: {
-        title: textRef('battleLog.offTurn.titles.opportunity'),
-        noun: textRef('battleLog.offTurn.nouns.opportunity'),
-    },
+export type ServerAttackLabel = CoreLabel | ServerLabelType;
+
+const CORE_LABELS: Record<CoreLabel, { title: TextRef; noun: TextRef }> = {
     readied: {
         title: textRef('battleLog.offTurn.titles.readied'),
         noun: textRef('battleLog.offTurn.nouns.readied'),
@@ -45,6 +37,19 @@ const LABELS: Record<ServerAttackLabel, { title: TextRef; noun: TextRef }> = {
         noun: textRef('battleLog.offTurn.nouns.legendary'),
     },
 };
+
+function labelsOf(label: ServerAttackLabel): { title: TextRef; noun: TextRef } {
+    if (label in CORE_LABELS) return CORE_LABELS[label as CoreLabel];
+
+    const keys = moduleVocab('actionTypes').find((e) => e.id === label)?.label;
+
+    if (!keys) throw new Error(`no log label for server attack "${label}"`);
+
+    return {
+        title: dynamicTextRef(keys.title),
+        noun: dynamicTextRef(keys.noun),
+    };
+}
 
 export interface ServerAttackInput {
     flow: ActionFlow;
@@ -77,7 +82,7 @@ function judgeServer(
         sceneState: flow.sceneState,
         map: flow.ctx.map,
         crit: flow.ctx.crit,
-        offTurn: { noun: LABELS[input.label].noun },
+        offTurn: { noun: labelsOf(input.label).noun },
     });
 
     if (r.scene) flow.sceneState = r.scene;
@@ -181,7 +186,7 @@ export function resolveServerAttack(input: ServerAttackInput): {
         battleId,
         currentRound: round,
         critFlavor,
-        title: LABELS[label].title,
+        title: labelsOf(label).title,
         rules: flow.ctx.rules,
     });
 

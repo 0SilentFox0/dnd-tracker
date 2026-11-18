@@ -33,9 +33,9 @@ const SOURCE_TYPES = [
     'action',
 ];
 
-const reject = Object.values(REJECT).map((key) =>
-    key.replace('battleLog.reject.', '')
-);
+const reject = Object.values(REJECT)
+    .filter((key) => key.startsWith('battleLog.reject.'))
+    .map((key) => key.replace('battleLog.reject.', ''));
 
 function sources(dir: string): string[] {
     return readdirSync(dir).flatMap((name) => {
@@ -59,13 +59,11 @@ describe('battleLog has translations', () => {
         'turnEnd',
     ]);
     expectLabelKeys('battleLog', 'offTurn.titles', [
-        'retaliation',
         'opportunity',
         'readied',
         'legendary',
     ]);
     expectLabelKeys('battleLog', 'offTurn.nouns', [
-        'retaliation',
         'opportunity',
         'readied',
         'legendary',

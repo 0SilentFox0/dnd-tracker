@@ -20,7 +20,7 @@ const FROZEN: Record<VocabKind, string[]> = {
     abilitySources: ['artifactSet'],
     abilityStats: ['morale'],
     abilityLimitFlags: ['lair'],
-    actionTypes: ['retaliation', 'opportunity'],
+    actionTypes: ['retaliation', 'opportunity', 'morale_skip'],
     legendaryKinds: ['lair'],
     rollKinds: ['morale'],
     combatStats: ['morale'],
@@ -51,7 +51,7 @@ describe('module vocab', () => {
 
     it('derives literal ids from the meta', () => {
         expectTypeOf<ModuleVocabId<'actionTypes'>>().toEqualTypeOf<
-            'retaliation' | 'opportunity'
+            'retaliation' | 'opportunity' | 'morale_skip'
         >();
         expectTypeOf<ModuleVocabId<'equipSlots'>>().toEqualTypeOf<'offHand'>();
     });

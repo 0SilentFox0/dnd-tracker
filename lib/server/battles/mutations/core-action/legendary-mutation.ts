@@ -1,7 +1,7 @@
 import { getCachedSummonPool } from '@/lib/cache/reference-data';
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { prisma } from '@/lib/db';
-import { joinLines, textRef } from '@/lib/i18n/text-ref';
+import { type AppMessageKey, joinLines, textRef } from '@/lib/i18n/text-ref';
 import {
     createSpellMutation,
     type SpellMutationDeps,
@@ -18,7 +18,7 @@ import {
 } from '@/lib/utils/abilities/engine/core/usage';
 import { evaluateCondition } from '@/lib/utils/abilities/registry/conditions';
 import {
-    lairOf,
+    sceneActionsOf,
 } from '@/lib/utils/battle/actions/access';
 import { legendaryAttack } from '@/lib/utils/battle/actions/dispatch';
 import {
@@ -87,6 +87,9 @@ type Option = LegendaryActionBody['option'];
 
 type AbilityOption = Exclude<Option, { kind: 'attack' }>;
 
+const legendaryLogKey = (verb: 'use' | 'run', kind: string | null) =>
+    `battleLog.legendary.${verb}${kind ? kind[0].toUpperCase() + kind.slice(1) : ''}` as AppMessageKey;
+
 type Ability = ReturnType<typeof legendaryAbilities>[number];
 
 interface AbilityRun {
@@ -94,7 +97,7 @@ interface AbilityRun {
     actor: BattleParticipant;
     option: AbilityOption;
     ability: Ability;
-    lair: boolean;
+    scene: boolean;
     spend: (p: BattleParticipant) => BattleParticipant;
     deps: SummonDeps & Partial<Pick<SpellMutationDeps, 'loadSpell'>>;
 }
@@ -187,12 +190,12 @@ async function runAbilityOption(
 
     const { round } = ctx.scene;
 
-    const lair = option.kind === 'lair';
+    const scene = option.kind !== 'ability';
 
-    const lairs = lairOf(ctx.meta.rules);
+    const sceneActions = sceneActionsOf(ctx.meta.rules);
 
     const ability = (
-        lair ? lairs.abilities(actor) : legendaryAbilities(actor)
+        scene ? sceneActions.abilities(actor) : legendaryAbilities(actor)
     ).find((a) => a.key === option.abilityKey);
 
     if (!ability)
@@ -203,14 +206,14 @@ async function runAbilityOption(
 
     const cost = legendaryCostOf(ability);
 
-    if (lair) {
-        const blocker = lairs.blocker(actor, round, ability.key);
+    if (scene) {
+        const blocker = sceneActions.blocker(actor, round, ability.key);
 
         if (blocker) throw ruleErrorOf('action_rejected', blocker);
     } else assertLegendaryAllowed(ctx, actor, cost);
 
     const spend = (p: BattleParticipant) =>
-        lair ? lairs.spend(p, round, ability.key) : spendLegendary(p, cost);
+        scene ? sceneActions.spend(p, round, ability.key) : spendLegendary(p, cost);
 
     if (!withinCountLimits(actor, ability))
         throw new BattleRuleError(
@@ -247,7 +250,7 @@ async function runAbilityOption(
             API_ERRORS.BATTLE_ABILITY_CONDITION_UNMET
         );
 
-    const run: AbilityRun = { ctx, actor, option, ability, lair, spend, deps };
+    const run: AbilityRun = { ctx, actor, option, ability, scene, spend, deps };
 
     if (ability.perform?.kind === 'spell')
         return performSpell(run, ability.perform.spellId);
@@ -259,10 +262,10 @@ async function runAbilityOption(
 }
 
 function performSpell(
-    { ctx, actor, option, ability, lair, deps }: AbilityRun,
+    { ctx, actor, option, ability, scene, deps }: AbilityRun,
     spellId: string
 ): Promise<MutationResult> {
-    if (!lair)
+    if (!scene)
         throw new BattleRuleError(
             'action_rejected',
             API_ERRORS.BATTLE_LEGENDARY_VIA_SPELL_DIALOG
@@ -281,7 +284,7 @@ function performSpell(
 }
 
 function performAttack(
-    { ctx, actor, option, ability, lair, spend }: AbilityRun,
+    { ctx, actor, option, ability, scene, spend }: AbilityRun,
     attackName: string
 ): MutationResult {
     const { id, name } = actor.basicInfo;
@@ -329,9 +332,7 @@ function performAttack(
             systemEvent(
                 round,
                 textRef(
-                    lair
-                        ? 'battleLog.legendary.useLair'
-                        : 'battleLog.legendary.use',
+                    legendaryLogKey('use', scene ? option.kind : null),
                     { name, ability: ability.name, attack: out.attackName }
                 )
             ),
@@ -345,7 +346,7 @@ async function performAbility({
     actor,
     option,
     ability,
-    lair,
+    scene,
     spend,
     deps,
 }: AbilityRun): Promise<MutationResult> {
@@ -388,7 +389,7 @@ async function performAbility({
 
     const legendaryText = logFields(
         textRef(
-            lair ? 'battleLog.legendary.runLair' : 'battleLog.legendary.run',
+            legendaryLogKey('run', scene ? option.kind : null),
             {
                 name,
                 ability: ability.name,

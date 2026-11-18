@@ -48,7 +48,7 @@ describe('morale module on d20', () => {
         );
     });
 
-    it('with the module an unresolved check blocks acting and ending, skipMorale waives the act gate', () => {
+    it('with the module an unresolved check blocks acting and ending, skipGate waives the act gate', () => {
         expect(() => assertCanAct(ctxOf(withMorale), 'hero')).toThrow(
             expect.objectContaining({ code: 'action_rejected' })
         );
@@ -56,11 +56,11 @@ describe('morale module on d20', () => {
             expect.objectContaining({ code: 'action_rejected' })
         );
         expect(() =>
-            assertCanAct(ctxOf(withMorale), 'hero', { skipMorale: true })
+            assertCanAct(ctxOf(withMorale), 'hero', { skipGate: true })
         ).not.toThrow();
     });
 
-    it('a panic result blocks acting even with skipMorale', () => {
+    it('a panic result blocks acting even with skipGate', () => {
         const panic = {
             participantId: 'hero',
             d10Roll: 1,
@@ -73,7 +73,7 @@ describe('morale module on d20', () => {
         };
 
         expect(() =>
-            assertCanAct(ctxOf(withMorale, panic), 'hero', { skipMorale: true })
+            assertCanAct(ctxOf(withMorale, panic), 'hero', { skipGate: true })
         ).toThrow(expect.objectContaining({ code: 'action_used' }));
     });
 

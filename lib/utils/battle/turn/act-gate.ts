@@ -41,8 +41,8 @@ function assertNoBlock(
 export const assertCanAct = (
     ctx: GateCtx,
     participantId: string,
-    opts: { skipMorale?: boolean } = {}
-): void => assertNoBlock(ctx, participantId, 'act', opts.skipMorale);
+    opts: { skipGate?: boolean } = {}
+): void => assertNoBlock(ctx, participantId, 'act', opts.skipGate);
 
 export const assertCanEndTurn = (ctx: GateCtx, participantId: string): void =>
     assertNoBlock(ctx, participantId, 'end');

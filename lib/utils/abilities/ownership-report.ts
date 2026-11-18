@@ -11,6 +11,7 @@ import { AbilitySchema } from './schema/ability';
 
 import { isRecord } from '@/lib/utils/common/is-record';
 import type { Composition } from '@/lib/utils/rules/systems/catalog';
+import { moduleVocab } from '@/lib/utils/rules/systems/vocab';
 
 export type ViolationReason = 'effect' | 'variable' | 'source' | 'schema';
 
@@ -30,7 +31,9 @@ export interface OwnershipTable {
 
 export const OWNERSHIP_TABLES: readonly OwnershipTable[] = [
     { table: 'skills', source: 'skill' },
-    { table: 'artifact_sets', source: 'artifactSet' },
+    ...moduleVocab('abilitySources').flatMap((e) =>
+        e.table ? [{ table: e.table, source: e.id }] : []
+    ),
     { table: 'artifacts' },
     { table: 'races' },
     { table: 'feats' },

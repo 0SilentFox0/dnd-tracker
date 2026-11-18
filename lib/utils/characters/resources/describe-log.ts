@@ -1,5 +1,19 @@
+import type { CharacterLogKindValue } from '@/lib/constants/character-log';
+import {
+    moduleVocab,
+    type ModuleVocabId,
+} from '@/lib/utils/rules/systems/vocab';
 import type { CharacterLogEntry } from '@/types/characters';
 import type { LogLine } from '@/types/text';
+
+type CoreLogKind = Exclude<
+    CharacterLogKindValue,
+    ModuleVocabId<'characterLogTypes'>
+>;
+
+const TOGGLE_TYPES: readonly string[] = moduleVocab('characterLogTypes')
+    .filter((t) => t.toggle)
+    .map((t) => t.id);
 
 export interface DescribedLog {
     key: string;
@@ -17,7 +31,12 @@ export function describeCharacterLog(
 
     const yes = (v: unknown) => (v ? 'yes' : 'no');
 
-    switch (e.kind) {
+    if (TOGGLE_TYPES.includes(e.kind))
+        return {
+            key: `rest.log.${e.kind}${d.value ? 'Gained' : 'Removed'}`,
+        };
+
+    switch (e.kind as CoreLogKind) {
         case 'check':
         case 'save':
             return {
@@ -31,7 +50,9 @@ export function describeCharacterLog(
                         : '',
                     total: num('total'),
                     mode: String(d.mode),
-                    inspiration: yes(d.inspiration),
+                    ...Object.fromEntries(
+                        TOGGLE_TYPES.map((id) => [id, yes(d[id])])
+                    ),
                 },
             };
         case 'test':
@@ -105,12 +126,6 @@ export function describeCharacterLog(
             return {
                 key: 'rest.log.careerAdvance',
                 params: { tier: num('tier') },
-            };
-        case 'inspiration':
-            return {
-                key: d.value
-                    ? 'rest.log.inspirationGained'
-                    : 'rest.log.inspirationRemoved',
             };
         case 'resources_edit':
             return { key: 'rest.log.resourcesEdit' };

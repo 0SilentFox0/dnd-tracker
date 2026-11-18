@@ -21,6 +21,22 @@ export type ModuleVocabId<K extends VocabKind> = Metas extends infer M
         : never
     : never;
 
+/** Ids of entries that carry the literal flag `F`, e.g. the action types a server attack may be labelled with */
+export type ModuleVocabFlagged<
+    K extends VocabKind,
+    F extends string,
+> = Metas extends infer M
+    ? M extends {
+          readonly vocab: {
+              readonly [P in K]: readonly (infer E)[];
+          };
+      }
+        ? E extends { readonly id: infer I } & { readonly [P in F]: true }
+            ? I
+            : never
+        : never
+    : never;
+
 const entries = new Map<VocabKind, readonly VocabEntry<VocabKind>[]>();
 
 /** Entries of every installed module, not only the campaign's composition, so stored data renders with a module off */

@@ -1,18 +1,19 @@
 import { damageTaken } from './damage-taken';
 
+import { isCounterAction } from '@/lib/utils/battle/action-types';
 import type { BattleAction } from '@/types/battle-actions';
 
-export interface RetaliationOutcome {
+export interface CounterOutcome {
     name: string;
     damage: number;
 }
 
-export function retaliationOutcome(
+export function counterOutcome(
     log: BattleAction[],
     seen: ReadonlySet<number>
-): RetaliationOutcome | undefined {
+): CounterOutcome | undefined {
     const e = log.find(
-        (x) => x.actionType === 'retaliation' && !seen.has(x.actionIndex)
+        (x) => isCounterAction(x.actionType) && !seen.has(x.actionIndex)
     );
 
     if (!e) return undefined;

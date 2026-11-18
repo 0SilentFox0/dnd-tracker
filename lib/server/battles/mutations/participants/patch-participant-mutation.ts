@@ -54,8 +54,8 @@ export function patchParticipantMutation(
                     ctx.scene.round,
                     textRef(
                         data.lairActive
-                            ? 'battleLog.dm.lairIn'
-                            : 'battleLog.dm.lairOut',
+                            ? 'lairLog.dmIn'
+                            : 'lairLog.dmOut',
                         { name: actor.basicInfo.name }
                     )
                 ),

@@ -7,6 +7,7 @@ import {
 } from './common';
 
 import { getProficiencyBonus } from '@/lib/utils/common/calculations';
+import { moduleVocab } from '@/lib/utils/rules/systems/vocab';
 
 const int = (key: string): FieldDef => ({ key, type: 'int' });
 
@@ -41,7 +42,7 @@ const fields: FieldDef[] = [
     },
     int('proficiencyBonus'),
     int('gridSize'),
-    int('morale'),
+    ...moduleVocab('unitImportFields').map((f) => int(f.id)),
     int('minTargets'),
     int('maxTargets'),
     { key: 'cr', type: 'cr' },

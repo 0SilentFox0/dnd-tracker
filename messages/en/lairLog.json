@@ -1,0 +1,8 @@
+{
+  "dmIn": "🏰 {name}: in the lair",
+  "dmOut": "🏰 {name}: outside the lair",
+  "use": "🏰 {name}: lair action — {ability} → {attack}",
+  "run": "🏰 {name}: lair action “{ability}” ({counter}) — {text}",
+  "rejectAbility": "This ability is a lair action",
+  "round": "🏰 Initiative 20: lair action — {name}"
+}

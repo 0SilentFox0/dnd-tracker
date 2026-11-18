@@ -1,0 +1,6 @@
+{
+  "title": "Retaliation",
+  "noun": "retaliation",
+  "result": "Target's reply: {name} {outcome}",
+  "actionKind": "retaliation"
+}

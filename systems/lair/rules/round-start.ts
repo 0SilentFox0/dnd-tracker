@@ -14,6 +14,6 @@ export const lairRoundStart: TurnHook<TurnHookCtx> = ({ participants }) => ({
                 p.battleData.resolvedAbilities.some((a) => a.limits?.lair)
         )
         .map((p) =>
-            textRef('battleLog.round.lair', { name: p.basicInfo.name })
+            textRef('lairLog.round', { name: p.basicInfo.name })
         ),
 });

@@ -23,6 +23,7 @@ import type { Effect, Flat, StaticEffect } from '@/lib/utils/abilities/schema';
 import {
     DAMAGE_FILTER_KINDS,
     STAT_KEYS,
+    statFlag,
 } from '@/lib/utils/abilities/schema/kinds';
 import { seg, type Segment } from '@/lib/utils/abilities/segments';
 import { effectName } from '@/lib/utils/battle/common/terms';
@@ -79,7 +80,7 @@ export function applyStatic(
 
     const fearBlocked =
         effect.kind === 'modifyStat' &&
-        effect.stat === 'morale' &&
+        statFlag(effect.stat, 'fearBlock') &&
         typeof effect.flat === 'number' &&
         effect.flat < 0;
 

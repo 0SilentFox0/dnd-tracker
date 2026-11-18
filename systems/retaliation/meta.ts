@@ -6,7 +6,15 @@ export const RETALIATION_META = {
     keys: [],
     requires: ['d20'],
     after: ['opportunity'],
-    i18n: {},
+    i18n: {
+        log: ['retaliationLog'],
+        legacyKeys: {
+            'battleLog.offTurn.titles.retaliation': 'retaliationLog.title',
+            'battleLog.offTurn.nouns.retaliation': 'retaliationLog.noun',
+            'battleCommon.actionKinds.retaliation': 'retaliationLog.actionKind',
+            'battle.result.retaliation': 'retaliationLog.result',
+        },
+    },
     vocab: {
         actionTypes: [
             {
@@ -14,6 +22,12 @@ export const RETALIATION_META = {
                 counter: true,
                 serverLabel: true,
                 fx: 'attack',
+                logged: true,
+                blockFlag: 'noRetaliation',
+                label: {
+                    title: 'retaliationLog.title',
+                    noun: 'retaliationLog.noun',
+                },
             },
         ],
     },

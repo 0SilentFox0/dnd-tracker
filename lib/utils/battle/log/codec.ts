@@ -1,4 +1,5 @@
 import { fromJson } from '@/lib/utils/common/json';
+import { moduleVocab } from '@/lib/utils/rules/systems/vocab';
 import type { LogLine, TextArg, TextRef } from '@/types/text';
 
 /** Stored shape of `details.log` lines: `{ message, params }` becomes `{ m, p }`. Tables are append-only — stored rows depend on them. */
@@ -6,11 +7,10 @@ type StoredRef = { m: string; p?: Record<string, StoredArg> };
 
 type StoredArg = string | number | StoredRef;
 
-const PREFIXES: ReadonlyArray<readonly [code: string, prefix: string]> = [
+const CORE_PREFIXES: ReadonlyArray<readonly [code: string, prefix: string]> = [
     ['a', 'abilityText.log.'],
     ['k', 'battleLog.attack.'],
     ['u', 'battleLog.turn.'],
-    ['m', 'battleLog.morale.'],
     ['g', 'battleLog.triggers.'],
     ['o', 'battleLog.offTurn.'],
     ['s', 'battleActions.spell.'],
@@ -24,7 +24,7 @@ const PREFIXES: ReadonlyArray<readonly [code: string, prefix: string]> = [
     ['z', '$capitalize'],
 ];
 
-const PARAM_KEYS: ReadonlyArray<readonly [code: string, key: string]> = [
+const CORE_PARAM_KEYS: ReadonlyArray<readonly [code: string, key: string]> = [
     ['t', 'target'],
     ['a', 'ability'],
     ['n', 'name'],
@@ -36,7 +36,6 @@ const PARAM_KEYS: ReadonlyArray<readonly [code: string, key: string]> = [
     ['u', 'amount'],
     ['y', 'type'],
     ['s', 'names'],
-    ['m', 'morale'],
     ['h', 'threshold'],
     ['i', 'detail'],
     ['f', 'flavor'],
@@ -49,6 +48,18 @@ const PARAM_KEYS: ReadonlyArray<readonly [code: string, key: string]> = [
     ['x', 'chance'],
     ['b', 'label'],
     ['v', 'heal'],
+];
+
+const fields = moduleVocab('logFields');
+
+const PREFIXES: ReadonlyArray<readonly [code: string, prefix: string]> = [
+    ...fields.flatMap((f) => (f.prefix ? [[f.code, f.prefix] as const] : [])),
+    ...CORE_PREFIXES,
+];
+
+const PARAM_KEYS: ReadonlyArray<readonly [code: string, key: string]> = [
+    ...CORE_PARAM_KEYS,
+    ...fields.map((f) => [f.code, f.id] as const),
 ];
 
 const SEPARATOR = '|';

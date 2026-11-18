@@ -1,5 +1,7 @@
 import type { Ability, StatKey } from './schema';
 
+import { moduleVocab,type ModuleVocabId } from '@/lib/utils/rules/systems/vocab';
+
 export type SheetStatKey =
     | 'strength'
     | 'dexterity'
@@ -10,7 +12,7 @@ export type SheetStatKey =
     | 'armorClass'
     | 'speed'
     | 'initiative'
-    | 'morale'
+    | ModuleVocabId<'abilityStats'>
     | 'minTargets'
     | 'maxTargets';
 
@@ -18,6 +20,12 @@ export interface SheetStatBonuses {
     stats: Partial<Record<SheetStatKey, number>>;
     spellSlotBonusByLevel: Record<string, number>;
 }
+
+const moduleSheetKeys = Object.fromEntries(
+    moduleVocab('abilityStats').flatMap((e) =>
+        e.sheetKey ? [[e.id, e.sheetKey]] : []
+    )
+) as Partial<Record<ModuleVocabId<'abilityStats'>, SheetStatKey>>;
 
 const STAT_TO_SHEET: Partial<Record<StatKey, SheetStatKey>> = {
     strength: 'strength',
@@ -29,7 +37,7 @@ const STAT_TO_SHEET: Partial<Record<StatKey, SheetStatKey>> = {
     armor: 'armorClass',
     speed: 'speed',
     initiative: 'initiative',
-    morale: 'morale',
+    ...moduleSheetKeys,
     minTargets: 'minTargets',
     maxTargets: 'maxTargets',
 };

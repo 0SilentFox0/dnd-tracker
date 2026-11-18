@@ -19,6 +19,7 @@ import type { HeroArchetypeKey } from '@/lib/constants/hero-archetypes';
 import type { DndSkill } from '@/lib/constants/skills';
 import type { AbilityFlowSummary } from '@/lib/utils/abilities/segments';
 import type { SystemData, SystemSlot } from '@/lib/utils/rules/systems/slot';
+import type { ModuleVocabId } from '@/lib/utils/rules/systems/vocab';
 import type { BackgroundSelection } from '@/types/backgrounds';
 import type {
     CharacterFeat,
@@ -209,7 +210,7 @@ export type SheetLineSource =
     | 'skill'
     | 'race'
     | 'artifact'
-    | 'artifactSet'
+    | ModuleVocabId<'abilitySources'>
     | 'unit'
     | 'character'
     | 'effect'

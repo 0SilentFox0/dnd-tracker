@@ -76,8 +76,6 @@ export const BattleActionType = {
     ABILITY: 'ability',
     END_TURN: 'end_turn',
     SKIP_TURN: 'skip_turn',
-    MORALE_SKIP: 'morale_skip',
-    RETALIATION: 'retaliation',
 } as const;
 
 export const BATTLE_CONSTANTS = {

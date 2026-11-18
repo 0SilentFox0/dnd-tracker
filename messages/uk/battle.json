@@ -117,8 +117,17 @@
       "preview": "Перегляд як гравець",
       "dmView": "Перегляд ДМ",
       "shareAllies": "Ділитися зором між союзниками",
-      "modes": { "off": "Вимкнено", "reveal": "Відкривати", "vision": "Зір героїв" },
-      "brushes": { "brush": "Кисть", "rectangle": "Прямокутник", "room": "Кімната", "erase": "Стерти" }
+      "modes": {
+        "off": "Вимкнено",
+        "reveal": "Відкривати",
+        "vision": "Зір героїв"
+      },
+      "brushes": {
+        "brush": "Кисть",
+        "rectangle": "Прямокутник",
+        "room": "Кімната",
+        "erase": "Стерти"
+      }
     },
     "camera": {
       "zoomIn": "Збільшити мапу",
@@ -199,7 +208,6 @@
     "critPrefix": "крит ",
     "downed": "повалений",
     "splash": "зачеплено",
-    "retaliation": "Відповідь цілі: {name} {outcome}",
     "applied": "Застосовано",
     "appliedTargets": "Застосовано · цілей: {count}",
     "aria": "Результат дії"

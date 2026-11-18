@@ -110,13 +110,11 @@
     "miss": "{title}: {attacker} → {target}: d20 {checkRoll}, miss{crit}",
     "second": "🎲 {noun}, {mode}: second d20 = {value}",
     "titles": {
-      "retaliation": "Retaliation",
       "opportunity": "Opportunity attack",
       "readied": "Readied attack",
       "legendary": "Legendary action"
     },
     "nouns": {
-      "retaliation": "retaliation",
       "opportunity": "opportunity attack",
       "readied": "readied attack",
       "legendary": "legendary attack"
@@ -136,7 +134,6 @@
     "doubledServer": " (server: {rolls})"
   },
   "rollMode": {
-    "inspiration": "Inspiration",
     "armorPenalty": "Armor without proficiency",
     "farRange": "Long range",
     "enemyNear": "Enemy nearby",
@@ -169,8 +166,7 @@
     "extraTurn": "{name} gets an extra turn"
   },
   "round": {
-    "start": "🔁 Start of Round {round}",
-    "lair": "🏰 Initiative 20: lair action — {name}"
+    "start": "🔁 Start of Round {round}"
   },
   "hazard": {
     "defaultLabel": "Hazardous area",
@@ -192,17 +188,6 @@
     "completeWon": "🎉 Battle over! The allies won!",
     "completeLost": "💀 Battle over! The allies lost!",
     "withXp": "{text} · ⭐ Experience: {share} each"
-  },
-  "morale": {
-    "ignored": "{name}: morale has no effect",
-    "neutral": "{name} has neutral morale",
-    "leadership": ", leadership +{bonus}%",
-    "detail": "Morale +{morale}{leadership}, roll: {roll}, needed: >={threshold}",
-    "extra": "⭐ {name}: extra turn! ({detail})",
-    "noExtra": "{name}: no extra turn ({detail})",
-    "skip": "😔 {name}: skips the turn because of low morale (Morale {morale}, roll: {roll}, skip on: <={threshold})",
-    "noSkip": "{name}: turn not skipped (Morale {morale}, roll: {roll}, skip on: <={threshold})",
-    "notFound": "Participant not found in the initiative order"
   },
   "death": {
     "wake": "🎲 {name}: death save 20 — wakes up with 1 HP",
@@ -256,8 +241,6 @@
   },
   "dm": {
     "name": "DM",
-    "lairIn": "🏰 {name}: in the lair",
-    "lairOut": "🏰 {name}: outside the lair",
     "removed": "Removed from battle (DM): {name}",
     "removedReserve": "Removed from reserve (DM): {name}",
     "returnedReserve": "Returned to reserve (DM): {name}",
@@ -291,9 +274,7 @@
   "legendary": {
     "action": "👑 {name}: legendary action — {attack} ({counter})",
     "use": "👑 {name}: legendary action — {ability} → {attack}",
-    "useLair": "🏰 {name}: lair action — {ability} → {attack}",
-    "run": "👑 {name}: legendary action “{ability}” ({counter}) — {text}",
-    "runLair": "🏰 {name}: lair action “{ability}” ({counter}) — {text}"
+    "run": "👑 {name}: legendary action “{ability}” ({counter}) — {text}"
   },
   "spell": {
     "castCancelled": "{name}: casting cancelled",
@@ -311,7 +292,6 @@
     "bonusActionUsed": "The bonus action has already been used this turn",
     "cannotAct": "The participant cannot act",
     "noSuchAbility": "The participant has no such ability",
-    "abilityIsLair": "This ability is a lair action",
     "abilityIsLegendary": "This ability is a legendary action, used outside your own turn",
     "abilityLimit": "The usage limit is exhausted",
     "abilityCooldown": "Cooldown: {rounds} more round(s)",
@@ -322,7 +302,6 @@
     "spellDiceCount": "{expected} spell dice are required, got {got}",
     "wrongStatus": "The action is unavailable in the status “{status}”",
     "panicSkip": "The participant is panicking and skips the turn",
-    "moraleFirst": "A morale check is needed first",
     "turnTimerRunning": "The turn time has not run out yet",
     "outOfRange": "Out of range",
     "pickDirection": "Pick a direction",

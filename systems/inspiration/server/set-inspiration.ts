@@ -1,5 +1,4 @@
 import { API_ERRORS } from '@/lib/constants/api-errors';
-import { CharacterLogKind } from '@/lib/constants/character-log';
 import { prisma } from '@/lib/db';
 import type {
     CharacterGate,
@@ -29,7 +28,7 @@ export async function setInspiration(
                 campaignId: character.campaignId,
                 characterId: character.id,
                 actorUserId: access.userId,
-                kind: CharacterLogKind.INSPIRATION,
+                kind: 'inspiration',
                 data: { value },
             },
         ]);

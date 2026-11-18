@@ -174,3 +174,22 @@ describe('partsOf', () => {
         );
     });
 });
+
+describe('OWNERSHIP_TABLES', () => {
+    it('keeps the table list and order with module sources from the vocab', async () => {
+        const { OWNERSHIP_TABLES } = await import(
+            '@/lib/utils/abilities/ownership-report'
+        );
+
+        expect(OWNERSHIP_TABLES).toEqual([
+            { table: 'skills', source: 'skill' },
+            { table: 'artifact_sets', source: 'artifactSet' },
+            { table: 'artifacts' },
+            { table: 'races' },
+            { table: 'feats' },
+            { table: 'units' },
+            { table: 'classes' },
+            { table: 'spells' },
+        ]);
+    });
+});

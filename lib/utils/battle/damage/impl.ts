@@ -3,7 +3,7 @@ import { ruleRow, stepRow, totalRow } from './rows';
 
 import type { AbilityKey } from '@/lib/constants/abilities';
 import { AttackType, BATTLE_CONSTANTS } from '@/lib/constants/battle';
-import { textRef } from '@/lib/i18n/text-ref';
+import { dynamicTextRef, textRef } from '@/lib/i18n/text-ref';
 import {
     collectModifiers,
     type ModifierEntry,
@@ -13,9 +13,24 @@ import type { StaticEffect } from '@/lib/utils/abilities/schema';
 import { attackKindOf } from '@/lib/utils/battle/common/attack-kind';
 import { abilityRef } from '@/lib/utils/battle/common/terms';
 import { signed } from '@/lib/utils/common/format';
+import {
+    moduleVocab,
+    type ModuleVocabId,
+} from '@/lib/utils/rules/systems/vocab';
 import type { BattleParticipant } from '@/types/battle';
 import type { DamageRow, DamageStep } from '@/types/battle-actions';
 import type { TextRef } from '@/types/text';
+
+const moduleSourcePrefixes = Object.fromEntries(
+    moduleVocab('abilitySources').map((e) => [
+        e.id,
+        dynamicTextRef(`battleLog.damage.sources.${e.id}`),
+    ])
+) as Record<ModuleVocabId<'abilitySources'>, TextRef>;
+
+const ITEM_LIKE_SOURCES: ReadonlySet<string> = new Set(
+    moduleVocab('abilitySources').flatMap((e) => (e.itemLike ? [e.id] : []))
+);
 
 const BONUS_PREFIX: Record<ModifierEntry['sourceType'], TextRef> = {
     skill: textRef('battleLog.damage.sources.skill'),
@@ -23,7 +38,7 @@ const BONUS_PREFIX: Record<ModifierEntry['sourceType'], TextRef> = {
     class: textRef('battleLog.damage.sources.class'),
     feat: textRef('battleLog.damage.sources.feat'),
     artifact: textRef('battleLog.damage.sources.artifact'),
-    artifactSet: textRef('battleLog.damage.sources.artifactSet'),
+    ...moduleSourcePrefixes,
     unit: textRef('battleLog.damage.sources.unit'),
     character: textRef('battleLog.damage.sources.character'),
     effect: textRef('battleLog.damage.sources.effect'),
@@ -107,7 +122,7 @@ export function calculateDamageWithModifiersImpl(
     }
 
     const isArtifact = (e: ModifierEntry) =>
-        e.sourceType === 'artifact' || e.sourceType === 'artifactSet';
+        e.sourceType === 'artifact' || ITEM_LIKE_SOURCES.has(e.sourceType);
 
     const sum = (
         pred: (e: ModifierEntry) => boolean,

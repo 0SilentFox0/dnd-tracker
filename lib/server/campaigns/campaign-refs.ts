@@ -2,6 +2,7 @@ import 'server-only';
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { prisma } from '@/lib/db';
 import { ContentError } from '@/lib/server/content/errors';
+import type { ModuleVocabId } from '@/lib/utils/rules/systems/vocab';
 
 type RefId = string | null | undefined;
 
@@ -10,7 +11,7 @@ export type CampaignRefKind =
     | 'spellGroup'
     | 'mainSkill'
     | 'skill'
-    | 'artifactSet'
+    | ModuleVocabId<'abilitySources'>
     | 'race'
     | 'feat'
     | 'career';

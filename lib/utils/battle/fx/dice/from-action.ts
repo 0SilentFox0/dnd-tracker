@@ -2,6 +2,7 @@ import { MAX_INITIATIVE_DICE, MAX_SAVES_SHOWN } from './layout';
 import type { DieFx } from './types';
 
 import { ruleSystemByKey } from '@/lib/utils/rules/systems';
+import { moduleVocab } from '@/lib/utils/rules/systems/vocab';
 import type { BattleAction, DiceRollGroup } from '@/types/battle-actions';
 
 export interface DiceThrowSpec {
@@ -22,14 +23,14 @@ const toDie = (group: DiceRollGroup) => {
 
 type RollKind = DiceRollGroup['kind'];
 
-const PHASES: RollKind[][] = [
-    ['attack'],
-    ['save'],
-    ['damage'],
-    ['heal'],
-    ['morale'],
-    ['initiative'],
-];
+const CORE_PHASES: RollKind[] = ['attack', 'save', 'damage', 'heal', 'initiative'];
+
+const PHASES: RollKind[][] = CORE_PHASES.flatMap((kind) => [
+    [kind],
+    ...moduleVocab('rollKinds')
+        .filter((r) => r.after === kind)
+        .map((r) => [r.id as RollKind]),
+]);
 
 const PERCENTILE_SEED_BASE = 1_000_003;
 

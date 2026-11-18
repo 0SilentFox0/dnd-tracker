@@ -1,3 +1,5 @@
+import type { ModuleVocabId } from '@/lib/utils/rules/systems/vocab';
+
 export const CharacterLogKind = {
     CHECK: 'check',
     SAVE: 'save',
@@ -12,7 +14,6 @@ export const CharacterLogKind = {
     ADVANCE: 'advance',
     CAREER_SET: 'career_set',
     CAREER_ADVANCE: 'career_advance',
-    INSPIRATION: 'inspiration',
     RESOURCES_EDIT: 'resources_edit',
     CHOICES_EDIT: 'choices_edit',
     BATTLE_RESULT: 'battle_result',
@@ -21,6 +22,7 @@ export const CharacterLogKind = {
 } as const;
 
 export type CharacterLogKindValue =
-    (typeof CharacterLogKind)[keyof typeof CharacterLogKind];
+    | (typeof CharacterLogKind)[keyof typeof CharacterLogKind]
+    | ModuleVocabId<'characterLogTypes'>;
 
 export const CHARACTER_LOG_PAGE_SIZE = 30;

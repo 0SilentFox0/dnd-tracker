@@ -61,6 +61,8 @@ const strikeText = (
 function AttackBody({ fx }: { fx: AttackFx }) {
     const t = useTranslations('battle.result');
 
+    const tr = useTranslations('retaliationLog');
+
     const text = useText();
 
     const { serverJudged } = useBattleRules();
@@ -140,7 +142,7 @@ function AttackBody({ fx }: { fx: AttackFx }) {
             )}
             {fx.retaliation && (
                 <div className="mt-1 text-sm text-[#e9a08f]">
-                    {t('retaliation', {
+                    {tr('result', {
                         name: fx.retaliation.name,
                         outcome:
                             fx.retaliation.damage > 0

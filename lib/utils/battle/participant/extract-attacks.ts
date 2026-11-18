@@ -15,10 +15,14 @@ import {
 import { WEAPON_PROFICIENCY_KINDS } from '@/lib/constants/artifacts';
 import { AttackType } from '@/lib/constants/battle';
 import { parseWeaponTraits } from '@/lib/constants/weapon-traits';
-import { weaponCategoryFromText } from '@/lib/utils/artifacts/weapon-slot';
+import {
+    isWeaponSlot,
+    weaponCategoryFromText,
+} from '@/lib/utils/artifacts/weapon-slot';
 import { resolveItemRow } from '@/lib/utils/items/resolve';
 import { type Ruleset } from '@/lib/utils/rules';
 import { SECTION_DEFAULTS } from '@/lib/utils/rules/defaults';
+import { moduleVocab } from '@/lib/utils/rules/systems/vocab';
 
 const defaultAttacks = (
     names: Ruleset['defaultAttacks'],
@@ -98,14 +102,14 @@ type ItemsOpt = { enabled: boolean; attuned: readonly string[] };
 
 const SLOT_KEYS = [
     'mainHand',
-    'offHand',
+    ...moduleVocab('equipSlots')
+        .filter((s) => s.weapon)
+        .map((s) => s.id),
     'weapon',
     'weapon1',
     'weapon2',
     'range_weapon',
-] as const;
-
-const WEAPON_SLOTS = ['weapon', 'mainHand', 'offHand', 'range_weapon'];
+];
 
 function extractWeaponAttacks(
     character: CharacterFromPrisma,
@@ -120,7 +124,7 @@ function extractWeaponAttacks(
 
     const equipped = (character.inventory.equipped as Equipped) || {};
 
-    const entries: Array<{ ref: string; offHand: boolean }> = [];
+    const entries: Array<{ ref: string; secondary: boolean }> = [];
 
     for (const key of SLOT_KEYS) {
         const val = equipped[key];
@@ -128,7 +132,7 @@ function extractWeaponAttacks(
         if (!val) continue;
 
         if (typeof val === 'string') {
-            entries.push({ ref: val, offHand: false });
+            entries.push({ ref: val, secondary: false });
         } else if (
             typeof val === 'object' &&
             val !== null &&
@@ -143,11 +147,11 @@ function extractWeaponAttacks(
             ? equipped.shield
             : null;
 
-    if (shieldRef) entries.push({ ref: shieldRef, offHand: true });
+    if (shieldRef) entries.push({ ref: shieldRef, secondary: true });
 
     const shieldCellEmpty = !equipped.shield;
 
-    for (const { ref, offHand } of entries) {
+    for (const { ref, secondary } of entries) {
         const weapon = resolveItemRow(ref, rowsById, {
             itemsEnabled: !!items?.enabled,
             attuned: items?.attuned ?? [],
@@ -156,14 +160,14 @@ function extractWeaponAttacks(
         if (!weapon) continue;
 
         if (
-            offHand
+            secondary
                 ? weapon.slot !== 'weapon'
-                : !WEAPON_SLOTS.includes(weapon.slot as string)
+                : !isWeaponSlot(weapon.slot)
         )
             continue;
 
         attacks.push(
-            attackFromItem(weapon, { ref, offHand, classMode, shieldCellEmpty })
+            attackFromItem(weapon, { ref, secondary, classMode, shieldCellEmpty })
         );
     }
 
@@ -209,12 +213,12 @@ function attackFromItem(
     weapon: ItemRow,
     ctx: {
         ref: string;
-        offHand: boolean;
+        secondary: boolean;
         classMode: boolean;
         shieldCellEmpty: boolean;
     }
 ): ExtractedAttack {
-    const { ref, offHand, classMode } = ctx;
+    const { ref, secondary, classMode } = ctx;
 
     const modifiers = (weapon.modifiers as ArtifactModifier[]) || [];
 
@@ -269,7 +273,7 @@ function attackFromItem(
 
     const useVersatile =
         classMode &&
-        !offHand &&
+        !secondary &&
         traits.includes('versatile') &&
         !!versatileDice &&
         ctx.shieldCellEmpty;
@@ -285,7 +289,7 @@ function attackFromItem(
     const category = weaponCategoryOf(modifiers, weapon.description);
 
     return {
-        id: offHand ? `${ref}:off` : ref,
+        id: secondary ? `${ref}:off` : ref,
         name: weapon.name,
         type: (attackType === AttackType.RANGED && !thrownMelee
             ? AttackType.RANGED
@@ -316,7 +320,7 @@ function attackFromItem(
             ) || undefined,
         ...(traits.length > 0 && { traits }),
         ...(versatileDice && { versatileDice }),
-        ...(offHand && { hand: 'off' as const }),
+        ...(secondary && { hand: 'off' as const }),
         ...(damageBonus !== 0 && { damageBonus }),
         ...(classMode && category && { weaponCategory: category }),
     };

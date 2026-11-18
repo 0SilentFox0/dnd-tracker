@@ -1,6 +1,6 @@
+import type { CounterOutcome } from '@/lib/utils/battle/view/counter-outcome';
 import type { CritEffectFx } from '@/lib/utils/battle/view/crit-outcome';
 import type { QueueEntry } from '@/lib/utils/battle/view/queue';
-import type { RetaliationOutcome } from '@/lib/utils/battle/view/retaliation';
 import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
 import type { BattleParticipant } from '@/types/battle';
 
@@ -22,7 +22,7 @@ export type ResultFx =
           weapon?: string;
           system?: SystemSlot;
           exact?: true;
-          retaliation?: RetaliationOutcome;
+          retaliation?: CounterOutcome;
           critEffect?: CritEffectFx;
           strikes?: StrikeFx[];
       }
@@ -33,7 +33,7 @@ export type ResultFx =
           known: string;
           system?: SystemSlot;
           exact?: true;
-          retaliation?: RetaliationOutcome;
+          retaliation?: CounterOutcome;
           critFail?: CritEffectFx;
           strikes?: StrikeFx[];
       }

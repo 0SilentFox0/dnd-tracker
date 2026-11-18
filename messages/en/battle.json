@@ -117,8 +117,17 @@
       "preview": "View as player",
       "dmView": "DM view",
       "shareAllies": "Share vision among allies",
-      "modes": { "off": "Off", "reveal": "Reveal", "vision": "Hero vision" },
-      "brushes": { "brush": "Brush", "rectangle": "Rectangle", "room": "Room", "erase": "Erase" }
+      "modes": {
+        "off": "Off",
+        "reveal": "Reveal",
+        "vision": "Hero vision"
+      },
+      "brushes": {
+        "brush": "Brush",
+        "rectangle": "Rectangle",
+        "room": "Room",
+        "erase": "Erase"
+      }
     },
     "camera": {
       "zoomIn": "Zoom in",
@@ -199,7 +208,6 @@
     "critPrefix": "crit ",
     "downed": "downed",
     "splash": "splashed",
-    "retaliation": "Target's reply: {name} {outcome}",
     "applied": "Applied",
     "appliedTargets": "Applied · targets: {count}",
     "aria": "Action result"

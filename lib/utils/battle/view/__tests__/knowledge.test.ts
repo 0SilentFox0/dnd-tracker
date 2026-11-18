@@ -221,7 +221,7 @@ describe('знання з заклинань', () => {
         expect(KNOWLEDGE_EVENT_TYPES).toEqual(
             expect.arrayContaining([
                 BattleActionType.ATTACK,
-                BattleActionType.RETALIATION,
+                'retaliation',
                 BattleActionType.SPELL,
             ])
         );

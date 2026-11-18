@@ -12,7 +12,7 @@ import {
     cooldownLeft,
     withinCountLimits,
 } from '@/lib/utils/abilities/engine/core/usage';
-import { lairOf } from '@/lib/utils/battle/actions/access';
+import { legendaryKindOf, sceneActionsOf } from '@/lib/utils/battle/actions/access';
 import {
     legendaryAbilities,
     legendaryBlocker,
@@ -29,7 +29,7 @@ import type { LogLine } from '@/types/text';
 
 export interface LegendaryChoice {
     id: string;
-    kind: 'attack' | 'ability' | 'lair';
+    kind: 'attack' | LegendaryOption['kind'];
     label: string;
     cost: number;
     spellId?: string;
@@ -54,7 +54,7 @@ export function useLegendaryAction(participant: BattleParticipant) {
 
     const spells = useSpellsByIds(campaignId, spellIds);
 
-    const lair = lairOf(battle.rules);
+    const scene = sceneActionsOf(battle.rules);
 
     const choices = useMemo<LegendaryChoice[]>(() => {
         const field = (order ?? []).filter((p) => !p.battleData.reserved);
@@ -92,7 +92,7 @@ export function useLegendaryAction(participant: BattleParticipant) {
 
         const abilities = [
             ...legendaryAbilities(participant),
-            ...lair.abilities(participant),
+            ...scene.abilities(participant),
         ].map((a): LegendaryChoice => {
             const cost = legendaryCostOf(a);
 
@@ -112,8 +112,8 @@ export function useLegendaryAction(participant: BattleParticipant) {
                 : a.name;
 
             const blocked =
-                (a.limits?.lair
-                    ? lair.blocker(participant, battle.currentRound, a.key)
+                (legendaryKindOf(a) !== 'ability'
+                    ? scene.blocker(participant, battle.currentRound, a.key)
                     : legendaryBlocker(participant, current, cost)) ??
                 (!withinCountLimits(participant, a)
                     ? textRef('battleDm.legendary.limitReached')
@@ -131,7 +131,7 @@ export function useLegendaryAction(participant: BattleParticipant) {
 
             return {
                 id: `ability:${a.key}`,
-                kind: a.limits?.lair ? 'lair' : 'ability',
+                kind: legendaryKindOf(a),
                 label,
                 cost,
                 abilityKey: a.key,
@@ -166,7 +166,7 @@ export function useLegendaryAction(participant: BattleParticipant) {
         spells.data,
         battle.currentRound,
         battle.map,
-        lair,
+        scene,
     ]);
 
     const { send, isPending } = useSendCoreAction();

@@ -29,7 +29,7 @@ export function checkMorale(
     if (ignored) {
         return {
             ...result,
-            message: textRef('battleLog.morale.ignored', {
+            message: textRef('moraleLog.check.ignored', {
                 name: participant.basicInfo.name,
             }),
         };
@@ -38,7 +38,7 @@ export function checkMorale(
     if (currentMorale === 0) {
         return {
             ...result,
-            message: textRef('battleLog.morale.neutral', {
+            message: textRef('moraleLog.check.neutral', {
                 name: participant.basicInfo.name,
             }),
         };
@@ -49,11 +49,11 @@ export function checkMorale(
 
         const { threshold } = moraleThreshold(currentMorale, bonus);
 
-        const detail = textRef('battleLog.morale.detail', {
+        const detail = textRef('moraleLog.check.detail', {
             morale: currentMorale,
             leadership:
                 bonus > 0
-                    ? textRef('battleLog.morale.leadership', { bonus })
+                    ? textRef('moraleLog.check.leadership', { bonus })
                     : '',
             roll: d10Roll,
             threshold,
@@ -61,12 +61,12 @@ export function checkMorale(
 
         if (d10Roll >= threshold) {
             result.hasExtraTurn = true;
-            result.message = textRef('battleLog.morale.extra', {
+            result.message = textRef('moraleLog.check.extra', {
                 name: participant.basicInfo.name,
                 detail,
             });
         } else {
-            result.message = textRef('battleLog.morale.noExtra', {
+            result.message = textRef('moraleLog.check.noExtra', {
                 name: participant.basicInfo.name,
                 detail,
             });
@@ -76,14 +76,14 @@ export function checkMorale(
 
         if (d10Roll <= threshold) {
             result.shouldSkipTurn = true;
-            result.message = textRef('battleLog.morale.skip', {
+            result.message = textRef('moraleLog.check.skip', {
                 name: participant.basicInfo.name,
                 morale: currentMorale,
                 roll: d10Roll,
                 threshold,
             });
         } else {
-            result.message = textRef('battleLog.morale.noSkip', {
+            result.message = textRef('moraleLog.check.noSkip', {
                 name: participant.basicInfo.name,
                 morale: currentMorale,
                 roll: d10Roll,

@@ -65,7 +65,7 @@ export function applyPendingMoraleCheck({
                 actionType: 'ability',
                 targets: [],
                 actionDetails: { d10Roll, morale: 0 },
-                ...logFields(textRef('battleLog.morale.notFound')),
+                ...logFields(textRef('moraleLog.check.notFound')),
                 hpChanges: [],
                 isCancelled: false,
                 stateBefore: undefined,

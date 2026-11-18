@@ -1,5 +1,6 @@
 import { BattleActionType } from '@/lib/constants/battle';
 import { lineKey } from '@/lib/i18n/text-ref';
+import { moduleVocab } from '@/lib/utils/rules/systems/vocab';
 import type { BattleAction, DamageStep } from '@/types/battle-actions';
 import type { LogLine } from '@/types/text';
 
@@ -23,7 +24,9 @@ export interface ObservedTrait {
 
 const AC_EVENT_TYPES: readonly string[] = [
     BattleActionType.ATTACK,
-    BattleActionType.RETALIATION,
+    ...moduleVocab('actionTypes')
+        .filter((e) => e.fx === 'attack')
+        .map((e) => e.id),
 ];
 
 const targets = (e: BattleAction, id: string) =>

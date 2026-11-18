@@ -637,7 +637,7 @@ function assertActionAvailable(
         const blocker = reactionsOf(ctx.meta.rules).blocker(caster);
 
         if (blocker) throw ruleErrorOf('action_rejected', blocker);
-    } else assertCanAct(ctx, caster.basicInfo.id, { skipMorale: free });
+    } else assertCanAct(ctx, caster.basicInfo.id, { skipGate: free });
 
     const isBonus = definition.cost === 'bonusAction';
 

@@ -1,0 +1,15 @@
+{
+  "check": {
+    "ignored": "{name}: мораль не діє",
+    "neutral": "{name} має нейтральну мораль",
+    "leadership": ", лідерство +{bonus}%",
+    "detail": "Мораль +{morale}{leadership}, кидок: {roll}, потрібно: >={threshold}",
+    "extra": "⭐ {name}: додатковий хід! ({detail})",
+    "noExtra": "{name}: без додаткового ходу ({detail})",
+    "skip": "😔 {name}: пропуск ходу через низьку мораль (Мораль {morale}, кидок: {roll}, пропуск на: <={threshold})",
+    "noSkip": "{name}: хід не пропущено (Мораль {morale}, кидок: {roll}, пропуск на: <={threshold})",
+    "notFound": "Учасник не знайдений в initiativeOrder"
+  },
+  "rejectFirst": "Спершу потрібна перевірка моралі",
+  "actionKind": "мораль"
+}

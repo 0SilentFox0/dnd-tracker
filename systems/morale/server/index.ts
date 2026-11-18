@@ -19,7 +19,7 @@ export const MORALE_MODULE_SERVER = defineAddon<SystemServer>(() => ({
                 roll: (ctx) => ({ d10Roll: rollDie(10, rngOf(ctx)) }),
             },
             load: async () => {
-                const { moraleCheckSchema } = await import('@/lib/schemas');
+                const { moraleCheckSchema } = await import('./battle/schema');
 
                 const { moraleCheckMutation } = await import(
                     './battle/morale-check-mutation'

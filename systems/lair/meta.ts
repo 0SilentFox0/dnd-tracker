@@ -6,7 +6,17 @@ export const LAIR_META = {
     keys: [],
     requires: ['d20'],
     toggle: 'free',
-    i18n: {},
+    i18n: {
+        log: ['lairLog'],
+        legacyKeys: {
+            'battleLog.reject.abilityIsLair': 'lairLog.rejectAbility',
+            'battleLog.dm.lairIn': 'lairLog.dmIn',
+            'battleLog.dm.lairOut': 'lairLog.dmOut',
+            'battleLog.legendary.useLair': 'lairLog.use',
+            'battleLog.legendary.runLair': 'lairLog.run',
+            'battleLog.round.lair': 'lairLog.round',
+        },
+    },
     vocab: {
         abilityLimitFlags: [
             { id: 'lair', clears: ['legendaryCost'], needsActionTrigger: true },

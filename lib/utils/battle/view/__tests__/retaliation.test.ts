@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { retaliationOutcome } from '@/lib/utils/battle/view';
+import { counterOutcome } from '@/lib/utils/battle/view';
 import type { BattleAction } from '@/types/battle-actions';
 
 const ret = (actionIndex: number, change: number) =>
@@ -22,15 +22,15 @@ const ret = (actionIndex: number, change: number) =>
             : [],
     }) as unknown as BattleAction;
 
-describe('retaliationOutcome', () => {
+describe('counterOutcome', () => {
     it('нова подія відсічі → імʼя і шкода по атакувальнику; стара або відсутня — нічого', () => {
         expect(
-            retaliationOutcome([ret(4, 3), ret(9, 4)], new Set([4]))
+            counterOutcome([ret(4, 3), ret(9, 4)], new Set([4]))
         ).toEqual({ name: 'Гоблін', damage: 4 });
-        expect(retaliationOutcome([ret(9, 0)], new Set())).toEqual({
+        expect(counterOutcome([ret(9, 0)], new Set())).toEqual({
             name: 'Гоблін',
             damage: 0,
         });
-        expect(retaliationOutcome([ret(4, 3)], new Set([4]))).toBeUndefined();
+        expect(counterOutcome([ret(4, 3)], new Set([4]))).toBeUndefined();
     });
 });

@@ -102,8 +102,8 @@ describe('empty params are not stored', () => {
     });
 
     it('omits params entirely when all are empty', () => {
-        expect(textRef('battleLog.morale.leadership', { bonus: '' })).toEqual({
-            message: 'battleLog.morale.leadership',
+        expect(textRef('moraleLog.check.leadership', { bonus: '' })).toEqual({
+            message: 'moraleLog.check.leadership',
         });
     });
 });

@@ -18,6 +18,7 @@ import type { WeaponTrait } from '@/lib/constants/weapon-traits';
 import type { NonRandomEffect } from '@/lib/utils/abilities/schema';
 import type { FxAuraKind } from '@/lib/utils/battle/fx';
 import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
+import type { ModuleVocabId } from '@/lib/utils/rules/systems/vocab';
 import type { InlineCast, SpellCost } from '@/lib/utils/spells/model/schema';
 import type { StoredSpellSlots } from '@/lib/utils/spells/slot-keys';
 import type {
@@ -272,7 +273,7 @@ export interface LegendaryState {
 
 export type LegendaryOption =
     | { kind: 'attack'; attackIndex: number; targetId: string }
-    | { kind: 'ability' | 'lair'; abilityKey: string; targetIds?: string[] };
+    | { kind: 'ability' | ModuleVocabId<'legendaryKinds'>; abilityKey: string; targetIds?: string[] };
 
 export interface AbilityPool {
     label: string;

@@ -2,6 +2,7 @@ import type { ComputeHitDamageResult } from './compute';
 
 import type { CriticalEffect } from '@/lib/constants/critical-effects';
 import { dynamicTextRef, textRef } from '@/lib/i18n/text-ref';
+import { counterActionType } from '@/lib/utils/battle/action-types';
 import {
     type CritFlavor,
     critNameRef,
@@ -314,7 +315,7 @@ export interface BuildOffTurnParams {
     battleId: string;
     currentRound: number;
     critFlavor?: CritFlavor;
-    title?: LogLine;
+    title: LogLine;
     rules: Ruleset;
 }
 
@@ -338,7 +339,7 @@ export function buildOffTurnAction(p: BuildOffTurnParams): BattleAction {
         : '';
 
     const head = {
-        title: p.title ?? textRef('battleLog.offTurn.titles.retaliation'),
+        title: p.title,
         attacker: retaliator.basicInfo.name,
         target: target.basicInfo.name,
         checkRoll: d20,
@@ -377,7 +378,7 @@ export function buildOffTurnAction(p: BuildOffTurnParams): BattleAction {
 
     return newBattleAction(
         retaliator,
-        'retaliation',
+        counterActionType(),
         { battleId: p.battleId, round: p.currentRound, targets: [target] },
         {
             actionDetails: {

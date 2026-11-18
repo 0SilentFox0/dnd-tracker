@@ -4,7 +4,7 @@ import { rerollTokenOn } from '@/lib/utils/rules/reroll-token-on';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { BattleParticipant } from '@/types/battle';
 
-export const INSPIRATION_LABEL = textRef('battleLog.rollMode.inspiration');
+export const INSPIRATION_LABEL = textRef('inspirationLog.rollMode');
 
 export function canUseInspiration(
     p: BattleParticipant | undefined | null,

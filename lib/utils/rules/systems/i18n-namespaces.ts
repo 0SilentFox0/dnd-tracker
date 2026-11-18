@@ -6,6 +6,7 @@ export const i18nNamespaces = ({
     member,
     dm,
     rules,
+    log,
     pages,
 }: SystemI18n): string[] => [
     ...(battle ?? []),
@@ -13,5 +14,6 @@ export const i18nNamespaces = ({
     ...(member ?? []),
     ...(dm ?? []),
     ...(rules ?? []),
+    ...(log ?? []),
     ...Object.values(pages ?? {}).flat(),
 ];

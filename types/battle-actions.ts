@@ -6,6 +6,7 @@ import {
 } from '@/lib/constants/battle';
 import type { SpellFx } from '@/lib/utils/battle/fx';
 import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
+import type { ModuleVocabId } from '@/lib/utils/rules/systems/vocab';
 import type { BattleParticipant } from '@/types/battle';
 import type { GridPoint } from '@/types/battle-grid';
 import type { LogLine } from '@/types/text';
@@ -36,7 +37,13 @@ export interface RolledDie {
 }
 
 export interface DiceRollGroup {
-    kind: 'attack' | 'damage' | 'heal' | 'save' | 'morale' | 'initiative';
+    kind:
+        | 'attack'
+        | 'damage'
+        | 'heal'
+        | 'save'
+        | 'initiative'
+        | ModuleVocabId<'rollKinds'>;
     rollerId: string;
     targetId?: string;
     dice: RolledDie[];
@@ -58,8 +65,7 @@ export interface BattleAction {
         | 'ability'
         | 'end_turn'
         | 'skip_turn'
-        | 'morale_skip'
-        | 'retaliation';
+        | ModuleVocabId<'actionTypes'>;
     targets: Array<{
         participantId: string;
         participantName: string;
@@ -147,7 +153,6 @@ export interface BattleAction {
             source: string;
         }>;
         d10Roll?: number;
-        morale?: number;
         diceRolls?: DiceRollGroup[];
         skillId?: string;
         skillName?: string;
@@ -160,7 +165,7 @@ export interface BattleAction {
             source?: 'attack' | 'save';
             flavorIndex?: number;
         };
-    };
+    } & { [K in ModuleVocabId<'combatStats'>]?: number };
     /** Legacy text log ("a | b"); events written by the structured log have "" and `log` */
     resultText: string;
     log?: LogLine[];

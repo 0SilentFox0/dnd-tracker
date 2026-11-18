@@ -1,14 +1,16 @@
 import { BattleActionType } from '@/lib/constants/battle';
 import { dynamicTextRef, textRef } from '@/lib/i18n/text-ref';
+import { moduleLoggedActionTypes } from '@/lib/utils/battle/action-types';
 import { splitLegacyTriggers } from '@/lib/utils/battle/log/legacy';
 import { actionLines } from '@/lib/utils/battle/log/lines';
 import { getLogEntryDetailItems } from '@/lib/utils/battle/view/log-format';
 import type { BattleAction } from '@/types/battle-actions';
 import type { LogLine } from '@/types/text';
 
-const KNOWN_KINDS: ReadonlySet<string> = new Set(
-    Object.values(BattleActionType)
-);
+const KNOWN_KINDS: ReadonlySet<string> = new Set([
+    ...Object.values(BattleActionType),
+    ...moduleLoggedActionTypes(),
+]);
 
 export interface LogEntryView {
     headline: LogLine;

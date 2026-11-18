@@ -9,7 +9,7 @@ import {
     isStaticEffect,
     TIMED_STATS,
 } from './effects';
-import { isAreaTarget, PASSIVE_TARGETS } from './kinds';
+import { isAreaTarget, PASSIVE_TARGETS, statFlag } from './kinds';
 import { AbilityParamsSchema } from './params';
 import { isStaticCondition } from './static-condition';
 import { isActionScopedTrigger, type Trigger, TriggerSchema } from './triggers';
@@ -17,6 +17,22 @@ import { isActionScopedTrigger, type Trigger, TriggerSchema } from './triggers';
 import type { ErrorParams } from '@/lib/constants/api-errors';
 import { CLASS_COLUMN_KEY_RE } from '@/lib/constants/classes';
 import { isSystemEffectKind } from '@/lib/utils/abilities/registry/effects/system-rows';
+import {
+    moduleVocab,
+    type ModuleVocabId,
+} from '@/lib/utils/rules/systems/vocab';
+
+const LIMIT_FLAGS = moduleVocab('abilityLimitFlags');
+
+const limitFlagSchemas = Object.fromEntries(
+    LIMIT_FLAGS.map((f) => [f.id, z.literal(true).optional()])
+) as Record<
+    ModuleVocabId<'abilityLimitFlags'>,
+    z.ZodOptional<z.ZodLiteral<true>>
+>;
+
+const isLimitFlagSet = (limits: object | undefined) =>
+    LIMIT_FLAGS.some((f) => (limits as Record<string, unknown> | undefined)?.[f.id]);
 
 export const LimitsSchema = z.object({
     perBattle: z.number().int().min(1).optional(),
@@ -35,7 +51,7 @@ export const LimitsSchema = z.object({
         .optional(),
     cooldownRounds: z.number().int().min(1).optional(),
     chance: z.number().min(1).max(100).optional(),
-    lair: z.literal(true).optional(),
+    ...limitFlagSchemas,
     legendaryCost: z.number().int().min(1).max(3).optional(),
     pool: z
         .object({
@@ -76,7 +92,7 @@ function passiveEffectIssues(
         if (
             effect.kind === 'modifyStat' &&
             isBakedStat(effect.stat) &&
-            effect.stat !== 'morale' &&
+            !statFlag(effect.stat, 'areaOk') &&
             isAreaTarget(effect.target)
         ) {
             issues.push({
@@ -142,10 +158,10 @@ function triggeredEffectIssues(
 
     if (
         effect.kind === 'modifyStat' &&
-        effect.stat === 'morale' &&
+        statFlag(effect.stat, 'needsDuration') &&
         !effect.duration
     ) {
-        issues.push({ message: 'abilities.validation.moraleNeedsDuration' });
+        issues.push({ message: `abilities.validation.${effect.stat}NeedsDuration` });
     }
 
     if (
@@ -262,22 +278,26 @@ export const AbilitySchema = z
             });
         }
 
-        if (
-            a.limits?.lair &&
-            (a.trigger.event !== 'action' ||
-                a.limits.legendaryCost !== undefined ||
-                a.aim)
-        ) {
-            ctx.addIssue({
-                code: 'custom',
-                path: ['limits', 'lair'],
-                message: 'abilities.validation.lairAction',
-            });
+        for (const flag of LIMIT_FLAGS) {
+            const limits = a.limits as Record<string, unknown> | undefined;
+
+            if (
+                limits?.[flag.id] &&
+                ((flag.needsActionTrigger && a.trigger.event !== 'action') ||
+                    flag.clears?.some((k) => limits[k] !== undefined) ||
+                    a.aim)
+            ) {
+                ctx.addIssue({
+                    code: 'custom',
+                    path: ['limits', flag.id],
+                    message: `abilities.validation.${flag.id}Action`,
+                });
+            }
         }
 
         if (
             a.perform &&
-            ((!a.limits?.legendaryCost && !a.limits?.lair) ||
+            ((!a.limits?.legendaryCost && !isLimitFlagSet(a.limits)) ||
                 a.effects.some((e) => e.kind !== 'note'))
         ) {
             ctx.addIssue({

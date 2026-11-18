@@ -80,3 +80,12 @@ export const rulesFormScope = (): readonly Namespace[] => [
         )
     ),
 ];
+
+/** Stored battle-log texts of every installed module (`meta.i18n.log`): old logs render with the module off */
+export const logScope = (): readonly Namespace[] => [
+    ...new Set(
+        (SYSTEM_META as readonly SystemMeta[]).flatMap(
+            (meta) => (meta.i18n.log ?? []) as readonly Namespace[]
+        )
+    ),
+];

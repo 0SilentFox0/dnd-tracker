@@ -8,7 +8,7 @@ import {
     CAMPAIGN_NAMESPACES,
     ROOT_NAMESPACES,
 } from '../scopes';
-import { systemScope } from '../system-scope';
+import { logScope, systemScope } from '../system-scope';
 
 import { SYSTEM_META } from '@/lib/utils/rules/systems/meta';
 
@@ -33,7 +33,7 @@ const systemScopes = SYSTEM_META.filter(
         };
     };
 
-    const battle = systemScope({ key }, 'battle');
+    const battle = [...systemScope({ key }, 'battle'), ...logScope()];
 
     const member = [
         ...BASE,
@@ -64,6 +64,7 @@ const systemScopes = SYSTEM_META.filter(
                 ...CAMPAIGN_NAMESPACES,
                 ...BATTLE_NAMESPACES,
                 ...systemScope({ key, modules: addons }, 'battle'),
+                ...logScope(),
             ],
             ...(budgetKb?.battle && { limit: budgetKb.battle }),
         },

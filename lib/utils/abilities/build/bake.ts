@@ -1,19 +1,17 @@
 import { ABILITY_KEYS } from '@/lib/constants/abilities';
-import {
-    clampMorale,
-    moraleCapOf,
-} from '@/lib/utils/abilities/build/morale-stat';
 import { resolveFlat } from '@/lib/utils/abilities/engine/core/amount';
 import { auraKey } from '@/lib/utils/abilities/engine/core/collect-modifiers';
 import { staticEffectStrength } from '@/lib/utils/abilities/engine/core/effect-strength';
 import { resolvedAbilitiesOf } from '@/lib/utils/abilities/engine/core/participants';
 import { evaluateCondition } from '@/lib/utils/abilities/registry/conditions';
 import type { Effect } from '@/lib/utils/abilities/schema';
-import { isBakedStat } from '@/lib/utils/abilities/schema/kinds';
+import { isBakedStat, statFlag } from '@/lib/utils/abilities/schema/kinds';
 import { isStaticCondition } from '@/lib/utils/abilities/schema/static-condition';
 import { getAbilityModifier } from '@/lib/utils/common/calculations';
 import type { ResolvedAbility } from '@/types/abilities';
 import type { BattleParticipant } from '@/types/battle';
+
+const CAPPED_STAT_DEFAULT_CAP = 3;
 
 type ModifyStat = Extract<Effect, { kind: 'modifyStat' }>;
 
@@ -52,14 +50,6 @@ function bakeOne(
                 ...p,
                 combatStats: { ...cs, speed: cs.speed + pct(cs.speed) },
             };
-        case 'morale':
-            return {
-                ...p,
-                combatStats: {
-                    ...cs,
-                    morale: clampMorale(cs.morale + flat, moraleCapOf(p)),
-                },
-            };
         case 'minTargets':
         case 'maxTargets':
             return {
@@ -94,6 +84,23 @@ function bakeOne(
             };
         }
         default: {
+            if (statFlag(e.stat, 'capped')) {
+                const stats = cs as unknown as Record<string, number | undefined>;
+
+                const cap = stats[`${e.stat}Cap`] ?? CAPPED_STAT_DEFAULT_CAP;
+
+                return {
+                    ...p,
+                    combatStats: {
+                        ...cs,
+                        [e.stat]: Math.max(
+                            -cap,
+                            Math.min(cap, (stats[e.stat] ?? 0) + flat)
+                        ),
+                    },
+                };
+            }
+
             if (!(ABILITY_KEYS as readonly string[]).includes(e.stat)) return p;
 
             const stat = e.stat as (typeof ABILITY_KEYS)[number];

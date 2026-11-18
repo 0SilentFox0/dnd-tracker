@@ -71,7 +71,7 @@ describe('d20 resolveAttack', () => {
     });
 
     it('an off-turn strike rolls both dice itself and labels the second-roll line with the noun', () => {
-        const noun = textRef('battleLog.offTurn.nouns.retaliation');
+        const noun = textRef('retaliationLog.noun');
 
         const r = combat.resolveAttack(
             ctx({ manualRoll: undefined, offTurn: { noun } })

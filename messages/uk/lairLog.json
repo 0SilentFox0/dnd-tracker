@@ -1,0 +1,8 @@
+{
+  "dmIn": "🏰 {name}: у лігві",
+  "dmOut": "🏰 {name}: поза лігвом",
+  "use": "🏰 {name}: дія лігва — {ability} → {attack}",
+  "run": "🏰 {name}: дія лігва «{ability}» ({counter}) — {text}",
+  "rejectAbility": "Це вміння — дія лігва",
+  "round": "🏰 Ініціатива 20: дія лігва — {name}"
+}

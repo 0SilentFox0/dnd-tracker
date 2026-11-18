@@ -90,8 +90,6 @@
     "end_turn": "кінець ходу",
     "turnStart": "початок ходу",
     "skip_turn": "пропуск ходу",
-    "morale_skip": "мораль",
-    "retaliation": "відсіч",
     "hazard": "небезпека",
     "event": "подія"
   },

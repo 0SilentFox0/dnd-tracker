@@ -8,6 +8,16 @@ export const OPPORTUNITY_META = {
     toggle: 'free',
     i18n: {},
     vocab: {
-        actionTypes: [{ id: 'opportunity', counter: true, serverLabel: true }],
+        actionTypes: [
+            {
+                id: 'opportunity',
+                counter: true,
+                serverLabel: true,
+                label: {
+                    title: 'battleLog.offTurn.titles.opportunity',
+                    noun: 'battleLog.offTurn.nouns.opportunity',
+                },
+            },
+        ],
     },
 } as const satisfies SystemMeta;

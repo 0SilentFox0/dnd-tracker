@@ -1,4 +1,13 @@
-const WEAPON_SLOTS = new Set(['weapon', 'mainHand', 'offHand', 'range_weapon']);
+import { moduleVocab } from '@/lib/utils/rules/systems/vocab';
+
+const WEAPON_SLOTS = new Set([
+    'weapon',
+    'mainHand',
+    ...moduleVocab('equipSlots')
+        .filter((s) => s.weapon)
+        .map((s) => s.id),
+    'range_weapon',
+]);
 
 export const isWeaponSlot = (slot: string | null | undefined) =>
     !!slot && WEAPON_SLOTS.has(slot);

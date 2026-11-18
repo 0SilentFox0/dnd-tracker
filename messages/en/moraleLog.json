@@ -1,0 +1,15 @@
+{
+  "check": {
+    "ignored": "{name}: morale has no effect",
+    "neutral": "{name} has neutral morale",
+    "leadership": ", leadership +{bonus}%",
+    "detail": "Morale +{morale}{leadership}, roll: {roll}, needed: >={threshold}",
+    "extra": "⭐ {name}: extra turn! ({detail})",
+    "noExtra": "{name}: no extra turn ({detail})",
+    "skip": "😔 {name}: skips the turn because of low morale (Morale {morale}, roll: {roll}, skip on: <={threshold})",
+    "noSkip": "{name}: turn not skipped (Morale {morale}, roll: {roll}, skip on: <={threshold})",
+    "notFound": "Participant not found in the initiative order"
+  },
+  "rejectFirst": "A morale check is needed first",
+  "actionKind": "morale"
+}

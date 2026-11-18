@@ -1,5 +1,4 @@
 import { API_ERRORS } from '@/lib/constants/api-errors';
-import type { MoraleCheckInput } from '@/lib/schemas';
 import { requireActor } from '@/lib/utils/battle/common/control';
 import type {
     BattleMutationContext,
@@ -12,6 +11,7 @@ import {
     withPendingMorale,
 } from '@/systems/morale/rules/state';
 import type { PendingMoraleCheckPayload } from '@/systems/morale/rules/threshold';
+import type { MoraleCheckInput } from '@/systems/morale/server/battle/schema';
 
 export function moraleCheckMutation(
     ctx: BattleMutationContext,

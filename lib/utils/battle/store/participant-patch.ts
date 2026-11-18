@@ -1,5 +1,6 @@
 import { stableStringify } from './stable-json';
 
+import { MODULE_COMBAT_STATS } from '@/lib/utils/battle/combat-stats';
 import { MAP_MODE_REGISTRY } from '@/lib/utils/battle/modes/registry';
 import type { BattleParticipantPatch } from '@/types/api';
 import type { BattleParticipant } from '@/types/battle';
@@ -11,7 +12,7 @@ type PatchableFields = {
 const CORE_PATCHABLE_FIELDS = {
     basicInfo: ['side', 'controlledBy'],
     abilities: ['initiative'],
-    combatStats: ['currentHp', 'tempHp', 'maxHp', 'morale', 'status'],
+    combatStats: ['currentHp', 'tempHp', 'maxHp', ...MODULE_COMBAT_STATS, 'status'],
     spellcasting: ['spellSlots'],
     battleData: [
         'activeEffects',

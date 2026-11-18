@@ -25,9 +25,9 @@ export const WFRP_META = {
             dmRules: ['battleWfrp', 'wfrpDowntime', 'wfrpCorruption'],
         },
         budgetKb: {
-            battle: 109.5,
-            member: 111.5,
-            dm: 115.5,
+            battle: 107.5,
+            member: 109.5,
+            dm: 113.5,
             pages: { character: 4, dmCharacter: 4, dmCharacters: 2 },
         },
     },

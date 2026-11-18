@@ -385,11 +385,6 @@ export const createBattleSchema = z
         path: ['mapId'],
     });
 
-export const moraleCheckSchema = z.object({
-    participantId: z.string(),
-    d10Roll: z.number().min(1).max(10),
-});
-
 export const critChoiceSchema = z.union([
     z.object({
         choices: z.record(
@@ -401,8 +396,6 @@ export const critChoiceSchema = z.union([
 ]);
 
 export type CritChoiceBody = z.infer<typeof critChoiceSchema>;
-
-export type MoraleCheckInput = z.infer<typeof moraleCheckSchema>;
 
 export const systemInputSchema = z.object({
     key: z.string(),

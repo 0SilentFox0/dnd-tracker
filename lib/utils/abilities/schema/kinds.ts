@@ -4,6 +4,11 @@ import type { Trigger } from './triggers';
 import { ABILITY_KEYS } from '@/lib/constants/abilities';
 import { AttackType, EffectMarker } from '@/lib/constants/battle';
 import { DICE_PATTERN } from '@/lib/utils/common/dice';
+import {
+    moduleVocab,
+    type ModuleVocabId,
+    type VocabEntry,
+} from '@/lib/utils/rules/systems/vocab';
 
 export const DICE_RE = DICE_PATTERN;
 
@@ -68,11 +73,18 @@ export const DYNAMIC_STATS = [
     'attacksPerAction',
 ] as const;
 
+type StatVocabFlag = 'baked' | 'timed';
+
+const moduleStats = (flag: StatVocabFlag) =>
+    moduleVocab('abilityStats')
+        .filter((e) => e[flag])
+        .map((e) => e.id as ModuleVocabId<'abilityStats'>);
+
 export const BAKED_STATS = [
     'initiative',
     'maxHp',
     'speed',
-    'morale',
+    ...moduleStats('baked'),
     'minTargets',
     'maxTargets',
     'spellSlots',
@@ -87,7 +99,7 @@ export const TIMED_STATS = [
     'critThreshold',
     'initiative',
     'speed',
-    'morale',
+    ...moduleStats('timed'),
     'actionsPerTurn',
     'savingThrow',
 ] as const;
@@ -143,6 +155,11 @@ export function isStaticEffect(e: Effect): e is StaticEffect {
         e.kind === 'modifyStat' || e.kind === 'damageBonus' || e.kind === 'flag'
     );
 }
+
+export const statFlag = (
+    stat: string,
+    flag: Exclude<keyof VocabEntry<'abilityStats'>, 'id' | 'defaultValue' | 'sheetKey'>
+): boolean => moduleVocab('abilityStats').some((e) => e.id === stat && e[flag]);
 
 export function isBakedStat(stat: StatKey): boolean {
     return (BAKED_STATS as readonly string[]).includes(stat);

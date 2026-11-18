@@ -6,7 +6,14 @@ export const INSPIRATION_META = {
     keys: [],
     requires: ['d20'],
     toggle: 'free',
-    i18n: { campaign: ['inspiration'], rules: ['rulesInspiration'] },
+    i18n: {
+        campaign: ['inspiration'],
+        rules: ['rulesInspiration'],
+        log: ['inspirationLog'],
+        legacyKeys: {
+            'battleLog.rollMode.inspiration': 'inspirationLog.rollMode',
+        },
+    },
     vocab: {
         characterLogTypes: [{ id: 'inspiration', toggle: true }],
     },

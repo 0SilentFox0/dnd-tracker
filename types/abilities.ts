@@ -1,6 +1,7 @@
 import { AttackType } from '@/lib/constants/battle';
 import type { OwnerKind } from '@/lib/utils/abilities/read';
 import type { Ability, StaticEffect } from '@/lib/utils/abilities/schema';
+import type { ModuleVocabId } from '@/lib/utils/rules/systems/vocab';
 import type { GridPoint } from '@/types/battle-grid';
 import type { LogLine } from '@/types/text';
 
@@ -10,16 +11,17 @@ export type {
 } from '@/lib/utils/abilities/segments';
 export type { Ability, StaticEffect };
 
+export type CoreAbilitySourceType =
+    | 'skill'
+    | 'race'
+    | 'artifact'
+    | 'unit'
+    | 'character'
+    | 'class'
+    | 'feat';
+
 export interface AbilitySource {
-    type:
-        | 'skill'
-        | 'race'
-        | 'artifact'
-        | 'artifactSet'
-        | 'unit'
-        | 'character'
-        | 'class'
-        | 'feat';
+    type: CoreAbilitySourceType | ModuleVocabId<'abilitySources'>;
     id: string;
     name: string;
     /** Derived (non-authored) sources: `name` stays an id-like string, the label renders per locale. */
@@ -42,7 +44,9 @@ export type AbilityPerform =
     | { kind: 'attack'; attack: string }
     | { kind: 'spell'; spellId: string };
 
-export type AbilityLimits5e = { lair?: true };
+export type AbilityLimits5e = {
+    [K in ModuleVocabId<'abilityLimitFlags'>]?: true;
+};
 
 export interface AbilityUsageCounter {
     battle: number;

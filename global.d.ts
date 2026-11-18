@@ -98,6 +98,10 @@ declare module 'next-intl' {
             battleMorale: typeof import('./messages/uk/battleMorale.json');
             battleWfrp: typeof import('./messages/uk/battleWfrp.json');
             inspiration: typeof import('./messages/uk/inspiration.json');
+            inspirationLog: typeof import('./messages/uk/inspirationLog.json');
+            lairLog: typeof import('./messages/uk/lairLog.json');
+            moraleLog: typeof import('./messages/uk/moraleLog.json');
+            retaliationLog: typeof import('./messages/uk/retaliationLog.json');
             rulesDeathSaves: typeof import('./messages/uk/rulesDeathSaves.json');
             rulesHeroScaling: typeof import('./messages/uk/rulesHeroScaling.json');
             rulesInspiration: typeof import('./messages/uk/rulesInspiration.json');

@@ -5,7 +5,16 @@ export const MORALE_META = {
     kind: 'addon',
     keys: [],
     requires: ['d20'],
-    i18n: { battle: ['battleMorale'], rules: ['rulesMorale'] },
+    i18n: {
+        battle: ['battleMorale'],
+        rules: ['rulesMorale'],
+        log: ['moraleLog'],
+        legacyKeys: {
+            'battleLog.morale.': 'moraleLog.check.',
+            'battleLog.reject.moraleFirst': 'moraleLog.rejectFirst',
+            'battleCommon.actionKinds.morale_skip': 'moraleLog.actionKind',
+        },
+    },
     vocab: {
         abilityStats: [
             {
@@ -22,7 +31,8 @@ export const MORALE_META = {
         ],
         combatStats: [{ id: 'morale', hidden: true, neutral: 0 }],
         rollKinds: [{ id: 'morale', after: 'heal' }],
-        logFields: [{ id: 'morale', code: 'm' }],
+        logFields: [{ id: 'morale', code: 'm', prefix: 'moraleLog.check.' }],
+        actionTypes: [{ id: 'morale_skip', logged: true }],
         unitImportFields: [{ id: 'morale', type: 'int' }],
     },
 } as const satisfies SystemMeta;

@@ -15,6 +15,7 @@ import type { LocalizedFieldMeta } from '@/lib/utils/abilities/registry/fields';
 import type { Limits } from '@/lib/utils/abilities/schema';
 import { patchDefined } from '@/lib/utils/common/patch-defined';
 import { ITEM_CHARGES_KEY } from '@/lib/utils/items/pools';
+import { moduleVocab } from '@/lib/utils/rules/systems/vocab';
 
 const LIMIT_FIELD_NAMES = [
     'perBattle',
@@ -81,9 +82,17 @@ export function LimitsSection({
             [name]: v,
         } as Partial<Limits>);
 
-        if (name === 'lair' && v) delete next.legendaryCost;
+        if (v) {
+            const flags = moduleVocab('abilityLimitFlags');
 
-        if (name === 'legendaryCost' && v) delete next.lair;
+            const stored: Record<string, unknown> = next;
+
+            for (const flag of flags) {
+                if (name === flag.id)
+                    flag.clears?.forEach((k) => delete stored[k]);
+                else if (flag.clears?.includes(name)) delete stored[flag.id];
+            }
+        }
 
         const { limits: _l, ...rest } = ability;
 
@@ -264,18 +273,30 @@ export function LimitsSection({
                     </div>
                 )}
             </div>
-            {ability.trigger.event === 'action' && (
-                <label className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Checkbox
-                        aria-label={t('lair')}
-                        checked={!!ability.limits?.lair}
-                        onCheckedChange={(on) =>
-                            set('lair', on === true ? true : undefined)
-                        }
-                    />
-                    {t('lair')}
-                </label>
-            )}
+            {moduleVocab('abilityLimitFlags')
+                .filter(
+                    (flag) =>
+                        !flag.needsActionTrigger ||
+                        ability.trigger.event === 'action'
+                )
+                .map((flag) => (
+                    <label
+                        key={flag.id}
+                        className="flex items-center gap-2 text-xs text-muted-foreground"
+                    >
+                        <Checkbox
+                            aria-label={t(flag.id as Parameters<typeof t>[0])}
+                            checked={!!ability.limits?.[flag.id as keyof Limits]}
+                            onCheckedChange={(on) =>
+                                set(
+                                    flag.id as keyof Limits,
+                                    on === true ? true : undefined
+                                )
+                            }
+                        />
+                        {t(flag.id as Parameters<typeof t>[0])}
+                    </label>
+                ))}
             <div className="grid grid-cols-6 items-end gap-2 [&>*]:min-w-0">
                 <FieldRenderer
                     meta={{

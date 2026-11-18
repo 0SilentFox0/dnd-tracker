@@ -1,3 +1,4 @@
+import { currentLogKey } from './legacy-log-keys';
 import type { Translator } from './translator';
 
 import {
@@ -111,14 +112,9 @@ export function translateIssue(
         return text.charAt(0).toLocaleUpperCase() + text.slice(1);
     }
 
-    return t.has(issue.message)
-        ? t(
-              issue.message,
-              withEmptyDefaults(
-                  t,
-                  issue.message,
-                  issueParams({ ...issue, params })
-              )
-          )
+    const key = currentLogKey(issue.message);
+
+    return t.has(key)
+        ? t(key, withEmptyDefaults(t, key, issueParams({ ...issue, params })))
         : issue.message;
 }

@@ -9,6 +9,7 @@ import type {
 } from '@/lib/hooks/characters';
 import { formatText } from '@/lib/i18n/text-ref';
 import { useTranslator } from '@/lib/i18n/use-translator';
+import { moduleVocab } from '@/lib/utils/rules/systems/vocab';
 import type { SpecialItem } from '@/types/inventory';
 
 export type TransferTarget = {
@@ -139,6 +140,8 @@ export function ItemActions({ inv, on }: ItemDetailsProps) {
 
     if (!value || !inv.access.canAct) return null;
 
+    const lightSlot = moduleVocab('equipSlots').find((s) => s.needsLight);
+
     const btn = (label: string, onClick: () => void) => (
         <Button
             key={label}
@@ -169,10 +172,11 @@ export function ItemActions({ inv, on }: ItemDetailsProps) {
                           t('equip'),
                           () => void inv.actions.equip(value.artifact.id)
                       ),
-                  inv.rules.offHand &&
+                  lightSlot &&
+                      inv.rules.offHand &&
                       value.artifact.light &&
                       btn(
-                          t('offHand'),
+                          t(lightSlot.id as Parameters<typeof t>[0]),
                           () =>
                               void inv.actions.equip(
                                   value.artifact.id,

@@ -1,5 +1,14 @@
 import { z } from 'zod';
 
+import {
+    moduleVocab,
+    type ModuleVocabId,
+} from '@/lib/utils/rules/systems/vocab';
+
+const LEGENDARY_KINDS = moduleVocab('legendaryKinds').map(
+    (k) => k.id
+) as ModuleVocabId<'legendaryKinds'>[];
+
 const id = z.string().min(1);
 
 const legendaryOptionSchema = z.discriminatedUnion('kind', [
@@ -9,7 +18,7 @@ const legendaryOptionSchema = z.discriminatedUnion('kind', [
         targetId: id,
     }),
     z.object({
-        kind: z.enum(['ability', 'lair']),
+        kind: z.enum(['ability', ...LEGENDARY_KINDS] as ['ability', ...typeof LEGENDARY_KINDS]),
         abilityKey: id,
         targetIds: z.array(id).max(20).optional(),
     }),

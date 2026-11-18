@@ -14,7 +14,7 @@ export * from './personal-effects';
 export * from './queue';
 export * from './redact-participants';
 export * from './result-fx';
-export * from './retaliation';
+export * from './counter-outcome';
 export * from './rollback';
 export * from './scene-maps';
 export * from './spell-result';

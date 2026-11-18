@@ -106,7 +106,7 @@ describe('pending morale check stored in the scene slot', () => {
         });
     });
 
-    it('homm: a payload for a missing participant logs battleLog.morale.notFound and changes nobody', () => {
+    it('homm: a payload for a missing participant logs moraleLog.check.notFound and changes nobody', () => {
         const out = advance(
             homm,
             stored('ghost', {
@@ -123,7 +123,7 @@ describe('pending morale check stored in the scene slot', () => {
             actionDetails: { d10Roll: 10, morale: 0 },
         });
         expect(JSON.stringify(out.actions[0])).toContain(
-            'battleLog.morale.notFound'
+            'moraleLog.check.notFound'
         );
         expect(out.participants.map((p) => p.actionFlags)).toEqual([
             hero.actionFlags,

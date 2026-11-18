@@ -1,12 +1,17 @@
 import { prisma } from '@/lib/db';
+import type { OwnerKind } from '@/lib/utils/abilities/read';
 import { abilitySummary } from '@/lib/utils/abilities/summary';
 import { isUniqueRow } from '@/lib/utils/items/item-row';
 import { refArtifactIds } from '@/lib/utils/items/ref';
 import { heldRefs } from '@/lib/utils/items/resolve';
+import { moduleVocab } from '@/lib/utils/rules/systems/vocab';
 import type {
     ArtifactForReference,
     ArtifactSetForReference,
 } from '@/types/info-reference';
+
+const SET_SOURCE = moduleVocab('abilitySources').find((e) => e.itemLike)
+    ?.id as OwnerKind | undefined;
 
 export interface ArtifactReference {
     artifacts: ArtifactForReference[];
@@ -84,7 +89,7 @@ export async function loadArtifactReference(
             name: s.name,
             icon: s.icon,
             description: s.description,
-            bonuses: abilitySummary('artifactSet', s),
+            bonuses: SET_SOURCE ? abilitySummary(SET_SOURCE, s) : [],
             artifactNames: s.artifacts
                 .map((x) => x.name)
                 .sort((x, y) => x.localeCompare(y)),

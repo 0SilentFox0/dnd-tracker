@@ -2,6 +2,10 @@ import { healthState } from './health';
 import { HP_BUCKET, PROJECTED_MAX_HP } from './hp-bucket';
 import { canSeeExactStats, type Viewer } from './visibility';
 
+import {
+    HIDDEN_COMBAT_STATS,
+    NEUTRAL_HIDDEN_STATS,
+} from '@/lib/utils/battle/combat-stats';
 import { stubReserve } from '@/lib/utils/battle/participant/reserve';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
@@ -14,7 +18,6 @@ import type {
     BattleAttack,
     BattleParticipant,
     BattleParticipantBattleData,
-    BattleParticipantCombatStats,
 } from '@/types/battle';
 
 const PUBLIC_BATTLE_KEYS = [
@@ -115,14 +118,6 @@ function slotRedactor(rules: Ruleset): SlotRedact {
 
 const withoutConcealed = (effects: ActiveEffect[]) =>
     effects.filter((e) => !e.concealed);
-
-const HIDDEN_STATS = [
-    'morale',
-] as const satisfies readonly (keyof BattleParticipantCombatStats)[];
-
-const NEUTRAL_HIDDEN_STATS = Object.fromEntries(
-    HIDDEN_STATS.map((key) => [key, 0])
-) as Pick<BattleParticipantCombatStats, (typeof HIDDEN_STATS)[number]>;
 
 const SECRET_ATTACK_KEYS = [
     'versatileDice',
@@ -288,7 +283,8 @@ function redactPatch(
             ...stats
         } = combatStats;
 
-        for (const key of HIDDEN_STATS) delete stats[key];
+        for (const key of HIDDEN_COMBAT_STATS)
+            delete (stats as Record<string, unknown>)[key];
 
         const projected =
             currentHp !== undefined ||

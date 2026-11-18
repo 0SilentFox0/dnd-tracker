@@ -27,7 +27,7 @@ import { logEntryView } from '@/lib/utils/battle/view';
 import type { BattleParticipant } from '@/types/battle';
 import type { BattleAction } from '@/types/battle-actions';
 
-const ICON: Record<BattleAction['actionType'], LucideIcon> = {
+const ICON: Partial<Record<BattleAction['actionType'], LucideIcon>> = {
     attack: Swords,
     spell: Sparkles,
     bonus_action: Zap,
