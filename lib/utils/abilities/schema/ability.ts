@@ -47,14 +47,12 @@ export const LimitsSchema = z.object({
 
 type EffectIssue = { message: string; params?: ErrorParams };
 
-function effectIssues(
+function passiveEffectIssues(
     effect: Effect,
-    trigger: Trigger,
     hasCondition: boolean
 ): EffectIssue[] {
     const issues: EffectIssue[] = [];
 
-    if (trigger.event === 'passive') {
         if (
             effect.kind !== 'note' &&
             effect.kind !== 'restoreSpellSlotLevels' &&
@@ -98,8 +96,15 @@ function effectIssues(
             });
         }
 
-        return issues;
-    }
+    return issues;
+}
+
+function triggeredEffectIssues(
+    effect: Effect,
+    trigger: Trigger,
+    hasCondition: boolean
+): EffectIssue[] {
+    const issues: EffectIssue[] = [];
 
     if (isSystemEffectKind(effect.kind))
         issues.push({ message: 'abilities.validation.passiveEffectKinds' });
@@ -157,6 +162,16 @@ function effectIssues(
     }
 
     return issues;
+}
+
+function effectIssues(
+    effect: Effect,
+    trigger: Trigger,
+    hasCondition: boolean
+): EffectIssue[] {
+    return trigger.event === 'passive'
+        ? passiveEffectIssues(effect, hasCondition)
+        : triggeredEffectIssues(effect, trigger, hasCondition);
 }
 
 export const AbilitySchema = z
