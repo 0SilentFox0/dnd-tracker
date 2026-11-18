@@ -1,120 +1,26 @@
 'use client';
 
-import { type ReactNode, useState } from 'react';
+import type { ReactNode } from 'react';
 
 import {
     resolutionKeysOf,
-    SAVE_ABILITY_KEYS,
-    SAVE_ON_SUCCESS_KEYS,
     SPELL_SIDE_KEYS,
     TARGETING_KINDS,
     TEMPLATE_SHAPE_KEYS,
 } from './spell-form-defaults';
+import { SpellRangeInput } from './SpellRangeInput';
+import { SpellResolutionFields } from './SpellResolutionFields';
+import { RANGED_KINDS, targetingOf } from './targeting-of';
 
 import { BoundedNumberInput } from '@/components/ui/bounded-number-input';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { SelectField } from '@/components/ui/select-field';
 import { Switch } from '@/components/ui/switch';
-import type { AbilityKey } from '@/lib/constants/abilities';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import type { TemplateShape } from '@/types/battle-grid';
 import type { SpellResolution, SpellTargeting } from '@/types/spells';
 
-const RANGED_KINDS = ['ally', 'enemy', 'allyDead', 'area', 'template'];
-
-function RangeInput({
-    id,
-    value,
-    onCommit,
-}: {
-    id: string;
-    value: number | undefined;
-    onCommit: (value: number | undefined) => void;
-}) {
-    const t = useTranslator();
-
-    const [draft, setDraft] = useState<string | null>(null);
-
-    const commit = () => {
-        if (draft === null) return;
-
-        setDraft(null);
-
-        const n = parseInt(draft);
-
-        onCommit(
-            Number.isFinite(n) ? Math.max(5, Math.min(600, n)) : undefined
-        );
-    };
-
-    return (
-        <Input
-            id={id}
-            type="number"
-            min={5}
-            max={600}
-            step={5}
-            placeholder={t('spellEditor.power.rangePlaceholder')}
-            value={draft ?? value ?? ''}
-            onChange={(e) => setDraft(e.target.value)}
-            onBlur={commit}
-            className="w-40"
-        />
-    );
-}
-
-export function targetingOf(
-    kind: string,
-    previous: SpellTargeting,
-    exactDefault = false
-): SpellTargeting {
-    const range =
-        RANGED_KINDS.includes(kind) && 'range' in previous
-            ? { range: previous.range }
-            : {};
-
-    const multi =
-        previous.kind === 'area' || previous.kind === 'template'
-            ? previous
-            : null;
-
-    const side = multi?.side ?? 'enemy';
-
-    const maxTargets = multi?.maxTargets ?? 3;
-
-    if (kind === 'area')
-        return {
-            kind,
-            side,
-            maxTargets,
-            ...range,
-            ...(previous.kind === 'area' && previous.chain
-                ? { chain: true }
-                : {}),
-        };
-
-    if (kind === 'template')
-        return {
-            kind,
-            shape: previous.kind === 'template' ? previous.shape : 'circle',
-            size: previous.kind === 'template' ? previous.size : 20,
-            side,
-            maxTargets,
-            ...range,
-            ...(previous.kind === 'template' && previous.zone
-                ? { zone: previous.zone }
-                : {}),
-            ...(previous.kind === 'template' && previous.hollow
-                ? { hollow: true }
-                : {}),
-            ...(previous.kind === 'template'
-                ? previous.exact !== undefined && { exact: previous.exact }
-                : exactDefault && { exact: true }),
-        };
-
-    return { kind, ...range } as SpellTargeting;
-}
+export { targetingOf };
 
 export interface TargetingValue {
     targeting: SpellTargeting;
@@ -350,7 +256,7 @@ export function SpellTargetingFields({
                 ) && (
                     <div className="col-span-2">
                         <Label htmlFor="spell-range">{tp('range')}</Label>
-                        <RangeInput
+                        <SpellRangeInput
                             id={id('spell-range')}
                             value={(targeting as { range?: number }).range}
                             onCommit={(range) =>
@@ -366,86 +272,16 @@ export function SpellTargetingFields({
                     </div>
                 )}
             {children}
-            <div className="col-span-2">
-                <Label htmlFor={id('resolution')}>{tp('check')}</Label>
-                <SelectField
-                    id={id('resolution')}
-                    value={resolution.kind}
-                    onValueChange={(kind) =>
-                        onChange({
-                            ...value,
-                            resolution:
-                                kind === 'save'
-                                    ? {
-                                          kind,
-                                          ability: 'dexterity',
-                                          onSuccess: 'half',
-                                      }
-                                    : kind === 'attack'
-                                      ? { kind }
-                                      : { kind: 'auto' },
-                        })
-                    }
-                    placeholder={tp('check')}
-                    options={
-                        classesEnabled || resolution.kind === 'attack'
-                            ? resolutionOptions
-                            : resolutionOptions.filter(
-                                  (o) => o.value !== 'attack'
-                              )
-                    }
-                />
-            </div>
-            {resolution.kind === 'save' && (
-                <>
-                    <div>
-                        <Label htmlFor={id('save-ability')}>
-                            {tp('saveAbility')}
-                        </Label>
-                        <SelectField
-                            id={id('save-ability')}
-                            value={resolution.ability}
-                            onValueChange={(ability) =>
-                                onChange({
-                                    ...value,
-                                    resolution: {
-                                        ...resolution,
-                                        ability: ability as AbilityKey,
-                                    },
-                                })
-                            }
-                            placeholder={tp('saveAbility')}
-                            options={SAVE_ABILITY_KEYS.map((k) => ({
-                                value: k,
-                                label: t(`gameTerms.abilities.${k}.label`),
-                            }))}
-                        />
-                    </div>
-                    <div>
-                        <Label htmlFor={id('save-on-success')}>
-                            {tp('onSuccess')}
-                        </Label>
-                        <SelectField
-                            id={id('save-on-success')}
-                            value={resolution.onSuccess}
-                            onValueChange={(onSuccess) =>
-                                onChange({
-                                    ...value,
-                                    resolution: {
-                                        ...resolution,
-                                        onSuccess: onSuccess as 'half' | 'none',
-                                    },
-                                })
-                            }
-                            placeholder={tp('onSuccess')}
-                            options={options(
-                                SAVE_ON_SUCCESS_KEYS,
-                                'spells.saveOnSuccess'
-                            )}
-                        />
-                    </div>
-                </>
-            )}
+            <SpellResolutionFields
+ value={value}
+ onChange={onChange}
+ options={
+ classesEnabled || resolution.kind === 'attack'
+ ? resolutionOptions
+ : resolutionOptions.filter((o) => o.value !== 'attack')
+ }
+ id={id}
+ />
         </>
     );
 }
