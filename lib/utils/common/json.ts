@@ -4,6 +4,8 @@ import { isRecord } from './is-record';
 
 export const toInputJson = (v: unknown) => v as Prisma.InputJsonValue;
 
+export const toInputJsonObject = (v: object) => v as Prisma.InputJsonObject;
+
 export const asRecord = (v: unknown): Record<string, unknown> =>
     isRecord(v) ? v : {};
 

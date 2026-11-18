@@ -300,7 +300,7 @@ function assertTargetsNotPacified(
     order: BattleParticipant[],
     caster: BattleParticipant,
     targeting: Parameters<typeof pacifiedBlock>[2],
-    targetIds: string[] | undefined
+    targetIds: Parameters<typeof pacifiedBlock>[3]
 ) {
     const pacified = pacifiedBlock(
         order,
