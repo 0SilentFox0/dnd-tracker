@@ -5,8 +5,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { renderSkillTree } from './render-intl';
 
-import { LevelUpOverlay } from '@/components/skill-tree/progression';
 import * as api from '@/lib/api/character-progression';
+import { LevelUpOverlay } from '@/systems/skilltrees/ui/progression';
 
 vi.unmock('next-intl');
 vi.mock('@/components/hud/fonts', () => ({

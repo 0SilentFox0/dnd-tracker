@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { renderSkillTree } from './render-intl';
 
-import { SlotButton } from '@/components/skill-tree/progression/SlotButton';
+import { SlotButton } from '@/systems/skilltrees/ui/progression/SlotButton';
 
 vi.unmock('next-intl');
 
@@ -28,7 +28,7 @@ describe('SlotButton', () => {
 describe('RacialRow', () => {
     it('голова рядка показує іконку раси, без неї — літеру', async () => {
         const { RacialRow } = await import(
-            '@/components/skill-tree/progression/RacialRow'
+            '@/systems/skilltrees/ui/progression/RacialRow'
         );
 
         const base = { race: 'Ельф', raceIcon: null } as never;

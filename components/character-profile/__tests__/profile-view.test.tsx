@@ -30,7 +30,7 @@ vi.mock('@/components/hud/fonts', () => ({
 vi.mock('@/systems/wfrp/ui/equipment/EquippedArmourSummary', () => ({
     EquippedArmourSummary: () => <div data-testid="wfrp-equipped-summary" />,
 }));
-vi.mock('@/components/skill-tree/progression', () => ({
+vi.mock('@/systems/skilltrees/ui/progression', () => ({
     ProgressionPanel: () => <div>прокачка</div>,
     LevelUpOverlay: () => null,
 }));

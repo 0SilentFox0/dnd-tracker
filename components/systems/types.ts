@@ -112,6 +112,12 @@ export interface PathPanelProps {
     manage: boolean;
 }
 
+export interface SheetOverlayProps {
+    campaignId: string;
+    characterId: string;
+    name: string;
+}
+
 export interface ItemSectionProps {
     sheet: CharacterSheet;
     variant: 'editor' | 'inventory';
@@ -260,6 +266,8 @@ export interface SystemUi {
         combatRows?: readonly ComponentType<CombatRowProps>[];
         /** Panels of the «Path» tab a module adds; data comes from `useProfile()` */
         pathPanels?: readonly ComponentType<PathPanelProps>[];
+        /** Overlays rendered above the character sheet (e.g. level-up celebration) */
+        overlays?: readonly ComponentType<SheetOverlayProps>[];
         /** Extra sections of the editor and the inventory tab */
         itemSections?: readonly ComponentType<ItemSectionProps>[];
     };

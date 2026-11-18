@@ -4,8 +4,8 @@ import { useTranslations } from 'next-intl';
 
 import { useProfile } from '@/components/character-profile/ProfileContext';
 import { EntityIcon } from '@/components/common/EntityIcon';
-import { ProgressionPanel } from '@/components/skill-tree/progression/ProgressionPanel';
 import type { PathPanelProps } from '@/components/systems/types';
+import { ProgressionPanel } from '@/systems/skilltrees/ui/progression/ProgressionPanel';
 
 export function SkillTreePanel({ manage }: PathPanelProps) {
     const { campaignId, characterId, sheet } = useProfile();

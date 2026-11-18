@@ -8,8 +8,8 @@ import {
 } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { renderSkillTree } from '@/components/skill-tree/__tests__/render-intl';
 import { buildTreeJson, normalizeTree } from '@/lib/utils/skills/progression';
+import { renderSkillTree } from '@/systems/skilltrees/__tests__/ui/progression/render-intl';
 import { SkillTreeEditor } from '@/systems/skilltrees/ui/content/skill-tree/editor';
 
 vi.unmock('next-intl');
