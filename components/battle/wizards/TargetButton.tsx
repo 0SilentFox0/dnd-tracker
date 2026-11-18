@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 
 import { Portrait } from '@/components/battle/hud';
-import { Button } from '@/components/ui/button';
+import { HudButton } from '@/components/hud';
 import { cn } from '@/lib/utils';
 import type { BattleParticipant } from '@/types/battle';
 
@@ -48,8 +48,7 @@ export function TargetButton({
     const t = TONE[tone];
 
     return (
-        <Button
-            variant="bare"
+        <HudButton
             type="button"
             aria-pressed={selected}
             disabled={disabled}
@@ -74,6 +73,6 @@ export function TargetButton({
                 {participant.basicInfo.name}
             </span>
             {trailing}
-        </Button>
+        </HudButton>
     );
 }

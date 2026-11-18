@@ -2,8 +2,8 @@
 
 import '@/components/battle/hud/battle-hud.css';
 import { BattleMap } from '@/components/battle/map/BattleMap';
+import { HudButton } from '@/components/hud';
 import { HudChipTabs, HudPanel } from '@/components/hud/page';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -75,22 +75,20 @@ export function BattleMapPlayground() {
                 </h1>
                 <div className="mb-2 flex shrink-0 flex-wrap items-center gap-2 lg:hidden">
                     {modeTabs}
-                    <Button
-                        variant="bare"
+                    <HudButton
                         type="button"
                         className={cn(BUTTON, 'h-8')}
                         onClick={controls.nextTurn}
                     >
                         Next turn
-                    </Button>
-                    <Button
-                        variant="bare"
+                    </HudButton>
+                    <HudButton
                         type="button"
                         className={cn(BUTTON, 'h-8')}
                         onClick={controls.reset}
                     >
                         Reset
-                    </Button>
+                    </HudButton>
                 </div>
                 <div className="grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)] gap-4 lg:grid-cols-[300px_1fr]">
                     <div className="hidden min-h-0 flex-col gap-3 overflow-y-auto lg:flex">
@@ -165,22 +163,20 @@ export function BattleMapPlayground() {
                             </label>
                             {modeTabs}
                             <div className="flex gap-2">
-                                <Button
-                                    variant="bare"
+                                <HudButton
                                     type="button"
                                     className={BUTTON}
                                     onClick={controls.nextTurn}
                                 >
                                     Next turn
-                                </Button>
-                                <Button
-                                    variant="bare"
+                                </HudButton>
+                                <HudButton
                                     type="button"
                                     className={BUTTON}
                                     onClick={controls.reset}
                                 >
                                     Reset
-                                </Button>
+                                </HudButton>
                             </div>
                         </HudPanel>
                         <HudPanel className="text-sm">

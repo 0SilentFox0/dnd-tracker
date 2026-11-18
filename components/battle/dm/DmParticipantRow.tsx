@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 
 import { SideDot } from '@/components/battle/hud';
-import { Button } from '@/components/ui/button';
+import { HudButton } from '@/components/hud';
 import { SelectField } from '@/components/ui/select-field';
 import { CombatStatus, ParticipantSourceType } from '@/lib/constants/battle';
 import {
@@ -173,8 +173,7 @@ export function DmParticipantRow({
                 )}
             </div>
             <div className="flex items-center gap-0.5 pl-5">
-                <Button
-                    variant="bare"
+                <HudButton
                     type="button"
                     className={cn(
                         ICON,
@@ -187,9 +186,8 @@ export function DmParticipantRow({
                     }}
                 >
                     <Heart className="size-3.5" />
-                </Button>
-                <Button
-                    variant="bare"
+                </HudButton>
+                <HudButton
                     type="button"
                     className={cn(
                         ICON,
@@ -203,35 +201,21 @@ export function DmParticipantRow({
                     }}
                 >
                     <LogIn className="size-3.5" />
-                </Button>
+                </HudButton>
                 {hasLair && onToggleLair && (
-                    <Button
-                        variant="bare"
+                    <HudButton
                         type="button"
-                        className={cn(
-                            ICON,
-                            inLair &&
-                                'text-hud-gold-bright'
-                        )}
-                        aria-label={
-                            inLair
-                                ? t('lairOff')
-                                : t('lairOn')
-                        }
-                        title={
-                            inLair
-                                ? t('inLair')
-                                : t('outLair')
-                        }
+                        className={cn(ICON, inLair && 'text-hud-gold-bright')}
+                        aria-label={inLair ? t('lairOff') : t('lairOn')}
+                        title={inLair ? t('inLair') : t('outLair')}
                         aria-pressed={inLair}
                         onClick={() => onToggleLair(participant)}
                     >
                         🏰
-                    </Button>
+                    </HudButton>
                 )}
                 {(legendary || (hasLair && onLegendary)) && (
-                    <Button
-                        variant="bare"
+                    <HudButton
                         type="button"
                         className={cn(
                             ICON,
@@ -242,11 +226,10 @@ export function DmParticipantRow({
                         onClick={() => onLegendary?.(participant)}
                     >
                         <Crown className="size-3.5" />
-                    </Button>
+                    </HudButton>
                 )}
                 {canConditions && (
-                    <Button
-                        variant="bare"
+                    <HudButton
                         type="button"
                         className={cn(
                             ICON,
@@ -256,11 +239,10 @@ export function DmParticipantRow({
                         onClick={() => onConditions(participant)}
                     >
                         <ShieldAlert className="size-3.5" />
-                    </Button>
+                    </HudButton>
                 )}
                 {canKill && (
-                    <Button
-                        variant="bare"
+                    <HudButton
                         type="button"
                         className={cn(
                             ICON,
@@ -283,11 +265,10 @@ export function DmParticipantRow({
                         }}
                     >
                         <Skull className="size-3.5" />
-                    </Button>
+                    </HudButton>
                 )}
                 {onToReserve && (
-                    <Button
-                        variant="bare"
+                    <HudButton
                         type="button"
                         className={ICON}
                         title={t('toReserve')}
@@ -307,10 +288,9 @@ export function DmParticipantRow({
                         }}
                     >
                         <EyeOff className="size-3.5" />
-                    </Button>
+                    </HudButton>
                 )}
-                <Button
-                    variant="bare"
+                <HudButton
                     type="button"
                     className={cn(
                         ICON,
@@ -333,7 +313,7 @@ export function DmParticipantRow({
                     }}
                 >
                     <Trash2 className="size-3.5" />
-                </Button>
+                </HudButton>
             </div>
         </div>
     );

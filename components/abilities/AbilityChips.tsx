@@ -2,6 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 
+import { HudButton } from '@/components/hud';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { Ability } from '@/lib/utils/abilities/schema';
@@ -40,8 +41,7 @@ export function AbilityChips({
                 const on = a.id === selectedId;
 
                 return (
-                    <Button
-                        variant="bare"
+                    <HudButton
                         key={a.id}
                         type="button"
                         role="tab"
@@ -63,7 +63,7 @@ export function AbilityChips({
                                 className="ml-1.5 h-1.5 w-1.5 rounded-full bg-hud-danger"
                             />
                         )}
-                    </Button>
+                    </HudButton>
                 );
             })}
             <Button

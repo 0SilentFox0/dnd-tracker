@@ -20,8 +20,8 @@ import {
     ELEMENT_LABEL,
 } from '@/components/fx/labels';
 import { PALETTE } from '@/components/fx/runtime/palette';
+import { HudButton } from '@/components/hud';
 import { HudChipTabs, HudPage, HudPageHeader } from '@/components/hud/page';
-import { Button } from '@/components/ui/button';
 import {
     FX_ARCHETYPES,
     type FxArchetype,
@@ -55,8 +55,7 @@ function CanvasFrameTile({
                     <span className="mt-1 block h-1.5 rounded-full bg-[#c0392b]" />
                 </span>
             </div>
-            <Button
-                variant="bare"
+            <HudButton
                 type="button"
                 onClick={() => setToken((t) => t + 1)}
                 aria-label={`Play frame: ${label}`}
@@ -64,7 +63,7 @@ function CanvasFrameTile({
             >
                 <Play className="size-3" />
                 Play
-            </Button>
+            </HudButton>
         </div>
     );
 }
@@ -101,8 +100,7 @@ export function FxLab() {
                             >
                                 Spells and effects
                             </Link>
-                            <Button
-                                variant="bare"
+                            <HudButton
                                 type="button"
                                 onClick={() => setToken((t) => t + 1)}
                                 aria-label="Play"
@@ -110,7 +108,7 @@ export function FxLab() {
                             >
                                 <Play className="size-4" />
                                 Play
-                            </Button>
+                            </HudButton>
                         </>
                     }
                 >

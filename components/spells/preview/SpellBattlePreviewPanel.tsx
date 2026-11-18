@@ -9,7 +9,7 @@ import { PALETTE } from '@/components/fx/runtime/palette';
 import { playFx } from '@/components/fx/runtime/play';
 import { cancelLayer } from '@/components/fx/runtime/stage';
 import { useFxBadgeLabels } from '@/components/fx/use-badge-labels';
-import { Button } from '@/components/ui/button';
+import { HudButton } from '@/components/hud';
 import {
     type FxRunner,
     useFxEnabled,
@@ -189,8 +189,7 @@ export default function SpellBattlePreviewPanel({
                     </Chip>
                 )}
                 {fx.enabled && spec && (
-                    <Button
-                        variant="bare"
+                    <HudButton
                         type="button"
                         onClick={replay}
                         className={cn(
@@ -202,7 +201,7 @@ export default function SpellBattlePreviewPanel({
                     >
                         <Play className="size-3" aria-hidden />
                         {t('fx.replay')}
-                    </Button>
+                    </HudButton>
                 )}
             </div>
         </section>

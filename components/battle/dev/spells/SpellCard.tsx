@@ -11,8 +11,8 @@ import {
     FRAME_LABEL,
 } from '@/components/fx/labels';
 import { PALETTE } from '@/components/fx/runtime/palette';
+import { HudButton } from '@/components/hud';
 import { HudCard, HudPill } from '@/components/hud/page';
-import { Button } from '@/components/ui/button';
 import { useAbilityText } from '@/lib/hooks/abilities';
 import { useText } from '@/lib/i18n/use-text';
 
@@ -64,15 +64,14 @@ export function SpellCard({
                                 {text(spell.targeting)}
                             </p>
                         </div>
-                        <Button
-                            variant="bare"
+                        <HudButton
                             type="button"
                             onClick={() => onPlay(spell)}
                             aria-label={`Play: ${spell.name}`}
                             className="flex size-8 shrink-0 items-center justify-center rounded-full text-[var(--palette-primary-foreground,#2a1d05)] [background:linear-gradient(135deg,#8a6414,#e6c25a_55%,#8a6414)]"
                         >
                             <Play className="size-3.5" />
-                        </Button>
+                        </HudButton>
                     </div>
                     <p className="text-sm text-hud-bone">{spell.description}</p>
                     <div className="flex flex-wrap gap-1">

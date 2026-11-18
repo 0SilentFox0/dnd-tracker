@@ -18,7 +18,7 @@ import { HpChips } from './HpChips';
 
 import { Portrait } from '@/components/battle/hud';
 import { LogEntryDetails } from '@/components/battle/log/LogEntryDetails';
-import { Button } from '@/components/ui/button';
+import { HudButton } from '@/components/hud';
 import { ParticipantSide } from '@/lib/constants/battle';
 import { useServiceActorName } from '@/lib/i18n/use-service-actor-name';
 import { useText } from '@/lib/i18n/use-text';
@@ -120,8 +120,7 @@ export const LogEntryCard = memo(function LogEntryCard({
                 ))}
                 <HpChips hp={view.hp} />
                 {view.hasDetails && (
-                    <Button
-                        variant="bare"
+                    <HudButton
                         type="button"
                         aria-expanded={open}
                         onClick={() => onToggle(entry.actionIndex)}
@@ -134,7 +133,7 @@ export const LogEntryCard = memo(function LogEntryCard({
                             )}
                         />
                         {open ? t('hideDetails') : t('details')}
-                    </Button>
+                    </HudButton>
                 )}
                 {open && <LogEntryDetails action={entry} wounds={wounds} />}
             </div>

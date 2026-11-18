@@ -7,8 +7,8 @@ import { Info } from 'lucide-react';
 import { RequirementList } from '@/components/choices/RequirementList';
 import { EntityIcon } from '@/components/common/EntityIcon';
 import { MarkdownLite } from '@/components/common/MarkdownLite';
+import { HudButton } from '@/components/hud';
 import { OptionButton } from '@/components/hud/OptionButton';
-import { Button } from '@/components/ui/button';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { cn } from '@/lib/utils';
 import type { Requirement } from '@/lib/utils/characters/choices/requirements';
@@ -26,8 +26,7 @@ export function DetailsButton({ title, text, className }: DetailsButtonProps) {
 
     return (
         <>
-            <Button
-                variant="bare"
+            <HudButton
                 type="button"
                 aria-label={t('picker.details')}
                 onClick={(e) => {
@@ -40,7 +39,7 @@ export function DetailsButton({ title, text, className }: DetailsButtonProps) {
                 )}
             >
                 <Info className="size-4" aria-hidden="true" />
-            </Button>
+            </HudButton>
             {open && (
                 <ResponsiveDialog hud open onOpenChange={setOpen} title={title}>
                     <MarkdownLite

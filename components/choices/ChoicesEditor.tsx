@@ -5,8 +5,8 @@ import { useTranslations } from 'next-intl';
 import { ChoicePicker, type PickerContext } from './ChoicePicker';
 import { classPickerContext, issueFor, pickerBase } from './picker-context';
 
+import { HudButton } from '@/components/hud';
 import { HUD_SELECT_CLASS, HudSection } from '@/components/hud/form';
-import { Button } from '@/components/ui/button';
 import { SelectField } from '@/components/ui/select-field';
 import type { ChoiceRefsView } from '@/lib/hooks/characters';
 import { useTranslator } from '@/lib/i18n/use-translator';
@@ -135,8 +135,7 @@ export function ChoicesEditor({
                                     className="text-sm text-hud-danger"
                                 >
                                     {t('editor.originFirst')}
-                                    <Button
-                                        variant="bare"
+                                    <HudButton
                                         type="button"
                                         className="ml-2 underline"
                                         onClick={() =>
@@ -149,7 +148,7 @@ export function ChoicesEditor({
                                         }
                                     >
                                         {t('editor.replaceOrigin')}
-                                    </Button>
+                                    </HudButton>
                                 </div>
                             )}
                             {pickers(

@@ -10,9 +10,9 @@ import { CombatRow } from './CombatRow';
 import { useProfile } from './ProfileContext';
 
 import { EmptyState } from '@/components/common/states';
+import { HudButton } from '@/components/hud';
 import { HudSection } from '@/components/hud/form';
 import { systemUiOf } from '@/components/systems';
-import { Button } from '@/components/ui/button';
 import { AttackType } from '@/lib/constants/battle';
 import { useCampaignRules } from '@/lib/hooks/campaigns';
 import { useCampaignSystem } from '@/lib/hooks/systems';
@@ -65,8 +65,7 @@ export function CombatTab() {
                                 key={a.id}
                                 className="mb-1.5 rounded-[10px] border border-hud-line bg-hud-field px-2.5 py-2"
                             >
-                                <Button
-                                    variant="bare"
+                                <HudButton
                                     type="button"
                                     aria-expanded={openAttack === a.id}
                                     onClick={() =>
@@ -94,7 +93,7 @@ export function CombatTab() {
                                         </b>{' '}
                                         {t('damage')}
                                     </span>
-                                </Button>
+                                </HudButton>
                                 {openAttack === a.id && (
                                     <>
                                         <p className="mt-2 text-[11px] text-hud-gold uppercase">

@@ -3,6 +3,7 @@
 import { type FormEvent, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
+import { HudButton } from '@/components/hud';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
@@ -73,8 +74,7 @@ export function AddTokenDialog({
                     aria-label={t('colorLabel')}
                 >
                     {TOKEN_COLORS.map((c) => (
-                        <Button
-                            variant="bare"
+                        <HudButton
                             key={c}
                             type="button"
                             aria-pressed={color === c}
@@ -91,7 +91,7 @@ export function AddTokenDialog({
                                 )}
                             />
                             {t(`colors.${c}`)}
-                        </Button>
+                        </HudButton>
                     ))}
                 </div>
                 <Input

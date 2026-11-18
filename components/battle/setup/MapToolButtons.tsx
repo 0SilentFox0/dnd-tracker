@@ -2,8 +2,8 @@
 
 import { useTranslations } from 'next-intl';
 
+import { HudButton } from '@/components/hud';
 import { OnboardingHint } from '@/components/onboarding/OnboardingHint';
-import { Button } from '@/components/ui/button';
 import type { BattleMapEditor } from '@/lib/hooks/battles';
 import { cn } from '@/lib/utils';
 import type { SetupTool } from '@/lib/utils/battle/grid';
@@ -29,8 +29,7 @@ export function ToolButtons({
     return (
         <div className="flex flex-wrap gap-1.5">
             {tools.map((value) => (
-                <Button
-                    variant="bare"
+                <HudButton
                     key={value}
                     type="button"
                     aria-pressed={tool === value}
@@ -43,7 +42,7 @@ export function ToolButtons({
                     )}
                 >
                     {t(`tools.${value}`)}
-                </Button>
+                </HudButton>
             ))}
         </div>
     );
@@ -59,8 +58,7 @@ export function DoorToolOptions({ editor }: { editor: BattleMapEditor }) {
     return (
         <div className="space-y-2">
             <OnboardingHint id="battle.map-doors" />
-            <Button
-                variant="bare"
+            <HudButton
                 type="button"
                 aria-pressed={doorLocked}
                 onClick={() => editor.actions.setDoorLocked(!doorLocked)}
@@ -72,7 +70,7 @@ export function DoorToolOptions({ editor }: { editor: BattleMapEditor }) {
                 )}
             >
                 {t('doorLocked')}
-            </Button>
+            </HudButton>
         </div>
     );
 }

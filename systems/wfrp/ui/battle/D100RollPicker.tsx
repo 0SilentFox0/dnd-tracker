@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl';
 import { D100Input } from './D100Input';
 
 import { AiRollButton } from '@/components/battle/hud/DiceInput';
-import { Button } from '@/components/ui/button';
+import { HudButton } from '@/components/hud';
 import { cn } from '@/lib/utils';
 
 export type RollSource = 'server' | 'manual';
@@ -81,8 +81,7 @@ export function D100RollPicker({
             {!locked && (
                 <div className="mt-3 grid h-10 grid-cols-2 border border-white/20">
                     {SOURCES.map((m) => (
-                        <Button
-                            variant="bare"
+                        <HudButton
                             key={m}
                             type="button"
                             aria-pressed={source === m}
@@ -95,7 +94,7 @@ export function D100RollPicker({
                             )}
                         >
                             {t(`mode.${m}`)}
-                        </Button>
+                        </HudButton>
                     ))}
                 </div>
             )}
@@ -110,8 +109,7 @@ export function D100RollPicker({
                         className="mt-1 grid h-9 grid-cols-3 border border-white/20"
                     >
                         {FORTUNE_OPTIONS.map((m) => (
-                            <Button
-                                variant="bare"
+                            <HudButton
                                 key={m ?? 'off'}
                                 type="button"
                                 aria-pressed={fortune.value === m}
@@ -124,7 +122,7 @@ export function D100RollPicker({
                                 )}
                             >
                                 {tf(m ?? 'off')}
-                            </Button>
+                            </HudButton>
                         ))}
                     </div>
                 </div>

@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 import { Breakdown } from './Breakdown';
 
-import { Button } from '@/components/ui/button';
+import { HudButton } from '@/components/hud';
 import type { SheetLine } from '@/types/characters';
 
 export function CombatRow({
@@ -22,8 +22,7 @@ export function CombatRow({
 
     return (
         <div className="border-b border-hud-raised py-1.5 text-sm">
-            <Button
-                variant="bare"
+            <HudButton
                 type="button"
                 disabled={!expandable}
                 aria-expanded={expandable ? open : undefined}
@@ -32,7 +31,7 @@ export function CombatRow({
             >
                 <span>{label}</span>
                 <span className="text-hud-ink tabular-nums">{value}</span>
-            </Button>
+            </HudButton>
             {open && lines && <Breakdown lines={lines} />}
         </div>
     );

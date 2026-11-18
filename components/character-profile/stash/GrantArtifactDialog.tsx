@@ -4,6 +4,7 @@ import { useProfile } from '../ProfileContext';
 
 import { EntityIcon } from '@/components/common/EntityIcon';
 import { EmptyState, LoadingState } from '@/components/common/states';
+import { HudButton } from '@/components/hud';
 import { HUD_SELECT_CLASS } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -39,8 +40,7 @@ function ArtifactRow({
 }) {
     return (
         <li>
-            <Button
-                variant="bare"
+            <HudButton
                 type="button"
                 disabled={disabled}
                 onClick={onClick}
@@ -62,7 +62,7 @@ function ArtifactRow({
                         {subtitle}
                     </span>
                 </span>
-            </Button>
+            </HudButton>
         </li>
     );
 }
@@ -193,10 +193,12 @@ export function GrantArtifactDialog({
                                 onValueChange={actions.setParameter}
                                 allowNone
                                 noneLabel={t('inventory.grant.chooseParameter')}
-                                options={form.parameterOptions.map((option) => ({
-                                    value: option.key,
-                                    label: option.label,
-                                }))}
+                                options={form.parameterOptions.map(
+                                    (option) => ({
+                                        value: option.key,
+                                        label: option.label,
+                                    })
+                                )}
                             />
                         </>
                     )}
@@ -213,20 +215,25 @@ export function GrantArtifactDialog({
                                         value={fields.spellId}
                                         onValueChange={actions.setSpellId}
                                         allowNone
-                                        noneLabel={t('inventory.grant.chooseSpell')}
-                                        options={form.spellOptions.map((spell) => ({
-                                            value: spell.spellId,
-                                            label:
-                                                spell.castLevel !== undefined
-                                                    ? t(
-                                                          'inventory.grant.spellOption',
-                                                          {
-                                                              label: spell.label,
-                                                              level: spell.castLevel,
-                                                          }
-                                                      )
-                                                    : spell.label,
-                                        }))}
+                                        noneLabel={t(
+                                            'inventory.grant.chooseSpell'
+                                        )}
+                                        options={form.spellOptions.map(
+                                            (spell) => ({
+                                                value: spell.spellId,
+                                                label:
+                                                    spell.castLevel !==
+                                                    undefined
+                                                        ? t(
+                                                              'inventory.grant.spellOption',
+                                                              {
+                                                                  label: spell.label,
+                                                                  level: spell.castLevel,
+                                                              }
+                                                          )
+                                                        : spell.label,
+                                            })
+                                        )}
                                     />
                                     <p className="text-xs text-hud-muted">
                                         {t('inventory.grant.spellNote')}

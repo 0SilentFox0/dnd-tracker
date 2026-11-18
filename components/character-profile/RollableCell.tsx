@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-import { Button } from '@/components/ui/button';
+import { HudButton } from '@/components/hud';
 
 export function RollableCell({
     canRoll,
@@ -18,8 +18,7 @@ export function RollableCell({
     children: ReactNode;
 }) {
     return canRoll ? (
-        <Button
-            variant="bare"
+        <HudButton
             type="button"
             title={title}
             aria-label={ariaLabel}
@@ -27,7 +26,7 @@ export function RollableCell({
             className={className}
         >
             {children}
-        </Button>
+        </HudButton>
     ) : (
         <div className={className}>{children}</div>
     );

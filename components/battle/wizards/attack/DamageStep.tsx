@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl';
 import { type AttackWizardModel, btn, primaryBtn } from './shared';
 
 import { AiRollButton, DamageDice } from '@/components/battle/hud/DiceInput';
-import { Button } from '@/components/ui/button';
+import { HudButton } from '@/components/hud';
 import { cn } from '@/lib/utils';
 import { cryptoRandom, rollDie } from '@/lib/utils/common/dice';
 
@@ -49,8 +49,7 @@ export function DamageStep({
                         )
                     }
                 />
-                <Button
-                    variant="bare"
+                <HudButton
                     type="button"
                     disabled={state.diceSlots.some(
                         (_, i) => draft[i] === undefined
@@ -59,7 +58,7 @@ export function DamageStep({
                     className={cn(btn, primaryBtn, 'disabled:opacity-50')}
                 >
                     {t('next')}
-                </Button>
+                </HudButton>
             </div>
         </>
     );

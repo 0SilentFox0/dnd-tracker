@@ -1,7 +1,7 @@
 import { useTranslations } from 'next-intl';
 
+import { HudButton } from '@/components/hud';
 import { SpellIcon } from '@/components/spells/SpellIcon';
-import { Button } from '@/components/ui/button';
 import { spellSchoolColor } from '@/lib/constants/spells';
 import { useSpellLabels } from '@/lib/hooks/spells';
 import { cn } from '@/lib/utils';
@@ -50,8 +50,7 @@ export function SpellRow({
         .join(' · ');
 
     return (
-        <Button
-            variant="bare"
+        <HudButton
             type="button"
             onClick={() => onPick(spell)}
             className={cn(
@@ -99,6 +98,6 @@ export function SpellRow({
                     {formula}
                 </span>
             ) : null}
-        </Button>
+        </HudButton>
     );
 }

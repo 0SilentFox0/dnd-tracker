@@ -2,12 +2,11 @@
 
 import { useTranslations } from 'next-intl';
 
-import { HUD_SURFACE } from '@/components/hud';
+import { HUD_SURFACE, HudButton } from '@/components/hud';
 import {
     SpellBookPages,
     SpellDetail,
 } from '@/components/spells/book/SpellBookPages';
-import { Button } from '@/components/ui/button';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { useSpellBrowser } from '@/lib/hooks/characters';
 import { DESKTOP_QUERY, useMediaQuery } from '@/lib/hooks/common';
@@ -65,14 +64,13 @@ export function ProfileSpellBook({
                 }
             />
             {showDetail && !wide && (
-                <Button
-                    variant="bare"
+                <HudButton
                     type="button"
                     onClick={book.back}
                     className="spell-book spell-book-accent hud-sc mt-2 h-10 w-full text-sm"
                 >
                     {t('back')}
-                </Button>
+                </HudButton>
             )}
         </ResponsiveDialog>
     );

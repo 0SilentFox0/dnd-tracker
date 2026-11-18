@@ -4,7 +4,7 @@ import { memo } from 'react';
 import { useTranslations } from 'next-intl';
 import { Trophy } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
+import { HudButton } from '@/components/hud';
 import { useBattleScene } from '@/lib/hooks/battle';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import { formatBattleLog } from '@/lib/utils/battle/log/lines';
@@ -23,8 +23,7 @@ export const BattleOverBanner = memo(function BattleOverBanner() {
     const last = lastAction(battle.battleLog ?? []);
 
     return (
-        <Button
-            variant="bare"
+        <HudButton
             type="button"
             onClick={() => resultScreen.setOpen(true)}
             className="mx-4 mt-2 flex min-h-10 w-[calc(100%-2rem)] items-center justify-center gap-3 border-y border-[var(--gold)]/60 bg-[var(--gold)]/10 px-3 py-1.5 text-center"
@@ -38,6 +37,6 @@ export const BattleOverBanner = memo(function BattleOverBanner() {
                     {formatBattleLog(t, last)}
                 </span>
             )}
-        </Button>
+        </HudButton>
     );
 });

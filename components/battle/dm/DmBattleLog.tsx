@@ -6,7 +6,7 @@ import { ScrollText, Trash2 } from 'lucide-react';
 
 import { BattleLogLoadEarlier } from '@/components/battle/log/BattleLogLoadEarlier';
 import { LogTimeline } from '@/components/battle/log/LogTimeline';
-import { Button } from '@/components/ui/button';
+import { HudButton } from '@/components/hud';
 import { useBattleRules, useBattleScene } from '@/lib/hooks/battle';
 import { useConfirm } from '@/lib/hooks/common';
 import { canRollbackEntry } from '@/lib/utils/battle/view';
@@ -28,8 +28,7 @@ export function DmBattleLog({ onClose }: { onClose: () => void }) {
 
     const renderActions = (entry: BattleAction) =>
         viewer.isDM && canRollbackEntry(battle, entry) ? (
-            <Button
-                variant="bare"
+            <HudButton
                 type="button"
                 className="flex size-8 items-center justify-center text-hud-danger transition-colors hover:bg-hud-danger/15"
                 title={t('rollback')}
@@ -47,7 +46,7 @@ export function DmBattleLog({ onClose }: { onClose: () => void }) {
                 }}
             >
                 <Trash2 className="size-3.5" />
-            </Button>
+            </HudButton>
         ) : null;
 
     return (
@@ -62,14 +61,13 @@ export function DmBattleLog({ onClose }: { onClose: () => void }) {
                         </span>
                     )}
                 </span>
-                <Button
-                    variant="bare"
+                <HudButton
                     type="button"
                     className="h-8 px-2 text-[13px] text-[var(--hud-muted)] hover:text-[var(--ink)]"
                     onClick={onClose}
                 >
                     {t('close')}
-                </Button>
+                </HudButton>
             </div>
             <div className="custom-scrollbar h-[min(50vh,400px)] overflow-y-auto border border-hud-rule bg-[color-mix(in_srgb,var(--hud-bone)_5%,transparent)] px-2">
                 {entries.length === 0 ? (

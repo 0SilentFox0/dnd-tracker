@@ -19,6 +19,7 @@ import {
     type BattleFormTabId,
 } from '@/components/battle/setup/battle-form-tabs';
 import { LoadingState } from '@/components/common/states';
+import { HudButton } from '@/components/hud';
 import { HudForm, HudFormPage, type HudTab } from '@/components/hud/form';
 import { OnboardingHint } from '@/components/onboarding/OnboardingHint';
 import { Button } from '@/components/ui/button';
@@ -123,8 +124,7 @@ function BattleSetupLayout({
                     >
                         {(['none', 'create', 'prepared'] as const).map(
                             (choice) => (
-                                <Button
-                                    variant="bare"
+                                <HudButton
                                     key={choice}
                                     type="button"
                                     aria-pressed={mapChoice === choice}
@@ -144,7 +144,7 @@ function BattleSetupLayout({
                                             `mapChoice.${choice}.description`
                                         )}
                                     </span>
-                                </Button>
+                                </HudButton>
                             )
                         )}
                     </div>

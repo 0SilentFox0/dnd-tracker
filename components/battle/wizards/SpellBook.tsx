@@ -8,12 +8,11 @@ import { SlotSelect } from './spellbook/SlotSelect';
 import { SpellAimPanel } from './spellbook/SpellAimPanel';
 import { SpellCastDialog } from './spellbook/SpellCastDialog';
 
-import { HUD_SURFACE } from '@/components/hud';
+import { HUD_SURFACE, HudButton } from '@/components/hud';
 import {
     SpellBookPages,
     SpellDetail,
 } from '@/components/spells/book/SpellBookPages';
-import { Button } from '@/components/ui/button';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import type { useSpellBook } from '@/lib/hooks/battle';
 import { DESKTOP_QUERY, useMediaQuery } from '@/lib/hooks/common';
@@ -108,8 +107,7 @@ export function SpellBook({ book }: { book: Book }) {
                         )}
                     </div>
                 )}
-                <Button
-                    variant="bare"
+                <HudButton
                     type="button"
                     disabled={
                         selected.executionMode === 'manual' ||
@@ -133,30 +131,28 @@ export function SpellBook({ book }: { book: Book }) {
                             ? tw('continueCasting')
                             : tw('startCasting')
                         : tw(`targets.${targetsKey(state.pick?.targetMode)}`)}
-                </Button>
+                </HudButton>
                 {selected.executionMode !== 'manual' &&
                     pending &&
                     view.canFastForward &&
                     preparing && (
-                        <Button
-                            variant="bare"
+                        <HudButton
                             type="button"
                             className="mt-2 text-sm underline"
                             disabled={view.costUsed(selected)}
                             onClick={actions.completeLong}
                         >
                             {tw('fastForward')}
-                        </Button>
+                        </HudButton>
                     )}
                 {view.pendingCast && (
-                    <Button
-                        variant="bare"
+                    <HudButton
                         type="button"
                         className="mt-2 text-sm underline"
                         onClick={() => void actions.prepareCast(true)}
                     >
                         {tw('cancelCasting')}
-                    </Button>
+                    </HudButton>
                 )}
             </SpellDetail>
         </div>
@@ -202,14 +198,13 @@ export function SpellBook({ book }: { book: Book }) {
                     detail={detailPage || null}
                 />
                 {showDetail && !wide && canGoBack(state) && (
-                    <Button
-                        variant="bare"
+                    <HudButton
                         type="button"
                         onClick={actions.back}
                         className="spell-book spell-book-accent hud-sc mt-2 h-10 w-full text-sm"
                     >
                         ← {tc('back')}
-                    </Button>
+                    </HudButton>
                 )}
             </ResponsiveDialog>
         </>
