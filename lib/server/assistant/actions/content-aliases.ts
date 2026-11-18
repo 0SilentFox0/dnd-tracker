@@ -3,6 +3,7 @@ import type { ActionRequest, AssistantCaller, DispatchResult } from '../types';
 import 'server-only';
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { ContentError } from '@/lib/server/content/errors';
+import { systemContent } from '@/lib/server/systems/registry';
 
 /** Trusted transport supplies caller and stable requestId; never model fields. */
 export async function dispatchContentAlias(
@@ -42,10 +43,6 @@ export async function dispatchContentAlias(
             actionId = 'rules.get';
             payload = {};
             break;
-        case 'get_skill_tree':
-            actionId = 'skill-trees.get';
-            payload = { race: input.race };
-            break;
         case 'source_diff':
             actionId = 'source.diff';
             payload = {
@@ -54,11 +51,18 @@ export async function dispatchContentAlias(
                 limit: input.limit,
             };
             break;
-        default:
-            throw new ContentError(
-                API_ERRORS.ASSISTANT_UNKNOWN_CONTENT_ALIAS,
-                404
-            );
+        default: {
+            const contributed = systemContent('aliases')[alias];
+
+            if (!contributed)
+                throw new ContentError(
+                    API_ERRORS.ASSISTANT_UNKNOWN_CONTENT_ALIAS,
+                    404
+                );
+
+            actionId = contributed.actionId;
+            payload = contributed.payload(input);
+        }
     }
 
     return dispatch(caller, { actionId, input: payload, requestId });

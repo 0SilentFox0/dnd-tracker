@@ -4,17 +4,22 @@ import { z } from 'zod';
 import { CONTENT_ID_RE } from './ids';
 
 import type { ErrorParams } from '@/lib/constants/api-errors';
-import type { SYNC_TABLE_SCOPES } from '@/lib/constants/source-sync';
 import {
     type CompendiumBundle,
     type CompendiumBundleDb,
     CompendiumBundleSchema,
 } from '@/lib/server/compendium-import/bundle';
 import { unsafeCast } from '@/lib/utils/common/cast';
+import {
+    MODULE_CONTENT_TABLES,
+    MODULE_TABLE_KEY_OF_KIND,
+    type ModuleDelegate,
+    type SyncTableScope,
+} from '@/lib/utils/rules/systems/content-tables';
 
-export type BundleTable = (typeof SYNC_TABLE_SCOPES)[number];
+export type BundleTable = SyncTableScope;
 
-type Delegate =
+type CoreDelegate =
     | 'spellGroup'
     | 'race'
     | 'gameClass'
@@ -23,12 +28,10 @@ type Delegate =
     | 'background'
     | 'unit'
     | 'spell'
-    | 'mainSkill'
-    | 'skill'
-    | 'skillTree'
-    | 'artifactSet'
     | 'artifact'
     | 'campaignTrack';
+
+type Delegate = CoreDelegate | ModuleDelegate;
 
 export interface BundleTableDef {
     key: BundleTable;
@@ -47,39 +50,40 @@ const EXCLUDED_COLUMNS = new Set([
     'sourceHash',
 ]);
 
-const SCALAR_ENUMS = {
-    SpellGroup: Prisma.SpellGroupScalarFieldEnum,
-    Race: Prisma.RaceScalarFieldEnum,
-    GameClass: Prisma.GameClassScalarFieldEnum,
-    Feat: Prisma.FeatScalarFieldEnum,
-    Career: Prisma.CareerScalarFieldEnum,
-    Background: Prisma.BackgroundScalarFieldEnum,
-    Unit: Prisma.UnitScalarFieldEnum,
-    Spell: Prisma.SpellScalarFieldEnum,
-    MainSkill: Prisma.MainSkillScalarFieldEnum,
-    Skill: Prisma.SkillScalarFieldEnum,
-    SkillTree: Prisma.SkillTreeScalarFieldEnum,
-    ArtifactSet: Prisma.ArtifactSetScalarFieldEnum,
-    Artifact: Prisma.ArtifactScalarFieldEnum,
-    CampaignTrack: Prisma.CampaignTrackScalarFieldEnum,
-} as const;
+const CORE_MODELS: ReadonlyArray<readonly [BundleTable, string, Delegate]> = [
+    ['spellGroups', 'SpellGroup', 'spellGroup'],
+    ['races', 'Race', 'race'],
+    ['classes', 'GameClass', 'gameClass'],
+    ['feats', 'Feat', 'feat'],
+    ['careers', 'Career', 'career'],
+    ['backgrounds', 'Background', 'background'],
+    ['units', 'Unit', 'unit'],
+    ['spells', 'Spell', 'spell'],
+];
 
-const MODEL_TO_KEY: Record<keyof typeof SCALAR_ENUMS, BundleTable> = {
-    SpellGroup: 'spellGroups',
-    Race: 'races',
-    GameClass: 'classes',
-    Feat: 'feats',
-    Career: 'careers',
-    Background: 'backgrounds',
-    Unit: 'units',
-    Spell: 'spells',
-    MainSkill: 'mainSkills',
-    Skill: 'skills',
-    SkillTree: 'skillTrees',
-    ArtifactSet: 'artifactSets',
-    Artifact: 'artifacts',
-    CampaignTrack: 'tracks',
-};
+const CORE_MODELS_TAIL: ReadonlyArray<
+    readonly [BundleTable, string, Delegate]
+> = [
+    ['artifacts', 'Artifact', 'artifact'],
+    ['tracks', 'CampaignTrack', 'campaignTrack'],
+];
+
+const ALL_MODELS: ReadonlyArray<readonly [BundleTable, string, Delegate]> = [
+    ...CORE_MODELS,
+    ...MODULE_CONTENT_TABLES.map(
+        (t) => [t.key as BundleTable, t.model, t.delegate as Delegate] as const
+    ),
+    ...CORE_MODELS_TAIL,
+];
+
+const SCALAR_ENUMS = Prisma as unknown as Record<
+    string,
+    Record<string, string>
+>;
+
+const MODEL_TO_KEY: Record<string, BundleTable> = Object.fromEntries(
+    ALL_MODELS.map(([key, model]) => [model, key])
+);
 
 function deriveFks(
     fields: readonly Prisma.DMMF.Field[]
@@ -87,7 +91,7 @@ function deriveFks(
     const fks: Partial<Record<string, BundleTable>> = {};
 
     for (const f of fields) {
-        const target = MODEL_TO_KEY[f.type as keyof typeof MODEL_TO_KEY];
+        const target = MODEL_TO_KEY[f.type];
 
         if (f.kind === 'object' && target && f.relationFromFields?.length === 1)
             fks[f.relationFromFields[0]] = target;
@@ -98,12 +102,12 @@ function deriveFks(
 
 function table(
     key: BundleTable,
-    model: keyof typeof SCALAR_ENUMS,
+    model: string,
     delegate: Delegate
 ): BundleTableDef {
-    const columns = Object.values(SCALAR_ENUMS[model]).filter(
-        (c) => !EXCLUDED_COLUMNS.has(c)
-    );
+    const columns = Object.values(
+        SCALAR_ENUMS[`${model}ScalarFieldEnum`]
+    ).filter((c) => !EXCLUDED_COLUMNS.has(c));
 
     const fields =
         Prisma.dmmf.datamodel.models.find((m) => m.name === model)?.fields ??
@@ -120,7 +124,7 @@ function table(
 
     return {
         key,
-        model,
+        model: model as Prisma.ModelName,
         delegate,
         columns,
         nullableJson,
@@ -131,27 +135,13 @@ function table(
     };
 }
 
-export const BUNDLE_TABLES: ReadonlyArray<BundleTableDef> = [
-    table('spellGroups', 'SpellGroup', 'spellGroup'),
-    table('races', 'Race', 'race'),
-    table('classes', 'GameClass', 'gameClass'),
-    table('feats', 'Feat', 'feat'),
-    table('careers', 'Career', 'career'),
-    table('backgrounds', 'Background', 'background'),
-    table('units', 'Unit', 'unit'),
-    table('spells', 'Spell', 'spell'),
-    table('mainSkills', 'MainSkill', 'mainSkill'),
-    table('skills', 'Skill', 'skill'),
-    table('skillTrees', 'SkillTree', 'skillTree'),
-    table('artifactSets', 'ArtifactSet', 'artifactSet'),
-    table('artifacts', 'Artifact', 'artifact'),
-    table('tracks', 'CampaignTrack', 'campaignTrack'),
-];
+export const BUNDLE_TABLES: ReadonlyArray<BundleTableDef> = ALL_MODELS.map(
+    ([key, model, delegate]) => table(key, model, delegate)
+);
 
-const TABLE_KEY_OF_KIND: Readonly<Record<string, BundleTable>> = {
+const TABLE_KEY_OF_KIND: Readonly<Record<string, string>> = {
     'spell-groups': 'spellGroups',
-    'main-skills': 'mainSkills',
-    'artifact-sets': 'artifactSets',
+    ...MODULE_TABLE_KEY_OF_KIND,
 };
 
 /** The one map from a content/pack kind to its bundle table key; kinds named like their table pass through. */
@@ -218,24 +208,7 @@ export function emptyBundle(): Bundle {
     };
 }
 
-export type TemplateDb = Pick<
-    Prisma.TransactionClient,
-    | 'spellGroup'
-    | 'race'
-    | 'gameClass'
-    | 'feat'
-    | 'career'
-    | 'background'
-    | 'unit'
-    | 'spell'
-    | 'mainSkill'
-    | 'skill'
-    | 'skillTree'
-    | 'artifactSet'
-    | 'artifact'
-    | 'campaignTrack'
-    | 'campaign'
-> &
+export type TemplateDb = Pick<Prisma.TransactionClient, Delegate | 'campaign'> &
     Partial<CompendiumBundleDb> &
     Partial<Pick<Prisma.TransactionClient, 'campaignContentHide'>>;
 
@@ -300,4 +273,6 @@ export interface RowDelegate {
 }
 
 export const delegateOf = (db: TemplateDb, t: BundleTableDef) =>
-    unsafeCast<RowDelegate>(db[t.delegate]);
+    unsafeCast<RowDelegate>(
+        unsafeCast<Record<string, unknown>>(db)[t.delegate]
+    );

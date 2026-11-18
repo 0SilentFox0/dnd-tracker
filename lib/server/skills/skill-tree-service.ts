@@ -4,7 +4,6 @@ import 'server-only';
 import { prisma } from '@/lib/db';
 import { assertCan } from '@/lib/server/content/access';
 import { ContentError } from '@/lib/server/content/errors';
-import { CONTENT_OPERATIONS } from '@/lib/server/content/operations';
 import { withCampaignContentWrite } from '@/lib/server/content/write';
 import { moveSkillTreeProgress } from '@/lib/server/skills/progress-move';
 import type { Actor } from '@/lib/utils/api/actor';
@@ -12,7 +11,7 @@ import { NEED } from '@/lib/utils/api/need';
 import { readTreeJson, validateTree } from '@/lib/utils/skills/progression';
 
 export function listSkillTrees(actor: Actor): Promise<SkillTree[]> {
-    assertCan(actor, CONTENT_OPERATIONS['skill-trees.list'].need);
+    assertCan(actor, NEED.read('member'));
 
     return prisma.skillTree.findMany({
         where: { campaignId: actor.campaignId },
@@ -34,7 +33,7 @@ export async function saveSkillTree(
     actor: Actor,
     input: { treeId?: string; race: string; skills: unknown }
 ): Promise<SkillTree> {
-    assertCan(actor, CONTENT_OPERATIONS['skill-trees.save'].need);
+    assertCan(actor, NEED.write);
 
     return withCampaignContentWrite(actor.campaignId, () =>
         saveLockedSkillTree(actor, input)

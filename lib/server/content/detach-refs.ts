@@ -1,53 +1,41 @@
-import type { Prisma } from '@prisma/client';
-
 import { bypassLayer } from '@/lib/db/content-layer';
 import { unsafeCast } from '@/lib/utils/common/cast';
+import {
+    MODULE_CONTENT_TABLES,
+    MODULE_DETACH_REFS,
+} from '@/lib/utils/rules/systems/content-tables';
 
-type Db = Pick<
-    Prisma.TransactionClient,
-    'spell' | 'skill' | 'mainSkill' | 'unit' | 'artifact' | 'characterSkills'
->;
+type Db = object;
 
-export type DetachKind =
-    | 'spellGroup'
-    | 'race'
-    | 'mainSkill'
-    | 'spell'
-    | 'unit'
-    | 'artifactSet'
-    | 'skillTree';
+export type DetachKind = string;
 
-type Target = { model: keyof Db; column: string; cascade?: boolean };
+type Target = {
+    model: string;
+    column: string;
+    cascade?: boolean;
+    viaCharacter?: boolean;
+};
 
 const REFERRERS: Record<DetachKind, Target[]> = {
-    spellGroup: [
-        { model: 'spell', column: 'groupId' },
-        { model: 'mainSkill', column: 'spellGroupId' },
-        { model: 'skill', column: 'spellGroupId' },
-    ],
+    spellGroup: [{ model: 'spell', column: 'groupId' }],
     race: [{ model: 'unit', column: 'raceId' }],
-    mainSkill: [{ model: 'skill', column: 'mainSkillId' }],
-    spell: [
-        { model: 'skill', column: 'spellId' },
-        { model: 'skill', column: 'spellNewSpellId' },
-        { model: 'skill', column: 'grantedSpellId' },
-    ],
     unit: [{ model: 'spell', column: 'summonUnitId' }],
-    artifactSet: [{ model: 'artifact', column: 'setId' }],
-    skillTree: [
-        { model: 'characterSkills', column: 'skillTreeId', cascade: true },
-    ],
 };
+
+for (const { kind, ...target } of MODULE_DETACH_REFS)
+    (REFERRERS[kind] ??= []).push(target);
 
 /** Bundle table → the reference kind that must be detached when one of its rows is removed. */
 export const DETACH_KIND_BY_TABLE: Record<string, DetachKind> = {
     spellGroups: 'spellGroup',
     races: 'race',
-    mainSkills: 'mainSkill',
     spells: 'spell',
     units: 'unit',
-    artifactSets: 'artifactSet',
-    skillTrees: 'skillTree',
+    ...Object.fromEntries(
+        MODULE_CONTENT_TABLES.flatMap((t) =>
+            t.detach ? [[t.key, t.detach]] : []
+        )
+    ),
 };
 
 /** Content FKs are gone (base rows can be referenced), so the old ON DELETE SET NULL is done here; `ids: "all"` nulls every reference of that kind. */
@@ -59,18 +47,18 @@ export async function detachRefs(
 ): Promise<void> {
     if (ids !== 'all' && !ids.length) return;
 
-    for (const { model, column, cascade } of REFERRERS[kind]) {
+    for (const { model, column, cascade, viaCharacter } of REFERRERS[kind] ??
+        []) {
         const match = { [column]: ids === 'all' ? { not: null } : { in: ids } };
 
-        const where =
-            model === 'characterSkills'
-                ? { ...match, character: { campaignId } }
-                : { campaignId, ...match };
+        const where = viaCharacter
+            ? { ...match, character: { campaignId } }
+            : { campaignId, ...match };
 
         const delegate = unsafeCast<{
             updateMany(args: unknown): Promise<unknown>;
             deleteMany(args: unknown): Promise<unknown>;
-        }>(db[model]);
+        }>(unsafeCast<Record<string, unknown>>(db)[model]);
 
         await bypassLayer(() =>
             cascade

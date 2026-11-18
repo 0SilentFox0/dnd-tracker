@@ -6,6 +6,7 @@ import { API_ERRORS } from '@/lib/constants/api-errors';
 import type { Translator } from '@/lib/i18n/translator';
 import { assertValidSystem } from '@/lib/server/campaigns/modules';
 import { ContentError } from '@/lib/server/content/errors';
+import { moduleContentOperations } from '@/lib/server/content/module-operations';
 import type { ContentOperationId } from '@/lib/server/content/operation-service';
 import { asRecord } from '@/lib/utils/common/json';
 import {
@@ -90,19 +91,7 @@ function previewCtx(
     };
 }
 
-const PREVIEWS: Partial<Record<ContentOperationId, (c: PreviewCtx) => void>> = {
-    'skills.duplicate': ({ owned, field, t }) => {
-        const row = owned('skills', 'skillId');
-
-        field(
-            'skills',
-            row,
-            'name',
-            String(row.name).trim()
-                ? t('defaults.copyOf', { name: String(row.name) })
-                : t('defaults.skillCopy')
-        );
-    },
+const PREVIEWS: Partial<Record<string, (c: PreviewCtx) => void>> = {
     'spells.remove-from-group': ({ owned, field }) =>
         field('spells', owned('spells', 'spellId'), 'groupId', null),
     'spell-groups.remove-all-spells': ({ owned, rows, field, input }) => {
@@ -147,18 +136,6 @@ const PREVIEWS: Partial<Record<ContentOperationId, (c: PreviewCtx) => void>> = {
             );
     },
     'rules.update': previewRulesUpdate,
-    'skill-trees.save': ({ rows, input, body, field }) => {
-        const row =
-            rows('skillTrees').find((row) => row.id === input.treeId) ??
-            rows('skillTrees').find((row) => row.race === body.race);
-
-        field(
-            'skillTrees',
-            row ?? { id: 'new', race: body.race },
-            'skills',
-            body.skills
-        );
-    },
 };
 
 function previewRulesUpdate({ root, body, t, warnings, field }: PreviewCtx) {
@@ -204,7 +181,9 @@ export function operationPreview(
     t: Translator,
     state: unknown
 ): Preview | null {
-    const build = Object.hasOwn(PREVIEWS, id) ? PREVIEWS[id] : null;
+    const build = Object.hasOwn(PREVIEWS, id)
+        ? PREVIEWS[id]
+        : moduleContentOperations()[id]?.assistant?.preview;
 
     if (!build) return null;
 

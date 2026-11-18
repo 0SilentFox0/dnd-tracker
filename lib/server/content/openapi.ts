@@ -8,8 +8,8 @@ import {
     sharedSchemas,
     toJsonSchemas,
 } from '@/lib/server/content/json-schema';
+import { contentOperationList } from '@/lib/server/content/module-operations';
 import {
-    CONTENT_OPERATION_LIST,
     type ContentOperation,
     type OperationResponse,
 } from '@/lib/server/content/operations';
@@ -83,7 +83,7 @@ type OpSpec = Omit<ContentOperation, 'description'> & {
 
 const resources = Object.values(CONTENT_RESOURCES) as AnyContentResource[];
 
-const operations = CONTENT_OPERATION_LIST.filter((op) => !op.need.sessionOnly);
+const operations = contentOperationList().filter((op) => !op.need.sessionOnly);
 
 function resourceSpecs(r: AnyContentResource): OpSpec[] {
     const item = `${r.path}/{${r.idParam}}`;

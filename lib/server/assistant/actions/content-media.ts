@@ -1,10 +1,13 @@
+import { systemContent } from '@/lib/server/systems/registry';
+
 /** Returns a translation key; media uses the existing browser editors; no uploads during preparation. */
 export function contentMediaHandoff(
     kind: string,
     input: Record<string, unknown>
 ) {
     if (
-        (kind === 'artifacts' || kind === 'artifact-sets') &&
+        (kind === 'artifacts' ||
+            systemContent('mediaKinds')[kind] === 'icon') &&
         typeof input.icon === 'string' &&
         input.icon.length > 0
     )

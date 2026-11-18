@@ -56,6 +56,7 @@ import { isPlatformAdmin } from '@/lib/utils/api/platform-admin';
 import { requestDigest } from '@/lib/utils/battle/store/stable-json';
 import { asRecord } from '@/lib/utils/common/json';
 import { ownHandler } from '@/lib/utils/common/own-handler';
+import { MODULE_CONTENT_TABLES } from '@/lib/utils/rules/systems/content-tables';
 import type { TemplateContentLocale } from '@/lib/utils/templates/manifest';
 
 export const campaignWindowSchema = z.object({
@@ -112,23 +113,25 @@ const need = (write = true, sessionOnly = false) => ({
 });
 
 const DELETE_DEPENDENCIES = {
-    artifactSets: { select: { id: true }, orderBy: { id: 'asc' } },
     artifacts: { select: { id: true }, orderBy: { id: 'asc' } },
     battles: { select: { id: true }, orderBy: { id: 'asc' } },
     characters: { select: { id: true }, orderBy: { id: 'asc' } },
-    mainSkills: { select: { id: true }, orderBy: { id: 'asc' } },
     races: { select: { id: true }, orderBy: { id: 'asc' } },
     classes: { select: { id: true }, orderBy: { id: 'asc' } },
     backgrounds: { select: { id: true }, orderBy: { id: 'asc' } },
     feats: { select: { id: true }, orderBy: { id: 'asc' } },
     scenarioPages: { select: { id: true }, orderBy: { id: 'asc' } },
-    skillTrees: { select: { id: true }, orderBy: { id: 'asc' } },
-    skills: { select: { id: true }, orderBy: { id: 'asc' } },
     spellGroups: { select: { id: true }, orderBy: { id: 'asc' } },
     spells: { select: { id: true }, orderBy: { id: 'asc' } },
     tracks: { select: { id: true }, orderBy: { id: 'asc' } },
     slideDecks: { select: { id: true }, orderBy: { id: 'asc' } },
     units: { select: { id: true }, orderBy: { id: 'asc' } },
+    ...Object.fromEntries(
+        MODULE_CONTENT_TABLES.map((table) => [
+            table.key,
+            { select: { id: true }, orderBy: { id: 'asc' } },
+        ])
+    ),
     aiThreads: { select: { id: true }, orderBy: { id: 'asc' } },
     aiProposals: { select: { id: true }, orderBy: { id: 'asc' } },
     apiTokens: { select: { id: true }, orderBy: { id: 'asc' } },

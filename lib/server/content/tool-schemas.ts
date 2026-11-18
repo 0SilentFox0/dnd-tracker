@@ -2,7 +2,6 @@ import type { ZodType } from 'zod';
 
 import 'server-only';
 import { API_ERRORS } from '@/lib/constants/api-errors';
-import { saveSkillTreeSchema } from '@/lib/schemas/skills';
 import type { AnyContentResource } from '@/lib/server/content/define-resource';
 import { ContentError } from '@/lib/server/content/errors';
 import {
@@ -12,6 +11,7 @@ import {
 } from '@/lib/server/content/json-schema';
 import { CONTENT_RESOURCES } from '@/lib/server/content/resources';
 import type { SchemaTarget } from '@/lib/server/content/schema-targets';
+import { systemContent } from '@/lib/server/systems/registry';
 import { NonRandomEffectSchema } from '@/lib/utils/abilities/schema/effects';
 
 export const EFFECT_KINDS: readonly string[] = (
@@ -53,7 +53,8 @@ function components() {
         );
     }
 
-    entries.push([saveSkillTreeSchema, 'SkillTreeSave']);
+    for (const { schema, id } of Object.values(systemContent('schemaTargets')))
+        entries.push([schema, id]);
 
     return (cache ??= toJsonSchemas(entries, { uriPrefix: '#/$defs/' }));
 }
@@ -127,7 +128,9 @@ function compute(input: {
 
     if (kind === 'rules') return build('RulesetPatch', STOPS);
 
-    if (kind === 'skill-tree') return build('SkillTreeSave', STOPS);
+    const contributed = systemContent('schemaTargets')[kind];
+
+    if (contributed) return build(contributed.id, STOPS);
 
     return build(
         `${pascal(kind)}${input.op === 'update' ? 'Update' : 'Create'}`,

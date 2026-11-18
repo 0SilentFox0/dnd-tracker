@@ -34,6 +34,10 @@ import {
     assertKindActive,
     isKindActive,
 } from '@/lib/server/content/kind-active';
+import {
+    contentOperationById,
+    moduleContentOperations,
+} from '@/lib/server/content/module-operations';
 import { CONTENT_OPERATIONS } from '@/lib/server/content/operations';
 import {
     assertEffectsInComposition,
@@ -41,10 +45,7 @@ import {
 } from '@/lib/server/content/traits-guard';
 import { withCampaignContentWrite } from '@/lib/server/content/write';
 import { afterContentCommit } from '@/lib/server/content/write-context';
-import {
-    listSkillTrees,
-    saveSkillTree,
-} from '@/lib/server/skills/skill-tree-service';
+import { systemContent } from '@/lib/server/systems/registry';
 import { exportCampaign } from '@/lib/server/templates/export-campaign';
 import { publishTemplate } from '@/lib/server/templates/publish-service';
 import {
@@ -53,11 +54,9 @@ import {
     getSourceDiff,
 } from '@/lib/server/templates/sync/service';
 import {
-    abilitiesJson,
     abilitySpellIds,
     OwnerKind,
     readAbilities,
-    skillAbilities,
 } from '@/lib/utils/abilities/read';
 import type { Actor } from '@/lib/utils/api/actor';
 import { localeOrRequest } from '@/lib/utils/api/translate-error';
@@ -67,14 +66,17 @@ import { IMPORT_KINDS } from '@/lib/utils/content/import/kinds';
 import { ruleSystemOf } from '@/lib/utils/rules/systems/lookup';
 import { importUnitsIntoCampaign } from '@/lib/utils/units/import-units';
 
-export type ContentOperationId = keyof typeof CONTENT_OPERATIONS;
+export type CoreContentOperationId = keyof typeof CONTENT_OPERATIONS;
+
+/** Core ids are typed; module ids are plain strings */
+export type ContentOperationId = CoreContentOperationId | (string & {});
 
 const id = z.string().min(1).max(200);
 
-const paths: Partial<Record<ContentOperationId, Record<string, z.ZodType>>> = {
+const paths: Partial<
+    Record<CoreContentOperationId, Record<string, z.ZodType>>
+> = {
     'rules.condition-usage': { slug: id },
-    'skill-trees.save': { treeId: id.optional() },
-    'skills.duplicate': { skillId: id },
     'spells.remove-from-group': { spellId: id },
     'spell-groups.remove-all-spells': { groupId: id },
     'abilities.get': { kind: z.enum(Object.values(OwnerKind)), ownerId: id },
@@ -83,59 +85,64 @@ const paths: Partial<Record<ContentOperationId, Record<string, z.ZodType>>> = {
     'content.import-example': { kind: z.enum(IMPORT_KINDS) },
 };
 
+const operationOf = (operationId: ContentOperationId) => {
+    const operation = contentOperationById(operationId);
+
+    if (!operation) throw new ContentError(API_ERRORS.NOT_FOUND, 404);
+
+    return operation;
+};
+
 export function contentOperationSchema(operationId: ContentOperationId) {
-    const operation = CONTENT_OPERATIONS[operationId];
+    const operation = operationOf(operationId);
 
     return z.object({
-        ...paths[operationId],
+        ...paths[operationId as CoreContentOperationId],
+        ...moduleContentOperations()[operationId]?.pathParams,
         ...(operationId === 'source.diff'
             ? {
                   offset: z.number().int().min(0).default(0),
                   limit: z.number().int().min(1).max(50).default(20),
               }
             : {}),
-        ...('body' in operation ? { body: operation.body } : {}),
-        ...('query' in operation ? { query: operation.query.optional() } : {}),
+        ...(operation.body ? { body: operation.body } : {}),
+        ...(operation.query ? { query: operation.query.optional() } : {}),
     });
 }
 export type OperationInput = z.infer<ReturnType<typeof contentOperationSchema>>;
 
-type BodyOf<K extends ContentOperationId> =
+type BodyOf<K extends CoreContentOperationId> =
     (typeof CONTENT_OPERATIONS)[K] extends { body: infer B extends z.ZodType }
         ? z.output<B>
         : never;
 
 // contentOperationSchema already validated the body; this only narrows the type.
-const bodyOf = <K extends ContentOperationId>(_id: K, body: unknown) =>
+const bodyOf = <K extends CoreContentOperationId>(_id: K, body: unknown) =>
     body as BodyOf<K>;
 
 const kindOf = (value: unknown) => value as (typeof IMPORT_KINDS)[number];
 
 type SourceRow = { id: string; name: string };
 
-const ABILITY_SOURCES: readonly {
+type AbilitySource = {
     source: string;
     contentKind: string;
+    order: number;
     load(where: { campaignId: string }): Promise<SourceRow[]>;
-}[] = [
-    {
-        source: 'skill',
-        contentKind: 'skills',
-        load: (where) =>
-            prisma.skill.findMany({
-                where,
-                select: { id: true, name: true },
-            }),
-    },
+};
+
+const CORE_ABILITY_SOURCES: readonly AbilitySource[] = [
     {
         source: 'race',
         contentKind: 'races',
+        order: 20,
         load: (where) =>
             prisma.race.findMany({ where, select: { id: true, name: true } }),
     },
     {
         source: 'artifact',
         contentKind: 'artifacts',
+        order: 30,
         load: (where) =>
             prisma.artifact.findMany({
                 where,
@@ -143,23 +150,16 @@ const ABILITY_SOURCES: readonly {
             }),
     },
     {
-        source: 'artifactSet',
-        contentKind: 'artifact-sets',
-        load: (where) =>
-            prisma.artifactSet.findMany({
-                where,
-                select: { id: true, name: true },
-            }),
-    },
-    {
         source: 'unit',
         contentKind: 'units',
+        order: 50,
         load: (where) =>
             prisma.unit.findMany({ where, select: { id: true, name: true } }),
     },
     {
         source: 'class',
         contentKind: 'classes',
+        order: 60,
         load: (where) =>
             prisma.gameClass.findMany({
                 where,
@@ -169,10 +169,19 @@ const ABILITY_SOURCES: readonly {
     {
         source: 'feat',
         contentKind: 'feats',
+        order: 70,
         load: (where) =>
             prisma.feat.findMany({ where, select: { id: true, name: true } }),
     },
 ];
+
+const abilitySources = (): AbilitySource[] =>
+    [
+        ...CORE_ABILITY_SOURCES,
+        ...Object.entries(systemContent('abilityOwners')).map(
+            ([source, owner]) => ({ source, ...owner })
+        ),
+    ].sort((a, b) => a.order - b.order);
 
 async function owned<T extends { campaignId: string }>(
     row: T | null,
@@ -192,20 +201,18 @@ async function owner(kind: OwnerKind, actor: Actor, ownerId: string) {
     const where = { id: ownerId, campaignId: actor.campaignId };
 
     switch (kind) {
-        case OwnerKind.SKILL:
-            return prisma.skill.findFirst({ where });
         case OwnerKind.RACE:
             return prisma.race.findFirst({ where });
         case OwnerKind.ARTIFACT:
             return prisma.artifact.findFirst({ where });
-        case OwnerKind.ARTIFACT_SET:
-            return prisma.artifactSet.findFirst({ where });
         case OwnerKind.UNIT:
             return prisma.unit.findFirst({ where });
         case OwnerKind.CLASS:
             return prisma.gameClass.findFirst({ where });
         case OwnerKind.FEAT:
             return prisma.feat.findFirst({ where });
+        default:
+            return systemContent('abilityOwners')[kind]?.find(where);
     }
 }
 
@@ -220,292 +227,236 @@ type OperationContext = {
 async function importOperation(ctx: OperationContext) {
     const { actor, input, body, locale } = ctx;
 
-        const report = await importContent(
-            actor,
-            kindOf(input.kind),
-            bodyOf('content.import', body)
-        );
+    const report = await importContent(
+        actor,
+        kindOf(input.kind),
+        bodyOf('content.import', body)
+    );
 
-        if (locale === null) return report;
+    if (locale === null) return report;
 
-        return translateImportReport(
-            await getTranslator(await localeOrRequest(locale)),
-            report
-        );
+    return translateImportReport(
+        await getTranslator(await localeOrRequest(locale)),
+        report
+    );
 }
 
-async function abilitySources(ctx: OperationContext) {
+async function listAbilitySources(ctx: OperationContext) {
     const { actor } = ctx;
 
-        const where = { campaignId: actor.campaignId };
+    const where = { campaignId: actor.campaignId };
 
-        const groups = await Promise.all(
-            ABILITY_SOURCES.map(async (s) =>
-                (await isKindActive(s.contentKind, actor))
-                    ? { kind: s.source, rows: await s.load(where) }
-                    : { kind: s.source, rows: [] }
-            )
-        );
+    const groups = await Promise.all(
+        abilitySources().map(async (s) =>
+            (await isKindActive(s.contentKind, actor))
+                ? { kind: s.source, rows: await s.load(where) }
+                : { kind: s.source, rows: [] }
+        )
+    );
 
-        return {
-            sources: groups.flatMap(({ kind, rows }) =>
-                rows
-                    .map((row) => ({
-                        kind,
-                        id: row.id,
-                        name: row.name,
-                    }))
-                    .sort(byName)
-            ),
-        };
+    return {
+        sources: groups.flatMap(({ kind, rows }) =>
+            rows
+                .map((row) => ({
+                    kind,
+                    id: row.id,
+                    name: row.name,
+                }))
+                .sort(byName)
+        ),
+    };
 }
 
 async function abilityGet(ctx: OperationContext) {
     const { actor, input, param } = ctx;
 
-        const kind = input.kind as OwnerKind;
+    const kind = input.kind as OwnerKind;
 
-        const row = await owner(kind, actor, param('ownerId'));
+    const row = await owner(kind, actor, param('ownerId'));
 
-        if (!row) throw new ContentError(API_ERRORS.NOT_FOUND, 404);
+    if (!row) throw new ContentError(API_ERRORS.NOT_FOUND, 404);
 
-        if (kind === OwnerKind.CLASS && 'features' in row) {
-            const cls = toGameClassData(row);
-
-            return {
-                abilities: [
-                    ...cls.features,
-                    ...cls.subclasses.flatMap((s) => s.features),
-                ].flatMap((f) => f.abilities),
-            };
-        }
-
-        return { abilities: readAbilities(kind, row).abilities };
-}
-
-async function duplicateSkill(ctx: OperationContext) {
-    const { actor, locale, param } = ctx;
-
-        const source = await owned(
-            await prisma.skill.findFirst({
-                where: {
-                    id: param('skillId'),
-                    campaignId: actor.campaignId,
-                },
-            }),
-            actor,
-            API_ERRORS.SKILL_NOT_FOUND
+    if (kind === OwnerKind.CLASS && 'features' in row) {
+        const cls = toGameClassData(
+            row as Parameters<typeof toGameClassData>[0]
         );
 
-        const t = await getTranslator(
-            await localeOrRequest(locale),
-            'assistant'
-        );
+        return {
+            abilities: [
+                ...cls.features,
+                ...cls.subclasses.flatMap((s) => s.features),
+            ].flatMap((f) => f.abilities),
+        };
+    }
 
-        const skill = await prisma.skill.create({
-            data: {
-                campaignId: actor.campaignId,
-                name: source.name.trim()
-                    ? t('defaults.copyOf', { name: source.name })
-                    : t('defaults.skillCopy'),
-                description: source.description,
-                icon: source.icon,
-                image: source.image ?? null,
-                spellId: source.spellId,
-                spellGroupId: source.spellGroupId,
-                grantedSpellId: source.grantedSpellId,
-                mainSkillId: source.mainSkillId,
-                spellNewSpellId: source.grantedSpellId,
-                abilities: abilitiesJson(skillAbilities(source)),
-            },
-            include: {
-                spell: true,
-                spellGroup: true,
-                grantedSpell: true,
-                mainSkill: true,
-            },
-        });
-
-        invalidate(actor, ReferenceKind.SKILLS);
-
-        return skill;
+    return { abilities: readAbilities(kind, row).abilities };
 }
 
 async function removeSpellFromGroup(ctx: OperationContext) {
     const { actor, param } = ctx;
 
-        await owned(
-            await prisma.spell.findFirst({
-                where: {
-                    id: param('spellId'),
-                    campaignId: actor.campaignId,
-                },
-            }),
-            actor
-        );
+    await owned(
+        await prisma.spell.findFirst({
+            where: {
+                id: param('spellId'),
+                campaignId: actor.campaignId,
+            },
+        }),
+        actor
+    );
 
-        const result = await prisma.spell.update({
-            where: { id: param('spellId') },
-            data: { groupId: null },
-            include: { spellGroup: true },
-        });
+    const result = await prisma.spell.update({
+        where: { id: param('spellId') },
+        data: { groupId: null },
+        include: { spellGroup: true },
+    });
 
-        invalidate(actor, ReferenceKind.SPELLS);
+    invalidate(actor, ReferenceKind.SPELLS);
 
-        return result;
+    return result;
 }
 
 async function removeAllSpellsFromGroup(ctx: OperationContext) {
     const { actor, param } = ctx;
 
-        await owned(
-            await prisma.spellGroup.findFirst({
-                where: {
-                    id: param('groupId'),
-                    campaignId: actor.campaignId,
-                },
-            }),
-            actor
-        );
-        await prisma.spell.updateMany({
+    await owned(
+        await prisma.spellGroup.findFirst({
             where: {
+                id: param('groupId'),
                 campaignId: actor.campaignId,
-                groupId: param('groupId'),
             },
-            data: { groupId: null },
-        });
-        invalidate(actor, ReferenceKind.SPELLS);
+        }),
+        actor
+    );
+    await prisma.spell.updateMany({
+        where: {
+            campaignId: actor.campaignId,
+            groupId: param('groupId'),
+        },
+        data: { groupId: null },
+    });
+    invalidate(actor, ReferenceKind.SPELLS);
 
-        return { ok: true };
+    return { ok: true };
 }
 
 async function deleteSpellsByLevel(ctx: OperationContext) {
     const { actor, body } = ctx;
 
-        const { level } = bodyOf('spells.delete-by-level', body);
+    const { level } = bodyOf('spells.delete-by-level', body);
 
-        const doomed = await prisma.spell.findMany({
-            where: { campaignId: actor.campaignId, level },
-            select: { id: true },
-        });
+    const doomed = await prisma.spell.findMany({
+        where: { campaignId: actor.campaignId, level },
+        select: { id: true },
+    });
 
-        await detachRefs(
-            prisma,
-            actor.campaignId,
-            'spell',
-            doomed.map((s) => s.id)
-        );
+    await detachRefs(
+        prisma,
+        actor.campaignId,
+        'spell',
+        doomed.map((s) => s.id)
+    );
 
-        const result = await prisma.spell.deleteMany({
-            where: { campaignId: actor.campaignId, level },
-        });
+    const result = await prisma.spell.deleteMany({
+        where: { campaignId: actor.campaignId, level },
+    });
 
-        invalidate(actor, ReferenceKind.SPELLS);
+    invalidate(actor, ReferenceKind.SPELLS);
 
-        return { ok: true, deleted: result.count };
+    return { ok: true, deleted: result.count };
 }
 
 async function importUnits(ctx: OperationContext) {
     const { actor, body } = ctx;
 
-        const { units: incoming } = bodyOf('units.import', body);
+    const { units: incoming } = bodyOf('units.import', body);
 
-        const rules = await loadRules(actor.campaignId);
+    const rules = await loadRules(actor.campaignId);
 
-        let droppedConditions = 0;
+    let droppedConditions = 0;
 
-        const units = incoming.map((unit) => {
-            const cleaned = dropForeignConditions(
-                rules.system,
-                unit.abilities
-            );
+    const units = incoming.map((unit) => {
+        const cleaned = dropForeignConditions(rules.system, unit.abilities);
 
-            droppedConditions += cleaned.dropped;
+        droppedConditions += cleaned.dropped;
 
-            return cleaned.dropped
-                ? { ...unit, abilities: cleaned.abilities }
-                : unit;
-        });
+        return cleaned.dropped
+            ? { ...unit, abilities: cleaned.abilities }
+            : unit;
+    });
 
-        assertEffectsInComposition(
-            rules.system,
-            units.flatMap((unit) => unit.abilities ?? [])
-        );
+    assertEffectsInComposition(
+        rules.system,
+        units.flatMap((unit) => unit.abilities ?? [])
+    );
 
-        await assertCampaignRefs(actor.campaignId, {
-            spell: [
-                ...units.flatMap((unit) => unit.knownSpells),
-                ...units.flatMap((unit) =>
-                    abilitySpellIds(unit.abilities)
-                ),
-            ],
-        });
+    await assertCampaignRefs(actor.campaignId, {
+        spell: [
+            ...units.flatMap((unit) => unit.knownSpells),
+            ...units.flatMap((unit) => abilitySpellIds(unit.abilities)),
+        ],
+    });
 
-        const persisted = ruleSystemOf(rules).characteristics.persisted;
+    const persisted = ruleSystemOf(rules).characteristics.persisted;
 
-        const narrowed = persisted
-            ? units.map((unit) =>
-                  unit.characteristics
-                      ? {
-                            ...unit,
-                            characteristics: parseSystemData(
-                                rules,
-                                unit.characteristics,
-                                'unitCharacteristics'
-                            ),
-                        }
-                      : unit
-              )
-            : units;
+    const narrowed = persisted
+        ? units.map((unit) =>
+              unit.characteristics
+                  ? {
+                        ...unit,
+                        characteristics: parseSystemData(
+                            rules,
+                            unit.characteristics,
+                            'unitCharacteristics'
+                        ),
+                    }
+                  : unit
+          )
+        : units;
 
-        const result = await importUnitsIntoCampaign(
-            prisma,
-            actor.campaignId,
-            narrowed,
-            rules
-        );
+    const result = await importUnitsIntoCampaign(
+        prisma,
+        actor.campaignId,
+        narrowed,
+        rules
+    );
 
-        invalidate(actor, ReferenceKind.UNITS);
+    invalidate(actor, ReferenceKind.UNITS);
 
-        return droppedConditions
-            ? { ...result, droppedConditions }
-            : result;
+    return droppedConditions ? { ...result, droppedConditions } : result;
 }
 
 async function reorderTracks(ctx: OperationContext) {
     const { actor, body } = ctx;
 
-        const { ids } = bodyOf('tracks.reorder', body);
+    const { ids } = bodyOf('tracks.reorder', body);
 
-        const known = new Set(
-            (
-                await prisma.campaignTrack.findMany({
-                    where: { campaignId: actor.campaignId },
-                    select: { id: true },
-                })
-            ).map((row) => row.id)
-        );
+    const known = new Set(
+        (
+            await prisma.campaignTrack.findMany({
+                where: { campaignId: actor.campaignId },
+                select: { id: true },
+            })
+        ).map((row) => row.id)
+    );
 
-        if (
-            ids.length !== known.size ||
-            new Set(ids).size !== ids.length ||
-            !ids.every((trackId) => known.has(trackId))
+    if (
+        ids.length !== known.size ||
+        new Set(ids).size !== ids.length ||
+        !ids.every((trackId) => known.has(trackId))
+    )
+        throw new ContentError(API_ERRORS.TRACK_ORDER_MISMATCH, 400);
+
+    await prisma.$transaction(
+        ids.map((trackId, sortOrder) =>
+            prisma.campaignTrack.update({
+                where: { id: trackId },
+                data: { sortOrder },
+            })
         )
-            throw new ContentError(
-                API_ERRORS.TRACK_ORDER_MISMATCH,
-                400
-            );
+    );
 
-        await prisma.$transaction(
-            ids.map((trackId, sortOrder) =>
-                prisma.campaignTrack.update({
-                    where: { id: trackId },
-                    data: { sortOrder },
-                })
-            )
-        );
-
-        return listTracks(actor.campaignId);
+    return listTracks(actor.campaignId);
 }
 
 /** Shared HTTP/action operation. It owns authorization, parsing and the write lock. */
@@ -515,7 +466,7 @@ export async function runContentOperation(
     raw: unknown,
     locale?: Locale | null
 ): Promise<unknown> {
-    const operation = CONTENT_OPERATIONS[operationId];
+    const operation = operationOf(operationId);
 
     assertCan(actor, operation.need);
 
@@ -567,17 +518,6 @@ export async function runContentOperation(
                 return applySource(actor, bodyOf('source.apply', body));
             case 'template.publish':
                 return publishTemplate(actor);
-            case 'skill-trees.list':
-                await assertKindActive('skills', actor);
-
-                return listSkillTrees(actor);
-            case 'skill-trees.save':
-                await assertKindActive('skills', actor);
-
-                return saveSkillTree(actor, {
-                    ...bodyOf('skill-trees.save', body),
-                    ...(input.treeId ? { treeId: String(input.treeId) } : {}),
-                });
             case 'content.import':
                 return importOperation(ctx);
             case 'content.import-example':
@@ -595,11 +535,9 @@ export async function runContentOperation(
                     locale: locale ?? undefined,
                 });
             case 'abilities.sources':
-                return abilitySources(ctx);
+                return listAbilitySources(ctx);
             case 'abilities.get':
                 return abilityGet(ctx);
-            case 'skills.duplicate':
-                return duplicateSkill(ctx);
             case 'spells.remove-from-group':
                 return removeSpellFromGroup(ctx);
             case 'spell-groups.remove-all-spells':
@@ -611,6 +549,14 @@ export async function runContentOperation(
             case 'tracks.reorder':
                 return reorderTracks(ctx);
         }
+
+        const contribution = moduleContentOperations()[operationId];
+
+        if (!contribution) throw new ContentError(API_ERRORS.NOT_FOUND, 404);
+
+        if (contribution.kind) await assertKindActive(contribution.kind, actor);
+
+        return contribution.run(ctx);
     };
 
     // The row importer owns per-row commits for ordinary HTTP use. In the

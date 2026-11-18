@@ -13,7 +13,7 @@ import {
     SCHEMA_TARGETS,
 } from '@/lib/server/content/schema-targets';
 import { contentSchema } from '@/lib/server/content/tool-schemas';
-import { readSkillTree } from '@/lib/server/skills/skill-tree-service';
+import { systemContent } from '@/lib/server/systems/registry';
 import { NEED } from '@/lib/utils/api/need';
 
 export function createContentReadActions(): AssistantActionDef[] {
@@ -81,37 +81,18 @@ export function createContentReadActions(): AssistantActionDef[] {
                 warnings: [],
             }),
         },
-        {
-            id: 'skill-trees.get',
-            title: 'Race skill tree',
-            description: 'Current skill tree by race name',
-            need: NEED.read('member'),
-            input: z.object({ race: z.string().min(1) }),
-            effect: 'read',
-            execute: async (caller, input) => {
-                const row = await readSkillTree(
-                    caller.actor,
-                    (input as { race: string }).race
-                );
-
-                return {
-                    data: jsonContent(
-                        row
-                            ? { id: row.id, race: row.race, skills: row.skills }
-                            : null
-                    ),
-                    affected: [],
-                    warnings: [],
-                };
-            },
-        },
+        ...Object.values(systemContent('readActions')),
         {
             id: 'content.media',
             title: 'Add media in the editor',
             description: 'The existing UI for icons and music files',
             need: NEED.write,
             input: z.object({
-                kind: z.enum(['artifacts', 'artifact-sets', 'tracks']),
+                kind: z.enum([
+                    'artifacts',
+                    ...Object.keys(systemContent('mediaKinds')),
+                    'tracks',
+                ] as [string, ...string[]]),
             }),
             effect: 'handoff',
             execute: async (caller, input) => ({

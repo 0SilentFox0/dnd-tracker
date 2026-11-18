@@ -1,4 +1,4 @@
-import { CONTENT_OPERATIONS } from '@/lib/server/content/operations';
+import { contentOperationList } from '@/lib/server/content/module-operations';
 import { CONTENT_RESOURCES } from '@/lib/server/content/resources';
 
 /** Implemented adapters; model activation is separately gated by T14. */
@@ -59,7 +59,7 @@ export const CONTENT_ACTION_COVERAGE = [
 
         return rows;
     }),
-    ...Object.values(CONTENT_OPERATIONS).map((operation) => ({
+    ...contentOperationList().map((operation) => ({
         route: `campaigns/[id]${operation.path.replace(/\{([^}]+)\}/g, '[$1]')}`,
         method: operation.method,
         actionId: operation.id,

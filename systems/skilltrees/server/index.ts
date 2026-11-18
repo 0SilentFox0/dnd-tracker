@@ -1,3 +1,4 @@
+import { SKILLTREES_CONTENT } from './content/content-contribution';
 import { mainSkillsResource } from './content/main-skills';
 import { skillsResource } from './content/skills';
 import { resolveLearnedSpellsAndMastery } from './participant/learned-spells';
@@ -9,6 +10,7 @@ import { defineAddon } from '@/lib/utils/rules/systems/compose';
 
 export const SKILLTREES_MODULE_SERVER = defineAddon<SystemServer>(() => ({
     operations: SKILLTREES_OPERATIONS,
+    content: SKILLTREES_CONTENT,
     contentKinds: {
         'main-skills': { resource: mainSkillsResource },
         skills: { resource: skillsResource },

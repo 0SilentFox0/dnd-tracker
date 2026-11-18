@@ -1,4 +1,5 @@
 import { composeServer } from './compose';
+import type { SystemContentServer } from './content-types';
 import type {
     ContentKindServer,
     ContentRefSource,
@@ -97,6 +98,27 @@ const unionServers = (): SystemServer[] => Object.values(systemServerUnion());
 
 export const systemContentKinds = (): Record<string, ContentKindServer> =>
     Object.assign({}, ...unionServers().map((s) => s.contentKinds ?? {}));
+
+/** One dictionary of the content contributions of every installed module, whatever the campaign composition (kind gating stays with the caller) */
+export const systemContent = <
+    K extends keyof Omit<SystemContentServer, 'template'>,
+>(
+    key: K
+): NonNullable<SystemContentServer[K]> =>
+    Object.assign(
+        {},
+        ...unionServers().map((s) => s.content?.[key] ?? {})
+    ) as NonNullable<SystemContentServer[K]>;
+
+export const systemTemplateHooks = <
+    K extends keyof NonNullable<SystemContentServer['template']>,
+>(
+    key: K
+): NonNullable<NonNullable<SystemContentServer['template']>[K]> =>
+    Object.assign(
+        {},
+        ...unionServers().map((s) => s.content?.template?.[key] ?? {})
+    ) as NonNullable<NonNullable<SystemContentServer['template']>[K]>;
 
 export const systemContentRefs = (): ContentRefSource[] =>
     unionServers().flatMap((s) => s.contentRefs ?? []);

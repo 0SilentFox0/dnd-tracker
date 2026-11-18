@@ -7,7 +7,6 @@ import {
     deleteSpellsByLevelSchema,
     importUnitsSchema,
     reorderTracksSchema,
-    saveSkillTreeSchema,
     sourceSyncApplySchema,
     sourceSyncQuerySchema,
 } from '@/lib/schemas';
@@ -128,38 +127,6 @@ const OPERATION_ROWS = {
         response: 'object',
         tag: 'Campaign',
     },
-    'skill-trees.list': {
-        method: 'GET',
-        path: '/skill-trees',
-        summary: 'Skill trees',
-        description: 'Skill trees of all campaign races.',
-        need: NEED.read('member'),
-        response: 'list',
-        tag: 'Skills',
-    },
-    'skill-trees.save': {
-        method: 'PATCH',
-        path: '/skill-trees/{treeId}',
-        summary: 'Save skill tree',
-        description:
-            'Saves a race tree, creating it if missing. Character progress is carried over. 409 — progress changed concurrently, retry.',
-        need: NEED.write,
-        body: saveSkillTreeSchema,
-        response: 'object',
-        errors: [409],
-        invalidBody: API_ERRORS.INVALID_SKILL_TREE,
-        tag: 'Skills',
-    },
-    'skills.duplicate': {
-        method: 'POST',
-        path: '/skills/{skillId}/duplicate',
-        summary: 'Duplicate skill',
-        description:
-            'A copy of the skill with a "(copy)" suffix in the author\'s language.',
-        need: NEED.write,
-        response: 'item',
-        tag: 'Skills',
-    },
     'spells.remove-from-group': {
         method: 'POST',
         path: '/spells/{spellId}/remove-from-group',
@@ -268,5 +235,6 @@ const OPERATION_ROWS = {
 
 export const CONTENT_OPERATIONS = defineOperations(OPERATION_ROWS);
 
-export const CONTENT_OPERATION_LIST: ContentOperation[] =
+/** Core operations only; module operations come from `module-operations.ts` */
+export const CORE_CONTENT_OPERATION_LIST: ContentOperation[] =
     Object.values(CONTENT_OPERATIONS);

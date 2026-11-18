@@ -1,6 +1,7 @@
 import { type Bundle, type BundleTable, tableKey } from './bundle';
 
 import { CONTENT_KINDS, type ContentKind } from '@/lib/constants/content-kinds';
+import { systemTemplateHooks } from '@/lib/server/systems/registry';
 import { isRecord } from '@/lib/utils/common/is-record';
 import { classOf, isTranslatable } from '@/lib/utils/templates/i18n/catalog';
 import {
@@ -105,43 +106,6 @@ export function localizeRules(rules: unknown, tr: TranslationsV2): unknown {
 
 const slugOf = (row: Record<string, unknown>): string | null =>
     typeof row.slug === 'string' && row.slug ? row.slug : null;
-
-/** Skill trees are not content kinds: their race and branch names follow the race and main-skill names (D30). A tree without a slug stays English. */
-function localizeTree(
-    row: Record<string, unknown>,
-    maps: Record<Table, Map<string, string>>
-): Record<string, unknown> {
-    if (!slugOf(row)) return row;
-
-    const race = (value: unknown) =>
-        typeof value === 'string' ? (maps.races.get(value) ?? value) : value;
-
-    const { skills } = row;
-
-    const branches =
-        isRecord(skills) && Array.isArray(skills.mainSkills)
-            ? skills.mainSkills
-            : null;
-
-    const mapped = isRecord(skills)
-        ? {
-              ...skills,
-              ...('race' in skills && { race: race(skills.race) }),
-              ...(branches && {
-                  mainSkills: branches.map((b) =>
-                      isRecord(b) && typeof b.name === 'string'
-                          ? {
-                                ...b,
-                                name: maps.mainSkills.get(b.name) ?? b.name,
-                            }
-                          : b
-                  ),
-              }),
-          }
-        : skills;
-
-    return { ...row, race: race(row.race), skills: mapped };
-}
 
 /** True when any content row of the bundle has no slug, so a slug-keyed dictionary cannot reach it. */
 export const hasUnsluggedRows = (bundle: Bundle): boolean =>
@@ -259,10 +223,16 @@ export function localizeTemplateBundle(
         });
     }
 
-    if (Array.isArray(bundle.skillTrees))
-        out.skillTrees = bundle.skillTrees.map(
-            (row) => localizeTree(row, maps) as typeof row
-        );
+    for (const [table, localize] of Object.entries(
+        systemTemplateHooks('localize')
+    )) {
+        const rows = (bundle as Record<string, unknown>)[table];
+
+        if (Array.isArray(rows))
+            (out as Record<string, unknown>)[table] = rows.map((row) =>
+                localize(row, maps)
+            );
+    }
 
     return { ...out, rules: localizeRules(bundle.rules, translations) };
 }

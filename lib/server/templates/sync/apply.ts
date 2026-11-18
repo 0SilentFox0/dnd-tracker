@@ -11,7 +11,7 @@ import {
     detachRefs,
 } from '@/lib/server/content/detach-refs';
 import { ContentError } from '@/lib/server/content/errors';
-import { moveSkillTreeProgress } from '@/lib/server/skills/progress-move';
+import { systemTemplateHooks } from '@/lib/server/systems/registry';
 import {
     assertNoLeak,
     findForeignContentIds,
@@ -62,7 +62,6 @@ import { localeOrRequest } from '@/lib/utils/api/translate-error';
 import { backgroundAsiRules } from '@/lib/utils/backgrounds/asi';
 import { backgroundReferenceError } from '@/lib/utils/backgrounds/integrity';
 import { parseRules } from '@/lib/utils/rules/schema';
-import { readTreeJson } from '@/lib/utils/skills/progression';
 import type { SourceApplyResult, SyncRef } from '@/types/campaigns';
 
 async function loadClassified(
@@ -543,8 +542,11 @@ async function writeTables(
 
                 if (count !== 1) throw sourceChanged();
 
-                if (t.key === 'skillTrees')
-                    await moveTreeProgress(db, ctx, item.localId, data);
+                await systemTemplateHooks('afterSyncUpdate')[t.key]?.(db, {
+                    campaignId: ctx.campaignId,
+                    before: indexOf(ctx).localById.get(item.localId)?.row,
+                    after: data,
+                });
             } else {
                 toCreate.push(
                     toPrismaJson(
@@ -639,23 +641,6 @@ async function assertWritable(
 
     if (foreign.length > 0)
         throw new ContentError(API_ERRORS.SOURCE_FOREIGN_IDS, 422);
-}
-
-async function moveTreeProgress(
-    db: SyncDb,
-    ctx: SyncContext,
-    localId: string,
-    next: Record<string, unknown>
-) {
-    const old = indexOf(ctx).localById.get(localId)?.row;
-
-    const from = old && readTreeJson(old.skills).id;
-
-    const to = readTreeJson(next.skills).id;
-
-    if (!old || !from || !to || from === to) return;
-
-    await moveSkillTreeProgress(db, ctx.campaignId, String(old.race), from, to);
 }
 
 async function writeCampaign(

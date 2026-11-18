@@ -4,6 +4,7 @@ import { cascadeRelationsOf } from './content-dependencies';
 
 import 'server-only';
 import { prisma } from '@/lib/db';
+import { moduleContentOperations } from '@/lib/server/content/module-operations';
 import {
     BUNDLE_TABLES,
     delegateOf,
@@ -103,7 +104,9 @@ export async function contentPreviewState(
     const ownKey = id ? undefined : tableKey(kind);
 
     for (const table of BUNDLE_TABLES) {
-        const delegate = unsafeCast<Delegate>(prisma[table.delegate]);
+        const delegate = unsafeCast<Delegate>(
+            unsafeCast<Record<string, Delegate>>(prisma)[table.delegate]
+        );
 
         if (table.key === ownKey) {
             tables[table.key] = await delegate.findMany({
@@ -189,7 +192,7 @@ async function referencing(
         )!;
 
         const rows = await unsafeCast<Delegate>(
-            prisma[table.delegate]
+            unsafeCast<Record<string, Delegate>>(prisma)[table.delegate]
         ).findMany({
             where: { campaignId, [relation.column]: { in: [...ids] } },
             orderBy: { id: 'asc' },
@@ -213,7 +216,7 @@ export async function contentOperationState(
     actor: Actor,
     operation: string,
     input: Row
-) {
+): Promise<{ tables?: Record<string, Row[]>; campaign?: unknown } | null> {
     const campaignId = actor.campaignId;
 
     const body = (input.body ?? {}) as Row;
@@ -228,10 +231,6 @@ export async function contentOperationState(
         });
 
     switch (operation) {
-        case 'skills.duplicate':
-            return {
-                tables: { skills: await find('skill', { id: input.skillId }) },
-            };
         case 'spells.remove-from-group':
             return {
                 tables: { spells: await find('spell', { id: input.spellId }) },
@@ -276,20 +275,13 @@ export async function contentOperationState(
                     select: { rules: true },
                 }),
             };
-        case 'skill-trees.save':
-            return {
-                tables: {
-                    skillTrees: await find('skillTree', {
-                        OR: [
-                            ...(input.treeId
-                                ? [{ id: String(input.treeId) }]
-                                : []),
-                            ...(body.race ? [{ race: body.race }] : []),
-                        ],
-                    }),
-                },
-            };
         default:
-            return null;
+            return (
+                moduleContentOperations()[operation]?.assistant?.state?.(
+                    actor,
+                    input,
+                    find
+                ) ?? null
+            );
     }
 }

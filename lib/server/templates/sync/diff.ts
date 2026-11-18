@@ -1,3 +1,4 @@
+import { systemTemplateHooks } from '@/lib/server/systems/registry';
 import { collectKeysAndStrings } from '@/lib/server/templates/remap-ids';
 import { classify } from '@/lib/server/templates/sync/classify';
 import type { SyncDb } from '@/lib/server/templates/sync/context';
@@ -107,11 +108,8 @@ async function countUsage(
         where: { campaignId },
         select: {
             knownSpells: true,
-            skillTreeProgress: true,
             personalSkillId: true,
-            characterSkills: {
-                select: { skillTreeId: true, unlockedSkills: true },
-            },
+            ...systemTemplateHooks('usageSelect'),
         },
     });
 

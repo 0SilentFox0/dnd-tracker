@@ -9,4 +9,15 @@ export const ARTIFACTSETS_META = {
     i18n: {},
     dmSections: ['artifact-sets'],
     contentKinds: ['artifact-sets'],
+    contentTables: [
+        {
+            key: 'artifactSets',
+            model: 'ArtifactSet',
+            delegate: 'artifactSet',
+            kind: 'artifact-sets',
+            order: 20,
+            detach: 'artifactSet',
+        },
+    ],
+    detachRefs: [{ kind: 'artifactSet', model: 'artifact', column: 'setId' }],
 } as const satisfies SystemMeta;

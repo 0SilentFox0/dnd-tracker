@@ -21,15 +21,23 @@ import { getTranslator } from '@/lib/i18n/translator';
 import { ContentError } from '@/lib/server/content/errors';
 import { translateImportReport } from '@/lib/server/content/import/translate-report';
 import {
+    contentOperationList,
+    moduleContentOperations,
+} from '@/lib/server/content/module-operations';
+import {
     type ContentOperationId,
     contentOperationSchema,
     runContentOperation,
 } from '@/lib/server/content/operation-service';
-import { CONTENT_OPERATIONS } from '@/lib/server/content/operations';
+import {
+    CONTENT_OPERATIONS,
+    type ContentOperation,
+} from '@/lib/server/content/operations';
 import { withCampaignRuntimeWrite } from '@/lib/server/content/write';
 import { previewSourceSelection } from '@/lib/server/templates/sync/apply';
 import { pageSourceDiff } from '@/lib/server/templates/sync/page-diff';
 import type { Actor } from '@/lib/utils/api/actor';
+import { MODULE_CONTENT_TABLES } from '@/lib/utils/rules/systems/content-tables';
 import type { SourceDiff } from '@/types/campaigns';
 import type { ImportReport } from '@/types/content-import';
 
@@ -72,7 +80,7 @@ type Ports = {
     sourcePreview: NonNullable<Deps['sourcePreview']>;
 };
 
-type Operation = (typeof CONTENT_OPERATIONS)[keyof typeof CONTENT_OPERATIONS];
+type Operation = ContentOperation;
 
 type ActionBase = Pick<
     AssistantActionDef,
@@ -212,7 +220,10 @@ async function applySourceDraft(
         kind:
             item.status === 'deletedInSource'
                 ? 'delete'
-                : item.scope === 'skillTrees'
+                : MODULE_CONTENT_TABLES.some(
+                        (table) =>
+                            table.key === item.scope && table.erasesProgress
+                    )
                   ? 'erase-progress'
                   : 'update',
         targets: [draft.targets[i]],
@@ -287,12 +298,15 @@ function destructiveEffects({
     )
         return [{ kind: 'delete', targets: draft.targets, description: label }];
 
-    if (operation.id === 'skill-trees.save')
+    const erases =
+        moduleContentOperations()[operation.id]?.assistant?.erasesProgress;
+
+    if (erases)
         return [
             {
                 kind: 'erase-progress',
                 targets: draft.targets,
-                description: t('effects.skillTreeReplace'),
+                description: t(erases),
             },
         ];
 
@@ -341,7 +355,9 @@ async function prepareOperation(
         warnings: projected ? [...projected.warnings] : [],
     };
 
-    draft.effects = [{ kind: 'update', targets: draft.targets, description: label }];
+    draft.effects = [
+        { kind: 'update', targets: draft.targets, description: label },
+    ];
 
     const scope: PrepareScope = { operation, caller, input, t, label, draft };
 
@@ -382,9 +398,8 @@ const writeAction = (
     effect: 'write',
     confirmation:
         operation.need.sessionOnly ||
-        ['spell-groups.remove-all-spells', 'skill-trees.save'].includes(
-            operation.id
-        )
+        operation.id === 'spell-groups.remove-all-spells' ||
+        moduleContentOperations()[operation.id]?.assistant?.confirm === 'always'
             ? 'always'
             : 'standard',
     prepare: async (caller, raw) =>
@@ -459,7 +474,7 @@ export function createContentOperationActions(
 ): AssistantActionDef[] {
     const ports = resolvePorts(deps);
 
-    const actions = Object.values(CONTENT_OPERATIONS).map(
+    const actions = contentOperationList().map(
         (operation): AssistantActionDef => {
             const base = {
                 id: operation.id,

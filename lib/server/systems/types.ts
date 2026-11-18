@@ -1,6 +1,8 @@
 import type { NextResponse } from 'next/server';
 import type { ZodType } from 'zod';
 
+import type { SystemContentServer } from './content-types';
+
 import type { RulesEdition } from '@/lib/constants/rules';
 import type { SpellRequestData } from '@/lib/schemas/battles';
 import type { AttackBody } from '@/lib/server/battles/mutations/attack/attack-mutation';
@@ -230,6 +232,8 @@ export interface SystemServer {
     schemas: SystemSchemas;
     contentKinds?: Record<string, ContentKindServer>;
     contentRefs?: readonly ContentRefSource[];
+    /** Operations, ability owners, template hooks and assistant surface of the module's content */
+    content?: SystemContentServer;
     /** Exclusive slot of a base; an addon never sets it */
     drafts?: SystemDrafts;
     participant?: SystemParticipantServer;

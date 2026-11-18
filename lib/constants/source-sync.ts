@@ -1,21 +1,18 @@
-export const SYNC_TABLE_SCOPES = [
-    'spellGroups',
-    'races',
-    'classes',
-    'feats',
-    'careers',
-    'backgrounds',
-    'units',
-    'spells',
-    'mainSkills',
-    'skills',
-    'skillTrees',
-    'artifactSets',
-    'artifacts',
-    'tracks',
-] as const;
+import {
+    SYNC_TABLE_SCOPES,
+    type SyncTableScope,
+} from '@/lib/utils/rules/systems/content-tables';
 
-export const SYNC_SCOPES = [...SYNC_TABLE_SCOPES, 'rules', 'settings'] as const;
+export { SYNC_TABLE_SCOPES };
+
+export const SYNC_SCOPES = [
+    ...SYNC_TABLE_SCOPES,
+    'rules',
+    'settings',
+] as unknown as readonly [
+    SyncTableScope | 'rules' | 'settings',
+    ...Array<SyncTableScope | 'rules' | 'settings'>,
+];
 
 export const SYNC_STATUSES = [
     'new',
