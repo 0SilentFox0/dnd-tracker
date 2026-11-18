@@ -5,6 +5,7 @@ import {
     tileDefinition,
     validateTileIdsForLayer,
 } from '../catalog';
+import snapshot from './catalog-snapshot.json';
 
 import enTileLabels from '@/messages/en/tile-labels.json';
 import ukTileLabels from '@/messages/uk/tile-labels.json';
@@ -74,5 +75,11 @@ describe('tile catalog', () => {
             validateTileIdsForLayer(new Uint16Array([5]), 'ground')
         ).toThrow(/not valid/i);
         expect(tileDefinition(999)).toBeUndefined();
+    });
+});
+
+describe('tile catalog snapshot', () => {
+    it('matches the frozen definition table', () => {
+        expect(JSON.parse(JSON.stringify(TILE_CATALOG))).toEqual(snapshot);
     });
 });
