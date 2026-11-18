@@ -108,8 +108,7 @@ const unchangedOr = (
     prev: ShowState | null,
     next: ShowState,
     key: 'battle' | 'cover' | 'world'
-) =>
-    prev && prev[key] === next[key] ? {} : { [key]: json(next[key] ?? null) };
+) => (prev && prev[key] === next[key] ? {} : { [key]: json(next[key] ?? null) });
 
 /** Optimistic locking by seq; the row is created by the first write and never deleted. */
 export async function writeShowState(

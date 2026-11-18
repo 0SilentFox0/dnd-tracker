@@ -1,4 +1,3 @@
-// components/character-profile/rest/__tests__/sheet-roll-dialog.test.tsx
 // @vitest-environment happy-dom
 import { cleanup, fireEvent, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';

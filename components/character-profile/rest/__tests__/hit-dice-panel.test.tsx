@@ -1,4 +1,3 @@
-// components/character-profile/rest/__tests__/hit-dice-panel.test.tsx
 // @vitest-environment happy-dom
 import { cleanup, fireEvent, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
