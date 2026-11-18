@@ -10,24 +10,25 @@ import type { GraphDetail } from '@/lib/utils/scenario/graph/types';
 export interface GraphInspectorProps {
     detail: GraphDetail;
     canOpen: boolean;
-    onOpen: () => void;
-    onSelect: (id: string) => void;
-    onClose: () => void;
     focusMode: boolean;
-    onToggleFocus: () => void;
+    actions: {
+        onOpen: () => void;
+        onSelect: (id: string) => void;
+        onClose: () => void;
+        onToggleFocus: () => void;
+    };
     children?: ReactNode;
 }
 
 export function GraphInspector({
     detail,
     canOpen,
-    onOpen,
-    onSelect,
-    onClose,
     focusMode,
-    onToggleFocus,
+    actions,
     children,
 }: GraphInspectorProps) {
+    const { onOpen, onSelect, onClose, onToggleFocus } = actions;
+
     const t = useTranslations('scenarioGraph.inspector');
 
     const tPage = useTranslations('scenario.pageKinds');

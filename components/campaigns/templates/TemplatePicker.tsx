@@ -228,13 +228,17 @@ export function TemplatePicker({ value, onChange }: TemplatePickerProps) {
                 </div>
             </HudSection>
             <ImportDialog
-                hideTrigger
                 accept=".json"
-                title={t('importFile')}
-                description={t('importDescription')}
+                labels={{
+                    title: t('importFile'),
+                    description: t('importDescription'),
+                }}
                 importHook={picker}
-                open={importOpen}
-                onOpenChange={setImportOpen}
+                control={{
+                    hideTrigger: true,
+                    open: importOpen,
+                    onOpenChange: setImportOpen,
+                }}
             />
         </>
     );

@@ -69,13 +69,15 @@ function UnitRow({ unit, stats, state, actions }: UnitRowProps) {
         <SetupEntityCard
             entity={unit}
             fallbackIcon="⚔️"
-            title={
-                <span className="font-normal text-muted-foreground">
-                    {' '}
-                    · {t('tier', { level: unit.level ?? 1 })}
-                </span>
-            }
-            stats={stats}
+            details={{
+                title: (
+                    <span className="font-normal text-muted-foreground">
+                        {' '}
+                        · {t('tier', { level: unit.level ?? 1 })}
+                    </span>
+                ),
+                stats,
+            }}
             state={{ isSelected, isEnemy, badge }}
             onToggle={actions.onToggle}
         >

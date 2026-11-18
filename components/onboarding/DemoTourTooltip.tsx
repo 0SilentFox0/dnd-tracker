@@ -5,17 +5,19 @@ import { X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 
-export function DemoTourTooltip({
-    backProps,
-    closeProps,
-    index,
-    isLastStep,
-    primaryProps,
-    size,
-    skipProps,
-    step,
-    tooltipProps,
-}: TooltipRenderProps) {
+export function DemoTourTooltip(props: TooltipRenderProps) {
+    const {
+        backProps,
+        closeProps,
+        index,
+        isLastStep,
+        primaryProps,
+        size,
+        skipProps,
+        step,
+        tooltipProps,
+    } = props;
+
     return (
         <div
             {...tooltipProps}

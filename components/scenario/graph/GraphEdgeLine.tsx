@@ -16,10 +16,8 @@ interface GraphEdgeLineProps {
     from: Point;
     to: Point;
     color: string;
-    sequence?: boolean;
-    relation?: boolean;
-    dimmed: boolean;
-    highlighted: boolean;
+    kind?: 'sequence' | 'relation';
+    emphasis?: 'dimmed' | 'highlighted';
     secretLabel: string;
 }
 
@@ -44,13 +42,15 @@ function GraphEdgeLineImpl({
     from,
     to,
     color,
-    sequence = false,
-    relation = false,
-    dimmed,
-    highlighted,
+    kind,
+    emphasis,
     secretLabel,
 }: GraphEdgeLineProps) {
-    if (sequence) {
+    const dimmed = emphasis === 'dimmed';
+
+    const highlighted = emphasis === 'highlighted';
+
+    if (kind === 'sequence') {
         const half = GRAPH_SCENE_W / 2;
 
         const { d } = curve(
@@ -79,7 +79,7 @@ function GraphEdgeLineImpl({
         );
     }
 
-    if (relation) {
+    if (kind === 'relation') {
         const { d } = curve(from, to, -0.1);
 
         return (

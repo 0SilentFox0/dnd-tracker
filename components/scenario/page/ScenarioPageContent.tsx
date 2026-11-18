@@ -23,9 +23,11 @@ type Props = {
     page: ScenarioPage;
     canEdit: boolean;
     play: ScenarioPlay | undefined;
-    progress: ReturnType<typeof useSectionProgress>;
-    played: Parameters<typeof tocItems>[2];
-    collapse: SectionCollapse;
+    reading: {
+        progress: ReturnType<typeof useSectionProgress>;
+        played: Parameters<typeof tocItems>[2];
+        collapse: SectionCollapse;
+    };
     toc: TocControl;
 };
 
@@ -61,11 +63,11 @@ export function ScenarioPageContent({
     page,
     canEdit,
     play,
-    progress,
-    played,
-    collapse,
+    reading,
     toc,
 }: Props) {
+    const { progress, played, collapse } = reading;
+
     const t = useTranslations('scenario.pageBody');
 
     return (

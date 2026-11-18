@@ -134,11 +134,13 @@ export function ScenarioGraph({ campaignId }: { campaignId: string }) {
         <GraphInspector
             detail={detail}
             canOpen={!!graphNodeHref(campaignId, detail.node)}
-            onOpen={() => open(detail.node)}
-            onSelect={set.focus}
-            onClose={clear}
             focusMode={isEgo}
-            onToggleFocus={() => set.ego(!isEgo)}
+            actions={{
+                onOpen: () => open(detail.node),
+                onSelect: set.focus,
+                onClose: clear,
+                onToggleFocus: () => set.ego(!isEgo),
+            }}
         >
             {detail.node.kind === 'scene' ? (
                 <SummarySlot
@@ -178,14 +180,18 @@ export function ScenarioGraph({ campaignId }: { campaignId: string }) {
         return (
             <ScenarioGraphView
                 graph={graph}
-                selection={selection}
-                selectedId={state.selectedId}
-                focus={state.focus}
-                showSequence={state.showSequence}
-                matched={matched}
-                onSelect={set.selected}
-                onClear={clear}
-                onOpen={open}
+                view={{
+                    selection,
+                    selectedId: state.selectedId,
+                    focus: state.focus,
+                    showSequence: state.showSequence,
+                    matched,
+                }}
+                actions={{
+                    onSelect: set.selected,
+                    onClear: clear,
+                    onOpen: open,
+                }}
             />
         );
     };

@@ -24,8 +24,10 @@ describe('ImportDialog', () => {
             mockMatchMedia(mobile);
             render(
                 <ImportDialog
-                    triggerLabel="Імпортувати юніти"
-                    title="Імпорт юнітів"
+                    labels={{
+                        triggerLabel: 'Імпортувати юніти',
+                        title: 'Імпорт юнітів',
+                    }}
                     importHook={importHook}
                 />
             );
@@ -57,10 +59,12 @@ describe('ImportDialog', () => {
 
         render(
             <ImportDialog
-                triggerLabel="Імпортувати юніти"
-                title="Імпорт юнітів"
+                labels={{
+                    triggerLabel: 'Імпортувати юніти',
+                    title: 'Імпорт юнітів',
+                }}
                 importHook={hook}
-                open
+                control={{ open: true }}
             />
         );
 

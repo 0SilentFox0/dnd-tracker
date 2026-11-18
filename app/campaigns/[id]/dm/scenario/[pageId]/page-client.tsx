@@ -224,9 +224,7 @@ function ScenarioPageBody({
                     page={page}
                     canEdit={canEdit}
                     play={playEnabled ? play : undefined}
-                    progress={progress}
-                    played={played}
-                    collapse={collapse}
+                    reading={{ progress, played, collapse }}
                     toc={toc}
                 />
             )}

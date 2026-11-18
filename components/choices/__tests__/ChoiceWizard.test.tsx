@@ -158,7 +158,7 @@ function Harness({
             }}
             refs={wrefs}
             startAt={startAt}
-            onClose={onClose}
+            actions={{ onClose }}
         />
     );
 }
@@ -260,7 +260,7 @@ describe('ChoiceWizard', () => {
                 initial={{ raceChoices: {}, feats: [], classes: [] }}
                 hero={{ level: 1, scores, skills: {}, classMode: true }}
                 refs={empty}
-                onClose={() => {}}
+                actions={{ onClose: () => {} }}
             />
         );
 
@@ -284,7 +284,7 @@ describe('ChoiceWizard', () => {
                 hero={{ level: 3, scores, skills: {}, classMode: true }}
                 refs={wrefs}
                 startAt={`subclass:${sorcerer.id}`}
-                onClose={() => {}}
+                actions={{ onClose: () => {} }}
             />
         );
 
@@ -343,7 +343,7 @@ describe('background step', () => {
                 hero={{ level: 1, scores, skills: {}, classMode: true }}
                 refs={brefs}
                 startAt="background"
-                onClose={() => {}}
+                actions={{ onClose: () => {} }}
             />
         );
 
@@ -409,7 +409,7 @@ describe('background step', () => {
                 hero={{ level: 1, scores, skills: {}, classMode: true }}
                 refs={brefs}
                 startAt="background"
-                onClose={() => {}}
+                actions={{ onClose: () => {} }}
             />
         );
 

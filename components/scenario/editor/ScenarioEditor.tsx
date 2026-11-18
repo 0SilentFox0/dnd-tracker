@@ -16,14 +16,11 @@ import {
     acquaintanceToolEnabled,
 } from './acquaintance-target';
 import { AcquaintanceDialog } from './AcquaintanceDialog';
-import { OrderButtons } from './OrderButtons';
 import { PagePropertiesDialog } from './PagePropertiesDialog';
-import { RevealSettings } from './RevealSettings';
-import { RowBindings } from './RowBindings';
 import { SaveStatus } from './SaveStatus';
 import { type CellColumn, ScenarioCell } from './ScenarioCell';
+import { ScenarioEditorSection } from './ScenarioEditorSection';
 import { ScenarioToolbar } from './ScenarioToolbar';
-import { SectionHeaderEditor } from './SectionHeaderEditor';
 
 import { ScenarioLayout } from '@/components/scenario/ScenarioLayout';
 import { ScenarioLegend } from '@/components/scenario/ScenarioLegend';
@@ -40,17 +37,7 @@ import {
     useScenarioPage,
 } from '@/lib/hooks/scenario';
 import {
-    addRow,
     addSection,
-    moveRow,
-    moveSection,
-    removeRow,
-    removeSection,
-    setRowBattle,
-    setRowMarker,
-    setRowSlide,
-    setSectionMarker,
-    setSectionTrack,
     updateRow,
     updateSection,
 } from '@/lib/utils/scenario/structure';
@@ -203,6 +190,13 @@ export function ScenarioEditor({
         />
     );
 
+    const sectionOps = {
+        setContent: draft.setContent,
+        confirmRemove: removeWithConfirm,
+        renderCell,
+        setReveal,
+    };
+
     return (
         <>
             <div ref={toolbarRef} className="sb-toolbar-wrap">
@@ -256,165 +250,14 @@ export function ScenarioEditor({
                 </header>
                 <main>
                     {draft.content.sections.map((s) => (
-                        <section key={s.id} id={`sec-${s.id}`}>
-                            <SectionHeaderEditor
-                                campaignId={campaignId}
-                                section={s}
-                                actions={{
-                                    onTitle: (title) =>
-                                        draft.setContent((c) =>
-                                            updateSection(c, s.id, { title })
-                                        ),
-                                    onIcon: (icon) =>
-                                        draft.setContent((c) =>
-                                            updateSection(c, s.id, { icon })
-                                        ),
-                                    onMarker: (marker) =>
-                                        draft.setContent((c) =>
-                                            setSectionMarker(c, s.id, marker)
-                                        ),
-                                    onTrack: (trackId) =>
-                                        draft.setContent((c) =>
-                                            setSectionTrack(c, s.id, trackId)
-                                        ),
-                                    onMove: (dir) =>
-                                        draft.setContent((c) =>
-                                            moveSection(c, s.id, dir)
-                                        ),
-                                    onRemove: () =>
-                                        void removeWithConfirm(
-                                            t('removeSection', {
-                                                title: s.title,
-                                            }),
-                                            () =>
-                                                draft.setContent((c) =>
-                                                    removeSection(c, s.id)
-                                                )
-                                        ),
-                                }}
-                            />
-                            {isHero && (
-                                <RevealSettings
-                                    key={JSON.stringify(s.reveal ?? null)}
-                                    campaignId={campaignId}
-                                    rule={s.reveal}
-                                    revealed={!!s.revealedAt}
-                                    onChange={(rule) => setReveal(s.id, rule)}
-                                    onToggleRevealed={() =>
-                                        draft.setContent((c) =>
-                                            updateSection(c, s.id, {
-                                                revealedAt: s.revealedAt
-                                                    ? null
-                                                    : new Date().toISOString(),
-                                            })
-                                        )
-                                    }
-                                />
-                            )}
-                            {s.rows.map((r) => (
-                                <div key={r.id} className="row">
-                                    <div className="story">
-                                        {renderCell(
-                                            s.id,
-                                            r.id,
-                                            'story',
-                                            r.story
-                                        )}
-                                    </div>
-                                    <aside
-                                        className="notes"
-                                        style={{ display: 'block' }}
-                                    >
-                                        {renderCell(
-                                            s.id,
-                                            r.id,
-                                            'notes',
-                                            r.notes
-                                        )}
-                                        <div className="sb-row-foot sans">
-                                            <RowBindings
-                                                campaignId={campaignId}
-                                                pageId={page.id}
-                                                row={r}
-                                                onChange={{
-                                                    slide: (v) =>
-                                                        draft.setContent((c) =>
-                                                            setRowSlide(
-                                                                c,
-                                                                s.id,
-                                                                r.id,
-                                                                v
-                                                            )
-                                                        ),
-                                                    battle: (v) =>
-                                                        draft.setContent((c) =>
-                                                            setRowBattle(
-                                                                c,
-                                                                s.id,
-                                                                r.id,
-                                                                v
-                                                            )
-                                                        ),
-                                                    marker: (v) =>
-                                                        draft.setContent((c) =>
-                                                            setRowMarker(
-                                                                c,
-                                                                s.id,
-                                                                r.id,
-                                                                v
-                                                            )
-                                                        ),
-                                                }}
-                                            />
-                                            <div className="sb-row-order">
-                                                <OrderButtons
-                                                    labels={{
-                                                        up: t('rowUp'),
-                                                        down: t('rowDown'),
-                                                        remove: t('rowRemove'),
-                                                    }}
-                                                    onMove={(dir) =>
-                                                        draft.setContent((c) =>
-                                                            moveRow(
-                                                                c,
-                                                                s.id,
-                                                                r.id,
-                                                                dir
-                                                            )
-                                                        )
-                                                    }
-                                                    onRemove={() =>
-                                                        void removeWithConfirm(
-                                                            t('removeRow'),
-                                                            () =>
-                                                                draft.setContent(
-                                                                    (c) =>
-                                                                        removeRow(
-                                                                            c,
-                                                                            s.id,
-                                                                            r.id
-                                                                        )
-                                                                )
-                                                        )
-                                                    }
-                                                />
-                                            </div>
-                                        </div>
-                                    </aside>
-                                </div>
-                            ))}
-                            <Button
-                                variant="bare"
-                                type="button"
-                                className="toggle sans"
-                                style={{ marginTop: 12 }}
-                                onClick={() =>
-                                    draft.setContent((c) => addRow(c, s.id))
-                                }
-                            >
-                                {t('addRow')}
-                            </Button>
-                        </section>
+                        <ScenarioEditorSection
+                            key={s.id}
+                            campaignId={campaignId}
+                            pageId={page.id}
+                            section={s}
+                            isHero={isHero}
+                            ops={sectionOps}
+                        />
                     ))}
                     <Button
                         variant="bare"

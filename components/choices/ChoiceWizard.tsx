@@ -28,8 +28,7 @@ interface ChoiceWizardProps {
     hero: ChoiceHero;
     refs: ChoiceRefsView;
     startAt?: string;
-    onSaved?: (updated: Character) => void;
-    onClose: () => void;
+    actions: { onSaved?: (updated: Character) => void; onClose: () => void };
 }
 
 const FEAT_SOURCE = {
@@ -54,9 +53,10 @@ export function ChoiceWizard({
     hero,
     refs,
     startAt,
-    onSaved,
-    onClose,
+    actions,
 }: ChoiceWizardProps) {
+    const { onSaved, onClose } = actions;
+
     const t = useTranslations('choices');
 
     const tc = useTranslations('common');

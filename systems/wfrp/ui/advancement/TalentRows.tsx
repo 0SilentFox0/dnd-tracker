@@ -59,9 +59,12 @@ export function TalentRows({
                         label={feat.name}
                         value={t('rank', { rank, max })}
                         hint={feat.description}
-                        cost={priced?.cost ?? null}
-                        outOfCareer={priced?.outOfCareer}
-                        limitLabel={rank >= max ? t('maxRank') : t('noCost')}
+                        price={{
+                            cost: priced?.cost ?? null,
+                            outOfCareer: priced?.outOfCareer,
+                            limitLabel:
+                                rank >= max ? t('maxRank') : t('noCost'),
+                        }}
                         available={available}
                         pending={pending}
                         onBuy={() => onBuy(feat.id)}

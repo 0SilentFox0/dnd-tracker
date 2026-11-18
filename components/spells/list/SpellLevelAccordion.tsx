@@ -126,8 +126,7 @@ export function SpellLevelAccordion({
                                 spell={spell}
                                 campaignId={campaignId}
                                 spellGroups={spellGroups}
-                                onRemoveFromGroup={actions?.onRemoveFromGroup}
-                                onMoveToGroup={actions?.onMoveToGroup}
+                                actions={actions}
                                 canEdit={canEdit}
                                 data-tour={
                                     tour && i === 0

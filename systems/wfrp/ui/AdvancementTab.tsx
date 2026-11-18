@@ -102,28 +102,15 @@ export function AdvancementTab() {
                             label={tc(`${key}.label`)}
                             value={value(c, key)}
                             hint={t('advances', { count: c.advances[key] })}
-                            cost={
-                                price(
+                            price={price(
+                                'characteristic',
+                                key,
+                                advanceCost(
                                     'characteristic',
-                                    key,
-                                    advanceCost(
-                                        'characteristic',
-                                        c.advances[key],
-                                        advancement
-                                    )
-                                ).cost
-                            }
-                            outOfCareer={
-                                price(
-                                    'characteristic',
-                                    key,
-                                    advanceCost(
-                                        'characteristic',
-                                        c.advances[key],
-                                        advancement
-                                    )
-                                ).outOfCareer
-                            }
+                                    c.advances[key],
+                                    advancement
+                                )
+                            )}
                             available={available}
                             pending={advance.isPending}
                             onBuy={() =>
@@ -154,8 +141,7 @@ export function AdvancementTab() {
                                 key={key}
                                 label={skillLabel(tg, s.key, s.spec)}
                                 value={advances}
-                                cost={priced.cost}
-                                outOfCareer={priced.outOfCareer}
+                                price={priced}
                                 available={available}
                                 pending={advance.isPending}
                                 onBuy={() =>

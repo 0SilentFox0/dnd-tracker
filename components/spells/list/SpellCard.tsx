@@ -27,8 +27,10 @@ interface SpellCardProps {
     spell: Spell;
     campaignId: string;
     spellGroups: SpellGroup[];
-    onRemoveFromGroup?: (spellId: string) => void;
-    onMoveToGroup?: (spellId: string, groupId: string | null) => void;
+    actions?: {
+        onRemoveFromGroup?: (spellId: string) => void;
+        onMoveToGroup?: (spellId: string, groupId: string | null) => void;
+    };
     canEdit?: boolean;
     /** Режим версії для друку: ховає інтерактивні елементи, розкриває обрізаний опис */
     printMode?: boolean;
@@ -41,12 +43,13 @@ export function SpellCard({
     spell,
     campaignId,
     spellGroups,
-    onRemoveFromGroup,
-    onMoveToGroup,
+    actions,
     canEdit = true,
     printMode = false,
     'data-tour': dataTour,
 }: SpellCardProps) {
+    const { onRemoveFromGroup, onMoveToGroup } = actions ?? {};
+
     const t = useTranslations('spells.card');
 
     const ta = useTranslations('common.actions');

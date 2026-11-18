@@ -11,26 +11,26 @@ import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import type { UseFileImportReturn } from '@/lib/hooks/common';
 
 interface ImportDialogProps {
-    triggerLabel?: string;
-    title?: string;
-    description?: string;
+    labels?: { triggerLabel?: string; title?: string; description?: string };
     importHook: UseFileImportReturn;
     accept?: string;
-    hideTrigger?: boolean;
-    onOpenChange?: (open: boolean) => void;
-    open?: boolean;
+    control?: {
+        hideTrigger?: boolean;
+        onOpenChange?: (open: boolean) => void;
+        open?: boolean;
+    };
 }
 
 export function ImportDialog({
-    triggerLabel,
-    title,
-    description,
+    labels = {},
     importHook,
     accept = '.csv,.json',
-    hideTrigger = false,
-    onOpenChange,
-    open,
+    control = {},
 }: ImportDialogProps) {
+    const { triggerLabel, title, description } = labels;
+
+    const { hideTrigger = false, onOpenChange, open } = control;
+
     const t = useTranslations('common.import');
 
     const tc = useTranslations('common.actions');

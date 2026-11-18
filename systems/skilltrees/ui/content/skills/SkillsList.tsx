@@ -61,7 +61,6 @@ export function SkillsList({
                         onDuplicate: actions.duplicateSkill,
                     }}
                     canEdit={canEdit}
-                    readOnly={!canEdit}
                 />
             ))}
         </Accordion>

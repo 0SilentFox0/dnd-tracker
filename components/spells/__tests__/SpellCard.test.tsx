@@ -27,8 +27,10 @@ describe('SpellCard icon buttons', () => {
                 spell={spell}
                 campaignId="c1"
                 spellGroups={[]}
-                onRemoveFromGroup={vi.fn()}
-                onMoveToGroup={vi.fn()}
+                actions={{
+                    onRemoveFromGroup: vi.fn(),
+                    onMoveToGroup: vi.fn(),
+                }}
             />
         );
 

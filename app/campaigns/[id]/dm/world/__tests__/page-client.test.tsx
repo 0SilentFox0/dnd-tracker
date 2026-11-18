@@ -58,7 +58,11 @@ vi.mock('@/components/world/editor/WorldToolbar', () => ({
     WorldToolHint: () => null,
 }));
 vi.mock('@/components/world/travel/TravelPanel', () => ({
-    TravelPanel: ({ onMoved }: { onMoved(e: unknown): void }) => (
+    TravelPanel: ({
+        actions: { onMoved },
+    }: {
+        actions: { onMoved(e: unknown): void };
+    }) => (
         <div>
             <span>travel-panel</span>
             <button

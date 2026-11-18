@@ -1,6 +1,7 @@
 export { scenarioKeys } from './keys';
 export { useActiveSection } from './useActiveSection';
 export { useGenerateScenarioSummary } from './useGenerateScenarioSummary';
+export { useGraphViewport } from './useGraphViewport';
 export { useMentionSearch } from './useMentionSearch';
 export {
     type DraftError,

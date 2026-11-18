@@ -56,8 +56,13 @@ const mapSummary = (id: string, parentMarkerId: string | null) => ({
     height: 1,
 });
 
-const renderPanel = (over: Partial<TravelPanelProps> = {}) =>
-    render(
+const renderPanel = (
+    over: Partial<Omit<TravelPanelProps, 'actions'>> &
+        Pick<TravelPanelProps['actions'], 'onMoved'> = {}
+) => {
+    const { onMoved, ...rest } = over;
+
+    return render(
         <QueryClientProvider
             client={
                 new QueryClient({
@@ -72,11 +77,12 @@ const renderPanel = (over: Partial<TravelPanelProps> = {}) =>
                 onMapIds={['h1', 'h2']}
                 target={{ x: 0.3, y: 0.6 }}
                 selectedMarker={null}
-                onPickTarget={vi.fn()}
-                {...over}
+                actions={{ onPickTarget: vi.fn(), onMoved }}
+                {...rest}
             />
         </QueryClientProvider>
     );
+};
 
 const move = () =>
     screen.getByRole('button', { name: /Перемістити/ }) as HTMLButtonElement;

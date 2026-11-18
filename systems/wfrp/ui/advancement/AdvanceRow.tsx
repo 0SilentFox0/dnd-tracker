@@ -9,11 +9,13 @@ export interface AdvanceRowProps {
     label: ReactNode;
     value: ReactNode;
     hint?: ReactNode;
-    cost: number | null;
+    price: {
+        cost: number | null;
+        limitLabel?: string;
+        outOfCareer?: number | null;
+    };
     available: number;
     pending: boolean;
-    limitLabel?: string;
-    outOfCareer?: number | null;
     onBuy: () => void;
 }
 
@@ -21,13 +23,13 @@ export function AdvanceRow({
     label,
     value,
     hint,
-    cost,
+    price,
     available,
     pending,
-    limitLabel,
-    outOfCareer,
     onBuy,
 }: AdvanceRowProps) {
+    const { cost, limitLabel, outOfCareer } = price;
+
     const t = useTranslations('wfrpAdvancement.ui');
 
     const short = cost !== null && cost > available;

@@ -38,10 +38,8 @@ const point: WorldMarker = {
 
 const props = {
     selectedId: null,
-    dragging: null,
+    drag: { current: null, onMove: () => {}, onEnd: () => {} },
     handlers: {},
-    onDragMove: () => {},
-    onDragEnd: () => {},
 };
 
 describe('WorldPins compact mode', () => {
