@@ -216,7 +216,8 @@ export function TemplatePicker({ value, onChange }: TemplatePickerProps) {
                         <p className="text-xs text-hud-muted">
                             {t('entities', { count: value.file.entities })} ·{' '}
                             <Button
-                                variant="bare"
+                                variant="plain"
+                                size="auto"
                                 type="button"
                                 className="underline"
                                 onClick={() => setImportOpen(true)}

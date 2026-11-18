@@ -176,7 +176,8 @@ export function ReferenceSearchBar({ filters }: ReferenceSearchBarProps) {
                     />
                     {search.value && (
                         <Button
-                            variant="bare"
+                            variant="plain"
+                            size="auto"
                             type="button"
                             onClick={() => search.set('')}
                             className="absolute top-1/2 right-3 -translate-y-1/2 rounded p-1 text-hud-muted hover:text-hud-ink"
@@ -208,7 +209,8 @@ export function ReferenceSearchBar({ filters }: ReferenceSearchBarProps) {
 
                 <div className="flex flex-wrap items-center gap-2">
                     <Button
-                        variant="bare"
+                        variant="plain"
+                        size="auto"
                         type="button"
                         onClick={() => panel.setOpen((o) => !o)}
                         className="inline-flex min-h-11 touch-manipulation items-center gap-2 rounded-full px-3 py-2 text-sm text-hud-gold shadow-[inset_0_0_0_1px_var(--color-hud-line)] hover:shadow-[inset_0_0_0_1px_var(--color-hud-gold)] md:hidden"
