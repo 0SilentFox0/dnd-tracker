@@ -2,6 +2,8 @@
 
 import { useMemo, useReducer, useState } from 'react';
 
+import { slotCostLabelOf } from './spell-book-labels';
+import { spellBookActions } from './spellBookActions';
 import { useBattleRules } from './useBattleRules';
 import { useBattleScene } from './useBattleScene';
 import { useBattleSpellLibrary } from './useBattleSpellLibrary';
@@ -9,7 +11,6 @@ import { useIngredientPlan } from './useIngredientPlan';
 import { useSpellBookTargets } from './useSpellBookTargets';
 import { useSpellCastSubmit } from './useSpellCastSubmit';
 
-import { joinLines, textRef } from '@/lib/i18n/text-ref';
 import { useText } from '@/lib/i18n/use-text';
 import { reactionBlockerOf } from '@/lib/utils/battle/actions/access';
 import {
@@ -17,32 +18,25 @@ import {
     casterUsesUniversalSlot,
     castPreviewOf,
     costBlocked,
-    defaultGrant,
     grantLabel as grantLabelOf,
     initialSpellFlow,
     inlineGrantLabel,
     inlineGrantOf,
-    slotOptions,
     spellBlockedBySlots,
     spellDefinition,
     spellFlow,
-    spellPayload,
     spellSaveTargets,
-    spellSlotCostLabel,
     spellSlotsLeft,
     spellSourceModel,
     spellWidening,
 } from '@/lib/utils/battle/flows';
 import { slotLevels } from '@/lib/utils/battle/view';
-import { cryptoRandom, rollDie } from '@/lib/utils/common/dice';
-import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
 import {
     groupSpellsByLevel,
     levelsWithSpells,
 } from '@/lib/utils/spells/group-by-level';
 import type { BattleParticipant } from '@/types/battle';
 import type { BookSpell } from '@/types/spells';
-import type { LogLine } from '@/types/text';
 
 export {
     useBonusSpells,
@@ -185,9 +179,6 @@ export function useSpellBook(
             ? inlineGrantLabel(caster, inlineGrantOf(caster, s))
             : grantLabelOf(caster, s.id);
 
-    const firstUsable = (who: BattleParticipant) =>
-        slotLevels(who).find((l) => l.current > 0)?.level ?? 0;
-
     const castPreview =
         magic && caster && selected && state.pick?.castTest
             ? castPreviewOf(
@@ -241,23 +232,17 @@ export function useSpellBook(
                 bypassCost ||
                     spells.some((s) => s.level === level && !!grantOf(s))
             ),
-        slotCostLabel: (s: BookSpell) => {
-            const parts = [
-                special
-                    ? textRef('battleWizards.flow.cost.special')
-                    : undefined,
-                labelOf(s),
-            ].filter((p): p is LogLine => p !== undefined && p !== '');
-
-            return parts.length > 0
-                ? joinLines(parts, ' · ')
-                : spellSlotCostLabel(s, {
-                      free,
-                      universal: universalSlot,
-                      chosen: slotChoices.find((o) => o.key === state.slotKey)
-                          ?.label,
-                  });
-        },
+        slotCostLabel: (s: BookSpell) =>
+            slotCostLabelOf(s, {
+                special: !!special,
+                grantLabel: labelOf(s),
+                fallback: {
+                    free,
+                    universal: universalSlot,
+                    chosen: slotChoices.find((o) => o.key === state.slotKey)
+                        ?.label,
+                },
+            }),
         slot: { options: slotChoices, value: state.slotKey },
         noSlot: (s: BookSpell) =>
             !canSlot(s) &&
@@ -295,182 +280,21 @@ export function useSpellBook(
             }),
     };
 
-    const actions = {
-        open: (level?: number, casterOverride?: BattleParticipant) => {
-            const who = casterOverride ?? caster;
-
-            if (who)
-                dispatch({
-                    type: 'OPEN',
-                    casterId: who.basicInfo.id,
-                    level: level ?? firstUsable(who),
-                    levels,
-                });
-        },
-        setLevel: (level: number) => dispatch({ type: 'SET_LEVEL', level }),
-        pick: (s: BookSpell) => {
-            const grants = grantsOf(s);
-
-            const choices =
-                !bypassCost && canSlot(s)
-                    ? slotOptions(caster, s.level, scene.battle.rules)
-                    : [];
-
-            const first = grants.length === 0 ? choices[0] : undefined;
-
-            const grant = defaultGrant(grants, {
-                hasSlotChoices: choices.length > 0,
-                spellLevel: s.level,
-            });
-
-            dispatch({
-                type: 'PICK',
-                pick: build(s, {
-                    castLevel: grant?.castLevel ?? first?.castLevel,
-                    test: !grant,
-                }),
-                ...(first && { slotKey: first.key }),
-                ...(grant?.key && { grantKey: grant.key }),
-                ...(grant?.upcast &&
-                    grant.castLevel !== undefined && {
-                        castLevel: grant.castLevel,
-                    }),
-            });
-        },
-        setSlot: (key: string) => {
-            const option = selected && slotChoices.find((o) => o.key === key);
-
-            if (selected && option)
-                dispatch({
-                    type: 'SET_SLOT',
-                    slotKey: key,
-                    pick: build(selected, { castLevel: option.castLevel }),
-                });
-        },
-        setSource: (value: string) => {
-            if (!selected) return;
-
-            if (value.startsWith('slot:'))
-                return actions.setSlot(value.slice('slot:'.length));
-
-            const grant = grantsOf(selected).find(
-                (g) => g.key === value.slice('grant:'.length)
-            );
-
-            if (grant?.key) {
-                dispatch({
-                    type: 'SET_GRANT',
-                    grantKey: grant.key,
-                    pick: build(selected, {
-                        castLevel: grant.castLevel,
-                        test: false,
-                    }),
-                    ...(grant.upcast &&
-                        grant.castLevel !== undefined && {
-                            castLevel: grant.castLevel,
-                        }),
-                });
-            }
-        },
-        setCastLevel: (castLevel: number) => {
-            if (selected && selectedGrant)
-                dispatch({
-                    type: 'SET_CAST_LEVEL',
-                    castLevel,
-                    pick: build(selected, { castLevel, test: false }),
-                });
-        },
-        setOption: (index: number) => dispatch({ type: 'SET_OPTION', index }),
-        setInputCount: (count: number) =>
-            dispatch({ type: 'SET_INPUT', count }),
-        setAttack: (id: string, v: number | undefined) =>
-            dispatch({ type: 'SET_ATTACK', id, value: v }),
-        prepareCast: async (cancel = false) => {
-            if (!caster || !selected) return;
-
-            try {
-                await scene.actions.castSpell.mutateAsync({
-                    ...spellPayload(state),
-                    spellId: cancel
-                        ? (caster.battleData.pendingCast?.spellId ??
-                          selected.id)
-                        : selected.id,
-                    targetIds: [],
-                    diceRolls: [],
-                    ...(cancel && { cancelCasting: true }),
-                });
-                dispatch({ type: 'CLOSE' });
-                options.onDone?.();
-            } catch (e) {
-                dispatch({
-                    type: 'FAIL',
-                    error:
-                        e instanceof Error
-                            ? e.message
-                            : textRef('battleWizards.spell.continueFailed'),
-                });
-            }
-        },
-        completeLong: () => {
-            setFinishLong(true);
-            dispatch({ type: 'TO_TARGETS' });
-        },
-        toTargets: () => {
-            setFinishLong(false);
-            dispatch({ type: 'TO_TARGETS' });
-        },
-        toggleTarget: (id: string) => {
-            const target = order.find((p) => p.basicInfo.id === id);
-
-            if (target && !inRange(target)) return;
-
-            dispatch({ type: 'TOGGLE_TARGET', id });
-        },
-        confirmTargets: () => {
-            if (state !== flow && state.aim)
-                dispatch({
-                    type: 'SET_AIM',
-                    aim: state.aim,
-                    targetIds: state.targetIds,
-                });
-
-            dispatch({ type: 'CONFIRM_TARGETS' });
-        },
-        setSave: (id: string, v: number | undefined) =>
-            dispatch({ type: 'SET_SAVE', id, value: v }),
-        setDamage: (i: number, v: number | undefined) =>
-            dispatch({ type: 'SET_DAMAGE', index: i, value: v }),
-        aiDamage: () => {
-            state.pick?.diceSlots.forEach((sides, i) =>
-                dispatch({
-                    type: 'SET_DAMAGE',
-                    index: i,
-                    value: rollDie(sides, cryptoRandom),
-                })
-            );
-
-            if (state.pick?.needsAttackRolls && attackDice)
-                state.targetIds.forEach(
-                    (id) =>
-                        state.attacks[id] === undefined &&
-                        dispatch({
-                            type: 'SET_ATTACK',
-                            id,
-                            value: rollDie(attackDice, cryptoRandom),
-                        })
-                );
-        },
-        setCastRoll: (roll?: number, second?: number) =>
-            dispatch({ type: 'SET_CAST_ROLL', roll, second }),
-        setUseIngredient: (value: boolean) =>
-            dispatch({ type: 'SET_CAST_INGREDIENT', value }),
-        setCastSystem: (value: SystemSlot | null) =>
-            dispatch({ type: 'SET_CAST_SYSTEM', value }),
-        toSummary: () => dispatch({ type: 'TO_SUMMARY' }),
-        back: () => dispatch({ type: 'BACK' }),
-        submit: () => dispatch({ type: 'SUBMIT' }),
-        close: () => dispatch({ type: 'CLOSE' }),
-    };
+    const actions = spellBookActions({
+        caster,
+        selected,
+        levels,
+        flow: { state, dispatch },
+        root: flow,
+        scene,
+        source: { grantsOf, canSlot, slotChoices, selectedGrant },
+        build,
+        inRange,
+        bypassCost,
+        attackDice,
+        setFinishLong,
+        onDone: options.onDone,
+    });
 
     return { state, view, actions };
 }

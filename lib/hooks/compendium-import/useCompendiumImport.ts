@@ -1,16 +1,14 @@
 'use client';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 
+import { type CompendiumPhase, compendiumPhaseOf } from './compendium-phase';
+import { compendiumRunOpener } from './compendiumRunOpener';
 import { compendiumKeys } from './keys';
 import { useCompendiumMedia } from './useCompendiumMedia';
+import { useCompendiumRequests } from './useCompendiumRequests';
+import { useCompendiumSelection } from './useCompendiumSelection';
 
-import {
-    confirmCompendium,
-    getCompendiumOptions,
-    getCompendiumRunReport,
-    previewCompendium,
-} from '@/lib/api/compendium';
 import type { JsonRecord } from '@/lib/constants/compendium-import';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import { readCompendiumFile } from '@/lib/utils/compendium-import/file';
@@ -25,29 +23,17 @@ import type {
     CompendiumOptions,
     CompendiumPreview,
     CompendiumReport,
-    CompendiumRun,
-    CompendiumTargets,
     ImportInput,
 } from '@/types/compendium-import';
 
-const NO_TARGETS: CompendiumTargets = { local: [], templates: [] };
-
-export type CompendiumPhase =
-    | 'idle'
-    | 'reading'
-    | 'previewing'
-    | 'confirming'
-    | 'media'
-    | 'opening';
+export type { CompendiumPhase };
 
 export function useCompendiumImport(campaignId: string, initialFile?: File) {
     const queryClient = useQueryClient();
 
     const t = useTranslator('compendium');
 
-    const [root, setRoot] = useState<JsonRecord | null>(null),
-        [categories, setCategories] = useState<string[]>([]),
-        [excludedChapters, setExcludedChapters] = useState<string[]>([]);
+    const [root, setRoot] = useState<JsonRecord | null>(null);
 
     const [options, setOptions] = useState<CompendiumOptions>({});
 
@@ -65,45 +51,15 @@ export function useCompendiumImport(campaignId: string, initialFile?: File) {
     const key = useRef(''),
         controller = useRef<AbortController | null>(null);
 
-    const previewMutation = useMutation({
-        mutationFn: ({
-            next,
-            signal,
-        }: {
-            next: ImportInput;
-            signal: AbortSignal;
-        }) => previewCompendium(campaignId, next, signal),
-    });
-
-    const confirmMutation = useMutation({
-        mutationFn: ({
-            body,
-            signal,
-        }: {
-            body: Parameters<typeof confirmCompendium>[1];
-            signal: AbortSignal;
-        }) => confirmCompendium(campaignId, body, signal),
-    });
-
-    const openRunMutation = useMutation({
-        mutationFn: (runId: string) =>
-            getCompendiumRunReport(campaignId, runId),
-    });
-
     const media = useCompendiumMedia(campaignId);
 
-    const targetsQuery = useQuery({
-        queryKey: compendiumKeys.options(campaignId),
-        queryFn: ({ signal }) => getCompendiumOptions(campaignId, signal),
-        enabled: !!preview,
-        staleTime: 0,
-    });
+    const requests = useCompendiumRequests(campaignId, !!preview);
 
     const busy =
         reading ||
-        previewMutation.isPending ||
-        confirmMutation.isPending ||
-        openRunMutation.isPending;
+        requests.preview.isPending ||
+        requests.confirm.isPending ||
+        requests.openRun.isPending;
 
     useEffect(() => () => controller.current?.abort(), []);
 
@@ -115,14 +71,23 @@ export function useCompendiumImport(campaignId: string, initialFile?: File) {
         key.current = '';
     }, []);
 
+    const {
+        categories,
+        excludedChapters,
+        setCategories,
+        setExcludedChapters,
+        toggleCategory,
+        selectCategories,
+        toggleChapter,
+        setChapterExclusions,
+    } = useCompendiumSelection(invalidate);
+
     const startRequest = () => {
         controller.current?.abort();
 
-        const abort = new AbortController();
+        controller.current = new AbortController();
 
-        controller.current = abort;
-
-        return abort;
+        return controller.current;
     };
 
     const changeOptions = (value: CompendiumOptions) => {
@@ -158,7 +123,7 @@ export function useCompendiumImport(campaignId: string, initialFile?: File) {
                 if (!abort.signal.aborted) setReading(false);
             }
         },
-        [invalidate]
+        [invalidate, setCategories, setExcludedChapters]
     );
 
     useEffect(() => {
@@ -181,7 +146,7 @@ export function useCompendiumImport(campaignId: string, initialFile?: File) {
                 excludedChapters
             );
 
-            const data = await previewMutation.mutateAsync({
+            const data = await requests.preview.mutateAsync({
                 next,
                 signal: abort.signal,
             });
@@ -205,7 +170,7 @@ export function useCompendiumImport(campaignId: string, initialFile?: File) {
         const abort = startRequest();
 
         try {
-            const report = await confirmMutation.mutateAsync({
+            const report = await requests.confirm.mutateAsync({
                 body: {
                     input,
                     token: preview.token,
@@ -258,59 +223,14 @@ export function useCompendiumImport(campaignId: string, initialFile?: File) {
             excludedKeys: [...(options.excludedKeys ?? []), rowKey],
         });
 
-    const toggleCategory = (kind: string, on: boolean) => {
-        setCategories(
-            on
-                ? [...categories, kind]
-                : categories.filter((item) => item !== kind)
-        );
-        invalidate();
-    };
-
-    const selectCategories = (kinds: string[]) => {
-        setCategories(kinds);
-        invalidate();
-    };
-
-    const setChapterExclusions = (paths: string[]) => {
-        setExcludedChapters(paths);
-        invalidate();
-    };
-
-    const toggleChapter = (path: string, on: boolean) => {
-        setExcludedChapters(
-            on
-                ? excludedChapters.filter((item) => item !== path)
-                : [...excludedChapters, path]
-        );
-        invalidate();
-    };
-
-    const showReport = (report: CompendiumReport) => {
-        setResult(report);
-
-        const loaded = reportMediaProgress(report);
-
-        if (loaded) media.load(loaded);
-    };
-
-    const openRun = async (run: CompendiumRun) => {
-        invalidate();
-        setRoot(null);
-        media.stop();
-
-        if (run.report) return showReport(run.report);
-
-        setFailure(null);
-        try {
-            const data = await openRunMutation.mutateAsync(run.id);
-
-            if (data.runs[0]) showReport(data.runs[0].report);
-            else setFailure({ key: 'errors.reportUnavailable' });
-        } catch {
-            setFailure({ key: 'errors.reportLoadFailed' });
-        }
-    };
+    const openRun = compendiumRunOpener({
+        media,
+        invalidate,
+        reset: () => setRoot(null),
+        setResult,
+        setFailure,
+        load: requests.openRun.mutateAsync,
+    });
 
     const close = () => {
         controller.current?.abort();
@@ -322,25 +242,13 @@ export function useCompendiumImport(campaignId: string, initialFile?: File) {
         invalidate();
     };
 
-    const phase: CompendiumPhase = reading
-        ? 'reading'
-        : previewMutation.isPending
-          ? 'previewing'
-          : confirmMutation.isPending
-            ? 'confirming'
-            : media.running
-              ? 'media'
-              : openRunMutation.isPending
-                ? 'opening'
-                : 'idle';
-
-    const targets = targetsQuery.data ?? NO_TARGETS;
-
-    const shownError = failure
-        ? compendiumErrorMessage(t, failure.error, failure.key)
-        : targetsQuery.isError && preview
-          ? t('errors.optionsLoadFailed')
-          : '';
+    const phase = compendiumPhaseOf({
+        reading,
+        previewing: requests.preview.isPending,
+        confirming: requests.confirm.isPending,
+        media: media.running,
+        opening: requests.openRun.isPending,
+    });
 
     return {
         state: {
@@ -352,12 +260,16 @@ export function useCompendiumImport(campaignId: string, initialFile?: File) {
             input,
             result,
             rights,
-            targets,
+            targets: requests.targetList,
             busy,
             phase,
             media: media.progress,
             mediaPaused: media.paused,
-            error: shownError,
+            error: failure
+                ? compendiumErrorMessage(t, failure.error, failure.key)
+                : requests.targets.isError && preview
+                  ? t('errors.optionsLoadFailed')
+                  : '',
         },
         actions: {
             selectFile,

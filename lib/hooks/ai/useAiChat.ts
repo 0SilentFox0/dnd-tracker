@@ -6,6 +6,11 @@ import { useChat } from '@ai-sdk/react';
 import type { UIMessage } from 'ai';
 
 import { ASSISTANT_POLLING } from './assistant-polling';
+import {
+    freshestLease,
+    hasUncertainEffects,
+    recoveryMessages,
+} from './recovery-state';
 
 import {
     cancelAiRun,
@@ -153,28 +158,10 @@ export function useAiChat({
 
                 const running = state.runs.find((r) => r.status === 'running');
 
-                const lease = state.runs
-                    .filter(
-                        (r) =>
-                            r.status !== 'running' &&
-                            Date.parse(r.expiresAt) > Date.now()
-                    )
-                    .sort(
-                        (a, b) =>
-                            Date.parse(b.expiresAt) - Date.parse(a.expiresAt)
-                    )[0];
+                const lease = freshestLease(state);
 
                 leaseRef.current = lease ? Date.parse(lease.expiresAt) : 0;
-                uncertainRef.current =
-                    state.receipts.some(
-                        (r) =>
-                            r.status === 'unknown' ||
-                            r.effectsStatus === 'unknown'
-                    ) ||
-                    (state.intents ?? []).some(
-                        (i) =>
-                            i.status === 'unknown' || i.status === 'executing'
-                    );
+                uncertainRef.current = hasUncertainEffects(state);
                 setLease(lease?.expiresAt ?? null);
                 activeRequest.current = running?.requestId ?? null;
                 sending.current = !!running;
@@ -186,35 +173,10 @@ export function useAiChat({
                     return;
                 }
 
-                // Receipts remain visible even if Stop happened after a committed tool call.
-                const receipts: UIMessage[] = state.receipts.map((r) => ({
-                    id: `receipt-${r.id}`,
-                    role: 'assistant',
-                    parts: [
-                        {
-                            type: 'text',
-                            text: tRef.current('chat.receipt', {
-                                id: r.id,
-                                status: r.status,
-                            }),
-                        },
-                    ],
-                }));
-
-                const pending: UIMessage[] = (state.intents ?? []).map((i) => ({
-                    id: `intent-${i.id}`,
-                    role: 'assistant',
-                    parts: [
-                        {
-                            type: 'text',
-                            text: tRef.current('chat.intentLine', {
-                                status: i.status,
-                                summary: i.summary,
-                                href: `/campaigns/${campaignId}/dm/assistant?intent=${i.id}`,
-                            }),
-                        },
-                    ],
-                }));
+                const { receipts, pending } = recoveryMessages(state, {
+                    t: tRef.current,
+                    campaignId,
+                });
 
                 setMessages([
                     ...((state.messages ?? []) as unknown as UIMessage[]),

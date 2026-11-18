@@ -1,34 +1,26 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { type ModeTools, useModeTools } from './modes/tools';
+import { useModeTools } from './modes/tools';
 import { useModeView } from './modes/useModeView';
+import type { BattleMapScene } from './battle-map-scene';
 import { turnStartDue } from './turn-start-check';
 import { useBattleScene } from './useBattleScene';
 import { useExclusivePalettes } from './useExclusivePalettes';
 import { useFollowTurnSetting } from './useFollowTurnSetting';
-import { useFxImpacts } from './useFxImpacts';
-import {
-    type MapBackgroundTool,
-    useMapBackgroundTool,
-} from './useMapBackgroundTool';
 import { useMapCellActions } from './useMapCellActions';
-import { type MapDoorsTool, useMapDoors } from './useMapDoors';
+import { useMapDmTools } from './useMapDmTools';
+import { useMapEdgeSources } from './useMapEdgeSources';
 import { useMapFogTool } from './useMapFogTool';
-import { type MapMotionTool, useMapMotionTool } from './useMapMotionTool';
 import { useMapPlacing } from './useMapPlacing';
-import { type MapTerrainTool, useMapTerrainTool } from './useMapTerrainTool';
-import { type MapUpdateTool, useMapUpdateTool } from './useMapUpdateTool';
-import { type MapWeatherTool, useMapWeatherTool } from './useMapWeatherTool';
+import { useMapSceneView } from './useMapSceneView';
+import { useMapTerrainTool } from './useMapTerrainTool';
 
 import { useText } from '@/lib/i18n/use-text';
 import type { SystemFx } from '@/lib/utils/battle/fx';
 import {
-    aimView,
-    checkReturnToStart,
-    composeMapView,
     deriveMapScene,
     dispatchMapClick,
     type MapClick,
@@ -36,39 +28,10 @@ import {
     type MapSceneActor,
     type MapSceneMode,
 } from '@/lib/utils/battle/grid';
-import type { TileLayerChunks } from '@/lib/utils/battle/tiles/derive';
 import { NO_ORDER } from '@/lib/utils/battle/view';
-import type { Viewer } from '@/lib/utils/battle/view/visibility';
-import type { BattleScene } from '@/types/api';
-import type { BattleParticipant } from '@/types/battle';
-import type {
-    BattleMapActions,
-    BattleMapConfig,
-    BattleMapView,
-    GridPoint,
-} from '@/types/battle-grid';
+import type { GridPoint } from '@/types/battle-grid';
 
-export interface BattleMapScene {
-    battle: BattleScene;
-    viewer: Viewer;
-    tileChunks?: TileLayerChunks;
-    tileVersion?: number;
-    map: BattleMapConfig;
-    participants: BattleParticipant[];
-    view: BattleMapView;
-    followTurn: { on: boolean; toggle(): void } | null;
-    actions: BattleMapActions;
-    placement: { active: boolean; toggle(): void } | null;
-    terrainTool: MapTerrainTool | null;
-    fogTool: ReturnType<typeof useMapFogTool>;
-    modeTools: ModeTools | null;
-    weatherTool: MapWeatherTool | null;
-    motionTool: MapMotionTool | null;
-    backgroundTool: MapBackgroundTool | null;
-    mapUpdate: MapUpdateTool | null;
-    doors: MapDoorsTool;
-    edgesLinked: boolean;
-}
+export type { BattleMapScene };
 
 export function useBattleMapScene(fx?: SystemFx): BattleMapScene | null {
     const t = useTranslations('battle.notify');
@@ -131,35 +94,11 @@ export function useBattleMapScene(fx?: SystemFx): BattleMapScene | null {
         [show, t]
     );
 
-    const { mutateAsync: mapWalls } = actions.mapWalls;
-
-    const wallsList = map?.walls;
-
-    const barsList = map?.bars;
-
-    const doorsList = map?.doors;
-
-    const edgeSource = useMemo(
-        () => ({ walls: wallsList, bars: barsList, mutate: mapWalls }),
-        [wallsList, barsList, mapWalls]
-    );
-
-    const { mutateAsync: mapEdgeRemove } = actions.mapEdgeRemove;
-
-    const removedList = battle.mapState?.removedEdges;
-
-    const stateEdgeSource = useMemo(
-        () => ({
-            present: new Set([
-                ...(wallsList ?? []),
-                ...(barsList ?? []),
-                ...Object.keys(doorsList ?? {}),
-            ]),
-            removed: new Set(removedList),
-            mutate: mapEdgeRemove,
-        }),
-        [wallsList, barsList, doorsList, removedList, mapEdgeRemove]
-    );
+    const { edgeSource, stateEdgeSource } = useMapEdgeSources({
+        map,
+        battle,
+        actions,
+    });
 
     const terrainTool = useMapTerrainTool({
         isDM,
@@ -223,94 +162,24 @@ export function useBattleMapScene(fx?: SystemFx): BattleMapScene | null {
         [map, battle.rules, order, selectedId, actor, mode, modeView]
     );
 
-    const { pending: pendingStroke } = terrainTool;
-
-    const impactFor = useFxImpacts(fx);
-
-    const { currentRound, currentTurnIndex } = battle;
-
-    const hovered = useMemo(
-        () =>
-            scene?.aiming && map && mapAim && hoverCell
-                ? aimView(
-                      {
-                          map,
-                          participants: scene.participants,
-                          rules: battle.rules,
-                      },
-                      mapAim,
-                      hoverCell
-                  )
-                : null,
-        [scene, map, mapAim, hoverCell, battle.rules]
-    );
-
-    const previewCell = hovered ? hoverCell : null;
-
-    const onAimHover = mapAim?.onHover;
-
-    useEffect(() => {
-        onAimHover?.(previewCell);
-    }, [onAimHover, previewCell]);
-
-    const returnId = useMemo(
-        () =>
-            canAct &&
-            map &&
-            current &&
-            !current.battleData.reserved &&
-            checkReturnToStart(map, order, current).ok
-                ? current.basicInfo.id
-                : null,
-        [canAct, map, order, current]
-    );
-
-    const composedView = useMemo(() => {
-        if (!scene || !map) return null;
-
-        return composeMapView({
-            scene,
-            map,
-            rules: battle.rules,
-            current,
-            hover: { cell: hoverCell, preview: hovered },
-            overlay: {
-                returnId,
-                pendingStroke,
-                impactFor,
-                effects,
-                round: currentRound,
-                mode: modeView,
-            },
-        });
-    }, [
+    const view = useMapSceneView({
         scene,
         map,
-        battle.rules,
-        hovered,
-        hoverCell,
-        pendingStroke,
+        rules: battle.rules,
         current,
-        returnId,
-        impactFor,
+        canAct,
+        order,
+        aim: mapAim,
+        hoverCell,
+        pendingStroke: terrainTool.pending,
+        fx,
         effects,
-        currentRound,
+        round: battle.currentRound,
         modeView,
-    ]);
+        camera: { isDM, follow: followEnabled, selfId: hero?.basicInfo.id },
+    });
 
-    const view = useMemo(
-        () =>
-            composedView
-                ? {
-                      ...composedView,
-                      camera: {
-                          follow: isDM ? followEnabled : true,
-                          selfId: hero?.basicInfo.id ?? null,
-                      },
-                  }
-                : null,
-        [composedView, isDM, followEnabled, hero?.basicInfo.id]
-    );
+    const { currentRound, currentTurnIndex } = battle;
 
     const { mutate: move } = actions.move;
 
@@ -376,39 +245,17 @@ export function useBattleMapScene(fx?: SystemFx): BattleMapScene | null {
         closeModeTool?.();
     }, [placing, setPlacingOn, setPlacingId, closeTerrain, closeModeTool]);
 
-    const weatherTool = useMapWeatherTool({
-        isDM,
-        current: map?.weather ?? null,
-        mutation: actions.mapWeather,
-    });
-
-    const motionTool = useMapMotionTool({
-        isDM,
-        current: map?.motion ?? null,
-        mutation: actions.mapMotion,
-    });
-
-    const backgroundTool = useMapBackgroundTool({
-        isDM,
-        current: map?.background ?? null,
-        mutation: actions.mapBackground,
-    });
-
-    const doors = useMapDoors({
-        isDM,
-        current: current ?? undefined,
-        isMyTurn,
-        mutation: actions.mapDoorToggle,
-        notify: show,
-    });
-
-    const mapUpdate = useMapUpdateTool({
-        isDM,
-        campaignId,
-        mapRef: battle.mapRef,
-        mutation: actions.mapUpdate,
-        notify: show,
-    });
+    const { weatherTool, motionTool, backgroundTool, doors, mapUpdate } =
+        useMapDmTools({
+            isDM,
+            map,
+            battle,
+            actions,
+            current,
+            isMyTurn,
+            campaignId,
+            notify: show,
+        });
 
     useExclusivePalettes({
         mode: { active: !!modeTools?.paletteOpen, close: closeModeTool },

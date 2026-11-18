@@ -1,74 +1,30 @@
 import { useCallback, useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 
+import {
+    careerPickValid,
+    FULL_STEPS,
+    STEP_ERRORS,
+    VISIBLE_STEP_ERRORS,
+    type WfrpDraftStepId,
+} from './draft-form-helpers';
 import { useRaceProfiles } from './useRaceProfiles';
+import { useWfrpDraftPicks } from './useWfrpDraftPicks';
+import { useWfrpDraftPlan } from './useWfrpDraftPlan';
+import { useWfrpDraftRolls } from './useWfrpDraftRolls';
+import { useWfrpDraftSubmit } from './useWfrpDraftSubmit';
+import { useWfrpSpecies } from './useWfrpSpecies';
 
-import { ApiError } from '@/lib/api/client';
 import { useCampaignRules } from '@/lib/hooks/campaigns';
-import { characterKeys } from '@/lib/hooks/characters/keys';
 import { useRollReveal } from '@/lib/hooks/characters/useRollReveal';
 import { useFeats } from '@/lib/hooks/feats';
 import { useRaces } from '@/lib/hooks/races';
 import { useRuleSystem } from '@/lib/hooks/systems/useRuleSystem';
 import { cryptoRandom } from '@/lib/utils/common/dice';
 import type { Rng } from '@/lib/utils/common/rng';
-import { RULE_SYSTEM_REGISTRY } from '@/lib/utils/rules/systems';
-import {
-    createWfrpDraft,
-    updateWfrpDraftIdentity,
-} from '@/systems/wfrp/api/characters';
-import type {
-    WfrpDraftIdentityInput,
-    WfrpDraftInput,
-} from '@/systems/wfrp/api/types';
+import type { WfrpDraftIdentityInput } from '@/systems/wfrp/api/types';
 import { useCareers } from '@/systems/wfrp/hooks/careers';
-import { CHARACTERISTIC_KEYS } from '@/systems/wfrp/rules/characteristics/keys';
-import {
-    type CreationPicks,
-    type CreationRolls,
-    isUsableProfile,
-    planDraft,
-    type PlanDraftResult,
-    rollCreation,
-    type SpeciesProfile,
-} from '@/systems/wfrp/rules/creation';
-import type { Race } from '@/types/races';
 
-export type WfrpDraftStepId =
-    | 'species'
-    | 'career'
-    | 'stats'
-    | 'talents'
-    | 'identity';
-
-type StatsMode = CreationPicks['stats']['mode'];
-
-type CareerMode = CreationPicks['career']['mode'];
-
-const FULL_STEPS: WfrpDraftStepId[] = [
-    'species',
-    'career',
-    'stats',
-    'talents',
-    'identity',
-];
-
-const STAT_COUNT = CHARACTERISTIC_KEYS.length;
-
-const VISIBLE_STEP_ERRORS = new Set([
-    'CAREER_UNKNOWN',
-    'FEAT_UNKNOWN',
-    'PROFILE_NOT_READY',
-]);
-
-const STEP_ERRORS: Record<WfrpDraftStepId, (code: string) => boolean> = {
-    species: (c) => c === 'PROFILE_NOT_READY',
-    career: (c) => c.startsWith('CAREER_'),
-    stats: (c) => c.startsWith('STATS_') || c.startsWith('POINTS_'),
-    talents: (c) => c.startsWith('TALENT_') || c === 'FEAT_UNKNOWN',
-    identity: () => false,
-};
+export type { WfrpDraftStepId };
 
 export interface WfrpDraftFormOptions {
     campaignId: string;
@@ -83,10 +39,6 @@ export function useWfrpDraftForm({
     initialIdentity,
     rng = cryptoRandom,
 }: WfrpDraftFormOptions) {
-    const router = useRouter();
-
-    const queryClient = useQueryClient();
-
     const { system } = useRuleSystem({ campaignId });
 
     const rules = useCampaignRules(campaignId).data?.advancement;
@@ -109,27 +61,31 @@ export function useWfrpDraftForm({
 
     const [index, setIndex] = useState(0);
 
-    const [speciesId, setSpeciesId] = useState<string>();
-
-    const [careerMode, setCareerModeState] = useState<CareerMode>('rolled');
-
-    const [careerId, setCareerId] = useState<string>();
-
-    const [careerRolls, setCareerRolls] = useState<
-        CreationRolls['careerRolls']
-    >([]);
-
-    const [statsMode, setStatsMode] = useState<StatsMode>('rolled');
-
-    const [statRolls, setStatRolls] = useState<number[]>([]);
-
-    const [arranged, setArranged] = useState<number[]>([]);
-
-    const [points, setPoints] = useState<number[]>(() =>
-        Array.from({ length: STAT_COUNT }, () => 10)
-    );
-
-    const [rolledTalents, setRolledTalents] = useState<string[]>([]);
+    const {
+        picks,
+        speciesId,
+        selectSpecies,
+        career: {
+            mode: careerMode,
+            setMode: setCareerMode,
+            id: careerId,
+            setId: setCareerId,
+            rolls: careerRolls,
+            setRolls: setCareerRolls,
+        },
+        stats: {
+            mode: statsMode,
+            setMode: setStatsMode,
+            rolls: statRolls,
+            setRolls: setStatRolls,
+            arranged,
+            setArranged,
+            points,
+            swap,
+            setPoint,
+        },
+        talents: { rolled: rolledTalents, set: setRolledTalents },
+    } = useWfrpDraftPicks();
 
     const [identity, setIdentity] = useState<WfrpDraftIdentityInput>(
         initialIdentity ?? { name: '' }
@@ -137,23 +93,11 @@ export function useWfrpDraftForm({
 
     const creation = system?.creation;
 
-    const species = useMemo(() => {
-        if (!creation) return [];
-
-        const byRace = new Map(
-            (profiles.data ?? []).map((p) => [p.raceId, p.profile])
-        );
-
-        return (races.data ?? []).flatMap(
-            (race): { race: Race; profile: SpeciesProfile }[] => {
-                const profile = byRace.get(race.id);
-
-                return profile && isUsableProfile(profile)
-                    ? [{ race, profile }]
-                    : [];
-            }
-        );
-    }, [creation, profiles.data, races.data]);
+    const species = useWfrpSpecies({
+        enabled: !!creation,
+        profiles: profiles.data,
+        races: races.data,
+    });
 
     const selected = species.find((s) => s.race.id === speciesId);
 
@@ -172,46 +116,24 @@ export function useWfrpDraftForm({
         [feats.data]
     );
 
-    const picks = useMemo<CreationPicks>(
-        () => ({
-            career: { mode: careerMode, careerId: careerId ?? '' },
-            stats:
-                statsMode === 'free'
-                    ? { mode: 'free', points }
-                    : statsMode === 'rearranged'
-                      ? { mode: 'rearranged', rolls: statRolls, arranged }
-                      : { mode: 'rolled', rolls: statRolls },
-            talents: rolledTalents,
-        }),
-        [
-            careerMode,
-            careerId,
-            statsMode,
-            points,
-            statRolls,
-            arranged,
-            rolledTalents,
-        ]
+    const careerIds = useMemo(
+        () => (careers.data ?? []).map((c) => c.id),
+        [careers.data]
     );
 
-    const preview: PlanDraftResult | undefined = useMemo(() => {
-        if (identityOnly || !creation || !profile || !rules) return undefined;
+    const featIds = useMemo(
+        () => (feats.data ?? []).map((f) => f.id),
+        [feats.data]
+    );
 
-        return planDraft(picks, {
-            profile,
-            rules,
-            careerIds: new Set((careers.data ?? []).map((c) => c.id)),
-            featIds: new Set((feats.data ?? []).map((f) => f.id)),
-        });
-    }, [
-        identityOnly,
-        creation,
+    const preview = useWfrpDraftPlan({
+        picks,
+        enabled: !identityOnly && !!creation,
         profile,
         rules,
-        picks,
-        careers.data,
-        feats.data,
-    ]);
+        careerIds,
+        featIds,
+    });
 
     const errorsFor = (id: WfrpDraftStepId) =>
         preview && !preview.ok ? preview.errors.filter(STEP_ERRORS[id]) : [];
@@ -241,159 +163,33 @@ export function useWfrpDraftForm({
                 (c !== 'CAREER_UNKNOWN' || !!careerId)
         );
 
-    const rollAll = useCallback(
-        () => (profile && creation ? rollCreation(rng, profile) : undefined),
-        [creation, profile, rng]
-    );
-
-    const selectSpecies = useCallback(
-        (raceId: string) => {
-            if (raceId === speciesId) return;
-
-            setSpeciesId(raceId);
-            setCareerId(undefined);
-            setCareerRolls([]);
-            setStatRolls([]);
-            setArranged([]);
-            setRolledTalents([]);
-        },
-        [speciesId]
-    );
-
-    const setCareerMode = useCallback(
-        (mode: CareerMode) => {
-            setCareerModeState(mode);
-            setCareerId((prev) =>
-                mode === 'rolled'
-                    ? careerRolls[0]?.careerId
-                    : mode === 'choice'
-                      ? careerRolls.some((r) => r.careerId === prev)
-                          ? prev
-                          : undefined
-                      : prev
-            );
-        },
-        [careerRolls]
-    );
-
-    const rollCareer = useCallback(() => {
-        if (careerRolls.length) return;
-
-        const rolled = rollAll();
-
-        if (!rolled) return;
-
-        setCareerRolls(rolled.careerRolls);
-        setCareerId(
-            careerMode === 'rolled'
-                ? rolled.careerRolls[0]?.careerId
-                : undefined
-        );
-        reveal.start(
-            rolled.careerRolls.map((r, i) => ({
-                key: `career${i}`,
-                pool: () =>
-                    careerName(
-                        (
-                            profile?.careerTable[
-                                Math.floor(rng() * profile.careerTable.length)
-                            ] ?? r
-                        ).careerId
-                    ),
-                final: careerName(r.careerId),
-            }))
-        );
-    }, [
-        careerRolls.length,
-        careerMode,
-        rollAll,
-        reveal,
-        careerName,
-        profile,
+    const rolls = useWfrpDraftRolls({
         rng,
-    ]);
-
-    const rollStats = useCallback(() => {
-        if (statRolls.length) return;
-
-        const rolled = rollAll();
-
-        if (!rolled) return;
-
-        setStatRolls(rolled.statRolls);
-        setArranged(rolled.statRolls);
-        reveal.start(
-            rolled.statRolls.map((v, i) => ({
-                key: `stat${i}`,
-                pool: () => 2 + Math.floor(rng() * 19),
-                final: v,
-            }))
-        );
-    }, [statRolls.length, rollAll, reveal, rng]);
-
-    const swap = useCallback(
-        (i: number, j: number) =>
-            setArranged((prev) =>
-                prev.map((v, k) => (k === i ? prev[j] : k === j ? prev[i] : v))
-            ),
-        []
-    );
-
-    const setPoint = useCallback(
-        (i: number, v: number) =>
-            setPoints((prev) => prev.map((p, k) => (k === i ? v : p))),
-        []
-    );
-
-    const rollTalents = useCallback(() => {
-        if (rolledTalents.length) return;
-
-        const rolled = rollAll();
-
-        if (!rolled) return;
-
-        setRolledTalents(rolled.randomTalents);
-        reveal.start(
-            rolled.randomTalents.map((f, i) => ({
-                key: `talent${i}`,
-                pool: () =>
-                    featName(
-                        (
-                            profile?.randomTalents[
-                                Math.floor(rng() * profile.randomTalents.length)
-                            ] ?? { featId: f }
-                        ).featId
-                    ),
-                final: featName(f),
-            }))
-        );
-    }, [rolledTalents.length, rollAll, reveal, featName, profile, rng]);
-
-    const mutation = useMutation({
-        mutationFn: () => {
-            if (characterId)
-                return updateWfrpDraftIdentity(
-                    campaignId,
-                    characterId,
-                    cleanIdentity(identity)
-                );
-
-            const body: WfrpDraftInput = {
-                ...cleanIdentity(identity),
-                speciesId: speciesId ?? '',
-                career: picks.career,
-                stats: picks.stats,
-                talents: picks.talents,
-            };
-
-            return createWfrpDraft(campaignId, body);
+        reveal,
+        profile,
+        enabled: !!creation,
+        names: { career: careerName, feat: featName },
+        career: {
+            mode: careerMode,
+            rolls: careerRolls,
+            setRolls: setCareerRolls,
+            setId: setCareerId,
         },
-        onSuccess: async () => {
-            await queryClient.invalidateQueries({
-                queryKey: characterKeys.sheet(campaignId),
-            });
-            router.push(`/campaigns/${campaignId}/character`);
+        stats: {
+            rolls: statRolls,
+            setRolls: setStatRolls,
+            setArranged,
         },
+        talents: { rolled: rolledTalents, set: setRolledTalents },
+    });
+
+    const submit = useWfrpDraftSubmit({
+        campaignId,
+        characterId,
+        identity,
+        speciesId,
+        picks,
+        canRun: valid.identity,
     });
 
     return {
@@ -418,7 +214,7 @@ export function useWfrpDraftForm({
             mode: careerMode,
             setMode: setCareerMode,
             rolls: careerRolls,
-            roll: rollCareer,
+            roll: rolls.careerRoll,
             careerId,
             pick: setCareerId,
             table: profile?.careerTable ?? [],
@@ -428,7 +224,7 @@ export function useWfrpDraftForm({
             mode: statsMode,
             setMode: setStatsMode,
             rolls: statRolls,
-            roll: rollStats,
+            roll: rolls.statsRoll,
             arranged,
             swap,
             points,
@@ -439,7 +235,7 @@ export function useWfrpDraftForm({
             fixed: profile?.talents ?? [],
             count: talentCount,
             rolled: rolledTalents,
-            roll: rollTalents,
+            roll: rolls.talentsRoll,
             names: featName,
         },
         careerName,
@@ -457,49 +253,6 @@ export function useWfrpDraftForm({
                 setIdentity((prev) => ({ ...prev, ...patch })),
         },
         reveal,
-        submit: {
-            run: () => mutation.mutate(),
-            isPending: mutation.isPending,
-            error: mutation.error,
-            issueCodes: serverIssueCodes(mutation.error),
-            canRun: valid.identity,
-        },
+        submit,
     };
 }
-
-const careerPickValid = (
-    mode: CareerMode,
-    careerId: string,
-    rolls: CreationRolls['careerRolls']
-) =>
-    mode === 'rolled'
-        ? careerId === rolls[0]?.careerId
-        : mode === 'choice'
-          ? rolls.some((r) => r.careerId === careerId)
-          : true;
-
-const cleanIdentity = ({
-    name,
-    alignment,
-    background,
-    avatar,
-    goals,
-}: WfrpDraftIdentityInput): WfrpDraftIdentityInput => ({
-    name: name.trim(),
-    ...(alignment &&
-        RULE_SYSTEM_REGISTRY.wfrp.identity.alignments && { alignment }),
-    ...(background && { background }),
-    ...(avatar && { avatar }),
-    ...(goals?.length && { goals }),
-});
-
-const serverIssueCodes = (error: unknown): string[] => {
-    const issues =
-        error instanceof ApiError
-            ? (error.body as { issues?: unknown } | undefined)?.issues
-            : undefined;
-
-    return Array.isArray(issues)
-        ? [...new Set(issues.filter((i): i is string => typeof i === 'string'))]
-        : [];
-};
