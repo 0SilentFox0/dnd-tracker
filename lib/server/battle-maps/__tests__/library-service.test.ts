@@ -181,6 +181,7 @@ const db = vi.hoisted(() => {
             ),
         },
         $queryRaw: vi.fn(async () => []),
+        $executeRaw: vi.fn(async () => 0),
         $transaction: vi.fn(),
     };
 
@@ -336,6 +337,14 @@ describe('battle map library service', () => {
         await expect(
             saveMap(id, { ...input(), expectedVersion: 7 })
         ).rejects.toMatchObject({ status: 409 });
+    });
+
+    it('create takes the per-campaign advisory lock before counting maps', async () => {
+        await createMap('c1', input());
+
+        expect(db.api.$executeRaw.mock.invocationCallOrder[0]).toBeLessThan(
+            db.api.battleMap.count.mock.invocationCallOrder[0]
+        );
     });
 
     it('create beyond the per-campaign quota is a 409 with the limit', async () => {

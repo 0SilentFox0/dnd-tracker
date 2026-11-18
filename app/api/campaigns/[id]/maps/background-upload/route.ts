@@ -9,6 +9,7 @@ import { createBattleMapBackgroundUploadTicket } from '@/lib/server/battle-maps/
 import { errorResponse } from '@/lib/utils/api/api-response';
 import { withDM } from '@/lib/utils/api/as-dm';
 import { parseBody } from '@/lib/utils/api/parse-body';
+import { checkRateLimit, rateLimitResponse } from '@/lib/utils/api/rate-limit';
 
 const requestSchema = z.object({
     size: z.number().int().positive().max(MAP_LIMITS.backgroundUploadBytes),
@@ -21,7 +22,17 @@ export async function POST(
 ) {
     const { id } = await params;
 
-    return withDM(id, 'issue battle map background upload', async () => {
+    return withDM(id, 'issue battle map background upload', async (access) => {
+        const rate = await checkRateLimit({
+            userId: access.userId,
+            scope: 'map-background-upload',
+            battleId: id,
+            ...MAP_LIMITS.createRate,
+            memoryFallback: true,
+        });
+
+        if (!rate.allowed) return rateLimitResponse(rate);
+
         const body = await parseBody(requestSchema, req);
 
         if (body instanceof NextResponse) return body;

@@ -77,8 +77,10 @@ export function ResponsiveDialog({
 
     const hudClass = hud ? `${HUD_SURFACE} hud-form hud-form-page` : undefined;
 
+    const hudPortal = hud || !!className?.split(/\s+/).includes(HUD_SURFACE);
+
     const body = (
-        <HudPortalClassProvider value={hud ? HUD_SURFACE : null}>
+        <HudPortalClassProvider value={hudPortal ? HUD_SURFACE : null}>
             {children}
         </HudPortalClassProvider>
     );
