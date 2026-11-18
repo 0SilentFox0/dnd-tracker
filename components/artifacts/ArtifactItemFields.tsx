@@ -4,10 +4,10 @@ import { useTranslations } from 'next-intl';
 
 import { PropertyFields } from '@/components/artifacts/ArtifactPropertyFields';
 import { ItemCastingFields } from '@/components/artifacts/ItemCastingFields';
-import { HUD_SELECT_CLASS, HudSection } from '@/components/hud/form';
+import { HUD_SELECT_TRIGGER_CLASS, HudSection } from '@/components/hud/form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { NativeSelect } from '@/components/ui/native-select';
+import { SelectField } from '@/components/ui/select-field';
 import { SwitchField } from '@/components/ui/switch-field';
 import {
     ArtifactSlot,
@@ -152,34 +152,30 @@ export function ArtifactItemFields({
                             >
                                 {t('recharge')}
                             </Label>
-                            <NativeSelect
+                            <SelectField
                                 id="item-charges-rest"
-                                className={`${HUD_SELECT_CLASS} w-full`}
+                                triggerClassName={HUD_SELECT_TRIGGER_CLASS}
                                 disabled={!charges || !!stats.consumable}
                                 value={
                                     charges ? (charges.rest ?? 'none') : 'long'
                                 }
-                                onChange={(e) =>
+                                onValueChange={(v) =>
                                     charges &&
                                     set({
                                         charges: {
                                             max: charges.max,
                                             rest:
-                                                e.target.value === 'none'
+                                                v === 'none'
                                                     ? null
-                                                    : (e.target.value as
-                                                          | 'short'
-                                                          | 'long'),
+                                                    : (v as 'short' | 'long'),
                                         },
                                     })
                                 }
-                            >
-                                {ITEM_REST_VALUES.map((value) => (
-                                    <option key={value} value={value}>
-                                        {t(`rest.${value}`)}
-                                    </option>
-                                ))}
-                            </NativeSelect>
+                                options={ITEM_REST_VALUES.map((value) => ({
+                                    value,
+                                    label: t(`rest.${value}`),
+                                }))}
+                            />
                         </div>
                     </div>
                     <SwitchField

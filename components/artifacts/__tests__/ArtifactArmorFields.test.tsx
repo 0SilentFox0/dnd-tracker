@@ -4,6 +4,10 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { ArtifactArmorFields } from '@/components/artifacts/ArtifactArmorFields';
 
+vi.mock('@/components/ui/select-field', () =>
+    import('@/components/ui/__tests__/select-field-mock')
+);
+
 describe('ArtifactArmorFields', () => {
     afterEach(cleanup);
 

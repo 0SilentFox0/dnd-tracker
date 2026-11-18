@@ -3,11 +3,11 @@
 import { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { HUD_SELECT_CLASS } from '@/components/hud/form';
+import { HUD_SELECT_TRIGGER_CLASS } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { NativeSelect } from '@/components/ui/native-select';
+import { SelectField } from '@/components/ui/select-field';
 import { ArtifactSlot } from '@/lib/constants/artifacts';
 import { useArtifactsList } from '@/lib/hooks/artifacts';
 import { ARMOR_CATEGORIES } from '@/lib/utils/artifacts/armor-stats';
@@ -145,21 +145,23 @@ export function PropertyFields({
                     >
                         {t('attackType')}
                     </Label>
-                    <NativeSelect
+                    <SelectField
                         id="item-attack-type"
-                        className={`${HUD_SELECT_CLASS} w-full`}
+                        triggerClassName={HUD_SELECT_TRIGGER_CLASS}
                         value={applies.attackType ?? ''}
-                        onChange={(e) =>
+                        onValueChange={(v) =>
                             setApplies({
-                                attackType: (e.target.value ||
+                                attackType: (v ||
                                     undefined) as AppliesTo['attackType'],
                             })
                         }
-                    >
-                        <option value="">{t('attackAny')}</option>
-                        <option value="melee">{t('attackMelee')}</option>
-                        <option value="ranged">{t('attackRanged')}</option>
-                    </NativeSelect>
+                        allowNone
+                        noneLabel={t('attackAny')}
+                        options={[
+                            { value: 'melee', label: t('attackMelee') },
+                            { value: 'ranged', label: t('attackRanged') },
+                        ]}
+                    />
                 </div>
             )}
             {applies.kinds.includes('armor') && (
