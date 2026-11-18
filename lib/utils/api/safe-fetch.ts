@@ -1,6 +1,7 @@
 import { lookup } from 'node:dns/promises';
 import type { IncomingMessage } from 'node:http';
 import { request as httpsRequest } from 'node:https';
+import type { LookupFunction } from 'node:net';
 import { BlockList, isIP } from 'node:net';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
@@ -175,7 +176,9 @@ async function resolvePublicTarget(
         throw new SafeFetchError(API_ERRORS.SAFE_FETCH_INTERNAL_URL);
     }
 
-    const address = addrs[0].address;
+    // IPv4 first: hosts without IPv6 egress fail on a pinned v6 address
+    const address = (addrs.find((a) => isIP(a.address) === 4) ?? addrs[0])
+        .address;
 
     return { url, address, family: isIP(address) as 4 | 6 };
 }
@@ -192,6 +195,16 @@ type PinnedResponse = {
     headers: IncomingMessage['headers'];
     stream: IncomingMessage;
 };
+
+/** Node's autoSelectFamily calls lookup with `all: true` and expects an array. */
+export const pinnedLookup =
+    (address: string, family: 4 | 6): LookupFunction =>
+    (_host, options, cb) =>
+        options.all
+            ? (cb as unknown as (e: null, a: unknown) => void)(null, [
+                  { address, family },
+              ])
+            : cb(null, address, family);
 
 /** Connects to the already-validated IP; Host and TLS SNI/cert check keep the original hostname, so DNS cannot rebind between check and connect. */
 function pinnedGet(
@@ -213,7 +226,7 @@ function pinnedGet(
                 headers,
                 servername: isIP(host) ? undefined : host,
                 signal,
-                lookup: (_h, _o, cb) => cb(null, address, family),
+                lookup: pinnedLookup(address, family),
             },
             (res) =>
                 resolve({
