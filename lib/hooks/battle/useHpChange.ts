@@ -11,18 +11,33 @@ export interface HpChange {
     impact: FxImpact | null;
 }
 
-/** Вплив фіксується в момент зміни HP: пізніші дії не перезапускають спалах/рамку цього удару. */
+/** Вплив фіксується в момент зміни HP: пізніші дії не перезапускають спалах/рамку цього удару. Для цілей із відром HP число береться з `impact.delta` сервера, а удар без зміни відра теж дає зміну. */
 export function useHpChange(
     hp: number,
     impact: FxImpact | null = null
 ): HpChange | null {
+    const reported =
+        impact?.delta !== undefined && impact.actionId
+            ? impact.actionId
+            : null;
+
     const [prev, setPrev] = useState(hp);
+
+    const [seen, setSeen] = useState(reported);
 
     const [change, setChange] = useState<HpChange | null>(null);
 
-    if (hp !== prev) {
+    const fresh = reported !== null && reported !== seen;
+
+    if (hp !== prev || fresh) {
         setPrev(hp);
-        setChange({ delta: hp - prev, hp, id: (change?.id ?? 0) + 1, impact });
+        setSeen(reported);
+        setChange({
+            delta: fresh && impact ? (impact.delta ?? 0) : hp - prev,
+            hp,
+            id: (change?.id ?? 0) + 1,
+            impact,
+        });
     }
 
     return change;

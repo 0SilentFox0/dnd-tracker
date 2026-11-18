@@ -11,6 +11,8 @@ export interface FxImpact {
     /** Бій: кадр чекає `fireFxImpact(actionId)` замість `delayMs`. */
     actionId?: string;
     waitMs?: number;
+    /** Signed HP change reported by the server for a target whose HP is a bucket on the client */
+    delta?: number;
 }
 
 /** `spec` is the first FX of the last action (`mapAction(action)[0]`), mapped once for all rows. */

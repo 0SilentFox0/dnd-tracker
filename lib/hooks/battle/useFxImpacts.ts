@@ -6,6 +6,7 @@ import { useBattleSceneData } from './useBattleScene';
 import { useFxEnabled } from './useFxEnabled';
 import { useSystemDice } from './useSystemDice';
 
+import { ParticipantSide } from '@/lib/constants/battle';
 import { usePageHidden } from '@/lib/hooks/common';
 import {
     type FxImpact,
@@ -35,6 +36,8 @@ export function useFxImpacts(
     const { battle } = useBattleSceneData();
 
     const log = battle.battleLog;
+
+    const { initiativeOrder, redacted } = battle;
 
     const systemDice = useSystemDice(fx).length;
 
@@ -71,6 +74,19 @@ export function useFxImpacts(
             );
         };
 
+        const projected = new Set(
+            redacted
+                ? initiativeOrder
+                      .filter((p) => p.basicInfo.side !== ParticipantSide.ALLY)
+                      .map((p) => p.basicInfo.id)
+                : []
+        );
+
+        const deltaOf = (action: BattleAction, id: string) =>
+            -action.hpChanges
+                .filter((h) => h.participantId === id)
+                .reduce((sum, h) => sum + h.change, 0);
+
         actions.forEach(({ action, main }, i) => {
             for (const id of [
                 ...(main?.targetIds ?? []),
@@ -81,23 +97,23 @@ export function useFxImpacts(
                     id
                 );
 
+                const delta = projected.has(id) ? deltaOf(action, id) : 0;
+
                 // прихована вкладка = FX-черга неактивна: показ без очікування сигналу
                 if (impact)
-                    result.set(
-                        id,
-                        hidden
-                            ? impact
-                            : {
-                                  ...impact,
-                                  actionId: action.id,
-                                  waitMs: waitFrom(i),
-                              }
-                    );
+                    result.set(id, {
+                        ...impact,
+                        ...(delta !== 0 && { delta }),
+                        ...(!hidden && {
+                            actionId: action.id,
+                            waitMs: waitFrom(i),
+                        }),
+                    });
             }
         });
 
         return result;
-    }, [log, enabled, systemDice, hidden]);
+    }, [log, enabled, systemDice, hidden, initiativeOrder, redacted]);
 
     return useCallback(
         (participantId: string) => impacts.get(participantId) ?? null,
