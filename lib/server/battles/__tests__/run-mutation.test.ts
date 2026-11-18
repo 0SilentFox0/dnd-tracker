@@ -118,6 +118,8 @@ function deps(over: Partial<PipelineDeps> = {}): PipelineDeps {
     };
 }
 
+type ExpectedVersionSchema = z.ZodType<{ expectedVersion: number }>;
+
 const params = { id: 'c1', battleId: 'b1' };
 
 const req = (body: unknown = {}) =>
@@ -849,7 +851,7 @@ describe('runBattleMutation', () => {
         expect(JSON.stringify(json)).not.toContain('"position"');
     });
 
-    it.each([
+    it.each<[string, ExpectedVersionSchema | undefined]>([
         [
             'declared in the route schema',
             z.object({ expectedVersion: z.number() }),

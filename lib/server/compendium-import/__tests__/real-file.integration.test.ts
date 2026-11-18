@@ -58,7 +58,9 @@ import {
 import { itemStatsFromRow } from '@/lib/utils/items/item-row';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 import { awaitsMoraleCheck } from '@/systems/morale/rules/awaits-check';
-import type { BattleParticipant } from '@/types/battle';
+
+// Raw JSON battle state is probed structurally, as before
+type Loose = any;
 
 interface JsonProbe {
     kind?: string;
@@ -432,10 +434,10 @@ describe.skipIf(!FILE)('real file import', () => {
             mutate: mutateSystemOperation('morale-check', 'morale disabled'),
         };
 
-        const alive = (p: BattleParticipant) =>
+        const alive = (p: Loose) =>
             p.combatStats.status === 'active' && p.combatStats.currentHp > 0;
 
-        const P = () => state.initiativeOrder as BattleParticipant[];
+        const P = () => state.initiativeOrder as unknown as Loose[];
 
         let created = 0;
 
@@ -937,7 +939,7 @@ describe.skipIf(!FILE)('real file import', () => {
                 )
             ).json();
 
-            const order = state.initiativeOrder as BattleParticipant[];
+            const order = state.initiativeOrder as unknown as Loose[];
 
             const me = order.find(
                 (p) => p.basicInfo.sourceType === 'character'
