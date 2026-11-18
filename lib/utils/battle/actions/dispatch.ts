@@ -7,6 +7,7 @@ import type {
     RunCoreActionResult,
 } from './types';
 
+import { actionsOf } from '@/lib/utils/battle/actions/access';
 import { resolveServerAttack } from '@/lib/utils/battle/attack/server-attack';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 
@@ -15,7 +16,7 @@ type WithoutStrike<T> = Omit<T, 'strike'>;
 export const runCoreAction = (
     input: WithoutStrike<RunCoreActionInput>
 ): RunCoreActionResult =>
-    ruleSystemOf(input.rules).combat.actions.run({
+    actionsOf(input.rules).run({
         ...input,
         strike: resolveServerAttack,
     });
@@ -23,7 +24,7 @@ export const runCoreAction = (
 export const legendaryAttack = (
     input: WithoutStrike<LegendaryAttackInput>
 ): LegendaryAttackResult =>
-    ruleSystemOf(input.rules).combat.actions.legendaryAttack({
+    actionsOf(input.rules).legendaryAttack({
         ...input,
         strike: resolveServerAttack,
         reach: ruleSystemOf(input.rules).combat.reach,
@@ -32,7 +33,7 @@ export const legendaryAttack = (
 export const moveWithReactions = (
     input: WithoutStrike<MovementInput>
 ): MovementResult =>
-    ruleSystemOf(input.rules).combat.actions.move({
+    actionsOf(input.rules).move({
         ...input,
         strike: resolveServerAttack,
     });

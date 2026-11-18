@@ -11,6 +11,7 @@ import {
     replaceParticipant,
 } from '@/lib/utils/abilities/engine/core/participants';
 import { resolveDowned } from '@/lib/utils/abilities/engine/core/run-abilities';
+import { actionsOf } from '@/lib/utils/battle/actions/access';
 import { moveWithReactions } from '@/lib/utils/battle/actions/dispatch';
 import {
     canStand,
@@ -42,7 +43,6 @@ import {
 import { ruleErrorOf } from '@/lib/utils/battle/store/errors';
 import { assertCanAct } from '@/lib/utils/battle/turn';
 import { rngOf } from '@/lib/utils/common/rng';
-import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
 import type { BattleParticipant } from '@/types/battle';
 import type {
@@ -86,7 +86,7 @@ export function moveMutation(
 
     const { rules } = ctx.meta;
 
-    const { actions } = ruleSystemOf(rules).combat;
+    const actions = actionsOf(rules);
 
     const at = (
         p: BattleParticipant,

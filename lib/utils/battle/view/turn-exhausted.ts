@@ -1,10 +1,10 @@
 import { canCastBonusSpell } from './hero';
 
+import { actionsOf } from '@/lib/utils/battle/actions/access';
 import { canAttackFromPool } from '@/lib/utils/battle/attack/attacks-left';
 import { canOffHandAttack } from '@/lib/utils/battle/attack/off-hand';
 import { remainingMovement } from '@/lib/utils/battle/grid/path';
 import type { Ruleset } from '@/lib/utils/rules/schema';
-import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { BattleParticipant } from '@/types/battle';
 
 type BonusSpell = Parameters<typeof canCastBonusSpell>[1][number];
@@ -33,7 +33,7 @@ export function turnExhausted(
         !canReturn &&
         !(
             coreActions &&
-            (ruleSystemOf(rules).combat.actions.canStandUp(p, rules) ||
+            (actionsOf(rules).canStandUp(p, rules) ||
                 (!!p.battleData.position && remainingMovement(p, rules) > 0))
         )
     );

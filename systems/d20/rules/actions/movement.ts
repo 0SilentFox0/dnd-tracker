@@ -5,6 +5,7 @@ import {
     findParticipant,
     replaceParticipant,
 } from '@/lib/utils/abilities/engine/core/participants';
+import { actionsOf } from '@/lib/utils/battle/actions/access';
 import { actionReason } from '@/lib/utils/battle/actions/reasons';
 import type {
     MovementInput,
@@ -14,7 +15,6 @@ import { releaseGrapples } from '@/lib/utils/battle/conditions/grapple-links';
 import { ruleErrorOf } from '@/lib/utils/battle/store/errors';
 import { battleActionToEvent } from '@/lib/utils/battle/store/event-mapping';
 import type { NewBattleEvent } from '@/lib/utils/battle/store/types';
-import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { MoveHookResult } from '@/lib/utils/rules/systems/types';
 import type { LogLine } from '@/types/text';
 
@@ -27,7 +27,7 @@ function runMoveHooks(input: MovementInput): MoveHookResult | null {
 
     let out: MoveHookResult | null = null;
 
-    for (const hook of ruleSystemOf(rules).combat.actions.onMove ?? []) {
+    for (const hook of actionsOf(rules).onMove ?? []) {
         const participants = out?.participants ?? input.participants;
 
         const next = hook({

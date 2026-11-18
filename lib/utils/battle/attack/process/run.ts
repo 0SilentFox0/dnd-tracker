@@ -10,6 +10,7 @@ import {
     isAttackable,
     withSelf,
 } from '@/lib/utils/abilities/engine/core/participants';
+import { actionEconomyOf } from '@/lib/utils/battle/actions/access';
 import {
     activeEffectIds,
     consumeAttackEffects,
@@ -227,7 +228,7 @@ function spendAttackAction(run: AttackRun): void {
     put(
         flow,
         params.offHand &&
-            ruleSystemOf(flow.ctx.rules).combat.actionEconomy.bonusAction
+            actionEconomyOf(flow.ctx.rules).bonusAction
             ? {
                   ...attacker,
                   actionFlags: {

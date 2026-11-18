@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
+import {
+    actionEconomyOf,
+    actionsOf,
+    NO_ACTION_ECONOMY,
+    reactionsOf,
+} from '@/lib/utils/battle/actions/access';
 import { noActions, noReactions } from '@/lib/utils/battle/actions/none';
+import { hitModelOf, noHitModel } from '@/lib/utils/battle/balance/hit-model';
 import { proficiencyOf, savesOf } from '@/lib/utils/battle/saves/access';
 import { noProficiency, noSaves } from '@/lib/utils/battle/saves/none';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
@@ -15,8 +22,12 @@ describe('combat slots through the registry', () => {
     it('wfrp answers with the null objects', () => {
         const { combat } = ruleSystemOf(WFRP_RULES);
 
-        expect(combat.actions).toBe(noActions);
-        expect(combat.reactions).toBe(noReactions);
+        expect(combat.actions).toBeUndefined();
+        expect(combat.reactions).toBeUndefined();
+        expect(combat.actionEconomy).toBeUndefined();
+        expect(actionsOf(WFRP_RULES)).toBe(noActions);
+        expect(reactionsOf(WFRP_RULES)).toBe(noReactions);
+        expect(actionEconomyOf(WFRP_RULES)).toBe(NO_ACTION_ECONOMY);
         expect(savesOf(WFRP_RULES)).toBe(noSaves);
         expect(proficiencyOf(WFRP_RULES)).toBe(noProficiency);
     });
@@ -24,22 +35,27 @@ describe('combat slots through the registry', () => {
     it('d20 answers with its own actions, reactions, saves and proficiency', () => {
         const { combat } = ruleSystemOf(DEFAULT_RULES);
 
-        expect(combat.actions.move).toBe(D20_ACTIONS.move);
-        expect(combat.actions.run).toBe(D20_ACTIONS.run);
-        expect(combat.actions.catalog).toBe(D20_ACTIONS.catalog);
-        expect(combat.actions.onMove).toEqual([opportunityOnMove]);
+        expect(actionsOf(DEFAULT_RULES).move).toBe(D20_ACTIONS.move);
+        expect(actionsOf(DEFAULT_RULES).run).toBe(D20_ACTIONS.run);
+        expect(actionsOf(DEFAULT_RULES).catalog).toBe(D20_ACTIONS.catalog);
+        expect(actionsOf(DEFAULT_RULES).onMove).toEqual([opportunityOnMove]);
         expect(combat.reactions).toBe(D20_REACTIONS);
         expect(combat.saves).toBe(D20_SAVES);
         expect(combat.proficiency).toBe(D20_PROFICIENCY);
     });
 
     it('bare d20 has no move hooks', () => {
-        const { combat } = ruleSystemOf({
-            ...DEFAULT_RULES,
-            system: { key: 'd20' },
-        });
+        const rules = { ...DEFAULT_RULES, system: { key: 'd20' } };
 
-        expect(combat.actions.move).toBe(D20_ACTIONS.move);
-        expect(combat.actions.onMove).toBeUndefined();
+        expect(actionsOf(rules).move).toBe(D20_ACTIONS.move);
+        expect(actionsOf(rules).onMove).toBeUndefined();
+    });
+
+    it('noHitModel is an even matchup with one damage per hit', () => {
+        expect(noHitModel.winChance(0, 0)).toBe(noHitModel.refHit);
+        expect(noHitModel.damage({} as never)).toBe(1);
+        expect(hitModelOf(DEFAULT_RULES)).toBe(
+            ruleSystemOf(DEFAULT_RULES).combat.hitModel
+        );
     });
 });

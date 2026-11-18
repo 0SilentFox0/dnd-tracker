@@ -7,6 +7,7 @@ import {
 } from './catalog';
 import { ruleSystemOf } from './lookup';
 
+import { noActions } from '@/lib/utils/battle/actions/none';
 import { sectionsOfComposition } from '@/lib/utils/rules/section-registry';
 
 export interface CompositionPreview {
@@ -39,7 +40,7 @@ export function previewComposition(
         ),
         contentKinds: [...contentKindsOf(draft)].sort(),
         dmSections: [...dmSectionsOf(draft)].sort(),
-        actions: Object.keys(definition.combat.actions.catalog).sort(),
+        actions: Object.keys((definition.combat.actions ?? noActions).catalog).sort(),
         added,
         removed,
         setup,

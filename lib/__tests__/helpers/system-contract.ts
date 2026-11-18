@@ -3,6 +3,9 @@ import { expect } from 'vitest';
 import type { SystemUi } from '@/components/systems/types';
 import { CHARACTER_SYSTEM_COLUMNS } from '@/lib/constants/stat-columns';
 import type { SystemServer } from '@/lib/server/systems/types';
+import { NO_ACTION_ECONOMY } from '@/lib/utils/battle/actions/access';
+import { noActions, noReactions } from '@/lib/utils/battle/actions/none';
+import { noHitModel } from '@/lib/utils/battle/balance/hit-model';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 import type { RuleSystemDefinition } from '@/lib/utils/rules/systems';
 import type { SystemMeta } from '@/lib/utils/rules/systems/meta';
@@ -66,6 +69,14 @@ export function assertSystemContract(
 
     const { characteristics, combat } = definition;
 
+    const actions = combat.actions ?? noActions;
+
+    const reactions = combat.reactions ?? noReactions;
+
+    const actionEconomy = combat.actionEconomy ?? NO_ACTION_ECONOMY;
+
+    const hitModel = combat.hitModel ?? noHitModel;
+
     expect(characteristics.isEmpty(null)).toBe(true);
     expect(characteristics.isEmpty(undefined)).toBe(true);
     expect(typeof characteristics.sheetBlock).toBe('function');
@@ -80,8 +91,8 @@ export function assertSystemContract(
 
     expect(['client', 'server']).toContain(combat.judge);
     expect(combat.dice).toBeGreaterThan(1);
-    expect(typeof combat.actionEconomy.bonusAction).toBe('boolean');
-    expect(typeof combat.actionEconomy.reaction).toBe('boolean');
+    expect(typeof actionEconomy.bonusAction).toBe('boolean');
+    expect(typeof actionEconomy.reaction).toBe('boolean');
 
     expect(typeof combat.resolveAttack).toBe('function');
     expect(typeof combat.abortedRoll).toBe('function');
@@ -89,18 +100,18 @@ export function assertSystemContract(
     for (const hook of [combat.initiative, combat.tieBreak, combat.damage])
         expect(typeof hook).toBe('function');
 
-    expect(combat.hitModel.refHit).toBeGreaterThan(0);
+    expect(hitModel.refHit).toBeGreaterThan(0);
 
     for (const hook of [
-        combat.actions.enabled,
-        combat.actions.available,
-        combat.actions.run,
-        combat.actions.move,
-        combat.reactions.blocker,
+        actions.enabled,
+        actions.available,
+        actions.run,
+        actions.move,
+        reactions.blocker,
     ])
         expect(typeof hook).toBe('function');
 
-    expect(typeof combat.actions.catalog).toBe('object');
+    expect(typeof actions.catalog).toBe('object');
 
     expect(typeof definition.conditionSet?.apply).toBe('function');
     expect(typeof definition.conditionSet?.effectInput).toBe('function');

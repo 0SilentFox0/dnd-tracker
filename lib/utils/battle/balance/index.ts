@@ -22,6 +22,7 @@ export { armorFactors, hitChance } from './hit-chance';
 export {
     type HitModel,
     hitModelHeroStats,
+    hitModelOf,
     hitModelUnitStats,
 } from './hit-model';
 export type { LiveScaleDirection } from './live-scale';

@@ -6,6 +6,7 @@ import {
 } from '@/lib/__tests__/helpers/dnd5e-modules';
 import { AttackType } from '@/lib/constants/battle';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
+import { actionsOf } from '@/lib/utils/battle/actions/access';
 import { moveWithReactions } from '@/lib/utils/battle/actions/dispatch';
 import { pathTo } from '@/lib/utils/battle/grid/path';
 import type { Ruleset } from '@/lib/utils/rules';
@@ -83,14 +84,14 @@ describe('opportunity module composition', () => {
     it('the module adds the move and after-attack hooks', () => {
         const { combat } = ruleSystemOf(dnd5eRules());
 
-        expect(combat.actions.onMove).toHaveLength(1);
+        expect(actionsOf(dnd5eRules()).onMove).toHaveLength(1);
         expect(combat.afterAttack).toHaveLength(1);
     });
 
     it('bare d20 has neither', () => {
         const { combat } = ruleSystemOf(bareD20Rules());
 
-        expect(combat.actions.onMove ?? []).toHaveLength(0);
+        expect(actionsOf(bareD20Rules()).onMove ?? []).toHaveLength(0);
         expect(combat.afterAttack ?? []).toHaveLength(0);
     });
 

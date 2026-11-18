@@ -298,7 +298,8 @@ export interface RuleSystemCombat {
     ): SystemSlot;
     /** Ranks participants with equal initiative: higher wins */
     tieBreak(p: BattleParticipant): number;
-    actionEconomy: { bonusAction: boolean; reaction: boolean };
+    /** Absent means neither a bonus action nor a reaction */
+    actionEconomy?: { bonusAction: boolean; reaction: boolean };
     resolveAttack(ctx: ResolveAttackCtx): ResolvedAttack;
     /** The roll recorded for an attack that never happened (the target or the attacker dropped out first) */
     abortedRoll(ctx: ResolveAttackCtx): AttackRollResult;
@@ -317,8 +318,10 @@ export interface RuleSystemCombat {
     /** A downed participant still in the fight (d20: dying, not stable); its side has not lost yet */
     holdsOn?(p: BattleParticipant): boolean;
     turn?: RuleSystemTurn;
-    actions: RuleSystemActions;
-    reactions: RuleSystemReactions;
+    /** Absent means `noActions` */
+    actions?: RuleSystemActions;
+    /** Absent means `noReactions` */
+    reactions?: RuleSystemReactions;
     saves?: RuleSystemSaves;
     proficiency?: RuleSystemProficiency;
     /** Hooks after each strike of an attack, base first, then modules */
@@ -333,8 +336,8 @@ export interface RuleSystemCombat {
         initiative: number;
         speed: number;
     };
-    /** Balance: hit chance from offense/defense numbers (instead of d20 to-hit vs AC) and expected damage per hit against a reference target */
-    hitModel: {
+    /** Balance: hit chance from offense/defense numbers (instead of d20 to-hit vs AC) and expected damage per hit against a reference target; absent means `noHitModel` */
+    hitModel?: {
         offense(p: BattleParticipant): number;
         defense(p: BattleParticipant): number;
         winChance(off: number, def: number): number;

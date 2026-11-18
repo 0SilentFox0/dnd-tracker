@@ -14,9 +14,9 @@ import { useXpBalance } from './useXpBalance';
 
 import { CharacterType } from '@/lib/constants/characters';
 import { useCampaignRules } from '@/lib/hooks/campaigns';
+import { hitModelOf } from '@/lib/utils/battle/balance';
 import { sharedEnemyRace } from '@/lib/utils/battle/balance/setup';
 import { SECTION_DEFAULTS } from '@/lib/utils/rules/defaults';
-import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import { FALLBACK_SYSTEM_KEY } from '@/lib/utils/rules/systems/catalog';
 import type { BattlePreparationParticipant } from '@/types/battle';
 import type { BattleMapConfig, BattleMapRef } from '@/types/battle-grid';
@@ -49,7 +49,7 @@ export function useBattleSetup(
 
     const encounters = rules?.encounters ?? SECTION_DEFAULTS.encounters;
 
-    const ruleSystem = ruleSystemOf(
+    const hitModel = hitModelOf(
         rules ?? { system: { key: FALLBACK_SYSTEM_KEY } }
     );
 
@@ -97,7 +97,7 @@ export function useBattleSetup(
         participants.list,
         entityStats,
         battleId ? enemyRaceId : balance.race,
-        ruleSystem.combat.hitModel
+        hitModel
     );
 
     const xp = useXpBalance(participants.list, entityStats, encounters);

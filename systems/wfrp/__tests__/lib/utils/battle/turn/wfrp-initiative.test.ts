@@ -4,6 +4,7 @@ import {
     createMockParticipant,
     grantPassive,
 } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
+import { actionsOf, reactionsOf } from '@/lib/utils/battle/actions/access';
 import { actionReason } from '@/lib/utils/battle/actions/reasons';
 import { baseMovement } from '@/lib/utils/battle/grid/path';
 import {
@@ -12,7 +13,6 @@ import {
 } from '@/lib/utils/battle/turn/initiative';
 import { rollInitiative } from '@/lib/utils/battle/turn/roll-initiative';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
-import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import {
     type Characteristics,
     DEFAULT_CHARACTERISTICS,
@@ -133,7 +133,7 @@ describe('wfrp action economy', () => {
     it('core actions are off in wfrp (empty catalog), available in d20', () => {
         const wf = cunning(wfrp('a'));
 
-        const { actions } = ruleSystemOf(WFRP_RULES).combat;
+        const actions = actionsOf(WFRP_RULES);
 
         expect(actions.catalog).toEqual({});
         expect(actions.enabled(WFRP_RULES)).toBe(false);
@@ -144,7 +144,7 @@ describe('wfrp action economy', () => {
         const d = cunning(createMockParticipant());
 
         expect(
-            ruleSystemOf(DEFAULT_RULES).combat.actions.available(
+            actionsOf(DEFAULT_RULES).available(
                 'dash',
                 d,
                 [d],
@@ -156,10 +156,10 @@ describe('wfrp action economy', () => {
 
     it('reactions are blocked in wfrp only', () => {
         expect(
-            ruleSystemOf(WFRP_RULES).combat.reactions.blocker(wfrp('a'))
+            reactionsOf(WFRP_RULES).blocker(wfrp('a'))
         ).toEqual(actionReason('noReaction'));
         expect(
-            ruleSystemOf(DEFAULT_RULES).combat.reactions.blocker(
+            reactionsOf(DEFAULT_RULES).blocker(
                 createMockParticipant()
             )
         ).toBeNull();

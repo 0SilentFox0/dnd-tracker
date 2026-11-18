@@ -1,6 +1,7 @@
 import { textRef } from '@/lib/i18n/text-ref';
 import { isActive } from '@/lib/utils/abilities/engine/core/participants';
 import { markKey } from '@/lib/utils/abilities/engine/effects/marks';
+import { reactionsOf } from '@/lib/utils/battle/actions/access';
 import { type ActionFlow, getP } from '@/lib/utils/battle/common/action-flow';
 import { cellsOf, footprintDistance, isOnMap } from '@/lib/utils/battle/grid';
 import { cellFeetOf } from '@/lib/utils/battle/grid/cell-feet';
@@ -15,7 +16,6 @@ import type {
 } from '@/lib/utils/battle/types/spell-process';
 import { rollDiceList } from '@/lib/utils/common/dice';
 import type { Ruleset } from '@/lib/utils/rules/schema';
-import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { BattleParticipant, SpellGrant } from '@/types/battle';
 
 const anchoredOn = (
@@ -100,7 +100,7 @@ export function runAutoReactions(
             continue;
 
         if (
-            ruleSystemOf(flow.ctx.rules).combat.reactions.blocker(holder) ||
+            reactionsOf(flow.ctx.rules).blocker(holder) ||
             !anchoredOn(target, holderId, grant.inline.anchorMarkId) ||
             !inRange(grant, target, attacker, !!flow.ctx.map, flow.ctx.rules)
         )
