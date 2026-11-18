@@ -76,7 +76,7 @@ export function checklistState(
 
     const completedAt = flag ? Date.parse(flag) : NaN;
 
-    // дата завершення фіксує результат: регрес фактів (видалили расу, гравець вийшов) чекліст не розгортає
+    // the completion date pins the result: later fact regressions never re-open the checklist
     if (Number.isNaN(completedAt))
         return allRequiredDone ? 'collapsed' : 'open';
 
@@ -101,7 +101,7 @@ export function unseenWhatsNew(
 ): WhatsNewEntry[] {
     const seenIndex = entries.findIndex((e) => e.id === lastSeenId);
 
-    // невідомий id (запис прибрали) — вважаємо все побаченим, а не показуємо всю історію
+    // unknown id (record removed): treat everything as seen instead of replaying the history
     if (seenIndex < 0) return [];
 
     return visibleWhatsNew(entries.slice(0, seenIndex), audiences);

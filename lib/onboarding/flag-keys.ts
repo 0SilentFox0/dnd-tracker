@@ -4,7 +4,7 @@ export const WHATS_NEW_KEY = 'whats-new';
 
 export const CHECKLIST_HIDDEN = 'hidden';
 
-// окремо від hint:*, щоб «Сховати/показати всі підказки» не міняли прогрес чекліста
+// kept apart from hint:*: toggling all hints must not change checklist progress
 export const PLAYER_SHEET_SEEN_KEY = 'seen:player-sheet';
 
 export const DEMO_TOUR_IDS = [
