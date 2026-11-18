@@ -46,6 +46,10 @@
 - Системний d20-UI живе в `systems/d20/ui`, а не в core; нейтральні імена в контрактах слотів (`monsterStats`, `armorStats`).
 - Кубики — `components/dice`; `ActionBar` — `components/ui/action-bar`; `ImageUpload` — `components/common`; `ThemeProvider` і `PaletteSwitcher` — `components/layout`.
 
+## Сирі контроли
+
+ESLint `raw-controls/no-raw-control` (`eslint/raw-controls.mjs`) забороняє `<button|input|select|img>` у `components/**`, `app/**`, `systems/**` поза `components/ui` і `components/hud`. Наявні порушення — `raw-controls-exempt.json` (файл + кількість; лише скорочується). Перегенерація/перевірка росту: `node scripts/shared/raw-controls-baseline.mjs [--write]`. Таблиця «що коли» для kit — `.claude/rules/components.md`.
+
 ## Допущене й відкладене
 
 - Цикли на рівні тек: `characters` ↔ `character-profile` (один домен «персонаж»), (цикл `spells` ↔ `battle/fx` зник: FX у `components/fx`). Файлові цикли — лише з `import-cycles-baseline.json` (`pnpm cycles`).

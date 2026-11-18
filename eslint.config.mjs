@@ -15,6 +15,11 @@ import {
     readRequires,
 } from './scripts/shared/system-requires.mjs';
 import {
+    RAW_CONTROL_FILES,
+    RAW_CONTROL_IGNORES,
+    rawControlsPlugin,
+} from './eslint/raw-controls.mjs';
+import {
     UI_LAYER_IGNORES,
     UI_LAYER_ZONES,
 } from './scripts/shared/ui-layers.mjs';
@@ -146,6 +151,10 @@ const uiLayersPlugin = {
 
 const UI_LAYERS_EXEMPT = JSON.parse(
     readFileSync(new URL('./ui-layers-exempt.json', import.meta.url), 'utf8')
+).map((e) => e.file.replace(/[[\]]/g, '\\$&'));
+
+const RAW_CONTROLS_EXEMPT = JSON.parse(
+    readFileSync(new URL('./raw-controls-exempt.json', import.meta.url), 'utf8')
 ).map((e) => e.file.replace(/[[\]]/g, '\\$&'));
 
 const SYSTEM_ZONE_PATTERN = {
@@ -740,6 +749,12 @@ const eslintConfig = defineConfig([
             ],
         },
     })),
+    {
+        files: RAW_CONTROL_FILES,
+        ignores: [...RAW_CONTROL_IGNORES, ...RAW_CONTROLS_EXEMPT],
+        plugins: { 'raw-controls': rawControlsPlugin },
+        rules: { 'raw-controls/no-raw-control': 'error' },
+    },
     {
         files: [DICE_SCENE_FILE],
         rules: {
