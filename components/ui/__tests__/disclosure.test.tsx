@@ -10,7 +10,12 @@ describe('Disclosure', () => {
     it('keeps closed content mounted but hidden', () => {
         render(<Disclosure summary="More">body</Disclosure>);
 
-        expect(screen.getByText('body').closest('[hidden]')).not.toBeNull();
+        expect(
+            screen
+                .getByText('body')
+                .closest('[data-state]')
+                ?.getAttribute('data-state')
+        ).toBe('closed');
     });
 
     it('reports changes and follows the controlled open prop', () => {
@@ -24,14 +29,24 @@ describe('Disclosure', () => {
 
         fireEvent.click(screen.getByRole('button', { name: /More/ }));
         expect(onOpenChange).toHaveBeenCalledWith(true);
-        expect(screen.getByText('body').closest('[hidden]')).not.toBeNull();
+        expect(
+            screen
+                .getByText('body')
+                .closest('[data-state]')
+                ?.getAttribute('data-state')
+        ).toBe('closed');
 
         rerender(
             <Disclosure summary="More" open onOpenChange={onOpenChange}>
                 body
             </Disclosure>
         );
-        expect(screen.getByText('body').closest('[hidden]')).toBeNull();
+        expect(
+            screen
+                .getByText('body')
+                .closest('[data-state]')
+                ?.getAttribute('data-state')
+        ).toBe('open');
     });
 
     it('renders the header as the requested heading level', () => {
