@@ -1,5 +1,5 @@
 import { SystemDmPage } from '@/components/systems/SystemDmPage';
-import { artifactSetKeys } from '@/lib/hooks/artifact-sets/keys';
+import { artifactSetKeys } from '@/lib/hooks/artifact-sets';
 import { PrefetchedQuery } from '@/lib/providers/prefetched-query';
 import { readArtifactSets } from '@/lib/server/artifacts/read-artifact-sets';
 import { requireCampaignDM } from '@/lib/server/campaigns/access';

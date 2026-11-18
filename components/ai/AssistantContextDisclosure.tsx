@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { AI_LIMITS } from '@/lib/constants/ai';
-import type { useAssistantContext } from '@/lib/hooks/ai/useAssistantContext';
+import type { useAssistantContext } from '@/lib/hooks/ai';
 
 type Context = ReturnType<typeof useAssistantContext>;
 

@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
-import { useAssistantPolicy } from '@/lib/hooks/ai/useAssistantPolicy';
+import { useAssistantPolicy } from '@/lib/hooks/ai';
 import type { ExecutionMode } from '@/types/assistant';
 
 export function AssistantPolicyControl({

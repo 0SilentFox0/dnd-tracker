@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl';
 import { ShowWaiting } from '@/components/show/stage/ShowWaiting';
 import { WorldMapView } from '@/components/world/WorldMapView';
 import { useMediaQuery, useReducedMotion } from '@/lib/hooks/common';
-import { DESKTOP_QUERY } from '@/lib/hooks/common/useIsMobile';
+import { DESKTOP_QUERY } from '@/lib/hooks/common';
 import { useShowWorld, useWorldDive } from '@/lib/hooks/world';
 import { cn } from '@/lib/utils';
 import type { ShowWorld } from '@/types/show';

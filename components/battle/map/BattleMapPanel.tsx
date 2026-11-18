@@ -18,7 +18,7 @@ import { OnboardingHint } from '@/components/onboarding/OnboardingHint';
 import { CONTROLLED_BY_DM } from '@/lib/constants/characters';
 import { TILE_CATALOG } from '@/lib/constants/tilesets/catalog';
 import { type MapUpdateTool, useBattleMapScene } from '@/lib/hooks/battle';
-import { useFogMemory } from '@/lib/hooks/battle/useFogMemory';
+import { useFogMemory } from '@/lib/hooks/battle';
 import { cn } from '@/lib/utils';
 import { fogView } from '@/lib/utils/battle/fog/fog-view';
 import { activeModeWithConfig } from '@/lib/utils/battle/modes';

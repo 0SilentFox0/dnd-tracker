@@ -7,13 +7,13 @@ import { RulesForm } from '@/components/rules/RulesForm';
 import { SystemDmPage } from '@/components/systems/SystemDmPage';
 import { ConfirmProvider } from '@/components/ui/confirm-dialog';
 import { battleOps, callBattleOp } from '@/lib/api/battle-ops';
-import type { BattleSceneValue } from '@/lib/hooks/battle/types';
-import { useAttackWizard } from '@/lib/hooks/battle/useAttackWizard';
+import type { BattleSceneValue } from '@/lib/hooks/battle';
+import { useAttackWizard } from '@/lib/hooks/battle';
 import {
     BattleSceneContext,
     BattleSceneDataContext,
-} from '@/lib/hooks/battle/useBattleScene';
-import { useSpellMapTargeting } from '@/lib/hooks/battle/useSpellMapTargeting';
+} from '@/lib/hooks/battle';
+import { useSpellMapTargeting } from '@/lib/hooks/battle';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import {
     initialSpellFlow,

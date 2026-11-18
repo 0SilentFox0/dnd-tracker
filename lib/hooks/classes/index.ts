@@ -1,3 +1,4 @@
+export { classKeys } from './keys';
 export {
     useClass,
     useClasses,

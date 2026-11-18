@@ -10,7 +10,7 @@ import { FieldErrors } from '../FieldErrors';
 import { NestedEffectsEditor } from '../NestedEffectsEditor';
 import { sectionId, SectionShell } from './SectionShell';
 
-import { useAbilityComposition } from '@/lib/hooks/abilities/useAbilityComposition';
+import { useAbilityComposition } from '@/lib/hooks/abilities';
 import { newEffect } from '@/lib/utils/abilities/editor';
 
 export function EffectsSection({

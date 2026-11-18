@@ -5,7 +5,7 @@ import { useQueryClient } from '@tanstack/react-query';
 
 import { markLevelSeen } from '@/lib/api/character-progression';
 import { useCharacterSheet } from '@/lib/hooks/characters';
-import { characterKeys } from '@/lib/hooks/characters/keys';
+import { characterKeys } from '@/lib/hooks/characters';
 import type { CharacterSheet } from '@/types/characters';
 
 export function useLevelUpCelebration(campaignId: string, characterId: string) {

@@ -1,7 +1,7 @@
 import { DMArtifactsPageClient } from './page-client';
 
-import { artifactSetKeys } from '@/lib/hooks/artifact-sets/keys';
-import { artifactKeys } from '@/lib/hooks/artifacts/keys';
+import { artifactSetKeys } from '@/lib/hooks/artifact-sets';
+import { artifactKeys } from '@/lib/hooks/artifacts';
 import { PrefetchedQuery } from '@/lib/providers/prefetched-query';
 import { readArtifactSets } from '@/lib/server/artifacts/read-artifact-sets';
 import { readArtifacts } from '@/lib/server/artifacts/read-artifacts';

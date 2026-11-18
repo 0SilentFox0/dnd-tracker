@@ -4,7 +4,7 @@ import '@/components/battle/hud/battle-hud.css';
 import { BattleMap } from '@/components/battle/map/BattleMap';
 import { HudChipTabs, HudPanel } from '@/components/hud/page';
 import { TooltipProvider } from '@/components/ui/tooltip';
-import { useBattleMapPlayground } from '@/lib/hooks/battle/useBattleMapPlayground';
+import { useBattleMapPlayground } from '@/lib/hooks/battle';
 import { cn } from '@/lib/utils';
 import { PREVIEW_RULES } from '@/lib/utils/battle/fx/preview-rules';
 import { remainingMovement } from '@/lib/utils/battle/grid';

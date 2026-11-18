@@ -1,5 +1,5 @@
 import { SystemDmPage } from '@/components/systems/SystemDmPage';
-import { skillKeys } from '@/lib/hooks/skills/keys';
+import { skillKeys } from '@/lib/hooks/skills';
 import { PrefetchedQuery } from '@/lib/providers/prefetched-query';
 import { requireCampaignDMOrDemo } from '@/lib/server/campaigns/access';
 import { readSkills } from '@/lib/server/skills/read-skills';

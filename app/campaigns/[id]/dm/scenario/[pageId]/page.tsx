@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { ScenarioPageClient } from './page-client';
 
 import { isAiConfigured } from '@/lib/ai/crypto';
-import { scenarioKeys } from '@/lib/hooks/scenario/keys';
+import { scenarioKeys } from '@/lib/hooks/scenario';
 import { PrefetchedQuery } from '@/lib/providers/prefetched-query';
 import { requireCampaignDMOrDemo } from '@/lib/server/campaigns/access';
 import { loadPlayedSections } from '@/lib/server/scenario/page-store';

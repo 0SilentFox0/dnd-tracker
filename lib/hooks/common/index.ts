@@ -1,5 +1,7 @@
+export type { ConfirmOptions } from './confirm-context';
 export { ConfirmContext, type ConfirmFn } from './confirm-context';
 export { prefersReducedMotion } from './media-query';
+export { shortcutBlocked } from './shortcut-guard';
 export {
     createSessionFlag,
     createStorageFlag,

@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
 import { getCharacterProgression } from '@/lib/api/character-progression';
-import { skillKeys } from '@/lib/hooks/skills/keys';
+import { skillKeys } from '@/lib/hooks/skills';
 import { ENTITY_STALE_MS } from '@/lib/providers/query-provider';
 import { normalizeTree, resolveLearned } from '@/lib/utils/skills/progression';
 import { progressionView, rankOffers } from '@/systems/skilltrees/rules/progression';

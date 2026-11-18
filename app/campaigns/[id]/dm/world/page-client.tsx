@@ -24,7 +24,7 @@ import { TargetMark } from '@/components/world/travel/TargetMark';
 import { TravelPanel } from '@/components/world/travel/TravelPanel';
 import { WorldMapView } from '@/components/world/WorldMapView';
 import { useMediaQuery } from '@/lib/hooks/common';
-import { DESKTOP_QUERY } from '@/lib/hooks/common/useIsMobile';
+import { DESKTOP_QUERY } from '@/lib/hooks/common';
 import { type TravelMoved, useWorldEditorPage } from '@/lib/hooks/world';
 import { viewToMapProps } from '@/lib/utils/world/view-props';
 

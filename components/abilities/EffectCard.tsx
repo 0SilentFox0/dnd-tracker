@@ -12,7 +12,7 @@ import { NestedEffectsEditor } from './NestedEffectsEditor';
 import { Button } from '@/components/ui/button';
 import { SelectField } from '@/components/ui/select-field';
 import { useAbilityText } from '@/lib/hooks/abilities';
-import { useAbilityComposition } from '@/lib/hooks/abilities/useAbilityComposition';
+import { useAbilityComposition } from '@/lib/hooks/abilities';
 import { useSpellGroups } from '@/lib/hooks/spells';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import {

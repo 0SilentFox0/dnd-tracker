@@ -699,6 +699,34 @@ const eslintConfig = defineConfig([
         },
     },
     {
+        files: ['**/*.{ts,tsx}'],
+        ignores: ['lib/hooks/**', '**/__tests__/**', '**/*.test.{ts,tsx}'],
+        plugins: {
+            'hooks-barrel': {
+                rules: { deep: builtinRules.get('no-restricted-imports') },
+            },
+        },
+        rules: {
+            'hooks-barrel/deep': [
+                'error',
+                {
+                    patterns: [
+                        {
+                            group: [
+                                '@/lib/hooks/*/*',
+                                '!@/lib/hooks/battle/modes',
+                                '!@/lib/hooks/battle/modes/**',
+                                '!@/lib/hooks/abilities/useRecipeValues',
+                            ],
+                            message:
+                                'Хуки — лише з барелю домену (@/lib/hooks/<domain>). useRecipeValues лишається поза барелем за рішенням власника.',
+                        },
+                    ],
+                },
+            ],
+        },
+    },
+    {
         files: [
             'app/**/*.{ts,tsx}',
             'components/**/*.{ts,tsx}',

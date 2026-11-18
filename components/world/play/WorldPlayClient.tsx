@@ -17,7 +17,7 @@ import { TravelLog } from '@/components/world/travel/TravelLog';
 import { WorldCrumbs } from '@/components/world/WorldCrumbs';
 import { WorldMapView } from '@/components/world/WorldMapView';
 import { useMediaQuery } from '@/lib/hooks/common';
-import { DESKTOP_QUERY } from '@/lib/hooks/common/useIsMobile';
+import { DESKTOP_QUERY } from '@/lib/hooks/common';
 import { usePusherShowSync } from '@/lib/hooks/show';
 import { useWorldPlay } from '@/lib/hooks/world';
 import { viewToMapProps } from '@/lib/utils/world/view-props';

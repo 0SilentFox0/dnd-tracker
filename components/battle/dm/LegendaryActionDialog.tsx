@@ -9,7 +9,7 @@ import { OptionButton } from '@/components/hud/OptionButton';
 import { Button } from '@/components/ui/button';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { useLegendaryAction } from '@/lib/hooks/battle';
-import { useSpellBook } from '@/lib/hooks/battle/useSpellBook';
+import { useSpellBook } from '@/lib/hooks/battle';
 import { useText } from '@/lib/i18n/use-text';
 import { toggleAbilityTarget } from '@/lib/utils/battle/validation/ability-targets';
 import type { BattleParticipant, LegendaryOption } from '@/types/battle';

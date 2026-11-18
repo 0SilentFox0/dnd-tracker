@@ -69,5 +69,6 @@ export {
 export { useBattleSummary } from './useBattleSummary';
 export { useDeleteBattleCard } from './useDeleteBattleCard';
 export { useResetBattleCard } from './useResetBattleCard';
+export { writeBattleDelta } from './write-battle-delta';
 export type { SystemConditionBody } from '@/lib/api/battle-ops';
 export type { BattleConditionsBody, CoreActionBody } from '@/lib/api/battles';

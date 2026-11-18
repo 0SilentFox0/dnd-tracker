@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button';
 import {
     ConfirmContext,
     type ConfirmOptions,
-} from '@/lib/hooks/common/confirm-context';
+} from '@/lib/hooks/common';
 import { errorMessage } from '@/lib/utils/common/error-message';
 
 // loaded on the first confirm() so pages that never ask (the landing) skip Radix Dialog + vaul

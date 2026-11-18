@@ -1,6 +1,6 @@
 import { ScenarioIndexPageClient } from './page-client';
 
-import { scenarioKeys } from '@/lib/hooks/scenario/keys';
+import { scenarioKeys } from '@/lib/hooks/scenario';
 import { PrefetchedQuery } from '@/lib/providers/prefetched-query';
 import { requireCampaignDMOrDemo } from '@/lib/server/campaigns/access';
 import { listScenarioHandler } from '@/lib/server/scenario/read-scenario';

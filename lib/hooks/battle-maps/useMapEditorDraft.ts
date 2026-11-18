@@ -11,7 +11,7 @@ import {
 } from '@/lib/api/battle-map-background';
 import { ApiError } from '@/lib/api/client';
 import { MAP_LIMITS } from '@/lib/constants/map-limits';
-import { useBattleMapEditor } from '@/lib/hooks/battles';
+import { useBattleMapEditor } from '@/lib/hooks/battles/setup/useBattleMapEditor';
 import { useNotify } from '@/lib/hooks/common';
 import type { BattleMapInput } from '@/lib/schemas/battle-maps';
 import { normalizeUvttBackground } from '@/lib/utils/battle/uvtt/normalize-background';

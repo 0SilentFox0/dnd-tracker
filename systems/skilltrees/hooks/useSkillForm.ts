@@ -6,8 +6,8 @@ import { useTranslations } from 'next-intl';
 
 import { abilitySaveError, useAbilityValidity } from '@/lib/hooks/abilities';
 import { useNavigateFresh } from '@/lib/hooks/common';
-import { useMainSkills } from '@/lib/hooks/skills/useMainSkills';
-import { useCreateSkill, useUpdateSkill } from '@/lib/hooks/skills/useSkills';
+import { useMainSkills } from '@/lib/hooks/skills';
+import { useCreateSkill, useUpdateSkill } from '@/lib/hooks/skills';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import { initialSkillFormValues } from '@/systems/skilltrees/rules/form/normalize';
 import { buildSkillFormPayload } from '@/systems/skilltrees/rules/form/payload';

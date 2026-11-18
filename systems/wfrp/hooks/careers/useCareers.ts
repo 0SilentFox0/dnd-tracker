@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import { careerKeys } from './keys';
 
-import { characterKeys } from '@/lib/hooks/characters/keys';
+import { characterKeys } from '@/lib/hooks/characters';
 import { useCrudMutation } from '@/lib/hooks/common';
 import { REFERENCE_STALE_MS } from '@/lib/providers/query-provider';
 import {

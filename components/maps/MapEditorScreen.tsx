@@ -56,8 +56,8 @@ import {
     usePatchBattleMapTiles,
 } from '@/lib/hooks/battle-maps';
 // deep import: the battle-maps barrel would close a cycle through battles
-import { useMapEditorDraft } from '@/lib/hooks/battle-maps/useMapEditorDraft';
-import { useTileEditor } from '@/lib/hooks/battle-maps/useTileEditor';
+import { useMapEditorDraft } from '@/lib/hooks/battle-maps';
+import { useTileEditor } from '@/lib/hooks/battle-maps';
 import { useCoarsePointer, useUnsavedChangesGuard } from '@/lib/hooks/common';
 import { useText } from '@/lib/i18n/use-text';
 import {

@@ -8,4 +8,8 @@ export {
     useBattleMapTiles,
     usePatchBattleMapTiles,
 } from './useBattleMaps';
+export { useImportCatalogMap } from './useImportCatalogMap';
+export { useMapCatalog } from './useMapCatalog';
+export { useMapEditorDraft } from './useMapEditorDraft';
 export { type NewMapForm, useMapLibrary } from './useMapLibrary';
+export { useTileEditor } from './useTileEditor';

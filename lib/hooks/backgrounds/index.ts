@@ -1,3 +1,4 @@
+export { backgroundKeys } from './keys';
 export { useBackgroundForm } from './useBackgroundForm';
 export {
     useBackground,

@@ -1,6 +1,6 @@
 import { useTranslations } from 'next-intl';
 
-import type { IngredientLine } from '@/lib/hooks/battle/useIngredientPlan';
+import type { IngredientLine } from '@/lib/hooks/battle';
 
 export function IngredientsLine({
     line,

@@ -8,7 +8,7 @@ import { AssistantQueue } from './AssistantQueue';
 
 import { Button } from '@/components/ui/button';
 import { ASSISTANT_PAGE_SIZES } from '@/lib/constants/ai';
-import { useAssistantIntents } from '@/lib/hooks/ai/useAssistantIntents';
+import { useAssistantIntents } from '@/lib/hooks/ai';
 
 type Queue = ReturnType<typeof useAssistantIntents>;
 type Proposal = NonNullable<Queue['legacy']['data']>[number];
