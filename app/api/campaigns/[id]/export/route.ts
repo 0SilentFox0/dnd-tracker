@@ -1,24 +1,21 @@
 import { NextResponse } from 'next/server';
 
-import { prisma } from '@/lib/db';
 import { operationRoute } from '@/lib/server/content/content-routes';
 import { CONTENT_OPERATIONS } from '@/lib/server/content/operations';
 import { bundleErrorResponse } from '@/lib/server/templates/bundle-error';
-import { exportCampaign } from '@/lib/server/templates/export-campaign';
+import { exportCampaignDownload } from '@/lib/server/templates/export-download';
 import { attachmentHeaders } from '@/lib/utils/api/api-response';
 
 export const GET = operationRoute(
     CONTENT_OPERATIONS['campaign.export'],
     async ({ actor }) => {
         try {
-            const bundle = await exportCampaign(prisma, actor.campaignId);
-
-            const date = new Date().toISOString().slice(0, 10);
+            const { bundle, fileName } = await exportCampaignDownload(
+                actor.campaignId
+            );
 
             return NextResponse.json(bundle, {
-                headers: attachmentHeaders(
-                    `campaign-${actor.campaignId}-${date}.json`
-                ),
+                headers: attachmentHeaders(fileName),
             });
         } catch (error) {
             const response = bundleErrorResponse(error);

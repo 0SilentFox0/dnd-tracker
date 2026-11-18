@@ -21,3 +21,13 @@ export async function syncUserLocale(
 
     return null;
 }
+
+export async function saveUserPreferences(
+    userId: string,
+    data: { locale?: Locale; timeZone?: string | null }
+) {
+    await prisma.user.updateMany({
+        where: { id: userId },
+        data: { locale: data.locale, timeZone: data.timeZone },
+    });
+}

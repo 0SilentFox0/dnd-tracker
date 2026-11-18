@@ -1,17 +1,8 @@
 import { NextResponse } from 'next/server';
 
 import '@/lib/server/systems/registry';
-import { invalidateCampaignLists } from '@/lib/cache/campaign-list';
-import { API_ERRORS } from '@/lib/constants/api-errors';
-import {
-    CampaignKind,
-    CampaignRole,
-    CampaignStatus,
-    isDemoKind,
-} from '@/lib/constants/campaigns';
-import { prisma } from '@/lib/db';
 import { joinCampaignSchema } from '@/lib/schemas';
-import { ensureDbUser, PUBLIC_USER_SELECT } from '@/lib/server/users/db-user';
+import { joinCampaignByCode } from '@/lib/server/campaigns/join-campaign';
 import { requireAuthUser } from '@/lib/utils/api/api-auth';
 import { errorResponse } from '@/lib/utils/api/api-response';
 import { handleApiError } from '@/lib/utils/api/error-handler';
@@ -47,53 +38,11 @@ export async function POST(request: Request) {
 
         const { inviteCode } = parsedBody;
 
-        // codes are uppercase, but phone keyboards often send lowercase
-        const campaign = await prisma.campaign.findFirst({
-            where: { inviteCode: { equals: inviteCode, mode: 'insensitive' } },
-            include: { members: { select: { userId: true } } },
-            omit: { aiInstructions: true },
-        });
+        const joined = await joinCampaignByCode(userId, authUser, inviteCode);
 
-        if (!campaign) {
-            return errorResponse(API_ERRORS.CAMPAIGN_NOT_FOUND, 404);
-        }
+        if (!joined.ok) return errorResponse(joined.error, joined.status);
 
-        if (campaign.kind === CampaignKind.TEMPLATE) {
-            return errorResponse(API_ERRORS.TEMPLATE_NOT_JOINABLE, 403);
-        }
-
-        if (isDemoKind(campaign.kind)) {
-            return errorResponse(API_ERRORS.DEMO_NOT_JOINABLE, 403);
-        }
-
-        if (campaign.status !== CampaignStatus.ACTIVE) {
-            return errorResponse(API_ERRORS.CAMPAIGN_NOT_ACTIVE, 400);
-        }
-
-        if (campaign.members.some((m) => m.userId === userId)) {
-            return errorResponse(API_ERRORS.ALREADY_MEMBER, 400);
-        }
-
-        await ensureDbUser(authUser);
-
-        const member = await prisma.campaignMember.create({
-            data: {
-                campaignId: campaign.id,
-                userId,
-                role: CampaignRole.PLAYER,
-            },
-            include: {
-                campaign: { omit: { aiInstructions: true } },
-                user: { select: PUBLIC_USER_SELECT },
-            },
-        });
-
-        await invalidateCampaignLists([
-            userId,
-            ...campaign.members.map((m) => m.userId),
-        ]);
-
-        return NextResponse.json(member);
+        return NextResponse.json(joined.member);
     } catch (error) {
         return handleApiError(error, { action: 'join campaign' });
     }

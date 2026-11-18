@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
 
-import { prisma } from '@/lib/db';
 import { battleRecordHttp } from '@/lib/server/battles/http';
+import {
+    listBattleBriefs,
+    listCampaignBattles,
+} from '@/lib/server/battles/list-battles';
 import { requireCampaignAccess } from '@/lib/utils/api/api-auth';
 import { handleApiError } from '@/lib/utils/api/error-handler';
-import { publicSetup } from '@/lib/utils/battle/participant/reserve';
-import { battleSceneListSelect } from '@/lib/utils/battle/store/scene-list-select';
-import type { BattlePreparationParticipant } from '@/types/battle';
 
 type Params = { params: Promise<{ id: string }> };
 export async function POST(req: Request, { params }: Params) {
@@ -32,36 +32,11 @@ export async function GET(
         }
 
         if (new URL(request.url).searchParams.get('brief') === '1') {
-            const briefs = await prisma.battleScene.findMany({
-                where: { campaignId: id },
-                orderBy: { createdAt: 'desc' },
-                select: { id: true, name: true, status: true },
-            });
-
-            return NextResponse.json(briefs);
+            return NextResponse.json(await listBattleBriefs(id));
         }
 
-        const battles = await prisma.battleScene.findMany({
-            where: {
-                campaignId: id,
-            },
-            orderBy: {
-                createdAt: 'desc',
-            },
-            select: battleSceneListSelect,
-        });
-
         return NextResponse.json(
-            battles.map((b) => ({
-                ...b,
-                participants: accessResult.isDM
-                    ? b.participants
-                    : publicSetup(
-                          b.participants as unknown as BattlePreparationParticipant[]
-                      ),
-                initiativeOrder: [] as unknown[],
-                battleLog: [] as unknown[],
-            }))
+            await listCampaignBattles(id, accessResult.isDM)
         );
     } catch (error) {
         return handleApiError(error, { action: 'list battles' });
