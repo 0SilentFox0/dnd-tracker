@@ -148,9 +148,7 @@ async function writeMapState(
     const data = {
         removedEdges: state.removedEdges as Prisma.InputJsonValue,
         doors: toInputJson(state.doors),
-        fog: state.fog
-            ? (toInputJson(state.fog))
-            : Prisma.DbNull,
+        fog: state.fog ? toInputJson(state.fog) : Prisma.DbNull,
     };
 
     await tx.battleMapState.upsert({
@@ -257,6 +255,243 @@ export function prepareSave(
     };
 }
 
+type SaveScope = {
+    before: LoadedBattle;
+    outcome: BattleMutationOutcome;
+    write: BattleWrite;
+} & Pick<
+    ReturnType<typeof prepareSave>,
+    'beforeStored' | 'diff' | 'events' | 'clearHistory' | 'turnStartedAt'
+>;
+
+async function assertPinnedMap(
+    tx: Prisma.TransactionClient,
+    { outcome }: SaveScope
+) {
+    const patch = outcome.scene ?? {};
+
+    if (patch.mapRef) {
+        const { mapId, version } = patch.mapRef;
+
+        await lockMapRow(tx, mapId, 'share');
+
+        const pinned = await tx.battleMapVersion.findUnique({
+            where: { mapId_version: { mapId, version } },
+            select: { version: true },
+        });
+
+        if (!pinned) throw new BattleConflictError();
+    }
+}
+
+async function updateScene(tx: Prisma.TransactionClient, s: SaveScope) {
+    const { before, outcome, events, clearHistory, turnStartedAt } = s;
+
+    const { scene } = before;
+
+    const patch = outcome.scene ?? {};
+
+    const { count } = await tx.battleScene.updateMany({
+        where: { id: scene.id, version: scene.version },
+        data: {
+            version: { increment: 1 },
+            eventSeq: clearHistory
+                ? events.length
+                : scene.eventSeq + events.length,
+            ...(patch.status !== undefined && { status: patch.status }),
+            ...(patch.round !== undefined && { currentRound: patch.round }),
+            ...(patch.turnIndex !== undefined && {
+                currentTurnIndex: patch.turnIndex,
+            }),
+            ...(patch.pendingMoraleCheck !== undefined && {
+                pendingMoraleCheck: jsonOrNull(patch.pendingMoraleCheck),
+            }),
+            ...(patch.pendingChoice !== undefined && {
+                pendingCritChoice: jsonOrNull(patch.pendingChoice),
+            }),
+            ...(patch.sceneState !== undefined && {
+                systemState: patch.sceneState
+                    ? toInputJson(patch.sceneState)
+                    : Prisma.DbNull,
+            }),
+            ...(patch.startedAt !== undefined && {
+                startedAt: patch.startedAt,
+            }),
+            ...(turnStartedAt !== (scene.turnStartedAt ?? null) && {
+                turnStartedAt,
+            }),
+            ...(patch.completedAt !== undefined && {
+                completedAt: patch.completedAt,
+            }),
+            ...(patch.map !== undefined && {
+                map: jsonOrNull(
+                    patch.map &&
+                        persistedMap(
+                            before.meta,
+                            patch.map,
+                            patch.mapState === undefined
+                                ? before.meta.mapState
+                                : patch.mapState
+                        )
+                ),
+            }),
+            ...(patch.mapRef && { mapVersion: patch.mapRef.version }),
+            ...(patch.rules !== undefined && {
+                rules: patch.rules as Prisma.InputJsonValue,
+            }),
+        },
+    });
+
+    if (count === 0) throw new BattleConflictError();
+}
+
+async function writeParticipants(
+    tx: Prisma.TransactionClient,
+    { before, outcome, diff }: SaveScope
+) {
+    const { scene } = before;
+
+    const patch = outcome.scene ?? {};
+
+    if (
+        patch.mapState !== undefined &&
+        !(
+            isEmptyMapState(before.meta.mapState) &&
+            isEmptyMapState(patch.mapState)
+        )
+    )
+        await writeMapState(tx, scene.id, patch.mapState);
+
+    if (diff.created.length > 0) {
+        await tx.battleParticipant.createMany({
+            data: diff.created.map((p) => ({
+                ...p.columns,
+                battleId: scene.id,
+                snapshot: toInputJson(p.snapshot),
+                state: toInputJson(p.state),
+                snapshotHash: p.snapshotHash,
+            })),
+        });
+    }
+
+    if (diff.removed.length > 0) {
+        await tx.battleParticipant.deleteMany({
+            where: {
+                battleId: scene.id,
+                id: { in: diff.removed.map((p) => p.columns.id) },
+            },
+        });
+    }
+
+    if (diff.updated.length > 0)
+        await tx.$executeRaw(updateParticipantsSql(scene.id, diff.updated));
+}
+
+async function writeHistory(
+    tx: Prisma.TransactionClient,
+    { before, outcome, diff, events, clearHistory, beforeStored }: SaveScope
+) {
+    const { scene } = before;
+
+    const patch = outcome.scene ?? {};
+
+    if (outcome.history && 'cancelFromSeq' in outcome.history) {
+        await tx.battleEvent.updateMany({
+            where: {
+                battleId: scene.id,
+                seq: { gte: outcome.history.cancelFromSeq },
+                cancelledAt: null,
+            },
+            data: { cancelledAt: new Date() },
+        });
+        await tx.battleSnapshot.deleteMany({
+            where: {
+                battleId: scene.id,
+                seq: { gte: outcome.history.cancelFromSeq },
+            },
+        });
+    }
+
+    if (clearHistory) {
+        await tx.battleEvent.deleteMany({ where: { battleId: scene.id } });
+        await tx.battleSnapshot.deleteMany({
+            where: { battleId: scene.id },
+        });
+    }
+
+    if (events.length > 0) {
+        await tx.battleSnapshot.createMany({
+            data: [
+                {
+                    battleId: scene.id,
+                    seq: events[0].seq,
+                    state: toInputJson(
+                        buildSnapshotState(
+                            scene,
+                            beforeStored,
+                            diff,
+                            before.meta.map,
+                            {
+                                mapState: before.meta.mapState,
+                                mapRef: before.meta.mapRef,
+                                mapStateChanged: patch.mapState !== undefined,
+                            }
+                        )
+                    ),
+                },
+            ],
+        });
+        await tx.battleEvent.createMany({
+            data: events.map((e) => ({
+                ...e,
+                battleId: scene.id,
+                targets: e.targets as Prisma.InputJsonValue,
+                details: e.details as Prisma.InputJsonValue,
+                hpChanges: e.hpChanges as Prisma.InputJsonValue,
+            })),
+        });
+    }
+}
+
+async function persistCompletion(
+    tx: Prisma.TransactionClient,
+    { before, outcome, write }: SaveScope
+) {
+    const { scene } = before;
+
+    await persistCharacterResources(
+        tx,
+        {
+            campaignId: scene.campaignId,
+            battleId: scene.id,
+            rules: before.meta.rules,
+        },
+        outcome.participants
+    );
+    await persistBattleXp(
+        tx,
+        {
+            campaignId: scene.campaignId,
+            battleId: scene.id,
+            rules: before.meta.rules,
+            locale: write.logLocale,
+        },
+        outcome.participants,
+        outcome.events
+    );
+    await persistConsumables(
+        tx,
+        { campaignId: scene.campaignId },
+        outcome.participants
+    );
+    await persistIngredients(
+        tx,
+        { campaignId: scene.campaignId, rules: before.meta.rules },
+        outcome.participants
+    );
+    await tx.$executeRaw(pruneSnapshotsSql(scene.id));
+}
+
 export async function saveBattle(
     db: BattleDb,
     before: LoadedBattle,
@@ -271,205 +506,25 @@ export async function saveBattle(
         ? await getTranslator(write.logLocale)
         : undefined;
 
-    const { beforeStored, diff, events, clearHistory, delta, turnStartedAt } =
-        prepareSave(
-            before,
-            outcome,
-            t && ((log) => formatBattleLog(t, { log, resultText: '' }))
-        );
+    const { delta, ...prepared } = prepareSave(
+        before,
+        outcome,
+        t && ((log) => formatBattleLog(t, { log, resultText: '' }))
+    );
+
+    const scope: SaveScope = { before, outcome, write, ...prepared };
 
     const completing =
         patch.status === BattleStatus.COMPLETED &&
         scene.status !== BattleStatus.COMPLETED;
 
     await db.$transaction(async (tx) => {
-        if (patch.mapRef) {
-            const { mapId, version } = patch.mapRef;
+        await assertPinnedMap(tx, scope);
+        await updateScene(tx, scope);
+        await writeParticipants(tx, scope);
+        await writeHistory(tx, scope);
 
-            await lockMapRow(tx, mapId, 'share');
-
-            const pinned = await tx.battleMapVersion.findUnique({
-                where: { mapId_version: { mapId, version } },
-                select: { version: true },
-            });
-
-            if (!pinned) throw new BattleConflictError();
-        }
-
-        const { count } = await tx.battleScene.updateMany({
-            where: { id: scene.id, version: scene.version },
-            data: {
-                version: { increment: 1 },
-                eventSeq: clearHistory
-                    ? events.length
-                    : scene.eventSeq + events.length,
-                ...(patch.status !== undefined && { status: patch.status }),
-                ...(patch.round !== undefined && { currentRound: patch.round }),
-                ...(patch.turnIndex !== undefined && {
-                    currentTurnIndex: patch.turnIndex,
-                }),
-                ...(patch.pendingMoraleCheck !== undefined && {
-                    pendingMoraleCheck: jsonOrNull(patch.pendingMoraleCheck),
-                }),
-                ...(patch.pendingChoice !== undefined && {
-                    pendingCritChoice: jsonOrNull(patch.pendingChoice),
-                }),
-                ...(patch.sceneState !== undefined && {
-                    systemState: patch.sceneState
-                        ? (toInputJson(patch.sceneState))
-                        : Prisma.DbNull,
-                }),
-                ...(patch.startedAt !== undefined && {
-                    startedAt: patch.startedAt,
-                }),
-                ...(turnStartedAt !== (scene.turnStartedAt ?? null) && {
-                    turnStartedAt,
-                }),
-                ...(patch.completedAt !== undefined && {
-                    completedAt: patch.completedAt,
-                }),
-                ...(patch.map !== undefined && {
-                    map: jsonOrNull(
-                        patch.map &&
-                            persistedMap(
-                                before.meta,
-                                patch.map,
-                                patch.mapState === undefined
-                                    ? before.meta.mapState
-                                    : patch.mapState
-                            )
-                    ),
-                }),
-                ...(patch.mapRef && { mapVersion: patch.mapRef.version }),
-                ...(patch.rules !== undefined && {
-                    rules: patch.rules as Prisma.InputJsonValue,
-                }),
-            },
-        });
-
-        if (count === 0) throw new BattleConflictError();
-
-        if (
-            patch.mapState !== undefined &&
-            !(
-                isEmptyMapState(before.meta.mapState) &&
-                isEmptyMapState(patch.mapState)
-            )
-        )
-            await writeMapState(tx, scene.id, patch.mapState);
-
-        if (diff.created.length > 0) {
-            await tx.battleParticipant.createMany({
-                data: diff.created.map((p) => ({
-                    ...p.columns,
-                    battleId: scene.id,
-                    snapshot: toInputJson(p.snapshot),
-                    state: toInputJson(p.state),
-                    snapshotHash: p.snapshotHash,
-                })),
-            });
-        }
-
-        if (diff.removed.length > 0) {
-            await tx.battleParticipant.deleteMany({
-                where: {
-                    battleId: scene.id,
-                    id: { in: diff.removed.map((p) => p.columns.id) },
-                },
-            });
-        }
-
-        if (diff.updated.length > 0)
-            await tx.$executeRaw(updateParticipantsSql(scene.id, diff.updated));
-
-        if (outcome.history && 'cancelFromSeq' in outcome.history) {
-            await tx.battleEvent.updateMany({
-                where: {
-                    battleId: scene.id,
-                    seq: { gte: outcome.history.cancelFromSeq },
-                    cancelledAt: null,
-                },
-                data: { cancelledAt: new Date() },
-            });
-            await tx.battleSnapshot.deleteMany({
-                where: {
-                    battleId: scene.id,
-                    seq: { gte: outcome.history.cancelFromSeq },
-                },
-            });
-        }
-
-        if (clearHistory) {
-            await tx.battleEvent.deleteMany({ where: { battleId: scene.id } });
-            await tx.battleSnapshot.deleteMany({
-                where: { battleId: scene.id },
-            });
-        }
-
-        if (events.length > 0) {
-            await tx.battleSnapshot.createMany({
-                data: [
-                    {
-                        battleId: scene.id,
-                        seq: events[0].seq,
-                        state: toInputJson(buildSnapshotState(
-                            scene,
-                            beforeStored,
-                            diff,
-                            before.meta.map,
-                            {
-                                mapState: before.meta.mapState,
-                                mapRef: before.meta.mapRef,
-                                mapStateChanged: patch.mapState !== undefined,
-                            }
-                        )),
-                    },
-                ],
-            });
-            await tx.battleEvent.createMany({
-                data: events.map((e) => ({
-                    ...e,
-                    battleId: scene.id,
-                    targets: e.targets as Prisma.InputJsonValue,
-                    details: e.details as Prisma.InputJsonValue,
-                    hpChanges: e.hpChanges as Prisma.InputJsonValue,
-                })),
-            });
-        }
-
-        if (completing) {
-            await persistCharacterResources(
-                tx,
-                {
-                    campaignId: scene.campaignId,
-                    battleId: scene.id,
-                    rules: before.meta.rules,
-                },
-                outcome.participants
-            );
-            await persistBattleXp(
-                tx,
-                {
-                    campaignId: scene.campaignId,
-                    battleId: scene.id,
-                    rules: before.meta.rules,
-                    locale: write.logLocale,
-                },
-                outcome.participants,
-                outcome.events
-            );
-            await persistConsumables(
-                tx,
-                { campaignId: scene.campaignId },
-                outcome.participants
-            );
-            await persistIngredients(
-                tx,
-                { campaignId: scene.campaignId, rules: before.meta.rules },
-                outcome.participants
-            );
-            await tx.$executeRaw(pruneSnapshotsSql(scene.id));
-        }
+        if (completing) await persistCompletion(tx, scope);
     });
 
     return delta;
