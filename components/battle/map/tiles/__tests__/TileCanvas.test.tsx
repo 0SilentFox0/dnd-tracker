@@ -7,12 +7,17 @@ const loadTileImage = vi.hoisted(() => vi.fn());
 
 const drawCachedTileViewport = vi.hoisted(() => vi.fn());
 
+const clearTileRasterCache = vi.hoisted(() => vi.fn());
+
 vi.mock('../assets', async (importOriginal) => ({
     ...(await importOriginal<typeof import('../assets')>()),
     loadTileImage,
 }));
 
-vi.mock('../chunk-cache', () => ({ drawCachedTileViewport }));
+vi.mock('../chunk-cache', () => ({
+    drawCachedTileViewport,
+    clearTileRasterCache,
+}));
 
 import { TileCanvas } from '../TileCanvas';
 

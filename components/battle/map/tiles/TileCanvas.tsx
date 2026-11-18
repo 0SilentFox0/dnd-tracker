@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { loadTileImage, visibleTileIds as getVisibleTileIds } from './assets';
-import { drawCachedTileViewport } from './chunk-cache';
+import { clearTileRasterCache, drawCachedTileViewport } from './chunk-cache';
 import type { TileRasterAssets } from './painter';
 
 import { TILE_CATALOG, tileDefinition } from '@/lib/constants/tilesets/catalog';
@@ -82,6 +82,13 @@ export function TileCanvas({
         });
     }, [visibleTileIds]);
 
+    const assets = useMemo(
+        () => ({ ...loadedAssets, ...tiles.assets }),
+        [loadedAssets, tiles.assets]
+    );
+
+    useEffect(() => clearTileRasterCache, [tiles.mapId]);
+
     useEffect(() => {
         const canvas = canvasRef.current;
 
@@ -95,21 +102,27 @@ export function TileCanvas({
 
         const height = Math.ceil(viewport.rows * cellPx);
 
-        canvas.width = Math.ceil(width * pixelRatio);
-        canvas.height = Math.ceil(height * pixelRatio);
+        const pixelWidth = Math.ceil(width * pixelRatio);
+
+        const pixelHeight = Math.ceil(height * pixelRatio);
+
+        if (canvas.width !== pixelWidth) canvas.width = pixelWidth;
+
+        if (canvas.height !== pixelHeight) canvas.height = pixelHeight;
+
         context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
         drawCachedTileViewport(context, {
             mapId: tiles.mapId,
             version: tiles.version,
             chunks: tiles.chunks,
-            assets: { ...loadedAssets, ...tiles.assets },
+            assets,
             catalog: CATALOG_BY_ID,
             window: viewport,
             cellPx,
             pixelRatio,
             seed: tiles.seed,
         });
-    }, [tiles, loadedAssets, viewport, cellPx]);
+    }, [tiles, assets, viewport, cellPx]);
 
     if (!viewport) return null;
 

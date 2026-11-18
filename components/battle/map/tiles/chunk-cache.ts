@@ -2,6 +2,7 @@ import { drawTileViewport, type TileRasterAssets } from './painter';
 
 import type { TileDefinition } from '@/lib/constants/tilesets/types';
 import type { GridWindow } from '@/lib/utils/battle/grid';
+import { CHUNK_SIDE, chunkKey } from '@/lib/utils/battle/map-storage/chunk-key';
 import type { TileLayerChunks } from '@/lib/utils/battle/tiles/derive';
 import type { TileLayer } from '@/lib/utils/battle/tiles/types';
 
@@ -99,8 +100,6 @@ export class TileRasterChunkCache<T = CanvasImageSource> {
     }
 }
 
-const CHUNK_SIDE = 16;
-
 const CHUNK_PADDING = 1;
 
 const TILE_LAYERS: readonly TileLayer[] = [
@@ -111,6 +110,52 @@ const TILE_LAYERS: readonly TileLayer[] = [
 ];
 
 const rasterCache = new TileRasterChunkCache<CanvasImageSource>();
+
+export function clearTileRasterCache(): void {
+    rasterCache.clear();
+}
+
+const signatureMemo = new WeakMap<
+    TileLayerChunks,
+    WeakMap<TileRasterAssets, Map<string, string>>
+>();
+
+function memoizedSignature(
+    chunks: TileLayerChunks,
+    layer: TileLayer,
+    cx: number,
+    cy: number,
+    assets: TileRasterAssets,
+    cellPx: number,
+    seed: string
+): string {
+    let byAssets = signatureMemo.get(chunks);
+
+    if (!byAssets) signatureMemo.set(chunks, (byAssets = new WeakMap()));
+
+    let byKey = byAssets.get(assets);
+
+    if (!byKey) byAssets.set(assets, (byKey = new Map()));
+
+    const key = `${layer}|${cx}|${cy}|${cellPx}|${seed}`;
+
+    let signature = byKey.get(key);
+
+    if (signature === undefined) {
+        signature = rasterSignature(
+            chunks,
+            layer,
+            cx,
+            cy,
+            assets,
+            cellPx,
+            seed
+        );
+        byKey.set(key, signature);
+    }
+
+    return signature;
+}
 
 function createRasterCanvas(width: number, height: number) {
     if (typeof OffscreenCanvas !== 'undefined')
@@ -132,7 +177,7 @@ function hasNearbyChunk(
 ): boolean {
     for (let y = cy - 1; y <= cy + 1; y++) {
         for (let x = cx - 1; x <= cx + 1; x++) {
-            if (chunks[layer]?.[`${x}:${y}`]) return true;
+            if (chunks[layer]?.[chunkKey(x, y)]) return true;
         }
     }
 
@@ -154,7 +199,7 @@ export function rasterSignature(
 
     for (let y = cy - 1; y <= cy + 1; y++) {
         for (let x = cx - 1; x <= cx + 1; x++) {
-            const values = chunks[layer]?.[`${x}:${y}`];
+            const values = chunks[layer]?.[chunkKey(x, y)];
 
             if (values) for (const id of values) if (assets[id]) used.add(id);
 
@@ -230,7 +275,7 @@ export function drawCachedTileViewport(
                         cx,
                         cy,
                         pixelRatio,
-                        signature: rasterSignature(
+                        signature: memoizedSignature(
                             chunks,
                             layer,
                             cx,

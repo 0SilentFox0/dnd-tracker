@@ -2,7 +2,7 @@
 
 import { memo } from 'react';
 
-import { PULSE_STEP_MS } from './constants';
+import { PULSE_STEP_MS, STROKE_COLORS, TEMPLATE_COLORS } from './constants';
 
 import {
     cellDistance,
@@ -28,8 +28,8 @@ export const StrokeLayer = memo(function StrokeLayer({
                     key={`p${k}`}
                     data-stroke-pending={k}
                     points={cellPolygon(parseCellKey(k))}
-                    fill="rgba(242,193,78,.22)"
-                    stroke="#f2c14e"
+                    fill={STROKE_COLORS.pendingFill}
+                    stroke={STROKE_COLORS.stroke}
                     strokeOpacity={0.6}
                     strokeWidth={1.5}
                     strokeDasharray="6 4"
@@ -41,8 +41,8 @@ export const StrokeLayer = memo(function StrokeLayer({
                     key={`s${k}`}
                     data-stroke={k}
                     points={cellPolygon(parseCellKey(k))}
-                    fill="rgba(242,193,78,.35)"
-                    stroke="#f2c14e"
+                    fill={STROKE_COLORS.fill}
+                    stroke={STROKE_COLORS.stroke}
                     strokeWidth={2}
                     vectorEffect="non-scaling-stroke"
                 />
@@ -86,8 +86,8 @@ export const TemplateLayer = memo(function TemplateLayer({
                     data-template-cell={k}
                     {...pulse(parseCellKey(k))}
                     points={cellPolygon(parseCellKey(k))}
-                    fill="rgba(168,120,255,.3)"
-                    stroke="#c4a6ff"
+                    fill={TEMPLATE_COLORS.fill}
+                    stroke={TEMPLATE_COLORS.stroke}
                     strokeWidth={1.5}
                     vectorEffect="non-scaling-stroke"
                 />
@@ -97,8 +97,8 @@ export const TemplateLayer = memo(function TemplateLayer({
                     data-template-aim={cellKey(aim)}
                     {...pulse(aim)}
                     points={cellPolygon(aim)}
-                    fill="rgba(200,176,255,.5)"
-                    stroke="#efe6ff"
+                    fill={TEMPLATE_COLORS.aimFill}
+                    stroke={TEMPLATE_COLORS.aimStroke}
                     strokeWidth={3}
                     vectorEffect="non-scaling-stroke"
                 />

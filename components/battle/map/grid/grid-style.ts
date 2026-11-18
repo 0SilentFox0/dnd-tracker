@@ -85,3 +85,16 @@ export function terrainTitle(
 
     return cell.kind === 'hazard' ? hazardTitle(t, cell, round) : null;
 }
+
+export const GRID_COLORS = {
+    barrierHatch: 'rgba(255,255,255,.28)',
+    difficultHatch: 'rgba(190,140,70,.7)',
+    hazardGradient: ['#ffd36b', '#ff7a1a', '#b8200f'],
+    flameStroke: '#ffe08a',
+    flameFill: 'rgba(255,120,30,.85)',
+    hazardOutline: '#ff9a2a',
+    obscured: 'rgba(210,215,225,.38)',
+    hazardEmber: 'rgba(255,190,70,.3)',
+    hazardEmberOutline: '#ffc35a',
+    blocked: 'rgba(20,0,0,.6)',
+} as const;

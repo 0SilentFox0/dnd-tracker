@@ -8,6 +8,7 @@ import {
     FLAME_ID,
     FLAME_SIZE,
     HATCH_ID,
+    GRID_COLORS,
     HAZARD_GRADIENT_ID,
     inWindow,
     TERRAIN_FILL,
@@ -86,7 +87,7 @@ export const GridDefs = memo(function GridDefs() {
                     y1="0"
                     x2="0"
                     y2={UNIT * 0.14}
-                    stroke="rgba(255,255,255,.28)"
+                    stroke={GRID_COLORS.barrierHatch}
                     strokeWidth={UNIT * 0.03}
                 />
             </pattern>
@@ -102,21 +103,33 @@ export const GridDefs = memo(function GridDefs() {
                     y1="0"
                     x2="0"
                     y2={UNIT * 0.2}
-                    stroke="rgba(190,140,70,.7)"
+                    stroke={GRID_COLORS.difficultHatch}
                     strokeWidth={UNIT * 0.035}
                 />
             </pattern>
             <radialGradient id={HAZARD_GRADIENT_ID}>
-                <stop offset="0%" stopColor="#ffd36b" stopOpacity={0.75} />
-                <stop offset="55%" stopColor="#ff7a1a" stopOpacity={0.62} />
-                <stop offset="100%" stopColor="#b8200f" stopOpacity={0.7} />
+                <stop
+                    offset="0%"
+                    stopColor={GRID_COLORS.hazardGradient[0]}
+                    stopOpacity={0.75}
+                />
+                <stop
+                    offset="55%"
+                    stopColor={GRID_COLORS.hazardGradient[1]}
+                    stopOpacity={0.62}
+                />
+                <stop
+                    offset="100%"
+                    stopColor={GRID_COLORS.hazardGradient[2]}
+                    stopOpacity={0.7}
+                />
             </radialGradient>
             <symbol id={FLAME_ID} viewBox="0 0 24 24" overflow="visible">
                 <Flame
                     width={24}
                     height={24}
-                    color="#ffe08a"
-                    fill="rgba(255,120,30,.85)"
+                    color={GRID_COLORS.flameStroke}
+                    fill={GRID_COLORS.flameFill}
                     strokeWidth={1.6}
                 />
             </symbol>
@@ -211,7 +224,7 @@ export const GridStatic = memo(function GridStatic({
                         <path
                             d={paths.hazardOutline}
                             fill="none"
-                            stroke="#ff9a2a"
+                            stroke={GRID_COLORS.hazardOutline}
                             strokeOpacity={0.9}
                             strokeWidth={1.5}
                             vectorEffect="non-scaling-stroke"
@@ -230,17 +243,20 @@ export const GridStatic = memo(function GridStatic({
                 <path
                     data-obscured=""
                     d={paths.obscured}
-                    fill="rgba(210,215,225,.38)"
+                    fill={GRID_COLORS.obscured}
                 />
             )}
             {hazardKeys.length > 0 && (
                 <g data-hazard-layer="">
                     <g className="battle-map-ember">
-                        <path d={paths.hazardFill} fill="rgba(255,190,70,.3)" />
+                        <path
+                            d={paths.hazardFill}
+                            fill={GRID_COLORS.hazardEmber}
+                        />
                         <path
                             d={paths.hazardOutline}
                             fill="none"
-                            stroke="#ffc35a"
+                            stroke={GRID_COLORS.hazardEmberOutline}
                             strokeWidth={2}
                             vectorEffect="non-scaling-stroke"
                         />
@@ -273,7 +289,7 @@ export const GridStatic = memo(function GridStatic({
                 <path
                     data-blocked=""
                     d={paths.blocked}
-                    fill="rgba(20,0,0,.6)"
+                    fill={GRID_COLORS.blocked}
                 />
             )}
         </g>

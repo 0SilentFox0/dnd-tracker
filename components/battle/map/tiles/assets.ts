@@ -1,9 +1,8 @@
 import type { TileDefinition } from '@/lib/constants/tilesets/types';
 import type { GridWindow } from '@/lib/utils/battle/grid';
+import { CHUNK_SIDE, chunkKey } from '@/lib/utils/battle/map-storage/chunk-key';
 import type { TileLayerChunks } from '@/lib/utils/battle/tiles/derive';
 import { loadImage } from '@/lib/utils/common/image-decode';
-
-const CHUNK_SIDE = 16;
 
 const imagePromises = new Map<string, Promise<HTMLImageElement>>();
 
@@ -49,7 +48,7 @@ export function visibleTileIds(
     for (const layerChunks of Object.values(chunks)) {
         for (let cy = startCy; cy <= endCy; cy++) {
             for (let cx = startCx; cx <= endCx; cx++) {
-                const chunk = layerChunks?.[`${cx}:${cy}`];
+                const chunk = layerChunks?.[chunkKey(cx, cy)];
 
                 if (!chunk) continue;
 

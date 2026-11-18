@@ -1,13 +1,12 @@
 import { formatEdgeKey, parseEdgeKey } from '@/lib/utils/battle/grid/walls';
 import {
     CHUNK_SIDE,
+    chunkKey,
     parseChunkKey,
 } from '@/lib/utils/battle/map-storage/chunk-key';
 import { toBase64 } from '@/lib/utils/common/base64';
 
-export const CHUNK_SIZE = CHUNK_SIDE;
-
-const CHUNK_BYTES = (CHUNK_SIZE * CHUNK_SIZE * 2 * 2) / 8;
+const CHUNK_BYTES = (CHUNK_SIDE * CHUNK_SIDE * 2 * 2) / 8;
 
 export const EMPTY_EDGE_CHUNK = toBase64(new Uint8Array(CHUNK_BYTES));
 
@@ -31,7 +30,7 @@ export class EdgeChunkError extends Error {
 
 function slot(x: number, y: number, side: 'e' | 's'): number {
     return (
-        ((y % CHUNK_SIZE) * CHUNK_SIZE + (x % CHUNK_SIZE)) * 2 +
+        ((y % CHUNK_SIDE) * CHUNK_SIDE + (x % CHUNK_SIDE)) * 2 +
         (side === 'e' ? 0 : 1)
     );
 }
@@ -69,7 +68,10 @@ function put(
 
     if (a.x < 0 || a.y < 0 || a.x >= cols || a.y >= rows) return;
 
-    const key = `${Math.floor(a.x / CHUNK_SIZE)}:${Math.floor(a.y / CHUNK_SIZE)}`;
+    const key = chunkKey(
+        Math.floor(a.x / CHUNK_SIDE),
+        Math.floor(a.y / CHUNK_SIDE)
+    );
 
     let bytes = chunks.get(key);
 
@@ -95,7 +97,10 @@ export function encodeEdges(
     for (const e of edges.walls ?? []) {
         const { a, side } = parseEdgeKey(e);
 
-        const key = `${Math.floor(a.x / CHUNK_SIZE)}:${Math.floor(a.y / CHUNK_SIZE)}`;
+        const key = chunkKey(
+            Math.floor(a.x / CHUNK_SIDE),
+            Math.floor(a.y / CHUNK_SIDE)
+        );
 
         const bytes = chunks.get(key);
 
@@ -145,7 +150,7 @@ export function decodeEdges(
 
         const bytes = fromBase64(value, key);
 
-        for (let idx = 0; idx < CHUNK_SIZE * CHUNK_SIZE * 2; idx++) {
+        for (let idx = 0; idx < CHUNK_SIDE * CHUNK_SIDE * 2; idx++) {
             const kind = (bytes[idx >> 2] >> ((idx & 3) * 2)) & 3;
 
             if (kind === 0) continue;
@@ -155,9 +160,9 @@ export function decodeEdges(
 
             const cell = idx >> 1;
 
-            const x = cx * CHUNK_SIZE + (cell % CHUNK_SIZE);
+            const x = cx * CHUNK_SIDE + (cell % CHUNK_SIDE);
 
-            const y = cy * CHUNK_SIZE + Math.floor(cell / CHUNK_SIZE);
+            const y = cy * CHUNK_SIDE + Math.floor(cell / CHUNK_SIDE);
 
             if (x >= cols || y >= rows) {
                 throw new EdgeChunkError(

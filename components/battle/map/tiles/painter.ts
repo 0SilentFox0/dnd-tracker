@@ -1,5 +1,6 @@
 import type { TileDefinition } from '@/lib/constants/tilesets/types';
 import type { GridWindow } from '@/lib/utils/battle/grid';
+import { CHUNK_SIDE, chunkKey } from '@/lib/utils/battle/map-storage/chunk-key';
 import { edgeMask } from '@/lib/utils/battle/tiles/autotile';
 import type { TileLayerChunks } from '@/lib/utils/battle/tiles/derive';
 import type { TileLayer } from '@/lib/utils/battle/tiles/types';
@@ -21,8 +22,6 @@ const LAYER_ORDER: readonly TileLayer[] = [
     'objects',
 ];
 
-const CHUNK_SIDE = 16;
-
 function tileAt(
     chunks: TileLayerChunks,
     layer: TileLayer,
@@ -35,7 +34,7 @@ function tileAt(
 
     const cy = Math.floor(y / CHUNK_SIDE);
 
-    const chunk = chunks[layer]?.[`${cx}:${cy}`];
+    const chunk = chunks[layer]?.[chunkKey(cx, cy)];
 
     return chunk?.[(y % CHUNK_SIDE) * CHUNK_SIDE + (x % CHUNK_SIDE)] ?? 0;
 }
@@ -229,7 +228,7 @@ export function drawTileViewport(
 
         for (let cy = startCy; cy <= endCy; cy++) {
             for (let cx = startCx; cx <= endCx; cx++) {
-                const chunk = chunks[layer]?.[`${cx}:${cy}`];
+                const chunk = chunks[layer]?.[chunkKey(cx, cy)];
 
                 if (!chunk) continue;
 
