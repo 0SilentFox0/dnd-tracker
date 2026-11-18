@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any -- raw JSON battle responses */
 // Local only: COMPENDIUM_REAL_FILE=<5etools json> DATABASE_URL/DIRECT_URL=<local db with the SRD template> pnpm exec vitest run --config vitest.integration.config.mts <this file>
+import type { Prisma } from '@prisma/client';
 import { randomUUID } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
@@ -47,6 +48,7 @@ import {
     reachable,
     remainingMovement,
 } from '@/lib/utils/battle/grid/path';
+import type { BattleMutationContext } from '@/lib/utils/battle/pipeline/run-battle-mutation';
 import { loadRecentEvents } from '@/lib/utils/battle/store';
 import { rollDiceList } from '@/lib/utils/common/dice';
 import {
@@ -56,6 +58,12 @@ import {
 import { itemStatsFromRow } from '@/lib/utils/items/item-row';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 import { awaitsMoraleCheck } from '@/systems/morale/rules/awaits-check';
+import type { BattleParticipant } from '@/types/battle';
+
+interface JsonProbe {
+    kind?: string;
+    side?: string;
+}
 
 const FILE = process.env.COMPENDIUM_REAL_FILE;
 
@@ -374,12 +382,12 @@ describe.skipIf(!FILE)('real file import', () => {
                         access: 'member',
                         dryRun: () => true,
                         includeRecentEvents: BATTLE_LOG_RECENT_EVENTS,
-                        mutate: (c: any) => ({
+                        mutate: (c: BattleMutationContext) => ({
                             participants: c.participants,
                             pending: c.pending,
                             events: [],
                         }),
-                    } as any,
+                    },
                     deps
                 )
             ).json();
@@ -424,10 +432,10 @@ describe.skipIf(!FILE)('real file import', () => {
             mutate: mutateSystemOperation('morale-check', 'morale disabled'),
         };
 
-        const alive = (p: any) =>
+        const alive = (p: BattleParticipant) =>
             p.combatStats.status === 'active' && p.combatStats.currentHp > 0;
 
-        const P = () => state.initiativeOrder as any[];
+        const P = () => state.initiativeOrder as BattleParticipant[];
 
         let created = 0;
 
@@ -456,7 +464,7 @@ describe.skipIf(!FILE)('real file import', () => {
                         campaignId,
                         name: `ТЕСТ real-file ${i}`,
                         status: 'prepared',
-                        participants: setup as any,
+                        participants: setup as unknown as Prisma.InputJsonValue,
                         map: {
                             cols: 20,
                             rows: 14,
@@ -831,18 +839,20 @@ describe.skipIf(!FILE)('real file import', () => {
         };
 
         const mechanic = (s: (typeof spells)[number]) => {
-            const r = (s.resolution as any)?.kind ?? 'auto';
+            const r = (s.resolution as JsonProbe | null)?.kind ?? 'auto';
 
             const kinds =
                 [
                     ...new Set(
-                        ((s.spellEffects as any[]) ?? []).map((e) => e.kind)
+                        ((s.spellEffects as JsonProbe[] | null) ?? []).map(
+                            (e) => e.kind
+                        )
                     ),
                 ]
                     .sort()
                     .join('+') || 'none';
 
-            return `${(s.targeting as any)?.kind ?? '?'}/${r}/${kinds}${s.cost === 'reaction' ? '/reaction' : ''}`;
+            return `${(s.targeting as JsonProbe | null)?.kind ?? '?'}/${r}/${kinds}${s.cost === 'reaction' ? '/reaction' : ''}`;
         };
 
         const byMechanic = new Map<string, { cast: number; errors: number }>();
@@ -882,7 +892,7 @@ describe.skipIf(!FILE)('real file import', () => {
                                 side: 'ally',
                                 quantity: 1,
                             },
-                        ] as any,
+                        ] as unknown as Prisma.InputJsonValue,
                         map: {
                             cols: 20,
                             rows: 14,
@@ -917,17 +927,17 @@ describe.skipIf(!FILE)('real file import', () => {
                         access: 'member',
                         dryRun: () => true,
                         includeRecentEvents: BATTLE_LOG_RECENT_EVENTS,
-                        mutate: (c: any) => ({
+                        mutate: (c: BattleMutationContext) => ({
                             participants: c.participants,
                             pending: c.pending,
                             events: [],
                         }),
-                    } as any,
+                    },
                     deps
                 )
             ).json();
 
-            const order = state.initiativeOrder as any[];
+            const order = state.initiativeOrder as BattleParticipant[];
 
             const me = order.find(
                 (p) => p.basicInfo.sourceType === 'character'
@@ -954,7 +964,7 @@ describe.skipIf(!FILE)('real file import', () => {
             await run(battleId, {
                 access: 'dm',
                 requireStatus: 'active',
-                mutate: (c: any) => ({
+                mutate: (c: BattleMutationContext) => ({
                     participants: c.participants.map((p: any) =>
                         p.basicInfo.id === foe.basicInfo.id
                             ? close(p, 1)
@@ -968,10 +978,11 @@ describe.skipIf(!FILE)('real file import', () => {
             });
             foe.battleData.position = { x: at.x + 1, y: at.y };
 
-            const kind = (spell.targeting as any)?.kind;
+            const kind = (spell.targeting as JsonProbe | null)?.kind;
 
             const ally =
-                kind === 'ally' || (spell.targeting as any)?.side === 'ally';
+                kind === 'ally' ||
+                (spell.targeting as JsonProbe | null)?.side === 'ally';
 
             const body = {
                 casterId: me.basicInfo.id,

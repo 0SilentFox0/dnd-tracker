@@ -23,8 +23,18 @@ export default defineConfig({
                 'systems/**/__tests__/**',
             ],
             thresholds: {
-                'lib/**': { lines: 85, statements: 85, functions: 85, branches: 85 },
-                'systems/**': { lines: 80, statements: 80, functions: 80, branches: 80 },
+                'lib/**': {
+                    lines: 85,
+                    statements: 85,
+                    functions: 85,
+                    branches: 85,
+                },
+                'systems/**': {
+                    lines: 80,
+                    statements: 80,
+                    functions: 80,
+                    branches: 80,
+                },
             },
         },
     },

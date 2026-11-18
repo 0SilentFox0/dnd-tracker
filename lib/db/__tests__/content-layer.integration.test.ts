@@ -163,6 +163,13 @@ const R = raw as unknown as Record<string, any>;
 
 const D = db as unknown as Record<string, any>;
 
+interface TxDelegate {
+    findMany(args: object): Promise<Array<Record<string, unknown>>>;
+    update(args: object): Promise<unknown>;
+}
+
+const delegates = (tx: object) => tx as unknown as Record<string, TxDelegate>;
+
 const rid = (f: Fixture, key: string) => `${marker}-${f.delegate}-${key}`;
 
 const baseRow = (
@@ -497,7 +504,7 @@ describe.skipIf(!isLocalDevDatabaseEnv())(
                 await expect(
                     db.$transaction(async (tx) => {
                         await runContentWriteContext(ids.layered, tx, () =>
-                            (tx as any)[f.delegate].update({
+                            delegates(tx)[f.delegate].update({
                                 where: { id: rid(f, 'b') },
                                 data: { [f.label]: 'Bravo2' },
                             })
@@ -1220,7 +1227,7 @@ describe.skipIf(!isLocalDevDatabaseEnv())(
         describe('transactions with a single connection', () => {
             it('layered reads and writes inside an interactive transaction do not deadlock', async () => {
                 const result = await scoped.$transaction(async (tx) => {
-                    const t = tx as any;
+                    const t = delegates(tx);
 
                     const before = await t.spell.findMany({
                         where: { campaignId: ids.latest },
@@ -1249,8 +1256,8 @@ describe.skipIf(!isLocalDevDatabaseEnv())(
 
             it('layered reads inside a plain transaction (no write context) use that transaction', async () => {
                 const count = await scoped.$transaction(async (tx) =>
-                    (tx as any).spell
-                        .findMany({
+                    delegates(tx)
+                        .spell.findMany({
                             where: { campaignId: ids.other },
                             include: { spellGroup: true },
                         })
@@ -1264,7 +1271,7 @@ describe.skipIf(!isLocalDevDatabaseEnv())(
                 await expect(
                     scoped.$transaction(async (tx) => {
                         await runContentWriteContext(ids.latest, tx, () =>
-                            (tx as any).race.update({
+                            delegates(tx).race.update({
                                 where: { id: rid(FIXTURES[8], 'a') },
                                 data: { name: 'Gone' },
                             })
