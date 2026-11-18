@@ -5,7 +5,7 @@ import {
 } from '@/lib/server/battle-maps/background-upload';
 
 const isReferenced = async (
-    tx: Pick<typeof prisma, 'battleMap' | 'battleMapVersion'>,
+    tx: Pick<typeof prisma, 'battleMap' | 'battleMapVersion' | 'battleScene'>,
     campaignId: string,
     url: string
 ) =>
@@ -23,6 +23,11 @@ const isReferenced = async (
                 payload: { path: ['header', 'background'], equals: url },
             },
             select: { mapId: true },
+        })) ||
+        // a battle detached from its library map keeps the map inline
+        (await tx.battleScene.findFirst({
+            where: { campaignId, map: { path: ['background'], equals: url } },
+            select: { id: true },
         }))
     );
 
