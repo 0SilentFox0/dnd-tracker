@@ -65,7 +65,7 @@ export const updateWorldMarker = (
 export const deleteWorldMarker = (campaignId: string, markerId: string) =>
     campaignDelete<{ ok: true }>(campaignId, `/world/markers/${markerId}`);
 
-/** Файл іде з браузера прямо в Storage: тіло запиту до Vercel обмежене 4,5 МБ. */
+/** The file goes from the browser straight to Storage: the request body to Vercel is capped at 4.5 MB. */
 export async function uploadWorldMapImage(
     campaignId: string,
     blob: Blob,
@@ -94,7 +94,6 @@ export async function uploadWorldMapImage(
     return ticket.publicUrl;
 }
 
-/** Best-effort: прибирає щойно завантажений файл, якщо створення/оновлення карти не вдалося. */
 export const discardWorldMapUpload = (campaignId: string, imageUrl: string) =>
     campaignPost<{ ok: true }>(campaignId, '/world/discard-upload', {
         imageUrl,

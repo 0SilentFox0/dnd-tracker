@@ -8,9 +8,6 @@ import type {
     StashView,
 } from '@/types/inventory';
 
-/**
- * Оновлює інвентар персонажа
- */
 export async function updateInventory(
     campaignId: string,
     characterId: string,

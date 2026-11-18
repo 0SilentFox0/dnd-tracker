@@ -104,7 +104,7 @@ export type UnitControlData =
 
 export interface AttackResponse {
     hpChanges: BattleAction['hpChanges'];
-    /** дію зупинено: ефект крита обирає ДМ, результат прийде пізніше */
+    // action paused: the DM picks the crit effect, the result arrives later
     pendingChoice?: true;
 }
 
@@ -118,7 +118,7 @@ export interface BattleOp<
     invalidate?: ('battles' | 'active-battles')[];
     retryOnConflict?: true;
     mapResponse?: (res: BattleMutationResponse) => BattleMutationResponse<TRes>;
-    /** лише для виведення типу TBody; у рантаймі не використовується */
+    // type inference for TBody only; unused at runtime
     readonly _body?: TBody;
 }
 
