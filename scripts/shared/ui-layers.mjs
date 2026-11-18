@@ -1,6 +1,8 @@
 export const SYSTEM_UI_KIT = [
     '@/components/character-profile/ProfileContext',
     '@/components/character-profile/CombatRow',
+    '@/components/character-profile/RollableCell',
+    '@/components/character-profile/RollResultView',
     '@/components/rules/RulesSection',
     '@/components/rules/NumberField',
     '@/components/rules/RulesPaths',

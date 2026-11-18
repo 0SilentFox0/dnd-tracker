@@ -31,7 +31,7 @@
 
 Явний список `SYSTEM_UI_KIT` у `scripts/shared/ui-layers.mjs` (barrel-файлів немає). Імпорт дозволений лише дослівно за цим шляхом:
 
-- `character-profile/ProfileContext` (дані листа), `character-profile/CombatRow`
+- `character-profile/ProfileContext` (дані листа), `character-profile/CombatRow`, `character-profile/RollableCell` (кнопка кидка або статична клітинка), `character-profile/RollResultView` (результат кидка в діалозі)
 - `rules/RulesSection`, `rules/NumberField`, `rules/RulesPaths`
 - `battle/hud/DiceInput`, `battle/wizards/attack/shared`, `battle/participants/Section`
 - `skill-tree/progression/ProgressionPanel`, `abilities`, `artifact-sets/ArtifactSetCard`, `skills/list/SkillCard`, `ContentTransferButtons`, `ChoiceListEditor`, `OnboardingHint`, `spells/book/SpellBookPages`, `characters/rest/CharacterPickList`

@@ -2,8 +2,8 @@
 
 import { useTranslations } from 'next-intl';
 
+import { RollableCell } from '@/components/character-profile/RollableCell';
 import type { SheetRollRequest } from '@/components/systems/types';
-import { cn } from '@/lib/utils';
 import { signed } from '@/lib/utils/common/format';
 import type { SheetWfrpBlock } from '@/systems/wfrp/rules/characteristics/sheet-block';
 
@@ -38,13 +38,13 @@ export function CharacteristicsGrid({ block, onRoll, canRoll }: Props) {
                     </>
                 );
 
-                return canRoll ? (
-                    <button
+                return (
+                    <RollableCell
                         key={c.key}
-                        type="button"
+                        canRoll={canRoll}
                         title={t('roll')}
-                        aria-label={`${t('roll')}: ${tg(`${c.key}.label`)}`}
-                        onClick={() =>
+                        ariaLabel={`${t('roll')}: ${tg(`${c.key}.label`)}`}
+                        onRoll={() =>
                             onRoll({
                                 label: tg(`${c.key}.label`),
                                 subject: {
@@ -53,19 +53,10 @@ export function CharacteristicsGrid({ block, onRoll, canRoll }: Props) {
                                 },
                             })
                         }
-                        className={cn(
-                            'min-w-0 rounded-lg border border-hud-line bg-hud-field py-1 text-center'
-                        )}
-                    >
-                        {body}
-                    </button>
-                ) : (
-                    <div
-                        key={c.key}
                         className="min-w-0 rounded-lg border border-hud-line bg-hud-field py-1 text-center"
                     >
                         {body}
-                    </div>
+                    </RollableCell>
                 );
             })}
         </div>
