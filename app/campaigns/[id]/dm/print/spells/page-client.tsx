@@ -111,10 +111,11 @@ export function PrintSpellsPageClient({
                                                     spell={spell}
                                                     campaignId={campaignId}
                                                     spellGroups={spellGroups}
-                                                    onRemoveFromGroup={
-                                                        noopRemove
-                                                    }
-                                                    onMoveToGroup={noopMove}
+                                                    actions={{
+                                                        onRemoveFromGroup:
+                                                            noopRemove,
+                                                        onMoveToGroup: noopMove,
+                                                    }}
                                                     printMode
                                                 />
                                             </div>

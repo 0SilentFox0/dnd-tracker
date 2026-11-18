@@ -23,10 +23,12 @@ interface WorldPinsProps {
     zoom: number;
     compact?: boolean;
     selectedId?: string | null;
-    dragging: { id: string; point: MapPoint } | null;
+    drag: {
+        current: { id: string; point: MapPoint } | null;
+        onMove(id: string, clientX: number, clientY: number): void;
+        onEnd(id: string, clientX: number, clientY: number): void;
+    };
     handlers: PinHandlers;
-    onDragMove(id: string, clientX: number, clientY: number): void;
-    onDragEnd(id: string, clientX: number, clientY: number): void;
 }
 
 const anchor = (m: WorldMarker): MapPoint =>
@@ -39,11 +41,11 @@ export function WorldPins({
     zoom,
     compact = false,
     selectedId,
-    dragging,
+    drag,
     handlers,
-    onDragMove,
-    onDragEnd,
 }: WorldPinsProps) {
+    const { current: dragging, onMove: onDragMove, onEnd: onDragEnd } = drag;
+
     const points = markers.filter((m) => m.kind !== 'zone');
 
     const shownZoneLabels: MapPoint[] = [];

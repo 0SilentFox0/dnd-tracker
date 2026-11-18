@@ -147,13 +147,14 @@ export function GraphScene({
                                   from={from}
                                   to={to}
                                   color={GOLD}
-                                  sequence
-                                  dimmed={
-                                      !!selectedId &&
+                                  kind="sequence"
+                                  emphasis={
+                                      selectedId &&
                                       !selection.nodes.has(edge.source) &&
                                       !selection.nodes.has(edge.target)
+                                          ? 'dimmed'
+                                          : undefined
                                   }
-                                  highlighted={false}
                                   secretLabel=""
                               />
                           );
@@ -175,9 +176,14 @@ export function GraphScene({
                             from={from}
                             to={to}
                             color={GOLD}
-                            relation
-                            dimmed={!!selectedId && !touched}
-                            highlighted={touched}
+                            kind="relation"
+                            emphasis={
+                                selectedId && !touched
+                                    ? 'dimmed'
+                                    : touched
+                                      ? 'highlighted'
+                                      : undefined
+                            }
                             secretLabel=""
                         />
                     );
@@ -200,10 +206,13 @@ export function GraphScene({
                                     ? GRAPH_TYPE_STYLE[to.type].color
                                     : 'currentColor'
                             }
-                            dimmed={
-                                !!selectedId && !selection.edges.has(edge.id)
+                            emphasis={
+                                selectedId && !selection.edges.has(edge.id)
+                                    ? 'dimmed'
+                                    : active.edges.has(edge.id)
+                                      ? 'highlighted'
+                                      : undefined
                             }
-                            highlighted={active.edges.has(edge.id)}
                             secretLabel={t('graph.secretEdge')}
                         />
                     );

@@ -21,23 +21,21 @@ import {
 export function RowFields({
     slot,
     row,
-    index,
-    from,
-    isLast,
+    position,
     canRemove,
     onChange,
     onRemove,
 }: {
     slot: TableSlot;
     row: TableRow;
-    index: number;
-    from: number;
-    isLast: boolean;
+    position: { index: number; from: number; isLast: boolean };
     canRemove: boolean;
     onChange: (next: TableRow) => void;
     onRemove: () => void;
 }) {
     const t = useTranslator('wfrpTables');
+
+    const { index, from, isLast } = position;
 
     return (
         <li className="border-hud-border space-y-2 rounded border p-2">

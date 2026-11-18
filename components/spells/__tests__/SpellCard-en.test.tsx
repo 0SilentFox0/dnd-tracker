@@ -32,8 +32,10 @@ describe('SpellCard in en', () => {
                 spell={spell}
                 campaignId="c1"
                 spellGroups={[]}
-                onRemoveFromGroup={vi.fn()}
-                onMoveToGroup={vi.fn()}
+                actions={{
+                    onRemoveFromGroup: vi.fn(),
+                    onMoveToGroup: vi.fn(),
+                }}
             />,
             { locale: 'en', namespaces: ['common', 'gameTerms', 'spells'] }
         );

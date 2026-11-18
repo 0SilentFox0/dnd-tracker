@@ -14,7 +14,6 @@ import type { Skill } from '@/types/skills';
 export interface SkillGroupAccordionItemProps {
     groupName: string;
     accent?: string;
-    totalSkills: number;
     groupMenu?: { onRename: () => void; onRemoveAll: () => void };
     actions?: SkillCardActions;
     skills: Skill[];
@@ -25,7 +24,6 @@ export interface SkillGroupAccordionItemProps {
 export function SkillGroupAccordionItem({
     groupName,
     accent,
-    totalSkills,
     groupMenu,
     actions,
     skills,
@@ -52,11 +50,13 @@ export function SkillGroupAccordionItem({
     return (
         <GroupAccordionItem
             value={groupName}
-            title={groupDisplayName(groupName, t('skills.group.ungrouped'))}
-            countLabel={t('skills.group.count', { count: totalSkills })}
+            header={{
+                title: groupDisplayName(groupName, t('skills.group.ungrouped')),
+                countLabel: t('skills.group.count', { count: skills.length }),
+                menuActions,
+            }}
             accent={accent}
             className="overflow-hidden rounded-lg"
-            menuActions={menuActions}
         >
             <div className="grid gap-4 px-4 pb-4 sm:px-6 md:grid-cols-2 lg:grid-cols-3">
                 {skills.map((skill) => (

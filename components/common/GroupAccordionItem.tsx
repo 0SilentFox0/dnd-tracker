@@ -15,27 +15,28 @@ import { cn } from '@/lib/utils';
 
 interface GroupAccordionItemProps {
     value: string;
-    title: string;
-    countLabel: string;
+    header: {
+        title: string;
+        countLabel: string;
+        icon?: ComponentType<{ className?: string }>;
+        menuActions?: ActionsMenuItem[];
+    };
     accent?: string;
     className?: string;
-    icon?: ComponentType<{ className?: string }>;
-    menuActions?: ActionsMenuItem[];
     'data-tour'?: string;
     children: ReactNode;
 }
 
 export function GroupAccordionItem({
     value,
-    title,
-    countLabel,
+    header,
     accent,
     className,
-    icon: Icon,
-    menuActions,
     'data-tour': dataTour,
     children,
 }: GroupAccordionItemProps) {
+    const { title, countLabel, icon: Icon, menuActions } = header;
+
     return (
         <AccordionItem
             value={value}

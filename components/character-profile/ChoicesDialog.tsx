@@ -79,7 +79,7 @@ export default function ChoicesDialog({
                     refs={refs}
                     startAt={startAt}
                     hero={hero}
-                    onClose={() => onOpenChange(false)}
+                    actions={{ onClose: () => onOpenChange(false) }}
                 />
             )}
         </ResponsiveDialog>

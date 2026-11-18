@@ -1,25 +1,11 @@
 {
     "components/abilities/AbilityListEditor.tsx#AbilityListEditor": 9,
     "components/abilities/NestedEffectsEditor.tsx#NestedEffectsEditor": 9,
-    "components/battle/map/MapToken.tsx#MapToken": 10,
     "components/battle/map/BattleMap.tsx#BattleMap": 8,
     "components/battle/map/MapStage.tsx#MapStage": 8,
-    "components/battle/setup/SetupEntityCard.tsx#SetupEntityCard": 8,
-    "components/choices/ChoiceWizard.tsx#ChoiceWizard": 8,
-    "components/common/GroupAccordionItem.tsx#GroupAccordionItem": 9,
-    "components/common/ImportDialog.tsx#ImportDialog": 8,
+    "components/battle/map/MapToken.tsx#MapToken": 10,
     "components/hud/form/HudForm.tsx#HudForm": 10,
     "components/hud/OptionButton.tsx#OptionButton": 9,
     "components/hud/page/HudCard.tsx#HudCard": 8,
-    "components/onboarding/DemoTourTooltip.tsx#DemoTourTooltip": 9,
-    "components/scenario/graph/GraphEdgeLine.tsx#GraphEdgeLine": 9,
-    "components/scenario/graph/GraphInspector.tsx#GraphInspector": 8,
-    "components/scenario/page/ScenarioPageContent.tsx#ScenarioPageContent": 8,
-    "components/spells/list/SpellCard.tsx#SpellCard": 8,
-    "components/world/travel/TravelPanel.tsx#TravelPanel": 8,
-    "components/world/WorldMapView.tsx#WorldMapView": 12,
-    "components/world/WorldPins.tsx#WorldPins": 8,
-    "systems/skilltrees/ui/content/skills/list/SkillGroupAccordion.tsx#SkillGroupAccordion": 8,
-    "systems/skilltrees/ui/content/skills/list/SkillGroupAccordionItem.tsx#SkillGroupAccordionItem": 8,
-    "systems/wfrp/ui/advancement/AdvanceRow.tsx#AdvanceRow": 9
+    "components/world/WorldMapView.tsx#WorldMapView": 12
 }

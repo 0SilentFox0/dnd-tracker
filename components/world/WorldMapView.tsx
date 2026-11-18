@@ -246,21 +246,22 @@ export function WorldMapView({
                                     zoom={zoom}
                                     compact={compact}
                                     selectedId={selectedId}
-                                    dragging={dragging}
-                                    handlers={handlers}
-                                    onDragMove={(id, x, y) =>
-                                        setDragging({
-                                            id,
-                                            point: pointAt(x, y),
-                                        })
-                                    }
-                                    onDragEnd={(id, x, y) => {
-                                        setDragging(null);
-                                        handlers.onMarkerDrag?.(
-                                            id,
-                                            pointAt(x, y)
-                                        );
+                                    drag={{
+                                        current: dragging,
+                                        onMove: (id, x, y) =>
+                                            setDragging({
+                                                id,
+                                                point: pointAt(x, y),
+                                            }),
+                                        onEnd: (id, x, y) => {
+                                            setDragging(null);
+                                            handlers.onMarkerDrag?.(
+                                                id,
+                                                pointAt(x, y)
+                                            );
+                                        },
                                     }}
+                                    handlers={handlers}
                                 />
                             </div>
                             {heroes?.length ? (

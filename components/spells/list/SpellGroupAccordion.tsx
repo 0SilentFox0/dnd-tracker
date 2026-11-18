@@ -77,10 +77,12 @@ export function SpellGroupAccordion({
         <>
             <GroupAccordionItem
                 value={groupName}
-                title={displayName}
-                countLabel={t('list.count', { count: totalSpells })}
-                icon={GroupIcon}
-                menuActions={menuActions}
+                header={{
+                    title: displayName,
+                    countLabel: t('list.count', { count: totalSpells }),
+                    icon: GroupIcon,
+                    menuActions,
+                }}
                 data-tour={tour ? 'libraries.group' : undefined}
             >
                 <Accordion

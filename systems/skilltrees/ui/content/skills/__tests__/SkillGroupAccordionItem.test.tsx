@@ -70,7 +70,6 @@ describe('SkillGroupAccordionItem', () => {
     it('рендерить назву групи та кількість скілів', () => {
         renderItem({
             groupName: 'Бойові скіли',
-            totalSkills: 2,
             groupMenu: { onRename: vi.fn(), onRemoveAll: vi.fn() },
             skills: [
                 minimalSkill({ id: 's1', name: 'Удар', description: null }),
@@ -87,7 +86,6 @@ describe('SkillGroupAccordionItem', () => {
     it('рендерить скіли всередині групи', () => {
         renderItem({
             groupName: 'Група',
-            totalSkills: 1,
             groupMenu: undefined,
             skills: [minimalSkill({ name: 'Єдиний скіл', description: null })],
             campaignId: 'c1',
@@ -99,7 +97,6 @@ describe('SkillGroupAccordionItem', () => {
     it('не показує меню групи для isUngrouped або без groupId', () => {
         renderItem({
             groupName: 'Без групи',
-            totalSkills: 0,
             groupMenu: undefined,
             skills: [],
             campaignId: 'c1',
@@ -112,7 +109,6 @@ describe('SkillGroupAccordionItem', () => {
     it('показує кнопку меню для групи з groupId', () => {
         renderItem({
             groupName: 'Група з меню',
-            totalSkills: 0,
             groupMenu: { onRename: vi.fn(), onRemoveAll: vi.fn() },
             skills: [],
             campaignId: 'c1',

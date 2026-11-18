@@ -11,9 +11,11 @@ import type { EntityStats } from '@/types/battle-setup';
 interface SetupEntityCardProps {
     entity: { name: string; avatar?: string | null };
     fallbackIcon: string;
-    title?: ReactNode;
-    stats?: EntityStats;
-    statsExtra?: ReactNode;
+    details?: {
+        title?: ReactNode;
+        stats?: EntityStats;
+        statsExtra?: ReactNode;
+    };
     state: { isSelected: boolean; isEnemy?: boolean; badge?: ReactNode };
     onToggle: () => void;
     /** Панель під карткою, видима лише для вибраного. */
@@ -23,13 +25,13 @@ interface SetupEntityCardProps {
 export function SetupEntityCard({
     entity,
     fallbackIcon,
-    title,
-    stats,
-    statsExtra,
+    details = {},
     state,
     onToggle,
     children,
 }: SetupEntityCardProps) {
+    const { title, stats, statsExtra } = details;
+
     const { isSelected, isEnemy, badge } = state;
 
     return (

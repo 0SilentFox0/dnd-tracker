@@ -111,9 +111,11 @@ export function TablesSection({ form }: { form: RulesFormState }) {
                                 key={i}
                                 slot={slot}
                                 row={row}
-                                index={i}
-                                from={i === 0 ? 1 : rows[i - 1].max + 1}
-                                isLast={i === rows.length - 1}
+                                position={{
+                                    index: i,
+                                    from: i === 0 ? 1 : rows[i - 1].max + 1,
+                                    isLast: i === rows.length - 1,
+                                }}
                                 canRemove={rows.length > 1}
                                 onChange={(next) =>
                                     setRows(

@@ -23,8 +23,7 @@ export interface TravelPanelProps {
     onMapIds: string[];
     target: MapPoint | null;
     selectedMarker: WorldMarker | null;
-    onPickTarget(): void;
-    onMoved?(e: TravelMoved): void;
+    actions: { onPickTarget(): void; onMoved?(e: TravelMoved): void };
 }
 
 export function TravelPanel({
@@ -34,9 +33,10 @@ export function TravelPanel({
     onMapIds,
     target,
     selectedMarker,
-    onPickTarget,
-    onMoved,
+    actions,
 }: TravelPanelProps) {
+    const { onPickTarget, onMoved } = actions;
+
     const t = useTranslations('world.travel');
 
     const panel = useTravelPanel({

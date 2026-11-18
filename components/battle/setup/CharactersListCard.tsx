@@ -114,14 +114,14 @@ export function CharactersListCard({
                                     key={character.id}
                                     entity={character}
                                     fallbackIcon="👤"
-                                    stats={stats}
-                                    statsExtra={
-                                        stats?.dprBreakdown && (
+                                    details={{
+                                        stats,
+                                        statsExtra: stats?.dprBreakdown && (
                                             <DprBreakdownTip
                                                 breakdown={stats.dprBreakdown}
                                             />
-                                        )
-                                    }
+                                        ),
+                                    }}
                                     state={{ isSelected }}
                                     onToggle={() =>
                                         actions.toggle(

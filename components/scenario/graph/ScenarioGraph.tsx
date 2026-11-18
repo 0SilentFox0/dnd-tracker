@@ -134,11 +134,13 @@ export function ScenarioGraph({ campaignId }: { campaignId: string }) {
         <GraphInspector
             detail={detail}
             canOpen={!!graphNodeHref(campaignId, detail.node)}
-            onOpen={() => open(detail.node)}
-            onSelect={set.focus}
-            onClose={clear}
             focusMode={isEgo}
-            onToggleFocus={() => set.ego(!isEgo)}
+            actions={{
+                onOpen: () => open(detail.node),
+                onSelect: set.focus,
+                onClose: clear,
+                onToggleFocus: () => set.ego(!isEgo),
+            }}
         >
             {detail.node.kind === 'scene' ? (
                 <SummarySlot

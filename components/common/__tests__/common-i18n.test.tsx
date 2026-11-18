@@ -25,7 +25,7 @@ const hook = (over: Record<string, unknown> = {}) =>
 
 describe('common components use translation keys', () => {
     it('ImportDialog defaults', () => {
-        render(<ImportDialog importHook={hook()} open />);
+        render(<ImportDialog importHook={hook()} control={{ open: true }} />);
 
         expect(screen.getByText('common.import.title')).toBeTruthy();
         expect(screen.getByText('common.import.description')).toBeTruthy();
@@ -40,7 +40,7 @@ describe('common components use translation keys', () => {
                 importHook={hook({
                     success: { imported: 2, total: 3, skipped: 1 },
                 })}
-                open
+                control={{ open: true }}
             />
         );
 

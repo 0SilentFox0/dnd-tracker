@@ -332,23 +332,12 @@ export function WorldEditorPageClient({
                                                                 selectedMarker={
                                                                     moveTarget.marker
                                                                 }
-                                                                onPickTarget={() =>
-                                                                    setTool(
-                                                                        'move'
-                                                                    )
-                                                                }
-                                                                onMoved={(
-                                                                    e: TravelMoved
-                                                                ) =>
-                                                                    e.kind !==
-                                                                        'travel' &&
-                                                                    openMap(
-                                                                        e.destMapId,
-                                                                        {
-                                                                            keepTool: true,
-                                                                        }
-                                                                    )
-                                                                }
+                                                                actions={{
+                                                                    onPickTarget: () => setTool('move'),
+                                                                    onMoved: (e: TravelMoved) =>
+                                                                        e.kind !== 'travel' &&
+                                                                        openMap(e.destMapId, { keepTool: true }),
+                                                                }}
                                                             />
                                                         </div>
                                                     ) : null}
