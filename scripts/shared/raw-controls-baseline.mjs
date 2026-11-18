@@ -30,11 +30,14 @@ const eslint = new ESLint({
 
 const results = await eslint.lintFiles(RAW_CONTROL_FILES);
 
+const rawOnly = (r) =>
+    r.messages.filter((m) => m.ruleId === 'raw-controls/no-raw-control');
+
 const current = results
-    .filter((r) => r.messages.length > 0)
+    .filter((r) => rawOnly(r).length > 0)
     .map((r) => ({
         file: r.filePath.slice(root.length),
-        count: r.messages.length,
+        count: rawOnly(r).length,
     }))
     .sort((a, b) => a.file.localeCompare(b.file));
 

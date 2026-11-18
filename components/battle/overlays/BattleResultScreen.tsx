@@ -7,6 +7,7 @@ import { BattlePlayerViewToggle } from '@/components/battle/scene/BattlePlayerVi
 import { OptimizedImage } from '@/components/common/OptimizedImage';
 import { QueryState } from '@/components/common/states';
 import { HudButton } from '@/components/hud';
+import { FullscreenOverlay } from '@/components/ui/fullscreen-overlay';
 import { useBattleScene, useFxBusy } from '@/lib/hooks/battle';
 import { useBattleSummary } from '@/lib/hooks/battles';
 import { useText } from '@/lib/i18n/use-text';
@@ -101,10 +102,9 @@ export function BattleResultScreen() {
         : `/campaigns/${campaignId}`;
 
     return (
-        <div
-            role="dialog"
-            aria-label={t('aria')}
-            className="fixed inset-0 z-[70] flex flex-col items-center overflow-y-auto bg-[radial-gradient(circle_at_50%_30%,rgba(60,48,24,.9),rgba(8,7,6,.97)_65%)] px-4 py-10 text-center [--hud-muted:#b5aa98] [--ink:#efe5d2]"
+        <FullscreenOverlay
+            label={t('aria')}
+            className="z-[70] flex flex-col items-center overflow-y-auto bg-[radial-gradient(circle_at_50%_30%,rgba(60,48,24,.9),rgba(8,7,6,.97)_65%)] px-4 py-10 text-center [--hud-muted:#b5aa98] [--ink:#efe5d2]"
         >
             <div className="my-auto flex w-full max-w-xl flex-col items-center">
                 <h2
@@ -161,6 +161,6 @@ export function BattleResultScreen() {
                     </HudButton>
                 </div>
             </div>
-        </div>
+        </FullscreenOverlay>
     );
 }

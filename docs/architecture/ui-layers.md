@@ -6,7 +6,7 @@
 
 | Шар | Теки | Приклади |
 |---|---|---|
-| L0 `ui` | `components/ui` | `Button`, `ResponsiveDialog`, `action-bar`, `portal-class` |
+| L0 `ui` | `components/ui` | `Button`, `ResponsiveDialog`, `FullscreenOverlay`, `action-bar`, `portal-class` |
 | L1 `hud` | `components/hud` | `HudPage`, `HudForm`, `fonts`, `metal` |
 | L2 `common` | `components/common` | `ImageUpload`, `states/*`, `SearchInput`, `IconUrlField` |
 | L2.5 `fx` | `components/fx` | `BattleFxLayer`, `animations/*`, `auras/*` (без імпорту `battle`/`spells`; слот модуля приходить пропсом `fx`) |

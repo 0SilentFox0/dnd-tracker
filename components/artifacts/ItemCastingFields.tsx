@@ -8,6 +8,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { SelectField } from '@/components/ui/select-field';
 import { ITEM_LIMITS } from '@/lib/constants/artifacts';
+import { MONSTER_CREATURE_TYPES } from '@/lib/constants/monster';
 import { MAX_SPELL_LEVEL } from '@/lib/constants/spells';
 import { useSpells } from '@/lib/hooks/spells';
 import type { ItemStats } from '@/lib/utils/items/item-stats';
@@ -28,22 +29,7 @@ const PARAM_OPTIONS = {
         'piercing',
         'slashing',
     ],
-    creatureType: [
-        'aberration',
-        'beast',
-        'celestial',
-        'construct',
-        'dragon',
-        'elemental',
-        'fey',
-        'fiend',
-        'giant',
-        'humanoid',
-        'monstrosity',
-        'ooze',
-        'plant',
-        'undead',
-    ],
+    creatureType: [...MONSTER_CREATURE_TYPES],
 };
 
 type ItemSpell = NonNullable<ItemStats['spells']>[number];

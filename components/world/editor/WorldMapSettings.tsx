@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { Crosshair, ImageUp, Map as MapIcon } from 'lucide-react';
 
 import { ChildMapList, ImageFileInput, RadiusRange } from './MapFieldParts';
+import { useEditorMapFields } from './use-editor-fields';
 import { useWorldEditorContext } from './WorldEditorContext';
 import { QuietDeleteButton, WorldPanelHeader } from './WorldPanelHeader';
 
@@ -13,7 +14,6 @@ import { Button } from '@/components/ui/button';
 import { LabeledInput } from '@/components/ui/labeled-input';
 import { Switch } from '@/components/ui/switch';
 import { WORLD_NAME_MAX } from '@/lib/constants/world';
-import { useMapFields } from '@/lib/hooks/world';
 import type { WorldMapDetail } from '@/types/world';
 
 export function WorldMapSettings() {
@@ -23,27 +23,11 @@ export function WorldMapSettings() {
 }
 
 function MapForm({ detail }: { detail: WorldMapDetail }) {
-    const { campaignId, maps, editor, openMap, tool, setTool } =
-        useWorldEditorContext();
-
     const t = useTranslations('world');
 
     const fileInput = useRef<HTMLInputElement>(null);
 
-    const {
-        map,
-        name,
-        setName,
-        commitName,
-        radius,
-        setRadius,
-        commitRadius,
-        fill,
-        children,
-        save,
-        replaceImage,
-        remove,
-    } = useMapFields({ campaignId, detail, maps, editor, openMap });
+    const m = useEditorMapFields(detail);
 
     return (
         <div>
@@ -54,18 +38,18 @@ function MapForm({ detail }: { detail: WorldMapDetail }) {
                         aria-hidden
                     />
                 }
-                title={map.name}
+                title={m.map.name}
                 subtitle={
-                    map.parentMapId ? t('mapKind.nested') : t('mapKind.root')
+                    m.map.parentMapId ? t('mapKind.nested') : t('mapKind.root')
                 }
             />
             <HudSection title={t('editor.basic')}>
                 <LabeledInput
                     label={t('name')}
                     maxLength={WORLD_NAME_MAX}
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    onBlur={commitName}
+                    value={m.name}
+                    onChange={(e) => m.setName(e.target.value)}
+                    onBlur={m.commitName}
                 />
             </HudSection>
             <HudSection title={t('editor.fog')}>
@@ -73,9 +57,9 @@ function MapForm({ detail }: { detail: WorldMapDetail }) {
                     <label className="flex items-center justify-between gap-3 text-sm">
                         {t('editor.fogHide')}
                         <Switch
-                            checked={map.fogEnabled}
+                            checked={m.map.fogEnabled}
                             onCheckedChange={(v) =>
-                                void save({ fogEnabled: v })
+                                void m.save({ fogEnabled: v })
                             }
                         />
                     </label>
@@ -83,14 +67,14 @@ function MapForm({ detail }: { detail: WorldMapDetail }) {
                         <span className="flex items-center justify-between">
                             {t('editor.radiusView')}
                             <span className="font-mono text-hud-gold-bright">
-                                {Math.round(radius * 100)}%
+                                {Math.round(m.radius * 100)}%
                             </span>
                         </span>
                         <RadiusRange
-                            radius={radius}
-                            fill={fill}
-                            setRadius={setRadius}
-                            commit={commitRadius}
+                            radius={m.radius}
+                            fill={m.fill}
+                            setRadius={m.setRadius}
+                            commit={m.commitRadius}
                         />
                     </label>
                 </div>
@@ -98,30 +82,30 @@ function MapForm({ detail }: { detail: WorldMapDetail }) {
             <HudSection title={t('editor.entry')}>
                 <Button
                     type="button"
-                    variant={tool === 'entry' ? 'default' : 'outline'}
+                    variant={m.tool === 'entry' ? 'default' : 'outline'}
                     onClick={() =>
-                        setTool(tool === 'entry' ? 'select' : 'entry')
+                        m.setTool(m.tool === 'entry' ? 'select' : 'entry')
                     }
                     className="w-full gap-2"
                 >
                     <Crosshair className="size-4" />
-                    {tool === 'entry'
+                    {m.tool === 'entry'
                         ? t('editor.entryPlacing')
                         : t('editor.entrySet')}
                 </Button>
             </HudSection>
             <HudSection
-                title={t('editor.children', { count: children.length })}
+                title={t('editor.children', { count: m.children.length })}
             >
                 <ChildMapList
-                    maps={children}
-                    onOpen={openMap}
+                    maps={m.children}
+                    onOpen={m.openMap}
                     itemClassName="min-h-10"
                 />
             </HudSection>
             <HudSection title={t('editor.image')}>
                 <p className="mb-2 text-xs text-hud-muted">
-                    {map.width}×{map.height} px
+                    {m.map.width}×{m.map.height} px
                 </p>
                 <Button
                     type="button"
@@ -134,12 +118,12 @@ function MapForm({ detail }: { detail: WorldMapDetail }) {
                 </Button>
                 <ImageFileInput
                     inputRef={fileInput}
-                    onFile={(file) => void replaceImage(file)}
+                    onFile={(file) => void m.replaceImage(file)}
                 />
             </HudSection>
             <QuietDeleteButton
                 label={t('editor.deleteMap')}
-                onClick={() => void remove()}
+                onClick={() => void m.remove()}
             />
         </div>
     );

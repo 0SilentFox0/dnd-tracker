@@ -7,6 +7,7 @@ import { useTranslations } from 'next-intl';
 import './level-up.css';
 import { HUD_SURFACE } from '@/components/hud';
 import { Button } from '@/components/ui/button';
+import { FullscreenOverlay } from '@/components/ui/fullscreen-overlay';
 import { useLevelUpCelebration } from '@/systems/skilltrees/hooks';
 
 export function LevelUpOverlay({
@@ -53,12 +54,11 @@ export function LevelUpOverlay({
     };
 
     return createPortal(
-        <div
-            role="dialog"
-            aria-modal="true"
-            aria-label={t('levelUp.dialog')}
+        <FullscreenOverlay
+            modal
+            label={t('levelUp.dialog')}
             onClick={dismiss}
-            className={`${HUD_SURFACE} level-up fixed inset-0 z-[100] flex flex-col items-center justify-center`}
+            className={`${HUD_SURFACE} level-up z-[100] flex flex-col items-center justify-center`}
         >
             <div className="lu-title hud-sc">{t('levelUp.title')}</div>
             <div className="lu-name">{name}</div>
@@ -110,7 +110,7 @@ export function LevelUpOverlay({
                 {t('levelUp.cta')}
             </Button>
             <div className="lu-skip">{t('levelUp.dismiss')}</div>
-        </div>,
+        </FullscreenOverlay>,
         document.body
     );
 }

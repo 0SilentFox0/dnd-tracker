@@ -8,6 +8,7 @@ import { DmMarkerNotes } from './DmMarkerNotes';
 import { MarkerIconGrid } from './MapFieldParts';
 import { markerIcon } from './marker-icon-options';
 import { NewWorldMapDialog } from './NewWorldMapDialog';
+import { useEditorMarkerFields } from './use-editor-fields';
 import { useWorldEditorContext } from './WorldEditorContext';
 import { QuietDeleteButton, WorldPanelHeader } from './WorldPanelHeader';
 
@@ -18,7 +19,6 @@ import { LabeledInput } from '@/components/ui/labeled-input';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { WORLD_DM_NOTE_MAX, WORLD_NAME_MAX } from '@/lib/constants/world';
-import { useMarkerFields } from '@/lib/hooks/world';
 import type { WorldMarker } from '@/types/world';
 
 export function WorldMarkerPanel() {
@@ -30,8 +30,7 @@ export function WorldMarkerPanel() {
 }
 
 function MarkerForm({ marker }: { marker: WorldMarker }) {
-    const { detail, editor, select, openMap, redraw, redrawId } =
-        useWorldEditorContext();
+    const { detail } = useWorldEditorContext();
 
     const t = useTranslations('world');
 
@@ -39,20 +38,7 @@ function MarkerForm({ marker }: { marker: WorldMarker }) {
 
     const [creating, setCreating] = useState(false);
 
-    const {
-        name,
-        setName,
-        commitName,
-        note,
-        setNote,
-        commitNote,
-        color,
-        pickColor,
-        save,
-        remove,
-    } = useMarkerFields({ marker, editor, select });
-
-    const redrawing = redrawId === marker.id;
+    const m = useEditorMarkerFields(marker);
 
     const HeaderIcon = markerIcon(marker);
 
@@ -76,23 +62,23 @@ function MarkerForm({ marker }: { marker: WorldMarker }) {
                     <LabeledInput
                         label={t('name')}
                         maxLength={WORLD_NAME_MAX}
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        onBlur={commitName}
+                        value={m.name}
+                        onChange={(e) => m.setName(e.target.value)}
+                        onBlur={m.commitName}
                     />
                     {marker.kind === 'point' ? (
                         <MarkerIconGrid
                             aria-label={t('editor.icon')}
                             value={marker.icon}
                             cellClassName="h-11"
-                            onPick={(icon) => void save({ icon })}
+                            onPick={(icon) => void m.save({ icon })}
                         />
                     ) : (
                         <div className="flex items-center gap-3 text-sm">
                             <ColorSwatch
-                                color={color}
+                                color={m.color}
                                 label={t('editor.zoneColor')}
-                                onChange={pickColor}
+                                onChange={m.pickColor}
                             />
                             {t('editor.zoneColor')}
                         </div>
@@ -100,12 +86,14 @@ function MarkerForm({ marker }: { marker: WorldMarker }) {
                     {marker.kind === 'zone' ? (
                         <Button
                             type="button"
-                            variant={redrawing ? 'default' : 'outline'}
-                            onClick={() => redraw(redrawing ? null : marker.id)}
+                            variant={m.redrawing ? 'default' : 'outline'}
+                            onClick={() =>
+                                m.redraw(m.redrawing ? null : marker.id)
+                            }
                             className="w-full gap-2"
                         >
                             <PenLine className="size-4" />
-                            {redrawing
+                            {m.redrawing
                                 ? t('editor.drawNewZone')
                                 : t('editor.redrawZone')}
                         </Button>
@@ -117,10 +105,10 @@ function MarkerForm({ marker }: { marker: WorldMarker }) {
                     <label className="block space-y-1 text-sm">
                         {t('editor.dmNote')}
                         <Textarea
-                            value={note}
+                            value={m.note}
                             maxLength={WORLD_DM_NOTE_MAX}
-                            onChange={(e) => setNote(e.target.value)}
-                            onBlur={commitNote}
+                            onChange={(e) => m.setNote(e.target.value)}
+                            onBlur={m.commitNote}
                         />
                     </label>
                     <label className="flex items-center justify-between gap-3 text-sm">
@@ -133,7 +121,7 @@ function MarkerForm({ marker }: { marker: WorldMarker }) {
                         <Switch
                             checked={marker.alwaysVisible}
                             onCheckedChange={(v) =>
-                                void save({ alwaysVisible: v })
+                                void m.save({ alwaysVisible: v })
                             }
                         />
                     </label>
@@ -149,7 +137,7 @@ function MarkerForm({ marker }: { marker: WorldMarker }) {
                     <Button
                         type="button"
                         variant="outline"
-                        onClick={() => openMap(marker.childMapId)}
+                        onClick={() => m.openMap(marker.childMapId)}
                         className="w-full gap-2"
                     >
                         <MapPinned className="size-4" />
@@ -169,7 +157,7 @@ function MarkerForm({ marker }: { marker: WorldMarker }) {
             </HudSection>
             <QuietDeleteButton
                 label={tc('delete')}
-                onClick={() => void remove()}
+                onClick={() => void m.remove()}
             />
             <NewWorldMapDialog
                 open={creating}

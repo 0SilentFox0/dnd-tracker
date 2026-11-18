@@ -14,7 +14,7 @@ import {
     SwitchField,
 } from './InspectorParts';
 import { ChildMapList, ImageFileInput, RadiusRange } from './MapFieldParts';
-import { useWorldEditorContext } from './WorldEditorContext';
+import { useEditorMapFields } from './use-editor-fields';
 
 import { HudButton } from '@/components/hud';
 import { Button } from '@/components/ui/button';
@@ -23,7 +23,6 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from '@/components/ui/popover';
-import { useMapFields } from '@/lib/hooks/world';
 import { cn } from '@/lib/utils';
 import type { WorldMapDetail } from '@/types/world';
 
@@ -34,79 +33,69 @@ export function MapStrip({
     detail: WorldMapDetail;
     onClose(): void;
 }) {
-    const { campaignId, maps, editor, openMap, tool, setTool } =
-        useWorldEditorContext();
-
     const t = useTranslations('world');
 
     const fileInput = useRef<HTMLInputElement>(null);
 
-    const {
-        map,
-        name,
-        setName,
-        commitName,
-        radius,
-        setRadius,
-        commitRadius,
-        fill,
-        children,
-        save,
-        replaceImage,
-        remove,
-    } = useMapFields({ campaignId, detail, maps, editor, openMap });
+    const m = useEditorMapFields(detail);
 
     return (
         <>
             <StripLead
                 icon={MapIcon}
                 label={
-                    map.parentMapId ? t('mapKind.nested') : t('mapKind.root')
+                    m.map.parentMapId ? t('mapKind.nested') : t('mapKind.root')
                 }
             />
-            <NameInput value={name} onChange={setName} onCommit={commitName} />
+            <NameInput
+                value={m.name}
+                onChange={m.setName}
+                onCommit={m.commitName}
+            />
             <SwitchField
                 label={t('editor.fog')}
                 title={t('editor.fogHide')}
-                checked={map.fogEnabled}
-                onChange={(v) => void save({ fogEnabled: v })}
+                checked={m.map.fogEnabled}
+                onChange={(v) => void m.save({ fogEnabled: v })}
             />
             <label className="flex shrink-0 items-center gap-2 text-sm">
                 {t('editor.radius')}
                 <RadiusRange
-                    radius={radius}
-                    fill={fill}
-                    setRadius={setRadius}
-                    commit={commitRadius}
+                    radius={m.radius}
+                    fill={m.fill}
+                    setRadius={m.setRadius}
+                    commit={m.commitRadius}
                     label={t('editor.radiusView')}
                     className="w-32"
                 />
                 <span className="w-10 font-mono text-hud-gold-bright">
-                    {Math.round(radius * 100)}%
+                    {Math.round(m.radius * 100)}%
                 </span>
             </label>
             <Button
                 type="button"
                 size="sm"
-                variant={tool === 'entry' ? 'default' : 'outline'}
-                onClick={() => setTool(tool === 'entry' ? 'select' : 'entry')}
+                variant={m.tool === 'entry' ? 'default' : 'outline'}
+                onClick={() =>
+                    m.setTool(m.tool === 'entry' ? 'select' : 'entry')
+                }
                 className="h-9 gap-1.5"
             >
                 <Crosshair className="size-4" />
-                {tool === 'entry'
+                {m.tool === 'entry'
                     ? t('editor.entryPlacing')
                     : t('editor.entryOnMap')}
             </Button>
             <Popover>
                 <PopoverTrigger asChild>
                     <HudButton type="button" className={CHIP}>
-                        {t('editor.children', { count: children.length })}
+                        {t('editor.children', { count: m.children.length })}
                     </HudButton>
                 </PopoverTrigger>
                 <PopoverContent className={cn(POPOVER, 'w-60')}>
                     <ChildMapList
-                        maps={children}
-                        onOpen={openMap}
+                        maps={m.children}
+                        onOpen={m.openMap}
                         itemClassName="min-h-9"
                     />
                 </PopoverContent>
@@ -115,7 +104,7 @@ export function MapStrip({
                 type="button"
                 size="sm"
                 variant="outline"
-                title={`${map.width}×${map.height} px`}
+                title={`${m.map.width}×${m.map.height} px`}
                 onClick={() => fileInput.current?.click()}
                 className="h-9 gap-1.5"
             >
@@ -124,12 +113,12 @@ export function MapStrip({
             </Button>
             <ImageFileInput
                 inputRef={fileInput}
-                onFile={(file) => void replaceImage(file)}
+                onFile={(file) => void m.replaceImage(file)}
             />
             <span className="ml-auto flex shrink-0 items-center gap-2">
                 <DeleteButton
                     label={t('editor.deleteMap')}
-                    onClick={() => void remove()}
+                    onClick={() => void m.remove()}
                 />
                 <CloseButton onClose={onClose} />
             </span>

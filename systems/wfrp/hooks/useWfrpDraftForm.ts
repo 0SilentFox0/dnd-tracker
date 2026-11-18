@@ -61,31 +61,9 @@ export function useWfrpDraftForm({
 
     const [index, setIndex] = useState(0);
 
-    const {
-        picks,
-        speciesId,
-        selectSpecies,
-        career: {
-            mode: careerMode,
-            setMode: setCareerMode,
-            id: careerId,
-            setId: setCareerId,
-            rolls: careerRolls,
-            setRolls: setCareerRolls,
-        },
-        stats: {
-            mode: statsMode,
-            setMode: setStatsMode,
-            rolls: statRolls,
-            setRolls: setStatRolls,
-            arranged,
-            setArranged,
-            points,
-            swap,
-            setPoint,
-        },
-        talents: { rolled: rolledTalents, set: setRolledTalents },
-    } = useWfrpDraftPicks();
+    const draft = useWfrpDraftPicks();
+
+    const { picks, speciesId, selectSpecies } = draft;
 
     const [identity, setIdentity] = useState<WfrpDraftIdentityInput>(
         initialIdentity ?? { name: '' }
@@ -143,14 +121,18 @@ export function useWfrpDraftForm({
     const valid: Record<WfrpDraftStepId, boolean> = {
         species: !!profile,
         career:
-            !!careerId &&
+            !!draft.career.id &&
             errorsFor('career').length === 0 &&
-            careerPickValid(careerMode, careerId, careerRolls),
+            careerPickValid(
+                draft.career.mode,
+                draft.career.id,
+                draft.career.rolls
+            ),
         stats: !!preview && errorsFor('stats').length === 0,
         talents:
             !!preview &&
             errorsFor('talents').length === 0 &&
-            rolledTalents.length === talentCount,
+            draft.talents.rolled.length === talentCount,
         identity:
             identity.name.trim().length > 0 &&
             (identityOnly || (!!preview && preview.ok)),
@@ -160,7 +142,7 @@ export function useWfrpDraftForm({
         errorsFor(id).filter(
             (c) =>
                 VISIBLE_STEP_ERRORS.has(c) &&
-                (c !== 'CAREER_UNKNOWN' || !!careerId)
+                (c !== 'CAREER_UNKNOWN' || !!draft.career.id)
         );
 
     const rolls = useWfrpDraftRolls({
@@ -170,17 +152,17 @@ export function useWfrpDraftForm({
         enabled: !!creation,
         names: { career: careerName, feat: featName },
         career: {
-            mode: careerMode,
-            rolls: careerRolls,
-            setRolls: setCareerRolls,
-            setId: setCareerId,
+            mode: draft.career.mode,
+            rolls: draft.career.rolls,
+            setRolls: draft.career.setRolls,
+            setId: draft.career.setId,
         },
         stats: {
-            rolls: statRolls,
-            setRolls: setStatRolls,
-            setArranged,
+            rolls: draft.stats.rolls,
+            setRolls: draft.stats.setRolls,
+            setArranged: draft.stats.setArranged,
         },
-        talents: { rolled: rolledTalents, set: setRolledTalents },
+        talents: { rolled: draft.talents.rolled, set: draft.talents.set },
     });
 
     const submit = useWfrpDraftSubmit({
@@ -211,30 +193,30 @@ export function useWfrpDraftForm({
             loading: races.isPending || profiles.isPending,
         },
         career: {
-            mode: careerMode,
-            setMode: setCareerMode,
-            rolls: careerRolls,
+            mode: draft.career.mode,
+            setMode: draft.career.setMode,
+            rolls: draft.career.rolls,
             roll: rolls.careerRoll,
-            careerId,
-            pick: setCareerId,
+            careerId: draft.career.id,
+            pick: draft.career.setId,
             table: profile?.careerTable ?? [],
             all: careers.data ?? [],
         },
         stats: {
-            mode: statsMode,
-            setMode: setStatsMode,
-            rolls: statRolls,
+            mode: draft.stats.mode,
+            setMode: draft.stats.setMode,
+            rolls: draft.stats.rolls,
             roll: rolls.statsRoll,
-            arranged,
-            swap,
-            points,
-            setPoint,
+            arranged: draft.stats.arranged,
+            swap: draft.stats.swap,
+            points: draft.stats.points,
+            setPoint: draft.stats.setPoint,
             budget: rules?.creation.freeBudget ?? 0,
         },
         talents: {
             fixed: profile?.talents ?? [],
             count: talentCount,
-            rolled: rolledTalents,
+            rolled: draft.talents.rolled,
             roll: rolls.talentsRoll,
             names: featName,
         },

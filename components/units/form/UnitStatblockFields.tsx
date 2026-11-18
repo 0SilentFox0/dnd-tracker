@@ -7,42 +7,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { NumberInput } from '@/components/ui/number-input';
 import { SelectField } from '@/components/ui/select-field';
+import {
+    MONSTER_CREATURE_TYPES,
+    MONSTER_SENSE_KEYS,
+    MONSTER_SIZES,
+} from '@/lib/constants/monster';
 import type { Unit, UnitStatblock } from '@/types/units';
 
 const MOVEMENT_KEYS = ['fly', 'swim', 'climb', 'burrow'] as const;
-
-const SENSE_KEYS = [
-    'darkvision',
-    'blindsight',
-    'tremorsense',
-    'truesight',
-] as const;
-
-const SIZE_KEYS = [
-    'tiny',
-    'small',
-    'medium',
-    'large',
-    'huge',
-    'gargantuan',
-] as const;
-
-const CREATURE_TYPES = [
-    'aberration',
-    'beast',
-    'celestial',
-    'construct',
-    'dragon',
-    'elemental',
-    'fey',
-    'fiend',
-    'giant',
-    'humanoid',
-    'monstrosity',
-    'ooze',
-    'plant',
-    'undead',
-] as const;
 
 export function UnitStatblockFields({
     formData,
@@ -100,7 +72,7 @@ export function UnitStatblockFields({
                     }
                 />
                 <datalist id="creature-types">
-                    {CREATURE_TYPES.map((type) => (
+                    {MONSTER_CREATURE_TYPES.map((type) => (
                         <option key={type} value={type} />
                     ))}
                 </datalist>
@@ -111,7 +83,7 @@ export function UnitStatblockFields({
                     id="creature-size"
                     allowNone
                     value={block.size ?? ''}
-                    options={SIZE_KEYS.map((value) => ({
+                    options={MONSTER_SIZES.map((value) => ({
                         value,
                         label: tMonster(`sizes.${value}`),
                     }))}
@@ -131,7 +103,7 @@ export function UnitStatblockFields({
                     }
                 />
             </div>
-            {SENSE_KEYS.map((key) =>
+            {MONSTER_SENSE_KEYS.map((key) =>
                 number(
                     `sense-${key}`,
                     t('feet', { label: tMonster(`senses.${key}`) }),

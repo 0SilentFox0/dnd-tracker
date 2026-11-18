@@ -72,6 +72,7 @@ function MapTokenImpl({
                 zIndex: isDown(participant) ? 1 : 2,
             }}
         >
+            {/* eslint-disable-next-line raw-controls/no-raw-control -- shakeRef/FX anchor needs the bare element */}
             <button
                 ref={shakeRef}
                 type="button"

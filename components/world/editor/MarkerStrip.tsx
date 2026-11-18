@@ -17,7 +17,7 @@ import {
 import { MarkerIconGrid } from './MapFieldParts';
 import { markerIcon } from './marker-icon-options';
 import { NewWorldMapDialog } from './NewWorldMapDialog';
-import { useWorldEditorContext } from './WorldEditorContext';
+import { useEditorMarkerFields } from './use-editor-fields';
 
 import { ColorSwatch } from '@/components/common/ColorSwatch';
 import { HudButton } from '@/components/hud';
@@ -29,7 +29,6 @@ import {
 } from '@/components/ui/popover';
 import { Textarea } from '@/components/ui/textarea';
 import { WORLD_DM_NOTE_MAX } from '@/lib/constants/world';
-import { useMarkerFields } from '@/lib/hooks/world';
 import { cn } from '@/lib/utils';
 import type { WorldMarker } from '@/types/world';
 
@@ -40,9 +39,6 @@ export function MarkerStrip({
     marker: WorldMarker;
     onClose(): void;
 }) {
-    const { editor, select, openMap, redraw, redrawId } =
-        useWorldEditorContext();
-
     const t = useTranslations('world');
 
     const tc = useTranslations('common.actions');
@@ -51,20 +47,7 @@ export function MarkerStrip({
 
     const [iconOpen, setIconOpen] = useState(false);
 
-    const {
-        name,
-        setName,
-        commitName,
-        note,
-        setNote,
-        commitNote,
-        color,
-        pickColor,
-        save,
-        remove,
-    } = useMarkerFields({ marker, editor, select });
-
-    const redrawing = redrawId === marker.id;
+    const m = useEditorMarkerFields(marker);
 
     const Icon = markerIcon(marker);
 
@@ -75,7 +58,11 @@ export function MarkerStrip({
                 label={t(`shape.${marker.kind}`)}
                 labelClassName="hidden xl:inline"
             />
-            <NameInput value={name} onChange={setName} onCommit={commitName} />
+            <NameInput
+                value={m.name}
+                onChange={m.setName}
+                onCommit={m.commitName}
+            />
             {marker.kind === 'point' ? (
                 <Popover open={iconOpen} onOpenChange={setIconOpen}>
                     <PopoverTrigger asChild>
@@ -95,7 +82,7 @@ export function MarkerStrip({
                             value={marker.icon}
                             cellClassName="size-10"
                             onPick={(icon) => {
-                                void save({ icon });
+                                void m.save({ icon });
                                 setIconOpen(false);
                             }}
                         />
@@ -104,24 +91,26 @@ export function MarkerStrip({
             ) : (
                 <>
                     <ColorSwatch
-                        color={color}
+                        color={m.color}
                         label={t('editor.zoneColor')}
-                        onChange={pickColor}
+                        onChange={m.pickColor}
                     />
                     <Button
                         type="button"
                         size="sm"
-                        variant={redrawing ? 'default' : 'outline'}
-                        onClick={() => redraw(redrawing ? null : marker.id)}
+                        variant={m.redrawing ? 'default' : 'outline'}
+                        onClick={() => m.redraw(m.redrawing ? null : marker.id)}
                         className="h-9 shrink-0 gap-1.5"
                         aria-label={
-                            redrawing
+                            m.redrawing
                                 ? t('editor.drawNewZone')
                                 : t('editor.redrawOutline')
                         }
                     >
                         <PenLine className="size-4" />
-                        {redrawing ? t('editor.drawing') : t('editor.outline')}
+                        {m.redrawing
+                            ? t('editor.drawing')
+                            : t('editor.outline')}
                     </Button>
                 </>
             )}
@@ -129,7 +118,7 @@ export function MarkerStrip({
                 label={t('editor.knownLocation')}
                 title={t('editor.knownLocationHint')}
                 checked={marker.alwaysVisible}
-                onChange={(v) => void save({ alwaysVisible: v })}
+                onChange={(v) => void m.save({ alwaysVisible: v })}
             />
             <Button
                 type="button"
@@ -137,7 +126,7 @@ export function MarkerStrip({
                 variant="outline"
                 onClick={() =>
                     marker.childMapId
-                        ? openMap(marker.childMapId)
+                        ? m.openMap(marker.childMapId)
                         : setCreating(true)
                 }
                 className="h-9 shrink-0 gap-1.5"
@@ -152,12 +141,12 @@ export function MarkerStrip({
                     ? t('editor.childMap')
                     : t('editor.createMap')}
             </Button>
-            <Popover onOpenChange={(o) => !o && commitNote()}>
+            <Popover onOpenChange={(o) => !o && m.commitNote()}>
                 <PopoverTrigger asChild>
                     <HudButton type="button" className={CHIP}>
                         <NotebookPen className="size-4" aria-hidden />
                         {t('editor.note')}
-                        {note.trim() ? (
+                        {m.note.trim() ? (
                             <span
                                 aria-hidden
                                 className="size-1.5 rounded-full bg-[var(--gold)]"
@@ -169,10 +158,10 @@ export function MarkerStrip({
                     <Textarea
                         aria-label={t('editor.dmNote')}
                         rows={5}
-                        value={note}
+                        value={m.note}
                         maxLength={WORLD_DM_NOTE_MAX}
-                        onChange={(e) => setNote(e.target.value)}
-                        onBlur={commitNote}
+                        onChange={(e) => m.setNote(e.target.value)}
+                        onBlur={m.commitNote}
                     />
                 </PopoverContent>
             </Popover>
@@ -192,7 +181,7 @@ export function MarkerStrip({
             <span className="ml-auto flex shrink-0 items-center gap-2">
                 <DeleteButton
                     label={tc('delete')}
-                    onClick={() => void remove()}
+                    onClick={() => void m.remove()}
                 />
                 <CloseButton onClose={onClose} />
             </span>

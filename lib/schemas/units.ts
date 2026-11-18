@@ -175,9 +175,7 @@ const monsterCreateFields = {
     saveProficiencies: saveProficiencies.default([]),
 };
 
-export const createUnitSchema = z.object({
-    name: z.string().trim().min(1).max(100),
-    raceId: z.string().min(1).nullable().optional(),
+const unitStatFields = {
     level: z.number().min(1).max(30).default(1),
     strength: z.number().min(1).max(30).default(10),
     dexterity: z.number().min(1).max(30).default(10),
@@ -191,12 +189,18 @@ export const createUnitSchema = z.object({
     gridSize: z.number().int().min(1).max(3).default(1),
     maxHp: z.number().min(1).default(10),
     proficiencyBonus: z.number().min(0).optional(),
-    minTargets: z.number().min(1).default(1),
-    maxTargets: z.number().min(1).default(1),
     attacks: z
         .array(unitAttackSchema)
         .describe('Unit attacks: name, bonus, damage dice, type')
         .default([]),
+};
+
+export const createUnitSchema = z.object({
+    name: z.string().trim().min(1).max(100),
+    raceId: z.string().min(1).nullable().optional(),
+    ...unitStatFields,
+    minTargets: z.number().min(1).default(1),
+    maxTargets: z.number().min(1).default(1),
     abilities: AbilitiesSchema.describe('Unit abilities').optional(),
     immunities: z.array(z.string()).default([]),
     knownSpells: z
@@ -254,23 +258,7 @@ export const updateUnitSchema = z.object({
 export const importUnitSchema = z.object({
     name: z.string().trim().min(1),
     raceName: z.string().trim().optional(),
-    level: z.number().min(1).max(30).default(1),
-    strength: z.number().min(1).max(30).default(10),
-    dexterity: z.number().min(1).max(30).default(10),
-    constitution: z.number().min(1).max(30).default(10),
-    intelligence: z.number().min(1).max(30).default(10),
-    wisdom: z.number().min(1).max(30).default(10),
-    charisma: z.number().min(1).max(30).default(10),
-    armorClass: z.number().min(0).default(10),
-    initiative: z.number().default(0),
-    speed: z.number().min(0).default(30),
-    gridSize: z.number().int().min(1).max(3).default(1),
-    maxHp: z.number().min(1).default(10),
-    proficiencyBonus: z.number().min(0).optional(),
-    attacks: z
-        .array(unitAttackSchema)
-        .describe('Unit attacks: name, bonus, damage dice, type')
-        .default([]),
+    ...unitStatFields,
     specialAbilities: z
         .array(
             z.object({

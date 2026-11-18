@@ -87,7 +87,7 @@ export async function listHeroesOnMap(
     return toDmHeroes(heroes, (id) => byId.get(id));
 }
 
-type DestMap = {
+export type DestMap = {
     id: string;
     revealRadius: number;
     width: number;

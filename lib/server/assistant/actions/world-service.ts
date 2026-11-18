@@ -47,6 +47,7 @@ import {
     toDmHeroes,
     writeRestLog,
 } from '@/lib/server/world/travel-store';
+import { travelToPoint } from '@/lib/server/world/travel-to-point';
 import { ownedWorldMapPath } from '@/lib/supabase/world-map-storage';
 import type { CampaignAccessResult } from '@/lib/utils/api/api-auth';
 import { requestDigest } from '@/lib/utils/battle/store/stable-json';
@@ -54,7 +55,7 @@ import { classesEnabled } from '@/lib/utils/characters/classes/classes-enabled';
 import { jsonContent } from '@/lib/utils/common/json';
 import { parseRules } from '@/lib/utils/rules/schema';
 import { polygonCentroid } from '@/lib/utils/world/geometry';
-import { planEnter, planExit, planTravel } from '@/lib/utils/world/travel';
+import { planEnter, planExit } from '@/lib/utils/world/travel';
 
 const id = z.string().min(1);
 
@@ -123,8 +124,7 @@ type TargetsState = {
 const byId = <T extends { id: string }>(rows: T[]) =>
     rows.sort((a, b) => a.id.localeCompare(b.id));
 
-const mapNotFound = () =>
-    new ContentError(API_ERRORS.WORLD_MAP_NOT_FOUND, 404);
+const mapNotFound = () => new ContentError(API_ERRORS.WORLD_MAP_NOT_FOUND, 404);
 
 const markerNotFound = () =>
     new ContentError(API_ERRORS.WORLD_MARKER_NOT_FOUND, 404);
@@ -433,22 +433,24 @@ async function restState({ campaignId, input, restRules }: StateArgs) {
     };
 }
 
-const WORLD_STATE: Record<WorldOperation, (args: StateArgs) => Promise<unknown>> =
-    {
-        'maps.create': mapsCreateState,
-        'maps.update': mapsUpdateState,
-        'maps.delete': mapsDeleteState,
-        'markers.create': markersCreateState,
-        'markers.update': markerMutationState,
-        'markers.delete': markerMutationState,
-        'notes.create': notesCreateState,
-        'notes.update': noteMutationState,
-        'notes.delete': noteMutationState,
-        travel: travelState,
-        enter: enterState,
-        exit: exitState,
-        rest: restState,
-    };
+const WORLD_STATE: Record<
+    WorldOperation,
+    (args: StateArgs) => Promise<unknown>
+> = {
+    'maps.create': mapsCreateState,
+    'maps.update': mapsUpdateState,
+    'maps.delete': mapsDeleteState,
+    'markers.create': markersCreateState,
+    'markers.update': markerMutationState,
+    'markers.delete': markerMutationState,
+    'notes.create': notesCreateState,
+    'notes.update': noteMutationState,
+    'notes.delete': noteMutationState,
+    travel: travelState,
+    enter: enterState,
+    exit: exitState,
+    rest: restState,
+};
 
 async function worldState(
     caller: AssistantCaller,
@@ -624,7 +626,10 @@ async function assertCanCreateMap(
         throw new ContentError(API_ERRORS.WORLD_MAPS_LIMIT, 409);
 
     if (body.parentMarkerId) {
-        const parent = await requireOwnedMarker(campaignId, body.parentMarkerId);
+        const parent = await requireOwnedMarker(
+            campaignId,
+            body.parentMarkerId
+        );
 
         if (!parent || parent.childMap)
             throw new ContentError(API_ERRORS.WORLD_NESTED_EXISTS, 409);
@@ -1111,31 +1116,13 @@ async function runTravel(args: TravelArgs): Promise<TravelResult> {
 
     if (body.rest !== 'none') await applyWorldRest(access, body.rest, ids);
 
-    const marker = body.toMarkerId
-        ? await prisma.worldMarker.findFirst({
-              where: { id: body.toMarkerId, mapId: map.id },
-              select: { id: true },
-          })
-        : null;
-
-    const plan = planTravel({
-        positions,
-        characterIds: ids,
-        mapId: map.id,
-        to: body.to,
-        radius: map.revealRadius,
-        aspect: map.width / map.height,
-    });
-
-    await commitTravel({
+    const plan = await travelToPoint({
         campaignId,
         userId: access.userId,
-        dest: map,
-        plan,
+        map,
+        body,
+        characterIds: ids,
         positions,
-        rest: body.rest,
-        toMarkerId: marker?.id ?? null,
-        kind: 'travel',
     });
 
     return travelOutcome(args, map.id, plan);

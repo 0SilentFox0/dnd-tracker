@@ -20,18 +20,14 @@ import {
     toDmHeroes,
     writeRestLog,
 } from '@/lib/server/world/travel-store';
+import { travelToPoint } from '@/lib/server/world/travel-to-point';
 import { publishWorldChanged } from '@/lib/server/world/world-events';
 import { requireCampaignAccess } from '@/lib/utils/api/api-auth';
 import { errorResponse } from '@/lib/utils/api/api-response';
 import { withDM } from '@/lib/utils/api/as-dm';
 import { handleApiError } from '@/lib/utils/api/error-handler';
 import { parseBody } from '@/lib/utils/api/parse-body';
-import {
-    planEnter,
-    planExit,
-    planTravel,
-    type TravelPlan,
-} from '@/lib/utils/world/travel';
+import { planEnter, planExit, type TravelPlan } from '@/lib/utils/world/travel';
 import type { WorldHero } from '@/types/world';
 
 type Heroes = { id: string; name: string; avatar: string | null }[];
@@ -77,33 +73,15 @@ export function travelHandler(req: Request, campaignId: string) {
 
         await applyWorldRest(access, body.rest, body.characterIds);
 
-        const marker = body.toMarkerId
-            ? await prisma.worldMarker.findFirst({
-                  where: { id: body.toMarkerId, mapId: map.id },
-                  select: { id: true },
-              })
-            : null;
-
         const positions = await readPositions(body.characterIds);
 
-        const plan = planTravel({
-            positions,
-            characterIds: body.characterIds,
-            mapId: map.id,
-            to: body.to,
-            radius: map.revealRadius,
-            aspect: map.width / map.height,
-        });
-
-        await commitTravel({
+        const plan = await travelToPoint({
             campaignId,
             userId: access.userId,
-            dest: map,
-            plan,
+            map,
+            body,
+            characterIds: body.characterIds,
             positions,
-            rest: body.rest,
-            toMarkerId: marker?.id ?? null,
-            kind: 'travel',
         });
 
         publishWorldChanged(campaignId, map.id);

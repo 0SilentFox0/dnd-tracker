@@ -35,6 +35,53 @@ function prepare({ access, character }: CharacterGate) {
     return { planGrant, planUndo: planCorruptionUndo };
 }
 
+type Tx = Parameters<Parameters<typeof prisma.$transaction>[0]>[0];
+
+type LockedCharacter = NonNullable<
+    Awaited<ReturnType<typeof lockCharacters>> extends Map<string, infer V>
+        ? V
+        : never
+>;
+
+function withLockedCharacter<T>(
+    { access, character }: CharacterGate,
+    run: (tx: Tx, locked: LockedCharacter) => Promise<T>
+) {
+    return prisma.$transaction(async (tx) => {
+        const locked = (await lockCharacters(tx, [character.id])).get(
+            character.id
+        );
+
+        if (!locked)
+            throw new ContentError(API_ERRORS.CHARACTER_NOT_FOUND, 404);
+
+        await assertNotInActiveBattle(
+            access.campaign.id,
+            [character.id],
+            API_ERRORS.CORRUPTION_IN_BATTLE
+        );
+
+        return run(tx, locked);
+    });
+}
+
+async function saveCorruption(
+    tx: Tx,
+    characterId: string,
+    locked: LockedCharacter,
+    corruption: ReturnType<typeof readCharacteristics>['corruption']
+) {
+    await tx.character.update({
+        where: { id: characterId },
+        data: {
+            characteristics: characteristicsJson({
+                ...readCharacteristics(locked),
+                corruption,
+            }),
+        },
+    });
+}
+
 export async function grantCorruption(
     gate: CharacterGate,
     input: CorruptionGrantInput
@@ -45,20 +92,7 @@ export async function grantCorruption(
 
     const campaignId = access.campaign.id;
 
-    return prisma.$transaction(async (tx) => {
-        const locked = (await lockCharacters(tx, [character.id])).get(
-            character.id
-        );
-
-        if (!locked)
-            throw new ContentError(API_ERRORS.CHARACTER_NOT_FOUND, 404);
-
-        await assertNotInActiveBattle(
-            campaignId,
-            [character.id],
-            API_ERRORS.CORRUPTION_IN_BATTLE
-        );
-
+    return withLockedCharacter(gate, async (tx, locked) => {
         const grantId = randomUUID();
 
         const { state, summary } = corruption.planGrant({
@@ -71,15 +105,7 @@ export async function grantCorruption(
             at: new Date().toISOString(),
         });
 
-        await tx.character.update({
-            where: { id: character.id },
-            data: {
-                characteristics: characteristicsJson({
-                    ...readCharacteristics(locked),
-                    corruption: state,
-                }),
-            },
-        });
+        await saveCorruption(tx, character.id, locked, state);
 
         await writeCharacterLog(tx, [
             {
@@ -113,20 +139,7 @@ export async function undoCorruption(
 
     const campaignId = access.campaign.id;
 
-    return prisma.$transaction(async (tx) => {
-        const locked = (await lockCharacters(tx, [character.id])).get(
-            character.id
-        );
-
-        if (!locked)
-            throw new ContentError(API_ERRORS.CHARACTER_NOT_FOUND, 404);
-
-        await assertNotInActiveBattle(
-            campaignId,
-            [character.id],
-            API_ERRORS.CORRUPTION_IN_BATTLE
-        );
-
+    return withLockedCharacter(gate, async (tx, locked) => {
         const result = corruption.planUndo(
             readCharacteristics(locked).corruption,
             input.grantId
@@ -135,15 +148,7 @@ export async function undoCorruption(
         if (!result.ok)
             throw new ContentError(API_ERRORS.CORRUPTION_STALE, 409);
 
-        await tx.character.update({
-            where: { id: character.id },
-            data: {
-                characteristics: characteristicsJson({
-                    ...readCharacteristics(locked),
-                    corruption: result.state,
-                }),
-            },
-        });
+        await saveCorruption(tx, character.id, locked, result.state);
 
         await writeCharacterLog(tx, [
             {

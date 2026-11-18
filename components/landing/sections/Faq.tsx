@@ -13,6 +13,7 @@ export function Faq({ t }: { t: Translator }) {
             <SectionTitle eyebrow={t('faq.eyebrow')} title={t('faq.title')} />
             <div className="mx-auto mt-10 max-w-3xl space-y-3">
                 {keysOf(t, 'faq.items').map((key) => (
+                    // eslint-disable-next-line raw-controls/no-raw-control -- static landing, no client JS
                     <details
                         key={key}
                         className="landing-reveal group rounded-xl border border-hud-rule bg-hud-panel open:border-hud-gold/50"

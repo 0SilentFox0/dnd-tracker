@@ -4,6 +4,7 @@ import {
     ParticipantSide,
 } from '@/lib/constants/battle';
 import { CONTROLLED_BY_DM } from '@/lib/constants/characters';
+import { NEUTRAL_SCORES } from '@/lib/utils/battle/view/redact-participants';
 import type { BattleParticipant } from '@/types/battle';
 
 interface PreviewParticipantOptions {
@@ -43,20 +44,7 @@ export function previewParticipant({
             level,
             initiative: 10,
             baseInitiative: 10,
-            strength: 10,
-            dexterity: 10,
-            constitution: 10,
-            intelligence: 10,
-            wisdom: 10,
-            charisma: 10,
-            modifiers: {
-                strength: 0,
-                dexterity: 0,
-                constitution: 0,
-                intelligence: 0,
-                wisdom: 0,
-                charisma: 0,
-            },
+            ...NEUTRAL_SCORES,
             proficiencyBonus: 2,
             race: 'human',
         },

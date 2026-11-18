@@ -1,14 +1,1 @@
-[
-    {
-        "file": "components/battle/map/MapToken.tsx",
-        "count": 1
-    },
-    {
-        "file": "components/systems/SystemGate.tsx",
-        "count": 1
-    },
-    {
-        "file": "systems/wfrp/ui/spells/SpellMagicFields.tsx",
-        "count": 1
-    }
-]
+[]

@@ -13,6 +13,8 @@ import type { ImportKind } from '@/types/content-import';
 export const contentImportKeys = {
     aiAvailability: (campaignId: string, kind: ImportKind) =>
         ['content-import-ai', campaignId, kind] as const,
+    fallbackList: (campaignId: string, kind: ImportKind) =>
+        [kind, campaignId] as const,
 };
 
 /** Kinds a module owns keep the `[kind, campaignId]` list key */
@@ -35,4 +37,7 @@ const INVALIDATE: Partial<
 export const importInvalidateKeys = (
     campaignId: string,
     kind: ImportKind
-): QueryKey[] => INVALIDATE[kind]?.(campaignId) ?? [[kind, campaignId]];
+): QueryKey[] =>
+    INVALIDATE[kind]?.(campaignId) ?? [
+        contentImportKeys.fallbackList(campaignId, kind),
+    ];

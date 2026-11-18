@@ -16,6 +16,8 @@ import {
 import {
     campaignState,
     campaignWindowSchema,
+    isReadCampaignOperation,
+    isSessionOnlyCampaignOperation,
     runCampaignOperation,
 } from '@/lib/server/campaigns/action-service';
 import { withCampaignRuntimeWrite } from '@/lib/server/content/write';
@@ -45,22 +47,9 @@ const definitions = {
 export const CAMPAIGN_ACTIONS: readonly AssistantActionDef[] = Object.entries(
     definitions
 ).map(([operation, input]): AssistantActionDef => {
-    const read = [
-        'status',
-        'instructions',
-        'members',
-        'templates',
-        'export',
-        'onboarding',
-    ].includes(operation);
+    const read = isReadCampaignOperation(operation);
 
-    const sessionOnly = [
-        'create',
-        'clone',
-        'delete',
-        'template.save',
-        'template.update',
-    ].includes(operation);
+    const sessionOnly = isSessionOnlyCampaignOperation(operation);
 
     const base = {
         id: `campaign.${operation}`,

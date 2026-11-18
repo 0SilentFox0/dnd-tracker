@@ -64,7 +64,7 @@ const PUBLIC_ABILITY_KEYS = [
     'raceId',
 ] as const;
 
-const NEUTRAL_SCORES = {
+export const NEUTRAL_SCORES = {
     strength: 10,
     dexterity: 10,
     constitution: 10,

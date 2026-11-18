@@ -1,4 +1,11 @@
-export const RAW_CONTROL_TAGS = ['button', 'input', 'select', 'img'];
+export const RAW_CONTROL_TAGS = [
+    'button',
+    'input',
+    'select',
+    'img',
+    'textarea',
+    'details',
+];
 
 export const RAW_CONTROL_FILES = [
     'components/**/*.tsx',
@@ -18,13 +25,14 @@ const rule = {
         type: 'problem',
         schema: [],
         messages: {
-            raw: 'Сирий <{{tag}}>: використайте kit (components/ui, components/hud; Slider для type=range, next/image для img). Baseline raw-controls-exempt.json лише скорочується.',
+            raw: 'Сирий <{{tag}}>: використайте kit (components/ui, components/hud: Textarea, Disclosure; Slider для type=range, next/image для img). Baseline raw-controls-exempt.json лише скорочується.',
         },
     },
     create(context) {
         return {
             JSXOpeningElement(node) {
-                const tag = node.name.type === 'JSXIdentifier' && node.name.name;
+                const tag =
+                    node.name.type === 'JSXIdentifier' && node.name.name;
 
                 if (!tag || !RAW_CONTROL_TAGS.includes(tag)) return;
 

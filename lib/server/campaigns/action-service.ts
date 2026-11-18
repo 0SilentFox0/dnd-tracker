@@ -610,6 +610,29 @@ async function onboardingResult({
     );
 }
 
+const READ_OPERATIONS: readonly string[] = [
+    'status',
+    'instructions',
+    'members',
+    'templates',
+    'export',
+    'onboarding',
+];
+
+const SESSION_ONLY_OPERATIONS: readonly string[] = [
+    'create',
+    'clone',
+    'delete',
+    'template.save',
+    'template.update',
+];
+
+export const isReadCampaignOperation = (operation: string) =>
+    READ_OPERATIONS.includes(operation);
+
+export const isSessionOnlyCampaignOperation = (operation: string) =>
+    SESSION_ONLY_OPERATIONS.includes(operation);
+
 const NO_BUMP_OPERATIONS = new Set([
     'create',
     'clone',
@@ -631,24 +654,9 @@ export async function runCampaignOperation(
         resultLabel(locale, 'campaign')
     );
 
-    const read = [
-        'status',
-        'instructions',
-        'members',
-        'templates',
-        'export',
-        'onboarding',
-    ].includes(operation);
+    const read = isReadCampaignOperation(operation);
 
-    const sessionOnly = [
-        'create',
-        'clone',
-        'delete',
-        'template.save',
-        'template.update',
-    ].includes(operation);
-
-    assertCan(actor, need(!read, sessionOnly));
+    assertCan(actor, need(!read, isSessionOnlyCampaignOperation(operation)));
 
     const base = { actor, input, locale, result: campaignResult };
 
