@@ -4,7 +4,8 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { Layers } from 'lucide-react';
 
-import { ArtifactSetCard } from '@/components/artifact-sets/ArtifactSetCard';
+import { ArtifactSetCard } from './ArtifactSetCard';
+
 import { SearchEmptyState } from '@/components/common/SearchEmptyState';
 import { SearchInput } from '@/components/common/SearchInput';
 import { EmptyState } from '@/components/common/states';

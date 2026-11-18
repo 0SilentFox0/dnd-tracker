@@ -25,8 +25,7 @@
     "searchReference": "Searching the reference: {query}",
     "getBattleState": "Looking at the battle…",
     "getParty": "Looking at the party…",
-    "proposeScenarioEdit": "Preparing a proposal…",
-    "proposeSceneSlide": "Paid image: an explicit request and confirmation are required"
+    "proposeScenarioEdit": "Preparing a proposal…"
   },
   "toolStatus": {
     "error": "Error",

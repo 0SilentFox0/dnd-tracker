@@ -116,7 +116,7 @@ describe('шкода атаки 5e', () => {
             '1d8'
         );
         expect(
-            attackDamageContext(fiveE, rapier, [5], DEFAULT_RULES).heroLevelPart
+            attackDamageContext(fiveE, rapier, [5], DEFAULT_RULES).flatPart
         ).toBe(0);
     });
 

@@ -9,7 +9,6 @@ export const TOOL_LABEL_KEYS = {
     get_battle_state: 'getBattleState',
     get_party: 'getParty',
     propose_scenario_edit: 'proposeScenarioEdit',
-    propose_scene_slide: 'proposeSceneSlide',
 } as const;
 
 const isLabelled = (name: string): name is keyof typeof TOOL_LABEL_KEYS =>

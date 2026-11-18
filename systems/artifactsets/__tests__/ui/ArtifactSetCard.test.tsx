@@ -3,9 +3,9 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { cleanup, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { ArtifactSetCard } from '@/components/artifact-sets/ArtifactSetCard';
 import { renderWithConfirm } from '@/components/ui/__tests__/render-with-confirm';
 import type { AbilityFlowSummary } from '@/lib/utils/abilities/segments';
+import { ArtifactSetCard } from '@/systems/artifactsets/ui/content/ArtifactSetCard';
 
 vi.mock('next/navigation', () => ({
     useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }),

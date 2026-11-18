@@ -13,6 +13,8 @@ import type { MechanicKey } from '@/lib/utils/rules/registry';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import type { SystemConditionInfo } from '@/lib/utils/rules/systems';
 import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
+import type { ArtifactSetCardData } from '@/types/artifact-sets';
+import type { ArtifactCardData } from '@/types/artifacts';
 import type { BattleParticipant } from '@/types/battle';
 import type { BattleAction } from '@/types/battle-actions';
 import type {
@@ -86,6 +88,16 @@ export interface DmPageProps {
     view?: DmPageView;
     /** Server-read payload of the view (the page narrows it itself) */
     data?: unknown;
+}
+
+export interface ArtifactSetsLinkProps {
+    campaignId: string;
+}
+
+export interface ArtifactSetsPanelProps {
+    campaignId: string;
+    canEdit: boolean;
+    sets: { set: ArtifactSetCardData; artifacts: ArtifactCardData[] }[];
 }
 
 export interface RestBadgesProps {
@@ -253,6 +265,11 @@ export interface SystemUi {
     DraftForm?: ComponentType<DraftFormProps>;
     RaceProfileEditor?: ComponentType<RaceProfileEditorProps>;
     ArtifactStatsEditor?: ComponentType<ArtifactStatsEditorProps>;
+    /** Link and panel of the DM artifacts page for item sets */
+    artifactSets?: {
+        Link: ComponentType<ArtifactSetsLinkProps>;
+        Panel: ComponentType<ArtifactSetsPanelProps>;
+    };
     EquippedSummary?: ComponentType<EquippedSummaryProps>;
     DowntimeTab?: ComponentType;
     DowntimePeriodPanel?: ComponentType<DowntimePeriodPanelProps>;

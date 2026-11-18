@@ -1,6 +1,6 @@
-import { EventEmitter } from 'node:events';
-import { Readable } from 'node:stream';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { bridgeHttpsToFetch } from './https-bridge';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import {
@@ -17,37 +17,6 @@ vi.mock('node:dns/promises', () => ({ lookup: lookupMock }));
 
 vi.mock('node:https', () => ({ request: httpsRequestMock }));
 
-// Adapts node:https.request onto the stubbed global fetch so the scenarios below stay response-driven.
-function bridgeHttpsToFetch() {
-    httpsRequestMock.mockImplementation(
-        (
-            opts: { host: string; path: string; signal: AbortSignal },
-            cb: (res: unknown) => void
-        ) => {
-            const req = new EventEmitter() as EventEmitter & { end(): void };
-
-            req.end = () => {
-                fetch(`https://${opts.host}${opts.path}`, {
-                    signal: opts.signal,
-                }).then((res) => {
-                    const stream = res.body
-                        ? Readable.fromWeb(res.body as never)
-                        : Readable.from([]);
-
-                    cb(
-                        Object.assign(stream, {
-                            statusCode: res.status,
-                            headers: Object.fromEntries(res.headers),
-                        })
-                    );
-                }, (e) => req.emit('error', e));
-            };
-
-            return req;
-        }
-    );
-}
-
 const PNG = Buffer.from([0x89, 0x50, 0x4e, 0x47, 1, 2, 3, 4]);
 
 const OPTS = { maxBytes: 100 };
@@ -63,7 +32,7 @@ describe('safe-fetch', () => {
     beforeEach(() => {
         lookupMock.mockReset();
         httpsRequestMock.mockReset();
-        bridgeHttpsToFetch();
+        bridgeHttpsToFetch(httpsRequestMock);
         lookupMock.mockResolvedValue([{ address: '93.184.216.34', family: 4 }]);
     });
 

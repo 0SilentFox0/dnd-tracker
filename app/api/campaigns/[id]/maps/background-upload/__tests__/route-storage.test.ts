@@ -30,10 +30,11 @@ vi.mock('@/lib/utils/api/as-dm', () => ({
     withDM: (_id: string, _action: string, handler: () => unknown) => handler(),
 }));
 
-import { POST } from '../route';
+// ensureBucket memoizes per module instance, so each test imports a fresh route
+const call = async (body: unknown) => {
+    const { POST } = await import('../route');
 
-const call = (body: unknown) =>
-    POST(
+    return POST(
         new Request('https://app.test/api/x', {
             method: 'POST',
             headers: { 'content-type': 'application/json' },
@@ -41,10 +42,12 @@ const call = (body: unknown) =>
         }),
         { params: Promise.resolve({ id: 'camp1' }) }
     );
+};
 
 describe('background-upload ticket against the storage boundary', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        vi.resetModules();
         vi.spyOn(console, 'warn').mockImplementation(() => undefined);
         vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', 'https://p.supabase.co');
         storage.listBuckets.mockResolvedValue({

@@ -50,7 +50,7 @@
 
 Після зміни складу сету `setId` у артефактів оновлюється автоматично.
 
-Реалізація: Zod-схеми в `lib/schemas/artifact-sets.ts`, помилки в `app/api/campaigns/[id]/artifact-sets/route-errors.ts`, Prisma — `lib/server/artifacts/artifact-set-queries.ts`, синхрон членів — `lib/server/artifacts/sync-artifact-set-members.ts`.
+Реалізація: Zod-схеми в `lib/schemas/artifact-sets.ts`, помилки в `app/api/campaigns/[id]/artifact-sets/route-errors.ts`, Prisma — `systems/artifactsets/server/content/queries.ts`, синхрон членів — `systems/artifactsets/server/content/sync-members.ts`.
 
 ## Бій
 

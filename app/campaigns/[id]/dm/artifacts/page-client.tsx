@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { Gem } from 'lucide-react';
 
-import { ArtifactSetCard } from '@/components/artifact-sets/ArtifactSetCard';
 import { ArtifactCard } from '@/components/artifacts/ArtifactCard';
 import { DeleteAllArtifactsButton } from '@/components/artifacts/DeleteAllArtifactsButton';
 import { SearchEmptyState } from '@/components/common/SearchEmptyState';
@@ -14,6 +13,7 @@ import { ContentTransferButtons } from '@/components/content-import/ContentTrans
 import { HudSection } from '@/components/hud/form';
 import { HudPage, HudPageHeader, HudPanel } from '@/components/hud/page';
 import { OnboardingHint } from '@/components/onboarding/OnboardingHint';
+import { systemUiOf } from '@/components/systems';
 import {
     Accordion,
     AccordionContent,
@@ -23,17 +23,22 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useArtifactsCatalog } from '@/lib/hooks/artifact-sets';
+import type { SystemSelection } from '@/lib/utils/rules/systems/catalog';
 
 export function DMArtifactsPageClient({
     campaignId,
+    system,
     canEdit = true,
 }: {
     campaignId: string;
+    system: SystemSelection;
     canEdit?: boolean;
 }) {
     const t = useTranslations('artifacts');
 
     const catalog = useArtifactsCatalog(campaignId);
+
+    const setsUi = systemUiOf(system.key, system.modules).artifactSets;
 
     const { search } = catalog;
 
@@ -65,17 +70,7 @@ export function DMArtifactsPageClient({
                                 artifactsCount={catalog.count}
                             />
                         )}
-                        <Button
-                            variant="outline"
-                            className="whitespace-nowrap"
-                            asChild
-                        >
-                            <Link
-                                href={`/campaigns/${campaignId}/dm/artifact-sets`}
-                            >
-                                {t('page.setsLink')}
-                            </Link>
-                        </Button>
+                        {setsUi && <setsUi.Link campaignId={campaignId} />}
                         {canEdit && (
                             <Button className="whitespace-nowrap" asChild>
                                 <Link href={newHref}>{t('page.create')}</Link>
@@ -117,25 +112,12 @@ export function DMArtifactsPageClient({
                             onClear={() => search.query.set('')}
                         />
                     )}
-                    {catalog.view.sets.length > 0 && (
-                        <HudPanel>
-                            <HudSection title={t('page.setsSection')}>
-                                <div className="space-y-4">
-                                    {catalog.view.sets.map(
-                                        ({ set, artifacts }) => (
-                                            <ArtifactSetCard
-                                                key={set.id}
-                                                variant="withArtifacts"
-                                                campaignId={campaignId}
-                                                set={set}
-                                                artifacts={artifacts}
-                                                canEdit={canEdit}
-                                            />
-                                        )
-                                    )}
-                                </div>
-                            </HudSection>
-                        </HudPanel>
+                    {setsUi && (
+                        <setsUi.Panel
+                            campaignId={campaignId}
+                            canEdit={canEdit}
+                            sets={catalog.view.sets}
+                        />
                     )}
 
                     {catalog.view.bySlot.length > 0 && (

@@ -120,7 +120,7 @@ describe('battle-damage-calculations', () => {
             expect(result.totalDamage).toBe(15);
         });
 
-        it('applies heroLevelPart and heroDicePart when provided in context', () => {
+        it('applies flatPart and heroDicePart when provided in context', () => {
             const attacker = createBaseParticipant();
 
             const result = calculateDamageWithModifiers(
@@ -129,7 +129,7 @@ describe('battle-damage-calculations', () => {
                 2,
                 AttackType.MELEE,
                 {
-                    heroLevelPart: 5,
+                    flatPart: 5,
                     heroDicePart: 4,
                 }
             );

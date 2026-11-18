@@ -47,11 +47,11 @@ export function averageAttackDamage(
 
     const { key: statKey } = attackAbilityOf(rules, p, attack);
 
-    const { heroLevelPart } = attackDamageContext(p, attack, [], rules);
+    const { flatPart } = attackDamageContext(p, attack, [], rules);
 
     const calc = calculateDamageWithModifiers(p, weaponAvg, statMod, type, {
         allParticipants: all,
-        heroLevelPart,
+        flatPart,
         heroDicePart: heroDiceAvg,
         heroDiceNotation: heroDice,
         weaponDiceNotation: attack.damageDice ?? undefined,
@@ -80,7 +80,7 @@ export function averageAttackDamage(
         statKey,
         weaponAvg,
         heroDice,
-        heroPart: heroLevelPart + heroDiceAvg,
+        heroPart: flatPart + heroDiceAvg,
         statMod,
         steps,
         multiplier: dm.multiplier,

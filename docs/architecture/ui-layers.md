@@ -34,7 +34,7 @@
 - `character-profile/ProfileContext` (дані листа), `character-profile/CombatRow`
 - `rules/RulesSection`, `rules/NumberField`, `rules/RulesPaths`
 - `battle/hud/DiceInput`, `battle/wizards/attack/shared`, `battle/participants/Section`
-- `abilities`, `artifact-sets/ArtifactSetCard`, `skills/list/SkillCard`, `ContentTransferButtons`, `ChoiceListEditor`, `OnboardingHint`, `spells/book/SpellBookPages`, `characters/rest/CharacterPickList`
+- `abilities`, `abilities/AbilityFlow`, `artifacts/ArtifactCard`, `skills/list/SkillCard`, `ContentTransferButtons`, `ChoiceListEditor`, `OnboardingHint`, `spells/book/SpellBookPages`, `characters/rest/CharacterPickList`
 
 Новий пункт кіта = правка списку (видно в ревʼю) + рядок тут.
 

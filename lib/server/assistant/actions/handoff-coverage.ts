@@ -9,6 +9,7 @@ export const HANDOFF_ACTION_COVERAGE = [
     ]),
     ['GET', 'ai/credentials', 'handoff.credentials'],
     ['DELETE', `${c}/api-tokens/[tokenId]`, 'handoff.tokens'],
+    ['POST', `${c}/api-tokens/[tokenId]/rotate`, 'handoff.tokens'],
     ...['GET', 'POST'].map((m) => [m, `${c}/api-tokens`, 'handoff.tokens']),
     ['PATCH', `${c}/characters/[characterId]/draft`, 'handoff.player-draft'],
     ['POST', `${c}/characters/draft/avatar`, 'handoff.player-draft'],

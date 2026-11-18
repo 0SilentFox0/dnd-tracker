@@ -11,6 +11,7 @@ import {
     type AiToolDef,
     runTool,
     runToolResult,
+    toolAnnotations,
     toolOutputSchema,
 } from './define';
 import { getPartyTool, readCharacterTool } from './party';
@@ -87,6 +88,7 @@ export function registerMcpTools(
                 description: def.description,
                 inputSchema: def.input as z.ZodObject,
                 outputSchema: toolOutputSchema,
+                annotations: toolAnnotations(def),
             },
             async (input: unknown, extra) => {
                 const tokenId = base.caller?.tokenId;

@@ -6,6 +6,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { MapEditorScreen } from '../MapEditorScreen';
 
 import { ConfirmContext } from '@/lib/hooks/common/confirm-context';
+import { makeT } from '@/lib/i18n/test/mock-t';
+import ukMaps from '@/messages/uk/maps.json';
 
 const touch = vi.hoisted(() => ({ value: false }));
 
@@ -23,6 +25,18 @@ const battleMapCapture = vi.hoisted(() => ({
     } | null,
 }));
 
+vi.mock('next-intl', async (orig) => ({
+    ...(await orig<object>()),
+    useTranslations: (namespace?: string) => {
+        if (namespace !== 'maps.tileLabels') return makeT(namespace);
+
+        const labels = ukMaps.tileLabels as Record<string, string>;
+
+        return Object.assign((key: string) => labels[key] ?? key, {
+            has: (key: string) => key in labels,
+        });
+    },
+}));
 vi.mock('@/lib/hooks/common', async (orig) => ({
     ...(await orig<object>()),
     useCoarsePointer: () => touch.value,

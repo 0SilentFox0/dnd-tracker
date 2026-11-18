@@ -1,8 +1,9 @@
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
-import { ArtifactSetBonusDisplay } from '@/components/artifact-sets/ArtifactSetBonusDisplay';
-import { ArtifactSetCardIcon } from '@/components/artifact-sets/ArtifactSetCardIcon';
+import { ArtifactSetBonusDisplay } from './ArtifactSetBonusDisplay';
+import { ArtifactSetCardIcon } from './ArtifactSetCardIcon';
+
 import { ArtifactCard } from '@/components/artifacts/ArtifactCard';
 import { HudCard } from '@/components/hud/page';
 import { Button } from '@/components/ui/button';
