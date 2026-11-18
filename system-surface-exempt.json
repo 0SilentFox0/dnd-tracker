@@ -3,7 +3,7 @@
     "components/battle/log/LogEntryCard.tsx": 1,
     "components/character-profile/rest/DmRestActions.tsx": 1,
     "components/units/form/UnitStatblockFields.tsx": 1,
-    "lib/ai/tools/party.ts": 1,
+    "lib/server/assistant/reads/party.ts": 1,
     "lib/constants/import-aliases.ts": 2,
     "lib/hooks/battle/mock-participants.ts": 1,
     "lib/hooks/battle/useAttackActions.ts": 1,
