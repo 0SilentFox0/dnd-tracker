@@ -53,31 +53,13 @@ export type SheetCharacter = NonNullable<
     Awaited<ReturnType<typeof loadSheetCharacter>>
 >;
 
-export async function buildSheetFor(
-    character: SheetCharacter,
-    viewer: CharacterSheet['viewer'],
-    campaign: { maxLevel: number; rules: Ruleset; allowPlayerEdit?: boolean }
-): Promise<CharacterSheet> {
-    const { context, race, tree, participant } =
-        await buildCharacterParticipant(character, campaign);
-
-    const known = participant.spellcasting.knownSpells ?? [];
-
-    const [spells, rows, chapters] = await Promise.all([
-        loadBookSpellsByIds(character.campaignId, known),
-        loadEquippedArtifactRows(character, context.artifactsById ?? {}, {
-            rules: campaign.rules,
-        }),
-        loadStoryChapters(character.id, character.campaignId),
-    ]);
-
-    const itemsOn = campaign.rules.items.enabled;
-
-    const attuned = attunedRefs(character.inventory);
-
-    const raw = context.artifactsById ?? {};
-
-    const artifacts: SheetArtifact[] = rows.map(({ row, slot, carried }) => ({
+function sheetArtifacts(
+    rows: Awaited<ReturnType<typeof loadEquippedArtifactRows>>,
+    raw: Parameters<typeof attunementRequired>[1],
+    itemsOn: boolean,
+    attuned: string[]
+): SheetArtifact[] {
+    return rows.map(({ row, slot, carried }) => ({
         id: row.id,
         name: row.name,
         icon: row.icon,
@@ -94,20 +76,16 @@ export async function buildSheetFor(
         ...(carried && { carried }),
         ...(row.systemStats != null && { systemStats: row.systemStats }),
     }));
+}
 
-    const personal = character.personalSkillId
-        ? context.skillsById?.[character.personalSkillId]
-        : undefined;
+type SheetBuild = Awaited<ReturnType<typeof buildCharacterParticipant>>;
 
-    const classEntries = context.classesById
-        ? CharacterClassesSchema.safeParse(character.classes)
-        : null;
-
-    const classes =
-        classEntries?.success && classEntries.data.length > 0
-            ? resolveClassEntries(classEntries.data, context.classesById ?? {})
-            : undefined;
-
+async function loadSheetChoices(
+    character: SheetCharacter,
+    context: SheetBuild['context'],
+    race: SheetBuild['race'],
+    classes: ReturnType<typeof resolveClassEntries> | undefined
+) {
     const state = choicesStateOf(character);
 
     const raceDefs = race ? readChoiceList(race.choices) : [];
@@ -165,6 +143,50 @@ export async function buildSheetFor(
                   backgroundOpen: backgroundOpenCount(visits, { featsById }),
               }
             : undefined;
+
+    return choices;
+}
+
+export async function buildSheetFor(
+    character: SheetCharacter,
+    viewer: CharacterSheet['viewer'],
+    campaign: { maxLevel: number; rules: Ruleset; allowPlayerEdit?: boolean }
+): Promise<CharacterSheet> {
+    const { context, race, tree, participant } =
+        await buildCharacterParticipant(character, campaign);
+
+    const known = participant.spellcasting.knownSpells ?? [];
+
+    const [spells, rows, chapters] = await Promise.all([
+        loadBookSpellsByIds(character.campaignId, known),
+        loadEquippedArtifactRows(character, context.artifactsById ?? {}, {
+            rules: campaign.rules,
+        }),
+        loadStoryChapters(character.id, character.campaignId),
+    ]);
+
+    const itemsOn = campaign.rules.items.enabled;
+
+    const attuned = attunedRefs(character.inventory);
+
+    const raw = context.artifactsById ?? {};
+
+    const artifacts = sheetArtifacts(rows, raw, itemsOn, attuned);
+
+    const personal = character.personalSkillId
+        ? context.skillsById?.[character.personalSkillId]
+        : undefined;
+
+    const classEntries = context.classesById
+        ? CharacterClassesSchema.safeParse(character.classes)
+        : null;
+
+    const classes =
+        classEntries?.success && classEntries.data.length > 0
+            ? resolveClassEntries(classEntries.data, context.classesById ?? {})
+            : undefined;
+
+    const choices = await loadSheetChoices(character, context, race, classes);
 
     const normalized = tree ? normalizeTree(tree) : null;
 
