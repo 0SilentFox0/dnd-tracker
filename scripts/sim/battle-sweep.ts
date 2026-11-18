@@ -1,5 +1,5 @@
 #!/usr/bin/env tsx
-/* eslint-disable @typescript-eslint/no-explicit-any -- сценарій ганяє сирі JSON-відповіді API */
+/* eslint-disable @typescript-eslint/no-explicit-any -- the scenario drives raw JSON API responses */
 import { spawnSync } from 'node:child_process';
 import { appendFileSync, mkdirSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
