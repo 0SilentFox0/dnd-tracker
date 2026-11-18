@@ -14,6 +14,7 @@ function makeRequest(opts: {
     origin?: string | null;
     host?: string;
     authorization?: string;
+    secFetchSite?: string;
 }): NextRequest {
     const url = new URL(`http://${opts.host ?? 'example.com'}${opts.pathname}`);
 
@@ -24,6 +25,8 @@ function makeRequest(opts: {
     if (opts.origin !== undefined && opts.origin !== null) {
         headers.set('origin', opts.origin);
     }
+
+    if (opts.secFetchSite) headers.set('sec-fetch-site', opts.secFetchSite);
 
     if (opts.authorization) headers.set('authorization', opts.authorization);
 
@@ -59,12 +62,47 @@ describe('rejectCrossOriginMutation', () => {
         ).toBeNull();
     });
 
-    it('returns null when Origin header missing (server-side fetch)', () => {
+    it('returns 403 when Origin is missing without same-origin Sec-Fetch-Site', () => {
         expect(
             rejectCrossOriginMutation(
                 makeRequest({ method: 'POST', pathname: '/api/campaigns' })
-            )
-        ).toBeNull();
+            )?.status
+        ).toBe(403);
+        expect(
+            rejectCrossOriginMutation(
+                makeRequest({
+                    method: 'POST',
+                    pathname: '/api/campaigns',
+                    secFetchSite: 'cross-site',
+                })
+            )?.status
+        ).toBe(403);
+    });
+
+    it('allows a missing Origin with Sec-Fetch-Site same-origin or none', () => {
+        for (const secFetchSite of ['same-origin', 'none'])
+            expect(
+                rejectCrossOriginMutation(
+                    makeRequest({
+                        method: 'POST',
+                        pathname: '/api/campaigns',
+                        secFetchSite,
+                    })
+                )
+            ).toBeNull();
+    });
+
+    it('allows a missing Origin for Bearer, /api/mcp and /api/cron', () => {
+        for (const [pathname, authorization] of <[string, string?][]>[
+            ['/api/campaigns/c1/units', 'Bearer dndt_x'],
+            ['/api/mcp', undefined],
+            ['/api/cron/assistant-cleanup', undefined],
+        ])
+            expect(
+                rejectCrossOriginMutation(
+                    makeRequest({ method: 'POST', pathname, authorization })
+                )
+            ).toBeNull();
     });
 
     it('returns 403 when Origin host != request host (cross-origin attack)', () => {

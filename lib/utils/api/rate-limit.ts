@@ -1,6 +1,7 @@
 /**
  * Rate limiting через `@upstash/ratelimit` (sliding window).
  * Fail-open: без Upstash запит пропускається, крім викликів з `memoryFallback` — вони рахуються в пам'яті інстанса.
+ * У production без Upstash один раз на процес пишеться console.error (сигнал для логів).
  */
 import type { NextResponse } from 'next/server';
 import { Ratelimit } from '@upstash/ratelimit';
@@ -104,6 +105,17 @@ function checkMemoryLimit(
     };
 }
 
+let warnedNoRedis = false;
+
+function warnNoRedisInProduction() {
+    if (warnedNoRedis || process.env.NODE_ENV !== 'production') return;
+
+    warnedNoRedis = true;
+    console.error(
+        '[rate-limit] Upstash is not configured in production: limits are per-instance memory or skipped'
+    );
+}
+
 export async function checkRateLimit(
     input: RateLimitInput
 ): Promise<RateLimitResult> {
@@ -124,6 +136,8 @@ export async function checkRateLimit(
         : `${userId}:${scope}`;
 
     if (!limiter) {
+        warnNoRedisInProduction();
+
         return memoryFallback
             ? checkMemoryLimit(identifier, limit, windowSeconds)
             : result;
@@ -239,3 +253,9 @@ export const AI_PLAYER_RATE_LIMIT = { limit: 10, windowSeconds: 600 } as const;
 export const DEMO_READ_RATE_LIMIT = { limit: 120, windowSeconds: 60 } as const;
 
 export const JOIN_RATE_LIMIT = { limit: 10, windowSeconds: 600 } as const;
+
+/** Per-IP, перед auth: /api/mcp і публічні маршрути. */
+export const IP_RATE_LIMITS = {
+    mcp: { limit: 120, windowSeconds: 60 },
+    public: { limit: 60, windowSeconds: 60 },
+} as const;

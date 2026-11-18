@@ -3,13 +3,21 @@ import { createServerClient } from '@supabase/ssr';
 
 import { LANDING_PATHS } from '@/lib/constants/site';
 import { bearerToken } from '@/lib/utils/api/bearer';
+import {
+    checkIpRateLimit,
+    ipRateLimitResponse,
+    ipScopeOf,
+} from '@/lib/utils/api/ip-rate-limit';
 
 /**
  * CSRF defense for mutating /api/* requests: Origin (або Sec-Fetch-Site) POST/PATCH/PUT/DELETE має бути same-origin.
- * Без Origin (server-side fetch, сторонні клієнти) запит пропускається — auth cookie все одно потрібна.
+ * Без Origin запит відхиляється, крім `Sec-Fetch-Site: same-origin|none`, Bearer-викликів і NO_ORIGIN_PREFIXES.
  * `/api/pusher/auth` не виключено: клієнт завжди same-origin.
  */
 const SIGN_OUT_PATH = '/auth/signout';
+
+/** Не-браузерні виклики без cookie-сесії: MCP (Bearer) і cron (Bearer CRON_SECRET). */
+const NO_ORIGIN_PREFIXES = ['/api/mcp', '/api/cron/'];
 
 export function rejectCrossOriginMutation(
     request: NextRequest
@@ -33,12 +41,25 @@ export function rejectCrossOriginMutation(
     // bearer requests never read cookies, so CSRF does not apply
     if (bearerToken(request)) return null;
 
-    if (pathname === '/api/mcp' || pathname.startsWith('/api/mcp/'))
+    if (
+        NO_ORIGIN_PREFIXES.some(
+            (prefix) => pathname === prefix || pathname.startsWith(prefix)
+        )
+    )
         return null;
 
     const origin = request.headers.get('origin');
 
-    if (!origin) return null;
+    if (!origin) {
+        const site = request.headers.get('sec-fetch-site');
+
+        if (site === 'same-origin' || site === 'none') return null;
+
+        return NextResponse.json(
+            { error: 'Missing Origin header' },
+            { status: 403 }
+        );
+    }
 
     let originHost: string;
 
@@ -67,6 +88,14 @@ export async function updateSession(request: NextRequest) {
     const csrfReject = rejectCrossOriginMutation(request);
 
     if (csrfReject) return csrfReject;
+
+    const ipScope = ipScopeOf(request.nextUrl.pathname);
+
+    if (ipScope) {
+        const rate = await checkIpRateLimit(request.headers, ipScope);
+
+        if (!rate.allowed) return ipRateLimitResponse(rate);
+    }
 
     // Routes check the session themselves (401) and refresh the token through their own server client.
     // The sign-out route must receive its POST as is (a redirect to /sign-in would downgrade it) and clears the cookies itself.
