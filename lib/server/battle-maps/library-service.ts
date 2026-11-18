@@ -82,12 +82,21 @@ export async function withStoredBackground<T extends BattleMapInput>(
     if (
         background &&
         background !== current &&
-        isHostedOnProjectStorage(background) &&
-        !(await verifyBattleMapBackground(campaignId, background))
+        isHostedOnProjectStorage(background)
     ) {
-        await removeUnreferencedBackgrounds(campaignId, [background]);
+        const check = await verifyBattleMapBackground(campaignId, background);
 
-        throw new ContentError(API_ERRORS.BATTLE_MAP_BACKGROUND_INVALID, 400);
+        if (check === 'unavailable')
+            throw new ContentError(API_ERRORS.INTERNAL, 503);
+
+        if (check === 'invalid') {
+            await removeUnreferencedBackgrounds(campaignId, [background]);
+
+            throw new ContentError(
+                API_ERRORS.BATTLE_MAP_BACKGROUND_INVALID,
+                400
+            );
+        }
     }
 
     const r = await resolveMapBackgroundForPersistence(input.map.background, {

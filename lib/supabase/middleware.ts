@@ -17,7 +17,7 @@ import {
 const SIGN_OUT_PATH = '/auth/signout';
 
 /** Не-браузерні виклики без cookie-сесії: MCP (Bearer) і cron (Bearer CRON_SECRET). */
-const NO_ORIGIN_PREFIXES = ['/api/mcp', '/api/cron/'];
+const NO_ORIGIN_PREFIXES = ['/api/mcp/', '/api/cron/'];
 
 export function rejectCrossOriginMutation(
     request: NextRequest
@@ -43,7 +43,7 @@ export function rejectCrossOriginMutation(
 
     if (
         NO_ORIGIN_PREFIXES.some(
-            (prefix) => pathname === prefix || pathname.startsWith(prefix)
+            (prefix) => pathname === prefix.slice(0, -1) || pathname.startsWith(prefix)
         )
     )
         return null;

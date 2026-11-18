@@ -105,6 +105,19 @@ describe('rejectCrossOriginMutation', () => {
             ).toBeNull();
     });
 
+    it('does not exempt look-alike paths such as /api/mcpx', () => {
+        const r = rejectCrossOriginMutation(
+            makeRequest({
+                method: 'POST',
+                pathname: '/api/mcpx',
+                origin: 'http://attacker.example',
+                host: 'example.com',
+            })
+        );
+
+        expect(r?.status).toBe(403);
+    });
+
     it('returns 403 when Origin host != request host (cross-origin attack)', () => {
         const r = rejectCrossOriginMutation(
             makeRequest({
