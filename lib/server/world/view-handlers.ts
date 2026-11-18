@@ -60,6 +60,64 @@ export async function readViewerScope(campaignId: string, heroIds: string[]) {
     };
 }
 
+async function viewNotes(
+    target: string,
+    asHero: boolean,
+    userId: string
+): Promise<NoteRow[]> {
+    const noteRows = await prisma.worldNote.findMany({
+        where: {
+            marker: { mapId: target },
+            ...(asHero
+                ? { visibility: 'public' }
+                : {
+                      OR: [{ visibility: 'public' }, { authorUserId: userId }],
+                  }),
+        },
+        include: { author: { select: { displayName: true } } },
+        orderBy: { createdAt: 'asc' },
+    });
+
+    return noteRows.map((n) => ({
+        id: n.id,
+        markerId: n.markerId,
+        authorUserId: n.authorUserId,
+        authorName: n.author.displayName,
+        characterId: n.characterId,
+        visibility: n.visibility === 'private' ? 'private' : 'public',
+        text: n.text,
+        createdAt: n.createdAt.toISOString(),
+        updatedAt: n.updatedAt.toISOString(),
+    }));
+}
+
+async function heroNamesOf(
+    campaignId: string,
+    positions: { characterId: string }[]
+) {
+    const positioned = [...new Set(positions.map((p) => p.characterId))];
+
+    const named =
+        positioned.length > 0
+            ? await activePlayerHeroes(campaignId, {
+                  id: { in: positioned },
+              })
+            : [];
+
+    const heroNames = new Map<string, HeroInfo>(
+        named.map((c) => [
+            c.id,
+            {
+                name: c.name,
+                avatar: c.avatar,
+                controlledBy: c.controlledBy,
+            },
+        ])
+    );
+
+    return heroNames;
+}
+
 export async function viewHandler(req: Request, campaignId: string) {
     try {
         const access = await requireCampaignAccess(campaignId, false, {
@@ -144,53 +202,9 @@ export async function viewHandler(req: Request, campaignId: string) {
 
         if (!detail) return errorResponse(API_ERRORS.WORLD_MAP_NOT_FOUND, 404);
 
-        const noteRows = await prisma.worldNote.findMany({
-            where: {
-                marker: { mapId: target },
-                ...(asHero
-                    ? { visibility: 'public' }
-                    : {
-                          OR: [
-                              { visibility: 'public' },
-                              { authorUserId: access.userId },
-                          ],
-                      }),
-            },
-            include: { author: { select: { displayName: true } } },
-            orderBy: { createdAt: 'asc' },
-        });
+        const notes = await viewNotes(target, asHero, access.userId);
 
-        const notes: NoteRow[] = noteRows.map((n) => ({
-            id: n.id,
-            markerId: n.markerId,
-            authorUserId: n.authorUserId,
-            authorName: n.author.displayName,
-            characterId: n.characterId,
-            visibility: n.visibility === 'private' ? 'private' : 'public',
-            text: n.text,
-            createdAt: n.createdAt.toISOString(),
-            updatedAt: n.updatedAt.toISOString(),
-        }));
-
-        const positioned = [...new Set(positions.map((p) => p.characterId))];
-
-        const named =
-            positioned.length > 0
-                ? await activePlayerHeroes(campaignId, {
-                      id: { in: positioned },
-                  })
-                : [];
-
-        const heroNames = new Map<string, HeroInfo>(
-            named.map((c) => [
-                c.id,
-                {
-                    name: c.name,
-                    avatar: c.avatar,
-                    controlledBy: c.controlledBy,
-                },
-            ])
-        );
+        const heroNames = await heroNamesOf(campaignId, positions);
 
         return NextResponse.json(
             buildWorldView({
