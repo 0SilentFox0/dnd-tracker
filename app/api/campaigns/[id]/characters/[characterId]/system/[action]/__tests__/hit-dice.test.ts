@@ -197,7 +197,6 @@ describe('POST hit-dice', () => {
     });
 });
 
-// Shared transaction SQL is exercised by character storage integration; retain the existing business DB doubles.
 vi.mock('@/lib/server/content/write', () => ({
     withCampaignContentWrite: async (
         _id: string,

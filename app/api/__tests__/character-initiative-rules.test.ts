@@ -17,10 +17,14 @@ vi.mock('@/lib/server/characters/core/resolve-character-owner', () => ({
     resolveCharacterOwner: vi.fn(async () => ({ controlledBy: 'owner' })),
 }));
 vi.mock('@/lib/server/characters/lock', () => ({
-    lockCharacters: vi.fn(async (_tx: unknown, ids: string[]) =>
-        new Map(
-            ids.map((id) => [id, { id, resources: {}, experience: 0, characteristics: null }])
-        )
+    lockCharacters: vi.fn(
+        async (_tx: unknown, ids: string[]) =>
+            new Map(
+                ids.map((id) => [
+                    id,
+                    { id, resources: {}, experience: 0, characteristics: null },
+                ])
+            )
     ),
 }));
 vi.mock('@/lib/supabase/avatar-storage', () => ({
@@ -82,9 +86,9 @@ const patch = (body: object) =>
 describe('ініціатива героя за правилами кампанії', () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        vi.mocked(prisma.$transaction).mockImplementation(
-            ((fn: (tx: unknown) => unknown) => fn(prisma)) as never
-        );
+        vi.mocked(prisma.$transaction).mockImplementation(((
+            fn: (tx: unknown) => unknown
+        ) => fn(prisma)) as never);
         vi.mocked(prisma.race.findFirst).mockResolvedValue(null);
         vi.mocked(prisma.character.create).mockImplementation((async (args: {
             data: object;
@@ -140,7 +144,6 @@ describe('ініціатива героя за правилами кампані
     });
 });
 
-// Domain assertions keep their DB doubles; real shared locking is covered by storage integration.
 vi.mock('@/lib/server/content/write', () => ({
     withCampaignContentWrite: async (
         _id: string,

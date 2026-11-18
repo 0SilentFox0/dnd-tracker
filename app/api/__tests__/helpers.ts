@@ -1,6 +1,3 @@
-/**
- * Хелпери для тестування API route handlers (NextResponse).
- */
 import { NextResponse } from 'next/server';
 
 export async function getResponseStatus(

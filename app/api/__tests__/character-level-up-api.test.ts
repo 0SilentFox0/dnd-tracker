@@ -21,18 +21,19 @@ vi.mock('@/lib/server/notifications/notify', () => ({
     notifyCharacterOwners: vi.fn().mockResolvedValue(0),
 }));
 vi.mock('@/lib/server/characters/lock', () => ({
-    lockCharacters: vi.fn(async (_tx: unknown, ids: string[]) =>
-        new Map([
-            [
-                ids[0],
-                {
-                    id: ids[0],
-                    resources: {},
-                    experience: 0,
-                    characteristics: { intelligence: 27 },
-                },
-            ],
-        ])
+    lockCharacters: vi.fn(
+        async (_tx: unknown, ids: string[]) =>
+            new Map([
+                [
+                    ids[0],
+                    {
+                        id: ids[0],
+                        resources: {},
+                        experience: 0,
+                        characteristics: { intelligence: 27 },
+                    },
+                ],
+            ])
     ),
 }));
 vi.mock('@/lib/utils/api/api-auth', () => ({
@@ -112,9 +113,9 @@ describe('POST level-up', () => {
         vi.mocked(prisma.race.findFirst).mockResolvedValue({
             spellSlotProgression: [{ level: 2, slots: 3 }],
         } as never);
-        vi.mocked(prisma.$transaction).mockImplementation(
-            ((fn: (tx: unknown) => unknown) => fn(prisma)) as never
-        );
+        vi.mocked(prisma.$transaction).mockImplementation(((
+            fn: (tx: unknown) => unknown
+        ) => fn(prisma)) as never);
         vi.mocked(prisma.$queryRaw).mockResolvedValue([
             {
                 id: 'ch',
@@ -202,7 +203,6 @@ describe('POST level-up', () => {
     });
 });
 
-// Shared transaction SQL is exercised by character storage integration; retain the existing business DB doubles.
 vi.mock('@/lib/server/content/write', () => ({
     withCampaignContentWrite: async (
         _id: string,

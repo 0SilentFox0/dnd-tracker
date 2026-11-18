@@ -214,15 +214,13 @@ it('background-only PATCH keeps classes and plans from the row read under lock',
         vi.mocked(prisma.character.update).mock.calls[0][0].data.classes
     ).toEqual(stored.classes);
     expect(
-        vi.mocked(prisma.character.update).mock.calls[0][0].data
-            .characteristics
+        vi.mocked(prisma.character.update).mock.calls[0][0].data.characteristics
     ).toMatchObject({ strength: 10 });
     expect(
         vi.mocked(resolveCharacterChoices).mock.calls[0][0].before.backgroundId
     ).toBe('old');
 });
 
-// Domain assertions keep their DB doubles; real shared locking is covered by storage integration.
 vi.mock('@/lib/server/content/write', () => ({
     withCampaignContentWrite: async (
         _id: string,

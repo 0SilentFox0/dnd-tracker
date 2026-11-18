@@ -140,7 +140,9 @@ describe('player draft API', () => {
                     status: 'pending',
                     controlledBy: 'u1',
                     type: 'player',
-                    characteristics: expect.objectContaining({ initiative: 10 }),
+                    characteristics: expect.objectContaining({
+                        initiative: 10,
+                    }),
                     level: 1,
                 }),
             });
@@ -526,7 +528,6 @@ describe('player draft API', () => {
     });
 });
 
-// Domain assertions keep their DB doubles; real shared locking is covered by storage integration.
 vi.mock('@/lib/server/content/write', () => ({
     withCampaignContentWrite: async (
         _id: string,
