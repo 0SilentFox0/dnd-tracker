@@ -1,9 +1,11 @@
 'use client';
 
 import { type DragEvent, useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { ImagePlus } from 'lucide-react';
 
+import { Input } from '@/components/ui/input';
 import { WORLD_MAP_MAX_EDGE_PX } from '@/lib/constants/world';
 import { cn } from '@/lib/utils';
 
@@ -73,7 +75,8 @@ export function MapFileDropzone({
                         : 'border-hud-line bg-black/30'
                 )}
             >
-                <input
+                <Input
+                    bare
                     type="file"
                     accept={ACCEPT}
                     aria-label={t('ariaLabel')}
@@ -81,11 +84,14 @@ export function MapFileDropzone({
                     onChange={(e) => accept(e.target.files?.[0])}
                 />
                 {file && preview ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
+                    <Image
                         src={preview}
                         alt=""
-                        className="max-h-40 rounded object-contain"
+                        width={0}
+                        height={0}
+                        sizes="100vw"
+                        unoptimized
+                        className="h-auto max-h-40 w-auto rounded object-contain"
                     />
                 ) : (
                     <ImagePlus className="size-7 text-hud-gold" aria-hidden />

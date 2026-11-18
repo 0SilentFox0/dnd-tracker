@@ -19,6 +19,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
 import { SECTION_ICON_KEYS } from '@/lib/constants/scenario';
 import { sectionIcon } from '@/lib/utils/scenario/section-icon';
 import type {
@@ -91,7 +92,7 @@ export function SectionHeaderEditor({
                     ))}
                 </DropdownMenuContent>
             </DropdownMenu>
-            <input
+            <Input
                 aria-label={t('title')}
                 value={section.title}
                 maxLength={200}

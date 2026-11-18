@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 
 import { IconUrlField } from '@/components/common/IconUrlField';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { useNotify } from '@/lib/hooks/common';
 import { resizeImageToDataUrl } from '@/lib/utils/common/image-resize';
 
@@ -79,7 +80,8 @@ export function ImageUpload({
                     <span className="text-sm text-muted-foreground">
                         {t('ui.or')}
                     </span>
-                    <input
+                    <Input
+                        bare
                         ref={fileInputRef}
                         type="file"
                         accept={ACCEPT}

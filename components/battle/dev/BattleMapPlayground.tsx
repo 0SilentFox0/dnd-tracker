@@ -4,6 +4,8 @@ import '@/components/battle/hud/battle-hud.css';
 import { BattleMap } from '@/components/battle/map/BattleMap';
 import { HudChipTabs, HudPanel } from '@/components/hud/page';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Slider } from '@/components/ui/slider';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { useBattleMapPlayground } from '@/lib/hooks/battle/useBattleMapPlayground';
 import { cn } from '@/lib/utils';
@@ -95,16 +97,15 @@ export function BattleMapPlayground() {
                         <HudPanel className="flex flex-col gap-3">
                             <label className="flex flex-col gap-1 text-sm">
                                 Grid opacity: {map.opacity.toFixed(2)}
-                                <input
-                                    type="range"
+                                <Slider
                                     min={0}
                                     max={1}
                                     step={0.05}
                                     value={map.opacity}
-                                    onChange={(e) =>
+                                    onValueChange={(v) =>
                                         setMap({
                                             ...map,
-                                            opacity: Number(e.target.value),
+                                            opacity: v,
                                         })
                                     }
                                 />
@@ -112,7 +113,7 @@ export function BattleMapPlayground() {
                             <div className="grid grid-cols-2 gap-2">
                                 <label className="flex flex-col gap-1 text-sm">
                                     Columns
-                                    <input
+                                    <Input
                                         className={FIELD}
                                         type="number"
                                         min={4}
@@ -131,7 +132,7 @@ export function BattleMapPlayground() {
                                 </label>
                                 <label className="flex flex-col gap-1 text-sm">
                                     Rows
-                                    <input
+                                    <Input
                                         className={FIELD}
                                         type="number"
                                         min={4}
@@ -151,7 +152,7 @@ export function BattleMapPlayground() {
                             </div>
                             <label className="flex flex-col gap-1 text-sm">
                                 Margins (cells)
-                                <input
+                                <Input
                                     className={FIELD}
                                     type="number"
                                     min={0}

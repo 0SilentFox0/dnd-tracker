@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { NativeSelect } from '@/components/ui/native-select';
 import { Textarea } from '@/components/ui/textarea';
 import { DND_SKILLS } from '@/lib/constants/skills';
 import { useBackgroundForm } from '@/lib/hooks/backgrounds';
@@ -132,7 +133,7 @@ export function BackgroundForm({
                                 <Label htmlFor="background-origin">
                                     {t('form.origin')}
                                 </Label>
-                                <select
+                                <NativeSelect
                                     id="background-origin"
                                     className={HUD_SELECT_CLASS}
                                     value={data.originFeatId ?? ''}
@@ -153,7 +154,7 @@ export function BackgroundForm({
                                                 {f.name}
                                             </option>
                                         ))}
-                                </select>
+                                </NativeSelect>
                                 <Label htmlFor="background-equipment">
                                     {t('form.equipment')}
                                 </Label>

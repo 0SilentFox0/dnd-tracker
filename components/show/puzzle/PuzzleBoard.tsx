@@ -1,4 +1,5 @@
 import type { Ref } from 'react';
+import Image from 'next/image';
 
 import { PuzzlePieceView } from './PuzzlePieceView';
 import type { PuzzleScene } from './types';
@@ -27,11 +28,12 @@ export function PuzzleBoard({
             className="relative size-full touch-none overflow-hidden rounded border border-white/20 bg-white/5"
         >
             {state.solved ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
+                <Image
                     src={scene.imageUrl}
                     alt=""
-                    className="absolute inset-0 size-full"
+                    fill
+                    sizes="100vw"
+                    unoptimized
                 />
             ) : (
                 pieces.map((piece) => {

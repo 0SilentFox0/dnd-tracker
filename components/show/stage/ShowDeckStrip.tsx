@@ -8,6 +8,7 @@ import { SHOW_TONE, ShowButton } from './show-ui';
 
 import { OptimizedImage } from '@/components/common/OptimizedImage';
 import { Button } from '@/components/ui/button';
+import { NativeSelect } from '@/components/ui/native-select';
 import { type ShowControl, useDeck, useDecks } from '@/lib/hooks/show';
 import { cn } from '@/lib/utils';
 import type { ShowState, SlideDeckSummary } from '@/types/show';
@@ -88,7 +89,7 @@ export function ShowDeckStrip({
     return (
         <div className="min-w-0 space-y-2">
             <div className="flex items-center gap-2">
-                <select
+                <NativeSelect
                     aria-label={t('deckStrip.deck')}
                     value={deckId ?? ''}
                     onChange={(e) =>
@@ -104,7 +105,7 @@ export function ShowDeckStrip({
                         <option value="">{t('deckStrip.chooseDeck')}</option>
                     )}
                     {decks && <DeckOptions decks={decks} sceneId={sceneId} />}
-                </select>
+                </NativeSelect>
                 {cover && (
                     <span
                         className={cn(

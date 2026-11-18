@@ -7,6 +7,8 @@ import { useAbilityEditor, useErrorsUnder } from '../editor-context';
 import { FieldErrors } from '../FieldErrors';
 import { SectionTitle } from './SectionTitle';
 
+import { NativeSelect } from '@/components/ui/native-select';
+
 export function PerformSection({
     ability,
     path,
@@ -62,7 +64,7 @@ export function PerformSection({
     return (
         <div className="space-y-2">
             <SectionTitle>{t('title')}</SectionTitle>
-            <select
+            <NativeSelect
                 aria-label={t('kindAria')}
                 className={fieldClass}
                 value={ability.perform?.kind ?? ''}
@@ -71,9 +73,9 @@ export function PerformSection({
                 <option value="">{t('effects')}</option>
                 <option value="attack">{t('attack')}</option>
                 <option value="spell">{t('spell')}</option>
-            </select>
+            </NativeSelect>
             {ability.perform?.kind === 'attack' && (
-                <select
+                <NativeSelect
                     aria-label={t('attackAria')}
                     className={fieldClass}
                     value={ability.perform.attack}
@@ -90,10 +92,10 @@ export function PerformSection({
                             {a.name}
                         </option>
                     ))}
-                </select>
+                </NativeSelect>
             )}
             {ability.perform?.kind === 'spell' && (
-                <select
+                <NativeSelect
                     aria-label={t('spellAria')}
                     className={fieldClass}
                     value={ability.perform.spellId}
@@ -110,7 +112,7 @@ export function PerformSection({
                             {s.name}
                         </option>
                     ))}
-                </select>
+                </NativeSelect>
             )}
             <FieldErrors errors={errors} />
         </div>

@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 import { List } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { MENTION_TYPES } from '@/lib/constants/scenario';
 import { GRAPH_TYPE_STYLE } from '@/lib/constants/scenario-graph';
@@ -33,8 +34,15 @@ export interface GraphToolbarProps {
 const checkClass = 'flex items-center gap-1.5 text-sm';
 
 export function GraphToolbar({ data, actions }: GraphToolbarProps) {
-    const { filters, counts, showSequence, timeline, listOpen, query, matches } =
-        data;
+    const {
+        filters,
+        counts,
+        showSequence,
+        timeline,
+        listOpen,
+        query,
+        matches,
+    } = data;
 
     const {
         onFilters,
@@ -97,10 +105,9 @@ export function GraphToolbar({ data, actions }: GraphToolbarProps) {
 
                     return (
                         <label key={type} className={checkClass}>
-                            <input
-                                type="checkbox"
+                            <Checkbox
                                 checked={filters.types.has(type)}
-                                onChange={() => toggleType(type)}
+                                onCheckedChange={() => toggleType(type)}
                             />
                             <Icon
                                 className="size-[18px]"
@@ -113,46 +120,41 @@ export function GraphToolbar({ data, actions }: GraphToolbarProps) {
                 })}
             </fieldset>
             <label className={checkClass}>
-                <input
-                    type="checkbox"
+                <Checkbox
                     checked={timeline}
-                    onChange={(e) => onTimeline(e.target.checked)}
+                    onCheckedChange={(v) => onTimeline(v === true)}
                 />
                 {t('timeline')}
             </label>
             <label className={checkClass}>
-                <input
-                    type="checkbox"
+                <Checkbox
                     checked={showSequence}
-                    onChange={(e) => onShowSequence(e.target.checked)}
+                    onCheckedChange={(v) => onShowSequence(v === true)}
                 />
                 {t('showSequence')}
             </label>
             <label className={checkClass}>
-                <input
-                    type="checkbox"
+                <Checkbox
                     checked={filters.onlyMissing}
-                    onChange={(e) =>
-                        onFilters({ onlyMissing: e.target.checked })
+                    onCheckedChange={(v) =>
+                        onFilters({ onlyMissing: v === true })
                     }
                 />
                 {t('onlyMissing')}
             </label>
             <label className={checkClass}>
-                <input
-                    type="checkbox"
+                <Checkbox
                     checked={filters.showLeaves}
-                    onChange={(e) =>
-                        onFilters({ showLeaves: e.target.checked })
+                    onCheckedChange={(v) =>
+                        onFilters({ showLeaves: v === true })
                     }
                 />
                 {t('showLeaves')}
             </label>
             <label className={checkClass}>
-                <input
-                    type="checkbox"
+                <Checkbox
                     checked={filters.showAll}
-                    onChange={(e) => onFilters({ showAll: e.target.checked })}
+                    onCheckedChange={(v) => onFilters({ showAll: v === true })}
                 />
                 {t('showAll')}
             </label>

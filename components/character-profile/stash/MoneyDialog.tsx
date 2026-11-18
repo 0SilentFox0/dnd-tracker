@@ -7,6 +7,7 @@ import { useProfile } from '../ProfileContext';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { NativeSelect } from '@/components/ui/native-select';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { type Coin, COINS } from '@/lib/constants/inventory';
 import { useStashAction } from '@/lib/hooks/characters';
@@ -147,7 +148,7 @@ export function MoneyDialog({
                                 className="h-11 min-w-0 flex-1"
                                 autoFocus
                             />
-                            <select
+                            <NativeSelect
                                 aria-label={t('money.coin')}
                                 value={coin}
                                 onChange={(e) =>
@@ -160,7 +161,7 @@ export function MoneyDialog({
                                         {label(c)}
                                     </option>
                                 ))}
-                            </select>
+                            </NativeSelect>
                         </div>
                         <Input
                             aria-label={t('money.noteSpend')}

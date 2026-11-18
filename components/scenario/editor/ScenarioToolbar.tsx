@@ -20,6 +20,8 @@ import {
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { NativeSelect } from '@/components/ui/native-select';
 import { CALLOUT_KINDS } from '@/lib/constants/scenario';
 import type { CalloutKind } from '@/types/scenario';
 
@@ -157,7 +159,7 @@ export function ScenarioToolbar({
             >
                 <MessageSquareQuote className="size-4" />
             </Tool>
-            <select
+            <NativeSelect
                 aria-label={t('callout')}
                 disabled={off}
                 value={state?.callout ? state.calloutKind : ''}
@@ -191,9 +193,9 @@ export function ScenarioToolbar({
                         {tCallouts(k)}
                     </option>
                 ))}
-            </select>
+            </NativeSelect>
             {state?.callout && (
-                <input
+                <Input
                     aria-label={t('calloutTitle')}
                     value={state.calloutTag}
                     maxLength={120}

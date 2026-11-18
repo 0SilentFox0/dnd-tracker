@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 
+import { Slider } from '@/components/ui/slider';
 import { useAudioPosition } from '@/lib/hooks/audio';
 
 const clock = (sec: number) =>
@@ -37,15 +38,14 @@ export function SeekBar({
     return (
         <div className="mt-2 flex items-center gap-2 text-hud-muted tabular-nums">
             <span className="w-9 text-right">{clock(shown)}</span>
-            <input
-                type="range"
+            <Slider
                 aria-label={t('seek')}
                 min={0}
                 max={Math.floor(durationSec)}
                 step={1}
                 value={Math.floor(shown)}
                 disabled={disabled}
-                onChange={(e) => setDrag(Number(e.target.value))}
+                onValueChange={(v) => setDrag(v)}
                 onPointerUp={commit}
                 onKeyUp={commit}
                 onBlur={commit}

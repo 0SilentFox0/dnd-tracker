@@ -4,8 +4,10 @@ import { useTranslations } from 'next-intl';
 
 import { HUD_SELECT_CLASS, HudSection } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { NativeSelect } from '@/components/ui/native-select';
 import {
     ARMOR_CATEGORIES,
     armorDexCap,
@@ -67,7 +69,7 @@ export function ArtifactArmorFields({
                     >
                         {t('category')}
                     </Label>
-                    <select
+                    <NativeSelect
                         id="armor-category"
                         className={`${HUD_SELECT_CLASS} w-full`}
                         value={value.category}
@@ -83,7 +85,7 @@ export function ArtifactArmorFields({
                                 {t(`categories.${c}`)}
                             </option>
                         ))}
-                    </select>
+                    </NativeSelect>
                 </div>
                 <div className="space-y-1">
                     <Label
@@ -147,12 +149,11 @@ export function ArtifactArmorFields({
                 </div>
             </div>
             <label className="flex items-center gap-2 text-sm">
-                <input
-                    type="checkbox"
+                <Checkbox
                     aria-label={t('stealth')}
                     checked={!!value.stealthDisadvantage}
-                    onChange={(e) =>
-                        set('stealthDisadvantage', e.target.checked)
+                    onCheckedChange={(v) =>
+                        set('stealthDisadvantage', v === true)
                     }
                 />
                 {t('stealth')}

@@ -1,5 +1,6 @@
 import { useTranslations } from 'next-intl';
 
+import { Checkbox } from '@/components/ui/checkbox';
 import type { IngredientLine } from '@/lib/hooks/battle/useIngredientPlan';
 
 export function IngredientsLine({
@@ -20,10 +21,9 @@ export function IngredientsLine({
             <p>{t('need', { list: line.need })}</p>
             {line.optional && (
                 <label className="mt-1 flex items-center gap-2">
-                    <input
-                        type="checkbox"
+                    <Checkbox
                         checked={line.use}
-                        onChange={(e) => onUse?.(e.target.checked)}
+                        onCheckedChange={(v) => onUse?.(v === true)}
                     />
                     {t('use')}
                 </label>

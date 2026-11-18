@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 import { Dices } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { parseDieInput } from '@/lib/utils/battle/flows';
 
@@ -67,7 +68,7 @@ export function DieInput({
     strict?: boolean;
 }) {
     return (
-        <input
+        <Input
             aria-label={label}
             inputMode="numeric"
             pattern="[0-9]*"

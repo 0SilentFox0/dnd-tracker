@@ -9,6 +9,7 @@ import { NowPlayingLabel } from './NowPlayingLabel';
 import { UnlockSoundButton } from './UnlockSoundButton';
 
 import { Button } from '@/components/ui/button';
+import { Slider } from '@/components/ui/slider';
 import { usePlayerAudio } from '@/lib/hooks/audio';
 import { cn } from '@/lib/utils';
 
@@ -94,16 +95,13 @@ export function AudioPlayerPanel({
                             <Volume2 className="size-4" />
                         )}
                     </Button>
-                    <input
-                        type="range"
+                    <Slider
                         aria-label={t('player.volume')}
                         min={0}
                         max={1}
                         step={0.05}
                         value={prefs.volume}
-                        onChange={(e) =>
-                            prefs.setVolume(Number(e.target.value))
-                        }
+                        onValueChange={(v) => prefs.setVolume(v)}
                         className="flex-1 accent-[var(--gold)]"
                     />
                 </div>

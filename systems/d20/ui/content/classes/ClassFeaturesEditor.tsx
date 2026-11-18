@@ -9,6 +9,7 @@ import { ChoiceListEditor } from '@/components/choices/ChoiceListEditor';
 import { HUD_SELECT_CLASS, HudSection } from '@/components/hud/form';
 import { HudChipTabs } from '@/components/hud/page';
 import { Button } from '@/components/ui/button';
+import { NativeSelect } from '@/components/ui/native-select';
 import { MAX_CLASS_LEVEL } from '@/lib/constants/classes';
 import { useErrorTotals } from '@/lib/hooks/common';
 import type { Ability } from '@/types/abilities';
@@ -182,7 +183,7 @@ export function ClassFeaturesEditor({
 
             {free.length > 0 && (
                 <div className="flex flex-wrap items-center gap-2">
-                    <select
+                    <NativeSelect
                         aria-label={t('features.levelToAdd')}
                         className={HUD_SELECT_CLASS}
                         value={next ?? ''}
@@ -193,7 +194,7 @@ export function ClassFeaturesEditor({
                                 {l}
                             </option>
                         ))}
-                    </select>
+                    </NativeSelect>
                     <Button
                         type="button"
                         variant="outline"

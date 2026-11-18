@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
+import { Input } from '@/components/ui/input';
 import { useScenarioSearch } from '@/lib/hooks/scenario';
 
 export function ScenarioSearch({ campaignId }: { campaignId: string }) {
@@ -15,7 +16,7 @@ export function ScenarioSearch({ campaignId }: { campaignId: string }) {
 
     return (
         <div data-tour="scenario.search">
-            <input
+            <Input
                 type="search"
                 aria-label={t('label')}
                 placeholder={t('placeholder')}

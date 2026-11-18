@@ -13,6 +13,7 @@ import '@/components/fx/fx.css';
 import '@/components/battle/dev/fx-lab.css';
 import { HudChipTabs, HudPage, HudPageHeader } from '@/components/hud/page';
 import { SpellBattlePreview } from '@/components/spells/preview/SpellBattlePreview';
+import { Checkbox } from '@/components/ui/checkbox';
 import { byName } from '@/lib/utils/common/text';
 
 const ALL = 'all';
@@ -91,11 +92,10 @@ export function FxSpells({ spells }: { spells: SpellCardData[] }) {
                                     {picked.name}
                                 </p>
                                 <label className="mt-1 flex items-center gap-2 text-[13px]">
-                                    <input
-                                        type="checkbox"
+                                    <Checkbox
                                         checked={bookLook}
-                                        onChange={(e) =>
-                                            setBookLook(e.target.checked)
+                                        onCheckedChange={(v) =>
+                                            setBookLook(v === true)
                                         }
                                     />
                                     Spellbook look

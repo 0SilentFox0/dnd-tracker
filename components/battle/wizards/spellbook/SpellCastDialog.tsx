@@ -12,6 +12,7 @@ import { AiRollButton, DamageDice } from '@/components/battle/hud/DiceInput';
 import { useSystemBattleUi } from '@/components/battle/use-system-battle-ui';
 import { HUD_SURFACE } from '@/components/hud';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { useAbilityText } from '@/lib/hooks/abilities';
 import type { useSpellBook } from '@/lib/hooks/battle';
@@ -150,7 +151,7 @@ function RollsStep({ book }: { book: Book }) {
                     <span className="hud-sc font-bold">
                         {state.pick.inputDice.label}
                     </span>
-                    <input
+                    <Input
                         type="number"
                         inputMode="numeric"
                         min={1}
@@ -209,7 +210,8 @@ function OptionPicker({ book }: { book: Book }) {
             </legend>
             {text.lines(state.pick.options).map((label, i) => (
                 <label key={i} className="flex items-start gap-2">
-                    <input
+                    <Input
+                        bare
                         type="radio"
                         name="spell-option"
                         checked={state.optionIndex === i}

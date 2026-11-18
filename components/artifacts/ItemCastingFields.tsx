@@ -4,7 +4,9 @@ import { useTranslations } from 'next-intl';
 
 import { HUD_SELECT_CLASS } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
+import { NativeSelect } from '@/components/ui/native-select';
 import { ITEM_LIMITS } from '@/lib/constants/artifacts';
 import { MAX_SPELL_LEVEL } from '@/lib/constants/spells';
 import { useSpells } from '@/lib/hooks/spells';
@@ -74,7 +76,7 @@ export function ItemCastingFields({
         <div className="space-y-3">
             <label className="block text-xs">
                 {t('parameter')}
-                <select
+                <NativeSelect
                     aria-label={t('parameterAria')}
                     className={HUD_SELECT_CLASS}
                     value={value.parameter?.kind ?? ''}
@@ -95,7 +97,7 @@ export function ItemCastingFields({
                     <option value="">{t('noParameter')}</option>
                     <option value="damageType">{t('damageType')}</option>
                     <option value="creatureType">{t('creatureType')}</option>
-                </select>
+                </NativeSelect>
             </label>
             {value.parameter && (
                 <div className="flex flex-wrap gap-1">
@@ -143,7 +145,7 @@ export function ItemCastingFields({
                     key={spell.spellId}
                     className="space-y-2 rounded border border-hud-line p-2"
                 >
-                    <select
+                    <NativeSelect
                         aria-label={t('spellAria')}
                         className={`${HUD_SELECT_CLASS} w-full`}
                         value={spell.spellId}
@@ -161,7 +163,7 @@ export function ItemCastingFields({
                                 {s.name} ({s.level})
                             </option>
                         ))}
-                    </select>
+                    </NativeSelect>
                     <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                         {SPELL_NUMBER_FIELDS.map((key) => {
                             const [min, max] = ITEM_LIMITS[key];
@@ -193,20 +195,20 @@ export function ItemCastingFields({
                         })}
                     </div>
                     <label className="flex items-center gap-2 text-xs">
-                        <input
-                            type="checkbox"
+                        <Checkbox
                             checked={!!spell.upcast}
-                            onChange={(e) =>
+                            onCheckedChange={(v) =>
                                 setSpell(index, {
-                                    upcast: e.target.checked
-                                        ? {
-                                              maxLevel: Math.min(
-                                                  MAX_SPELL_LEVEL,
-                                                  (spell.castLevel ?? 0) + 1
-                                              ),
-                                              extraCost: 1,
-                                          }
-                                        : undefined,
+                                    upcast:
+                                        v === true
+                                            ? {
+                                                  maxLevel: Math.min(
+                                                      MAX_SPELL_LEVEL,
+                                                      (spell.castLevel ?? 0) + 1
+                                                  ),
+                                                  extraCost: 1,
+                                              }
+                                            : undefined,
                                 })
                             }
                         />

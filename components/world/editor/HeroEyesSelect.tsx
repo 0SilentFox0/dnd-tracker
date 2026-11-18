@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { Eye } from 'lucide-react';
 
+import { NativeSelect } from '@/components/ui/native-select';
 import type { RosterHero } from '@/lib/hooks/world';
 
 interface HeroEyesSelectProps {
@@ -22,7 +23,7 @@ export function HeroEyesSelect({
         <label className="flex h-10 w-full shrink-0 items-center gap-1.5 rounded-md border border-hud-rule bg-black/40 px-2 text-xs text-hud-muted lg:w-auto">
             <Eye className="size-4 shrink-0" aria-hidden />
             <span className="sr-only">{t('label')}</span>
-            <select
+            <NativeSelect
                 aria-label={t('label')}
                 value={value ?? ''}
                 onChange={(e) => onChange(e.target.value || null)}
@@ -34,7 +35,7 @@ export function HeroEyesSelect({
                         {h.name}
                     </option>
                 ))}
-            </select>
+            </NativeSelect>
         </label>
     );
 }

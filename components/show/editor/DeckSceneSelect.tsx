@@ -2,6 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 
+import { NativeSelect } from '@/components/ui/native-select';
 import { useScenarioPages } from '@/lib/hooks/scenario';
 import { useDeckScene } from '@/lib/hooks/show';
 import type { SlideDeck } from '@/types/show';
@@ -22,7 +23,7 @@ export function DeckSceneSelect({
     return (
         <label className="flex items-center gap-2 text-sm text-hud-muted">
             {t('sceneSelect.label')}
-            <select
+            <NativeSelect
                 aria-label={t('sceneSelect.label')}
                 value={deck.scenarioPageId ?? ''}
                 disabled={scene.pending}
@@ -37,7 +38,7 @@ export function DeckSceneSelect({
                             {p.title}
                         </option>
                     ))}
-            </select>
+            </NativeSelect>
         </label>
     );
 }

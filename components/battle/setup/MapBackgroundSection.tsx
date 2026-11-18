@@ -7,6 +7,7 @@ import { GridCalibration } from './GridCalibration';
 import { ImageUpload } from '@/components/common/ImageUpload';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { Slider } from '@/components/ui/slider';
 import type { BattleMapEditor } from '@/lib/hooks/battles';
 import {
     MAX_CELL_PX,
@@ -32,12 +33,11 @@ function RangeRow({
     return (
         <div>
             <Label htmlFor={id}>{label}</Label>
-            <input
+            <Slider
                 id={id}
-                type="range"
                 {...range}
                 value={value}
-                onChange={(e) => onChange(Number(e.target.value))}
+                onValueChange={(v) => onChange(v)}
                 className={SLIDER}
             />
         </div>

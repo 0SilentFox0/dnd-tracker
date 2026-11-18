@@ -8,6 +8,7 @@ import { SpellGrantEditor } from './SpellGrantEditor';
 import { HUD_SELECT_CLASS } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { NativeSelect } from '@/components/ui/native-select';
 import { MAX_CLASS_LEVEL } from '@/lib/constants/classes';
 import { useSpells } from '@/lib/hooks/spells';
 import type { ChoiceOption } from '@/types/choices';
@@ -46,7 +47,7 @@ export function OptionSpellsEditor({
                                 set(i, { level: Number(e.target.value) || 1 })
                             }
                         />
-                        <select
+                        <NativeSelect
                             aria-label={t('optionSpells.spell')}
                             className={HUD_SELECT_CLASS}
                             value={row.spellId}
@@ -64,7 +65,7 @@ export function OptionSpellsEditor({
                                     {t('optionSpells.missing')}
                                 </option>
                             )}
-                        </select>
+                        </NativeSelect>
                         <Button
                             type="button"
                             variant="ghost"

@@ -1,4 +1,5 @@
 'use client';
+import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 
 export function CategoryChip({
@@ -24,12 +25,11 @@ export function CategoryChip({
                 disabled && 'cursor-not-allowed opacity-50'
             )}
         >
-            <input
+            <Checkbox
                 className="sr-only"
-                type="checkbox"
                 checked={checked}
                 disabled={disabled}
-                onChange={(e) => onChange(e.target.checked)}
+                onCheckedChange={(v) => onChange(v === true)}
             />
             {`${label} (${count})`}
         </label>

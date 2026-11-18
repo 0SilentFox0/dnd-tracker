@@ -17,11 +17,13 @@ import { useWorldEditorContext } from './WorldEditorContext';
 import { RADIUS_STEP } from './WorldMapSettings';
 
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
     Popover,
     PopoverContent,
     PopoverTrigger,
 } from '@/components/ui/popover';
+import { Slider } from '@/components/ui/slider';
 import { REVEAL_RADIUS_RANGE } from '@/lib/constants/world';
 import { useMapFields } from '@/lib/hooks/world';
 import { cn } from '@/lib/utils';
@@ -73,8 +75,7 @@ export function MapStrip({
             />
             <label className="flex shrink-0 items-center gap-2 text-sm">
                 {t('editor.radius')}
-                <input
-                    type="range"
+                <Slider
                     aria-label={t('editor.radiusView')}
                     className="hud-range w-32"
                     style={{ '--fill': `${fill}%` } as CSSProperties}
@@ -82,7 +83,7 @@ export function MapStrip({
                     max={REVEAL_RADIUS_RANGE.max}
                     step={RADIUS_STEP}
                     value={radius}
-                    onChange={(e) => setRadius(Number(e.target.value))}
+                    onValueChange={(v) => setRadius(v)}
                     onPointerUp={commitRadius}
                     onKeyUp={commitRadius}
                     onBlur={commitRadius}
@@ -149,7 +150,8 @@ export function MapStrip({
                 <ImageUp className="size-4" />
                 {t('editor.replaceImage')}
             </Button>
-            <input
+            <Input
+                bare
                 ref={fileInput}
                 type="file"
                 accept="image/*"

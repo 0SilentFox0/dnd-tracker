@@ -1,5 +1,6 @@
 import { useTranslations } from 'next-intl';
 
+import { NativeSelect } from '@/components/ui/native-select';
 import { BATTLE_SELECT_CLASS } from '@/lib/constants/battle';
 import type { useSpellBook } from '@/lib/hooks/battle';
 import { useText } from '@/lib/i18n/use-text';
@@ -22,7 +23,7 @@ export function CastSourceSelect({ book }: { book: Book }) {
         <div className="mb-3 space-y-2 text-sm">
             <label className="flex items-center justify-between gap-3">
                 {tw('label')}
-                <select
+                <NativeSelect
                     aria-label={tw('label')}
                     value={value}
                     onChange={(e) => book.actions.setSource(e.target.value)}
@@ -40,12 +41,12 @@ export function CastSourceSelect({ book }: { book: Book }) {
                             {text(option.label)}
                         </option>
                     ))}
-                </select>
+                </NativeSelect>
             </label>
             {book.view.castLevelOptions.length > 0 && (
                 <label className="flex items-center justify-between gap-3">
                     {tw('level')}
-                    <select
+                    <NativeSelect
                         aria-label={tw('level')}
                         value={book.view.castLevelValue ?? ''}
                         onChange={(e) =>
@@ -62,7 +63,7 @@ export function CastSourceSelect({ book }: { book: Book }) {
                                 {text(option.label)}
                             </option>
                         ))}
-                    </select>
+                    </NativeSelect>
                 </label>
             )}
         </div>

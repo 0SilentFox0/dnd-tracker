@@ -9,6 +9,7 @@ import { HUD_SELECT_CLASS } from '@/components/hud/form';
 import { Checkbox } from '@/components/ui/checkbox';
 import { CommaListInput } from '@/components/ui/comma-list-input';
 import { Input } from '@/components/ui/input';
+import { NativeSelect } from '@/components/ui/native-select';
 import { ABILITY_KEYS, ABILITY_SCORE_CAP } from '@/lib/constants/abilities';
 import { CHOICE_LIMITS, FEAT_TYPES } from '@/lib/constants/choices';
 import { DND_SKILLS } from '@/lib/constants/skills';
@@ -160,7 +161,7 @@ export function SpellChoiceFields({
                     </label>
                     <label className="flex items-center gap-2">
                         {t('fields.minCircle')}
-                        <select
+                        <NativeSelect
                             aria-label={t('fields.minCircleAria')}
                             className={HUD_SELECT_CLASS}
                             value={rule.minLevel}
@@ -178,11 +179,11 @@ export function SpellChoiceFields({
                                     {c}
                                 </option>
                             ))}
-                        </select>
+                        </NativeSelect>
                     </label>
                     <label className="flex items-center gap-2">
                         {t('fields.maxCircle')}
-                        <select
+                        <NativeSelect
                             aria-label={t('fields.maxCircleAria')}
                             className={HUD_SELECT_CLASS}
                             value={String(rule.maxLevel)}
@@ -208,7 +209,7 @@ export function SpellChoiceFields({
                                     {t('fields.slotsMax')}
                                 </option>
                             )}
-                        </select>
+                        </NativeSelect>
                     </label>
                 </div>
             )}

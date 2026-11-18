@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 
 import { ScenarioOpList } from './ScenarioOpList';
@@ -23,11 +24,14 @@ function SlideView({
 
     return (
         <div className="space-y-1 rounded border border-primary/40 p-2">
-            {/* eslint-disable-next-line @next/next/no-img-element -- AI preview from storage, not a layout image */}
-            <img
+            <Image
                 src={op.slide.imageUrl}
                 alt={op.slide.title ?? t('proposal.slideAlt')}
-                className="max-h-60 w-full rounded object-contain"
+                width={0}
+                height={0}
+                sizes="100vw"
+                unoptimized
+                className="h-auto max-h-60 w-full rounded object-contain"
             />
             <p className="text-xs text-muted-foreground">
                 {op.deckId && op.deckTitle

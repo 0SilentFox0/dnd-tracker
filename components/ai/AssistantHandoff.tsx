@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { isAssistantHandoffHref } from '@/lib/schemas/assistant-handoff';
 import type { HandoffResult } from '@/types/assistant';
 
@@ -41,12 +42,11 @@ function SourceNotePicker({
                     key={note.canonicalKey}
                     className="flex items-center gap-2"
                 >
-                    <input
-                        type="checkbox"
+                    <Checkbox
                         checked={current.includes(note.canonicalKey)}
-                        onChange={(event) =>
+                        onCheckedChange={(v) =>
                             setSelected((previous) =>
-                                event.target.checked
+                                v === true
                                     ? [...previous, note.canonicalKey]
                                     : previous.filter(
                                           (k) => k !== note.canonicalKey

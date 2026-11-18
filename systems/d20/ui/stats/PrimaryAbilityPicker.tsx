@@ -2,6 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 
+import { Checkbox } from '@/components/ui/checkbox';
 import { CORE_ABILITY_SCORES } from '@/lib/constants/abilities';
 import type { AbilityKey } from '@/types/characters';
 
@@ -26,13 +27,12 @@ export function PrimaryAbilityPicker({
                     key={a.key}
                     className="flex h-11 items-center gap-2 text-sm"
                 >
-                    <input
-                        type="checkbox"
+                    <Checkbox
                         aria-label={t('aria', {
                             ability: tg(`abilities.${a.key}.label`),
                         })}
                         checked={value === a.key}
-                        onChange={() =>
+                        onCheckedChange={() =>
                             onChange(value === a.key ? null : a.key)
                         }
                         className="size-5 accent-hud-gold"

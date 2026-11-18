@@ -7,6 +7,7 @@ import { classPickerContext, issueFor, pickerBase } from './picker-context';
 
 import { HUD_SELECT_CLASS, HudSection } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
+import { NativeSelect } from '@/components/ui/native-select';
 import type { ChoiceRefsView } from '@/lib/hooks/characters';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import { mergeBackground } from '@/lib/utils/backgrounds/selection';
@@ -88,7 +89,7 @@ export function ChoicesEditor({
                 <HudSection title={t('editor.background')}>
                     <label className="block space-y-2">
                         {t('editor.background')}
-                        <select
+                        <NativeSelect
                             aria-label={t('editor.background')}
                             className={`${HUD_SELECT_CLASS} w-full`}
                             value={data.backgroundId ?? ''}
@@ -109,7 +110,7 @@ export function ChoicesEditor({
                                     </option>
                                 )
                             )}
-                        </select>
+                        </NativeSelect>
                     </label>
                     <p className="text-xs text-hud-muted">
                         {t('editor.backgroundHint')}

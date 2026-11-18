@@ -7,6 +7,7 @@ import { HUD_SELECT_CLASS } from '@/components/hud/form';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { NativeSelect } from '@/components/ui/native-select';
 import { Textarea } from '@/components/ui/textarea';
 import { ABILITY_KEYS, type AbilityKey } from '@/lib/constants/abilities';
 import { CHOICE_LIMITS, FEAT_TYPES } from '@/lib/constants/choices';
@@ -76,7 +77,7 @@ export function FeatBasicsTab({
             {!advancement && (
                 <div className="space-y-2">
                     <Label htmlFor="feat-type">{t('form.type')}</Label>
-                    <select
+                    <NativeSelect
                         id="feat-type"
                         className={HUD_SELECT_CLASS}
                         value={data.type}
@@ -89,7 +90,7 @@ export function FeatBasicsTab({
                                 {t(`types.${type}`)}
                             </option>
                         ))}
-                    </select>
+                    </NativeSelect>
                 </div>
             )}
             {advancement && (

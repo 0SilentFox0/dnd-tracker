@@ -32,6 +32,8 @@ Not duplicates: the first of each pair is the primitive, the second adds label/s
 | Slider | `Slider` (`components/ui/slider`) | raw `type=range` |
 | Custom-composed dropdown (groups, triggers) | `Select*` primitives | — |
 | Plain dropdown from options array | `SelectField` | hand-built `Select` tree |
+| Native dropdown with `<option>` children (empty value, HUD forms, phones) | `NativeSelect` (`components/ui/native-select`) | raw `<select>` |
+| Fully custom-styled button / file or radio input | `Button variant="bare"`, `Input bare` | raw `<button>`/`<input>` |
 | Bare toggle inside custom layout | `Switch` | — |
 | Labelled toggle row (+ description) | `SwitchField` | `Switch` + `Label` by hand |
 | Any modal (desktop modal, phone sheet) | `ResponsiveDialog` | `Dialog` / `vaul` directly |

@@ -6,6 +6,8 @@ import { AiPanel } from './AiPanel';
 import { AssistantReview } from './AssistantReview';
 
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { NativeSelect } from '@/components/ui/native-select';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import { focusLabelOf } from '@/lib/utils/ai/focus';
 import type { AiFocus } from '@/types/ai';
@@ -55,7 +57,7 @@ export function AssistantWorkspace({
             >
                 <label>
                     {t('workspace.focusKind')}
-                    <select
+                    <NativeSelect
                         aria-label={t('workspace.focusKind')}
                         value={kind}
                         onChange={(event) => setKind(event.target.value)}
@@ -72,12 +74,12 @@ export function AssistantWorkspace({
                         <option value="battle">
                             {t('workspace.kinds.battle')}
                         </option>
-                    </select>
+                    </NativeSelect>
                 </label>
                 {kind !== 'campaign' && (
                     <label>
                         {t('workspace.focusId')}
-                        <input
+                        <Input
                             aria-label={t('workspace.focusId')}
                             maxLength={40}
                             value={id}

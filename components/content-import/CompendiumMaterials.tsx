@@ -1,5 +1,6 @@
 'use client';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import type { ChapterBlock } from '@/lib/utils/compendium-import/categories';
 import { NOTES_LIMIT_BYTES } from '@/lib/utils/compendium-import/categories';
@@ -74,13 +75,12 @@ export function CompendiumMaterials({
                                 className="mt-1 flex items-start gap-2"
                                 key={chapter.path}
                             >
-                                <input
+                                <Checkbox
                                     className="mt-0.5 h-4 w-4 shrink-0 accent-hud-gold"
-                                    type="checkbox"
                                     checked={!excluded.includes(chapter.path)}
                                     disabled={busy}
-                                    onChange={(e) =>
-                                        toggle([chapter.path], e.target.checked)
+                                    onCheckedChange={(v) =>
+                                        toggle([chapter.path], v === true)
                                     }
                                 />
                                 <span className="min-w-0 break-words">

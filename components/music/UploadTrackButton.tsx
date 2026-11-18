@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { Upload } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { TRACK_FILE_ACCEPT } from '@/lib/constants/music';
 
 export function UploadTrackButton({
@@ -20,7 +21,8 @@ export function UploadTrackButton({
 
     return (
         <>
-            <input
+            <Input
+                bare
                 ref={input}
                 type="file"
                 accept={TRACK_FILE_ACCEPT}

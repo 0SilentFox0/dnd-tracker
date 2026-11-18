@@ -9,7 +9,9 @@ import { QuietDeleteButton, WorldPanelHeader } from './WorldPanelHeader';
 
 import { HudSection } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { LabeledInput } from '@/components/ui/labeled-input';
+import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { REVEAL_RADIUS_RANGE, WORLD_NAME_MAX } from '@/lib/constants/world';
 import { useMapFields } from '@/lib/hooks/world';
@@ -87,15 +89,14 @@ function MapForm({ detail }: { detail: WorldMapDetail }) {
                                 {Math.round(radius * 100)}%
                             </span>
                         </span>
-                        <input
-                            type="range"
+                        <Slider
                             className="hud-range"
                             style={{ '--fill': `${fill}%` } as CSSProperties}
                             min={REVEAL_RADIUS_RANGE.min}
                             max={REVEAL_RADIUS_RANGE.max}
                             step={RADIUS_STEP}
                             value={radius}
-                            onChange={(e) => setRadius(Number(e.target.value))}
+                            onValueChange={(v) => setRadius(v)}
                             onPointerUp={commitRadius}
                             onKeyUp={commitRadius}
                             onBlur={commitRadius}
@@ -159,7 +160,8 @@ function MapForm({ detail }: { detail: WorldMapDetail }) {
                     <ImageUp className="size-4" />
                     {t('editor.replaceImage')}
                 </Button>
-                <input
+                <Input
+                    bare
                     ref={fileInput}
                     type="file"
                     accept="image/*"

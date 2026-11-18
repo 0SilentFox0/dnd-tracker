@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
@@ -206,11 +207,14 @@ export function GenerateSlideDialog({
                     </p>
                 )}
                 {result && !gen.pending && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
+                    <Image
                         src={result}
                         alt={t('generate.resultAlt')}
-                        className="max-h-80 w-full rounded-md object-contain"
+                        width={0}
+                        height={0}
+                        sizes="100vw"
+                        unoptimized
+                        className="h-auto max-h-80 w-full rounded-md object-contain"
                     />
                 )}
             </form>

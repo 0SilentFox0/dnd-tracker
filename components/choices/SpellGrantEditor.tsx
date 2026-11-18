@@ -3,7 +3,9 @@
 import { useTranslations } from 'next-intl';
 
 import { HUD_SELECT_CLASS } from '@/components/hud/form';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
+import { NativeSelect } from '@/components/ui/native-select';
 import { ABILITY_KEYS, type AbilityKey } from '@/lib/constants/abilities';
 import { CHOICE_LIMITS } from '@/lib/constants/choices';
 import { MAX_SPELL_LEVEL } from '@/lib/constants/spells';
@@ -27,12 +29,11 @@ export function SpellGrantEditor({
     return (
         <fieldset className="space-y-2 rounded border border-hud-line p-2">
             <label className="flex items-center gap-2 text-sm">
-                <input
-                    type="checkbox"
+                <Checkbox
                     checked={!!value}
-                    onChange={(e) =>
+                    onCheckedChange={(v) =>
                         onChange(
-                            e.target.checked
+                            v === true
                                 ? { uses: 1, rest: 'long', via: 'grant' }
                                 : undefined
                         )
@@ -59,12 +60,11 @@ export function SpellGrantEditor({
                         />
                     </label>
                     <label className="flex items-center gap-2 text-xs">
-                        <input
-                            type="checkbox"
+                        <Checkbox
                             checked={value.uses === 'proficiency'}
-                            onChange={(e) =>
+                            onCheckedChange={(v) =>
                                 set({
-                                    uses: e.target.checked ? 'proficiency' : 1,
+                                    uses: v === true ? 'proficiency' : 1,
                                 })
                             }
                         />
@@ -72,7 +72,7 @@ export function SpellGrantEditor({
                     </label>
                     <label className="text-xs">
                         {t('grant.rest')}
-                        <select
+                        <NativeSelect
                             aria-label={t('grant.restAria')}
                             className={HUD_SELECT_CLASS}
                             value={value.rest}
@@ -86,7 +86,7 @@ export function SpellGrantEditor({
                             <option value="short">
                                 {t('grant.restShort')}
                             </option>
-                        </select>
+                        </NativeSelect>
                     </label>
                     <label className="text-xs">
                         {t('grant.circle')}
@@ -108,7 +108,7 @@ export function SpellGrantEditor({
                     </label>
                     <label className="text-xs">
                         {t('grant.ability')}
-                        <select
+                        <NativeSelect
                             aria-label={t('grant.abilityAria')}
                             className={HUD_SELECT_CLASS}
                             value={value.dcAbility ?? ''}
@@ -128,17 +128,14 @@ export function SpellGrantEditor({
                                     {tg(`abilities.${key}.label`)}
                                 </option>
                             ))}
-                        </select>
+                        </NativeSelect>
                     </label>
                     <label className="flex items-center gap-2 text-xs">
-                        <input
-                            type="checkbox"
+                        <Checkbox
                             checked={value.via === 'slotOrGrant'}
-                            onChange={(e) =>
+                            onCheckedChange={(v) =>
                                 set({
-                                    via: e.target.checked
-                                        ? 'slotOrGrant'
-                                        : 'grant',
+                                    via: v === true ? 'slotOrGrant' : 'grant',
                                 })
                             }
                         />

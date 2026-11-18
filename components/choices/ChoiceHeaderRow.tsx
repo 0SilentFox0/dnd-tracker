@@ -6,6 +6,7 @@ import { HUD_SELECT_CLASS } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { NativeSelect } from '@/components/ui/native-select';
 import { MAX_CLASS_LEVEL } from '@/lib/constants/classes';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import type { Choice, ChoiceKind, ChoiceOwner } from '@/types/choices';
@@ -50,7 +51,7 @@ export function ChoiceHeaderRow({
                     <Label htmlFor={`choice-${index}-kind`}>
                         {t('header.kind')}
                     </Label>
-                    <select
+                    <NativeSelect
                         id={`choice-${index}-kind`}
                         className={HUD_SELECT_CLASS}
                         value={choice.kind}
@@ -63,7 +64,7 @@ export function ChoiceHeaderRow({
                                 {t(`kinds.${k}`)}
                             </option>
                         ))}
-                    </select>
+                    </NativeSelect>
                 </div>
                 {owner !== 'feat' && (
                     <div className="w-24 space-y-1">

@@ -10,6 +10,7 @@ import { BoundedNumberInput } from '@/components/ui/bounded-number-input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
+import { Slider } from '@/components/ui/slider';
 import { type BattleMapEditor, useGridCalibration } from '@/lib/hooks/battles';
 import {
     backgroundColsOf,
@@ -209,16 +210,13 @@ export function GridCalibration({ editor }: { editor: BattleMapEditor }) {
                             <Label htmlFor="map-calibration-zoom">
                                 {t('zoom', { value: zoom })}
                             </Label>
-                            <input
+                            <Slider
                                 id="map-calibration-zoom"
-                                type="range"
                                 min={1}
                                 max={4}
                                 step={0.25}
                                 value={zoom}
-                                onChange={(e) =>
-                                    setZoom(Number(e.target.value))
-                                }
+                                onValueChange={(v) => setZoom(v)}
                                 className="w-full accent-[var(--hud-gold,#f2c14e)]"
                             />
                         </div>
@@ -226,17 +224,14 @@ export function GridCalibration({ editor }: { editor: BattleMapEditor }) {
                             <Label htmlFor="map-calibration-opacity">
                                 {t('previewOpacity')}
                             </Label>
-                            <input
+                            <Slider
                                 id="map-calibration-opacity"
-                                type="range"
                                 min={0.1}
                                 max={1}
                                 step={0.05}
                                 value={state.previewOpacity}
-                                onChange={(e) =>
-                                    actions.setPreviewOpacity(
-                                        Number(e.target.value)
-                                    )
+                                onValueChange={(v) =>
+                                    actions.setPreviewOpacity(v)
                                 }
                                 className="w-full accent-[var(--hud-gold,#f2c14e)]"
                             />

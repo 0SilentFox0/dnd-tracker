@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { CharacterType } from '@/lib/constants/characters';
 import { useCharacterRoster } from '@/lib/hooks/characters';
 
@@ -62,10 +63,9 @@ export function AudiencePicker({
                             key={hero.id}
                             className="flex items-center gap-2 text-sm text-hud-bone"
                         >
-                            <input
-                                type="checkbox"
+                            <Checkbox
                                 checked={value.includes(hero.id)}
-                                onChange={() => toggle(hero.id)}
+                                onCheckedChange={() => toggle(hero.id)}
                             />
                             {hero.name}
                         </label>

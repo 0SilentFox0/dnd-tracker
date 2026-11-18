@@ -15,6 +15,8 @@ import { AddYoutubeTrackDialog } from '@/components/music/AddYoutubeTrackDialog'
 import { TrackTitleInput } from '@/components/music/TrackTitleInput';
 import { UploadTrackButton } from '@/components/music/UploadTrackButton';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { NativeSelect } from '@/components/ui/native-select';
 import {
     type PlayerAudioDm,
     type PlaylistView,
@@ -112,7 +114,7 @@ function PlaylistFilters({
                     aria-hidden
                     className="pointer-events-none absolute left-1.5 size-3.5 text-hud-muted"
                 />
-                <input
+                <Input
                     type="search"
                     aria-label={t('music.search.label')}
                     placeholder={t('music.search.placeholder')}
@@ -123,7 +125,7 @@ function PlaylistFilters({
             </div>
             <div className="flex items-center gap-1">
                 {view.groupNames.length > 1 && (
-                    <select
+                    <NativeSelect
                         aria-label={t('music.playlist.group')}
                         value={data.group ?? ''}
                         onChange={(e) => set({ group: e.target.value || null })}
@@ -137,9 +139,9 @@ function PlaylistFilters({
                                 {trackGroupLabel(t, g)}
                             </option>
                         ))}
-                    </select>
+                    </NativeSelect>
                 )}
-                <select
+                <NativeSelect
                     aria-label={t('music.playlist.kind')}
                     value={data.kind ?? ''}
                     onChange={(e) =>
@@ -155,7 +157,7 @@ function PlaylistFilters({
                             {t(`music.playlist.kinds.${k}`)}
                         </option>
                     ))}
-                </select>
+                </NativeSelect>
                 {active && (
                     <Button
                         variant="bare"
