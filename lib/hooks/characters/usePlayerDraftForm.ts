@@ -1,68 +1,33 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useLocale, useTranslations } from 'next-intl';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useCallback, useMemo, useState } from 'react';
+import { useLocale } from 'next-intl';
 
-import {
-    avatarStep,
-    backgroundStep,
-    emptyDraft,
-    type RollKey,
-    scoresOf,
-    scoreSteps,
-} from './draft-form-helpers';
-import { characterKeys } from './keys';
+import { emptyDraft, type RollKey, scoresOf } from './draft-form-helpers';
 import { useDraftAi } from './useDraftAi';
-import { draftPortraitsQuery, useDraftPortraits } from './useDraftPortraits';
-import { type RollStep, useRollReveal } from './useRollReveal';
+import { usePlayerDraftGenerate } from './usePlayerDraftGenerate';
+import { usePlayerDraftSubmit } from './usePlayerDraftSubmit';
+import { useRollReveal } from './useRollReveal';
 
-import { createDraft, updateDraft } from '@/lib/api/characters';
-import { ApiError } from '@/lib/api/client';
 import { ABILITY_KEYS, type AbilityKey } from '@/lib/constants/abilities';
-import { ALIGNMENTS } from '@/lib/constants/alignment';
-import { HERO_ARCHETYPE_KEYS } from '@/lib/constants/hero-archetypes';
 import { useClassMode } from '@/lib/hooks/classes';
 import { useRaces } from '@/lib/hooks/races';
 import type { Locale } from '@/lib/i18n/config';
-import { translateIssue } from '@/lib/i18n/translate-issue';
-import { useTranslator } from '@/lib/i18n/use-translator';
-import { pendingIssues } from '@/lib/utils/characters/choices/pending';
 import {
     draftChoicesState,
     stateDraftChoices,
 } from '@/lib/utils/characters/choices/picks';
-import { prunePicks } from '@/lib/utils/characters/choices/prune';
-import {
-    type ChoiceRefs,
-    countFeats,
-    visitPicks,
-} from '@/lib/utils/characters/choices/walk';
 import { classModeOf } from '@/lib/utils/characters/classes';
 import {
     type AbilityMethod,
-    ARCHETYPE_PRIMARY,
-    archetypeClasses,
-    assignByPriority,
-    assignStandardArray,
-    classPrimaryAbilities,
-    createRng,
-    generateBackstory as generateLocalBackstory,
-    generateCharacter,
-    generateName,
-    pick,
     pointBuySpent,
     recommendedPriority,
     recommendedScores,
     rerecommendScores,
     validateAbilityScores,
 } from '@/lib/utils/characters/generate';
-import { isRecord } from '@/lib/utils/common/is-record';
 import type { DraftInput } from '@/types/characters';
-import type { ChoiceIssue, ChoicesState } from '@/types/choices';
+import type { ChoicesState } from '@/types/choices';
 
 export type { RollKey };
-
-const seedNow = () => Date.now();
 
 export interface PlayerDraftFormOptions {
     campaignId: string;
@@ -70,26 +35,12 @@ export interface PlayerDraftFormOptions {
     initial?: 'generate' | DraftInput;
 }
 
-// the 400 body may carry plain Zod issues (path is an array), not only ChoiceIssue
-const isChoiceIssue = (i: unknown): i is ChoiceIssue =>
-    isRecord(i) && typeof i.path === 'string' && typeof i.message === 'string';
-
 export function usePlayerDraftForm({
     campaignId,
     characterId,
     initial,
 }: PlayerDraftFormOptions) {
     const locale = useLocale() as Locale;
-
-    const t = useTranslations('characters.draft');
-
-    const tRoot = useTranslator();
-
-    const tArchetype = useTranslations('characters.archetypes');
-
-    const router = useRouter();
-
-    const queryClient = useQueryClient();
 
     const { data: raceList } = useRaces(campaignId);
 
@@ -179,171 +130,6 @@ export function usePlayerDraftForm({
         [priorityOf]
     );
 
-    const raceStep = useCallback(
-        (race: string): RollStep<RollKey> => ({
-            key: 'race',
-            pool: () =>
-                raceNames.length ? pick(Math.random, raceNames) : race,
-            final: race,
-        }),
-        [raceNames]
-    );
-
-    const nameStep = useCallback(
-        (name: string, race: string): RollStep<RollKey> => ({
-            key: 'name',
-            pool: () => generateName(race, Math.random, locale),
-            final: name,
-        }),
-        [locale]
-    );
-
-    const portraitPools = useDraftPortraits(campaignId);
-
-    const portraitPool = useCallback(
-        (race: string) =>
-            queryClient.getQueryData<Record<string, string[]>>(
-                characterKeys.draftPortraits(campaignId)
-            )?.[race] ?? [],
-        [queryClient, campaignId]
-    );
-
-    const canReroll = (portraitPools.data?.[values.race]?.length ?? 0) > 0;
-
-    const all = useCallback(() => {
-        const seed = seedNow();
-
-        const g = generateCharacter({
-            races: raceNames,
-            seed,
-            classes: classBased ? classMode.classes : undefined,
-            locale,
-        });
-
-        const pool = portraitPool(g.race);
-
-        const portrait = pool.length ? pick(createRng(seed), pool) : undefined;
-
-        if (!pool.length && g.race) {
-            queryClient
-                .fetchQuery(draftPortraitsQuery(campaignId))
-                .then((pools) => {
-                    const loaded = pools[g.race] ?? [];
-
-                    if (loaded.length)
-                        setValues((prev) =>
-                            prev.race === g.race
-                                ? {
-                                      ...prev,
-                                      avatar: pick(createRng(seed), loaded),
-                                  }
-                                : prev
-                        );
-                })
-                .catch(() => undefined);
-        }
-
-        setValues((prev) => ({
-            ...prev,
-            name: g.name,
-            race: g.race,
-            archetype: g.archetype,
-            class: g.class,
-            classId: g.classId,
-            alignment: g.alignment,
-            method: g.method,
-            ...g.scores,
-            primaryAbility: g.primaryAbility,
-            background: g.background,
-            goals: g.goals,
-            ...(portrait && { avatar: portrait }),
-        }));
-
-        start([
-            raceStep(g.race),
-            ...(portrait ? [avatarStep(portrait, pool)] : []),
-            ...(classBased
-                ? []
-                : [
-                      {
-                          key: 'archetype' as const,
-                          pool: () =>
-                              tArchetype(
-                                  `${pick(Math.random, HERO_ARCHETYPE_KEYS)}.name`
-                              ),
-                          final: tArchetype(`${g.archetype}.name`),
-                      },
-                  ]),
-            {
-                key: 'class',
-                pool: () =>
-                    classBased
-                        ? pick(Math.random, classMode.classes).name
-                        : archetypeClasses(locale)[
-                              pick(Math.random, HERO_ARCHETYPE_KEYS)
-                          ],
-                final: g.class,
-            },
-            {
-                key: 'alignment',
-                pool: () => pick(Math.random, ALIGNMENTS),
-                final: g.alignment,
-            },
-            nameStep(g.name, g.race),
-            ...scoreSteps(g.scores),
-            backgroundStep(g.background),
-        ]);
-    }, [
-        raceNames,
-        raceStep,
-        start,
-        portraitPool,
-        queryClient,
-        campaignId,
-        classBased,
-        classMode.classes,
-        tArchetype,
-        nameStep,
-        locale,
-    ]);
-
-    const name = useCallback(() => {
-        const next = generateName(values.race, Math.random, locale);
-
-        setValues((prev) => ({ ...prev, name: next }));
-
-        start([nameStep(next, values.race)]);
-    }, [start, values.race, locale, nameStep]);
-
-    const scores = useCallback(() => {
-        const cls = classBased
-            ? classMode.classes.find((c) => c.id === values.classId)
-            : undefined;
-
-        const priority = cls
-            ? classPrimaryAbilities(cls)
-            : ARCHETYPE_PRIMARY[values.archetype];
-
-        const next = cls
-            ? assignByPriority(priority, Math.random)
-            : assignStandardArray(values.archetype, Math.random);
-
-        setValues((prev) => ({
-            ...prev,
-            method: 'standard',
-            ...next,
-            primaryAbility: priority[0] ?? ARCHETYPE_PRIMARY[prev.archetype][0],
-        }));
-
-        start(scoreSteps(next));
-    }, [
-        start,
-        values.archetype,
-        values.classId,
-        classBased,
-        classMode.classes,
-    ]);
-
     const setClass = useCallback(
         (classId: string) =>
             setValues((prev) => {
@@ -374,151 +160,28 @@ export function usePlayerDraftForm({
         [classMode.classes, priorityOf]
     );
 
-    const backstory = useCallback(() => {
-        const next = generateLocalBackstory(
-            {
-                name: values.name || t('defaultHeroName'),
-                raceName: values.race,
-                archetype: values.archetype,
-            },
-            Math.random,
-            locale
-        );
-
-        setValues((prev) => ({ ...prev, ...next }));
-
-        start([backgroundStep(next.background)]);
-    }, [start, values.archetype, values.name, values.race, t, locale]);
-
-    const portrait = useCallback(() => {
-        const pool = portraitPool(values.race);
-
-        const options =
-            pool.length > 1
-                ? pool.filter((url) => url !== values.avatar)
-                : pool;
-
-        if (!options.length) return;
-
-        const next = pick(createRng(seedNow()), options);
-
-        setValues((prev) => ({ ...prev, avatar: next }));
-        start([avatarStep(next, pool)]);
-    }, [portraitPool, start, values.race, values.avatar]);
+    const { generate } = usePlayerDraftGenerate({
+        campaignId,
+        values,
+        setValues,
+        start,
+        raceNames,
+        classBased,
+        classes: classMode.classes,
+        autoGenerate:
+            initial === 'generate' &&
+            raceList !== undefined &&
+            !classMode.pending,
+    });
 
     const ai = useDraftAi({ campaignId, values, setValues, start });
 
-    const submitMutation = useMutation({
-        mutationFn: (refs?: ChoiceRefs) => {
-            const choices =
-                values.choices && refs
-                    ? stateDraftChoices(
-                          prunePicks(
-                              draftChoicesState(
-                                  values.choices,
-                                  classBased ? values.classId : undefined
-                              ),
-                              refs
-                          ).state
-                      )
-                    : values.choices;
-
-            const body: DraftInput = {
-                ...values,
-                ...(choices && { choices }),
-                alignment: values.alignment || undefined,
-                background: values.background || undefined,
-                avatar: values.avatar,
-            };
-
-            return characterId
-                ? updateDraft(campaignId, characterId, body)
-                : createDraft(campaignId, body);
-        },
-        onError: (e) => {
-            const issues = (e instanceof ApiError ? e.body : undefined) as
-                | { issues?: unknown }
-                | undefined;
-
-            setChoiceIssues(
-                Array.isArray(issues?.issues)
-                    ? issues.issues.filter(isChoiceIssue)
-                    : []
-            );
-        },
-        onSuccess: async () => {
-            await queryClient.invalidateQueries({
-                queryKey: characterKeys.sheet(campaignId),
-            });
-            router.push(`/campaigns/${campaignId}/character`);
-        },
+    const submit = usePlayerDraftSubmit({
+        campaignId,
+        characterId,
+        values,
+        classBased,
     });
-
-    const [validationError, setValidationError] = useState<string | null>(null);
-
-    const [choiceIssues, setChoiceIssues] = useState<ChoiceIssue[]>([]);
-
-    const run = (refs?: ChoiceRefs) => {
-        if (!values.race) {
-            setValidationError(t('raceRequired'));
-
-            return;
-        }
-
-        const classMode = classBased && !!values.classId;
-
-        const state = draftChoicesState(
-            values.choices,
-            classBased ? values.classId : undefined
-        );
-
-        const visits = refs
-            ? visitPicks(state, refs, { level: 1, classMode })
-            : [];
-
-        const issues = refs
-            ? pendingIssues(visits, {
-                  ...refs,
-                  hero: { totalLevel: 1, scores: scoresOf(values) },
-                  takenFeatIds: new Set(
-                      countFeats(visits, state, classMode).keys()
-                  ),
-              })
-            : [];
-
-        setChoiceIssues(
-            issues.map((issue) => ({
-                ...issue,
-                message: translateIssue(tRoot, issue),
-            }))
-        );
-
-        if (issues.length > 0) {
-            setValidationError(t('choicesIncomplete'));
-
-            return;
-        }
-
-        setValidationError(null);
-        submitMutation.mutate(refs);
-    };
-
-    const autoGenerated = useRef(false);
-
-    useEffect(() => {
-        if (
-            initial !== 'generate' ||
-            autoGenerated.current ||
-            raceList === undefined ||
-            portraitPools.isPending ||
-            classMode.pending
-        )
-            return;
-
-        autoGenerated.current = true;
-
-        all();
-    }, [initial, raceList, portraitPools.isPending, classMode.pending, all]);
 
     const scoreStatus = useMemo(() => {
         const scoreValues = scoresOf(values);
@@ -550,8 +213,7 @@ export function usePlayerDraftForm({
                 classBased ? values.classId : undefined
             ),
             set: (next: ChoicesState) => {
-                setChoiceIssues([]);
-                setValidationError(null);
+                submit.clearIssues();
                 setValues((prev) => ({
                     ...prev,
                     choices: stateDraftChoices(next),
@@ -559,24 +221,13 @@ export function usePlayerDraftForm({
             },
             enabled: classBased,
         },
-        generate: {
-            all,
-            name,
-            scores,
-            backstory,
-            portrait,
-            canPortrait: canReroll,
-        },
+        generate,
         ai,
         submit: {
-            run,
-            choiceIssues,
-            isPending: submitMutation.isPending,
-            error:
-                validationError ??
-                (submitMutation.error instanceof Error
-                    ? submitMutation.error.message
-                    : null),
+            run: submit.run,
+            choiceIssues: submit.choiceIssues,
+            isPending: submit.isPending,
+            error: submit.error,
         },
         scoreStatus,
         reveal,
