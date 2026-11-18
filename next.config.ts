@@ -33,6 +33,23 @@ export const SECURITY_HEADERS = [
     },
 ];
 
+function supabaseImagePatterns() {
+    const raw = process.env.NEXT_PUBLIC_SUPABASE_URL;
+
+    if (!raw) return [];
+
+    const { protocol, hostname, port } = new URL(raw);
+
+    return [
+        {
+            protocol: protocol.replace(':', '') as 'http' | 'https',
+            hostname,
+            ...(port ? { port } : {}),
+            pathname: '/storage/v1/object/public/**',
+        },
+    ];
+}
+
 const nextConfig: NextConfig = {
     // CSS goes into the HTML instead of render-blocking requests (mobile LCP on the landing)
     experimental: { inlineCss: true },
@@ -76,11 +93,7 @@ const nextConfig: NextConfig = {
                 hostname: 'static.wikia.nocookie.net',
                 pathname: '/**',
             },
-            {
-                protocol: 'https',
-                hostname: '**.supabase.co',
-                pathname: '/storage/v1/object/public/**',
-            },
+            ...supabaseImagePatterns(),
         ],
     },
 };

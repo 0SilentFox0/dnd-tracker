@@ -14,6 +14,8 @@ import { errorResponse } from '@/lib/utils/api/api-response';
 import { handleApiError } from '@/lib/utils/api/error-handler';
 import { parseBody } from '@/lib/utils/api/parse-body';
 
+const ENVELOPE_BYTES = 4096;
+
 export async function POST(request: Request) {
     try {
         const authResult = await requireAuthUser();
@@ -22,14 +24,11 @@ export async function POST(request: Request) {
 
         const { userId, authUser } = authResult;
 
-        if (Number(request.headers.get('content-length')) > MAX_BUNDLE_BYTES) {
-            return errorResponse(API_ERRORS.BUNDLE_TOO_LARGE, 413);
-        }
-
         const data = await parseBody(
             importCampaignSchema,
             request,
-            API_ERRORS.BUNDLE_INVALID
+            API_ERRORS.BUNDLE_INVALID,
+            { maxBytes: MAX_BUNDLE_BYTES + ENVELOPE_BYTES }
         );
 
         if (data instanceof NextResponse) return data;
