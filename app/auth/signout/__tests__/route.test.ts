@@ -34,7 +34,7 @@ describe('POST /auth/signout', () => {
     it('помилка глобального виходу — локальний вихід чистить cookies', async () => {
         signOut.mockResolvedValueOnce({ error: new Error('network') });
 
-        const res = await POST(post());
+        const res = await POST(post('http://app.test'));
 
         expect(signOut).toHaveBeenLastCalledWith({ scope: 'local' });
         expect(res.status).toBe(303);
@@ -42,6 +42,13 @@ describe('POST /auth/signout', () => {
 
     it('чужий Origin — 403 без виходу', async () => {
         const res = await POST(post('http://evil.test'));
+
+        expect(res.status).toBe(403);
+        expect(signOut).not.toHaveBeenCalled();
+    });
+
+    it('без Origin — 403 без виходу', async () => {
+        const res = await POST(post());
 
         expect(res.status).toBe(403);
         expect(signOut).not.toHaveBeenCalled();

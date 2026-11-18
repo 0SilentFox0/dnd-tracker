@@ -2,7 +2,11 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const lookupMock = vi.hoisted(() => vi.fn());
 
+const httpsRequestMock = vi.hoisted(() => vi.fn());
+
 vi.mock('node:dns/promises', () => ({ lookup: lookupMock }));
+
+vi.mock('node:https', () => ({ request: httpsRequestMock }));
 
 vi.mock('@/lib/utils/api/api-auth', () => ({
     requireDM: vi.fn(async () => ({ userId: 'u1' })),
@@ -57,6 +61,7 @@ vi.mock('@/lib/server/artifacts/artifact-set-queries', () => ({
 }));
 
 import { prisma } from '@/lib/db';
+import { bridgeHttpsToFetch } from '@/lib/utils/api/__tests__/https-bridge';
 
 const SVG_URL = 'https://game-icons.net/icons/a.svg';
 
@@ -73,6 +78,7 @@ describe('PATCH with an already stored external icon', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         vi.stubGlobal('fetch', fetchMock);
+        bridgeHttpsToFetch(httpsRequestMock);
         lookupMock.mockResolvedValue([{ address: '93.184.216.34', family: 4 }]);
         vi.mocked(prisma.artifact.findFirst).mockResolvedValue({
             id: 'a1',

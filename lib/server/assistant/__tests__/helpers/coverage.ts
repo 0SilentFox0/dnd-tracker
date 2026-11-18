@@ -254,6 +254,13 @@ export const ASSISTANT_ROUTE_COVERAGE: readonly RouteCoverage[] = [
         state: 'active',
     },
     {
+        route: 'campaigns/[id]/api-tokens/[tokenId]/rotate',
+        methods: ['POST'],
+        task: 4,
+        adapter: 'handoffs/settings',
+        state: 'handoff',
+    },
+    {
         route: 'campaigns/[id]/api-tokens/[tokenId]',
         methods: ['DELETE'],
         task: 4,
