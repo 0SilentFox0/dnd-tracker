@@ -119,16 +119,16 @@ export function PlayerDraftForm({
 
                     <fieldset disabled={busy} className="min-w-0 border-0 p-0">
                         <DraftRegenerateBar
- form={form}
- generate={generate}
- ai={ai}
- busy={busy}
- />
+                            form={form}
+                            generate={generate}
+                            ai={ai}
+                            busy={busy}
+                        />
 
                         <DraftBasicSection
- draft={{ form, reveal, generate, ai }}
- options={{ races, archetypes, hasArchetype }}
- />
+                            draft={{ form, reveal, generate, ai }}
+                            options={{ races, archetypes, hasArchetype }}
+                        />
 
                         <HudSection title={t('sections.scores')}>
                             <AbilityScoresPicker

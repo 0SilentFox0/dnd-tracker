@@ -2,11 +2,7 @@
 
 import { Plus, X } from 'lucide-react';
 
-import {
-    EffectFields,
-    effectsMax,
-    newEffect,
-} from './TableEffectFields';
+import { EffectFields, effectsMax, newEffect } from './TableEffectFields';
 
 import { BoundedNumberInput } from '@/components/ui/bounded-number-input';
 import { Button } from '@/components/ui/button';
@@ -116,4 +112,3 @@ export function RowFields({
         </li>
     );
 }
-

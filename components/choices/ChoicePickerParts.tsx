@@ -64,12 +64,17 @@ export function Card({
     );
 }
 
-export const NO_SCORES = Object.fromEntries(ABILITY_KEYS.map((k) => [k, 0])) as Record<
-    AbilityKey,
-    number
->;
+export const NO_SCORES = Object.fromEntries(
+    ABILITY_KEYS.map((k) => [k, 0])
+) as Record<AbilityKey, number>;
 
-export function ChoiceSummary({ title, text }: { title: string; text: string }) {
+export function ChoiceSummary({
+    title,
+    text,
+}: {
+    title: string;
+    text: string;
+}) {
     const summary = summarize(text);
 
     return (

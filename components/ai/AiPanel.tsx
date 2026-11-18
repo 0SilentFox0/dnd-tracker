@@ -1,10 +1,6 @@
 'use client';
 
-import {
-    type CSSProperties,
-    type ReactNode,
-    useState,
-} from 'react';
+import { type CSSProperties, type ReactNode, useState } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { KeyRound } from 'lucide-react';

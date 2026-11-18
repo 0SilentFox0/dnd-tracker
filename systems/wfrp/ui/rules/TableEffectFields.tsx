@@ -186,4 +186,3 @@ export function EffectFields({
         </li>
     );
 }
-

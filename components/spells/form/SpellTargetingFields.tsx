@@ -273,15 +273,15 @@ export function SpellTargetingFields({
                 )}
             {children}
             <SpellResolutionFields
- value={value}
- onChange={onChange}
- options={
- classesEnabled || resolution.kind === 'attack'
- ? resolutionOptions
- : resolutionOptions.filter((o) => o.value !== 'attack')
- }
- id={id}
- />
+                value={value}
+                onChange={onChange}
+                options={
+                    classesEnabled || resolution.kind === 'attack'
+                        ? resolutionOptions
+                        : resolutionOptions.filter((o) => o.value !== 'attack')
+                }
+                id={id}
+            />
         </>
     );
 }

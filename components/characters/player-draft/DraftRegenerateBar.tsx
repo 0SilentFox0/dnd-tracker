@@ -32,11 +32,7 @@ export function DraftRegenerateBar({
         <div className="mb-4 flex flex-wrap gap-2">
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <Button
-                        type="button"
-                        variant="outline"
-                        disabled={busy}
-                    >
+                    <Button type="button" variant="outline" disabled={busy}>
                         {t('regenerate')}
                     </Button>
                 </DropdownMenuTrigger>
@@ -47,14 +43,10 @@ export function DraftRegenerateBar({
                     <DropdownMenuItem onSelect={generate.name}>
                         {t('regenName')}
                     </DropdownMenuItem>
-                    <DropdownMenuItem
-                        onSelect={generate.scores}
-                    >
+                    <DropdownMenuItem onSelect={generate.scores}>
                         {t('regenScores')}
                     </DropdownMenuItem>
-                    <DropdownMenuItem
-                        onSelect={generate.backstory}
-                    >
+                    <DropdownMenuItem onSelect={generate.backstory}>
                         {t('regenBackstory')}
                     </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -64,16 +56,11 @@ export function DraftRegenerateBar({
                     type="button"
                     variant="outline"
                     disabled={
-                        busy ||
-                        ai.isPending ||
-                        !values.name ||
-                        !values.race
+                        busy || ai.isPending || !values.name || !values.race
                     }
                     onClick={ai.run}
                 >
-                    {ai.isPending
-                        ? t('aiBackstoryPending')
-                        : t('aiBackstory')}
+                    {ai.isPending ? t('aiBackstoryPending') : t('aiBackstory')}
                 </Button>
             )}
         </div>

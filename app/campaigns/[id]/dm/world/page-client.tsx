@@ -333,10 +333,22 @@ export function WorldEditorPageClient({
                                                                     moveTarget.marker
                                                                 }
                                                                 actions={{
-                                                                    onPickTarget: () => setTool('move'),
-                                                                    onMoved: (e: TravelMoved) =>
-                                                                        e.kind !== 'travel' &&
-                                                                        openMap(e.destMapId, { keepTool: true }),
+                                                                    onPickTarget:
+                                                                        () =>
+                                                                            setTool(
+                                                                                'move'
+                                                                            ),
+                                                                    onMoved: (
+                                                                        e: TravelMoved
+                                                                    ) =>
+                                                                        e.kind !==
+                                                                            'travel' &&
+                                                                        openMap(
+                                                                            e.destMapId,
+                                                                            {
+                                                                                keepTool: true,
+                                                                            }
+                                                                        ),
                                                                 }}
                                                             />
                                                         </div>

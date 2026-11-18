@@ -24,7 +24,10 @@ const POLL_MS = 100;
 
 const SETTLE_ATTEMPTS = 8;
 
-export const stepWait = (item: { optional?: boolean; clickUntilTarget?: boolean }) =>
+export const stepWait = (item: {
+    optional?: boolean;
+    clickUntilTarget?: boolean;
+}) =>
     item.optional
         ? OPTIONAL_WAIT_MS + 1000
         : item.clickUntilTarget
@@ -133,7 +136,6 @@ function activate(element: HTMLElement) {
     element.click();
 }
 
-
 export async function prepareTourStep(
     item: DemoTourStep,
     env: {
@@ -144,104 +146,85 @@ export async function prepareTourStep(
 ) {
     const { campaignPath, push, onTall } = env;
 
-        let destination =
-            item.route !== undefined
-                ? `${campaignPath}${item.route}`
-                : window.location.pathname;
+    let destination =
+        item.route !== undefined
+            ? `${campaignPath}${item.route}`
+            : window.location.pathname;
 
-        if (item.routeFromTarget) {
-            const source = await waitFor(
-                () =>
-                    document.querySelector(
-                        `[data-tour="${item.routeFromTarget}"]`
-                    ),
-                Date.now() + BEFORE_TIMEOUT_MS - 700
-            );
+    if (item.routeFromTarget) {
+        const source = await waitFor(
+            () =>
+                document.querySelector(`[data-tour="${item.routeFromTarget}"]`),
+            Date.now() + BEFORE_TIMEOUT_MS - 700
+        );
 
-            const anchor =
-                source instanceof HTMLAnchorElement
-                    ? source
-                    : source?.closest('a');
+        const anchor =
+            source instanceof HTMLAnchorElement ? source : source?.closest('a');
 
-            if (!(anchor instanceof HTMLAnchorElement)) return;
+        if (!(anchor instanceof HTMLAnchorElement)) return;
 
-            destination = new URL(anchor.href).pathname;
-        }
+        destination = new URL(anchor.href).pathname;
+    }
 
-        if (!window.location.pathname.endsWith(destination))
-            push(destination);
+    if (!window.location.pathname.endsWith(destination)) push(destination);
 
-        const deadline = Date.now() + stepWait(item) - 700;
+    const deadline = Date.now() + stepWait(item) - 700;
 
-        const arrived = () =>
-            window.location.pathname.endsWith(destination);
+    const arrived = () => window.location.pathname.endsWith(destination);
 
-        const find = () =>
-            arrived() ? document.querySelector(item.target) : null;
+    const find = () => (arrived() ? document.querySelector(item.target) : null);
 
-        if (item.clickFromTarget) {
-            const sourceSelector = `[data-tour="${item.clickFromTarget}"]`;
+    if (item.clickFromTarget) {
+        const sourceSelector = `[data-tour="${item.clickFromTarget}"]`;
 
-            const source = await waitFor(
-                () =>
-                    arrived()
-                        ? document.querySelector(sourceSelector)
-                        : null,
-                Math.min(
-                    deadline,
-                    Date.now() + CLICK_SOURCE_WAIT_MS
-                )
-            );
+        const source = await waitFor(
+            () => (arrived() ? document.querySelector(sourceSelector) : null),
+            Math.min(deadline, Date.now() + CLICK_SOURCE_WAIT_MS)
+        );
 
-            // відсутнє джерело (напр. плеєр уже розгорнуто) — просто йдемо до цілі
-            if (source instanceof HTMLElement) {
-                activate(source);
+        // відсутнє джерело (напр. плеєр уже розгорнуто) — просто йдемо до цілі
+        if (source instanceof HTMLElement) {
+            activate(source);
 
-                if (item.clickUntilTarget) {
-                    // кожен клік — запит на сервер: наступний лише коли кнопка знову активна або ціль з'явилась
-                    const enabledSource = () => {
-                        const again =
-                            document.querySelector(sourceSelector);
+            if (item.clickUntilTarget) {
+                // кожен клік — запит на сервер: наступний лише коли кнопка знову активна або ціль з'явилась
+                const enabledSource = () => {
+                    const again = document.querySelector(sourceSelector);
 
-                        return again instanceof HTMLElement &&
-                            !(again as HTMLButtonElement).disabled
-                            ? again
-                            : null;
-                    };
+                    return again instanceof HTMLElement &&
+                        !(again as HTMLButtonElement).disabled
+                        ? again
+                        : null;
+                };
 
-                    for (
-                        let attempt = 0;
-                        attempt < CLICK_UNTIL_ATTEMPTS &&
-                        Date.now() < deadline;
-                        attempt += 1
-                    ) {
-                        const ready = await waitFor(
-                            () => find() ?? enabledSource(),
-                            Math.min(
-                                deadline,
-                                Date.now() + CLICK_UNTIL_STEP_MS
-                            )
-                        );
+                for (
+                    let attempt = 0;
+                    attempt < CLICK_UNTIL_ATTEMPTS && Date.now() < deadline;
+                    attempt += 1
+                ) {
+                    const ready = await waitFor(
+                        () => find() ?? enabledSource(),
+                        Math.min(deadline, Date.now() + CLICK_UNTIL_STEP_MS)
+                    );
 
-                        if (find()) break;
+                    if (find()) break;
 
-                        if (ready instanceof HTMLElement)
-                            activate(ready);
-                    }
+                    if (ready instanceof HTMLElement) activate(ready);
                 }
             }
         }
+    }
 
-        const target = await waitFor(find, deadline);
+    const target = await waitFor(find, deadline);
 
-        if (!target) return;
+    if (!target) return;
 
-        // joyride скролить лише вікно, а сторінки скролять усередині overflow-контейнерів
-        await revealTarget(target);
+    // joyride скролить лише вікно, а сторінки скролять усередині overflow-контейнерів
+    await revealTarget(target);
 
-        if (
-            target.getBoundingClientRect().height >
-            window.innerHeight - TOOLTIP_ROOM_PX
-        )
-            onTall(item.id);
+    if (
+        target.getBoundingClientRect().height >
+        window.innerHeight - TOOLTIP_ROOM_PX
+    )
+        onTall(item.id);
 }

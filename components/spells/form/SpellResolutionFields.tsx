@@ -51,13 +51,7 @@ export function SpellResolutionFields({
                         })
                     }
                     placeholder={tp('check')}
-                    options={
-                        classesEnabled || resolution.kind === 'attack'
-                            ? options
-                            : options.filter(
-                                  (o) => o.value !== 'attack'
-                              )
-                    }
+                    options={options}
                 />
             </div>
             {resolution.kind === 'save' && (

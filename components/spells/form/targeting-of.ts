@@ -53,4 +53,3 @@ export function targetingOf(
 
     return { kind, ...range } as SpellTargeting;
 }
-

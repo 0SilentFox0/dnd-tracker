@@ -58,163 +58,108 @@ export function ScenarioEditorSection({
     const { setContent, confirmRemove, renderCell, setReveal } = ops;
 
     return (
-    <section id={`sec-${s.id}`}>
-        <SectionHeaderEditor
-            campaignId={campaignId}
-            section={s}
-            actions={{
-                onTitle: (title) =>
-                    setContent((c) =>
-                        updateSection(c, s.id, { title })
-                    ),
-                onIcon: (icon) =>
-                    setContent((c) =>
-                        updateSection(c, s.id, { icon })
-                    ),
-                onMarker: (marker) =>
-                    setContent((c) =>
-                        setSectionMarker(c, s.id, marker)
-                    ),
-                onTrack: (trackId) =>
-                    setContent((c) =>
-                        setSectionTrack(c, s.id, trackId)
-                    ),
-                onMove: (dir) =>
-                    setContent((c) =>
-                        moveSection(c, s.id, dir)
-                    ),
-                onRemove: () =>
-                    void confirmRemove(
-                        t('removeSection', {
-                            title: s.title,
-                        }),
-                        () =>
-                            setContent((c) =>
-                                removeSection(c, s.id)
-                            )
-                    ),
-            }}
-        />
-        {isHero && (
-            <RevealSettings
-                key={JSON.stringify(s.reveal ?? null)}
+        <section id={`sec-${s.id}`}>
+            <SectionHeaderEditor
                 campaignId={campaignId}
-                rule={s.reveal}
-                revealed={!!s.revealedAt}
-                onChange={(rule) => setReveal(s.id, rule)}
-                onToggleRevealed={() =>
-                    setContent((c) =>
-                        updateSection(c, s.id, {
-                            revealedAt: s.revealedAt
-                                ? null
-                                : new Date().toISOString(),
-                        })
-                    )
-                }
+                section={s}
+                actions={{
+                    onTitle: (title) =>
+                        setContent((c) => updateSection(c, s.id, { title })),
+                    onIcon: (icon) =>
+                        setContent((c) => updateSection(c, s.id, { icon })),
+                    onMarker: (marker) =>
+                        setContent((c) => setSectionMarker(c, s.id, marker)),
+                    onTrack: (trackId) =>
+                        setContent((c) => setSectionTrack(c, s.id, trackId)),
+                    onMove: (dir) =>
+                        setContent((c) => moveSection(c, s.id, dir)),
+                    onRemove: () =>
+                        void confirmRemove(
+                            t('removeSection', {
+                                title: s.title,
+                            }),
+                            () => setContent((c) => removeSection(c, s.id))
+                        ),
+                }}
             />
-        )}
-        {s.rows.map((r) => (
-            <div key={r.id} className="row">
-                <div className="story">
-                    {renderCell(
-                        s.id,
-                        r.id,
-                        'story',
-                        r.story
-                    )}
-                </div>
-                <aside
-                    className="notes"
-                    style={{ display: 'block' }}
-                >
-                    {renderCell(
-                        s.id,
-                        r.id,
-                        'notes',
-                        r.notes
-                    )}
-                    <div className="sb-row-foot sans">
-                        <RowBindings
-                            campaignId={campaignId}
-                            pageId={pageId}
-                            row={r}
-                            onChange={{
-                                slide: (v) =>
-                                    setContent((c) =>
-                                        setRowSlide(
-                                            c,
-                                            s.id,
-                                            r.id,
-                                            v
-                                        )
-                                    ),
-                                battle: (v) =>
-                                    setContent((c) =>
-                                        setRowBattle(
-                                            c,
-                                            s.id,
-                                            r.id,
-                                            v
-                                        )
-                                    ),
-                                marker: (v) =>
-                                    setContent((c) =>
-                                        setRowMarker(
-                                            c,
-                                            s.id,
-                                            r.id,
-                                            v
-                                        )
-                                    ),
-                            }}
-                        />
-                        <div className="sb-row-order">
-                            <OrderButtons
-                                labels={{
-                                    up: t('rowUp'),
-                                    down: t('rowDown'),
-                                    remove: t('rowRemove'),
-                                }}
-                                onMove={(dir) =>
-                                    setContent((c) =>
-                                        moveRow(
-                                            c,
-                                            s.id,
-                                            r.id,
-                                            dir
-                                        )
-                                    )
-                                }
-                                onRemove={() =>
-                                    void confirmRemove(
-                                        t('removeRow'),
-                                        () =>
-                                            setContent(
-                                                (c) =>
-                                                    removeRow(
-                                                        c,
-                                                        s.id,
-                                                        r.id
-                                                    )
-                                            )
-                                    )
-                                }
-                            />
-                        </div>
+            {isHero && (
+                <RevealSettings
+                    key={JSON.stringify(s.reveal ?? null)}
+                    campaignId={campaignId}
+                    rule={s.reveal}
+                    revealed={!!s.revealedAt}
+                    onChange={(rule) => setReveal(s.id, rule)}
+                    onToggleRevealed={() =>
+                        setContent((c) =>
+                            updateSection(c, s.id, {
+                                revealedAt: s.revealedAt
+                                    ? null
+                                    : new Date().toISOString(),
+                            })
+                        )
+                    }
+                />
+            )}
+            {s.rows.map((r) => (
+                <div key={r.id} className="row">
+                    <div className="story">
+                        {renderCell(s.id, r.id, 'story', r.story)}
                     </div>
-                </aside>
-            </div>
-        ))}
-        <button
-            type="button"
-            className="toggle sans"
-            style={{ marginTop: 12 }}
-            onClick={() =>
-                setContent((c) => addRow(c, s.id))
-            }
-        >
-            {t('addRow')}
-        </button>
-    </section>
+                    <aside className="notes" style={{ display: 'block' }}>
+                        {renderCell(s.id, r.id, 'notes', r.notes)}
+                        <div className="sb-row-foot sans">
+                            <RowBindings
+                                campaignId={campaignId}
+                                pageId={pageId}
+                                row={r}
+                                onChange={{
+                                    slide: (v) =>
+                                        setContent((c) =>
+                                            setRowSlide(c, s.id, r.id, v)
+                                        ),
+                                    battle: (v) =>
+                                        setContent((c) =>
+                                            setRowBattle(c, s.id, r.id, v)
+                                        ),
+                                    marker: (v) =>
+                                        setContent((c) =>
+                                            setRowMarker(c, s.id, r.id, v)
+                                        ),
+                                }}
+                            />
+                            <div className="sb-row-order">
+                                <OrderButtons
+                                    labels={{
+                                        up: t('rowUp'),
+                                        down: t('rowDown'),
+                                        remove: t('rowRemove'),
+                                    }}
+                                    onMove={(dir) =>
+                                        setContent((c) =>
+                                            moveRow(c, s.id, r.id, dir)
+                                        )
+                                    }
+                                    onRemove={() =>
+                                        void confirmRemove(t('removeRow'), () =>
+                                            setContent((c) =>
+                                                removeRow(c, s.id, r.id)
+                                            )
+                                        )
+                                    }
+                                />
+                            </div>
+                        </div>
+                    </aside>
+                </div>
+            ))}
+            <button
+                type="button"
+                className="toggle sans"
+                style={{ marginTop: 12 }}
+                onClick={() => setContent((c) => addRow(c, s.id))}
+            >
+                {t('addRow')}
+            </button>
+        </section>
     );
 }

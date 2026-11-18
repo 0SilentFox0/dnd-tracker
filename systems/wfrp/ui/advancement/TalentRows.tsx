@@ -62,7 +62,8 @@ export function TalentRows({
                         price={{
                             cost: priced?.cost ?? null,
                             outOfCareer: priced?.outOfCareer,
-                            limitLabel: rank >= max ? t('maxRank') : t('noCost'),
+                            limitLabel:
+                                rank >= max ? t('maxRank') : t('noCost'),
                         }}
                         available={available}
                         pending={pending}

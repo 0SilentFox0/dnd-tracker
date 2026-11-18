@@ -187,7 +187,11 @@ export function ScenarioGraph({ campaignId }: { campaignId: string }) {
                     showSequence: state.showSequence,
                     matched,
                 }}
-                actions={{ onSelect: set.selected, onClear: clear, onOpen: open }}
+                actions={{
+                    onSelect: set.selected,
+                    onClear: clear,
+                    onOpen: open,
+                }}
             />
         );
     };
