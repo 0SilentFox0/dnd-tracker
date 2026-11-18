@@ -155,16 +155,14 @@ function enterMap(
     });
 }
 
-export function createAddParticipantMutation(
-    deps: AddParticipantDeps = defaultDeps
-) {
-    return async (
-        ctx: BattleMutationContext,
-        data: AddParticipantBody
-    ): Promise<MutationResult> => {
-        const side = data.side;
+async function buildAdded(
+    deps: AddParticipantDeps,
+    ctx: BattleMutationContext,
+    data: AddParticipantBody
+): Promise<BattleParticipant[]> {
+    const side = data.side;
 
-        const battleId = ctx.scene.id;
+    const battleId = ctx.scene.id;
 
         const added: BattleParticipant[] = [];
 
@@ -236,21 +234,13 @@ export function createAddParticipantMutation(
             }
         }
 
-        if (data.reserved) {
-            return {
-                participants: ctx.participants,
-                pending: [...ctx.pending, ...added.map(toReserve)],
-                events: [],
-            };
-        }
+    return added;
+}
 
-        const addedIds = new Set(added.map((p) => p.basicInfo.id));
-
-        const baked = applyBakedAuras(
-            [...ctx.participants, ...enterMap(ctx, added, data.position)],
-            addedIds
-        );
-
+function insertNewcomers(
+    ctx: BattleMutationContext,
+    baked: BattleParticipant[]
+) {
         let order = baked.slice(0, ctx.participants.length);
 
         let turnIndex = ctx.scene.turnIndex;
@@ -286,6 +276,35 @@ export function createAddParticipantMutation(
 
             order = [...order.slice(0, at), p, ...order.slice(at)];
         }
+
+    return { order, turnIndex };
+}
+
+export function createAddParticipantMutation(
+    deps: AddParticipantDeps = defaultDeps
+) {
+    return async (
+        ctx: BattleMutationContext,
+        data: AddParticipantBody
+    ): Promise<MutationResult> => {
+        const added = await buildAdded(deps, ctx, data);
+
+        if (data.reserved) {
+            return {
+                participants: ctx.participants,
+                pending: [...ctx.pending, ...added.map(toReserve)],
+                events: [],
+            };
+        }
+
+        const addedIds = new Set(added.map((p) => p.basicInfo.id));
+
+        const baked = applyBakedAuras(
+            [...ctx.participants, ...enterMap(ctx, added, data.position)],
+            addedIds
+        );
+
+        const { order, turnIndex } = insertNewcomers(ctx, baked);
 
         const { participants, psychology } = runPsychology(
             order,
