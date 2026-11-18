@@ -1,6 +1,6 @@
 #!/usr/bin/env tsx
 /**
- * Moves `battle_scenes.pendingMoraleCheck` into the scene slot (`system_state`, `ext.morale.pending`) and nulls the column.
+ * Moves `battle_scenes.pendingMoraleCheck` into the scene slot (`system_state`, the morale entry of `ext`) and nulls the column.
  * Expand-only: the column stays in the schema; reads already fall back to it. Dry run by default; --apply writes with a version guard (no version bump).
  *
  *   pnpm exec tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/db/backfill-pending-morale.ts [--apply] [--allow-remote]

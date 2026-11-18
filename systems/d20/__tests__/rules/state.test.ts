@@ -199,7 +199,10 @@ describe('state in ext (upgrade-on-read)', () => {
                 },
             },
         });
-        expect(d20State(next)).toEqual(d20State(withD20State(p, {})));
+        expect(d20State(next)).toEqual({
+            ...d20State(withD20State(p, {})),
+            attackedWithLight: true,
+        });
     });
 
     it('clearing a field is not undone by a legacy fallback', () => {

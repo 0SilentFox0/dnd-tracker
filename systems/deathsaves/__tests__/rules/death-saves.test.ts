@@ -91,7 +91,11 @@ describe('startDying', () => {
 
         expect(p.battleData.system).toEqual({
             key: 'd20',
-            data: { deathSaves: { successes: 0, failures: 0, stable: false } },
+            data: {
+                ext: {
+                    deathsaves: { successes: 0, failures: 0, stable: false },
+                },
+            },
         });
         expect(p.battleData.dying).toBe(true);
         expect(p.battleData).not.toHaveProperty('deathSaves');

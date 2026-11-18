@@ -1,6 +1,6 @@
 #!/usr/bin/env tsx
 /**
- * Moves the flat d20 slot fields (deathSaves, inspiration, inspirationSpent, attackedWithLight) of `battle_participants.state` into `ext` (`ext.deathsaves`, `ext.inspiration`, `ext.offhand`).
+ * Moves the flat pre-ext d20 slot fields of `battle_participants.state` into the slot's `ext` map, one entry per owning module (deathsaves, inspiration, offhand).
  * Expand-only: reads already fall back to the flat shape; nothing else is touched (`snapshot`/`snapshotHash` are not part of `state`). Dry run by default; --apply writes with a compare-and-set on the old text.
  * `battle_snapshots` (history) is left as is: it is read through the same fallback.
  *
@@ -21,7 +21,7 @@ async function main() {
 
     try {
         const found = await prisma.$queryRaw<Array<{ id: string; raw: string }>>(
-            Prisma.sql`SELECT id, state::text AS raw FROM battle_participants WHERE state #> '{system,data}' ?| array['deathSaves','inspiration','inspirationSpent','attackedWithLight']`
+            Prisma.sql`SELECT id, state::text AS raw FROM battle_participants WHERE jsonb_typeof(state #> '{system,data}') = 'object'`
         );
 
         const rows = found.map((r) => ({
@@ -33,7 +33,7 @@ async function main() {
         const { changes } = planD20ExtState(rows);
 
         console.log(
-            `${flags.has('--apply') ? 'APPLY' : 'DRY RUN'} · rows with flat fields ${rows.length} · to rewrite ${changes.length}`
+            `${flags.has('--apply') ? 'APPLY' : 'DRY RUN'} · candidate rows ${rows.length} · to rewrite ${changes.length}`
         );
 
         if (!flags.has('--apply')) return;

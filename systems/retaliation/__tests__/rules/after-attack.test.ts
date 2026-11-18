@@ -80,10 +80,14 @@ describe('retaliation module on d20', () => {
     });
 
     it('wfrp has no retaliation even with actions.retaliation on', () => {
-        expect(DEFAULT_RULES.actions.retaliation).toBe(true);
-        expect(hooksOf(rulesOf({ key: 'wfrp' }))).not.toContain(
-            retaliationAfterAttack
-        );
+        const wfrp = rulesOf({ key: 'wfrp' });
+
+        expect(
+            hooksOf({
+                ...wfrp,
+                actions: { ...wfrp.actions, retaliation: true },
+            })
+        ).not.toContain(retaliationAfterAttack);
     });
 
     it('a provoking critical effect is answered once by the provocation and the module stays out', () => {

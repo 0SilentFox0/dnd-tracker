@@ -1,3 +1,4 @@
+import '@/lib/utils/rules/systems/registry';
 import { upgradeSceneState } from '@/lib/utils/battle/scene-state';
 import { isRecord } from '@/lib/utils/common/is-record';
 import { defaultRulesFor } from '@/lib/utils/rules/section-registry';

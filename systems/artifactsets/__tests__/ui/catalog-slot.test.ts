@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { systemUiOf } from '@/components/systems';
+import { systemUiOf } from '@/components/systems/registry';
 
 describe('artifactsets catalog slot', () => {
     it('present with the module and on homm, absent on bare dnd5e', () => {

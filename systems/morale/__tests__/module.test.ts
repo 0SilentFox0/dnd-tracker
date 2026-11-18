@@ -5,7 +5,7 @@ import {
     goblin,
     hero,
 } from '@/lib/server/battles/__tests__/mutations/fixtures';
-import { systemServerOf } from '@/lib/server/systems/lookup';
+import { systemServerOf } from '@/lib/server/systems/registry';
 import { runAbilities } from '@/lib/utils/abilities/engine/core/run-abilities';
 import { resetSceneState, upgradeSceneState } from '@/lib/utils/battle/scene-state';
 import { assertCanAct, assertCanEndTurn } from '@/lib/utils/battle/turn';

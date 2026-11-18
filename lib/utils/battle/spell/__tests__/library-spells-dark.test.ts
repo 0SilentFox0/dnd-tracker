@@ -500,7 +500,7 @@ describe('Темрява — бібліотечні заклинання', () =>
                 seen.map((orc) => {
                     const ctx = {
                         scene,
-                        meta: {},
+                        meta: { rules: DEFAULT_RULES },
                         participants: [orc, hero()],
                         pending: [],
                         userId: 'dm',

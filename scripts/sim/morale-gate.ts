@@ -1,3 +1,4 @@
+import '@/lib/utils/rules/systems/registry';
 import type { Ruleset } from '@/lib/utils/rules';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';

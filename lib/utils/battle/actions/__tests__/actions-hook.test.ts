@@ -1,13 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { coreActionsOn, reactionBlockerOf } from '../access';
-import { moveWithReactions, runCoreAction } from '../dispatch';
-import { noActions } from '../none';
-import { actionReason } from '../reasons';
-
 import { D6POOL_SYSTEM } from '@/lib/__tests__/fixtures/d6pool/definition';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
-import { BattleRuleError } from '@/lib/utils/battle/store/errors';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
 
@@ -22,6 +16,19 @@ vi.mock('@/lib/utils/rules/systems', async (importOriginal) => {
         ruleSystemByKey: () => base,
     };
 });
+
+// setup preloads the registry (and with it the core modules); reset so the mock above reaches them
+vi.resetModules();
+
+const { coreActionsOn, reactionBlockerOf } = await import('../access');
+
+const { moveWithReactions, runCoreAction } = await import('../dispatch');
+
+const { noActions } = await import('../none');
+
+const { actionReason } = await import('../reasons');
+
+const { BattleRuleError } = await import('@/lib/utils/battle/store/errors');
 
 describe('core actions of a system without them (d6pool base)', () => {
     const actor = createMockParticipant();

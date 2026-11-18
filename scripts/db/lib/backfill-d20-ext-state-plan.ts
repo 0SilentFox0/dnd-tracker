@@ -1,3 +1,4 @@
+import '@/lib/utils/rules/systems/registry';
 import { isRecord } from '@/lib/utils/common/is-record';
 import { defaultRulesFor } from '@/lib/utils/rules/section-registry';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
