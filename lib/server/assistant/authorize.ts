@@ -3,6 +3,7 @@ import type { Prisma } from '@prisma/client';
 import type { AssistantCaller } from './types';
 
 import 'server-only';
+import { isTokenActive } from '@/lib/ai/api-tokens';
 import { hasScope, isApiTokenScope } from '@/lib/constants/ai';
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { prisma } from '@/lib/db';
@@ -60,12 +61,13 @@ export async function revalidateAssistantCaller(
             userId: true,
             scopes: true,
             revokedAt: true,
+            expiresAt: true,
         },
     });
 
     if (
         !token ||
-        token.revokedAt ||
+        !isTokenActive(token) ||
         token.campaignId !== actor.campaignId ||
         token.userId !== actor.userId
     )

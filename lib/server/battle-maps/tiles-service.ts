@@ -50,7 +50,9 @@ export function tileLayersToSnapshot(
     const snapshot: TileSnapshot = {};
 
     for (const row of rows) {
-        const layers = parseSnapshot({ [chunkKey(row.cx, row.cy)]: row.tileLayers });
+        const layers = parseSnapshot({
+            [chunkKey(row.cx, row.cy)]: row.tileLayers,
+        });
 
         Object.assign(snapshot, layers);
     }
@@ -177,7 +179,9 @@ export async function patchTileChunks(
 
         if (!count) throw conflict();
 
-        for (const coord of new Set(patches.map(({ cx, cy }) => chunkKey(cx, cy)))) {
+        for (const coord of new Set(
+            patches.map(({ cx, cy }) => chunkKey(cx, cy))
+        )) {
             const [cx, cy] = coord.split(':').map(Number);
 
             const existing = byCoord.get(coord);

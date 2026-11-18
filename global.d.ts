@@ -46,6 +46,7 @@ import type skills from './messages/uk/skills.json';
 import type skillTree from './messages/uk/skillTree.json';
 import type spellEditor from './messages/uk/spellEditor.json';
 import type spells from './messages/uk/spells.json';
+import type tileLabels from './messages/uk/tileLabels.json';
 import type units from './messages/uk/units.json';
 import type validation from './messages/uk/validation.json';
 import type whatsNew from './messages/uk/whatsNew.json';
@@ -92,6 +93,7 @@ declare module 'next-intl' {
             acquaintances: typeof acquaintances;
             world: typeof world;
             maps: typeof maps;
+            tileLabels: typeof tileLabels;
             // <systems:generated>
             battleMorale: typeof import('./messages/uk/battleMorale.json');
             battleWfrp: typeof import('./messages/uk/battleWfrp.json');

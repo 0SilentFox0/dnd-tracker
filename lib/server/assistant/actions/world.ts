@@ -49,7 +49,7 @@ export const WORLD_ACTIONS: readonly AssistantActionDef[] = [
         effect: 'handoff',
         execute: async (caller) => ({
             href: `/campaigns/${encodeURIComponent(caller.actor.campaignId)}/dm/world`,
-            reason: 'Upload the map image in the app, then create the map with world_action.',
+            reason: 'Upload the map image in the app, then create the map through the world actions.',
         }),
     },
 ];

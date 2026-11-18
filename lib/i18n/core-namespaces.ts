@@ -30,6 +30,7 @@ export const CAMPAIGN_NAMESPACES = [
     'acquaintances',
     'world',
     'maps',
+    'tileLabels',
     'compendium',
     'contentImport',
     'gameTerms',

@@ -6,6 +6,7 @@ const db = vi.hoisted(() => {
     const api = {
         battleMap: { findFirst: vi.fn() },
         battleMapVersion: { findFirst: vi.fn() },
+        battleScene: { findFirst: vi.fn() },
         $executeRaw: vi.fn(async () => 1),
         $transaction: vi.fn(),
     };
@@ -51,6 +52,7 @@ describe('discard unused battle map background', () => {
         vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', 'https://p.supabase.co');
         db.battleMap.findFirst.mockResolvedValue(null);
         db.battleMapVersion.findFirst.mockResolvedValue(null);
+        db.battleScene.findFirst.mockResolvedValue(null);
         remove.mockResolvedValue({ error: null });
     });
 
@@ -66,6 +68,10 @@ describe('discard unused battle map background', () => {
 
         db.battleMap.findFirst.mockResolvedValue(null);
         db.battleMapVersion.findFirst.mockResolvedValue({ mapId: 'm' });
+        await call(url('camp1'));
+
+        db.battleMapVersion.findFirst.mockResolvedValue(null);
+        db.battleScene.findFirst.mockResolvedValue({ id: 'b' });
         await call(url('camp1'));
 
         expect(remove).not.toHaveBeenCalled();

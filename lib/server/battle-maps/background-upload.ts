@@ -24,14 +24,16 @@ export const removeBattleMapBackgroundFiles = storage.remove;
 
 const SNIFF_BYTES = 32;
 
-/** Direct signed uploads bypass the server, so the first bytes are checked against the extension before the URL is persisted. */
+export type BackgroundCheck = 'valid' | 'invalid' | 'unavailable';
+
+/** Direct signed uploads bypass the server, so the first bytes are checked against the extension before the URL is persisted. 'unavailable' (network, 5xx) must not delete the just-uploaded file. */
 export async function verifyBattleMapBackground(
     campaignId: string,
     url: string
-): Promise<boolean> {
+): Promise<BackgroundCheck> {
     const path = storage.ownedPath(campaignId, url);
 
-    if (!path) return false;
+    if (!path) return 'invalid';
 
     const expected = Object.entries(BATTLE_MAP_BACKGROUND_FORMATS).find(
         ([, ext]) => path.endsWith(`.${ext}`)
@@ -43,17 +45,19 @@ export async function verifyBattleMapBackground(
             cache: 'no-store',
         });
 
-        if (!res.ok) return false;
+        if (!res.ok) return res.status >= 500 || res.status === 429 ? 'unavailable' : 'invalid';
 
         const head = Buffer.from(await res.arrayBuffer()).subarray(
             0,
             SNIFF_BYTES
         );
 
-        return !!expected && sniffImageMime(head) === expected;
+        return !!expected && sniffImageMime(head) === expected
+            ? 'valid'
+            : 'invalid';
     } catch (error) {
         console.warn('[battle-map-background] sniff failed', error);
 
-        return false;
+        return 'unavailable';
     }
 }

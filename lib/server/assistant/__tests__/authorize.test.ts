@@ -33,6 +33,7 @@ const active = {
     userId: 'dm',
     scopes: ['characters:write'],
     revokedAt: null,
+    expiresAt: null,
 };
 
 describe('assistant authorization uses current membership and token grants', () => {
@@ -62,6 +63,14 @@ describe('assistant authorization uses current membership and token grants', () 
         ).resolves.toBeUndefined();
     });
 
+    it('accepts a token that expires in the future', async () => {
+        vi.mocked(prisma.apiToken.findUnique).mockResolvedValue({
+            ...active,
+            expiresAt: new Date(Date.now() + 60_000),
+        } as never);
+        await expect(authorizeAssistant(caller, need)).resolves.toBeUndefined();
+    });
+
     it('rejects lost DM membership despite a stale isDM assertion', async () => {
         vi.mocked(prisma.campaignMember.findMany).mockResolvedValue([
             { role: 'player' },
@@ -73,12 +82,13 @@ describe('assistant authorization uses current membership and token grants', () 
 
     it.each([
         { ...active, revokedAt: new Date() },
+        { ...active, expiresAt: new Date(Date.now() - 1000) },
         { ...active, campaignId: 'other-campaign' },
         { ...active, userId: 'another-dm' },
         { ...active, scopes: ['ai'] },
         null,
     ])(
-        'rejects revoked, foreign or insufficient persisted token grants',
+        'rejects revoked, expired, foreign or insufficient persisted token grants',
         async (row) => {
             vi.mocked(prisma.apiToken.findUnique).mockResolvedValue(
                 row as never

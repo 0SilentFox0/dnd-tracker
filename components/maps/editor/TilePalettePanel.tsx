@@ -49,7 +49,7 @@ export function TilePalettePanel({
 
     const t = useTranslations('maps.editor.tiles');
 
-    const labels = useTranslations('maps.tileLabels');
+    const labels = useTranslations('tileLabels');
 
     const tileLabel = useCallback(
         (key: string) =>
