@@ -17,6 +17,11 @@ import type {
     CreatedApiToken,
 } from '@/types/ai';
 
+export const isTokenActive = (
+    token: { revokedAt: Date | null; expiresAt: Date | null },
+    now = Date.now()
+) => !token.revokedAt && !(token.expiresAt && token.expiresAt.getTime() <= now);
+
 const SELECT = {
     id: true,
     name: true,
@@ -170,8 +175,7 @@ export async function verifyApiToken(
 
     if (!row || row.revokedAt) return null;
 
-    if (row.expiresAt && row.expiresAt.getTime() <= Date.now())
-        return 'expired';
+    if (!isTokenActive(row)) return 'expired';
 
     const [members, owner] = await Promise.all([
         prisma.campaignMember.findMany({

@@ -23,6 +23,7 @@ import type {
 } from './types';
 
 import 'server-only';
+import { isTokenActive } from '@/lib/ai/api-tokens';
 import { isApiTokenScope } from '@/lib/constants/ai';
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { ASSISTANT_LIMITS } from '@/lib/constants/assistant';
@@ -161,12 +162,13 @@ async function authorizeExecution(
             campaignId: true,
             userId: true,
             revokedAt: true,
+            expiresAt: true,
         },
     });
 
     if (
         !original ||
-        original.revokedAt ||
+        !isTokenActive(original) ||
         original.userId !== row.userId ||
         original.campaignId !== row.campaignId
     )
