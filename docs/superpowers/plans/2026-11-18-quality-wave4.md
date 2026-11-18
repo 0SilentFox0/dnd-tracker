@@ -14,7 +14,7 @@ Order: A → C → B (Opus design first, stop for confirmation) → D → E → 
 | A2 | rate limit fail-closed in prod, cron `timingSafeEqual`, deck `campaignId`, PREPARED map access, join response fields, trusted-proxy IP | done |
 | A3 | enforce CSP (nonce, landing stays static) + report endpoint + Permissions-Policy/HSTS + ratchets (route auth, migration RLS) | done |
 | A gate | tsc + cycles + lint:dirs + full tests + Opus review | done (17622 tests green; Opus review fixes in 1885470d3, f2daa9ce8) |
-| C | MCP: idempotency w/o session id, `propose_scenario_edit` requestId, L11-11, e2e IDOR/retry, AiToolError codes, ai.md | todo |
+| C | MCP: idempotency w/o session id, `propose_scenario_edit` requestId, L11-11, e2e IDOR/retry, AiToolError codes, ai.md | done (full tests green after ratchet entry move) |
 | B | modularity + migrations (Opus design first) | todo |
 | D | tests (route-contract, app/api coverage, d20 rules, systems UI, downtime-handler) | todo |
 | E | file/function size hygiene, snapshot Zod | todo |
@@ -29,6 +29,8 @@ Order: A → C → B (Opus design first, stop for confirmation) → D → E → 
 - A3: root layout must not read cookies/headers (landing static). Nonce CSP only where the route is already dynamic (proxy matcher excludes the static landing, which keeps a hash/report-only policy or strict static policy); decision documented in `docs/architecture/platform.md`.
 
 ## Journal
+
+- 2026-11-18: lane C done (f4c40f467, e9142ab47). Derived MCP idempotency key = hash(tokenId+tool+args) in 10-min bucket (+previous bucket lookup), no migration. DEPLOY NOTE: prod API tokens with only the `ai` scope now get 403 on the 12 moved read tools (need catalog read scopes: re-issue or one-off scope expansion). Strict tool input schemas reject extra keys.
 
 - 2026-11-18: lane A done, local main 1885470d3, NOT pushed. Known limits: server fog ignores tile walls; log aimCell leaks; nonce CSP stays report-only (`NONCE_CSP_ENFORCED=false`, palette script needs a hash first). Deploy prerequisite: UPSTASH_REDIS_* or RATE_LIMIT_ALLOW_MEMORY=1 (else battle/audio 503 in prod).
 
