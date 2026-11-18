@@ -15,7 +15,7 @@ Order: A → C → B (Opus design first, stop for confirmation) → D → E → 
 | A3 | enforce CSP (nonce, landing stays static) + report endpoint + Permissions-Policy/HSTS + ratchets (route auth, migration RLS) | done |
 | A gate | tsc + cycles + lint:dirs + full tests + Opus review | done (17622 tests green; Opus review fixes in 1885470d3, f2daa9ce8) |
 | C | MCP: idempotency w/o session id, `propose_scenario_edit` requestId, L11-11, e2e IDOR/retry, AiToolError codes, ai.md | done (full tests green after ratchet entry move) |
-| B | modularity + migrations (Opus design first) | design done (`2026-11-18-quality-wave4-lane-b-design.md`, 9103f4a2f); awaiting owner sign-off on slice 1 |
+| B | modularity + migrations (Opus design first) | slice 1 done (local main 8b5755f22; baselines dccc3f287), Opus review 0 Critical/0 Important; slices 2-3 (P5, P9, P10, P12-P14, P16) not started |
 | D | tests (route-contract, app/api coverage, d20 rules, systems UI, downtime-handler) | todo |
 | E | file/function size hygiene, snapshot Zod | todo |
 | F | maps perf + BattleMap/MapStage split + chunk constants | todo |
@@ -39,3 +39,6 @@ Order: A → C → B (Opus design first, stop for confirmation) → D → E → 
 - 2026-11-18: lane A done, local main 1885470d3, NOT pushed. Known limits: server fog ignores tile walls; log aimCell leaks; nonce CSP stays report-only (`NONCE_CSP_ENFORCED=false`, palette script needs a hash first). Deploy prerequisite: UPSTASH_REDIS_* or RATE_LIMIT_ALLOW_MEMORY=1 (else battle/audio 503 in prod).
 
 - 2026-11-18: plan created.
+
+- 2026-11-18 (session 2): lane B slice 1 done, NOT pushed. P1 scanner (surface 77->1477 hits honest reset, then 246 files after moves; message keys 34->192; literals 5->45 files/67 hits, target <=2 NOT met: the rest is vocabulary for P5), P2 (DEFAULT_RULES -> test fixture, 'd20' kind -> 'check'), P3 (slots secondaryAttack/sceneActions/rerollToken/itemGroups, d20 ext codecs owned by addons), P4 (sections of morale/heroScaling/deathSaves/inspiration owned by modules; namespaces rulesMorale etc.), P6.0 (content registry seam), P6a partial, P6b+P6c, P7, P8. Full tests green (2503 files), tsc, cycles 0. P11: prodcopy_w4b shows 0 rows with pendingMoraleCheck, nothing to backfill; prod has 1 active battle so `--expect-idle` fails until it ends.
+- Open tails for slice 2: (a) core HTTP routes for skill-trees/artifact-sets stay (system/[action] has no path params and no API-token scopes) - needs a content-operation target kind; (b) skill hooks used by core UI (useSkillTrees/useRacialSkills/useMainSkills) need a SystemUi slot; (c) battle participant assembly (load-character-context, start-build-context) still queries skillTree/mainSkill - needs a ParticipantPart; (d) literal vocabulary hits (stat 'morale', retaliation labels, 'artifactSet' source type, 'offHand' slot) = P5; (e) Opus minors: DEFAULT_RULES fixture now has opportunityAttacks/retaliation on (sim/sweep baselines may shift), inline query keys in lib/hooks/content-import/keys.ts, 308 redirects cached, inspiration op without module now 404 instead of 409, 3 rules tests fail eslint import-sort.
