@@ -146,3 +146,87 @@ describe('redactPatchesForViewer', () => {
         expect(redactPatchesForViewer(player, patches, [ally], DEFAULT_RULES)).toBe(patches);
     });
 });
+
+describe('statblock numbers (L8b M1/morale)', () => {
+    const armed = (): BattleParticipant => {
+        const p = foe({ morale: 2 });
+
+        return {
+            ...p,
+            battleData: {
+                ...p.battleData,
+                attacks: [
+                    {
+                        id: 'a1',
+                        name: 'Bite',
+                        type: 'melee',
+                        attackBonus: 9,
+                        damageDice: '3d8',
+                        damageType: 'fire',
+                        range: '30',
+                        reachCells: 2,
+                        damageBonus: 4,
+                        guaranteedDamage: 3,
+                        versatileDice: '2d10',
+                    },
+                ],
+                resolvedAbilities: [
+                    {
+                        key: 'r1',
+                        effects: [{ flag: 'resistance', damageType: 'fire', percent: 50 }],
+                    },
+                    {
+                        key: 'r2',
+                        effects: [
+                            { flag: 'resistance', damageType: 'cold', percent: 100 },
+                            { flag: 'guaranteedHit' },
+                        ],
+                    },
+                ],
+            } as unknown as BattleParticipant['battleData'],
+        };
+    };
+
+    it('ворог: опори й бонуси атак знято, дальність лишається', () => {
+        const [p] = redactParticipantsForViewer(player, [armed()], DEFAULT_RULES);
+
+        const [atk] = p.battleData.attacks;
+
+        expect(atk).toMatchObject({ name: 'Bite', range: '30', reachCells: 2, damageType: 'fire', attackBonus: 0, damageDice: '' });
+        expect(atk.damageBonus).toBeUndefined();
+        expect(atk.guaranteedDamage).toBeUndefined();
+        expect(atk.versatileDice).toBeUndefined();
+        expect(p.battleData.resolvedAbilities.map((a) => a.key)).toEqual(['r2']);
+        expect(JSON.stringify(p.battleData.resolvedAbilities)).not.toContain('resistance');
+    });
+
+    it('мораль ворога нейтральна, союзника лишається', () => {
+        const [enemy] = redactParticipantsForViewer(player, [armed()], DEFAULT_RULES);
+
+        expect(enemy.combatStats.morale).toBe(0);
+
+        const ally = { ...armed(), basicInfo: { ...armed().basicInfo, side: ParticipantSide.ALLY } };
+
+        expect(redactParticipantsForViewer(player, [ally], DEFAULT_RULES)[0].combatStats.morale).toBe(2);
+    });
+
+    it('глядач із seeEnemyHp і ДМ бачать усе', () => {
+        const all = [armed()];
+
+        expect(redactParticipantsForViewer({ ...player, canSeeEnemyHp: true }, all, DEFAULT_RULES)).toBe(all);
+    });
+
+    it('патч: мораль і числа атак ворога знято', () => {
+        const owner = armed();
+
+        const [patch] = redactPatchesForViewer(
+            player,
+            [{ id: 'foe', combatStats: { morale: 3, status: CombatStatus.ACTIVE }, battleData: { attacks: owner.battleData.attacks } }],
+            [owner],
+            DEFAULT_RULES
+        );
+
+        expect(patch.combatStats).not.toHaveProperty('morale');
+        expect(patch.battleData?.attacks?.[0].attackBonus).toBe(0);
+    });
+});

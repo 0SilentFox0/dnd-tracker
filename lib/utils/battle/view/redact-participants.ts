@@ -7,9 +7,11 @@ import type { Ruleset } from '@/lib/utils/rules/schema';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
 import type { SlotScope } from '@/lib/utils/rules/systems/types-participant';
+import type { ResolvedAbility } from '@/types/abilities';
 import type { BattleParticipantPatch } from '@/types/api';
 import type {
     ActiveEffect,
+    BattleAttack,
     BattleParticipant,
     BattleParticipantBattleData,
 } from '@/types/battle';
@@ -86,6 +88,40 @@ function slotRedactor(rules: Ruleset): SlotRedact {
 const withoutConcealed = (effects: ActiveEffect[]) =>
     effects.filter((e) => !e.concealed);
 
+const SECRET_ATTACK_KEYS = [
+    'versatileDice',
+    'damageBonus',
+    'guaranteedDamage',
+    'damageDistribution',
+] as const satisfies readonly (keyof BattleAttack)[];
+
+const SECRET_EFFECT_FLAGS = new Set(['resistance', 'spellAbsorb']);
+
+function redactAttack(a: BattleAttack): BattleAttack {
+    const open = { ...a, attackBonus: 0, damageDice: '' };
+
+    for (const key of SECRET_ATTACK_KEYS) delete open[key];
+
+    return open;
+}
+
+function redactAbilities(abilities: ResolvedAbility[]): ResolvedAbility[] {
+    return abilities.flatMap((a) => {
+        const effects = a.effects.filter(
+            (e) =>
+                !(
+                    'flag' in e &&
+                    typeof e.flag === 'string' &&
+                    SECRET_EFFECT_FLAGS.has(e.flag)
+                )
+        );
+
+        if (effects.length === a.effects.length) return [a];
+
+        return effects.length ? [{ ...a, effects }] : [];
+    });
+}
+
 function projectHp(p: BattleParticipant) {
     const state = healthState(p);
 
@@ -106,6 +142,13 @@ function redactOne(
     for (const key of SECRET_BATTLE_KEYS) delete battleData[key];
 
     battleData.activeEffects = withoutConcealed(activeEffects);
+
+    battleData.attacks = battleData.attacks.map(redactAttack);
+
+    if (battleData.resolvedAbilities)
+        battleData.resolvedAbilities = redactAbilities(
+            battleData.resolvedAbilities
+        );
 
     const slot = redact(system, 'battle');
 
@@ -136,6 +179,7 @@ function redactOne(
             ...projectHp(p),
             tempHp: 0,
             armorClass: 0,
+            morale: 0,
         },
         spellcasting: { spellSlots: {}, knownSpells: [] },
         battleData,
@@ -191,6 +235,7 @@ function redactPatch(
             maxHp,
             tempHp: _t,
             armorClass: _ac,
+            morale: _morale,
             ...stats
         } = combatStats;
 
@@ -236,6 +281,11 @@ function redactPatch(
         const next: Partial<BattleParticipantBattleData> = { ...data };
 
         for (const key of SECRET_BATTLE_KEYS) delete next[key];
+
+        if (next.attacks) next.attacks = next.attacks.map(redactAttack);
+
+        if (next.resolvedAbilities)
+            next.resolvedAbilities = redactAbilities(next.resolvedAbilities);
 
         if (activeEffects) next.activeEffects = withoutConcealed(activeEffects);
 
