@@ -9,8 +9,8 @@ import { useNavigateFresh } from '@/lib/hooks/common';
 import { useMainSkills } from '@/lib/hooks/skills/useMainSkills';
 import { useCreateSkill, useUpdateSkill } from '@/lib/hooks/skills/useSkills';
 import { useTranslator } from '@/lib/i18n/use-translator';
-import { initialSkillFormValues } from '@/lib/utils/skills/form/normalize';
-import { buildSkillFormPayload } from '@/lib/utils/skills/form/payload';
+import { initialSkillFormValues } from '@/systems/skilltrees/rules/form/normalize';
+import { buildSkillFormPayload } from '@/systems/skilltrees/rules/form/payload';
 import type { MainSkill } from '@/types/main-skills';
 import type { Skill, SkillFormBinding, SkillFormValues } from '@/types/skills';
 

@@ -5,12 +5,10 @@ import { EditorCell } from './EditorCell';
 
 import { BRANCH_LEVEL_METAL, CIRCLE_METAL } from '@/components/hud';
 import { Button } from '@/components/ui/button';
-import type {
-    CellRef,
-    RawTree,
-    TreeNodes,
-} from '@/lib/utils/skills/progression';
-import { BRANCH_LEVELS, cellSkillId } from '@/lib/utils/skills/progression';
+import type { RawTree, TreeNodes } from '@/lib/utils/skills/progression';
+import { BRANCH_LEVELS } from '@/lib/utils/skills/progression';
+import type { CellRef } from '@/systems/skilltrees/rules/progression';
+import { cellSkillId } from '@/systems/skilltrees/rules/progression';
 
 const COLUMNS: Array<{ circle: 'outer' | 'middle' | 'inner'; index: number }> =
     [

@@ -3,11 +3,12 @@ import { useTranslations } from 'next-intl';
 import { SlotButton } from './SlotButton';
 
 import { OptimizedImage } from '@/components/common/OptimizedImage';
-import type { NodeState, TreeNodes } from '@/lib/utils/skills/progression';
+import type { TreeNodes } from '@/lib/utils/skills/progression';
 import {
     BRANCH_LEVELS,
     RACIAL_MIN_LEVEL,
 } from '@/lib/utils/skills/progression';
+import type { NodeState } from '@/systems/skilltrees/rules/progression';
 import type { CharacterProgressionDto } from '@/types/progression';
 
 export function RacialRow({

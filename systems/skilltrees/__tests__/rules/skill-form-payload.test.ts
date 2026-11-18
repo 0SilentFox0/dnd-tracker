@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildSkillFormPayload } from '@/lib/utils/skills/form/payload';
+import { buildSkillFormPayload } from '@/systems/skilltrees/rules/form/payload';
 
 describe('buildSkillFormPayload', () => {
     it("abilities і null для знятих прив'язок", () => {

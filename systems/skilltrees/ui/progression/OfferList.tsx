@@ -7,7 +7,7 @@ import { useAbilityText } from '@/lib/hooks/abilities';
 import { useText } from '@/lib/i18n/use-text';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import type { ProgressionNode } from '@/lib/utils/skills/progression';
-import { nodeLabel } from '@/lib/utils/skills/progression/labels';
+import { nodeLabel } from '@/systems/skilltrees/rules/progression/labels';
 import type { CharacterProgressionDto } from '@/types/progression';
 
 export function OfferList({

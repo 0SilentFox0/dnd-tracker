@@ -58,3 +58,17 @@ export function writeUnlocked(
 export function learnedInTree(tree: TreeNodes, unlocked: string[]): string[] {
     return unlocked.filter((id) => tree.nodes.has(id));
 }
+
+export function skillPoints(
+    tree: TreeNodes,
+    unlocked: string[],
+    characterLevel: number
+): { spent: number; total: number; free: number } {
+    const spent = learnedInTree(tree, unlocked).length;
+
+    return {
+        spent,
+        total: characterLevel,
+        free: Math.max(0, characterLevel - spent),
+    };
+}

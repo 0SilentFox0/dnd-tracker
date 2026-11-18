@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { progressionView, rankOffers } from '..';
-import { lvl, TREE } from './fixtures';
+import { lvl, TREE } from '@/lib/utils/skills/progression/__tests__/fixtures';
+import { progressionView, rankOffers } from '@/systems/skilltrees/rules/progression';
 
 // Приклад зі спеки: Просунутий Напад (+1 зовнішній) і Основи Захисту (+1 зовнішній), рівень 8 → 2 вільні
 const UNLOCKED = [

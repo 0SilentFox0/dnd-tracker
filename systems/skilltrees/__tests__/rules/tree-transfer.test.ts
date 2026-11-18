@@ -6,7 +6,7 @@ import {
     planSkillTreeImport,
     readSkillTreeFiles,
     SKILL_TREE_FILE_FORMAT,
-} from '../tree-transfer';
+} from '@/systems/skilltrees/rules/tree-transfer';
 
 const TREE = {
     race: 'Ельфи',

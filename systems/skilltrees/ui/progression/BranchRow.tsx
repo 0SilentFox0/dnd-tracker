@@ -5,11 +5,9 @@ import { SlotButton } from './SlotButton';
 import { OptimizedImage } from '@/components/common/OptimizedImage';
 import { BRANCH_LEVEL_METAL } from '@/components/hud';
 import { Button } from '@/components/ui/button';
-import type {
-    BranchRow as Row,
-    NodeState,
-} from '@/lib/utils/skills/progression';
+import type { BranchRow as Row } from '@/lib/utils/skills/progression';
 import { branchLevelNodeId } from '@/lib/utils/skills/progression';
+import type { NodeState } from '@/systems/skilltrees/rules/progression';
 import type { CharacterProgressionDto } from '@/types/progression';
 
 export function BranchRow({

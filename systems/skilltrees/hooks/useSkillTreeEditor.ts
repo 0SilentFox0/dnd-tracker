@@ -9,9 +9,11 @@ import { useConfirm, useNotify } from '@/lib/hooks/common';
 import { useRaces } from '@/lib/hooks/races';
 import { useCreateMainSkill, useMainSkills } from '@/lib/hooks/skills/useMainSkills';
 import { useSkills } from '@/lib/hooks/skills/useSkills';
-import type { CellRef, RawTree } from '@/lib/utils/skills/progression';
+import type { RawTree } from '@/lib/utils/skills/progression';
 import { RACIAL_BRANCH_ID } from '@/lib/utils/skills/progression';
 import * as edit from '@/lib/utils/skills/progression';
+import type { CellRef } from '@/systems/skilltrees/rules/progression';
+import * as treeEdit from '@/systems/skilltrees/rules/progression';
 import type { Skill } from '@/types/skills';
 
 export function useSkillTreeEditor(campaignId: string) {
@@ -75,7 +77,7 @@ export function useSkillTreeEditor(campaignId: string) {
             treeId: serverRow?.id ?? 'new',
             raw: serverRow
                 ? edit.readTreeJson(serverRow.skills)
-                : edit.emptyTree(activeRace, starting),
+                : treeEdit.emptyTree(activeRace, starting),
         };
     }, [seedKey, activeRace, serverRow, races, mainSkills]);
 
@@ -191,7 +193,7 @@ export function useSkillTreeEditor(campaignId: string) {
             tree,
             errors,
             locations: raw
-                ? edit.skillLocations(raw)
+                ? treeEdit.skillLocations(raw)
                 : new Map<string, CellRef[]>(),
             librarySkills: skills.map((s) => ({
                 id: s.id,
@@ -216,7 +218,7 @@ export function useSkillTreeEditor(campaignId: string) {
                     : null;
 
                 update((r) =>
-                    edit.setCellSkill(
+                    treeEdit.setCellSkill(
                         r,
                         ref,
                         skill
@@ -234,7 +236,7 @@ export function useSkillTreeEditor(campaignId: string) {
 
                 if (m)
                     update((r) =>
-                        edit.addBranch(r, {
+                        treeEdit.addBranch(r, {
                             id: m.id,
                             name: m.name,
                             color: m.color,
@@ -256,7 +258,7 @@ export function useSkillTreeEditor(campaignId: string) {
                     });
 
                     update((r) =>
-                        edit.addBranch(r, {
+                        treeEdit.addBranch(r, {
                             id: created.id,
                             name: created.name,
                             color: created.color,
@@ -272,9 +274,9 @@ export function useSkillTreeEditor(campaignId: string) {
                 }
             },
             removeBranch: (branchId: string) =>
-                update((r) => edit.removeBranch(r, branchId)),
+                update((r) => treeEdit.removeBranch(r, branchId)),
             moveBranch: (branchId: string, dir: -1 | 1) =>
-                update((r) => edit.moveBranch(r, branchId, dir)),
+                update((r) => treeEdit.moveBranch(r, branchId, dir)),
             save,
             cancel: () => setDraft(null),
             setRace: setRaceSafely,

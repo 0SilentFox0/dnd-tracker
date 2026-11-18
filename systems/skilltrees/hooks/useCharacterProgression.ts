@@ -6,12 +6,8 @@ import { useQuery } from '@tanstack/react-query';
 import { getCharacterProgression } from '@/lib/api/character-progression';
 import { skillKeys } from '@/lib/hooks/skills/keys';
 import { ENTITY_STALE_MS } from '@/lib/providers/query-provider';
-import {
-    normalizeTree,
-    progressionView,
-    rankOffers,
-    resolveLearned,
-} from '@/lib/utils/skills/progression';
+import { normalizeTree, resolveLearned } from '@/lib/utils/skills/progression';
+import { progressionView, rankOffers } from '@/systems/skilltrees/rules/progression';
 
 export function useCharacterProgression(
     campaignId: string,

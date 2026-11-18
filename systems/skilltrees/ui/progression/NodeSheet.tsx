@@ -6,12 +6,10 @@ import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { useAbilityText } from '@/lib/hooks/abilities';
 import { useText } from '@/lib/i18n/use-text';
 import { useTranslator } from '@/lib/i18n/use-translator';
-import type {
-    NodeState,
-    ProgressionNode,
-} from '@/lib/utils/skills/progression';
+import type { ProgressionNode } from '@/lib/utils/skills/progression';
 import { BRANCH_MIN_LEVEL } from '@/lib/utils/skills/progression';
-import { nodeLabel } from '@/lib/utils/skills/progression/labels';
+import type { NodeState } from '@/systems/skilltrees/rules/progression';
+import { nodeLabel } from '@/systems/skilltrees/rules/progression/labels';
 import type { CharacterProgressionDto } from '@/types/progression';
 
 export interface SheetTarget {

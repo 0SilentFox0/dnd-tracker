@@ -1,14 +1,14 @@
-import { realSkillId } from './ids';
-import type { RawBranch, RawSlot, RawTree } from './tree-json';
-import { CIRCLE_KEY } from './tree-json';
-import type { BranchLevel, Circle } from './types';
+import { realSkillId } from '@/lib/utils/skills/progression/ids';
+import type { RawBranch, RawSlot, RawTree } from '@/lib/utils/skills/progression/tree-json';
+import { CIRCLE_KEY } from '@/lib/utils/skills/progression/tree-json';
+import type { BranchLevel, Circle } from '@/lib/utils/skills/progression/types';
 import {
     BRANCH_LEVELS,
     CIRCLE_SIZE,
     CIRCLES,
     RACIAL_BRANCH_ID,
     RACIAL_BRANCH_NAME,
-} from './types';
+} from '@/lib/utils/skills/progression/types';
 
 export type CellRef =
     | { kind: 'level'; branchId: string; level: BranchLevel }

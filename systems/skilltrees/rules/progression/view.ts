@@ -1,17 +1,17 @@
-import { branchLevelNodeId, racialNodeId } from './ids';
-import { learnedInTree } from './progress';
-import { canLearn } from './rules';
+import { branchLevelNodeId, racialNodeId } from '@/lib/utils/skills/progression/ids';
+import { skillPoints } from '@/lib/utils/skills/progression/progress';
+import { canLearn } from '@/lib/utils/skills/progression/rules';
 import type {
     BranchGrid,
     BranchLevel,
     LearnBlockReason,
     ProgressionNode,
     TreeNodes,
-} from './types';
+} from '@/lib/utils/skills/progression/types';
 
 const NO_CELLS: BranchGrid = { outer: [], middle: [], inner: [] };
 
-import { BRANCH_LEVELS, CIRCLES } from './types';
+import { BRANCH_LEVELS, CIRCLES } from '@/lib/utils/skills/progression/types';
 
 export interface NodeState {
     nodeId: string | null;
@@ -66,20 +66,6 @@ function touches(
     }
 
     return false;
-}
-
-export function skillPoints(
-    tree: TreeNodes,
-    unlocked: string[],
-    characterLevel: number
-): ProgressionView['points'] {
-    const spent = learnedInTree(tree, unlocked).length;
-
-    return {
-        spent,
-        total: characterLevel,
-        free: Math.max(0, characterLevel - spent),
-    };
 }
 
 export function progressionView(

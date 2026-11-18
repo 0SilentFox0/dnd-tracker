@@ -1,16 +1,16 @@
 import { describe, expect, it } from 'vitest';
 
+import { normalizeTree } from '@/lib/utils/skills/progression';
+import { RAW } from '@/lib/utils/skills/progression/__tests__/fixtures';
 import {
     addBranch,
     cellSkillId,
     emptyTree,
     moveBranch,
-    normalizeTree,
     removeBranch,
     setCellSkill,
     skillLocations,
-} from '..';
-import { RAW } from './fixtures';
+} from '@/systems/skilltrees/rules/progression';
 
 describe('edit', () => {
     it('setCellSkill ставить і прибирає скіл слота, рівня, расового, ультимейта', () => {

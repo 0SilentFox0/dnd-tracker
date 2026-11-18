@@ -17,12 +17,10 @@ import { EmptyState, QueryState } from '@/components/common/states';
 import { HUD_SURFACE } from '@/components/hud';
 import { Button } from '@/components/ui/button';
 import { useConfirm } from '@/lib/hooks/common';
-import type {
-    NodeState,
-    ProgressionNode,
-} from '@/lib/utils/skills/progression';
+import type { ProgressionNode } from '@/lib/utils/skills/progression';
 import { canUnlearn } from '@/lib/utils/skills/progression';
 import { useCharacterProgression, useProgressionActions } from '@/systems/skilltrees/hooks';
+import type { NodeState } from '@/systems/skilltrees/rules/progression';
 
 export function ProgressionPanel({
     campaignId,

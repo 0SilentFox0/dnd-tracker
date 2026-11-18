@@ -4,13 +4,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { renderSkillTree } from './render-intl';
 
-import {
-    buildTreeJson,
-    normalizeTree,
-    progressionView,
-    rankOffers,
-    resolveLearned,
-} from '@/lib/utils/skills/progression';
+import { buildTreeJson, normalizeTree, resolveLearned } from '@/lib/utils/skills/progression';
+import { progressionView, rankOffers } from '@/systems/skilltrees/rules/progression';
 import { ProgressionPanel } from '@/systems/skilltrees/ui/progression';
 
 vi.unmock('next-intl');

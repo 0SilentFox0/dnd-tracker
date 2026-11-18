@@ -19,7 +19,7 @@ import {
     type SkillTreeFile,
     type TreeImportFailure,
     type TreeImportPlan,
-} from '@/lib/utils/skills/tree-transfer';
+} from '@/systems/skilltrees/rules/tree-transfer';
 
 export function useSkillTreeTransfer(campaignId: string) {
     const trees = useSkillTrees(campaignId);

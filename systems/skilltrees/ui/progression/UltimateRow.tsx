@@ -2,7 +2,7 @@ import { useTranslations } from 'next-intl';
 
 import { SlotButton } from './SlotButton';
 
-import type { NodeState } from '@/lib/utils/skills/progression';
+import type { NodeState } from '@/systems/skilltrees/rules/progression';
 import type { CharacterProgressionDto } from '@/types/progression';
 
 export function UltimateRow({

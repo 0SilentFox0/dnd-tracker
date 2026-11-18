@@ -21,9 +21,9 @@ import { SelectField } from '@/components/ui/select-field';
 import { useConfirm } from '@/lib/hooks/common';
 import type { Translator } from '@/lib/i18n/translator';
 import { useTranslator } from '@/lib/i18n/use-translator';
-import type { CellRef } from '@/lib/utils/skills/progression';
-import { cellSkillId } from '@/lib/utils/skills/progression';
 import { useSkillTreeEditor } from '@/systems/skilltrees/hooks';
+import type { CellRef } from '@/systems/skilltrees/rules/progression';
+import { cellSkillId } from '@/systems/skilltrees/rules/progression';
 
 const refLabel = (
     ref: CellRef,

@@ -2,7 +2,7 @@ import { useTranslations } from 'next-intl';
 
 import { OptimizedImage } from '@/components/common/OptimizedImage';
 import { Button } from '@/components/ui/button';
-import type { NodeState } from '@/lib/utils/skills/progression';
+import type { NodeState } from '@/systems/skilltrees/rules/progression';
 
 export function SlotButton({
     state,

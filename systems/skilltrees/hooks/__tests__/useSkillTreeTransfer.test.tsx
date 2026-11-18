@@ -2,8 +2,8 @@
 import { act, cleanup, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { SKILL_TREE_FILE_FORMAT } from '@/lib/utils/skills/tree-transfer';
 import { useSkillTreeTransfer } from '@/systems/skilltrees/hooks/useSkillTreeTransfer';
+import { SKILL_TREE_FILE_FORMAT } from '@/systems/skilltrees/rules/tree-transfer';
 
 const state = vi.hoisted(() => ({
     trees: [] as Array<{ id: string; race: string; skills: unknown }>,
