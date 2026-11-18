@@ -545,6 +545,7 @@ export const API_ERRORS = {
     BATTLE_PARTICIPANT_DOWN_CANNOT_ACT: 'errors.battleParticipantDownCannotAct',
     BATTLE_PARTICIPANT_CANNOT_ACT: 'errors.battleParticipantCannotAct',
     BATTLE_ROLLBACK_EXPIRED: 'errors.battleRollbackExpired',
+    BATTLE_MAP_BACKGROUND_INVALID: 'errors.battleMapBackgroundInvalid',
     BATTLE_MAP_CONFLICT: 'errors.battleMapConflict',
     BATTLE_MAP_IN_USE: 'errors.battleMapInUse',
     BATTLE_MAP_LIMIT: 'errors.battleMapLimit',

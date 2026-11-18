@@ -1,11 +1,9 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
-import { prisma } from '@/lib/db';
-import {
-    ownedBattleMapBackgroundPath,
-    removeBattleMapBackgroundFiles,
-} from '@/lib/server/battle-maps/background-upload';
+import { API_ERRORS } from '@/lib/constants/api-errors';
+import { removeUnreferencedBackgrounds } from '@/lib/server/battle-maps/background-cleanup';
+import { ownedBattleMapBackgroundPath } from '@/lib/server/battle-maps/background-upload';
 import { errorResponse } from '@/lib/utils/api/api-response';
 import { withDM } from '@/lib/utils/api/as-dm';
 import { parseBody } from '@/lib/utils/api/parse-body';
@@ -24,30 +22,9 @@ export async function POST(
         if (body instanceof NextResponse) return body;
 
         if (!ownedBattleMapBackgroundPath(id, body.imageUrl))
-            return errorResponse('Invalid battle map background', 400);
+            return errorResponse(API_ERRORS.BATTLE_MAP_BACKGROUND_INVALID, 400);
 
-        const [usedCurrent, usedByVersion] = await Promise.all([
-            prisma.battleMap.findFirst({
-                where: {
-                    campaignId: id,
-                    header: { path: ['background'], equals: body.imageUrl },
-                },
-                select: { id: true },
-            }),
-            prisma.battleMapVersion.findFirst({
-                where: {
-                    map: { campaignId: id },
-                    payload: {
-                        path: ['header', 'background'],
-                        equals: body.imageUrl,
-                    },
-                },
-                select: { mapId: true },
-            }),
-        ]);
-
-        if (!usedCurrent && !usedByVersion)
-            await removeBattleMapBackgroundFiles(id, [body.imageUrl]);
+        await removeUnreferencedBackgrounds(id, [body.imageUrl]);
 
         return NextResponse.json({ ok: true });
     });

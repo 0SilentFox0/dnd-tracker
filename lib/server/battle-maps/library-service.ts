@@ -15,6 +15,11 @@ import type {
     BattleMapInput,
     BattleMapSaveInput,
 } from '@/lib/schemas/battle-maps';
+import {
+    backgroundOf,
+    removeUnreferencedBackgrounds,
+} from '@/lib/server/battle-maps/background-cleanup';
+import { verifyBattleMapBackground } from '@/lib/server/battle-maps/background-upload';
 import { ContentError } from '@/lib/server/content/errors';
 import { resolveMapBackgroundForPersistence } from '@/lib/supabase/battle-map-storage';
 import { chunkKey } from '@/lib/utils/battle/map-storage/chunk-key';
@@ -25,6 +30,7 @@ import {
 } from '@/lib/utils/battle/map-storage/edge-chunks';
 import { withoutEdges } from '@/lib/utils/battle/map-storage/persisted-map';
 import { isTileLayer, type TileLayer } from '@/lib/utils/battle/tiles/types';
+import { isHostedOnProjectStorage } from '@/lib/utils/common/image-url';
 import type { BattleMapConfig } from '@/types/battle-grid';
 import type { BattleMapBrief, BattleMapFull } from '@/types/battle-map';
 
@@ -71,6 +77,19 @@ export async function withStoredBackground<T extends BattleMapInput>(
     campaignId: string,
     current?: string | null
 ): Promise<T> {
+    const background = input.map.background;
+
+    if (
+        background &&
+        background !== current &&
+        isHostedOnProjectStorage(background) &&
+        !(await verifyBattleMapBackground(campaignId, background))
+    ) {
+        await removeUnreferencedBackgrounds(campaignId, [background]);
+
+        throw new ContentError(API_ERRORS.BATTLE_MAP_BACKGROUND_INVALID, 400);
+    }
+
     const r = await resolveMapBackgroundForPersistence(input.map.background, {
         campaignId,
         current,
@@ -320,11 +339,20 @@ export async function saveMap(
 ): Promise<BattleMapBrief> {
     const { header, chunks, headerJson, payloadJson } = payloadOf(input);
 
-    return prisma.$transaction(async (tx) => {
+    const released: { campaignId: string; urls: (string | null)[] } = {
+        campaignId: '',
+        urls: [],
+    };
+
+    const brief = await prisma.$transaction(async (tx) => {
         const current = await tx.battleMap.findUniqueOrThrow({
             where: { id: mapId },
-            select: { mapVersion: true },
+            select: { mapVersion: true, header: true, campaignId: true },
         });
+
+        released.campaignId = current.campaignId;
+
+        released.urls.push(backgroundOf(current.header));
 
         const base = current.mapVersion;
 
@@ -349,6 +377,8 @@ export async function saveMap(
         const snapshotPayload = snapshot
             ? (plain(snapshot.payload) as Record<string, unknown>)
             : null;
+
+        released.urls.push(backgroundOf(snapshotPayload?.header));
 
         const unchanged =
             !!snapshotPayload &&
@@ -402,6 +432,10 @@ export async function saveMap(
 
         return toBrief(row);
     });
+
+    await removeUnreferencedBackgrounds(released.campaignId, released.urls);
+
+    return brief;
 }
 
 /** Row lock serializes against battle creation, which share-locks the map before pinning it. */
@@ -416,16 +450,43 @@ export async function lockMapRow(
 }
 
 export async function deleteMap(mapId: string): Promise<'ok' | 'in-use'> {
-    return prisma.$transaction(async (tx) => {
+    let released: { campaignId: string; urls: (string | null)[] } | undefined;
+
+    const result = await prisma.$transaction(async (tx) => {
         await lockMapRow(tx, mapId, 'update');
 
         if ((await tx.battleScene.count({ where: { mapId } })) > 0)
             return 'in-use';
 
+        const row = await tx.battleMap.findUnique({
+            where: { id: mapId },
+            select: { campaignId: true, header: true },
+        });
+
+        const versions = await tx.battleMapVersion.findMany({
+            where: { mapId },
+            select: { payload: true },
+        });
+
         await tx.battleMap.delete({ where: { id: mapId } });
+
+        released = {
+            campaignId: row?.campaignId ?? '',
+            urls: [
+                backgroundOf(row?.header),
+                ...versions.map((v) =>
+                    backgroundOf((v.payload as { header?: unknown }).header)
+                ),
+            ],
+        };
 
         return 'ok';
     });
+
+    if (result === 'ok' && released)
+        await removeUnreferencedBackgrounds(released.campaignId, released.urls);
+
+    return result;
 }
 
 export async function cloneMap(

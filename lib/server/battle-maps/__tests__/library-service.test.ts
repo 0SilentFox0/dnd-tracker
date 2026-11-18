@@ -129,6 +129,9 @@ const db = vi.hoisted(() => {
             }),
         },
         battleMapVersion: {
+            findMany: vi.fn(async ({ where }: { where: { mapId: string } }) =>
+                versions.filter((v) => v.mapId === where.mapId)
+            ),
             findUnique: vi.fn(
                 async ({
                     where,
