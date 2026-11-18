@@ -1,6 +1,8 @@
 import type { Camera, Frame } from './camera';
 
-const unit = (v: number) => Math.min(1, Math.max(0, v));
+import { clamp } from '@/lib/utils/common/clamp';
+
+const unit = (v: number) => clamp(v, 0, 1);
 
 export function minimapViewport(
     cam: Camera,

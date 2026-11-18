@@ -1,4 +1,5 @@
 import { type MapView,MIN_TAP_CELL_PX } from '@/lib/utils/battle/grid/layout';
+import { clamp } from '@/lib/utils/common/clamp';
 
 export interface Size {
     width: number;
@@ -18,9 +19,6 @@ export interface Frame {
 }
 
 export const CAMERA_MAX_CELL_PX = 3 * MIN_TAP_CELL_PX;
-
-const clamp = (v: number, lo: number, hi: number) =>
-    Math.min(hi, Math.max(lo, v));
 
 export function cameraBounds(fitCellPx: number): { min: 1; max: number } {
     return {

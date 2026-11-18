@@ -1,5 +1,4 @@
 'use client';
-
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 
@@ -9,6 +8,7 @@ import { AttackType } from '@/lib/constants/battle';
 import { MAX_CLASS_LEVEL } from '@/lib/constants/classes';
 import { getHeroDamageDiceForLevel } from '@/lib/constants/hero-scaling';
 import { useNotify } from '@/lib/hooks/common';
+import { sameJson } from '@/lib/utils/common/json';
 import { type Ruleset, type RulesetPatch } from '@/lib/utils/rules';
 
 export const HERO_LEVELS = Array.from(
@@ -23,9 +23,6 @@ export interface RulesFormState {
 }
 
 type DiceTable = Record<string, string> | null;
-
-const same = (a: unknown, b: unknown) =>
-    JSON.stringify(a) === JSON.stringify(b);
 
 const fillDiceTable = (table: DiceTable, type: AttackType): DiceTable =>
     table &&
@@ -75,7 +72,7 @@ export function useRulesForm(campaignId: string) {
 
     const dirtyKeys = server
         ? (Object.keys(changes) as (keyof Ruleset)[]).filter(
-              (key) => !same(changes[key], server[key])
+              (key) => !sameJson(changes[key], server[key])
           )
         : [];
 

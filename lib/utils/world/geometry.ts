@@ -1,8 +1,9 @@
+import { clamp } from '@/lib/utils/common/clamp';
 import type { MapPoint, Polygon, RevealShape } from '@/types/world';
 
 const DUPLICATE_EPS = 0.002;
 
-export const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
+export const clamp01 = (v: number) => clamp(v, 0, 1);
 
 type Box = { left: number; top: number; width: number; height: number };
 
