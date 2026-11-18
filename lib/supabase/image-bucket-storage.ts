@@ -27,7 +27,7 @@ export function imageBucketStorage<T extends string>({
         `^[a-f0-9]{32}\\.(${Object.values<string>(formats).join('|')})$`
     );
 
-    /** Ліміт і типи на рівні бакета: Storage сам відхилить чужий файл за підписаним URL. Викликати до дзеркалювання, щоб бакет не створився без лімітів. */
+    /** Bucket-level limit and types; call before mirroring so a bucket is never created without limits. */
     const ensure = (supabase: Admin) =>
         ensureBucket(supabase, bucket, {
             public: true,

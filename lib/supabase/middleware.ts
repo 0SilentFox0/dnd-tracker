@@ -9,14 +9,10 @@ import {
     ipScopeOf,
 } from '@/lib/utils/api/ip-rate-limit';
 
-/**
- * CSRF defense for mutating /api/* requests: Origin (або Sec-Fetch-Site) POST/PATCH/PUT/DELETE має бути same-origin.
- * Без Origin запит відхиляється, крім `Sec-Fetch-Site: same-origin|none`, Bearer-викликів і NO_ORIGIN_PREFIXES.
- * `/api/pusher/auth` не виключено: клієнт завжди same-origin.
- */
+/** CSRF defense: mutating /api/* requests must be same-origin (Origin or Sec-Fetch-Site). A missing Origin is rejected except `Sec-Fetch-Site: same-origin|none`, Bearer calls and NO_ORIGIN_PREFIXES; `/api/pusher/auth` stays covered since the client is always same-origin. */
 const SIGN_OUT_PATH = '/auth/signout';
 
-/** Не-браузерні виклики без cookie-сесії: MCP (Bearer) і cron (Bearer CRON_SECRET). */
+/** Non-browser calls without a cookie session: MCP (Bearer) and cron (Bearer CRON_SECRET). */
 const NO_ORIGIN_PREFIXES = ['/api/mcp/', '/api/cron/'];
 
 export function rejectCrossOriginMutation(
@@ -43,7 +39,8 @@ export function rejectCrossOriginMutation(
 
     if (
         NO_ORIGIN_PREFIXES.some(
-            (prefix) => pathname === prefix.slice(0, -1) || pathname.startsWith(prefix)
+            (prefix) =>
+                pathname === prefix.slice(0, -1) || pathname.startsWith(prefix)
         )
     )
         return null;
@@ -179,7 +176,6 @@ export async function updateSession(request: NextRequest) {
         return NextResponse.redirect(url);
     }
 
-    // Якщо користувач авторизований і на сторінці входу - перенаправляємо на campaigns
     if (user && request.nextUrl.pathname.startsWith('/sign-in')) {
         const url = request.nextUrl.clone();
 
