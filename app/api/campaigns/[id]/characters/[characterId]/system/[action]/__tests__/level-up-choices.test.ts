@@ -8,7 +8,7 @@ import {
     scores,
     sorcerer,
 } from '@/lib/utils/characters/choices/__tests__/fixtures';
-import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { classLevelUp } from '@/systems/d20/server/operations/class-level-up';
 
 vi.mock('@/lib/server/notifications/notify', () => ({

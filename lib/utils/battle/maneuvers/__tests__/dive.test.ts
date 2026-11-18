@@ -20,7 +20,7 @@ import { textsOf } from '@/lib/utils/battle/log/__tests__/event-text';
 import { processStartOfTurn } from '@/lib/utils/battle/turn/start-end';
 import { checkVictoryConditions as checkVictory } from '@/lib/utils/battle/turn/victory';
 import { assertAbilityTargets } from '@/lib/utils/battle/validation/ability-targets';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { BattleParticipant } from '@/types/battle';
 
 const checkVictoryConditions = (

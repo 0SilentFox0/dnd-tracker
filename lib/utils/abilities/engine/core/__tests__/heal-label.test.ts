@@ -7,7 +7,7 @@ import {
     seq,
 } from '@/lib/utils/abilities/__tests__/fixtures';
 import { runAbilities } from '@/lib/utils/abilities/engine/core/run-abilities';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 describe('лікування союзників', () => {
     it('у повідомленні видно, чиє вміння лікує', () => {

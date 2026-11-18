@@ -22,7 +22,7 @@ import {
     type RetaliationInput,
 } from '@/lib/utils/battle/attack/__tests__/helpers';
 import { eventTextOf } from '@/lib/utils/battle/log/__tests__/event-text';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { ResolvedAbility } from '@/types/abilities';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
 

@@ -3,7 +3,8 @@ import { describe, expect, it, vi } from 'vitest';
 vi.mock('@/lib/db', () => ({ prisma: {} }));
 
 import { systemServerOf } from '@/lib/server/systems/registry';
-import { DEFAULT_RULES, type Ruleset } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
+import { type Ruleset } from '@/lib/utils/rules';
 
 const rules = (system: Ruleset['system']): Ruleset => ({
     ...DEFAULT_RULES,

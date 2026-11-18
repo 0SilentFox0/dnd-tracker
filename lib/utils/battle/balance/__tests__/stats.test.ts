@@ -12,7 +12,7 @@ import { computeHitDamage } from '@/lib/utils/battle/attack/process/compute';
 import { getCharacterStats, getUnitStats } from '@/lib/utils/battle/balance';
 import { averageAttackDamage } from '@/lib/utils/battle/damage/average';
 import { getEffectiveArmorClass } from '@/lib/utils/battle/participant/helpers';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
 import { SkillLevel } from '@/types/skill-tree';
 

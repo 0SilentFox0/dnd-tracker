@@ -4,7 +4,7 @@ import { AttackType } from '@/lib/constants/battle';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import { resolveServerAttack } from '@/lib/utils/battle/attack/server-attack';
 import { pathTo } from '@/lib/utils/battle/grid/path';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { resolveOpportunityAttacks } from '@/systems/opportunity/rules/opportunity';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
 import type { BattleMapConfig } from '@/types/battle-grid';

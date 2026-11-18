@@ -3,10 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { assertMatrixCase } from './helpers/composition-matrix';
 import { realCompose } from './helpers/real-compose';
 
-import {
-    kindOf,
-    moduleMetaOf,
-} from '@/lib/utils/rules/systems/catalog';
+import { kindOf, moduleMetaOf } from '@/lib/utils/rules/systems/catalog';
 import { validateComposition } from '@/lib/utils/rules/systems/compose';
 import { SYSTEM_META, type SystemMeta } from '@/lib/utils/rules/systems/meta';
 
@@ -83,11 +80,18 @@ describe('N-module subsets of the real composition', () => {
         }
     });
 
-    it('a walk over bit-masks of the module list never throws in composition', () => {
-        for (let mask = 0; mask < 1 << Math.min(ids.length, 8); mask += 7) {
+    it('every bit-mask of the module list that validates composes without throwing', () => {
+        let composed = 0;
+
+        for (let mask = 0; mask < 1 << ids.length; mask++) {
             const modules = subsetOf(ids, mask);
 
-            if (valid(modules)) expect(() => realCompose(d20Key, modules)).not.toThrow();
+            if (!valid(modules)) continue;
+
+            composed++;
+            expect(() => realCompose(d20Key, modules)).not.toThrow();
         }
-    });
+
+        expect(composed).toBeGreaterThan(ids.length);
+    }, 30_000);
 });

@@ -12,7 +12,7 @@ import {
     inputDiceOf,
 } from '@/lib/utils/battle/spell/cast/state';
 import type { CastableSpell } from '@/lib/utils/battle/types/spell-process';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import {
     SpellDefinitionSchema,
     type SpellEffect,

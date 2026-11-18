@@ -15,7 +15,7 @@ import {
     scores,
     sorcerer,
 } from '@/lib/utils/characters/choices/__tests__/fixtures';
-import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 const rules = { ...DEFAULT_RULES, classes: { enabled: true } };
 

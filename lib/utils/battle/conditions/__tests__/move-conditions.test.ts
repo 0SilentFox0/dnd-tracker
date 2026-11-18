@@ -8,7 +8,7 @@ import {
 } from '@/lib/server/battles/__tests__/mutations/fixtures';
 import { moveMutation } from '@/lib/server/battles/mutations/move/move-mutation';
 import { frightenedBlocksMove } from '@/lib/utils/battle/grid';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { applyCondition5e } from '@/systems/d20/rules/conditions/apply';
 import type { BattleParticipant } from '@/types/battle';
 

@@ -7,7 +7,7 @@ import {
     spellAttackBonus,
 } from '@/lib/utils/battle/spell/power';
 import { resolveChosenSlot } from '@/lib/utils/battle/spell/slot';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { BattleParticipant } from '@/types/battle';
 
 const caster = (

@@ -15,7 +15,7 @@ import { prisma } from '@/lib/db';
 import { lockCharacters } from '@/lib/server/characters/lock';
 import { notifyCharacterOwners } from '@/lib/server/notifications/notify';
 import * as apiAuth from '@/lib/utils/api/api-auth';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 vi.mock('@/lib/server/notifications/notify', () => ({
     notifyCharacterOwners: vi.fn().mockResolvedValue(0),

@@ -6,7 +6,7 @@ import { makeParticipant } from '@/lib/utils/abilities/__tests__/fixtures';
 import { initialSpellFlow } from '@/lib/utils/battle/flows/spell-flow';
 import type { SpellFlowState } from '@/lib/utils/battle/flows/spell-flow-types';
 import { spellSourceModel } from '@/lib/utils/battle/flows/spell-source';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { BattleParticipant, SpellGrant } from '@/types/battle';
 import type { BookSpell } from '@/types/spells';
 

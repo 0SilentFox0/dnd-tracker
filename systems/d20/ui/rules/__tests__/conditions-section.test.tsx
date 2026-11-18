@@ -12,7 +12,8 @@ import { ConditionsSection } from '../ConditionsSection';
 
 import '@/components/ui/__tests__/match-media';
 import type { RulesFormState } from '@/lib/hooks/campaigns';
-import { DEFAULT_RULES, type Ruleset } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
+import { type Ruleset } from '@/lib/utils/rules';
 
 const remove = vi.fn();
 

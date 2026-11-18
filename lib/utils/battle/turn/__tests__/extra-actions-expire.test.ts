@@ -11,7 +11,7 @@ import { applyScenePatch } from '@/lib/utils/battle/scene-state';
 import type { BattleSceneState } from '@/lib/utils/battle/store';
 import { advanceTurn } from '@/lib/utils/battle/turn';
 import { processStartOfTurn } from '@/lib/utils/battle/turn/start-end';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { BattleParticipant } from '@/types/battle';
 
 const scene: BattleSceneState = {

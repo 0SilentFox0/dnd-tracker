@@ -37,7 +37,7 @@ import {
     makeParticipant,
     resolved,
 } from '@/lib/utils/abilities/__tests__/fixtures';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 describe('buildStartOrder: резерв', () => {
     it('резерв не отримує ауру й не потрапляє в чергу, але лишається масштабованим', async () => {

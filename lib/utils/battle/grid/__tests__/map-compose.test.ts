@@ -7,7 +7,7 @@ import type { MapScene } from '../map-scene';
 import { ParticipantSide } from '@/lib/constants/battle';
 import { AttackType } from '@/lib/constants/battle';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
 import type {
     BattleMapConfig,

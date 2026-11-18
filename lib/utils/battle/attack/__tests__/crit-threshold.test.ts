@@ -4,7 +4,7 @@ import { critThresholdOf } from '../crit-threshold';
 
 import { MIN_CRIT_ON } from '@/lib/constants/battle';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 describe('critThresholdOf', () => {
     const attacker = createMockParticipant();

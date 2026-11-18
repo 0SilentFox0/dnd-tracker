@@ -5,7 +5,7 @@ import { draftFields } from '../draft-data';
 import { classDraftSchema, draftSchema } from '../draft-schema';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { parseRules } from '@/lib/utils/rules/schema';
 
 const mocks = vi.hoisted(() => ({

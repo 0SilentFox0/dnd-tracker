@@ -6,7 +6,7 @@ import { fakeScene } from './fake-scene';
 
 import { useDmParticipantActions } from '@/lib/hooks/battle';
 import { makeEffect } from '@/lib/utils/abilities/__tests__/fixtures';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 const noop = () => {};
 

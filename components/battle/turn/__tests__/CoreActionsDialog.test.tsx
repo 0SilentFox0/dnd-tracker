@@ -8,7 +8,7 @@ import { ReadiedAttackButton } from '../ReadiedAttackButton';
 import { fakeScene } from '@/lib/hooks/battle/__tests__/fake-scene';
 import { render } from '@/lib/i18n/test/render-uk';
 import { actionsOf } from '@/lib/utils/battle/actions/access';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import battle from '@/messages/uk/battle.json';
 import battleCommon from '@/messages/uk/battleCommon.json';
 import { applyCondition5e } from '@/systems/d20/rules/conditions/apply';

@@ -4,7 +4,7 @@ import { API_ERRORS } from '@/lib/constants/api-errors';
 import { CharacterLogKind } from '@/lib/constants/character-log';
 import { makeT } from '@/lib/i18n/test/mock-t';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { applyWfrpConditionTo } from '@/systems/wfrp/rules/conditions/apply';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
 
@@ -114,7 +114,7 @@ describe('rollForSheet by rule system', () => {
             ability: 'strength',
         });
 
-        expect(result.kind).toBe('d20');
+        expect(result.kind).toBe('check');
         expect(writeCharacterLog.mock.calls[0][1][0].kind).toBe(
             CharacterLogKind.CHECK
         );

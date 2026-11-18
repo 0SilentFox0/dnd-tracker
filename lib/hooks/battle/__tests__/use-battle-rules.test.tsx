@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 
 import { BattleSceneDataContext, useBattleRules } from '@/lib/hooks/battle';
 import type { BattleSceneData } from '@/lib/hooks/battle/types';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { sceneOf } from '@/systems/wfrp/rules/__tests__/slot-fixtures';
 
 const render = (key: string, momentum?: { ally?: true }) => {

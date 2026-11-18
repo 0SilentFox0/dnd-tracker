@@ -10,7 +10,7 @@ import { averageAttackDamage } from '@/lib/utils/battle/damage/average';
 import { casterSpellDice } from '@/lib/utils/battle/spell/caster-dice';
 import { computeSpellPower } from '@/lib/utils/battle/spell/power';
 import type { CharacterFromPrisma } from '@/lib/utils/battle/types/participant';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { BattleAttack } from '@/types/battle';
 
 const CAMPAIGN_NAME = 'SIM: баланс бібліотеки';

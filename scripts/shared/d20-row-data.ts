@@ -1,7 +1,7 @@
 import type { Prisma } from '@prisma/client';
 
 import '@/lib/utils/rules/systems/registry';
-import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { splitColumnView } from '@/lib/utils/rules/systems/column-view';
 import { ruleSystemOf } from '@/lib/utils/rules/systems/lookup';
 

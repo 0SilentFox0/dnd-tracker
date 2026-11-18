@@ -6,7 +6,7 @@ import {
     resolved,
 } from '@/lib/utils/abilities/__tests__/fixtures';
 import { rollModeReasons } from '@/lib/utils/battle/attack/bonus';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { ELF_EYE_ABILITY } from '@/scripts/constructor/backfill/elf-eye';
 import type { BattleAttack } from '@/types/battle';
 

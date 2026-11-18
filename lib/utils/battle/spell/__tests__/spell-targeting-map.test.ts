@@ -11,7 +11,7 @@ import {
     resolveSpellTargets,
     type SpellMapContext,
 } from '@/lib/utils/battle/spell/spell-targeting';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { SpellTargeting } from '@/lib/utils/spells/model/schema';
 import type { BattleParticipant } from '@/types/battle';
 import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';

@@ -6,7 +6,7 @@ import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/moc
 import { averageAttackDamage } from '@/lib/utils/battle/damage/average';
 import { weaponPreview } from '@/lib/utils/battle/view';
 import { diceAverage } from '@/lib/utils/common/dice';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { BattleAttack } from '@/types/battle';
 
 const sword = {

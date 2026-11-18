@@ -19,7 +19,7 @@ import {
 } from '@/lib/utils/battle/attack-phase/request';
 import { resolveSpellTargets } from '@/lib/utils/battle/spell/spell-targeting';
 import { REJECT } from '@/lib/utils/battle/store/reject';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { applyCondition5e } from '@/systems/d20/rules/conditions/apply';
 import type { Condition5eKey } from '@/systems/d20/rules/conditions/keys';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';

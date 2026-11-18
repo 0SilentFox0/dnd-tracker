@@ -14,7 +14,7 @@ import {
     redactParticipantsForViewer,
     sanitizeLogEntry,
 } from '@/lib/utils/battle/view';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import { attackOf, castOf } from '@/systems/wfrp/rules/__tests__/slot-fixtures';
 import type { BattleParticipant } from '@/types/battle';

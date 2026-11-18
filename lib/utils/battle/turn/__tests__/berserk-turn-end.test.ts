@@ -11,7 +11,7 @@ import {
     seq,
 } from '@/lib/utils/abilities/__tests__/fixtures';
 import { placed, testMap } from '@/lib/utils/battle/__tests__/fixtures/placed';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { attackOf } from '@/systems/wfrp/rules/__tests__/slot-fixtures';
 import { DEFAULT_CHARACTERISTICS } from '@/systems/wfrp/rules/characteristics/keys';
 import { wfrpAbilitiesOf } from '@/systems/wfrp/rules/combat/participant';

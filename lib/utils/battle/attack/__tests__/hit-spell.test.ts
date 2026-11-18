@@ -11,7 +11,7 @@ import { castHitSpell } from '@/lib/utils/battle/attack/process/hit-spell';
 import { textsOf } from '@/lib/utils/battle/log/__tests__/event-text';
 import { mazeMap } from '@/lib/utils/battle/modes/maze/__tests__/fixtures';
 import type { CastableSpell } from '@/lib/utils/battle/types/spell-process';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 const spellOf = (key: string): CastableSpell => {
     const s = SPELLS.find((x) => x.key === key);

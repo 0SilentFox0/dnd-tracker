@@ -23,7 +23,7 @@ import type { BattleSceneValue } from '@/lib/hooks/battle/types';
 import { render } from '@/lib/i18n/test/render-uk';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import { buildDisplayEffects } from '@/lib/utils/battle/view';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { BattleScene } from '@/types/api';
 
 vi.unmock('next-intl');

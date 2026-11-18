@@ -11,7 +11,7 @@ import {
     checkVictoryConditions as checkVictory,
     completeBattle as complete,
 } from '@/lib/utils/battle/turn/victory';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { d20StateData } from '@/systems/d20/rules/state';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
 import type { BattleParticipant } from '@/types/battle';

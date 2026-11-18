@@ -10,7 +10,7 @@ import { noActions, noReactions } from '@/lib/utils/battle/actions/none';
 import { hitModelOf, noHitModel } from '@/lib/utils/battle/balance/hit-model';
 import { proficiencyOf, savesOf } from '@/lib/utils/battle/saves/access';
 import { noProficiency, noSaves } from '@/lib/utils/battle/saves/none';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import { D20_ACTIONS } from '@/systems/d20/rules/actions';
 import { D20_REACTIONS } from '@/systems/d20/rules/reactions';

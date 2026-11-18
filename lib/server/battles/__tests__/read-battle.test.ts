@@ -8,7 +8,7 @@ import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/moc
 import type { PipelineDeps } from '@/lib/utils/battle/pipeline/run-battle-mutation';
 import { readScenePreview } from '@/lib/utils/battle/pipeline/run-battle-mutation';
 import type { LoadedBattle } from '@/lib/utils/battle/store';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 const hero = createMockParticipant({
     basicInfo: {

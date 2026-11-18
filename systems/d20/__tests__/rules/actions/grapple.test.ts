@@ -11,7 +11,7 @@ import {
     releaseGrapples,
 } from '@/lib/utils/battle/conditions/grapple-links';
 import { pathTo, reachable } from '@/lib/utils/battle/grid/path';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import {
     contest,
     releaseInvalidGrapples,

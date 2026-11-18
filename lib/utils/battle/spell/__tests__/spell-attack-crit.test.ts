@@ -12,7 +12,7 @@ import type { CritPicker } from '@/lib/utils/battle/crit-choice/types';
 import { castSpell } from '@/lib/utils/battle/spell';
 import type { CastableSpell } from '@/lib/utils/battle/types/spell-process';
 import { mulberry32 } from '@/lib/utils/common/rng';
-import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { BattleParticipant } from '@/types/battle';
 
 const fire: Effect = {

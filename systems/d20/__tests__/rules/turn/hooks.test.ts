@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { d20DropStalePendingCast } from '../../../rules/turn/on-turn-end';
 
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { beginConcentration } from '@/systems/d20/rules/concentration/sustain';
 
 const ctx = (

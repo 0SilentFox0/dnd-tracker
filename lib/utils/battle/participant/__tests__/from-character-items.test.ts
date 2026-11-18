@@ -6,7 +6,8 @@ import { createBattleParticipantFromCharacter } from '@/lib/server/battles/parti
 import { weaponStatsColumns } from '@/lib/utils/artifacts/weapon-stats';
 import { loadEquippedArtifactRows } from '@/lib/utils/battle/participant/extract-artifacts';
 import { type ItemStats, itemStatsColumns } from '@/lib/utils/items/item-stats';
-import { DEFAULT_RULES, type Ruleset } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
+import { type Ruleset } from '@/lib/utils/rules';
 import { parseRules } from '@/lib/utils/rules/schema';
 import type { GameClassData } from '@/types/classes';
 

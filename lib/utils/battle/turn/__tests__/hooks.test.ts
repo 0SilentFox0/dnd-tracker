@@ -5,7 +5,7 @@ import { runTurnHooks } from '../hooks';
 import { D6POOL_SYSTEM } from '@/lib/__tests__/fixtures/d6pool/definition';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import { applyDamageConsequences } from '@/lib/utils/battle/damage/consequences';
-import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { composeSystem } from '@/lib/utils/rules/systems/compose';
 import type {
     TurnHook,

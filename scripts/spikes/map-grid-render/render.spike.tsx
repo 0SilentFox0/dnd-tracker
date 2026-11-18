@@ -17,7 +17,7 @@ import '@/lib/utils/rules/systems/registry';
 import { BattleMap } from '@/components/battle/map';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { moveZoneMarks } from '@/lib/utils/battle/grid';
-import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { BattleMapView } from '@/types/battle-grid';
 
 const RUNS = Number(process.env.SPIKE_RENDER_RUNS ?? 3);

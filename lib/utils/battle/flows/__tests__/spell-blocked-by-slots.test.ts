@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { ParticipantSourceType } from '@/lib/constants/battle';
 import { makeParticipant } from '@/lib/utils/abilities/__tests__/fixtures';
 import { spellBlockedBySlots } from '@/lib/utils/battle/flows/spell-flow';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { BattleParticipant } from '@/types/battle';
 
 const caster = (

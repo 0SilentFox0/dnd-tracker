@@ -7,7 +7,7 @@ import { WEATHER_KINDS } from '@/lib/constants/battle-weather';
 import { DAMAGE_ELEMENT_OPTIONS } from '@/lib/constants/damage';
 import { actionsOf } from '@/lib/utils/battle/actions/access';
 import { HEALTH_LABEL } from '@/lib/utils/battle/view';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 
 describe('battle has translations', () => {

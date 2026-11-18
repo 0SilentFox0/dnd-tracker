@@ -21,7 +21,7 @@ import {
 } from '@/lib/utils/battle/maneuvers/__tests__/fixtures';
 import { castSpell } from '@/lib/utils/battle/spell';
 import type { CastableSpell } from '@/lib/utils/battle/types/spell-process';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { contest } from '@/systems/d20/rules/actions/grapple';
 import { concentrationCheck } from '@/systems/d20/rules/concentration/check';
 import { beginConcentration } from '@/systems/d20/rules/concentration/sustain';

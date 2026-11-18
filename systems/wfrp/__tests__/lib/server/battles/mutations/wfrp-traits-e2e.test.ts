@@ -12,7 +12,7 @@ import { applyScenePatch } from '@/lib/utils/battle/scene-state';
 import { diffParticipants, splitParticipant } from '@/lib/utils/battle/store';
 import { runJoinTriggers } from '@/lib/utils/battle/turn/join-triggers';
 import type { UnitFromPrisma } from '@/lib/utils/battle/types/participant';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import { DEFAULT_CHARACTERISTICS } from '@/systems/wfrp/rules/characteristics/keys';
 import { wfrpAbilitiesOf } from '@/systems/wfrp/rules/combat/participant';

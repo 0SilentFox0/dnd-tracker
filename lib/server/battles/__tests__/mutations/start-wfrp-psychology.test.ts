@@ -29,7 +29,7 @@ vi.mock('@/lib/utils/battle/participant', () => ({
 import { ParticipantSide } from '@/lib/constants/battle';
 import { buildStartOrder } from '@/lib/server/battles/mutations/start/start-battle-handler';
 import { makeParticipant } from '@/lib/utils/abilities/__tests__/fixtures';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { DEFAULT_CHARACTERISTICS } from '@/systems/wfrp/rules/characteristics/keys';
 import { wfrpAbilitiesOf } from '@/systems/wfrp/rules/combat/participant';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';

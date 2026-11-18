@@ -10,7 +10,7 @@ import {
 } from '@/lib/utils/battle/store/split-participant';
 import { runAdvanceTurnLoop } from '@/lib/utils/battle/turn/run-advance-turn-loop';
 import { processStartOfTurn } from '@/lib/utils/battle/turn/start-end';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { BattleParticipant } from '@/types/battle';
 
 const key = 'pool:spell:breath';

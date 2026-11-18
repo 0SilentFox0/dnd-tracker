@@ -11,7 +11,7 @@ import {
     damageDiceSlots,
 } from '@/lib/utils/battle/damage/attack-parts';
 import { averageAttackDamage } from '@/lib/utils/battle/damage/average';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
 
 const base = createMockParticipant();

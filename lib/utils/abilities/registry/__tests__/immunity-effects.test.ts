@@ -9,7 +9,7 @@ import {
 } from '@/lib/utils/abilities/__tests__/fixtures';
 import { applyEffect } from '@/lib/utils/abilities/registry/effects';
 import { AbilitySchema, type Effect } from '@/lib/utils/abilities/schema';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 const immune = (flag: Effect) =>
     resolved({ trigger: { event: 'passive' }, effects: [flag] }, { id: 'imm' });

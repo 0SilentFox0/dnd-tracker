@@ -10,7 +10,7 @@ import { computeHitDamage } from '@/lib/utils/battle/attack/process/compute';
 import { attackDamageParts } from '@/lib/utils/battle/damage/attack-parts';
 import { getAttackAbilityModifier } from '@/lib/utils/common/calculations';
 import { diceMax } from '@/lib/utils/common/dice';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
 
 const maxCrit = CRITICAL_SUCCESS_EFFECTS.find(

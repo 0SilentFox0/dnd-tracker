@@ -11,7 +11,7 @@ import { removeEffects } from '@/lib/utils/battle/conditions';
 import { applyResistance } from '@/lib/utils/battle/resistance';
 import { castSpell } from '@/lib/utils/battle/spell';
 import type { CastableSpell } from '@/lib/utils/battle/types/spell-process';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { SpellEffect } from '@/lib/utils/spells/model/schema';
 import { runEscape } from '@/systems/d20/rules/actions/grapple';
 import { bestSaveAbility } from '@/systems/d20/rules/saves/roll-save';

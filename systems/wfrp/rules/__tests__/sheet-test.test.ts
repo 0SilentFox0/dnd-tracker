@@ -9,7 +9,7 @@ import { textRef } from '@/lib/i18n/text-ref';
 import { makeParticipant } from '@/lib/utils/abilities/__tests__/fixtures';
 import { ContentError } from '@/lib/utils/api/content-error';
 import { mulberry32 } from '@/lib/utils/common/rng';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { SheetTestInput } from '@/lib/utils/rules/systems/types';
 
 const characteristics = {

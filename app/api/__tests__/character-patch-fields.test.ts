@@ -6,7 +6,7 @@ import { createCharacterSchema } from '@/lib/server/characters/core/create-chara
 import { updateCharacterSchema } from '@/lib/server/characters/core/update-character-schema';
 import { resolveAvatarForPersistence } from '@/lib/supabase/avatar-storage';
 import * as apiAuth from '@/lib/utils/api/api-auth';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 vi.mock('@/lib/server/notifications/notify', () => ({
     notifyCharacterOwners: vi.fn().mockResolvedValue(0),

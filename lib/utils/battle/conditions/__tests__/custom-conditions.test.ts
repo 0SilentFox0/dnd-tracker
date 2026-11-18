@@ -13,7 +13,8 @@ import type { BattleMutationContext } from '@/lib/utils/battle/pipeline/run-batt
 import { castSpell } from '@/lib/utils/battle/spell';
 import { pacifiedBlock } from '@/lib/utils/battle/spell/spell-targeting';
 import type { CastableSpell } from '@/lib/utils/battle/types/spell-process';
-import { DEFAULT_RULES, type Ruleset } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
+import { type Ruleset } from '@/lib/utils/rules';
 import { mergeRules, parseRules } from '@/lib/utils/rules/schema';
 import { applyCondition5e } from '@/systems/d20/rules/conditions/apply';
 import type { BattleParticipant } from '@/types/battle';

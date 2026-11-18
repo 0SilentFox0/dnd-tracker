@@ -22,7 +22,7 @@ import {
     type PartyPower,
 } from '@/lib/utils/battle/balance/fair';
 import * as fromUnit from '@/lib/utils/battle/participant/from-unit';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 const row = (
     id: string,

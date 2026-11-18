@@ -9,7 +9,7 @@ import { makeParticipant } from '@/lib/utils/abilities/__tests__/fixtures';
 import { attackDamageModifier } from '@/lib/utils/battle/attack/ability';
 import { calculateAttackBonus } from '@/lib/utils/battle/attack/bonus';
 import { parseDice } from '@/lib/utils/common/dice';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { BattleAttack } from '@/types/battle';
 
 const units = convertUnits(loadOpen5e(FIXTURE_DIR));

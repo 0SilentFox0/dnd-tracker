@@ -6,7 +6,7 @@ import { rollTable } from '../roll-table';
 
 import { dynamicTextRef } from '@/lib/i18n/text-ref';
 import { mulberry32 } from '@/lib/utils/common/rng';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 const rows = [{ max: 20 }, { max: 40 }, { max: 100 }];
 

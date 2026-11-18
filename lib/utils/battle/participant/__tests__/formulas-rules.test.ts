@@ -9,7 +9,7 @@ import { getUnitStats } from '@/lib/utils/battle/balance/stats';
 import { createBattleParticipantFromUnit } from '@/lib/utils/battle/participant/from-unit';
 import { spellSaveDc } from '@/lib/utils/battle/spell/save-dc';
 import type { UnitFromPrisma } from '@/lib/utils/battle/types/participant';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { parseRules } from '@/lib/utils/rules/schema';
 
 const custom = parseRules({

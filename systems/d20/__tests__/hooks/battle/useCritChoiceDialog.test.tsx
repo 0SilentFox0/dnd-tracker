@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 
 import { fakeScene } from '@/lib/hooks/battle/__tests__/fake-scene';
 import { critEffectsFor } from '@/lib/utils/battle/crit-choice/catalog';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { useCritChoiceDialog } from '@/systems/d20/hooks/battle/useCritChoiceDialog';
 
 const pending = {

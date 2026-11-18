@@ -9,7 +9,7 @@ import type {
     BattleSceneState,
     LoadedBattle,
 } from '@/lib/utils/battle/store/types';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 const scene: BattleSceneState = {
     id: 'b1',

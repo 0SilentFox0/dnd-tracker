@@ -8,7 +8,7 @@ import { TravelPanel, type TravelPanelProps } from '../TravelPanel';
 import { render } from '@/components/ui/__tests__/uk-intl';
 import * as rulesApi from '@/lib/api/rules';
 import * as api from '@/lib/api/world';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { WorldMarker } from '@/types/world';
 
 vi.unmock('next-intl');

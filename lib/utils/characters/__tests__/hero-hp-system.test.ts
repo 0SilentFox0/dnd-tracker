@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { characterBaseHp } from '@/lib/utils/characters/hero-hp';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
 import type { GameClassData, ResolvedClassEntry } from '@/types/classes';
 

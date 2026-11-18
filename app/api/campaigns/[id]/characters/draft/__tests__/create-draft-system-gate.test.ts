@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 
 import '@/lib/server/systems/registry';
-import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
 
 vi.mock('server-only', () => ({}));

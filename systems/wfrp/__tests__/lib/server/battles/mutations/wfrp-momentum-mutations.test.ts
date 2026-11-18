@@ -9,7 +9,7 @@ import {
 import { legendaryMutation } from '@/lib/server/battles/mutations/core-action/legendary-mutation';
 import { makeParticipant } from '@/lib/utils/abilities/__tests__/fixtures';
 import type { BattleMutationContext } from '@/lib/utils/battle/pipeline/run-battle-mutation';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { coreActionMutation } from '@/systems/d20/server/battle/core-action-mutation';
 import {
     momentumOf,

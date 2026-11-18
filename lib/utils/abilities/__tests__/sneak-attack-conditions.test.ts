@@ -10,7 +10,7 @@ import { runAbilities } from '@/lib/utils/abilities/engine/core/run-abilities';
 import type { Condition } from '@/lib/utils/abilities/schema';
 import { eventRollMode } from '@/lib/utils/battle/attack/event-roll-mode';
 import type { AttackRollResult } from '@/lib/utils/battle/types/attack';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { AbilityEvent } from '@/types/abilities';
 import type { BattleParticipant } from '@/types/battle';
 import type { GridPoint } from '@/types/battle-grid';

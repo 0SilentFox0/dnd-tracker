@@ -14,7 +14,7 @@ import type {
 } from '@/lib/utils/battle/pipeline/run-battle-mutation';
 import type { BattleDelta, LoadedBattle } from '@/lib/utils/battle/store';
 import { BattleConflictError, BattleRuleError } from '@/lib/utils/battle/store';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { BattleParticipant } from '@/types/battle';
 
 vi.mock('@/lib/i18n/request-locale', () => ({

@@ -752,15 +752,13 @@ const eslintConfig = defineConfig([
             'fixtures/zone': [
                 'error',
                 {
-                    paths: [
-                        '@/lib/utils/rules',
-                        '@/lib/utils/rules/defaults',
-                    ].map((name) => ({
-                        name,
-                        importNames: ['DEFAULT_RULES'],
-                        message:
-                            'DEFAULT_RULES is a test fixture: take the rules of the campaign, SECTION_DEFAULTS for neutral section defaults',
-                    })),
+                    patterns: [
+                        {
+                            group: ['**/__tests__/fixtures/*'],
+                            message:
+                                'DEFAULT_RULES is a test fixture: take the rules of the campaign, SECTION_DEFAULTS for neutral section defaults',
+                        },
+                    ],
                 },
             ],
         },

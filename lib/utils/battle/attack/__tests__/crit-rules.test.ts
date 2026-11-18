@@ -11,7 +11,7 @@ import { collectModifiers } from '@/lib/utils/abilities/engine/core/collect-modi
 import type { StaticEffect } from '@/lib/utils/abilities/schema';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import { resolveAttackRoll } from '@/lib/utils/battle/common/attack-roll-helpers';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { parseRules } from '@/lib/utils/rules/schema';
 import { calculateAttackRoll } from '@/systems/d20/rules/attack/roll';
 

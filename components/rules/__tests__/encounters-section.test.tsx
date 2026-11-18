@@ -5,7 +5,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { EncountersSection } from '../sections/EncountersSection';
 
 import type { RulesFormState } from '@/lib/hooks/campaigns';
-import { DEFAULT_RULES, type Ruleset } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
+import { type Ruleset } from '@/lib/utils/rules';
 
 const formOf = (data: Ruleset) =>
     ({ data, set: vi.fn() }) as unknown as RulesFormState & {

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { AttackType, ParticipantSide } from '@/lib/constants/battle';
 import { processAttack } from '@/lib/utils/battle/attack';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { BattleAttack, BattleParticipant } from '@/types/battle';
 
 describe('Multi-target Attack Logic', () => {

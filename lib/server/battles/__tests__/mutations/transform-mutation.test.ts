@@ -6,7 +6,7 @@ import { context, goblin, participant } from './fixtures';
 import '@/lib/server/systems/registry';
 import { createSpellMutation } from '@/lib/server/battles/mutations/spell/spell-mutation';
 import { revertExpiredTransforms } from '@/lib/utils/battle/transform/revert';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { BattleParticipant } from '@/types/battle';
 
 const frog = {

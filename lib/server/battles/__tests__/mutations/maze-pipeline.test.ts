@@ -37,7 +37,7 @@ import {
     joinParticipant,
     splitParticipant,
 } from '@/lib/utils/battle/store';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { BattleMutationResponse, BattleScene } from '@/types/api';
 import type { BattleParticipant } from '@/types/battle';
 import type {

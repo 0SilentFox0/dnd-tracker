@@ -21,7 +21,7 @@ import {
     spellTargetInRange,
 } from '@/lib/utils/battle/flows';
 import type { MapAim, MapPick } from '@/lib/utils/battle/grid';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { AttackData, BattleScene } from '@/types/api';
 import type { BackgroundData } from '@/types/backgrounds';
 import type { GameClassData } from '@/types/classes';

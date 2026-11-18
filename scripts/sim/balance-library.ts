@@ -61,7 +61,7 @@ import {
     usableAbilities,
 } from '@/lib/utils/battle/view';
 import { rollDiceList } from '@/lib/utils/common/dice';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import {
     branchLevelNodeId,
     canLearn,

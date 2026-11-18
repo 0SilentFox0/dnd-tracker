@@ -23,7 +23,7 @@ import {
     sorcerer,
 } from '@/lib/utils/characters/choices/__tests__/fixtures';
 import * as featRows from '@/lib/utils/feats/row';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { parseRules } from '@/lib/utils/rules/schema';
 import type { BackgroundData } from '@/types/backgrounds';
 

@@ -8,7 +8,7 @@ import { context } from '@/lib/server/battles/__tests__/mutations/fixtures';
 import { critEffectsFor } from '@/lib/utils/battle/crit-choice/catalog';
 import { publicPending } from '@/lib/utils/battle/pipeline/public-pending';
 import type { MutationResult } from '@/lib/utils/battle/pipeline/run-battle-mutation';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 const info: CritTriggerInfo = {
     source: 'attack',

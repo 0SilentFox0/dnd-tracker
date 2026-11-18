@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { MoveHook, MoveHookInput } from '@/lib/utils/rules/systems/types';
 import type { BattleParticipant } from '@/types/battle';
 

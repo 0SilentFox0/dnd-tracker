@@ -341,7 +341,7 @@ export function buildOffTurnAction(p: BuildOffTurnParams): BattleAction {
         title: p.title ?? textRef('battleLog.offTurn.titles.retaliation'),
         attacker: retaliator.basicInfo.name,
         target: target.basicInfo.name,
-        d20,
+        checkRoll: d20,
         crit: critText,
     };
 

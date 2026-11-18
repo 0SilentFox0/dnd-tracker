@@ -12,7 +12,7 @@ import {
     splitParticipant,
 } from '@/lib/utils/battle/store/split-participant';
 import type { UnitFromPrisma } from '@/lib/utils/battle/types/participant';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { lairStateOf } from '@/systems/lair/rules/state';
 
 const homm = (over: Partial<UnitFromPrisma> = {}) =>

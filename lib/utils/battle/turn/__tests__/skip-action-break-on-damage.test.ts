@@ -12,7 +12,7 @@ import { applyEffect } from '@/lib/utils/abilities/registry/effects';
 import type { Effect } from '@/lib/utils/abilities/schema';
 import { applyDamageToTarget } from '@/lib/utils/battle/attack/process/damage';
 import { processStartOfTurn } from '@/lib/utils/battle/turn/start-end';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 function cast(effect: Effect) {
     const ps = [

@@ -11,7 +11,7 @@ import {
     spellPayload,
 } from '@/lib/utils/battle/flows';
 import { isGrantLive } from '@/lib/utils/battle/spell/inline-grant';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { SpellGrant } from '@/types/battle';
 import type { BookSpell } from '@/types/spells';
 

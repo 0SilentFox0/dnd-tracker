@@ -7,7 +7,7 @@ import {
     applyBattleDelta,
     prependBattleLog,
 } from '@/lib/utils/battle/client/apply-delta';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import {
     momentumOf,
     sceneOf,

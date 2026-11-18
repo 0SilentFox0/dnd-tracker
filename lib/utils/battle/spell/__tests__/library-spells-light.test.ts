@@ -19,7 +19,7 @@ import { resolveSpellTargets } from '@/lib/utils/battle/spell/spell-targeting';
 import type { BattleSceneState } from '@/lib/utils/battle/store';
 import { advanceTurn } from '@/lib/utils/battle/turn';
 import type { CastableSpell } from '@/lib/utils/battle/types/spell-process';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
 
 const spellOf = (key: string): CastableSpell => {

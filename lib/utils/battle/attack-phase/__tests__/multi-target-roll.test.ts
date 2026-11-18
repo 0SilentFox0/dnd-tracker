@@ -11,7 +11,7 @@ import {
 import { placed, testMap } from '@/lib/utils/battle/__tests__/fixtures/placed';
 import { eventTextOf } from '@/lib/utils/battle/log/__tests__/event-text';
 import { REJECT } from '@/lib/utils/battle/store/reject';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
 
 const sword: BattleAttack = {

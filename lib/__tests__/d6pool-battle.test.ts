@@ -7,7 +7,7 @@ import { D6POOL_SERVER } from '@/lib/__tests__/fixtures/d6pool/server';
 import { AttackType, ParticipantSide } from '@/lib/constants/battle';
 import { noActions } from '@/lib/utils/battle/actions/none';
 import type { BattleMutationContext } from '@/lib/utils/battle/pipeline/run-battle-mutation';
-import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { SYSTEM_ROOTS } from '@/scripts/shared/system-ratchet';
 import type { BattleAttack } from '@/types/battle';
 

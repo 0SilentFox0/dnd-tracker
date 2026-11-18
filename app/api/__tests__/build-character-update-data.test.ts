@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { buildCharacterUpdateData } from '@/lib/server/characters/core/build-character-update-data';
-import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { parseRules } from '@/lib/utils/rules/schema';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 

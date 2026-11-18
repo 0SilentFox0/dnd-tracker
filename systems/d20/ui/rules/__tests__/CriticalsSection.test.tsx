@@ -9,7 +9,7 @@ import '@/components/ui/__tests__/match-media';
 vi.unmock('next-intl');
 
 import { renderWithIntl } from '@/lib/i18n/test/render-with-intl';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 const form = { data: DEFAULT_RULES, set: vi.fn() } as unknown as Parameters<
     typeof CriticalsSection

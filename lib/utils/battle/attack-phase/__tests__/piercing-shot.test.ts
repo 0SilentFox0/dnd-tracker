@@ -6,7 +6,7 @@ import { piercingShot } from '@/data/library/unit-abilities';
 import { AttackType, ParticipantSide } from '@/lib/constants/battle';
 import { resolved, seq } from '@/lib/utils/abilities/__tests__/fixtures';
 import { placed, testMap } from '@/lib/utils/battle/__tests__/fixtures/placed';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
 import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 

@@ -18,7 +18,7 @@ vi.mock('@/components/systems/SystemDmPage', () => ({
 
 import DMSystemSectionPage from '../page';
 
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 const rulesOf = (key: string) => ({ ...DEFAULT_RULES, system: { key } });
 

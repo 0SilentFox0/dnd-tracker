@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import '@/lib/server/systems/registry';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 vi.mock('server-only', () => ({}));
 

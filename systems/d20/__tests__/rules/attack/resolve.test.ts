@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { AttackType, ParticipantSide } from '@/lib/constants/battle';
 import { textRef } from '@/lib/i18n/text-ref';
 import { placed } from '@/lib/utils/battle/__tests__/fixtures/placed';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { ResolveAttackCtx } from '@/lib/utils/rules/systems/types';
 import type { BattleAttack } from '@/types/battle';

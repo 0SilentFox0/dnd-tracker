@@ -20,7 +20,7 @@ import { isReserved } from '@/lib/utils/battle/participant/reserve';
 import type { BattleMutationContext } from '@/lib/utils/battle/pipeline/run-battle-mutation';
 import { buildSnapshotState } from '@/lib/utils/battle/store';
 import { checkVictoryConditions as checkVictory } from '@/lib/utils/battle/turn/victory';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { BattleParticipant } from '@/types/battle';
 import type {
     BattleMapConfig,

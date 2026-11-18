@@ -5,7 +5,7 @@ import { draftChoiceFields } from '../../../draft/draft-choices';
 import '@/lib/server/systems/registry';
 import { prisma } from '@/lib/db';
 import * as apiAuth from '@/lib/utils/api/api-auth';
-import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 vi.mock('server-only', () => ({}));
 vi.mock('@/lib/utils/api/api-auth', () => ({ requireCampaignAccess: vi.fn() }));

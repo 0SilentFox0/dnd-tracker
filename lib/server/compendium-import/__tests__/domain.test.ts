@@ -6,7 +6,7 @@ import { createSpellSchema } from '@/lib/schemas/spells';
 import { makeParticipant } from '@/lib/utils/abilities/__tests__/fixtures';
 import { classFeatureAbilities } from '@/lib/utils/abilities/read';
 import { castSpell } from '@/lib/utils/battle/spell/cast';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { assertManualActivation } from '@/lib/utils/spells/model/execution';
 import {
     readSpellDefinition,

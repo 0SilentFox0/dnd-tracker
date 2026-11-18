@@ -7,7 +7,7 @@ import {
     hero,
 } from '@/lib/server/battles/__tests__/mutations/fixtures';
 import { eventTextOf } from '@/lib/utils/battle/log/__tests__/event-text';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
 import {

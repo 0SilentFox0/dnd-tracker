@@ -12,7 +12,7 @@ import {
     modeWalls,
 } from '@/lib/utils/battle/modes/engine';
 import { assertAbilityAim } from '@/lib/utils/battle/validation/ability-aim';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { ResolvedAbility } from '@/types/abilities';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
 import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';

@@ -4,7 +4,7 @@ import { AttackType, ParticipantSide } from '@/lib/constants/battle';
 import { grantPassive } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import { computeDamageBreakdown } from '@/lib/utils/battle/damage';
 import { rowLines, textsOf } from '@/lib/utils/battle/log/__tests__/event-text';
-import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
 
 function createBaseParticipant(

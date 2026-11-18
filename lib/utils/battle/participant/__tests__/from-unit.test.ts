@@ -9,7 +9,7 @@ vi.mock('@/lib/db', () => ({
 import { ParticipantSide } from '@/lib/constants/battle';
 import { createBattleParticipantFromUnit } from '@/lib/utils/battle/participant/from-unit';
 import type { UnitFromPrisma } from '@/lib/utils/battle/types/participant';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 const orc = {
     id: 'r1',

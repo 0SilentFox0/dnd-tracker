@@ -23,7 +23,7 @@ import { render } from '@/lib/i18n/test/render-uk';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import type { FxImpact } from '@/lib/utils/battle/fx';
 import { buildDisplayEffects, turnQueue } from '@/lib/utils/battle/view';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { BattleScene } from '@/types/api';
 import type { ActiveEffect } from '@/types/battle';
 import type { BattleAction } from '@/types/battle-actions';

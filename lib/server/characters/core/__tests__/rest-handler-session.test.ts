@@ -4,7 +4,7 @@ import { API_ERRORS } from '@/lib/constants/api-errors';
 import { CharacterLogKind } from '@/lib/constants/character-log';
 import { ContentError } from '@/lib/server/content/errors';
 import { applyRest } from '@/lib/utils/characters/resources/rest';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
 
 vi.mock('server-only', () => ({}));

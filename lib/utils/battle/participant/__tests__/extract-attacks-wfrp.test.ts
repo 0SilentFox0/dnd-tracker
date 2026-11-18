@@ -9,7 +9,7 @@ import { makeParticipant } from '@/lib/utils/abilities/__tests__/fixtures';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import { attackReachError } from '@/lib/utils/battle/grid/attack-reach';
 import type { CharacterFromPrisma } from '@/lib/utils/battle/types/participant';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { DEFAULT_CHARACTERISTICS } from '@/systems/wfrp/rules/characteristics/keys';
 import { extractWfrpAttacks } from '@/systems/wfrp/rules/combat/extract-attacks';
 import { mitigateWfrpDamage } from '@/systems/wfrp/rules/combat/mitigate';

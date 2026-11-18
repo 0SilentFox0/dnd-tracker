@@ -26,7 +26,7 @@ import {
     LimitsSchema,
 } from '@/lib/utils/abilities/schema';
 import { renderSegment, renderSegments } from '@/lib/utils/abilities/segments';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 describe('scale refs in the schema', () => {
     it('Flat, Amount and perRest.uses accept { scale }; uses also { formula }', () => {

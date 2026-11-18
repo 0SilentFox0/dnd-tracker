@@ -4,7 +4,7 @@ import { AttackType, ParticipantSide } from '@/lib/constants/battle';
 import { textOf } from '@/lib/i18n/test/text';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import { computeDamageBreakdown } from '@/lib/utils/battle/damage';
-import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { BattleAttack } from '@/types/battle';
 
 const base = createMockParticipant();

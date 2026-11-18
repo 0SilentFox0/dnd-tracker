@@ -8,7 +8,7 @@ import {
     scores,
     sorcerer,
 } from '@/lib/utils/characters/choices/__tests__/fixtures';
-import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 vi.mock('server-only', () => ({}));
 vi.mock('@/lib/server/characters/access', () => ({

@@ -24,7 +24,7 @@ import { calculateInitiative } from '@/lib/utils/battle/turn/initiative';
 import { runAdvanceTurnLoop } from '@/lib/utils/battle/turn/run-advance-turn-loop';
 import { processStartOfTurn } from '@/lib/utils/battle/turn/start-end';
 import type { CastableSpell } from '@/lib/utils/battle/types/spell-process';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { effectiveMorale } from '@/systems/morale/rules/effective-morale';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
 

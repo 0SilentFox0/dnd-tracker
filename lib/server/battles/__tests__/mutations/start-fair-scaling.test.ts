@@ -108,7 +108,7 @@ vi.mock('@/lib/db', () => {
 });
 
 import { buildStartOrder } from '@/lib/server/battles/mutations/start/start-battle-handler';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 const setup = [
     ...DATA.heroes.map((h) => ({

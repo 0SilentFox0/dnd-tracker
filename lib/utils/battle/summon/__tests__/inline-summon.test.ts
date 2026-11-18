@@ -18,7 +18,7 @@ import { applyAbilitySummons } from '@/lib/utils/battle/summon/ability-summons';
 import { dismissExpiredSummons } from '@/lib/utils/battle/summon/dismiss';
 import { checkVictoryConditions as checkVictory } from '@/lib/utils/battle/turn/victory';
 import type { CastableSpell } from '@/lib/utils/battle/types/spell-process';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type {
     SpellEffect,
     SummonInlineEffect,

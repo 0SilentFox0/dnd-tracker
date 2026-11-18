@@ -6,7 +6,7 @@ import { onslaught } from '@/data/library/units/mages';
 import { collectModifiers } from '@/lib/utils/abilities/engine/core/collect-modifiers';
 import { runAbilities } from '@/lib/utils/abilities/engine/core/run-abilities';
 import { withinLimits } from '@/lib/utils/abilities/engine/core/usage';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 describe('Натиск', () => {
     const ability = resolved(onslaught, { type: 'unit', id: 'kshatriya' });

@@ -14,7 +14,7 @@ import {
 } from '@/lib/utils/abilities/registry/effects';
 import { EffectSchema } from '@/lib/utils/abilities/schema';
 import { renderSegments } from '@/lib/utils/abilities/segments';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 const t = await ukT();
 

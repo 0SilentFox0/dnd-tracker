@@ -5,7 +5,7 @@ import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/moc
 import { buildClientDelta } from '@/lib/utils/battle/pipeline/client-delta';
 import { PUSHER_DELTA_LIMIT_BYTES } from '@/lib/utils/battle/pipeline/limits';
 import type { BattleSceneState } from '@/lib/utils/battle/store';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import {
     momentumOf,
     sceneOf,

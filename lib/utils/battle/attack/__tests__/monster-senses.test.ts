@@ -5,7 +5,7 @@ import { resolved } from '@/lib/utils/abilities/__tests__/fixtures';
 import { EffectSchema } from '@/lib/utils/abilities/schema';
 import { CLAWS, placed } from '@/lib/utils/battle/__tests__/fixtures/placed';
 import { rollModeReasons } from '@/lib/utils/battle/attack/bonus';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { applyCondition5e } from '@/systems/d20/rules/conditions/apply';
 import type { Condition5eKey } from '@/systems/d20/rules/conditions/keys';
 import type { BattleParticipant } from '@/types/battle';

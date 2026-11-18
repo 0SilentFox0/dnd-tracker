@@ -6,7 +6,7 @@ import { AttackType } from '@/lib/constants/battle';
 import { getHeroDamageDiceForLevel } from '@/lib/constants/hero-scaling';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import { attackDamageParts } from '@/lib/utils/battle/damage/attack-parts';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import { defaultRulesFor } from '@/lib/utils/rules/section-registry';
 import type { BattleAttack } from '@/types/battle';

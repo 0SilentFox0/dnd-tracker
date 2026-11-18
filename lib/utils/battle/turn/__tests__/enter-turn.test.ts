@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { makeParticipant } from '@/lib/utils/abilities/__tests__/fixtures';
 import { enterChangedTurn } from '@/lib/utils/battle/turn/enter-turn';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 const spent = (id: string) => {
     const p = makeParticipant({ id });

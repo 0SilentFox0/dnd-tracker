@@ -16,7 +16,7 @@ import {
 import { applyRawDamage } from '@/lib/utils/abilities/engine/effects/hp';
 import { upsertTimedEffect } from '@/lib/utils/abilities/engine/effects/timed-effects';
 import { rollDice } from '@/lib/utils/common/dice';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 describe('amount', () => {
     it('кидає кубики через rng', () => {

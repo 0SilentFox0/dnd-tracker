@@ -8,7 +8,7 @@ import {
 import type { LoadedBattle } from '@/lib/utils/battle/store';
 import { BattleConflictError } from '@/lib/utils/battle/store/errors';
 import * as victory from '@/lib/utils/battle/turn/victory';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 const loaded = {
     scene: {

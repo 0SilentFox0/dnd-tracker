@@ -39,7 +39,7 @@ import {
     KNOWLEDGE_EVENT_TYPES,
     summarizeKnowledge,
 } from '@/lib/utils/battle/view/knowledge';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { BattleMutationResponse, BattleScene } from '@/types/api';
 import type { ActiveEffect, BattleParticipant } from '@/types/battle';
 

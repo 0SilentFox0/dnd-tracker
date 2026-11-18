@@ -12,7 +12,7 @@ import {
 } from '@/lib/utils/battle/balance/unit-library';
 import { createBattleParticipantFromUnit } from '@/lib/utils/battle/participant/from-unit';
 import type { UnitFromPrisma } from '@/lib/utils/battle/types/participant';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { unitRow } from '@/scripts/seed/seed-library-lib';
 
 const maps = {

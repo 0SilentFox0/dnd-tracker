@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { localSource } from '@/lib/i18n/local-source';
 import { translateIssue } from '@/lib/i18n/translate-issue';
 import type { Translator } from '@/lib/i18n/translator';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { CharacterHpInput } from '@/lib/utils/rules/systems/types';
 import { heroBaseHp as baseHp } from '@/systems/heroscaling/rules/hero-hp';
 

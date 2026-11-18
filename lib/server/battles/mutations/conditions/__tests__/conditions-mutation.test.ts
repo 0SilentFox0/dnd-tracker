@@ -13,7 +13,7 @@ import {
 } from '@/lib/server/battles/__tests__/mutations/fixtures';
 import { hasCondition } from '@/lib/utils/battle/conditions';
 import { eventTextOf } from '@/lib/utils/battle/log/__tests__/event-text';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import {
     beginConcentration,
     hasConcentration,

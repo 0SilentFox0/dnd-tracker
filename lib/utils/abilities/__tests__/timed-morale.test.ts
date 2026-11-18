@@ -5,7 +5,7 @@ import { makeParticipant, resolved, seq } from './fixtures';
 import { textOf } from '@/lib/i18n/test/text';
 import { runAbilities } from '@/lib/utils/abilities/engine/core/run-abilities';
 import { AbilitySchema } from '@/lib/utils/abilities/schema';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { AbilityEvent } from '@/types/abilities';
 
 const bonusAction = (key: string) =>

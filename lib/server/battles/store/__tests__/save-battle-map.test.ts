@@ -8,7 +8,7 @@ import type {
     BattleMutationOutcome,
     LoadedBattle,
 } from '@/lib/utils/battle/store/types';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { BattleMapConfig } from '@/types/battle-grid';
 
 const map: BattleMapConfig = {

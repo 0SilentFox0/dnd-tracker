@@ -446,7 +446,7 @@ export interface SheetPercentileRollResult {
 }
 
 export interface SheetD20RollResult {
-    kind: 'd20';
+    kind: 'check';
     label: string;
     rolls: number[];
     roll: number;

@@ -8,7 +8,7 @@ import { mazeMap } from '@/lib/utils/battle/modes/maze/__tests__/fixtures';
 import type { BattleSceneState } from '@/lib/utils/battle/store';
 import { advanceTurn } from '@/lib/utils/battle/turn';
 import { checkVictoryConditions as checkVictory } from '@/lib/utils/battle/turn/victory';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { BattleParticipant } from '@/types/battle';
 
 const checkVictoryConditions = (

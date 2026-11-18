@@ -12,7 +12,7 @@ import {
 import { hashJson } from '@/lib/utils/battle/store/stable-json';
 import type { StoredParticipant } from '@/lib/utils/battle/store/types';
 import { resetTurnState } from '@/lib/utils/battle/turn/turn-state';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { retaliationsUsedOf } from '@/systems/retaliation/rules/state';
 import type { BattleParticipant } from '@/types/battle';
 

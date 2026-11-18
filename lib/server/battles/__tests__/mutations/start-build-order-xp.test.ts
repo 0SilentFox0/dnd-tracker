@@ -31,7 +31,7 @@ vi.mock('@/lib/utils/battle/participant', () => ({
 import { ParticipantSide } from '@/lib/constants/battle';
 import { buildStartOrder } from '@/lib/server/battles/mutations/start/start-battle-handler';
 import { makeParticipant } from '@/lib/utils/abilities/__tests__/fixtures';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 const setup = [
     { id: 'h1', type: 'character' as const, side: ParticipantSide.ALLY },

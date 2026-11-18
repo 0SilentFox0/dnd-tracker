@@ -22,7 +22,7 @@ import { splitGuardedDamage } from '@/lib/utils/battle/attack/process/guard';
 import { runAttackPhase } from '@/lib/utils/battle/attack-phase/run-attack-phase';
 import { participantImmuneToSpell } from '@/lib/utils/battle/spell/spell-immunity';
 import { spellTargetingFor } from '@/lib/utils/battle/spell/spell-targeting';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { AbilityEvent } from '@/types/abilities';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
 

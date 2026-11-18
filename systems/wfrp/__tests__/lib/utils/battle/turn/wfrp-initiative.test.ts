@@ -12,7 +12,7 @@ import {
     compareInitiative,
 } from '@/lib/utils/battle/turn/initiative';
 import { rollInitiative } from '@/lib/utils/battle/turn/roll-initiative';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import {
     type Characteristics,
     DEFAULT_CHARACTERISTICS,

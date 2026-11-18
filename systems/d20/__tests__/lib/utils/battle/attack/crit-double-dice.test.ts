@@ -8,7 +8,7 @@ import { computeDamageBreakdown } from '@/lib/utils/battle/damage';
 import { attackDamageParts } from '@/lib/utils/battle/damage/attack-parts';
 import { eventTextOf } from '@/lib/utils/battle/log/__tests__/event-text';
 import { diceCount } from '@/lib/utils/common/dice';
-import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { parseRules } from '@/lib/utils/rules/schema';
 import type { BattleAttack } from '@/types/battle';
 

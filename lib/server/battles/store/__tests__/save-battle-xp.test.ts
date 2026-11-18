@@ -14,7 +14,8 @@ import type {
     LoadedBattle,
     NewBattleEvent,
 } from '@/lib/utils/battle/store/types';
-import { DEFAULT_RULES, type Ruleset } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
+import { type Ruleset } from '@/lib/utils/rules';
 import type { BattleParticipant } from '@/types/battle';
 
 const hero = (id: string, sourceId: string): BattleParticipant => {

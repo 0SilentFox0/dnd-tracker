@@ -106,8 +106,8 @@
   "offTurn": {
     "hitPercentile": "{title}: {attacker} → {target}: d100 {roll}, {damage} шкоди{plainCrit}{crit}",
     "missPercentile": "{title}: {attacker} → {target}: d100 {roll}, промах{crit}",
-    "hit": "{title}: {attacker} → {target}: d20 {d20}, {damage} шкоди{plainCrit}{crit}",
-    "miss": "{title}: {attacker} → {target}: d20 {d20}, промах{crit}",
+    "hit": "{title}: {attacker} → {target}: d20 {checkRoll}, {damage} шкоди{plainCrit}{crit}",
+    "miss": "{title}: {attacker} → {target}: d20 {checkRoll}, промах{crit}",
     "second": "🎲 {noun}, {mode}: другий d20 = {value}",
     "titles": {
       "retaliation": "Відсіч",

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { characteristicsPatch } from '@/lib/server/characters/core/characteristics-patch';
-import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 
 const system = ruleSystemOf(DEFAULT_RULES);

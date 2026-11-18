@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { TablesSection } from '../TablesSection';
 
 import '@/components/ui/__tests__/match-media';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { DEFAULT_TABLES } from '@/systems/wfrp/rules/tables/defaults';
 import type { TableRow } from '@/systems/wfrp/rules/tables/schema';
 

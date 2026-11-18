@@ -11,7 +11,7 @@ import { applyEffect } from '@/lib/utils/abilities/registry/effects';
 import type { Effect } from '@/lib/utils/abilities/schema';
 import { segmentsLine } from '@/lib/utils/abilities/segments';
 import { hashJson } from '@/lib/utils/battle/store/stable-json';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import {
     monsterSenseAbilities,
     multiattackAbilities,

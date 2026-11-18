@@ -6,7 +6,7 @@ import { API_ERRORS } from '@/lib/constants/api-errors';
 import { prisma } from '@/lib/db';
 import { resolveAvatarForPersistence } from '@/lib/supabase/avatar-storage';
 import * as apiAuth from '@/lib/utils/api/api-auth';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 vi.mock('@/lib/utils/api/api-auth', () => ({
     requireCampaignAccess: vi.fn(),

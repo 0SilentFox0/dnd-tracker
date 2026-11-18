@@ -5,7 +5,7 @@ import {
     buildCharacterSheet,
     type SheetInput,
 } from '@/lib/utils/characters/sheet';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { woundsMax } from '@/systems/wfrp/rules/characteristics/derive';
 import { CharacteristicsSchema } from '@/systems/wfrp/rules/characteristics/schema';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';

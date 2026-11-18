@@ -23,7 +23,7 @@ import {
     unitMember,
     type UnitStats,
 } from '@/lib/utils/battle/balance';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
 
 const unit = (

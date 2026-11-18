@@ -25,7 +25,7 @@ describe('WFRP_MODULE_SERVER.battle', () => {
             '@/lib/server/battles/operations'
         );
 
-        const { DEFAULT_RULES } = await import('@/lib/utils/rules');
+        const { DEFAULT_RULES } = await import('@/lib/utils/rules/__tests__/fixtures/default-rules');
 
         const def = await getBattleOperation('channel', {
             id: 'c',

@@ -56,7 +56,7 @@ import {
     projectInput,
 } from '@/lib/utils/compendium-import/flow';
 import { itemStatsFromRow } from '@/lib/utils/items/item-row';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { awaitsMoraleCheck } from '@/systems/morale/rules/awaits-check';
 
 // Raw JSON battle state is probed structurally, as before

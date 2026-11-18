@@ -63,7 +63,7 @@ async function main() {
         '@/lib/server/campaigns/create-campaign'
     );
 
-    const { DEFAULT_RULES } = await import('@/lib/utils/rules/defaults');
+    const { DEFAULT_RULES } = await import('@/lib/utils/rules/__tests__/fixtures/default-rules');
 
     const { withStoredColumns } = await import(
         '@/lib/utils/rules/systems/column-view'

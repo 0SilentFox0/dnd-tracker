@@ -5,7 +5,7 @@ import { placed } from '@/lib/utils/battle/__tests__/fixtures/placed';
 import { deriveMapScene, type MapSceneActor } from '@/lib/utils/battle/grid';
 import { deriveMazeView } from '@/lib/utils/battle/modes/maze';
 import { mazeMap } from '@/lib/utils/battle/modes/maze/__tests__/fixtures';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { BattleParticipant } from '@/types/battle';
 import type {
     BattleMapConfig,

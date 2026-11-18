@@ -18,7 +18,7 @@ import {
     setRule,
 } from '../sections';
 
-import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { composition } from '@/lib/utils/rules/systems/catalog';
 import { CompositionError } from '@/lib/utils/rules/systems/compose';
 import { DEFAULT_ADVANCEMENT_RULES } from '@/systems/wfrp/rules/advancement/rules';

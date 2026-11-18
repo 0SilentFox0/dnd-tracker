@@ -9,7 +9,7 @@ import {
     type CounterStrikeInput,
     type CounterStrikeResult,
 } from '@/lib/utils/battle/attack/counter-strike';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { retaliationAfterAttack } from '@/systems/retaliation/rules/after-attack';
 import type { ResolvedAbility } from '@/types/abilities';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';

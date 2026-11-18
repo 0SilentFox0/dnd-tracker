@@ -9,7 +9,7 @@ vi.mock('@/lib/db', () => ({
 import { AttackType, ParticipantSide } from '@/lib/constants/battle';
 import { createBattleParticipantFromUnit } from '@/lib/utils/battle/participant/from-unit';
 import type { UnitFromPrisma } from '@/lib/utils/battle/types/participant';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { parseRules } from '@/lib/utils/rules/schema';
 import { slotStats } from '@/systems/wfrp/rules/__tests__/slot-fixtures';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';

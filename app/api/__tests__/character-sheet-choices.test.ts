@@ -25,7 +25,7 @@ import { buildSheetFor } from '@/lib/server/characters/core/sheet-handler';
 import { buildCharacterParticipant } from '@/lib/server/characters/participant';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import { elf } from '@/lib/utils/characters/choices/__tests__/fixtures';
-import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 const character = {
     id: 'h',

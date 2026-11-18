@@ -15,7 +15,7 @@ import {
     parseArmorProficiency,
     parseWeaponProficiency,
 } from '@/lib/utils/battle/proficiency';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { rollSave } from '@/systems/d20/rules/saves/roll-save';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
 

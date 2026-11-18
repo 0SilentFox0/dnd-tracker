@@ -13,7 +13,7 @@ import {
 } from '@/lib/utils/abilities/__tests__/fixtures';
 import type { FlagKey } from '@/lib/utils/abilities/schema';
 import { resolveRetaliation } from '@/lib/utils/battle/attack/__tests__/helpers';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
 
 const sword: BattleAttack = {

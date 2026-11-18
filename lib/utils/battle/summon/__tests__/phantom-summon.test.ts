@@ -7,7 +7,7 @@ import {
 } from '@/lib/utils/abilities/__tests__/fixtures';
 import { applyAbilitySummons } from '@/lib/utils/battle/summon/ability-summons';
 import { dismissPhantoms } from '@/lib/utils/battle/summon/phantom-summon';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 const run = (
     order: ReturnType<typeof makeParticipant>[],

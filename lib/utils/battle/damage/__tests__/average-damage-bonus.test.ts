@@ -5,7 +5,7 @@ import { textOf } from '@/lib/i18n/test/text';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import { averageAttackDamage } from '@/lib/utils/battle/damage/average';
 import { attackSheet } from '@/lib/utils/characters/sheet/lines';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { BattleAttack } from '@/types/battle';
 
 const bow = {

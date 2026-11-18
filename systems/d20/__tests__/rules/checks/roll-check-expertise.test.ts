@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { checkBonus } from '@/systems/d20/rules/checks/roll-check';
 import type { BattleParticipant } from '@/types/battle';
 

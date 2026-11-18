@@ -11,7 +11,7 @@ import {
     resolveDowned,
     runAbilities,
 } from '@/lib/utils/abilities/engine/core/run-abilities';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 const ctx = { round: 1, rng: seq(0), rules: DEFAULT_RULES };
 

@@ -3,7 +3,8 @@ import { describe, expect, it } from 'vitest';
 import '@/lib/server/systems/registry';
 import { ParticipantSide } from '@/lib/constants/battle';
 import { createBattleParticipantFromCharacter } from '@/lib/server/battles/participant/from-character';
-import { DEFAULT_RULES, type Ruleset } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
+import { type Ruleset } from '@/lib/utils/rules';
 import { parseRules } from '@/lib/utils/rules/schema';
 import type { GameClassData } from '@/types/classes';
 

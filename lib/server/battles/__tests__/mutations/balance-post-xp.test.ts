@@ -113,7 +113,8 @@ vi.mock('@/lib/db', () => {
 
 import { postBalanceResponse } from '@/lib/server/battles/balance/balance-post';
 import { balanceSchema } from '@/lib/server/battles/balance/balance-schema';
-import { DEFAULT_RULES, type Ruleset } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
+import { type Ruleset } from '@/lib/utils/rules';
 
 const allies = { characterIds: ['h1', 'h2', 'h3', 'h4'], units: [] };
 

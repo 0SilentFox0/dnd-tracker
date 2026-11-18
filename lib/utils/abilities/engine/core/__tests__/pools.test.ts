@@ -14,7 +14,7 @@ import {
     withinCountLimits,
 } from '@/lib/utils/abilities/engine/core/usage';
 import { abilityOptions, poolViews } from '@/lib/utils/battle/view';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { BattleParticipant } from '@/types/battle';
 
 const KEY = 'pool:monk:focus-points';

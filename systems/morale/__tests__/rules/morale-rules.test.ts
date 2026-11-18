@@ -6,7 +6,7 @@ import {
     seq,
 } from '@/lib/utils/abilities/__tests__/fixtures';
 import { applyEffect } from '@/lib/utils/abilities/registry/effects';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { awaitsMoraleCheck } from '@/systems/morale/rules/awaits-check';
 import { effectiveMorale } from '@/systems/morale/rules/effective-morale';
 import type { BattleParticipant } from '@/types/battle';

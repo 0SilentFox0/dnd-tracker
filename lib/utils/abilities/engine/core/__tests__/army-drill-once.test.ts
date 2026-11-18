@@ -9,7 +9,7 @@ import {
 import { collectModifiers } from '@/lib/utils/abilities/engine/core/collect-modifiers';
 import { runAbilities } from '@/lib/utils/abilities/engine/core/run-abilities';
 import type { Ability } from '@/lib/utils/abilities/schema';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 describe('Вишкіл війська', () => {
     it('дає +1 до моралі раз на сторону, а не на кожного юніта раси', () => {

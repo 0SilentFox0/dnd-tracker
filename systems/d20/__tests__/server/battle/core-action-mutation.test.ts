@@ -7,7 +7,7 @@ import {
 } from '@/lib/server/battles/__tests__/mutations/fixtures';
 import { BattleAccessError } from '@/lib/utils/battle/store';
 import { REJECT } from '@/lib/utils/battle/store/reject';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { coreActionMutation } from '@/systems/d20/server/battle/core-action-mutation';
 
 const on = (over: Parameters<typeof context>[0] = {}) => {

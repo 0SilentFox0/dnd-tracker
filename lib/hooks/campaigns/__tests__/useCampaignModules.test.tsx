@@ -9,7 +9,7 @@ import { updateCampaignRules } from '@/lib/api/rules';
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { useCampaignModules } from '@/lib/hooks/campaigns';
 import { campaignKeys } from '@/lib/hooks/campaigns/keys';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { CampaignRulesView } from '@/types/campaigns';
 
 const refresh = vi.fn();

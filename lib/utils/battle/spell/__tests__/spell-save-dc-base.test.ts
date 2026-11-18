@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import { spellSaveDc } from '@/lib/utils/battle/spell/save-dc';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 describe('spellSaveDc з базою кампанії', () => {
     const p = createMockParticipant();

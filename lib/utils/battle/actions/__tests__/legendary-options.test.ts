@@ -15,7 +15,7 @@ import {
     spendLegendary,
 } from '@/lib/utils/battle/actions/legendary-options';
 import { resetTurnState } from '@/lib/utils/battle/turn/turn-state';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { BattleParticipant } from '@/types/battle';
 
 const wing = resolved({

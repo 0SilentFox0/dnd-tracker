@@ -13,7 +13,7 @@ import {
 
 import { getBattleVersion } from '@/lib/api/battles';
 import { audioState } from '@/lib/utils/audio/__tests__/fixtures';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { BattleScene } from '@/types/api';
 
 vi.mock('@/lib/api/battles', () => ({ getBattleVersion: vi.fn() }));

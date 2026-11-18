@@ -93,7 +93,7 @@ vi.mock('@/lib/db', () => {
 });
 
 import { loadCharacterBalanceStats } from '@/lib/server/battles/balance/character-stats';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 describe('loadCharacterBalanceStats', () => {
     it('один контекст на всіх: без запиту на кожного персонажа, запитів не більше, ніж було (4 + 2N)', async () => {

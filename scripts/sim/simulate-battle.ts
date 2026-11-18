@@ -79,7 +79,7 @@ import { loadRecentEvents } from '@/lib/utils/battle/store';
 import { PATCHABLE_PARTICIPANT_FIELDS } from '@/lib/utils/battle/store/participant-patch';
 import { stableStringify } from '@/lib/utils/battle/store/stable-json';
 import { rollDiceList } from '@/lib/utils/common/dice';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import {
     branchLevelNodeId,
     buildTreeJson,

@@ -8,7 +8,7 @@ import { participantAttackIntent } from '@/lib/utils/battle/flows/attack-intent'
 import { placeParticipants } from '@/lib/utils/battle/grid';
 import { resolveSpellTargets } from '@/lib/utils/battle/spell/spell-targeting';
 import { needsBonusTarget } from '@/lib/utils/battle/view';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { BattleScene } from '@/types/api';
 
 const airborne = () =>

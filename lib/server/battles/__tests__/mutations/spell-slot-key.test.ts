@@ -7,7 +7,7 @@ import '@/lib/server/systems/registry';
 import { ParticipantSide } from '@/lib/constants/battle';
 import { createSpellMutation } from '@/lib/server/battles/mutations/spell/spell-mutation';
 import { casterSpellDice } from '@/lib/utils/battle/spell/caster-dice';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { BattleParticipant } from '@/types/battle';
 
 const fireball = {

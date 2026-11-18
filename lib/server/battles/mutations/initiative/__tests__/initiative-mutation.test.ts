@@ -16,7 +16,7 @@ import {
     participant,
 } from '@/lib/server/battles/__tests__/mutations/fixtures';
 import { guardTurnOrder } from '@/lib/utils/battle/pipeline/turn-order-guard';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 const three = [participant('a'), participant('b'), participant('c')];
 

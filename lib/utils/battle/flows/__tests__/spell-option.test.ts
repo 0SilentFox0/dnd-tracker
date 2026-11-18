@@ -8,7 +8,7 @@ import {
     spellFlow,
     spellPayload,
 } from '@/lib/utils/battle/flows/spell-flow';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { BookSpell } from '@/types/spells';
 
 const spell = {

@@ -3,7 +3,8 @@ import { describe, expect, it } from 'vitest';
 import { type ActionFlow, applyFlowDamage } from '../action-flow';
 
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
-import { DEFAULT_RULES, type Ruleset } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
+import { type Ruleset } from '@/lib/utils/rules';
 import { beginConcentration } from '@/systems/d20/rules/concentration/sustain';
 import type { BattleParticipant } from '@/types/battle';
 

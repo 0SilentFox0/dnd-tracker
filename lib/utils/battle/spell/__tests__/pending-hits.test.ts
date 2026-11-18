@@ -8,7 +8,7 @@ import { castSpell } from '@/lib/utils/battle/spell';
 import { resolvePendingHits } from '@/lib/utils/battle/spell/pending-hits';
 import { processStartOfTurn } from '@/lib/utils/battle/turn/turn-start';
 import type { CastableSpell } from '@/lib/utils/battle/types/spell-process';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { BattleParticipant } from '@/types/battle';
 import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 

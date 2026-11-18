@@ -6,7 +6,7 @@ import { getResponseJson } from './helpers';
 
 import { prisma } from '@/lib/db';
 import * as apiAuth from '@/lib/utils/api/api-auth';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { buildTreeJson } from '@/lib/utils/skills/progression';
 
 vi.mock('@/lib/server/notifications/notify', () => ({

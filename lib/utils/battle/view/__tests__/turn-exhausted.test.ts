@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { createMockParticipant } from '../../__tests__/fixtures/mock-participant';
 import { turnExhausted } from '../turn-exhausted';
 
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { applyCondition5e } from '@/systems/d20/rules/conditions/apply';
 
 const used = () => {

@@ -53,7 +53,7 @@ vi.mock('@/lib/server/notifications/notify', () => ({
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { CharacterLogKind } from '@/lib/constants/character-log';
 import { runCharacterOperation } from '@/lib/server/characters/operation-runner';
-import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import { preserveServerOwned } from '@/systems/wfrp/rules/advancement/privacy';
 import {

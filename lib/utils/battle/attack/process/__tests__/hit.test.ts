@@ -10,7 +10,7 @@ import {
 import { processAttack } from '@/lib/utils/battle/attack/process';
 import { computeHitDamage } from '@/lib/utils/battle/attack/process/compute';
 import { eventTextOf } from '@/lib/utils/battle/log/__tests__/event-text';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import battleTerms from '@/messages/uk/battleTerms.json';
 import type { BattleAttack } from '@/types/battle';
 

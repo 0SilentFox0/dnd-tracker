@@ -13,7 +13,7 @@ import { refreshFromSource } from '@/lib/utils/battle/participant/refresh-from-s
 import { resolveSpellTargets } from '@/lib/utils/battle/spell/spell-targeting';
 import { matchesTargetFilter } from '@/lib/utils/battle/spell/target-filter';
 import type { UnitFromPrisma } from '@/lib/utils/battle/types/participant';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { SpellTargetingSchema } from '@/lib/utils/spells/model/schema';
 
 const foe = (

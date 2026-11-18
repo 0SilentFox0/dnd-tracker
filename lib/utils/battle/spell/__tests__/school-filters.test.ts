@@ -9,7 +9,7 @@ import {
 } from '@/lib/utils/abilities/__tests__/fixtures';
 import { castSpell } from '@/lib/utils/battle/spell';
 import type { CastableSpell } from '@/lib/utils/battle/types/spell-process';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 const spellOf = (key: string): CastableSpell => {
     const s = SPELLS.find((x) => x.key === key);

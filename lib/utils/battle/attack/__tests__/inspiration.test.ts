@@ -8,7 +8,7 @@ import {
     INSPIRATION_LABEL,
     spendInspiration,
 } from '@/lib/utils/battle/attack/inspiration';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { d20State, withD20State } from '@/systems/d20/rules/state';
 import type { BattleAttack } from '@/types/battle';
 

@@ -65,7 +65,7 @@ vi.mock('@/lib/api/races', () => ({ getRaces: vi.fn(async () => []) }));
 
 import { useBattleSetup } from '../useBattleSetup';
 
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 let client: QueryClient;
 

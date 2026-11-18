@@ -6,7 +6,7 @@ import {
     seq,
 } from '@/lib/utils/abilities/__tests__/fixtures';
 import { savesOf } from '@/lib/utils/battle/saves/access';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { evasionFactor, hasEvasion } from '@/systems/d20/rules/saves/evasion';
 import { resolveSave } from '@/systems/d20/rules/saves/legendary';
 import { bestSaveAbility, rollSave } from '@/systems/d20/rules/saves/roll-save';

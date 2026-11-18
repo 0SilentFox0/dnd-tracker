@@ -14,7 +14,7 @@ import {
     ConditionSchema,
     TriggerSchema,
 } from '@/lib/utils/abilities/schema';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { AbilityEvent } from '@/types/abilities';
 import type { BattleParticipant } from '@/types/battle';
 

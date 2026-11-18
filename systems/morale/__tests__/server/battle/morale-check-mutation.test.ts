@@ -6,7 +6,7 @@ import {
     hero,
 } from '@/lib/server/battles/__tests__/mutations/fixtures';
 import { BattleAccessError } from '@/lib/utils/battle/store';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { pendingMoraleOf, pendingSlot } from '@/systems/morale/__tests__/pending';
 import { moraleCheckMutation } from '@/systems/morale/server/battle/morale-check-mutation';
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { heroBaseHp } from '@/systems/heroscaling/rules/hero-hp';
 
 const hero = { level: 10, constitution: 14, archetype: 'warrior' };

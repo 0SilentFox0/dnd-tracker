@@ -1,7 +1,7 @@
 import '@/lib/utils/rules/systems/registry';
 import { isRecord } from '@/lib/utils/common/is-record';
 import { contentRowHash } from '@/lib/utils/content/row-hash';
-import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { sectionSchemas } from '@/lib/utils/rules/section-shapes';
 import {
     composition,

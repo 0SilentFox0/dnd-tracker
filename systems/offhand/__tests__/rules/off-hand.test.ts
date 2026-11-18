@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { AttackType } from '@/lib/constants/battle';
 import { makeParticipant } from '@/lib/utils/abilities/__tests__/fixtures';
 import { resetTurnState } from '@/lib/utils/battle/turn/turn-state';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { d20State, withD20State } from '@/systems/d20/rules/state';
 import { OFF_HAND_RULES } from '@/systems/offhand/rules/off-hand';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';

@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { ParticipantSide } from '@/lib/constants/battle';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import { completeBattle } from '@/lib/utils/battle/turn/victory';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 const base = createMockParticipant();
 

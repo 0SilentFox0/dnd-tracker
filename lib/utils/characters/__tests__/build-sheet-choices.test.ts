@@ -7,7 +7,7 @@ import {
     buildCharacterSheet,
     type SheetInput,
 } from '@/lib/utils/characters/sheet';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 function input(
     over: Partial<SheetInput> = {},

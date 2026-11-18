@@ -11,7 +11,7 @@ import { isHostile } from '@/lib/utils/battle/modes/engine';
 import { castSpell } from '@/lib/utils/battle/spell';
 import { resolveSpellTargets } from '@/lib/utils/battle/spell/spell-targeting';
 import type { CastableSpell } from '@/lib/utils/battle/types/spell-process';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { IllusionPair } from '@/types/battle-grid';
 
 const ally = ParticipantSide.ALLY;

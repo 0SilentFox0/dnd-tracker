@@ -14,7 +14,7 @@ import type {
     RunBattleMutationOptions,
 } from '@/lib/utils/battle/pipeline/run-battle-mutation';
 import type { LoadedBattle } from '@/lib/utils/battle/store';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 const registry = vi.hoisted(() => ({
     definition: {} as RunBattleMutationOptions<unknown>,

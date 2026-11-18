@@ -17,7 +17,7 @@ import { textsOf } from '@/lib/utils/battle/log/__tests__/event-text';
 import { hasEffectMarker } from '@/lib/utils/battle/participant/state';
 import { REJECT } from '@/lib/utils/battle/store/reject';
 import { forgoDice } from '@/lib/utils/common/dice';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import {
     cunningStrikeCost,
     cunningStrikeOffer,

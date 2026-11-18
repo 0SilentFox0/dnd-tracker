@@ -12,7 +12,7 @@ import { processAttack } from '@/lib/utils/battle/attack/process';
 import { runAttackPhase } from '@/lib/utils/battle/attack-phase/run-attack-phase';
 import { applyObstacle } from '@/lib/utils/battle/damage/obstacle';
 import { eventTextOf } from '@/lib/utils/battle/log/__tests__/event-text';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
 import type { BattleMapConfig } from '@/types/battle-grid';
 

@@ -143,7 +143,7 @@ import { loadRecentEvents } from '@/lib/utils/battle/store';
 import { REJECT } from '@/lib/utils/battle/store/reject';
 import { checkVictoryConditions } from '@/lib/utils/battle/turn/victory';
 import { rollDiceList } from '@/lib/utils/common/dice';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { ruleSystemByKey } from '@/lib/utils/rules/systems';
 import {
     branchLevelNodeId,

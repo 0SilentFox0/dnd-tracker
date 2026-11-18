@@ -12,7 +12,7 @@ import { BattleSceneContext, BattleSceneDataContext } from '@/lib/hooks/battle';
 import type { BattleSceneValue } from '@/lib/hooks/battle/types';
 import { renderWithConfirm } from '@/lib/i18n/test/render-uk';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { BattleScene } from '@/types/api';
 
 vi.unmock('next-intl');

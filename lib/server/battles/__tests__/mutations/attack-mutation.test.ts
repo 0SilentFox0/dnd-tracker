@@ -16,7 +16,7 @@ import {
     mergeDiceFormulas,
     parseDice,
 } from '@/lib/utils/common/dice';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { pendingSlot } from '@/systems/morale/__tests__/pending';
 
 const base = createMockParticipant();

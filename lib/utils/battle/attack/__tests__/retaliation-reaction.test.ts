@@ -20,7 +20,7 @@ import { runAbilities } from '@/lib/utils/abilities/engine/core/run-abilities';
 import { testMap } from '@/lib/utils/battle/__tests__/fixtures/placed';
 import { applyCriticalEffect } from '@/lib/utils/battle/attack';
 import { processStartOfTurn } from '@/lib/utils/battle/turn/start-end';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { parseRules } from '@/lib/utils/rules/schema';
 import { retaliationsUsedOf } from '@/systems/retaliation/rules/state';
 import type { ResolvedAbility } from '@/types/abilities';

@@ -13,7 +13,7 @@ import type { SheetRest } from '@/types/characters';
 const h = vi.hoisted(() => ({
     roll: {
         mutateAsync: vi.fn(async () => ({
-            kind: 'd20',
+            kind: 'check',
             label: 'Скритність',
             rolls: [11, 20],
             roll: 20,

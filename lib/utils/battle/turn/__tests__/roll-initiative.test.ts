@@ -7,7 +7,7 @@ import {
 import { bakePassives } from '@/lib/utils/abilities/build/bake';
 import { rollInitiative as roll } from '@/lib/utils/battle/turn/roll-initiative';
 import { mulberry32 } from '@/lib/utils/common/rng';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { BattleParticipant } from '@/types/battle';
 
 const rollInitiative = (ps: BattleParticipant[], rng: () => number) =>

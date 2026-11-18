@@ -15,7 +15,7 @@ import type { MazeTools } from '@/lib/hooks/battle/modes/maze';
 import { CAMPAIGN_NAMESPACES } from '@/lib/i18n/scopes';
 import { renderWithIntl } from '@/lib/i18n/test/render-with-intl';
 import { hero } from '@/lib/server/battles/__tests__/mutations/fixtures';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import { CONDITION_5E_KEYS } from '@/systems/d20/rules/conditions/keys';
 

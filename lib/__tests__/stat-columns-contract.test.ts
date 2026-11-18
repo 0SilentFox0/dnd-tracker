@@ -8,7 +8,7 @@ import {
     CHARACTER_SYSTEM_COLUMNS,
     type CharacterSystemColumn,
 } from '@/lib/constants/stat-columns';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { parseRules } from '@/lib/utils/rules/schema';
 import { moduleCatalog } from '@/lib/utils/rules/systems/catalog';
 import { ruleSystemOf } from '@/lib/utils/rules/systems/lookup';

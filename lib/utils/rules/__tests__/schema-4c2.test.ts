@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { parseRules, RulesetPatchSchema } from '@/lib/utils/rules/schema';
 
 const SYS = { system: { key: 'homm' } };

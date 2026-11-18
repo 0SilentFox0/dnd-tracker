@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { d20Damage } from '../../rules/damage';
 
-import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { parseRules } from '@/lib/utils/rules/schema';
 
 describe('d20Damage', () => {

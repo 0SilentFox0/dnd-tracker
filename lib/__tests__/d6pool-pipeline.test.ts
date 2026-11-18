@@ -11,7 +11,7 @@ import {
 } from '@/lib/constants/battle';
 import { noActions } from '@/lib/utils/battle/actions/none';
 import type { RunBattleMutationOptions } from '@/lib/utils/battle/pipeline/run-battle-mutation';
-import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { BattleAttack } from '@/types/battle';
 
 let runGuardedBattleOperationCore: typeof import('@/lib/utils/battle/pipeline/run-battle-mutation').runGuardedBattleOperationCore;

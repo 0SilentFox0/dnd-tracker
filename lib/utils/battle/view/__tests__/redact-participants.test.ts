@@ -9,7 +9,7 @@ import {
     redactPatchesForViewer,
     redactPendingForViewer,
 } from '@/lib/utils/battle/view';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { BattleParticipant } from '@/types/battle';
 
 const base = createMockParticipant();

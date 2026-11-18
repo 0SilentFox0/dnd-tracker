@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import { REJECT } from '@/lib/utils/battle/store/reject';
 import { assertAbilityAim } from '@/lib/utils/battle/validation/ability-aim';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { ResolvedAbility } from '@/types/abilities';
 import type { BattleMapConfig } from '@/types/battle-grid';
 

@@ -7,7 +7,7 @@ import { placed } from '@/lib/utils/battle/__tests__/fixtures/placed';
 import { spellTargetCandidates } from '@/lib/utils/battle/flows';
 import { targetMarks } from '@/lib/utils/battle/grid/map-view';
 import { bonusTargetCandidates } from '@/lib/utils/battle/view';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { ResolvedAbility } from '@/types/abilities';
 import type { BattleAttack } from '@/types/battle';
 import type { IllusionPair } from '@/types/battle-grid';

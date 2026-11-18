@@ -7,7 +7,7 @@ import { RulesForm } from '../RulesForm';
 import '@/components/ui/__tests__/match-media';
 import '@/components/systems/registry';
 import { renderWithConfirm } from '@/components/ui/__tests__/render-with-confirm';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 const mocks = vi.hoisted(() => ({
     system: { key: 'dnd5e' } as { key: string; modules?: string[] },

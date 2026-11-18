@@ -12,7 +12,7 @@ import {
     sortByInitiative,
     staticInitiative,
 } from '@/lib/utils/battle/turn/initiative';
-import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { parseRules, RulesetSchema } from '@/lib/utils/rules/schema';
 import { ALWAYS_FIRST_ABILITY } from '@/scripts/constructor/backfill/always-first';
 

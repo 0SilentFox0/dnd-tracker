@@ -17,7 +17,7 @@ import {
 } from '@/lib/utils/battle/conditions';
 import { movementBudget } from '@/lib/utils/battle/grid/path';
 import { spellSaveDc } from '@/lib/utils/battle/spell/save-dc';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { BattleParticipant } from '@/types/battle';
 
 const immune = (flag: Effect) =>

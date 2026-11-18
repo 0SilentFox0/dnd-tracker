@@ -7,7 +7,7 @@ import {
     seq,
 } from '@/lib/utils/abilities/__tests__/fixtures';
 import { runAbilities } from '@/lib/utils/abilities/engine/core/run-abilities';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { BattleParticipant } from '@/types/battle';
 
 const ctx = { round: 1, rng: seq(0), rules: DEFAULT_RULES };

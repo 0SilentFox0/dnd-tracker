@@ -19,7 +19,7 @@ import {
     deriveScene,
     turnQueue,
 } from '@/lib/utils/battle/view';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { sceneOf } from '@/systems/wfrp/rules/__tests__/slot-fixtures';
 import type { SceneMomentum } from '@/systems/wfrp/rules/slots';
 import type { ResolvedAbility } from '@/types/abilities';

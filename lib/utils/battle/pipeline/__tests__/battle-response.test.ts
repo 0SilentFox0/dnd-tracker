@@ -8,7 +8,7 @@ import {
     toBattleResponse,
 } from '@/lib/utils/battle/pipeline/battle-response';
 import type { BattleSceneState } from '@/lib/utils/battle/store';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { ClientBattleDelta } from '@/types/api';
 
 const scene: BattleSceneState = {

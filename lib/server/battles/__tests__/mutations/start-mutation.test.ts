@@ -4,7 +4,7 @@ import { API_ERRORS } from '@/lib/constants/api-errors';
 import { createStartMutation } from '@/lib/server/battles/mutations/start/start-mutation';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import type { BattleMutationContext } from '@/lib/utils/battle/pipeline/run-battle-mutation';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 const ctx = {
     scene: {

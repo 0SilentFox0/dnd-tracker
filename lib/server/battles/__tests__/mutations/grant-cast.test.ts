@@ -8,7 +8,7 @@ import { API_ERRORS } from '@/lib/constants/api-errors';
 import { createSpellMutation } from '@/lib/server/battles/mutations/spell/spell-mutation';
 import { processStartOfTurn } from '@/lib/utils/battle/turn/turn-start';
 import { applyBattleResult } from '@/lib/utils/characters/resources/battle';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { BattleParticipant } from '@/types/battle';
 
 const inlineCast = {

@@ -10,7 +10,7 @@ import {
     removeCustomConditions,
 } from '@/lib/api/rules';
 import { useRemoveCustomCondition } from '@/lib/hooks/campaigns';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 vi.mock('@/lib/api/rules', () => ({
     getCustomConditionUsage: vi.fn(),

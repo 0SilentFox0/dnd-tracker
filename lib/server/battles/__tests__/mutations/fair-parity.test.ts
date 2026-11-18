@@ -158,7 +158,7 @@ import {
     type SetupBalanceStats,
     setupFairScaling,
 } from '@/lib/utils/battle/balance/setup';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 const setup = [
     ...['h1', 'h2', 'h3', 'h4'].map((id) => ({

@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { rayCells, templateCells } from '../template';
 
 import { testMap } from '@/lib/utils/battle/__tests__/fixtures/placed';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { GridPoint, SpellTemplate } from '@/types/battle-grid';
 
 const column = (edge: 'walls' | 'bars') => ({

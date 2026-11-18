@@ -9,7 +9,7 @@ import { signed } from '@/lib/utils/common/format';
 export function RollDialogBody({ result }: RollDialogBodyProps) {
     const t = useTranslations('rest');
 
-    if (result?.kind !== 'd20') return null;
+    if (result?.kind !== 'check') return null;
 
     return (
         <RollResultView

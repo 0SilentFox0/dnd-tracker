@@ -6,7 +6,7 @@ import {
     seq,
 } from '@/lib/utils/abilities/__tests__/fixtures';
 import type { StaticEffect } from '@/lib/utils/abilities/schema';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { parseRules } from '@/lib/utils/rules/schema';
 import {
     passivePerception,

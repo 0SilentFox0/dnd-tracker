@@ -25,7 +25,7 @@ import {
     uploadImageDataUrl,
     YEAR_CACHE_SECONDS,
 } from '@/lib/supabase/image-storage';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { fullSpellSlots } from '@/lib/utils/spells/spell-slots';
 import { d20RowData } from '@/scripts/shared/d20-row-data';
 import type { CharacterGoal } from '@/types/characters';

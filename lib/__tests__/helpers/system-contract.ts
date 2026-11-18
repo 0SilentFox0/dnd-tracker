@@ -6,7 +6,7 @@ import type { SystemServer } from '@/lib/server/systems/types';
 import { NO_ACTION_ECONOMY } from '@/lib/utils/battle/actions/access';
 import { noActions, noReactions } from '@/lib/utils/battle/actions/none';
 import { noHitModel } from '@/lib/utils/battle/balance/hit-model';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { RuleSystemDefinition } from '@/lib/utils/rules/systems';
 import type { SystemMeta } from '@/lib/utils/rules/systems/meta';
 import { statColumnFillOf } from '@/lib/utils/rules/systems/stats';

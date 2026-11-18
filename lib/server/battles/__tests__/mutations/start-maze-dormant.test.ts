@@ -37,7 +37,7 @@ import {
     resolved,
 } from '@/lib/utils/abilities/__tests__/fixtures';
 import { mazeMap } from '@/lib/utils/battle/modes/maze/__tests__/fixtures';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 const roar = resolved({
     trigger: { event: 'battleStart' },

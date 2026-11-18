@@ -12,7 +12,7 @@ import {
     defaultReadDeps,
 } from '@/lib/server/battles/pipeline-deps';
 import * as apiAuth from '@/lib/utils/api/api-auth';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 vi.mock('@/lib/server/battles/pipeline-deps', () => ({
     defaultPipelineDeps: {

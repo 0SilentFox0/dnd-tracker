@@ -9,7 +9,7 @@ import { hpOf } from '@/lib/utils/battle/__tests__/fixtures/placed';
 import { applyScenePatch } from '@/lib/utils/battle/scene-state';
 import type { BattleSceneState } from '@/lib/utils/battle/store';
 import { advanceAfterRemoval, advanceTurn } from '@/lib/utils/battle/turn';
-import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { withDeathSaves } from '@/systems/deathsaves/rules/state';
 import { pendingSlot } from '@/systems/morale/__tests__/pending';
 import { pendingMoraleOf } from '@/systems/morale/rules/state';

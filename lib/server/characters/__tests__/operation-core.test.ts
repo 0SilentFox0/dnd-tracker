@@ -13,7 +13,7 @@ import {
     runCharacterProgression,
 } from '@/lib/server/characters/progression-service';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
-import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 const h = vi.hoisted(() => ({
     campaign: { findUnique: vi.fn() },

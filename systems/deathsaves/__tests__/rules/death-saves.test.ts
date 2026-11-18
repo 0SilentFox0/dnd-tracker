@@ -16,7 +16,8 @@ import { textsOf } from '@/lib/utils/battle/log/__tests__/event-text';
 import type { BattleSceneState } from '@/lib/utils/battle/store';
 import { advanceTurn } from '@/lib/utils/battle/turn';
 import { checkVictoryConditions as checkVictory } from '@/lib/utils/battle/turn/victory';
-import { DEFAULT_RULES, type Ruleset } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
+import { type Ruleset } from '@/lib/utils/rules';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import { beginConcentration } from '@/systems/d20/rules/concentration/sustain';
 import {

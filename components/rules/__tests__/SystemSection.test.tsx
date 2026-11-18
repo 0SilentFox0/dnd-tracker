@@ -6,7 +6,7 @@ import { SystemSection } from '../sections/SystemSection';
 
 import '@/components/ui/__tests__/match-media';
 import type { RulesFormState, useCampaignModules } from '@/lib/hooks/campaigns';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import {
     type ModuleToggle,
     moduleToggles,

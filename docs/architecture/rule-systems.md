@@ -9,7 +9,7 @@
 | Вид (`SystemMeta.kind`) | Що це | Приклади |
 |---|---|---|
 | `base` (типово) | повний набір хуків гри: правила, лист, бій, магія, UI, сервер; ключ(і) кампанії = `keys` | `d20` (`dnd5e`), `wfrp` |
-| `addon` (модуль) | необов'язкова надбудова над базою з `requires`; додає секції правил, хуки, колонки, UI-слоти | `morale`, `retaliation`, `heroscaling`, `skilltrees`, `artifactsets`, `unitstacks` |
+| `addon` (модуль) | необов'язкова надбудова над базою з `requires`; додає секції правил, хуки, колонки, UI-слоти | `morale`, `retaliation`, `heroscaling`, `skilltrees`, `artifactsets`, `unitstacks` (маркер без хуків: механіка стеків у core) |
 | `preset` | лише ім'я: база + набір модулів (`preset: { base, modules }`) | `homm` = `d20` + шість модулів |
 
 Явний `system.modules` заміщує набір пресета; `modules: []` = «голий» base; відсутній `modules` = набір пресета; зміна `key` скидає `modules`. Вимкнення модуля нічого не видаляє (колонки, секції правил, рядки лишаються, їх лише ігнорують).
@@ -158,7 +158,7 @@ Core бачить `systems/*` лише через корені (`SYSTEM_ROOTS`, 
 | `combat.turn.*`, `combat.actions.onMove`, `afterAttack`, `onDamaged`, `damageParts`, `participant.*`, `stats.columns`, `sheet.blocks` | список | просто додати елемент |
 | `magic`, `conditions` | група | лише claim усієї групи |
 
-**Обгортка скаляра** (так роблять `heroscaling`, `unitstacks`, flanking). Заявлений шлях — крапкова адреса поля; `prev` — уже зібрана база (і попередні модулі):
+**Обгортка скаляра** (так роблять `heroscaling`, flanking; `unitstacks` — маркерний модуль без хуків і без `claims`). Заявлений шлях — крапкова адреса поля; `prev` — уже зібрана база (і попередні модулі):
 
 ```ts
 // meta.ts: claims: ['combat.resolveAttack']

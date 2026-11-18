@@ -18,7 +18,7 @@ import { validateAttackRequest } from '@/lib/utils/battle/attack-phase/request';
 import { applyMainActionUsed } from '@/lib/utils/battle/participant';
 import { resetTurnState } from '@/lib/utils/battle/turn/turn-state';
 import { turnExhausted } from '@/lib/utils/battle/view/turn-exhausted';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { parseRules } from '@/lib/utils/rules/schema';
 import { d20State, withD20State } from '@/systems/d20/rules/state';
 import { resolveOpportunityAttacks } from '@/systems/opportunity/rules/opportunity';

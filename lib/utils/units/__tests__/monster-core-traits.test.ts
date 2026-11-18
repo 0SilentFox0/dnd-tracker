@@ -4,7 +4,7 @@ import { battleSpeed, coreTrait } from '../monster-core-traits';
 
 import { makeParticipant } from '@/lib/utils/abilities/__tests__/fixtures';
 import { baseMovement } from '@/lib/utils/battle/grid/path';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 describe('battleSpeed', () => {
     it('takes the fastest of walk/fly, else swim, climb, burrow', () => {

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { getProficiencyBonus } from '@/lib/utils/common/calculations';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { proficiencyForLevel } from '@/systems/d20/rules/proficiency/level';
 
 describe('proficiencyForLevel', () => {

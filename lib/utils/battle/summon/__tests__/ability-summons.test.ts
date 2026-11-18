@@ -11,7 +11,7 @@ import {
     type SummonDeps,
 } from '@/lib/utils/battle/summon/ability-summons';
 import type { UnitFromPrisma } from '@/lib/utils/battle/types/participant';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { BattleParticipant } from '@/types/battle';
 
 const elemental = {

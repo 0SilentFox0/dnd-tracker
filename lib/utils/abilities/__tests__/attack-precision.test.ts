@@ -15,7 +15,7 @@ import {
     consumeAttackEffects,
 } from '@/lib/utils/battle/attack/consume-effects';
 import { decreaseEffectDurations } from '@/lib/utils/battle/turn/effects';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
 
 const reckless = resolved({

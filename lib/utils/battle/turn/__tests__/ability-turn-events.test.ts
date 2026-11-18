@@ -14,7 +14,7 @@ import {
     processStartOfRound,
     processStartOfTurn,
 } from '@/lib/utils/battle/turn/start-end';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { applyPendingMoraleCheck } from '@/systems/morale/rules/turn/apply-pending';
 
 describe('turn events', () => {

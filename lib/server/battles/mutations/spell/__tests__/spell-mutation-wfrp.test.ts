@@ -10,7 +10,7 @@ import {
     participant,
 } from '@/lib/server/battles/__tests__/mutations/fixtures';
 import { createSpellMutation } from '@/lib/server/battles/mutations/spell/spell-mutation';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
 import { castOf } from '@/systems/wfrp/rules/__tests__/slot-fixtures';
 import { DEFAULT_CHARACTERISTICS } from '@/systems/wfrp/rules/characteristics/keys';

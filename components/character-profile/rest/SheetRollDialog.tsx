@@ -74,7 +74,7 @@ export function SheetRollDialog({
             setResult(r);
             setUseInspiration(false);
 
-            if (r.kind === 'd20')
+            if (r.kind === 'check')
                 void stage.current?.play({
                     seed: Math.floor(cryptoRandom() * 2 ** 31),
                     groups: [

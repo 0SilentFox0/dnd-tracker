@@ -106,8 +106,8 @@
   "offTurn": {
     "hitPercentile": "{title}: {attacker} → {target}: d100 {roll}, {damage} damage{plainCrit}{crit}",
     "missPercentile": "{title}: {attacker} → {target}: d100 {roll}, miss{crit}",
-    "hit": "{title}: {attacker} → {target}: d20 {d20}, {damage} damage{plainCrit}{crit}",
-    "miss": "{title}: {attacker} → {target}: d20 {d20}, miss{crit}",
+    "hit": "{title}: {attacker} → {target}: d20 {checkRoll}, {damage} damage{plainCrit}{crit}",
+    "miss": "{title}: {attacker} → {target}: d20 {checkRoll}, miss{crit}",
     "second": "🎲 {noun}, {mode}: second d20 = {value}",
     "titles": {
       "retaliation": "Retaliation",

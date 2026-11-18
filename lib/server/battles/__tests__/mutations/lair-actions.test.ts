@@ -15,7 +15,7 @@ import {
     splitParticipant,
 } from '@/lib/utils/battle/store/split-participant';
 import { processStartOfRound } from '@/lib/utils/battle/turn/start-end';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { resolveSave } from '@/systems/d20/rules/saves/legendary';
 import { lairStateData, lairStateOf } from '@/systems/lair/rules/state';
 import type { BattleParticipant } from '@/types/battle';

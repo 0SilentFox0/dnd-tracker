@@ -8,7 +8,7 @@ import {
 } from '@/lib/utils/abilities/__tests__/fixtures';
 import { applyVampirism } from '@/lib/utils/battle/attack/process/hit-effects';
 import { castSpell } from '@/lib/utils/battle/spell';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { BattleParticipant } from '@/types/battle';
 
 const vamp = (percent: number, hp = 10) =>

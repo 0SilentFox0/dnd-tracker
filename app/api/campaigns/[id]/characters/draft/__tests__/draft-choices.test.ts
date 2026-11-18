@@ -15,7 +15,7 @@ vi.mock('@/lib/server/characters/choices/load-refs', () => ({
 import { draftChoiceFields } from '../draft-choices';
 
 import { loadChoiceRefs } from '@/lib/server/characters/choices/load-refs';
-import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 const data = {
     name: 'Lia',

@@ -1,6 +1,6 @@
 import type { PartyPower } from '@/lib/utils/battle/balance/fair';
 import { hitModelOf } from '@/lib/utils/battle/balance/hit-model';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 export const D20_MODEL = hitModelOf(DEFAULT_RULES);
 

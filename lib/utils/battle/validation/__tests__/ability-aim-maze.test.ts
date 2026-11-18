@@ -4,7 +4,7 @@ import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/moc
 import { aimView } from '@/lib/utils/battle/grid/map-scene';
 import { mazeMap } from '@/lib/utils/battle/modes/maze/__tests__/fixtures';
 import { assertAbilityAim } from '@/lib/utils/battle/validation/ability-aim';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { ResolvedAbility } from '@/types/abilities';
 
 const map = mazeMap({ walls: ['6:5:e'], exit: { x: 11, y: 11 } }, 12);

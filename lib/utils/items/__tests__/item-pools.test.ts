@@ -15,7 +15,7 @@ import {
 } from '@/lib/utils/abilities/engine/core/usage';
 import { type ItemStats, itemStatsColumns } from '@/lib/utils/items/item-stats';
 import { itemPools, withItemPool } from '@/lib/utils/items/pools';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { parseRules } from '@/lib/utils/rules/schema';
 
 const EXPEND = {

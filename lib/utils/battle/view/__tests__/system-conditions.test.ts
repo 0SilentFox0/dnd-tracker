@@ -4,7 +4,7 @@ import { buildDisplayEffects, collapseSystemConditions } from '../index';
 
 import { textRef } from '@/lib/i18n/text-ref';
 import { makeParticipant } from '@/lib/utils/abilities/__tests__/fixtures';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { applyWfrpConditionTo } from '@/systems/wfrp/rules/conditions/apply';
 import { wfrpConditions } from '@/systems/wfrp/rules/conditions/levels';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';

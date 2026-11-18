@@ -7,7 +7,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ConfirmProvider } from '@/components/ui/confirm-dialog';
 import { getCampaignRules, updateCampaignRules } from '@/lib/api/rules';
 import { type RulesFormState, useRulesForm } from '@/lib/hooks/campaigns';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 vi.mock('@/lib/api/rules', () => ({
     getCampaignRules: vi.fn(),

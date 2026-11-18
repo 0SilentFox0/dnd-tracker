@@ -7,7 +7,7 @@ import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/moc
 import { castSpell } from '@/lib/utils/battle/spell';
 import { fireTrigger } from '@/lib/utils/battle/spell/zone-fire';
 import type { CastableSpell } from '@/lib/utils/battle/types/spell-process';
-import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { BattleMapConfig } from '@/types/battle-grid';
 
 vi.mock('@/lib/utils/rules/systems', async (importOriginal) => ({

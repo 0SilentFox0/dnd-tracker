@@ -6,7 +6,7 @@ import { AttackType, ParticipantSide } from '@/lib/constants/battle';
 import { bonusActionMutation } from '@/lib/server/battles/mutations/bonus-action/bonus-action-mutation';
 import { resolved, seq } from '@/lib/utils/abilities/__tests__/fixtures';
 import { toggleAbilityTarget } from '@/lib/utils/battle/validation/ability-targets';
-import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { calculateAttackRoll } from '@/systems/d20/rules/attack/roll';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
 

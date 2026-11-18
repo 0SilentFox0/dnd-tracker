@@ -11,7 +11,7 @@ import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/moc
 import { applyHeroDmDamageMultiplier } from '@/lib/utils/battle/damage/hero-dm-multiplier';
 import { rowLines } from '@/lib/utils/battle/log/__tests__/event-text';
 import { computeSpellPower } from '@/lib/utils/battle/spell/power';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { BattleParticipant } from '@/types/battle';
 
 function hero(

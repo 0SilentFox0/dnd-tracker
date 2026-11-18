@@ -6,7 +6,7 @@ import {
     refs,
     scores,
 } from '@/lib/utils/characters/choices/__tests__/fixtures';
-import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 const humanRefs = vi.hoisted(() => ({ value: null as unknown }));
 

@@ -22,7 +22,7 @@ import { advanceTurn } from '@/lib/utils/battle/turn';
 import { calculateInitiative } from '@/lib/utils/battle/turn/initiative';
 import type { UnitFromPrisma } from '@/lib/utils/battle/types/participant';
 import type { CastableSpell } from '@/lib/utils/battle/types/spell-process';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
 
 const spell = (key: string): CastableSpell => {

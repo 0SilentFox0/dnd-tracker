@@ -1,6 +1,6 @@
 import '@/lib/utils/rules/systems/registry';
 import type { Ruleset } from '@/lib/utils/rules';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { ActGateScope } from '@/lib/utils/rules/systems/types';
 import type { BattleParticipant } from '@/types/battle';

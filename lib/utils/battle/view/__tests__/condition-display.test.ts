@@ -8,7 +8,7 @@ import {
 import { ukT } from '@/lib/utils/abilities/__tests__/describe-fixtures';
 import { effectName } from '@/lib/utils/battle/common/terms';
 import { displayEffects, effectSummary } from '@/lib/utils/battle/view';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { applyCondition5e } from '@/systems/d20/rules/conditions/apply';
 
 describe('показ станів 5e', () => {

@@ -8,7 +8,7 @@ import {
     dealResistedDamage as dealDamage,
     dealResistedHits as dealHits,
 } from '@/lib/utils/battle/damage/resisted-ability-damage';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 const dealResistedDamage = (
     ps: Parameters<typeof dealDamage>[0],

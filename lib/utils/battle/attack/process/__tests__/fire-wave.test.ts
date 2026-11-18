@@ -8,7 +8,7 @@ import { AttackType, ParticipantSide } from '@/lib/constants/battle';
 import { resolved } from '@/lib/utils/abilities/__tests__/fixtures';
 import { placed, testMap } from '@/lib/utils/battle/__tests__/fixtures/placed';
 import { textsOf } from '@/lib/utils/battle/log/__tests__/event-text';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { calculateAttackRoll } from '@/systems/d20/rules/attack/roll';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
 import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';

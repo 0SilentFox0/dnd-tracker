@@ -29,7 +29,7 @@ export function rollFromSheet(
     }
 ): SheetD20RollResult {
     const base = {
-        kind: 'd20' as const,
+        kind: 'check' as const,
         label: sheetRollLabel(subject, opts.t),
         inspirationUsed: opts.inspiration,
     };

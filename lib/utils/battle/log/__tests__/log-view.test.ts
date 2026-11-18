@@ -11,7 +11,7 @@ import {
     sanitizeLogEntry,
 } from '@/lib/utils/battle/view';
 import { getLogEntryDetailItems } from '@/lib/utils/battle/view/log-format';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { ActiveEffect } from '@/types/battle';
 import type { BattleAction } from '@/types/battle-actions';
 

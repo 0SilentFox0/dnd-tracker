@@ -16,7 +16,7 @@ import type { Effect } from '@/lib/utils/abilities/schema';
 import { renderSegments } from '@/lib/utils/abilities/segments';
 import { endTurnCleanup } from '@/lib/utils/battle/turn/end-turn-cleanup';
 import { processStartOfTurn } from '@/lib/utils/battle/turn/start-end';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 const hot: Effect = {
     kind: 'hot',

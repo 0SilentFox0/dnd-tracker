@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { fakeScene } from './fake-scene';
 
 import { useSpellBook } from '@/lib/hooks/battle/useSpellBook';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
 import type { BookSpell } from '@/types/spells';
 

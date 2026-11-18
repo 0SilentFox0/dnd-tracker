@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { seq } from '@/lib/utils/abilities/__tests__/fixtures';
 import { runAbilities } from '@/lib/utils/abilities/engine/core/run-abilities';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { applyPendingMoraleCheck } from '@/systems/morale/rules/turn/apply-pending';
 
 const p = createMockParticipant();

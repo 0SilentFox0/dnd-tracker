@@ -11,7 +11,7 @@ import { makeParticipant, seq } from '@/lib/utils/abilities/__tests__/fixtures';
 import { resolveRetaliation } from '@/lib/utils/battle/attack/__tests__/helpers';
 import { critEffectsFor } from '@/lib/utils/battle/crit-choice/catalog';
 import { mulberry32 } from '@/lib/utils/common/rng';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { calculateAttackRoll } from '@/systems/d20/rules/attack/roll';
 import type { BattleAttack } from '@/types/battle';
 

@@ -6,7 +6,7 @@ import { updateCharacterSchema } from '../update-character-schema';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { ContentError } from '@/lib/server/content/errors';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { RULE_SYSTEM_REGISTRY } from '@/lib/utils/rules/systems';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
 

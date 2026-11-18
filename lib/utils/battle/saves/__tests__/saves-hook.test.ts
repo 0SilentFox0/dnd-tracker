@@ -10,7 +10,7 @@ import {
 } from '@/lib/utils/abilities/__tests__/fixtures';
 import type { Effect } from '@/lib/utils/abilities/schema';
 import type { CastableSpell } from '@/lib/utils/battle/types/spell-process';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 const hooks = vi.hoisted(() => ({ roll: vi.fn(), rollEnds: vi.fn() }));
 

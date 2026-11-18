@@ -8,7 +8,7 @@ import { RULE_SYSTEM_KEYS } from '../meta';
 import { SYSTEM_UI } from '@/components/systems/registry';
 import { SYSTEM_SERVER } from '@/lib/server/systems/registry';
 import { distanceOf } from '@/lib/utils/battle/grid/cell-feet';
-import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { must } from '@/systems/wfrp/rules/traits/__tests__/fixtures';
 
 const sheetInput = { characteristics: {} as never, resources: {} };

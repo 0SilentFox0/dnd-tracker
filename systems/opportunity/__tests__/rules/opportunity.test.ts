@@ -8,7 +8,7 @@ import { resolveServerAttack } from '@/lib/utils/battle/attack/server-attack';
 import { cellKey } from '@/lib/utils/battle/grid';
 import { pathTo, reachable } from '@/lib/utils/battle/grid/path';
 import { eventTextOf } from '@/lib/utils/battle/log/__tests__/event-text';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { applyCondition5e } from '@/systems/d20/rules/conditions/apply';
 import { resolveOpportunityAttacks } from '@/systems/opportunity/rules/opportunity';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';

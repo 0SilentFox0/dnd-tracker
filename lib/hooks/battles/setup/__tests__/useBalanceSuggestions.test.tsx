@@ -20,7 +20,7 @@ vi.mock('../../useBattleSetupQueries', () => ({
 
 import { useBalanceSuggestions } from '../useBalanceSuggestions';
 
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 describe('useBalanceSuggestions', () => {
     it('прийняття пропозиції зберігає резерв ворогів (обмежений кількістю) і не чіпає союзників', () => {

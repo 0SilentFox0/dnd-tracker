@@ -9,7 +9,7 @@ import {
 import { runAbilities } from '@/lib/utils/abilities/engine/core/run-abilities';
 import { endTurnCleanup } from '@/lib/utils/battle/turn/end-turn-cleanup';
 import { processStartOfTurn } from '@/lib/utils/battle/turn/start-end';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { AbilityEvent } from '@/types/abilities';
 import type { BattleParticipant } from '@/types/battle';
 

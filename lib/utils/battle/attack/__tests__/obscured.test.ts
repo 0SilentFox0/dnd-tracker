@@ -7,7 +7,7 @@ import {
     testMap,
 } from '@/lib/utils/battle/__tests__/fixtures/placed';
 import { rollModeReasons } from '@/lib/utils/battle/attack/bonus';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { BattleParticipant } from '@/types/battle';
 import type { BattleMapConfig } from '@/types/battle-grid';
 

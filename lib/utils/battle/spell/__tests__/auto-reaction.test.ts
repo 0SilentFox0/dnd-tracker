@@ -6,7 +6,7 @@ import { processAttack } from '@/lib/utils/battle/attack/process';
 import { eventTextOf } from '@/lib/utils/battle/log/__tests__/event-text';
 import { castSpell } from '@/lib/utils/battle/spell';
 import type { CastableSpell } from '@/lib/utils/battle/types/spell-process';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { InlineCast, SpellEffect } from '@/lib/utils/spells/model/schema';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
 import type { BattleMapConfig } from '@/types/battle-grid';

@@ -15,7 +15,7 @@ import {
 import { calculateDamageWithModifiers } from '@/lib/utils/battle/damage';
 import { getEffectiveArmorClass } from '@/lib/utils/battle/participant';
 import { applyResistance } from '@/lib/utils/battle/resistance';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { calculateAttackRoll } from '@/systems/d20/rules/attack/roll';
 import type { BattleAttack } from '@/types/battle';
 

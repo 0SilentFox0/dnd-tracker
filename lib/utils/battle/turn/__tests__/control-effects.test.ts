@@ -13,7 +13,7 @@ import { eventTextOf } from '@/lib/utils/battle/log/__tests__/event-text';
 import type { BattleSceneState } from '@/lib/utils/battle/store';
 import { advanceTurn } from '@/lib/utils/battle/turn';
 import { runAdvanceTurnLoop } from '@/lib/utils/battle/turn/run-advance-turn-loop';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { BattleParticipant } from '@/types/battle';
 
 const claw = {

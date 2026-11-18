@@ -10,7 +10,7 @@ vi.mock('@/components/hud/fonts', () => ({
 import { ConditionsDialog } from '@/components/battle/dm/ConditionsDialog';
 import { render } from '@/lib/i18n/test/render-uk';
 import { hero } from '@/lib/server/battles/__tests__/mutations/fixtures';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import { applyCondition5e } from '@/systems/d20/rules/conditions/apply';
 import { CONDITION_5E_KEYS } from '@/systems/d20/rules/conditions/keys';

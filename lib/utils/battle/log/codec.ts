@@ -44,7 +44,7 @@ const PARAM_KEYS: ReadonlyArray<readonly [code: string, key: string]> = [
     ['w', 'hasCount'],
     ['g', 'guardian'],
     ['p', 'spell'],
-    ['q', 'd20'],
+    ['q', 'checkRoll'],
     ['o', 'title'],
     ['x', 'chance'],
     ['b', 'label'],

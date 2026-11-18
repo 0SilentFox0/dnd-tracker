@@ -16,7 +16,7 @@ import { averageAttackDamage } from '@/lib/utils/battle/damage/average';
 import { computeDamageBreakdown } from '@/lib/utils/battle/damage/breakdown';
 import { WEAPON_FLAT_LABEL } from '@/lib/utils/battle/damage/weapon-flat';
 import { getAttackAbilityModifier } from '@/lib/utils/common/calculations';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
 
 const weapon = (damageDice: string): BattleAttack => ({

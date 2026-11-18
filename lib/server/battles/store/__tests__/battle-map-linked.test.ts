@@ -24,7 +24,7 @@ import { BattleConflictError } from '@/lib/utils/battle/store/errors';
 import { buildSnapshotState } from '@/lib/utils/battle/store/snapshot-state';
 import type { BattleDb } from '@/lib/utils/battle/store/types';
 import type { LoadedBattle } from '@/lib/utils/battle/store/types';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import type { BattleMapConfig, BattleMapState } from '@/types/battle-grid';
 
 const header: BattleMapConfig = {

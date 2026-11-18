@@ -10,7 +10,7 @@ import { testMap } from '@/lib/utils/battle/__tests__/fixtures/placed';
 import { processAttack } from '@/lib/utils/battle/attack/process';
 import { resolveServerAttack } from '@/lib/utils/battle/attack/server-attack';
 import type { ActionFlow } from '@/lib/utils/battle/common/action-flow';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import {
     momentumOf,
     sceneOf,

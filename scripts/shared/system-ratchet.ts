@@ -89,7 +89,15 @@ export const literalTokens = (): LiteralTokens => {
     };
 };
 
-export const countLiterals = (text: string, tokens: LiteralTokens): number => {
+export const countLiterals = (
+    rawText: string,
+    tokens: LiteralTokens
+): number => {
+    const text = rawText
+        .split('\n')
+        .filter((l) => !l.includes('system-literal-ok'))
+        .join('\n');
+
     const sub = tokens.substring.length
         ? (
               text.match(

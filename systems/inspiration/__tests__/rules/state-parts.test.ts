@@ -5,7 +5,8 @@ import {
     applyCharacterResources,
     battleResultOutcome,
 } from '@/lib/utils/characters/resources/battle';
-import { DEFAULT_RULES, type Ruleset } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
+import { type Ruleset } from '@/lib/utils/rules';
 import { d20State, withD20State } from '@/systems/d20/rules/state';
 import type { StoredCharacterState } from '@/types/characters';
 

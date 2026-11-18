@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { ParticipantSide } from '@/lib/constants/battle';
 import { makeParticipant } from '@/lib/utils/abilities/__tests__/fixtures';
 import { applyAbilitySummons } from '@/lib/utils/battle/summon/ability-summons';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 describe('phantom clone does not inherit the source system state', () => {
     it('drops the slot and the dying flag', async () => {

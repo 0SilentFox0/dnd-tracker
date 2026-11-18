@@ -9,7 +9,7 @@ import { dynamicTextRef } from '@/lib/i18n/text-ref';
 import { makeParticipant, seq } from '@/lib/utils/abilities/__tests__/fixtures';
 import { processAttack } from '@/lib/utils/battle/attack/process';
 import { settleStatusChange } from '@/lib/utils/battle/damage/consequences';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import { attackOf } from '@/systems/wfrp/rules/__tests__/slot-fixtures';
 import { DEFAULT_CHARACTERISTICS } from '@/systems/wfrp/rules/characteristics/keys';

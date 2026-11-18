@@ -7,7 +7,8 @@ import {
 } from '@/lib/constants/battle';
 import { applyRawDamage } from '@/lib/utils/abilities/engine/effects/hp';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
-import { DEFAULT_RULES, type Ruleset } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
+import { type Ruleset } from '@/lib/utils/rules';
 import { deathSavesOnZeroHp } from '@/systems/deathsaves/rules/on-zero-hp';
 import { deathSavesOf } from '@/systems/deathsaves/rules/state';
 import type { BattleParticipant } from '@/types/battle';

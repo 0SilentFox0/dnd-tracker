@@ -27,7 +27,7 @@ import type {
 import type { PendingChoice } from '@/lib/utils/battle/store';
 import { diffParticipants, splitParticipant } from '@/lib/utils/battle/store';
 import { buildSnapshotState } from '@/lib/utils/battle/store/snapshot-state';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 import { createCritChoiceMutation } from '@/systems/d20/server/battle/crit-choice-mutation';
 
 const hero = {
