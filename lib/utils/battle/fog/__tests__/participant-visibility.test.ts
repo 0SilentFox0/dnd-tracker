@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+    fogHiddenForPlayers,
     fogHiddenIds,
     fogModeOf,
     withoutPosition,
@@ -74,7 +75,57 @@ describe('fogHiddenIds', () => {
     });
 });
 
+describe('fogHiddenForPlayers', () => {
+    const foe = (id: string, x: number) => ({
+        ...unit(id, 'dm', x),
+        basicInfo: { ...unit(id, 'dm', x).basicInfo, side: ParticipantSide.ENEMY },
+    });
+
+    it('an enemy seen only by a teammate is visible to every player', () => {
+        const all = [unit('h1', 'a', 1), unit('h2', 'b', 15), foe('e', 16)];
+
+        expect(fogHiddenForPlayers({ map, fog: vision }, all).size).toBe(0);
+    });
+
+    it('a DM-controlled ally shares its vision with the players', () => {
+        const all = [unit('h1', 'a', 1), unit('summon', 'dm', 15), foe('e', 16)];
+
+        expect(fogHiddenForPlayers({ map, fog: vision }, all).size).toBe(0);
+    });
+
+    it('a downed hero stays known to its owner and allies; a fallen enemy is hidden', () => {
+        const down = unit('h2', 'b', 15);
+
+        down.combatStats.status = CombatStatus.DEAD;
+
+        const dead = foe('e', 17);
+
+        dead.combatStats.status = CombatStatus.DEAD;
+
+        const hidden = fogHiddenForPlayers({ map, fog: vision }, [unit('h1', 'a', 1), down, dead]);
+
+        expect([...hidden]).toEqual(['e']);
+    });
+});
+
 describe('withoutPosition', () => {
+    it('drops airborne.landAt but keeps the rest of the state', () => {
+        const flyer = unit('f', 'dm', 4);
+
+        flyer.battleData.airborne = {
+            landAt: { x: 5, y: 5 },
+            since: 1,
+            percent: 50,
+            name: 'x',
+        };
+
+        expect(withoutPosition(flyer).battleData.airborne).toEqual({
+            since: 1,
+            percent: 50,
+            name: 'x',
+        });
+    });
+
     it('drops position, turn start and facing, keeping the rest', () => {
         const out = withoutPosition(unit('x', 'dm', 4));
 

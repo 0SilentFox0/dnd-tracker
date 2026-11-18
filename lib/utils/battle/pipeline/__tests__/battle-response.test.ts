@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { ParticipantSide } from '@/lib/constants/battle';
+import { CombatStatus, ParticipantSide } from '@/lib/constants/battle';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import {
     buildPusherMessages,
@@ -853,6 +853,46 @@ describe('server-side fog', () => {
         expect(byId.gob.battleData.position).toEqual({ x: 3, y: 2 });
         expect(byId.hero.battleData.position).toEqual({ x: 1, y: 2 });
         expect(b.initiativeOrder).toHaveLength(3);
+    });
+
+    it('GET and Pusher delta agree: an enemy seen by a teammate keeps its position for both', () => {
+        const mate = {
+            ...at(hero, 15),
+            basicInfo: { ...hero.basicInfo, id: 'mate', controlledBy: 'u-mate' },
+        };
+
+        const all = [mine, mate, far];
+
+        const b = toBattleResponse({ meta: fogMeta }, scene, all, [], log, {
+            userId: 'u-player',
+        });
+
+        expect(b.initiativeOrder[2].battleData.position).toEqual({ x: 15, y: 2 });
+
+        const c = { map: fogMeta.map, fog: fogMeta.mapState.fog };
+
+        const out = redactDeltaForPlayers(
+            delta({ upserted: [far] }),
+            all,
+            DEFAULT_RULES,
+            { userId: 'u-player', isDM: false, readOnly: true, canSeeEnemyHp: false },
+            { before: c, after: c, beforeParticipants: all }
+        );
+
+        expect(out.delta.upserted[0].battleData.position).toEqual({ x: 15, y: 2 });
+    });
+
+    it('GET: a downed hero keeps its position for the owner', () => {
+        const down = {
+            ...mine,
+            combatStats: { ...mine.combatStats, status: CombatStatus.DEAD },
+        };
+
+        const b = toBattleResponse({ meta: fogMeta }, scene, [down, far], [], log, {
+            userId: 'u-player',
+        });
+
+        expect(b.initiativeOrder[0].battleData.position).toEqual({ x: 1, y: 2 });
     });
 
     it('GET: the DM keeps every position', () => {

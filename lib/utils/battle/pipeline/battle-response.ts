@@ -11,7 +11,7 @@ import {
 } from '@/lib/pusher/channels';
 import {
     type FogContext,
-    fogHiddenIds,
+    fogHiddenForPlayers,
     withoutPosition,
 } from '@/lib/utils/battle/fog/participant-visibility';
 import { clientMapOf } from '@/lib/utils/battle/map-storage/persisted-map';
@@ -75,28 +75,16 @@ export const fogContextOf = (
     meta: Pick<LoadedBattle['meta'], 'map' | 'mapState'>
 ): FogContext => ({ map: meta.map, fog: meta.mapState?.fog });
 
-const playerViewerIds = (participants: BattleParticipant[]) => {
-    const ids = new Set(
-        participants
-            .map((p) => p.basicInfo.controlledBy)
-            .filter((id) => id !== CONTROLLED_BY_DM)
-    );
-
-    return ids.size ? [...ids] : [null];
-};
-
 function fogFilterDelta(
     delta: ClientBattleDelta,
     fog: DeltaFog,
-    participants: BattleParticipant[],
-    viewerIds: (string | null)[]
+    participants: BattleParticipant[]
 ): ClientBattleDelta {
-    const hidden = fogHiddenIds(fog.after, participants, viewerIds);
+    const hidden = fogHiddenForPlayers(fog.after, participants);
 
-    const hiddenBefore = fogHiddenIds(
+    const hiddenBefore = fogHiddenForPlayers(
         fog.before,
-        fog.beforeParticipants,
-        viewerIds
+        fog.beforeParticipants
     );
 
     if (!hidden.size && !hiddenBefore.size) return delta;
@@ -142,9 +130,7 @@ function fogRedacted(
 ): BattleParticipant[] {
     if (viewer.isDM) return participants;
 
-    const hidden = fogHiddenIds(fogContextOf(meta), participants, [
-        viewer.userId,
-    ]);
+    const hidden = fogHiddenForPlayers(fogContextOf(meta), participants);
 
     if (!hidden.size) return participants;
 
@@ -234,12 +220,7 @@ export function redactDeltaForPlayers(
 
     const fogged =
         fog && !viewer.isDM
-            ? fogFilterDelta(
-                  delta,
-                  fog,
-                  participants,
-                  viewer.userId ? [viewer.userId] : playerViewerIds(participants)
-              )
+            ? fogFilterDelta(delta, fog, participants)
             : delta;
 
     const upserted = redactParticipantsForViewer(

@@ -20,6 +20,7 @@ import type {
 const PUBLIC_BATTLE_KEYS = [
     'attacks',
     'position',
+    'movement',
     'facing',
     'turnStartPosition',
     'dying',
@@ -155,7 +156,24 @@ function redactAbilities(abilities: ResolvedAbility[]): ResolvedAbility[] {
 
         const { key, name, label, source, trigger } = a;
 
-        return [{ key, name, label, source, trigger, effects } as ResolvedAbility];
+        const allPublic = effects.length === a.effects.length;
+
+        // collectModifiers/auraKey read id, condition and params; they stay only when nothing secret was cut
+        const readable = allPublic
+            ? { id: a.id, condition: a.condition, params: a.params }
+            : {};
+
+        return [
+            {
+                key,
+                name,
+                label,
+                source,
+                trigger,
+                effects,
+                ...readable,
+            } as ResolvedAbility,
+        ];
     });
 }
 

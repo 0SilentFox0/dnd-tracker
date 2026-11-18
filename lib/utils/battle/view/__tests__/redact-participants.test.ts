@@ -286,7 +286,6 @@ describe('enemy battleData allowlist', () => {
         pendingCast: { spellId: 'fireball' },
         transform: { formId: 'bear' },
         schoolMastery: { fire: 'expert' },
-        movement: { fly: 60 },
         ammo: { a: 3 },
         reload: { a: 1 },
         charmReturn: { side: 'enemy', controlledBy: 'dm' },
@@ -351,6 +350,59 @@ describe('enemy battleData allowlist', () => {
             'source',
             'trigger',
         ]);
+    });
+
+    it('movement is public (fly filter), the rest of the speeds stay out of the allowlist', () => {
+        const p = withLeaks();
+
+        p.battleData.movement = { fly: 60 } as never;
+
+        const [out] = redactParticipantsForViewer(player, [p], DEFAULT_RULES);
+
+        expect(out.battleData.movement).toEqual({ fly: 60 });
+
+        const [patch] = redactPatchesForViewer(
+            player,
+            [{ id: 'foe', battleData: { movement: { fly: 30 } as never, ammo: { a: 1 } } }],
+            [foe()],
+            DEFAULT_RULES
+        );
+
+        expect(patch.battleData).toEqual({ movement: { fly: 30 } });
+    });
+
+    it('all-public ability keeps id, condition and params; a secret effect drops them', () => {
+        const mk = (effects: unknown[]) => {
+            const p = withLeaks();
+
+            p.battleData.resolvedAbilities = [
+                {
+                    key: 'k',
+                    id: 'aura-1',
+                    name: 'n',
+                    condition: { type: 'always' },
+                    params: { stat: 'ac' },
+                    trigger: { event: 'passive' },
+                    effects,
+                    source: { type: 'unit', id: 'u', name: 'U' },
+                },
+            ] as unknown as BattleParticipant['battleData']['resolvedAbilities'];
+
+            const [out] = redactParticipantsForViewer(player, [p], DEFAULT_RULES);
+
+            return out.battleData.resolvedAbilities?.[0] as unknown as Record<string, unknown>;
+        };
+
+        const open = mk([{ type: 'stat', stat: 'ac', value: 1 }]);
+
+        expect(open).toMatchObject({ id: 'aura-1', condition: { type: 'always' }, params: { stat: 'ac' } });
+
+        const mixed = mk([{ type: 'stat', stat: 'ac', value: 1 }, { flag: 'resistance' }]);
+
+        expect(mixed.id).toBeUndefined();
+        expect(mixed.condition).toBeUndefined();
+        expect(mixed.params).toBeUndefined();
+        expect(mixed.effects).toHaveLength(1);
     });
 
     it('патч: те саме обмеження ключів', () => {
