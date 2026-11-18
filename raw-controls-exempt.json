@@ -45,7 +45,11 @@
     },
     {
         "file": "components/artifacts/ArtifactItemFields.tsx",
-        "count": 2
+        "count": 1
+    },
+    {
+        "file": "components/artifacts/ArtifactPropertyFields.tsx",
+        "count": 1
     },
     {
         "file": "components/artifacts/ItemCastingFields.tsx",
