@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 
 import { useBattleResync } from './useBattleResync';
@@ -29,6 +29,9 @@ export type PusherConnectionState =
     | 'connecting'
     | 'unavailable'
     | null;
+
+/** One scene GET per burst of projected deltas (one turn is several actions). */
+export const PROJECTED_REFETCH_DEBOUNCE_MS = 400;
 
 const CONNECTION_STATES = new Set([
     'connected',
@@ -75,6 +78,24 @@ export function usePusherBattleSync(
         () => void resync()
     );
 
+    const refetchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    useEffect(
+        () => () => {
+            if (refetchTimerRef.current) clearTimeout(refetchTimerRef.current);
+        },
+        []
+    );
+
+    const invalidateCoalesced = (key: readonly unknown[]) => {
+        if (refetchTimerRef.current) return;
+
+        refetchTimerRef.current = setTimeout(() => {
+            refetchTimerRef.current = null;
+            void queryClient.invalidateQueries({ queryKey: key });
+        }, PROJECTED_REFETCH_DEBOUNCE_MS);
+    };
+
     const applyDelta = (data: unknown) => {
         const key = battleKeys.scene(campaignId, battleId);
 
@@ -106,7 +127,7 @@ export function usePusherBattleSync(
                     cached &&
                     alwaysSeesEnemyStats(cached.initiativeOrder, currentUserId)))
         ) {
-            void queryClient.invalidateQueries({ queryKey: key });
+            invalidateCoalesced(key);
 
             return;
         }

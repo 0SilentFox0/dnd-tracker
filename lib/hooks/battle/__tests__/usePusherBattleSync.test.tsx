@@ -894,6 +894,44 @@ describe('usePusherBattleSync: dm-канал', () => {
         expect(qc.getQueryData<BattleScene>(key)?.version).toBe(4);
     });
 
+    it('серія redacted дельт — один GET сцени (коалесинг)', async () => {
+        const qc = new QueryClient();
+
+        const invalidate = vi.spyOn(qc, 'invalidateQueries');
+
+        qc.setQueryData(key, makeBattlePayload({ version: 4 }));
+        render(
+            <PlayerSync
+                campaignId="camp-1"
+                battleId="battle-1"
+                userId="dm"
+                client={qc}
+                isDM
+            />
+        );
+        await waitFor(() =>
+            expect(
+                channelBindings
+                    .get('private-battle-battle-1')
+                    ?.has('battle-delta')
+            ).toBe(true)
+        );
+        invalidate.mockClear();
+
+        act(() => {
+            for (let i = 0; i < 3; i++)
+                simulateTrigger(
+                    'private-battle-battle-1',
+                    'battle-delta',
+                    delta([entry('прихований')], true)
+                );
+        });
+
+        await waitFor(() => expect(invalidate).toHaveBeenCalledTimes(1));
+        await new Promise((r) => setTimeout(r, 600));
+        expect(invalidate).toHaveBeenCalledTimes(1);
+    });
+
     it('redacted дельта не новіша за кеш не викликає інвалідацію', async () => {
         const qc = new QueryClient();
 
