@@ -1,13 +1,14 @@
-import { awaitsMoraleCheck } from '@/lib/utils/battle/morale/awaits-check';
-import type { PendingMoraleCheckPayload } from '@/lib/utils/battle/morale/threshold';
 import { REJECT } from '@/lib/utils/battle/store/reject';
+import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
 import type { ActGate } from '@/lib/utils/rules/systems/types';
+import { awaitsMoraleCheck } from '@/systems/morale/rules/awaits-check';
+import { pendingMoraleOf } from '@/systems/morale/rules/state';
 
 export function isPanicking(
-    pendingMoraleCheck: unknown,
+    sceneState: SystemSlot | undefined,
     participantId: string
 ): boolean {
-    const pending = pendingMoraleCheck as PendingMoraleCheckPayload | null;
+    const pending = pendingMoraleOf(sceneState);
 
     return (
         pending?.participantId === participantId &&
@@ -28,7 +29,7 @@ export const moraleGate: ActGate = (
 
     if (
         phase === 'act' &&
-        isPanicking(scope.scene.pendingMoraleCheck, participantId)
+        isPanicking(scope.scene.sceneState, participantId)
     )
         return { code: 'action_used', key: REJECT.panicSkip };
 

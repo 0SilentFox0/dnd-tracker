@@ -12,7 +12,7 @@ import {
     cooldownLeft,
     withinCountLimits,
 } from '@/lib/utils/abilities/engine/core/usage';
-import { lairAbilities, lairBlocker } from '@/lib/utils/battle/actions/lair';
+import { lairOf } from '@/lib/utils/battle/actions/access';
 import {
     legendaryAbilities,
     legendaryBlocker,
@@ -54,6 +54,8 @@ export function useLegendaryAction(participant: BattleParticipant) {
 
     const spells = useSpellsByIds(campaignId, spellIds);
 
+    const lair = lairOf(battle.rules);
+
     const choices = useMemo<LegendaryChoice[]>(() => {
         const field = (order ?? []).filter((p) => !p.battleData.reserved);
 
@@ -90,7 +92,7 @@ export function useLegendaryAction(participant: BattleParticipant) {
 
         const abilities = [
             ...legendaryAbilities(participant),
-            ...lairAbilities(participant),
+            ...lair.abilities(participant),
         ].map((a): LegendaryChoice => {
             const cost = legendaryCostOf(a);
 
@@ -111,7 +113,7 @@ export function useLegendaryAction(participant: BattleParticipant) {
 
             const blocked =
                 (a.limits?.lair
-                    ? lairBlocker(participant, battle.currentRound, a.key)
+                    ? lair.blocker(participant, battle.currentRound, a.key)
                     : legendaryBlocker(participant, current, cost)) ??
                 (!withinCountLimits(participant, a)
                     ? textRef('battleDm.legendary.limitReached')
@@ -164,6 +166,7 @@ export function useLegendaryAction(participant: BattleParticipant) {
         spells.data,
         battle.currentRound,
         battle.map,
+        lair,
     ]);
 
     const { send, isPending } = useSendCoreAction();

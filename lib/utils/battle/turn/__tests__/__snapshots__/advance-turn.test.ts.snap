@@ -595,7 +595,6 @@ exports[`детермінований контракт turn loop > зберіг�
       },
     ],
     "scene": {
-      "pendingMoraleCheck": null,
       "round": 2,
       "status": "active",
       "turnIndex": 0,

@@ -36,7 +36,6 @@ describe('useAttack', () => {
                 status: 'active',
                 round: 1,
                 turnIndex: 0,
-                pendingMoraleCheck: null,
                 pendingChoice: null,
             },
             upserted: [],

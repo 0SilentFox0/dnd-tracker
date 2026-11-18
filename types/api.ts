@@ -99,7 +99,6 @@ export interface BattleScene {
     battleLogMode?: 'append';
     /** Записи з actionIndex ≥ цього значення скасовано відкатом */
     battleLogCancelledFrom?: number;
-    pendingMoraleCheck?: unknown;
     /** Public part of a pause the system is waiting on; its shape belongs to the system */
     pendingChoice?: unknown;
     /** Стан сцени, яким керує система; відсутнє = немає */
@@ -130,7 +129,6 @@ export interface ClientBattleDelta {
         status: BattleScene['status'];
         round: number;
         turnIndex: number;
-        pendingMoraleCheck: unknown;
         pendingChoice: unknown;
         /** відсутнє = без змін, null = стан скинуто */
         system?: SystemSlot | null;

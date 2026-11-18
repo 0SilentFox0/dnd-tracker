@@ -34,7 +34,6 @@ const scene: BattleSceneState = {
     turnIndex: 1,
     version: 7,
     eventSeq: 10,
-    pendingMoraleCheck: null,
     pendingChoice: null,
     startedAt: new Date('2026-01-01'),
     completedAt: null,

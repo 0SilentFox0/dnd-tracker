@@ -5,6 +5,7 @@ import { getPinnedGeometry } from '@/lib/server/battle-maps/library-service';
 import { getPinnedTileChunks } from '@/lib/server/battle-maps/tiles-service';
 import { pendingFromStored } from '@/lib/utils/battle/crit-choice/pending';
 import { composeEffectiveMap } from '@/lib/utils/battle/map-storage/effective-map';
+import { upgradeSceneState } from '@/lib/utils/battle/scene-state';
 import { BattleMapVersionMissingError } from '@/lib/utils/battle/store/errors';
 import { snapshotCache } from '@/lib/utils/battle/store/snapshot-cache';
 import { rowToMapState } from '@/lib/utils/battle/store/snapshot-state';
@@ -263,7 +264,6 @@ export async function loadBattle(
         turnIndex: row.currentTurnIndex,
         version: row.version,
         eventSeq: row.eventSeq,
-        pendingMoraleCheck: row.pendingMoraleCheck ?? null,
         pendingChoice: pendingFromStored(row.pendingCritChoice),
         ...(row.systemState && {
             sceneState: row.systemState as unknown as SystemSlot,
@@ -293,6 +293,12 @@ export async function loadBattle(
     ]);
 
     const rules = parseRulesCached(rawRules);
+
+    const sceneState = upgradeSceneState(rules, scene.sceneState, {
+        pendingMoraleCheck: row.pendingMoraleCheck,
+    });
+
+    if (sceneState) scene.sceneState = sceneState;
 
     const all = withSnap.map((p) => ({
         isPending: p.isPending,

@@ -78,9 +78,11 @@ describe('d20StateData', () => {
         expect(data.system).toEqual({
             key: 'd20',
             data: {
-                deathSaves: SAVES,
-                inspiration: true,
-                attackedWithLight: true,
+                ext: {
+                    deathsaves: SAVES,
+                    inspiration: { available: true },
+                    offhand: { attackedWithLight: true },
+                },
             },
         });
     });
@@ -99,8 +101,10 @@ describe('d20StateData', () => {
         expect(data.system).toEqual({
             key: 'd20',
             data: {
-                inspirationSpent: true,
-                ext: { retaliation: { used: 1 } },
+                ext: {
+                    retaliation: { used: 1 },
+                    inspiration: { spent: true },
+                },
             },
         });
     });
@@ -149,5 +153,62 @@ describe('withD20State', () => {
             inspirationSpent: true,
             attackedWithLight: true,
         });
+    });
+});
+
+describe('state in ext (upgrade-on-read)', () => {
+    it('reads the ext shape, and ext wins over the flat legacy fields', () => {
+        const p = of({
+            system: {
+                key: 'd20',
+                data: {
+                    inspiration: true,
+                    ext: {
+                        deathsaves: SAVES,
+                        inspiration: { spent: true },
+                        offhand: { attackedWithLight: true },
+                    },
+                },
+            },
+        });
+
+        expect(d20State(p)).toEqual({
+            deathSaves: SAVES,
+            inspirationSpent: true,
+            attackedWithLight: true,
+        });
+    });
+
+    it('a write moves the legacy flat fields into ext and drops them', () => {
+        const p = of({
+            system: {
+                key: 'd20',
+                data: { deathSaves: SAVES, inspiration: true },
+            },
+        });
+
+        const next = withD20State(p, { attackedWithLight: true });
+
+        expect(next.battleData.system).toEqual({
+            key: 'd20',
+            data: {
+                ext: {
+                    deathsaves: SAVES,
+                    inspiration: { available: true },
+                    offhand: { attackedWithLight: true },
+                },
+            },
+        });
+        expect(d20State(next)).toEqual(d20State(withD20State(p, {})));
+    });
+
+    it('clearing a field is not undone by a legacy fallback', () => {
+        const p = of({
+            system: { key: 'd20', data: { deathSaves: SAVES } },
+        });
+
+        expect(d20State(withD20State(p, { deathSaves: undefined }))).toEqual(
+            {}
+        );
     });
 });

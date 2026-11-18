@@ -17,12 +17,10 @@ import {
     withinCountLimits,
 } from '@/lib/utils/abilities/engine/core/usage';
 import { evaluateCondition } from '@/lib/utils/abilities/registry/conditions';
-import { legendaryAttack } from '@/lib/utils/battle/actions/dispatch';
 import {
-    lairAbilities,
-    lairBlocker,
-    spendLair,
-} from '@/lib/utils/battle/actions/lair';
+    lairOf,
+} from '@/lib/utils/battle/actions/access';
+import { legendaryAttack } from '@/lib/utils/battle/actions/dispatch';
 import {
     legendaryAbilities,
     legendaryBlocker,
@@ -191,8 +189,10 @@ async function runAbilityOption(
 
     const lair = option.kind === 'lair';
 
+    const lairs = lairOf(ctx.meta.rules);
+
     const ability = (
-        lair ? lairAbilities(actor) : legendaryAbilities(actor)
+        lair ? lairs.abilities(actor) : legendaryAbilities(actor)
     ).find((a) => a.key === option.abilityKey);
 
     if (!ability)
@@ -204,13 +204,13 @@ async function runAbilityOption(
     const cost = legendaryCostOf(ability);
 
     if (lair) {
-        const blocker = lairBlocker(actor, round, ability.key);
+        const blocker = lairs.blocker(actor, round, ability.key);
 
         if (blocker) throw ruleErrorOf('action_rejected', blocker);
     } else assertLegendaryAllowed(ctx, actor, cost);
 
     const spend = (p: BattleParticipant) =>
-        lair ? spendLair(p, round, ability.key) : spendLegendary(p, cost);
+        lair ? lairs.spend(p, round, ability.key) : spendLegendary(p, cost);
 
     if (!withinCountLimits(actor, ability))
         throw new BattleRuleError(

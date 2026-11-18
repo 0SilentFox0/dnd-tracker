@@ -58,7 +58,6 @@ const delta = (over: Partial<ClientBattleDelta> = {}): ClientBattleDelta => ({
         status: 'active',
         round: 1,
         turnIndex: 1,
-        pendingMoraleCheck: null,
         pendingChoice: null,
     },
     upserted: [],
@@ -118,7 +117,6 @@ describe('applyBattleDelta', () => {
             status: 'active' as const,
             round: 1,
             turnIndex: 1,
-            pendingMoraleCheck: null,
             pendingChoice: null,
             map: terrain,
         };
@@ -141,7 +139,6 @@ describe('applyBattleDelta', () => {
             status: 'active' as const,
             round: 1,
             turnIndex: 1,
-            pendingMoraleCheck: null,
             pendingChoice: null,
             walls: { add: ['3:3:e'], remove: ['1:1:e'] },
             bars: { add: ['4:4:s'], remove: [] },
@@ -189,7 +186,6 @@ describe('applyBattleDelta', () => {
             status: 'active' as const,
             round: 1,
             turnIndex: 1,
-            pendingMoraleCheck: null,
             pendingChoice: null,
             terrain,
         };
@@ -318,7 +314,6 @@ describe('applyBattleDelta', () => {
                     status: 'prepared',
                     round: 1,
                     turnIndex: 0,
-                    pendingMoraleCheck: null,
                     pendingChoice: null,
                 },
                 removed: ['a', 'b'],
@@ -360,7 +355,6 @@ describe('applyBattleDelta — відкат завершеного бою', () =
                     status: 'active',
                     round: 1,
                     turnIndex: 0,
-                    pendingMoraleCheck: null,
                     pendingChoice: null,
                     completedAt: null,
                 },
@@ -377,7 +371,6 @@ describe('applyBattleDelta — system state', () => {
         status: 'active' as const,
         round: 1,
         turnIndex: 1,
-        pendingMoraleCheck: null,
         pendingChoice: null,
     };
 

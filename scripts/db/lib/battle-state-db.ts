@@ -37,7 +37,7 @@ export async function loadScenes(
             : Prisma.empty;
 
     return db.$queryRaw<SceneRow[]>(
-        Prisma.sql`SELECT s.id, s.name, s.status, s."campaignId", c.name AS "campaignName", s.rules::text AS rules, c.rules::text AS "campaignRules", s."currentRound" AS round, s."currentTurnIndex" AS "turnIndex", s.version, (s."pendingMoraleCheck" IS NOT NULL AND s."pendingMoraleCheck"::text <> 'null') AS "pendingMorale", (s."pendingCritChoice" IS NOT NULL AND s."pendingCritChoice"::text <> 'null') AS "pendingChoice" FROM battle_scenes s JOIN campaigns c ON c.id = s."campaignId" ${where} ORDER BY s."createdAt", s.id`
+        Prisma.sql`SELECT s.id, s.name, s.status, s."campaignId", c.name AS "campaignName", s.rules::text AS rules, c.rules::text AS "campaignRules", s."currentRound" AS round, s."currentTurnIndex" AS "turnIndex", s.version, ((s."pendingMoraleCheck" IS NOT NULL AND s."pendingMoraleCheck"::text <> 'null') OR (s.system_state #> '{data,ext,morale,pending}') IS NOT NULL AND (s.system_state #>> '{data,ext,morale,pending}') <> 'null') AS "pendingMorale", (s."pendingCritChoice" IS NOT NULL AND s."pendingCritChoice"::text <> 'null') AS "pendingChoice" FROM battle_scenes s JOIN campaigns c ON c.id = s."campaignId" ${where} ORDER BY s."createdAt", s.id`
     );
 }
 

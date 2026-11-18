@@ -17,6 +17,7 @@ import {
 import { processStartOfRound } from '@/lib/utils/battle/turn/start-end';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
 import { resolveSave } from '@/systems/d20/rules/saves/legendary';
+import { lairStateData, lairStateOf } from '@/systems/lair/rules/state';
 import type { BattleParticipant } from '@/types/battle';
 
 const a = resolved({
@@ -29,22 +30,31 @@ const a = resolved({
 
 const b = { ...a, id: 'fog', key: 'unit:dragon:fog', name: 'Туман' };
 
+const inLair = (p: BattleParticipant, active: boolean): BattleParticipant => ({
+    ...p,
+    battleData: {
+        ...p.battleData,
+        ...lairStateData(p, { active, baseResistances: 2 }),
+    },
+});
+
 const dragon = (): BattleParticipant => {
     const p = participant('dragon', {
         name: 'Дракон',
         side: ParticipantSide.ENEMY,
     });
 
-    return {
+    const base = {
         ...p,
         battleData: {
             ...p.battleData,
             resolvedAbilities: [a, b],
             legendary: { actions: 3, actionsLeft: 3, resistLeft: 2 },
             lairResistances: 4,
-            lair: { active: true, baseResistances: 2, resistSpent: 0 },
         },
     };
+
+    return inLair(base, true);
 };
 
 const dm = (p: BattleParticipant, round = 1) =>
@@ -75,7 +85,7 @@ describe('lair actions', () => {
         const p = actor(out);
 
         expect(p.battleData.legendary?.actionsLeft).toBe(3);
-        expect(p.battleData.lair).toMatchObject({
+        expect(lairStateOf(p)).toMatchObject({
             usedRound: 1,
             lastKey: a.key,
         });
@@ -87,23 +97,18 @@ describe('lair actions', () => {
             { message: API_ERRORS.LAIR_REPEAT }
         );
         expect(
-            actor(await legendaryMutation(dm(p, 2), body(b.key))).battleData
-                .lair?.lastKey
+            lairStateOf(actor(await legendaryMutation(dm(p, 2), body(b.key))))
+                ?.lastKey
         ).toBe(b.key);
         expect(
-            actor(await legendaryMutation(dm(p, 3), body())).battleData.lair
+            lairStateOf(actor(await legendaryMutation(dm(p, 3), body())))
                 ?.usedRound
         ).toBe(3);
     });
 
     it('rejects inactive lairs and players without spending', async () => {
-        const p = dragon();
+        const p = inLair(dragon(), false);
 
-        p.battleData.lair = {
-            active: false,
-            baseResistances: 2,
-            resistSpent: 0,
-        };
         await expect(legendaryMutation(dm(p), body())).rejects.toMatchObject({
             message: API_ERRORS.LAIR_NOT_ACTIVE,
         });
@@ -125,7 +130,7 @@ describe('lair actions', () => {
             DEFAULT_RULES
         );
 
-        expect(textsOf(out.lairMessages)).toEqual([
+        expect(textsOf(out.hookMessages)).toEqual([
             '🏰 Ініціатива 20: дія лігва — Дракон',
         ]);
         expect(out.updatedInitiativeOrder[0].combatStats.morale).toBe(0);
@@ -134,13 +139,7 @@ describe('lair actions', () => {
 
 describe('DM lair toggles', () => {
     it('tracks spent resistances across toggles and round-trips with updated snapshot hash', () => {
-        const p = dragon();
-
-        p.battleData.lair = {
-            active: false,
-            baseResistances: 2,
-            resistSpent: 0,
-        };
+        const p = inLair(dragon(), false);
 
         const stored = splitParticipant(p, { orderIndex: 1, isPending: false });
 
@@ -156,7 +155,7 @@ describe('DM lair toggles', () => {
 
         const spent = resolveSave(active, { success: false }).participant;
 
-        expect(spent.battleData.lair?.resistSpent).toBe(1);
+        expect(spent.battleData.legendary?.resistSpent).toBe(1);
 
         const off = actor(
             patchParticipantMutation(dm(spent), 'dragon', { lairActive: false })
@@ -173,8 +172,8 @@ describe('DM lair toggles', () => {
         const after = splitParticipant(on, { orderIndex: 1, isPending: false });
 
         expect(after.snapshotHash).not.toBe(stored.snapshotHash);
-        expect(joinParticipant(after, 'b1').battleData.lair).toEqual(
-            on.battleData.lair
+        expect(lairStateOf(joinParticipant(after, 'b1'))).toEqual(
+            lairStateOf(on)
         );
     });
 

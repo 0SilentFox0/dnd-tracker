@@ -14,7 +14,7 @@ export function useSystemDice(fx?: SystemFx): SystemDice[] {
 
     const { currentRound, currentTurnIndex, initiativeOrder } = battle;
 
-    const { pendingMoraleCheck } = battle;
+    const { system } = battle;
 
     return useMemo(() => {
         const sources = fx?.dice;
@@ -25,14 +25,14 @@ export function useSystemDice(fx?: SystemFx): SystemDice[] {
             round: currentRound,
             turnIndex: currentTurnIndex,
             participants: initiativeOrder,
-            scene: { pendingCheck: pendingMoraleCheck },
+            scene: { system },
             visible,
         };
 
         return sources.flatMap((source) => source(event) ?? []);
     }, [
         fx,
-        pendingMoraleCheck,
+        system,
         currentRound,
         currentTurnIndex,
         initiativeOrder,

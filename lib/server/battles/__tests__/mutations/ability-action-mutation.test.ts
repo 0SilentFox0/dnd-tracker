@@ -8,6 +8,7 @@ import { abilityActionMutation } from '@/lib/server/battles/mutations/ability-ac
 import { resolved } from '@/lib/utils/abilities/__tests__/fixtures';
 import { testMap } from '@/lib/utils/battle/__tests__/fixtures/placed';
 import { REJECT } from '@/lib/utils/battle/store/reject';
+import { pendingSlot } from '@/systems/morale/__tests__/pending';
 import type { BattleParticipant } from '@/types/battle';
 
 const angel = resolved({
@@ -236,7 +237,7 @@ describe('abilityActionMutation', () => {
 
         await expect(
             abilityActionMutation(
-                { ...ctx, scene: { ...ctx.scene, pendingMoraleCheck: panic } },
+                { ...ctx, scene: { ...ctx.scene, sceneState: pendingSlot(panic) } },
                 body
             )
         ).rejects.toThrow(expect.objectContaining({ code: 'action_used' }));

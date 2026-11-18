@@ -228,7 +228,7 @@ describe('useBattleFxQueue', () => {
                     {
                         battle: {
                             battleLog: log,
-                            pendingMoraleCheck: pending,
+                            system: pending,
                             initiativeOrder: [],
                         },
                     } as never
@@ -242,8 +242,8 @@ describe('useBattleFxQueue', () => {
 
         const fx = {
             dice: [
-                (e: { scene: { pendingCheck: unknown } }) =>
-                    e.scene.pendingCheck
+                (e: { scene: { system: unknown } }) =>
+                    e.scene.system
                         ? {
                               key: 'sys:1',
                               actorId: 'p',

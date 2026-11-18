@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 
 import { useBattleSceneData } from './useBattleScene';
 
-import { NO_ACTION_ECONOMY } from '@/lib/utils/battle/actions/access';
+import { lairOf, NO_ACTION_ECONOMY } from '@/lib/utils/battle/actions/access';
 import { distanceOf } from '@/lib/utils/battle/grid/cell-feet';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 export function useBattleRules() {
@@ -26,6 +26,7 @@ export function useBattleRules() {
             tested: !!magic.tested,
             distance: distanceOf(rules),
             hpTerm: progression.hpTerm,
+            lair: lairOf(rules),
             systemKey: rules.system.key,
             sceneState: system,
         };

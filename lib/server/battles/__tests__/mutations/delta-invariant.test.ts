@@ -60,7 +60,6 @@ function memoryBattle(init: {
         turnIndex: 0,
         version: 1,
         eventSeq: 0,
-        pendingMoraleCheck: null,
         pendingChoice: null,
         startedAt: new Date('2026-01-01T00:00:00.000Z'),
         completedAt: null,

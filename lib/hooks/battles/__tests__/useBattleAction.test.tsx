@@ -29,7 +29,6 @@ const delta = (version: number): ClientBattleDelta => ({
         status: 'active',
         round: 1,
         turnIndex: 1,
-        pendingMoraleCheck: null,
         pendingChoice: null,
     },
     upserted: [],
@@ -290,7 +289,6 @@ describe('useBattleAction — retryOnConflict', () => {
                 status: 'completed',
                 round: 1,
                 turnIndex: 0,
-                pendingMoraleCheck: null,
                 pendingChoice: null,
             },
         };

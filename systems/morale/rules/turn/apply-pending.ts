@@ -6,14 +6,15 @@ import {
 } from '@/lib/utils/abilities/engine/core/participants';
 import { newBattleAction } from '@/lib/utils/battle/common/new-action';
 import { lineText, logFields } from '@/lib/utils/battle/log/lines';
-import { effectiveMorale } from '@/lib/utils/battle/morale/effective-morale';
-import type { PendingMoraleCheckPayload } from '@/lib/utils/battle/morale/threshold';
 import type { Ruleset } from '@/lib/utils/rules';
 import type {
     RunAbilities,
     TurnAdvanceCtx,
     TurnHook,
 } from '@/lib/utils/rules/systems/types';
+import { effectiveMorale } from '@/systems/morale/rules/effective-morale';
+import { pendingMoraleOf } from '@/systems/morale/rules/state';
+import type { PendingMoraleCheckPayload } from '@/systems/morale/rules/threshold';
 import type { BattleParticipant } from '@/types/battle';
 import type { BattleAction } from '@/types/battle-actions';
 
@@ -147,11 +148,13 @@ export const applyPendingMorale: TurnHook<TurnAdvanceCtx> = ({
     rules,
     run,
 }) => {
-    if (!scene.pendingMoraleCheck) return { participants, messages: [] };
+    const payload = pendingMoraleOf(scene.sceneState);
+
+    if (!payload) return { participants, messages: [] };
 
     const morale = applyPendingMoraleCheck({
         participants,
-        payload: scene.pendingMoraleCheck as PendingMoraleCheckPayload,
+        payload,
         scene,
         rules,
         run,

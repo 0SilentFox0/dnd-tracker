@@ -1,6 +1,6 @@
 import type { SystemDice, SystemDiceSource } from '@/lib/utils/battle/fx';
-import type { PendingMoraleCheckPayload } from '@/lib/utils/battle/turn';
 import { moraleDiceDone } from '@/systems/morale/hooks/morale-dice';
+import { pendingMoraleOf } from '@/systems/morale/rules/state';
 
 export function moraleThrowOf(input: {
     round: number;
@@ -31,8 +31,7 @@ export function moraleThrowOf(input: {
 }
 
 export const moraleDiceSource: SystemDiceSource = (event) => {
-    const pending = event.scene
-        .pendingCheck as PendingMoraleCheckPayload | null;
+    const pending = pendingMoraleOf(event.scene.system);
 
     const who = pending
         ? event.participants.find((p) => p.basicInfo.id === pending.participantId)

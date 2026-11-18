@@ -31,8 +31,6 @@ export const SECTION_DEFAULTS: SectionDefaults = {
     conditions: { enabled: false, exhaustion: '2014' },
     actions: {
         enabled: false,
-        opportunityAttacks: true,
-        retaliation: true,
         variant: '2014',
     },
     classes: { enabled: false },

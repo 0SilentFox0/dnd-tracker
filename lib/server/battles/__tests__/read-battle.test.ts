@@ -30,7 +30,6 @@ function loaded(
             turnIndex: 0,
             version: 3,
             eventSeq: 4,
-            pendingMoraleCheck: null,
             pendingChoice: null,
             startedAt: null,
             completedAt: null,

@@ -8,6 +8,7 @@
 import type { Prisma } from '@prisma/client';
 import { execFileSync } from 'node:child_process';
 
+import { awaitsMoraleCheck } from './morale-gate';
 import { SIM_PLAYER, SIM_USER } from './simulate-battle-scenario';
 import { FAIR_WEAPONS } from './simulate-battle-scenario';
 
@@ -49,7 +50,6 @@ import {
 import { hitModelOf } from '@/lib/utils/battle/balance/hit-model';
 import { applyBattleDelta } from '@/lib/utils/battle/client/apply-delta';
 import { attackDamageParts } from '@/lib/utils/battle/damage/attack-parts';
-import { awaitsMoraleCheck } from '@/lib/utils/battle/morale/awaits-check';
 import {
     loadEquippedArtifactRows,
     toEquippedArtifacts,
@@ -525,7 +525,7 @@ async function playTurn(actor: BattleParticipant, foes: BattleParticipant[]) {
                 participants: state.initiativeOrder,
                 scene: {
                     turnIndex: state.currentTurnIndex,
-                    pendingMoraleCheck: state.pendingMoraleCheck,
+                    sceneState: state.system,
                 },
             },
             actor.basicInfo.id

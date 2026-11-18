@@ -1,6 +1,7 @@
 import type { DiceThrowSpec } from './dice/from-action';
 import type { FxBadgeKey } from './badges';
 
+import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
 import type { BattleParticipant } from '@/types/battle';
 import type { TextRef } from '@/types/text';
 
@@ -17,7 +18,7 @@ export interface SystemDiceEvent {
     round: number;
     turnIndex: number;
     participants: BattleParticipant[];
-    scene: { pendingCheck: unknown };
+    scene: { system: SystemSlot | undefined };
     visible(participant: BattleParticipant): boolean;
 }
 

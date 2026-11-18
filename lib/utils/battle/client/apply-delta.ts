@@ -144,7 +144,6 @@ export function applyBattleDelta(
         status: scene.status,
         currentRound: scene.round,
         currentTurnIndex: scene.turnIndex,
-        pendingMoraleCheck: scene.pendingMoraleCheck,
         pendingChoice: scene.pendingChoice,
         system:
             scene.system === null ? undefined : (scene.system ?? cached.system),

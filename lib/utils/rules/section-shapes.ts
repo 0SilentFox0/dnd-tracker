@@ -77,8 +77,6 @@ export const sectionSchemas = {
     }),
     actions: z.strictObject({
         enabled: z.boolean(),
-        opportunityAttacks: z.boolean(),
-        retaliation: z.boolean(),
         variant: z.enum(RULES_EDITIONS),
     }),
     classes: z.strictObject({ enabled: z.boolean() }),
@@ -120,7 +118,12 @@ export type CoreRuleset = {
 /** Sections owned by a system add themselves here through module augmentation */
 export interface RulesetExtensions {}
 
+/** Items a module adds to `actions` declare themselves here through module augmentation (absent while the module is off) */
+export interface ActionsRulesExtensions {}
+
 /** The mapped form keeps the implicit index signature that an interface would lose (JSON columns, `Record<string, unknown>` readers) */
 export type Ruleset = CoreRuleset & {
     [K in keyof RulesetExtensions]: RulesetExtensions[K];
+} & {
+    actions: { [K in keyof ActionsRulesExtensions]: ActionsRulesExtensions[K] };
 };

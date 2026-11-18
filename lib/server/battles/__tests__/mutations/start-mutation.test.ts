@@ -15,7 +15,6 @@ const ctx = {
         turnIndex: 0,
         version: 0,
         eventSeq: 0,
-        pendingMoraleCheck: null,
         pendingChoice: null,
         startedAt: null,
         completedAt: null,
@@ -60,7 +59,6 @@ describe('start mutation', () => {
             status: 'active',
             round: 1,
             turnIndex: 0,
-            pendingMoraleCheck: null,
             pendingChoice: null,
             completedAt: null,
         });

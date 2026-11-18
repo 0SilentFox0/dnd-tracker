@@ -23,7 +23,6 @@ import {
 import { useConfirm } from '@/lib/hooks/common';
 import { useText } from '@/lib/i18n/use-text';
 import { cn } from '@/lib/utils';
-import { lairAbilities } from '@/lib/utils/battle/actions/lair';
 import {
     hasLegendaryActions,
     legendaryBadge,
@@ -92,7 +91,7 @@ export function DmParticipantRow({
 
     const close = () => onDone?.();
 
-    const { hpTerm } = useBattleRules();
+    const { hpTerm, lair } = useBattleRules();
 
     const label = scaleLabel(participant, t, hpTerm === 'wounds');
 
@@ -106,8 +105,9 @@ export function DmParticipantRow({
             ? participant.battleData.legendary
             : undefined;
 
-    const hasLair =
-        !!participant.battleData.lair || lairAbilities(participant).length > 0;
+    const hasLair = lair.present(participant);
+
+    const inLair = lair.active(participant);
 
     const text = useText();
 
@@ -206,20 +206,20 @@ export function DmParticipantRow({
                         type="button"
                         className={cn(
                             ICON,
-                            participant.battleData.lair?.active &&
+                            inLair &&
                                 'text-hud-gold-bright'
                         )}
                         aria-label={
-                            participant.battleData.lair?.active
+                            inLair
                                 ? t('lairOff')
                                 : t('lairOn')
                         }
                         title={
-                            participant.battleData.lair?.active
+                            inLair
                                 ? t('inLair')
                                 : t('outLair')
                         }
-                        aria-pressed={!!participant.battleData.lair?.active}
+                        aria-pressed={inLair}
                         onClick={() => onToggleLair(participant)}
                     >
                         🏰

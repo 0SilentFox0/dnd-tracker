@@ -7,6 +7,7 @@ import {
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import { processStartOfRound } from '@/lib/utils/battle/turn/round-start';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
+import { lairStateData } from '@/systems/lair/rules/state';
 
 const lairHolder = () => {
     const p = createMockParticipant();
@@ -15,7 +16,7 @@ const lairHolder = () => {
         ...p,
         battleData: {
             ...p.battleData,
-            lair: { active: true, baseResistances: 0, resistSpent: 0 },
+            ...lairStateData(p, { active: true, baseResistances: 0 }),
             resolvedAbilities: [
                 { trigger: { event: 'turnStart' }, limits: { lair: true } },
             ],
@@ -37,8 +38,8 @@ describe('lair module composition', () => {
     });
 
     it('an active lair logs its line only with the module', () => {
-        expect(roundStart(dnd5eRules()).lairMessages).toHaveLength(1);
-        expect(roundStart(bareD20Rules()).lairMessages).toEqual([]);
+        expect(roundStart(dnd5eRules()).hookMessages).toHaveLength(1);
+        expect(roundStart(bareD20Rules()).hookMessages).toEqual([]);
     });
 
     it('is silent without an active lair', () => {
@@ -46,7 +47,7 @@ describe('lair module composition', () => {
 
         expect(
             processStartOfRound([p], 2, [], () => 0.5, null, dnd5eRules())
-                .lairMessages
+                .hookMessages
         ).toEqual([]);
     });
 });

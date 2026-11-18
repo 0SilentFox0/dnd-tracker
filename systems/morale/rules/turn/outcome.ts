@@ -1,9 +1,7 @@
 import type { TurnGateOutcome } from '@/lib/utils/battle/flows/turn-flow';
-import type {
-    MoraleCheckResult,
-    PendingMoraleCheckPayload,
-} from '@/lib/utils/battle/morale/threshold';
 import type { TurnStartCheck } from '@/lib/utils/rules/systems/types';
+import { pendingMoraleOf } from '@/systems/morale/rules/state';
+import type { MoraleCheckResult } from '@/systems/morale/rules/threshold';
 
 export function moraleOutcome(
     r:
@@ -15,10 +13,10 @@ export function moraleOutcome(
 }
 
 export const moraleOutcomeOf: TurnStartCheck['outcomeOf'] = (
-    pending,
+    sceneState,
     participantId
 ) => {
-    const payload = pending as PendingMoraleCheckPayload | null;
+    const payload = pendingMoraleOf(sceneState);
 
     return payload?.participantId === participantId
         ? moraleOutcome(payload.moraleResult)

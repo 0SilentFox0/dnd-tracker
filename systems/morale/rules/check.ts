@@ -2,11 +2,11 @@ import { textRef } from '@/lib/i18n/text-ref';
 import {
     effectiveMorale,
     moraleChanceBonus,
-} from '@/lib/utils/battle/morale/effective-morale';
+} from '@/systems/morale/rules/effective-morale';
 import {
     type MoraleCheckResult,
     moraleThreshold,
-} from '@/lib/utils/battle/morale/threshold';
+} from '@/systems/morale/rules/threshold';
 import type { BattleParticipant } from '@/types/battle';
 
 export function checkMorale(

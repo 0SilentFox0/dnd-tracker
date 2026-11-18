@@ -6,6 +6,7 @@ import {
 } from '@/lib/utils/abilities/__tests__/fixtures';
 import { parseRules } from '@/lib/utils/rules/schema';
 import type { ActGateScope } from '@/lib/utils/rules/systems/types';
+import { pendingSlot } from '@/systems/morale/__tests__/pending';
 import type { BattleParticipant } from '@/types/battle';
 
 let ruleSystemOf: typeof import('@/lib/utils/rules/systems').ruleSystemOf;
@@ -27,7 +28,7 @@ const legacy = (over: Partial<BattleParticipant['actionFlags']> = {}) => {
 const scope = (p: BattleParticipant, rules: ActGateScope['rules']) =>
     ({
         participants: [p],
-        scene: { turnIndex: 0, pendingMoraleCheck: null },
+        scene: { turnIndex: 0 },
         rules,
     }) satisfies ActGateScope;
 
@@ -97,8 +98,8 @@ describe('startCheck', () => {
             },
         };
 
-        expect(check?.outcomeOf(pending, 'p')).toBe('skip');
-        expect(check?.outcomeOf(pending, 'other')).toBeUndefined();
-        expect(check?.outcomeOf(null, 'p')).toBeUndefined();
+        expect(check?.outcomeOf(pendingSlot(pending), 'p')).toBe('skip');
+        expect(check?.outcomeOf(pendingSlot(pending), 'other')).toBeUndefined();
+        expect(check?.outcomeOf(undefined, 'p')).toBeUndefined();
     });
 });

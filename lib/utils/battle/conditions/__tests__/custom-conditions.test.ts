@@ -344,7 +344,6 @@ describe('pacified: шкода', () => {
                     turnIndex: 0,
                     version: 2,
                     eventSeq: 3,
-                    pendingMoraleCheck: null,
                     pendingChoice: null,
                     startedAt: null,
                     completedAt: null,

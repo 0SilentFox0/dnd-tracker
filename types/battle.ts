@@ -329,6 +329,8 @@ export interface LegendaryState {
     actions: number;
     actionsLeft: number;
     resistLeft: number;
+    /** Legendary resistances used so far; the lair module restores the pool from it */
+    resistSpent?: number;
 }
 
 export type LegendaryOption =
@@ -475,13 +477,6 @@ export interface BattleParticipantBattleData {
     /** Легендарні дії й опір монстра 5e; actionsLeft відновлюється на початку його ходу */
     legendary?: LegendaryState;
     lairResistances?: number;
-    lair?: {
-        active: boolean;
-        usedRound?: number;
-        lastKey?: string;
-        baseResistances: number;
-        resistSpent: number;
-    };
     senses?: {
         darkvision?: number;
         blindsight?: number;

@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 
+import { turnStartOutcome } from '../../turn-start-check';
 import { useBattleScene } from '../../useBattleScene';
 
 import { BattleStatus } from '@/lib/constants/battle';
@@ -31,7 +32,7 @@ export function useMazeDarkAutoSkip(): void {
         !!battle.map?.maze?.dark &&
         !!current &&
         mine &&
-        !battle.pendingMoraleCheck &&
+        turnStartOutcome(battle, current.basicInfo.id) === undefined &&
         !anyPending;
 
     const { version, currentTurnIndex } = battle;

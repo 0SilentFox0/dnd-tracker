@@ -13,7 +13,6 @@ import { processAttack } from '@/lib/utils/battle/attack';
 import { runAttackPhase } from '@/lib/utils/battle/attack-phase/run-attack-phase';
 import { movementBudget } from '@/lib/utils/battle/grid';
 import { eventTextOf } from '@/lib/utils/battle/log/__tests__/event-text';
-import { effectiveMorale } from '@/lib/utils/battle/morale/effective-morale';
 import type { BattleMutationContext } from '@/lib/utils/battle/pipeline/run-battle-mutation';
 import { applyResistance } from '@/lib/utils/battle/resistance';
 import { castSpell } from '@/lib/utils/battle/spell';
@@ -26,6 +25,7 @@ import { runAdvanceTurnLoop } from '@/lib/utils/battle/turn/run-advance-turn-loo
 import { processStartOfTurn } from '@/lib/utils/battle/turn/start-end';
 import type { CastableSpell } from '@/lib/utils/battle/types/spell-process';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { effectiveMorale } from '@/systems/morale/rules/effective-morale';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
 
 const spell = (key: string): CastableSpell => {
@@ -491,7 +491,6 @@ describe('Темрява — бібліотечні заклинання', () =>
                 turnIndex: 0,
                 version: 1,
                 eventSeq: 0,
-                pendingMoraleCheck: null,
                 pendingChoice: null,
                 startedAt: null,
                 completedAt: null,

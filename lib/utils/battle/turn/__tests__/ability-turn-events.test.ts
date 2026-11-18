@@ -197,7 +197,6 @@ describe('turn events', () => {
             turnIndex: 1,
             version: 1,
             eventSeq: 0,
-            pendingMoraleCheck: null,
             pendingChoice: null,
             startedAt: null,
             completedAt: null,

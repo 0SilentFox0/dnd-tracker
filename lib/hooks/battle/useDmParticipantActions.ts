@@ -11,6 +11,7 @@ import {
 
 import { BattleStatus } from '@/lib/constants/battle';
 import { useConfirm } from '@/lib/hooks/common';
+import { lairOf } from '@/lib/utils/battle/actions/access';
 import { hasAnyStandardCondition } from '@/lib/utils/battle/conditions';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { BattleParticipant } from '@/types/battle';
@@ -99,7 +100,12 @@ export function useDmParticipantActions({ onChangeHp, onDone }: Options) {
             ? (p) =>
                   actions.updateParticipant.mutate({
                       participantId: p.basicInfo.id,
-                      data: { lairActive: !p.battleData.lair?.active },
+                      data: {
+                          lairActive: !(
+                              battle.rules &&
+                              lairOf(battle.rules).active(p)
+                          ),
+                      },
                   })
             : undefined,
         onLegendary: isActive

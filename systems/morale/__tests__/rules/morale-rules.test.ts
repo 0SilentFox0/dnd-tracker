@@ -6,9 +6,9 @@ import {
     seq,
 } from '@/lib/utils/abilities/__tests__/fixtures';
 import { applyEffect } from '@/lib/utils/abilities/registry/effects';
-import { awaitsMoraleCheck } from '@/lib/utils/battle/morale/awaits-check';
-import { effectiveMorale } from '@/lib/utils/battle/morale/effective-morale';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { awaitsMoraleCheck } from '@/systems/morale/rules/awaits-check';
+import { effectiveMorale } from '@/systems/morale/rules/effective-morale';
 import type { BattleParticipant } from '@/types/battle';
 
 function withCap(
@@ -43,7 +43,7 @@ describe('morale rules', () => {
             awaitsMoraleCheck(
                 {
                     participants: [p],
-                    scene: { turnIndex: 0, pendingMoraleCheck: null },
+                    scene: { turnIndex: 0 },
                 },
                 'p'
             )

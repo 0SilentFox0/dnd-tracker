@@ -1,8 +1,8 @@
 import {
     effectiveMorale,
     moraleChanceBonus,
-} from '@/lib/utils/battle/morale/effective-morale';
-import { moraleThreshold } from '@/lib/utils/battle/morale/threshold';
+} from '@/systems/morale/rules/effective-morale';
+import { moraleThreshold } from '@/systems/morale/rules/threshold';
 import type { BattleParticipant } from '@/types/battle';
 
 /** Значення d10, на яких спрацює мораль: додатковий хід (позитивна) чи пропуск ходу (негативна). */

@@ -6,7 +6,7 @@ import {
     resolved,
 } from '@/lib/utils/abilities/__tests__/fixtures';
 import { AbilitySchema, type FlagEffect } from '@/lib/utils/abilities/schema';
-import { effectiveMorale } from '@/lib/utils/battle/morale/effective-morale';
+import { effectiveMorale } from '@/systems/morale/rules/effective-morale';
 import type { BattleParticipant } from '@/types/battle';
 
 function withMorale(

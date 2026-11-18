@@ -18,7 +18,6 @@ const scene: BattleSceneState = {
     turnIndex: 1,
     version: 5,
     eventSeq: 9,
-    pendingMoraleCheck: null,
     pendingChoice: null,
     startedAt: null,
     completedAt: null,
@@ -42,7 +41,6 @@ describe('buildSnapshotState', () => {
             round: 2,
             turnIndex: 1,
             status: 'active',
-            pendingMoraleCheck: null,
         });
         expect(state.participants).toHaveLength(1);
         expect(state.participants[0]).not.toHaveProperty('snapshot');

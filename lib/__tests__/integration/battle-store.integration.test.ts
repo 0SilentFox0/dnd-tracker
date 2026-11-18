@@ -12,6 +12,7 @@ import { loadBattle, loadBattleAccess } from '@/lib/server/battles/store/load-ba
 import { saveBattle } from '@/lib/server/battles/store/save-battle';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import { BattleConflictError, loadEventsBefore, loadRecentEvents, loadSnapshotsFrom, restoreParticipantsAt } from '@/lib/utils/battle/store';
+import { pendingSlot } from '@/systems/morale/__tests__/pending';
 import type { BattleParticipant } from '@/types/battle';
 
 const url = process.env.DATABASE_URL ?? '';
@@ -305,12 +306,16 @@ describe.skipIf(!isLocal)('battle store (local DB)', () => {
         ).rejects.toBeInstanceOf(BattleConflictError);
     });
 
-    it('pendingMoraleCheck: null записується як SQL NULL', async () => {
+    it('запис сценового слота обнуляє застарілу колонку pendingMoraleCheck', async () => {
         const before = await mustLoad();
 
         await saveBattle(prisma, before, {
             scene: {
-                pendingMoraleCheck: { participantId: 'hero', d10Roll: 5 },
+                sceneState: pendingSlot({
+                    participantId: 'hero',
+                    d10Roll: 5,
+                    moraleResult: {},
+                }),
             },
             participants: before.participants,
             pending: [],
@@ -320,7 +325,7 @@ describe.skipIf(!isLocal)('battle store (local DB)', () => {
         const mid = await mustLoad();
 
         await saveBattle(prisma, mid, {
-            scene: { pendingMoraleCheck: null },
+            scene: { sceneState: null },
             participants: mid.participants,
             pending: [],
             events: [],

@@ -150,7 +150,6 @@ beforeEach(() => {
             turnIndex: 0,
             version: 3,
             eventSeq: 0,
-            pendingMoraleCheck: null,
             startedAt: null,
             completedAt: null,
         },

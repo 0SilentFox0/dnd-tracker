@@ -1,10 +1,9 @@
-import type { MoraleScope } from '@/lib/utils/battle/morale/awaits-check';
 import { BattleRuleError } from '@/lib/utils/battle/store/errors';
 import type { Ruleset } from '@/lib/utils/rules';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
-import type { ActGateBlock } from '@/lib/utils/rules/systems/types';
+import type { ActGateBlock, ActGateScope } from '@/lib/utils/rules/systems/types';
 
-type GateCtx = MoraleScope & { meta: { rules: Ruleset } };
+type GateCtx = Omit<ActGateScope, 'rules'> & { meta: { rules: Ruleset } };
 
 function firstBlock(
     ctx: GateCtx,

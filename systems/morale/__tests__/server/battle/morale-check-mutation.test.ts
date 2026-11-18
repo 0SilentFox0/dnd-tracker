@@ -7,17 +7,18 @@ import {
 } from '@/lib/server/battles/__tests__/mutations/fixtures';
 import { BattleAccessError } from '@/lib/utils/battle/store';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { pendingMoraleOf, pendingSlot } from '@/systems/morale/__tests__/pending';
 import { moraleCheckMutation } from '@/systems/morale/server/battle/morale-check-mutation';
 
 describe('morale-check mutation', () => {
-    it('зберігає результат у pendingMoraleCheck і повертає moraleResult', () => {
+    it('зберігає результат у слоті сцени і повертає moraleResult', () => {
         const out = moraleCheckMutation(context(), {
             participantId: 'hero',
             d10Roll: 5,
         });
 
         expect(out.events).toEqual([]);
-        expect(out.scene?.pendingMoraleCheck).toMatchObject({
+        expect(pendingMoraleOf(out.scene?.sceneState ?? undefined)).toMatchObject({
             participantId: 'hero',
             d10Roll: 5,
         });
@@ -76,7 +77,10 @@ describe('morale-check mutation', () => {
         expect(() =>
             moraleCheckMutation(
                 context({
-                    scene: { ...context().scene, pendingMoraleCheck: pending },
+                    scene: {
+                        ...context().scene,
+                        sceneState: pendingSlot(pending),
+                    },
                 }),
                 { participantId: 'hero', d10Roll: 10 }
             )

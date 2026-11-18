@@ -50,7 +50,6 @@ function fakeDb(rows = stored) {
         currentTurnIndex: 0,
         version: 3,
         eventSeq: 0,
-        pendingMoraleCheck: null,
         pendingCritChoice: null,
         rules: { system: { key: 'homm' } },
         audio: {

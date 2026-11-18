@@ -75,7 +75,6 @@ const ctx = (h: BattleParticipant, rules = RULES, foes = [goblin('gob')]) =>
             turnIndex: 0,
             version: 2,
             eventSeq: 3,
-            pendingMoraleCheck: null,
             startedAt: null,
             completedAt: null,
         },

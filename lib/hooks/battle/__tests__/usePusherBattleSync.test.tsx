@@ -217,7 +217,6 @@ describe('usePusherBattleSync — two players receive same battle state', () => 
             status: 'active',
             round: 1,
             turnIndex,
-            pendingMoraleCheck: null,
             pendingChoice: null,
         },
         upserted: [
@@ -743,7 +742,6 @@ describe('usePusherBattleSync: dm-канал', () => {
             status: 'active',
             round: 1,
             turnIndex: 1,
-            pendingMoraleCheck: null,
             pendingChoice: null,
         },
         upserted: [],

@@ -181,7 +181,6 @@ export function buildClientDelta(args: {
             status: after.status,
             round: after.round,
             turnIndex: after.turnIndex,
-            pendingMoraleCheck: after.pendingMoraleCheck,
             pendingChoice: publicPending(after.pendingChoice),
             ...(after.turnStartedAt &&
                 after.turnStartedAt.getTime() !==

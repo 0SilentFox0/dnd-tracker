@@ -9,6 +9,7 @@ import {
 import { useMazeDarkAutoSkip } from '../useMazeDarkAutoSkip';
 
 import { mazeMap } from '@/lib/utils/battle/modes/maze/__tests__/fixtures';
+import { pendingSlot } from '@/systems/morale/__tests__/pending';
 
 const skip = vi.fn();
 
@@ -33,7 +34,10 @@ function setup(
     if (opts.pending)
         (scene.value as { anyPending: boolean }).anyPending = true;
 
-    if (opts.moraleCheck) scene.battle.pendingMoraleCheck = {};
+    if (opts.moraleCheck) scene.battle.system = pendingSlot({
+            participantId: 'me',
+            moraleResult: {},
+        });
 
     return renderHook(() => useMazeDarkAutoSkip(), { wrapper: scene.wrapper });
 }
