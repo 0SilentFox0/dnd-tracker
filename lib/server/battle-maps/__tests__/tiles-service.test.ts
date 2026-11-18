@@ -222,4 +222,17 @@ describe('battle map tile storage', () => {
         ).rejects.toMatchObject({ status: 400 });
         expect(db.api.battleMap.updateMany).not.toHaveBeenCalled();
     });
+
+    it('reads only patched chunks and skips unchanged ones', async () => {
+        db.rows[0].tileLayers = { ground: encodedNew };
+        const next = await patchTileChunks('m1', 1, [
+            { layer: 'ground', cx: 0, cy: 0, data: encodedNew },
+        ]);
+
+        expect(next).toBe(2);
+        expect(db.api.battleMapChunk.findMany).toHaveBeenCalledWith({
+            where: { mapId: 'm1', OR: [{ cx: 0, cy: 0 }] },
+        });
+        expect(db.api.battleMapChunk.upsert).not.toHaveBeenCalled();
+    });
 });

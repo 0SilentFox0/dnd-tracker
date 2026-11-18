@@ -6,7 +6,11 @@ import { prisma } from '@/lib/db';
 import { pruneMapVersions } from '@/lib/server/battle-maps/library-service';
 import { ContentError } from '@/lib/server/content/errors';
 import { chunkKey } from '@/lib/utils/battle/map-storage/chunk-key';
-import { EMPTY_EDGE_CHUNK } from '@/lib/utils/battle/map-storage/edge-chunks';
+import {
+    planTileChunkWrites,
+    tilePatchKeys,
+    type ExistingTileChunk,
+} from '@/lib/utils/battle/map-storage/tile-chunk-patch';
 import { decodeTileChunk } from '@/lib/utils/battle/tiles/rle';
 import { isTileLayer, type TileLayer } from '@/lib/utils/battle/tiles/types';
 
@@ -151,25 +155,38 @@ export async function patchTileChunks(
 
         if (!current) throw conflict();
 
-        const rows = await tx.battleMapChunk.findMany({ where: { mapId } });
+        const keys = tilePatchKeys(patches);
 
-        const currentTiles = tileLayersToSnapshot(rows);
+        const rows = await tx.battleMapChunk.findMany({
+            where: {
+                mapId,
+                OR: keys.map((key) => {
+                    const [cx, cy] = key.split(':').map(Number);
 
-        const nextTiles: TileSnapshot = structuredClone(currentTiles);
+                    return { cx, cy };
+                }),
+            },
+        });
 
-        const byCoord = new Map(
-            rows.map((row) => [chunkKey(row.cx, row.cy), row])
+        const existing = new Map<string, ExistingTileChunk>(
+            rows.map((row) => [
+                chunkKey(row.cx, row.cy),
+                {
+                    data: row.data,
+                    layers: parseSnapshot({ k: row.tileLayers }).k,
+                },
+            ])
         );
 
-        for (const patch of patches) {
-            const key = chunkKey(patch.cx, patch.cy);
+        const { nextLayers, writes } = planTileChunkWrites(patches, existing);
 
-            const layers = (nextTiles[key] ??= {});
+        const nextTiles = parseSnapshot(
+            (current.payload as { tileLayers?: unknown }).tileLayers
+        );
 
-            if (patch.data === null) delete layers[patch.layer];
-            else layers[patch.layer] = patch.data;
-
-            if (Object.keys(layers).length === 0) delete nextTiles[key];
+        for (const [key, layers] of nextLayers) {
+            if (layers) nextTiles[key] = layers;
+            else delete nextTiles[key];
         }
 
         const { count } = await tx.battleMap.updateMany({
@@ -179,39 +196,33 @@ export async function patchTileChunks(
 
         if (!count) throw conflict();
 
-        for (const coord of new Set(
-            patches.map(({ cx, cy }) => chunkKey(cx, cy))
-        )) {
-            const [cx, cy] = coord.split(':').map(Number);
-
-            const existing = byCoord.get(coord);
-
-            const tileLayers = nextTiles[coord];
-
-            if (
-                !tileLayers &&
-                (!existing || existing.data === EMPTY_EDGE_CHUNK)
-            ) {
-                await tx.battleMapChunk.deleteMany({
-                    where: { mapId, cx, cy },
-                });
-                continue;
-            }
-
-            await tx.battleMapChunk.upsert({
-                where: { mapId_cx_cy: { mapId, cx, cy } },
-                create: {
-                    mapId,
-                    cx,
-                    cy,
-                    data: existing?.data ?? EMPTY_EDGE_CHUNK,
-                    tileLayers: tileLayers ?? Prisma.DbNull,
-                },
-                update: {
-                    tileLayers: tileLayers ?? Prisma.DbNull,
-                },
-            });
-        }
+        await Promise.all(
+            writes.map((write) =>
+                write.kind === 'delete'
+                    ? tx.battleMapChunk.deleteMany({
+                          where: { mapId, cx: write.cx, cy: write.cy },
+                      })
+                    : tx.battleMapChunk.upsert({
+                          where: {
+                              mapId_cx_cy: {
+                                  mapId,
+                                  cx: write.cx,
+                                  cy: write.cy,
+                              },
+                          },
+                          create: {
+                              mapId,
+                              cx: write.cx,
+                              cy: write.cy,
+                              data: write.data,
+                              tileLayers: write.layers ?? Prisma.DbNull,
+                          },
+                          update: {
+                              tileLayers: write.layers ?? Prisma.DbNull,
+                          },
+                      })
+            )
+        );
 
         const payload = current.payload as Record<string, unknown>;
 
