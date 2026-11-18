@@ -9,6 +9,13 @@ import {
     useState,
 } from 'react';
 
+import {
+    type DragState,
+    LONG_PRESS_MS,
+    NON_PASSIVE,
+    type Origin,
+    SCROLL_SLOP_PX,
+} from './puzzle-drag-types';
 import type { PuzzleControl } from './usePuzzleControl';
 
 import { PUZZLE_KEEPALIVE_MS } from '@/lib/constants/show';
@@ -16,33 +23,7 @@ import { dropAction } from '@/lib/utils/puzzle/drop-action';
 import { isHeldByOther } from '@/lib/utils/puzzle/hold';
 import type { PuzzleSpec, PuzzleState } from '@/types/show';
 
-export interface DragState {
-    id: string;
-    clientX: number;
-    clientY: number;
-    rot: number;
-    scale: number;
-    grabbed: boolean;
-    released: boolean;
-    pointerId: number;
-    origin: {
-        clientX: number;
-        clientY: number;
-        board: { x: number; y: number } | null;
-    };
-}
-
-interface Origin {
-    pointerId: number;
-    clientX: number;
-    clientY: number;
-}
-
-const NON_PASSIVE: AddEventListenerOptions = { passive: false };
-
-const LONG_PRESS_MS = 200;
-
-const SCROLL_SLOP_PX = 8;
+export type { DragState };
 
 interface Args {
     puzzle: PuzzleState;
