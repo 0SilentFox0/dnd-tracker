@@ -89,6 +89,9 @@ describe('ClassesHeader', () => {
     });
 });
 
+const trigger = (c: HTMLElement) =>
+    c.querySelector('[data-slot="disclosure"] button') as HTMLButtonElement;
+
 describe('ClassSection', () => {
     afterEach(cleanup);
 
@@ -99,7 +102,7 @@ describe('ClassSection', () => {
             </ClassSection>
         );
 
-        expect(container.querySelector('details')?.open).toBe(true);
+        expect(trigger(container).dataset.state).toBe('open');
         expect(screen.getByText('Fighter')).toBeTruthy();
         expect(
             screen.getByText('characterProfile.path.sectionLevel {"level":4}')
@@ -110,7 +113,7 @@ describe('ClassSection', () => {
             </ClassSection>
         );
 
-        expect(container.querySelector('details')?.open).toBe(true);
+        expect(trigger(container).dataset.state).toBe('open');
     });
 
     it("starts closed, opens when defaultOpen turns on, and keeps the user's own toggle", () => {
@@ -120,36 +123,28 @@ describe('ClassSection', () => {
             </ClassSection>
         );
 
-        const details = container.querySelector(
-            'details'
-        ) as HTMLDetailsElement;
-
-        expect(details.open).toBe(false);
+        expect(trigger(container).dataset.state).toBe('closed');
         rerender(
             <ClassSection progression={two[0]} defaultOpen>
                 x
             </ClassSection>
         );
 
-        expect(details.open).toBe(true);
+        expect(trigger(container).dataset.state).toBe('open');
 
-        details.open = false;
-        fireEvent(details, new Event('toggle'));
+        fireEvent.click(trigger(container));
         rerender(
             <ClassSection progression={two[0]} defaultOpen>
                 x
             </ClassSection>
         );
 
-        expect(details.open).toBe(false);
+        expect(trigger(container).dataset.state).toBe('closed');
     });
 });
 
 describe('ClassSection', () => {
     afterEach(cleanup);
-
-    const details = (c: HTMLElement) =>
-        c.querySelector('details') as HTMLDetailsElement;
 
     it("opens when defaultOpen flips to true, and otherwise keeps the user's toggle", () => {
         const { container, rerender } = render(
@@ -158,20 +153,20 @@ describe('ClassSection', () => {
             </ClassSection>
         );
 
-        expect(details(container).open).toBe(false);
+        expect(trigger(container).dataset.state).toBe('closed');
         rerender(
             <ClassSection progression={two[0]} defaultOpen>
                 x
             </ClassSection>
         );
 
-        expect(details(container).open).toBe(true);
+        expect(trigger(container).dataset.state).toBe('open');
         rerender(
             <ClassSection progression={two[0]} defaultOpen={false}>
                 x
             </ClassSection>
         );
 
-        expect(details(container).open).toBe(true);
+        expect(trigger(container).dataset.state).toBe('open');
     });
 });

@@ -247,7 +247,7 @@ describe('ChoiceListEditor', () => {
         expect(
             screen
                 .getByText('choices.header.technical')
-                .closest('details')
+                .closest('[data-slot="disclosure"]')
                 ?.contains(screen.getByLabelText('choices.header.id'))
         ).toBe(true);
     });
@@ -275,6 +275,8 @@ describe('ChoiceListEditor', () => {
             />
         );
 
-        expect(screen.getByText('First').closest('details')?.open).toBe(false);
+        expect(screen.getByText('First').closest('button')?.dataset.state).toBe(
+            'closed'
+        );
     });
 });

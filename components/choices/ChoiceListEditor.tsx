@@ -16,6 +16,7 @@ import { MarkdownLite } from '@/components/common/MarkdownLite';
 import { HUD_SELECT_CLASS } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Disclosure } from '@/components/ui/disclosure';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { SelectField } from '@/components/ui/select-field';
@@ -117,29 +118,32 @@ export function ChoiceListEditor({
                 const onPatch = (patch: Partial<Choice>) => update(i, patch);
 
                 return (
-                    <details
+                    <Disclosure
                         key={keys[i]}
-                        open={fresh === i || value.length === 1}
-                        className="group rounded-md border border-hud-line/60"
+                        className="rounded-md border border-hud-line/60"
+                        triggerClassName="flex flex-wrap items-center gap-2 px-3 py-2 text-sm"
+                        defaultOpen={fresh === i || value.length === 1}
+                        summary={
+                            <>
+                                <span className="hud-sc">
+                                    {choice.label || t('list.newChoice')}
+                                </span>
+                                <span className="text-xs text-hud-muted">
+                                    {[
+                                        t(`kinds.${choice.kind}`),
+                                        typeof choice.count === 'number'
+                                            ? `×${choice.count}`
+                                            : null,
+                                        choice.lineage
+                                            ? t('list.lineageTag')
+                                            : null,
+                                    ]
+                                        .filter(Boolean)
+                                        .join(' · ')}
+                                </span>
+                            </>
+                        }
                     >
-                        <summary className="flex cursor-pointer flex-wrap items-center gap-2 px-3 py-2 text-sm">
-                            <span className="hud-sc">
-                                {choice.label || t('list.newChoice')}
-                            </span>
-                            <span className="text-xs text-hud-muted">
-                                {[
-                                    t(`kinds.${choice.kind}`),
-                                    typeof choice.count === 'number'
-                                        ? `×${choice.count}`
-                                        : null,
-                                    choice.lineage
-                                        ? t('list.lineageTag')
-                                        : null,
-                                ]
-                                    .filter(Boolean)
-                                    .join(' · ')}
-                            </span>
-                        </summary>
                         <div className="space-y-3 p-3 pt-1">
                             <ChoiceHeaderRow
                                 index={i}
@@ -208,11 +212,15 @@ export function ChoiceListEditor({
                                                     })
                                                 }
                                                 allowNone
-                                                noneLabel={t('list.scaleNumber')}
-                                                options={classColumns.map((c) => ({
-                                                    value: c.key,
-                                                    label: c.label,
-                                                }))}
+                                                noneLabel={t(
+                                                    'list.scaleNumber'
+                                                )}
+                                                options={classColumns.map(
+                                                    (c) => ({
+                                                        value: c.key,
+                                                        label: c.label,
+                                                    })
+                                                )}
                                             />
                                         </div>
                                     )}
@@ -301,10 +309,11 @@ export function ChoiceListEditor({
                                     }}
                                 />
                             )}
-                            <details className="rounded-md border border-hud-line/30 px-3 py-2 text-sm">
-                                <summary className="cursor-pointer text-hud-muted">
-                                    {t('header.technical')}
-                                </summary>
+                            <Disclosure
+                                className="rounded-md border border-hud-line/30 px-3 py-2 text-sm"
+                                triggerClassName="text-hud-muted"
+                                summary={<>{t('header.technical')}</>}
+                            >
                                 <div className="mt-2 w-56 space-y-1">
                                     <Label htmlFor={`choice-${i}-id`}>
                                         {t('header.id')}
@@ -320,9 +329,9 @@ export function ChoiceListEditor({
                                         {t('header.idHint')}
                                     </p>
                                 </div>
-                            </details>
+                            </Disclosure>
                         </div>
-                    </details>
+                    </Disclosure>
                 );
             })}
             <Button type="button" variant="outline" size="sm" onClick={add}>
