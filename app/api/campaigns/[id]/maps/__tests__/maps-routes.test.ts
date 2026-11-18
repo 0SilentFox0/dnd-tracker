@@ -69,7 +69,11 @@ beforeEach(() => {
     vi.clearAllMocks();
     auth.requireDM.mockResolvedValue({ userId: 'dm', isDM: true });
     auth.requireCampaignAccess.mockResolvedValue({ userId: 'p', isDM: false });
-    access.resolveMapReadVersion.mockResolvedValue({ version: undefined });
+    access.resolveMapReadVersion.mockImplementation(
+        async (_c: string, _m: string, _dm: boolean, requested?: number) => ({
+            version: requested,
+        })
+    );
     svc.getMap.mockResolvedValue(full);
     svc.getMapMeta.mockResolvedValue(full);
 });
