@@ -51,6 +51,18 @@ export function alwaysSeesEnemyStats(
     return mine.length > 0 && mine.every((p) => canSeeEnemyHp(p, order));
 }
 
+// the shared channel projects a charmed or PvP hero (own, but on a non-ally side); the owner needs the exact copy from the scene
+export function controlsNonAlly(
+    order: BattleParticipant[],
+    userId: string
+): boolean {
+    return order.some(
+        (p) =>
+            p.basicInfo.controlledBy === userId &&
+            p.basicInfo.side !== ParticipantSide.ALLY
+    );
+}
+
 export const PLAYER_VIEWER: Viewer = {
     userId: null,
     isDM: false,

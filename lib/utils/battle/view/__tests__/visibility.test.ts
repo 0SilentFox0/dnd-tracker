@@ -6,6 +6,7 @@ import {
     alwaysSeesEnemyStats,
     canSeeEnemyHp,
     canSeeExactStats,
+    controlsNonAlly,
     hiddenTargetSteps,
     PLAYER_VIEWER,
     redactLogForPlayers,
@@ -969,5 +970,21 @@ describe('числа HP/AC ворога в журналі (L8b C1)', () => {
         expect(
             sanitizeLogEntry(entry, { ...PLAYER_VIEWER, isDM: true }, ctx)
         ).toBe(entry);
+    });
+});
+
+describe('controlsNonAlly', () => {
+    const owned = (side: ParticipantSide, by: string) => {
+        const p = createMockParticipant();
+
+        return { ...p, basicInfo: { ...p.basicInfo, side, controlledBy: by } };
+    };
+
+    it('свій герой на ворожому боці (charm/PvP) — так', () => {
+        expect(controlsNonAlly([owned(ParticipantSide.ENEMY, 'u1')], 'u1')).toBe(true);
+    });
+
+    it('свій на стороні союзників або чужий ворог — ні', () => {
+        expect(controlsNonAlly([owned(ParticipantSide.ALLY, 'u1'), owned(ParticipantSide.ENEMY, 'u2')], 'u1')).toBe(false);
     });
 });

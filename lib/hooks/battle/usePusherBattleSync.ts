@@ -15,7 +15,7 @@ import {
     battleDmChannelName,
     userChannelName,
 } from '@/lib/pusher/channels';
-import { alwaysSeesEnemyStats } from '@/lib/utils/battle/view';
+import { alwaysSeesEnemyStats, controlsNonAlly } from '@/lib/utils/battle/view';
 import type {
     BattleRefetchSignal,
     BattleScene,
@@ -125,7 +125,8 @@ export function usePusherBattleSync(
             (isDM ||
                 (currentUserId &&
                     cached &&
-                    alwaysSeesEnemyStats(cached.initiativeOrder, currentUserId)))
+                    (alwaysSeesEnemyStats(cached.initiativeOrder, currentUserId) ||
+                        controlsNonAlly(cached.initiativeOrder, currentUserId))))
         ) {
             invalidateCoalesced(key);
 
