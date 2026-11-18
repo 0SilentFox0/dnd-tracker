@@ -1,0 +1,46 @@
+'use client';
+
+import { useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
+
+import { getCharacterProgression } from '@/lib/api/character-progression';
+import { skillKeys } from '@/lib/hooks/skills/keys';
+import { ENTITY_STALE_MS } from '@/lib/providers/query-provider';
+import { normalizeTree, resolveLearned } from '@/lib/utils/skills/progression';
+import { progressionView, rankOffers } from '@/systems/skilltrees/rules/progression';
+
+export function useCharacterProgression(
+    campaignId: string,
+    characterId: string | undefined
+) {
+    const query = useQuery({
+        queryKey: skillKeys.progression(campaignId, characterId ?? ''),
+        queryFn: () => getCharacterProgression(campaignId, characterId ?? ''),
+        enabled: !!campaignId && !!characterId,
+        staleTime: ENTITY_STALE_MS,
+    });
+
+    const { data } = query;
+
+    const derived = useMemo(() => {
+        if (!data?.treeId || !data.tree)
+            return { tree: null, view: null, offers: [], learned: [] };
+
+        const tree = normalizeTree({
+            id: data.treeId,
+            race: data.race,
+            skills: data.tree,
+        });
+
+        return {
+            tree,
+            view: progressionView(tree, data.unlocked, data.level),
+            offers: rankOffers(tree, data.unlocked, data.level),
+            learned: resolveLearned(tree, {
+                [tree.treeId]: { unlockedSkills: data.unlocked },
+            }),
+        };
+    }, [data]);
+
+    return { query, data, ...derived };
+}

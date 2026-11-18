@@ -1,6 +1,7 @@
 import { mainSkillsResource } from './content/main-skills';
 import { skillsResource } from './content/skills';
 import { resolveLearnedSpellsAndMastery } from './participant/learned-spells';
+import { loadSkillEntries } from './participant/skill-entries';
 import { SKILLTREES_OPERATIONS } from './operations';
 
 import type { SystemServer } from '@/lib/server/systems/types';
@@ -22,5 +23,8 @@ export const SKILLTREES_MODULE_SERVER = defineAddon<SystemServer>(() => ({
             'progression.reset': { POST: { operation: 'progression.reset' } },
         },
     },
-    participant: { learnedSpells: [resolveLearnedSpellsAndMastery] },
+    participant: {
+        learnedSpells: [resolveLearnedSpellsAndMastery],
+        skillEntries: [loadSkillEntries],
+    },
 }));

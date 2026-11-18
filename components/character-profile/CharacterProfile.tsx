@@ -29,7 +29,6 @@ import { ReviewActions } from '@/components/characters/review/ReviewActions';
 import { LoadingState, QueryState } from '@/components/common/states';
 import { HUD_SURFACE } from '@/components/hud';
 import { PlayerSheetHint } from '@/components/onboarding/OnboardingHint';
-import { LevelUpOverlay } from '@/components/skill-tree/progression';
 import { systemUiOf } from '@/components/systems';
 import { SystemGate } from '@/components/systems/SystemGate';
 import { Button } from '@/components/ui/button';
@@ -336,13 +335,14 @@ function CharacterProfileView({
                                             hero.past ? <CompactHero /> : null
                                         }
                                     />
-                                    {!ui.hideProgression && (
-                                        <LevelUpOverlay
+                                    {ui.sheet?.overlays?.map((Overlay, i) => (
+                                        <Overlay
+                                            key={i}
                                             campaignId={campaignId}
                                             characterId={characterId}
                                             name={sheet.identity.name}
                                         />
-                                    )}
+                                    ))}
                                 </>
                             )}
                         </ProfileShell>

@@ -30,7 +30,7 @@ vi.mock('@/components/hud/fonts', () => ({
 vi.mock('@/systems/wfrp/ui/equipment/EquippedArmourSummary', () => ({
     EquippedArmourSummary: () => <div data-testid="wfrp-equipped-summary" />,
 }));
-vi.mock('@/components/skill-tree/progression', () => ({
+vi.mock('@/systems/skilltrees/ui/progression', () => ({
     ProgressionPanel: () => <div>прокачка</div>,
     LevelUpOverlay: () => null,
 }));
@@ -38,7 +38,7 @@ vi.mock('@/lib/hooks/campaigns', async (orig) => ({
     ...(await orig<object>()),
     useCampaignRules: () => ({ data: undefined }),
 }));
-vi.mock('@/lib/hooks/skills', () => ({
+vi.mock('@/systems/skilltrees/hooks', () => ({
     useCharacterProgression: () => ({ view: null }),
 }));
 vi.mock('@/lib/hooks/characters/useStash', async (orig) => ({

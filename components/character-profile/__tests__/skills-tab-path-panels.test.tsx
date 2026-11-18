@@ -29,7 +29,7 @@ vi.mock('@/components/character-profile/FeatsBlock', () => ({
 vi.mock('@/components/character-profile/rest/ChargesList', () => ({
     ChargesList: () => null,
 }));
-vi.mock('@/components/skill-tree/progression/ProgressionPanel', () => ({
+vi.mock('@/systems/skilltrees/ui/progression/ProgressionPanel', () => ({
     ProgressionPanel: () => <div data-testid="panel" />,
 }));
 vi.mock('@/lib/hooks/campaigns', async (orig) => ({
