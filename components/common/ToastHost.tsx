@@ -48,7 +48,8 @@ export function ToastHost({
                         </Link>
                     )}
                     <Button
-                        variant="bare"
+                        variant="plain"
+                        size="auto"
                         type="button"
                         aria-label={t('ui.close')}
                         onClick={() => onDismiss(toast.id)}

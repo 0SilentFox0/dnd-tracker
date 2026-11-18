@@ -20,7 +20,8 @@ export function PlayerViewToggle({
 
     return (
         <Button
-            variant="bare"
+            variant="plain"
+            size="auto"
             type="button"
             onClick={onToggle}
             aria-label={label}

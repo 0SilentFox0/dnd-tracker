@@ -23,7 +23,8 @@ export function ZoomableEntityIcon(props: EntityIconProps) {
     return (
         <>
             <Button
-                variant="bare"
+                variant="plain"
+                size="auto"
                 type="button"
                 aria-label={t('zoomIcon', { name: props.name })}
                 className="shrink-0 cursor-zoom-in rounded-lg focus-visible:outline-2 focus-visible:outline-hud-gold"

@@ -40,7 +40,8 @@ export function SearchInput({
             />
             {value ? (
                 <Button
-                    variant="bare"
+                    variant="plain"
+                    size="auto"
                     type="button"
                     aria-label={t('clear')}
                     onClick={() => onChange('')}
