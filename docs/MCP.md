@@ -5,7 +5,7 @@ The MCP endpoint is DM-only and uses a campaign-scoped API token. Connect a Stre
 ## Token scopes
 
 - `world:read` lists maps, reads map details and the travel log, and exposes the world-map resource.
-- `world:write` adds the read capability and exposes the `world_action` tool.
+- `world:write` adds the read capability; world-map writes go through `assistant_action` (`world.*`).
 - `campaign:read` exposes the campaign brief resource.
 - `scenario:read` exposes the scenario index resource.
 - Existing campaign, scenario, character, battle, show, and content tools remain available under their existing scopes.
@@ -17,9 +17,9 @@ Demo-campaign tokens remain read-only. Existing tokens receive no new scopes aut
 - `world_maps_list`: map index for the campaign.
 - `world_map_get`: a map, markers (including DM notes), heroes on the map, and public notes. Private player notes remain subject to the existing DM API rules.
 - `world_travel_log`: recent travel, entry/exit, and rest records.
-- `world_action`: prepares map and marker changes, public DM notes, party travel, entry/exit, and rests. Destructive actions and party movement always require confirmation in the app. Other writes follow the token's review/auto mode.
+- `assistant_action` with `world.*` action ids prepares map and marker changes, public DM notes, party travel, entry/exit, and rests. Destructive actions and party movement always require confirmation in the app. Other writes follow the token's review/auto mode.
 
-Map image uploads require the web editor. Use `world_action` with operation `maps.upload-handoff` to open it, then create a map using its campaign-owned image URL.
+Map image uploads require the web editor. Use `assistant_action` with `world.maps.upload-handoff` to open it, then create a map using its campaign-owned image URL.
 
 ## Resources and prompts
 

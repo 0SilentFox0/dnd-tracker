@@ -11,10 +11,12 @@ import {
     type AiToolDef,
     runTool,
     runToolResult,
+    toolOutputSchema,
 } from './define';
 import { getPartyTool, readCharacterTool } from './party';
 import { proposeScenarioEditTool } from './propose';
 import { readReferenceTool, searchReferenceTool } from './reference';
+import { mcpRequestKey } from './request-key';
 import {
     findScenarioMentionsTool,
     listScenarioPagesTool,
@@ -84,14 +86,34 @@ export function registerMcpTools(
                 title: def.title,
                 description: def.description,
                 inputSchema: def.input as z.ZodObject,
+                outputSchema: toolOutputSchema,
             },
-            async (input: unknown) => {
-                const result = await runToolResult(def, ctx, input);
+            async (input: unknown, extra) => {
+                const tokenId = base.caller?.tokenId;
+
+                const result = await runToolResult(
+                    def,
+                    {
+                        ...ctx,
+                        ...(tokenId && extra?.mcpReq
+                            ? {
+                                  requestKey: mcpRequestKey(
+                                      tokenId,
+                                      extra.mcpReq.id,
+                                      def.name,
+                                      input
+                                  ),
+                              }
+                            : {}),
+                    },
+                    input
+                );
 
                 return {
                     content: [
                         { type: 'text' as const, text: JSON.stringify(result) },
                     ],
+                    structuredContent: result,
                     isError: result.kind === 'error',
                 };
             }

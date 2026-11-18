@@ -69,12 +69,7 @@ describe('AI tool registry', () => {
             toolsFor(['world:write'])
                 .filter((tool) => tool.name.startsWith('world_'))
                 .map((tool) => tool.name)
-        ).toEqual([
-            'world_maps_list',
-            'world_map_get',
-            'world_travel_log',
-            'world_action',
-        ]);
+        ).toEqual(['world_maps_list', 'world_map_get', 'world_travel_log']);
     });
 
     it('toAiSdkTools і registerMcpTools покривають усі інструменти', async () => {
@@ -228,14 +223,8 @@ describe('AI tool registry', () => {
         });
         expect(byName('assistant_read').readOnlyHint).toBe(true);
         expect(byName('assistant_status').readOnlyHint).toBe(true);
-        expect(byName('content_create')).toMatchObject({
+        expect(byName('propose_scenario_edit')).toMatchObject({
             readOnlyHint: false,
-            destructiveHint: false,
-        });
-        expect(byName('content_delete')).toMatchObject({
-            readOnlyHint: false,
-            destructiveHint: true,
-            idempotentHint: true,
         });
         expect(byName('assistant_action').destructiveHint).toBe(true);
     });

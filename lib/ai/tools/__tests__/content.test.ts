@@ -53,38 +53,9 @@ it.each([
     ['content_schema', { kind: 'units' }, 'content.schema'],
     ['content_list', { kind: 'units', offset: 50 }, 'content.units.list'],
     ['content_get', { kind: 'units', id: 'u' }, 'content.units.get'],
-    [
-        'content_create',
-        { kind: 'units', data: { name: 'Goblin' } },
-        'content.units.create',
-    ],
-    [
-        'content_update',
-        { kind: 'units', id: 'u', patch: { name: 'Orc' } },
-        'content.units.update',
-    ],
-    ['content_delete', { kind: 'units', id: 'u' }, 'content.units.delete'],
     ['get_rules', {}, 'rules.get'],
-    ['update_rules', { patch: {} }, 'rules.update'],
     ['get_skill_tree', { race: 'Human' }, 'skill-trees.get'],
-    [
-        'save_skill_tree',
-        {
-            race: 'Human',
-            skills: { mainSkills: [{ id: 'm', name: 'M', color: 'red' }] },
-        },
-        'skill-trees.save',
-    ],
     ['source_diff', { scope: 'units', offset: 2, limit: 1 }, 'source.diff'],
-    [
-        'source_apply',
-        {
-            apply: [
-                { scope: 'units', key: 'u', sourceHash: 'h', status: 'new' },
-            ],
-        },
-        'source.apply',
-    ],
 ] as const)(
     '%s uses the canonical dispatcher and returns pending metadata',
     async (name, input, actionId) => {
@@ -123,15 +94,18 @@ it('filters content writes while keeping read and generic discovery', () => {
     expect(names).not.toContain('content_create');
     expect(names).not.toContain('source_apply');
 });
-it.each([
-    { race: 'Human', skills: {} },
-    { race: 'Human', skills: { mainSkills: [] } },
-    { race: 'Human', tree: {} },
-])('rejects invalid tree shape before dispatch', async (input) => {
-    const out = JSON.parse(
-        await runTool(toolOf('save_skill_tree'), ctx, input)
-    );
+it('content writes are not exposed as separate tools', () => {
+    const names = CONTENT_TOOLS.map((t) => t.name);
 
-    expect(out).toMatchObject({ kind: 'error', error: { status: 400 } });
-    expect(f.dispatch).not.toHaveBeenCalled();
+    for (const write of [
+        'content_create',
+        'content_update',
+        'content_delete',
+        'content_import',
+        'update_rules',
+        'save_skill_tree',
+        'source_apply',
+        'source_apply_safe',
+    ])
+        expect(names).not.toContain(write);
 });

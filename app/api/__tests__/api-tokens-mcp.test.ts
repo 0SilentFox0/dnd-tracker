@@ -551,14 +551,12 @@ describe('API tokens + MCP', () => {
 
             expect(names).toEqual(
                 expect.arrayContaining([
-                    'content_create',
-                    'content_update',
-                    'content_delete',
-                    'update_rules',
-                    'save_skill_tree',
+                    'assistant_action',
                     'content_list',
                 ])
             );
+            expect(names).not.toContain('content_create');
+            expect(names).not.toContain('update_rules');
         });
 
         it('ai — без content_*', async () => {
@@ -587,12 +585,24 @@ describe('API tokens + MCP', () => {
 
             expect(read.data.result.data.name).toBe('Гоблін');
             for (const [name, args] of [
-                ['content_create', { kind: 'units', data: { name: 'Новий' } }],
                 [
-                    'content_update',
-                    { kind: 'units', id: 'u1', patch: { name: 'Орк' } },
+                    'assistant_action',
+                    {
+                        actionId: 'content.units.create',
+                        input: { data: { name: 'Новий' } },
+                    },
                 ],
-                ['content_delete', { kind: 'units', id: 'u1' }],
+                [
+                    'assistant_action',
+                    {
+                        actionId: 'content.units.update',
+                        input: { id: 'u1', patch: { name: 'Орк' } },
+                    },
+                ],
+                [
+                    'assistant_action',
+                    { actionId: 'content.units.delete', input: { id: 'u1' } },
+                ],
             ] as const) {
                 const output = JSON.parse(await call(name, args));
 
@@ -623,8 +633,11 @@ describe('API tokens + MCP', () => {
                     'tools/call',
                     2,
                     {
-                        name: 'content_create',
-                        arguments: { kind: 'units', data: { name: 'Гоблін' } },
+                        name: 'assistant_action',
+                        arguments: {
+                            actionId: 'content.units.create',
+                            input: { data: { name: 'Гоблін' } },
+                        },
                     },
                     'dndt_abc'
                 )
@@ -638,9 +651,9 @@ describe('API tokens + MCP', () => {
             asToken(['content:write']);
 
             expect(
-                await call('content_create', {
-                    kind: 'units',
-                    data: { name: '' },
+                await call('assistant_action', {
+                    actionId: 'content.units.create',
+                    input: { data: { name: '' } },
                 })
             ).toContain('name');
         });

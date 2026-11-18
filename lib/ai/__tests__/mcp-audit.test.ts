@@ -17,7 +17,7 @@ describe('mcpAuditLogger', () => {
             result: { content: 'SECRET' },
             status: 'success',
             duration: 12,
-        });
+        } as never);
 
         const line = String(info.mock.calls[0][0]);
 

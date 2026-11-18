@@ -2,13 +2,11 @@ import { z } from 'zod';
 
 import { callerOf } from './assistant-caller';
 import { AiToolError, defineTool } from './define';
-import { toolRequestId } from './request-key';
 
 import 'server-only';
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { TRAVEL_LOG_LIMIT } from '@/lib/constants/world';
 import { authorizeAssistant } from '@/lib/server/assistant/authorize';
-import { dispatchAction } from '@/lib/server/assistant/execute';
 import {
     listWorldMaps,
     readWorldMapDetail,
@@ -96,52 +94,8 @@ export const getWorldTravelLogTool = defineTool({
     },
 });
 
-const worldOperation = z.enum([
-    'maps.create',
-    'maps.update',
-    'maps.delete',
-    'maps.upload-handoff',
-    'markers.create',
-    'markers.update',
-    'markers.delete',
-    'notes.create',
-    'notes.update',
-    'notes.delete',
-    'travel',
-    'enter',
-    'exit',
-    'rest',
-]);
-
-export const worldActionTool = defineTool({
-    name: 'world_action',
-    scopes: ['world:write'],
-    title: 'Prepare world-map change',
-    description:
-        'Prepares a validated world-map change. Depending on token execution mode, it may require DM confirmation in the app before it is applied.',
-    input: z.strictObject({ operation: worldOperation, input: z.unknown() }),
-    handler: async (ctx, { operation, input }) => {
-        const caller = callerOf(ctx);
-
-        const actionId = `world.${operation}`;
-
-        await authorizeAssistant(
-            caller,
-            { access: 'dm', scope: 'world:write' },
-            'prepare'
-        );
-
-        return dispatchAction(
-            caller,
-            { actionId, input, requestId: toolRequestId(ctx) },
-            ctx.abortSignal
-        );
-    },
-});
-
 export const WORLD_TOOLS = [
     listWorldMapsTool,
     getWorldMapTool,
     getWorldTravelLogTool,
-    worldActionTool,
 ];

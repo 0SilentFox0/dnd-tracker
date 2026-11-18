@@ -29,7 +29,7 @@ vi.mock('@/lib/server/world/travel-store', () => ({
 }));
 
 import { runToolResult } from '../define';
-import { getWorldMapTool, worldActionTool } from '../world';
+import { getWorldMapTool } from '../world';
 
 const caller = {
     actor: {
@@ -76,58 +76,5 @@ describe('world MCP tools', () => {
         expect(result).toMatchObject({ kind: 'error', error: { status: 422 } });
         expect(mocks.listHeroesOnMap).not.toHaveBeenCalled();
         expect(mocks.listPublicMapNotes).not.toHaveBeenCalled();
-    });
-
-    it('requires DM write authorization and dispatches writes through the confirmation workflow', async () => {
-        const pending = {
-            kind: 'pending',
-            intent: { id: 'intent-1', status: 'pending' },
-            reviewUrl: '/assistant/review',
-        };
-
-        mocks.dispatchAction.mockResolvedValue(pending);
-
-        const result = await worldActionTool.handler(ctx, {
-            operation: 'markers.create',
-            input: { mapId: 'map-1', name: 'Old bridge' },
-        });
-
-        expect(mocks.authorizeAssistant).toHaveBeenCalledWith(
-            caller,
-            { access: 'dm', scope: 'world:write' },
-            'prepare'
-        );
-        expect(mocks.dispatchAction).toHaveBeenCalledWith(
-            caller,
-            expect.objectContaining({
-                actionId: 'world.markers.create',
-                input: { mapId: 'map-1', name: 'Old bridge' },
-            }),
-            undefined
-        );
-        expect(result).toEqual(pending);
-    });
-
-    it('rejects unknown world operations and extra top-level arguments', async () => {
-        const unknownOperation = await runToolResult(worldActionTool, ctx, {
-            operation: 'maps.publish',
-            input: {},
-        });
-
-        const extraArgument = await runToolResult(worldActionTool, ctx, {
-            operation: 'maps.create',
-            input: {},
-            campaignId: 'campaign-2',
-        });
-
-        expect(unknownOperation).toMatchObject({
-            kind: 'error',
-            error: { code: 'INVALID_INPUT', status: 400 },
-        });
-        expect(extraArgument).toMatchObject({
-            kind: 'error',
-            error: { code: 'INVALID_INPUT', status: 400 },
-        });
-        expect(mocks.dispatchAction).not.toHaveBeenCalled();
     });
 });
