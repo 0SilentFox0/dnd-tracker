@@ -1,6 +1,5 @@
 import type { QueryKey } from '@tanstack/react-query';
 
-import { artifactSetKeys } from '@/lib/hooks/artifact-sets/keys';
 import { artifactKeys } from '@/lib/hooks/artifacts/keys';
 import { backgroundKeys } from '@/lib/hooks/backgrounds/keys';
 import { classKeys } from '@/lib/hooks/classes/keys';
@@ -29,8 +28,8 @@ const INVALIDATE: Partial<
     classes: (c) => [classKeys.list(c)],
     backgrounds: (c) => [backgroundKeys.list(c)],
     feats: (c) => [featKeys.list(c)],
-    artifacts: (c) => [artifactKeys.list(c), artifactSetKeys.list(c)],
-    'artifact-sets': (c) => [artifactSetKeys.list(c), artifactKeys.list(c)],
+    artifacts: (c) => [artifactKeys.list(c), ['artifact-sets', c]],
+    'artifact-sets': (c) => [['artifact-sets', c], artifactKeys.list(c)],
 };
 
 export const importInvalidateKeys = (

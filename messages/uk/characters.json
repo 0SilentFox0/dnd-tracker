@@ -109,7 +109,6 @@
   "card": {
     "npcHero": "NPC герой",
     "player": "Гравець",
-    "inspiration": "Натхнення",
     "levelReady": "Рівень доступний",
     "unassigned": "Не призначено",
     "actions": "Дії персонажа",

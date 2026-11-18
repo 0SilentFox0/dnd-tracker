@@ -1,0 +1,1 @@
+export { useInspiration } from './useInspiration';

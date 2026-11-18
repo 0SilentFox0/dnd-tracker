@@ -76,8 +76,6 @@ export const experienceSchema = z.object({
 
 export type ExperienceInput = z.infer<typeof experienceSchema>;
 
-export const inspirationSchema = z.object({ value: z.boolean() });
-
 export const resourcesEditSchema = z
     .object({
         hp: z.number().int().min(0).max(9999).optional(),

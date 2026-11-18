@@ -13,8 +13,11 @@ import type { MechanicKey } from '@/lib/utils/rules/registry';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import type { SystemConditionInfo } from '@/lib/utils/rules/systems';
 import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
-import type { ArtifactSetCardData } from '@/types/artifact-sets';
-import type { ArtifactCardData } from '@/types/artifacts';
+import type {
+    ArtifactCardData,
+    ItemGroupCardData,
+    ItemGroupsView,
+} from '@/types/artifacts';
 import type { BattleParticipant } from '@/types/battle';
 import type { BattleAction } from '@/types/battle-actions';
 import type {
@@ -90,14 +93,25 @@ export interface DmPageProps {
     data?: unknown;
 }
 
-export interface ArtifactSetsLinkProps {
+export interface ItemGroupsLinkProps {
     campaignId: string;
 }
 
-export interface ArtifactSetsPanelProps {
+export interface ItemGroupsPanelProps {
     campaignId: string;
     canEdit: boolean;
-    sets: { set: ArtifactSetCardData; artifacts: ArtifactCardData[] }[];
+    groups: { group: ItemGroupCardData; artifacts: ArtifactCardData[] }[];
+}
+
+export interface RerollTokenDmProps {
+    campaignId: string;
+    characterId: string;
+    value: boolean;
+}
+
+export interface RerollTokenControlProps {
+    checked: boolean;
+    onChange: (checked: boolean) => void;
 }
 
 export interface RestBadgesProps {
@@ -267,8 +281,16 @@ export interface SystemUi {
     ArtifactStatsEditor?: ComponentType<ArtifactStatsEditorProps>;
     /** Link and panel of the DM artifacts page for item sets */
     itemGroups?: {
-        Link: ComponentType<ArtifactSetsLinkProps>;
-        Panel: ComponentType<ArtifactSetsPanelProps>;
+        Link: ComponentType<ItemGroupsLinkProps>;
+        Panel: ComponentType<ItemGroupsPanelProps>;
+        useGroups(campaignId: string): ItemGroupsView;
+    };
+    /** One-shot reroll token a hero holds: DM toggle, list-card mark and the options of the attack and sheet rolls */
+    rerollToken?: {
+        DmToggle: ComponentType<RerollTokenDmProps>;
+        CardMark: ComponentType;
+        AttackOption: ComponentType<RerollTokenControlProps>;
+        SheetOption: ComponentType<RerollTokenControlProps>;
     };
     EquippedSummary?: ComponentType<EquippedSummaryProps>;
     DowntimeTab?: ComponentType;

@@ -3,7 +3,7 @@
 import { useArtifactSetsList } from './useArtifactSets';
 
 import { useSearch } from '@/lib/hooks/common';
-import type { ArtifactSetRow } from '@/types/artifact-sets';
+import type { ArtifactSetRow } from '@/systems/artifactsets/types';
 
 const EMPTY_SETS: ArtifactSetRow[] = [];
 

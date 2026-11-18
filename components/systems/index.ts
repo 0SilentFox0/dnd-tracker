@@ -8,6 +8,8 @@ export type {
     DmPageProps,
     DmPageView,
     FormFieldProps,
+    RerollTokenControlProps,
+    RerollTokenDmProps,
     ResourceFieldsProps,
     RestBadgesProps,
     RollBodyProps,

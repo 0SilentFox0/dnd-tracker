@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 
 import { abilityKeys } from '../abilities/keys';
 import { aiKeys } from '../ai/keys';
-import { artifactSetKeys } from '../artifact-sets/keys';
 import { artifactKeys } from '../artifacts/keys';
 import { battleKeys } from '../battles/keys';
 import { campaignKeys } from '../campaigns/keys';
@@ -24,7 +23,6 @@ const allKeys: ReadonlyArray<readonly unknown[]> = [
     aiKeys.proposalSummaries(C, 'p1'),
     aiKeys.apiTokens(C),
     aiKeys.settings(C),
-    artifactSetKeys.list(C),
     artifactKeys.list(C),
     battleKeys.scene(C, 'b1'),
     battleKeys.list(C),

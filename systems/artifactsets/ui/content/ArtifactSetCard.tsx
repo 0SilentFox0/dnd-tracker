@@ -7,7 +7,7 @@ import { ArtifactSetCardIcon } from './ArtifactSetCardIcon';
 import { ArtifactCard } from '@/components/artifacts/ArtifactCard';
 import { HudCard } from '@/components/hud/page';
 import { Button } from '@/components/ui/button';
-import type { ArtifactSetCardData } from '@/types/artifact-sets';
+import type { ArtifactSetCardData } from '@/systems/artifactsets/types';
 import type { ArtifactCardData } from '@/types/artifacts';
 import type { IdName } from '@/types/common';
 
@@ -27,7 +27,7 @@ export function ArtifactSetCard(props: ArtifactSetCardProps) {
 
     const { set, campaignId, canEdit = true } = props;
 
-    const editHref = `/campaigns/${campaignId}/dm/artifact-sets/${set.id}`;
+    const editHref = `/campaigns/${campaignId}/dm/system/artifact-sets/${set.id}`;
 
     const count = props.artifacts.length;
 

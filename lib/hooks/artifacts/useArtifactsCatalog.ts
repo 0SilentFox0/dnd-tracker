@@ -2,21 +2,22 @@
 
 import { useMemo } from 'react';
 
-import { useArtifactSetsList } from './useArtifactSets';
+import { useArtifactsList } from './useArtifacts';
 
 import { ARTIFACT_SLOT_VALUES } from '@/lib/constants/artifacts';
-import { useArtifactsList } from '@/lib/hooks/artifacts';
 import { useSearch } from '@/lib/hooks/common';
 import { matchesQuery } from '@/lib/utils/common/text-search';
 import type {
-    ArtifactSetCardData,
-    ArtifactSetRow,
-} from '@/types/artifact-sets';
-import type { ArtifactCardData, ArtifactListItem } from '@/types/artifacts';
+    ArtifactCardData,
+    ArtifactListItem,
+    ItemGroupsView,
+} from '@/types/artifacts';
 
 const EMPTY_ARTIFACTS: ArtifactListItem[] = [];
 
-const EMPTY_SETS: ArtifactSetRow[] = [];
+const NO_GROUPS: ItemGroupsView = { groups: [], isLoading: false };
+
+const useNoGroups = (): ItemGroupsView => NO_GROUPS;
 
 const artifactFields = (a: ArtifactListItem) => [a.name, a.artifactSet?.name];
 
@@ -32,24 +33,18 @@ const toCard = (a: ArtifactListItem): ArtifactCardData => ({
     itemKind: a.itemKind,
 });
 
-const toSetCard = (s: ArtifactSetRow): ArtifactSetCardData => ({
-    id: s.id,
-    name: s.name,
-    icon: s.icon ?? null,
-    description: s.description,
-    setBonus: s.setBonus,
-    abilitySummary: s.abilitySummary ?? [],
-});
-
-/** DM artifacts page: sets with their artifacts and the ungrouped ones by slot, both from the list queries. */
-export function useArtifactsCatalog(campaignId: string) {
+/** DM artifacts page: item groups (sets) with their artifacts and the ungrouped ones by slot, both from the list queries. */
+export function useArtifactsCatalog(
+    campaignId: string,
+    useGroups: (campaignId: string) => ItemGroupsView = useNoGroups
+) {
     const artifactsQuery = useArtifactsList(campaignId);
 
-    const setsQuery = useArtifactSetsList(campaignId);
+    const groupsQuery = useGroups(campaignId);
 
     const artifacts = artifactsQuery.data ?? EMPTY_ARTIFACTS;
 
-    const sets = setsQuery.data ?? EMPTY_SETS;
+    const { groups } = groupsQuery;
 
     const search = useSearch(artifacts, artifactFields);
 
@@ -60,16 +55,16 @@ export function useArtifactsCatalog(campaignId: string) {
     const view = useMemo(() => {
         const cards = shown.map(toCard);
 
-        const bySet = sets
-            .map((set) => ({
-                set: toSetCard(set),
-                artifacts: cards.filter((_, i) => shown[i].setId === set.id),
+        const byGroup = groups
+            .map((group) => ({
+                group,
+                artifacts: cards.filter((_, i) => shown[i].setId === group.id),
             }))
             .filter(
-                ({ set, artifacts: own }) =>
+                ({ group, artifacts: own }) =>
                     !isActive ||
                     own.length > 0 ||
-                    matchesQuery([set.name], query)
+                    matchesQuery([group.name], query)
             );
 
         const ungrouped = cards.filter((_, i) => !shown[i].setId);
@@ -79,13 +74,13 @@ export function useArtifactsCatalog(campaignId: string) {
             artifacts: ungrouped.filter((a) => a.slot === slot),
         })).filter((g) => g.artifacts.length > 0);
 
-        return { sets: bySet, bySlot };
-    }, [shown, sets, isActive, query]);
+        return { groups: byGroup, bySlot };
+    }, [shown, groups, isActive, query]);
 
     return {
         count: artifacts.length,
-        isEmpty: artifacts.length === 0 && sets.length === 0,
-        isLoading: artifactsQuery.isLoading || setsQuery.isLoading,
+        isEmpty: artifacts.length === 0 && groups.length === 0,
+        isLoading: artifactsQuery.isLoading || groupsQuery.isLoading,
         search,
         view,
     };

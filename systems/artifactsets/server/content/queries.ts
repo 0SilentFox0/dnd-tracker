@@ -147,3 +147,21 @@ export async function deleteArtifactSetAndClearArtifacts(
         prisma.artifactSet.deleteMany({ where: { id: setId, campaignId } }),
     ]);
 }
+
+export async function findArtifactSetForEdit(
+    campaignId: string,
+    setId: string
+) {
+    const set = await prisma.artifactSet.findFirst({
+        where: { id: setId, campaignId },
+    });
+
+    if (!set) return null;
+
+    const members = await prisma.artifact.findMany({
+        where: { setId },
+        select: { id: true },
+    });
+
+    return { set, artifactIds: members.map((a) => a.id) };
+}

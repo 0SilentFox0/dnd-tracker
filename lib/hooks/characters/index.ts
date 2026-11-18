@@ -50,7 +50,6 @@ export {
     useAwardXp,
     useCharacterLog,
     useEditResources,
-    useInspiration,
     useRest,
     useSheetRoll,
     useSpendHitDie,

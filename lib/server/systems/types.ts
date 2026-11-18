@@ -228,6 +228,17 @@ export interface ContentRefSource {
     invalidatesOnDelete?: readonly string[];
 }
 
+/** What a DM section page renders for the path segments after the section; `null` is a 404 */
+export type SystemDmPageView = {
+    view: { type: 'list' } | { type: 'new' } | { type: 'edit'; id: string };
+    data?: unknown;
+} | null;
+
+export type SystemDmPageResolver = (input: {
+    campaignId: string;
+    rest: string[];
+}) => Promise<SystemDmPageView>;
+
 export interface SystemServer {
     schemas: SystemSchemas;
     contentKinds?: Record<string, ContentKindServer>;
@@ -241,6 +252,8 @@ export interface SystemServer {
     operations?: Record<string, SystemOperation>;
     /** Battle operations the route layer resolves by name; the core settings (access, gates) stay with the route */
     battle?: Record<string, SystemBattleOperation>;
+    /** Sections of `dm/system/<section>/...` that have sub-pages; a section without a resolver is a single list page */
+    dmPages?: Record<string, SystemDmPageResolver>;
     /** Keys are old paths with `/` as `.`; the method picks the target */
     routes?: {
         campaign?: Record<string, SystemRoute>;

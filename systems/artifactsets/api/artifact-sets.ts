@@ -1,6 +1,6 @@
 import { createCampaignCrudApi } from '@/lib/api/client';
 import type { Ability } from '@/lib/utils/abilities/schema';
-import type { ArtifactSetRow } from '@/types/artifact-sets';
+import type { ArtifactSetRow } from '@/systems/artifactsets/types';
 
 export type { ArtifactSetRow };
 

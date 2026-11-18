@@ -10,7 +10,6 @@ import {
     patchResources,
     postExperience,
     postHitDie,
-    postInspiration,
     postRest,
     postSheetRoll,
 } from '@/lib/api/characters';
@@ -71,17 +70,6 @@ export function useSheetRoll(campaignId: string, characterId: string) {
             'useInspiration' in body && body.useInspiration
                 ? heroKeys(campaignId, characterId)
                 : [characterKeys.log(campaignId, characterId)],
-    });
-}
-
-export function useInspiration(campaignId: string, characterId: string) {
-    const t = useTranslations('rest.errors');
-
-    return useCrudMutation({
-        mutationFn: (value: boolean) =>
-            postInspiration(campaignId, characterId, value),
-        invalidateKeys: heroKeys(campaignId, characterId),
-        errorText: t('inspirationFailed'),
     });
 }
 

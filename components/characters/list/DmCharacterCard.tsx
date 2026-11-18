@@ -48,6 +48,10 @@ export function DmCharacterCard({
 
     const columns = system ? statColumnsOf(system) : undefined;
 
+    const RerollToken = ready
+        ? systemUiOf(systemKey, rules?.system.modules).rerollToken
+        : undefined;
+
     const armorStats = !!columns?.has('armorClass');
 
     const hideProgression =
@@ -114,16 +118,10 @@ export function DmCharacterCard({
                         <HudPill tone={isNpc ? 'silver' : 'gold'}>
                             {isNpc ? t('npcHero') : t('player')}
                         </HudPill>
-                        {rules &&
+                        {RerollToken &&
+                            rules &&
                             rerollTokenOn(rules) &&
-                            character.inspiration && (
-                                <span
-                                    title={t('inspiration')}
-                                    className="text-hud-gold"
-                                >
-                                    ✦
-                                </span>
-                            )}
+                            character.inspiration && <RerollToken.CardMark />}
                         {levelReady && (
                             <HudPill tone="gold">{t('levelReady')}</HudPill>
                         )}

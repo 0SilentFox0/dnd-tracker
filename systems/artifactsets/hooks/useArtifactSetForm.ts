@@ -81,7 +81,7 @@ export function useArtifactSetForm({
             return next;
         });
 
-    const listHref = `/campaigns/${campaignId}/dm/artifact-sets`;
+    const listHref = `/campaigns/${campaignId}/dm/system/artifact-sets`;
 
     const submit = async (e: React.FormEvent) => {
         e.preventDefault();

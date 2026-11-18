@@ -109,7 +109,6 @@
   "card": {
     "npcHero": "NPC hero",
     "player": "Player",
-    "inspiration": "Inspiration",
     "levelReady": "Level available",
     "unassigned": "Unassigned",
     "actions": "Character actions",

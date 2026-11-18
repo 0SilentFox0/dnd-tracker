@@ -1,5 +1,4 @@
 export { artifactSetKeys } from './keys';
-export { useArtifactsCatalog } from './useArtifactsCatalog';
 export {
     type ArtifactSetFormInitial,
     useArtifactSetForm,
@@ -10,3 +9,4 @@ export {
     useSaveArtifactSet,
 } from './useArtifactSets';
 export { useArtifactSetsPage } from './useArtifactSetsPage';
+export { useItemGroups } from './useItemGroups';

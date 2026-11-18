@@ -11,8 +11,8 @@ import { DiceStage, type DiceStageHandle } from '@/components/dice/DiceStage';
 import { type SheetRollRequest, systemUiOf } from '@/components/systems';
 import { Button } from '@/components/ui/button';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
-import { SwitchField } from '@/components/ui/switch-field';
 import { useSheetRoll } from '@/lib/hooks/characters';
+import { useCampaignSystem } from '@/lib/hooks/systems';
 import { cryptoRandom } from '@/lib/utils/common/dice';
 import type { SheetRollBody, SheetRollResult } from '@/types/characters';
 
@@ -41,7 +41,9 @@ export function SheetRollDialog({
 
     const roll = useSheetRoll(campaignId, characterId);
 
-    const Ui = systemUiOf(sheet.system);
+    const { system } = useCampaignSystem(campaignId, sheet.system);
+
+    const Ui = systemUiOf(system.key, system.modules);
 
     const stage = useRef<DiceStageHandle>(null);
 
@@ -102,15 +104,13 @@ export function SheetRollDialog({
                 </Button>
             }
         >
-            {sheet.rest?.inspiration &&
+            {Ui.rerollToken &&
+                sheet.rest?.inspiration &&
                 !result &&
                 request?.subject.kind !== 'test' && (
-                    <SwitchField
-                        id="sheet-roll-inspiration"
-                        ariaLabel={t('sheetRoll.inspirationAria')}
-                        label={t('sheetRoll.inspiration')}
+                    <Ui.rerollToken.SheetOption
                         checked={useInspiration}
-                        onCheckedChange={setUseInspiration}
+                        onChange={setUseInspiration}
                     />
                 )}
             {request && (

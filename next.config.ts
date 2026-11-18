@@ -78,19 +78,29 @@ const nextConfig: NextConfig = {
     async redirects() {
         return [
             {
+                source: '/campaigns/:id/dm/skill-trees',
+                destination: '/campaigns/:id/dm/system/skill-trees',
+                permanent: true,
+            },
+            {
                 source: '/campaigns/:id/dm/artifacts/sets/new',
-                destination: '/campaigns/:id/dm/artifact-sets/new',
+                destination: '/campaigns/:id/dm/system/artifact-sets/new',
                 permanent: false,
             },
             {
                 source: '/campaigns/:id/dm/artifacts/sets/:setId',
-                destination: '/campaigns/:id/dm/artifact-sets/:setId',
+                destination: '/campaigns/:id/dm/system/artifact-sets/:setId',
                 permanent: false,
             },
             {
                 source: '/campaigns/:id/dm/artifacts/sets',
-                destination: '/campaigns/:id/dm/artifact-sets',
+                destination: '/campaigns/:id/dm/system/artifact-sets',
                 permanent: false,
+            },
+            {
+                source: '/campaigns/:id/dm/artifact-sets/:rest*',
+                destination: '/campaigns/:id/dm/system/artifact-sets/:rest*',
+                permanent: true,
             },
         ];
     },

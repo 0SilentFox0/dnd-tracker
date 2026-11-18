@@ -11,6 +11,7 @@ import type { ModuleEntry } from '@/lib/utils/rules/systems/resolve';
 // <systems:generated>
 import { ARTIFACTSETS_MODULE_SERVER } from '@/systems/artifactsets/server';
 import { D20_MODULE_SERVER } from '@/systems/d20/server';
+import { INSPIRATION_MODULE_SERVER } from '@/systems/inspiration/server';
 import { MORALE_MODULE_SERVER } from '@/systems/morale/server';
 import { SKILLTREES_MODULE_SERVER } from '@/systems/skilltrees/server';
 import { WFRP_MODULE_SERVER } from '@/systems/wfrp/server';
@@ -22,6 +23,7 @@ export const MODULE_SERVER: Record<string, ModuleEntry<SystemServer>> = {
     // <systems:generated>
     artifactsets: ARTIFACTSETS_MODULE_SERVER,
     d20: D20_MODULE_SERVER,
+    inspiration: INSPIRATION_MODULE_SERVER,
     morale: MORALE_MODULE_SERVER,
     skilltrees: SKILLTREES_MODULE_SERVER,
     wfrp: WFRP_MODULE_SERVER,

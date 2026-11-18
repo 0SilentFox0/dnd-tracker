@@ -4,9 +4,11 @@ import { useTranslations } from 'next-intl';
 import { type AttackWizardModel, btn } from './shared';
 
 import { AiRollButton, DiceGrid } from '@/components/battle/hud/DiceInput';
-import { useSystemBattleUi } from '@/components/battle/use-system-battle-ui';
+import {
+    useRerollTokenUi,
+    useSystemBattleUi,
+} from '@/components/battle/use-system-battle-ui';
 import { HudButton } from '@/components/hud';
-import { Switch } from '@/components/ui/switch';
 import { useText } from '@/lib/i18n/use-text';
 import { cn } from '@/lib/utils';
 import type { AttackMode } from '@/lib/utils/battle/flows';
@@ -66,6 +68,8 @@ function D20RollBody({
 
     const text = useText();
 
+    const RerollToken = useRerollTokenUi();
+
     const [first, setFirst] = useState<number | undefined>();
 
     const setMode = (m: AttackMode) => {
@@ -113,15 +117,11 @@ function D20RollBody({
                     {text(view.forcedMode.reason)}
                 </div>
             )}
-            {view.inspirationAvailable && state.index === 0 && (
-                <label className="mt-2 flex items-center gap-2 text-sm text-hud-gold">
-                    <Switch
-                        checked={!!state.inspiration}
-                        onCheckedChange={setInspiration}
-                        aria-label={t('inspiration')}
-                    />
-                    {t('inspirationNote')}
-                </label>
+            {RerollToken && view.inspirationAvailable && state.index === 0 && (
+                <RerollToken.AttackOption
+                    checked={!!state.inspiration}
+                    onChange={setInspiration}
+                />
             )}
             {view.rollMode !== 'normal' && (
                 <div className="mt-2 text-xs text-[var(--hud-muted)]">

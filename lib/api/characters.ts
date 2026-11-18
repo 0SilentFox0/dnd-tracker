@@ -271,17 +271,6 @@ export const postExperience = (campaignId: string, body: AwardXpBody) =>
         body
     );
 
-export const postInspiration = (
-    campaignId: string,
-    characterId: string,
-    value: boolean
-) =>
-    campaignPost<{ inspiration: boolean }>(
-        campaignId,
-        `/characters/${characterId}/inspiration`,
-        { value }
-    );
-
 export const patchResources = (
     campaignId: string,
     characterId: string,

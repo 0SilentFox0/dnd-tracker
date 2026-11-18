@@ -12,7 +12,7 @@ import { EmptyState } from '@/components/common/states';
 import { ContentTransferButtons } from '@/components/content-import/ContentTransferButtons';
 import { HudPage, HudPageHeader } from '@/components/hud/page';
 import { Button } from '@/components/ui/button';
-import { useArtifactSetsPage } from '@/lib/hooks/artifact-sets';
+import { useArtifactSetsPage } from '@/systems/artifactsets/hooks';
 
 export function ArtifactSetsList({ campaignId: id }: { campaignId: string }) {
     const t = useTranslations('artifacts.sets.page');
@@ -32,7 +32,7 @@ export function ArtifactSetsList({ campaignId: id }: { campaignId: string }) {
                         />
                         <Button asChild>
                             <Link
-                                href={`/campaigns/${id}/dm/artifact-sets/new`}
+                                href={`/campaigns/${id}/dm/system/artifact-sets/new`}
                             >
                                 {t('new')}
                             </Link>
@@ -55,7 +55,7 @@ export function ArtifactSetsList({ campaignId: id }: { campaignId: string }) {
                     action={
                         <Button asChild>
                             <Link
-                                href={`/campaigns/${id}/dm/artifact-sets/new`}
+                                href={`/campaigns/${id}/dm/system/artifact-sets/new`}
                             >
                                 {t('createFirst')}
                             </Link>

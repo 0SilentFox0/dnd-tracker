@@ -6,11 +6,9 @@ import { useTranslations } from 'next-intl';
 import { useProfile } from '../ProfileContext';
 import { ResourcesDialog } from './ResourcesDialog';
 
+import { systemUiOf } from '@/components/systems';
 import { Button } from '@/components/ui/button';
-import { SwitchField } from '@/components/ui/switch-field';
-import { useInspiration } from '@/lib/hooks/characters';
 import { useCampaignSystem } from '@/lib/hooks/systems';
-import { statColumnsOf } from '@/lib/utils/rules/systems/stats';
 import type { SheetRest } from '@/types/characters';
 
 export function DmRestActions() {
@@ -26,9 +24,9 @@ function DmRestControls({ rest }: { rest: SheetRest }) {
 
     const { campaignId, characterId, sheet } = useProfile();
 
-    const { def: system } = useCampaignSystem(campaignId, sheet.system);
+    const { system } = useCampaignSystem(campaignId, sheet.system);
 
-    const inspiration = useInspiration(campaignId, characterId);
+    const RerollToken = systemUiOf(system.key, system.modules).rerollToken;
 
     const [open, setOpen] = useState(false);
 
@@ -44,16 +42,13 @@ function DmRestControls({ rest }: { rest: SheetRest }) {
                     {t('resources')}
                 </Button>
             )}
-            {statColumnsOf(system).has('armorClass') &&
-                rest.inspiration !== null && (
-                    <SwitchField
-                        id="dm-inspiration"
-                        label={t('inspiration')}
-                        checked={rest.inspiration}
-                        disabled={inspiration.isPending}
-                        onCheckedChange={(v) => void inspiration.mutateOk(v)}
-                    />
-                )}
+            {RerollToken && rest.inspiration !== null && (
+                <RerollToken.DmToggle
+                    campaignId={campaignId}
+                    characterId={characterId}
+                    value={rest.inspiration}
+                />
+            )}
             {open && (
                 <ResourcesDialog rest={rest} open onOpenChange={setOpen} />
             )}

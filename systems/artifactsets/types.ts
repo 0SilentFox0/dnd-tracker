@@ -1,4 +1,5 @@
 import type { AbilityFlowSummary } from '@/lib/utils/abilities/segments';
+import type { ItemGroupCardData } from '@/types/artifacts';
 export interface ArtifactSetSummaryArtifact {
     id: string;
     name: string;
@@ -18,11 +19,4 @@ export interface ArtifactSetRow {
     abilitySummary?: AbilityFlowSummary[];
 }
 
-export interface ArtifactSetCardData {
-    id: string;
-    name: string;
-    icon: string | null;
-    description: string | null;
-    setBonus: unknown;
-    abilitySummary: AbilityFlowSummary[];
-}
+export type ArtifactSetCardData = ItemGroupCardData;

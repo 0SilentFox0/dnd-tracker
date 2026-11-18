@@ -7,3 +7,4 @@ export {
     useDeleteArtifact,
     useUpdateArtifact,
 } from './useArtifacts';
+export { useArtifactsCatalog } from './useArtifactsCatalog';

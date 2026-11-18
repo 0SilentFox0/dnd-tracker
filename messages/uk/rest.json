@@ -3,7 +3,6 @@
     "restFailed": "Не вдалося провести відпочинок",
     "xpFailed": "Не вдалося нарахувати досвід",
     "arcaneFailed": "Не вдалося відновити слоти",
-    "inspirationFailed": "Не вдалося змінити натхнення",
     "resourcesFailed": "Не вдалося змінити ресурси",
     "rollFailed": "Не вдалося кинути",
     "hitDieFailed": "Не вдалося витратити кістку хітів"
@@ -55,8 +54,6 @@
   },
   "sheetRoll": {
     "roll": "Кинути",
-    "inspirationAria": "Натхнення",
-    "inspiration": "✦ Натхнення — перевага, натхнення буде витрачено",
     "autoFail": "Автопровал",
     "result": "d20 {rolls}{mode, select, advantage { з перевагою} disadvantage { з перешкодою} other {}} · {bonus}",
     "difficulty": "Складність",
@@ -95,8 +92,7 @@
     "fortune": "Удача {current}/{max}"
   },
   "dm": {
-    "resources": "Ресурси",
-    "inspiration": "✦ Натхнення"
+    "resources": "Ресурси"
   },
   "charges": {
     "title": "ЗАРЯДИ",

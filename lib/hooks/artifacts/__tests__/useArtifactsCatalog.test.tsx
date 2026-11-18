@@ -38,24 +38,24 @@ vi.mock('@/lib/api/artifacts', () => ({
     deleteArtifact: vi.fn(),
     deleteAllArtifacts: vi.fn(),
 }));
-vi.mock('@/lib/api/artifact-sets', () => ({
-    getArtifactSets: vi.fn(async () => [
+import { useArtifactsCatalog, useUpdateArtifact } from '@/lib/hooks/artifacts';
+import type { ItemGroupsView } from '@/types/artifacts';
+
+const groupsView: ItemGroupsView = {
+    groups: [
         {
             id: 's1',
-            campaignId: 'c1',
             name: 'Луска',
+            icon: null,
             description: null,
             setBonus: null,
-            createdAt: '',
+            abilitySummary: [],
         },
-    ]),
-    createArtifactSet: vi.fn(),
-    updateArtifactSet: vi.fn(),
-    deleteArtifactSet: vi.fn(),
-}));
+    ],
+    isLoading: false,
+};
 
-import { useArtifactsCatalog } from '@/lib/hooks/artifact-sets';
-import { useUpdateArtifact } from '@/lib/hooks/artifacts';
+const useGroups = () => groupsView;
 
 afterEach(cleanup);
 
@@ -73,21 +73,21 @@ describe('useArtifactsCatalog', () => {
     it('групує артефакти по сетах і слотах; зміна слоту переносить картку без reload', async () => {
         const { result } = renderHook(
             () => ({
-                catalog: useArtifactsCatalog('c1'),
+                catalog: useArtifactsCatalog('c1', useGroups),
                 update: useUpdateArtifact('c1'),
             }),
             { wrapper }
         );
 
         await waitFor(() =>
-            expect(result.current.catalog.view.sets).toHaveLength(1)
+            expect(result.current.catalog.view.groups).toHaveLength(1)
         );
 
         expect(result.current.catalog.count).toBe(2);
         expect(
-            result.current.catalog.view.sets[0].artifacts.map((a) => a.id)
+            result.current.catalog.view.groups[0].artifacts.map((a) => a.id)
         ).toEqual(['a2']);
-        expect(result.current.catalog.view.sets[0].set).toMatchObject({
+        expect(result.current.catalog.view.groups[0].group).toMatchObject({
             icon: null,
             abilitySummary: [],
         });
@@ -119,23 +119,26 @@ describe('useArtifactsCatalog', () => {
     });
 
     it('пошук шукає за назвою артефакта й сету, ховає порожні групи', async () => {
-        const { result } = renderHook(() => useArtifactsCatalog('c1'), {
-            wrapper,
-        });
+        const { result } = renderHook(
+            () => useArtifactsCatalog('c1', useGroups),
+            {
+                wrapper,
+            }
+        );
 
-        await waitFor(() => expect(result.current.view.sets).toHaveLength(1));
+        await waitFor(() => expect(result.current.view.groups).toHaveLength(1));
 
         act(() => result.current.search.query.set('луска'));
 
         await waitFor(() => expect(result.current.view.bySlot).toEqual([]));
 
-        expect(result.current.view.sets[0].artifacts.map((a) => a.id)).toEqual([
-            'a2',
-        ]);
+        expect(
+            result.current.view.groups[0].artifacts.map((a) => a.id)
+        ).toEqual(['a2']);
 
         act(() => result.current.search.query.set('кільце'));
 
-        await waitFor(() => expect(result.current.view.sets).toEqual([]));
+        await waitFor(() => expect(result.current.view.groups).toEqual([]));
 
         expect(result.current.view.bySlot.map((g) => g.slot)).toEqual([
             'amulet',

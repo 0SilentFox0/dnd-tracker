@@ -73,7 +73,7 @@ describe('SheetRollDialog', () => {
 
         fireEvent.click(
             screen.getByRole('switch', {
-                name: 'rest.sheetRoll.inspirationAria',
+                name: 'inspiration.label',
             })
         );
         fireEvent.click(
@@ -110,7 +110,7 @@ describe('SheetRollDialog', () => {
 
         fireEvent.click(
             screen.getByRole('switch', {
-                name: 'rest.sheetRoll.inspirationAria',
+                name: 'inspiration.label',
             })
         );
         fireEvent.click(

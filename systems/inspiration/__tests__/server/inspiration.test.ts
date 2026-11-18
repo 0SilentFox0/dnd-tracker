@@ -43,7 +43,15 @@ const gate = (inspiration: boolean) =>
     } as never);
 
 const post = async (body: object) => {
-    const { POST } = await import('../route');
+    const { characterRoute } = await import(
+        '@/lib/server/characters/operation-runner'
+    );
+
+    const { inspirationOperation } = await import(
+        '@/systems/inspiration/server/operation'
+    );
+
+    const POST = characterRoute(inspirationOperation);
 
     return POST(
         new Request('http://x', { method: 'POST', body: JSON.stringify(body) }),

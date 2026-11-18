@@ -31,6 +31,20 @@ export interface ArtifactCardData {
     itemKind?: 'property' | 'gear';
 }
 
+export interface ItemGroupCardData {
+    id: string;
+    name: string;
+    icon: string | null;
+    description: string | null;
+    setBonus: unknown;
+    abilitySummary: AbilityFlowSummary[];
+}
+
+export interface ItemGroupsView {
+    groups: ItemGroupCardData[];
+    isLoading: boolean;
+}
+
 export type Artifact = ArtifactListItem & Record<string, unknown>;
 
 export interface ArtifactSetOption {

@@ -4,7 +4,6 @@ import {
     bareD20Rules,
     dnd5eRules,
 } from '@/lib/__tests__/helpers/dnd5e-modules';
-import { setInspiration } from '@/lib/server/characters/core/set-inspiration';
 import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/mock-participant';
 import { canUseInspiration } from '@/lib/utils/battle/attack/inspiration';
 import {
@@ -16,6 +15,7 @@ import { rerollTokenOn } from '@/lib/utils/rules/reroll-token-on';
 import { parseRules } from '@/lib/utils/rules/schema';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import { d20State, withD20State } from '@/systems/d20/rules/state';
+import { setInspiration } from '@/systems/inspiration/server/set-inspiration';
 
 const on = (rules: Ruleset): Ruleset => ({
     ...rules,

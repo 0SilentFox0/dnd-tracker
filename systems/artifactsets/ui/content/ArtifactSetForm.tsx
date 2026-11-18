@@ -16,12 +16,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { useTranslator } from '@/lib/i18n/use-translator';
+import type { ConversionIssue } from '@/lib/utils/abilities/schema';
 import {
     type ArtifactSetFormInitial,
     useArtifactSetForm,
-} from '@/lib/hooks/artifact-sets';
-import { useTranslator } from '@/lib/i18n/use-translator';
-import type { ConversionIssue } from '@/lib/utils/abilities/schema';
+} from '@/systems/artifactsets/hooks';
 
 export interface ArtifactSetFormProps {
     campaignId: string;
@@ -166,7 +166,7 @@ export function ArtifactSetForm({
                         )}
                         <Button type="button" variant="outline" asChild>
                             <Link
-                                href={`/campaigns/${campaignId}/dm/artifact-sets`}
+                                href={`/campaigns/${campaignId}/dm/system/artifact-sets`}
                             >
                                 {tCommon('actions.cancel')}
                             </Link>

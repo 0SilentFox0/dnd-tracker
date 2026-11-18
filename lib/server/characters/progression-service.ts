@@ -19,7 +19,6 @@ import { DEFAULT_LOCALE, type Locale } from '@/lib/i18n/config';
 import { ChoicesBodySchema } from '@/lib/schemas/choices';
 import {
     experienceSchema,
-    inspirationSchema,
     resourcesEditSchema,
     restSchema,
     sheetRollSchema,
@@ -61,7 +60,6 @@ const CORE_INPUTS: Record<string, z.ZodType> = {
     stash: characterIdSchema,
     'stash.apply': stashWithId,
     transfer: withId(transferSchema),
-    inspiration: withId(inspirationSchema),
     rest: restSchema.strict(),
     experience: experienceSchema.strict(),
     roll: serverRoll,

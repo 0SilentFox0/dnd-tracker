@@ -4,15 +4,15 @@ import { useQuery } from '@tanstack/react-query';
 
 import { artifactSetKeys } from './keys';
 
+import { artifactKeys } from '@/lib/hooks/artifacts';
+import { useCrudMutation } from '@/lib/hooks/common';
 import {
     type ArtifactSetCreatePayload,
     createArtifactSet,
     deleteArtifactSet,
     getArtifactSets,
     updateArtifactSet,
-} from '@/lib/api/artifact-sets';
-import { artifactKeys } from '@/lib/hooks/artifacts/keys';
-import { useCrudMutation } from '@/lib/hooks/common';
+} from '@/systems/artifactsets/api/artifact-sets';
 
 const keys = (campaignId: string) => [
     artifactSetKeys.list(campaignId),

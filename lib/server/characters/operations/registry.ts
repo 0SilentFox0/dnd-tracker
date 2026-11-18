@@ -11,7 +11,6 @@ import { deleteAllOperation } from './delete-all';
 import { experienceOperation } from './experience';
 import { getOperation } from './get';
 import { goalsOperation } from './goals';
-import { inspirationOperation } from './inspiration';
 import { inventoryUpdateOperation } from './inventory-update';
 import { listOperation } from './list';
 import { notesOperation } from './notes';
@@ -59,7 +58,6 @@ const CORE_OPERATIONS: Record<string, CharacterOperation> = {
     'inventory.patch': erased(inventoryUpdateOperation),
     'stash.apply': erased(stashUpdateOperation),
     transfer: erased(transferOperation),
-    inspiration: erased(inspirationOperation),
     rest: erased(restOperation),
     experience: erased(experienceOperation),
     roll: erased(rollOperation),

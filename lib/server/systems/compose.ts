@@ -39,6 +39,7 @@ export const composeServer = (
             'content.template.localize',
             'content.template.afterSyncUpdate',
             'content.template.usageSelect',
+            'dmPages',
             'routes.campaign',
             'routes.character',
             'ai.heroSelect',

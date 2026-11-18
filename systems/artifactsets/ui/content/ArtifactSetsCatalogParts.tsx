@@ -6,17 +6,17 @@ import { ArtifactSetCard } from './ArtifactSetCard';
 import { HudSection } from '@/components/hud/form';
 import { HudPanel } from '@/components/hud/page';
 import type {
-    ArtifactSetsLinkProps,
-    ArtifactSetsPanelProps,
+    ItemGroupsLinkProps,
+    ItemGroupsPanelProps,
 } from '@/components/systems/types';
 import { Button } from '@/components/ui/button';
 
-export function ArtifactSetsLink({ campaignId }: ArtifactSetsLinkProps) {
+export function ArtifactSetsLink({ campaignId }: ItemGroupsLinkProps) {
     const t = useTranslations('artifacts.page');
 
     return (
         <Button variant="outline" className="whitespace-nowrap" asChild>
-            <Link href={`/campaigns/${campaignId}/dm/artifact-sets`}>
+            <Link href={`/campaigns/${campaignId}/dm/system/artifact-sets`}>
                 {t('setsLink')}
             </Link>
         </Button>
@@ -26,22 +26,22 @@ export function ArtifactSetsLink({ campaignId }: ArtifactSetsLinkProps) {
 export function ArtifactSetsPanel({
     campaignId,
     canEdit,
-    sets,
-}: ArtifactSetsPanelProps) {
+    groups,
+}: ItemGroupsPanelProps) {
     const t = useTranslations('artifacts.page');
 
-    if (sets.length === 0) return null;
+    if (groups.length === 0) return null;
 
     return (
         <HudPanel>
             <HudSection title={t('setsSection')}>
                 <div className="space-y-4">
-                    {sets.map(({ set, artifacts }) => (
+                    {groups.map(({ group, artifacts }) => (
                         <ArtifactSetCard
-                            key={set.id}
+                            key={group.id}
                             variant="withArtifacts"
                             campaignId={campaignId}
-                            set={set}
+                            set={group}
                             artifacts={artifacts}
                             canEdit={canEdit}
                         />

@@ -779,13 +779,6 @@ export const ASSISTANT_ROUTE_COVERAGE: readonly RouteCoverage[] = [
         state: 'handoff',
     },
     {
-        route: 'campaigns/[id]/characters/[characterId]/inspiration',
-        methods: ['POST'],
-        task: 9,
-        adapter: 'characters',
-        state: 'active',
-    },
-    {
         route: 'campaigns/[id]/characters/[characterId]/inventory',
         methods: ['GET', 'PATCH'],
         task: 9,

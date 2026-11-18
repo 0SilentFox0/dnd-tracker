@@ -22,7 +22,7 @@ import {
 } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { useArtifactsCatalog } from '@/lib/hooks/artifact-sets';
+import { useArtifactsCatalog } from '@/lib/hooks/artifacts';
 import type { SystemSelection } from '@/lib/utils/rules/systems/catalog';
 
 export function DMArtifactsPageClient({
@@ -36,15 +36,15 @@ export function DMArtifactsPageClient({
 }) {
     const t = useTranslations('artifacts');
 
-    const catalog = useArtifactsCatalog(campaignId);
+    const groupsUi = systemUiOf(system.key, system.modules).itemGroups;
 
-    const setsUi = systemUiOf(system.key, system.modules).itemGroups;
+    const catalog = useArtifactsCatalog(campaignId, groupsUi?.useGroups);
 
     const { search } = catalog;
 
     const noResults =
         search.isActive &&
-        catalog.view.sets.length === 0 &&
+        catalog.view.groups.length === 0 &&
         catalog.view.bySlot.length === 0;
 
     const slotKeys = catalog.view.bySlot.map((g) => g.slot).join('|');
@@ -70,7 +70,7 @@ export function DMArtifactsPageClient({
                                 artifactsCount={catalog.count}
                             />
                         )}
-                        {setsUi && <setsUi.Link campaignId={campaignId} />}
+                        {groupsUi && <groupsUi.Link campaignId={campaignId} />}
                         {canEdit && (
                             <Button className="whitespace-nowrap" asChild>
                                 <Link href={newHref}>{t('page.create')}</Link>
@@ -112,11 +112,11 @@ export function DMArtifactsPageClient({
                             onClear={() => search.query.set('')}
                         />
                     )}
-                    {setsUi && (
-                        <setsUi.Panel
+                    {groupsUi && (
+                        <groupsUi.Panel
                             campaignId={campaignId}
                             canEdit={canEdit}
-                            sets={catalog.view.sets}
+                            groups={catalog.view.groups}
                         />
                     )}
 

@@ -6,12 +6,23 @@ const mocks = vi.hoisted(() => ({
     notFound: vi.fn(() => {
         throw new Error('NEXT_NOT_FOUND');
     }),
+    redirect: vi.fn(() => {
+        throw new Error('NEXT_REDIRECT');
+    }),
+    findEdit: vi.fn(),
 }));
 
 vi.mock('@/lib/server/campaigns/access', () => ({
     requireCampaignDMOrDemo: mocks.requireCampaignDMOrDemo,
 }));
-vi.mock('next/navigation', () => ({ notFound: mocks.notFound }));
+vi.mock('next/navigation', () => ({
+    notFound: mocks.notFound,
+    redirect: mocks.redirect,
+}));
+vi.mock('@/systems/artifactsets/server/content/queries', async (orig) => ({
+    ...(await orig<object>()),
+    findArtifactSetForEdit: mocks.findEdit,
+}));
 vi.mock('@/components/systems/SystemDmPage', () => ({
     SystemDmPage: () => null,
 }));
@@ -22,8 +33,10 @@ import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rule
 
 const rulesOf = (key: string) => ({ ...DEFAULT_RULES, system: { key } });
 
-const call = (section: string) =>
-    DMSystemSectionPage({ params: Promise.resolve({ id: 'c1', section }) });
+const call = (section: string, rest?: string[]) =>
+    DMSystemSectionPage({
+        params: Promise.resolve({ id: 'c1', section, rest }),
+    });
 
 beforeEach(() => vi.clearAllMocks());
 
@@ -52,6 +65,41 @@ describe('DM system section page (server)', () => {
         });
 
         await expect(call('careers')).rejects.toThrow('NEXT_NOT_FOUND');
+    });
+
+    it('is not found for a sub-path of a section without sub-pages', async () => {
+        mocks.requireCampaignDMOrDemo.mockResolvedValue({
+            campaign: { rules: rulesOf('wfrp') },
+            isDemo: false,
+        });
+
+        await expect(call('careers', ['new'])).rejects.toThrow(
+            'NEXT_NOT_FOUND'
+        );
+    });
+
+    it('resolves the new and edit views of a module with sub-pages', async () => {
+        mocks.requireCampaignDMOrDemo.mockResolvedValue({
+            campaign: {
+                rules: {
+                    ...DEFAULT_RULES,
+                    system: { key: 'dnd5e', modules: ['artifactsets'] },
+                },
+            },
+            isDemo: false,
+        });
+
+        const el = (await call('artifact-sets', ['new'])) as ReactElement<
+            Record<string, unknown>
+        >;
+
+        expect(el.props.view).toEqual({ type: 'new' });
+
+        mocks.findEdit.mockResolvedValue(null);
+
+        await expect(call('artifact-sets', ['x'])).rejects.toThrow(
+            'NEXT_NOT_FOUND'
+        );
     });
 
     it('propagates a guard error', async () => {

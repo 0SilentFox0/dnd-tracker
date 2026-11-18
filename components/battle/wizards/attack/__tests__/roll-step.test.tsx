@@ -13,7 +13,10 @@ vi.mock('@/lib/hooks/battle', () => ({
 vi.mock('@/components/battle/use-system-battle-ui', async () => {
     const { systemUiOf } = await import('@/components/systems');
 
-    return { useSystemBattleUi: () => systemUiOf(rules.systemKey).battle };
+    return {
+        useSystemBattleUi: () => systemUiOf(rules.systemKey).battle,
+        useRerollTokenUi: () => systemUiOf(rules.systemKey).rerollToken,
+    };
 });
 
 import { RollStep } from '../RollStep';

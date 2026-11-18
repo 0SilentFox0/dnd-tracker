@@ -8,6 +8,7 @@ vi.unmock('next-intl');
 vi.mock('@/components/hud/fonts', () => ({ hudFontClassName: '' }));
 vi.mock('@/components/battle/use-system-battle-ui', () => ({
     useSystemBattleUi: () => ({}),
+    useRerollTokenUi: () => undefined,
 }));
 
 import { RollStep } from '@/components/battle/wizards/attack/RollStep';

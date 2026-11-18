@@ -94,6 +94,7 @@ export const DM_SECTIONS: readonly DmSection[] = [
     {
         path: 'skill-trees',
         icon: GitBranch,
+        systemPage: true,
         templateVisible: true,
         hiddenWithClasses: true,
         tile: 'all',
@@ -144,7 +145,13 @@ export const DM_SECTIONS: readonly DmSection[] = [
         tile: 'template',
     },
     { path: 'rules', icon: Scale, templateVisible: true, tile: 'all' },
-    { path: 'artifact-sets', icon: Gem, templateVisible: false, tile: 'none' },
+    {
+        path: 'artifact-sets',
+        icon: Gem,
+        templateVisible: false,
+        systemPage: true,
+        tile: 'none',
+    },
     { path: 'assistant', icon: Bot, templateVisible: false, tile: 'none' },
     { path: 'ai', icon: Cpu, templateVisible: true, tile: 'all' },
 ];

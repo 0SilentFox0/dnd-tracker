@@ -20,14 +20,14 @@ vi.mock('@/lib/api/artifacts', () => ({
         { id: 'a3', name: 'Чоботи', slot: 'boots', setId: 's1' },
     ]),
 }));
-vi.mock('@/lib/api/artifact-sets', () => ({
+vi.mock('@/systems/artifactsets/api/artifact-sets', () => ({
     updateArtifactSet: vi.fn(async () => ({})),
     createArtifactSet: vi.fn(async () => ({})),
     deleteArtifactSet: vi.fn(),
 }));
 
-import { updateArtifactSet } from '@/lib/api/artifact-sets';
-import { useArtifactSetForm } from '@/lib/hooks/artifact-sets';
+import { updateArtifactSet } from '@/systems/artifactsets/api/artifact-sets';
+import { useArtifactSetForm } from '@/systems/artifactsets/hooks';
 
 const wrapper = ({ children }: { children: ReactNode }) => (
     <QueryClientProvider

@@ -3,7 +3,6 @@
     "restFailed": "Failed to take the rest",
     "xpFailed": "Failed to award experience",
     "arcaneFailed": "Failed to recover slots",
-    "inspirationFailed": "Failed to change inspiration",
     "resourcesFailed": "Failed to change resources",
     "rollFailed": "Failed to roll",
     "hitDieFailed": "Failed to spend a hit die"
@@ -55,8 +54,6 @@
   },
   "sheetRoll": {
     "roll": "Roll",
-    "inspirationAria": "Inspiration",
-    "inspiration": "✦ Inspiration — advantage, inspiration will be spent",
     "autoFail": "Automatic failure",
     "result": "d20 {rolls}{mode, select, advantage { with advantage} disadvantage { with disadvantage} other {}} · {bonus}",
     "difficulty": "Difficulty",
@@ -95,8 +92,7 @@
     "fortune": "Fortune {current}/{max}"
   },
   "dm": {
-    "resources": "Resources",
-    "inspiration": "✦ Inspiration"
+    "resources": "Resources"
   },
   "charges": {
     "title": "CHARGES",

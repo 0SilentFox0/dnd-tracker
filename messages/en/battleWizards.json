@@ -38,8 +38,6 @@
       "title": "Attack roll · d20",
       "strike": "Strike {n} of {total} · {name}",
       "cover": "🧱 Obstacle in the way · damage ×0.5",
-      "inspiration": "Inspiration",
-      "inspirationNote": "✦ Inspiration — advantage on this roll",
       "diceHint": "First die first, then the second",
       "rollModes": {
         "normal": "Normal",

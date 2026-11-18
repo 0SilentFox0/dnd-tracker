@@ -67,7 +67,7 @@ describe('ArtifactSetCard', () => {
             screen
                 .getByRole('link', { name: 'artifacts.sets.card.editSet' })
                 .getAttribute('href')
-        ).toBe('/campaigns/c1/dm/artifact-sets/s1');
+        ).toBe('/campaigns/c1/dm/system/artifact-sets/s1');
     });
 
     it('рідкість показується через ключ, а не сире значення', () => {
@@ -113,6 +113,6 @@ describe('ArtifactSetCard', () => {
             screen
                 .getByRole('link', { name: 'common.actions.edit' })
                 .getAttribute('href')
-        ).toBe('/campaigns/c1/dm/artifact-sets/s1');
+        ).toBe('/campaigns/c1/dm/system/artifact-sets/s1');
     });
 });
