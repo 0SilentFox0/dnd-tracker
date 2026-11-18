@@ -49,53 +49,12 @@ function learnedNeeds(
     };
 }
 
-/**
- * Контекст персонажа: раса й дерево + артефакти зі сетами → скіли, школи й заклинання.
- * Школи й заклинання — лише коли є вивчені вузли, і лише групи гілок дерева та вивчених скілів.
- * Класи й потрібні choice refs читаються campaign-scoped кешованими loaders.
- */
-export async function loadCharacterContext(
-    character: CharacterFromPrisma,
-    settings: { maxLevel: number; rules: Ruleset }
-): Promise<CharacterContext> {
-    const { campaignId, race: raceName } = character;
+type LearnedNeeds = ReturnType<typeof learnedNeeds>;
 
-    const { maxLevel, rules } = settings;
+async function loadLibrary(campaignId: string, needs: LearnedNeeds) {
+    if (!(needs.skillIds.length > 0 || needs.learned)) return null;
 
-    const artifactIds = inventoryArtifactIds(character.inventory, {
-        stash: rules.items.enabled,
-        consumables: rules.items.enabled,
-    });
-
-    const [campaign, artifacts] = await Promise.all([
-        prisma.campaign.findUnique({
-            where: { id: campaignId },
-            select: {
-                races: { where: { name: raceName }, take: 1 },
-                skillTrees: { where: { race: raceName }, take: 1 },
-            },
-        }),
-        artifactIds.length > 0
-            ? prisma.artifact.findMany({
-                  where: { id: { in: artifactIds }, campaignId },
-                  include: {
-                      artifactSet: {
-                          include: { artifacts: { select: { id: true } } },
-                      },
-                  },
-              })
-            : [],
-    ]);
-
-    const race = campaign?.races[0] ?? null;
-
-    const tree = campaign?.skillTrees[0] ?? null;
-
-    const needs = learnedNeeds(character, tree);
-
-    const library =
-        needs.skillIds.length > 0 || needs.learned
-            ? await prisma.campaign.findUnique({
+    return prisma.campaign.findUnique({
                   where: { id: campaignId },
                   select: {
                       ...(needs.skillIds.length > 0 && {
@@ -143,8 +102,92 @@ export async function loadCharacterContext(
                           },
                       }),
                   },
+              });
+}
+
+function indexArtifacts(
+    artifacts: Prisma.ArtifactGetPayload<{
+        include: {
+            artifactSet: { include: { artifacts: { select: { id: true } } } };
+        };
+    }>[]
+) {
+    const artifactsById: NonNullable<CampaignSpellContext['artifactsById']> =
+        {};
+
+    const artifactSetsById: NonNullable<
+        CampaignSpellContext['artifactSetsById']
+    > = {};
+
+    const artifactSetMemberIds: NonNullable<
+        CampaignSpellContext['artifactSetMemberIds']
+    > = {};
+
+    for (const { artifactSet, ...row } of artifacts) {
+        artifactsById[row.id] = row;
+
+        if (artifactSet) {
+            artifactSetsById[artifactSet.id] = {
+                id: artifactSet.id,
+                name: artifactSet.name,
+                setBonus: artifactSet.setBonus,
+                icon: artifactSet.icon,
+                abilities: artifactSet.abilities,
+            };
+            artifactSetMemberIds[artifactSet.id] = artifactSet.artifacts.map(
+                (a) => a.id
+            );
+        }
+    }
+
+    return { artifactsById, artifactSetsById, artifactSetMemberIds };
+}
+
+/**
+ * Контекст персонажа: раса й дерево + артефакти зі сетами → скіли, школи й заклинання.
+ * Школи й заклинання — лише коли є вивчені вузли, і лише групи гілок дерева та вивчених скілів.
+ * Класи й потрібні choice refs читаються campaign-scoped кешованими loaders.
+ */
+export async function loadCharacterContext(
+    character: CharacterFromPrisma,
+    settings: { maxLevel: number; rules: Ruleset }
+): Promise<CharacterContext> {
+    const { campaignId, race: raceName } = character;
+
+    const { maxLevel, rules } = settings;
+
+    const artifactIds = inventoryArtifactIds(character.inventory, {
+        stash: rules.items.enabled,
+        consumables: rules.items.enabled,
+    });
+
+    const [campaign, artifacts] = await Promise.all([
+        prisma.campaign.findUnique({
+            where: { id: campaignId },
+            select: {
+                races: { where: { name: raceName }, take: 1 },
+                skillTrees: { where: { race: raceName }, take: 1 },
+            },
+        }),
+        artifactIds.length > 0
+            ? prisma.artifact.findMany({
+                  where: { id: { in: artifactIds }, campaignId },
+                  include: {
+                      artifactSet: {
+                          include: { artifacts: { select: { id: true } } },
+                      },
+                  },
               })
-            : null;
+            : [],
+    ]);
+
+    const race = campaign?.races[0] ?? null;
+
+    const tree = campaign?.skillTrees[0] ?? null;
+
+    const needs = learnedNeeds(character, tree);
+
+    const library = await loadLibrary(campaignId, needs);
 
     const skills = library?.skills ?? [];
 
@@ -183,33 +226,8 @@ export async function loadCharacterContext(
         ? await loadBackground(campaignId, state.backgroundId)
         : null;
 
-    const artifactsById: NonNullable<CampaignSpellContext['artifactsById']> =
-        {};
-
-    const artifactSetsById: NonNullable<
-        CampaignSpellContext['artifactSetsById']
-    > = {};
-
-    const artifactSetMemberIds: NonNullable<
-        CampaignSpellContext['artifactSetMemberIds']
-    > = {};
-
-    for (const { artifactSet, ...row } of artifacts) {
-        artifactsById[row.id] = row;
-
-        if (artifactSet) {
-            artifactSetsById[artifactSet.id] = {
-                id: artifactSet.id,
-                name: artifactSet.name,
-                setBonus: artifactSet.setBonus,
-                icon: artifactSet.icon,
-                abilities: artifactSet.abilities,
-            };
-            artifactSetMemberIds[artifactSet.id] = artifactSet.artifacts.map(
-                (a) => a.id
-            );
-        }
-    }
+    const { artifactsById, artifactSetsById, artifactSetMemberIds } =
+        indexArtifacts(artifacts);
 
     return {
         race,
