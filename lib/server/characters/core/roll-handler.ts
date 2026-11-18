@@ -1,3 +1,5 @@
+import type { Prisma } from '@prisma/client';
+
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { CharacterLogKind } from '@/lib/constants/character-log';
 import { prisma } from '@/lib/db';
@@ -108,9 +110,22 @@ export async function rollForSheet(
 
     const logged = await prisma.$transaction(async (tx) => {
         if (inspired) {
+            const token = system.combat.rerollToken;
+
+            const row = await tx.character.findUnique({
+                where: { id: character.id },
+                select: {
+                    inspiration: true,
+                    characteristics: true,
+                    updatedAt: true,
+                },
+            });
+
+            if (!row || !token?.stored(row)) return false;
+
             const { count } = await tx.character.updateMany({
-                where: { id: character.id, inspiration: true },
-                data: { inspiration: false },
+                where: { id: character.id, updatedAt: row.updatedAt },
+                data: token.store(row, false) as Prisma.CharacterUpdateInput,
             });
 
             if (count === 0) return false;

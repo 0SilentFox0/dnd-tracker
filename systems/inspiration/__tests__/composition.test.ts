@@ -11,7 +11,7 @@ import {
     battleResultOutcome,
 } from '@/lib/utils/characters/resources/battle';
 import type { Ruleset } from '@/lib/utils/rules';
-import { rerollTokenOn } from '@/lib/utils/rules/reroll-token-on';
+import { rerollTokenOn, storedInspiration } from '@/lib/utils/rules/reroll-token-on';
 import { parseRules } from '@/lib/utils/rules/schema';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import { d20State, withD20State } from '@/systems/d20/rules/state';
@@ -86,5 +86,28 @@ describe('inspiration module composition', () => {
 
         expect(rerollTokenOn(raw([]))).toBe(false);
         expect(rerollTokenOn(raw(['inspiration']))).toBe(true);
+    });
+
+    it('the stored reader works through the core seam and is null when off', () => {
+        const ext = {
+            inspiration: false,
+            characteristics: { ext: { inspiration: { available: true } } },
+        };
+
+        expect(storedInspiration(on(dnd5eRules()), ext)).toBe(true);
+        expect(storedInspiration(on(dnd5eRules()), { inspiration: true })).toBe(
+            true
+        );
+        expect(storedInspiration(bareD20Rules(), ext)).toBeNull();
+    });
+
+    it('wfrp has no token store, so its rows never get an ext slot', () => {
+        const rules = parseRules({
+            system: { key: 'wfrp' },
+            outOfCombat: { inspiration: true },
+        });
+
+        expect(ruleSystemOf(rules).combat.rerollToken).toBeUndefined();
+        expect(storedInspiration(rules, { inspiration: true })).toBeNull();
     });
 });

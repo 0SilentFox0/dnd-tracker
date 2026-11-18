@@ -28,6 +28,16 @@ model CharacterSkills {
   @@map("character_skills")
 }
 
+// No Prisma relation to Character (core model); the FK lives in the migration only.
+model SkillTreeProgress {
+  characterId String   @id @map("character_id")
+  progress    Json     @default("{}")
+  version     Int      @default(0)
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("skill_tree_progress")
+}
+
 // BEGIN GENERATED BASE MODELS (scripts/db/gen-base-models.ts)
 
 model SkillTreeBase {

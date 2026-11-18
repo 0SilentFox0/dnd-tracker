@@ -159,8 +159,11 @@ export interface SystemMeta {
     importLinks?: Readonly<Record<string, readonly string[]>>;
     /** `hashJson` of `characteristics` values the system treats as empty besides null / {} */
     emptyCharacteristicsHashes?: readonly string[];
-    /** Row columns the system stores inside `characteristics`; the content hash folds them back so legacy and migrated rows hash alike */
-    characteristicsColumns?: readonly string[];
+    /** Row columns the system stores inside `characteristics` (a key, or a path such as `ext.<module>.<key>`); the content hash folds them back so legacy and migrated rows hash alike */
+    characteristicsColumns?: readonly (
+        | string
+        | { column: string; path: readonly string[] }
+    )[];
 }
 
 export const SYSTEM_META = [

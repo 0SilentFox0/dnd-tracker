@@ -5,7 +5,7 @@ import { hitDicePool } from '@/lib/utils/characters/resources/hit-dice';
 import { readResources } from '@/lib/utils/characters/resources/schema';
 import { isConsumablePool } from '@/lib/utils/items/pools';
 import type { Ruleset } from '@/lib/utils/rules';
-import { rerollTokenOn } from '@/lib/utils/rules/reroll-token-on';
+import { rerollTokenOn, storedInspiration } from '@/lib/utils/rules/reroll-token-on';
 import { ruleSystemOf } from '@/lib/utils/rules/systems/lookup';
 import type { BattleParticipant } from '@/types/battle';
 import type { SheetRest } from '@/types/characters';
@@ -17,6 +17,7 @@ export function buildRestBlock(input: {
         level: number;
         resources?: unknown;
         inspiration?: boolean;
+        characteristics?: unknown;
         experience?: number;
     };
     classes?: ResolvedClassEntry[];
@@ -98,7 +99,10 @@ export function buildRestBlock(input: {
             used: offer.used,
             slots: offer.slots,
         },
-        inspiration: inspiration ? !!c.inspiration : null,
+        inspiration:
+            input.rules && inspiration
+                ? storedInspiration(input.rules, c)
+                : null,
         xp: ooc.xp
             ? {
                   value: experience,

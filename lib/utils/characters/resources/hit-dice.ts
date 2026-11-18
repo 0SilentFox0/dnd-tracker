@@ -104,9 +104,12 @@ export function spendHitDie(
 
     if (hpBefore >= input.maxHp) return { ok: false, error: 'hp_full' };
 
-    const healed = Math.max(0, input.roll + input.conMod);
+    const hpAfter = Math.min(
+        input.maxHp,
+        hpBefore + Math.max(0, input.roll + input.conMod)
+    );
 
-    const hpAfter = Math.min(input.maxHp, hpBefore + healed);
+    const healed = hpAfter - hpBefore;
 
     const counted = {
         ...r,

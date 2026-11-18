@@ -1,16 +1,12 @@
 import type { RuleSystemDefinition } from './types';
 
 import { isRecord } from '@/lib/utils/common/is-record';
-import { SYSTEM_META, type SystemMeta } from '@/lib/utils/rules/systems/meta';
 import type { SystemData } from '@/lib/utils/rules/systems/slot';
-
-const STORED_COLUMNS = [
-    ...new Set(
-        (SYSTEM_META as readonly SystemMeta[]).flatMap(
-            (m) => m.characteristicsColumns ?? []
-        )
-    ),
-];
+import {
+    getAtPath,
+    omitAtPath,
+    STORED_COLUMN_ENTRIES,
+} from '@/lib/utils/rules/systems/stored-columns';
 
 /** For loaders without a ruleset; same rule as the d20 codec: stored number, else the column. */
 export function withStoredColumns<T extends object>(row: T): T {
@@ -19,9 +15,11 @@ export function withStoredColumns<T extends object>(row: T): T {
     if (!isRecord(stored)) return row;
 
     const picked = Object.fromEntries(
-        STORED_COLUMNS.flatMap((column) =>
-            typeof stored[column] === 'number' ? [[column, stored[column]]] : []
-        )
+        STORED_COLUMN_ENTRIES.flatMap(({ column, path }) => {
+            const value = getAtPath(stored, path);
+
+            return typeof value === 'number' ? [[column, value]] : [];
+        })
     );
 
     return Object.keys(picked).length > 0 ? { ...row, ...picked } : row;
@@ -33,14 +31,12 @@ export function flattenStoredColumns<T extends object>(row: T): T {
 
     if (!isRecord(flat.characteristics)) return flat;
 
-    const rest = Object.fromEntries(
-        Object.entries(flat.characteristics).filter(
-            ([key]) => !STORED_COLUMNS.includes(key)
-        )
+    const rest = STORED_COLUMN_ENTRIES.reduce<Record<string, unknown>>(
+        (acc, { path }) => omitAtPath(acc, path),
+        flat.characteristics
     );
 
-    if (Object.keys(rest).length === Object.keys(flat.characteristics).length)
-        return flat;
+    if (rest === flat.characteristics) return flat;
 
     return {
         ...flat,

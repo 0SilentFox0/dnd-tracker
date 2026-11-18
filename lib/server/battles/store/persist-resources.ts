@@ -62,7 +62,12 @@ export async function persistCharacterResources(
             id: { in: heroes.map((h) => h.basicInfo.sourceId) },
             campaignId: battle.campaignId,
         },
-        select: { id: true, resources: true },
+        select: {
+            id: true,
+            resources: true,
+            inspiration: true,
+            characteristics: true,
+        },
     });
 
     const byId = new Map(rows.map((r) => [r.id, r]));
@@ -86,10 +91,12 @@ export async function persistCharacterResources(
                 },
             });
 
-        if (outcome.clearInspiration)
-            await tx.character.updateMany({
-                where: { id: row.id, inspiration: true },
-                data: { inspiration: false },
+        const token = ruleSystemOf(battle.rules).combat.rerollToken;
+
+        if (outcome.clearInspiration && token?.stored(row))
+            await tx.character.update({
+                where: { id: row.id },
+                data: token.store(row, false) as Prisma.CharacterUpdateInput,
             });
 
         if (persistResources)

@@ -141,3 +141,25 @@ describe('columnViewDto', () => {
         expect(columnViewDto(plain, d20)).toBe(plain);
     });
 });
+
+describe('ext path columns', () => {
+    const migrated = {
+        characteristics: { ext: { morale: { value: 4 }, other: { a: 1 } } },
+    };
+
+    it('withStoredColumns lifts ext.morale.value to the column', () => {
+        expect(withStoredColumns(migrated)).toMatchObject({ morale: 4 });
+    });
+
+    it('flattenStoredColumns removes the path and prunes empty ext', () => {
+        expect(flattenStoredColumns(migrated)).toEqual({
+            morale: 4,
+            characteristics: { ext: { other: { a: 1 } } },
+        });
+        expect(
+            flattenStoredColumns({
+                characteristics: { ext: { morale: { value: 4 } } },
+            })
+        ).toEqual({ morale: 4, characteristics: null });
+    });
+});

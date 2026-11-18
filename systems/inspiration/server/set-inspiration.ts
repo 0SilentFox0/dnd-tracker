@@ -1,3 +1,7 @@
+import type { Prisma } from '@prisma/client';
+
+import { writeInspiration } from '../rules/value';
+
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { prisma } from '@/lib/db';
 import type {
@@ -19,9 +23,14 @@ export async function setInspiration(
     await assertNotInActiveBattle(character.campaignId, [character.id]);
 
     await prisma.$transaction(async (tx) => {
+        const fresh = await tx.character.findUniqueOrThrow({
+            where: { id: character.id },
+            select: { characteristics: true },
+        });
+
         await tx.character.update({
             where: { id: character.id },
-            data: { inspiration: value },
+            data: writeInspiration(fresh, value) as Prisma.CharacterUpdateInput,
         });
         await writeCharacterLog(tx, [
             {

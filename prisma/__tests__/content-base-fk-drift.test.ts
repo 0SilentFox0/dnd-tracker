@@ -36,6 +36,7 @@ const EXPECTED = DROPPED_IN_MIGRATION.filter((k) => k !== 'artifacts.setId');
 // Relations removed from the schema (P10) while the DB keeps the FK: migrate diff proposes DROP for them.
 const INVERSE_DROP = [
     'artifact_sets_campaignId_fkey',
+    'skill_tree_progress_character_id_fkey',
     'skill_trees_campaignId_fkey',
 ];
 
@@ -76,6 +77,10 @@ describe('inverse drift (relation removed from the schema, FK kept in the DB)', 
         }
     );
 
+    it('skill_tree_progress declares no relation (FK is migration-only)', () => {
+        expect(relationColumns('skill_tree_progress')).toEqual([]);
+    });
+
     it('artifacts has no set relation in the schema', () => {
         expect(relationColumns('artifacts')).not.toContain('setId');
     });
@@ -83,6 +88,7 @@ describe('inverse drift (relation removed from the schema, FK kept in the DB)', 
     it('lists the FKs the schema no longer declares', () => {
         expect(INVERSE_DROP).toEqual([
             'artifact_sets_campaignId_fkey',
+            'skill_tree_progress_character_id_fkey',
             'skill_trees_campaignId_fkey',
         ]);
     });

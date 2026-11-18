@@ -1,20 +1,17 @@
 import { hashJson } from '@/lib/utils/battle/store/stable-json';
 import { isRecord } from '@/lib/utils/common/is-record';
 import { SYSTEM_META, type SystemMeta } from '@/lib/utils/rules/systems/meta';
+import {
+    getAtPath,
+    omitAtPath,
+    STORED_COLUMN_ENTRIES,
+} from '@/lib/utils/rules/systems/stored-columns';
 
 const EMPTY_HASHES = new Set<string>(
     (SYSTEM_META as readonly SystemMeta[]).flatMap(
         (m) => m.emptyCharacteristicsHashes ?? []
     )
 );
-
-const FOLDED_COLUMNS = [
-    ...new Set(
-        (SYSTEM_META as readonly SystemMeta[]).flatMap(
-            (m) => m.characteristicsColumns ?? []
-        )
-    ),
-];
 
 const isEmptyCharacteristics = (v: unknown) =>
     v == null ||
@@ -34,13 +31,19 @@ export function contentRowHash(
         (model === 'Unit' || model === 'Character') &&
         isRecord(row.characteristics)
     ) {
-        const rest = { ...row.characteristics };
+        let rest: Record<string, unknown> = { ...row.characteristics };
 
-        for (const c of FOLDED_COLUMNS)
-            if (rest[c] !== undefined) {
-                row[c] = rest[c];
-                delete rest[c];
+        for (const { column, path } of STORED_COLUMN_ENTRIES) {
+            const value = getAtPath(rest, path);
+
+            if (value !== undefined) {
+                row[column] = value;
+                rest = omitAtPath(rest, path);
             }
+        }
+
+        if (isRecord(rest.ext) && Object.keys(rest.ext).length === 0)
+            delete rest.ext;
 
         row.characteristics = rest;
     }

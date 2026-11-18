@@ -118,8 +118,7 @@ describe('spendHitDieFor', () => {
         expect(out.hpAfter).toBe(40);
     });
 
-    // BUG: spendHitDie reports healed = roll + CON (11) even when only 2 HP were gained
-    it.skip('healed reports the effective HP gained when capped at max HP', async () => {
+    it('healed reports the effective HP gained when capped at max HP', async () => {
         const g = gate() as { character: { resources: object } };
 
         g.character.resources = { shortRestOpen: true, hp: 38 };

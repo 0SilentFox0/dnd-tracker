@@ -106,6 +106,15 @@ describe('spendHitDie', () => {
         expect(r.ok && r.healed).toBe(0);
     });
 
+    it('healed is the effective HP gained when capped at max HP', () => {
+        const r = spendHitDie(
+            { ...open, hp: 38 },
+            { pool, classId: 'fig', roll: 10, conMod: 1, maxHp: 40 }
+        );
+
+        expect(r.ok && [r.healed, r.hpBefore, r.hpAfter]).toEqual([2, 38, 40]);
+    });
+
     it.each([
         [{ hp: 5 }, 'fig', 'closed'],
         [{ ...open, dead: true }, 'fig', 'dead'],

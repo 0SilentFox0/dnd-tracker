@@ -122,14 +122,20 @@ export const listOperation = defineCharacterOperation({
                 orderBy,
             });
 
+        const token = ruleSystemOf(access.campaign.rules).combat.rerollToken;
+
+        const rows = await prisma.character.findMany({
+            where,
+            select: pending
+                ? { ...LIST_SELECT, reviewNote: true }
+                : LIST_SELECT,
+            orderBy,
+        });
+
         return redactListedLedgers(
-            await prisma.character.findMany({
-                where,
-                select: pending
-                    ? { ...LIST_SELECT, reviewNote: true }
-                    : LIST_SELECT,
-                orderBy,
-            }),
+            rows.map((row) =>
+                token ? { ...row, inspiration: token.stored(row) } : row
+            ),
             access,
             ruleSystemOf(access.campaign.rules)
         ).map(flattenStoredColumns);

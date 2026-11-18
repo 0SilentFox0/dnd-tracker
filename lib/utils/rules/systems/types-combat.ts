@@ -232,6 +232,16 @@ export interface InspirationRules {
     enabled(rules: Ruleset): boolean;
     available(p: BattleParticipant): boolean;
     spend(p: BattleParticipant): BattleParticipant;
+    /** Stored token of a character row (dual store: ext first, then the column) */
+    stored(row: {
+        inspiration?: boolean | null;
+        characteristics?: unknown;
+    }): boolean;
+    /** Update data that sets the token in every store */
+    store(
+        row: { characteristics?: unknown },
+        value: boolean
+    ): { inspiration: boolean; characteristics: Record<string, unknown> };
 }
 
 export type CritRules = Pick<

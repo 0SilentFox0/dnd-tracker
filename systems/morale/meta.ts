@@ -5,6 +5,9 @@ export const MORALE_META = {
     kind: 'addon',
     keys: [],
     requires: ['d20'],
+    characteristicsColumns: [
+        { column: 'morale', path: ['ext', 'morale', 'value'] },
+    ],
     i18n: {
         battle: ['battleMorale'],
         rules: ['rulesMorale'],

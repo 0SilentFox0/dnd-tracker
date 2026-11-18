@@ -30,7 +30,9 @@ describe('d20 characteristics column view', () => {
     });
 
     it('no other system uses these names as characteristics', () => {
-        for (const m of SYSTEM_META.filter((m) => m.module !== 'd20'))
+        for (const m of SYSTEM_META.filter(
+            (m) => !['d20', 'morale'].includes(m.module)
+        ))
             expect(
                 (m as { characteristicsColumns?: readonly string[] })
                     .characteristicsColumns ?? []

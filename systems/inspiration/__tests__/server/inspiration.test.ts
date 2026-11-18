@@ -11,7 +11,12 @@ vi.mock('@/lib/server/characters/access', () => ({
 }));
 vi.mock('@/lib/db', () => {
     const prisma = {
-        character: { update: vi.fn() },
+        character: {
+            update: vi.fn(),
+            findUniqueOrThrow: vi.fn(async () => ({
+                characteristics: { strength: 12, ext: { other: { a: 1 } } },
+            })),
+        },
         characterLog: { createMany: vi.fn() },
         battleParticipant: { findFirst: vi.fn(async () => null) },
         $queryRaw: vi.fn(async () => []),
@@ -79,7 +84,16 @@ describe('POST inspiration', () => {
         expect(await res.json()).toEqual({ inspiration: true });
         expect(prisma.character.update).toHaveBeenCalledWith({
             where: { id: 'ch' },
-            data: { inspiration: true },
+            data: {
+                inspiration: true,
+                characteristics: {
+                    strength: 12,
+                    ext: {
+                        other: { a: 1 },
+                        inspiration: { available: true },
+                    },
+                },
+            },
         });
         expect(prisma.characterLog.createMany).toHaveBeenCalledWith({
             data: [
