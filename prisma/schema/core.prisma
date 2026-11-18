@@ -146,13 +146,11 @@ model Character {
   knownSpells         Json                @default("[]")
   languages           Json                @default("[]")
   proficiencies       Json                @default("{}")
-  skillTreeProgress   Json                @default("{}")
   characteristics     Json                @default("{}")
   seenLevel           Int?
   createdAt           DateTime            @default(now())
   updatedAt           DateTime            @updatedAt
   immunities          Json                @default("[]")
-  morale              Int                 @default(0)
   maxTargets          Int                 @default(1)
   minTargets          Int                 @default(1)
   personalSkillId     String?
@@ -166,7 +164,6 @@ model Character {
   selectedBackground  Background?         @relation(fields: [backgroundId], references: [id], onDelete: Restrict)
   raceChoices         Json                @default("{}")
   resources           Json                @default("{}")
-  inspiration         Boolean             @default(false)
   hpMultiplier        Float?
   archetype           String?
   meleeMultiplier     Float?
@@ -215,7 +212,6 @@ model Unit {
   avatar               String?
   createdAt            DateTime @default(now())
   immunities           Json     @default("[]")
-  morale               Int      @default(0)
   maxTargets           Int      @default(1)
   minTargets           Int      @default(1)
   abilities            Json     @default("[]")
@@ -422,7 +418,6 @@ model BattleScene {
   participants       Json                @default("[]")
   currentRound       Int                 @default(1)
   currentTurnIndex   Int                 @default(0)
-  pendingMoraleCheck Json?
   pendingCritChoice  Json?
   systemState        Json?               @map("system_state")
   map                Json?
@@ -1369,7 +1364,6 @@ model UnitBase {
   avatar               String?
   createdAt            DateTime @default(now())
   immunities           Json     @default("[]")
-  morale               Int      @default(0)
   maxTargets           Int      @default(1)
   minTargets           Int      @default(1)
   abilities            Json     @default("[]")
