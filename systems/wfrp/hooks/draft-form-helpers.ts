@@ -42,7 +42,6 @@ export const STEP_ERRORS: Record<WfrpDraftStepId, (code: string) => boolean> = {
     identity: () => false,
 };
 
-
 export const careerPickValid = (
     mode: CareerMode,
     careerId: string,

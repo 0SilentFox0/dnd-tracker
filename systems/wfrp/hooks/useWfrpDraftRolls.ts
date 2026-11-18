@@ -142,7 +142,19 @@ export function useWfrpDraftRolls({
                 final: featName(f),
             }))
         );
-    }, [talents.rolled.length, setRolledTalents, rollAll, reveal, featName, profile, rng]);
+    }, [
+        talents.rolled.length,
+        setRolledTalents,
+        rollAll,
+        reveal,
+        featName,
+        profile,
+        rng,
+    ]);
 
-    return { careerRoll: rollCareer, statsRoll: rollStats, talentsRoll: rollTalents };
+    return {
+        careerRoll: rollCareer,
+        statsRoll: rollStats,
+        talentsRoll: rollTalents,
+    };
 }

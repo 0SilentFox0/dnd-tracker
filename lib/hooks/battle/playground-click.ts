@@ -89,13 +89,7 @@ export function playgroundCellClick(
     }
 
     if (mode === 'template') {
-        if (
-            !aimView(
-                { map, participants, rules: PREVIEW_RULES },
-                mapAim,
-                p
-            )
-        )
+        if (!aimView({ map, participants, rules: PREVIEW_RULES }, mapAim, p))
             return pushLog({ key: 'outOfRange', params: {} });
 
         const hit = templateArea(
@@ -133,8 +127,7 @@ export function playgroundCellClick(
                               ...q.battleData,
                               position: p,
                               movementUsed:
-                                  (q.battleData.movementUsed ?? 0) +
-                                  cost,
+                                  (q.battleData.movementUsed ?? 0) + cost,
                           },
                       }
                     : q

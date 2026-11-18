@@ -34,7 +34,6 @@ export function useWfrpDraftPicks() {
 
     const [rolledTalents, setRolledTalents] = useState<string[]>([]);
 
-
     const picks = useMemo<CreationPicks>(
         () => ({
             career: { mode: careerMode, careerId: careerId ?? '' },
@@ -86,7 +85,6 @@ export function useWfrpDraftPicks() {
         },
         [careerRolls]
     );
-
 
     const swap = useCallback(
         (i: number, j: number) =>

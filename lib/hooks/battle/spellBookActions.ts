@@ -31,7 +31,9 @@ export interface SpellBookActionsContext {
         Grants,
         'grantsOf' | 'canSlot' | 'slotChoices' | 'selectedGrant'
     >;
-    build(s: BookSpell, opts?: { castLevel?: number; test?: boolean }
+    build(
+        s: BookSpell,
+        opts?: { castLevel?: number; test?: boolean }
     ): ReturnType<typeof buildSpellPick>;
     inRange(p: BattleParticipant): boolean;
     bypassCost: boolean;

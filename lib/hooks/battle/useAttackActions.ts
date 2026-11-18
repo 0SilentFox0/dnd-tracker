@@ -112,7 +112,6 @@ export function useAttackActions({
         });
     };
 
-
     const outcomeOf = (d20: number, second?: number): RollOutcome => {
         const target = byId(state.strikes[state.index]?.targetId ?? '');
 

@@ -13,7 +13,24 @@ import { useSpellCastSubmit } from './useSpellCastSubmit';
 import { joinLines, textRef } from '@/lib/i18n/text-ref';
 import { useText } from '@/lib/i18n/use-text';
 import { reactionBlockerOf } from '@/lib/utils/battle/actions/access';
-import {buildSpellPick, casterUsesUniversalSlot, castPreviewOf, costBlocked, grantLabel as grantLabelOf, initialSpellFlow, inlineGrantLabel, inlineGrantOf, spellBlockedBySlots, spellDefinition, spellFlow, spellSaveTargets, spellSlotCostLabel, spellSlotsLeft, spellSourceModel, spellWidening} from '@/lib/utils/battle/flows';
+import {
+    buildSpellPick,
+    casterUsesUniversalSlot,
+    castPreviewOf,
+    costBlocked,
+    grantLabel as grantLabelOf,
+    initialSpellFlow,
+    inlineGrantLabel,
+    inlineGrantOf,
+    spellBlockedBySlots,
+    spellDefinition,
+    spellFlow,
+    spellSaveTargets,
+    spellSlotCostLabel,
+    spellSlotsLeft,
+    spellSourceModel,
+    spellWidening,
+} from '@/lib/utils/battle/flows';
 import { slotLevels } from '@/lib/utils/battle/view';
 import {
     groupSpellsByLevel,

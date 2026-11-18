@@ -1,13 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import {useQueryClient} from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 
-import {importInvalidateKeys} from './keys';
+import { importInvalidateKeys } from './keys';
 import { type ImportPart, postChunks } from './post-chunks';
 import { useImportAiMapping } from './useImportAiMapping';
 
-import {contentExampleUrl} from '@/lib/api/content-import';
+import { contentExampleUrl } from '@/lib/api/content-import';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import { downloadText } from '@/lib/utils/common/download-text';
 import { errorMessage } from '@/lib/utils/common/error-message';
@@ -22,7 +22,14 @@ import {
     parseTable,
 } from '@/lib/utils/content/import';
 import { AggregateImportFileError } from '@/lib/utils/content/import/table';
-import {loadStoredMapping, mergeReports, readImportFile, reportToCsv, saveStoredMapping, statusKey} from '@/lib/utils/content/import/wizard';
+import {
+    loadStoredMapping,
+    mergeReports,
+    readImportFile,
+    reportToCsv,
+    saveStoredMapping,
+    statusKey,
+} from '@/lib/utils/content/import/wizard';
 import type {
     ImportKind,
     ImportMapping,

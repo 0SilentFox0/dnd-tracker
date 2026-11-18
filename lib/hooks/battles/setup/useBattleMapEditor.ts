@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, useState } from 'react';
 
-import {EDGES_STRIPPED_NOTICE, NO_PLAYABLE_NOTICE} from './mapEditorNotices';
+import { EDGES_STRIPPED_NOTICE, NO_PLAYABLE_NOTICE } from './mapEditorNotices';
 import { useMapBackground } from './useMapBackground';
 import { useMapEdgeEditing } from './useMapEdgeEditing';
 import { NO_MARGINS, useMapGridSizing } from './useMapGridSizing';
@@ -15,7 +15,18 @@ import {
 } from '@/lib/constants/battle';
 import { useMapMotionTool } from '@/lib/hooks/battle/useMapMotionTool';
 import { useImageSize } from '@/lib/hooks/common';
-import {hasPlayableArea, hazardDamage, impliedCellPx, inferMargins, isEdgeTool, isPreviewSafeBackground, type Margins, MAX_SIDE, paintCells, type SetupTool} from '@/lib/utils/battle/grid';
+import {
+    hasPlayableArea,
+    hazardDamage,
+    impliedCellPx,
+    inferMargins,
+    isEdgeTool,
+    isPreviewSafeBackground,
+    type Margins,
+    MAX_SIDE,
+    paintCells,
+    type SetupTool,
+} from '@/lib/utils/battle/grid';
 import {
     MAP_MODE_REGISTRY,
     type MapModeDefinition,
@@ -100,24 +111,34 @@ export function useBattleMapEditor(
 
     const image = useImageSize(enabled ? imageSrc : null);
 
-    const { setSize, setCellSize, applyCalibration, setGridOffset, setMargins } =
-        useMapGridSizing({
-            map,
-            setMap,
-            margins,
-            setMargins: setMarginsState,
-            setNotice,
-            image,
-            maxSide,
-        });
+    const {
+        setSize,
+        setCellSize,
+        applyCalibration,
+        setGridOffset,
+        setMargins,
+    } = useMapGridSizing({
+        map,
+        setMap,
+        margins,
+        setMargins: setMarginsState,
+        setNotice,
+        image,
+        maxSide,
+    });
 
     const setOpacity = useCallback(
         (opacity: number) => setMap((m) => ({ ...m, opacity })),
         []
     );
 
-    const { setBackground, replaceBackground, pendingKeep, keepCalibration, dropCalibration } =
-        useMapBackground({ map, setMap, image });
+    const {
+        setBackground,
+        replaceBackground,
+        pendingKeep,
+        keepCalibration,
+        dropCalibration,
+    } = useMapBackground({ map, setMap, image });
 
     const replaceMapFromImport = useCallback(
         (

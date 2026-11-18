@@ -41,7 +41,7 @@ export function useCompendiumRequests(
             getCompendiumRunReport(campaignId, runId),
     });
 
-        const targetsQuery = useQuery({
+    const targetsQuery = useQuery({
         queryKey: compendiumKeys.options(campaignId),
         queryFn: ({ signal }) => getCompendiumOptions(campaignId, signal),
         enabled: optionsEnabled,

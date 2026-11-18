@@ -13,11 +13,14 @@ import type { TileLayer } from '@/lib/utils/battle/tiles/types';
 import type { BattleScene } from '@/types/api';
 
 const TILE_PROPERTIES = Object.fromEntries(
-    TILE_CATALOG.map((tile) => [tile.id, {
-        blocks: tile.blocks,
-        blocksSight: tile.blocksSight,
-        footprint: tile.footprint,
-    }])
+    TILE_CATALOG.map((tile) => [
+        tile.id,
+        {
+            blocks: tile.blocks,
+            blocksSight: tile.blocksSight,
+            footprint: tile.footprint,
+        },
+    ])
 );
 
 function decodeTileLayers(
@@ -103,7 +106,9 @@ export function useBattleSceneMap(
         const map = blocked?.size
             ? {
                   ...effective,
-                  blocked: [...new Set([...(effective.blocked ?? []), ...blocked])],
+                  blocked: [
+                      ...new Set([...(effective.blocked ?? []), ...blocked]),
+                  ],
               }
             : effective;
 

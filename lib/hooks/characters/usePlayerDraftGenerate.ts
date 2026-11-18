@@ -8,7 +8,12 @@ import {
 import { useLocale, useTranslations } from 'next-intl';
 import { useQueryClient } from '@tanstack/react-query';
 
-import { avatarStep, backgroundStep, type RollKey, scoreSteps } from './draft-form-helpers';
+import {
+    avatarStep,
+    backgroundStep,
+    type RollKey,
+    scoreSteps,
+} from './draft-form-helpers';
 import { characterKeys } from './keys';
 import { draftPortraitsQuery, useDraftPortraits } from './useDraftPortraits';
 import type { RollStep } from './useRollReveal';
@@ -243,7 +248,15 @@ export function usePlayerDraftGenerate({
         setValues((prev) => ({ ...prev, ...next }));
 
         start([backgroundStep(next.background)]);
-    }, [setValues, start, values.archetype, values.name, values.race, t, locale]);
+    }, [
+        setValues,
+        start,
+        values.archetype,
+        values.name,
+        values.race,
+        t,
+        locale,
+    ]);
 
     const portrait = useCallback(() => {
         const pool = portraitPool(values.race);

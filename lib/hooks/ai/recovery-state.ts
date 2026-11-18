@@ -9,7 +9,8 @@ type Translate = (key: string, values?: Record<string, string>) => string;
 export const freshestLease = (state: RecoveryState) =>
     state.runs
         .filter(
-            (r) => r.status !== 'running' && Date.parse(r.expiresAt) > Date.now()
+            (r) =>
+                r.status !== 'running' && Date.parse(r.expiresAt) > Date.now()
         )
         .sort((a, b) => Date.parse(b.expiresAt) - Date.parse(a.expiresAt))[0];
 

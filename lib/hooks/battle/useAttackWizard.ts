@@ -16,10 +16,14 @@ import { attackCounter } from '@/lib/utils/battle/attack/attacks-left';
 import { critDoublesDice } from '@/lib/utils/battle/attack/crit-dice';
 import { canUseInspiration } from '@/lib/utils/battle/attack/inspiration';
 import { attackKindOf } from '@/lib/utils/battle/common/attack-kind';
-import {attackFlow, initialAttackFlow, strikeMode} from '@/lib/utils/battle/flows';
-import {canSeeExactStats, weaponPreview} from '@/lib/utils/battle/view';
+import {
+    attackFlow,
+    initialAttackFlow,
+    strikeMode,
+} from '@/lib/utils/battle/flows';
+import { canSeeExactStats, weaponPreview } from '@/lib/utils/battle/view';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
-import type {BattleParticipant} from '@/types/battle';
+import type { BattleParticipant } from '@/types/battle';
 
 export function useAttackWizard(
     attacker: BattleParticipant | null,
@@ -117,7 +121,6 @@ export function useAttackWizard(
         map,
         rules: scene.battle.rules,
     };
-
 
     useAttackSubmit({ attacker, attack, flow: { state, dispatch }, onDone });
 
@@ -218,7 +221,6 @@ export function useAttackWizard(
         serverJudged,
         dice,
     });
-
 
     const doubled =
         state.step === 'damage' &&

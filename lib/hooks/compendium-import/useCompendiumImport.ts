@@ -1,6 +1,6 @@
 'use client';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import {useQueryClient} from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 
 import { type CompendiumPhase, compendiumPhaseOf } from './compendium-phase';
 import { compendiumRunOpener } from './compendiumRunOpener';
@@ -19,7 +19,12 @@ import {
     projectInput,
 } from '@/lib/utils/compendium-import/flow';
 import { reportMediaProgress } from '@/lib/utils/compendium-import/media-loop';
-import type {CompendiumOptions, CompendiumPreview, CompendiumReport, ImportInput} from '@/types/compendium-import';
+import type {
+    CompendiumOptions,
+    CompendiumPreview,
+    CompendiumReport,
+    ImportInput,
+} from '@/types/compendium-import';
 
 export type { CompendiumPhase };
 

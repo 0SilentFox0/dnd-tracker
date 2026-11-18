@@ -1,7 +1,10 @@
 import { useMemo } from 'react';
 
 import type { RaceProfileItem } from '@/systems/wfrp/api/types';
-import { isUsableProfile, type SpeciesProfile } from '@/systems/wfrp/rules/creation';
+import {
+    isUsableProfile,
+    type SpeciesProfile,
+} from '@/systems/wfrp/rules/creation';
 import type { Race } from '@/types/races';
 
 export function useWfrpSpecies({

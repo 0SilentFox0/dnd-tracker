@@ -27,9 +27,24 @@ import {
     MAZE_MARK_SYMBOLS,
 } from '@/lib/constants/battle';
 import { PREVIEW_RULES } from '@/lib/utils/battle/fx/preview-rules';
-import {aimView, deriveTrajectory, type MapAim, marginCells, moveMarks, moveZoneMarks, placeParticipants, targetMarks} from '@/lib/utils/battle/grid';
+import {
+    aimView,
+    deriveTrajectory,
+    type MapAim,
+    marginCells,
+    moveMarks,
+    moveZoneMarks,
+    placeParticipants,
+    targetMarks,
+} from '@/lib/utils/battle/grid';
 import type { BattleParticipant } from '@/types/battle';
-import type {BattleMapActions, BattleMapConfig, BattleMapView, GridPoint, MazeMarkSymbol} from '@/types/battle-grid';
+import type {
+    BattleMapActions,
+    BattleMapConfig,
+    BattleMapView,
+    GridPoint,
+    MazeMarkSymbol,
+} from '@/types/battle-grid';
 
 export function useBattleMapPlayground(
     snapshot: BattleMapPlaygroundSnapshot = {}

@@ -1,7 +1,10 @@
 import type { CompendiumMediaController } from './useCompendiumMedia';
 
 import { reportMediaProgress } from '@/lib/utils/compendium-import/media-loop';
-import type { CompendiumReport, CompendiumRun } from '@/types/compendium-import';
+import type {
+    CompendiumReport,
+    CompendiumRun,
+} from '@/types/compendium-import';
 
 interface RunOpenerContext {
     media: CompendiumMediaController;
@@ -13,7 +16,14 @@ interface RunOpenerContext {
 }
 
 export const compendiumRunOpener =
-    ({ media, invalidate, reset, setResult, setFailure, load }: RunOpenerContext) =>
+    ({
+        media,
+        invalidate,
+        reset,
+        setResult,
+        setFailure,
+        load,
+    }: RunOpenerContext) =>
     async (run: CompendiumRun) => {
         const showReport = (report: CompendiumReport) => {
             setResult(report);

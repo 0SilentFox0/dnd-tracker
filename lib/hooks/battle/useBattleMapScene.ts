@@ -1,6 +1,6 @@
 'use client';
 
-import {useCallback, useMemo, useState} from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { useModeTools } from './modes/tools';
@@ -14,13 +14,20 @@ import { useMapCellActions } from './useMapCellActions';
 import { useMapFogTool } from './useMapFogTool';
 import { useMapPlacing } from './useMapPlacing';
 import { useMapSceneView } from './useMapSceneView';
-import {useMapTerrainTool} from './useMapTerrainTool';
+import { useMapTerrainTool } from './useMapTerrainTool';
 
 import { useText } from '@/lib/i18n/use-text';
 import type { SystemFx } from '@/lib/utils/battle/fx';
-import {deriveMapScene, dispatchMapClick, type MapClick, mapClickHandlers, type MapSceneActor, type MapSceneMode} from '@/lib/utils/battle/grid';
+import {
+    deriveMapScene,
+    dispatchMapClick,
+    type MapClick,
+    mapClickHandlers,
+    type MapSceneActor,
+    type MapSceneMode,
+} from '@/lib/utils/battle/grid';
 import { NO_ORDER } from '@/lib/utils/battle/view';
-import type {GridPoint} from '@/types/battle-grid';
+import type { GridPoint } from '@/types/battle-grid';
 
 export type { BattleMapScene };
 
