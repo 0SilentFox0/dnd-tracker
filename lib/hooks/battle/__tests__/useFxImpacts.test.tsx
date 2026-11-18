@@ -12,6 +12,8 @@ const h = vi.hoisted(() => ({
     log: [] as BattleAction[],
     morale: null as unknown,
     hidden: false,
+    redacted: undefined as true | undefined,
+    order: [] as unknown[],
 }));
 
 vi.mock('../useBattleScene', () => ({
@@ -19,7 +21,8 @@ vi.mock('../useBattleScene', () => ({
         battle: {
             battleLog: h.log,
             system: h.morale,
-            initiativeOrder: [],
+            initiativeOrder: h.order,
+            redacted: h.redacted,
         },
     }),
 }));
@@ -50,9 +53,50 @@ beforeEach(() => {
     h.log = [attack, retaliation];
     h.morale = null;
     h.hidden = false;
+    h.redacted = undefined;
+    h.order = [];
 });
 
 describe('useFxImpacts', () => {
+    it('redacted: ворог отримує delta з hpChanges, союзник — ні', () => {
+        h.redacted = true;
+        h.order = [
+            { basicInfo: { id: 'd', side: 'enemy' } },
+            { basicInfo: { id: 'a', side: 'ally' } },
+        ];
+        h.log = [
+            {
+                ...attack,
+                hpChanges: [
+                    {
+                        participantId: 'd',
+                        participantName: 'D',
+                        oldHp: 75,
+                        newHp: 75,
+                        change: 4,
+                    },
+                ],
+            },
+            {
+                ...retaliation,
+                hpChanges: [
+                    {
+                        participantId: 'a',
+                        participantName: 'A',
+                        oldHp: 20,
+                        newHp: 17,
+                        change: 3,
+                    },
+                ],
+            },
+        ];
+
+        const { result } = renderHook(() => useFxImpacts());
+
+        expect(result.current('d')?.delta).toBe(-4);
+        expect(result.current('a')?.delta).toBeUndefined();
+    });
+
     it('атака + відповідний удар в одній дельті: кожен отримує свою дію', () => {
         const { result } = renderHook(() => useFxImpacts());
 

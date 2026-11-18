@@ -33,6 +33,35 @@ describe('useHpChange', () => {
         });
     });
 
+    it('ціль із відром HP: число з impact.delta, удар без зміни відра теж дає зміну, мова про той самий удар — один раз', () => {
+        const hit = (actionId: string, delta: number): FxImpact => ({
+            element: 'fire',
+            kind: 'damage',
+            delayMs: 600,
+            actionId,
+            delta,
+        });
+
+        const { result, rerender } = renderHook(
+            ({ hp, impact }) => useHpChange(hp, impact),
+            { initialProps: { hp: 75, impact: hit('a1', -3) as FxImpact } }
+        );
+
+        expect(result.current).toBeNull();
+
+        rerender({ hp: 75, impact: hit('a2', -3) });
+
+        expect(result.current).toMatchObject({ delta: -3, id: 1 });
+
+        rerender({ hp: 40, impact: hit('a3', -9) });
+
+        expect(result.current).toMatchObject({ delta: -9, hp: 40, id: 2 });
+
+        rerender({ hp: 40, impact: hit('a3', -9) });
+
+        expect(result.current?.id).toBe(2);
+    });
+
     it('вплив знімається в момент зміни HP; пізніший вплив без зміни HP його не змінює', () => {
         const hit: FxImpact = { element: 'fire', kind: 'damage', delayMs: 600 };
 

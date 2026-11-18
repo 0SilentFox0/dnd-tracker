@@ -15,7 +15,7 @@ import type { BattleParticipant } from '@/types/battle';
 const p = (
     id: string,
     hp = 10,
-    side = ParticipantSide.ALLY
+    side: ParticipantSide = ParticipantSide.ALLY
 ): BattleParticipant => {
     const base = createMockParticipant();
 
@@ -78,6 +78,24 @@ describe('buildClientDelta', () => {
             turnIndex: 0,
             startedAt: '2026-01-01T00:00:00.000Z',
         });
+    });
+
+    it('зміна сторони (charm) — повний учасник, а не патч', () => {
+        const a = p('a', 10, ParticipantSide.ENEMY),
+            charmed = p('a', 10, ParticipantSide.ALLY);
+
+        const d = buildClientDelta({
+            before: { scene, meta, participants: [a], pending: [] },
+            after: { ...scene, version: 8 },
+            participants: [charmed],
+            pending: [],
+            stored: [charmed],
+            fullIds: [],
+            log: [],
+        });
+
+        expect(d.upserted).toEqual([charmed]);
+        expect(d.patched ?? []).toEqual([]);
     });
 
     it('system у scene: без змін — відсутнє, змінилось — є, скинуто — null', () => {

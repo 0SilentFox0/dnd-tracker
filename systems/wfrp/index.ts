@@ -33,6 +33,7 @@ import { WFRP_CONDITIONS } from './rules/conditions';
 import { WFRP_CONDITION_SET } from './rules/conditions/standard-set';
 import { WFRP_EQUIPMENT } from './rules/equipment';
 import { WFRP_MAGIC } from './rules/magic';
+import { redactWfrpSlot } from './rules/redact';
 import { onSession } from './rules/session';
 import { acceptsWfrpSheetTest, rollWfrpSheetTest } from './rules/sheet-test';
 import { wfrpFromStored, wfrpPersist } from './rules/state-parts';
@@ -45,7 +46,11 @@ import type { RuleSystemDefinition } from '@/lib/utils/rules/systems/types';
 
 export const WFRP_MODULE: RuleSystemDefinition = {
     key: 'wfrp',
-    participant: { fromStored: [wfrpFromStored], persist: [wfrpPersist] },
+    participant: {
+        fromStored: [wfrpFromStored],
+        persist: [wfrpPersist],
+        redactSlot: [redactWfrpSlot],
+    },
     progression: {
         levels: false,
         hpTerm: 'wounds',

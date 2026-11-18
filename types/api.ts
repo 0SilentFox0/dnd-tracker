@@ -77,6 +77,8 @@ export interface BattleScene {
     currentRound: number;
     currentTurnIndex: number;
     initiativeOrder: BattleParticipant[];
+    /** The server projected enemy stats for this viewer: exact numbers are never in the cache */
+    redacted?: true;
     rules: Ruleset;
     /** Призвані істоти (з’являться на початку наступного раунду) */
     pendingSummons?: BattleParticipant[];

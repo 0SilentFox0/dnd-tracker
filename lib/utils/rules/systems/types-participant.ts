@@ -1,5 +1,6 @@
 import type { UnitFromPrisma } from '@/lib/utils/battle/types/participant';
 import type { Ruleset } from '@/lib/utils/rules/schema';
+import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
 import type { BattleParticipant } from '@/types/battle';
 import type {
     CharacterResources,
@@ -57,7 +58,13 @@ export type StateUpgrade = (
     battleData: BattleParticipant['battleData']
 ) => BattleParticipant['battleData'];
 
+export type SlotScope = 'abilities' | 'battle';
+
+/** What a viewer without exact stats may see of a participant's own slot; `slot.ext` is already gone and slots of other keys pass through */
+export type SlotRedactor = (slot: SystemSlot, scope: SlotScope) => SystemSlot;
+
 export interface RuleSystemParticipant {
+    redactSlot?: readonly SlotRedactor[];
     upgradeState?: readonly StateUpgrade[];
     fromCharacter?: readonly ParticipantPart<CharacterPartRow>[];
     fromUnit?: readonly ParticipantPart<UnitPartRow>[];

@@ -142,8 +142,14 @@ export function buildClientDelta(args: {
 
         const old = previous.get(p.basicInfo.id);
 
+        // a changed side/owner flips what a viewer may see, so the cache must not keep the old projection
+        const reprojected =
+            old &&
+            (old.basicInfo.side !== p.basicInfo.side ||
+                old.basicInfo.controlledBy !== p.basicInfo.controlledBy);
+
         const patch =
-            old && !full.has(p.basicInfo.id)
+            old && !full.has(p.basicInfo.id) && !reprojected
                 ? buildParticipantPatch(old, p)
                 : FULL_PARTICIPANT;
 

@@ -129,7 +129,7 @@ export interface BattleAction {
             participantId: string;
             roll: number;
             total: number;
-            ac: number;
+            ac?: number;
             hit: boolean;
             crit: boolean;
         }>;

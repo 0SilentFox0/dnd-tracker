@@ -259,7 +259,11 @@ describe('wfrp magic end to end (engine)', () => {
             true
         );
 
-        const shown = redactParticipantsForViewer(PLAYER_VIEWER, out.participants).find(
+        const shown = redactParticipantsForViewer(
+            PLAYER_VIEWER,
+            out.participants,
+            WFRP_RULES
+        ).find(
             (p) => p.basicInfo.id === 'foe'
         ) as BattleParticipant;
 
