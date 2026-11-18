@@ -38,7 +38,6 @@ interface GridHitProps {
     scene: { round?: number; clickableBlocked?: boolean };
 }
 
-/** Один прозорий прямокутник на всю карту: клітинка визначається геометрично за CTM `<svg>`. */
 export const GridHit = memo(function GridHit({
     map,
     blocked,

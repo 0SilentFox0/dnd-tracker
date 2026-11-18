@@ -27,7 +27,6 @@ export function OptimizedImage({
 }: OptimizedImageProps) {
     const normalizedSrc = normalizeImageUrl(src);
 
-    // помилка прив'язана до конкретної адреси: нова src (введення URL) знову пробує завантажити
     const [failedSrc, setFailedSrc] = useState<string | null>(null);
 
     const hasError = failedSrc === normalizedSrc;
@@ -44,7 +43,6 @@ export function OptimizedImage({
             height={height}
             className={className}
             referrerPolicy="no-referrer"
-            // зовнішні хости можуть бути не в remotePatterns; Supabase — через кеш Vercel, щоб не палити egress
             unoptimized={!isSupabaseStorageUrl(normalizedSrc)}
             onError={() => setFailedSrc(normalizedSrc)}
         />

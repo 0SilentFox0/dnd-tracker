@@ -100,7 +100,6 @@ export function DesktopBattleLayout({
 
     const [storedMode, setViewMode] = useBattleViewMode(battleId);
 
-    // наведення шаблону тимчасово показує карту, не змінюючи збережений вибір
     const viewMode = intents.mapAim || intents.mapPick ? 'map' : storedMode;
 
     const [toolsSlot, setToolsSlot] = useState<HTMLDivElement | null>(null);

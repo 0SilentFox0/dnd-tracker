@@ -39,10 +39,8 @@ export interface MapTokenHudProps {
     onReturn?: () => void;
 }
 
-// портрет займає верхні 70% рамки; плашка може трохи зайти на його низ, але не закрити
 const HUD_MAX_SHARE = 0.42;
 
-// рамка 1px + відступи плашки
 const PLAQUE_CHROME = { text: 6, bar: 4 };
 
 function hpView(

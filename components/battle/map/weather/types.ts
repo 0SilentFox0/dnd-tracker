@@ -11,13 +11,9 @@ export interface WeatherSim {
 }
 
 export interface WeatherEffect {
-    /** CSS-фон замість руху при prefers-reduced-motion */
     tint: string;
-    /** прозорість шару: HP під токенами мусить лишатися читабельним */
     opacity: number;
-    /** частинок на мегапіксель */
     density: number;
-    /** стеля кількості; без неї — density */
     maxParticles?: number;
     minParticles?: number;
     create(size: WeatherSize, count: number, rand: Rand): WeatherSim;

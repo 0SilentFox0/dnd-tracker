@@ -99,7 +99,6 @@ export interface MapStageProps {
     interaction: MapStageInteraction;
 }
 
-/** Шар карти в пікселях: фон, SVG-сітка й шари, жетони з HUD і числами ударів. */
 function MapStageImpl({
     map,
     participants,
@@ -170,7 +169,7 @@ function MapStageImpl({
 
     const routes = useMoveRoutes(map, participants);
 
-    // полеглі лишаються тут: жетон зникає лише в момент удару анімації, а число смертельного удару — після
+    // fallen tokens stay until the hit animation lands; the lethal-hit number outlives them
     const placed = useMemo(
         () =>
             participants
@@ -218,7 +217,7 @@ function MapStageImpl({
         [wasDragged]
     );
 
-    // портрет перехоплює вказівник, тож клітинка під ним не отримує pointerenter
+    // the portrait captures the pointer, so the cell under it gets no pointerenter
     const onTokenHover = useCallback(
         (id: string | null) => {
             const token = id
@@ -332,7 +331,6 @@ function MapStageImpl({
                     tool={doorsTool}
                 />
             )}
-            {/* у режимі місцевості токени притушені, щоб під ними було видно штрих і заливку */}
             <div
                 data-map-tokens
                 className={cn(rotated && '*:-rotate-90')}

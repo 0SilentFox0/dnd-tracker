@@ -53,7 +53,6 @@ export interface BattleMapProps {
     actions?: BattleMapActions;
     look?: BattleMapLook;
     editing?: BattleMapEditing;
-    /** телефон: карта обрізана до ігрових клітинок, на всю ширину й вертикально, якщо вона альбомна */
     phone?: boolean;
 }
 
@@ -68,13 +67,9 @@ export interface BattleMapEditing {
     clickableBlocked?: boolean;
     showBlocked?: boolean;
     strokeTool?: boolean;
-    /** інструмент ребер: стіни й ґрати малюються штрихом по краях клітинок; null — вимкнений */
     edges?: EdgeEditing | null;
-    /** двері: клік гравця відчиняє, меню ДМ; null/відсутній — лише гліфи */
     doors?: MapDoorsTool | null;
-    /** показувати замки дверей (редактор, ДМ) */
     doorLocks?: boolean;
-    /** інструменти ДМ активного режиму; null — жоден не активний */
     mode?: ModeTools | null;
     fog?: {
         mode: 'off' | 'reveal' | 'vision';
@@ -96,7 +91,6 @@ const FIT_ZOOM_BOUNDS = { min: 1, max: 3 };
 
 const ZOOM_STEP = 1.2;
 
-// на десктопі карта може бути вищою за область (до цього множника), щоб розтягнутись по ширині; зайве прокручується
 const DESKTOP_MAX_TALLER = 1.4;
 
 export function BattleMap({
@@ -319,14 +313,14 @@ export function BattleMap({
         ]
     );
 
-    // свайп віддаємо браузеру лише для прокрутки; зум, щипок і штрих місцевості — наші
+    // swipe goes to the browser for scrolling only; zoom, pinch and terrain strokes are ours
     const touch =
         !cameraMode && scrolls && zoom === 1 && !drawing
             ? cn(scrollsX && 'touch-pan-x', scrollsY && 'touch-pan-y')
             : 'touch-none';
 
     return (
-        // карта, більша за екран, прокручується; по центру вона обрізала б край без прокрутки; смуга прокрутки з резервом, щоб ширина не стрибала
+        // a map larger than the screen scrolls; centring would clip its edge; scrollbar gutter reserved so the width doesn't jump
         <div
             ref={outerRef}
             className={cn(
@@ -351,7 +345,7 @@ export function BattleMap({
                     'relative shrink-0 overflow-hidden bg-black select-none',
                     touch,
                     !phone && 'rounded-xl border border-white/10',
-                    // курсор-зброя має перебити інлайн cursor: pointer на клітинках і токенах
+                    // the weapon cursor must beat the inline cursor: pointer on cells and tokens
                     trajectory &&
                         'cursor-(--attack-cursor)! **:cursor-(--attack-cursor)!'
                 )}
@@ -379,7 +373,6 @@ export function BattleMap({
                         transform: `translate(${offset.x}px, ${offset.y}px) scale(${zoom})`,
                     }}
                 >
-                    {/* поворот усередині шару зуму, тож панорама й щипок лишаються в екранних координатах */}
                     <div
                         data-map-rotated={renderedFit.rotated || undefined}
                         className={cn(

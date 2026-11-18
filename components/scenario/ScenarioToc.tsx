@@ -86,7 +86,6 @@ export function ScenarioToc({ items, inline, drawer, onPick }: Props) {
             </aside>
         );
 
-    // на iOS vaul фіксує body і при закритті повертає стару прокрутку — переходимо вже після закриття
     const pick = (id: string, event: MouseEvent<HTMLAnchorElement>) => {
         event.preventDefault();
         onPick?.(id);

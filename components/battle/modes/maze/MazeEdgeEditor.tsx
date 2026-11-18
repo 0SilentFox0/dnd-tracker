@@ -11,7 +11,6 @@ const BAND = 30;
 
 const INSET = 12;
 
-/** Зона кліку вздовж ребра: вужча за клітинку й коротша за ребро, щоб центр і кути лишались вільними. */
 export function edgeHitRect(edge: string): {
     x: number;
     y: number;
@@ -45,14 +44,14 @@ interface HitsProps {
     enter(edge: string): void;
 }
 
-// ~7 000 зон на 60×60: рендеряться лише при зміні розміру карти, обробники делеговані на групу
+// ~7,000 zones at 60x60: rendered only on map resize, handlers delegated to the group
 const EdgeHits = memo(function EdgeHits({ edges, begin, enter }: HitsProps) {
     const onPointerDown = (e: PointerEvent) => {
         const edge = edgeOf(e);
 
         if (e.button !== 0 || !edge) return;
 
-        // інакше дотик захоплює вказівник і сусідні ребра не отримують pointerover
+        // otherwise touch captures the pointer and neighbouring edges get no pointerover
         (e.target as Element).releasePointerCapture?.(e.pointerId);
         begin(edge);
     };

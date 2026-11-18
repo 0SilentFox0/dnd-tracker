@@ -22,7 +22,6 @@ interface CacheEntry<T> {
     bytes: number;
 }
 
-/** Raster LRU: незмінні чанки перевикористовуються між версіями карти. */
 export class TileRasterChunkCache<T = CanvasImageSource> {
     private readonly entries = new Map<string, CacheEntry<T>>();
     private byteCount = 0;

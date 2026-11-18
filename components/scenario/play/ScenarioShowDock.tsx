@@ -50,7 +50,6 @@ export function ScenarioShowDock({
     return <DockBody campaignId={campaignId} pageId={pageId} play={play} />;
 }
 
-/** Що зараз бачать гравці; клік — до рядка зі слайдом. */
 function OnScreen({
     campaignId,
     show,

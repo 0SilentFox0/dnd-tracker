@@ -10,7 +10,6 @@ interface FormFieldProps {
     required?: boolean;
     description?: string;
     error?: string;
-    /** Додатковий вміст після підпису (наприклад, дельта від артефактів). */
     labelExtra?: React.ReactNode;
     labelClassName?: string;
     className?: string;

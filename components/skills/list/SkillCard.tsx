@@ -23,7 +23,6 @@ export interface SkillCardProps {
     skill: Skill;
     campaignId: string;
     actions?: SkillCardActions;
-    /** Режим версії для друку: ховає інтерактивні елементи, розкриває обрізаний опис */
     printMode?: boolean;
     canEdit?: boolean;
 }

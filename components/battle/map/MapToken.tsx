@@ -23,9 +23,7 @@ export interface MapTokenProps {
     current?: boolean;
     passThrough?: boolean;
     impact?: FxImpact | null;
-    /** анімовані аури станів, як на портреті в списку; іконок на карті немає */
     effects?: readonly ActiveEffect[];
-    /** лабіринт: сплячий ворог — напівпрозорий із «z» */
     dormant?: boolean;
     onClick?: (id: string) => void;
     onHover?: (id: string | null) => void;

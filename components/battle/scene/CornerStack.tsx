@@ -6,7 +6,6 @@ const CornerStackContext = createContext(false);
 
 export const useInCornerStack = () => useContext(CornerStackContext);
 
-/** Лівий нижній кут: картка результату стає над плеєром музики, а не поверх нього. */
 export function CornerStack({ children }: { children: ReactNode }) {
     return (
         <CornerStackContext value>

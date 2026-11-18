@@ -5,12 +5,10 @@ import { ChevronRight } from 'lucide-react';
 
 import { HudButton } from '@/components/hud';
 
-/** Нижня смуга вкладки «Карта» на телефоні: панелі, що інакше лягли б поверх карти, рендеряться сюди в потоці. */
 export const MapStripSlotContext = createContext<HTMLElement | null>(null);
 
 export const useMapStripSlot = () => useContext(MapStripSlotContext);
 
-/** Стовпчик повідомлень угорі телефона: тост і картка результату стають одне під одним, а не одне на одному. */
 export const NoticeStackContext = createContext<HTMLElement | null>(null);
 
 export const useNoticeStack = () => useContext(NoticeStackContext);

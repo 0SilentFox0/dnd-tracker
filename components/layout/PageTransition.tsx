@@ -7,12 +7,7 @@ interface PageTransitionProps {
     children: React.ReactNode;
 }
 
-/**
- * Обхід конфлікту aria-hidden: Radix Select викликає hideOthers(), через що
- * на цей div ставлять aria-hidden. Якщо фокус залишається на тригері селекта
- * (нащадку цього div), браузер блокує дропдаун. Спостерігаємо за aria-hidden
- * і знімаємо його, коли фокус всередині контейнера.
- */
+/** Radix Select's hideOthers() sets aria-hidden on this div; with focus still inside, the browser blocks the dropdown, so we strip it while focus is within. */
 export function PageTransition({ children }: PageTransitionProps) {
     const pathname = usePathname();
 
@@ -46,7 +41,6 @@ export function PageTransition({ children }: PageTransitionProps) {
         return () => observer.disconnect();
     }, []);
 
-    // Перезапуск анімації без `key={pathname}`: ремаунт скидав стан лейаутів (напр. демо-тур під час переходу).
     useEffect(() => {
         const el = ref.current;
 

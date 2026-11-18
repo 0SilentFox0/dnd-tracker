@@ -9,10 +9,6 @@ import { cn } from '@/lib/utils';
 import { normalizeTrackTitle } from '@/lib/utils/audio/track-title';
 import type { CampaignTrack } from '@/types/audio';
 
-/**
- * Поле назви треку: Enter/blur зберігає. Без onClose — завжди поле (бібліотека);
- * з onClose — режим «олівець → поле»: Esc скасовує, і поле закривається після будь-якого завершення.
- */
 export function TrackTitleInput({
     track,
     onRename,
@@ -26,7 +22,7 @@ export function TrackTitleInput({
 }) {
     const t = useTranslations('music');
 
-    // Esc знімає поле з фокусу, і blur не мусить зберегти скасовану назву
+    // Esc blurs the field and the blur must not save the cancelled title
     const settled = useRef(false);
 
     const finish = (input: HTMLInputElement, raw: string | null) => {

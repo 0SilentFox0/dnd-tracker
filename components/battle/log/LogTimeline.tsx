@@ -16,7 +16,6 @@ import { groupLogByRound } from '@/lib/utils/battle/view';
 import type { BattleParticipant } from '@/types/battle';
 import type { BattleAction } from '@/types/battle-actions';
 
-/** Записи від нових до старих, згруповані по раундах; `renderActions` — слот дій на картці (відкіт для DM). */
 export function LogTimeline({
     entries,
     participants,

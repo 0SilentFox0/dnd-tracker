@@ -16,7 +16,6 @@ type BoundedNumberInputProps = Omit<
     decimal?: boolean;
 };
 
-/** Чернетка під час введення (можна стерти й набрати заново); обмеження й запис — на blur чи Enter (onValueChange — живо, лише для коректного значення в межах), порожнє повертає останнє значення. */
 export function BoundedNumberInput({
     value,
     min,
@@ -67,7 +66,7 @@ export function BoundedNumberInput({
             }}
             onBlur={commit}
             onKeyDown={(e) => {
-                // Enter у формі бою інакше відправив би всю форму
+                // otherwise Enter in the battle form would submit the whole form
                 if (e.key === 'Enter') {
                     e.preventDefault();
                     commit();

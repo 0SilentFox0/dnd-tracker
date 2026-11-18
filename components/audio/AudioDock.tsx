@@ -14,11 +14,6 @@ import { usePlayerAudio } from '@/lib/hooks/audio';
 import { DESKTOP_QUERY, useMediaQuery } from '@/lib/hooks/common';
 import { cn } from '@/lib/utils';
 
-/**
- * corner — у CornerStack зліва внизу (desktop, лобі); strip — шар над областю карти/списку телефона, чип зліва внизу.
- * collapseOn — нове не-null значення згортає панель (у бою — новий хід: вікно ходу забирає ту саму висоту).
- * collapseTick — кожне зростання лічильника теж згортає панель.
- */
 export function AudioDock({
     placement,
     collapseOn = null,
@@ -36,7 +31,6 @@ export function AudioDock({
 
     const wide = useMediaQuery(DESKTOP_QUERY);
 
-    // на телефоні панель закрила б третину карти — стартує згорнутою
     const [choice, setChoice] = useState<boolean | null>(null);
 
     const [seenCollapseOn, setSeenCollapseOn] = useState(collapseOn);
@@ -61,7 +55,6 @@ export function AudioDock({
 
     const showVideo = prefs.video.set;
 
-    // iOS чекає дотику до ▶ у самому плеєрі — його треба показати
     const onNeedsTap = useCallback(() => {
         showVideo(true);
         setChoice(true);
@@ -71,12 +64,10 @@ export function AudioDock({
 
     if (!track && !dm) return null;
 
-    // згорнута панель лишає iframe змонтованим (звук іде), лише ховає його з екрана
     const youtubeId =
         sound.unlocked && track?.kind === 'youtube' ? track.youtubeId : null;
 
     return (
-        // strip: панель стискається до висоти шару й гортається, тож заголовок із «Згорнути» не виходить за верх
         <div
             data-battle-audio={placement}
             data-tour="music.dock"

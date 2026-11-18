@@ -31,9 +31,7 @@ export interface PickerContext {
     spells: SpellRef[];
     proficient: ReadonlySet<DndSkill>;
     scores: Record<AbilityKey, number>;
-    /** scores з урахуванням змін піків відносно збережених; без нього — scores + піки цього вибору */
     scoreAfter?: Record<AbilityKey, number>;
-    /** скільки разів кожну рису вже взято в усіх пікерах героя */
     featCounts?: ReadonlyMap<string, number>;
 }
 

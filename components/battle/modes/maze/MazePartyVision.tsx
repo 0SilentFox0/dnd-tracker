@@ -5,7 +5,6 @@ import { memo } from 'react';
 import { parseCellKey, UNIT } from '@/lib/utils/battle/grid';
 import { MazeView } from '@/lib/utils/battle/modes/maze';
 
-/** ДМ бачить, що зараз бачить загін: світла підсвітка клітинок під токенами. */
 export const MazePartyVision = memo(function MazePartyVision({
     view,
 }: {

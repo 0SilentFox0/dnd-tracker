@@ -21,7 +21,6 @@ interface LayerProps {
     onReady?: () => void;
 }
 
-/** Фон цілком (без обрізання): клітинка фону = клітинка сітки, зсув — частки клітинки; непокрите лишається темним. */
 function BackgroundLayer({ map, cellPx, phone, rotated, onReady }: LayerProps) {
     const src = map.background ?? DEFAULT_MAP_BACKGROUND;
 
@@ -74,7 +73,6 @@ const fade = (visible: boolean) => ({
     transitionDuration: `${BACKGROUND_FADE_MS}ms`,
 });
 
-/** Зміна фону: новий шар з'являється з opacity після завантаження, попередній одночасно зникає. */
 export const MapBackground = memo(function MapBackground(
     props: Omit<LayerProps, 'onReady'>
 ) {

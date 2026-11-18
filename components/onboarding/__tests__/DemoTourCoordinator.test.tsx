@@ -270,7 +270,6 @@ describe('DemoTourCoordinator', () => {
         marker.remove();
         document.querySelector('[data-tour="world.notes"]')?.remove();
 
-        // відсутнє джерело: крок не падає, лише чекає на ціль
         const places = document.createElement('div');
 
         places.setAttribute('data-tour', 'world.places');

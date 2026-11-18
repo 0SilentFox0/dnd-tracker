@@ -28,7 +28,6 @@ export const FIREFLY_RGB = '150,255,120';
 
 export const BLACK_SNOW = 'rgba(22,22,26,.85)';
 
-/** Світлячок спалахує й гасне: половину циклу темний. */
 export const fireflyGlow = (phase: number) =>
     Math.min(1, Math.max(0, (Math.sin(phase) - 0.1) / 0.7));
 

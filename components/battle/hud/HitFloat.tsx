@@ -10,7 +10,6 @@ export const hitFlashClass = (change: HpChange | null) =>
         ? 'animate-[hud-flash-red_.5s]'
         : 'animate-[hud-flash-green_.7s]');
 
-/** Спливна «−N/+N» над портретом; новий `change.id` перезапускає анімацію. */
 export function HitFloat({
     change,
     className,

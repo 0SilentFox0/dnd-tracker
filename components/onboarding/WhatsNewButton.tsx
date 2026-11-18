@@ -16,7 +16,6 @@ export function WhatsNewButton() {
 
     const [open, setOpen] = useState(false);
 
-    // знімок при відкритті: після markSeen хук одразу поверне unseen = [], а мітки «нове» мають лишитися
     const [newIds, setNewIds] = useState<Set<string>>(() => new Set());
 
     const onOpenChange = (next: boolean) => {

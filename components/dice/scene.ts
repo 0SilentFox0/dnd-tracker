@@ -57,7 +57,6 @@ const FONT_PX: Record<DieSides, number> = {
 
 const GOLD = 'vec3( 1.0, 0.78, 0.3 )';
 
-// перевага/перешкода: відкинутий d20 гасне після приземлення — плашок над кубиками немає
 const DROPPED_DIM = 0.6;
 
 function atlasGrid(faceCount: number) {
@@ -156,7 +155,6 @@ function buildMeshData(sides: DieSides, markValue: number) {
     return { position, normal, uv, mark };
 }
 
-// грань-результат світиться у власному тоні з золотом: змішування з білим робило синій d6 сірим
 function dieMaterial(sides: DieSides, map: CanvasTexture, dropped: boolean) {
     const settle = { value: 0 };
 

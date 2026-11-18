@@ -14,14 +14,12 @@ export interface DiceStageHandle {
 
 export const sceneLoader = { load: () => import('./scene') };
 
-// WebGL-шар створюється при першому кидку й живе до виходу з бою: один рендерер на бій
 export const DiceStage = forwardRef<DiceStageHandle>(
     function DiceStage(_, ref) {
         const host = useRef<HTMLDivElement>(null);
 
         const engine = useRef<Promise<DiceEngine | null> | null>(null);
 
-        // скасування під час завантаження чанку сцени має зупинити кидок, що на нього чекає
         const runs = useRef(0);
 
         useImperativeHandle(ref, () => {
@@ -32,7 +30,6 @@ export const DiceStage = forwardRef<DiceStageHandle>(
                     scene = await sceneLoader.load();
                 } catch (e) {
                     console.warn('dice stage', e);
-                    // чанк не завантажився — наступний кидок спробує знову; без WebGL (нижче) результат кешується
                     engine.current = null;
 
                     return null;
@@ -64,7 +61,6 @@ export const DiceStage = forwardRef<DiceStageHandle>(
                         );
                     });
 
-                    // повільний чанк не тримає чергу: завантаження триває у фоні для наступного кидка
                     const e = await Promise.race([ensure(), timeout]).finally(
                         () => window.clearTimeout(timer)
                     );
@@ -85,7 +81,6 @@ export const DiceStage = forwardRef<DiceStageHandle>(
 
                 const pending = engine.current;
 
-                // StrictMode монтує вдруге: наступний кидок створить новий рушій замість звільненого
                 engine.current = null;
                 void pending?.then((e) => e?.dispose());
             },

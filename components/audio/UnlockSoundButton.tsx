@@ -6,7 +6,6 @@ import { HudButton } from '@/components/hud';
 import { usePlayerAudio } from '@/lib/hooks/audio';
 import { cn } from '@/lib/utils';
 
-/** Той самий вигляд, що й «Наступний хід». */
 export function UnlockSoundButton({ className }: { className?: string }) {
     const t = useTranslations('music');
 

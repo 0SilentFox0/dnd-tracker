@@ -48,7 +48,6 @@ vi.unmock('next-intl');
 
 type ResultApi = BattleSceneValue['result'];
 
-/** Справжній стан результату замість шпигуна: картка має з'явитися після відправки. */
 function Stage({
     value,
     children,

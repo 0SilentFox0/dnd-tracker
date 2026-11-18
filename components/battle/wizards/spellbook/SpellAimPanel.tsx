@@ -34,7 +34,6 @@ function hintOf({ state }: Book, tw: AimT): string {
     return tw('single');
 }
 
-/** Поки гравець цілиться, книга закрита, а карта лишається клікабельною: шаблон — точка, решта — клік по токену. */
 export function SpellAimPanel({
     book,
     spellName,

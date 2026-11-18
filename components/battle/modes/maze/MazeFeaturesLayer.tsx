@@ -54,7 +54,7 @@ function MarkGlyph({
 
     const { d, turn, stroke } = GLYPHS[mark.symbol];
 
-    // стрілка вказує сторону лабіринту, тож на повернутій карті крутиться разом із нею; решта символів стоїть прямо
+    // the arrow points to the maze side, so it rotates with a rotated map; other glyphs stay upright
     const angle = turn ?? (rotated ? -90 : 0);
 
     const transform = `translate(${c.x} ${c.y})${angle ? ` rotate(${angle})` : ''}`;

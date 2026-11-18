@@ -4,7 +4,6 @@ import { MapAimPanel } from './MapAimPanel';
 
 import { HudButton } from '@/components/hud';
 
-/** Поки вміння наводиться на карту, вибір закритий. */
 export function AbilityAimPanel({
     name,
     onCancel,

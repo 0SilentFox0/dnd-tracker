@@ -3,7 +3,6 @@ import type { ButtonHTMLAttributes } from 'react';
 import { HudButton } from '@/components/hud';
 import { cn } from '@/lib/utils';
 
-/** Кольори через --show-* (сценарій задає свої), інакше HUD. */
 export const SHOW_TONE = {
     rule: 'border-[var(--show-rule,var(--color-hud-rule))]',
     accent: 'border-[var(--show-accent,var(--color-hud-gold-strong))] ring-2 ring-[var(--show-accent,var(--color-hud-gold-strong))]',

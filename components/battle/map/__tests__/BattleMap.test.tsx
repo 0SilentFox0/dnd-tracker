@@ -703,7 +703,6 @@ describe('BattleMap', () => {
             1.5
         );
         expect(bad.getAttribute('stroke')).toBe('rgba(255,100,85,.65)');
-        // приглушена заливка: фон карти лишається видимим
         expect(
             container.querySelectorAll('[data-fx-zone="move"]')
         ).toHaveLength(1);
@@ -1026,7 +1025,6 @@ describe('BattleMap — поворот у портреті', () => {
             <BattleMap map={{ ...wide, blocked }} participants={people} phone />
         );
 
-        // 7×3 ігрових → 600/7 px на клітинку, рамка 600×(3·600/7)
         expect(clip(container).style.width).toBe('600px');
         expect(parseFloat(clip(container).style.height)).toBeCloseTo(
             (3 * 600) / 7,
@@ -1097,7 +1095,7 @@ describe('BattleMap — телефон: прокрутка, дотик, коле
 
         expect(fireEvent.wheel(clip(container), { deltaY: 100 })).toBe(true);
 
-        // happy-dom не переносить ctrlKey з ініціалізатора WheelEvent
+        // happy-dom drops ctrlKey from the WheelEvent initialiser
         const zoomWheel = new WheelEvent('wheel', {
             deltaY: -100,
             cancelable: true,
@@ -1245,7 +1243,6 @@ describe('BattleMap — terrain stroke', () => {
             />
         );
 
-        // 100 px на клітинку: одиниця SVG = 1 px екрана
         stubGridCtm(utils.container);
 
         const cell = () =>
@@ -1429,7 +1426,6 @@ describe('BattleMap — terrain stroke', () => {
         expect(
             [...cells].map((c) => c.getAttribute('data-template-cell'))
         ).toEqual(['1:1', '2:1']);
-        // аркановий фіолет, щоб прев'ю не зливалося з помаранчевими клітинками небезпеки
         expect(cells[0].getAttribute('stroke')).toBe('#c4a6ff');
         expect(
             container.querySelector('[data-template-aim="1:1"]')

@@ -20,7 +20,6 @@ export interface RainOptions {
     maxSpeed: number;
     color: string;
     lineWidth: number;
-    /** затемнення під краплями: без нього тонкі струмені губляться на світлому фоні */
     haze: string;
 }
 

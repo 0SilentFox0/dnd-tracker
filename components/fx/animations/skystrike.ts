@@ -68,7 +68,6 @@ function makeBolt(
     return { at, power, trunk, forks };
 }
 
-/** Біле ядро, кольорове сяйво й широкий ореол — три проходи, як справжній розряд. */
 function drawBolt(
     g: CanvasRenderingContext2D,
     bolt: Bolt,
@@ -110,7 +109,6 @@ async function strike(
 
     const top = { x: at.x + rand(-60, 60), y: -30 };
 
-    // хмара над ціллю може частково піти за верхній край — так і задумано: удар іде «з-за кадру»
     const cloudY = at.y - 150;
 
     const bolts = [0, 110, 230, ...(spec.critical ? [350] : [])].map((t, i) =>
@@ -149,7 +147,6 @@ async function strike(
 
             g.globalCompositeOperation = 'source-over';
 
-            // темне небо одне на каст (цілі б'ються разом): кілька шарів дали б майже чорний екран
             if (first) {
                 g.globalAlpha = 0.32 * gather * leave;
                 g.fillStyle = '#04060e';
@@ -177,7 +174,6 @@ async function strike(
             if (after >= 0) {
                 const fade = 1 - clamp01(after / 600);
 
-                // спалах трохи після розряду — інакше стовбур тоне в білому
                 sprite(
                     g,
                     white,
@@ -270,7 +266,6 @@ async function strike(
     );
 }
 
-/** Блискавка з неба: небо темніє, хмара збирає заряд, три розряди з відгалуженнями від верхнього краю в ціль, спалах, струс карти, іскри й тріск навколо. */
 export const skystrike: FxAnimation = (run) =>
     perTarget(
         run.stage,

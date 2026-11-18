@@ -29,7 +29,6 @@ export type PickerBase = Omit<
     'level' | 'columns' | 'maxSlotLevel'
 >;
 
-/** `saved` — вибори, чий приріст уже входить у hero.scores */
 export function pickerBase(
     data: ChoicesState,
     refs: ChoiceRefsView,

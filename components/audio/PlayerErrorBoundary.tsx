@@ -6,7 +6,6 @@ import { useTranslations } from 'next-intl';
 import { HudButton } from '@/components/hud';
 
 interface Props {
-    /** новий трек — нова спроба */
     resetKey: string;
     children: ReactNode;
 }
@@ -38,7 +37,6 @@ function PlayerFailedNotice({ onRestart }: { onRestart(): void }) {
     );
 }
 
-/** Збій зовнішнього плеєра (YouTube API) лишається в доку, а не валить сторінку бою. */
 export class PlayerErrorBoundary extends Component<Props, State> {
     state: State = { failed: false, key: this.props.resetKey, attempt: 0 };
 

@@ -11,7 +11,6 @@ interface Props {
     view: MazeView | null | undefined;
 }
 
-/** Чорна заливка всієї карти з «дірками» в полі зору; без пам'яті — решта карти просто чорна. */
 export const MazeFogOfWar = memo(function MazeFogOfWar({ map, view }: Props) {
     const id = `maze-fow-${useId().replace(/:/g, '')}`;
 

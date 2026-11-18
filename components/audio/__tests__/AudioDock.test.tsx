@@ -40,7 +40,6 @@ vi.mock('@/lib/hooks/audio/useYoutubeSync', async () => {
 
     return {
         useYoutubeSync: () => {
-            // як справжній збій: seekTo на знищеному плеєрі з ефекту синхронізації
             useEffect(() => {
                 if (yt.crash)
                     throw new TypeError(
