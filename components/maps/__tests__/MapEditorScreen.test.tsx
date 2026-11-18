@@ -7,7 +7,7 @@ import { MapEditorScreen } from '../MapEditorScreen';
 
 import { ConfirmContext } from '@/lib/hooks/common/confirm-context';
 import { makeT } from '@/lib/i18n/test/mock-t';
-import ukMaps from '@/messages/uk/maps.json';
+import ukTileLabels from '@/messages/uk/tileLabels.json';
 
 const touch = vi.hoisted(() => ({ value: false }));
 
@@ -28,9 +28,9 @@ const battleMapCapture = vi.hoisted(() => ({
 vi.mock('next-intl', async (orig) => ({
     ...(await orig<object>()),
     useTranslations: (namespace?: string) => {
-        if (namespace !== 'maps.tileLabels') return makeT(namespace);
+        if (namespace !== 'tileLabels') return makeT(namespace);
 
-        const labels = ukMaps.tileLabels as Record<string, string>;
+        const labels = ukTileLabels as Record<string, string>;
 
         return Object.assign((key: string) => labels[key] ?? key, {
             has: (key: string) => key in labels,

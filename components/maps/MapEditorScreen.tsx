@@ -277,7 +277,7 @@ function EditorContent({
 
     const tileTranslations = useTranslations('maps.editor.tiles');
 
-    const tileLabelTranslations = useTranslations('maps.tileLabels');
+    const tileLabelTranslations = useTranslations('tileLabels');
 
     const tileLabel = (key: string) =>
         tileLabelTranslations.has(key as never)
