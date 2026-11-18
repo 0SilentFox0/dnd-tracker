@@ -858,7 +858,9 @@ describe('runBattleMutation', () => {
         ],
         [
             'not declared by the route schema',
-            z.object({ targetId: z.string() }),
+            z.object({
+                targetId: z.string(),
+            }) as unknown as ExpectedVersionSchema,
         ],
         ['route without a schema', undefined],
     ])(
