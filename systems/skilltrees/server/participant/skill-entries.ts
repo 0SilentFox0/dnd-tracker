@@ -1,6 +1,7 @@
 import type { Prisma } from '@prisma/client';
 
 import { prisma } from '@/lib/db';
+import type { SkillEntriesLoader } from '@/lib/server/systems/types';
 import type { SkillRowEntry } from '@/lib/utils/battle/participant/extract-skills';
 import type { CharacterFromPrisma } from '@/lib/utils/battle/types/participant';
 import {
@@ -132,3 +133,14 @@ async function loadMainSkillSpellGroups(
 
     return mainSkillSpellGroupById;
 }
+
+export const loadSkillEntries: SkillEntriesLoader = ({ character, context }) =>
+    resolveCharacterSkillEntries(
+        character,
+        character.campaignId,
+        context?.skillsById,
+        context
+            ? new Map(context.mainSkills.map((m) => [m.id, m.spellGroupId]))
+            : undefined,
+        context ? (context.skillTreeByRace[character.race] ?? null) : undefined
+    );

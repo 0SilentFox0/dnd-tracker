@@ -8,7 +8,6 @@ import { CONTROLLED_BY_DM } from '@/lib/constants/characters';
 import { DND_SKILLS } from '@/lib/constants/skills';
 import { CharacterClassesSchema } from '@/lib/schemas/classes';
 import { loadBackground } from '@/lib/server/backgrounds/load';
-import { resolveCharacterSkillEntries } from '@/lib/server/battles/participant/character-skill-entries';
 import { resolveSpellSlotsFromCharacter } from '@/lib/server/battles/participant/from-character-spell-slots';
 import { loadRace } from '@/lib/server/battles/participant/load-race';
 import { systemServerOf } from '@/lib/server/systems/lookup';
@@ -103,17 +102,13 @@ async function loadCharacterBuildRefs(
     context: CampaignSpellContext | undefined,
     preloaded: BuildPreloaded | undefined
 ) {
-    const mainSkillGroups = context
-        ? new Map(context.mainSkills.map((m) => [m.id, m.spellGroupId]))
-        : undefined;
-
-    const skills = await resolveCharacterSkillEntries(
-        character,
-        character.campaignId,
-        context?.skillsById,
-        mainSkillGroups,
-        context ? (context.skillTreeByRace[character.race] ?? null) : undefined
-    );
+    const skills = (
+        await Promise.all(
+            (systemServerOf(rules).participant?.skillEntries ?? []).map(
+                (load) => load({ character, context })
+            )
+        )
+    ).flat();
 
     const artifactRows =
         preloaded?.artifactRows ??

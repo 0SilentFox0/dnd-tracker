@@ -13,6 +13,7 @@ import type { CampaignAccessResult } from '@/lib/utils/api/api-auth';
 import type { LegendaryActionBody } from '@/lib/utils/battle/actions/schema';
 import type { getCharacterStats, UnitStats } from '@/lib/utils/battle/balance';
 import type { CritResume } from '@/lib/utils/battle/crit-choice/types';
+import type { SkillRowEntry } from '@/lib/utils/battle/participant/extract-skills';
 import type {
     BattleMutationContext,
     MutationResult,
@@ -169,7 +170,14 @@ export type LearnedSpellsLoader = (input: {
     schoolMastery: Record<string, BranchLevel>;
 }>;
 
+/** Skill rows a character brings into battle; the participant builder concatenates all loaders */
+export type SkillEntriesLoader = (input: {
+    character: CharacterFromPrisma;
+    context?: CampaignSpellContext;
+}) => Promise<SkillRowEntry[]>;
+
 export interface SystemParticipantServer {
+    skillEntries?: readonly SkillEntriesLoader[];
     learnedSpells?: readonly LearnedSpellsLoader[];
     characterRefs?: readonly CharacterRefLoader[];
     prepareContext?: readonly ContextPreparer[];

@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
 import { RACES } from '@/data/library/races';
-import { resolveCharacterSkillEntries } from '@/lib/server/battles/participant/character-skill-entries';
 import { collectCharacterAbilities } from '@/lib/utils/abilities/build/collect';
 import { composition } from '@/lib/utils/rules/systems/catalog';
 import { buildTreeJson, racialNodeId } from '@/lib/utils/skills/progression';
+import { resolveCharacterSkillEntries } from '@/systems/skilltrees/server/participant/skill-entries';
 
 async function learnedRacial(
     raceKey: string,
