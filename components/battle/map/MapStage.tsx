@@ -1,103 +1,31 @@
 'use client';
 
-import {
-    memo,
-    type PointerEvent,
-    type RefObject,
-    useCallback,
-    useEffect,
-    useMemo,
-    useRef,
-} from 'react';
+import { memo, useMemo } from 'react';
 
 import { MapFogLayer } from './fog/MapFogLayer';
 import { type GridCellActions, GridLayer } from './grid/GridLayer';
 import { MapEffectsLayer } from './tiles/MapEffectsLayer';
-import { TileCanvas, type TileRenderState } from './tiles/TileCanvas';
+import { TileCanvas } from './tiles/TileCanvas';
 import { DoorMenu } from './DoorMenu';
 import { DoorsLayer } from './DoorsLayer';
 import { EdgeEditor } from './EdgeEditor';
 import { MapBackground } from './MapBackground';
-import { MapHitFloat } from './MapHitFloat';
 import { StrokeLayer, TemplateLayer } from './MapLayers';
-import { MapToken } from './MapToken';
-import { MapTokenHud } from './MapTokenHud';
+import type { MapStageProps } from './map-stage-types';
+import { MapTokensLayer } from './MapTokensLayer';
 import { RangedHint } from './RangedHint';
-import { type MapPlacement } from './token-box';
+import { useMapStageTokens } from './useMapStageTokens';
 import { WallsLayer } from './WallsLayer';
 
 import { modeUiOf } from '@/components/battle/modes';
-import {
-    type EdgeEditing,
-    type MapDoorsTool,
-    type ModeTools,
-    useMoveRoutes,
-} from '@/lib/hooks/battle';
-import { cn } from '@/lib/utils';
-import {
-    isDormant,
-    isEscaped,
-} from '@/lib/utils/abilities/engine/core/participants';
-import {
-    centreCell,
-    type GridWindow,
-    isFallen,
-    isMoveMark,
-    tokenBox,
-    UNIT,
-} from '@/lib/utils/battle/grid';
-import type { BattleParticipant } from '@/types/battle';
-import type {
-    BattleMapActions,
-    BattleMapConfig,
-    BattleMapView,
-} from '@/types/battle-grid';
+import { UNIT } from '@/lib/utils/battle/grid';
 
-export interface MapStageLayout {
-    win: { x: number; y: number };
-    size: { width: number; height: number };
-    pxPerUnit: number;
-    rotated: boolean;
-    phone: boolean;
-    window: GridWindow | null;
-    tiles?: TileRenderState;
-}
-
-export interface MapStageInteraction {
-    painting: boolean;
-    preview: ReadonlySet<string>;
-    svgRef: RefObject<SVGSVGElement | null>;
-    onStrokeStart: (p: { x: number; y: number }, e: PointerEvent) => void;
-    wasDragged: () => boolean;
-}
-
-export interface MapStageEditing {
-    showDefaultBackground?: boolean;
-    clickableBlocked?: boolean;
-    showBlocked?: boolean;
-    mode: ModeTools | null;
-    edges?: EdgeEditing | null;
-    doors?: MapDoorsTool | null;
-    doorLocks?: boolean;
-    fogActive?: boolean;
-    fog?: {
-        mode: 'off' | 'reveal' | 'vision';
-        revealed: import('@/types/battle-grid').RevealedRun[];
-        visible: ReadonlySet<string>;
-        explored: ReadonlySet<string>;
-        dmEditing: boolean;
-    };
-}
-
-export interface MapStageProps {
-    map: BattleMapConfig;
-    participants: BattleParticipant[];
-    view?: BattleMapView;
-    actions?: BattleMapActions;
-    editing: MapStageEditing;
-    layout: MapStageLayout;
-    interaction: MapStageInteraction;
-}
+export type {
+    MapStageEditing,
+    MapStageInteraction,
+    MapStageLayout,
+    MapStageProps,
+} from './map-stage-types';
 
 function MapStageImpl({
     map,
@@ -140,8 +68,6 @@ function MapStageImpl({
 
     const round = view?.round;
 
-    const onTokenClickProp = actions?.onTokenClick;
-
     const onCellClick = actions?.onCellClick;
 
     const onCellHover = actions?.onCellHover;
@@ -167,81 +93,27 @@ function MapStageImpl({
         [fogActive, onCellClick, onCellHover, wasDragged, svgRef]
     );
 
-    const routes = useMoveRoutes(map, participants);
-
-    // fallen tokens stay until the hit animation lands; the lethal-hit number outlives them
-    const placed = useMemo(
-        () =>
-            participants
-                .filter((p) => !p.battleData.reserved)
-                .filter(
-                    (p) =>
-                        !modeView ||
-                        (!isEscaped(p) &&
-                            modeView.visibleIds.has(p.basicInfo.id))
-                )
-                .flatMap((p) => {
-                    const box = tokenBox(p);
-
-                    return box
-                        ? [
-                              {
-                                  p,
-                                  box,
-                                  placement: {
-                                      box,
-                                      mapSize: size,
-                                      pxPerUnit,
-                                      route: routes.get(p.basicInfo.id),
-                                  } satisfies MapPlacement,
-                              },
-                          ]
-                        : [];
-                }),
-        [participants, modeView, size, pxPerUnit, routes]
-    );
-
-    const tokens = useMemo(
-        () => placed.filter(({ p }) => !isFallen(p)),
-        [placed]
-    );
-
-    const tokenClickRef = useRef(onTokenClickProp);
-
-    useEffect(() => {
-        tokenClickRef.current = onTokenClickProp;
-    }, [onTokenClickProp]);
-
-    const onTokenClick = useCallback(
-        (id: string) => !wasDragged() && tokenClickRef.current?.(id),
-        [wasDragged]
-    );
-
-    // the portrait captures the pointer, so the cell under it gets no pointerenter
-    const onTokenHover = useCallback(
-        (id: string | null) => {
-            const token = id
-                ? tokens.find((t) => t.p.basicInfo.id === id)
-                : undefined;
-
-            onCellHover?.(token ? centreCell(token.p) : null);
-        },
-        [tokens, onCellHover]
-    );
-
-    const movingId =
-        view?.currentId &&
-        view.marks &&
-        [...view.marks.values()].some((m) => isMoveMark(m))
-            ? view.currentId
-            : null;
+    const { placed, onTokenClick, onTokenHover, movingId, from } =
+        useMapStageTokens({
+            map,
+            participants,
+            view,
+            actions,
+            size,
+            pxPerUnit,
+            wasDragged,
+        });
 
     const trajectory = view?.trajectory ?? null;
 
-    const from =
-        trajectory?.kind === 'ranged'
-            ? tokens.find((t) => t.p.basicInfo.id === trajectory.fromId)
-            : undefined;
+    const tokensState = {
+        rotated,
+        painting,
+        passAll: painting || !!edges || !!modeTools?.toolActive || !!fogActive,
+        movingId,
+    };
+
+    const tokensHandlers = { onTokenClick, onTokenHover };
 
     return (
         <div
@@ -331,68 +203,13 @@ function MapStageImpl({
                     tool={doorsTool}
                 />
             )}
-            <div
-                data-map-tokens
-                className={cn(rotated && '*:-rotate-90')}
-                style={painting ? { opacity: 0.35 } : undefined}
-            >
-                {placed.map(({ p, placement }) => (
-                    <MapToken
-                        key={p.basicInfo.id}
-                        participant={p}
-                        placement={placement}
-                        selected={view?.selectedId === p.basicInfo.id}
-                        current={view?.currentId === p.basicInfo.id}
-                        onClick={onTokenClick}
-                        onHover={
-                            painting || !onCellHover ? undefined : onTokenHover
-                        }
-                        passThrough={
-                            painting ||
-                            !!edges ||
-                            !!modeTools?.toolActive ||
-                            !!fogActive ||
-                            movingId === p.basicInfo.id
-                        }
-                        impact={view?.impactFor?.(p.basicInfo.id)}
-                        effects={view?.effects?.get(p.basicInfo.id)}
-                        dormant={!!modeView?.showDormant && isDormant(p)}
-                    />
-                ))}
-                {placed.map(({ p, placement }) => {
-                    const id = p.basicInfo.id;
-
-                    const hud = view?.hud?.get(id);
-
-                    return (
-                        <MapTokenHud
-                            key={`hud:${id}`}
-                            participant={p}
-                            placement={placement}
-                            exact={hud?.exact ?? false}
-                            raised={
-                                view?.selectedId === id ||
-                                view?.currentId === id
-                            }
-                            impact={view?.impactFor?.(id)}
-                            effects={view?.effects?.get(id)}
-                            onReturn={
-                                view?.returnId === id
-                                    ? actions?.onReturn
-                                    : undefined
-                            }
-                        />
-                    );
-                })}
-                {placed.map(({ p, placement }) => (
-                    <MapHitFloat
-                        key={`float:${p.basicInfo.id}`}
-                        participant={p}
-                        placement={placement}
-                        impact={view?.impactFor?.(p.basicInfo.id)}
-                    />
-                ))}
-            </div>
+            <MapTokensLayer
+                placed={placed}
+                view={view}
+                actions={actions}
+                state={tokensState}
+                handlers={tokensHandlers}
+            />
             {tiles && (
                 <MapEffectsLayer
                     chunks={tiles.chunks}
