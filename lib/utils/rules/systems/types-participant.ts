@@ -52,7 +52,13 @@ export type PersistPart = (
     acc: PersistOutcome
 ) => PersistOutcome;
 
+/** Upgrade-on-read/backfill: rewrites a stored `battleData` from an older state shape to the current one */
+export type StateUpgrade = (
+    battleData: BattleParticipant['battleData']
+) => BattleParticipant['battleData'];
+
 export interface RuleSystemParticipant {
+    upgradeState?: readonly StateUpgrade[];
     fromCharacter?: readonly ParticipantPart<CharacterPartRow>[];
     fromUnit?: readonly ParticipantPart<UnitPartRow>[];
     fromStored?: readonly StoredPart[];

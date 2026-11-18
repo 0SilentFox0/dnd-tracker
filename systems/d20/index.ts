@@ -20,6 +20,7 @@ import { D20_REACTIONS } from './rules/reactions';
 import { D20_PROFICIENCY, D20_SAVES } from './rules/saves';
 import { d20SheetBlock } from './rules/sheet/block';
 import { rollFromSheet } from './rules/sheet-roll';
+import { upgradeD20State } from './rules/state';
 import { D20_STAT_COLUMNS } from './rules/stats';
 import { D20_TURN } from './rules/turn';
 import { d20OnZeroHp } from './rules/zero-hp';
@@ -88,6 +89,7 @@ export const D20_MODULE: RuleSystemDefinition = {
     },
     participant: {
         fromUnit: [d20UnitSpellDc],
+        upgradeState: [upgradeD20State],
     },
     conditionSet: D20_CONDITION_SET,
     magic: D20_MAGIC,

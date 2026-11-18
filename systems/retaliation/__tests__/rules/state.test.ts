@@ -28,9 +28,9 @@ const of = (
     };
 };
 
-const slotOf = (used: number, rest: Record<string, unknown> = {}) => ({
+const slotOf = (used: number, ext: Record<string, unknown> = {}) => ({
     key: 'd20',
-    data: { ...rest, ext: { retaliation: { used } } },
+    data: { ext: { ...ext, retaliation: { used } } },
 });
 
 describe('retaliation count read', () => {
@@ -70,7 +70,7 @@ describe('retaliationStateData', () => {
 
         const data = retaliationStateData(p, 1);
 
-        expect(data.system).toEqual(slotOf(1, { attackedWithLight: true }));
+        expect(data.system).toEqual(slotOf(1, { offhand: { attackedWithLight: true } }));
     });
 
     it('a later d20 write keeps the ext', () => {
@@ -79,7 +79,7 @@ describe('retaliationStateData', () => {
         const next = withD20State(p, { inspiration: true });
 
         expect(next.battleData.system).toEqual(
-            slotOf(2, { inspiration: true })
+            slotOf(2, { inspiration: { available: true } })
         );
         expect(d20State(next)).toEqual({ inspiration: true });
     });

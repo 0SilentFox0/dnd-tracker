@@ -1,6 +1,6 @@
 #!/usr/bin/env tsx
 /**
- * Read-only: скільки battle_scenes мають pendingMoraleCheck (D9) — за статусом і rules.system (знімок сцени, інакше правила кампанії).
+ * Read-only: скільки battle_scenes мають відкладений кидок моралі (колонка pendingMoraleCheck або слот ext.morale.pending) — за статусом і rules.system (знімок сцени, інакше правила кампанії).
  *
  *   pnpm exec tsx scripts/db/pending-morale-report.ts [--json] [--allow-remote]
  */
@@ -8,6 +8,14 @@ import '@/lib/utils/rules/systems/registry';
 import { assertSeedTarget } from '@/scripts/seed/seed-library-lib';
 
 const flags = new Set(process.argv.slice(2));
+
+const slotHasPending = (state: unknown): boolean => {
+    const pending = (
+        state as { data?: { ext?: { morale?: { pending?: unknown } } } } | null
+    )?.data?.ext?.morale?.pending;
+
+    return pending !== undefined && pending !== null;
+};
 
 const systemOf = (rules: unknown): string | undefined => {
     const system = (
@@ -35,6 +43,7 @@ async function main() {
                 status: true,
                 rules: true,
                 pendingMoraleCheck: true,
+                systemState: true,
                 campaignId: true,
             },
         });
@@ -52,7 +61,8 @@ async function main() {
         let pending = 0;
 
         for (const scene of scenes) {
-            if (scene.pendingMoraleCheck === null) continue;
+            if (scene.pendingMoraleCheck === null && !slotHasPending(scene.systemState))
+                continue;
 
             pending++;
 
