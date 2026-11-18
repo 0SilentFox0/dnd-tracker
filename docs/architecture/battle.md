@@ -334,3 +334,7 @@ Spell reducer/payload facade — `flows/spell-flow.ts`; types/costs/selection �
 
 - **Анімація ходу.** `useMoveRoutes` порівнює знімки учасників і через `moveRoutes` (`lib/utils/battle/grid/move-route.ts`, шлях `pathTo` з урахуванням стін) дає маршрут; `useTokenGlide` проводить жетон і його HUD по клітинках (Web Animations, 120 мс/клітинку, ≤1.5 с; `prefers-reduced-motion` вимикає).
 - **Екіпіювання в бою.** Плитка «Екіпіювання» (`GearDialog`) відкриває `InventoryTab` героя; зміни пишуться в персонажа звичайними stash-діями, а «Застосувати» викликає `swap-gear` (`mutations/swap-gear/`): у свій хід за бонусну дію учасник перебудовується з листа (`refreshFromSource` + `armorClass`). Без застосування зміни діють з наступного бою.
+
+## Відкат коду після переходу на слоти (L4a/L4b)
+
+Відкладена мораль (`ext.morale.pending` у `system_state`) і стан лігва (`ext.lair`) у новій формі старий код не читає, а надійно визначити «свіжішу» форму без зміни схеми не можна: слот перемагає стару колонку `pendingMoraleCheck`. Відкат коду до L4a/L4b — лише без активних боїв (`active-battles-report --expect-idle`). Стара форма `battleData.lair` у `snapshot` лишається постійним fallback-читанням (бекфіл `state` її не мігрує, `snapshot` не переписується).

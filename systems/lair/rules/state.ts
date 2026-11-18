@@ -37,13 +37,17 @@ const legacyLair = (battleData: BattleData): Record<string, unknown> | null => {
 export const lairStateOf = (p: BattleParticipant): LairState | undefined =>
     LAIR_STATE.read(p.battleData.system) ?? parseLair(legacyLair(p.battleData));
 
-export const resistSpentOf = (p: BattleParticipant): number =>
-    (p.battleData.legendary?.resistSpent ?? 0) +
-    (typeof legacyLair(p.battleData)?.resistSpent === 'number'
-        ? (legacyLair(p.battleData)?.resistSpent as number)
-        : 0);
+export const resistSpentOf = (p: BattleParticipant): number => {
+    const own = p.battleData.legendary?.resistSpent;
 
-/** Battle data with the state in the d20 slot; the pre-ext `battleData.lair` is folded in and dropped */
+    if (own !== undefined) return own;
+
+    const legacy = legacyLair(p.battleData)?.resistSpent;
+
+    return typeof legacy === 'number' ? legacy : 0;
+};
+
+/** Battle data with the state in the d20 slot; the pre-ext `battleData.lair` snapshot form stays readable as a permanent fallback */
 export function lairStateData(
     p: BattleParticipant,
     lair: LairState

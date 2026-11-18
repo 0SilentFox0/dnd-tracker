@@ -94,4 +94,23 @@ describe('lair module composition', () => {
         expect(none.spend(p, 3, 'k')).toBe(p);
         expect(none.blocker(p, 3, 'k')).toBeNull();
     });
+
+    it('toggling a legacy-form lair repeatedly does not inflate the spent count', () => {
+        const base = legacy();
+
+        const withLegendary = {
+            ...base,
+            battleData: {
+                ...base.battleData,
+                legendary: { actions: 0, actionsLeft: 0, resistLeft: 1 },
+            },
+        };
+
+        const twice = LAIR_RULES.toggle(
+            LAIR_RULES.toggle(withLegendary, false),
+            true
+        );
+
+        expect(resistSpentOf(twice)).toBe(1);
+    });
 });

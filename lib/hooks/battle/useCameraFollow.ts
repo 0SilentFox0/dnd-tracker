@@ -17,6 +17,8 @@ type Flight = ReturnType<typeof useCameraFlight>;
 
 export interface CameraFollowOptions {
     enabled: boolean;
+    /** content scale differs between modes: a change re-initializes the camera */
+    modeKey?: unknown;
     frame: Frame | null;
     frameRef: RefObject<Frame | null>;
     userMoved: boolean;
@@ -38,6 +40,7 @@ export interface CameraFollowOptions {
 
 export function useCameraFollow({
     enabled,
+    modeKey,
     frame,
     frameRef,
     userMoved,
@@ -46,6 +49,8 @@ export function useCameraFollow({
 }: CameraFollowOptions) {
     const initialized = useRef(false);
 
+    const lastModeKey = useRef(modeKey);
+
     const previousTurn = useRef(follow.currentId);
 
     const previousTarget = useRef(follow.target?.point ?? null);
@@ -53,9 +58,16 @@ export function useCameraFollow({
     useEffect(() => {
         if (!enabled || !frame) return;
 
-        const previous = frameRef.current;
+        let previous = frameRef.current;
 
         frameRef.current = frame;
+
+        if (lastModeKey.current !== modeKey) {
+            lastModeKey.current = modeKey;
+            initialized.current = false;
+            previous = null;
+            cancelAnimation();
+        }
 
         if (!initialized.current) {
             const target = follow.self ?? follow.target;
@@ -111,6 +123,7 @@ export function useCameraFollow({
         enabled,
         frame,
         frameRef,
+        modeKey,
         follow.self,
         follow.target,
         updateCamera,

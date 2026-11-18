@@ -8,14 +8,15 @@ import { EditorSidebar } from './editor/EditorSidebar';
 
 import { BattleMap } from '@/components/battle/map';
 import { QueryState } from '@/components/common/states';
-import { useBattleMap, useBattleMapTiles } from '@/lib/hooks/battle-maps';
-import { useMapEditorDraft } from '@/lib/hooks/battle-maps';
 import {
     type EditorPanel,
+    useBattleMap,
+    useBattleMapTiles,
+    useMapEditorDraft,
     useMapEditorWorkspace,
+    useTileSave,
+    useUvttImport,
 } from '@/lib/hooks/battle-maps';
-import { useTileSave } from '@/lib/hooks/battle-maps';
-import { useUvttImport } from '@/lib/hooks/battle-maps';
 import { useCoarsePointer } from '@/lib/hooks/common';
 import { useText } from '@/lib/i18n/use-text';
 import { isEdgeTool, isPreviewSafeBackground } from '@/lib/utils/battle/grid';

@@ -1,4 +1,5 @@
 import '@/lib/utils/rules/systems/registry';
+import { jsonEqual } from '@/lib/utils/battle/store/stable-json';
 import { isRecord } from '@/lib/utils/common/is-record';
 import { defaultRulesFor } from '@/lib/utils/rules/section-registry';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
@@ -36,7 +37,7 @@ export function planD20ExtState(rows: ParticipantStateRow[]): {
 
         const next = hooks.reduce((acc, hook) => hook(acc), battleData);
 
-        if (JSON.stringify(next) === JSON.stringify(battleData)) continue;
+        if (jsonEqual(next, battleData)) continue;
 
         changes.push({
             id: row.id,
