@@ -45,7 +45,7 @@ type Handler = (
     isError: boolean;
 }>;
 
-function register() {
+function register(session?: string) {
     const registered: Record<string, { config: unknown; cb: Handler }> = {};
 
     registerMcpTools(
@@ -55,7 +55,7 @@ function register() {
             },
         } as never,
         [assistantActionTool],
-        base
+        session ? { ...base, mcpSessionId: session } : base
     );
 
     return registered.assistant_action;
@@ -69,8 +69,8 @@ const keys = () =>
 beforeEach(() => vi.mocked(dispatchAction).mockClear());
 
 describe('MCP write idempotency', () => {
-    it('a retry with the same JSON-RPC id and arguments reuses the request key', async () => {
-        const { cb } = register();
+    it('within an Mcp-Session-Id a retry with the same JSON-RPC id and arguments reuses the key', async () => {
+        const { cb } = register('sess-1');
 
         await cb(payload, { mcpReq: { id: 7 } });
         await cb(payload, { mcpReq: { id: 7 } });
@@ -78,17 +78,31 @@ describe('MCP write idempotency', () => {
         const [first, second] = keys();
 
         expect(first).toBe(second);
-        expect(first).toBe(mcpRequestKey('tok', 7, 'assistant_action', payload));
+        expect(first).toBe(
+            mcpRequestKey('tok', 'sess-1', 7, 'assistant_action', payload)
+        );
         expect(first).toMatch(/^[a-zA-Z0-9_-]{1,100}$/);
     });
 
-    it('a different id, token or arguments gives a different key', () => {
-        const a = mcpRequestKey('tok', 7, 'assistant_action', payload);
+    it('without a session or client requestId every call gets a fresh key', async () => {
+        const { cb } = register();
 
-        expect(mcpRequestKey('tok', 8, 'assistant_action', payload)).not.toBe(a);
-        expect(mcpRequestKey('other', 7, 'assistant_action', payload)).not.toBe(a);
+        await cb(payload, { mcpReq: { id: 7 } });
+        await cb(payload, { mcpReq: { id: 7 } });
+
+        const [first, second] = keys();
+
+        expect(first).not.toBe(second);
+    });
+
+    it('a different session, id, token or arguments gives a different key', () => {
+        const a = mcpRequestKey('tok', 's', 7, 'assistant_action', payload);
+
+        expect(mcpRequestKey('tok', 's2', 7, 'assistant_action', payload)).not.toBe(a);
+        expect(mcpRequestKey('tok', 's', 8, 'assistant_action', payload)).not.toBe(a);
+        expect(mcpRequestKey('other', 's', 7, 'assistant_action', payload)).not.toBe(a);
         expect(
-            mcpRequestKey('tok', 7, 'assistant_action', { ...payload, input: 1 })
+            mcpRequestKey('tok', 's', 7, 'assistant_action', { ...payload, input: 1 })
         ).not.toBe(a);
     });
 

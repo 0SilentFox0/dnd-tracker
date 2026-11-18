@@ -8,15 +8,18 @@ import { ContentError } from '@/lib/server/content/errors';
 export const toolRequestKey = (runId: string, toolCallId: string) =>
     `${runId}_${createHash('sha256').update(toolCallId).digest('hex')}`;
 
-/** Stable per retry: the same token, JSON-RPC id, tool and arguments map to one key. */
+/** JSON-RPC ids repeat across clients and sessions, so the key exists only within a client-sent Mcp-Session-Id. */
 export const mcpRequestKey = (
     tokenId: string,
+    sessionId: string,
     rpcId: string | number,
     toolName: string,
     input: unknown
 ) =>
     `mcp_${createHash('sha256')
-        .update(JSON.stringify([tokenId, rpcId, toolName, input ?? null]))
+        .update(
+            JSON.stringify([tokenId, sessionId, rpcId, toolName, input ?? null])
+        )
         .digest('hex')
         .slice(0, 48)}`;
 

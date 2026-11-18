@@ -97,10 +97,11 @@ export function registerMcpTools(
                     def,
                     {
                         ...ctx,
-                        ...(tokenId && extra?.mcpReq
+                        ...(tokenId && base.mcpSessionId && extra?.mcpReq
                             ? {
                                   requestKey: mcpRequestKey(
                                       tokenId,
+                                      base.mcpSessionId,
                                       extra.mcpReq.id,
                                       def.name,
                                       input

@@ -19,6 +19,7 @@ export type AiToolContext = {
     caller?: AssistantCaller;
     toolCallId?: string;
     requestKey?: string;
+    mcpSessionId?: string;
     campaignId: string;
     userId: string;
     scopes: readonly ApiTokenScope[];
