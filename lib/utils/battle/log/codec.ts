@@ -1,3 +1,4 @@
+import { fromJson } from '@/lib/utils/common/json';
 import type { LogLine, TextArg, TextRef } from '@/types/text';
 
 /** Stored shape of `details.log` lines: `{ message, params }` becomes `{ m, p }`. Tables are append-only — stored rows depend on them. */
@@ -95,7 +96,7 @@ function encodeRef(ref: TextRef): StoredRef {
         entries.some(([key]) => keyByCode.has(key)) ||
         ref.message.includes(SEPARATOR)
     )
-        return ref as unknown as StoredRef;
+        return fromJson<StoredRef>(ref);
 
     const m = encodeMessage(ref.message);
 
@@ -136,9 +137,7 @@ function decodeRef(ref: StoredRef | TextRef): TextRef {
 
 export const encodeLog = (log: readonly LogLine[]): LogLine[] =>
     log.map((line) =>
-        typeof line === 'string'
-            ? line
-            : (encodeRef(line) as unknown as TextRef)
+        typeof line === 'string' ? line : fromJson<TextRef>(encodeRef(line))
     );
 
 /** Accepts both stored shapes: `{ m, p }` and legacy `{ message, params }`. */

@@ -36,7 +36,7 @@ import { isDmMember } from '@/lib/utils/api/is-dm';
 import { BATTLE_RATE_LIMITS, checkRateLimit } from '@/lib/utils/api/rate-limit';
 import { requestDigest } from '@/lib/utils/battle/store/stable-json';
 import { isHostedOnProjectStorage } from '@/lib/utils/common/image-url';
-import { jsonContent } from '@/lib/utils/common/json';
+import { fromJson, jsonContent } from '@/lib/utils/common/json';
 import { ownHandler } from '@/lib/utils/common/own-handler';
 import {
     applyShowCommand,
@@ -293,7 +293,7 @@ async function saveDeck(run: ShowRun): Promise<ActionResult> {
         throw conflict();
 
     const remaining = ctx?.externalResult
-        ? (ctx.externalResult as unknown as { slides: Slide[] }).slides
+        ? fromJson<{ slides: Slide[] }>(ctx.externalResult).slides
         : (body.slides as Slide[]);
 
     // No copying or provider call under the DB guard.

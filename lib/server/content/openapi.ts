@@ -177,12 +177,7 @@ function queryParams(schema: ZodType | undefined) {
     }));
 }
 
-export function buildOpenApi(): OpenApiDocument {
-    const specs: OpSpec[] = [
-        ...resources.flatMap(resourceSpecs),
-        ...operations,
-    ];
-
+function schemaEntries() {
     const entries: Array<readonly [ZodType, string]> = [];
 
     for (const r of resources) {
@@ -201,6 +196,154 @@ export function buildOpenApi(): OpenApiDocument {
         if (op.body) entries.push([op.body, `${pascal(op.id)}Body`]);
     }
 
+    return entries;
+}
+
+function operationOf(
+    spec: OpSpec,
+    p: string,
+    idBySchema: Map<ZodType, string>
+): OpenApiOperation {
+    const scope = spec.need.scope;
+
+    const codes = [
+        ...new Set([
+            ...BASE_ERRORS,
+            ...((spec.notFound ?? true) ? [404] : []),
+            ...(spec.errors ?? []),
+        ]),
+    ].sort((a, b) => a - b);
+
+    const bodyId = spec.body && idBySchema.get(spec.body);
+
+    const operation: OpenApiOperation = {
+        operationId: spec.id,
+        summary: spec.summary,
+        ...(spec.description || spec.need.access === 'dm'
+            ? {
+                  description: [
+                      spec.description,
+                      spec.need.access === 'dm' ? 'DM only.' : '',
+                  ]
+                      .filter(Boolean)
+                      .join('\n'),
+              }
+            : {}),
+        tags: [spec.tag],
+        'x-scopes': [scope],
+        ...((spec.pathEnums || spec.query) && {
+            parameters: [
+                ...pathParams(p, spec.pathEnums).filter(
+                    (param) =>
+                        'schema' in param &&
+                        param.schema &&
+                        'enum' in param.schema
+                ),
+                ...queryParams(spec.query),
+            ],
+        }),
+        ...(bodyId && {
+            requestBody: {
+                required: true,
+                content: { 'application/json': { schema: ref(bodyId) } },
+            },
+        }),
+        responses: {
+            [spec.status ?? 200]: responseRef(
+                SUCCESS_RESPONSES[spec.response].id
+            ),
+            ...Object.fromEntries(
+                codes.map((c) => [c, responseRef(ERROR_RESPONSES[c].id)])
+            ),
+        },
+    };
+
+    return operation;
+}
+
+function openApiComponents(
+    entries: Array<readonly [ZodType, string]>
+): OpenApiDocument['components'] {
+    return {
+        responses: {
+            ...Object.fromEntries(
+                Object.values(ERROR_RESPONSES).map(({ id, description }) => [
+                    id,
+                    {
+                        description,
+                        content: {
+                            'application/json': {
+                                schema: ref('Error'),
+                            },
+                        },
+                    },
+                ])
+            ),
+            ...Object.fromEntries(
+                Object.values(SUCCESS_RESPONSES).map(
+                    ({ id, schema, contentType = 'application/json' }) => [
+                        id,
+                        {
+                            description: 'Success',
+                            content: { [contentType]: { schema } },
+                        },
+                    ]
+                )
+            ),
+        },
+        parameters: {
+            CampaignId: {
+                name: 'id',
+                in: 'path',
+                required: true,
+                schema: { type: 'string' },
+                description: 'Campaign id',
+            },
+        },
+        securitySchemes: {
+            bearerAuth: {
+                type: 'http',
+                scheme: 'bearer',
+                description:
+                    'Token from /dm/ai (content:read / content:write scopes).',
+            },
+        },
+        schemas: {
+            ...toJsonSchemas(entries),
+            ContentItem: {
+                type: 'object',
+                required: ['id', 'name'],
+                properties: {
+                    id: { type: 'string' },
+                    name: { type: 'string' },
+                },
+                additionalProperties: true,
+            },
+            Ok: {
+                type: 'object',
+                required: ['ok'],
+                properties: { ok: { type: 'boolean', const: true } },
+            },
+            Error: {
+                type: 'object',
+                required: ['error'],
+                properties: {
+                    error: { type: 'string' },
+                    issues: { type: 'array', items: {} },
+                },
+            },
+        },
+    };
+}
+
+export function buildOpenApi(): OpenApiDocument {
+    const specs: OpSpec[] = [
+        ...resources.flatMap(resourceSpecs),
+        ...operations,
+    ];
+
+    const entries = schemaEntries();
+
     const idBySchema = new Map<ZodType, string>();
 
     for (const [schema, id] of [...sharedSchemas(), ...entries]) {
@@ -210,61 +353,7 @@ export function buildOpenApi(): OpenApiDocument {
     const paths: OpenApiDocument['paths'] = {};
 
     for (const spec of specs) {
-        const scope = spec.need.scope;
-
         const p = `${BASE}${spec.path}`;
-
-        const codes = [
-            ...new Set([
-                ...BASE_ERRORS,
-                ...((spec.notFound ?? true) ? [404] : []),
-                ...(spec.errors ?? []),
-            ]),
-        ].sort((a, b) => a - b);
-
-        const bodyId = spec.body && idBySchema.get(spec.body);
-
-        const operation: OpenApiOperation = {
-            operationId: spec.id,
-            summary: spec.summary,
-            ...(spec.description || spec.need.access === 'dm'
-                ? {
-                      description: [
-                          spec.description,
-                          spec.need.access === 'dm' ? 'DM only.' : '',
-                      ]
-                          .filter(Boolean)
-                          .join('\n'),
-                  }
-                : {}),
-            tags: [spec.tag],
-            'x-scopes': [scope],
-            ...((spec.pathEnums || spec.query) && {
-                parameters: [
-                    ...pathParams(p, spec.pathEnums).filter(
-                        (param) =>
-                            'schema' in param &&
-                            param.schema &&
-                            'enum' in param.schema
-                    ),
-                    ...queryParams(spec.query),
-                ],
-            }),
-            ...(bodyId && {
-                requestBody: {
-                    required: true,
-                    content: { 'application/json': { schema: ref(bodyId) } },
-                },
-            }),
-            responses: {
-                [spec.status ?? 200]: responseRef(
-                    SUCCESS_RESPONSES[spec.response].id
-                ),
-                ...Object.fromEntries(
-                    codes.map((c) => [c, responseRef(ERROR_RESPONSES[c].id)])
-                ),
-            },
-        };
 
         const path = (paths[p] ??= {});
 
@@ -272,7 +361,7 @@ export function buildOpenApi(): OpenApiDocument {
             (param) =>
                 !('schema' in param && param.schema && 'enum' in param.schema)
         ) as unknown as OpenApiOperation;
-        path[spec.method.toLowerCase()] = operation;
+        path[spec.method.toLowerCase()] = operationOf(spec, p, idBySchema);
     }
 
     return {
@@ -281,78 +370,7 @@ export function buildOpenApi(): OpenApiDocument {
         servers: [{ url: '/' }],
         security: [{ bearerAuth: [] }],
         paths,
-        components: {
-            responses: {
-                ...Object.fromEntries(
-                    Object.values(ERROR_RESPONSES).map(
-                        ({ id, description }) => [
-                            id,
-                            {
-                                description,
-                                content: {
-                                    'application/json': {
-                                        schema: ref('Error'),
-                                    },
-                                },
-                            },
-                        ]
-                    )
-                ),
-                ...Object.fromEntries(
-                    Object.values(SUCCESS_RESPONSES).map(
-                        ({ id, schema, contentType = 'application/json' }) => [
-                            id,
-                            {
-                                description: 'Success',
-                                content: { [contentType]: { schema } },
-                            },
-                        ]
-                    )
-                ),
-            },
-            parameters: {
-                CampaignId: {
-                    name: 'id',
-                    in: 'path',
-                    required: true,
-                    schema: { type: 'string' },
-                    description: 'Campaign id',
-                },
-            },
-            securitySchemes: {
-                bearerAuth: {
-                    type: 'http',
-                    scheme: 'bearer',
-                    description:
-                        'Token from /dm/ai (content:read / content:write scopes).',
-                },
-            },
-            schemas: {
-                ...toJsonSchemas(entries),
-                ContentItem: {
-                    type: 'object',
-                    required: ['id', 'name'],
-                    properties: {
-                        id: { type: 'string' },
-                        name: { type: 'string' },
-                    },
-                    additionalProperties: true,
-                },
-                Ok: {
-                    type: 'object',
-                    required: ['ok'],
-                    properties: { ok: { type: 'boolean', const: true } },
-                },
-                Error: {
-                    type: 'object',
-                    required: ['error'],
-                    properties: {
-                        error: { type: 'string' },
-                        issues: { type: 'array', items: {} },
-                    },
-                },
-            },
-        },
+        components: openApiComponents(entries),
     };
 }
 

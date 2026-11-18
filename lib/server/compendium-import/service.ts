@@ -305,52 +305,13 @@ function customConditionsToOffer(
     );
 }
 
-function reportOf(
+function reportRows(
     plan: ImportPlan,
-    root: JsonRecord,
-    sources: JsonRecord[],
-    embedded: Record<string, number> = {},
-    hasCharacters?: boolean,
-    classesMode?: ClassesMode,
-    customRules: CustomConditionRule[] = []
-): CompendiumReport {
-    const counts = {
-        created: 0,
-        updated: 0,
-        unchanged: 0,
-        errors: plan.errors.length,
-    };
-
-    const unique = new Map<string, ImportIssue>();
-
-    for (const i of [...plan.errors, ...plan.warnings])
-        unique.set(`${i.code}:${i.path}`, i);
-
-    const allIssues = [...unique.values()];
-
-    if (hasCharacters === false)
-        allIssues.push(issue('CHARACTERS_REQUIRED', 'characters', 'warning'));
-
-    const classesMissing =
-        !!classesMode &&
-        (!classesMode.enabled || !classesMode.exists) &&
-        plan.writes.some((w) => !w.nested && CLASS_DEPENDENT_KINDS.has(w.kind));
-
-    if (classesMissing)
-        allIssues.push(
-            issue('CLASSES_MODE_REQUIRED', CLASSES_RULE_PATH, 'warning')
-        );
-
-    const issueCounts: Record<string, number> = Object.create(null);
-
-    for (const entry of allIssues)
-        issueCounts[entry.code] = (issueCounts[entry.code] ?? 0) + 1;
-
-    const nextActions = allIssues.slice(0, 10_000);
-
+    counts: Record<'created' | 'updated' | 'unchanged' | 'errors', number>
+) {
     let rowBudget = 10_000;
 
-    const rows = plan.writes.map((r) => {
+    return plan.writes.map((r) => {
         if (!r.nested)
             counts[
                 r.operation === 'create'
@@ -378,8 +339,14 @@ function reportOf(
             issues: shown,
         };
     });
+}
 
-    const countsByCategory = Object.fromEntries(
+function categoryCounts(
+    plan: ImportPlan,
+    root: JsonRecord,
+    embedded: Record<string, number>
+) {
+    return Object.fromEntries(
         Object.entries(root)
             .filter(([, v]) => Array.isArray(v))
             .map(([kind, v]) => {
@@ -451,6 +418,54 @@ function reportOf(
                 ];
             })
     );
+}
+
+function reportOf(
+    plan: ImportPlan,
+    root: JsonRecord,
+    sources: JsonRecord[],
+    embedded: Record<string, number> = {},
+    hasCharacters?: boolean,
+    classesMode?: ClassesMode,
+    customRules: CustomConditionRule[] = []
+): CompendiumReport {
+    const counts = {
+        created: 0,
+        updated: 0,
+        unchanged: 0,
+        errors: plan.errors.length,
+    };
+
+    const unique = new Map<string, ImportIssue>();
+
+    for (const i of [...plan.errors, ...plan.warnings])
+        unique.set(`${i.code}:${i.path}`, i);
+
+    const allIssues = [...unique.values()];
+
+    if (hasCharacters === false)
+        allIssues.push(issue('CHARACTERS_REQUIRED', 'characters', 'warning'));
+
+    const classesMissing =
+        !!classesMode &&
+        (!classesMode.enabled || !classesMode.exists) &&
+        plan.writes.some((w) => !w.nested && CLASS_DEPENDENT_KINDS.has(w.kind));
+
+    if (classesMissing)
+        allIssues.push(
+            issue('CLASSES_MODE_REQUIRED', CLASSES_RULE_PATH, 'warning')
+        );
+
+    const issueCounts: Record<string, number> = Object.create(null);
+
+    for (const entry of allIssues)
+        issueCounts[entry.code] = (issueCounts[entry.code] ?? 0) + 1;
+
+    const nextActions = allIssues.slice(0, 10_000);
+
+    const rows = reportRows(plan, counts);
+
+    const countsByCategory = categoryCounts(plan, root, embedded);
 
     const editionSummary: Record<string, number> = Object.create(null);
 

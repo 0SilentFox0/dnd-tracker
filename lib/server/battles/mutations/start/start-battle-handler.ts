@@ -35,32 +35,18 @@ import type { BattleAction } from '@/types/battle-actions';
 import type { BattleMapConfig } from '@/types/battle-grid';
 import type { LogLine } from '@/types/text';
 
-export async function buildStartOrder(
-    battleId: string,
+type SetupParticipant = {
+    id: string;
+    type: ParticipantSourceTypeValue;
+    side: ParticipantSide;
+    quantity?: number;
+    reserved?: number;
+};
+
+async function loadSetupRows(
     campaignId: string,
-    setup: BattlePreparationParticipant[],
-    map: BattleMapConfig | null,
-    rules: Ruleset
-): Promise<{
-    order: BattleParticipant[];
-    reserve: BattleParticipant[];
-    triggerLogEntries: BattleAction[];
-}> {
-    const participantsRaw = setup as Array<{
-        id: string;
-        type: ParticipantSourceTypeValue;
-        side: string;
-        quantity?: number;
-        reserved?: number;
-    }>;
-
-    const participants = participantsRaw.map((p) => ({
-        ...p,
-        side: (p.side === ParticipantSide.ALLY
-            ? ParticipantSide.ALLY
-            : ParticipantSide.ENEMY) as ParticipantSide,
-    }));
-
+    participants: SetupParticipant[]
+) {
     const { charIds, unitIds } = participants.reduce(
         (acc, p) => {
             if (p.type === ParticipantSourceType.CHARACTER)
@@ -92,31 +78,31 @@ export async function buildStartOrder(
             : [],
     ]);
 
-    const characterMap = new Map(characters.map((c) => [c.id, c]));
+    return { characters, units };
+}
 
-    const unitMap = new Map(units.map((u) => [u.id, u]));
+type SetupRows = Awaited<ReturnType<typeof loadSetupRows>>;
 
-    const { campaignContext, racesById } = await buildCampaignContextForStart(
-        campaignId,
-        characters,
-        units
-    );
+type ParticipantSlot =
+    | {
+          type: typeof ParticipantSourceType.CHARACTER;
+          character: SetupRows['characters'][number];
+          side: ParticipantSide;
+          reserved: boolean;
+      }
+    | {
+          type: typeof ParticipantSourceType.UNIT;
+          unit: SetupRows['units'][number];
+          side: ParticipantSide;
+          instanceNumber: number;
+          reserved: boolean;
+      };
 
-    type ParticipantSlot =
-        | {
-              type: typeof ParticipantSourceType.CHARACTER;
-              character: (typeof characters)[number];
-              side: ParticipantSide;
-              reserved: boolean;
-          }
-        | {
-              type: typeof ParticipantSourceType.UNIT;
-              unit: (typeof units)[number];
-              side: ParticipantSide;
-              instanceNumber: number;
-              reserved: boolean;
-          };
-
+function buildSlots(
+    participants: SetupParticipant[],
+    characterMap: Map<string, SetupRows['characters'][number]>,
+    unitMap: Map<string, SetupRows['units'][number]>
+) {
     const slots: ParticipantSlot[] = [];
 
     for (const participant of participants) {
@@ -149,6 +135,49 @@ export async function buildStartOrder(
             }
         }
     }
+
+    return slots;
+}
+
+export async function buildStartOrder(
+    battleId: string,
+    campaignId: string,
+    setup: BattlePreparationParticipant[],
+    map: BattleMapConfig | null,
+    rules: Ruleset
+): Promise<{
+    order: BattleParticipant[];
+    reserve: BattleParticipant[];
+    triggerLogEntries: BattleAction[];
+}> {
+    const participantsRaw = setup as Array<{
+        id: string;
+        type: ParticipantSourceTypeValue;
+        side: string;
+        quantity?: number;
+        reserved?: number;
+    }>;
+
+    const participants = participantsRaw.map((p) => ({
+        ...p,
+        side: (p.side === ParticipantSide.ALLY
+            ? ParticipantSide.ALLY
+            : ParticipantSide.ENEMY) as ParticipantSide,
+    }));
+
+    const { characters, units } = await loadSetupRows(campaignId, participants);
+
+    const characterMap = new Map(characters.map((c) => [c.id, c]));
+
+    const unitMap = new Map(units.map((u) => [u.id, u]));
+
+    const { campaignContext, racesById } = await buildCampaignContextForStart(
+        campaignId,
+        characters,
+        units
+    );
+
+    const slots = buildSlots(participants, characterMap, unitMap);
 
     const builtRaw = await Promise.all(
         slots.map((slot) =>

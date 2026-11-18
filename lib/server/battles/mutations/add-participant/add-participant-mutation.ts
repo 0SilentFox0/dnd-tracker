@@ -155,6 +155,120 @@ function enterMap(
     });
 }
 
+async function buildAdded(
+    deps: AddParticipantDeps,
+    ctx: BattleMutationContext,
+    data: AddParticipantBody
+): Promise<BattleParticipant[]> {
+    const side = data.side;
+
+    const battleId = ctx.scene.id;
+
+    const added: BattleParticipant[] = [];
+
+    if (data.type === ParticipantSourceType.CHARACTER) {
+        const character = await deps.loadCharacter(data.sourceId);
+
+        if (!character || character.campaignId !== ctx.scene.campaignId) {
+            throw new BattleAccessError(404, API_ERRORS.CHARACTER_NOT_FOUND);
+        }
+
+        const campaignContext = await deps.buildContext(
+            ctx.scene.campaignId,
+            character
+        );
+
+        added.push(
+            await deps.fromCharacter(
+                character,
+                battleId,
+                side,
+                undefined,
+                campaignContext,
+                { rules: ctx.meta.rules }
+            )
+        );
+    } else {
+        const unit = await deps.loadUnit(data.sourceId, ctx.scene.campaignId);
+
+        if (!unit || unit.campaignId !== ctx.scene.campaignId) {
+            throw new BattleAccessError(404, API_ERRORS.BATTLE_UNIT_NOT_FOUND);
+        }
+
+        const twin =
+            side === ParticipantSide.ENEMY
+                ? [...ctx.participants, ...reserveOf(ctx.pending)].find(
+                      (p) =>
+                          p.basicInfo.sourceId === unit.id &&
+                          p.basicInfo.side === ParticipantSide.ENEMY
+                  )
+                : undefined;
+
+        const racesById = {
+            [unit.raceId ?? '']: await deps.loadRace(
+                unit.raceId,
+                ctx.scene.campaignId
+            ),
+        };
+
+        for (let i = 0; i < (data.quantity ?? 1); i++) {
+            const fresh = await deps.fromUnit(
+                unit,
+                battleId,
+                side,
+                i + 1,
+                racesById,
+                ctx.meta.rules
+            );
+
+            added.push(twin ? matchScaling(fresh, twin) : fresh);
+        }
+    }
+
+    return added;
+}
+
+function insertNewcomers(
+    ctx: BattleMutationContext,
+    baked: BattleParticipant[]
+) {
+    let order = baked.slice(0, ctx.participants.length);
+
+    let turnIndex = ctx.scene.turnIndex;
+
+    for (const newcomer of baked.slice(ctx.participants.length)) {
+        const initiative = calculateInitiative(newcomer, [...order, newcomer], {
+            rules: ctx.meta.rules,
+        });
+
+        const p = {
+            ...newcomer,
+            abilities: { ...newcomer.abilities, initiative },
+        };
+
+        const current = order[turnIndex];
+
+        let at: number;
+
+        if (current && compareInitiative(p, current, ctx.meta.rules) < 0) {
+            // місце в цьому раунді вже минуло: поточний лишається поточним, новачок ходить з наступного раунду
+            at = initiativeSlot(order, p, ctx.meta.rules);
+            turnIndex++;
+        } else {
+            // порядок після розкриттів не монотонний: шукаємо лише серед тих, хто ще має ходити (після щойно введених)
+            let afterRun = turnIndex + 1;
+
+            while (order[afterRun]?.battleData.revealPending) afterRun++;
+
+            at = initiativeSlot(order, p, ctx.meta.rules, afterRun);
+        }
+
+        order = [...order.slice(0, at), p, ...order.slice(at)];
+    }
+
+    return { order, turnIndex };
+}
+
 export function createAddParticipantMutation(
     deps: AddParticipantDeps = defaultDeps
 ) {
@@ -162,79 +276,7 @@ export function createAddParticipantMutation(
         ctx: BattleMutationContext,
         data: AddParticipantBody
     ): Promise<MutationResult> => {
-        const side = data.side;
-
-        const battleId = ctx.scene.id;
-
-        const added: BattleParticipant[] = [];
-
-        if (data.type === ParticipantSourceType.CHARACTER) {
-            const character = await deps.loadCharacter(data.sourceId);
-
-            if (!character || character.campaignId !== ctx.scene.campaignId) {
-                throw new BattleAccessError(
-                    404,
-                    API_ERRORS.CHARACTER_NOT_FOUND
-                );
-            }
-
-            const campaignContext = await deps.buildContext(
-                ctx.scene.campaignId,
-                character
-            );
-
-            added.push(
-                await deps.fromCharacter(
-                    character,
-                    battleId,
-                    side,
-                    undefined,
-                    campaignContext,
-                    { rules: ctx.meta.rules }
-                )
-            );
-        } else {
-            const unit = await deps.loadUnit(
-                data.sourceId,
-                ctx.scene.campaignId
-            );
-
-            if (!unit || unit.campaignId !== ctx.scene.campaignId) {
-                throw new BattleAccessError(
-                    404,
-                    API_ERRORS.BATTLE_UNIT_NOT_FOUND
-                );
-            }
-
-            const twin =
-                side === ParticipantSide.ENEMY
-                    ? [...ctx.participants, ...reserveOf(ctx.pending)].find(
-                          (p) =>
-                              p.basicInfo.sourceId === unit.id &&
-                              p.basicInfo.side === ParticipantSide.ENEMY
-                      )
-                    : undefined;
-
-            const racesById = {
-                [unit.raceId ?? '']: await deps.loadRace(
-                    unit.raceId,
-                    ctx.scene.campaignId
-                ),
-            };
-
-            for (let i = 0; i < (data.quantity ?? 1); i++) {
-                const fresh = await deps.fromUnit(
-                    unit,
-                    battleId,
-                    side,
-                    i + 1,
-                    racesById,
-                    ctx.meta.rules
-                );
-
-                added.push(twin ? matchScaling(fresh, twin) : fresh);
-            }
-        }
+        const added = await buildAdded(deps, ctx, data);
 
         if (data.reserved) {
             return {
@@ -251,41 +293,7 @@ export function createAddParticipantMutation(
             addedIds
         );
 
-        let order = baked.slice(0, ctx.participants.length);
-
-        let turnIndex = ctx.scene.turnIndex;
-
-        for (const newcomer of baked.slice(ctx.participants.length)) {
-            const initiative = calculateInitiative(
-                newcomer,
-                [...order, newcomer],
-                { rules: ctx.meta.rules }
-            );
-
-            const p = {
-                ...newcomer,
-                abilities: { ...newcomer.abilities, initiative },
-            };
-
-            const current = order[turnIndex];
-
-            let at: number;
-
-            if (current && compareInitiative(p, current, ctx.meta.rules) < 0) {
-                // місце в цьому раунді вже минуло: поточний лишається поточним, новачок ходить з наступного раунду
-                at = initiativeSlot(order, p, ctx.meta.rules);
-                turnIndex++;
-            } else {
-                // порядок після розкриттів не монотонний: шукаємо лише серед тих, хто ще має ходити (після щойно введених)
-                let afterRun = turnIndex + 1;
-
-                while (order[afterRun]?.battleData.revealPending) afterRun++;
-
-                at = initiativeSlot(order, p, ctx.meta.rules, afterRun);
-            }
-
-            order = [...order.slice(0, at), p, ...order.slice(at)];
-        }
+        const { order, turnIndex } = insertNewcomers(ctx, baked);
 
         const { participants, psychology } = runPsychology(
             order,

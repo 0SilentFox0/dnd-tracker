@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/db';
 import { publicSetup } from '@/lib/utils/battle/participant/reserve';
 import { battleSceneListSelect } from '@/lib/utils/battle/store/scene-list-select';
+import { fromJson } from '@/lib/utils/common/json';
 import type { BattlePreparationParticipant } from '@/types/battle';
 
 export function listBattleBriefs(campaignId: string) {
@@ -23,7 +24,7 @@ export async function listCampaignBattles(campaignId: string, isDM: boolean) {
         participants: isDM
             ? b.participants
             : publicSetup(
-                  b.participants as unknown as BattlePreparationParticipant[]
+                  fromJson<BattlePreparationParticipant[]>(b.participants)
               ),
         initiativeOrder: [] as unknown[],
         battleLog: [] as unknown[],

@@ -20,6 +20,7 @@ import {
     flowSegments,
     linesText,
 } from '@/lib/utils/abilities/segments';
+import { unsafeCast } from '@/lib/utils/common/cast';
 
 const kindSchema = z.enum(['unit', 'spell', 'race', 'skill', 'artifact']);
 
@@ -41,21 +42,23 @@ async function listOf(
         const unitView = systemServerOf(await loadRules(campaignId)).ai
             ?.unitView;
 
-        return units.map((u) => ({
-            ...u,
-            abilitySummary: linesText(
-                registry,
-                (u.abilitySummary ?? []).map(flowSegments)
-            ),
-            ...(unitView && u.characteristics && unitView(u)),
-        })) as unknown as Entry[];
+        return unsafeCast<Entry[]>(
+            units.map((u) => ({
+                ...u,
+                abilitySummary: linesText(
+                    registry,
+                    (u.abilitySummary ?? []).map(flowSegments)
+                ),
+                ...(unitView && u.characteristics && unitView(u)),
+            }))
+        );
     }
 
     if (kind === 'spell')
-        return (await getCachedSpells(campaignId)) as unknown as Entry[];
+        return unsafeCast<Entry[]>(await getCachedSpells(campaignId));
 
     if (kind === 'race')
-        return (await getCachedRaces(campaignId)) as unknown as Entry[];
+        return unsafeCast<Entry[]>(await getCachedRaces(campaignId));
 
     if (kind === 'skill')
         return prisma.skill.findMany({

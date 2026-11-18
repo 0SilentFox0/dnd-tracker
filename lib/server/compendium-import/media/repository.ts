@@ -26,7 +26,7 @@ import { afterContentCommit } from '@/lib/server/content/write-context';
 import { contentWrite } from '@/lib/server/scenario/content-write';
 import { snapshotIfDue } from '@/lib/server/scenario/versions';
 import type { Actor } from '@/lib/utils/api/actor';
-import { asRecord, jsonContentInput } from '@/lib/utils/common/json';
+import { asRecord, fromJson, jsonContentInput } from '@/lib/utils/common/json';
 import { fillImageSources } from '@/lib/utils/scenario/fill-image-sources';
 import type { ScenarioContent } from '@/types/scenario';
 
@@ -153,7 +153,7 @@ async function applyPages(
         );
 
         const filled = fillImageSources(
-            page.content as unknown as ScenarioContent,
+            fromJson<ScenarioContent>(page.content),
             urls
         );
 

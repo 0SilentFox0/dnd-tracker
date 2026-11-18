@@ -132,6 +132,116 @@ async function rejectIntentTransaction(
     });
 }
 
+async function executeIntent(
+    deps: ExecutorDeps,
+    caller: AssistantCaller,
+    intentId: string,
+    human: boolean,
+    signal?: AbortSignal
+): Promise<ReceiptDto> {
+    const callbacks: Array<() => void> = [];
+
+    const outcome = await executeIntentTransaction(
+        deps,
+        caller,
+        intentId,
+        human,
+        callbacks,
+        signal
+    );
+
+    return completeIntentOutcome(
+        deps,
+        caller,
+        intentId,
+        outcome,
+        callbacks,
+        () => executeIntent(deps, caller, intentId, human, signal),
+        signal
+    );
+}
+
+async function dispatchActionWith(
+    deps: ExecutorDeps,
+    caller: AssistantCaller,
+    raw: ActionRequest,
+    signal?: AbortSignal
+): Promise<DispatchResult> {
+    signal?.throwIfAborted();
+
+    const { db, catalog, now } = deps;
+
+    const action = catalog.getAction(raw.actionId);
+
+    await authorizeAssistant(caller, action.need, 'prepare', db);
+
+    const input = parseInput(action.input, raw.input);
+
+    if (action.effect === 'read' || action.effect === 'handoff')
+        return dispatchImmediate(caller, action, input);
+
+    if (action.effect === 'paid' && !action.external)
+        throw new ContentError(
+            API_ERRORS.ASSISTANT_PAID_ADAPTER_UNAVAILABLE,
+            409
+        );
+
+    if (action.effect === 'paid' && !caller.runId)
+        throw new ContentError(API_ERRORS.ASSISTANT_RUN_ID_REQUIRED, 409);
+
+    const { request, originKey, requestHash } = identifyActionRequest(caller, {
+        ...raw,
+        input,
+    });
+
+    const prior = await priorResult(db, caller, {
+        originKey,
+        requestId: request.requestId,
+        requestHash,
+    });
+
+    if (prior) return prior;
+
+    const preview = parseInput(
+        actionPreviewSchema,
+        await action.prepare(caller, input)
+    );
+
+    if (action.external && caller.runId)
+        preview.preconditions = {
+            assistantExternalRun: caller.runId,
+            action: preview.preconditions,
+        };
+
+    const intent = await createIntent(caller, request, preview, {
+        db,
+        now: now(),
+    });
+
+    if (
+        confirmationFor(action, await executionModeFor(caller, db), preview) ===
+        'none'
+    ) {
+        const receipt = await executeIntent(
+            deps,
+            caller,
+            intent.id,
+            false,
+            signal
+        );
+
+        if (!receipt.result) throw conflict();
+
+        return { kind: 'result', result: receipt.result };
+    }
+
+    return {
+        kind: 'pending',
+        intent,
+        reviewUrl: `/campaigns/${caller.actor.campaignId}/dm/assistant?intent=${intent.id}`,
+    };
+}
+
 export function createAssistantExecutor(options: Options = {}) {
     const db = options.db ?? prisma;
 
@@ -146,113 +256,11 @@ export function createAssistantExecutor(options: Options = {}) {
         effects: options.effects ?? ASSISTANT_EFFECT_HANDLERS,
     };
 
-    async function executeIntent(
-        caller: AssistantCaller,
-        intentId: string,
-        human: boolean,
-        signal?: AbortSignal
-    ): Promise<ReceiptDto> {
-        const callbacks: Array<() => void> = [];
-
-        const outcome = await executeIntentTransaction(
-            deps,
-            caller,
-            intentId,
-            human,
-            callbacks,
-            signal
-        );
-
-        return completeIntentOutcome(
-            deps,
-            caller,
-            intentId,
-            outcome,
-            callbacks,
-            () => executeIntent(caller, intentId, human, signal),
-            signal
-        );
-    }
-
-    async function dispatchAction(
+    const dispatchAction = (
         caller: AssistantCaller,
         raw: ActionRequest,
         signal?: AbortSignal
-    ): Promise<DispatchResult> {
-        signal?.throwIfAborted();
-
-        const action = catalog.getAction(raw.actionId);
-
-        await authorizeAssistant(caller, action.need, 'prepare', db);
-
-        const input = parseInput(action.input, raw.input);
-
-        if (action.effect === 'read' || action.effect === 'handoff')
-            return dispatchImmediate(caller, action, input);
-
-        if (action.effect === 'paid' && !action.external)
-            throw new ContentError(
-                API_ERRORS.ASSISTANT_PAID_ADAPTER_UNAVAILABLE,
-                409
-            );
-
-        if (action.effect === 'paid' && !caller.runId)
-            throw new ContentError(API_ERRORS.ASSISTANT_RUN_ID_REQUIRED, 409);
-
-        const { request, originKey, requestHash } = identifyActionRequest(
-            caller,
-            { ...raw, input }
-        );
-
-        const prior = await priorResult(db, caller, {
-            originKey,
-            requestId: request.requestId,
-            requestHash,
-        });
-
-        if (prior) return prior;
-
-        const preview = parseInput(
-            actionPreviewSchema,
-            await action.prepare(caller, input)
-        );
-
-        if (action.external && caller.runId)
-            preview.preconditions = {
-                assistantExternalRun: caller.runId,
-                action: preview.preconditions,
-            };
-
-        const intent = await createIntent(caller, request, preview, {
-            db,
-            now: now(),
-        });
-
-        if (
-            confirmationFor(
-                action,
-                await executionModeFor(caller, db),
-                preview
-            ) === 'none'
-        ) {
-            const receipt = await executeIntent(
-                caller,
-                intent.id,
-                false,
-                signal
-            );
-
-            if (!receipt.result) throw conflict();
-
-            return { kind: 'result', result: receipt.result };
-        }
-
-        return {
-            kind: 'pending',
-            intent,
-            reviewUrl: `/campaigns/${caller.actor.campaignId}/dm/assistant?intent=${intent.id}`,
-        };
-    }
+    ) => dispatchActionWith(deps, caller, raw, signal);
 
     async function confirmIntent(
         actor: Actor,
@@ -263,6 +271,7 @@ export function createAssistantExecutor(options: Options = {}) {
             throw forbidden();
 
         return executeIntent(
+            deps,
             { actor, channel: 'chat', threadId: null, tokenId: null, locale },
             id,
             true
@@ -272,7 +281,12 @@ export function createAssistantExecutor(options: Options = {}) {
     async function rejectIntent(caller: AssistantCaller, id: string) {
         const callbacks: Array<() => void> = [];
 
-        const result = await rejectIntentTransaction(deps, caller, id, callbacks);
+        const result = await rejectIntentTransaction(
+            deps,
+            caller,
+            id,
+            callbacks
+        );
 
         for (const callback of callbacks) await callback();
 

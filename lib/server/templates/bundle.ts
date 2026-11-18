@@ -10,6 +10,7 @@ import {
     type CompendiumBundleDb,
     CompendiumBundleSchema,
 } from '@/lib/server/compendium-import/bundle';
+import { unsafeCast } from '@/lib/utils/common/cast';
 
 export type BundleTable = (typeof SYNC_TABLE_SCOPES)[number];
 
@@ -299,4 +300,4 @@ export interface RowDelegate {
 }
 
 export const delegateOf = (db: TemplateDb, t: BundleTableDef) =>
-    db[t.delegate] as unknown as RowDelegate;
+    unsafeCast<RowDelegate>(db[t.delegate]);

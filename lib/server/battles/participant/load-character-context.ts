@@ -49,6 +49,100 @@ function learnedNeeds(
     };
 }
 
+type LearnedNeeds = ReturnType<typeof learnedNeeds>;
+
+async function loadLibrary(campaignId: string, needs: LearnedNeeds) {
+    if (!(needs.skillIds.length > 0 || needs.learned)) return null;
+
+    return prisma.campaign.findUnique({
+        where: { id: campaignId },
+        select: {
+            ...(needs.skillIds.length > 0 && {
+                skills: { where: { id: { in: needs.skillIds } } },
+            }),
+            ...(needs.learned && {
+                mainSkills: {
+                    where: { id: { in: needs.branchIds } },
+                    select: {
+                        id: true,
+                        spellGroupId: true,
+                        name: true,
+                        role: true,
+                    },
+                },
+                spells: {
+                    where: {
+                        OR: [
+                            { groupId: { in: needs.branchGroupIds } },
+                            {
+                                spellGroup: {
+                                    mainSkills: {
+                                        some: {
+                                            id: {
+                                                in: needs.branchIds,
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                            {
+                                spellGroup: {
+                                    skills: {
+                                        some: {
+                                            id: {
+                                                in: needs.skillIds,
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        ],
+                    },
+                    select: { id: true, level: true, groupId: true },
+                },
+            }),
+        },
+    });
+}
+
+function indexArtifacts(
+    artifacts: Prisma.ArtifactGetPayload<{
+        include: {
+            artifactSet: { include: { artifacts: { select: { id: true } } } };
+        };
+    }>[]
+) {
+    const artifactsById: NonNullable<CampaignSpellContext['artifactsById']> =
+        {};
+
+    const artifactSetsById: NonNullable<
+        CampaignSpellContext['artifactSetsById']
+    > = {};
+
+    const artifactSetMemberIds: NonNullable<
+        CampaignSpellContext['artifactSetMemberIds']
+    > = {};
+
+    for (const { artifactSet, ...row } of artifacts) {
+        artifactsById[row.id] = row;
+
+        if (artifactSet) {
+            artifactSetsById[artifactSet.id] = {
+                id: artifactSet.id,
+                name: artifactSet.name,
+                setBonus: artifactSet.setBonus,
+                icon: artifactSet.icon,
+                abilities: artifactSet.abilities,
+            };
+            artifactSetMemberIds[artifactSet.id] = artifactSet.artifacts.map(
+                (a) => a.id
+            );
+        }
+    }
+
+    return { artifactsById, artifactSetsById, artifactSetMemberIds };
+}
+
 /**
  * Контекст персонажа: раса й дерево + артефакти зі сетами → скіли, школи й заклинання.
  * Школи й заклинання — лише коли є вивчені вузли, і лише групи гілок дерева та вивчених скілів.
@@ -93,58 +187,7 @@ export async function loadCharacterContext(
 
     const needs = learnedNeeds(character, tree);
 
-    const library =
-        needs.skillIds.length > 0 || needs.learned
-            ? await prisma.campaign.findUnique({
-                  where: { id: campaignId },
-                  select: {
-                      ...(needs.skillIds.length > 0 && {
-                          skills: { where: { id: { in: needs.skillIds } } },
-                      }),
-                      ...(needs.learned && {
-                          mainSkills: {
-                              where: { id: { in: needs.branchIds } },
-                              select: {
-                                  id: true,
-                                  spellGroupId: true,
-                                  name: true,
-                                  role: true,
-                              },
-                          },
-                          spells: {
-                              where: {
-                                  OR: [
-                                      { groupId: { in: needs.branchGroupIds } },
-                                      {
-                                          spellGroup: {
-                                              mainSkills: {
-                                                  some: {
-                                                      id: {
-                                                          in: needs.branchIds,
-                                                      },
-                                                  },
-                                              },
-                                          },
-                                      },
-                                      {
-                                          spellGroup: {
-                                              skills: {
-                                                  some: {
-                                                      id: {
-                                                          in: needs.skillIds,
-                                                      },
-                                                  },
-                                              },
-                                          },
-                                      },
-                                  ],
-                              },
-                              select: { id: true, level: true, groupId: true },
-                          },
-                      }),
-                  },
-              })
-            : null;
+    const library = await loadLibrary(campaignId, needs);
 
     const skills = library?.skills ?? [];
 
@@ -183,33 +226,8 @@ export async function loadCharacterContext(
         ? await loadBackground(campaignId, state.backgroundId)
         : null;
 
-    const artifactsById: NonNullable<CampaignSpellContext['artifactsById']> =
-        {};
-
-    const artifactSetsById: NonNullable<
-        CampaignSpellContext['artifactSetsById']
-    > = {};
-
-    const artifactSetMemberIds: NonNullable<
-        CampaignSpellContext['artifactSetMemberIds']
-    > = {};
-
-    for (const { artifactSet, ...row } of artifacts) {
-        artifactsById[row.id] = row;
-
-        if (artifactSet) {
-            artifactSetsById[artifactSet.id] = {
-                id: artifactSet.id,
-                name: artifactSet.name,
-                setBonus: artifactSet.setBonus,
-                icon: artifactSet.icon,
-                abilities: artifactSet.abilities,
-            };
-            artifactSetMemberIds[artifactSet.id] = artifactSet.artifacts.map(
-                (a) => a.id
-            );
-        }
-    }
+    const { artifactsById, artifactSetsById, artifactSetMemberIds } =
+        indexArtifacts(artifacts);
 
     return {
         race,

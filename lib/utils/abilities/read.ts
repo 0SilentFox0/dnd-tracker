@@ -8,7 +8,7 @@ import {
     parseAbilities,
 } from '@/lib/utils/abilities/schema';
 import { readChoices } from '@/lib/utils/characters/choices/read';
-import { toInputJson } from '@/lib/utils/common/json';
+import { fromJson, toInputJson } from '@/lib/utils/common/json';
 import type { Choice } from '@/types/choices';
 import type { ClassFeature } from '@/types/classes';
 
@@ -116,7 +116,7 @@ export function readAbilities(
 export function withAbilityIssues<R extends OwnerRow, B extends object = R>(
     kind: OwnerKind,
     row: R,
-    base: B = row as unknown as B
+    base: B = fromJson<B>(row)
 ) {
     const { abilities, issues: abilityIssues } = readAbilities(kind, row);
 

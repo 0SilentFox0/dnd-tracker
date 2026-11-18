@@ -17,17 +17,32 @@ import { moduleChange } from '@/lib/utils/rules/systems/catalog';
 
 type Row = Record<string, unknown>;
 
-/** Read-only projections over the same uncached, locked rows used by the guard. */
-export function operationPreview(
+type Preview = {
+    changes: FieldChange[];
+    targets: TargetRef[];
+    warnings: string[];
+};
+
+type PreviewCtx = {
+    id: ContentOperationId;
+    input: Row;
+    t: Translator;
+    state: unknown;
+    root: Row;
+    body: Row;
+    changes: FieldChange[];
+    warnings: string[];
+    rows: (key: string) => Row[];
+    owned: (domain: string, key: string) => Row;
+    field: (domain: string, row: Row, path: string, after: unknown) => void;
+};
+
+function previewCtx(
     id: ContentOperationId,
     input: Row,
     t: Translator,
     state: unknown
-): {
-    changes: FieldChange[];
-    targets: TargetRef[];
-    warnings: string[];
-} | null {
+): PreviewCtx {
     const root = asRecord(state),
         tables = asRecord(root.tables),
         body = asRecord(input.body);
@@ -43,15 +58,14 @@ export function operationPreview(
 
     const changes: FieldChange[] = [];
 
-    const warnings: string[] = [];
-
-    const field = (domain: string, row: Row, path: string, after: unknown) =>
+    const field = (domain: string, row: Row, path: string, after: unknown) => {
         changes.push({
             target: target(domain, row),
             path,
             before: jsonContent(path === '$record' ? row : row[path]),
             after: jsonContent(after),
         });
+    };
 
     const owned = (domain: string, key: string) => {
         const row = rows(domain).find((row) => row.id === input[key]);
@@ -61,124 +75,144 @@ export function operationPreview(
         return row;
     };
 
-    switch (id) {
-        case 'skills.duplicate': {
-            const row = owned('skills', 'skillId');
+    return {
+        id,
+        input,
+        t,
+        state,
+        root,
+        body,
+        changes,
+        warnings: [],
+        rows,
+        owned,
+        field,
+    };
+}
 
-            field(
-                'skills',
-                row,
-                'name',
-                String(row.name).trim()
-                    ? t('defaults.copyOf', { name: String(row.name) })
-                    : t('defaults.skillCopy')
-            );
-            break;
-        }
-        case 'spells.remove-from-group':
-            field('spells', owned('spells', 'spellId'), 'groupId', null);
-            break;
-        case 'spell-groups.remove-all-spells': {
-            owned('spellGroups', 'groupId');
-            for (const row of rows('spells').filter(
-                (row) => row.groupId === input.groupId
-            ))
-                field('spells', row, 'groupId', null);
-            break;
-        }
-        case 'spells.delete-by-level': {
-            const selected = rows('spells').filter(
-                (row) => row.level === body.level
-            );
+const PREVIEWS: Partial<Record<ContentOperationId, (c: PreviewCtx) => void>> = {
+    'skills.duplicate': ({ owned, field, t }) => {
+        const row = owned('skills', 'skillId');
 
-            for (const row of selected) field('spells', row, '$record', null);
-            changes.push(
-                ...contentDeleteCascades(
-                    state,
-                    'spells',
-                    selected.map((row) => String(row.id))
-                )
-            );
-            break;
-        }
-        case 'tracks.reorder': {
-            const ids = body.ids as string[];
+        field(
+            'skills',
+            row,
+            'name',
+            String(row.name).trim()
+                ? t('defaults.copyOf', { name: String(row.name) })
+                : t('defaults.skillCopy')
+        );
+    },
+    'spells.remove-from-group': ({ owned, field }) =>
+        field('spells', owned('spells', 'spellId'), 'groupId', null),
+    'spell-groups.remove-all-spells': ({ owned, rows, field, input }) => {
+        owned('spellGroups', 'groupId');
+        for (const row of rows('spells').filter(
+            (row) => row.groupId === input.groupId
+        ))
+            field('spells', row, 'groupId', null);
+    },
+    'spells.delete-by-level': ({ rows, field, changes, state, body }) => {
+        const selected = rows('spells').filter(
+            (row) => row.level === body.level
+        );
 
-            const known = rows('tracks');
-
-            if (
-                ids.length !== known.length ||
-                new Set(ids).size !== ids.length ||
-                !ids.every((id) => known.some((row) => row.id === id))
+        for (const row of selected) field('spells', row, '$record', null);
+        changes.push(
+            ...contentDeleteCascades(
+                state,
+                'spells',
+                selected.map((row) => String(row.id))
             )
-                throw new ContentError(API_ERRORS.TRACK_ORDER_MISMATCH, 400);
+        );
+    },
+    'tracks.reorder': ({ body, rows, field }) => {
+        const ids = body.ids as string[];
 
-            for (const [index, id] of ids.entries())
-                field(
-                    'tracks',
-                    known.find((row) => row.id === id)!,
-                    'sortOrder',
-                    index
-                );
-            break;
-        }
-        case 'rules.update': {
-            const before = parseRules(asRecord(root.campaign).rules);
+        const known = rows('tracks');
 
-            const { confirm: _confirm, ...patch } =
-                RulesetPatchSchema.parse(body);
+        if (
+            ids.length !== known.length ||
+            new Set(ids).size !== ids.length ||
+            !ids.every((id) => known.some((row) => row.id === id))
+        )
+            throw new ContentError(API_ERRORS.TRACK_ORDER_MISMATCH, 400);
 
-            if (
-                patch.system?.modules ||
-                (patch.system?.key && patch.system.key !== before.system.key)
-            )
-                assertValidSystem({
-                    key: patch.system.key ?? before.system.key,
-                    ...(patch.system.modules && {
-                        modules: patch.system.modules,
-                    }),
-                });
-
-            const merged = mergeRules(before, patch);
-
-            if (!merged.ok)
-                throw new ContentError(
-                    API_ERRORS.INVALID_RULES,
-                    400,
-                    merged.issues
-                );
-
-            if (moduleChange(before.system, merged.rules.system).setup.length)
-                warnings.push(t('warnings.moduleSetup'));
-
-            const row = { ...before, id: 'rules', name: t('results.rules') };
-
-            for (const key of Object.keys(patch)) {
-                const section =
-                    key === 'removeCustomConditions'
-                        ? 'conditions'
-                        : (key as keyof typeof merged.rules);
-
-                field('rules', row, section, merged.rules[section]);
-            }
-            break;
-        }
-        case 'skill-trees.save': {
-            const row =
-                rows('skillTrees').find((row) => row.id === input.treeId) ??
-                rows('skillTrees').find((row) => row.race === body.race);
-
+        for (const [index, id] of ids.entries())
             field(
-                'skillTrees',
-                row ?? { id: 'new', race: body.race },
-                'skills',
-                body.skills
+                'tracks',
+                known.find((row) => row.id === id)!,
+                'sortOrder',
+                index
             );
-            break;
-        }
-        default:
-            return null;
+    },
+    'rules.update': previewRulesUpdate,
+    'skill-trees.save': ({ rows, input, body, field }) => {
+        const row =
+            rows('skillTrees').find((row) => row.id === input.treeId) ??
+            rows('skillTrees').find((row) => row.race === body.race);
+
+        field(
+            'skillTrees',
+            row ?? { id: 'new', race: body.race },
+            'skills',
+            body.skills
+        );
+    },
+};
+
+function previewRulesUpdate({ root, body, t, warnings, field }: PreviewCtx) {
+    const before = parseRules(asRecord(root.campaign).rules);
+
+    const { confirm: _confirm, ...patch } = RulesetPatchSchema.parse(body);
+
+    if (
+        patch.system?.modules ||
+        (patch.system?.key && patch.system.key !== before.system.key)
+    )
+        assertValidSystem({
+            key: patch.system.key ?? before.system.key,
+            ...(patch.system.modules && {
+                modules: patch.system.modules,
+            }),
+        });
+
+    const merged = mergeRules(before, patch);
+
+    if (!merged.ok)
+        throw new ContentError(API_ERRORS.INVALID_RULES, 400, merged.issues);
+
+    if (moduleChange(before.system, merged.rules.system).setup.length)
+        warnings.push(t('warnings.moduleSetup'));
+
+    const row = { ...before, id: 'rules', name: t('results.rules') };
+
+    for (const key of Object.keys(patch)) {
+        const section =
+            key === 'removeCustomConditions'
+                ? 'conditions'
+                : (key as keyof typeof merged.rules);
+
+        field('rules', row, section, merged.rules[section]);
     }
+}
+
+/** Read-only projections over the same uncached, locked rows used by the guard. */
+export function operationPreview(
+    id: ContentOperationId,
+    input: Row,
+    t: Translator,
+    state: unknown
+): Preview | null {
+    const build = PREVIEWS[id];
+
+    if (!build) return null;
+
+    const ctx = previewCtx(id, input, t, state);
+
+    build(ctx);
+
+    const { changes, warnings } = ctx;
 
     return {
         changes,

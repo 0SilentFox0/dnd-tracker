@@ -323,13 +323,7 @@ async function deleteRemoved(
 
             const kind = DETACH_KIND_BY_TABLE[t.key];
 
-            if (kind)
-                await detachRefs(
-                    db as unknown as Parameters<typeof detachRefs>[0],
-                    ctx.campaignId,
-                    kind,
-                    [i.localId]
-                );
+            if (kind) await detachRefs(db, ctx.campaignId, kind, [i.localId]);
 
             await delegateOf(db, t).deleteMany({
                 where: { id: i.localId, campaignId: ctx.campaignId },

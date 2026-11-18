@@ -18,6 +18,7 @@ import {
     getAiRunRecovery,
 } from '@/lib/api/ai';
 import { useExpiry, usePageHidden } from '@/lib/hooks/common';
+import { fromJson } from '@/lib/utils/common/json';
 import type {
     AiChatMessage,
     AiFocus,
@@ -105,7 +106,7 @@ export function useAiChat({
 
     const chat = useChat({
         id: thread.id,
-        messages: initialMessages as unknown as UIMessage[],
+        messages: fromJson<UIMessage[]>(initialMessages),
         transport,
         onFinish: ({ isAbort, isDisconnect, isError }) => {
             streamOk.current = !isAbort && !isDisconnect && !isError;
@@ -179,7 +180,7 @@ export function useAiChat({
                 });
 
                 setMessages([
-                    ...((state.messages ?? []) as unknown as UIMessage[]),
+                    ...fromJson<UIMessage[]>(state.messages ?? []),
                     ...receipts,
                     ...pending,
                 ]);

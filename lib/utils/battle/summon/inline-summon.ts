@@ -6,6 +6,7 @@ import { upsertTimedEffect } from '@/lib/utils/abilities/engine/effects/timed-ef
 import { nearestStandable } from '@/lib/utils/battle/grid/occupancy';
 import { createBattleParticipantFromUnit } from '@/lib/utils/battle/participant';
 import type { UnitFromPrisma } from '@/lib/utils/battle/types/participant';
+import { fromJson } from '@/lib/utils/common/json';
 import type { Ruleset } from '@/lib/utils/rules';
 import type { BattleParticipant } from '@/types/battle';
 import type { BattleMapConfig } from '@/types/battle-grid';
@@ -27,7 +28,7 @@ function inlineUnitRow(
         type: a.range && !/^5\s*(фт|ft)/i.test(a.range) ? 'ranged' : 'melee',
     }));
 
-    return {
+    return fromJson<UnitFromPrisma>({
         id,
         campaignId,
         name: inline.name,
@@ -65,7 +66,7 @@ function inlineUnitRow(
         spellcasting: {},
         sourceId: null,
         sourceHash: null,
-    } as unknown as UnitFromPrisma;
+    });
 }
 
 interface BuildInput {

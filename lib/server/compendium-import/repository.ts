@@ -28,8 +28,12 @@ import { templateLocaleWhere } from '@/lib/server/templates/locale-filter';
 import type { Actor } from '@/lib/utils/api/actor';
 import { armorStatsFromRow } from '@/lib/utils/artifacts/armor-stats';
 import { weaponStatsFromRow } from '@/lib/utils/artifacts/weapon-stats';
-import { asRecord, jsonContentInput } from '@/lib/utils/common/json';
-import { CompendiumError, type JsonRecord, normalized } from '@/lib/utils/compendium-import/parse';
+import { asRecord, fromJson, jsonContentInput } from '@/lib/utils/common/json';
+import {
+    CompendiumError,
+    type JsonRecord,
+    normalized,
+} from '@/lib/utils/compendium-import/parse';
 import { itemStatsFromRow } from '@/lib/utils/items/item-row';
 import { parseRules } from '@/lib/utils/rules/schema';
 import { contentKindsOf } from '@/lib/utils/rules/systems/catalog';
@@ -195,9 +199,9 @@ async function loadRows(
 
         const values =
             kind === 'scenarioPages'
-                ? ((await prisma.scenarioPage.findMany({
-                      where,
-                  })) as unknown as JsonRecord[])
+                ? fromJson<JsonRecord[]>(
+                      await prisma.scenarioPage.findMany({ where })
+                  )
                 : await delegateOf(
                       prisma,
                       tableOf(kindTable[kind as keyof typeof kindTable])
@@ -243,6 +247,205 @@ const sourceFields = new Set([
     'partnered',
 ]);
 
+type LoadContextInput = Parameters<ImportRepository['loadContext']>[1];
+type Provenance = Awaited<ReturnType<typeof loadProvenance>>;
+type BoundEntry = (
+    key: string,
+    kind: TargetKind,
+    localId: string,
+    raw: JsonRecord
+) => ExistingEntry;
+
+const loadProvenance = (campaignId: string) =>
+    prisma.compendiumEntry.findMany({
+        where: { campaignId },
+        orderBy: { canonicalKey: 'asc' },
+        select: {
+            canonicalKey: true,
+            kind: true,
+            localId: true,
+            edition: true,
+            baseline: true,
+            bindings: true,
+        },
+    });
+
+const bindingRefs = (entry: Provenance[number]) =>
+    Object.values(asRecord(entry.bindings))
+        .map(asRecord)
+        .filter((b) => typeof b.kind === 'string' && typeof b.id === 'string')
+        .map((b) => ({
+            kind: b.kind as TargetKind,
+            id: b.id as string,
+        }));
+
+function existingEntriesOf(
+    provenance: Provenance,
+    rows: Awaited<ReturnType<typeof loadRows>>
+): ExistingEntry[] {
+    return provenance.map((entry) => {
+        const raw = rows.get(entry.kind as TargetKind)?.get(entry.localId);
+
+        return {
+            key: entry.canonicalKey,
+            kind: entry.kind as TargetKind,
+            edition: entry.edition as 'classic' | 'one' | 'unknown',
+            localId: entry.localId,
+            baseline: asRecord(entry.baseline),
+            body: raw ? nativeBody(entry.kind as TargetKind, raw) : {},
+            missing: !raw,
+        };
+    });
+}
+
+function boundEntryFactory(existing: ExistingEntry[]): BoundEntry {
+    const existingByRef = new Map(
+        existing.map((e) => [entryRefKey(e.kind ?? '', e.localId), e] as const)
+    );
+
+    return (key, kind, localId, raw) => {
+        const body = nativeBody(kind, raw);
+
+        const found = existingByRef.get(entryRefKey(kind, localId));
+
+        return {
+            ...found,
+            key: found?.key ?? key,
+            kind,
+            localId,
+            body,
+            baseline: body,
+        };
+    };
+}
+
+function explicitBindings(
+    provenance: Provenance,
+    input: LoadContextInput,
+    rows: Awaited<ReturnType<typeof loadRows>>,
+    boundEntry: BoundEntry
+) {
+    const bindings: Record<string, ExistingEntry> = Object.create(null);
+
+    for (const entry of provenance)
+        for (const [key, rawBinding] of Object.entries(
+            asRecord(entry.bindings)
+        )) {
+            const binding = asRecord(rawBinding);
+
+            if (
+                typeof binding.kind !== 'string' ||
+                typeof binding.id !== 'string'
+            )
+                continue;
+
+            const kind = binding.kind as TargetKind;
+
+            const raw = rows.get(kind)?.get(binding.id);
+
+            if (!raw) continue;
+
+            bindings[key] = boundEntry(key, kind, binding.id, raw);
+        }
+
+    for (const [key, binding] of Object.entries(input.bindings ?? {})) {
+        const raw = rows.get(binding.kind)?.get(binding.id);
+
+        if (!raw) throw new CompendiumError('BINDING_WRONG_CAMPAIGN', key);
+
+        bindings[key] = boundEntry(key, binding.kind, binding.id, raw);
+    }
+
+    return bindings;
+}
+
+async function autoBindDependencies(args: {
+    campaignId: string;
+    input: LoadContextInput;
+    adaptedEntries: Parameters<typeof pendingRefs>[0];
+    provenance: Provenance;
+    existing: ExistingEntry[];
+    occupiedNames: Awaited<ReturnType<typeof loadNames>>;
+    bindings: Record<string, ExistingEntry>;
+    boundEntry: BoundEntry;
+}) {
+    const {
+        campaignId,
+        input,
+        adaptedEntries,
+        provenance,
+        existing,
+        occupiedNames,
+        bindings,
+        boundEntry,
+    } = args;
+
+    const explicit = new Set((input.dependencies ?? []).map((d) => d.refKey));
+
+    const pending = pendingRefs(
+        adaptedEntries.filter((e) => !input.excludedKeys?.includes(e.key)),
+        (key) =>
+            key in bindings ||
+            explicit.has(key) ||
+            existing.some((e) => e.key === key)
+    );
+
+    const imported = new Set(provenance.map((e) => `${e.kind}:${e.localId}`));
+
+    const matched = matchCampaignRows(pending, occupiedNames, (kind, id) =>
+        imported.has(`${kind}:${id}`)
+    );
+
+    const autoRows = await loadRows(
+        campaignId,
+        matched.map((m) => ({ kind: m.kind, id: m.row.id }))
+    );
+
+    for (const m of matched) {
+        const raw = autoRows.get(m.kind)?.get(m.row.id);
+
+        if (raw) bindings[m.key] = boundEntry(m.key, m.kind, m.row.id, raw);
+    }
+
+    const choices: DependencyChoice[] = [...(input.dependencies ?? [])];
+
+    const stillPending = pending.filter((p) => !(p.key in bindings));
+
+    if (stillPending.length)
+        await addOfficialTemplateChoices(
+            choices,
+            stillPending,
+            input.allowMixedEdition
+        );
+
+    const templates = await loadTemplateSnapshots(choices);
+
+    const dependencies = buildDependencyClosure(
+        templates,
+        choices,
+        input.allowMixedEdition
+    );
+
+    for (const [refKey, key] of Object.entries(dependencies.aliases)) {
+        const entry = dependencies.entries.find((e) => e.key === key)!;
+
+        const localId =
+            existing.find((e) => e.key === key && !e.missing)?.localId ??
+            `c${digest([campaignId, key]).slice(0, 24)}`;
+
+        bindings[refKey] = {
+            key,
+            edition: entry.edition,
+            kind: entry.kind,
+            localId,
+            body: entry.body,
+            baseline: entry.body,
+        };
+    }
+
+    return dependencies.entries;
+}
+
 export const prismaImportRepository: ImportRepository = {
     async authorize(actor) {
         if (!actor.isDM || actor.via !== 'session')
@@ -277,30 +480,7 @@ export const prismaImportRepository: ImportRepository = {
                 where: { campaignId: actor.campaignId },
             })) > 0;
 
-        const provenance = await prisma.compendiumEntry.findMany({
-            where: { campaignId: actor.campaignId },
-            orderBy: { canonicalKey: 'asc' },
-            select: {
-                canonicalKey: true,
-                kind: true,
-                localId: true,
-                edition: true,
-                baseline: true,
-                bindings: true,
-            },
-        });
-
-        const bindingRefs = (entry: (typeof provenance)[number]) =>
-            Object.values(asRecord(entry.bindings))
-                .map(asRecord)
-                .filter(
-                    (b) =>
-                        typeof b.kind === 'string' && typeof b.id === 'string'
-                )
-                .map((b) => ({
-                    kind: b.kind as TargetKind,
-                    id: b.id as string,
-                }));
+        const provenance = await loadProvenance(actor.campaignId);
 
         const rows = await loadRows(actor.campaignId, [
             ...provenance.map((entry) => ({
@@ -311,159 +491,41 @@ export const prismaImportRepository: ImportRepository = {
             ...Object.values(input.bindings ?? {}),
         ]);
 
-        const existing: ExistingEntry[] = provenance.map((entry) => {
-            const raw = rows.get(entry.kind as TargetKind)?.get(entry.localId);
+        const existing = existingEntriesOf(provenance, rows);
 
-            return {
-                key: entry.canonicalKey,
-                kind: entry.kind as TargetKind,
-                edition: entry.edition as 'classic' | 'one' | 'unknown',
-                localId: entry.localId,
-                baseline: asRecord(entry.baseline),
-                body: raw ? nativeBody(entry.kind as TargetKind, raw) : {},
-                missing: !raw,
-            };
-        });
+        const boundEntry = boundEntryFactory(existing);
 
-        const existingByRef = new Map(
-            existing.map(
-                (e) => [entryRefKey(e.kind ?? '', e.localId), e] as const
-            )
-        );
-
-        const boundEntry = (
-            key: string,
-            kind: TargetKind,
-            localId: string,
-            raw: JsonRecord
-        ): ExistingEntry => {
-            const body = nativeBody(kind, raw);
-
-            const found = existingByRef.get(entryRefKey(kind, localId));
-
-            return {
-                ...found,
-                key: found?.key ?? key,
-                kind,
-                localId,
-                body,
-                baseline: body,
-            };
-        };
-
-        const bindings: Record<string, ExistingEntry> = Object.create(null);
-
-        for (const entry of provenance)
-            for (const [key, rawBinding] of Object.entries(
-                asRecord(entry.bindings)
-            )) {
-                const binding = asRecord(rawBinding);
-
-                if (
-                    typeof binding.kind !== 'string' ||
-                    typeof binding.id !== 'string'
-                )
-                    continue;
-
-                const kind = binding.kind as TargetKind;
-
-                const raw = rows.get(kind)?.get(binding.id);
-
-                if (!raw) continue;
-
-                bindings[key] = boundEntry(key, kind, binding.id, raw);
-            }
-        for (const [key, binding] of Object.entries(input.bindings ?? {})) {
-            const raw = rows.get(binding.kind)?.get(binding.id);
-
-            if (!raw) throw new CompendiumError('BINDING_WRONG_CAMPAIGN', key);
-
-            bindings[key] = boundEntry(key, binding.kind, binding.id, raw);
-        }
+        const bindings = explicitBindings(provenance, input, rows, boundEntry);
 
         const occupiedNames = await loadNames(actor.campaignId);
 
-        const explicit = new Set(
-            (input.dependencies ?? []).map((d) => d.refKey)
-        );
+        const extraEntries = await autoBindDependencies({
+            campaignId: actor.campaignId,
+            input,
+            adaptedEntries,
+            provenance,
+            existing,
+            occupiedNames,
+            bindings,
+            boundEntry,
+        });
 
-        const pending = pendingRefs(
-            adaptedEntries.filter((e) => !input.excludedKeys?.includes(e.key)),
-            (key) =>
-                key in bindings ||
-                explicit.has(key) ||
-                existing.some((e) => e.key === key)
-        );
-
-        const imported = new Set(
-            provenance.map((e) => `${e.kind}:${e.localId}`)
-        );
-
-        const matched = matchCampaignRows(pending, occupiedNames, (kind, id) =>
-            imported.has(`${kind}:${id}`)
-        );
-
-        const autoRows = await loadRows(
-            actor.campaignId,
-            matched.map((m) => ({ kind: m.kind, id: m.row.id }))
-        );
-
-        for (const m of matched) {
-            const raw = autoRows.get(m.kind)?.get(m.row.id);
-
-            if (raw) bindings[m.key] = boundEntry(m.key, m.kind, m.row.id, raw);
-        }
-
-        const choices: DependencyChoice[] = [...(input.dependencies ?? [])];
-
-        const stillPending = pending.filter((p) => !(p.key in bindings));
-
-        if (stillPending.length)
-            await addOfficialTemplateChoices(
-                choices,
-                stillPending,
-                input.allowMixedEdition
-            );
-
-        const templates = await loadTemplateSnapshots(choices);
-
-        const dependencies = buildDependencyClosure(
-            templates,
-            choices,
-            input.allowMixedEdition
-        );
-
-        for (const [refKey, key] of Object.entries(dependencies.aliases)) {
-            const entry = dependencies.entries.find((e) => e.key === key)!;
-
-            const localId =
-                existing.find((e) => e.key === key && !e.missing)?.localId ??
-                `c${digest([actor.campaignId, key]).slice(0, 24)}`;
-
-            bindings[refKey] = {
-                key,
-                edition: entry.edition,
-                kind: entry.kind,
-                localId,
-                body: entry.body,
-                baseline: entry.body,
-            };
-        }
+        const rules = parseRules(settings.rules);
 
         return {
             campaignId: actor.campaignId,
             existing,
             bindings,
             occupiedNames,
-            extraEntries: dependencies.entries,
+            extraEntries,
             settingsHash: digest(settings),
             hasCharacters,
             hasClasses,
-            classesEnabled: parseRules(settings.rules).classes.enabled,
-            customConditionKeys: (
-                parseRules(settings.rules).conditions.custom ?? []
-            ).map((c) => c.key),
-            activeKinds: contentKindsOf(parseRules(settings.rules).system),
+            classesEnabled: rules.classes.enabled,
+            customConditionKeys: (rules.conditions.custom ?? []).map(
+                (c) => c.key
+            ),
+            activeKinds: contentKindsOf(rules.system),
         };
     },
     async findRun(actor, key) {
@@ -479,7 +541,7 @@ export const prismaImportRepository: ImportRepository = {
         return run
             ? {
                   requestHash: run.planHash,
-                  report: run.report as unknown as CompendiumReport,
+                  report: fromJson<CompendiumReport>(run.report),
               }
             : undefined;
     },

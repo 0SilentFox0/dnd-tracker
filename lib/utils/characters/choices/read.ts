@@ -1,5 +1,6 @@
 import { CHOICE_KINDS } from '@/lib/constants/choices';
 import { isRecord } from '@/lib/utils/common/is-record';
+import { fromJson } from '@/lib/utils/common/json';
 import type { Ability } from '@/types/abilities';
 import type {
     CharacterFeat,
@@ -73,7 +74,7 @@ function readOption(raw: unknown): ChoiceOption[] {
 
     return [
         {
-            ...(raw as unknown as ChoiceOption),
+            ...fromJson<ChoiceOption>(raw),
             abilities: Array.isArray(raw.abilities)
                 ? (raw.abilities as Ability[])
                 : [],
@@ -104,7 +105,7 @@ export function readChoices(raw: unknown): Choice[] {
 
         return [
             {
-                ...(c as unknown as Choice),
+                ...fromJson<Choice>(c),
                 level,
                 count: count as Choice['count'],
                 ...(Array.isArray(c.options) && {

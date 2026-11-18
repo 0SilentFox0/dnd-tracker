@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/db';
+import { fromJson } from '@/lib/utils/common/json';
 import { fullSpellSlots } from '@/lib/utils/spells/spell-slots';
 import type { SpellSlotProgression } from '@/types/races';
 
@@ -34,7 +35,7 @@ export async function deriveCharacterDefaults(
         spellSlots: fullSpellSlots(
             input.level,
             Array.isArray(race?.spellSlotProgression)
-                ? (race.spellSlotProgression as unknown as SpellSlotProgression[])
+                ? fromJson<SpellSlotProgression[]>(race.spellSlotProgression)
                 : null
         ),
     };

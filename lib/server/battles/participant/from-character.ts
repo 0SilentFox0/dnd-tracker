@@ -417,8 +417,14 @@ function resolveCharacterAbilities(
     >,
     rules: Ruleset
 ) {
-    const { skills, artifactRows, consumables, completed, resolvedClasses, race } =
-        refs;
+    const {
+        skills,
+        artifactRows,
+        consumables,
+        completed,
+        resolvedClasses,
+        race,
+    } = refs;
 
     return [
         ...collectCharacterAbilities(
@@ -452,11 +458,17 @@ function participantAbilities(a: {
     rules: Ruleset;
     race: Awaited<ReturnType<typeof loadCharacterBuildRefs>>['race'];
     resolvedClasses: ResolvedClasses;
-    baseStats: ReturnType<NonNullable<RuleSystem['combat']['baseStats']>> | undefined;
-    equipmentGear: ReturnType<NonNullable<RuleSystem['equipment']>['armourAp']> | undefined;
+    baseStats:
+        | ReturnType<NonNullable<RuleSystem['combat']['baseStats']>>
+        | undefined;
+    equipmentGear:
+        | ReturnType<NonNullable<RuleSystem['equipment']>['armourAp']>
+        | undefined;
     primaryAbility: AbilityKey | undefined;
     proficiencyBonus: number;
-    classProficiency: ReturnType<ReturnType<typeof proficiencyOf>['fromClasses']> | undefined;
+    classProficiency:
+        | ReturnType<ReturnType<typeof proficiencyOf>['fromClasses']>
+        | undefined;
     saveProficiencies: AbilityKey[];
     dndSkillProficiencies: NonNullable<
         BattleParticipant['abilities']['skillProficiencies']
@@ -517,6 +529,58 @@ function participantAbilities(a: {
         ...(dndSkillProficiencies.length && {
             skillProficiencies: dndSkillProficiencies,
         }),
+    };
+}
+
+function ingredientStockOf(character: CharacterFromPrisma, rules: Ruleset) {
+    return rules.spellIngredients.enabled &&
+        character.controlledBy &&
+        character.controlledBy !== CONTROLLED_BY_DM
+        ? buildIngredientStock(character.inventory, {
+              withPurse: rules.spellIngredients.autoPay,
+              value: currencyValueOf(rules),
+          })
+        : undefined;
+}
+
+function basicInfoOf(
+    character: CharacterFromPrisma,
+    battleId: string,
+    side: ParticipantSide,
+    instanceNumber?: number
+): BattleParticipant['basicInfo'] {
+    return {
+        id: `${character.id}-${instanceNumber || 0}-${Date.now()}`,
+        battleId,
+        sourceId: character.id,
+        sourceType: ParticipantSourceType.CHARACTER,
+        instanceNumber: instanceNumber || undefined,
+        instanceId: instanceNumber
+            ? `${character.id}-${instanceNumber - 1}`
+            : undefined,
+        name: character.name,
+        avatar: character.avatar || undefined,
+        side,
+        controlledBy: character.controlledBy || CONTROLLED_BY_DM,
+    };
+}
+
+function combatStatsOf(
+    character: CharacterFromPrisma,
+    baseStats: { speed?: number } | undefined,
+    computedMaxHp: number
+): BattleParticipant['combatStats'] {
+    return {
+        maxHp: computedMaxHp,
+        currentHp: computedMaxHp,
+        tempHp: 0,
+        armorClass: character.armorClass,
+        speed: baseStats?.speed ?? character.speed,
+        morale: (character as { morale?: number }).morale || 0,
+        moraleCap: 0,
+        status: computedMaxHp <= 0 ? CombatStatus.DEAD : CombatStatus.ACTIVE,
+        minTargets: character.minTargets ?? 1,
+        maxTargets: character.maxTargets ?? 1,
     };
 }
 
@@ -601,15 +665,7 @@ export async function createBattleParticipantFromCharacter(
         rules
     );
 
-    const ingredientStock =
-        rules.spellIngredients.enabled &&
-        character.controlledBy &&
-        character.controlledBy !== CONTROLLED_BY_DM
-            ? buildIngredientStock(character.inventory, {
-                  withPurse: rules.spellIngredients.autoPay,
-                  value: currencyValueOf(rules),
-              })
-            : undefined;
+    const ingredientStock = ingredientStockOf(character, rules);
 
     const pools = {
         ...(resolvedClasses ? classPools(resolvedClasses) : {}),
@@ -619,20 +675,7 @@ export async function createBattleParticipantFromCharacter(
     const baseStats = ruleSystemOf(rules).combat.baseStats?.(character);
 
     const participant: BattleParticipant = {
-        basicInfo: {
-            id: `${character.id}-${instanceNumber || 0}-${Date.now()}`,
-            battleId,
-            sourceId: character.id,
-            sourceType: ParticipantSourceType.CHARACTER,
-            instanceNumber: instanceNumber || undefined,
-            instanceId: instanceNumber
-                ? `${character.id}-${instanceNumber - 1}`
-                : undefined,
-            name: character.name,
-            avatar: character.avatar || undefined,
-            side,
-            controlledBy: character.controlledBy || CONTROLLED_BY_DM,
-        },
+        basicInfo: basicInfoOf(character, battleId, side, instanceNumber),
         abilities: participantAbilities({
             character,
             rules,
@@ -646,19 +689,7 @@ export async function createBattleParticipantFromCharacter(
             saveProficiencies,
             dndSkillProficiencies,
         }),
-        combatStats: {
-            maxHp: computedMaxHp,
-            currentHp: computedMaxHp,
-            tempHp: 0,
-            armorClass: character.armorClass,
-            speed: baseStats?.speed ?? character.speed,
-            morale: (character as { morale?: number }).morale || 0,
-            moraleCap: 0,
-            status:
-                computedMaxHp <= 0 ? CombatStatus.DEAD : CombatStatus.ACTIVE,
-            minTargets: character.minTargets ?? 1,
-            maxTargets: character.maxTargets ?? 1,
-        },
+        combatStats: combatStatsOf(character, baseStats, computedMaxHp),
         spellcasting,
         battleData: {
             attacks,

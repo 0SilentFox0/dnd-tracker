@@ -12,6 +12,7 @@ import type {
 
 import { BATTLE_LOG_RECENT_EVENTS } from '@/lib/constants/battle';
 import { KNOWLEDGE_EVENT_TYPES } from '@/lib/utils/battle/view/knowledge';
+import { fromJson } from '@/lib/utils/common/json';
 import type { BattleParticipant } from '@/types/battle';
 import type { BattleAction } from '@/types/battle-actions';
 
@@ -32,7 +33,7 @@ type EventRow = Prisma.BattleEventGetPayload<{ select: typeof EVENT_SELECT }>;
 
 function toActions(rows: EventRow[], battleId: string): BattleAction[] {
     return rows.map((r) =>
-        eventToBattleAction(r as unknown as StoredBattleEvent, battleId, {
+        eventToBattleAction(fromJson<StoredBattleEvent>(r), battleId, {
             createdAt: r.createdAt,
             cancelledAt: r.cancelledAt,
         })
@@ -91,11 +92,11 @@ export async function loadAllEvents(
 
     return rows.map((r) =>
         eventToBattleAction(
-            {
+            fromJson<StoredBattleEvent>({
                 ...r,
                 targets: [],
                 resultText: '',
-            } as unknown as StoredBattleEvent,
+            }),
             battleId
         )
     );
@@ -121,7 +122,7 @@ export async function loadSnapshotsFrom(
 
     return rows.map((r) => ({
         seq: r.seq,
-        state: r.state as unknown as SnapshotState,
+        state: fromJson<SnapshotState>(r.state),
     }));
 }
 
@@ -215,11 +216,11 @@ export async function loadKnowledgeEvents(
 
     return rows.map((r) =>
         eventToBattleAction(
-            {
+            fromJson<StoredBattleEvent>({
                 ...r,
                 hpChanges: [],
                 resultText: '',
-            } as unknown as StoredBattleEvent,
+            }),
             battleId
         )
     );

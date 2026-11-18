@@ -40,6 +40,7 @@ import { choicesStateOf } from '@/lib/utils/characters/choices/picks';
 import { keepStoredPicks } from '@/lib/utils/characters/choices/picks';
 import { heroInitiativeRange } from '@/lib/utils/characters/initiative-range';
 import { seenLevelOnLevelChange } from '@/lib/utils/characters/seen-level';
+import { fromJson, toInputJson } from '@/lib/utils/common/json';
 import {
     levelNotificationEvents,
     spellNotificationEvents,
@@ -216,7 +217,7 @@ async function computeUpdate(
         : undefined;
 
     const progression = Array.isArray(race?.spellSlotProgression)
-        ? (race.spellSlotProgression as unknown as SpellSlotProgression[])
+        ? fromJson<SpellSlotProgression[]>(race.spellSlotProgression)
         : null;
 
     const restoredSlots = clearingClasses
@@ -285,9 +286,8 @@ function updateWriter({
                     data.characteristics) as Prisma.InputJsonValue | undefined,
                 backgroundChoices: undefined,
                 backgroundFeatPicks: undefined,
-                classes: classes as unknown as
-                    | Prisma.InputJsonValue
-                    | undefined,
+                classes:
+                    classes === undefined ? undefined : toInputJson(classes),
                 avatar,
                 level: computed.finalLevel,
                 ...(computed.abilityScores ?? {}),
@@ -320,6 +320,114 @@ function updateWriter({
     };
 }
 
+type PatchWriteCtx = {
+    gate: Gate;
+    data: Extract<
+        Awaited<ReturnType<typeof editableData>>,
+        { data: unknown }
+    >['data'];
+    resolved: Awaited<ReturnType<typeof resolveClasses>>;
+    computed: Awaited<ReturnType<typeof computeUpdate>>['computed'];
+    writeUpdate: ReturnType<typeof updateWriter>;
+    system: ReturnType<typeof ruleSystemOf>;
+    changesBackground: boolean;
+    guardsLedger: boolean;
+};
+
+async function patchWithFresh(
+    tx: Prisma.TransactionClient,
+    {
+        gate,
+        data,
+        resolved,
+        computed,
+        writeUpdate,
+        system,
+        changesBackground,
+        guardsLedger,
+    }: PatchWriteCtx
+) {
+    const { access, character } = gate;
+
+    const { campaign, isDM } = access;
+
+    const campaignId = character.campaignId;
+
+    const characterId = character.id;
+
+    await lockCharacters(tx, [characterId]);
+
+    const fresh = await tx.character.findUnique({
+        where: { id: characterId },
+    });
+
+    if (!fresh) throw new ContentError(API_ERRORS.CHARACTER_NOT_FOUND, 404);
+
+    const classes = data.classes
+        ? keepStoredPicks(data.classes, fresh.classes)
+        : undefined;
+
+    const before = choicesStateOf(fresh);
+
+    const choices = changesBackground
+        ? await resolveCharacterChoices({
+              db: tx,
+              campaignId,
+              rules: campaign.rules,
+              isDM,
+              character: {
+                  ...withColumnView(fresh, system),
+                  ...computed.abilityScores,
+                  level: resolved.finalLevel,
+              },
+              before,
+              after: {
+                  ...before,
+                  ...mergeBackground(before, data),
+                  classes: classes ?? before.classes,
+              },
+          })
+        : null;
+
+    if (choices && !choices.ok) throw choices.error;
+
+    const characteristics =
+        guardsLedger && data.characteristics
+            ? ruleSystemOf(campaign.rules).characteristics.reconcile?.(
+                  fresh.characteristics,
+                  data.characteristics,
+                  { isDM, baseline: data.systemBaseline }
+              )
+            : undefined;
+
+    return writeUpdate(
+        tx,
+        classes,
+        choices?.ok ? choices.fields : undefined,
+        characteristics,
+        fresh.characteristics
+    );
+}
+
+async function patchPlain(
+    tx: Prisma.TransactionClient,
+    { gate, resolved, writeUpdate }: PatchWriteCtx
+) {
+    const characterId = gate.character.id;
+
+    const fresh = (await lockCharacters(tx, [characterId])).get(characterId);
+
+    if (!fresh) throw new ContentError(API_ERRORS.CHARACTER_NOT_FOUND, 404);
+
+    return writeUpdate(
+        tx,
+        resolved.classesInput,
+        undefined,
+        undefined,
+        fresh.characteristics
+    );
+}
+
 async function patchCore(gate: Gate, parsed: Parsed) {
     const system = ruleSystemOf(gate.access.campaign.rules);
 
@@ -327,8 +435,7 @@ async function patchCore(gate: Gate, parsed: Parsed) {
         where: { id: gate.character.id },
     });
 
-    if (!stored)
-        throw new ContentError(API_ERRORS.CHARACTER_NOT_FOUND, 404);
+    if (!stored) throw new ContentError(API_ERRORS.CHARACTER_NOT_FOUND, 404);
 
     gate = { ...gate, character: withColumnView(stored, system) };
 
@@ -382,87 +489,21 @@ async function patchCore(gate: Gate, parsed: Parsed) {
         data.characteristics && ruleSystemOf(campaign.rules).advancement
     );
 
+    const patchCtx: PatchWriteCtx = {
+        gate,
+        data,
+        resolved,
+        computed,
+        writeUpdate,
+        system,
+        changesBackground,
+        guardsLedger,
+    };
+
     const updatedCharacter =
         data.classes || changesBackground || guardsLedger
-            ? await prisma.$transaction(async (tx) => {
-                  await lockCharacters(tx, [characterId]);
-
-                  const fresh = await tx.character.findUnique({
-                      where: { id: characterId },
-                  });
-
-                  if (!fresh)
-                      throw new ContentError(
-                          API_ERRORS.CHARACTER_NOT_FOUND,
-                          404
-                      );
-
-                  const classes = data.classes
-                      ? keepStoredPicks(data.classes, fresh.classes)
-                      : undefined;
-
-                  const before = choicesStateOf(fresh);
-
-                  const choices = changesBackground
-                      ? await resolveCharacterChoices({
-                            db: tx,
-                            campaignId,
-                            rules: campaign.rules,
-                            isDM,
-                            character: {
-                                ...withColumnView(fresh, system),
-                                ...computed.abilityScores,
-                                level: resolved.finalLevel,
-                            },
-                            before,
-                            after: {
-                                ...before,
-                                ...mergeBackground(before, data),
-                                classes: classes ?? before.classes,
-                            },
-                        })
-                      : null;
-
-                  if (choices && !choices.ok) throw choices.error;
-
-                  const characteristics =
-                      guardsLedger && data.characteristics
-                          ? ruleSystemOf(
-                                campaign.rules
-                            ).characteristics.reconcile?.(
-                                fresh.characteristics,
-                                data.characteristics,
-                                { isDM, baseline: data.systemBaseline }
-                            )
-                          : undefined;
-
-                  return writeUpdate(
-                      tx,
-                      classes,
-                      choices?.ok ? choices.fields : undefined,
-                      characteristics,
-                      fresh.characteristics
-                  );
-              })
-            : await prisma.$transaction(async (tx) => {
-                  const fresh = (await lockCharacters(tx, [characterId])).get(
-                      characterId
-                  );
-
-                  if (!fresh)
-                      throw new ContentError(
-                          API_ERRORS.CHARACTER_NOT_FOUND,
-                          404
-                      );
-
-                  return writeUpdate(
-                      tx,
-                      resolved.classesInput,
-                      undefined,
-                      undefined,
-                      fresh.characteristics
-                  );
-              });
+            ? await prisma.$transaction((tx) => patchWithFresh(tx, patchCtx))
+            : await prisma.$transaction((tx) => patchPlain(tx, patchCtx));
 
     await notifyCharacterOwners({
         campaignId,

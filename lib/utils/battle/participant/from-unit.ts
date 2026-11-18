@@ -17,6 +17,7 @@ import { collectUnitAbilities } from '@/lib/utils/abilities/build/collect';
 import { immunityAbilities } from '@/lib/utils/abilities/build/immunities';
 import { resolveLimitFormulas } from '@/lib/utils/abilities/build/limit-formulas';
 import { getAbilityModifier } from '@/lib/utils/common/calculations';
+import { fromJson } from '@/lib/utils/common/json';
 import { spellGrantFields, spellPoolKey } from '@/lib/utils/items/pools';
 import { getUnitImmunities } from '@/lib/utils/races/race-effects';
 import { type Ruleset } from '@/lib/utils/rules';
@@ -47,9 +48,9 @@ function monsterSpellcasting(unit: UnitFromPrisma): {
     const monster = isMonster5e(unit);
 
     const config = monster
-        ? ((unit.spellcasting ?? { spells: [] }) as unknown as NonNullable<
-              Unit['spellcasting']
-          >)
+        ? fromJson<NonNullable<Unit['spellcasting']>>(
+              unit.spellcasting ?? { spells: [] }
+          )
         : { spells: [] };
 
     const configuredSpells = Array.isArray(config.spells) ? config.spells : [];
@@ -334,7 +335,7 @@ export async function createBattleParticipantFromUnit(
         ...collectUnitAbilities(unit, race),
         ...(monster ? multiattackAbilities(unit) : []),
         ...monsterSenseAbilities(unit, statblock.senses),
-        ...immunityAbilities(getUnitImmunities(unit as unknown as Unit), {
+        ...immunityAbilities(getUnitImmunities(fromJson<Unit>(unit)), {
             type: 'unit',
             id: unit.id,
         }),

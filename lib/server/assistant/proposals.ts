@@ -53,7 +53,7 @@ import type {
     AiProposalStatus,
     ScenarioAiOp,
 } from '@/types/ai';
-import type { ScenarioPage } from '@/types/scenario';
+import type { ScenarioContent, ScenarioPage } from '@/types/scenario';
 import type { SlideDeck } from '@/types/show';
 
 const SELECT = {
@@ -282,6 +282,118 @@ async function settle(
     return { ok: false, status, error, settled };
 }
 
+type Newcomer = Extract<ScenarioAiOp, { op: 'createAcquaintance' }>;
+
+type CreatedAcquaintance = { id: string; name: string; description: string };
+
+async function registerNewcomers(
+    tx: Tx,
+    campaignId: string,
+    newcomers: Newcomer[]
+) {
+    const ids = new Map<string, string>();
+
+    const byName =
+        newcomers.length > 0
+            ? await findAcquaintancesByNames(
+                  tx,
+                  campaignId,
+                  newcomers.map((n) => n.name)
+              )
+            : new Map<string, string>();
+
+    const created: CreatedAcquaintance[] = [];
+
+    for (const n of newcomers) {
+        const key = n.name.trim().toLowerCase();
+
+        const existing = byName.get(key);
+
+        const id = existing ?? randomUUID();
+
+        byName.set(key, id);
+        ids.set(n.ref, id);
+
+        if (!existing)
+            created.push({
+                id,
+                name: n.name.trim(),
+                description: n.description,
+            });
+    }
+
+    return { ids, created };
+}
+
+async function checkApplied(
+    tx: Tx,
+    campaignId: string,
+    content: ScenarioContent,
+    finalOps: ScenarioAiOp[],
+    created: CreatedAcquaintance[]
+): Promise<
+    | { ok: false; failure: Extract<ApplyResult, { ok: false }> }
+    | { ok: true; sources: Map<string, string | undefined> }
+> {
+    const foreign = acquaintanceMentionIds(finalOps).filter(
+        (id) => !created.some((c) => c.id === id)
+    );
+
+    if (
+        foreign.length > 0 &&
+        (await tx.acquaintance.count({
+            where: { campaignId, id: { in: foreign } },
+        })) !== foreign.length
+    )
+        return {
+            ok: false as const,
+            failure: {
+                ok: false as const,
+                status: 404,
+                error: API_ERRORS.ACQUAINTANCE_NOT_FOUND,
+            },
+        };
+
+    if (!scenarioContentSchema.safeParse(content).success)
+        return {
+            ok: false as const,
+            failure: {
+                ok: false as const,
+                status: 400,
+                error: API_ERRORS.AI_PROPOSAL_INVALID,
+            },
+        };
+
+    if (Buffer.byteLength(JSON.stringify(content)) > SCENARIO_MAX_CONTENT_BYTES)
+        return {
+            ok: false as const,
+            failure: {
+                ok: false as const,
+                status: 413,
+                error: API_ERRORS.SCENARIO_TOO_LARGE,
+            },
+        };
+
+    const sources = new Map(
+        created.map((n) => [
+            n.id,
+            sectionOfMention(finalOps, n.id) ?? content.sections[0]?.id,
+        ])
+    );
+
+    if ([...sources.values()].some((v) => !v))
+        return {
+            ok: false as const,
+            failure: {
+                ok: false as const,
+                status: 400,
+                error: API_ERRORS.AI_PROPOSAL_INVALID,
+            },
+        };
+
+    return { ok: true as const, sources };
+}
+
 async function applyClaimed(
     tx: Tx,
     campaignId: string,
@@ -293,7 +405,11 @@ async function applyClaimed(
 
     const ops = readProposalOps(proposal.ops);
 
-    if (ops.length === 0 && Array.isArray(proposal.ops) && proposal.ops.length > 0)
+    if (
+        ops.length === 0 &&
+        Array.isArray(proposal.ops) &&
+        proposal.ops.length > 0
+    )
         throw new Error('ai proposal ops are unreadable');
 
     const slideOps = ops.filter((o): o is AddSlideAiOp => o.op === 'addSlide');
@@ -334,36 +450,7 @@ async function applyClaimed(
 
     const content = readContentStrict(page.content);
 
-    const ids = new Map<string, string>();
-
-    const byName =
-        newcomers.length > 0
-            ? await findAcquaintancesByNames(
-                  tx,
-                  campaignId,
-                  newcomers.map((n) => n.name)
-              )
-            : new Map<string, string>();
-
-    const created: { id: string; name: string; description: string }[] = [];
-
-    for (const n of newcomers) {
-        const key = n.name.trim().toLowerCase();
-
-        const existing = byName.get(key);
-
-        const id = existing ?? randomUUID();
-
-        byName.set(key, id);
-        ids.set(n.ref, id);
-
-        if (!existing)
-            created.push({
-                id,
-                name: n.name.trim(),
-                description: n.description,
-            });
-    }
+    const { ids, created } = await registerNewcomers(tx, campaignId, newcomers);
 
     const finalOps =
         newcomers.length > 0 ? substituteRefs(scenarioOps, ids) : scenarioOps;
@@ -388,48 +475,17 @@ async function applyClaimed(
             API_ERRORS.AI_PROPOSAL_INVALID
         );
 
-    const foreign = acquaintanceMentionIds(finalOps).filter(
-        (id) => !created.some((c) => c.id === id)
+    const checked = await checkApplied(
+        tx,
+        campaignId,
+        applied.content,
+        finalOps,
+        created
     );
 
-    if (
-        foreign.length > 0 &&
-        (await tx.acquaintance.count({
-            where: { campaignId, id: { in: foreign } },
-        })) !== foreign.length
-    )
-        return {
-            ok: false,
-            status: 404,
-            error: API_ERRORS.ACQUAINTANCE_NOT_FOUND,
-        };
+    if (!checked.ok) return checked.failure;
 
-    if (!scenarioContentSchema.safeParse(applied.content).success)
-        return {
-            ok: false,
-            status: 400,
-            error: API_ERRORS.AI_PROPOSAL_INVALID,
-        };
-
-    if (
-        Buffer.byteLength(JSON.stringify(applied.content)) >
-        SCENARIO_MAX_CONTENT_BYTES
-    )
-        return { ok: false, status: 413, error: API_ERRORS.SCENARIO_TOO_LARGE };
-
-    const sources = new Map(
-        created.map((n) => [
-            n.id,
-            sectionOfMention(finalOps, n.id) ?? applied.content.sections[0]?.id,
-        ])
-    );
-
-    if ([...sources.values()].some((v) => !v))
-        return {
-            ok: false,
-            status: 400,
-            error: API_ERRORS.AI_PROPOSAL_INVALID,
-        };
+    const { sources } = checked;
 
     await snapshotIfDue(tx, page.id, userId, { force: true });
     await pruneVersions(tx, page.id);

@@ -1,5 +1,6 @@
 import type { Ability, ConversionIssue } from '@/lib/utils/abilities/schema';
 import { readChoices } from '@/lib/utils/characters/choices/read';
+import { fromJson } from '@/lib/utils/common/json';
 import type { Race, RaceRow } from '@/types/races';
 
 export function toRace(
@@ -23,10 +24,10 @@ export function toRace(
             : [],
         passiveAbility:
             passive && typeof passive === 'object' && !Array.isArray(passive)
-                ? (passive as unknown as Race['passiveAbility'])
+                ? fromJson<Race['passiveAbility']>(passive)
                 : null,
         spellSlotProgression: Array.isArray(row.spellSlotProgression)
-            ? (row.spellSlotProgression as unknown as Race['spellSlotProgression'])
+            ? fromJson<Race['spellSlotProgression']>(row.spellSlotProgression)
             : undefined,
         ...(Array.isArray(row.choices) &&
             row.choices.length > 0 && { choices: readChoices(row.choices) }),

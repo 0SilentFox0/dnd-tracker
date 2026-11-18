@@ -26,6 +26,7 @@ import { privateJson } from '@/lib/utils/api/api-response';
 import { checkRateLimit, rateLimitResponse } from '@/lib/utils/api/rate-limit';
 import { isSameOriginRequest } from '@/lib/utils/api/same-origin';
 import { isRecord } from '@/lib/utils/common/is-record';
+import { fromJson } from '@/lib/utils/common/json';
 import {
     COMPENDIUM_LIMITS,
     CompendiumError,
@@ -138,7 +139,7 @@ async function reportsResponse({ id, url, offset, t }: RouteScope) {
                       report: mediaPresentation(
                           translateCompendiumReport(
                               t,
-                              run.report as unknown as CompendiumReport
+                              fromJson<CompendiumReport>(run.report)
                           )
                       ),
                   }
@@ -180,7 +181,7 @@ async function entriesResponse({ id, url, offset, t }: RouteScope) {
                       isRecord(item)
                           ? translateCompendiumIssue(
                                 t,
-                                item as unknown as ImportIssue
+                                fromJson<ImportIssue>(item)
                             )
                           : item
                   )

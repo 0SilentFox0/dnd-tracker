@@ -13,6 +13,7 @@ import {
 } from '@/lib/server/show/show-store';
 import { triggerWorldChanged } from '@/lib/server/world/world-events';
 import { removeWorldMapFiles } from '@/lib/supabase/world-map-storage';
+import { fromJson } from '@/lib/utils/common/json';
 import type { ShowState } from '@/types/show';
 
 const battlePublication = z.object({
@@ -103,7 +104,7 @@ export const ASSISTANT_EFFECT_HANDLERS: EffectHandlers = {
             })
             .parse(payload);
 
-        await publishShow(show.campaignId, show.show as unknown as ShowState, {
+        await publishShow(show.campaignId, fromJson<ShowState>(show.show), {
             strict: true,
         });
     },

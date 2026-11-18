@@ -1,3 +1,5 @@
+import type { z } from 'zod';
+
 import type { TableHashes } from './sync/types';
 import { assertNoLeak, findForeignContentIds } from './assert-no-leak';
 import {
@@ -32,22 +34,12 @@ export interface ImportLayer {
     overrides: Readonly<Record<string, string | null>>;
 }
 
-export async function importBundle(
-    tx: TemplateDb,
-    raw: Bundle,
-    targetCampaignId: string,
-    layer?: ImportLayer
-) {
-    const parsed = BundleSchema.safeParse(raw);
+const isOverrideId = (layer: ImportLayer | undefined, id: string) =>
+    !!layer && Object.hasOwn(layer.overrides, id);
 
-    if (!parsed.success)
-        throw new BundleInvalidError(
-            API_ERRORS.IMPORT_BUNDLE_BAD_FORMAT,
-            parsed.error.issues
-        );
+type ParsedBundle = z.infer<typeof BundleSchema>;
 
-    const bundle = parsed.data;
-
+function assertBackgroundRefs(bundle: ParsedBundle, layer?: ImportLayer) {
     for (const background of layer ? [] : bundle.backgrounds) {
         const error = backgroundReferenceError(
             {
@@ -60,12 +52,9 @@ export async function importBundle(
 
         if (error) throw new BundleInvalidError(error);
     }
+}
 
-    const isOverride = (id: string) =>
-        !!layer && Object.hasOwn(layer.overrides, id);
-
-    const warnings: string[] = [];
-
+function buildIdMap(tx: TemplateDb, bundle: ParsedBundle, layer?: ImportLayer) {
     const idMap = new Map<string, string>();
 
     for (const t of BUNDLE_TABLES) {
@@ -80,7 +69,10 @@ export async function importBundle(
                 );
 
             seen.add(row.id);
-            idMap.set(row.id, isOverride(row.id) ? row.id : newContentId());
+            idMap.set(
+                row.id,
+                isOverrideId(layer, row.id) ? row.id : newContentId()
+            );
         }
     }
 
@@ -122,31 +114,32 @@ export async function importBundle(
         }
     }
 
-    const foreign = layer
-        ? []
-        : await findForeignContentIds(
-              tx,
-              idCandidates(bundle),
-              new Set(idMap.keys())
-          );
+    return idMap;
+}
 
-    if (foreign.length > 0)
-        throw new BundleInvalidError(
-            API_ERRORS.BUNDLE_FOREIGN_CONTENT,
-            undefined,
-            { ids: foreign.slice(0, 5).join(', ') }
-        );
-
+function buildWrites({
+    bundle,
+    idMap,
+    layer,
+    targetCampaignId,
+    warnings,
+    hashes,
+    remappedRows,
+}: {
+    bundle: ParsedBundle;
+    idMap: Map<string, string>;
+    layer?: ImportLayer;
+    targetCampaignId: string;
+    warnings: string[];
+    hashes: TableHashes;
+    remappedRows: Record<string, unknown>[];
+}) {
     const idsByTable = new Map(
         BUNDLE_TABLES.map((t) => [
             t.key,
             new Set(bundle[t.key].map((r) => r.id)),
         ])
     );
-
-    const remappedRows: Record<string, unknown>[] = [];
-
-    const hashes: TableHashes = {};
 
     const writes = BUNDLE_TABLES.map((t) => {
         const rows = dropTakenSlugs(
@@ -176,7 +169,7 @@ export async function importBundle(
 
                 const stored = !layer
                     ? { id: idMap.get(row.id)!, sourceId: row.id, sourceHash }
-                    : isOverride(row.id)
+                    : isOverrideId(layer, row.id)
                       ? {
                             id: newContentId(),
                             sourceId: row.id,
@@ -201,6 +194,60 @@ export async function importBundle(
         ).map((row) => toPrismaJson(row, t));
 
         return { t, rows };
+    });
+
+    return writes;
+}
+
+export async function importBundle(
+    tx: TemplateDb,
+    raw: Bundle,
+    targetCampaignId: string,
+    layer?: ImportLayer
+) {
+    const parsed = BundleSchema.safeParse(raw);
+
+    if (!parsed.success)
+        throw new BundleInvalidError(
+            API_ERRORS.IMPORT_BUNDLE_BAD_FORMAT,
+            parsed.error.issues
+        );
+
+    const bundle = parsed.data;
+
+    assertBackgroundRefs(bundle, layer);
+
+    const warnings: string[] = [];
+
+    const idMap = buildIdMap(tx, bundle, layer);
+
+    const foreign = layer
+        ? []
+        : await findForeignContentIds(
+              tx,
+              idCandidates(bundle),
+              new Set(idMap.keys())
+          );
+
+    if (foreign.length > 0)
+        throw new BundleInvalidError(
+            API_ERRORS.BUNDLE_FOREIGN_CONTENT,
+            undefined,
+            { ids: foreign.slice(0, 5).join(', ') }
+        );
+
+    const remappedRows: Record<string, unknown>[] = [];
+
+    const hashes: TableHashes = {};
+
+    const writes = buildWrites({
+        bundle,
+        idMap,
+        layer,
+        targetCampaignId,
+        warnings,
+        hashes,
+        remappedRows,
     });
 
     assertNoLeak(

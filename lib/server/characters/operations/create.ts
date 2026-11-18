@@ -73,6 +73,144 @@ async function assertClassSkills({
         throw new ContentError(issues[0].message, 422, issues);
 }
 
+type NormalizedInput = CreateCharacterInput;
+
+type AppliedClasses = Extract<
+    Awaited<ReturnType<typeof applyClasses>>,
+    { ok: true }
+>['data'];
+
+async function createChoices(
+    {
+        campaignId,
+        campaign,
+        data,
+        entries,
+    }: {
+        campaignId: string;
+        campaign: CampaignScope['access']['campaign'];
+        data: NormalizedInput;
+        entries: CharacterClassEntry[];
+    },
+    fromClasses: AppliedClasses
+) {
+    const withChoices =
+        !!data.backgroundId ||
+        hasPicks(data.raceChoices) ||
+        (data.feats?.length ?? 0) > 0 ||
+        entries.some((e) => hasPicks(e.choices));
+
+    const choices = withChoices
+        ? await resolveCharacterChoices({
+              campaignId,
+              rules: campaign.rules,
+              isDM: true,
+              character: {
+                  race: data.race,
+                  level: fromClasses?.level ?? data.level,
+                  skills: data.skills,
+                  strength: data.strength,
+                  dexterity: data.dexterity,
+                  constitution: data.constitution,
+                  intelligence: data.intelligence,
+                  wisdom: data.wisdom,
+                  charisma: data.charisma,
+              },
+              before: { raceChoices: {}, feats: [], classes: [] },
+              after: {
+                  ...backgroundFields(data),
+                  raceChoices: data.raceChoices ?? {},
+                  feats: data.feats ?? [],
+                  classes: entries,
+              },
+          })
+        : null;
+
+    return choices;
+}
+
+function characterCreateData({
+    campaignId,
+    system,
+    data,
+    initiative,
+    fromClasses,
+    choices,
+    owner,
+    avatar,
+    spellSlots,
+    split,
+}: {
+    campaignId: string;
+    system: ReturnType<typeof ruleSystemOf>;
+    data: NormalizedInput;
+    initiative: number;
+    fromClasses: AppliedClasses;
+    choices: Awaited<ReturnType<typeof createChoices>>;
+    owner: { controlledBy: string };
+    avatar: { avatar?: string | null };
+    spellSlots: Prisma.InputJsonValue;
+    split: ReturnType<typeof splitColumnView>;
+}): Prisma.CharacterUncheckedCreateInput {
+    return {
+        campaignId,
+        type: data.type,
+        controlledBy: owner.controlledBy,
+        name: data.name,
+        level: fromClasses?.level ?? data.level,
+        class: fromClasses?.class ?? data.class ?? '',
+        subclass: fromClasses ? fromClasses.subclass : data.subclass,
+        classes: toInputJson(data.classes ?? []),
+        archetype: data.archetype ?? null,
+        race: data.race,
+        subrace: data.subrace,
+        alignment: data.alignment,
+        background: data.background,
+        avatar: avatar.avatar ?? undefined,
+
+        ...{
+            strength: data.strength,
+            dexterity: data.dexterity,
+            constitution: data.constitution,
+            intelligence: data.intelligence,
+            wisdom: data.wisdom,
+            charisma: data.charisma,
+            armorClass: data.armorClass,
+            initiative,
+            speed: data.speed,
+        },
+
+        savingThrows: data.savingThrows as Record<string, boolean>,
+        skills: data.skills as Record<string, boolean>,
+
+        spellcastingAbility:
+            fromClasses?.spellcastingAbility ?? data.spellcastingAbility,
+        spellSlots,
+        knownSpells: data.knownSpells,
+
+        languages: data.languages,
+        immunities: data.immunities || [],
+        proficiencies: data.proficiencies,
+
+        personalSkillId: data.personalSkillId ?? null,
+        primaryAbility: data.primaryAbility ?? null,
+
+        skillTreeProgress: {},
+        characteristics: (split.characteristics ??
+            data.characteristics ??
+            system.characteristics.defaults()) as
+            | Prisma.InputJsonObject
+            | undefined,
+        ...(system.resources?.seed &&
+            data.characteristics && {
+                resources: system.resources.seed(
+                    data.characteristics
+                ) as Prisma.InputJsonObject,
+            }),
+        ...(choices?.ok && choices.fields),
+    };
+}
+
 async function createCharacterCore(
     { access, campaignId }: CampaignScope,
     input: CreateCharacterInput
@@ -127,37 +265,10 @@ async function createCharacterCore(
         byId: applied.classesById,
     });
 
-    const withChoices =
-        !!data.backgroundId ||
-        hasPicks(data.raceChoices) ||
-        (data.feats?.length ?? 0) > 0 ||
-        entries.some((e) => hasPicks(e.choices));
-
-    const choices = withChoices
-        ? await resolveCharacterChoices({
-              campaignId,
-              rules: campaign.rules,
-              isDM: true,
-              character: {
-                  race: data.race,
-                  level: fromClasses?.level ?? data.level,
-                  skills: data.skills,
-                  strength: data.strength,
-                  dexterity: data.dexterity,
-                  constitution: data.constitution,
-                  intelligence: data.intelligence,
-                  wisdom: data.wisdom,
-                  charisma: data.charisma,
-              },
-              before: { raceChoices: {}, feats: [], classes: [] },
-              after: {
-                  ...backgroundFields(data),
-                  raceChoices: data.raceChoices ?? {},
-                  feats: data.feats ?? [],
-                  classes: entries,
-              },
-          })
-        : null;
+    const choices = await createChoices(
+        { campaignId, campaign, data, entries },
+        fromClasses
+    );
 
     if (choices && !choices.ok) throw choices.error;
 
@@ -183,64 +294,18 @@ async function createCharacterCore(
 
     try {
         const character = await prisma.character.create({
-            data: {
+            data: characterCreateData({
                 campaignId,
-                type: data.type,
-                controlledBy: owner.controlledBy,
-                name: data.name,
-                level: fromClasses?.level ?? data.level,
-                class: fromClasses?.class ?? data.class ?? '',
-                subclass: fromClasses ? fromClasses.subclass : data.subclass,
-                classes: toInputJson(data.classes ?? []),
-                archetype: data.archetype ?? null,
-                race: data.race,
-                subrace: data.subrace,
-                alignment: data.alignment,
-                background: data.background,
-                avatar: avatar.avatar ?? undefined,
-
-                ...{
-                    strength: data.strength,
-                    dexterity: data.dexterity,
-                    constitution: data.constitution,
-                    intelligence: data.intelligence,
-                    wisdom: data.wisdom,
-                    charisma: data.charisma,
-                    armorClass: data.armorClass,
-                    initiative,
-                    speed: data.speed,
-                },
-
-                savingThrows: data.savingThrows as Record<string, boolean>,
-                skills: data.skills as Record<string, boolean>,
-
-                spellcastingAbility:
-                    fromClasses?.spellcastingAbility ??
-                    data.spellcastingAbility,
+                system,
+                data,
+                initiative,
+                fromClasses,
+                choices,
+                owner,
+                avatar,
                 spellSlots,
-                knownSpells: data.knownSpells,
-
-                languages: data.languages,
-                immunities: data.immunities || [],
-                proficiencies: data.proficiencies,
-
-                personalSkillId: data.personalSkillId ?? null,
-                primaryAbility: data.primaryAbility ?? null,
-
-                skillTreeProgress: {},
-                characteristics: (split.characteristics ??
-                    data.characteristics ??
-                    system.characteristics.defaults()) as
-                    | Prisma.InputJsonObject
-                    | undefined,
-                ...(system.resources?.seed &&
-                    data.characteristics && {
-                        resources: system.resources.seed(
-                            data.characteristics
-                        ) as Prisma.InputJsonObject,
-                    }),
-                ...(choices?.ok && choices.fields),
-            },
+                split,
+            }),
             include: { user: { select: PUBLIC_USER_SELECT } },
         });
 

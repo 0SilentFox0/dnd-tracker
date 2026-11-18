@@ -1,9 +1,10 @@
-import type { PrismaClient } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
 
 import { bypassLayer } from '@/lib/db/content-layer';
+import { unsafeCast } from '@/lib/utils/common/cast';
 
 type Db = Pick<
-    PrismaClient,
+    Prisma.TransactionClient,
     'spell' | 'skill' | 'mainSkill' | 'unit' | 'artifact' | 'characterSkills'
 >;
 
@@ -66,10 +67,10 @@ export async function detachRefs(
                 ? { ...match, character: { campaignId } }
                 : { campaignId, ...match };
 
-        const delegate = db[model] as unknown as {
+        const delegate = unsafeCast<{
             updateMany(args: unknown): Promise<unknown>;
             deleteMany(args: unknown): Promise<unknown>;
-        };
+        }>(db[model]);
 
         await bypassLayer(() =>
             cascade

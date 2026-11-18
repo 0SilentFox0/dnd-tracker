@@ -216,13 +216,7 @@ async function applyItem(
                 ? DETACH_KIND_BY_TABLE[i.scope]
                 : undefined;
 
-        if (kind)
-            await detachRefs(
-                db as unknown as Parameters<typeof detachRefs>[0],
-                campaignId,
-                kind,
-                [i.localId, i.key]
-            );
+        if (kind) await detachRefs(db, campaignId, kind, [i.localId, i.key]);
 
         await bypassLayer(() =>
             delegateOf(db, t).deleteMany({

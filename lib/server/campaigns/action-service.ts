@@ -54,6 +54,7 @@ import type { Actor } from '@/lib/utils/api/actor';
 import { windowOf } from '@/lib/utils/api/page-of';
 import { isPlatformAdmin } from '@/lib/utils/api/platform-admin';
 import { requestDigest } from '@/lib/utils/battle/store/stable-json';
+import { asRecord } from '@/lib/utils/common/json';
 import { ownHandler } from '@/lib/utils/common/own-handler';
 import type { TemplateContentLocale } from '@/lib/utils/templates/manifest';
 
@@ -220,8 +221,7 @@ async function loadCampaignState(
                 ? Object.fromEntries(
                       Object.keys(DELETE_DEPENDENCIES).map((key) => [
                           key,
-                          (row as unknown as Record<string, unknown>)[key] ??
-                              [],
+                          asRecord(row)[key] ?? [],
                       ])
                   )
                 : null,

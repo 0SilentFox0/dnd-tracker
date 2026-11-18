@@ -12,7 +12,7 @@ import {
 } from './record-service';
 
 import { API_ERRORS } from '@/lib/constants/api-errors';
-import { DEFAULT_LOCALE } from '@/lib/i18n/config';
+import { DEFAULT_LOCALE, type Locale } from '@/lib/i18n/config';
 import { resultLabel } from '@/lib/server/assistant/result-labels';
 import type {
     ActionExecutionContext,
@@ -40,6 +40,100 @@ export type BattleOperationCommand = {
     expectedVersion: number;
     serverDice?: boolean;
 };
+
+const RECORD_OPERATIONS = [
+    'create',
+    'patch',
+    'delete',
+    'clear-history',
+    'audio',
+];
+
+function runRecordOperation(
+    actor: Actor,
+    command: BattleOperationCommand,
+    input: Record<string, unknown>,
+    locale: Locale,
+    execution?: ActionExecutionContext
+) {
+    return runGuardedBattleRecordOperation(
+        actor,
+        async () => {
+            if (!['create', 'clear-history'].includes(command.operation)) {
+                const row = await battleRecord(
+                    actor.campaignId,
+                    command.battleId
+                );
+
+                if (row.version !== command.expectedVersion)
+                    throw new ContentError(
+                        API_ERRORS.BATTLE_CHANGED_PREVIEW_AGAIN,
+                        409
+                    );
+            }
+
+            const data = await writeBattleRecord(
+                actor.campaignId,
+                actor.userId,
+                command.operation as RecordOperation,
+                command.battleId,
+                input,
+                execution
+            );
+
+            const battleId =
+                command.operation === 'create' && 'id' in data
+                    ? data.id
+                    : command.battleId;
+
+            return {
+                data: {
+                    operation: command.operation,
+                    battleId,
+                    ...('version' in data ? { version: data.version } : {}),
+                } as Prisma.JsonValue,
+                affected: [
+                    {
+                        domain: 'battles',
+                        id: battleId || actor.campaignId,
+                        name: resultLabel(locale, 'battle'),
+                    },
+                ],
+                warnings: [],
+            };
+        },
+        execution
+    );
+}
+
+function pipelineDepsFor(
+    execution: ActionExecutionContext | undefined,
+    injectedDeps: PipelineDeps | undefined
+): PipelineDeps {
+    const base =
+        injectedDeps ??
+        (execution ? scopedPipelineDeps(execution.db) : defaultPipelineDeps);
+
+    return execution
+        ? {
+              ...base,
+              publish: (messages) =>
+                  execution.afterCommit({
+                      key: `${execution.intentId}:battle-publish`,
+                      kind: 'publish',
+                      payload: JSON.parse(
+                          JSON.stringify({ battleMessages: messages })
+                      ) as Prisma.JsonValue,
+                  }),
+              onLeftActive: (campaignId, battleId) =>
+                  execution.afterCommit({
+                      key: `${execution.intentId}:battle-left-active`,
+                      kind: 'invalidate',
+                      payload: { campaignId, battleId, battleLeftActive: true },
+                  }),
+          }
+        : base;
+}
 
 /** Internal actor entry point; catalog/transport registration belongs to T14. */
 export async function executeBattleOperation(
@@ -70,60 +164,8 @@ export async function executeBattleOperation(
             ? (command.input as Record<string, unknown>)
             : {};
 
-    if (
-        ['create', 'patch', 'delete', 'clear-history', 'audio'].includes(
-            command.operation
-        )
-    ) {
-        return runGuardedBattleRecordOperation(
-            actor,
-            async () => {
-                if (!['create', 'clear-history'].includes(command.operation)) {
-                    const row = await battleRecord(
-                        actor.campaignId,
-                        command.battleId
-                    );
-
-                    if (row.version !== command.expectedVersion)
-                        throw new ContentError(
-                            API_ERRORS.BATTLE_CHANGED_PREVIEW_AGAIN,
-                            409
-                        );
-                }
-
-                const data = await writeBattleRecord(
-                    actor.campaignId,
-                    actor.userId,
-                    command.operation as RecordOperation,
-                    command.battleId,
-                    input,
-                    execution
-                );
-
-                const battleId =
-                    command.operation === 'create' && 'id' in data
-                        ? data.id
-                        : command.battleId;
-
-                return {
-                    data: {
-                        operation: command.operation,
-                        battleId,
-                        ...('version' in data ? { version: data.version } : {}),
-                    } as Prisma.JsonValue,
-                    affected: [
-                        {
-                            domain: 'battles',
-                            id: battleId || actor.campaignId,
-                            name: resultLabel(locale, 'battle'),
-                        },
-                    ],
-                    warnings: [],
-                };
-            },
-            execution
-        );
-    }
+    if (RECORD_OPERATIONS.includes(command.operation))
+        return runRecordOperation(actor, command, input, locale, execution);
 
     const params = {
         id: actor.campaignId,
@@ -145,29 +187,7 @@ export async function executeBattleOperation(
             ...withServerBattleDice(command.operation, options),
         };
 
-    const base =
-        injectedDeps ??
-        (execution ? scopedPipelineDeps(execution.db) : defaultPipelineDeps);
-
-    const deps: PipelineDeps = execution
-        ? {
-              ...base,
-              publish: (messages) =>
-                  execution.afterCommit({
-                      key: `${execution.intentId}:battle-publish`,
-                      kind: 'publish',
-                      payload: JSON.parse(
-                          JSON.stringify({ battleMessages: messages })
-                      ) as Prisma.JsonValue,
-                  }),
-              onLeftActive: (campaignId, battleId) =>
-                  execution.afterCommit({
-                      key: `${execution.intentId}:battle-left-active`,
-                      kind: 'invalidate',
-                      payload: { campaignId, battleId, battleLeftActive: true },
-                  }),
-          }
-        : base;
+    const deps = pipelineDepsFor(execution, injectedDeps);
 
     const run = async (): Promise<ActionResult> => {
         const outcome = await runGuardedBattleOperationCore(

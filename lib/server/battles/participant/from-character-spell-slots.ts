@@ -3,6 +3,7 @@ import type {
     CampaignSpellContext,
     CharacterFromPrisma,
 } from '@/lib/utils/battle/types/participant';
+import { fromJson } from '@/lib/utils/common/json';
 import { classSpellSlots } from '@/lib/utils/spells/class-slots';
 import { calculateSpellSlotsForLevel } from '@/lib/utils/spells/spell-slots';
 import type { ResolvedClassEntry } from '@/types/classes';
@@ -56,7 +57,7 @@ export async function resolveSpellSlotsFromCharacter(
     const progression = (
         race?.spellSlotProgression
             ? Array.isArray(race.spellSlotProgression)
-                ? (race.spellSlotProgression as unknown as SpellSlotProgression[])
+                ? fromJson<SpellSlotProgression[]>(race.spellSlotProgression)
                 : []
             : []
     ) as SpellSlotProgression[];
