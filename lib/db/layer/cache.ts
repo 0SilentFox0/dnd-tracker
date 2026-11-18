@@ -55,7 +55,7 @@ class Lru<V> {
     }
 }
 
-/** Campaigns known to have no base (value = time marked). baseSourceId changes once, at legacy migration (Part 5); TTL bounds stale marks on other instances. */
+/** Campaigns known to have no base (value = time marked). baseSourceId changes once, at legacy migration; TTL bounds stale marks on other instances. */
 const plain = new Lru<number>(PLAIN_MAX);
 
 /** Shared by every campaign on the same published version: key = `source|version|model|query`. Rows are immutable per version. */

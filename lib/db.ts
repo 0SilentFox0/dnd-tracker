@@ -3,14 +3,6 @@ import { PrismaClient } from '@prisma/client';
 import { contentLayer } from '@/lib/db/content-layer';
 import { createScopedDatabase } from '@/lib/server/content/write-context';
 
-/**
- * Supabase pooler (рекомендовано для serverless/Vercel):
- * - Host: pooler.supabase.co (або aws-*-*.pooler.supabase.com)
- * - Port: 6543 (Transaction mode)
- * - Query: ?pgbouncer=true
- * Приклад: postgresql://postgres.[REF]:[PWD]@aws-1-eu-central-1.pooler.supabase.com:6543/postgres?sslmode=require&pgbouncer=true
- */
-
 const globalForPrisma = globalThis as unknown as {
     prisma: PrismaClient | undefined;
 };
@@ -80,8 +72,7 @@ const basePrisma =
                 url: withSafePoolLimits(process.env.DATABASE_URL),
             },
         },
-        // Для Transaction mode (порт 6543) вимикаємо prepared statements
-        // Prisma автоматично визначає це, але можна явно вказати
+        // Transaction mode (port 6543) has no prepared statements
     });
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = basePrisma;
