@@ -247,7 +247,7 @@ export const countModuleSurface = (
 
     return [
         new RegExp(`\\bcase\\s*${Q}(?:${alt})${Q}`, 'g'),
-        new RegExp(`${Q}(?:${alt})${Q}\\s*:`, 'g'),
+        new RegExp(`(?<!\\bcase\\s*)${Q}(?:${alt})${Q}\\s*:`, 'g'),
         new RegExp(`^\\s*(?:${alt})\\s*:`, 'gm'),
         new RegExp(`${Q}(?:${alt})-[a-z-]+${Q}`, 'g'),
         new RegExp(`${Q}[a-z]+-(?:${alt})${Q}`, 'g'),
