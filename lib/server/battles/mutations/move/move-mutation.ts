@@ -62,67 +62,57 @@ type ModeMove = (
 
 const MODE_MOVES: Partial<Record<MapModeKey, ModeMove>> = { maze: mazeMove };
 
-export function moveMutation(
-    ctx: BattleMutationContext,
-    data: MoveBody
-): MutationResult {
-    const map = ctx.meta.map;
-
-    if (!map)
-        throw new BattleRuleError('action_rejected', API_ERRORS.BATTLE_NO_MAP);
-
-    const own = MODE_MOVES[activeMapMode(map).key as MapModeKey];
-
-    if (own) return own(ctx, data, map);
-
-    const { participants, mover, ownTurn } = resolveMover(
-        ctx,
-        data.participantId,
-        (ps) => placeParticipants(map, ps)
-    );
-
-    if (data.returnToStart)
-        return returnToStart(ctx, participants, mover, ownTurn);
-
-    const { rules } = ctx.meta;
-
-    const actions = actionsOf(rules);
-
-    const at = (
-        p: BattleParticipant,
-        position: GridPoint,
-        movementUsed?: number
-    ) => ({
+function at(p: BattleParticipant, position: GridPoint, movementUsed?: number) {
+    return {
         ...p,
         battleData: {
             ...p.battleData,
             position,
             ...(movementUsed !== undefined && { movementUsed }),
         },
+    };
+}
+
+function placeMove(
+    ctx: BattleMutationContext,
+    data: MoveBody,
+    map: BattleMapConfig,
+    participants: BattleParticipant[],
+    mover: BattleParticipant
+): MutationResult {
+    const actions = actionsOf(ctx.meta.rules);
+
+    if (!canStand(map, participants, mover, data.to))
+        throw new BattleRuleError(
+            'action_rejected',
+            API_ERRORS.BATTLE_CELL_BLOCKED
+        );
+
+    const moved = at(mover, data.to, mover.battleData.movementUsed);
+
+    const placed = replaceParticipant(participants, moved);
+
+    const released = actions.releaseInvalidGrapples(placed, map);
+
+    return finishMove(ctx, {
+        participants: released.participants,
+        moved,
+        hazard: null,
+        messages: released.messages,
+        events: [],
     });
+}
 
-    // розстановка ДМ (чужий хід або free) — без бюджету й шляху
-    if (!ownTurn || (ctx.isDM && data.free === true)) {
-        if (!canStand(map, participants, mover, data.to))
-            throw new BattleRuleError(
-                'action_rejected',
-                API_ERRORS.BATTLE_CELL_BLOCKED
-            );
+function walkMove(
+    ctx: BattleMutationContext,
+    data: MoveBody,
+    map: BattleMapConfig,
+    participants: BattleParticipant[],
+    mover: BattleParticipant
+): MutationResult {
+    const { rules } = ctx.meta;
 
-        const moved = at(mover, data.to, mover.battleData.movementUsed);
-
-        const placed = replaceParticipant(participants, moved);
-
-        const released = actions.releaseInvalidGrapples(placed, map);
-
-        return finishMove(ctx, {
-            participants: released.participants,
-            moved,
-            hazard: null,
-            messages: released.messages,
-            events: [],
-        });
-    }
+    const actions = actionsOf(rules);
 
     assertCanAct(ctx, mover.basicInfo.id);
 
@@ -215,6 +205,35 @@ export function moveMutation(
             path: stopAt >= 0 ? full.slice(0, stopAt + 1) : full,
         },
     });
+}
+
+export function moveMutation(
+    ctx: BattleMutationContext,
+    data: MoveBody
+): MutationResult {
+    const map = ctx.meta.map;
+
+    if (!map)
+        throw new BattleRuleError('action_rejected', API_ERRORS.BATTLE_NO_MAP);
+
+    const own = MODE_MOVES[activeMapMode(map).key as MapModeKey];
+
+    if (own) return own(ctx, data, map);
+
+    const { participants, mover, ownTurn } = resolveMover(
+        ctx,
+        data.participantId,
+        (ps) => placeParticipants(map, ps)
+    );
+
+    if (data.returnToStart)
+        return returnToStart(ctx, participants, mover, ownTurn);
+
+    // розстановка ДМ (чужий хід або free) — без бюджету й шляху
+    if (!ownTurn || (ctx.isDM && data.free === true))
+        return placeMove(ctx, data, map, participants, mover);
+
+    return walkMove(ctx, data, map, participants, mover);
 }
 
 interface MoveOutcome {
