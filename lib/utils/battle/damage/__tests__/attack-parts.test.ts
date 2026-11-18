@@ -140,7 +140,7 @@ describe('attackDamageParts', () => {
 describe('attackDamageContext', () => {
     it('один кидок героя — кубики рівня середнім', () => {
         expect(attackDamageContext(hero, sword, [5], DEFAULT_RULES)).toEqual({
-            heroLevelPart: 5,
+            flatPart: 5,
             heroDicePart: 7,
             heroDiceNotation: '2d6',
             weaponDiceNotation: '1d8+2',
@@ -151,7 +151,7 @@ describe('attackDamageContext', () => {
         expect(
             attackDamageContext(hero, sword, [5, 3, 4], DEFAULT_RULES)
         ).toEqual({
-            heroLevelPart: 5,
+            flatPart: 5,
             heroDicePart: 0,
             heroDiceNotation: '',
             weaponDiceNotation: '2d6+1d8',
@@ -160,7 +160,7 @@ describe('attackDamageContext', () => {
 
     it('юніт', () => {
         expect(attackDamageContext(unit, sword, [5], DEFAULT_RULES)).toEqual({
-            heroLevelPart: 0,
+            flatPart: 0,
             heroDicePart: 0,
             heroDiceNotation: '',
             weaponDiceNotation: '1d8+2',

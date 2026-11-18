@@ -38,7 +38,7 @@ export function calculateDamageWithModifiersImpl(
     context?: {
         allParticipants?: BattleParticipant[];
         additionalDamage?: Array<{ type: string; value: number }>;
-        heroLevelPart?: number;
+        flatPart?: number;
         heroDicePart?: number;
         heroDiceNotation?: string;
         weaponDiceNotation?: string;
@@ -49,7 +49,7 @@ export function calculateDamageWithModifiersImpl(
 ): DamageCalculationResult {
     const breakdown: DamageRow[] = [];
 
-    const heroLevelPart = context?.heroLevelPart ?? 0;
+    const flatPart = context?.flatPart ?? 0;
 
     const heroDicePart = context?.heroDicePart ?? 0;
 
@@ -62,15 +62,15 @@ export function calculateDamageWithModifiersImpl(
 
     const baseWithStat = Math.max(
         BATTLE_CONSTANTS.MIN_DAMAGE,
-        baseDamage + heroLevelPart + heroDicePart + statModifier
+        baseDamage + flatPart + heroDicePart + statModifier
     );
 
     breakdown.push(stepRow(textRef('battleLog.damage.rows.dice'), baseDamage));
 
     breakdown.push(stepRow(statLabel, signed(statModifier)));
 
-    if (heroLevelPart > 0 || heroDicePart > 0) {
-        const levelAndDice = heroLevelPart + heroDicePart;
+    if (flatPart > 0 || heroDicePart > 0) {
+        const levelAndDice = flatPart + heroDicePart;
 
         const levelLabel =
             heroDicePart > 0 && heroDiceNotation
@@ -148,13 +148,13 @@ export function calculateDamageWithModifiersImpl(
         });
     }
 
-    if (heroLevelPart + heroDicePart > 0) {
-        running += heroLevelPart + heroDicePart;
+    if (flatPart + heroDicePart > 0) {
+        running += flatPart + heroDicePart;
         steps.push({
             label: textRef('battleLog.damage.steps.heroLevel'),
             side: 'attacker',
             kind: 'flat',
-            value: heroLevelPart + heroDicePart,
+            value: flatPart + heroDicePart,
             after: running,
         });
     }

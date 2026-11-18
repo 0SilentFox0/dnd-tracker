@@ -48,7 +48,7 @@ vi.mock('@/lib/supabase/admin', () => ({
     }),
 }));
 
-vi.mock('@/lib/server/artifacts/artifact-set-queries', () => ({
+vi.mock('@/systems/artifactsets/server/content/queries', () => ({
     findArtifactSetInCampaign: vi.fn(async () => ({
         id: 's1',
         campaignId: 'c1',

@@ -34,18 +34,18 @@ vi.mock('@/lib/supabase/artifact-icon-storage', () => ({
     resolveArtifactIconForPersistence: resolveIcon,
 }));
 vi.mock(
-    '@/lib/server/artifacts/sync-artifact-set-members',
+    '@/systems/artifactsets/server/content/sync-members',
     async (importOriginal) => ({
         ...(await importOriginal<object>()),
         syncArtifactSetMembers: sync,
     })
 );
 
-import { SyncArtifactSetError } from '@/lib/server/artifacts/sync-artifact-set-members';
 import { artifactsResource } from '@/lib/server/content/resources/artifacts';
 import { createContent, updateContent } from '@/lib/server/content/service';
 import type { Actor } from '@/lib/utils/api/actor';
 import { artifactSetsResource } from '@/systems/artifactsets/server/content/artifact-sets';
+import { SyncArtifactSetError } from '@/systems/artifactsets/server/content/sync-members';
 
 const actor: Actor = {
     campaignId: 'c1',

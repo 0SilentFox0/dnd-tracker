@@ -1,9 +1,8 @@
 // @vitest-environment happy-dom
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { ArtifactSetBonusDisplay } from '@/components/artifact-sets/ArtifactSetBonusDisplay';
 import { ArtifactCard } from '@/components/artifacts/ArtifactCard';
 import { renderWithConfirm } from '@/components/ui/__tests__/render-with-confirm';
 import type { AbilityFlowSummary } from '@/lib/utils/abilities/segments';
@@ -88,18 +87,6 @@ describe('картки артефактів', () => {
         );
 
         expect(screen.getByText(shown('шкода +2'))).toBeInTheDocument();
-    });
-
-    it('ArtifactSetBonusDisplay показує назву бонусу й уміння сету', () => {
-        render(
-            <ArtifactSetBonusDisplay
-                setBonus={{ name: 'Кров дракона' }}
-                abilitySummary={[line('AC +1')]}
-            />
-        );
-
-        expect(screen.getByText('Кров дракона')).toBeInTheDocument();
-        expect(screen.getByText(shown('AC +1'))).toBeInTheDocument();
     });
 
     it('невдала зміна слоту повертає попередній слот і показує повідомлення', async () => {

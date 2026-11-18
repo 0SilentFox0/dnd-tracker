@@ -5,6 +5,14 @@ import { createArtifactSetSchema, patchArtifactSetSchema } from './schema';
 
 import 'server-only';
 import { API_ERRORS } from '@/lib/constants/api-errors';
+import { persistIcon } from '@/lib/server/artifacts/persist-icon';
+import { defineResource } from '@/lib/server/content/define-resource';
+import { ContentError } from '@/lib/server/content/errors';
+import {
+    assertCampaignEffects,
+    storedEffectOwners,
+} from '@/lib/server/content/traits-guard';
+import { withAbilityIssues } from '@/lib/utils/abilities/read';
 import {
     buildArtifactSetPatchInput,
     deleteArtifactSetAndClearArtifacts,
@@ -13,19 +21,11 @@ import {
     listArtifactSets,
     reloadArtifactSetDetail,
     updateArtifactSetRow,
-} from '@/lib/server/artifacts/artifact-set-queries';
-import { persistIcon } from '@/lib/server/artifacts/persist-icon';
+} from '@/systems/artifactsets/server/content/queries';
 import {
     SyncArtifactSetError,
     syncArtifactSetMembers,
-} from '@/lib/server/artifacts/sync-artifact-set-members';
-import { defineResource } from '@/lib/server/content/define-resource';
-import { ContentError } from '@/lib/server/content/errors';
-import {
-    assertCampaignEffects,
-    storedEffectOwners,
-} from '@/lib/server/content/traits-guard';
-import { withAbilityIssues } from '@/lib/utils/abilities/read';
+} from '@/systems/artifactsets/server/content/sync-members';
 
 type SetRow = NonNullable<
     Awaited<ReturnType<typeof findArtifactSetInCampaign>>
