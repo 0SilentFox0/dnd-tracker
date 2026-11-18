@@ -93,7 +93,9 @@ describe('maps routes', () => {
         expect(access.requireMapReadAccess).toHaveBeenCalledWith(
             'c1',
             'm1',
-            false
+            false,
+            undefined,
+            2
         );
         expect(svc.getMap).not.toHaveBeenCalled();
     });

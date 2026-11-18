@@ -31,10 +31,6 @@ export async function GET(req: Request, { params }: Ctx) {
 
     if (access instanceof NextResponse) return access;
 
-    const denied = await requireMapReadAccess(id, mapId, access.isDM);
-
-    if (denied) return denied;
-
     const raw = new URL(req.url).searchParams.get('version');
 
     const version = raw === null ? undefined : Number(raw);
@@ -45,6 +41,16 @@ export async function GET(req: Request, { params }: Ctx) {
     const meta = await loadOwned(getMapMeta(mapId), id);
 
     if (meta instanceof NextResponse) return meta;
+
+    const denied = await requireMapReadAccess(
+        id,
+        mapId,
+        access.isDM,
+        version,
+        meta.version
+    );
+
+    if (denied) return denied;
 
     if (version === undefined) {
         const notModified = ifNoneMatch(req, weakEtag(mapId, meta.version));
