@@ -41,7 +41,8 @@ export function DiceRoller() {
             onKeyDown={(e) => e.key === 'Escape' && setOpen(false)}
         >
             <Button
-                variant="bare"
+                variant="plain"
+                size="auto"
                 type="button"
                 onClick={() => setOpen((v) => !v)}
                 aria-expanded={open}
@@ -59,7 +60,8 @@ export function DiceRoller() {
                     <div className="grid grid-cols-3 gap-1.5">
                         {ROLLER_SIDES.map((s) => (
                             <Button
-                                variant="bare"
+                                variant="plain"
+                                size="auto"
                                 key={s}
                                 type="button"
                                 aria-pressed={s === sides}
@@ -80,7 +82,8 @@ export function DiceRoller() {
                         </span>
                         <div className="flex items-center gap-2">
                             <Button
-                                variant="bare"
+                                variant="plain"
+                                size="auto"
                                 type="button"
                                 aria-label={t('fewer')}
                                 disabled={count <= 1}
@@ -93,7 +96,8 @@ export function DiceRoller() {
                                 {count}
                             </span>
                             <Button
-                                variant="bare"
+                                variant="plain"
+                                size="auto"
                                 type="button"
                                 aria-label={t('more')}
                                 disabled={count >= ROLLER_MAX_COUNT}
@@ -105,7 +109,8 @@ export function DiceRoller() {
                         </div>
                     </div>
                     <Button
-                        variant="bare"
+                        variant="plain"
+                        size="auto"
                         type="button"
                         disabled={isRolling}
                         onClick={() => void roll()}
