@@ -35,15 +35,23 @@ vi.mock('@/lib/db', () => ({
 
 const SECRET = 'лиходій — абат';
 
-type Args = { omit?: { aiInstructions?: boolean } };
+type Args = {
+    omit?: { aiInstructions?: boolean };
+    select?: Record<string, boolean>;
+};
 
-// mimics Prisma: a column in `omit` is not returned
+// mimics Prisma: a column in `omit` is not returned, `select` narrows the row
 const honoringOmit =
     <T extends Record<string, unknown>>(row: T) =>
     async (args: Args) => {
         const copy: Record<string, unknown> = { ...row };
 
         if (args?.omit?.aiInstructions) delete copy.aiInstructions;
+
+        if (args?.select)
+            return Object.fromEntries(
+                Object.keys(args.select).map((k) => [k, copy[k]])
+            );
 
         return copy;
     };

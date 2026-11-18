@@ -76,7 +76,7 @@ export async function bindDeckRecord(
                 throw new ContentError(API_ERRORS.DECK_SCENE_INVALID, 400);
         }
 
-        const current = await prisma.slideDeck.findFirst({
+        const current = await prisma.slideDeck.findUnique({
             where: { id: deckId, campaignId },
             select: { updatedAt: true },
         });

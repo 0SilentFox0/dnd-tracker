@@ -552,7 +552,7 @@ describe('decks API', () => {
 
         expect(res.status).toBe(200);
         expect(prisma.slideDeck.delete).toHaveBeenCalledWith({
-            where: { id: 'd1' },
+            where: { id: 'd1', campaignId: 'c1' },
         });
 
         await runAfter();
