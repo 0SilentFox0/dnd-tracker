@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+import { useCommittedName } from './useCommittedName';
 import { useRemoveMarker } from './useRemoveMarker';
 import type { useWorldEditor } from './useWorldEditor';
 
@@ -17,8 +18,6 @@ interface Options {
 }
 
 export function useMarkerFields({ marker, editor, select }: Options) {
-    const [name, setName] = useState(marker.name);
-
     const [note, setNote] = useState(marker.dmNote ?? '');
 
     const [color, setColor] = useState(marker.color ?? DEFAULT_ZONE_COLOR);
@@ -31,6 +30,11 @@ export function useMarkerFields({ marker, editor, select }: Options) {
 
     const save = (data: UpdateWorldMarkerData) =>
         editor.marker.update.mutateOk({ id: marker.id, data });
+
+    const { name, setName, commitName } = useCommittedName(
+        marker.name,
+        (next) => save({ name: next })
+    );
 
     const saveRef = useRef(save);
 
@@ -50,13 +54,6 @@ export function useMarkerFields({ marker, editor, select }: Options) {
     }, []);
 
     useEffect(() => flushColor, [flushColor]);
-
-    const commitName = () => {
-        const next = name.trim();
-
-        if (!next) setName(marker.name);
-        else if (next !== marker.name) void save({ name: next });
-    };
 
     const commitNote = () => {
         const next = note.trim();

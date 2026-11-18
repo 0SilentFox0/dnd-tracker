@@ -5,7 +5,8 @@ import { useTranslations } from 'next-intl';
 import { MapPinned, PenLine } from 'lucide-react';
 
 import { DmMarkerNotes } from './DmMarkerNotes';
-import { ICON_OPTIONS, markerIcon } from './marker-icon-options';
+import { MarkerIconGrid } from './MapFieldParts';
+import { markerIcon } from './marker-icon-options';
 import { NewWorldMapDialog } from './NewWorldMapDialog';
 import { useWorldEditorContext } from './WorldEditorContext';
 import { QuietDeleteButton, WorldPanelHeader } from './WorldPanelHeader';
@@ -18,7 +19,6 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { WORLD_DM_NOTE_MAX, WORLD_NAME_MAX } from '@/lib/constants/world';
 import { useMarkerFields } from '@/lib/hooks/world';
-import { cn } from '@/lib/utils';
 import type { WorldMarker } from '@/types/world';
 
 export function WorldMarkerPanel() {
@@ -81,30 +81,12 @@ function MarkerForm({ marker }: { marker: WorldMarker }) {
                         onBlur={commitName}
                     />
                     {marker.kind === 'point' ? (
-                        <div
-                            role="group"
+                        <MarkerIconGrid
                             aria-label={t('editor.icon')}
-                            className="grid grid-cols-4 gap-1.5"
-                        >
-                            {ICON_OPTIONS.map(({ value, Icon }) => (
-                                <button
-                                    key={value}
-                                    type="button"
-                                    title={t(`markerKinds.${value}`)}
-                                    aria-label={t(`markerKinds.${value}`)}
-                                    aria-pressed={marker.icon === value}
-                                    onClick={() => void save({ icon: value })}
-                                    className={cn(
-                                        'flex h-11 items-center justify-center rounded-md border bg-black/40 text-hud-muted hover:text-hud-ink',
-                                        marker.icon === value
-                                            ? 'metal-gold metal-fill border-[var(--gold)]'
-                                            : 'border-hud-rule'
-                                    )}
-                                >
-                                    <Icon className="size-5" aria-hidden />
-                                </button>
-                            ))}
-                        </div>
+                            value={marker.icon}
+                            cellClassName="h-11"
+                            onPick={(icon) => void save({ icon })}
+                        />
                     ) : (
                         <div className="flex items-center gap-3 text-sm">
                             <ColorSwatch

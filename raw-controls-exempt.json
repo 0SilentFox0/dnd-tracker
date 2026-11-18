@@ -728,24 +728,20 @@
         "count": 2
     },
     {
+        "file": "components/world/editor/MapFieldParts.tsx",
+        "count": 4
+    },
+    {
         "file": "components/world/editor/MapFileDropzone.tsx",
         "count": 3
     },
     {
         "file": "components/world/editor/MapStrip.tsx",
-        "count": 4
+        "count": 1
     },
     {
         "file": "components/world/editor/MarkerStrip.tsx",
-        "count": 4
-    },
-    {
-        "file": "components/world/editor/WorldMapSettings.tsx",
         "count": 3
-    },
-    {
-        "file": "components/world/editor/WorldMarkerPanel.tsx",
-        "count": 1
     },
     {
         "file": "components/world/editor/WorldPanelHeader.tsx",

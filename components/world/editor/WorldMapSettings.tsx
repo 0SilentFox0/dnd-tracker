@@ -1,9 +1,10 @@
 'use client';
 
-import { type CSSProperties, useRef } from 'react';
+import { useRef } from 'react';
 import { useTranslations } from 'next-intl';
-import { ChevronRight, Crosshair, ImageUp, Map as MapIcon } from 'lucide-react';
+import { Crosshair, ImageUp, Map as MapIcon } from 'lucide-react';
 
+import { ChildMapList, ImageFileInput, RadiusRange } from './MapFieldParts';
 import { useWorldEditorContext } from './WorldEditorContext';
 import { QuietDeleteButton, WorldPanelHeader } from './WorldPanelHeader';
 
@@ -11,11 +12,9 @@ import { HudSection } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
 import { LabeledInput } from '@/components/ui/labeled-input';
 import { Switch } from '@/components/ui/switch';
-import { REVEAL_RADIUS_RANGE, WORLD_NAME_MAX } from '@/lib/constants/world';
+import { WORLD_NAME_MAX } from '@/lib/constants/world';
 import { useMapFields } from '@/lib/hooks/world';
 import type { WorldMapDetail } from '@/types/world';
-
-export const RADIUS_STEP = 0.005;
 
 export function WorldMapSettings() {
     const { detail } = useWorldEditorContext();
@@ -87,18 +86,11 @@ function MapForm({ detail }: { detail: WorldMapDetail }) {
                                 {Math.round(radius * 100)}%
                             </span>
                         </span>
-                        <input
-                            type="range"
-                            className="hud-range"
-                            style={{ '--fill': `${fill}%` } as CSSProperties}
-                            min={REVEAL_RADIUS_RANGE.min}
-                            max={REVEAL_RADIUS_RANGE.max}
-                            step={RADIUS_STEP}
-                            value={radius}
-                            onChange={(e) => setRadius(Number(e.target.value))}
-                            onPointerUp={commitRadius}
-                            onKeyUp={commitRadius}
-                            onBlur={commitRadius}
+                        <RadiusRange
+                            radius={radius}
+                            fill={fill}
+                            setRadius={setRadius}
+                            commit={commitRadius}
                         />
                     </label>
                 </div>
@@ -121,29 +113,11 @@ function MapForm({ detail }: { detail: WorldMapDetail }) {
             <HudSection
                 title={t('editor.children', { count: children.length })}
             >
-                {children.length ? (
-                    <ul className="space-y-1">
-                        {children.map((m) => (
-                            <li key={m.id}>
-                                <button
-                                    type="button"
-                                    onClick={() => openMap(m.id)}
-                                    className="flex min-h-10 w-full items-center justify-between gap-2 rounded-md border border-hud-rule bg-black/30 px-3 text-left text-sm hover:border-[var(--gold)]"
-                                >
-                                    <span className="truncate">{m.name}</span>
-                                    <ChevronRight
-                                        className="size-4 shrink-0 text-hud-muted"
-                                        aria-hidden
-                                    />
-                                </button>
-                            </li>
-                        ))}
-                    </ul>
-                ) : (
-                    <p className="text-xs text-hud-muted">
-                        {t('editor.childrenEmpty')}
-                    </p>
-                )}
+                <ChildMapList
+                    maps={children}
+                    onOpen={openMap}
+                    itemClassName="min-h-10"
+                />
             </HudSection>
             <HudSection title={t('editor.image')}>
                 <p className="mb-2 text-xs text-hud-muted">
@@ -158,18 +132,9 @@ function MapForm({ detail }: { detail: WorldMapDetail }) {
                     <ImageUp className="size-4" />
                     {t('editor.replaceImage')}
                 </Button>
-                <input
-                    ref={fileInput}
-                    type="file"
-                    accept="image/*"
-                    hidden
-                    onChange={(e) => {
-                        const file = e.target.files?.[0];
-
-                        e.target.value = '';
-
-                        if (file) void replaceImage(file);
-                    }}
+                <ImageFileInput
+                    inputRef={fileInput}
+                    onFile={(file) => void replaceImage(file)}
                 />
             </HudSection>
             <QuietDeleteButton

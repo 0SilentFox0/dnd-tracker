@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
+import { useCommittedName } from './useCommittedName';
 import type { useWorldEditor } from './useWorldEditor';
 import { useWorldMapUpload } from './useWorldMapUpload';
 
@@ -41,8 +42,6 @@ export function useMapFields({
 
     const { upload, discard } = useWorldMapUpload(campaignId);
 
-    const [name, setName] = useState(map.name);
-
     const [radius, setRadius] = useState(map.revealRadius);
 
     const lastRadius = useRef(map.revealRadius);
@@ -58,12 +57,9 @@ export function useMapFields({
         data: Parameters<typeof editor.map.update.mutateOk>[0]['data']
     ) => editor.map.update.mutateOk({ id: map.id, data });
 
-    const commitName = () => {
-        const next = name.trim();
-
-        if (!next) setName(map.name);
-        else if (next !== map.name) void save({ name: next });
-    };
+    const { name, setName, commitName } = useCommittedName(map.name, (next) =>
+        save({ name: next })
+    );
 
     const commitRadius = () => {
         if (radius === lastRadius.current) return;
