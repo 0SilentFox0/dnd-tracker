@@ -952,7 +952,7 @@ describe('spell mutation', () => {
                     (preview.response?.battleAction as { hpChanges: unknown[] })
                         .hpChanges
                 )
-            ).toEqual(strip(cast.events[0].hpChanges));
+            ).toEqual(strip(cast.events[0].hpChanges ?? []));
         });
 
         it('шаблон: цілі визначає сервер за точкою, обрані ігноруються', async () => {
