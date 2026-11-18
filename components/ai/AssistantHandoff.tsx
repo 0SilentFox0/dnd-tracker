@@ -58,7 +58,8 @@ function SourceNotePicker({
                 </label>
             ))}
             <Button
-                variant="bare"
+                variant="plain"
+                size="auto"
                 type="button"
                 disabled={!current.length}
                 className="underline disabled:opacity-50"

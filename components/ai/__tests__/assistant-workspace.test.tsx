@@ -14,6 +14,10 @@ import { AssistantWorkspace } from '../AssistantWorkspace';
 import * as ai from '@/lib/api/ai';
 import * as api from '@/lib/api/assistant';
 
+vi.mock('@/components/ui/select-field', () =>
+    import('@/components/ui/__tests__/select-field-mock')
+);
+
 vi.mock('@/lib/api/assistant', () => ({
     getAssistantIntents: vi.fn(),
     getAssistantIntent: vi.fn(),

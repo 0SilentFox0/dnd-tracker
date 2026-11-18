@@ -61,7 +61,8 @@ export function AiComposer({
                 <div className="flex items-center justify-between gap-2 rounded-md bg-muted px-2 py-1 text-xs">
                     <span>{focusLabel}</span>
                     <Button
-                        variant="bare"
+                        variant="plain"
+                        size="auto"
                         type="button"
                         aria-label={t('composer.clearFocus')}
                         onClick={actions.onClearFocus}
