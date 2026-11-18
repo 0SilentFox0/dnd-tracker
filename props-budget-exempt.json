@@ -14,7 +14,6 @@
     "components/onboarding/DemoTourTooltip.tsx#DemoTourTooltip": 9,
     "components/scenario/graph/GraphEdgeLine.tsx#GraphEdgeLine": 9,
     "components/scenario/graph/GraphInspector.tsx#GraphInspector": 8,
-    "components/scenario/graph/ScenarioGraphView.tsx#ScenarioGraphView": 9,
     "components/scenario/page/ScenarioPageContent.tsx#ScenarioPageContent": 8,
     "components/spells/list/SpellCard.tsx#SpellCard": 8,
     "components/world/travel/TravelPanel.tsx#TravelPanel": 8,

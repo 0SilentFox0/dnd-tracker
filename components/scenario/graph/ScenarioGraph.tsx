@@ -178,14 +178,14 @@ export function ScenarioGraph({ campaignId }: { campaignId: string }) {
         return (
             <ScenarioGraphView
                 graph={graph}
-                selection={selection}
-                selectedId={state.selectedId}
-                focus={state.focus}
-                showSequence={state.showSequence}
-                matched={matched}
-                onSelect={set.selected}
-                onClear={clear}
-                onOpen={open}
+                view={{
+                    selection,
+                    selectedId: state.selectedId,
+                    focus: state.focus,
+                    showSequence: state.showSequence,
+                    matched,
+                }}
+                actions={{ onSelect: set.selected, onClear: clear, onOpen: open }}
             />
         );
     };
