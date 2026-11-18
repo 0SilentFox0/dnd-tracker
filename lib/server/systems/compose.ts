@@ -40,6 +40,7 @@ export const composeServer = (
             'content.template.localize',
             'content.template.afterSyncUpdate',
             'content.template.usageSelect',
+            'content.template.usageRows',
             'dmPages',
             'routes.campaign',
             'routes.character',

@@ -120,7 +120,6 @@ export async function createWfrpDraft(
                 experience: plan.experience,
                 initiative: heroInitiativeRange(campaign.rules).min,
                 avatar: avatar.avatar ?? undefined,
-                skillTreeProgress: {},
             },
         });
 

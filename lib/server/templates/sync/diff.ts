@@ -109,12 +109,27 @@ async function countUsage(
         select: {
             knownSpells: true,
             personalSkillId: true,
+            id: true,
             ...systemTemplateHooks('usageSelect'),
         },
     });
 
+    const extras = await Promise.all(
+        Object.values(systemTemplateHooks('usageRows')).map((load) =>
+            load(
+                db as SyncDb,
+                characters.map((c) => (c as { id: string }).id)
+            )
+        )
+    );
+
     for (const c of characters) {
-        const seen = collectKeysAndStrings(c);
+        const { id, ...rest } = c as { id: string };
+
+        const seen = collectKeysAndStrings({
+            ...rest,
+            extras: extras.map((m) => m.get(id)),
+        });
 
         for (const id of ids) if (seen.has(id)) out.get(id)!.characters++;
     }

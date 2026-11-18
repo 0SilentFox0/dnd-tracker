@@ -115,7 +115,6 @@ it('sameCreateHttpAndToolDefaults', async () => {
         name: 'Герой',
         level: 1,
         controlledBy: 'dm',
-        skillTreeProgress: {},
     });
     expect(h.characterInventory.create).toHaveBeenCalledWith({
         data: {

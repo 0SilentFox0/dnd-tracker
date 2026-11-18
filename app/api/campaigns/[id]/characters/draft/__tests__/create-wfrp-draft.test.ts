@@ -118,7 +118,6 @@ describe('createWfrpDraft', () => {
             class: '',
             archetype: null,
             campaignId: 'camp',
-            skillTreeProgress: {},
         });
         expect(data.experience).toBe(
             WFRP_RULES.advancement.creation.careerBonus.rolled +

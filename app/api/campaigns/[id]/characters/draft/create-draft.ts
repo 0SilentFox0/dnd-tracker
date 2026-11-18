@@ -115,7 +115,6 @@ export async function createDraft(
                 level: 1,
                 avatar: avatar.avatar ?? undefined,
                 spellSlots,
-                skillTreeProgress: {},
             },
         });
 

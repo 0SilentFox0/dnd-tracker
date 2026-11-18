@@ -98,6 +98,11 @@ export interface SystemTemplateServer {
     >;
     /** Character columns the "where is this used" scan also reads */
     usageSelect?: Record<string, unknown>;
+    /** Per-character values the usage scan reads from module tables (keyed by character id) */
+    usageRows?: Record<
+        string,
+        (db: SyncDb, characterIds: string[]) => Promise<Map<string, unknown>>
+    >;
 }
 
 /** Rows of a module that a core content row of kind `host` carries under `as`, found through its `column` */

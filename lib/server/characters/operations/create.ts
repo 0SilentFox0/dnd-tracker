@@ -195,7 +195,6 @@ function characterCreateData({
         personalSkillId: data.personalSkillId ?? null,
         primaryAbility: data.primaryAbility ?? null,
 
-        skillTreeProgress: {},
         characteristics: (split.characteristics ??
             data.characteristics ??
             system.characteristics.defaults()) as

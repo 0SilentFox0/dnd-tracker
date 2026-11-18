@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { readProgress } from '../progress-store';
 import { moveSkillTreeProgress } from '../service/progress-move';
 import {
     listSkillTrees,
@@ -306,8 +307,10 @@ export const SKILLTREES_CONTENT: SystemContentServer = {
                 );
             },
         },
+        usageRows: {
+            skillTreeProgress: (db, ids) => readProgress(ids, db),
+        },
         usageSelect: {
-            skillTreeProgress: true,
             characterSkills: {
                 select: { skillTreeId: true, unlockedSkills: true },
             },
