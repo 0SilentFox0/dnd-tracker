@@ -940,6 +940,7 @@ describe('spell mutation', () => {
             expect(cells).toHaveLength(49);
             expect(cells).toContain('10:6');
             expect(cells).not.toContain('9:9');
+
             const strip = (list: unknown[]) =>
                 (list as { participantId: string; change: number }[]).map(
                     ({ participantId, change }) => ({ participantId, change })
