@@ -12,7 +12,10 @@ export { useAttackWizard } from './useAttackWizard';
 export { type AuraZoneStep, useAuraZones } from './useAuraZones';
 export { useBattleAudioHost } from './useBattleAudioHost';
 export { useBattleFxQueue } from './useBattleFxQueue';
-export type { BattleMapPlaygroundMode } from './useBattleMapPlayground';
+export {
+    type BattleMapPlaygroundMode,
+    useBattleMapPlayground,
+} from './useBattleMapPlayground';
 export { type BattleMapScene, useBattleMapScene } from './useBattleMapScene';
 export {
     type BattlePageDialogs,

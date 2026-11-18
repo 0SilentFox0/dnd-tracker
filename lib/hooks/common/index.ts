@@ -32,7 +32,7 @@ export { useFileImport } from './useFileImport';
 export { useFlip } from './useFlip';
 export { useHydrated } from './useHydrated';
 export { useImageSize } from './useImageSize';
-export { DESKTOP_QUERY } from './useIsMobile';
+export { DESKTOP_QUERY, useIsMobile } from './useIsMobile';
 export { useLibraryList } from './useLibraryList';
 export { useMediaQuery } from './useMediaQuery';
 export { useNavigateFresh } from './useNavigateFresh';
