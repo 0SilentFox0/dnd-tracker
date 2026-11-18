@@ -6,7 +6,7 @@ import { SwitchField } from '@/components/ui/switch-field';
 import type { RulesFormState } from '@/lib/hooks/campaigns';
 
 export function MoraleSection({ form }: { form: RulesFormState }) {
-    const t = useTranslations('rules');
+    const t = useTranslations('rulesMorale');
 
     const morale = form.data.morale;
 
@@ -14,14 +14,14 @@ export function MoraleSection({ form }: { form: RulesFormState }) {
         <RulesSection mechanic="morale">
             <SwitchField
                 id="rules-morale-enabled"
-                label={t('sections.morale.enabled')}
+                label={t('enabled')}
                 checked={morale.enabled}
                 onCheckedChange={(enabled) =>
                     form.set('morale', { ...morale, enabled })
                 }
             />
             <NumberField
-                label={t('sections.morale.cap')}
+                label={t('cap')}
                 value={morale.cap}
                 range={[1, 10]}
                 disabled={!morale.enabled}

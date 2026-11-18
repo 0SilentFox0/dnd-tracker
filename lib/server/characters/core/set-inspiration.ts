@@ -8,13 +8,13 @@ import type {
 import { assertNotInActiveBattle } from '@/lib/server/characters/battle-lock';
 import { writeCharacterLog } from '@/lib/server/characters/log';
 import { ContentError } from '@/lib/server/content/errors';
-import { inspirationOn } from '@/lib/utils/rules/inspiration-on';
+import { rerollTokenOn } from '@/lib/utils/rules/reroll-token-on';
 
 export async function setInspiration(
     { access, character }: CharacterGate<CharacterRow>,
     value: boolean
 ) {
-    if (!inspirationOn(access.campaign.rules))
+    if (!rerollTokenOn(access.campaign.rules))
         throw new ContentError(API_ERRORS.OOC_INSPIRATION_DISABLED, 409);
 
     await assertNotInActiveBattle(character.campaignId, [character.id]);

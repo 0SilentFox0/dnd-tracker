@@ -9,7 +9,7 @@ import {
 } from '@/lib/utils/battle/conditions';
 import { isCastPool, isConsumablePool } from '@/lib/utils/items/pools';
 import type { Ruleset } from '@/lib/utils/rules';
-import { inspirationOn } from '@/lib/utils/rules/inspiration-on';
+import { rerollTokenOn } from '@/lib/utils/rules/reroll-token-on';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { PersistOutcome } from '@/lib/utils/rules/systems/types';
 import type { BattleParticipant } from '@/types/battle';
@@ -28,7 +28,7 @@ export function storedCharacterState(
         resources: rules.outOfCombat.persistResources
             ? readResources(character.resources)
             : null,
-        inspiration: inspirationOn(rules) ? !!character.inspiration : null,
+        inspiration: rerollTokenOn(rules) ? !!character.inspiration : null,
     };
 }
 

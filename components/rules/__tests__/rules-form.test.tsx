@@ -7,7 +7,7 @@ import { RulesForm } from '../RulesForm';
 import '@/components/ui/__tests__/match-media';
 import '@/components/systems/registry';
 import { renderWithConfirm } from '@/components/ui/__tests__/render-with-confirm';
-import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
 
 const mutateAsync = vi.fn().mockResolvedValue(DEFAULT_RULES);
 
@@ -46,17 +46,17 @@ describe('RulesForm', () => {
         renderWithConfirm(<RulesForm campaignId="c1" />);
 
         expect(
-            screen.getByLabelText('rules.sections.morale.cap')
+            screen.getByLabelText('rulesMorale.cap')
         ).not.toBeDisabled();
 
         fireEvent.click(
             screen.getByRole('switch', {
-                name: 'rules.sections.morale.enabled',
+                name: 'rulesMorale.enabled',
             })
         );
 
         expect(
-            screen.getByLabelText('rules.sections.morale.cap')
+            screen.getByLabelText('rulesMorale.cap')
         ).toBeDisabled();
 
         fireEvent.click(

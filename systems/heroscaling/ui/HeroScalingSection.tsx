@@ -10,7 +10,7 @@ import { AttackType } from '@/lib/constants/battle';
 import type { RulesFormState } from '@/lib/hooks/campaigns';
 
 export function HeroScalingSection({ form }: { form: RulesFormState }) {
-    const t = useTranslations('rules');
+    const t = useTranslations('rulesHeroScaling');
 
     const h = form.data.heroScaling;
 
@@ -21,13 +21,13 @@ export function HeroScalingSection({ form }: { form: RulesFormState }) {
         <RulesSection mechanic="heroScaling">
             <div className="grid gap-3 sm:grid-cols-2">
                 <NumberField
-                    label={t('sections.heroScaling.hpBaseLevels')}
+                    label={t('hpBaseLevels')}
                     value={h.hpBaseLevels}
                     range={[0, 10]}
                     onCommit={(hpBaseLevels) => set({ hpBaseLevels })}
                 />
                 <NumberField
-                    label={t('sections.heroScaling.hpConCoefficient')}
+                    label={t('hpConCoefficient')}
                     value={h.hpConCoefficient}
                     range={[0, 5]}
                     decimal
@@ -36,13 +36,13 @@ export function HeroScalingSection({ form }: { form: RulesFormState }) {
             </div>
             <div className="mt-4 space-y-5">
                 <DiceTableEditor
-                    title={t('sections.heroScaling.melee')}
+                    title={t('melee')}
                     type={AttackType.MELEE}
                     table={h.meleeDiceByLevel}
                     onChange={(meleeDiceByLevel) => set({ meleeDiceByLevel })}
                 />
                 <DiceTableEditor
-                    title={t('sections.heroScaling.ranged')}
+                    title={t('ranged')}
                     type={AttackType.RANGED}
                     table={h.rangedDiceByLevel}
                     onChange={(rangedDiceByLevel) => set({ rangedDiceByLevel })}

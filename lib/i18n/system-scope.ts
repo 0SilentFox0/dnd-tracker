@@ -7,6 +7,7 @@ import {
 } from '@/lib/utils/rules/systems/catalog';
 import {
     metaOf,
+    SYSTEM_META,
     type SystemMeta,
     type SystemPageScope,
 } from '@/lib/utils/rules/systems/meta';
@@ -70,3 +71,12 @@ export function systemScope(
 /** Keys of `gameTerms.ruleSystem.*` follow the open set of system keys, so the typed translator cannot check them. */
 export const ruleSystemLabelKey = (key: string): never =>
     `ruleSystem.${key}` as never;
+
+/** Rules-form texts of every installed module (`meta.i18n.rules`) */
+export const rulesFormScope = (): readonly Namespace[] => [
+    ...new Set(
+        (SYSTEM_META as readonly SystemMeta[]).flatMap(
+            (meta) => (meta.i18n.rules ?? []) as readonly Namespace[]
+        )
+    ),
+];

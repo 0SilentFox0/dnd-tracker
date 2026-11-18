@@ -1,15 +1,15 @@
 import { useTranslations } from 'next-intl';
 
-import { useHasRule } from '../RulesPaths';
+import { RulesItems, useHasRule } from '../RulesPaths';
 import { RulesSection } from '../RulesSection';
 
 import { SwitchField } from '@/components/ui/switch-field';
 import type { RulesFormState } from '@/lib/hooks/campaigns';
 import type { Ruleset } from '@/lib/utils/rules';
 
-type ToggleKey = 'persistResources' | 'xp' | 'inspiration';
+type ToggleKey = 'persistResources' | 'xp';
 
-const TOGGLES: ToggleKey[] = ['persistResources', 'xp', 'inspiration'];
+const TOGGLES: ToggleKey[] = ['persistResources', 'xp'];
 
 export function OutOfCombatSection({ form }: { form: RulesFormState }) {
     const t = useTranslations('rules');
@@ -35,6 +35,7 @@ export function OutOfCombatSection({ form }: { form: RulesFormState }) {
                         />
                     )
                 )}
+                <RulesItems section="outOfCombat" form={form} />
                 {section.persistResources &&
                     has('outOfCombat.longRestHitDice') && (
                         <SwitchField

@@ -58,6 +58,10 @@ export const LOADERS: Record<string, Loader> = {
     inspiration: {
         rules: () =>
             import('@/systems/inspiration').then((m) => m.INSPIRATION_MODULE),
+        ui: () =>
+            import('@/systems/inspiration/ui').then(
+                (m) => m.INSPIRATION_MODULE_UI
+            ),
     },
     lair: { rules: () => import('@/systems/lair').then((m) => m.LAIR_MODULE) },
     morale: {

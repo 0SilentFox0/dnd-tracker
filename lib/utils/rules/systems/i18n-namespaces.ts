@@ -5,11 +5,13 @@ export const i18nNamespaces = ({
     campaign,
     member,
     dm,
+    rules,
     pages,
 }: SystemI18n): string[] => [
     ...(battle ?? []),
     ...(campaign ?? []),
     ...(member ?? []),
     ...(dm ?? []),
+    ...(rules ?? []),
     ...Object.values(pages ?? {}).flat(),
 ];

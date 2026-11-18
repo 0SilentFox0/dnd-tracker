@@ -10,7 +10,7 @@ import { assertNotInActiveBattle } from '@/lib/server/characters/battle-lock';
 import { writeCharacterLog } from '@/lib/server/characters/log';
 import { buildCharacterParticipant } from '@/lib/server/characters/participant';
 import { ContentError } from '@/lib/server/content/errors';
-import { inspirationOn } from '@/lib/utils/rules/inspiration-on';
+import { rerollTokenOn } from '@/lib/utils/rules/reroll-token-on';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { SheetRollResult } from '@/types/characters';
 
@@ -67,7 +67,7 @@ export async function rollForSheet(
     const inspired = body.kind !== 'test' && !!body.useInspiration;
 
     if (inspired) {
-        if (!inspirationOn(rules))
+        if (!rerollTokenOn(rules))
             throw new ContentError(API_ERRORS.OOC_INSPIRATION_DISABLED, 409);
 
         await assertNotInActiveBattle(character.campaignId, [character.id]);

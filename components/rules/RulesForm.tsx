@@ -8,6 +8,7 @@ import { ItemsSection } from './sections/ItemsSection';
 import { OutOfCombatSection } from './sections/OutOfCombatSection';
 import { SpellIngredientsSection } from './sections/SpellIngredientsSection';
 import { SystemSection } from './sections/SystemSection';
+import { useMechanicText } from './mechanic-text';
 import { RulesPathsProvider } from './RulesPaths';
 
 import { ErrorState, LoadingState } from '@/components/common/states';
@@ -38,6 +39,8 @@ export function RulesForm({ campaignId }: { campaignId: string }) {
     const t = useTranslator('rules');
 
     const tc = useTranslator('common');
+
+    const text = useMechanicText();
 
     const {
         form,
@@ -72,7 +75,7 @@ export function RulesForm({ campaignId }: { campaignId: string }) {
 
         return {
             id: key,
-            label: t(`mechanics.${key}.label`),
+            label: text(key, 'label'),
             content: <Section form={form} />,
         };
     });

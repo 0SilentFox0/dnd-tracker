@@ -23,6 +23,10 @@ export interface RulesSection {
     refine?(value: Record<string, unknown>): boolean;
     refineMessage?: string;
     mechanic: boolean;
+    /** Namespace holding `label` and `description` of the section when it is not core (`rules.mechanics.<name>`) */
+    labels?: string;
+    /** Last touch on the value the form sends (e.g. fill blanks) */
+    prepareSave?(value: Record<string, unknown>): Record<string, unknown>;
     playerHidden?: true;
     /** Patch-body keys beside the items that only this section reads */
     patchExtras?: Record<string, z.ZodType>;

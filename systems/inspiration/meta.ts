@@ -6,5 +6,5 @@ export const INSPIRATION_META = {
     keys: [],
     requires: ['d20'],
     toggle: 'free',
-    i18n: {},
+    i18n: { rules: ['rulesInspiration'] },
 } as const satisfies SystemMeta;

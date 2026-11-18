@@ -30,6 +30,8 @@ export interface SystemI18n {
     campaign?: readonly string[];
     member?: readonly string[];
     dm?: readonly string[];
+    /** Texts of the module's rules-form sections: loaded on the rules page for every installed module, because the wizard lists sections of modules that are still off */
+    rules?: readonly string[];
     pages?: Partial<Record<SystemPageScope, readonly string[]>>;
     budgetKb?: {
         battle?: number;
@@ -40,6 +42,32 @@ export interface SystemI18n {
 }
 
 export type SystemKind = 'base' | 'addon' | 'preset';
+
+/** A table a module adds to template bundles and source sync; module tables sit between `spells` and `artifacts`, by `order` */
+export interface ContentTableMeta {
+    key: string;
+    /** Prisma model name */
+    model: string;
+    /** Prisma client delegate */
+    delegate: string;
+    /** Content kind slug when it differs from `key` */
+    kind?: string;
+    order: number;
+    /** Reference kind detached from `detachRefs` when a row of this table is removed */
+    detach?: string;
+    /** A source update of a row replaces character progress that depends on it */
+    erasesProgress?: true;
+}
+
+/** `model.column` holds the id of a row of reference kind `kind`; it is nulled (or the row deleted) when that row goes */
+export interface DetachRefMeta {
+    kind: string;
+    model: string;
+    column: string;
+    cascade?: true;
+    /** The model has no campaign column; rows are scoped through their `character` */
+    viaCharacter?: true;
+}
 
 export interface SystemMeta {
     module: string;
@@ -65,6 +93,8 @@ export interface SystemMeta {
     whatsNew?: readonly WhatsNewEntry[];
     dmSections?: readonly string[];
     contentKinds?: readonly string[];
+    contentTables?: readonly ContentTableMeta[];
+    detachRefs?: readonly DetachRefMeta[];
     /** `hashJson` of `characteristics` values the system treats as empty besides null / {} */
     emptyCharacteristicsHashes?: readonly string[];
     /** Row columns the system stores inside `characteristics`; the content hash folds them back so legacy and migrated rows hash alike */

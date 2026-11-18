@@ -7,6 +7,7 @@ import { ARTIFACTSETS_MODULE_UI } from '@/systems/artifactsets/ui';
 import { D20_MODULE_UI } from '@/systems/d20/ui';
 import { DEATHSAVES_MODULE_UI } from '@/systems/deathsaves/ui';
 import { HEROSCALING_MODULE_UI } from '@/systems/heroscaling/ui';
+import { INSPIRATION_MODULE_UI } from '@/systems/inspiration/ui';
 import { MORALE_MODULE_UI } from '@/systems/morale/ui';
 import { OPPORTUNITY_MODULE_UI } from '@/systems/opportunity/ui';
 import { RETALIATION_MODULE_UI } from '@/systems/retaliation/ui';
@@ -20,6 +21,7 @@ export const MODULE_UI: Record<string, ModuleEntry<SystemUi>> = {
     d20: D20_MODULE_UI,
     deathsaves: DEATHSAVES_MODULE_UI,
     heroscaling: HEROSCALING_MODULE_UI,
+    inspiration: INSPIRATION_MODULE_UI,
     morale: MORALE_MODULE_UI,
     opportunity: OPPORTUNITY_MODULE_UI,
     retaliation: RETALIATION_MODULE_UI,

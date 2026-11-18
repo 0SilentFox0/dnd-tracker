@@ -66,12 +66,15 @@ export function systemIssues(system: SystemSelection): CompositionIssue[] {
 
 /** Full defaults: core defaults plus the default of every section from the registry (system-owned sections such as advancement) */
 export const defaultRulesFor = (system: SystemSelection): Ruleset => {
+    const sectionDefaults: Record<string, object> = SECTION_DEFAULTS;
+
     const rules: Record<string, unknown> = {
         ...SECTION_DEFAULTS,
         ...Object.fromEntries(
-            Object.entries(ALL_SECTIONS)
-                .filter(([name]) => !(name in SECTION_DEFAULTS))
-                .map(([name, section]) => [name, defaultsOf(section)])
+            Object.entries(ALL_SECTIONS).map(([name, section]) => [
+                name,
+                { ...defaultsOf(section), ...sectionDefaults[name] },
+            ])
         ),
     };
 

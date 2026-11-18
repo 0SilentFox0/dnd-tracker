@@ -1,0 +1,6 @@
+{
+  "label": "Morale",
+  "description": "A d10 check at the start of a turn: positive morale gives a chance of an extra turn, negative makes the unit skip. The cap is the maximum value of ±N.",
+  "enabled": "Enabled",
+  "cap": "Cap ±N"
+}

@@ -1,0 +1,6 @@
+{
+  "label": "Death saves",
+  "description": "A hero at 0 HP rolls d20 on their turn: 3 successes — stable, 3 failures — death, a 20 — 1 HP. Units at 0 HP die.",
+  "enabled": "Enabled",
+  "unitsDieAtZero": "Units at 0 HP die"
+}

@@ -32,10 +32,6 @@
     "tablesEffect": "This effect type is not allowed in this table"
   },
   "sections": {
-    "morale": {
-      "enabled": "Enabled",
-      "cap": "Cap ±N"
-    },
     "criticals": {
       "critOn": "Crit on (d20 ≥)",
       "fumbleOn": "Fumble on (d20 ≤)",
@@ -53,12 +49,6 @@
       "proficiencyEvery": "+1 every N levels",
       "preview": "Level 5: proficiency {proficiency}, DC = base + {proficiency} + mod"
     },
-    "heroScaling": {
-      "hpBaseLevels": "Base HP levels",
-      "hpConCoefficient": "CON coefficient",
-      "melee": "Melee attack",
-      "ranged": "Ranged attack"
-    },
     "initiative": {
       "mode": "Mode",
       "modeStatic": "Static (from the sheet / unit)",
@@ -73,10 +63,6 @@
     },
     "saves": {
       "proficiency": "Proficiency in saving throws"
-    },
-    "deathSaves": {
-      "enabled": "Enabled",
-      "unitsDieAtZero": "Units at 0 HP die"
     },
     "concentration": {
       "enabled": "Concentration enabled",
@@ -99,7 +85,6 @@
     "outOfCombat": {
       "persistResources": "Heroes' resources persist between battles",
       "xp": "Experience by the 5e table (otherwise — milestones)",
-      "inspiration": "Inspiration",
       "longRestHitDice": "2024 rules: a long rest restores all hit dice (otherwise half)"
     },
     "encounters": {
@@ -118,10 +103,6 @@
     }
   },
   "mechanics": {
-    "morale": {
-      "label": "Morale",
-      "description": "A d10 check at the start of a turn: positive morale gives a chance of an extra turn, negative makes the unit skip. The cap is the maximum value of ±N."
-    },
     "criticals": {
       "label": "Critical hits",
       "description": "The crit and fumble thresholds on d20 and the critical effect tables."
@@ -129,10 +110,6 @@
     "formulas": {
       "label": "Formulas",
       "description": "Save DC = base + proficiency + modifier; the proficiency bonus grows with the hero's level."
-    },
-    "heroScaling": {
-      "label": "Hero power",
-      "description": "Hero damage dice by level and the HP formula."
     },
     "initiative": {
       "label": "Initiative",
@@ -145,10 +122,6 @@
     "saves": {
       "label": "Saving throws",
       "description": "Proficiency in a hero's saving throws (from the character sheet). Advantage, disadvantage and auto-fail always come from conditions and abilities."
-    },
-    "deathSaves": {
-      "label": "Death saves",
-      "description": "A hero at 0 HP rolls d20 on their turn: 3 successes — stable, 3 failures — death, a 20 — 1 HP. Units at 0 HP die."
     },
     "concentration": {
       "label": "Concentration",

@@ -5,5 +5,5 @@ export const MORALE_META = {
     kind: 'addon',
     keys: [],
     requires: ['d20'],
-    i18n: { battle: ['battleMorale'] },
+    i18n: { battle: ['battleMorale'], rules: ['rulesMorale'] },
 } as const satisfies SystemMeta;

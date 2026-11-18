@@ -228,6 +228,8 @@ export type DamagePart = (
 ) => DamagePartResult | null;
 
 export interface InspirationRules {
+    /** The campaign's switch for the token */
+    enabled(rules: Ruleset): boolean;
     available(p: BattleParticipant): boolean;
     spend(p: BattleParticipant): BattleParticipant;
 }

@@ -8,5 +8,5 @@ export const DEATHSAVES_META = {
     requires: ['d20'],
     claims: ['combat.onZeroHp'],
     toggle: 'free',
-    i18n: {},
+    i18n: { rules: ['rulesDeathSaves'] },
 } as const satisfies SystemMeta;

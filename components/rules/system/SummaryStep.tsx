@@ -1,3 +1,5 @@
+import { useMechanicText } from '../mechanic-text';
+
 import { useTranslator } from '@/lib/i18n/use-translator';
 import type { CompositionPreview } from '@/lib/utils/rules/systems/preview';
 
@@ -31,6 +33,8 @@ export function SummaryStep({ preview }: { preview: CompositionPreview }) {
 
     const tBattle = useTranslator('battleCommon');
 
+    const text = useMechanicText();
+
     const none = t('system.wizard.none');
 
     const names = (ids: string[]) =>
@@ -60,9 +64,7 @@ export function SummaryStep({ preview }: { preview: CompositionPreview }) {
             </div>
             <Group
                 title={t('system.wizard.rulesSections')}
-                items={preview.rulesSections.map((key) =>
-                    t(`mechanics.${key}.label`)
-                )}
+                items={preview.rulesSections.map((key) => text(key, 'label'))}
                 emptyLabel={none}
             />
             <Group

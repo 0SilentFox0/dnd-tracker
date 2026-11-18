@@ -8,5 +8,5 @@ export const HEROSCALING_META = {
     requires: ['d20'],
     claims: ['progression.maxHp'],
     toggle: 'setup',
-    i18n: {},
+    i18n: { rules: ['rulesHeroScaling'] },
 } as const satisfies SystemMeta;

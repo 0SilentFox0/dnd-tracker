@@ -1,0 +1,8 @@
+{
+  "label": "Hero power",
+  "description": "Hero damage dice by level and the HP formula.",
+  "hpBaseLevels": "Base HP levels",
+  "hpConCoefficient": "CON coefficient",
+  "melee": "Melee attack",
+  "ranged": "Ranged attack"
+}

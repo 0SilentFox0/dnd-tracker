@@ -9,10 +9,6 @@ import {
 } from '@/lib/utils/abilities/schema/kinds';
 import { RULE_SYSTEM_KEYS } from '@/lib/utils/rules/systems/meta';
 
-const level = z.string().regex(/^([1-9]|1\d|20)$/);
-
-const DiceTable = z.record(level, z.string().regex(/^\d+d\d+([+-]\d+d\d+)*$/));
-
 export const INITIATIVE_ORDER_MESSAGE = 'rules.validation.initiativeOrder';
 
 export const CRITICALS_ORDER_MESSAGE = 'rules.validation.criticalsOrder';
@@ -28,10 +24,6 @@ const CustomConditionSchema = z.object({
 });
 
 export const sectionSchemas = {
-    morale: z.strictObject({
-        enabled: z.boolean(),
-        cap: z.number().int().min(1).max(10),
-    }),
     criticals: z.strictObject({
         critOn: z.number().int().min(2).max(20),
         fumbleOn: z.number().int().min(0).max(5),
@@ -45,12 +37,6 @@ export const sectionSchemas = {
         proficiencyBase: z.number().int().min(0).max(10),
         proficiencyEvery: z.number().int().min(1).max(20),
     }),
-    heroScaling: z.strictObject({
-        meleeDiceByLevel: DiceTable.nullable(),
-        rangedDiceByLevel: DiceTable.nullable(),
-        hpBaseLevels: z.number().int().min(0).max(10),
-        hpConCoefficient: z.number().min(0).max(5),
-    }),
     initiative: z.strictObject({
         heroMin: z.number().int().min(0).max(50),
         heroMax: z.number().int().min(0).max(50),
@@ -62,10 +48,6 @@ export const sectionSchemas = {
         weaponName: z.string().trim().min(1).max(60),
     }),
     saves: z.strictObject({ proficiency: z.boolean() }),
-    deathSaves: z.strictObject({
-        enabled: z.boolean(),
-        unitsDieAtZero: z.boolean(),
-    }),
     concentration: z.strictObject({
         enabled: z.boolean(),
         dcCap: z.number().int().min(10).max(99).nullable(),
@@ -84,7 +66,6 @@ export const sectionSchemas = {
         persistResources: z.boolean(),
         longRestHitDice: z.enum(['half', 'all']),
         xp: z.boolean(),
-        inspiration: z.boolean(),
     }),
     encounters: z.strictObject({
         balance: z.enum(['fair', 'xp']),
@@ -121,9 +102,16 @@ export interface RulesetExtensions {}
 /** Items a module adds to `actions` declare themselves here through module augmentation (absent while the module is off) */
 export interface ActionsRulesExtensions {}
 
+/** Items a module adds to `outOfCombat` declare themselves here through module augmentation (absent while the module is off) */
+export interface OutOfCombatRulesExtensions {}
+
 /** The mapped form keeps the implicit index signature that an interface would lose (JSON columns, `Record<string, unknown>` readers) */
 export type Ruleset = CoreRuleset & {
     [K in keyof RulesetExtensions]: RulesetExtensions[K];
 } & {
     actions: { [K in keyof ActionsRulesExtensions]: ActionsRulesExtensions[K] };
+} & {
+    outOfCombat: {
+        [K in keyof OutOfCombatRulesExtensions]: OutOfCombatRulesExtensions[K];
+    };
 };

@@ -1,6 +1,6 @@
 import { textRef } from '@/lib/i18n/text-ref';
 import type { Ruleset } from '@/lib/utils/rules';
-import { inspirationOn } from '@/lib/utils/rules/inspiration-on';
+import { rerollTokenOn } from '@/lib/utils/rules/reroll-token-on';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { BattleParticipant } from '@/types/battle';
 
@@ -13,7 +13,7 @@ export function canUseInspiration(
     return (
         !!p &&
         !!rules &&
-        inspirationOn(rules) &&
+        rerollTokenOn(rules) &&
         !!ruleSystemOf(rules).combat.rerollToken?.available(p)
     );
 }

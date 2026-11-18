@@ -12,7 +12,7 @@ import {
     battleResultOutcome,
 } from '@/lib/utils/characters/resources/battle';
 import type { Ruleset } from '@/lib/utils/rules';
-import { inspirationOn } from '@/lib/utils/rules/inspiration-on';
+import { rerollTokenOn } from '@/lib/utils/rules/reroll-token-on';
 import { parseRules } from '@/lib/utils/rules/schema';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import { d20State, withD20State } from '@/systems/d20/rules/state';
@@ -84,7 +84,7 @@ describe('inspiration module composition', () => {
                 system: { key: 'd20', modules },
             });
 
-        expect(inspirationOn(raw([]))).toBe(false);
-        expect(inspirationOn(raw(['inspiration']))).toBe(true);
+        expect(rerollTokenOn(raw([]))).toBe(false);
+        expect(rerollTokenOn(raw(['inspiration']))).toBe(true);
     });
 });
