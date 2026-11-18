@@ -5,7 +5,7 @@ import { useProfile } from '../ProfileContext';
 import { EntityIcon } from '@/components/common/EntityIcon';
 import { EmptyState, LoadingState } from '@/components/common/states';
 import { HudButton } from '@/components/hud';
-import { HUD_SELECT_CLASS } from '@/components/hud/form';
+import { HUD_SELECT_TRIGGER_CLASS } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -188,7 +188,7 @@ export function GrantArtifactDialog({
                             </Label>
                             <SelectField
                                 id="grant-parameter"
-                                triggerClassName={`${HUD_SELECT_CLASS} w-full`}
+                                triggerClassName={`${HUD_SELECT_TRIGGER_CLASS} w-full`}
                                 value={fields.parameter}
                                 onValueChange={actions.setParameter}
                                 allowNone
@@ -211,7 +211,7 @@ export function GrantArtifactDialog({
                                     </Label>
                                     <SelectField
                                         id="grant-spell"
-                                        triggerClassName={`${HUD_SELECT_CLASS} w-full`}
+                                        triggerClassName={`${HUD_SELECT_TRIGGER_CLASS} w-full`}
                                         value={fields.spellId}
                                         onValueChange={actions.setSpellId}
                                         allowNone

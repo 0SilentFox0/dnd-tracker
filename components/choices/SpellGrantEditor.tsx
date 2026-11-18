@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 
-import { HUD_SELECT_CLASS } from '@/components/hud/form';
+import { HUD_SELECT_TRIGGER_CLASS } from '@/components/hud/form';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { SelectField } from '@/components/ui/select-field';
@@ -74,7 +74,7 @@ export function SpellGrantEditor({
                         {t('grant.rest')}
                         <SelectField
                             aria-label={t('grant.restAria')}
-                            triggerClassName={`${HUD_SELECT_CLASS} w-auto`}
+                            triggerClassName={`${HUD_SELECT_TRIGGER_CLASS} w-auto`}
                             value={value.rest}
                             onValueChange={(rest) =>
                                 set({ rest: rest as 'short' | 'long' })
@@ -107,7 +107,7 @@ export function SpellGrantEditor({
                         {t('grant.ability')}
                         <SelectField
                             aria-label={t('grant.abilityAria')}
-                            triggerClassName={`${HUD_SELECT_CLASS} w-auto`}
+                            triggerClassName={`${HUD_SELECT_TRIGGER_CLASS} w-auto`}
                             value={value.dcAbility ?? ''}
                             onValueChange={(ability) =>
                                 set({

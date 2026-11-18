@@ -69,7 +69,7 @@ export function ChoiceOptionsEditor({
                         className="rounded-md border border-hud-line/40"
                         triggerClassName="px-3 py-2 text-sm"
                         defaultOpen={!option.name}
-                        summary={<>{option.name || t('options.unnamed')}</>}
+                        summary={option.name || t('options.unnamed')}
                     >
                         <div className="space-y-2 p-3 pt-1">
                             <div className="flex items-end gap-2">
@@ -206,7 +206,7 @@ export function ChoiceOptionsEditor({
                             <Disclosure
                                 className="rounded-md border border-hud-line/30 px-3 py-2 text-sm"
                                 triggerClassName="text-hud-muted"
-                                summary={<>{t('header.technical')}</>}
+                                summary={t('header.technical')}
                             >
                                 <div className="mt-2 w-56 space-y-1">
                                     <Label htmlFor={`${optionKey}-id`}>

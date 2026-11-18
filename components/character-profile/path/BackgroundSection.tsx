@@ -92,7 +92,7 @@ export function BackgroundSection({
             {description && (
                 <Disclosure
                     className="text-hud-muted"
-                    summary={<>{t('description')}</>}
+                    summary={t('description')}
                 >
                     <p className="mt-1 whitespace-pre-line">{description}</p>
                 </Disclosure>

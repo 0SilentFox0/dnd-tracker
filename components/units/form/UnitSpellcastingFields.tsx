@@ -89,10 +89,8 @@ export function UnitSpellcastingFields({
                         }))}
                         onValueChange={(v) =>
                             set({
-                                ability:
-                                    v === 'none'
-                                        ? undefined
-                                        : (v as UnitSpellcasting['ability']),
+                                ability: (v ||
+                                    undefined) as UnitSpellcasting['ability'],
                             })
                         }
                     />

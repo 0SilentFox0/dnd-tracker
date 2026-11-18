@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl';
 
 import { ChoiceListEditor } from '@/components/choices/ChoiceListEditor';
 import { ImageUpload } from '@/components/common/ImageUpload';
-import { HUD_SELECT_CLASS, HudForm, HudFormPage } from '@/components/hud/form';
+import { HUD_SELECT_TRIGGER_CLASS, HudForm, HudFormPage } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
@@ -135,7 +135,7 @@ export function BackgroundForm({
                                 </Label>
                                 <SelectField
                                     id="background-origin"
-                                    triggerClassName={`${HUD_SELECT_CLASS} w-auto`}
+                                    triggerClassName={`${HUD_SELECT_TRIGGER_CLASS} w-auto`}
                                     value={data.originFeatId ?? ''}
                                     onValueChange={(originFeatId) =>
                                         patch({

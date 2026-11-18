@@ -1,7 +1,7 @@
 import { useTranslations } from 'next-intl';
 
 import { SelectField } from '@/components/ui/select-field';
-import { BATTLE_SELECT_CLASS } from '@/lib/constants/battle';
+import { BATTLE_SELECT_TRIGGER_CLASS } from '@/lib/constants/battle';
 import type { useSpellBook } from '@/lib/hooks/battle';
 import { useText } from '@/lib/i18n/use-text';
 
@@ -28,7 +28,7 @@ export function CastSourceSelect({ book }: { book: Book }) {
                     value={value}
                     onValueChange={book.actions.setSource}
                     placeholder={tw('pick')}
-                    triggerClassName={`${BATTLE_SELECT_CLASS} w-auto`}
+                    triggerClassName={`${BATTLE_SELECT_TRIGGER_CLASS} w-auto`}
                     options={options.map((option) => ({
                         value: option.value,
                         label: text(option.label),
@@ -45,7 +45,7 @@ export function CastSourceSelect({ book }: { book: Book }) {
                         onValueChange={(v) =>
                             book.actions.setCastLevel(Number(v))
                         }
-                        triggerClassName={`${BATTLE_SELECT_CLASS} w-auto`}
+                        triggerClassName={`${BATTLE_SELECT_TRIGGER_CLASS} w-auto`}
                         options={book.view.castLevelOptions.map((option) => ({
                             value: String(option.value),
                             label: text(option.label),

@@ -6,7 +6,7 @@ import { Plus, Trash2 } from 'lucide-react';
 
 import { AbilityListEditor } from '@/components/abilities';
 import { ChoiceListEditor } from '@/components/choices/ChoiceListEditor';
-import { HUD_SELECT_CLASS, HudSection } from '@/components/hud/form';
+import { HUD_SELECT_TRIGGER_CLASS, HudSection } from '@/components/hud/form';
 import { HudChipTabs } from '@/components/hud/page';
 import { Button } from '@/components/ui/button';
 import { SelectField } from '@/components/ui/select-field';
@@ -185,7 +185,7 @@ export function ClassFeaturesEditor({
                 <div className="flex flex-wrap items-center gap-2">
                     <SelectField
                         aria-label={t('features.levelToAdd')}
-                        triggerClassName={`${HUD_SELECT_CLASS} w-auto`}
+                        triggerClassName={`${HUD_SELECT_TRIGGER_CLASS} w-auto`}
                         value={String(next ?? '')}
                         onValueChange={(v) => setPicked(Number(v))}
                         options={free.map((l) => ({

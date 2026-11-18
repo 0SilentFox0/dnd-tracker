@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { Plus, Trash2 } from 'lucide-react';
 
-import { HUD_SELECT_CLASS, HudSection } from '@/components/hud/form';
+import { HUD_SELECT_TRIGGER_CLASS, HudSection } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
@@ -169,7 +169,7 @@ export function ClassColumnsEditor({
                                 aria-label={t('columns.restLabel', {
                                     n: i + 1,
                                 })}
-                                triggerClassName={`${HUD_SELECT_CLASS} w-auto`}
+                                triggerClassName={`${HUD_SELECT_TRIGGER_CLASS} w-auto`}
                                 value={c.pool.rest}
                                 onValueChange={(rest) =>
                                     patch(i, {

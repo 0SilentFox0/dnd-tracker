@@ -16,6 +16,7 @@ export const HudButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ({ className, ...props }, ref) => (
         <button
             ref={ref}
+            type="button"
             data-slot="hud-button"
             className={cn('cursor-pointer', className)}
             {...props}
@@ -46,16 +47,3 @@ export const HudIconButton = React.forwardRef<
 ));
 
 HudIconButton.displayName = 'HudIconButton';
-
-export const HudTile = React.forwardRef<HTMLButtonElement, ButtonProps>(
-    ({ className, ...props }, ref) => (
-        <HudButton
-            ref={ref}
-            data-slot="hud-tile"
-            className={cn('flex w-full items-center text-left', className)}
-            {...props}
-        />
-    )
-);
-
-HudTile.displayName = 'HudTile';

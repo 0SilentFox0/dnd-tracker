@@ -182,5 +182,5 @@ export const MAZE_LIMITS = {
     fogPatches: 20,
 } as const;
 
-export const BATTLE_SELECT_CLASS =
-    'h-10 min-w-40 border border-white/20 bg-black/30 px-2 text-[var(--ink)]';
+export const BATTLE_SELECT_TRIGGER_CLASS =
+    'min-w-40 border border-white/20 px-2 text-[var(--ink)] shadow-none data-[size=default]:h-10 dark:bg-black/30';

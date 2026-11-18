@@ -46,6 +46,7 @@ export function ClassSection({
         <section className="mb-3">
             <Disclosure
                 open={open}
+                headingLevel={3}
                 onOpenChange={setOpen}
                 className="space-y-2"
                 triggerClassName="flex-wrap items-baseline gap-2"
@@ -56,7 +57,7 @@ export function ClassSection({
                             name={progression.className}
                             className="size-6 text-xs"
                         />
-                        <h3 className="inline">{progression.className}</h3>
+                        <span>{progression.className}</span>
                         {level !== null ? (
                             <span className="text-sm text-hud-muted">
                                 {t('sectionLevel', { level })}

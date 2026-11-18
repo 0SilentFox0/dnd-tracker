@@ -49,7 +49,7 @@ function SubclassOptions({ progression }: { progression: ClassProgression }) {
     return (
         <Disclosure
             className="mt-1 text-xs text-hud-muted"
-            summary={<>{t('subclassOptions')}</>}
+            summary={t('subclassOptions')}
         >
             <ul className="mt-1 space-y-1">
                 {preview.map((sub) => (

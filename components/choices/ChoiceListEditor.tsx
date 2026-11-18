@@ -13,7 +13,7 @@ import {
 } from './ChoiceKindFields';
 
 import { MarkdownLite } from '@/components/common/MarkdownLite';
-import { HUD_SELECT_CLASS } from '@/components/hud/form';
+import { HUD_SELECT_TRIGGER_CLASS } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Disclosure } from '@/components/ui/disclosure';
@@ -197,7 +197,7 @@ export function ChoiceListEditor({
                                             </Label>
                                             <SelectField
                                                 id={`choice-${i}-scale`}
-                                                triggerClassName={`${HUD_SELECT_CLASS} w-auto`}
+                                                triggerClassName={`${HUD_SELECT_TRIGGER_CLASS} w-auto`}
                                                 value={
                                                     typeof choice.count ===
                                                     'number'
@@ -312,7 +312,7 @@ export function ChoiceListEditor({
                             <Disclosure
                                 className="rounded-md border border-hud-line/30 px-3 py-2 text-sm"
                                 triggerClassName="text-hud-muted"
-                                summary={<>{t('header.technical')}</>}
+                                summary={t('header.technical')}
                             >
                                 <div className="mt-2 w-56 space-y-1">
                                     <Label htmlFor={`choice-${i}-id`}>

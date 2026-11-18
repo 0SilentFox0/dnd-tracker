@@ -61,6 +61,7 @@ export function CompendiumAdvanced({
     return (
         <Disclosure
             className="rounded-lg border border-hud-rule p-2 text-sm"
+            chevronClassName="text-hud-gold"
             summary={
                 <span className="text-hud-gold">
                     {t('advanced.title')}
@@ -110,6 +111,7 @@ export function CompendiumAdvanced({
                     })}
                 </p>
                 <Disclosure
+                    chevronClassName="text-hud-gold"
                     summary={
                         <span className="text-hud-gold">
                             {t('categoriesStep.sources')}

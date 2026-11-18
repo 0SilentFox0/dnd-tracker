@@ -4,7 +4,6 @@ import { useTranslations } from 'next-intl';
 
 import { EntityIcon } from '@/components/common/EntityIcon';
 import { Disclosure } from '@/components/ui/disclosure';
-import { cn } from '@/lib/utils';
 import type { ProgressionItem, ProgressionRow } from '@/types/classes';
 
 export interface ProgressionActions {
@@ -19,6 +18,27 @@ export const STATE_CLASS: Record<ProgressionRow['state'], string> = {
     template: '',
 };
 
+function ItemLabel({ item }: { item: ProgressionItem }) {
+    return (
+        <span>
+            {item.icon ? (
+                <EntityIcon
+                    src={item.icon}
+                    name={item.name}
+                    size={20}
+                    className="mr-1 inline-flex size-5 rounded align-middle"
+                />
+            ) : null}
+            {item.name}
+            {item.summary ? (
+                <span className="ml-1 text-xs text-hud-muted">
+                    {item.summary}
+                </span>
+            ) : null}
+        </span>
+    );
+}
+
 export function Items({
     items,
     accent,
@@ -32,39 +52,26 @@ export function Items({
         <ul className="space-y-1">
             {items.map((it) => (
                 <li key={it.key}>
-                    <Disclosure
-                        hideChevron={!it.description}
-                        triggerClassName={cn(
-                            'text-sm',
-                            it.description ? '' : 'pointer-events-none'
-                        )}
-                        summary={
-                            <span
-                                style={accent ? { color: accent } : undefined}
-                            >
-                                {it.icon ? (
-                                    <EntityIcon
-                                        src={it.icon}
-                                        name={it.name}
-                                        size={20}
-                                        className="mr-1 inline-flex size-5 rounded align-middle"
-                                    />
-                                ) : null}
-                                {it.name}
-                                {it.summary ? (
-                                    <span className="ml-1 text-xs text-hud-muted">
-                                        {it.summary}
-                                    </span>
-                                ) : null}
-                            </span>
-                        }
-                    >
-                        {it.description ? (
+                    {it.description ? (
+                        <Disclosure
+                            triggerClassName="text-sm"
+                            triggerStyle={
+                                accent ? { color: accent } : undefined
+                            }
+                            summary={<ItemLabel item={it} />}
+                        >
                             <p className="mt-1 text-xs whitespace-pre-line text-hud-muted">
                                 {it.description}
                             </p>
-                        ) : null}
-                    </Disclosure>
+                        </Disclosure>
+                    ) : (
+                        <span
+                            className="text-sm"
+                            style={accent ? { color: accent } : undefined}
+                        >
+                            <ItemLabel item={it} />
+                        </span>
+                    )}
                 </li>
             ))}
         </ul>

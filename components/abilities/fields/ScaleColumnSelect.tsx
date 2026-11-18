@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl';
 
 import { useAbilityEditor } from '@/components/abilities/editor-context';
-import { HUD_SELECT_CLASS } from '@/components/hud/form';
+import { HUD_SELECT_TRIGGER_CLASS } from '@/components/hud/form';
 import { SelectField } from '@/components/ui/select-field';
 
 export function ScaleColumnSelect({
@@ -27,7 +27,7 @@ export function ScaleColumnSelect({
         <SelectField
             id={id}
             aria-label={t('classColumn')}
-            triggerClassName={`${HUD_SELECT_CLASS} w-full`}
+            triggerClassName={`${HUD_SELECT_TRIGGER_CLASS} w-full`}
             value={value ?? ''}
             onValueChange={onChange}
             placeholder="—"

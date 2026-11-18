@@ -16,6 +16,9 @@ interface DisclosureProps {
     onOpenChange?: (open: boolean) => void;
     className?: string;
     triggerClassName?: string;
+    triggerStyle?: React.CSSProperties;
+    chevronClassName?: string;
+    headingLevel?: 1 | 2 | 3 | 4 | 5 | 6;
     contentClassName?: string;
     hideChevron?: boolean;
 }
@@ -28,6 +31,9 @@ function Disclosure({
     onOpenChange,
     className,
     triggerClassName,
+    triggerStyle,
+    chevronClassName,
+    headingLevel,
     contentClassName,
     hideChevron = false,
 }: DisclosureProps) {
@@ -35,6 +41,8 @@ function Disclosure({
         open === undefined
             ? { defaultValue: defaultOpen ? ITEM : '' }
             : { value: open ? ITEM : '' };
+
+    const Heading = headingLevel ? (`h${headingLevel}` as const) : 'div';
 
     return (
         <AccordionPrimitive.Root
@@ -46,19 +54,25 @@ function Disclosure({
         >
             <AccordionPrimitive.Item value={ITEM} className={className}>
                 <AccordionPrimitive.Header asChild>
-                    <div>
+                    <Heading className="m-0 text-[length:inherit] font-[inherit]">
                         <AccordionPrimitive.Trigger
                             className={cn(
                                 'group/disclosure flex w-full cursor-pointer items-center gap-1.5 text-left',
                                 triggerClassName
                             )}
+                            style={triggerStyle}
                         >
                             {!hideChevron && (
-                                <ChevronRight className="size-3.5 shrink-0 transition-transform group-data-[state=open]/disclosure:rotate-90" />
+                                <ChevronRight
+                                    className={cn(
+                                        'size-3.5 shrink-0 transition-transform group-data-[state=open]/disclosure:rotate-90',
+                                        chevronClassName
+                                    )}
+                                />
                             )}
                             {summary}
                         </AccordionPrimitive.Trigger>
-                    </div>
+                    </Heading>
                 </AccordionPrimitive.Header>
                 <AccordionPrimitive.Content
                     forceMount

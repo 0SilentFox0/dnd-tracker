@@ -1,7 +1,7 @@
 import { useTranslations } from 'next-intl';
 
 import { SelectField } from '@/components/ui/select-field';
-import { BATTLE_SELECT_CLASS } from '@/lib/constants/battle';
+import { BATTLE_SELECT_TRIGGER_CLASS } from '@/lib/constants/battle';
 import type { useSpellBook } from '@/lib/hooks/battle';
 import { useText } from '@/lib/i18n/use-text';
 
@@ -23,7 +23,7 @@ export function SlotSelect({ book }: { book: Book }) {
                 aria-label={tw('slot')}
                 value={value ?? options[0].key}
                 onValueChange={book.actions.setSlot}
-                triggerClassName={`${BATTLE_SELECT_CLASS} w-auto`}
+                triggerClassName={`${BATTLE_SELECT_TRIGGER_CLASS} w-auto`}
                 options={options.map((o) => ({
                     value: o.key,
                     label: text(o.label),

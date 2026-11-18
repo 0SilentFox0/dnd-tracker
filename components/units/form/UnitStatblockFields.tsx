@@ -116,12 +116,7 @@ export function UnitStatblockFields({
                         label: tMonster(`sizes.${value}`),
                     }))}
                     onValueChange={(v) =>
-                        set({
-                            size:
-                                v === 'none'
-                                    ? undefined
-                                    : (v as UnitStatblock['size']),
-                        })
+                        set({ size: (v || undefined) as UnitStatblock['size'] })
                     }
                 />
             </div>

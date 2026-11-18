@@ -161,6 +161,7 @@ export function CompendiumDependencies({
             <Disclosure
                 defaultOpen
                 className="text-sm"
+                chevronClassName="text-hud-gold"
                 summary={
                     <span className="text-hud-gold">
                         {hiddenCount > 0 && !showAll

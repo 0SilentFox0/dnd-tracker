@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { ChoiceOptionsEditor } from './ChoiceOptionsEditor';
 import { SpellGrantEditor } from './SpellGrantEditor';
 
-import { HUD_SELECT_CLASS } from '@/components/hud/form';
+import { HUD_SELECT_TRIGGER_CLASS } from '@/components/hud/form';
 import { Checkbox } from '@/components/ui/checkbox';
 import { CommaListInput } from '@/components/ui/comma-list-input';
 import { Input } from '@/components/ui/input';
@@ -163,7 +163,7 @@ export function SpellChoiceFields({
                         {t('fields.minCircle')}
                         <SelectField
                             aria-label={t('fields.minCircleAria')}
-                            triggerClassName={`${HUD_SELECT_CLASS} w-auto`}
+                            triggerClassName={`${HUD_SELECT_TRIGGER_CLASS} w-auto`}
                             value={String(rule.minLevel)}
                             onValueChange={(v) =>
                                 onPatch({
@@ -180,7 +180,7 @@ export function SpellChoiceFields({
                         {t('fields.maxCircle')}
                         <SelectField
                             aria-label={t('fields.maxCircleAria')}
-                            triggerClassName={`${HUD_SELECT_CLASS} w-auto`}
+                            triggerClassName={`${HUD_SELECT_TRIGGER_CLASS} w-auto`}
                             value={String(rule.maxLevel)}
                             onValueChange={(v) =>
                                 onPatch({

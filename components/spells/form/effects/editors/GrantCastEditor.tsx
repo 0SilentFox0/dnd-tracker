@@ -117,7 +117,7 @@ export function GrantCastEditor({
             <Disclosure
                 className="col-span-6"
                 triggerClassName="text-xs text-muted-foreground"
-                summary={<>{t('spellEffects.fields.grantCast.advanced')}</>}
+                summary={t('spellEffects.fields.grantCast.advanced')}
             >
                 <div className="mt-2 grid grid-cols-6 items-end gap-2 [&>*]:min-w-0">
                     {field('cast.anchorMarkId', 'text')}

@@ -6,7 +6,7 @@ import { ChoicePicker, type PickerContext } from './ChoicePicker';
 import { classPickerContext, issueFor, pickerBase } from './picker-context';
 
 import { HudButton } from '@/components/hud';
-import { HUD_SELECT_CLASS, HudSection } from '@/components/hud/form';
+import { HUD_SELECT_TRIGGER_CLASS, HudSection } from '@/components/hud/form';
 import { SelectField } from '@/components/ui/select-field';
 import type { ChoiceRefsView } from '@/lib/hooks/characters';
 import { useTranslator } from '@/lib/i18n/use-translator';
@@ -91,7 +91,7 @@ export function ChoicesEditor({
                         {t('editor.background')}
                         <SelectField
                             aria-label={t('editor.background')}
-                            triggerClassName={`${HUD_SELECT_CLASS} w-full`}
+                            triggerClassName={`${HUD_SELECT_TRIGGER_CLASS} w-full`}
                             value={data.backgroundId ?? ''}
                             onValueChange={(backgroundId) =>
                                 set({

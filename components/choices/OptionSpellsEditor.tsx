@@ -5,7 +5,7 @@ import { Plus, Trash2 } from 'lucide-react';
 
 import { SpellGrantEditor } from './SpellGrantEditor';
 
-import { HUD_SELECT_CLASS } from '@/components/hud/form';
+import { HUD_SELECT_TRIGGER_CLASS } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { SelectField } from '@/components/ui/select-field';
@@ -49,7 +49,7 @@ export function OptionSpellsEditor({
                         />
                         <SelectField
                             aria-label={t('optionSpells.spell')}
-                            triggerClassName={`${HUD_SELECT_CLASS} w-auto`}
+                            triggerClassName={`${HUD_SELECT_TRIGGER_CLASS} w-auto`}
                             value={row.spellId}
                             onValueChange={(spellId) => set(i, { spellId })}
                             options={[

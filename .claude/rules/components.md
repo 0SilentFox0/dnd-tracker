@@ -36,7 +36,7 @@ Not duplicates: the first of each pair is the primitive, the second adds label/s
 | Labelled toggle row (+ description) | `SwitchField` | `Switch` + `Label` by hand |
 | Any modal (desktop modal, phone sheet) | `ResponsiveDialog` | `Dialog` / `vaul` directly |
 | Yes/no confirmation | `useConfirm()` (renders `ConfirmDialog`) | `window.confirm`, `ConfirmDialog` by hand |
-| HUD button / icon button / tile (custom-styled clickable) | `HudButton`, `HudIconButton` (`size` sm/md, `tone`), `HudTile` (`components/hud`) | raw `<button>` |
+| HUD button / icon button (custom-styled clickable) | `HudButton`, `HudIconButton` (`size` sm/md, `tone`) (`components/hud`) | raw `<button>` |
 | Map/HUD toggle chip, toolbar | `HudToggleChip`, `HudToolbar` (`components/hud`) | per-file gold-chip classes |
 
 `dialog.tsx` is the Radix wrapper used only inside `components/ui` (`ResponsiveDialog`, `ConfirmDialog` build on it).

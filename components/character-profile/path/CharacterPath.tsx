@@ -56,7 +56,7 @@ export function CharacterPath({
         rows.length > 0 ? (
             <Disclosure
                 triggerClassName="text-sm text-hud-muted"
-                summary={<>{label}</>}
+                summary={label}
             >
                 <div className="mt-2 space-y-2">{rows.map(card)}</div>
             </Disclosure>

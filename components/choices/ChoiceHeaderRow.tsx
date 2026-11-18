@@ -2,7 +2,7 @@
 
 import { Trash2 } from 'lucide-react';
 
-import { HUD_SELECT_CLASS } from '@/components/hud/form';
+import { HUD_SELECT_TRIGGER_CLASS } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -53,7 +53,7 @@ export function ChoiceHeaderRow({
                     </Label>
                     <SelectField
                         id={`choice-${index}-kind`}
-                        triggerClassName={`${HUD_SELECT_CLASS} w-auto`}
+                        triggerClassName={`${HUD_SELECT_TRIGGER_CLASS} w-auto`}
                         value={choice.kind}
                         onValueChange={(k) =>
                             actions.onSwitchKind(k as ChoiceKind)

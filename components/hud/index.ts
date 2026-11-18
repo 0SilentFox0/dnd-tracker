@@ -1,5 +1,5 @@
 export { HUD_PRELOAD_FONTS, hudFontClassName } from './fonts';
-export { HudButton, HudIconButton, HudTile } from './HudButton';
+export { HudButton, HudIconButton } from './HudButton';
 export { HudToggleChip } from './HudToggleChip';
 export { HudToolbar } from './HudToolbar';
 export {

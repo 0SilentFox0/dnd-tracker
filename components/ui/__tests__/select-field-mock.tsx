@@ -14,7 +14,7 @@ interface MockProps {
 }
 
 const renderOption = (o: SelectOption) => (
-    <option key={o.value} value={o.value}>
+    <option key={o.value} value={o.value} disabled={o.disabled}>
         {o.label}
     </option>
 );
@@ -40,7 +40,7 @@ export function SelectField({
             disabled={disabled}
             onChange={(e) => onValueChange(e.target.value)}
         >
-            {(allowNone || !value) && (
+            {(allowNone || (!value && placeholder)) && (
                 <option value="">{allowNone ? noneLabel : placeholder}</option>
             )}
             {groups?.length
