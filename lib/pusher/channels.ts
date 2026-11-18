@@ -1,12 +1,4 @@
-/**
- * Channel naming для Pusher — спільне між server (lib/pusher/server.ts) і client
- * (lib/pusher/client.ts). Файл нічого не імпортує з
- * `pusher` / `pusher-js` бібліотек, тому безпечний для прямого `import` як
- * з server-кампонентів, так і з `"use client"` коду.
- *
- * Канали — приватні (`private-*`), щоб Pusher викликав auth route
- * (`/api/pusher/auth`) і ми могли перевірити ownership перед підпискою.
- */
+/** Free of `pusher`/`pusher-js` imports, so both server components and `"use client"` code can import it. */
 
 export const battleChannelName = (battleId: string): string =>
     `private-battle-${battleId}`;
@@ -17,14 +9,14 @@ export const userChannelName = (userId: string): string =>
 export const BATTLE_CHANNEL_PREFIX = 'private-battle-';
 export const BATTLE_DM_CHANNEL_PREFIX = 'private-battle-dm-';
 
-/** Повна дельта лише для ДМ: публічний канал несе журнал, відредагований для гравців. */
+/** Full delta for the DM only: the public channel carries a log redacted for players. */
 export const battleDmChannelName = (battleId: string): string =>
     `${BATTLE_DM_CHANNEL_PREFIX}${battleId}`;
 export const USER_CHANNEL_PREFIX = 'private-user-';
 
 export const NOTIFY_CHANNEL_PREFIX = 'private-notify-';
 
-/** Окремо від `private-user-*`: бій відписується від нього при unmount. */
+/** Separate from `private-user-*`: the battle unsubscribes from it on unmount. */
 export const notifyChannelName = (userId: string): string =>
     `${NOTIFY_CHANNEL_PREFIX}${userId}`;
 
@@ -32,7 +24,7 @@ export const NOTIFICATIONS_CHANGED_EVENT = 'notifications-changed';
 
 export const PUSHER_AUTH_ENDPOINT = '/api/pusher/auth';
 
-/** Окремо від battle-delta: музика не підвищує версію бою. */
+/** Separate from battle-delta: music does not bump the battle version. */
 export const BATTLE_AUDIO_EVENT = 'battle-audio';
 
 export const SHOW_CHANNEL_PREFIX = 'private-show-';
@@ -40,8 +32,8 @@ export const SHOW_CHANNEL_PREFIX = 'private-show-';
 export const showChannelName = (campaignId: string): string =>
     `${SHOW_CHANNEL_PREFIX}${campaignId}`;
 
-/** Повний стан показу: він малий, дельти не потрібні. */
+/** Full show state: it is small, so no deltas. */
 export const SHOW_STATE_EVENT = 'show-state';
 
-/** Лише сигнал «світ змінився»: дані клієнт дочитує власним відфільтрованим view. */
+/** Signal only ("world changed"): clients refetch through their own filtered view. */
 export const WORLD_CHANGED_EVENT = 'world-changed';

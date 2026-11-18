@@ -1,14 +1,10 @@
-/**
- * Pusher trigger, що ніколи не відхиляється й логує збій з контекстом: втрачену подію клієнт
- * підхопить сам при reconnect. `after(() => safePusherTrigger(...))` дочікується відправки до заморожування функції.
- */
+/** Never rejects and logs failures with context: a lost event is recovered by the client on reconnect; `after()` awaits the send before the function freezes. */
 
 import type Pusher from 'pusher';
 
 import { logger } from '@/lib/utils/common/logger';
 
 export interface PusherTriggerContext {
-    /** Що зараз робив handler (для structured логу). */
     action?: string;
     [key: string]: unknown;
 }
