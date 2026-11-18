@@ -120,7 +120,8 @@ export function AudioDock({
                             <UnlockSoundButton className="px-3" />
                         )}
                         <Button
-                            variant="bare"
+                            variant="plain"
+                            size="auto"
                             type="button"
                             data-tour="music.expand"
                             aria-label={t('player.expand', {

@@ -27,7 +27,8 @@ function PlayerFailedNotice({ onRestart }: { onRestart(): void }) {
         >
             {t('player.failedTitle')}
             <Button
-                variant="bare"
+                variant="plain"
+                size="auto"
                 type="button"
                 aria-label={t('player.restartLabel')}
                 onClick={onRestart}

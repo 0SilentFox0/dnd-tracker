@@ -24,7 +24,8 @@ function IconButton({
 }) {
     return (
         <Button
-            variant="bare"
+            variant="plain"
+            size="auto"
             type="button"
             aria-label={label}
             title={label}

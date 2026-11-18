@@ -50,7 +50,8 @@ export function AudioPlayerPanel({
                 )}
                 {state?.track?.kind === 'youtube' && (
                     <Button
-                        variant="bare"
+                        variant="plain"
+                        size="auto"
                         type="button"
                         aria-pressed={prefs.video.shown}
                         onClick={() => prefs.video.set(!prefs.video.shown)}
@@ -66,7 +67,8 @@ export function AudioPlayerPanel({
                     </Button>
                 )}
                 <Button
-                    variant="bare"
+                    variant="plain"
+                    size="auto"
                     type="button"
                     data-tour="music.collapse"
                     aria-label={t('player.collapse')}
@@ -79,7 +81,8 @@ export function AudioPlayerPanel({
             {sound.unlocked ? (
                 <div className="mt-2 flex items-center gap-2">
                     <Button
-                        variant="bare"
+                        variant="plain"
+                        size="auto"
                         type="button"
                         aria-label={
                             prefs.muted

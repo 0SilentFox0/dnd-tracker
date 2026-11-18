@@ -14,7 +14,8 @@ export function UnlockSoundButton({ className }: { className?: string }) {
 
     return (
         <Button
-            variant="bare"
+            variant="plain"
+            size="auto"
             type="button"
             className={cn(
                 'hud-sc flex h-8 items-center justify-center bg-[var(--enemy,#9c2a1d)] text-sm text-[#fffaf0]',
