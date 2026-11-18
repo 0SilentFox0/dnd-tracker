@@ -8,50 +8,47 @@ import { SHOW_TONE, ShowButton } from './show-ui';
 
 import { OptimizedImage } from '@/components/common/OptimizedImage';
 import { Button } from '@/components/ui/button';
-import { NativeSelect } from '@/components/ui/native-select';
+import { SelectField } from '@/components/ui/select-field';
 import { type ShowControl, useDeck, useDecks } from '@/lib/hooks/show';
 import { cn } from '@/lib/utils';
 import type { ShowState, SlideDeckSummary } from '@/types/show';
 
 const SELECT =
-    'h-7 min-w-0 max-w-56 rounded bg-transparent pr-1 text-xs opacity-75 hover:opacity-100 [&>*]:bg-neutral-900 [&>*]:text-neutral-100';
+    'h-7 min-w-0 max-w-56 rounded border-0 bg-transparent px-1 py-0 text-xs opacity-75 shadow-none hover:opacity-100 data-[size=default]:h-7 dark:bg-transparent dark:hover:bg-transparent';
 
 const inScene = (sceneId?: string) => (d: SlideDeckSummary) =>
     !!sceneId && d.scenarioPageId === sceneId;
 
-function DeckOptions({
-    decks,
-    sceneId,
-}: {
-    decks: SlideDeckSummary[];
-    sceneId?: string;
-}) {
-    const t = useTranslations('show');
+const deckGroups = (
+    labels: { own: string; other: string },
+    decks: SlideDeckSummary[],
+    sceneId?: string
+) => {
+    const option = (d: SlideDeckSummary) => ({
+        value: d.id,
+        label: `${d.title} (${d.slideCount})`,
+    });
 
     const own = decks.filter(inScene(sceneId));
 
     const rest = decks.filter((d) => !inScene(sceneId)(d));
 
-    const options = (list: SlideDeckSummary[]) =>
-        list.map((d) => (
-            <option key={d.id} value={d.id}>
-                {d.title} ({d.slideCount})
-            </option>
-        ));
+    if (own.length === 0) return { options: rest.map(option) };
 
-    if (own.length === 0) return <>{options(rest)}</>;
-
-    return (
-        <>
-            <optgroup label={t('deckStrip.thisScene')}>{options(own)}</optgroup>
-            {rest.length > 0 && (
-                <optgroup label={t('deckStrip.otherDecks')}>
-                    {options(rest)}
-                </optgroup>
-            )}
-        </>
-    );
-}
+    return {
+        groups: [
+            { label: labels.own, options: own.map(option) },
+            ...(rest.length > 0
+                ? [
+                      {
+                          label: labels.other,
+                          options: rest.map(option),
+                      },
+                  ]
+                : []),
+        ],
+    };
+};
 
 /** Набір для перегляду: поточний показу, інакше перший набір сцени. */
 export function ShowDeckStrip({
@@ -89,23 +86,23 @@ export function ShowDeckStrip({
     return (
         <div className="min-w-0 space-y-2">
             <div className="flex items-center gap-2">
-                <NativeSelect
+                <SelectField
                     aria-label={t('deckStrip.deck')}
                     value={deckId ?? ''}
-                    onChange={(e) =>
-                        e.target.value &&
-                        void control.send({
-                            action: 'open',
-                            deckId: e.target.value,
-                        })
+                    onValueChange={(id) =>
+                        id && void control.send({ action: 'open', deckId: id })
                     }
-                    className={SELECT}
-                >
-                    {!deckId && (
-                        <option value="">{t('deckStrip.chooseDeck')}</option>
+                    placeholder={t('deckStrip.chooseDeck')}
+                    {...deckGroups(
+                        {
+                            own: t('deckStrip.thisScene'),
+                            other: t('deckStrip.otherDecks'),
+                        },
+                        decks ?? [],
+                        sceneId
                     )}
-                    {decks && <DeckOptions decks={decks} sceneId={sceneId} />}
-                </NativeSelect>
+                    triggerClassName={SELECT}
+                />
                 {cover && (
                     <span
                         className={cn(
@@ -155,7 +152,8 @@ export function ShowDeckStrip({
                                 className="group relative w-28 shrink-0"
                             >
                                 <Button
-                                    variant="bare"
+                                    variant="plain"
+                                    size="auto"
                                     type="button"
                                     aria-current={current || undefined}
                                     aria-label={
@@ -209,7 +207,8 @@ export function ShowDeckStrip({
                                 )}
                                 {!slide.audience && (
                                     <Button
-                                        variant="bare"
+                                        variant="plain"
+                                        size="auto"
                                         type="button"
                                         aria-pressed={isCover}
                                         aria-label={

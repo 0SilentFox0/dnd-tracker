@@ -17,7 +17,8 @@ export function ShowButton({
 }: ButtonHTMLAttributes<HTMLButtonElement> & { tone?: 'plain' | 'danger' }) {
     return (
         <Button
-            variant="bare"
+            variant="plain"
+            size="auto"
             type="button"
             {...props}
             className={cn(

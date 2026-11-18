@@ -39,7 +39,8 @@ export function PuzzleHand({ drag, piece, spec, imageUrl, onRotate }: Props) {
             />
             <div className="pointer-events-auto absolute -top-9 left-1/2 flex -translate-x-1/2 gap-1">
                 <Button
-                    variant="bare"
+                    variant="plain"
+                    size="auto"
                     type="button"
                     aria-label={t('puzzle.rotateLeft')}
                     className="size-8 rounded bg-black/70 text-white"
@@ -48,7 +49,8 @@ export function PuzzleHand({ drag, piece, spec, imageUrl, onRotate }: Props) {
                     ↺
                 </Button>
                 <Button
-                    variant="bare"
+                    variant="plain"
+                    size="auto"
                     type="button"
                     aria-label={t('puzzle.rotateRight')}
                     className="size-8 rounded bg-black/70 text-white"

@@ -6,7 +6,7 @@ import { Footprints, Map as MapIcon, Presentation } from 'lucide-react';
 
 import { SHOW_TONE, ShowButton } from '@/components/show/stage/show-ui';
 import { WorldTravelDialog } from '@/components/show/world/WorldTravelDialog';
-import { NativeSelect } from '@/components/ui/native-select';
+import { SelectField } from '@/components/ui/select-field';
 import { WorldMapLink } from '@/components/world/WorldMapLink';
 import type { ShowControl } from '@/lib/hooks/show';
 import { type TravelMoved, useWorldMap, useWorldMaps } from '@/lib/hooks/world';
@@ -15,7 +15,7 @@ import { mapPath } from '@/lib/utils/world/tree';
 import type { ShowState } from '@/types/show';
 
 const SELECT =
-    'h-7 min-w-0 max-w-48 rounded bg-transparent pr-1 text-xs opacity-75 hover:opacity-100 [&>*]:bg-neutral-900 [&>*]:text-neutral-100';
+    'h-7 min-w-0 max-w-48 rounded border-0 bg-transparent px-1 py-0 text-xs opacity-75 shadow-none hover:opacity-100 data-[size=default]:h-7 dark:bg-transparent dark:hover:bg-transparent';
 
 interface Pick {
     base: string | undefined;
@@ -102,35 +102,31 @@ export function ShowWorldControls({
                 <MapIcon className="size-4" />
                 <span className="text-xs">{t('present')}</span>
             </ShowButton>
-            <NativeSelect
+            <SelectField
                 aria-label={t('map')}
                 value={mapId ?? ''}
-                onChange={(e) =>
-                    setMapPick({ base: shownMapId, id: e.target.value })
+                onValueChange={(id) =>
+                    setMapPick({ base: shownMapId, id })
                 }
-                className={SELECT}
-            >
-                {rows.map(({ map, path }) => (
-                    <option key={map.id} value={map.id}>
-                        {'  '.repeat(path.length - 1)}
-                        {map.name}
-                    </option>
-                ))}
-            </NativeSelect>
-            <NativeSelect
+                options={rows.map(({ map, path }) => ({
+                    value: map.id,
+                    label: `${'\u00a0\u00a0'.repeat(path.length - 1)}${map.name}`,
+                }))}
+                triggerClassName={SELECT}
+            />
+            <SelectField
                 aria-label={t('focus')}
                 value={focusId ?? ''}
-                onChange={(e) => pickFocus(e.target.value)}
-                className={SELECT}
+                onValueChange={pickFocus}
                 disabled={control.pending}
-            >
-                <option value="">{t('noFocus')}</option>
-                {detail?.markers.map((m) => (
-                    <option key={m.id} value={m.id}>
-                        {m.name}
-                    </option>
-                ))}
-            </NativeSelect>
+                allowNone
+                noneLabel={t('noFocus')}
+                options={(detail?.markers ?? []).map((m) => ({
+                    value: m.id,
+                    label: m.name,
+                }))}
+                triggerClassName={SELECT}
+            />
             {show?.world && (
                 <ShowButton
                     aria-label={t('toSlides')}

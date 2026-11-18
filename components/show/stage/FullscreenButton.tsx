@@ -40,7 +40,8 @@ export function FullscreenButton() {
 
     return (
         <Button
-            variant="bare"
+            variant="plain"
+            size="auto"
             type="button"
             onClick={toggle}
             aria-label={active ? t('fullscreen.exit') : t('fullscreen.enter')}

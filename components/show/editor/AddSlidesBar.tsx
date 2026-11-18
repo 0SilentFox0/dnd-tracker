@@ -46,7 +46,6 @@ export function AddSlidesBar({
         <div className="space-y-2">
             <div className="flex flex-col gap-2 sm:flex-row">
                 <Input
-                    bare
                     ref={fileInput}
                     type="file"
                     multiple
@@ -75,7 +74,6 @@ export function AddSlidesBar({
                     }}
                 />
                 <Input
-                    bare
                     ref={puzzleInput}
                     type="file"
                     hidden

@@ -22,7 +22,8 @@ function Row({
 }) {
     return (
         <Button
-            variant="bare"
+            variant="plain"
+            size="auto"
             type="button"
             aria-pressed={selected}
             onClick={onClick}
@@ -87,7 +88,8 @@ export function TrackPicker({
                                 className="flex items-center gap-1"
                             >
                                 <Button
-                                    variant="bare"
+                                    variant="plain"
+                                    size="auto"
                                     type="button"
                                     aria-label={`${preview.playingId === track.id ? tList('pause') : tList('play')}: ${track.title}`}
                                     aria-pressed={

@@ -29,7 +29,8 @@ function IconButton({
 }) {
     return (
         <Button
-            variant="bare"
+            variant="plain"
+            size="auto"
             type="button"
             aria-label={label}
             disabled={disabled}
@@ -60,7 +61,8 @@ export function SlideGrid({
                     className="overflow-hidden rounded border border-hud-rule bg-black/40"
                 >
                     <Button
-                        variant="bare"
+                        variant="plain"
+                        size="auto"
                         type="button"
                         aria-label={t('slide', { index: i + 1 })}
                         onClick={() => edit(slide.id)}
