@@ -12,7 +12,7 @@ import { Label } from '@/components/ui/label';
 import { SelectField } from '@/components/ui/select-field';
 import { Slider } from '@/components/ui/slider';
 import { TILE_CATALOG } from '@/lib/constants/tilesets/catalog';
-import type { useMapEditorWorkspace } from '@/lib/hooks/battle-maps/useMapEditorWorkspace';
+import type { useMapEditorWorkspace } from '@/lib/hooks/battle-maps';
 import { useSearch } from '@/lib/hooks/common';
 
 type Workspace = ReturnType<typeof useMapEditorWorkspace>;

@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { Checkbox } from '@/components/ui/checkbox';
 import { SelectField } from '@/components/ui/select-field';
 import { CONTROLLED_BY_DM } from '@/lib/constants/characters';
-import type { useBattleMapFog } from '@/lib/hooks/battle/useBattleMapFog';
+import type { useBattleMapFog } from '@/lib/hooks/battle';
 import { cn } from '@/lib/utils';
 import type { BattleParticipant } from '@/types/battle';
 

@@ -19,7 +19,7 @@ import { HudToggleChip } from '@/components/hud';
 import { OnboardingHint } from '@/components/onboarding/OnboardingHint';
 import { Button } from '@/components/ui/button';
 import { type MapUpdateTool, useBattleMapScene } from '@/lib/hooks/battle';
-import { useBattleMapFog } from '@/lib/hooks/battle/useBattleMapFog';
+import { useBattleMapFog } from '@/lib/hooks/battle';
 import { cn } from '@/lib/utils';
 import { activeModeWithConfig } from '@/lib/utils/battle/modes';
 

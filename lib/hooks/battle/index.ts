@@ -12,6 +12,7 @@ export { useAttackWizard } from './useAttackWizard';
 export { type AuraZoneStep, useAuraZones } from './useAuraZones';
 export { useBattleAudioHost } from './useBattleAudioHost';
 export { useBattleFxQueue } from './useBattleFxQueue';
+export { useBattleMapFog } from './useBattleMapFog';
 export {
     type BattleMapPlaygroundMode,
     useBattleMapPlayground,

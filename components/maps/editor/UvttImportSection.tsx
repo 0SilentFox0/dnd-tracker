@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl';
 
 import { FileButton } from '@/components/ui/file-button';
-import type { UvttImportFailure } from '@/lib/hooks/battle-maps/useUvttImport';
+import type { UvttImportFailure } from '@/lib/hooks/battle-maps';
 import type { UvttWarning } from '@/lib/utils/battle/uvtt/parse';
 
 export function UvttImportSection({

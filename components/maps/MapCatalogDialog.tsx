@@ -8,7 +8,7 @@ import { SearchInput } from '@/components/common/SearchInput';
 import { QueryState } from '@/components/common/states';
 import { Button } from '@/components/ui/button';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
-import { useMapCatalog } from '@/lib/hooks/battle-maps/useMapCatalog';
+import { useMapCatalog } from '@/lib/hooks/battle-maps';
 import { useSearch } from '@/lib/hooks/common';
 import type { MapCatalogEntry } from '@/types/map-catalog';
 

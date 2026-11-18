@@ -26,7 +26,7 @@ import {
 } from 'lucide-react';
 
 import type { MapSpellEffect } from '@/lib/constants/tilesets/types';
-import type { EditorPanel } from '@/lib/hooks/battle-maps/useMapEditorWorkspace';
+import type { EditorPanel } from '@/lib/hooks/battle-maps';
 
 export const PANELS: EditorPanel[] = [
     'background',

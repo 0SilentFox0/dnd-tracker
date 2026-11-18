@@ -9,14 +9,13 @@ import { EditorSidebar } from './editor/EditorSidebar';
 import { BattleMap } from '@/components/battle/map';
 import { QueryState } from '@/components/common/states';
 import { useBattleMap, useBattleMapTiles } from '@/lib/hooks/battle-maps';
-// deep imports: the battle-maps barrel would close a cycle through battles
-import { useMapEditorDraft } from '@/lib/hooks/battle-maps/useMapEditorDraft';
+import { useMapEditorDraft } from '@/lib/hooks/battle-maps';
 import {
     type EditorPanel,
     useMapEditorWorkspace,
-} from '@/lib/hooks/battle-maps/useMapEditorWorkspace';
-import { useTileSave } from '@/lib/hooks/battle-maps/useTileSave';
-import { useUvttImport } from '@/lib/hooks/battle-maps/useUvttImport';
+} from '@/lib/hooks/battle-maps';
+import { useTileSave } from '@/lib/hooks/battle-maps';
+import { useUvttImport } from '@/lib/hooks/battle-maps';
 import { useCoarsePointer } from '@/lib/hooks/common';
 import { useText } from '@/lib/i18n/use-text';
 import { isEdgeTool, isPreviewSafeBackground } from '@/lib/utils/battle/grid';

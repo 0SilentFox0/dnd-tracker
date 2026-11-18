@@ -11,5 +11,8 @@ export {
 export { useImportCatalogMap } from './useImportCatalogMap';
 export { useMapCatalog } from './useMapCatalog';
 export { useMapEditorDraft } from './useMapEditorDraft';
+export { type EditorPanel, useMapEditorWorkspace } from './useMapEditorWorkspace';
 export { type NewMapForm, useMapLibrary } from './useMapLibrary';
 export { useTileEditor } from './useTileEditor';
+export { useTileSave } from './useTileSave';
+export { useUvttImport,type UvttImportFailure } from './useUvttImport';

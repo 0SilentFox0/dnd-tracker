@@ -9,9 +9,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { MAP_LIMITS } from '@/lib/constants/map-limits';
-import type { useMapEditorDraft } from '@/lib/hooks/battle-maps/useMapEditorDraft';
-import type { useMapEditorWorkspace } from '@/lib/hooks/battle-maps/useMapEditorWorkspace';
-import type { useTileSave } from '@/lib/hooks/battle-maps/useTileSave';
+import type { useMapEditorDraft } from '@/lib/hooks/battle-maps';
+import type { useMapEditorWorkspace } from '@/lib/hooks/battle-maps';
+import type { useTileSave } from '@/lib/hooks/battle-maps';
 import { MIN_SIDE } from '@/lib/utils/battle/grid';
 
 export function BackLink({ campaignId }: { campaignId: string }) {

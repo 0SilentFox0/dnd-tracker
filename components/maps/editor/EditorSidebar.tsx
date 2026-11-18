@@ -15,12 +15,12 @@ import {
 } from '@/components/battle/setup/MapToolButtons';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import type { useMapEditorDraft } from '@/lib/hooks/battle-maps/useMapEditorDraft';
+import type { useMapEditorDraft } from '@/lib/hooks/battle-maps';
 import type {
     EditorPanel,
     useMapEditorWorkspace,
-} from '@/lib/hooks/battle-maps/useMapEditorWorkspace';
-import type { useUvttImport } from '@/lib/hooks/battle-maps/useUvttImport';
+} from '@/lib/hooks/battle-maps';
+import type { useUvttImport } from '@/lib/hooks/battle-maps';
 
 const GROUP_LABEL =
     'col-span-2 px-1 pt-1 text-[10px] font-semibold tracking-wide text-hud-muted uppercase';

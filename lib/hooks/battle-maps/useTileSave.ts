@@ -1,8 +1,8 @@
 'use client';
 
-import { usePatchBattleMapTiles } from '@/lib/hooks/battle-maps';
-import type { useMapEditorDraft } from '@/lib/hooks/battle-maps/useMapEditorDraft';
-import type { useTileEditor } from '@/lib/hooks/battle-maps/useTileEditor';
+import { usePatchBattleMapTiles } from './useBattleMaps';
+import type { useMapEditorDraft } from './useMapEditorDraft';
+import type { useTileEditor } from './useTileEditor';
 
 export function useTileSave(
     campaignId: string,
