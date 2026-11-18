@@ -82,16 +82,13 @@ const build = (rules: Ruleset, character: object) =>
         ParticipantSide.ALLY,
         undefined,
         {
-            skillTreeByRace: {},
-            mainSkills: [],
+            ext: {},
             spells: [],
             allSkills: [],
             racesByName: { Людина: null },
             campaign: { maxLevel: 20 },
             skillsById: {},
             artifactsById: {},
-            artifactSetsById: {},
-            artifactSetMemberIds: {},
             rules,
             classesById: { monk },
         } as never

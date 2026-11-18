@@ -88,16 +88,13 @@ const wizard: GameClassData = {
 
 const build = (rules: Ruleset, character: object) => {
     const context = {
-        skillTreeByRace: {},
-        mainSkills: [],
+        ext: {},
         spells: [],
         allSkills: [],
         racesByName: { Людина: null },
         campaign: { maxLevel: 20 },
         skillsById: {},
         artifactsById: { art1: chain },
-        artifactSetsById: {},
-        artifactSetMemberIds: {},
         rules,
         classesById: { fighter, wizard },
     } as never;

@@ -1,12 +1,22 @@
 import { prisma } from '@/lib/db';
-import type { CampaignSpellContext } from '@/lib/utils/battle/types/participant';
+import { defineContextExt } from '@/lib/utils/battle/types/context-ext';
 
 export type ArtifactSetBattleMaps = {
-    artifactSetsById: NonNullable<CampaignSpellContext['artifactSetsById']>;
-    artifactSetMemberIds: NonNullable<
-        CampaignSpellContext['artifactSetMemberIds']
+    artifactSetsById: Record<
+        string,
+        {
+            id: string;
+            name: string;
+            setBonus: unknown;
+            icon?: string | null;
+            abilities?: unknown;
+        }
     >;
+    artifactSetMemberIds: Record<string, string[]>;
 };
+
+export const artifactSetContext =
+    defineContextExt<ArtifactSetBattleMaps>('artifactsets');
 
 export async function loadArtifactSetBattleMaps(
     campaignId: string,

@@ -164,16 +164,13 @@ const fighter: GameClassData = {
 
 const build = (rules: Ruleset, inventory: object, character: object = {}) => {
     const context = {
-        skillTreeByRace: {},
-        mainSkills: [],
+        ext: {},
         spells: [],
         allSkills: [],
         racesByName: { Людина: null },
         campaign: { maxLevel: 20 },
         skillsById: {},
         artifactsById: ROWS,
-        artifactSetsById: {},
-        artifactSetMemberIds: {},
         rules,
         classesById: { fighter },
     } as never;
@@ -523,16 +520,13 @@ describe('battle participant: item refs', () => {
                 ParticipantSide.ALLY,
                 2,
                 {
-                    skillTreeByRace: {},
-                    mainSkills: [],
+                    ext: {},
                     spells: [],
                     allSkills: [],
                     racesByName: { Людина: race },
                     campaign: { maxLevel: 20 },
                     skillsById: {},
                     artifactsById: { ring, scroll },
-                    artifactSetsById: {},
-                    artifactSetMemberIds: {},
                     rules: parseRules({
                         system: { key: 'homm' },
                         classes: { enabled: true },

@@ -1,5 +1,6 @@
 import { completedSetsLoader } from './battle/apply-completed-sets';
 import { attachArtifactSetsToSpellContext } from './battle/attach-to-spell-context';
+import { artifactSetCharacterContext } from './battle/character-context';
 import { artifactSetsResource } from './content/artifact-sets';
 import { ARTIFACTSETS_CONTENT } from './content/content-contribution';
 import { artifactSetsDmPage } from './dm-page';
@@ -14,5 +15,6 @@ export const ARTIFACTSETS_MODULE_SERVER = defineAddon<SystemServer>(() => ({
     participant: {
         characterRefs: [completedSetsLoader],
         prepareContext: [attachArtifactSetsToSpellContext],
+        characterContext: [artifactSetCharacterContext],
     },
 }));

@@ -41,8 +41,7 @@ const character = {
 };
 
 const context = {
-    skillTreeByRace: {},
-    mainSkills: [],
+    ext: {},
     spells: [],
     allSkills: [],
     racesByName: {
@@ -62,8 +61,6 @@ const context = {
     campaign: { maxLevel: 20 },
     skillsById: {},
     artifactsById: {},
-    artifactSetsById: {},
-    artifactSetMemberIds: {},
 } as never;
 
 const build = (over: object, rules = parseRules(WFRP_RULES)) =>

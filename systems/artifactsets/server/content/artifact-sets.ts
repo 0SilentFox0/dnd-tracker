@@ -58,6 +58,7 @@ export const artifactSetsResource = defineResource<
     description:
         'Sets: artifact composition, set bonus (text and abilities), icon.',
     path: '/artifact-sets',
+    http: { collection: ['GET', 'POST'], item: ['GET', 'PATCH', 'DELETE'] },
     schemas: {
         create: createArtifactSetSchema,
         update: patchArtifactSetSchema,

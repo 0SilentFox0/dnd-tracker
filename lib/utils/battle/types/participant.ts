@@ -48,13 +48,7 @@ export type CharacterFromPrisma = Prisma.CharacterGetPayload<{
 export type UnitFromPrisma = Prisma.UnitGetPayload<Record<string, never>>;
 
 export interface CampaignSpellContext {
-    skillTreeByRace: Record<string, Prisma.SkillTreeGetPayload<object> | null>;
-    mainSkills: Array<{
-        id: string;
-        spellGroupId: string | null;
-        name: string;
-        role: string | null;
-    }>;
+    ext: Record<string, unknown>;
     spells: Array<{
         id: string;
         level: number;
@@ -69,15 +63,4 @@ export interface CampaignSpellContext {
     backgroundsById?: Record<string, BackgroundData>;
     skillsById?: Record<string, Prisma.SkillGetPayload<object>>;
     artifactsById?: Record<string, Prisma.ArtifactGetPayload<object>>;
-    artifactSetsById?: Record<
-        string,
-        {
-            id: string;
-            name: string;
-            setBonus: unknown;
-            icon?: string | null;
-            abilities?: unknown;
-        }
-    >;
-    artifactSetMemberIds?: Record<string, string[]>;
 }

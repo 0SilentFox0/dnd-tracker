@@ -76,7 +76,11 @@ describe('buildOpenApi', () => {
 
     it('шляхи документа відповідають route.ts з тим самим методом', async () => {
         for (const { path, method } of ops) {
-            const file = `/app${path.replace(/\{(\w+)\}/g, '[$1]')}/route.ts`;
+            const staticFile = `/app${path.replace(/\{(\w+)\}/g, '[$1]')}/route.ts`;
+
+            const file = routes[staticFile]
+                ? staticFile
+                : '/app/api/campaigns/[id]/[kind]/[[...rest]]/route.ts';
 
             expect(routes[file], file).toBeDefined();
             expect(

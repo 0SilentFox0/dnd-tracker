@@ -32,6 +32,8 @@ export interface SystemI18n {
     dm?: readonly string[];
     /** Texts of the module's rules-form sections: loaded on the rules page for every installed module, because the wizard lists sections of modules that are still off */
     rules?: readonly string[];
+    /** Scopes with the module's stored battle-log texts: loaded for every installed module so old logs render with the module off */
+    log?: readonly string[];
     pages?: Partial<Record<SystemPageScope, readonly string[]>>;
     budgetKb?: {
         battle?: number;
@@ -69,6 +71,45 @@ export interface DetachRefMeta {
     viaCharacter?: true;
 }
 
+export interface VocabShapes {
+    abilitySources: { id: string; itemLike?: true; table?: string };
+    abilityStats: {
+        id: string;
+        baked?: true;
+        timed?: true;
+        capped?: true;
+        defaultValue?: number;
+        sheetKey?: string;
+        needsDuration?: true;
+        areaOk?: true;
+        fearBlock?: true;
+    };
+    abilityLimitFlags: {
+        id: string;
+        clears?: readonly string[];
+        needsActionTrigger?: true;
+    };
+    actionTypes: {
+        id: string;
+        counter?: true;
+        serverLabel?: true;
+        fx?: 'attack';
+    };
+    legendaryKinds: { id: string; lair?: true };
+    rollKinds: { id: string; after: string };
+    combatStats: { id: string; hidden?: true; neutral?: number };
+    logFields: { id: string; code: string };
+    equipSlots: { id: string; weapon?: true; needsLight?: true };
+    characterLogTypes: { id: string; toggle?: true };
+    unitImportFields: { id: string; type: 'int' };
+}
+
+export type VocabKind = keyof VocabShapes;
+
+export type SystemVocab = {
+    [K in VocabKind]?: readonly VocabShapes[K][];
+};
+
 export interface SystemMeta {
     module: string;
     /** Absent means "base" until every folder declares it */
@@ -95,6 +136,10 @@ export interface SystemMeta {
     contentKinds?: readonly string[];
     contentTables?: readonly ContentTableMeta[];
     detachRefs?: readonly DetachRefMeta[];
+    /** Stored strings the module owns (ability sources, log keys, slots, ...); the core reads them through `moduleVocab` from every installed module */
+    vocab?: SystemVocab;
+    /** Content kind -> kinds whose lists an import of it invalidates */
+    importLinks?: Readonly<Record<string, readonly string[]>>;
     /** `hashJson` of `characteristics` values the system treats as empty besides null / {} */
     emptyCharacteristicsHashes?: readonly string[];
     /** Row columns the system stores inside `characteristics`; the content hash folds them back so legacy and migrated rows hash alike */

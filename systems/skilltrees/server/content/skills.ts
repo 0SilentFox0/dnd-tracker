@@ -55,6 +55,10 @@ export const skillsResource = defineResource<
     description:
         'Skill library: description, icon, link to a branch and spells, abilities.',
     path: '/skills',
+    http: {
+        collection: ['GET', 'POST', 'DELETE'],
+        item: ['GET', 'PATCH', 'DELETE'],
+    },
     schemas: {
         create: createSkillSchema,
         update: updateSkillSchema,

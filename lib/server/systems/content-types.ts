@@ -41,6 +41,8 @@ export interface ContentOperationContribution {
     /** Content kind that must be active in the campaign composition, else 404 */
     kind?: string;
     run(ctx: ContentOperationRunCtx): Promise<unknown>;
+    /** Served by the module content dispatcher; `direct` skips the kind gate and write lock, `project` shapes the response */
+    http?: { direct?: true; project?(result: unknown): unknown };
     assistant?: {
         confirm?: 'always';
         /** `assistant` i18n key of the effect "character progress is replaced" */

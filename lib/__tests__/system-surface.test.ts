@@ -5,6 +5,7 @@ import {
     countModuleSurface,
     readSurfaceExempt,
     scanCoreMessageKeys,
+    scanModuleSchemaFiles,
     scanModuleSurface,
     scanSchemaColumns,
 } from '@/scripts/shared/system-ratchet';
@@ -38,6 +39,9 @@ describe('module surface ratchet', () => {
 
     it('schema columns named after a module stay on the allowlist until the contract step', () =>
         expect(scanSchemaColumns()).toEqual(exempt.schema));
+
+    it('a module schema file names only its own module', () =>
+        expect(scanModuleSchemaFiles()).toEqual([]));
 
     it('core message namespaces carry no new module keys', () =>
         expect(scanCoreMessageKeys()).toEqual(exempt.messages));

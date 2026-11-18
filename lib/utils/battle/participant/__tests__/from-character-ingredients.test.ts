@@ -45,16 +45,13 @@ const character = {
 
 const build = (rules: object, hero: object = character) => {
     const context = {
-        skillTreeByRace: {},
-        mainSkills: [],
+        ext: {},
         spells: [],
         allSkills: [],
         racesByName: { Людина: null },
         campaign: { maxLevel: 20 },
         skillsById: {},
         artifactsById: {},
-        artifactSetsById: {},
-        artifactSetMemberIds: {},
         rules: parseRules({ system: { key: 'homm' }, ...rules }),
     } as never;
 

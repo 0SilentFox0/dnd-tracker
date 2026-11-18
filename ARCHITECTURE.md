@@ -227,7 +227,7 @@ React-провайдери: **`query-provider.tsx`** (TanStack Query), можл�
 
 ## 5. `prisma/`
 
-- **`schema.prisma`** — повна схема БД (User, Campaign, CampaignMember, Character, Unit, Spell, SpellGroup, Artifact, ArtifactSet, CharacterInventory, SkillTree, CharacterSkills, BattleScene, StatusEffect, Skill, Race, MainSkill тощо).
+- **`prisma/schema/`** (`core.prisma`, `systems/*.prisma`) — повна схема БД (User, Campaign, CampaignMember, Character, Unit, Spell, SpellGroup, Artifact, ArtifactSet, CharacterInventory, SkillTree, CharacterSkills, BattleScene, StatusEffect, Skill, Race, MainSkill тощо).
 - **`migrations/`** — історія міграцій. Після зміни схеми: `npx prisma migrate dev --name опис`.
 
 Після змін обов’язково: `npx prisma generate` (часто виконується в `postinstall` та перед build).

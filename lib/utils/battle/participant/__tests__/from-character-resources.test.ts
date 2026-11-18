@@ -80,16 +80,13 @@ const FIGHTER3 = [{ classId: 'fighter', level: 3 }];
 
 const build = (outOfCombat: object, character: object, extra: object = {}) => {
     const context = {
-        skillTreeByRace: {},
-        mainSkills: [],
+        ext: {},
         spells: [],
         allSkills: [],
         racesByName: { Людина: null },
         campaign: { maxLevel: 20 },
         skillsById: {},
         artifactsById: {},
-        artifactSetsById: {},
-        artifactSetMemberIds: {},
         rules: parseRules({
             system: { key: 'dnd5e' },
             classes: { enabled: true },

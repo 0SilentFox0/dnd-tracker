@@ -54,16 +54,13 @@ const build = (
     classes: Array<{ classId: string; level: number }>
 ) => {
     const context = {
-        skillTreeByRace: {},
-        mainSkills: [],
+        ext: {},
         spells: [],
         allSkills: [],
         racesByName: { Людина: null },
         campaign: { maxLevel: 20 },
         skillsById: {},
         artifactsById: {},
-        artifactSetsById: {},
-        artifactSetMemberIds: {},
         rules: parseRules({
             system: { key: 'classes' in rules ? 'dnd5e' : 'homm' },
             ...rules,

@@ -1,4 +1,5 @@
 import type { NextResponse } from 'next/server';
+import type { Prisma } from '@prisma/client';
 import type { ZodType } from 'zod';
 
 import type { SystemContentServer } from './content-types';
@@ -166,10 +167,33 @@ export type CharacterRefLoader = (input: {
     }>
 >;
 
+/** Batch path: fills the module's `ext` slice for the given characters; must filter its reads by their races and ids */
 export type ContextPreparer = (
     campaignId: string,
-    context: CampaignSpellContext
+    context: CampaignSpellContext,
+    scope: { characters: CharacterFromPrisma[] }
 ) => Promise<void>;
+
+export interface CharacterContribution {
+    ext?: Record<string, unknown>;
+    skills?: Prisma.SkillGetPayload<object>[];
+    spells?: CampaignSpellContext['spells'];
+    /** Skill tree row the character sheet reads next to the participant */
+    tree?: Prisma.SkillTreeGetPayload<object> | null;
+}
+
+/** Single-character path: `select` joins the one campaign read, `load` may add its own reads */
+export interface CharacterContextLoader {
+    select?(character: CharacterFromPrisma): Prisma.CampaignSelect;
+    /** Relations joined into the equipped-artifact read; their keys are stripped from the context rows */
+    artifactInclude?: Prisma.ArtifactInclude;
+    load(input: {
+        character: CharacterFromPrisma;
+        campaignId: string;
+        campaign: Record<string, unknown> | null;
+        artifacts: Record<string, unknown>[];
+    }): Promise<CharacterContribution>;
+}
 
 export type LearnedSpellsLoader = (input: {
     character: CharacterFromPrisma;
@@ -191,6 +215,7 @@ export interface SystemParticipantServer {
     learnedSpells?: readonly LearnedSpellsLoader[];
     characterRefs?: readonly CharacterRefLoader[];
     prepareContext?: readonly ContextPreparer[];
+    characterContext?: readonly CharacterContextLoader[];
 }
 
 /** Player-draft creation of a base whose characters are built by a creation flow instead of the d20 draft */

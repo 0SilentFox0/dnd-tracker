@@ -59,11 +59,15 @@ describe('D20_BALANCE', () => {
         const out = D20_BALANCE.heroPower(
             input({
                 campaignContext: {
-                    skillTreeByRace: { elf: { nodes: [] } },
-                    mainSkills: [
-                        { id: 'm1', role: 'magic' },
-                        { id: 'm2', role: 'martial' },
-                    ],
+                    ext: {
+                        skilltrees: {
+                            treeByRace: { elf: { nodes: [] } },
+                            mainSkills: [
+                                { id: 'm1', role: 'magic' },
+                                { id: 'm2', role: 'martial' },
+                            ],
+                        },
+                    },
                 },
             }) as never
         );
@@ -79,8 +83,12 @@ describe('D20_BALANCE', () => {
         const out = D20_BALANCE.heroPower(
             input({
                 campaignContext: {
-                    skillTreeByRace: { dwarf: { nodes: [] } },
-                    mainSkills: [],
+                    ext: {
+                        skilltrees: {
+                            treeByRace: { dwarf: { nodes: [] } },
+                            mainSkills: [],
+                        },
+                    },
                 },
             }) as never
         );

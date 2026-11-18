@@ -126,6 +126,7 @@ export const SKILLTREES_CONTENT: SystemContentServer = {
                 tag: 'Skills',
             },
             kind: 'skills',
+            http: { direct: true },
             run: ({ actor }) => listSkillTrees(actor),
         },
         'skill-trees.save': {
@@ -144,6 +145,18 @@ export const SKILLTREES_CONTENT: SystemContentServer = {
             },
             pathParams: { treeId: id.optional() },
             kind: 'skills',
+            http: {
+                direct: true,
+                project: (saved) => {
+                    const { id, race, skills } = saved as {
+                        id: string;
+                        race: string;
+                        skills: unknown;
+                    };
+
+                    return { id, race, skills };
+                },
+            },
             run: ({ actor, body, input }) =>
                 saveSkillTree(actor, {
                     ...(body as z.output<typeof saveSkillTreeSchema>),
@@ -204,6 +217,7 @@ export const SKILLTREES_CONTENT: SystemContentServer = {
                 tag: 'Skills',
             },
             pathParams: { skillId: id },
+            http: {},
             run: duplicateSkill,
             assistant: {
                 state: async (_actor, input, find) => ({

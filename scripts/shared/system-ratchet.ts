@@ -241,7 +241,9 @@ export interface SurfaceExempt {
     messages: string[];
 }
 
-const SCHEMA_FILES = ['prisma/schema.prisma', 'prisma/schema/core.prisma'];
+const SCHEMA_FILES = ['prisma/schema/core.prisma'];
+
+const MODULE_SCHEMA_DIR = 'prisma/schema/systems';
 
 const MESSAGE_LOCALES = ['uk', 'en'] as const;
 
@@ -415,6 +417,38 @@ export const scanSchemaColumns = (
     }
 
     return hits.sort();
+};
+
+/** A module schema file may name only its own module (file name = module id) */
+export const scanModuleSchemaFiles = (
+    dir: string = MODULE_SCHEMA_DIR
+): string[] => {
+    const abs = path.join(ROOT, dir);
+
+    if (!fs.existsSync(abs)) return [];
+
+    const metas = (SYSTEM_META as readonly SystemMeta[]).filter(
+        (m) => m.kind === 'addon'
+    );
+
+    return fs
+        .readdirSync(abs)
+        .filter((f) => f.endsWith('.prisma'))
+        .flatMap((f) => {
+            const id = f.replace(/\.prisma$/, '');
+
+            const own = new Set(
+                metas.filter((m) => m.module === id).flatMap(moduleNames)
+            );
+
+            const foreign = allModuleNames().filter((n) => !own.has(n));
+
+            return scanSchemaColumns(
+                fs.readFileSync(path.join(abs, f), 'utf8'),
+                foreign
+            ).map((hit) => `${f}: ${hit}`);
+        })
+        .sort();
 };
 
 const jsonKeyPaths = (value: unknown, prefix: string): string[] =>

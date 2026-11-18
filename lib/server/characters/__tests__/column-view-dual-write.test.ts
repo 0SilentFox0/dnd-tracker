@@ -72,16 +72,13 @@ const build = (character: object) =>
         ParticipantSide.ALLY,
         undefined,
         {
-            skillTreeByRace: {},
-            mainSkills: [],
+            ext: {},
             spells: [],
             allSkills: [],
             racesByName: { Людина: null },
             campaign: { maxLevel: 20 },
             skillsById: {},
             artifactsById: {},
-            artifactSetsById: {},
-            artifactSetMemberIds: {},
             rules,
             classesById: {},
             featsById: {},
@@ -152,12 +149,12 @@ describe('fromCharacter reads characteristics, then the column', () => {
             expect(legacyParticipant).toEqual(migratedParticipant);
             expect(withStoredColumns(legacy)).toMatchObject(STATS);
             expect(withStoredColumns(migrated)).toMatchObject(STATS);
-            expect(
-                withColumnView(legacy, ruleSystemOf(rules))
-            ).toMatchObject(STATS);
-            expect(
-                withColumnView(migrated, ruleSystemOf(rules))
-            ).toMatchObject(STATS);
+            expect(withColumnView(legacy, ruleSystemOf(rules))).toMatchObject(
+                STATS
+            );
+            expect(withColumnView(migrated, ruleSystemOf(rules))).toMatchObject(
+                STATS
+            );
         }
     );
 

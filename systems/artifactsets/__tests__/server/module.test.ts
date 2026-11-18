@@ -17,16 +17,20 @@ const equipped = [
 ] as never;
 
 const context = {
-    artifactSetsById: {
-        s1: {
-            id: 's1',
-            name: 'Set',
-            icon: null,
-            setBonus: { x: 1 },
-            abilities: [],
+    ext: {
+        artifactsets: {
+            artifactSetsById: {
+                s1: {
+                    id: 's1',
+                    name: 'Set',
+                    icon: null,
+                    setBonus: { x: 1 },
+                    abilities: [],
+                },
+            },
+            artifactSetMemberIds: { s1: ['a1', 'a2'] },
         },
     },
-    artifactSetMemberIds: { s1: ['a1', 'a2'] },
 } as never;
 
 const loadAll = async (r: Ruleset) =>
@@ -58,6 +62,6 @@ describe('artifactsets module on d20', () => {
 
         expect(
             systemServerOf(rules({ key: 'homm' })).participant?.prepareContext
-        ).toHaveLength(1);
+        ).toHaveLength(2);
     });
 });

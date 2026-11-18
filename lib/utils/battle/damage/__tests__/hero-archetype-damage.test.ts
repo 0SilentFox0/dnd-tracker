@@ -131,8 +131,7 @@ describe('hero archetype damage', () => {
 
         const context = {
             rules: DEFAULT_RULES,
-            skillTreeByRace: {},
-            mainSkills: [],
+            ext: {},
             spells: [],
             allSkills: [],
             racesByName: {
@@ -152,8 +151,6 @@ describe('hero archetype damage', () => {
             campaign: { maxLevel: 20 },
             skillsById: {},
             artifactsById: {},
-            artifactSetsById: {},
-            artifactSetMemberIds: {},
         } as never;
 
         const p = await createBattleParticipantFromCharacter(

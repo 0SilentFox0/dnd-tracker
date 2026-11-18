@@ -1,5 +1,7 @@
 import type { Prisma } from '@prisma/client';
 
+import { skillTreeContext } from './context';
+
 import { prisma } from '@/lib/db';
 import type { SkillEntriesLoader } from '@/lib/server/systems/types';
 import type { SkillRowEntry } from '@/lib/utils/battle/participant/extract-skills';
@@ -135,7 +137,14 @@ export const loadSkillEntries: SkillEntriesLoader = ({ character, context }) =>
         character.campaignId,
         context?.skillsById,
         context
-            ? new Map(context.mainSkills.map((m) => [m.id, m.spellGroupId]))
+            ? new Map(
+                  (skillTreeContext.read(context)?.mainSkills ?? []).map(
+                      (m) => [m.id, m.spellGroupId]
+                  )
+              )
             : undefined,
-        context ? (context.skillTreeByRace[character.race] ?? null) : undefined
+        context
+            ? (skillTreeContext.read(context)?.treeByRace[character.race] ??
+                  null)
+            : undefined
     );

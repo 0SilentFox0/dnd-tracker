@@ -7,4 +7,14 @@ export const RETALIATION_META = {
     requires: ['d20'],
     after: ['opportunity'],
     i18n: {},
+    vocab: {
+        actionTypes: [
+            {
+                id: 'retaliation',
+                counter: true,
+                serverLabel: true,
+                fx: 'attack',
+            },
+        ],
+    },
 } as const satisfies SystemMeta;

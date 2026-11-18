@@ -21,7 +21,7 @@ import type { RuleSystemDefinition } from '@/lib/utils/rules/systems/types';
 
 const characterModel = () => {
     const schema = fs.readFileSync(
-        path.resolve(__dirname, '../../prisma/schema.prisma'),
+        path.resolve(__dirname, '../../prisma/schema/core.prisma'),
         'utf8'
     );
 

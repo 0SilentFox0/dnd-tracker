@@ -1,0 +1,50 @@
+model SkillTree {
+  id              String            @id @default(cuid())
+  campaignId      String
+  race            String
+  skills          Json              @default("[]")
+  createdAt       DateTime          @default(now())
+  characterSkills CharacterSkills[]
+  campaign        Campaign          @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  sourceId        String?
+  sourceHash      String?
+  slug            String?
+
+  @@index([campaignId, race])
+  @@index([campaignId, sourceId])
+  @@map("skill_trees")
+}
+
+model CharacterSkills {
+  id             String    @id @default(cuid())
+  characterId    String
+  skillTreeId    String
+  unlockedSkills Json      @default("[]")
+  updatedAt      DateTime  @updatedAt
+  character      Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  skillTree      SkillTree @relation(fields: [skillTreeId], references: [id], onDelete: Cascade)
+
+  @@unique([characterId, skillTreeId])
+  @@index([skillTreeId])
+  @@map("character_skills")
+}
+
+// BEGIN GENERATED BASE MODELS (scripts/db/gen-base-models.ts)
+
+model SkillTreeBase {
+  id               String
+  race             String
+  skills           Json     @default("[]")
+  createdAt        DateTime @default(now())
+  slug             String?
+  sourceCampaignId String
+  validFrom        Int
+  validTo          Int?
+
+  @@id([id, validFrom])
+  @@index([sourceCampaignId, validFrom, validTo])
+  @@index([sourceCampaignId, slug])
+  @@map("skill_trees_base")
+}
+
+// END GENERATED BASE MODELS

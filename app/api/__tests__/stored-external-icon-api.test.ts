@@ -129,8 +129,8 @@ describe('PATCH with an already stored external icon', () => {
     });
 
     it('artifact set: same SVG icon -> 200, no fetch', async () => {
-        const { PATCH } = await import(
-            '@/app/api/campaigns/[id]/artifact-sets/[setId]/route'
+        const { PATCH } = await import('./dispatched-route').then((m) =>
+            m.dispatchedRoute('artifact-sets/:setId')
         );
 
         const res = await PATCH(req({ icon: 'https://game-icons.net/a.svg' }), {
@@ -149,8 +149,8 @@ describe('PATCH with an already stored external icon', () => {
             })
         );
 
-        const { PATCH } = await import(
-            '@/app/api/campaigns/[id]/artifact-sets/[setId]/route'
+        const { PATCH } = await import('./dispatched-route').then((m) =>
+            m.dispatchedRoute('artifact-sets/:setId')
         );
 
         const res = await PATCH(

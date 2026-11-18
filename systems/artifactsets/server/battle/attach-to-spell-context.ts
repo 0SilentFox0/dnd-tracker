@@ -1,4 +1,4 @@
-import { loadArtifactSetBattleMaps } from './load-maps';
+import { artifactSetContext, loadArtifactSetBattleMaps } from './load-maps';
 
 import type { ContextPreparer } from '@/lib/server/systems/types';
 
@@ -18,6 +18,5 @@ export const attachArtifactSetsToSpellContext: ContextPreparer = async (
 
     const maps = await loadArtifactSetBattleMaps(campaignId, [...setIds]);
 
-    context.artifactSetsById = maps.artifactSetsById;
-    context.artifactSetMemberIds = maps.artifactSetMemberIds;
+    artifactSetContext.write(context, maps);
 };

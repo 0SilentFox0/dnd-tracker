@@ -20,8 +20,12 @@ const tree = {
 };
 
 const context = {
-    skillTreeByRace: { Ельф: tree },
-    mainSkills: [{ id: 'light', spellGroupId: 'sg', name: 'Світло' }],
+    ext: {
+        skilltrees: {
+            treeByRace: { Ельф: tree },
+            mainSkills: [{ id: 'light', spellGroupId: 'sg', name: 'Світло' }],
+        },
+    },
     spells: [{ id: 's1', level: 1, spellGroup: { id: 'sg' } }],
     allSkills: [],
 } as never;
@@ -61,7 +65,7 @@ describe('resolveLearnedSpellsAndMastery', () => {
             (
                 await resolve(character, ['k'], {
                     ...(context as object),
-                    skillTreeByRace: {},
+                    ext: {},
                 } as never)
             ).knownSpells
         ).toEqual(['k']);
@@ -78,7 +82,7 @@ describe('resolveLearnedSpellsAndMastery', () => {
 
         const ctx = {
             ...(context as object),
-            skillTreeByRace: {},
+            ext: {},
             allSkills: [{ id: 'ps', grantedSpellId: 'avatar' }],
         } as never;
 
@@ -124,16 +128,13 @@ describe('закляття персонального вміння в учасн
             ParticipantSide.ALLY,
             undefined,
             {
-                skillTreeByRace: {},
-                mainSkills: [],
+                ext: {},
                 spells: [],
                 allSkills: [{ id: 'ps', grantedSpellId: 'avatar' }],
                 racesByName: { Людина: null },
                 campaign: { maxLevel: 20 },
                 skillsById: {},
                 artifactsById: {},
-                artifactSetsById: {},
-                artifactSetMemberIds: {},
                 rules,
                 classesById: {},
                 featsById: {},

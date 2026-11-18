@@ -3,8 +3,8 @@ import type { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db';
 import { CharacterClassesSchema } from '@/lib/schemas/classes';
 import { loadBackground } from '@/lib/server/backgrounds/load';
+import { systemServerOf } from '@/lib/server/systems/lookup';
 import { readChoiceList } from '@/lib/utils/abilities/read';
-import { referencedSkillIds } from '@/lib/utils/battle/participant/extract-skills';
 import { loadClassesById } from '@/lib/utils/battle/participant/load-classes';
 import { loadFeatsById } from '@/lib/utils/battle/participant/load-feats';
 import type {
@@ -17,7 +17,6 @@ import { classesEnabled } from '@/lib/utils/characters/classes/classes-enabled';
 import { inventoryArtifactIds } from '@/lib/utils/items/resolve';
 import type { Ruleset } from '@/lib/utils/rules';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
-import { normalizeTree, resolveLearned } from '@/lib/utils/skills/progression';
 import { resolveClassEntries } from '@/lib/utils/spells/class-slots';
 import type { ResolvedClassEntry } from '@/types/classes';
 
@@ -28,118 +27,23 @@ export interface CharacterContext {
     classEntries: ResolvedClassEntry[];
 }
 
-function learnedNeeds(
-    character: CharacterFromPrisma,
-    tree: Prisma.SkillTreeGetPayload<object> | null
-) {
-    const normalized = tree ? normalizeTree(tree) : null;
-
-    const learned = normalized
-        ? resolveLearned(normalized, character.skillTreeProgress)
-        : [];
-
-    return {
-        learned: learned.length > 0,
-        skillIds: referencedSkillIds([character], tree ? [tree] : []),
-        branchIds: normalized?.branches.map((b) => b.id) ?? [],
-        branchGroupIds: (normalized?.branches ?? []).flatMap((b) =>
-            b.spellGroupId ? [b.spellGroupId] : []
-        ),
-    };
-}
-
-type LearnedNeeds = ReturnType<typeof learnedNeeds>;
-
-async function loadLibrary(campaignId: string, needs: LearnedNeeds) {
-    if (!(needs.skillIds.length > 0 || needs.learned)) return null;
-
-    return prisma.campaign.findUnique({
-        where: { id: campaignId },
-        select: {
-            ...(needs.skillIds.length > 0 && {
-                skills: { where: { id: { in: needs.skillIds } } },
-            }),
-            ...(needs.learned && {
-                mainSkills: {
-                    where: { id: { in: needs.branchIds } },
-                    select: {
-                        id: true,
-                        spellGroupId: true,
-                        name: true,
-                        role: true,
-                    },
-                },
-                spells: {
-                    where: {
-                        OR: [
-                            { groupId: { in: needs.branchGroupIds } },
-                            {
-                                spellGroup: {
-                                    mainSkills: {
-                                        some: {
-                                            id: {
-                                                in: needs.branchIds,
-                                            },
-                                        },
-                                    },
-                                },
-                            },
-                            {
-                                spellGroup: {
-                                    skills: {
-                                        some: {
-                                            id: {
-                                                in: needs.skillIds,
-                                            },
-                                        },
-                                    },
-                                },
-                            },
-                        ],
-                    },
-                    select: { id: true, level: true, groupId: true },
-                },
-            }),
-        },
-    });
-}
-
 function indexArtifacts(
-    artifacts: Prisma.ArtifactGetPayload<{
-        include: {
-            artifactSet: { include: { artifacts: { select: { id: true } } } };
-        };
-    }>[]
-) {
+    artifacts: Record<string, unknown>[],
+    joined: string[]
+): NonNullable<CampaignSpellContext['artifactsById']> {
     const artifactsById: NonNullable<CampaignSpellContext['artifactsById']> =
         {};
 
-    const artifactSetsById: NonNullable<
-        CampaignSpellContext['artifactSetsById']
-    > = {};
+    for (const raw of artifacts) {
+        const row = { ...raw };
 
-    const artifactSetMemberIds: NonNullable<
-        CampaignSpellContext['artifactSetMemberIds']
-    > = {};
+        for (const key of joined) delete row[key];
 
-    for (const { artifactSet, ...row } of artifacts) {
-        artifactsById[row.id] = row;
-
-        if (artifactSet) {
-            artifactSetsById[artifactSet.id] = {
-                id: artifactSet.id,
-                name: artifactSet.name,
-                setBonus: artifactSet.setBonus,
-                icon: artifactSet.icon,
-                abilities: artifactSet.abilities,
-            };
-            artifactSetMemberIds[artifactSet.id] = artifactSet.artifacts.map(
-                (a) => a.id
-            );
-        }
+        artifactsById[row.id as string] =
+            row as unknown as Prisma.ArtifactGetPayload<object>;
     }
 
-    return { artifactsById, artifactSetsById, artifactSetMemberIds };
+    return artifactsById;
 }
 
 export async function loadCharacterContext(
@@ -155,35 +59,61 @@ export async function loadCharacterContext(
         consumables: rules.items.enabled,
     });
 
+    const loaders = systemServerOf(rules).participant?.characterContext ?? [];
+
+    const artifactInclude = Object.assign(
+        {},
+        ...loaders.map((l) => l.artifactInclude)
+    ) as Prisma.ArtifactInclude;
+
+    const joined = Object.keys(artifactInclude);
+
     const [campaign, artifacts] = await Promise.all([
         prisma.campaign.findUnique({
             where: { id: campaignId },
             select: {
                 races: { where: { name: raceName }, take: 1 },
-                skillTrees: { where: { race: raceName }, take: 1 },
+                ...Object.assign(
+                    {},
+                    ...loaders.map((l) => l.select?.(character))
+                ),
             },
         }),
         artifactIds.length > 0
             ? prisma.artifact.findMany({
                   where: { id: { in: artifactIds }, campaignId },
-                  include: {
-                      artifactSet: {
-                          include: { artifacts: { select: { id: true } } },
-                      },
-                  },
+                  ...(joined.length > 0 && { include: artifactInclude }),
               })
             : [],
     ]);
 
     const race = campaign?.races[0] ?? null;
 
-    const tree = campaign?.skillTrees[0] ?? null;
+    const contributions = await Promise.all(
+        loaders.map((l) =>
+            l.load({
+                character,
+                campaignId,
+                campaign,
+                artifacts: artifacts as Record<string, unknown>[],
+            })
+        )
+    );
 
-    const needs = learnedNeeds(character, tree);
+    const skills = contributions.flatMap((c) => c.skills ?? []);
 
-    const library = await loadLibrary(campaignId, needs);
+    const personalId = character.personalSkillId?.trim();
 
-    const skills = library?.skills ?? [];
+    // A campaign without the skill-trees module still shows a stored personal skill on the sheet
+    if (personalId && !skills.some((s) => s.id === personalId)) {
+        const personal = await prisma.skill.findFirst({
+            where: { id: personalId, campaignId },
+        });
+
+        if (personal) skills.push(personal);
+    }
+
+    const tree = contributions.find((c) => c.tree !== undefined)?.tree ?? null;
 
     const withClasses = classesEnabled(rules);
 
@@ -220,29 +150,24 @@ export async function loadCharacterContext(
         ? await loadBackground(campaignId, state.backgroundId)
         : null;
 
-    const { artifactsById, artifactSetsById, artifactSetMemberIds } =
-        indexArtifacts(artifacts);
+    const artifactsById = indexArtifacts(
+        artifacts as Record<string, unknown>[],
+        joined
+    );
 
     return {
         race,
         tree,
         classEntries,
         context: {
-            skillTreeByRace: { [raceName]: tree },
-            mainSkills: library?.mainSkills ?? [],
-            spells: (library?.spells ?? []).map((s) => ({
-                id: s.id,
-                level: s.level,
-                spellGroup: s.groupId ? { id: s.groupId } : null,
-            })),
+            ext: Object.assign({}, ...contributions.map((c) => c.ext)),
+            spells: contributions.flatMap((c) => c.spells ?? []),
             allSkills: skills,
             racesByName: { [raceName]: race },
             campaign: { maxLevel },
             rules,
             skillsById: Object.fromEntries(skills.map((s) => [s.id, s])),
             artifactsById,
-            artifactSetsById,
-            artifactSetMemberIds,
             featsById,
             backgroundsById: background ? { [background.id]: background } : {},
             ...(classesById && { classesById }),

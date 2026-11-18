@@ -98,7 +98,7 @@ lib/
   utils/<domain>/     # чиста доменна логіка (battle, abilities, spells, …)
   ai/  pusher/  supabase/  schemas/  constants/  onboarding/
 types/                # типи за доменами
-prisma/               # schema.prisma, міграції
+prisma/               # schema/ (core.prisma + systems/*.prisma), міграції
 scripts/              # CLI-скрипти (assets, constructor, db, import, seed, sim, srd)
 data/                 # бібліотеки й шаблони (templates/srd-5.2)
 docs/                 # architecture/, guides/, product/, superpowers/ (специфікації й плани)

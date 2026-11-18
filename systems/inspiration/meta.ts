@@ -7,4 +7,7 @@ export const INSPIRATION_META = {
     requires: ['d20'],
     toggle: 'free',
     i18n: { campaign: ['inspiration'], rules: ['rulesInspiration'] },
+    vocab: {
+        characterLogTypes: [{ id: 'inspiration', toggle: true }],
+    },
 } as const satisfies SystemMeta;

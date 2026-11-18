@@ -2,6 +2,8 @@ import { readdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 
+import { prismaSchemaFiles } from '@/scripts/shared/prisma-schema-files';
+
 const MIGRATION = readFileSync(
     path.resolve(
         __dirname,
@@ -10,10 +12,9 @@ const MIGRATION = readFileSync(
     'utf8'
 );
 
-const SCHEMA = readFileSync(
-    path.resolve(__dirname, '../schema.prisma'),
-    'utf8'
-);
+const SCHEMA = prismaSchemaFiles()
+    .map((f) => readFileSync(f, 'utf8'))
+    .join('\n');
 
 const EXPECTED = [
     'artifacts.setId',
@@ -52,7 +53,7 @@ describe('content_base FK drop (documented drift, see .claude/rules/db-deploy.md
         expect([...dropped].sort()).toEqual(EXPECTED);
     });
 
-    it.each(EXPECTED)('%s keeps its @relation in schema.prisma', (key) => {
+    it.each(EXPECTED)('%s keeps its @relation in the schema', (key) => {
         const [table, column] = key.split('.');
 
         expect(relationColumns(table)).toContain(column);

@@ -29,6 +29,16 @@ describe('CONTENT_RESOURCES', () => {
 
             const item = `${ROOT}${r.path}/[${r.idParam}]/route.ts`;
 
+            if (r.http) {
+                expect(existsSync(collection)).toBe(false);
+                expect(existsSync(item)).toBe(false);
+                expect(existsSync(`${ROOT}/[kind]/[[...rest]]/route.ts`)).toBe(
+                    true
+                );
+
+                return;
+            }
+
             expect(readFileSync(collection, 'utf8')).toMatch(
                 /\b(kindC|c)ollectionRoutes\(/
             );

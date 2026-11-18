@@ -1,7 +1,9 @@
 import { SKILLTREES_CONTENT } from './content/content-contribution';
 import { mainSkillsResource } from './content/main-skills';
 import { skillsResource } from './content/skills';
+import { skillTreeCharacterContext } from './participant/character-context';
 import { resolveLearnedSpellsAndMastery } from './participant/learned-spells';
+import { prepareSkillTreeContext } from './participant/prepare-context';
 import { loadSkillEntries } from './participant/skill-entries';
 import { SKILLTREES_OPERATIONS } from './operations';
 
@@ -28,5 +30,7 @@ export const SKILLTREES_MODULE_SERVER = defineAddon<SystemServer>(() => ({
     participant: {
         learnedSpells: [resolveLearnedSpellsAndMastery],
         skillEntries: [loadSkillEntries],
+        prepareContext: [prepareSkillTreeContext],
+        characterContext: [skillTreeCharacterContext],
     },
 }));

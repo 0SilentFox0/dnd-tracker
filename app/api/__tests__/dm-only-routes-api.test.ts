@@ -34,8 +34,8 @@ vi.mock('@/lib/db', () => ({
     ),
 }));
 
-import * as artifactSetOne from '@/app/api/campaigns/[id]/artifact-sets/[setId]/route';
-import * as artifactSets from '@/app/api/campaigns/[id]/artifact-sets/route';
+import { dispatchedRoute } from './dispatched-route';
+
 import * as artifacts from '@/app/api/campaigns/[id]/artifacts/route';
 import * as battleAudio from '@/app/api/campaigns/[id]/battles/[battleId]/audio/route';
 import * as inventory from '@/app/api/campaigns/[id]/characters/[characterId]/inventory/route';
@@ -44,8 +44,6 @@ import * as characters from '@/app/api/campaigns/[id]/characters/route';
 import * as deckOne from '@/app/api/campaigns/[id]/decks/[deckId]/route';
 import * as decks from '@/app/api/campaigns/[id]/decks/route';
 import * as deckUpload from '@/app/api/campaigns/[id]/decks/upload-url/route';
-import * as mainSkillOne from '@/app/api/campaigns/[id]/main-skills/[mainSkillId]/route';
-import * as mainSkills from '@/app/api/campaigns/[id]/main-skills/route';
 import * as member from '@/app/api/campaigns/[id]/members/[memberId]/route';
 import * as races from '@/app/api/campaigns/[id]/races/route';
 import * as scenarioPage from '@/app/api/campaigns/[id]/scenario/[pageId]/route';
@@ -54,7 +52,6 @@ import * as scenarioVersions from '@/app/api/campaigns/[id]/scenario/[pageId]/ve
 import * as scenarioMentions from '@/app/api/campaigns/[id]/scenario/mentions/route';
 import * as scenario from '@/app/api/campaigns/[id]/scenario/route';
 import * as scenarioSearch from '@/app/api/campaigns/[id]/scenario/search/route';
-import * as duplicateSkill from '@/app/api/campaigns/[id]/skills/[skillId]/duplicate/route';
 import * as spellOne from '@/app/api/campaigns/[id]/spells/[spellId]/route';
 import * as spells from '@/app/api/campaigns/[id]/spells/route';
 import * as trackOne from '@/app/api/campaigns/[id]/tracks/[trackId]/route';
@@ -62,6 +59,17 @@ import * as trackOrder from '@/app/api/campaigns/[id]/tracks/order/route';
 import * as tracks from '@/app/api/campaigns/[id]/tracks/route';
 import * as trackUpload from '@/app/api/campaigns/[id]/tracks/upload-url/route';
 import * as units from '@/app/api/campaigns/[id]/units/route';
+
+const artifactSets = dispatchedRoute('artifact-sets');
+
+const artifactSetOne = dispatchedRoute('artifact-sets/:setId');
+
+const mainSkills = dispatchedRoute('main-skills');
+
+const mainSkillOne = dispatchedRoute('main-skills/:mainSkillId');
+
+const duplicateSkill = dispatchedRoute('skills/:skillId/duplicate');
+
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { CampaignRole } from '@/lib/constants/campaigns';
 

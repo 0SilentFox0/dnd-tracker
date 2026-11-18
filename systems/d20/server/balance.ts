@@ -4,11 +4,18 @@ import {
     getCharacterStats,
     magicMainSkillIds,
 } from '@/lib/utils/battle/balance';
+import { defineContextExt } from '@/lib/utils/battle/types/context-ext';
 import {
     branchLevels,
     normalizeTree,
     resolveLearned,
 } from '@/lib/utils/skills/progression';
+
+/** Slice written by the skill-tree module; a base cannot import its addon, so the key and the read shape are repeated here */
+const skillTreeContext = defineContextExt<{
+    treeByRace: Record<string, Parameters<typeof normalizeTree>[0] | null>;
+    mainSkills: Parameters<typeof magicMainSkillIds>[0];
+}>('skilltrees');
 
 export const D20_BALANCE: SystemBalance = {
     heroPower: ({ built, rules, character, campaignContext }) => {
@@ -20,13 +27,15 @@ export const D20_BALANCE: SystemBalance = {
         const progress = (character.row as { skillTreeProgress?: unknown })
             .skillTreeProgress;
 
-        const treeRow = campaignContext?.skillTreeByRace[character.race];
+        const treeCtx = skillTreeContext.read(campaignContext);
+
+        const treeRow = treeCtx?.treeByRace[character.race];
 
         const levels = treeRow
             ? branchLevels(resolveLearned(normalizeTree(treeRow), progress))
             : {};
 
-        const mainSkills = campaignContext?.mainSkills ?? [];
+        const mainSkills = treeCtx?.mainSkills ?? [];
 
         return {
             levels,

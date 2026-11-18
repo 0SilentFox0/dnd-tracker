@@ -1,7 +1,8 @@
 #!/usr/bin/env tsx
 import { execSync } from 'node:child_process';
 import { readFileSync, writeFileSync } from 'node:fs';
-import path from 'node:path';
+
+import { prismaSchemaFiles } from '@/scripts/shared/prisma-schema-files';
 
 export const CONTENT_MODELS = [
     'Unit',
@@ -106,38 +107,74 @@ function baseModel(
     ].join('\n');
 }
 
-export function generateBaseModels(schema: string): string {
+export function generateBaseModels(
+    schema: string,
+    names: readonly string[] = CONTENT_MODELS
+): string {
     const blocks = modelBlocks(schema);
 
     const modelNames = new Set(blocks.keys());
 
-    return CONTENT_MODELS.map((name) => {
-        const lines = blocks.get(name);
+    return names
+        .map((name) => {
+            const lines = blocks.get(name);
 
-        if (!lines) throw new Error(`model ${name} not found`);
+            if (!lines) throw new Error(`model ${name} not found`);
 
-        return baseModel(name, lines, modelNames);
-    }).join('\n\n');
+            return baseModel(name, lines, modelNames);
+        })
+        .join('\n\n');
 }
 
-export function applyGenerated(schema: string): string {
+const stripGenerated = (schema: string): string => {
     const start = schema.indexOf(BEGIN);
 
     const end = schema.indexOf(END);
 
-    const source = (
+    return (
         start === -1
             ? schema
             : `${schema.slice(0, start)}${schema.slice(end + END.length)}`
     ).trimEnd();
+};
 
-    return `${source}\n\n${BEGIN}\n\n${generateBaseModels(source)}\n\n${END}\n`;
+const hasBlock = (source: string, name: string): boolean =>
+    new RegExp(`^model ${name} \\{`, 'm').test(source);
+
+/** `files` maps path to text; each file gets Base models only for the content models it declares */
+export function applyGenerated(
+    files: Record<string, string>
+): Record<string, string> {
+    const sources = Object.fromEntries(
+        Object.entries(files).map(([f, text]) => [f, stripGenerated(text)])
+    );
+
+    const combined = Object.values(sources).join('\n\n');
+
+    return Object.fromEntries(
+        Object.entries(sources).map(([file, source]) => {
+            const owned = CONTENT_MODELS.filter((name) =>
+                hasBlock(source, name)
+            );
+
+            if (owned.length === 0) return [file, `${source}\n`];
+
+            return [
+                file,
+                `${source}\n\n${BEGIN}\n\n${generateBaseModels(combined, owned)}\n\n${END}\n`,
+            ];
+        })
+    );
 }
 
 function main() {
-    const file = path.join(process.cwd(), 'prisma/schema.prisma');
+    const files = Object.fromEntries(
+        prismaSchemaFiles().map((f) => [f, readFileSync(f, 'utf8')])
+    );
 
-    writeFileSync(file, applyGenerated(readFileSync(file, 'utf8')));
+    for (const [file, text] of Object.entries(applyGenerated(files)))
+        writeFileSync(file, text);
+
     execSync('pnpm exec prisma format', { stdio: 'inherit' });
 }
 

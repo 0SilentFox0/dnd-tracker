@@ -99,16 +99,13 @@ const build = (
         ParticipantSide.ALLY,
         undefined,
         {
-            skillTreeByRace: {},
-            mainSkills: [],
+            ext: {},
             spells: [],
             allSkills: [],
             racesByName: { Людина: null },
             campaign: { maxLevel: 20 },
             skillsById: {},
             artifactsById: ROWS,
-            artifactSetsById: {},
-            artifactSetMemberIds: {},
             rules,
         } as never
     );

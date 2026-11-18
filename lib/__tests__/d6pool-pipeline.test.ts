@@ -116,8 +116,7 @@ const CHARACTER = {
 };
 
 const CONTEXT = {
-    skillTreeByRace: {},
-    mainSkills: [],
+    ext: {},
     spells: [],
     allSkills: [],
     racesByName: {
@@ -137,8 +136,6 @@ const CONTEXT = {
     campaign: { maxLevel: 20 },
     skillsById: {},
     artifactsById: {},
-    artifactSetsById: {},
-    artifactSetMemberIds: {},
 } as never;
 
 const PARAMS = { id: 'c1', battleId: 'b1' };
@@ -264,9 +261,10 @@ describe('d6pool through the real battle pipeline', () => {
 
         const { participants } = store.state;
 
-        expect(
-            noActions.releaseInvalidGrapples(participants, null)
-        ).toEqual({ participants, messages: [] });
+        expect(noActions.releaseInvalidGrapples(participants, null)).toEqual({
+            participants,
+            messages: [],
+        });
         expect(magic.sustain.dropOrphaned(participants, null, 1)).toEqual({
             participants,
             messages: [],

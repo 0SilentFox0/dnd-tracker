@@ -423,21 +423,59 @@ it('every Task5 route method resolves to a real content action', async () => {
         '@/lib/server/assistant/__tests__/helpers/coverage'
     );
 
+    const { systemContentKinds } = await import(
+        '@/lib/server/systems/lookup'
+    );
+
+    const { moduleContentOperations } = await import(
+        '@/lib/server/content/module-operations'
+    );
+
     const catalog = createActionCatalog(createContentActions());
+
+    const DISPATCHER = 'campaigns/[id]/[kind]/[[...rest]]';
+
+    const pairs: Array<{ route: string; method: string }> = [];
 
     for (const entry of ASSISTANT_ROUTE_COVERAGE.filter(
         (row) => row.task === 5
     )) {
-        for (const method of entry.methods) {
-            const mapping = CONTENT_ACTION_COVERAGE.find(
-                (row) => row.route === entry.route && row.method === method
-            );
+        if (entry.route === DISPATCHER) continue;
 
-            expect(mapping, `${method} ${entry.route}`).toBeDefined();
-            expect(catalog.getAction(mapping!.actionId).id).toBe(
-                mapping!.actionId
-            );
-            expect(mapping!.testId).toMatch(/content-(actions|operations)/);
-        }
+        for (const method of entry.methods)
+            pairs.push({ route: entry.route, method });
+    }
+
+    // The dispatcher serves module-owned resources and operations: each of them must be mapped too
+    for (const { resource } of Object.values(systemContentKinds())) {
+        if (!resource.http) continue;
+
+        const route = `campaigns/[id]${resource.path}`;
+
+        const item = `${route}/[${resource.idParam}]`;
+
+        for (const method of resource.http.collection)
+            pairs.push({ route, method });
+        for (const method of resource.http.item)
+            pairs.push({ route: item, method });
+    }
+
+    for (const op of Object.values(moduleContentOperations()))
+        if (op.http)
+            pairs.push({
+                route: `campaigns/[id]${op.row.path.replace(/\{([^}]+)\}/g, '[$1]')}`,
+                method: op.row.method,
+            });
+
+    expect(pairs.length).toBeGreaterThan(0);
+
+    for (const { route, method } of pairs) {
+        const mapping = CONTENT_ACTION_COVERAGE.find(
+            (row) => row.route === route && row.method === method
+        );
+
+        expect(mapping, `${method} ${route}`).toBeDefined();
+        expect(catalog.getAction(mapping!.actionId).id).toBe(mapping!.actionId);
+        expect(mapping!.testId).toMatch(/content-(actions|operations)/);
     }
 });

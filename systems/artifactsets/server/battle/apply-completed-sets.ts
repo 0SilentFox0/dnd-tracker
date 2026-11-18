@@ -1,5 +1,6 @@
 import {
     type ArtifactSetBattleMaps,
+    artifactSetContext,
     loadArtifactSetBattleMaps,
 } from './load-maps';
 
@@ -60,14 +61,11 @@ export async function findCompletedSets(
 
     if (setIds.length === 0) return { sets: [], progress: [] };
 
+    const preloaded = artifactSetContext.read(context);
+
     const maps: ArtifactSetBattleMaps =
-        context?.artifactSetsById &&
-        context.artifactSetMemberIds &&
-        Object.keys(context.artifactSetsById).length > 0
-            ? {
-                  artifactSetsById: context.artifactSetsById,
-                  artifactSetMemberIds: context.artifactSetMemberIds,
-              }
+        preloaded && Object.keys(preloaded.artifactSetsById).length > 0
+            ? preloaded
             : await loadArtifactSetBattleMaps(campaignId, setIds);
 
     const progress = findSetProgress(equipped, maps);

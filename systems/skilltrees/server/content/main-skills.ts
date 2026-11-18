@@ -23,6 +23,7 @@ export const mainSkillsResource = defineResource<
     description:
         'Progression branches (attack, magic, leadership…): role, colour, icon, school of magic.',
     path: '/main-skills',
+    http: { collection: ['GET', 'POST'], item: ['GET', 'PATCH', 'DELETE'] },
     schemas: { create: createMainSkillSchema, update: updateMainSkillSchema },
     access: { list: 'member', item: 'dm' },
     invalidates: [ReferenceKind.MAIN_SKILLS, ReferenceKind.SKILLS],

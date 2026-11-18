@@ -7,4 +7,7 @@ export const OPPORTUNITY_META = {
     requires: ['d20'],
     toggle: 'free',
     i18n: {},
+    vocab: {
+        actionTypes: [{ id: 'opportunity', counter: true, serverLabel: true }],
+    },
 } as const satisfies SystemMeta;

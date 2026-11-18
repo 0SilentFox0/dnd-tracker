@@ -50,7 +50,7 @@ export function createStartMutation(build = buildStartOrder) {
                 completedAt: null,
                 round: 1,
                 turnIndex,
-                
+
                 pendingChoice: null,
                 sceneState: null,
                 rules: ctx.meta.rules,

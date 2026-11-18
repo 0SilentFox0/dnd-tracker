@@ -75,16 +75,13 @@ function character(raceName: string, morale = 0) {
 const context = (race: ReturnType<typeof raceRow>) =>
     ({
         rules: DEFAULT_RULES,
-        skillTreeByRace: {},
-        mainSkills: [],
+        ext: {},
         spells: [],
         allSkills: [],
         racesByName: { [race.name]: race },
         campaign: { maxLevel: 20 },
         skillsById: {},
         artifactsById: {},
-        artifactSetsById: {},
-        artifactSetMemberIds: {},
     }) as never;
 
 async function build(

@@ -1,0 +1,42 @@
+model ArtifactSet {
+  id          String     @id @default(cuid())
+  campaignId  String
+  name        String
+  description String?
+  setBonus    Json?
+  icon        String?
+  createdAt   DateTime   @default(now())
+  abilities   Json       @default("[]")
+  campaign    Campaign   @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  artifacts   Artifact[]
+  sourceId    String?
+  sourceHash  String?
+  slug        String?
+
+  @@index([campaignId])
+  @@index([campaignId, sourceId])
+  @@map("artifact_sets")
+}
+
+// BEGIN GENERATED BASE MODELS (scripts/db/gen-base-models.ts)
+
+model ArtifactSetBase {
+  id               String
+  name             String
+  description      String?
+  setBonus         Json?
+  icon             String?
+  createdAt        DateTime @default(now())
+  abilities        Json     @default("[]")
+  slug             String?
+  sourceCampaignId String
+  validFrom        Int
+  validTo          Int?
+
+  @@id([id, validFrom])
+  @@index([sourceCampaignId, validFrom, validTo])
+  @@index([sourceCampaignId, slug])
+  @@map("artifact_sets_base")
+}
+
+// END GENERATED BASE MODELS

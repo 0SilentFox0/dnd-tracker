@@ -7,6 +7,11 @@ import type { AccessLevel, Actor } from '@/lib/utils/api/actor';
 
 export type { ContentKind } from '@/lib/constants/content-kinds';
 
+export type ContentHttp = {
+    collection: readonly ('GET' | 'POST' | 'DELETE')[];
+    item: readonly ('GET' | 'PATCH' | 'DELETE')[];
+};
+
 export type FindPurpose = 'read' | 'write';
 
 export interface ContentResource<
@@ -52,6 +57,8 @@ export interface ContentResource<
         existing: Row,
         assertUnreferenced?: () => Promise<void>
     ): Promise<void>;
+    /** Methods the module content dispatcher serves; absent = the kind has its own route files */
+    http?: ContentHttp;
     /** absent → bulk delete is not offered (405) */
     removeAll?(actor: Actor): Promise<number>;
 }

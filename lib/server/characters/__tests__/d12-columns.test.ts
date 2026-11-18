@@ -264,16 +264,13 @@ const participantFor = (name: Name) => {
     const rules = COMPOSITIONS[name];
 
     const context = {
-        skillTreeByRace: {},
-        mainSkills: [],
+        ext: {},
         spells: [],
         allSkills: [],
         racesByName: { Людина: null },
         campaign: { maxLevel: 20 },
         skillsById: {},
         artifactsById: {},
-        artifactSetsById: {},
-        artifactSetMemberIds: {},
         rules,
         classesById,
         featsById: {},

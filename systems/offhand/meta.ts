@@ -8,4 +8,7 @@ export const OFFHAND_META = {
     requires: ['d20'],
     toggle: 'free',
     i18n: {},
+    vocab: {
+        equipSlots: [{ id: 'offHand', weapon: true, needsLight: true }],
+    },
 } as const satisfies SystemMeta;

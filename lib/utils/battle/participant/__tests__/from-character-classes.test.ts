@@ -90,16 +90,13 @@ const build = (
     classesById: Record<string, GameClassData> = { fighter, warlock }
 ) => {
     const context = {
-        skillTreeByRace: {},
-        mainSkills: [],
+        ext: {},
         spells: [],
         allSkills: [],
         racesByName: { Людина: null },
         campaign: { maxLevel: 20 },
         skillsById: {},
         artifactsById: {},
-        artifactSetsById: {},
-        artifactSetMemberIds: {},
         rules,
         classesById,
     } as never;
@@ -269,16 +266,13 @@ describe('classEntries from the character context', () => {
         };
 
         const context = {
-            skillTreeByRace: {},
-            mainSkills: [],
+            ext: {},
             spells: [],
             allSkills: [],
             racesByName: { Людина: null },
             campaign: { maxLevel: 20 },
             skillsById: {},
             artifactsById: {},
-            artifactSetsById: {},
-            artifactSetMemberIds: {},
             rules: enabled,
             classesById: { fighter },
         } as never;

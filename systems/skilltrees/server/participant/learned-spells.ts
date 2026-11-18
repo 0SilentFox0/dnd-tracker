@@ -1,3 +1,5 @@
+import { skillTreeContext } from './context';
+
 import { prisma } from '@/lib/db';
 import type { LearnedSpellsLoader } from '@/lib/server/systems/types';
 import type {
@@ -52,7 +54,8 @@ export const resolveLearnedSpellsAndMastery: LearnedSpellsLoader = async ({
         ];
 
         const treeRow = context
-            ? (context.skillTreeByRace[character.race] ?? null)
+            ? (skillTreeContext.read(context)?.treeByRace[character.race] ??
+              null)
             : await prisma.skillTree.findFirst({
                   where: {
                       campaignId: character.campaignId,
@@ -78,7 +81,7 @@ export const resolveLearnedSpellsAndMastery: LearnedSpellsLoader = async ({
             ? [
                   context.allSkills.filter((s) => skillIds.includes(s.id)),
                   context.spells,
-                  context.mainSkills,
+                  skillTreeContext.read(context)?.mainSkills ?? [],
               ]
             : await Promise.all([
                   prisma.skill.findMany({

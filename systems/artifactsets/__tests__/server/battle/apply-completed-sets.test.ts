@@ -14,10 +14,20 @@ const equipped = [
 
 const context = (setBonus: unknown, abilities: unknown) =>
     ({
-        artifactSetsById: {
-            s1: { id: 's1', name: 'Дракон', icon: null, setBonus, abilities },
+        ext: {
+            artifactsets: {
+                artifactSetsById: {
+                    s1: {
+                        id: 's1',
+                        name: 'Дракон',
+                        icon: null,
+                        setBonus,
+                        abilities,
+                    },
+                },
+                artifactSetMemberIds: { s1: ['a1', 'a2'] },
+            },
         },
-        artifactSetMemberIds: { s1: ['a1', 'a2'] },
     }) as never;
 
 describe('findCompletedSets', () => {
@@ -143,7 +153,9 @@ describe('findSetProgress', () => {
     });
 
     it('findCompletedSets — повна підмножина прогресу', async () => {
-        const r = await findCompletedSets(worn as never, 'c1', maps as never);
+        const r = await findCompletedSets(worn as never, 'c1', {
+            ext: { artifactsets: maps },
+        } as never);
 
         expect(r.progress.map((p) => p.setId)).toEqual(['s1', 's3']);
         expect(r.sets.map((s) => s.id)).toEqual(['s3']);

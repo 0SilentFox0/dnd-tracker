@@ -8,6 +8,8 @@ vi.mock('@/lib/utils/api/actor', () => ({
     ),
 }));
 
+import { dispatchedRoute } from './dispatched-route';
+
 import { resolveActor } from '@/lib/utils/api/actor';
 
 const W = { access: 'dm', scope: 'content:write' };
@@ -57,22 +59,21 @@ const CASES: Array<
     ],
     [
         'skills duplicate',
-        () =>
-            import('@/app/api/campaigns/[id]/skills/[skillId]/duplicate/route'),
+        () => Promise.resolve(dispatchedRoute('skills/:skillId/duplicate')),
         'POST',
         { skillId: 'k' },
         W,
     ],
     [
         'skill-trees GET',
-        () => import('@/app/api/campaigns/[id]/skill-trees/route'),
+        () => Promise.resolve(dispatchedRoute('skill-trees')),
         'GET',
         {},
         { access: 'member', scope: 'content:read' },
     ],
     [
         'skill-trees PATCH',
-        () => import('@/app/api/campaigns/[id]/skill-trees/[treeId]/route'),
+        () => Promise.resolve(dispatchedRoute('skill-trees/:treeId')),
         'PATCH',
         { treeId: 't' },
         W,

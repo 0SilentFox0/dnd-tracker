@@ -51,7 +51,7 @@ const req = (url: string, init?: RequestInit) =>
     new Request(`http://localhost${url}`, init);
 
 beforeAll(async () => {
-    await import('@/app/api/campaigns/[id]/skills/[skillId]/route');
+    await import('@/lib/server/content/module-dispatch');
 }, 30_000);
 
 describe('abilities API', () => {
@@ -86,8 +86,8 @@ describe('abilities API', () => {
             abilities: null,
         } as never);
 
-        const { GET } = await import(
-            '@/app/api/campaigns/[id]/skills/[skillId]/route'
+        const { GET } = await import('./dispatched-route').then((m) =>
+            m.dispatchedRoute('skills/:skillId')
         );
 
         const body = await (
@@ -114,8 +114,8 @@ describe('abilities API', () => {
             abilities: [],
         } as never);
 
-        const { PATCH } = await import(
-            '@/app/api/campaigns/[id]/skills/[skillId]/route'
+        const { PATCH } = await import('./dispatched-route').then((m) =>
+            m.dispatchedRoute('skills/:skillId')
         );
 
         const abilities = [
@@ -172,8 +172,8 @@ describe('abilities API', () => {
             name: 'Лють',
         } as never);
 
-        const { PATCH } = await import(
-            '@/app/api/campaigns/[id]/skills/[skillId]/route'
+        const { PATCH } = await import('./dispatched-route').then((m) =>
+            m.dispatchedRoute('skills/:skillId')
         );
 
         const bad = [

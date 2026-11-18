@@ -118,24 +118,32 @@ const hero = {
 
 const context = (rules: Ruleset) =>
     ({
-        skillTreeByRace: { Ельф: tree },
-        mainSkills: [{ id: 'light', spellGroupId: 'sg', name: 'Світло' }],
+        ext: {
+            skilltrees: {
+                treeByRace: { Ельф: tree },
+                mainSkills: [
+                    { id: 'light', spellGroupId: 'sg', name: 'Світло' },
+                ],
+            },
+            artifactsets: {
+                artifactSetsById: {
+                    set1: {
+                        id: 'set1',
+                        name: 'Сет',
+                        icon: null,
+                        setBonus: { x: 1 },
+                        abilities: [],
+                    },
+                },
+                artifactSetMemberIds: { set1: ['a1', 'a2'] },
+            },
+        },
         spells: [{ id: 's1', level: 1, spellGroup: { id: 'sg' } }],
         allSkills: [{ id: 'ps', grantedSpellId: 'avatar' }],
         racesByName: { Ельф: null },
         campaign: { maxLevel: 20 },
         skillsById: {},
         artifactsById: { a1: art('a1', 'helmet'), a2: art('a2', 'ring') },
-        artifactSetsById: {
-            set1: {
-                id: 'set1',
-                name: 'Сет',
-                icon: null,
-                setBonus: { x: 1 },
-                abilities: [],
-            },
-        },
-        artifactSetMemberIds: { set1: ['a1', 'a2'] },
         rules,
         classesById: {},
         featsById: {},

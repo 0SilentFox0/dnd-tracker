@@ -20,4 +20,13 @@ export const ARTIFACTSETS_META = {
         },
     ],
     detachRefs: [{ kind: 'artifactSet', model: 'artifact', column: 'setId' }],
+    vocab: {
+        abilitySources: [
+            { id: 'artifactSet', itemLike: true, table: 'artifact_sets' },
+        ],
+    },
+    importLinks: {
+        artifacts: ['artifact-sets'],
+        'artifact-sets': ['artifacts'],
+    },
 } as const satisfies SystemMeta;

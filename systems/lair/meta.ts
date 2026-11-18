@@ -7,4 +7,10 @@ export const LAIR_META = {
     requires: ['d20'],
     toggle: 'free',
     i18n: {},
+    vocab: {
+        abilityLimitFlags: [
+            { id: 'lair', clears: ['legendaryCost'], needsActionTrigger: true },
+        ],
+        legendaryKinds: [{ id: 'lair', lair: true }],
+    },
 } as const satisfies SystemMeta;

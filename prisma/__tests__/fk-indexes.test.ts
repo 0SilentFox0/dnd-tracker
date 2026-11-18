@@ -1,11 +1,11 @@
 import { readFileSync } from 'node:fs';
-import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 
-const SCHEMA = readFileSync(
-    path.resolve(__dirname, '../schema.prisma'),
-    'utf8'
-);
+import { prismaSchemaFiles } from '@/scripts/shared/prisma-schema-files';
+
+const SCHEMA = prismaSchemaFiles()
+    .map((f) => readFileSync(f, 'utf8'))
+    .join('\n');
 
 const UNINDEXED_FK_EXCEPTIONS: string[] = [];
 
