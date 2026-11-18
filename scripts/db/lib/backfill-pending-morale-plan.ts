@@ -1,6 +1,7 @@
 import { upgradeSceneState } from '@/lib/utils/battle/scene-state';
 import { isRecord } from '@/lib/utils/common/is-record';
 import { defaultRulesFor } from '@/lib/utils/rules/section-registry';
+import { FALLBACK_SYSTEM_KEY } from '@/lib/utils/rules/systems/catalog';
 import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
 
 export interface PendingMoraleRow {
@@ -16,7 +17,7 @@ export interface PendingMoraleChange {
     systemState: SystemSlot;
 }
 
-const RULES = defaultRulesFor({ key: 'dnd5e', modules: ['morale'] });
+const RULES = defaultRulesFor({ key: FALLBACK_SYSTEM_KEY, modules: ['morale'] });
 
 const slotOf = (raw: unknown): SystemSlot | undefined =>
     isRecord(raw) && typeof raw.key === 'string'
