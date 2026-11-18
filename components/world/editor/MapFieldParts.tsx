@@ -62,7 +62,8 @@ export function ChildMapList({
             {maps.map((m) => (
                 <li key={m.id}>
                     <Button
-                        variant="bare"
+                        variant="plain"
+                        size="auto"
                         type="button"
                         onClick={() => onOpen(m.id)}
                         className={cn(
@@ -93,7 +94,6 @@ export function ImageFileInput({
 }) {
     return (
         <Input
-            bare
             ref={inputRef}
             type="file"
             accept="image/*"
@@ -132,7 +132,8 @@ export function MarkerIconGrid({
         >
             {ICON_OPTIONS.map(({ value: option, Icon }) => (
                 <Button
-                    variant="bare"
+                    variant="plain"
+                    size="auto"
                     key={option}
                     type="button"
                     title={t(`markerKinds.${option}`)}

@@ -173,7 +173,8 @@ export function WorldPlayClient({
                                                 {places.map((m) => (
                                                     <li key={m.id}>
                                                         <Button
-                                                            variant="bare"
+                                                            variant="plain"
+                                                            size="auto"
                                                             type="button"
                                                             className="text-sm text-hud-gold underline-offset-2 hover:text-hud-gold-bright hover:underline"
                                                             onClick={() =>

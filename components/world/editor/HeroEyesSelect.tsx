@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { Eye } from 'lucide-react';
 
-import { NativeSelect } from '@/components/ui/native-select';
+import { SelectField } from '@/components/ui/select-field';
 import type { RosterHero } from '@/lib/hooks/world';
 
 interface HeroEyesSelectProps {
@@ -23,19 +23,15 @@ export function HeroEyesSelect({
         <label className="flex h-10 w-full shrink-0 items-center gap-1.5 rounded-md border border-hud-rule bg-black/40 px-2 text-xs text-hud-muted lg:w-auto">
             <Eye className="size-4 shrink-0" aria-hidden />
             <span className="sr-only">{t('label')}</span>
-            <NativeSelect
+            <SelectField
                 aria-label={t('label')}
                 value={value ?? ''}
-                onChange={(e) => onChange(e.target.value || null)}
-                className="min-w-0 bg-transparent text-sm text-hud-ink outline-none max-lg:flex-1 lg:max-w-36"
-            >
-                <option value="">{t('dm')}</option>
-                {heroes.map((h) => (
-                    <option key={h.id} value={h.id}>
-                        {h.name}
-                    </option>
-                ))}
-            </NativeSelect>
+                onValueChange={(v) => onChange(v || null)}
+                allowNone
+                noneLabel={t('dm')}
+                options={heroes.map((h) => ({ value: h.id, label: h.name }))}
+                triggerClassName="h-auto min-w-0 border-0 bg-transparent px-0 py-0 text-sm text-hud-ink shadow-none data-[size=default]:h-auto max-lg:flex-1 lg:max-w-36 dark:bg-transparent"
+            />
         </label>
     );
 }

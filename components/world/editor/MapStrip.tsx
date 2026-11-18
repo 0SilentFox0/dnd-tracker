@@ -98,7 +98,7 @@ export function MapStrip({
             </Button>
             <Popover>
                 <PopoverTrigger asChild>
-                    <Button variant="bare" type="button" className={CHIP}>
+                    <Button variant="plain" size="auto" type="button" className={CHIP}>
                         {t('editor.children', { count: children.length })}
                     </Button>
                 </PopoverTrigger>

@@ -104,7 +104,8 @@ export function WorldPins({
 
                 return (
                     <Button
-                        variant="bare"
+                        variant="plain"
+                        size="auto"
                         key={m.id}
                         type="button"
                         aria-label={m.name}

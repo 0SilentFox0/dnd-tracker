@@ -57,7 +57,8 @@ function ToolButton({
         <Tooltip>
             <TooltipTrigger asChild>
                 <Button
-                    variant="bare"
+                    variant="plain"
+                    size="auto"
                     type="button"
                     aria-label={label}
                     aria-pressed={active}
@@ -155,7 +156,8 @@ export function WorldToolbar({
                                     className="mx-0.5 h-6 w-px shrink-0 bg-hud-rule"
                                 />
                                 <Button
-                                    variant="bare"
+                                    variant="plain"
+                                    size="auto"
                                     type="button"
                                     aria-label={t('toParent', {
                                         name: parent.name,

@@ -47,7 +47,8 @@ export function HeroCluster({ cluster, zoom, onHeroClick }: HeroClusterProps) {
     if (rest.length === 0) {
         return (
             <Button
-                variant="bare"
+                variant="plain"
+                size="auto"
                 type="button"
                 aria-label={top.name}
                 data-own={top.own}
@@ -72,7 +73,8 @@ export function HeroCluster({ cluster, zoom, onHeroClick }: HeroClusterProps) {
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
                 <Button
-                    variant="bare"
+                    variant="plain"
+                    size="auto"
                     type="button"
                     aria-label={t('heroCluster', {
                         name: top.name,
@@ -98,7 +100,8 @@ export function HeroCluster({ cluster, zoom, onHeroClick }: HeroClusterProps) {
             <PopoverContent className="flex w-48 flex-col gap-1 p-1">
                 {cluster.heroes.map((h) => (
                     <Button
-                        variant="bare"
+                        variant="plain"
+                        size="auto"
                         key={h.id}
                         type="button"
                         className="flex items-center gap-2 rounded-sm px-1.5 py-1 text-left text-sm hover:bg-accent"

@@ -17,6 +17,10 @@ import { render } from '@/components/ui/__tests__/uk-intl';
 import * as api from '@/lib/api/world';
 import { useHeroEyes } from '@/lib/hooks/world';
 
+vi.mock('@/components/ui/select-field', () =>
+    import('@/components/ui/__tests__/select-field-mock')
+);
+
 vi.unmock('next-intl');
 
 vi.mock('@/lib/api/world');

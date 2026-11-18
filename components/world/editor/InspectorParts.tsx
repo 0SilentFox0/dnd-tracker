@@ -23,7 +23,8 @@ export function CloseButton({ onClose }: { onClose(): void }) {
 
     return (
         <Button
-            variant="bare"
+            variant="plain"
+            size="auto"
             type="button"
             aria-label={t('closePanel')}
             onClick={onClose}
@@ -43,7 +44,8 @@ export function DeleteButton({
 }) {
     return (
         <Button
-            variant="bare"
+            variant="plain"
+            size="auto"
             type="button"
             onClick={onClick}
             className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-md border border-hud-danger/60 bg-hud-danger/20 px-3 text-sm font-medium text-hud-danger transition-colors hover:bg-hud-danger/30 hover:text-hud-bad"

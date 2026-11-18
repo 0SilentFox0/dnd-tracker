@@ -79,7 +79,8 @@ export function MarkerStrip({
                 <Popover open={iconOpen} onOpenChange={setIconOpen}>
                     <PopoverTrigger asChild>
                         <Button
-                            variant="bare"
+                            variant="plain"
+                            size="auto"
                             type="button"
                             aria-label={t('editor.icon')}
                             title={t('editor.icon')}
@@ -154,7 +155,7 @@ export function MarkerStrip({
             </Button>
             <Popover onOpenChange={(o) => !o && commitNote()}>
                 <PopoverTrigger asChild>
-                    <Button variant="bare" type="button" className={CHIP}>
+                    <Button variant="plain" size="auto" type="button" className={CHIP}>
                         <NotebookPen className="size-4" aria-hidden />
                         {t('editor.note')}
                         {note.trim() ? (
@@ -178,7 +179,7 @@ export function MarkerStrip({
             </Popover>
             <Popover>
                 <PopoverTrigger asChild>
-                    <Button variant="bare" type="button" className={CHIP}>
+                    <Button variant="plain" size="auto" type="button" className={CHIP}>
                         <MessagesSquare className="size-4" aria-hidden />
                         {t('editor.playerNotes')}
                     </Button>

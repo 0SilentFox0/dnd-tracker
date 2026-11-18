@@ -35,7 +35,8 @@ export function QuietDeleteButton({
 }) {
     return (
         <Button
-            variant="bare"
+            variant="plain"
+            size="auto"
             type="button"
             onClick={onClick}
             className="mt-6 flex min-h-10 w-full items-center justify-center gap-2 rounded-md border border-hud-danger/60 bg-hud-danger/20 px-3 text-sm font-medium text-hud-danger transition-colors hover:bg-hud-danger/30 hover:text-hud-bad"
