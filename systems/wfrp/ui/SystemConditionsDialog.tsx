@@ -192,8 +192,10 @@ function DialogBody({
                             role="radio"
                             checked={selected === key}
                             onClick={() => setSelected(key)}
-                            title={tCondition(key, 'label')}
-                            note={tCondition(key, 'description')}
+                            text={{
+                                title: tCondition(key, 'label'),
+                                note: tCondition(key, 'description'),
+                            }}
                         />
                     ))}
                 </div>

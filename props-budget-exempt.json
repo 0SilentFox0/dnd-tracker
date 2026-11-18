@@ -3,7 +3,5 @@
     "components/abilities/NestedEffectsEditor.tsx#NestedEffectsEditor": 9,
     "components/battle/map/MapToken.tsx#MapToken": 10,
     "components/hud/form/HudForm.tsx#HudForm": 10,
-    "components/hud/OptionButton.tsx#OptionButton": 9,
-    "components/hud/page/HudCard.tsx#HudCard": 8,
     "components/world/WorldMapView.tsx#WorldMapView": 12
 }

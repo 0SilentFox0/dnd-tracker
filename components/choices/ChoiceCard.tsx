@@ -91,18 +91,18 @@ export function ChoiceCard({
                 disabled={disabled}
                 onClick={onClick}
                 className={description ? 'pr-9' : undefined}
-                title={
-                    <span className="flex items-center gap-2">
-                        <EntityIcon
-                            src={icon}
-                            name={name}
-                            className="size-7 text-xs"
-                        />
-                        {title}
-                    </span>
-                }
-                note={
-                    (summary || note) && (
+                text={{
+                    title: (
+                        <span className="flex items-center gap-2">
+                            <EntityIcon
+                                src={icon}
+                                name={name}
+                                className="size-7 text-xs"
+                            />
+                            {title}
+                        </span>
+                    ),
+                    note: (summary || note) && (
                         <>
                             {summary}
                             {note && (
@@ -111,8 +111,8 @@ export function ChoiceCard({
                                 </span>
                             )}
                         </>
-                    )
-                }
+                    ),
+                }}
             />
             {description && (
                 <DetailsButton

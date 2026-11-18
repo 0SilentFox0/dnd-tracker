@@ -59,8 +59,7 @@ export function Card({
             checked={checked}
             disabled={disabled}
             onClick={onClick}
-            title={title}
-            note={note}
+            text={{ title: title, note: note }}
         />
     );
 }

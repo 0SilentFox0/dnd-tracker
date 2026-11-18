@@ -65,12 +65,14 @@ export function RaceCard({
 
     return (
         <HudCard
-            href={
+            link={
                 canEdit
-                    ? `/campaigns/${campaignId}/dm/races/${race.id}`
+                    ? {
+                          href: `/campaigns/${campaignId}/dm/races/${race.id}`,
+                          label: race.name,
+                      }
                     : undefined
             }
-            linkLabel={race.name}
             accent={race.color ?? undefined}
             className="flex h-full flex-col gap-3"
         >

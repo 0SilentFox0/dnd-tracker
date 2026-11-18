@@ -15,8 +15,7 @@ interface HudCardProps {
     tone?: keyof typeof TONE;
     accent?: string;
     asChild?: boolean;
-    href?: string;
-    linkLabel?: string;
+    link?: { href: string; label?: string };
     className?: string;
     'data-tour'?: string;
     children: ReactNode;
@@ -26,8 +25,7 @@ export function HudCard({
     tone = 'default',
     accent,
     asChild = false,
-    href,
-    linkLabel,
+    link,
     className,
     'data-tour': dataTour,
     children,
@@ -38,22 +36,22 @@ export function HudCard({
         <Comp
             data-tone={tone}
             data-tour={dataTour}
-            data-clickable={href ? '' : undefined}
+            data-clickable={link ? '' : undefined}
             style={accent ? { borderLeftColor: accent } : undefined}
             className={cn(
-                href && 'relative cursor-pointer',
+                link && 'relative cursor-pointer',
                 'block rounded-lg bg-hud-panel p-3 text-hud-bone transition-shadow',
                 accent && 'border-l-[3px]',
                 TONE[tone],
                 className
             )}
         >
-            {href && !asChild ? (
+            {link && !asChild ? (
                 <>
                     <Link
-                        href={href}
+                        href={link.href}
                         data-card-overlay
-                        aria-label={linkLabel}
+                        aria-label={link.label}
                         className="absolute inset-0 rounded-lg"
                     />
                     {children}

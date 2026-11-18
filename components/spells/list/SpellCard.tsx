@@ -75,12 +75,14 @@ export function SpellCard({
     return (
         <HudCard
             data-tour={dataTour}
-            href={
+            link={
                 canEdit
-                    ? `/campaigns/${campaignId}/dm/spells/${spell.id}`
+                    ? {
+                          href: `/campaigns/${campaignId}/dm/spells/${spell.id}`,
+                          label: spell.name,
+                      }
                     : undefined
             }
-            linkLabel={spell.name}
             className="flex h-full flex-col gap-2"
         >
             <div className="flex items-start gap-3">

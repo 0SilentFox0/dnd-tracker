@@ -89,8 +89,10 @@ export function DmCharacterCard({
 
     return (
         <HudCard
-            href={`/campaigns/${campaignId}/dm/characters/${character.id}`}
-            linkLabel={character.name}
+            link={{
+                href: `/campaigns/${campaignId}/dm/characters/${character.id}`,
+                label: character.name,
+            }}
             className="space-y-3 p-3"
         >
             <HeroPortrait

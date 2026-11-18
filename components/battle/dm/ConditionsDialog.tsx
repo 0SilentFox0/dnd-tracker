@@ -203,16 +203,18 @@ function ConditionsDialogBody({
                             role="radio"
                             checked={selected === key}
                             onClick={() => setSelected(key)}
-                            title={text(
-                                dynamicTextRef(
-                                    `${standard.labelKey(key)}.label`
-                                )
-                            )}
-                            note={text(
-                                dynamicTextRef(
-                                    `${standard.labelKey(key)}.description`
-                                )
-                            )}
+                            text={{
+                                title: text(
+                                    dynamicTextRef(
+                                        `${standard.labelKey(key)}.label`
+                                    )
+                                ),
+                                note: text(
+                                    dynamicTextRef(
+                                        `${standard.labelKey(key)}.description`
+                                    )
+                                ),
+                            }}
                         />
                     ))}
                     {custom.map((c) => (
@@ -221,8 +223,7 @@ function ConditionsDialogBody({
                             role="radio"
                             checked={selected === c.key}
                             onClick={() => setSelected(c.key as ConditionKey)}
-                            title={c.name}
-                            note={c.description}
+                            text={{ title: c.name, note: c.description }}
                         />
                     ))}
                 </div>

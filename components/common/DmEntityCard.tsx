@@ -31,8 +31,7 @@ export function DmEntityCard({
 
     return (
         <HudCard
-            href={canEdit ? href : undefined}
-            linkLabel={title}
+            link={canEdit ? { href: href, label: title } : undefined}
             accent={accent}
             className="flex h-full flex-col gap-3"
         >

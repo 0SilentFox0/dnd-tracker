@@ -33,8 +33,7 @@ export function ArtifactSetCard(props: ArtifactSetCardProps) {
 
     return (
         <HudCard
-            href={canEdit ? editHref : undefined}
-            linkLabel={set.name}
+            link={canEdit ? { href: editHref, label: set.name } : undefined}
             className="space-y-4 p-4"
         >
             <div className="flex items-start justify-between gap-2">

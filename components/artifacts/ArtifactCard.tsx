@@ -185,12 +185,14 @@ export function ArtifactCard({
 
     return (
         <HudCard
-            href={
+            link={
                 canEdit
-                    ? `/campaigns/${campaignId}/dm/artifacts/${artifact.id}`
+                    ? {
+                          href: `/campaigns/${campaignId}/dm/artifacts/${artifact.id}`,
+                          label: artifact.name,
+                      }
                     : undefined
             }
-            linkLabel={artifact.name}
             className="space-y-2 p-4"
         >
             <div className="flex items-start gap-3">

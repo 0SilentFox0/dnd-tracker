@@ -146,18 +146,18 @@ function LegendaryActionBody({
                                 role="radio"
                                 checked={choiceId === c.id}
                                 disabled={!!c.blocked}
-                                title={c.label}
-                                meta={c.cost}
-                                note={
-                                    c.blocked && (
-                                        <span className="text-hud-danger">
-                                            {text(c.blocked)}
-                                        </span>
-                                    )
-                                }
                                 onClick={() => {
                                     setChoiceId(c.id);
                                     setTargets([]);
+                                }}
+                                text={{
+                                    title: c.label,
+                                    meta: c.cost,
+                                    note: c.blocked && (
+                                        <span className="text-hud-danger">
+                                            {text(c.blocked)}
+                                        </span>
+                                    ),
                                 }}
                             />
                         ))}
