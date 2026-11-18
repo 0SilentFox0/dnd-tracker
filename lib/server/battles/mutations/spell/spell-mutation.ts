@@ -30,6 +30,7 @@ import { spellDiceRolls } from '@/lib/utils/battle/dice-record';
 import { adjacencyOf } from '@/lib/utils/battle/grid/adjacency';
 import { withLines, withPrefix } from '@/lib/utils/battle/log/lines';
 import { hasEffectMarker } from '@/lib/utils/battle/participant/state';
+import { viewerOf } from '@/lib/utils/battle/pipeline/battle-response';
 import type {
     BattleMutationContext,
     MutationResult,
@@ -81,6 +82,7 @@ import { objectsNear } from '@/lib/utils/battle/summon/objects-near';
 import { applyTransforms } from '@/lib/utils/battle/transform/apply-transforms';
 import { assertCanAct } from '@/lib/utils/battle/turn';
 import { assertSpellRolls } from '@/lib/utils/battle/validation/dice-checks';
+import { sanitizeLogEntry } from '@/lib/utils/battle/view';
 import { rollDiceList } from '@/lib/utils/common/dice';
 import { rngOf } from '@/lib/utils/common/rng';
 import { currencyValueOf, ruleSystemOf } from '@/lib/utils/rules/systems';
@@ -807,16 +809,21 @@ async function executeCast(
     }
 
     if (data.preview) {
+        const battleAction = ctx.isDM
+            ? result.battleAction
+            : sanitizeLogEntry(
+                  result.battleAction,
+                  viewerOf({ userId: ctx.userId }, order),
+                  { participants: order, rules: ctx.meta.rules }
+              );
+
         return {
             participants: order,
             pending: ctx.pending,
             events: [],
             response: {
                 preview: true,
-                battleAction: {
-                    ...result.battleAction,
-                    stateBefore: undefined,
-                },
+                battleAction: { ...battleAction, stateBefore: undefined },
                 ...(resolution.cells && { cells: resolution.cells }),
             },
         };

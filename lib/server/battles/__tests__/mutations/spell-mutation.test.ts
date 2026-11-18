@@ -185,11 +185,15 @@ describe('spell mutation', () => {
             );
 
             const action = preview.response?.battleAction as {
-                hpChanges: unknown[];
+                hpChanges: { change: number }[];
             };
 
             expect(hpOf(out, 'gob')).toBe(heal ? 18 : 2);
-            expect(action.hpChanges).toEqual(out.events[0].hpChanges);
+            expect(action.hpChanges.map((h) => h.change)).toEqual(
+                (out.events[0].hpChanges as { change: number }[]).map(
+                    (h) => h.change
+                )
+            );
             expect(preview.participants).toBe(ctx.participants);
         }
     );
@@ -417,6 +421,30 @@ describe('spell mutation', () => {
         expect(out.events).toEqual([]);
         expect(out.response).toMatchObject({ preview: true });
         expect(out.response?.battleAction).toBeDefined();
+    });
+
+    it('preview для гравця не віддає точні HP ворога, для ДМ — віддає', async () => {
+        const target = {
+            ...goblin,
+            combatStats: { ...goblin.combatStats, currentHp: 30, maxHp: 50 },
+        };
+
+        const row = { ...spellRow, dice: 2, damageBonus: 3 } as unknown as Spell;
+
+        const hp = async (isDM: boolean) =>
+            (
+                (
+                    await mutation(row)(
+                        context({ participants: [caster, target], isDM }),
+                        body({ preview: true, diceRolls: [2, 3] }) as never
+                    )
+                ).response?.battleAction as {
+                    hpChanges: { oldHp: number; newHp: number }[];
+                }
+            ).hpChanges[0];
+
+        expect(await hp(false)).toMatchObject({ oldHp: 75, newHp: 40 });
+        expect(await hp(true)).toMatchObject({ oldHp: 30, newHp: 22 });
     });
 
     it('кастера немає — 404; не свій хід — 403', async () => {
