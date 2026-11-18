@@ -40,6 +40,7 @@ export function BattleMapLibraryPicker({
                 value={library.selectedId ?? ''}
                 onValueChange={(id) => {
                     if (!id) onClear?.();
+
                     void library.select(id || null);
                 }}
                 options={options}
