@@ -3,7 +3,10 @@ import { HP_BUCKET, PROJECTED_MAX_HP } from './hp-bucket';
 import { canSeeExactStats, type Viewer } from './visibility';
 
 import { stubReserve } from '@/lib/utils/battle/participant/reserve';
+import type { Ruleset } from '@/lib/utils/rules/schema';
+import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
+import type { SlotScope } from '@/lib/utils/rules/systems/types-participant';
 import type { BattleParticipantPatch } from '@/types/api';
 import type {
     ActiveEffect,
@@ -65,6 +68,21 @@ function stripExt(slot: SystemSlot | undefined): SystemSlot | undefined {
     return { ...slot, data };
 }
 
+type SlotRedact = (
+    slot: SystemSlot | undefined,
+    scope: SlotScope
+) => SystemSlot | undefined;
+
+function slotRedactor(rules: Ruleset): SlotRedact {
+    const hooks = ruleSystemOf(rules).participant?.redactSlot ?? [];
+
+    return (slot, scope) => {
+        const open = stripExt(slot);
+
+        return open && hooks.reduce((acc, hook) => hook(acc, scope), open);
+    };
+}
+
 const withoutConcealed = (effects: ActiveEffect[]) =>
     effects.filter((e) => !e.concealed);
 
@@ -77,7 +95,10 @@ function projectHp(p: BattleParticipant) {
     };
 }
 
-function redactOne(p: BattleParticipant): BattleParticipant {
+function redactOne(
+    p: BattleParticipant,
+    redact: SlotRedact
+): BattleParticipant {
     const { activeEffects, system, ...battleRest } = p.battleData;
 
     const battleData = { ...battleRest } as BattleParticipantBattleData;
@@ -86,7 +107,7 @@ function redactOne(p: BattleParticipant): BattleParticipant {
 
     battleData.activeEffects = withoutConcealed(activeEffects);
 
-    const slot = stripExt(system);
+    const slot = redact(system, 'battle');
 
     if (slot) battleData.system = slot;
 
@@ -101,7 +122,7 @@ function redactOne(p: BattleParticipant): BattleParticipant {
         (typeof PUBLIC_ABILITY_KEYS)[number]
     >;
 
-    const abilitySlot = stripExt(p.abilities.system);
+    const abilitySlot = redact(p.abilities.system, 'abilities');
 
     return {
         ...p,
@@ -124,12 +145,15 @@ function redactOne(p: BattleParticipant): BattleParticipant {
 /** Server-side: what `viewer` may learn about each participant; own and ally participants stay whole, the rest is projected (HP to a health bucket, no AC/scores/ext). */
 export function redactParticipantsForViewer(
     viewer: Viewer,
-    participants: BattleParticipant[]
+    participants: BattleParticipant[],
+    rules: Ruleset
 ): BattleParticipant[] {
     if (viewer.isDM) return participants;
 
+    const redact = slotRedactor(rules);
+
     const redacted = participants.map((p) =>
-        isExact(p, viewer) ? p : redactOne(p)
+        isExact(p, viewer) ? p : redactOne(p, redact)
     );
 
     return redacted.some((p, i) => p !== participants[i])
@@ -139,15 +163,17 @@ export function redactParticipantsForViewer(
 
 export const redactPendingForViewer = (
     viewer: Viewer,
-    pending: BattleParticipant[]
+    pending: BattleParticipant[],
+    rules: Ruleset
 ): BattleParticipant[] =>
     viewer.isDM
         ? pending
-        : stubReserve(redactParticipantsForViewer(viewer, pending));
+        : stubReserve(redactParticipantsForViewer(viewer, pending, rules));
 
 function redactPatch(
     patch: BattleParticipantPatch,
-    owner: BattleParticipant
+    owner: BattleParticipant,
+    redact: SlotRedact
 ): BattleParticipantPatch {
     const {
         combatStats,
@@ -197,7 +223,7 @@ function redactPatch(
             )
         );
 
-        const slot = stripExt(system);
+        const slot = redact(system, 'abilities');
 
         const next = { ...kept, ...(slot && { system: slot }) };
 
@@ -213,7 +239,7 @@ function redactPatch(
 
         if (activeEffects) next.activeEffects = withoutConcealed(activeEffects);
 
-        const slot = stripExt(system);
+        const slot = redact(system, 'battle');
 
         if (slot) next.system = slot;
 
@@ -226,9 +252,12 @@ function redactPatch(
 export function redactPatchesForViewer(
     viewer: Viewer,
     patches: BattleParticipantPatch[],
-    participants: BattleParticipant[]
+    participants: BattleParticipant[],
+    rules: Ruleset
 ): BattleParticipantPatch[] {
     if (viewer.isDM) return patches;
+
+    const redact = slotRedactor(rules);
 
     const byId = new Map(participants.map((p) => [p.basicInfo.id, p]));
 
@@ -236,7 +265,7 @@ export function redactPatchesForViewer(
         const owner = byId.get(patch.id);
 
         return owner && !isExact(owner, viewer)
-            ? redactPatch(patch, owner)
+            ? redactPatch(patch, owner, redact)
             : patch;
     });
 

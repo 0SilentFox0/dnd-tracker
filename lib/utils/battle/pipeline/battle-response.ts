@@ -103,9 +103,9 @@ export function toBattleResponse(
         currentRound: scene.round,
         currentTurnIndex: scene.turnIndex,
         initiativeOrder: viewer
-            ? redactParticipantsForViewer(viewer, participants)
+            ? redactParticipantsForViewer(viewer, participants, meta.rules)
             : participants,
-        pendingSummons: viewer ? redactPendingForViewer(viewer, pending) : pending,
+        pendingSummons: viewer ? redactPendingForViewer(viewer, pending, meta.rules) : pending,
         pendingChoice: publicPending(scene.pendingChoice),
         ...(scene.sceneState && { system: scene.sceneState }),
         ...mapFields(meta),
@@ -141,14 +141,14 @@ export function redactDeltaForPlayers(
         rules,
     });
 
-    const upserted = redactParticipantsForViewer(viewer, delta.upserted);
+    const upserted = redactParticipantsForViewer(viewer, delta.upserted, rules);
 
     const patched =
         delta.patched &&
-        redactPatchesForViewer(viewer, delta.patched, participants);
+        redactPatchesForViewer(viewer, delta.patched, participants, rules);
 
     const pending =
-        delta.pending && redactPendingForViewer(viewer, delta.pending);
+        delta.pending && redactPendingForViewer(viewer, delta.pending, rules);
 
     const setup = delta.setup && publicSetup(delta.setup);
 

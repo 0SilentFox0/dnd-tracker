@@ -423,7 +423,8 @@ describe('видимість', () => {
 
         const [redactedFoe, redactedFriend] = redactParticipantsForViewer(
             PLAYER_VIEWER,
-            [foe, friend]
+            [foe, friend],
+            DEFAULT_RULES
         );
 
         expect(redactedFoe.battleData.activeEffects.map((e) => e.id)).toEqual([
@@ -435,7 +436,7 @@ describe('видимість', () => {
             effect('keep'),
         ]);
 
-        expect(redactParticipantsForViewer(PLAYER_VIEWER, [allyClean])[0]).toBe(
+        expect(redactParticipantsForViewer(PLAYER_VIEWER, [allyClean], DEFAULT_RULES)[0]).toBe(
             allyClean
         );
     });

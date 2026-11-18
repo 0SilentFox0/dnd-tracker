@@ -9,6 +9,7 @@ import {
     redactPatchesForViewer,
     redactPendingForViewer,
 } from '@/lib/utils/battle/view';
+import { DEFAULT_RULES } from '@/lib/utils/rules';
 import type { BattleParticipant } from '@/types/battle';
 
 const base = createMockParticipant();
@@ -50,12 +51,12 @@ describe('redactParticipantsForViewer', () => {
         const all = [foe()];
 
         expect(
-            redactParticipantsForViewer({ ...player, isDM: true }, all)
+            redactParticipantsForViewer({ ...player, isDM: true }, all, DEFAULT_RULES)
         ).toBe(all);
     });
 
     it('ворог: HP у відро, без AC/tempHp/scores/ext/множників', () => {
-        const [p] = redactParticipantsForViewer(player, [foe()]);
+        const [p] = redactParticipantsForViewer(player, [foe()], DEFAULT_RULES);
 
         expect(p.combatStats).toMatchObject({
             maxHp: 100,
@@ -74,7 +75,7 @@ describe('redactParticipantsForViewer', () => {
         for (const currentHp of [40, 30, 15, 6, 0]) {
             const raw = foe({ currentHp });
 
-            const [p] = redactParticipantsForViewer(player, [raw]);
+            const [p] = redactParticipantsForViewer(player, [raw], DEFAULT_RULES);
 
             expect(healthState(p)).toBe(healthState(raw));
         }
@@ -82,7 +83,7 @@ describe('redactParticipantsForViewer', () => {
         const dead = foe({ currentHp: 5, status: CombatStatus.DEAD });
 
         expect(
-            healthState(redactParticipantsForViewer(player, [dead])[0])
+            healthState(redactParticipantsForViewer(player, [dead], DEFAULT_RULES)[0])
         ).toBe('down');
     });
 
@@ -93,19 +94,19 @@ describe('redactParticipantsForViewer', () => {
 
         const all = [ally, own];
 
-        expect(redactParticipantsForViewer(player, all)).toBe(all);
+        expect(redactParticipantsForViewer(player, all, DEFAULT_RULES)).toBe(all);
 
         const enemies = [foe()];
 
         expect(
-            redactParticipantsForViewer({ ...player, canSeeEnemyHp: true }, enemies)
+            redactParticipantsForViewer({ ...player, canSeeEnemyHp: true }, enemies, DEFAULT_RULES)
         ).toBe(enemies);
     });
 
     it('pending: резерв стає заглушкою, приклик ворога проєктується', () => {
         const reserved = { ...foe(), battleData: { ...foe().battleData, reserved: true } };
 
-        const [stub, summon] = redactPendingForViewer(player, [reserved, foe()]);
+        const [stub, summon] = redactPendingForViewer(player, [reserved, foe()], DEFAULT_RULES);
 
         expect(stub.battleData).toEqual({ reserved: true });
         expect(summon.combatStats.maxHp).toBe(100);
@@ -128,7 +129,8 @@ describe('redactPatchesForViewer', () => {
                     },
                 },
             ],
-            [owner]
+            [owner],
+            DEFAULT_RULES
         );
 
         expect(patch.combatStats).toEqual({ currentHp: 10, maxHp: 100 });
@@ -141,6 +143,6 @@ describe('redactPatchesForViewer', () => {
 
         const patches = [{ id: 'foe', combatStats: { currentHp: 1 } }];
 
-        expect(redactPatchesForViewer(player, patches, [ally])).toBe(patches);
+        expect(redactPatchesForViewer(player, patches, [ally], DEFAULT_RULES)).toBe(patches);
     });
 });
