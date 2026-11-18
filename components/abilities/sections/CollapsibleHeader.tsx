@@ -33,7 +33,8 @@ export function CollapsibleHeader({
 
     return (
         <div className="flex items-center gap-1">
-            <button
+            <Button
+                variant="bare"
                 type="button"
                 aria-expanded={open}
                 aria-controls={controlsId}
@@ -56,7 +57,7 @@ export function CollapsibleHeader({
                             {t('emptySummary')}
                         </span>
                     ))}
-            </button>
+            </Button>
             {onAdd && (
                 <Button
                     type="button"

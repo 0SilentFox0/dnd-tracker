@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 
 import type { SheetRollRequest } from '@/components/systems/types';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { signed } from '@/lib/utils/common/format';
 import type { SheetWfrpBlock } from '@/systems/wfrp/rules/characteristics/sheet-block';
@@ -39,7 +40,8 @@ export function CharacteristicsGrid({ block, onRoll, canRoll }: Props) {
                 );
 
                 return canRoll ? (
-                    <button
+                    <Button
+                        variant="bare"
                         key={c.key}
                         type="button"
                         title={t('roll')}
@@ -58,7 +60,7 @@ export function CharacteristicsGrid({ block, onRoll, canRoll }: Props) {
                         )}
                     >
                         {body}
-                    </button>
+                    </Button>
                 ) : (
                     <div
                         key={c.key}

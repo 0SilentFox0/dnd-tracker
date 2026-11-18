@@ -126,13 +126,14 @@ function SignUpCard() {
                     <p className="text-hud-muted">{t('signUp.existingNote')}</p>
                     <ResendConfirmation email={sentTo} />
                     <div className="flex justify-between text-sm">
-                        <button
+                        <Button
+                            variant="bare"
                             type="button"
                             onClick={reset}
                             className="text-hud-gold hover:text-hud-gold-strong"
                         >
                             {t('signUp.changeEmail')}
-                        </button>
+                        </Button>
                         <AuthLink href="/sign-in">
                             {t('common.backToSignIn')}
                         </AuthLink>

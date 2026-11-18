@@ -9,6 +9,7 @@ import type {
     SheetRollRequest,
     StatsTabProps,
 } from '@/components/systems/types';
+import { Button } from '@/components/ui/button';
 import type { DndSkill } from '@/lib/constants/skills';
 import { cn } from '@/lib/utils';
 import { signed } from '@/lib/utils/common/format';
@@ -22,7 +23,8 @@ export function StatsTab({ section, onRoll, canRoll }: StatsTabProps) {
 
     const rollable = (request: SheetRollRequest, children: ReactNode) =>
         canRoll ? (
-            <button
+            <Button
+                variant="bare"
                 type="button"
                 title={t('roll')}
                 onClick={() => onRoll(request)}
@@ -30,7 +32,7 @@ export function StatsTab({ section, onRoll, canRoll }: StatsTabProps) {
             >
                 <span className="sr-only">{t('roll')}: </span>
                 {children}
-            </button>
+            </Button>
         ) : (
             <div className="flex w-full justify-between gap-2">{children}</div>
         );

@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { EyeOff, X } from 'lucide-react';
 
 import { Portrait } from '@/components/battle/hud';
+import { Button } from '@/components/ui/button';
 import { useBattleScene } from '@/lib/hooks/battle';
 import { useConfirm } from '@/lib/hooks/common';
 import type { BattleParticipant } from '@/types/battle';
@@ -50,7 +51,8 @@ export const ReserveParticipantRow = memo(function ReserveParticipantRow({
             <span className="hud-sc min-w-0 flex-1 truncate text-base font-bold text-[var(--ink)]">
                 {name}
             </span>
-            <button
+            <Button
+                variant="bare"
                 type="button"
                 aria-label={t('reveal', { name })}
                 title={t('revealHint')}
@@ -59,8 +61,9 @@ export const ReserveParticipantRow = memo(function ReserveParticipantRow({
                 className="flex size-10 shrink-0 items-center justify-center rounded-full border border-white/20 text-[var(--ink)] hover:bg-white/10 disabled:opacity-50"
             >
                 <EyeOff className="size-5" />
-            </button>
-            <button
+            </Button>
+            <Button
+                variant="bare"
                 type="button"
                 aria-label={t('remove', { name })}
                 disabled={actions.updateParticipant.isPending}
@@ -68,7 +71,7 @@ export const ReserveParticipantRow = memo(function ReserveParticipantRow({
                 className="flex size-10 shrink-0 items-center justify-center rounded-full border border-white/20 text-[var(--ink)] hover:bg-white/10 disabled:opacity-50"
             >
                 <X className="size-5" />
-            </button>
+            </Button>
         </div>
     );
 });

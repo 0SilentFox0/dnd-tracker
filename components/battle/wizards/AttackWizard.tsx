@@ -11,6 +11,7 @@ import { TargetStep } from './attack/TargetStep';
 import { WeaponStep } from './attack/WeaponStep';
 
 import { HUD_SURFACE } from '@/components/hud';
+import { Button } from '@/components/ui/button';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { useText } from '@/lib/i18n/use-text';
 import { cn } from '@/lib/utils';
@@ -110,13 +111,14 @@ export function AttackWizard({ wizard }: { wizard: AttackWizardModel }) {
                         {state.step === 'roll' &&
                             state.weaponCount > 1 &&
                             state.index === 0 && (
-                                <button
+                                <Button
+                                    variant="bare"
                                     type="button"
                                     onClick={actions.changeWeapon}
                                     className="h-8 border border-white/25 px-2.5 text-xs text-[var(--ink)]"
                                 >
                                     {t('changeWeapon')}
-                                </button>
+                                </Button>
                             )}
                     </div>
                 )}

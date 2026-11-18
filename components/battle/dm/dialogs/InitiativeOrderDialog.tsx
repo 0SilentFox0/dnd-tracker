@@ -83,7 +83,8 @@ function InitiativeOrderBody({
                         <span className="min-w-0 flex-1 truncate text-[15px]">
                             {names.get(id)}
                         </span>
-                        <button
+                        <Button
+                            variant="bare"
                             type="button"
                             className="p-1 text-[var(--gold)] disabled:opacity-30"
                             disabled={i === 0}
@@ -91,8 +92,9 @@ function InitiativeOrderBody({
                             onClick={() => move(id, i - 1)}
                         >
                             <ChevronUp className="size-4" />
-                        </button>
-                        <button
+                        </Button>
+                        <Button
+                            variant="bare"
                             type="button"
                             className="p-1 text-[var(--gold)] disabled:opacity-30"
                             disabled={i === order.length - 1}
@@ -102,7 +104,7 @@ function InitiativeOrderBody({
                             onClick={() => move(id, i + 1)}
                         >
                             <ChevronDown className="size-4" />
-                        </button>
+                        </Button>
                     </li>
                 ))}
             </ol>

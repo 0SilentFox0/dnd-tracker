@@ -5,6 +5,7 @@ import { btn, primaryBtn } from '../attack/shared';
 import { MapAimPanel } from '../MapAimPanel';
 
 import { Portrait } from '@/components/battle/hud';
+import { Button } from '@/components/ui/button';
 import type { useSpellBook } from '@/lib/hooks/battle';
 import { cn } from '@/lib/utils';
 
@@ -72,22 +73,25 @@ export function SpellAimPanel({
             hint={hintOf(book, tw)}
             footer={
                 <>
-                    <button
+                    <Button
+                        variant="bare"
                         type="button"
                         onClick={actions.back}
                         className={footerBtn}
                     >
                         ← {tc('back')}
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                        variant="bare"
                         type="button"
                         onClick={actions.close}
                         className={footerBtn}
                     >
                         {tc('cancel')}
-                    </button>
+                    </Button>
                     {confirmable && (
-                        <button
+                        <Button
+                            variant="bare"
                             type="button"
                             disabled={state.targetIds.length === 0}
                             onClick={actions.confirmTargets}
@@ -98,7 +102,7 @@ export function SpellAimPanel({
                             )}
                         >
                             {tw('next')}
-                        </button>
+                        </Button>
                     )}
                 </>
             }

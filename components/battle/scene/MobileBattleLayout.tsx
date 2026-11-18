@@ -23,6 +23,7 @@ import { ParticipantList } from '@/components/battle/participants/ParticipantLis
 import { ReserveSheetButton } from '@/components/battle/participants/ReservePanel';
 import { MyTurnControls } from '@/components/battle/turn/MyTurnControls';
 import { HUD_SURFACE } from '@/components/hud';
+import { Button } from '@/components/ui/button';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { BattleStatus, ParticipantSide } from '@/lib/constants/battle';
 import {
@@ -89,7 +90,8 @@ export function MobileBattleLayout() {
     const selected = useSelectedParticipant();
 
     const tabBtn = (side: MobileBattleTab, label: string, n?: number) => (
-        <button
+        <Button
+            variant="bare"
             role="tab"
             aria-selected={tab === side}
             type="button"
@@ -102,7 +104,7 @@ export function MobileBattleLayout() {
             )}
         >
             {label} {n}
-        </button>
+        </Button>
     );
 
     const completed = battle.status === BattleStatus.COMPLETED;
@@ -164,14 +166,15 @@ export function MobileBattleLayout() {
                     {mapTab && <ReserveSheetButton />}
                     {mapTab && <BattlePlayerViewToggle className="shrink-0" />}
                     {isDM && battle.status !== BattleStatus.PREPARED && (
-                        <button
+                        <Button
+                            variant="bare"
                             type="button"
                             onClick={() => setDmOpen(true)}
                             aria-label={t('openDmActions')}
                             className="flex w-11 items-center justify-center text-[var(--gold)]"
                         >
                             <Settings2 className="size-5" />
-                        </button>
+                        </Button>
                     )}
                 </div>
                 {/* док — шар над картою/списком: панель не може вилізти за верх області, а на будь-якій вкладці лишається змонтованою (звук іде) */}

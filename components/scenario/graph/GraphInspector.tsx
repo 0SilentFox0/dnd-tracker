@@ -82,7 +82,8 @@ export function GraphInspector({
                 <ul className="flex flex-col gap-1">
                     {links.map((l) => (
                         <li key={l.node.id}>
-                            <button
+                            <Button
+                                variant="bare"
                                 type="button"
                                 className="flex w-full items-center gap-2 rounded px-1 py-0.5 text-left text-sm hover:bg-accent"
                                 onClick={() => onSelect(l.node.id)}
@@ -96,7 +97,7 @@ export function GraphInspector({
                                 <span className="text-xs text-muted-foreground">
                                     ×{l.count}
                                 </span>
-                            </button>
+                            </Button>
                         </li>
                     ))}
                 </ul>
@@ -107,7 +108,8 @@ export function GraphInspector({
                     <ul className="flex flex-col gap-1">
                         {relations.map((r) => (
                             <li key={`${r.node.id}|${r.label}`}>
-                                <button
+                                <Button
+                                    variant="bare"
                                     type="button"
                                     className="flex w-full flex-col rounded px-1 py-0.5 text-left text-sm hover:bg-accent"
                                     onClick={() => onSelect(r.node.id)}
@@ -118,7 +120,7 @@ export function GraphInspector({
                                     <span className="text-xs text-muted-foreground">
                                         {r.label}
                                     </span>
-                                </button>
+                                </Button>
                             </li>
                         ))}
                     </ul>

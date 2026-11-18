@@ -8,6 +8,7 @@ import { AbilityAimPanel } from '@/components/battle/wizards/AbilityAimPanel';
 import { TargetButton } from '@/components/battle/wizards/TargetButton';
 import { OptimizedImage } from '@/components/common/OptimizedImage';
 import { HUD_SURFACE } from '@/components/hud';
+import { Button } from '@/components/ui/button';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { ParticipantSide } from '@/lib/constants/battle';
 import { useAbilityText } from '@/lib/hooks/abilities';
@@ -79,7 +80,8 @@ export function BonusActionPicker({
                         trigger === 'bonusAction' &&
                         onOffHand &&
                         canOffHandAttack(participant, battle.rules) && (
-                            <button
+                            <Button
+                                variant="bare"
                                 type="button"
                                 disabled={isPending}
                                 onClick={() => {
@@ -92,14 +94,15 @@ export function BonusActionPicker({
                                 <span className="hud-sc block font-bold">
                                     {t('bonus.offHand')}
                                 </span>
-                            </button>
+                            </Button>
                         )}
                     {!ability &&
                         abilities.map(({ ability: a, cooldownLeft, pool }) => {
                             const icon = a.icon ?? a.source.icon;
 
                             return (
-                                <button
+                                <Button
+                                    variant="bare"
                                     key={a.key}
                                     type="button"
                                     disabled={cooldownLeft > 0 || isPending}
@@ -143,7 +146,7 @@ export function BonusActionPicker({
                                                       .join(', '))}
                                         </span>
                                     </span>
-                                </button>
+                                </Button>
                             );
                         })}
                     {ability &&
@@ -168,14 +171,15 @@ export function BonusActionPicker({
                             />
                         ))}
                     {ability && max > 1 && (
-                        <button
+                        <Button
+                            variant="bare"
                             type="button"
                             disabled={picked.length === 0 || isPending}
                             onClick={aiming.confirm}
                             className="hud-sc flex h-12 w-full items-center justify-center border border-[var(--gold)] disabled:opacity-40"
                         >
                             {t('bonus.confirm', { picked: picked.length, max })}
-                        </button>
+                        </Button>
                     )}
                 </div>
             </ResponsiveDialog>

@@ -9,6 +9,7 @@ import {
     ActionsMenu,
     type ActionsMenuItem,
 } from '@/components/common/ActionsMenu';
+import { Button } from '@/components/ui/button';
 import { useCssVarHeight } from '@/lib/hooks/common';
 
 type NavTarget = { href: string; title: string };
@@ -47,7 +48,8 @@ export function ScenarioBar({ title, notes, toc, nav, actions, menu }: Props) {
                     </Link>
                 )}
                 {toc && (
-                    <button
+                    <Button
+                        variant="bare"
                         type="button"
                         className="toggle sb-bar-toc"
                         aria-label={t('sections')}
@@ -57,18 +59,19 @@ export function ScenarioBar({ title, notes, toc, nav, actions, menu }: Props) {
                         <span className="sb-bar-toc-label">
                             {t('sections')}
                         </span>
-                    </button>
+                    </Button>
                 )}
                 <strong>{title}</strong>
                 <div className="sb-bar-btns">
-                    <button
+                    <Button
+                        variant="bare"
                         type="button"
                         className="toggle"
                         aria-pressed={notes.hidden}
                         onClick={notes.toggle}
                     >
                         {notes.hidden ? t('showNotes') : t('hideNotes')}
-                    </button>
+                    </Button>
                     {actions}
                     {menu.length > 0 && (
                         <ActionsMenu

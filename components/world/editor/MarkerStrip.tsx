@@ -77,7 +77,8 @@ export function MarkerStrip({
             {marker.kind === 'point' ? (
                 <Popover open={iconOpen} onOpenChange={setIconOpen}>
                     <PopoverTrigger asChild>
-                        <button
+                        <Button
+                            variant="bare"
                             type="button"
                             aria-label={t('editor.icon')}
                             title={t('editor.icon')}
@@ -85,7 +86,7 @@ export function MarkerStrip({
                         >
                             <Icon className="size-4" aria-hidden />
                             {t('editor.icon')}
-                        </button>
+                        </Button>
                     </PopoverTrigger>
                     <PopoverContent className={POPOVER}>
                         <div
@@ -94,7 +95,8 @@ export function MarkerStrip({
                             className="grid grid-cols-4 gap-1.5"
                         >
                             {ICON_OPTIONS.map(({ value, Icon: Option }) => (
-                                <button
+                                <Button
+                                    variant="bare"
                                     key={value}
                                     type="button"
                                     title={t(`markerKinds.${value}`)}
@@ -112,7 +114,7 @@ export function MarkerStrip({
                                     )}
                                 >
                                     <Option className="size-5" aria-hidden />
-                                </button>
+                                </Button>
                             ))}
                         </div>
                     </PopoverContent>
@@ -170,7 +172,7 @@ export function MarkerStrip({
             </Button>
             <Popover onOpenChange={(o) => !o && commitNote()}>
                 <PopoverTrigger asChild>
-                    <button type="button" className={CHIP}>
+                    <Button variant="bare" type="button" className={CHIP}>
                         <NotebookPen className="size-4" aria-hidden />
                         {t('editor.note')}
                         {note.trim() ? (
@@ -179,7 +181,7 @@ export function MarkerStrip({
                                 className="size-1.5 rounded-full bg-[var(--gold)]"
                             />
                         ) : null}
-                    </button>
+                    </Button>
                 </PopoverTrigger>
                 <PopoverContent className={cn(POPOVER, 'w-72')}>
                     <Textarea
@@ -194,10 +196,10 @@ export function MarkerStrip({
             </Popover>
             <Popover>
                 <PopoverTrigger asChild>
-                    <button type="button" className={CHIP}>
+                    <Button variant="bare" type="button" className={CHIP}>
                         <MessagesSquare className="size-4" aria-hidden />
                         {t('editor.playerNotes')}
-                    </button>
+                    </Button>
                 </PopoverTrigger>
                 <PopoverContent
                     className={cn(POPOVER, 'max-h-96 w-80 overflow-y-auto')}

@@ -7,6 +7,7 @@ import { D100RollPicker } from './D100RollPicker';
 import { btn } from '@/components/battle/wizards/attack/shared';
 import { HUD_SURFACE } from '@/components/hud';
 import type { ChannelDialogProps } from '@/components/systems/types';
+import { Button } from '@/components/ui/button';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { cn } from '@/lib/utils';
 import { useChannelAction } from '@/systems/wfrp/hooks/useChannelAction';
@@ -50,14 +51,15 @@ export function ChannelDialog({
                     onAuto={actions.auto}
                 />
             </fieldset>
-            <button
+            <Button
+                variant="bare"
                 type="button"
                 disabled={view.pending}
                 onClick={actions.close}
                 className={cn(btn, 'mt-3 w-full border-white/25')}
             >
                 {tc('cancel')}
-            </button>
+            </Button>
         </ResponsiveDialog>
     );
 }

@@ -6,6 +6,7 @@ import { Dices, Minus, Plus } from 'lucide-react';
 
 import '@/components/fx/fx.css';
 import { DiceStage, type DiceStageHandle } from '@/components/dice/DiceStage';
+import { Button } from '@/components/ui/button';
 import {
     ROLLER_MAX_COUNT,
     ROLLER_SIDES,
@@ -39,7 +40,8 @@ export function DiceRoller() {
             className="relative"
             onKeyDown={(e) => e.key === 'Escape' && setOpen(false)}
         >
-            <button
+            <Button
+                variant="bare"
                 type="button"
                 onClick={() => setOpen((v) => !v)}
                 aria-expanded={open}
@@ -47,7 +49,7 @@ export function DiceRoller() {
                 className="flex size-9 items-center justify-center rounded-full border border-hud-rule bg-black/70 text-hud-bone hover:bg-black/90"
             >
                 <Dices className="size-4" />
-            </button>
+            </Button>
             {open && (
                 <div
                     role="dialog"
@@ -56,7 +58,8 @@ export function DiceRoller() {
                 >
                     <div className="grid grid-cols-3 gap-1.5">
                         {ROLLER_SIDES.map((s) => (
-                            <button
+                            <Button
+                                variant="bare"
                                 key={s}
                                 type="button"
                                 aria-pressed={s === sides}
@@ -68,7 +71,7 @@ export function DiceRoller() {
                                 )}
                             >
                                 d{s}
-                            </button>
+                            </Button>
                         ))}
                     </div>
                     <div className="flex items-center justify-between">
@@ -76,7 +79,8 @@ export function DiceRoller() {
                             {t('count')}
                         </span>
                         <div className="flex items-center gap-2">
-                            <button
+                            <Button
+                                variant="bare"
                                 type="button"
                                 aria-label={t('fewer')}
                                 disabled={count <= 1}
@@ -84,11 +88,12 @@ export function DiceRoller() {
                                 className={stepClass}
                             >
                                 <Minus className="size-3.5" />
-                            </button>
+                            </Button>
                             <span className="w-5 text-center font-semibold tabular-nums">
                                 {count}
                             </span>
-                            <button
+                            <Button
+                                variant="bare"
                                 type="button"
                                 aria-label={t('more')}
                                 disabled={count >= ROLLER_MAX_COUNT}
@@ -96,17 +101,18 @@ export function DiceRoller() {
                                 className={stepClass}
                             >
                                 <Plus className="size-3.5" />
-                            </button>
+                            </Button>
                         </div>
                     </div>
-                    <button
+                    <Button
+                        variant="bare"
                         type="button"
                         disabled={isRolling}
                         onClick={() => void roll()}
                         className="h-10 w-full rounded border-2 border-hud-gold-strong bg-hud-gold-strong/20 font-semibold text-hud-gold-bright hover:bg-hud-gold-strong/30 disabled:opacity-50"
                     >
                         {t('roll', { count, sides })}
-                    </button>
+                    </Button>
                     <div aria-live="polite" className="min-h-12 text-center">
                         {result && (
                             <>

@@ -31,14 +31,15 @@ function ReadiedAttackPicker({
 
     return (
         <>
-            <button
+            <Button
+                variant="bare"
                 type="button"
                 onClick={() => setOpen(true)}
                 className="hud-sc mt-2 flex h-11 w-full items-center justify-center gap-2 border border-[var(--enemy)] bg-[var(--enemy)]/25 text-[15px] tracking-[.08em] text-[var(--ink)]"
             >
                 <Crosshair className="size-5 text-[var(--bone)]" />
                 {t('title')}
-            </button>
+            </Button>
             <ResponsiveDialog
                 open={open}
                 onOpenChange={setOpen}
@@ -63,7 +64,8 @@ function ReadiedAttackPicker({
                         </div>
                     )}
                     {targets.map((target) => (
-                        <button
+                        <Button
+                            variant="bare"
                             key={target.basicInfo.id}
                             type="button"
                             disabled={isPending}
@@ -74,7 +76,7 @@ function ReadiedAttackPicker({
                             className={TARGET_BUTTON}
                         >
                             {target.basicInfo.name}
-                        </button>
+                        </Button>
                     ))}
                 </div>
             </ResponsiveDialog>

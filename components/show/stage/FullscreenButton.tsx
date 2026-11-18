@@ -4,6 +4,8 @@ import { useSyncExternalStore } from 'react';
 import { useTranslations } from 'next-intl';
 import { Maximize, Minimize } from 'lucide-react';
 
+import { Button } from '@/components/ui/button';
+
 const subscribe = (onChange: () => void) => {
     document.addEventListener('fullscreenchange', onChange);
 
@@ -37,13 +39,14 @@ export function FullscreenButton() {
     const Icon = active ? Minimize : Maximize;
 
     return (
-        <button
+        <Button
+            variant="bare"
             type="button"
             onClick={toggle}
             aria-label={active ? t('fullscreen.exit') : t('fullscreen.enter')}
             className="flex size-9 items-center justify-center rounded-full border border-hud-rule bg-black/70 text-hud-bone hover:bg-black/90"
         >
             <Icon className="size-4" />
-        </button>
+        </Button>
     );
 }

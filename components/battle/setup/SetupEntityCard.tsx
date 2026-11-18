@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import { Check } from 'lucide-react';
 
 import { EntityIcon } from '@/components/common/EntityIcon';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { round1 } from '@/lib/utils/common/format';
 import type { EntityStats } from '@/types/battle-setup';
@@ -44,7 +45,8 @@ export function SetupEntityCard({
                         : 'border-primary bg-primary/10 shadow-sm')
             )}
         >
-            <button
+            <Button
+                variant="bare"
                 type="button"
                 onClick={onToggle}
                 className="flex w-full items-center gap-4 rounded-t-xl p-3 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
@@ -90,7 +92,7 @@ export function SetupEntityCard({
                         </div>
                     </div>
                 )}
-            </button>
+            </Button>
             {isSelected && children}
         </div>
     );

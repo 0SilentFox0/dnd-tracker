@@ -40,7 +40,8 @@ export function AbilityChips({
                 const on = a.id === selectedId;
 
                 return (
-                    <button
+                    <Button
+                        variant="bare"
                         key={a.id}
                         type="button"
                         role="tab"
@@ -62,7 +63,7 @@ export function AbilityChips({
                                 className="ml-1.5 h-1.5 w-1.5 rounded-full bg-hud-danger"
                             />
                         )}
-                    </button>
+                    </Button>
                 );
             })}
             <Button

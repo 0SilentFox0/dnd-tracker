@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 interface OptionCardProps {
@@ -16,7 +17,8 @@ export function OptionCard({
     disabled,
 }: OptionCardProps) {
     return (
-        <button
+        <Button
+            variant="bare"
             type="button"
             role="radio"
             aria-checked={selected}
@@ -28,7 +30,7 @@ export function OptionCard({
             )}
         >
             {children}
-        </button>
+        </Button>
     );
 }
 

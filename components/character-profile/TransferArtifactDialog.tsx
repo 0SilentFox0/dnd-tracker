@@ -6,6 +6,7 @@ import { useProfile } from './ProfileContext';
 
 import { EntityIcon } from '@/components/common/EntityIcon';
 import { EmptyState, LoadingState } from '@/components/common/states';
+import { Button } from '@/components/ui/button';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import {
     useCharacterRoster,
@@ -73,7 +74,8 @@ export function TransferArtifactDialog({
                 <ul>
                     {recipients.map((h) => (
                         <li key={h.id}>
-                            <button
+                            <Button
+                                variant="bare"
                                 type="button"
                                 disabled={transfer.isPending}
                                 onClick={() => give(h.id, h.name)}
@@ -93,7 +95,7 @@ export function TransferArtifactDialog({
                                         {t('toStash')}
                                     </span>
                                 </span>
-                            </button>
+                            </Button>
                         </li>
                     ))}
                 </ul>

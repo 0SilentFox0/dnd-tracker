@@ -6,6 +6,7 @@ import { MapPin, Play, Swords } from 'lucide-react';
 
 import { OptimizedImage } from '@/components/common/OptimizedImage';
 import { MarkerChip } from '@/components/scenario/MarkerChip';
+import { Button } from '@/components/ui/button';
 import { BattleStatus } from '@/lib/constants/battle';
 import type { ScenarioPlay } from '@/lib/hooks/scenario';
 import { useTranslator } from '@/lib/i18n/use-translator';
@@ -38,7 +39,8 @@ export function MarkerPlay({
                 onScreen ? (
                     <span className="sb-bind-live">{t('onScreen')}</span>
                 ) : play.readOnly ? null : (
-                    <button
+                    <Button
+                        variant="bare"
                         type="button"
                         className="toggle"
                         aria-label={t('showOnMap')}
@@ -46,7 +48,7 @@ export function MarkerPlay({
                         onClick={() => play.showMarker(marker)}
                     >
                         <MapPin className="size-3" /> {t('showOnMap')}
-                    </button>
+                    </Button>
                 )
             }
         />
@@ -97,7 +99,8 @@ export function RowPlayControls({
                     {slide.active ? (
                         <span className="sb-bind-live">{t('onScreen')}</span>
                     ) : play.readOnly ? null : (
-                        <button
+                        <Button
+                            variant="bare"
                             type="button"
                             className="toggle"
                             aria-label={t('showSlide')}
@@ -105,7 +108,7 @@ export function RowPlayControls({
                             onClick={() => play.showSlide(row)}
                         >
                             <Play className="size-3" /> {t('show')}
-                        </button>
+                        </Button>
                     )}
                 </span>
             )}
@@ -153,7 +156,8 @@ export function RowPlayControls({
                         </small>
                     </span>
                     {action !== 'none' && !play.readOnly && (
-                        <button
+                        <Button
+                            variant="bare"
                             type="button"
                             className="toggle"
                             disabled={play.pending}
@@ -164,7 +168,7 @@ export function RowPlayControls({
                                 : battle.called
                                   ? t('callAgain')
                                   : t('callToBattle')}
-                        </button>
+                        </Button>
                     )}
                     {battle.battle.status === BattleStatus.ACTIVE && (
                         <Link
@@ -178,9 +182,14 @@ export function RowPlayControls({
                     )}
                     {action === 'none' &&
                         battle.battle.status === BattleStatus.COMPLETED && (
-                            <button type="button" className="toggle" disabled>
+                            <Button
+                                variant="bare"
+                                type="button"
+                                className="toggle"
+                                disabled
+                            >
                                 {t('battleDone')}
-                            </button>
+                            </Button>
                         )}
                 </span>
             )}

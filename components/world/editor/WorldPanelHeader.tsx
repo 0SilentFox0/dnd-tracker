@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react';
 
+import { Button } from '@/components/ui/button';
+
 export function WorldPanelHeader({
     badge,
     title,
@@ -32,12 +34,13 @@ export function QuietDeleteButton({
     onClick(): void;
 }) {
     return (
-        <button
+        <Button
+            variant="bare"
             type="button"
             onClick={onClick}
             className="mt-6 flex min-h-10 w-full items-center justify-center gap-2 rounded-md border border-hud-danger/60 bg-hud-danger/20 px-3 text-sm font-medium text-hud-danger transition-colors hover:bg-hud-danger/30 hover:text-hud-bad"
         >
             {label}
-        </button>
+        </Button>
     );
 }

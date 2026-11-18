@@ -6,6 +6,7 @@ import { ChoicePicker, type PickerContext } from './ChoicePicker';
 import { classPickerContext, issueFor, pickerBase } from './picker-context';
 
 import { HUD_SELECT_CLASS, HudSection } from '@/components/hud/form';
+import { Button } from '@/components/ui/button';
 import type { ChoiceRefsView } from '@/lib/hooks/characters';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import { mergeBackground } from '@/lib/utils/backgrounds/selection';
@@ -137,7 +138,8 @@ export function ChoicesEditor({
                                     className="text-sm text-hud-danger"
                                 >
                                     {t('editor.originFirst')}
-                                    <button
+                                    <Button
+                                        variant="bare"
                                         type="button"
                                         className="ml-2 underline"
                                         onClick={() =>
@@ -150,7 +152,7 @@ export function ChoicesEditor({
                                         }
                                     >
                                         {t('editor.replaceOrigin')}
-                                    </button>
+                                    </Button>
                                 </div>
                             )}
                             {pickers(

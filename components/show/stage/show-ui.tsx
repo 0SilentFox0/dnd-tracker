@@ -1,5 +1,6 @@
 import type { ButtonHTMLAttributes } from 'react';
 
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 /** Кольори через --show-* (сценарій задає свої), інакше HUD. */
@@ -15,7 +16,8 @@ export function ShowButton({
     ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & { tone?: 'plain' | 'danger' }) {
     return (
-        <button
+        <Button
+            variant="bare"
             type="button"
             {...props}
             className={cn(

@@ -2,6 +2,7 @@ import { MapPin } from 'lucide-react';
 
 import { MARKER_ICON } from './marker-icons';
 
+import { Button } from '@/components/ui/button';
 import {
     WORLD_LABEL_ZOOM,
     WORLD_LABEL_ZOOM_COMPACT,
@@ -100,7 +101,8 @@ export function WorldPins({
                 const draggable = !!handlers.onMarkerDrag;
 
                 return (
-                    <button
+                    <Button
+                        variant="bare"
                         key={m.id}
                         type="button"
                         aria-label={m.name}
@@ -178,7 +180,7 @@ export function WorldPins({
                             <Icon className="size-4" aria-hidden />
                         </span>
                         <span className="atlas-label">{m.name}</span>
-                    </button>
+                    </Button>
                 );
             })}
         </>

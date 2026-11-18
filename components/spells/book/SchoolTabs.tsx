@@ -1,5 +1,6 @@
 import { useTranslations } from 'next-intl';
 
+import { Button } from '@/components/ui/button';
 import { spellSchoolColor } from '@/lib/constants/spells';
 import { ALL_SCHOOLS } from '@/lib/hooks/spells';
 import {
@@ -44,7 +45,8 @@ export function SchoolTabs({
                 const backgroundColor = normalizeHexColor(t.color);
 
                 return (
-                    <button
+                    <Button
+                        variant="bare"
                         key={t.name}
                         type="button"
                         aria-pressed={active === t.name}
@@ -64,7 +66,7 @@ export function SchoolTabs({
                                 {count}
                             </span>
                         )}
-                    </button>
+                    </Button>
                 );
             })}
         </div>

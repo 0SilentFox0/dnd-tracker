@@ -105,16 +105,17 @@ export function MapStrip({
             </Button>
             <Popover>
                 <PopoverTrigger asChild>
-                    <button type="button" className={CHIP}>
+                    <Button variant="bare" type="button" className={CHIP}>
                         {t('editor.children', { count: children.length })}
-                    </button>
+                    </Button>
                 </PopoverTrigger>
                 <PopoverContent className={cn(POPOVER, 'w-60')}>
                     {children.length ? (
                         <ul className="space-y-1">
                             {children.map((m) => (
                                 <li key={m.id}>
-                                    <button
+                                    <Button
+                                        variant="bare"
                                         type="button"
                                         onClick={() => openMap(m.id)}
                                         className="flex min-h-9 w-full items-center justify-between gap-2 rounded-md border border-hud-rule bg-black/30 px-3 text-left text-sm hover:border-[var(--gold)]"
@@ -126,7 +127,7 @@ export function MapStrip({
                                             className="size-4 shrink-0 text-hud-muted"
                                             aria-hidden
                                         />
-                                    </button>
+                                    </Button>
                                 </li>
                             ))}
                         </ul>

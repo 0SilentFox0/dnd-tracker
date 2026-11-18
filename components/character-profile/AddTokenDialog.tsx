@@ -73,7 +73,8 @@ export function AddTokenDialog({
                     aria-label={t('colorLabel')}
                 >
                     {TOKEN_COLORS.map((c) => (
-                        <button
+                        <Button
+                            variant="bare"
                             key={c}
                             type="button"
                             aria-pressed={color === c}
@@ -90,7 +91,7 @@ export function AddTokenDialog({
                                 )}
                             />
                             {t(`colors.${c}`)}
-                        </button>
+                        </Button>
                     ))}
                 </div>
                 <Input

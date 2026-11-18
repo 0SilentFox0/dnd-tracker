@@ -38,7 +38,8 @@ function ArtifactRow({
 }) {
     return (
         <li>
-            <button
+            <Button
+                variant="bare"
                 type="button"
                 disabled={disabled}
                 onClick={onClick}
@@ -60,7 +61,7 @@ function ArtifactRow({
                         {subtitle}
                     </span>
                 </span>
-            </button>
+            </Button>
         </li>
     );
 }

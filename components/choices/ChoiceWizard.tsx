@@ -173,7 +173,8 @@ export function ChoiceWizard({
                     {conflict?.kind === 'freeOrigin' && (
                         <p role="alert" className="text-sm text-hud-danger">
                             {t('editor.originFirst')}
-                            <button
+                            <Button
+                                variant="bare"
                                 type="button"
                                 className="ml-2 underline"
                                 onClick={() =>
@@ -186,7 +187,7 @@ export function ChoiceWizard({
                                 }
                             >
                                 {t('editor.replaceOrigin')}
-                            </button>
+                            </Button>
                         </p>
                     )}
                     {conflict?.kind === 'duplicate' && (

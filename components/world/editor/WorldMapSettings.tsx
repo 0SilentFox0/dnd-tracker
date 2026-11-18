@@ -125,7 +125,8 @@ function MapForm({ detail }: { detail: WorldMapDetail }) {
                     <ul className="space-y-1">
                         {children.map((m) => (
                             <li key={m.id}>
-                                <button
+                                <Button
+                                    variant="bare"
                                     type="button"
                                     onClick={() => openMap(m.id)}
                                     className="flex min-h-10 w-full items-center justify-between gap-2 rounded-md border border-hud-rule bg-black/30 px-3 text-left text-sm hover:border-[var(--gold)]"
@@ -135,7 +136,7 @@ function MapForm({ detail }: { detail: WorldMapDetail }) {
                                         className="size-4 shrink-0 text-hud-muted"
                                         aria-hidden
                                     />
-                                </button>
+                                </Button>
                             </li>
                         ))}
                     </ul>

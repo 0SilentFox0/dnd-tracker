@@ -4,6 +4,7 @@ import { type AttackWizardModel, btn, primaryBtn } from './shared';
 
 import { HealthLabel } from '@/components/battle/hud';
 import { TargetButton } from '@/components/battle/wizards/TargetButton';
+import { Button } from '@/components/ui/button';
 import { useText } from '@/lib/i18n/use-text';
 import { cn } from '@/lib/utils';
 import type { LogLine } from '@/types/text';
@@ -56,30 +57,33 @@ export function TargetStep({
                 ))}
             </div>
             {view.canSelectAllEnemies && (
-                <button
+                <Button
+                    variant="bare"
                     type="button"
                     onClick={actions.selectAllEnemies}
                     className={cn(btn, 'mt-3 w-full border-white/25')}
                 >
                     {tw('allEnemies')}
-                </button>
+                </Button>
             )}
             <div className="mt-3 grid grid-cols-2 gap-2">
-                <button
+                <Button
+                    variant="bare"
                     type="button"
                     onClick={actions.close}
                     className={cn(btn, 'border-white/25')}
                 >
                     {tc('cancel')}
-                </button>
-                <button
+                </Button>
+                <Button
+                    variant="bare"
                     type="button"
                     disabled={state.targetIds.length === 0}
                     onClick={actions.confirmTargets}
                     className={cn(btn, primaryBtn, 'disabled:opacity-50')}
                 >
                     {tw('next')}
-                </button>
+                </Button>
             </div>
         </>
     );

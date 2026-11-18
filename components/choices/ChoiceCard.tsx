@@ -8,6 +8,7 @@ import { RequirementList } from '@/components/choices/RequirementList';
 import { EntityIcon } from '@/components/common/EntityIcon';
 import { MarkdownLite } from '@/components/common/MarkdownLite';
 import { OptionButton } from '@/components/hud/OptionButton';
+import { Button } from '@/components/ui/button';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { cn } from '@/lib/utils';
 import type { Requirement } from '@/lib/utils/characters/choices/requirements';
@@ -25,7 +26,8 @@ export function DetailsButton({ title, text, className }: DetailsButtonProps) {
 
     return (
         <>
-            <button
+            <Button
+                variant="bare"
                 type="button"
                 aria-label={t('picker.details')}
                 onClick={(e) => {
@@ -38,7 +40,7 @@ export function DetailsButton({ title, text, className }: DetailsButtonProps) {
                 )}
             >
                 <Info className="size-4" aria-hidden="true" />
-            </button>
+            </Button>
             {open && (
                 <ResponsiveDialog hud open onOpenChange={setOpen} title={title}>
                     <MarkdownLite
@@ -72,7 +74,11 @@ interface ChoiceCardProps {
     };
 }
 
-export function ChoiceCard({ control, content, requirements }: ChoiceCardProps) {
+export function ChoiceCard({
+    control,
+    content,
+    requirements,
+}: ChoiceCardProps) {
     const { role, checked, disabled, onClick } = control;
 
     const { title, name, icon, summary, description, note } = content;
@@ -116,7 +122,10 @@ export function ChoiceCard({ control, content, requirements }: ChoiceCardProps) 
                     className="absolute top-1 right-1"
                 />
             )}
-            <RequirementList items={requirements?.items} names={requirements?.names} />
+            <RequirementList
+                items={requirements?.items}
+                names={requirements?.names}
+            />
         </div>
     );
 }

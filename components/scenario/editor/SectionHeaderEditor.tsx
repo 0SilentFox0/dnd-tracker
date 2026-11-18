@@ -11,6 +11,7 @@ import { SectionTrackDialog } from './SectionTrackDialog';
 import { MarkerChip } from '@/components/scenario/MarkerChip';
 import { SectionIcon } from '@/components/scenario/SectionIcon';
 import { SectionTrackChip } from '@/components/scenario/SectionTrackChip';
+import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -56,7 +57,8 @@ export function SectionHeaderEditor({
         <h2 className="sb-sec-edit">
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <button
+                    <Button
+                        variant="bare"
                         type="button"
                         className="toggle sb-icon-pick"
                         aria-label={t('icon', {
@@ -69,7 +71,7 @@ export function SectionHeaderEditor({
                             name={sectionIcon(section)}
                             className="sb-sec-icon"
                         />
-                    </button>
+                    </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start">
                     <DropdownMenuItem
@@ -110,14 +112,15 @@ export function SectionHeaderEditor({
                     onRemove={() => actions.onMarker(undefined)}
                 />
             ) : (
-                <button
+                <Button
+                    variant="bare"
                     type="button"
                     className="toggle"
                     aria-label={t('bindMarker')}
                     onClick={() => setPicking(true)}
                 >
                     <MapPin className="size-3.5" />
-                </button>
+                </Button>
             )}
             {section.trackId && (
                 <SectionTrackChip
@@ -126,14 +129,15 @@ export function SectionHeaderEditor({
                     onRemove={() => actions.onTrack(undefined)}
                 />
             )}
-            <button
+            <Button
+                variant="bare"
                 type="button"
                 className="toggle"
                 aria-label={t('bindTrack')}
                 onClick={() => setPickingTrack(true)}
             >
                 <Music className="size-3.5" />
-            </button>
+            </Button>
             {pickingTrack && (
                 <SectionTrackDialog
                     campaignId={campaignId}

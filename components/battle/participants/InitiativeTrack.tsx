@@ -3,6 +3,7 @@
 import { memo, useRef } from 'react';
 
 import { Portrait } from '@/components/battle/hud';
+import { Button } from '@/components/ui/button';
 import { ROMAN_NUMERALS } from '@/lib/constants/spells';
 import { useBattleSceneData, useInitiativeDrag } from '@/lib/hooks/battle';
 import { useFlip } from '@/lib/hooks/common';
@@ -54,7 +55,8 @@ export const InitiativeTrack = memo(function InitiativeTrack({
                         </span>
                     </span>
                 ) : (
-                    <button
+                    <Button
+                        variant="bare"
                         key={keys[i]}
                         data-flip={keys[i]}
                         type="button"
@@ -80,7 +82,7 @@ export const InitiativeTrack = memo(function InitiativeTrack({
                             }
                             extra={e.kind === 'extra'}
                         />
-                    </button>
+                    </Button>
                 )
             )}
         </div>

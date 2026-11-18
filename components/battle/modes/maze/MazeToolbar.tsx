@@ -7,6 +7,7 @@ import { MazeGenerateDialog } from './MazeGenerateDialog';
 import { MazeIllusionDialog } from './MazeIllusionDialog';
 import { MazeReshuffleDialog } from './MazeReshuffleDialog';
 
+import { Button } from '@/components/ui/button';
 import { SelectField } from '@/components/ui/select-field';
 import { useBattleSceneData } from '@/lib/hooks/battle';
 import { type MazeTool, type MazeTools } from '@/lib/hooks/battle/modes/maze';
@@ -38,7 +39,8 @@ function ToolButton({
     children: ReactNode;
 }) {
     return (
-        <button
+        <Button
+            variant="bare"
             type="button"
             aria-label={label}
             aria-pressed={active}
@@ -52,7 +54,7 @@ function ToolButton({
             )}
         >
             {children}
-        </button>
+        </Button>
     );
 }
 

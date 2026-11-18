@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import { MapPin, X } from 'lucide-react';
 
+import { Button } from '@/components/ui/button';
 import { useWorldMap } from '@/lib/hooks/world';
 import type { ScenarioMarkerRef } from '@/types/scenario';
 
@@ -42,13 +43,14 @@ export function MarkerChip({
             )}
             {action?.(available)}
             {onRemove && (
-                <button
+                <Button
+                    variant="bare"
                     type="button"
                     aria-label={t('unbind')}
                     onClick={onRemove}
                 >
                     <X className="size-3" />
-                </button>
+                </Button>
             )}
         </span>
     );

@@ -19,6 +19,7 @@ import {
     VenetianMask,
 } from 'lucide-react';
 
+import { Button } from '@/components/ui/button';
 import { CALLOUT_KINDS } from '@/lib/constants/scenario';
 import type { CalloutKind } from '@/types/scenario';
 
@@ -36,7 +37,8 @@ function Tool({
     children: ReactNode;
 }) {
     return (
-        <button
+        <Button
+            variant="bare"
             type="button"
             className="toggle"
             title={label}
@@ -47,7 +49,7 @@ function Tool({
             onClick={onClick}
         >
             {children}
-        </button>
+        </Button>
     );
 }
 

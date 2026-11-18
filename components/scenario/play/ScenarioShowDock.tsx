@@ -11,6 +11,7 @@ import { ShowButton } from '@/components/show/stage/show-ui';
 import { ShowDeckStrip } from '@/components/show/stage/ShowDeckStrip';
 import { ShowTransport } from '@/components/show/stage/ShowTransport';
 import { ShowWorldControls } from '@/components/show/world/ShowWorldControls';
+import { Button } from '@/components/ui/button';
 import { useCssVarHeight, useNotify } from '@/lib/hooks/common';
 import { type ScenarioPlay, useShowDockExpanded } from '@/lib/hooks/scenario';
 import { useShowAudioHost, useShowKeys } from '@/lib/hooks/show';
@@ -83,7 +84,8 @@ function OnScreen({
             : (show?.slide?.title ?? show?.deckTitle ?? t('slide'));
 
     return (
-        <button
+        <Button
+            variant="bare"
             type="button"
             className="sb-show-now"
             data-curtain={(cover && !!show?.deckId) || undefined}
@@ -105,7 +107,7 @@ function OnScreen({
                 </span>
             )}
             <span className="sb-show-title">{label}</span>
-        </button>
+        </Button>
     );
 }
 

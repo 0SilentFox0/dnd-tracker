@@ -1,6 +1,7 @@
 import { useTranslations } from 'next-intl';
 
 import { SpellIcon } from '@/components/spells/SpellIcon';
+import { Button } from '@/components/ui/button';
 import { spellSchoolColor } from '@/lib/constants/spells';
 import { useSpellLabels } from '@/lib/hooks/spells';
 import { cn } from '@/lib/utils';
@@ -49,7 +50,8 @@ export function SpellRow({
         .join(' · ');
 
     return (
-        <button
+        <Button
+            variant="bare"
             type="button"
             onClick={() => onPick(spell)}
             className={cn(
@@ -97,6 +99,6 @@ export function SpellRow({
                     {formula}
                 </span>
             ) : null}
-        </button>
+        </Button>
     );
 }

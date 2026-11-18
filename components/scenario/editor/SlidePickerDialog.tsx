@@ -87,7 +87,8 @@ export function SlidePickerDialog({
                     {deck && (
                         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                             {deck.slides.map((slide, i) => (
-                                <button
+                                <Button
+                                    variant="bare"
                                     key={slide.id}
                                     type="button"
                                     aria-label={
@@ -109,7 +110,7 @@ export function SlidePickerDialog({
                                         height={54}
                                         className="aspect-video w-full object-cover"
                                     />
-                                </button>
+                                </Button>
                             ))}
                         </div>
                     )}

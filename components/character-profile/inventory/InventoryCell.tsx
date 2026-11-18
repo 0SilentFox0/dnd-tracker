@@ -2,6 +2,7 @@ import type { DragEvent, ReactNode } from 'react';
 
 import { EntityIcon } from '@/components/common/EntityIcon';
 import { NewPill } from '@/components/common/NewPill';
+import { Button } from '@/components/ui/button';
 import { ARTIFACT_RARITY_COLOR } from '@/lib/constants/artifacts';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import { cn } from '@/lib/utils';
@@ -47,7 +48,8 @@ export function InventoryCell({
         : undefined;
 
     return (
-        <button
+        <Button
+            variant="bare"
             type="button"
             aria-label={label}
             title={title}
@@ -96,6 +98,6 @@ export function InventoryCell({
                     {placeholder}
                 </span>
             )}
-        </button>
+        </Button>
     );
 }

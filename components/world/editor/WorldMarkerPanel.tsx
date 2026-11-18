@@ -87,7 +87,8 @@ function MarkerForm({ marker }: { marker: WorldMarker }) {
                             className="grid grid-cols-4 gap-1.5"
                         >
                             {ICON_OPTIONS.map(({ value, Icon }) => (
-                                <button
+                                <Button
+                                    variant="bare"
                                     key={value}
                                     type="button"
                                     title={t(`markerKinds.${value}`)}
@@ -102,7 +103,7 @@ function MarkerForm({ marker }: { marker: WorldMarker }) {
                                     )}
                                 >
                                     <Icon className="size-5" aria-hidden />
-                                </button>
+                                </Button>
                             ))}
                         </div>
                     ) : (

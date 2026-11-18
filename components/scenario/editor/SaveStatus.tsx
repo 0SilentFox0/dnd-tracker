@@ -2,6 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 
+import { Button } from '@/components/ui/button';
 import type { DraftError, DraftState } from '@/lib/hooks/scenario';
 
 export function SaveStatus({
@@ -33,14 +34,15 @@ export function SaveStatus({
         >
             {state === 'error' && error ? error.message : t(state)}
             {state === 'error' && error?.retryable !== false && (
-                <button
+                <Button
+                    variant="bare"
                     type="button"
                     className="toggle"
                     style={{ marginLeft: 8 }}
                     onClick={onRetry}
                 >
                     {t('retry')}
-                </button>
+                </Button>
             )}
             {state === 'conflict' && (
                 <>
@@ -48,22 +50,24 @@ export function SaveStatus({
                         {' '}
                         {t('conflictNote')} {error?.message}
                     </span>
-                    <button
+                    <Button
+                        variant="bare"
                         type="button"
                         className="toggle"
                         style={{ marginLeft: 8 }}
                         onClick={onReload}
                     >
                         {t('discard')}
-                    </button>
+                    </Button>
                     {onRetain && (
-                        <button
+                        <Button
+                            variant="bare"
                             type="button"
                             className="toggle"
                             onClick={onRetain}
                         >
                             {t('keepLocal')}
-                        </button>
+                        </Button>
                     )}
                 </>
             )}

@@ -172,7 +172,8 @@ export function WorldPlayClient({
                                             <ul className="flex flex-col gap-1">
                                                 {places.map((m) => (
                                                     <li key={m.id}>
-                                                        <button
+                                                        <Button
+                                                            variant="bare"
                                                             type="button"
                                                             className="text-sm text-hud-gold underline-offset-2 hover:text-hud-gold-bright hover:underline"
                                                             onClick={() =>
@@ -182,7 +183,7 @@ export function WorldPlayClient({
                                                             }
                                                         >
                                                             {m.name}
-                                                        </button>
+                                                        </Button>
                                                     </li>
                                                 ))}
                                             </ul>
