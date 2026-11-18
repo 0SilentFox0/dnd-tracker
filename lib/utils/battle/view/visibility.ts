@@ -7,6 +7,7 @@ import { findFlags } from '@/lib/utils/abilities/engine/core/collect-modifiers';
 import { withSelf } from '@/lib/utils/abilities/engine/core/participants';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import { ruleSystemOf, systemKeyOf } from '@/lib/utils/rules/systems';
+import type { ClientBattleDelta } from '@/types/api';
 import type { BattleParticipant } from '@/types/battle';
 import type { BattleAction, DamageStep } from '@/types/battle-actions';
 import type { LogLine } from '@/types/text';
@@ -51,7 +52,29 @@ export function alwaysSeesEnemyStats(
     return mine.length > 0 && mine.every((p) => canSeeEnemyHp(p, order));
 }
 
-// the shared channel projects a charmed or PvP hero (own, but on a non-ally side); the owner needs the exact copy from the scene
+export function deltaTouchesOwned(
+    delta: Pick<ClientBattleDelta, 'upserted' | 'patched'>,
+    order: BattleParticipant[],
+    userId: string
+): boolean {
+    const ownedIds = new Set(
+        order
+            .filter((p) => p.basicInfo.controlledBy === userId)
+            .map((p) => p.basicInfo.id)
+    );
+
+    return (
+        delta.upserted.some((p) => p.basicInfo.controlledBy === userId) ||
+        (delta.patched ?? []).some(
+            (patch) =>
+                ownedIds.has(patch.id) ||
+                patch.basicInfo?.controlledBy === userId ||
+                patch.basicInfo?.side !== undefined
+        )
+    );
+}
+
+// публічний канал проєктує зачарованого або PvP-героя (свій, але не на стороні союзників); власнику потрібна точна копія зі сцени
 export function controlsNonAlly(
     order: BattleParticipant[],
     userId: string

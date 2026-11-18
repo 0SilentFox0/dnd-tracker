@@ -204,7 +204,7 @@ export function operationPreview(
     t: Translator,
     state: unknown
 ): Preview | null {
-    const build = PREVIEWS[id];
+    const build = Object.hasOwn(PREVIEWS, id) ? PREVIEWS[id] : null;
 
     if (!build) return null;
 

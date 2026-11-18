@@ -15,7 +15,11 @@ import {
     battleDmChannelName,
     userChannelName,
 } from '@/lib/pusher/channels';
-import { alwaysSeesEnemyStats, controlsNonAlly } from '@/lib/utils/battle/view';
+import {
+    alwaysSeesEnemyStats,
+    controlsNonAlly,
+    deltaTouchesOwned,
+} from '@/lib/utils/battle/view';
 import type {
     BattleRefetchSignal,
     BattleScene,
@@ -87,7 +91,16 @@ export function usePusherBattleSync(
         []
     );
 
+    const refetchBattleRef = useRef(battleId);
+
     const invalidateCoalesced = (key: readonly unknown[]) => {
+        if (refetchBattleRef.current !== battleId) {
+            if (refetchTimerRef.current) clearTimeout(refetchTimerRef.current);
+
+            refetchTimerRef.current = null;
+            refetchBattleRef.current = battleId;
+        }
+
         if (refetchTimerRef.current) return;
 
         refetchTimerRef.current = setTimeout(() => {
@@ -126,7 +139,13 @@ export function usePusherBattleSync(
                 (currentUserId &&
                     cached &&
                     (alwaysSeesEnemyStats(cached.initiativeOrder, currentUserId) ||
-                        controlsNonAlly(cached.initiativeOrder, currentUserId))))
+                        controlsNonAlly(cached.initiativeOrder, currentUserId) ||
+                        ('upserted' in signal &&
+                            deltaTouchesOwned(
+                                signal,
+                                cached.initiativeOrder,
+                                currentUserId
+                            )))))
         ) {
             invalidateCoalesced(key);
 

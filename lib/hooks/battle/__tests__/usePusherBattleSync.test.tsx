@@ -992,6 +992,57 @@ describe('usePusherBattleSync: dm-канал', () => {
         );
     });
 
+    it('redacted дельта з патчем сторони героя гравця (зачарування в цій дельті) інвалідує сцену', async () => {
+        const qc = new QueryClient();
+
+        const invalidate = vi.spyOn(qc, 'invalidateQueries');
+
+        const scene = makeBattlePayload({ version: 4 });
+
+        const [first, ...rest] = scene.initiativeOrder;
+
+        qc.setQueryData(key, {
+            ...scene,
+            initiativeOrder: [
+                {
+                    ...first,
+                    basicInfo: {
+                        ...first.basicInfo,
+                        side: 'ally',
+                        controlledBy: 'user-1',
+                    },
+                },
+                ...rest,
+            ],
+        });
+        render(
+            <PlayerSync
+                campaignId="camp-1"
+                battleId="battle-1"
+                userId="user-1"
+                client={qc}
+            />
+        );
+        await waitFor(() =>
+            expect(
+                channelBindings
+                    .get('private-battle-battle-1')
+                    ?.has('battle-delta')
+            ).toBe(true)
+        );
+        invalidate.mockClear();
+
+        act(() =>
+            simulateTrigger('private-battle-battle-1', 'battle-delta', {
+                ...delta([entry('прихований')], true),
+                patched: [{ id: first.basicInfo.id, basicInfo: { side: 'enemy' } }],
+            })
+        );
+        await waitFor(() =>
+            expect(invalidate).toHaveBeenCalledWith({ queryKey: key })
+        );
+    });
+
     it('redacted дельта не новіша за кеш не викликає інвалідацію', async () => {
         const qc = new QueryClient();
 

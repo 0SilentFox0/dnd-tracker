@@ -127,7 +127,9 @@ function redactAbilities(abilities: ResolvedAbility[]): ResolvedAbility[] {
 
         if (effects.length === a.effects.length) return [a];
 
-        return effects.length ? [{ ...a, effects }] : [];
+        return effects.length
+            ? [{ ...a, effects, description: '', details: undefined }]
+            : [];
     });
 }
 
@@ -152,7 +154,7 @@ function redactOne(
 
     battleData.activeEffects = withoutConcealed(activeEffects);
 
-    battleData.attacks = battleData.attacks.map(redactAttack);
+    battleData.attacks = (battleData.attacks ?? []).map(redactAttack);
 
     if (battleData.resolvedAbilities)
         battleData.resolvedAbilities = redactAbilities(

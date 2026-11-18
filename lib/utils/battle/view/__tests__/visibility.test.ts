@@ -7,6 +7,7 @@ import {
     canSeeEnemyHp,
     canSeeExactStats,
     controlsNonAlly,
+    deltaTouchesOwned,
     hiddenTargetSteps,
     PLAYER_VIEWER,
     redactLogForPlayers,
@@ -986,5 +987,43 @@ describe('controlsNonAlly', () => {
 
     it('свій на стороні союзників або чужий ворог — ні', () => {
         expect(controlsNonAlly([owned(ParticipantSide.ALLY, 'u1'), owned(ParticipantSide.ENEMY, 'u2')], 'u1')).toBe(false);
+    });
+});
+
+describe('deltaTouchesOwned', () => {
+    const mk = (id: string, by: string, side = ParticipantSide.ALLY) => {
+        const p = createMockParticipant();
+
+        return {
+            ...p,
+            basicInfo: { ...p.basicInfo, id, side, controlledBy: by },
+        };
+    };
+
+    const order = [mk('mine', 'u1'), mk('other', 'u2')];
+
+    it('upsert власного героя — так', () => {
+        expect(
+            deltaTouchesOwned({ upserted: [mk('mine', 'u1')] }, order, 'u1')
+        ).toBe(true);
+    });
+
+    it('патч власного героя або зміна side/controlledBy — так', () => {
+        expect(
+            deltaTouchesOwned({ upserted: [], patched: [{ id: 'mine' }] }, order, 'u1')
+        ).toBe(true);
+        expect(
+            deltaTouchesOwned(
+                { upserted: [], patched: [{ id: 'other', basicInfo: { side: ParticipantSide.ENEMY } }] },
+                order,
+                'u1'
+            )
+        ).toBe(true);
+    });
+
+    it('чужий герой без зміни сторони — ні', () => {
+        expect(
+            deltaTouchesOwned({ upserted: [mk('other', 'u2')], patched: [{ id: 'other' }] }, order, 'u1')
+        ).toBe(false);
     });
 });

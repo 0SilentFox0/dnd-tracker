@@ -200,6 +200,29 @@ describe('statblock numbers (L8b M1/morale)', () => {
         expect(JSON.stringify(p.battleData.resolvedAbilities)).not.toContain('resistance');
     });
 
+    it('здібність зі змішаними ефектами втрачає опис і details, що могли нести числа опорів', () => {
+        const base = armed();
+
+        const withText = {
+            ...base,
+            battleData: {
+                ...base.battleData,
+                resolvedAbilities: [
+                    {
+                        key: 'r3',
+                        description: 'Resists fire 50%',
+                        details: 'x',
+                        effects: [{ flag: 'resistance', damageType: 'fire', percent: 50 }, { flag: 'guaranteedHit' }],
+                    },
+                ],
+            },
+        } as unknown as BattleParticipant;
+
+        const [p] = redactParticipantsForViewer(player, [withText], DEFAULT_RULES);
+
+        expect(JSON.stringify(p.battleData.resolvedAbilities)).not.toContain('50');
+    });
+
     it('мораль ворога нейтральна, союзника лишається', () => {
         const [enemy] = redactParticipantsForViewer(player, [armed()], DEFAULT_RULES);
 
