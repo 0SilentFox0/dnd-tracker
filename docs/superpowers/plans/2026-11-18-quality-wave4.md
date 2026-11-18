@@ -30,6 +30,8 @@ Order: A → C → B (Opus design first, stop for confirmation) → D → E → 
 
 ## Journal
 
+- 2026-11-18: session 1 ended after A, C and B-design. Next session: B slice 1 (owner sign-off pending, see design doc §5 and the 5 decision points), then D, E, F, G, mini re-audit. Main b23196270+, nothing pushed.
+
 - 2026-11-18: lane B design committed (16 packages P1–P16). Recommended slice 1 (code moves + scanner fix + existing pendingMoraleCheck backfill run) = ~9 Sonnet + 1 Opus review, fresh session. Needs owner sign-off: one-time growth of surface baseline; defer BattleParticipant.morale (P15); 2 permanent drift lines for Campaign.skillTrees/artifactSets; log-key bundle size.
 
 - 2026-11-18: lane C done (f4c40f467, e9142ab47). Derived MCP idempotency key = hash(tokenId+tool+args) in 10-min bucket (+previous bucket lookup), no migration. DEPLOY NOTE: prod API tokens with only the `ai` scope now get 403 on the 12 moved read tools (need catalog read scopes: re-issue or one-off scope expansion). Strict tool input schemas reject extra keys.
