@@ -3,10 +3,16 @@ import path from 'node:path';
 
 import { ROOT_SPECS } from './systems-index';
 
-import { SYSTEM_META, type SystemMeta } from '@/lib/utils/rules/systems/meta';
+import {
+    SYSTEM_META,
+    type SystemMeta,
+    systemNamespaces,
+} from '@/lib/utils/rules/systems/meta';
 import { TEMPLATE_REGISTRY } from '@/lib/utils/templates/registry';
 
 export const ROOT = path.resolve(__dirname, '../..');
+
+export const SURFACE_FILE = 'system-surface-exempt.json';
 
 export const IMPORTS_FILE = 'system-imports-exempt.json';
 
@@ -217,6 +223,122 @@ export const scanModuleQueries = (): Record<string, number> => {
     return out;
 };
 
+export interface SurfaceExempt {
+    code: Record<string, number>;
+    schema: string[];
+    messages: string[];
+}
+
+const SCHEMA_FILE = 'prisma/schema.prisma';
+
+const MESSAGE_LOCALE = 'en';
+
+const nameRe = (ids: readonly string[]) =>
+    new RegExp(ids.map((id) => escapeRe(id).replace(/s$/, '')).join('|'), 'i');
+
+/** `case` labels, object keys and kebab operation names that carry a module id */
+export const countModuleSurface = (
+    text: string,
+    ids: readonly string[]
+): number => {
+    if (ids.length === 0) return 0;
+
+    const alt = ids.map(escapeRe).join('|');
+
+    return [
+        new RegExp(`\\bcase\\s*${Q}(?:${alt})${Q}`, 'g'),
+        new RegExp(`${Q}(?:${alt})${Q}\\s*:`, 'g'),
+        new RegExp(`^\\s*(?:${alt})\\s*:`, 'gm'),
+        new RegExp(`${Q}(?:${alt})-[a-z-]+${Q}`, 'g'),
+        new RegExp(`${Q}[a-z]+-(?:${alt})${Q}`, 'g'),
+    ].reduce((sum, re) => sum + (text.match(re) ?? []).length, 0);
+};
+
+export const scanModuleSurface = (): Record<string, number> => {
+    const tokens = literalTokens();
+
+    const ids = moduleIds();
+
+    const out: Record<string, number> = {};
+
+    for (const file of sourceFiles()) {
+        if (isLiteralAllowed(file, tokens)) continue;
+
+        const count = countModuleSurface(
+            fs.readFileSync(path.join(ROOT, file), 'utf8'),
+            ids
+        );
+
+        if (count > 0) out[file] = count;
+    }
+
+    return out;
+};
+
+export const scanSchemaColumns = (
+    text: string = fs.readFileSync(path.join(ROOT, SCHEMA_FILE), 'utf8'),
+    ids: readonly string[] = moduleIds()
+): string[] => {
+    const re = nameRe(ids);
+
+    const hits: string[] = [];
+
+    let model = '';
+
+    for (const line of text.split('\n')) {
+        const open = /^model\s+(\w+)/.exec(line);
+
+        if (open) {
+            model = open[1];
+
+            if (re.test(model)) hits.push(`model ${model}`);
+
+            continue;
+        }
+
+        const field = /^\s+(\w+)\s/.exec(line);
+
+        if (model && field && re.test(field[1]))
+            hits.push(`${model}.${field[1]}`);
+    }
+
+    return hits.sort();
+};
+
+const jsonKeyPaths = (value: unknown, prefix: string): string[] =>
+    value && typeof value === 'object'
+        ? Object.entries(value).flatMap(([k, v]) => [
+              `${prefix}.${k}`,
+              ...jsonKeyPaths(v, `${prefix}.${k}`),
+          ])
+        : [];
+
+export const scanCoreMessageKeys = (
+    ids: readonly string[] = moduleIds()
+): string[] => {
+    const re = new RegExp(`^(?:${ids.map(escapeRe).join('|')})$`, 'i');
+
+    const owned = new Set(systemNamespaces());
+
+    const dir = path.join(ROOT, 'messages', MESSAGE_LOCALE);
+
+    return fs
+        .readdirSync(dir)
+        .filter((f) => f.endsWith('.json') && !owned.has(f.slice(0, -5)))
+        .flatMap((f) =>
+            jsonKeyPaths(
+                JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8')),
+                f.slice(0, -5)
+            )
+        )
+        .filter((p) => !p.startsWith('gameTerms.module.'))
+        .filter((p) => re.test(p.slice(p.lastIndexOf('.') + 1)))
+        .sort();
+};
+
+export const readSurfaceExempt = (): SurfaceExempt =>
+    JSON.parse(fs.readFileSync(path.join(ROOT, SURFACE_FILE), 'utf8'));
+
 export interface ImportEntry {
     file: string;
     reason: string;
@@ -262,6 +384,17 @@ export const writeSnapshots = (): void => {
     fs.writeFileSync(
         path.join(ROOT, IMPORTS_FILE),
         `${JSON.stringify(imports, null, 2)}\n`
+    );
+
+    const surface: SurfaceExempt = {
+        code: sortedObject(scanModuleSurface()),
+        schema: scanSchemaColumns(),
+        messages: scanCoreMessageKeys(),
+    };
+
+    fs.writeFileSync(
+        path.join(ROOT, SURFACE_FILE),
+        `${JSON.stringify(surface, null, 2)}\n`
     );
     fs.writeFileSync(
         path.join(ROOT, LITERALS_FILE),

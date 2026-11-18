@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
-import { cellSkillId, normalizeTree, RACIAL_BRANCH_ID, setCellSkill } from '..';
+import { normalizeTree, RACIAL_BRANCH_ID } from '..';
 import { RAW } from './fixtures';
+
+import { cellSkillId, setCellSkill } from '@/systems/skilltrees/rules/progression';
 
 const renamed = (name: string) => ({
     ...RAW,

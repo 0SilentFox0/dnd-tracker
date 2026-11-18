@@ -4492,7 +4492,7 @@ import { act, cleanup, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { useSkillTreeTransfer } from "@/lib/hooks/skills/useSkillTreeTransfer";
-import { SKILL_TREE_FILE_FORMAT } from "@/lib/utils/skills/tree-transfer";
+import { SKILL_TREE_FILE_FORMAT } from "@/systems/skilltrees/rules/tree-transfer";
 
 const state = vi.hoisted(() => ({ trees: [] as Array<{ id: string; race: string; skills: unknown }> }));
 
@@ -4696,7 +4696,7 @@ import { useNotify } from "@/lib/hooks/common";
 import { useRaces } from "@/lib/hooks/races";
 import { downloadText } from "@/lib/utils/common/download-text";
 import type { RawTree } from "@/lib/utils/skills/progression";
-import { exportSkillTrees, isTreeImportFailure, planSkillTreeImport, readSkillTreeFiles, type SkillTreeFile } from "@/lib/utils/skills/tree-transfer";
+import { exportSkillTrees, isTreeImportFailure, planSkillTreeImport, readSkillTreeFiles, type SkillTreeFile } from "@/systems/skilltrees/rules/tree-transfer";
 
 export function useSkillTreeTransfer(campaignId: string) {
   const trees = useSkillTrees(campaignId);

@@ -64,7 +64,7 @@ export function damageDiceSlots(
 }
 
 export interface AttackDamageContext {
-    heroLevelPart: number;
+    flatPart: number;
     heroDicePart: number;
     heroDiceNotation: string;
     weaponDiceNotation: string | undefined;
@@ -94,7 +94,7 @@ export function attackDamageContext(
             damageRolls.length === 2 * fullDiceCount);
 
     return {
-        heroLevelPart: flat,
+        flatPart: flat,
         heroDicePart: extraDice && !fullRolls ? diceAverage(extraDice) : 0,
         heroDiceNotation: fullRolls ? '' : extraDice,
         weaponDiceNotation:

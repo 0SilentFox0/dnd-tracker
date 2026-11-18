@@ -6,7 +6,7 @@ import { MainSkillFormFields } from './MainSkillFormFields';
 
 import { HudForm, HudFormPage } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
-import { useMainSkillForm } from '@/lib/hooks/skills';
+import { useMainSkillForm } from '@/systems/skilltrees/hooks';
 import type { MainSkill } from '@/types/main-skills';
 
 interface MainSkillEditFormProps {

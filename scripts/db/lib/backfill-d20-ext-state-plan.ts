@@ -1,6 +1,7 @@
 import { isRecord } from '@/lib/utils/common/is-record';
 import { defaultRulesFor } from '@/lib/utils/rules/section-registry';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
+import { FALLBACK_SYSTEM_KEY } from '@/lib/utils/rules/systems/catalog';
 import type { BattleParticipant } from '@/types/battle';
 
 export interface ParticipantStateRow {
@@ -16,7 +17,7 @@ export interface ParticipantStateChange {
     state: Record<string, unknown>;
 }
 
-const RULES = defaultRulesFor({ key: 'dnd5e' });
+const RULES = defaultRulesFor({ key: FALLBACK_SYSTEM_KEY });
 
 /** Rows whose stored `system` slot still has flat pre-ext fields; the upgrade hooks come from the composition, not from module imports */
 export function planD20ExtState(rows: ParticipantStateRow[]): {

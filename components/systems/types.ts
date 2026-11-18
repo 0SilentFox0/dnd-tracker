@@ -13,6 +13,8 @@ import type { MechanicKey } from '@/lib/utils/rules/registry';
 import type { Ruleset } from '@/lib/utils/rules/schema';
 import type { SystemConditionInfo } from '@/lib/utils/rules/systems';
 import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
+import type { ArtifactSetCardData } from '@/types/artifact-sets';
+import type { ArtifactCardData } from '@/types/artifacts';
 import type { BattleParticipant } from '@/types/battle';
 import type { BattleAction } from '@/types/battle-actions';
 import type {
@@ -88,6 +90,16 @@ export interface DmPageProps {
     data?: unknown;
 }
 
+export interface ArtifactSetsLinkProps {
+    campaignId: string;
+}
+
+export interface ArtifactSetsPanelProps {
+    campaignId: string;
+    canEdit: boolean;
+    sets: { set: ArtifactSetCardData; artifacts: ArtifactCardData[] }[];
+}
+
 export interface RestBadgesProps {
     sheet: CharacterSheet;
 }
@@ -110,6 +122,12 @@ export interface CombatRowProps {
 
 export interface PathPanelProps {
     manage: boolean;
+}
+
+export interface SheetOverlayProps {
+    campaignId: string;
+    characterId: string;
+    name: string;
 }
 
 export interface ItemSectionProps {
@@ -247,6 +265,11 @@ export interface SystemUi {
     DraftForm?: ComponentType<DraftFormProps>;
     RaceProfileEditor?: ComponentType<RaceProfileEditorProps>;
     ArtifactStatsEditor?: ComponentType<ArtifactStatsEditorProps>;
+    /** Link and panel of the DM artifacts page for item sets */
+    artifactSets?: {
+        Link: ComponentType<ArtifactSetsLinkProps>;
+        Panel: ComponentType<ArtifactSetsPanelProps>;
+    };
     EquippedSummary?: ComponentType<EquippedSummaryProps>;
     DowntimeTab?: ComponentType;
     DowntimePeriodPanel?: ComponentType<DowntimePeriodPanelProps>;
@@ -260,6 +283,8 @@ export interface SystemUi {
         combatRows?: readonly ComponentType<CombatRowProps>[];
         /** Panels of the «Path» tab a module adds; data comes from `useProfile()` */
         pathPanels?: readonly ComponentType<PathPanelProps>[];
+        /** Overlays rendered above the character sheet (e.g. level-up celebration) */
+        overlays?: readonly ComponentType<SheetOverlayProps>[];
         /** Extra sections of the editor and the inventory tab */
         itemSections?: readonly ComponentType<ItemSectionProps>[];
     };

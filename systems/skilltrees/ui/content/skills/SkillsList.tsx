@@ -13,7 +13,7 @@ import { HudPage, HudPageHeader } from '@/components/hud/page';
 import { OnboardingHint } from '@/components/onboarding/OnboardingHint';
 import { Accordion } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
-import { useSkillsList } from '@/lib/hooks/skills';
+import { useSkillsList } from '@/systems/skilltrees/hooks';
 import { SkillGroupAccordion } from '@/systems/skilltrees/ui/content/skills/list/SkillGroupAccordion';
 
 export function SkillsList({

@@ -27,11 +27,10 @@ import {
     graphViolations,
     matrixCases,
 } from './helpers/composition-matrix';
+import { realCompose } from './helpers/real-compose';
 
 import { composeUi } from '@/components/systems/compose';
-import { SYSTEM_UI, systemUiOf } from '@/components/systems/registry';
 import { composeServer } from '@/lib/server/systems/compose';
-import { systemServerOf } from '@/lib/server/systems/registry';
 import { composition } from '@/lib/utils/rules/systems/catalog';
 import {
     type Addon,
@@ -40,20 +39,9 @@ import {
     SYSTEM_FIELD_KINDS,
     validateComposition,
 } from '@/lib/utils/rules/systems/compose';
-import { ruleSystemOf } from '@/lib/utils/rules/systems/lookup';
 import { SYSTEM_META, type SystemMeta } from '@/lib/utils/rules/systems/meta';
 
 const REAL: readonly SystemMeta[] = SYSTEM_META;
-
-const realCompose: ComposeFn = (key, modules) => {
-    const system = { key, ...(modules ? { modules: [...modules] } : {}) };
-
-    return {
-        definition: ruleSystemOf({ system }),
-        ui: modules ? systemUiOf(key, modules) : SYSTEM_UI[key],
-        server: systemServerOf({ system }),
-    };
-};
 
 const FIXTURE_METAS: readonly SystemMeta[] = [
     D6POOL_META,
