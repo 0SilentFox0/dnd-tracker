@@ -13,8 +13,13 @@ const FIELDS = [
     'disposition',
 ] as const;
 
+// control chars would let a report forge extra log lines
+const CONTROL_CHARS = /[\u0000-\u001f\u007f-\u009f\u2028\u2029]/g;
+
+const clean = (value: string) => value.replace(CONTROL_CHARS, '');
+
 const clip = (value: unknown) =>
-    typeof value === 'string' ? value.slice(0, 200) : undefined;
+    typeof value === 'string' ? clean(value.slice(0, 200)) : undefined;
 
 // query strings and fragments can carry tokens: keep origin + path only
 function stripUrl(value: unknown): string | undefined {
@@ -27,7 +32,7 @@ function stripUrl(value: unknown): string | undefined {
 
         return `${u.origin}${u.pathname}`;
     } catch {
-        return raw.split(/[?#]/)[0];
+        return clean(raw.split(/[?#]/)[0]);
     }
 }
 

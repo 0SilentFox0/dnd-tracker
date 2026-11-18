@@ -13,6 +13,7 @@ describe('ipScopeOf', () => {
         expect(ipScopeOf('/api/mcp')).toBe('mcp');
         expect(ipScopeOf('/api/mcp/sse')).toBe('mcp');
         expect(ipScopeOf('/api/health')).toBe('public');
+        expect(ipScopeOf('/api/csp-report')).toBe('csp-report');
         expect(ipScopeOf('/api/campaigns')).toBeNull();
     });
 });

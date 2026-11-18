@@ -2,17 +2,77 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 
-import { ROOT, staticGraph } from './helpers/static-graph';
+import {
+    importSpecs,
+    resolveSpec,
+    ROOT,
+    staticGraph,
+} from './helpers/static-graph';
 
 const API_DIR = path.join(ROOT, 'app/api');
 
-// reaching one of these means the route (or a handler it delegates to) can authenticate the caller
-const AUTH_PROVIDERS = new Set([
-    'lib/auth.ts',
-    'lib/utils/api/api-auth.ts',
-    'lib/utils/api/actor.ts',
-    'lib/utils/api/as-dm.ts',
-]);
+const AUTH_CALLS = [
+    'requireAuth',
+    'requireAuthUser',
+    'requireCampaignAccess',
+    'requireDM',
+    'requireCampaignDMOrDemoAccess',
+    'getAuthUser',
+    'getAuthUserOptional',
+    'getSessionUserId',
+    'getClaims',
+    'verifyBearer',
+    'authenticateToken',
+    'resolveActor',
+    'withAccess',
+    'withDM',
+    'withDMOrDemo',
+    'verifyApiToken',
+    'requirePlatformAdmin',
+    'operationAccess',
+    'operationDM',
+    // character operations require a `gate` in their type, run before the handler
+    'characterHandler',
+    'characterRoute',
+    'executeCharacterRoute',
+    'runCharacterOperation',
+];
+
+const AUTH_CALL_RE = new RegExp(`\\b(?:${AUTH_CALLS.join('|')})\\b`);
+
+const MAX_DEPTH = 2;
+
+// the route or a local module within MAX_DEPTH imports must use an auth function (a call, or one injected as a dependency)
+function callsAuth(route: string): boolean {
+    let frontier = [path.join(ROOT, route)];
+
+    const seen = new Set(frontier);
+
+    for (let depth = 0; depth <= MAX_DEPTH; depth++) {
+        const next: string[] = [];
+
+        for (const file of frontier) {
+            const source = fs.readFileSync(file, 'utf8');
+
+            if (AUTH_CALL_RE.test(source)) return true;
+
+            for (const spec of importSpecs(source)) {
+                const local = resolveSpec(file, spec);
+
+                if (!local || seen.has(local)) continue;
+
+                if (path.basename(local).startsWith('index.')) continue;
+
+                seen.add(local);
+                next.push(local);
+            }
+        }
+
+        frontier = next;
+    }
+
+    return false;
+}
 
 // public by design; this list may only shrink
 const PUBLIC_ROUTES = new Set([
@@ -41,17 +101,13 @@ function routeFiles(dir: string): string[] {
 const routes = routeFiles(API_DIR).map((f) => path.relative(ROOT, f));
 
 describe('route auth ratchet', () => {
-    it('every non-public route reaches an auth provider', () => {
+    it('every non-public route calls an auth function (depth <= 2)', () => {
         const offenders = routes
             .filter((r) => !PUBLIC_ROUTES.has(r))
-            .filter((r) => {
-                const { files } = staticGraph([r], AUTH_PROVIDERS);
-
-                return ![...files].some((f) => AUTH_PROVIDERS.has(f));
-            });
+            .filter((r) => !callsAuth(r));
 
         expect(offenders).toEqual([]);
-    }, 60_000);
+    });
 
     it('public routes still exist and are not stale', () => {
         for (const r of PUBLIC_ROUTES) expect(routes).toContain(r);

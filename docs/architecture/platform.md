@@ -46,5 +46,11 @@ Themed surfaces use Tailwind tokens from `app/globals.css` (`bg-hud-page/surface
 - The full resource policy (`script-src`, `connect-src` for Supabase/Pusher, `img-src`, ...) is still **Report-Only**. Static pages (landing, auth, root-layout palette bootstrap) cannot carry a per-request nonce without turning dynamic, so they keep `script-src 'unsafe-inline'` in report-only; the landing stays static.
 - `proxy.ts` generates a nonce only for dynamic prefixes (`NONCE_PATH_PREFIXES`, currently `/campaigns`), forwards it in the request CSP header (Next stamps it on its scripts) and sets `script-src 'nonce-... ' 'strict-dynamic'` on the response, as Report-Only while `NONCE_CSP_ENFORCED` is false. The static Report-Only header is excluded from those prefixes in `next.config.ts` to avoid two policies.
 - Promotion: read `[csp-report]` lines in the Vercel logs; when clean, flip `NONCE_CSP_ENFORCED`. Known blocker: the root-layout palette bootstrap `<script>` has no nonce (it would need a hash in `script-src`).
-- `POST /api/csp-report` is public (IP rate limit `public` scope, 8 KB body cap, logs directive + origin/path only, never query strings).
+- `POST /api/csp-report` is public (IP rate limit own `csp-report` scope, 120/min, 8 KB body cap, logs directive + origin/path only, never query strings).
 - Ratchets: `lib/__tests__/route-auth-ratchet.test.ts` (every `route.ts` reaches an auth provider; public list only shrinks) and `lib/__tests__/migrations-rls.test.ts` (every `CREATE TABLE` has `ENABLE ROW LEVEL SECURITY`).
+
+## Rate limiting deploy notes
+
+- Sensitive routes (`failClosed`, e.g. battle mutations, audio) answer 503 in production when Upstash is not configured. Before the first production deploy set `UPSTASH_REDIS_REST_URL`/`UPSTASH_REDIS_REST_TOKEN`, or temporarily `RATE_LIMIT_ALLOW_MEMORY=1` (per-instance memory limits instead of 503).
+- It never fails closed on Vercel `preview`/`development` (`VERCEL_ENV`) or outside `NODE_ENV=production`.
+- IP limits (`lib/utils/api/ip-rate-limit.ts`) trust proxy headers on Vercel only; behind a self-hosted proxy set `TRUST_PROXY=1`, otherwise all clients share one `untrusted-proxy` bucket.

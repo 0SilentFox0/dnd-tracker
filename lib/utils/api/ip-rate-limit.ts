@@ -14,9 +14,11 @@ const PUBLIC_API_PATHS = [
     '/api/health',
     '/api/locale',
     '/api/theme',
-    '/api/csp-report',
 ];
 
+const CSP_REPORT_PATH = '/api/csp-report';
+
+// TRUST_PROXY=1 is required behind a self-hosted proxy, else every client shares one bucket
 function trustsProxyHeaders(): boolean {
     return Boolean(process.env.VERCEL) || process.env.TRUST_PROXY === '1';
 }
@@ -29,11 +31,13 @@ export function clientIp(headers: Headers): string {
     return headers.get('x-real-ip')?.trim() || forwarded || 'unknown';
 }
 
-type IpScope = 'mcp' | 'public';
+type IpScope = 'mcp' | 'public' | 'csp-report';
 
 export function ipScopeOf(pathname: string): IpScope | null {
     if (pathname === MCP_PATH || pathname.startsWith(`${MCP_PATH}/`))
         return 'mcp';
+
+    if (pathname === CSP_REPORT_PATH) return 'csp-report';
 
     return PUBLIC_API_PATHS.includes(pathname) ? 'public' : null;
 }

@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 
+import { BattleStatus } from '@/lib/constants/battle';
 import { TILE_CATALOG } from '@/lib/constants/tilesets/catalog';
 import { useBattleMapEdges, useBattleMapTiles } from '@/lib/hooks/battle-maps';
 import {
@@ -45,13 +46,19 @@ export function useBattleSceneMap(
     campaignId: string,
     rawBattle: BattleScene | undefined
 ) {
-    const mapEdges = useBattleMapEdges(campaignId, rawBattle?.mapRef);
+    // the server hides a prepared battle's map from players (403)
+    const mapRef =
+        rawBattle?.status === BattleStatus.PREPARED && !rawBattle.isDM
+            ? undefined
+            : rawBattle?.mapRef;
+
+    const mapEdges = useBattleMapEdges(campaignId, mapRef);
 
     const mapTiles = useBattleMapTiles(
         campaignId,
-        rawBattle?.mapRef?.mapId,
-        rawBattle?.mapRef?.version,
-        !!rawBattle?.mapRef
+        mapRef?.mapId,
+        mapRef?.version,
+        !!mapRef
     );
 
     const [heldEdges, setHeldEdges] = useState<LibraryEdges | undefined>();
@@ -61,7 +68,7 @@ export function useBattleSceneMap(
 
     const edges =
         mapEdges.data ??
-        (rawBattle?.mapRef && mapEdges.isPending ? heldEdges : undefined);
+        (mapRef && mapEdges.isPending ? heldEdges : undefined);
 
     const tileChunks = useMemo(
         () => decodeTileLayers(mapTiles.data?.chunks),
@@ -83,7 +90,7 @@ export function useBattleSceneMap(
     }, [mapTiles.data, rawBattle, tileChunks]);
 
     const isMapPending =
-        !!rawBattle?.mapRef &&
+        !!mapRef &&
         (!edges || (mapTiles.isPending && !mapTiles.isError));
 
     const mapError = isMapPending ? mapEdges.error : null;

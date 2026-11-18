@@ -240,6 +240,29 @@ describe('checkRateLimit memoryFallback', () => {
         vi.unstubAllEnvs();
     });
 
+    it('failClosed without Redis stays open with RATE_LIMIT_ALLOW_MEMORY=1 or on Vercel preview', async () => {
+        const sensitive = { ...input('m5b'), failClosed: true };
+
+        vi.stubEnv('NODE_ENV', 'production');
+        vi.stubEnv('RATE_LIMIT_ALLOW_MEMORY', '1');
+
+        expect((await checkRateLimit(sensitive)).allowed).toBe(true);
+
+        vi.stubEnv('RATE_LIMIT_ALLOW_MEMORY', '');
+        vi.stubEnv('VERCEL_ENV', 'preview');
+
+        expect(
+            (await checkRateLimit({ ...sensitive, userId: 'u9' })).allowed
+        ).toBe(true);
+
+        vi.stubEnv('VERCEL_ENV', 'production');
+
+        expect(
+            (await checkRateLimit({ ...sensitive, userId: 'u10' })).unavailable
+        ).toBe(true);
+        vi.unstubAllEnvs();
+    });
+
     it('failClosed on a Redis error in production returns unavailable', async () => {
         vi.mocked(getRedisClient).mockReturnValue({} as never);
         limitMock.mockRejectedValue(new Error('down'));

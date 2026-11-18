@@ -51,4 +51,21 @@ describe('POST /api/csp-report', () => {
         expect((await post('{nope')).status).toBe(400);
         expect((await post('x'.repeat(9000))).status).toBe(413);
     });
+
+    it('strips control characters so a report cannot forge log lines', async () => {
+        const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+        await post(
+            JSON.stringify({
+                'csp-report': {
+                    'violated-directive': 'script-src\n[csp-report] fake\r',
+                    'blocked-uri': 'not a url\nforged',
+                },
+            })
+        );
+
+        const logged = String(warn.mock.calls[0][0]);
+
+        expect(logged).not.toMatch(/[\r\n]/);
+    });
 });

@@ -490,3 +490,5 @@ _Оновлено: 2026-11-15._
 **Відкат після L4a/L4b:** код відкочувати лише без активних боїв (слот `ext.morale`/`ext.lair` старий код не бачить); деталі — [battle.md](architecture/battle.md), «Відкат коду після переходу на слоти».
 
 **Хвиля 2b, фікси ревʼю (2026-11-18, `feat/q-b-fix`):** виправлено I/M знахідки UI й сервера/редакції (див. журнал трекера). Відомий компроміс: у PvP/NEUTRAL кожен гравець зі героєм не на стороні союзників робить повний GET сцени на кожну урізану дельту (debounce 400 мс) — egress; рішення на майбутнє: персональний канал або точні патчі власника у відповіді ([participant-privacy-scope.md](architecture/participant-privacy-scope.md)).
+
+**Deploy prerequisite (rate limit):** set `UPSTASH_REDIS_REST_*` or temporarily `RATE_LIMIT_ALLOW_MEMORY=1` before deploying, otherwise battle mutations/audio return 503 (see platform.md).

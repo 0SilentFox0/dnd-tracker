@@ -91,6 +91,16 @@ function checkMemoryLimit(
     };
 }
 
+function failClosesHere(failClosed: boolean): boolean {
+    if (!failClosed || process.env.NODE_ENV !== 'production') return false;
+
+    if (process.env.RATE_LIMIT_ALLOW_MEMORY === '1') return false;
+
+    const env = process.env.VERCEL_ENV;
+
+    return env !== 'preview' && env !== 'development';
+}
+
 let warnedNoRedis = false;
 
 function warnNoRedisInProduction() {
@@ -129,7 +139,7 @@ export async function checkRateLimit(
         : `${userId}:${scope}`;
 
     const degraded = (): RateLimitResult => {
-        if (failClosed && process.env.NODE_ENV === 'production')
+        if (failClosesHere(failClosed))
             return {
                 allowed: false,
                 count: limit,
@@ -238,4 +248,5 @@ export const JOIN_RATE_LIMIT = { limit: 10, windowSeconds: 600 } as const;
 export const IP_RATE_LIMITS = {
     mcp: { limit: 300, windowSeconds: 60 },
     public: { limit: 60, windowSeconds: 60 },
+    'csp-report': { limit: 120, windowSeconds: 60 },
 } as const;
