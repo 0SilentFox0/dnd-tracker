@@ -1,0 +1,27 @@
+# S11: клони / перевикористання (main d871500da)
+
+Інструмент: jscpd не встановлено; власний скрипт `tmp/clones.py` (вікно 12 рядків, нормалізовані пробіли, без імпортів/коментарів/тестів; 3978 файлів у components/lib/systems/app). Результат: `tmp/clones.out`. Усього 38 клонових пар >=12 рядків (дублі-вікна в межах RaceEditFormStatModifiers рахуються окремо).
+
+## 1) Оцінки
+- Перевикористання: **7.0** (було 5-6). Дублювання в цілому невелике (38 пар на ~4k файлів), примітиви звелися до одного місця, але ціль "0 клонів у components/world/editor і wfrp" НЕ досягнута.
+- Генератор карт, reuse: **6.5** (було 4.5): cellKey/image-decode/clamp консолідовані, але CHUNK_SIDE x3 і кілька pan/zoom-стеків лишились.
+
+## 2) Що змінилось (докази)
+- `cellKey`: одне визначення `lib/utils/battle/grid/geometry.ts:18`; усі споживачі імпортують (GridHit, MapLayers, MazeFeaturesLayer, MapFogLayer). Ціль виконано. Лишився інлайн `${x},${y}` у `components/world/WorldZones.tsx:5` (це SVG points, не ключ клітинки, нормально).
+- image-decode: єдина точка `lib/utils/common/image-decode.ts:8,23`; інших `createImageBitmap`/`new Image()` у components/systems/app немає. Ціль виконано.
+- `clamp`: канонічний `lib/utils/common/clamp.ts:1`, `clamp01` у `lib/utils/world/geometry.ts:6` вже на ньому. Але ще ~68 інлайнових `Math.max(a, Math.min(...))`/`Math.min(.., Math.max(..))` у lib/components/systems/app (напр. `systems/wfrp/rules/corruption/fold.ts`, `systems/wfrp/rules/traits/unit-build.ts`), плюс багато локальних `clampX` з власною логікою (`lib/utils/battle/camera/camera.ts:38`, `viewport-math.ts:16`, `lib/constants/*`), і `components/fx/runtime/easing.ts:1 clamp01` (дубль). Частково.
+- d20 vs wfrp однойменні файли: wfrp/ui має HeroStats, ResourceFields, RestBadges, RollDialogBody, StatsFields, StatsTab, UnitStatsFields, SkillsList; такі самі імена є в `systems/d20/ui/**`. Клонів >=12 рядків між ними сканер НЕ знайшов (тобто вони не копії; спільний kit, схоже, діє). Єдине d20 внутрішнє: `ui/HeroStats.tsx` vs `ui/battle/HeroStats.tsx` (різний вміст, diff 64 рядки).
+
+## 3) Відкриті дефекти
+- **I** `components/world/editor/MapStrip.tsx:37-56` == `WorldMapSettings.tsx:26-45` (19 рядків: однаковий блок useWorldEditorContext/useTranslations/useRef + деструктуризація хука useMapFields). Також `MapStrip.tsx:45`/`WorldMapSettings.tsx:34` ~ `lib/hooks/world/useMapFields.ts:118` (12 р.) Fix: один хук/спільний підкомпонент, що повертає уже зібрані поля карти.
+- **I** `MarkerStrip.tsx:1` == `MapStrip.tsx:1` (13 р., спільна шапка імпортів/інфра) і `WorldMarkerPanel.tsx:42` == `MarkerStrip.tsx:54` (13 р.). Fix: винести спільний `useMarkerFields`/StripShell. Це прямо порушує ціль плану (0 клонів у world/editor): **4 клони**.
+- **I** wfrp: `systems/wfrp/hooks/useWfrpDraftForm.ts:65` == `useWfrpDraftPicks.ts:104` (21 р., найбільший клон у репо); `systems/wfrp/server/corruption-handler.ts:42` == `:110` (12 р.). Fix: спільний хелпер draft-пікс; згорнути два гілки handler-а. Ціль "0 у wfrp": **2 клони**.
+- **I** `lib/server/assistant/actions/campaign.ts:48` == `lib/server/campaigns/action-service.ts:631` (15 р.); `lib/server/assistant/actions/world-service.ts:1124` == `lib/server/world/travel-handlers.ts:92` (13 р.): дубль логіки в AI-акціях і сервісах. Fix: AI-дія викликає сервіс.
+- **M** CHUNK_SIDE=16 дубльований у `components/battle/map/tiles/{chunk-cache.ts:102,painter.ts:24,assets.ts:6}`, при цьому канон `lib/utils/battle/map-storage/chunk-key.ts:3` (= MAP_LIMITS.chunk). Fix: імпортувати канон (ціль плану "один CHUNK_SIDE" не виконана).
+- **M** Pan/zoom: щонайменше 5 стеків: `useViewport`+`usePanPinch` (lib/hooks/common, WorldMapView), `useMapCamera` (battle), `useGraphViewport` (scenario; не використовує жоден із common, wheel окремо), `usePuzzleDrag`, плюс wheel в `components/battle/map/BattleMap.tsx`. Ціль "один стек" не виконана; перевірити, чи camera/graph можна звести до usePanPinch+viewport-math.
+- **M** Інші клони: `components/races/RaceEditFormStatModifiers.tsx:82/122` (15 р. + хвіст вікон, copy-paste блоків); `components/campaigns/info/SpellReferenceCard.tsx:131` ~ `SkillReferenceCard.tsx:122` (15); `lib/hooks/ai/useAssistantIntents.ts:98` ~ `useAiProposals.ts:84` (14); `components/artifacts/ItemCastingFields.tsx:32` ~ `components/units/form/UnitStatblockFields.tsx:31` (14); `lib/utils/battle/fx/preview-participant.ts:46` ~ `view/redact-participants.ts:41` (13); `lib/server/templates/bundle.ts:18` ~ `:223` (13); `lib/schemas/units.ts:181` ~ `:257` (13); `components/fx/animations/watersummon.ts:5` ~ `firesummon.ts:5` (13, також forestspirit/earthsummon); `app/campaigns/[id]/dm/battles/layout.tsx:6` ~ `app/campaigns/[id]/battles/layout.tsx:10` (13); `components/spells/list/SpellGroupAccordion.tsx:110` ~ `systems/skilltrees/ui/content/skills/list/SkillGroupAccordion.tsx:60` (12); `components/units/form/UnitAttacks.tsx:51` ~ `UnitImmunities.tsx:38`; `components/battle/dm/dialogs/AddParticipantDialog.tsx:80` ~ `components/maps/CreateMapDialog.tsx:50`; `app/campaigns/[id]/dm/artifact-sets/page.tsx:6` ~ `new/page.tsx:6`; `lib/hooks/battle/useBattleSceneDataValue.ts` (3 внутрішні, 9/25/39).
+
+## 4) Не перевірено
+- Клони <12 рядків і структурні (інші ідентифікатори, змінені літерали): скрипт їх не бачить; jscpd з токенізацією міг би знайти більше.
+- Вікна з >6 входженнями відкинуті (шаблонний бойлерплейт). Семантична ідентичність pan/zoom-стеків не аналізувалась глибоко.
+- Однойменні d20/wfrp файли порівнювались лише хеш-вікнами 12 рядків, не вручну.
