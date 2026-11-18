@@ -73,60 +73,27 @@ async function assertClassSkills({
         throw new ContentError(issues[0].message, 422, issues);
 }
 
-async function createCharacterCore(
-    { access, campaignId }: CampaignScope,
-    input: CreateCharacterInput
-) {
-    const { campaign } = access;
+type NormalizedInput = ReturnType<typeof normalizeCharacterInput>;
 
-    const system = ruleSystemOf(campaign.rules);
+type AppliedClasses = Extract<
+    Awaited<ReturnType<typeof applyClasses>>,
+    { ok: true }
+>['data'];
 
-    const data = normalizeCharacterInput(
-        system,
-        input,
-        campaign.rules,
-        'create'
-    );
-
-    const { min: heroMin, max: heroMax } = heroInitiativeRange(campaign.rules);
-
-    const initiative = data.initiative ?? heroMin;
-
-    if (initiative < heroMin || initiative > heroMax)
-        throw new ContentError(
-            API_ERRORS.INITIATIVE_OUT_OF_RANGE_DETAIL,
-            400,
-            undefined,
-            { min: heroMin, max: heroMax }
-        );
-
-    const applied = await applyClasses({
+async function createChoices(
+    {
         campaignId,
-        rules: campaign.rules,
-        maxLevel: campaign.maxLevel,
-        entries: data.classes ?? [],
-        spellcastingAbility: data.spellcastingAbility ?? null,
-    });
-
-    if (!applied.ok)
-        throw new ContentError(
-            applied.error,
-            applied.status,
-            undefined,
-            applied.params
-        );
-
-    const fromClasses = applied.data;
-
-    const entries = data.classes ?? [];
-
-    await assertClassSkills({
-        campaignId,
+        campaign,
         data,
         entries,
-        byId: applied.classesById,
-    });
-
+    }: {
+        campaignId: string;
+        campaign: CampaignScope['access']['campaign'];
+        data: NormalizedInput;
+        entries: CharacterClassEntry[];
+    },
+    fromClasses: AppliedClasses
+) {
     const withChoices =
         !!data.backgroundId ||
         hasPicks(data.raceChoices) ||
@@ -159,31 +126,33 @@ async function createCharacterCore(
           })
         : null;
 
-    if (choices && !choices.ok) throw choices.error;
+    return choices;
+}
 
-    const owner = await resolveCharacterOwner(campaignId, access.userId, data);
-
-    if ('error' in owner) return errorStatusMessage(owner.error);
-
-    const avatar = await resolveAvatarForPersistence(data.avatar, {
-        campaignId,
-    });
-
-    if (!avatar.ok)
-        throw new ContentError(avatar.message, 400, undefined, avatar.params);
-
-    const spellSlots =
-        fromClasses?.spellSlots ??
-        (await deriveCharacterDefaults(campaignId, data)).spellSlots;
-
-    const split = splitColumnView(
-        { ...data, initiative, ...(choices?.ok && choices.fields) },
-        system
-    );
-
-    try {
-        const character = await prisma.character.create({
-            data: {
+function characterCreateData({
+    campaignId,
+    system,
+    data,
+    initiative,
+    fromClasses,
+    choices,
+    owner,
+    avatar,
+    spellSlots,
+    split,
+}: {
+    campaignId: string;
+    system: ReturnType<typeof ruleSystemOf>;
+    data: NormalizedInput;
+    initiative: number;
+    fromClasses: AppliedClasses;
+    choices: Awaited<ReturnType<typeof createChoices>>;
+    owner: { controlledBy: string | null };
+    avatar: { avatar?: string | null };
+    spellSlots: Prisma.InputJsonValue;
+    split: ReturnType<typeof splitColumnView>;
+}): Prisma.CharacterUncheckedCreateInput {
+    return {
                 campaignId,
                 type: data.type,
                 controlledBy: owner.controlledBy,
@@ -240,7 +209,104 @@ async function createCharacterCore(
                         ) as Prisma.InputJsonObject,
                     }),
                 ...(choices?.ok && choices.fields),
-            },
+            };
+}
+
+async function createCharacterCore(
+    { access, campaignId }: CampaignScope,
+    input: CreateCharacterInput
+) {
+    const { campaign } = access;
+
+    const system = ruleSystemOf(campaign.rules);
+
+    const data = normalizeCharacterInput(
+        system,
+        input,
+        campaign.rules,
+        'create'
+    );
+
+    const { min: heroMin, max: heroMax } = heroInitiativeRange(campaign.rules);
+
+    const initiative = data.initiative ?? heroMin;
+
+    if (initiative < heroMin || initiative > heroMax)
+        throw new ContentError(
+            API_ERRORS.INITIATIVE_OUT_OF_RANGE_DETAIL,
+            400,
+            undefined,
+            { min: heroMin, max: heroMax }
+        );
+
+    const applied = await applyClasses({
+        campaignId,
+        rules: campaign.rules,
+        maxLevel: campaign.maxLevel,
+        entries: data.classes ?? [],
+        spellcastingAbility: data.spellcastingAbility ?? null,
+    });
+
+    if (!applied.ok)
+        throw new ContentError(
+            applied.error,
+            applied.status,
+            undefined,
+            applied.params
+        );
+
+    const fromClasses = applied.data;
+
+    const entries = data.classes ?? [];
+
+    await assertClassSkills({
+        campaignId,
+        data,
+        entries,
+        byId: applied.classesById,
+    });
+
+    const choices = await createChoices(
+        { campaignId, campaign, data, entries },
+        fromClasses
+    );
+
+    if (choices && !choices.ok) throw choices.error;
+
+    const owner = await resolveCharacterOwner(campaignId, access.userId, data);
+
+    if ('error' in owner) return errorStatusMessage(owner.error);
+
+    const avatar = await resolveAvatarForPersistence(data.avatar, {
+        campaignId,
+    });
+
+    if (!avatar.ok)
+        throw new ContentError(avatar.message, 400, undefined, avatar.params);
+
+    const spellSlots =
+        fromClasses?.spellSlots ??
+        (await deriveCharacterDefaults(campaignId, data)).spellSlots;
+
+    const split = splitColumnView(
+        { ...data, initiative, ...(choices?.ok && choices.fields) },
+        system
+    );
+
+    try {
+        const character = await prisma.character.create({
+            data: characterCreateData({
+                campaignId,
+                system,
+                data,
+                initiative,
+                fromClasses,
+                choices,
+                owner,
+                avatar,
+                spellSlots,
+                split,
+            }),
             include: { user: { select: PUBLIC_USER_SELECT } },
         });
 
