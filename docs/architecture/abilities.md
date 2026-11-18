@@ -110,4 +110,4 @@ Cunning Strike (Rogue): `Ability.params` (`schema/params.ts`) — `sneakAttack: 
 
 **Мораль (Ч18c).** Стеля моралі — `combatStats.moraleCap`, а не `abilities.moraleCap`: пише модуль моралі (`systems/morale/rules/cap.ts`, `moraleCapPart`), двигун читає лише `moraleCapOf(p)` (`lib/utils/abilities/build/morale-stat.ts`, фолбек 3; решта колишнього `engine/effects/morale.ts` — `systems/morale/rules/effects.ts`); колонка `abilities` статблока цього поля більше не містить.
 
-**Власник стату morale (хвиля 4).** Ім'я й читання стату `morale` ядро бере зі словника модуля (`vocab`, власник — модуль моралі); двигун не називає модуль напряму. Базове значення героя/юніта читається `readMorale` (`ext.morale.value`, до D2 з колонкою як фолбеком).
+**Власник стату morale (хвиля 4).** Ім'я й читання стату `morale` ядро бере зі словника модуля (`vocab`, власник — модуль моралі); двигун не називає модуль напряму. Базове значення героя/юніта читається `readStoredColumn(rules, row, 'morale', 'number')` (`ext.morale.value`, до D2 з колонкою як фолбеком).

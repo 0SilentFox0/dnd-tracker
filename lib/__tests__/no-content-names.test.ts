@@ -17,7 +17,7 @@ const ROOTS = [
 const ALLOWED_FILES: Record<string, string> = {
     'components/fx/labels.ts':
         'UI labels of built-in FX archetypes/elements/auras, keyed by FX kind (names coincide with library content)',
-    'lib/constants/import-aliases.ts':
+    'lib/constants/import-aliases/':
         'CSV import header aliases and example cells (user-facing sample data, not engine rules)',
     'lib/hooks/battle/mock-participants.ts':
         'dev-only mock participants for the FX/map playground',
@@ -75,7 +75,12 @@ describe('engine has no content names', () => {
         const offenders: string[] = [];
 
         for (const file of ROOTS.flatMap(files)) {
-            if (file in ALLOWED_FILES) continue;
+            if (
+                Object.keys(ALLOWED_FILES).some((a) =>
+                    a.endsWith('/') ? file.startsWith(a) : file === a
+                )
+            )
+                continue;
 
             const src = readFileSync(file, 'utf8');
 

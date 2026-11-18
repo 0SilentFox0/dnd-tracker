@@ -15,6 +15,11 @@ import { buildCharacterParticipant } from '@/lib/server/characters/participant';
 import { ContentError } from '@/lib/server/content/errors';
 import { rerollTokenOn } from '@/lib/utils/rules/reroll-token-on';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
+import {
+    readStoredColumn,
+    STORED_COLUMN,
+    storedColumnUpdate,
+} from '@/lib/utils/rules/systems/stored-columns';
 import type { SheetRollResult } from '@/types/characters';
 
 function logData(result: SheetRollResult, inspired: boolean) {
@@ -117,11 +122,25 @@ export async function rollForSheet(
                 character.id
             );
 
-            if (!row || !token?.stored(row)) return false;
+            if (
+                !row ||
+                !token ||
+                !readStoredColumn(
+                    rules,
+                    row,
+                    STORED_COLUMN.inspiration,
+                    'boolean'
+                )
+            )
+                return false;
 
             await tx.character.update({
                 where: { id: character.id },
-                data: token.store(row, false) as Prisma.CharacterUpdateInput,
+                data: storedColumnUpdate(
+                    row,
+                    STORED_COLUMN.inspiration,
+                    false
+                ) as Prisma.CharacterUpdateInput,
             });
         }
 

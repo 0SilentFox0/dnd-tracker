@@ -16,25 +16,22 @@ import { API_ERRORS } from '@/lib/constants/api-errors';
 import { BattleStatus } from '@/lib/constants/battle';
 import type { Locale } from '@/lib/i18n/config';
 import type { Rng } from '@/lib/utils/abilities/engine/core/types';
-import { syncMapAuras } from '@/lib/utils/abilities/engine/effects/map-auras';
 import type {
     BATTLE_RATE_LIMITS,
     RateLimitResult,
 } from '@/lib/utils/api/rate-limit';
-import { actionsOf } from '@/lib/utils/battle/actions/access';
 import { controls, currentOf } from '@/lib/utils/battle/common/control';
-import { placeParticipants } from '@/lib/utils/battle/grid/placement';
-import { placeRevived } from '@/lib/utils/battle/grid/revive-placement';
-import { lineText } from '@/lib/utils/battle/log/lines';
 import {
     modeBlockedText,
     withModeAfterMutation,
     withModeAfterSettle,
 } from '@/lib/utils/battle/modes/server';
-import { clearFallenEffects } from '@/lib/utils/battle/participant/fallen';
 import { reserveOf } from '@/lib/utils/battle/participant/reserve';
+import {
+    withPlacement,
+    withVictory,
+} from '@/lib/utils/battle/pipeline/post-mutation';
 import { applyScenePatch } from '@/lib/utils/battle/scene-state';
-import { sweepOrphanedAnchored } from '@/lib/utils/battle/spell/anchored-zone';
 import { sweepDeadZones } from '@/lib/utils/battle/spell/zone-triggers';
 import type {
     BattleDelta,
@@ -46,30 +43,20 @@ import type {
 } from '@/lib/utils/battle/store';
 import {
     BattleAccessError,
-    battleActionToEvent,
     BattleConflictError,
     BattleRuleError,
     eventToBattleAction,
-    systemEvent,
 } from '@/lib/utils/battle/store';
 import { REJECT } from '@/lib/utils/battle/store/reject';
-import { dismissExpiredSummons } from '@/lib/utils/battle/summon/dismiss';
-import { revertExpiredTransforms } from '@/lib/utils/battle/transform/revert';
-import {
-    checkVictoryConditions,
-    completeBattle,
-} from '@/lib/utils/battle/turn/victory';
+import { checkVictoryConditions } from '@/lib/utils/battle/turn/victory';
 import type { BattleKnowledge } from '@/lib/utils/battle/view/knowledge';
 import {
     alwaysSeesEnemyStats,
     redactLogForPlayers,
 } from '@/lib/utils/battle/view/visibility';
-import type { Ruleset } from '@/lib/utils/rules';
-import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import type { BattleScene, ClientBattleDelta } from '@/types/api';
 import type { BattleParticipant } from '@/types/battle';
 import type { BattleAction } from '@/types/battle-actions';
-import type { BattleMapConfig } from '@/types/battle-grid';
 
 export { PUSHER_DELTA_LIMIT_BYTES } from './limits';
 
@@ -161,160 +148,6 @@ export function assertAccess(
             API_ERRORS.BATTLE_NOT_YOUR_TURN
         );
     }
-}
-
-function withVictory(
-    scene: BattleSceneState,
-    result: MutationResult,
-    rules: Ruleset
-): MutationResult {
-    const status = result.scene?.status ?? scene.status;
-
-    if (status !== BattleStatus.ACTIVE) return result;
-
-    const victory = checkVictoryConditions(
-        result.participants,
-        reserveOf(result.pending),
-        rules
-    );
-
-    if (!victory.result) return result;
-
-    const round = result.scene?.round ?? scene.round;
-
-    const { updatedParticipants, battleAction } = completeBattle(
-        result.participants,
-        victory.result,
-        round,
-        rules
-    );
-
-    return {
-        ...result,
-        participants: updatedParticipants,
-        scene: {
-            ...result.scene,
-            status: BattleStatus.COMPLETED,
-            completedAt: new Date(),
-        },
-        events: [
-            ...result.events,
-            battleActionToEvent({ ...battleAction, round }),
-        ],
-    };
-}
-
-function withPlacement(
-    map: BattleMapConfig | null,
-    scene: {
-        status: BattleStatus;
-        round: number;
-        participants: BattleParticipant[];
-    },
-    result: MutationResult,
-    place: boolean,
-    rules: Ruleset
-): MutationResult {
-    const dismissed = dismissExpiredSummons(
-        result.participants,
-        result.scene?.round ?? scene.round,
-        rules
-    );
-
-    if (dismissed.participants !== result.participants)
-        result = {
-            ...result,
-            participants: dismissed.participants,
-            events: [
-                ...result.events,
-                systemEvent(
-                    result.scene?.round ?? scene.round,
-                    lineText(dismissed.messages, '; ')
-                ),
-            ],
-        };
-
-    const reverted = revertExpiredTransforms(
-        result.participants,
-        result.scene?.round ?? scene.round,
-        rules
-    );
-
-    if (reverted.participants !== result.participants)
-        result = {
-            ...result,
-            participants: reverted.participants,
-            events: [
-                ...result.events,
-                systemEvent(
-                    result.scene?.round ?? scene.round,
-                    lineText(reverted.messages, '; ')
-                ),
-            ],
-        };
-
-    const cleared = clearFallenEffects(result.participants, rules);
-
-    if (cleared !== result.participants)
-        result = { ...result, participants: cleared };
-
-    const released = actionsOf(rules).releaseInvalidGrapples(
-        result.participants,
-        map
-    );
-
-    if (released.participants !== result.participants)
-        result = {
-            ...result,
-            participants: released.participants,
-            events: [
-                ...result.events,
-                systemEvent(
-                    result.scene?.round ?? scene.round,
-                    lineText(released.messages, '; ')
-                ),
-            ],
-        };
-
-    const swept = sweepOrphanedAnchored(result.participants);
-
-    if (swept !== result.participants)
-        result = { ...result, participants: swept };
-
-    const orphaned = ruleSystemOf(rules).magic.sustain.dropOrphaned(
-        result.participants,
-        map,
-        result.scene?.round ?? scene.round
-    );
-
-    if (orphaned.participants !== result.participants)
-        result = {
-            ...result,
-            participants: orphaned.participants,
-            events: [
-                ...result.events,
-                systemEvent(
-                    result.scene?.round ?? scene.round,
-                    lineText(orphaned.messages, '; ')
-                ),
-            ],
-        };
-
-    if (!map || (result.scene?.status ?? scene.status) !== BattleStatus.ACTIVE)
-        return result;
-
-    const placed = place
-        ? placeParticipants(
-              map,
-              placeRevived(map, scene.participants, result.participants)
-          )
-        : result.participants;
-
-    const participants = syncMapAuras(placed, map);
-
-    return participants === result.participants
-        ? result
-        : { ...result, participants };
 }
 
 export class BattleOperationError extends Error {
@@ -587,7 +420,10 @@ export async function runGuardedBattleOperationCore<TBody>(
     const fog: DeltaFog = {
         before: fogContextOf(loaded.meta),
         after: fogContextOf({
-            map: result.scene?.map !== undefined ? result.scene.map : loaded.meta.map,
+            map:
+                result.scene?.map !== undefined
+                    ? result.scene.map
+                    : loaded.meta.map,
             mapState:
                 result.scene?.mapState !== undefined
                     ? result.scene.mapState

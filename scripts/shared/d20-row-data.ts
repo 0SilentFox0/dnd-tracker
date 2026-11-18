@@ -2,9 +2,12 @@ import type { Prisma } from '@prisma/client';
 
 import '@/lib/utils/rules/systems/registry';
 import { DEFAULT_RULES } from '@/lib/utils/rules/__tests__/fixtures/default-rules';
-import { moraleUpdate } from '@/lib/utils/rules/morale-store';
 import { splitColumnView } from '@/lib/utils/rules/systems/column-view';
 import { ruleSystemOf } from '@/lib/utils/rules/systems/lookup';
+import {
+    STORED_COLUMN,
+    storedColumnUpdate,
+} from '@/lib/utils/rules/systems/stored-columns';
 
 type WithCharacteristics<T> = T & {
     characteristics?: Prisma.InputJsonObject;
@@ -26,7 +29,11 @@ export function d20RowData<T extends object>(
 
     const stored =
         typeof morale === 'number'
-            ? moraleUpdate(system, { characteristics: view ?? prev }, morale)
+            ? storedColumnUpdate(
+                  { characteristics: view ?? prev },
+                  STORED_COLUMN.morale,
+                  morale
+              )
             : undefined;
 
     const characteristics = stored?.characteristics ?? view;

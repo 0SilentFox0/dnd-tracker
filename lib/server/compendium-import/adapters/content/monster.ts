@@ -1,0 +1,439 @@
+import { renderEntries } from '../../entries';
+import { type Adapter, type AdapterContext, issue } from '../../types';
+import {
+    type MonsterStats,
+    parseAttack,
+    parseMultiattack,
+    plainName,
+} from '../monster-attacks';
+import {
+    CastingBuilder,
+    defenseAbilities,
+    legendaryAbilities,
+    legendaryResistances,
+    saveProficiencies,
+} from '../monster-traits';
+import {
+    ABILITIES,
+    array,
+    description,
+    num,
+    object,
+    str,
+    unsupported,
+} from '../shared';
+
+import type { AbilityKey } from '@/lib/constants/abilities';
+import type { Ability } from '@/lib/utils/abilities/schema';
+import { battleSpeed, coreTrait } from '@/lib/utils/units/monster-core-traits';
+
+const MONSTER_FIELDS = [
+    'trait',
+    'action',
+    'bonus',
+    'reaction',
+    'legendary',
+    'spellcasting',
+] as const;
+
+const renderRaw = (entries: unknown[]): string =>
+    entries.map((e) => (typeof e === 'string' ? e : '')).join(' ');
+
+const SIZE_NAMES: Record<string, string> = {
+    T: 'tiny',
+    S: 'small',
+    M: 'medium',
+    L: 'large',
+    H: 'huge',
+    G: 'gargantuan',
+};
+
+const SPEED_KEYS = ['walk', 'fly', 'swim', 'climb', 'burrow'];
+
+function readCombatStats(row: Record<string, unknown>, ctx: AdapterContext) {
+    const ac = array(row.ac)
+        .map((v) => num(v) ?? num(object(v).ac))
+        .find((v) => v !== undefined);
+
+    const hpRow = object(row.hp);
+
+    const special = /^\s*(\d[\d,]*)\s*\(/.exec(str(hpRow.special))?.[1];
+
+    const parsedHp =
+        num(hpRow.average) ??
+        (special ? Number(special.replace(/,/g, '')) : undefined);
+
+    const hp = parsedHp !== undefined && parsedHp >= 1 ? parsedHp : undefined;
+
+    if (hp === undefined && typeof hpRow.special === 'string')
+        ctx.issues.push(
+            issue('MANUAL_MONSTER_HP', `${ctx.path}.hp`, 'warning', {
+                value: hpRow.special,
+            })
+        );
+    else if (ac === undefined || hp === undefined)
+        ctx.issues.push(issue('REQUIRED_MONSTER_STATS', ctx.path, 'error'));
+
+    const scores = Object.fromEntries(
+        Object.entries(ABILITIES).map(([short, long]) => [
+            long,
+            num(row[short]),
+        ])
+    );
+
+    if (Object.values(scores).some((v) => v === undefined))
+        ctx.issues.push(issue('MONSTER_ABILITY_REQUIRED', ctx.path, 'error'));
+
+    const rawCr = str(row.cr) || str(object(row.cr).cr);
+
+    const cr = /^\d+\/\d+$/.test(rawCr)
+        ? Number(rawCr.split('/')[0]) / Number(rawCr.split('/')[1])
+        : rawCr
+          ? Number(rawCr)
+          : null;
+
+    const movement = object(row.speed);
+
+    const speeds = Object.fromEntries(
+        SPEED_KEYS.map((k) => [
+            k,
+            num(movement[k]) ?? num(object(movement[k]).number),
+        ])
+    );
+
+    const complete = Object.values(scores).every((v) => v !== undefined);
+
+    const stats: MonsterStats = {
+        scores: complete ? (scores as Record<AbilityKey, number>) : null,
+        cr: cr !== null && Number.isFinite(cr) ? cr : null,
+    };
+
+    return { ac, hp, scores, cr, movement, speeds, stats };
+}
+
+interface MonsterActions {
+    attacks: Array<Record<string, unknown>>;
+    abilities: Ability[];
+    multiattack: number;
+    resistances: ReturnType<typeof legendaryResistances> | undefined;
+    unhandled: Record<string, unknown[]>;
+}
+
+function collectActions(
+    row: Record<string, unknown>,
+    ctx: AdapterContext,
+    stats: MonsterStats,
+    casting: CastingBuilder
+): MonsterActions {
+    const out: MonsterActions = {
+        attacks: [],
+        abilities: [],
+        multiattack: 1,
+        resistances: undefined,
+        unhandled: {},
+    };
+
+    const keep = (field: string, item: unknown) =>
+        (out.unhandled[field] ??= []).push(item);
+
+    for (const field of MONSTER_FIELDS) {
+        for (const [index, item] of array(row[field]).entries()) {
+            const entry = object(item);
+
+            const name = plainName(str(entry.name));
+
+            if (field === 'spellcasting') {
+                casting.block(item);
+                keep(field, { name, entries: array(entry.headerEntries) });
+                continue;
+            }
+
+            if (field === 'legendary') {
+                keep(field, item);
+                continue;
+            }
+
+            const entries = array(entry.entries);
+
+            const core =
+                field === 'trait'
+                    ? coreTrait(name, renderRaw(entries))
+                    : undefined;
+
+            if (core) {
+                out.abilities.push({
+                    id: `trait-${
+                        name
+                            .toLowerCase()
+                            .replace(/[^a-z0-9]+/g, '-')
+                            .replace(/^-|-$/g, '') || index
+                    }`,
+                    name,
+                    description: renderEntries(entries).text,
+                    ...core,
+                });
+                continue;
+            }
+
+            if (
+                field === 'trait' &&
+                /^Legendary Resistance \(\d+\/Day/i.test(name)
+            ) {
+                out.resistances = legendaryResistances([item]);
+                continue;
+            }
+
+            if (
+                field === 'action' &&
+                collectAttack(out, ctx, { stats, item, name, entries, index })
+            )
+                continue;
+
+            if (
+                field !== 'trait' &&
+                casting.action(str(entry.name), renderRaw(entries))
+            ) {
+                keep(field, item);
+                continue;
+            }
+
+            keep(field, item);
+            ctx.issues.push(
+                issue(
+                    'MANUAL_MONSTER_ACTION',
+                    `${ctx.path}.${field}[${index}]`,
+                    'warning',
+                    { variant: 'action', name: name || `#${index + 1}` }
+                )
+            );
+        }
+    }
+
+    return out;
+}
+
+/** Multiattack or a parsable attack from an action row; true when the row was consumed. */
+function collectAttack(
+    out: MonsterActions,
+    ctx: AdapterContext,
+    row: {
+        stats: MonsterStats;
+        item: unknown;
+        name: string;
+        entries: unknown[];
+        index: number;
+    }
+): boolean {
+    const { stats, item, name, entries, index } = row;
+
+    const multi = parseMultiattack({ name, entries });
+
+    if (multi) {
+        out.multiattack = multi.count;
+        (out.unhandled.action ??= []).push(item);
+
+        if (multi.complex)
+            ctx.issues.push(
+                issue(
+                    'MANUAL_MULTIATTACK_DETAIL',
+                    `${ctx.path}.action[${index}]`,
+                    'warning'
+                )
+            );
+
+        return true;
+    }
+
+    const parsed = parseAttack(
+        { name: str(object(item).name), entries },
+        stats
+    );
+
+    if (!parsed) return false;
+
+    out.attacks.push(parsed.row);
+
+    if (parsed.rider)
+        ctx.issues.push(
+            issue(
+                'MANUAL_ATTACK_RIDER',
+                `${ctx.path}.action[${index}]`,
+                'warning',
+                { name }
+            )
+        );
+
+    if (parsed.mixedDamage)
+        ctx.issues.push(
+            issue(
+                'MONSTER_ATTACK_MIXED_DAMAGE',
+                `${ctx.path}.action[${index}]`,
+                'warning',
+                { name }
+            )
+        );
+
+    return true;
+}
+
+const MONSTER_CONSUMED = [
+    'ac',
+    'hp',
+    'cr',
+    'speed',
+    'size',
+    'type',
+    'languages',
+    'save',
+    'resist',
+    'immune',
+    'vulnerable',
+    'conditionImmune',
+    'legendaryActions',
+    ...Object.keys(ABILITIES),
+    ...MONSTER_FIELDS,
+];
+
+function monsterNotes(
+    row: Record<string, unknown>,
+    ctx: AdapterContext,
+    unhandled: Record<string, unknown[]>
+): string {
+    return [
+        description(row, ctx),
+        ...MONSTER_FIELDS.map((field) => {
+            const rendered = renderEntries(
+                unhandled[field] ?? [],
+                `${ctx.path}.${field}`
+            );
+
+            ctx.issues.push(...rendered.issues);
+
+            return rendered.text;
+        }),
+        unsupported(row, MONSTER_CONSUMED, ctx),
+    ]
+        .filter(Boolean)
+        .join('\n');
+}
+
+export const monster: Adapter = (row, ctx) => {
+    const { ac, hp, scores, cr, movement, speeds, stats } = readCombatStats(
+        row,
+        ctx
+    );
+
+    const type = str(row.type) || str(object(row.type).type);
+
+    const casting = new CastingBuilder(ctx.edition);
+
+    const { attacks, abilities, multiattack, resistances, unhandled } =
+        collectActions(row, ctx, stats, casting);
+
+    const defenses = defenseAbilities(row);
+
+    abilities.push(...defenses.abilities);
+
+    for (const text of defenses.unresolved)
+        ctx.issues.push(
+            issue('MANUAL_MONSTER_DEFENSE', `${ctx.path}.defenses`, 'warning', {
+                text,
+            })
+        );
+
+    if (defenses.nonMagicalApprox)
+        ctx.issues.push(
+            issue(
+                'MONSTER_NONMAGICAL_APPROX',
+                `${ctx.path}.defenses`,
+                'warning'
+            )
+        );
+
+    const legendary = legendaryAbilities(
+        row.legendary,
+        attacks.map((a) => String(a.name))
+    );
+
+    abilities.push(...legendary.abilities);
+
+    for (const name of legendary.manual)
+        ctx.issues.push(
+            issue('MANUAL_MONSTER_ACTION', `${ctx.path}.legendary`, 'warning', {
+                variant: 'legendary',
+                name,
+            })
+        );
+
+    const built = casting.build();
+
+    if (built?.approximate)
+        ctx.issues.push(
+            issue(
+                'MONSTER_SPELL_SLOTS_APPROX',
+                `${ctx.path}.spellcasting`,
+                'warning'
+            )
+        );
+
+    for (const key of built?.unresolved ?? [])
+        ctx.issues.push(
+            issue('MANUAL_MONSTER_ACTION', `${ctx.path}.${key}`, 'warning', {
+                variant: 'spells',
+            })
+        );
+
+    const size = SIZE_NAMES[str(array(row.size)[0])];
+
+    const statblock = {
+        ...(type && { creatureType: type }),
+        ...(size && { size }),
+        ...(Array.isArray(row.languages) && {
+            languages: row.languages.map(str).join(', '),
+        }),
+        ...(resistances?.lair !== undefined && {
+            lairResistances: resistances.lair,
+        }),
+        movement: {
+            ...Object.fromEntries(
+                ['fly', 'swim', 'climb', 'burrow']
+                    .filter((k) => (speeds[k] ?? 0) >= 5)
+                    .map((k) => [k, speeds[k]])
+            ),
+            ...(movement.canHover === true && { hover: true }),
+        },
+    };
+
+    const notes = monsterNotes(row, ctx, unhandled);
+
+    const legendaryCount =
+        num(row.legendaryActions) ?? (legendary.abilities.length > 0 ? 3 : 0);
+
+    return {
+        kind: 'units',
+        refs: built?.refs,
+        body: {
+            name: row.name,
+            ...scores,
+            armorClass: ac,
+            maxHp: hp ?? 1,
+            speed: battleSpeed(speeds) || (num(row.speed) ?? 0),
+            gridSize:
+                str(array(row.size)[0]) === 'L'
+                    ? 2
+                    : ['H', 'G'].includes(str(array(row.size)[0]))
+                      ? 3
+                      : 1,
+            cr,
+            statblock,
+            attacks,
+            abilities,
+            multiattack,
+            saveProficiencies: saveProficiencies(row.save, stats.scores),
+            legendaryActions: Math.min(5, legendaryCount),
+            legendaryResistances: Math.min(10, resistances?.count ?? 0),
+            ...(built && { spellcasting: built.config }),
+        },
+        notes,
+    };
+};

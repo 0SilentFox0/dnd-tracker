@@ -20,7 +20,7 @@
     "reason": "uk tables of the hero generator (names, backstory, archetype classes), selected by locale"
   },
   {
-    "glob": "lib/constants/import-aliases.ts",
+    "glob": "lib/constants/import-aliases/**",
     "reason": "uk aliases matched when importing content"
   },
   {

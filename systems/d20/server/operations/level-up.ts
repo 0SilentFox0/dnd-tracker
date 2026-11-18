@@ -49,222 +49,113 @@ type Gate = Exclude<
     NextResponse
 >;
 
-async function levelUpCore({ access, character }: Gate, pick: LevelUpPick) {
-    const { campaign } = access;
+type ClassResult = NonNullable<
+    Exclude<Awaited<ReturnType<typeof classLevelUp>>, NextResponse>
+>;
 
-    if (!ruleSystemOf(campaign.rules).progression.levels)
-        throw new ContentError(API_ERRORS.SYSTEM_LEVELS_UNSUPPORTED, 409);
+type Campaign = Gate['access']['campaign'];
 
-    const id = character.campaignId;
+type Tx = Prisma.TransactionClient;
 
-    const characterId = character.id;
+interface ClassLevelUpArgs {
+    gate: Gate;
+    pick: LevelUpPick;
+    refs: Awaited<ReturnType<typeof loadChoiceRefs>> | undefined;
+}
 
-    const classResult = await orThrow(
-        classLevelUp({ campaign, character, pick })
-    );
-
-    if (classResult) {
-        const withChoices = hasPicks(pick.choices);
-
-        if (withChoices) await assertNotInActiveBattle(id, [characterId]);
-
-        const refs = withChoices
-            ? await loadChoiceRefs(id, character.race, {
-                  classMode: characterClassMode(
-                      campaign.rules,
-                      classResult.classes
-                  ),
-                  backgroundIds: [choicesStateOf(character).backgroundId],
-              })
-            : undefined;
-
-        return prisma.$transaction(async (tx) => {
-            await lockCharacters(tx, [characterId]);
-
-            const stored = await tx.character.findUnique({
-                where: { id: characterId },
-            });
-
-            if (!stored)
-                throw new ContentError(API_ERRORS.CHARACTER_NOT_FOUND, 404);
-
-            const row = withColumnView(stored, ruleSystemOf(campaign.rules));
-
-            const fresh = await orThrow(
-                classLevelUp({ campaign, character: row, pick })
-            );
-
-            if (!fresh) throw new ContentError(API_ERRORS.CLASS_REQUIRED, 422);
-
-            const seenLevel = seenLevelOnLevelChange(
-                row.level,
-                fresh.level,
-                row.seenLevel
-            );
-
-            const before = choicesStateOf(row);
-
-            const raised = fresh.classes.find(
-                (e) => e.classId === pick.classId
-            );
-
-            const choices = withChoices
-                ? await resolveCharacterChoices({
-                      campaignId: id,
-                      rules: campaign.rules,
-                      isDM: true,
-                      character: { ...row, level: fresh.level },
-                      before,
-                      after: {
-                          ...before,
-                          classes: withClassPicks(fresh.classes, {
-                              [pick.classId as string]: {
-                                  ...(raised?.choices ?? {}),
-                                  ...pick.choices,
-                              },
-                          }),
-                      },
-                      refs,
-                  })
-                : null;
-
-            if (choices && !choices.ok) throw choices.error;
-
-            const updated = await tx.character.update({
-                where: { id: characterId },
-                data: {
-                    classes: fresh.classes as unknown as Prisma.InputJsonValue,
-                    level: fresh.level,
-                    class: fresh.class,
-                    subclass: fresh.subclass,
-                    spellSlots: fresh.spellSlots as Prisma.InputJsonValue,
-                    ...(fresh.spellcastingAbility && {
-                        spellcastingAbility: fresh.spellcastingAbility,
-                    }),
-                    ...(seenLevel !== undefined && { seenLevel }),
-                    ...(choices?.ok && choices.fields),
-                    ...(choices?.ok &&
-                        characteristicsPatch(
-                            choices.fields,
-                            ruleSystemOf(campaign.rules),
-                            row.characteristics
-                        )),
-                },
-                include: {
-                    user: { select: PUBLIC_USER_SELECT },
-                    inventory: true,
-                },
-            });
-
-            await notifyCharacterOwners(
-                {
-                    campaignId: id,
-                    actorUserId: access.userId,
-                    events: levelNotificationEvents(
-                        characterId,
-                        row.level,
-                        fresh.level
-                    ),
-                },
-                tx
-            );
-
-            if (choices?.ok)
-                await writeCharacterLog(tx, [
-                    {
-                        campaignId: id,
-                        characterId,
-                        actorUserId: access.userId,
-                        kind: CharacterLogKind.CHOICES_EDIT,
-                        data: { before, after: choices.state },
-                    },
-                ]);
-
-            return {
-                ...columnViewDto(updated, ruleSystemOf(campaign.rules)),
-                levelUpDetails: {
-                    abilityIncreased: null,
-                    classId: pick.classId,
-                },
-            };
-        });
-    }
-
-    if (character.level + 1 > campaign.maxLevel)
+function assertWithinMaxLevel(campaign: Campaign, level: number) {
+    if (level > campaign.maxLevel)
         throw new ContentError(
             API_ERRORS.CHARACTER_MAX_LEVEL_REACHED,
             422,
             undefined,
             { max: campaign.maxLevel }
         );
+}
 
-    const race = await loadRaceProgression(id, character.race);
+async function applyClassLevelUp(
+    tx: Tx,
+    { gate: { access, character }, pick, refs }: ClassLevelUpArgs
+) {
+    const { campaign } = access;
 
-    const { updatedCharacter, gain, fromLevel, newLevel } =
-        await prisma.$transaction(async (tx) => {
-            await lockCharacters(tx, [characterId]);
+    const id = character.campaignId;
 
-            const stored = await tx.character.findUnique({
-                where: { id: characterId },
-            });
+    const characterId = character.id;
 
-            if (!stored)
-                throw new ContentError(API_ERRORS.CHARACTER_NOT_FOUND, 404);
+    await lockCharacters(tx, [characterId]);
 
-            const fresh = withColumnView(stored, ruleSystemOf(campaign.rules));
+    const stored = await tx.character.findUnique({
+        where: { id: characterId },
+    });
 
-            const freshLevel = fresh.level + 1;
+    if (!stored) throw new ContentError(API_ERRORS.CHARACTER_NOT_FOUND, 404);
 
-            if (freshLevel > campaign.maxLevel)
-                throw new ContentError(
-                    API_ERRORS.CHARACTER_MAX_LEVEL_REACHED,
-                    422,
-                    undefined,
-                    { max: campaign.maxLevel }
-                );
+    const row = withColumnView(stored, ruleSystemOf(campaign.rules));
 
-            const currentGain = applyLevelGain({
-                character: fresh,
-                race,
-                campaign,
-                fromLevel: fresh.level,
-                toLevel: freshLevel,
-            });
+    const fresh = await orThrow(
+        classLevelUp({ campaign, character: row, pick })
+    );
 
-            const currentSeenLevel = seenLevelOnLevelChange(
-                fresh.level,
-                freshLevel,
-                fresh.seenLevel
-            );
+    if (!fresh) throw new ContentError(API_ERRORS.CLASS_REQUIRED, 422);
 
-            const updated = await tx.character.update({
-                where: { id: characterId },
-                data: {
-                    level: freshLevel,
-                    ...(currentSeenLevel !== undefined && {
-                        seenLevel: currentSeenLevel,
-                    }),
-                    ...currentGain.abilityScores,
-                    ...characteristicsPatch(
-                        currentGain.abilityScores,
-                        ruleSystemOf(campaign.rules),
-                        fresh.characteristics
-                    ),
-                    spellSlots: currentGain.spellSlots as Prisma.InputJsonValue,
-                },
-                include: {
-                    user: { select: PUBLIC_USER_SELECT },
-                    inventory: true,
-                },
-            });
+    const seenLevel = seenLevelOnLevelChange(
+        row.level,
+        fresh.level,
+        row.seenLevel
+    );
 
-            return {
-                updatedCharacter: updated,
-                gain: currentGain,
-                fromLevel: fresh.level,
-                newLevel: freshLevel,
-            };
-        });
+    const before = choicesStateOf(row);
+
+    const raised = fresh.classes.find((e) => e.classId === pick.classId);
+
+    const choices = refs
+        ? await resolveCharacterChoices({
+              campaignId: id,
+              rules: campaign.rules,
+              isDM: true,
+              character: { ...row, level: fresh.level },
+              before,
+              after: {
+                  ...before,
+                  classes: withClassPicks(fresh.classes, {
+                      [pick.classId as string]: {
+                          ...(raised?.choices ?? {}),
+                          ...pick.choices,
+                      },
+                  }),
+              },
+              refs,
+          })
+        : null;
+
+    if (choices && !choices.ok) throw choices.error;
+
+    const updated = await tx.character.update({
+        where: { id: characterId },
+        data: {
+            classes: fresh.classes as unknown as Prisma.InputJsonValue,
+            level: fresh.level,
+            class: fresh.class,
+            subclass: fresh.subclass,
+            spellSlots: fresh.spellSlots as Prisma.InputJsonValue,
+            ...(fresh.spellcastingAbility && {
+                spellcastingAbility: fresh.spellcastingAbility,
+            }),
+            ...(seenLevel !== undefined && { seenLevel }),
+            ...(choices?.ok && choices.fields),
+            ...(choices?.ok &&
+                characteristicsPatch(
+                    choices.fields,
+                    ruleSystemOf(campaign.rules),
+                    row.characteristics
+                )),
+        },
+        include: {
+            user: { select: PUBLIC_USER_SELECT },
+            inventory: true,
+        },
+    });
 
     await notifyCharacterOwners(
         {
@@ -272,9 +163,144 @@ async function levelUpCore({ access, character }: Gate, pick: LevelUpPick) {
             actorUserId: access.userId,
             events: levelNotificationEvents(
                 characterId,
-                fromLevel,
-                newLevel
+                row.level,
+                fresh.level
             ),
+        },
+        tx
+    );
+
+    if (choices?.ok)
+        await writeCharacterLog(tx, [
+            {
+                campaignId: id,
+                characterId,
+                actorUserId: access.userId,
+                kind: CharacterLogKind.CHOICES_EDIT,
+                data: { before, after: choices.state },
+            },
+        ]);
+
+    return {
+        ...columnViewDto(updated, ruleSystemOf(campaign.rules)),
+        levelUpDetails: {
+            abilityIncreased: null,
+            classId: pick.classId,
+        },
+    };
+}
+
+async function levelUpWithClass(
+    gate: Gate,
+    pick: LevelUpPick,
+    classResult: ClassResult
+) {
+    const { campaign } = gate.access;
+
+    const withChoices = hasPicks(pick.choices);
+
+    if (withChoices)
+        await assertNotInActiveBattle(gate.character.campaignId, [
+            gate.character.id,
+        ]);
+
+    const refs = withChoices
+        ? await loadChoiceRefs(gate.character.campaignId, gate.character.race, {
+              classMode: characterClassMode(
+                  campaign.rules,
+                  classResult.classes
+              ),
+              backgroundIds: [choicesStateOf(gate.character).backgroundId],
+          })
+        : undefined;
+
+    return prisma.$transaction((tx) =>
+        applyClassLevelUp(tx, { gate, pick, refs })
+    );
+}
+
+async function applyFlatLevelUp(
+    tx: Tx,
+    { access, character }: Gate,
+    race: Awaited<ReturnType<typeof loadRaceProgression>>
+) {
+    const { campaign } = access;
+
+    await lockCharacters(tx, [character.id]);
+
+    const stored = await tx.character.findUnique({
+        where: { id: character.id },
+    });
+
+    if (!stored) throw new ContentError(API_ERRORS.CHARACTER_NOT_FOUND, 404);
+
+    const fresh = withColumnView(stored, ruleSystemOf(campaign.rules));
+
+    const freshLevel = fresh.level + 1;
+
+    assertWithinMaxLevel(campaign, freshLevel);
+
+    const gain = applyLevelGain({
+        character: fresh,
+        race,
+        campaign,
+        fromLevel: fresh.level,
+        toLevel: freshLevel,
+    });
+
+    const seenLevel = seenLevelOnLevelChange(
+        fresh.level,
+        freshLevel,
+        fresh.seenLevel
+    );
+
+    const updated = await tx.character.update({
+        where: { id: character.id },
+        data: {
+            level: freshLevel,
+            ...(seenLevel !== undefined && { seenLevel }),
+            ...gain.abilityScores,
+            ...characteristicsPatch(
+                gain.abilityScores,
+                ruleSystemOf(campaign.rules),
+                fresh.characteristics
+            ),
+            spellSlots: gain.spellSlots as Prisma.InputJsonValue,
+        },
+        include: {
+            user: { select: PUBLIC_USER_SELECT },
+            inventory: true,
+        },
+    });
+
+    return {
+        updatedCharacter: updated,
+        gain,
+        fromLevel: fresh.level,
+        newLevel: freshLevel,
+    };
+}
+
+async function levelUpFlat(gate: Gate) {
+    const { access, character } = gate;
+
+    const { campaign } = access;
+
+    assertWithinMaxLevel(campaign, character.level + 1);
+
+    const race = await loadRaceProgression(
+        character.campaignId,
+        character.race
+    );
+
+    const { updatedCharacter, gain, fromLevel, newLevel } =
+        await prisma.$transaction((tx) => applyFlatLevelUp(tx, gate, race));
+
+    await notifyCharacterOwners(
+        {
+            campaignId: character.campaignId,
+            actorUserId: access.userId,
+            events: levelNotificationEvents(character.id, fromLevel, newLevel),
         },
         prisma
     );
@@ -286,6 +312,21 @@ async function levelUpCore({ access, character }: Gate, pick: LevelUpPick) {
             spellSlots: gain.spellSlots,
         },
     };
+}
+
+async function levelUpCore(gate: Gate, pick: LevelUpPick) {
+    const { campaign } = gate.access;
+
+    if (!ruleSystemOf(campaign.rules).progression.levels)
+        throw new ContentError(API_ERRORS.SYSTEM_LEVELS_UNSUPPORTED, 409);
+
+    const classResult = await orThrow(
+        classLevelUp({ campaign, character: gate.character, pick })
+    );
+
+    return classResult
+        ? levelUpWithClass(gate, pick, classResult)
+        : levelUpFlat(gate);
 }
 
 export const levelUpOperation = defineCharacterOperation({

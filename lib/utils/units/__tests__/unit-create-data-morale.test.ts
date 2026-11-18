@@ -2,15 +2,12 @@ import { describe, expect, it } from 'vitest';
 
 import '@/lib/server/systems/registry';
 import { createUnitSchema } from '@/lib/schemas/units';
-import { moraleUpdate } from '@/lib/utils/rules/morale-store';
 import { parseRules } from '@/lib/utils/rules/schema';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
+import { storedColumnUpdate } from '@/lib/utils/rules/systems/stored-columns';
 import { unitCreateData } from '@/lib/utils/units/unit-create-data';
-import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
 
 const homm = ruleSystemOf(parseRules({ system: { key: 'homm' } }));
-
-const wfrp = ruleSystemOf(parseRules(WFRP_RULES));
 
 describe('morale dual-write', () => {
     it('unit create writes the column and ext.morale.value', () => {
@@ -25,9 +22,9 @@ describe('morale dual-write', () => {
     });
 
     it('keeps other characteristics and ext keys', () => {
-        const out = moraleUpdate(
-            homm,
+        const out = storedColumnUpdate(
             { characteristics: { strength: 9, ext: { other: { a: 1 } } } },
+            'morale',
             -1
         );
 
@@ -41,7 +38,7 @@ describe('morale dual-write', () => {
     });
 
     it('a system without the module still writes the ext value (readers prefer it)', () => {
-        expect(moraleUpdate(wfrp, { characteristics: { ws: 3 } }, 2)).toEqual({
+        expect(storedColumnUpdate({ characteristics: { ws: 3 } }, 'morale', 2)).toEqual({
             morale: 2,
             characteristics: { ws: 3, ext: { morale: { value: 2 } } },
         });

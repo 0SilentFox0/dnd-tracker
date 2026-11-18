@@ -1,10 +1,10 @@
-import { z } from 'zod';
 /* eslint-disable @typescript-eslint/no-explicit-any -- raw JSON battle responses */
 // Local only: COMPENDIUM_REAL_FILE=<5etools json> DATABASE_URL/DIRECT_URL=<local db with the SRD template> pnpm exec vitest run --config vitest.integration.config.mts <this file>
 import type { Prisma } from '@prisma/client';
 import { randomUUID } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
+import { z } from 'zod';
 
 import {
     attackBodySchema,

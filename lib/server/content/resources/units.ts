@@ -24,12 +24,15 @@ import {
     abilitySpellIds,
     withAbilityIssues,
 } from '@/lib/utils/abilities/read';
-import { moraleUpdate } from '@/lib/utils/rules/morale-store';
 import { parseRules, type Ruleset } from '@/lib/utils/rules/schema';
 import { splitColumnView } from '@/lib/utils/rules/systems/column-view';
 import { ruleSystemOf } from '@/lib/utils/rules/systems/lookup';
 import type { SystemData } from '@/lib/utils/rules/systems/slot';
-import { keepStoredColumns } from '@/lib/utils/rules/systems/stored-columns';
+import {
+    keepStoredColumns,
+    STORED_COLUMN,
+    storedColumnUpdate,
+} from '@/lib/utils/rules/systems/stored-columns';
 import type { RuleSystemDefinition } from '@/lib/utils/rules/systems/types';
 import { toUnit } from '@/lib/utils/units/to-unit';
 import { unitCreateData } from '@/lib/utils/units/unit-create-data';
@@ -147,12 +150,12 @@ export const unitsResource = defineResource<
         const moraleData =
             data.morale === undefined
                 ? undefined
-                : moraleUpdate(
-                      loaded.system,
+                : storedColumnUpdate(
                       {
                           characteristics:
                               characteristics ?? current?.characteristics,
                       },
+                      STORED_COLUMN.morale,
                       data.morale
                   );
 

@@ -23,6 +23,10 @@ import {
     ruleSystemOf,
 } from '@/lib/utils/rules/systems';
 import { flattenStoredColumns } from '@/lib/utils/rules/systems/column-view';
+import {
+    readStoredColumn,
+    STORED_COLUMN,
+} from '@/lib/utils/rules/systems/stored-columns';
 
 const COMPACT_SELECT = {
     id: true,
@@ -134,7 +138,18 @@ export const listOperation = defineCharacterOperation({
 
         return redactListedLedgers(
             rows.map((row) =>
-                token ? { ...row, inspiration: token.stored(row) } : row
+                token
+                    ? {
+                          ...row,
+                          inspiration:
+                              readStoredColumn(
+                                  access.campaign.rules,
+                                  row,
+                                  STORED_COLUMN.inspiration,
+                                  'boolean'
+                              ) ?? false,
+                      }
+                    : row
             ),
             access,
             ruleSystemOf(access.campaign.rules)

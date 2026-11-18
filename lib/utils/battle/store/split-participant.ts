@@ -1,3 +1,4 @@
+import { readJoinableSnapshot } from './snapshot-schema';
 import { hashJson } from './stable-json';
 import type {
     ParticipantSnapshot,
@@ -140,15 +141,7 @@ export function joinParticipant(
 ): BattleParticipant {
     const { columns: c, state } = stored;
 
-    const s = stored.snapshot as {
-        basicInfo: Record<string, unknown>;
-        abilities: Record<string, unknown>;
-        combatStats: Record<string, unknown>;
-        spellcasting: Record<string, unknown> & {
-            spellSlots?: Record<string, { max: number; level?: number }>;
-        };
-        battleData: Record<string, unknown>;
-    };
+    const s = readJoinableSnapshot(stored.snapshot);
 
     const spellSlots: Record<
         string,

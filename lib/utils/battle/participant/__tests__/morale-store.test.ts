@@ -5,8 +5,8 @@ import { ParticipantSide } from '@/lib/constants/battle';
 import { createBattleParticipantFromCharacter } from '@/lib/server/battles/participant/from-character';
 import { createBattleParticipantFromUnit } from '@/lib/utils/battle/participant/from-unit';
 import type { UnitFromPrisma } from '@/lib/utils/battle/types/participant';
-import { storedMorale } from '@/lib/utils/rules/morale-store';
 import { parseRules } from '@/lib/utils/rules/schema';
+import { readStoredColumn } from '@/lib/utils/rules/systems/stored-columns';
 import { WFRP_RULES } from '@/systems/wfrp/rules/rules-preset';
 
 const rules = parseRules({ system: { key: 'homm' } });
@@ -126,10 +126,12 @@ describe('morale dual store in participants (the sheet reads combatStats)', () =
 
     it('a ruleset without the module reads the column', () => {
         expect(
-            storedMorale(parseRules(WFRP_RULES), {
-                morale: 4,
-                characteristics: ext(1),
-            })
+            readStoredColumn(
+                parseRules(WFRP_RULES),
+                { morale: 4, characteristics: ext(1) },
+                'morale',
+                'number'
+            )
         ).toBe(4);
     });
 });

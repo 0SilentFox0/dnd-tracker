@@ -1,7 +1,5 @@
 import type { Prisma } from '@prisma/client';
 
-import { writeInspiration } from '../rules/value';
-
 import { API_ERRORS } from '@/lib/constants/api-errors';
 import { prisma } from '@/lib/db';
 import type {
@@ -13,6 +11,7 @@ import { lockCharacters } from '@/lib/server/characters/lock';
 import { writeCharacterLog } from '@/lib/server/characters/log';
 import { ContentError } from '@/lib/server/content/errors';
 import { rerollTokenOn } from '@/lib/utils/rules/reroll-token-on';
+import { storedColumnUpdate } from '@/lib/utils/rules/systems/stored-columns';
 
 export async function setInspiration(
     { access, character }: CharacterGate<CharacterRow>,
@@ -32,7 +31,11 @@ export async function setInspiration(
 
         await tx.character.update({
             where: { id: character.id },
-            data: writeInspiration(fresh, value) as Prisma.CharacterUpdateInput,
+            data: storedColumnUpdate(
+                fresh,
+                'inspiration',
+                value
+            ) as Prisma.CharacterUpdateInput,
         });
         await writeCharacterLog(tx, [
             {

@@ -46,14 +46,17 @@ import {
     levelNotificationEvents,
     spellNotificationEvents,
 } from '@/lib/utils/notifications/events';
-import { moraleUpdate } from '@/lib/utils/rules/morale-store';
 import { allLevelResets, ruleSystemOf } from '@/lib/utils/rules/systems';
 import {
     columnViewDto,
     splitColumnView,
     withColumnView,
 } from '@/lib/utils/rules/systems/column-view';
-import { keepStoredColumns } from '@/lib/utils/rules/systems/stored-columns';
+import {
+    keepStoredColumns,
+    STORED_COLUMN,
+    storedColumnUpdate,
+} from '@/lib/utils/rules/systems/stored-columns';
 import type { RuleSystemDefinition } from '@/lib/utils/rules/systems/types';
 import type { SpellSlots } from '@/lib/utils/spells/spell-slots';
 import type { SpellSlotProgression } from '@/types/races';
@@ -290,9 +293,9 @@ function updateWriter({
 
         const moraleData =
             typeof columns.morale === 'number'
-                ? moraleUpdate(
-                      system,
+                ? storedColumnUpdate(
                       { characteristics: nextCharacteristics ?? prev },
+                      STORED_COLUMN.morale,
                       columns.morale
                   )
                 : undefined;

@@ -1,5 +1,9 @@
 import type { Ruleset } from '@/lib/utils/rules';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
+import {
+    readStoredColumn,
+    STORED_COLUMN,
+} from '@/lib/utils/rules/systems/stored-columns';
 
 /** The campaign switch lives in the module's rules item; without the module there is no token */
 export const rerollTokenOn = (rules: Ruleset): boolean =>
@@ -12,5 +16,8 @@ export const storedInspiration = (
 ): boolean | null => {
     const hook = ruleSystemOf(rules).combat.rerollToken;
 
-    return hook?.enabled(rules) ? hook.stored(row) : null;
+    return hook?.enabled(rules)
+        ? (readStoredColumn(rules, row, STORED_COLUMN.inspiration, 'boolean') ??
+              false)
+        : null;
 };

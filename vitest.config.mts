@@ -16,11 +16,12 @@ export default defineConfig({
         coverage: {
             provider: 'v8',
             reporter: ['text', 'html'],
-            include: ['lib/**/*.ts', 'systems/**/*.ts'],
+            include: ['lib/**/*.ts', 'systems/**/*.ts', 'app/api/**/*.ts'],
             exclude: [
                 'lib/**/*.test.ts',
                 'lib/**/__tests__/**',
                 'systems/**/__tests__/**',
+                'app/api/**/__tests__/**',
             ],
             thresholds: {
                 'lib/**': {
@@ -28,6 +29,12 @@ export default defineConfig({
                     statements: 85,
                     functions: 85,
                     branches: 84,
+                },
+                'app/api/**': {
+                    lines: 80,
+                    statements: 80,
+                    functions: 80,
+                    branches: 70,
                 },
                 'systems/**': {
                     lines: 80,

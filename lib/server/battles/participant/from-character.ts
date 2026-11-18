@@ -56,11 +56,14 @@ import { getAbilityModifier } from '@/lib/utils/common/calculations';
 import { isRecord } from '@/lib/utils/common/is-record';
 import { attunedRefs } from '@/lib/utils/items/resolve';
 import { type Ruleset } from '@/lib/utils/rules';
-import { storedMorale } from '@/lib/utils/rules/morale-store';
 import { currencyValueOf, ruleSystemOf } from '@/lib/utils/rules/systems';
 import { composition } from '@/lib/utils/rules/systems/catalog';
 import { withColumnView } from '@/lib/utils/rules/systems/column-view';
 import { systemSlotOf } from '@/lib/utils/rules/systems/slot';
+import {
+    readStoredColumn,
+    STORED_COLUMN,
+} from '@/lib/utils/rules/systems/stored-columns';
 import type { BranchLevel } from '@/lib/utils/skills/progression';
 import { resolveClassEntries } from '@/lib/utils/spells/class-slots';
 import { buildIngredientStock } from '@/lib/utils/spells/ingredients/stock';
@@ -578,7 +581,13 @@ function combatStatsOf(
         tempHp: 0,
         armorClass: character.armorClass,
         speed: baseStats?.speed ?? character.speed,
-        morale: storedMorale(rules, character),
+        morale:
+            readStoredColumn(
+                rules,
+                character,
+                STORED_COLUMN.morale,
+                'number'
+            ) ?? 0,
         moraleCap: 0,
         status: computedMaxHp <= 0 ? CombatStatus.DEAD : CombatStatus.ACTIVE,
         minTargets: character.minTargets ?? 1,

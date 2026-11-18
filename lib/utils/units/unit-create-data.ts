@@ -3,8 +3,11 @@ import type { z } from 'zod';
 
 import type { createUnitSchema } from '@/lib/schemas/units';
 import { abilitiesJson } from '@/lib/utils/abilities/read';
-import { moraleUpdate } from '@/lib/utils/rules/morale-store';
 import { splitColumnView } from '@/lib/utils/rules/systems/column-view';
+import {
+    STORED_COLUMN,
+    storedColumnUpdate,
+} from '@/lib/utils/rules/systems/stored-columns';
 import type { RuleSystemDefinition } from '@/lib/utils/rules/systems/types';
 import { resolveUnitProficiency } from '@/lib/utils/units/monster';
 
@@ -36,7 +39,11 @@ export function unitCreateData(
         data.characteristics;
 
     const { morale, characteristics } = system
-        ? moraleUpdate(system, { characteristics: base }, data.morale)
+        ? storedColumnUpdate(
+              { characteristics: base },
+              STORED_COLUMN.morale,
+              data.morale
+          )
         : { morale: data.morale, characteristics: base };
 
     return {

@@ -14,6 +14,11 @@ import {
 import { readResources } from '@/lib/utils/characters/resources/schema';
 import type { Ruleset } from '@/lib/utils/rules';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
+import {
+    readStoredColumn,
+    STORED_COLUMN,
+    storedColumnUpdate,
+} from '@/lib/utils/rules/systems/stored-columns';
 import type { BattleParticipant } from '@/types/battle';
 
 export function persistedHeroes(
@@ -100,11 +105,20 @@ export async function persistCharacterResources(
         if (outcome.clearInspiration && token) {
             const locked = (await lockCharacters(tx, [row.id])).get(row.id);
 
-            if (locked && token.stored(locked))
+            if (
+                locked &&
+                readStoredColumn(
+                    battle.rules,
+                    locked,
+                    STORED_COLUMN.inspiration,
+                    'boolean'
+                )
+            )
                 await tx.character.update({
                     where: { id: row.id },
-                    data: token.store(
+                    data: storedColumnUpdate(
                         locked,
+                        STORED_COLUMN.inspiration,
                         false
                     ) as Prisma.CharacterUpdateInput,
                 });

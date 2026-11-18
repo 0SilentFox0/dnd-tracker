@@ -64,7 +64,7 @@ describe('cyrillic ratchet', () => {
             0
         );
         expect(
-            await cyrillicErrors('lib/constants/import-aliases.ts', literal)
+            await cyrillicErrors('lib/constants/import-aliases/index.ts', literal)
         ).toHaveLength(0);
     });
 

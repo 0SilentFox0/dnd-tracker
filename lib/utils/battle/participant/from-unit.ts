@@ -21,10 +21,13 @@ import { fromJson } from '@/lib/utils/common/json';
 import { spellGrantFields, spellPoolKey } from '@/lib/utils/items/pools';
 import { getUnitImmunities } from '@/lib/utils/races/race-effects';
 import { type Ruleset } from '@/lib/utils/rules';
-import { storedMorale } from '@/lib/utils/rules/morale-store';
 import { ruleSystemOf } from '@/lib/utils/rules/systems';
 import { withColumnView } from '@/lib/utils/rules/systems/column-view';
 import { systemSlotOf } from '@/lib/utils/rules/systems/slot';
+import {
+    readStoredColumn,
+    STORED_COLUMN,
+} from '@/lib/utils/rules/systems/stored-columns';
 import {
     bestMentalAbility,
     isMonster5e,
@@ -273,7 +276,8 @@ function unitCombatStats(
         armorClass: unit.armorClass,
         speed: ruleSystemOf(rules).combat.baseStats?.(unit).speed ?? unit.speed,
         gridSize: unit.gridSize ?? 1,
-        morale: storedMorale(rules, unit),
+        morale:
+            readStoredColumn(rules, unit, STORED_COLUMN.morale, 'number') ?? 0,
         moraleCap: 0,
         status: CombatStatus.ACTIVE,
         minTargets: unit.minTargets ?? 1,
