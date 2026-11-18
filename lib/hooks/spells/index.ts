@@ -6,7 +6,6 @@ export { useSpellFormSync } from './useSpellFormSync';
 export { useSpellGroupActions } from './useSpellGroupActions';
 export { useSpellIssueText } from './useSpellIssueText';
 export { useSpellLabels } from './useSpellLabels';
-export { useSpellMechanics } from './useSpellMechanics';
 export { useSpellRefs } from './useSpellRefs';
 export {
     useCreateSpell,

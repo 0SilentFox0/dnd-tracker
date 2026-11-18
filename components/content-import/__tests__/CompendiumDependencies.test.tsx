@@ -110,7 +110,7 @@ describe('CompendiumDependencies', () => {
 
         expect(container.textContent).toContain('Fog');
         expect(
-            container.querySelector('details details input[type=checkbox]')
+            container.querySelector("details details [role='checkbox']")
         ).not.toBeNull();
         expect(
             container.querySelector("[aria-label='Зіставлення Mist']")

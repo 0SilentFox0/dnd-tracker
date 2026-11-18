@@ -22,7 +22,6 @@ export { useBundleFilePicker, useImportCampaign } from './useImportCampaign';
 export { useInfoReferenceFilters } from './useInfoReferenceFilters';
 export { useJoinBattle } from './useJoinBattle';
 export { useMapLibraryEnabled } from './useMapLibraryEnabled';
-export { useModuleDraft } from './useModuleDraft';
 export { usePublishTemplate } from './usePublishTemplate';
 export { useRemoveCustomCondition } from './useRemoveCustomCondition';
 export { HERO_LEVELS, type RulesFormState, useRulesForm } from './useRulesForm';

@@ -11,19 +11,25 @@ exports[`RollStep > dnd5e keeps the d20 roll body 1`] = `
     class="mt-3 grid h-10 grid-cols-3 border border-white/20"
   >
     <button
-      class="border-l border-white/20 text-sm first:border-l-0 disabled:cursor-not-allowed bg-white/10 font-bold text-[var(--ink)]"
+      class="cursor-pointer border-l border-white/20 text-sm first:border-l-0 disabled:cursor-not-allowed bg-white/10 font-bold text-[var(--ink)]"
+      data-slot="button"
+      data-variant="bare"
       type="button"
     >
       Звичайний
     </button>
     <button
-      class="border-l border-white/20 text-sm first:border-l-0 disabled:cursor-not-allowed text-hud-soft"
+      class="cursor-pointer border-l border-white/20 text-sm first:border-l-0 disabled:cursor-not-allowed text-hud-soft"
+      data-slot="button"
+      data-variant="bare"
       type="button"
     >
       Перевага
     </button>
     <button
-      class="border-l border-white/20 text-sm first:border-l-0 disabled:cursor-not-allowed text-hud-soft"
+      class="cursor-pointer border-l border-white/20 text-sm first:border-l-0 disabled:cursor-not-allowed text-hud-soft"
+      data-slot="button"
+      data-variant="bare"
       type="button"
     >
       Недолік
@@ -33,121 +39,161 @@ exports[`RollStep > dnd5e keeps the d20 roll body 1`] = `
     class="mt-3 grid grid-cols-5 gap-1.5"
   >
     <button
-      class="flex h-12 items-center justify-center border text-lg font-medium border-white/15 bg-black/25 text-[#c98a7c]"
+      class="cursor-pointer flex h-12 items-center justify-center border text-lg font-medium border-white/15 bg-black/25 text-[#c98a7c]"
+      data-slot="button"
+      data-variant="bare"
       type="button"
     >
       1
     </button>
     <button
-      class="flex h-12 items-center justify-center border text-lg font-medium border-white/15 bg-black/25 text-[var(--bone)]"
+      class="cursor-pointer flex h-12 items-center justify-center border text-lg font-medium border-white/15 bg-black/25 text-[var(--bone)]"
+      data-slot="button"
+      data-variant="bare"
       type="button"
     >
       2
     </button>
     <button
-      class="flex h-12 items-center justify-center border text-lg font-medium border-white/15 bg-black/25 text-[var(--bone)]"
+      class="cursor-pointer flex h-12 items-center justify-center border text-lg font-medium border-white/15 bg-black/25 text-[var(--bone)]"
+      data-slot="button"
+      data-variant="bare"
       type="button"
     >
       3
     </button>
     <button
-      class="flex h-12 items-center justify-center border text-lg font-medium border-white/15 bg-black/25 text-[var(--bone)]"
+      class="cursor-pointer flex h-12 items-center justify-center border text-lg font-medium border-white/15 bg-black/25 text-[var(--bone)]"
+      data-slot="button"
+      data-variant="bare"
       type="button"
     >
       4
     </button>
     <button
-      class="flex h-12 items-center justify-center border text-lg font-medium border-white/15 bg-black/25 text-[var(--bone)]"
+      class="cursor-pointer flex h-12 items-center justify-center border text-lg font-medium border-white/15 bg-black/25 text-[var(--bone)]"
+      data-slot="button"
+      data-variant="bare"
       type="button"
     >
       5
     </button>
     <button
-      class="flex h-12 items-center justify-center border text-lg font-medium border-white/15 bg-black/25 text-[var(--bone)]"
+      class="cursor-pointer flex h-12 items-center justify-center border text-lg font-medium border-white/15 bg-black/25 text-[var(--bone)]"
+      data-slot="button"
+      data-variant="bare"
       type="button"
     >
       6
     </button>
     <button
-      class="flex h-12 items-center justify-center border text-lg font-medium border-white/15 bg-black/25 text-[var(--bone)]"
+      class="cursor-pointer flex h-12 items-center justify-center border text-lg font-medium border-white/15 bg-black/25 text-[var(--bone)]"
+      data-slot="button"
+      data-variant="bare"
       type="button"
     >
       7
     </button>
     <button
-      class="flex h-12 items-center justify-center border text-lg font-medium border-white/15 bg-black/25 text-[var(--bone)]"
+      class="cursor-pointer flex h-12 items-center justify-center border text-lg font-medium border-white/15 bg-black/25 text-[var(--bone)]"
+      data-slot="button"
+      data-variant="bare"
       type="button"
     >
       8
     </button>
     <button
-      class="flex h-12 items-center justify-center border text-lg font-medium border-white/15 bg-black/25 text-[var(--bone)]"
+      class="cursor-pointer flex h-12 items-center justify-center border text-lg font-medium border-white/15 bg-black/25 text-[var(--bone)]"
+      data-slot="button"
+      data-variant="bare"
       type="button"
     >
       9
     </button>
     <button
-      class="flex h-12 items-center justify-center border text-lg font-medium border-white/15 bg-black/25 text-[var(--bone)]"
+      class="cursor-pointer flex h-12 items-center justify-center border text-lg font-medium border-white/15 bg-black/25 text-[var(--bone)]"
+      data-slot="button"
+      data-variant="bare"
       type="button"
     >
       10
     </button>
     <button
-      class="flex h-12 items-center justify-center border text-lg font-medium border-white/15 bg-black/25 text-[var(--bone)]"
+      class="cursor-pointer flex h-12 items-center justify-center border text-lg font-medium border-white/15 bg-black/25 text-[var(--bone)]"
+      data-slot="button"
+      data-variant="bare"
       type="button"
     >
       11
     </button>
     <button
-      class="flex h-12 items-center justify-center border text-lg font-medium border-white/15 bg-black/25 text-[var(--bone)]"
+      class="cursor-pointer flex h-12 items-center justify-center border text-lg font-medium border-white/15 bg-black/25 text-[var(--bone)]"
+      data-slot="button"
+      data-variant="bare"
       type="button"
     >
       12
     </button>
     <button
-      class="flex h-12 items-center justify-center border text-lg font-medium border-white/15 bg-black/25 text-[var(--bone)]"
+      class="cursor-pointer flex h-12 items-center justify-center border text-lg font-medium border-white/15 bg-black/25 text-[var(--bone)]"
+      data-slot="button"
+      data-variant="bare"
       type="button"
     >
       13
     </button>
     <button
-      class="flex h-12 items-center justify-center border text-lg font-medium border-white/15 bg-black/25 text-[var(--bone)]"
+      class="cursor-pointer flex h-12 items-center justify-center border text-lg font-medium border-white/15 bg-black/25 text-[var(--bone)]"
+      data-slot="button"
+      data-variant="bare"
       type="button"
     >
       14
     </button>
     <button
-      class="flex h-12 items-center justify-center border text-lg font-medium border-white/15 bg-black/25 text-[var(--bone)]"
+      class="cursor-pointer flex h-12 items-center justify-center border text-lg font-medium border-white/15 bg-black/25 text-[var(--bone)]"
+      data-slot="button"
+      data-variant="bare"
       type="button"
     >
       15
     </button>
     <button
-      class="flex h-12 items-center justify-center border text-lg font-medium border-white/15 bg-black/25 text-[var(--bone)]"
+      class="cursor-pointer flex h-12 items-center justify-center border text-lg font-medium border-white/15 bg-black/25 text-[var(--bone)]"
+      data-slot="button"
+      data-variant="bare"
       type="button"
     >
       16
     </button>
     <button
-      class="flex h-12 items-center justify-center border text-lg font-medium border-white/15 bg-black/25 text-[var(--bone)]"
+      class="cursor-pointer flex h-12 items-center justify-center border text-lg font-medium border-white/15 bg-black/25 text-[var(--bone)]"
+      data-slot="button"
+      data-variant="bare"
       type="button"
     >
       17
     </button>
     <button
-      class="flex h-12 items-center justify-center border text-lg font-medium border-white/15 bg-black/25 text-[var(--bone)]"
+      class="cursor-pointer flex h-12 items-center justify-center border text-lg font-medium border-white/15 bg-black/25 text-[var(--bone)]"
+      data-slot="button"
+      data-variant="bare"
       type="button"
     >
       18
     </button>
     <button
-      class="flex h-12 items-center justify-center border text-lg font-medium border-white/15 bg-black/25 text-[var(--bone)]"
+      class="cursor-pointer flex h-12 items-center justify-center border text-lg font-medium border-white/15 bg-black/25 text-[var(--bone)]"
+      data-slot="button"
+      data-variant="bare"
       type="button"
     >
       19
     </button>
     <button
-      class="flex h-12 items-center justify-center border text-lg font-medium border-white/15 bg-black/25 text-[#e8c77a]"
+      class="cursor-pointer flex h-12 items-center justify-center border text-lg font-medium border-white/15 bg-black/25 text-[#e8c77a]"
+      data-slot="button"
+      data-variant="bare"
       type="button"
     >
       20
@@ -157,7 +203,9 @@ exports[`RollStep > dnd5e keeps the d20 roll body 1`] = `
     class="mt-3 grid grid-cols-[1.25fr_1fr] gap-2"
   >
     <button
-      class="hud-sc flex h-[52px] w-full items-center justify-center gap-2.5 border text-[15px] font-bold tracking-[.04em] whitespace-nowrap border-white/25 text-[var(--bone)]"
+      class="cursor-pointer hud-sc flex h-[52px] w-full items-center justify-center gap-2.5 border text-[15px] font-bold tracking-[.04em] whitespace-nowrap border-white/25 text-[var(--bone)]"
+      data-slot="button"
+      data-variant="bare"
       type="button"
     >
       <svg
@@ -200,7 +248,9 @@ exports[`RollStep > dnd5e keeps the d20 roll body 1`] = `
       Авто-кидок
     </button>
     <button
-      class="hud-sc flex h-[52px] items-center justify-center gap-2.5 border text-base font-bold tracking-[.04em] border-white/25"
+      class="cursor-pointer hud-sc flex h-[52px] items-center justify-center gap-2.5 border text-base font-bold tracking-[.04em] border-white/25"
+      data-slot="button"
+      data-variant="bare"
       type="button"
     >
       Назад

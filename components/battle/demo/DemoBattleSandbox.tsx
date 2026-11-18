@@ -9,7 +9,7 @@ import { DEFAULT_BATTLE_MAP, MAZE_MARK_SYMBOLS } from '@/lib/constants/battle';
 import {
     type BattleMapPlaygroundMode,
     useBattleMapPlayground,
-} from '@/lib/hooks/battle';
+} from '@/lib/hooks/battle/useBattleMapPlayground';
 import type { BattleScene } from '@/types/api';
 import type { BattleMapConfig } from '@/types/battle-grid';
 

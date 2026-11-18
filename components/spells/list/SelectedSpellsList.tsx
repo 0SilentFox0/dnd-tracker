@@ -7,7 +7,7 @@ import { HudCard } from '@/components/hud/page';
 import { SpellIcon } from '@/components/spells/SpellIcon';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { useSpellMechanics } from '@/lib/hooks/spells';
+import { useSpellMechanics } from '@/lib/hooks/spells/useSpellMechanics';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import type { Spell } from '@/types/spells';
 

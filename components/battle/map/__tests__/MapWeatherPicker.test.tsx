@@ -94,7 +94,7 @@ describe('Погода в інструментах карти', () => {
         }
 
         const labels = Array.from(
-            getByRole('group', { name: 'Погода' }).querySelectorAll('button'),
+            getByRole('toolbar', { name: 'Погода' }).querySelectorAll('button'),
             (b) => b.textContent
         );
 
@@ -120,7 +120,7 @@ describe('Погода в інструментах карти', () => {
         fireEvent.click(getByRole('button', { name: 'Сніг' }));
 
         expect(mutate).toHaveBeenCalledWith({ weather: 'snow' });
-        expect(queryByRole('group', { name: 'Погода' })).toBeNull();
+        expect(queryByRole('toolbar', { name: 'Погода' })).toBeNull();
 
         fireEvent.click(getByRole('button', { name: 'Погода' }));
         fireEvent.click(getByRole('button', { name: 'Дощ' }));

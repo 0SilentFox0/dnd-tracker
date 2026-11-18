@@ -15,7 +15,10 @@ vi.mock('../../ProfileContext', () => ({
 vi.mock('@/lib/hooks/characters/useStash', () => ({
     useStashAction: () => ({ mutateAsync: vi.fn(), isPending: false }),
 }));
-vi.mock('@/lib/hooks/common', () => ({ useNotify: () => vi.fn() }));
+vi.mock('@/lib/hooks/common', async (orig) => ({
+    ...(await orig<object>()),
+    useNotify: () => vi.fn(),
+}));
 
 afterEach(cleanup);
 

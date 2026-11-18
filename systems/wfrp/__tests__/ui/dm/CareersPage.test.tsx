@@ -41,7 +41,8 @@ vi.mock('@/systems/wfrp/hooks/careers', () => ({
 vi.mock('@/systems/wfrp/ui/careers/CareerForm', () => ({
     CareerForm: () => null,
 }));
-vi.mock('@/lib/hooks/common', () => ({
+vi.mock('@/lib/hooks/common', async (orig) => ({
+    ...(await orig<object>()),
     useConfirm: () => mocks.confirm,
     useNotify: () => mocks.notify,
 }));

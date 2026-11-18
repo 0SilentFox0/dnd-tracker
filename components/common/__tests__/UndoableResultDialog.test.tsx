@@ -4,7 +4,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { UndoableResultDialog } from '../UndoableResultDialog';
 
-vi.mock('@/lib/hooks/common', () => ({
+vi.mock('@/lib/hooks/common', async (orig) => ({
+    ...(await orig<object>()),
     useConfirm: () => (o: { onConfirm: () => Promise<void> }) => o.onConfirm(),
 }));
 

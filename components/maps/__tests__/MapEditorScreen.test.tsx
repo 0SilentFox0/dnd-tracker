@@ -1,6 +1,12 @@
 // @vitest-environment happy-dom
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import {
+    act,
+    cleanup,
+    fireEvent,
+    render,
+    screen,
+} from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { MapEditorScreen } from '../MapEditorScreen';
@@ -19,7 +25,13 @@ const tileSaveMutation = vi.hoisted(() => vi.fn());
 
 const battleMapCapture = vi.hoisted(() => ({
     current: null as {
-        map: { background: string | null; cols?: number; rows?: number; walls?: string[]; doors?: Record<string, unknown> };
+        map: {
+            background: string | null;
+            cols?: number;
+            rows?: number;
+            walls?: string[];
+            doors?: Record<string, unknown>;
+        };
         editing: { edges: unknown };
         actions: { onStroke: (points: { x: number; y: number }[]) => void };
     } | null,
@@ -42,7 +54,8 @@ vi.mock('@/lib/hooks/common', async (orig) => ({
     useCoarsePointer: () => touch.value,
     useUnsavedChangesGuard: () => undefined,
 }));
-vi.mock('@/lib/hooks/battle-maps', () => ({
+vi.mock('@/lib/hooks/battle-maps/useBattleMaps', async (orig) => ({
+    ...(await orig<object>()),
     useBattleMap: () => query.value,
     useBattleMapTiles: () => ({ data: { version: 1, chunks: {} } }),
     usePatchBattleMapTiles: () => ({
@@ -54,10 +67,15 @@ vi.mock('@/lib/hooks/battle-maps', () => ({
         update: { mutate: vi.fn(), isPending: false },
     }),
 }));
-vi.mock('@/lib/hooks/battle-maps/useMapEditorDraft', async (orig) => orig());
 vi.mock('@/components/battle/map', () => ({
     BattleMap: (props: {
-        map: { background: string | null; cols?: number; rows?: number; walls?: string[]; doors?: Record<string, unknown> };
+        map: {
+            background: string | null;
+            cols?: number;
+            rows?: number;
+            walls?: string[];
+            doors?: Record<string, unknown>;
+        };
         editing: { edges: unknown };
         actions: { onStroke: (points: { x: number; y: number }[]) => void };
     }) => {
@@ -317,9 +335,15 @@ describe('MapEditorScreen', () => {
             isPending: false,
             isError: false,
             data: {
-                id: 'm1', name: 'Cave', cols: 10, rows: 8, version: 1,
-                updatedAt: '', map: { cols: 10, rows: 8, background: null, opacity: 0.35 },
-                walls: [], bars: [],
+                id: 'm1',
+                name: 'Cave',
+                cols: 10,
+                rows: 8,
+                version: 1,
+                updatedAt: '',
+                map: { cols: 10, rows: 8, background: null, opacity: 0.35 },
+                walls: [],
+                bars: [],
             },
         };
         render(
@@ -330,24 +354,46 @@ describe('MapEditorScreen', () => {
             </QueryClientProvider>
         );
 
-        fireEvent.mouseDown(screen.getByRole('tab', { name: 'maps.editor.panels.background' }));
+        fireEvent.mouseDown(
+            screen.getByRole('tab', { name: 'maps.editor.panels.background' })
+        );
 
         const content = JSON.stringify({
             image: 'iVBORw0KGgoAAAANSUhEUgAAAAoAAAAK',
-            resolution: { map_origin: [0, 0], map_size: { x: 8, y: 6 }, pixels_per_grid: 10 },
+            resolution: {
+                map_origin: [0, 0],
+                map_size: { x: 8, y: 6 },
+                pixels_per_grid: 10,
+            },
             line_of_sight: [[20, 10, 40, 10]],
         });
 
-        fireEvent.change(screen.getByLabelText('maps.editor.import.chooseFile'), {
-            target: { files: [new File([content], 'scene.uvtt', { type: 'application/json' })] },
-        });
+        fireEvent.change(
+            screen.getByLabelText('maps.editor.import.chooseFile'),
+            {
+                target: {
+                    files: [
+                        new File([content], 'scene.uvtt', {
+                            type: 'application/json',
+                        }),
+                    ],
+                },
+            }
+        );
 
         await screen.findByText('maps.editor.import.help');
         expect(battleMapCapture.current?.map).toMatchObject({
-            cols: 8, rows: 6, backgroundCols: 1, walls: ['2:0:s', '3:0:s'],
+            cols: 8,
+            rows: 6,
+            backgroundCols: 1,
+            walls: ['2:0:s', '3:0:s'],
         });
         expect(tileSaveMutation).not.toHaveBeenCalled();
-        expect(screen.getByRole('button', { name: 'maps.editor.save' }).hasAttribute('disabled')).toBe(false);
+        expect(
+            screen
+                .getByRole('button', { name: 'maps.editor.save' })
+                .hasAttribute('disabled')
+        ).toBe(false);
     });
 
     it('reports skipped UVTT geometry after an import', async () => {
@@ -356,9 +402,15 @@ describe('MapEditorScreen', () => {
             isPending: false,
             isError: false,
             data: {
-                id: 'm1', name: 'Cave', cols: 10, rows: 8, version: 1,
-                updatedAt: '', map: { cols: 10, rows: 8, background: null, opacity: 0.35 },
-                walls: [], bars: [],
+                id: 'm1',
+                name: 'Cave',
+                cols: 10,
+                rows: 8,
+                version: 1,
+                updatedAt: '',
+                map: { cols: 10, rows: 8, background: null, opacity: 0.35 },
+                walls: [],
+                bars: [],
             },
         };
         render(
@@ -369,19 +421,39 @@ describe('MapEditorScreen', () => {
             </QueryClientProvider>
         );
 
-        fireEvent.mouseDown(screen.getByRole('tab', { name: 'maps.editor.panels.background' }));
+        fireEvent.mouseDown(
+            screen.getByRole('tab', { name: 'maps.editor.panels.background' })
+        );
 
         const content = JSON.stringify({
             image: 'iVBORw0KGgoAAAANSUhEUgAAAAoAAAAK',
-            resolution: { map_origin: [0, 0], map_size: { x: 8, y: 6 }, pixels_per_grid: 10 },
-            line_of_sight: [[20, 10, 40, 10], [0, 0, 30, 30]],
+            resolution: {
+                map_origin: [0, 0],
+                map_size: { x: 8, y: 6 },
+                pixels_per_grid: 10,
+            },
+            line_of_sight: [
+                [20, 10, 40, 10],
+                [0, 0, 30, 30],
+            ],
         });
 
-        fireEvent.change(screen.getByLabelText('maps.editor.import.chooseFile'), {
-            target: { files: [new File([content], 'scene.uvtt', { type: 'application/json' })] },
-        });
+        fireEvent.change(
+            screen.getByLabelText('maps.editor.import.chooseFile'),
+            {
+                target: {
+                    files: [
+                        new File([content], 'scene.uvtt', {
+                            type: 'application/json',
+                        }),
+                    ],
+                },
+            }
+        );
 
-        expect(await screen.findByText('maps.editor.import.warnings.diagonal')).toBeTruthy();
+        expect(
+            await screen.findByText(/maps\.editor\.import\.warnings\.diagonal/)
+        ).toBeTruthy();
     });
 
     it('filters texture cards by their localized label', () => {

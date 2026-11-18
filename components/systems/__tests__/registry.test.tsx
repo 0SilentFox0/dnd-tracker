@@ -22,6 +22,7 @@ describe('system ui registry', () => {
             battle: hommBattle,
             dmPages: hommPages,
             fx: hommFx,
+            artifactSets: hommArtifactSets,
             ...hommRest
         } = systemUiOf('homm');
 
@@ -37,6 +38,7 @@ describe('system ui registry', () => {
         } = systemUiOf('dnd5e');
 
         expect(hommRest).toEqual(dndRest);
+        expect(hommArtifactSets).toBeDefined();
         expect(hommFx?.dice).toHaveLength(1);
         expect(dndFx).toBeUndefined();
         expect(Object.keys(dndPages ?? {})).toEqual(['classes', 'backgrounds']);

@@ -14,7 +14,7 @@ import { useXpBalance } from './useXpBalance';
 
 import { CharacterType } from '@/lib/constants/characters';
 import { useCampaignRules } from '@/lib/hooks/campaigns';
-import { hitModelOf } from '@/lib/utils/battle/balance';
+import { hitModelOf } from '@/lib/utils/battle/balance/hit-model';
 import { sharedEnemyRace } from '@/lib/utils/battle/balance/setup';
 import { SECTION_DEFAULTS } from '@/lib/utils/rules/defaults';
 import { FALLBACK_SYSTEM_KEY } from '@/lib/utils/rules/systems/catalog';

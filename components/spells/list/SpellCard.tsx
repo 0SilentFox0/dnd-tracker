@@ -18,7 +18,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useSpellMechanics } from '@/lib/hooks/spells';
+import { useSpellMechanics } from '@/lib/hooks/spells/useSpellMechanics';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import { getSpellGroupIcon } from '@/lib/utils/spells/spell-icons';
 import type { Spell, SpellGroup } from '@/types/spells';

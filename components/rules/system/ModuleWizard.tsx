@@ -7,7 +7,7 @@ import { SummaryStep } from './SummaryStep';
 import { ErrorState, LoadingState } from '@/components/common/states';
 import { Button } from '@/components/ui/button';
 import type { useCampaignModules } from '@/lib/hooks/campaigns';
-import { useModuleDraft } from '@/lib/hooks/campaigns';
+import { useModuleDraft } from '@/lib/hooks/campaigns/useModuleDraft';
 import type { SystemSelection } from '@/lib/utils/rules/systems/catalog';
 
 type Step = 'modules' | 'summary';

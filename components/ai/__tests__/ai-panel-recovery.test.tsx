@@ -19,12 +19,21 @@ const chat = vi.hoisted(() => ({
 vi.mock('@/lib/hooks/common', () => ({
     DESKTOP_QUERY: '',
     useMediaQuery: () => true,
+    useIsMobile: () => false,
+}));
+vi.mock('@/components/ai/AssistantContextDisclosure', () => ({
+    AssistantContextDisclosure: () => null,
 }));
 vi.mock('@/components/ai/AiComposer', () => ({ AiComposer: () => null }));
 vi.mock('@/components/ai/AiThreadHeader', () => ({
     AiThreadHeader: () => null,
 }));
 vi.mock('@/lib/hooks/ai', () => ({
+    useAssistantContext: () => ({
+        getSessionContext: () => undefined,
+        requestSend: vi.fn(),
+    }),
+    useAssistantEffects: () => ({ consumeReceipt: vi.fn() }),
     AI_PANEL_WIDTH: { min: 320, step: 32 },
     useAiPanelWidth: () => ({ width: 420, max: 960 }),
     useAiCredentials: () => ({

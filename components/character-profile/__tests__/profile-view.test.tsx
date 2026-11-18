@@ -38,8 +38,10 @@ vi.mock('@/lib/hooks/campaigns', async (orig) => ({
     ...(await orig<object>()),
     useCampaignRules: () => ({ data: undefined }),
 }));
-vi.mock('@/systems/skilltrees/hooks', () => ({
+vi.mock('@/systems/skilltrees/hooks', async (orig) => ({
+    ...(await orig<object>()),
     useCharacterProgression: () => ({ view: null }),
+    useLevelUpCelebration: () => ({ celebration: null, dismiss: () => {} }),
 }));
 vi.mock('@/lib/hooks/characters/useStash', async (orig) => ({
     ...(await orig<object>()),

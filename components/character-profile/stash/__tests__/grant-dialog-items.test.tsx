@@ -71,7 +71,10 @@ vi.mock('@/lib/hooks/characters/useStash', () => ({
         ],
     }),
 }));
-vi.mock('@/lib/hooks/common', () => ({ useNotify: () => vi.fn() }));
+vi.mock('@/lib/hooks/common', async (orig) => ({
+    ...(await orig<object>()),
+    useNotify: () => vi.fn(),
+}));
 
 import { GrantArtifactDialog } from '../GrantArtifactDialog';
 
