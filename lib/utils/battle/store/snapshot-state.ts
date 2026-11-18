@@ -39,9 +39,11 @@ export interface SnapshotState {
     /** terrain і конфіги режимів лише для боїв із картою; старі знімки без поля — цю частину карти при відкаті не чіпаємо */
     scene: Pick<
         BattleSceneState,
-        'round' | 'turnIndex' | 'status' | 'pendingMoraleCheck'
+        'round' | 'turnIndex' | 'status'
     > & {
         sceneState?: SystemSlot;
+        /** Legacy snapshots only: read through `upgradeScene`, never written */
+        pendingMoraleCheck?: unknown;
         mapState?: BattleMapState;
         mapStateChanged?: true;
         mapVersion?: number;
@@ -76,7 +78,6 @@ export function buildSnapshotState(
             round: scene.round,
             turnIndex: scene.turnIndex,
             status: scene.status,
-            pendingMoraleCheck: scene.pendingMoraleCheck,
             ...(scene.sceneState && { sceneState: scene.sceneState }),
             ...(mapLayer.mapStateChanged && {
                 mapState: isEmptyMapState(mapLayer.mapState)

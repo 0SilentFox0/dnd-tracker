@@ -21,6 +21,7 @@ import { diffTerrain } from '@/lib/utils/battle/grid/terrain';
 import { eventTextOf } from '@/lib/utils/battle/log/__tests__/event-text';
 import { BattleAccessError } from '@/lib/utils/battle/store';
 import type { UnitFromPrisma } from '@/lib/utils/battle/types/participant';
+import { pendingSlot } from '@/systems/morale/__tests__/pending';
 import type { BattleParticipant } from '@/types/battle';
 import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 
@@ -676,7 +677,7 @@ describe('spell mutation', () => {
 
         await expect(
             mutation()(
-                { ...ctx, scene: { ...ctx.scene, pendingMoraleCheck: panic } },
+                { ...ctx, scene: { ...ctx.scene, sceneState: pendingSlot(panic) } },
                 body() as never
             )
         ).rejects.toMatchObject({ code: 'action_used' });

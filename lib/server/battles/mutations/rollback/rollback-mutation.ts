@@ -12,6 +12,7 @@ import type {
     BattleMutationContext,
     MutationResult,
 } from '@/lib/utils/battle/pipeline/run-battle-mutation';
+import { upgradeSceneState } from '@/lib/utils/battle/scene-state';
 import type { SnapshotState } from '@/lib/utils/battle/store';
 import {
     BattleRuleError,
@@ -117,9 +118,11 @@ export function createRollbackMutation(
                 round: scene.round,
                 turnIndex: scene.turnIndex,
                 status: scene.status,
-                pendingMoraleCheck: scene.pendingMoraleCheck,
                 pendingChoice: null,
-                sceneState: scene.sceneState ?? null,
+                sceneState:
+                    upgradeSceneState(ctx.meta.rules, scene.sceneState, {
+                        pendingMoraleCheck: scene.pendingMoraleCheck,
+                    }) ?? null,
                 ...(scene.status !== BattleStatus.COMPLETED && {
                     completedAt: null,
                 }),

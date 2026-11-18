@@ -17,7 +17,6 @@ const ctx = {
         turnIndex: 0,
         version: 2,
         eventSeq: 3,
-        pendingMoraleCheck: null,
         pendingChoice: null,
         startedAt: null,
         completedAt: null,
@@ -55,7 +54,6 @@ describe('next-turn mutation', () => {
         expect(out.scene).toMatchObject({
             turnIndex: 1,
             round: 1,
-            pendingMoraleCheck: null,
         });
         expect(Array.isArray(out.events)).toBe(true);
     });

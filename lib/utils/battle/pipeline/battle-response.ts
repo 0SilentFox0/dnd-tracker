@@ -83,7 +83,6 @@ export function toBattleResponse(
             ? redactParticipantsForPlayers(participants)
             : participants,
         pendingSummons: hide ? redactPendingForPlayers(pending) : pending,
-        pendingMoraleCheck: scene.pendingMoraleCheck,
         pendingChoice: publicPending(scene.pendingChoice),
         ...(scene.sceneState && { system: scene.sceneState }),
         ...mapFields(meta),

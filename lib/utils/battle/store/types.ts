@@ -36,7 +36,6 @@ export interface BattleSceneState {
     turnIndex: number;
     version: number;
     eventSeq: number;
-    pendingMoraleCheck: unknown | null;
     pendingChoice: PendingChoice | null;
     sceneState?: SystemSlot;
     startedAt: Date | null;
@@ -149,7 +148,6 @@ export type ScenePatch = Partial<
         | 'status'
         | 'round'
         | 'turnIndex'
-        | 'pendingMoraleCheck'
         | 'pendingChoice'
         | 'startedAt'
         | 'completedAt'
@@ -181,7 +179,6 @@ export interface BattleDelta {
         | 'status'
         | 'round'
         | 'turnIndex'
-        | 'pendingMoraleCheck'
         | 'pendingChoice'
         | 'turnStartedAt'
     > & { sceneState?: SystemSlot };

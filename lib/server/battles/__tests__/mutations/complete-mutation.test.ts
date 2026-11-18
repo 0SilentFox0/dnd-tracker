@@ -4,6 +4,7 @@ import { context } from './fixtures';
 
 import { completeMutation } from '@/lib/server/battles/mutations/complete/complete-mutation';
 import { eventTextOf } from '@/lib/utils/battle/log/__tests__/event-text';
+import { pendingSlot } from '@/systems/morale/__tests__/pending';
 
 describe('complete mutation', () => {
     it('завершує бій з вказаним результатом', () => {
@@ -22,7 +23,7 @@ describe('complete mutation', () => {
                 ...ctx,
                 scene: {
                     ...ctx.scene,
-                    pendingMoraleCheck: {
+                    sceneState: pendingSlot({
                         participantId: 'hero',
                         d10Roll: 1,
                         moraleResult: {
@@ -31,13 +32,13 @@ describe('complete mutation', () => {
                             moralePositive: false,
                             message: '',
                         },
-                    },
+                    }),
                 },
             },
             {}
         );
 
-        expect(out.scene?.pendingMoraleCheck).toBeNull();
+        expect(out.scene?.sceneState).toBeNull();
     });
 
     it('без результату — перемога за замовчуванням', () => {

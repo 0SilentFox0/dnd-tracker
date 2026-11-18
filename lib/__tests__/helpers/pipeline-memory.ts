@@ -76,7 +76,6 @@ export function memoryPipeline(initial: MemoryBattle) {
                     status: scene.status,
                     round: scene.round,
                     turnIndex: scene.turnIndex,
-                    pendingMoraleCheck: scene.pendingMoraleCheck,
                     pendingChoice: scene.pendingChoice,
                     turnStartedAt: null,
                 },

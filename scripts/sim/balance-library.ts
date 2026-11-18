@@ -525,7 +525,7 @@ async function playTurn(actor: BattleParticipant, foes: BattleParticipant[]) {
                 participants: state.initiativeOrder,
                 scene: {
                     turnIndex: state.currentTurnIndex,
-                    pendingMoraleCheck: state.pendingMoraleCheck,
+                    sceneState: state.system,
                 },
             },
             actor.basicInfo.id

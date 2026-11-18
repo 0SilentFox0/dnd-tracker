@@ -566,7 +566,7 @@ const awaitsMorale = (name: string) =>
             participants: state.initiativeOrder,
             scene: {
                 turnIndex: state.currentTurnIndex,
-                pendingMoraleCheck: state.pendingMoraleCheck,
+                sceneState: state.system,
             },
         },
         by(name).basicInfo.id

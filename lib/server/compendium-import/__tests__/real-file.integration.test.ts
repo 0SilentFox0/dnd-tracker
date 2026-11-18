@@ -525,8 +525,7 @@ describe.skipIf(!FILE)('real file import', () => {
                                 participants: P(),
                                 scene: {
                                     turnIndex: state.currentTurnIndex,
-                                    pendingMoraleCheck:
-                                        state.pendingMoraleCheck,
+                                    sceneState: state.system,
                                 },
                             },
                             id

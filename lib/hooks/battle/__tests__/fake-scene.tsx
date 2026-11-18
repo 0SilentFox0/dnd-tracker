@@ -144,7 +144,6 @@ export function fakeScene(opts: FakeSceneOptions = {}) {
         version: 5,
         isDM: opts.isDM ?? opts.playerView ?? false,
         campaign: { id: 'c1', friendlyFire: false },
-        pendingMoraleCheck: null,
         pendingChoice: opts.critPending
             ? {
                   triggers: [

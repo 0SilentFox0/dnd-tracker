@@ -9,6 +9,7 @@ import { eventTextOf } from '@/lib/utils/battle/log/__tests__/event-text';
 import type { BattleSceneState } from '@/lib/utils/battle/store';
 import { advanceTurn } from '@/lib/utils/battle/turn';
 import { DEFAULT_RULES } from '@/lib/utils/rules/defaults';
+import { pendingMoraleOf, pendingSlot } from '@/systems/morale/__tests__/pending';
 import type { BattleAction } from '@/types/battle-actions';
 import type { BattleMapConfig } from '@/types/battle-grid';
 
@@ -20,7 +21,6 @@ const scene: BattleSceneState = {
     turnIndex: 0,
     version: 1,
     eventSeq: 0,
-    pendingMoraleCheck: null,
     pendingChoice: null,
     startedAt: null,
     completedAt: null,
@@ -53,7 +53,6 @@ describe('advanceTurn', () => {
         expect(out.scene).toMatchObject({
             turnIndex: 1,
             round: 1,
-            pendingMoraleCheck: null,
         });
     });
 
@@ -150,14 +149,14 @@ describe('advanceTurn', () => {
         expect(out.scene.status).toBe('completed');
     });
 
-    it('невикористаний pendingMoraleCheck застосовується і скидається', () => {
+    it('невикористаний відкладений кидок моралі застосовується і скидається', () => {
         const out = advanceTurn({
             rules: DEFAULT_RULES,
             participants: [hero, goblin],
             pending: [],
             scene: {
                 ...scene,
-                pendingMoraleCheck: {
+                sceneState: pendingSlot({
                     participantId: 'hero',
                     d10Roll: 1,
                     moraleResult: {
@@ -166,11 +165,11 @@ describe('advanceTurn', () => {
                         message: 'Пропуск',
                         moralePositive: false,
                     },
-                },
+                }),
             },
         });
 
-        expect(out.scene.pendingMoraleCheck).toBeNull();
+        expect(pendingMoraleOf(out.scene.sceneState ?? undefined)).toBeNull();
         expect(out.actions.some((a) => eventTextOf(a).length > 0)).toBe(true);
     });
 
@@ -269,7 +268,7 @@ describe('advanceTurn', () => {
                 scene: {
                     ...scene,
                     turnIndex: 0,
-                    pendingMoraleCheck: moraleExtra,
+                    sceneState: pendingSlot(moraleExtra),
                 },
             });
 
@@ -454,7 +453,7 @@ describe('advanceTurn', () => {
                 scene: {
                     ...scene,
                     turnIndex: 0,
-                    pendingMoraleCheck: moraleExtra,
+                    sceneState: pendingSlot(moraleExtra),
                 },
             });
 

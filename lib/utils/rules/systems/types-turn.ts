@@ -60,7 +60,7 @@ export type TurnHook<C extends TurnHookCtx = TurnHookCtx> = (
 
 export interface ActGateScope {
     participants: BattleParticipant[];
-    scene: Pick<BattleSceneState, 'turnIndex' | 'pendingMoraleCheck'>;
+    scene: Pick<BattleSceneState, 'turnIndex' | 'sceneState'>;
     rules: Ruleset;
 }
 
@@ -86,10 +86,21 @@ export interface TurnStartCheck {
         participants: BattleParticipant[]
     ): number;
     outcomeOf(
-        pending: unknown,
+        sceneState: SystemSlot | undefined,
         participantId: string
     ): TurnGateOutcome | undefined;
 }
+
+/** Drops the per-turn part of the scene slot when the turn moves on; returns the slot unchanged when there is nothing to drop */
+export type SceneStateReset = (
+    slot: SystemSlot | undefined
+) => SystemSlot | undefined;
+
+/** Upgrade-on-read: folds values still stored in legacy scene columns into the scene slot; `legacy` is keyed by column name */
+export type SceneStateUpgrade = (
+    slot: SystemSlot | undefined,
+    legacy: Record<string, unknown>
+) => SystemSlot | undefined;
 
 /** Clears the per-turn part of a participant's system state; 'reaction' = only what a regained reaction restores */
 export type TurnStateReset = (
@@ -101,6 +112,10 @@ export type TurnStateReset = (
 export interface RuleSystemTurn {
     /** Resets system state when a turn begins (or a reaction is regained) */
     resetState?: readonly TurnStateReset[];
+    /** The scene slot loses its per-turn state when the turn moves on */
+    resetScene?: readonly SceneStateReset[];
+    /** Reads legacy scene columns into the scene slot (load and rollback) */
+    upgradeScene?: readonly SceneStateUpgrade[];
     /** Client turn gate (a check before the first action) */
     startCheck?: TurnStartCheck;
     /** Before the turn passes on */

@@ -6,6 +6,7 @@ import { bonusActionMutation } from '@/lib/server/battles/mutations/bonus-action
 import { resolved } from '@/lib/utils/abilities/__tests__/fixtures';
 import { BattleAccessError } from '@/lib/utils/battle/store';
 import { REJECT } from '@/lib/utils/battle/store/reject';
+import { pendingSlot } from '@/systems/morale/__tests__/pending';
 
 const rally = resolved({
     id: 'r',
@@ -157,7 +158,7 @@ describe('bonusActionMutation', () => {
 
         await expect(
             bonusActionMutation(
-                { ...ctx, scene: { ...ctx.scene, pendingMoraleCheck: panic } },
+                { ...ctx, scene: { ...ctx.scene, sceneState: pendingSlot(panic) } },
                 { participantId: 'hero', abilityKey: rally.key }
             )
         ).rejects.toThrow(expect.objectContaining({ code: 'action_used' }));

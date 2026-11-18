@@ -6,6 +6,7 @@ import { auraZoneMutation } from '@/lib/server/battles/mutations/aura-zone/aura-
 import { resolved } from '@/lib/utils/abilities/__tests__/fixtures';
 import { eventTextOf } from '@/lib/utils/battle/log/__tests__/event-text';
 import { BattleAccessError } from '@/lib/utils/battle/store';
+import { pendingSlot } from '@/systems/morale/__tests__/pending';
 
 const aura = resolved(
     {
@@ -87,7 +88,7 @@ describe('aura-zone mutation', () => {
     });
 
     it('у паніці зону не обрати', () => {
-        const pendingMoraleCheck = {
+        const pending = {
             participantId: 'hero',
             d10Roll: 1,
             moraleResult: { shouldSkipTurn: true },
@@ -97,7 +98,7 @@ describe('aura-zone mutation', () => {
 
         expect(() =>
             auraZoneMutation(
-                { ...ctx, scene: { ...ctx.scene, pendingMoraleCheck } },
+                { ...ctx, scene: { ...ctx.scene, sceneState: pendingSlot(pending) } },
                 { participantId: 'hero', auraId, targetIds: [] }
             )
         ).toThrow(expect.objectContaining({ code: 'action_used' }));

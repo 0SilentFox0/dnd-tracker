@@ -8,6 +8,7 @@ import { attackMutation } from '@/lib/server/battles/mutations/attack/attack-mut
 import { moveMutation } from '@/lib/server/battles/mutations/move/move-mutation';
 import { nextTurnMutation } from '@/lib/server/battles/mutations/next-turn/next-turn-mutation';
 import { REJECT } from '@/lib/utils/battle/store/reject';
+import { pendingSlot } from '@/systems/morale/__tests__/pending';
 import type { BattleParticipant } from '@/types/battle';
 
 const map = { cols: 10, rows: 5, background: null, opacity: 0.3 };
@@ -36,7 +37,7 @@ const ctx = (over: Parameters<typeof context>[0] = {}) => {
 
 const resolvedScene = (c: ReturnType<typeof ctx>) => ({
     ...c.scene,
-    pendingMoraleCheck: {
+    sceneState: pendingSlot({
         participantId: 'hero',
         d10Roll: 3,
         moraleResult: {
@@ -45,7 +46,7 @@ const resolvedScene = (c: ReturnType<typeof ctx>) => ({
             message: '',
             moralePositive: true,
         },
-    },
+    }),
 });
 
 const move = { participantId: 'hero', to: { x: 2, y: 0 } };

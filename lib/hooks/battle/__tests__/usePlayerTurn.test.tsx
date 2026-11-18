@@ -5,6 +5,8 @@ import { describe, expect, it } from 'vitest';
 import { usePlayerTurn } from '../usePlayerTurn';
 import { fakeScene } from './fake-scene';
 
+import { pendingSlot } from '@/systems/morale/__tests__/pending';
+
 describe('usePlayerTurn', () => {
     it('після вичерпаної дії — відлік; «Залишитись» — назад до дій', () => {
         const { me, wrapper } = fakeScene();
@@ -96,7 +98,7 @@ describe('usePlayerTurn', () => {
         expect(result.current.phase).toBe('acting');
     });
 
-    it('результат моралі: без перевірки — undefined; уже перевірена в цьому ході — з pendingMoraleCheck', () => {
+    it('результат моралі: без перевірки — undefined; уже перевірена в цьому ході — зі збереженим кидком', () => {
         const plain = fakeScene();
 
         expect(
@@ -107,7 +109,7 @@ describe('usePlayerTurn', () => {
 
         const checked = fakeScene({ morale: 2 });
 
-        checked.battle.pendingMoraleCheck = {
+        checked.battle.system = pendingSlot({
             participantId: 'me',
             d10Roll: 9,
             moraleResult: {
@@ -116,7 +118,7 @@ describe('usePlayerTurn', () => {
                 moralePositive: true,
                 message: '',
             },
-        };
+        });
 
         const { result } = renderHook(() => usePlayerTurn(checked.me), {
             wrapper: checked.wrapper,

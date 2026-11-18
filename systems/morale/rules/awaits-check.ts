@@ -1,12 +1,13 @@
 import { effectiveMorale } from './effective-morale';
 
 import { currentOf } from '@/lib/utils/battle/common/control';
-import type { PendingMoraleCheckPayload } from '@/systems/morale/rules/threshold';
+import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
+import { pendingMoraleOf } from '@/systems/morale/rules/state';
 import type { BattleParticipant } from '@/types/battle';
 
 export interface MoraleScope {
     participants: BattleParticipant[];
-    scene: { turnIndex: number; pendingMoraleCheck: unknown };
+    scene: { turnIndex: number; sceneState?: SystemSlot };
 }
 
 // мораль могла змінитися посеред ходу (вбивство, вміння) — перевірка потрібна лише до першої дії
@@ -30,10 +31,7 @@ export function awaitsMoraleCheck(
     )
         return false;
 
-    if (
-        (scope.scene.pendingMoraleCheck as PendingMoraleCheckPayload | null)
-            ?.participantId === participantId
-    )
+    if (pendingMoraleOf(scope.scene.sceneState)?.participantId === participantId)
         return false;
 
     return effectiveMorale(current, scope.participants).value !== 0;

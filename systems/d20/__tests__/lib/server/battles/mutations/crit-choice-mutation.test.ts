@@ -301,7 +301,6 @@ describe('crit-choice mutation', () => {
                     status: BattleStatus.ACTIVE,
                     round: 1,
                     turnIndex: 0,
-                    pendingMoraleCheck: null,
                     pendingChoice: null,
                 },
                 upserted: [],

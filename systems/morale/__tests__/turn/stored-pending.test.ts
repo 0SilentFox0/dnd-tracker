@@ -5,6 +5,7 @@ import { createMockParticipant } from '@/lib/utils/battle/__tests__/fixtures/moc
 import type { BattleSceneState } from '@/lib/utils/battle/store';
 import { advanceTurn } from '@/lib/utils/battle/turn';
 import { DEFAULT_RULES, type Ruleset } from '@/lib/utils/rules';
+import { pendingMoraleOf, pendingSlot } from '@/systems/morale/__tests__/pending';
 
 const scene: BattleSceneState = {
     id: 'b1',
@@ -14,7 +15,6 @@ const scene: BattleSceneState = {
     turnIndex: 0,
     version: 1,
     eventSeq: 0,
-    pendingMoraleCheck: null,
     pendingChoice: null,
     startedAt: null,
     completedAt: null,
@@ -54,10 +54,10 @@ const advance = (rules: Ruleset, pendingMoraleCheck: unknown) =>
         rules,
         participants: [hero, goblin],
         pending: [],
-        scene: { ...scene, pendingMoraleCheck },
+        scene: { ...scene, sceneState: pendingSlot(pendingMoraleCheck) },
     });
 
-describe('pendingMoraleCheck stored before Ch8 (D9)', () => {
+describe('pending morale check stored in the scene slot', () => {
     it('homm: a positive result marks the hero for an extra turn and logs the roll', () => {
         const out = advance(
             homm,
@@ -75,7 +75,6 @@ describe('pendingMoraleCheck stored before Ch8 (D9)', () => {
         expect(out.scene).toMatchObject({
             turnIndex: 1,
             round: 1,
-            pendingMoraleCheck: null,
         });
         expect(out.actions[0]).toMatchObject({
             actionType: 'ability',
@@ -98,7 +97,7 @@ describe('pendingMoraleCheck stored before Ch8 (D9)', () => {
             hasUsedReaction: true,
             hasExtraTurn: false,
         });
-        expect(out.scene.pendingMoraleCheck).toBeNull();
+        expect(pendingMoraleOf(out.scene.sceneState ?? undefined)).toBeNull();
         expect(out.actions[0]).toMatchObject({
             actionType: 'morale_skip',
             actorId: 'hero',
@@ -142,7 +141,7 @@ describe('pendingMoraleCheck stored before Ch8 (D9)', () => {
             })
         );
 
-        expect(out.scene.pendingMoraleCheck).toBeNull();
+        expect(pendingMoraleOf(out.scene.sceneState ?? undefined)).toBeNull();
         expect(out.participants[0].actionFlags).toEqual(hero.actionFlags);
         expect(
             out.actions.some(

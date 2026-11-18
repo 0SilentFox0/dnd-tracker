@@ -28,7 +28,6 @@ function fakeDb(row: {
                       currentTurnIndex: 0,
                       version: 1,
                       eventSeq: 0,
-                      pendingMoraleCheck: null,
                       map: null,
                       audio: null,
                       rules: row.rules,

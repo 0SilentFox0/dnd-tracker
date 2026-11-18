@@ -150,7 +150,6 @@ const battle = {
     isDM: false,
     rules: DEFAULT_RULES,
     campaign: { id: 'c1', friendlyFire: false },
-    pendingMoraleCheck: null,
     pendingChoice: null,
 } as unknown as BattleScene;
 
@@ -181,7 +180,6 @@ const delta: ClientBattleDelta = {
         status: 'active',
         round: 1,
         turnIndex: 0,
-        pendingMoraleCheck: null,
         pendingChoice: null,
     },
     upserted: [],

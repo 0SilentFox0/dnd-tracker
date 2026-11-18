@@ -80,7 +80,7 @@ describe('createBattleParticipantFromCharacter: правила бою без п�
             awaitsMoraleCheck(
                 {
                     participants: [p],
-                    scene: { turnIndex: 0, pendingMoraleCheck: null },
+                    scene: { turnIndex: 0 },
                 },
                 p.basicInfo.id
             )

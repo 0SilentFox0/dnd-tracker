@@ -233,7 +233,6 @@ describe('illusion auto-clear through the pipeline', () => {
                 status: BattleStatus.COMPLETED,
                 round: 1,
                 turnIndex: 0,
-                pendingMoraleCheck: null,
                 pendingChoice: null,
             },
             upserted: [],

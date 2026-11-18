@@ -73,7 +73,6 @@ const ctx = (h: BattleParticipant) =>
             turnIndex: 0,
             version: 2,
             eventSeq: 3,
-            pendingMoraleCheck: null,
             startedAt: null,
             completedAt: null,
         },

@@ -7,6 +7,10 @@ import type {
 } from '@/lib/utils/battle/pipeline/run-battle-mutation';
 import { BattleRuleError, rejectAction } from '@/lib/utils/battle/store';
 import { checkMorale } from '@/systems/morale/rules/check';
+import {
+    pendingMoraleOf,
+    withPendingMorale,
+} from '@/systems/morale/rules/state';
 import type { PendingMoraleCheckPayload } from '@/systems/morale/rules/threshold';
 
 export function moraleCheckMutation(
@@ -21,8 +25,7 @@ export function moraleCheckMutation(
         forbidden: API_ERRORS.FORBIDDEN,
     });
 
-    const pending = ctx.scene
-        .pendingMoraleCheck as PendingMoraleCheckPayload | null;
+    const pending = pendingMoraleOf(ctx.scene.sceneState);
 
     if (pending?.participantId === data.participantId) {
         throw new BattleRuleError(
@@ -53,7 +56,9 @@ export function moraleCheckMutation(
     return {
         participants: ctx.participants,
         pending: ctx.pending,
-        scene: { pendingMoraleCheck },
+        scene: {
+            sceneState: withPendingMorale(ctx.scene.sceneState, pendingMoraleCheck) ?? null,
+        },
         events: [],
         response: { moraleResult },
     };

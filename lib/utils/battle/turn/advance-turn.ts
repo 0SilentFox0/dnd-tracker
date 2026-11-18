@@ -22,6 +22,7 @@ import {
     dropBattleFlag,
     reserveOf,
 } from '@/lib/utils/battle/participant/reserve';
+import { resetSceneState, sceneResetPatch } from '@/lib/utils/battle/scene-state';
 import type { BattleSceneState, ScenePatch } from '@/lib/utils/battle/store';
 import type { Ruleset } from '@/lib/utils/rules';
 import type { BattleParticipant } from '@/types/battle';
@@ -66,7 +67,7 @@ export function advanceAfterRemoval({
             scene: {
                 ...scene,
                 turnIndex: before - 1,
-                pendingMoraleCheck: null,
+                sceneState: resetSceneState(input.rules, scene.sceneState),
             },
         },
         true
@@ -108,7 +109,7 @@ function advanceFrom(
                 turnIndex: scene.turnIndex,
                 round: scene.round,
                 status: scene.status,
-                pendingMoraleCheck: null,
+                ...sceneResetPatch(rules, scene.sceneState),
             },
             actions,
         };
@@ -227,7 +228,7 @@ function advanceFrom(
                 turnIndex: extraIndex,
                 round: scene.round,
                 status: scene.status,
-                pendingMoraleCheck: null,
+                ...sceneResetPatch(rules, scene.sceneState),
             },
             actions: [...actions, extraTurnAction(taker, scene)],
         };
@@ -282,7 +283,7 @@ function advanceFrom(
             round: loop.nextRound,
             status: victory.finalStatus as BattleSceneState['status'],
             ...(victory.completedAt && { completedAt: victory.completedAt }),
-            pendingMoraleCheck: null,
+            ...sceneResetPatch(rules, scene.sceneState),
             ...(prunedMap && { map: prunedMap }),
         },
         actions: [...actions, ...newLogEntries],

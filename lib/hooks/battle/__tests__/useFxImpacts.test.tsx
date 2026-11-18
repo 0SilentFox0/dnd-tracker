@@ -18,7 +18,7 @@ vi.mock('../useBattleScene', () => ({
     useBattleSceneData: () => ({
         battle: {
             battleLog: h.log,
-            pendingMoraleCheck: h.morale,
+            system: h.morale,
             initiativeOrder: [],
         },
     }),
@@ -73,8 +73,8 @@ describe('useFxImpacts', () => {
     it('кубик системи в черзі збільшує запобіжник; без слота — ні', () => {
         const fx = {
             dice: [
-                (e: { scene: { pendingCheck: unknown } }) =>
-                    e.scene.pendingCheck
+                (e: { scene: { system: unknown } }) =>
+                    e.scene.system
                         ? {
                               key: 'k',
                               actorId: 'a',

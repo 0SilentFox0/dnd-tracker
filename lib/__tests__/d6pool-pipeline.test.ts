@@ -151,7 +151,6 @@ const SCENE = {
     turnIndex: 0,
     version: 0,
     eventSeq: 0,
-    pendingMoraleCheck: null,
     pendingChoice: null,
     startedAt: null,
     completedAt: null,

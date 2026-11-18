@@ -17,6 +17,7 @@ import {
     parseDice,
 } from '@/lib/utils/common/dice';
 import { DEFAULT_RULES } from '@/lib/utils/rules';
+import { pendingSlot } from '@/systems/morale/__tests__/pending';
 
 const base = createMockParticipant();
 
@@ -57,7 +58,6 @@ const ctx = {
         turnIndex: 0,
         version: 2,
         eventSeq: 3,
-        pendingMoraleCheck: null,
         pendingChoice: null,
         startedAt: null,
         completedAt: null,
@@ -164,7 +164,6 @@ describe('attack mutation', () => {
 
         expect(out.scene).toMatchObject({
             turnIndex: 1,
-            pendingMoraleCheck: null,
         });
     });
 
@@ -283,7 +282,7 @@ describe('attack mutation', () => {
             attackMutation(
                 {
                     ...ctx,
-                    scene: { ...ctx.scene, pendingMoraleCheck: panic },
+                    scene: { ...ctx.scene, sceneState: pendingSlot(panic) },
                 } as BattleMutationContext,
                 body()
             )

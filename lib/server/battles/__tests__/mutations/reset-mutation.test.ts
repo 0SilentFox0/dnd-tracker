@@ -14,7 +14,6 @@ describe('reset mutation', () => {
             status: 'prepared',
             round: 1,
             turnIndex: 0,
-            pendingMoraleCheck: null,
             pendingChoice: null,
             sceneState: null,
             startedAt: null,

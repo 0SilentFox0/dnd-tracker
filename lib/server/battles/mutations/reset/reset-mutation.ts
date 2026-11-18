@@ -21,7 +21,7 @@ export function resetMutation(ctx: BattleMutationContext): MutationResult {
             status: BattleStatus.PREPARED,
             round: 1,
             turnIndex: 0,
-            pendingMoraleCheck: null,
+            
             pendingChoice: null,
             sceneState: null,
             startedAt: null,

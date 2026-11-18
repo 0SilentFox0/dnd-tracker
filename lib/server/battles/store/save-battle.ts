@@ -230,7 +230,6 @@ export function prepareSave(
             status: nextScene.status,
             round: nextScene.round,
             turnIndex: nextScene.turnIndex,
-            pendingMoraleCheck: nextScene.pendingMoraleCheck,
             pendingChoice: nextScene.pendingChoice,
             turnStartedAt,
             ...(nextScene.sceneState && { sceneState: nextScene.sceneState }),
@@ -307,13 +306,11 @@ export async function saveBattle(
                 ...(patch.turnIndex !== undefined && {
                     currentTurnIndex: patch.turnIndex,
                 }),
-                ...(patch.pendingMoraleCheck !== undefined && {
-                    pendingMoraleCheck: jsonOrNull(patch.pendingMoraleCheck),
-                }),
                 ...(patch.pendingChoice !== undefined && {
                     pendingCritChoice: jsonOrNull(patch.pendingChoice),
                 }),
                 ...(patch.sceneState !== undefined && {
+                    pendingMoraleCheck: Prisma.DbNull,
                     systemState: patch.sceneState
                         ? (patch.sceneState as unknown as Prisma.InputJsonValue)
                         : Prisma.DbNull,

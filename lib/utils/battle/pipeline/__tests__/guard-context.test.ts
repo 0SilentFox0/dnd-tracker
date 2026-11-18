@@ -19,7 +19,6 @@ const loaded = {
         turnIndex: 0,
         version: 3,
         eventSeq: 4,
-        pendingMoraleCheck: null,
         startedAt: null,
         completedAt: null,
     },

@@ -165,7 +165,6 @@ const scene = (turnIndex: number, round = 1): BattleSceneState => ({
     turnIndex,
     version: 1,
     eventSeq: 0,
-    pendingMoraleCheck: null,
     pendingChoice: null,
     startedAt: null,
     completedAt: null,

@@ -162,7 +162,6 @@ exports[`removal зберігає death-save event, participants, turn/round і 
     ],
     "pending": [],
     "scene": {
-      "pendingMoraleCheck": null,
       "round": 1,
       "status": "active",
       "turnIndex": 1,
