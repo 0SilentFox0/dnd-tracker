@@ -6,6 +6,7 @@ import { Footprints, Map as MapIcon, Presentation } from 'lucide-react';
 
 import { SHOW_TONE, ShowButton } from '@/components/show/stage/show-ui';
 import { WorldTravelDialog } from '@/components/show/world/WorldTravelDialog';
+import { NativeSelect } from '@/components/ui/native-select';
 import { WorldMapLink } from '@/components/world/WorldMapLink';
 import type { ShowControl } from '@/lib/hooks/show';
 import { type TravelMoved, useWorldMap, useWorldMaps } from '@/lib/hooks/world';
@@ -101,7 +102,7 @@ export function ShowWorldControls({
                 <MapIcon className="size-4" />
                 <span className="text-xs">{t('present')}</span>
             </ShowButton>
-            <select
+            <NativeSelect
                 aria-label={t('map')}
                 value={mapId ?? ''}
                 onChange={(e) =>
@@ -115,8 +116,8 @@ export function ShowWorldControls({
                         {map.name}
                     </option>
                 ))}
-            </select>
-            <select
+            </NativeSelect>
+            <NativeSelect
                 aria-label={t('focus')}
                 value={focusId ?? ''}
                 onChange={(e) => pickFocus(e.target.value)}
@@ -129,7 +130,7 @@ export function ShowWorldControls({
                         {m.name}
                     </option>
                 ))}
-            </select>
+            </NativeSelect>
             {show?.world && (
                 <ShowButton
                     aria-label={t('toSlides')}

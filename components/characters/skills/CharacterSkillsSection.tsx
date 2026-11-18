@@ -1,6 +1,7 @@
 import { useTranslations } from 'next-intl';
 
 import { HudSection } from '@/components/hud/form';
+import { Checkbox } from '@/components/ui/checkbox';
 import { DND_SAVING_THROWS, DND_SKILLS } from '@/lib/constants/skills';
 import type { CharacterFormBindings } from '@/lib/utils/characters/form/bindings';
 
@@ -29,10 +30,9 @@ export function CharacterSkillsSection({
                             key={ability}
                             className="flex h-11 cursor-pointer items-center space-x-2"
                         >
-                            <input
-                                type="checkbox"
+                            <Checkbox
                                 checked={savingThrows[ability] || false}
-                                onChange={() =>
+                                onCheckedChange={() =>
                                     handlers.toggleSavingThrow(ability)
                                 }
                                 className="rounded"
@@ -52,10 +52,11 @@ export function CharacterSkillsSection({
                             key={skill}
                             className="flex h-11 cursor-pointer items-center space-x-2"
                         >
-                            <input
-                                type="checkbox"
+                            <Checkbox
                                 checked={skills[skill] || false}
-                                onChange={() => handlers.toggleSkill(skill)}
+                                onCheckedChange={() =>
+                                    handlers.toggleSkill(skill)
+                                }
                                 className="rounded"
                             />
                             <span className="text-sm">

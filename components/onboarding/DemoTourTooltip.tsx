@@ -33,13 +33,14 @@ export function DemoTourTooltip({
                         {step.content}
                     </div>
                 </div>
-                <button
+                <Button
+                    variant="bare"
                     type="button"
                     {...closeProps}
                     className="-mt-1 -mr-1 shrink-0 rounded-md p-1 text-hud-muted transition-colors hover:text-hud-ink"
                 >
                     <X className="size-4" aria-hidden />
-                </button>
+                </Button>
             </div>
             <div className="mt-3 flex items-center gap-2">
                 <span className="hud-sc text-xs text-hud-muted">

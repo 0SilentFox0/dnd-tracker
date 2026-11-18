@@ -1,7 +1,7 @@
 'use client';
 
-import Link from 'next/link';
 import { useState } from 'react';
+import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
 import { AutopickCard } from './AutopickCard';
@@ -22,13 +22,13 @@ import { LoadingState } from '@/components/common/states';
 import { HudForm, HudFormPage, type HudTab } from '@/components/hud/form';
 import { OnboardingHint } from '@/components/onboarding/OnboardingHint';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 import { ParticipantSide } from '@/lib/constants/battle';
 import {
     type BattleSetupInitial,
     useBattleSetup,
     useBattleSetupInitial,
 } from '@/lib/hooks/battles';
+import { cn } from '@/lib/utils';
 
 interface BattleSetupFormProps {
     campaignId: string;
@@ -87,9 +87,11 @@ function BattleSetupLayout({
 
     const chooseMap = (choice: 'none' | 'create' | 'prepared') => {
         setPreparedMapChosen(choice === 'prepared');
+
         if (choice === 'none' || choice === 'create') {
             if (libraryMap.selectedId) void libraryMap.select(null);
         }
+
         mapEditor.actions.setEnabled(choice === 'create' ? true : false);
     };
 
@@ -121,7 +123,8 @@ function BattleSetupLayout({
                     >
                         {(['none', 'create', 'prepared'] as const).map(
                             (choice) => (
-                                <button
+                                <Button
+                                    variant="bare"
                                     key={choice}
                                     type="button"
                                     aria-pressed={mapChoice === choice}
@@ -141,7 +144,7 @@ function BattleSetupLayout({
                                             `mapChoice.${choice}.description`
                                         )}
                                     </span>
-                                </button>
+                                </Button>
                             )
                         )}
                     </div>

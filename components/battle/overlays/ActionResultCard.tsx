@@ -11,6 +11,7 @@ import {
 } from '@/components/battle/scene/MapStrip';
 import { HUD_SURFACE } from '@/components/hud';
 import { systemUiByKey } from '@/components/systems';
+import { Button } from '@/components/ui/button';
 import { useActionResult, useBattleRules } from '@/lib/hooks/battle';
 import { useText } from '@/lib/i18n/use-text';
 import { cn } from '@/lib/utils';
@@ -236,14 +237,15 @@ export function ActionResultCard() {
             ) : (
                 <AttackBody fx={fx} />
             )}
-            <button
+            <Button
+                variant="bare"
                 type="button"
                 aria-label={tu('close')}
                 onClick={close}
                 className="absolute top-1 right-1 flex size-7 items-center justify-center text-[var(--hud-muted)]"
             >
                 <X className="size-4" />
-            </button>
+            </Button>
         </div>
     );
 

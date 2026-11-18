@@ -45,7 +45,8 @@ export function AddSlidesBar({
     return (
         <div className="space-y-2">
             <div className="flex flex-col gap-2 sm:flex-row">
-                <input
+                <Input
+                    bare
                     ref={fileInput}
                     type="file"
                     multiple
@@ -73,7 +74,8 @@ export function AddSlidesBar({
                         if (files.length) void upload.addFiles(files);
                     }}
                 />
-                <input
+                <Input
+                    bare
                     ref={puzzleInput}
                     type="file"
                     hidden

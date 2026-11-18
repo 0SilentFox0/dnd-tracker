@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { Portrait, type PortraitProps } from './Portrait';
 
 import { ImageZoomDialog } from '@/components/common/ImageZoomDialog';
+import { Button } from '@/components/ui/button';
 
 interface ZoomablePortraitProps
     extends Omit<PortraitProps, 'current' | 'extra'> {
@@ -27,14 +28,15 @@ export function ZoomablePortrait({
 
     return (
         <>
-            <button
+            <Button
+                variant="bare"
                 type="button"
                 aria-label={t('zoomAvatar', { name })}
                 onClick={() => setZoomed(true)}
                 className="cursor-zoom-in rounded-full"
             >
                 <Portrait key={flashKey} {...props} />
-            </button>
+            </Button>
             {zoomed && (
                 <ImageZoomDialog
                     src={avatar}

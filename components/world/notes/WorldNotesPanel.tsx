@@ -5,6 +5,7 @@ import { Pencil, Trash2 } from 'lucide-react';
 
 import { HudChipTabs, HudPanel } from '@/components/hud/page';
 import { Button } from '@/components/ui/button';
+import { NativeSelect } from '@/components/ui/native-select';
 import { Textarea } from '@/components/ui/textarea';
 import { WORLD_NOTE_MAX } from '@/lib/constants/world';
 import { type RosterHero, useNotesPanel } from '@/lib/hooks/world';
@@ -165,7 +166,7 @@ export function WorldNotesPanel({
                 />
                 <div className="flex flex-wrap items-center gap-2">
                     {!isDM && heroes.length > 1 ? (
-                        <select
+                        <NativeSelect
                             aria-label={t('asHero')}
                             value={panel.characterId}
                             onChange={(e) =>
@@ -178,7 +179,7 @@ export function WorldNotesPanel({
                                     {h.name}
                                 </option>
                             ))}
-                        </select>
+                        </NativeSelect>
                     ) : null}
                     <span
                         className={

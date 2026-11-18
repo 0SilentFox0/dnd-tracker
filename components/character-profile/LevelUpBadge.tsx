@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 import { ChevronsUp } from 'lucide-react';
 
 import { metalClass } from '@/components/hud';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 export function LevelUpBadge({
@@ -18,7 +19,8 @@ export function LevelUpBadge({
     if (free === 0) return null;
 
     return (
-        <button
+        <Button
+            variant="bare"
             type="button"
             aria-label={t('freePoints', { free })}
             onClick={onOpen}
@@ -29,6 +31,6 @@ export function LevelUpBadge({
         >
             <ChevronsUp aria-hidden className="size-3" />
             LVL UP +{free}
-        </button>
+        </Button>
     );
 }

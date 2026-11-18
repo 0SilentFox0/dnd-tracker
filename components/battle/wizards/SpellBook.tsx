@@ -13,6 +13,7 @@ import {
     SpellBookPages,
     SpellDetail,
 } from '@/components/spells/book/SpellBookPages';
+import { Button } from '@/components/ui/button';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import type { useSpellBook } from '@/lib/hooks/battle';
 import { DESKTOP_QUERY, useMediaQuery } from '@/lib/hooks/common';
@@ -107,7 +108,8 @@ export function SpellBook({ book }: { book: Book }) {
                         )}
                     </div>
                 )}
-                <button
+                <Button
+                    variant="bare"
                     type="button"
                     disabled={
                         selected.executionMode === 'manual' ||
@@ -131,28 +133,30 @@ export function SpellBook({ book }: { book: Book }) {
                             ? tw('continueCasting')
                             : tw('startCasting')
                         : tw(`targets.${targetsKey(state.pick?.targetMode)}`)}
-                </button>
+                </Button>
                 {selected.executionMode !== 'manual' &&
                     pending &&
                     view.canFastForward &&
                     preparing && (
-                        <button
+                        <Button
+                            variant="bare"
                             type="button"
                             className="mt-2 text-sm underline"
                             disabled={view.costUsed(selected)}
                             onClick={actions.completeLong}
                         >
                             {tw('fastForward')}
-                        </button>
+                        </Button>
                     )}
                 {view.pendingCast && (
-                    <button
+                    <Button
+                        variant="bare"
                         type="button"
                         className="mt-2 text-sm underline"
                         onClick={() => void actions.prepareCast(true)}
                     >
                         {tw('cancelCasting')}
-                    </button>
+                    </Button>
                 )}
             </SpellDetail>
         </div>
@@ -198,13 +202,14 @@ export function SpellBook({ book }: { book: Book }) {
                     detail={detailPage || null}
                 />
                 {showDetail && !wide && canGoBack(state) && (
-                    <button
+                    <Button
+                        variant="bare"
                         type="button"
                         onClick={actions.back}
                         className="spell-book spell-book-accent hud-sc mt-2 h-10 w-full text-sm"
                     >
                         ← {tc('back')}
-                    </button>
+                    </Button>
                 )}
             </ResponsiveDialog>
         </>

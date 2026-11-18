@@ -3,6 +3,7 @@ import { Crosshair, Swords } from 'lucide-react';
 
 import type { AttackWizardModel } from './shared';
 
+import { Button } from '@/components/ui/button';
 import { AttackType } from '@/lib/constants/battle';
 import { useText } from '@/lib/i18n/use-text';
 import { cn } from '@/lib/utils';
@@ -31,7 +32,8 @@ export function WeaponStep({
                 const locked = !!ammo && ammo.status !== 'ok';
 
                 return (
-                    <button
+                    <Button
+                        variant="bare"
                         key={id}
                         type="button"
                         disabled={locked}
@@ -106,7 +108,7 @@ export function WeaponStep({
                                 ≈ {preview?.estimate}
                             </small>
                         </span>
-                    </button>
+                    </Button>
                 );
             })}
         </div>

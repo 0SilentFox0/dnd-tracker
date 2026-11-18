@@ -16,6 +16,7 @@ import { HudPage, HudPageHeader, HudPanel } from '@/components/hud/page';
 import { OnboardingHint } from '@/components/onboarding/OnboardingHint';
 import { ActionBar } from '@/components/ui/action-bar';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useCompendiumImport } from '@/lib/hooks/compendium-import';
 
 export function CompendiumImport({
@@ -97,13 +98,12 @@ export function CompendiumImport({
                     <HudPanel className="space-y-3">
                         <div className="flex flex-wrap items-center justify-between gap-3">
                             <label className="flex min-w-0 items-start gap-2 text-sm">
-                                <input
+                                <Checkbox
                                     className="mt-0.5 h-4 w-4 shrink-0 accent-hud-gold"
-                                    type="checkbox"
                                     checked={rights}
                                     disabled={busy}
-                                    onChange={(e) =>
-                                        setRights(e.target.checked)
+                                    onCheckedChange={(v) =>
+                                        setRights(v === true)
                                     }
                                 />{' '}
                                 {t('rights')}

@@ -10,6 +10,7 @@ import { SlidePickerDialog } from './SlidePickerDialog';
 
 import { OptimizedImage } from '@/components/common/OptimizedImage';
 import { MarkerChip } from '@/components/scenario/MarkerChip';
+import { Button } from '@/components/ui/button';
 import { useBattleBriefs } from '@/lib/hooks/battles';
 import { useDeck } from '@/lib/hooks/show';
 import type {
@@ -67,23 +68,25 @@ export function RowBindings({ campaignId, pageId, row, onChange }: Props) {
                     ) : (
                         deck && t('slideMissing')
                     )}
-                    <button
+                    <Button
+                        variant="bare"
                         type="button"
                         aria-label={t('unbindSlide')}
                         onClick={() => onChange.slide(undefined)}
                     >
                         <X className="size-3" />
-                    </button>
+                    </Button>
                 </span>
             ) : (
-                <button
+                <Button
+                    variant="bare"
                     type="button"
                     className="toggle"
                     aria-label={t('bindSlide')}
                     onClick={() => setPicking('slide')}
                 >
                     <ImageIcon className="size-3.5" /> {t('slide')}
-                </button>
+                </Button>
             )}
             {row.battleId ? (
                 <span className="sb-chip">
@@ -95,23 +98,25 @@ export function RowBindings({ campaignId, pageId, row, onChange }: Props) {
                     ) : (
                         briefs && t('battleMissing')
                     )}
-                    <button
+                    <Button
+                        variant="bare"
                         type="button"
                         aria-label={t('unbindBattle')}
                         onClick={() => onChange.battle(undefined)}
                     >
                         <X className="size-3" />
-                    </button>
+                    </Button>
                 </span>
             ) : (
-                <button
+                <Button
+                    variant="bare"
                     type="button"
                     className="toggle"
                     aria-label={t('bindBattle')}
                     onClick={() => setPicking('battle')}
                 >
                     <Swords className="size-3.5" /> {t('battle')}
-                </button>
+                </Button>
             )}
             {row.marker ? (
                 <MarkerChip
@@ -120,14 +125,15 @@ export function RowBindings({ campaignId, pageId, row, onChange }: Props) {
                     onRemove={() => onChange.marker(undefined)}
                 />
             ) : (
-                <button
+                <Button
+                    variant="bare"
                     type="button"
                     className="toggle"
                     aria-label={t('bindMarker')}
                     onClick={() => setPicking('marker')}
                 >
                     <MapPin className="size-3.5" /> {t('marker')}
-                </button>
+                </Button>
             )}
             <SlidePickerDialog
                 campaignId={campaignId}

@@ -2,6 +2,7 @@ import { useTranslations } from 'next-intl';
 
 import { HudChipTabs } from '@/components/hud/page';
 import { Button } from '@/components/ui/button';
+import { NativeSelect } from '@/components/ui/native-select';
 import { ABILITY_KEYS, type AbilityKey } from '@/lib/constants/abilities';
 import type { usePlayerDraftForm } from '@/lib/hooks/characters';
 import { cn } from '@/lib/utils';
@@ -101,7 +102,7 @@ export function AbilityScoresPicker({
                                     {shown(key)}
                                 </span>
                             ) : method === 'standard' ? (
-                                <select
+                                <NativeSelect
                                     id={`score-${key}`}
                                     value={values[key]}
                                     onChange={(e) =>
@@ -114,7 +115,7 @@ export function AbilityScoresPicker({
                                             {n}
                                         </option>
                                     ))}
-                                </select>
+                                </NativeSelect>
                             ) : (
                                 <div className="flex items-center gap-1">
                                     <Button

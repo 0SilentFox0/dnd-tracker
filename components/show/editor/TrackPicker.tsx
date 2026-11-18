@@ -4,6 +4,7 @@ import { type ReactNode, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Pause, Play } from 'lucide-react';
 
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { SEARCH_DEBOUNCE_MS, useDebouncedValue } from '@/lib/hooks/common';
 import { useTrackPreview, useTracks } from '@/lib/hooks/music';
@@ -20,7 +21,8 @@ function Row({
     children: ReactNode;
 }) {
     return (
-        <button
+        <Button
+            variant="bare"
             type="button"
             aria-pressed={selected}
             onClick={onClick}
@@ -30,7 +32,7 @@ function Row({
             )}
         >
             {children}
-        </button>
+        </Button>
     );
 }
 
@@ -84,7 +86,8 @@ export function TrackPicker({
                                 key={track.id}
                                 className="flex items-center gap-1"
                             >
-                                <button
+                                <Button
+                                    variant="bare"
                                     type="button"
                                     aria-label={`${preview.playingId === track.id ? tList('pause') : tList('play')}: ${track.title}`}
                                     aria-pressed={
@@ -107,7 +110,7 @@ export function TrackPicker({
                                     ) : (
                                         <Play className="size-4" />
                                     )}
-                                </button>
+                                </Button>
                                 <div className="min-w-0 flex-1">
                                     <Row
                                         selected={value === track.id}

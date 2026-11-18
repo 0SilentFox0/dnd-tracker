@@ -5,6 +5,7 @@ import { type AttackWizardModel, btn } from './shared';
 
 import { AiRollButton, DiceGrid } from '@/components/battle/hud/DiceInput';
 import { useSystemBattleUi } from '@/components/battle/use-system-battle-ui';
+import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { useText } from '@/lib/i18n/use-text';
 import { cn } from '@/lib/utils';
@@ -91,7 +92,8 @@ function D20RollBody({
                 )}
             >
                 {MODES.map((m) => (
-                    <button
+                    <Button
+                        variant="bare"
                         key={m}
                         type="button"
                         disabled={!!view.forcedMode}
@@ -104,7 +106,7 @@ function D20RollBody({
                         )}
                     >
                         {t(`rollModes.${m}`)}
-                    </button>
+                    </Button>
                 ))}
             </div>
             {view.forcedMode && (
@@ -130,13 +132,14 @@ function D20RollBody({
             <DiceGrid sides={20} value={first} onPick={pick} />
             <div className="mt-3 grid grid-cols-[1.25fr_1fr] gap-2">
                 <AiRollButton onClick={actions.aiRoll} />
-                <button
+                <Button
+                    variant="bare"
                     type="button"
                     onClick={actions.back}
                     className={cn(btn, 'border-white/25')}
                 >
                     {tc('back')}
-                </button>
+                </Button>
             </div>
         </>
     );

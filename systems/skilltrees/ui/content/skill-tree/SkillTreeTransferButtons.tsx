@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { Download, Upload } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { useSkillTreeTransfer } from '@/systems/skilltrees/hooks';
 
 export function SkillTreeTransferButtons({
@@ -20,7 +21,8 @@ export function SkillTreeTransferButtons({
 
     return (
         <div className="flex flex-wrap justify-end gap-2">
-            <input
+            <Input
+                bare
                 ref={input}
                 type="file"
                 accept=".json"

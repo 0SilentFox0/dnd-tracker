@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { dynamicTextRef } from '@/lib/i18n/text-ref';
 import { useText } from '@/lib/i18n/use-text';
@@ -121,7 +122,8 @@ function CritChoiceForm({
                                 key={o.id}
                                 className="flex cursor-pointer items-start gap-2 rounded px-2 py-1 text-sm hover:bg-white/5"
                             >
-                                <input
+                                <Input
+                                    bare
                                     type="radio"
                                     name={trigger.key}
                                     className="mt-0.5"

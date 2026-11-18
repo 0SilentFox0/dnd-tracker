@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 
+import { Button } from '@/components/ui/button';
 import { useBattleScene } from '@/lib/hooks/battle';
 import { cn } from '@/lib/utils';
 import { TURN_SKIP_MS } from '@/lib/utils/battle/flows';
@@ -71,7 +72,8 @@ export function MoraleResultOverlay() {
                         morale: signed(data.morale),
                     })}
                 </div>
-                <button
+                <Button
+                    variant="bare"
                     type="button"
                     onClick={close}
                     className={cn(
@@ -80,7 +82,7 @@ export function MoraleResultOverlay() {
                     )}
                 >
                     {t('toBattle')}
-                </button>
+                </Button>
             </div>
         );
     }

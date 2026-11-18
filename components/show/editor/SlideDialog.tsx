@@ -11,6 +11,7 @@ import { OptimizedImage } from '@/components/common/OptimizedImage';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
+import { Slider } from '@/components/ui/slider';
 import { Textarea } from '@/components/ui/textarea';
 import {
     PUZZLE_MAX_PIECES,
@@ -104,16 +105,15 @@ function SlideForm({
                     </div>
                     <label className="flex items-center gap-3 text-sm text-hud-bone">
                         {t('slideDialog.pieces', { count: puzzle.count })}
-                        <input
-                            type="range"
+                        <Slider
                             aria-label={t('slideDialog.piecesLabel')}
                             min={PUZZLE_MIN_PIECES}
                             max={PUZZLE_MAX_PIECES}
                             value={puzzle.count}
-                            onChange={(e) =>
+                            onValueChange={(v) =>
                                 setPuzzle({
                                     ...puzzle,
-                                    count: Number(e.target.value),
+                                    count: v,
                                 })
                             }
                             className="flex-1"

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 
+import { Button } from '@/components/ui/button';
 import { groupIndex } from '@/lib/utils/scenario/index-groups';
 import type { ScenarioPageSummary } from '@/types/scenario';
 
@@ -41,20 +42,22 @@ function IndexRow({
             </span>
             {onMove && (
                 <span className="mv">
-                    <button
+                    <Button
+                        variant="bare"
                         type="button"
                         aria-label={t('index.up', { title: page.title })}
                         onClick={() => onMove(page.id, -1, siblings)}
                     >
                         <ChevronUp className="size-4" />
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                        variant="bare"
                         type="button"
                         aria-label={t('index.down', { title: page.title })}
                         onClick={() => onMove(page.id, 1, siblings)}
                     >
                         <ChevronDown className="size-4" />
-                    </button>
+                    </Button>
                 </span>
             )}
         </li>

@@ -1,4 +1,5 @@
 'use client';
+import { Checkbox } from '@/components/ui/checkbox';
 import type { CompendiumImportController } from '@/lib/hooks/compendium-import';
 import { useTranslator } from '@/lib/i18n/use-translator';
 import { describeRulesPatch } from '@/lib/utils/compendium-import/labels';
@@ -21,15 +22,14 @@ export function RulesPatchOffer({
             {'classes' in patch && <p>{t('rulesOffer.text')}</p>}
             {'conditions' in patch && <p>{t('rulesOffer.conditions')}</p>}
             <label className="flex items-start gap-2">
-                <input
+                <Checkbox
                     className="mt-0.5 h-4 w-4 shrink-0 accent-hud-gold"
-                    type="checkbox"
                     checked={!!options.rulesPatch}
                     disabled={busy}
-                    onChange={(e) =>
+                    onCheckedChange={(v) =>
                         wizard.actions.applyOptions({
                             ...options,
-                            rulesPatch: e.target.checked ? patch : undefined,
+                            rulesPatch: v === true ? patch : undefined,
                         })
                     }
                 />{' '}

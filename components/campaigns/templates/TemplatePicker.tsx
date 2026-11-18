@@ -6,6 +6,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { ImportDialog } from '@/components/common/ImportDialog';
 import { HudSection } from '@/components/hud/form';
 import { HudPill } from '@/components/hud/page';
+import { Button } from '@/components/ui/button';
 import {
     SelectField,
     type SelectOptionGroup,
@@ -214,13 +215,14 @@ export function TemplatePicker({ value, onChange }: TemplatePickerProps) {
                     {value.file && (
                         <p className="text-xs text-hud-muted">
                             {t('entities', { count: value.file.entities })} ·{' '}
-                            <button
+                            <Button
+                                variant="bare"
                                 type="button"
                                 className="underline"
                                 onClick={() => setImportOpen(true)}
                             >
                                 {t('pickAnother')}
-                            </button>
+                            </Button>
                         </p>
                     )}
                 </div>

@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react';
 
+import { Button } from '@/components/ui/button';
+
 export function RollableCell({
     canRoll,
     onRoll,
@@ -16,7 +18,8 @@ export function RollableCell({
     children: ReactNode;
 }) {
     return canRoll ? (
-        <button
+        <Button
+            variant="bare"
             type="button"
             title={title}
             aria-label={ariaLabel}
@@ -24,7 +27,7 @@ export function RollableCell({
             className={className}
         >
             {children}
-        </button>
+        </Button>
     ) : (
         <div className={className}>{children}</div>
     );

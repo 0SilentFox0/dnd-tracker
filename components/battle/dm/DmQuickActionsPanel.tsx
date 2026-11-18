@@ -24,6 +24,7 @@ import { LegendaryActionDialog } from './LegendaryActionDialog';
 
 import { useSystemBattleUi } from '@/components/battle/use-system-battle-ui';
 import { HUD_SURFACE } from '@/components/hud';
+import { Button } from '@/components/ui/button';
 import { BattleStatus } from '@/lib/constants/battle';
 import {
     type BattlePageDialogs,
@@ -57,7 +58,8 @@ function QuickAction({
     disabled,
 }: QuickActionProps) {
     return (
-        <button
+        <Button
+            variant="bare"
             type="button"
             className="hud-sc flex h-10 w-full items-center gap-2.5 border border-white/25 bg-black/55 px-3 text-left text-[15px] text-[var(--ink)] transition-colors hover:border-[var(--gold)]/60 hover:bg-[var(--gold)]/[.06]"
             title={title}
@@ -69,7 +71,7 @@ function QuickAction({
         >
             <Icon className={cn('size-4 shrink-0', tone)} />
             {label}
-        </button>
+        </Button>
     );
 }
 
@@ -146,7 +148,8 @@ export function DmQuickActionsPanel({
     return (
         <>
             {!panel && (
-                <button
+                <Button
+                    variant="bare"
                     type="button"
                     onClick={() => setOpen(true)}
                     className={cn(
@@ -159,7 +162,7 @@ export function DmQuickActionsPanel({
                     aria-label={t('panel.open')}
                 >
                     <ChevronLeft className="size-6" />
-                </button>
+                </Button>
             )}
 
             <div
@@ -177,7 +180,8 @@ export function DmQuickActionsPanel({
                     <span className="hud-sc text-[15px] font-bold tracking-[.1em] text-[var(--gold)]">
                         {t('panel.title')}
                     </span>
-                    <button
+                    <Button
+                        variant="bare"
                         type="button"
                         className="flex size-8 items-center justify-center text-[var(--hud-muted)] hover:text-[var(--ink)]"
                         onClick={closePanel}
@@ -185,7 +189,7 @@ export function DmQuickActionsPanel({
                         aria-label={t('panel.close')}
                     >
                         <ChevronLeft className="size-5 rotate-180" />
-                    </button>
+                    </Button>
                 </div>
 
                 <div className="flex-1 space-y-2 overflow-y-auto p-4">
@@ -322,7 +326,8 @@ export function DmQuickActionsPanel({
                     </PanelSection>
 
                     {isActive && (
-                        <button
+                        <Button
+                            variant="bare"
                             type="button"
                             className="metal-gold metal-fill hud-sc flex h-11 w-full items-center justify-center gap-2 text-[15px] font-bold tracking-[.08em]"
                             onClick={() => {
@@ -332,7 +337,7 @@ export function DmQuickActionsPanel({
                         >
                             <Trophy className="size-4" />
                             {t('completeBattle')}
-                        </button>
+                        </Button>
                     )}
                 </div>
             </div>
@@ -366,7 +371,8 @@ export function DmQuickActionsPanel({
             />
 
             {open && (
-                <button
+                <Button
+                    variant="bare"
                     type="button"
                     className="fixed inset-0 z-30 bg-black/50 backdrop-blur-[1px]"
                     aria-label={t('panel.close')}

@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { skillLabel } from './skill-label';
 
 import type { SheetRollRequest } from '@/components/systems/types';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { SheetWfrpBlock } from '@/systems/wfrp/rules/characteristics/sheet-block';
 
@@ -34,7 +35,8 @@ export function SkillsList({ block, onRoll, canRoll }: Props) {
                             !s.trained && 'text-hud-muted'
                         )}
                     >
-                        <button
+                        <Button
+                            variant="bare"
                             type="button"
                             disabled={!rollable}
                             title={s.trained ? t('roll') : t('untrained')}
@@ -60,7 +62,7 @@ export function SkillsList({ block, onRoll, canRoll }: Props) {
                                 </span>
                             </span>
                             <span className="tabular-nums">{s.target}</span>
-                        </button>
+                        </Button>
                     </li>
                 );
             })}

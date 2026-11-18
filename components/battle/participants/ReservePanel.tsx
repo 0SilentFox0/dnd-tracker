@@ -7,6 +7,7 @@ import { ReserveParticipantRow } from './ReserveParticipantRow';
 
 import { SideDot } from '@/components/battle/hud';
 import { HUD_SURFACE } from '@/components/hud';
+import { Button } from '@/components/ui/button';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { ParticipantSide } from '@/lib/constants/battle';
 import { useBattleScene } from '@/lib/hooks/battle';
@@ -79,13 +80,14 @@ export function ReserveSheetButton() {
 
     return (
         <>
-            <button
+            <Button
+                variant="bare"
                 type="button"
                 onClick={() => setOpen(true)}
                 className="hud-sc flex shrink-0 items-center px-2 text-[14px] tracking-[.06em] text-[var(--gold)]"
             >
                 {t('title', { count: reserve.length })}
-            </button>
+            </Button>
             <ResponsiveDialog
                 open={open}
                 onOpenChange={setOpen}

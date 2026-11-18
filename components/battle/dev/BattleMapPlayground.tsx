@@ -3,6 +3,9 @@
 import '@/components/battle/hud/battle-hud.css';
 import { BattleMap } from '@/components/battle/map/BattleMap';
 import { HudChipTabs, HudPanel } from '@/components/hud/page';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Slider } from '@/components/ui/slider';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { useBattleMapPlayground } from '@/lib/hooks/battle/useBattleMapPlayground';
 import { cn } from '@/lib/utils';
@@ -72,36 +75,37 @@ export function BattleMapPlayground() {
                 </h1>
                 <div className="mb-2 flex shrink-0 flex-wrap items-center gap-2 lg:hidden">
                     {modeTabs}
-                    <button
+                    <Button
+                        variant="bare"
                         type="button"
                         className={cn(BUTTON, 'h-8')}
                         onClick={controls.nextTurn}
                     >
                         Next turn
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                        variant="bare"
                         type="button"
                         className={cn(BUTTON, 'h-8')}
                         onClick={controls.reset}
                     >
                         Reset
-                    </button>
+                    </Button>
                 </div>
                 <div className="grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)] gap-4 lg:grid-cols-[300px_1fr]">
                     <div className="hidden min-h-0 flex-col gap-3 overflow-y-auto lg:flex">
                         <HudPanel className="flex flex-col gap-3">
                             <label className="flex flex-col gap-1 text-sm">
                                 Grid opacity: {map.opacity.toFixed(2)}
-                                <input
-                                    type="range"
+                                <Slider
                                     min={0}
                                     max={1}
                                     step={0.05}
                                     value={map.opacity}
-                                    onChange={(e) =>
+                                    onValueChange={(v) =>
                                         setMap({
                                             ...map,
-                                            opacity: Number(e.target.value),
+                                            opacity: v,
                                         })
                                     }
                                 />
@@ -109,7 +113,7 @@ export function BattleMapPlayground() {
                             <div className="grid grid-cols-2 gap-2">
                                 <label className="flex flex-col gap-1 text-sm">
                                     Columns
-                                    <input
+                                    <Input
                                         className={FIELD}
                                         type="number"
                                         min={4}
@@ -128,7 +132,7 @@ export function BattleMapPlayground() {
                                 </label>
                                 <label className="flex flex-col gap-1 text-sm">
                                     Rows
-                                    <input
+                                    <Input
                                         className={FIELD}
                                         type="number"
                                         min={4}
@@ -148,7 +152,7 @@ export function BattleMapPlayground() {
                             </div>
                             <label className="flex flex-col gap-1 text-sm">
                                 Margins (cells)
-                                <input
+                                <Input
                                     className={FIELD}
                                     type="number"
                                     min={0}
@@ -161,20 +165,22 @@ export function BattleMapPlayground() {
                             </label>
                             {modeTabs}
                             <div className="flex gap-2">
-                                <button
+                                <Button
+                                    variant="bare"
                                     type="button"
                                     className={BUTTON}
                                     onClick={controls.nextTurn}
                                 >
                                     Next turn
-                                </button>
-                                <button
+                                </Button>
+                                <Button
+                                    variant="bare"
                                     type="button"
                                     className={BUTTON}
                                     onClick={controls.reset}
                                 >
                                     Reset
-                                </button>
+                                </Button>
                             </div>
                         </HudPanel>
                         <HudPanel className="text-sm">

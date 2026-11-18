@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { NativeSelect } from '@/components/ui/native-select';
 import { Textarea } from '@/components/ui/textarea';
 import { ABILITY_SCORE_CAP } from '@/lib/constants/abilities';
 import { CHOICE_KINDS, CHOICE_LIMITS } from '@/lib/constants/choices';
@@ -190,7 +191,7 @@ export function ChoiceListEditor({
                                             >
                                                 {t('list.scale')}
                                             </Label>
-                                            <select
+                                            <NativeSelect
                                                 id={`choice-${i}-scale`}
                                                 className={HUD_SELECT_CLASS}
                                                 value={
@@ -222,7 +223,7 @@ export function ChoiceListEditor({
                                                         {c.label}
                                                     </option>
                                                 ))}
-                                            </select>
+                                            </NativeSelect>
                                         </div>
                                     )}
                                 {owner === 'race' &&

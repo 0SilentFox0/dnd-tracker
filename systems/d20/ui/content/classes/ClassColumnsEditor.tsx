@@ -5,7 +5,9 @@ import { Plus, Trash2 } from 'lucide-react';
 
 import { HUD_SELECT_CLASS, HudSection } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
+import { NativeSelect } from '@/components/ui/native-select';
 import { MAX_CLASS_COLUMNS, MAX_CLASS_LEVEL } from '@/lib/constants/classes';
 import type { ClassColumn } from '@/types/classes';
 
@@ -153,18 +155,17 @@ export function ClassColumnsEditor({
                     />
                     <div className="mt-2 flex flex-wrap items-center gap-3 text-sm">
                         <label className="flex items-center gap-2">
-                            <input
-                                type="checkbox"
+                            <Checkbox
                                 aria-label={t('columns.poolLabel', {
                                     n: i + 1,
                                 })}
                                 checked={!!c.pool}
-                                onChange={(e) => setPool(i, e.target.checked)}
+                                onCheckedChange={(v) => setPool(i, v === true)}
                             />
                             {t('columns.pool')}
                         </label>
                         {c.pool && (
-                            <select
+                            <NativeSelect
                                 aria-label={t('columns.restLabel', {
                                     n: i + 1,
                                 })}
@@ -186,7 +187,7 @@ export function ClassColumnsEditor({
                                 <option value="long">
                                     {t('columns.restLong')}
                                 </option>
-                            </select>
+                            </NativeSelect>
                         )}
                     </div>
                 </HudSection>

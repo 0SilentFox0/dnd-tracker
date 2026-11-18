@@ -7,6 +7,7 @@ import { D100Input } from './D100Input';
 
 import { AiRollButton } from '@/components/battle/hud/DiceInput';
 import type { ConditionTestPanelProps } from '@/components/systems/types';
+import { Button } from '@/components/ui/button';
 import { useText } from '@/lib/i18n/use-text';
 import { cn } from '@/lib/utils';
 import { useConditionTestPanel } from '@/systems/wfrp/hooks/useConditionTestPanel';
@@ -38,7 +39,8 @@ export function ConditionTestPanel({ hero }: ConditionTestPanelProps) {
         <div className="mt-2 space-y-1.5">
             {panel.items.map(({ key, label, stand }) => (
                 <div key={key}>
-                    <button
+                    <Button
+                        variant="bare"
                         type="button"
                         disabled={panel.isPending}
                         aria-expanded={open === key}
@@ -52,12 +54,13 @@ export function ConditionTestPanel({ hero }: ConditionTestPanelProps) {
                         {stand
                             ? t('stand')
                             : t('attempt', { condition: text(label) })}
-                    </button>
+                    </Button>
                     {open === key && (
                         <div className="pb-1">
                             <div className="mt-2 grid h-9 grid-cols-2 border border-white/20">
                                 {SOURCES.map((m) => (
-                                    <button
+                                    <Button
+                                        variant="bare"
                                         key={m}
                                         type="button"
                                         aria-pressed={source === m}
@@ -70,7 +73,7 @@ export function ConditionTestPanel({ hero }: ConditionTestPanelProps) {
                                         )}
                                     >
                                         {t(m === 'server' ? 'auto' : 'manual')}
-                                    </button>
+                                    </Button>
                                 ))}
                             </div>
                             {source === 'manual' ? (

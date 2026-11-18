@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { EntityIcon } from '@/components/common/EntityIcon';
+import { Button } from '@/components/ui/button';
 import {
     Popover,
     PopoverContent,
@@ -45,7 +46,8 @@ export function HeroCluster({ cluster, zoom, onHeroClick }: HeroClusterProps) {
 
     if (rest.length === 0) {
         return (
-            <button
+            <Button
+                variant="bare"
                 type="button"
                 aria-label={top.name}
                 data-own={top.own}
@@ -62,14 +64,15 @@ export function HeroCluster({ cluster, zoom, onHeroClick }: HeroClusterProps) {
                 onDoubleClick={(e) => e.stopPropagation()}
             >
                 {avatar}
-            </button>
+            </Button>
         );
     }
 
     return (
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
-                <button
+                <Button
+                    variant="bare"
                     type="button"
                     aria-label={t('heroCluster', {
                         name: top.name,
@@ -90,11 +93,12 @@ export function HeroCluster({ cluster, zoom, onHeroClick }: HeroClusterProps) {
                     <span aria-hidden className="atlas-hero-badge">
                         +{rest.length}
                     </span>
-                </button>
+                </Button>
             </PopoverTrigger>
             <PopoverContent className="flex w-48 flex-col gap-1 p-1">
                 {cluster.heroes.map((h) => (
-                    <button
+                    <Button
+                        variant="bare"
                         key={h.id}
                         type="button"
                         className="flex items-center gap-2 rounded-sm px-1.5 py-1 text-left text-sm hover:bg-accent"
@@ -110,7 +114,7 @@ export function HeroCluster({ cluster, zoom, onHeroClick }: HeroClusterProps) {
                             className="size-6 shrink-0 rounded-full"
                         />
                         <span className="truncate">{h.name}</span>
-                    </button>
+                    </Button>
                 ))}
             </PopoverContent>
         </Popover>

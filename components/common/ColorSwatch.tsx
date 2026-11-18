@@ -2,6 +2,8 @@
 
 import { useTranslations } from 'next-intl';
 
+import { Input } from '@/components/ui/input';
+
 export function ColorSwatch({
     color,
     onChange,
@@ -19,7 +21,8 @@ export function ColorSwatch({
             className="relative size-9 shrink-0 cursor-pointer rounded-md border border-input focus-within:ring-2 focus-within:ring-ring"
             style={{ background: color }}
         >
-            <input
+            <Input
+                bare
                 type="color"
                 aria-label={label}
                 value={color}

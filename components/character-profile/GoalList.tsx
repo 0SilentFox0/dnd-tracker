@@ -116,7 +116,8 @@ export function GoalList() {
                         key={g.id}
                         className="flex items-start gap-2 border-b border-hud-raised py-2.5 text-sm last:border-b-0"
                     >
-                        <button
+                        <Button
+                            variant="bare"
                             type="button"
                             disabled={!isDM || isPending}
                             aria-label={t('statusLabel', {
@@ -141,7 +142,7 @@ export function GoalList() {
                             ) : (
                                 '◆'
                             )}
-                        </button>
+                        </Button>
                         <div className="min-w-0 flex-1 pt-1.5">
                             {(g.title ||
                                 g.kind ||

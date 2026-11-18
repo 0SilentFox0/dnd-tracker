@@ -2,6 +2,7 @@ import { useTranslations } from 'next-intl';
 import type { LucideIcon } from 'lucide-react';
 import { Trash2, X } from 'lucide-react';
 
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { WORLD_NAME_MAX } from '@/lib/constants/world';
@@ -21,14 +22,15 @@ export function CloseButton({ onClose }: { onClose(): void }) {
     const t = useTranslations('world.editor');
 
     return (
-        <button
+        <Button
+            variant="bare"
             type="button"
             aria-label={t('closePanel')}
             onClick={onClose}
             className="inline-flex size-8 shrink-0 items-center justify-center rounded-md border border-hud-rule text-hud-muted hover:bg-white/10 hover:text-hud-ink"
         >
             <X className="size-4" aria-hidden />
-        </button>
+        </Button>
     );
 }
 
@@ -40,14 +42,15 @@ export function DeleteButton({
     onClick(): void;
 }) {
     return (
-        <button
+        <Button
+            variant="bare"
             type="button"
             onClick={onClick}
             className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-md border border-hud-danger/60 bg-hud-danger/20 px-3 text-sm font-medium text-hud-danger transition-colors hover:bg-hud-danger/30 hover:text-hud-bad"
         >
             <Trash2 className="size-4" aria-hidden />
             {label}
-        </button>
+        </Button>
     );
 }
 

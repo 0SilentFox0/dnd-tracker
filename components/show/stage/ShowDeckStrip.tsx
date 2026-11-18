@@ -7,6 +7,8 @@ import { Lock, Music, Star, X } from 'lucide-react';
 import { SHOW_TONE, ShowButton } from './show-ui';
 
 import { OptimizedImage } from '@/components/common/OptimizedImage';
+import { Button } from '@/components/ui/button';
+import { NativeSelect } from '@/components/ui/native-select';
 import { type ShowControl, useDeck, useDecks } from '@/lib/hooks/show';
 import { cn } from '@/lib/utils';
 import type { ShowState, SlideDeckSummary } from '@/types/show';
@@ -87,7 +89,7 @@ export function ShowDeckStrip({
     return (
         <div className="min-w-0 space-y-2">
             <div className="flex items-center gap-2">
-                <select
+                <NativeSelect
                     aria-label={t('deckStrip.deck')}
                     value={deckId ?? ''}
                     onChange={(e) =>
@@ -103,7 +105,7 @@ export function ShowDeckStrip({
                         <option value="">{t('deckStrip.chooseDeck')}</option>
                     )}
                     {decks && <DeckOptions decks={decks} sceneId={sceneId} />}
-                </select>
+                </NativeSelect>
                 {cover && (
                     <span
                         className={cn(
@@ -152,7 +154,8 @@ export function ShowDeckStrip({
                                 ref={current ? currentRef : undefined}
                                 className="group relative w-28 shrink-0"
                             >
-                                <button
+                                <Button
+                                    variant="bare"
                                     type="button"
                                     aria-current={current || undefined}
                                     aria-label={
@@ -189,7 +192,7 @@ export function ShowDeckStrip({
                                         {i + 1}.{' '}
                                         {slide.title ?? t('deckStrip.untitled')}
                                     </span>
-                                </button>
+                                </Button>
                                 {slide.audience && (
                                     <Lock
                                         aria-label={t('deckStrip.audience', {
@@ -205,7 +208,8 @@ export function ShowDeckStrip({
                                     />
                                 )}
                                 {!slide.audience && (
-                                    <button
+                                    <Button
+                                        variant="bare"
                                         type="button"
                                         aria-pressed={isCover}
                                         aria-label={
@@ -241,7 +245,7 @@ export function ShowDeckStrip({
                                                 isCover && 'fill-current'
                                             )}
                                         />
-                                    </button>
+                                    </Button>
                                 )}
                             </li>
                         );

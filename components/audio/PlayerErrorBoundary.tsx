@@ -3,6 +3,8 @@
 import { Component, type ErrorInfo, Fragment, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 
+import { Button } from '@/components/ui/button';
+
 interface Props {
     /** новий трек — нова спроба */
     resetKey: string;
@@ -24,14 +26,15 @@ function PlayerFailedNotice({ onRestart }: { onRestart(): void }) {
             className="mt-2 flex items-center gap-2 text-[var(--enemy)]"
         >
             {t('player.failedTitle')}
-            <button
+            <Button
+                variant="bare"
                 type="button"
                 aria-label={t('player.restartLabel')}
                 onClick={onRestart}
                 className="underline"
             >
                 {t('player.restart')}
-            </button>
+            </Button>
         </p>
     );
 }

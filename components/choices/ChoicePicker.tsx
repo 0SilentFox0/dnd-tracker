@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 
 import { ChoiceCard, DetailsButton } from '@/components/choices/ChoiceCard';
 import { OptionButton } from '@/components/hud/OptionButton';
+import { Button } from '@/components/ui/button';
 import {
     ABILITY_KEYS,
     ABILITY_SCORE_CAP,
@@ -468,7 +469,8 @@ function AbilityPoints({
                         <span className="w-28">
                             {tg(`abilities.${a}.label`)}
                         </span>
-                        <button
+                        <Button
+                            variant="bare"
                             type="button"
                             aria-label={`−1 ${tg(`abilities.${a}.label`)}`}
                             disabled={added === 0}
@@ -489,8 +491,9 @@ function AbilityPoints({
                             className="rounded border border-hud-line/50 px-2 disabled:opacity-40"
                         >
                             −
-                        </button>
-                        <button
+                        </Button>
+                        <Button
+                            variant="bare"
                             type="button"
                             aria-label={`+1 ${tg(`abilities.${a}.label`)}`}
                             disabled={
@@ -503,7 +506,7 @@ function AbilityPoints({
                             className="rounded border border-hud-line/50 px-2 disabled:opacity-40"
                         >
                             +
-                        </button>
+                        </Button>
                         {after !== scores[a] && (
                             <span className="text-xs text-hud-muted">{`${scores[a]} → ${after}`}</span>
                         )}

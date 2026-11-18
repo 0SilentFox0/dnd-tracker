@@ -6,6 +6,9 @@ import { ChevronRight } from 'lucide-react';
 
 import { ICON_OPTIONS } from './marker-icon-options';
 
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Slider } from '@/components/ui/slider';
 import { REVEAL_RADIUS_RANGE } from '@/lib/constants/world';
 import { cn } from '@/lib/utils';
 
@@ -27,8 +30,7 @@ export function RadiusRange({
     className?: string;
 }) {
     return (
-        <input
-            type="range"
+        <Slider
             aria-label={label}
             className={cn('hud-range', className)}
             style={{ '--fill': `${fill}%` } as CSSProperties}
@@ -36,7 +38,7 @@ export function RadiusRange({
             max={REVEAL_RADIUS_RANGE.max}
             step={RADIUS_STEP}
             value={radius}
-            onChange={(e) => setRadius(Number(e.target.value))}
+            onValueChange={(v) => setRadius(v)}
             onPointerUp={commit}
             onKeyUp={commit}
             onBlur={commit}
@@ -59,7 +61,8 @@ export function ChildMapList({
         <ul className="space-y-1">
             {maps.map((m) => (
                 <li key={m.id}>
-                    <button
+                    <Button
+                        variant="bare"
                         type="button"
                         onClick={() => onOpen(m.id)}
                         className={cn(
@@ -72,7 +75,7 @@ export function ChildMapList({
                             className="size-4 shrink-0 text-hud-muted"
                             aria-hidden
                         />
-                    </button>
+                    </Button>
                 </li>
             ))}
         </ul>
@@ -89,7 +92,8 @@ export function ImageFileInput({
     onFile: (file: File) => void;
 }) {
     return (
-        <input
+        <Input
+            bare
             ref={inputRef}
             type="file"
             accept="image/*"
@@ -127,7 +131,8 @@ export function MarkerIconGrid({
             {...aria}
         >
             {ICON_OPTIONS.map(({ value: option, Icon }) => (
-                <button
+                <Button
+                    variant="bare"
                     key={option}
                     type="button"
                     title={t(`markerKinds.${option}`)}
@@ -143,7 +148,7 @@ export function MarkerIconGrid({
                     )}
                 >
                     <Icon className="size-5" aria-hidden />
-                </button>
+                </Button>
             ))}
         </div>
     );

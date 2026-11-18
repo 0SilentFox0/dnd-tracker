@@ -1,6 +1,7 @@
 import { useTranslations } from 'next-intl';
 import { ChevronDown } from 'lucide-react';
 
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 export function RoundHeader({
@@ -17,7 +18,8 @@ export function RoundHeader({
     const t = useTranslations('battle.log');
 
     return (
-        <button
+        <Button
+            variant="bare"
             type="button"
             aria-expanded={!collapsed}
             onClick={() => onToggle(round)}
@@ -37,6 +39,6 @@ export function RoundHeader({
                 </span>
             )}
             <span className="h-px flex-1 bg-white/10" />
-        </button>
+        </Button>
     );
 }

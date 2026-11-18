@@ -4,6 +4,7 @@ import { type ComponentProps, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Eye, EyeOff } from 'lucide-react';
 
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { FormField } from '@/components/ui/labeled-input';
 
@@ -42,7 +43,8 @@ export function PasswordInput({
                     className="pr-10"
                     {...props}
                 />
-                <button
+                <Button
+                    variant="bare"
                     type="button"
                     onClick={() => setVisible((v) => !v)}
                     aria-label={
@@ -56,7 +58,7 @@ export function PasswordInput({
                     ) : (
                         <Eye className="size-4" />
                     )}
-                </button>
+                </Button>
             </div>
         </FormField>
     );

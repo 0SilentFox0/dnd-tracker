@@ -1,4 +1,5 @@
 'use client';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import type { JsonRecord } from '@/lib/constants/compendium-import';
 import type { CompendiumImportController } from '@/lib/hooks/compendium-import';
@@ -68,32 +69,31 @@ export function CompendiumAdvanced({
             </summary>
             <div className="mt-2 space-y-3">
                 <label className="flex items-start gap-2">
-                    <input
+                    <Checkbox
                         className="mt-0.5 h-4 w-4 shrink-0 accent-hud-gold"
-                        type="checkbox"
                         checked={options.allowMixedEdition ?? false}
                         disabled={busy}
-                        onChange={(e) =>
+                        onCheckedChange={(v) =>
                             changeOptions({
                                 ...options,
-                                allowMixedEdition: e.target.checked,
+                                allowMixedEdition: v === true,
                             })
                         }
                     />{' '}
                     {t('categoriesStep.mixedEdition')}
                 </label>
                 <label className="flex items-start gap-2">
-                    <input
+                    <Checkbox
                         className="mt-0.5 h-4 w-4 shrink-0 accent-hud-gold"
-                        type="checkbox"
                         checked={!!options.rulesPatch}
                         disabled={busy}
-                        onChange={(e) =>
+                        onCheckedChange={(v) =>
                             changeOptions({
                                 ...options,
-                                rulesPatch: e.target.checked
-                                    ? { classes: { enabled: true } }
-                                    : undefined,
+                                rulesPatch:
+                                    v === true
+                                        ? { classes: { enabled: true } }
+                                        : undefined,
                             })
                         }
                     />{' '}

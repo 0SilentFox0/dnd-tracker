@@ -4,6 +4,7 @@ import { Loader2, Swords } from 'lucide-react';
 import { type AttackWizardModel, btn, primaryBtn } from './shared';
 
 import { PendingChoiceNote } from '@/components/battle/wizards/PendingChoiceNote';
+import { Button } from '@/components/ui/button';
 import { useText } from '@/lib/i18n/use-text';
 import { cn } from '@/lib/utils';
 import { formatDamageStep } from '@/lib/utils/battle/view';
@@ -65,7 +66,8 @@ export function SummaryStep({
                     </div>
                     <div className="mt-1.5 flex flex-wrap gap-2">
                         {view.cunning.options.map((o) => (
-                            <button
+                            <Button
+                                variant="bare"
                                 key={o.effect}
                                 type="button"
                                 aria-pressed={o.selected}
@@ -79,22 +81,24 @@ export function SummaryStep({
                                 )}
                             >
                                 {text(o.label)} · −{o.dice}d6
-                            </button>
+                            </Button>
                         ))}
                     </div>
                 </div>
             )}
             {state.waitingCrit && <PendingChoiceNote />}
             <div className="mt-3 grid grid-cols-2 gap-2">
-                <button
+                <Button
+                    variant="bare"
                     type="button"
                     disabled={submitting}
                     onClick={actions.back}
                     className={cn(btn, 'border-white/25')}
                 >
                     ← {tc('back')}
-                </button>
-                <button
+                </Button>
+                <Button
+                    variant="bare"
                     type="button"
                     disabled={submitting}
                     onClick={actions.submit}
@@ -108,7 +112,7 @@ export function SummaryStep({
                             {t('submit')}
                         </>
                     )}
-                </button>
+                </Button>
             </div>
         </>
     );

@@ -104,7 +104,8 @@ export function DemoBattleSandbox({ scene }: { scene: BattleScene }) {
                 className="grid gap-2 sm:grid-cols-2"
             >
                 {participants.map((participant) => (
-                    <button
+                    <Button
+                        variant="bare"
                         key={participant.basicInfo.id}
                         type="button"
                         onClick={() =>
@@ -120,7 +121,7 @@ export function DemoBattleSandbox({ scene }: { scene: BattleScene }) {
                                 max: participant.combatStats.maxHp,
                             })}
                         </span>
-                    </button>
+                    </Button>
                 ))}
             </section>
             {log.length > 0 && (

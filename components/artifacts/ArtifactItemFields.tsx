@@ -8,6 +8,7 @@ import { HUD_SELECT_CLASS, HudSection } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { NativeSelect } from '@/components/ui/native-select';
 import { SwitchField } from '@/components/ui/switch-field';
 import {
     ArtifactSlot,
@@ -160,7 +161,7 @@ function PropertyFields({
                     >
                         {t('attackType')}
                     </Label>
-                    <select
+                    <NativeSelect
                         id="item-attack-type"
                         className={`${HUD_SELECT_CLASS} w-full`}
                         value={applies.attackType ?? ''}
@@ -174,7 +175,7 @@ function PropertyFields({
                         <option value="">{t('attackAny')}</option>
                         <option value="melee">{t('attackMelee')}</option>
                         <option value="ranged">{t('attackRanged')}</option>
-                    </select>
+                    </NativeSelect>
                 </div>
             )}
             {applies.kinds.includes('armor') && (
@@ -368,7 +369,7 @@ export function ArtifactItemFields({
                             >
                                 {t('recharge')}
                             </Label>
-                            <select
+                            <NativeSelect
                                 id="item-charges-rest"
                                 className={`${HUD_SELECT_CLASS} w-full`}
                                 disabled={!charges || !!stats.consumable}
@@ -395,7 +396,7 @@ export function ArtifactItemFields({
                                         {t(`rest.${value}`)}
                                     </option>
                                 ))}
-                            </select>
+                            </NativeSelect>
                         </div>
                     </div>
                     <SwitchField

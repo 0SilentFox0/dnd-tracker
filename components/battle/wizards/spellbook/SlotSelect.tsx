@@ -1,5 +1,6 @@
 import { useTranslations } from 'next-intl';
 
+import { NativeSelect } from '@/components/ui/native-select';
 import { BATTLE_SELECT_CLASS } from '@/lib/constants/battle';
 import type { useSpellBook } from '@/lib/hooks/battle';
 import { useText } from '@/lib/i18n/use-text';
@@ -18,7 +19,7 @@ export function SlotSelect({ book }: { book: Book }) {
     return (
         <label className="mb-3 flex items-center justify-between gap-3 text-sm">
             {tw('slot')}
-            <select
+            <NativeSelect
                 aria-label={tw('slot')}
                 value={value ?? options[0].key}
                 onChange={(e) => book.actions.setSlot(e.target.value)}
@@ -29,7 +30,7 @@ export function SlotSelect({ book }: { book: Book }) {
                         {text(o.label)}
                     </option>
                 ))}
-            </select>
+            </NativeSelect>
         </label>
     );
 }

@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { Search, X } from 'lucide-react';
 
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 
@@ -38,14 +39,15 @@ export function SearchInput({
                 className="pr-9 pl-9 [&::-webkit-search-cancel-button]:hidden"
             />
             {value ? (
-                <button
+                <Button
+                    variant="bare"
                     type="button"
                     aria-label={t('clear')}
                     onClick={() => onChange('')}
                     className="absolute top-1/2 right-2 -translate-y-1/2 rounded p-1 text-hud-muted hover:text-foreground"
                 >
                     <X className="h-4 w-4" aria-hidden />
-                </button>
+                </Button>
             ) : null}
         </div>
     );

@@ -8,6 +8,7 @@ import { HUD_SELECT_CLASS } from '@/components/hud/form';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { NativeSelect } from '@/components/ui/native-select';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { ITEM_LIMITS } from '@/lib/constants/artifacts';
 import { useGrantArtifactForm } from '@/lib/hooks/characters';
@@ -38,7 +39,8 @@ function ArtifactRow({
 }) {
     return (
         <li>
-            <button
+            <Button
+                variant="bare"
                 type="button"
                 disabled={disabled}
                 onClick={onClick}
@@ -60,7 +62,7 @@ function ArtifactRow({
                         {subtitle}
                     </span>
                 </span>
-            </button>
+            </Button>
         </li>
     );
 }
@@ -184,7 +186,7 @@ export function GrantArtifactDialog({
                             <Label htmlFor="grant-parameter">
                                 {t('inventory.grant.parameter')}
                             </Label>
-                            <select
+                            <NativeSelect
                                 id="grant-parameter"
                                 className={`${HUD_SELECT_CLASS} w-full`}
                                 value={fields.parameter}
@@ -200,7 +202,7 @@ export function GrantArtifactDialog({
                                         {option.label}
                                     </option>
                                 ))}
-                            </select>
+                            </NativeSelect>
                         </>
                     )}
                     {picked.consumable && (
@@ -210,7 +212,7 @@ export function GrantArtifactDialog({
                                     <Label htmlFor="grant-spell">
                                         {t('inventory.grant.spell')}
                                     </Label>
-                                    <select
+                                    <NativeSelect
                                         id="grant-spell"
                                         className={`${HUD_SELECT_CLASS} w-full`}
                                         value={fields.spellId}
@@ -237,7 +239,7 @@ export function GrantArtifactDialog({
                                                     : spell.label}
                                             </option>
                                         ))}
-                                    </select>
+                                    </NativeSelect>
                                     <p className="text-xs text-hud-muted">
                                         {t('inventory.grant.spellNote')}
                                     </p>

@@ -5,6 +5,7 @@ import { PagerNav } from '@/components/common/PagerNav';
 import { HudPill } from '@/components/hud/page';
 import { ActionBar } from '@/components/ui/action-bar';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { SelectField } from '@/components/ui/select-field';
 import {
     COMPENDIUM_PAGE_SIZES,
@@ -214,19 +215,15 @@ export function CompendiumDependencies({
                                         .filter((ref) => !ref.unresolved)
                                         .map(refBlock)}
                                     <label className="flex items-start gap-2">
-                                        <input
+                                        <Checkbox
                                             className="mt-0.5 h-4 w-4 shrink-0 accent-hud-gold"
-                                            type="checkbox"
                                             checked={
                                                 options.overwriteKeys?.includes(
                                                     row.key
                                                 ) ?? false
                                             }
-                                            onChange={(e) =>
-                                                overwrite(
-                                                    row.key,
-                                                    e.target.checked
-                                                )
+                                            onCheckedChange={(v) =>
+                                                overwrite(row.key, v === true)
                                             }
                                         />{' '}
                                         {t('dependencies.overwrite')}

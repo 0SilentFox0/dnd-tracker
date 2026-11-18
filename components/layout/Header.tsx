@@ -1,6 +1,7 @@
 'use client';
 
 import { Fragment, useRef } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -52,17 +53,19 @@ function UserAvatar({
     return (
         <span
             className={cn(
-                'inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full border border-hud-gold/60 bg-hud-panel text-hud-gold',
+                'relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full border border-hud-gold/60 bg-hud-panel text-hud-gold',
                 className
             )}
         >
             {url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
+                <Image
                     src={url}
                     alt=""
+                    fill
+                    sizes="40px"
+                    unoptimized
                     referrerPolicy="no-referrer"
-                    className="size-full object-cover"
+                    className="object-cover"
                 />
             ) : (
                 <User className="size-4" aria-hidden />

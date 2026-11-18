@@ -6,6 +6,7 @@ import { Info } from 'lucide-react';
 
 import { EntityIcon } from '@/components/common/EntityIcon';
 import { HudPill } from '@/components/hud/page';
+import { Button } from '@/components/ui/button';
 import { DND_SKILLS, type DndSkill } from '@/lib/constants/skills';
 import { cn } from '@/lib/utils';
 import {
@@ -106,13 +107,14 @@ function PickLine({
     const subclass = progression.subclasses.find((c) => c.id === chosen)?.name;
 
     const pickButton = (label: string) => (
-        <button
+        <Button
+            variant="bare"
             type="button"
             onClick={() => onPick?.(pickStepKey(progression.classId, pick))}
             className="min-h-10 w-full rounded-md border border-hud-gold-strong/60 px-3 py-2 text-left text-sm text-hud-gold-strong"
         >
             {label}
-        </button>
+        </Button>
     );
 
     if (pick.kind === 'subclass') {
@@ -240,14 +242,15 @@ export function PathRowCard({
                             ) : null}
                         </div>
                         {item.description ? (
-                            <button
+                            <Button
+                                variant="bare"
                                 type="button"
                                 aria-label={t('details', { name: item.name })}
                                 onClick={() => onDetail(item)}
                                 className="flex size-9 shrink-0 items-center justify-center rounded-md text-hud-muted hover:text-hud-ink"
                             >
                                 <Info className="size-4" />
-                            </button>
+                            </Button>
                         ) : null}
                     </li>
                 ))}

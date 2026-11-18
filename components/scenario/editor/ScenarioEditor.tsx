@@ -32,6 +32,7 @@ import {
     type TocControl,
     tocItems,
 } from '@/components/scenario/ScenarioToc';
+import { Button } from '@/components/ui/button';
 import { useConfirm, useCssVarHeight } from '@/lib/hooks/common';
 import {
     useMentionSearch,
@@ -221,20 +222,22 @@ export function ScenarioEditor({
                         onReload={() => void draft.reload()}
                         onRetain={draft.retainLocal}
                     />
-                    <button
+                    <Button
+                        variant="bare"
                         type="button"
                         className="toggle"
                         onClick={() => setPropsOpen(true)}
                     >
                         {t('properties')}
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                        variant="bare"
                         type="button"
                         className="toggle"
                         onClick={() => void finish()}
                     >
                         {t('done')}
-                    </button>
+                    </Button>
                     {toolbarActions}
                 </div>
             </div>
@@ -400,7 +403,8 @@ export function ScenarioEditor({
                                     </aside>
                                 </div>
                             ))}
-                            <button
+                            <Button
+                                variant="bare"
                                 type="button"
                                 className="toggle sans"
                                 style={{ marginTop: 12 }}
@@ -409,10 +413,11 @@ export function ScenarioEditor({
                                 }
                             >
                                 {t('addRow')}
-                            </button>
+                            </Button>
                         </section>
                     ))}
-                    <button
+                    <Button
+                        variant="bare"
                         type="button"
                         className="toggle sans"
                         style={{ marginTop: 40 }}
@@ -426,7 +431,7 @@ export function ScenarioEditor({
                         }
                     >
                         {t('addSection')}
-                    </button>
+                    </Button>
                 </main>
             </ScenarioLayout>
             {acquaintance && (

@@ -116,14 +116,8 @@ describe('CompendiumImport', () => {
             target: { files: [new File(['{}'], 'synthetic.json')] },
         });
         await screen.findByLabelText('Заклинання (1)');
-        expect(
-            (screen.getByLabelText('Заклинання (1)') as HTMLInputElement)
-                .checked
-        ).toBe(true);
-        expect(
-            (screen.getByLabelText('Сторінки книг (1)') as HTMLInputElement)
-                .checked
-        ).toBe(false);
+        expect(screen.getByLabelText('Заклинання (1)')).toBeChecked();
+        expect(screen.getByLabelText('Сторінки книг (1)')).not.toBeChecked();
         fireEvent.click(
             screen.getByRole('button', { name: 'Перевірити JSON' })
         );
@@ -305,15 +299,9 @@ describe('CompendiumImport', () => {
             ).disabled
         ).toBe(true);
         fireEvent.click(screen.getByRole('button', { name: 'Усе' }));
-        expect(
-            (screen.getByLabelText('Сторінки книг (1)') as HTMLInputElement)
-                .checked
-        ).toBe(true);
+        expect(screen.getByLabelText('Сторінки книг (1)')).toBeChecked();
         fireEvent.click(screen.getByRole('button', { name: 'Рекомендоване' }));
-        expect(
-            (screen.getByLabelText('Сторінки книг (1)') as HTMLInputElement)
-                .checked
-        ).toBe(false);
+        expect(screen.getByLabelText('Сторінки книг (1)')).not.toBeChecked();
         expect(screen.getByText('Класи та персонажі')).toBeTruthy();
         expect(screen.getByText('Матеріали ДМ')).toBeTruthy();
     });

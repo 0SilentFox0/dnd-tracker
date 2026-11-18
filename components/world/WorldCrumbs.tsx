@@ -2,6 +2,7 @@ import { Fragment } from 'react';
 import { useTranslations } from 'next-intl';
 import { ChevronRight } from 'lucide-react';
 
+import { Button } from '@/components/ui/button';
 import { mapPath } from '@/lib/utils/world/tree';
 import type { WorldMapSummary } from '@/types/world';
 
@@ -37,13 +38,14 @@ export function WorldCrumbs({ maps, mapId, onOpen }: WorldCrumbsProps) {
                             {m.name}
                         </span>
                     ) : (
-                        <button
+                        <Button
+                            variant="bare"
                             type="button"
                             className="hud-sc min-h-6 text-hud-gold underline-offset-2 hover:text-hud-gold-bright hover:underline"
                             onClick={() => onOpen(m.id)}
                         >
                             {m.name}
-                        </button>
+                        </Button>
                     )}
                 </Fragment>
             ))}

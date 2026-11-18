@@ -4,6 +4,7 @@ import { memo } from 'react';
 import { useTranslations } from 'next-intl';
 import { Hourglass } from 'lucide-react';
 
+import { Button } from '@/components/ui/button';
 import { useBattleScene } from '@/lib/hooks/battle';
 
 const BOX =
@@ -29,7 +30,8 @@ export const AwaitingDmBanner = memo(function AwaitingDmBanner() {
     }
 
     return (
-        <button
+        <Button
+            variant="bare"
             type="button"
             onClick={() => dialogs.awaitingDm.setOpen(true)}
             disabled={dialogs.awaitingDm.open}
@@ -39,6 +41,6 @@ export const AwaitingDmBanner = memo(function AwaitingDmBanner() {
             <span className="hud-sc text-[17px] tracking-[.12em] text-[var(--ink)]">
                 {t('awaitingYou')}
             </span>
-        </button>
+        </Button>
     );
 });

@@ -2,6 +2,7 @@
 import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { AI_LIMITS } from '@/lib/constants/ai';
 import type { useAssistantContext } from '@/lib/hooks/ai/useAssistantContext';
@@ -20,16 +21,15 @@ function NotesPicker({ context }: { context: Context }) {
                     key={note.canonicalKey}
                     className="flex items-center gap-2"
                 >
-                    <input
-                        type="checkbox"
+                    <Checkbox
                         checked={context.selected.includes(note.canonicalKey)}
                         disabled={
                             context.selected.length >= 5 &&
                             !context.selected.includes(note.canonicalKey)
                         }
-                        onChange={(event) =>
+                        onCheckedChange={(v) =>
                             context.selectNotes(
-                                event.target.checked
+                                v === true
                                     ? [...context.selected, note.canonicalKey]
                                     : context.selected.filter(
                                           (key) => key !== note.canonicalKey

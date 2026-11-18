@@ -5,6 +5,7 @@ import { Loader2, Sparkles } from 'lucide-react';
 
 import { BattlePlayerViewToggle } from './BattlePlayerViewToggle';
 
+import { Button } from '@/components/ui/button';
 import { BattleStatus } from '@/lib/constants/battle';
 import { useBattleScene, useFxEnabled, useTurnTimer } from '@/lib/hooks/battle';
 import { useConfirm } from '@/lib/hooks/common';
@@ -60,7 +61,8 @@ export function BattleTopBar({ onComplete }: { onComplete?: () => void }) {
                     {t('yourTurn')}
                 </span>
             )}
-            <button
+            <Button
+                variant="bare"
                 type="button"
                 disabled={!motionAllowed}
                 title={fxHint}
@@ -73,7 +75,7 @@ export function BattleTopBar({ onComplete }: { onComplete?: () => void }) {
                 )}
             >
                 <Sparkles className="size-4" />
-            </button>
+            </Button>
             <BattlePlayerViewToggle />
             <span className="hud-sc flex items-center gap-2 text-sm text-hud-soft">
                 {t('round', { round: battle.currentRound })}
@@ -89,24 +91,27 @@ export function BattleTopBar({ onComplete }: { onComplete?: () => void }) {
             {isDM && battle.status !== BattleStatus.PREPARED && (
                 <span className="hidden gap-2 lg:flex">
                     {onComplete && battle.status === BattleStatus.ACTIVE && (
-                        <button
+                        <Button
+                            variant="bare"
                             type="button"
                             onClick={onComplete}
                             className="hud-sc h-8 w-32 border border-[var(--gold)]/60 text-sm text-[var(--gold)] hover:bg-[var(--gold)]/10"
                         >
                             {t('complete')}
-                        </button>
+                        </Button>
                     )}
-                    <button
+                    <Button
+                        variant="bare"
                         type="button"
                         data-tour="battle.reset"
                         onClick={() => void reset()}
                         className="hud-sc h-8 w-28 border border-hud-danger/50 text-sm text-hud-danger hover:bg-hud-danger/10"
                     >
                         {t('reset')}
-                    </button>
+                    </Button>
                     {battle.status === BattleStatus.ACTIVE && (
-                        <button
+                        <Button
+                            variant="bare"
                             type="button"
                             data-tour="battle.next-turn"
                             disabled={nextPending}
@@ -118,7 +123,7 @@ export function BattleTopBar({ onComplete }: { onComplete?: () => void }) {
                             ) : (
                                 t('nextTurn')
                             )}
-                        </button>
+                        </Button>
                     )}
                 </span>
             )}

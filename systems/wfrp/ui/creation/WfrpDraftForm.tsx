@@ -91,14 +91,15 @@ export function WfrpDraftForm({
                         />
                     )}
                     {rolling && (
-                        <button
+                        <Button
+                            variant="bare"
                             type="button"
                             aria-label={t('skipHint')}
                             className="absolute inset-0 z-20 cursor-pointer bg-transparent"
                             onClick={skip}
                         >
                             <span className="sr-only">{t('skipHint')}</span>
-                        </button>
+                        </Button>
                     )}
                     {step.id !== 'identity' &&
                         form.stepErrors(step.id).length > 0 && (

@@ -106,11 +106,7 @@ describe('protected workflow handoff', () => {
             />
         );
         expect(
-            (
-                screen.getByRole('checkbox', {
-                    name: 'Обране джерело',
-                }) as HTMLInputElement
-            ).checked
-        ).toBe(false);
+            screen.getByRole('checkbox', { name: 'Обране джерело' })
+        ).not.toBeChecked();
     });
 });

@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { BattlePlayerViewToggle } from '@/components/battle/scene/BattlePlayerViewToggle';
 import { OptimizedImage } from '@/components/common/OptimizedImage';
 import { QueryState } from '@/components/common/states';
+import { Button } from '@/components/ui/button';
 import { useBattleScene, useFxBusy } from '@/lib/hooks/battle';
 import { useBattleSummary } from '@/lib/hooks/battles';
 import { useText } from '@/lib/i18n/use-text';
@@ -151,13 +152,14 @@ export function BattleResultScreen() {
                             {t('exit')}
                         </Link>
                     )}
-                    <button
+                    <Button
+                        variant="bare"
                         type="button"
                         onClick={() => resultScreen.setOpen(false)}
                         className="hud-sc flex h-11 items-center justify-center border border-white/[.25] text-[15px] tracking-[.06em] text-[var(--ink)]"
                     >
                         {t('review')}
-                    </button>
+                    </Button>
                 </div>
             </div>
         </div>

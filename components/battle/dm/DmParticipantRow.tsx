@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 
 import { SideDot } from '@/components/battle/hud';
+import { Button } from '@/components/ui/button';
 import { SelectField } from '@/components/ui/select-field';
 import { CombatStatus, ParticipantSourceType } from '@/lib/constants/battle';
 import {
@@ -172,7 +173,8 @@ export function DmParticipantRow({
                 )}
             </div>
             <div className="flex items-center gap-0.5 pl-5">
-                <button
+                <Button
+                    variant="bare"
                     type="button"
                     className={cn(
                         ICON,
@@ -185,8 +187,9 @@ export function DmParticipantRow({
                     }}
                 >
                     <Heart className="size-3.5" />
-                </button>
-                <button
+                </Button>
+                <Button
+                    variant="bare"
                     type="button"
                     className={cn(
                         ICON,
@@ -200,9 +203,10 @@ export function DmParticipantRow({
                     }}
                 >
                     <LogIn className="size-3.5" />
-                </button>
+                </Button>
                 {hasLair && onToggleLair && (
-                    <button
+                    <Button
+                        variant="bare"
                         type="button"
                         className={cn(
                             ICON,
@@ -223,10 +227,11 @@ export function DmParticipantRow({
                         onClick={() => onToggleLair(participant)}
                     >
                         🏰
-                    </button>
+                    </Button>
                 )}
                 {(legendary || (hasLair && onLegendary)) && (
-                    <button
+                    <Button
+                        variant="bare"
                         type="button"
                         className={cn(
                             ICON,
@@ -237,10 +242,11 @@ export function DmParticipantRow({
                         onClick={() => onLegendary?.(participant)}
                     >
                         <Crown className="size-3.5" />
-                    </button>
+                    </Button>
                 )}
                 {canConditions && (
-                    <button
+                    <Button
+                        variant="bare"
                         type="button"
                         className={cn(
                             ICON,
@@ -250,10 +256,11 @@ export function DmParticipantRow({
                         onClick={() => onConditions(participant)}
                     >
                         <ShieldAlert className="size-3.5" />
-                    </button>
+                    </Button>
                 )}
                 {canKill && (
-                    <button
+                    <Button
+                        variant="bare"
                         type="button"
                         className={cn(
                             ICON,
@@ -276,10 +283,11 @@ export function DmParticipantRow({
                         }}
                     >
                         <Skull className="size-3.5" />
-                    </button>
+                    </Button>
                 )}
                 {onToReserve && (
-                    <button
+                    <Button
+                        variant="bare"
                         type="button"
                         className={ICON}
                         title={t('toReserve')}
@@ -299,9 +307,10 @@ export function DmParticipantRow({
                         }}
                     >
                         <EyeOff className="size-3.5" />
-                    </button>
+                    </Button>
                 )}
-                <button
+                <Button
+                    variant="bare"
                     type="button"
                     className={cn(
                         ICON,
@@ -324,7 +333,7 @@ export function DmParticipantRow({
                     }}
                 >
                     <Trash2 className="size-3.5" />
-                </button>
+                </Button>
             </div>
         </div>
     );

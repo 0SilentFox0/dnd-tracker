@@ -60,13 +60,14 @@ export function AiComposer({
             {focusLabel ? (
                 <div className="flex items-center justify-between gap-2 rounded-md bg-muted px-2 py-1 text-xs">
                     <span>{focusLabel}</span>
-                    <button
+                    <Button
+                        variant="bare"
                         type="button"
                         aria-label={t('composer.clearFocus')}
                         onClick={actions.onClearFocus}
                     >
                         <X className="size-3.5" aria-hidden />
-                    </button>
+                    </Button>
                 </div>
             ) : null}
             {mode === 'live' && !busy ? (

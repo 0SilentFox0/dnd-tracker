@@ -3,6 +3,8 @@
 import { useTranslations } from 'next-intl';
 import { Dices } from 'lucide-react';
 
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { parseDieInput } from '@/lib/utils/battle/flows';
 
@@ -20,7 +22,8 @@ export function DiceGrid({
     return (
         <div className="mt-3 grid grid-cols-5 gap-1.5">
             {Array.from({ length: sides }, (_, i) => i + 1).map((n) => (
-                <button
+                <Button
+                    variant="bare"
                     key={n}
                     type="button"
                     onClick={() => onPick(n)}
@@ -42,7 +45,7 @@ export function DiceGrid({
                     )}
                 >
                     {n}
-                </button>
+                </Button>
             ))}
         </div>
     );
@@ -65,7 +68,7 @@ export function DieInput({
     strict?: boolean;
 }) {
     return (
-        <input
+        <Input
             aria-label={label}
             inputMode="numeric"
             pattern="[0-9]*"
@@ -140,7 +143,8 @@ export function AiRollButton({
     const t = useTranslations('battle.hud');
 
     return (
-        <button
+        <Button
+            variant="bare"
             type="button"
             onClick={onClick}
             className={cn(
@@ -152,6 +156,6 @@ export function AiRollButton({
         >
             <Dices className="size-5" />
             {label ?? t('autoRoll')}
-        </button>
+        </Button>
     );
 }

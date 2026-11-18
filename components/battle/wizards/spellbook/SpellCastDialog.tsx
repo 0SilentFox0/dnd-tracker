@@ -11,6 +11,8 @@ import { SpellSummary } from './SpellSummary';
 import { AiRollButton, DamageDice } from '@/components/battle/hud/DiceInput';
 import { useSystemBattleUi } from '@/components/battle/use-system-battle-ui';
 import { HUD_SURFACE } from '@/components/hud';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { useAbilityText } from '@/lib/hooks/abilities';
 import type { useSpellBook } from '@/lib/hooks/battle';
@@ -34,22 +36,24 @@ function BackCancel({ book, disabled }: { book: Book; disabled?: boolean }) {
 
     return (
         <div className="mt-3 grid grid-cols-2 gap-2">
-            <button
+            <Button
+                variant="bare"
                 type="button"
                 disabled={disabled || !canGoBack(state)}
                 onClick={actions.back}
                 className={cn(ghost, 'disabled:opacity-50')}
             >
                 ← {tc('back')}
-            </button>
-            <button
+            </Button>
+            <Button
+                variant="bare"
                 type="button"
                 disabled={disabled}
                 onClick={actions.close}
                 className={ghost}
             >
                 {tc('cancel')}
-            </button>
+            </Button>
         </div>
     );
 }
@@ -95,14 +99,15 @@ function TargetsStep({ book }: { book: Book }) {
                     })}
                 </div>
             )}
-            <button
+            <Button
+                variant="bare"
                 type="button"
                 disabled={state.targetIds.length === 0}
                 onClick={actions.confirmTargets}
                 className={cn(primary, 'mt-3 w-full')}
             >
                 {tw('next')}
-            </button>
+            </Button>
             <BackCancel book={book} />
         </>
     );
@@ -146,7 +151,7 @@ function RollsStep({ book }: { book: Book }) {
                     <span className="hud-sc font-bold">
                         {state.pick.inputDice.label}
                     </span>
-                    <input
+                    <Input
                         type="number"
                         inputMode="numeric"
                         min={1}
@@ -174,14 +179,15 @@ function RollsStep({ book }: { book: Book }) {
             )}
             <div className="mt-3 grid grid-cols-[1.25fr_1fr] gap-2">
                 <AiRollButton onClick={actions.aiDamage} />
-                <button
+                <Button
+                    variant="bare"
                     type="button"
                     disabled={!rollsComplete(state)}
                     onClick={actions.toSummary}
                     className={primary}
                 >
                     {tw('nextSummary')}
-                </button>
+                </Button>
             </div>
             <BackCancel book={book} />
         </>
@@ -204,7 +210,8 @@ function OptionPicker({ book }: { book: Book }) {
             </legend>
             {text.lines(state.pick.options).map((label, i) => (
                 <label key={i} className="flex items-start gap-2">
-                    <input
+                    <Input
+                        bare
                         type="radio"
                         name="spell-option"
                         checked={state.optionIndex === i}
@@ -244,7 +251,8 @@ function SummaryStep({ book }: { book: Book }) {
                 onUse={actions.setUseIngredient}
             />
             <OptionPicker book={book} />
-            <button
+            <Button
+                variant="bare"
                 type="button"
                 disabled={
                     submitting ||
@@ -262,7 +270,7 @@ function SummaryStep({ book }: { book: Book }) {
                         {tw('apply')}
                     </>
                 )}
-            </button>
+            </Button>
             <BackCancel book={book} disabled={submitting} />
         </>
     );

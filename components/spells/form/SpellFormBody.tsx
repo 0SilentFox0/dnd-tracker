@@ -13,6 +13,7 @@ import { SpellFormPowerFields } from './SpellFormPowerFields';
 import { HudForm, type HudTab } from '@/components/hud/form';
 import { systemUiOf } from '@/components/systems';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useCampaignRules } from '@/lib/hooks/campaigns';
 import { useRuleSystem } from '@/lib/hooks/systems';
 import type { IdName } from '@/types/common';
@@ -104,15 +105,12 @@ export function SpellFormBody({
                 <p role="status">{t('spellEditor.body.manualNotice')}</p>
             )}
             <label className="mx-4 my-3 flex items-center gap-2">
-                <input
-                    type="checkbox"
+                <Checkbox
                     checked={formData.executionMode !== 'manual'}
-                    onChange={(e) =>
+                    onCheckedChange={(v) =>
                         setFormData({
                             ...formData,
-                            executionMode: e.target.checked
-                                ? 'native'
-                                : 'manual',
+                            executionMode: v === true ? 'native' : 'manual',
                         })
                     }
                 />{' '}

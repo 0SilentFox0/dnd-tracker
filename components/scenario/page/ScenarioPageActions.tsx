@@ -42,13 +42,14 @@ export function ScenarioPageActions({
         <>
             {!flags.editing && flags.canEdit && (
                 <>
-                    <button
+                    <Button
+                        variant="bare"
                         type="button"
                         className="toggle is-primary"
                         onClick={on.edit}
                     >
                         {t('edit')}
-                    </button>
+                    </Button>
                     <Link
                         className="toggle sb-hide-sm"
                         href={`/campaigns/${campaignId}/show`}

@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { useProfile } from '../ProfileContext';
 
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { Textarea } from '@/components/ui/textarea';
@@ -155,10 +156,9 @@ export function ItemDialog({ item, open, onOpenChange }: ItemDialogProps) {
                     className="h-11"
                 />
                 <label className="flex min-h-11 items-center gap-2 text-sm text-hud-ink">
-                    <input
-                        type="checkbox"
+                    <Checkbox
                         checked={consumable}
-                        onChange={(e) => setConsumable(e.target.checked)}
+                        onCheckedChange={(v) => setConsumable(v === true)}
                         className="size-4"
                     />
                     {t('itemDialog.consumable')}

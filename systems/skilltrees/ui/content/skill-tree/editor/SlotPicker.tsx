@@ -3,6 +3,8 @@ import { useTranslations } from 'next-intl';
 
 import { HUD_SURFACE } from '@/components/hud';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { useAbilityText } from '@/lib/hooks/abilities';
 import type { AbilityFlowSummary } from '@/lib/utils/abilities/segments';
@@ -84,17 +86,16 @@ export function SlotPicker({
                 </>
             }
         >
-            <input
+            <Input
                 className="mb-2 h-9 w-full border border-[#4a4036] bg-transparent px-2"
                 placeholder={t('search')}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
             />
             <label className="mb-2 flex items-center gap-2 text-xs">
-                <input
-                    type="checkbox"
+                <Checkbox
                     checked={all}
-                    onChange={(e) => setAll(e.target.checked)}
+                    onCheckedChange={(v) => setAll(v === true)}
                 />{' '}
                 {t('all')}
             </label>

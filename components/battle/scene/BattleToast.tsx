@@ -1,5 +1,6 @@
 'use client';
 
+import { Button } from '@/components/ui/button';
 import { useBattleScene } from '@/lib/hooks/battle';
 
 export function BattleToast() {
@@ -8,13 +9,14 @@ export function BattleToast() {
     if (!toast.message) return null;
 
     return (
-        <button
+        <Button
+            variant="bare"
             type="button"
             onClick={toast.dismiss}
             role="status"
             className="flex min-h-11 w-full animate-[hud-fade_.2s] items-center gap-2.5 border border-white/25 bg-hud-surface/95 px-3.5 text-left text-sm text-hud-text"
         >
             {toast.message}
-        </button>
+        </Button>
     );
 }
