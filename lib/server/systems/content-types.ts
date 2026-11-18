@@ -100,7 +100,21 @@ export interface SystemTemplateServer {
     usageSelect?: Record<string, unknown>;
 }
 
+/** Rows of a module that a core content row of kind `host` carries under `as`, found through its `column` */
+export interface RowEmbed {
+    host: string;
+    as: string;
+    column: string;
+    /** `brief` = list shape (id and name only) */
+    load(input: {
+        campaignId: string;
+        ids: string[];
+        brief?: true;
+    }): Promise<Array<Record<string, unknown> & { id: string }>>;
+}
+
 export interface SystemContentServer {
+    embeds?: Record<string, RowEmbed>;
     operations?: Record<string, ContentOperationContribution>;
     abilityOwners?: Record<string, AbilityOwnerContribution>;
     /** `content_schema` targets beyond the content kinds: target → component id and its schema */

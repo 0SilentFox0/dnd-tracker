@@ -20,6 +20,7 @@ import { systemStatsOrThrow } from '@/lib/server/artifacts/system-stats';
 import { assertCampaignRefs } from '@/lib/server/campaigns/campaign-refs';
 import { loadRules } from '@/lib/server/campaigns/rules';
 import { defineResource } from '@/lib/server/content/define-resource';
+import { embedRows } from '@/lib/server/content/embeds';
 import { ContentError } from '@/lib/server/content/errors';
 import {
     assertCampaignEffects,
@@ -103,13 +104,8 @@ async function systemStatsColumn(
     return { systemStats: value as Prisma.InputJsonValue };
 }
 
-async function attachSet<T extends { setId: string | null }>(row: T) {
-    const artifactSet = row.setId
-        ? await prisma.artifactSet.findUnique({ where: { id: row.setId } })
-        : null;
-
-    return { ...row, artifactSet };
-}
+const withEmbeds = async <T extends ArtifactRow>(row: T) =>
+    (await embedRows('artifacts', row.campaignId, [row]))[0];
 
 export const artifactsResource = defineResource<
     ArtifactRow,
@@ -132,7 +128,7 @@ export const artifactsResource = defineResource<
     find: (actor, id, purpose) =>
         prisma.artifact
             .findFirst({ where: { id, campaignId: actor.campaignId } })
-            .then((row) => (row && purpose === 'read' ? attachSet(row) : row)),
+            .then((row) => (row && purpose === 'read' ? withEmbeds(row) : row)),
     toItem: (row) => withAbilityIssues('artifact', row),
     checkImport: async (actor, data) => {
         await systemStatsColumn(actor.campaignId, data.systemStats);
@@ -208,7 +204,7 @@ export const artifactsResource = defineResource<
                     icon,
                 },
             })
-            .then(attachSet);
+            .then(withEmbeds);
     },
     async update(actor, existing, data) {
         if (data.armor && (data.slot ?? existing.slot) !== ArtifactSlot.ARMOR)
@@ -272,7 +268,7 @@ export const artifactsResource = defineResource<
                     icon: icon === undefined ? undefined : (icon ?? null),
                 },
             })
-            .then(attachSet);
+            .then(withEmbeds);
     },
     async remove(actor, existing) {
         await prisma.artifact.deleteMany({

@@ -20,6 +20,7 @@ export const ARTIFACTSETS_META = {
         },
     ],
     detachRefs: [{ kind: 'artifactSet', model: 'artifact', column: 'setId' }],
+    columnRefs: [{ model: 'Artifact', column: 'setId', table: 'artifactSets' }],
     vocab: {
         abilitySources: [
             { id: 'artifactSet', itemLike: true, table: 'artifact_sets' },

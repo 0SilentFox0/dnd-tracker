@@ -11,6 +11,7 @@ import {
 } from '@/lib/server/compendium-import/bundle';
 import { unsafeCast } from '@/lib/utils/common/cast';
 import {
+    MODULE_COLUMN_REFS,
     MODULE_CONTENT_TABLES,
     MODULE_TABLE_KEY_OF_KIND,
     type ModuleDelegate,
@@ -131,7 +132,12 @@ function table(
         fks: {
             ...deriveFks(fields),
             ...(model === 'Background' && { originFeatId: 'feats' as const }),
-            ...(model === 'Artifact' && { setId: 'artifactSets' as const }),
+            ...Object.fromEntries(
+                MODULE_COLUMN_REFS.filter((r) => r.model === model).map((r) => [
+                    r.column,
+                    r.table as BundleTable,
+                ])
+            ),
         },
     };
 }

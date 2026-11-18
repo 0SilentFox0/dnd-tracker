@@ -1,5 +1,6 @@
 import 'server-only';
 import { prisma } from '@/lib/db';
+import { embedRows } from '@/lib/server/content/embeds';
 import { artifactAbilities } from '@/lib/utils/abilities/read';
 import { sheetStatBonuses } from '@/lib/utils/abilities/sheet-bonuses';
 import { abilitySummary } from '@/lib/utils/abilities/summary';
@@ -19,16 +20,10 @@ export async function readArtifactsList(campaignId: string) {
         orderBy: { createdAt: 'desc' },
     });
 
-    const sets = await prisma.artifactSet.findMany({
-        where: { campaignId },
-        select: { id: true, name: true },
-    });
+    const embedded = await embedRows('artifacts', campaignId, rows, true);
 
-    const setById = new Map(sets.map((set) => [set.id, set]));
-
-    return rows.map(({ abilities, ...row }) => ({
+    return embedded.map(({ abilities, ...row }) => ({
         ...row,
-        artifactSet: (row.setId && setById.get(row.setId)) || null,
         ...itemKindBadge(row),
         sheetBonuses: sheetStatBonuses(
             artifactAbilities({ ...row, abilities })

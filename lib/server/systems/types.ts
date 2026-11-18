@@ -178,8 +178,8 @@ export interface CharacterContribution {
     ext?: Record<string, unknown>;
     skills?: Prisma.SkillGetPayload<object>[];
     spells?: CampaignSpellContext['spells'];
-    /** Skill tree row the character sheet reads next to the participant */
-    tree?: Prisma.SkillTreeGetPayload<object> | null;
+    /** Row the character sheet reads next to the participant */
+    tree?: object | null;
 }
 
 /** Single-character path: `select` joins the one campaign read, `load` may add its own reads */

@@ -15,5 +15,17 @@ export const ARTIFACTSETS_CONTENT: SystemContentServer = {
             find: (where) => prisma.artifactSet.findFirst({ where }),
         },
     },
+    embeds: {
+        artifactSet: {
+            host: 'artifacts',
+            as: 'artifactSet',
+            column: 'setId',
+            load: ({ campaignId, ids, brief }) =>
+                prisma.artifactSet.findMany({
+                    where: { campaignId, id: { in: ids } },
+                    ...(brief && { select: { id: true, name: true } }),
+                }),
+        },
+    },
     mediaKinds: { 'artifact-sets': 'icon' },
 };

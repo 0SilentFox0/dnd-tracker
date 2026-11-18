@@ -17,9 +17,7 @@ import {
     withinCountLimits,
 } from '@/lib/utils/abilities/engine/core/usage';
 import { evaluateCondition } from '@/lib/utils/abilities/registry/conditions';
-import {
-    sceneActionsOf,
-} from '@/lib/utils/battle/actions/access';
+import { sceneActionsOf } from '@/lib/utils/battle/actions/access';
 import { legendaryAttack } from '@/lib/utils/battle/actions/dispatch';
 import {
     legendaryAbilities,
@@ -52,6 +50,7 @@ import { assertAbilityTargets } from '@/lib/utils/battle/validation/ability-targ
 import { abilityOnMap } from '@/lib/utils/battle/view';
 import { rngOf } from '@/lib/utils/common/rng';
 import type { SystemSlot } from '@/lib/utils/rules/systems/slot';
+import { moduleVocab } from '@/lib/utils/rules/systems/vocab';
 import type { BattleParticipant } from '@/types/battle';
 import type { LogLine } from '@/types/text';
 
@@ -87,8 +86,15 @@ type Option = LegendaryActionBody['option'];
 
 type AbilityOption = Exclude<Option, { kind: 'attack' }>;
 
-const legendaryLogKey = (verb: 'use' | 'run', kind: string | null) =>
-    `battleLog.legendary.${verb}${kind ? kind[0].toUpperCase() + kind.slice(1) : ''}` as AppMessageKey;
+export const legendaryLogKey = (
+    verb: 'use' | 'run',
+    kind: string | null
+): AppMessageKey =>
+    (kind &&
+        (moduleVocab('legendaryKinds').find((k) => k.id === kind)?.log?.[
+            verb
+        ] as AppMessageKey | undefined)) ||
+    `battleLog.legendary.${verb}`;
 
 type Ability = ReturnType<typeof legendaryAbilities>[number];
 
@@ -213,7 +219,9 @@ async function runAbilityOption(
     } else assertLegendaryAllowed(ctx, actor, cost);
 
     const spend = (p: BattleParticipant) =>
-        scene ? sceneActions.spend(p, round, ability.key) : spendLegendary(p, cost);
+        scene
+            ? sceneActions.spend(p, round, ability.key)
+            : spendLegendary(p, cost);
 
     if (!withinCountLimits(actor, ability))
         throw new BattleRuleError(
@@ -331,10 +339,11 @@ function performAttack(
         events: [
             systemEvent(
                 round,
-                textRef(
-                    legendaryLogKey('use', scene ? option.kind : null),
-                    { name, ability: ability.name, attack: out.attackName }
-                )
+                textRef(legendaryLogKey('use', scene ? option.kind : null), {
+                    name,
+                    ability: ability.name,
+                    attack: out.attackName,
+                })
             ),
             battleActionToEvent(out.action),
         ],
@@ -388,15 +397,12 @@ async function performAbility({
         : [textRef('battleLog.ability.noEffect', { name: ability.name })];
 
     const legendaryText = logFields(
-        textRef(
-            legendaryLogKey('run', scene ? option.kind : null),
-            {
-                name,
-                ability: ability.name,
-                counter: counter(after),
-                text: joinLines(parts, ' | '),
-            }
-        )
+        textRef(legendaryLogKey('run', scene ? option.kind : null), {
+            name,
+            ability: ability.name,
+            counter: counter(after),
+            text: joinLines(parts, ' | '),
+        })
     );
 
     return {

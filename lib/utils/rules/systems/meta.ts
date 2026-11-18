@@ -73,6 +73,13 @@ export interface DetachRefMeta {
     viaCharacter?: true;
 }
 
+/** `model.column` is a foreign key to the bundle table `table` of the module, which the Prisma schema does not declare as a relation */
+export interface ColumnRefMeta {
+    model: string;
+    column: string;
+    table: string;
+}
+
 export interface VocabShapes {
     abilitySources: { id: string; itemLike?: true; table?: string };
     abilityStats: {
@@ -100,7 +107,11 @@ export interface VocabShapes {
         blockFlag?: string;
         label?: { title: string; noun: string };
     };
-    legendaryKinds: { id: string; lair?: true };
+    legendaryKinds: {
+        id: string;
+        lair?: true;
+        log?: { use: string; run: string };
+    };
     rollKinds: { id: string; after: string };
     combatStats: { id: string; hidden?: true; neutral?: number };
     logFields: { id: string; code: string; prefix?: string };
@@ -141,6 +152,7 @@ export interface SystemMeta {
     contentKinds?: readonly string[];
     contentTables?: readonly ContentTableMeta[];
     detachRefs?: readonly DetachRefMeta[];
+    columnRefs?: readonly ColumnRefMeta[];
     /** Stored strings the module owns (ability sources, log keys, slots, ...); the core reads them through `moduleVocab` from every installed module */
     vocab?: SystemVocab;
     /** Content kind -> kinds whose lists an import of it invalidates */

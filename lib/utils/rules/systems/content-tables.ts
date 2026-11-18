@@ -1,4 +1,5 @@
 import {
+    type ColumnRefMeta,
     type ContentTableMeta,
     type DetachRefMeta,
     SYSTEM_META,
@@ -42,6 +43,10 @@ export const MODULE_CONTENT_TABLES: readonly ContentTableMeta[] = metas
 
 export const MODULE_DETACH_REFS: readonly DetachRefMeta[] = metas.flatMap(
     (m) => m.detachRefs ?? []
+);
+
+export const MODULE_COLUMN_REFS: readonly ColumnRefMeta[] = metas.flatMap(
+    (m) => m.columnRefs ?? []
 );
 
 export const SYNC_TABLE_SCOPES: readonly SyncTableScope[] = [

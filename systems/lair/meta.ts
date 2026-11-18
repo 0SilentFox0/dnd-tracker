@@ -21,6 +21,12 @@ export const LAIR_META = {
         abilityLimitFlags: [
             { id: 'lair', clears: ['legendaryCost'], needsActionTrigger: true },
         ],
-        legendaryKinds: [{ id: 'lair', lair: true }],
+        legendaryKinds: [
+            {
+                id: 'lair',
+                lair: true,
+                log: { use: 'lairLog.use', run: 'lairLog.run' },
+            },
+        ],
     },
 } as const satisfies SystemMeta;

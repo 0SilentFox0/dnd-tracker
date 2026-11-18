@@ -32,6 +32,7 @@ export const composeServer = (
             'contentKinds',
             'content.operations',
             'content.abilityOwners',
+            'content.embeds',
             'content.schemaTargets',
             'content.mediaKinds',
             'content.readActions',

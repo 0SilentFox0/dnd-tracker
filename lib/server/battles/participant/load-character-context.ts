@@ -92,7 +92,8 @@ export async function loadCharacterContext(
         if (personal) skills.push(personal);
     }
 
-    const tree = contributions.find((c) => c.tree !== undefined)?.tree ?? null;
+    const tree = (contributions.find((c) => c.tree !== undefined)?.tree ??
+        null) as CharacterContext['tree'];
 
     const withClasses = classesEnabled(rules);
 
