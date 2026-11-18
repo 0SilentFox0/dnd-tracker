@@ -127,7 +127,8 @@ function SignUpCard() {
                     <ResendConfirmation email={sentTo} />
                     <div className="flex justify-between text-sm">
                         <Button
-                            variant="bare"
+                            variant="plain"
+                            size="auto"
                             type="button"
                             onClick={reset}
                             className="text-hud-gold hover:text-hud-gold-strong"

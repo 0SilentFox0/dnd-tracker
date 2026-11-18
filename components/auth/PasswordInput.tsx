@@ -44,7 +44,8 @@ export function PasswordInput({
                     {...props}
                 />
                 <Button
-                    variant="bare"
+                    variant="plain"
+                    size="auto"
                     type="button"
                     onClick={() => setVisible((v) => !v)}
                     aria-label={
