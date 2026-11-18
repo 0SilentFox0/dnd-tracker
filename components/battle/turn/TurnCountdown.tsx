@@ -3,7 +3,7 @@
 import { useEffect, useEffectEvent, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { Button } from '@/components/ui/button';
+import { HudButton } from '@/components/hud';
 
 export function TurnCountdown({
     seconds,
@@ -43,14 +43,13 @@ export function TurnCountdown({
             <span className="flex-1 text-[15px] text-[var(--ink)]">
                 {t.rich('endsIn', { left, b: (chunks) => <b>{chunks}</b> })}
             </span>
-            <Button
-                variant="bare"
+            <HudButton
                 type="button"
                 onClick={onStay}
                 className="hud-sc h-9 border border-white/40 px-3.5 text-[15px] font-bold text-[var(--ink)]"
             >
                 {t('stay')}
-            </Button>
+            </HudButton>
             <i
                 className="absolute bottom-0 left-0 h-[3px] bg-[#c0392b]"
                 style={{

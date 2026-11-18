@@ -13,10 +13,9 @@ const TONES = {
 const ICON_SIZES = { sm: 'size-8', md: 'size-10' } as const;
 
 export const HudButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
-    ({ className, type = 'button', ...props }, ref) => (
+    ({ className, ...props }, ref) => (
         <button
             ref={ref}
-            type={type}
             data-slot="hud-button"
             className={cn('cursor-pointer', className)}
             {...props}

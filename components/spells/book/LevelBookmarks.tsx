@@ -1,7 +1,6 @@
 import { useTranslations } from 'next-intl';
 
-import { spellLevelMetal } from '@/components/hud';
-import { Button } from '@/components/ui/button';
+import { HudButton, spellLevelMetal } from '@/components/hud';
 import { spellLevelRoman } from '@/lib/constants/spells';
 import { cn } from '@/lib/utils';
 
@@ -26,8 +25,7 @@ export function LevelBookmarks({
                 {LEVELS.filter(
                     (l) => l <= 5 || hideSlots || slotOf(l) > 0 || level === l
                 ).map((l) => (
-                    <Button
-                        variant="bare"
+                    <HudButton
                         key={l}
                         type="button"
                         aria-pressed={level === l}
@@ -55,7 +53,7 @@ export function LevelBookmarks({
                                 </span>
                             )}
                         </span>
-                    </Button>
+                    </HudButton>
                 ))}
             </div>
         </div>

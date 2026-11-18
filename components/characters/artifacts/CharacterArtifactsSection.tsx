@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 
 import { EntityIcon } from '@/components/common/EntityIcon';
-import { Button } from '@/components/ui/button';
+import { HudButton } from '@/components/hud';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -124,8 +124,7 @@ export function CharacterArtifactsSection({
                         return (
                             <DropdownMenu key={cell.key}>
                                 <DropdownMenuTrigger asChild>
-                                    <Button
-                                        variant="bare"
+                                    <HudButton
                                         type="button"
                                         disabled={updatingSlot === cell.key}
                                         className={CELL}
@@ -160,7 +159,7 @@ export function CharacterArtifactsSection({
                                                 </span>
                                             </>
                                         )}
-                                    </Button>
+                                    </HudButton>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent
                                     align="center"

@@ -10,8 +10,7 @@ import { SpellSummary } from './SpellSummary';
 
 import { AiRollButton, DamageDice } from '@/components/battle/hud/DiceInput';
 import { useSystemBattleUi } from '@/components/battle/use-system-battle-ui';
-import { HUD_SURFACE } from '@/components/hud';
-import { Button } from '@/components/ui/button';
+import { HUD_SURFACE, HudButton } from '@/components/hud';
 import { Input } from '@/components/ui/input';
 import { Radio } from '@/components/ui/radio';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
@@ -37,24 +36,22 @@ function BackCancel({ book, disabled }: { book: Book; disabled?: boolean }) {
 
     return (
         <div className="mt-3 grid grid-cols-2 gap-2">
-            <Button
-                variant="bare"
+            <HudButton
                 type="button"
                 disabled={disabled || !canGoBack(state)}
                 onClick={actions.back}
                 className={cn(ghost, 'disabled:opacity-50')}
             >
                 ← {tc('back')}
-            </Button>
-            <Button
-                variant="bare"
+            </HudButton>
+            <HudButton
                 type="button"
                 disabled={disabled}
                 onClick={actions.close}
                 className={ghost}
             >
                 {tc('cancel')}
-            </Button>
+            </HudButton>
         </div>
     );
 }
@@ -100,15 +97,14 @@ function TargetsStep({ book }: { book: Book }) {
                     })}
                 </div>
             )}
-            <Button
-                variant="bare"
+            <HudButton
                 type="button"
                 disabled={state.targetIds.length === 0}
                 onClick={actions.confirmTargets}
                 className={cn(primary, 'mt-3 w-full')}
             >
                 {tw('next')}
-            </Button>
+            </HudButton>
             <BackCancel book={book} />
         </>
     );
@@ -180,15 +176,14 @@ function RollsStep({ book }: { book: Book }) {
             )}
             <div className="mt-3 grid grid-cols-[1.25fr_1fr] gap-2">
                 <AiRollButton onClick={actions.aiDamage} />
-                <Button
-                    variant="bare"
+                <HudButton
                     type="button"
                     disabled={!rollsComplete(state)}
                     onClick={actions.toSummary}
                     className={primary}
                 >
                     {tw('nextSummary')}
-                </Button>
+                </HudButton>
             </div>
             <BackCancel book={book} />
         </>
@@ -250,8 +245,7 @@ function SummaryStep({ book }: { book: Book }) {
                 onUse={actions.setUseIngredient}
             />
             <OptionPicker book={book} />
-            <Button
-                variant="bare"
+            <HudButton
                 type="button"
                 disabled={
                     submitting ||
@@ -269,7 +263,7 @@ function SummaryStep({ book }: { book: Book }) {
                         {tw('apply')}
                     </>
                 )}
-            </Button>
+            </HudButton>
             <BackCancel book={book} disabled={submitting} />
         </>
     );

@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 
-import { Button } from '@/components/ui/button';
+import { HudButton } from '@/components/hud';
 import { cn } from '@/lib/utils';
 
 interface BattlePreparationViewProps {
@@ -80,8 +80,7 @@ export function BattlePreparationView({
 
                 <div className="pt-4 sm:pt-8">
                     {isDM ? (
-                        <Button
-                            variant="bare"
+                        <HudButton
                             type="button"
                             data-tour="battle.start"
                             className="metal-gold metal-fill hud-sc h-16 w-full text-xl font-extrabold tracking-[.2em] shadow-[0_0_40px_rgba(230,194,90,.35)] transition-transform active:scale-95 disabled:opacity-70 sm:w-80 sm:text-2xl"
@@ -89,7 +88,7 @@ export function BattlePreparationView({
                             disabled={isStarting || !canStart}
                         >
                             {isStarting ? t('starting') : t('start')}
-                        </Button>
+                        </HudButton>
                     ) : (
                         <div className="mx-auto inline-block animate-[hud-pulse_2.4s_infinite] border-y border-hud-line bg-black/55 px-6 py-4 text-lg text-hud-text italic sm:px-8 sm:text-xl">
                             {t('waiting')}

@@ -6,8 +6,7 @@ import { useTranslations } from 'next-intl';
 import { ReserveParticipantRow } from './ReserveParticipantRow';
 
 import { SideDot } from '@/components/battle/hud';
-import { HUD_SURFACE } from '@/components/hud';
-import { Button } from '@/components/ui/button';
+import { HUD_SURFACE, HudButton } from '@/components/hud';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { ParticipantSide } from '@/lib/constants/battle';
 import { useBattleScene } from '@/lib/hooks/battle';
@@ -80,14 +79,13 @@ export function ReserveSheetButton() {
 
     return (
         <>
-            <Button
-                variant="bare"
+            <HudButton
                 type="button"
                 onClick={() => setOpen(true)}
                 className="hud-sc flex shrink-0 items-center px-2 text-[14px] tracking-[.06em] text-[var(--gold)]"
             >
                 {t('title', { count: reserve.length })}
-            </Button>
+            </HudButton>
             <ResponsiveDialog
                 open={open}
                 onOpenChange={setOpen}

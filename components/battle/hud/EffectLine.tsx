@@ -3,7 +3,7 @@ import { useTranslations } from 'next-intl';
 
 import { EffectIcon } from './EffectIcon';
 
-import { Button } from '@/components/ui/button';
+import { HudButton } from '@/components/hud';
 import {
     Tooltip,
     TooltipContent,
@@ -103,8 +103,7 @@ export function EffectLine({
                 <EffectChip key={e.id} effect={e} hideLevel={hideLevels} />
             ))}
             {overflow && (
-                <Button
-                    variant="bare"
+                <HudButton
                     type="button"
                     aria-expanded={open}
                     aria-label={
@@ -116,7 +115,7 @@ export function EffectLine({
                     className="relative cursor-pointer rounded px-1 text-[13px] leading-5 whitespace-nowrap text-[var(--hud-muted)] hover:bg-white/10 hover:text-hud-text"
                 >
                     {open ? t('less') : `+${effects.length - max}`}
-                </Button>
+                </HudButton>
             )}
         </div>
     );

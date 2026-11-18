@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
 
-import { Button } from '@/components/ui/button';
+import { HudButton } from '@/components/hud';
 import {
     useBattleSceneData,
     useReactionSpells,
@@ -38,14 +38,13 @@ export function ReactionSpellButton({
 
     return (
         <>
-            <Button
-                variant="bare"
+            <HudButton
                 type="button"
                 onClick={() => book.actions.open()}
                 className="hud-sc mt-2 h-10 w-full border border-hud-line text-sm"
             >
                 {t('reactionSpell')}
-            </Button>
+            </HudButton>
             <SpellBook book={book} />
         </>
     );

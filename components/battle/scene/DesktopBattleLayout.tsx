@@ -20,8 +20,8 @@ import { ParticipantDetails } from '@/components/battle/participants/Participant
 import { ParticipantList } from '@/components/battle/participants/ParticipantList';
 import { ReserveGroup } from '@/components/battle/participants/ReservePanel';
 import { MyTurnControls } from '@/components/battle/turn/MyTurnControls';
+import { HudButton } from '@/components/hud';
 import { HudChipTabs } from '@/components/hud/page/HudChipTabs';
-import { Button } from '@/components/ui/button';
 import { BattleStatus, ParticipantSide } from '@/lib/constants/battle';
 import {
     useBattleScene,
@@ -193,14 +193,13 @@ export function DesktopBattleLayout({
                     <h3 className="hud-sc flex h-8 items-center justify-between border-b border-white/[.14] text-[15px] font-bold tracking-[.1em] text-hud-soft">
                         {selected ? t('participant') : t('log')}
                         {selected && (
-                            <Button
-                                variant="bare"
+                            <HudButton
                                 type="button"
                                 onClick={() => select(null)}
                                 className="font-sans text-[13px] font-normal tracking-normal text-[var(--hud-muted)]"
                             >
                                 {t('backToLog')}
-                            </Button>
+                            </HudButton>
                         )}
                     </h3>
                     {selected ? (

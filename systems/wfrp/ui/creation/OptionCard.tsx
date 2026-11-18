@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-import { Button } from '@/components/ui/button';
+import { HudButton } from '@/components/hud';
 import { cn } from '@/lib/utils';
 
 interface OptionCardProps {
@@ -17,8 +17,7 @@ export function OptionCard({
     disabled,
 }: OptionCardProps) {
     return (
-        <Button
-            variant="bare"
+        <HudButton
             type="button"
             role="radio"
             aria-checked={selected}
@@ -30,7 +29,7 @@ export function OptionCard({
             )}
         >
             {children}
-        </Button>
+        </HudButton>
     );
 }
 

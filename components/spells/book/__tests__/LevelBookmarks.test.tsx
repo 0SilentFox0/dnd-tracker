@@ -4,7 +4,10 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { LevelBookmarks } from '../LevelBookmarks';
 
-vi.mock('@/components/hud', () => ({ spellLevelMetal: () => '' }));
+vi.mock('@/components/hud', async (importOriginal) => ({
+    ...(await importOriginal<typeof import('@/components/hud')>()),
+    spellLevelMetal: () => '',
+}));
 
 describe('LevelBookmarks', () => {
     afterEach(cleanup);

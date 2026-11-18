@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 
+import { HudButton } from '@/components/hud';
 import { Button } from '@/components/ui/button';
 import { ResponsiveDialog } from '@/components/ui/responsive-dialog';
 import { useInitiativeOrder } from '@/lib/hooks/battle';
@@ -83,8 +84,7 @@ function InitiativeOrderBody({
                         <span className="min-w-0 flex-1 truncate text-[15px]">
                             {names.get(id)}
                         </span>
-                        <Button
-                            variant="bare"
+                        <HudButton
                             type="button"
                             className="p-1 text-[var(--gold)] disabled:opacity-30"
                             disabled={i === 0}
@@ -92,9 +92,8 @@ function InitiativeOrderBody({
                             onClick={() => move(id, i - 1)}
                         >
                             <ChevronUp className="size-4" />
-                        </Button>
-                        <Button
-                            variant="bare"
+                        </HudButton>
+                        <HudButton
                             type="button"
                             className="p-1 text-[var(--gold)] disabled:opacity-30"
                             disabled={i === order.length - 1}
@@ -104,7 +103,7 @@ function InitiativeOrderBody({
                             onClick={() => move(id, i + 1)}
                         >
                             <ChevronDown className="size-4" />
-                        </Button>
+                        </HudButton>
                     </li>
                 ))}
             </ol>

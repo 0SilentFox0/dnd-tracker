@@ -11,7 +11,7 @@ import { useTranslations } from 'next-intl';
 import { LogEntryCard } from './LogEntryCard';
 import { RoundHeader } from './RoundHeader';
 
-import { Button } from '@/components/ui/button';
+import { HudButton } from '@/components/hud';
 import { groupLogByRound } from '@/lib/utils/battle/view';
 import type { BattleParticipant } from '@/types/battle';
 import type { BattleAction } from '@/types/battle-actions';
@@ -83,14 +83,13 @@ export function LogTimeline({
         <div className="pb-2 text-sm leading-5 text-[#cfc5b2]">
             {groups.length > 1 && (
                 <div className="flex justify-end pt-1">
-                    <Button
-                        variant="bare"
+                    <HudButton
                         type="button"
                         onClick={toggleAll}
                         className="text-[12px] text-[var(--hud-muted)] hover:text-[var(--ink)]"
                     >
                         {allCollapsed ? t('expandAll') : t('collapseAll')}
-                    </Button>
+                    </HudButton>
                 </div>
             )}
             {groups.map((g) => (

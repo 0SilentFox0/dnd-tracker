@@ -11,8 +11,8 @@ import { HeroPortrait } from './HeroPortrait';
 import { useProfile } from './ProfileContext';
 
 import { OptimizedImage } from '@/components/common/OptimizedImage';
+import { HudButton } from '@/components/hud';
 import { systemUiOf } from '@/components/systems';
-import { Button } from '@/components/ui/button';
 import { useCampaignSystem } from '@/lib/hooks/systems';
 import { signed } from '@/lib/utils/common/format';
 import { statColumnsOf } from '@/lib/utils/rules/systems/stats';
@@ -88,8 +88,7 @@ export function ProfileHero({
                                         : ''}
                                 </span>
                             </p>
-                            <Button
-                                variant="bare"
+                            <HudButton
                                 type="button"
                                 aria-expanded={hpOpen}
                                 onClick={() => setHpOpen((v) => !v)}
@@ -99,7 +98,7 @@ export function ProfileHero({
                                     ? `${t(hpKey.current, { current: sheet.rest.hp.current, max: sheet.rest.hp.max })}${sheet.rest.hp.temp ? ` (+${sheet.rest.hp.temp})` : ''}`
                                     : t(hpKey.total, { total: sheet.hp.total })}
                                 {sheet.hitDice && ` · ${sheet.hitDice}`}
-                            </Button>
+                            </HudButton>
                             {sheet.classTable?.map((line) => (
                                 <p
                                     key={line}
