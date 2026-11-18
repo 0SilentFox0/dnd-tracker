@@ -27,7 +27,6 @@ export function trackToDraft(track: CampaignTrack): TrackDraft {
     };
 }
 
-/** Лише змінені поля; назва = «група - назва»; порожня чи задовга назва чи некоректні посилання/тривалість — помилка */
 export function buildTrackPatch(
     track: CampaignTrack,
     draft: TrackDraft

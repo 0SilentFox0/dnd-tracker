@@ -1,6 +1,3 @@
-/**
- * Парсить JSON файл в масив об'єктів
- */
 export async function parseJSONFile<T>(file: File): Promise<T[]> {
     const text = await file.text();
 

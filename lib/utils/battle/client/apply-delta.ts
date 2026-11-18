@@ -134,7 +134,6 @@ export function applyBattleDelta(
 
     if (mapState === 'refetch') return 'refetch';
 
-    // знання з GET могло спиратися на скасовані події: відкат приносить перераховане
     const { knowledge: _knowledge, ...withoutKnowledge } = cached;
 
     return {
@@ -204,7 +203,6 @@ export function acceptFullBattle(
             ? (cached?.battleLog ?? [])
             : [];
 
-    // seq монотонні й після відкату, тож сусідство не доводить відсутність скасованої дірки — потрібне перекриття з вікном
     const overlaps = cachedLog.some((e) => e.actionIndex === windowStart);
 
     const older = overlaps

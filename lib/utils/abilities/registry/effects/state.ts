@@ -339,7 +339,6 @@ export function applyCleanse(
 
             if (!removed.length) return null;
 
-            // знятий чарм більше не поверне учасника наприкінці ходу — повертаємо одразу
             const charm = removed.find((e) => e.charmOrigin);
 
             return charm

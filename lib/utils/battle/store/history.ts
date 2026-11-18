@@ -192,7 +192,6 @@ type KnowledgeEventRow = Pick<
     'seq' | 'round' | 'type' | 'actorId' | 'targets' | 'details'
 >;
 
-// лише поля, які читають knownArmorClass / observedTraits — без повного details на кожен GET
 export async function loadKnowledgeEvents(
     db: BattleDb,
     battleId: string

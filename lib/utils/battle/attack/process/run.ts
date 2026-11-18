@@ -220,15 +220,13 @@ function reactToAttack(run: AttackRun): void {
 function spendAttackAction(run: AttackRun): void {
     const { params, flow, attackerId } = run;
 
-    // дія витрачається до подій атаки: «оновлення дії» від вбивства чи «+1 дія» мають пережити цей удар
     if (params.actionSpent) return;
 
     const attacker = getP(flow, attackerId);
 
     put(
         flow,
-        params.offHand &&
-            actionEconomyOf(flow.ctx.rules).bonusAction
+        params.offHand && actionEconomyOf(flow.ctx.rules).bonusAction
             ? {
                   ...attacker,
                   actionFlags: {

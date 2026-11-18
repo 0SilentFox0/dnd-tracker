@@ -167,7 +167,6 @@ interface FormWithChoices {
     > & { raceChoices: Picks; feats: ChoicesState['feats'] };
 }
 
-/** Прибирає піки, яких більше немає в обраній расі/класі (зміна раси, реролл), перед відправкою форми. */
 export function pruneFormChoices<T extends FormWithChoices>(
     data: T,
     refs: ChoiceRefs

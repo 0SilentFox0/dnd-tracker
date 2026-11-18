@@ -1,27 +1,14 @@
-// Утиліти для розрахунків D&D
-
 import { AttackType } from '@/lib/constants/battle';
 import type { AbilityKey } from '@/types/characters';
 
-/**
- * Розраховує модифікатор з ability score
- * Формула: (score - 10) / 2 (rounded down)
- */
 export function getAbilityModifier(score: number): number {
     return Math.floor((score - 10) / 2);
 }
 
-/**
- * Розраховує proficiency bonus залежно від рівня
- */
 export function getProficiencyBonus(level: number): number {
     return Math.ceil(level / 4) + 1;
 }
 
-/**
- * Розраховує Spell Save DC
- * Формула: 8 + proficiency bonus + ability modifier
- */
 export function getSpellSaveDC(
     proficiencyBonus: number,
     abilityModifier: number,
@@ -30,10 +17,6 @@ export function getSpellSaveDC(
     return base + proficiencyBonus + abilityModifier;
 }
 
-/**
- * Розраховує Spell Attack Bonus
- * Формула: proficiency bonus + ability modifier
- */
 export function getSpellAttackBonus(
     proficiencyBonus: number,
     abilityModifier: number
@@ -41,9 +24,6 @@ export function getSpellAttackBonus(
     return proficiencyBonus + abilityModifier;
 }
 
-/**
- * Розраховує чи попадання успішне
- */
 export function isHit(attackRoll: number, targetAC: number): boolean {
     return attackRoll >= targetAC;
 }

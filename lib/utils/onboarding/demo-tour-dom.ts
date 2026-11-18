@@ -1,15 +1,11 @@
 import type { DemoTourStep } from '@/lib/onboarding/demo-tours';
 
-// запас під тултіп: якщо ціль + тултіп не вміщаються у вікно, крок центруємо
 const TOOLTIP_ROOM_PX = 220;
 
-// перше відкриття бібліотек і боїв (холодний сервер, запуск бою) буває довшим за 5 с
 const BEFORE_TIMEOUT_MS = 20000;
 
-// joyride скролить ціль до верху вікна: без запасу вона ховається під липкою шапкою (89px)
 export const SCROLL_OFFSET_PX = 120;
 
-// опційні кроки (ціль залежить від стану: демо лише для перегляду, бій уже запущено): не висимо 20 с
 const OPTIONAL_WAIT_MS = 2000;
 
 const CLICK_SOURCE_WAIT_MS = 4000;
@@ -50,7 +46,6 @@ async function waitFor<T>(
 const rectKey = (box: DOMRect) =>
     [box.top, box.left, box.width, box.height].map(Math.round).join(':');
 
-// шухляди й панелі в'їжджають анімацією: спотлайт міряємо, коли ціль перестала рухатися
 async function settle(target: Element) {
     let previous = rectKey(target.getBoundingClientRect());
 
@@ -65,7 +60,6 @@ async function settle(target: Element) {
     }
 }
 
-// липка шапка: ціль під нею видно не буде
 function headerOffset() {
     const header = document.querySelector('body header');
 
@@ -99,7 +93,6 @@ async function revealTarget(target: Element) {
 
     if (visible || !(target instanceof HTMLElement)) return;
 
-    // scroll-margin працює і у вкладених overflow-контейнерах, на відміну від scrollBy
     const previousMargin = target.style.scrollMarginTop;
 
     target.style.scrollMarginTop = `${top + 16}px`;
@@ -114,7 +107,6 @@ async function revealTarget(target: Element) {
     );
 }
 
-// маркери карти слухають pointerup, кнопки — click: шлемо обидва
 function activate(element: HTMLElement) {
     const box = element.getBoundingClientRect();
 
@@ -182,12 +174,10 @@ export async function prepareTourStep(
             Math.min(deadline, Date.now() + CLICK_SOURCE_WAIT_MS)
         );
 
-        // відсутнє джерело (напр. плеєр уже розгорнуто) — просто йдемо до цілі
         if (source instanceof HTMLElement) {
             activate(source);
 
             if (item.clickUntilTarget) {
-                // кожен клік — запит на сервер: наступний лише коли кнопка знову активна або ціль з'явилась
                 const enabledSource = () => {
                     const again = document.querySelector(sourceSelector);
 
@@ -219,7 +209,6 @@ export async function prepareTourStep(
 
     if (!target) return;
 
-    // joyride скролить лише вікно, а сторінки скролять усередині overflow-контейнерів
     await revealTarget(target);
 
     if (

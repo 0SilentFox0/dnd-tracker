@@ -20,11 +20,6 @@ export function getEffectiveArmorClass(
     );
 }
 
-/**
- * Застосовує використання основної дії: якщо є пул додаткових дій (pendingExtraActions),
- * споживає одну й залишає hasUsedAction = false; інакше виставляє hasUsedAction = true.
- * Пул живе лише в межах ходу: на початку ходу він дорівнює actionsPerTurn, наприкінці згорає.
- */
 export function applyMainActionUsed(
     participant: BattleParticipant
 ): BattleParticipant {
@@ -47,7 +42,6 @@ export function applyMainActionUsed(
     };
 }
 
-/** +n основних дій: перша повертає вже витрачену дію, решта йде в пул цього ходу. */
 export function grantExtraActions(
     participant: BattleParticipant,
     n: number
@@ -86,7 +80,6 @@ export function setExtraActionPool(
     };
 }
 
-/** Додаткові дії на хід від actionsPerTurn («Жага крові» тощо). */
 export function actionsPerTurnPool(
     participant: BattleParticipant,
     participants: BattleParticipant[]

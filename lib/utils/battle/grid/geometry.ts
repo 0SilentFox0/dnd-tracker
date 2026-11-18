@@ -52,7 +52,6 @@ export function cellDistance(a: GridPoint, b: GridPoint): number {
     return Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y));
 }
 
-/** клітинки на відрізку a→b (Брезенгем), з обома кінцями; дробові координати округлюються, нескінченні/NaN дають [] */
 export function cellLine(from: GridPoint, to: GridPoint): GridPoint[] {
     if (![from.x, from.y, to.x, to.y].every(Number.isFinite)) return [];
 
@@ -243,7 +242,6 @@ export function closestCell(cells: GridPoint[], to: GridPoint[]): GridPoint {
     );
 }
 
-/** Усі клітинки карти рядками зверху вниз. */
 export function allCells(
     map: Pick<BattleMapConfig, 'cols' | 'rows'>
 ): GridPoint[] {
@@ -260,7 +258,6 @@ export const mapCentre = (
     map: Pick<BattleMapConfig, 'cols' | 'rows'>
 ): GridPoint => ({ x: Math.floor(map.cols / 2), y: Math.floor(map.rows / 2) });
 
-/** Клітинки карти кільцями Чебишева від `from`; усередині кільця — рядками зверху вниз. */
 export function* cellsByRing(
     map: Pick<BattleMapConfig, 'cols' | 'rows'>,
     from: GridPoint
@@ -302,7 +299,6 @@ export function* cellsByRing(
     }
 }
 
-/** Усі клітинки карти за зростанням відстані від `from`; при рівності — рядками зверху вниз. */
 export function cellsByDistance(
     map: Pick<BattleMapConfig, 'cols' | 'rows'>,
     from: GridPoint

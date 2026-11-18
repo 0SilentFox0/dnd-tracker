@@ -10,13 +10,6 @@ import type { Ruleset } from '@/lib/utils/rules';
 import type { BattleParticipant } from '@/types/battle';
 import type { LogLine } from '@/types/text';
 
-/**
- * Обробляє завершення ходу та перехід до наступного
- * @param currentTurnIndex - поточний індекс ходу
- * @param initiativeOrder - масив учасників
- * @param currentRound - поточний раунд
- * @returns новий індекс ходу та раунд
- */
 export function processEndOfTurn(
     currentTurnIndex: number,
     initiativeOrder: BattleParticipant[],
@@ -49,7 +42,6 @@ export function processEndOfTurn(
             nextRound += 1;
         }
 
-        // у новому раунді черга перевпорядковується: кидки для нього робить цикл ходу
         const rolled =
             nextRound === currentRound
                 ? skippedTurnAt(order, nextTurnIndex, {
@@ -75,9 +67,7 @@ export function processEndOfTurn(
             break;
         }
 
-        // Якщо ми перевірили всіх і нікого живого немає - зупиняємось (безпека)
         if (attempts >= maxAttempts) {
-            // у лабіринті живі можуть не ходити (сплять, вийшли): новий раунд починається з першого живого
             if (initiativeOrder.some(isActive))
                 nextTurnIndex = idleTurnIndex(initiativeOrder);
 

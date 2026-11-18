@@ -42,7 +42,6 @@ export function casterSpellDice(
     );
 }
 
-/** «6к10»: кубики за рівнем героя і майстерністю школи, без плоских бонусів. */
 export function spellFormulaLabel(
     caster: BattleParticipant,
     spell: Parameters<typeof casterSpellDice>[1],
@@ -67,7 +66,6 @@ const diceLabel = (dice: string): LogLine => {
         : dice;
 };
 
-/** Сила заклинання без кубиків каста: діапазон byDistance або кубики лікування варіантів; "" — шкоди/лікування немає. */
 export function spellEffectsFormula(effects: SpellEffect[]): LogLine {
     const list = effects.flatMap((e) =>
         e.kind === 'chooseOne' ? e.options : [e]

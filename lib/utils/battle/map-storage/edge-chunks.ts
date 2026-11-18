@@ -1,5 +1,8 @@
 import { formatEdgeKey, parseEdgeKey } from '@/lib/utils/battle/grid/walls';
-import { CHUNK_SIDE, parseChunkKey } from '@/lib/utils/battle/map-storage/chunk-key';
+import {
+    CHUNK_SIDE,
+    parseChunkKey,
+} from '@/lib/utils/battle/map-storage/chunk-key';
 import { toBase64 } from '@/lib/utils/common/base64';
 
 export const CHUNK_SIZE = CHUNK_SIDE;
@@ -80,7 +83,6 @@ function put(
     bytes[idx >> 2] |= kind << ((idx & 3) * 2);
 }
 
-/** Ребро і в walls, і в bars кодується стіною; ребра поза сіткою відкидаються. */
 export function encodeEdges(
     edges: Partial<EdgeSets>,
     cols: number,

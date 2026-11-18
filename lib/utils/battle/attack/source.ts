@@ -1,4 +1,3 @@
-/** Id атаки = ref предмета; друга рука — той самий предмет. */
 export const attackSourceOf = (attack: {
     id?: string;
 }): { attackSourceId?: string } =>

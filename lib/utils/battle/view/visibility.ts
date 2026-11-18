@@ -42,7 +42,6 @@ export function canSeeEnemyHp(
     );
 }
 
-// клієнт обирає героя за ходом, тож точні стати гарантовані лише коли прапорець має кожен герой гравця
 export function alwaysSeesEnemyStats(
     order: BattleParticipant[],
     userId: string
@@ -74,7 +73,6 @@ export function deltaTouchesOwned(
     );
 }
 
-// публічний канал проєктує зачарованого або PvP-героя (свій, але не на стороні союзників); власнику потрібна точна копія зі сцени
 export function controlsNonAlly(
     order: BattleParticipant[],
     userId: string
@@ -210,7 +208,8 @@ export function sanitizeLogEntry(
 
     const numbersChanged =
         hpChanges !== e.hpChanges ||
-        (!!spellAttacks && spellAttacks.some((a, i) => a !== details.spellAttacks?.[i]));
+        (!!spellAttacks &&
+            spellAttacks.some((a, i) => a !== details.spellAttacks?.[i]));
 
     if (
         !stripsNumbers &&
@@ -266,6 +265,5 @@ export function hiddenTargetSteps(
         (s) => s.side === 'attacker' || known.has(lineKey(s.label))
     );
 
-    // after відомого кроку вже містить прихований опір, тож або всі кроки цілі, або жодного
     return allKnown ? steps : steps.filter((s) => s.side === 'attacker');
 }

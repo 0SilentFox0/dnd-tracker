@@ -15,13 +15,6 @@ import type { BattleAction } from '@/types/battle-actions';
 import type { BattleMapConfig } from '@/types/battle-grid';
 import type { LogLine } from '@/types/text';
 
-/**
- * Обробляє початок нового раунду
- * @param initiativeOrder - масив учасників
- * @param currentRound - поточний раунд
- * @param pendingSummons - масив призваних істот що з'являться
- * @returns оновлений масив учасників та повідомлення
- */
 export function processStartOfRound(
     initiativeOrder: BattleParticipant[],
     currentRound: number,
@@ -36,7 +29,6 @@ export function processStartOfRound(
     hookMessages: LogLine[];
     psychology: { lines: LogLine[]; targets: BattleAction['targets'] };
 } {
-    // 0. Видаляємо тимчасові слоти додаткових ходів з попереднього раунду
     const baseOrder = (initiativeOrder || []).filter(
         (p) => !p.basicInfo?.isExtraTurnSlot
     );

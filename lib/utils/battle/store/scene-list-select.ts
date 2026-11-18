@@ -1,8 +1,5 @@
 import type { Prisma } from '@prisma/client';
 
-/**
- * Список сцен бою: лише метадані й лобі; стан учасників і журнал живуть в окремих таблицях.
- */
 export const battleSceneListSelect = {
     id: true,
     name: true,

@@ -106,7 +106,6 @@ export function hazardOnMove(
     )
         return null;
 
-    // точний шлях невідомий: консервативно — найсильніша небезпека в радіусі cost
     const origin = cellsOf(mover);
 
     return strongest(

@@ -21,10 +21,7 @@ export function wallSet(list?: string[]): ReadonlySet<string> {
     return set;
 }
 
-export function formatEdgeKey(
-    p: GridPoint,
-    side: 'e' | 's'
-): string {
+export function formatEdgeKey(p: GridPoint, side: 'e' | 's'): string {
     return `${cellKey(p)}:${side}`;
 }
 
@@ -46,7 +43,6 @@ export interface ParsedEdge {
     side: 'e' | 's';
 }
 
-/** "x:y:e" — ребро між (x,y) і (x+1,y); "x:y:s" — між (x,y) і (x,y+1). */
 export function parseEdgeKey(edge: string): ParsedEdge {
     const [x, y, side] = edge.split(':');
 

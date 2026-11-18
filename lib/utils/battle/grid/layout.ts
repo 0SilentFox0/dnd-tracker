@@ -17,7 +17,6 @@ export function mapSize(map: Pick<BattleMapConfig, 'cols' | 'rows'>): {
     return { width: map.cols * UNIT, height: map.rows * UNIT };
 }
 
-/** a…f екранної матриці SVG (`svg.getScreenCTM()`), яка вже містить зум, зсув і поворот карти */
 export interface ScreenMatrix {
     a: number;
     b: number;
@@ -83,7 +82,6 @@ export function cellScreenPoint(
 
 const EDGE_TOLERANCE = 0.35;
 
-/** Ребро, найближче до точки в одиницях карти (UNIT на клітинку); `null` — поза межами, на зовнішньому краї або далі за `tolerance` клітинки. */
 export function edgeAtScreenPoint(
     map: Pick<BattleMapConfig, 'cols' | 'rows'>,
     x: number,
@@ -111,12 +109,16 @@ export function edgeAtScreenPoint(
     if (vertical) {
         const row = Math.min(Math.floor(fy), map.rows - 1);
 
-        return vx > 0 && vx < map.cols ? formatEdgeKey({ x: vx - 1, y: row }, 'e') : null;
+        return vx > 0 && vx < map.cols
+            ? formatEdgeKey({ x: vx - 1, y: row }, 'e')
+            : null;
     }
 
     const col = Math.min(Math.floor(fx), map.cols - 1);
 
-    return hy > 0 && hy < map.rows ? formatEdgeKey({ x: col, y: hy - 1 }, 's') : null;
+    return hy > 0 && hy < map.rows
+        ? formatEdgeKey({ x: col, y: hy - 1 }, 's')
+        : null;
 }
 
 export function cellCenter(p: GridPoint): { x: number; y: number } {
@@ -173,17 +175,10 @@ export interface MapView {
     grow: number;
 }
 
-// карта лягає вертикально, лише коли вона помітно ширша, ніж висока
 const ROTATE_MIN_RATIO = 1.15;
 
-/** найменша клітинка на екрані, яку ще можна влучно тапнути пальцем */
 export const MIN_TAP_CELL_PX = 30;
 
-/**
- * рамка карти на екрані; rotated — карта повернута на 90° за годинниковою, width/height уже переставлені;
- * fillWidth — рамка на всю ширину, висота може перевищити доступну (тоді її прокручують);
- * minCell — рамка росте, щоб клітинка була не меншою, і тоді прокручується в обидва боки
- */
 export function fitMapView(
     avail: { width: number; height: number },
     map: Pick<BattleMapConfig, 'cols' | 'rows'>,
@@ -201,7 +196,6 @@ export function fitMapView(
         minCell?: number;
     } = {}
 ): MapView {
-    // за орієнтацією, а не за виграшем площі: інакше карта перекидається, коли панель знизу росте
     const landscapeMapInPortrait =
         avail.height > avail.width && map.cols >= map.rows * ROTATE_MIN_RATIO;
 
@@ -240,7 +234,6 @@ export type GridWindow = { x: number; y: number; cols: number; rows: number };
 
 const boundsCache = new WeakMap<string[], Map<string, GridWindow>>();
 
-/** найменший прямокутник з усіма ігровими клітинками; стіни ігрові, неігрові лише blocked */
 export function playableBounds(
     map: Pick<BattleMapConfig, 'cols' | 'rows' | 'blocked'>
 ): GridWindow {

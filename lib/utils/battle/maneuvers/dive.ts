@@ -76,7 +76,6 @@ function victimOf(
     return target && enemy(target) ? target : undefined;
 }
 
-/** Приземлення на початку ходу: удар по тому, хто на клітинці (без карти — по цілі), і посадка на найближчу вільну клітинку. */
 export function landDive(
     ps: BattleParticipant[],
     actorId: string,

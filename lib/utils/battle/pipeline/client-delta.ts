@@ -45,7 +45,6 @@ const baseOf = (map: BattleMapConfig) =>
         )
     );
 
-// повну карту шлемо лише коли змінилось щось, крім місцевості, тригерів зон (клієнту не потрібні) й полів лабіринту: інакше великі штрихи переповнюють Pusher
 function mapChange(
     before: BattleMapConfig | null,
     after: BattleMapConfig | null | undefined
@@ -92,14 +91,11 @@ export function buildClientDelta(args: {
     after: BattleSceneState;
     participants: BattleParticipant[];
     pending: BattleParticipant[];
-    /** змінені учасники у збереженій формі (split → join): клієнт має бачити те саме, що віддасть GET */
     stored: BattleParticipant[];
-    /** нові учасники й ті, чий знімок змінився */
     fullIds: string[];
     log: BattleAction[];
     cancelledFrom?: number;
     knowledge?: BattleKnowledge;
-    /** карта після мутації, якщо мутація її повернула */
     map?: BattleMapConfig | null;
     mapState?: BattleMapState | null;
     mapRef?: BattleMapRef;

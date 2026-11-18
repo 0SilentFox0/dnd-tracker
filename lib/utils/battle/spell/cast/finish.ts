@@ -122,7 +122,6 @@ function fxMeta(
     };
 }
 
-/** Кожен, кого зачепило заклинання і хто впав, отримує lethalDamage/kill; власна смерть кастера — без kill на його рахунок. */
 function settleAllDowned(
     state: SpellCastState,
     before: BattleParticipant[]
@@ -308,7 +307,6 @@ export function finishSpellAction(
           }
         : undefined;
 
-    // withSelf ставить кастера першим — повертаємо вихідний порядок ініціативи
     return {
         success: true,
         casterUpdated: getP(flow, casterId),

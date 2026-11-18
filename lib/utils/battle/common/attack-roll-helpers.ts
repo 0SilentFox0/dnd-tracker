@@ -1,8 +1,3 @@
-/**
- * Утиліти для визначення результату кидка атаки (hit/miss/crit).
- * Використовуються в UI (PlayerTurnView) та при потребі на бекенді.
- */
-
 export interface AttackRollData {
     attackRoll: number;
     advantageRoll?: number;
@@ -15,9 +10,6 @@ export interface ResolveAttackRollResult {
     critFail: boolean;
 }
 
-/**
- * Обчислює ефективний d20 з урахуванням advantage/disadvantage.
- */
 export function getEffectiveD20(data: AttackRollData | undefined): number {
     if (!data) return 0;
 
@@ -32,12 +24,6 @@ export function getEffectiveD20(data: AttackRollData | undefined): number {
     return data.attackRoll;
 }
 
-/**
- * Визначає результат атаки: hit, crit, critFail.
- * @param data — кидки гравця
- * @param targetAC — КБ цілі
- * @param totalAttackBonus — повний бонус атаки (attackBonus + statModifier + proficiencyBonus)
- */
 export function resolveAttackRoll(
     data: AttackRollData,
     targetAC: number,

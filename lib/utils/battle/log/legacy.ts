@@ -8,7 +8,6 @@ export function legacyLines(resultText: string): string[] {
         .filter(Boolean);
 }
 
-/** Legacy trigger rows: «Тригери <when>: a; b» — one headline and the items as lines. */
 export function splitLegacyTriggers(lines: readonly LogLine[]): {
     headline: LogLine;
     lines: LogLine[];

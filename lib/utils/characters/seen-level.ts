@@ -1,4 +1,3 @@
-/** NULL = «бачив поточний рівень»; перше підвищення фіксує старий рівень, щоб профіль показав анімацію. */
 export function seenLevelOnLevelChange(
     oldLevel: number,
     newLevel: number,

@@ -53,7 +53,6 @@ export function openChapters(
         }));
 }
 
-/** Зіграний розділ сцени або відкрита глава героя — те саме правило для кнопки, змісту і згортання. */
 export function sectionDone(
     section: ScenarioSection,
     isHero: boolean,

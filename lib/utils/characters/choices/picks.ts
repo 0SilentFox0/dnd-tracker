@@ -158,7 +158,6 @@ export const choicesBodyOf = (state: ChoicesState): ChoicesBody => ({
     }),
 });
 
-/** Збережені вибори чернетки для форми: піки раси лише коли раса та сама, класу — лише коли той самий клас. */
 export function storedDraftChoices(
     row: {
         backgroundId?: unknown;

@@ -1,4 +1,3 @@
-/** Нова назва для перейменування або null: порожня, скасована (null) чи та сама — не зберігаємо. */
 export function normalizeTrackTitle(
     raw: string | null,
     current: string

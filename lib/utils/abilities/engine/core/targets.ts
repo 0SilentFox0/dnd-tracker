@@ -25,7 +25,6 @@ export function resolveTargetIds(
 
     const side = owner.basicInfo.side;
 
-    // у лабіринті масові вміння по ворогах — лише ті, кого власник бачить (як і заклинання)
     const reachable = (p: BattleParticipant) =>
         targetableInPlay(p) &&
         (p.basicInfo.side === side ||
@@ -57,7 +56,6 @@ export function resolveTargetIds(
 
             return pick ? [pick.basicInfo.id] : [];
         }
-        // nearby* дозволені лише пасивкам (схема) — тут безпечний запасний варіант
         case 'allAllies':
         case 'nearbyAllies':
             return ps

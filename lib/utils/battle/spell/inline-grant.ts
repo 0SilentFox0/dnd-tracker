@@ -30,7 +30,6 @@ export const peekInlineGrant = (
           )
         : undefined;
 
-/** Підкаст кастується як окреме заклинання 0-го кола з визначенням з гранту. */
 export function withInlineDefinition(
     spell: CastableSpell,
     grant: SpellGrant

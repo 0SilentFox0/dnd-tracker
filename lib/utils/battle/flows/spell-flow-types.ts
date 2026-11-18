@@ -14,26 +14,17 @@ export interface SpellPick {
     spellId: string;
     level: number;
     targetMode: SpellTargetMode;
-    /** кого можна обирати: союзник, ворог або полеглий союзник */
     targetSide?: 'ally' | 'enemy' | 'dead';
     maxTargets?: number;
     template?: SpellTemplate;
-    /** дальність у футах */
     range?: number;
-    /** шаблон лишає зону: його можна поставити й без цілей */
     zone?: boolean;
-    /** одиночне заклинання, розширене вмінням до кількох цілей: на карті — коло лише по своїй стороні */
     skillRadius?: SkillRadius;
-    /** ланцюг на карті: гравець обирає першу ціль, решту рахує спільний spellChain */
     chain?: SpellChain;
-    /** обмеження цілей (тип, CR, політ) разом із колом, від якого рахується CR */
     filter?: SpellTargetFilter;
     castLevel?: number;
-    /** підписи варіантів chooseOne; гравець обирає один перед кастом */
     options?: Segment[][];
-    /** кількість кубиків вводить кастер (напр. висота падіння); diceSlots відповідають поточному вводу */
     inputDice?: { label: string; max: number; sides: number };
-    /** плитка inline-гранту: на сервер йде справжній spellId і ключ гранту */
     inline?: { spellId: string; grantKey: string };
     needsSaves: boolean;
     needsAttackRolls?: boolean;
@@ -81,7 +72,6 @@ export interface SpellFlowState {
     /** optional-ingredient systems: spend an ingredient to cancel a miscast */
     useIngredient?: boolean;
     error?: LogLine;
-    /** сервер зупинив каст: ДМ обирає ефект крита */
     waitingCrit?: boolean;
 }
 
@@ -126,8 +116,6 @@ export type SpellFlowAction =
     | { type: 'CLOSE' };
 
 export interface SpellWidening {
-    /** коротко для рядка списку */
     badge: LogLine;
-    /** повністю для деталей заклинання */
     note: LogLine;
 }

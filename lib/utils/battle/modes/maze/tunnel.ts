@@ -14,7 +14,6 @@ export type TunnelDir = 'n' | 'e' | 's' | 'w';
 
 export interface HeroTunnel {
     dir: TunnelDir;
-    /** від центру (глухий кінець) до краю карти; остання клітинка — новий вихід */
     cells: GridPoint[];
     walls: string[];
     exit: GridPoint;
@@ -46,7 +45,6 @@ function cellsToEdge(grid: GridSize, dir: TunnelDir): GridPoint[] {
     return out;
 }
 
-/** null — сусід поза картою (там рамка). */
 function edgeToward(
     grid: GridSize,
     p: GridPoint,
@@ -95,11 +93,6 @@ const byLength = (grid: GridSize, dirs: TunnelDir[]) =>
         .map((d) => build(grid, d))
         .sort((a, b) => b.cells.length - a.cells.length);
 
-/**
- * Прямий тунель шириною в клітинку від центру карти до краю: глухий кінець за першим героєм, стіни обабіч, вихід на краю.
- * Напрямок — до краю старого виходу (у куті — довша вісь); якщо герої не влазять (клітинка виходу лишається вільною) —
- * протилежний край, далі інша вісь.
- */
 export function heroTunnel(
     grid: GridSize,
     oldExit: GridPoint | null,

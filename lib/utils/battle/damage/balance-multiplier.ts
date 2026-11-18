@@ -6,7 +6,6 @@ export function balanceDamageMultiplier(p: BattleParticipant): number {
     return typeof x === 'number' && Number.isFinite(x) && x > 0 ? x : 1;
 }
 
-/** Масштаб шкоди ворога для рівного бою: після кубиків і модифікаторів, до опору. */
 export function applyBalanceDamageMultiplier(
     attacker: BattleParticipant,
     damage: number

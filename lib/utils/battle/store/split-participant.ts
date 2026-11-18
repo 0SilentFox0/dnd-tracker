@@ -54,7 +54,6 @@ export function splitParticipant(
         ...battleDataWithScoped
     } = p.battleData;
 
-    // потрібне лише під час старту бою
     const battleDataRest = omit(
         battleDataWithScoped as typeof battleDataWithScoped & {
             pendingScopedArtifactBonuses?: unknown;
@@ -108,7 +107,6 @@ export function splitParticipant(
         spellSlotsCurrent,
     };
 
-    // колонки INTEGER: JSON раніше приймав дроби від відсоткових модифікаторів
     return {
         columns: {
             id,

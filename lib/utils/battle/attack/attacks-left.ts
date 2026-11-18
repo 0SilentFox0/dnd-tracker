@@ -20,7 +20,6 @@ export function attacksPerAction(
 export const canAttackFromPool = (p: BattleParticipant): boolean =>
     (p.battleData.attacksLeft ?? 0) > 0;
 
-/** «Атака N/M» лише для героя з додатковими атаками; N — наступна атака дією. */
 export function attackCounter(
     p: BattleParticipant,
     participants: BattleParticipant[]
@@ -42,7 +41,6 @@ export function attackCounter(
     };
 }
 
-/** З лічильника, якщо він є; інакше витрачає дію й пише attacksLeft = attacksPerAction. */
 export function spendFromPool(
     p: BattleParticipant,
     participants: BattleParticipant[]

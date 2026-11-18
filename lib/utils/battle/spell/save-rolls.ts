@@ -7,7 +7,6 @@ interface SaveRoll {
     roll: number;
 }
 
-/** Клієнтські рятівні кидки приймаються лише від DM або за цілі, якими керує користувач; решту кидає сервер. */
 export function splitSaveRolls(
     actor: BattleActor,
     order: BattleParticipant[],

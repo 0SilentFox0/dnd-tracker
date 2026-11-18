@@ -8,7 +8,6 @@ export interface FxImpact {
     kind: 'damage' | 'heal';
     delayMs: number;
     attack?: 'melee' | 'ranged';
-    /** Бій: кадр чекає `fireFxImpact(actionId)` замість `delayMs`. */
     actionId?: string;
     waitMs?: number;
     /** Signed HP change reported by the server for a target whose HP is a bucket on the client */
@@ -35,7 +34,6 @@ export function impactFor(
     return impact;
 }
 
-/** Жертви дії, яких немає серед цілей головного FX: вогняна хвиля, стріла сили. */
 export function splashTargetIds(
     action: BattleAction,
     main: FxSpec | undefined

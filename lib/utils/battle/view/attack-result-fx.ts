@@ -18,7 +18,6 @@ interface StrikeOutcome {
     targetId: string;
 }
 
-/** Підсумки залпу з журналу; без записів — припущення за кидками. */
 export function attackResultsOf(
     log: BattleAction[],
     seen: ReadonlySet<number>,

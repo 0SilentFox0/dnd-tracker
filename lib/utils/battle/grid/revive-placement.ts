@@ -11,7 +11,6 @@ import { modePlaceRevived } from '@/lib/utils/battle/modes/server';
 import type { BattleParticipant } from '@/types/battle';
 import type { BattleMapConfig } from '@/types/battle-grid';
 
-/** Воскреслі стають на свою останню клітинку, а якщо вона зайнята — на найближчу вільну; без клітинки лишаються до звичайної розстановки. */
 export function placeRevived(
     map: BattleMapConfig,
     before: BattleParticipant[],
@@ -34,7 +33,6 @@ export function placeRevived(
 
         const from = p.battleData.position;
 
-        // ще не поставлені воскреслі клітинок не займають, інакше порядок у списку вирішував би, хто зсувається
         const standing = out.filter((q) => !pending.has(q.basicInfo.id));
 
         const others = occupiedBy(standing, (q) => q.basicInfo.id !== id);

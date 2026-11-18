@@ -59,10 +59,6 @@ function* combinations<T>(items: T[], size: number, start = 0): Generator<T[]> {
     }
 }
 
-/**
- * Склад, для якого hpScale і dmgScale найближчі до 1 (±PICK_TOLERANCE).
- * Пріоритет: юніти тіру, близького до сили одного героя → кількість у [⌈N/2⌉, 2N] → менше різних юнітів.
- */
 export function pickEnemyRoster(
     party: PartyPower,
     rawLibrary: UnitStats[],
@@ -123,7 +119,6 @@ export function pickEnemyRoster(
 
         const dmgScale = reached.dpr / base.dpr;
 
-        // стеля тіру може обрізати множник — тоді склад не дотягує до цілі, хоч масштаб і «≈1»
         const reaches =
             Math.abs(reached.hp / target.hp - 1) <= BALANCE_TOLERANCE &&
             Math.abs(reached.dpr / target.dpr - 1) <= BALANCE_TOLERANCE;

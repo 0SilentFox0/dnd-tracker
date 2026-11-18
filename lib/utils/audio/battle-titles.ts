@@ -18,7 +18,6 @@ const BATTLE_TITLE = new RegExp(
     'u'
 );
 
-/** «<Раса> - Битва», «… Битва 2», «… Битва (альфа-версія)» → раса і примітка в дужках */
 export function parseBattleTitle(
     title: string
 ): { faction: string; note: string | null } | null {
@@ -41,7 +40,6 @@ export function battleTrackTitle(
         .join(' ');
 }
 
-/** Нумерація за порядком бібліотеки лише серед треків з однаковою назвою (раса + примітка); ідемпотентно */
 export function planBattleTitles(
     tracks: BattleTrackRef[]
 ): BattleTitleChange[] {

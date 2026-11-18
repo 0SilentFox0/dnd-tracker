@@ -33,11 +33,8 @@ export interface FactorParty {
     ac?: number;
     weaponShare?: number;
     damageProfile?: Record<string, number>;
-    /** Середній модифікатор рятунку партії за характеристикою. */
     saves?: Partial<Record<string, number>>;
-    /** Середній опір партії до шкоди заклять за типом, %. */
     spellResist?: Record<string, number>;
-    /** Системна модель влучання замість d20 (offense/defense замість to-hit/AC) і її еталон. */
     hit: HitFn;
     refHit: number;
     refHitUnit: number;
@@ -129,7 +126,6 @@ function failedSaveShare(
     return 1 - success * (save.half ? 0.5 : 1);
 }
 
-/** Закляття юніта проти цієї партії: рятунки й опір зрізають шкоду, а слотів вистачає лише на частину раундів — решту б'є зброя. */
 export function unitSpellDpr(
     spell: UnitSpellPower,
     party: FactorParty

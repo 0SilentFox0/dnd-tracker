@@ -41,7 +41,6 @@ export const YT_STATE = { ENDED: 0, PLAYING: 1, PAUSED: 2 } as const;
 
 let loading: Promise<YtNamespace> | null = null;
 
-/** Скрипт YouTube вантажимо лише коли гравець увімкнув звук на YouTube-треку. */
 export function loadYoutubeIframeApi(): Promise<YtNamespace> {
     if (window.YT?.Player) return Promise.resolve(window.YT);
 

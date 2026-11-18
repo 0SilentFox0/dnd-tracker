@@ -17,7 +17,6 @@ export function armorDexCap(stats: ArmorStats): number | null {
     return stats.dexCap ?? DEFAULT_DEX_CAP[stats.category];
 }
 
-/** Без zod: ходить у entry-чанк бою (`lib/__tests__/client-entry-imports.test.ts`). */
 export function armorStatsFromRow(row: {
     modifiers?: unknown;
 }): ArmorStats | null {

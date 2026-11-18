@@ -1,6 +1,5 @@
 import type { ShowState, Slide } from '@/types/show';
 
-/** Під заглушкою або без слайда гравці бачать заглушку (або стандартний екран). */
 export type StageMode = 'cover' | 'world' | 'puzzle' | 'slide' | 'waiting';
 
 export const showsCover = (show: ShowState | null) =>
@@ -22,11 +21,9 @@ export function stageMode(show: ShowState | null): StageMode {
 const sees = (slide: Slide, heroIds: readonly string[]) =>
     !slide.audience || slide.audience.some((id) => heroIds.includes(id));
 
-/** Поточний слайд обмежений: стан для гравців читається окремо, а не розсилається. */
 export const isRestricted = (show: ShowState | null): boolean =>
     !!show?.slide?.audience;
 
-/** Те, що клієнт ніколи не бачить: серверна стежка. */
 export function toClientShow(show: ShowState): ShowState {
     const { trail: _trail, ...client } = show;
 
@@ -35,7 +32,6 @@ export function toClientShow(show: ShowState): ShowState {
 
 const publicSlide = ({ audience: _audience, ...slide }: Slide): Slide => slide;
 
-/** Гравець бачить поточний слайд, а якщо той не для його героїв — останній доступний зі стежки (або нічого). */
 export function playerShowView(
     show: ShowState,
     heroIds: readonly string[]

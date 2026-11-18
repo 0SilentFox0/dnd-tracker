@@ -74,7 +74,6 @@ export function assertAbilityTargets(
         }
     }
 
-    // UI пропонує лише ворогів; без цього застарілий клієнт міг повісити «Мисливця» на союзника
     if (
         !rules.requiresDead &&
         owner &&

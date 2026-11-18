@@ -37,7 +37,6 @@ export type DisabledCrits = {
     fail: readonly string[];
 };
 
-/** disabled з правил критів стосується лише таблиць атаки; таблиці save мають інші id. */
 export const enabledCritEffects = (
     source: CritSource,
     kind: CritKind,

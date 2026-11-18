@@ -27,7 +27,6 @@ export interface ZoneCtx {
     rules: Ruleset;
 }
 
-/** Джерело тригера: зона на мапі або аура на учаснику. */
 export interface FireSource {
     casterId: string;
     spellId: string;
@@ -38,7 +37,6 @@ export interface FireSource {
     hitKey: string;
     excludeId?: string;
     attackBonus?: number;
-    /** id ефекту-аури: накладені тригером ефекти прив'язуються до нього */
     anchorId?: string;
 }
 

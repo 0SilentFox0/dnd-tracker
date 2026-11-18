@@ -61,7 +61,6 @@ describe('allReachExit', () => {
 });
 
 describe('allReachExit з телепортами', () => {
-    // пара телепорта — замкнена клітинка (0,1): ступив на (2,0) — і застряг
     const pocket = {
         cols: 5,
         rows: 2,
@@ -100,7 +99,6 @@ describe('allReachExit з телепортами', () => {
 });
 
 describe('allReachExit збігається з пошуком від кожної точки', () => {
-    // еталон: прямий пошук, як у русі — ступив на телепорт, і тебе переносить до пари
     function naiveReaches(g: MazeGridLike, from: GridPoint): boolean {
         const exit = g.maze.exit as GridPoint;
 

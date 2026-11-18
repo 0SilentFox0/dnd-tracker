@@ -5,7 +5,6 @@ export const branchLevelNodeId = (branchId: string, level: BranchLevel) =>
 
 export const racialNodeId = (level: BranchLevel) => `racial_${level}_racial`;
 
-// мок-генератор дерев писав такі id у порожні слоти й ультимейт
 const PLACEHOLDER_RE = /^placeholder_|_circle[123]_skill\d+$|_ultimate$/;
 
 export function isPlaceholderSkillId(id: unknown): boolean {

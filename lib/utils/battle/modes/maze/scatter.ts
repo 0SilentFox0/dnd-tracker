@@ -15,7 +15,6 @@ import type { GridPoint } from '@/types/battle-grid';
 
 const SCATTER_ATTEMPTS = 20;
 
-// MAZE_SCATTER_MIN_GAP — порожні клітинки між учасниками, тож відстань на 1 більша
 const MIN_DISTANCE = MAZE_SCATTER_MIN_GAP + 1;
 
 const freeCells = (grid: MazeGrid): GridPoint[] => {
@@ -41,13 +40,10 @@ export function scatterStarts(
 
 export interface FreeStartsArgs {
     heroIds: string[];
-    /** клітинки решти учасників на полі */
     others: GridPoint[];
-    /** усі мають мати шлях до виходу; інакше повтор, а після всіх спроб — «замурують» */
     mustReachExit?: boolean;
 }
 
-/** Старти героїв на крайніх клітинках, не зайнятих рештою учасників. */
 export function scatterFreeStarts(
     grid: MazeGrid,
     { heroIds, others, mustReachExit = false }: FreeStartsArgs,

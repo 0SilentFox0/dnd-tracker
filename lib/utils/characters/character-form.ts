@@ -17,9 +17,6 @@ function getDefaultSpellSlotsForLevel(
     return fullSpellSlots(level, progression);
 }
 
-/**
- * Конвертує плоску структуру Character в згруповану CharacterFormData
- */
 export function characterToFormData(
     character: Partial<Character>,
     raceProgression?: SpellSlotProgression[]
@@ -110,7 +107,6 @@ export function characterToFormData(
     };
 }
 
-/** Після підняття рівня оновлюються лише рівень, характеристики й слоти — решта правок форми лишається. */
 export function mergeLevelUpIntoForm(
     prev: CharacterFormData,
     updated: Partial<Character>
@@ -143,10 +139,6 @@ export function mergeLevelUpIntoForm(
         },
     };
 }
-
-/**
- * Конвертує згруповану CharacterFormData в плоску структуру для API
- */
 
 export function formDataToCharacter(
     formData: CharacterFormData

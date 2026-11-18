@@ -1,9 +1,5 @@
 import type { DamageRow, DamageStep } from '@/types/battle-actions';
 
-/**
- * Типи для розрахунку урону
- */
-
 export interface DamageCalculationResult {
     baseDamage: number;
     skillPercentBonus: number;

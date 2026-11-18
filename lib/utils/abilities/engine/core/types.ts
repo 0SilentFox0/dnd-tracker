@@ -21,7 +21,6 @@ export interface AbilityRunContext {
     crit?: CritPicker;
 }
 
-/** Учасник без рядка в БД: статы з визначення заклинання. */
 export interface InlineSummon {
     name: string;
     size: 'tiny' | 'small' | 'medium' | 'large';
@@ -43,11 +42,9 @@ export interface SummonRequest {
     group?: string;
     tier?: number;
     unitId?: string;
-    /** id учасника, чий двійник (фантом) створюється */
     cloneOf?: string;
     count: number;
     casterLevel?: number;
-    /** закляття, яким прикликано (для extraSummons) */
     spellId?: string;
     inline?: InlineSummon;
     atCell?: GridPoint;

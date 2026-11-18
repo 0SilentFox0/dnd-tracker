@@ -19,7 +19,6 @@ export function sizeOf(p: BattleParticipant): number {
     return Math.min(3, Math.max(1, p.combatStats.gridSize ?? 1));
 }
 
-/** Мертвий чи непритомний: зникає з поля, поки його не воскресять; герой, що вмирає за 5e, лишається на клітинці. */
 export function isFallen(p: BattleParticipant): boolean {
     return p.combatStats.status !== CombatStatus.ACTIVE && !isDying(p);
 }

@@ -53,9 +53,7 @@ export interface UnitStats {
     /** Best weapon's `kind:damageType` (party profile when the unit is an ally). */
     damageKey?: string;
     resist?: Record<string, number>;
-    /** Закляття сильніше за зброю: ефективну шкоду рахує `effectiveUnit` з рятунками, опором партії і слотами. */
     spell?: UnitSpellPower;
-    /** Ціль прикликання (Фенікс, елементалі): ДМ не виставляє його сам, тож він не задає стелю тіру. */
     summon?: boolean;
     cr?: number;
     xp?: number;

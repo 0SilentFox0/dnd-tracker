@@ -10,7 +10,6 @@ export function isCleave(attack: BattleAttack): boolean {
     );
 }
 
-/** Скільки цілей обирає гравець; автоцілі (ланцюг, розщеплення, пробивний, «бʼє всіх») — поза лімітом. */
 export function attackMaxTargets(
     attacker: BattleParticipant,
     attack: BattleAttack,

@@ -9,7 +9,6 @@ export interface FxQueueState {
     log: BattleAction[] | null;
     seen: number | null;
     queue: FxSpec[];
-    /** undefined = ще не бачили (перший рендер не програє кубик) */
     dice?: string[];
 }
 
@@ -41,7 +40,6 @@ export const INITIAL_FX_QUEUE: FxQueueState = {
 
 export const MAX_FX_QUEUE = 32;
 
-/** Дія, що грає (усі її спеки), лишається; решта обрізається найстарішими діями цілком, щоб залп не втратив середину. */
 export function trimFxQueue(queue: FxSpec[], max: number): FxSpec[] {
     if (queue.length <= max) return queue;
 
@@ -67,7 +65,6 @@ export function trimFxQueue(queue: FxSpec[], max: number): FxSpec[] {
     return [...head, ...tail];
 }
 
-/** `active` = FX увімкнено і вкладка видима; неактивна черга лише просуває `seen`, тож після повернення нічого не програється пачкою. */
 export function advanceFxQueue(
     state: FxQueueState,
     { log, dice }: FxQueueInput,
@@ -100,7 +97,6 @@ export function advanceFxQueue(
     };
 }
 
-/** Знімає голову лише якщо це та сама анімація: запізнілий `done` після очищення черги нічого не пропускає. */
 export function shiftFxQueue(state: FxQueueState, key: string): FxQueueState {
     return state.queue[0]?.key === key
         ? { ...state, queue: state.queue.slice(1) }

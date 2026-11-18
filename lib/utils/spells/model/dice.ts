@@ -77,7 +77,6 @@ export function spellDice5e(
     };
 }
 
-// юніти не мають майстерності шкіл: грані ростуть з рівнем, а кубики — швидше, ніж у героя
 const unitSides = (level: number) => (level >= 10 ? 10 : level >= 5 ? 8 : 6);
 
 export function spellDice(

@@ -133,7 +133,6 @@ export function modeWalls(map: MapArg): readonly string[] {
     );
 }
 
-/** Масові цілі: ворогів, яких каст не бачить, відсіює режим; союзники й невідомі id лишаються. */
 export function modeSightedTargets(
     map: MapArg,
     ps: BattleParticipant[],

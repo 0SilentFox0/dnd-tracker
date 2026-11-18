@@ -174,7 +174,6 @@ export const TRIGGER_REGISTRY: { [E in TriggerEvent]: TriggerDefinition<E> } = {
 
             const victim = findParticipant(ps, e.targetId);
 
-            // friendly fire не рахується як вбивство для вбивці та його сторони
             const enemyKilled =
                 !!killer &&
                 !!victim &&

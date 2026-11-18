@@ -50,7 +50,6 @@ export function slotOptions(
     });
 }
 
-/** Скільки разів ще можна кастувати коло; кантрипи та вільний каст DM безлімітні. */
 export function spellSlotsLeft(
     caster: BattleParticipant | null,
     level: number,

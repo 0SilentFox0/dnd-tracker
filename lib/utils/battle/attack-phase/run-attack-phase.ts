@@ -102,8 +102,6 @@ interface StrikeOpts {
 const liveOf = (st: PhaseState, p: BattleParticipant) =>
     findParticipant(st.order, p.basicInfo.id) ?? p;
 
-// d100: сервер сам вирішує влучання, а клієнт шле кубики на кожну ціль; пул, як у d20, — лише за влучання.
-// Пробний прогін записує rng, повторний програє запис, тож влучання збігаються.
 export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
     const targets = requestedTargetIds(input.data).length;
 
@@ -225,7 +223,6 @@ function runPhase(input: AttackPhaseInput): AttackPhaseResult {
     let firstHit = false;
 
     for (let i = 0; i < targets.length; i++) {
-        // пробивний летить крізь цілі: штраф лише на першу
         const result = strikeAt(ctx, st, targets[i], i, {
             serverRolled: i >= serverRolledFrom,
             multiplier: targets.length > 1 ? fractions[i] : undefined,

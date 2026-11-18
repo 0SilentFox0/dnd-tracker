@@ -156,7 +156,6 @@ describe('runAbilities', () => {
 
         expect(r.participants[2].combatStats.status).toBe('unconscious');
         expect(r.participants[0].combatStats.morale).toBe(-1);
-        // glory спрацював на глибині 1, тож його смерть від dealDamage вже не породжує kill
         expect(r.participants[0].combatStats).toMatchObject({
             currentHp: 0,
             status: 'unconscious',

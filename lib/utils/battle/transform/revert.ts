@@ -57,7 +57,6 @@ function restoreSaved(
     };
 }
 
-/** Відкат на 0 HP форми: надлишок шкоди (понад HP форми) йде в звичайну форму. */
 export function revertOnZero(
     before: BattleParticipant,
     after: BattleParticipant,
@@ -101,7 +100,6 @@ const expired = (
     );
 };
 
-/** Форма закінчилась (час, концентрація, знятий маркер, смерть): стани звичайної форми повертаються. */
 export function revertExpiredTransforms(
     ps: BattleParticipant[],
     round: number,

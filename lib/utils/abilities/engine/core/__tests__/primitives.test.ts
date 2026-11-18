@@ -170,7 +170,6 @@ describe('hp', () => {
             currentHp: 0,
             status: 'unconscious',
         });
-        // як атака: HP не нижче 0, тож надмірна шкода від уміння лишає непритомним, а не мертвим
         expect(applyRawDamage(p, 9).combatStats).toMatchObject({
             currentHp: 0,
             status: 'unconscious',

@@ -340,7 +340,6 @@ function withTargets(s: SpellFlowState, ids: string[]): SpellFlowState {
     };
 }
 
-/** Шаблон: цілі — ті, кого точка зачіпає зараз; рух після наведення змінює список, тож підказки й каст беруть живий. */
 export function withLiveAimTargets(
     s: SpellFlowState,
     liveIds: string[]
@@ -350,7 +349,6 @@ export function withLiveAimTargets(
         : s;
 }
 
-/** «all»: цілі не обирають — уся сторона заклинання зараз, тож рятунки й підсумок бачать живий список. */
 export function withAllTargets(
     s: SpellFlowState,
     sideIds: string[]
@@ -358,7 +356,6 @@ export function withAllTargets(
     return s.pick?.targetMode === 'all' ? withTargets(s, sideIds) : s;
 }
 
-/** Ланцюг: обрана лише перша ціль, а рятунки й підсумок бачать увесь ланцюг від неї. */
 export function withChainTargets(
     s: SpellFlowState,
     chainIds: string[]

@@ -1,7 +1,3 @@
-/**
- * Тести breakdown урону (превью в UI). Джерело правди: docs/DAMAGE_CALCULATION_TEST_ARCHITECTURE.md
- */
-
 import { describe, expect, it } from 'vitest';
 
 import { AttackType, ParticipantSide } from '@/lib/constants/battle';

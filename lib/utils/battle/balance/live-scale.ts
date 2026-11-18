@@ -16,7 +16,6 @@ export function isLiveScalable(p: BattleParticipant): boolean {
     );
 }
 
-/** Множить HP і шкоду живих ворожих юнітів лише в цьому бою; формула рівного бою не змінюється. */
 export function liveScaleEnemyUnits(
     participants: BattleParticipant[],
     direction: LiveScaleDirection

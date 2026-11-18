@@ -7,7 +7,6 @@ export const clamp01 = (v: number) => clamp(v, 0, 1);
 
 type Box = { left: number; top: number; width: number; height: number };
 
-/** `box` — rect нерухомого зовнішнього шару картинки; трансформ (offset, zoom) на внутрішньому з origin 0 0. */
 export function toMapPoint(
     client: { x: number; y: number },
     box: Box,
@@ -123,7 +122,6 @@ function distToSegmentScaled(p: MapPoint, a: MapPoint, b: MapPoint): number {
     return Math.hypot(p.x - (a.x + t * dx), p.y - (a.y + t * dy));
 }
 
-/** Відстань у частках ширини карти; `aspect = width / height`. */
 export function distToSegment(
     p: MapPoint,
     a: MapPoint,

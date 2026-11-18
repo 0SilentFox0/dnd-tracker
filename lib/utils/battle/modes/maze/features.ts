@@ -14,7 +14,6 @@ import type { GridPoint, MazeConfig } from '@/types/battle-grid';
 
 const PATCH_ATTEMPTS = 30;
 
-/** Клітинки виходу й телепортів: на них не ставлять учасників і не проходять крізь них. */
 export function featureKeys(
     maze: Pick<MazeConfig, 'exit' | 'teleports'>
 ): Set<string> {
@@ -66,7 +65,6 @@ export function placeTeleports(
             })
             .find((p) => p !== null);
 
-        // на малій карті пар може бути менше, ніж просили
         if (!pair) break;
 
         pairs.push(pair);
@@ -114,7 +112,6 @@ export function placeFog(
 ): string[] {
     const fog = new Set<string>();
 
-    // плями не торкаються одна одної, щоб кожна лишалась окремою плямою 2–4 клітинок
     const blocked = (p: GridPoint) =>
         exclude.has(cellKey(p)) ||
         fog.has(cellKey(p)) ||

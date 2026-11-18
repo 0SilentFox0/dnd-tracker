@@ -176,14 +176,9 @@ export interface BattleDelta {
     version: number;
     scene: Pick<
         BattleSceneState,
-        | 'status'
-        | 'round'
-        | 'turnIndex'
-        | 'pendingChoice'
-        | 'turnStartedAt'
+        'status' | 'round' | 'turnIndex' | 'pendingChoice' | 'turnStartedAt'
     > & { sceneState?: SystemSlot };
     upserted: BattleParticipant[];
-    /** нові учасники й ті, чий знімок змінився */
     fullIds: string[];
     removed: string[];
     events: StoredBattleEvent[];

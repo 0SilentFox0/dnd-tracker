@@ -9,7 +9,6 @@ import type { LogLine } from '@/types/text';
 export interface DamageConsequencesInput {
     before: BattleParticipant;
     after: BattleParticipant;
-    /** шкода після опорів, до обрізання на 0 */
     amount: number;
     crit?: boolean;
     rules: Ruleset;
@@ -59,7 +58,6 @@ export function applyDamageConsequences(
     );
 }
 
-/** DM-зміна статусу (HP, воскресіння, вбивство): ті самі наслідки, що й від шкоди. `participants` уже містять `after`. */
 export function settleStatusChange(
     before: BattleParticipant,
     after: BattleParticipant,

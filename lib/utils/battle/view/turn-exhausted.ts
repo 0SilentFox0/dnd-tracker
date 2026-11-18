@@ -9,7 +9,6 @@ import type { BattleParticipant } from '@/types/battle';
 
 type BonusSpell = Parameters<typeof canCastBonusSpell>[1][number];
 
-/** coreActions: лишок руху на карті й підйом лежачого тримають хід відкритим. */
 export function turnExhausted(
     p: BattleParticipant,
     bonusSpells: BonusSpell[],

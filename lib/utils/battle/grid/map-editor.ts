@@ -198,7 +198,6 @@ function withEdges(
 
 export type EdgePaint = { map: BattleMapConfig; overflow: boolean };
 
-/** Додає/прибирає ребра; стіна й ґрати не живуть на одному ребрі — остання дія перемагає, понад ліміт — відкидається (`overflow`). */
 export function paintEdges(
     map: BattleMapConfig,
     edges: string[],
@@ -251,7 +250,6 @@ export function paintEdges(
     };
 }
 
-/** Ставить зачинені (за потреби замкнені) двері або прибирає їх; двері витісняють стіну й ґрати на ребрі, понад ліміт — відкидається (`overflow`). */
 export function paintDoors(
     map: BattleMapConfig,
     edges: { add: string[]; remove: string[] },

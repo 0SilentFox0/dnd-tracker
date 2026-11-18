@@ -31,17 +31,14 @@ export interface Outcome {
     factor: number;
     raceMultiplier: number;
     critExtra?: number;
-    /** крит рятівного кидка: статуси заклинання на ціль не накладаються */
     negateEffects?: boolean;
 }
 
 export interface SpellCastState {
     flow: ActionFlow;
     spell: ChosenSpell;
-    /** Кастер до каста: сторона й множник балансу. */
     caster: BattleParticipant;
     targetIds: string[];
-    /** Цілі каста й усі, кого зачепили власні ефекти заклинання — без тих, кого змінили лише тригери. */
     touchedIds: Set<string>;
     info: {
         spellId: string;
@@ -70,7 +67,6 @@ export interface SpellCastState {
     outcomes: Map<string, Outcome>;
     summons: SummonRequest[];
     transforms: TransformRequest[];
-    /** Сума фактичної шкоди (після опору) від усіх dealDamage цього касту. */
     dealt: number;
 }
 
@@ -109,7 +105,6 @@ export const isPerTarget = (e: Effect) =>
     !NO_TARGET_KINDS.has(e.kind) &&
     (targetOf(e) === undefined || targetOf(e) === 'eventTarget');
 
-/** Цільові ефекти, що читають шкоду касту: виконуються після нецільових. */
 export const readsEventDamage = (e: Effect) =>
     (e.kind === 'heal' || e.kind === 'dealDamage') &&
     typeof e.amount === 'object' &&

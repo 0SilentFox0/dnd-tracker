@@ -49,7 +49,6 @@ function extraSummons(
         .reduce((n, f) => n + f.count, 0);
 }
 
-/** Найсильніше «Вигнання» серед живих ворогів власника: прикликана істота втрачає частку HP. */
 function banish(
     order: BattleParticipant[],
     summoned: BattleParticipant

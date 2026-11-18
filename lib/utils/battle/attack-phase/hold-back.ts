@@ -8,7 +8,6 @@ import type { ActiveEffect, BattleParticipant } from '@/types/battle';
 const isCritConsumable = (e: ActiveEffect) =>
     e.id.startsWith('critical-') && !!e.consumeOn;
 
-// Крит-ефекти атакуючого з витратою діють з наступної атаки, тому решту залпу пропускають.
 export function holdBackNewEffects(
     order: BattleParticipant[],
     attacker: BattleParticipant,

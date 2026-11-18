@@ -119,7 +119,6 @@ export function buildTreeJson(input: BuildTreeInput): RawTree {
     };
 }
 
-/** JSON для клієнта без назв/описів у слотах — вони приходять окремою мапою скілів. */
 export function stripTreeForClient(raw: RawTree): RawTree {
     const strip = (list?: RawSlot[]) => list?.map((s) => ({ id: s.id }));
 

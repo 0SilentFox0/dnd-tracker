@@ -65,7 +65,6 @@ const fitsSpell = (f: TargetingFlag, spell: SpellRef) =>
     (!f.spellIds || f.spellIds.includes(spell.id)) &&
     (!f.school || f.school === spell.groupId);
 
-/** Найсильніше розширення заклинання разом із назвою вміння/артефакту, що його дало. */
 export function spellWideningOf(
     ps: BattleParticipant[],
     casterId: string,
@@ -105,7 +104,6 @@ export function spellTargetingFor(
     return { mode, maxTargets };
 }
 
-/** Режим «all»: уся сторона заклинання на полі — без вибору, наведення й дальності, з картою чи без. */
 export function skillAllTargets(
     ps: BattleParticipant[],
     caster: BattleParticipant,
@@ -139,7 +137,6 @@ export const SKILL_AREA_TEMPLATE: SpellTemplate = {
     size: SKILL_AREA_RADIUS_FEET,
 };
 
-/** Розширене вмінням одиночне заклинання не б'є своїх: лише сторона заклинання, найближчі до точки, до maxTargets. */
 export function skillRadiusArea(
     { map, participants, caster, rules }: AimScene,
     radius: SkillRadius,
@@ -166,7 +163,6 @@ export interface SpellChain {
     maxTargets: number;
 }
 
-/** Ланцюг на карті: кожна наступна ціль — найближча до попередньої жива на карті зі сторони заклинання; рівні — за ініціативою. */
 export function spellChain(
     { participants, caster }: Omit<AimScene, 'map' | 'rules'>,
     chain: SpellChain,
@@ -303,12 +299,8 @@ function resolveTemplate(
         rules
     );
 
-    // конус/лінія у власну клітинку не мають напрямку — інакше слот згорів би без зони
-
     if (cells.length === 0)
         return fail(textRef('battleActions.spell.target.pickDirection'));
-
-    // промах повз усіх — теж каст: слот і дія витрачаються, FX летить у точку
 
     return {
         ok: true,
@@ -598,7 +590,6 @@ function hostile(targeting: SpellTargetingDef): boolean {
     return HOSTILE_KINDS.has(targeting.kind);
 }
 
-/** Кастер зі станом «без ворожих заклинань»: ворожий шаблон або будь-яка ціль-ворог. */
 export function pacifiedBlock(
     ps: BattleParticipant[],
     caster: BattleParticipant,

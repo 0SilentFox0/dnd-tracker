@@ -250,7 +250,6 @@ function readStats(raw: unknown): ItemStats | null {
 
 const STATS_CACHE = new WeakMap<object, ItemStats | null>();
 
-/** Без zod: ходить у entry-чанки бою й профілю (`lib/__tests__/client-entry-imports.test.ts`). */
 export function itemStatsFromRow(row: {
     modifiers?: unknown;
 }): ItemStats | null {

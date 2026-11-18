@@ -64,7 +64,6 @@ export function createMockParticipant(
     };
 }
 
-/** Додає учаснику пасивне вміння з указаними ефектами (мутує battleData). */
 export function grantPassive(
     p: BattleParticipant,
     effects: StaticEffect[],

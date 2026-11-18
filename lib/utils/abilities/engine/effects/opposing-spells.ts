@@ -36,7 +36,6 @@ const clash = (xs: Axis[], ys: Axis[]) =>
 
 const spellFamily = (timedKey: string) => timedKey.split('#')[0];
 
-/** Протилежні заклинання (Поспіх ↔ Сповільнення, Кам'яна шкіра ↔ Немічність…) не складаються: нове знімає з цілі ефект іншого заклинання на тому ж статі з протилежним знаком. */
 function dropOpposingSpellEffects(
     p: BattleParticipant,
     abilityKey: string,

@@ -4,7 +4,6 @@ import { isOnMap } from '@/lib/utils/battle/grid/occupancy';
 import type { BattleAttack, BattleParticipant } from '@/types/battle';
 import type { BattleMapConfig } from '@/types/battle-grid';
 
-/** Суміжна атака: на мапі — за клітинками, без мапи — ближня. */
 export function isAdjacentAttack(
     attacker: BattleParticipant,
     target: BattleParticipant,

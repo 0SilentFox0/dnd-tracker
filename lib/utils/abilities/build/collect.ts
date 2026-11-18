@@ -66,7 +66,6 @@ function classResolved(entries: ResolvedClassEntry[]): ResolvedAbility[] {
                 .filter((f) => f.level <= level)
                 .flatMap((f) => f.abilities);
 
-        // підклас бере колонки, рівень і пули свого класу
         const scale = (abilities: Ability[]) =>
             applyClassScale(abilities, {
                 classId: cls.id,

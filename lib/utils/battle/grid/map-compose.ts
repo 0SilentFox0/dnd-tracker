@@ -20,7 +20,6 @@ interface ComposeMapViewInput {
     > & { pendingStroke: ReadonlySet<string> };
 }
 
-/** Вид карти для рендера: сцена + прев'ю під курсором + службові накладки. */
 export function composeMapView({
     scene,
     map,

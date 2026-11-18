@@ -27,7 +27,6 @@ export async function runWithCritChoice(
 ): Promise<MutationResult> {
     const seed = opts.resume?.seed ?? Math.floor(Math.random() * 2 ** 32);
 
-    // скриптовий ctx.rng (тести, sweep) діє напряму; повтор після паузи завжди йде за seed
     const rng = !opts.resume && ctx.rng ? ctx.rng : mulberry32(seed);
 
     const { criticals } = ctx.meta.rules;

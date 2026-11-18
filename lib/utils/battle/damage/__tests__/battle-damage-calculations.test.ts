@@ -1,8 +1,3 @@
-/**
- * Тести логіки обрахунку шкоди (TDD — тести як джерело правди).
- * Архітектура: docs/DAMAGE_CALCULATION_TEST_ARCHITECTURE.md
- */
-
 import { describe, expect, it } from 'vitest';
 
 import { AttackType, ParticipantSide } from '@/lib/constants/battle';

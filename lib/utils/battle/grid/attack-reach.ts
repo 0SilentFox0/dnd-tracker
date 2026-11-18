@@ -81,7 +81,6 @@ export function enemiesInReach(
     );
 }
 
-/** Ближня атака, якщо дістає; інакше перша досяжна. Без карти чи позиції — перша ближня, інакше перша. */
 export function pickAttack(
     map: BattleMapConfig | null,
     participants: BattleParticipant[],
@@ -118,7 +117,6 @@ export function pickAttack(
         else rangedError ??= e;
     }
 
-    // до далекої цілі «підійдіть» менш корисне, ніж причина, чому не стріляє лук
     const adjacent =
         !!target.battleData.position &&
         footprintDistance(cellsOf(attacker), cellsOf(target)) <= 1;

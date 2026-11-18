@@ -5,7 +5,6 @@ import { modeSightedTargets } from '@/lib/utils/battle/modes/engine';
 import type { BattleParticipant } from '@/types/battle';
 import type { BattleMapConfig, GridPoint } from '@/types/battle-grid';
 
-/** Core-видимість: стіни карти не перекривають лінію між жодною парою клітинок обох учасників. */
 export function wallsAllowSight(
     map: BattleMapConfig | null | undefined,
     viewer: BattleParticipant,
@@ -18,7 +17,6 @@ export function wallsAllowSight(
     return cellsConnected(map, 'sight', cellsOf(viewer), cellsOf(target));
 }
 
-/** Точка прицілу шаблону має бути досяжна для заклинателя крізь стіни (як лінія вогню). */
 export function wallsAllowAim(
     map: BattleMapConfig | null | undefined,
     caster: BattleParticipant,
@@ -29,7 +27,6 @@ export function wallsAllowAim(
     return cellsConnected(map, 'fire', cellsOf(caster), [aim]);
 }
 
-/** `modeSightedTargets` плюс стіни карти. */
 export function sightedTargets(
     map: BattleMapConfig | null | undefined,
     ps: BattleParticipant[],

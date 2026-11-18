@@ -46,7 +46,6 @@ export function attackDamageParts(
     };
 }
 
-/** Розміри кубиків шкоди за зростанням, як у формі гравця; вільний текст юніта («2d6 + STR») читається за першою групою. */
 export function damageDiceSlots(
     p: BattleParticipant,
     attack: BattleAttack,
@@ -70,7 +69,6 @@ export interface AttackDamageContext {
     weaponDiceNotation: string | undefined;
 }
 
-/** Клієнт героя кидає зброю разом із кубиками системи; якщо кидків менше — додаткові кубики йдуть середнім. */
 export function attackDamageContext(
     p: BattleParticipant,
     attack: BattleAttack,

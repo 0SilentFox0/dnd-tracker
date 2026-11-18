@@ -154,7 +154,6 @@ describe('computeFairScaling', () => {
             lib
         );
 
-        // HP тіру 2 без фенікса: 12, 30, 40, 50, 60 → нижній квартиль 30
         expect(s.units.a.hpMult).toBe(3);
         expect(s.units.a.dmgMult).toBeCloseTo(10 / 4);
     });
@@ -259,7 +258,6 @@ describe('pickEnemyRoster', () => {
     }
 
     it('склад, якому стеля тіру не дає дотягнути до цілі, не вважається рівним', () => {
-        // brute ближчий до сили героя, але вищий тір слабший за нього — масштаб brute обрізано до ×1
         const lib = [
             unit('brute', 3, 130, 35),
             unit('imp', 4, 60, 15),

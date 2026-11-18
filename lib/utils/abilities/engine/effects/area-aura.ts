@@ -19,7 +19,6 @@ import type { ResolvedAbility } from '@/types/abilities';
 import type { ActiveEffect, BattleParticipant } from '@/types/battle';
 
 export interface AreaAura {
-    /** ключ зони в межах власника: ability.key + сторона */
     id: string;
     ability: ResolvedAbility;
     target: AreaTarget;
@@ -46,7 +45,6 @@ export function areaAuras(p: BattleParticipant): AreaAura[] {
 export const zoneEffectId = (ownerId: string, auraId: string) =>
     `zone:${ownerId}:${auraId}`;
 
-/** Хто може бути в зоні: живі учасники відповідної сторони (власник — у своїй зоні союзників). */
 export function zoneCandidates(
     ps: BattleParticipant[],
     owner: BattleParticipant,
@@ -60,7 +58,6 @@ export function zoneCandidates(
     );
 }
 
-/** Поточний склад зони — з ефектів на цілях. */
 export function zoneMembers(
     ps: BattleParticipant[],
     ownerId: string,
@@ -83,7 +80,6 @@ export function zoneMembers(
     return { ids, round };
 }
 
-/** Аури власника, зону яких ще не вказано в цьому раунді. */
 export function pendingAreaAuras(
     ps: BattleParticipant[],
     ownerId: string,
@@ -142,7 +138,6 @@ export function auraZoneEffect(
     };
 }
 
-/** Нова зона аури: знімає попередню цього власника, накладає ефект на обраних і записує раунд вибору на власнику. */
 export function applyAuraZone(
     ps: BattleParticipant[],
     owner: BattleParticipant,

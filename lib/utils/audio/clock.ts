@@ -9,6 +9,5 @@ export function clockOffsetFromDate(
 
     if (!Number.isFinite(server)) return null;
 
-    // Date має цілі секунди: +500 мс — середнє відкинутої частки
     return server + 500 - (sentAt + receivedAt) / 2;
 }

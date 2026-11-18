@@ -4,7 +4,6 @@ import { mazeBudgetLeft, mazeReachable } from './movement';
 
 import { parseCellKey } from '@/lib/utils/battle/grid/geometry';
 
-/** Кроки лише крізь видимі клітинки й повз видимих учасників — прихованих гравець не має вгадувати з зони ходу. */
 export const mazeMoveZone: NonNullable<
     ModeEngineHooks<unknown>['moveZone']
 > = ({ map, seen, mover, view }): ModeMoveZone => {
@@ -12,7 +11,6 @@ export const mazeMoveZone: NonNullable<
 
     const zone: ModeMoveZone = { steps: new Map(), marks: new Map() };
 
-    // без виходу лабіринт ще не готовий — сервер відхилить будь-який крок
     if (!grid || grid.maze.dark || !grid.maze.exit) return zone;
 
     const reach = mazeReachable(grid, {

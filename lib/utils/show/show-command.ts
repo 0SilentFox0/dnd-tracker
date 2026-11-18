@@ -51,7 +51,6 @@ type SlideCommand = Extract<ShowCommand, { action: 'open' | 'next' | 'prev' }>;
 const isSlideCommand = (cmd: ShowCommand): cmd is SlideCommand =>
     cmd.action === 'open' || cmd.action === 'next' || cmd.action === 'prev';
 
-/** -1: слайда з open.slideId немає в наборі. */
 function targetIndex(
     prev: ShowState | null,
     cmd: SlideCommand,
@@ -100,7 +99,6 @@ function autoTrack(
     trackId: string | undefined,
     ctx: Ctx
 ): BattleAudioState | null {
-    // той самий трек — навіть на паузі — не чіпаємо: паузу ДМ поставив свідомо
     if (!trackId || audio?.trackId === trackId) return audio;
 
     const played = applyAudioCommand(audio, { action: 'play', trackId }, ctx);
@@ -139,7 +137,6 @@ const slideAt = (deck: ShowDeck, index: number) => {
     };
 };
 
-/** Публічний слайд скидає стежку: хід назад від будь-чого після нього все одно зупиниться на ньому. */
 export function nextTrail(
     trail: SlideTrailEntry[] | undefined,
     slide: Slide
@@ -156,7 +153,6 @@ export function nextTrail(
     ].slice(-SHOW_TRAIL_MAX);
 }
 
-/** Прибирає поле стану й піднімає seq. */
 function without(
     prev: ShowState,
     ...keys: ('battle' | 'curtain' | 'cover' | 'world')[]
@@ -171,7 +167,6 @@ function without(
 const keepCover = (prev: ShowState | null) =>
     prev?.cover ? { cover: prev.cover } : {};
 
-/** on не задано — перемикання. */
 function setCurtain(prev: ShowState | null, on = !prev?.curtain): Outcome {
     const base = prev ?? EMPTY;
 
@@ -207,7 +202,6 @@ function setCover(
     });
 }
 
-/** null, якщо показ не вказує на цей бій. */
 export function withoutBattle(
     prev: ShowState | null,
     battleId: string
@@ -235,7 +229,6 @@ function showWorld(
     });
 }
 
-/** null, якщо показана карта/фокус-маркер не серед видалених. */
 export function withoutWorldTargets(
     prev: ShowState | null,
     gone: { mapIds: string[]; markerIds: string[] }
@@ -390,7 +383,6 @@ const sameSlide = (a: Slide | null, b: Slide) =>
     sameAudience(a.audience, b.audience) &&
     samePuzzleSpec(a.puzzle, b.puzzle);
 
-/** Після збереження набору: знімок поточного слайда без перемикання і без автотреку; видалений слайд замінює сусід, порожній набір завершує показ. */
 export function refreshShowSlide(
     prev: ShowState,
     deck: ShowDeck,

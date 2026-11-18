@@ -3,10 +3,8 @@ import { ParticipantSourceType } from '@/lib/constants/battle';
 import { PACT_KEY, pactSlot, slotLevel } from '@/lib/utils/spells/slot-keys';
 import type { BattleParticipant } from '@/types/battle';
 
-/** Кантрипи (коло 0) слота не потребують. */
 export const spellNeedsSlot = (level: number): boolean => level > 0;
 
-/** Юніт кастує з універсального слота, герой — зі слота кола. */
 export function spellSlotKey(p: BattleParticipant, level: number): string {
     if (p.basicInfo.sourceType === ParticipantSourceType.UNIT)
         return 'universal';
@@ -30,7 +28,6 @@ export function spellSlotLeft(p: BattleParticipant, level: number): number {
     return p.spellcasting?.spellSlots?.[spellSlotKey(p, level)]?.current ?? 0;
 }
 
-/** Обраний слот: існує, не порожній, коло ≥ коло заклинання. */
 export function resolveChosenSlot(
     p: BattleParticipant,
     spellLevel: number,

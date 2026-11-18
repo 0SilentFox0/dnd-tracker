@@ -124,7 +124,6 @@ describe('berserk', () => {
             battleId: 'b1',
             currentBattleLogLength: 0,
             pendingSummons: [],
-            // жертви: [mage, gob]; 0.99 -> gob, d20 = 20
             rng: seq(0.99, 0.99, 0.5),
         });
 

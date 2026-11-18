@@ -1,6 +1,5 @@
 import type { Condition } from './conditions';
 
-/** Спорядження в бою не змінюється, тож така умова дозволена й на запечених статах. */
 export function isStaticCondition(c: Condition): boolean {
     switch (c.type) {
         case 'armorWorn':

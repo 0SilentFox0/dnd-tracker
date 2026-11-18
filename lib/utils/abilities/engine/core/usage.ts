@@ -22,7 +22,6 @@ export function cooldownLeft(
     return Math.max(0, lastRound + cooldown + 1 - round);
 }
 
-// нерозв'язане посилання на таблицю класу чи формула → 0, вміння недоступне
 export function restUses(l: Limits): number | undefined {
     const uses = l.perRest?.uses;
 

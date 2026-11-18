@@ -130,7 +130,6 @@ function cast(
     });
 }
 
-/** Ходить по колу, повертає учасника на початку кожного його ходу. */
 function turnsOf(
     ps: BattleParticipant[],
     id: string,
@@ -396,7 +395,6 @@ describe("Кам'яна шкіра (+3 AC) і Праведна міць (+3 ат
     const ally = unit('a');
 
     it('+3 AC перетворює влучання на промах', () => {
-        // бонус атаки 5+2+2 = 9; d20 = 6 → 15 проти AC 14 (влучання) і 17 (промах)
         expect(hits(attack(attacker, ally, sword, 6))).toBe(true);
 
         const stone = get(
@@ -419,7 +417,6 @@ describe("Кам'яна шкіра (+3 AC) і Праведна міць (+3 ат
             'a'
         );
 
-        // d20 = 2 → 11 (промах проти 14); з +3 → 14 (влучання)
         expect(hits(attack(hero, foe, sword, 2))).toBe(false);
         expect(hits(attack(might, foe, sword, 2))).toBe(true);
 
@@ -703,7 +700,6 @@ describe('тривалість «N раундів»', () => {
 
         const foe = unit('e', ParticipantSide.ENEMY, { hp: 500, maxHp: 500 });
 
-        // порядок a → c → e; c кастує у свій хід, коли a вже походив
         const ps = cast(
             'stoneskin',
             c,

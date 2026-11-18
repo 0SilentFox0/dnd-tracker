@@ -191,7 +191,6 @@ export function buildPartyPower(
 
     if (saves) party.saves = saves;
 
-    // опір рахується лише серед тих, хто його звітує (герої); відсутній тип — 0 %
     const spellResist = averageRecords(
         members.flatMap(({ stats, quantity = 1 }) =>
             stats.spellResist
@@ -292,7 +291,6 @@ const lowerQuantile = (values: number[]) =>
         Math.floor((values.length - 1) * TIER_CEILING_QUANTILE)
     ];
 
-/** Слабкий край кожного тіру (за HP і за DPR окремо): нижній квартиль юнітів, яких ДМ виставляє сам, — без цілей прикликання. */
 export function weakestPerTier(library: UnitStats[]): TierCeilings {
     const byTier = new Map<number, UnitStats[]>();
 
@@ -313,7 +311,6 @@ export function weakestPerTier(library: UnitStats[]): TierCeilings {
     );
 }
 
-/** Стеля для тіру `tier`: слабкий край найближчого вищого тіру, якщо він є. */
 function ceilingFor(tier: number, weakest: TierCeilings): Power | null {
     let next: number | null = null;
 
@@ -516,7 +513,6 @@ function suggestHint(
 
 const ZERO: Power = { hp: 0, dpr: 0 };
 
-/** `fixed` — сила ворогів, що не масштабуються (NPC-персонажі): входить у базу й досягнуту силу, а масштабовані юніти добирають решту цілі. */
 export function computeFairScaling(
     party: PartyPower,
     roster: RosterEntry[],

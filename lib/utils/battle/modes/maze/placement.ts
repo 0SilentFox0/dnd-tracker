@@ -20,7 +20,6 @@ const ERROR = MAZE_TEXTS.placement;
 const isHeroSide = (p: BattleParticipant) =>
     p.basicInfo.side === ParticipantSide.ALLY;
 
-/** Розстановка ДМ: без бюджету й шляху; герої до першого кроку — лише на краю. */
 export function mazePlacementError(
     grid: MazeGrid,
     { participants, mover, to }: MazePlacementArgs

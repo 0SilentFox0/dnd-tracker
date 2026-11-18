@@ -47,7 +47,6 @@ export type CharacterFromPrisma = Prisma.CharacterGetPayload<{
 
 export type UnitFromPrisma = Prisma.UnitGetPayload<Record<string, never>>;
 
-/** Опціональний контекст для batch-завантаження (спільні дані кампанії) */
 export interface CampaignSpellContext {
     skillTreeByRace: Record<string, Prisma.SkillTreeGetPayload<object> | null>;
     mainSkills: Array<{
@@ -66,12 +65,10 @@ export interface CampaignSpellContext {
     campaign: { maxLevel: number };
     rules: Ruleset;
     classesById?: Record<string, GameClassData>;
-    /** Refs цієї кампанії; undefined потребує fallback, {} означає завантажену порожню map. */
     featsById?: Record<string, FeatData>;
     backgroundsById?: Record<string, BackgroundData>;
     skillsById?: Record<string, Prisma.SkillGetPayload<object>>;
     artifactsById?: Record<string, Prisma.ArtifactGetPayload<object>>;
-    /** Сети артефактів (для бонусу повного комплекту без додаткових запитів). */
     artifactSetsById?: Record<
         string,
         {
@@ -82,6 +79,5 @@ export interface CampaignSpellContext {
             abilities?: unknown;
         }
     >;
-    /** setId → усі id артефактів кампанії в цьому сеті */
     artifactSetMemberIds?: Record<string, string[]>;
 }

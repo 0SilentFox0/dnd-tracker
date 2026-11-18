@@ -22,7 +22,6 @@ export const damageKey = (attackKind: string, damageType: string | undefined) =>
 export function unitResistances(
     unit: BattleParticipant
 ): Record<string, number> {
-    // власник завжди в своїй зоні союзників (zoneCandidates), тож її опір рахується; зона ворогів на нього не діє
     const p = areaAuras(unit)
         .filter((a) => a.target === 'nearbyAllies')
         .reduce(
@@ -51,7 +50,6 @@ export function unitResistances(
     return out;
 }
 
-/** Опір героя до шкоди заклять за типом (`fire`, …, `magic` — закляття без типу), ненульові відсотки. */
 export function spellResistances(p: BattleParticipant): Record<string, number> {
     const out: Record<string, number> = {};
 

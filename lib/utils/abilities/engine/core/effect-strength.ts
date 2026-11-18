@@ -4,7 +4,6 @@ import { strengthOf } from './strength-core';
 import type { StaticEffect } from '@/lib/utils/abilities/schema';
 import type { BattleParticipant } from '@/types/battle';
 
-/** Сила статичного ефекту для порівняння однакових аур: |flat| + |percent|, прапорці — їхній параметр або 1. Формули — лише з власником. */
 export function staticEffectStrength(
     effect: StaticEffect,
     owner?: BattleParticipant

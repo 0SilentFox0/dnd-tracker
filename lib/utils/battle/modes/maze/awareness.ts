@@ -119,7 +119,6 @@ interface AwareOutcome {
     scene?: ScenePatch;
 }
 
-/** Після кожної мутації в активному бою з готовим лабіринтом: прокидаються ті, кого побачили герої. */
 export function withMazeAwareness<T extends AwareOutcome>(
     map: BattleMapConfig | null,
     scene: { status: BattleStatus; round: number },

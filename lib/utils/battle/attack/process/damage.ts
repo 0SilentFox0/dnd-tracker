@@ -5,7 +5,6 @@ import { applyResistance } from '@/lib/utils/battle/resistance';
 import type { BattleParticipant } from '@/types/battle';
 import type { LogLine } from '@/types/text';
 
-/** Фізичний + додатковий урон: спершу tempHp, далі HP і статус. Виживання вирішують уміння (lethalDamage). */
 export function applyDamageToTarget(
     target: BattleParticipant,
     totalFinalDamage: number
@@ -42,9 +41,6 @@ export interface ApplyResistanceForAdditionalResult {
     additionalDamageBreakdown: LogLine[];
 }
 
-/**
- * Застосовує опір для додаткових типів урону (fire, poison тощо).
- */
 export function applyResistanceForAdditional(
     target: BattleParticipant,
     additionalDamageList: Array<{ type: string; value: number }>,

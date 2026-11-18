@@ -19,7 +19,6 @@ const BY_MIME: Record<string, TrackFormat> = {
     'audio/m4a': 'm4a',
 };
 
-// Safari/Windows інколи не дають MIME для .m4a — тоді вирішує розширення
 const UNTYPED = new Set(['', 'application/octet-stream']);
 
 export function detectTrackFormat(file: {

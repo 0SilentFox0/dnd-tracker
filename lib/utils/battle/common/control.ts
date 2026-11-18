@@ -14,7 +14,6 @@ export interface BattleActor {
     isDM: boolean;
 }
 
-/** DM керує всіма; гравець — лише учасниками, якими керує (герой, юніти сторони, прикликані). */
 export function controls(
     actor: BattleActor,
     p: BattleParticipant | undefined
@@ -22,7 +21,6 @@ export function controls(
     return actor.isDM || (!!p && p.basicInfo.controlledBy === actor.userId);
 }
 
-/** Діяти (атака, закляття, вміння, мораль) гравець може лише своїм учасником і лише в його хід. */
 export function canActNow(
     actor: BattleActor,
     p: BattleParticipant | undefined,
