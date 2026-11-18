@@ -1,17 +1,3 @@
-/**
- * Інтеграційний тест Redis через Upstash REST API.
- *
- * Покриває:
- *  - lib/redis.ts → getRedisClient (raw @upstash/redis client)
- *  - lib/cache/kv.ts → kvGet/kvSet/kvDel (high-level помічники, що
- *    використовують той самий клієнт)
- *
- * Тест-ключі мають префікс `int-test-${TEST_RUN_ID}:` і видаляються
- * після прогону, щоб не залишати сміття. Upstash підтримує кілька
- * env-prefix варіантів (UPSTASH_REDIS_REST_*, KV_REST_API_*,
- * dnd_KV_REST_API_*) — будь-яка валідна пара активує тести.
- */
-
 import { afterAll, describe, expect, it } from 'vitest';
 
 import { TEST_RUN_ID } from './_helpers';

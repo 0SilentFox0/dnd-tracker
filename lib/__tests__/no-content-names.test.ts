@@ -48,7 +48,7 @@ const ALLOWED: Record<string, string> = {
         'dev-only playground hazard label',
 };
 
-// landing: статичний маркетинг; import/fields: приклади значень і назви колонок, не рушій
+// landing: static marketing; import/fields: example values and column names, not the engine
 function files(dir: string): string[] {
     return readdirSync(dir).flatMap((f) => {
         const p = join(dir, f);

@@ -20,7 +20,7 @@ const BUILDERS = [
 const STATBLOCK =
     /\babilities\.(?:strength|dexterity|constitution|intelligence|wisdom|charisma|modifiers|proficiencyBonus|armorClass|speed|spellSlots|morale|moraleCap|minTargets|maxTargets)\b|\babilities\[/g;
 
-/** Only goes down; target 0 is E3. */
+/** Only goes down. */
 const MAX: Record<string, number> = {};
 
 const countStatblockReads = (text: string) =>
