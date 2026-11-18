@@ -1,8 +1,3 @@
-/**
- * Розмір клієнтської дельти бою: поточна (log у {message,params}) vs кодек {m,p} vs старий вигляд (resultText без log).
- *   DELTA_DUMP=<file> pnpm battle-sweep --mode sweep --keep-battles   # збирає дельти
- *   pnpm tsx --tsconfig tsconfig.scripts.json scripts/sim/delta-size.ts <file>
- */
 import { readFileSync } from 'node:fs';
 import { gzipSync } from 'node:zlib';
 

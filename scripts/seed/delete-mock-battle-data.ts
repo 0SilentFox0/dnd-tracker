@@ -1,27 +1,10 @@
 #!/usr/bin/env tsx
-/**
- * ВИДАЛЕННЯ МОК ДАНИХ ДЛЯ ТЕСТУВАННЯ БОЙОВОЇ СИСТЕМИ
- *
- * Цей скрипт видаляє всі моки, створені seed-mock-battle-data.ts:
- * - Персонажі (Годрик Воїн, Айра Маг, Ліра Стрілець, Елвін Чарівник)
- * - Раси (human, elf)
- * - Дерева скілів для цих рас
- * - Скіли для Human та Elf
- * - Основні скіли (якщо створені моками)
- * - Заклинання (Fireball, Heal, Magic Missile, Cure Wounds, Poison Spray)
- *
- * ВИКОРИСТАННЯ:
- *   npm run delete-mock-battle YOUR_CAMPAIGN_ID
- *
- * УВАГА: Цей скрипт видаляє дані без підтвердження!
- */
 import { PrismaClient } from '@prisma/client';
 
 import { DEFAULT_CAMPAIGN_ID } from '@/scripts/shared/default-campaign';
 
 const prisma = new PrismaClient();
 
-// ID кампанії (потрібно передати як аргумент або змінити вручну)
 const CAMPAIGN_ID = process.argv[2] || DEFAULT_CAMPAIGN_ID;
 
 async function deleteMockData() {
@@ -36,7 +19,6 @@ async function deleteMockData() {
     }
 
     try {
-        // Перевіряємо чи існує кампанія
         const campaign = await prisma.campaign.findUnique({
             where: { id: CAMPAIGN_ID },
         });
@@ -48,7 +30,6 @@ async function deleteMockData() {
 
         console.log(`✅ Кампанія знайдена: ${campaign.name}`);
 
-        // Список назв для видалення
         const mockSpellNames = [
             'Fireball',
             'Heal',
@@ -73,9 +54,6 @@ async function deleteMockData() {
             'Швидкість',
         ];
 
-        // ============================================
-        // 1. ВИДАЛЕННЯ ПЕРСОНАЖІВ
-        // ============================================
         console.log('\n👥 Видалення персонажів...');
 
         let deletedCharacters = 0;
@@ -96,9 +74,6 @@ async function deleteMockData() {
         }
         console.log(`  📊 Всього видалено персонажів: ${deletedCharacters}`);
 
-        // ============================================
-        // 2. ВИДАЛЕННЯ ДЕРЕВ СКІЛІВ
-        // ============================================
         console.log('\n🌳 Видалення дерев скілів...');
 
         let deletedSkillTrees = 0;
@@ -119,9 +94,6 @@ async function deleteMockData() {
         }
         console.log(`  📊 Всього видалено дерев: ${deletedSkillTrees}`);
 
-        // ============================================
-        // 3. ВИДАЛЕННЯ РАС
-        // ============================================
         console.log('\n🏛️ Видалення рас...');
 
         let deletedRaces = 0;
@@ -142,19 +114,13 @@ async function deleteMockData() {
         }
         console.log(`  📊 Всього видалено рас: ${deletedRaces}`);
 
-        // ============================================
-        // 4. ВИДАЛЕННЯ СКІЛІВ
-        // ============================================
         console.log('\n⚔️ Видалення скілів...');
 
-        // Видаляємо скіли для Human та Elf (за назвами)
         const mockSkillNames = [
-            // Human skills
             'Базова Атака',
             'Просунута Атака',
             'Базовий Захист',
             'Базове Заклинання',
-            // Elf skills
             'Ельфійська Точність',
             'Отруйна Стріла',
             'Магічна Стрільба',
@@ -179,9 +145,6 @@ async function deleteMockData() {
         }
         console.log(`  📊 Всього видалено скілів: ${deletedSkills}`);
 
-        // ============================================
-        // 5. ВИДАЛЕННЯ ОСНОВНИХ СКІЛІВ
-        // ============================================
         console.log('\n📚 Видалення основних скілів...');
 
         let deletedMainSkills = 0;
@@ -204,9 +167,6 @@ async function deleteMockData() {
             `  📊 Всього видалено основних скілів: ${deletedMainSkills}`
         );
 
-        // ============================================
-        // 6. ВИДАЛЕННЯ ЗАКЛИНАНЬ
-        // ============================================
         console.log('\n📜 Видалення заклинань...');
 
         let deletedSpells = 0;
@@ -227,9 +187,6 @@ async function deleteMockData() {
         }
         console.log(`  📊 Всього видалено заклинань: ${deletedSpells}`);
 
-        // ============================================
-        // 7. ВИДАЛЕННЯ СЦЕН БОЮ
-        // ============================================
         console.log('\n⚔️ Видалення сцен бою...');
 
         const mockBattleNames = ['Маленький бій (Мок)', 'Великий бій (Мок)'];

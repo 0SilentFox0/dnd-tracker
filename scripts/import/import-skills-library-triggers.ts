@@ -1,7 +1,3 @@
-/**
- * Парсинг trigger-рядків з SKILLS.md для import-skills-library
- */
-
 import type {
     ComplexTrigger,
     ParsedTrigger,

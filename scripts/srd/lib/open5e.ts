@@ -310,7 +310,7 @@ export const FIXTURE_4F4_DIR = path.join(
     'fixtures-4f4'
 );
 
-// MagicItem arrived in 4f-3, feats in 4f-4: older fixture dirs do not carry them
+// older fixture dirs do not carry MagicItem or feats
 const OPTIONAL_FILES = new Set<Open5eFile>([
     'MagicItem',
     'Feat',

@@ -1,11 +1,4 @@
 #!/usr/bin/env tsx
-/**
- * Перераховує scenario_pages.searchText = buildSearchText(title, content) для всіх сторінок.
- * Потрібно для сторінок, імпортованих до виправлення bundle.ts (searchText = лише назва) і для NFC-нормалізації.
- * Ідемпотентно: оновлює лише рядки, де значення змінилось. Вміст сторінок не виводить.
- *
- *   pnpm exec tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/db/backfill-scenario-search-text.ts [--dry-run] [--allow-remote]
- */
 import '@/lib/utils/rules/systems/registry';
 import { prisma } from '@/lib/db';
 import { scenarioContentSchema } from '@/lib/schemas/scenario';

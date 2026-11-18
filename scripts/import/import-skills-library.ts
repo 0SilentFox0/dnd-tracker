@@ -1,14 +1,4 @@
 #!/usr/bin/env tsx
-/**
- * Імпорт бібліотеки скілів з docs/SKILLS.md у кампанію.
- * Повністю парсить тригери (26 типів), модифікатори (probability, oncePerBattle, тощо)
- * та зберігає ефекти у форматі, готовому для бойової системи.
- *
- * Використання:
- *   npx tsx scripts/import/import-skills-library.ts [campaignId]
- *
- * campaignId за замовчуванням — з lib/constants/campaigns.ts
- */
 
 import { PrismaClient } from '@prisma/client';
 
@@ -35,7 +25,6 @@ export type {
 
 const prisma = new PrismaClient();
 
-/** Код категорії (англ.) → назва базового навику в UI та БД */
 const MAIN_SKILL_BY_CATEGORY: Record<string, string> = {
     Attack: 'Напад',
     Ranged: 'Стрільба',
@@ -50,7 +39,6 @@ const MAIN_SKILL_BY_CATEGORY: Record<string, string> = {
     Personal: 'Персональні',
 };
 
-/** Аліаси (різні написання) → канонічна назва базового навику */
 const MAIN_SKILL_ALIASES: Record<string, string> = {
     'Темна Магія': 'Магія Темряви',
     'Темна магія': 'Магія Темряви',
@@ -60,12 +48,8 @@ const MAIN_SKILL_ALIASES: Record<string, string> = {
     Призив: 'Магія Призиву',
 };
 
-/** Усі канонічні назви базових навиків (для валідації) */
 const MAIN_SKILL_NAMES = new Set([...Object.values(MAIN_SKILL_BY_CATEGORY)]);
 
-/**
- * Повертає канонічну назву базового навику за кодом категорії або аліасом.
- */
 function getCanonicalMainSkillName(
     categoryOrAlias: string,
     mainSkillFromSkill?: string
@@ -90,7 +74,6 @@ function getCanonicalMainSkillName(
     return categoryOrAlias;
 }
 
-/** Усі варіанти назв для канонічної назви (сама назва + аліаси, що на неї вказують) */
 function getMainSkillNameVariants(canonicalName: string): string[] {
     const aliases = Object.entries(MAIN_SKILL_ALIASES)
         .filter(([, v]) => v === canonicalName)
@@ -154,8 +137,6 @@ async function ensureMainSkill(
 
     return main.id;
 }
-
-// ---------- Людино-читабельний опис ефекту ----------
 
 const STAT_LABELS: Record<string, string> = {
     melee_damage: 'шкода ближня',
@@ -228,14 +209,11 @@ function effectToHumanDescription(e: LibraryEffect): string {
     return `${label}: ${valueStr}${durationStr}`.trim();
 }
 
-// ---------- Upsert Skill ----------
-
 async function upsertSkill(
     campaignId: string,
     mainSkillId: string | null,
     lib: LibrarySkill
 ): Promise<void> {
-    // Генеруємо людино-читабельний опис з ефектів
     const description = lib.effects.length
         ? lib.effects
               .map((e) => effectToHumanDescription(e))
@@ -255,7 +233,6 @@ async function upsertSkill(
         where: { campaignId, name: lib.name },
     });
 
-    // формат бібліотеки — старий (ефекти + тригери), у БД іде лише abilities
     const abilities = convertLegacySkill({
         id: existing?.id ?? lib.name,
         name: lib.name,
@@ -286,8 +263,6 @@ async function upsertSkill(
     }
 }
 
-// ---------- Main ----------
-
 async function main() {
     const campaignId = process.argv[2] || DEFAULT_CAMPAIGN_ID;
 
@@ -309,7 +284,6 @@ async function main() {
         process.exit(1);
     }
 
-    // Статистика тригерів
     const triggerStats = new Map<string, number>();
 
     for (const lib of skills) {
@@ -321,7 +295,6 @@ async function main() {
 
         await upsertSkill(campaignId, mainSkillId, lib);
 
-        // Збираємо статистику
         const triggers = triggerStringToSkillTriggers(lib.trigger);
 
         for (const t of triggers) {
@@ -331,7 +304,6 @@ async function main() {
         }
     }
 
-    // Перевірка: скіли згруповані по базовим навикам
     const byMain = await prisma.skill.groupBy({
         by: ['mainSkillId'],
         where: { campaignId },
@@ -367,7 +339,6 @@ async function main() {
         console.warn(`  Очікувалось з файлу: ${skills.length}`);
     }
 
-    // Виводимо статистику тригерів
     console.log('\n--- Статистика тригерів ---');
 
     const sortedTriggers = [...triggerStats.entries()].sort(
@@ -381,7 +352,7 @@ async function main() {
     console.log('\nDone.');
 }
 
-// Запускати main лише коли скрипт викликають напряму (не при імпорті)
+// run main only when invoked directly (not on import)
 const isEntryPoint =
     typeof process !== 'undefined' &&
     process.argv[1] != null &&

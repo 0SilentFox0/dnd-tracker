@@ -1,8 +1,3 @@
-/**
- * Розмір логу бою: M1 = log / uk-рендер, M2 = (log + resultText) / resultText.
- *   DATABASE_URL=postgresql://postgres:postgres@localhost:54322/prodcopy pnpm tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/sim/log-size.ts --since <ISO> [--cleanup]
- * Читає бої `ТЕСТ …`, створені після --since (battle-sweep --keep-battles); --cleanup видаляє їх.
- */
 import { prisma } from '@/lib/db';
 import { decodeStoredLog } from '@/lib/utils/battle/log/codec';
 import { resultTextOf } from '@/scripts/sim/log-text';

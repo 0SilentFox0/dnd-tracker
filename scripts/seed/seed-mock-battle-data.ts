@@ -1,21 +1,4 @@
 #!/usr/bin/env tsx
-/**
- * МОК ДАНІ ДЛЯ ТЕСТУВАННЯ БОЙОВОЇ СИСТЕМИ
- *
- * Цей файл містить всі моки для тестування:
- * - Заклинання (Spells) - 5 шт
- * - Основні скіли (MainSkills) - 4 шт
- * - Скіли для Human - 4 шт
- * - Скіли для Elf - 4 шт
- * - Раси (Race) - 2 шт (human, elf)
- * - Дерева скілів (SkillTree) - 2 шт
- * - Персонажі (Character) - 4 шт (по 2 на расу)
- *
- * ВИКОРИСТАННЯ:
- *   npm run seed-mock-battle YOUR_CAMPAIGN_ID
- *
- * ВИДАЛИТИ ПІСЛЯ ТЕСТУВАННЯ!
- */
 import { Prisma, PrismaClient } from '@prisma/client';
 
 import {
@@ -34,7 +17,6 @@ import { DEFAULT_CAMPAIGN_ID } from '@/scripts/shared/default-campaign';
 
 const prisma = new PrismaClient();
 
-// ID кампанії (потрібно передати як аргумент або змінити вручну)
 const CAMPAIGN_ID = process.argv[2] || DEFAULT_CAMPAIGN_ID;
 
 async function seedMockData() {
@@ -49,7 +31,6 @@ async function seedMockData() {
     }
 
     try {
-        // Перевіряємо чи існує кампанія
         const campaign = await prisma.campaign.findUnique({
             where: { id: CAMPAIGN_ID },
         });
@@ -61,7 +42,6 @@ async function seedMockData() {
 
         console.log(`✅ Кампанія знайдена: ${campaign.name}`);
 
-        // Перевіряємо чи вже є моки (за назвами)
         const existingSpell = await prisma.spell.findFirst({
             where: {
                 campaignId: CAMPAIGN_ID,
@@ -77,15 +57,11 @@ async function seedMockData() {
             process.exit(0);
         }
 
-        // ============================================
-        // 1. СТВОРЕННЯ ЗАКЛИНАНЬ (SPELLS)
-        // ============================================
         console.log('\n📜 Створення заклинань...');
 
         const createdSpells = [];
 
         for (const spellData of SPELLS_DATA) {
-            // Перевіряємо чи вже існує заклинання з такою назвою
             const existing = await prisma.spell.findFirst({
                 where: {
                     campaignId: CAMPAIGN_ID,
@@ -119,15 +95,11 @@ async function seedMockData() {
             console.log(`  ✅ Створено: ${spell.name}`);
         }
 
-        // ============================================
-        // 2. СТВОРЕННЯ MAIN SKILLS
-        // ============================================
         console.log('\n🎯 Створення основних скілів...');
 
         const createdMainSkills = [];
 
         for (const mainSkillData of MAIN_SKILLS_DATA) {
-            // Перевіряємо чи вже існує
             const existing = await prisma.mainSkill.findFirst({
                 where: {
                     campaignId: CAMPAIGN_ID,
@@ -154,9 +126,6 @@ async function seedMockData() {
             console.log(`  ✅ Створено: ${mainSkill.name}`);
         }
 
-        // ============================================
-        // 3. СТВОРЕННЯ SKILLS ДЛЯ HUMAN
-        // ============================================
         console.log('\n👤 Створення скілів для раси Human...');
 
         const humanSkills = getHumanSkillsData(createdMainSkills);
@@ -164,7 +133,6 @@ async function seedMockData() {
         const createdHumanSkills = [];
 
         for (const skillData of humanSkills) {
-            // Перевіряємо чи вже існує
             const existing = await prisma.skill.findFirst({
                 where: {
                     campaignId: CAMPAIGN_ID,
@@ -193,9 +161,6 @@ async function seedMockData() {
             console.log(`  ✅ Створено: ${skill.name}`);
         }
 
-        // ============================================
-        // 4. СТВОРЕННЯ SKILLS ДЛЯ ELF
-        // ============================================
         console.log('\n🧝 Створення скілів для раси Elf...');
 
         const elfSkills = getElfSkillsData(createdMainSkills, createdSpells);
@@ -203,7 +168,6 @@ async function seedMockData() {
         const createdElfSkills = [];
 
         for (const skillData of elfSkills) {
-            // Перевіряємо чи вже існує
             const existing = await prisma.skill.findFirst({
                 where: {
                     campaignId: CAMPAIGN_ID,
@@ -233,9 +197,6 @@ async function seedMockData() {
             console.log(`  ✅ Створено: ${skill.name}`);
         }
 
-        // ============================================
-        // 5. СТВОРЕННЯ RACES
-        // ============================================
         console.log('\n🏛️ Створення рас...');
 
         let humanRace = await prisma.race.findFirst({
@@ -311,12 +272,8 @@ async function seedMockData() {
         console.log(`  ✅ Створено: ${humanRace.name}`);
         console.log(`  ✅ Створено: ${elfRace.name}`);
 
-        // ============================================
-        // 6. СТВОРЕННЯ SKILL TREES
-        // ============================================
         console.log('\n🌳 Створення дерев скілів...');
 
-        // SkillTree для Human
         let humanSkillTree = await prisma.skillTree.findFirst({
             where: {
                 campaignId: CAMPAIGN_ID,
@@ -362,7 +319,6 @@ async function seedMockData() {
             console.log(`  ⏭️  Пропущено (вже існує): дерево для human`);
         }
 
-        // SkillTree для Elf
         let elfSkillTree = await prisma.skillTree.findFirst({
             where: {
                 campaignId: CAMPAIGN_ID,
@@ -408,12 +364,8 @@ async function seedMockData() {
         console.log(`  ✅ Створено дерево для: human`);
         console.log(`  ✅ Створено дерево для: elf`);
 
-        // ============================================
-        // 7. СТВОРЕННЯ ПЕРСОНАЖІВ
-        // ============================================
         console.log('\n👥 Створення персонажів...');
 
-        // Отримуємо першого користувача кампанії як DM
         const campaignMember = await prisma.campaignMember.findFirst({
             where: { campaignId: CAMPAIGN_ID, role: CampaignRole.DM },
         });
@@ -425,7 +377,6 @@ async function seedMockData() {
 
         const dmUserId = campaignMember.userId;
 
-        // Human персонажі
         const humanCharacters = [
             {
                 name: 'Годрик Воїн',
@@ -480,7 +431,6 @@ async function seedMockData() {
             },
         ];
 
-        // Elf персонажі
         const elfCharacters = [
             {
                 name: 'Ліра Стрілець',
@@ -543,7 +493,6 @@ async function seedMockData() {
         const createdCharacters = [];
 
         for (const charData of allCharacters) {
-            // Перевіряємо чи вже існує персонаж з таким ім'ям
             const existing = await prisma.character.findFirst({
                 where: {
                     campaignId: CAMPAIGN_ID,
@@ -570,11 +519,9 @@ async function seedMockData() {
                 }),
             });
 
-            // Створюємо CharacterSkills для дерева скілів
             const skillTreeId =
                 charData.race === 'human' ? humanSkillTree.id : elfSkillTree.id;
 
-            // Визначаємо розблоковані скіли залежно від персонажа
             let unlockedSkills: string[] = [];
 
             if (character.race === 'human') {
@@ -600,7 +547,6 @@ async function seedMockData() {
                 }
             }
 
-            // Оновлюємо skillTreeProgress
             await prisma.character.update({
                 where: { id: character.id },
                 data: {
@@ -612,7 +558,6 @@ async function seedMockData() {
                 },
             });
 
-            // Створюємо інвентар з базовою зброєю
             let equippedItems: Record<string, unknown> = {};
 
             if (character.class === 'Fighter') {
@@ -641,7 +586,6 @@ async function seedMockData() {
                     },
                 };
             } else {
-                // Для магів
                 equippedItems = {
                     mainHand: {
                         id: `weapon-${character.id}-staff`,

@@ -30,7 +30,6 @@ async function main() {
     console.log(`Використання файлу: ${csvFilePath}`);
     console.log(`Використання кампанії: ${campaignId}`);
 
-    // Перевіряємо чи існує кампанія
     const campaign = await prisma.campaign.findUnique({
         where: { id: campaignId },
     });
@@ -42,7 +41,6 @@ async function main() {
 
     console.log(`Імпорт юнітів для кампанії: ${campaign.name}`);
 
-    // Читаємо CSV файл
     const filePath = path.resolve(process.cwd(), csvFilePath);
 
     if (!fs.existsSync(filePath)) {

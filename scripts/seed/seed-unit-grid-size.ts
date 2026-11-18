@@ -1,9 +1,4 @@
 #!/usr/bin/env tsx
-/**
- * Оновлює лише units.gridSize юнітів кампанії за бібліотекою (data/library), інші поля й таблиці не чіпає.
- *
- *   pnpm seed-unit-grid-size <campaignId> [--dry-run] [--allow-remote]
- */
 import { assertSeedTarget, findByName, parseArgs } from './seed-library-lib';
 
 import '@/lib/utils/rules/systems/registry';

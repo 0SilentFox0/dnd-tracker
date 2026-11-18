@@ -1,7 +1,3 @@
-/**
- * Константи даних для seed-mock-battle-data (заклинання, основні скіли, скіли рас)
- */
-
 type SpellSeedItem = {
     name: string;
     level: number;

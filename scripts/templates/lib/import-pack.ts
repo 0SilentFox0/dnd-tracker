@@ -106,7 +106,7 @@ function describeReport(
     ];
 }
 
-/** Refuses to create rows in a kind where the template still has unslugged rows (D33). */
+/** Refuses to create rows in a kind where the template still has unslugged rows. */
 async function assertSlugged(
     campaignId: string,
     kind: PackKind,

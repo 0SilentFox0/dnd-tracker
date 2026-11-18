@@ -1,10 +1,4 @@
 #!/usr/bin/env tsx
-/**
- * Баланс бібліотеки: автобої героїв (3 побудови × рівні 3/6/10) проти складів Tier 1/4/7 кожної раси з бібліотечних юнітів.
- * Лише локальна БД. Кампанія «SIM: баланс бібліотеки» створюється разом із сідом бібліотеки (юніти теж із нього).
- *
- *   pnpm balance-library [--runs=6] [--levels=3,6,10] [--parties=mixed,martial,caster,leader] [--races=humans,demons,…] [--reuse] [--sets] [--fixed-roster]
- */
 import type { Prisma } from '@prisma/client';
 import { execFileSync } from 'node:child_process';
 
@@ -472,7 +466,6 @@ function abilityTargets(
     return picked.length ? picked : null;
 }
 
-// Автоплей юнітів: бонусні дії щоходу, дії здібностей лише «раз за бій» (замість атаки), коли є ціль.
 async function playUnitAbilities(
     actor: BattleParticipant,
     foes: BattleParticipant[]

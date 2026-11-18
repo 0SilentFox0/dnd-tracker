@@ -1,13 +1,4 @@
 #!/usr/bin/env tsx
-/**
- * Заповнює кампанію бібліотекою (data/library): школи, закляття, раси, юніти, гілки, скіли, артефакти, дерева рас.
- * Ідемпотентно: знаходить за назвою в кампанії → оновлює, інакше створює. Лише локальна БД без --allow-remote.
- *
- *   pnpm seed-library <campaignId> [--dry-run] [--replace-trees] [--allow-remote]
- *
- * Кеш довідників на сервері оновиться протягом 300 с (скрипт не інвалідує Next data cache).
- * Застаріло для створення шаблону Heroes: це робить `pnpm template import heroes-homm`; data/library лишається джерелом для тестів і seed кампаній.
- */
 import type { Prisma } from '@prisma/client';
 
 import {
@@ -483,7 +474,7 @@ async function main() {
             grantedSpellId: skill.grantedSpellKey
                 ? spells.get(skill.grantedSpellKey)
                 : undefined,
-            // старий стовпець дзеркалимо до його видалення, щоб відкат деплою бачив закляття
+            // the old column is mirrored until it is dropped so a deploy rollback still sees the spell
             spellNewSpellId: skill.grantedSpellKey
                 ? spells.get(skill.grantedSpellKey)
                 : undefined,

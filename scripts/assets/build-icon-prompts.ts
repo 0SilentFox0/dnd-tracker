@@ -1,12 +1,4 @@
 #!/usr/bin/env tsx
-/**
- * Будує промпти для AI-генерації іконок (CSV + markdown) у docs/assets/icon-prompts.
- *
- *   pnpm assets:icon-prompts --srd <Open5e srd-2024 dir> [--campaign <id>] [--out <dir>]
- *
- * SRD: Creature/CreatureTrait/CreatureAction/Spell/Weapon/Armor .json (Django fixtures).
- * HOMM5: з БД (DATABASE_URL) за id кампанії; суб'єкти — scripts/assets/icon-subjects/homm5-*.json.
- */
 import * as fs from 'fs';
 import * as path from 'path';
 

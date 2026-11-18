@@ -1,10 +1,4 @@
 #!/usr/bin/env tsx
-/**
- * Генерує моделі `<Model>Base` (базове сховище опублікованих версій шаблону) з 14 контентних моделей
- * і вставляє їх у prisma/schema.prisma між маркерами. Ідемпотентно.
- *
- *   pnpm exec tsx scripts/db/gen-base-models.ts
- */
 import { execSync } from 'node:child_process';
 import { readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';

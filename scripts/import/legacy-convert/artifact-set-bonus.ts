@@ -1,8 +1,3 @@
-/**
- * Структура бонусу повного сету (`ArtifactSet.setBonus`).
- * Докладніше: docs/ARTIFACT-SETS.md, lib/constants/artifact-sets.ts
- */
-
 import type { ArtifactEffectAudience } from '@/lib/constants/artifact-effect-scope';
 import { parseEffectScopeObject } from '@/lib/constants/artifact-effect-scope';
 import { isRecord } from '@/lib/utils/common/is-record';
@@ -28,9 +23,7 @@ export interface ParsedArtifactSetBonus {
     modifiers: ArtifactSetModifier[];
     spellSlotBonus: Record<string, number>;
     passiveEffects: ArtifactSetPassiveEffect[];
-    /** За замовчуванням — лише носій; інакше чергається на роздачу після збору всіх учасників. */
     effectAudience?: ArtifactEffectAudience;
-    /** ID заклинань кампанії, до яких ціль імунна (після застосування бонусу). */
     immuneSpellIds?: string[];
 }
 
@@ -114,7 +107,6 @@ const emptyParsed = (): ParsedArtifactSetBonus => ({
     passiveEffects: [],
 });
 
-/** Нормалізує JSON з БД для застосування в бою. */
 export function parseArtifactSetBonus(raw: unknown): ParsedArtifactSetBonus {
     if (raw == null) return emptyParsed();
 

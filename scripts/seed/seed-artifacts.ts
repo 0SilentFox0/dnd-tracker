@@ -1,12 +1,3 @@
-/**
- * Скрипт для заповнення артефактів кампанії: зброя (ближній/дальній бій), шоломи, броня, черевики.
- * Пропускає артефакти, які вже є в кампанії (за назвою).
- *
- * Запуск:
- *   pnpm run seed-artifacts              — використає DEFAULT_CAMPAIGN_ID
- *   pnpm run seed-artifacts <campaignId> — або: npx tsx scripts/seed/seed-artifacts.ts <campaignId>
- */
-
 import { PrismaClient } from '@prisma/client';
 
 import { ARTIFACT_ICONS } from '@/scripts/import/artifact-icon-map';

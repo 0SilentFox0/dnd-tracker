@@ -14,7 +14,7 @@ export interface LocaleRow {
 export const planLocaleBackfill = (clones: readonly LocaleRow[]): string[] =>
     clones.filter((row) => row.locale === null).map((row) => row.id);
 
-/** D34: clones of a template that predates its English base read Ukrainian rows; mark them `locale` before the first sync against the localized source. */
+/** clones of a template that predates its English base read Ukrainian rows; mark them `locale` before the first sync against the localized source. */
 export async function backfillLocale(
     key: string,
     opts: {

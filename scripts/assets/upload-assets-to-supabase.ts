@@ -1,21 +1,8 @@
 #!/usr/bin/env tsx
-/**
- * Створює бакети в Supabase Storage і завантажує вміст папки assets/ у них.
- * - assets/unit-icons/* → bucket unit-icons
- * - assets/spell-icons/* → bucket spell-icons
- * - assets/skill-icons/* → bucket skill-icons
- * - assets/main-skill-icons/* → bucket main-skill-icons
- * - assets/artifact-icons/* → bucket artifact-icons (іконки з UI також потрапляють сюди через API)
- *
- * Потрібно: NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY (з .env.local або env)
- *
- * Використання: pnpm run upload-assets-to-supabase
- */
 
 import * as fs from 'fs';
 import * as path from 'path';
 
-// Завантажити .env.local якщо є (для tsx без next)
 const envPath = path.join(process.cwd(), '.env.local');
 
 if (fs.existsSync(envPath)) {

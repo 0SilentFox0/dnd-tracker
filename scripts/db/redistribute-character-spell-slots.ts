@@ -1,12 +1,4 @@
 #!/usr/bin/env tsx
-/**
- * Перерозподіл spell slots для існуючих персонажів за новою логікою
- * (більш рівномірний розподіл по рівнях 1–3, обмеження слотів 1 рівня).
- *
- * Оновлює character.spellSlots: max з перерахунку, current = max (повні слоти).
- *
- * Usage: pnpm run redistribute-character-spell-slots [--dry-run]
- */
 
 import { PrismaClient } from '@prisma/client';
 

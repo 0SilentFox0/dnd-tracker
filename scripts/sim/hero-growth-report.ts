@@ -1,10 +1,4 @@
 #!/usr/bin/env tsx
-/**
- * Таблиця росту героїв: HP і шкода за архетипами, расами й рівнями (герой в пам'яті, без навичок і артефактів).
- * Потрібна кампанія «SIM: баланс бібліотеки» (pnpm balance-library її створює). Лише читання з локальної БД.
- *
- *   pnpm hero-growth-report [--out=docs/reports/hero-growth-2026-10.md]
- */
 import { writeFileSync } from 'node:fs';
 
 import '@/lib/server/systems/registry';

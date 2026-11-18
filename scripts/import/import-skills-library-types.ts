@@ -1,7 +1,3 @@
-/**
- * Типи для import-skills-library
- */
-
 export interface LibraryEffect {
     stat: string;
     type: string;

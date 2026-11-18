@@ -686,7 +686,6 @@ async function seed(userId: string) {
             });
         }
 
-        // журнал подорожей для туру: прибуття, перехід і відпочинок
         const village = { mapId: world.id, x: 0.22, y: 0.62 };
 
         const grove = { mapId: world.id, x: 0.56, y: 0.43 };

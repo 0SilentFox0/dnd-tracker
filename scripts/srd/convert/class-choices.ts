@@ -101,7 +101,6 @@ interface Ctx {
     find: (tail: string) => Ability | undefined;
 }
 
-/** перетворює вміння-нотатку на вибір; null — вміння лишається як є */
 function abilityChoice(
     a: Ability,
     level: number,
