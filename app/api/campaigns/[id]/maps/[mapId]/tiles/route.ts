@@ -32,16 +32,22 @@ export async function GET(req: Request, { params }: Ctx) {
 
     if (meta instanceof NextResponse) return meta;
 
-    const denied = await requireMapReadAccess(id, mapId, access.isDM);
-
-    if (denied) return denied;
-
     const rawVersion = new URL(req.url).searchParams.get('version');
 
     const version = rawVersion === null ? meta.version : Number(rawVersion);
 
     if (!(Number.isInteger(version) && version >= 1))
         return errorResponse(API_ERRORS.INVALID_BODY, 400);
+
+    const denied = await requireMapReadAccess(
+        id,
+        mapId,
+        access.isDM,
+        version,
+        meta.version
+    );
+
+    if (denied) return denied;
 
     const chunks = await getTileChunks(mapId, version);
 

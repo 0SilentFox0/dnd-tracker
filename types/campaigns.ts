@@ -8,7 +8,7 @@ export interface Campaign {
     id: string;
     name: string;
     description?: string;
-    inviteCode: string;
+    inviteCode?: string;
     dmUserId: string;
     maxLevel: number;
     allowPlayerEdit: boolean;

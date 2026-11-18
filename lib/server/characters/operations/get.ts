@@ -55,7 +55,11 @@ export const getOperation = defineCharacterOperation({
         )
             throw new ContentError(API_ERRORS.FORBIDDEN, 403);
 
-        const { notes, ...rest } = character;
+        const { notes, campaign, ...rest } = character;
+
+        const { inviteCode, ...publicCampaign } = campaign;
+
+        const isDm = isDmMember(campaign.members);
 
         const knownSpells = Array.isArray(rest.knownSpells)
             ? rest.knownSpells
@@ -64,6 +68,7 @@ export const getOperation = defineCharacterOperation({
         // notes are private: the DM does not see them
         return {
             ...flattenStoredColumns(rest),
+            campaign: isDm ? { ...publicCampaign, inviteCode } : publicCampaign,
             ...(character.controlledBy === userId && { notes }),
             knownSpells,
         };

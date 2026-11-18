@@ -1,4 +1,4 @@
-import { CampaignKind } from '@/lib/constants/campaigns';
+import { CampaignKind, CampaignRole } from '@/lib/constants/campaigns';
 import { prisma } from '@/lib/db';
 import {
     CAMPAIGN_INCLUDE,
@@ -6,8 +6,8 @@ import {
 } from '@/lib/server/campaigns/create-campaign';
 import { PUBLIC_USER_SELECT } from '@/lib/server/users/db-user';
 
-export function listUserCampaigns(userId: string) {
-    return prisma.campaign.findMany({
+export async function listUserCampaigns(userId: string) {
+    const campaigns = await prisma.campaign.findMany({
         where: {
             kind: CampaignKind.CAMPAIGN,
             members: { some: { userId } },
@@ -18,6 +18,13 @@ export function listUserCampaigns(userId: string) {
         omit: CAMPAIGN_OMIT,
         orderBy: { updatedAt: 'desc' },
     });
+
+    return campaigns.map(({ inviteCode, ...campaign }) =>
+        campaign.members.find((m) => m.userId === userId)?.role ===
+        CampaignRole.DM
+            ? { ...campaign, inviteCode }
+            : campaign
+    );
 }
 
 export function readCampaign(id: string, isDM: boolean) {
