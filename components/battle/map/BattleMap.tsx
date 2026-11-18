@@ -138,7 +138,9 @@ export function BattleMap({
 
     const size = useMemo(() => mapSize({ cols, rows }), [cols, rows]);
 
-    const { ref: outerRef, size: avail } = useElementSize<HTMLDivElement>();
+    const { ref: outerRef, size: avail } = useElementSize<HTMLDivElement>({
+        contentBox: true,
+    });
 
     const onPaintStroke = useCallback(
         (cells: import('@/types/battle-grid').GridPoint[]) => {

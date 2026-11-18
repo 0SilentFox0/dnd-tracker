@@ -89,7 +89,7 @@ export interface MapStageEditing {
     };
 }
 
-interface MapStageProps {
+export interface MapStageProps {
     map: BattleMapConfig;
     participants: BattleParticipant[];
     view?: BattleMapView;
